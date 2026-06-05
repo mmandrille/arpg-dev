@@ -1,0 +1,10 @@
+{
+  "type": "move_to_intent",
+  "message_id": "msg_01HX0000000000000000000000",
+  "session_id": "ses_01HX0000000000000000000000",
+  "tick": 1,
+  "correlation_id": "cor_01HX0000000000000000000000",
+  "payload": {
+    "position": { "x": 5, "y": 7 }
+  }
+}

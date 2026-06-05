@@ -1,0 +1,33 @@
+client/scripts/damage_number.gd.uid
+  s_b419d20a5666bd::t_870892c30b0ac2 1
+client/scripts/monster_health_bar.gd.uid
+  s_b419d20a5666bd::t_8f6da2c6567b9b 1
+client/scripts/damage_number.gd
+  s_b419d20a5666bd::t_9814a20ad983d9 1-58
+client/scripts/main.gd
+  s_b419d20a5666bd::t_e887c69d694e83 148,152-153,357-358,371,400-401
+  s_b419d20a5666bd::t_49349fcad97bb4 321,323
+  s_b419d20a5666bd::t_7b36b28984d80b 176-180,296-298
+  s_b419d20a5666bd::t_9814a20ad983d9 10,65,227,319-320,324-341,667-669
+  s_b419d20a5666bd::t_8b28b6237b8d29 11,66-67,284-286,295,299,342-353,670-673
+  s_b419d20a5666bd::t_1bf03550340e9e 228,317-318,322
+client/scripts/monster_health_bar.gd
+  s_b419d20a5666bd::t_8b28b6237b8d29 1-4,6-77
+  s_b419d20a5666bd::t_e5ee1ad97881f7 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "d10a30e7146387d0e617bc2800a616e6953c4499",
+  "prompts": {},
+  "sessions": {
+    "s_b419d20a5666bd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e98ad-9472-7580-9e00-901f7f049009",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

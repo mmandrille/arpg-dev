@@ -1,0 +1,31 @@
+tools/assets/gen_glb.py
+  s_c36b8efb59b07f::t_840f7a674b45a5 142-213,215-273,275-280,282-311,313-314,316
+  s_c36b8efb59b07f::t_24f16287da9182 2,4-9,11-17
+  s_c36b8efb59b07f::t_79349ed73e67d7 214
+  s_c36b8efb59b07f::t_d47460bac81b1e 333
+client/tools/inspect_rig.gd
+  s_c36b8efb59b07f::t_d89db7edba04f9 13,18,25-28
+  s_c36b8efb59b07f::t_c47ba984b3e943 1-12,14-17,19-24,29-33
+client/tools/inspect_rig.gd.uid
+  s_c36b8efb59b07f::t_2e9bdaced4afb7 1
+client/assets/monsters/dummy/monster_dummy.glb.import
+  s_c36b8efb59b07f::t_2e9bdaced4afb7 1-42
+assets/monsters/dummy/README.md
+  s_c36b8efb59b07f::t_3f3b8a349af3f2 1-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "d305f97d9077d9478d66c1484101267ff9c9f736",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}

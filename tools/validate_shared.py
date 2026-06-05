@@ -117,6 +117,7 @@ def cross_checks(report: Report) -> None:
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
     damage_golden = load(GOLDEN / "damage_formula.json")
+    retaliation_golden = load(GOLDEN / "retaliation_damage.json")
     loot_golden = load(GOLDEN / "loot_roll.json")
     slice_golden = load(GOLDEN / "slice_outcome.json")
 
@@ -134,6 +135,38 @@ def cross_checks(report: Report) -> None:
         report.fail("damage_formula cases", f"{len(bad)} case(s) violate min + (draw mod span)")
     else:
         report.ok("damage_formula cases satisfy min + (draw mod span)")
+
+    # retaliation_damage golden must match the training dummy range and formula.
+    dummy = monsters["monsters"].get("training_dummy")
+    retaliation = dummy.get("retaliation_damage") if dummy else None
+    if retaliation is None:
+        report.fail("training_dummy retaliation", "missing retaliation_damage")
+    elif retaliation["max"] < retaliation["min"]:
+        report.fail("training_dummy retaliation", "max must be >= min")
+    else:
+        report.ok("training_dummy retaliation range is configured")
+
+    for mid, mdef in monsters["monsters"].items():
+        rd = mdef.get("retaliation_damage")
+        if rd is not None and rd["max"] < rd["min"]:
+            report.fail("monster retaliation range", f"{mid}: max must be >= min")
+
+    if retaliation is not None and retaliation_golden["retaliation_damage"] != retaliation:
+        report.fail("retaliation_damage vs monster", "retaliation_damage mismatch")
+    else:
+        report.ok("retaliation_damage golden matches training_dummy")
+
+    rmin = retaliation_golden["retaliation_damage"]["min"]
+    rmax = retaliation_golden["retaliation_damage"]["max"]
+    rspan = rmax - rmin + 1
+    if rspan <= 0:
+        report.fail("retaliation_damage golden", "max must be >= min")
+    else:
+        rbad = [c for c in retaliation_golden["cases"] if c["expected_damage"] != rmin + (c["draw"] % rspan)]
+        if rbad:
+            report.fail("retaliation_damage cases", f"{len(rbad)} case(s) violate min + (draw mod span)")
+        else:
+            report.ok("retaliation_damage cases satisfy min + (draw mod span)")
 
     # monster -> loot table -> item references resolve.
     for mid, mdef in monsters["monsters"].items():
@@ -164,8 +197,12 @@ def cross_checks(report: Report) -> None:
         report.fail("slice_outcome golden", "unknown monster_def_id")
     elif slice_golden["dropped_item_def_id"] not in items["items"]:
         report.fail("slice_outcome golden", "unknown dropped_item_def_id")
+    elif not slice_golden.get("pinned_seed"):
+        report.fail("slice_outcome golden", "missing pinned_seed")
+    elif slice_golden["monster_def_id"] == "training_dummy" and slice_golden["final_player_hp"] != 9:
+        report.fail("slice_outcome golden", "training_dummy pinned_seed final_player_hp must be 9")
     else:
-        report.ok("slice_outcome golden references valid defs")
+        report.ok("slice_outcome golden references valid defs and pinned_seed")
 
     # item_visuals: every keyed item_def_id exists in items.v0.json with a
     # matching slot, and the visual-resolution golden matches the metadata

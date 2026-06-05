@@ -1,0 +1,44 @@
+client/tests/test_golden.gd.uid
+  s_453dc3b8c102a5::t_693768b004f5d5 1
+client/scripts/net_client.gd.uid
+  s_453dc3b8c102a5::t_693768b004f5d5 1
+client/scripts/net_client.gd
+  s_453dc3b8c102a5::t_cbdac0e13593e6 1-147
+client/scripts/main.gd.uid
+  s_453dc3b8c102a5::t_693768b004f5d5 1
+client/scripts/main.gd
+  s_453dc3b8c102a5::t_5b713008a379ac 1-90,92-171,173,175-225,227-237
+  s_453dc3b8c102a5::t_cfe6826c5b1393 226
+  s_453dc3b8c102a5::t_b340b01683c165 91
+  s_453dc3b8c102a5::t_42d864bf5dc3c7 172,174
+client/scripts/smoke.gd
+  s_453dc3b8c102a5::t_89cc476e32acd9 49-50,64
+  s_453dc3b8c102a5::t_dedc12fc255f0e 87,90
+  s_453dc3b8c102a5::t_6120cae64a38aa 1-48,51-63,65-86,88-89,91-105,107-126
+  s_453dc3b8c102a5::t_2649e5d370f8ee 106
+client/scenes/main.tscn
+  s_453dc3b8c102a5::t_b09d6eae2f962c 1-6
+client/tests/test_golden.gd
+  s_453dc3b8c102a5::t_1244dd90f45cc0 1-53
+client/scripts/smoke.gd.uid
+  s_453dc3b8c102a5::t_693768b004f5d5 1
+client/project.godot
+  s_453dc3b8c102a5::t_29f93b4bc56a06 1-15
+  s_453dc3b8c102a5::t_7179fa4f294a4f 16-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "29bb01aefa23cf23fd03e57f0ccf61cfce53ecf2",
+  "prompts": {},
+  "sessions": {
+    "s_453dc3b8c102a5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b19faada-d99f-4150-81ee-94c64c9f386d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    }
+  }
+}

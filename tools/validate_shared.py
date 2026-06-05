@@ -119,6 +119,7 @@ def cross_checks(report: Report) -> None:
     worlds = load(RULES / "worlds.v0.json")
     damage_golden = load(GOLDEN / "damage_formula.json")
     retaliation_golden = load(GOLDEN / "retaliation_damage.json")
+    equipped_weapon_golden = load(GOLDEN / "equipped_weapon_damage.json")
     loot_golden = load(GOLDEN / "loot_roll.json")
     slice_golden = load(GOLDEN / "slice_outcome.json")
 
@@ -168,6 +169,46 @@ def cross_checks(report: Report) -> None:
             report.fail("retaliation_damage cases", f"{len(rbad)} case(s) violate min + (draw mod span)")
         else:
             report.ok("retaliation_damage cases satisfy min + (draw mod span)")
+
+    # item damage is weapon-only and the equipped_weapon_damage golden must
+    # mirror the referenced item definition.
+    for item_id, item in items["items"].items():
+        dmg = item.get("damage")
+        if dmg is None:
+            continue
+        if not item.get("equippable") or item.get("slot") != "weapon":
+            report.fail("item damage eligibility", f"{item_id}: damage is only valid on equippable weapons")
+            continue
+        if dmg["max"] < dmg["min"]:
+            report.fail("item damage range", f"{item_id}: max must be >= min")
+        else:
+            report.ok(f"item {item_id} weapon damage range is valid")
+
+    golden_item_id = equipped_weapon_golden["item_def_id"]
+    golden_item = items["items"].get(golden_item_id)
+    if golden_item is None:
+        report.fail("equipped_weapon_damage golden", f"unknown item_def_id {golden_item_id}")
+    elif not golden_item.get("equippable") or golden_item.get("slot") != "weapon":
+        report.fail("equipped_weapon_damage golden", f"{golden_item_id} is not an equippable weapon")
+    elif golden_item.get("damage") != equipped_weapon_golden["damage"]:
+        report.fail("equipped_weapon_damage golden", "damage range mismatch with item rules")
+    else:
+        report.ok("equipped_weapon_damage golden matches weapon item rules")
+
+    ew_min = equipped_weapon_golden["damage"]["min"]
+    ew_max = equipped_weapon_golden["damage"]["max"]
+    ew_span = ew_max - ew_min + 1
+    if ew_span <= 0:
+        report.fail("equipped_weapon_damage golden", "max must be >= min")
+    else:
+        ew_bad = [
+            c for c in equipped_weapon_golden["cases"]
+            if c["expected_damage"] != ew_min + (c["draw"] % ew_span)
+        ]
+        if ew_bad:
+            report.fail("equipped_weapon_damage cases", f"{len(ew_bad)} case(s) violate min + (draw mod span)")
+        else:
+            report.ok("equipped_weapon_damage cases satisfy min + (draw mod span)")
 
     # monster -> loot table -> item references resolve.
     for mid, mdef in monsters["monsters"].items():

@@ -1,0 +1,11 @@
+{
+  "description": "Cross-language damage formula when rusty_sword is equipped: damage = min + (draw mod (max - min + 1)).",
+  "item_def_id": "rusty_sword",
+  "damage": { "min": 3, "max": 5 },
+  "cases": [
+    { "draw": 0, "expected_damage": 3 },
+    { "draw": 1, "expected_damage": 4 },
+    { "draw": 2, "expected_damage": 5 },
+    { "draw": 3, "expected_damage": 3 }
+  ]
+}

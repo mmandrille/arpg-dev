@@ -438,7 +438,24 @@ func (s *Sim) applyMovement(res *TickResult) {
 }
 
 func (s *Sim) rollDamage() int {
-	return s.rollRange(s.rules.Combat.PlayerDamage)
+	return s.rollRange(s.resolvePlayerAttackDamage())
+}
+
+func (s *Sim) resolvePlayerAttackDamage() DamageRange {
+	base := s.rules.Combat.PlayerDamage
+	instanceID := s.equipped[weaponSlot]
+	if instanceID == 0 {
+		return base
+	}
+	item := s.findItemByID(instanceID)
+	if item == nil {
+		return base
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok || def.Damage == nil {
+		return base
+	}
+	return *def.Damage
 }
 
 func (s *Sim) rollRange(d DamageRange) int {

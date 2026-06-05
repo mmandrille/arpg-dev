@@ -1,6 +1,6 @@
 # Equipped Weapon Damage (Slice v8) - Implementation Plan
 
-Status: Draft
+Status: Complete (`make ci` green on 2026-06-05)
 
 Goal: Make equipped weapons change authoritative player attack damage while keeping
 the unarmed vertical-slice path, protocol, replay, and client UI unchanged.
@@ -78,19 +78,19 @@ Files:
 - Create: `shared/golden/equipped_weapon_damage.json`
 - Modify: `tools/validate_shared.py`
 
-- [ ] Step 1.1: Extend item schema with a reusable `damage_range` object:
+- [x] Step 1.1: Extend item schema with a reusable `damage_range` object:
   required integer `min` and `max`, both `minimum: 0`.
-- [ ] Step 1.2: Add conditionals:
+- [x] Step 1.2: Add conditionals:
   - `equippable: true` still requires `slot`
   - `equippable: false` forbids `slot` and `damage`
   - `damage` is only valid for `equippable: true` with `slot: "weapon"`
-- [ ] Step 1.3: Add `damage: { "min": 3, "max": 5 }` to `rusty_sword`;
+- [x] Step 1.3: Add `damage: { "min": 3, "max": 5 }` to `rusty_sword`;
   leave `training_badge` statless.
-- [ ] Step 1.4: Add `equipped_weapon_damage.json` with `item_def_id:
+- [x] Step 1.4: Add `equipped_weapon_damage.json` with `item_def_id:
   "rusty_sword"`, copied damage range, and draw cases `0..3 -> 3,4,5,3`.
-- [ ] Step 1.5: Add a golden schema requiring `description`, `item_def_id`,
+- [x] Step 1.5: Add a golden schema requiring `description`, `item_def_id`,
   `damage`, and non-empty `cases`.
-- [ ] Step 1.6: Extend `validate_shared.py`:
+- [x] Step 1.6: Extend `validate_shared.py`:
   - load `equipped_weapon_damage.json`
   - verify `item_def_id` resolves
   - verify the referenced item is equippable in the weapon slot
@@ -110,21 +110,21 @@ Files:
 - Modify: `server/internal/game/rules.go`
 - Modify: `server/internal/game/sim.go`
 
-- [ ] Step 2.1: Add a `Damage *DamageRange` field to `ItemDef`, tagged as
+- [x] Step 2.1: Add a `Damage *DamageRange` field to `ItemDef`, tagged as
   `json:"damage,omitempty"`.
-- [ ] Step 2.2: In `LoadRules`, validate item damage:
+- [x] Step 2.2: In `LoadRules`, validate item damage:
   - if `Damage != nil`, item must be `Equippable` and `Slot == weaponSlot`
   - call `validateDamageRange("items.<id>.damage", *def.Damage)`
   - preserve existing non-equippable slot rejection
-- [ ] Step 2.3: Add `resolvePlayerAttackDamage() DamageRange` on `Sim`:
+- [x] Step 2.3: Add `resolvePlayerAttackDamage() DamageRange` on `Sim`:
   - get `instanceID := s.equipped[weaponSlot]`
   - if `instanceID == 0`, return `s.rules.Combat.PlayerDamage`
   - find the inventory item; if missing, return base damage
   - look up the item definition; if missing or no `Damage`, return base damage
   - return `*def.Damage`
-- [ ] Step 2.4: Change `rollDamage()` to call
+- [x] Step 2.4: Change `rollDamage()` to call
   `s.rollRange(s.resolvePlayerAttackDamage())`.
-- [ ] Step 2.5: Do not change RNG draw order in `handleAttack`: hit draw first,
+- [x] Step 2.5: Do not change RNG draw order in `handleAttack`: hit draw first,
   then one damage draw, then existing damage/retaliation flow.
 
 Verification:
@@ -138,20 +138,20 @@ cd server && go test ./internal/game -run 'LoadRules|Damage|Equipped|Slice'
 Files:
 - Modify: `server/internal/game/game_test.go`
 
-- [ ] Step 3.1: Update `TestLoadRules` to assert
+- [x] Step 3.1: Update `TestLoadRules` to assert
   `rusty_sword.Damage == {3,5}` and `training_badge.Damage == nil`.
-- [ ] Step 3.2: Add `TestEquippedWeaponDamageGolden` consuming
+- [x] Step 3.2: Add `TestEquippedWeaponDamageGolden` consuming
   `shared/golden/equipped_weapon_damage.json`.
-- [ ] Step 3.3: Add `TestEquippedWeaponOneShotsRewardDummy`:
+- [x] Step 3.3: Add `TestEquippedWeaponOneShotsRewardDummy`:
   - build `NewSimWithWorld(..., "gear_before_combat")`
   - pick up initial `rusty_sword`
   - equip it
   - attack `training_dummy_reward` once
   - assert ack, `monster_damaged`, `monster_killed`, loot spawn, and HP `0`
-- [ ] Step 3.4: Add unarmed fallback coverage by cloning loaded rules in-memory:
+- [x] Step 3.4: Add unarmed fallback coverage by cloning loaded rules in-memory:
   set `rusty_sword.Damage = nil`, run the same gear flow with a seed/draw where
   base damage can be `2`, and assert the reward dummy survives one hit.
-- [ ] Step 3.5: Keep `TestScriptedSliceMatchesGolden` unchanged except for any
+- [x] Step 3.5: Keep `TestScriptedSliceMatchesGolden` unchanged except for any
   helper reuse; it must still kill before equip and preserve `final_player_hp: 9`.
 
 Verification:
@@ -165,12 +165,12 @@ cd server && go test ./internal/game/... -run 'Golden|Slice|Equipped|Weapon|Load
 Files:
 - Modify: `client/tests/test_golden.gd`
 
-- [ ] Step 4.1: Load `rules/items.v0.json` and
+- [x] Step 4.1: Load `rules/items.v0.json` and
   `golden/equipped_weapon_damage.json`.
-- [ ] Step 4.2: Assert the golden item exists, is a weapon, and its `damage`
+- [x] Step 4.2: Assert the golden item exists, is a weapon, and its `damage`
   range matches the item definition.
-- [ ] Step 4.3: Reuse the existing range formula check for the new cases.
-- [ ] Step 4.4: Update the success log to include `equipped_weapon_damage`.
+- [x] Step 4.3: Reuse the existing range formula check for the new cases.
+- [x] Step 4.4: Update the success log to include `equipped_weapon_damage`.
 
 Verification:
 
@@ -185,31 +185,31 @@ Files:
 - Modify: `tools/bot/run.py`
 - Modify: `tools/bot/test_protocol.py`
 
-- [ ] Step 5.1: Add this assertion to `02_gear_before_combat.json`:
+- [x] Step 5.1: Add this assertion to `02_gear_before_combat.json`:
 
 ```json
 { "type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1 }
 ```
 
-- [ ] Step 5.2: Extend `RuntimeState` with runtime observation fields:
+- [x] Step 5.2: Extend `RuntimeState` with runtime observation fields:
   pending attack message id -> monster def id, accepted attack counts by monster
   def id, and killed entity ids if useful for diagnostics.
-- [ ] Step 5.3: When `attack_until_event` sends an attack, construct the
+- [x] Step 5.3: When `attack_until_event` sends an attack, construct the
   envelope first, record its `message_id` with the selected `monster_def_id`,
   then send it.
-- [ ] Step 5.4: Update `ingest_message` to handle:
+- [x] Step 5.4: Update `ingest_message` to handle:
   - `intent_accepted`: if `accepted_message_id` is a pending attack, increment
     the count for that monster def id
   - `intent_rejected`: if it matches a pending attack, raise or record a clear
     failure instead of counting it
   - `state_delta`: existing entity/event ingestion remains unchanged
-- [ ] Step 5.5: Add a runtime assertion pass after `drive_scenario` and before
+- [x] Step 5.5: Add a runtime assertion pass after `drive_scenario` and before
   `/state` checks. It evaluates only assertion types that need runtime history,
   currently `monster_killed_in_attacks`.
-- [ ] Step 5.6: Keep `run_assertions` final-state-only. Either ignore runtime
+- [x] Step 5.6: Keep `run_assertions` final-state-only. Either ignore runtime
   assertion types there or split assertion lists before calling it, so `/state`
   and reconnect do not fail on observations they cannot derive.
-- [ ] Step 5.7: Add Python unit tests:
+- [x] Step 5.7: Add Python unit tests:
   - `intent_accepted` increments attack count for pending attack
   - `monster_killed_in_attacks` passes at `1 <= max_attacks`
   - it fails with a clear message when count exceeds max
@@ -226,11 +226,11 @@ Verification:
 Files:
 - Modify after implementation is complete: `docs/PROGRESS.md`
 
-- [ ] Step 6.1: Run focused shared + Go + Python checks.
-- [ ] Step 6.2: Run `make bot` to prove both scenarios, `/state`, reconnect,
+- [x] Step 6.1: Run focused shared + Go + Python checks.
+- [x] Step 6.2: Run `make bot` to prove both scenarios, `/state`, reconnect,
   and replay verification still pass.
-- [ ] Step 6.3: Run `make ci`.
-- [ ] Step 6.4: Update `docs/PROGRESS.md` only after the slice passes:
+- [x] Step 6.3: Run `make ci`.
+- [x] Step 6.4: Update `docs/PROGRESS.md` only after the slice passes:
   mark v8 complete, add summary, and keep deferred UI/plugin work in backlog.
 
 Final verification:

@@ -59,8 +59,14 @@ func TestLoadRules(t *testing.T) {
 	if !r.Items["rusty_sword"].Equippable || r.Items["rusty_sword"].Slot != "weapon" {
 		t.Fatalf("rusty_sword def = %+v", r.Items["rusty_sword"])
 	}
+	if r.Items["rusty_sword"].Damage == nil || r.Items["rusty_sword"].Damage.Min != 3 || r.Items["rusty_sword"].Damage.Max != 5 {
+		t.Fatalf("rusty_sword damage = %+v, want {3,5}", r.Items["rusty_sword"].Damage)
+	}
 	if r.Items["training_badge"].Equippable || r.Items["training_badge"].Slot != "" {
 		t.Fatalf("training_badge def = %+v, want non-equippable without slot", r.Items["training_badge"])
+	}
+	if r.Items["training_badge"].Damage != nil {
+		t.Fatalf("training_badge damage = %+v, want nil", r.Items["training_badge"].Damage)
 	}
 	if _, ok := r.Worlds[DefaultWorldID]; !ok {
 		t.Fatalf("missing default world %q", DefaultWorldID)
@@ -159,6 +165,34 @@ func TestRetaliationDamageGolden(t *testing.T) {
 		got := dummy.RetaliationDamage.Min + (c.Draw % span)
 		if got != c.ExpectedDamage {
 			t.Fatalf("draw %d: retaliation damage = %d, want %d", c.Draw, got, c.ExpectedDamage)
+		}
+	}
+}
+
+func TestEquippedWeaponDamageGolden(t *testing.T) {
+	r := loadRules(t)
+	var golden struct {
+		ItemDefID string      `json:"item_def_id"`
+		Damage    DamageRange `json:"damage"`
+		Cases     []struct {
+			Draw           int `json:"draw"`
+			ExpectedDamage int `json:"expected_damage"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "equipped_weapon_damage.json", &golden)
+
+	item := r.Items[golden.ItemDefID]
+	if !item.Equippable || item.Slot != weaponSlot || item.Damage == nil {
+		t.Fatalf("golden item %s = %+v, want equippable weapon with damage", golden.ItemDefID, item)
+	}
+	if golden.Damage != *item.Damage {
+		t.Fatalf("golden damage %+v != rules %+v", golden.Damage, *item.Damage)
+	}
+	span := item.Damage.Max - item.Damage.Min + 1
+	for _, c := range golden.Cases {
+		got := item.Damage.Min + (c.Draw % span)
+		if got != c.ExpectedDamage {
+			t.Fatalf("draw %d: weapon damage = %d, want %d", c.Draw, got, c.ExpectedDamage)
 		}
 	}
 }
@@ -318,6 +352,54 @@ func TestSuccessfulHitRetaliatesAndPreservesKillOrder(t *testing.T) {
 	}
 	if hasEvent(r, "player_killed") {
 		t.Fatalf("unexpected player_killed event: %+v", r.Events)
+	}
+}
+
+func TestEquippedWeaponOneShotsRewardDummy(t *testing.T) {
+	sim := gearBeforeCombatWithEquippedSword(t, loadRules(t))
+
+	r := sim.Tick([]Input{{
+		MessageID:     "a1",
+		CorrelationID: "corr_weapon",
+		Type:          "attack_intent",
+		Attack:        &AttackIntent{TargetID: "1003"},
+	}})
+
+	assertAck(t, r, "a1")
+	monster := sim.findEntity("1003")
+	if monster == nil || monster.hp != 0 {
+		t.Fatalf("reward dummy hp = %+v, want dead", monster)
+	}
+	if !hasEvent(r, "monster_damaged") || !hasEvent(r, "monster_killed") || !hasEvent(r, "loot_dropped") {
+		t.Fatalf("missing equipped attack events: %+v", r.Events)
+	}
+	if !hasLootSpawn(r, "training_badge") {
+		t.Fatalf("missing training_badge loot spawn: %+v", r.Changes)
+	}
+}
+
+func TestEquippedWeaponWithoutDamageFallsBackToBaseDamage(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sword := rules.Items["rusty_sword"]
+	sword.Damage = nil
+	rules.Items["rusty_sword"] = sword
+	rules.Combat.PlayerDamage = DamageRange{Min: 2, Max: 2}
+	sim := gearBeforeCombatWithEquippedSword(t, rules)
+
+	r := sim.Tick([]Input{{
+		MessageID:     "a1",
+		CorrelationID: "corr_base",
+		Type:          "attack_intent",
+		Attack:        &AttackIntent{TargetID: "1003"},
+	}})
+
+	assertAck(t, r, "a1")
+	monster := sim.findEntity("1003")
+	if monster == nil || monster.hp != 1 {
+		t.Fatalf("reward dummy hp = %+v, want hp 1 from base damage fallback", monster)
+	}
+	if hasEvent(r, "monster_killed") || hasEvent(r, "loot_dropped") {
+		t.Fatalf("fallback base hit should not kill reward dummy: %+v", r.Events)
 	}
 }
 
@@ -580,9 +662,69 @@ func assertAck(t *testing.T, r TickResult, msgID string) {
 	t.Fatalf("expected ack of %q; rejects=%+v acks=%+v", msgID, r.Rejects, r.Acks)
 }
 
+func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
+	t.Helper()
+	sim, err := NewSimWithWorld("sess_gear_weapon", "deadbeefdeadbeef", rules, "gear_before_combat")
+	if err != nil {
+		t.Fatalf("new gear sim: %v", err)
+	}
+
+	pickup := sim.Tick([]Input{{
+		MessageID:     "p1",
+		CorrelationID: "corr_pickup",
+		Type:          "pick_up_intent",
+		PickUp:        &PickUpIntent{EntityID: "1002"},
+	}})
+	assertAck(t, pickup, "p1")
+
+	snap := sim.Snapshot()
+	if len(snap.Inventory) != 1 {
+		t.Fatalf("inventory size = %d, want 1", len(snap.Inventory))
+	}
+	itemID := snap.Inventory[0].ItemInstanceID
+	equip := sim.Tick([]Input{{
+		MessageID:     "e1",
+		CorrelationID: "corr_equip",
+		Type:          "equip_intent",
+		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: weaponSlot},
+	}})
+	assertAck(t, equip, "e1")
+	return sim
+}
+
+func cloneRules(r *Rules) *Rules {
+	out := *r
+	out.Items = make(map[string]ItemDef, len(r.Items))
+	for id, def := range r.Items {
+		out.Items[id] = def
+	}
+	out.Monsters = make(map[string]MonsterDef, len(r.Monsters))
+	for id, def := range r.Monsters {
+		out.Monsters[id] = def
+	}
+	out.LootTables = make(map[string]LootTable, len(r.LootTables))
+	for id, def := range r.LootTables {
+		out.LootTables[id] = def
+	}
+	out.Worlds = make(map[string]WorldDef, len(r.Worlds))
+	for id, def := range r.Worlds {
+		out.Worlds[id] = def
+	}
+	return &out
+}
+
 func hasEvent(r TickResult, eventType string) bool {
 	for _, ev := range r.Events {
 		if ev.EventType == eventType {
+			return true
+		}
+	}
+	return false
+}
+
+func hasLootSpawn(r TickResult, itemDefID string) bool {
+	for _, c := range r.Changes {
+		if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == lootEntity && c.Entity.ItemDefID == itemDefID {
 			return true
 		}
 	}

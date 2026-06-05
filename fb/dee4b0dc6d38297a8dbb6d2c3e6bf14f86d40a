@@ -1,0 +1,19 @@
+docs/adr/0001-technology-stack.md
+  s_13473f34cdc911::t_f0c7eba13e85f0 247
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "fbdee4b0dc6d38297a8dbb6d2c3e6bf14f86d40a",
+  "prompts": {},
+  "sessions": {
+    "s_13473f34cdc911": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e953f-0872-7443-967d-50812010efdb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    }
+  }
+}

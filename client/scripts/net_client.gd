@@ -1,0 +1,147 @@
+# NetClient: the thin transport layer for the arpg client.
+#
+# Speaks the same auth + WebSocket protocol as the Python bot (ADR-0001 D4/D5):
+# dev-login + create session over HTTP, then the v0 JSON envelope over a
+# WebSocket. Used by both the interactive scene (main.gd) and the headless
+# smoke runner (smoke.gd).
+extends RefCounted
+class_name NetClient
+
+var base_url: String
+var host: String
+var port: int
+var use_tls: bool
+
+var token: String = ""
+var account_id: String = ""
+var session_id: String = ""
+var seed: String = ""
+var ws_url: String = ""
+
+var _ws := WebSocketPeer.new()
+var _msg_counter: int = 0
+
+
+func _init(p_base_url: String) -> void:
+	base_url = p_base_url
+	use_tls = p_base_url.begins_with("https")
+	var rest := p_base_url.replace("https://", "").replace("http://", "")
+	var hostport := rest.split("/")[0]
+	var parts := hostport.split(":")
+	host = parts[0]
+	if parts.size() > 1:
+		port = int(parts[1])
+	else:
+		port = 443 if use_tls else 80
+
+
+# --- HTTP (blocking, dev-only) ---------------------------------------------
+
+func _http(method: int, path: String, headers: Array, body: String) -> Dictionary:
+	var client := HTTPClient.new()
+	var tls = TLSOptions.client() if use_tls else null
+	var err := client.connect_to_host(host, port, tls)
+	if err != OK:
+		return {"_error": "connect_to_host failed: %d" % err}
+	while client.get_status() in [HTTPClient.STATUS_CONNECTING, HTTPClient.STATUS_RESOLVING]:
+		client.poll()
+		OS.delay_msec(5)
+	if client.get_status() != HTTPClient.STATUS_CONNECTED:
+		return {"_error": "not connected: %d" % client.get_status()}
+
+	var all_headers := ["Content-Type: application/json"]
+	all_headers.append_array(headers)
+	err = client.request(method, path, all_headers, body)
+	if err != OK:
+		return {"_error": "request failed: %d" % err}
+	while client.get_status() == HTTPClient.STATUS_REQUESTING:
+		client.poll()
+		OS.delay_msec(5)
+
+	var code := client.get_response_code()
+	var buf := PackedByteArray()
+	while client.get_status() == HTTPClient.STATUS_BODY:
+		client.poll()
+		var chunk := client.read_response_body_chunk()
+		if chunk.size() > 0:
+			buf.append_array(chunk)
+		else:
+			OS.delay_msec(5)
+	var parsed = JSON.parse_string(buf.get_string_from_utf8())
+	return {"_code": code, "body": parsed}
+
+
+func login(email: String, dev_token: String) -> bool:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/auth/dev-login", [],
+		JSON.stringify({"email": email, "dev_token": dev_token}))
+	if r.get("_code", 0) == 200 and r.has("body"):
+		token = r["body"]["access_token"]
+		account_id = r["body"]["account_id"]
+		return true
+	push_error("login failed: %s" % r)
+	return false
+
+
+func create_session() -> bool:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
+		["Authorization: Bearer " + token], JSON.stringify({"mode": "solo"}))
+	if r.get("_code", 0) in [200, 201] and r.has("body"):
+		session_id = r["body"]["session_id"]
+		seed = r["body"]["seed"]
+		ws_url = r["body"]["ws_url"]
+		return true
+	push_error("create_session failed: %s" % r)
+	return false
+
+
+func get_state(debug_token: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/sessions/%s/state" % session_id,
+		["Authorization: Bearer " + token, "X-Debug-Token: " + debug_token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	return {}
+
+
+# --- WebSocket --------------------------------------------------------------
+
+func connect_ws() -> void:
+	var scheme := "wss" if use_tls else "ws"
+	# Token via query param: WebSocketPeer cannot set the Authorization header.
+	var url := "%s://%s:%d%s&access_token=%s" % [scheme, host, port, ws_url, token]
+	_ws.connect_to_url(url)
+
+
+func ready_state() -> int:
+	return _ws.get_ready_state()
+
+
+# poll returns any envelopes received this frame as an Array of Dictionaries.
+func poll() -> Array:
+	_ws.poll()
+	var out: Array = []
+	while _ws.get_ready_state() == WebSocketPeer.STATE_OPEN and _ws.get_available_packet_count() > 0:
+		var text := _ws.get_packet().get_string_from_utf8()
+		var env = JSON.parse_string(text)
+		if env != null:
+			out.append(env)
+	return out
+
+
+func next_message_id() -> String:
+	_msg_counter += 1
+	return "cmsg-%d" % _msg_counter
+
+
+func send(msg_type: String, tick: int, payload: Dictionary) -> void:
+	var env := {
+		"type": msg_type,
+		"message_id": next_message_id(),
+		"session_id": session_id,
+		"tick": tick,
+		"payload": payload,
+	}
+	_ws.send_text(JSON.stringify(env))
+
+
+func close() -> void:
+	_ws.close()

@@ -1,0 +1,21 @@
+; arpg-dev minimal client (Godot 4.6.x). See .godot-version for the exact pin.
+; Configuration is intentionally minimal; input is read directly via Input in
+; main.gd rather than an input map to keep this file diff-friendly for agents.
+
+config_version=5
+
+[application]
+
+config/name="arpg-client"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.6")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+
+[debug]
+
+; This client necessarily handles dynamic JSON (Variant) from the protocol;
+; do not fail loads on inference/unsafe-access warnings.
+gdscript/warnings/treat_warnings_as_errors=false

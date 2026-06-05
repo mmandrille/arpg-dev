@@ -5,7 +5,7 @@ Plays the full vertical slice through the same auth + WebSocket path as the
 real client and asserts authoritative outcomes:
 
     dev-login -> create session -> move -> attack until dead -> pick up loot
-    -> equip -> assert via /state -> reconnect and assert persisted inventory.
+    -> equip -> assert via /state -> reconnect and assert reconstructed state.
 
 Progress goes to stderr; with --print-session-id the recorded session id is
 written to stdout (and nothing else) so it can be captured for replay.
@@ -148,15 +148,18 @@ async def drive_slice(base_url: str, token: str, sess: dict[str, Any]) -> str:
 
 
 async def check_persistence(base_url: str, token: str, session_id: str, item_id: str) -> None:
-    """Reconnect with a fresh sim; the snapshot must reload inventory from DB."""
+    """Reconnect and assert the snapshot was reconstructed from recorded inputs."""
     uri = to_ws_url(base_url, "/v0/ws?session_id=" + session_id)
     async with websockets.connect(uri, additional_headers=auth(token)) as ws:
         snap = await recv_json(ws)
         assert snap["type"] == "session_snapshot", snap["type"]
-        inv = snap["payload"]["inventory"]
-        equipped = snap["payload"]["equipped"]
+        payload = snap["payload"]
+        inv = payload["inventory"]
+        equipped = payload["equipped"]
         assert_equipped_sword(inv, equipped, item_id, "reconnect snapshot")
-        log("persisted inventory survived reconnect (loaded from Postgres)")
+        assert_player_damaged(payload["entities"], "reconnect snapshot")
+        assert_monster_dead(payload["entities"], "reconnect snapshot")
+        log("reconnect snapshot restored inventory, player damage, and monster death")
 
 
 # --- assertions -------------------------------------------------------------
@@ -178,6 +181,15 @@ def assert_player_damaged(entities: list[dict], where: str) -> None:
     hp = players[0].get("hp")
     if not isinstance(hp, int) or hp >= 10:
         raise AssertionError(f"{where}: player hp {hp} did not show retaliation damage")
+
+
+def assert_monster_dead(entities: list[dict], where: str) -> None:
+    monsters = [e for e in entities if e.get("id") == MONSTER_ID and e.get("type") == "monster"]
+    if len(monsters) != 1:
+        raise AssertionError(f"{where}: expected training dummy entity, got {monsters}")
+    hp = monsters[0].get("hp")
+    if hp != 0:
+        raise AssertionError(f"{where}: training dummy hp {hp} != 0")
 
 
 # --- main -------------------------------------------------------------------
@@ -202,9 +214,10 @@ def main() -> int:
         state = fetch_state(client, token, args.debug_token, session_id)
         assert_equipped_sword(state["inventory"], state["equipped"], item_id, "/state API")
         assert_player_damaged(state["entities"], "/state API")
-        log("/state API confirms equipped inventory and player damage")
+        assert_monster_dead(state["entities"], "/state API")
+        log("/state API confirms equipped inventory, player damage, and monster death")
 
-        # Assert persistence by reconnecting a fresh session loop.
+        # Assert replay reconstruction by reconnecting a fresh session loop.
         asyncio.run(check_persistence(args.base_url, token, session_id, item_id))
 
     log("BOT OK")

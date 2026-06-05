@@ -7,7 +7,7 @@
 #      matching ids + socket)                                  (acceptance #6/#7)
 #   2. a move intent after equip leaves the weapon mounted     (acceptance #13)
 #   3. disconnect + resume the SAME session and restore the mounted weapon from
-#      the session_snapshot alone (no equipped_update delta)   (acceptance #8)
+#      the session_snapshot alone, with restored HP/death state (acceptance #8)
 # Quits 0 (pass) or 1 (fail). The resolver mounts under an injected minimal
 # mount-root (Node3D + right_hand_socket child), the §4.8 decoupled code path.
 extends SceneTree
@@ -193,32 +193,27 @@ func _step_resume(delta: float) -> bool:
 		resume_ready_sent = true
 
 	var got_snapshot := false
+	var resume_snap: Dictionary = {}
 	for env in msgs:
 		if env.get("type", "") == "session_snapshot":
 			var snap: Dictionary = env["payload"]
+			resume_snap = snap
 			resolver_resume.apply_snapshot(snap)
 			# Acceptance #8 (monsters): a snapshot entity with type=="monster" and
 			# hp<=0 must drive the controller to terminal "death" from hp ALONE --
-			# no delta / recent_events replay (spec §5.4). We assert that client
-			# behavior here by routing the snapshot's real monster entity (same id,
-			# type and position shape the server sends) through the same code as
-			# main.gd::_upsert_entity, with hp forced to 0.
-			#
-			# WHY hp is forced: the server's resume path (hub.go: game.NewSim +
-			# LoadInventory) reconstructs the sim from seed + persisted INVENTORY
-			# only -- it does NOT replay recorded combat -- so a resumed session's
-			# snapshot carries the monster RESPAWNED at full hp (max_hp=3), not the
-			# hp==0 it had when killed in the live session. Persisting monster death
-			# across resume is a server concern outside this slice. To keep the
-			# client-side acceptance #8 assertion deterministic and meaningful
-			# rather than a silent no-op, we take the snapshot's monster entity and
-			# set hp=0, proving the snapshot->terminal-death wiring exactly as the
-			# client would behave were the server to send a dead monster.
+			# no delta / recent_events replay (spec §5.4).
 			_resume_monster_from_snapshot(snap)
 			got_snapshot = true
 
 	if got_snapshot:
-		# The client put the (hp==0) snapshot monster into the terminal death pose.
+		var resumed_hp := _player_hp_from_state(resume_snap)
+		if resumed_hp < 0 or resumed_hp >= 10:
+			_fail("resume snapshot did not restore player damage hp=%d" % resumed_hp)
+			return true
+		if _monster_hp_from_state(resume_snap) != 0:
+			_fail("resume snapshot did not restore dead monster: %s" % resume_snap.get("entities", []))
+			return true
+		# The client put the real hp==0 snapshot monster into the terminal death pose.
 		if monster_anim_resume == null:
 			_fail("resume snapshot carried no monster entity to assert death pose (acceptance #8)")
 			return true
@@ -232,7 +227,7 @@ func _step_resume(delta: float) -> bool:
 			and w["asset_id"] == "weapon_rusty_sword_v0" \
 			and w["mount_socket"] == "right_hand_socket"
 		if ok:
-			print("[smoke] PASS: equip visible, survives move, and restored on resume from snapshot")
+			print("[smoke] PASS: equip visible, survives move, and restored combat state on resume")
 			quit(0)
 		else:
 			_fail("resume did not restore weapon visual from snapshot (acceptance #8): %s" % w)
@@ -329,28 +324,28 @@ func _player_hp_from_state(state: Dictionary) -> int:
 	return -1
 
 
+func _monster_hp_from_state(state: Dictionary) -> int:
+	for e in state.get("entities", []):
+		if str(e.get("id", "")) == "1002" and str(e.get("type", "")) == "monster":
+			return int(e.get("hp", -1))
+	return -1
+
+
 func _resume_monster_from_snapshot(snap: Dictionary) -> void:
 	# Mirror main.gd::_upsert_entity for monsters: instance a real monster +
 	# fresh controller (not the primary monster_anim, so the pose provably comes
 	# from this snapshot and not leftover live state) and enter terminal "death"
 	# when the snapshot entity reports hp<=0.
-	#
-	# The server's resume snapshot respawns the monster at full hp (see the WHY
-	# note in _step_resume), so we force hp=0 on the snapshot's monster entity to
-	# exercise the hp<=0 -> terminal branch the client must implement.
 	for e in snap.get("entities", []):
 		if str(e.get("type", "")) != "monster":
+			continue
+		if int(e.get("hp", -1)) > 0:
 			continue
 		if monster_anim_resume == null:
 			var mon := MonsterScene.instantiate()
 			get_root().add_child(mon)
 			var mon_ap := mon.find_child("AnimationPlayer", true, false) as AnimationPlayer
 			monster_anim_resume = AnimControllerScript.new(mon_ap)
-		# The server reconstructs resume from seed + inventory only (hub.go: NewSim+LoadInventory),
-		# so the snapshot monster is RESPAWNED at full hp -- a real hp==0 monster never appears on
-		# resume. Force the dead path to prove the client's snapshot->terminal-death wiring
-		# (type==monster + hp<=0 -> enter_terminal), which is the only part acceptance #8 can test
-		# without a server change.
 		monster_anim_resume.enter_terminal("death")
 
 

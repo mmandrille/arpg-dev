@@ -1,0 +1,28 @@
+make/shared.mk
+  s_c36b8efb59b07f::t_c4495f60a52877 2
+  s_c36b8efb59b07f::t_e1254c6da15daa 11-14
+client/animations/monster_anims.tres
+  s_c36b8efb59b07f::t_b548fb1cb240fe 1-38
+client/tools/build_animations.gd.uid
+  s_c36b8efb59b07f::t_b548fb1cb240fe 1
+client/animations/character_anims.tres
+  s_c36b8efb59b07f::t_b548fb1cb240fe 1-46
+client/tools/build_animations.gd
+  s_c36b8efb59b07f::t_b99df6530334fe 1-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "93084a9bd4eb50d11e1940a8028f7f5bdea27f3a",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

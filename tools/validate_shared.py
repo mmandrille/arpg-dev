@@ -250,6 +250,14 @@ def cross_checks(report: Report) -> None:
                     report.fail("world loot entity", f"{label}: unknown item {item_id}")
                 else:
                     report.ok(f"{label} loot item reference resolves")
+            elif etype == "wall":
+                size = entity.get("size", {})
+                if not isinstance(size.get("x"), (int, float)) or not isinstance(size.get("y"), (int, float)):
+                    report.fail("world wall entity", f"{label}: wall size must have numeric x/y")
+                elif size["x"] <= 0 or size["y"] <= 0:
+                    report.fail("world wall entity", f"{label}: wall size must be positive")
+                else:
+                    report.ok(f"{label} wall size is positive")
             else:
                 report.fail("world entity type", f"{label}: unknown type {etype}")
 

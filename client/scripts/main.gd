@@ -65,6 +65,7 @@ var entities_root: Node3D
 var damage_numbers_layer: CanvasLayer
 var health_bars_layer: CanvasLayer
 var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
+var walls_root: Node3D
 
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
@@ -111,9 +112,11 @@ func _ready() -> void:
 		_start_next_visual_replay()
 		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
-	if not client.create_session(resume_session_id):
+	var requested_world_id := _env("ARPG_WORLD_ID", "")
+	if not client.create_session(resume_session_id, requested_world_id):
 		_debug("session failed")
 		return
+	_render_world_walls(client.world_id)
 	autoplay_enabled = _truthy_env("ARPG_AUTOPLAY")
 	if autoplay_enabled:
 		autoplay_phase = "move"
@@ -605,7 +608,9 @@ func _start_next_visual_replay() -> void:
 
 	var scenario: Dictionary = visual_replay_scenarios[visual_replay_index]
 	var session_id := str(scenario.get("session_id", ""))
+	var world_id := str(scenario.get("world_id", "vertical_slice"))
 	visual_replay_title = str(scenario.get("title", scenario.get("id", session_id)))
+	_render_world_walls(world_id)
 	if session_id == "":
 		_debug("visual replay entry missing session_id; skipping")
 		_start_next_visual_replay()
@@ -671,6 +676,46 @@ func _build_scene() -> void:
 	health_bars_layer = CanvasLayer.new()
 	health_bars_layer.layer = 1
 	add_child(health_bars_layer)
+
+	walls_root = Node3D.new()
+	walls_root.name = "StaticWalls"
+	add_child(walls_root)
+
+
+func _render_world_walls(world_id: String) -> void:
+	if walls_root == null:
+		return
+	for child in walls_root.get_children():
+		child.queue_free()
+
+	var rules_path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/worlds.v0.json")
+	var parsed = _read_json(rules_path)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		push_warning("[main] could not read world rules for walls: %s" % rules_path)
+		return
+	var worlds: Dictionary = parsed.get("worlds", {})
+	var world: Dictionary = worlds.get(world_id, {})
+	for entity in world.get("entities", []):
+		if str(entity.get("type", "")) != "wall":
+			continue
+		var pos: Dictionary = entity.get("position", {})
+		var size: Dictionary = entity.get("size", {})
+		var node := MeshInstance3D.new()
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
+		node.mesh = mesh
+		node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.32, 0.34, 0.36)
+		node.material_override = mat
+		walls_root.add_child(node)
+
+
+func _read_json(path: String):
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return null
+	return JSON.parse_string(f.get_as_text())
 
 
 func _make_entity_node(kind: String) -> Node3D:

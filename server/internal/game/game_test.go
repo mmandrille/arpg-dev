@@ -74,6 +74,9 @@ func TestLoadRules(t *testing.T) {
 	if _, ok := r.Worlds["gear_before_combat"]; !ok {
 		t.Fatal("missing gear_before_combat world")
 	}
+	if _, ok := r.Worlds["collision_lab"]; !ok {
+		t.Fatal("missing collision_lab world")
+	}
 }
 
 func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
@@ -101,6 +104,20 @@ func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
 	assertEntity(t, gsnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
 	assertEntity(t, gsnap, "1002", lootEntity, "", "rusty_sword", Vec2{X: 6, Y: 5})
 	assertEntity(t, gsnap, "1003", monsterEntity, "training_dummy_reward", "", Vec2{X: 12, Y: 5})
+
+	collision, err := NewSimWithWorld("sess_collision", "01", rules, "collision_lab")
+	if err != nil {
+		t.Fatalf("collision world: %v", err)
+	}
+	csnap := collision.Snapshot()
+	if len(csnap.Entities) != 2 {
+		t.Fatalf("collision entities = %d, want 2 mutable entities: %+v", len(csnap.Entities), csnap.Entities)
+	}
+	if len(collision.walls) != 2 {
+		t.Fatalf("collision walls = %d, want 2", len(collision.walls))
+	}
+	assertEntity(t, csnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
+	assertEntity(t, csnap, "1002", monsterEntity, "training_dummy_reward", "", Vec2{X: 4, Y: 5})
 }
 
 func assertEntity(t *testing.T, snap Snapshot, id, typ, monsterDefID, itemDefID string, pos Vec2) {
@@ -537,7 +554,10 @@ func TestDifferentSeedsStillProduceItem(t *testing.T) {
 // --- movement ---------------------------------------------------------------
 
 func TestMovement(t *testing.T) {
-	sim := NewSim("sess_move", "abcd", loadRules(t))
+	sim, err := NewSimWithWorld("sess_move", "abcd", loadRules(t), "gear_before_combat")
+	if err != nil {
+		t.Fatalf("gear world: %v", err)
+	}
 	start := sim.entities[sim.playerID].pos
 
 	r := sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1, Y: 0}, DurationTicks: 3}}})
@@ -581,6 +601,76 @@ func hasPlayerUpdate(r TickResult) bool {
 		}
 	}
 	return false
+}
+
+func TestCollisionBlocksLiveMonster(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_collision_monster", "01", loadRules(t), "collision_lab")
+	if err != nil {
+		t.Fatalf("collision world: %v", err)
+	}
+
+	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 6}}})
+	for i := 0; i < 5; i++ {
+		sim.Tick(nil)
+	}
+
+	player := sim.entities[sim.playerID]
+	monster := sim.findEntity("1002")
+	if player.pos != (Vec2{X: 3, Y: 5}) {
+		t.Fatalf("player pos = %+v, want stopped at x=3 before monster", player.pos)
+	}
+	if circlesOverlap(player.pos, playerRadius, monster.pos, monsterRadius) {
+		t.Fatalf("player overlaps live monster: player=%+v monster=%+v", player.pos, monster.pos)
+	}
+}
+
+func TestCollisionIgnoresDeadMonster(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_collision_dead_monster", "01", loadRules(t), "collision_lab")
+	if err != nil {
+		t.Fatalf("collision world: %v", err)
+	}
+	sim.findEntity("1002").hp = 0
+
+	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 4}}})
+	for i := 0; i < 3; i++ {
+		sim.Tick(nil)
+	}
+
+	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 4, Y: 5}) {
+		t.Fatalf("player pos = %+v, want able to enter dead monster position", got)
+	}
+}
+
+func TestCollisionBlocksWallAndAllowsRoute(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_collision_wall", "01", loadRules(t), "collision_lab")
+	if err != nil {
+		t.Fatalf("collision world: %v", err)
+	}
+	sim.findEntity("1002").hp = 0
+
+	sim.Tick([]Input{{MessageID: "right", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 8}}})
+	for i := 0; i < 7; i++ {
+		sim.Tick(nil)
+	}
+	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 6, Y: 5}) {
+		t.Fatalf("player pos after wall push = %+v, want x=6,y=5", got)
+	}
+	if circleIntersectsAABB(sim.entities[sim.playerID].pos, playerRadius, sim.walls[0].pos, sim.walls[0].size) {
+		t.Fatalf("player intersects first wall at %+v", sim.entities[sim.playerID].pos)
+	}
+
+	sim.Tick([]Input{{MessageID: "down", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{Y: -1}, DurationTicks: 4}}})
+	for i := 0; i < 3; i++ {
+		sim.Tick(nil)
+	}
+	sim.Tick([]Input{{MessageID: "around", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 4}}})
+	for i := 0; i < 3; i++ {
+		sim.Tick(nil)
+	}
+
+	if got := sim.entities[sim.playerID].pos; got.X < 10 || got.Y != 1 {
+		t.Fatalf("player route pos = %+v, want around first wall at y=1 and x>=10", got)
+	}
 }
 
 // --- rejections (criterion 12) ----------------------------------------------

@@ -11,10 +11,13 @@ const (
 	baseEntityID  = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
 	playerStartHP = 10
 	moveSpeed     = 1.0
+	playerRadius  = 0.45
+	monsterRadius = 0.45
 	monsterDefID  = "training_dummy"
 	playerEntity  = "player"
 	monsterEntity = "monster"
 	lootEntity    = "loot"
+	wallEntity    = "wall"
 	weaponSlot    = "weapon"
 )
 
@@ -47,6 +50,11 @@ type activeMove struct {
 	remaining int
 }
 
+type wallObstacle struct {
+	pos  Vec2
+	size Vec2
+}
+
 // Sim is the deterministic authoritative simulation for one solo session.
 // Given the same seed and the same ordered inputs, it produces identical
 // outputs (entity ids, events, final state) on every run (ADR-0001 D8.1).
@@ -64,6 +72,7 @@ type Sim struct {
 	inventory []*invItem
 	equipped  map[string]uint64 // slot -> instanceID (0 = none)
 	move      *activeMove
+	walls     []wallObstacle
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
@@ -114,6 +123,8 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 			loot := &entity{kind: lootEntity, pos: preset.Position, itemDefID: preset.ItemDefID}
 			loot.id = s.alloc()
 			s.entities[loot.id] = loot
+		case wallEntity:
+			s.walls = append(s.walls, wallObstacle{pos: preset.Position, size: preset.Size})
 		default:
 			return nil, ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
 		}
@@ -428,13 +439,70 @@ func (s *Sim) applyMovement(res *TickResult) {
 		return
 	}
 	player := s.entities[s.playerID]
-	player.pos.X += s.move.dir.X * moveSpeed
-	player.pos.Y += s.move.dir.Y * moveSpeed
+	before := player.pos
+	player.pos = s.resolveMovement(player.pos, Vec2{
+		X: s.move.dir.X * moveSpeed,
+		Y: s.move.dir.Y * moveSpeed,
+	})
 	s.move.remaining--
 	if s.move.remaining == 0 {
 		s.move = nil
 	}
+	if player.pos == before {
+		return
+	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+}
+
+func (s *Sim) resolveMovement(pos, delta Vec2) Vec2 {
+	candidate := Vec2{X: pos.X + delta.X, Y: pos.Y + delta.Y}
+	if !s.playerPositionBlocked(candidate) {
+		return candidate
+	}
+	xOnly := Vec2{X: pos.X + delta.X, Y: pos.Y}
+	if delta.X != 0 && !s.playerPositionBlocked(xOnly) {
+		return xOnly
+	}
+	yOnly := Vec2{X: pos.X, Y: pos.Y + delta.Y}
+	if delta.Y != 0 && !s.playerPositionBlocked(yOnly) {
+		return yOnly
+	}
+	return pos
+}
+
+func (s *Sim) playerPositionBlocked(pos Vec2) bool {
+	for _, wall := range s.walls {
+		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+			return true
+		}
+	}
+	for _, id := range sortedEntityIDs(s.entities) {
+		e := s.entities[id]
+		if e.kind != monsterEntity || e.hp <= 0 {
+			continue
+		}
+		if circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
+			return true
+		}
+	}
+	return false
+}
+
+func circlesOverlap(a Vec2, ar float64, b Vec2, br float64) bool {
+	dx := a.X - b.X
+	dy := a.Y - b.Y
+	r := ar + br
+	return dx*dx+dy*dy < r*r-1e-9
+}
+
+func circleIntersectsAABB(center Vec2, radius float64, rectCenter Vec2, rectSize Vec2) bool {
+	halfX := rectSize.X / 2
+	halfY := rectSize.Y / 2
+	closestX := math.Max(rectCenter.X-halfX, math.Min(center.X, rectCenter.X+halfX))
+	closestY := math.Max(rectCenter.Y-halfY, math.Min(center.Y, rectCenter.Y+halfY))
+	dx := center.X - closestX
+	dy := center.Y - closestY
+	return dx*dx+dy*dy < radius*radius-1e-9
 }
 
 func (s *Sim) rollDamage() int {
@@ -496,13 +564,18 @@ func (s *Sim) findItemByID(id uint64) *invItem {
 	return nil
 }
 
-// Snapshot returns the full authoritative state, with entities ordered by id.
-func (s *Sim) Snapshot() Snapshot {
-	ids := make([]uint64, 0, len(s.entities))
-	for id := range s.entities {
+func sortedEntityIDs(entities map[uint64]*entity) []uint64 {
+	ids := make([]uint64, 0, len(entities))
+	for id := range entities {
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
+}
+
+// Snapshot returns the full authoritative state, with entities ordered by id.
+func (s *Sim) Snapshot() Snapshot {
+	ids := sortedEntityIDs(s.entities)
 
 	entities := make([]EntityView, 0, len(ids))
 	for _, id := range ids {

@@ -1,0 +1,7 @@
+{
+  "description": "rusty_sword resolves to the v2 weapon asset and mount socket via shared metadata + manifest.",
+  "item_def_id": "rusty_sword",
+  "expected_asset_id": "weapon_rusty_sword_v0",
+  "expected_mount_socket": "right_hand_socket",
+  "expected_slot": "weapon"
+}

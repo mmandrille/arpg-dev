@@ -1,0 +1,25 @@
+client/tests/test_animation.gd.uid
+  s_c36b8efb59b07f::t_0a0d666a26a48d 1
+client/tests/test_animation.gd
+  s_c36b8efb59b07f::t_289e96bbd3b7ef 1-74
+client/scripts/animation_controller.gd.uid
+  s_c36b8efb59b07f::t_0a0d666a26a48d 1
+client/scripts/animation_controller.gd
+  s_c36b8efb59b07f::t_23f56ba9a9daa0 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "062427213b86a0570523ce3816041e92e00f2ce8",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

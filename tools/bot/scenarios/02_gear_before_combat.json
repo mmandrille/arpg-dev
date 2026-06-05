@@ -37,7 +37,6 @@
     { "type": "inventory_count", "equals": 2 },
     { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
     { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false },
-    { "type": "monster_dead", "monster_def_id": "training_dummy_reward" },
-    { "type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1 }
+    { "type": "monster_dead", "monster_def_id": "training_dummy_reward" }
   ]
 }

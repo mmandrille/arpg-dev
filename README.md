@@ -63,9 +63,7 @@ Headless cross-language golden checks (including `retaliation_damage.json`) run 
 Typical first run:
 
 ```bash
-make db-up
-make server          # in one terminal
-make bot             # in another — plays login -> session -> move -> attack -> pickup -> equip
+make bot-visual
 ```
 
 ## Status

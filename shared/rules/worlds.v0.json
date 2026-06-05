@@ -8,11 +8,31 @@
           "type": "monster",
           "monster_def_id": "training_dummy",
           "position": { "x": 12, "y": 5 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
         }
       ]
     },
     "gear_before_combat": {
-      "player": { "position": { "x": 0, "y": 5 } },
+      "player": { "position": { "x": 2, "y": 5 } },
       "entities": [
         {
           "type": "loot",
@@ -23,11 +43,31 @@
           "type": "monster",
           "monster_def_id": "training_dummy_reward",
           "position": { "x": 12, "y": 5 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
         }
       ]
     },
     "collision_lab": {
-      "player": { "position": { "x": 0, "y": 5 } },
+      "player": { "position": { "x": 2, "y": 2 } },
       "entities": [
         {
           "type": "monster",
@@ -36,88 +76,153 @@
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 2 },
-          "size": { "x": 1, "y": 4 }
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 8 },
-          "size": { "x": 1, "y": 4 }
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 4, "y": 6 },
+          "size": { "x": 1, "y": 6 }
         }
       ]
     },
     "door_lab": {
-      "player": { "position": { "x": 0, "y": 5 } },
+      "player": { "position": { "x": 2, "y": 2 } },
       "entities": [
         {
           "type": "interactable",
           "interactable_def_id": "wooden_door",
-          "position": { "x": 4, "y": 5 }
+          "position": { "x": 4, "y": 2 }
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 2 },
-          "size": { "x": 1, "y": 5 }
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 8 },
-          "size": { "x": 1, "y": 5 }
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 4, "y": 6 },
+          "size": { "x": 1, "y": 6 }
         },
         {
           "type": "loot",
           "item_def_id": "training_badge",
-          "position": { "x": 8, "y": 5 }
+          "position": { "x": 8, "y": 2 }
         }
       ]
     },
     "path_maze": {
-      "player": { "position": { "x": 0, "y": 5 } },
+      "player": { "position": { "x": 2, "y": 5 } },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_path",
-          "position": { "x": 10, "y": 5 }
+          "position": { "x": 12, "y": 5 }
         },
         {
           "type": "wall",
-          "position": { "x": 2, "y": 4 },
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 4, "y": 6 },
           "size": { "x": 1, "y": 6 }
         },
         {
           "type": "wall",
-          "position": { "x": 5, "y": 7 },
+          "position": { "x": 7, "y": 3.5 },
           "size": { "x": 1, "y": 6 }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 3 },
+          "position": { "x": 10, "y": 6 },
           "size": { "x": 1, "y": 6 }
         }
       ]
     },
     "ranged_lab": {
-      "player": { "position": { "x": 0, "y": 5 } },
+      "player": { "position": { "x": 2, "y": 2 } },
       "entities": [
         {
           "type": "loot",
           "item_def_id": "training_bow",
-          "position": { "x": 1, "y": 5 }
+          "position": { "x": 3, "y": 2 }
         },
         {
           "type": "monster",
           "monster_def_id": "training_dummy_ranged",
-          "position": { "x": 14, "y": 5 }
+          "position": { "x": 12, "y": 5 }
         },
         {
           "type": "wall",
-          "position": { "x": 5, "y": 3 },
-          "size": { "x": 1, "y": 3 }
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
         },
         {
           "type": "wall",
-          "position": { "x": 5, "y": 7 },
-          "size": { "x": 1, "y": 3 }
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 5, "y": 6 },
+          "size": { "x": 1, "y": 6 }
         }
       ]
     }

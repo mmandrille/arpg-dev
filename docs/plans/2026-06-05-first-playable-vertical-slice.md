@@ -308,3 +308,47 @@ make ci
   concepts.
 - Use `/v0/sessions/{session_id}/state` as the canonical live inspection endpoint; do not add a
   parallel `/inspect` route in v0.
+
+## As-Built Notes
+
+Deviations and concrete decisions made during implementation (status: all 12 tasks complete; the
+full slice passes via `make ci` — shared validation, Go tests, Python bot, replay verification, and
+the Godot 4.6.3 headless smoke).
+
+### Toolchain (verified-latest-at-scaffold)
+- **Go**: `go.mod` pins `go 1.24`; the local/CI toolchain is Go 1.25.x. ADR baseline was 1.24.x.
+- **Python**: `pyproject.toml` requires `>=3.12`; the local interpreter is 3.14.x. Lower bounds are
+  pinned and upper bounds left open so tooling runs on the newer interpreter present at scaffold.
+- **Postgres**: `postgres:16.4` via Docker Compose. The Docker daemon is provided by **Colima**
+  (not Docker Desktop), and Compose is invoked as `docker-compose` (the v5 standalone binary); the
+  `docker compose` plugin is not present. `make db-up` works with either daemon.
+- **Godot**: `4.6.3-stable`, installed via Homebrew cask.
+
+### Architecture / contract decisions
+- **Inventory persistence is session-scoped**, not character-scoped. `inventory_items` is keyed by
+  `(session_id, id)`. Reason: `id` is the protocol `item_instance_id`, allocated by the
+  deterministic per-session entity counter (which restarts at 1001 each session), so it is unique
+  only within a session. Spec 4.6 lists inventory as character-scoped with no `session_id`; honoring
+  that with per-session ids caused cross-session id collisions (a later session's pickup `1004`
+  conflicted with an earlier one, and equip mutated the wrong row). "Survives restart" (acceptance
+  #8) is proven by reconnecting to the **same** session, which reloads inventory from Postgres into
+  a fresh sim. Durable cross-session character inventory is deferred post-v0.
+- **`session_inputs.payload` stores the full envelope** (not just the intent payload), because spec
+  4.6 has no `type` column and replay needs the message type to re-apply inputs.
+- **WebSocket auth accepts `?access_token=` query param** in addition to the `Authorization: Bearer`
+  header, because `WebSocketPeer` (Godot) and browsers cannot reliably set handshake headers. The
+  Python bot and Go tests use the header; the Godot client uses the query param.
+- **Monster death leaves a corpse** (`entity_update` to hp 0), matching the spec `state_delta`
+  example; `entity_remove` is used only for loot on pickup.
+- **`state_delta.changes`/`events` are always emitted as `[]`** (never `null`); the sim guarantees
+  non-nil slices so the wire conforms to the schema and dynamically-typed clients don't choke.
+- **Combat has no attack-range gate in v0**: `base_hit_chance` is 1.0 and an attack on a living
+  monster always hits. Movement is real (predicted + reconciled) but not a precondition for the
+  kill, keeping the bot/client robust.
+- **Metrics** use `prometheus/client_golang` for `/metrics` (Prometheus-compatible exposition).
+- **Plan step 6.7** (persist authoritative inputs + events) is implemented in the realtime session
+  runner (Task 7), where inputs actually arrive, rather than inside the pure sim package.
+- **Replay** reconstructs authoritative state from a session's own recorded input stream; it does
+  not replay cross-session resumed inventory.
+- A small `internal/ids` package (hand-rolled prefixed ULIDs) was added for platform identities;
+  these are explicitly outside the deterministic sim (which uses the per-session counter).

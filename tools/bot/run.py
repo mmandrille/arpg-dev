@@ -31,10 +31,21 @@ import websockets
 
 from tools.bot.protocol import make_envelope, to_ws_url
 
-MONSTER_ID = "1002"
 SLICE_TIMEOUT_S = 20.0
+DEFAULT_WORLD_ID = "vertical_slice"
+WALK_STOP_DISTANCE = 1.0
+WALK_MAX_TICKS = 40
 ROOT = Path(__file__).resolve().parent.parent.parent
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
+
+
+def load_known_world_ids() -> set[str]:
+    worlds_path = ROOT / "shared" / "rules" / "worlds.v0.json"
+    data = json.loads(worlds_path.read_text(encoding="utf-8"))
+    return set(data["worlds"])
+
+
+KNOWN_WORLD_IDS = load_known_world_ids()
 
 
 def log(*args: Any) -> None:
@@ -44,10 +55,11 @@ def log(*args: Any) -> None:
 @dataclass(frozen=True)
 class Scenario:
     id: str
+    world_id: str
     title: str
     description: str
     steps: list[dict[str, Any]]
-    assertions: list[str]
+    assertions: list[Any]
     path: Path
 
 
@@ -55,6 +67,9 @@ class Scenario:
 class RuntimeState:
     last_tick: int = 0
     killed: bool = False
+    entities: dict[str, dict[str, Any]] = field(default_factory=dict)
+    inventory: list[dict[str, Any]] = field(default_factory=list)
+    equipped: dict[str, Any] = field(default_factory=dict)
     loot_ids: list[str] = field(default_factory=list)
     item_id: str | None = None
     equipped_item_id: str | None = None
@@ -68,8 +83,12 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
         sid = raw.get("id", "")
         if not sid:
             raise ValueError(f"{path}: missing scenario id")
+        world_id = raw.get("world_id", DEFAULT_WORLD_ID)
+        if world_id not in KNOWN_WORLD_IDS:
+            raise ValueError(f"{path}: unknown world_id {world_id}")
         scenarios.append(Scenario(
             id=sid,
+            world_id=world_id,
             title=raw.get("title", sid),
             description=raw.get("description", ""),
             steps=list(raw.get("steps", [])),
@@ -102,11 +121,11 @@ def dev_login(client: httpx.Client, email: str, dev_token: str) -> tuple[str, st
     return body["account_id"], body["access_token"]
 
 
-def create_session(client: httpx.Client, token: str) -> dict[str, Any]:
-    resp = client.post("/v0/sessions", headers=auth(token), json={"mode": "solo"})
+def create_session(client: httpx.Client, token: str, world_id: str) -> dict[str, Any]:
+    resp = client.post("/v0/sessions", headers=auth(token), json={"mode": "solo", "world_id": world_id})
     resp.raise_for_status()
     body = resp.json()
-    log("session", body["session_id"], "seed", body["seed"])
+    log("session", body["session_id"], "seed", body["seed"], "world", body.get("world_id"))
     return body
 
 
@@ -147,7 +166,8 @@ async def drive_scenario(base_url: str, token: str, sess: dict[str, Any], scenar
 
         first = await recv_json(ws)
         assert first["type"] == "session_snapshot", first["type"]
-        state = RuntimeState(last_tick=first["payload"]["server_tick"])
+        state = RuntimeState()
+        ingest_snapshot(first["payload"], state)
         log("connected; initial snapshot tick", state.last_tick)
 
         await ws.send(json.dumps(make_envelope(
@@ -178,7 +198,12 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
         return
 
     if action == "attack_until_event":
-        target_id = str(step.get("target_id", MONSTER_ID))
+        target_id = str(step["target_id"]) if step.get("target_id") else None
+        if target_id is None:
+            monster = find_monster(state, str(step.get("monster_def_id", "training_dummy")))
+            if monster is None:
+                raise AssertionError(f"attack_until_event: monster not found: {step}")
+            target_id = str(monster["id"])
         event_type = str(step["event_type"])
         last_attack = 0.0
         deadline = loop.time() + SLICE_TIMEOUT_S
@@ -186,10 +211,27 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
             if loop.time() > deadline:
                 raise TimeoutError(f"attack_until_event stalled waiting for {event_type}")
             if loop.time() - last_attack > 0.12:
+                monster = state.entities.get(target_id)
+                if monster is not None and monster.get("hp") == 0:
+                    break
                 await ws.send(json.dumps(make_envelope(
                     "attack_intent", session_id, state.last_tick, {"target_id": target_id})))
                 last_attack = loop.time()
             await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "walk_to_loot":
+        loot = find_loot(state, str(step["item_def_id"]))
+        if loot is None:
+            raise AssertionError(f"walk_to_loot: loot not found: {step}")
+        await walk_toward(ws, session_id, state, loot["position"], loop)
+        return
+
+    if action == "walk_to_monster":
+        monster = find_monster(state, str(step["monster_def_id"]))
+        if monster is None:
+            raise AssertionError(f"walk_to_monster: monster not found: {step}")
+        await walk_toward(ws, session_id, state, monster["position"], loop)
         return
 
     if action == "pick_up_first_loot":
@@ -208,6 +250,24 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
             await pump_one(ws, state, timeout=0.1)
         return
 
+    if action == "pick_up_loot":
+        item_def_id = str(step["item_def_id"])
+        loot = find_loot(state, item_def_id)
+        if loot is None:
+            raise AssertionError(f"pick_up_loot: loot not found for item_def_id={item_def_id}")
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        await ws.send(json.dumps(make_envelope(
+            "pick_up_intent", session_id, state.last_tick, {"entity_id": loot["id"]})))
+        log("picking up", item_def_id, "loot", loot["id"])
+        while find_inventory_item(state.inventory, item_def_id) is None:
+            if loop.time() > deadline:
+                raise TimeoutError(f"pick_up_loot stalled waiting for {item_def_id}")
+            await pump_one(ws, state, timeout=0.1)
+        item = find_inventory_item(state.inventory, item_def_id)
+        if item is not None:
+            state.item_id = item["item_instance_id"]
+        return
+
     if action == "equip_first_inventory_item":
         deadline = loop.time() + SLICE_TIMEOUT_S
         while state.item_id is None:
@@ -224,7 +284,77 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
             await pump_one(ws, state, timeout=0.1)
         return
 
+    if action == "equip_inventory_item":
+        item_def_id = str(step["item_def_id"])
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        item = find_inventory_item(state.inventory, item_def_id)
+        while item is None:
+            if loop.time() > deadline:
+                raise TimeoutError(f"equip_inventory_item stalled waiting for {item_def_id}")
+            await pump_one(ws, state, timeout=0.1)
+            item = find_inventory_item(state.inventory, item_def_id)
+        slot = str(step.get("slot", item.get("slot", "weapon")))
+        item_id = str(item["item_instance_id"])
+        await ws.send(json.dumps(make_envelope(
+            "equip_intent", session_id, state.last_tick, {"item_instance_id": item_id, "slot": slot})))
+        log("equipping", item_def_id, item_id)
+        while state.equipped.get(slot) != item_id:
+            if loop.time() > deadline:
+                raise TimeoutError(f"equip_inventory_item stalled waiting for equipped_update for {item_def_id}")
+            await pump_one(ws, state, timeout=0.1)
+        state.equipped_item_id = item_id
+        return
+
     raise ValueError(f"unsupported scenario action: {action}")
+
+
+async def walk_toward(
+    ws,
+    session_id: str,
+    state: RuntimeState,
+    target_pos: dict[str, Any],
+    loop,
+    max_ticks: int = WALK_MAX_TICKS,
+) -> None:
+    for _ in range(max_ticks):
+        player = find_player(state)
+        if player is None:
+            raise AssertionError("walk_toward: player not found")
+        player_pos = player["position"]
+        dx = float(target_pos["x"]) - float(player_pos["x"])
+        dy = float(target_pos["y"]) - float(player_pos["y"])
+        if max(abs(dx), abs(dy)) <= WALK_STOP_DISTANCE:
+            return
+
+        direction = {"x": 0, "y": 0}
+        if abs(dx) > 0:
+            direction["x"] = 1 if dx > 0 else -1
+        elif abs(dy) > 0:
+            direction["y"] = 1 if dy > 0 else -1
+
+        before = {"x": player_pos["x"], "y": player_pos["y"]}
+        await ws.send(json.dumps(make_envelope(
+            "move_intent",
+            session_id,
+            state.last_tick,
+            {"direction": direction, "duration_ticks": 1},
+        )))
+        await wait_for_player_move(ws, state, before, loop)
+
+    raise TimeoutError(f"walk_toward exhausted {max_ticks} ticks toward {target_pos}")
+
+
+async def wait_for_player_move(ws, state: RuntimeState, before: dict[str, Any], loop) -> None:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while True:
+        player = find_player(state)
+        if player is not None:
+            pos = player["position"]
+            if pos.get("x") != before.get("x") or pos.get("y") != before.get("y"):
+                return
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for player movement from {before}")
+        await pump_one(ws, state, timeout=0.1)
 
 
 async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop) -> None:
@@ -245,10 +375,14 @@ async def pump_one(ws, state: RuntimeState, timeout: float) -> None:
 
 def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
     state.last_tick = max(state.last_tick, int(m.get("tick", 0)))
+    if m.get("type") == "session_snapshot":
+        ingest_snapshot(m["payload"], state)
+        return
     if m.get("type") != "state_delta":
         return
 
     p = m["payload"]
+    state.last_tick = max(state.last_tick, int(p.get("server_tick", state.last_tick)))
     for ev in (p.get("events") or []):
         event_type = ev["event_type"]
         state.seen_events.add(event_type)
@@ -256,17 +390,85 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.killed = True
             log("monster killed at tick", p.get("server_tick"))
     for c in (p.get("changes") or []):
-        if c["op"] == "entity_spawn" and c["entity"]["type"] == "loot":
-            loot_id = c["entity"]["id"]
-            if loot_id not in state.loot_ids:
-                state.loot_ids.append(loot_id)
+        if c["op"] in {"entity_spawn", "entity_update"}:
+            entity = c["entity"]
+            existing = state.entities.get(entity["id"], {})
+            existing.update(entity)
+            state.entities[entity["id"]] = existing
+            if c["op"] == "entity_spawn" and entity["type"] == "loot":
+                loot_id = entity["id"]
+                if loot_id not in state.loot_ids:
+                    state.loot_ids.append(loot_id)
+        elif c["op"] == "entity_remove":
+            entity_id = c["entity_id"]
+            state.entities.pop(entity_id, None)
+            if entity_id in state.loot_ids:
+                state.loot_ids.remove(entity_id)
         elif c["op"] == "inventory_add":
+            upsert_inventory(state, c["item"])
             state.item_id = c["item"]["item_instance_id"]
+        elif c["op"] == "inventory_update":
+            upsert_inventory(state, c["item"])
         elif c["op"] == "equipped_update" and c.get("slot") == "weapon":
             state.equipped_item_id = c.get("item_instance_id")
+            state.equipped[c["slot"]] = c.get("item_instance_id")
 
 
-async def check_persistence(base_url: str, token: str, session_id: str, item_id: str, assertions: list[str]) -> None:
+def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
+    state.last_tick = max(state.last_tick, int(payload.get("server_tick", 0)))
+    state.entities = {str(e["id"]): dict(e) for e in payload.get("entities", [])}
+    state.inventory = [dict(i) for i in payload.get("inventory", [])]
+    state.equipped = dict(payload.get("equipped", {}))
+    state.loot_ids = [
+        entity_id
+        for entity_id, entity in state.entities.items()
+        if entity.get("type") == "loot"
+    ]
+    for item in state.inventory:
+        if item.get("equipped"):
+            state.equipped_item_id = item.get("item_instance_id")
+
+
+def upsert_inventory(state: RuntimeState, item: dict[str, Any]) -> None:
+    item_id = item["item_instance_id"]
+    for i, current in enumerate(state.inventory):
+        if current.get("item_instance_id") == item_id:
+            merged = dict(current)
+            merged.update(item)
+            state.inventory[i] = merged
+            return
+    state.inventory.append(dict(item))
+
+
+def find_loot(state: RuntimeState, item_def_id: str) -> dict[str, Any] | None:
+    for entity in state.entities.values():
+        if entity.get("type") == "loot" and entity.get("item_def_id") == item_def_id:
+            return entity
+    return None
+
+
+def find_monster(state: RuntimeState, monster_def_id: str) -> dict[str, Any] | None:
+    for entity in state.entities.values():
+        if entity.get("type") == "monster" and entity.get("monster_def_id") == monster_def_id:
+            return entity
+    return None
+
+
+def find_inventory_item(inventory: list[dict[str, Any]], item_def_id: str) -> dict[str, Any] | None:
+    for item in inventory:
+        if item.get("item_def_id") == item_def_id:
+            return item
+    return None
+
+
+def find_player(state: RuntimeState) -> dict[str, Any] | None:
+    for entity in state.entities.values():
+        if entity.get("type") == "player":
+            return entity
+    return None
+
+
+async def check_persistence(base_url: str, token: str, session_id: str, item_id: str | None, assertions: list[Any]) -> None:
     """Reconnect and assert the snapshot was reconstructed from recorded inputs."""
     uri = to_ws_url(base_url, "/v0/ws?session_id=" + session_id)
     async with websockets.connect(uri, additional_headers=auth(token)) as ws:
@@ -281,13 +483,14 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
 
 # --- assertions -------------------------------------------------------------
 
-def assert_equipped_sword(inventory: list[dict], equipped: dict, item_id: str, where: str) -> None:
-    if len(inventory) != 1:
-        raise AssertionError(f"{where}: inventory size {len(inventory)} != 1: {inventory}")
-    item = inventory[0]
+def assert_equipped_sword(inventory: list[dict], equipped: dict, item_id: str | None, where: str) -> None:
+    item = find_inventory_item(inventory, "rusty_sword")
+    if item is None:
+        raise AssertionError(f"{where}: missing rusty_sword in inventory: {inventory}")
     if item["item_def_id"] != "rusty_sword" or not item["equipped"]:
         raise AssertionError(f"{where}: item not an equipped rusty_sword: {item}")
-    if equipped.get("weapon") != item_id:
+    expected_id = item_id or item["item_instance_id"]
+    if equipped.get("weapon") != expected_id:
         raise AssertionError(f"{where}: equipped weapon {equipped.get('weapon')} != {item_id}")
 
 
@@ -300,17 +503,25 @@ def assert_player_damaged(entities: list[dict], where: str) -> None:
         raise AssertionError(f"{where}: player hp {hp} did not show retaliation damage")
 
 
-def assert_monster_dead(entities: list[dict], where: str) -> None:
-    monsters = [e for e in entities if e.get("id") == MONSTER_ID and e.get("type") == "monster"]
+def assert_monster_dead(entities: list[dict], where: str, monster_def_id: str = "training_dummy") -> None:
+    monsters = [e for e in entities if e.get("monster_def_id") == monster_def_id and e.get("type") == "monster"]
     if len(monsters) != 1:
-        raise AssertionError(f"{where}: expected training dummy entity, got {monsters}")
+        raise AssertionError(f"{where}: expected monster {monster_def_id}, got {monsters}")
     hp = monsters[0].get("hp")
     if hp != 0:
-        raise AssertionError(f"{where}: training dummy hp {hp} != 0")
+        raise AssertionError(f"{where}: monster {monster_def_id} hp {hp} != 0")
+
+
+def assert_inventory_contains(inventory: list[dict], item_def_id: str, equipped: bool | None, where: str) -> None:
+    item = find_inventory_item(inventory, item_def_id)
+    if item is None:
+        raise AssertionError(f"{where}: missing inventory item {item_def_id}: {inventory}")
+    if equipped is not None and bool(item.get("equipped")) != equipped:
+        raise AssertionError(f"{where}: {item_def_id} equipped={item.get('equipped')} want {equipped}")
 
 
 def run_assertions(
-    assertions: list[str],
+    assertions: list[Any],
     entities: list[dict],
     inventory: list[dict],
     equipped: dict,
@@ -318,16 +529,32 @@ def run_assertions(
     where: str,
 ) -> None:
     for assertion in assertions:
-        if assertion == "equipped_rusty_sword":
-            if item_id is None:
-                raise AssertionError(f"{where}: scenario did not observe an item to equip")
-            assert_equipped_sword(inventory, equipped, item_id, where)
-        elif assertion == "player_damaged":
-            assert_player_damaged(entities, where)
-        elif assertion == "monster_dead":
-            assert_monster_dead(entities, where)
+        if isinstance(assertion, str):
+            if assertion == "equipped_rusty_sword":
+                assert_equipped_sword(inventory, equipped, item_id, where)
+            elif assertion == "player_damaged":
+                assert_player_damaged(entities, where)
+            elif assertion == "monster_dead":
+                assert_monster_dead(entities, where)
+            else:
+                raise AssertionError(f"{where}: unknown assertion {assertion}")
+            continue
+
+        if not isinstance(assertion, dict):
+            raise AssertionError(f"{where}: assertion must be string or object: {assertion}")
+
+        typ = assertion.get("type")
+        if typ == "inventory_count":
+            want = int(assertion["equals"])
+            if len(inventory) != want:
+                raise AssertionError(f"{where}: inventory count {len(inventory)} != {want}: {inventory}")
+        elif typ == "inventory_contains":
+            expected_equipped = assertion.get("equipped")
+            assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
+        elif typ == "monster_dead":
+            assert_monster_dead(entities, where, str(assertion["monster_def_id"]))
         else:
-            raise AssertionError(f"{where}: unknown assertion {assertion}")
+            raise AssertionError(f"{where}: unknown assertion type {typ}")
 
 
 def default_manifest_path() -> Path:
@@ -372,7 +599,7 @@ def main() -> int:
         _, token = dev_login(client, args.email, args.dev_token)
         for scenario in selected:
             log("scenario", scenario.id, "-", scenario.title)
-            sess = create_session(client, token)
+            sess = create_session(client, token, scenario.world_id)
             session_id = sess["session_id"]
             last_session_id = session_id
 
@@ -391,8 +618,7 @@ def main() -> int:
             log("/state API confirms expected scenario state")
 
             # Assert replay reconstruction by reconnecting a fresh session loop.
-            if observed.item_id is not None:
-                asyncio.run(check_persistence(args.base_url, token, session_id, observed.item_id, scenario.assertions))
+            asyncio.run(check_persistence(args.base_url, token, session_id, observed.item_id, scenario.assertions))
 
             replay = fetch_replay(client, token, args.debug_token, session_id)
             if not replay.get("match", False):
@@ -403,6 +629,7 @@ def main() -> int:
                 "id": scenario.id,
                 "title": scenario.title,
                 "description": scenario.description,
+                "world_id": scenario.world_id,
                 "session_id": session_id,
                 "seed": sess["seed"],
                 "status": "passed",

@@ -87,6 +87,7 @@ func TestAccountCharacterSessionFlow(t *testing.T) {
 		AccountID:   acct.ID,
 		CharacterID: char.ID,
 		Seed:        "deadbeef",
+		WorldID:     "gear_before_combat",
 		Status:      store.SessionActive,
 	}
 	if err := s.CreateSession(ctx, sess); err != nil {
@@ -96,7 +97,7 @@ func TestAccountCharacterSessionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get session: %v", err)
 	}
-	if got.Seed != "deadbeef" || got.Status != store.SessionActive {
+	if got.Seed != "deadbeef" || got.WorldID != "gear_before_combat" || got.Status != store.SessionActive {
 		t.Fatalf("session round-trip mismatch: %+v", got)
 	}
 
@@ -111,7 +112,7 @@ func TestInventoryPersistAndEquip(t *testing.T) {
 
 	acct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "inv+"+ids.Token()[:12]+"@example.test")
 	char, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), acct.ID, "Hero")
-	sess := store.Session{ID: ids.New("sess"), AccountID: acct.ID, CharacterID: char.ID, Seed: "ab", Status: store.SessionActive}
+	sess := store.Session{ID: ids.New("sess"), AccountID: acct.ID, CharacterID: char.ID, Seed: "ab", WorldID: "vertical_slice", Status: store.SessionActive}
 	if err := s.CreateSession(ctx, sess); err != nil {
 		t.Fatalf("create session: %v", err)
 	}
@@ -159,7 +160,7 @@ func TestInputsAndEventsOrdering(t *testing.T) {
 
 	acct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "ev+"+ids.Token()[:12]+"@example.test")
 	char, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), acct.ID, "Hero")
-	sess := store.Session{ID: ids.New("sess"), AccountID: acct.ID, CharacterID: char.ID, Seed: "ab", Status: store.SessionActive}
+	sess := store.Session{ID: ids.New("sess"), AccountID: acct.ID, CharacterID: char.ID, Seed: "ab", WorldID: "vertical_slice", Status: store.SessionActive}
 	if err := s.CreateSession(ctx, sess); err != nil {
 		t.Fatalf("create session: %v", err)
 	}

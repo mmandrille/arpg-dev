@@ -5,6 +5,11 @@
       "entries": [
         { "item_def_id": "rusty_sword", "weight": 1 }
       ]
+    },
+    "reward_drop": {
+      "entries": [
+        { "item_def_id": "training_badge", "weight": 1 }
+      ]
     }
   }
 }

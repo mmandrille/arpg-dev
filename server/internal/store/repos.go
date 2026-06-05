@@ -84,9 +84,9 @@ func (s *Store) GetCharacter(ctx context.Context, id string) (Character, error) 
 
 func (s *Store) CreateSession(ctx context.Context, sess Session) error {
 	_, err := s.pool.Exec(ctx,
-		`INSERT INTO sessions (id, account_id, character_id, seed, status)
-		 VALUES ($1, $2, $3, $4, $5)`,
-		sess.ID, sess.AccountID, sess.CharacterID, sess.Seed, sess.Status,
+		`INSERT INTO sessions (id, account_id, character_id, seed, world_id, status)
+		 VALUES ($1, $2, $3, $4, $5, $6)`,
+		sess.ID, sess.AccountID, sess.CharacterID, sess.Seed, sess.WorldID, sess.Status,
 	)
 	if err != nil {
 		return fmt.Errorf("store: create session: %w", err)
@@ -97,14 +97,17 @@ func (s *Store) CreateSession(ctx context.Context, sess Session) error {
 func (s *Store) GetSession(ctx context.Context, id string) (Session, error) {
 	var sess Session
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, account_id, character_id, seed, status, created_at, updated_at
+		`SELECT id, account_id, character_id, seed, world_id, status, created_at, updated_at
 		 FROM sessions WHERE id = $1`, id,
-	).Scan(&sess.ID, &sess.AccountID, &sess.CharacterID, &sess.Seed, &sess.Status, &sess.CreatedAt, &sess.UpdatedAt)
+	).Scan(&sess.ID, &sess.AccountID, &sess.CharacterID, &sess.Seed, &sess.WorldID, &sess.Status, &sess.CreatedAt, &sess.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Session{}, ErrNotFound
 	}
 	if err != nil {
 		return Session{}, fmt.Errorf("store: get session: %w", err)
+	}
+	if sess.WorldID == "" {
+		sess.WorldID = defaultWorldID
 	}
 	return sess, nil
 }

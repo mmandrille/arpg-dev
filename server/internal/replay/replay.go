@@ -109,7 +109,10 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 		}
 	}
 
-	recon := ReconstructFromInputs(sessionID, sess.Seed, rules, recordedInputs, maxTick)
+	recon, err := ReconstructFromInputs(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID), recordedInputs, maxTick)
+	if err != nil {
+		return Reconstruction{Session: sess}, err
+	}
 	recon.Session = sess
 	return recon, nil
 }
@@ -141,7 +144,10 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 	}
 
 	byTick := inputsByTick(recordedInputs)
-	sim := game.NewSim(sessionID, sess.Seed, rules)
+	sim, err := game.NewSimWithWorld(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID))
+	if err != nil {
+		return Timeline{}, err
+	}
 	out := Timeline{
 		SessionID: sessionID,
 		Seed:      sess.Seed,
@@ -198,7 +204,7 @@ func StoredInputs(rows []store.SessionInput) ([]RecordedInput, int64, error) {
 
 // ReconstructFromInputs rebuilds a session from an already-decoded input stream.
 // throughTick is inclusive; pass -1 for a fresh untouched session.
-func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, inputs []RecordedInput, throughTick int64) Reconstruction {
+func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64) (Reconstruction, error) {
 	byTick := make(map[int64][]game.Input)
 	meta := ResumeMetadata{
 		SeenMessageIDs: make(map[string]bool, len(inputs)),
@@ -213,7 +219,10 @@ func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, inputs []R
 		}
 	}
 
-	sim := game.NewSim(sessionID, seed, rules)
+	sim, err := game.NewSimWithWorld(sessionID, seed, rules, worldID)
+	if err != nil {
+		return Reconstruction{}, err
+	}
 	var derived []derivedEvent
 	for t := int64(0); t <= throughTick; t++ {
 		ins := byTick[t]
@@ -235,7 +244,7 @@ func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, inputs []R
 		Snapshot:      sim.Snapshot(),
 		DerivedEvents: derived,
 		Metadata:      meta,
-	}
+	}, nil
 }
 
 func inputsByTick(inputs []RecordedInput) map[int64][]game.Input {
@@ -314,4 +323,12 @@ func jsonEqual(a, b []byte) bool {
 		return false
 	}
 	return reflect.DeepEqual(ma, mb)
+}
+
+func normalizeWorldID(worldID string) string {
+	if worldID == "" {
+		return game.DefaultWorldID
+	}
+
+	return worldID
 }

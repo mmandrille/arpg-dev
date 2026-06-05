@@ -116,6 +116,7 @@ def cross_checks(report: Report) -> None:
     items = load(RULES / "items.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
+    worlds = load(RULES / "worlds.v0.json")
     damage_golden = load(GOLDEN / "damage_formula.json")
     retaliation_golden = load(GOLDEN / "retaliation_damage.json")
     loot_golden = load(GOLDEN / "loot_roll.json")
@@ -181,6 +182,36 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"monster {mid} loot table + items resolve")
 
+    # world presets: entity references resolve and type-specific fields are present.
+    for world_id, world in worlds["worlds"].items():
+        pos = world["player"]["position"]
+        if not isinstance(pos.get("x"), (int, float)) or not isinstance(pos.get("y"), (int, float)):
+            report.fail("world player position", f"{world_id}: player.position must have numeric x/y")
+        else:
+            report.ok(f"world {world_id} player position is numeric")
+
+        for idx, entity in enumerate(world["entities"]):
+            etype = entity.get("type")
+            label = f"world {world_id} entity {idx}"
+            if etype == "monster":
+                monster_id = entity.get("monster_def_id")
+                if not monster_id:
+                    report.fail("world monster entity", f"{label}: missing monster_def_id")
+                elif monster_id not in monsters["monsters"]:
+                    report.fail("world monster entity", f"{label}: unknown monster {monster_id}")
+                else:
+                    report.ok(f"{label} monster reference resolves")
+            elif etype == "loot":
+                item_id = entity.get("item_def_id")
+                if not item_id:
+                    report.fail("world loot entity", f"{label}: missing item_def_id")
+                elif item_id not in items["items"]:
+                    report.fail("world loot entity", f"{label}: unknown item {item_id}")
+                else:
+                    report.ok(f"{label} loot item reference resolves")
+            else:
+                report.fail("world entity type", f"{label}: unknown type {etype}")
+
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])
     if not table:
@@ -212,7 +243,7 @@ def cross_checks(report: Report) -> None:
         item = items["items"].get(def_id)
         if item is None:
             report.fail("item_visuals key", f"{def_id} not in items.v0.json")
-        elif item["slot"] != vis["slot"]:
+        elif item.get("slot") != vis["slot"]:
             report.fail("item_visuals slot", f"{def_id}: {vis['slot']} != items slot {item['slot']}")
         else:
             report.ok(f"item_visuals {def_id} resolves to items.v0.json with matching slot")

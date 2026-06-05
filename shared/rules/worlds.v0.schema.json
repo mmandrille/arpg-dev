@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/worlds.v0.schema.json",
+  "title": "World presets (v0)",
+  "description": "Deterministic initial world layouts used by the authoritative sim.",
+  "type": "object",
+  "required": ["version", "worlds"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "worlds": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["player", "entities"],
+        "additionalProperties": false,
+        "properties": {
+          "player": {
+            "type": "object",
+            "required": ["position"],
+            "additionalProperties": false,
+            "properties": {
+              "position": { "$ref": "#/$defs/position" }
+            }
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "position"],
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string", "enum": ["monster", "loot"] },
+                "monster_def_id": { "type": "string" },
+                "item_def_id": { "type": "string" },
+                "position": { "$ref": "#/$defs/position" }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": { "type": { "const": "monster" } },
+                    "required": ["type"]
+                  },
+                  "then": {
+                    "required": ["monster_def_id"],
+                    "not": { "required": ["item_def_id"] }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": { "type": { "const": "loot" } },
+                    "required": ["type"]
+                  },
+                  "then": {
+                    "required": ["item_def_id"],
+                    "not": { "required": ["monster_def_id"] }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

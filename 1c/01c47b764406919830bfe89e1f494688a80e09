@@ -1,0 +1,47 @@
+tools/bot/scenarios/02_gear_before_combat.json
+  s_b419d20a5666bd::t_822128c02560ef 38-39
+docs/PROGRESS.md
+  s_b419d20a5666bd::t_314f29c349db29 14,17,25,41-44,56,147-160,192,220-222
+tools/validate_shared.py
+  s_b419d20a5666bd::t_6c6c3a38c0809d 122,173-211
+shared/rules/items.v0.schema.json
+  s_b419d20a5666bd::t_7f84fb94e755b1 20-21,36-53,58-66
+tools/bot/run.py
+  s_b419d20a5666bd::t_822128c02560ef 77-79,220-224,387-399,410-412,578-579,584-603,651
+docs/plans/v8_2026-06-05-equipped-weapon-damage.md
+  s_b419d20a5666bd::t_185689275363dc 3
+  s_b419d20a5666bd::t_d30434e096e430 81,83,87,89,91,93,113,115,119,125,127,141,143,145,151,154,168,170,172-173,188,194,197,200,206,209,212,229-230,232-233
+shared/golden/equipped_weapon_damage.v0.schema.json
+  s_b419d20a5666bd::t_7f84fb94e755b1 1-37
+server/internal/game/sim.go
+  s_b419d20a5666bd::t_6ec963d254da80 441-458
+shared/golden/equipped_weapon_damage.json
+  s_b419d20a5666bd::t_7f84fb94e755b1 1-11
+tools/bot/test_protocol.py
+  s_b419d20a5666bd::t_4fa512b29834fc 13,56-66,141-181,197
+client/tests/test_golden.gd
+  s_b419d20a5666bd::t_ccd389a8d498dc 42-60,68
+server/internal/game/rules.go
+  s_b419d20a5666bd::t_6ec963d254da80 35-38,109-115
+server/internal/game/game_test.go
+  s_b419d20a5666bd::t_a4b6c851e5a211 62-64,68-70,172-199,358-402
+  s_b419d20a5666bd::t_3a5553ac15ca30 665-715,725-727
+shared/rules/items.v0.json
+  s_b419d20a5666bd::t_7f84fb94e755b1 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "1c01c47b764406919830bfe89e1f494688a80e09",
+  "prompts": {},
+  "sessions": {
+    "s_b419d20a5666bd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e98ad-9472-7580-9e00-901f7f049009",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

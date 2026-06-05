@@ -1,0 +1,10 @@
+{
+  "version": 0,
+  "loot_tables": {
+    "basic_drop": {
+      "entries": [
+        { "item_def_id": "rusty_sword", "weight": 1 }
+      ]
+    }
+  }
+}

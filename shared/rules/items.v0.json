@@ -1,0 +1,6 @@
+{
+  "version": 0,
+  "items": {
+    "rusty_sword": { "name": "Rusty Sword", "slot": "weapon", "equippable": true }
+  }
+}

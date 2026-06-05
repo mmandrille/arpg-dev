@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/protocol/state_delta.v0.schema.json",
+  "title": "state_delta payload (v0)",
+  "description": "Ordered authoritative changes produced by a single tick, applied in array order. Unknown `op` values are protocol errors.",
+  "type": "object",
+  "required": ["server_tick", "changes", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "server_tick": { "type": "integer", "minimum": 0 },
+    "changes": { "type": "array", "items": { "$ref": "#/$defs/change" } },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+  },
+  "$defs": {
+    "prefixed_id": { "type": "string", "pattern": "^[a-z]+_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "decimal_id": { "type": "string", "pattern": "^[0-9]+$" },
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "type", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/decimal_id" },
+        "type": { "type": "string", "enum": ["player", "monster", "loot"] },
+        "position": { "$ref": "#/$defs/vec2" },
+        "hp": { "type": "integer", "minimum": 0 },
+        "max_hp": { "type": "integer", "minimum": 0 },
+        "monster_def_id": { "type": "string" },
+        "item_def_id": { "type": "string" }
+      }
+    },
+    "item": {
+      "type": "object",
+      "required": ["item_instance_id", "item_def_id", "slot", "equipped"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "item_def_id": { "type": "string" },
+        "slot": { "type": "string", "enum": ["weapon"] },
+        "equipped": { "type": "boolean" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_type"],
+      "properties": {
+        "event_type": { "type": "string" },
+        "entity_id": { "$ref": "#/$defs/decimal_id" },
+        "correlation_id": { "$ref": "#/$defs/prefixed_id" }
+      }
+    },
+    "change": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity"],
+          "properties": { "op": { "const": "entity_spawn" }, "entity": { "$ref": "#/$defs/entity" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity"],
+          "properties": { "op": { "const": "entity_update" }, "entity": { "$ref": "#/$defs/entity" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity_id"],
+          "properties": { "op": { "const": "entity_remove" }, "entity_id": { "$ref": "#/$defs/decimal_id" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "item"],
+          "properties": { "op": { "const": "inventory_add" }, "item": { "$ref": "#/$defs/item" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "item"],
+          "properties": { "op": { "const": "inventory_update" }, "item": { "$ref": "#/$defs/item" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "slot", "item_instance_id"],
+          "properties": {
+            "op": { "const": "equipped_update" },
+            "slot": { "type": "string", "enum": ["weapon"] },
+            "item_instance_id": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+          }
+        }
+      ]
+    }
+  }
+}

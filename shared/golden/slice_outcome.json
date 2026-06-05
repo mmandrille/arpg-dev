@@ -1,0 +1,11 @@
+{
+  "description": "Expected authoritative end-state after the scripted vertical-slice flow: player kills the training_dummy, it drops rusty_sword, player picks it up and equips it. Player takes no damage (dummy does not retaliate in v0).",
+  "monster_def_id": "training_dummy",
+  "dropped_item_def_id": "rusty_sword",
+  "final_player_hp": 10,
+  "final_monster_hp": 0,
+  "final_inventory": [
+    { "item_def_id": "rusty_sword", "slot": "weapon", "equipped": true }
+  ],
+  "final_equipped": { "weapon": "rusty_sword" }
+}

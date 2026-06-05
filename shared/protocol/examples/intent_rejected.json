@@ -1,0 +1,8 @@
+{
+  "type": "intent_rejected",
+  "message_id": "msg_01H00000000000000000000011",
+  "session_id": "sess_01H00000000000000000000000",
+  "tick": 51,
+  "correlation_id": "corr_01H00000000000000000000003",
+  "payload": { "rejected_message_id": "msg_01H00000000000000000000003", "reason": "invalid_target" }
+}

@@ -1,0 +1,36 @@
+make/agents.mk
+  s_a613d4b1a5f4a5::t_eccf794831859a 1-8
+make/tools.mk
+  s_a613d4b1a5f4a5::t_0066077e6f5719 1-8
+make/subfiles.mk
+  s_a613d4b1a5f4a5::t_5e2416156bd504 1-9
+make/shared.mk
+  s_a613d4b1a5f4a5::t_efed06a7db38d1 1-10
+make/db.mk
+  s_a613d4b1a5f4a5::t_e0b152fc1308ff 1-17
+make/server.mk
+  s_a613d4b1a5f4a5::t_f38784d520f88b 1-10
+make/ci.mk
+  s_a613d4b1a5f4a5::t_2289ab0676fa7f 1-4
+Makefile
+  s_a613d4b1a5f4a5::t_0a003347b73b06 31
+  s_a613d4b1a5f4a5::t_1b72a720c53f71 28
+make/client.mk
+  s_a613d4b1a5f4a5::t_e5442ffc46aed4 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "5cb2da0f6d3b36e8341433e9ad3d55eef06c186b",
+  "prompts": {},
+  "sessions": {
+    "s_a613d4b1a5f4a5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7438c798-9790-4b42-a7d9-cc04781129ed",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

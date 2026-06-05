@@ -13,7 +13,7 @@ movement and structured assertions over the existing WebSocket protocol.
 Tech stack: shared JSON rules + validator, Go sim/store/replay/realtime, Python bot,
 Godot visual replay playlist (no scenario-specific client code).
 
-Spec: [`docs/specs/spec-gear-before-combat-scenario.md`](../specs/spec-gear-before-combat-scenario.md)
+Spec: [`docs/specs/v7_spec-gear-before-combat-scenario.md`](../specs/v7_spec-gear-before-combat-scenario.md)
 Baseline: slice v6 `visual-bot-scenario-runner` (complete)
 Branch: `feature/gear-before-combat-scenario`
 

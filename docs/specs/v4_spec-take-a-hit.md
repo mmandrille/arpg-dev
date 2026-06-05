@@ -73,7 +73,7 @@ combat depth, AI, or art quality.
 | Modify | `client/tests/test_animation.gd` | Character `hit`/`death` clips; controller terminal; snapshot player death pose harness |
 | Modify | `tools/bot/run.py` | Assert `/state` player `hp < 10` after slice (bot uses random seed, not golden seed) |
 | Modify | `docs/adr/0007-animation-state-model.md` | As-built: player reactions now event-driven |
-| Modify | `docs/plans/2026-06-05-take-a-hit.md` | Implementation plan |
+| Modify | `docs/plans/v4_2026-06-05-take-a-hit.md` | Implementation plan |
 
 **Additional files (sensible post-plan additions, not blocking acceptance):**
 
@@ -238,7 +238,7 @@ Extend v3's snapshot rules to the **player**:
 - If `hp > 0`: do not force a clip; locomotion/idle derives from input as today.
 - **v5 as-built:** WebSocket resume now replays recorded inputs before sending
   `session_snapshot`; monster death and reduced player HP are restored
-  authoritatively. See `spec-resume-authoritative-state.md`.
+  authoritatively. See `v5_spec-resume-authoritative-state.md`.
 - **Player death resume:** covered by the v5 WebSocket integration test with a
   focused high-HP/lethal-retaliation rules fixture.
 
@@ -391,7 +391,7 @@ not part of CI. See §11.
 The plan only required Go + Python validation of `retaliation_damage.json`. During
 implementation, `test_golden.gd` was extended to consume the new fixture alongside
 `damage_formula.json` and `loot_roll.json`, following the cross-language pattern from
-slice v2 (`spec-equip-and-see-it` §4.8). It runs as the first gate in
+slice v2 (`v2_spec-equip-and-see-it` §4.8). It runs as the first gate in
 `scripts/client_smoke.sh` (`make client-smoke` / CI step 7). This gives a third
 language proof that the client reads the same shared rules the server uses.
 

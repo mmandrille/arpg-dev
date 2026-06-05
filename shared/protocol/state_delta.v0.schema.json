@@ -51,8 +51,18 @@
       "properties": {
         "event_type": { "type": "string" },
         "entity_id": { "$ref": "#/$defs/decimal_id" },
-        "correlation_id": { "$ref": "#/$defs/prefixed_id" }
-      }
+        "correlation_id": { "$ref": "#/$defs/prefixed_id" },
+        "damage": { "type": "integer", "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["monster_damaged", "player_damaged", "player_killed"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["damage"] }
+        }
+      ]
     },
     "change": {
       "oneOf": [

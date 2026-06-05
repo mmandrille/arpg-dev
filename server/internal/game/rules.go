@@ -32,9 +32,10 @@ type Combat struct {
 
 // ItemDef is a single item definition.
 type ItemDef struct {
-	Name       string `json:"name"`
-	Slot       string `json:"slot"`
-	Equippable bool   `json:"equippable"`
+	Name       string       `json:"name"`
+	Slot       string       `json:"slot"`
+	Equippable bool         `json:"equippable"`
+	Damage     *DamageRange `json:"damage,omitempty"`
 }
 
 // MonsterDef is a single monster definition.
@@ -104,6 +105,14 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 		if !def.Equippable && def.Slot != "" {
 			return nil, fmt.Errorf("game: invalid rules items.%s: non-equippable item must not declare slot", id)
+		}
+		if def.Damage != nil {
+			if !def.Equippable || def.Slot != weaponSlot {
+				return nil, fmt.Errorf("game: invalid rules items.%s.damage: damage is only valid on equippable weapons", id)
+			}
+			if err := validateDamageRange("items."+id+".damage", *def.Damage); err != nil {
+				return nil, err
+			}
 		}
 	}
 	r.Items = items.Items

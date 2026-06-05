@@ -2,7 +2,7 @@
 
 Status: Draft
 Branch: `feature/visual-bot-scenario-runner`
-Related: [`docs/PROGRESS.md`](../PROGRESS.md), [`spec-resume-authoritative-state.md`](spec-resume-authoritative-state.md)
+Related: [`docs/PROGRESS.md`](../PROGRESS.md), [`v5_spec-resume-authoritative-state.md`](v5_spec-resume-authoritative-state.md)
 
 ## 1. Purpose
 
@@ -24,8 +24,8 @@ discover scenarios -> run protocol sessions -> verify replay -> launch Godot rep
 ## 3. Files to create or modify
 
 ```text
-docs/specs/spec-visual-bot-scenario-runner.md - feature contract
-docs/plans/2026-06-05-visual-bot-scenario-runner.md - implementation plan
+docs/specs/v6_spec-visual-bot-scenario-runner.md - feature contract
+docs/plans/v6_2026-06-05-visual-bot-scenario-runner.md - implementation plan
 tools/bot/scenarios/*.json - declarative scenario catalog
 tools/bot/run.py - scenario discovery, execution, and manifest output
 tools/bot/test_protocol.py - scenario catalog tests

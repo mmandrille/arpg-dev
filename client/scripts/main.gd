@@ -7,6 +7,8 @@ extends Node3D
 const NetClientScript := preload("res://scripts/net_client.gd")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
+const DamageNumberScript := preload("res://scripts/damage_number.gd")
+const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
@@ -60,6 +62,9 @@ var visual_replay_exit_timer: float = 0.0
 var player_anchor: Node3D
 var character_visual: Node3D
 var entities_root: Node3D
+var damage_numbers_layer: CanvasLayer
+var health_bars_layer: CanvasLayer
+var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
 
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
@@ -140,10 +145,12 @@ func _process(delta: float) -> void:
 	if player_anim != null:
 		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
 			and player_hp > 0 \
+			and not _input_locked() \
 			and (Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
 			or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D))
 		player_anim.set_locomotion(moving)
-	_update_facing_toward_mouse()
+	if not _input_locked():
+		_update_facing_toward_mouse()
 	_update_debug()
 
 
@@ -166,6 +173,11 @@ func _apply_snapshot(p: Dictionary) -> void:
 	for id in entities.keys():
 		(entities[id]["node"] as Node3D).queue_free()
 	entities.clear()
+	for id in monster_health_bars.keys():
+		var bar = monster_health_bars[id]
+		if is_instance_valid(bar):
+			bar.queue_free()
+	monster_health_bars.clear()
 	loot_ids.clear()
 	monster_ids.clear()
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
@@ -212,6 +224,8 @@ func _apply_delta(p: Dictionary) -> void:
 		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
 			continue
+		if event_type == "monster_damaged" or event_type == "monster_killed":
+			_show_damage_number(eid, Color(1.0, 0.92, 0.25), ev.get("damage", null))
 		if autoplay_enabled and event_type == "monster_killed":
 			autoplay_phase = "pickup"
 			autoplay_timer = autoplay_step_delay
@@ -267,6 +281,9 @@ func _upsert_entity(e: Dictionary) -> void:
 	# the terminal death pose without waiting for an event (spec §5.4).
 	if rec["type"] == "monster" and rec["controller"] != null:
 		var hp = e.get("hp", null)
+		var max_hp = e.get("max_hp", null)
+		if hp != null and max_hp != null:
+			_upsert_monster_health_bar(id, rec["node"] as Node3D, int(hp), int(max_hp))
 		if hp != null and int(hp) <= 0:
 			rec["controller"].enter_terminal("death")
 
@@ -275,6 +292,11 @@ func _remove_entity(id: String) -> void:
 	if entities.has(id):
 		(entities[id]["node"] as Node3D).queue_free()
 		entities.erase(id)
+	if monster_health_bars.has(id):
+		var bar = monster_health_bars[id]
+		if is_instance_valid(bar):
+			bar.queue_free()
+		monster_health_bars.erase(id)
 	loot_ids.erase(id)
 	monster_ids.erase(id)
 
@@ -292,9 +314,48 @@ func _reconcile_player() -> void:
 		player_anchor.position = predicted_pos
 
 
+func _show_damage_number(entity_id: String, color: Color, event_damage = null) -> void:
+	if damage_numbers_layer == null or _camera == null:
+		return
+
+	if event_damage == null:
+		return
+	var amount := int(event_damage)
+
+	var target: Node3D = null
+	var world_position := Vector3.ZERO
+	if entity_id == player_id:
+		target = player_anchor
+		world_position = player_anchor.global_position
+	elif entities.has(entity_id):
+		target = entities[entity_id]["node"] as Node3D
+		world_position = target.global_position
+	else:
+		return
+
+	var pop := DamageNumberScript.new() as DamageNumber
+	damage_numbers_layer.add_child(pop)
+	var side := -1.0 if entity_id == player_id else 1.0
+	pop.setup(_camera, target, world_position, amount, color, side)
+
+
+func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_hp: int) -> void:
+	if health_bars_layer == null or _camera == null or target == null:
+		return
+	if monster_health_bars.has(entity_id):
+		(monster_health_bars[entity_id] as MonsterHealthBar).update_hp(hp, max_hp)
+		return
+	var bar := MonsterHealthBarScript.new() as MonsterHealthBar
+	health_bars_layer.add_child(bar)
+	bar.setup(_camera, target, hp, max_hp)
+	monster_health_bars[entity_id] = bar
+
+
 # --- input + prediction -----------------------------------------------------
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _input_locked():
+		return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
@@ -307,7 +368,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _handle_input(delta: float) -> void:
-	if client.ready_state() != WebSocketPeer.STATE_OPEN:
+	if _input_locked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		return
 	_send_cooldown -= delta
 	_attack_cooldown -= delta
@@ -334,6 +395,10 @@ func _handle_input(delta: float) -> void:
 	if Input.is_key_pressed(KEY_Q) and inventory.size() > 0 and _send_cooldown <= 0.0:
 		client.send("equip_intent", last_server_tick, {"item_instance_id": inventory[0]["item_instance_id"], "slot": "weapon"})
 		_send_cooldown = SEND_INTERVAL
+
+
+func _input_locked() -> bool:
+	return visual_replay_enabled or autoplay_enabled
 
 
 func _handle_autoplay(delta: float) -> void:
@@ -598,6 +663,14 @@ func _build_scene() -> void:
 	_debug_label = Label.new()
 	_debug_label.position = Vector2(12, 12)
 	ui.add_child(_debug_label)
+
+	damage_numbers_layer = CanvasLayer.new()
+	damage_numbers_layer.layer = 2
+	add_child(damage_numbers_layer)
+
+	health_bars_layer = CanvasLayer.new()
+	health_bars_layer.layer = 1
+	add_child(health_bars_layer)
 
 
 func _make_entity_node(kind: String) -> Node3D:

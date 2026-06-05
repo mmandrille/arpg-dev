@@ -7,9 +7,9 @@
     { "op": "inventory_add", "item": { "item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": false } }
   ],
   "events": [
-    { "event_type": "monster_damaged", "entity_id": "1002", "correlation_id": "corr_01H00000000000000000000000" },
+    { "event_type": "monster_damaged", "entity_id": "1002", "correlation_id": "corr_01H00000000000000000000000", "damage": 3 },
     { "event_type": "monster_killed", "entity_id": "1002", "correlation_id": "corr_01H00000000000000000000000" },
     { "event_type": "loot_dropped", "entity_id": "1003", "correlation_id": "corr_01H00000000000000000000000" },
-    { "event_type": "player_damaged", "entity_id": "1001", "correlation_id": "corr_01H00000000000000000000000" }
+    { "event_type": "player_damaged", "entity_id": "1001", "correlation_id": "corr_01H00000000000000000000000", "damage": 1 }
   ]
 }

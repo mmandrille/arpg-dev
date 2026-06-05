@@ -4,8 +4,8 @@ Status: Complete
 Branch: `feature/gear-before-combat-scenario`
 Related:
 
-- [`spec-visual-bot-scenario-runner.md`](spec-visual-bot-scenario-runner.md)
-- [`spec-resume-authoritative-state.md`](spec-resume-authoritative-state.md)
+- [`v6_spec-visual-bot-scenario-runner.md`](v6_spec-visual-bot-scenario-runner.md)
+- [`v5_spec-resume-authoritative-state.md`](v5_spec-resume-authoritative-state.md)
 - [`../PROGRESS.md`](../PROGRESS.md)
 
 ## 1. Purpose

@@ -59,6 +59,56 @@ func TestLoadRules(t *testing.T) {
 	if !r.Items["rusty_sword"].Equippable || r.Items["rusty_sword"].Slot != "weapon" {
 		t.Fatalf("rusty_sword def = %+v", r.Items["rusty_sword"])
 	}
+	if r.Items["training_badge"].Equippable || r.Items["training_badge"].Slot != "" {
+		t.Fatalf("training_badge def = %+v, want non-equippable without slot", r.Items["training_badge"])
+	}
+	if _, ok := r.Worlds[DefaultWorldID]; !ok {
+		t.Fatalf("missing default world %q", DefaultWorldID)
+	}
+	if _, ok := r.Worlds["gear_before_combat"]; !ok {
+		t.Fatal("missing gear_before_combat world")
+	}
+}
+
+func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
+	rules := loadRules(t)
+
+	vertical, err := NewSimWithWorld("sess_vertical", "01", rules, DefaultWorldID)
+	if err != nil {
+		t.Fatalf("vertical world: %v", err)
+	}
+	vsnap := vertical.Snapshot()
+	if len(vsnap.Entities) != 2 {
+		t.Fatalf("vertical entities = %d, want 2: %+v", len(vsnap.Entities), vsnap.Entities)
+	}
+	assertEntity(t, vsnap, "1001", playerEntity, "", "", Vec2{X: 10, Y: 5})
+	assertEntity(t, vsnap, "1002", monsterEntity, monsterDefID, "", Vec2{X: 12, Y: 5})
+
+	gear, err := NewSimWithWorld("sess_gear", "01", rules, "gear_before_combat")
+	if err != nil {
+		t.Fatalf("gear world: %v", err)
+	}
+	gsnap := gear.Snapshot()
+	if len(gsnap.Entities) != 3 {
+		t.Fatalf("gear entities = %d, want 3: %+v", len(gsnap.Entities), gsnap.Entities)
+	}
+	assertEntity(t, gsnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
+	assertEntity(t, gsnap, "1002", lootEntity, "", "rusty_sword", Vec2{X: 6, Y: 5})
+	assertEntity(t, gsnap, "1003", monsterEntity, "training_dummy_reward", "", Vec2{X: 12, Y: 5})
+}
+
+func assertEntity(t *testing.T, snap Snapshot, id, typ, monsterDefID, itemDefID string, pos Vec2) {
+	t.Helper()
+	for _, e := range snap.Entities {
+		if e.ID != id {
+			continue
+		}
+		if e.Type != typ || e.MonsterDefID != monsterDefID || e.ItemDefID != itemDefID || e.Position != pos {
+			t.Fatalf("entity %s = %+v", id, e)
+		}
+		return
+	}
+	t.Fatalf("missing entity %s in %+v", id, snap.Entities)
 }
 
 // --- cross-language golden fixtures (criterion 7) ---------------------------
@@ -448,6 +498,13 @@ func TestRejections(t *testing.T) {
 		sim := NewSim("s", "01", rules)
 		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: "weapon"}}})
 		assertReject(t, r, "x", "not_in_inventory")
+	})
+
+	t.Run("equip non-equippable", func(t *testing.T) {
+		sim := NewSim("s", "01", rules)
+		sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge"})
+		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: "weapon"}}})
+		assertReject(t, r, "x", "not_equippable")
 	})
 
 	t.Run("unknown type", func(t *testing.T) {

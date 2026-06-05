@@ -41,6 +41,18 @@ var autoplay_move_sent: bool = false
 var autoplay_pickup_sent: bool = false
 var autoplay_equip_sent: bool = false
 var autoplay_step_delay: float = 0.35
+var visual_replay_enabled: bool = false
+var visual_replay_manifest_path: String = ""
+var visual_replay_scenarios: Array = []
+var visual_replay_index: int = -1
+var visual_replay_envelopes: Array = []
+var visual_replay_envelope_index: int = 0
+var visual_replay_timer: float = 0.0
+var visual_replay_title: String = ""
+var visual_replay_debug_token: String = ""
+var visual_replay_exit_on_complete: bool = false
+var visual_replay_exit_requested: bool = false
+var visual_replay_exit_timer: float = 0.0
 
 # Slice v2 scene graph (spec §5.1): the local player is a humanoid under a
 # PlayerAnchor that follows authoritative position; monsters/loot live under
@@ -81,6 +93,18 @@ func _ready() -> void:
 	if not client.login(_env("ARPG_EMAIL", "client@example.test"), dev_token):
 		_debug("login failed")
 		return
+	visual_replay_manifest_path = _env("ARPG_VISUAL_REPLAY_MANIFEST", "")
+	visual_replay_enabled = visual_replay_manifest_path != ""
+	if visual_replay_enabled:
+		visual_replay_debug_token = _env("ARPG_DEBUG_TOKEN", "local-debug-token")
+		visual_replay_exit_on_complete = _truthy_text(_env("ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE", "1"))
+		autoplay_step_delay = maxf(0.05, float(_env("ARPG_AUTOPLAY_STEP_DELAY", "0.35")))
+		if not _load_visual_replay_manifest(visual_replay_manifest_path):
+			_debug("visual replay manifest failed: %s" % visual_replay_manifest_path)
+			return
+		_debug("visual replay playlist loaded: %d scenario(s)" % visual_replay_scenarios.size())
+		_start_next_visual_replay()
+		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	if not client.create_session(resume_session_id):
 		_debug("session failed")
@@ -107,7 +131,9 @@ func _process(delta: float) -> void:
 	for env in client.poll():
 		_handle_message(env)
 
-	if autoplay_enabled:
+	if visual_replay_enabled:
+		_handle_visual_replay(delta)
+	elif autoplay_enabled:
 		_handle_autoplay(delta)
 	else:
 		_handle_input(delta)
@@ -484,6 +510,74 @@ func _adjust_camera_zoom(delta_size: float) -> void:
 	_camera.size = clampf(_camera.size + delta_size, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
 
 
+# --- visual replay playlist -------------------------------------------------
+
+func _load_visual_replay_manifest(path: String) -> bool:
+	if not FileAccess.file_exists(path):
+		push_error("visual replay manifest not found: %s" % path)
+		return false
+	var text := FileAccess.get_file_as_string(path)
+	var parsed = JSON.parse_string(text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		push_error("visual replay manifest is not a JSON object: %s" % path)
+		return false
+	visual_replay_scenarios = parsed.get("scenarios", [])
+	return visual_replay_scenarios.size() > 0
+
+
+func _start_next_visual_replay() -> void:
+	visual_replay_index += 1
+	visual_replay_envelopes = []
+	visual_replay_envelope_index = 0
+	visual_replay_timer = autoplay_step_delay
+	if visual_replay_index >= visual_replay_scenarios.size():
+		visual_replay_title = "complete"
+		_debug("visual replay playlist complete")
+		if visual_replay_exit_on_complete:
+			visual_replay_exit_requested = true
+			visual_replay_exit_timer = maxf(autoplay_step_delay, 0.25)
+		return
+
+	var scenario: Dictionary = visual_replay_scenarios[visual_replay_index]
+	var session_id := str(scenario.get("session_id", ""))
+	visual_replay_title = str(scenario.get("title", scenario.get("id", session_id)))
+	if session_id == "":
+		_debug("visual replay entry missing session_id; skipping")
+		_start_next_visual_replay()
+		return
+	var timeline := client.get_replay_timeline(visual_replay_debug_token, session_id)
+	visual_replay_envelopes = timeline.get("envelopes", [])
+	_debug("visual replay %d/%d: %s (%d envelopes)" % [
+		visual_replay_index + 1, visual_replay_scenarios.size(), visual_replay_title, visual_replay_envelopes.size()])
+	if visual_replay_envelopes.is_empty():
+		_start_next_visual_replay()
+
+
+func _handle_visual_replay(delta: float) -> void:
+	if visual_replay_exit_requested:
+		visual_replay_exit_timer -= delta
+		if visual_replay_exit_timer <= 0.0:
+			_debug("visual replay exit requested")
+			if client != null:
+				client.close()
+			get_tree().quit(0)
+		return
+	if visual_replay_index >= visual_replay_scenarios.size():
+		return
+	visual_replay_timer -= delta
+	if visual_replay_timer > 0.0:
+		return
+	if visual_replay_envelope_index >= visual_replay_envelopes.size():
+		visual_replay_timer = maxf(autoplay_step_delay * 4.0, 0.5)
+		_start_next_visual_replay()
+		return
+
+	var env: Dictionary = visual_replay_envelopes[visual_replay_envelope_index]
+	visual_replay_envelope_index += 1
+	_handle_message(env)
+	visual_replay_timer = autoplay_step_delay
+
+
 # --- scene construction (placeholder primitives) ----------------------------
 
 func _build_scene() -> void:
@@ -545,7 +639,11 @@ func _update_debug() -> void:
 		var w = resolver.get_debug_state()["equipped_visuals"]["weapon"]
 		if w != null:
 			weapon_vis = "%s(visible=%s)" % [w["asset_id"], w["visible"]]
-	var mode := "visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual"
+	var mode := "visual-replay:%d/%d %s" % [
+		min(visual_replay_index + 1, visual_replay_scenarios.size()),
+		visual_replay_scenarios.size(),
+		visual_replay_title,
+	] if visual_replay_enabled else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual")
 	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB attack  scroll zoom  E pickup  Q equip" % [
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
 
@@ -560,5 +658,9 @@ func _env(key: String, fallback: String) -> String:
 
 
 func _truthy_env(key: String) -> bool:
-	var v := OS.get_environment(key).to_lower()
+	return _truthy_text(OS.get_environment(key))
+
+
+func _truthy_text(value: String) -> bool:
+	var v := value.to_lower()
 	return v in ["1", "true", "yes", "on"]

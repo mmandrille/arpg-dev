@@ -1,0 +1,30 @@
+{
+  "id": "vertical_slice",
+  "world_id": "vertical_slice",
+  "title": "Vertical slice",
+  "description": "Move, kill the training dummy, pick up loot, equip the sword, and verify resume state.",
+  "steps": [
+    {
+      "action": "move",
+      "direction": {"x": 1, "y": 0},
+      "duration_ticks": 3
+    },
+    {
+      "action": "attack_until_event",
+      "monster_def_id": "training_dummy",
+      "event_type": "monster_killed"
+    },
+    {
+      "action": "pick_up_first_loot"
+    },
+    {
+      "action": "equip_first_inventory_item",
+      "slot": "weapon"
+    }
+  ],
+  "assertions": [
+    "equipped_rusty_sword",
+    "player_damaged",
+    "monster_dead"
+  ]
+}

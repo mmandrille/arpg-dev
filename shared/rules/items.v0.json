@@ -1,6 +1,7 @@
 {
   "version": 0,
   "items": {
-    "rusty_sword": { "name": "Rusty Sword", "slot": "weapon", "equippable": true }
+    "rusty_sword": { "name": "Rusty Sword", "slot": "weapon", "equippable": true },
+    "training_badge": { "name": "Training Badge", "equippable": false }
   }
 }

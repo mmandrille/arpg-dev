@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
@@ -17,12 +18,14 @@ func (s *Server) registerSessionRoutes(mux *http.ServeMux) {
 type createSessionRequest struct {
 	Mode            string  `json:"mode"`
 	ResumeSessionID *string `json:"resume_session_id"`
+	WorldID         string  `json:"world_id"`
 }
 
 type createSessionResponse struct {
 	SessionID   string `json:"session_id"`
 	CharacterID string `json:"character_id"`
 	Seed        string `json:"seed"`
+	WorldID     string `json:"world_id"`
 	WSURL       string `json:"ws_url"`
 }
 
@@ -65,6 +68,19 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create path: ensure the account's default character, then a new session.
+	worldID := req.WorldID
+	if worldID == "" {
+		worldID = game.DefaultWorldID
+	}
+	if s.rules == nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "rules not loaded")
+		return
+	}
+	if _, ok := s.rules.Worlds[worldID]; !ok {
+		writeError(w, http.StatusBadRequest, "invalid_world_id", "unknown world_id")
+		return
+	}
+
 	char, err := s.store.GetOrCreateDefaultCharacter(ctx, ids.New("char"), accountID, "Hero")
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
@@ -83,6 +99,7 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		AccountID:   accountID,
 		CharacterID: char.ID,
 		Seed:        seed,
+		WorldID:     worldID,
 		Status:      store.SessionActive,
 	}
 	if err := s.store.CreateSession(ctx, sess); err != nil {
@@ -99,6 +116,7 @@ func sessionResponse(sess store.Session) createSessionResponse {
 		SessionID:   sess.ID,
 		CharacterID: sess.CharacterID,
 		Seed:        sess.Seed,
+		WorldID:     sess.WorldID,
 		WSURL:       "/v0/ws?session_id=" + sess.ID,
 	}
 }

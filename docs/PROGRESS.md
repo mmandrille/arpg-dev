@@ -11,15 +11,15 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v4 — `take-a-hit` (bidirectional combat + player hit/death reactions) |
-| **Active branch** | `feature/animate-and-react` (v2–v4 work; **not yet merged to `main`**) |
-| **CI gate** | `make ci` — expected green on the feature branch |
-| **Next slice** | **Not chosen.** See [Open gaps & deferred work](#open-gaps--deferred-work) for candidates. |
+| **Latest completed slice** | v7 — `gear-before-combat-scenario` (world presets + second ARPG bot scenario) |
+| **Active branch** | `feature/resume-authoritative-state` |
+| **CI gate** | `make ci` green on 2026-06-05 |
+| **Next slice** | TBD |
 
 ### Slice numbering note
 
 ADR-0001 sometimes calls the first slice **v1**; repo docs call it **v0**
-(`first-playable-vertical-slice`). This file uses **v0–v4** to match spec/plan filenames.
+(`first-playable-vertical-slice`). This file uses **v0–v7** to match spec/plan filenames.
 
 ---
 
@@ -29,20 +29,21 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit
-   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)
-        │                      │                        │                        │
-     main ✓              feature branch            feature branch           feature branch
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat
+   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)        (world presets)
+        │                      │                        │                        │                         │                         │                              │
+     main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓
 ```
 
 | Slice | Codename | Status | Spec | Plan |
 |-------|----------|--------|------|------|
 | **v0** | `first-playable-vertical-slice` | Complete (on `main`) | [`spec-first-playable-vertical-slice.md`](specs/spec-first-playable-vertical-slice.md) | [`2026-06-05-first-playable-vertical-slice.md`](plans/2026-06-05-first-playable-vertical-slice.md) |
-| **v2** | `equip-and-see-it` | Complete (feature branch) | [`spec-equip-and-see-it.md`](specs/spec-equip-and-see-it.md) | [`2026-06-05-equip-and-see-it.md`](plans/2026-06-05-equip-and-see-it.md) |
-| **v3** | `animate-and-react` | Complete (feature branch) | [`spec-animate-and-react.md`](specs/spec-animate-and-react.md) | [`2026-06-05-animate-and-react.md`](plans/2026-06-05-animate-and-react.md) |
-| **v4** | `take-a-hit` | Complete (feature branch) | [`spec-take-a-hit.md`](specs/spec-take-a-hit.md) | [`2026-06-05-take-a-hit.md`](plans/2026-06-05-take-a-hit.md) |
-
-There is **no v5 spec or plan yet**.
+| **v2** | `equip-and-see-it` | Complete (on `main`) | [`spec-equip-and-see-it.md`](specs/spec-equip-and-see-it.md) | [`2026-06-05-equip-and-see-it.md`](plans/2026-06-05-equip-and-see-it.md) |
+| **v3** | `animate-and-react` | Complete (on `main`) | [`spec-animate-and-react.md`](specs/spec-animate-and-react.md) | [`2026-06-05-animate-and-react.md`](plans/2026-06-05-animate-and-react.md) |
+| **v4** | `take-a-hit` | Complete (on `main`) | [`spec-take-a-hit.md`](specs/spec-take-a-hit.md) | [`2026-06-05-take-a-hit.md`](plans/2026-06-05-take-a-hit.md) |
+| **v5** | `resume-authoritative-state` | Complete (`make ci` green) | [`spec-resume-authoritative-state.md`](specs/spec-resume-authoritative-state.md) | [`2026-06-05-resume-authoritative-state.md`](plans/2026-06-05-resume-authoritative-state.md) |
+| **v6** | `visual-bot-scenario-runner` | Complete (`make ci` green) | [`spec-visual-bot-scenario-runner.md`](specs/spec-visual-bot-scenario-runner.md) | [`2026-06-05-visual-bot-scenario-runner.md`](plans/2026-06-05-visual-bot-scenario-runner.md) |
+| **v7** | `gear-before-combat-scenario` | Complete (`make ci` green) | [`spec-gear-before-combat-scenario.md`](specs/spec-gear-before-combat-scenario.md) | [`2026-06-05-gear-before-combat-scenario.md`](plans/2026-06-05-gear-before-combat-scenario.md) |
 
 ---
 
@@ -95,6 +96,46 @@ There is **no v5 spec or plan yet**.
 
 **Explicit non-goals (still true):** no respawn, no healing, no monster attack anim on retaliate.
 
+### v5 — Resume authoritative state
+
+**Proves:** Same-session reconnect restores server-owned combat/world state through deterministic replay.
+
+- WebSocket resume uses `replay.Reconstruct` when `session_inputs` exist.
+- No `LoadInventory` on replay resume; inventory/equipped state comes from recorded pickup/equip inputs.
+- Initial resume snapshot restores player HP, monster HP/death, inventory, equipped weapon, server tick, and ID continuity.
+- Runner seeds historical message IDs and next sequence, so old intents reject as `duplicate`.
+- Bot and Godot smoke assert real resumed monster death and reduced player HP.
+- Extras: dead-player resume rejects gameplay intents; `/state` and WebSocket resume snapshot parity.
+
+**Explicit non-goals (still true):** no character-scoped inventory, no respawn/healing/checkpoints, no protocol schema bump.
+
+### v6 — Visual bot scenario runner
+
+**Proves:** Bot scenarios are discoverable local artifacts and can be visually replayed without hardcoding Godot-only flows.
+
+- `tools/bot/scenarios/*.json` defines declarative scenario steps and named assertions.
+- `make bot` runs every discovered scenario through auth + WebSocket, then verifies `/state`, reconnect resume, and replay.
+- `tools.bot.run --write-manifest` writes `.artifacts/bot-runs/*.json` with scenario/session metadata.
+- Debug endpoint `GET /v0/sessions/{id}/replay/timeline` emits protocol-shaped snapshot/delta envelopes from deterministic replay.
+- `make bot-visual` records all scenarios, verifies replay, then launches Godot with a visual replay playlist.
+- Godot visual replay mode consumes the manifest and timeline envelopes through existing snapshot/delta render handlers.
+- The visual replay client exits normally after the playlist completes; set `ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE=0` to keep it open.
+
+**Explicit non-goals (still true):** no production replay browser, no durable artifact retention policy, no client presentation annotations beyond authoritative events.
+
+### v7 — Gear before combat scenario
+
+**Proves:** The server can own multiple deterministic initial world presets, and replay/resume/debug timelines reconstruct the selected preset instead of drifting to the default world.
+
+- Shared `worlds.v0.json` defines `vertical_slice` and `gear_before_combat` initial layouts.
+- Sessions persist `world_id`; create defaults to `vertical_slice`, rejects unknown worlds, and resume returns the persisted world.
+- `game.NewSimWithWorld` spawns the player, initial loot, and monsters from rules data; `NewSim` remains a default wrapper.
+- Replay reconstruction, `/state`, replay timeline, and WebSocket fresh/resume paths use the persisted world.
+- Bot scenario catalog now runs `01_vertical_slice.json` then `02_gear_before_combat.json`.
+- Gear scenario walks to initial `rusty_sword`, picks it up, equips it, kills `training_dummy_reward`, picks up `training_badge`, and asserts two inventory items.
+
+**Explicit non-goals (still true):** no pickup range gate, no equipped sword damage modifier, no `world_id` in WebSocket snapshots, no Godot inventory UI for non-visual items.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -119,16 +160,23 @@ dev-login → create session → move → attack training dummy → pick up loot
 ```
 
 After v4 the player **survives with reduced HP** (`hp < 10`). Monster dies; player may take retaliation
-each successful hit.
+each successful hit. After v7 this flow lives in `tools/bot/scenarios/01_vertical_slice.json`; additional
+scenario JSON files are automatically included in filename order in `make bot` and `make bot-visual`.
+
+The scenario catalog also includes:
+
+```text
+gear_before_combat: walk to rusty_sword → pick up → equip → kill reward dummy → pick up training_badge
+```
 
 **Verify:**
 
 ```bash
 make db-up && make server    # terminal 1
-make bot                     # terminal 2 — protocol bot
+make bot                     # terminal 2 — all protocol bot scenarios
 make client-smoke            # headless Godot gates + slice smoke
 make ci                      # full suite
-make bot-visual              # optional — watch autoplay in Godot window
+make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
 ```
 
 ---
@@ -137,14 +185,14 @@ make bot-visual              # optional — watch autoplay in Godot window
 
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
-### Known unsatisfiable / partial behavior (highest-signal follow-up)
+### Recently closed
 
-**Combat/world state does not persist on session resume.** Resume rebuilds the sim from
-`seed + inventory` only (`server/internal/realtime/hub.go`). Monster death and player HP are
-**not** restored authoritatively — the dummy respawns at full HP on reconnect. Client harnesses
-(`test_animation.gd`, smoke snapshot branches) verify **client wiring** for death poses; default
-smoke does not assert server-persisted player death on resume. Documented in
-`spec-animate-and-react.md` §11 and `spec-take-a-hit.md` §11.
+**Combat/world state now persists on same-session resume.** v5 replays recorded
+inputs before the WebSocket `session_snapshot`, so monster death, player HP,
+inventory, equipped state, and ID continuity are restored authoritatively.
+
+**World preset identity now persists on sessions.** v7 stores `world_id`, so fresh WebSocket attach,
+resume, `/state`, replay verification, and replay timeline all reconstruct the same initial layout.
 
 ### Other deferred items (from specs / ADRs)
 

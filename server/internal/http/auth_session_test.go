@@ -12,6 +12,7 @@ import (
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/auth"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/config"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/metrics"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
@@ -36,12 +37,21 @@ func fullServer(t *testing.T) http.Handler {
 		t.Fatalf("migrate: %v", err)
 	}
 	t.Cleanup(db.Close)
+	rulesDir, err := game.FindSharedRulesDir()
+	if err != nil {
+		t.Fatalf("rules dir: %v", err)
+	}
+	rules, err := game.LoadRules(rulesDir)
+	if err != nil {
+		t.Fatalf("load rules: %v", err)
+	}
 	return New(Deps{
 		Config:  config.Config{Addr: ":0", Env: "local", DevToken: testDevToken, MetricsEnabled: true},
 		Logger:  logging.NewTo(io.Discard, "local"),
 		Metrics: metrics.New(),
 		Store:   db,
 		Auth:    auth.NewService(testDevToken, db, db),
+		Rules:   rules,
 		Ready:   db.Ping,
 	}).Handler()
 }
@@ -122,7 +132,7 @@ func TestCreateAndResumeSession(t *testing.T) {
 	}
 	var created createSessionResponse
 	_ = json.Unmarshal(rec.Body.Bytes(), &created)
-	if created.SessionID == "" || created.Seed == "" || created.CharacterID == "" {
+	if created.SessionID == "" || created.Seed == "" || created.CharacterID == "" || created.WorldID != game.DefaultWorldID {
 		t.Fatalf("incomplete session response: %+v", created)
 	}
 	if created.WSURL != "/v0/ws?session_id="+created.SessionID {
@@ -137,8 +147,51 @@ func TestCreateAndResumeSession(t *testing.T) {
 	}
 	var resumed createSessionResponse
 	_ = json.Unmarshal(rec.Body.Bytes(), &resumed)
-	if resumed.SessionID != resumeID || resumed.Seed != created.Seed {
+	if resumed.SessionID != resumeID || resumed.Seed != created.Seed || resumed.WorldID != created.WorldID {
 		t.Fatalf("resume mismatch: %+v vs %+v", resumed, created)
+	}
+}
+
+func TestCreateSessionWorldID(t *testing.T) {
+	h := fullServer(t)
+	_, token := login(t, h)
+
+	rec := postJSON(h, "/v0/sessions", token, map[string]any{"mode": "solo", "world_id": "gear_before_combat"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var created createSessionResponse
+	_ = json.Unmarshal(rec.Body.Bytes(), &created)
+	if created.WorldID != "gear_before_combat" {
+		t.Fatalf("world_id = %q, want gear_before_combat", created.WorldID)
+	}
+
+	resumeID := created.SessionID
+	rec = postJSON(h, "/v0/sessions", token, map[string]any{
+		"mode": "solo", "resume_session_id": resumeID, "world_id": game.DefaultWorldID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("resume status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var resumed createSessionResponse
+	_ = json.Unmarshal(rec.Body.Bytes(), &resumed)
+	if resumed.WorldID != "gear_before_combat" {
+		t.Fatalf("resume world_id = %q, want persisted gear_before_combat", resumed.WorldID)
+	}
+}
+
+func TestCreateSessionRejectsUnknownWorldID(t *testing.T) {
+	h := fullServer(t)
+	_, token := login(t, h)
+
+	rec := postJSON(h, "/v0/sessions", token, map[string]any{"mode": "solo", "world_id": "missing"})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400, body = %s", rec.Code, rec.Body.String())
+	}
+	var body errorBody
+	_ = json.Unmarshal(rec.Body.Bytes(), &body)
+	if body.Error.Code != "invalid_world_id" {
+		t.Fatalf("error code = %q", body.Error.Code)
 	}
 }
 

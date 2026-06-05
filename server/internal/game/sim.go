@@ -18,10 +18,9 @@ const (
 	weaponSlot    = "weapon"
 )
 
-var (
-	playerStartPos  = Vec2{X: 10, Y: 5}
-	monsterStartPos = Vec2{X: 12, Y: 5}
-)
+// DefaultWorldID is the compatibility world used when callers do not choose a
+// preset explicitly.
+const DefaultWorldID = "vertical_slice"
 
 // entity is the internal mutable scene entity.
 type entity struct {
@@ -67,8 +66,21 @@ type Sim struct {
 	move      *activeMove
 }
 
-// NewSim builds a fresh session with the player and the v0 monster spawned.
+// NewSim builds a fresh session in the default vertical-slice world.
 func NewSim(sessionID, seed string, rules *Rules) *Sim {
+	s, err := NewSimWithWorld(sessionID, seed, rules, DefaultWorldID)
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
+// NewSimWithWorld builds a fresh session from a deterministic world preset.
+func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim, error) {
+	world, ok := rules.Worlds[worldID]
+	if !ok {
+		return nil, ErrUnknownWorld{WorldID: worldID}
+	}
 	s := &Sim{
 		sessionID: sessionID,
 		seed:      seed,
@@ -79,24 +91,54 @@ func NewSim(sessionID, seed string, rules *Rules) *Sim {
 		equipped:  map[string]uint64{weaponSlot: 0},
 	}
 
-	player := &entity{kind: playerEntity, pos: playerStartPos, hp: playerStartHP, maxHP: playerStartHP}
+	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: playerStartHP, maxHP: playerStartHP}
 	player.id = s.alloc()
 	s.playerID = player.id
 	s.entities[player.id] = player
 
-	def := rules.Monsters[monsterDefID]
-	monster := &entity{
-		kind:         monsterEntity,
-		pos:          monsterStartPos,
-		hp:           def.MaxHP,
-		maxHP:        def.MaxHP,
-		monsterDefID: monsterDefID,
-		lootTable:    def.LootTable,
+	for _, preset := range world.Entities {
+		switch preset.Type {
+		case monsterEntity:
+			def := rules.Monsters[preset.MonsterDefID]
+			monster := &entity{
+				kind:         monsterEntity,
+				pos:          preset.Position,
+				hp:           def.MaxHP,
+				maxHP:        def.MaxHP,
+				monsterDefID: preset.MonsterDefID,
+				lootTable:    def.LootTable,
+			}
+			monster.id = s.alloc()
+			s.entities[monster.id] = monster
+		case lootEntity:
+			loot := &entity{kind: lootEntity, pos: preset.Position, itemDefID: preset.ItemDefID}
+			loot.id = s.alloc()
+			s.entities[loot.id] = loot
+		default:
+			return nil, ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
+		}
 	}
-	monster.id = s.alloc()
-	s.entities[monster.id] = monster
 
-	return s
+	return s, nil
+}
+
+// ErrUnknownWorld reports an unknown world preset.
+type ErrUnknownWorld struct {
+	WorldID string
+}
+
+func (e ErrUnknownWorld) Error() string {
+	return "game: unknown world " + e.WorldID
+}
+
+// ErrUnknownWorldEntity reports invalid world preset data that escaped rules validation.
+type ErrUnknownWorldEntity struct {
+	WorldID    string
+	EntityType string
+}
+
+func (e ErrUnknownWorldEntity) Error() string {
+	return "game: unknown world entity " + e.WorldID + ": " + e.EntityType
 }
 
 // PersistedItem is a durable inventory item reloaded on session resume.

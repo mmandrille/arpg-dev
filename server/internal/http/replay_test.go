@@ -130,3 +130,128 @@ func TestInspectionDebugAuth(t *testing.T) {
 		t.Fatal("state endpoint: no weapon equipped in reconstructed snapshot")
 	}
 }
+
+func TestReplayTimelineEndpoint(t *testing.T) {
+	srv := fullStack(t)
+	token, sessionID := loginAndSession(t, srv)
+	driveSlice(t, srv, token, sessionID)
+
+	req, _ := http.NewRequest(http.MethodGet, srv.URL+"/v0/sessions/"+sessionID+"/replay/timeline", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("X-Debug-Token", testDebugToken)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("timeline: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		t.Fatalf("timeline: status = %d, body %s", resp.StatusCode, b)
+	}
+
+	var body struct {
+		SessionID string `json:"session_id"`
+		Seed      string `json:"seed"`
+		Envelopes []struct {
+			Type      string          `json:"type"`
+			MessageID string          `json:"message_id"`
+			SessionID string          `json:"session_id"`
+			Tick      uint64          `json:"tick"`
+			Payload   json.RawMessage `json:"payload"`
+		} `json:"envelopes"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatalf("decode timeline: %v", err)
+	}
+	if body.SessionID != sessionID {
+		t.Fatalf("timeline session_id = %q, want %q", body.SessionID, sessionID)
+	}
+	if len(body.Envelopes) < 2 {
+		t.Fatalf("expected snapshot plus deltas, got %d envelopes", len(body.Envelopes))
+	}
+	if body.Envelopes[0].Type != "session_snapshot" {
+		t.Fatalf("first envelope type = %q, want session_snapshot", body.Envelopes[0].Type)
+	}
+	sawDelta := false
+	sawMonsterKilled := false
+	for _, env := range body.Envelopes {
+		if env.Type != "state_delta" {
+			continue
+		}
+		sawDelta = true
+		var payload struct {
+			ServerTick uint64       `json:"server_tick"`
+			Events     []game.Event `json:"events"`
+		}
+		if err := json.Unmarshal(env.Payload, &payload); err != nil {
+			t.Fatalf("decode delta payload: %v", err)
+		}
+		for _, ev := range payload.Events {
+			if ev.EventType == "monster_killed" {
+				sawMonsterKilled = true
+			}
+		}
+	}
+	if !sawDelta {
+		t.Fatal("expected at least one state_delta")
+	}
+	if !sawMonsterKilled {
+		t.Fatal("expected replay timeline to include monster_killed event")
+	}
+}
+
+func TestReplayTimelineEndpointUsesSessionWorld(t *testing.T) {
+	srv := fullStack(t)
+	token, sessionID := loginAndSessionWithWorld(t, srv, "gear_before_combat")
+
+	req, _ := http.NewRequest(http.MethodGet, srv.URL+"/v0/sessions/"+sessionID+"/replay/timeline", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("X-Debug-Token", testDebugToken)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("timeline: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		t.Fatalf("timeline: status = %d, body %s", resp.StatusCode, b)
+	}
+
+	var body struct {
+		Envelopes []struct {
+			Type    string          `json:"type"`
+			Payload json.RawMessage `json:"payload"`
+		} `json:"envelopes"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatalf("decode timeline: %v", err)
+	}
+	if len(body.Envelopes) == 0 || body.Envelopes[0].Type != "session_snapshot" {
+		t.Fatalf("missing initial snapshot: %+v", body.Envelopes)
+	}
+	var snap game.Snapshot
+	if err := json.Unmarshal(body.Envelopes[0].Payload, &snap); err != nil {
+		t.Fatalf("decode snapshot: %v", err)
+	}
+	player := snapshotEntity(snap, "1001")
+	loot := snapshotEntity(snap, "1002")
+	monster := snapshotEntity(snap, "1003")
+	if player == nil || player.Position.X != 0 || player.Position.Y != 5 {
+		t.Fatalf("player = %+v, want gear world player", player)
+	}
+	if loot == nil || loot.Type != "loot" || loot.ItemDefID != "rusty_sword" {
+		t.Fatalf("loot = %+v, want initial rusty_sword", loot)
+	}
+	if monster == nil || monster.Type != "monster" || monster.MonsterDefID != "training_dummy_reward" {
+		t.Fatalf("monster = %+v, want training_dummy_reward", monster)
+	}
+}
+
+func snapshotEntity(snap game.Snapshot, id string) *game.EntityView {
+	for i := range snap.Entities {
+		if snap.Entities[i].ID == id {
+			return &snap.Entities[i]
+		}
+	}
+	return nil
+}

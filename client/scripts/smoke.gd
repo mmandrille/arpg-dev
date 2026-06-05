@@ -15,6 +15,7 @@ extends SceneTree
 const NetClientScript := preload("res://scripts/net_client.gd")
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimControllerScript := preload("res://scripts/animation_controller.gd")
+const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScene := preload("res://scenes/monster_dummy.tscn")
 const TIMEOUT_S := 40.0
 
@@ -29,6 +30,9 @@ var resolver: EquipmentVisualResolver
 # player slice, to prove monster hit -> death and the resume death pose.
 var monster_anim: AnimationController
 var monster_saw_hit: bool = false
+var player_anim: AnimationController
+var player_saw_hit: bool = false
+var player_hit_clip_seen: bool = false
 
 # Resume phase uses a fresh client + resolver so the restored visual provably
 # comes from the snapshot, not from leftover live state.
@@ -60,6 +64,13 @@ func _initialize() -> void:
 	debug_token = _env("DEBUG_TOKEN", "local-debug-token")
 
 	resolver = _make_resolver()
+	var player := CharacterScene.instantiate()
+	get_root().add_child(player)
+	var player_ap := player.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if player_ap == null:
+		_fail("character scene has no AnimationPlayer")
+		return
+	player_anim = AnimControllerScript.new(player_ap)
 	# Real monster_dummy + controller, driven by the same authoritative event
 	# stream as the slice. The scene has no script/_ready, so the AnimationPlayer
 	# (static scene data) is available right after instantiate(); the controller's
@@ -263,6 +274,12 @@ func _handle(env: Dictionary) -> void:
 			killed = true
 			if monster_anim != null:
 				monster_anim.enter_terminal("death")
+		if et == "player_damaged" and player_anim != null:
+			player_anim.play_one_shot("hit")
+			player_saw_hit = true
+			player_hit_clip_seen = player_hit_clip_seen or player_anim.current_clip() == "hit"
+		if et == "player_killed" and player_anim != null:
+			player_anim.enter_terminal("death")
 
 
 # --- verification helpers ----------------------------------------------------
@@ -272,10 +289,13 @@ func _verify_equip() -> bool:
 	var state := client.get_state(debug_token)
 	var inv: Array = state.get("inventory", [])
 	var eq: Dictionary = state.get("equipped", {})
+	var hp := _player_hp_from_state(state)
 	var server_ok: bool = inv.size() == 1 \
 		and inv[0].get("item_def_id", "") == "rusty_sword" \
 		and inv[0].get("equipped", false) \
-		and str(eq.get("weapon", "")) == item_id
+		and str(eq.get("weapon", "")) == item_id \
+		and hp >= 0 \
+		and hp < 10
 
 	var w = resolver.get_debug_state()["equipped_visuals"]["weapon"]
 	var visual_ok: bool = w != null and w["visible"] == true \
@@ -288,15 +308,25 @@ func _verify_equip() -> bool:
 		if monster_anim != null and monster_anim.get_debug_state()["terminal"] != true:
 			_fail("monster did not reach terminal death pose after kill: %s" % monster_anim.get_debug_state())
 			return false
-		print("[smoke] equip verified + monster death pose terminal (saw_hit=%s)" % monster_saw_hit)
+		if not player_saw_hit or not player_hit_clip_seen:
+			_fail("player did not play hit from player_damaged (saw_hit=%s clip_seen=%s state=%s)" % [player_saw_hit, player_hit_clip_seen, player_anim.get_debug_state()])
+			return false
+		print("[smoke] equip verified + monster death pose terminal + player damaged hp=%d" % hp)
 		return true
-	_fail("equip verification failed (server_ok=%s visual_ok=%s) state=%s visual=%s" % [server_ok, visual_ok, state, w])
+	_fail("equip verification failed (server_ok=%s visual_ok=%s hp=%d) state=%s visual=%s" % [server_ok, visual_ok, hp, state, w])
 	return false
 
 
 func _weapon_mounted(res: EquipmentVisualResolver) -> bool:
 	var w = res.get_debug_state()["equipped_visuals"]["weapon"]
 	return w != null and w.get("visible", false) == true
+
+
+func _player_hp_from_state(state: Dictionary) -> int:
+	for e in state.get("entities", []):
+		if str(e.get("type", "")) == "player":
+			return int(e.get("hp", -1))
+	return -1
 
 
 func _resume_monster_from_snapshot(snap: Dictionary) -> void:

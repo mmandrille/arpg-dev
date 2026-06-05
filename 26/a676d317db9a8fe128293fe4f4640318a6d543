@@ -1,0 +1,52 @@
+tools/validate_shared.py
+  s_eb8792a7a0817c::t_19263021802f43 253-260
+client/scripts/main.gd
+  s_eb8792a7a0817c::t_8b7be89b2a7e59 68,115-116,119,611,613,680-718
+docs/plans/v9_2026-06-05-solid-collision-and-obstacles.md
+  s_eb8792a7a0817c::t_db6c4b945b5806 1-42,46-48,53-55,59-61,65-67
+  s_eb8792a7a0817c::t_924f08074f171e 43-45,49-52,56-57,62-64,69-70
+  s_eb8792a7a0817c::t_ff4768d341375b 58,68,71-73
+shared/rules/worlds.v0.schema.json
+  s_eb8792a7a0817c::t_c5175e0ef279f3 34,37-38,60-72,90-97
+server/internal/game/rules.go
+  s_eb8792a7a0817c::t_19f92c00dace00 77,180-182
+docs/specs/v9_spec-solid-collision-and-obstacles.md
+  s_eb8792a7a0817c::t_db6c4b945b5806 1-117
+shared/rules/worlds.v0.json
+  s_eb8792a7a0817c::t_c5175e0ef279f3 28-47
+client/scripts/net_client.gd
+  s_eb8792a7a0817c::t_8b7be89b2a7e59 19,86,93-94,100
+docs/PROGRESS.md
+  s_eb8792a7a0817c::t_686e41c7e4f2b6 14-15,21,27,41-44,57,163-181,213,245-247
+tools/bot/scenarios/03_collision_lab.json
+  s_eb8792a7a0817c::t_f5cb9365b600a0 1-7,9,11-19,21,23-26,28,32-33,35,37-44
+  s_eb8792a7a0817c::t_63b790cba07ccb 8,10,20,22,27,29-31,34,36
+server/internal/game/sim.go
+  s_eb8792a7a0817c::t_19f92c00dace00 14-15,20,53-57,75,126-127,442-446,451-453,457-505
+  s_eb8792a7a0817c::t_8a8ce788a21e0e 567-569,573-578
+tools/bot/run.py
+  s_eb8792a7a0817c::t_f3b999489b9965 444
+  s_eb8792a7a0817c::t_e03c7b52620973 401,407-409,416,427-428
+  s_eb8792a7a0817c::t_73db34965d1c0b 402-406,410-415,417-426
+  s_eb8792a7a0817c::t_bb7d257bce014d 80,195,200-205,208,213-223
+  s_eb8792a7a0817c::t_f5cb9365b600a0 206-207,209-212,224-227,584-592
+server/internal/game/game_test.go
+  s_eb8792a7a0817c::t_df2fc0689715d6 557-560
+  s_eb8792a7a0817c::t_69ecc6bca8fc0c 77-79,107-120,606-673
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "26a676d317db9a8fe128293fe4f4640318a6d543",
+  "prompts": {},
+  "sessions": {
+    "s_eb8792a7a0817c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e98d8-4c9f-7852-a6ff-bbd99d40dac5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

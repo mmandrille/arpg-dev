@@ -1,0 +1,23 @@
+scripts/client_smoke.sh
+  s_c36b8efb59b07f::t_d446ab0beb89a4 36-43
+client/tests/test_animation.gd
+  s_c36b8efb59b07f::t_16f431e3fe1eeb 100-106,108-127
+  s_c36b8efb59b07f::t_1a3314afb39795 107
+  s_c36b8efb59b07f::t_36a901603816f2 21-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "efb236fb874b96df91b42d833fddbc2fc61b1c8d",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

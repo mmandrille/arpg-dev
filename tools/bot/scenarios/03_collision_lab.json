@@ -1,0 +1,30 @@
+{
+  "id": "collision_lab",
+  "world_id": "collision_lab",
+  "title": "Collision lab",
+  "description": "Pass through the middle gap between static walls, then attack the monster on the far side.",
+  "steps": [
+    {
+      "action": "move_until_player_position",
+      "direction": { "x": 1, "y": 0 },
+      "duration_ticks": 4,
+      "x": 4,
+      "y": 5
+    },
+    {
+      "action": "move_until_player_position",
+      "direction": { "x": 1, "y": 0 },
+      "duration_ticks": 3,
+      "x": 7,
+      "y": 5
+    },
+    {
+      "action": "action_until_event",
+      "monster_def_id": "training_dummy_reward",
+      "event_type": "monster_killed"
+    }
+  ],
+  "assertions": [
+    { "type": "monster_dead", "monster_def_id": "training_dummy_reward" }
+  ]
+}

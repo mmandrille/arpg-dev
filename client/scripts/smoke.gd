@@ -115,8 +115,8 @@ func _step_primary(delta: float) -> bool:
 
 	if not ready_sent:
 		client.send("client_ready", last_tick, {"client_version": "godot-smoke", "last_seen_tick": last_tick})
-		client.send("attack_intent", last_tick, {"target_id": "1002"})
-		attack_cd = 0.15
+		client.send("move_intent", last_tick, {"direction": {"x": 1, "y": 0}, "duration_ticks": 1})
+		attack_cd = 0.5
 		ready_sent = true
 
 	for env in msgs:
@@ -124,10 +124,10 @@ func _step_primary(delta: float) -> bool:
 
 	attack_cd -= delta
 	if not killed and attack_cd <= 0.0:
-		client.send("attack_intent", last_tick, {"target_id": "1002"})
+		client.send("action_intent", last_tick, {"target_id": "1002"})
 		attack_cd = 0.15
 	if killed and not picked and loot_id != "":
-		client.send("pick_up_intent", last_tick, {"entity_id": loot_id})
+		client.send("action_intent", last_tick, {"target_id": loot_id})
 		picked = true
 	if picked and item_id != "" and not equip_sent:
 		client.send("equip_intent", last_tick, {"item_instance_id": item_id, "slot": "weapon"})

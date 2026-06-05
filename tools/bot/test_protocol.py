@@ -4,6 +4,7 @@ from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
 from tools.bot.run import (
     RuntimeState,
     find_inventory_item,
+    find_interactable,
     find_loot,
     find_monster,
     find_player,
@@ -64,6 +65,19 @@ def test_load_scenarios_gear_accepts_runtime_attack_assertion():
     } in gear.assertions
 
 
+def test_load_scenarios_discovers_door_lab():
+    scenarios = load_scenarios()
+    door = next(s for s in scenarios if s.id == "door_lab")
+
+    assert door.world_id == "door_lab"
+    assert any(step.get("expect_reject") == "out_of_range" for step in door.steps)
+    assert {
+        "type": "interactable_state",
+        "interactable_def_id": "wooden_door",
+        "state": "open",
+    } in door.assertions
+
+
 def test_select_scenarios_all_returns_catalog_order():
     scenarios = load_scenarios()
 
@@ -108,6 +122,7 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
                 {"id": "1001", "type": "player", "position": {"x": 0, "y": 5}, "hp": 10, "max_hp": 10},
                 {"id": "1002", "type": "loot", "item_def_id": "rusty_sword", "position": {"x": 6, "y": 5}},
                 {"id": "1003", "type": "monster", "monster_def_id": "training_dummy_reward", "position": {"x": 12, "y": 5}, "hp": 3, "max_hp": 3},
+                {"id": "1004", "type": "interactable", "interactable_def_id": "wooden_door", "state": "closed", "position": {"x": 4, "y": 5}},
             ],
             "inventory": [],
             "equipped": {"weapon": None},
@@ -117,6 +132,7 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
     assert find_player(state)["id"] == "1001"
     assert find_loot(state, "rusty_sword")["id"] == "1002"
     assert find_monster(state, "training_dummy_reward")["id"] == "1003"
+    assert find_interactable(state, "wooden_door")["id"] == "1004"
 
     ingest_message({
         "type": "state_delta",
@@ -183,6 +199,7 @@ def test_structured_assertions():
     entities = [
         {"id": "1001", "type": "player", "hp": 9},
         {"id": "1003", "type": "monster", "monster_def_id": "training_dummy_reward", "hp": 0},
+        {"id": "1007", "type": "interactable", "interactable_def_id": "wooden_door", "state": "open"},
     ]
     inventory = [
         {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": True},
@@ -195,6 +212,7 @@ def test_structured_assertions():
         {"type": "inventory_contains", "item_def_id": "training_badge", "equipped": False},
         {"type": "monster_dead", "monster_def_id": "training_dummy_reward"},
         {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
+        {"type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open"},
     ], entities, inventory, {"weapon": "1004"}, None, "test")
 
 

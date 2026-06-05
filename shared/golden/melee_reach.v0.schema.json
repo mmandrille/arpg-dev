@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/melee_reach.v0.schema.json",
+  "title": "Melee reach golden fixture (v0)",
+  "type": "object",
+  "required": ["description", "epsilon", "target_radii", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string", "minLength": 1 },
+    "epsilon": { "type": "number", "exclusiveMinimum": 0 },
+    "target_radii": {
+      "type": "object",
+      "required": ["monster", "loot", "interactable"],
+      "additionalProperties": false,
+      "properties": {
+        "monster": { "type": "number", "exclusiveMinimum": 0 },
+        "loot": { "type": "number", "exclusiveMinimum": 0 },
+        "interactable": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "reach", "target_radius", "distance", "in_range"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "reach": { "type": "number", "exclusiveMinimum": 0 },
+          "target_radius": { "type": "number", "exclusiveMinimum": 0 },
+          "distance": { "type": "number", "minimum": 0 },
+          "in_range": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

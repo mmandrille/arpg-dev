@@ -57,7 +57,18 @@ func _initialize() -> void:
 			_fail("equipped weapon case draw=%d: got %d want %d" % [int(c["draw"]), got, int(c["expected_damage"])])
 			return
 
-	# 4. Loot roll: single-entry table resolves to the expected item.
+	# 4. Melee reach: same distance formula used by the authoritative sim.
+	var reach_golden := _read(shared.path_join("golden/melee_reach.json"))
+	for c in reach_golden["cases"]:
+		var dist := float(c["distance"])
+		var reach := float(c["reach"])
+		var target_radius := float(c["target_radius"])
+		var got := dist <= reach + target_radius + 0.000001
+		if got != bool(c["in_range"]):
+			_fail("melee reach case %s: got %s want %s" % [str(c["name"]), str(got), str(c["in_range"])])
+			return
+
+	# 5. Loot roll: single-entry table resolves to the expected item.
 	var loot := _read(shared.path_join("rules/loot_tables.v0.json"))
 	var loot_golden := _read(shared.path_join("golden/loot_roll.json"))
 	var entries: Array = loot["loot_tables"][loot_golden["loot_table"]]["entries"]
@@ -65,7 +76,7 @@ func _initialize() -> void:
 		_fail("loot golden mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, loot_roll)")
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll)")
 	quit(0)
 
 

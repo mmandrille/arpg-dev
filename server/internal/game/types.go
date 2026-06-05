@@ -11,17 +11,19 @@ type Vec2 struct {
 	Y float64 `json:"y"`
 }
 
-// EntityView is the protocol view of a scene entity (player, monster, loot).
+// EntityView is the protocol view of a scene entity.
 // HP/MaxHP are pointers so a value of 0 (a dead monster) is preserved while a
 // loot entity simply omits them.
 type EntityView struct {
-	ID           string `json:"id"`
-	Type         string `json:"type"`
-	Position     Vec2   `json:"position"`
-	HP           *int   `json:"hp,omitempty"`
-	MaxHP        *int   `json:"max_hp,omitempty"`
-	MonsterDefID string `json:"monster_def_id,omitempty"`
-	ItemDefID    string `json:"item_def_id,omitempty"`
+	ID                string `json:"id"`
+	Type              string `json:"type"`
+	Position          Vec2   `json:"position"`
+	HP                *int   `json:"hp,omitempty"`
+	MaxHP             *int   `json:"max_hp,omitempty"`
+	MonsterDefID      string `json:"monster_def_id,omitempty"`
+	ItemDefID         string `json:"item_def_id,omitempty"`
+	InteractableDefID string `json:"interactable_def_id,omitempty"`
+	State             string `json:"state,omitempty"`
 }
 
 // ItemView is the protocol view of an inventory item.

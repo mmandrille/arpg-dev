@@ -207,7 +207,7 @@ func TestResumeSnapshotMatchesStateEndpoint(t *testing.T) {
 		t.Fatalf("resume snapshot != state endpoint\nresume: %+v\nstate:  %+v", resumed, state)
 	}
 
-	sendIntent(t, conn, sessionID, resumed.ServerTick, "msg-1", "attack_intent", map[string]any{"target_id": "1002"})
+	sendIntent(t, conn, sessionID, resumed.ServerTick, "msg-1", "action_intent", map[string]any{"target_id": "1002"})
 	rej := readRejected(t, conn, "msg-1")
 	if rej.Reason != "duplicate" {
 		t.Fatalf("duplicate rejection reason = %q, want duplicate", rej.Reason)
@@ -232,7 +232,7 @@ func TestPostResumePickupAllocatesAfterHistoricalEntities(t *testing.T) {
 	if findEntity(snap, lootID) == nil {
 		t.Fatalf("resume snapshot missing historical loot entity %s: %+v", lootID, snap.Entities)
 	}
-	sendIntent(t, resume, sessionID, snap.ServerTick, "msg-pick-after-resume", "pick_up_intent", map[string]any{"entity_id": lootID})
+	sendIntent(t, resume, sessionID, snap.ServerTick, "msg-pick-after-resume", "action_intent", map[string]any{"target_id": lootID})
 	item := readInventoryAdd(t, resume)
 	if item.ItemInstanceID == lootID {
 		t.Fatalf("post-resume item id collided with loot entity id %s", lootID)
@@ -258,7 +258,9 @@ func TestDeadPlayerResumeRejectsGameplayIntents(t *testing.T) {
 	if first.Type != "session_snapshot" {
 		t.Fatalf("first = %q, want session_snapshot", first.Type)
 	}
-	sendIntent(t, conn, sessionID, first.Tick, "msg-lethal", "attack_intent", map[string]any{"target_id": "1002"})
+	sendIntent(t, conn, sessionID, first.Tick, "msg-move-lethal", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
+	moveTick := waitStateDeltaTick(t, conn, first.Tick)
+	sendIntent(t, conn, sessionID, moveTick, "msg-lethal", "action_intent", map[string]any{"target_id": "1002"})
 	readEvent(t, conn, "player_killed")
 	_ = conn.Close()
 
@@ -276,8 +278,8 @@ func TestDeadPlayerResumeRejectsGameplayIntents(t *testing.T) {
 		payload any
 	}{
 		{"msg-dead-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}},
-		{"msg-dead-attack", "attack_intent", map[string]any{"target_id": "1002"}},
-		{"msg-dead-pickup", "pick_up_intent", map[string]any{"entity_id": "1003"}},
+		{"msg-dead-attack", "action_intent", map[string]any{"target_id": "1002"}},
+		{"msg-dead-pickup", "action_intent", map[string]any{"target_id": "1003"}},
 		{"msg-dead-equip", "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "weapon"}},
 	}
 	for _, in := range intents {
@@ -321,7 +323,7 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 
 	var lastTick uint64
 	var lootID, itemID string
-	killed, pickedUp, equipSent, equipped := false, false, false, false
+	movedIntoRange, killed, pickedUp, equipSent, equipped := false, false, false, false, false
 	seq := 0
 	send := func(typ string, payload any) {
 		seq++
@@ -333,6 +335,8 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 			t.Fatalf("send %s: %v", typ, err)
 		}
 	}
+	lastTick = first.Tick
+	send("move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
 
 	attackTicker := time.NewTicker(120 * time.Millisecond)
 	defer attackTicker.Stop()
@@ -343,8 +347,8 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 		case <-overall:
 			t.Fatalf("slice stalled: killed=%v pickedUp=%v equipped=%v", killed, pickedUp, equipped)
 		case <-attackTicker.C:
-			if !killed {
-				send("attack_intent", map[string]any{"target_id": "1002"})
+			if movedIntoRange && !killed {
+				send("action_intent", map[string]any{"target_id": "1002"})
 			}
 		case m, ok := <-recv:
 			if !ok {
@@ -367,6 +371,9 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 				}
 			}
 			for _, c := range d.Changes {
+				if c.Op == "entity_update" && c.Entity != nil && c.Entity.Type == "player" {
+					movedIntoRange = true
+				}
 				if c.Op == "entity_spawn" && c.Entity != nil && c.Entity.Type == "loot" {
 					lootID = c.Entity.ID
 				}
@@ -379,7 +386,7 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 				}
 			}
 			if killed && !pickedUp && lootID != "" {
-				send("pick_up_intent", map[string]any{"entity_id": lootID})
+				send("action_intent", map[string]any{"target_id": lootID})
 				pickedUp = true
 			}
 			if pickedUp && itemID != "" && !equipSent {
@@ -516,14 +523,36 @@ func readEvent(t *testing.T, conn *websocket.Conn, eventType string) {
 	}
 }
 
+func waitStateDeltaTick(t *testing.T, conn *websocket.Conn, fallback uint64) uint64 {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	lastTick := fallback
+	for {
+		select {
+		case <-deadline:
+			t.Fatal("no state_delta before timeout")
+		default:
+		}
+		m := readMsg(t, conn)
+		if m.Tick > lastTick {
+			lastTick = m.Tick
+		}
+		if m.Type == "state_delta" {
+			return lastTick
+		}
+	}
+}
+
 func killUntilLoot(t *testing.T, conn *websocket.Conn, sessionID string, startTick uint64) string {
 	t.Helper()
 	lastTick := startTick
 	seq := 0
 	deadline := time.After(5 * time.Second)
+	sendIntent(t, conn, sessionID, lastTick, "msg-pre-pick-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
+	lastTick = waitStateDeltaTick(t, conn, lastTick)
 	for {
 		seq++
-		sendIntent(t, conn, sessionID, lastTick, "msg-pre-pick-attack-"+strconv.Itoa(seq), "attack_intent", map[string]any{"target_id": "1002"})
+		sendIntent(t, conn, sessionID, lastTick, "msg-pre-pick-attack-"+strconv.Itoa(seq), "action_intent", map[string]any{"target_id": "1002"})
 		select {
 		case <-deadline:
 			t.Fatal("no loot before timeout")

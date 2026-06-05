@@ -12,12 +12,18 @@ const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
 	"monster_killed": "death",
 }
+const PLAYER_EVENT_CLIPS := {
+	"player_damaged": "hit",
+	"player_killed": "death",
+}
+const PLAYER_START_HP := 10
 
 var client: NetClient
 var resolver: EquipmentVisualResolver
 var player_anim: AnimationController
 var entities: Dictionary = {}        # id (String) -> {node:Node3D, controller:AnimationController|null, type:String}
 var player_id: String = ""
+var player_hp: int = PLAYER_START_HP
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
@@ -27,6 +33,14 @@ var loot_ids: Array = []
 var monster_ids: Array = []
 var ready_sent: bool = false
 var item_to_equip: String = ""
+var autoplay_enabled: bool = false
+var autoplay_phase: String = "idle"
+var autoplay_timer: float = 0.0
+var autoplay_attack_cooldown: float = 0.0
+var autoplay_move_sent: bool = false
+var autoplay_pickup_sent: bool = false
+var autoplay_equip_sent: bool = false
+var autoplay_step_delay: float = 0.35
 
 # Slice v2 scene graph (spec §5.1): the local player is a humanoid under a
 # PlayerAnchor that follows authoritative position; monsters/loot live under
@@ -67,9 +81,15 @@ func _ready() -> void:
 	if not client.login(_env("ARPG_EMAIL", "client@example.test"), dev_token):
 		_debug("login failed")
 		return
-	if not client.create_session():
+	var resume_session_id := _env("ARPG_SESSION_ID", "")
+	if not client.create_session(resume_session_id):
 		_debug("session failed")
 		return
+	autoplay_enabled = _truthy_env("ARPG_AUTOPLAY")
+	if autoplay_enabled:
+		autoplay_phase = "move"
+		autoplay_step_delay = maxf(0.05, float(_env("ARPG_AUTOPLAY_STEP_DELAY", "0.35")))
+		_debug("visual bot enabled for session %s" % client.session_id)
 	predicted_pos = Vector3.ZERO
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
@@ -87,9 +107,13 @@ func _process(delta: float) -> void:
 	for env in client.poll():
 		_handle_message(env)
 
-	_handle_input(delta)
+	if autoplay_enabled:
+		_handle_autoplay(delta)
+	else:
+		_handle_input(delta)
 	if player_anim != null:
 		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
+			and player_hp > 0 \
 			and (Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
 			or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D))
 		player_anim.set_locomotion(moving)
@@ -148,10 +172,23 @@ func _apply_delta(p: Dictionary) -> void:
 				if resolver != null:
 					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
 	for ev in p.get("events", []):
-		var clip = MONSTER_EVENT_CLIPS.get(str(ev.get("event_type", "")), null)
+		var eid := str(ev.get("entity_id", ""))
+		var event_type := str(ev.get("event_type", ""))
+		if eid == player_id:
+			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
+			if player_clip == null or player_anim == null:
+				continue
+			if player_clip == "death":
+				player_anim.enter_terminal("death")
+			else:
+				player_anim.play_one_shot(player_clip)
+			continue
+		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
 			continue
-		var eid := str(ev.get("entity_id", ""))
+		if autoplay_enabled and event_type == "monster_killed":
+			autoplay_phase = "pickup"
+			autoplay_timer = autoplay_step_delay
 		if not entities.has(eid):
 			continue
 		var ctrl = entities[eid]["controller"]
@@ -171,6 +208,10 @@ func _upsert_entity(e: Dictionary) -> void:
 	if e["type"] == "player":
 		# The player is the humanoid under PlayerAnchor, not an entity-dict node.
 		player_id = id
+		if e.has("hp"):
+			player_hp = int(e["hp"])
+			if player_hp <= 0 and player_anim != null:
+				player_anim.enter_terminal("death")
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
@@ -231,7 +272,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
-				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN:
+				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
 					_try_attack_toward_mouse()
 			MOUSE_BUTTON_WHEEL_UP:
 				_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
@@ -244,6 +285,8 @@ func _handle_input(delta: float) -> void:
 		return
 	_send_cooldown -= delta
 	_attack_cooldown -= delta
+	if player_hp <= 0:
+		return
 
 	var input := Vector2.ZERO
 	if Input.is_key_pressed(KEY_W): input.y -= 1
@@ -267,8 +310,71 @@ func _handle_input(delta: float) -> void:
 		_send_cooldown = SEND_INTERVAL
 
 
+func _handle_autoplay(delta: float) -> void:
+	if client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	autoplay_timer -= delta
+	autoplay_attack_cooldown -= delta
+	if autoplay_timer > 0.0:
+		return
+
+	match autoplay_phase:
+		"move":
+			if not autoplay_move_sent:
+				var dir := Vector2(1, 0)
+				predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
+				_reconcile_player()
+				client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
+				autoplay_move_sent = true
+				autoplay_timer = autoplay_step_delay
+				return
+			autoplay_phase = "attack"
+		"attack":
+			if monster_ids.is_empty():
+				return
+			var target_id := str(monster_ids[0])
+			if not entities.has(target_id):
+				return
+			var rec: Dictionary = entities[target_id]
+			var target_node := rec["node"] as Node3D
+			if target_node == null:
+				return
+			var to_target := target_node.position - predicted_pos
+			var aim := Vector2(to_target.x, to_target.z).normalized()
+			if aim != Vector2.ZERO:
+				_face_direction(aim)
+			if player_anim != null:
+				player_anim.play_one_shot("attack")
+			if autoplay_attack_cooldown <= 0.0:
+				client.send("attack_intent", last_server_tick, {"target_id": target_id})
+				autoplay_attack_cooldown = autoplay_step_delay
+			autoplay_timer = autoplay_step_delay
+		"pickup":
+			if not autoplay_pickup_sent and loot_ids.size() > 0:
+				client.send("pick_up_intent", last_server_tick, {"entity_id": loot_ids[0]})
+				autoplay_pickup_sent = true
+				autoplay_timer = autoplay_step_delay
+				return
+			if autoplay_pickup_sent and inventory.size() > 0:
+				autoplay_phase = "equip"
+			else:
+				autoplay_timer = autoplay_step_delay
+		"equip":
+			if not autoplay_equip_sent and inventory.size() > 0:
+				client.send("equip_intent", last_server_tick, {"item_instance_id": inventory[0]["item_instance_id"], "slot": "weapon"})
+				autoplay_equip_sent = true
+				autoplay_timer = autoplay_step_delay
+				return
+			var weapon_id = equipped.get("weapon", null)
+			if weapon_id != null:
+				autoplay_phase = "done"
+				_debug("visual bot complete: equipped weapon %s, player_hp=%d" % [str(weapon_id), player_hp])
+		"done":
+			return
+
+
 func _try_attack_toward_mouse() -> void:
-	if _attack_cooldown > 0.0:
+	if _attack_cooldown > 0.0 or player_hp <= 0:
 		return
 
 	var aim := _aim_direction_from_mouse()
@@ -439,8 +545,9 @@ func _update_debug() -> void:
 		var w = resolver.get_debug_state()["equipped_visuals"]["weapon"]
 		if w != null:
 			weapon_vis = "%s(visible=%s)" % [w["asset_id"], w["visible"]]
-	_debug_label.text = "ws=%s  tick=%d  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB attack  scroll zoom  E pickup  Q equip" % [
-		ws_state, last_server_tick, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
+	var mode := "visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual"
+	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB attack  scroll zoom  E pickup  Q equip" % [
+		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
 
 
 func _debug(msg: String) -> void:
@@ -450,3 +557,8 @@ func _debug(msg: String) -> void:
 func _env(key: String, fallback: String) -> String:
 	var v := OS.get_environment(key)
 	return v if v != "" else fallback
+
+
+func _truthy_env(key: String) -> bool:
+	var v := OS.get_environment(key).to_lower()
+	return v in ["1", "true", "yes", "on"]

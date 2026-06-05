@@ -64,6 +64,14 @@ func _character_clips() -> Dictionary:
 		"attack": {"length": 0.35, "loop": false, "bones": {
 			"arm_r": [[0.0, 0, 0, 0], [0.12, -110, 0, 0], [0.35, 0, 0, 0]],
 		}},
+		# hit: brief backward wobble on authoritative player damage.
+		"hit": {"length": 0.25, "loop": false, "bones": {
+			"spine": [[0.0, 0, 0, 0], [0.08, -14, 0, 0], [0.25, 0, 0, 0]],
+		}},
+		# death: terminal topple pose held at the clip end.
+		"death": {"length": 0.6, "loop": false, "bones": {
+			"spine": [[0.0, 0, 0, 0], [0.6, -72, 0, 0]],
+		}},
 	}
 
 func _monster_clips() -> Dictionary:

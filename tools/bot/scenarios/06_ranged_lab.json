@@ -2,16 +2,14 @@
   "id": "ranged_lab",
   "world_id": "ranged_lab",
   "title": "Ranged lab",
-  "description": "Equip training bow and kill a monster through a wall gap without entering melee range.",
+  "description": "Equip the training bow, click from a wall-blocked upper lane, auto-reposition for a clear shot, and kill without entering melee range.",
   "steps": [
     { "action": "action_entity", "item_def_id": "training_bow", "event_type": "item_picked_up" },
     { "action": "equip_inventory_item", "item_def_id": "training_bow", "slot": "weapon" },
     {
       "action": "move_until_player_position",
-      "direction": { "x": 0, "y": -1 },
-      "duration_ticks": 2,
-      "x": 0,
-      "y": 3
+      "x": 2,
+      "y": 8
     },
     {
       "action": "action_once_until_event",

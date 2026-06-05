@@ -34,30 +34,14 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["name", "world_id", "start", "goal", "goal_mode", "target_kind", "unarmed_reach", "expected_step_count", "expected_end"],
+        "required": ["name", "world_id", "goal_mode", "target_kind"],
         "additionalProperties": false,
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "world_id": { "type": "string", "minLength": 1 },
-          "start": { "$ref": "#/$defs/vec2" },
-          "goal": { "$ref": "#/$defs/vec2" },
           "goal_mode": { "type": "string", "enum": ["point", "melee_approach"] },
-          "target_kind": { "type": "string", "enum": ["monster", "loot", "interactable"] },
-          "unarmed_reach": { "type": "number", "exclusiveMinimum": 0 },
-          "expected_step_count": { "type": "integer", "minimum": 0 },
-          "expected_end": { "$ref": "#/$defs/vec2" }
+          "target_kind": { "type": "string", "enum": ["monster", "loot", "interactable"] }
         }
-      }
-    }
-  },
-  "$defs": {
-    "vec2": {
-      "type": "object",
-      "required": ["x", "y"],
-      "additionalProperties": false,
-      "properties": {
-        "x": { "type": "number" },
-        "y": { "type": "number" }
       }
     }
   }

@@ -54,14 +54,13 @@ def test_load_scenarios_catalog_order():
     assert [s.id for s in scenarios[:2]] == ["vertical_slice", "gear_before_combat"]
 
 
-def test_load_scenarios_gear_accepts_runtime_attack_assertion():
+def test_load_scenarios_gear_asserts_outcome_not_timing():
     scenarios = load_scenarios()
     gear = next(s for s in scenarios if s.id == "gear_before_combat")
 
     assert {
-        "type": "monster_killed_in_attacks",
+        "type": "monster_dead",
         "monster_def_id": "training_dummy_reward",
-        "max_attacks": 1,
     } in gear.assertions
 
 

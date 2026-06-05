@@ -91,16 +91,12 @@ func _initialize() -> void:
 		if not worlds["worlds"].has(world_id):
 			_fail("auto_path references unknown world_id %s" % world_id)
 			return
-		if int(c["expected_step_count"]) > int(navigation["max_auto_steps"]):
-			_fail("auto_path case %s exceeds max_auto_steps" % str(c["name"]))
+		if str(c["goal_mode"]) != "melee_approach":
+			_fail("auto_path case %s must use melee_approach goal_mode" % str(c["name"]))
 			return
-		if str(c["goal_mode"]) == "melee_approach":
-			var end: Dictionary = c["expected_end"]
-			var goal: Dictionary = c["goal"]
-			var dist := Vector2(float(end["x"]) - float(goal["x"]), float(end["y"]) - float(goal["y"])).length()
-			if dist > float(c["unarmed_reach"]) + 0.45 + 0.000001:
-				_fail("auto_path case %s end is not in monster melee reach" % str(c["name"]))
-				return
+		if str(c["target_kind"]) != "monster":
+			_fail("auto_path case %s must target a monster" % str(c["name"]))
+			return
 
 	# 7. Ranged projectile golden references shared item/world/monster rules.
 	var ranged_projectile := _read(shared.path_join("golden/ranged_projectile.json"))

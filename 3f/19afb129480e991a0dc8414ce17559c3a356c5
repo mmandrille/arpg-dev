@@ -1,0 +1,29 @@
+client/scripts/smoke.gd
+  s_c36b8efb59b07f::t_8e9e0db601da4d 303-310
+  s_c36b8efb59b07f::t_584eaf609779ce 257-265
+  s_c36b8efb59b07f::t_2907f6e48bbe86 189-205,210,212,215
+  s_c36b8efb59b07f::t_0f4f92f0d01ad4 38-41
+  s_c36b8efb59b07f::t_4578ac85c3893f 28-32
+  s_c36b8efb59b07f::t_b3173bb752d4a0 187-188,206,211,213-214,216
+  s_c36b8efb59b07f::t_3298497880a4c0 288-291
+  s_c36b8efb59b07f::t_c1da985cb59463 302,311-318,325-326
+  s_c36b8efb59b07f::t_fdae69ce53af1f 319-324
+  s_c36b8efb59b07f::t_24caafabf6eaef 17-18
+  s_c36b8efb59b07f::t_8cd6ce927dcb2d 63-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "3f19afb129480e991a0dc8414ce17559c3a356c5",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}

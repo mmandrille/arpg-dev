@@ -1,0 +1,26 @@
+shared/rules/worlds.v0.json
+  s_e72de07330ced8::t_a4772584eda22a 200
+  s_e72de07330ced8::t_a4731c4a53cb08 70,105,110,140,190,195
+  s_e72de07330ced8::t_4cb38fa542143c 174,179,184
+  s_e72de07330ced8::t_4c90d5e2989ac3 224-225
+  s_e72de07330ced8::t_0d024934fdbe71 150
+  s_e72de07330ced8::t_399b1afa572634 99-100
+  s_e72de07330ced8::t_d9539f314d2c7a 11-30,35,46-65,79-85,89-95,114-115,119-130,145,151-160,164-170,204-205,209-223
+  s_e72de07330ced8::t_d3e8302b4eb8a9 134-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "1fe41b68471b5921a5a6c3bdb99964ad047d4430",
+  "prompts": {},
+  "sessions": {
+    "s_e72de07330ced8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b930ae56-8b5a-4cc3-ba9d-fa564ededae0",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

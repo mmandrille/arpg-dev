@@ -244,7 +244,7 @@ truth), and CI enforces them. For an AI-led repo this matters more than usual: *
 
 | Component        | Baseline (verify latest stable at scaffold) | Source-of-truth pin                     |
 |------------------|---------------------------------------------|-----------------------------------------|
-| Godot            | 4.4.x stable (never `dev`/`rc`)             | `.godot-version` + CI export image      |
+| Godot            | 4.6.x stable (never `dev`/`rc`)             | `.godot-version` + CI export image      |
 | Go               | 1.24.x                                      | `go.mod` `go` directive + CI            |
 | Postgres         | 16.x                                        | `docker-compose` / migration tooling    |
 | Python (tools)   | 3.12.x                                      | `.tool-versions` / `pyproject.toml`     |

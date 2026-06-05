@@ -1,0 +1,19 @@
+client/scripts/smoke.gd
+  s_56b42e2608aa12::t_f27f8140ad24be 1,4-12,16-21,24-32,35,47-48,51,68,70-72,74-77,81,105-183,187-188,191-195,208-210,212,217-220,224,228-257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "e80a773460c60d7989f61f2f542f7b94e9332c3e",
+  "prompts": {},
+  "sessions": {
+    "s_56b42e2608aa12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "198f963e-4091-4cdb-bd5a-29791eaa2bd5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,100 @@
+docs/plans/v10_2026-06-05-click-action-and-melee-range.md
+  s_63d6ce49636e2d::t_1f87c7e730e5b5 12,65-73,77-86,90-95,99-108,112-113
+shared/protocol/state_delta.v0.schema.json
+  s_63d6ce49636e2d::t_cad6f1fc8dd688 29,34-36,66-72
+shared/golden/melee_reach.v0.schema.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 1-38
+shared/protocol/session_snapshot.v0.schema.json
+  s_63d6ce49636e2d::t_cad6f1fc8dd688 34,39-41,79-85
+shared/protocol/envelope.v0.schema.json
+  s_63d6ce49636e2d::t_cad6f1fc8dd688 15
+shared/rules/worlds.v0.schema.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 34,37,74-85
+server/internal/replay/replay_test.go
+  s_63d6ce49636e2d::t_b698ca37a35b01 31-32,34,102,104-105,111,113-114,120,122-130,135,141-144,187-188
+server/internal/realtime/protocol.go
+  s_63d6ce49636e2d::t_e4c39e335524eb 21
+shared/rules/worlds.v0.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 48-72
+tools/bot/run.py
+  s_63d6ce49636e2d::t_b1b04cbb39ea67 767
+  s_63d6ce49636e2d::t_3218b3ddf715fa 81,249,257-297,320,335,393,402,452-470,513,517,598-628,739-747
+shared/rules/items.v0.schema.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 21-22,41-42,56-58
+tools/bot/scenarios/02_gear_before_combat.json
+  s_63d6ce49636e2d::t_220c65717adaf7 12-14,26,31-33
+shared/protocol/messages.v0.schema.json
+  s_63d6ce49636e2d::t_cad6f1fc8dd688 15,35-36,80
+docs/PROGRESS.md
+  s_63d6ce49636e2d::t_355c8b31f2ba67 14,17,41,44,58,183-201,270-272,278
+  s_63d6ce49636e2d::t_42cc5e10cb7420 180-181
+CLAUDE.md
+  s_63d6ce49636e2d::t_75c98f184b0c9d 13-14
+server/internal/game/rules.go
+  s_63d6ce49636e2d::t_b4dcf590d03665 14-17,19
+  s_63d6ce49636e2d::t_e4c39e335524eb 18,32,41-53,88-93,104,112-115,138-145,184-199,228-233
+server/internal/http/ws_test.go
+  s_63d6ce49636e2d::t_7285624b936d9b 210,235,261-263,281-282,326,338-339,350-351,374-376,389,526-545,551-552,555
+server/internal/game/sim.go
+  s_63d6ce49636e2d::t_b4dcf590d03665 11-25,27,36-42,44-45
+  s_63d6ce49636e2d::t_e4c39e335524eb 26,43,136-145,217,227,275,285-286,310-311,315-316,320-335,337,347,356,359,399,415-421,508-511,514-519,546-604,716-718
+shared/protocol/examples/action_intent.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 2-6
+tools/validate_shared.py
+  s_63d6ce49636e2d::t_755da2c0aea9da 119,178-199,275-282,286-297
+tools/bot/scenarios/04_door_lab.json
+  s_63d6ce49636e2d::t_220c65717adaf7 1-38
+tools/bot/test_protocol.py
+  s_63d6ce49636e2d::t_b1b04cbb39ea67 7,68-80,125,135,202,215
+shared/rules/combat.v0.schema.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 7,20-21
+tools/bot/scenarios/03_collision_lab.json
+  s_63d6ce49636e2d::t_220c65717adaf7 15
+client/scripts/smoke.gd
+  s_63d6ce49636e2d::t_67e66368d728eb 118,127,130
+  s_63d6ce49636e2d::t_d864d41fdd1d16 119
+shared/rules/combat.v0.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 4-5
+shared/rules/items.v0.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 4
+server/internal/game/types.go
+  s_63d6ce49636e2d::t_e4c39e335524eb 14,18-26
+server/internal/inputdecode/inputdecode.go
+  s_63d6ce49636e2d::t_e4c39e335524eb 14,30,42,63-64,68
+docs/specs/v10_spec-click-action-and-melee-range.md
+  s_63d6ce49636e2d::t_1f87c7e730e5b5 3-4
+client/scripts/main.gd
+  s_63d6ce49636e2d::t_30220f7bc0cca0 282,287-288,290-292,315,740-741,752-805
+  s_63d6ce49636e2d::t_df9476283893af 36,186,377,451,456,478,482-483,486-490,492-495,497,562-577
+  s_63d6ce49636e2d::t_67e66368d728eb 228-230,829
+tools/bot/scenarios/01_vertical_slice.json
+  s_63d6ce49636e2d::t_220c65717adaf7 13,18-20
+shared/rules/interactables.v0.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 2-11
+shared/rules/interactables.v0.schema.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 1-43
+shared/golden/melee_reach.json
+  s_63d6ce49636e2d::t_ed5c523dba59a3 1-17
+server/internal/game/game_test.go
+  s_63d6ce49636e2d::t_de602952865f5b 65-70,86-91,133-147,164-177,258-277,303,397,491,513,540,546-547,740-805,918,944-950,965-967
+  s_63d6ce49636e2d::t_756ec8e1666e4f 312,328,401-402,444-445,473-474,497-498,517-518,815,822,848,858-859,923-924
+  s_63d6ce49636e2d::t_2b7ce9b0c204f1 821,940
+client/tests/test_golden.gd
+  s_63d6ce49636e2d::t_8d59491eeba172 60-71,79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "012de43d2bc319c30f527601a1445e3c438b6990",
+  "prompts": {},
+  "sessions": {
+    "s_63d6ce49636e2d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e993f-0d6c-7182-b64e-e878528b2255",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

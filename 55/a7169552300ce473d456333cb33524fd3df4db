@@ -1,0 +1,25 @@
+tools/bot/scenarios/03_collision_lab.json
+  s_63d6ce49636e2d::t_5ee7e9e5c5c599 5,10-11,17-18,22-24
+docs/PROGRESS.md
+  s_63d6ce49636e2d::t_9d75079293e998 162-163,171,175-176,235
+server/internal/game/game_test.go
+  s_63d6ce49636e2d::t_5ee7e9e5c5c599 132,676-677,683-684,698-699,703,713-718,720-721,724-727
+shared/rules/worlds.v0.json
+  s_63d6ce49636e2d::t_5ee7e9e5c5c599 35,39-40,44-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "55a7169552300ce473d456333cb33524fd3df4db",
+  "prompts": {},
+  "sessions": {
+    "s_63d6ce49636e2d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e993f-0d6c-7182-b64e-e878528b2255",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

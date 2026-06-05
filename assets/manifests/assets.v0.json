@@ -1,0 +1,22 @@
+{
+  "version": 0,
+  "assets": {
+    "character_base_humanoid_v0": {
+      "type": "character",
+      "source_path": "assets/characters/base_humanoid/base_humanoid.blend",
+      "runtime_path": "client/assets/characters/base_humanoid/base_humanoid.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": ["right_hand_socket"]
+    },
+    "weapon_rusty_sword_v0": {
+      "type": "equipment",
+      "slot": "weapon",
+      "source_path": "assets/equipment/weapons/rusty_sword/rusty_sword.blend",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    }
+  }
+}

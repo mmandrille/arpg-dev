@@ -1,0 +1,125 @@
+docs/plans/v12_2026-06-05-ranged-projectile-combat.md
+  s_1c20b74b902ce8::t_db0903f54e5f0e 1-4,6-53,55-60,62-69,72-74,76,78,80,82,84,86-94,96,98-104,106-109,111,113,115,122-125,127,129,131,133-137,139-142,144,146,148-154,156,158-166,168,170,172,174-182,184,188,190,192-193,195-200,202,204,206,208,210-218,220-224,226-230,232,234-241
+  s_1c20b74b902ce8::t_25ffa95ede26f5 70-71,77
+  s_234691023c07be::t_ffad54c7052bdd 116,187,191,194
+  s_1c20b74b902ce8::t_1d0e1af17cf5c2 54,61,75,79,81,83,85,95,97,105,110,112,114,126,128,130,132,138,143,145,147,157,167,169,171,173,183,185,201,203,205,207,209,219,225,231,233
+  s_234691023c07be::t_817df7638ffce4 5,117-121,155,186,189
+tools/bot/run.py
+  s_1c20b74b902ce8::t_c9f2ac4a32f4cd 112-122,128-139
+  s_1c20b74b902ce8::t_3b23f3847bfbe9 82,592,608-630,810-811,821-833
+server/internal/game/types.go
+  s_1c20b74b902ce8::t_e8332f0a70a764 26-28
+tools/assets/gen_glb.py
+  s_1c20b74b902ce8::t_3f996a5ef4a577 330-343,347
+client/assets/equipment/weapons/training_bow/training_bow.glb.import
+  s_1c20b74b902ce8::t_e45443875dc114 1-42
+shared/rules/items.v0.json
+  s_1c20b74b902ce8::t_25ffa95ede26f5 5
+shared/protocol/examples/state_delta.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 7-9,16-17
+assets/manifests/assets.v0.json
+  s_1c20b74b902ce8::t_aeeeb9577a0d1c 31-44
+server/internal/game/sim.go
+  s_234691023c07be::t_701a7f9dafe265 717,722-749,1114-1115,1118-1155
+  s_1c20b74b902ce8::t_5230eff64d5749 27
+  s_1c20b74b902ce8::t_706a646adfc47a 20,25-26,32-33,52-61,297,382,387,409-413,453-484,486-494,657,715-716,718-721,751-756,772,827-838,842-1032,1054-1078,1100-1113,1116-1117,1156-1157,1196-1204,1302-1305
+  s_1c20b74b902ce8::t_1ece4dd04ab383 62,485,839-841
+client/scripts/main.gd
+  s_1c20b74b902ce8::t_6204337c4fd59f 82,293,298-300,317-321,802-821
+  s_1c20b74b902ce8::t_1ece4dd04ab383 269,273,294-297
+  s_1c20b74b902ce8::t_6a53e7d2a0e6a7 673-687
+  s_1c20b74b902ce8::t_ebd3129d19e6b9 285-286,775-776,787-801
+tools/bot/test_protocol.py
+  s_1c20b74b902ce8::t_cf6892b33b2c3e 99-108
+docs/PROGRESS.md
+  s_1c20b74b902ce8::t_b17f2c8bf77532 14,30,43,62,227-247,323-325,331
+  s_1c20b74b902ce8::t_5dd0e5c914010c 225
+  s_1c20b74b902ce8::t_4f5103f6aaa22e 291
+make/agents.mk
+  s_1c20b74b902ce8::t_4f5103f6aaa22e 6
+  s_1c20b74b902ce8::t_c9f2ac4a32f4cd 7
+server/internal/game/rules.go
+  s_1c20b74b902ce8::t_e8332f0a70a764 54-60,197-214
+shared/rules/worlds.v0.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 98-109,111-122
+  s_1c20b74b902ce8::t_25ffa95ede26f5 110
+shared/protocol/session_snapshot.v0.schema.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 34,41-43
+shared/golden/ranged_projectile.v0.schema.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 1-59
+tools/validate_shared.py
+  s_234691023c07be::t_0f006d2746b28e 355
+  s_1c20b74b902ce8::t_4fb7c38e06c607 128,198-210,332-354,356-358
+server/internal/game/game_test.go
+  s_1c20b74b902ce8::t_c7bec657d1361b 407-418,420,422-424
+  s_234691023c07be::t_e6c2e77bb3b64d 343-344,425-455,458-473
+  s_1c20b74b902ce8::t_3756bbffa254ab 89-95,155-168,312-314,318,325-342,345-402,405-406,419,421
+  s_1c20b74b902ce8::t_25ffa95ede26f5 169
+  s_1c20b74b902ce8::t_45b76f89ab731f 315-317,319-324
+  s_1c20b74b902ce8::t_8764eff20d44db 404
+  s_234691023c07be::t_d5edfd85593872 456-457
+  s_1c20b74b902ce8::t_4a09d583cda211 403
+tools/bot/scenarios/06_ranged_lab.json
+  s_1c20b74b902ce8::t_3b23f3847bfbe9 1-6,8-9,17-31
+  s_1c20b74b902ce8::t_39aab1e01a4130 7
+  s_234691023c07be::t_daa62ad5bbecdf 10-12,14-16
+  s_234691023c07be::t_e05db74ef82c09 13
+shared/rules/items.v0.schema.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 21,23-24,68-92
+client/tests/test_golden.gd
+  s_1c20b74b902ce8::t_f8cdb385b2edd3 105-133
+scripts/bot_visual.sh
+  s_1c20b74b902ce8::t_c9f2ac4a32f4cd 21,57,60
+shared/rules/monsters.v0.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 21-26
+docs/specs/v12_spec-ranged-projectile-combat.md
+  s_1c20b74b902ce8::t_a8bf533d2962f8 38
+  s_6b8ef949badde1::t_1c8a49f641e49d 1-2,4-5,7-30,36-37,39-47,50-98,103-124,127-132,134-168,172,185-207,209-248,250,266,272-376,378-423,427-432,434,436-438,440-445,447-522,525-634,636
+  s_234691023c07be::t_dd30dceeff3596 169-171
+  s_1c20b74b902ce8::t_8213ff5ffd7ca6 6,133,208,249,251-265,267-271,425-426,439
+  s_1c20b74b902ce8::t_511ec3aa847111 377
+  s_1c20b74b902ce8::t_16ea421c1eddee 523-524,635
+  s_1c20b74b902ce8::t_08db963325b173 3
+  s_234691023c07be::t_057290e4bad52d 31-35,48-49,99-102,173-184
+  s_1c20b74b902ce8::t_25ffa95ede26f5 125-126,424,433,435,446
+shared/protocol/state_delta.v0.schema.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 29,36-38
+shared/golden/ranged_projectile.json
+  s_1c20b74b902ce8::t_966b3d04b735ad 1-16,18-23,25-30,33-46
+  s_234691023c07be::t_42c4dea7fd5678 24,31-32
+  s_1c20b74b902ce8::t_511ec3aa847111 17
+shared/assets/item_visuals.v0.json
+  s_1c20b74b902ce8::t_01154d8cbb4eb6 13-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "767cdb70f554d585a1b677184be98073415a5dcd",
+  "prompts": {},
+  "sessions": {
+    "s_1c20b74b902ce8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e99d6-d11d-7e62-be1b-8c79eff2eb23",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_234691023c07be": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9a05-2d08-7bd0-82c9-2c5a09b34f07",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_6b8ef949badde1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4c4b7395-d934-417e-b075-80f6f0b30d8e",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

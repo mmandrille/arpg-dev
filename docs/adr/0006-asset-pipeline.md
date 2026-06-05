@@ -106,6 +106,20 @@ single transform; nothing else hardcodes it.
 - Authorship tooling is free to change (CC0 download today, Blender/AI generation later) without
   touching the contract, because the contract is the manifest→import→mount path, not the source.
 
+## As-built (v2, 2026-06-05)
+
+- **Authorship tool used:** the stdlib generator `tools/assets/gen_glb.py` (D2 sanctions either a
+  CC0 fetch or a committed generator; the generator was chosen for byte-determinism and because the
+  D5 `required_nodes` GLB check needs `right_hand_socket` embedded in the model, which a fetched
+  humanoid lacks). Provenance recorded per entry as `origin=gen_glb.py / license=CC0-1.0 / sha256`.
+  Regenerate with `make gen-assets`; output is stable across runs/machines.
+- **Socket location:** `right_hand_socket` is an empty node *inside* `base_humanoid.glb`, so
+  `character.tscn` instances the GLB as `ModelRoot` with the socket already present (no duplicate
+  placeholder). When skeletal animation lands (D4 upgrade path), this empty becomes a
+  `BoneAttachment3D` with the same name — no manifest/metadata/resolver change.
+- **Contract verified end-to-end** by the Python validators and the Godot headless smoke; no server
+  or protocol change was required (resume reuses the existing `resume_session_id` rehydration).
+
 ## Status of D7 (ADR-0001)
 
 This ADR ratifies ADR-0001 D7 (glTF-first) for runtime assets. Animation rigging, a Blender export

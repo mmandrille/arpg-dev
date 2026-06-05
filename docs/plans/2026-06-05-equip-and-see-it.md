@@ -1,6 +1,6 @@
 # Equip and See It (Slice v2) - Implementation Plan
 
-Status: Not started
+Status: Complete (2026-06-05) — all tasks implemented; `make ci` green incl. extended Godot smoke.
 Goal: prove slice v2 from ADR-0001 — an equipped item renders on the player character via a
 repeatable shared-metadata → GLB → mount-socket pipeline, without changing server authority.
 Architecture: v0 protocol and sim unchanged; new shared asset metadata + asset manifest + Godot
@@ -301,4 +301,33 @@ Expected: full CI green including extended Godot smoke when Godot is installed l
 
 ### Implementation log
 
-(To be filled during implementation.)
+Implemented Tasks 1–9 on branch `feature/equip-and-see-it`, one commit per task,
+testing progressively. Final gate `make ci` is green including the extended Godot smoke.
+
+Deviations from the plan (all sanctioned by the spec/ADR decisions):
+
+- **Asset authorship (Task 4): used the stdlib generator (`tools/assets/gen_glb.py`), not a CC0
+  fetch.** This is spec §9 #5's documented fallback, chosen deliberately for two reasons beyond
+  sandbox network constraints: (a) the asset validator hard-checks `required_nodes` against the GLB,
+  and a fetched humanoid would not contain a node named `right_hand_socket` — so the CC0 path would
+  require post-processing the binary anyway, erasing the "no authorship tool" benefit; (b) a
+  generator produces **byte-deterministic** output, giving a stable `provenance.sha256` and
+  reproducible CI. The generator is the recorded source-of-truth; provenance is
+  `origin=gen_glb.py / license=CC0-1.0 / sha256`. The manifest→import→mount contract is identical
+  regardless of source, which is the actual proof.
+- **Socket lives in the GLB, not as a scene placeholder (Task 5, Step 5.2).** The generator embeds
+  `right_hand_socket` as an empty node in `base_humanoid.glb`, so `character.tscn` instances the GLB
+  as `ModelRoot` and the socket arrives with it — no duplicate `Node3D` is added (which would create
+  an ambiguous `right_hand_socket`). The §4.4 path `CharacterVisual/ModelRoot/right_hand_socket`
+  holds; verified headless. This also makes the Python GLB node-name check a hard pass, not warn-only.
+- **`node_path` in debug state is environment-dependent (spec §4.4/§4.7).** In the headless smoke's
+  minimal `SceneTree` subtree the mounted node reports `node_path == ""`; tests assert the
+  `asset_id`/ids/`visible`/socket fields, never the absolute path. In the interactive `main.tscn`
+  tree it is populated.
+
+Verification highlights:
+- `make validate-shared` (39 checks) and `make validate-assets` (9 checks) green.
+- `tools/assets/test_validate_assets.py` (9 cases) green.
+- Godot smoke proved acceptance #6/#7 (server `/state` + `get_debug_state().weapon.visible`),
+  #13 (move-after-equip still mounted), and #8 (resume restores the visual from `session_snapshot`
+  alone via a fresh client + resolver — no `equipped_update` delta). No server/protocol changes.

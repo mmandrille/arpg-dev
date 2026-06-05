@@ -55,6 +55,9 @@ jobs:
       - name: Validate shared contracts
         run: .venv/bin/python tools/validate_shared.py
 
+      - name: Validate assets (manifest + runtime GLBs)
+        run: .venv/bin/python tools/assets/validate_assets.py
+
       - name: Go tests
         run: cd server && go test ./...
 

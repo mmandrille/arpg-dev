@@ -139,9 +139,10 @@ func scriptedStoredInputs(t *testing.T) []store.SessionInput {
 	t.Helper()
 	return []store.SessionInput{
 		storedInput(t, "inp-move", "msg-move", 0, 0, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
-		storedInput(t, "inp-attack", "msg-attack", 1, 1, "action_intent", map[string]any{"target_id": "1002"}),
-		storedInput(t, "inp-pickup", "msg-pickup", 2, 2, "action_intent", map[string]any{"target_id": "1003"}),
-		storedInput(t, "inp-equip", "msg-equip", 3, 3, "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "weapon"}),
+		storedInput(t, "inp-move-to", "msg-move-to", 0, 1, "move_to_intent", map[string]any{"position": map[string]any{"x": 10, "y": 5}}),
+		storedInput(t, "inp-attack", "msg-attack", 1, 2, "action_intent", map[string]any{"target_id": "1002"}),
+		storedInput(t, "inp-pickup", "msg-pickup", 2, 3, "action_intent", map[string]any{"target_id": "1003"}),
+		storedInput(t, "inp-equip", "msg-equip", 3, 4, "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "weapon"}),
 	}
 }
 

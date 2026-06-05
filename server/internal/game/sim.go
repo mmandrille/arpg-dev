@@ -58,6 +58,13 @@ type activeMove struct {
 	remaining int
 }
 
+type autoNavState struct {
+	steps         []Vec2
+	pendingAction *ActionIntent
+	sourceMsgID   string
+	sourceCorrID  string
+}
+
 type wallObstacle struct {
 	pos  Vec2
 	size Vec2
@@ -80,6 +87,7 @@ type Sim struct {
 	inventory []*invItem
 	equipped  map[string]uint64 // slot -> instanceID (0 = none)
 	move      *activeMove
+	autoNav   *autoNavState
 	walls     []wallObstacle
 }
 
@@ -214,6 +222,7 @@ type Input struct {
 	Sequence      int64
 	Type          string
 	Move          *MoveIntent
+	MoveTo        *MoveToIntent
 	Action        *ActionIntent
 	Equip         *EquipIntent
 }
@@ -223,6 +232,9 @@ type (
 	MoveIntent struct {
 		Direction     Vec2
 		DurationTicks int
+	}
+	MoveToIntent struct {
+		Position Vec2
 	}
 	ActionIntent struct{ TargetID string }
 	EquipIntent  struct {
@@ -272,7 +284,7 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "action_intent", "equip_intent":
+		case "move_intent", "move_to_intent", "action_intent", "equip_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -282,6 +294,8 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		res.ack(in.MessageID)
 	case "move_intent":
 		s.handleMove(in, res)
+	case "move_to_intent":
+		s.handleMoveTo(in, res)
 	case "action_intent":
 		s.handleAction(in, res)
 	case "equip_intent":
@@ -302,8 +316,38 @@ func (s *Sim) handleMove(in Input, res *TickResult) {
 		dur = 1
 	}
 	if dir.X != 0 || dir.Y != 0 {
+		s.clearAutoNav()
 		s.move = &activeMove{dir: dir, remaining: dur}
 	}
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleMoveTo(in Input, res *TickResult) {
+	if in.MoveTo == nil || !finiteVec2(in.MoveTo.Position) {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	player := s.entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	if distance(player.pos, in.MoveTo.Position) <= s.rules.Navigation.StopDistance {
+		s.clearAutoNav()
+		res.ack(in.MessageID)
+		return
+	}
+	steps, ok := PlanPath(s.rules.Navigation, player.pos, in.MoveTo.Position, s.buildBlockedFn())
+	if !ok {
+		res.reject(in.MessageID, "no_path")
+		return
+	}
+	if len(steps) > s.rules.Navigation.MaxAutoSteps {
+		res.reject(in.MessageID, "path_too_long")
+		return
+	}
+	s.move = nil
+	s.autoNav = &autoNavState{steps: steps, sourceMsgID: in.MessageID, sourceCorrID: in.CorrelationID}
 	res.ack(in.MessageID)
 }
 
@@ -317,24 +361,44 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_target")
 		return
 	}
-	if !s.inMeleeRange(target) {
-		res.reject(in.MessageID, "out_of_range")
+	if s.inMeleeRange(target) {
+		s.dispatchAction(target, in, res, true)
 		return
 	}
 
+	_, steps, ok := s.findMeleeApproachGoal(target)
+	if !ok {
+		res.reject(in.MessageID, "no_path")
+		return
+	}
+	if len(steps) > s.rules.Navigation.MaxAutoSteps {
+		res.reject(in.MessageID, "path_too_long")
+		return
+	}
+	s.move = nil
+	s.autoNav = &autoNavState{
+		steps:         steps,
+		pendingAction: &ActionIntent{TargetID: in.Action.TargetID},
+		sourceMsgID:   in.MessageID,
+		sourceCorrID:  in.CorrelationID,
+	}
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) dispatchAction(target *entity, in Input, res *TickResult, ack bool) {
 	switch target.kind {
 	case monsterEntity:
-		s.attackTarget(target, in, res)
+		s.attackTarget(target, in, res, ack)
 	case lootEntity:
-		s.pickUpTarget(target, in, res)
+		s.pickUpTarget(target, in, res, ack)
 	case interactableEntity:
-		s.activateInteractable(target, in, res)
+		s.activateInteractable(target, in, res, ack)
 	default:
 		res.reject(in.MessageID, "invalid_target")
 	}
 }
 
-func (s *Sim) attackTarget(target *entity, in Input, res *TickResult) {
+func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) {
 	// Always consume two draws (hit, damage) so the RNG stream is independent
 	// of the hit/miss branch (base_hit_chance is 1.0 in v0).
 	hitDraw := s.rng.Next()
@@ -342,7 +406,9 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult) {
 	hit := s.rules.Combat.BaseHitChance >= 1.0 ||
 		float64(hitDraw%10000)/10000.0 < s.rules.Combat.BaseHitChance
 
-	res.ack(in.MessageID)
+	if ack {
+		res.ack(in.MessageID)
+	}
 	if !hit {
 		res.Events = append(res.Events, Event{EventType: "attack_missed", EntityID: idStr(target.id), CorrelationID: in.CorrelationID})
 		return
@@ -396,7 +462,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), CorrelationID: corr, Damage: intPtr(dmg)})
 }
 
-func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult) {
+func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 	delete(s.entities, e.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
 
@@ -409,14 +475,18 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult) {
 	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
 	res.Events = append(res.Events, Event{EventType: "item_picked_up", EntityID: idStr(item.instanceID), CorrelationID: in.CorrelationID})
-	res.ack(in.MessageID)
+	if ack {
+		res.ack(in.MessageID)
+	}
 }
 
-func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult) {
+func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack bool) {
 	e.state = interactableOpen
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
 	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
-	res.ack(in.MessageID)
+	if ack {
+		res.ack(in.MessageID)
+	}
 }
 
 func (s *Sim) handleEquip(in Input, res *TickResult) {
@@ -458,6 +528,10 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 }
 
 func (s *Sim) applyMovement(res *TickResult) {
+	if s.autoNav != nil && s.move == nil {
+		s.applyAutoNav(res)
+		return
+	}
 	if s.move == nil || s.move.remaining <= 0 {
 		return
 	}
@@ -479,6 +553,51 @@ func (s *Sim) applyMovement(res *TickResult) {
 		return
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+}
+
+func (s *Sim) applyAutoNav(res *TickResult) {
+	if s.playerDead() {
+		s.clearAutoNav()
+		return
+	}
+	if len(s.autoNav.steps) == 0 {
+		s.finishAutoNav(res)
+		return
+	}
+	player := s.entities[s.playerID]
+	before := player.pos
+	step := normalize(s.autoNav.steps[0])
+	s.autoNav.steps = s.autoNav.steps[1:]
+	player.pos = s.resolveMovement(player.pos, Vec2{X: step.X * moveSpeed, Y: step.Y * moveSpeed})
+	if player.pos != before {
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+	}
+	if len(s.autoNav.steps) == 0 {
+		s.finishAutoNav(res)
+	}
+}
+
+func (s *Sim) finishAutoNav(res *TickResult) {
+	nav := s.autoNav
+	s.clearAutoNav()
+	if nav == nil || nav.pendingAction == nil {
+		return
+	}
+	in := Input{
+		MessageID:     nav.sourceMsgID,
+		CorrelationID: nav.sourceCorrID,
+		Type:          "action_intent",
+		Action:        nav.pendingAction,
+	}
+	target := s.findEntity(nav.pendingAction.TargetID)
+	if target == nil || !s.actionable(target) || !s.inMeleeRange(target) {
+		return
+	}
+	s.dispatchAction(target, in, res, false)
+}
+
+func (s *Sim) clearAutoNav() {
+	s.autoNav = nil
 }
 
 func (s *Sim) resolveMovement(pos, delta Vec2) Vec2 {
@@ -522,11 +641,72 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 	return false
 }
 
+func (s *Sim) buildBlockedFn() func(gx, gy int) bool {
+	return func(gx, gy int) bool {
+		center := gridToWorld(s.rules.Navigation, gridCell{x: gx, y: gy})
+		return s.playerPositionBlocked(center)
+	}
+}
+
+func (s *Sim) findMeleeApproachGoal(target *entity) (Vec2, []Vec2, bool) {
+	player := s.entities[s.playerID]
+	if player == nil {
+		return Vec2{}, nil, false
+	}
+	nav := s.rules.Navigation
+	targetCell := worldToGrid(nav, target.pos)
+	blocked := s.buildBlockedFn()
+	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
+	for radius := 0; radius <= maxRadius; radius++ {
+		candidates := ringCells(targetCell, radius)
+		for _, cell := range candidates {
+			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
+				continue
+			}
+			goal := gridToWorld(nav, cell)
+			if !meleeInRange(distance(goal, target.pos), s.playerReach(), s.targetInteractionRadius(target)) {
+				continue
+			}
+			steps, ok := PlanPath(nav, player.pos, goal, blocked)
+			if ok {
+				return goal, steps, true
+			}
+		}
+	}
+	return Vec2{}, nil, false
+}
+
+func ringCells(center gridCell, radius int) []gridCell {
+	if radius == 0 {
+		return []gridCell{center}
+	}
+	out := []gridCell{}
+	for y := center.y - radius; y <= center.y+radius; y++ {
+		for x := center.x - radius; x <= center.x+radius; x++ {
+			if absInt(x-center.x) != radius && absInt(y-center.y) != radius {
+				continue
+			}
+			out = append(out, gridCell{x: x, y: y})
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].y != out[j].y {
+			return out[i].y < out[j].y
+		}
+		return out[i].x < out[j].x
+	})
+	return out
+}
+
 func circlesOverlap(a Vec2, ar float64, b Vec2, br float64) bool {
 	dx := a.X - b.X
 	dy := a.Y - b.Y
 	r := ar + br
 	return dx*dx+dy*dy < r*r-1e-9
+}
+
+func finiteVec2(v Vec2) bool {
+	return !math.IsNaN(v.X) && !math.IsInf(v.X, 0) && !math.IsNaN(v.Y) && !math.IsInf(v.Y, 0)
 }
 
 func circleIntersectsAABB(center Vec2, radius float64, rectCenter Vec2, rectSize Vec2) bool {
@@ -739,4 +919,11 @@ func normalize(v Vec2) Vec2 {
 		return Vec2{}
 	}
 	return Vec2{X: v.X / length, Y: v.Y / length}
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

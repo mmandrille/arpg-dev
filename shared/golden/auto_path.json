@@ -1,0 +1,28 @@
+{
+  "version": 0,
+  "navigation": {
+    "version": 0,
+    "cell_size": 1.0,
+    "max_auto_steps": 100,
+    "grid_bounds": {
+      "min_x": -2,
+      "min_y": -2,
+      "max_x": 16,
+      "max_y": 12
+    },
+    "stop_distance": 0.25
+  },
+  "cases": [
+    {
+      "name": "path_maze_start_to_monster_approach",
+      "world_id": "path_maze",
+      "start": { "x": 0, "y": 5 },
+      "goal": { "x": 10, "y": 5 },
+      "goal_mode": "melee_approach",
+      "target_kind": "monster",
+      "unarmed_reach": 1.0,
+      "expected_step_count": 22,
+      "expected_end": { "x": 9, "y": 4 }
+    }
+  ]
+}

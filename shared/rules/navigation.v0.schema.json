@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/navigation.v0.schema.json",
+  "title": "Navigation rules (v0)",
+  "type": "object",
+  "required": ["version", "cell_size", "max_auto_steps", "grid_bounds", "stop_distance"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "const": 0 },
+    "cell_size": { "type": "number", "exclusiveMinimum": 0 },
+    "max_auto_steps": { "type": "integer", "minimum": 1 },
+    "grid_bounds": {
+      "type": "object",
+      "required": ["min_x", "min_y", "max_x", "max_y"],
+      "additionalProperties": false,
+      "properties": {
+        "min_x": { "type": "integer" },
+        "min_y": { "type": "integer" },
+        "max_x": { "type": "integer" },
+        "max_y": { "type": "integer" }
+      }
+    },
+    "stop_distance": { "type": "number", "minimum": 0 }
+  }
+}

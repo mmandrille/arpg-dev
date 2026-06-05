@@ -276,6 +276,19 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
             await pump_one(ws, state, timeout=0.1)
         return
 
+    if action == "action_once_until_event":
+        target = resolve_target(state, step)
+        event_type = str(step["event_type"])
+        target_id = str(target["id"])
+        monster_def_id = str(step.get("monster_def_id") or target.get("monster_def_id") or "")
+        env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target_id})
+        if monster_def_id:
+            state.pending_attack_monsters[env["message_id"]] = monster_def_id
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_event(ws, state, event_type, loop)
+        return
+
     if action == "action_entity":
         target = resolve_target(state, step)
         env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": str(target["id"])})

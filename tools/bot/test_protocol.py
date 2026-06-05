@@ -70,12 +70,24 @@ def test_load_scenarios_discovers_door_lab():
     door = next(s for s in scenarios if s.id == "door_lab")
 
     assert door.world_id == "door_lab"
-    assert any(step.get("expect_reject") == "out_of_range" for step in door.steps)
+    assert not any("expect_reject" in step for step in door.steps)
     assert {
         "type": "interactable_state",
         "interactable_def_id": "wooden_door",
         "state": "open",
     } in door.assertions
+
+
+def test_load_scenarios_discovers_path_maze():
+    scenarios = load_scenarios()
+    maze = next(s for s in scenarios if s.id == "path_maze")
+
+    assert maze.world_id == "path_maze"
+    assert maze.steps == [{
+        "action": "action_once_until_event",
+        "monster_def_id": "training_dummy_path",
+        "event_type": "monster_killed",
+    }]
 
 
 def test_select_scenarios_all_returns_catalog_order():

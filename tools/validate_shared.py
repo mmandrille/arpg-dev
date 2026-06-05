@@ -117,12 +117,14 @@ def cross_checks(report: Report) -> None:
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
     interactables = load(RULES / "interactables.v0.json")
+    navigation = load(RULES / "navigation.v0.json")
     worlds = load(RULES / "worlds.v0.json")
     damage_golden = load(GOLDEN / "damage_formula.json")
     retaliation_golden = load(GOLDEN / "retaliation_damage.json")
     equipped_weapon_golden = load(GOLDEN / "equipped_weapon_damage.json")
     loot_golden = load(GOLDEN / "loot_roll.json")
     slice_golden = load(GOLDEN / "slice_outcome.json")
+    auto_path_golden = load(GOLDEN / "auto_path.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -197,6 +199,15 @@ def cross_checks(report: Report) -> None:
         report.fail("combat unarmed_reach", "must be positive")
     else:
         report.ok("combat unarmed_reach is positive")
+
+    if navigation.get("cell_size") != 1.0:
+        report.fail("navigation cell_size", "must be 1.0 for v11 moveSpeed parity")
+    elif navigation.get("max_auto_steps", 0) <= 0:
+        report.fail("navigation max_auto_steps", "must be positive")
+    elif navigation.get("stop_distance", -1) < 0:
+        report.fail("navigation stop_distance", "must be non-negative")
+    else:
+        report.ok("navigation rules are within v11 bounds")
 
     golden_item_id = equipped_weapon_golden["item_def_id"]
     golden_item = items["items"].get(golden_item_id)
@@ -282,6 +293,27 @@ def cross_checks(report: Report) -> None:
                     report.ok(f"{label} interactable reference resolves")
             else:
                 report.fail("world entity type", f"{label}: unknown type {etype}")
+
+    if auto_path_golden["navigation"] != navigation:
+        report.fail("auto_path navigation", "golden navigation block must match navigation.v0.json")
+    else:
+        report.ok("auto_path golden navigation matches navigation.v0.json")
+
+    for case in auto_path_golden["cases"]:
+        world_id = case["world_id"]
+        if world_id not in worlds["worlds"]:
+            report.fail("auto_path world", f"{case['name']}: unknown world_id {world_id}")
+        elif case["expected_step_count"] > navigation["max_auto_steps"]:
+            report.fail("auto_path step budget", f"{case['name']}: exceeds max_auto_steps")
+        elif case["goal_mode"] == "melee_approach" and case["target_kind"] == "monster":
+            dx = float(case["expected_end"]["x"]) - float(case["goal"]["x"])
+            dy = float(case["expected_end"]["y"]) - float(case["goal"]["y"])
+            if (dx * dx + dy * dy) ** 0.5 > float(case["unarmed_reach"]) + 0.45 + 0.000001:
+                report.fail("auto_path melee end", f"{case['name']}: expected_end not in monster reach")
+            else:
+                report.ok(f"auto_path {case['name']} references world and melee end")
+        else:
+            report.ok(f"auto_path {case['name']} references world and step budget")
 
     for interactable_id, interactable in interactables["interactables"].items():
         if interactable.get("initial_state") != "closed":

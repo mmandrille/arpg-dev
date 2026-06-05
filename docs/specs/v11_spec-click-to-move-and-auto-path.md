@@ -1,6 +1,6 @@
 # Spec: `click-to-move-and-auto-path`
 
-Status: Approved — ready for implementation (2026-06-05)
+Status: Complete (2026-06-05)
 Branch: `feature/click-to-move-and-auto-path`
 Slice: v11 — server-authoritative click-to-move and auto-approach before action
 Baseline: slice v10 `click-action-and-melee-range` (complete, `make ci` green on 2026-06-05)

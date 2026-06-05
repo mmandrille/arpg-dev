@@ -12,6 +12,7 @@ import (
 // server's loader and typed view.
 type Rules struct {
 	Combat        Combat
+	Navigation    NavigationRules
 	Items         map[string]ItemDef
 	Monsters      map[string]MonsterDef
 	LootTables    map[string]LootTable
@@ -30,6 +31,22 @@ type Combat struct {
 	BaseHitChance float64     `json:"base_hit_chance"`
 	PlayerDamage  DamageRange `json:"player_damage"`
 	UnarmedReach  float64     `json:"unarmed_reach"`
+}
+
+// NavigationRules bounds server-owned auto-navigation.
+type NavigationRules struct {
+	CellSize     float64    `json:"cell_size"`
+	MaxAutoSteps int        `json:"max_auto_steps"`
+	GridBounds   GridBounds `json:"grid_bounds"`
+	StopDistance float64    `json:"stop_distance"`
+}
+
+// GridBounds is the inclusive grid rectangle searched by A*.
+type GridBounds struct {
+	MinX int `json:"min_x"`
+	MinY int `json:"min_y"`
+	MaxX int `json:"max_x"`
+	MaxY int `json:"max_y"`
 }
 
 // ItemDef is a single item definition.
@@ -113,6 +130,38 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, fmt.Errorf("game: invalid rules combat.unarmed_reach: must be positive")
 	}
 	r.Combat = Combat{BaseHitChance: combat.BaseHitChance, PlayerDamage: combat.PlayerDamage, UnarmedReach: combat.UnarmedReach}
+
+	var navigation struct {
+		Version      int        `json:"version"`
+		CellSize     float64    `json:"cell_size"`
+		MaxAutoSteps int        `json:"max_auto_steps"`
+		GridBounds   GridBounds `json:"grid_bounds"`
+		StopDistance float64    `json:"stop_distance"`
+	}
+	if err := readJSON(filepath.Join(dir, "navigation.v0.json"), &navigation); err != nil {
+		return nil, err
+	}
+	if navigation.CellSize <= 0 {
+		return nil, fmt.Errorf("game: invalid rules navigation.cell_size: must be positive")
+	}
+	if navigation.CellSize != moveSpeed {
+		return nil, fmt.Errorf("game: invalid rules navigation.cell_size: must equal moveSpeed %.1f for v11", moveSpeed)
+	}
+	if navigation.MaxAutoSteps <= 0 {
+		return nil, fmt.Errorf("game: invalid rules navigation.max_auto_steps: must be positive")
+	}
+	if navigation.GridBounds.MaxX < navigation.GridBounds.MinX || navigation.GridBounds.MaxY < navigation.GridBounds.MinY {
+		return nil, fmt.Errorf("game: invalid rules navigation.grid_bounds: max must be >= min")
+	}
+	if navigation.StopDistance < 0 {
+		return nil, fmt.Errorf("game: invalid rules navigation.stop_distance: must be non-negative")
+	}
+	r.Navigation = NavigationRules{
+		CellSize:     navigation.CellSize,
+		MaxAutoSteps: navigation.MaxAutoSteps,
+		GridBounds:   navigation.GridBounds,
+		StopDistance: navigation.StopDistance,
+	}
 
 	var items struct {
 		Items map[string]ItemDef `json:"items"`

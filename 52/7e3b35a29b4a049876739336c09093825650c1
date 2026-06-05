@@ -1,0 +1,71 @@
+shared/protocol/examples/client_ready.json
+  s_453dc3b8c102a5::t_403397c4a1aa64 1-8
+shared/protocol/messages.v0.schema.json
+  s_453dc3b8c102a5::t_e168e0dc2be1cc 1-132
+shared/rules/combat.v0.json
+  s_453dc3b8c102a5::t_333f2c29eb24ca 1-5
+shared/golden/slice_outcome.v0.schema.json
+  s_453dc3b8c102a5::t_62fdd67b9a7dc8 1-37
+shared/rules/items.v0.schema.json
+  s_453dc3b8c102a5::t_7476e6fb762b16 1-25
+shared/rules/combat.v0.schema.json
+  s_453dc3b8c102a5::t_989bbca958eafc 1-22
+shared/golden/loot_roll.json
+  s_453dc3b8c102a5::t_d6ffc959caffc1 1-5
+shared/rules/monsters.v0.json
+  s_453dc3b8c102a5::t_fa9786857c6501 1-6
+shared/protocol/examples/session_snapshot.json
+  s_453dc3b8c102a5::t_b87efc50bd550a 1-12
+shared/protocol/examples/state_delta.json
+  s_453dc3b8c102a5::t_b71db32dbd0fba 1-11
+shared/protocol/examples/intent_rejected.json
+  s_453dc3b8c102a5::t_67bc2f0625b7ca 1-8
+shared/protocol/examples/error.json
+  s_453dc3b8c102a5::t_5acc7095499a69 1-7
+shared/golden/damage_formula.json
+  s_453dc3b8c102a5::t_e74b21083b590c 1-13
+shared/rules/loot_tables.v0.json
+  s_453dc3b8c102a5::t_72695ee5d20c91 1-10
+shared/protocol/session_snapshot.v0.schema.json
+  s_453dc3b8c102a5::t_91c5aacc166717 1-71
+shared/protocol/examples/pick_up_intent.json
+  s_453dc3b8c102a5::t_527bb7b1dac679 1-8
+shared/rules/monsters.v0.schema.json
+  s_453dc3b8c102a5::t_f17d72b45c9080 1-26
+shared/golden/slice_outcome.json
+  s_453dc3b8c102a5::t_3d9711b82fe837 1-11
+shared/protocol/examples/attack_intent.json
+  s_453dc3b8c102a5::t_d9b507692d137d 1-8
+shared/protocol/state_delta.v0.schema.json
+  s_453dc3b8c102a5::t_f4ccb7346650e8 1-102
+shared/rules/items.v0.json
+  s_453dc3b8c102a5::t_e66d77251b55cc 1-6
+shared/protocol/examples/intent_accepted.json
+  s_453dc3b8c102a5::t_c0504682615bf8 1-8
+shared/protocol/envelope.v0.schema.json
+  s_453dc3b8c102a5::t_1ce42f493ee8fa 1-38
+shared/protocol/examples/move_intent.json
+  s_453dc3b8c102a5::t_a5e2482f150224 1-8
+shared/golden/loot_roll.v0.schema.json
+  s_453dc3b8c102a5::t_b097f26b1b2ddd 1-13
+shared/protocol/examples/equip_intent.json
+  s_453dc3b8c102a5::t_fb59264d2137ca 1-8
+shared/golden/damage_formula.v0.schema.json
+  s_453dc3b8c102a5::t_5fd5f394181236 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "527e3b35a29b4a049876739336c09093825650c1",
+  "prompts": {},
+  "sessions": {
+    "s_453dc3b8c102a5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b19faada-d99f-4150-81ee-94c64c9f386d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    }
+  }
+}

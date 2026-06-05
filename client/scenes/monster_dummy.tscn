@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+; Slice v3 monster (spec animate-and-react §5.3). Rigged dummy GLB + an
+; AnimationPlayer playing idle/hit/death from the committed monster library.
+; Instanced at runtime by main.gd::_make_entity_node("monster").
+[ext_resource type="PackedScene" path="res://assets/monsters/dummy/monster_dummy.glb" id="1_glb"]
+[ext_resource type="AnimationLibrary" path="res://animations/monster_anims.tres" id="2_anims"]
+
+[node name="MonsterDummy" type="Node3D"]
+
+[node name="ModelRoot" parent="." instance=ExtResource("1_glb")]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../ModelRoot")
+libraries = {
+"": ExtResource("2_anims")
+}

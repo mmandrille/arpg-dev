@@ -74,6 +74,9 @@ class RuntimeState:
     item_id: str | None = None
     equipped_item_id: str | None = None
     seen_events: set[str] = field(default_factory=set)
+    pending_attack_monsters: dict[str, str] = field(default_factory=dict)
+    accepted_attack_counts: dict[str, int] = field(default_factory=dict)
+    killed_monster_def_ids: set[str] = field(default_factory=set)
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -214,8 +217,11 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
                 monster = state.entities.get(target_id)
                 if monster is not None and monster.get("hp") == 0:
                     break
-                await ws.send(json.dumps(make_envelope(
-                    "attack_intent", session_id, state.last_tick, {"target_id": target_id})))
+                monster_def_id = str(step.get("monster_def_id") or (monster or {}).get("monster_def_id") or "")
+                env = make_envelope("attack_intent", session_id, state.last_tick, {"target_id": target_id})
+                if monster_def_id:
+                    state.pending_attack_monsters[env["message_id"]] = monster_def_id
+                await ws.send(json.dumps(env))
                 last_attack = loop.time()
             await pump_one(ws, state, timeout=0.1)
         return
@@ -378,6 +384,19 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
     if m.get("type") == "session_snapshot":
         ingest_snapshot(m["payload"], state)
         return
+    if m.get("type") == "intent_accepted":
+        accepted_id = str(m.get("payload", {}).get("accepted_message_id", ""))
+        monster_def_id = state.pending_attack_monsters.pop(accepted_id, None)
+        if monster_def_id:
+            state.accepted_attack_counts[monster_def_id] = state.accepted_attack_counts.get(monster_def_id, 0) + 1
+        return
+    if m.get("type") == "intent_rejected":
+        rejected_id = str(m.get("payload", {}).get("rejected_message_id", ""))
+        monster_def_id = state.pending_attack_monsters.pop(rejected_id, None)
+        if monster_def_id:
+            reason = m.get("payload", {}).get("reason", "unknown")
+            raise AssertionError(f"attack_intent for {monster_def_id} was rejected: {reason}")
+        return
     if m.get("type") != "state_delta":
         return
 
@@ -388,6 +407,9 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         state.seen_events.add(event_type)
         if event_type == "monster_killed":
             state.killed = True
+            entity = state.entities.get(str(ev.get("entity_id")))
+            if entity is not None and entity.get("monster_def_id"):
+                state.killed_monster_def_ids.add(str(entity["monster_def_id"]))
             log("monster killed at tick", p.get("server_tick"))
     for c in (p.get("changes") or []):
         if c["op"] in {"entity_spawn", "entity_update"}:
@@ -553,8 +575,30 @@ def run_assertions(
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
         elif typ == "monster_dead":
             assert_monster_dead(entities, where, str(assertion["monster_def_id"]))
+        elif typ == "monster_killed_in_attacks":
+            continue
         else:
             raise AssertionError(f"{where}: unknown assertion type {typ}")
+
+
+def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: str) -> None:
+    for assertion in assertions:
+        if not isinstance(assertion, dict):
+            continue
+        typ = assertion.get("type")
+        if typ != "monster_killed_in_attacks":
+            continue
+        monster_def_id = str(assertion["monster_def_id"])
+        max_attacks = int(assertion["max_attacks"])
+        count = state.accepted_attack_counts.get(monster_def_id, 0)
+        if monster_def_id not in state.killed_monster_def_ids:
+            raise AssertionError(f"{where}: monster {monster_def_id} was not observed killed at runtime")
+        if count < 1:
+            raise AssertionError(f"{where}: no accepted attack_intent observed for {monster_def_id}")
+        if count > max_attacks:
+            raise AssertionError(
+                f"{where}: monster {monster_def_id} killed in {count} accepted attacks, max {max_attacks}"
+            )
 
 
 def default_manifest_path() -> Path:
@@ -604,6 +648,7 @@ def main() -> int:
             last_session_id = session_id
 
             observed = asyncio.run(drive_scenario(args.base_url, token, sess, scenario))
+            run_runtime_assertions(scenario.assertions, observed, "runtime protocol")
 
             # Assert authoritative state through the inspection API.
             state = fetch_state(client, token, args.debug_token, session_id)

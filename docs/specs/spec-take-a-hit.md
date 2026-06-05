@@ -75,6 +75,15 @@ combat depth, AI, or art quality.
 | Modify | `docs/adr/0007-animation-state-model.md` | As-built: player reactions now event-driven |
 | Modify | `docs/plans/2026-06-05-take-a-hit.md` | Implementation plan |
 
+**Additional files (sensible post-plan additions, not blocking acceptance):**
+
+| Action | Path | Responsibility |
+|--------|------|----------------|
+| Modify | `client/tests/test_golden.gd` | GDScript cross-language golden: consume `retaliation_damage.json` (mirrors `tools/validate_shared.py` + Go `TestRetaliationDamageGolden`) |
+| Create | `scripts/bot_visual.sh` | Start local server + launch Godot with `ARPG_AUTOPLAY=1` for visible slice inspection |
+| Modify | `make/agents.mk` | Expose `make bot-visual` target |
+| Modify | `README.md` | Document `make bot-visual` usage |
+
 **Out of scope for file changes:** `AnimationController` API (unchanged),
 `EquipmentVisualResolver`, asset manifests/GLBs (rig joints unchanged), monster
 scenes/clips.
@@ -337,6 +346,13 @@ No second monster, no debug cheat intent, no production rule change.
 **Python (`make validate-shared`, `pytest tools`):** schema for monsters +
 retaliation golden.
 
+**Headless GDScript golden (`client/tests/test_golden.gd`, via `make client-smoke`):**
+- Consumes `damage_formula.json`, **`retaliation_damage.json`**, and `loot_roll.json`
+  from `shared/golden/`.
+- For retaliation: asserts golden range matches `training_dummy.retaliation_damage`
+  in `monsters.v0.json`, then verifies each case satisfies
+  `min + (draw mod (max - min + 1))` — same formula checked in Python and Go.
+
 **Go (`go test ./...`):**
 - `TestScriptedSliceMatchesGolden` — `pinned_seed` + `final_player_hp: 9`.
 - `TestRetaliationDamageGolden` — roll formula matches fixture.
@@ -356,6 +372,9 @@ retaliation golden.
 
 **Python bot (`make bot`):** assert `/state` player `hp < 10` after slice.
 
+**Interactive visual inspection (`make bot-visual`):** optional developer workflow;
+not part of CI. See §11.
+
 ## 11. As-Built Notes
 
 - Retaliation RNG runs after loot drop on killing blows; event order is monster
@@ -363,5 +382,32 @@ retaliation golden.
   `player_killed`.
 - `make ci` green on 2026-06-05; bot/smoke assert `hp < 10` on random seeds;
   Go golden uses `pinned_seed` `deadbeefdeadbeef` with `final_player_hp: 9`.
-- Client GDScript golden (`test_golden.gd`) also consumes `retaliation_damage.json`.
-- `make bot-visual` added for interactive slice inspection (out of spec file map).
+
+### Post-plan additions
+
+**`client/tests/test_golden.gd` — retaliation golden on the client**
+
+The plan only required Go + Python validation of `retaliation_damage.json`. During
+implementation, `test_golden.gd` was extended to consume the new fixture alongside
+`damage_formula.json` and `loot_roll.json`, following the cross-language pattern from
+slice v2 (`spec-equip-and-see-it` §4.8). It runs as the first gate in
+`scripts/client_smoke.sh` (`make client-smoke` / CI step 7). This gives a third
+language proof that the client reads the same shared rules the server uses.
+
+**`make bot-visual` + `scripts/bot_visual.sh` — interactive slice inspection**
+
+Headless `make bot` and `make client-smoke` prove the slice but are hard to watch.
+`bot-visual` builds the server, waits for `/readyz`, imports Godot assets, then
+launches the normal client with `ARPG_AUTOPLAY=1` so the scripted flow (move →
+attack → pickup → equip, including player `hit` reactions) plays visibly. The
+server shuts down when the Godot window closes.
+
+```bash
+make bot-visual
+AUTOPLAY_STEP_DELAY=0.8 make bot-visual   # slower steps for inspection
+GODOT=/path/to/godot make bot-visual      # override Godot binary
+```
+
+Wiring: `make/agents.mk` (`bot-visual` target) → `scripts/bot_visual.sh` → Godot
+`client/` with `ARPG_BASE_URL`, `ARPG_DEV_TOKEN`, `ARPG_DEBUG_TOKEN`, and optional
+`AUTOPLAY_STEP_DELAY`. Documented in `README.md`; not required for slice acceptance.

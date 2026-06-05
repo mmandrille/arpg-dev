@@ -1,0 +1,19 @@
+docs/specs/spec-animate-and-react.md
+  s_e7971ad9f727db::t_28b6480e1f29fa 1-322
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "a937b592190b3c883d109aa98c52b03a9af6542a",
+  "prompts": {},
+  "sessions": {
+    "s_e7971ad9f727db": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0ca44e12-12fc-49d3-bf1b-c25dc38b1033",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

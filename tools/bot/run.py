@@ -79,6 +79,7 @@ class RuntimeState:
     killed_monster_def_ids: set[str] = field(default_factory=set)
     accepted_message_ids: set[str] = field(default_factory=set)
     rejected_message_reasons: dict[str, str] = field(default_factory=dict)
+    min_player_monster_distance: dict[str, float] = field(default_factory=dict)
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -108,12 +109,34 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
 def select_scenarios(scenarios: list[Scenario], selected: str) -> list[Scenario]:
     if selected == "all":
         return scenarios
-    wanted = {part.strip() for part in selected.split(",") if part.strip()}
-    found = [s for s in scenarios if s.id in wanted]
-    missing = wanted - {s.id for s in found}
+    wanted = {normalize_scenario_selector(part.strip()) for part in selected.split(",") if part.strip()}
+    found = [s for s in scenarios if scenario_matches_selector(s, wanted)]
+    matched: set[str] = set()
+    for scenario in found:
+        aliases = {
+            normalize_scenario_selector(scenario.id),
+            normalize_scenario_selector(scenario.path.name),
+            normalize_scenario_selector(scenario.path.stem),
+        }
+        matched.update(wanted & aliases)
+    missing = wanted - matched
     if missing:
         raise ValueError(f"unknown scenario(s): {', '.join(sorted(missing))}")
     return found
+
+
+def normalize_scenario_selector(value: str) -> str:
+    if value.endswith(".json"):
+        value = value[:-5]
+    return value
+
+
+def scenario_matches_selector(scenario: Scenario, wanted: set[str]) -> bool:
+    return bool({
+        normalize_scenario_selector(scenario.id),
+        normalize_scenario_selector(scenario.path.name),
+        normalize_scenario_selector(scenario.path.stem),
+    } & wanted)
 
 
 # --- HTTP steps -------------------------------------------------------------
@@ -566,6 +589,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         elif c["op"] == "equipped_update" and c.get("slot") == "weapon":
             state.equipped_item_id = c.get("item_instance_id")
             state.equipped[c["slot"]] = c.get("item_instance_id")
+    update_runtime_distances(state)
 
 
 def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
@@ -581,6 +605,29 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     for item in state.inventory:
         if item.get("equipped"):
             state.equipped_item_id = item.get("item_instance_id")
+    update_runtime_distances(state)
+
+
+def update_runtime_distances(state: RuntimeState) -> None:
+    player = find_player(state)
+    if player is None:
+        return
+    ppos = player.get("position", {})
+    px = float(ppos.get("x", 0.0))
+    py = float(ppos.get("y", 0.0))
+    for entity in state.entities.values():
+        if entity.get("type") != "monster":
+            continue
+        monster_def_id = str(entity.get("monster_def_id", ""))
+        if not monster_def_id:
+            continue
+        mpos = entity.get("position", {})
+        dx = px - float(mpos.get("x", 0.0))
+        dy = py - float(mpos.get("y", 0.0))
+        dist = (dx * dx + dy * dy) ** 0.5
+        current = state.min_player_monster_distance.get(monster_def_id)
+        if current is None or dist < current:
+            state.min_player_monster_distance[monster_def_id] = dist
 
 
 def upsert_inventory(state: RuntimeState, item: dict[str, Any]) -> None:
@@ -760,6 +807,8 @@ def run_assertions(
                 raise AssertionError(f"{where}: interactable {expected_id} state = {matches}, want {expected_state}")
         elif typ == "monster_killed_in_attacks":
             continue
+        elif typ == "player_never_in_melee_range_of":
+            continue
         else:
             raise AssertionError(f"{where}: unknown assertion type {typ}")
 
@@ -769,6 +818,19 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if not isinstance(assertion, dict):
             continue
         typ = assertion.get("type")
+        if typ == "player_never_in_melee_range_of":
+            monster_def_id = str(assertion["monster_def_id"])
+            min_distance = state.min_player_monster_distance.get(monster_def_id)
+            if min_distance is None:
+                raise AssertionError(f"{where}: no distance samples for monster {monster_def_id}")
+            reach = float(assertion.get("reach", 1.5))
+            monster_radius = float(assertion.get("monster_radius", 0.45))
+            threshold = reach + monster_radius + 0.000001
+            if min_distance <= threshold:
+                raise AssertionError(
+                    f"{where}: player entered melee range of {monster_def_id}: min_distance={min_distance:.3f}, threshold={threshold:.3f}"
+                )
+            continue
         if typ != "monster_killed_in_attacks":
             continue
         monster_def_id = str(assertion["monster_def_id"])

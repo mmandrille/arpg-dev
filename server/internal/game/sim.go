@@ -17,14 +17,20 @@ const (
 	playerEntity                  = "player"
 	monsterEntity                 = "monster"
 	lootEntity                    = "loot"
+	projectileEntity              = "projectile"
 	wallEntity                    = "wall"
 	interactableEntity            = "interactable"
 	interactableClosed            = "closed"
 	interactableOpen              = "open"
+	attackModeMelee               = "melee"
+	attackModeRanged              = "ranged"
+	trainingArrowProjectileDefID  = "training_arrow"
 	weaponSlot                    = "weapon"
 	lootInteractionRadius         = 0.35
 	interactableInteractionRadius = 0.50
 	meleeRangeEpsilon             = 0.000001
+	projectileRadius              = 0.10
+	tickDuration                  = 0.05
 )
 
 // DefaultWorldID is the compatibility world used when callers do not choose a
@@ -43,6 +49,17 @@ type entity struct {
 	interactableDefID string
 	state             string
 	lootTable         string
+	ownerID           uint64
+	targetID          uint64
+	projectileDefID   string
+	dir               Vec2
+	speed             float64
+	traveled          float64
+	maxDistance       float64
+	damageRange       DamageRange
+	sourceMsgID       string
+	sourceCorrID      string
+	spawnTick         uint64
 }
 
 // invItem is an internal inventory item.
@@ -277,6 +294,7 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 		s.applyInput(in, &res)
 	}
 	s.applyMovement(&res)
+	s.advanceProjectiles(&res)
 	s.tick++
 	return res
 }
@@ -361,12 +379,12 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_target")
 		return
 	}
-	if s.inMeleeRange(target) {
+	if s.inDispatchRange(target) {
 		s.dispatchAction(target, in, res, true)
 		return
 	}
 
-	_, steps, ok := s.findMeleeApproachGoal(target)
+	_, steps, ok := s.findApproachGoal(target)
 	if !ok {
 		res.reject(in.MessageID, "no_path")
 		return
@@ -388,7 +406,11 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 func (s *Sim) dispatchAction(target *entity, in Input, res *TickResult, ack bool) {
 	switch target.kind {
 	case monsterEntity:
-		s.attackTarget(target, in, res, ack)
+		if s.playerAttackMode() == attackModeRanged {
+			s.fireProjectile(target, in, res, ack)
+		} else {
+			s.attackTarget(target, in, res, ack)
+		}
 	case lootEntity:
 		s.pickUpTarget(target, in, res, ack)
 	case interactableEntity:
@@ -426,6 +448,48 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 		s.dropLoot(target, in.CorrelationID, res)
 	}
 	s.retaliate(target, in.CorrelationID, res)
+}
+
+func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool) {
+	if s.playerProjectileInFlight() {
+		res.reject(in.MessageID, "projectile_busy")
+		return
+	}
+	player := s.entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	weapon, ok := s.equippedWeaponDef()
+	if !ok || weapon.AttackMode != attackModeRanged || weapon.ProjectileSpeed == nil {
+		res.reject(in.MessageID, "invalid_target")
+		return
+	}
+	dir := normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
+	if dir.X == 0 && dir.Y == 0 {
+		dir = Vec2{X: 1}
+	}
+	maxDistance := s.playerActionReach()
+	projectile := &entity{
+		kind:            projectileEntity,
+		pos:             player.pos,
+		ownerID:         player.id,
+		targetID:        target.id,
+		projectileDefID: trainingArrowProjectileDefID,
+		dir:             dir,
+		speed:           *weapon.ProjectileSpeed,
+		maxDistance:     maxDistance,
+		damageRange:     *weapon.Damage,
+		sourceMsgID:     in.MessageID,
+		sourceCorrID:    in.CorrelationID,
+		spawnTick:       s.tick,
+	}
+	projectile.id = s.alloc()
+	s.entities[projectile.id] = projectile
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(projectile.view())})
+	if ack {
+		res.ack(in.MessageID)
+	}
 }
 
 func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
@@ -590,7 +654,7 @@ func (s *Sim) finishAutoNav(res *TickResult) {
 		Action:        nav.pendingAction,
 	}
 	target := s.findEntity(nav.pendingAction.TargetID)
-	if target == nil || !s.actionable(target) || !s.inMeleeRange(target) {
+	if target == nil || !s.actionable(target) || !s.inDispatchRange(target) {
 		return
 	}
 	s.dispatchAction(target, in, res, false)
@@ -648,7 +712,48 @@ func (s *Sim) buildBlockedFn() func(gx, gy int) bool {
 	}
 }
 
+func (s *Sim) findApproachGoal(target *entity) (Vec2, []Vec2, bool) {
+	if target.kind == monsterEntity && s.playerAttackMode() == attackModeRanged {
+		return s.findRangedApproachGoal(target)
+	}
+	return s.findMeleeApproachGoal(target)
+}
+
+func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
+	player := s.entities[s.playerID]
+	if player == nil {
+		return Vec2{}, nil, false
+	}
+	nav := s.rules.Navigation
+	playerCell := worldToGrid(nav, player.pos)
+	blocked := s.buildBlockedFn()
+	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
+	for radius := 0; radius <= maxRadius; radius++ {
+		candidates := ringCells(playerCell, radius)
+		for _, cell := range candidates {
+			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
+				continue
+			}
+			goal := gridToWorld(nav, cell)
+			if !s.inActionRangeFrom(goal, target) || !s.hasClearRangedShot(goal, target) {
+				continue
+			}
+			steps, ok := PlanPath(nav, player.pos, goal, blocked)
+			if ok {
+				return goal, steps, true
+			}
+		}
+	}
+	return Vec2{}, nil, false
+}
+
 func (s *Sim) findMeleeApproachGoal(target *entity) (Vec2, []Vec2, bool) {
+	return s.findApproachGoalMatching(target, func(pos Vec2, target *entity) bool {
+		return meleeInRange(distance(pos, target.pos), s.playerReach(), s.targetInteractionRadius(target))
+	})
+}
+
+func (s *Sim) findApproachGoalMatching(target *entity, inRange func(Vec2, *entity) bool) (Vec2, []Vec2, bool) {
 	player := s.entities[s.playerID]
 	if player == nil {
 		return Vec2{}, nil, false
@@ -664,7 +769,7 @@ func (s *Sim) findMeleeApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 				continue
 			}
 			goal := gridToWorld(nav, cell)
-			if !meleeInRange(distance(goal, target.pos), s.playerReach(), s.targetInteractionRadius(target)) {
+			if !inRange(goal, target) {
 				continue
 			}
 			steps, ok := PlanPath(nav, player.pos, goal, blocked)
@@ -719,6 +824,212 @@ func circleIntersectsAABB(center Vec2, radius float64, rectCenter Vec2, rectSize
 	return dx*dx+dy*dy < radius*radius-1e-9
 }
 
+func (s *Sim) advanceProjectiles(res *TickResult) {
+	ids := sortedEntityIDs(s.entities)
+	for _, id := range ids {
+		p := s.entities[id]
+		if p == nil || p.kind != projectileEntity {
+			continue
+		}
+		s.advanceProjectile(p, res)
+	}
+}
+
+func (s *Sim) advanceProjectile(p *entity, res *TickResult) {
+	if p.spawnTick == s.tick {
+		return
+	}
+	delta := p.speed * tickDuration
+	if delta <= 0 {
+		return
+	}
+	candidate := Vec2{X: p.pos.X + p.dir.X*delta, Y: p.pos.Y + p.dir.Y*delta}
+	segmentLength := distance(p.pos, candidate)
+	hit, ok := s.firstProjectileHit(p, candidate)
+	if ok {
+		p.pos = hit.pos
+		s.resolveProjectileHit(p, hit, res)
+		delete(s.entities, p.id)
+		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(p.id)})
+		return
+	}
+	if p.traveled+segmentLength >= p.maxDistance-meleeRangeEpsilon {
+		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
+		delete(s.entities, p.id)
+		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(p.id)})
+		return
+	}
+	p.pos = candidate
+	p.traveled += segmentLength
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(p.view())})
+}
+
+type projectileHit struct {
+	t        float64
+	category int
+	entityID uint64
+	pos      Vec2
+}
+
+const (
+	projectileHitWall = iota
+	projectileHitInteractable
+	projectileHitMonster
+)
+
+func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool) {
+	best := projectileHit{t: math.Inf(1)}
+	found := false
+	consider := func(hit projectileHit) {
+		hit.pos = Vec2{
+			X: p.pos.X + (candidate.X-p.pos.X)*hit.t,
+			Y: p.pos.Y + (candidate.Y-p.pos.Y)*hit.t,
+		}
+		if !found || projectileHitLess(hit, best) {
+			best = hit
+			found = true
+		}
+	}
+	for _, wall := range s.walls {
+		if t, ok := segmentIntersectsInflatedAABB(p.pos, candidate, wall.pos, wall.size, projectileRadius); ok {
+			consider(projectileHit{t: t, category: projectileHitWall})
+		}
+	}
+	for _, id := range sortedEntityIDs(s.entities) {
+		e := s.entities[id]
+		if e == nil || e.id == p.id {
+			continue
+		}
+		switch e.kind {
+		case interactableEntity:
+			if e.state != interactableClosed {
+				continue
+			}
+			def, ok := s.rules.Interactables[e.interactableDefID]
+			if !ok {
+				continue
+			}
+			if t, ok := segmentIntersectsInflatedAABB(p.pos, candidate, e.pos, def.BarrierWhenClosed.Size, projectileRadius); ok {
+				consider(projectileHit{t: t, category: projectileHitInteractable, entityID: e.id})
+			}
+		case monsterEntity:
+			if e.hp <= 0 {
+				continue
+			}
+			if t, ok := segmentIntersectsCircle(p.pos, candidate, e.pos, monsterRadius+projectileRadius); ok {
+				consider(projectileHit{t: t, category: projectileHitMonster, entityID: e.id})
+			}
+		}
+	}
+	return best, found
+}
+
+func projectileHitLess(a, b projectileHit) bool {
+	if math.Abs(a.t-b.t) > 1e-9 {
+		return a.t < b.t
+	}
+	if a.category != b.category {
+		return a.category < b.category
+	}
+	return a.entityID < b.entityID
+}
+
+func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult) {
+	if hit.category != projectileHitMonster {
+		res.Events = append(res.Events, Event{EventType: "projectile_blocked", CorrelationID: p.sourceCorrID})
+		return
+	}
+	target := s.entities[hit.entityID]
+	if target == nil || target.kind != monsterEntity || target.hp <= 0 {
+		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
+		return
+	}
+	hitDraw := s.rng.Next()
+	hitOK := s.rules.Combat.BaseHitChance >= 1.0 ||
+		float64(hitDraw%10000)/10000.0 < s.rules.Combat.BaseHitChance
+	if !hitOK {
+		res.Events = append(res.Events, Event{EventType: "attack_missed", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID})
+		return
+	}
+	dmg := s.rollRange(p.damageRange)
+	target.hp -= dmg
+	if target.hp < 0 {
+		target.hp = 0
+	}
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
+	res.Events = append(res.Events, Event{EventType: "monster_damaged", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID, Damage: intPtr(dmg)})
+
+	if target.hp == 0 {
+		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID})
+		s.dropLoot(target, p.sourceCorrID, res)
+	}
+	s.retaliate(target, p.sourceCorrID, res)
+}
+
+func segmentIntersectsInflatedAABB(start, end, rectCenter, rectSize Vec2, inflate float64) (float64, bool) {
+	halfX := rectSize.X/2 + inflate
+	halfY := rectSize.Y/2 + inflate
+	minX, maxX := rectCenter.X-halfX, rectCenter.X+halfX
+	minY, maxY := rectCenter.Y-halfY, rectCenter.Y+halfY
+	dx := end.X - start.X
+	dy := end.Y - start.Y
+	tmin, tmax := 0.0, 1.0
+	if !clipSegmentAxis(start.X, dx, minX, maxX, &tmin, &tmax) {
+		return 0, false
+	}
+	if !clipSegmentAxis(start.Y, dy, minY, maxY, &tmin, &tmax) {
+		return 0, false
+	}
+	return tmin, true
+}
+
+func clipSegmentAxis(start, delta, minV, maxV float64, tmin, tmax *float64) bool {
+	if math.Abs(delta) < 1e-12 {
+		return start >= minV && start <= maxV
+	}
+	inv := 1 / delta
+	t1 := (minV - start) * inv
+	t2 := (maxV - start) * inv
+	if t1 > t2 {
+		t1, t2 = t2, t1
+	}
+	if t1 > *tmin {
+		*tmin = t1
+	}
+	if t2 < *tmax {
+		*tmax = t2
+	}
+	return *tmin <= *tmax && *tmax >= 0 && *tmin <= 1
+}
+
+func segmentIntersectsCircle(start, end, center Vec2, radius float64) (float64, bool) {
+	d := Vec2{X: end.X - start.X, Y: end.Y - start.Y}
+	f := Vec2{X: start.X - center.X, Y: start.Y - center.Y}
+	a := d.X*d.X + d.Y*d.Y
+	if a == 0 {
+		if distance(start, center) <= radius {
+			return 0, true
+		}
+		return 0, false
+	}
+	b := 2 * (f.X*d.X + f.Y*d.Y)
+	c := f.X*f.X + f.Y*f.Y - radius*radius
+	discriminant := b*b - 4*a*c
+	if discriminant < 0 {
+		return 0, false
+	}
+	root := math.Sqrt(discriminant)
+	t1 := (-b - root) / (2 * a)
+	t2 := (-b + root) / (2 * a)
+	if t1 >= 0 && t1 <= 1 {
+		return t1, true
+	}
+	if t2 >= 0 && t2 <= 1 {
+		return t2, true
+	}
+	return 0, false
+}
+
 func (s *Sim) rollDamage() int {
 	return s.rollRange(s.resolvePlayerAttackDamage())
 }
@@ -740,6 +1051,31 @@ func (s *Sim) playerReach() float64 {
 	return *def.Reach
 }
 
+func (s *Sim) playerActionReach() float64 {
+	return s.playerReach()
+}
+
+func (s *Sim) playerAttackMode() string {
+	def, ok := s.equippedWeaponDef()
+	if !ok || def.AttackMode == "" {
+		return attackModeMelee
+	}
+	return def.AttackMode
+}
+
+func (s *Sim) equippedWeaponDef() (ItemDef, bool) {
+	instanceID := s.equipped[weaponSlot]
+	if instanceID == 0 {
+		return ItemDef{}, false
+	}
+	item := s.findItemByID(instanceID)
+	if item == nil {
+		return ItemDef{}, false
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	return def, ok
+}
+
 func (s *Sim) targetInteractionRadius(e *entity) float64 {
 	switch e.kind {
 	case monsterEntity:
@@ -759,6 +1095,64 @@ func (s *Sim) inMeleeRange(target *entity) bool {
 		return false
 	}
 	return meleeInRange(distance(player.pos, target.pos), s.playerReach(), s.targetInteractionRadius(target))
+}
+
+func (s *Sim) inActionRange(target *entity) bool {
+	player := s.entities[s.playerID]
+	if player == nil {
+		return false
+	}
+	return s.inActionRangeFrom(player.pos, target)
+}
+
+func (s *Sim) inActionRangeFrom(pos Vec2, target *entity) bool {
+	return meleeInRange(distance(pos, target.pos), s.playerActionReach(), s.targetInteractionRadius(target))
+}
+
+func (s *Sim) inDispatchRange(target *entity) bool {
+	if target.kind == monsterEntity && s.playerAttackMode() == attackModeRanged {
+		player := s.entities[s.playerID]
+		return player != nil && s.inActionRange(target) && s.hasClearRangedShot(player.pos, target)
+	}
+	return s.inMeleeRange(target)
+}
+
+func (s *Sim) hasClearRangedShot(from Vec2, target *entity) bool {
+	if target == nil || target.kind != monsterEntity || target.hp <= 0 {
+		return false
+	}
+	for _, wall := range s.walls {
+		if _, ok := segmentIntersectsInflatedAABB(from, target.pos, wall.pos, wall.size, projectileRadius); ok {
+			return false
+		}
+	}
+	for _, id := range sortedEntityIDs(s.entities) {
+		e := s.entities[id]
+		if e == nil || e.id == target.id {
+			continue
+		}
+		switch e.kind {
+		case interactableEntity:
+			if e.state != interactableClosed {
+				continue
+			}
+			def, ok := s.rules.Interactables[e.interactableDefID]
+			if !ok {
+				continue
+			}
+			if _, ok := segmentIntersectsInflatedAABB(from, target.pos, e.pos, def.BarrierWhenClosed.Size, projectileRadius); ok {
+				return false
+			}
+		case monsterEntity:
+			if e.hp <= 0 {
+				continue
+			}
+			if _, ok := segmentIntersectsCircle(from, target.pos, e.pos, monsterRadius+projectileRadius); ok {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func meleeInRange(dist, reach, targetRadius float64) bool {
@@ -797,6 +1191,15 @@ func (s *Sim) resolvePlayerAttackDamage() DamageRange {
 		return base
 	}
 	return *def.Damage
+}
+
+func (s *Sim) playerProjectileInFlight() bool {
+	for _, e := range s.entities {
+		if e.kind == projectileEntity && e.ownerID == s.playerID {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Sim) rollRange(d DamageRange) int {
@@ -896,6 +1299,10 @@ func (e *entity) view() EntityView {
 	case interactableEntity:
 		ev.InteractableDefID = e.interactableDefID
 		ev.State = e.state
+	case projectileEntity:
+		ev.OwnerID = idStr(e.ownerID)
+		ev.TargetID = idStr(e.targetID)
+		ev.ProjectileDefID = e.projectileDefID
 	}
 	return ev
 }

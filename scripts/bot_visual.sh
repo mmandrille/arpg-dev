@@ -18,6 +18,7 @@ EMAIL="${ARPG_EMAIL:-bot@example.test}"
 AUTOPLAY_STEP_DELAY="${AUTOPLAY_STEP_DELAY:-0.45}"
 EXIT_ON_COMPLETE="${ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE:-1}"
 MANIFEST="${ARPG_VISUAL_REPLAY_MANIFEST:-$ROOT/.artifacts/bot-runs/$(date -u +%Y%m%dT%H%M%SZ)-visual.json}"
+SCENARIO="${ARPG_BOT_SCENARIO:-${SCENARIO:-${scenario:-all}}}"
 
 if ! command -v "$GODOT" >/dev/null 2>&1; then
   echo "[bot-visual] Godot runtime '$GODOT' not found on PATH."
@@ -53,10 +54,10 @@ for i in $(seq 1 60); do
 done
 curl -fsS "$BASE_URL/readyz" >/dev/null
 
-echo "[bot-visual] recording bot scenarios (manifest: $MANIFEST)..."
+echo "[bot-visual] recording bot scenario selection '$SCENARIO' (manifest: $MANIFEST)..."
 "$ROOT/.venv/bin/python" -m tools.bot.run \
   --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
-  --email "$EMAIL" --scenario all --write-manifest "$MANIFEST"
+  --email "$EMAIL" --scenario "$SCENARIO" --write-manifest "$MANIFEST"
 
 "$GODOT" --headless --path "$ROOT/client" --import >/dev/null 2>&1 || true
 

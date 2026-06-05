@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/ranged_projectile.v0.schema.json",
+  "title": "Ranged projectile golden cases (v0)",
+  "type": "object",
+  "required": ["version", "constants", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "constants": {
+      "type": "object",
+      "required": ["projectile_radius", "tick_duration", "monster_radius"],
+      "additionalProperties": false,
+      "properties": {
+        "projectile_radius": { "type": "number", "exclusiveMinimum": 0 },
+        "tick_duration": { "type": "number", "exclusiveMinimum": 0 },
+        "monster_radius": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "world_id", "seed", "player_position", "equipped_weapon", "target_monster_def_id"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "world_id": { "type": "string" },
+          "seed": { "type": "string", "pattern": "^[0-9a-f]+$" },
+          "base_hit_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+          "player_position": { "$ref": "#/$defs/vec2" },
+          "equipped_weapon": { "type": "string" },
+          "target_monster_def_id": { "type": "string" },
+          "fire_tick": { "type": "integer", "minimum": 0 },
+          "expected_impact_tick": { "type": "integer", "minimum": 0 },
+          "expected_hit": { "type": "boolean" },
+          "expected_damage_min": { "type": "integer", "minimum": 0 },
+          "expected_damage_max": { "type": "integer", "minimum": 0 },
+          "expected_monster_dead": { "type": "boolean" },
+          "expected_event": { "type": "string" },
+          "expected_monster_hp_unchanged": { "type": "boolean" },
+          "expected_player_hp": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

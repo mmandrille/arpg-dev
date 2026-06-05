@@ -18,8 +18,10 @@
           "name": { "type": "string" },
           "slot": { "type": "string", "enum": ["weapon"] },
           "equippable": { "type": "boolean" },
+          "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
           "damage": { "$ref": "#/$defs/damage_range" },
-          "reach": { "type": "number", "exclusiveMinimum": 0 }
+          "reach": { "type": "number", "exclusiveMinimum": 0 },
+          "projectile_speed": { "type": "number", "exclusiveMinimum": 0 }
         },
         "allOf": [
           {
@@ -63,6 +65,31 @@
               },
               "required": ["equippable", "slot"]
             }
+          },
+          {
+            "if": {
+              "properties": { "attack_mode": { "const": "ranged" } },
+              "required": ["attack_mode"]
+            },
+            "then": {
+              "properties": {
+                "equippable": { "const": true },
+                "slot": { "const": "weapon" }
+              },
+              "required": ["equippable", "slot", "damage", "reach", "projectile_speed"]
+            }
+          },
+          {
+            "if": {
+              "anyOf": [
+                { "not": { "required": ["attack_mode"] } },
+                {
+                  "properties": { "attack_mode": { "const": "melee" } },
+                  "required": ["attack_mode"]
+                }
+              ]
+            },
+            "then": { "not": { "required": ["projectile_speed"] } }
           }
         ]
       }

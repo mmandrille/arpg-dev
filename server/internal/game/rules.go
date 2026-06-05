@@ -51,11 +51,13 @@ type GridBounds struct {
 
 // ItemDef is a single item definition.
 type ItemDef struct {
-	Name       string       `json:"name"`
-	Slot       string       `json:"slot"`
-	Equippable bool         `json:"equippable"`
-	Damage     *DamageRange `json:"damage,omitempty"`
-	Reach      *float64     `json:"reach,omitempty"`
+	Name            string       `json:"name"`
+	Slot            string       `json:"slot"`
+	Equippable      bool         `json:"equippable"`
+	AttackMode      string       `json:"attack_mode,omitempty"`
+	Damage          *DamageRange `json:"damage,omitempty"`
+	Reach           *float64     `json:"reach,omitempty"`
+	ProjectileSpeed *float64     `json:"projectile_speed,omitempty"`
 }
 
 // InteractableDef is a single activatable world object definition.
@@ -191,6 +193,25 @@ func LoadRules(dir string) (*Rules, error) {
 			if *def.Reach <= 0 {
 				return nil, fmt.Errorf("game: invalid rules items.%s.reach: must be positive", id)
 			}
+		}
+		mode := def.AttackMode
+		if mode == "" {
+			mode = attackModeMelee
+		}
+		switch mode {
+		case attackModeMelee:
+			if def.ProjectileSpeed != nil {
+				return nil, fmt.Errorf("game: invalid rules items.%s.projectile_speed: only valid on ranged weapons", id)
+			}
+		case attackModeRanged:
+			if !def.Equippable || def.Slot != weaponSlot || def.Damage == nil || def.Reach == nil || def.ProjectileSpeed == nil {
+				return nil, fmt.Errorf("game: invalid rules items.%s: ranged weapons require slot, damage, reach, and projectile_speed", id)
+			}
+			if *def.ProjectileSpeed <= 0 {
+				return nil, fmt.Errorf("game: invalid rules items.%s.projectile_speed: must be positive", id)
+			}
+		default:
+			return nil, fmt.Errorf("game: invalid rules items.%s.attack_mode: %s", id, def.AttackMode)
 		}
 	}
 	r.Items = items.Items

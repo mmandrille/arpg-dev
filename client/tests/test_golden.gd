@@ -102,7 +102,35 @@ func _initialize() -> void:
 				_fail("auto_path case %s end is not in monster melee reach" % str(c["name"]))
 				return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path)")
+	# 7. Ranged projectile golden references shared item/world/monster rules.
+	var ranged_projectile := _read(shared.path_join("golden/ranged_projectile.json"))
+	if float(ranged_projectile["constants"]["projectile_radius"]) != 0.10:
+		_fail("ranged projectile radius constant mismatch")
+		return
+	if float(ranged_projectile["constants"]["tick_duration"]) != 0.05:
+		_fail("ranged projectile tick duration mismatch")
+		return
+	if float(ranged_projectile["constants"]["monster_radius"]) != 0.45:
+		_fail("ranged projectile monster radius mismatch")
+		return
+	for c in ranged_projectile["cases"]:
+		var world_id := str(c["world_id"])
+		var weapon_id := str(c["equipped_weapon"])
+		var monster_id := str(c["target_monster_def_id"])
+		if not worlds["worlds"].has(world_id):
+			_fail("ranged projectile references unknown world_id %s" % world_id)
+			return
+		if not items["items"].has(weapon_id):
+			_fail("ranged projectile references unknown weapon %s" % weapon_id)
+			return
+		if str(items["items"][weapon_id].get("attack_mode", "melee")) != "ranged":
+			_fail("ranged projectile weapon %s is not ranged" % weapon_id)
+			return
+		if not monsters["monsters"].has(monster_id):
+			_fail("ranged projectile references unknown monster %s" % monster_id)
+			return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile)")
 	quit(0)
 
 

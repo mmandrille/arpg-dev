@@ -40,9 +40,17 @@ make validate-shared # validate all shared JSON against schemas
 make validate-assets # validate the asset manifest + runtime .glb files
 make gen-assets      # regenerate the committed runtime .glb files (deterministic)
 make bot             # run the Python protocol bot end-to-end (server must be up)
+make bot-visual      # open Godot and visibly autoplay the bot slice
 make replay SESSION_ID=<id>   # re-simulate and verify a recorded session
 make client-smoke    # Godot headless smoke (skips if Godot not installed)
 make ci              # full local CI suite
+```
+
+To watch the scripted slice in the real client, run:
+
+```bash
+make bot-visual
+AUTOPLAY_STEP_DELAY=0.8 make bot-visual  # slower, easier to inspect
 ```
 
 Typical first run:

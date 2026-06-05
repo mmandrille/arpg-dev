@@ -14,7 +14,7 @@ Last updated: 2026-06-05
 | **Latest completed slice** | v9 — `solid-collision-and-obstacles` (authoritative monster/wall collision) |
 | **Active branch** | `feature/solid-collision-and-obstacles` |
 | **CI gate** | `make ci` green on 2026-06-05 |
-| **Next slice** | TBD |
+| **Next slice** | v10 — `click-action-and-melee-range` (spec + plan drafted) |
 
 ### Slice numbering note
 
@@ -25,7 +25,7 @@ ADR-0001 sometimes calls the first slice **v1**; repo lifecycle labels use **v0�
 v1_* = first-playable    v5_* = resume-state    v8_* = equipped-weapon-damage
 v2_* = equip-and-see-it  v6_* = visual-bot
 v3_* = animate-and-react v7_* = gear-before-combat v9_* = solid-collision
-v4_* = take-a-hit
+v4_* = take-a-hit        v10_* = click-action-and-melee-range
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

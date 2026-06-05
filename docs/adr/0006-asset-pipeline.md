@@ -120,6 +120,15 @@ single transform; nothing else hardcodes it.
 - **Contract verified end-to-end** by the Python validators and the Godot headless smoke; no server
   or protocol change was required (resume reuses the existing `resume_session_id` rehydration).
 
+## As-built update (slice v3, 2026-06-05)
+
+The predicted upgrade from a placeholder `Node3D` mount socket to a
+`BoneAttachment3D` is now executed. `right_hand_socket` keeps its name but is
+attached (in `character_visual.gd`) to the rig bone `hand_r`, so the equipped
+weapon rides the arm during the skeletal `attack` clip. The asset validator was
+upgraded from a node-name check to a **skin-joint** check: a required mount bone
+must be an actual glTF skin joint, proving the GLB is genuinely rigged.
+
 ## Status of D7 (ADR-0001)
 
 This ADR ratifies ADR-0001 D7 (glTF-first) for runtime assets. Animation rigging, a Blender export

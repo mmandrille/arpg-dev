@@ -18,6 +18,7 @@ REAL_SCHEMA = REPO_ROOT / "assets/manifests/assets.v0.schema.json"
 
 CHAR_GLB = "client/assets/characters/base_humanoid/base_humanoid.glb"
 SWORD_GLB = "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb"
+MONSTER_GLB = "client/assets/monsters/dummy/monster_dummy.glb"
 
 
 def make_glb(node_names: list[str]) -> bytes:
@@ -27,6 +28,71 @@ def make_glb(node_names: list[str]) -> bytes:
     chunk = struct.pack("<II", len(payload), 0x4E4F534A) + payload  # 'JSON'
     total = 12 + len(chunk)
     return b"glTF" + struct.pack("<II", 2, total) + chunk
+
+
+def make_skinned_glb(joint_names: list[str]) -> bytes:
+    """Emit a minimal valid skinned glTF whose `skins[0].joints` are joint_names.
+
+    Enough of a skin (non-empty `skins`, JOINTS_0/WEIGHTS_0 attributes, inverse
+    bind matrices) that ``parse_glb_skin_joint_names`` returns exactly the given
+    names — no Godot import needed for headless tests.
+    """
+    n = len(joint_names)
+    # Joint nodes (indices 0..n-1) + one mesh node referencing the skin.
+    nodes = [{"name": name, "translation": [0.0, 0.0, 0.0]} for name in joint_names]
+    nodes.append({"name": "Mesh", "mesh": 0, "skin": 0})
+
+    bin_buf = bytearray()
+    # POSITION: one vertex.
+    pos_off = len(bin_buf)
+    bin_buf += struct.pack("<fff", 0.0, 0.0, 0.0)
+    # JOINTS_0 (VEC4 u16): weighted to joint 0.
+    j_off = len(bin_buf)
+    bin_buf += struct.pack("<HHHH", 0, 0, 0, 0)
+    # WEIGHTS_0 (VEC4 f32).
+    w_off = len(bin_buf)
+    bin_buf += struct.pack("<ffff", 1.0, 0.0, 0.0, 0.0)
+    # Inverse bind matrices: identity per joint.
+    ibm_off = len(bin_buf)
+    identity = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    for _ in range(n):
+        bin_buf += struct.pack("<16f", *identity)
+    while len(bin_buf) % 4 != 0:
+        bin_buf.append(0)
+
+    gltf = {
+        "asset": {"version": "2.0"},
+        "scene": 0,
+        "scenes": [{"nodes": [0, n]}],
+        "nodes": nodes,
+        "meshes": [{
+            "primitives": [{
+                "attributes": {"POSITION": 0, "JOINTS_0": 1, "WEIGHTS_0": 2},
+                "mode": 4,
+            }],
+        }],
+        "skins": [{"joints": list(range(n)), "inverseBindMatrices": 3}],
+        "accessors": [
+            {"bufferView": 0, "componentType": 5126, "count": 1, "type": "VEC3"},
+            {"bufferView": 1, "componentType": 5123, "count": 1, "type": "VEC4"},
+            {"bufferView": 2, "componentType": 5126, "count": 1, "type": "VEC4"},
+            {"bufferView": 3, "componentType": 5126, "count": n, "type": "MAT4"},
+        ],
+        "bufferViews": [
+            {"buffer": 0, "byteOffset": pos_off, "byteLength": j_off - pos_off},
+            {"buffer": 0, "byteOffset": j_off, "byteLength": w_off - j_off},
+            {"buffer": 0, "byteOffset": w_off, "byteLength": ibm_off - w_off},
+            {"buffer": 0, "byteOffset": ibm_off, "byteLength": n * 64},
+        ],
+        "buffers": [{"byteLength": len(bin_buf)}],
+    }
+    json_bytes = bytearray(json.dumps(gltf).encode("utf-8"))
+    while len(json_bytes) % 4 != 0:
+        json_bytes.append(0x20)
+    json_chunk = struct.pack("<II", len(json_bytes), 0x4E4F534A) + bytes(json_bytes)
+    bin_chunk = struct.pack("<II", len(bin_buf), 0x004E4942) + bytes(bin_buf)
+    total = 12 + len(json_chunk) + len(bin_chunk)
+    return b"glTF" + struct.pack("<II", 2, total) + json_chunk + bin_chunk
 
 
 def write(path: Path, data) -> None:
@@ -45,7 +111,7 @@ def default_manifest() -> dict:
                 "type": "character",
                 "runtime_path": CHAR_GLB,
                 "format": "glb",
-                "required_nodes": ["right_hand_socket"],
+                "required_nodes": ["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"],
             },
             "weapon_rusty_sword_v0": {
                 "type": "equipment",
@@ -89,7 +155,10 @@ def build_root(
     shutil.copy(REAL_SCHEMA, root / "assets/manifests/assets.v0.schema.json")
     write(root / "assets/manifests/assets.v0.json", manifest or default_manifest())
     write(root / "shared/assets/item_visuals.v0.json", visuals or default_visuals())
-    write(root / CHAR_GLB, make_glb(char_nodes if char_nodes is not None else ["right_hand_socket"]))
+    char_joints = char_nodes if char_nodes is not None else [
+        "root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"
+    ]
+    write(root / CHAR_GLB, make_skinned_glb(char_joints))
     if write_sword:
         write(root / SWORD_GLB, make_glb([]))
     return root
@@ -120,10 +189,15 @@ def test_unknown_asset_id(tmp_path):
 
 def test_socket_coverage_failure(tmp_path):
     manifest = default_manifest()
-    manifest["assets"]["character_base_humanoid_v0"]["required_nodes"] = []
-    # GLB still has the socket node, but the manifest no longer declares it.
-    report = run(build_root(tmp_path, manifest=manifest))
-    assert any("required_nodes" in f for f in report.failures)
+    # Drop the weapon mount bone: the mount-bone coverage check must fail.
+    manifest["assets"]["character_base_humanoid_v0"]["required_nodes"] = [
+        "root", "spine", "arm_r", "leg_l", "leg_r"
+    ]
+    report = run(build_root(
+        tmp_path, manifest=manifest,
+        char_nodes=["root", "spine", "arm_r", "leg_l", "leg_r"],
+    ))
+    assert any("mount bone" in f for f in report.failures)
 
 
 def test_sha256_mismatch(tmp_path):
@@ -149,10 +223,14 @@ def test_sha256_match(tmp_path):
     assert report.failures == []
 
 
-def test_glb_missing_required_node(tmp_path):
-    # Manifest declares the socket, but the GLB body lacks that node.
-    report = run(build_root(tmp_path, char_nodes=["some_other_node"]))
-    assert any("glb node" in f for f in report.failures)
+def test_glb_required_node_not_a_skin_joint(tmp_path):
+    # Manifest declares the rig joints, but the GLB skin omits one of them
+    # (here `spine`) -> [6] must hard-fail because it is not an actual joint.
+    report = run(build_root(
+        tmp_path,
+        char_nodes=["root", "arm_r", "hand_r", "leg_l", "leg_r"],
+    ))
+    assert any("glb joint" in f or "not skin joints" in f for f in report.failures)
 
 
 def test_asset_id_wrong_type(tmp_path):
@@ -168,3 +246,25 @@ def test_schema_invalid_manifest(tmp_path):
     manifest["version"] = 99  # violates const 0
     report = run(build_root(tmp_path, manifest=manifest))
     assert any("manifest schema" in f for f in report.failures)
+
+
+def test_monster_entry_passes(tmp_path):
+    manifest = default_manifest()
+    manifest["assets"]["monster_dummy_v0"] = {
+        "type": "monster",
+        "runtime_path": MONSTER_GLB,
+        "format": "glb",
+        "required_nodes": ["root", "pivot"],
+    }
+    root = build_root(tmp_path, manifest=manifest)
+    write(root / MONSTER_GLB, make_skinned_glb(["root", "pivot"]))
+    report = run(root)
+    assert report.failures == []
+
+
+def test_required_node_not_a_skin_joint_fails(tmp_path):
+    manifest = default_manifest()
+    manifest["assets"]["character_base_humanoid_v0"]["required_nodes"] = ["not_a_joint"]
+    root = build_root(tmp_path, manifest=manifest, char_nodes=["root", "hand_r"])
+    report = run(root)
+    assert any("not skin joints" in f or "not_a_joint" in f for f in report.failures)

@@ -49,8 +49,12 @@ func TestLoadRules(t *testing.T) {
 	if r.Combat.PlayerDamage.Min != 2 || r.Combat.PlayerDamage.Max != 4 {
 		t.Fatalf("combat player_damage = %+v, want {2,4}", r.Combat.PlayerDamage)
 	}
-	if r.Monsters[monsterDefID].MaxHP != 3 {
-		t.Fatalf("training_dummy max_hp = %d, want 3", r.Monsters[monsterDefID].MaxHP)
+	dummy := r.Monsters[monsterDefID]
+	if dummy.MaxHP != 3 {
+		t.Fatalf("training_dummy max_hp = %d, want 3", dummy.MaxHP)
+	}
+	if dummy.RetaliationDamage == nil || dummy.RetaliationDamage.Min != 1 || dummy.RetaliationDamage.Max != 1 {
+		t.Fatalf("training_dummy retaliation_damage = %+v, want {1,1}", dummy.RetaliationDamage)
 	}
 	if !r.Items["rusty_sword"].Equippable || r.Items["rusty_sword"].Slot != "weapon" {
 		t.Fatalf("rusty_sword def = %+v", r.Items["rusty_sword"])
@@ -82,11 +86,38 @@ func TestDamageFormulaGolden(t *testing.T) {
 	}
 }
 
+func TestRetaliationDamageGolden(t *testing.T) {
+	r := loadRules(t)
+	var golden struct {
+		RetaliationDamage DamageRange `json:"retaliation_damage"`
+		Cases             []struct {
+			Draw           int `json:"draw"`
+			ExpectedDamage int `json:"expected_damage"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "retaliation_damage.json", &golden)
+
+	dummy := r.Monsters[monsterDefID]
+	if dummy.RetaliationDamage == nil {
+		t.Fatal("training_dummy missing retaliation_damage")
+	}
+	if golden.RetaliationDamage != *dummy.RetaliationDamage {
+		t.Fatalf("golden retaliation_damage %+v != rules %+v", golden.RetaliationDamage, *dummy.RetaliationDamage)
+	}
+	span := dummy.RetaliationDamage.Max - dummy.RetaliationDamage.Min + 1
+	for _, c := range golden.Cases {
+		got := dummy.RetaliationDamage.Min + (c.Draw % span)
+		if got != c.ExpectedDamage {
+			t.Fatalf("draw %d: retaliation damage = %d, want %d", c.Draw, got, c.ExpectedDamage)
+		}
+	}
+}
+
 func TestLootRollGolden(t *testing.T) {
 	r := loadRules(t)
 	var golden struct {
-		LootTable          string `json:"loot_table"`
-		ExpectedItemDefID  string `json:"expected_item_def_id"`
+		LootTable         string `json:"loot_table"`
+		ExpectedItemDefID string `json:"expected_item_def_id"`
 	}
 	loadGolden(t, "loot_roll.json", &golden)
 
@@ -148,11 +179,12 @@ func runSlice(t *testing.T, seed string) *Sim {
 
 func TestScriptedSliceMatchesGolden(t *testing.T) {
 	var golden struct {
-		MonsterDefID    string `json:"monster_def_id"`
+		PinnedSeed       string `json:"pinned_seed"`
+		MonsterDefID     string `json:"monster_def_id"`
 		DroppedItemDefID string `json:"dropped_item_def_id"`
-		FinalPlayerHP   int    `json:"final_player_hp"`
-		FinalMonsterHP  int    `json:"final_monster_hp"`
-		FinalInventory  []struct {
+		FinalPlayerHP    int    `json:"final_player_hp"`
+		FinalMonsterHP   int    `json:"final_monster_hp"`
+		FinalInventory   []struct {
 			ItemDefID string `json:"item_def_id"`
 			Slot      string `json:"slot"`
 			Equipped  bool   `json:"equipped"`
@@ -163,7 +195,7 @@ func TestScriptedSliceMatchesGolden(t *testing.T) {
 	}
 	loadGolden(t, "slice_outcome.json", &golden)
 
-	sim := runSlice(t, "deadbeefdeadbeef")
+	sim := runSlice(t, golden.PinnedSeed)
 	snap := sim.Snapshot()
 
 	var player, monster *EntityView
@@ -196,6 +228,111 @@ func TestScriptedSliceMatchesGolden(t *testing.T) {
 	}
 	if got.ItemInstanceID != *wp || got.ItemDefID != golden.FinalEquipped.Weapon {
 		t.Fatalf("equipped weapon = %v (%s), want def %s", *wp, got.ItemDefID, golden.FinalEquipped.Weapon)
+	}
+}
+
+func TestSuccessfulHitRetaliatesAndPreservesKillOrder(t *testing.T) {
+	sim := NewSim("sess_retaliate", "deadbeefdeadbeef", loadRules(t))
+	r := sim.Tick([]Input{{
+		MessageID:     "a1",
+		CorrelationID: "corr_hit",
+		Type:          "attack_intent",
+		Attack:        &AttackIntent{TargetID: "1002"},
+	}})
+
+	assertAck(t, r, "a1")
+	if len(r.Changes) != 3 {
+		t.Fatalf("changes len = %d, want 3: %+v", len(r.Changes), r.Changes)
+	}
+	if r.Changes[0].Op != OpEntityUpdate || r.Changes[0].Entity == nil || r.Changes[0].Entity.Type != monsterEntity {
+		t.Fatalf("first change = %+v, want monster entity_update", r.Changes[0])
+	}
+	if r.Changes[1].Op != OpEntitySpawn || r.Changes[1].Entity == nil || r.Changes[1].Entity.Type != lootEntity {
+		t.Fatalf("second change = %+v, want loot entity_spawn", r.Changes[1])
+	}
+	if r.Changes[2].Op != OpEntityUpdate || r.Changes[2].Entity == nil || r.Changes[2].Entity.Type != playerEntity {
+		t.Fatalf("third change = %+v, want player entity_update", r.Changes[2])
+	}
+	if r.Changes[2].Entity.HP == nil || *r.Changes[2].Entity.HP != 9 {
+		t.Fatalf("player hp update = %+v, want hp 9", r.Changes[2].Entity)
+	}
+
+	wantEvents := []string{"monster_damaged", "monster_killed", "loot_dropped", "player_damaged"}
+	if len(r.Events) != len(wantEvents) {
+		t.Fatalf("events len = %d, want %d: %+v", len(r.Events), len(wantEvents), r.Events)
+	}
+	for i, want := range wantEvents {
+		if r.Events[i].EventType != want || r.Events[i].CorrelationID != "corr_hit" {
+			t.Fatalf("event[%d] = %+v, want %s corr_hit", i, r.Events[i], want)
+		}
+	}
+	if hasEvent(r, "player_killed") {
+		t.Fatalf("unexpected player_killed event: %+v", r.Events)
+	}
+}
+
+func TestMissedAttackDoesNotRetaliate(t *testing.T) {
+	rules := loadRules(t)
+	rules.Combat.BaseHitChance = 0
+	sim := NewSim("sess_miss", "deadbeefdeadbeef", rules)
+	r := sim.Tick([]Input{{
+		MessageID:     "a1",
+		CorrelationID: "corr_miss",
+		Type:          "attack_intent",
+		Attack:        &AttackIntent{TargetID: "1002"},
+	}})
+
+	assertAck(t, r, "a1")
+	if !hasEvent(r, "attack_missed") {
+		t.Fatalf("expected attack_missed: %+v", r.Events)
+	}
+	if hasEvent(r, "player_damaged") || hasEvent(r, "player_killed") || hasPlayerUpdate(r) {
+		t.Fatalf("miss retaliated unexpectedly: changes=%+v events=%+v", r.Changes, r.Events)
+	}
+	if sim.entities[sim.playerID].hp != playerStartHP {
+		t.Fatalf("player hp = %d, want %d", sim.entities[sim.playerID].hp, playerStartHP)
+	}
+}
+
+func TestPlayerKilledByRetaliation(t *testing.T) {
+	rules := loadRules(t)
+	dummy := rules.Monsters[monsterDefID]
+	dummy.MaxHP = 100
+	rules.Monsters[monsterDefID] = dummy
+
+	sim := NewSim("sess_player_death", "deadbeefdeadbeef", rules)
+	damaged, killed := 0, 0
+	for i := 0; i < playerStartHP+2; i++ {
+		r := sim.Tick([]Input{{
+			MessageID:     "a" + itoa(i),
+			CorrelationID: "corr_death",
+			Type:          "attack_intent",
+			Attack:        &AttackIntent{TargetID: "1002"},
+		}})
+		for _, ev := range r.Events {
+			switch ev.EventType {
+			case "player_damaged":
+				damaged++
+			case "player_killed":
+				killed++
+				if hasEvent(r, "player_damaged") {
+					t.Fatalf("fatal retaliation emitted paired player_damaged: %+v", r.Events)
+				}
+			}
+		}
+		if sim.entities[sim.playerID].hp == 0 {
+			break
+		}
+	}
+
+	if sim.entities[sim.playerID].hp != 0 {
+		t.Fatalf("player hp = %d, want 0", sim.entities[sim.playerID].hp)
+	}
+	if sim.entities[sim.playerID].hp < 0 {
+		t.Fatalf("player hp went negative: %d", sim.entities[sim.playerID].hp)
+	}
+	if damaged == 0 || killed != 1 {
+		t.Fatalf("player events damaged=%d killed=%d, want damaged>0 killed=1", damaged, killed)
 	}
 }
 
@@ -327,6 +464,42 @@ func TestRejections(t *testing.T) {
 	})
 }
 
+func TestDeadPlayerRejectsIntentsAndStopsActiveMovement(t *testing.T) {
+	rules := loadRules(t)
+
+	cases := []Input{
+		{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}},
+		{MessageID: "attack", Type: "attack_intent", Attack: &AttackIntent{TargetID: "1002"}},
+		{MessageID: "pickup", Type: "pick_up_intent", PickUp: &PickUpIntent{EntityID: "1003"}},
+		{MessageID: "equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: "weapon"}},
+	}
+	for _, in := range cases {
+		sim := NewSim("sess_dead_"+in.MessageID, "01", rules)
+		sim.entities[sim.playerID].hp = 0
+		r := sim.Tick([]Input{in})
+		assertReject(t, r, in.MessageID, "player_dead")
+	}
+
+	sim := NewSim("sess_dead_move", "01", rules)
+	start := sim.entities[sim.playerID].pos
+	sim.Tick([]Input{{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 3}}})
+	afterFirst := sim.entities[sim.playerID].pos
+	if afterFirst.X == start.X {
+		t.Fatal("setup failed: player did not move on first active movement tick")
+	}
+	sim.entities[sim.playerID].hp = 0
+	r := sim.Tick(nil)
+	if hasPlayerUpdate(r) {
+		t.Fatalf("dead active movement emitted player update: %+v", r.Changes)
+	}
+	if sim.entities[sim.playerID].pos != afterFirst {
+		t.Fatalf("dead player moved from %+v to %+v", afterFirst, sim.entities[sim.playerID].pos)
+	}
+	if sim.move != nil {
+		t.Fatalf("active movement not cleared for dead player: %+v", sim.move)
+	}
+}
+
 func assertReject(t *testing.T, r TickResult, msgID, reason string) {
 	t.Helper()
 	for _, rej := range r.Rejects {
@@ -338,6 +511,25 @@ func assertReject(t *testing.T, r TickResult, msgID, reason string) {
 		}
 	}
 	t.Fatalf("expected reject of %q with reason %q; rejects=%+v acks=%+v", msgID, reason, r.Rejects, r.Acks)
+}
+
+func assertAck(t *testing.T, r TickResult, msgID string) {
+	t.Helper()
+	for _, ack := range r.Acks {
+		if ack.MessageID == msgID {
+			return
+		}
+	}
+	t.Fatalf("expected ack of %q; rejects=%+v acks=%+v", msgID, r.Rejects, r.Acks)
+}
+
+func hasEvent(r TickResult, eventType string) bool {
+	for _, ev := range r.Events {
+		if ev.EventType == eventType {
+			return true
+		}
+	}
+	return false
 }
 
 func itoa(i int) string {

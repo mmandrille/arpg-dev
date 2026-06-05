@@ -20,13 +20,7 @@ var _inventory: Dictionary = {}    # item_instance_id (String) -> item_def_id (S
 var _equipped_weapon: String = ""  # equipped weapon instance id ("" = none)
 var _mounted_node: Node3D = null
 var _mounted_state: Dictionary = {}
-var _rest_rotation_degrees := Vector3.ZERO
-var _swing_tween: Tween = null
 var _warnings: Array = []
-
-const ATTACK_SWING_DOWN_DEG := 90.0
-const ATTACK_SWING_DOWN_SEC := 0.08
-const ATTACK_SWING_RETURN_SEC := 0.12
 
 
 func _init(mount_root: Node3D) -> void:
@@ -71,23 +65,6 @@ func get_debug_state() -> Dictionary:
 		"equipped_visuals": {"weapon": weapon},
 		"warnings": _warnings,
 	}
-
-
-func play_attack_swing() -> void:
-	# Client-only chop feedback: tilt the mounted weapon down and return.
-	if _mounted_node == null or not is_instance_valid(_mounted_node):
-		return
-	if not _mounted_node.is_inside_tree():
-		return
-
-	if _swing_tween != null and _swing_tween.is_valid():
-		_swing_tween.kill()
-		_mounted_node.rotation_degrees = _rest_rotation_degrees
-
-	var down := _rest_rotation_degrees + Vector3(-ATTACK_SWING_DOWN_DEG, 0.0, 0.0)
-	_swing_tween = _mounted_node.create_tween()
-	_swing_tween.tween_property(_mounted_node, "rotation_degrees", down, ATTACK_SWING_DOWN_SEC)
-	_swing_tween.tween_property(_mounted_node, "rotation_degrees", _rest_rotation_degrees, ATTACK_SWING_RETURN_SEC)
 
 
 # --- internals --------------------------------------------------------------
@@ -142,7 +119,6 @@ func _refresh_weapon() -> void:
 	var inst := (packed as PackedScene).instantiate()
 	inst.name = asset_id
 	_apply_transform(inst, vis.get("local_transform", {}))
-	_rest_rotation_degrees = inst.rotation_degrees
 	socket.add_child(inst)
 	_mounted_node = inst
 	_mounted_state = {
@@ -156,9 +132,6 @@ func _refresh_weapon() -> void:
 
 
 func _clear_mounted() -> void:
-	if _swing_tween != null and _swing_tween.is_valid():
-		_swing_tween.kill()
-	_swing_tween = null
 	if _mounted_node != null and is_instance_valid(_mounted_node):
 		_mounted_node.queue_free()
 	_mounted_node = null

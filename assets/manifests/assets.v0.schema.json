@@ -16,7 +16,7 @@
         "required": ["type", "runtime_path", "format"],
         "additionalProperties": false,
         "properties": {
-          "type": { "type": "string", "enum": ["character", "equipment"] },
+          "type": { "type": "string", "enum": ["character", "equipment", "monster"] },
           "slot": { "type": "string", "enum": ["weapon"] },
           "source_path": { "type": "string" },
           "runtime_path": { "type": "string", "minLength": 1 },

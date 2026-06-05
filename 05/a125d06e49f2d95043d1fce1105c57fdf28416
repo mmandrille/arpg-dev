@@ -1,0 +1,34 @@
+tools/__init__.py
+  s_453dc3b8c102a5::t_569ffd9021fc37 1
+tools/bot/__init__.py
+  s_453dc3b8c102a5::t_fc8b66f5cfd919 1
+tools/validate_shared.py
+  s_453dc3b8c102a5::t_bd9b33db79ced5 1-180
+tools/replay/run.py
+  s_453dc3b8c102a5::t_918e3af6b19984 1-37
+tools/bot/test_protocol.py
+  s_453dc3b8c102a5::t_6282ddff3e3640 1-23
+tools/bot/protocol.py
+  s_453dc3b8c102a5::t_e30f267c49d703 1-51
+tools/replay/__init__.py
+  s_453dc3b8c102a5::t_05947869d8e366 1
+tools/bot/run.py
+  s_453dc3b8c102a5::t_3e1fb312231e53 1-122,124-126,128-207
+  s_453dc3b8c102a5::t_569e01052163d6 123,127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "05a125d06e49f2d95043d1fce1105c57fdf28416",
+  "prompts": {},
+  "sessions": {
+    "s_453dc3b8c102a5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b19faada-d99f-4150-81ee-94c64c9f386d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    }
+  }
+}

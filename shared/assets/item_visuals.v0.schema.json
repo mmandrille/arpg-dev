@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/item_visuals.v0.schema.json",
+  "title": "Item visual metadata (v0)",
+  "description": "Rendering contract only: maps an item_def_id to an asset_id, mount socket, and local transform. Carries NO gameplay stats (ADR-0006 D3).",
+  "type": "object",
+  "required": ["version", "item_visuals"],
+  "additionalProperties": false,
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    }
+  },
+  "properties": {
+    "version": { "const": 0 },
+    "item_visuals": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["asset_id", "slot", "mount_socket", "local_transform"],
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": { "type": "string", "minLength": 1 },
+          "slot": { "type": "string", "enum": ["weapon"] },
+          "mount_socket": { "type": "string", "minLength": 1 },
+          "local_transform": {
+            "type": "object",
+            "required": ["position", "rotation_degrees", "scale"],
+            "additionalProperties": false,
+            "properties": {
+              "position": { "$ref": "#/$defs/vec3" },
+              "rotation_degrees": { "$ref": "#/$defs/vec3" },
+              "scale": { "$ref": "#/$defs/vec3" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

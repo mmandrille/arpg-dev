@@ -1,0 +1,23 @@
+client/tests/test_item_visuals.gd
+  s_56b42e2608aa12::t_ae2633d3e74dab 1-76
+client/tests/test_item_visuals.gd.uid
+  s_56b42e2608aa12::t_6f7625331d3888 1
+scripts/client_smoke.sh
+  s_56b42e2608aa12::t_95555cf6071b2b 32-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "2c49a4fa1cca8dff3ba6c0b26b49e5f3c149be9e",
+  "prompts": {},
+  "sessions": {
+    "s_56b42e2608aa12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "198f963e-4091-4cdb-bd5a-29791eaa2bd5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+assets/characters/base_humanoid/README.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 8
+docs/adr/0006-asset-pipeline.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 8
+CLAUDE.md
+  s_46c418e07ef0bf::t_612f18cf00ffd0 106-107
+README.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "382ef4c13fdce8633e1ef3883863101814597d8c",
+  "prompts": {},
+  "sessions": {
+    "s_46c418e07ef0bf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a3689368-8f74-4f4e-ba89-df62607bb60e",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

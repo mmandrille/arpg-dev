@@ -5,8 +5,10 @@
 extends Node3D
 
 const NetClientScript := preload("res://scripts/net_client.gd")
+const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 
 var client: NetClient
+var resolver: EquipmentVisualResolver
 var entities: Dictionary = {}        # id (String) -> MeshInstance3D (monsters/loot only)
 var player_id: String = ""
 var predicted_pos := Vector3.ZERO    # client-predicted player position
@@ -37,6 +39,9 @@ func _ready() -> void:
 	player_anchor = $World/PlayerAnchor
 	character_visual = $World/PlayerAnchor/CharacterVisual
 	entities_root = $Entities
+	# Mount-root is injected (spec §4.8): the resolver finds the named socket
+	# within CharacterVisual, never via an absolute scene path.
+	resolver = EquipmentResolverScript.new(character_visual)
 	_build_scene()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
@@ -95,6 +100,8 @@ func _apply_snapshot(p: Dictionary) -> void:
 		_upsert_entity(e)
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
+	if resolver != null:
+		resolver.apply_snapshot(p)
 	_reconcile_player()
 
 
@@ -107,10 +114,16 @@ func _apply_delta(p: Dictionary) -> void:
 				_remove_entity(c["entity_id"])
 			"inventory_add":
 				inventory.append(c["item"])
+				if resolver != null:
+					resolver.ingest_inventory_item(c["item"])
 			"inventory_update":
 				_update_inventory_item(c["item"])
+				if resolver != null:
+					resolver.ingest_inventory_item(c["item"])
 			"equipped_update":
 				equipped[c["slot"]] = c.get("item_instance_id")
+				if resolver != null:
+					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
 	_reconcile_player()
 
 
@@ -243,8 +256,13 @@ func _update_debug() -> void:
 			WebSocketPeer.STATE_OPEN: ws_state = "open"
 			WebSocketPeer.STATE_CLOSING: ws_state = "closing"
 			WebSocketPeer.STATE_CLOSED: ws_state = "closed"
-	_debug_label.text = "ws=%s  tick=%d  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nW/A/S/D move  SPACE attack  E pickup  Q equip" % [
-		ws_state, last_server_tick, reconciliation_delta, inventory.size(), entities.size(), str(eq)]
+	var weapon_vis := "none"
+	if resolver != null:
+		var w = resolver.get_debug_state()["equipped_visuals"]["weapon"]
+		if w != null:
+			weapon_vis = "%s(visible=%s)" % [w["asset_id"], w["visible"]]
+	_debug_label.text = "ws=%s  tick=%d  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  SPACE attack  E pickup  Q equip" % [
+		ws_state, last_server_tick, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
 
 
 func _debug(msg: String) -> void:

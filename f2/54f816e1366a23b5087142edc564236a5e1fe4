@@ -1,0 +1,43 @@
+shared/golden/auto_path.v0.schema.json
+  s_e72de07330ced8::t_9be9fc3fba2de6 37,43
+shared/golden/auto_path.json
+  s_e72de07330ced8::t_aca98014e38529 20
+tools/validate_shared.py
+  s_e72de07330ced8::t_7e8937ca52d368 320-321,323
+client/tests/test_golden.gd
+  s_e72de07330ced8::t_1f03b48eaf2640 94-98
+server/internal/game/game_test.go
+  s_e72de07330ced8::t_b9e37160bd382e 975-982,988-991
+  s_e72de07330ced8::t_c734abc5a974de 169
+  s_e72de07330ced8::t_9023053276ae7c 938-940,946-947
+  s_e72de07330ced8::t_fee06b7e81665b 961
+  s_e72de07330ced8::t_970dcf077d8d59 123
+  s_e72de07330ced8::t_054784d6a7c01f 135-136
+  s_e72de07330ced8::t_308c2ac509dcee 407
+  s_e72de07330ced8::t_522d0997b7df73 138,149-150,152-154,164-165,167-168
+  s_e72de07330ced8::t_8455579073dc04 406
+  s_e72de07330ced8::t_4e6bb015ac8042 434
+  s_e72de07330ced8::t_eb2b2001706770 283-284,303-310
+  s_e72de07330ced8::t_8fd065a675c51d 350,355,359-360
+  s_e72de07330ced8::t_f8e9b2522da378 962-963
+shared/golden/ranged_projectile.json
+  s_e72de07330ced8::t_47c4b22abcf425 13,16
+  s_e72de07330ced8::t_04a2d8dc282110 34
+  s_e72de07330ced8::t_af709285b8d00f 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "f254f816e1366a23b5087142edc564236a5e1fe4",
+  "prompts": {},
+  "sessions": {
+    "s_e72de07330ced8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b930ae56-8b5a-4cc3-ba9d-fa564ededae0",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

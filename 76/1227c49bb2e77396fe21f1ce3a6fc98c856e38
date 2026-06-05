@@ -1,0 +1,28 @@
+client/scripts/main.gd
+  s_c36b8efb59b07f::t_c8ac52a406ffb6 150-163
+  s_c36b8efb59b07f::t_282e94ee32715c 9-14,18-19
+  s_c36b8efb59b07f::t_a00d81627960ba 360
+  s_c36b8efb59b07f::t_769da72d1a4db1 91-95
+  s_c36b8efb59b07f::t_2d6b3cd33a098c 117
+  s_c36b8efb59b07f::t_5fdc7b03952d6c 403-419,421
+  s_c36b8efb59b07f::t_d37234aff217d4 209
+  s_c36b8efb59b07f::t_251ab02dcedaf0 179,181,183,185-193,198-204
+  s_c36b8efb59b07f::t_134ed325a54f05 59-61
+  s_c36b8efb59b07f::t_3c94d5f4b1da17 279-280
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "761227c49bb2e77396fe21f1ce3a6fc98c856e38",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

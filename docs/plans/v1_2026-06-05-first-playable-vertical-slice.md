@@ -7,7 +7,7 @@ Architecture: Godot client and Go server as separate apps; server-authoritative 
 persistence; JSON-over-WebSocket realtime protocol; Python bot and replay verification.
 Tech stack: Go, Godot 4/GDScript, Python, Postgres, JSON Schema.
 
-Related spec: `docs/specs/spec-first-playable-vertical-slice.md`
+Related spec: `docs/specs/v1_spec-first-playable-vertical-slice.md`
 
 ## File Map
 

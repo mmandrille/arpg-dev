@@ -3,7 +3,7 @@
 Status: Ready for review (2026-06-05)
 Branch: `feature/equip-and-see-it`
 Related: `docs/adr/0001-technology-stack.md`; `docs/adr/0006-asset-pipeline.md` (Task 1);
-`docs/specs/spec-first-playable-vertical-slice.md` (v0 baseline)
+`docs/specs/v1_spec-first-playable-vertical-slice.md` (v0 baseline)
 
 ## 1. Purpose
 

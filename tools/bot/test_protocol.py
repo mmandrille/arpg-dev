@@ -10,6 +10,7 @@ from tools.bot.run import (
     ingest_message,
     load_scenarios,
     run_assertions,
+    run_runtime_assertions,
     select_scenarios,
 )
 
@@ -50,6 +51,17 @@ def test_load_scenarios_catalog_order():
 
     assert [s.path.name for s in scenarios[:2]] == ["01_vertical_slice.json", "02_gear_before_combat.json"]
     assert [s.id for s in scenarios[:2]] == ["vertical_slice", "gear_before_combat"]
+
+
+def test_load_scenarios_gear_accepts_runtime_attack_assertion():
+    scenarios = load_scenarios()
+    gear = next(s for s in scenarios if s.id == "gear_before_combat")
+
+    assert {
+        "type": "monster_killed_in_attacks",
+        "monster_def_id": "training_dummy_reward",
+        "max_attacks": 1,
+    } in gear.assertions
 
 
 def test_select_scenarios_all_returns_catalog_order():
@@ -126,6 +138,47 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
     assert state.equipped["weapon"] == "1004"
 
 
+def test_intent_accepted_increments_pending_attack_count():
+    state = RuntimeState()
+    state.pending_attack_monsters["msg-attack"] = "training_dummy_reward"
+
+    ingest_message({
+        "type": "intent_accepted",
+        "tick": 4,
+        "payload": {"accepted_message_id": "msg-attack", "server_tick": 4},
+    }, state)
+
+    assert state.accepted_attack_counts["training_dummy_reward"] == 1
+    assert "msg-attack" not in state.pending_attack_monsters
+
+
+def test_runtime_assertion_monster_killed_in_attacks_passes():
+    state = RuntimeState(
+        accepted_attack_counts={"training_dummy_reward": 1},
+        killed_monster_def_ids={"training_dummy_reward"},
+    )
+
+    run_runtime_assertions([
+        {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1}
+    ], state, "test")
+
+
+def test_runtime_assertion_monster_killed_in_attacks_fails_over_max():
+    state = RuntimeState(
+        accepted_attack_counts={"training_dummy_reward": 2},
+        killed_monster_def_ids={"training_dummy_reward"},
+    )
+
+    try:
+        run_runtime_assertions([
+            {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1}
+        ], state, "test")
+    except AssertionError as exc:
+        assert "killed in 2 accepted attacks, max 1" in str(exc)
+    else:
+        raise AssertionError("expected AssertionError")
+
+
 def test_structured_assertions():
     entities = [
         {"id": "1001", "type": "player", "hp": 9},
@@ -141,6 +194,7 @@ def test_structured_assertions():
         {"type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": True},
         {"type": "inventory_contains", "item_def_id": "training_badge", "equipped": False},
         {"type": "monster_dead", "monster_def_id": "training_dummy_reward"},
+        {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
     ], entities, inventory, {"weapon": "1004"}, None, "test")
 
 

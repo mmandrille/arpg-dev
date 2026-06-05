@@ -5,5 +5,5 @@
 - **Required sockets:** `right_hand_socket` (v2 canonical weapon mount — ADR-0006 D4).
 
 Source/provenance (origin, license, `sha256`) is recorded in the manifest `provenance` block and in
-the spec's as-built notes (`docs/specs/spec-equip-and-see-it.md`). No `.blend` source is committed
+the spec's as-built notes (`docs/specs/v2_spec-equip-and-see-it.md`). No `.blend` source is committed
 for v2 (ADR-0006 D2).

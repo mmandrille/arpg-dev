@@ -12,7 +12,7 @@ import (
 	"sort"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
-	"github.com/mmandrille_meli/arpg-dev/server/internal/realtime"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/inputdecode"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -36,35 +36,72 @@ type Report struct {
 	Snapshot           game.Snapshot `json:"snapshot"`
 }
 
+// Envelope is a protocol-shaped server-to-client replay message.
+type Envelope struct {
+	Type      string `json:"type"`
+	MessageID string `json:"message_id"`
+	SessionID string `json:"session_id"`
+	Tick      uint64 `json:"tick"`
+	Payload   any    `json:"payload"`
+}
+
+// Timeline is a visual/debug replay stream reconstructed from seed + inputs.
+type Timeline struct {
+	SessionID string     `json:"session_id"`
+	Seed      string     `json:"seed"`
+	Envelopes []Envelope `json:"envelopes"`
+}
+
+// StateDeltaPayload mirrors the live WebSocket state_delta payload without
+// importing the realtime package into replay.
+type StateDeltaPayload struct {
+	ServerTick uint64        `json:"server_tick"`
+	Changes    []game.Change `json:"changes"`
+	Events     []game.Event  `json:"events"`
+}
+
+// ResumeMetadata carries the runner state needed to continue after replaying
+// historical inputs.
+type ResumeMetadata struct {
+	SeenMessageIDs map[string]bool
+	NextSequence   int64
+}
+
+// RecordedInput is a store-independent input stamped with its authoritative
+// simulation tick.
+type RecordedInput struct {
+	Tick  int64
+	Input game.Input
+}
+
+// Reconstruction is the authoritative state rebuilt from seed + inputs.
+type Reconstruction struct {
+	Sim           *game.Sim
+	Snapshot      game.Snapshot
+	DerivedEvents []derivedEvent
+	Session       store.Session
+	Metadata      ResumeMetadata
+}
+
 // Reconstruct re-simulates the session from seed + recorded inputs, returning
-// the resulting authoritative snapshot and the derived event stream.
-func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, sessionID string) (game.Snapshot, []derivedEvent, store.Session, error) {
+// the restored sim, snapshot, derived event stream, and resume metadata.
+func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, sessionID string) (Reconstruction, error) {
 	sess, err := repo.GetSession(ctx, sessionID)
 	if err != nil {
-		return game.Snapshot{}, nil, store.Session{}, err
+		return Reconstruction{}, err
 	}
 	inputs, err := repo.ListInputs(ctx, sessionID)
 	if err != nil {
-		return game.Snapshot{}, nil, sess, err
+		return Reconstruction{Session: sess}, err
 	}
 	recorded, err := repo.ListEvents(ctx, sessionID)
 	if err != nil {
-		return game.Snapshot{}, nil, sess, err
+		return Reconstruction{Session: sess}, err
 	}
 
-	byTick := make(map[int64][]game.Input)
-	maxTick := int64(0)
-	for _, row := range inputs {
-		in, ok := realtime.DecodeStored(row.Payload)
-		if !ok {
-			continue
-		}
-		in.Sequence = row.Sequence
-		in.CorrelationID = row.CorrelationID
-		byTick[row.Tick] = append(byTick[row.Tick], in)
-		if row.Tick > maxTick {
-			maxTick = row.Tick
-		}
+	recordedInputs, maxTick, err := StoredInputs(inputs)
+	if err != nil {
+		return Reconstruction{Session: sess}, err
 	}
 	for _, ev := range recorded {
 		if ev.Tick > maxTick {
@@ -72,16 +109,124 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 		}
 	}
 
-	sim := game.NewSim(sessionID, sess.Seed, rules)
-	var derived []derivedEvent
+	recon, err := ReconstructFromInputs(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID), recordedInputs, maxTick)
+	if err != nil {
+		return Reconstruction{Session: sess}, err
+	}
+	recon.Session = sess
+	return recon, nil
+}
+
+// BuildTimeline reconstructs a protocol-shaped replay stream for local visual
+// tooling. It intentionally emits only snapshot/delta messages, not acks, so
+// consumers render authoritative state without re-sending inputs.
+func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules, sessionID string) (Timeline, error) {
+	sess, err := repo.GetSession(ctx, sessionID)
+	if err != nil {
+		return Timeline{}, err
+	}
+	inputs, err := repo.ListInputs(ctx, sessionID)
+	if err != nil {
+		return Timeline{}, err
+	}
+	recorded, err := repo.ListEvents(ctx, sessionID)
+	if err != nil {
+		return Timeline{}, err
+	}
+	recordedInputs, maxTick, err := StoredInputs(inputs)
+	if err != nil {
+		return Timeline{}, err
+	}
+	for _, ev := range recorded {
+		if ev.Tick > maxTick {
+			maxTick = ev.Tick
+		}
+	}
+
+	byTick := inputsByTick(recordedInputs)
+	sim, err := game.NewSimWithWorld(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID))
+	if err != nil {
+		return Timeline{}, err
+	}
+	out := Timeline{
+		SessionID: sessionID,
+		Seed:      sess.Seed,
+		Envelopes: []Envelope{{
+			Type:      "session_snapshot",
+			MessageID: "replay-snapshot",
+			SessionID: sessionID,
+			Tick:      sim.CurrentTick(),
+			Payload:   sim.Snapshot(),
+		}},
+	}
+
 	for t := int64(0); t <= maxTick; t++ {
 		ins := byTick[t]
-		sort.SliceStable(ins, func(i, j int) bool {
-			if ins[i].Sequence != ins[j].Sequence {
-				return ins[i].Sequence < ins[j].Sequence
-			}
-			return ins[i].MessageID < ins[j].MessageID
+		sortInputs(ins)
+		res := sim.Tick(ins)
+		out.Envelopes = append(out.Envelopes, Envelope{
+			Type:      "state_delta",
+			MessageID: fmt.Sprintf("replay-tick-%d", res.Tick),
+			SessionID: sessionID,
+			Tick:      res.Tick,
+			Payload: StateDeltaPayload{
+				ServerTick: res.Tick,
+				Changes:    res.Changes,
+				Events:     res.Events,
+			},
 		})
+	}
+	return out, nil
+}
+
+// StoredInputs converts durable input rows into replay inputs. The stored row
+// owns sequencing and dedupe metadata; the JSON payload only supplies type and
+// intent-specific fields.
+func StoredInputs(rows []store.SessionInput) ([]RecordedInput, int64, error) {
+	recorded := make([]RecordedInput, 0, len(rows))
+	maxTick := int64(-1)
+	for _, row := range rows {
+		in, ok := inputdecode.DecodeStored(row.Payload)
+		if !ok {
+			return nil, maxTick, fmt.Errorf("decode stored input: session_id=%s input_id=%s tick=%d message_id=%s",
+				row.SessionID, row.ID, row.Tick, row.MessageID)
+		}
+		in.MessageID = row.MessageID
+		in.Sequence = row.Sequence
+		in.CorrelationID = row.CorrelationID
+		recorded = append(recorded, RecordedInput{Tick: row.Tick, Input: in})
+		if row.Tick > maxTick {
+			maxTick = row.Tick
+		}
+	}
+	return recorded, maxTick, nil
+}
+
+// ReconstructFromInputs rebuilds a session from an already-decoded input stream.
+// throughTick is inclusive; pass -1 for a fresh untouched session.
+func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64) (Reconstruction, error) {
+	byTick := make(map[int64][]game.Input)
+	meta := ResumeMetadata{
+		SeenMessageIDs: make(map[string]bool, len(inputs)),
+	}
+	for _, rec := range inputs {
+		byTick[rec.Tick] = append(byTick[rec.Tick], rec.Input)
+		if rec.Input.MessageID != "" {
+			meta.SeenMessageIDs[rec.Input.MessageID] = true
+		}
+		if rec.Input.Sequence >= meta.NextSequence {
+			meta.NextSequence = rec.Input.Sequence + 1
+		}
+	}
+
+	sim, err := game.NewSimWithWorld(sessionID, seed, rules, worldID)
+	if err != nil {
+		return Reconstruction{}, err
+	}
+	var derived []derivedEvent
+	for t := int64(0); t <= throughTick; t++ {
+		ins := byTick[t]
+		sortInputs(ins)
 		res := sim.Tick(ins)
 		for i, ev := range res.Events {
 			payload, _ := json.Marshal(ev)
@@ -94,7 +239,29 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 		}
 	}
 
-	return sim.Snapshot(), derived, sess, nil
+	return Reconstruction{
+		Sim:           sim,
+		Snapshot:      sim.Snapshot(),
+		DerivedEvents: derived,
+		Metadata:      meta,
+	}, nil
+}
+
+func inputsByTick(inputs []RecordedInput) map[int64][]game.Input {
+	byTick := make(map[int64][]game.Input)
+	for _, rec := range inputs {
+		byTick[rec.Tick] = append(byTick[rec.Tick], rec.Input)
+	}
+	return byTick
+}
+
+func sortInputs(ins []game.Input) {
+	sort.SliceStable(ins, func(i, j int) bool {
+		if ins[i].Sequence != ins[j].Sequence {
+			return ins[i].Sequence < ins[j].Sequence
+		}
+		return ins[i].MessageID < ins[j].MessageID
+	})
 }
 
 // Verify reconstructs the session and compares derived events against the
@@ -102,7 +269,7 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 // if the same seed + inputs did not reproduce the recorded authoritative
 // output.
 func Verify(ctx context.Context, repo store.Repository, rules *game.Rules, sessionID string) (Report, error) {
-	snap, derived, sess, err := Reconstruct(ctx, repo, rules, sessionID)
+	recon, err := Reconstruct(ctx, repo, rules, sessionID)
 	if err != nil {
 		return Report{}, err
 	}
@@ -117,21 +284,21 @@ func Verify(ctx context.Context, repo store.Repository, rules *game.Rules, sessi
 
 	rep := Report{
 		SessionID:          sessionID,
-		Seed:               sess.Seed,
+		Seed:               recon.Session.Seed,
 		InputCount:         len(inputs),
 		RecordedEventCount: len(recorded),
-		DerivedEventCount:  len(derived),
-		Snapshot:           snap,
+		DerivedEventCount:  len(recon.DerivedEvents),
+		Snapshot:           recon.Snapshot,
 		Match:              true,
 	}
 
-	if len(derived) != len(recorded) {
+	if len(recon.DerivedEvents) != len(recorded) {
 		rep.Match = false
-		rep.Mismatch = fmt.Sprintf("event count: derived %d, recorded %d", len(derived), len(recorded))
+		rep.Mismatch = fmt.Sprintf("event count: derived %d, recorded %d", len(recon.DerivedEvents), len(recorded))
 		return rep, nil
 	}
-	for i := range derived {
-		d, r := derived[i], recorded[i]
+	for i := range recon.DerivedEvents {
+		d, r := recon.DerivedEvents[i], recorded[i]
 		if d.EventType != r.EventType || d.Tick != r.Tick || d.Sequence != r.Sequence {
 			rep.Match = false
 			rep.Mismatch = fmt.Sprintf("event %d: derived (%s,t%d,s%d) != recorded (%s,t%d,s%d)",
@@ -156,4 +323,12 @@ func jsonEqual(a, b []byte) bool {
 		return false
 	}
 	return reflect.DeepEqual(ma, mb)
+}
+
+func normalizeWorldID(worldID string) string {
+	if worldID == "" {
+		return game.DefaultWorldID
+	}
+
+	return worldID
 }

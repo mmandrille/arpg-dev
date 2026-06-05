@@ -15,6 +15,7 @@ type Rules struct {
 	Items      map[string]ItemDef
 	Monsters   map[string]MonsterDef
 	LootTables map[string]LootTable
+	Worlds     map[string]WorldDef
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -55,6 +56,25 @@ type LootTable struct {
 	Entries []LootEntry `json:"entries"`
 }
 
+// WorldDef is a deterministic initial session layout.
+type WorldDef struct {
+	Player   WorldPlayer   `json:"player"`
+	Entities []WorldEntity `json:"entities"`
+}
+
+// WorldPlayer is the initial player placement for a world.
+type WorldPlayer struct {
+	Position Vec2 `json:"position"`
+}
+
+// WorldEntity is an initial non-player entity in a world.
+type WorldEntity struct {
+	Type         string `json:"type"`
+	MonsterDefID string `json:"monster_def_id,omitempty"`
+	ItemDefID    string `json:"item_def_id,omitempty"`
+	Position     Vec2   `json:"position"`
+}
+
 // LoadRules reads and parses the v0 rules files from a directory.
 func LoadRules(dir string) (*Rules, error) {
 	r := &Rules{}
@@ -77,6 +97,14 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if err := readJSON(filepath.Join(dir, "items.v0.json"), &items); err != nil {
 		return nil, err
+	}
+	for id, def := range items.Items {
+		if def.Equippable && def.Slot == "" {
+			return nil, fmt.Errorf("game: invalid rules items.%s: equippable item must declare slot", id)
+		}
+		if !def.Equippable && def.Slot != "" {
+			return nil, fmt.Errorf("game: invalid rules items.%s: non-equippable item must not declare slot", id)
+		}
 	}
 	r.Items = items.Items
 
@@ -102,6 +130,49 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	r.LootTables = loot.LootTables
+	for tableID, table := range r.LootTables {
+		for _, entry := range table.Entries {
+			if _, ok := r.Items[entry.ItemDefID]; !ok {
+				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown item %s", tableID, entry.ItemDefID)
+			}
+		}
+	}
+	for id, def := range r.Monsters {
+		if _, ok := r.LootTables[def.LootTable]; !ok {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s: unknown loot table %s", id, def.LootTable)
+		}
+	}
+
+	var worlds struct {
+		Worlds map[string]WorldDef `json:"worlds"`
+	}
+	if err := readJSON(filepath.Join(dir, "worlds.v0.json"), &worlds); err != nil {
+		return nil, err
+	}
+	for worldID, world := range worlds.Worlds {
+		for i, entity := range world.Entities {
+			label := fmt.Sprintf("worlds.%s.entities[%d]", worldID, i)
+			switch entity.Type {
+			case monsterEntity:
+				if entity.MonsterDefID == "" {
+					return nil, fmt.Errorf("game: invalid rules %s: missing monster_def_id", label)
+				}
+				if _, ok := r.Monsters[entity.MonsterDefID]; !ok {
+					return nil, fmt.Errorf("game: invalid rules %s: unknown monster %s", label, entity.MonsterDefID)
+				}
+			case lootEntity:
+				if entity.ItemDefID == "" {
+					return nil, fmt.Errorf("game: invalid rules %s: missing item_def_id", label)
+				}
+				if _, ok := r.Items[entity.ItemDefID]; !ok {
+					return nil, fmt.Errorf("game: invalid rules %s: unknown item %s", label, entity.ItemDefID)
+				}
+			default:
+				return nil, fmt.Errorf("game: invalid rules %s: unknown type %s", label, entity.Type)
+			}
+		}
+	}
+	r.Worlds = worlds.Worlds
 
 	return r, nil
 }

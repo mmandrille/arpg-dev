@@ -1,0 +1,51 @@
+docs/specs/v2_spec-equip-and-see-it.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-502
+docs/specs/v3_spec-animate-and-react.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-439
+docs/plans/v4_2026-06-05-take-a-hit.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-226
+docs/plans/v5_2026-06-05-resume-authoritative-state.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-231
+docs/specs/v5_spec-resume-authoritative-state.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-253
+docs/specs/v1_spec-first-playable-vertical-slice.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-420
+docs/plans/v7_2026-06-05-gear-before-combat-scenario.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-345
+docs/PROGRESS.md
+  s_46c418e07ef0bf::t_1612ea2dd98e89 15,17
+  s_46c418e07ef0bf::t_93458f06bfb5b1 21-31
+  s_46c418e07ef0bf::t_b5e059db289fac 225-226
+  s_46c418e07ef0bf::t_7ffd315a0bf65a 56
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 49-55
+docs/plans/v1_2026-06-05-first-playable-vertical-slice.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-354
+docs/plans/v6_2026-06-05-visual-bot-scenario-runner.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-84
+docs/specs/v4_spec-take-a-hit.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-414
+docs/plans/v3_2026-06-05-animate-and-react.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-1552
+docs/specs/v6_spec-visual-bot-scenario-runner.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-177
+docs/specs/v7_spec-gear-before-combat-scenario.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-574
+docs/plans/v2_2026-06-05-equip-and-see-it.md
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-333
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "900970700fdcf0a6975ed14d428283efdca26a5c",
+  "prompts": {},
+  "sessions": {
+    "s_46c418e07ef0bf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a3689368-8f74-4f4e-ba89-df62607bb60e",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

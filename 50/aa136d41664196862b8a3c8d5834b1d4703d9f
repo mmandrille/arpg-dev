@@ -1,0 +1,33 @@
+docs/plans/v11_2026-06-05-click-to-move-and-auto-path.md
+  s_e584b772c74b86::t_dc4a90411daeb2 7,59,86,91,101,107,126,151,162,168-171,199-200,222,241,259
+  s_e4dfdc0935eeb1::t_d64a6d1f1d30dd 1-6,8-58,60-85,87-90,92-100,102-106,108-125,127-150,152-161,163-167,172-198,201-221,223-240,242-258,260-310
+docs/specs/v11_spec-click-to-move-and-auto-path.md
+  s_e4dfdc0935eeb1::t_00b168e0163640 1-2,5-31,35-85,87-99,101-105,109-147,152-154,157-160,164-196,201-206,208-212,215-231,233-242,244-249,254-266,269-363,365-374,379,382-408,413-442,444-486
+  s_e4dfdc0935eeb1::t_9c8f0b59df8a69 3-4
+  s_e584b772c74b86::t_8807b5686157d7 243,267-268
+  s_e584b772c74b86::t_4ea1e3612868b1 32-34,86,100,106-108,148-151,155-156,161-163,197-200,207,213-214,232,250-253,364,375-378,380-381,409-412,443
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "50aa136d41664196862b8a3c8d5834b1d4703d9f",
+  "prompts": {},
+  "sessions": {
+    "s_e4dfdc0935eeb1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "67ca851b-650d-49f9-bf02-93022f11d187",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_e584b772c74b86": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e997c-ecfe-79b3-b5f9-adc4b2c85470",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

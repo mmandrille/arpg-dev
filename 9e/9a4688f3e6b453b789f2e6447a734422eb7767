@@ -1,0 +1,14 @@
+client/project.godot
+  h_6c904e338a0e5a 13-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "9e9a4688f3e6b453b789f2e6447a734422eb7767",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

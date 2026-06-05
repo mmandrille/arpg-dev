@@ -255,6 +255,78 @@ func TestEquippedWeaponDamageGolden(t *testing.T) {
 	}
 }
 
+func TestAutoPathGolden(t *testing.T) {
+	var golden struct {
+		Cases []struct {
+			Name              string `json:"name"`
+			WorldID           string `json:"world_id"`
+			ExpectedStepCount int    `json:"expected_step_count"`
+			ExpectedEnd       Vec2   `json:"expected_end"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "auto_path.json", &golden)
+	rules := loadRules(t)
+	for _, tc := range golden.Cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			sim, err := NewSimWithWorld("sess_auto_path_golden", "01", rules, tc.WorldID)
+			if err != nil {
+				t.Fatalf("world: %v", err)
+			}
+			target := firstEntityByKind(sim, monsterEntity)
+			if target == nil {
+				t.Fatal("missing monster target")
+			}
+			end, steps, ok := sim.findMeleeApproachGoal(target)
+			if !ok {
+				t.Fatal("findMeleeApproachGoal ok=false")
+			}
+			if len(steps) != tc.ExpectedStepCount || end != tc.ExpectedEnd {
+				t.Fatalf("path = len %d end %+v, want len %d end %+v", len(steps), end, tc.ExpectedStepCount, tc.ExpectedEnd)
+			}
+		})
+	}
+}
+
+func TestActionIntentAutoApproachAndAttack(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_path_maze", "01", loadRules(t), "path_maze")
+	if err != nil {
+		t.Fatalf("path_maze world: %v", err)
+	}
+	target := firstEntityByKind(sim, monsterEntity)
+	r := sim.Tick([]Input{{MessageID: "maze_action", CorrelationID: "corr_maze", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(target.id)}}})
+	assertAck(t, r, "maze_action")
+	for i := 0; i < 100 && target.hp > 0; i++ {
+		sim.Tick(nil)
+	}
+	if target.hp != 0 {
+		t.Fatalf("target hp = %d, want killed by queued action", target.hp)
+	}
+}
+
+func TestMoveToIntentArrivesAndManualMoveCancels(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_move_to", "01", loadRules(t), "collision_lab")
+	if err != nil {
+		t.Fatalf("collision world: %v", err)
+	}
+	r := sim.Tick([]Input{{MessageID: "go", Type: "move_to_intent", MoveTo: &MoveToIntent{Position: Vec2{X: 3, Y: 5}}}})
+	assertAck(t, r, "go")
+	sim.Tick(nil)
+	manual := sim.Tick([]Input{{MessageID: "manual", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{Y: 1}, DurationTicks: 1}}})
+	assertAck(t, manual, "manual")
+	if sim.autoNav != nil {
+		t.Fatal("manual move did not clear autoNav")
+	}
+}
+
+func firstEntityByKind(sim *Sim, kind string) *entity {
+	for _, id := range sortedEntityIDs(sim.entities) {
+		if sim.entities[id].kind == kind {
+			return sim.entities[id]
+		}
+	}
+	return nil
+}
+
 func TestMeleeReachGolden(t *testing.T) {
 	var golden struct {
 		Cases []struct {
@@ -728,13 +800,13 @@ func TestCollisionBlocksWallAndAllowsRoute(t *testing.T) {
 	}
 }
 
-func TestActionRejectsOutOfRange(t *testing.T) {
+func TestActionAutoApproachQueuesWhenOutOfRange(t *testing.T) {
 	rules := loadRules(t)
 
 	t.Run("monster", func(t *testing.T) {
 		sim := NewSim("sess_range_monster", "01", rules)
 		r := sim.Tick([]Input{{MessageID: "a", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
-		assertReject(t, r, "a", "out_of_range")
+		assertAck(t, r, "a")
 	})
 
 	t.Run("loot", func(t *testing.T) {
@@ -743,7 +815,7 @@ func TestActionRejectsOutOfRange(t *testing.T) {
 			t.Fatalf("gear world: %v", err)
 		}
 		r := sim.Tick([]Input{{MessageID: "p", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
-		assertReject(t, r, "p", "out_of_range")
+		assertAck(t, r, "p")
 	})
 
 	t.Run("door", func(t *testing.T) {
@@ -752,7 +824,7 @@ func TestActionRejectsOutOfRange(t *testing.T) {
 			t.Fatalf("door world: %v", err)
 		}
 		r := sim.Tick([]Input{{MessageID: "d", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
-		assertReject(t, r, "d", "out_of_range")
+		assertAck(t, r, "d")
 	})
 }
 
@@ -769,9 +841,6 @@ func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
 	if got := sim.entities[sim.playerID].pos; got.X >= 4 {
 		t.Fatalf("player passed closed door: pos=%+v", got)
 	}
-	r := sim.Tick([]Input{{MessageID: "closed_loot", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}}})
-	assertReject(t, r, "closed_loot", "out_of_range")
-
 	open := sim.Tick([]Input{{MessageID: "open", CorrelationID: "corr_door", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
 	assertAck(t, open, "open")
 	if !hasEvent(open, "interactable_activated") {

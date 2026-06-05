@@ -12,6 +12,12 @@
       "max_hp": 3,
       "loot_table": "reward_drop",
       "retaliation_damage": { "min": 1, "max": 1 }
+    },
+    "training_dummy_path": {
+      "name": "Training Dummy",
+      "max_hp": 2,
+      "loot_table": "reward_drop",
+      "retaliation_damage": { "min": 1, "max": 1 }
     }
   }
 }

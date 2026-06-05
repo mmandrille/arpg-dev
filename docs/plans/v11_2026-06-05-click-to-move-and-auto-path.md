@@ -49,8 +49,8 @@
 
 ## Plugin adoption
 
-- [ ] Consult `docs/godot-plugins-and-shortcuts.md`.
-- [ ] Decision: **reject** NavMesh / NavigationServer plugins — in-repo grid A\* mirrors v9 collision.
+- [x] Consult `docs/godot-plugins-and-shortcuts.md`.
+- [x] Decision: **reject** NavMesh / NavigationServer plugins — in-repo grid A\* mirrors v9 collision.
 
 ---
 

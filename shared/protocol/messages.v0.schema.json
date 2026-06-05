@@ -12,6 +12,7 @@
       "enum": [
         "client_ready",
         "move_intent",
+        "move_to_intent",
         "action_intent",
         "equip_intent",
         "session_snapshot",
@@ -32,6 +33,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/client_ready" } } } },
     { "if": { "properties": { "type": { "const": "move_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/move_intent" } } } },
+    { "if": { "properties": { "type": { "const": "move_to_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/move_to_intent" } } } },
     { "if": { "properties": { "type": { "const": "action_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/action_intent" } } } },
     { "if": { "properties": { "type": { "const": "equip_intent" } } },
@@ -76,6 +79,12 @@
         "direction": { "$ref": "#/$defs/vec2" },
         "duration_ticks": { "type": "integer", "minimum": 1 }
       }
+    },
+    "move_to_intent": {
+      "type": "object",
+      "required": ["position"],
+      "additionalProperties": false,
+      "properties": { "position": { "$ref": "#/$defs/vec2" } }
     },
     "action_intent": {
       "type": "object",

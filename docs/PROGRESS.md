@@ -11,7 +11,7 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v10 — `click-action-and-melee-range` (unified action + melee reach + door) |
+| **Latest completed slice** | v11 — `click-to-move-and-auto-path` (server-authoritative auto-navigation) |
 | **Active branch** | `feature/solid-collision-and-obstacles` |
 | **CI gate** | `make ci` green on 2026-06-05 |
 | **Next slice** | TBD |
@@ -26,6 +26,7 @@ v1_* = first-playable    v5_* = resume-state    v8_* = equipped-weapon-damage
 v2_* = equip-and-see-it  v6_* = visual-bot
 v3_* = animate-and-react v7_* = gear-before-combat v9_* = solid-collision
 v4_* = take-a-hit        v10_* = click-action-and-melee-range
+v11_* = click-to-move-and-auto-path
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -38,7 +39,7 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action ──► v11 auto-path
    (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)        (world presets)              (weapon damage)             (walls + bodies)
         │                      │                        │                        │                         │                         │                              │                              │                         │
      main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓                       branch ✓                  branch ✓                  branch ✓
@@ -56,6 +57,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v8** | `equipped-weapon-damage` | Complete (`make ci` green) | [`v8_spec-equipped-weapon-damage.md`](specs/v8_spec-equipped-weapon-damage.md) | [`v8_2026-06-05-equipped-weapon-damage.md`](plans/v8_2026-06-05-equipped-weapon-damage.md) |
 | **v9** | `solid-collision-and-obstacles` | Complete (`make ci` green) | [`v9_spec-solid-collision-and-obstacles.md`](specs/v9_spec-solid-collision-and-obstacles.md) | [`v9_2026-06-05-solid-collision-and-obstacles.md`](plans/v9_2026-06-05-solid-collision-and-obstacles.md) |
 | **v10** | `click-action-and-melee-range` | Complete (`make ci` green) | [`v10_spec-click-action-and-melee-range.md`](specs/v10_spec-click-action-and-melee-range.md) | [`v10_2026-06-05-click-action-and-melee-range.md`](plans/v10_2026-06-05-click-action-and-melee-range.md) |
+| **v11** | `click-to-move-and-auto-path` | Complete (`make ci` green) | [`v11_spec-click-to-move-and-auto-path.md`](specs/v11_spec-click-to-move-and-auto-path.md) | [`v11_2026-06-05-click-to-move-and-auto-path.md`](plans/v11_2026-06-05-click-to-move-and-auto-path.md) |
 
 ---
 
@@ -201,6 +203,25 @@ while the server enforces melee reach and mutable world object state determinist
 **Explicit non-goals (still true):** no click-to-move, pathfinding, ranged weapons, key/lock
 puzzles, door closing, inventory UI, or production door art.
 
+### v11 — Click to move and auto path
+
+**Proves:** The server can own deterministic click-to-move and auto-approach using shared
+navigation rules while preserving replay/resume behavior.
+
+- `move_to_intent { position }` queues server-owned floor-click movement.
+- Out-of-range `action_intent` plans to a reachable melee approach cell, queues movement, and
+  executes the original action on arrival with one acceptance ack.
+- Shared `navigation.v0.json` defines `cell_size`, `max_auto_steps`, search bounds, and
+  `stop_distance`; `auto_path.json` pins the path-maze approach fixture.
+- Go A* rasterizes walls, live monsters, and closed interactables from the same collision rules
+  used by movement; manual `move_intent` cancels queued auto-navigation.
+- `path_maze` world plus bot scenario `05_path_maze.json` proves one entity click routes through
+  a wall maze and kills a target without scripted waypoints.
+- Godot empty-floor left click sends `move_to_intent`; entity click stays `action_intent`.
+
+**Explicit non-goals (still true):** no NavMesh authority, monster AI/pathfinding, path preview UI,
+ranged weapons, door closing, inventory UI, or production navigation polish.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -270,6 +291,9 @@ deterministic replay.
 
 **Click action and melee reach are now authoritative.** v10 unifies combat/pickup/door activation
 behind `action_intent`, enforces reach from shared rules, and proves a replayable opening door.
+
+**Click-to-move and action auto-approach are now authoritative.** v11 adds shared navigation
+rules, deterministic server A*, `move_to_intent`, and a path-maze bot proof.
 
 ### Other deferred items (from specs / ADRs)
 

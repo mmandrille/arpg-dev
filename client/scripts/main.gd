@@ -481,6 +481,9 @@ func _try_action_at_mouse() -> void:
 
 	var target_id := _pick_entity_at_mouse()
 	if target_id == "" or not entities.has(target_id):
+		var ground := _mouse_ground_point()
+		client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
+		_attack_cooldown = SEND_INTERVAL
 		return
 
 	var rec: Dictionary = entities[target_id]

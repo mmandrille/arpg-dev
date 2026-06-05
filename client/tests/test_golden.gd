@@ -76,7 +76,33 @@ func _initialize() -> void:
 		_fail("loot golden mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll)")
+	# 6. Auto-path golden references shared navigation/world rules.
+	var navigation := _read(shared.path_join("rules/navigation.v0.json"))
+	var worlds := _read(shared.path_join("rules/worlds.v0.json"))
+	var auto_path := _read(shared.path_join("golden/auto_path.json"))
+	if auto_path["navigation"] != navigation:
+		_fail("auto_path navigation != navigation rules")
+		return
+	if float(navigation["cell_size"]) != 1.0:
+		_fail("navigation cell_size must be 1.0 for v11 client fixture")
+		return
+	for c in auto_path["cases"]:
+		var world_id := str(c["world_id"])
+		if not worlds["worlds"].has(world_id):
+			_fail("auto_path references unknown world_id %s" % world_id)
+			return
+		if int(c["expected_step_count"]) > int(navigation["max_auto_steps"]):
+			_fail("auto_path case %s exceeds max_auto_steps" % str(c["name"]))
+			return
+		if str(c["goal_mode"]) == "melee_approach":
+			var end: Dictionary = c["expected_end"]
+			var goal: Dictionary = c["goal"]
+			var dist := Vector2(float(end["x"]) - float(goal["x"]), float(end["y"]) - float(goal["y"])).length()
+			if dist > float(c["unarmed_reach"]) + 0.45 + 0.000001:
+				_fail("auto_path case %s end is not in monster melee reach" % str(c["name"]))
+				return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path)")
 	quit(0)
 
 

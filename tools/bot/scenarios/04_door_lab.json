@@ -2,28 +2,12 @@
   "id": "door_lab",
   "world_id": "door_lab",
   "title": "Door lab",
-  "description": "Reject far door activation, open a closed door in melee reach, pass through, and pick up loot beyond it.",
+  "description": "Auto-approach a closed door, open it, then auto-approach and pick up loot beyond it.",
   "steps": [
     {
       "action": "action_entity",
       "interactable_def_id": "wooden_door",
-      "expect_reject": "out_of_range"
-    },
-    {
-      "action": "move_until_in_range",
-      "interactable_def_id": "wooden_door"
-    },
-    {
-      "action": "action_entity",
-      "interactable_def_id": "wooden_door",
       "event_type": "interactable_activated"
-    },
-    {
-      "action": "move_until_player_position",
-      "direction": { "x": 1, "y": 0 },
-      "duration_ticks": 5,
-      "x": 8,
-      "y": 5
     },
     {
       "action": "action_entity",

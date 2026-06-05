@@ -12,6 +12,7 @@
       "enum": [
         "client_ready",
         "move_intent",
+        "move_to_intent",
         "action_intent",
         "equip_intent",
         "session_snapshot",

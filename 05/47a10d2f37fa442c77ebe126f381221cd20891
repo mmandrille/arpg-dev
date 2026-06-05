@@ -1,0 +1,43 @@
+docs/specs/v8_spec-equipped-weapon-damage.md
+  s_3e76a5e988016f::t_711f2bc1837a4a 61
+  s_3e76a5e988016f::t_2b1699e37579c9 287
+  s_3e76a5e988016f::t_c5c32328c83f39 12
+  s_3e76a5e988016f::t_9a65a2ad5c3cdd 30-31
+  s_3e76a5e988016f::t_4f596de0392ea9 185
+  s_46c418e07ef0bf::t_1f5e4a81eee96e 1-11,13-29,32-60,62-184,186-286,288-297
+docs/plans/v8_2026-06-05-equipped-weapon-damage.md
+  s_27893c70ee0904::t_3de1a36cd533d5 1-112,115-272
+  s_27893c70ee0904::t_f92e657420c8ca 113-114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "0547a10d2f37fa442c77ebe126f381221cd20891",
+  "prompts": {},
+  "sessions": {
+    "s_27893c70ee0904": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e988b-d56d-7af3-a2d7-c3132d29ec09",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_3e76a5e988016f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "30ac73e9-6647-4d09-8e73-e004287efaaf",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_46c418e07ef0bf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a3689368-8f74-4f4e-ba89-df62607bb60e",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

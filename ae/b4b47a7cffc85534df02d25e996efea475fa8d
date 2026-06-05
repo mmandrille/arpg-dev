@@ -1,0 +1,21 @@
+server/internal/realtime/protocol.go
+  s_4565ec34f2f0e0::t_01a20ff218e44b 11,19-23,79,85
+server/internal/inputdecode/inputdecode.go
+  s_4565ec34f2f0e0::t_01a20ff218e44b 1-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "aeb4b47a7cffc85534df02d25e996efea475fa8d",
+  "prompts": {},
+  "sessions": {
+    "s_4565ec34f2f0e0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e980d-e89f-74a3-88ab-4bfb7f0f8cf7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

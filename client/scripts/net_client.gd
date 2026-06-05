@@ -82,9 +82,15 @@ func login(email: String, dev_token: String) -> bool:
 	return false
 
 
-func create_session() -> bool:
+func create_session(resume_session_id: String = "") -> bool:
+	# resume_session_id rejoins an existing session: the server rehydrates
+	# inventory AND equipped state before the initial session_snapshot (no
+	# protocol change — see spec §4.5). Empty string mints a fresh session.
+	var body := {"mode": "solo"}
+	if resume_session_id != "":
+		body["resume_session_id"] = resume_session_id
 	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
-		["Authorization: Bearer " + token], JSON.stringify({"mode": "solo"}))
+		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) in [200, 201] and r.has("body"):
 		session_id = r["body"]["session_id"]
 		seed = r["body"]["seed"]

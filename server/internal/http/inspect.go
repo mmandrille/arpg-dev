@@ -52,12 +52,12 @@ func (s *Server) handleSessionState(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	snap, _, _, err := replay.Reconstruct(r.Context(), s.store, s.rules, sess.ID)
+	recon, err := replay.Reconstruct(r.Context(), s.store, s.rules, sess.ID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not reconstruct state")
 		return
 	}
-	writeJSON(w, http.StatusOK, snap)
+	writeJSON(w, http.StatusOK, recon.Snapshot)
 }
 
 // handleSessionReplay returns replay metadata plus the latest verification

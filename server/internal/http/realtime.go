@@ -11,8 +11,9 @@ func (s *Server) registerRealtimeRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /v0/ws", s.requireAuth(http.HandlerFunc(s.handleWS)))
 }
 
-// handleWS authenticates (via requireAuth), validates session ownership, loads
-// the character's persisted inventory, then upgrades to the realtime protocol.
+// handleWS authenticates (via requireAuth), validates session ownership, then
+// upgrades to the realtime protocol. The hub restores authoritative state from
+// recorded inputs when this is a same-session resume.
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	accountID, ok := accountFromContext(r.Context())
 	if !ok {
@@ -36,12 +37,5 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inventory, err := s.store.ListInventory(r.Context(), sess.ID)
-	if err != nil {
-		s.metrics.PersistenceErrors.Inc()
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not load inventory")
-		return
-	}
-
-	s.realtime.Run(w, r, sess, inventory)
+	s.realtime.Run(w, r, sess)
 }

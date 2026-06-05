@@ -13,6 +13,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/metrics"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -38,7 +39,15 @@ type runner struct {
 	closeOnce sync.Once
 }
 
-func newRunner(conn *websocket.Conn, sim *game.Sim, sess store.Session, st store.Repository, log *slog.Logger, m *metrics.Metrics) *runner {
+func newRunner(conn *websocket.Conn, sim *game.Sim, sess store.Session, st store.Repository, log *slog.Logger, m *metrics.Metrics, meta *replay.ResumeMetadata) *runner {
+	seen := make(map[string]bool)
+	seq := int64(0)
+	if meta != nil {
+		for id := range meta.SeenMessageIDs {
+			seen[id] = true
+		}
+		seq = meta.NextSequence
+	}
 	return &runner{
 		conn:     conn,
 		sim:      sim,
@@ -47,8 +56,9 @@ func newRunner(conn *websocket.Conn, sim *game.Sim, sess store.Session, st store
 		log:      logging.Component(log, "realtime").With("session_id", sess.ID),
 		metrics:  m,
 		buffer:   make(map[uint64][]game.Input),
-		seen:     make(map[string]bool),
+		seen:     seen,
 		received: make(map[string]time.Time),
+		seq:      seq,
 		sendCh:   make(chan outEnvelope, sendQueueSize),
 		done:     make(chan struct{}),
 	}
@@ -196,11 +206,11 @@ func (r *runner) handleMessage(data []byte) {
 	r.buffer[t] = append(r.buffer[t], in)
 	r.received[env.MessageID] = time.Now()
 	rec := store.SessionInput{
-		ID:        ids.New("inp"),
-		SessionID: r.sess.ID,
-		Tick:      int64(t),
-		Sequence:  in.Sequence,
-		MessageID: env.MessageID,
+		ID:            ids.New("inp"),
+		SessionID:     r.sess.ID,
+		Tick:          int64(t),
+		Sequence:      in.Sequence,
+		MessageID:     env.MessageID,
 		CorrelationID: env.CorrelationID,
 		// Persist the full envelope so replay can recover the message type
 		// (session_inputs has no type column, per spec 4.6).

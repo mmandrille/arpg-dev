@@ -8,6 +8,7 @@ import (
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/metrics"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -36,26 +37,34 @@ func NewHub(st store.Repository, rules *game.Rules, log *slog.Logger, m *metrics
 }
 
 // Run upgrades the request to a WebSocket and runs the authoritative session
-// loop. The caller must have already validated session ownership and supplies
-// the session record and its character's persisted inventory.
-func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session, inventory []store.InventoryItem) {
+// loop. The caller must have already validated session ownership.
+func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
+	storedInputs, err := h.store.ListInputs(r.Context(), sess.ID)
+	if err != nil {
+		h.metrics.PersistenceErrors.Inc()
+		http.Error(w, "could not load session inputs", http.StatusInternalServerError)
+		return
+	}
+
+	sim := game.NewSim(sess.ID, sess.Seed, h.rules)
+	var meta *replay.ResumeMetadata
+	if len(storedInputs) > 0 {
+		recon, err := replay.Reconstruct(r.Context(), h.store, h.rules, sess.ID)
+		if err != nil {
+			h.metrics.PersistenceErrors.Inc()
+			h.log.Error("reconstruct session for websocket resume", "session_id", sess.ID, "error", err)
+			http.Error(w, "could not reconstruct session", http.StatusInternalServerError)
+			return
+		}
+		sim = recon.Sim
+		meta = &recon.Metadata
+	}
+
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		// Upgrade writes its own HTTP error response on failure.
 		return
 	}
 
-	sim := game.NewSim(sess.ID, sess.Seed, h.rules)
-	items := make([]game.PersistedItem, 0, len(inventory))
-	for _, it := range inventory {
-		items = append(items, game.PersistedItem{
-			InstanceID: it.ID,
-			ItemDefID:  it.ItemDefID,
-			Slot:       it.Slot,
-			Equipped:   it.Equipped,
-		})
-	}
-	sim.LoadInventory(items)
-
-	newRunner(conn, sim, sess, h.store, h.log, h.metrics).run(r.Context())
+	newRunner(conn, sim, sess, h.store, h.log, h.metrics, meta).run(r.Context())
 }

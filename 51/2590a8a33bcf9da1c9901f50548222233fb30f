@@ -1,0 +1,29 @@
+docs/godot-plugins-and-shortcuts.md
+  s_082ae866d76840::t_47db65eefe7c77 31
+  s_082ae866d76840::t_f008e0021bacf0 1-8,11-30,32-109,156-187,189-203,205-234,236-247,249-259,265-280
+  s_082ae866d76840::t_a96bbb0a263f70 9-10
+  s_082ae866d76840::t_d9763a78408b7f 204
+  s_082ae866d76840::t_2a85f6ff528090 235
+  s_082ae866d76840::t_80abecc6aaf400 110-155
+  s_082ae866d76840::t_684e71ae634859 248
+  s_082ae866d76840::t_a3a7e0b59c774a 260-264
+  s_082ae866d76840::t_279a9d689366f5 188
+AGENTS.md
+  s_082ae866d76840::t_09c02b8a22b382 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "512590a8a33bcf9da1c9901f50548222233fb30f",
+  "prompts": {},
+  "sessions": {
+    "s_082ae866d76840": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "52f9ffb5-096e-4baa-a560-e30ffe23588d",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

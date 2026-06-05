@@ -1,0 +1,36 @@
+docs/adr/0001-technology-stack.md
+  s_ddc30b5c926323::t_2fdaf3d4470942 124-133
+  s_962916d7bd59ea::t_d731b1f5896f09 16-18,20-21,54,56-64,67-69,72-73,76-79,97,100,113-122,183-190,194-195,199-200,226-235,278-282,284,308-309,318-319,327-332
+  s_ddc30b5c926323::t_b47ae989f3dc6e 161-176
+  s_ddc30b5c926323::t_6474353fa877e2 269
+  s_ddc30b5c926323::t_e8abbf2bf88496 286-297,299-301
+  s_ddc30b5c926323::t_250e6e7ad0493e 201-204
+  s_ddc30b5c926323::t_ccb915ba64b073 343-355
+  s_ddc30b5c926323::t_115f5edd539eac 222-225
+  s_ddc30b5c926323::t_23bc7671c4a828 239-258
+  s_ddc30b5c926323::t_26ce1c814ba2af 1-15,19,22-53,55,65-66,70-71,74-75,80-96,98-99,101-112,123,134-160,177-182,191-193,196-198,205-221,236-238,259-268,270-277,283,285,298,302-307,310-317,320-326,333-342
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "738417ec50b34720b763355b8ebaa9e0d2efe36e",
+  "prompts": {},
+  "sessions": {
+    "s_962916d7bd59ea": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e951e-5cbf-7223-aa3a-68dd41da8507",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    },
+    "s_ddc30b5c926323": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7684501-a273-4033-81d4-ebb5d048caae",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    }
+  }
+}

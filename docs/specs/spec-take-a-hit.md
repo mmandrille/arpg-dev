@@ -236,12 +236,11 @@ Extend v3's snapshot rules to the **player**:
 - If `hp <= 0` and `player_anim != null`: `enter_terminal("death")` immediately
   (no `recent_events` dependency — same rule as monsters).
 - If `hp > 0`: do not force a clip; locomotion/idle derives from input as today.
-- Monster resume death pose: unchanged (v3 smoke forces `hp == 0` because resume
-  rebuilds combat from seed + inventory only).
-- **Player death resume in default smoke:** out of scope — same server resume
-  limitation as monsters. Acceptance #7 is covered by `main.gd` snapshot wiring
-  plus a **headless harness** in `test_animation.gd` (player entity `hp == 0`
-  → terminal `death`, no event replay).
+- **v5 as-built:** WebSocket resume now replays recorded inputs before sending
+  `session_snapshot`; monster death and reduced player HP are restored
+  authoritatively. See `spec-resume-authoritative-state.md`.
+- **Player death resume:** covered by the v5 WebSocket integration test with a
+  focused high-HP/lethal-retaliation rules fixture.
 
 ### 5.4 Scripted slice outcome (golden)
 
@@ -368,9 +367,11 @@ retaliation golden.
 **Extended slice smoke (`smoke.gd`):**
 - During kill loop: assert at least one `player_damaged` and player `hit` clip.
 - After equip verify: `/state` player `hp < 10` (not exact golden — random seed).
-- Resume phase: unchanged (weapon restore only); player stays alive at reduced HP.
+- Resume phase after v5: assert replay-restored monster `hp == 0`, player
+  `hp < 10`, and mounted weapon state from the server snapshot.
 
-**Python bot (`make bot`):** assert `/state` player `hp < 10` after slice.
+**Python bot (`make bot`):** assert `/state` and WebSocket resume both report
+player `hp < 10`, monster `hp == 0`, and equipped `rusty_sword`.
 
 **Interactive visual inspection (`make bot-visual`):** optional developer workflow;
 not part of CI. See §11.

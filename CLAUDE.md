@@ -10,8 +10,8 @@ That file is the canonical lifecycle doc: completed slices (v0–v4), current br
 what each slice proved, known gaps, deferred backlog, and the agent checklist for starting work.
 Update it when a slice ships.
 
-**Current snapshot (2026-06-05):** slices through **v4 `take-a-hit`** are implemented on
-`feature/animate-and-react` (`make ci` green); not yet merged to `main`. No v5 spec exists.
+**Current snapshot (2026-06-05):** slices through **v10 `click-action-and-melee-range`** are
+implemented on `feature/solid-collision-and-obstacles` (`make ci` green); not yet merged to `main`.
 
 ## Commands
 

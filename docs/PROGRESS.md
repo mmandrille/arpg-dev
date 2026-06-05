@@ -11,10 +11,10 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v9 — `solid-collision-and-obstacles` (authoritative monster/wall collision) |
+| **Latest completed slice** | v10 — `click-action-and-melee-range` (unified action + melee reach + door) |
 | **Active branch** | `feature/solid-collision-and-obstacles` |
 | **CI gate** | `make ci` green on 2026-06-05 |
-| **Next slice** | v10 — `click-action-and-melee-range` (spec + plan drafted) |
+| **Next slice** | TBD |
 
 ### Slice numbering note
 
@@ -38,10 +38,10 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action
    (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)        (world presets)              (weapon damage)             (walls + bodies)
         │                      │                        │                        │                         │                         │                              │                              │                         │
-     main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓                       branch ✓                  branch ✓
+     main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓                       branch ✓                  branch ✓                  branch ✓
 ```
 
 | Slice | Codename | Status | Spec | Plan |
@@ -55,6 +55,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v7** | `gear-before-combat-scenario` | Complete (`make ci` green) | [`v7_spec-gear-before-combat-scenario.md`](specs/v7_spec-gear-before-combat-scenario.md) | [`v7_2026-06-05-gear-before-combat-scenario.md`](plans/v7_2026-06-05-gear-before-combat-scenario.md) |
 | **v8** | `equipped-weapon-damage` | Complete (`make ci` green) | [`v8_spec-equipped-weapon-damage.md`](specs/v8_spec-equipped-weapon-damage.md) | [`v8_2026-06-05-equipped-weapon-damage.md`](plans/v8_2026-06-05-equipped-weapon-damage.md) |
 | **v9** | `solid-collision-and-obstacles` | Complete (`make ci` green) | [`v9_spec-solid-collision-and-obstacles.md`](specs/v9_spec-solid-collision-and-obstacles.md) | [`v9_2026-06-05-solid-collision-and-obstacles.md`](plans/v9_2026-06-05-solid-collision-and-obstacles.md) |
+| **v10** | `click-action-and-melee-range` | Complete (`make ci` green) | [`v10_spec-click-action-and-melee-range.md`](specs/v10_spec-click-action-and-melee-range.md) | [`v10_2026-06-05-click-action-and-melee-range.md`](plans/v10_2026-06-05-click-action-and-melee-range.md) |
 
 ---
 
@@ -176,8 +177,28 @@ static world walls while preserving replay/resume determinism.
   manifests; the server still owns all collision outcomes.
 - `make ci` green on 2026-06-05.
 
-**Explicit non-goals (still true):** no pathfinding, navmesh, monster movement/AI, polygon
-collision, attack range, or wall protocol entities.
+**Explicit non-goals:** no pathfinding, navmesh, monster movement/AI, polygon collision, or wall
+protocol entities. Attack range was deferred in v9 and closed by v10.
+
+### v10 — Click action and melee range
+
+**Proves:** A single left-click action can cover combat, loot pickup, and interactable activation
+while the server enforces melee reach and mutable world object state deterministically.
+
+- `action_intent { target_id }` replaces active `attack_intent` / `pick_up_intent` protocol use.
+- Shared combat/item rules define `combat.unarmed_reach` and weapon `reach`; Go and GDScript
+  consume `shared/golden/melee_reach.json`.
+- Server rejects in-world actionable targets beyond reach with `out_of_range`.
+- `wooden_door` interactables spawn from shared rules, block movement while closed, open through
+  an authoritative action, emit `interactable_activated`, and unblock passage.
+- Godot left-click ray-picks monsters, loot, and doors through per-entity pick colliders; doors are
+  rendered as simple in-repo panels that tween open from authoritative state.
+- Bot scenarios `01`-`03` now use action steps; `04_door_lab` proves far reject, door open,
+  passage, loot pickup, reconnect resume, and replay.
+- `make ci` green on 2026-06-05.
+
+**Explicit non-goals (still true):** no click-to-move, pathfinding, ranged weapons, key/lock
+puzzles, door closing, inventory UI, or production door art.
 
 ---
 
@@ -246,12 +267,15 @@ dummy in one acknowledged attack.
 against live monsters and static world walls, while collision lab proves routed movement and
 deterministic replay.
 
+**Click action and melee reach are now authoritative.** v10 unifies combat/pickup/door activation
+behind `action_intent`, enforces reach from shared rules, and proves a replayable opening door.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Cross-session **character-scoped** inventory | v0 as-built §10 |
-| Combat | Attack range, miss chance, healing, armor, respawn | v0/v4 non-goals |
+| Combat | Miss chance, healing, armor, respawn | v0/v4 non-goals |
 | Content | Visual mappings for items beyond `rusty_sword` | equip spec §4.9 |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

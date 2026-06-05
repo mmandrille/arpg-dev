@@ -1,0 +1,102 @@
+server/internal/replay/replay_test.go
+  s_7213b065e67b44::t_056b94f4bb157f 22-25,52-55,58,75-94
+server/internal/game/sim.go
+  s_7213b065e67b44::t_946a098901b2f7 21-23,69,71-83,94,99-119,122-141
+shared/rules/worlds.v0.json
+  s_7213b065e67b44::t_f96866abda40b8 1-30
+tools/bot/scenarios/01_vertical_slice.json
+  s_7213b065e67b44::t_0f25ff1e685c73 1-30
+tools/bot/scenarios/02_gear_before_combat.json
+  s_7213b065e67b44::t_0f25ff1e685c73 1-40
+docs/specs/spec-gear-before-combat-scenario.md
+  s_7213b065e67b44::t_ae2052cb27687c 3
+  h_6c904e338a0e5a 1-2,4-574
+docs/PROGRESS.md
+  s_7213b065e67b44::t_ab6e58eeadc250 14,22,32-35,46,126-138,163-170,194-195
+server/migrations/0002_session_world_id.sql
+  s_7213b065e67b44::t_e5e76c03fae6e2 1-4
+tools/bot/run.py
+  s_7213b065e67b44::t_6b45552614801a 471,486-489,492-493,506-507,509,512-520,524,532-555,557
+  s_7213b065e67b44::t_634c4d2b866add 35-37,58,62,70-72,86-88,91,124-125,128
+  s_7213b065e67b44::t_aaf06a1968ec78 169-170
+  s_a678ddda9cfd2c::t_4b61ddef04fef1 42-48
+  s_7213b065e67b44::t_694ec4acda6c11 602,621,632
+  s_7213b065e67b44::t_edadf1f6b12a07 201-206,214-216,223-236,253-270,287-305
+  s_7213b065e67b44::t_6baad37b358ac6 311-334,336-341,343-344,358-359
+  s_7213b065e67b44::t_96c66d262c80b8 335,342,345-357
+  s_7213b065e67b44::t_ae789d8be60b4d 378-380,385,393-406,408,410-411,414-429,432-468
+docs/plans/2026-06-05-gear-before-combat-scenario.md
+  s_a678ddda9cfd2c::t_542456360aca55 1-2,4-85,87-91,93-95,97-98,101,103-122,124,126,129-131,134,136-156,158-163,166-170,173,175,179-180,182-184,186,188-206,211-213,216,218-224,226-229,231-232,234,236,238-241,243-248,250-258,261,263,265,267-269,271-291,295,298-312,316,323-345
+  s_7213b065e67b44::t_b09ae203869fe4 3,86,92,96,99-100,102,123,125,127-128,132-133,135,157,164-165,171-172,174,176-178,181,185,187,207-210,214-215,217,225,230,233,235,237,242,249,259-260,262,264,266,270,292-294,296-297,313-315,317-322
+server/internal/game/game_test.go
+  s_7213b065e67b44::t_80aca0140d01b0 62-111
+  s_7213b065e67b44::t_349e82a0259670 503-509
+shared/rules/items.v0.json
+  s_7213b065e67b44::t_f96866abda40b8 4-5
+shared/rules/loot_tables.v0.json
+  s_7213b065e67b44::t_f96866abda40b8 8-12
+server/internal/http/session.go
+  s_7213b065e67b44::t_1590d667def0de 9,21,28,71-83,102,119
+server/internal/store/store_test.go
+  s_7213b065e67b44::t_e5e76c03fae6e2 90,100,115,163
+server/internal/store/repos.go
+  s_7213b065e67b44::t_e5e76c03fae6e2 87-89,100,102
+  s_a678ddda9cfd2c::t_b30ddb2aa6230a 109-111
+server/internal/http/ws_test.go
+  s_7213b065e67b44::t_f7a4eef96656e2 106-109,118-122
+shared/rules/items.v0.schema.json
+  s_7213b065e67b44::t_f96866abda40b8 15,21-37
+server/internal/game/rules.go
+  s_7213b065e67b44::t_946a098901b2f7 18,59-77,101-108,133-175
+server/internal/replay/replay.go
+  s_a678ddda9cfd2c::t_a17b6339dd6e58 147
+  s_a678ddda9cfd2c::t_80872e2f7a4a92 327-334
+  s_7213b065e67b44::t_f8ce1375a47e5a 113-115,148-150,207,222-225,247
+  s_a678ddda9cfd2c::t_6c321492f716a8 112
+tools/bot/test_protocol.py
+  s_7213b065e67b44::t_eef99092c2bba8 1-2,4-14,44-52,70-153
+tools/validate_shared.py
+  s_7213b065e67b44::t_f96866abda40b8 119,185-214,246
+server/internal/store/models.go
+  s_a678ddda9cfd2c::t_a58c90c3c4951f 41-43
+  s_7213b065e67b44::t_e5e76c03fae6e2 29
+shared/rules/monsters.v0.json
+  s_7213b065e67b44::t_f96866abda40b8 9-14
+server/internal/http/replay_test.go
+  s_7213b065e67b44::t_f7a4eef96656e2 202-257
+server/internal/realtime/hub.go
+  s_a678ddda9cfd2c::t_fb9e53e6e97f80 49,61-72
+server/internal/http/auth_session_test.go
+  s_7213b065e67b44::t_50b9c080ed7fa5 15,40-47,54,135,150,155-194
+shared/rules/worlds.v0.schema.json
+  s_7213b065e67b44::t_f96866abda40b8 1-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "72eb3d40de155030515737facc20b54e153ecdc4",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_7213b065e67b44": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e986c-0840-7bd3-8f59-ccca6965dbff",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a678ddda9cfd2c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fb0df4f8-6b4a-4012-8590-262b750cdda6",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -171,6 +171,15 @@ def assert_equipped_sword(inventory: list[dict], equipped: dict, item_id: str, w
         raise AssertionError(f"{where}: equipped weapon {equipped.get('weapon')} != {item_id}")
 
 
+def assert_player_damaged(entities: list[dict], where: str) -> None:
+    players = [e for e in entities if e.get("type") == "player"]
+    if len(players) != 1:
+        raise AssertionError(f"{where}: expected one player entity, got {players}")
+    hp = players[0].get("hp")
+    if not isinstance(hp, int) or hp >= 10:
+        raise AssertionError(f"{where}: player hp {hp} did not show retaliation damage")
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -192,7 +201,8 @@ def main() -> int:
         # Assert authoritative state through the inspection API.
         state = fetch_state(client, token, args.debug_token, session_id)
         assert_equipped_sword(state["inventory"], state["equipped"], item_id, "/state API")
-        log("/state API confirms equipped inventory")
+        assert_player_damaged(state["entities"], "/state API")
+        log("/state API confirms equipped inventory and player damage")
 
         # Assert persistence by reconnecting a fresh session loop.
         asyncio.run(check_persistence(args.base_url, token, session_id, item_id))

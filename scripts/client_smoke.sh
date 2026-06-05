@@ -33,6 +33,14 @@ echo "[client-smoke] running GDScript golden test"
 echo "[client-smoke] running GDScript item visual resolution test"
 "$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_item_visuals.gd
 
+# 2b. Rig gate: both GLBs import as skinned Skeleton3D (spec §10 fail-fast).
+echo "[client-smoke] running GDScript rig gate"
+"$GODOT" --headless --path "$CLIENT_DIR" --script res://tools/inspect_rig.gd
+
+# 2c. Animation controller + rigged scene test (server-independent).
+echo "[client-smoke] running GDScript animation test"
+"$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_animation.gd
+
 # 3. Headless slice smoke against the running server.
 echo "[client-smoke] running headless slice smoke"
 "$GODOT" --headless --path "$CLIENT_DIR" --script res://scripts/smoke.gd

@@ -1,0 +1,27 @@
+client/scripts/equipment_visuals.gd
+  s_a613d4b1a5f4a5::t_55b12415a4cbfd 76-92
+  s_a613d4b1a5f4a5::t_00864e02956b50 159-161
+  s_a613d4b1a5f4a5::t_da81d01e3603c7 23-24,27-29
+  s_a613d4b1a5f4a5::t_6a151468b84a03 145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "e30b5e771f2f4a36c35e8f266acadfe8cf272121",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_a613d4b1a5f4a5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7438c798-9790-4b42-a7d9-cc04781129ed",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

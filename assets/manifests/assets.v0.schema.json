@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/assets.v0.schema.json",
+  "title": "Asset manifest (v0)",
+  "description": "asset_id -> runtime .glb file + metadata. Single source of truth for asset identity->file (ADR-0006 D3).",
+  "type": "object",
+  "required": ["version", "assets"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "assets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["type", "runtime_path", "format"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "enum": ["character", "equipment"] },
+          "slot": { "type": "string", "enum": ["weapon"] },
+          "source_path": { "type": "string" },
+          "runtime_path": { "type": "string", "minLength": 1 },
+          "format": { "type": "string", "enum": ["glb"] },
+          "scale_unit": { "type": "string", "enum": ["meters"] },
+          "required_nodes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "provenance": {
+            "type": "object",
+            "required": ["license"],
+            "additionalProperties": false,
+            "properties": {
+              "source_url": { "type": "string" },
+              "origin": { "type": "string" },
+              "license": { "type": "string", "minLength": 1 },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

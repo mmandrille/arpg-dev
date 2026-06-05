@@ -1,0 +1,31 @@
+README.md
+  s_453dc3b8c102a5::t_ce5288e361a3e4 2-56
+.godot-version
+  s_453dc3b8c102a5::t_7801cd62715742 1
+.tool-versions
+  s_453dc3b8c102a5::t_11b5e37bfafacf 1-7
+.gitignore
+  s_453dc3b8c102a5::t_446209de589b56 18-29
+Makefile
+  s_453dc3b8c102a5::t_fbe857d96dbc77 1-91
+pyproject.toml
+  s_453dc3b8c102a5::t_a5f256a4fefb6b 1-27
+docker-compose.yml
+  s_453dc3b8c102a5::t_02bebfa9a35384 1-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "156553f4e8ca79d422641beab81c07fed491fa62",
+  "prompts": {},
+  "sessions": {
+    "s_453dc3b8c102a5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b19faada-d99f-4150-81ee-94c64c9f386d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    }
+  }
+}

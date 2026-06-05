@@ -1,0 +1,31 @@
+assets/equipment/weapons/rusty_sword/README.md
+  s_56b42e2608aa12::t_8d94188faf087b 1-8
+docs/adr/0006-asset-pipeline.md
+  s_56b42e2608aa12::t_1073c46f40fce2 1-113
+assets/README.md
+  s_56b42e2608aa12::t_8e7a7d4f94bf84 1-23
+tools/assets/README.md
+  s_56b42e2608aa12::t_39c733f8475a4a 1-11
+assets/manifests/README.md
+  s_56b42e2608aa12::t_16be8b14b6a7fc 1-3
+client/assets/README.md
+  s_56b42e2608aa12::t_822198a10f4f74 1-14
+assets/characters/base_humanoid/README.md
+  s_56b42e2608aa12::t_1bdd2cae4c8ab8 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "f7652579e64be31a5cb7d412e98e08802ba95397",
+  "prompts": {},
+  "sessions": {
+    "s_56b42e2608aa12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "198f963e-4091-4cdb-bd5a-29791eaa2bd5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -14,7 +14,10 @@ ADDR="${ARPG_ADDR:-:8080}"
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
+EMAIL="${ARPG_EMAIL:-bot@example.test}"
 AUTOPLAY_STEP_DELAY="${AUTOPLAY_STEP_DELAY:-0.45}"
+EXIT_ON_COMPLETE="${ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE:-1}"
+MANIFEST="${ARPG_VISUAL_REPLAY_MANIFEST:-$ROOT/.artifacts/bot-runs/$(date -u +%Y%m%dT%H%M%SZ)-visual.json}"
 
 if ! command -v "$GODOT" >/dev/null 2>&1; then
   echo "[bot-visual] Godot runtime '$GODOT' not found on PATH."
@@ -50,12 +53,18 @@ for i in $(seq 1 60); do
 done
 curl -fsS "$BASE_URL/readyz" >/dev/null
 
+echo "[bot-visual] recording bot scenarios (manifest: $MANIFEST)..."
+"$ROOT/.venv/bin/python" -m tools.bot.run \
+  --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
+  --email "$EMAIL" --scenario all --write-manifest "$MANIFEST"
+
 "$GODOT" --headless --path "$ROOT/client" --import >/dev/null 2>&1 || true
 
-echo "[bot-visual] launching Godot visual bot."
-echo "[bot-visual] AUTOPLAY_STEP_DELAY=$AUTOPLAY_STEP_DELAY; close the window to stop the server."
-ARPG_BASE_URL="$BASE_URL" ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
-  ARPG_AUTOPLAY=1 ARPG_AUTOPLAY_STEP_DELAY="$AUTOPLAY_STEP_DELAY" \
+echo "[bot-visual] launching Godot visual replay playlist."
+echo "[bot-visual] AUTOPLAY_STEP_DELAY=$AUTOPLAY_STEP_DELAY; EXIT_ON_COMPLETE=$EXIT_ON_COMPLETE."
+ARPG_BASE_URL="$BASE_URL" ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" ARPG_EMAIL="$EMAIL" \
+  ARPG_VISUAL_REPLAY_MANIFEST="$MANIFEST" ARPG_AUTOPLAY_STEP_DELAY="$AUTOPLAY_STEP_DELAY" \
+  ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE="$EXIT_ON_COMPLETE" \
   "$GODOT" $GODOT_FLAGS --path "$ROOT/client"
 
 echo "[bot-visual] client closed; shutting down server."

@@ -11,7 +11,7 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v5 — `resume-authoritative-state` (authoritative combat/world resume) |
+| **Latest completed slice** | v6 — `visual-bot-scenario-runner` (discoverable bot scenarios + visual replay playlist) |
 | **Active branch** | `feature/resume-authoritative-state` |
 | **CI gate** | `make ci` green on 2026-06-05 |
 | **Next slice** | TBD |
@@ -29,10 +29,10 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-authoritative-state
-   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)
-        │                      │                        │                        │                         │
-     main ✓                  main ✓                    main ✓                    main ✓              branch ✓
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios
+   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)
+        │                      │                        │                        │                         │                         │
+     main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓
 ```
 
 | Slice | Codename | Status | Spec | Plan |
@@ -42,6 +42,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v3** | `animate-and-react` | Complete (on `main`) | [`spec-animate-and-react.md`](specs/spec-animate-and-react.md) | [`2026-06-05-animate-and-react.md`](plans/2026-06-05-animate-and-react.md) |
 | **v4** | `take-a-hit` | Complete (on `main`) | [`spec-take-a-hit.md`](specs/spec-take-a-hit.md) | [`2026-06-05-take-a-hit.md`](plans/2026-06-05-take-a-hit.md) |
 | **v5** | `resume-authoritative-state` | Complete (`make ci` green) | [`spec-resume-authoritative-state.md`](specs/spec-resume-authoritative-state.md) | [`2026-06-05-resume-authoritative-state.md`](plans/2026-06-05-resume-authoritative-state.md) |
+| **v6** | `visual-bot-scenario-runner` | Complete (`make ci` green) | [`spec-visual-bot-scenario-runner.md`](specs/spec-visual-bot-scenario-runner.md) | [`2026-06-05-visual-bot-scenario-runner.md`](plans/2026-06-05-visual-bot-scenario-runner.md) |
 
 ---
 
@@ -107,6 +108,20 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 **Explicit non-goals (still true):** no character-scoped inventory, no respawn/healing/checkpoints, no protocol schema bump.
 
+### v6 — Visual bot scenario runner
+
+**Proves:** Bot scenarios are discoverable local artifacts and can be visually replayed without hardcoding Godot-only flows.
+
+- `tools/bot/scenarios/*.json` defines declarative scenario steps and named assertions.
+- `make bot` runs every discovered scenario through auth + WebSocket, then verifies `/state`, reconnect resume, and replay.
+- `tools.bot.run --write-manifest` writes `.artifacts/bot-runs/*.json` with scenario/session metadata.
+- Debug endpoint `GET /v0/sessions/{id}/replay/timeline` emits protocol-shaped snapshot/delta envelopes from deterministic replay.
+- `make bot-visual` records all scenarios, verifies replay, then launches Godot with a visual replay playlist.
+- Godot visual replay mode consumes the manifest and timeline envelopes through existing snapshot/delta render handlers.
+- The visual replay client exits normally after the playlist completes; set `ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE=0` to keep it open.
+
+**Explicit non-goals (still true):** no production replay browser, no durable artifact retention policy, no client presentation annotations beyond authoritative events.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -131,16 +146,17 @@ dev-login → create session → move → attack training dummy → pick up loot
 ```
 
 After v4 the player **survives with reduced HP** (`hp < 10`). Monster dies; player may take retaliation
-each successful hit.
+each successful hit. After v6 this flow lives in `tools/bot/scenarios/vertical_slice.json`; additional
+scenario JSON files are automatically included in `make bot` and `make bot-visual`.
 
 **Verify:**
 
 ```bash
 make db-up && make server    # terminal 1
-make bot                     # terminal 2 — protocol bot
+make bot                     # terminal 2 — all protocol bot scenarios
 make client-smoke            # headless Godot gates + slice smoke
 make ci                      # full suite
-make bot-visual              # optional — watch autoplay in Godot window
+make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
 ```
 
 ---

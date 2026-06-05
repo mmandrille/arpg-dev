@@ -108,6 +108,15 @@ func get_state(debug_token: String) -> Dictionary:
 	return {}
 
 
+func get_replay_timeline(debug_token: String, replay_session_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/sessions/%s/replay/timeline" % replay_session_id,
+		["Authorization: Bearer " + token, "X-Debug-Token: " + debug_token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("get_replay_timeline failed: %s" % r)
+	return {}
+
+
 # --- WebSocket --------------------------------------------------------------
 
 func connect_ws() -> void:

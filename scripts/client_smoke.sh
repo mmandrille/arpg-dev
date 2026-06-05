@@ -22,26 +22,41 @@ fi
 
 echo "[client-smoke] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
 
+# Godot exits 0 even on a GDScript PARSE/load error when run via --script, so a
+# bare exit-code check could pass silently on a broken gate. run_gate captures
+# each gate's combined output and asserts its expected success sentinel appears,
+# failing nonzero (with a clear message) if it does not.
+run_gate() {
+  local label="$1" sentinel="$2" script="$3"
+  local out
+  echo "[client-smoke] running $label"
+  if ! out="$("$GODOT" --headless --path "$CLIENT_DIR" --script "$script" 2>&1)"; then
+    printf '%s\n' "$out"
+    echo "[client-smoke] FAIL: $label exited nonzero" >&2
+    exit 1
+  fi
+  printf '%s\n' "$out"
+  if ! grep -qF -- "$sentinel" <<<"$out"; then
+    echo "[client-smoke] FAIL: $label did not emit expected sentinel: $sentinel" >&2
+    exit 1
+  fi
+}
+
 # Import resources once so headless --script runs cleanly.
 "$GODOT" --headless --path "$CLIENT_DIR" --import >/dev/null 2>&1 || true
 
 # 1. GDScript golden-fixture test (server-independent; ADR D6 / acceptance #7).
-echo "[client-smoke] running GDScript golden test"
-"$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_golden.gd
+run_gate "GDScript golden test" "[gdtest] PASS" res://tests/test_golden.gd
 
 # 2. Item visual resolution test (server-independent; acceptance #14).
-echo "[client-smoke] running GDScript item visual resolution test"
-"$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_item_visuals.gd
+run_gate "GDScript item visual resolution test" "[gdtest] PASS" res://tests/test_item_visuals.gd
 
 # 2b. Rig gate: both GLBs import as skinned Skeleton3D (spec §10 fail-fast).
-echo "[client-smoke] running GDScript rig gate"
-"$GODOT" --headless --path "$CLIENT_DIR" --script res://tools/inspect_rig.gd
+run_gate "GDScript rig gate" "[rig-gate] PASS" res://tools/inspect_rig.gd
 
 # 2c. Animation controller + rigged scene test (server-independent).
-echo "[client-smoke] running GDScript animation test"
-"$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_animation.gd
+run_gate "GDScript animation test" "[gdtest] PASS: animation controller + scenes" res://tests/test_animation.gd
 
 # 3. Headless slice smoke against the running server.
-echo "[client-smoke] running headless slice smoke"
-"$GODOT" --headless --path "$CLIENT_DIR" --script res://scripts/smoke.gd
+run_gate "headless slice smoke" "[smoke] PASS" res://scripts/smoke.gd
 echo "[client-smoke] PASS"

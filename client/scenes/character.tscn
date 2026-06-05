@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+; Player character visual (spec equip-and-see-it §4.3 / §5.1). The base humanoid
+; GLB is instanced as "ModelRoot"; the GLB itself embeds the named
+; "right_hand_socket" Node3D (ADR-0006 D4), so no duplicate placeholder is added
+; here. The EquipmentVisualResolver mounts weapons under that socket by name.
+[ext_resource type="PackedScene" uid="uid://c47pdy6tnkrny" path="res://assets/characters/base_humanoid/base_humanoid.glb" id="1_glb"]
+
+[node name="CharacterVisual" type="Node3D"]
+
+[node name="ModelRoot" parent="." instance=ExtResource("1_glb")]

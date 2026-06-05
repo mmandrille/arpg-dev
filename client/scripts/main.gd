@@ -7,7 +7,7 @@ extends Node3D
 const NetClientScript := preload("res://scripts/net_client.gd")
 
 var client: NetClient
-var entities: Dictionary = {}        # id (String) -> MeshInstance3D
+var entities: Dictionary = {}        # id (String) -> MeshInstance3D (monsters/loot only)
 var player_id: String = ""
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
@@ -19,6 +19,13 @@ var monster_ids: Array = []
 var ready_sent: bool = false
 var item_to_equip: String = ""
 
+# Slice v2 scene graph (spec §5.1): the local player is a humanoid under a
+# PlayerAnchor that follows authoritative position; monsters/loot live under
+# Entities. These are defined in main.tscn and cached on ready.
+var player_anchor: Node3D
+var character_visual: Node3D
+var entities_root: Node3D
+
 var _send_cooldown: float = 0.0
 var _debug_label: Label
 
@@ -27,6 +34,9 @@ const PLAYER_SPEED := 4.0
 
 
 func _ready() -> void:
+	player_anchor = $World/PlayerAnchor
+	character_visual = $World/PlayerAnchor/CharacterVisual
+	entities_root = $Entities
 	_build_scene()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
@@ -80,6 +90,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	entities.clear()
 	loot_ids.clear()
 	monster_ids.clear()
+	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
 	for e in p.get("entities", []):
 		_upsert_entity(e)
 	inventory = p.get("inventory", [])
@@ -105,27 +116,28 @@ func _apply_delta(p: Dictionary) -> void:
 
 func _upsert_entity(e: Dictionary) -> void:
 	var id := str(e["id"])
+	var pos: Dictionary = e["position"]
+	var server_pos := Vector3(pos["x"], 0.0, pos["y"])
+	if e["type"] == "player":
+		# The player is the humanoid under PlayerAnchor, not an entity-dict node.
+		player_id = id
+		reconciliation_delta = predicted_pos.distance_to(server_pos)
+		# Reconcile: snap prediction back toward authoritative truth.
+		predicted_pos = server_pos
+		player_anchor.position = server_pos
+		return
 	var node: MeshInstance3D
 	if entities.has(id):
 		node = entities[id]
 	else:
 		node = _make_entity_node(e["type"])
-		add_child(node)
+		entities_root.add_child(node)
 		entities[id] = node
 		if e["type"] == "loot" and not loot_ids.has(id):
 			loot_ids.append(id)
 		if e["type"] == "monster" and not monster_ids.has(id):
 			monster_ids.append(id)
-	var pos: Dictionary = e["position"]
-	var server_pos := Vector3(pos["x"], 0.0, pos["y"])
-	if e["type"] == "player":
-		player_id = id
-		reconciliation_delta = predicted_pos.distance_to(server_pos)
-		# Reconcile: snap prediction back toward authoritative truth.
-		predicted_pos = server_pos
-		node.position = server_pos
-	else:
-		node.position = server_pos
+	node.position = server_pos
 
 
 func _remove_entity(id: String) -> void:
@@ -144,8 +156,8 @@ func _update_inventory_item(item: Dictionary) -> void:
 
 
 func _reconcile_player() -> void:
-	if player_id != "" and entities.has(player_id):
-		entities[player_id].position = predicted_pos
+	if player_anchor != null:
+		player_anchor.position = predicted_pos
 
 
 # --- input + prediction -----------------------------------------------------
@@ -203,12 +215,11 @@ func _build_scene() -> void:
 
 
 func _make_entity_node(kind: String) -> MeshInstance3D:
+	# Monsters and loot stay v0 placeholder primitives (spec §5.1); only the
+	# local player adopts the humanoid GLB pipeline in v2.
 	var node := MeshInstance3D.new()
 	var mat := StandardMaterial3D.new()
 	match kind:
-		"player":
-			node.mesh = CapsuleMesh.new()
-			mat.albedo_color = Color(0.2, 0.6, 1.0)
 		"monster":
 			node.mesh = BoxMesh.new()
 			mat.albedo_color = Color(1.0, 0.3, 0.3)

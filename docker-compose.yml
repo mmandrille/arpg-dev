@@ -1,0 +1,23 @@
+# Local Postgres dev runner for the first playable vertical slice.
+# Canonical DB startup path: `make db-up`.
+# Postgres pinned to 16.x per ADR-0001 toolchain table.
+services:
+  postgres:
+    image: postgres:16.4
+    container_name: arpg-postgres
+    environment:
+      POSTGRES_USER: arpg
+      POSTGRES_PASSWORD: arpg
+      POSTGRES_DB: arpg
+    ports:
+      - "5432:5432"
+    volumes:
+      - arpg-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arpg -d arpg"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  arpg-pgdata:

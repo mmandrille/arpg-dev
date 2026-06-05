@@ -1,0 +1,7 @@
+{
+  "type": "error",
+  "message_id": "msg_01H00000000000000000000012",
+  "session_id": "sess_01H00000000000000000000000",
+  "tick": 0,
+  "payload": { "code": "bad_message", "message": "malformed envelope: missing payload" }
+}

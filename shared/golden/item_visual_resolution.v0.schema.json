@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/item_visual_resolution.v0.schema.json",
+  "title": "Golden: item visual resolution (v0)",
+  "type": "object",
+  "required": ["description", "item_def_id", "expected_asset_id", "expected_mount_socket", "expected_slot"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "item_def_id": { "type": "string" },
+    "expected_asset_id": { "type": "string" },
+    "expected_mount_socket": { "type": "string" },
+    "expected_slot": { "type": "string" }
+  }
+}

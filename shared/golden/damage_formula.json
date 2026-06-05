@@ -1,0 +1,13 @@
+{
+  "description": "Cross-language damage formula: damage = min + (draw mod (max - min + 1)). Consumed by both Go and GDScript tests against shared/rules/combat.v0.json player_damage.",
+  "player_damage": { "min": 2, "max": 4 },
+  "cases": [
+    { "draw": 0, "expected_damage": 2 },
+    { "draw": 1, "expected_damage": 3 },
+    { "draw": 2, "expected_damage": 4 },
+    { "draw": 3, "expected_damage": 2 },
+    { "draw": 4, "expected_damage": 3 },
+    { "draw": 7, "expected_damage": 3 },
+    { "draw": 11, "expected_damage": 4 }
+  ]
+}

@@ -1,6 +1,11 @@
 {
   "version": 0,
   "monsters": {
-    "training_dummy": { "name": "Training Dummy", "max_hp": 3, "loot_table": "basic_drop" }
+    "training_dummy": {
+      "name": "Training Dummy",
+      "max_hp": 3,
+      "loot_table": "basic_drop",
+      "retaliation_damage": { "min": 1, "max": 1 }
+    }
   }
 }

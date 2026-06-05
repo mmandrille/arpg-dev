@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://arpg.dev/schemas/rules/monsters.v0.schema.json",
   "title": "Monster definitions (v0)",
-  "description": "Source of truth for monster HP and which loot table they roll on death.",
+  "description": "Source of truth for monster HP, optional retaliation damage, and which loot table they roll on death.",
   "type": "object",
   "required": ["version", "monsters"],
   "additionalProperties": false,
@@ -13,14 +13,23 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["name", "max_hp", "loot_table"],
-        "additionalProperties": false,
-        "properties": {
-          "name": { "type": "string" },
-          "max_hp": { "type": "integer", "minimum": 1 },
-          "loot_table": { "type": "string" }
+          "required": ["name", "max_hp", "loot_table"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "max_hp": { "type": "integer", "minimum": 1 },
+            "loot_table": { "type": "string" },
+            "retaliation_damage": {
+              "type": "object",
+              "required": ["min", "max"],
+              "additionalProperties": false,
+              "properties": {
+                "min": { "type": "integer", "minimum": 0 },
+                "max": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
         }
       }
-    }
   }
 }

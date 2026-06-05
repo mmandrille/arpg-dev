@@ -8,14 +8,14 @@ import (
 
 // Simulation constants for the v0 slice.
 const (
-	baseEntityID    = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
-	playerStartHP   = 10
-	moveSpeed       = 1.0
-	monsterDefID    = "training_dummy"
-	playerEntity    = "player"
-	monsterEntity   = "monster"
-	lootEntity      = "loot"
-	weaponSlot      = "weapon"
+	baseEntityID  = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
+	playerStartHP = 10
+	moveSpeed     = 1.0
+	monsterDefID  = "training_dummy"
+	playerEntity  = "player"
+	monsterEntity = "monster"
+	lootEntity    = "loot"
+	weaponSlot    = "weapon"
 )
 
 var (
@@ -150,7 +150,10 @@ type Input struct {
 
 // Intent payloads.
 type (
-	MoveIntent   struct{ Direction Vec2; DurationTicks int }
+	MoveIntent struct {
+		Direction     Vec2
+		DurationTicks int
+	}
 	AttackIntent struct{ TargetID string }
 	PickUpIntent struct{ EntityID string }
 	EquipIntent  struct {
@@ -177,8 +180,10 @@ type TickResult struct {
 	Rejects []Reject
 }
 
-func (r *TickResult) ack(id string)            { r.Acks = append(r.Acks, Ack{MessageID: id}) }
-func (r *TickResult) reject(id, reason string) { r.Rejects = append(r.Rejects, Reject{MessageID: id, Reason: reason}) }
+func (r *TickResult) ack(id string) { r.Acks = append(r.Acks, Ack{MessageID: id}) }
+func (r *TickResult) reject(id, reason string) {
+	r.Rejects = append(r.Rejects, Reject{MessageID: id, Reason: reason})
+}
 
 // Tick processes the inputs stamped for the current tick (already ordered by
 // the runner as (sequence, message_id)), applies continuous movement, advances
@@ -196,6 +201,13 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 }
 
 func (s *Sim) applyInput(in Input, res *TickResult) {
+	if in.Type != "client_ready" && s.playerDead() {
+		switch in.Type {
+		case "move_intent", "attack_intent", "pick_up_intent", "equip_intent":
+			res.reject(in.MessageID, "player_dead")
+			return
+		}
+	}
 	switch in.Type {
 	case "client_ready":
 		res.ack(in.MessageID)
@@ -263,6 +275,7 @@ func (s *Sim) handleAttack(in Input, res *TickResult) {
 		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: in.Attack.TargetID, CorrelationID: in.CorrelationID})
 		s.dropLoot(target, in.CorrelationID, res)
 	}
+	s.retaliate(target, in.CorrelationID, res)
 }
 
 func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
@@ -275,6 +288,28 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 	s.entities[loot.id] = loot
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
 	res.Events = append(res.Events, Event{EventType: "loot_dropped", EntityID: idStr(loot.id), CorrelationID: corr})
+}
+
+func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
+	def := s.rules.Monsters[monster.monsterDefID]
+	if def.RetaliationDamage == nil {
+		return
+	}
+	player := s.entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		return
+	}
+	dmg := s.rollRange(*def.RetaliationDamage)
+	player.hp -= dmg
+	if player.hp < 0 {
+		player.hp = 0
+	}
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+	eventType := "player_damaged"
+	if player.hp == 0 {
+		eventType = "player_killed"
+	}
+	res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), CorrelationID: corr})
 }
 
 func (s *Sim) handlePickUp(in Input, res *TickResult) {
@@ -346,6 +381,10 @@ func (s *Sim) applyMovement(res *TickResult) {
 	if s.move == nil || s.move.remaining <= 0 {
 		return
 	}
+	if s.playerDead() {
+		s.move = nil
+		return
+	}
 	player := s.entities[s.playerID]
 	player.pos.X += s.move.dir.X * moveSpeed
 	player.pos.Y += s.move.dir.Y * moveSpeed
@@ -357,12 +396,20 @@ func (s *Sim) applyMovement(res *TickResult) {
 }
 
 func (s *Sim) rollDamage() int {
-	d := s.rules.Combat.PlayerDamage
+	return s.rollRange(s.rules.Combat.PlayerDamage)
+}
+
+func (s *Sim) rollRange(d DamageRange) int {
 	span := d.Max - d.Min + 1
 	if span <= 0 {
 		return d.Min
 	}
 	return d.Min + s.rng.IntN(span)
+}
+
+func (s *Sim) playerDead() bool {
+	player := s.entities[s.playerID]
+	return player == nil || player.hp <= 0
 }
 
 func (s *Sim) findEntity(id string) *entity {

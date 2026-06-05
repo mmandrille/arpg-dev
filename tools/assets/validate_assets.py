@@ -6,13 +6,12 @@ Engine-free checks over the asset manifest and the shared visual metadata:
   1. The manifest is a valid JSON Schema instance.
   2. Every ``runtime_path`` exists on disk.
   3. Every ``asset_id`` referenced by ``item_visuals`` resolves in the manifest.
-  4. Every character entry's ``required_nodes`` covers all mount sockets the
-     item visuals reference, and equipment entries declare a ``slot`` matching
-     the visuals that point at them.
-  5. When ``provenance.sha256`` is present it matches the committed file.
-  6. Best-effort: parse the GLB JSON chunk and confirm declared ``required_nodes``
-     names exist (warn-only if the file can't be parsed; hard-fail on an
-     explicit name mismatch).
+  4. Equipment entries declare a ``slot`` matching the visuals that point at
+     them, and each visual's ``asset_id`` resolves to an equipment entry.
+  5. Every character entry's ``required_nodes`` declares the weapon mount bone
+     (``hand_r``); the runtime ``BoneAttachment3D`` socket rides that bone.
+  6. Parse the GLB skin and hard-fail unless every declared ``required_nodes``
+     name is an actual skin joint (proves the GLB is rigged, not a stub).
 
 Authoritative runtime socket/visibility truth lives in the Godot headless smoke,
 not here. Exit code is non-zero if anything fails. Run via ``make validate-assets``.
@@ -59,25 +58,26 @@ class Report:
         print(f"  FAIL {label}: {detail}")
 
 
-def parse_glb_node_names(path: Path) -> set[str] | None:
-    """Return the set of node names in a .glb JSON chunk, or None if unparseable.
+def parse_glb_skin_joint_names(path: Path) -> set[str] | None:
+    """Return the set of node names referenced by any skin's `joints`, or None.
 
-    glTF-binary layout: 12-byte header ('glTF', version, total length) followed
-    by length-prefixed chunks; the first chunk is JSON.
+    A required bone must be an actual skin joint, not merely a named node — this
+    is what proves the GLB is skinned (spec §6), not a v2 socket placeholder.
     """
     try:
         data = path.read_bytes()
         if len(data) < 20 or data[0:4] != b"glTF":
             return None
-        # Skip the 12-byte header (magic, version, total length); the first
-        # chunk header (length, type) sits at offset 12, its payload at 20.
         chunk_len, chunk_type = struct.unpack_from("<II", data, 12)
         if chunk_type != 0x4E4F534A:  # 'JSON'
             return None
-        chunk = data[20 : 20 + chunk_len]
-        gltf = json.loads(chunk.decode("utf-8"))
-        return {n["name"] for n in gltf.get("nodes", []) if "name" in n}
-    except Exception:  # noqa: BLE001 - any read/parse error -> "unknown", warn upstream
+        gltf = json.loads(data[20 : 20 + chunk_len].decode("utf-8"))
+        nodes = gltf.get("nodes", [])
+        joint_idx: set[int] = set()
+        for skin in gltf.get("skins", []):
+            joint_idx.update(skin.get("joints", []))
+        return {nodes[i]["name"] for i in joint_idx if i < len(nodes) and "name" in nodes[i]}
+    except Exception:  # noqa: BLE001
         return None
 
 
@@ -132,9 +132,7 @@ def validate(root: Path, report: Report) -> None:
 
     # [4] visual->manifest resolution + slot agreement (spec §4.9 #2, #4).
     print("[4] item_visuals -> manifest resolution")
-    referenced_sockets: set[str] = set()
     for def_id, vis in sorted(visuals.items()):
-        referenced_sockets.add(vis["mount_socket"])
         entry = assets.get(vis["asset_id"])
         if entry is None:
             report.fail("asset_id resolution", f"{def_id}: asset_id {vis['asset_id']} not in manifest")
@@ -146,21 +144,28 @@ def validate(root: Path, report: Report) -> None:
         else:
             report.ok(f"{def_id} -> {vis['asset_id']} resolves with matching slot")
 
-    # [5] character required_nodes cover every referenced mount socket (spec §4.9 #3).
-    print("[5] character socket coverage")
+    # [5] character mount-bone coverage (spec §4.3): item_visuals still names the
+    #     runtime socket right_hand_socket, but the manifest required_nodes list
+    #     rig joints. The weapon mount contract is satisfied when hand_r is declared.
+    print("[5] character mount-bone coverage")
     characters = {aid: e for aid, e in assets.items() if e["type"] == "character"}
     if not characters:
         report.fail("character coverage", "no character asset declared")
+    WEAPON_MOUNT_BONE = "hand_r"
     for asset_id, entry in sorted(characters.items()):
         declared = set(entry.get("required_nodes", []))
-        missing = referenced_sockets - declared
-        if missing:
-            report.fail("required_nodes", f"{asset_id}: missing socket(s) {sorted(missing)}")
+        if WEAPON_MOUNT_BONE not in declared:
+            report.fail(
+                "mount bone",
+                f"{asset_id}: required_nodes missing weapon mount bone {WEAPON_MOUNT_BONE}",
+            )
         else:
-            report.ok(f"{asset_id} declares all referenced sockets {sorted(referenced_sockets)}")
+            report.ok(f"{asset_id} declares weapon mount bone {WEAPON_MOUNT_BONE}")
 
-    # [6] best-effort GLB node-name inspection for declared required_nodes.
-    print("[6] GLB node-name inspection (best-effort)")
+    # [6] GLB skin-joint inspection: required_nodes must be SKIN JOINTS, proving
+    #     the GLB is actually rigged (spec §6, §10). Characters/monsters are
+    #     skinned; equipment (the sword) is static and declares no required_nodes.
+    print("[6] GLB skin-joint inspection")
     for asset_id, entry in sorted(assets.items()):
         required = entry.get("required_nodes", [])
         if not required:
@@ -168,15 +173,15 @@ def validate(root: Path, report: Report) -> None:
         rt = root / entry["runtime_path"]
         if not rt.is_file():
             continue  # already failed in [2]
-        names = parse_glb_node_names(rt)
-        if names is None:
-            report.warn("glb inspect", f"{asset_id}: could not parse GLB nodes (skipped name check)")
+        joints = parse_glb_skin_joint_names(rt)
+        if joints is None:
+            report.fail("glb skin", f"{asset_id}: could not parse GLB skin joints")
             continue
-        absent = [n for n in required if n not in names]
+        absent = [n for n in required if n not in joints]
         if absent:
-            report.fail("glb node", f"{asset_id}: required_nodes absent in GLB: {absent}")
+            report.fail("glb joint", f"{asset_id}: required_nodes not skin joints: {absent}")
         else:
-            report.ok(f"{asset_id} GLB contains required nodes {required}")
+            report.ok(f"{asset_id} GLB skin includes joints {required}")
 
 
 def main() -> int:

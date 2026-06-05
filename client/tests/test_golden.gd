@@ -24,7 +24,22 @@ func _initialize() -> void:
 			_fail("damage case draw=%d: got %d want %d" % [int(c["draw"]), got, int(c["expected_damage"])])
 			return
 
-	# 2. Loot roll: single-entry table resolves to the expected item.
+	# 2. Retaliation formula: same range rule, against the training dummy.
+	var monsters := _read(shared.path_join("rules/monsters.v0.json"))
+	var retaliation := _read(shared.path_join("golden/retaliation_damage.json"))
+	var dummy_retaliation: Dictionary = monsters["monsters"]["training_dummy"]["retaliation_damage"]
+	if retaliation["retaliation_damage"] != dummy_retaliation:
+		_fail("retaliation golden range != training_dummy rules")
+		return
+	var rmin: int = int(dummy_retaliation["min"])
+	var rspan: int = int(dummy_retaliation["max"]) - rmin + 1
+	for c in retaliation["cases"]:
+		var got: int = rmin + (int(c["draw"]) % rspan)
+		if got != int(c["expected_damage"]):
+			_fail("retaliation case draw=%d: got %d want %d" % [int(c["draw"]), got, int(c["expected_damage"])])
+			return
+
+	# 3. Loot roll: single-entry table resolves to the expected item.
 	var loot := _read(shared.path_join("rules/loot_tables.v0.json"))
 	var loot_golden := _read(shared.path_join("golden/loot_roll.json"))
 	var entries: Array = loot["loot_tables"][loot_golden["loot_table"]]["entries"]
@@ -32,7 +47,7 @@ func _initialize() -> void:
 		_fail("loot golden mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, loot_roll)")
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, loot_roll)")
 	quit(0)
 
 

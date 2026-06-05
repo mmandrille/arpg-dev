@@ -40,10 +40,25 @@ make validate-shared # validate all shared JSON against schemas
 make validate-assets # validate the asset manifest + runtime .glb files
 make gen-assets      # regenerate the committed runtime .glb files (deterministic)
 make bot             # run the Python protocol bot end-to-end (server must be up)
+make bot-visual      # scripts/bot_visual.sh: server + Godot autoplay (see below)
 make replay SESSION_ID=<id>   # re-simulate and verify a recorded session
 make client-smoke    # Godot headless smoke (skips if Godot not installed)
 make ci              # full local CI suite
 ```
+
+To watch the scripted slice in the real client (move → attack → pickup → equip,
+including player hit reactions), run `make bot-visual`. It builds the server,
+waits for `/readyz`, then opens Godot with `ARPG_AUTOPLAY=1` via
+`scripts/bot_visual.sh`. Close the Godot window to stop the server.
+
+```bash
+make bot-visual
+AUTOPLAY_STEP_DELAY=0.8 make bot-visual  # slower, easier to inspect
+GODOT=/path/to/godot make bot-visual       # override Godot binary
+```
+
+Headless cross-language golden checks (including `retaliation_damage.json`) run in
+`make client-smoke` via `client/tests/test_golden.gd`.
 
 Typical first run:
 

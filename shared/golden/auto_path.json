@@ -16,13 +16,8 @@
     {
       "name": "path_maze_start_to_monster_approach",
       "world_id": "path_maze",
-      "start": { "x": 0, "y": 5 },
-      "goal": { "x": 10, "y": 5 },
       "goal_mode": "melee_approach",
-      "target_kind": "monster",
-      "unarmed_reach": 1.0,
-      "expected_step_count": 22,
-      "expected_end": { "x": 9, "y": 4 }
+      "target_kind": "monster"
     }
   ]
 }

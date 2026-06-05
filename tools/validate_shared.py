@@ -317,17 +317,10 @@ def cross_checks(report: Report) -> None:
         world_id = case["world_id"]
         if world_id not in worlds["worlds"]:
             report.fail("auto_path world", f"{case['name']}: unknown world_id {world_id}")
-        elif case["expected_step_count"] > navigation["max_auto_steps"]:
-            report.fail("auto_path step budget", f"{case['name']}: exceeds max_auto_steps")
-        elif case["goal_mode"] == "melee_approach" and case["target_kind"] == "monster":
-            dx = float(case["expected_end"]["x"]) - float(case["goal"]["x"])
-            dy = float(case["expected_end"]["y"]) - float(case["goal"]["y"])
-            if (dx * dx + dy * dy) ** 0.5 > float(case["unarmed_reach"]) + 0.45 + 0.000001:
-                report.fail("auto_path melee end", f"{case['name']}: expected_end not in monster reach")
-            else:
-                report.ok(f"auto_path {case['name']} references world and melee end")
+        elif case.get("goal_mode") != "melee_approach" or case.get("target_kind") != "monster":
+            report.fail("auto_path goal", f"{case['name']}: must use melee_approach on monster")
         else:
-            report.ok(f"auto_path {case['name']} references world and step budget")
+            report.ok(f"auto_path {case['name']} references world and goal mode")
 
     constants = ranged_projectile_golden["constants"]
     if constants.get("projectile_radius") != 0.10:

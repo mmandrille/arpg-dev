@@ -1,0 +1,39 @@
+server/internal/game/sim.go
+  s_b419d20a5666bd::t_1bf03550340e9e 314,354,565
+shared/protocol/state_delta.v0.schema.json
+  s_b419d20a5666bd::t_49349fcad97bb4 56-65
+  s_b419d20a5666bd::t_1bf03550340e9e 54-55
+server/internal/game/types.go
+  s_b419d20a5666bd::t_1bf03550340e9e 40
+server/internal/game/game_test.go
+  s_b419d20a5666bd::t_bdd30a913e9b85 749-776
+  s_b419d20a5666bd::t_8311ce3c67ed53 354,378
+  s_b419d20a5666bd::t_9712e4bab55393 353
+  s_b419d20a5666bd::t_a0ebbfebbe135a 409-429
+shared/protocol/session_snapshot.v0.schema.json
+  s_b419d20a5666bd::t_49349fcad97bb4 69-78
+  s_b419d20a5666bd::t_1bf03550340e9e 67-68
+shared/protocol/examples/state_delta.json
+  s_b419d20a5666bd::t_1bf03550340e9e 10,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "577ca5a3571b41eeaa118c0f1185c4e4f47fff5c",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_b419d20a5666bd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e98ad-9472-7580-9e00-901f7f049009",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

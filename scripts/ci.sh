@@ -21,17 +21,20 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "== 1/6 shared schema validation =="
+echo "== 1/7 shared schema validation =="
 make validate-shared
 
-echo "== 2/6 Go tests =="
+echo "== 2/7 asset manifest + GLB validation =="
+make validate-assets
+
+echo "== 3/7 Go tests =="
 (cd server && go test ./...)
 
-echo "== 3/6 Python unit checks =="
+echo "== 4/7 Python unit checks =="
 make tools >/dev/null
 "$ROOT/.venv/bin/python" -m pytest -q tools || { echo "pytest failed"; exit 1; }
 
-echo "== 4/6 start Postgres + server =="
+echo "== 5/7 start Postgres + server =="
 make db-up
 # Build a binary and run it directly (not via `go run`, whose child binary
 # would survive the cleanup kill and, if stdout were piped, hold the pipe open).
@@ -49,14 +52,14 @@ for i in $(seq 1 60); do
 done
 curl -fsS "$BASE_URL/readyz" >/dev/null
 
-echo "== 5/6 protocol bot + replay =="
+echo "== 6/7 protocol bot + replay =="
 SESSION_ID="$("$ROOT/.venv/bin/python" -m tools.bot.run \
   --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
   --print-session-id)"
 echo "bot completed session: $SESSION_ID"
 (cd server && ARPG_DATABASE_URL="$DATABASE_URL" go run ./cmd/arpg-replay --session-id "$SESSION_ID")
 
-echo "== 6/6 Godot headless smoke (optional) =="
+echo "== 7/7 Godot headless smoke (optional) =="
 GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" DEBUG_TOKEN="$DEBUG_TOKEN" \
   ./scripts/client_smoke.sh
 

@@ -37,6 +37,8 @@ make db-up           # start local Postgres (canonical DB startup path)
 make server          # run the Go server against local Postgres
 make test-go         # run all Go tests
 make validate-shared # validate all shared JSON against schemas
+make validate-assets # validate the asset manifest + runtime .glb files
+make gen-assets      # regenerate the committed runtime .glb files (deterministic)
 make bot             # run the Python protocol bot end-to-end (server must be up)
 make replay SESSION_ID=<id>   # re-simulate and verify a recorded session
 make client-smoke    # Godot headless smoke (skips if Godot not installed)

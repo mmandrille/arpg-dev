@@ -23,6 +23,7 @@ SHARED = ROOT / "shared"
 PROTOCOL = SHARED / "protocol"
 RULES = SHARED / "rules"
 GOLDEN = SHARED / "golden"
+ASSETS = SHARED / "assets"
 
 
 def load(path: Path):
@@ -51,6 +52,9 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "rules":
         # foo.v0.json -> foo.v0.schema.json
         return RULES / instance_path.name.replace(".v0.json", ".v0.schema.json")
+    if parts[0] == "assets":
+        # foo.v0.json -> foo.v0.schema.json
+        return ASSETS / instance_path.name.replace(".v0.json", ".v0.schema.json")
     if parts[0] == "golden":
         # foo.json -> foo.v0.schema.json
         return GOLDEN / (instance_path.stem + ".v0.schema.json")
@@ -71,6 +75,7 @@ def iter_schemas() -> list[Path]:
 def iter_instances() -> list[Path]:
     instances: list[Path] = []
     instances += sorted(p for p in RULES.glob("*.v0.json") if not p.name.endswith(".schema.json"))
+    instances += sorted(p for p in ASSETS.glob("*.v0.json") if not p.name.endswith(".schema.json"))
     instances += sorted(p for p in GOLDEN.glob("*.json") if not p.name.endswith(".schema.json"))
     instances += sorted(PROTOCOL.glob("examples/*.json"))
     return instances
@@ -161,6 +166,31 @@ def cross_checks(report: Report) -> None:
         report.fail("slice_outcome golden", "unknown dropped_item_def_id")
     else:
         report.ok("slice_outcome golden references valid defs")
+
+    # item_visuals: every keyed item_def_id exists in items.v0.json with a
+    # matching slot, and the visual-resolution golden matches the metadata
+    # (spec equip-and-see-it §4.9 #1; rendering contract, not gameplay stats).
+    visuals = load(ASSETS / "item_visuals.v0.json")["item_visuals"]
+    for def_id, vis in visuals.items():
+        item = items["items"].get(def_id)
+        if item is None:
+            report.fail("item_visuals key", f"{def_id} not in items.v0.json")
+        elif item["slot"] != vis["slot"]:
+            report.fail("item_visuals slot", f"{def_id}: {vis['slot']} != items slot {item['slot']}")
+        else:
+            report.ok(f"item_visuals {def_id} resolves to items.v0.json with matching slot")
+
+    visual_golden = load(GOLDEN / "item_visual_resolution.json")
+    gdef = visual_golden["item_def_id"]
+    gvis = visuals.get(gdef)
+    if gvis is None:
+        report.fail("item_visual_resolution golden", f"unmapped item_def_id {gdef}")
+    elif (visual_golden["expected_asset_id"] != gvis["asset_id"]
+          or visual_golden["expected_mount_socket"] != gvis["mount_socket"]
+          or visual_golden["expected_slot"] != gvis["slot"]):
+        report.fail("item_visual_resolution golden", "expected_* fields disagree with item_visuals metadata")
+    else:
+        report.ok("item_visual_resolution golden matches item_visuals metadata")
 
 
 def main() -> int:

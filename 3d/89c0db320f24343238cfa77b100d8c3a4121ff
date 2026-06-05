@@ -1,0 +1,37 @@
+tools/assets/validate_assets.py
+  s_c36b8efb59b07f::t_2cd890c19b2271 61-62,64-65,74-80
+  s_c36b8efb59b07f::t_b1bd59baf7e6af 9-14
+  s_c36b8efb59b07f::t_4f5c87bfbbea83 147-150,154,157-161,163
+  s_c36b8efb59b07f::t_1956c1ed26ef0a 165-168,176-178,180,182,184
+assets/manifests/assets.v0.schema.json
+  s_c36b8efb59b07f::t_3ef81481aff1b6 19
+tools/assets/test_validate_assets.py
+  s_c36b8efb59b07f::t_0123a37e1103e5 33-97
+  s_c36b8efb59b07f::t_0482f06ac11d63 158-161
+  s_c36b8efb59b07f::t_dae75b3d8a30c9 192-200
+  s_c36b8efb59b07f::t_49cfdfa5942bb7 249-270
+  s_c36b8efb59b07f::t_809f5e341b53bb 226-233
+  s_c36b8efb59b07f::t_aa362a548bd64e 21
+  s_c36b8efb59b07f::t_2f7829a745494f 114
+assets/manifests/assets.v0.json
+  s_c36b8efb59b07f::t_2ec7b576c1fb4f 10
+  s_c36b8efb59b07f::t_74391a08a9e4e0 14
+  s_c36b8efb59b07f::t_ab26b15fb31dac 30-40,42
+  s_c36b8efb59b07f::t_d886dd6d978121 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "3d89c0db320f24343238cfa77b100d8c3a4121ff",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

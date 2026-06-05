@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/items.v0.schema.json",
+  "title": "Item definitions (v0)",
+  "type": "object",
+  "required": ["version", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "items": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "slot", "equippable"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "slot": { "type": "string", "enum": ["weapon"] },
+          "equippable": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

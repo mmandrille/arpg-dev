@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/loot_roll.v0.schema.json",
+  "title": "Golden: loot roll (v0)",
+  "type": "object",
+  "required": ["description", "loot_table", "expected_item_def_id"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "loot_table": { "type": "string" },
+    "expected_item_def_id": { "type": "string" }
+  }
+}

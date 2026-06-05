@@ -1,0 +1,6 @@
+{
+  "version": 0,
+  "monsters": {
+    "training_dummy": { "name": "Training Dummy", "max_hp": 3, "loot_table": "basic_drop" }
+  }
+}

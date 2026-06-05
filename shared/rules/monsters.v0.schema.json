@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/monsters.v0.schema.json",
+  "title": "Monster definitions (v0)",
+  "description": "Source of truth for monster HP and which loot table they roll on death.",
+  "type": "object",
+  "required": ["version", "monsters"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "monsters": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "max_hp", "loot_table"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "max_hp": { "type": "integer", "minimum": 1 },
+          "loot_table": { "type": "string" }
+        }
+      }
+    }
+  }
+}

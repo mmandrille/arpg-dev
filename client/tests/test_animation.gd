@@ -18,7 +18,15 @@ func _initialize() -> void:
 	if _failed: quit(1); return
 	_test_controller_locomotion_change_during_one_shot()
 	if _failed: quit(1); return
-	print("[gdtest] PASS: animation controller")
+	# Scene tests exercise runtime _ready (socket attach). add_child() inside
+	# _initialize() does NOT enter the tree synchronously in Godot 4.6, so we
+	# await a frame to let _ready fire before asserting. This makes _initialize
+	# a coroutine; quit() still sets the exit code correctly when it resumes.
+	await _test_character_scene()
+	if _failed: quit(1); return
+	await _test_monster_scene()
+	if _failed: quit(1); return
+	print("[gdtest] PASS: animation controller + scenes")
 	quit(0)
 
 
@@ -87,6 +95,34 @@ func _test_controller_locomotion_change_during_one_shot() -> void:
 	ap.emit_signal("animation_finished", "attack")
 	_assert(c.current_clip() == "walk", "fallback honors latched _moving after one-shot, got %s" % c.current_clip())
 	ap.queue_free()
+
+
+func _test_character_scene() -> void:
+	var s = (load("res://scenes/character.tscn") as PackedScene).instantiate()
+	get_root().add_child(s)  # _ready attaches the socket
+	await process_frame      # node enters tree + _ready fires next frame
+	var sock = s.find_child("right_hand_socket", true, false)
+	_assert(sock is BoneAttachment3D, "right_hand_socket must be a BoneAttachment3D")
+	if sock is BoneAttachment3D:
+		_assert(sock.bone_name == "hand_r", "socket bound to hand_r, got %s" % sock.bone_name)
+	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	_assert(ap != null, "character AnimationPlayer missing")
+	if ap != null:
+		for clip in ["idle", "walk", "attack"]:
+			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
+	s.queue_free()
+
+
+func _test_monster_scene() -> void:
+	var s = (load("res://scenes/monster_dummy.tscn") as PackedScene).instantiate()
+	get_root().add_child(s)
+	await process_frame
+	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	_assert(ap != null, "monster AnimationPlayer missing")
+	if ap != null:
+		for clip in ["idle", "hit", "death"]:
+			_assert(ap.has_animation(clip), "monster missing clip %s" % clip)
+	s.queue_free()
 
 
 func _assert(cond: bool, msg: String) -> void:

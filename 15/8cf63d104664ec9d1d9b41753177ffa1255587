@@ -1,0 +1,30 @@
+tools/bot/scenarios/05_path_maze.json
+  s_e72de07330ced8::t_18b28322c789b1 14
+tools/bot/scenarios/03_collision_lab.json
+  s_e72de07330ced8::t_ad730fba31d3d3 5,9,13-14
+  s_e72de07330ced8::t_128fa85628a4ba 10
+tools/bot/scenarios/02_gear_before_combat.json
+  s_e72de07330ced8::t_8683faa746c706 40
+tools/bot/run.py
+  s_e72de07330ced8::t_d8e4cb4638239e 230,232,234,236
+tools/bot/scenarios/06_ranged_lab.json
+  s_e72de07330ced8::t_ef8c2f5761e1fe 5,11-12
+tools/bot/test_protocol.py
+  s_e72de07330ced8::t_3cd8bc2a64ccd0 57,62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "158cf63d104664ec9d1d9b41753177ffa1255587",
+  "prompts": {},
+  "sessions": {
+    "s_e72de07330ced8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b930ae56-8b5a-4cc3-ba9d-fa564ededae0",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

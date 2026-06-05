@@ -10,7 +10,7 @@ Status: Ready for implementation (2026-06-05) — gaps vs spec/codebase closed i
 
 **Tech Stack:** Python 3 (stdlib `struct`/`json` + jsonschema + pytest), Godot 4.6.3 / GDScript, glTF/GLB, JSON Schema. Go server untouched.
 
-**Spec:** `docs/specs/spec-animate-and-react.md`
+**Spec:** `docs/specs/v3_spec-animate-and-react.md`
 **Baseline:** slice v2 `equip-and-see-it` (complete — `make ci` green)
 **Branch:** `feature/animate-and-react` (already created; the spec is committed there)
 
@@ -1435,7 +1435,7 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 **Files:**
 - Modify: `docs/adr/0006-asset-pipeline.md`
 - Create: `docs/adr/0007-animation-state-model.md`
-- Modify: `docs/specs/spec-animate-and-react.md` (As-Built section)
+- Modify: `docs/specs/v3_spec-animate-and-react.md` (As-Built section)
 
 - [ ] **Step 11.1: Append an as-built note to ADR-0006**
 
@@ -1487,7 +1487,7 @@ Animation is **client-side presentation state**, never authored on the wire.
 
 - [ ] **Step 11.3: Fill the spec As-Built section**
 
-Replace the placeholder in `docs/specs/spec-animate-and-react.md` §11 with a short summary of what shipped and any deviations (e.g. the socket is attached in `character_visual.gd` rather than declared in the `.tscn`, for robustness against the imported skeleton path; clips are built by `client/tools/build_animations.gd` and committed as `.tres`). Set the Status line to `Implemented (2026-06-05)`.
+Replace the placeholder in `docs/specs/v3_spec-animate-and-react.md` §11 with a short summary of what shipped and any deviations (e.g. the socket is attached in `character_visual.gd` rather than declared in the `.tscn`, for robustness against the imported skeleton path; clips are built by `client/tools/build_animations.gd` and committed as `.tres`). Set the Status line to `Implemented (2026-06-05)`.
 
 - [ ] **Step 11.4: Full local gate**
 
@@ -1504,7 +1504,7 @@ Expected: all green; the `server` diff is empty (acceptance #11). `make ci` gree
 - [ ] **Step 11.5: Commit**
 
 ```bash
-git add docs/adr/0006-asset-pipeline.md docs/adr/0007-animation-state-model.md docs/specs/spec-animate-and-react.md
+git add docs/adr/0006-asset-pipeline.md docs/adr/0007-animation-state-model.md docs/specs/v3_spec-animate-and-react.md
 git commit -m "docs: ADR-0006 as-built + ADR-0007 animation state model; spec as-built
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"

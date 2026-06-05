@@ -25,7 +25,7 @@ Review findings closed:
 Tech stack: Go deterministic sim/replay/realtime tests, Postgres-backed store
 contracts, Python protocol bot, Godot headless smoke.
 
-Spec: `docs/specs/spec-resume-authoritative-state.md`
+Spec: `docs/specs/v5_spec-resume-authoritative-state.md`
 Baseline: slice v4 `take-a-hit` (complete on `main`)
 Branch: `feature/resume-authoritative-state`
 
@@ -44,7 +44,7 @@ Branch: `feature/resume-authoritative-state`
 | Modify | `server/internal/http/ws_test.go` | Resume integration: HP, monster death, `/state` parity, duplicate, dead-player |
 | Modify | `client/scripts/smoke.gd` | Assert real resumed monster death/player HP; remove forced death workaround |
 | Modify | `tools/bot/run.py` | Resume probe asserts HP and monster death, not just inventory |
-| Modify | `docs/specs/spec-take-a-hit.md` | Replace resume limitation with v5 as-built pointer after implementation |
+| Modify | `docs/specs/v4_spec-take-a-hit.md` | Replace resume limitation with v5 as-built pointer after implementation |
 | Modify | `docs/PROGRESS.md` | Mark v5 complete after implementation and remove the open resume gap |
 
 ## Task 1: Break Import Cycle And Extend Reconstruct
@@ -181,9 +181,9 @@ make client-smoke
 ## Task 6: Docs And Final Gate
 
 Files:
-- Modify: `docs/specs/spec-take-a-hit.md`
-- Modify: `docs/specs/spec-resume-authoritative-state.md`
-- Modify: `docs/plans/2026-06-05-resume-authoritative-state.md`
+- Modify: `docs/specs/v4_spec-take-a-hit.md`
+- Modify: `docs/specs/v5_spec-resume-authoritative-state.md`
+- Modify: `docs/plans/v5_2026-06-05-resume-authoritative-state.md`
 - Modify: `docs/PROGRESS.md`
 
 - [x] Step 6.1: Update the v4 spec limitation note to point to v5 once the

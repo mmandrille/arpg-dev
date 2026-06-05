@@ -96,6 +96,16 @@ def test_select_scenarios_all_returns_catalog_order():
     assert select_scenarios(scenarios, "all") == scenarios
 
 
+def test_select_scenarios_accepts_file_name_and_stem():
+    scenarios = load_scenarios()
+
+    by_file = select_scenarios(scenarios, "06_ranged_lab.json")
+    assert [s.id for s in by_file] == ["ranged_lab"]
+
+    by_stem = select_scenarios(scenarios, "06_ranged_lab")
+    assert [s.id for s in by_stem] == ["ranged_lab"]
+
+
 def test_select_scenarios_rejects_unknown_id():
     scenarios = load_scenarios()
 

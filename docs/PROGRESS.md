@@ -11,7 +11,7 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v11 — `click-to-move-and-auto-path` (server-authoritative auto-navigation) |
+| **Latest completed slice** | v12 — `ranged-projectile-combat` (server-authoritative ranged projectiles) |
 | **Active branch** | `feature/solid-collision-and-obstacles` |
 | **CI gate** | `make ci` green on 2026-06-05 |
 | **Next slice** | TBD |
@@ -27,6 +27,7 @@ v2_* = equip-and-see-it  v6_* = visual-bot
 v3_* = animate-and-react v7_* = gear-before-combat v9_* = solid-collision
 v4_* = take-a-hit        v10_* = click-action-and-melee-range
 v11_* = click-to-move-and-auto-path
+v12_* = ranged-projectile-combat
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -39,7 +40,7 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action ──► v11 auto-path
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action ──► v11 auto-path ──► v12 ranged-projectiles
    (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)        (world presets)              (weapon damage)             (walls + bodies)
         │                      │                        │                        │                         │                         │                              │                              │                         │
      main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓                       branch ✓                  branch ✓                  branch ✓
@@ -58,6 +59,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v9** | `solid-collision-and-obstacles` | Complete (`make ci` green) | [`v9_spec-solid-collision-and-obstacles.md`](specs/v9_spec-solid-collision-and-obstacles.md) | [`v9_2026-06-05-solid-collision-and-obstacles.md`](plans/v9_2026-06-05-solid-collision-and-obstacles.md) |
 | **v10** | `click-action-and-melee-range` | Complete (`make ci` green) | [`v10_spec-click-action-and-melee-range.md`](specs/v10_spec-click-action-and-melee-range.md) | [`v10_2026-06-05-click-action-and-melee-range.md`](plans/v10_2026-06-05-click-action-and-melee-range.md) |
 | **v11** | `click-to-move-and-auto-path` | Complete (`make ci` green) | [`v11_spec-click-to-move-and-auto-path.md`](specs/v11_spec-click-to-move-and-auto-path.md) | [`v11_2026-06-05-click-to-move-and-auto-path.md`](plans/v11_2026-06-05-click-to-move-and-auto-path.md) |
+| **v12** | `ranged-projectile-combat` | Complete (`make ci` green) | [`v12_spec-ranged-projectile-combat.md`](specs/v12_spec-ranged-projectile-combat.md) | [`v12_2026-06-05-ranged-projectile-combat.md`](plans/v12_2026-06-05-ranged-projectile-combat.md) |
 
 ---
 
@@ -220,7 +222,29 @@ navigation rules while preserving replay/resume behavior.
 - Godot empty-floor left click sends `move_to_intent`; entity click stays `action_intent`.
 
 **Explicit non-goals (still true):** no NavMesh authority, monster AI/pathfinding, path preview UI,
-ranged weapons, door closing, inventory UI, or production navigation polish.
+door closing, inventory UI, or production navigation polish.
+
+### v12 — Ranged projectile combat
+
+**Proves:** Ranged weapons can use server-owned traveling projectile entities with deterministic
+impact-time collision, hit, damage, replay, and client presentation.
+
+- `training_bow` declares `attack_mode: "ranged"`, weapon damage, reach, and projectile speed in
+  shared item rules, with schema and validation guards.
+- Ranged monster `action_intent` spawns a wire-visible `projectile` entity; melee combat, loot, and
+  interactables keep their existing behavior.
+- Projectile flight advances at 20 Hz and sweeps against inflated wall/door AABBs and live monster
+  circles using nearest-hit selection with deterministic tie-breaks.
+- Ranged hit chance and damage roll only at impact; miss emits `attack_missed` without retaliation.
+- `ranged_projectile.json` pins gap kill, wall block, and miss/no-retaliation cases for Go and
+  GDScript fixture checks.
+- `ranged_lab` plus bot scenario `06_ranged_lab.json` proves bow pickup/equip, ranged kill beyond
+  melee range through a wall gap, `/state`, reconnect resume, and replay.
+- Godot renders placeholder projectile entities from authoritative spawn/update/remove deltas.
+- `make ci` green on 2026-06-05.
+
+**Explicit non-goals (still true):** no spells, piercing, homing/AoE, monster ranged AI, predictive
+leading, ranged pickup/door activation, production bow art, inventory UI, or projectile catalog.
 
 ---
 
@@ -264,6 +288,7 @@ make bot                     # terminal 2 — all protocol bot scenarios
 make client-smoke            # headless Godot gates + slice smoke
 make ci                      # full suite
 make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
+make bot-visual scenario=06_ranged_lab.json  # optional — replay one scenario by file name or id
 ```
 
 ---
@@ -295,12 +320,15 @@ behind `action_intent`, enforces reach from shared rules, and proves a replayabl
 **Click-to-move and action auto-approach are now authoritative.** v11 adds shared navigation
 rules, deterministic server A*, `move_to_intent`, and a path-maze bot proof.
 
+**Ranged projectile combat is now authoritative.** v12 adds ranged weapon rules, projectile
+entities, swept collision, impact-time hit/damage, and a ranged-lab bot/replay proof.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Cross-session **character-scoped** inventory | v0 as-built §10 |
-| Combat | Miss chance, healing, armor, respawn | v0/v4 non-goals |
+| Combat | Healing, armor, respawn, spell systems, piercing/AoE/homing projectiles, monster ranged AI | v0/v4/v12 non-goals |
 | Content | Visual mappings for items beyond `rusty_sword` | equip spec §4.9 |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

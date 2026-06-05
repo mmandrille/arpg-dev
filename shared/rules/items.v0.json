@@ -2,6 +2,7 @@
   "version": 0,
   "items": {
     "rusty_sword": { "name": "Rusty Sword", "slot": "weapon", "equippable": true, "damage": { "min": 3, "max": 5 }, "reach": 1.5 },
+    "training_bow": { "name": "Training Bow", "slot": "weapon", "equippable": true, "attack_mode": "ranged", "damage": { "min": 2, "max": 4 }, "reach": 16.0, "projectile_speed": 50.0 },
     "training_badge": { "name": "Training Badge", "equippable": false }
   }
 }

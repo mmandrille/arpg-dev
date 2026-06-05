@@ -79,6 +79,7 @@ const CAMERA_ZOOM_DEFAULT := 20.0
 const CAMERA_ZOOM_STEP := 1.5
 const CAMERA_ZOOM_MIN := 8.0
 const CAMERA_ZOOM_MAX := 40.0
+const PROJECTILE_LERP_SECONDS := 0.10
 
 
 func _ready() -> void:
@@ -265,9 +266,11 @@ func _upsert_entity(e: Dictionary) -> void:
 		player_anchor.position = server_pos
 		return
 	var rec: Dictionary
+	var is_new := false
 	if entities.has(id):
 		rec = entities[id]
 	else:
+		is_new = true
 		var node := _make_entity_node(e["type"])
 		entities_root.add_child(node)
 		var controller: AnimationController = null
@@ -279,14 +282,22 @@ func _upsert_entity(e: Dictionary) -> void:
 				push_warning("[main] monster %s has no AnimationPlayer" % id)
 		rec = {"node": node, "controller": controller, "type": str(e["type"])}
 		entities[id] = rec
-		_attach_pick_collider(node, id, str(e["type"]))
+		if e["type"] != "projectile":
+			_attach_pick_collider(node, id, str(e["type"]))
 		if e["type"] == "loot" and not loot_ids.has(id):
 			loot_ids.append(id)
 		if e["type"] == "monster" and not monster_ids.has(id):
 			monster_ids.append(id)
 		if e["type"] == "interactable" and not interactable_ids.has(id):
 			interactable_ids.append(id)
-	(rec["node"] as Node3D).position = server_pos
+	if rec["type"] == "projectile":
+		if is_new:
+			(rec["node"] as Node3D).position = server_pos
+			rec["last_server_pos"] = server_pos
+			return
+		_move_projectile_node(rec, server_pos)
+	else:
+		(rec["node"] as Node3D).position = server_pos
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
@@ -303,6 +314,11 @@ func _upsert_entity(e: Dictionary) -> void:
 
 func _remove_entity(id: String) -> void:
 	if entities.has(id):
+		var rec: Dictionary = entities[id]
+		if rec.has("move_tween"):
+			var tween = rec["move_tween"]
+			if is_instance_valid(tween):
+				tween.kill()
 		(entities[id]["node"] as Node3D).queue_free()
 		entities.erase(id)
 	if monster_health_bars.has(id):
@@ -654,7 +670,21 @@ func _handle_visual_replay(delta: float) -> void:
 	var env: Dictionary = visual_replay_envelopes[visual_replay_envelope_index]
 	visual_replay_envelope_index += 1
 	_handle_message(env)
-	visual_replay_timer = autoplay_step_delay
+	visual_replay_timer = _visual_replay_delay_for(env)
+
+
+func _visual_replay_delay_for(env: Dictionary) -> float:
+	if str(env.get("type", "")) != "state_delta":
+		return autoplay_step_delay
+	var payload: Dictionary = env.get("payload", {})
+	for change in payload.get("changes", []):
+		if change.get("op", "") in ["entity_spawn", "entity_update"]:
+			var entity: Dictionary = change.get("entity", {})
+			if str(entity.get("type", "")) == "projectile":
+				return 0.05
+		if change.get("op", "") == "entity_remove":
+			return 0.08
+	return autoplay_step_delay
 
 
 # --- scene construction (placeholder primitives) ----------------------------
@@ -742,6 +772,8 @@ func _make_entity_node(kind: String) -> Node3D:
 		return fallback
 	if kind == "interactable":
 		return _make_door_node()
+	if kind == "projectile":
+		return _make_projectile_node()
 	var node := MeshInstance3D.new()  # loot
 	var box := BoxMesh.new()
 	box.size = Vector3(0.5, 0.5, 0.5)
@@ -750,6 +782,43 @@ func _make_entity_node(kind: String) -> Node3D:
 	mat.albedo_color = Color(1.0, 0.85, 0.2)
 	node.material_override = mat
 	return node
+
+
+func _make_projectile_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Projectile"
+	var shaft := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.16, 0.16, 0.7)
+	shaft.mesh = mesh
+	shaft.position = Vector3(0.0, 0.35, 0.0)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.65, 0.90, 1.0)
+	mat.emission_enabled = true
+	mat.emission = Color(0.25, 0.55, 0.9)
+	shaft.material_override = mat
+	root.add_child(shaft)
+	return root
+
+
+func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:
+	var node := rec["node"] as Node3D
+	if node == null:
+		return
+	var from := node.position
+	var flat := Vector2(target_pos.x - from.x, target_pos.z - from.z)
+	if flat.length_squared() > 0.0001:
+		node.look_at(Vector3(target_pos.x, from.y, target_pos.z), Vector3.UP)
+	if rec.has("move_tween"):
+		var old_tween = rec["move_tween"]
+		if is_instance_valid(old_tween):
+			old_tween.kill()
+	var duration := PROJECTILE_LERP_SECONDS
+	if visual_replay_enabled:
+		duration = clampf(autoplay_step_delay * 0.35, 0.06, 0.18)
+	var tween := create_tween()
+	rec["move_tween"] = tween
+	tween.tween_property(node, "position", target_pos, duration).set_trans(Tween.TRANS_LINEAR)
 
 
 func _make_door_node() -> Node3D:

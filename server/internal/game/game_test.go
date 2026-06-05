@@ -86,6 +86,13 @@ func TestLoadRules(t *testing.T) {
 	if _, ok := r.Worlds["door_lab"]; !ok {
 		t.Fatal("missing door_lab world")
 	}
+	if _, ok := r.Worlds["ranged_lab"]; !ok {
+		t.Fatal("missing ranged_lab world")
+	}
+	bow := r.Items["training_bow"]
+	if !bow.Equippable || bow.Slot != weaponSlot || bow.AttackMode != attackModeRanged || bow.Damage == nil || bow.Reach == nil || bow.ProjectileSpeed == nil {
+		t.Fatalf("training_bow def = %+v, want ranged weapon", bow)
+	}
 	if r.Interactables["wooden_door"].InitialState != interactableClosed {
 		t.Fatalf("wooden_door = %+v, want initially closed", r.Interactables["wooden_door"])
 	}
@@ -145,6 +152,21 @@ func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
 	assertEntity(t, dsnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
 	assertInteractable(t, dsnap, "1002", "wooden_door", interactableClosed, Vec2{X: 4, Y: 5})
 	assertEntity(t, dsnap, "1003", lootEntity, "", "training_badge", Vec2{X: 8, Y: 5})
+
+	ranged, err := NewSimWithWorld("sess_ranged", "01", rules, "ranged_lab")
+	if err != nil {
+		t.Fatalf("ranged world: %v", err)
+	}
+	rsnap := ranged.Snapshot()
+	if len(rsnap.Entities) != 3 {
+		t.Fatalf("ranged entities = %d, want player+bow+monster: %+v", len(rsnap.Entities), rsnap.Entities)
+	}
+	if len(ranged.walls) != 2 {
+		t.Fatalf("ranged walls = %d, want 2", len(ranged.walls))
+	}
+	assertEntity(t, rsnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
+	assertEntity(t, rsnap, "1002", lootEntity, "", "training_bow", Vec2{X: 1, Y: 5})
+	assertEntity(t, rsnap, "1003", monsterEntity, "training_dummy_ranged", "", Vec2{X: 14, Y: 5})
 }
 
 func assertEntity(t *testing.T, snap Snapshot, id, typ, monsterDefID, itemDefID string, pos Vec2) {
@@ -284,6 +306,171 @@ func TestAutoPathGolden(t *testing.T) {
 				t.Fatalf("path = len %d end %+v, want len %d end %+v", len(steps), end, tc.ExpectedStepCount, tc.ExpectedEnd)
 			}
 		})
+	}
+}
+
+func TestRangedProjectileGolden(t *testing.T) {
+	var golden struct {
+		Cases []struct {
+			Name                       string   `json:"name"`
+			WorldID                    string   `json:"world_id"`
+			Seed                       string   `json:"seed"`
+			BaseHitChance              *float64 `json:"base_hit_chance"`
+			PlayerPosition             Vec2     `json:"player_position"`
+			ExpectedImpactTick         int      `json:"expected_impact_tick"`
+			ExpectedEvent              string   `json:"expected_event"`
+			ExpectedMonsterHPUnchanged bool     `json:"expected_monster_hp_unchanged"`
+			ExpectedPlayerHP           int      `json:"expected_player_hp"`
+			ExpectedMonsterDead        bool     `json:"expected_monster_dead"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "ranged_projectile.json", &golden)
+	for _, tc := range golden.Cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			rules := loadRules(t)
+			if tc.BaseHitChance != nil {
+				rulesCopy := *rules
+				rulesCopy.Combat = rules.Combat
+				rulesCopy.Combat.BaseHitChance = *tc.BaseHitChance
+				rules = &rulesCopy
+			}
+			sim := rangedLabWithEquippedBow(t, rules, tc.Seed)
+			sim.entities[sim.playerID].pos = tc.PlayerPosition
+			monster := firstEntityByKind(sim, monsterEntity)
+			initialMonsterHP := monster.hp
+			fire := sim.Tick([]Input{{MessageID: "fire", CorrelationID: "corr_ranged", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+			assertAck(t, fire, "fire")
+			if firstEntityByKind(sim, projectileEntity) == nil && sim.autoNav == nil && !hasEvent(fire, tc.ExpectedEvent) {
+				t.Fatalf("no projectile spawned, auto-nav queued, or expected event on fire tick: %+v", fire)
+			}
+			impactTick := -1
+			var impact TickResult
+			for i := 0; i < 80; i++ {
+				r := sim.Tick(nil)
+				if len(r.Events) > 0 {
+					impactTick = int(r.Tick)
+					impact = r
+					break
+				}
+			}
+			if tc.ExpectedImpactTick != 0 && impactTick != tc.ExpectedImpactTick {
+				t.Fatalf("impact tick = %d, want %d; impact=%+v", impactTick, tc.ExpectedImpactTick, impact)
+			}
+			if tc.ExpectedEvent != "" && !hasEvent(impact, tc.ExpectedEvent) {
+				t.Fatalf("impact events = %+v, want %s", impact.Events, tc.ExpectedEvent)
+			}
+			if tc.ExpectedMonsterHPUnchanged && monster.hp != initialMonsterHP {
+				t.Fatalf("monster hp = %d, want unchanged %d", monster.hp, initialMonsterHP)
+			}
+			if tc.ExpectedMonsterDead && monster.hp != 0 {
+				t.Fatalf("monster hp = %d, want dead", monster.hp)
+			}
+			if tc.ExpectedPlayerHP != 0 {
+				player := sim.entities[sim.playerID]
+				if player.hp != tc.ExpectedPlayerHP {
+					t.Fatalf("player hp = %d, want %d", player.hp, tc.ExpectedPlayerHP)
+				}
+			}
+		})
+	}
+}
+
+func rangedLabWithEquippedBow(t *testing.T, rules *Rules, seed string) *Sim {
+	t.Helper()
+	sim, err := NewSimWithWorld("sess_ranged", seed, rules, "ranged_lab")
+	if err != nil {
+		t.Fatalf("ranged_lab world: %v", err)
+	}
+	pickup := sim.Tick([]Input{{MessageID: "pick_bow", CorrelationID: "corr_pick", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+	assertAck(t, pickup, "pick_bow")
+	equip := sim.Tick([]Input{{MessageID: "equip_bow", CorrelationID: "corr_equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: weaponSlot}}})
+	assertAck(t, equip, "equip_bow")
+	return sim
+}
+
+func TestProjectileBusyRejectsSecondFire(t *testing.T) {
+	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	monster := firstEntityByKind(sim, monsterEntity)
+	first := sim.Tick([]Input{{MessageID: "fire1", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, first, "fire1")
+	second := sim.Tick([]Input{{MessageID: "fire2", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertReject(t, second, "fire2", "projectile_busy")
+}
+
+func TestRangedAutoApproachThenFire(t *testing.T) {
+	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	monster := firstEntityByKind(sim, monsterEntity)
+	sim.entities[sim.playerID].pos = Vec2{X: -2, Y: 5}
+	monster.pos = Vec2{X: 16, Y: 5}
+	r := sim.Tick([]Input{{MessageID: "far_fire", CorrelationID: "corr_far", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, r, "far_fire")
+	sawProjectile := false
+	sawImpact := false
+	for i := 0; i < 80 && !sawImpact; i++ {
+		r := sim.Tick(nil)
+		for _, c := range r.Changes {
+			if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == projectileEntity {
+				sawProjectile = true
+			}
+		}
+		if hasEvent(r, "monster_damaged") || hasEvent(r, "attack_missed") || hasEvent(r, "projectile_blocked") {
+			sawImpact = true
+		}
+	}
+	if !sawProjectile {
+		t.Fatal("auto-approach did not spawn projectile")
+	}
+	if !sawImpact {
+		t.Fatal("auto-approach projectile did not resolve")
+	}
+}
+
+func TestRangedBlockedLineAutoMovesUntilClearThenFires(t *testing.T) {
+	sim := rangedLabWithEquippedBow(t, loadRules(t), "deadbeefdeadbeef")
+	monster := firstEntityByKind(sim, monsterEntity)
+	sim.entities[sim.playerID].pos = Vec2{X: 0, Y: 3}
+	if sim.hasClearRangedShot(sim.entities[sim.playerID].pos, monster) {
+		t.Fatal("test setup has clear shot; want wall-blocked line")
+	}
+
+	r := sim.Tick([]Input{{MessageID: "covered_fire", CorrelationID: "corr_covered", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, r, "covered_fire")
+	if sim.autoNav == nil {
+		t.Fatal("blocked ranged click fired immediately; want auto-nav")
+	}
+	if firstEntityByKind(sim, projectileEntity) != nil {
+		t.Fatal("projectile spawned before line was clear")
+	}
+
+	sawProjectile := false
+	sawImpact := false
+	for i := 0; i < 80 && !sawImpact; i++ {
+		r := sim.Tick(nil)
+		for _, c := range r.Changes {
+			if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == projectileEntity {
+				sawProjectile = true
+				player := sim.entities[sim.playerID]
+				if !sim.hasClearRangedShot(player.pos, monster) {
+					t.Fatalf("projectile spawned without clear shot from %+v to %+v", player.pos, monster.pos)
+				}
+				playerMonsterDistance := distance(player.pos, monster.pos)
+				if meleeInRange(playerMonsterDistance, sim.rules.Combat.UnarmedReach, monsterRadius) {
+					t.Fatalf("ranged auto-nav entered melee range at %+v", player.pos)
+				}
+			}
+		}
+		if hasEvent(r, "monster_damaged") || hasEvent(r, "monster_killed") || hasEvent(r, "attack_missed") || hasEvent(r, "projectile_blocked") {
+			sawImpact = true
+			if hasEvent(r, "projectile_blocked") {
+				t.Fatalf("projectile was still blocked after auto-nav: %+v", r.Events)
+			}
+		}
+	}
+	if !sawProjectile {
+		t.Fatal("auto-nav never spawned projectile")
+	}
+	if !sawImpact {
+		t.Fatal("auto-nav projectile did not resolve")
 	}
 }
 

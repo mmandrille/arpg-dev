@@ -327,9 +327,24 @@ def rusty_sword_glb() -> bytes:
     return _build_glb(color, parts, [])
 
 
+def training_bow_glb() -> bytes:
+    """Low-poly bow, grip at origin, bow/string standing along local Y."""
+    color = (0.38, 0.24, 0.12, 1.0)
+    parts = [
+        {"name": "grip", "translation": [0.0, 0.0, 0.0], "scale": [0.08, 0.24, 0.08]},
+        {"name": "upper_limb_inner", "translation": [-0.08, 0.38, 0.0], "scale": [0.05, 0.55, 0.05]},
+        {"name": "lower_limb_inner", "translation": [-0.08, -0.38, 0.0], "scale": [0.05, 0.55, 0.05]},
+        {"name": "upper_limb_tip", "translation": [-0.19, 0.78, 0.0], "scale": [0.05, 0.36, 0.05]},
+        {"name": "lower_limb_tip", "translation": [-0.19, -0.78, 0.0], "scale": [0.05, 0.36, 0.05]},
+        {"name": "string", "translation": [0.16, 0.0, 0.0], "scale": [0.018, 1.45, 0.018]},
+    ]
+    return _build_glb(color, parts, [])
+
+
 TARGETS = {
     "client/assets/characters/base_humanoid/base_humanoid.glb": base_humanoid_glb,
     "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
+    "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
     "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
 }
 

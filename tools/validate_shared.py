@@ -125,6 +125,7 @@ def cross_checks(report: Report) -> None:
     loot_golden = load(GOLDEN / "loot_roll.json")
     slice_golden = load(GOLDEN / "slice_outcome.json")
     auto_path_golden = load(GOLDEN / "auto_path.json")
+    ranged_projectile_golden = load(GOLDEN / "ranged_projectile.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -194,6 +195,19 @@ def cross_checks(report: Report) -> None:
                 report.fail("item reach", f"{item_id}: reach must be positive")
             else:
                 report.ok(f"item {item_id} weapon reach is valid")
+        attack_mode = item.get("attack_mode", "melee")
+        projectile_speed = item.get("projectile_speed")
+        if attack_mode == "ranged":
+            if not item.get("equippable") or item.get("slot") != "weapon":
+                report.fail("item ranged eligibility", f"{item_id}: ranged mode is only valid on equippable weapons")
+            elif dmg is None or reach is None or projectile_speed is None:
+                report.fail("item ranged fields", f"{item_id}: ranged weapon requires damage, reach, and projectile_speed")
+            elif projectile_speed <= 0:
+                report.fail("item projectile_speed", f"{item_id}: projectile_speed must be positive")
+            else:
+                report.ok(f"item {item_id} ranged weapon fields are valid")
+        elif projectile_speed is not None:
+            report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
 
     if combat.get("unarmed_reach", 0) <= 0:
         report.fail("combat unarmed_reach", "must be positive")
@@ -314,6 +328,34 @@ def cross_checks(report: Report) -> None:
                 report.ok(f"auto_path {case['name']} references world and melee end")
         else:
             report.ok(f"auto_path {case['name']} references world and step budget")
+
+    constants = ranged_projectile_golden["constants"]
+    if constants.get("projectile_radius") != 0.10:
+        report.fail("ranged_projectile projectile_radius", "must match v12 projectileRadius 0.10")
+    elif constants.get("tick_duration") != 0.05:
+        report.fail("ranged_projectile tick_duration", "must match 20 Hz tick duration 0.05")
+    elif constants.get("monster_radius") != 0.45:
+        report.fail("ranged_projectile monster_radius", "must match server monsterRadius 0.45")
+    else:
+        report.ok("ranged_projectile constants match v12 sim constants")
+
+    for case in ranged_projectile_golden["cases"]:
+        name = case["name"]
+        world_id = case["world_id"]
+        weapon_id = case["equipped_weapon"]
+        monster_id = case["target_monster_def_id"]
+        if world_id not in worlds["worlds"]:
+            report.fail("ranged_projectile world", f"{name}: unknown world_id {world_id}")
+        elif weapon_id not in items["items"]:
+            report.fail("ranged_projectile weapon", f"{name}: unknown equipped_weapon {weapon_id}")
+        elif items["items"][weapon_id].get("attack_mode") != "ranged":
+            report.fail("ranged_projectile weapon", f"{name}: {weapon_id} is not ranged")
+        elif monster_id not in monsters["monsters"]:
+            report.fail("ranged_projectile monster", f"{name}: unknown target_monster_def_id {monster_id}")
+        elif case.get("expected_event") not in (None, "projectile_blocked", "projectile_expired", "attack_missed", "monster_killed"):
+            report.fail("ranged_projectile event", f"{name}: unexpected expected_event {case.get('expected_event')}")
+        else:
+            report.ok(f"ranged_projectile {name} references valid rules")
 
     for interactable_id, interactable in interactables["interactables"].items():
         if interactable.get("initial_state") != "closed":

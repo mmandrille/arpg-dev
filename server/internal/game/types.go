@@ -23,6 +23,9 @@ type EntityView struct {
 	MonsterDefID      string `json:"monster_def_id,omitempty"`
 	ItemDefID         string `json:"item_def_id,omitempty"`
 	InteractableDefID string `json:"interactable_def_id,omitempty"`
+	OwnerID           string `json:"owner_id,omitempty"`
+	TargetID          string `json:"target_id,omitempty"`
+	ProjectileDefID   string `json:"projectile_def_id,omitempty"`
 	State             string `json:"state,omitempty"`
 }
 

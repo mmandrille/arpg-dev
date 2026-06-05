@@ -1,0 +1,21 @@
+server/internal/http/ws_test.go
+  s_4565ec34f2f0e0::t_82e53e0bf696d2 9,29-32,53-55,187-208,237-285,405,414-426,429,434,442-505,567-617
+  s_4565ec34f2f0e0::t_22dfbb963cbaf8 169-171
+  s_4565ec34f2f0e0::t_923dbff30907aa 209-236,506-566
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "6f9c31790c86ae0944f8b47bb15bd9263bc41de5",
+  "prompts": {},
+  "sessions": {
+    "s_4565ec34f2f0e0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e980d-e89f-74a3-88ab-4bfb7f0f8cf7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

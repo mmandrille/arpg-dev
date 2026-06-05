@@ -1,0 +1,34 @@
+server/internal/http/inspect.go
+  s_4565ec34f2f0e0::t_32ea04239e9d1b 55,60
+server/internal/replay/replay.go
+  s_4565ec34f2f0e0::t_ccca3fa9cb109f 133
+  s_4565ec34f2f0e0::t_5432a32df0cd0f 15,39-61,63-64,67,71,75,78-100,102-103,105,108,113-129,135,155-160,168,183,186-187,191,193,196-197
+server/internal/replay/replay_test.go
+  s_4565ec34f2f0e0::t_192faf41a61254 208-210
+  s_4565ec34f2f0e0::t_ef05c12182b1f5 1-207,211-240
+server/internal/http/realtime.go
+  s_4565ec34f2f0e0::t_d8795c1ab294aa 14-16,40
+server/internal/realtime/hub.go
+  s_4565ec34f2f0e0::t_d8795c1ab294aa 11,40-42,44-45,50-66,69
+server/internal/store/repos.go
+  s_4565ec34f2f0e0::t_32ea04239e9d1b 208,246
+server/internal/realtime/runner.go
+  s_4565ec34f2f0e0::t_192faf41a61254 209-213
+  s_4565ec34f2f0e0::t_d8795c1ab294aa 16,42-50,59,61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "8e7b1b348cd22ceb300c336ee57ef220ecea9688",
+  "prompts": {},
+  "sessions": {
+    "s_4565ec34f2f0e0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e980d-e89f-74a3-88ab-4bfb7f0f8cf7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

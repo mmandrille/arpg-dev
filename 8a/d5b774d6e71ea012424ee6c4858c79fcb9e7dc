@@ -1,0 +1,19 @@
+docs/plans/2026-06-05-animate-and-react.md
+  s_e7971ad9f727db::t_98e75abaa5306b 1-1440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "8ad5b774d6e71ea012424ee6c4858c79fcb9e7dc",
+  "prompts": {},
+  "sessions": {
+    "s_e7971ad9f727db": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0ca44e12-12fc-49d3-bf1b-c25dc38b1033",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

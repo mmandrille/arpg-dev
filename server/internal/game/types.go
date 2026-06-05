@@ -37,6 +37,7 @@ type Event struct {
 	EventType     string `json:"event_type"`
 	EntityID      string `json:"entity_id,omitempty"`
 	CorrelationID string `json:"correlation_id,omitempty"`
+	Damage        *int   `json:"damage,omitempty"`
 }
 
 // Snapshot is the full authoritative state for rendering (session_snapshot).

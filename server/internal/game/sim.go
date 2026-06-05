@@ -311,7 +311,7 @@ func (s *Sim) handleAttack(in Input, res *TickResult) {
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
-	res.Events = append(res.Events, Event{EventType: "monster_damaged", EntityID: in.Attack.TargetID, CorrelationID: in.CorrelationID})
+	res.Events = append(res.Events, Event{EventType: "monster_damaged", EntityID: in.Attack.TargetID, CorrelationID: in.CorrelationID, Damage: intPtr(dmg)})
 
 	if target.hp == 0 {
 		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: in.Attack.TargetID, CorrelationID: in.CorrelationID})
@@ -351,7 +351,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	if player.hp == 0 {
 		eventType = "player_killed"
 	}
-	res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), CorrelationID: corr})
+	res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), CorrelationID: corr, Damage: intPtr(dmg)})
 }
 
 func (s *Sim) handlePickUp(in Input, res *TickResult) {
@@ -562,6 +562,7 @@ func (it *invItem) view() ItemView {
 
 func ptrEntityView(v EntityView) *EntityView { return &v }
 func ptrItemView(v ItemView) *ItemView       { return &v }
+func intPtr(v int) *int                      { return &v }
 
 func normalize(v Vec2) Vec2 {
 	length := math.Hypot(v.X, v.Y)

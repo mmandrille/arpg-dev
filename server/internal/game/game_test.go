@@ -350,6 +350,8 @@ func TestSuccessfulHitRetaliatesAndPreservesKillOrder(t *testing.T) {
 			t.Fatalf("event[%d] = %+v, want %s corr_hit", i, r.Events[i], want)
 		}
 	}
+	assertEventDamageAtLeast(t, r, "monster_damaged", 3)
+	assertEventDamage(t, r, "player_damaged", 1)
 	if hasEvent(r, "player_killed") {
 		t.Fatalf("unexpected player_killed event: %+v", r.Events)
 	}
@@ -373,6 +375,7 @@ func TestEquippedWeaponOneShotsRewardDummy(t *testing.T) {
 	if !hasEvent(r, "monster_damaged") || !hasEvent(r, "monster_killed") || !hasEvent(r, "loot_dropped") {
 		t.Fatalf("missing equipped attack events: %+v", r.Events)
 	}
+	assertEventDamageAtLeast(t, r, "monster_damaged", 3)
 	if !hasLootSpawn(r, "training_badge") {
 		t.Fatalf("missing training_badge loot spawn: %+v", r.Changes)
 	}
@@ -401,6 +404,27 @@ func TestEquippedWeaponWithoutDamageFallsBackToBaseDamage(t *testing.T) {
 	if hasEvent(r, "monster_killed") || hasEvent(r, "loot_dropped") {
 		t.Fatalf("fallback base hit should not kill reward dummy: %+v", r.Events)
 	}
+}
+
+func TestDamageEventReportsRolledDamageNotClampedHPDelta(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.Combat.PlayerDamage = DamageRange{Min: 5, Max: 5}
+	sim := NewSim("sess_overkill_damage_event", "deadbeefdeadbeef", rules)
+	sim.findEntity("1002").hp = 1
+
+	r := sim.Tick([]Input{{
+		MessageID:     "a1",
+		CorrelationID: "corr_overkill",
+		Type:          "attack_intent",
+		Attack:        &AttackIntent{TargetID: "1002"},
+	}})
+
+	assertAck(t, r, "a1")
+	monster := sim.findEntity("1002")
+	if monster == nil || monster.hp != 0 {
+		t.Fatalf("monster hp = %+v, want dead", monster)
+	}
+	assertEventDamage(t, r, "monster_damaged", 5)
 }
 
 func TestMissedAttackDoesNotRetaliate(t *testing.T) {
@@ -720,6 +744,34 @@ func hasEvent(r TickResult, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func assertEventDamage(t *testing.T, r TickResult, eventType string, want int) {
+	t.Helper()
+	for _, ev := range r.Events {
+		if ev.EventType != eventType {
+			continue
+		}
+		if ev.Damage == nil || *ev.Damage != want {
+			t.Fatalf("%s damage = %v, want %d in events %+v", eventType, ev.Damage, want, r.Events)
+		}
+		return
+	}
+	t.Fatalf("missing event %s in %+v", eventType, r.Events)
+}
+
+func assertEventDamageAtLeast(t *testing.T, r TickResult, eventType string, min int) {
+	t.Helper()
+	for _, ev := range r.Events {
+		if ev.EventType != eventType {
+			continue
+		}
+		if ev.Damage == nil || *ev.Damage < min {
+			t.Fatalf("%s damage = %v, want >= %d in events %+v", eventType, ev.Damage, min, r.Events)
+		}
+		return
+	}
+	t.Fatalf("missing event %s in %+v", eventType, r.Events)
 }
 
 func hasLootSpawn(r TickResult, itemDefID string) bool {

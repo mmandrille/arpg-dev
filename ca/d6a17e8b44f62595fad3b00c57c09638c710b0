@@ -1,0 +1,30 @@
+make/shared.mk
+  s_c36b8efb59b07f::t_e1254c6da15daa 11-14
+  s_c36b8efb59b07f::t_c4495f60a52877 2
+client/tools/build_animations.gd.uid
+  s_c36b8efb59b07f::t_b548fb1cb240fe 1
+client/tools/build_animations.gd
+  s_c36b8efb59b07f::t_b99df6530334fe 1-20,26-42,44-84
+  s_c36b8efb59b07f::t_6f6e7d84d1076a 21-25
+  s_c36b8efb59b07f::t_3c9a3b12f6fa9c 43
+client/animations/monster_anims.tres
+  s_c36b8efb59b07f::t_b548fb1cb240fe 1-38
+client/animations/character_anims.tres
+  s_c36b8efb59b07f::t_b548fb1cb240fe 1-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "cad6a17e8b44f62595fad3b00c57c09638c710b0",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}

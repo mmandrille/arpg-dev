@@ -1,0 +1,19 @@
+client/scenes/monster_dummy.tscn
+  s_c36b8efb59b07f::t_5530d7addb1d0e 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "c1fe406d8ef7e4d5fc7a3089876d2ebe3752aacd",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -45,6 +45,31 @@
           "size": { "x": 1, "y": 3 }
         }
       ]
+    },
+    "door_lab": {
+      "player": { "position": { "x": 0, "y": 5 } },
+      "entities": [
+        {
+          "type": "interactable",
+          "interactable_def_id": "wooden_door",
+          "position": { "x": 4, "y": 5 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 4, "y": 2 },
+          "size": { "x": 1, "y": 5 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 4, "y": 8 },
+          "size": { "x": 1, "y": 5 }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "training_badge",
+          "position": { "x": 8, "y": 5 }
+        }
+      ]
     }
   }
 }

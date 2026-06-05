@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "interactables": {
+    "wooden_door": {
+      "name": "Wooden Door",
+      "initial_state": "closed",
+      "barrier_when_closed": {
+        "size": { "x": 1.0, "y": 0.25 }
+      }
+    }
+  }
+}

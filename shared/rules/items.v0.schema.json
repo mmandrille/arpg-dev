@@ -18,7 +18,8 @@
           "name": { "type": "string" },
           "slot": { "type": "string", "enum": ["weapon"] },
           "equippable": { "type": "boolean" },
-          "damage": { "$ref": "#/$defs/damage_range" }
+          "damage": { "$ref": "#/$defs/damage_range" },
+          "reach": { "type": "number", "exclusiveMinimum": 0 }
         },
         "allOf": [
           {
@@ -37,13 +38,24 @@
               "not": {
                 "anyOf": [
                   { "required": ["slot"] },
-                  { "required": ["damage"] }
+                  { "required": ["damage"] },
+                  { "required": ["reach"] }
                 ]
               }
             }
           },
           {
             "if": { "required": ["damage"] },
+            "then": {
+              "properties": {
+                "equippable": { "const": true },
+                "slot": { "const": "weapon" }
+              },
+              "required": ["equippable", "slot"]
+            }
+          },
+          {
+            "if": { "required": ["reach"] },
             "then": {
               "properties": {
                 "equippable": { "const": true },

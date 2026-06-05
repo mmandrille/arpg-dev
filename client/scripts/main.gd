@@ -6,10 +6,17 @@ extends Node3D
 
 const NetClientScript := preload("res://scripts/net_client.gd")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
+const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
+const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
+const MONSTER_EVENT_CLIPS := {
+	"monster_damaged": "hit",
+	"monster_killed": "death",
+}
 
 var client: NetClient
 var resolver: EquipmentVisualResolver
-var entities: Dictionary = {}        # id (String) -> MeshInstance3D (monsters/loot only)
+var player_anim: AnimationController
+var entities: Dictionary = {}        # id (String) -> {node:Node3D, controller:AnimationController|null, type:String}
 var player_id: String = ""
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
@@ -49,6 +56,9 @@ func _ready() -> void:
 	# Mount-root is injected (spec §4.8): the resolver finds the named socket
 	# within CharacterVisual, never via an absolute scene path.
 	resolver = EquipmentResolverScript.new(character_visual)
+	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap != null:
+		player_anim = AnimationControllerScript.new(ap)
 	_build_scene()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
@@ -78,6 +88,11 @@ func _process(delta: float) -> void:
 		_handle_message(env)
 
 	_handle_input(delta)
+	if player_anim != null:
+		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
+			and (Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
+			or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D))
+		player_anim.set_locomotion(moving)
 	_update_facing_toward_mouse()
 	_update_debug()
 
@@ -99,7 +114,7 @@ func _handle_message(env: Dictionary) -> void:
 
 func _apply_snapshot(p: Dictionary) -> void:
 	for id in entities.keys():
-		entities[id].queue_free()
+		(entities[id]["node"] as Node3D).queue_free()
 	entities.clear()
 	loot_ids.clear()
 	monster_ids.clear()
@@ -132,6 +147,20 @@ func _apply_delta(p: Dictionary) -> void:
 				equipped[c["slot"]] = c.get("item_instance_id")
 				if resolver != null:
 					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
+	for ev in p.get("events", []):
+		var clip = MONSTER_EVENT_CLIPS.get(str(ev.get("event_type", "")), null)
+		if clip == null:
+			continue
+		var eid := str(ev.get("entity_id", ""))
+		if not entities.has(eid):
+			continue
+		var ctrl = entities[eid]["controller"]
+		if ctrl == null:
+			continue
+		if clip == "death":
+			ctrl.enter_terminal("death")
+		else:
+			ctrl.play_one_shot(clip)
 	_reconcile_player()
 
 
@@ -147,23 +176,37 @@ func _upsert_entity(e: Dictionary) -> void:
 		predicted_pos = server_pos
 		player_anchor.position = server_pos
 		return
-	var node: MeshInstance3D
+	var rec: Dictionary
 	if entities.has(id):
-		node = entities[id]
+		rec = entities[id]
 	else:
-		node = _make_entity_node(e["type"])
+		var node := _make_entity_node(e["type"])
 		entities_root.add_child(node)
-		entities[id] = node
+		var controller: AnimationController = null
+		if e["type"] == "monster":
+			var ap := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
+			if ap != null:
+				controller = AnimationControllerScript.new(ap)
+			else:
+				push_warning("[main] monster %s has no AnimationPlayer" % id)
+		rec = {"node": node, "controller": controller, "type": str(e["type"])}
+		entities[id] = rec
 		if e["type"] == "loot" and not loot_ids.has(id):
 			loot_ids.append(id)
 		if e["type"] == "monster" and not monster_ids.has(id):
 			monster_ids.append(id)
-	node.position = server_pos
+	(rec["node"] as Node3D).position = server_pos
+	# Resume/snapshot consistency: a monster already dead in the snapshot enters
+	# the terminal death pose without waiting for an event (spec §5.4).
+	if rec["type"] == "monster" and rec["controller"] != null:
+		var hp = e.get("hp", null)
+		if hp != null and int(hp) <= 0:
+			rec["controller"].enter_terminal("death")
 
 
 func _remove_entity(id: String) -> void:
 	if entities.has(id):
-		entities[id].queue_free()
+		(entities[id]["node"] as Node3D).queue_free()
 		entities.erase(id)
 	loot_ids.erase(id)
 	monster_ids.erase(id)
@@ -233,8 +276,8 @@ func _try_attack_toward_mouse() -> void:
 		return
 
 	_face_direction(aim)
-	if resolver != null:
-		resolver.play_attack_swing()
+	if player_anim != null:
+		player_anim.play_one_shot("attack")
 
 	var target_id := _best_monster_in_direction(aim)
 	if target_id == "":
@@ -314,7 +357,7 @@ func _best_monster_in_direction(aim: Vector2) -> String:
 		if not entities.has(id):
 			continue
 
-		var entity_node: MeshInstance3D = entities[id]
+		var entity_node: Node3D = entities[id]["node"]
 		var to_monster: Vector3 = entity_node.position - predicted_pos
 		var flat := Vector2(to_monster.x, to_monster.z)
 		if flat.length_squared() < 0.0001:
@@ -357,20 +400,25 @@ func _build_scene() -> void:
 	ui.add_child(_debug_label)
 
 
-func _make_entity_node(kind: String) -> MeshInstance3D:
-	# Monsters and loot stay v0 placeholder primitives (spec §5.1); only the
-	# local player adopts the humanoid GLB pipeline in v2.
-	var node := MeshInstance3D.new()
+func _make_entity_node(kind: String) -> Node3D:
+	# Monster adopts the rigged dummy scene (spec §5.3); loot stays a primitive.
+	if kind == "monster":
+		var packed := MonsterDummyScene
+		if packed != null:
+			return packed.instantiate()
+		# Fallback: red primitive so positioning/targeting still works.
+		var fallback := MeshInstance3D.new()
+		var fm := StandardMaterial3D.new()
+		fm.albedo_color = Color(1.0, 0.3, 0.3)
+		fallback.mesh = BoxMesh.new()
+		fallback.material_override = fm
+		return fallback
+	var node := MeshInstance3D.new()  # loot
+	var box := BoxMesh.new()
+	box.size = Vector3(0.5, 0.5, 0.5)
+	node.mesh = box
 	var mat := StandardMaterial3D.new()
-	match kind:
-		"monster":
-			node.mesh = BoxMesh.new()
-			mat.albedo_color = Color(1.0, 0.3, 0.3)
-		"loot":
-			var box := BoxMesh.new()
-			box.size = Vector3(0.5, 0.5, 0.5)
-			node.mesh = box
-			mat.albedo_color = Color(1.0, 0.85, 0.2)
+	mat.albedo_color = Color(1.0, 0.85, 0.2)
 	node.material_override = mat
 	return node
 

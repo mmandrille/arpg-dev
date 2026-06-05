@@ -187,8 +187,9 @@ func _build_scene() -> void:
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 	cam.size = 20.0
 	cam.position = Vector3(20, 20, 20)
-	cam.look_at(Vector3(11, 0, 5), Vector3.UP)
 	add_child(cam)
+	# look_at requires the node to be inside the scene tree (Godot 4).
+	cam.look_at(Vector3(11, 0, 5), Vector3.UP)
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -40, 0)
@@ -224,8 +225,15 @@ func _make_entity_node(kind: String) -> MeshInstance3D:
 
 func _update_debug() -> void:
 	var eq = equipped.get("weapon", null)
-	_debug_label.text = "tick=%d  recon_delta=%.2f\ninv=%d  equipped_weapon=%s\nW/A/S/D move  SPACE attack  E pickup  Q equip" % [
-		last_server_tick, reconciliation_delta, inventory.size(), str(eq)]
+	var ws_state := "?"
+	if client != null:
+		match client.ready_state():
+			WebSocketPeer.STATE_CONNECTING: ws_state = "connecting"
+			WebSocketPeer.STATE_OPEN: ws_state = "open"
+			WebSocketPeer.STATE_CLOSING: ws_state = "closing"
+			WebSocketPeer.STATE_CLOSED: ws_state = "closed"
+	_debug_label.text = "ws=%s  tick=%d  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nW/A/S/D move  SPACE attack  E pickup  Q equip" % [
+		ws_state, last_server_tick, reconciliation_delta, inventory.size(), entities.size(), str(eq)]
 
 
 func _debug(msg: String) -> void:

@@ -19,7 +19,10 @@ func TestReconstructFromInputsRestoresCombatStateAndMetadata(t *testing.T) {
 	rules := loadRules(t)
 	inputs, maxTick := scriptedRecordedInputs()
 
-	recon := ReconstructFromInputs(testSessionID, testSeed, rules, inputs, maxTick)
+	recon, err := ReconstructFromInputs(testSessionID, testSeed, rules, game.DefaultWorldID, inputs, maxTick)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
 	if recon.Sim == nil {
 		t.Fatal("reconstructed sim is nil")
 	}
@@ -46,10 +49,13 @@ func TestVerifyUsesReconstructedSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stored inputs: %v", err)
 	}
-	expected := ReconstructFromInputs(testSessionID, testSeed, rules, recorded, maxTick)
+	expected, err := ReconstructFromInputs(testSessionID, testSeed, rules, game.DefaultWorldID, recorded, maxTick)
+	if err != nil {
+		t.Fatalf("reconstruct expected: %v", err)
+	}
 
 	repo := &fakeRepo{
-		session: store.Session{ID: testSessionID, Seed: testSeed},
+		session: store.Session{ID: testSessionID, Seed: testSeed, WorldID: game.DefaultWorldID},
 		inputs:  rows,
 		events:  storeEvents(expected.DerivedEvents),
 	}
@@ -64,6 +70,28 @@ func TestVerifyUsesReconstructedSnapshot(t *testing.T) {
 		t.Fatalf("verify snapshot differs\n got: %+v\nwant: %+v", rep.Snapshot, expected.Snapshot)
 	}
 	assertRestoredSlice(t, rep.Snapshot)
+}
+
+func TestReconstructFromInputsUsesWorldID(t *testing.T) {
+	rules := loadRules(t)
+	recon, err := ReconstructFromInputs(testSessionID, testSeed, rules, "gear_before_combat", nil, -1)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+
+	snap := recon.Snapshot
+	player := entityByID(snap, "1001")
+	if player == nil || player.Position.X != 0 || player.Position.Y != 5 {
+		t.Fatalf("player = %+v, want 1001 at (0,5)", player)
+	}
+	loot := entityByID(snap, "1002")
+	if loot == nil || loot.Type != "loot" || loot.ItemDefID != "rusty_sword" {
+		t.Fatalf("loot = %+v, want rusty_sword 1002", loot)
+	}
+	monster := entityByID(snap, "1003")
+	if monster == nil || monster.Type != "monster" || monster.MonsterDefID != "training_dummy_reward" {
+		t.Fatalf("monster = %+v, want training_dummy_reward 1003", monster)
+	}
 }
 
 func scriptedRecordedInputs() ([]RecordedInput, int64) {

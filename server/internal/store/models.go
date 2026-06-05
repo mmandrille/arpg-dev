@@ -26,6 +26,7 @@ type Session struct {
 	AccountID   string
 	CharacterID string
 	Seed        string // hex-encoded server seed
+	WorldID     string // shared/rules/worlds.v0.json preset id
 	Status      string // "active" | "ended"
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
@@ -36,6 +37,9 @@ const (
 	SessionActive = "active"
 	SessionEnded  = "ended"
 )
+
+// defaultWorldID is used when legacy rows omit world_id.
+const defaultWorldID = "vertical_slice"
 
 // InventoryItem is a session-scoped inventory entry (see migration note). ID is
 // the protocol item_instance_id (decimal string), unique within its session.

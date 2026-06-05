@@ -103,6 +103,10 @@ type wMsg struct {
 }
 
 func loginAndSession(t *testing.T, srv *httptest.Server) (token, sessionID string) {
+	return loginAndSessionWithWorld(t, srv, "")
+}
+
+func loginAndSessionWithWorld(t *testing.T, srv *httptest.Server, worldID string) (token, sessionID string) {
 	t.Helper()
 	// dev-login
 	rec := doHTTP(t, srv, "POST", "/v0/auth/dev-login", "", map[string]string{
@@ -111,7 +115,11 @@ func loginAndSession(t *testing.T, srv *httptest.Server) (token, sessionID strin
 	var lr devLoginResponse
 	mustJSON(t, rec, &lr)
 	// create session
-	rec = doHTTP(t, srv, "POST", "/v0/sessions", lr.AccessToken, map[string]any{"mode": "solo"})
+	body := map[string]any{"mode": "solo"}
+	if worldID != "" {
+		body["world_id"] = worldID
+	}
+	rec = doHTTP(t, srv, "POST", "/v0/sessions", lr.AccessToken, body)
 	var sr createSessionResponse
 	mustJSON(t, rec, &sr)
 	return lr.AccessToken, sr.SessionID

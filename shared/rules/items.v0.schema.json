@@ -12,13 +12,29 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["name", "slot", "equippable"],
+        "required": ["name", "equippable"],
         "additionalProperties": false,
         "properties": {
           "name": { "type": "string" },
           "slot": { "type": "string", "enum": ["weapon"] },
           "equippable": { "type": "boolean" }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "equippable": { "const": true } },
+              "required": ["equippable"]
+            },
+            "then": { "required": ["slot"] }
+          },
+          {
+            "if": {
+              "properties": { "equippable": { "const": false } },
+              "required": ["equippable"]
+            },
+            "then": { "not": { "required": ["slot"] } }
+          }
+        ]
       }
     }
   }

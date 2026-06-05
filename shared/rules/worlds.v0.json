@@ -1,0 +1,30 @@
+{
+  "version": 0,
+  "worlds": {
+    "vertical_slice": {
+      "player": { "position": { "x": 10, "y": 5 } },
+      "entities": [
+        {
+          "type": "monster",
+          "monster_def_id": "training_dummy",
+          "position": { "x": 12, "y": 5 }
+        }
+      ]
+    },
+    "gear_before_combat": {
+      "player": { "position": { "x": 0, "y": 5 } },
+      "entities": [
+        {
+          "type": "loot",
+          "item_def_id": "rusty_sword",
+          "position": { "x": 6, "y": 5 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "training_dummy_reward",
+          "position": { "x": 12, "y": 5 }
+        }
+      ]
+    }
+  }
+}

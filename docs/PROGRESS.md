@@ -11,7 +11,7 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v6 — `visual-bot-scenario-runner` (discoverable bot scenarios + visual replay playlist) |
+| **Latest completed slice** | v7 — `gear-before-combat-scenario` (world presets + second ARPG bot scenario) |
 | **Active branch** | `feature/resume-authoritative-state` |
 | **CI gate** | `make ci` green on 2026-06-05 |
 | **Next slice** | TBD |
@@ -19,7 +19,7 @@ Last updated: 2026-06-05
 ### Slice numbering note
 
 ADR-0001 sometimes calls the first slice **v1**; repo docs call it **v0**
-(`first-playable-vertical-slice`). This file uses **v0–v5** to match spec/plan filenames.
+(`first-playable-vertical-slice`). This file uses **v0–v7** to match spec/plan filenames.
 
 ---
 
@@ -29,10 +29,10 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios
-   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)
-        │                      │                        │                        │                         │                         │
-     main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat
+   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)        (world presets)
+        │                      │                        │                        │                         │                         │                              │
+     main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓
 ```
 
 | Slice | Codename | Status | Spec | Plan |
@@ -43,6 +43,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v4** | `take-a-hit` | Complete (on `main`) | [`spec-take-a-hit.md`](specs/spec-take-a-hit.md) | [`2026-06-05-take-a-hit.md`](plans/2026-06-05-take-a-hit.md) |
 | **v5** | `resume-authoritative-state` | Complete (`make ci` green) | [`spec-resume-authoritative-state.md`](specs/spec-resume-authoritative-state.md) | [`2026-06-05-resume-authoritative-state.md`](plans/2026-06-05-resume-authoritative-state.md) |
 | **v6** | `visual-bot-scenario-runner` | Complete (`make ci` green) | [`spec-visual-bot-scenario-runner.md`](specs/spec-visual-bot-scenario-runner.md) | [`2026-06-05-visual-bot-scenario-runner.md`](plans/2026-06-05-visual-bot-scenario-runner.md) |
+| **v7** | `gear-before-combat-scenario` | Complete (`make ci` green) | [`spec-gear-before-combat-scenario.md`](specs/spec-gear-before-combat-scenario.md) | [`2026-06-05-gear-before-combat-scenario.md`](plans/2026-06-05-gear-before-combat-scenario.md) |
 
 ---
 
@@ -122,6 +123,19 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 **Explicit non-goals (still true):** no production replay browser, no durable artifact retention policy, no client presentation annotations beyond authoritative events.
 
+### v7 — Gear before combat scenario
+
+**Proves:** The server can own multiple deterministic initial world presets, and replay/resume/debug timelines reconstruct the selected preset instead of drifting to the default world.
+
+- Shared `worlds.v0.json` defines `vertical_slice` and `gear_before_combat` initial layouts.
+- Sessions persist `world_id`; create defaults to `vertical_slice`, rejects unknown worlds, and resume returns the persisted world.
+- `game.NewSimWithWorld` spawns the player, initial loot, and monsters from rules data; `NewSim` remains a default wrapper.
+- Replay reconstruction, `/state`, replay timeline, and WebSocket fresh/resume paths use the persisted world.
+- Bot scenario catalog now runs `01_vertical_slice.json` then `02_gear_before_combat.json`.
+- Gear scenario walks to initial `rusty_sword`, picks it up, equips it, kills `training_dummy_reward`, picks up `training_badge`, and asserts two inventory items.
+
+**Explicit non-goals (still true):** no pickup range gate, no equipped sword damage modifier, no `world_id` in WebSocket snapshots, no Godot inventory UI for non-visual items.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -146,8 +160,14 @@ dev-login → create session → move → attack training dummy → pick up loot
 ```
 
 After v4 the player **survives with reduced HP** (`hp < 10`). Monster dies; player may take retaliation
-each successful hit. After v6 this flow lives in `tools/bot/scenarios/vertical_slice.json`; additional
-scenario JSON files are automatically included in `make bot` and `make bot-visual`.
+each successful hit. After v7 this flow lives in `tools/bot/scenarios/01_vertical_slice.json`; additional
+scenario JSON files are automatically included in filename order in `make bot` and `make bot-visual`.
+
+The scenario catalog also includes:
+
+```text
+gear_before_combat: walk to rusty_sword → pick up → equip → kill reward dummy → pick up training_badge
+```
 
 **Verify:**
 
@@ -170,6 +190,9 @@ Do **not** assume these are the next slice — they are documented backlog items
 **Combat/world state now persists on same-session resume.** v5 replays recorded
 inputs before the WebSocket `session_snapshot`, so monster death, player HP,
 inventory, equipped state, and ID continuity are restored authoritatively.
+
+**World preset identity now persists on sessions.** v7 stores `world_id`, so fresh WebSocket attach,
+resume, `/state`, replay verification, and replay timeline all reconstruct the same initial layout.
 
 ### Other deferred items (from specs / ADRs)
 

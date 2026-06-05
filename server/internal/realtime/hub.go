@@ -46,7 +46,7 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
 		return
 	}
 
-	sim := game.NewSim(sess.ID, sess.Seed, h.rules)
+	var sim *game.Sim
 	var meta *replay.ResumeMetadata
 	if len(storedInputs) > 0 {
 		recon, err := replay.Reconstruct(r.Context(), h.store, h.rules, sess.ID)
@@ -58,6 +58,18 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
 		}
 		sim = recon.Sim
 		meta = &recon.Metadata
+	} else {
+		worldID := sess.WorldID
+		if worldID == "" {
+			worldID = game.DefaultWorldID
+		}
+		var err error
+		sim, err = game.NewSimWithWorld(sess.ID, sess.Seed, h.rules, worldID)
+		if err != nil {
+			h.log.Error("create session sim", "session_id", sess.ID, "world_id", worldID, "error", err)
+			http.Error(w, "could not create session sim", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	conn, err := h.upgrader.Upgrade(w, r, nil)

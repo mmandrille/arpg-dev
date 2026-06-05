@@ -36,6 +36,30 @@ type Report struct {
 	Snapshot           game.Snapshot `json:"snapshot"`
 }
 
+// Envelope is a protocol-shaped server-to-client replay message.
+type Envelope struct {
+	Type      string `json:"type"`
+	MessageID string `json:"message_id"`
+	SessionID string `json:"session_id"`
+	Tick      uint64 `json:"tick"`
+	Payload   any    `json:"payload"`
+}
+
+// Timeline is a visual/debug replay stream reconstructed from seed + inputs.
+type Timeline struct {
+	SessionID string     `json:"session_id"`
+	Seed      string     `json:"seed"`
+	Envelopes []Envelope `json:"envelopes"`
+}
+
+// StateDeltaPayload mirrors the live WebSocket state_delta payload without
+// importing the realtime package into replay.
+type StateDeltaPayload struct {
+	ServerTick uint64        `json:"server_tick"`
+	Changes    []game.Change `json:"changes"`
+	Events     []game.Event  `json:"events"`
+}
+
 // ResumeMetadata carries the runner state needed to continue after replaying
 // historical inputs.
 type ResumeMetadata struct {
@@ -90,6 +114,65 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 	return recon, nil
 }
 
+// BuildTimeline reconstructs a protocol-shaped replay stream for local visual
+// tooling. It intentionally emits only snapshot/delta messages, not acks, so
+// consumers render authoritative state without re-sending inputs.
+func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules, sessionID string) (Timeline, error) {
+	sess, err := repo.GetSession(ctx, sessionID)
+	if err != nil {
+		return Timeline{}, err
+	}
+	inputs, err := repo.ListInputs(ctx, sessionID)
+	if err != nil {
+		return Timeline{}, err
+	}
+	recorded, err := repo.ListEvents(ctx, sessionID)
+	if err != nil {
+		return Timeline{}, err
+	}
+	recordedInputs, maxTick, err := StoredInputs(inputs)
+	if err != nil {
+		return Timeline{}, err
+	}
+	for _, ev := range recorded {
+		if ev.Tick > maxTick {
+			maxTick = ev.Tick
+		}
+	}
+
+	byTick := inputsByTick(recordedInputs)
+	sim := game.NewSim(sessionID, sess.Seed, rules)
+	out := Timeline{
+		SessionID: sessionID,
+		Seed:      sess.Seed,
+		Envelopes: []Envelope{{
+			Type:      "session_snapshot",
+			MessageID: "replay-snapshot",
+			SessionID: sessionID,
+			Tick:      sim.CurrentTick(),
+			Payload:   sim.Snapshot(),
+		}},
+	}
+
+	for t := int64(0); t <= maxTick; t++ {
+		ins := byTick[t]
+		sortInputs(ins)
+		res := sim.Tick(ins)
+		out.Envelopes = append(out.Envelopes, Envelope{
+			Type:      "state_delta",
+			MessageID: fmt.Sprintf("replay-tick-%d", res.Tick),
+			SessionID: sessionID,
+			Tick:      res.Tick,
+			Payload: StateDeltaPayload{
+				ServerTick: res.Tick,
+				Changes:    res.Changes,
+				Events:     res.Events,
+			},
+		})
+	}
+	return out, nil
+}
+
 // StoredInputs converts durable input rows into replay inputs. The stored row
 // owns sequencing and dedupe metadata; the JSON payload only supplies type and
 // intent-specific fields.
@@ -134,12 +217,7 @@ func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, inputs []R
 	var derived []derivedEvent
 	for t := int64(0); t <= throughTick; t++ {
 		ins := byTick[t]
-		sort.SliceStable(ins, func(i, j int) bool {
-			if ins[i].Sequence != ins[j].Sequence {
-				return ins[i].Sequence < ins[j].Sequence
-			}
-			return ins[i].MessageID < ins[j].MessageID
-		})
+		sortInputs(ins)
 		res := sim.Tick(ins)
 		for i, ev := range res.Events {
 			payload, _ := json.Marshal(ev)
@@ -158,6 +236,23 @@ func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, inputs []R
 		DerivedEvents: derived,
 		Metadata:      meta,
 	}
+}
+
+func inputsByTick(inputs []RecordedInput) map[int64][]game.Input {
+	byTick := make(map[int64][]game.Input)
+	for _, rec := range inputs {
+		byTick[rec.Tick] = append(byTick[rec.Tick], rec.Input)
+	}
+	return byTick
+}
+
+func sortInputs(ins []game.Input) {
+	sort.SliceStable(ins, func(i, j int) bool {
+		if ins[i].Sequence != ins[j].Sequence {
+			return ins[i].Sequence < ins[j].Sequence
+		}
+		return ins[i].MessageID < ins[j].MessageID
+	})
 }
 
 // Verify reconstructs the session and compares derived events against the

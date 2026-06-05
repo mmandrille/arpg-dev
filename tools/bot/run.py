@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Headless Python protocol bot (ADR-0001 D8.5 layer 1).
 
-Plays the full vertical slice through the same auth + WebSocket path as the
+Plays discovered bot scenarios through the same auth + WebSocket path as the
 real client and asserts authoritative outcomes:
 
     dev-login -> create session -> move -> attack until dead -> pick up loot
@@ -13,13 +13,16 @@ written to stdout (and nothing else) so it can be captured for replay.
 Usage:
     python -m tools.bot.run --base-url http://localhost:8080 \
         --dev-token local-dev-token --debug-token local-debug-token \
-        [--print-session-id]
+        [--scenario all] [--write-manifest path] [--print-session-id]
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 import json
+from pathlib import Path
 import sys
 from typing import Any
 
@@ -30,10 +33,63 @@ from tools.bot.protocol import make_envelope, to_ws_url
 
 MONSTER_ID = "1002"
 SLICE_TIMEOUT_S = 20.0
+ROOT = Path(__file__).resolve().parent.parent.parent
+SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
 
 
 def log(*args: Any) -> None:
     print("[bot]", *args, file=sys.stderr, flush=True)
+
+
+@dataclass(frozen=True)
+class Scenario:
+    id: str
+    title: str
+    description: str
+    steps: list[dict[str, Any]]
+    assertions: list[str]
+    path: Path
+
+
+@dataclass
+class RuntimeState:
+    last_tick: int = 0
+    killed: bool = False
+    loot_ids: list[str] = field(default_factory=list)
+    item_id: str | None = None
+    equipped_item_id: str | None = None
+    seen_events: set[str] = field(default_factory=set)
+
+
+def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
+    scenarios: list[Scenario] = []
+    for path in sorted(scenario_dir.glob("*.json")):
+        raw = json.loads(path.read_text())
+        sid = raw.get("id", "")
+        if not sid:
+            raise ValueError(f"{path}: missing scenario id")
+        scenarios.append(Scenario(
+            id=sid,
+            title=raw.get("title", sid),
+            description=raw.get("description", ""),
+            steps=list(raw.get("steps", [])),
+            assertions=list(raw.get("assertions", [])),
+            path=path,
+        ))
+    if not scenarios:
+        raise ValueError(f"no scenarios found in {scenario_dir}")
+    return scenarios
+
+
+def select_scenarios(scenarios: list[Scenario], selected: str) -> list[Scenario]:
+    if selected == "all":
+        return scenarios
+    wanted = {part.strip() for part in selected.split(",") if part.strip()}
+    found = [s for s in scenarios if s.id in wanted]
+    missing = wanted - {s.id for s in found}
+    if missing:
+        raise ValueError(f"unknown scenario(s): {', '.join(sorted(missing))}")
+    return found
 
 
 # --- HTTP steps -------------------------------------------------------------
@@ -63,6 +119,15 @@ def fetch_state(client: httpx.Client, token: str, debug_token: str, session_id: 
     return resp.json()
 
 
+def fetch_replay(client: httpx.Client, token: str, debug_token: str, session_id: str) -> dict[str, Any]:
+    resp = client.get(
+        f"/v0/sessions/{session_id}/replay",
+        headers={**auth(token), "X-Debug-Token": debug_token},
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 def auth(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
@@ -73,8 +138,8 @@ async def recv_json(ws) -> dict[str, Any]:
     return json.loads(await ws.recv())
 
 
-async def drive_slice(base_url: str, token: str, sess: dict[str, Any]) -> str:
-    """Play the slice over WebSocket; return the equipped item's instance id."""
+async def drive_scenario(base_url: str, token: str, sess: dict[str, Any], scenario: Scenario) -> RuntimeState:
+    """Play one scenario over WebSocket and return observed runtime state."""
     sid = sess["session_id"]
     uri = to_ws_url(base_url, sess["ws_url"])
     async with websockets.connect(uri, additional_headers=auth(token)) as ws:
@@ -82,72 +147,126 @@ async def drive_slice(base_url: str, token: str, sess: dict[str, Any]) -> str:
 
         first = await recv_json(ws)
         assert first["type"] == "session_snapshot", first["type"]
-        last_tick = first["payload"]["server_tick"]
-        log("connected; initial snapshot tick", last_tick)
+        state = RuntimeState(last_tick=first["payload"]["server_tick"])
+        log("connected; initial snapshot tick", state.last_tick)
 
         await ws.send(json.dumps(make_envelope(
-            "client_ready", sid, last_tick, {"client_version": "bot", "last_seen_tick": last_tick})))
+            "client_ready", sid, state.last_tick, {"client_version": "bot", "last_seen_tick": state.last_tick})))
 
-        # Move toward the monster (exercises movement + reconciliation surface).
+        for step in scenario.steps:
+            await execute_step(ws, sid, state, step, loop)
+
+        if state.equipped_item_id:
+            log("equipped item", state.equipped_item_id, "- scenario complete over protocol")
+        else:
+            log("scenario complete over protocol")
+        return state
+
+
+async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str, Any], loop) -> None:
+    action = step.get("action")
+    if action == "move":
+        direction = step["direction"]
+        duration = int(step.get("duration_ticks", 1))
         await ws.send(json.dumps(make_envelope(
-            "move_intent", sid, last_tick, {"direction": {"x": 1, "y": 0}, "duration_ticks": 3})))
+            "move_intent",
+            session_id,
+            state.last_tick,
+            {"direction": direction, "duration_ticks": duration},
+        )))
+        await wait_for_tick(ws, state, state.last_tick + 1, loop)
+        return
 
-        async def attack() -> None:
-            await ws.send(json.dumps(make_envelope("attack_intent", sid, last_tick, {"target_id": MONSTER_ID})))
-
-        killed = picked_up = equip_sent = equipped = False
-        loot_id: str | None = None
-        item_id: str | None = None
-
-        await attack()
-        last_attack = loop.time()
+    if action == "attack_until_event":
+        target_id = str(step.get("target_id", MONSTER_ID))
+        event_type = str(step["event_type"])
+        last_attack = 0.0
         deadline = loop.time() + SLICE_TIMEOUT_S
-
-        while not equipped:
+        while event_type not in state.seen_events:
             if loop.time() > deadline:
-                raise TimeoutError(f"slice stalled: killed={killed} picked_up={picked_up} equipped={equipped}")
-            try:
-                msg = await asyncio.wait_for(ws.recv(), timeout=0.1)
-            except asyncio.TimeoutError:
-                if not killed and loop.time() - last_attack > 0.12:
-                    await attack()
-                    last_attack = loop.time()
-                continue
-
-            m = json.loads(msg)
-            last_tick = max(last_tick, int(m.get("tick", 0)))
-            if m["type"] != "state_delta":
-                continue
-
-            p = m["payload"]
-            for ev in (p.get("events") or []):
-                if ev["event_type"] == "monster_killed":
-                    killed = True
-                    log("monster killed at tick", p.get("server_tick"))
-            for c in (p.get("changes") or []):
-                if c["op"] == "entity_spawn" and c["entity"]["type"] == "loot":
-                    loot_id = c["entity"]["id"]
-                elif c["op"] == "inventory_add":
-                    item_id = c["item"]["item_instance_id"]
-                elif c["op"] == "equipped_update" and c.get("slot") == "weapon" and c.get("item_instance_id") == item_id:
-                    equipped = True
-
-            if killed and not picked_up and loot_id:
-                await ws.send(json.dumps(make_envelope("pick_up_intent", sid, last_tick, {"entity_id": loot_id})))
-                picked_up = True
-                log("picking up loot", loot_id)
-            if picked_up and item_id and not equip_sent:
+                raise TimeoutError(f"attack_until_event stalled waiting for {event_type}")
+            if loop.time() - last_attack > 0.12:
                 await ws.send(json.dumps(make_envelope(
-                    "equip_intent", sid, last_tick, {"item_instance_id": item_id, "slot": "weapon"})))
-                equip_sent = True
-                log("equipping item", item_id)
+                    "attack_intent", session_id, state.last_tick, {"target_id": target_id})))
+                last_attack = loop.time()
+            await pump_one(ws, state, timeout=0.1)
+        return
 
-        log("equipped item", item_id, "- slice complete over protocol")
-        assert item_id is not None
-        return item_id
+    if action == "pick_up_first_loot":
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        while not state.loot_ids:
+            if loop.time() > deadline:
+                raise TimeoutError("pick_up_first_loot stalled waiting for loot")
+            await pump_one(ws, state, timeout=0.1)
+        loot_id = state.loot_ids[0]
+        await ws.send(json.dumps(make_envelope(
+            "pick_up_intent", session_id, state.last_tick, {"entity_id": loot_id})))
+        log("picking up loot", loot_id)
+        while state.item_id is None:
+            if loop.time() > deadline:
+                raise TimeoutError("pick_up_first_loot stalled waiting for inventory_add")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "equip_first_inventory_item":
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        while state.item_id is None:
+            if loop.time() > deadline:
+                raise TimeoutError("equip_first_inventory_item stalled waiting for inventory")
+            await pump_one(ws, state, timeout=0.1)
+        slot = str(step.get("slot", "weapon"))
+        await ws.send(json.dumps(make_envelope(
+            "equip_intent", session_id, state.last_tick, {"item_instance_id": state.item_id, "slot": slot})))
+        log("equipping item", state.item_id)
+        while state.equipped_item_id != state.item_id:
+            if loop.time() > deadline:
+                raise TimeoutError("equip_first_inventory_item stalled waiting for equipped_update")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    raise ValueError(f"unsupported scenario action: {action}")
 
 
-async def check_persistence(base_url: str, token: str, session_id: str, item_id: str) -> None:
+async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop) -> None:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while state.last_tick < target_tick:
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for tick {target_tick}")
+        await pump_one(ws, state, timeout=0.1)
+
+
+async def pump_one(ws, state: RuntimeState, timeout: float) -> None:
+    try:
+        msg = await asyncio.wait_for(ws.recv(), timeout=timeout)
+    except asyncio.TimeoutError:
+        return
+    ingest_message(json.loads(msg), state)
+
+
+def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
+    state.last_tick = max(state.last_tick, int(m.get("tick", 0)))
+    if m.get("type") != "state_delta":
+        return
+
+    p = m["payload"]
+    for ev in (p.get("events") or []):
+        event_type = ev["event_type"]
+        state.seen_events.add(event_type)
+        if event_type == "monster_killed":
+            state.killed = True
+            log("monster killed at tick", p.get("server_tick"))
+    for c in (p.get("changes") or []):
+        if c["op"] == "entity_spawn" and c["entity"]["type"] == "loot":
+            loot_id = c["entity"]["id"]
+            if loot_id not in state.loot_ids:
+                state.loot_ids.append(loot_id)
+        elif c["op"] == "inventory_add":
+            state.item_id = c["item"]["item_instance_id"]
+        elif c["op"] == "equipped_update" and c.get("slot") == "weapon":
+            state.equipped_item_id = c.get("item_instance_id")
+
+
+async def check_persistence(base_url: str, token: str, session_id: str, item_id: str, assertions: list[str]) -> None:
     """Reconnect and assert the snapshot was reconstructed from recorded inputs."""
     uri = to_ws_url(base_url, "/v0/ws?session_id=" + session_id)
     async with websockets.connect(uri, additional_headers=auth(token)) as ws:
@@ -156,10 +275,8 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
         payload = snap["payload"]
         inv = payload["inventory"]
         equipped = payload["equipped"]
-        assert_equipped_sword(inv, equipped, item_id, "reconnect snapshot")
-        assert_player_damaged(payload["entities"], "reconnect snapshot")
-        assert_monster_dead(payload["entities"], "reconnect snapshot")
-        log("reconnect snapshot restored inventory, player damage, and monster death")
+        run_assertions(assertions, payload["entities"], inv, equipped, item_id, "reconnect snapshot")
+        log("reconnect snapshot restored expected scenario state")
 
 
 # --- assertions -------------------------------------------------------------
@@ -192,6 +309,42 @@ def assert_monster_dead(entities: list[dict], where: str) -> None:
         raise AssertionError(f"{where}: training dummy hp {hp} != 0")
 
 
+def run_assertions(
+    assertions: list[str],
+    entities: list[dict],
+    inventory: list[dict],
+    equipped: dict,
+    item_id: str | None,
+    where: str,
+) -> None:
+    for assertion in assertions:
+        if assertion == "equipped_rusty_sword":
+            if item_id is None:
+                raise AssertionError(f"{where}: scenario did not observe an item to equip")
+            assert_equipped_sword(inventory, equipped, item_id, where)
+        elif assertion == "player_damaged":
+            assert_player_damaged(entities, where)
+        elif assertion == "monster_dead":
+            assert_monster_dead(entities, where)
+        else:
+            raise AssertionError(f"{where}: unknown assertion {assertion}")
+
+
+def default_manifest_path() -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return ROOT / ".artifacts" / "bot-runs" / f"{stamp}.json"
+
+
+def write_manifest(path: Path, base_url: str, results: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    body = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "base_url": base_url,
+        "scenarios": results,
+    }
+    path.write_text(json.dumps(body, indent=2) + "\n")
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -200,29 +353,69 @@ def main() -> int:
     parser.add_argument("--dev-token", default="local-dev-token")
     parser.add_argument("--debug-token", default="local-debug-token")
     parser.add_argument("--email", default="bot@example.test")
+    parser.add_argument("--scenario", default="all", help="scenario id, comma-separated ids, or all")
+    parser.add_argument("--list-scenarios", action="store_true")
+    parser.add_argument("--write-manifest", type=Path)
     parser.add_argument("--print-session-id", action="store_true")
     args = parser.parse_args()
 
+    scenarios = load_scenarios()
+    if args.list_scenarios:
+        for scenario in scenarios:
+            print(f"{scenario.id}\t{scenario.title}")
+        return 0
+    selected = select_scenarios(scenarios, args.scenario)
+    results: list[dict[str, Any]] = []
+    last_session_id = ""
+
     with httpx.Client(base_url=args.base_url, timeout=10.0) as client:
         _, token = dev_login(client, args.email, args.dev_token)
-        sess = create_session(client, token)
-        session_id = sess["session_id"]
+        for scenario in selected:
+            log("scenario", scenario.id, "-", scenario.title)
+            sess = create_session(client, token)
+            session_id = sess["session_id"]
+            last_session_id = session_id
 
-        item_id = asyncio.run(drive_slice(args.base_url, token, sess))
+            observed = asyncio.run(drive_scenario(args.base_url, token, sess, scenario))
 
-        # Assert authoritative state through the inspection API.
-        state = fetch_state(client, token, args.debug_token, session_id)
-        assert_equipped_sword(state["inventory"], state["equipped"], item_id, "/state API")
-        assert_player_damaged(state["entities"], "/state API")
-        assert_monster_dead(state["entities"], "/state API")
-        log("/state API confirms equipped inventory, player damage, and monster death")
+            # Assert authoritative state through the inspection API.
+            state = fetch_state(client, token, args.debug_token, session_id)
+            run_assertions(
+                scenario.assertions,
+                state["entities"],
+                state["inventory"],
+                state["equipped"],
+                observed.item_id,
+                "/state API",
+            )
+            log("/state API confirms expected scenario state")
 
-        # Assert replay reconstruction by reconnecting a fresh session loop.
-        asyncio.run(check_persistence(args.base_url, token, session_id, item_id))
+            # Assert replay reconstruction by reconnecting a fresh session loop.
+            if observed.item_id is not None:
+                asyncio.run(check_persistence(args.base_url, token, session_id, observed.item_id, scenario.assertions))
 
-    log("BOT OK")
+            replay = fetch_replay(client, token, args.debug_token, session_id)
+            if not replay.get("match", False):
+                raise AssertionError(f"replay mismatch for {session_id}: {replay.get('mismatch')}")
+            log("replay verified for", session_id)
+
+            results.append({
+                "id": scenario.id,
+                "title": scenario.title,
+                "description": scenario.description,
+                "session_id": session_id,
+                "seed": sess["seed"],
+                "status": "passed",
+                "replay_match": True,
+            })
+
+    if args.write_manifest:
+        write_manifest(args.write_manifest, args.base_url, results)
+        log("wrote manifest", args.write_manifest)
+
+    log("BOT OK", "- scenarios:", ", ".join(r["id"] for r in results))
     if args.print_session_id:
-        print(session_id)
+        print(last_session_id)
     return 0
 
 

@@ -1,7 +1,7 @@
 # Spec: `click-action-and-melee-range`
 
-Status: Draft
-Branch: `feature/click-action-and-melee-range`
+Status: Complete (`make ci` green on 2026-06-05)
+Branch: `feature/solid-collision-and-obstacles`
 Slice: v10 — unified left-click action, authoritative melee reach, door interactable proof
 Baseline: slice v9 `solid-collision-and-obstacles` (complete, `make ci` green)
 Related:

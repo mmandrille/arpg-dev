@@ -9,7 +9,7 @@ type; Godot ray-picks entities and tweens door open on `state: open`; Python bot
 
 Tech stack: Go sim/tests, shared JSON schemas + golden, Python protocol bot, Godot GDScript smoke.
 
-Branch: `feature/click-action-and-melee-range`
+Branch: `feature/solid-collision-and-obstacles`
 
 ## File Map
 
@@ -62,55 +62,55 @@ Branch: `feature/click-action-and-melee-range`
 
 ## Task 1: Shared contracts
 
-- [ ] Step 1.1: Add `unarmed_reach` to combat rules + schema.
-- [ ] Step 1.2: Add optional `reach` on weapon items + schema validation.
-- [ ] Step 1.3: Create `interactables.v0.json` + schema (`wooden_door`).
-- [ ] Step 1.4: Extend worlds schema with `interactable` type; add `door_lab` preset.
-- [ ] Step 1.5: Add `action_intent` to protocol; remove `attack_intent` / `pick_up_intent`.
-- [ ] Step 1.6: Delete stale `shared/protocol/examples/attack_intent.json` and `pick_up_intent.json`.
-- [ ] Step 1.7: Extend state_delta/session_snapshot for `interactable` entity + `interactable_activated`; require `entity_id` for `interactable_activated` in both `state_delta.events` and `session_snapshot.recent_events`.
-- [ ] Step 1.8: Add `melee_reach.v0.json` golden + schema.
-- [ ] Step 1.9: Run `make validate-shared`.
+- [x] Step 1.1: Add `unarmed_reach` to combat rules + schema.
+- [x] Step 1.2: Add optional `reach` on weapon items + schema validation.
+- [x] Step 1.3: Create `interactables.v0.json` + schema (`wooden_door`).
+- [x] Step 1.4: Extend worlds schema with `interactable` type; add `door_lab` preset.
+- [x] Step 1.5: Add `action_intent` to protocol; remove `attack_intent` / `pick_up_intent`.
+- [x] Step 1.6: Delete stale `shared/protocol/examples/attack_intent.json` and `pick_up_intent.json`.
+- [x] Step 1.7: Extend state_delta/session_snapshot for `interactable` entity + `interactable_activated`; require `entity_id` for `interactable_activated` in both `state_delta.events` and `session_snapshot.recent_events`.
+- [x] Step 1.8: Add `melee_reach.v0.json` golden + schema.
+- [x] Step 1.9: Run `make validate-shared`.
 
 ## Task 2: Server — reach and action dispatch
 
-- [ ] Step 2.1: Parse interactables and reach in `rules.go`; validate `door_lab` world.
-- [ ] Step 2.2: Add interactable fields to internal `entity` + `EntityView`.
-- [ ] Step 2.3: Spawn interactables from world preset in `NewSimWithWorld`.
-- [ ] Step 2.4: Implement `playerReach()`, `targetInteractionRadius()`, `inMeleeRange()`.
-- [ ] Step 2.5: Implement `handleAction` dispatching to attack/pickup/open interactable.
-- [ ] Step 2.6: Include closed interactable barriers in `playerPositionBlocked`.
-- [ ] Step 2.7: Wire `action_intent` in `applyInput`; remove attack/pickup handlers.
-- [ ] Step 2.8: Update `inputdecode` and realtime constants.
-- [ ] Step 2.9: Update replay tests (`server/internal/replay/replay_test.go`) and WebSocket tests (`server/internal/http/ws_test.go`) to send/store `action_intent`.
-- [ ] Step 2.10: Go tests — golden reach, out_of_range, door barrier, `door_lab` closed-door passage gating, existing slice golden.
+- [x] Step 2.1: Parse interactables and reach in `rules.go`; validate `door_lab` world.
+- [x] Step 2.2: Add interactable fields to internal `entity` + `EntityView`.
+- [x] Step 2.3: Spawn interactables from world preset in `NewSimWithWorld`.
+- [x] Step 2.4: Implement `playerReach()`, `targetInteractionRadius()`, `inMeleeRange()`.
+- [x] Step 2.5: Implement `handleAction` dispatching to attack/pickup/open interactable.
+- [x] Step 2.6: Include closed interactable barriers in `playerPositionBlocked`.
+- [x] Step 2.7: Wire `action_intent` in `applyInput`; remove attack/pickup handlers.
+- [x] Step 2.8: Update `inputdecode` and realtime constants.
+- [x] Step 2.9: Update replay tests (`server/internal/replay/replay_test.go`) and WebSocket tests (`server/internal/http/ws_test.go`) to send/store `action_intent`.
+- [x] Step 2.10: Go tests — golden reach, out_of_range, door barrier, `door_lab` closed-door passage gating, existing slice golden.
 
 ## Task 3: Bot and replay
 
-- [ ] Step 3.1: Add bot helpers: `action_entity`, `action_until_event`, `move_until_in_range`.
-- [ ] Step 3.2: Add reject assertion helper for `out_of_range`.
-- [ ] Step 3.3: Create `04_door_lab.json`; assert beyond-door loot cannot be picked/reached before activation, then can be picked up after opening and crossing the doorway.
-- [ ] Step 3.4: Migrate `01` / `02` / `03` scenarios to action steps.
-- [ ] Step 3.5: Update `test_protocol.py`.
-- [ ] Step 3.6: Run `make bot`.
+- [x] Step 3.1: Add bot helpers: `action_entity`, `action_until_event`, `move_until_in_range`.
+- [x] Step 3.2: Add reject assertion helper for `out_of_range`.
+- [x] Step 3.3: Create `04_door_lab.json`; assert beyond-door loot cannot be picked/reached before activation, then can be picked up after opening and crossing the doorway.
+- [x] Step 3.4: Migrate `01` / `02` / `03` scenarios to action steps.
+- [x] Step 3.5: Update `test_protocol.py`.
+- [x] Step 3.6: Run `make bot`.
 
 ## Task 4: Godot client
 
-- [ ] Step 4.1: Add pick colliders + `entity_id` metadata on monster, loot, interactable nodes.
-- [ ] Step 4.2: Implement `_pick_entity_at_mouse()` raycast; left click → `action_intent`.
-- [ ] Step 4.3: Face clicked targets; play attack one-shot for monster and closed-door targets only, not loot.
-- [ ] Step 4.4: Remove E pickup and `attack_intent` / `pick_up_intent` sends.
-- [ ] Step 4.5: Spawn interactable door mesh; track `state` from snapshots/deltas.
-- [ ] Step 4.6: Tween door rotation on `state == open` / `interactable_activated`.
-- [ ] Step 4.7: Update autoplay and visual replay paths to `action_intent`.
-- [ ] Step 4.8: Migrate `smoke.gd` to `action_intent`.
-- [ ] Step 4.9: Add GDScript golden tests for melee reach.
-- [ ] Step 4.10: Run `make client-smoke`.
+- [x] Step 4.1: Add pick colliders + `entity_id` metadata on monster, loot, interactable nodes.
+- [x] Step 4.2: Implement `_pick_entity_at_mouse()` raycast; left click → `action_intent`.
+- [x] Step 4.3: Face clicked targets; play attack one-shot for monster and closed-door targets only, not loot.
+- [x] Step 4.4: Remove E pickup and `attack_intent` / `pick_up_intent` sends.
+- [x] Step 4.5: Spawn interactable door mesh; track `state` from snapshots/deltas.
+- [x] Step 4.6: Tween door rotation on `state == open` / `interactable_activated`.
+- [x] Step 4.7: Update autoplay and visual replay paths to `action_intent`.
+- [x] Step 4.8: Migrate `smoke.gd` to `action_intent`.
+- [x] Step 4.9: Add GDScript golden tests for melee reach.
+- [x] Step 4.10: Run `make client-smoke`.
 
 ## Task 5: Documentation and CI
 
-- [ ] Step 5.1: Update `docs/PROGRESS.md` lifecycle table + v10 summary when done.
-- [ ] Step 5.2: Run `make ci`.
+- [x] Step 5.1: Update `docs/PROGRESS.md` lifecycle table + v10 summary when done.
+- [x] Step 5.2: Run `make ci`.
 - [ ] Step 5.3: Optional `make bot-visual` — confirm door swing in `door_lab` replay.
 
 ## Verification commands

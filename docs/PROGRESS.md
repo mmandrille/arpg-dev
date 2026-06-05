@@ -159,7 +159,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 - `gear_before_combat` now asserts `training_dummy_reward` dies in one acknowledged equipped attack.
 - Replay, reconnect resume, `/state`, and Godot smoke stay green through `make ci`.
 
-**Explicit non-goals (still true):** no additive stat system, attack range, armor, healing, client damage preview, or inventory UI/plugin adoption.
+**Explicit non-goals:** no additive stat system, armor, healing, client damage preview, or inventory
+UI/plugin adoption. Attack range was deferred in v8 and closed by v10.
 
 ### v9 — Solid collision and obstacles
 
@@ -167,12 +168,12 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 static world walls while preserving replay/resume determinism.
 
 - Shared `worlds.v0.json` now supports static `wall` entries with axis-aligned rectangular sizes.
-- `collision_lab` world places a live monster and wall obstacles in a deterministic test layout.
+- `collision_lab` world places wall obstacles with a middle passage and a live monster beyond them.
 - Server movement checks player circle vs live monster circles and wall AABBs; diagonal moves slide
   on one axis when possible.
 - Dead monsters are non-solid, so corpses do not block loot/combat scenario flow.
-- Python bot adds `move_until_player_position` and a collision lab scenario proving monster block,
-  dead-monster pass-through, wall block, routed movement, `/state`, reconnect, and replay.
+- Python bot adds `move_until_player_position` and a collision lab scenario proving traversal
+  through the wall gap before the final monster attack, `/state`, reconnect, and replay.
 - Godot renders simple static wall boxes from shared world rules for fresh sessions and visual replay
   manifests; the server still owns all collision outcomes.
 - `make ci` green on 2026-06-05.
@@ -231,7 +232,7 @@ The scenario catalog also includes:
 
 ```text
 gear_before_combat: walk to rusty_sword → pick up → equip → one-shot reward dummy → pick up training_badge
-collision_lab: push into live monster → kill it → push into wall → route around walls
+collision_lab: pass through middle wall gap → kill monster on far side
 ```
 
 **Verify:**

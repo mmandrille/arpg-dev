@@ -1,5 +1,7 @@
 # Animate and React (Slice v3) Implementation Plan
 
+Status: Ready for implementation (2026-06-05) — gaps vs spec/codebase closed in this revision.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Prove the `rigged GLB → Skeleton3D → state-driven AnimationPlayer + BoneAttachment3D` pipeline on the player (idle/walk/attack, client-derived) and the monster (hit/death, authoritative-event-driven), with zero server/protocol change.
@@ -21,8 +23,10 @@
 | Modify | `tools/assets/gen_glb.py` | Add a skinned-mesh builder; emit rigged `base_humanoid.glb` + new `monster_dummy.glb`; sword stays static |
 | Modify | `assets/manifests/assets.v0.schema.json` | Add `"monster"` to the asset `type` enum |
 | Modify | `assets/manifests/assets.v0.json` | Add `monster_dummy_v0`; character `required_nodes` → rig joints incl. `hand_r`; regenerate `sha256` |
-| Modify | `tools/assets/validate_assets.py` | Parse GLB `skins[].joints` and hard-check required joint names are skin joints |
-| Modify | `tools/assets/test_validate_assets.py` | Cover the monster entry + skin-joint pass/fail |
+| Modify | `tools/assets/validate_assets.py` | Check [5]: mount-bone `hand_r` in character `required_nodes`; check [6]: skin-joint hard-check |
+| Modify | `tools/assets/test_validate_assets.py` | Update v2 fixtures for rig joints + skin GLBs; cover monster + mount-bone + skin-joint pass/fail |
+| Create | `client/tools/inspect_rig.gd` | Rig gate: assert both GLBs import as skinned `Skeleton3D` (wired into `client_smoke.sh`) |
+| Create | `assets/monsters/dummy/README.md` | Source notes for the generated monster dummy (mirrors character/sword README stubs) |
 | Create | `client/tools/build_animations.gd` | Headless builder: emit `AnimationLibrary` `.tres` clips targeting skeleton bone poses |
 | Create | `client/animations/character_anims.tres` | Library: `idle`, `walk`, `attack` (generated artifact) |
 | Create | `client/animations/monster_anims.tres` | Library: `idle`, `hit`, `death` (generated artifact) |
@@ -32,9 +36,10 @@
 | Create | `client/scripts/animation_controller.gd` | Injected `AnimationController` state machine (one script, per-entity instances) |
 | Create | `client/tests/test_animation.gd` | Headless: rig/scene assertions + controller state-machine logic |
 | Modify | `client/scripts/equipment_visuals.gd` | Delete `play_attack_swing()` + tween machinery; mount logic unchanged |
-| Modify | `client/scripts/main.gd` | Controllers; locomotion from input; attack one-shot; read `events`; `entities[id] = {node,controller,type}`; monster uses scene |
+| Modify | `client/scripts/main.gd` | Controllers; locomotion from input; attack one-shot; read `events`; `entities[id] = {node,controller,type}` (incl. `_apply_snapshot` clear); monster uses scene |
 | Modify | `client/scripts/smoke.gd` | Player attack-clip assert; monster hit→death event path; resume death pose |
-| Modify | `scripts/client_smoke.sh` | Run `test_animation.gd` before the slice smoke |
+| Modify | `scripts/client_smoke.sh` | Run `inspect_rig.gd` + `test_animation.gd` before the slice smoke |
+| Modify | `shared/assets/item_visuals.v0.json` | Re-tune `rusty_sword` `local_transform` if the bone-mounted grip looks wrong (data-only) |
 | Modify | `make/shared.mk` | Add `gen-anims` target (regenerate clip libraries) |
 | Create | `docs/adr/0007-animation-state-model.md` | Durable decision: client-derived vs event-driven, discrete clips, no protocol change |
 | Modify | `docs/adr/0006-asset-pipeline.md` | As-built: `Node3D` socket → `BoneAttachment3D` on `hand_r` |
@@ -244,7 +249,7 @@ def monster_dummy_glb() -> bytes:
     return _build_skinned_glb(color, joints, parts)
 ```
 
-- [ ] **Step 1.3: Register the new target**
+- [ ] **Step 1.3: Register the new target + monster source stub**
 
 Update the `TARGETS` dict:
 
@@ -256,6 +261,11 @@ TARGETS = {
 }
 ```
 
+Create `assets/monsters/dummy/README.md` (mirrors the character/sword source stubs):
+runtime bytes live under `client/assets/monsters/dummy/`; authorship is
+`tools/assets/gen_glb.py`. Update the `gen_glb.py` module docstring to describe
+skinned rigs (v3) instead of empty socket nodes (v2).
+
 - [ ] **Step 1.4: Regenerate the GLBs**
 
 Run: `make gen-assets`
@@ -263,13 +273,13 @@ Expected: prints `wrote client/assets/characters/base_humanoid/base_humanoid.glb
 
 - [ ] **Step 1.5: RIG GATE — import in Godot and introspect the skeleton (fail-fast)**
 
-This is the highest-risk gate: bad skin math imports as a collapsed/empty mesh. Create a throwaway introspection script and run it.
+This is the highest-risk gate: bad skin math imports as a collapsed/empty mesh.
 
 Create `client/tools/inspect_rig.gd`:
 
 ```gdscript
 extends SceneTree
-# Throwaway rig gate: confirm both rigged GLBs import as real skinned scenes.
+# Rig gate (spec §10): confirm both rigged GLBs import as real skinned scenes.
 func _initialize() -> void:
     _check("res://assets/characters/base_humanoid/base_humanoid.glb", ["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"])
     _check("res://assets/monsters/dummy/monster_dummy.glb", ["root", "pivot"])
@@ -303,12 +313,13 @@ Run:
 godot --headless --path client --import
 godot --headless --path client --script res://tools/inspect_rig.gd
 ```
-Expected: `[rig-gate] PASS`, and the printed `skeleton_path=` lines (note them — Tasks 3/4 use that path; the conventional value is `Skeleton3D`). If FAIL with "no Skeleton3D", the skin data is wrong — debug the generator before continuing.
+Expected: `[rig-gate] PASS`, and the printed `skeleton_path=` lines (note them — Tasks 3/4 use that path; the conventional value is `Skeleton3D`). If FAIL with "no Skeleton3D", the skin data is wrong — debug the generator before continuing. This script is **not** throwaway — Task 9 wires it into `client_smoke.sh` as the CI rig gate (spec §10).
 
 - [ ] **Step 1.6: Commit**
 
 ```bash
-git add tools/assets/gen_glb.py client/assets/characters/base_humanoid/base_humanoid.glb \
+git add tools/assets/gen_glb.py assets/monsters/dummy/README.md \
+        client/assets/characters/base_humanoid/base_humanoid.glb \
         client/assets/monsters/dummy/monster_dummy.glb client/tools/inspect_rig.gd
 git add client/assets/monsters/dummy/monster_dummy.glb.import client/assets/characters/base_humanoid/base_humanoid.glb.import 2>/dev/null || true
 git commit -m "feat(assets): skinned humanoid + dummy rigs (gen_glb skin support)
@@ -340,7 +351,7 @@ to:
 
 - [ ] **Step 2.2: Update the manifest data**
 
-In `assets/manifests/assets.v0.json`, set the character's `required_nodes` to the rig joints and add the monster entry. Use placeholder all-zero shas for now; Step 2.6 fixes them.
+In `assets/manifests/assets.v0.json`, set the character's `required_nodes` to the rig joints and add the monster entry. Use placeholder all-zero shas for now; Step 2.7 fixes them.
 
 Change `character_base_humanoid_v0`'s `required_nodes` to:
 ```json
@@ -392,7 +403,32 @@ def parse_glb_skin_joint_names(path: Path) -> set[str] | None:
         return None
 ```
 
-- [ ] **Step 2.4: Replace check [6] with a skin-joint hard-check**
+- [ ] **Step 2.4: Replace check [5] mount-socket logic with mount-bone coverage**
+
+v2 check [5] required `required_nodes` to include every `item_visuals.mount_socket` name (e.g. `right_hand_socket`). v3 moves the socket out of the GLB — `character_visual.gd` creates a runtime `BoneAttachment3D` named `right_hand_socket` on bone `hand_r` (spec §4.3, §5.5). If check [5] is left unchanged, `make validate-assets` fails immediately after Step 2.2.
+
+In `validate_assets.py`, replace the entire `# [5] character required_nodes cover every referenced mount socket ...` block with:
+
+```python
+    # [5] character mount-bone coverage (spec §4.3): item_visuals still names the
+    #     runtime socket right_hand_socket, but the manifest required_nodes list
+    #     rig joints. The weapon mount contract is satisfied when hand_r is declared.
+    print("[5] character mount-bone coverage")
+    WEAPON_MOUNT_BONE = "hand_r"
+    for asset_id, entry in sorted(characters.items()):
+        declared = set(entry.get("required_nodes", []))
+        if WEAPON_MOUNT_BONE not in declared:
+            report.fail(
+                "mount bone",
+                f"{asset_id}: required_nodes missing weapon mount bone {WEAPON_MOUNT_BONE}",
+            )
+        else:
+            report.ok(f"{asset_id} declares weapon mount bone {WEAPON_MOUNT_BONE}")
+```
+
+Also update the module docstring bullet for check [4]/[5] to describe mount-bone coverage instead of socket-name coverage.
+
+- [ ] **Step 2.5: Replace check [6] with a skin-joint hard-check**
 
 In `validate_assets.py`, replace the entire `# [6] best-effort GLB node-name inspection ...` block with:
 
@@ -419,32 +455,46 @@ In `validate_assets.py`, replace the entire `# [6] best-effort GLB node-name ins
             report.ok(f"{asset_id} GLB skin includes joints {required}")
 ```
 
-- [ ] **Step 2.5: Write the failing validator tests**
+- [ ] **Step 2.6: Update existing pytest fixtures + add new cases**
 
-Append to `tools/assets/test_validate_assets.py` (match the existing test style in that file — it builds a temp repo tree; reuse its existing helpers/fixtures). Add:
+The test file uses `build_root(tmp_path)` — **not** a `tmp_repo` fixture. Several v2 tests break once checks [5]/[6] change:
+
+1. **Update `default_manifest()`** — character `required_nodes` becomes rig joints:
+   ```python
+   "required_nodes": ["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"],
+   ```
+2. **Add `MONSTER_GLB`** constant and a `make_skinned_glb(joint_names: list[str])` helper that emits a minimal valid glTF skin (non-empty `skins`, `JOINTS_0`/`WEIGHTS_0`, inverse bind matrices) so headless tests do not depend on Godot import. Use it in `build_root()` for the character GLB and optionally a monster stub.
+3. **Update `test_socket_coverage_failure`** — remove `hand_r` from `required_nodes` and assert a `mount bone` failure (not the old socket-name message).
+4. **Rename/update `test_glb_missing_required_node`** — assert a `glb joint` / `not skin joints` failure when a declared joint is absent from the skin.
+5. **Append new tests:**
 
 ```python
-def test_monster_entry_passes(tmp_repo):
-    # tmp_repo is the existing fixture that lays down a valid manifest + GLBs.
-    report = Report()
-    validate(tmp_repo, report)
-    assert not report.failures, report.failures
-    assert any("monster_dummy_v0" in line for line in _ok_labels(report))
+MONSTER_GLB = "client/assets/monsters/dummy/monster_dummy.glb"
 
 
-def test_required_node_not_a_skin_joint_fails(tmp_repo):
-    # Point the character at a GLB whose 'hand_r' is a plain node, not a joint.
-    manifest = json.loads((tmp_repo / MANIFEST_REL).read_text())
+def test_monster_entry_passes(tmp_path):
+    manifest = default_manifest()
+    manifest["assets"]["monster_dummy_v0"] = {
+        "type": "monster",
+        "runtime_path": MONSTER_GLB,
+        "format": "glb",
+        "required_nodes": ["root", "pivot"],
+    }
+    root = build_root(tmp_path, manifest=manifest)
+    write(root / MONSTER_GLB, make_skinned_glb(["root", "pivot"]))
+    report = run(root)
+    assert report.failures == []
+
+
+def test_required_node_not_a_skin_joint_fails(tmp_path):
+    manifest = default_manifest()
     manifest["assets"]["character_base_humanoid_v0"]["required_nodes"] = ["not_a_joint"]
-    (tmp_repo / MANIFEST_REL).write_text(json.dumps(manifest))
-    report = Report()
-    validate(tmp_repo, report)
+    root = build_root(tmp_path, manifest=manifest, char_nodes=["root", "hand_r"])
+    report = run(root)
     assert any("not skin joints" in f or "not_a_joint" in f for f in report.failures)
 ```
 
-If the existing test file has no `tmp_repo` fixture or `_ok_labels` helper, add minimal versions that copy the real `assets/` and `client/assets/` + `shared/assets/` trees into a `tmp_path` (the real generated GLBs already satisfy the joint check, so the happy path needs no fakes).
-
-- [ ] **Step 2.6: Fix the manifest sha + run everything green**
+- [ ] **Step 2.7: Fix the manifest sha + run everything green**
 
 ```bash
 make gen-assets   # ensure bytes are current
@@ -460,7 +510,7 @@ make validate-assets
 ```
 Expected: `ASSET VALIDATION OK` and all pytest green.
 
-- [ ] **Step 2.7: Commit**
+- [ ] **Step 2.8: Commit**
 
 ```bash
 git add assets/manifests/ tools/assets/validate_assets.py tools/assets/test_validate_assets.py
@@ -646,7 +696,7 @@ Replace the contents of `client/scenes/character.tscn` with (the GLB now carries
 ; attaches a BoneAttachment3D named "right_hand_socket" to hand_r so the equipped
 ; weapon rides the arm. AnimationPlayer plays idle/walk/attack from the committed
 ; library; root_node targets ModelRoot so bone-pose tracks resolve.
-[ext_resource type="PackedScene" uid="uid://c47pdy6tnkrny" path="res://assets/characters/base_humanoid/base_humanoid.glb" id="1_glb"]
+[ext_resource type="PackedScene" path="res://assets/characters/base_humanoid/base_humanoid.glb" id="1_glb"]
 [ext_resource type="Script" path="res://scripts/character_visual.gd" id="2_script"]
 [ext_resource type="AnimationLibrary" path="res://animations/character_anims.tres" id="3_anims"]
 
@@ -661,6 +711,11 @@ libraries = {
 "": ExtResource("3_anims")
 }
 ```
+
+> **Do not hard-code a `uid://` on the GLB ext_resource** — regenerating
+> `base_humanoid.glb` in Task 1 changes the import UID. Omit it (Godot rewrites
+> on save) or let the editor assign one after `--import`. The v2 scene used
+> `uid://c47pdy6tnkrny`; that value will be stale after the rig rewrite.
 
 > If Step 1.5 reported a `skeleton_path` other than `Skeleton3D`, the script
 > still works (it searches by type). The `root_node` only needs to be the GLB
@@ -778,6 +833,7 @@ func _initialize() -> void:
     _test_controller_locomotion()
     _test_controller_one_shot_returns()
     _test_controller_terminal_latches()
+    _test_controller_hit_ignored_after_death()
     print("[gdtest] PASS: animation controller")
     quit(0)
 
@@ -825,6 +881,15 @@ func _test_controller_terminal_latches() -> void:
     c.set_locomotion(true)        # ignored
     _assert(c.current_clip() == "death", "terminal latched, got %s" % c.current_clip())
     _assert(c.get_debug_state()["terminal"] == true, "terminal flag set")
+    ap.queue_free()
+
+
+func _test_controller_hit_ignored_after_death() -> void:
+    var ap := _make_player(["idle", "hit", "death"])
+    var c = ControllerScript.new(ap)
+    c.enter_terminal("death")
+    c.play_one_shot("hit")
+    _assert(c.current_clip() == "death", "hit ignored after terminal death, got %s" % c.current_clip())
     ap.queue_free()
 
 
@@ -993,7 +1058,15 @@ grep -n "play_attack_swing\|_swing_tween\|_rest_rotation_degrees\|ATTACK_SWING" 
 ```
 Expected: `clean`.
 
-- [ ] **Step 7.5: Commit**
+- [ ] **Step 7.5: Re-tune weapon grip offset if needed (spec §5.5)**
+
+The sword no longer hangs from a static empty node — it rides `hand_r` through the
+bone attachment. If the mounted weapon looks misaligned in manual play, adjust
+`shared/assets/item_visuals.v0.json` → `rusty_sword.local_transform` only (no
+code change). Skip if the default `(0,0,0)` grip still looks acceptable on the
+crude rig.
+
+- [ ] **Step 7.6: Commit**
 
 ```bash
 git add client/scripts/equipment_visuals.gd
@@ -1134,6 +1207,14 @@ to
 		var to_monster: Vector3 = entity_node.position - predicted_pos
 ```
 
+Update `_apply_snapshot`'s entity-clear loop (currently `entities[id].queue_free()`) to read through the record — same shape as `_remove_entity`:
+```gdscript
+	for id in entities.keys():
+		(entities[id]["node"] as Node3D).queue_free()
+	entities.clear()
+```
+Without this change, the first snapshot after wiring Task 8.4 crashes because `entities[id]` is no longer a `Node3D`.
+
 - [ ] **Step 8.5: Read the `events` array (changes first, then events)**
 
 In `_apply_delta`, the loop currently processes only `changes`. After the existing `for c in p.get("changes", []):` match block completes (i.e., right before the final `_reconcile_player()` call), add:
@@ -1225,11 +1306,15 @@ godot --headless --path client --script res://tests/test_animation.gd
 ```
 Expected: `[gdtest] PASS: animation controller + scenes`.
 
-- [ ] **Step 9.3: Wire it into the smoke script**
+- [ ] **Step 9.3: Wire rig gate + animation test into the smoke script**
 
 In `scripts/client_smoke.sh`, after the item-visual test block (step "2."), insert:
 ```bash
-# 2b. Animation controller + rigged scene test (server-independent).
+# 2b. Rig gate: both GLBs import as skinned Skeleton3D (spec §10 fail-fast).
+echo "[client-smoke] running GDScript rig gate"
+"$GODOT" --headless --path "$CLIENT_DIR" --script res://tools/inspect_rig.gd
+
+# 2c. Animation controller + rigged scene test (server-independent).
 echo "[client-smoke] running GDScript animation test"
 "$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_animation.gd
 ```
@@ -1304,11 +1389,25 @@ In `_verify_equip()`, after the existing `if server_ok and visual_ok:` success b
 ```
 (Remove the old `print("[smoke] equip verified: ...")` line so there is one success print.)
 
-- [ ] **Step 10.4: Assert the player attack clip during the moving phase**
+- [ ] **Step 10.4: Assert resume death pose from snapshot (spec §5.4 / acceptance #8)**
+
+The primary smoke already resumes the session for the weapon visual. Extend the
+resume phase to assert a dead monster enters terminal `death` from snapshot `hp`
+alone — no delta replay.
+
+In `_step_resume`, after `resolver_resume.apply_snapshot(env["payload"])`, also
+upsert monsters from the snapshot with the same controller wiring as `main.gd`
+(or instantiate one `MonsterScene` + controller and call `enter_terminal("death")`
+when any snapshot entity has `type == "monster"` and `hp <= 0`). Assert
+`monster_anim.get_debug_state()["terminal"] == true` before the existing weapon
+resume check. This covers acceptance #8 for monsters without depending on
+`recent_events`.
+
+- [ ] **Step 10.5: Assert the player attack clip during the moving phase**
 
 In `_make_resolver` the smoke uses a bare Node3D mount (no AnimationPlayer), so the smoke has no *player* AnimationController — the player attack-clip assertion lives in `test_animation.gd` (Task 6/9) which already proves `play_one_shot("attack")` → `current_clip()=="attack"` → returns. No change needed here; this step is a no-op confirmation that player attack-clip coverage exists in `test_animation.gd`.
 
-- [ ] **Step 10.5: Run the full smoke against a running server**
+- [ ] **Step 10.6: Run the full smoke against a running server**
 
 ```bash
 make db-up
@@ -1320,7 +1419,7 @@ kill $SERVER_PID
 ```
 Expected (if Godot installed): `[smoke] PASS: ...` and `[client-smoke] PASS`. If Godot is absent, `client-smoke` SKIPs with exit 0 — acceptable for CI parity.
 
-- [ ] **Step 10.6: Commit**
+- [ ] **Step 10.7: Commit**
 
 ```bash
 git add client/scripts/smoke.gd
@@ -1415,25 +1514,38 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 
 ## Self-Review
 
+**Gaps closed in this revision (would have blocked implementation):**
+- Check [5] still required `right_hand_socket` in `required_nodes` while the manifest
+  switched to rig joints → added Step 2.4 (mount-bone `hand_r` coverage).
+- `_apply_snapshot` still called `entities[id].queue_free()` on raw nodes → added
+  Step 8.4 snapshot-clear fix alongside `_remove_entity`.
+- Pytest step referenced nonexistent `tmp_repo` / `_ok_labels` fixtures → Step 2.6
+  now matches `build_root(tmp_path)` and adds `make_skinned_glb`.
+- Hard-coded GLB `uid://` in Task 4.2 would stale after rig regen → omit UID.
+- Rig gate (`inspect_rig.gd`) was committed but never wired into CI → Step 9.3.
+- Spec §10 resume death pose + hit-after-death controller case were missing →
+  Steps 10.4 and 6.1 respectively.
+- Spec §5.5 grip re-tune after bone mount → Step 7.5.
+
 **Spec coverage:**
 - §3 file map — every Create/Modify path appears in a task. ✓ (`.glb.import` files are committed in Task 1.6 / regenerated by import.)
 - §4.1/§4.2 rigs (joints incl. `hand_r`, `pivot`) — Task 1. ✓
-- §4.3 manifest (`type:"monster"`, `required_nodes`, sha) — Task 2. ✓
+- §4.3 manifest (`type:"monster"`, `required_nodes`, sha, mount-bone check [5]) — Task 2. ✓
 - §4.4 clips (idle/walk/attack, idle/hit/death) — Task 3. ✓
 - §4.5 `AnimationController` (priority, API, `get_debug_state`) — Task 6. ✓
 - §4.5 event→clip map in `main.gd` — Task 8.1/8.5. ✓
 - §4.6 no protocol change; read `events` — Task 8.5 + acceptance check Task 11.4. ✓
 - §5.2 locomotion from input (not reconciliation) — Task 8.3. ✓
 - §5.3 monster scene + controller + changes-before-events ordering — Task 8.4/8.5. ✓
-- §5.4 resume `hp==0` death pose — Task 8.4. ✓
+- §5.4 resume `hp==0` death pose — Task 8.4 + smoke Step 10.4. ✓
 - §5.5 `BoneAttachment3D` + resolver simplification — Tasks 4 + 7. ✓
 - §5.6 `_make_entity_node`→`Node3D`, accessors via `["node"]` — Task 8.4. ✓
-- §6 skin data required (non-empty skins, JOINTS_0/WEIGHTS_0) — Task 1 + validator Task 2.4. ✓
+- §6 skin data required (non-empty skins, JOINTS_0/WEIGHTS_0) — Task 1 + validator Task 2.5. ✓
 - §7 failure behavior (unknown clip warn; monster scene load fallback; missing AnimationPlayer warn) — Task 6.3 (`_warn`), 8.4 (fallback). ✓
 - §8 acceptance — covered across Tasks 2/4/5/6/9/10/11. ✓
-- §10 testing plan (rig gate, pytest, test_animation.gd, smoke) — Tasks 1.5, 2, 6/9, 10. ✓
+- §10 testing plan (rig gate in smoke, pytest skin GLBs, test_animation.gd hit-after-death, smoke resume death) — Tasks 1.5/2/6/9/10. ✓
 
-**Placeholder scan:** No "TBD"/"handle edge cases"; the only literal placeholder is the all-zero sha in Task 2.2, explicitly replaced in Task 2.6. ✓
+**Placeholder scan:** No "TBD"/"handle edge cases"; the only literal placeholder is the all-zero sha in Task 2.2, explicitly replaced in Task 2.7. ✓
 
 **Type consistency:** `AnimationController` API (`set_locomotion`, `play_one_shot`, `enter_terminal`, `current_clip`, `get_debug_state`) is identical across Tasks 6, 8, 9, 10. `entities[id]` is `{node, controller, type}` consistently in Task 8.4/8.5. Event field is `event_type` and entity field `entity_id` (matching the Go `Event` struct and existing `smoke.gd`) in Tasks 8.5 + 10.2. ✓
 

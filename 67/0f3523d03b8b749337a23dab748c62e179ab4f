@@ -1,0 +1,53 @@
+docs/plans/2026-06-05-resume-authoritative-state.md
+  s_4565ec34f2f0e0::t_6c4c180a6e985c 3,58,60,62,64-65,67-68,84,86,88,90,93,95,98,116,118,122,137,139,141-142,144,147,162,164,166-167,169,171,189,191,193,195,211-231
+  s_f2de64d0f8e5fa::t_3c35ead1c1aa5f 1-2,4-7,24-29,31-35,45,47-49,51-52,55,70-81,100-106,108-109,112,123-127,129-136,138,143,149-161,168,172-188,190,192,194,198-210
+  s_4565ec34f2f0e0::t_e099b82536d30d 30,197
+  s_02db83581f24c7::t_af7d7d74506c0e 8-23,36-44,46,50,53-54,56-57,59,61,63,66,69,82-83,85,87,89,91-92,94,96-97,99,107,110-111,113-115,117,119-121,128,140,145-146,148,163,165,170,196
+docs/specs/spec-take-a-hit.md
+  s_4565ec34f2f0e0::t_6c4c180a6e985c 239-243,370-371,373-374
+docs/PROGRESS.md
+  s_f2de64d0f8e5fa::t_2b15b651c06107 32,34,41-43
+  s_4565ec34f2f0e0::t_e099b82536d30d 14-17,33,35,44,97-109,152,154-156
+  s_f2de64d0f8e5fa::t_80c6cb3cfcac1f 22
+docs/specs/spec-resume-authoritative-state.md
+  s_02db83581f24c7::t_0394b4aa2b2fbe 240-253
+  s_02db83581f24c7::t_4c929802249e93 91-96,99-102
+  s_02db83581f24c7::t_59d85667d074be 48-54,56-57
+  s_02db83581f24c7::t_785302bc0a8834 203-209,211
+  s_02db83581f24c7::t_1f497b0371cf8a 6
+  s_02db83581f24c7::t_028b88617f29a1 130-132,134,136-142,144-148,154,156-157,160-164,166-170
+  s_4565ec34f2f0e0::t_6c4c180a6e985c 3-4,213-230,234-235,238
+  s_f2de64d0f8e5fa::t_3c35ead1c1aa5f 1-2,5,7-47,55,58-90,97-98,103-129,133,135,143,149-153,155,158-159,165,171-202,210,212,231-233,236-237,239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "670f3523d03b8b749337a23dab748c62e179ab4f",
+  "prompts": {},
+  "sessions": {
+    "s_02db83581f24c7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7e0b205c-853a-4756-aedd-b23f82c81bdb",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_4565ec34f2f0e0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e980d-e89f-74a3-88ab-4bfb7f0f8cf7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_f2de64d0f8e5fa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9801-c64e-79a3-a4fb-6fcd49be2100",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

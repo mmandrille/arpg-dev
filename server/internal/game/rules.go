@@ -11,11 +11,12 @@ import (
 // Go server and the Godot client read the same files (ADR-0001 D6); this is the
 // server's loader and typed view.
 type Rules struct {
-	Combat     Combat
-	Items      map[string]ItemDef
-	Monsters   map[string]MonsterDef
-	LootTables map[string]LootTable
-	Worlds     map[string]WorldDef
+	Combat        Combat
+	Items         map[string]ItemDef
+	Monsters      map[string]MonsterDef
+	LootTables    map[string]LootTable
+	Interactables map[string]InteractableDef
+	Worlds        map[string]WorldDef
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -28,6 +29,7 @@ type DamageRange struct {
 type Combat struct {
 	BaseHitChance float64     `json:"base_hit_chance"`
 	PlayerDamage  DamageRange `json:"player_damage"`
+	UnarmedReach  float64     `json:"unarmed_reach"`
 }
 
 // ItemDef is a single item definition.
@@ -36,6 +38,19 @@ type ItemDef struct {
 	Slot       string       `json:"slot"`
 	Equippable bool         `json:"equippable"`
 	Damage     *DamageRange `json:"damage,omitempty"`
+	Reach      *float64     `json:"reach,omitempty"`
+}
+
+// InteractableDef is a single activatable world object definition.
+type InteractableDef struct {
+	Name              string              `json:"name"`
+	InitialState      string              `json:"initial_state"`
+	BarrierWhenClosed InteractableBarrier `json:"barrier_when_closed"`
+}
+
+// InteractableBarrier is the closed-state movement blocker for an interactable.
+type InteractableBarrier struct {
+	Size Vec2 `json:"size"`
 }
 
 // MonsterDef is a single monster definition.
@@ -70,11 +85,12 @@ type WorldPlayer struct {
 
 // WorldEntity is an initial non-player entity in a world.
 type WorldEntity struct {
-	Type         string `json:"type"`
-	MonsterDefID string `json:"monster_def_id,omitempty"`
-	ItemDefID    string `json:"item_def_id,omitempty"`
-	Position     Vec2   `json:"position"`
-	Size         Vec2   `json:"size,omitempty"`
+	Type              string `json:"type"`
+	MonsterDefID      string `json:"monster_def_id,omitempty"`
+	ItemDefID         string `json:"item_def_id,omitempty"`
+	InteractableDefID string `json:"interactable_def_id,omitempty"`
+	Position          Vec2   `json:"position"`
+	Size              Vec2   `json:"size,omitempty"`
 }
 
 // LoadRules reads and parses the v0 rules files from a directory.
@@ -85,6 +101,7 @@ func LoadRules(dir string) (*Rules, error) {
 		Version       int         `json:"version"`
 		BaseHitChance float64     `json:"base_hit_chance"`
 		PlayerDamage  DamageRange `json:"player_damage"`
+		UnarmedReach  float64     `json:"unarmed_reach"`
 	}
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
@@ -92,7 +109,10 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateDamageRange("combat.player_damage", combat.PlayerDamage); err != nil {
 		return nil, err
 	}
-	r.Combat = Combat{BaseHitChance: combat.BaseHitChance, PlayerDamage: combat.PlayerDamage}
+	if combat.UnarmedReach <= 0 {
+		return nil, fmt.Errorf("game: invalid rules combat.unarmed_reach: must be positive")
+	}
+	r.Combat = Combat{BaseHitChance: combat.BaseHitChance, PlayerDamage: combat.PlayerDamage, UnarmedReach: combat.UnarmedReach}
 
 	var items struct {
 		Items map[string]ItemDef `json:"items"`
@@ -113,6 +133,14 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 			if err := validateDamageRange("items."+id+".damage", *def.Damage); err != nil {
 				return nil, err
+			}
+		}
+		if def.Reach != nil {
+			if !def.Equippable || def.Slot != weaponSlot {
+				return nil, fmt.Errorf("game: invalid rules items.%s.reach: reach is only valid on equippable weapons", id)
+			}
+			if *def.Reach <= 0 {
+				return nil, fmt.Errorf("game: invalid rules items.%s.reach: must be positive", id)
 			}
 		}
 	}
@@ -153,6 +181,22 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 
+	var interactables struct {
+		Interactables map[string]InteractableDef `json:"interactables"`
+	}
+	if err := readJSON(filepath.Join(dir, "interactables.v0.json"), &interactables); err != nil {
+		return nil, err
+	}
+	for id, def := range interactables.Interactables {
+		if def.InitialState != interactableClosed {
+			return nil, fmt.Errorf("game: invalid rules interactables.%s.initial_state: must be closed", id)
+		}
+		if def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0 {
+			return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
+		}
+	}
+	r.Interactables = interactables.Interactables
+
 	var worlds struct {
 		Worlds map[string]WorldDef `json:"worlds"`
 	}
@@ -180,6 +224,13 @@ func LoadRules(dir string) (*Rules, error) {
 			case wallEntity:
 				if entity.Size.X <= 0 || entity.Size.Y <= 0 {
 					return nil, fmt.Errorf("game: invalid rules %s: wall size must be positive", label)
+				}
+			case interactableEntity:
+				if entity.InteractableDefID == "" {
+					return nil, fmt.Errorf("game: invalid rules %s: missing interactable_def_id", label)
+				}
+				if _, ok := r.Interactables[entity.InteractableDefID]; !ok {
+					return nil, fmt.Errorf("game: invalid rules %s: unknown interactable %s", label, entity.InteractableDefID)
 				}
 			default:
 				return nil, fmt.Errorf("game: invalid rules %s: unknown type %s", label, entity.Type)

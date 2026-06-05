@@ -62,6 +62,12 @@ func TestLoadRules(t *testing.T) {
 	if r.Items["rusty_sword"].Damage == nil || r.Items["rusty_sword"].Damage.Min != 3 || r.Items["rusty_sword"].Damage.Max != 5 {
 		t.Fatalf("rusty_sword damage = %+v, want {3,5}", r.Items["rusty_sword"].Damage)
 	}
+	if r.Items["rusty_sword"].Reach == nil || *r.Items["rusty_sword"].Reach != 1.5 {
+		t.Fatalf("rusty_sword reach = %+v, want 1.5", r.Items["rusty_sword"].Reach)
+	}
+	if r.Combat.UnarmedReach != 1.0 {
+		t.Fatalf("unarmed reach = %v, want 1.0", r.Combat.UnarmedReach)
+	}
 	if r.Items["training_badge"].Equippable || r.Items["training_badge"].Slot != "" {
 		t.Fatalf("training_badge def = %+v, want non-equippable without slot", r.Items["training_badge"])
 	}
@@ -76,6 +82,12 @@ func TestLoadRules(t *testing.T) {
 	}
 	if _, ok := r.Worlds["collision_lab"]; !ok {
 		t.Fatal("missing collision_lab world")
+	}
+	if _, ok := r.Worlds["door_lab"]; !ok {
+		t.Fatal("missing door_lab world")
+	}
+	if r.Interactables["wooden_door"].InitialState != interactableClosed {
+		t.Fatalf("wooden_door = %+v, want initially closed", r.Interactables["wooden_door"])
 	}
 }
 
@@ -118,6 +130,21 @@ func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
 	}
 	assertEntity(t, csnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
 	assertEntity(t, csnap, "1002", monsterEntity, "training_dummy_reward", "", Vec2{X: 4, Y: 5})
+
+	door, err := NewSimWithWorld("sess_door", "01", rules, "door_lab")
+	if err != nil {
+		t.Fatalf("door world: %v", err)
+	}
+	dsnap := door.Snapshot()
+	if len(dsnap.Entities) != 3 {
+		t.Fatalf("door entities = %d, want player+door+loot: %+v", len(dsnap.Entities), dsnap.Entities)
+	}
+	if len(door.walls) != 2 {
+		t.Fatalf("door walls = %d, want 2", len(door.walls))
+	}
+	assertEntity(t, dsnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
+	assertInteractable(t, dsnap, "1002", "wooden_door", interactableClosed, Vec2{X: 4, Y: 5})
+	assertEntity(t, dsnap, "1003", lootEntity, "", "training_badge", Vec2{X: 8, Y: 5})
 }
 
 func assertEntity(t *testing.T, snap Snapshot, id, typ, monsterDefID, itemDefID string, pos Vec2) {
@@ -132,6 +159,20 @@ func assertEntity(t *testing.T, snap Snapshot, id, typ, monsterDefID, itemDefID 
 		return
 	}
 	t.Fatalf("missing entity %s in %+v", id, snap.Entities)
+}
+
+func assertInteractable(t *testing.T, snap Snapshot, id, defID, state string, pos Vec2) {
+	t.Helper()
+	for _, e := range snap.Entities {
+		if e.ID != id {
+			continue
+		}
+		if e.Type != interactableEntity || e.InteractableDefID != defID || e.State != state || e.Position != pos {
+			t.Fatalf("interactable %s = %+v", id, e)
+		}
+		return
+	}
+	t.Fatalf("missing interactable %s in %+v", id, snap.Entities)
 }
 
 // --- cross-language golden fixtures (criterion 7) ---------------------------
@@ -214,6 +255,26 @@ func TestEquippedWeaponDamageGolden(t *testing.T) {
 	}
 }
 
+func TestMeleeReachGolden(t *testing.T) {
+	var golden struct {
+		Cases []struct {
+			Name         string  `json:"name"`
+			Reach        float64 `json:"reach"`
+			TargetRadius float64 `json:"target_radius"`
+			Distance     float64 `json:"distance"`
+			InRange      bool    `json:"in_range"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "melee_reach.json", &golden)
+
+	for _, c := range golden.Cases {
+		got := meleeInRange(c.Distance, c.Reach, c.TargetRadius)
+		if got != c.InRange {
+			t.Fatalf("%s: meleeInRange(%v,%v,%v) = %v, want %v", c.Name, c.Distance, c.Reach, c.TargetRadius, got, c.InRange)
+		}
+	}
+}
+
 func TestLootRollGolden(t *testing.T) {
 	r := loadRules(t)
 	var golden struct {
@@ -239,8 +300,7 @@ func runSlice(t *testing.T, seed string) *Sim {
 	t.Helper()
 	sim := NewSim("sess_test", seed, loadRules(t))
 
-	// Move toward the monster for a few ticks (exercises movement; combat does
-	// not gate on range in v0).
+	// Move into unarmed reach of the monster.
 	sim.Tick([]Input{{MessageID: "m1", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 2}}})
 
 	// Attack until the monster is dead.
@@ -249,7 +309,7 @@ func runSlice(t *testing.T, seed string) *Sim {
 		if e := sim.findEntity(monsterID); e == nil || e.hp == 0 {
 			break
 		}
-		sim.Tick([]Input{{MessageID: "a" + itoa(i), CorrelationID: "corr_a", Type: "attack_intent", Attack: &AttackIntent{TargetID: monsterID}}})
+		sim.Tick([]Input{{MessageID: "a" + itoa(i), CorrelationID: "corr_a", Type: "action_intent", Action: &ActionIntent{TargetID: monsterID}}})
 	}
 	if e := sim.findEntity(monsterID); e == nil || e.hp != 0 {
 		t.Fatalf("monster not dead after attacks: %+v", e)
@@ -265,7 +325,7 @@ func runSlice(t *testing.T, seed string) *Sim {
 	if lootID == "" {
 		t.Fatal("no loot entity after kill")
 	}
-	sim.Tick([]Input{{MessageID: "p1", CorrelationID: "corr_p", Type: "pick_up_intent", PickUp: &PickUpIntent{EntityID: lootID}}})
+	sim.Tick([]Input{{MessageID: "p1", CorrelationID: "corr_p", Type: "action_intent", Action: &ActionIntent{TargetID: lootID}}})
 
 	// Equip the picked-up item.
 	snap := sim.Snapshot()
@@ -334,11 +394,12 @@ func TestScriptedSliceMatchesGolden(t *testing.T) {
 
 func TestSuccessfulHitRetaliatesAndPreservesKillOrder(t *testing.T) {
 	sim := NewSim("sess_retaliate", "deadbeefdeadbeef", loadRules(t))
+	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
 		CorrelationID: "corr_hit",
-		Type:          "attack_intent",
-		Attack:        &AttackIntent{TargetID: "1002"},
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1002"},
 	}})
 
 	assertAck(t, r, "a1")
@@ -380,8 +441,8 @@ func TestEquippedWeaponOneShotsRewardDummy(t *testing.T) {
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
 		CorrelationID: "corr_weapon",
-		Type:          "attack_intent",
-		Attack:        &AttackIntent{TargetID: "1003"},
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1003"},
 	}})
 
 	assertAck(t, r, "a1")
@@ -409,8 +470,8 @@ func TestEquippedWeaponWithoutDamageFallsBackToBaseDamage(t *testing.T) {
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
 		CorrelationID: "corr_base",
-		Type:          "attack_intent",
-		Attack:        &AttackIntent{TargetID: "1003"},
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1003"},
 	}})
 
 	assertAck(t, r, "a1")
@@ -427,13 +488,14 @@ func TestDamageEventReportsRolledDamageNotClampedHPDelta(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	rules.Combat.PlayerDamage = DamageRange{Min: 5, Max: 5}
 	sim := NewSim("sess_overkill_damage_event", "deadbeefdeadbeef", rules)
+	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	sim.findEntity("1002").hp = 1
 
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
 		CorrelationID: "corr_overkill",
-		Type:          "attack_intent",
-		Attack:        &AttackIntent{TargetID: "1002"},
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1002"},
 	}})
 
 	assertAck(t, r, "a1")
@@ -448,11 +510,12 @@ func TestMissedAttackDoesNotRetaliate(t *testing.T) {
 	rules := loadRules(t)
 	rules.Combat.BaseHitChance = 0
 	sim := NewSim("sess_miss", "deadbeefdeadbeef", rules)
+	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
 		CorrelationID: "corr_miss",
-		Type:          "attack_intent",
-		Attack:        &AttackIntent{TargetID: "1002"},
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1002"},
 	}})
 
 	assertAck(t, r, "a1")
@@ -474,13 +537,14 @@ func TestPlayerKilledByRetaliation(t *testing.T) {
 	rules.Monsters[monsterDefID] = dummy
 
 	sim := NewSim("sess_player_death", "deadbeefdeadbeef", rules)
+	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	damaged, killed := 0, 0
 	for i := 0; i < playerStartHP+2; i++ {
 		r := sim.Tick([]Input{{
 			MessageID:     "a" + itoa(i),
 			CorrelationID: "corr_death",
-			Type:          "attack_intent",
-			Attack:        &AttackIntent{TargetID: "1002"},
+			Type:          "action_intent",
+			Action:        &ActionIntent{TargetID: "1002"},
 		}})
 		for _, ev := range r.Events {
 			switch ev.EventType {
@@ -673,6 +737,74 @@ func TestCollisionBlocksWallAndAllowsRoute(t *testing.T) {
 	}
 }
 
+func TestActionRejectsOutOfRange(t *testing.T) {
+	rules := loadRules(t)
+
+	t.Run("monster", func(t *testing.T) {
+		sim := NewSim("sess_range_monster", "01", rules)
+		r := sim.Tick([]Input{{MessageID: "a", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+		assertReject(t, r, "a", "out_of_range")
+	})
+
+	t.Run("loot", func(t *testing.T) {
+		sim, err := NewSimWithWorld("sess_range_loot", "01", rules, "gear_before_combat")
+		if err != nil {
+			t.Fatalf("gear world: %v", err)
+		}
+		r := sim.Tick([]Input{{MessageID: "p", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+		assertReject(t, r, "p", "out_of_range")
+	})
+
+	t.Run("door", func(t *testing.T) {
+		sim, err := NewSimWithWorld("sess_range_door", "01", rules, "door_lab")
+		if err != nil {
+			t.Fatalf("door world: %v", err)
+		}
+		r := sim.Tick([]Input{{MessageID: "d", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+		assertReject(t, r, "d", "out_of_range")
+	})
+}
+
+func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_door_passage", "01", loadRules(t), "door_lab")
+	if err != nil {
+		t.Fatalf("door world: %v", err)
+	}
+
+	sim.Tick([]Input{{MessageID: "push_closed", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 7}}})
+	for i := 0; i < 6; i++ {
+		sim.Tick(nil)
+	}
+	if got := sim.entities[sim.playerID].pos; got.X >= 4 {
+		t.Fatalf("player passed closed door: pos=%+v", got)
+	}
+	r := sim.Tick([]Input{{MessageID: "closed_loot", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}}})
+	assertReject(t, r, "closed_loot", "out_of_range")
+
+	open := sim.Tick([]Input{{MessageID: "open", CorrelationID: "corr_door", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+	assertAck(t, open, "open")
+	if !hasEvent(open, "interactable_activated") {
+		t.Fatalf("missing interactable_activated: %+v", open.Events)
+	}
+	door := sim.findEntity("1002")
+	if door == nil || door.state != interactableOpen {
+		t.Fatalf("door state = %+v, want open", door)
+	}
+
+	sim.Tick([]Input{{MessageID: "through", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 6}}})
+	for i := 0; i < 5; i++ {
+		sim.Tick(nil)
+	}
+	if got := sim.entities[sim.playerID].pos; got.X <= 4 {
+		t.Fatalf("player did not pass open door: pos=%+v", got)
+	}
+	pickup := sim.Tick([]Input{{MessageID: "loot", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}}})
+	assertAck(t, pickup, "loot")
+	if !hasEvent(pickup, "item_picked_up") {
+		t.Fatalf("missing item_picked_up after door passage: %+v", pickup.Events)
+	}
+}
+
 // --- rejections (criterion 12) ----------------------------------------------
 
 func TestRejections(t *testing.T) {
@@ -680,13 +812,14 @@ func TestRejections(t *testing.T) {
 
 	t.Run("invalid attack target", func(t *testing.T) {
 		sim := NewSim("s", "01", rules)
-		r := sim.Tick([]Input{{MessageID: "x", Type: "attack_intent", Attack: &AttackIntent{TargetID: "9999"}}})
+		r := sim.Tick([]Input{{MessageID: "x", Type: "action_intent", Action: &ActionIntent{TargetID: "9999"}}})
 		assertReject(t, r, "x", "invalid_target")
 	})
 
 	t.Run("pickup non-loot", func(t *testing.T) {
 		sim := NewSim("s", "01", rules)
-		r := sim.Tick([]Input{{MessageID: "x", Type: "pick_up_intent", PickUp: &PickUpIntent{EntityID: "1002"}}})
+		sim.findEntity("1002").hp = 0
+		r := sim.Tick([]Input{{MessageID: "x", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
 		assertReject(t, r, "x", "invalid_target")
 	})
 
@@ -712,7 +845,7 @@ func TestRejections(t *testing.T) {
 	t.Run("duplicate pickup", func(t *testing.T) {
 		sim := runSlice(t, "0011223344556677")
 		// The loot was already picked up during runSlice; picking up 1003 again rejects.
-		r := sim.Tick([]Input{{MessageID: "dup", Type: "pick_up_intent", PickUp: &PickUpIntent{EntityID: "1003"}}})
+		r := sim.Tick([]Input{{MessageID: "dup", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}}})
 		assertReject(t, r, "dup", "invalid_target")
 	})
 }
@@ -722,8 +855,8 @@ func TestDeadPlayerRejectsIntentsAndStopsActiveMovement(t *testing.T) {
 
 	cases := []Input{
 		{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}},
-		{MessageID: "attack", Type: "attack_intent", Attack: &AttackIntent{TargetID: "1002"}},
-		{MessageID: "pickup", Type: "pick_up_intent", PickUp: &PickUpIntent{EntityID: "1003"}},
+		{MessageID: "attack", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}},
+		{MessageID: "pickup", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}},
 		{MessageID: "equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: "weapon"}},
 	}
 	for _, in := range cases {
@@ -782,12 +915,13 @@ func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
 	if err != nil {
 		t.Fatalf("new gear sim: %v", err)
 	}
+	moveTicks(sim, "to_sword", Vec2{X: 1}, 5)
 
 	pickup := sim.Tick([]Input{{
 		MessageID:     "p1",
 		CorrelationID: "corr_pickup",
-		Type:          "pick_up_intent",
-		PickUp:        &PickUpIntent{EntityID: "1002"},
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1002"},
 	}})
 	assertAck(t, pickup, "p1")
 
@@ -803,7 +937,15 @@ func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
 		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: weaponSlot},
 	}})
 	assertAck(t, equip, "e1")
+	moveTicks(sim, "to_dummy", Vec2{X: 1}, 6)
 	return sim
+}
+
+func moveTicks(sim *Sim, messageID string, dir Vec2, ticks int) {
+	sim.Tick([]Input{{MessageID: messageID, Type: "move_intent", Move: &MoveIntent{Direction: dir, DurationTicks: ticks}}})
+	for i := 1; i < ticks; i++ {
+		sim.Tick(nil)
+	}
 }
 
 func cloneRules(r *Rules) *Rules {
@@ -819,6 +961,10 @@ func cloneRules(r *Rules) *Rules {
 	out.LootTables = make(map[string]LootTable, len(r.LootTables))
 	for id, def := range r.LootTables {
 		out.LootTables[id] = def
+	}
+	out.Interactables = make(map[string]InteractableDef, len(r.Interactables))
+	for id, def := range r.Interactables {
+		out.Interactables[id] = def
 	}
 	out.Worlds = make(map[string]WorldDef, len(r.Worlds))
 	for id, def := range r.Worlds {

@@ -28,10 +28,10 @@ func TestReconstructFromInputsRestoresCombatStateAndMetadata(t *testing.T) {
 	}
 	assertRestoredSlice(t, recon.Snapshot)
 
-	if recon.Metadata.NextSequence != 3 {
-		t.Fatalf("next sequence = %d, want 3", recon.Metadata.NextSequence)
+	if recon.Metadata.NextSequence != 4 {
+		t.Fatalf("next sequence = %d, want 4", recon.Metadata.NextSequence)
 	}
-	for _, id := range []string{"msg-attack", "msg-pickup", "msg-equip"} {
+	for _, id := range []string{"msg-move", "msg-attack", "msg-pickup", "msg-equip"} {
 		if !recon.Metadata.SeenMessageIDs[id] {
 			t.Fatalf("metadata missing seen message id %s", id)
 		}
@@ -99,39 +99,49 @@ func scriptedRecordedInputs() ([]RecordedInput, int64) {
 		{
 			Tick: 0,
 			Input: game.Input{
-				MessageID: "msg-attack",
+				MessageID: "msg-move",
 				Sequence:  0,
-				Type:      "attack_intent",
-				Attack:    &game.AttackIntent{TargetID: "1002"},
+				Type:      "move_intent",
+				Move:      &game.MoveIntent{Direction: game.Vec2{X: 1}, DurationTicks: 1},
 			},
 		},
 		{
 			Tick: 1,
 			Input: game.Input{
-				MessageID: "msg-pickup",
+				MessageID: "msg-attack",
 				Sequence:  1,
-				Type:      "pick_up_intent",
-				PickUp:    &game.PickUpIntent{EntityID: "1003"},
+				Type:      "action_intent",
+				Action:    &game.ActionIntent{TargetID: "1002"},
 			},
 		},
 		{
 			Tick: 2,
 			Input: game.Input{
-				MessageID: "msg-equip",
+				MessageID: "msg-pickup",
 				Sequence:  2,
+				Type:      "action_intent",
+				Action:    &game.ActionIntent{TargetID: "1003"},
+			},
+		},
+		{
+			Tick: 3,
+			Input: game.Input{
+				MessageID: "msg-equip",
+				Sequence:  3,
 				Type:      "equip_intent",
 				Equip:     &game.EquipIntent{ItemInstanceID: "1004", Slot: "weapon"},
 			},
 		},
-	}, 2
+	}, 3
 }
 
 func scriptedStoredInputs(t *testing.T) []store.SessionInput {
 	t.Helper()
 	return []store.SessionInput{
-		storedInput(t, "inp-attack", "msg-attack", 0, 0, "attack_intent", map[string]any{"target_id": "1002"}),
-		storedInput(t, "inp-pickup", "msg-pickup", 1, 1, "pick_up_intent", map[string]any{"entity_id": "1003"}),
-		storedInput(t, "inp-equip", "msg-equip", 2, 2, "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "weapon"}),
+		storedInput(t, "inp-move", "msg-move", 0, 0, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
+		storedInput(t, "inp-attack", "msg-attack", 1, 1, "action_intent", map[string]any{"target_id": "1002"}),
+		storedInput(t, "inp-pickup", "msg-pickup", 2, 2, "action_intent", map[string]any{"target_id": "1003"}),
+		storedInput(t, "inp-equip", "msg-equip", 3, 3, "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "weapon"}),
 	}
 }
 
@@ -174,8 +184,8 @@ func storeEvents(events []derivedEvent) []store.SessionEvent {
 
 func assertRestoredSlice(t *testing.T, snap game.Snapshot) {
 	t.Helper()
-	if snap.ServerTick != 3 {
-		t.Fatalf("server tick = %d, want 3", snap.ServerTick)
+	if snap.ServerTick != 4 {
+		t.Fatalf("server tick = %d, want 4", snap.ServerTick)
 	}
 	player := entityByID(snap, "1001")
 	if player == nil || player.HP == nil || *player.HP >= 10 {

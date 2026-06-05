@@ -8,17 +8,23 @@ import (
 
 // Simulation constants for the v0 slice.
 const (
-	baseEntityID  = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
-	playerStartHP = 10
-	moveSpeed     = 1.0
-	playerRadius  = 0.45
-	monsterRadius = 0.45
-	monsterDefID  = "training_dummy"
-	playerEntity  = "player"
-	monsterEntity = "monster"
-	lootEntity    = "loot"
-	wallEntity    = "wall"
-	weaponSlot    = "weapon"
+	baseEntityID                  = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
+	playerStartHP                 = 10
+	moveSpeed                     = 1.0
+	playerRadius                  = 0.45
+	monsterRadius                 = 0.45
+	monsterDefID                  = "training_dummy"
+	playerEntity                  = "player"
+	monsterEntity                 = "monster"
+	lootEntity                    = "loot"
+	wallEntity                    = "wall"
+	interactableEntity            = "interactable"
+	interactableClosed            = "closed"
+	interactableOpen              = "open"
+	weaponSlot                    = "weapon"
+	lootInteractionRadius         = 0.35
+	interactableInteractionRadius = 0.50
+	meleeRangeEpsilon             = 0.000001
 )
 
 // DefaultWorldID is the compatibility world used when callers do not choose a
@@ -27,14 +33,16 @@ const DefaultWorldID = "vertical_slice"
 
 // entity is the internal mutable scene entity.
 type entity struct {
-	id           uint64
-	kind         string
-	pos          Vec2
-	hp           int
-	maxHP        int
-	monsterDefID string
-	itemDefID    string
-	lootTable    string
+	id                uint64
+	kind              string
+	pos               Vec2
+	hp                int
+	maxHP             int
+	monsterDefID      string
+	itemDefID         string
+	interactableDefID string
+	state             string
+	lootTable         string
 }
 
 // invItem is an internal inventory item.
@@ -125,6 +133,16 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 			s.entities[loot.id] = loot
 		case wallEntity:
 			s.walls = append(s.walls, wallObstacle{pos: preset.Position, size: preset.Size})
+		case interactableEntity:
+			def := rules.Interactables[preset.InteractableDefID]
+			interactable := &entity{
+				kind:              interactableEntity,
+				pos:               preset.Position,
+				interactableDefID: preset.InteractableDefID,
+				state:             def.InitialState,
+			}
+			interactable.id = s.alloc()
+			s.entities[interactable.id] = interactable
 		default:
 			return nil, ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
 		}
@@ -196,8 +214,7 @@ type Input struct {
 	Sequence      int64
 	Type          string
 	Move          *MoveIntent
-	Attack        *AttackIntent
-	PickUp        *PickUpIntent
+	Action        *ActionIntent
 	Equip         *EquipIntent
 }
 
@@ -207,8 +224,7 @@ type (
 		Direction     Vec2
 		DurationTicks int
 	}
-	AttackIntent struct{ TargetID string }
-	PickUpIntent struct{ EntityID string }
+	ActionIntent struct{ TargetID string }
 	EquipIntent  struct {
 		ItemInstanceID string
 		Slot           string
@@ -256,7 +272,7 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "attack_intent", "pick_up_intent", "equip_intent":
+		case "move_intent", "action_intent", "equip_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -266,10 +282,8 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		res.ack(in.MessageID)
 	case "move_intent":
 		s.handleMove(in, res)
-	case "attack_intent":
-		s.handleAttack(in, res)
-	case "pick_up_intent":
-		s.handlePickUp(in, res)
+	case "action_intent":
+		s.handleAction(in, res)
 	case "equip_intent":
 		s.handleEquip(in, res)
 	default:
@@ -293,17 +307,34 @@ func (s *Sim) handleMove(in Input, res *TickResult) {
 	res.ack(in.MessageID)
 }
 
-func (s *Sim) handleAttack(in Input, res *TickResult) {
-	if in.Attack == nil {
+func (s *Sim) handleAction(in Input, res *TickResult) {
+	if in.Action == nil {
 		res.reject(in.MessageID, "invalid_payload")
 		return
 	}
-	target := s.findEntity(in.Attack.TargetID)
-	if target == nil || target.kind != monsterEntity || target.hp <= 0 {
+	target := s.findEntity(in.Action.TargetID)
+	if target == nil || !s.actionable(target) {
 		res.reject(in.MessageID, "invalid_target")
 		return
 	}
+	if !s.inMeleeRange(target) {
+		res.reject(in.MessageID, "out_of_range")
+		return
+	}
 
+	switch target.kind {
+	case monsterEntity:
+		s.attackTarget(target, in, res)
+	case lootEntity:
+		s.pickUpTarget(target, in, res)
+	case interactableEntity:
+		s.activateInteractable(target, in, res)
+	default:
+		res.reject(in.MessageID, "invalid_target")
+	}
+}
+
+func (s *Sim) attackTarget(target *entity, in Input, res *TickResult) {
 	// Always consume two draws (hit, damage) so the RNG stream is independent
 	// of the hit/miss branch (base_hit_chance is 1.0 in v0).
 	hitDraw := s.rng.Next()
@@ -313,7 +344,7 @@ func (s *Sim) handleAttack(in Input, res *TickResult) {
 
 	res.ack(in.MessageID)
 	if !hit {
-		res.Events = append(res.Events, Event{EventType: "attack_missed", EntityID: in.Attack.TargetID, CorrelationID: in.CorrelationID})
+		res.Events = append(res.Events, Event{EventType: "attack_missed", EntityID: idStr(target.id), CorrelationID: in.CorrelationID})
 		return
 	}
 
@@ -322,10 +353,10 @@ func (s *Sim) handleAttack(in Input, res *TickResult) {
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
-	res.Events = append(res.Events, Event{EventType: "monster_damaged", EntityID: in.Attack.TargetID, CorrelationID: in.CorrelationID, Damage: intPtr(dmg)})
+	res.Events = append(res.Events, Event{EventType: "monster_damaged", EntityID: idStr(target.id), CorrelationID: in.CorrelationID, Damage: intPtr(dmg)})
 
 	if target.hp == 0 {
-		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: in.Attack.TargetID, CorrelationID: in.CorrelationID})
+		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: in.CorrelationID})
 		s.dropLoot(target, in.CorrelationID, res)
 	}
 	s.retaliate(target, in.CorrelationID, res)
@@ -365,18 +396,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), CorrelationID: corr, Damage: intPtr(dmg)})
 }
 
-func (s *Sim) handlePickUp(in Input, res *TickResult) {
-	if in.PickUp == nil {
-		res.reject(in.MessageID, "invalid_payload")
-		return
-	}
-	e := s.findEntity(in.PickUp.EntityID)
-	if e == nil || e.kind != lootEntity {
-		// Covers duplicate pickup: the loot entity is already gone.
-		res.reject(in.MessageID, "invalid_target")
-		return
-	}
-
+func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult) {
 	delete(s.entities, e.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
 
@@ -389,6 +409,13 @@ func (s *Sim) handlePickUp(in Input, res *TickResult) {
 	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
 	res.Events = append(res.Events, Event{EventType: "item_picked_up", EntityID: idStr(item.instanceID), CorrelationID: in.CorrelationID})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult) {
+	e.state = interactableOpen
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
+	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
 	res.ack(in.MessageID)
 }
 
@@ -478,11 +505,18 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 	}
 	for _, id := range sortedEntityIDs(s.entities) {
 		e := s.entities[id]
-		if e.kind != monsterEntity || e.hp <= 0 {
+		if e.kind == monsterEntity && e.hp > 0 {
+			if circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
+				return true
+			}
 			continue
 		}
-		if circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
-			return true
+		if e.kind == interactableEntity && e.state == interactableClosed {
+			if def, ok := s.rules.Interactables[e.interactableDefID]; ok {
+				if circleIntersectsAABB(pos, playerRadius, e.pos, def.BarrierWhenClosed.Size) {
+					return true
+				}
+			}
 		}
 	}
 	return false
@@ -507,6 +541,65 @@ func circleIntersectsAABB(center Vec2, radius float64, rectCenter Vec2, rectSize
 
 func (s *Sim) rollDamage() int {
 	return s.rollRange(s.resolvePlayerAttackDamage())
+}
+
+func (s *Sim) playerReach() float64 {
+	base := s.rules.Combat.UnarmedReach
+	instanceID := s.equipped[weaponSlot]
+	if instanceID == 0 {
+		return base
+	}
+	item := s.findItemByID(instanceID)
+	if item == nil {
+		return base
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok || def.Reach == nil {
+		return base
+	}
+	return *def.Reach
+}
+
+func (s *Sim) targetInteractionRadius(e *entity) float64 {
+	switch e.kind {
+	case monsterEntity:
+		return monsterRadius
+	case lootEntity:
+		return lootInteractionRadius
+	case interactableEntity:
+		return interactableInteractionRadius
+	default:
+		return 0
+	}
+}
+
+func (s *Sim) inMeleeRange(target *entity) bool {
+	player := s.entities[s.playerID]
+	if player == nil {
+		return false
+	}
+	return meleeInRange(distance(player.pos, target.pos), s.playerReach(), s.targetInteractionRadius(target))
+}
+
+func meleeInRange(dist, reach, targetRadius float64) bool {
+	return dist <= reach+targetRadius+meleeRangeEpsilon
+}
+
+func distance(a, b Vec2) float64 {
+	return math.Hypot(a.X-b.X, a.Y-b.Y)
+}
+
+func (s *Sim) actionable(e *entity) bool {
+	switch e.kind {
+	case monsterEntity:
+		return e.hp > 0
+	case lootEntity:
+		return true
+	case interactableEntity:
+		return e.state == interactableClosed
+	default:
+		return false
+	}
 }
 
 func (s *Sim) resolvePlayerAttackDamage() DamageRange {
@@ -620,6 +713,9 @@ func (e *entity) view() EntityView {
 		}
 	case lootEntity:
 		ev.ItemDefID = e.itemDefID
+	case interactableEntity:
+		ev.InteractableDefID = e.interactableDefID
+		ev.State = e.state
 	}
 	return ev
 }

@@ -1,0 +1,28 @@
+Makefile
+  s_56b42e2608aa12::t_170a79a030df6e 77-78
+client/assets/characters/base_humanoid/base_humanoid.glb.import
+  s_56b42e2608aa12::t_aed02348df08fb 1-42
+tools/assets/gen_glb.py
+  s_56b42e2608aa12::t_4afc1d854e79d7 1-182
+client/assets/equipment/weapons/rusty_sword/rusty_sword.glb.import
+  s_56b42e2608aa12::t_aed02348df08fb 1-42
+assets/manifests/assets.v0.json
+  s_56b42e2608aa12::t_d1db1c9f619573 10-15
+  s_56b42e2608aa12::t_593f4eb39b631e 24-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "0d906220e17b6103cb8a2fb28ab55ce678c89ba1",
+  "prompts": {},
+  "sessions": {
+    "s_56b42e2608aa12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "198f963e-4091-4cdb-bd5a-29791eaa2bd5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

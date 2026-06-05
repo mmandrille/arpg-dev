@@ -1,6 +1,6 @@
 # Spec: `first-playable-vertical-slice`
 
-Status: Ready for implementation
+Status: Implemented (v0, 2026-06-05) — see section 10 (As-built deviations)
 Branch: `feature/first-playable-vertical-slice`
 Related: `docs/adr/0001-technology-stack.md`
 
@@ -78,6 +78,10 @@ Debug authorization in v0 requires both a valid account bearer token and `X-Debu
 the server `DEBUG_TOKEN` setting. Local dev may default `DEBUG_TOKEN` to `local-debug-token`.
 Remote deployments must set a non-default token and must not expose debug routes without this
 header.
+
+> **As-built (§10):** `GET /v0/ws` also accepts the access token via an `?access_token=` query
+> parameter as a fallback to the `Authorization` header, because WebSocket clients (Godot's
+> `WebSocketPeer`, browsers) cannot reliably set handshake headers.
 
 ### 4.2 Auth shapes
 
@@ -245,6 +249,13 @@ Minimal `state_delta` payload:
 `changes` are applied in array order. Unknown `op` values are protocol errors in tests.
 Entity IDs are decimal strings in JSON to preserve unsigned 64-bit values without precision loss.
 
+The full authoritative `op` set in v0 is: `entity_spawn`, `entity_update`, `entity_remove`
+(loot on pickup), `inventory_add`, `inventory_update` (equip toggles), and `equipped_update`
+(`{ "op": "equipped_update", "slot": "weapon", "item_instance_id": "1004" | null }`). A killed
+monster stays in the scene as a corpse via `entity_update` to `hp: 0` (matching the example
+above); `entity_remove` is reserved for loot leaving the scene on pickup. `changes` and `events`
+are always emitted as arrays (never `null`).
+
 ### 4.5 Shared rules data
 
 Minimum shared data files:
@@ -283,7 +294,7 @@ Minimum persisted entities:
 | `accounts` | `id`, `email`, `created_at` |
 | `characters` | `id`, `account_id`, `name`, `created_at` |
 | `sessions` | `id`, `account_id`, `character_id`, `seed`, `status`, `created_at`, `updated_at` |
-| `inventory_items` | `id`, `account_id`, `character_id`, `item_def_id`, `slot`, `equipped`, `created_at` |
+| `inventory_items` | `id`, `session_id`, `account_id`, `character_id`, `item_def_id`, `slot`, `equipped`, `created_at` — **as-built (§10):** keyed by `(session_id, id)`; inventory is session-scoped in v0, not character-scoped |
 | `session_events` | `id`, `session_id`, `tick`, `sequence`, `event_type`, `correlation_id`, `payload`, `created_at` |
 | `session_inputs` | `id`, `session_id`, `tick`, `sequence`, `message_id`, `correlation_id`, `payload`, `created_at` |
 
@@ -377,3 +388,33 @@ Replay tool
    attack, pickup, and equip, and verifies client state through the debug API.
 7. CI runs shared validation, Go tests, replay fixture verification, Python bot smoke, and Godot
    headless smoke where the runtime is available.
+
+## 10. As-built deviations (v0)
+
+The slice is implemented and passes `make ci` (shared validation, Go tests, Python bot E2E, replay
+verification, Godot headless smoke). The following are the points where the running system differs
+from the contract as originally written above. The implementation plan's As-Built Notes carry the
+full rationale.
+
+1. **Inventory is session-scoped, not character-scoped (§4.6).** `inventory_items` gains a
+   `session_id` and is keyed by `(session_id, id)`. `id` is the protocol `item_instance_id`,
+   allocated by the deterministic per-session entity counter (which restarts at `1001` each
+   session), so it is unique only within a session; a global character-scoped key collided across
+   sessions. "Survives restart" (acceptance #8) is proven by reconnecting to the **same** session,
+   which reloads inventory from Postgres into a fresh sim. Durable cross-session character inventory
+   is deferred post-v0.
+2. **`session_inputs.payload` stores the full message envelope**, not just the intent payload,
+   because the table has no `type` column and replay needs the message type to re-apply inputs.
+3. **`GET /v0/ws` accepts `?access_token=`** as an auth fallback to the `Authorization` header
+   (WebSocket handshake header limitation).
+4. **`state_delta` op set is explicit** (§4.4 note): adds `entity_remove`, `inventory_update`, and
+   `equipped_update` beyond the three shown by example; dead monsters remain as `hp: 0` corpses;
+   `changes`/`events` are always arrays, never `null`.
+5. **No attack-range gate in v0.** `base_hit_chance` is 1.0 and an attack on a living monster always
+   hits; movement is predicted/reconciled but is not a precondition for the kill.
+6. **Metrics** use `prometheus/client_golang`; **identities** use hand-rolled prefixed ULIDs
+   (`internal/ids`), explicitly outside the deterministic sim.
+7. **Replay** reconstructs authoritative state from a session's own recorded input stream.
+8. **Toolchain** present at scaffold runs at or above the ADR baselines (Go 1.25.x with `go 1.24`
+   in `go.mod`; Python 3.14.x with a `>=3.12` floor); Docker is provided by Colima and Compose via
+   the `docker-compose` binary.

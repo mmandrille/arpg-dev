@@ -57,7 +57,7 @@ not a broader save-game, progression, or character-scoped inventory system.
 | Create | `server/internal/replay/replay_test.go` | Package-level tests: reconstruction restores combat state; resume metadata; snapshot matches `Verify` report |
 | Modify | `client/scripts/smoke.gd` | Remove forced monster-death resume harness; assert real server snapshot carries dead monster and reduced player HP |
 | Modify | `tools/bot/run.py` | Add resume probe after the slice flow and assert HP/monster death survive reconnect |
-| Modify | `docs/specs/spec-take-a-hit.md` | Replace the v4 resume limitation note with a v5 as-built pointer after implementation |
+| Modify | `docs/specs/v4_spec-take-a-hit.md` | Replace the v4 resume limitation note with a v5 as-built pointer after implementation |
 | Modify | `docs/PROGRESS.md` | Mark v5 complete when shipped and remove this gap from open items |
 
 ## 4. Data shapes

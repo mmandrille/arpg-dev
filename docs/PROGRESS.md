@@ -12,14 +12,23 @@ Last updated: 2026-06-05
 | Field | Value |
 |-------|-------|
 | **Latest completed slice** | v7 — `gear-before-combat-scenario` (world presets + second ARPG bot scenario) |
-| **Active branch** | `feature/resume-authoritative-state` |
+| **Active branch** | `feature/equipped-weapon-damage` |
 | **CI gate** | `make ci` green on 2026-06-05 |
-| **Next slice** | TBD |
+| **Next slice** | v8 — `equipped-weapon-damage` (spec drafted) |
 
 ### Slice numbering note
 
-ADR-0001 sometimes calls the first slice **v1**; repo docs call it **v0**
-(`first-playable-vertical-slice`). This file uses **v0–v7** to match spec/plan filenames.
+ADR-0001 sometimes calls the first slice **v1**; repo lifecycle labels use **v0–v8**
+(`v0` = first playable). **Spec and plan filenames** use a `vN_` prefix for execution order:
+
+```text
+v1_* = first-playable    v5_* = resume-state    v8_* = equipped-weapon-damage (draft)
+v2_* = equip-and-see-it  v6_* = visual-bot
+v3_* = animate-and-react v7_* = gear-before-combat
+v4_* = take-a-hit
+```
+
+Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
 
 ---
 
@@ -37,13 +46,14 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan |
 |-------|----------|--------|------|------|
-| **v0** | `first-playable-vertical-slice` | Complete (on `main`) | [`spec-first-playable-vertical-slice.md`](specs/spec-first-playable-vertical-slice.md) | [`2026-06-05-first-playable-vertical-slice.md`](plans/2026-06-05-first-playable-vertical-slice.md) |
-| **v2** | `equip-and-see-it` | Complete (on `main`) | [`spec-equip-and-see-it.md`](specs/spec-equip-and-see-it.md) | [`2026-06-05-equip-and-see-it.md`](plans/2026-06-05-equip-and-see-it.md) |
-| **v3** | `animate-and-react` | Complete (on `main`) | [`spec-animate-and-react.md`](specs/spec-animate-and-react.md) | [`2026-06-05-animate-and-react.md`](plans/2026-06-05-animate-and-react.md) |
-| **v4** | `take-a-hit` | Complete (on `main`) | [`spec-take-a-hit.md`](specs/spec-take-a-hit.md) | [`2026-06-05-take-a-hit.md`](plans/2026-06-05-take-a-hit.md) |
-| **v5** | `resume-authoritative-state` | Complete (`make ci` green) | [`spec-resume-authoritative-state.md`](specs/spec-resume-authoritative-state.md) | [`2026-06-05-resume-authoritative-state.md`](plans/2026-06-05-resume-authoritative-state.md) |
-| **v6** | `visual-bot-scenario-runner` | Complete (`make ci` green) | [`spec-visual-bot-scenario-runner.md`](specs/spec-visual-bot-scenario-runner.md) | [`2026-06-05-visual-bot-scenario-runner.md`](plans/2026-06-05-visual-bot-scenario-runner.md) |
-| **v7** | `gear-before-combat-scenario` | Complete (`make ci` green) | [`spec-gear-before-combat-scenario.md`](specs/spec-gear-before-combat-scenario.md) | [`2026-06-05-gear-before-combat-scenario.md`](plans/2026-06-05-gear-before-combat-scenario.md) |
+| **v0** | `first-playable-vertical-slice` | Complete (on `main`) | [`v1_spec-first-playable-vertical-slice.md`](specs/v1_spec-first-playable-vertical-slice.md) | [`v1_2026-06-05-first-playable-vertical-slice.md`](plans/v1_2026-06-05-first-playable-vertical-slice.md) |
+| **v2** | `equip-and-see-it` | Complete (on `main`) | [`v2_spec-equip-and-see-it.md`](specs/v2_spec-equip-and-see-it.md) | [`v2_2026-06-05-equip-and-see-it.md`](plans/v2_2026-06-05-equip-and-see-it.md) |
+| **v3** | `animate-and-react` | Complete (on `main`) | [`v3_spec-animate-and-react.md`](specs/v3_spec-animate-and-react.md) | [`v3_2026-06-05-animate-and-react.md`](plans/v3_2026-06-05-animate-and-react.md) |
+| **v4** | `take-a-hit` | Complete (on `main`) | [`v4_spec-take-a-hit.md`](specs/v4_spec-take-a-hit.md) | [`v4_2026-06-05-take-a-hit.md`](plans/v4_2026-06-05-take-a-hit.md) |
+| **v5** | `resume-authoritative-state` | Complete (`make ci` green) | [`v5_spec-resume-authoritative-state.md`](specs/v5_spec-resume-authoritative-state.md) | [`v5_2026-06-05-resume-authoritative-state.md`](plans/v5_2026-06-05-resume-authoritative-state.md) |
+| **v6** | `visual-bot-scenario-runner` | Complete (`make ci` green) | [`v6_spec-visual-bot-scenario-runner.md`](specs/v6_spec-visual-bot-scenario-runner.md) | [`v6_2026-06-05-visual-bot-scenario-runner.md`](plans/v6_2026-06-05-visual-bot-scenario-runner.md) |
+| **v7** | `gear-before-combat-scenario` | Complete (`make ci` green) | [`v7_spec-gear-before-combat-scenario.md`](specs/v7_spec-gear-before-combat-scenario.md) | [`v7_2026-06-05-gear-before-combat-scenario.md`](plans/v7_2026-06-05-gear-before-combat-scenario.md) |
+| **v8** | `equipped-weapon-damage` | Draft (spec only) | [`v8_spec-equipped-weapon-damage.md`](specs/v8_spec-equipped-weapon-damage.md) | — |
 
 ---
 
@@ -212,8 +222,8 @@ resume, `/state`, replay verification, and replay timeline all reconstruct the s
 
 1. **Read this file** (`docs/PROGRESS.md`) — confirm baseline slice and open gaps.
 2. **Read ADR-0001** and any feature-specific ADRs listed above.
-3. **Spec first** — create or read `docs/specs/spec-<feature>.md` (SDD).
-4. **Plan second** — create `docs/plans/<YYYY-MM-DD>-<feature>.md` with file map + verification commands.
+3. **Spec first** — create or read `docs/specs/vN_spec-<feature>.md` (SDD; `N` = next execution order).
+4. **Plan second** — create `docs/plans/vN_<YYYY-MM-DD>-<feature>.md` with file map + verification commands.
 5. **Branch** — `feature/<codename>` off latest integration branch (today: merge target TBD).
 6. **Implement** shared → server → client → bot/smoke → docs; keep `make ci` green.
 7. **Update this file** when the slice completes: new row in lifecycle table, summary, and any new gaps.

@@ -7,7 +7,7 @@ Architecture: v0 protocol and sim unchanged; new shared asset metadata + asset m
 equipment visual resolver; Python asset validation; extended headless smoke.
 Tech stack: Go (unchanged), Godot 4.6.3/GDScript, Python, glTF/GLB, JSON Schema.
 
-Related spec: `docs/specs/spec-equip-and-see-it.md`
+Related spec: `docs/specs/v2_spec-equip-and-see-it.md`
 Baseline: v0 first playable slice (complete — `make ci` green)
 
 ## File Map

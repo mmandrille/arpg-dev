@@ -11,15 +11,15 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v4 — `take-a-hit` (bidirectional combat + player hit/death reactions) |
-| **Active branch** | `feature/animate-and-react` (v2–v4 work; **not yet merged to `main`**) |
-| **CI gate** | `make ci` — expected green on the feature branch |
-| **Next slice** | **Not chosen.** See [Open gaps & deferred work](#open-gaps--deferred-work) for candidates. |
+| **Latest completed slice** | v5 — `resume-authoritative-state` (authoritative combat/world resume) |
+| **Active branch** | `feature/resume-authoritative-state` |
+| **CI gate** | `make ci` green on 2026-06-05 |
+| **Next slice** | TBD |
 
 ### Slice numbering note
 
 ADR-0001 sometimes calls the first slice **v1**; repo docs call it **v0**
-(`first-playable-vertical-slice`). This file uses **v0–v4** to match spec/plan filenames.
+(`first-playable-vertical-slice`). This file uses **v0–v5** to match spec/plan filenames.
 
 ---
 
@@ -29,20 +29,19 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit
-   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)
-        │                      │                        │                        │
-     main ✓              feature branch            feature branch           feature branch
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-authoritative-state
+   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)
+        │                      │                        │                        │                         │
+     main ✓                  main ✓                    main ✓                    main ✓              branch ✓
 ```
 
 | Slice | Codename | Status | Spec | Plan |
 |-------|----------|--------|------|------|
 | **v0** | `first-playable-vertical-slice` | Complete (on `main`) | [`spec-first-playable-vertical-slice.md`](specs/spec-first-playable-vertical-slice.md) | [`2026-06-05-first-playable-vertical-slice.md`](plans/2026-06-05-first-playable-vertical-slice.md) |
-| **v2** | `equip-and-see-it` | Complete (feature branch) | [`spec-equip-and-see-it.md`](specs/spec-equip-and-see-it.md) | [`2026-06-05-equip-and-see-it.md`](plans/2026-06-05-equip-and-see-it.md) |
-| **v3** | `animate-and-react` | Complete (feature branch) | [`spec-animate-and-react.md`](specs/spec-animate-and-react.md) | [`2026-06-05-animate-and-react.md`](plans/2026-06-05-animate-and-react.md) |
-| **v4** | `take-a-hit` | Complete (feature branch) | [`spec-take-a-hit.md`](specs/spec-take-a-hit.md) | [`2026-06-05-take-a-hit.md`](plans/2026-06-05-take-a-hit.md) |
-
-There is **no v5 spec or plan yet**.
+| **v2** | `equip-and-see-it` | Complete (on `main`) | [`spec-equip-and-see-it.md`](specs/spec-equip-and-see-it.md) | [`2026-06-05-equip-and-see-it.md`](plans/2026-06-05-equip-and-see-it.md) |
+| **v3** | `animate-and-react` | Complete (on `main`) | [`spec-animate-and-react.md`](specs/spec-animate-and-react.md) | [`2026-06-05-animate-and-react.md`](plans/2026-06-05-animate-and-react.md) |
+| **v4** | `take-a-hit` | Complete (on `main`) | [`spec-take-a-hit.md`](specs/spec-take-a-hit.md) | [`2026-06-05-take-a-hit.md`](plans/2026-06-05-take-a-hit.md) |
+| **v5** | `resume-authoritative-state` | Complete (`make ci` green) | [`spec-resume-authoritative-state.md`](specs/spec-resume-authoritative-state.md) | [`2026-06-05-resume-authoritative-state.md`](plans/2026-06-05-resume-authoritative-state.md) |
 
 ---
 
@@ -95,6 +94,19 @@ There is **no v5 spec or plan yet**.
 
 **Explicit non-goals (still true):** no respawn, no healing, no monster attack anim on retaliate.
 
+### v5 — Resume authoritative state
+
+**Proves:** Same-session reconnect restores server-owned combat/world state through deterministic replay.
+
+- WebSocket resume uses `replay.Reconstruct` when `session_inputs` exist.
+- No `LoadInventory` on replay resume; inventory/equipped state comes from recorded pickup/equip inputs.
+- Initial resume snapshot restores player HP, monster HP/death, inventory, equipped weapon, server tick, and ID continuity.
+- Runner seeds historical message IDs and next sequence, so old intents reject as `duplicate`.
+- Bot and Godot smoke assert real resumed monster death and reduced player HP.
+- Extras: dead-player resume rejects gameplay intents; `/state` and WebSocket resume snapshot parity.
+
+**Explicit non-goals (still true):** no character-scoped inventory, no respawn/healing/checkpoints, no protocol schema bump.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -137,14 +149,11 @@ make bot-visual              # optional — watch autoplay in Godot window
 
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
-### Known unsatisfiable / partial behavior (highest-signal follow-up)
+### Recently closed
 
-**Combat/world state does not persist on session resume.** Resume rebuilds the sim from
-`seed + inventory` only (`server/internal/realtime/hub.go`). Monster death and player HP are
-**not** restored authoritatively — the dummy respawns at full HP on reconnect. Client harnesses
-(`test_animation.gd`, smoke snapshot branches) verify **client wiring** for death poses; default
-smoke does not assert server-persisted player death on resume. Documented in
-`spec-animate-and-react.md` §11 and `spec-take-a-hit.md` §11.
+**Combat/world state now persists on same-session resume.** v5 replays recorded
+inputs before the WebSocket `session_snapshot`, so monster death, player HP,
+inventory, equipped state, and ID continuity are restored authoritatively.
 
 ### Other deferred items (from specs / ADRs)
 

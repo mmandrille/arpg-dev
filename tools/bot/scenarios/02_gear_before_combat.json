@@ -9,8 +9,9 @@
       "item_def_id": "rusty_sword"
     },
     {
-      "action": "pick_up_loot",
-      "item_def_id": "rusty_sword"
+      "action": "action_entity",
+      "item_def_id": "rusty_sword",
+      "event_type": "item_picked_up"
     },
     {
       "action": "equip_inventory_item",
@@ -22,13 +23,14 @@
       "monster_def_id": "training_dummy_reward"
     },
     {
-      "action": "attack_until_event",
+      "action": "action_until_event",
       "monster_def_id": "training_dummy_reward",
       "event_type": "monster_killed"
     },
     {
-      "action": "pick_up_loot",
-      "item_def_id": "training_badge"
+      "action": "action_entity",
+      "item_def_id": "training_badge",
+      "event_type": "item_picked_up"
     }
   ],
   "assertions": [

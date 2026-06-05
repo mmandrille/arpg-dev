@@ -116,6 +116,7 @@ def cross_checks(report: Report) -> None:
     items = load(RULES / "items.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
+    interactables = load(RULES / "interactables.v0.json")
     worlds = load(RULES / "worlds.v0.json")
     damage_golden = load(GOLDEN / "damage_formula.json")
     retaliation_golden = load(GOLDEN / "retaliation_damage.json")
@@ -174,15 +175,28 @@ def cross_checks(report: Report) -> None:
     # mirror the referenced item definition.
     for item_id, item in items["items"].items():
         dmg = item.get("damage")
-        if dmg is None:
-            continue
-        if not item.get("equippable") or item.get("slot") != "weapon":
-            report.fail("item damage eligibility", f"{item_id}: damage is only valid on equippable weapons")
-            continue
-        if dmg["max"] < dmg["min"]:
-            report.fail("item damage range", f"{item_id}: max must be >= min")
-        else:
-            report.ok(f"item {item_id} weapon damage range is valid")
+        reach = item.get("reach")
+        if dmg is not None:
+            if not item.get("equippable") or item.get("slot") != "weapon":
+                report.fail("item damage eligibility", f"{item_id}: damage is only valid on equippable weapons")
+                continue
+            if dmg["max"] < dmg["min"]:
+                report.fail("item damage range", f"{item_id}: max must be >= min")
+            else:
+                report.ok(f"item {item_id} weapon damage range is valid")
+        if reach is not None:
+            if not item.get("equippable") or item.get("slot") != "weapon":
+                report.fail("item reach eligibility", f"{item_id}: reach is only valid on equippable weapons")
+                continue
+            if reach <= 0:
+                report.fail("item reach", f"{item_id}: reach must be positive")
+            else:
+                report.ok(f"item {item_id} weapon reach is valid")
+
+    if combat.get("unarmed_reach", 0) <= 0:
+        report.fail("combat unarmed_reach", "must be positive")
+    else:
+        report.ok("combat unarmed_reach is positive")
 
     golden_item_id = equipped_weapon_golden["item_def_id"]
     golden_item = items["items"].get(golden_item_id)
@@ -258,8 +272,29 @@ def cross_checks(report: Report) -> None:
                     report.fail("world wall entity", f"{label}: wall size must be positive")
                 else:
                     report.ok(f"{label} wall size is positive")
+            elif etype == "interactable":
+                interactable_id = entity.get("interactable_def_id")
+                if not interactable_id:
+                    report.fail("world interactable entity", f"{label}: missing interactable_def_id")
+                elif interactable_id not in interactables["interactables"]:
+                    report.fail("world interactable entity", f"{label}: unknown interactable {interactable_id}")
+                else:
+                    report.ok(f"{label} interactable reference resolves")
             else:
                 report.fail("world entity type", f"{label}: unknown type {etype}")
+
+    for interactable_id, interactable in interactables["interactables"].items():
+        if interactable.get("initial_state") != "closed":
+            report.fail("interactable initial_state", f"{interactable_id}: initial_state must be closed")
+        else:
+            report.ok(f"interactable {interactable_id} initial_state is closed")
+        size = interactable.get("barrier_when_closed", {}).get("size", {})
+        if not isinstance(size.get("x"), (int, float)) or not isinstance(size.get("y"), (int, float)):
+            report.fail("interactable barrier", f"{interactable_id}: size must have numeric x/y")
+        elif size["x"] <= 0 or size["y"] <= 0:
+            report.fail("interactable barrier", f"{interactable_id}: size must be positive")
+        else:
+            report.ok(f"interactable {interactable_id} barrier size is positive")
 
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])

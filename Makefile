@@ -74,6 +74,9 @@ validate-shared: tools ## Validate all shared JSON (protocol, rules, golden) aga
 validate-assets: tools ## Validate the asset manifest, runtime .glb paths, and GLB nodes
 	$(PY) tools/assets/validate_assets.py
 
+gen-assets: tools ## Regenerate committed runtime .glb files (deterministic source-of-truth)
+	$(PY) tools/assets/gen_glb.py
+
 # --- Agents -------------------------------------------------------------------
 .PHONY: bot replay
 bot: tools ## Run the Python protocol bot end-to-end against a running server

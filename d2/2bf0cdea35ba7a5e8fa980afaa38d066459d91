@@ -1,0 +1,23 @@
+client/scenes/character.tscn
+  s_c36b8efb59b07f::t_e83a5b2d14ce77 1,3-10,13,16-21
+client/scripts/character_visual.gd
+  s_c36b8efb59b07f::t_b155646d4fb74e 1-23
+client/scripts/character_visual.gd.uid
+  s_c36b8efb59b07f::t_2e1791859efb19 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "d22bf0cdea35ba7a5e8fa980afaa38d066459d91",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

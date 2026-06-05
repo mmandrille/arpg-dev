@@ -205,7 +205,7 @@ func (s *Store) AppendInput(ctx context.Context, in SessionInput) error {
 func (s *Store) ListInputs(ctx context.Context, sessionID string) ([]SessionInput, error) {
 	rows, err := s.pool.Query(ctx,
 		`SELECT id, session_id, tick, sequence, message_id, COALESCE(correlation_id, ''), payload, created_at
-		 FROM session_inputs WHERE session_id = $1 ORDER BY tick ASC, sequence ASC`,
+		 FROM session_inputs WHERE session_id = $1 ORDER BY tick ASC, sequence ASC, message_id ASC`,
 		sessionID,
 	)
 	if err != nil {
@@ -243,7 +243,7 @@ func (s *Store) AppendEvent(ctx context.Context, ev SessionEvent) error {
 func (s *Store) ListEvents(ctx context.Context, sessionID string) ([]SessionEvent, error) {
 	rows, err := s.pool.Query(ctx,
 		`SELECT id, session_id, tick, sequence, event_type, COALESCE(correlation_id, ''), payload, created_at
-		 FROM session_events WHERE session_id = $1 ORDER BY tick ASC, sequence ASC`,
+		 FROM session_events WHERE session_id = $1 ORDER BY tick ASC, sequence ASC, event_type ASC`,
 		sessionID,
 	)
 	if err != nil {

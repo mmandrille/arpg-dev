@@ -1,0 +1,124 @@
+server/internal/realtime/hub.go
+  s_453dc3b8c102a5::t_879695e2c7b490 1-61
+server/internal/http/auth_session_test.go
+  s_453dc3b8c102a5::t_53425668bc9192 1-19,24-153
+  s_453dc3b8c102a5::t_13bee18bc7df57 20-23
+server/internal/http/replay_test.go
+  s_453dc3b8c102a5::t_5fde77f81973c0 115
+  s_453dc3b8c102a5::t_28c43f5a85a6e9 1-114,116-132
+server/internal/auth/service.go
+  s_453dc3b8c102a5::t_840d141d025008 1-80
+server/internal/game/rng.go
+  s_453dc3b8c102a5::t_50925ebe503d02 1-47
+server/internal/store/store_test.go
+  s_453dc3b8c102a5::t_c28dc3f1b0ad4b 1-113,118-120,122-130,132-135,137-139,141-150,152-224
+  s_453dc3b8c102a5::t_24d918c3cf6b4a 114-117,121,131,136,140,151
+server/internal/realtime/protocol.go
+  s_453dc3b8c102a5::t_cbf9ae4214fbd5 132-146
+server/internal/game/types.go
+  s_453dc3b8c102a5::t_d6a3ec6bf0125c 1-105
+server/internal/http/server_test.go
+  s_453dc3b8c102a5::t_43321ce5617966 1-95
+server/internal/http/auth.go
+  s_453dc3b8c102a5::t_22dbad84e3b727 1-63
+server/internal/auth/tokens.go
+  s_453dc3b8c102a5::t_2ed6cb7bd2712c 1-55
+server/internal/config/config.go
+  s_453dc3b8c102a5::t_4e6d2df13c1daa 1-85
+server/internal/game/rules.go
+  s_453dc3b8c102a5::t_7701efda60a65b 1-157
+server/internal/http/session.go
+  s_453dc3b8c102a5::t_a1c293359401ed 1-113
+server/internal/realtime/runner.go
+  s_453dc3b8c102a5::t_515f706d3a3ea7 340,355
+  s_453dc3b8c102a5::t_447365763634af 1-198,204,208-288,291,300-304,306-339,341-354,356-381
+  s_453dc3b8c102a5::t_729c1e8b81a04f 289-290,292-299,305
+  s_453dc3b8c102a5::t_62de2a744f9160 199-203,205-207
+server/internal/replay/replay.go
+  s_453dc3b8c102a5::t_8305110346c5d7 1-159
+server/internal/http/context.go
+  s_453dc3b8c102a5::t_ad3b141fa6b22f 1-24,28-30,33,35-54
+  s_453dc3b8c102a5::t_4c09b658369c26 25-27,31-32,34
+server/internal/http/ws_test.go
+  s_453dc3b8c102a5::t_681a039c79bb70 1-50,52-56,58-79,86-173,181-182,203-206,208-211,214-219,223-224,231,235,238,272-276,278,281,297-342
+  s_453dc3b8c102a5::t_1ca34793760d53 51
+  s_453dc3b8c102a5::t_7d3ae052245bb2 57
+  s_453dc3b8c102a5::t_89c1e9ea6f5ddf 80-85
+  s_453dc3b8c102a5::t_a761f221b39698 183-202,212-213,220-222,225-230,232-234,236-237,239-258,263-267,269,271,277,279-280,282-295
+  s_453dc3b8c102a5::t_08c2cde55a55fc 174-180
+  s_453dc3b8c102a5::t_4a0e09b94f429e 207
+  s_453dc3b8c102a5::t_cce337a0a545c8 296
+  s_453dc3b8c102a5::t_424836980da42c 259-262,268,270
+server/internal/metrics/metrics.go
+  s_453dc3b8c102a5::t_ae40443de795b4 1-98
+server/internal/store/models.go
+  s_453dc3b8c102a5::t_acf79878900809 1-39,42-43,45-75
+  s_453dc3b8c102a5::t_4c8e79186d4490 40-41,44
+server/cmd/arpg-server/main.go
+  s_453dc3b8c102a5::t_0e01333843bad0 8
+  s_453dc3b8c102a5::t_5e4602093b1955 17,21
+  s_453dc3b8c102a5::t_287a5030a490fb 15
+  s_453dc3b8c102a5::t_f2ed11d795a172 22
+  s_453dc3b8c102a5::t_b01b1226bef252 70-71
+  s_453dc3b8c102a5::t_f6369430129fc7 91
+  s_453dc3b8c102a5::t_3e408ed716513e 1-7,9-14,16,18-20,23-48,66-69,84,93-119
+  s_453dc3b8c102a5::t_ab783f3f23308b 49-65
+  s_453dc3b8c102a5::t_f19be6c312eeaa 72-83,85-90,92
+server/internal/game/sim.go
+  s_453dc3b8c102a5::t_482e0ad7b866f3 187-189
+server/internal/game/game_test.go
+  s_453dc3b8c102a5::t_8c6dd925f5ab8e 268-283
+  s_453dc3b8c102a5::t_ac12b9b3ca0c11 1-267,284-353
+server/internal/store/store.go
+  s_453dc3b8c102a5::t_61db0a264f5b24 1-117
+server/internal/logging/logging.go
+  s_453dc3b8c102a5::t_f3c865623872cb 1-61
+server/internal/store/repos.go
+  s_453dc3b8c102a5::t_351019f9800015 1-130,132,136-144,146-152,155-160,165-171,173-177,180-272
+  s_453dc3b8c102a5::t_be368157946cd9 131,133-135,145,153-154,161-164,172,178-179
+server/go.mod
+  s_453dc3b8c102a5::t_3015e61692c311 3,5,7-9,14-16,23,25
+  s_453dc3b8c102a5::t_c13fdb587faaec 12-13,17-22,24,26
+  s_453dc3b8c102a5::t_21b6cf7ae712b2 6
+  s_453dc3b8c102a5::t_4afc80a20d8646 1-2,4,10-11,27
+server/internal/store/interfaces.go
+  s_453dc3b8c102a5::t_5e6a8a757929a3 1-28,30,32,34-60
+  s_453dc3b8c102a5::t_183def5207fa0e 29,31,33
+server/internal/http/server.go
+  s_453dc3b8c102a5::t_c3b2dd163d7055 24
+  s_453dc3b8c102a5::t_0ca8f765703df4 80
+  s_453dc3b8c102a5::t_363ad65bb74f97 20
+  s_453dc3b8c102a5::t_5bb2021ac5d63d 25
+  s_453dc3b8c102a5::t_91e684905c60b9 1-17,19,21-23,26-33,42-45,54-58,67-79,81-215
+  s_453dc3b8c102a5::t_9c0bacc6b4ef62 40,52,65
+  s_453dc3b8c102a5::t_06472fb600423b 18
+  s_453dc3b8c102a5::t_44461c6fbcfb6f 34-39,41,46-51,53,59-64,66
+server/cmd/arpg-replay/main.go
+  s_453dc3b8c102a5::t_729972d17c2d25 1-74
+server/internal/http/realtime.go
+  s_453dc3b8c102a5::t_9837a5a3113293 39
+  s_453dc3b8c102a5::t_f3646c27525b6f 1-38,40-47
+server/migrations/0001_init.sql
+  s_453dc3b8c102a5::t_3caa5027a627d7 31-37,39-40,46-47,50
+  s_453dc3b8c102a5::t_519f5ab32292fe 1-30,38,41-45,48-49,51-87
+server/internal/http/inspect.go
+  s_453dc3b8c102a5::t_76e3f0c3c620c4 1-79
+server/migrations/embed.go
+  s_453dc3b8c102a5::t_9fdd16b995327e 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "44d46fb6af52c8c813b11cd50fde9ac2058a9f1c",
+  "prompts": {},
+  "sessions": {
+    "s_453dc3b8c102a5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b19faada-d99f-4150-81ee-94c64c9f386d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille@mercadolibre.com>"
+    }
+  }
+}

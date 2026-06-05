@@ -1,0 +1,21 @@
+Makefile
+  s_56b42e2608aa12::t_3ab3aabdf011ef 90,94-95
+scripts/play.sh
+  s_56b42e2608aa12::t_c49246638b7cc5 1-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "0078238d30054369f8d651f20faf31833a94e148",
+  "prompts": {},
+  "sessions": {
+    "s_56b42e2608aa12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "198f963e-4091-4cdb-bd5a-29791eaa2bd5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

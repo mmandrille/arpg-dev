@@ -1,0 +1,5 @@
+{
+  "description": "Rolling basic_drop yields rusty_sword regardless of seed (single-entry weighted table). Consumed by both Go and GDScript tests against shared/rules/loot_tables.v0.json.",
+  "loot_table": "basic_drop",
+  "expected_item_def_id": "rusty_sword"
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/protocol/session_snapshot.v0.schema.json",
+  "title": "session_snapshot payload (v0)",
+  "description": "Full authoritative state needed to render the scene. This validates the bare payload body (the `payload` field of a session_snapshot envelope).",
+  "type": "object",
+  "required": ["server_tick", "session_id", "seed", "entities", "inventory", "equipped", "recent_events"],
+  "additionalProperties": false,
+  "properties": {
+    "server_tick": { "type": "integer", "minimum": 0 },
+    "session_id": { "$ref": "#/$defs/prefixed_id" },
+    "seed": { "$ref": "#/$defs/hex_seed" },
+    "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
+    "inventory": { "type": "array", "items": { "$ref": "#/$defs/item" } },
+    "equipped": { "$ref": "#/$defs/equipped" },
+    "recent_events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+  },
+  "$defs": {
+    "prefixed_id": { "type": "string", "pattern": "^[a-z]+_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "decimal_id": { "type": "string", "pattern": "^[0-9]+$" },
+    "hex_seed": { "type": "string", "pattern": "^[0-9a-f]+$", "minLength": 2 },
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "type", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/decimal_id" },
+        "type": { "type": "string", "enum": ["player", "monster", "loot"] },
+        "position": { "$ref": "#/$defs/vec2" },
+        "hp": { "type": "integer", "minimum": 0 },
+        "max_hp": { "type": "integer", "minimum": 0 },
+        "monster_def_id": { "type": "string" },
+        "item_def_id": { "type": "string" }
+      }
+    },
+    "item": {
+      "type": "object",
+      "required": ["item_instance_id", "item_def_id", "slot", "equipped"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "item_def_id": { "type": "string" },
+        "slot": { "type": "string", "enum": ["weapon"] },
+        "equipped": { "type": "boolean" }
+      }
+    },
+    "equipped": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weapon"],
+      "properties": {
+        "weapon": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_type"],
+      "properties": {
+        "event_type": { "type": "string" },
+        "entity_id": { "$ref": "#/$defs/decimal_id" },
+        "correlation_id": { "$ref": "#/$defs/prefixed_id" }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+# Exact toolchain pins (asdf format). Source of truth for local + CI.
+# Baselines come from docs/adr/0001-technology-stack.md, verified to latest
+# stable available at scaffold time (2026-06). See docs/plans as-built notes
+# for deviations from the ADR baseline table.
+golang 1.24.4
+python 3.12.7
+# Godot is pinned separately in .godot-version (no canonical asdf plugin).

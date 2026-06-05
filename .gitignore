@@ -15,3 +15,15 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# Python tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Go
+server/arpg-server
+server/arpg-replay
+

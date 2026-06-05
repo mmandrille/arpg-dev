@@ -38,9 +38,10 @@ type ItemDef struct {
 
 // MonsterDef is a single monster definition.
 type MonsterDef struct {
-	Name      string `json:"name"`
-	MaxHP     int    `json:"max_hp"`
-	LootTable string `json:"loot_table"`
+	Name              string       `json:"name"`
+	MaxHP             int          `json:"max_hp"`
+	LootTable         string       `json:"loot_table"`
+	RetaliationDamage *DamageRange `json:"retaliation_damage,omitempty"`
 }
 
 // LootEntry is one weighted entry in a loot table.
@@ -66,6 +67,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
 	}
+	if err := validateDamageRange("combat.player_damage", combat.PlayerDamage); err != nil {
+		return nil, err
+	}
 	r.Combat = Combat{BaseHitChance: combat.BaseHitChance, PlayerDamage: combat.PlayerDamage}
 
 	var items struct {
@@ -81,6 +85,13 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if err := readJSON(filepath.Join(dir, "monsters.v0.json"), &monsters); err != nil {
 		return nil, err
+	}
+	for id, def := range monsters.Monsters {
+		if def.RetaliationDamage != nil {
+			if err := validateDamageRange("monsters."+id+".retaliation_damage", *def.RetaliationDamage); err != nil {
+				return nil, err
+			}
+		}
 	}
 	r.Monsters = monsters.Monsters
 
@@ -126,6 +137,16 @@ func readJSON(path string, v any) error {
 	}
 	if err := json.Unmarshal(b, v); err != nil {
 		return fmt.Errorf("game: parse rules %s: %w", path, err)
+	}
+	return nil
+}
+
+func validateDamageRange(label string, d DamageRange) error {
+	if d.Min < 0 || d.Max < 0 {
+		return fmt.Errorf("game: invalid rules %s: min/max must be non-negative", label)
+	}
+	if d.Max < d.Min {
+		return fmt.Errorf("game: invalid rules %s: max must be >= min", label)
 	}
 	return nil
 }

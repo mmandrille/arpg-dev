@@ -33,6 +33,7 @@ var inventory: Array = []
 var equipped: Dictionary = {}
 var loot_ids: Array = []
 var monster_ids: Array = []
+var interactable_ids: Array = []
 var ready_sent: bool = false
 var item_to_equip: String = ""
 var autoplay_enabled: bool = false
@@ -65,6 +66,7 @@ var entities_root: Node3D
 var damage_numbers_layer: CanvasLayer
 var health_bars_layer: CanvasLayer
 var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
+var walls_root: Node3D
 
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
@@ -73,7 +75,6 @@ var _camera: Camera3D
 
 const SEND_INTERVAL := 0.1
 const PLAYER_SPEED := 4.0
-const ATTACK_AIM_MIN_DOT := 0.0  # monster must be in the forward half-space
 const CAMERA_ZOOM_DEFAULT := 20.0
 const CAMERA_ZOOM_STEP := 1.5
 const CAMERA_ZOOM_MIN := 8.0
@@ -111,9 +112,11 @@ func _ready() -> void:
 		_start_next_visual_replay()
 		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
-	if not client.create_session(resume_session_id):
+	var requested_world_id := _env("ARPG_WORLD_ID", "")
+	if not client.create_session(resume_session_id, requested_world_id):
 		_debug("session failed")
 		return
+	_render_world_walls(client.world_id)
 	autoplay_enabled = _truthy_env("ARPG_AUTOPLAY")
 	if autoplay_enabled:
 		autoplay_phase = "move"
@@ -180,6 +183,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	monster_health_bars.clear()
 	loot_ids.clear()
 	monster_ids.clear()
+	interactable_ids.clear()
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
 	for e in p.get("entities", []):
 		_upsert_entity(e)
@@ -220,6 +224,9 @@ func _apply_delta(p: Dictionary) -> void:
 				player_anim.enter_terminal("death")
 			else:
 				player_anim.play_one_shot(player_clip)
+			continue
+		if event_type == "interactable_activated" and entities.has(eid):
+			_set_interactable_state(eid, entities[eid], "open")
 			continue
 		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
@@ -272,11 +279,17 @@ func _upsert_entity(e: Dictionary) -> void:
 				push_warning("[main] monster %s has no AnimationPlayer" % id)
 		rec = {"node": node, "controller": controller, "type": str(e["type"])}
 		entities[id] = rec
+		_attach_pick_collider(node, id, str(e["type"]))
 		if e["type"] == "loot" and not loot_ids.has(id):
 			loot_ids.append(id)
 		if e["type"] == "monster" and not monster_ids.has(id):
 			monster_ids.append(id)
+		if e["type"] == "interactable" and not interactable_ids.has(id):
+			interactable_ids.append(id)
 	(rec["node"] as Node3D).position = server_pos
+	if rec["type"] == "interactable":
+		var state := str(e.get("state", rec.get("state", "closed")))
+		_set_interactable_state(id, rec, state)
 	# Resume/snapshot consistency: a monster already dead in the snapshot enters
 	# the terminal death pose without waiting for an event (spec §5.4).
 	if rec["type"] == "monster" and rec["controller"] != null:
@@ -299,6 +312,7 @@ func _remove_entity(id: String) -> void:
 		monster_health_bars.erase(id)
 	loot_ids.erase(id)
 	monster_ids.erase(id)
+	interactable_ids.erase(id)
 
 
 func _update_inventory_item(item: Dictionary) -> void:
@@ -360,7 +374,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
-					_try_attack_toward_mouse()
+					_try_action_at_mouse()
 			MOUSE_BUTTON_WHEEL_UP:
 				_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			MOUSE_BUTTON_WHEEL_DOWN:
@@ -389,9 +403,6 @@ func _handle_input(delta: float) -> void:
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 		_send_cooldown = SEND_INTERVAL
 
-	if Input.is_key_pressed(KEY_E) and loot_ids.size() > 0 and _send_cooldown <= 0.0:
-		client.send("pick_up_intent", last_server_tick, {"entity_id": loot_ids[0]})
-		_send_cooldown = SEND_INTERVAL
 	if Input.is_key_pressed(KEY_Q) and inventory.size() > 0 and _send_cooldown <= 0.0:
 		client.send("equip_intent", last_server_tick, {"item_instance_id": inventory[0]["item_instance_id"], "slot": "weapon"})
 		_send_cooldown = SEND_INTERVAL
@@ -437,12 +448,12 @@ func _handle_autoplay(delta: float) -> void:
 			if player_anim != null:
 				player_anim.play_one_shot("attack")
 			if autoplay_attack_cooldown <= 0.0:
-				client.send("attack_intent", last_server_tick, {"target_id": target_id})
+				client.send("action_intent", last_server_tick, {"target_id": target_id})
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
 		"pickup":
 			if not autoplay_pickup_sent and loot_ids.size() > 0:
-				client.send("pick_up_intent", last_server_tick, {"entity_id": loot_ids[0]})
+				client.send("action_intent", last_server_tick, {"target_id": loot_ids[0]})
 				autoplay_pickup_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -464,24 +475,26 @@ func _handle_autoplay(delta: float) -> void:
 			return
 
 
-func _try_attack_toward_mouse() -> void:
+func _try_action_at_mouse() -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
 		return
 
-	var aim := _aim_direction_from_mouse()
-	if aim == Vector2.ZERO:
+	var target_id := _pick_entity_at_mouse()
+	if target_id == "" or not entities.has(target_id):
 		return
 
-	_face_direction(aim)
-	if player_anim != null:
+	var rec: Dictionary = entities[target_id]
+	var target_node := rec["node"] as Node3D
+	var flat := Vector2(target_node.global_position.x - player_anchor.global_position.x, target_node.global_position.z - player_anchor.global_position.z)
+	if flat.length_squared() > 0.0001:
+		_face_direction(flat.normalized())
+
+	var typ := str(rec.get("type", ""))
+	var state := str(rec.get("state", ""))
+	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")):
 		player_anim.play_one_shot("attack")
 
-	var target_id := _best_monster_in_direction(aim)
-	if target_id == "":
-		_attack_cooldown = SEND_INTERVAL
-		return
-
-	client.send("attack_intent", last_server_tick, {"target_id": target_id})
+	client.send("action_intent", last_server_tick, {"target_id": target_id})
 	_attack_cooldown = SEND_INTERVAL
 
 
@@ -546,26 +559,22 @@ func _mouse_ground_point() -> Vector3:
 	return origin + normal * t
 
 
-func _best_monster_in_direction(aim: Vector2) -> String:
-	var best_id := ""
-	var best_dot := ATTACK_AIM_MIN_DOT
-
-	for id in monster_ids:
-		if not entities.has(id):
-			continue
-
-		var entity_node: Node3D = entities[id]["node"]
-		var to_monster: Vector3 = entity_node.position - predicted_pos
-		var flat := Vector2(to_monster.x, to_monster.z)
-		if flat.length_squared() < 0.0001:
-			return id
-
-		var dot := flat.normalized().dot(aim)
-		if dot > best_dot:
-			best_dot = dot
-			best_id = id
-
-	return best_id
+func _pick_entity_at_mouse() -> String:
+	if _camera == null:
+		return ""
+	var mouse_pos := get_viewport().get_mouse_position()
+	var origin := _camera.project_ray_origin(mouse_pos)
+	var normal := _camera.project_ray_normal(mouse_pos)
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + normal * 200.0)
+	query.collide_with_areas = true
+	query.collide_with_bodies = true
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return ""
+	var collider = hit.get("collider")
+	if collider != null and collider.has_meta("entity_id"):
+		return str(collider.get_meta("entity_id"))
+	return ""
 
 
 func _adjust_camera_zoom(delta_size: float) -> void:
@@ -605,7 +614,9 @@ func _start_next_visual_replay() -> void:
 
 	var scenario: Dictionary = visual_replay_scenarios[visual_replay_index]
 	var session_id := str(scenario.get("session_id", ""))
+	var world_id := str(scenario.get("world_id", "vertical_slice"))
 	visual_replay_title = str(scenario.get("title", scenario.get("id", session_id)))
+	_render_world_walls(world_id)
 	if session_id == "":
 		_debug("visual replay entry missing session_id; skipping")
 		_start_next_visual_replay()
@@ -672,6 +683,46 @@ func _build_scene() -> void:
 	health_bars_layer.layer = 1
 	add_child(health_bars_layer)
 
+	walls_root = Node3D.new()
+	walls_root.name = "StaticWalls"
+	add_child(walls_root)
+
+
+func _render_world_walls(world_id: String) -> void:
+	if walls_root == null:
+		return
+	for child in walls_root.get_children():
+		child.queue_free()
+
+	var rules_path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/worlds.v0.json")
+	var parsed = _read_json(rules_path)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		push_warning("[main] could not read world rules for walls: %s" % rules_path)
+		return
+	var worlds: Dictionary = parsed.get("worlds", {})
+	var world: Dictionary = worlds.get(world_id, {})
+	for entity in world.get("entities", []):
+		if str(entity.get("type", "")) != "wall":
+			continue
+		var pos: Dictionary = entity.get("position", {})
+		var size: Dictionary = entity.get("size", {})
+		var node := MeshInstance3D.new()
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
+		node.mesh = mesh
+		node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.32, 0.34, 0.36)
+		node.material_override = mat
+		walls_root.add_child(node)
+
+
+func _read_json(path: String):
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return null
+	return JSON.parse_string(f.get_as_text())
+
 
 func _make_entity_node(kind: String) -> Node3D:
 	# Monster adopts the rigged dummy scene (spec §5.3); loot stays a primitive.
@@ -686,6 +737,8 @@ func _make_entity_node(kind: String) -> Node3D:
 		fallback.mesh = BoxMesh.new()
 		fallback.material_override = fm
 		return fallback
+	if kind == "interactable":
+		return _make_door_node()
 	var node := MeshInstance3D.new()  # loot
 	var box := BoxMesh.new()
 	box.size = Vector3(0.5, 0.5, 0.5)
@@ -694,6 +747,62 @@ func _make_entity_node(kind: String) -> Node3D:
 	mat.albedo_color = Color(1.0, 0.85, 0.2)
 	node.material_override = mat
 	return node
+
+
+func _make_door_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "InteractableDoor"
+	var pivot := Node3D.new()
+	pivot.name = "DoorPivot"
+	pivot.position = Vector3(-0.5, 0.0, 0.0)
+	root.add_child(pivot)
+	var panel := MeshInstance3D.new()
+	panel.name = "DoorPanel"
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(1.0, 1.0, 0.25)
+	panel.mesh = mesh
+	panel.position = Vector3(0.5, 0.5, 0.0)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.55, 0.32, 0.15)
+	panel.material_override = mat
+	pivot.add_child(panel)
+	return root
+
+
+func _attach_pick_collider(node: Node3D, entity_id: String, kind: String) -> void:
+	var body := StaticBody3D.new()
+	body.name = "PickBody"
+	body.set_meta("entity_id", entity_id)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	match kind:
+		"monster":
+			box.size = Vector3(1.0, 1.6, 1.0)
+			shape.position = Vector3(0.0, 0.8, 0.0)
+		"interactable":
+			box.size = Vector3(1.2, 1.2, 0.45)
+			shape.position = Vector3(0.0, 0.6, 0.0)
+		_:
+			box.size = Vector3(0.75, 0.75, 0.75)
+			shape.position = Vector3(0.0, 0.375, 0.0)
+	shape.shape = box
+	body.add_child(shape)
+	node.add_child(body)
+
+
+func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String) -> void:
+	if rec.get("state", "") == state:
+		return
+	rec["state"] = state
+	var node := rec["node"] as Node3D
+	if node == null:
+		return
+	var pivot := node.find_child("DoorPivot", true, false) as Node3D
+	if pivot == null:
+		return
+	var target_rot := deg_to_rad(90.0) if state == "open" else 0.0
+	var tween := create_tween()
+	tween.tween_property(pivot, "rotation:y", target_rot, 0.25)
 
 
 # --- debug ------------------------------------------------------------------
@@ -717,7 +826,7 @@ func _update_debug() -> void:
 		visual_replay_scenarios.size(),
 		visual_replay_title,
 	] if visual_replay_enabled else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual")
-	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB attack  scroll zoom  E pickup  Q equip" % [
+	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB action  scroll zoom  Q equip" % [
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
 
 

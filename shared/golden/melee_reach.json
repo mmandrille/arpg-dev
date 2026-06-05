@@ -1,0 +1,17 @@
+{
+  "description": "Cross-language melee reach fixture: in_range iff distance <= reach + target_radius + epsilon.",
+  "epsilon": 0.000001,
+  "target_radii": {
+    "monster": 0.45,
+    "loot": 0.35,
+    "interactable": 0.5
+  },
+  "cases": [
+    { "name": "unarmed_monster_touching_radius", "reach": 1.0, "target_radius": 0.45, "distance": 1.45, "in_range": true },
+    { "name": "unarmed_monster_beyond_radius", "reach": 1.0, "target_radius": 0.45, "distance": 1.451, "in_range": false },
+    { "name": "sword_loot_in_range", "reach": 1.5, "target_radius": 0.35, "distance": 1.85, "in_range": true },
+    { "name": "sword_loot_out_of_range", "reach": 1.5, "target_radius": 0.35, "distance": 1.851, "in_range": false },
+    { "name": "unarmed_door_in_range", "reach": 1.0, "target_radius": 0.5, "distance": 1.5, "in_range": true },
+    { "name": "unarmed_door_out_of_range", "reach": 1.0, "target_radius": 0.5, "distance": 1.501, "in_range": false }
+  ]
+}

@@ -31,12 +31,14 @@
       "additionalProperties": false,
       "properties": {
         "id": { "$ref": "#/$defs/decimal_id" },
-        "type": { "type": "string", "enum": ["player", "monster", "loot"] },
+        "type": { "type": "string", "enum": ["player", "monster", "loot", "interactable"] },
         "position": { "$ref": "#/$defs/vec2" },
         "hp": { "type": "integer", "minimum": 0 },
         "max_hp": { "type": "integer", "minimum": 0 },
         "monster_def_id": { "type": "string" },
-        "item_def_id": { "type": "string" }
+        "item_def_id": { "type": "string" },
+        "interactable_def_id": { "type": "string" },
+        "state": { "type": "string", "enum": ["closed", "open"] }
       }
     },
     "item": {
@@ -74,6 +76,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["damage"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "interactable_activated" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id"] }
         }
       ]
     }

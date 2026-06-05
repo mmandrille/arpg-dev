@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/interactables.v0.schema.json",
+  "title": "Interactable definitions (v0)",
+  "type": "object",
+  "required": ["version", "interactables"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "interactables": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "initial_state", "barrier_when_closed"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "initial_state": { "const": "closed" },
+          "barrier_when_closed": {
+            "type": "object",
+            "required": ["size"],
+            "additionalProperties": false,
+            "properties": {
+              "size": { "$ref": "#/$defs/size" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "size": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "y": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

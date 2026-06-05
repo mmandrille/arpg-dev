@@ -31,10 +31,12 @@
               "required": ["type", "position"],
               "additionalProperties": false,
               "properties": {
-                "type": { "type": "string", "enum": ["monster", "loot"] },
+                "type": { "type": "string", "enum": ["monster", "loot", "wall", "interactable"] },
                 "monster_def_id": { "type": "string" },
                 "item_def_id": { "type": "string" },
-                "position": { "$ref": "#/$defs/position" }
+                "interactable_def_id": { "type": "string" },
+                "position": { "$ref": "#/$defs/position" },
+                "size": { "$ref": "#/$defs/size" }
               },
               "allOf": [
                 {
@@ -56,6 +58,33 @@
                     "required": ["item_def_id"],
                     "not": { "required": ["monster_def_id"] }
                   }
+                },
+                {
+                  "if": {
+                    "properties": { "type": { "const": "wall" } },
+                    "required": ["type"]
+                  },
+                  "then": {
+                    "required": ["size"],
+                    "not": { "anyOf": [
+                      { "required": ["monster_def_id"] },
+                      { "required": ["item_def_id"] }
+                    ] }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": { "type": { "const": "interactable" } },
+                    "required": ["type"]
+                  },
+                  "then": {
+                    "required": ["interactable_def_id"],
+                    "not": { "anyOf": [
+                      { "required": ["monster_def_id"] },
+                      { "required": ["item_def_id"] },
+                      { "required": ["size"] }
+                    ] }
+                  }
                 }
               ]
             }
@@ -72,6 +101,15 @@
       "properties": {
         "x": { "type": "number" },
         "y": { "type": "number" }
+      }
+    },
+    "size": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "y": { "type": "number", "exclusiveMinimum": 0 }
       }
     }
   }

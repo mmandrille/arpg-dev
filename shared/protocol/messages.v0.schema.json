@@ -12,8 +12,7 @@
       "enum": [
         "client_ready",
         "move_intent",
-        "attack_intent",
-        "pick_up_intent",
+        "action_intent",
         "equip_intent",
         "session_snapshot",
         "state_delta",
@@ -33,10 +32,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/client_ready" } } } },
     { "if": { "properties": { "type": { "const": "move_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/move_intent" } } } },
-    { "if": { "properties": { "type": { "const": "attack_intent" } } },
-      "then": { "properties": { "payload": { "$ref": "#/$defs/attack_intent" } } } },
-    { "if": { "properties": { "type": { "const": "pick_up_intent" } } },
-      "then": { "properties": { "payload": { "$ref": "#/$defs/pick_up_intent" } } } },
+    { "if": { "properties": { "type": { "const": "action_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/action_intent" } } } },
     { "if": { "properties": { "type": { "const": "equip_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/equip_intent" } } } },
     { "if": { "properties": { "type": { "const": "intent_accepted" } } },
@@ -80,17 +77,11 @@
         "duration_ticks": { "type": "integer", "minimum": 1 }
       }
     },
-    "attack_intent": {
+    "action_intent": {
       "type": "object",
       "required": ["target_id"],
       "additionalProperties": false,
       "properties": { "target_id": { "$ref": "#/$defs/decimal_id" } }
-    },
-    "pick_up_intent": {
-      "type": "object",
-      "required": ["entity_id"],
-      "additionalProperties": false,
-      "properties": { "entity_id": { "$ref": "#/$defs/decimal_id" } }
     },
     "equip_intent": {
       "type": "object",

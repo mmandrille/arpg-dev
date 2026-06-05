@@ -129,7 +129,7 @@ func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
 		t.Fatalf("collision walls = %d, want 2", len(collision.walls))
 	}
 	assertEntity(t, csnap, "1001", playerEntity, "", "", Vec2{X: 0, Y: 5})
-	assertEntity(t, csnap, "1002", monsterEntity, "training_dummy_reward", "", Vec2{X: 4, Y: 5})
+	assertEntity(t, csnap, "1002", monsterEntity, "training_dummy_reward", "", Vec2{X: 8, Y: 5})
 
 	door, err := NewSimWithWorld("sess_door", "01", rules, "door_lab")
 	if err != nil {
@@ -673,15 +673,15 @@ func TestCollisionBlocksLiveMonster(t *testing.T) {
 		t.Fatalf("collision world: %v", err)
 	}
 
-	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 6}}})
-	for i := 0; i < 5; i++ {
+	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 10}}})
+	for i := 0; i < 9; i++ {
 		sim.Tick(nil)
 	}
 
 	player := sim.entities[sim.playerID]
 	monster := sim.findEntity("1002")
-	if player.pos != (Vec2{X: 3, Y: 5}) {
-		t.Fatalf("player pos = %+v, want stopped at x=3 before monster", player.pos)
+	if player.pos != (Vec2{X: 7, Y: 5}) {
+		t.Fatalf("player pos = %+v, want stopped at x=7 before monster after wall gap", player.pos)
 	}
 	if circlesOverlap(player.pos, playerRadius, monster.pos, monsterRadius) {
 		t.Fatalf("player overlaps live monster: player=%+v monster=%+v", player.pos, monster.pos)
@@ -695,12 +695,12 @@ func TestCollisionIgnoresDeadMonster(t *testing.T) {
 	}
 	sim.findEntity("1002").hp = 0
 
-	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 4}}})
-	for i := 0; i < 3; i++ {
+	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 8}}})
+	for i := 0; i < 7; i++ {
 		sim.Tick(nil)
 	}
 
-	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 4, Y: 5}) {
+	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 8, Y: 5}) {
 		t.Fatalf("player pos = %+v, want able to enter dead monster position", got)
 	}
 }
@@ -710,30 +710,21 @@ func TestCollisionBlocksWallAndAllowsRoute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("collision world: %v", err)
 	}
-	sim.findEntity("1002").hp = 0
-
-	sim.Tick([]Input{{MessageID: "right", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 8}}})
-	for i := 0; i < 7; i++ {
-		sim.Tick(nil)
+	moveTicks(sim, "to_gap_edge", Vec2{X: 1}, 3)
+	moveTicks(sim, "up_to_wall", Vec2{Y: -1}, 1)
+	blocked := sim.Tick([]Input{{MessageID: "push_wall", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 2}}})
+	sim.Tick(nil)
+	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 3, Y: 4}) {
+		t.Fatalf("player pos after wall push = %+v, want blocked at x=3,y=4", got)
 	}
-	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 6, Y: 5}) {
-		t.Fatalf("player pos after wall push = %+v, want x=6,y=5", got)
-	}
-	if circleIntersectsAABB(sim.entities[sim.playerID].pos, playerRadius, sim.walls[0].pos, sim.walls[0].size) {
-		t.Fatalf("player intersects first wall at %+v", sim.entities[sim.playerID].pos)
+	if hasPlayerUpdate(blocked) {
+		t.Fatalf("blocked wall push emitted player update: %+v", blocked.Changes)
 	}
 
-	sim.Tick([]Input{{MessageID: "down", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{Y: -1}, DurationTicks: 4}}})
-	for i := 0; i < 3; i++ {
-		sim.Tick(nil)
-	}
-	sim.Tick([]Input{{MessageID: "around", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 4}}})
-	for i := 0; i < 3; i++ {
-		sim.Tick(nil)
-	}
-
-	if got := sim.entities[sim.playerID].pos; got.X < 10 || got.Y != 1 {
-		t.Fatalf("player route pos = %+v, want around first wall at y=1 and x>=10", got)
+	moveTicks(sim, "back_to_gap", Vec2{Y: 1}, 1)
+	moveTicks(sim, "through_gap", Vec2{X: 1}, 4)
+	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 7, Y: 5}) {
+		t.Fatalf("player gap route pos = %+v, want x=7,y=5 before monster", got)
 	}
 }
 

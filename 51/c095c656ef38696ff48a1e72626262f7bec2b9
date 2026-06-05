@@ -1,0 +1,59 @@
+docs/plans/2026-06-05-equip-and-see-it.md
+  s_b1cdca27e1d95a::t_7cbc51a74b8998 77-82
+  s_b1cdca27e1d95a::t_cd4c6dba4e308b 30-31
+  s_b1cdca27e1d95a::t_c49104202b9679 178-180,182-183
+  s_e3efdaf9f49fb2::t_204c09443ab9fe 1-29,32-76,83-121,125-127,137,140-145,147-173,176-177,181,184-227,232-283,304
+  s_b1cdca27e1d95a::t_8960805ba3df0d 122-124,128-136,138-139,146
+  s_b1cdca27e1d95a::t_ef2fbabe3f03ec 228-231
+  s_b1cdca27e1d95a::t_414b0792d0d4aa 174-175
+  s_b1cdca27e1d95a::t_a770f164247fd9 284-303
+docs/specs/spec-equip-and-see-it.md
+  s_e3efdaf9f49fb2::t_323fb436cf0507 191
+  s_b1cdca27e1d95a::t_104cdbfbef714e 148-150
+  s_b1cdca27e1d95a::t_9868848e9f920f 294-296,300-302
+  s_b1cdca27e1d95a::t_c4a8aef1a36823 386-387
+  s_e3efdaf9f49fb2::t_9852e466061884 439-441,443,445-446,449-450
+  s_b1cdca27e1d95a::t_412348193dbc5b 210-214
+  s_e3efdaf9f49fb2::t_b77a20d97d9626 232-235,243-293,297-299,303-318
+  s_b1cdca27e1d95a::t_1036d05e401fa5 153-155
+  s_b1cdca27e1d95a::t_88ff22a711146b 236-242
+  s_1861649dafc655::t_f7e43496201b5a 1-2,4,7-41,43-147,151-152,156-164,167-190,192-209,215-231,319-352,375-385,388-438,442,444,452-479,481-482,495-497,499-502
+  s_e3efdaf9f49fb2::t_2cef327857d53d 3,5-6
+  s_1861649dafc655::t_50129185dc4305 165-166
+  s_b1cdca27e1d95a::t_34fe61463d017d 42
+  s_e3efdaf9f49fb2::t_45bc574de5edb1 353-374
+  s_b1cdca27e1d95a::t_3f7604e2f92093 447-448,451
+  s_e3efdaf9f49fb2::t_bfd5bd931b03dc 480,483-494,498
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "51c095c656ef38696ff48a1e72626262f7bec2b9",
+  "prompts": {},
+  "sessions": {
+    "s_1861649dafc655": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e95c0-a17f-7540-9be1-81ff671ff255",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_b1cdca27e1d95a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "390f3d56-2204-423f-8773-4854696e6f4c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_e3efdaf9f49fb2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c490be60-7a8d-4cab-aa35-f7cbf937d4b0",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

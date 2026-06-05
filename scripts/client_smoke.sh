@@ -29,7 +29,11 @@ echo "[client-smoke] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
 echo "[client-smoke] running GDScript golden test"
 "$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_golden.gd
 
-# 2. Headless slice smoke against the running server.
+# 2. Item visual resolution test (server-independent; acceptance #14).
+echo "[client-smoke] running GDScript item visual resolution test"
+"$GODOT" --headless --path "$CLIENT_DIR" --script res://tests/test_item_visuals.gd
+
+# 3. Headless slice smoke against the running server.
 echo "[client-smoke] running headless slice smoke"
 "$GODOT" --headless --path "$CLIENT_DIR" --script res://scripts/smoke.gd
 echo "[client-smoke] PASS"

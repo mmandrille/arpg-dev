@@ -77,6 +77,7 @@ class RuntimeState:
     pending_attack_monsters: dict[str, str] = field(default_factory=dict)
     accepted_attack_counts: dict[str, int] = field(default_factory=dict)
     killed_monster_def_ids: set[str] = field(default_factory=set)
+    accepted_message_ids: set[str] = field(default_factory=set)
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -191,13 +192,39 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
     if action == "move":
         direction = step["direction"]
         duration = int(step.get("duration_ticks", 1))
-        await ws.send(json.dumps(make_envelope(
+        env = make_envelope(
             "move_intent",
             session_id,
             state.last_tick,
             {"direction": direction, "duration_ticks": duration},
-        )))
-        await wait_for_tick(ws, state, state.last_tick + 1, loop)
+        )
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        return
+
+    if action == "move_until_player_position":
+        direction = step["direction"]
+        duration = int(step.get("duration_ticks", 1))
+        env = make_envelope(
+            "move_intent",
+            session_id,
+            state.last_tick,
+            {"direction": direction, "duration_ticks": duration},
+        )
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_player_position(
+            ws,
+            state,
+            float(step["x"]),
+            float(step["y"]),
+            float(step.get("tolerance", 0.001)),
+            loop,
+        )
+        return
+
+    if action == "assert_player_position":
+        assert_player_position(state, float(step["x"]), float(step["y"]), float(step.get("tolerance", 0.001)), "runtime protocol")
         return
 
     if action == "attack_until_event":
@@ -371,6 +398,34 @@ async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop) -> None
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_accept(ws, state: RuntimeState, message_id: str, loop) -> None:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while message_id not in state.accepted_message_ids:
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for accept {message_id}")
+        await pump_one(ws, state, timeout=0.1)
+
+
+async def wait_for_player_position(
+    ws,
+    state: RuntimeState,
+    x: float,
+    y: float,
+    tolerance: float,
+    loop,
+) -> None:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while True:
+        try:
+            assert_player_position(state, x, y, tolerance, "runtime protocol")
+            return
+        except AssertionError:
+            pass
+        if loop.time() > deadline:
+            assert_player_position(state, x, y, tolerance, "runtime protocol")
+        await pump_one(ws, state, timeout=0.1)
+
+
 async def pump_one(ws, state: RuntimeState, timeout: float) -> None:
     try:
         msg = await asyncio.wait_for(ws.recv(), timeout=timeout)
@@ -386,6 +441,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         return
     if m.get("type") == "intent_accepted":
         accepted_id = str(m.get("payload", {}).get("accepted_message_id", ""))
+        state.accepted_message_ids.add(accepted_id)
         monster_def_id = state.pending_attack_monsters.pop(accepted_id, None)
         if monster_def_id:
             state.accepted_attack_counts[monster_def_id] = state.accepted_attack_counts.get(monster_def_id, 0) + 1
@@ -523,6 +579,17 @@ def assert_player_damaged(entities: list[dict], where: str) -> None:
     hp = players[0].get("hp")
     if not isinstance(hp, int) or hp >= 10:
         raise AssertionError(f"{where}: player hp {hp} did not show retaliation damage")
+
+
+def assert_player_position(state: RuntimeState, x: float, y: float, tolerance: float, where: str) -> None:
+    player = find_player(state)
+    if player is None:
+        raise AssertionError(f"{where}: missing player entity")
+    pos = player.get("position", {})
+    got_x = float(pos.get("x", "nan"))
+    got_y = float(pos.get("y", "nan"))
+    if abs(got_x - x) > tolerance or abs(got_y - y) > tolerance:
+        raise AssertionError(f"{where}: player position ({got_x}, {got_y}) != ({x}, {y})")
 
 
 def assert_monster_dead(entities: list[dict], where: str, monster_def_id: str = "training_dummy") -> None:

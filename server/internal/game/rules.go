@@ -74,6 +74,7 @@ type WorldEntity struct {
 	MonsterDefID string `json:"monster_def_id,omitempty"`
 	ItemDefID    string `json:"item_def_id,omitempty"`
 	Position     Vec2   `json:"position"`
+	Size         Vec2   `json:"size,omitempty"`
 }
 
 // LoadRules reads and parses the v0 rules files from a directory.
@@ -175,6 +176,10 @@ func LoadRules(dir string) (*Rules, error) {
 				}
 				if _, ok := r.Items[entity.ItemDefID]; !ok {
 					return nil, fmt.Errorf("game: invalid rules %s: unknown item %s", label, entity.ItemDefID)
+				}
+			case wallEntity:
+				if entity.Size.X <= 0 || entity.Size.Y <= 0 {
+					return nil, fmt.Errorf("game: invalid rules %s: wall size must be positive", label)
 				}
 			default:
 				return nil, fmt.Errorf("game: invalid rules %s: unknown type %s", label, entity.Type)

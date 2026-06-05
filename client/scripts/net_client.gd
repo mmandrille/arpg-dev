@@ -16,6 +16,7 @@ var token: String = ""
 var account_id: String = ""
 var session_id: String = ""
 var seed: String = ""
+var world_id: String = ""
 var ws_url: String = ""
 
 var _ws := WebSocketPeer.new()
@@ -82,18 +83,21 @@ func login(email: String, dev_token: String) -> bool:
 	return false
 
 
-func create_session(resume_session_id: String = "") -> bool:
+func create_session(resume_session_id: String = "", requested_world_id: String = "") -> bool:
 	# resume_session_id rejoins an existing session: the server rehydrates
 	# inventory AND equipped state before the initial session_snapshot (no
 	# protocol change — see spec §4.5). Empty string mints a fresh session.
 	var body := {"mode": "solo"}
 	if resume_session_id != "":
 		body["resume_session_id"] = resume_session_id
+	elif requested_world_id != "":
+		body["world_id"] = requested_world_id
 	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
 		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) in [200, 201] and r.has("body"):
 		session_id = r["body"]["session_id"]
 		seed = r["body"]["seed"]
+		world_id = str(r["body"].get("world_id", "vertical_slice"))
 		ws_url = r["body"]["ws_url"]
 		return true
 	push_error("create_session failed: %s" % r)

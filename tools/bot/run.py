@@ -227,23 +227,13 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
         return
 
     if action == "move_until_player_position":
-        direction = step["direction"]
-        duration = int(step.get("duration_ticks", 1))
-        env = make_envelope(
-            "move_intent",
-            session_id,
-            state.last_tick,
-            {"direction": direction, "duration_ticks": duration},
-        )
-        await ws.send(json.dumps(env))
-        await wait_for_accept(ws, state, env["message_id"], loop)
-        await wait_for_player_position(
+        await walk_toward(
             ws,
+            session_id,
             state,
-            float(step["x"]),
-            float(step["y"]),
-            float(step.get("tolerance", 0.001)),
+            {"x": float(step["x"]), "y": float(step["y"])},
             loop,
+            stop_distance=float(step.get("tolerance", 0.25)),
         )
         return
 

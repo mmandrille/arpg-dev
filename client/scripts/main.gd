@@ -29,10 +29,17 @@ var character_visual: Node3D
 var entities_root: Node3D
 
 var _send_cooldown: float = 0.0
+var _attack_cooldown: float = 0.0
 var _debug_label: Label
+var _camera: Camera3D
 
 const SEND_INTERVAL := 0.1
 const PLAYER_SPEED := 4.0
+const ATTACK_AIM_MIN_DOT := 0.0  # monster must be in the forward half-space
+const CAMERA_ZOOM_DEFAULT := 20.0
+const CAMERA_ZOOM_STEP := 1.5
+const CAMERA_ZOOM_MIN := 8.0
+const CAMERA_ZOOM_MAX := 40.0
 
 
 func _ready() -> void:
@@ -71,6 +78,7 @@ func _process(delta: float) -> void:
 		_handle_message(env)
 
 	_handle_input(delta)
+	_update_facing_toward_mouse()
 	_update_debug()
 
 
@@ -158,6 +166,7 @@ func _remove_entity(id: String) -> void:
 		entities[id].queue_free()
 		entities.erase(id)
 	loot_ids.erase(id)
+	monster_ids.erase(id)
 
 
 func _update_inventory_item(item: Dictionary) -> void:
@@ -175,28 +184,38 @@ func _reconcile_player() -> void:
 
 # --- input + prediction -----------------------------------------------------
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN:
+					_try_attack_toward_mouse()
+			MOUSE_BUTTON_WHEEL_UP:
+				_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
+			MOUSE_BUTTON_WHEEL_DOWN:
+				_adjust_camera_zoom(CAMERA_ZOOM_STEP)
+
+
 func _handle_input(delta: float) -> void:
 	if client.ready_state() != WebSocketPeer.STATE_OPEN:
 		return
 	_send_cooldown -= delta
+	_attack_cooldown -= delta
 
-	var dir := Vector2.ZERO
-	if Input.is_key_pressed(KEY_W): dir.y -= 1
-	if Input.is_key_pressed(KEY_S): dir.y += 1
-	if Input.is_key_pressed(KEY_A): dir.x -= 1
-	if Input.is_key_pressed(KEY_D): dir.x += 1
+	var input := Vector2.ZERO
+	if Input.is_key_pressed(KEY_W): input.y -= 1
+	if Input.is_key_pressed(KEY_S): input.y += 1
+	if Input.is_key_pressed(KEY_A): input.x -= 1
+	if Input.is_key_pressed(KEY_D): input.x += 1
 
-	if dir != Vector2.ZERO and _send_cooldown <= 0.0:
-		dir = dir.normalized()
+	if input != Vector2.ZERO and _send_cooldown <= 0.0:
+		var dir := _camera_relative_flat_direction(input)
 		# Local prediction: move immediately for responsive feel.
 		predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
 		_reconcile_player()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 		_send_cooldown = SEND_INTERVAL
 
-	if Input.is_key_pressed(KEY_SPACE) and monster_ids.size() > 0 and _send_cooldown <= 0.0:
-		client.send("attack_intent", last_server_tick, {"target_id": monster_ids[0]})
-		_send_cooldown = SEND_INTERVAL
 	if Input.is_key_pressed(KEY_E) and loot_ids.size() > 0 and _send_cooldown <= 0.0:
 		client.send("pick_up_intent", last_server_tick, {"entity_id": loot_ids[0]})
 		_send_cooldown = SEND_INTERVAL
@@ -205,16 +224,127 @@ func _handle_input(delta: float) -> void:
 		_send_cooldown = SEND_INTERVAL
 
 
+func _try_attack_toward_mouse() -> void:
+	if _attack_cooldown > 0.0:
+		return
+
+	var aim := _aim_direction_from_mouse()
+	if aim == Vector2.ZERO:
+		return
+
+	_face_direction(aim)
+	if resolver != null:
+		resolver.play_attack_swing()
+
+	var target_id := _best_monster_in_direction(aim)
+	if target_id == "":
+		_attack_cooldown = SEND_INTERVAL
+		return
+
+	client.send("attack_intent", last_server_tick, {"target_id": target_id})
+	_attack_cooldown = SEND_INTERVAL
+
+
+func _update_facing_toward_mouse() -> void:
+	var aim := _aim_direction_from_mouse()
+	if aim != Vector2.ZERO:
+		_face_direction(aim)
+
+
+func _face_direction(flat_dir: Vector2) -> void:
+	if character_visual == null or player_anchor == null:
+		return
+
+	var target := player_anchor.global_position + Vector3(flat_dir.x, 0.0, flat_dir.y)
+	character_visual.look_at(target, Vector3.UP)
+
+
+func _camera_relative_flat_direction(input: Vector2) -> Vector2:
+	# WASD is screen-relative under the isometric camera, not world X/Z.
+	if _camera == null or input == Vector2.ZERO:
+		return Vector2.ZERO
+
+	var forward := -_camera.global_transform.basis.z
+	forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		return input.normalized()
+	forward = forward.normalized()
+
+	var right := _camera.global_transform.basis.x
+	right.y = 0.0
+	if right.length_squared() < 0.0001:
+		return input.normalized()
+	right = right.normalized()
+
+	var world := right * input.x - forward * input.y
+	return Vector2(world.x, world.z).normalized()
+
+
+func _aim_direction_from_mouse() -> Vector2:
+	if _camera == null or player_anchor == null:
+		return Vector2.ZERO
+
+	var ground := _mouse_ground_point()
+	var flat := Vector2(ground.x - player_anchor.global_position.x, ground.z - player_anchor.global_position.z)
+	if flat.length_squared() < 0.0001:
+		return Vector2.ZERO
+
+	return flat.normalized()
+
+
+func _mouse_ground_point() -> Vector3:
+	var mouse_pos := get_viewport().get_mouse_position()
+	var origin := _camera.project_ray_origin(mouse_pos)
+	var normal := _camera.project_ray_normal(mouse_pos)
+	if abs(normal.y) < 0.0001:
+		return player_anchor.global_position
+
+	var t := -origin.y / normal.y
+	if t < 0.0:
+		return player_anchor.global_position
+
+	return origin + normal * t
+
+
+func _best_monster_in_direction(aim: Vector2) -> String:
+	var best_id := ""
+	var best_dot := ATTACK_AIM_MIN_DOT
+
+	for id in monster_ids:
+		if not entities.has(id):
+			continue
+
+		var entity_node: MeshInstance3D = entities[id]
+		var to_monster: Vector3 = entity_node.position - predicted_pos
+		var flat := Vector2(to_monster.x, to_monster.z)
+		if flat.length_squared() < 0.0001:
+			return id
+
+		var dot := flat.normalized().dot(aim)
+		if dot > best_dot:
+			best_dot = dot
+			best_id = id
+
+	return best_id
+
+
+func _adjust_camera_zoom(delta_size: float) -> void:
+	if _camera == null:
+		return
+
+	_camera.size = clampf(_camera.size + delta_size, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
+
+
 # --- scene construction (placeholder primitives) ----------------------------
 
 func _build_scene() -> void:
-	var cam := Camera3D.new()
-	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 20.0
-	cam.position = Vector3(20, 20, 20)
-	add_child(cam)
+	_camera = Camera3D.new()
+	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	_camera.size = CAMERA_ZOOM_DEFAULT
+	_camera.position = Vector3(20, 20, 20)
+	add_child(_camera)
 	# look_at requires the node to be inside the scene tree (Godot 4).
-	cam.look_at(Vector3(11, 0, 5), Vector3.UP)
+	_camera.look_at(Vector3(11, 0, 5), Vector3.UP)
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -40, 0)
@@ -261,7 +391,7 @@ func _update_debug() -> void:
 		var w = resolver.get_debug_state()["equipped_visuals"]["weapon"]
 		if w != null:
 			weapon_vis = "%s(visible=%s)" % [w["asset_id"], w["visible"]]
-	_debug_label.text = "ws=%s  tick=%d  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  SPACE attack  E pickup  Q equip" % [
+	_debug_label.text = "ws=%s  tick=%d  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB attack  scroll zoom  E pickup  Q equip" % [
 		ws_state, last_server_tick, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
 
 

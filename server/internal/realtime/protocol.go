@@ -18,8 +18,7 @@ const tickHz = 20
 const (
 	typeClientReady = inputdecode.TypeClientReady
 	typeMoveIntent  = inputdecode.TypeMoveIntent
-	typeAttack      = inputdecode.TypeAttack
-	typePickUp      = inputdecode.TypePickUp
+	typeAction      = inputdecode.TypeAction
 	typeEquip       = inputdecode.TypeEquip
 )
 

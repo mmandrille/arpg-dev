@@ -11,8 +11,7 @@ import (
 const (
 	TypeClientReady = "client_ready"
 	TypeMoveIntent  = "move_intent"
-	TypeAttack      = "attack_intent"
-	TypePickUp      = "pick_up_intent"
+	TypeAction      = "action_intent"
 	TypeEquip       = "equip_intent"
 )
 
@@ -28,11 +27,8 @@ type (
 		Direction     game.Vec2 `json:"direction"`
 		DurationTicks int       `json:"duration_ticks"`
 	}
-	attackPayloadWire struct {
+	actionPayloadWire struct {
 		TargetID string `json:"target_id"`
-	}
-	pickUpPayloadWire struct {
-		EntityID string `json:"entity_id"`
 	}
 	equipPayloadWire struct {
 		ItemInstanceID string `json:"item_instance_id"`
@@ -43,7 +39,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeAttack, TypePickUp, TypeEquip:
+	case TypeMoveIntent, TypeAction, TypeEquip:
 		return true
 	}
 	return false
@@ -64,18 +60,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.Move = &game.MoveIntent{Direction: p.Direction, DurationTicks: p.DurationTicks}
-	case TypeAttack:
-		var p attackPayloadWire
+	case TypeAction:
+		var p actionPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.TargetID == "" {
 			return in, false
 		}
-		in.Attack = &game.AttackIntent{TargetID: p.TargetID}
-	case TypePickUp:
-		var p pickUpPayloadWire
-		if err := json.Unmarshal(payload, &p); err != nil || p.EntityID == "" {
-			return in, false
-		}
-		in.PickUp = &game.PickUpIntent{EntityID: p.EntityID}
+		in.Action = &game.ActionIntent{TargetID: p.TargetID}
 	case TypeEquip:
 		var p equipPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.ItemInstanceID == "" || p.Slot == "" {

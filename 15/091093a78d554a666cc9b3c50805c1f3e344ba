@@ -1,0 +1,84 @@
+docs/plans/v11_2026-06-05-click-to-move-and-auto-path.md
+  s_844a1edbd11be2::t_2f54f8d8c12a80 52-53
+shared/rules/navigation.v0.schema.json
+  s_844a1edbd11be2::t_2f54f8d8c12a80 1-25
+shared/golden/auto_path.v0.schema.json
+  s_844a1edbd11be2::t_2f54f8d8c12a80 1-9,32-64
+  s_844a1edbd11be2::t_c33728bc6215a9 10-31
+server/internal/game/sim.go
+  s_844a1edbd11be2::t_4b2c875e421b4f 61-67,90,225,236-238,287,297-298,319,325-353,364-365,369-388,391,393,395,401,409-411,465,478-480,483,487-489,531-534,558-602,644-700,708-711,923-928
+server/internal/inputdecode/inputdecode.go
+  s_844a1edbd11be2::t_07c0c589ab89f9 14,31-33,46,67-72
+shared/golden/auto_path.json
+  s_844a1edbd11be2::t_2f54f8d8c12a80 1-23,26-28
+  s_844a1edbd11be2::t_65804adc6b04cc 24
+  s_844a1edbd11be2::t_2d446bf0ca04dd 25
+server/internal/game/pathfind_test.go
+  s_844a1edbd11be2::t_cdc99079493f77 1-18,21,29-50,52-57
+  s_844a1edbd11be2::t_65804adc6b04cc 19-20,22-28
+  s_844a1edbd11be2::t_60af9bd985f6ab 51
+server/internal/game/game_test.go
+  s_844a1edbd11be2::t_072fa1b6065f78 803,809,818,827
+  s_844a1edbd11be2::t_c4382cc3c5928f 258-329
+shared/rules/navigation.v0.json
+  s_844a1edbd11be2::t_2f54f8d8c12a80 1-12
+shared/protocol/envelope.v0.schema.json
+  s_844a1edbd11be2::t_2f54f8d8c12a80 15
+tools/validate_shared.py
+  s_844a1edbd11be2::t_3df20fa2bc071d 120,127,203-211,297-316
+shared/protocol/examples/move_to_intent.json
+  s_844a1edbd11be2::t_2f54f8d8c12a80 1-10
+server/internal/game/rules.go
+  s_844a1edbd11be2::t_465a6b4dd7cc4c 15,36-51,134,136-164
+  s_844a1edbd11be2::t_289c6152bdfd74 135
+client/scripts/main.gd
+  s_844a1edbd11be2::t_ef040f001412f1 484-486
+shared/protocol/messages.v0.schema.json
+  s_844a1edbd11be2::t_2f54f8d8c12a80 15,36-37,83-87
+tools/bot/run.py
+  s_844a1edbd11be2::t_2b0460bec77ee5 279-291
+server/internal/game/pathfind.go
+  s_844a1edbd11be2::t_17185de68c9cf2 114-121
+  s_844a1edbd11be2::t_ee7d6a4f2b5338 47-51
+  s_844a1edbd11be2::t_465a6b4dd7cc4c 1-46,52-72,75-113,122-177
+  s_844a1edbd11be2::t_4f6ca397fc7e94 73-74
+shared/rules/monsters.v0.json
+  s_844a1edbd11be2::t_2d446bf0ca04dd 18
+  s_844a1edbd11be2::t_0d7f9cca8e1e46 15-17
+docs/PROGRESS.md
+  s_844a1edbd11be2::t_0843031710bfa4 295-297
+  s_844a1edbd11be2::t_d37e155081cb22 14,29,42,206-223
+  s_844a1edbd11be2::t_35ee0607b8cd2a 60
+tools/bot/scenarios/04_door_lab.json
+  s_844a1edbd11be2::t_2b0460bec77ee5 5
+tools/bot/scenarios/05_path_maze.json
+  s_844a1edbd11be2::t_2b0460bec77ee5 1-21
+tools/bot/test_protocol.py
+  s_844a1edbd11be2::t_2b0460bec77ee5 73,81-90
+server/internal/replay/replay_test.go
+  s_844a1edbd11be2::t_7d0dd383546e95 142-145
+shared/rules/worlds.v0.json
+  s_844a1edbd11be2::t_0d7f9cca8e1e46 79
+  s_844a1edbd11be2::t_2f54f8d8c12a80 73-78,80-97
+docs/specs/v11_spec-click-to-move-and-auto-path.md
+  s_844a1edbd11be2::t_d37e155081cb22 3
+client/tests/test_golden.gd
+  s_844a1edbd11be2::t_ef040f001412f1 79-97,100-105
+  s_844a1edbd11be2::t_dbfdcacec60be9 98-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "15091093a78d554a666cc9b3c50805c1f3e344ba",
+  "prompts": {},
+  "sessions": {
+    "s_844a1edbd11be2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e998d-fba2-7082-9796-764829ecf006",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

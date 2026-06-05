@@ -1,0 +1,26 @@
+docs/plans/2026-06-05-take-a-hit.md
+  s_002a81a0b1b4b6::t_9c0d630c26fff3 190-206
+README.md
+  s_002a81a0b1b4b6::t_fe43d03f9327b5 43
+  s_002a81a0b1b4b6::t_984fea33fbebfc 49-52,57,60-61
+docs/specs/spec-take-a-hit.md
+  s_002a81a0b1b4b6::t_87b74167491de9 375-377,385-413
+  s_002a81a0b1b4b6::t_3f47bb16a17009 349-355
+  s_002a81a0b1b4b6::t_349116905fd78f 78-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "c6882fa34ca552b99a394df0605f08d9073ae871",
+  "prompts": {},
+  "sessions": {
+    "s_002a81a0b1b4b6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fa2ca923-5b6c-4e9e-a7dc-3377e9edf474",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

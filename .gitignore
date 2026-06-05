@@ -27,3 +27,4 @@ __pycache__/
 server/arpg-server
 server/arpg-replay
 
+/.artifacts

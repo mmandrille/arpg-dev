@@ -103,8 +103,8 @@ Animation is **client-only presentation state** — never on the wire. Player lo
 This project uses Spec-Driven Development. Before touching code for any new feature:
 
 1. Read [`docs/PROGRESS.md`](docs/PROGRESS.md) — baseline slice, open gaps, invariants.
-2. Read or write the spec under `docs/specs/spec-<feature>.md`.
-3. Write or check the plan under `docs/plans/<date>-<feature>.md`.
+2. Read or write the spec under `docs/specs/vN_spec-<feature>.md` (`N` = slice execution order).
+3. Write or check the plan under `docs/plans/vN_<date>-<feature>.md`.
 4. Consult the relevant ADRs in `docs/adr/` — especially ADR-0001 (foundational) and any feature-specific ones.
 5. When the slice completes, update `docs/PROGRESS.md` (lifecycle table + summary + new gaps).
 

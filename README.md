@@ -2,7 +2,7 @@
 
 Personal experiment: an isometric action-RPG / looter built almost entirely by
 AI agents. See [`docs/adr/0001-technology-stack.md`](docs/adr/0001-technology-stack.md)
-for the foundational architecture and [`docs/specs/spec-first-playable-vertical-slice.md`](docs/specs/spec-first-playable-vertical-slice.md)
+for the foundational architecture and [`docs/specs/v1_spec-first-playable-vertical-slice.md`](docs/specs/v1_spec-first-playable-vertical-slice.md)
 for the current slice.
 
 Architecture in one line: a **Godot 4 client** and a **Go authoritative server**

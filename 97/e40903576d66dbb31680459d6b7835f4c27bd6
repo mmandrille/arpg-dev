@@ -1,0 +1,28 @@
+assets/manifests/assets.v0.json
+  s_56b42e2608aa12::t_74e9d3cc8dd5d3 1-22
+Makefile
+  s_56b42e2608aa12::t_2fb15273e3c789 70,73-75
+tools/assets/validate_assets.py
+  s_56b42e2608aa12::t_bad281e13881b7 1-69,71,74-196
+  s_56b42e2608aa12::t_00cfc89d253dc4 70,72-73
+assets/manifests/assets.v0.schema.json
+  s_56b42e2608aa12::t_be7e927b231076 1-44
+tools/assets/test_validate_assets.py
+  s_56b42e2608aa12::t_cf3994d7d3cfa4 1-170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "97e40903576d66dbb31680459d6b7835f4c27bd6",
+  "prompts": {},
+  "sessions": {
+    "s_56b42e2608aa12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "198f963e-4091-4cdb-bd5a-29791eaa2bd5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

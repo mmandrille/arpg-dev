@@ -5,7 +5,7 @@
 - **Deciders:** Project owner (PM / tech lead)
 - **Context tags:** assets, glTF, GLB, Godot, asset-manifest, attachment-sockets
 - **Supersedes/extends:** ADR-0001 D1 (3D low-poly), D7 (glTF-first asset format)
-- **Proven by:** `docs/specs/spec-equip-and-see-it.md` (slice v2)
+- **Proven by:** `docs/specs/v2_spec-equip-and-see-it.md` (slice v2)
 
 ---
 

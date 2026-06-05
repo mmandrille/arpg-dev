@@ -1,0 +1,28 @@
+client/tests/test_animation.gd
+  s_c36b8efb59b07f::t_289e96bbd3b7ef 1-11,13-87
+  s_c36b8efb59b07f::t_f8f5990c247967 12
+client/scripts/animation_controller.gd
+  s_c36b8efb59b07f::t_9654b2618a3a31 30
+  s_c36b8efb59b07f::t_23f56ba9a9daa0 1-29,31-58,60-84
+  s_c36b8efb59b07f::t_ed970c1b076141 59
+client/tests/test_animation.gd.uid
+  s_c36b8efb59b07f::t_0a0d666a26a48d 1
+client/scripts/animation_controller.gd.uid
+  s_c36b8efb59b07f::t_0a0d666a26a48d 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "85d9a8ce48fecac024f22c0cab2153b1acda473a",
+  "prompts": {},
+  "sessions": {
+    "s_c36b8efb59b07f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33d8751e-53d7-4d95-9fa8-7bffd2165854",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}

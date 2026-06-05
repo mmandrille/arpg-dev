@@ -24,6 +24,8 @@ func _initialize() -> void:
 	# a coroutine; quit() still sets the exit code correctly when it resumes.
 	await _test_character_scene()
 	if _failed: quit(1); return
+	await _test_player_snapshot_death_pose()
+	if _failed: quit(1); return
 	await _test_monster_scene()
 	if _failed: quit(1); return
 	print("[gdtest] PASS: animation controller + scenes")
@@ -108,8 +110,24 @@ func _test_character_scene() -> void:
 	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_assert(ap != null, "character AnimationPlayer missing")
 	if ap != null:
-		for clip in ["idle", "walk", "attack"]:
+		for clip in ["idle", "walk", "attack", "hit", "death"]:
 			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
+	s.queue_free()
+
+
+func _test_player_snapshot_death_pose() -> void:
+	var s = (load("res://scenes/character.tscn") as PackedScene).instantiate()
+	get_root().add_child(s)
+	await process_frame
+	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	_assert(ap != null, "character AnimationPlayer missing for player snapshot death")
+	if ap != null:
+		var player_controller = ControllerScript.new(ap)
+		var e := {"id": "1001", "type": "player", "position": {"x": 10, "y": 5}, "hp": 0, "max_hp": 10}
+		if str(e.get("type", "")) == "player" and int(e.get("hp", 1)) <= 0:
+			player_controller.enter_terminal("death")
+		_assert(player_controller.get_debug_state()["terminal"] == true, "player snapshot hp<=0 enters terminal death")
+		_assert(player_controller.current_clip() == "death", "player snapshot death clip active, got %s" % player_controller.current_clip())
 	s.queue_free()
 
 

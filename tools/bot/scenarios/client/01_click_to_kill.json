@@ -8,6 +8,8 @@
     { "type": "wait_ws_open",        "timeout_s": 10.0 },
     { "type": "wait_entity",         "entity_type": "monster", "timeout_s": 10.0 },
     { "type": "click_entity",        "entity_type": "monster" },
+    { "type": "click_entity",        "entity_type": "monster" },
+    { "type": "click_entity",        "entity_type": "monster" },
     { "type": "wait_event",          "event_type": "monster_killed", "timeout_s": 15.0 },
     { "type": "assert_entity_removed", "entity_type": "monster", "timeout_s": 5.0 }
   ]

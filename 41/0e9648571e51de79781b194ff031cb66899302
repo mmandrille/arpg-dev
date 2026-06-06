@@ -1,0 +1,23 @@
+docs/PROGRESS.md
+  s_7c3b00e473c666::t_59de470330da7e 66
+  s_7c3b00e473c666::t_7c522b22bc0ba9 14-15
+  s_7c3b00e473c666::t_a34a9800b4cb9f 353,355
+  s_7c3b00e473c666::t_c52e3c6fb00e77 277-312
+  s_7c3b00e473c666::t_ba029609783a26 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "410e9648571e51de79781b194ff031cb66899302",
+  "prompts": {},
+  "sessions": {
+    "s_7c3b00e473c666": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db5ffc9a-8944-4273-9c12-90167edf2468",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

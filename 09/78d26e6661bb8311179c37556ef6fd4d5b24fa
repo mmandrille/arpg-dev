@@ -1,0 +1,124 @@
+client/animations/monster_anims.tres
+  s_9123c286098f88::t_05b26378aa7a20 33-43,48-49
+tools/bot/scenarios/10_chase_maze.json
+  s_9123c286098f88::t_be9e99a8967b42 1-6,8-18
+  s_9123c286098f88::t_c57e496f660517 7
+server/internal/replay/replay_test.go
+  s_9123c286098f88::t_3686264eeb35e8 100-101
+  s_9123c286098f88::t_89829e4c236350 96-97,99
+  s_9123c286098f88::t_5cb07ac0e2f658 93-94
+  s_9123c286098f88::t_44be7a712b9632 75-92,95,98,102-104
+client/tests/test_golden.gd
+  s_9123c286098f88::t_8be24d12d6a0ba 167-185
+client/tools/build_animations.gd
+  s_9123c286098f88::t_d46600ba8fde8c 80-82
+server/internal/http/inspect.go
+  s_9123c286098f88::t_6822f233ec7464 108-117
+  s_9123c286098f88::t_1945d211d19aac 6
+client/scripts/net_client.gd
+  s_9123c286098f88::t_c79ce6aae7b166 115-119
+server/internal/game/sim.go
+  s_9123c286098f88::t_0e25cfa9256e8e 68-69
+  s_9123c286098f88::t_516eb246df6323 318
+  s_9123c286098f88::t_fad9259f8c653e 1241-1246,1253-1254,1261,1264-1270,1272-1282,1285
+  s_9123c286098f88::t_2d2a07c7a026ce 23-27
+  s_9123c286098f88::t_299ac386f011c8 1218-1219
+  s_9123c286098f88::t_dd9bc066f9f30e 1129-1217,1220-1240,1247-1252,1255-1257,1260,1271,1283-1284,1286-1349
+  s_9123c286098f88::t_78603fd4330273 155,160
+  s_9123c286098f88::t_661eab24e6e7bd 1258-1259,1262-1263
+shared/rules/monsters.v0.json
+  s_9123c286098f88::t_1ae847fa9bfab7 33-42
+client/scripts/main.gd
+  s_9123c286098f88::t_4c01fe3cd34681 840-841
+  s_9123c286098f88::t_f81232c0aafa85 384-390
+docs/plans/v17_2026-06-06-monster-chase-movement.md
+  s_9123c286098f88::t_4a8218e97bdc1b 3
+  s_32aabee5658d72::t_782d99b0c148b7 1-2,4-11,13-14,19,21,24-216
+  s_32aabee5658d72::t_602261c41a1706 12,15-18,20,22-23
+docs/specs/v17_spec-monster-chase-movement.md
+  s_3975520c94765d::t_fd31a39b01b7f3 1-5,7-32,35-122,124-129,132-196,206-215,220-227,230-232,235-308,310-490,496-528
+  s_32aabee5658d72::t_602261c41a1706 6
+  s_32aabee5658d72::t_4c1b4d4f510e07 33-34,123,130-131,197-205,216-219,228-229,233-234,309,491-495
+shared/rules/worlds.v0.json
+  s_9123c286098f88::t_ea0d9c40776251 248-279,281-352
+  s_9123c286098f88::t_d281e78af0b8bc 280
+docs/PROGRESS.md
+  s_9123c286098f88::t_cfada2ac7b8b23 364-383
+  s_9123c286098f88::t_efa40a4be5339c 72
+  s_9123c286098f88::t_27a471354690eb 418
+  s_9123c286098f88::t_a47b629e98f887 14
+  s_32aabee5658d72::t_b21eab9b107458 15,34-35,71
+  s_32aabee5658d72::t_4945dd879295f5 342-363,417,428,474-475
+  s_9123c286098f88::t_33fdddd96cd86b 477-480
+  s_9123c286098f88::t_1b305198c416cd 486
+shared/rules/monsters.v0.schema.json
+  s_9123c286098f88::t_f6739b72e6f4e5 30-34
+shared/golden/monster_chase.v0.schema.json
+  s_9123c286098f88::t_1169353029d4c1 1-86
+server/internal/game/game_test.go
+  s_9123c286098f88::t_8c2a563561d9f2 1840
+  s_9123c286098f88::t_3f9a07d25319d8 1854-1855
+  s_9123c286098f88::t_46b84766d1ff78 1859-1885
+  s_9123c286098f88::t_e256362724e399 1730-1839,1841-1853,1856-1858
+shared/golden/monster_chase.json
+  s_9123c286098f88::t_27259b8a3ab21f 1-37
+tools/bot/run.py
+  s_9123c286098f88::t_27148be2201cdd 246-247,252-253
+  s_9123c286098f88::t_a8e6ff44386736 721
+  s_9123c286098f88::t_5cae7b9a4bb86a 94
+  s_9123c286098f88::t_44a54bb3539851 1196
+  s_9123c286098f88::t_03ee7e52ad3c43 757-758,762-772
+  s_9123c286098f88::t_3875145c9dff72 1015
+  s_9123c286098f88::t_8e6570483e2db1 1041-1106
+  s_9123c286098f88::t_3e0e9ee6980c8b 248-251
+  s_9123c286098f88::t_6f1ef7b9baff91 609-617
+tools/bot/scenarios/09_chase_lab.json
+  s_9123c286098f88::t_c860e43f74cee9 1-18
+server/internal/replay/replay.go
+  s_9123c286098f88::t_997f045429e4c4 147-149
+  s_9123c286098f88::t_a63736c1bae707 172-174
+  s_9123c286098f88::t_45037aa4b92776 123-125
+shared/protocol/state_delta.v0.schema.json
+  s_9123c286098f88::t_4ab8e9ecbb3c9f 92-98
+server/internal/game/rules.go
+  s_9123c286098f88::t_59b9d46fff1f20 83-102
+  s_9123c286098f88::t_4940715ef0c027 254-272
+tools/validate_shared.py
+  s_9123c286098f88::t_c1ad1f9a59f45d 131
+  s_9123c286098f88::t_8cf795757e7c75 162-185
+  s_9123c286098f88::t_72729487f2eb56 429-451
+tools/bot/scenarios/11_leash_lab.json
+  s_9123c286098f88::t_c74b52ab0b90b8 1-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0978d26e6661bb8311179c37556ef6fd4d5b24fa",
+  "prompts": {},
+  "sessions": {
+    "s_32aabee5658d72": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b10-8bbd-7941-8cfb-ee29535c8347",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_3975520c94765d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d5326830-b9df-4137-b2a3-4e37e3eb8092",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_9123c286098f88": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "be0789f2-c563-4072-85cb-95fb99e14a68",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

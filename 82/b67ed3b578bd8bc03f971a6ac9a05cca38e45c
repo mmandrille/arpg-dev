@@ -1,0 +1,19 @@
+client/scripts/main.gd
+  s_824f232a8f76c8::t_8aa4d400461431 571
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "82b67ed3b578bd8bc03f971a6ac9a05cca38e45c",
+  "prompts": {},
+  "sessions": {
+    "s_824f232a8f76c8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "da1fc753-9148-4df6-ae44-4338487530c8",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

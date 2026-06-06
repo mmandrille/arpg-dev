@@ -38,7 +38,7 @@ Python bot; it covers the surface the Python bot structurally cannot reach.
 - Test server-side Go logic (that remains the Python bot's job).
 - Assert pixel-perfect rendering or screenshot diff.
 - Implement competing or multiplayer bots (requires multi-player sessions, currently deferred).
-- Run multiple Godot instances in the same CI step.
+- Run multiple Godot instances concurrently in the same CI step.
 - Test every client scenario — v14 scopes to the core interaction surfaces: movement,
   combat click, loot pickup, and inventory panel (open/equip/unequip/drop).
 
@@ -51,9 +51,9 @@ client/
   scripts/
     bot_controller.gd          NEW — GDScript bot: scenario runner, synthetic input, assertions
     bot_scenario_runner.gd     NEW — frame-tick step executor (one step per process frame)
-    main.gd                    MOD — expose thin read interface for bot (entities, inventory, equipped, player_hp)
+    main.gd                    MOD — owns bot runtime; exposes thin read interface for bot (entities, inventory, equipped, player_hp)
   tests/
-    test_client_bot.gd         NEW — headless Godot smoke: runs all client scenarios, exits non-zero on failure
+    test_client_bot.gd         NEW — unit-style runner tests only; `main.tscn` owns integration execution
 
 tools/
   bot/
@@ -61,9 +61,12 @@ tools/
       01_click_to_kill.json
       02_inventory_open_close.json
       03_inventory_equip_unequip.json
-      04_click_to_move.json
+      04_inventory_lab_drop_item.json
+      05_click_to_move.json
 
 Makefile                       MOD — add `bot-client` target
+make/agents.mk                 MOD — expose `bot-client`
+scripts/ci.sh                  MOD — run `bot-client` after Python bot
 docs/specs/v14_spec-godot-client-bot.md   THIS FILE
 ```
 
@@ -110,6 +113,9 @@ of `steps`.
 | `assert_equipped` | Assert `equipped["weapon"] != null` |
 | `drag_weapon_to_bag` | Reverse: weapon slot → bag area |
 | `assert_unequipped` | Assert `equipped["weapon"] == null` |
+| `drag_bag_to_outside` | Drag a bag item outside the inventory panel to trigger `drop_intent` |
+| `assert_inventory_missing` | Assert inventory no longer contains an item matching `item_def_id` or `item_instance_id` |
+| `wait_loot_item` | Spin until a loot entity matching `item_def_id` exists in scene |
 | `click_floor` | Project a floor coordinate → screen; inject left click for `move_to_intent` |
 | `wait_player_near` | Spin until `predicted_pos` is within `distance` of target world position |
 
@@ -138,13 +144,13 @@ reads without coupling to internal variables:
 
 ```
 Makefile: make bot-client
-  └─ launches Godot headless --headless --resolution 1280x720
-       └─ ARPG_BOT_CLIENT=1  ARPG_BOT_SCENARIO=all (or specific file)
+  └─ for each selected client scenario, launches Godot headless --headless --resolution 1280x720
+       └─ ARPG_BOT_CLIENT=1  ARPG_BOT_SCENARIO=<scenario file>  ARPG_WORLD_ID=<scenario.world_id>
             └─ main.gd._ready()
                  ├─ normal session create (same auth + WS path)
                  └─ if ARPG_BOT_CLIENT:
                       add_child(BotController)
-                      BotController.load_scenarios(scenario_dir)
+                      BotController.load_scenario(ARPG_BOT_SCENARIO)
                       BotController.start()
 
 BotController._process(delta):
@@ -161,9 +167,20 @@ BotController._process(delta):
   │    → flows into main.gd._unhandled_input()
   ├─ on assertion failure or timeout:
   │    print error, set exit_code = 1
-  └─ on all scenarios complete:
+  └─ on scenario complete:
        get_tree().quit(exit_code)
 ```
+
+### Scenario lifecycle
+
+`main.tscn` is the integration owner. It creates the normal client session, connects the
+WebSocket, mounts `BotController`, and exits the process when the scenario finishes.
+
+`make bot-client` may accept `SCENARIO=all` or a specific scenario id/file. For `all`, the
+shell target runs one Godot process per client scenario rather than trying to reset scene
+state inside a single process. Each process reads the scenario JSON before launch, sets
+`ARPG_WORLD_ID` from `scenario.world_id`, and starts with a fresh server session. This keeps
+scenario state isolated and avoids adding a client-side session reset path.
 
 ### Headless ray-pick validation (must spike before full implementation)
 
@@ -181,17 +198,36 @@ ray-pick and calls `client.send("action_intent", tick, {"target_id": id})` direc
 still exercising the WebSocket + server + delta path (but not the ray-pick client path).
 In that case, a separate non-CI manual test documents that ray-pick works in windowed mode.
 
+### Headless GUI drag validation (must spike before full implementation)
+
+Inventory equip, unequip, and drop must use the real `InventoryPanel` Control path, not a
+direct `client.send(...)` shortcut. The spike (Task 0 in the plan) must confirm that
+synthetic mouse press + motion + release events in `--headless --resolution 1280x720`
+trigger:
+
+1. `InventorySlotButton._get_drag_data()`
+2. `_drop_data()` on the weapon slot and bag area
+3. `NOTIFICATION_DRAG_END` with `gui_is_drag_successful() == false` when dropping outside
+   the panel, causing `drop_intent`
+
+If Godot headless does not deliver Control drag events reliably, the fallback is to add a
+small test-only input adapter on `InventoryPanel` that invokes the same internal handlers
+(`_handle_drop_on_slot` / outside-drop path) after validating screen coordinates. That
+fallback still belongs inside the client UI layer and must not bypass `main.gd` intent
+routing or the WebSocket.
+
 ---
 
 ## 6. Integration with existing machinery
 
-### 6.1 Input locking
+### 6.1 Bot mode and input locking
 
 `_input_locked()` in `main.gd` currently returns `true` when `visual_replay_enabled or
-autoplay_enabled`. The bot must NOT set `autoplay_enabled` or `visual_replay_enabled`.
-Instead, `BotController` is the only active agent when `ARPG_BOT_CLIENT=1`. The
-`_input_locked()` check must be extended to also return `true` when a bot is running, so
-human input does not interfere during windowed runs.
+autoplay_enabled`. The bot must NOT set `autoplay_enabled` or `visual_replay_enabled`, and
+bot mode must not be modeled as a normal `_input_locked()` state. `BotController` is the
+only active agent when `ARPG_BOT_CLIENT=1`; if windowed debugging needs physical-input
+suppression, implement that as a separate bot-mode guard that still allows bot-dispatched
+events through the normal handlers.
 
 ### 6.2 Session lifecycle
 
@@ -203,11 +239,21 @@ REST endpoints are needed. The bot reads `client.session_id` and `client.world_i
 
 ```makefile
 bot-client:
-    ARPG_BOT_CLIENT=1 ARPG_BASE_URL=http://localhost:8080 \
-    ARPG_DEV_TOKEN=local-dev-token \
-    $(GODOT) --headless --resolution 1280x720 \
-             --path client res://main.tscn; \
-    test $$? -eq 0
+    GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" \
+    SCENARIO="$(or $(SCENARIO),$(scenario),all)" ./scripts/bot_client.sh
+```
+
+`scripts/bot_client.sh` discovers `tools/bot/scenarios/client/*.json`, filters by
+`SCENARIO`, validates each scenario has `"runner": "godot_client"` and `world_id`, then
+launches one headless `main.tscn` process per selected scenario:
+
+```bash
+ARPG_BOT_CLIENT=1 \
+ARPG_BOT_SCENARIO="$scenario_path" \
+ARPG_WORLD_ID="$world_id" \
+ARPG_BASE_URL="$BASE_URL" \
+ARPG_DEV_TOKEN="$DEV_TOKEN" \
+"$GODOT" --headless --resolution 1280x720 --path client res://main.tscn
 ```
 
 Requires `make db-up && make server` to be running (same as `make bot`). Does not launch
@@ -215,15 +261,34 @@ the server itself — CI composition handles that.
 
 ### 6.4 `make ci` integration
 
-`make ci` runs: `validate-shared → test-go → bot → bot-client → replay`. The new
-`bot-client` step runs after the Python bot confirms the server is healthy.
+`make ci` is implemented by `scripts/ci.sh`, so the slice must update that script, not only
+the Makefile docs. CI order becomes:
+
+`validate-shared → test-go → client-unit → bot → bot-client → replay`
+
+The new `bot-client` step runs after the Python bot confirms the server is healthy and
+before replay verifies the final recorded session.
+
+### 6.5 Bot input gating
+
+The bot must exercise the same input handlers as a human. Therefore bot mode must not make
+`_input_locked()` return `true` for bot-dispatched events, because `_unhandled_input()`,
+`_handle_input()`, and inventory intent routing return early when input is locked.
+
+Implementation requirement:
+
+- Physical/manual input may be ignored during bot mode if needed for windowed debugging.
+- Synthetic bot events must pass through `_unhandled_input()` and `InventoryPanel` GUI input.
+- Add an explicit bot-dispatch guard if necessary, for example `bot_input_active`, instead
+  of treating bot mode as equivalent to `visual_replay_enabled` or `autoplay_enabled`.
+- Existing `visual_replay_enabled` and `autoplay_enabled` locking behavior remains unchanged.
 
 ---
 
 ## 7. Acceptance criteria
 
-1. `make bot-client` exits 0 with all four client scenarios passing (kill, open/close
-   inventory, equip/unequip, click-to-move) against a live server.
+1. `make bot-client` exits 0 with all five client scenarios passing (kill, open/close
+   inventory, equip/unequip, inventory-lab drop item, click-to-move) against a live server.
 2. `make bot-client` exits non-zero and prints a clear error when a step assertion fails
    (e.g., `[bot-client] FAIL click_to_kill: assert_entity_removed timed out after 10s`).
 3. `make bot-client` exits non-zero when a step times out.
@@ -234,8 +299,11 @@ the server itself — CI composition handles that.
    and the `assert_panel_visible` step confirms `inventory_panel.visible == true`.
 6. The `drag_bag_to_weapon_slot` step exercises the inventory panel's drag-equip path and
    `assert_equipped` confirms `equipped["weapon"] != null` in scene state.
-7. `make ci` is green end-to-end including the new `bot-client` step.
-8. Python bot and visual replay are unchanged and still pass.
+7. The inventory-lab drop scenario exercises the panel's outside-drop path and confirms the
+   item leaves inventory, appears as world loot, can be picked up again, and remains server
+   authoritative.
+8. `make ci` is green end-to-end including the new `bot-client` step.
+9. Python bot and visual replay are unchanged and still pass.
 
 ---
 
@@ -244,10 +312,11 @@ the server itself — CI composition handles that.
 | # | Question | Status |
 |---|----------|--------|
 | D-1 | Does headless ray-pick work in Godot 4.6.3 with `--resolution 1280x720`? | Must spike (Task 0 in plan) |
-| D-2 | Should client scenarios reuse `tools/bot/scenarios/*.json` format or get a separate dir? | Separate `client/` subdir chosen — avoids Python bot accidentally loading them |
-| D-3 | Screenshot diff / pixel-level visual assertion | Deferred: out of scope for v14 |
-| D-4 | Multi-bot / competing bots | Deferred: requires multiplayer sessions |
-| D-5 | Bot AI complexity (pathfinding goals, behavior trees) | Deferred: v14 uses simple sequential state machine |
+| D-2 | Does headless Control drag/drop work in Godot 4.6.3 with `--resolution 1280x720`? | Must spike (Task 0 in plan) |
+| D-3 | Should client scenarios reuse `tools/bot/scenarios/*.json` format or get a separate dir? | Separate `client/` subdir chosen — avoids Python bot accidentally loading them |
+| D-4 | Screenshot diff / pixel-level visual assertion | Deferred: out of scope for v14 |
+| D-5 | Multi-bot / competing bots | Deferred: requires multiplayer sessions |
+| D-6 | Bot AI complexity (pathfinding goals, behavior trees) | Deferred: v14 uses simple sequential state machine |
 
 ---
 
@@ -256,8 +325,12 @@ the server itself — CI composition handles that.
 1. **Spike (manual):** Run a minimal headless Godot script that creates a session, renders
    one frame, and confirms `camera.unproject_position` + `intersect_ray` returns a hit.
    Command: see Task 0 in plan.
-2. **Unit (GDScript):** `make client-smoke` — existing `test_golden.gd` suite must still
-   pass; new `test_client_bot.gd` runs all four client scenarios and exits non-zero on
-   failure.
-3. **Integration:** `make bot-client` against live server — four scenarios, all green.
-4. **Regression:** `make ci` end-to-end — Python bot + client bot + replay all green.
+2. **Spike (manual):** Run a minimal headless Godot script that opens the inventory panel
+   and confirms synthetic drag/drop reaches `InventoryPanel` equip, unequip, and outside
+   drop paths. Command: see Task 0 in plan.
+3. **Unit (GDScript):** `make client-unit` — existing `test_golden.gd` suite must still
+   pass; `test_client_bot.gd` validates scenario loading/step validation without requiring
+   a live server.
+4. **Integration:** `make bot-client` against live server — five scenarios, all green,
+   owned by `main.tscn`.
+5. **Regression:** `make ci` end-to-end — Python bot + client bot + replay all green.

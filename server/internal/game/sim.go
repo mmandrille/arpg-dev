@@ -244,6 +244,7 @@ type Input struct {
 	Equip         *EquipIntent
 	Unequip       *UnequipIntent
 	Drop          *DropIntent
+	Use           *UseIntent
 }
 
 // Intent payloads.
@@ -264,6 +265,9 @@ type (
 		Slot string
 	}
 	DropIntent struct {
+		ItemInstanceID string
+	}
+	UseIntent struct {
 		ItemInstanceID string
 	}
 )
@@ -310,7 +314,7 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "action_intent", "equip_intent", "unequip_intent", "drop_intent":
+		case "move_intent", "move_to_intent", "action_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -330,6 +334,8 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleUnequip(in, res)
 	case "drop_intent":
 		s.handleDrop(in, res)
+	case "use_intent":
+		s.handleUse(in, res)
 	default:
 		res.reject(in.MessageID, "unknown_type")
 	}
@@ -505,11 +511,36 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 }
 
 func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
-	for _, itemDefID := range s.rules.LootDrops(monster.lootTable, s.rng) {
-		dropPos, ok := s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
-		if !ok {
-			dropPos = monster.pos
+	drops := s.rules.LootDrops(monster.lootTable, s.rng)
+	var clusterAnchor Vec2
+	clusterReady := false
+
+	for i, itemDefID := range drops {
+		var dropPos Vec2
+		var ok bool
+
+		if i == 0 {
+			dropPos, ok = s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
+			if !ok {
+				dropPos = monster.pos
+			}
+			clusterAnchor = dropPos
+			clusterReady = true
+		} else if clusterReady {
+			dropPos, ok = s.findClusterLootDropPosition(clusterAnchor, i)
+			if !ok {
+				dropPos, ok = s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
+				if !ok {
+					dropPos = monster.pos
+				}
+			}
+		} else {
+			dropPos, ok = s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
+			if !ok {
+				dropPos = monster.pos
+			}
 		}
+
 		loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID}
 		loot.id = s.alloc()
 		s.entities[loot.id] = loot
@@ -667,6 +698,68 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 		EventType:      "item_dropped",
 		EntityID:       idStr(loot.id),
 		CorrelationID:  in.CorrelationID,
+		ItemInstanceID: removedID,
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleUse(in Input, res *TickResult) {
+	if in.Use == nil || in.Use.ItemInstanceID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	player := s.entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	item := s.findItem(in.Use.ItemInstanceID)
+	if item == nil {
+		res.reject(in.MessageID, "not_in_inventory")
+		return
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok || def.Category != "consumable" {
+		res.reject(in.MessageID, "not_consumable")
+		return
+	}
+	if def.Heal == nil {
+		res.reject(in.MessageID, "not_usable")
+		return
+	}
+	if player.hp >= player.maxHP {
+		res.reject(in.MessageID, "already_full_hp")
+		return
+	}
+
+	rolled := s.rollRange(*def.Heal)
+	heal := rolled
+	if player.hp+heal > player.maxHP {
+		heal = player.maxHP - player.hp
+	}
+	if heal <= 0 {
+		res.reject(in.MessageID, "already_full_hp")
+		return
+	}
+
+	removedID := idStr(item.instanceID)
+	s.removeItemByID(item.instanceID)
+	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
+
+	player.hp += heal
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+	res.Events = append(res.Events, Event{
+		EventType:      "item_used",
+		EntityID:       idStr(player.id),
+		CorrelationID:  in.CorrelationID,
+		Heal:           intPtr(heal),
+		ItemInstanceID: removedID,
+	})
+	res.Events = append(res.Events, Event{
+		EventType:      "player_healed",
+		EntityID:       idStr(player.id),
+		CorrelationID:  in.CorrelationID,
+		Heal:           intPtr(heal),
 		ItemInstanceID: removedID,
 	})
 	res.ack(in.MessageID)
@@ -851,6 +944,35 @@ func (s *Sim) lootDropBlocked(pos Vec2) bool {
 		}
 	}
 	return false
+}
+
+func (s *Sim) findClusterLootDropPosition(anchor Vec2, index int) (Vec2, bool) {
+	spacing := lootInteractionRadius * 2.1
+	offsets := []Vec2{
+		{X: spacing, Y: 0},
+		{X: -spacing, Y: 0},
+		{X: 0, Y: spacing},
+		{X: 0, Y: -spacing},
+		{X: spacing, Y: spacing},
+		{X: -spacing, Y: spacing},
+		{X: -spacing, Y: -spacing},
+		{X: spacing, Y: -spacing},
+	}
+
+	for try := 0; try < len(offsets); try++ {
+		offset := offsets[(index-1+try)%len(offsets)]
+		pos := Vec2{X: anchor.X + offset.X, Y: anchor.Y + offset.Y}
+		if s.lootDropBlocked(pos) {
+			continue
+		}
+		if s.lootPositionBlocked(pos) {
+			continue
+		}
+
+		return pos, true
+	}
+
+	return Vec2{}, false
 }
 
 func (s *Sim) lootPositionBlocked(pos Vec2) bool {

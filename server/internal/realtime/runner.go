@@ -474,7 +474,7 @@ func less(a, b game.Input) bool {
 }
 
 func isInventoryIntentType(t string) bool {
-	return t == inputdecode.TypeEquip || t == inputdecode.TypeUnequip || t == inputdecode.TypeDrop
+	return t == inputdecode.TypeEquip || t == inputdecode.TypeUnequip || t == inputdecode.TypeDrop || t == inputdecode.TypeUse
 }
 
 func inventoryPayloadSummary(in game.Input) map[string]string {
@@ -488,6 +488,9 @@ func inventoryPayloadSummary(in game.Input) map[string]string {
 	}
 	if in.Drop != nil {
 		out["item_instance_id"] = in.Drop.ItemInstanceID
+	}
+	if in.Use != nil {
+		out["item_instance_id"] = in.Use.ItemInstanceID
 	}
 	return out
 }

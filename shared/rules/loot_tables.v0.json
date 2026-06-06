@@ -18,6 +18,9 @@
         { "item_def_id": "quest_leaf", "weight": 1 },
         { "item_def_id": "red_potion", "weight": 1 }
       ]
+    },
+    "heal_double_drop": {
+      "drops": ["red_potion", "red_potion"]
     }
   }
 }

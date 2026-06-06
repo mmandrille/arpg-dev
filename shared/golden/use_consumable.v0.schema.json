@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/use_consumable.v0.schema.json",
+  "title": "Use consumable golden (v0)",
+  "type": "object",
+  "required": ["version", "item_def_id", "heal", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "description": { "type": "string" },
+    "item_def_id": { "type": "string" },
+    "heal": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "integer", "minimum": 1 },
+        "max": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "player_hp", "player_max_hp", "draw", "expected_heal", "expected_player_hp"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "player_hp": { "type": "integer", "minimum": 0 },
+          "player_max_hp": { "type": "integer", "minimum": 1 },
+          "draw": { "type": "integer", "minimum": 0 },
+          "expected_heal": { "type": "integer", "minimum": 0 },
+          "expected_player_hp": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

@@ -22,7 +22,8 @@
           "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
           "damage": { "$ref": "#/$defs/damage_range" },
           "reach": { "type": "number", "exclusiveMinimum": 0 },
-          "projectile_speed": { "type": "number", "exclusiveMinimum": 0 }
+          "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
+          "heal": { "$ref": "#/$defs/heal_range" }
         },
         "allOf": [
           {
@@ -91,12 +92,40 @@
               ]
             },
             "then": { "not": { "required": ["projectile_speed"] } }
+          },
+          {
+            "if": {
+              "properties": { "category": { "const": "consumable" } },
+              "required": ["category"]
+            },
+            "then": { "required": ["heal"] }
+          },
+          {
+            "if": {
+              "required": ["heal"]
+            },
+            "then": {
+              "properties": {
+                "category": { "const": "consumable" },
+                "equippable": { "const": false }
+              },
+              "required": ["category", "equippable"]
+            }
           }
         ]
       }
     }
   },
   "$defs": {
+    "heal_range": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "integer", "minimum": 1 },
+        "max": { "type": "integer", "minimum": 1 }
+      }
+    },
     "damage_range": {
       "type": "object",
       "required": ["min", "max"],

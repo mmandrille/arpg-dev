@@ -146,7 +146,25 @@ func _initialize() -> void:
 		_fail("inventory_drop drop_step != navigation.cell_size")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop)")
+	# 9. Use consumable golden references shared consumable heal rules.
+	var use_consumable := _read(shared.path_join("golden/use_consumable.json"))
+	var use_item_def: Dictionary = items["items"][use_consumable["item_def_id"]]
+	if str(use_item_def.get("category", "")) != "consumable":
+		_fail("use_consumable golden item is not consumable")
+		return
+	if use_item_def["heal"] != use_consumable["heal"]:
+		_fail("use_consumable golden heal != item rules")
+		return
+	var hmin: int = int(use_consumable["heal"]["min"])
+	var hspan: int = int(use_consumable["heal"]["max"]) - hmin + 1
+	for c in use_consumable["cases"]:
+		var rolled: int = hmin + (int(c["draw"]) % hspan)
+		var capped: int = mini(rolled, int(c["player_max_hp"]) - int(c["player_hp"]))
+		if capped != int(c["expected_heal"]) or int(c["player_hp"]) + capped != int(c["expected_player_hp"]):
+			_fail("use_consumable case %s heal cap mismatch" % str(c["name"]))
+			return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable)")
 	quit(0)
 
 

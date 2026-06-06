@@ -43,6 +43,7 @@ type Event struct {
 	EntityID       string `json:"entity_id,omitempty"`
 	CorrelationID  string `json:"correlation_id,omitempty"`
 	Damage         *int   `json:"damage,omitempty"`
+	Heal           *int   `json:"heal,omitempty"`
 	ItemInstanceID string `json:"item_instance_id,omitempty"`
 }
 

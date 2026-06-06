@@ -47,6 +47,9 @@ func _ready() -> void:
 
 	_scenario_id = str((data as Dictionary).get("id", "unknown"))
 	_runner = BotScenarioRunnerScript.new()
+	var delay_str := OS.get_environment("ARPG_BOT_STEP_DELAY")
+	if delay_str != "":
+		_runner.step_delay_s = maxf(0.0, float(delay_str))
 	_runner.bind_controller(self)
 	if not _runner.load_scenario(data as Dictionary):
 		_fail_startup("scenario has no client_steps: %s" % scenario_path)

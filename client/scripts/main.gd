@@ -1189,13 +1189,20 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 # --- bot API (read-only state + intent dispatch) ----------------------------
 
 func get_bot_state() -> Dictionary:
+	# Exclude dead monsters (hp==0) from monster_ids so assert_entity_removed
+	# treats a killed monster as "gone" even if the server hasn't sent entity_remove.
+	var live_monster_ids: Array = []
+	for mid in monster_ids:
+		var rec: Dictionary = entities.get(mid, {})
+		if int(rec.get("hp", 1)) > 0:
+			live_monster_ids.append(mid)
 	var out := {
 		"ws_open": client != null and client.ready_state() == WebSocketPeer.STATE_OPEN,
 		"player_hp": player_hp,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
 		"inventory": inventory.duplicate(true),
 		"equipped": equipped.duplicate(true),
-		"monster_ids": monster_ids.duplicate(),
+		"monster_ids": live_monster_ids,
 		"loot_ids": loot_ids.duplicate(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
 		"pending_events": _bot_pending_events.duplicate(true),

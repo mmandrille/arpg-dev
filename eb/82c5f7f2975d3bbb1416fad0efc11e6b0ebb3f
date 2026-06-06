@@ -1,0 +1,108 @@
+client/scripts/inventory_panel.gd.uid
+  s_b4a68f28938d7e::t_831699bf1e3a6e 1
+client/scripts/inventory_panel.gd
+  s_c5ff5ecc3528e3::t_bedf4a307929a0 181-185,189-197
+  s_c5ff5ecc3528e3::t_a727adf7c80f87 271-285
+  s_c5ff5ecc3528e3::t_fcbc948a47807d 186-188
+  s_c5ff5ecc3528e3::t_332f99892e3d3e 30-31,40
+  s_c5ff5ecc3528e3::t_5a1c1149bf7498 69,76-77,79-109
+  s_c5ff5ecc3528e3::t_d8852b912be0d8 155-164
+  s_b4a68f28938d7e::t_3ef2e6634eec0d 1-16,20-29,32-39,41-66,70-75,78,115-134,198,200-216,218,226-270,286-427
+  s_c5ff5ecc3528e3::t_4438addd7391ca 199
+  s_c5ff5ecc3528e3::t_642381c7d22e2d 17-19
+  s_c5ff5ecc3528e3::t_94c0a7baf76268 217,219-225
+  s_c5ff5ecc3528e3::t_01b57af10a71a6 135-154,165-180
+  s_13d76ff3aef7a8::t_2efc8d53e49f07 67-68,110-114
+scripts/play.sh
+  s_b4a68f28938d7e::t_0a9811bbb6fc5d 56
+client/scripts/smoke.gd
+  s_b4a68f28938d7e::t_e326fbb32faa6b 368,374
+  s_b4a68f28938d7e::t_3fbbf47d03639b 18,63-64,367,369-373,375-394
+client/scripts/main.gd
+  s_c5ff5ecc3528e3::t_f0d1804bb090a7 388-389
+  s_13d76ff3aef7a8::t_79c5a379d62334 670-675,679-685,702-712
+  s_c5ff5ecc3528e3::t_3ef39877582e44 13
+  s_c5ff5ecc3528e3::t_26100ffb393749 141
+  s_c5ff5ecc3528e3::t_54f6435ba38e5f 813
+  s_64f8ffe99bf44c::t_4933c0644b8304 365
+  s_c5ff5ecc3528e3::t_acf21148b8680c 251-252
+  s_64f8ffe99bf44c::t_ffac202ceb930a 270-271
+  s_64f8ffe99bf44c::t_2eee66db7da5e5 422-430,432-434
+  s_13d76ff3aef7a8::t_98accff8df89c1 452-455
+  s_c5ff5ecc3528e3::t_2d5e0143ba570b 542
+  s_b4a68f28938d7e::t_e812c67508609b 1203
+  s_c5ff5ecc3528e3::t_9ec306f578aa3f 128
+  s_c5ff5ecc3528e3::t_f2ab927ed61575 536
+  s_13d76ff3aef7a8::t_352c5ebde64834 193-194,221
+  s_c5ff5ecc3528e3::t_e35c898661271b 247-250
+  s_c5ff5ecc3528e3::t_4734261405bf03 981-983
+  s_13d76ff3aef7a8::t_10b0ce4d26ebb8 272-275,349,352
+  s_13d76ff3aef7a8::t_353162c52fd0a0 573-578,686-700
+  s_13d76ff3aef7a8::t_ab938d9a41e152 451,489-491
+  s_c5ff5ecc3528e3::t_5465daac31b3f7 552-554
+  s_b4a68f28938d7e::t_89ccc8ade037d9 12,213,235-236,241-243,379-387,390-391,977-979,998-1001
+  s_13d76ff3aef7a8::t_1ebaff1a6b5472 36,109,313,1040-1041,1063,1068-1086
+  s_c5ff5ecc3528e3::t_a5a93d353134f0 804,806-807,811,814-821,823-824,826
+  s_c5ff5ecc3528e3::t_af213dee23037d 513
+  s_c5ff5ecc3528e3::t_a96a31f1bfb444 754-761
+  s_c5ff5ecc3528e3::t_3a01a6a6f1edb6 218-220
+  s_c5ff5ecc3528e3::t_a14f3a11e789ca 82
+  s_c5ff5ecc3528e3::t_679fce779d6f63 822,825
+  s_c5ff5ecc3528e3::t_05cc7371f7f81e 829-895,898-905,908-915,917-918,920-954
+  s_edbd5183536185::t_6eaba15c2b60ad 62-69
+  s_c5ff5ecc3528e3::t_f4d39c7095bfce 896-897,906-907,916,919
+  s_c5ff5ecc3528e3::t_18c2b3d3259b63 81
+client/scripts/input_shadow_overlay.gd
+  s_c5ff5ecc3528e3::t_c445b6e49287a7 1-10,13-20,52-60,62,64,66,68,70-72,75-80,82-213
+  s_c5ff5ecc3528e3::t_a0ba1efd29b7bb 11-12,21-51,61,63,65,67,69,73-74,81
+client/tests/test_golden.gd
+  s_b4a68f28938d7e::t_b4d302e741f816 129-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "eb82c5f7f2975d3bbb1416fad0efc11e6b0ebb3f",
+  "prompts": {},
+  "sessions": {
+    "s_13d76ff3aef7a8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9a74-9bea-7812-821c-e091213329fa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_64f8ffe99bf44c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "30ebe2ef-3e82-4587-9e1b-db855cec0d67",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_b4a68f28938d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9a1b-efa7-7eb2-a486-176e0f53068c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_c5ff5ecc3528e3": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e254c8a3-f77a-439f-9f71-8b8c99cd2304",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_edbd5183536185": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a33dc0d8-0fac-4c29-b5de-7125c22c683a",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

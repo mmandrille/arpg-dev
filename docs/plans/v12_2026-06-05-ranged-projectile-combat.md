@@ -44,7 +44,7 @@
 
 ## Plugin adoption
 
-- [x] Consult `docs/godot-plugins-and-shortcuts.md`.
+- [x] Consult `docs/researchs/godot-plugins-and-shortcuts.md`.
 - [x] Decision: **reject** projectile/VFX plugins for v12. The slice needs a simple placeholder mesh and server-authoritative wire entity, not client-side gameplay logic or production art.
 
 ---

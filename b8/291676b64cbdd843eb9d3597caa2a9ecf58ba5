@@ -1,0 +1,19 @@
+docs/ideas/keyboard-jump-and-gaps.md
+  s_d8b35dd554cc83::t_18658ac491bf86 1-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b8291676b64cbdd843eb9d3597caa2a9ecf58ba5",
+  "prompts": {},
+  "sessions": {
+    "s_d8b35dd554cc83": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b08-aeff-75b2-acdd-1d957a0570bc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

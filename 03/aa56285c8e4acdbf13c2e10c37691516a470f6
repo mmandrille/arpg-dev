@@ -1,0 +1,194 @@
+docs/specs/v16_spec-use-consumable.md
+  s_0c8a722f0b696b::t_62904eec642da1 1-42
+server/internal/game/types.go
+  s_0c8a722f0b696b::t_775a09b8cb6bff 46
+shared/protocol/session_snapshot.v0.schema.json
+  s_0c8a722f0b696b::t_6b695ebec62bd2 74,85-90
+client/tests/test_golden.gd
+  s_0c8a722f0b696b::t_7f0121df7ae051 149-167
+shared/rules/worlds.v0.json
+  s_0c8a722f0b696b::t_a80033227a2c19 244
+  s_0c8a722f0b696b::t_ccacd7a8cfad40 240,245
+  s_0c8a722f0b696b::t_5f2d4ac87b4f8f 238-239,241-243,246-247
+tools/validate_shared.py
+  s_0c8a722f0b696b::t_45362b1813c59d 376-403
+  s_0c8a722f0b696b::t_bcc7de367e4d34 130
+  s_0c8a722f0b696b::t_00001e912c2fa2 260
+shared/protocol/messages.v0.schema.json
+  s_0c8a722f0b696b::t_c01fd25677eb4a 129
+  s_0c8a722f0b696b::t_e872d2691f4b69 49-50
+  s_0c8a722f0b696b::t_2f78ad2d78c679 20
+client/scripts/damage_number.gd
+  s_a11a87769a8040::t_31274afcdf3101 16,21
+client/scripts/consumable_bar.gd
+  s_0c8a722f0b696b::t_555f5862bda120 1-301
+server/internal/realtime/runner.go
+  s_0c8a722f0b696b::t_1e288d4f05c8f6 477
+  s_0c8a722f0b696b::t_feb51643b376d7 492-494
+shared/rules/items.v0.schema.json
+  s_0c8a722f0b696b::t_b09f30cfd8e12e 25-26
+  s_0c8a722f0b696b::t_d07238f50b9061 95-113,120-128
+client/scripts/main.gd
+  s_a11a87769a8040::t_23ad1b89446a04 33
+  s_a11a87769a8040::t_7ea56f2f9d3797 91
+  s_a11a87769a8040::t_84234557a903e7 448-449,464-465
+  s_0c8a722f0b696b::t_40d8daf8728b28 439-440
+  s_a11a87769a8040::t_9e55b83c83355f 931-932
+  s_0c8a722f0b696b::t_c1f3d55bbf97c6 89
+  s_a11a87769a8040::t_56bb3f0b0e292c 281-289
+  s_0c8a722f0b696b::t_bf3d77634073ea 499-510
+  s_0c8a722f0b696b::t_de08d3a4570a60 1213
+  s_0c8a722f0b696b::t_d26cac475691a0 241-245
+  s_0c8a722f0b696b::t_80a4b026552075 430,433-438
+  s_0c8a722f0b696b::t_4fa571796a4e6d 827-828
+  s_0c8a722f0b696b::t_003d8f9a690ce4 928-930
+  s_0c8a722f0b696b::t_b8a5050642d485 124,126-127,130-131
+  s_0c8a722f0b696b::t_db30ab90e9b8f1 1242-1253
+  s_0c8a722f0b696b::t_ed2e6439209f5c 13
+  s_0c8a722f0b696b::t_cb365c7af8f49d 47
+  s_0c8a722f0b696b::t_b15a7240fd4aeb 1254-1259
+  s_0c8a722f0b696b::t_31011cf900657c 272
+  s_a11a87769a8040::t_881ba3a77667f3 339-342
+  s_0c8a722f0b696b::t_4f416c38c3e3fb 147-148,151-152
+  s_0c8a722f0b696b::t_ef5e56851ef74b 162,164
+  s_0c8a722f0b696b::t_3bbcabea401554 239
+  s_0c8a722f0b696b::t_9762c6c0d98be7 549-557
+  s_0c8a722f0b696b::t_29941afb15efdd 179-180
+  s_a11a87769a8040::t_91aa914a266612 14
+shared/rules/monsters.v0.json
+  s_0c8a722f0b696b::t_fc5e943a61c571 27-31
+  s_0c8a722f0b696b::t_17dc42d2aa3c5e 32
+tools/bot/scenarios/08_heal_lab.json
+  s_0c8a722f0b696b::t_f8ebbf46dc473b 1-4,6,8,14-19
+  s_0c8a722f0b696b::t_7cfe45139c284c 5,7,9-13
+shared/golden/use_consumable.v0.schema.json
+  s_0c8a722f0b696b::t_0873f25f5aa169 1-39
+server/internal/game/sim.go
+  s_0c8a722f0b696b::t_da3dfdaa7569c3 270-272
+  s_0c8a722f0b696b::t_3bdbb0c8ceb54f 317
+  s_0c8a722f0b696b::t_a701518a395591 949-977
+  s_0c8a722f0b696b::t_8f6ec94ff6af61 247
+  s_0c8a722f0b696b::t_944075df352aa8 337-338
+  s_0c8a722f0b696b::t_2ba0d75ab3042b 514-541,543
+  s_0c8a722f0b696b::t_af8c97637dfcba 706-767
+shared/protocol/state_delta.v0.schema.json
+  s_0c8a722f0b696b::t_fb1f37279fe2c6 61,72-77
+client/scripts/bot_controller.gd
+  s_0c8a722f0b696b::t_e971e083bc5f86 138-143,151-154
+  s_0c8a722f0b696b::t_4472f1e8232d6c 259-283
+  s_0c8a722f0b696b::t_c53a3e6e15db8c 190-191,193,195-197,209-210
+  s_0c8a722f0b696b::t_b7765e8851a254 70-72
+  s_0c8a722f0b696b::t_82bfdc4d7e9162 98
+  s_0c8a722f0b696b::t_99216cd2e61298 107
+  s_0c8a722f0b696b::t_1f9bdda91a1197 189,192,194,198-208
+  s_0c8a722f0b696b::t_90f45837f8305c 108-119
+  s_0c8a722f0b696b::t_f4ab902499648e 222,226,231-234
+  s_0c8a722f0b696b::t_471c8a4f467d77 239-248
+shared/protocol/examples/use_intent.json
+  s_0c8a722f0b696b::t_11da23c41e2854 1-10
+server/internal/game/rules.go
+  s_0c8a722f0b696b::t_18575fd74b29a2 55,62
+server/internal/inputdecode/inputdecode.go
+  s_0c8a722f0b696b::t_3a123999f06377 58
+  s_0c8a722f0b696b::t_1c5f7feb7ac874 19
+  s_0c8a722f0b696b::t_09cb05b26f74f7 109-114
+  s_0c8a722f0b696b::t_4f8e6338bb928d 50-52
+client/scripts/bot_scenario_runner.gd
+  s_0c8a722f0b696b::t_61949a4c0a1b73 24-25
+  s_0c8a722f0b696b::t_d2fa8230196c9c 44-45
+  s_0c8a722f0b696b::t_f64620c3c669d4 105-108
+  s_0c8a722f0b696b::t_b78d165c11ba53 17,34
+  s_0c8a722f0b696b::t_668b9877d029a6 269-300
+  s_0c8a722f0b696b::t_ebb50146d679ae 9-10,15,22,28-30,35
+  s_0c8a722f0b696b::t_492db9b0ff2ede 301-310,314-322
+  s_0c8a722f0b696b::t_b65c914d2fa11d 330-333,337-338,343-402
+  s_0c8a722f0b696b::t_0d0fbe1344d88b 152-155,158-164
+  s_0c8a722f0b696b::t_88979c823344b8 126,130
+  s_0c8a722f0b696b::t_e735cebde5d475 465,471-476
+  s_0c8a722f0b696b::t_d497695305503f 468-470,477-482
+  s_0c8a722f0b696b::t_ce7ba0a0d612bc 62-63
+  s_0c8a722f0b696b::t_9466c6bc5805b3 117-119,121
+scripts/bot_client.sh
+  s_0c8a722f0b696b::t_474896a21798a3 108-109
+  s_0c8a722f0b696b::t_9a58682b1c7187 146
+  s_0c8a722f0b696b::t_55dd9d0b6fe7ed 85-91
+  s_0c8a722f0b696b::t_dde6b08793f314 134-135
+  s_0c8a722f0b696b::t_81d0c3c662782e 119
+  s_a11a87769a8040::t_3d66b16e27f9c0 98,102,110,116-117,122,127-128,133
+  s_0c8a722f0b696b::t_34a6211d6c16bd 101,104
+  s_0c8a722f0b696b::t_2098988eaabeaf 14-18
+  s_0c8a722f0b696b::t_8520237a1f5097 33-34
+tools/bot/scenarios/client/06_use_potion_hotbar.json
+  s_0c8a722f0b696b::t_3e974a3ba018a3 1-4,7,19,24,28-29
+  s_0c8a722f0b696b::t_1fb89879aebbf3 5,8-15,18,20-23,25-27
+  s_a11a87769a8040::t_ccaff45ec5aff3 6,16-17
+shared/rules/loot_tables.v0.schema.json
+  s_0c8a722f0b696b::t_5460ab90dc9f03 20,36-40
+tools/bot/run.py
+  s_0c8a722f0b696b::t_8932046a379e78 876-891
+  s_0c8a722f0b696b::t_ae2cf52d07d668 1063-1064,1068,1070,1072,1076,1086,1089,1091,1093,1097-1098
+  s_0c8a722f0b696b::t_f0559467def584 234-243
+  s_0c8a722f0b696b::t_e208f9e8df5f70 27
+  s_0c8a722f0b696b::t_07fb7beae1eab6 282-283,288-298
+  s_0c8a722f0b696b::t_bf5f89afea319a 54-63
+  s_0c8a722f0b696b::t_f2fe349f2beb39 494-495,497,499,501-504,507-509,522-524
+  s_0c8a722f0b696b::t_16f0b09a157a15 505-506,510-521
+  s_0c8a722f0b696b::t_6da086c0fe73a2 414-415,419-428
+  s_0c8a722f0b696b::t_40c2725834255b 486-493,496,498,500
+  s_0c8a722f0b696b::t_a7221df405ea63 36
+  s_0c8a722f0b696b::t_9b8e144ea8a5cd 832-840
+  s_0c8a722f0b696b::t_8c4b65c6ad3b81 983-984
+  s_0c8a722f0b696b::t_ff99f48b378804 215-225
+shared/rules/loot_tables.v0.json
+  s_0c8a722f0b696b::t_a9faa806503037 21-23
+client/scripts/player_health_bar.gd
+  s_a11a87769a8040::t_1b345d58754a56 1-115
+  s_a11a87769a8040::t_ea8b9b0b3e3bc3 116
+docs/plans/v16_2026-06-06-use-consumable.md
+  s_0c8a722f0b696b::t_54a51f2dbed5f1 1-42
+client/scripts/consumable_bar.gd.uid
+  s_0c8a722f0b696b::t_a8e458e37c7baf 1
+client/scripts/player_health_bar.gd.uid
+  s_a11a87769a8040::t_2b388a30c887d0 1
+shared/golden/use_consumable.json
+  s_0c8a722f0b696b::t_b41aea6e1d81aa 8-9,12-13,16-17,20
+  s_0c8a722f0b696b::t_e158e7c6b1902e 1-7,10-11,14-15,18-19,21-24
+server/internal/game/game_test.go
+  s_0c8a722f0b696b::t_85577d1225d9c2 78-81
+  s_0c8a722f0b696b::t_9ecd2168ca67f3 1739-1752
+  s_0c8a722f0b696b::t_9354cde2777cde 1638-1656
+  s_0c8a722f0b696b::t_4cd7a55ea383c3 1097,1099,1102-1116,1120,1122-1127,1129-1131,1138-1147,1149,1151,1153,1155-1159,1161,1163,1166,1168
+  s_0c8a722f0b696b::t_4941a249dffeeb 1117-1119,1128,1132-1137
+  s_0c8a722f0b696b::t_936aa991f44959 5
+  s_0c8a722f0b696b::t_178fb79a2a0ae0 1091-1096,1098,1100-1101,1121,1148,1150,1152,1154,1160,1162,1164-1165,1167,1169-1198
+  s_0c8a722f0b696b::t_ce5806dbfde7ae 1627-1637
+client/scripts/inventory_panel.gd
+  s_0c8a722f0b696b::t_a16f7e655da147 437-442
+  s_0c8a722f0b696b::t_179126c1d1e73b 415-416
+shared/rules/items.v0.json
+  s_0c8a722f0b696b::t_a56e2a22a9f3ae 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "03aa56285c8e4acdbf13c2e10c37691516a470f6",
+  "prompts": {},
+  "sessions": {
+    "s_0c8a722f0b696b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b3dabd1d-b6aa-4f32-9d7c-3fc6c8e068a7",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a11a87769a8040": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd0a373f-8cb4-4493-9a06-626b97f50943",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

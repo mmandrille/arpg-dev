@@ -23,10 +23,10 @@ func PlanPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bo
 
 	open := &pathPriorityQueue{}
 	heap.Init(open)
-	startNode := &pathNode{cell: startCell, g: 0, f: octile(startCell, goalCell)}
+	startNode := &pathNode{cell: startCell, g: 0, f: octile(startCell, goalCell), diagonals: 0}
 	heap.Push(open, startNode)
 
-	best := map[gridCell]int{startCell: 0}
+	best := map[gridCell]pathCost{startCell: {g: 0, diagonals: 0}}
 	cameFrom := map[gridCell]gridCell{}
 	closed := map[gridCell]bool{}
 
@@ -50,12 +50,24 @@ func PlanPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bo
 				continue
 			}
 			ng := current.g + 1
-			if old, ok := best[next]; ok && ng >= old {
+			newDiagonals := current.diagonals
+			if dx != 0 && dy != 0 {
+				newDiagonals++
+			}
+			if prev, ok := best[next]; ok && ng > prev.g {
 				continue
 			}
-			best[next] = ng
+			if prev, ok := best[next]; ok && ng == prev.g && newDiagonals <= prev.diagonals {
+				continue
+			}
+			best[next] = pathCost{g: ng, diagonals: newDiagonals}
 			cameFrom[next] = current.cell
-			heap.Push(open, &pathNode{cell: next, g: ng, f: ng + octile(next, goalCell)})
+			heap.Push(open, &pathNode{
+				cell:      next,
+				g:         ng,
+				f:         ng + octile(next, goalCell),
+				diagonals: newDiagonals,
+			})
 		}
 	}
 	return nil, false
@@ -113,21 +125,26 @@ func reconstructPath(nav NavigationRules, cameFrom map[gridCell]gridCell, start,
 		to := cells[i-1]
 		dx := signInt(to.x - from.x)
 		dy := signInt(to.y - from.y)
-		if dx != 0 {
-			steps = append(steps, Vec2{X: float64(dx)})
-		}
-		if dy != 0 {
-			steps = append(steps, Vec2{Y: float64(dy)})
+		step := Vec2{X: float64(dx), Y: float64(dy)}
+		if step.X != 0 || step.Y != 0 {
+			steps = append(steps, step)
 		}
 	}
+
 	return steps
 }
 
+type pathCost struct {
+	g         int
+	diagonals int
+}
+
 type pathNode struct {
-	cell  gridCell
-	g     int
-	f     int
-	index int
+	cell      gridCell
+	g         int
+	f         int
+	diagonals int
+	index     int
 }
 
 type pathPriorityQueue []*pathNode
@@ -136,6 +153,9 @@ func (pq pathPriorityQueue) Len() int { return len(pq) }
 func (pq pathPriorityQueue) Less(i, j int) bool {
 	if pq[i].f != pq[j].f {
 		return pq[i].f < pq[j].f
+	}
+	if pq[i].diagonals != pq[j].diagonals {
+		return pq[i].diagonals > pq[j].diagonals
 	}
 	if pq[i].cell.y != pq[j].cell.y {
 		return pq[i].cell.y < pq[j].cell.y

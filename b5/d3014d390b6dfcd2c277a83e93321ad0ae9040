@@ -1,0 +1,21 @@
+scripts/test_all.sh
+  s_c73842b7b935ce::t_cb166c58144eb4 1-32
+make/test.mk
+  s_c73842b7b935ce::t_8f122102096077 4-6,15-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b5d3014d390b6dfcd2c277a83e93321ad0ae9040",
+  "prompts": {},
+  "sessions": {
+    "s_c73842b7b935ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "406880e6-9fed-4bb5-b3c9-3f6b38d7438b",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

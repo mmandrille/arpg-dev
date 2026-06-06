@@ -1,0 +1,29 @@
+README.md
+  s_4479f238e4d100::t_7548f56515c0dc 38,40
+make/client.mk
+  s_4479f238e4d100::t_7548f56515c0dc 2-6
+make/subfiles.mk
+  s_4479f238e4d100::t_7548f56515c0dc 7
+make/test.mk
+  s_4479f238e4d100::t_7548f56515c0dc 1-13
+scripts/client_smoke.sh
+  s_4479f238e4d100::t_7548f56515c0dc 60-64
+CLAUDE.md
+  s_4479f238e4d100::t_7548f56515c0dc 32,34-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cd52bf697dee0219f632f9f2390088562b8aefa1",
+  "prompts": {},
+  "sessions": {
+    "s_4479f238e4d100": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "23b48b70-c426-42a3-9d5e-2ec89bd00d35",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

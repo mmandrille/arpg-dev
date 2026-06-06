@@ -16,14 +16,11 @@ func TestPlanPathOpenField(t *testing.T) {
 	if !ok {
 		t.Fatal("PlanPath returned ok=false")
 	}
-	if len(steps) != 6 {
-		t.Fatalf("len(steps) = %d, want 6: %+v", len(steps), steps)
+	if len(steps) != 3 {
+		t.Fatalf("len(steps) = %d, want 3: %+v", len(steps), steps)
 	}
+	want := Vec2{X: 1, Y: 1}
 	for i, step := range steps {
-		want := Vec2{X: 1}
-		if i%2 == 1 {
-			want = Vec2{Y: 1}
-		}
 		if step != want {
 			t.Fatalf("step[%d] = %+v, want %+v", i, step, want)
 		}
@@ -42,6 +39,24 @@ func TestPlanPathBlockedCellDetour(t *testing.T) {
 	for _, step := range steps {
 		if step == (Vec2{X: 0, Y: 0}) {
 			t.Fatalf("zero step in path: %+v", steps)
+		}
+	}
+}
+
+func TestPlanPathUnequalAxesUsesDiagonalSteps(t *testing.T) {
+	nav := testNav()
+	nav.GridBounds = GridBounds{MinX: -10, MinY: -10, MaxX: 16, MaxY: 12}
+	steps, ok := PlanPath(nav, Vec2{X: 0, Y: 0}, Vec2{X: -4, Y: 3}, func(_, _ int) bool { return false })
+	if !ok {
+		t.Fatal("PlanPath returned ok=false")
+	}
+	want := []Vec2{{X: -1, Y: 1}, {X: -1, Y: 1}, {X: -1, Y: 1}, {X: -1}}
+	if len(steps) != len(want) {
+		t.Fatalf("len(steps) = %d, want %d: %+v", len(steps), len(want), steps)
+	}
+	for i, step := range steps {
+		if step != want[i] {
+			t.Fatalf("step[%d] = %+v, want %+v", i, step, want[i])
 		}
 	}
 }

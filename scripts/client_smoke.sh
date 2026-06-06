@@ -57,6 +57,9 @@ run_gate "GDScript rig gate" "[rig-gate] PASS" res://tools/inspect_rig.gd
 # 2c. Animation controller + rigged scene test (server-independent).
 run_gate "GDScript animation test" "[gdtest] PASS: animation controller + scenes" res://tests/test_animation.gd
 
+# 2d. Bot scenario runner unit tests (server-independent).
+run_gate "GDScript client bot unit test" "[gdtest] PASS: test_client_bot" res://tests/test_client_bot.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0

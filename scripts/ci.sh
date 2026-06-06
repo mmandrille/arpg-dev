@@ -52,14 +52,18 @@ for i in $(seq 1 60); do
 done
 curl -fsS "$BASE_URL/readyz" >/dev/null
 
-echo "== 6/7 protocol bot + replay =="
+echo "== 6/8 protocol bot + replay =="
 SESSION_ID="$("$ROOT/.venv/bin/python" -m tools.bot.run \
   --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
   --print-session-id)"
 echo "bot completed session: $SESSION_ID"
 (cd server && ARPG_DATABASE_URL="$DATABASE_URL" go run ./cmd/arpg-replay --session-id "$SESSION_ID")
 
-echo "== 7/7 Godot headless smoke (optional) =="
+echo "== 7/8 Godot client bot scenarios =="
+GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
+  SCENARIO=all ./scripts/bot_client.sh
+
+echo "== 8/8 Godot headless smoke (optional) =="
 GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" DEBUG_TOKEN="$DEBUG_TOKEN" \
   ./scripts/client_smoke.sh
 

@@ -1,0 +1,20 @@
+{
+  "id": "inventory_lab_drop_item",
+  "runner": "godot_client",
+  "world_id": "inventory_lab",
+  "title": "Inventory drop: outside-panel drop, loot respawn, and pickup",
+  "description": "Bot picks up rusty_sword, opens panel, drops outside to floor, asserts inventory empty, waits for loot entity, picks it up again, asserts inventory has item.",
+  "client_steps": [
+    { "type": "wait_ws_open",           "timeout_s": 10.0 },
+    { "type": "wait_entity",            "entity_type": "loot", "timeout_s": 10.0 },
+    { "type": "click_entity",           "entity_type": "loot" },
+    { "type": "wait_inventory_item",    "timeout_s": 10.0 },
+    { "type": "press_key",              "keycode": "KEY_I" },
+    { "type": "assert_panel_visible",   "visible": true },
+    { "type": "drag_bag_to_outside",    "item_def_id": "rusty_sword" },
+    { "type": "assert_inventory_missing", "item_def_id": "rusty_sword" },
+    { "type": "wait_loot_item",         "timeout_s": 10.0 },
+    { "type": "click_entity",           "entity_type": "loot" },
+    { "type": "wait_inventory_item",    "item_def_id": "rusty_sword", "timeout_s": 10.0 }
+  ]
+}

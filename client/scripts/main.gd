@@ -39,6 +39,8 @@ var monster_ids: Array = []
 var interactable_ids: Array = []
 var ready_sent: bool = false
 var item_to_equip: String = ""
+var bot_mode: bool = false
+var _bot_pending_events: Array = []
 var autoplay_enabled: bool = false
 var autoplay_phase: String = "idle"
 var autoplay_timer: float = 0.0
@@ -142,6 +144,10 @@ func _ready() -> void:
 	predicted_pos = Vector3.ZERO
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
+	bot_mode = _truthy_env("ARPG_BOT_CLIENT")
+	if bot_mode:
+		var bot := preload("res://scripts/bot_controller.gd").new()
+		add_child(bot)
 
 
 func _process(delta: float) -> void:
@@ -282,6 +288,9 @@ func _apply_delta(p: Dictionary) -> void:
 			ctrl.enter_terminal("death")
 		else:
 			ctrl.play_one_shot(clip)
+	if bot_mode:
+		for ev in p.get("events", []):
+			_bot_pending_events.append(ev)
 	_reconcile_player()
 
 
@@ -490,6 +499,8 @@ func _is_inventory_key(event: InputEventKey) -> bool:
 
 func _input_locked() -> bool:
 	return visual_replay_enabled or autoplay_enabled
+	# bot_mode intentionally not included: bot synthetic events must pass through
+	# _unhandled_input() and _on_inventory_intent_requested() without locking.
 
 
 func _handle_autoplay(delta: float) -> void:
@@ -1173,6 +1184,35 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 	var target_rot := deg_to_rad(90.0) if state == "open" else 0.0
 	var tween := create_tween()
 	tween.tween_property(pivot, "rotation:y", target_rot, 0.25)
+
+
+# --- bot API (read-only state + intent dispatch) ----------------------------
+
+func get_bot_state() -> Dictionary:
+	var out := {
+		"ws_open": client != null and client.ready_state() == WebSocketPeer.STATE_OPEN,
+		"player_hp": player_hp,
+		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
+		"inventory": inventory.duplicate(true),
+		"equipped": equipped.duplicate(true),
+		"monster_ids": monster_ids.duplicate(),
+		"loot_ids": loot_ids.duplicate(),
+		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
+		"pending_events": _bot_pending_events.duplicate(true),
+	}
+	_bot_pending_events.clear()
+	return out
+
+
+func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	client.send(intent_type, last_server_tick, payload)
+	_attack_cooldown = SEND_INTERVAL
+
+
+func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> void:
+	_on_inventory_intent_requested(intent_type, payload)
 
 
 # --- debug ------------------------------------------------------------------

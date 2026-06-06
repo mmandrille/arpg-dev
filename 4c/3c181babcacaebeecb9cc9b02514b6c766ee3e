@@ -1,0 +1,37 @@
+client/scripts/bot_controller.gd
+  s_c73842b7b935ce::t_af96ed7c76a19c 88-89
+scripts/bot_client.sh
+  h_6c904e338a0e5a 20
+client/scripts/input_shadow_overlay.gd
+  s_c73842b7b935ce::t_e07aeda31e881a 4-6
+client/scripts/main.gd
+  s_c73842b7b935ce::t_faeafb17e7d44f 147-150
+  s_c73842b7b935ce::t_e45d8cfa745782 456-457
+  s_c73842b7b935ce::t_629d12fa592d8c 475
+  s_c73842b7b935ce::t_42db5f97f4ff1c 1208
+  s_c73842b7b935ce::t_47920cf3fd9612 176,180
+  s_c73842b7b935ce::t_aa09d49835c632 506-507
+  s_c73842b7b935ce::t_787ddf7d435d0a 503-505,508
+  s_c73842b7b935ce::t_8bf91cb84ddd16 1107-1187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4c3c181babcacaebeecb9cc9b02514b6c766ee3e",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_c73842b7b935ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "406880e6-9fed-4bb5-b3c9-3f6b38d7438b",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

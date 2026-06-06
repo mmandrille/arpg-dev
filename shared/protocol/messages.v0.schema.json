@@ -15,6 +15,8 @@
         "move_to_intent",
         "action_intent",
         "equip_intent",
+        "unequip_intent",
+        "drop_intent",
         "session_snapshot",
         "state_delta",
         "intent_accepted",
@@ -39,6 +41,10 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/action_intent" } } } },
     { "if": { "properties": { "type": { "const": "equip_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/equip_intent" } } } },
+    { "if": { "properties": { "type": { "const": "unequip_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/unequip_intent" } } } },
+    { "if": { "properties": { "type": { "const": "drop_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/drop_intent" } } } },
     { "if": { "properties": { "type": { "const": "intent_accepted" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/intent_accepted" } } } },
     { "if": { "properties": { "type": { "const": "intent_rejected" } } },
@@ -99,6 +105,22 @@
       "properties": {
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
         "slot": { "type": "string", "enum": ["weapon"] }
+      }
+    },
+    "unequip_intent": {
+      "type": "object",
+      "required": ["slot"],
+      "additionalProperties": false,
+      "properties": {
+        "slot": { "type": "string", "enum": ["weapon"] }
+      }
+    },
+    "drop_intent": {
+      "type": "object",
+      "required": ["item_instance_id"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" }
       }
     },
     "intent_accepted": {

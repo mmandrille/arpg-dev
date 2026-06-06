@@ -126,6 +126,7 @@ def cross_checks(report: Report) -> None:
     slice_golden = load(GOLDEN / "slice_outcome.json")
     auto_path_golden = load(GOLDEN / "auto_path.json")
     ranged_projectile_golden = load(GOLDEN / "ranged_projectile.json")
+    inventory_drop_golden = load(GOLDEN / "inventory_drop.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -260,7 +261,12 @@ def cross_checks(report: Report) -> None:
                 report.fail("loot entry item", f"{table} -> unknown item {entry['item_def_id']}")
                 break
         else:
-            report.ok(f"monster {mid} loot table + items resolve")
+            for item_id in loot["loot_tables"][table].get("drops", []):
+                if item_id not in items["items"]:
+                    report.fail("loot drop item", f"{table} -> unknown item {item_id}")
+                    break
+            else:
+                report.ok(f"monster {mid} loot table + items resolve")
 
     # world presets: entity references resolve and type-specific fields are present.
     for world_id, world in worlds["worlds"].items():
@@ -349,6 +355,22 @@ def cross_checks(report: Report) -> None:
             report.fail("ranged_projectile event", f"{name}: unexpected expected_event {case.get('expected_event')}")
         else:
             report.ok(f"ranged_projectile {name} references valid rules")
+
+    inventory_world_id = inventory_drop_golden["world_id"]
+    inventory_item_id = inventory_drop_golden["item_def_id"]
+    inventory_constants = inventory_drop_golden["constants"]
+    if inventory_world_id not in worlds["worlds"]:
+        report.fail("inventory_drop world", f"unknown world_id {inventory_world_id}")
+    elif inventory_item_id not in items["items"]:
+        report.fail("inventory_drop item", f"unknown item_def_id {inventory_item_id}")
+    elif inventory_constants.get("loot_drop_radius") != 0.35:
+        report.fail("inventory_drop loot_drop_radius", "must match v13 loot drop radius 0.35")
+    elif inventory_constants.get("player_radius") != 0.45:
+        report.fail("inventory_drop player_radius", "must match server playerRadius 0.45")
+    elif inventory_constants.get("drop_step") != navigation.get("cell_size"):
+        report.fail("inventory_drop drop_step", "must match navigation.cell_size")
+    else:
+        report.ok("inventory_drop golden references valid rules and constants")
 
     for interactable_id, interactable in interactables["interactables"].items():
         if interactable.get("initial_state") != "closed":

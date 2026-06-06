@@ -390,9 +390,11 @@ chase speeds, or NavMesh authority.
 | [0001](adr/0001-technology-stack.md) | Foundational stack (Go server, Godot client, shared rules, replay, bot) | Accepted |
 | [0006](adr/0006-asset-pipeline.md) | glTF-first assets, manifests, sockets, validation | Accepted; v3 as-built for rigged GLBs |
 | [0007](adr/0007-animation-state-model.md) | Client-only animation; event-driven reactions | Accepted; v4 as-built for player reactions |
+| [0008](adr/0008-world-structure-and-dungeon-progression.md) | World structure: infinite inverted-tower dungeon, multi-level Sim, character-scoped persistence, waypoints, co-op | Accepted |
 
-Anticipated but **not written:** netcode timing, Protobuf migration, production auth, multiplayer split
-(see ADR-0001 follow-up list).
+Anticipated but **not written:** netcode timing, Protobuf migration, production auth, multiplayer split,
+quest system design, NPC interaction protocol, player trade, character progression formulas
+(see ADR-0001 follow-up list and ADR-0008 deferred items).
 
 ---
 

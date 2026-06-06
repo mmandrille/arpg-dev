@@ -61,10 +61,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v0.schema.json"
-        if name == "state_delta.json":
-            return PROTOCOL / "state_delta.v0.schema.json"
-        return PROTOCOL / "messages.v0.schema.json"
+            return PROTOCOL / "session_snapshot.v1.schema.json"
+        if name.startswith("state_delta"):
+            return PROTOCOL / "state_delta.v1.schema.json"
+        return PROTOCOL / "messages.v1.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 
@@ -119,6 +119,7 @@ def cross_checks(report: Report) -> None:
     interactables = load(RULES / "interactables.v0.json")
     navigation = load(RULES / "navigation.v0.json")
     worlds = load(RULES / "worlds.v0.json")
+    dungeon_generation = load(RULES / "dungeon_generation.v0.json")
     damage_golden = load(GOLDEN / "damage_formula.json")
     retaliation_golden = load(GOLDEN / "retaliation_damage.json")
     equipped_weapon_golden = load(GOLDEN / "equipped_weapon_damage.json")
@@ -250,6 +251,22 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("navigation rules are within v11 bounds")
 
+    floor_size = dungeon_generation["floor_size"]
+    if floor_size.get("width", 0) < 16 or floor_size.get("height", 0) < 10:
+        report.fail("dungeon_generation floor_size", "must be at least 16x10")
+    else:
+        report.ok("dungeon_generation floor_size is at least legacy arena size")
+    for key in dungeon_generation["level_names"]:
+        try:
+            level_num = int(key)
+        except ValueError:
+            report.fail("dungeon_generation level_names", f"{key}: must be an integer string")
+            continue
+        if level_num >= 0:
+            report.fail("dungeon_generation level_names", f"{key}: must be a negative level")
+        else:
+            report.ok(f"dungeon_generation level name {key} is negative")
+
     golden_item_id = equipped_weapon_golden["item_def_id"]
     golden_item = items["items"].get(golden_item_id)
     if golden_item is None:
@@ -296,6 +313,14 @@ def cross_checks(report: Report) -> None:
 
     # world presets: entity references resolve and type-specific fields are present.
     for world_id, world in worlds["worlds"].items():
+        mode = world.get("mode")
+        if mode is None:
+            report.ok(f"world {world_id} uses single-level mode")
+        elif mode == "multi_level":
+            report.ok(f"world {world_id} uses multi-level mode")
+        else:
+            report.fail("world mode", f"{world_id}: unsupported mode {mode}")
+
         pos = world["player"]["position"]
         if not isinstance(pos.get("x"), (int, float)) or not isinstance(pos.get("y"), (int, float)):
             report.fail("world player position", f"{world_id}: player.position must have numeric x/y")
@@ -450,17 +475,38 @@ def cross_checks(report: Report) -> None:
                 report.ok(f"monster_chase world {world_id} uses chase monster {monster_id}")
 
     for interactable_id, interactable in interactables["interactables"].items():
-        if interactable.get("initial_state") != "closed":
-            report.fail("interactable initial_state", f"{interactable_id}: initial_state must be closed")
-        else:
+        initial_state = interactable.get("initial_state")
+        if initial_state == "closed":
             report.ok(f"interactable {interactable_id} initial_state is closed")
-        size = interactable.get("barrier_when_closed", {}).get("size", {})
-        if not isinstance(size.get("x"), (int, float)) or not isinstance(size.get("y"), (int, float)):
-            report.fail("interactable barrier", f"{interactable_id}: size must have numeric x/y")
-        elif size["x"] <= 0 or size["y"] <= 0:
-            report.fail("interactable barrier", f"{interactable_id}: size must be positive")
+            size = interactable.get("barrier_when_closed", {}).get("size", {})
+            if not isinstance(size.get("x"), (int, float)) or not isinstance(size.get("y"), (int, float)):
+                report.fail("interactable barrier", f"{interactable_id}: size must have numeric x/y")
+            elif size["x"] <= 0 or size["y"] <= 0:
+                report.fail("interactable barrier", f"{interactable_id}: size must be positive")
+            else:
+                report.ok(f"interactable {interactable_id} barrier size is positive")
+            if "transition" in interactable:
+                report.fail("interactable transition", f"{interactable_id}: closed blocker must not declare transition")
+            continue
+        if initial_state == "ready":
+            transition = interactable.get("transition")
+            if transition not in ("ascend", "descend"):
+                report.fail("interactable transition", f"{interactable_id}: ready interactable needs ascend/descend")
+            elif "barrier_when_closed" in interactable:
+                report.fail("interactable barrier", f"{interactable_id}: ready interactable must not block")
+            else:
+                report.ok(f"interactable {interactable_id} ready transition is {transition}")
+            continue
+        report.fail("interactable initial_state", f"{interactable_id}: unsupported state {initial_state}")
+
+    for stair_id, expected_transition in {"stairs_down": "descend", "stairs_up": "ascend"}.items():
+        stair = interactables["interactables"].get(stair_id)
+        if stair is None:
+            report.fail("stair interactable", f"missing {stair_id}")
+        elif stair.get("initial_state") != "ready" or stair.get("transition") != expected_transition:
+            report.fail("stair interactable", f"{stair_id}: expected ready/{expected_transition}")
         else:
-            report.ok(f"interactable {interactable_id} barrier size is positive")
+            report.ok(f"stair interactable {stair_id} is ready/{expected_transition}")
 
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])

@@ -45,6 +45,8 @@ type Event struct {
 	Damage         *int   `json:"damage,omitempty"`
 	Heal           *int   `json:"heal,omitempty"`
 	ItemInstanceID string `json:"item_instance_id,omitempty"`
+	FromLevel      *int   `json:"from_level,omitempty"`
+	ToLevel        *int   `json:"to_level,omitempty"`
 }
 
 // Snapshot is the full authoritative state for rendering (session_snapshot).
@@ -52,6 +54,7 @@ type Snapshot struct {
 	ServerTick   uint64             `json:"server_tick"`
 	SessionID    string             `json:"session_id"`
 	Seed         string             `json:"seed"`
+	CurrentLevel int                `json:"current_level"`
 	Entities     []EntityView       `json:"entities"`
 	Inventory    []ItemView         `json:"inventory"`
 	Equipped     map[string]*string `json:"equipped"`

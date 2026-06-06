@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/dungeon_generation.v0.schema.json",
+  "title": "Dungeon generation rules (v0)",
+  "type": "object",
+  "required": [
+    "version",
+    "floor_size",
+    "wall_thickness",
+    "player_spawn",
+    "stair_placement",
+    "level_names",
+    "default_level_name_template"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "floor_size": {
+      "type": "object",
+      "required": ["width", "height"],
+      "additionalProperties": false,
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "wall_thickness": { "type": "number", "exclusiveMinimum": 0 },
+    "player_spawn": { "$ref": "#/$defs/position" },
+    "stair_placement": {
+      "type": "object",
+      "required": ["min_separation", "margin_from_wall", "max_attempts"],
+      "additionalProperties": false,
+      "properties": {
+        "min_separation": { "type": "number", "exclusiveMinimum": 0 },
+        "margin_from_wall": { "type": "number", "minimum": 0 },
+        "max_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "level_names": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "propertyNames": { "pattern": "^-[0-9]+$" }
+    },
+    "default_level_name_template": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

@@ -1,5 +1,6 @@
 {
   "server_tick": 43,
+  "level": 0,
   "changes": [
     { "op": "entity_update", "entity": { "id": "1002", "type": "monster", "position": { "x": 12, "y": 5 }, "hp": 0, "max_hp": 3 } },
     { "op": "entity_spawn", "entity": { "id": "1003", "type": "loot", "item_def_id": "rusty_sword", "position": { "x": 12, "y": 5 } } },

@@ -182,7 +182,39 @@ func _initialize() -> void:
 				_fail("monster_chase world %s uses non-chase monster %s" % [world_id, monster_id])
 				return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase)")
+	# 11. Dungeon stairs golden references generated floor rules and level labels.
+	var dungeon_generation := _read(shared.path_join("rules/dungeon_generation.v0.json"))
+	var dungeon_stairs := _read(shared.path_join("golden/dungeon_stairs.json"))
+	if float(dungeon_generation["floor_size"]["width"]) != 32.0:
+		_fail("dungeon_generation width mismatch")
+		return
+	if float(dungeon_generation["floor_size"]["height"]) != 20.0:
+		_fail("dungeon_generation height mismatch")
+		return
+	if str(dungeon_generation["level_names"]["-1"]) != "Entry Hall":
+		_fail("dungeon level -1 name mismatch")
+		return
+	var level1: Dictionary = dungeon_stairs["levels"]["-1"]
+	var level2: Dictionary = dungeon_stairs["levels"]["-2"]
+	if not _vec2_equals(level1["stairs_down"], 14.0, 18.0):
+		_fail("dungeon level -1 stairs_down mismatch")
+		return
+	if not _vec2_equals(level2["stairs_up"], 9.0, 11.0) or not _vec2_equals(level2["stairs_down"], 28.0, 14.0):
+		_fail("dungeon level -2 stairs mismatch")
+		return
+	var dungeon_loot: Array = level2["loot"]
+	if dungeon_loot.size() != 1:
+		_fail("dungeon level -2 loot count mismatch")
+		return
+	if str(dungeon_loot[0]["item_def_id"]) != "training_badge" or not _vec2_equals(dungeon_loot[0]["position"], 16.0, 11.0):
+		_fail("dungeon level -2 coin loot mismatch")
+		return
+	var fallback := str(dungeon_generation["default_level_name_template"]).replace("{n}", str(abs(-9)))
+	if fallback != "Depth 9":
+		_fail("dungeon fallback level name mismatch")
+		return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs)")
 	quit(0)
 
 
@@ -196,6 +228,10 @@ func _read(path: String) -> Dictionary:
 		_fail("invalid JSON in %s" % path)
 		return {}
 	return parsed
+
+
+func _vec2_equals(value: Dictionary, x: float, y: float) -> bool:
+	return is_equal_approx(float(value.get("x", NAN)), x) and is_equal_approx(float(value.get("y", NAN)), y)
 
 
 func _fail(msg: String) -> void:

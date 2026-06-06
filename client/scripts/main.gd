@@ -38,9 +38,12 @@ var inventory: Array = []
 var equipped: Dictionary = {}
 var item_rules: Dictionary = {}
 var item_presentations: Dictionary = {}
+var dungeon_generation: Dictionary = {}
 var loot_ids: Array = []
 var monster_ids: Array = []
 var interactable_ids: Array = []
+var current_world_id: String = "vertical_slice"
+var current_level: int = 0
 var ready_sent: bool = false
 var item_to_equip: String = ""
 var bot_mode: bool = false
@@ -93,6 +96,7 @@ var _health_bar: PlayerHealthBar
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
 var _debug_label: Label
+var _level_label: Label
 var _camera: Camera3D
 
 const SEND_INTERVAL := 0.1
@@ -117,6 +121,7 @@ func _ready() -> void:
 	_build_scene()
 	_load_item_rules()
 	_load_item_presentations()
+	_load_dungeon_generation()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
 
@@ -150,6 +155,7 @@ func _ready() -> void:
 		return
 	if bot_client_run:
 		print("[bot-client] session ok id=%s world=%s" % [client.session_id, client.world_id])
+	current_world_id = client.world_id
 	_render_world_walls(client.world_id)
 	autoplay_enabled = _truthy_env("ARPG_AUTOPLAY")
 	if autoplay_enabled:
@@ -218,17 +224,10 @@ func _handle_message(env: Dictionary) -> void:
 
 
 func _apply_snapshot(p: Dictionary) -> void:
-	for id in entities.keys():
-		(entities[id]["node"] as Node3D).queue_free()
-	entities.clear()
-	for id in monster_health_bars.keys():
-		var bar = monster_health_bars[id]
-		if is_instance_valid(bar):
-			bar.queue_free()
-	monster_health_bars.clear()
-	loot_ids.clear()
-	monster_ids.clear()
-	interactable_ids.clear()
+	current_level = int(p.get("current_level", 0))
+	_clear_level_entities()
+	_render_world_walls(current_world_id)
+	_update_level_hud()
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
 	for e in p.get("entities", []):
 		_upsert_entity(e)
@@ -246,6 +245,12 @@ func _apply_snapshot(p: Dictionary) -> void:
 
 
 func _apply_delta(p: Dictionary) -> void:
+	for ev in p.get("events", []):
+		if str(ev.get("event_type", "")) == "level_changed":
+			current_level = int(ev.get("to_level", current_level))
+			_clear_level_entities()
+			_render_world_walls(current_world_id)
+			_update_level_hud()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -365,6 +370,8 @@ func _upsert_entity(e: Dictionary) -> void:
 		rec = {"node": node, "controller": controller, "type": str(e["type"])}
 		if e.has("item_def_id"):
 			rec["item_def_id"] = str(e["item_def_id"])
+		if e.has("interactable_def_id"):
+			rec["interactable_def_id"] = str(e["interactable_def_id"])
 		entities[id] = rec
 		if e["type"] != "projectile":
 			_attach_pick_collider(node, id, str(e["type"]))
@@ -417,6 +424,20 @@ func _remove_entity(id: String) -> void:
 	loot_ids.erase(id)
 	monster_ids.erase(id)
 	interactable_ids.erase(id)
+
+
+func _clear_level_entities() -> void:
+	for id in entities.keys():
+		(entities[id]["node"] as Node3D).queue_free()
+	entities.clear()
+	for id in monster_health_bars.keys():
+		var bar = monster_health_bars[id]
+		if is_instance_valid(bar):
+			bar.queue_free()
+	monster_health_bars.clear()
+	loot_ids.clear()
+	monster_ids.clear()
+	interactable_ids.clear()
 
 
 func _update_inventory_item(item: Dictionary) -> void:
@@ -656,6 +677,12 @@ func _try_action_at_mouse() -> void:
 
 	var typ := str(rec.get("type", ""))
 	var state := str(rec.get("state", ""))
+	var interactable_def_id := str(rec.get("interactable_def_id", ""))
+	if typ == "interactable" and interactable_def_id in ["stairs_down", "stairs_up"]:
+		var intent_type := "descend_intent" if interactable_def_id == "stairs_down" else "ascend_intent"
+		client.send(intent_type, last_server_tick, {})
+		_attack_cooldown = SEND_INTERVAL
+		return
 	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")):
 		player_anim.play_one_shot("attack")
 
@@ -821,6 +848,7 @@ func _start_next_visual_replay() -> void:
 	var scenario: Dictionary = visual_replay_scenarios[visual_replay_index]
 	var session_id := str(scenario.get("session_id", ""))
 	var world_id := str(scenario.get("world_id", "vertical_slice"))
+	current_world_id = world_id
 	visual_replay_title = str(scenario.get("title", scenario.get("id", session_id)))
 	var visual_cfg: Dictionary = scenario.get("visual", {})
 	visual_replay_show_inventory = bool(visual_cfg.get("inventory_panel", false)) \
@@ -929,6 +957,16 @@ func _build_scene() -> void:
 	_debug_label = Label.new()
 	_debug_label.position = Vector2(12, 12)
 	ui.add_child(_debug_label)
+	_level_label = Label.new()
+	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_level_label.position = Vector2(0, 12)
+	_level_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_level_label.offset_left = -260
+	_level_label.offset_right = -12
+	_level_label.offset_top = 12
+	_level_label.offset_bottom = 44
+	ui.add_child(_level_label)
+	_update_level_hud()
 	inventory_panel = InventoryPanelScript.new()
 	inventory_panel.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(inventory_panel)
@@ -974,6 +1012,9 @@ func _render_world_walls(world_id: String) -> void:
 		return
 	var worlds: Dictionary = parsed.get("worlds", {})
 	var world: Dictionary = worlds.get(world_id, {})
+	if str(world.get("mode", "")) == "multi_level":
+		_render_dungeon_walls()
+		return
 	for entity in world.get("entities", []):
 		if str(entity.get("type", "")) != "wall":
 			continue
@@ -988,6 +1029,55 @@ func _render_world_walls(world_id: String) -> void:
 		mat.albedo_color = Color(0.32, 0.34, 0.36)
 		node.material_override = mat
 		walls_root.add_child(node)
+
+
+func _render_dungeon_walls() -> void:
+	if dungeon_generation.is_empty():
+		return
+	var floor_size: Dictionary = dungeon_generation.get("floor_size", {})
+	var width := float(floor_size.get("width", 32.0))
+	var height := float(floor_size.get("height", 20.0))
+	var thickness := float(dungeon_generation.get("wall_thickness", 1.0))
+	var half := thickness / 2.0
+	var walls := [
+		{"position": {"x": width / 2.0, "y": -half}, "size": {"x": width + thickness * 2.0, "y": thickness}},
+		{"position": {"x": width / 2.0, "y": height + half}, "size": {"x": width + thickness * 2.0, "y": thickness}},
+		{"position": {"x": -half, "y": height / 2.0}, "size": {"x": thickness, "y": height}},
+		{"position": {"x": width + half, "y": height / 2.0}, "size": {"x": thickness, "y": height}},
+	]
+	for wall in walls:
+		var pos: Dictionary = wall["position"]
+		var size: Dictionary = wall["size"]
+		var node := MeshInstance3D.new()
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(float(size["x"]), 1.0, float(size["y"]))
+		node.mesh = mesh
+		node.position = Vector3(float(pos["x"]), 0.5, float(pos["y"]))
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.24, 0.25, 0.27)
+		node.material_override = mat
+		walls_root.add_child(node)
+
+
+func _update_level_hud() -> void:
+	if _level_label == null:
+		return
+	if current_level == 0:
+		_level_label.visible = false
+		_level_label.text = ""
+		return
+	_level_label.visible = true
+	var depth: int = abs(current_level)
+	_level_label.text = "Level %d - %s" % [depth, _dungeon_level_name(current_level)]
+
+
+func _dungeon_level_name(level: int) -> String:
+	var names: Dictionary = dungeon_generation.get("level_names", {})
+	var key := str(level)
+	if names.has(key):
+		return str(names[key])
+	var template := str(dungeon_generation.get("default_level_name_template", "Depth {n}"))
+	return template.replace("{n}", str(abs(level)))
 
 
 func _read_json(path: String):
@@ -1013,6 +1103,9 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		fallback.material_override = fm
 		return fallback
 	if kind == "interactable":
+		var def_id := str(e.get("interactable_def_id", ""))
+		if def_id == "stairs_down" or def_id == "stairs_up":
+			return _make_stair_node(def_id)
 		return _make_door_node()
 	if kind == "projectile":
 		return _make_projectile_node()
@@ -1103,6 +1196,13 @@ func _load_item_presentations() -> void:
 		item_presentations = parsed.get("items", {})
 
 
+func _load_dungeon_generation() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/dungeon_generation.v0.json")
+	var parsed = _read_json(path)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		dungeon_generation = parsed
+
+
 func _make_projectile_node() -> Node3D:
 	var root := Node3D.new()
 	root.name = "Projectile"
@@ -1157,6 +1257,31 @@ func _make_door_node() -> Node3D:
 	mat.albedo_color = Color(0.55, 0.32, 0.15)
 	panel.material_override = mat
 	pivot.add_child(panel)
+	return root
+
+
+func _make_stair_node(def_id: String) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Stairs_%s" % def_id
+	var base := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(1.1, 0.18, 1.1)
+	base.mesh = mesh
+	base.position = Vector3(0.0, 0.09, 0.0)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.22, 0.24, 0.27) if def_id == "stairs_down" else Color(0.46, 0.48, 0.50)
+	base.material_override = mat
+	root.add_child(base)
+	for i in range(3):
+		var step := MeshInstance3D.new()
+		var smesh := BoxMesh.new()
+		smesh.size = Vector3(0.95 - float(i) * 0.18, 0.12, 0.22)
+		step.mesh = smesh
+		step.position = Vector3(0.0, 0.22 + float(i) * 0.12, -0.34 + float(i) * 0.27)
+		var step_mat := StandardMaterial3D.new()
+		step_mat.albedo_color = Color(0.58, 0.56, 0.50)
+		step.material_override = step_mat
+		root.add_child(step)
 	return root
 
 

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/dungeon_stairs.v0.schema.json",
+  "title": "Dungeon stairs golden fixture (v0)",
+  "type": "object",
+  "required": ["seed", "levels", "descend_then_ascend"],
+  "additionalProperties": false,
+  "properties": {
+    "seed": { "type": "string", "minLength": 1 },
+    "levels": {
+      "type": "object",
+      "required": ["-1", "-2"],
+      "additionalProperties": false,
+      "properties": {
+        "-1": { "$ref": "#/$defs/level" },
+        "-2": { "$ref": "#/$defs/level" }
+      }
+    },
+    "descend_then_ascend": {
+      "type": "object",
+      "required": ["expected_level", "expected_player_position"],
+      "additionalProperties": false,
+      "properties": {
+        "expected_level": { "type": "integer" },
+        "expected_player_position": { "$ref": "#/$defs/vec2" }
+      }
+    }
+  },
+  "$defs": {
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "level": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stairs_down": { "$ref": "#/$defs/vec2" },
+        "stairs_up": { "$ref": "#/$defs/vec2" },
+        "loot": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/loot" }
+        }
+      }
+    },
+    "loot": {
+      "type": "object",
+      "required": ["item_def_id", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "item_def_id": { "type": "string", "minLength": 1 },
+        "position": { "$ref": "#/$defs/vec2" }
+      }
+    }
+  }
+}

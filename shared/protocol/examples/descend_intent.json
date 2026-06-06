@@ -1,0 +1,8 @@
+{
+  "type": "descend_intent",
+  "message_id": "msg_01H00000000000000000000018",
+  "session_id": "ses_01H00000000000000000000000",
+  "tick": 12,
+  "correlation_id": "cor_01H00000000000000000000018",
+  "payload": {}
+}

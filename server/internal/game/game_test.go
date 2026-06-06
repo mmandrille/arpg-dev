@@ -1729,20 +1729,20 @@ func cloneRules(r *Rules) *Rules {
 
 func TestMonsterChaseGolden(t *testing.T) {
 	var golden struct {
-		Seed   string `json:"seed"`
-		Cases  []struct {
-			Name                     string   `json:"name"`
-			WorldID                  string   `json:"world_id"`
-			IdlePlayerTicks          int      `json:"idle_player_ticks"`
-			PlayerKiteSteps          []struct {
+		Seed  string `json:"seed"`
+		Cases []struct {
+			Name            string `json:"name"`
+			WorldID         string `json:"world_id"`
+			IdlePlayerTicks int    `json:"idle_player_ticks"`
+			PlayerKiteSteps []struct {
 				Direction     Vec2 `json:"direction"`
 				DurationTicks int  `json:"duration_ticks"`
 				Ticks         int  `json:"ticks"`
 			} `json:"player_kite_steps"`
-			WaitTicksAfterKite       int      `json:"wait_ticks_after_kite"`
-			ExpectedMonsterPosition  *Vec2    `json:"expected_monster_position"`
-			ExpectedNearSpawn        bool     `json:"expected_monster_final_near_spawn"`
-			ExpectedEvents           []string `json:"expected_events"`
+			WaitTicksAfterKite      int      `json:"wait_ticks_after_kite"`
+			ExpectedMonsterPosition *Vec2    `json:"expected_monster_position"`
+			ExpectedNearSpawn       bool     `json:"expected_monster_final_near_spawn"`
+			ExpectedEvents          []string `json:"expected_events"`
 		} `json:"cases"`
 	}
 	loadGolden(t, "monster_chase.json", &golden)
@@ -1881,6 +1881,179 @@ func TestMonsterChaseStopsWhenMeleeAdjacent(t *testing.T) {
 	if monster.pos != at {
 		t.Fatalf("monster drifted from %+v to %+v while adjacent to player", at, monster.pos)
 	}
+}
+
+func TestDungeonStairsGolden(t *testing.T) {
+	var golden struct {
+		Seed   string `json:"seed"`
+		Levels map[string]struct {
+			StairsDown *Vec2 `json:"stairs_down"`
+			StairsUp   *Vec2 `json:"stairs_up"`
+			Loot       []struct {
+				ItemDefID string `json:"item_def_id"`
+				Position  Vec2   `json:"position"`
+			} `json:"loot"`
+		} `json:"levels"`
+	}
+	loadGolden(t, "dungeon_stairs.json", &golden)
+	rules := loadRules(t)
+
+	level1, err := GenerateDungeonLevel(golden.Seed, -1, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate -1: %v", err)
+	}
+	if got := generatedStairPos(level1, stairsDownDefID); golden.Levels["-1"].StairsDown == nil || got != *golden.Levels["-1"].StairsDown {
+		t.Fatalf("level -1 stairs_down = %+v, want %+v", got, golden.Levels["-1"].StairsDown)
+	}
+
+	level2, err := GenerateDungeonLevel(golden.Seed, -2, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate -2: %v", err)
+	}
+	if got := generatedStairPos(level2, stairsUpDefID); golden.Levels["-2"].StairsUp == nil || got != *golden.Levels["-2"].StairsUp {
+		t.Fatalf("level -2 stairs_up = %+v, want %+v", got, golden.Levels["-2"].StairsUp)
+	}
+	if got := generatedStairPos(level2, stairsDownDefID); golden.Levels["-2"].StairsDown == nil || got != *golden.Levels["-2"].StairsDown {
+		t.Fatalf("level -2 stairs_down = %+v, want %+v", got, golden.Levels["-2"].StairsDown)
+	}
+	if len(golden.Levels["-2"].Loot) != 1 {
+		t.Fatalf("level -2 golden loot = %+v, want one entry", golden.Levels["-2"].Loot)
+	}
+	wantLoot := golden.Levels["-2"].Loot[0]
+	if got, ok := generatedLootPos(level2, wantLoot.ItemDefID); !ok || got != wantLoot.Position {
+		t.Fatalf("level -2 loot %s = %+v/%v, want %+v", wantLoot.ItemDefID, got, ok, wantLoot.Position)
+	}
+	if distance(wantLoot.Position, *golden.Levels["-2"].StairsUp) < dungeonCoinStairDistance {
+		t.Fatalf("level -2 coin distance from stairs_up = %v, want at least %v", distance(wantLoot.Position, *golden.Levels["-2"].StairsUp), dungeonCoinStairDistance)
+	}
+}
+
+func TestDungeonDescendAscendTransitions(t *testing.T) {
+	var golden struct {
+		Seed              string `json:"seed"`
+		DescendThenAscend struct {
+			ExpectedLevel          int  `json:"expected_level"`
+			ExpectedPlayerPosition Vec2 `json:"expected_player_position"`
+		} `json:"descend_then_ascend"`
+	}
+	loadGolden(t, "dungeon_stairs.json", &golden)
+	sim, err := NewSimWithWorld("sess_dungeon", golden.Seed, loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	if sim.currentLevel != -1 {
+		t.Fatalf("currentLevel = %d, want -1", sim.currentLevel)
+	}
+	down := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	if down == nil {
+		t.Fatal("missing down stairs on level -1")
+	}
+	sim.entities[sim.playerID].pos = down.pos
+
+	results := sim.TickResults([]Input{{MessageID: "descend", Type: "descend_intent", Descend: &DescendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("descend results = %d, want 2: %+v", len(results), results)
+	}
+	if results[0].Level != -1 || results[1].Level != -2 {
+		t.Fatalf("descend result levels = %d/%d, want -1/-2", results[0].Level, results[1].Level)
+	}
+	if !hasEntityRemove(results[0], idStr(sim.playerID)) {
+		t.Fatalf("from-level result missing player remove: %+v", results[0].Changes)
+	}
+	if !hasEntitySpawn(results[1], idStr(sim.playerID)) {
+		t.Fatalf("to-level result missing player spawn: %+v", results[1].Changes)
+	}
+	assertLevelChanged(t, results[0], -1, -2)
+
+	up := sim.findStair(sim.activeLevel(), stairsUpDefID)
+	if up == nil {
+		t.Fatal("missing up stairs on level -2")
+	}
+	if got := sim.entities[sim.playerID].pos; got != up.pos {
+		t.Fatalf("player position after descend = %+v, want up stair %+v", got, up.pos)
+	}
+	coin := findLootByDef(sim, "training_badge")
+	if coin == nil {
+		t.Fatal("missing dungeon training_badge coin")
+	}
+	pickup := sim.Tick([]Input{{MessageID: "pick_coin", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(coin.id)}}})
+	assertAck(t, pickup, "pick_coin")
+	if len(sim.inventory) != 0 {
+		t.Fatalf("coin picked up without leaving stair: %+v", sim.inventory)
+	}
+	pickupTicks := 1
+	for ; pickupTicks < 20 && len(sim.inventory) == 0; pickupTicks++ {
+		sim.Tick(nil)
+	}
+	if len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "training_badge" {
+		t.Fatalf("inventory after coin pickup = %+v, want training_badge", sim.inventory)
+	}
+	if pickupTicks < 5 {
+		t.Fatalf("coin pickup took %d ticks from stair, want at least 5", pickupTicks)
+	}
+
+	sim.entities[sim.playerID].pos = up.pos
+	results = sim.TickResults([]Input{{MessageID: "ascend", Type: "ascend_intent", Ascend: &AscendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("ascend results = %d, want 2: %+v", len(results), results)
+	}
+	if sim.currentLevel != golden.DescendThenAscend.ExpectedLevel {
+		t.Fatalf("currentLevel = %d, want %d", sim.currentLevel, golden.DescendThenAscend.ExpectedLevel)
+	}
+	if got := sim.entities[sim.playerID].pos; got != golden.DescendThenAscend.ExpectedPlayerPosition {
+		t.Fatalf("player position after ascend = %+v, want %+v", got, golden.DescendThenAscend.ExpectedPlayerPosition)
+	}
+	assertLevelChanged(t, results[0], -2, -1)
+}
+
+func generatedStairPos(level generatedDungeonLevel, defID string) Vec2 {
+	for _, stair := range level.stairs {
+		if stair.defID == defID {
+			return stair.pos
+		}
+	}
+	return Vec2{}
+}
+
+func generatedLootPos(level generatedDungeonLevel, itemDefID string) (Vec2, bool) {
+	for _, loot := range level.loot {
+		if loot.itemDefID == itemDefID {
+			return loot.pos, true
+		}
+	}
+	return Vec2{}, false
+}
+
+func hasEntityRemove(r TickResult, entityID string) bool {
+	for _, ch := range r.Changes {
+		if ch.Op == OpEntityRemove && ch.EntityID == entityID {
+			return true
+		}
+	}
+	return false
+}
+
+func hasEntitySpawn(r TickResult, entityID string) bool {
+	for _, ch := range r.Changes {
+		if ch.Op == OpEntitySpawn && ch.Entity != nil && ch.Entity.ID == entityID {
+			return true
+		}
+	}
+	return false
+}
+
+func assertLevelChanged(t *testing.T, r TickResult, fromLevel, toLevel int) {
+	t.Helper()
+	for _, ev := range r.Events {
+		if ev.EventType != "level_changed" {
+			continue
+		}
+		if ev.FromLevel == nil || ev.ToLevel == nil || *ev.FromLevel != fromLevel || *ev.ToLevel != toLevel {
+			t.Fatalf("level_changed = %+v, want %d -> %d", ev, fromLevel, toLevel)
+		}
+		return
+	}
+	t.Fatalf("missing level_changed in %+v", r.Events)
 }
 
 func hasEvent(r TickResult, eventType string) bool {

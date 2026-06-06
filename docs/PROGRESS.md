@@ -14,7 +14,7 @@ Last updated: 2026-06-06
 | **Latest completed slice** | v17 — `monster-chase-movement` (server chase AI + bot labs + client walk) |
 | **Active branch** | `feature/monster-chase-movement` |
 | **CI gate** | `make ci` green on 2026-06-06 |
-| **Next slice** | TBD |
+| **Next slice** | v18 — `dungeon-levels-and-stairs` implementation present; DB-dependent bot/CI gate blocked locally by missing Docker/Colima socket |
 
 ### Slice numbering note
 
@@ -33,6 +33,7 @@ v14_* = godot-client-bot
 v15_* = item-visuals-and-loot-presentation
 v16_* = use-consumable
 v17_* = monster-chase-movement
+v18_* = dungeon-levels-and-stairs
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -70,6 +71,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v15** | `item-visuals-and-loot-presentation` | Complete (`make ci` green) | [`v15_spec-item-visuals-and-loot-presentation.md`](specs/v15_spec-item-visuals-and-loot-presentation.md) | [`v15_2026-06-06-item-visuals-and-loot-presentation.md`](plans/v15_2026-06-06-item-visuals-and-loot-presentation.md) |
 | **v16** | `use-consumable` | Complete (`make ci` green) | [`v16_spec-use-consumable.md`](specs/v16_spec-use-consumable.md) | [`v16_2026-06-06-use-consumable.md`](plans/v16_2026-06-06-use-consumable.md) |
 | **v17** | `monster-chase-movement` | Complete (`make ci` green) | [`v17_spec-monster-chase-movement.md`](specs/v17_spec-monster-chase-movement.md) | [`v17_2026-06-06-monster-chase-movement.md`](plans/v17_2026-06-06-monster-chase-movement.md) |
+| **v18** | `dungeon-levels-and-stairs` | Implemented; final DB-dependent verification blocked locally | [`v18_spec-dungeon-levels-and-stairs.md`](specs/v18_spec-dungeon-levels-and-stairs.md) | [`v18_2026-06-06-dungeon-levels-and-stairs.md`](plans/v18_2026-06-06-dungeon-levels-and-stairs.md) |
 
 ---
 

@@ -1,0 +1,19 @@
+{
+  "seed": "deadbeefdeadbeef",
+  "levels": {
+    "-1": {
+      "stairs_down": { "x": 14, "y": 18 }
+    },
+    "-2": {
+      "stairs_up": { "x": 9, "y": 11 },
+      "stairs_down": { "x": 28, "y": 14 },
+      "loot": [
+        { "item_def_id": "training_badge", "position": { "x": 16, "y": 11 } }
+      ]
+    }
+  },
+  "descend_then_ascend": {
+    "expected_level": -1,
+    "expected_player_position": { "x": 14, "y": 18 }
+  }
+}

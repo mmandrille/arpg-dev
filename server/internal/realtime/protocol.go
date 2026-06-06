@@ -67,6 +67,7 @@ type (
 	}
 	stateDeltaPayload struct {
 		ServerTick uint64        `json:"server_tick"`
+		Level      int           `json:"level"`
 		Changes    []game.Change `json:"changes"`
 		Events     []game.Event  `json:"events"`
 	}

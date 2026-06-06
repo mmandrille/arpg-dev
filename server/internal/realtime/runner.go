@@ -311,13 +311,15 @@ func (r *runner) doTick() {
 	}
 	delete(r.buffer, t)
 	sortInputs(inputs)
-	res := r.sim.Tick(inputs)
+	results := r.sim.TickResults(inputs)
 	// Capture per-input receipt times for latency, then forget them.
-	latencies := make([]time.Duration, 0, len(res.Acks)+len(res.Rejects))
-	for _, a := range res.Acks {
-		if recv, ok := r.received[a.MessageID]; ok {
-			latencies = append(latencies, time.Since(recv))
-			delete(r.received, a.MessageID)
+	latencies := []time.Duration{}
+	for _, res := range results {
+		for _, a := range res.Acks {
+			if recv, ok := r.received[a.MessageID]; ok {
+				latencies = append(latencies, time.Since(recv))
+				delete(r.received, a.MessageID)
+			}
 		}
 	}
 	r.mu.Unlock()
@@ -328,31 +330,36 @@ func (r *runner) doTick() {
 	}
 
 	// Acks / rejects.
-	for _, a := range res.Acks {
-		if isInventoryIntentType(inputTypes[a.MessageID]) {
-			r.log.Debug("inventory_debug_intent_accepted",
-				"message_id", a.MessageID,
-				"type", inputTypes[a.MessageID],
-				"tick", res.Tick,
-			)
+	for _, res := range results {
+		for _, a := range res.Acks {
+			if isInventoryIntentType(inputTypes[a.MessageID]) {
+				r.log.Debug("inventory_debug_intent_accepted",
+					"message_id", a.MessageID,
+					"type", inputTypes[a.MessageID],
+					"tick", res.Tick,
+				)
+			}
+			r.enqueue(r.acceptedEnvelope(a.MessageID, res.Tick, ""))
 		}
-		r.enqueue(r.acceptedEnvelope(a.MessageID, res.Tick, ""))
-	}
-	for _, rej := range res.Rejects {
-		if isInventoryIntentType(inputTypes[rej.MessageID]) {
-			r.log.Debug("inventory_debug_intent_rejected",
-				"message_id", rej.MessageID,
-				"type", inputTypes[rej.MessageID],
-				"tick", res.Tick,
-				"reason", rej.Reason,
-			)
+		for _, rej := range res.Rejects {
+			if isInventoryIntentType(inputTypes[rej.MessageID]) {
+				r.log.Debug("inventory_debug_intent_rejected",
+					"message_id", rej.MessageID,
+					"type", inputTypes[rej.MessageID],
+					"tick", res.Tick,
+					"reason", rej.Reason,
+				)
+			}
+			r.rejectIntent(rej.MessageID, rej.Reason, "")
 		}
-		r.rejectIntent(rej.MessageID, rej.Reason, "")
 	}
 
 	// State delta (only when something changed). Slices are coerced to non-nil
 	// so they marshal as [] not null, matching the state_delta schema.
-	if len(res.Changes) > 0 || len(res.Events) > 0 {
+	for _, res := range results {
+		if len(res.Changes) == 0 && len(res.Events) == 0 {
+			continue
+		}
 		changes := res.Changes
 		if changes == nil {
 			changes = []game.Change{}
@@ -366,11 +373,13 @@ func (r *runner) doTick() {
 			MessageID: ids.New("msg"),
 			SessionID: r.sess.ID,
 			Tick:      res.Tick,
-			Payload:   stateDeltaPayload{ServerTick: res.Tick, Changes: changes, Events: events},
+			Payload:   stateDeltaPayload{ServerTick: res.Tick, Level: res.Level, Changes: changes, Events: events},
 		})
 	}
 
-	r.persistTick(res)
+	for _, res := range results {
+		r.persistTick(res)
+	}
 }
 
 // persistTick writes events and inventory mutations produced by the tick.

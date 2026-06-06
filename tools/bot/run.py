@@ -92,6 +92,11 @@ class RuntimeState:
     rejected_message_reasons: dict[str, str] = field(default_factory=dict)
     min_player_monster_distance: dict[str, float] = field(default_factory=dict)
     initial_monster_positions: dict[str, dict[str, float]] = field(default_factory=dict)
+    current_level: int = 0
+    visited_levels: set[int] = field(default_factory=lambda: {0})
+    last_delta_level: int | None = None
+    pending_level_load: int | None = None
+    used_stair_positions: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -279,6 +284,20 @@ async def execute_step(
         assert_player_position(state, float(step["x"]), float(step["y"]), float(step.get("tolerance", 0.001)), "runtime protocol")
         return
 
+    if action == "assert_player_at_used_stair":
+        direction = str(step["direction"])
+        pos = state.used_stair_positions.get(direction)
+        if pos is None:
+            raise AssertionError(f"assert_player_at_used_stair: no recorded {direction} stair")
+        assert_player_position(
+            state,
+            float(pos["x"]),
+            float(pos["y"]),
+            float(step.get("tolerance", 0.001)),
+            "runtime protocol",
+        )
+        return
+
     if action == "attack_until_event":
         target_id = str(step["target_id"]) if step.get("target_id") else None
         if target_id is None:
@@ -379,6 +398,36 @@ async def execute_step(
     if action == "move_until_in_range":
         target = resolve_target(state, step)
         await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)))
+        return
+
+    if action == "use_stair":
+        direction = str(step["direction"])
+        if direction not in {"down", "up"}:
+            raise AssertionError(f"use_stair: direction must be down/up: {step}")
+        stair_def_id = "stairs_down" if direction == "down" else "stairs_up"
+        target = find_interactable(state, stair_def_id)
+        if target is None:
+            raise AssertionError(f"use_stair: missing {stair_def_id} on level {state.current_level}")
+        target_pos = target.get("position", {})
+        state.used_stair_positions[direction] = {
+            "x": float(target_pos.get("x", "nan")),
+            "y": float(target_pos.get("y", "nan")),
+        }
+        await walk_toward(
+            ws,
+            session_id,
+            state,
+            target["position"],
+            loop,
+            stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
+            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+        )
+        msg_type = "descend_intent" if direction == "down" else "ascend_intent"
+        previous_level = state.current_level
+        env = make_envelope(msg_type, session_id, state.last_tick, {})
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_level_change(ws, state, previous_level, loop)
         return
 
     if action == "walk_to_loot":
@@ -650,6 +699,14 @@ async def wait_for_event(ws, state: RuntimeState, event_type: str, loop) -> None
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, loop) -> None:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while state.current_level == previous_level or state.pending_level_load is not None:
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for level change from {previous_level}")
+        await pump_one(ws, state, timeout=0.1)
+
+
 async def wait_for_player_position(
     ws,
     state: RuntimeState,
@@ -703,17 +760,29 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
 
     p = m["payload"]
     state.last_tick = max(state.last_tick, int(p.get("server_tick", state.last_tick)))
+    delta_level = int(p.get("level", state.current_level))
+    state.last_delta_level = delta_level
+    state.visited_levels.add(delta_level)
     for ev in (p.get("events") or []):
         event_type = ev["event_type"]
         state.seen_events.add(event_type)
+        if event_type == "level_changed":
+            state.current_level = int(ev["to_level"])
+            state.pending_level_load = state.current_level
+            clear_active_level_state(state)
+            state.visited_levels.add(int(ev["from_level"]))
+            state.visited_levels.add(int(ev["to_level"]))
         if event_type == "monster_killed":
             state.killed = True
             entity = state.entities.get(str(ev.get("entity_id")))
             if entity is not None and entity.get("monster_def_id"):
                 state.killed_monster_def_ids.add(str(entity["monster_def_id"]))
             log("monster killed at tick", p.get("server_tick"))
+    apply_level_entities = delta_level == state.current_level
     for c in (p.get("changes") or []):
         if c["op"] in {"entity_spawn", "entity_update"}:
+            if not apply_level_entities:
+                continue
             entity = c["entity"]
             existing = state.entities.get(entity["id"], {})
             existing.update(entity)
@@ -724,6 +793,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                 if loot_id not in state.loot_ids:
                     state.loot_ids.append(loot_id)
         elif c["op"] == "entity_remove":
+            if not apply_level_entities:
+                continue
             entity_id = c["entity_id"]
             state.entities.pop(entity_id, None)
             if entity_id in state.loot_ids:
@@ -738,11 +809,17 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         elif c["op"] == "equipped_update" and c.get("slot") == "weapon":
             state.equipped_item_id = c.get("item_instance_id")
             state.equipped[c["slot"]] = c.get("item_instance_id")
+    if state.pending_level_load is not None and delta_level == state.pending_level_load:
+        state.pending_level_load = None
     update_runtime_distances(state)
 
 
 def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.last_tick = max(state.last_tick, int(payload.get("server_tick", 0)))
+    state.current_level = int(payload.get("current_level", 0))
+    state.visited_levels.add(state.current_level)
+    state.last_delta_level = state.current_level
+    state.pending_level_load = None
     state.entities = {str(e["id"]): dict(e) for e in payload.get("entities", [])}
     state.inventory = [dict(i) for i in payload.get("inventory", [])]
     state.equipped = dict(payload.get("equipped", {}))
@@ -757,6 +834,13 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     for entity in state.entities.values():
         track_initial_monster_position(state, entity)
     update_runtime_distances(state)
+
+
+def clear_active_level_state(state: RuntimeState) -> None:
+    state.entities.clear()
+    state.loot_ids.clear()
+    state.min_player_monster_distance.clear()
+    state.initial_monster_positions.clear()
 
 
 def track_initial_monster_position(state: RuntimeState, entity: dict[str, Any]) -> None:
@@ -890,7 +974,15 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
         payload = snap["payload"]
         inv = payload["inventory"]
         equipped = payload["equipped"]
-        run_assertions(assertions, payload["entities"], inv, equipped, item_id, "reconnect snapshot")
+        run_assertions(
+            assertions,
+            payload["entities"],
+            inv,
+            equipped,
+            item_id,
+            "reconnect snapshot",
+            current_level=int(payload.get("current_level", 0)),
+        )
         log("reconnect snapshot restored expected scenario state")
 
 
@@ -967,6 +1059,7 @@ def run_assertions(
     equipped: dict,
     item_id: str | None,
     where: str,
+    current_level: int | None = None,
 ) -> None:
     for assertion in assertions:
         if isinstance(assertion, str):
@@ -1016,6 +1109,14 @@ def run_assertions(
             continue
         elif typ == "player_hp_equals":
             assert_player_hp_equals(entities, int(assertion["equals"]), where)
+        elif typ == "current_level":
+            if current_level is None:
+                raise AssertionError(f"{where}: current_level unavailable")
+            want = int(assertion["equals"])
+            if current_level != want:
+                raise AssertionError(f"{where}: current_level {current_level} != {want}")
+        elif typ == "visited_levels_contain":
+            continue
         else:
             raise AssertionError(f"{where}: unknown assertion type {typ}")
 
@@ -1105,6 +1206,20 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                     f"{where}: monster {monster_def_id} spawn distance {dist:.3f} > {max_distance_from_spawn}"
                 )
             continue
+        if typ == "current_level":
+            want = int(assertion["equals"])
+            if state.current_level != want:
+                raise AssertionError(f"{where}: current_level {state.current_level} != {want}")
+            continue
+        if typ == "visited_levels_contain":
+            want = int(assertion["level"])
+            if want not in state.visited_levels:
+                raise AssertionError(f"{where}: level {want} not visited; have {sorted(state.visited_levels)}")
+            continue
+        if typ == "inventory_contains":
+            expected_equipped = assertion.get("equipped")
+            assert_inventory_contains(state.inventory, str(assertion["item_def_id"]), expected_equipped, where)
+            continue
 
 
 def default_manifest_path() -> Path:
@@ -1170,6 +1285,7 @@ def main() -> int:
                 state["equipped"],
                 observed.item_id,
                 "/state API",
+                current_level=int(state.get("current_level", 0)),
             )
             log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 

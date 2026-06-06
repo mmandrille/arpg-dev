@@ -7,6 +7,16 @@
       "barrier_when_closed": {
         "size": { "x": 1.0, "y": 0.25 }
       }
+    },
+    "stairs_down": {
+      "name": "Stairs Down",
+      "initial_state": "ready",
+      "transition": "descend"
+    },
+    "stairs_up": {
+      "name": "Stairs Up",
+      "initial_state": "ready",
+      "transition": "ascend"
     }
   }
 }

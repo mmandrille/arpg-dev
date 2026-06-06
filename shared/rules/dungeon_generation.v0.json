@@ -1,0 +1,17 @@
+{
+  "version": 0,
+  "floor_size": { "width": 32, "height": 20 },
+  "wall_thickness": 1.0,
+  "player_spawn": { "x": 4, "y": 10 },
+  "stair_placement": {
+    "min_separation": 8.0,
+    "margin_from_wall": 2.0,
+    "max_attempts": 64
+  },
+  "level_names": {
+    "-1": "Entry Hall",
+    "-2": "Lower Depths",
+    "-3": "Deep Vault"
+  },
+  "default_level_name_template": "Depth {n}"
+}

@@ -16,6 +16,7 @@
         "additionalProperties": false,
         "properties": {
           "name": { "type": "string" },
+          "category": { "type": "string", "enum": ["equipment", "currency", "quest", "consumable"] },
           "slot": { "type": "string", "enum": ["weapon"] },
           "equippable": { "type": "boolean" },
           "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },

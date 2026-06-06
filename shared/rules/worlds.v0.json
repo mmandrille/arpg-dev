@@ -225,6 +225,16 @@
           "size": { "x": 1, "y": 6 }
         }
       ]
+    },
+    "inventory_lab": {
+      "player": { "position": { "x": 4, "y": 5 } },
+      "entities": [
+        {
+          "type": "loot",
+          "item_def_id": "rusty_sword",
+          "position": { "x": 5, "y": 5 }
+        }
+      ]
     }
   }
 }

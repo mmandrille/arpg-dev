@@ -61,6 +61,7 @@
         "damage": { "type": "integer", "minimum": 0 },
         "heal": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "level": { "type": "integer" },
         "from_level": { "type": "integer" },
         "to_level": { "type": "integer" }
       },
@@ -106,6 +107,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["from_level", "to_level"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "teleporter_discovered" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "level"] }
         }
       ]
     },
@@ -158,6 +166,16 @@
             "op": { "const": "equipped_update" },
             "slot": { "type": "string", "enum": ["weapon"] },
             "item_instance_id": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "level", "discovered"],
+          "properties": {
+            "op": { "const": "teleporter_discovery_update" },
+            "level": { "type": "integer", "maximum": -1 },
+            "discovered": { "type": "boolean" }
           }
         }
       ]

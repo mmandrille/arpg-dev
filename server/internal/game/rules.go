@@ -45,12 +45,13 @@ type NavigationRules struct {
 
 // DungeonGenerationRules controls deterministic generated dungeon floors.
 type DungeonGenerationRules struct {
-	FloorSize                DungeonFloorSize    `json:"floor_size"`
-	WallThickness            float64             `json:"wall_thickness"`
-	PlayerSpawn              Vec2                `json:"player_spawn"`
-	StairPlacement           StairPlacementRules `json:"stair_placement"`
-	LevelNames               map[string]string   `json:"level_names"`
-	DefaultLevelNameTemplate string              `json:"default_level_name_template"`
+	FloorSize                DungeonFloorSize         `json:"floor_size"`
+	WallThickness            float64                  `json:"wall_thickness"`
+	PlayerSpawn              Vec2                     `json:"player_spawn"`
+	StairPlacement           StairPlacementRules      `json:"stair_placement"`
+	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
+	LevelNames               map[string]string        `json:"level_names"`
+	DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 }
 
 type DungeonFloorSize struct {
@@ -62,6 +63,12 @@ type StairPlacementRules struct {
 	MinSeparation  float64 `json:"min_separation"`
 	MarginFromWall float64 `json:"margin_from_wall"`
 	MaxAttempts    int     `json:"max_attempts"`
+}
+
+type TeleporterPlacementRules struct {
+	MarginFromWall   float64 `json:"margin_from_wall"`
+	MinStairDistance float64 `json:"min_stair_distance"`
+	MaxAttempts      int     `json:"max_attempts"`
 }
 
 // GridBounds is the inclusive grid rectangle searched by A*.
@@ -346,9 +353,9 @@ func LoadRules(dir string) (*Rules, error) {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: ready interactable must not declare barrier", id)
 			}
 			switch def.Transition {
-			case interactableTransitionAscend, interactableTransitionDescend:
+			case interactableTransitionAscend, interactableTransitionDescend, interactableTransitionWaypoint:
 			default:
-				return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: must be ascend or descend", id)
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: must be ascend, descend, or waypoint", id)
 			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules interactables.%s.initial_state: unsupported state %s", id, def.InitialState)
@@ -357,13 +364,14 @@ func LoadRules(dir string) (*Rules, error) {
 	r.Interactables = interactables.Interactables
 
 	var dungeonGeneration struct {
-		Version                  int                 `json:"version"`
-		FloorSize                DungeonFloorSize    `json:"floor_size"`
-		WallThickness            float64             `json:"wall_thickness"`
-		PlayerSpawn              Vec2                `json:"player_spawn"`
-		StairPlacement           StairPlacementRules `json:"stair_placement"`
-		LevelNames               map[string]string   `json:"level_names"`
-		DefaultLevelNameTemplate string              `json:"default_level_name_template"`
+		Version                  int                      `json:"version"`
+		FloorSize                DungeonFloorSize         `json:"floor_size"`
+		WallThickness            float64                  `json:"wall_thickness"`
+		PlayerSpawn              Vec2                     `json:"player_spawn"`
+		StairPlacement           StairPlacementRules      `json:"stair_placement"`
+		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
+		LevelNames               map[string]string        `json:"level_names"`
+		DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 	}
 	if err := readJSON(filepath.Join(dir, "dungeon_generation.v0.json"), &dungeonGeneration); err != nil {
 		return nil, err
@@ -383,6 +391,15 @@ func LoadRules(dir string) (*Rules, error) {
 	if dungeonGeneration.StairPlacement.MaxAttempts <= 0 {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.stair_placement.max_attempts: must be positive")
 	}
+	if dungeonGeneration.TeleporterPlacement.MarginFromWall < 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.teleporter_placement.margin_from_wall: must be non-negative")
+	}
+	if dungeonGeneration.TeleporterPlacement.MinStairDistance <= 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.teleporter_placement.min_stair_distance: must be positive")
+	}
+	if dungeonGeneration.TeleporterPlacement.MaxAttempts <= 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.teleporter_placement.max_attempts: must be positive")
+	}
 	for key := range dungeonGeneration.LevelNames {
 		level, err := strconv.Atoi(key)
 		if err != nil || level >= 0 {
@@ -394,6 +411,7 @@ func LoadRules(dir string) (*Rules, error) {
 		WallThickness:            dungeonGeneration.WallThickness,
 		PlayerSpawn:              dungeonGeneration.PlayerSpawn,
 		StairPlacement:           dungeonGeneration.StairPlacement,
+		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
 		LevelNames:               dungeonGeneration.LevelNames,
 		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
 	}

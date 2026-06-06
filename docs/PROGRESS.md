@@ -11,10 +11,10 @@ Last updated: 2026-06-06
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v17 — `monster-chase-movement` (server chase AI + bot labs + client walk) |
-| **Active branch** | `feature/monster-chase-movement` |
+| **Latest completed slice** | v19 — `teleporters-and-waypoint-ui` (generated teleporters + waypoint fast travel) |
+| **Active branch** | `feature/teleporters-and-waypoint-ui` |
 | **CI gate** | `make ci` green on 2026-06-06 |
-| **Next slice** | v18 — `dungeon-levels-and-stairs` implementation present; DB-dependent bot/CI gate blocked locally by missing Docker/Colima socket |
+| **Next slice** | TBD |
 
 ### Slice numbering note
 
@@ -34,6 +34,7 @@ v15_* = item-visuals-and-loot-presentation
 v16_* = use-consumable
 v17_* = monster-chase-movement
 v18_* = dungeon-levels-and-stairs
+v19_* = teleporters-and-waypoint-ui
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -71,7 +72,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v15** | `item-visuals-and-loot-presentation` | Complete (`make ci` green) | [`v15_spec-item-visuals-and-loot-presentation.md`](specs/v15_spec-item-visuals-and-loot-presentation.md) | [`v15_2026-06-06-item-visuals-and-loot-presentation.md`](plans/v15_2026-06-06-item-visuals-and-loot-presentation.md) |
 | **v16** | `use-consumable` | Complete (`make ci` green) | [`v16_spec-use-consumable.md`](specs/v16_spec-use-consumable.md) | [`v16_2026-06-06-use-consumable.md`](plans/v16_2026-06-06-use-consumable.md) |
 | **v17** | `monster-chase-movement` | Complete (`make ci` green) | [`v17_spec-monster-chase-movement.md`](specs/v17_spec-monster-chase-movement.md) | [`v17_2026-06-06-monster-chase-movement.md`](plans/v17_2026-06-06-monster-chase-movement.md) |
-| **v18** | `dungeon-levels-and-stairs` | Implemented; final DB-dependent verification blocked locally | [`v18_spec-dungeon-levels-and-stairs.md`](specs/v18_spec-dungeon-levels-and-stairs.md) | [`v18_2026-06-06-dungeon-levels-and-stairs.md`](plans/v18_2026-06-06-dungeon-levels-and-stairs.md) |
+| **v18** | `dungeon-levels-and-stairs` | Complete (`make ci` green) | [`v18_spec-dungeon-levels-and-stairs.md`](specs/v18_spec-dungeon-levels-and-stairs.md) | [`v18_2026-06-06-dungeon-levels-and-stairs.md`](plans/v18_2026-06-06-dungeon-levels-and-stairs.md) |
+| **v19** | `teleporters-and-waypoint-ui` | Complete (`make ci` green) | [`v19_spec-teleporters-and-waypoint-ui.md`](specs/v19_spec-teleporters-and-waypoint-ui.md) | [`v19_2026-06-06-teleporters-and-waypoint-ui.md`](plans/v19_2026-06-06-teleporters-and-waypoint-ui.md) |
 
 ---
 
@@ -383,6 +385,43 @@ heal-over-time, production potion art, stash, vendors, or crafting.
 **Explicit non-goals:** no proactive monster attacks, behavior trees/LimboAI, group aggro, fractional
 chase speeds, or NavMesh authority.
 
+### v18 — Dungeon levels and stairs
+
+**Proves:** The authoritative Sim can hold multiple generated dungeon levels and move the player
+between them with deterministic, level-scoped deltas.
+
+- `dungeon_levels` world runs in multi-level mode; legacy worlds remain single-level at level `0`.
+- `LevelState` owns per-level entities, walls, movement, auto-nav, and navigation bounds.
+- `shared/rules/dungeon_generation.v0.json` drives 32x20 dungeon floors, perimeter walls, level
+  names, player spawn, and deterministic stair placement.
+- `descend_intent` / `ascend_intent` move the player between generated levels and emit old-level
+  remove + new-level full spawn deltas with `level_changed`.
+- `shared/golden/dungeon_stairs.json` pins level -1/-2 stair and loot positions.
+- Godot renders generated dungeon walls, placeholder stairs, and a top-right level HUD.
+
+**Explicit non-goals:** no character-scoped persistence, town, waypoints, full room/corridor PCG,
+monster density by depth, co-op routing, or production stair art.
+
+### v19 — Teleporters and waypoint UI
+
+**Proves:** Dungeon levels can expose session-scoped discovered teleporters and use them for
+server-authoritative fast travel.
+
+- Dungeon generation places one deterministic `teleporter` interactable per generated level.
+- `action_intent` on a reachable teleporter discovers that level and emits
+  `teleporter_discovery_update` plus `teleporter_discovered`.
+- v1 snapshots include `discovered_teleporters`, listing generated/visited levels as enabled or
+  disabled.
+- `teleport_intent { target_level }` validates current teleporter reach and target discovery, then
+  reuses v18 two-delta level transition output.
+- Godot renders a placeholder teleporter and opens a left-side waypoint panel with disabled
+  undiscovered rows and a scroll container for longer level lists.
+- Bot scenario `13_teleporter_lab.json` covers discover -1, descend, verify -2 disabled, discover
+  -2, and teleport back to -1.
+
+**Explicit non-goals:** no character-scoped waypoint persistence, town waypoint, VFX/audio,
+production teleporter art, hidden infinite level catalog, or plugin adoption.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -420,6 +459,7 @@ collision_lab: pass through middle wall gap → kill monster on far side
 inventory_lab: pick up rusty_sword → equip → unequip → drop → re-pickup → re-equip
 heal_lab: pick up red_potion x2 → take damage → use potion twice → full HP
 chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond leash and return
+dungeon_levels / teleporter_lab: descend/ascend generated floors; discover teleporters and fast-travel back
 ```
 
 **Verify:**
@@ -481,6 +521,10 @@ goldens, server-owned inventory removal, and a client-only hotbar that sends use
 **Monster chase movement is now authoritative.** v17 adds opt-in chase behavior, deterministic
 monster pathing around solids, leash return, chase/lab bot scenarios, and client walk presentation
 from position deltas.
+
+**Dungeon levels, stairs, and teleporters are now authoritative.** v18 adds multi-level dungeon
+state and generated stairs; v19 adds generated teleporters, session discovery, and server-owned
+fast travel with a client-only waypoint panel.
 
 ### Other deferred items (from specs / ADRs)
 

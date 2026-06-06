@@ -16,6 +16,7 @@
         "action_intent",
         "descend_intent",
         "ascend_intent",
+        "teleport_intent",
         "equip_intent",
         "unequip_intent",
         "drop_intent",

@@ -44,6 +44,7 @@ var monster_ids: Array = []
 var interactable_ids: Array = []
 var current_world_id: String = "vertical_slice"
 var current_level: int = 0
+var discovered_teleporters: Dictionary = {}
 var ready_sent: bool = false
 var item_to_equip: String = ""
 var bot_mode: bool = false
@@ -68,6 +69,8 @@ var visual_replay_title: String = ""
 var visual_replay_debug_token: String = ""
 var visual_replay_exit_on_complete: bool = false
 var visual_replay_exit_requested: bool = false
+var waypoint_panel: PanelContainer
+var waypoint_rows: VBoxContainer
 var visual_replay_exit_timer: float = 0.0
 var visual_replay_show_inventory: bool = false
 
@@ -105,6 +108,7 @@ const CAMERA_ZOOM_DEFAULT := 20.0
 const CAMERA_ZOOM_STEP := 1.5
 const CAMERA_ZOOM_MIN := 8.0
 const CAMERA_ZOOM_MAX := 40.0
+const CAMERA_FOLLOW_OFFSET := Vector3(9.0, 20.0, 15.0)
 const PROJECTILE_LERP_SECONDS := 0.10
 
 
@@ -225,9 +229,11 @@ func _handle_message(env: Dictionary) -> void:
 
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
+	_apply_teleporter_snapshot(p.get("discovered_teleporters", []))
 	_clear_level_entities()
 	_render_world_walls(current_world_id)
 	_update_level_hud()
+	_refresh_waypoint_panel()
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
 	for e in p.get("entities", []):
 		_upsert_entity(e)
@@ -251,6 +257,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_clear_level_entities()
 			_render_world_walls(current_world_id)
 			_update_level_hud()
+			_hide_waypoint_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -272,6 +279,13 @@ func _apply_delta(p: Dictionary) -> void:
 				equipped[c["slot"]] = c.get("item_instance_id")
 				if resolver != null:
 					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
+			"teleporter_discovery_update":
+				var discovered_level := int(c.get("level", 0))
+				var discovered := bool(c.get("discovered", false))
+				discovered_teleporters[discovered_level] = discovered
+				_refresh_waypoint_panel()
+				if discovered and discovered_level == current_level:
+					_show_waypoint_panel()
 			_:
 				pass
 	_refresh_inventory_ui()
@@ -396,6 +410,10 @@ func _upsert_entity(e: Dictionary) -> void:
 			var moved := prev_pos.distance_to(server_pos) > 0.001
 			rec["controller"].set_locomotion(moved and hp_val > 0)
 	if rec["type"] == "interactable":
+		if str(e.get("interactable_def_id", rec.get("interactable_def_id", ""))) == "teleporter" \
+				and not discovered_teleporters.has(current_level):
+			discovered_teleporters[current_level] = false
+			_refresh_waypoint_panel()
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
 	# Resume/snapshot consistency: a monster already dead in the snapshot enters
@@ -470,6 +488,15 @@ func _refresh_inventory_panel() -> void:
 func _reconcile_player() -> void:
 	if player_anchor != null:
 		player_anchor.position = predicted_pos
+		_sync_camera_to_player()
+
+
+func _sync_camera_to_player() -> void:
+	if _camera == null or player_anchor == null:
+		return
+	var target := player_anchor.global_position
+	_camera.global_position = target + CAMERA_FOLLOW_OFFSET
+	_camera.look_at(target, Vector3.UP)
 
 
 func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0) -> void:
@@ -682,6 +709,13 @@ func _try_action_at_mouse() -> void:
 		var intent_type := "descend_intent" if interactable_def_id == "stairs_down" else "ascend_intent"
 		client.send(intent_type, last_server_tick, {})
 		_attack_cooldown = SEND_INTERVAL
+		return
+	if typ == "interactable" and interactable_def_id == "teleporter":
+		if bool(discovered_teleporters.get(current_level, false)):
+			_show_waypoint_panel()
+		else:
+			client.send("action_intent", last_server_tick, {"target_id": target_id})
+			_attack_cooldown = SEND_INTERVAL
 		return
 	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")):
 		player_anim.play_one_shot("attack")
@@ -943,10 +977,10 @@ func _build_scene() -> void:
 	_camera = Camera3D.new()
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	_camera.size = CAMERA_ZOOM_DEFAULT
-	_camera.position = Vector3(20, 20, 20)
+	_camera.position = CAMERA_FOLLOW_OFFSET
 	add_child(_camera)
 	# look_at requires the node to be inside the scene tree (Godot 4).
-	_camera.look_at(Vector3(11, 0, 5), Vector3.UP)
+	_sync_camera_to_player()
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -40, 0)
@@ -967,6 +1001,7 @@ func _build_scene() -> void:
 	_level_label.offset_bottom = 44
 	ui.add_child(_level_label)
 	_update_level_hud()
+	_setup_waypoint_panel(ui)
 	inventory_panel = InventoryPanelScript.new()
 	inventory_panel.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(inventory_panel)
@@ -997,6 +1032,82 @@ func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) ->
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
+
+
+func _setup_waypoint_panel(ui: CanvasLayer) -> void:
+	waypoint_panel = PanelContainer.new()
+	waypoint_panel.visible = false
+	waypoint_panel.position = Vector2(16, 96)
+	waypoint_panel.custom_minimum_size = Vector2(230, 0)
+	var panel_box := VBoxContainer.new()
+	panel_box.add_theme_constant_override("separation", 6)
+	var title := Label.new()
+	title.text = "Teleport"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	panel_box.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(220, 36 * 9)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	waypoint_rows = VBoxContainer.new()
+	waypoint_rows.add_theme_constant_override("separation", 4)
+	scroll.add_child(waypoint_rows)
+	panel_box.add_child(scroll)
+	waypoint_panel.add_child(panel_box)
+	ui.add_child(waypoint_panel)
+
+
+func _apply_teleporter_snapshot(rows: Array) -> void:
+	discovered_teleporters.clear()
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		discovered_teleporters[int(row.get("level", 0))] = bool(row.get("discovered", false))
+
+
+func _show_waypoint_panel() -> void:
+	if waypoint_panel == null:
+		return
+	_refresh_waypoint_panel()
+	waypoint_panel.visible = true
+
+
+func _hide_waypoint_panel() -> void:
+	if waypoint_panel != null:
+		waypoint_panel.visible = false
+
+
+func _refresh_waypoint_panel() -> void:
+	if waypoint_panel == null or waypoint_rows == null:
+		return
+	for child in waypoint_rows.get_children():
+		child.queue_free()
+	var levels := discovered_teleporter_levels()
+	for level in levels:
+		var row := Button.new()
+		row.custom_minimum_size = Vector2(204, 32)
+		row.text = _waypoint_row_text(level)
+		row.disabled = not bool(discovered_teleporters.get(level, false))
+		row.pressed.connect(_on_waypoint_level_pressed.bind(level))
+		waypoint_rows.add_child(row)
+
+
+func discovered_teleporter_levels() -> Array:
+	var levels: Array = discovered_teleporters.keys()
+	levels.sort()
+	return levels
+
+
+func _waypoint_row_text(level: int) -> String:
+	var depth: int = abs(level)
+	var state := "" if bool(discovered_teleporters.get(level, false)) else " (undiscovered)"
+	return "Level %d - %s%s" % [depth, _dungeon_level_name(level), state]
+
+
+func _on_waypoint_level_pressed(level: int) -> void:
+	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	client.send("teleport_intent", last_server_tick, {"target_level": level})
+	_hide_waypoint_panel()
 
 
 func _render_world_walls(world_id: String) -> void:
@@ -1106,6 +1217,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		var def_id := str(e.get("interactable_def_id", ""))
 		if def_id == "stairs_down" or def_id == "stairs_up":
 			return _make_stair_node(def_id)
+		if def_id == "teleporter":
+			return _make_teleporter_node()
 		return _make_door_node()
 	if kind == "projectile":
 		return _make_projectile_node()
@@ -1282,6 +1395,37 @@ func _make_stair_node(def_id: String) -> Node3D:
 		step_mat.albedo_color = Color(0.58, 0.56, 0.50)
 		step.material_override = step_mat
 		root.add_child(step)
+	return root
+
+
+func _make_teleporter_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Teleporter"
+	var base := MeshInstance3D.new()
+	var base_mesh := CylinderMesh.new()
+	base_mesh.top_radius = 0.62
+	base_mesh.bottom_radius = 0.72
+	base_mesh.height = 0.16
+	base.mesh = base_mesh
+	base.position = Vector3(0.0, 0.08, 0.0)
+	var base_mat := StandardMaterial3D.new()
+	base_mat.albedo_color = Color(0.16, 0.19, 0.22)
+	base.material_override = base_mat
+	root.add_child(base)
+
+	var core := MeshInstance3D.new()
+	var core_mesh := CylinderMesh.new()
+	core_mesh.top_radius = 0.34
+	core_mesh.bottom_radius = 0.34
+	core_mesh.height = 0.42
+	core.mesh = core_mesh
+	core.position = Vector3(0.0, 0.32, 0.0)
+	var core_mat := StandardMaterial3D.new()
+	core_mat.albedo_color = Color(0.15, 0.62, 0.70)
+	core_mat.emission_enabled = true
+	core_mat.emission = Color(0.05, 0.55, 0.68)
+	core.material_override = core_mat
+	root.add_child(core)
 	return root
 
 

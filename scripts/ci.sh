@@ -61,7 +61,7 @@ echo "bot completed session: $SESSION_ID"
 
 echo "== 7/8 Godot client bot scenarios =="
 GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
-  SCENARIO=all ./scripts/bot_client.sh
+  SCENARIO=all HEADLESS=1 ./scripts/bot_client.sh
 
 echo "== 8/8 Godot headless smoke (optional) =="
 GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" DEBUG_TOKEN="$DEBUG_TOKEN" \

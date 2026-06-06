@@ -25,9 +25,11 @@ const ALL_STEP_TYPES: Array = [
 ]
 
 var scenario: Dictionary = {}
+var step_delay_s: float = 0.0  # pause after each completed step (visual mode)
 var _steps: Array = []
 var _step_index: int = 0
 var _step_elapsed: float = 0.0
+var _post_step_wait: float = 0.0  # countdown after a step completes
 var _done: bool = false
 var _passed: bool = false
 var _failure_msg: String = ""
@@ -72,6 +74,9 @@ func tick(delta: float, state: Dictionary) -> bool:
 	pending_action = {}  # clear action from previous frame
 	if _done:
 		return true
+	if _post_step_wait > 0.0:
+		_post_step_wait -= delta
+		return false
 	if _step_index >= _steps.size():
 		_pass()
 		return true
@@ -205,6 +210,8 @@ func _queue_action(step: Dictionary, stype: String) -> void:
 func _advance() -> void:
 	_step_index += 1
 	_step_elapsed = 0.0
+	if step_delay_s > 0.0:
+		_post_step_wait = step_delay_s
 
 
 func _check_complete() -> void:

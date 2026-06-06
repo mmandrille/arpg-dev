@@ -14,6 +14,10 @@ GODOT="${GODOT:-godot}"
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
 SCENARIO="${SCENARIO:-all}"
+# Set HEADLESS=1 for CI. Default is 0 (windowed) so you can watch the bot act.
+HEADLESS="${HEADLESS:-0}"
+# When windowed, pause this many seconds between steps so the action is visible.
+BOT_STEP_DELAY="${BOT_STEP_DELAY:-$([ "$HEADLESS" == "1" ] && echo 0.0 || echo 1.2)}"
 
 if ! command -v "$GODOT" >/dev/null 2>&1; then
   echo "[bot-client] FAIL: Godot runtime '$GODOT' not found on PATH." >&2
@@ -85,12 +89,15 @@ run_scenario() {
 
   echo "[bot-client] --- running scenario: $scenario_id (world=$world_id)"
   exit_code=0
+  local godot_flags="--resolution 1280x720"
+  [[ "$HEADLESS" == "1" ]] && godot_flags="--headless $godot_flags"
   out="$(ARPG_BOT_CLIENT=1 \
     ARPG_BOT_SCENARIO="$scenario_path" \
     ARPG_WORLD_ID="$world_id" \
     ARPG_BASE_URL="$BASE_URL" \
     ARPG_DEV_TOKEN="$DEV_TOKEN" \
-    "$GODOT" --headless --resolution 1280x720 --path "$CLIENT_DIR" 2>&1)" \
+    ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
+    "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1)" \
     || exit_code=$?
 
   printf '%s\n' "$out"

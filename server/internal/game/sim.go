@@ -919,7 +919,7 @@ func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 
 func (s *Sim) findMeleeApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 	return s.findApproachGoalMatching(target, func(pos Vec2, target *entity) bool {
-		return meleeInRange(distance(pos, target.pos), s.playerReach(), s.targetInteractionRadius(target))
+		return meleeInRange(distance(pos, target.pos), s.playerMeleeReach(), s.targetInteractionRadius(target))
 	})
 }
 
@@ -1221,6 +1221,17 @@ func (s *Sim) playerReach() float64 {
 	return *def.Reach
 }
 
+func (s *Sim) playerMeleeReach() float64 {
+	def, ok := s.equippedWeaponDef()
+	if !ok || def.AttackMode == attackModeRanged {
+		return s.rules.Combat.UnarmedReach
+	}
+	if def.Reach == nil {
+		return s.rules.Combat.UnarmedReach
+	}
+	return *def.Reach
+}
+
 func (s *Sim) playerActionReach() float64 {
 	return s.playerReach()
 }
@@ -1264,7 +1275,7 @@ func (s *Sim) inMeleeRange(target *entity) bool {
 	if player == nil {
 		return false
 	}
-	return meleeInRange(distance(player.pos, target.pos), s.playerReach(), s.targetInteractionRadius(target))
+	return meleeInRange(distance(player.pos, target.pos), s.playerMeleeReach(), s.targetInteractionRadius(target))
 }
 
 func (s *Sim) inActionRange(target *entity) bool {

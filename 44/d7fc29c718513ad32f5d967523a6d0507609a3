@@ -1,0 +1,59 @@
+shared/golden/waypoint_panel.v0.schema.json
+  s_fdb01a363063e3::t_5b595f5609ac6b 1-21
+scripts/client_smoke.sh
+  s_fdb01a363063e3::t_fa30edc21612dc 63-65
+client/tests/test_waypoint_panel.gd.uid
+  s_fdb01a363063e3::t_5f330031e112ab 1
+client/tests/test_waypoint_panel.gd
+  s_fdb01a363063e3::t_b91ac898f70228 1-33,35,40-41,43-44,46-51,54-71
+  s_fdb01a363063e3::t_db0d508654b371 34,36-39,42,45,52-53
+server/internal/game/sim.go
+  s_fdb01a363063e3::t_92803c38550d20 955-961
+server/internal/game/game_test.go
+  s_fdb01a363063e3::t_ed3b46996ea1e3 2172-2175,2177-2182
+  s_fdb01a363063e3::t_31cb32232fc989 2233-2236,2238
+  s_fdb01a363063e3::t_cddcb237351c61 2101
+  s_fdb01a363063e3::t_23f03f849fa70c 2070-2100,2102-2171,2176,2183-2186
+tools/validate_shared.py
+  s_fdb01a363063e3::t_63b4865ab16eaf 133-134
+  s_fdb01a363063e3::t_a8c997cf1e41df 529-539
+shared/golden/dungeon_teleporters.json
+  s_fdb01a363063e3::t_8ac158a3b46791 1-8,11-16,19-21
+  s_fdb01a363063e3::t_79fc86d8509bd1 9-10
+  s_fdb01a363063e3::t_9d22a9d1568578 17-18
+shared/golden/dungeon_teleporters.v0.schema.json
+  s_fdb01a363063e3::t_4a2ecd0b1c9bdb 1-63
+server/internal/game/game_replay_test.go
+  s_fdb01a363063e3::t_d8499565834dac 6
+  s_fdb01a363063e3::t_53bc2dd2b82240 177
+  s_fdb01a363063e3::t_4a79aaed2a18ce 1-5,7-176,178-240
+client/tests/test_golden.gd
+  s_fdb01a363063e3::t_060bb9f889f8bf 226-249
+client/scripts/main.gd
+  s_fdb01a363063e3::t_812a8d14181984 1047-1050
+  s_fdb01a363063e3::t_272f4840c69fe9 7-8
+  s_fdb01a363063e3::t_325c5e2acef4aa 1039
+  s_fdb01a363063e3::t_fb77be9367b595 1088
+shared/golden/waypoint_panel.json
+  s_fdb01a363063e3::t_18f5a0f8868edd 1-7
+client/scripts/waypoint_panel_config.gd.uid
+  s_fdb01a363063e3::t_5f330031e112ab 1
+client/scripts/waypoint_panel_config.gd
+  s_fdb01a363063e3::t_0fd580e9d3904d 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "44d7fc29c718513ad32f5d967523a6d0507609a3",
+  "prompts": {},
+  "sessions": {
+    "s_fdb01a363063e3": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "58b69491-57bc-4e2e-b39b-cfc6befe28fd",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

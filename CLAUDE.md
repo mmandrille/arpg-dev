@@ -29,8 +29,11 @@ make bot-visual      # server + interactive Godot window with ARPG_AUTOPLAY=1
 make play            # Postgres + server + interactive Godot client
 
 # Testing
+make test            # unit tests: shared validation + Go + Python + client unit
 make test-go         # all Go tests  (`cd server && go test ./...`)
-make client-smoke    # Godot headless smoke tests (requires Godot binary)
+make test-py         # Python unit tests (`pytest tools/`)
+make client-unit     # Godot headless unit tests (no server required)
+make client-smoke    # Godot headless smoke + slice (slice needs server)
 make ci              # full local CI suite (shared validation + Go tests + bot + replay)
 
 # Shared contracts

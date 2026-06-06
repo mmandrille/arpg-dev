@@ -35,7 +35,9 @@ Everything runs through the `Makefile`. Run `make help` for the full list.
 ```bash
 make db-up           # start local Postgres (canonical DB startup path)
 make server          # run the Go server against local Postgres
+make test            # unit tests: shared validation, Go, Python, client unit
 make test-go         # run all Go tests
+make test-py         # run Python unit tests (tools/)
 make validate-shared # validate all shared JSON against schemas
 make validate-assets # validate the asset manifest + runtime .glb files
 make gen-assets      # regenerate the committed runtime .glb files (deterministic)

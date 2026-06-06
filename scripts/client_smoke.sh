@@ -57,6 +57,11 @@ run_gate "GDScript rig gate" "[rig-gate] PASS" res://tools/inspect_rig.gd
 # 2c. Animation controller + rigged scene test (server-independent).
 run_gate "GDScript animation test" "[gdtest] PASS: animation controller + scenes" res://tests/test_animation.gd
 
+if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
+  echo "[client-unit] PASS"
+  exit 0
+fi
+
 # 3. Headless slice smoke against the running server.
 run_gate "headless slice smoke" "[smoke] PASS" res://scripts/smoke.gd
 echo "[client-smoke] PASS"

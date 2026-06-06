@@ -655,6 +655,8 @@ def update_runtime_distances(state: RuntimeState) -> None:
     for entity in state.entities.values():
         if entity.get("type") != "monster":
             continue
+        if int(entity.get("hp", 0)) <= 0:
+            continue
         monster_def_id = str(entity.get("monster_def_id", ""))
         if not monster_def_id:
             continue

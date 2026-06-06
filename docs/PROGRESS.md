@@ -11,7 +11,7 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v12 — `ranged-projectile-combat` (server-authoritative ranged projectiles) |
+| **Latest completed slice** | v13 — `inventory-ui` (authoritative inventory panel, unequip, and drop) |
 | **Active branch** | `feature/solid-collision-and-obstacles` |
 | **CI gate** | `make ci` green on 2026-06-05 |
 | **Next slice** | TBD |
@@ -28,6 +28,7 @@ v3_* = animate-and-react v7_* = gear-before-combat v9_* = solid-collision
 v4_* = take-a-hit        v10_* = click-action-and-melee-range
 v11_* = click-to-move-and-auto-path
 v12_* = ranged-projectile-combat
+v13_* = inventory-ui
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -40,7 +41,7 @@ Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim →
 Python bot/smoke → golden fixtures → `make ci` green.
 
 ```text
-v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action ──► v11 auto-path ──► v12 ranged-projectiles
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action ──► v11 auto-path ──► v12 ranged-projectiles ──► v13 inventory-ui
    (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)        (world presets)              (weapon damage)             (walls + bodies)
         │                      │                        │                        │                         │                         │                              │                              │                         │
      main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓                       branch ✓                  branch ✓                  branch ✓
@@ -60,6 +61,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v10** | `click-action-and-melee-range` | Complete (`make ci` green) | [`v10_spec-click-action-and-melee-range.md`](specs/v10_spec-click-action-and-melee-range.md) | [`v10_2026-06-05-click-action-and-melee-range.md`](plans/v10_2026-06-05-click-action-and-melee-range.md) |
 | **v11** | `click-to-move-and-auto-path` | Complete (`make ci` green) | [`v11_spec-click-to-move-and-auto-path.md`](specs/v11_spec-click-to-move-and-auto-path.md) | [`v11_2026-06-05-click-to-move-and-auto-path.md`](plans/v11_2026-06-05-click-to-move-and-auto-path.md) |
 | **v12** | `ranged-projectile-combat` | Complete (`make ci` green) | [`v12_spec-ranged-projectile-combat.md`](specs/v12_spec-ranged-projectile-combat.md) | [`v12_2026-06-05-ranged-projectile-combat.md`](plans/v12_2026-06-05-ranged-projectile-combat.md) |
+| **v13** | `inventory-ui` | Complete (`make ci` green) | [`v13_spec-inventory-ui.md`](specs/v13_spec-inventory-ui.md) | [`v13_2026-06-05-inventory-ui.md`](plans/v13_2026-06-05-inventory-ui.md) |
 
 ---
 
@@ -243,8 +245,32 @@ impact-time collision, hit, damage, replay, and client presentation.
 - Godot renders placeholder projectile entities from authoritative spawn/update/remove deltas.
 - `make ci` green on 2026-06-05.
 
-**Explicit non-goals (still true):** no spells, piercing, homing/AoE, monster ranged AI, predictive
+**Explicit non-goals for v12:** no spells, piercing, homing/AoE, monster ranged AI, predictive
 leading, ranged pickup/door activation, production bow art, inventory UI, or projectile catalog.
+
+### v13 — Inventory UI
+
+**Proves:** Human-facing inventory presentation can stay display-only while server-owned inventory
+intents mutate authoritative state, persistence, replay, and resume.
+
+- `unequip_intent` and `drop_intent` extend the protocol; `inventory_remove` lets deltas remove bag
+  rows without waiting for a fresh snapshot.
+- Server drop placement is deterministic, collision-free, adjacent to the player, and pinned by
+  `shared/golden/inventory_drop.json` in Go and GDScript fixture checks.
+- Dropping an equipped item clears `equipped.weapon`, removes the inventory row, spawns pickup-able
+  loot, persists the removal, and reconstructs through replay/resume.
+- `inventory_lab` plus bot scenario `07_inventory_lab.json` proves pickup, equip, unequip, drop,
+  re-pickup, and re-equip over protocol, `/state`, reconnect resume, and replay.
+- Godot adds a custom Diablo-dark panel toggled with `I`, one weapon slot, a bag grid, tooltips from
+  item rules, double-click/drag equip, drag-to-bag unequip, drag-outside drop, and no local inventory
+  authority.
+- The old `Q` equip shortcut and debug hints are removed; autoplay and bot continue using explicit
+  protocol `equip_intent`.
+- `make ci` green on 2026-06-05.
+
+**Explicit non-goals (still true):** no stash, vendors, crafting, stack splitting, equipment slots
+beyond weapon, production item icons, Godot inventory plugins, character-scoped persistence, item
+destruction, or drop targeting/range gates.
 
 ---
 
@@ -278,6 +304,7 @@ The scenario catalog also includes:
 ```text
 gear_before_combat: walk to rusty_sword → pick up → equip → one-shot reward dummy → pick up training_badge
 collision_lab: pass through middle wall gap → kill monster on far side
+inventory_lab: pick up rusty_sword → equip → unequip → drop → re-pickup → re-equip
 ```
 
 **Verify:**
@@ -288,7 +315,7 @@ make bot                     # terminal 2 — all protocol bot scenarios
 make client-smoke            # headless Godot gates + slice smoke
 make ci                      # full suite
 make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
-make bot-visual scenario=06_ranged_lab.json  # optional — replay one scenario by file name or id
+make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenario by file name or id
 ```
 
 ---
@@ -322,6 +349,10 @@ rules, deterministic server A*, `move_to_intent`, and a path-maze bot proof.
 
 **Ranged projectile combat is now authoritative.** v12 adds ranged weapon rules, projectile
 entities, swept collision, impact-time hit/damage, and a ranged-lab bot/replay proof.
+
+**Inventory UI, unequip, and player drop are now authoritative.** v13 adds protocol-backed
+unequip/drop intents, deterministic adjacent loot placement, persisted inventory removal, and a
+display-only Godot panel that mirrors server snapshots/deltas.
 
 ### Other deferred items (from specs / ADRs)
 

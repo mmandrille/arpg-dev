@@ -1,0 +1,89 @@
+docs/plans/v14_2026-06-02-godot-client-bot.md
+  s_14de4188fd3f91::t_8e42660ac141b5 1,3,5,7,9-144,146-152,154,156,158,160,162,164-169,171-180,182,184,186,188,190,192,194-200,202,204-211,213,215-219,221,223,225,227,229-235,237-286,288-289,294-328
+  h_6c904e338a0e5a 2,4,6,8,145,153,155,157,159,161,163,170,181,183,185,187,189,191,193,201,203,212,214,220,222,224,226,228,236
+  s_14de4188fd3f91::t_02f2e3396035e3 287,290-293
+client/tests/test_client_bot.gd
+  s_7c3b00e473c666::t_0decd3b13a8be3 1-205
+client/scripts/bot_scenario_runner.gd.uid
+  s_7c3b00e473c666::t_58e094c94816e4 1
+scripts/client_smoke.sh
+  s_7c3b00e473c666::t_eca4918abb5e01 60-62
+scripts/bot_client.sh
+  s_7c3b00e473c666::t_ac9beff3c0b7b8 1-124
+client/tests/test_client_bot.gd.uid
+  s_7c3b00e473c666::t_58e094c94816e4 1
+client/scripts/bot_controller.gd.uid
+  s_7c3b00e473c666::t_58e094c94816e4 1
+client/scripts/bot_scenario_runner.gd
+  s_7c3b00e473c666::t_f12a33be8d4e71 1-8,10-11,13-68,71,73-92,94-97,99-101,103-146,153-209,215-279
+  s_7c3b00e473c666::t_58f929f44698ac 69-70,72
+  s_7c3b00e473c666::t_7cc6c79d4c2325 147-152
+  s_7c3b00e473c666::t_025244fe530e76 210-214
+  s_7c3b00e473c666::t_dd72923dad393d 9,12
+  s_7c3b00e473c666::t_167303547abe0d 93,98,102
+make/agents.mk
+  s_7c3b00e473c666::t_c7e7fb5d09c44f 2,9-11
+scripts/ci.sh
+  s_7c3b00e473c666::t_c16da24b11c86b 55,62-66
+tools/bot/scenarios/client/04_inventory_lab_drop_item.json
+  s_7c3b00e473c666::t_48b6bfbbcfc258 1-20
+tools/bot/scenarios/client/03_inventory_equip_unequip.json
+  s_7c3b00e473c666::t_9d0dbecb3ab97a 1-19
+tools/bot/scenarios/client/05_click_to_move.json
+  s_7c3b00e473c666::t_62058c8da9a5b8 1-12
+client/scripts/bot_controller.gd
+  s_7c3b00e473c666::t_dcf20da2f2f814 1-197
+tools/bot/scenarios/client/01_click_to_kill.json
+  s_7c3b00e473c666::t_137d519b095d65 12
+  s_7c3b00e473c666::t_8614c1836eb4a6 1-11,13-14
+client/scripts/main.gd
+  s_7c3b00e473c666::t_08ddf4d88947db 1189-1217
+  s_7c3b00e473c666::t_9353a103674cb5 291-293
+  s_7c3b00e473c666::t_d9fac0f8b8d601 42-43
+  s_7c3b00e473c666::t_e7198ffd2bd430 502-503
+  s_7c3b00e473c666::t_2b4d93c07fa171 147-150
+tools/bot/scenarios/client/02_inventory_open_close.json
+  s_7c3b00e473c666::t_9b40c7c7ef9869 1-14
+docs/specs/v14_spec-godot-client-bot.md
+  s_7bf59beee45953::t_47d2054ac4294a 317-319
+  s_7bf59beee45953::t_fa01f180c1890f 54,56,64-65,68-69,116-118,147-148,153,174-184,201-217,242-256,264-284,290-291,302-306,315-316,328-336
+  s_7bf59beee45953::t_2b738141dc76a5 223,226-230
+  s_7bf59beee45953::t_81cba43fe75d2e 41,170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "acf392f8ddf4304942cf2a3a97b02db383e45e1a",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_14de4188fd3f91": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9aca-ed13-7702-96c1-67724f5b4cc4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_7bf59beee45953": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9abd-3438-77d2-9dd4-7057d018a49d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_7c3b00e473c666": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db5ffc9a-8944-4273-9c12-90167edf2468",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -89,6 +89,9 @@ func TestLoadRules(t *testing.T) {
 	if _, ok := r.Worlds["ranged_lab"]; !ok {
 		t.Fatal("missing ranged_lab world")
 	}
+	if _, ok := r.Worlds["inventory_lab"]; !ok {
+		t.Fatal("missing inventory_lab world")
+	}
 	bow := r.Items["training_bow"]
 	if !bow.Equippable || bow.Slot != weaponSlot || bow.AttackMode != attackModeRanged || bow.Damage == nil || bow.Reach == nil || bow.ProjectileSpeed == nil {
 		t.Fatalf("training_bow def = %+v, want ranged weapon", bow)
@@ -428,6 +431,49 @@ func TestRangedAutoApproachThenFire(t *testing.T) {
 	}
 }
 
+func TestRangedDummyDropsThreeSeparatedLootItems(t *testing.T) {
+	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.hp = 1
+	r := sim.Tick([]Input{{MessageID: "kill", CorrelationID: "corr_kill", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, r, "kill")
+	for i := 0; i < 20 && !hasEvent(r, "monster_killed"); i++ {
+		r = sim.Tick(nil)
+	}
+	if !hasEvent(r, "monster_killed") {
+		t.Fatalf("ranged kill did not resolve: %+v", r.Events)
+	}
+
+	want := map[string]bool{
+		"training_badge": false,
+		"quest_leaf":     false,
+		"red_potion":     false,
+	}
+	positions := map[Vec2]string{}
+	for _, c := range r.Changes {
+		if c.Op != OpEntitySpawn || c.Entity == nil || c.Entity.Type != lootEntity {
+			continue
+		}
+		itemDefID := c.Entity.ItemDefID
+		if _, ok := want[itemDefID]; !ok {
+			t.Fatalf("unexpected ranged loot %s in %+v", itemDefID, r.Changes)
+		}
+		if positions[c.Entity.Position] != "" {
+			t.Fatalf("loot overlap at %+v: %s and %s", c.Entity.Position, positions[c.Entity.Position], itemDefID)
+		}
+		if sim.lootDropBlocked(c.Entity.Position) {
+			t.Fatalf("loot spawned inside blocked geometry at %+v", c.Entity.Position)
+		}
+		positions[c.Entity.Position] = itemDefID
+		want[itemDefID] = true
+	}
+	for itemDefID, seen := range want {
+		if !seen {
+			t.Fatalf("missing ranged loot %s in %+v", itemDefID, r.Changes)
+		}
+	}
+}
+
 func TestRangedBlockedLineAutoMovesUntilClearThenFires(t *testing.T) {
 	sim := rangedLabWithEquippedBow(t, loadRules(t), "deadbeefdeadbeef")
 	monster := firstEntityByKind(sim, monsterEntity)
@@ -588,6 +634,9 @@ func runSlice(t *testing.T, seed string) *Sim {
 		t.Fatal("no loot entity after kill")
 	}
 	sim.Tick([]Input{{MessageID: "p1", CorrelationID: "corr_p", Type: "action_intent", Action: &ActionIntent{TargetID: lootID}}})
+	for i := 0; i < 10 && len(sim.Snapshot().Inventory) == 0; i++ {
+		sim.Tick(nil)
+	}
 
 	// Equip the picked-up item.
 	snap := sim.Snapshot()
@@ -719,6 +768,16 @@ func TestEquippedWeaponOneShotsRewardDummy(t *testing.T) {
 	if !hasLootSpawn(r, "training_badge") {
 		t.Fatalf("missing training_badge loot spawn: %+v", r.Changes)
 	}
+	lootPos, ok := lootSpawnPosition(r, "training_badge")
+	if !ok {
+		t.Fatalf("missing training_badge loot spawn position: %+v", r.Changes)
+	}
+	if lootPos == monster.pos {
+		t.Fatalf("loot spawned on monster body at %+v", lootPos)
+	}
+	if distance(lootPos, monster.pos) < monsterRadius+lootInteractionRadius {
+		t.Fatalf("loot overlaps monster body: loot=%+v monster=%+v", lootPos, monster.pos)
+	}
 }
 
 func TestEquippedWeaponWithoutDamageFallsBackToBaseDamage(t *testing.T) {
@@ -832,6 +891,200 @@ func TestPlayerKilledByRetaliation(t *testing.T) {
 	}
 	if damaged == 0 || killed != 1 {
 		t.Fatalf("player events damaged=%d killed=%d, want damaged>0 killed=1", damaged, killed)
+	}
+}
+
+func TestUnequipWeapon(t *testing.T) {
+	rules := loadRules(t)
+	sim, itemID := inventoryLabEquippedSword(t, rules)
+
+	r := sim.Tick([]Input{{
+		MessageID:     "unequip",
+		CorrelationID: "corr_unequip",
+		Type:          "unequip_intent",
+		Unequip:       &UnequipIntent{Slot: weaponSlot},
+	}})
+	assertAck(t, r, "unequip")
+	if sim.equipped[weaponSlot] != 0 {
+		t.Fatalf("equipped weapon = %d, want cleared", sim.equipped[weaponSlot])
+	}
+	item := sim.findItem(itemID)
+	if item == nil || item.equipped {
+		t.Fatalf("item after unequip = %+v, want present and unequipped", item)
+	}
+	if !hasEvent(r, "item_unequipped") {
+		t.Fatalf("missing item_unequipped: %+v", r.Events)
+	}
+}
+
+func TestDropInventoryItem(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_drop_badge", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatalf("new inventory lab: %v", err)
+	}
+	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge", slot: "", equipped: false})
+
+	r := sim.Tick([]Input{{
+		MessageID:     "drop",
+		CorrelationID: "corr_drop",
+		Type:          "drop_intent",
+		Drop:          &DropIntent{ItemInstanceID: "5000"},
+	}})
+	assertAck(t, r, "drop")
+	if len(sim.inventory) != 0 {
+		t.Fatalf("inventory after drop = %+v, want empty", sim.inventory)
+	}
+	loot := findLootByDef(sim, "training_badge")
+	if loot == nil {
+		t.Fatal("missing dropped training_badge loot")
+	}
+	player := sim.entities[sim.playerID]
+	if distance(loot.pos, player.pos) < playerRadius+lootInteractionRadius {
+		t.Fatalf("loot too close to player: player=%+v loot=%+v", player.pos, loot.pos)
+	}
+	if !hasEvent(r, "item_dropped") {
+		t.Fatalf("missing item_dropped: %+v", r.Events)
+	}
+}
+
+func TestDropEquippedWeapon(t *testing.T) {
+	rules := loadRules(t)
+	sim, itemID := inventoryLabEquippedSword(t, rules)
+
+	r := sim.Tick([]Input{{
+		MessageID:     "drop",
+		CorrelationID: "corr_drop",
+		Type:          "drop_intent",
+		Drop:          &DropIntent{ItemInstanceID: itemID},
+	}})
+	assertAck(t, r, "drop")
+	if sim.equipped[weaponSlot] != 0 {
+		t.Fatalf("equipped weapon = %d, want cleared", sim.equipped[weaponSlot])
+	}
+	if sim.findItem(itemID) != nil {
+		t.Fatalf("dropped item %s still in inventory", itemID)
+	}
+	if findLootByDef(sim, "rusty_sword") == nil {
+		t.Fatal("missing dropped rusty_sword loot")
+	}
+	if !hasChange(r, OpInventoryRemove) || !hasChange(r, OpEquippedUpdate) {
+		t.Fatalf("drop missing inventory_remove/equipped_update changes: %+v", r.Changes)
+	}
+}
+
+func TestDropThenPickup(t *testing.T) {
+	rules := loadRules(t)
+	sim, itemID := inventoryLabEquippedSword(t, rules)
+	drop := sim.Tick([]Input{{
+		MessageID: "drop",
+		Type:      "drop_intent",
+		Drop:      &DropIntent{ItemInstanceID: itemID},
+	}})
+	assertAck(t, drop, "drop")
+	loot := findLootByDef(sim, "rusty_sword")
+	if loot == nil {
+		t.Fatal("missing dropped loot")
+	}
+
+	pickup := sim.Tick([]Input{{
+		MessageID: "pickup",
+		Type:      "action_intent",
+		Action:    &ActionIntent{TargetID: idStr(loot.id)},
+	}})
+	assertAck(t, pickup, "pickup")
+	if len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "rusty_sword" {
+		t.Fatalf("inventory after re-pickup = %+v, want rusty_sword", sim.inventory)
+	}
+}
+
+func TestDropNoSpace(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_drop_no_space", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatalf("new inventory lab: %v", err)
+	}
+	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge"})
+	player := sim.entities[sim.playerID]
+	for ring := 1; ring <= 6; ring++ {
+		for _, offset := range adjacentUnitOffsets() {
+			sim.walls = append(sim.walls, wallObstacle{
+				pos:  Vec2{X: player.pos.X + offset.X*float64(ring), Y: player.pos.Y + offset.Y*float64(ring)},
+				size: Vec2{X: 1, Y: 1},
+			})
+		}
+	}
+
+	r := sim.Tick([]Input{{MessageID: "drop", Type: "drop_intent", Drop: &DropIntent{ItemInstanceID: "5000"}}})
+	assertReject(t, r, "drop", "no_drop_space")
+	if len(sim.inventory) != 1 {
+		t.Fatalf("inventory mutated on rejected drop: %+v", sim.inventory)
+	}
+	if findLootByDef(sim, "training_badge") != nil {
+		t.Fatal("rejected drop spawned loot")
+	}
+}
+
+func TestAdjacentLootDropSpreadsAndAvoidsWalls(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_multi_drop", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatalf("new inventory lab: %v", err)
+	}
+	source := Vec2{X: 10, Y: 10}
+	blockedFirstCandidate := Vec2{X: source.X + 1, Y: source.Y}
+	sim.walls = append(sim.walls, wallObstacle{pos: blockedFirstCandidate, size: Vec2{X: 1, Y: 1}})
+
+	positions := map[Vec2]bool{}
+	for i := 0; i < 12; i++ {
+		pos, ok := sim.findEntityLootDropPosition(source, monsterRadius)
+		if !ok {
+			t.Fatalf("drop %d had no placement", i)
+		}
+		if positions[pos] {
+			t.Fatalf("drop %d overlapped existing loot at %+v", i, pos)
+		}
+		if sim.lootDropBlocked(pos) {
+			t.Fatalf("drop %d placed inside blocked geometry at %+v", i, pos)
+		}
+		if circlesOverlap(pos, lootInteractionRadius, source, monsterRadius) {
+			t.Fatalf("drop %d overlaps source body: %+v", i, pos)
+		}
+		positions[pos] = true
+		loot := &entity{kind: lootEntity, pos: pos, itemDefID: "training_badge"}
+		loot.id = sim.alloc()
+		sim.entities[loot.id] = loot
+	}
+	if positions[blockedFirstCandidate] {
+		t.Fatalf("drop placed inside wall at %+v", blockedFirstCandidate)
+	}
+}
+
+func TestInventoryDropGolden(t *testing.T) {
+	var golden struct {
+		WorldID              string `json:"world_id"`
+		ItemDefID            string `json:"item_def_id"`
+		ExpectedLootPosition Vec2   `json:"expected_loot_position"`
+	}
+	loadGolden(t, "inventory_drop.json", &golden)
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_inventory_drop_golden", "01", rules, golden.WorldID)
+	if err != nil {
+		t.Fatalf("new golden world: %v", err)
+	}
+	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: golden.ItemDefID})
+	r := sim.Tick([]Input{{
+		MessageID: "drop",
+		Type:      "drop_intent",
+		Drop:      &DropIntent{ItemInstanceID: "5000"},
+	}})
+	assertAck(t, r, "drop")
+	loot := findLootByDef(sim, golden.ItemDefID)
+	if loot == nil {
+		t.Fatalf("missing dropped loot for %s", golden.ItemDefID)
+	}
+	if loot.pos != golden.ExpectedLootPosition {
+		t.Fatalf("drop position = %+v, want %+v", loot.pos, golden.ExpectedLootPosition)
 	}
 }
 
@@ -1110,6 +1363,8 @@ func TestDeadPlayerRejectsIntentsAndStopsActiveMovement(t *testing.T) {
 		{MessageID: "attack", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}},
 		{MessageID: "pickup", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}},
 		{MessageID: "equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: "weapon"}},
+		{MessageID: "unequip", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: weaponSlot}},
+		{MessageID: "drop", Type: "drop_intent", Drop: &DropIntent{ItemInstanceID: "1004"}},
 	}
 	for _, in := range cases {
 		sim := NewSim("sess_dead_"+in.MessageID, "01", rules)
@@ -1159,6 +1414,52 @@ func assertAck(t *testing.T, r TickResult, msgID string) {
 		}
 	}
 	t.Fatalf("expected ack of %q; rejects=%+v acks=%+v", msgID, r.Rejects, r.Acks)
+}
+
+func inventoryLabEquippedSword(t *testing.T, rules *Rules) (*Sim, string) {
+	t.Helper()
+	sim, err := NewSimWithWorld("sess_inventory_lab", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatalf("new inventory lab: %v", err)
+	}
+	pickup := sim.Tick([]Input{{
+		MessageID:     "pickup",
+		CorrelationID: "corr_pickup",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1002"},
+	}})
+	assertAck(t, pickup, "pickup")
+	if len(sim.inventory) != 1 {
+		t.Fatalf("inventory size = %d, want 1", len(sim.inventory))
+	}
+	itemID := idStr(sim.inventory[0].instanceID)
+	equip := sim.Tick([]Input{{
+		MessageID:     "equip",
+		CorrelationID: "corr_equip",
+		Type:          "equip_intent",
+		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: weaponSlot},
+	}})
+	assertAck(t, equip, "equip")
+	return sim, itemID
+}
+
+func findLootByDef(sim *Sim, itemDefID string) *entity {
+	for _, id := range sortedEntityIDs(sim.entities) {
+		e := sim.entities[id]
+		if e.kind == lootEntity && e.itemDefID == itemDefID {
+			return e
+		}
+	}
+	return nil
+}
+
+func hasChange(r TickResult, op string) bool {
+	for _, c := range r.Changes {
+		if c.Op == op {
+			return true
+		}
+	}
+	return false
 }
 
 func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
@@ -1269,6 +1570,28 @@ func hasLootSpawn(r TickResult, itemDefID string) bool {
 		}
 	}
 	return false
+}
+
+func lootSpawnPosition(r TickResult, itemDefID string) (Vec2, bool) {
+	for _, c := range r.Changes {
+		if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == lootEntity && c.Entity.ItemDefID == itemDefID {
+			return c.Entity.Position, true
+		}
+	}
+	return Vec2{}, false
+}
+
+func adjacentUnitOffsets() []Vec2 {
+	return []Vec2{
+		{X: 1, Y: 0},
+		{X: 0, Y: 1},
+		{X: -1, Y: 0},
+		{X: 0, Y: -1},
+		{X: 1, Y: 1},
+		{X: -1, Y: 1},
+		{X: -1, Y: -1},
+		{X: 1, Y: -1},
+	}
 }
 
 func itoa(i int) string {

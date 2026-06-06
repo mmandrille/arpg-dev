@@ -88,6 +88,7 @@ type LootEntry struct {
 
 // LootTable is a weighted set of loot entries.
 type LootTable struct {
+	Drops   []string    `json:"drops,omitempty"`
 	Entries []LootEntry `json:"entries"`
 }
 
@@ -244,6 +245,11 @@ func LoadRules(dir string) (*Rules, error) {
 				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown item %s", tableID, entry.ItemDefID)
 			}
 		}
+		for _, itemDefID := range table.Drops {
+			if _, ok := r.Items[itemDefID]; !ok {
+				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown drop item %s", tableID, itemDefID)
+			}
+		}
 	}
 	for id, def := range r.Monsters {
 		if _, ok := r.LootTables[def.LootTable]; !ok {
@@ -334,6 +340,25 @@ func (r *Rules) RollLoot(tableID string, rng *RNG) (string, bool) {
 		}
 	}
 	return table.Entries[len(table.Entries)-1].ItemDefID, true
+}
+
+// LootDrops returns all guaranteed drops for a table, or one weighted roll for
+// legacy single-drop tables.
+func (r *Rules) LootDrops(tableID string, rng *RNG) []string {
+	table, ok := r.LootTables[tableID]
+	if !ok {
+		return nil
+	}
+	if len(table.Drops) > 0 {
+		out := make([]string, len(table.Drops))
+		copy(out, table.Drops)
+		return out
+	}
+	itemDefID, ok := r.RollLoot(tableID, rng)
+	if !ok {
+		return nil
+	}
+	return []string{itemDefID}
 }
 
 func readJSON(path string, v any) error {

@@ -31,6 +31,7 @@ type InventoryRepo interface {
 	ListInventory(ctx context.Context, sessionID string) ([]InventoryItem, error)
 	AddInventoryItem(ctx context.Context, item InventoryItem) error
 	SetEquipped(ctx context.Context, sessionID, itemInstanceID, slot string, equipped bool) error
+	RemoveInventoryItem(ctx context.Context, sessionID, itemInstanceID string) error
 }
 
 // InputRepo records and reads authoritative inputs for replay.

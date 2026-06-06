@@ -1,0 +1,115 @@
+tools/validate_shared.py
+  s_d9e179e7c94bee::t_1d21d4afae76f0 259-267,502-503,519-525
+shared/rules/dungeon_generation.v0.schema.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 12,40-46
+shared/protocol/examples/teleport_intent.json
+  s_d9e179e7c94bee::t_b3952a45317ee3 1-9
+server/internal/game/types.go
+  s_d9e179e7c94bee::t_80df23d63eee19 62-70,75-81
+  s_d9e179e7c94bee::t_a7f3d9e0e830bc 48,53-59,82,95-96,132-137
+server/internal/inputdecode/inputdecode.go
+  s_d9e179e7c94bee::t_35621e759b24ef 18,45-47,66,111-116
+  s_d9e179e7c94bee::t_80df23d63eee19 43-44,48
+shared/protocol/messages.v1.schema.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 19,50-51,123-129
+docs/PROGRESS.md
+  s_d9e179e7c94bee::t_3a4866ded0fc9d 388-424
+  s_d9e179e7c94bee::t_fb6ce3f151f243 462,525-527
+  s_d9e179e7c94bee::t_67195991ba4a8c 14,17,75-76
+  s_d9e179e7c94bee::t_b501dc7d087e36 15,37
+shared/protocol/session_snapshot.v1.schema.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 7,17,68-76,87,128-134
+shared/golden/dungeon_stairs.v0.schema.json
+  s_d9e179e7c94bee::t_c45864b3088c4d 45
+tools/bot/run.py
+  s_d9e179e7c94bee::t_39a527ded72226 303-310
+  s_d9e179e7c94bee::t_d916f3e134462e 100,457-469,475-485
+  s_d9e179e7c94bee::t_eb224df69cc0c8 1311-1324
+  s_d9e179e7c94bee::t_6c204910177c9f 1061,1395
+  s_d9e179e7c94bee::t_6076d37bf7d840 101,311-324,470-474
+  s_d9e179e7c94bee::t_63936b62ebc5ea 878-879
+  s_d9e179e7c94bee::t_563e93beb16aad 894,908-912
+  s_d9e179e7c94bee::t_3881bc12da380f 768-775
+  s_d9e179e7c94bee::t_16c5c7ed2e81b4 1140,1196-1209
+server/internal/game/sim.go
+  s_d9e179e7c94bee::t_8579be033543b4 2057,2121-2131,2142-2145
+  s_d9e179e7c94bee::t_d27d0412c4567c 377,379,403,417-418
+  s_d9e179e7c94bee::t_5a76abb433dc26 769-772,781-806
+  s_d9e179e7c94bee::t_8551b8d0789a5b 296,315-317
+  s_d9e179e7c94bee::t_cb76073fc3b584 34
+  s_d9e179e7c94bee::t_2240b142cd8543 498-508
+  s_d9e179e7c94bee::t_80df23d63eee19 12-33,35-47,124-132,152-160,312-314,318
+  s_d9e179e7c94bee::t_5b6f51027553b6 876-877,879-933,935,937
+  s_d9e179e7c94bee::t_eb746746a9e7ce 2203-2211,2215-2230
+  s_d9e179e7c94bee::t_eade15cdf12eff 133,161
+shared/protocol/examples/session_snapshot.json
+  s_d9e179e7c94bee::t_a0c938de07cc23 12
+server/internal/game/dungeon_gen.go
+  s_d9e179e7c94bee::t_2fd3f1d495ca57 12-16,24-28,53-57,69-73,81-88,121-142
+shared/golden/dungeon_stairs.json
+  s_d9e179e7c94bee::t_4157dff0a83987 6
+  s_d9e179e7c94bee::t_183a397547490e 11
+  s_d9e179e7c94bee::t_c45864b3088c4d 5
+scripts/bot_client.sh
+  s_d9e179e7c94bee::t_ea6fa5b39ea11e 87-94
+  s_d9e179e7c94bee::t_522035dfcc9db7 84-86
+server/internal/game/rules.go
+  s_d9e179e7c94bee::t_75e9916a45128e 52,68-73,356,358,372,394-402,414
+  s_d9e179e7c94bee::t_80df23d63eee19 48-51,53-54,367-371,373-374
+client/tests/test_golden.gd
+  s_d9e179e7c94bee::t_c62e3ed1abeda9 197-199,205-207,211-212
+tools/bot/scenarios/13_teleporter_lab.json
+  s_d9e179e7c94bee::t_0653531a06f236 1-12,14-28
+  s_d9e179e7c94bee::t_6076d37bf7d840 13
+shared/rules/interactables.v0.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 20-24
+client/scripts/main.gd
+  s_d9e179e7c94bee::t_dbccc617980f29 47,72-73
+  s_d9e179e7c94bee::t_ff890525c76be9 1004
+  s_d9e179e7c94bee::t_ad1f25c6c39ef5 1220-1221,1401-1428
+  s_d9e179e7c94bee::t_45e0711227caaa 283-285,287-288,413-416
+  s_d9e179e7c94bee::t_ec9988b2d42834 232,236,260,282,286
+  s_d9e179e7c94bee::t_7c7f12f3dbba81 111,491-499,980,983
+  s_d9e179e7c94bee::t_b83ef8e951e12f 713-719
+  s_d9e179e7c94bee::t_3abfd26f4ecb63 1037-1112
+scripts/bot_client_local.sh
+  s_d9e179e7c94bee::t_92286e68dc88c1 43-45
+  s_d9e179e7c94bee::t_9763a26f05acdb 1-42,46-50
+make/agents.mk
+  s_d9e179e7c94bee::t_63a78ec5482591 9,12
+docs/plans/v19_2026-06-06-teleporters-and-waypoint-ui.md
+  s_d9e179e7c94bee::t_a1a34f51b61491 53-55,57,67-71,81-82,84-85,95-96,98,108-112,123
+  s_d9e179e7c94bee::t_05c29500fde1a0 1-2,4-52,56,58-66,72-80,83,86-94,97,99-107,113-122,125-130
+  s_d9e179e7c94bee::t_67195991ba4a8c 3,124
+shared/protocol/state_delta.v1.schema.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 64,110-116,170-178
+shared/rules/dungeon_generation.v0.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 11-15
+server/internal/game/game_test.go
+  s_d9e179e7c94bee::t_9fdfaa31196d8e 1517
+  s_d9e179e7c94bee::t_22077275536657 2016-2069,2115-2126
+  s_d9e179e7c94bee::t_c45864b3088c4d 1892,1909-1911,1923-1924,2079-2082
+shared/protocol/envelope.v1.schema.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 19
+docs/specs/v19_spec-teleporters-and-waypoint-ui.md
+  s_d9e179e7c94bee::t_67195991ba4a8c 3
+  s_d9e179e7c94bee::t_05c29500fde1a0 1-2,4-196
+shared/rules/interactables.v0.schema.json
+  s_d9e179e7c94bee::t_fcea938b1cbcd0 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3f60f5c111ecfc5ee4b2e2352e415d7c20b35609",
+  "prompts": {},
+  "sessions": {
+    "s_d9e179e7c94bee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9d6d-6529-78b1-9e9a-bfb5a4d220d4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

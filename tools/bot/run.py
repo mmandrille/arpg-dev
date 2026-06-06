@@ -304,6 +304,8 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
 
     if action == "action_entity":
         target = resolve_target(state, step)
+        target_type = str(target.get("type", ""))
+        target_item_def_id = str(target.get("item_def_id", step.get("item_def_id", "")))
         env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": str(target["id"])})
         await ws.send(json.dumps(env))
         expect_reject = step.get("expect_reject")
@@ -311,6 +313,13 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
             await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
             return
         await wait_for_accept(ws, state, env["message_id"], loop)
+        if target_type == "loot" and target_item_def_id:
+            deadline = loop.time() + SLICE_TIMEOUT_S
+            while find_inventory_item(state.inventory, target_item_def_id) is None:
+                if loop.time() > deadline:
+                    raise TimeoutError(f"action_entity stalled waiting for loot pickup {target_item_def_id}")
+                await pump_one(ws, state, timeout=0.1)
+            return
         event_type = step.get("event_type")
         if event_type:
             await wait_for_event(ws, state, str(event_type), loop)
@@ -404,6 +413,42 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
                 raise TimeoutError(f"equip_inventory_item stalled waiting for equipped_update for {item_def_id}")
             await pump_one(ws, state, timeout=0.1)
         state.equipped_item_id = item_id
+        return
+
+    if action == "unequip_slot":
+        slot = str(step.get("slot", "weapon"))
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        if state.equipped.get(slot) is None:
+            raise AssertionError(f"unequip_slot: slot {slot} is already empty")
+        await ws.send(json.dumps(make_envelope(
+            "unequip_intent", session_id, state.last_tick, {"slot": slot})))
+        log("unequipping", slot)
+        while state.equipped.get(slot) is not None:
+            if loop.time() > deadline:
+                raise TimeoutError(f"unequip_slot stalled waiting for empty {slot}")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "drop_inventory_item":
+        item_def_id = str(step["item_def_id"])
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        item = find_inventory_item(state.inventory, item_def_id)
+        if item is None:
+            raise AssertionError(f"drop_inventory_item: missing inventory item {item_def_id}")
+        item_id = str(item["item_instance_id"])
+        await ws.send(json.dumps(make_envelope(
+            "drop_intent", session_id, state.last_tick, {"item_instance_id": item_id})))
+        log("dropping", item_def_id, item_id)
+        while any(str(i.get("item_instance_id")) == item_id for i in state.inventory):
+            if loop.time() > deadline:
+                raise TimeoutError(f"drop_inventory_item stalled waiting for removal of {item_id}")
+            await pump_one(ws, state, timeout=0.1)
+        while find_loot(state, item_def_id) is None:
+            if loop.time() > deadline:
+                raise TimeoutError(f"drop_inventory_item stalled waiting for loot {item_def_id}")
+            await pump_one(ws, state, timeout=0.1)
+        if state.item_id == item_id:
+            state.item_id = None
         return
 
     raise ValueError(f"unsupported scenario action: {action}")
@@ -576,6 +621,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.item_id = c["item"]["item_instance_id"]
         elif c["op"] == "inventory_update":
             upsert_inventory(state, c["item"])
+        elif c["op"] == "inventory_remove":
+            remove_inventory_item(state, str(c["item_instance_id"]))
         elif c["op"] == "equipped_update" and c.get("slot") == "weapon":
             state.equipped_item_id = c.get("item_instance_id")
             state.equipped[c["slot"]] = c.get("item_instance_id")
@@ -629,6 +676,17 @@ def upsert_inventory(state: RuntimeState, item: dict[str, Any]) -> None:
             state.inventory[i] = merged
             return
     state.inventory.append(dict(item))
+
+
+def remove_inventory_item(state: RuntimeState, item_instance_id: str) -> None:
+    state.inventory = [
+        item for item in state.inventory
+        if str(item.get("item_instance_id")) != item_instance_id
+    ]
+    if state.item_id == item_instance_id:
+        state.item_id = None
+    if state.equipped_item_id == item_instance_id:
+        state.equipped_item_id = None
 
 
 def find_loot(state: RuntimeState, item_def_id: str) -> dict[str, Any] | None:
@@ -784,6 +842,14 @@ def run_assertions(
         elif typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
+        elif typ == "equipped_weapon_def":
+            expected_def = str(assertion["item_def_id"])
+            weapon_id = equipped.get("weapon")
+            if weapon_id is None:
+                raise AssertionError(f"{where}: equipped weapon is empty, want {expected_def}")
+            item = next((i for i in inventory if str(i.get("item_instance_id")) == str(weapon_id)), None)
+            if item is None or item.get("item_def_id") != expected_def:
+                raise AssertionError(f"{where}: equipped weapon {weapon_id} row = {item}, want {expected_def}")
         elif typ == "monster_dead":
             assert_monster_dead(entities, where, str(assertion["monster_def_id"]))
         elif typ == "interactable_state":
@@ -905,7 +971,8 @@ def main() -> int:
                 raise AssertionError(f"replay mismatch for {session_id}: {replay.get('mismatch')}")
             log("replay verified for", session_id)
 
-            results.append({
+            scenario_visual = json.loads(scenario.path.read_text()).get("visual")
+            entry = {
                 "id": scenario.id,
                 "title": scenario.title,
                 "description": scenario.description,
@@ -914,7 +981,10 @@ def main() -> int:
                 "seed": sess["seed"],
                 "status": "passed",
                 "replay_match": True,
-            })
+            }
+            if isinstance(scenario_visual, dict):
+                entry["visual"] = scenario_visual
+            results.append(entry)
 
     if args.write_manifest:
         write_manifest(args.write_manifest, args.base_url, results)

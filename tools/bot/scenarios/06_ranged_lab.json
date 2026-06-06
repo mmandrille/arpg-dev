@@ -15,10 +15,16 @@
       "action": "action_once_until_event",
       "monster_def_id": "training_dummy_ranged",
       "event_type": "monster_killed"
-    }
+    },
+    { "action": "action_entity", "item_def_id": "training_badge", "event_type": "item_picked_up" },
+    { "action": "action_entity", "item_def_id": "quest_leaf", "event_type": "item_picked_up" },
+    { "action": "action_entity", "item_def_id": "red_potion", "event_type": "item_picked_up" }
   ],
   "assertions": [
     { "type": "monster_dead", "monster_def_id": "training_dummy_ranged" },
+    { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false },
+    { "type": "inventory_contains", "item_def_id": "quest_leaf", "equipped": false },
+    { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false },
     {
       "type": "player_never_in_melee_range_of",
       "monster_def_id": "training_dummy_ranged",

@@ -190,8 +190,6 @@ func _handle_message(env: Dictionary) -> void:
 
 
 func _apply_snapshot(p: Dictionary) -> void:
-		JSON.stringify(p.get("equipped", {})),
-	])
 	for id in entities.keys():
 		(entities[id]["node"] as Node3D).queue_free()
 	entities.clear()
@@ -218,7 +216,6 @@ func _apply_delta(p: Dictionary) -> void:
 	var changes: Array = p.get("changes", [])
 	var loot_positions := _capture_loot_positions()
 	for c in changes:
-		if str(c.get("op", "")) in ["inventory_add", "inventory_update", "inventory_remove", "equipped_update"]:
 		match c.get("op", ""):
 			"entity_spawn", "entity_update":
 				_upsert_entity(c["entity"])
@@ -571,8 +568,7 @@ func _try_action_at_mouse() -> void:
 	if target_id == "" or not entities.has(target_id):
 		var ground := _mouse_ground_point()
 		target_id = _nearest_loot_at_ground(ground)
-		if target_id != "":
-		else:
+		if target_id == "":
 			client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
 			_attack_cooldown = SEND_INTERVAL
 			return

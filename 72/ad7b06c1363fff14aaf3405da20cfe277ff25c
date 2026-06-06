@@ -1,0 +1,26 @@
+docs/plans/v13_2026-06-05-inventory-ui.md
+  h_6c904e338a0e5a 51
+docs/plans/v10_2026-06-05-click-action-and-melee-range.md
+  h_6c904e338a0e5a 60
+docs/plans/v11_2026-06-05-click-to-move-and-auto-path.md
+  h_6c904e338a0e5a 52
+AGENTS.md
+  h_6c904e338a0e5a 7
+docs/specs/v9_spec-solid-collision-and-obstacles.md
+  h_6c904e338a0e5a 5,84
+docs/plans/v12_2026-06-05-ranged-projectile-combat.md
+  h_6c904e338a0e5a 47
+docs/plans/v14_2026-06-02-godot-client-bot.md
+  h_6c904e338a0e5a 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "72ad7b06c1363fff14aaf3405da20cfe277ff25c",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

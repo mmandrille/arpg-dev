@@ -90,7 +90,7 @@ run_scenario() {
     ARPG_WORLD_ID="$world_id" \
     ARPG_BASE_URL="$BASE_URL" \
     ARPG_DEV_TOKEN="$DEV_TOKEN" \
-    "$GODOT" --headless --resolution 1280x720 --path "$CLIENT_DIR" res://main.tscn 2>&1)" \
+    "$GODOT" --headless --resolution 1280x720 --path "$CLIENT_DIR" 2>&1)" \
     || exit_code=$?
 
   printf '%s\n' "$out"

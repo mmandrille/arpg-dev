@@ -9,9 +9,10 @@
     "seed": { "type": "string", "minLength": 1 },
     "levels": {
       "type": "object",
-      "required": ["-1", "-2"],
+      "required": ["0", "-1", "-2"],
       "additionalProperties": false,
       "properties": {
+        "0": { "$ref": "#/$defs/level" },
         "-1": { "$ref": "#/$defs/level" },
         "-2": { "$ref": "#/$defs/level" }
       }

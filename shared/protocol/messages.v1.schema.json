@@ -125,7 +125,7 @@
       "required": ["target_level"],
       "additionalProperties": false,
       "properties": {
-        "target_level": { "type": "integer", "maximum": -1 }
+        "target_level": { "type": "integer", "maximum": 0 }
       }
     },
     "equip_intent": {

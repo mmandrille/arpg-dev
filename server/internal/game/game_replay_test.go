@@ -50,6 +50,22 @@ func buildDungeonTeleporterReplayInputs(t *testing.T, rules *game.Rules, seed, w
 		return fmt.Sprintf("%s_%d", prefix, msgStep)
 	}
 
+	townDown := findSnapshotInteractable(scratch.Snapshot(), "stairs_down")
+	if townDown == nil {
+		t.Fatal("missing town down stairs")
+	}
+	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), townDown.Position)
+	inputs = append(inputs, replay.RecordedInput{
+		Tick: tick,
+		Input: game.Input{
+			MessageID: nextMsg("descend"),
+			Type:      "descend_intent",
+			Descend:   &game.DescendIntent{},
+		},
+	})
+	scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
+	tick++
+
 	level1Teleporter := findSnapshotTeleporter(scratch.Snapshot())
 	if level1Teleporter == nil {
 		t.Fatal("missing level -1 teleporter")

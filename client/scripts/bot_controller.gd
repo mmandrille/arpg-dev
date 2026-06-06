@@ -152,7 +152,9 @@ func _do_click_entity(entity_type: String, state: Dictionary, entity_index: int 
 		printerr("[bot-client] click_entity: index %d out of range for %s" % [entity_index, entity_type])
 		return
 	var target_id := str(ids[entity_index])
-	if _main.has_method("bot_dispatch_action"):
+	if _main.has_method("bot_click_entity_id"):
+		_main.bot_click_entity_id(target_id)
+	elif _main.has_method("bot_dispatch_action"):
 		_main.bot_dispatch_action("action_intent", {"target_id": target_id})
 
 

@@ -354,7 +354,18 @@
     "dungeon_levels": {
       "mode": "multi_level",
       "player": { "position": { "x": 4, "y": 10 } },
-      "entities": []
+      "entities": [
+        {
+          "type": "interactable",
+          "interactable_def_id": "stairs_down",
+          "position": { "x": 8, "y": 10 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "teleporter",
+          "position": { "x": 4, "y": 13 }
+        }
+      ]
     }
   }
 }

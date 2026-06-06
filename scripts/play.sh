@@ -55,6 +55,7 @@ curl -fsS "$BASE_URL/readyz" >/dev/null
 echo "[play] launching Godot client — close the window to stop the server."
 echo "[play] controls: W/A/S/D move, LMB action, scroll zoom, I inventory."
 ARPG_BASE_URL="$BASE_URL" ARPG_DEV_TOKEN="$DEV_TOKEN" \
+  ARPG_WORLD_ID="dungeon_levels" ARPG_SESSION_ID="" \
   "$GODOT" --path "$ROOT/client"
 
 echo "[play] client closed; shutting down server."

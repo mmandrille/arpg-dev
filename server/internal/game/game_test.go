@@ -1906,6 +1906,9 @@ func TestDungeonStairsGolden(t *testing.T) {
 	if got := generatedStairPos(level1, stairsDownDefID); golden.Levels["-1"].StairsDown == nil || got != *golden.Levels["-1"].StairsDown {
 		t.Fatalf("level -1 stairs_down = %+v, want %+v", got, golden.Levels["-1"].StairsDown)
 	}
+	if got := generatedStairPos(level1, stairsUpDefID); golden.Levels["-1"].StairsUp == nil || got != *golden.Levels["-1"].StairsUp {
+		t.Fatalf("level -1 stairs_up = %+v, want %+v", got, golden.Levels["-1"].StairsUp)
+	}
 	if got := generatedTeleporterPos(level1); golden.Levels["-1"].Teleporter == nil || got != *golden.Levels["-1"].Teleporter {
 		t.Fatalf("level -1 teleporter = %+v, want %+v", got, golden.Levels["-1"].Teleporter)
 	}
@@ -1948,27 +1951,43 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new dungeon sim: %v", err)
 	}
-	if sim.currentLevel != -1 {
-		t.Fatalf("currentLevel = %d, want -1", sim.currentLevel)
+	if sim.currentLevel != townLevel {
+		t.Fatalf("currentLevel = %d, want town", sim.currentLevel)
 	}
-	down := sim.findStair(sim.activeLevel(), stairsDownDefID)
-	if down == nil {
-		t.Fatal("missing down stairs on level -1")
+	if _, ok := sim.levels[-1]; ok {
+		t.Fatal("level -1 was generated before first descend")
 	}
-	sim.entities[sim.playerID].pos = down.pos
+	townDown := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	if townDown == nil || townDown.pos != (Vec2{X: 8, Y: 10}) {
+		t.Fatalf("town down stair = %+v, want {8 10}", townDown)
+	}
 
-	results := sim.TickResults([]Input{{MessageID: "descend", Type: "descend_intent", Descend: &DescendIntent{}}})
+	results := descendFromCurrentLevel(t, sim, "descend_town")
 	if len(results) != 2 {
 		t.Fatalf("descend results = %d, want 2: %+v", len(results), results)
 	}
-	if results[0].Level != -1 || results[1].Level != -2 {
-		t.Fatalf("descend result levels = %d/%d, want -1/-2", results[0].Level, results[1].Level)
+	if results[0].Level != townLevel || results[1].Level != -1 {
+		t.Fatalf("town descend result levels = %d/%d, want 0/-1", results[0].Level, results[1].Level)
 	}
 	if !hasEntityRemove(results[0], idStr(sim.playerID)) {
 		t.Fatalf("from-level result missing player remove: %+v", results[0].Changes)
 	}
 	if !hasEntitySpawn(results[1], idStr(sim.playerID)) {
 		t.Fatalf("to-level result missing player spawn: %+v", results[1].Changes)
+	}
+	assertLevelChanged(t, results[0], townLevel, -1)
+
+	down := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	if down == nil {
+		t.Fatal("missing down stairs on level -1")
+	}
+	sim.entities[sim.playerID].pos = down.pos
+	results = sim.TickResults([]Input{{MessageID: "descend_2", Type: "descend_intent", Descend: &DescendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("descend to -2 results = %d, want 2: %+v", len(results), results)
+	}
+	if results[0].Level != -1 || results[1].Level != -2 {
+		t.Fatalf("descend result levels = %d/%d, want -1/-2", results[0].Level, results[1].Level)
 	}
 	assertLevelChanged(t, results[0], -1, -2)
 
@@ -2004,13 +2023,65 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 	if len(results) != 2 {
 		t.Fatalf("ascend results = %d, want 2: %+v", len(results), results)
 	}
-	if sim.currentLevel != golden.DescendThenAscend.ExpectedLevel {
-		t.Fatalf("currentLevel = %d, want %d", sim.currentLevel, golden.DescendThenAscend.ExpectedLevel)
+	if sim.currentLevel != -1 {
+		t.Fatalf("currentLevel = %d, want -1", sim.currentLevel)
 	}
-	if got := sim.entities[sim.playerID].pos; got != golden.DescendThenAscend.ExpectedPlayerPosition {
-		t.Fatalf("player position after ascend = %+v, want %+v", got, golden.DescendThenAscend.ExpectedPlayerPosition)
+	if got := sim.entities[sim.playerID].pos; got != down.pos {
+		t.Fatalf("player position after ascend = %+v, want %+v", got, down.pos)
 	}
 	assertLevelChanged(t, results[0], -2, -1)
+
+	up = sim.findStair(sim.activeLevel(), stairsUpDefID)
+	if up == nil {
+		t.Fatal("missing up stairs on level -1")
+	}
+	sim.entities[sim.playerID].pos = up.pos
+	results = sim.TickResults([]Input{{MessageID: "ascend_town", Type: "ascend_intent", Ascend: &AscendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("ascend to town results = %d, want 2: %+v", len(results), results)
+	}
+	if sim.currentLevel != golden.DescendThenAscend.ExpectedLevel {
+		t.Fatalf("currentLevel after town ascend = %d, want %d", sim.currentLevel, golden.DescendThenAscend.ExpectedLevel)
+	}
+	if got := sim.entities[sim.playerID].pos; got != golden.DescendThenAscend.ExpectedPlayerPosition {
+		t.Fatalf("player position after town ascend = %+v, want %+v", got, golden.DescendThenAscend.ExpectedPlayerPosition)
+	}
+	assertLevelChanged(t, results[0], -1, townLevel)
+}
+
+func TestDungeonTownBootstrapAndDeepDescent(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_dungeon_town", "deadbeefdeadbeef", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	if sim.currentLevel != townLevel {
+		t.Fatalf("currentLevel = %d, want town", sim.currentLevel)
+	}
+	if len(sim.levels) != 1 {
+		t.Fatalf("levels at start = %v, want only town", sim.levels)
+	}
+	if !sim.discoveredTeleporters[townLevel] {
+		t.Fatal("town teleporter should start discovered")
+	}
+	if sim.findStair(sim.activeLevel(), stairsDownDefID) == nil {
+		t.Fatal("town missing down stair")
+	}
+	if sim.findTeleporter(sim.activeLevel()) == nil {
+		t.Fatal("town missing teleporter")
+	}
+
+	for want := -1; want >= -3; want-- {
+		results := descendFromCurrentLevel(t, sim, fmt.Sprintf("descend_%d", -want))
+		if len(results) != 2 {
+			t.Fatalf("descend to %d results = %d, want 2: %+v", want, len(results), results)
+		}
+		if sim.currentLevel != want {
+			t.Fatalf("currentLevel after descend = %d, want %d", sim.currentLevel, want)
+		}
+		if _, ok := sim.levels[want]; !ok {
+			t.Fatalf("level %d not generated", want)
+		}
+	}
 }
 
 func TestDungeonTeleporterDiscoveryAndTravel(t *testing.T) {
@@ -2018,6 +2089,11 @@ func TestDungeonTeleporterDiscoveryAndTravel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new dungeon sim: %v", err)
 	}
+	townTeleporter := sim.findTeleporter(sim.activeLevel())
+	if townTeleporter == nil {
+		t.Fatal("missing town teleporter")
+	}
+	descendFromCurrentLevel(t, sim, "descend_town")
 	level1Teleporter := sim.findTeleporter(sim.activeLevel())
 	if level1Teleporter == nil {
 		t.Fatal("missing level -1 teleporter")
@@ -2065,14 +2141,26 @@ func TestDungeonTeleporterDiscoveryAndTravel(t *testing.T) {
 	if got := sim.entities[sim.playerID].pos; got != level1Teleporter.pos {
 		t.Fatalf("player position after teleport = %+v, want %+v", got, level1Teleporter.pos)
 	}
+
+	results = sim.TickResults([]Input{{MessageID: "tp_to_town", Type: "teleport_intent", Teleport: &TeleportIntent{TargetLevel: townLevel}}})
+	if len(results) != 2 {
+		t.Fatalf("teleport to town results = %d, want 2: %+v", len(results), results)
+	}
+	assertLevelChanged(t, results[0], -1, townLevel)
+	if sim.currentLevel != townLevel {
+		t.Fatalf("currentLevel = %d, want town", sim.currentLevel)
+	}
+	if got := sim.entities[sim.playerID].pos; got != townTeleporter.pos {
+		t.Fatalf("player position after town teleport = %+v, want %+v", got, townTeleporter.pos)
+	}
 }
 
 func TestTeleportRejectsUndiscoveredTargetLevel(t *testing.T) {
 	var golden struct {
-		Seed                         string `json:"seed"`
-		VisitedUndiscoveredTarget    struct {
-			RejectReason            string `json:"reject_reason"`
-			DiscoveredTeleporters   []struct {
+		Seed                      string `json:"seed"`
+		VisitedUndiscoveredTarget struct {
+			RejectReason          string `json:"reject_reason"`
+			DiscoveredTeleporters []struct {
 				Level      int  `json:"level"`
 				Discovered bool `json:"discovered"`
 			} `json:"discovered_teleporters"`
@@ -2084,6 +2172,7 @@ func TestTeleportRejectsUndiscoveredTargetLevel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new dungeon sim: %v", err)
 	}
+	descendFromCurrentLevel(t, sim, "descend_town")
 	level1Teleporter := sim.findTeleporter(sim.activeLevel())
 	if level1Teleporter == nil {
 		t.Fatal("missing level -1 teleporter")
@@ -2139,6 +2228,7 @@ func TestDungeonTeleportersGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new dungeon sim: %v", err)
 	}
+	descendFromCurrentLevel(t, sim, "descend_town")
 	level1Teleporter := sim.findTeleporter(sim.activeLevel())
 	if level1Teleporter == nil {
 		t.Fatal("missing level -1 teleporter")
@@ -2182,6 +2272,16 @@ func assertTeleporterDiscoveryView(t *testing.T, got []TeleporterDiscoveryView, 
 			t.Fatalf("discovery[%d] = %+v, want level=%d discovered=%v", i, got[i], row.Level, row.Discovered)
 		}
 	}
+}
+
+func descendFromCurrentLevel(t *testing.T, sim *Sim, messageID string) []TickResult {
+	t.Helper()
+	down := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	if down == nil {
+		t.Fatalf("missing down stairs on level %d", sim.currentLevel)
+	}
+	sim.entities[sim.playerID].pos = down.pos
+	return sim.TickResults([]Input{{MessageID: messageID, Type: "descend_intent", Descend: &DescendIntent{}}})
 }
 
 func generatedStairPos(level generatedDungeonLevel, defID string) Vec2 {

@@ -8,6 +8,29 @@ Read these **before** specs, plans, or code:
 
 When starting client-side work, run the adoption checklist in the plugins doc and record *adopt / borrow / reject* in the slice plan.
 
+## Slash commands (cross-agent skills)
+
+Canonical definitions live in [`skills/`](skills/README.md). Tool paths are symlinks to the same files.
+
+| Command | Skill | What it does |
+|---------|-------|--------------|
+| `/next {optional idea}` | [`skills/next/SKILL.md`](skills/next/SKILL.md) | Read `PROGRESS.md` + ADRs → propose next slice options or evaluate your idea → spec-ready brief (complexity, requirements, doubts) |
+| `/plan {spec_file.md}` | [`skills/plan/SKILL.md`](skills/plan/SKILL.md) | Review spec for gaps → ask questions → write `docs/plans/vN_<date>-<codename>.md` (includes bot scenarios when gameplay/protocol is in scope) |
+| `/execute {plan_file.md}` | [`skills/execute/SKILL.md`](skills/execute/SKILL.md) | Review plan for gaps → ask questions → implement task-by-task until `make ci` is green |
+| `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Consolidate `PROGRESS.md` + uncommitted changes → `make ci` green → commit `feat: v{N}: {title}` |
+
+Workflow: `/next` → write spec → `/plan` → `/execute` → `/finish`. Do not skip the review gates.
+
+### Per-agent setup
+
+| Agent | Discovery | Invoke |
+|-------|-----------|--------|
+| **Cursor** | `.cursor/skills/` → `skills/` (committed symlink) | `/next`, `/plan`, `/execute`, `/finish` |
+| **Claude Code** | `.claude/skills/` → `skills/` (committed symlink) | same; `/reload-skills` after pull |
+| **Codex** | `skills/` in repo + run [`scripts/link-agent-skills.sh`](scripts/link-agent-skills.sh) once for `~/.codex/skills/` | `$next`, `$plan`, `$execute`, `$finish` |
+
+Edit skills only under `skills/` — never duplicate into `.cursor/` or `.claude/`.
+
 ## Development priority
 
 While the game is still in active development, do **not** preserve backward compatibility just for its own sake. Prefer the cleanest, healthiest implementation and update contracts, fixtures, tests, tools, and docs together.

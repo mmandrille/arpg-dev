@@ -80,6 +80,26 @@ type MonsterDef struct {
 	MaxHP             int          `json:"max_hp"`
 	LootTable         string       `json:"loot_table"`
 	RetaliationDamage *DamageRange `json:"retaliation_damage,omitempty"`
+	Behavior          string       `json:"behavior,omitempty"`
+	AggroRadius       float64      `json:"aggro_radius,omitempty"`
+	LeashRadius       float64      `json:"leash_radius,omitempty"`
+	MoveSpeed         float64      `json:"move_speed,omitempty"`
+}
+
+func (d MonsterDef) effectiveBehavior() string {
+	if d.Behavior == "" {
+		return monsterBehaviorStatic
+	}
+
+	return d.Behavior
+}
+
+func (d MonsterDef) effectiveMoveSpeed(nav NavigationRules) float64 {
+	if d.MoveSpeed > 0 {
+		return d.MoveSpeed
+	}
+
+	return nav.CellSize
 }
 
 // LootEntry is one weighted entry in a loot table.
@@ -230,6 +250,25 @@ func LoadRules(dir string) (*Rules, error) {
 			if err := validateDamageRange("monsters."+id+".retaliation_damage", *def.RetaliationDamage); err != nil {
 				return nil, err
 			}
+		}
+		behavior := def.effectiveBehavior()
+		switch behavior {
+		case monsterBehaviorStatic:
+			if def.AggroRadius > 0 || def.LeashRadius > 0 || def.MoveSpeed > 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: aggro/leash/move_speed only valid for chase behavior", id)
+			}
+		case monsterBehaviorChase:
+			if def.AggroRadius <= 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: chase requires positive aggro_radius", id)
+			}
+			if def.LeashRadius > 0 && def.LeashRadius < def.AggroRadius {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: leash_radius must be >= aggro_radius", id)
+			}
+			if def.MoveSpeed > 0 && def.MoveSpeed != r.Navigation.CellSize {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: move_speed must equal navigation.cell_size %.1f in v17", id, r.Navigation.CellSize)
+			}
+		default:
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.behavior: %s", id, def.Behavior)
 		}
 	}
 	r.Monsters = monsters.Monsters

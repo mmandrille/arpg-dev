@@ -30,9 +30,21 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
 
+[sub_resource type="Animation" id="Animation_knoay"]
+length = 0.8
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Skeleton3D:pivot")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.4, 1, 0, 0, 0.06975647, 0.9975641, 0.8, 1, 0, 0, 0, 1)
+
 [resource]
 _data = {
 &"death": SubResource("Animation_tygyj"),
 &"hit": SubResource("Animation_i24ol"),
-&"idle": SubResource("Animation_ugye1")
+&"idle": SubResource("Animation_ugye1"),
+&"walk": SubResource("Animation_knoay")
 }

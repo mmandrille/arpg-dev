@@ -89,6 +89,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "item_instance_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["monster_aggro", "monster_leashed"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id"] }
         }
       ]
     },

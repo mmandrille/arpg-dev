@@ -164,7 +164,25 @@ func _initialize() -> void:
 			_fail("use_consumable case %s heal cap mismatch" % str(c["name"]))
 			return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable)")
+	# 10. Monster chase golden references shared navigation/world/monster rules.
+	var monster_chase := _read(shared.path_join("golden/monster_chase.json"))
+	if monster_chase["navigation"] != navigation:
+		_fail("monster_chase navigation != navigation rules")
+		return
+	for c in monster_chase["cases"]:
+		var world_id := str(c.get("world_id", monster_chase.get("world_id", "")))
+		if not worlds["worlds"].has(world_id):
+			_fail("monster_chase references unknown world_id %s" % world_id)
+			return
+		for entity in worlds["worlds"][world_id]["entities"]:
+			if str(entity.get("type", "")) != "monster":
+				continue
+			var monster_id := str(entity["monster_def_id"])
+			if str(monsters["monsters"][monster_id].get("behavior", "static")) != "chase":
+				_fail("monster_chase world %s uses non-chase monster %s" % [world_id, monster_id])
+				return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase)")
 	quit(0)
 
 

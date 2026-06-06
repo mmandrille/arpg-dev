@@ -120,7 +120,9 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 // BuildTimeline reconstructs a protocol-shaped replay stream for local visual
 // tooling. It intentionally emits only snapshot/delta messages, not acks, so
 // consumers render authoritative state without re-sending inputs.
-func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules, sessionID string) (Timeline, error) {
+// throughTick extends simulation when the live session advanced without
+// durable inputs (for example bot wait_ticks); values below maxTick are ignored.
+func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules, sessionID string, throughTick int64) (Timeline, error) {
 	sess, err := repo.GetSession(ctx, sessionID)
 	if err != nil {
 		return Timeline{}, err
@@ -141,6 +143,9 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 		if ev.Tick > maxTick {
 			maxTick = ev.Tick
 		}
+	}
+	if throughTick > maxTick {
+		maxTick = throughTick
 	}
 
 	byTick := inputsByTick(recordedInputs)
@@ -164,6 +169,9 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 		ins := byTick[t]
 		sortInputs(ins)
 		res := sim.Tick(ins)
+		if len(res.Changes) == 0 && len(res.Events) == 0 {
+			continue
+		}
 		out.Envelopes = append(out.Envelopes, Envelope{
 			Type:      "state_delta",
 			MessageID: fmt.Sprintf("replay-tick-%d", res.Tick),

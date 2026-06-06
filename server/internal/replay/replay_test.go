@@ -72,6 +72,36 @@ func TestVerifyUsesReconstructedSnapshot(t *testing.T) {
 	assertRestoredSlice(t, rep.Snapshot)
 }
 
+func TestBuildTimelineThroughTickExtendsPassiveSimulation(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{
+			ID:      testSessionID,
+			Seed:    "cafebabecafebabe",
+			WorldID: "chase_maze",
+		},
+	}
+
+	short, err := BuildTimeline(context.Background(), repo, rules, testSessionID, -1)
+	if err != nil {
+		t.Fatalf("short timeline: %v", err)
+	}
+	long, err := BuildTimeline(context.Background(), repo, rules, testSessionID, 30)
+	if err != nil {
+		t.Fatalf("long timeline: %v", err)
+	}
+	if len(short.Envelopes) != 1 {
+		t.Fatalf("short timeline envelopes = %d, want snapshot only", len(short.Envelopes))
+	}
+	if len(long.Envelopes) <= len(short.Envelopes) {
+		t.Fatalf("long timeline envelopes = %d, want more than short %d", len(long.Envelopes), len(short.Envelopes))
+	}
+	last := long.Envelopes[len(long.Envelopes)-1]
+	if last.Tick < 10 {
+		t.Fatalf("last timeline tick = %d, want at least 10 movement ticks", last.Tick)
+	}
+}
+
 func TestReconstructFromInputsUsesWorldID(t *testing.T) {
 	rules := loadRules(t)
 	recon, err := ReconstructFromInputs(testSessionID, testSeed, rules, "gear_before_combat", nil, -1)

@@ -381,7 +381,13 @@ func _upsert_entity(e: Dictionary) -> void:
 			return
 		_move_projectile_node(rec, server_pos)
 	else:
-		(rec["node"] as Node3D).position = server_pos
+		var node := rec["node"] as Node3D
+		var prev_pos := node.position
+		node.position = server_pos
+		if rec["type"] == "monster" and rec["controller"] != null and not is_new:
+			var hp_val := int(e.get("hp", rec.get("hp", 1)))
+			var moved := prev_pos.distance_to(server_pos) > 0.001
+			rec["controller"].set_locomotion(moved and hp_val > 0)
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
@@ -831,7 +837,8 @@ func _start_next_visual_replay() -> void:
 		_debug("visual replay entry missing session_id; skipping")
 		_start_next_visual_replay()
 		return
-	var timeline := client.get_replay_timeline(visual_replay_debug_token, session_id)
+	var through_tick := int(scenario.get("final_tick", -1))
+	var timeline := client.get_replay_timeline(visual_replay_debug_token, session_id, through_tick)
 	visual_replay_envelopes = timeline.get("envelopes", [])
 	_debug("visual replay %d/%d: %s (%d envelopes)" % [
 		visual_replay_index + 1, visual_replay_scenarios.size(), visual_replay_title, visual_replay_envelopes.size()])

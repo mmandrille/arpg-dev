@@ -3,6 +3,7 @@ package httpapi
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
@@ -104,7 +105,16 @@ func (s *Server) handleSessionReplayTimeline(w http.ResponseWriter, r *http.Requ
 	if !ok {
 		return
 	}
-	timeline, err := replay.BuildTimeline(r.Context(), s.store, s.rules, sess.ID)
+	throughTick := int64(-1)
+	if raw := r.URL.Query().Get("through_tick"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed < 0 {
+			writeError(w, http.StatusBadRequest, "invalid_request", "through_tick must be a non-negative integer")
+			return
+		}
+		throughTick = parsed
+	}
+	timeline, err := replay.BuildTimeline(r.Context(), s.store, s.rules, sess.ID, throughTick)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not build replay timeline")
 		return

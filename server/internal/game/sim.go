@@ -20,6 +20,11 @@ const (
 	projectileEntity              = "projectile"
 	wallEntity                    = "wall"
 	interactableEntity            = "interactable"
+	monsterBehaviorStatic         = "static"
+	monsterBehaviorChase          = "chase"
+	monsterAIModeIdle             = "idle"
+	monsterAIModeChase            = "chase"
+	monsterAIModeReturn           = "return"
 	interactableClosed            = "closed"
 	interactableOpen              = "open"
 	attackModeMelee               = "melee"
@@ -60,6 +65,8 @@ type entity struct {
 	sourceMsgID       string
 	sourceCorrID      string
 	spawnTick         uint64
+	spawnPos          Vec2
+	aiMode            string
 }
 
 // invItem is an internal inventory item.
@@ -145,10 +152,12 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 			monster := &entity{
 				kind:         monsterEntity,
 				pos:          preset.Position,
+				spawnPos:     preset.Position,
 				hp:           def.MaxHP,
 				maxHP:        def.MaxHP,
 				monsterDefID: preset.MonsterDefID,
 				lootTable:    def.LootTable,
+				aiMode:       monsterAIModeIdle,
 			}
 			monster.id = s.alloc()
 			s.entities[monster.id] = monster
@@ -306,6 +315,7 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 		s.applyInput(in, &res)
 	}
 	s.applyMovement(&res)
+	s.advanceMonsterMovement(&res)
 	s.advanceProjectiles(&res)
 	s.tick++
 	return res
@@ -1114,6 +1124,227 @@ func circleIntersectsAABB(center Vec2, radius float64, rectCenter Vec2, rectSize
 	dx := center.X - closestX
 	dy := center.Y - closestY
 	return dx*dx+dy*dy < radius*radius-1e-9
+}
+
+func (s *Sim) advanceMonsterMovement(res *TickResult) {
+	if s.playerDead() {
+		return
+	}
+	player := s.entities[s.playerID]
+	if player == nil {
+		return
+	}
+	nav := s.rules.Navigation
+	for _, id := range sortedEntityIDs(s.entities) {
+		monster := s.entities[id]
+		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
+			continue
+		}
+		def, ok := s.rules.Monsters[monster.monsterDefID]
+		if !ok || def.effectiveBehavior() != monsterBehaviorChase {
+			continue
+		}
+		prevMode := monster.aiMode
+		s.updateMonsterAIMode(monster, player, def, prevMode, res)
+		if monster.aiMode == monsterAIModeIdle {
+			continue
+		}
+		goal, hasGoal := s.monsterMovementGoal(monster, player)
+		if !hasGoal {
+			continue
+		}
+		if distance(monster.pos, goal) <= nav.StopDistance {
+			continue
+		}
+		blocked := s.buildMonsterBlockedFn(monster.id)
+		steps, ok := PlanPath(nav, monster.pos, goal, blocked)
+		if !ok || len(steps) == 0 {
+			continue
+		}
+		moveSpeed := def.effectiveMoveSpeed(nav)
+		before := monster.pos
+		monster.pos = s.resolveMonsterMovement(monster, Vec2{
+			X: steps[0].X * moveSpeed,
+			Y: steps[0].Y * moveSpeed,
+		})
+		if monster.pos != before {
+			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(monster.view())})
+		}
+	}
+}
+
+func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDef, prevMode string, res *TickResult) {
+	nav := s.rules.Navigation
+	distPlayer := distance(monster.pos, player.pos)
+	distPlayerFromSpawn := distance(player.pos, monster.spawnPos)
+
+	if def.LeashRadius > 0 && distPlayerFromSpawn > def.LeashRadius {
+		if prevMode != monsterAIModeReturn {
+			res.Events = append(res.Events, Event{EventType: "monster_leashed", EntityID: idStr(monster.id)})
+		}
+		monster.aiMode = monsterAIModeReturn
+
+		return
+	}
+
+	if distPlayer <= def.AggroRadius {
+		if prevMode != monsterAIModeChase {
+			res.Events = append(res.Events, Event{EventType: "monster_aggro", EntityID: idStr(monster.id)})
+		}
+		monster.aiMode = monsterAIModeChase
+
+		return
+	}
+
+	if distance(monster.pos, monster.spawnPos) <= nav.StopDistance {
+		monster.aiMode = monsterAIModeIdle
+
+		return
+	}
+
+	if prevMode == monsterAIModeReturn {
+		monster.aiMode = monsterAIModeReturn
+
+		return
+	}
+
+	monster.aiMode = monsterAIModeIdle
+}
+
+func (s *Sim) monsterMovementGoal(monster *entity, player *entity) (Vec2, bool) {
+	nav := s.rules.Navigation
+	switch monster.aiMode {
+	case monsterAIModeChase:
+		stopDist := playerRadius + monsterRadius
+		if distance(monster.pos, player.pos) <= stopDist+1e-9 {
+			return Vec2{}, false
+		}
+
+		return s.findMonsterChaseGoal(monster, player)
+	case monsterAIModeReturn:
+		if distance(monster.pos, monster.spawnPos) <= nav.StopDistance {
+			return Vec2{}, false
+		}
+
+		return monster.spawnPos, true
+	default:
+		return Vec2{}, false
+	}
+}
+
+func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity) (Vec2, bool) {
+	nav := s.rules.Navigation
+	playerCell := worldToGrid(nav, player.pos)
+	blocked := s.buildMonsterBlockedFn(monster.id)
+	maxReach := playerRadius + monsterRadius + nav.CellSize
+	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
+	var (
+		bestGoal       Vec2
+		bestPlayerDist = math.MaxFloat64
+		bestCell       gridCell
+		found          bool
+	)
+	for radius := 0; radius <= maxRadius; radius++ {
+		for _, cell := range ringCells(playerCell, radius) {
+			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
+				continue
+			}
+			goal := gridToWorld(nav, cell)
+			goalDist := distance(goal, player.pos)
+			if goalDist > maxReach {
+				continue
+			}
+			steps, ok := PlanPath(nav, monster.pos, goal, blocked)
+			if !ok {
+				continue
+			}
+			if len(steps) == 0 && distance(monster.pos, goal) > nav.StopDistance+1e-9 {
+				continue
+			}
+			if !found || goalDist < bestPlayerDist-1e-9 ||
+				(math.Abs(goalDist-bestPlayerDist) <= 1e-9 && cellLess(cell, bestCell)) {
+				bestGoal = goal
+				bestPlayerDist = goalDist
+				bestCell = cell
+				found = true
+			}
+		}
+	}
+	if !found {
+		return Vec2{}, false
+	}
+
+	return bestGoal, true
+}
+
+func cellLess(a, b gridCell) bool {
+	if a.y != b.y {
+		return a.y < b.y
+	}
+
+	return a.x < b.x
+}
+
+func (s *Sim) buildMonsterBlockedFn(excludeMonsterID uint64) func(gx, gy int) bool {
+	return func(gx, gy int) bool {
+		center := gridToWorld(s.rules.Navigation, gridCell{x: gx, y: gy})
+		return s.monsterPositionBlocked(center, excludeMonsterID)
+	}
+}
+
+func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
+	for _, wall := range s.walls {
+		if circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
+			return true
+		}
+	}
+	player := s.entities[s.playerID]
+	if player != nil && player.hp > 0 {
+		if circlesOverlap(pos, monsterRadius, player.pos, playerRadius) {
+			return true
+		}
+	}
+	for _, id := range sortedEntityIDs(s.entities) {
+		if id == excludeMonsterID {
+			continue
+		}
+		e := s.entities[id]
+		if e == nil {
+			continue
+		}
+		if e.kind == monsterEntity && e.hp > 0 {
+			if circlesOverlap(pos, monsterRadius, e.pos, monsterRadius) {
+				return true
+			}
+			continue
+		}
+		if e.kind == interactableEntity && e.state == interactableClosed {
+			if def, ok := s.rules.Interactables[e.interactableDefID]; ok {
+				if circleIntersectsAABB(pos, monsterRadius, e.pos, def.BarrierWhenClosed.Size) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+func (s *Sim) resolveMonsterMovement(monster *entity, delta Vec2) Vec2 {
+	candidate := Vec2{X: monster.pos.X + delta.X, Y: monster.pos.Y + delta.Y}
+	if !s.monsterPositionBlocked(candidate, monster.id) {
+		return candidate
+	}
+	xOnly := Vec2{X: monster.pos.X + delta.X, Y: monster.pos.Y}
+	if delta.X != 0 && !s.monsterPositionBlocked(xOnly, monster.id) {
+		return xOnly
+	}
+	yOnly := Vec2{X: monster.pos.X, Y: monster.pos.Y + delta.Y}
+	if delta.Y != 0 && !s.monsterPositionBlocked(yOnly, monster.id) {
+		return yOnly
+	}
+
+	return monster.pos
 }
 
 func (s *Sim) advanceProjectiles(res *TickResult) {

@@ -1,0 +1,13 @@
+{
+  "version": 0,
+  "description": "Player drop at inventory_lab spawn places loot at first valid adjacent cell.",
+  "world_id": "inventory_lab",
+  "player_spawn": { "x": 4, "y": 5 },
+  "item_def_id": "rusty_sword",
+  "expected_loot_position": { "x": 5, "y": 5 },
+  "constants": {
+    "loot_drop_radius": 0.35,
+    "player_radius": 0.45,
+    "drop_step": 1.0
+  }
+}

@@ -46,7 +46,7 @@
       "properties": {
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
         "item_def_id": { "type": "string" },
-        "slot": { "type": "string", "enum": ["weapon"] },
+        "slot": { "type": "string", "enum": ["weapon", ""] },
         "equipped": { "type": "boolean" }
       }
     },
@@ -57,7 +57,8 @@
         "event_type": { "type": "string" },
         "entity_id": { "$ref": "#/$defs/decimal_id" },
         "correlation_id": { "$ref": "#/$defs/prefixed_id" },
-        "damage": { "type": "integer", "minimum": 0 }
+        "damage": { "type": "integer", "minimum": 0 },
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" }
       },
       "allOf": [
         {
@@ -73,6 +74,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "item_dropped" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "item_instance_id"] }
         }
       ]
     },
@@ -107,6 +115,15 @@
           "additionalProperties": false,
           "required": ["op", "item"],
           "properties": { "op": { "const": "inventory_update" }, "item": { "$ref": "#/$defs/item" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "item_instance_id"],
+          "properties": {
+            "op": { "const": "inventory_remove" },
+            "item_instance_id": { "$ref": "#/$defs/decimal_id" }
+          }
         },
         {
           "type": "object",

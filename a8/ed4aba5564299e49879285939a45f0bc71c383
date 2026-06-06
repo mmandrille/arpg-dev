@@ -1,0 +1,37 @@
+shared/rules/items.v0.schema.json
+  s_13d76ff3aef7a8::t_f144fd2bd1b013 19
+shared/rules/items.v0.json
+  s_13d76ff3aef7a8::t_ad5d54ac473fb2 4-8
+shared/rules/loot_tables.v0.schema.json
+  s_13d76ff3aef7a8::t_4db6a46e093a1f 19-22
+shared/rules/loot_tables.v0.json
+  s_13d76ff3aef7a8::t_913d51f9ae2977 13-20
+shared/rules/worlds.v0.json
+  s_b4a68f28938d7e::t_413e63be0edeb7 228-237
+shared/rules/monsters.v0.json
+  s_13d76ff3aef7a8::t_65ef35c6efd13c 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a8ed4aba5564299e49879285939a45f0bc71c383",
+  "prompts": {},
+  "sessions": {
+    "s_13d76ff3aef7a8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9a74-9bea-7812-821c-e091213329fa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_b4a68f28938d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9a1b-efa7-7eb2-a486-176e0f53068c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

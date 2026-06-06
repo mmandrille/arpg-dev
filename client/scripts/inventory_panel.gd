@@ -10,6 +10,7 @@ const SLOT_KIND_BAG_AREA := "bag_area"
 var inventory: Array = []
 var equipped: Dictionary = {"weapon": null}
 var item_rules: Dictionary = {}
+var item_presentations: Dictionary = {}
 var _panel: PanelContainer
 var _weapon_slot: InventorySlotButton
 var _bag_grid: GridContainer
@@ -25,6 +26,11 @@ class InventorySlotButton:
 	var panel: InventoryPanel
 	var slot_kind: String = ""
 	var item: Dictionary = {}
+
+	func _draw() -> void:
+		if item.is_empty():
+			return
+		panel._draw_item_icon(self, item)
 
 	func _gui_input(event: InputEvent) -> void:
 		if not panel._interactive:
@@ -68,6 +74,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_load_item_rules()
+	_load_item_presentations()
 	_build()
 	visible = false
 
@@ -129,6 +136,7 @@ func get_debug_state() -> Dictionary:
 		"bag_count": inventory.size(),
 		"equipped_weapon": equipped.get("weapon", null),
 		"weapon_item": _equipped_weapon_item(),
+		"item_presentations": _debug_presentations(),
 	}
 
 
@@ -290,10 +298,12 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 	if item.is_empty():
 		slot.text = ""
 		slot.tooltip_text = "Empty"
+		slot.queue_redraw()
 		return
 	var def_id := str(item.get("item_def_id", ""))
-	slot.text = _short_label(def_id)
+	slot.text = ""
 	slot.tooltip_text = _tooltip(def_id)
+	slot.queue_redraw()
 
 
 func _slot_button(kind: String, size: Vector2) -> InventorySlotButton:
@@ -309,6 +319,50 @@ func _slot_button(kind: String, size: Vector2) -> InventorySlotButton:
 	btn.add_theme_color_override("font_color", Color("#e8dcc8"))
 	btn.add_theme_font_size_override("font_size", 10)
 	return btn
+
+
+func _draw_item_icon(slot: Control, item: Dictionary) -> void:
+	var def_id := str(item.get("item_def_id", ""))
+	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
+	var shape := str(icon.get("shape", "box"))
+	var color := Color(str(icon.get("color", "#d8d0bd")))
+	var accent := Color(str(icon.get("accent", "#6b5420")))
+	var rect := Rect2(Vector2.ZERO, slot.size)
+	var center := rect.get_center()
+	var min_side = min(rect.size.x, rect.size.y)
+	var label := str(icon.get("label", _short_label(def_id)))
+
+	match shape:
+		"blade":
+			var a := center + Vector2(-min_side * 0.22, min_side * 0.22)
+			var b := center + Vector2(min_side * 0.22, -min_side * 0.22)
+			slot.draw_line(a, b, color, 5.0, true)
+			slot.draw_line(a + Vector2(-4, 4), a + Vector2(5, -5), accent, 4.0, true)
+		"bow":
+			slot.draw_arc(center, min_side * 0.28, -1.25, 1.25, 18, color, 4.0, true)
+			slot.draw_line(center + Vector2(min_side * 0.18, -min_side * 0.26), center + Vector2(min_side * 0.18, min_side * 0.26), accent, 2.0, true)
+		"badge":
+			slot.draw_circle(center, min_side * 0.24, color)
+			slot.draw_arc(center, min_side * 0.17, 0.0, TAU, 18, accent, 2.0, true)
+		"leaf":
+			var pts := PackedVector2Array([
+				center + Vector2(0, -min_side * 0.30),
+				center + Vector2(min_side * 0.24, -min_side * 0.02),
+				center + Vector2(0, min_side * 0.28),
+				center + Vector2(-min_side * 0.24, -min_side * 0.02),
+			])
+			slot.draw_colored_polygon(pts, color)
+			slot.draw_line(center + Vector2(0, -min_side * 0.22), center + Vector2(0, min_side * 0.22), accent, 2.0, true)
+		"potion":
+			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.13, -min_side * 0.05), Vector2(min_side * 0.26, min_side * 0.28)), color, true)
+			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.08, -min_side * 0.22), Vector2(min_side * 0.16, min_side * 0.16)), accent, true)
+		_:
+			slot.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
+
+	var font := slot.get_theme_default_font()
+	var font_size := 9
+	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.38), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#f4ead8"))
 
 
 func _title(text: String) -> Label:
@@ -425,3 +479,24 @@ func _load_item_rules() -> void:
 	var parsed = JSON.parse_string(f.get_as_text())
 	if typeof(parsed) == TYPE_DICTIONARY:
 		item_rules = parsed.get("items", {})
+
+
+func _load_item_presentations() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_presentations = parsed.get("items", {})
+
+
+func _debug_presentations() -> Dictionary:
+	var out := {}
+	for item in inventory:
+		var def_id := str(item.get("item_def_id", ""))
+		if def_id != "":
+			out[def_id] = item_presentations.has(def_id)
+	return out

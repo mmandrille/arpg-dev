@@ -7,14 +7,17 @@
   "client_steps": [
     { "type": "wait_ws_open",             "timeout_s": 10.0 },
     { "type": "wait_entity",              "entity_type": "loot", "timeout_s": 10.0 },
+    { "type": "assert_loot_presentation", "item_def_id": "rusty_sword" },
     { "type": "click_entity",             "entity_type": "loot" },
     { "type": "wait_inventory_item",      "timeout_s": 10.0 },
+    { "type": "assert_inventory_presentation", "item_def_id": "rusty_sword" },
     { "type": "press_key",                "keycode": "KEY_I" },
     { "type": "assert_panel_visible",     "visible": true },
     { "type": "drag_bag_to_outside",      "item_def_id": "rusty_sword" },
     { "type": "wait_event",               "event_type": "item_dropped", "timeout_s": 10.0 },
     { "type": "assert_inventory_missing", "item_def_id": "rusty_sword" },
     { "type": "wait_loot_item",           "timeout_s": 10.0 },
+    { "type": "assert_loot_presentation", "item_def_id": "rusty_sword" },
     { "type": "click_entity",             "entity_type": "loot" },
     { "type": "wait_inventory_item",      "item_def_id": "rusty_sword", "timeout_s": 10.0 }
   ]

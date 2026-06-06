@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/item_presentations.v0.schema.json",
+  "title": "Item presentation metadata (v0)",
+  "description": "Client rendering hints only: icon and ground-loot presentation keyed by item_def_id. Carries NO gameplay stats.",
+  "type": "object",
+  "required": ["version", "items"],
+  "additionalProperties": false,
+  "$defs": {
+    "hexColor": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "iconShape": {
+      "type": "string",
+      "enum": ["blade", "bow", "badge", "leaf", "potion", "box"]
+    },
+    "groundShape": {
+      "type": "string",
+      "enum": ["blade", "bow", "coin", "leaf", "potion", "box"]
+    }
+  },
+  "properties": {
+    "version": { "const": 0 },
+    "items": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["icon", "ground"],
+        "additionalProperties": false,
+        "properties": {
+          "icon": {
+            "type": "object",
+            "required": ["shape", "color", "accent", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "shape": { "$ref": "#/$defs/iconShape" },
+              "color": { "$ref": "#/$defs/hexColor" },
+              "accent": { "$ref": "#/$defs/hexColor" },
+              "label": { "type": "string", "minLength": 1, "maxLength": 3 }
+            }
+          },
+          "ground": {
+            "type": "object",
+            "required": ["shape", "color", "accent", "scale"],
+            "additionalProperties": false,
+            "properties": {
+              "shape": { "$ref": "#/$defs/groundShape" },
+              "color": { "$ref": "#/$defs/hexColor" },
+              "accent": { "$ref": "#/$defs/hexColor" },
+              "scale": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

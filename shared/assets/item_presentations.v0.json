@@ -1,0 +1,26 @@
+{
+  "version": 0,
+  "items": {
+    "rusty_sword": {
+      "icon": { "shape": "blade", "color": "#b8bdc2", "accent": "#6d5a3a", "label": "Sw" },
+      "ground": { "shape": "blade", "color": "#b8bdc2", "accent": "#6d5a3a", "scale": 1.0 }
+    },
+    "training_bow": {
+      "icon": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "label": "Bw" },
+      "ground": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "scale": 1.0 }
+    },
+    "training_badge": {
+      "icon": { "shape": "badge", "color": "#d5a928", "accent": "#fff0a6", "label": "Bd" },
+      "ground": { "shape": "coin", "color": "#d5a928", "accent": "#fff0a6", "scale": 0.9 }
+    },
+    "quest_leaf": {
+      "icon": { "shape": "leaf", "color": "#3fbf62", "accent": "#b8f0a8", "label": "Lf" },
+      "ground": { "shape": "leaf", "color": "#3fbf62", "accent": "#b8f0a8", "scale": 0.9 }
+    },
+    "red_potion": {
+      "icon": { "shape": "potion", "color": "#d63b32", "accent": "#ffd3c9", "label": "Pt" },
+      "ground": { "shape": "potion", "color": "#d63b32", "accent": "#ffd3c9", "scale": 0.9 }
+    }
+  }
+}
+

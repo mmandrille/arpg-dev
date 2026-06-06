@@ -433,6 +433,21 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("item_visual_resolution golden matches item_visuals metadata")
 
+    # item_presentations: every current item has display metadata, and no
+    # presentation entry points at a missing item. This is client-only rendering
+    # data, but drift would make loot/inventory presentation fall back silently.
+    presentations = load(ASSETS / "item_presentations.v0.json")["items"]
+    for def_id in sorted(presentations):
+        if def_id not in items["items"]:
+            report.fail("item_presentations key", f"{def_id} not in items.v0.json")
+        else:
+            report.ok(f"item_presentations {def_id} resolves to items.v0.json")
+    missing_presentations = sorted(set(items["items"]) - set(presentations))
+    if missing_presentations:
+        report.fail("item_presentations coverage", f"missing entries: {missing_presentations}")
+    else:
+        report.ok("item_presentations covers all item rules")
+
 
 def main() -> int:
     report = Report()

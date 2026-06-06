@@ -1,0 +1,24 @@
+server/internal/game/game_test.go
+  s_4479f238e4d100::t_ef19966e3b2e0c 477-534
+  s_4479f238e4d100::t_0b3618339bca74 312
+server/internal/game/sim.go
+  s_4479f238e4d100::t_24b8dbfc67abea 1224-1234
+  s_4479f238e4d100::t_815401754fb2c9 922
+  s_4479f238e4d100::t_08691199d4b0ad 1278
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0f779788c0c2b3b4cb80d627cf7982a31bec92a0",
+  "prompts": {},
+  "sessions": {
+    "s_4479f238e4d100": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "23b48b70-c426-42a3-9d5e-2ec89bd00d35",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

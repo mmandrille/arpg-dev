@@ -199,6 +199,16 @@ func _initialize() -> void:
 		return
 	var level1: Dictionary = dungeon_stairs["levels"]["-1"]
 	var level2: Dictionary = dungeon_stairs["levels"]["-2"]
+	var town: Dictionary = dungeon_stairs["levels"]["0"]
+	if not _vec2_equals(town["stairs_down"], 8.0, 10.0):
+		_fail("town stairs_down mismatch")
+		return
+	if not _vec2_equals(town["teleporter"], 4.0, 13.0):
+		_fail("town teleporter mismatch")
+		return
+	if not _vec2_equals(level1["stairs_up"], 4.0, 10.0):
+		_fail("dungeon level -1 stairs_up mismatch")
+		return
 	if not _vec2_equals(level1["stairs_down"], 14.0, 18.0):
 		_fail("dungeon level -1 stairs_down mismatch")
 		return

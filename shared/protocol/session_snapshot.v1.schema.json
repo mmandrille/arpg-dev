@@ -70,7 +70,7 @@
       "required": ["level", "discovered"],
       "additionalProperties": false,
       "properties": {
-        "level": { "type": "integer", "maximum": -1 },
+        "level": { "type": "integer", "maximum": 0 },
         "discovered": { "type": "boolean" }
       }
     },

@@ -11,7 +11,7 @@ const STEP_TYPES_WAIT := [
 	"click_entity_until_event",
 ]
 const STEP_TYPES_ASSERT := [
-	"assert_panel_visible", "assert_equipped",
+	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
 	"assert_unequipped", "assert_inventory_missing", "assert_inventory_count",
 	"assert_loot_presentation", "assert_inventory_presentation",
 	"assert_hotbar_assigned", "assert_player_hp",
@@ -25,7 +25,7 @@ const WAIT_LOG_INTERVAL_S := 2.0
 
 const ALL_STEP_TYPES: Array = [
 	"wait_ws_open", "wait_entity", "wait_event", "assert_entity_removed",
-	"assert_panel_visible", "wait_inventory_item", "wait_inventory_count",
+	"assert_panel_visible", "assert_waypoint_panel_visible", "wait_inventory_item", "wait_inventory_count",
 	"assert_equipped", "assert_unequipped", "assert_inventory_missing",
 	"assert_inventory_count", "wait_loot_item", "wait_loot_count",
 	"wait_player_near", "press_key", "click_entity", "click_floor",
@@ -213,6 +213,15 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			var got := bool(state.get("inventory_panel_visible", false))
 			if want != got:
 				_fail("assert_panel_visible failed: want=%s got=%s step=%d scenario=%s" % [
+					want, got, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_waypoint_panel_visible":
+			var want := bool(step.get("visible", true))
+			var got := bool(state.get("waypoint_panel_visible", false))
+			if want != got:
+				_fail("assert_waypoint_panel_visible failed: want=%s got=%s step=%d scenario=%s" % [
 					want, got, _step_index, str(scenario.get("id", "?"))
 				])
 				return false

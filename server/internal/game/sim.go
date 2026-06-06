@@ -52,8 +52,8 @@ const (
 const DefaultWorldID = "vertical_slice"
 
 const (
-	entryLevel = -1
-	levelZero  = 0
+	townLevel = 0
+	levelZero = 0
 )
 
 // entity is the internal mutable scene entity.
@@ -162,24 +162,28 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 	}
 
 	if s.multiLevel {
-		s.currentLevel = entryLevel
-		nav := dungeonNavigation(rules.Navigation, rules.DungeonGeneration)
-		level := newLevelState(entryLevel, &nav)
-		s.levels[entryLevel] = level
-		player := &entity{kind: playerEntity, pos: rules.DungeonGeneration.PlayerSpawn, hp: playerStartHP, maxHP: playerStartHP}
-		player.id = s.alloc()
-		s.playerID = player.id
-		level.entities[player.id] = player
-		if err := s.populateDungeonLevel(level); err != nil {
+		s.currentLevel = townLevel
+		level := newLevelState(townLevel, &rules.Navigation)
+		s.levels[townLevel] = level
+		if err := s.populatePresetLevel(level, worldID, world); err != nil {
 			return nil, err
 		}
+		s.discoveredTeleporters[townLevel] = true
 		s.syncCompatibilityFields()
 		return s, nil
 	}
 
 	level := newLevelState(levelZero, &rules.Navigation)
 	s.levels[levelZero] = level
+	if err := s.populatePresetLevel(level, worldID, world); err != nil {
+		return nil, err
+	}
 
+	s.syncCompatibilityFields()
+	return s, nil
+}
+
+func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world WorldDef) error {
 	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: playerStartHP, maxHP: playerStartHP}
 	player.id = s.alloc()
 	s.playerID = player.id
@@ -188,7 +192,7 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 	for _, preset := range world.Entities {
 		switch preset.Type {
 		case monsterEntity:
-			def := rules.Monsters[preset.MonsterDefID]
+			def := s.rules.Monsters[preset.MonsterDefID]
 			monster := &entity{
 				kind:         monsterEntity,
 				pos:          preset.Position,
@@ -208,7 +212,7 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 		case wallEntity:
 			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size})
 		case interactableEntity:
-			def := rules.Interactables[preset.InteractableDefID]
+			def := s.rules.Interactables[preset.InteractableDefID]
 			interactable := &entity{
 				kind:              interactableEntity,
 				pos:               preset.Position,
@@ -218,12 +222,10 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 			interactable.id = s.alloc()
 			level.entities[interactable.id] = interactable
 		default:
-			return nil, ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
+			return ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
 		}
 	}
-
-	s.syncCompatibilityFields()
-	return s, nil
+	return nil
 }
 
 // ErrUnknownWorld reports an unknown world preset.
@@ -465,6 +467,9 @@ func (s *Sim) syncCompatibilityFields() {
 }
 
 func (s *Sim) ensureDungeonLevel(levelNum int) (*LevelState, error) {
+	if levelNum >= levelZero {
+		return nil, fmt.Errorf("game: invalid dungeon level %d", levelNum)
+	}
 	if level, ok := s.levels[levelNum]; ok {
 		return level, nil
 	}
@@ -476,6 +481,17 @@ func (s *Sim) ensureDungeonLevel(levelNum int) (*LevelState, error) {
 		return nil, err
 	}
 	return level, nil
+}
+
+func (s *Sim) ensureTravelLevel(levelNum int) (*LevelState, error) {
+	if levelNum == townLevel {
+		level, ok := s.levels[townLevel]
+		if !ok {
+			return nil, fmt.Errorf("game: missing town level")
+		}
+		return level, nil
+	}
+	return s.ensureDungeonLevel(levelNum)
 }
 
 func (s *Sim) populateDungeonLevel(level *LevelState) error {
@@ -835,7 +851,7 @@ func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
 			res.reject(in.MessageID, "invalid_payload")
 			return nil
 		}
-		if s.currentLevel >= entryLevel {
+		if s.currentLevel >= townLevel {
 			res.reject(in.MessageID, "already_at_entry")
 			return nil
 		}
@@ -846,11 +862,6 @@ func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
 		res.reject(in.MessageID, "invalid_payload")
 		return nil
 	}
-	if destLevel >= levelZero {
-		res.reject(in.MessageID, "invalid_level")
-		return nil
-	}
-
 	current := s.activeLevel()
 	player := current.entities[s.playerID]
 	if player == nil {
@@ -863,7 +874,7 @@ func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
 		return nil
 	}
 
-	dest, err := s.ensureDungeonLevel(destLevel)
+	dest, err := s.ensureTravelLevel(destLevel)
 	if err != nil {
 		res.reject(in.MessageID, "invalid_level")
 		return nil
@@ -890,7 +901,7 @@ func (s *Sim) handleTeleport(in Input, res *TickResult) *TickResult {
 		return nil
 	}
 	targetLevel := in.Teleport.TargetLevel
-	if targetLevel >= levelZero {
+	if targetLevel > townLevel {
 		res.reject(in.MessageID, "invalid_level")
 		return nil
 	}
@@ -912,7 +923,7 @@ func (s *Sim) handleTeleport(in Input, res *TickResult) *TickResult {
 		res.reject(in.MessageID, "no_teleporter_in_range")
 		return nil
 	}
-	dest, err := s.ensureDungeonLevel(targetLevel)
+	dest, err := s.ensureTravelLevel(targetLevel)
 	if err != nil {
 		res.reject(in.MessageID, "invalid_level")
 		return nil
@@ -952,7 +963,7 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 	})
 
 	arrivalRes := TickResult{Tick: res.Tick, Level: destLevel, Changes: []Change{}, Events: []Event{}}
-	if s.multiLevel && destLevel < levelZero && !s.discoveredTeleporters[destLevel] {
+	if s.multiLevel && !s.discoveredTeleporters[destLevel] {
 		arrivalRes.Changes = append(arrivalRes.Changes, Change{
 			Op:         OpTeleporterDiscoveryUpdate,
 			Level:      destLevel,
@@ -2225,7 +2236,7 @@ func (s *Sim) teleporterDiscoveryView() []TeleporterDiscoveryView {
 	}
 	levels := make([]int, 0, len(s.levels))
 	for levelNum := range s.levels {
-		if levelNum < levelZero {
+		if levelNum <= townLevel {
 			levels = append(levels, levelNum)
 		}
 	}

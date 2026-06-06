@@ -1,7 +1,12 @@
 {
   "seed": "deadbeefdeadbeef",
   "levels": {
+    "0": {
+      "stairs_down": { "x": 8, "y": 10 },
+      "teleporter": { "x": 4, "y": 13 }
+    },
     "-1": {
+      "stairs_up": { "x": 4, "y": 10 },
       "stairs_down": { "x": 14, "y": 18 },
       "teleporter": { "x": 14, "y": 12 }
     },
@@ -15,7 +20,7 @@
     }
   },
   "descend_then_ascend": {
-    "expected_level": -1,
-    "expected_player_position": { "x": 14, "y": 18 }
+    "expected_level": 0,
+    "expected_player_position": { "x": 8, "y": 10 }
   }
 }

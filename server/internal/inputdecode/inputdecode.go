@@ -43,7 +43,7 @@ type (
 	descendPayloadWire  struct{}
 	ascendPayloadWire   struct{}
 	teleportPayloadWire struct {
-		TargetLevel int `json:"target_level"`
+		TargetLevel *int `json:"target_level"`
 	}
 	equipPayloadWire struct {
 		ItemInstanceID string `json:"item_instance_id"`
@@ -110,10 +110,10 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 		in.Ascend = &game.AscendIntent{}
 	case TypeTeleport:
 		var p teleportPayloadWire
-		if err := json.Unmarshal(payload, &p); err != nil || p.TargetLevel >= 0 {
+		if err := json.Unmarshal(payload, &p); err != nil || p.TargetLevel == nil || *p.TargetLevel > 0 {
 			return in, false
 		}
-		in.Teleport = &game.TeleportIntent{TargetLevel: p.TargetLevel}
+		in.Teleport = &game.TeleportIntent{TargetLevel: *p.TargetLevel}
 	case TypeEquip:
 		var p equipPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.ItemInstanceID == "" || p.Slot == "" {

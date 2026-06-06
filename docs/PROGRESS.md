@@ -11,8 +11,8 @@ Last updated: 2026-06-06
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v19 — `teleporters-and-waypoint-ui` (generated teleporters + waypoint fast travel) |
-| **Active branch** | `feature/teleporters-and-waypoint-ui` |
+| **Latest completed slice** | v20 — `play-session-loop` (town entry + fresh playable dungeon loop) |
+| **Active branch** | `feature/play-session-loop` |
 | **CI gate** | `make ci` green on 2026-06-06 |
 | **Next slice** | TBD |
 
@@ -35,6 +35,7 @@ v16_* = use-consumable
 v17_* = monster-chase-movement
 v18_* = dungeon-levels-and-stairs
 v19_* = teleporters-and-waypoint-ui
+v20_* = play-session-loop
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -74,6 +75,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v17** | `monster-chase-movement` | Complete (`make ci` green) | [`v17_spec-monster-chase-movement.md`](specs/v17_spec-monster-chase-movement.md) | [`v17_2026-06-06-monster-chase-movement.md`](plans/v17_2026-06-06-monster-chase-movement.md) |
 | **v18** | `dungeon-levels-and-stairs` | Complete (`make ci` green) | [`v18_spec-dungeon-levels-and-stairs.md`](specs/v18_spec-dungeon-levels-and-stairs.md) | [`v18_2026-06-06-dungeon-levels-and-stairs.md`](plans/v18_2026-06-06-dungeon-levels-and-stairs.md) |
 | **v19** | `teleporters-and-waypoint-ui` | Complete (`make ci` green) | [`v19_spec-teleporters-and-waypoint-ui.md`](specs/v19_spec-teleporters-and-waypoint-ui.md) | [`v19_2026-06-06-teleporters-and-waypoint-ui.md`](plans/v19_2026-06-06-teleporters-and-waypoint-ui.md) |
+| **v20** | `play-session-loop` | Complete (`make ci` green) | [`v20_spec-play-session-loop.md`](specs/v20_spec-play-session-loop.md) | [`v20_2026-06-06-play-session-loop.md`](plans/v20_2026-06-06-play-session-loop.md) |
 
 ---
 
@@ -422,6 +424,29 @@ server-authoritative fast travel.
 **Explicit non-goals:** no character-scoped waypoint persistence, town waypoint, VFX/audio,
 production teleporter art, hidden infinite level catalog, or plugin adoption.
 
+### v20 — Play session loop
+
+**Proves:** The generated dungeon can be entered from a static town and used as the default fresh
+interactive play loop without changing the authoritative client/server boundary.
+
+- `dungeon_levels` now starts at town level `0`, built from `worlds.v0.json` with a down stair and
+  a teleporter; level `-1` is generated lazily on first descent.
+- Town teleporter discovery is initialized server-side and appears in snapshots as level `0`
+  discovered; protocol v1 now allows `target_level: 0`.
+- Generated level `-1` now has a `stairs_up` landing at the dungeon player spawn, so
+  `0 -> -1 -> -2 -> -1 -> 0` is replayable and golden-tested.
+- `ascend_intent` from level `-1` returns to town at the town down stair; teleporting to town lands
+  at the town teleporter when the current floor has an active discovered teleporter.
+- `scripts/play.sh` launches a fresh `dungeon_levels` run by default, and the interactive Godot
+  client requests `dungeon_levels` when no world is specified.
+- Godot renders dungeon perimeter walls only below level `0`; town remains an open placeholder hub
+  with the existing waypoint panel and level-HUD behavior.
+- Bot scenarios `12_dungeon_levels` and `13_teleporter_lab`, replay goldens, and client golden
+  checks were updated for the town preamble and town waypoint row.
+
+**Explicit non-goals:** no character-scoped persistence, player-facing resume, safe-zone combat
+rules, NPCs/vendors/stash, production town art, or plugin adoption.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -459,7 +484,7 @@ collision_lab: pass through middle wall gap → kill monster on far side
 inventory_lab: pick up rusty_sword → equip → unequip → drop → re-pickup → re-equip
 heal_lab: pick up red_potion x2 → take damage → use potion twice → full HP
 chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond leash and return
-dungeon_levels / teleporter_lab: descend/ascend generated floors; discover teleporters and fast-travel back
+dungeon_levels / teleporter_lab: start in town, descend/ascend generated floors; discover teleporters and fast-travel back
 ```
 
 **Verify:**
@@ -522,17 +547,18 @@ goldens, server-owned inventory removal, and a client-only hotbar that sends use
 monster pathing around solids, leash return, chase/lab bot scenarios, and client walk presentation
 from position deltas.
 
-**Dungeon levels, stairs, and teleporters are now authoritative.** v18 adds multi-level dungeon
-state and generated stairs; v19 adds generated teleporters, session discovery, and server-owned
-fast travel with a client-only waypoint panel.
+**Dungeon levels, stairs, teleporters, and town entry are now authoritative.** v18 adds multi-level
+dungeon state and generated stairs; v19 adds generated teleporters, session discovery, and
+server-owned fast travel with a client-only waypoint panel; v20 makes town level `0` the fresh
+play-session entry and keeps dungeon floors lazy.
 
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Cross-session **character-scoped** inventory | v0 as-built §10 |
+| Persistence | Cross-session **character-scoped** inventory, waypoints, and player-facing resume | v0 as-built §10, v20 non-goals |
 | Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, proactive monster melee/ranged AI | v0/v4/v12/v17 non-goals |
-| Content | Production item art/icons, additional item families beyond current rules | v15 non-goals |
+| Content | Production item art/icons, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |

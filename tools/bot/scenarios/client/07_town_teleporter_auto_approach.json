@@ -1,0 +1,14 @@
+{
+  "id": "town_teleporter_auto_approach",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "title": "Town teleporter auto-approach",
+  "description": "Clicking the town teleporter from spawn auto-navigates to activation range and opens the waypoint panel.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 10.0 },
+    { "type": "click_entity", "entity_type": "interactable", "entity_index": 1 },
+    { "type": "wait_player_near", "x": 4.0, "z": 13.0, "distance": 1.5, "timeout_s": 10.0 },
+    { "type": "assert_waypoint_panel_visible", "visible": true }
+  ]
+}

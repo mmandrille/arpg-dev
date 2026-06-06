@@ -2,8 +2,9 @@
   "id": "dungeon_levels",
   "world_id": "dungeon_levels",
   "title": "Dungeon levels",
-  "description": "Descend to generated level -2, pick up the currency coin, then ascend back to level -1 at the matching down stair.",
+  "description": "Descend from town to generated level -2, pick up the currency coin, then ascend back to level -1 at the matching down stair.",
   "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 40 },
     { "action": "use_stair", "direction": "down", "max_ticks": 40 },
     { "action": "pick_up_loot", "item_def_id": "training_badge" },
     { "action": "use_stair", "direction": "up", "max_ticks": 20 },
@@ -11,6 +12,7 @@
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
+    { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -2 },
     { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false },
     { "type": "event_seen", "event_type": "level_changed" }

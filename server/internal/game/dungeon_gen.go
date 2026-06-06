@@ -49,7 +49,10 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place down stairs", levelNum)
 	}
 	if levelNum == -1 {
-		out.stairs = append(out.stairs, generatedStair{defID: stairsDownDefID, pos: down})
+		out.stairs = append(out.stairs,
+			generatedStair{defID: stairsUpDefID, pos: rules.PlayerSpawn},
+			generatedStair{defID: stairsDownDefID, pos: down},
+		)
 		teleporter, ok := randomTeleporterPosition(rng, rules, out.stairPositions())
 		if !ok {
 			return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)

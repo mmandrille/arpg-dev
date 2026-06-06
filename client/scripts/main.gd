@@ -25,6 +25,7 @@ const PLAYER_EVENT_CLIPS := {
 	"player_killed": "death",
 }
 const PLAYER_START_HP := 10
+const INTERACTABLE_ACTIVATION_RANGE := 1.5
 
 var client: NetClient
 var resolver: EquipmentVisualResolver
@@ -47,6 +48,9 @@ var interactable_ids: Array = []
 var current_world_id: String = "vertical_slice"
 var current_level: int = 0
 var discovered_teleporters: Dictionary = {}
+var pending_interactable_action: Dictionary = {}
+var pending_waypoint_target_level: int = 0
+var pending_waypoint_travel: bool = false
 var ready_sent: bool = false
 var item_to_equip: String = ""
 var bot_mode: bool = false
@@ -154,6 +158,8 @@ func _ready() -> void:
 		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
+	if requested_world_id == "" and not bot_client_run:
+		requested_world_id = "dungeon_levels"
 	if not client.create_session(resume_session_id, requested_world_id):
 		if bot_client_run:
 			printerr("[bot-client] session failed world_id=%s resume=%s" % [requested_world_id, resume_session_id])
@@ -195,6 +201,8 @@ func _process(delta: float) -> void:
 
 	for env in client.poll():
 		_handle_message(env)
+	_try_complete_pending_interactable_action()
+	_try_complete_pending_waypoint_travel()
 
 	if visual_replay_enabled:
 		_handle_visual_replay(delta)
@@ -224,6 +232,8 @@ func _handle_message(env: Dictionary) -> void:
 		"state_delta":
 			_apply_delta(env["payload"])
 		"intent_rejected":
+			pending_interactable_action.clear()
+			pending_waypoint_travel = false
 			_debug("rejected: %s" % env["payload"].get("reason", "?"))
 		"error":
 			_debug("error: %s" % env["payload"].get("message", "?"))
@@ -231,6 +241,8 @@ func _handle_message(env: Dictionary) -> void:
 
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
+	pending_interactable_action.clear()
+	pending_waypoint_travel = false
 	_apply_teleporter_snapshot(p.get("discovered_teleporters", []))
 	_clear_level_entities()
 	_render_world_walls(current_world_id)
@@ -256,6 +268,8 @@ func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		if str(ev.get("event_type", "")) == "level_changed":
 			current_level = int(ev.get("to_level", current_level))
+			pending_interactable_action.clear()
+			pending_waypoint_travel = false
 			_clear_level_entities()
 			_render_world_walls(current_world_id)
 			_update_level_hud()
@@ -428,6 +442,8 @@ func _upsert_entity(e: Dictionary) -> void:
 
 
 func _remove_entity(id: String) -> void:
+	if str(pending_interactable_action.get("target_id", "")) == id:
+		pending_interactable_action.clear()
 	if entities.has(id):
 		var rec: Dictionary = entities[id]
 		if rec.has("move_tween"):
@@ -704,22 +720,82 @@ func _try_action_at_mouse() -> void:
 	var state := str(rec.get("state", ""))
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
 	if typ == "interactable" and interactable_def_id in ["stairs_down", "stairs_up"]:
-		var intent_type := "descend_intent" if interactable_def_id == "stairs_down" else "ascend_intent"
-		client.send(intent_type, last_server_tick, {})
-		_attack_cooldown = SEND_INTERVAL
+		_activate_or_approach_interactable(target_id, rec)
 		return
 	if typ == "interactable" and interactable_def_id == "teleporter":
-		if bool(discovered_teleporters.get(current_level, false)):
-			_show_waypoint_panel()
-		else:
-			client.send("action_intent", last_server_tick, {"target_id": target_id})
-			_attack_cooldown = SEND_INTERVAL
+		_activate_or_approach_interactable(target_id, rec)
 		return
 	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")):
 		player_anim.play_one_shot("attack")
 
 	client.send("action_intent", last_server_tick, {"target_id": target_id})
 	_attack_cooldown = SEND_INTERVAL
+
+
+func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> void:
+	if _interactable_in_activation_range(rec):
+		_activate_interactable_now(target_id, rec)
+		return
+	var interactable_def_id := str(rec.get("interactable_def_id", ""))
+	pending_interactable_action = {
+		"target_id": target_id,
+		"interactable_def_id": interactable_def_id,
+	}
+	if interactable_def_id == "teleporter":
+		client.send("action_intent", last_server_tick, {"target_id": target_id})
+		_attack_cooldown = SEND_INTERVAL
+		return
+	var target_node := rec["node"] as Node3D
+	if target_node == null:
+		pending_interactable_action.clear()
+		return
+	client.send("move_to_intent", last_server_tick, {
+		"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
+	})
+	_attack_cooldown = SEND_INTERVAL
+
+
+func _try_complete_pending_interactable_action() -> void:
+	if pending_interactable_action.is_empty() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
+		return
+	var target_id := str(pending_interactable_action.get("target_id", ""))
+	if target_id == "" or not entities.has(target_id):
+		pending_interactable_action.clear()
+		return
+	var rec: Dictionary = entities[target_id]
+	if not _interactable_in_activation_range(rec):
+		return
+	pending_interactable_action.clear()
+	_activate_interactable_now(target_id, rec)
+
+
+func _interactable_in_activation_range(rec: Dictionary) -> bool:
+	var target_node := rec.get("node") as Node3D
+	if target_node == null or player_anchor == null:
+		return false
+	var flat := Vector2(
+		target_node.global_position.x - player_anchor.global_position.x,
+		target_node.global_position.z - player_anchor.global_position.z
+	)
+	return flat.length() <= INTERACTABLE_ACTIVATION_RANGE
+
+
+func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
+	var interactable_def_id := str(rec.get("interactable_def_id", ""))
+	if interactable_def_id == "stairs_down":
+		client.send("descend_intent", last_server_tick, {})
+		_attack_cooldown = SEND_INTERVAL
+		return
+	if interactable_def_id == "stairs_up":
+		client.send("ascend_intent", last_server_tick, {})
+		_attack_cooldown = SEND_INTERVAL
+		return
+	if interactable_def_id == "teleporter":
+		if bool(discovered_teleporters.get(current_level, false)):
+			_show_waypoint_panel()
+		else:
+			client.send("action_intent", last_server_tick, {"target_id": target_id})
+			_attack_cooldown = SEND_INTERVAL
 
 
 func _update_facing_toward_mouse() -> void:
@@ -1107,8 +1183,44 @@ func _waypoint_row_text(level: int) -> String:
 func _on_waypoint_level_pressed(level: int) -> void:
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
-	client.send("teleport_intent", last_server_tick, {"target_level": level})
+	if level == current_level:
+		_hide_waypoint_panel()
+		return
+	var teleporter := _current_teleporter_record()
+	if teleporter.is_empty() or _interactable_in_activation_range(teleporter):
+		client.send("teleport_intent", last_server_tick, {"target_level": level})
+	else:
+		var target_node := teleporter["node"] as Node3D
+		if target_node == null:
+			return
+		pending_waypoint_target_level = level
+		pending_waypoint_travel = true
+		client.send("move_to_intent", last_server_tick, {
+			"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
+		})
 	_hide_waypoint_panel()
+
+
+func _try_complete_pending_waypoint_travel() -> void:
+	if not pending_waypoint_travel or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
+		return
+	var teleporter := _current_teleporter_record()
+	if teleporter.is_empty():
+		pending_waypoint_travel = false
+		return
+	if not _interactable_in_activation_range(teleporter):
+		return
+	var target_level := pending_waypoint_target_level
+	pending_waypoint_travel = false
+	client.send("teleport_intent", last_server_tick, {"target_level": target_level})
+
+
+func _current_teleporter_record() -> Dictionary:
+	for id in interactable_ids:
+		var rec: Dictionary = entities.get(id, {})
+		if str(rec.get("interactable_def_id", "")) == "teleporter":
+			return rec
+	return {}
 
 
 func _render_world_walls(world_id: String) -> void:
@@ -1125,7 +1237,8 @@ func _render_world_walls(world_id: String) -> void:
 	var worlds: Dictionary = parsed.get("worlds", {})
 	var world: Dictionary = worlds.get(world_id, {})
 	if str(world.get("mode", "")) == "multi_level":
-		_render_dungeon_walls()
+		if current_level < 0:
+			_render_dungeon_walls()
 		return
 	for entity in world.get("entities", []):
 		if str(entity.get("type", "")) != "wall":
@@ -1484,8 +1597,10 @@ func get_bot_state() -> Dictionary:
 		"equipped": equipped.duplicate(true),
 		"monster_ids": live_monster_ids,
 		"loot_ids": loot_ids.duplicate(),
+		"interactable_ids": interactable_ids.duplicate(),
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
+		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
@@ -1507,6 +1622,21 @@ func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
+	_attack_cooldown = SEND_INTERVAL
+
+
+func bot_click_entity_id(target_id: String) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	if target_id == "" or not entities.has(target_id):
+		return
+	var rec: Dictionary = entities[target_id]
+	var typ := str(rec.get("type", ""))
+	var interactable_def_id := str(rec.get("interactable_def_id", ""))
+	if typ == "interactable" and interactable_def_id in ["stairs_down", "stairs_up", "teleporter"]:
+		_activate_or_approach_interactable(target_id, rec)
+		return
+	client.send("action_intent", last_server_tick, {"target_id": target_id})
 	_attack_cooldown = SEND_INTERVAL
 
 

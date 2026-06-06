@@ -1,0 +1,19 @@
+docs/specs/v14_spec-godot-client-bot.md
+  s_4479f238e4d100::t_c222db96618f16 1-263
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9d2073a2b5a75c1530c372ac920939c8a3c2d61b",
+  "prompts": {},
+  "sessions": {
+    "s_4479f238e4d100": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "23b48b70-c426-42a3-9d5e-2ec89bd00d35",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

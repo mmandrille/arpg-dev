@@ -91,6 +91,7 @@ class RuntimeState:
     accepted_message_ids: set[str] = field(default_factory=set)
     rejected_message_reasons: dict[str, str] = field(default_factory=dict)
     min_player_monster_distance: dict[str, float] = field(default_factory=dict)
+    initial_monster_positions: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -242,6 +243,14 @@ async def execute_step(
     total: int = 0,
 ) -> None:
     action = step.get("action")
+    if action == "wait_ticks":
+        ticks = int(step["ticks"])
+        deadline = loop.time() + (ticks * 0.05) + 0.15
+        while loop.time() < deadline:
+            await pump_one(ws, state, timeout=0.05)
+
+        return
+
     if action == "move":
         direction = step["direction"]
         duration = int(step.get("duration_ticks", 1))
@@ -597,6 +606,15 @@ async def wait_for_player_move(ws, state: RuntimeState, before: dict[str, Any], 
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_tick_advance(ws, state: RuntimeState, loop) -> None:
+    start = state.last_tick
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while state.last_tick <= start:
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for tick advance from {start}")
+        await pump_one(ws, state, timeout=0.1)
+
+
 async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop) -> None:
     deadline = loop.time() + SLICE_TIMEOUT_S
     while state.last_tick < target_tick:
@@ -700,6 +718,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             existing = state.entities.get(entity["id"], {})
             existing.update(entity)
             state.entities[entity["id"]] = existing
+            track_initial_monster_position(state, existing)
             if c["op"] == "entity_spawn" and entity["type"] == "loot":
                 loot_id = entity["id"]
                 if loot_id not in state.loot_ids:
@@ -735,7 +754,22 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     for item in state.inventory:
         if item.get("equipped"):
             state.equipped_item_id = item.get("item_instance_id")
+    for entity in state.entities.values():
+        track_initial_monster_position(state, entity)
     update_runtime_distances(state)
+
+
+def track_initial_monster_position(state: RuntimeState, entity: dict[str, Any]) -> None:
+    if entity.get("type") != "monster":
+        return
+    monster_def_id = str(entity.get("monster_def_id", ""))
+    if not monster_def_id or monster_def_id in state.initial_monster_positions:
+        return
+    pos = entity.get("position", {})
+    state.initial_monster_positions[monster_def_id] = {
+        "x": float(pos.get("x", 0.0)),
+        "y": float(pos.get("y", 0.0)),
+    }
 
 
 def update_runtime_distances(state: RuntimeState) -> None:
@@ -978,7 +1012,7 @@ def run_assertions(
                 raise AssertionError(f"{where}: interactable {expected_id} state = {matches}, want {expected_state}")
         elif typ == "monster_killed_in_attacks":
             continue
-        elif typ == "player_never_in_melee_range_of":
+        elif typ in {"monster_moved", "monster_within_player_distance", "monster_near_spawn", "event_seen", "player_never_in_melee_range_of"}:
             continue
         elif typ == "player_hp_equals":
             assert_player_hp_equals(entities, int(assertion["equals"]), where)
@@ -1004,19 +1038,73 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                     f"{where}: player entered melee range of {monster_def_id}: min_distance={min_distance:.3f}, threshold={threshold:.3f}"
                 )
             continue
-        if typ != "monster_killed_in_attacks":
+        if typ == "monster_killed_in_attacks":
+            monster_def_id = str(assertion["monster_def_id"])
+            max_attacks = int(assertion["max_attacks"])
+            count = state.accepted_attack_counts.get(monster_def_id, 0)
+            if monster_def_id not in state.killed_monster_def_ids:
+                raise AssertionError(f"{where}: monster {monster_def_id} was not observed killed at runtime")
+            if count < 1:
+                raise AssertionError(f"{where}: no accepted action_intent observed for {monster_def_id}")
+            if count > max_attacks:
+                raise AssertionError(
+                    f"{where}: monster {monster_def_id} killed in {count} accepted attacks, max {max_attacks}"
+                )
             continue
-        monster_def_id = str(assertion["monster_def_id"])
-        max_attacks = int(assertion["max_attacks"])
-        count = state.accepted_attack_counts.get(monster_def_id, 0)
-        if monster_def_id not in state.killed_monster_def_ids:
-            raise AssertionError(f"{where}: monster {monster_def_id} was not observed killed at runtime")
-        if count < 1:
-            raise AssertionError(f"{where}: no accepted action_intent observed for {monster_def_id}")
-        if count > max_attacks:
-            raise AssertionError(
-                f"{where}: monster {monster_def_id} killed in {count} accepted attacks, max {max_attacks}"
-            )
+        if typ == "event_seen":
+            event_type = str(assertion["event_type"])
+            if event_type not in state.seen_events:
+                raise AssertionError(f"{where}: event {event_type} not seen; have {sorted(state.seen_events)}")
+            continue
+        if typ == "monster_moved":
+            monster_def_id = str(assertion["monster_def_id"])
+            min_distance = float(assertion["min_distance"])
+            initial = state.initial_monster_positions.get(monster_def_id)
+            monster = find_monster(state, monster_def_id)
+            if initial is None or monster is None:
+                raise AssertionError(f"{where}: missing initial/current monster {monster_def_id}")
+            pos = monster.get("position", {})
+            dx = float(pos.get("x", 0.0)) - initial["x"]
+            dy = float(pos.get("y", 0.0)) - initial["y"]
+            dist = (dx * dx + dy * dy) ** 0.5
+            if dist < min_distance:
+                raise AssertionError(
+                    f"{where}: monster {monster_def_id} moved {dist:.3f} < min_distance {min_distance}"
+                )
+            continue
+        if typ == "monster_within_player_distance":
+            monster_def_id = str(assertion["monster_def_id"])
+            max_distance = float(assertion["max_distance"])
+            player = find_player(state)
+            monster = find_monster(state, monster_def_id)
+            if player is None or monster is None:
+                raise AssertionError(f"{where}: missing player or monster {monster_def_id}")
+            ppos = player.get("position", {})
+            mpos = monster.get("position", {})
+            dx = float(ppos.get("x", 0.0)) - float(mpos.get("x", 0.0))
+            dy = float(ppos.get("y", 0.0)) - float(mpos.get("y", 0.0))
+            dist = (dx * dx + dy * dy) ** 0.5
+            if dist > max_distance:
+                raise AssertionError(
+                    f"{where}: monster {monster_def_id} distance {dist:.3f} > max_distance {max_distance}"
+                )
+            continue
+        if typ == "monster_near_spawn":
+            monster_def_id = str(assertion["monster_def_id"])
+            max_distance_from_spawn = float(assertion["max_distance_from_spawn"])
+            spawn = state.initial_monster_positions.get(monster_def_id)
+            monster = find_monster(state, monster_def_id)
+            if spawn is None or monster is None:
+                raise AssertionError(f"{where}: missing spawn/current monster {monster_def_id}")
+            mpos = monster.get("position", {})
+            dx = float(mpos.get("x", 0.0)) - spawn["x"]
+            dy = float(mpos.get("y", 0.0)) - spawn["y"]
+            dist = (dx * dx + dy * dy) ** 0.5
+            if dist > max_distance_from_spawn:
+                raise AssertionError(
+                    f"{where}: monster {monster_def_id} spawn distance {dist:.3f} > {max_distance_from_spawn}"
+                )
+            continue
 
 
 def default_manifest_path() -> Path:
@@ -1105,6 +1193,7 @@ def main() -> int:
                 "world_id": scenario.world_id,
                 "session_id": session_id,
                 "seed": sess["seed"],
+                "final_tick": observed.last_tick,
                 "status": "passed",
                 "replay_match": True,
             }

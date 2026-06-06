@@ -11,8 +11,8 @@ Last updated: 2026-06-06
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v15 — `item-visuals-and-loot-presentation` (shared item presentation metadata, distinct inventory icons + ground loot) |
-| **Active branch** | `main` |
+| **Latest completed slice** | v17 — `monster-chase-movement` (server chase AI + bot labs + client walk) |
+| **Active branch** | `feature/monster-chase-movement` |
 | **CI gate** | `make ci` green on 2026-06-06 |
 | **Next slice** | TBD |
 
@@ -31,6 +31,8 @@ v12_* = ranged-projectile-combat
 v13_* = inventory-ui
 v14_* = godot-client-bot
 v15_* = item-visuals-and-loot-presentation
+v16_* = use-consumable
+v17_* = monster-chase-movement
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -66,6 +68,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v13** | `inventory-ui` | Complete (`make ci` green) | [`v13_spec-inventory-ui.md`](specs/v13_spec-inventory-ui.md) | [`v13_2026-06-05-inventory-ui.md`](plans/v13_2026-06-05-inventory-ui.md) |
 | **v14** | `godot-client-bot` | Complete (`make ci` green) | [`v14_spec-godot-client-bot.md`](specs/v14_spec-godot-client-bot.md) | [`v14_2026-06-02-godot-client-bot.md`](plans/v14_2026-06-02-godot-client-bot.md) |
 | **v15** | `item-visuals-and-loot-presentation` | Complete (`make ci` green) | [`v15_spec-item-visuals-and-loot-presentation.md`](specs/v15_spec-item-visuals-and-loot-presentation.md) | [`v15_2026-06-06-item-visuals-and-loot-presentation.md`](plans/v15_2026-06-06-item-visuals-and-loot-presentation.md) |
+| **v16** | `use-consumable` | Complete (`make ci` green) | [`v16_spec-use-consumable.md`](specs/v16_spec-use-consumable.md) | [`v16_2026-06-06-use-consumable.md`](plans/v16_2026-06-06-use-consumable.md) |
+| **v17** | `monster-chase-movement` | Complete (`make ci` green) | [`v17_spec-monster-chase-movement.md`](specs/v17_spec-monster-chase-movement.md) | [`v17_2026-06-06-monster-chase-movement.md`](plans/v17_2026-06-06-monster-chase-movement.md) |
 
 ---
 
@@ -335,6 +339,48 @@ authoritative for inventory, loot, or equipment outcomes.
 **Explicit non-goals:** no production art, imported icon pack, texture budget, Blender export
 pipeline, remote patcher, stash, vendors, crafting, consumable use, or new gameplay item stats.
 
+### v16 — Use consumable
+
+**Proves:** Consumable item use can mutate authoritative HP and inventory while the hotbar stays a
+client-only input surface.
+
+- `use_intent { item_instance_id }` is decoded, persisted with the input stream, and resolved by
+  the Go sim against server-owned inventory and item rules.
+- `red_potion` declares `heal: { min: 5, max: 5 }`; `shared/golden/use_consumable.json` pins heal
+  amount and HP cap behavior for Go/GDScript drift checks.
+- Server removes the consumed inventory row, emits `item_used` and `player_healed`, and updates the
+  player entity HP; rejects include non-consumable, missing item, full HP, and dead player cases.
+- `heal_lab` plus protocol bot scenario `08_heal_lab.json` proves pickup of two potions, damage,
+  two uses, `/state`, reconnect resume, and replay.
+- Godot adds a bottom-center `ConsumableBar` with 10 client-only slots; drag assignment and keys
+  `1`-`9`/`0` send `use_intent` for the assigned inventory item.
+- Client bot scenario `06_use_potion_hotbar.json` exercises hotbar assignment, double-click bag
+  use, key use, and inventory removal.
+- `make ci` green on 2026-06-06.
+
+**Explicit non-goals:** no server-side hotbar persistence, stack splitting, cooldowns, buffs,
+heal-over-time, production potion art, stash, vendors, or crafting.
+
+### v17 — Monster chase movement
+
+**Proves:** opt-in server-authoritative monster chase with aggro, leash return, and v11 path reuse.
+
+- Shared `behavior: "chase"` on `training_dummy_chase` with `aggro_radius`, `leash_radius`, and
+  `move_speed == navigation.cell_size`; all legacy monsters default to static.
+- `Sim.Tick` runs `advanceMonsterMovement` after player movement and before projectiles; monsters
+  replan each tick, path around walls/player/other monsters, and emit edge-only `monster_aggro` /
+  `monster_leashed` events plus `entity_update` position deltas.
+- Golden `shared/golden/monster_chase.json` pins maze chase and leash return on seed
+  `cafebabecafebabe`.
+- Worlds `chase_lab`, `chase_maze`, and `leash_lab` plus bot scenarios `09`–`11` prove open-field
+  chase, maze routing, and leash reset through `/state`, reconnect, and replay.
+- Godot drives monster `walk`/`idle` from authoritative position deltas; `monster_anims.tres` adds
+  a minimal walk clip.
+- `make ci` green on 2026-06-06.
+
+**Explicit non-goals:** no proactive monster attacks, behavior trees/LimboAI, group aggro, fractional
+chase speeds, or NavMesh authority.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -368,6 +414,8 @@ The scenario catalog also includes:
 gear_before_combat: walk to rusty_sword → pick up → equip → one-shot reward dummy → pick up training_badge
 collision_lab: pass through middle wall gap → kill monster on far side
 inventory_lab: pick up rusty_sword → equip → unequip → drop → re-pickup → re-equip
+heal_lab: pick up red_potion x2 → take damage → use potion twice → full HP
+chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond leash and return
 ```
 
 **Verify:**
@@ -377,7 +425,7 @@ make db-up && make server    # terminal 1
 make bot                     # terminal 2 — all protocol bot scenarios
 make client-unit             # headless Godot unit gates (no server required)
 make client-smoke            # headless Godot gates + slice smoke
-make bot-client              # Godot client bot (all 5 scenarios; requires live server)
+make bot-client              # Godot client bot (all 6 scenarios; requires live server)
 make ci                      # full suite
 make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
 make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenario by file name or id
@@ -423,12 +471,19 @@ display-only Godot panel that mirrors server snapshots/deltas.
 current item definitions and uses it for inventory icons and ground loot silhouettes without
 server/protocol changes.
 
+**Consumable healing is now authoritative.** v16 adds `use_intent`, red potion heal rules, HP cap
+goldens, server-owned inventory removal, and a client-only hotbar that sends use intents.
+
+**Monster chase movement is now authoritative.** v17 adds opt-in chase behavior, deterministic
+monster pathing around solids, leash return, chase/lab bot scenarios, and client walk presentation
+from position deltas.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Cross-session **character-scoped** inventory | v0 as-built §10 |
-| Combat | Healing, armor, respawn, spell systems, piercing/AoE/homing projectiles, monster ranged AI | v0/v4/v12 non-goals |
+| Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, proactive monster melee/ranged AI | v0/v4/v12/v17 non-goals |
 | Content | Production item art/icons, additional item families beyond current rules | v15 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

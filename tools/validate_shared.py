@@ -128,6 +128,7 @@ def cross_checks(report: Report) -> None:
     ranged_projectile_golden = load(GOLDEN / "ranged_projectile.json")
     inventory_drop_golden = load(GOLDEN / "inventory_drop.json")
     use_consumable_golden = load(GOLDEN / "use_consumable.json")
+    monster_chase_golden = load(GOLDEN / "monster_chase.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -158,6 +159,30 @@ def cross_checks(report: Report) -> None:
         rd = mdef.get("retaliation_damage")
         if rd is not None and rd["max"] < rd["min"]:
             report.fail("monster retaliation range", f"{mid}: max must be >= min")
+        behavior = mdef.get("behavior", "static")
+        if behavior not in ("static", "chase"):
+            report.fail("monster behavior", f"{mid}: invalid behavior {behavior}")
+            continue
+        if behavior == "static":
+            if mdef.get("aggro_radius") or mdef.get("leash_radius") or mdef.get("move_speed"):
+                report.fail("monster behavior fields", f"{mid}: aggro/leash/move_speed only valid for chase")
+            else:
+                report.ok(f"monster {mid} static behavior is valid")
+            continue
+        aggro = mdef.get("aggro_radius")
+        if not isinstance(aggro, (int, float)) or aggro <= 0:
+            report.fail("monster aggro_radius", f"{mid}: chase requires positive aggro_radius")
+            continue
+        leash = mdef.get("leash_radius")
+        if leash is not None:
+            if not isinstance(leash, (int, float)) or leash < aggro:
+                report.fail("monster leash_radius", f"{mid}: leash_radius must be >= aggro_radius")
+                continue
+        move_speed = mdef.get("move_speed", navigation["cell_size"])
+        if move_speed != navigation["cell_size"]:
+            report.fail("monster move_speed", f"{mid}: move_speed must equal navigation.cell_size in v17")
+        else:
+            report.ok(f"monster {mid} chase behavior is valid")
 
     if retaliation is not None and retaliation_golden["retaliation_damage"] != retaliation:
         report.fail("retaliation_damage vs monster", "retaliation_damage mismatch")
@@ -400,6 +425,29 @@ def cross_checks(report: Report) -> None:
             report.fail("use_consumable cases", f"{len(bad_use)} case(s) violate heal cap formula: {bad_use}")
         else:
             report.ok("use_consumable cases satisfy heal roll + HP cap")
+
+    if monster_chase_golden["navigation"] != navigation:
+        report.fail("monster_chase navigation", "navigation block mismatch")
+    else:
+        report.ok("monster_chase.navigation matches navigation.v0.json")
+
+    chase_worlds = {"chase_lab", "chase_maze", "leash_lab"}
+    for case in monster_chase_golden["cases"]:
+        world_id = case.get("world_id", monster_chase_golden.get("world_id"))
+        if world_id not in worlds["worlds"]:
+            report.fail("monster_chase world", f"{case['name']}: unknown world_id {world_id}")
+            continue
+        report.ok(f"monster_chase case {case['name']} references world {world_id}")
+        for entity in worlds["worlds"][world_id]["entities"]:
+            if entity.get("type") != "monster":
+                continue
+            monster_id = entity["monster_def_id"]
+            if monsters["monsters"][monster_id].get("behavior") != "chase":
+                report.fail("monster_chase world monster", f"{world_id}: {monster_id} must be chase")
+            elif world_id in chase_worlds and monster_id != "training_dummy_chase":
+                report.fail("monster_chase lab monster", f"{world_id}: expected training_dummy_chase")
+            else:
+                report.ok(f"monster_chase world {world_id} uses chase monster {monster_id}")
 
     for interactable_id, interactable in interactables["interactables"].items():
         if interactable.get("initial_state") != "closed":

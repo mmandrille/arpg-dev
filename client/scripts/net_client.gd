@@ -112,8 +112,11 @@ func get_state(debug_token: String) -> Dictionary:
 	return {}
 
 
-func get_replay_timeline(debug_token: String, replay_session_id: String) -> Dictionary:
-	var r := _http(HTTPClient.METHOD_GET, "/v0/sessions/%s/replay/timeline" % replay_session_id,
+func get_replay_timeline(debug_token: String, replay_session_id: String, through_tick: int = -1) -> Dictionary:
+	var path := "/v0/sessions/%s/replay/timeline" % replay_session_id
+	if through_tick >= 0:
+		path += "?through_tick=%d" % through_tick
+	var r := _http(HTTPClient.METHOD_GET, path,
 		["Authorization: Bearer " + token, "X-Debug-Token: " + debug_token], "")
 	if r.get("_code", 0) == 200 and r.has("body"):
 		return r["body"]

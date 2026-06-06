@@ -1727,6 +1727,162 @@ func cloneRules(r *Rules) *Rules {
 	return &out
 }
 
+func TestMonsterChaseGolden(t *testing.T) {
+	var golden struct {
+		Seed   string `json:"seed"`
+		Cases  []struct {
+			Name                     string   `json:"name"`
+			WorldID                  string   `json:"world_id"`
+			IdlePlayerTicks          int      `json:"idle_player_ticks"`
+			PlayerKiteSteps          []struct {
+				Direction     Vec2 `json:"direction"`
+				DurationTicks int  `json:"duration_ticks"`
+				Ticks         int  `json:"ticks"`
+			} `json:"player_kite_steps"`
+			WaitTicksAfterKite       int      `json:"wait_ticks_after_kite"`
+			ExpectedMonsterPosition  *Vec2    `json:"expected_monster_position"`
+			ExpectedNearSpawn        bool     `json:"expected_monster_final_near_spawn"`
+			ExpectedEvents           []string `json:"expected_events"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "monster_chase.json", &golden)
+	rules := loadRules(t)
+	for _, tc := range golden.Cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			worldID := tc.WorldID
+			if worldID == "" {
+				worldID = "chase_maze"
+			}
+			sim, err := NewSimWithWorld("sess_monster_chase", golden.Seed, rules, worldID)
+			if err != nil {
+				t.Fatalf("world: %v", err)
+			}
+			monster := firstEntityByKind(sim, monsterEntity)
+			spawn := monster.spawnPos
+			seen := map[string]bool{}
+			record := func(res TickResult) {
+				for _, ev := range res.Events {
+					seen[ev.EventType] = true
+				}
+			}
+			for i := 0; i < tc.IdlePlayerTicks; i++ {
+				record(sim.Tick(nil))
+			}
+			for _, step := range tc.PlayerKiteSteps {
+				dir := step.Direction
+				duration := step.DurationTicks
+				if duration == 0 {
+					duration = 1
+				}
+				repeats := step.Ticks
+				if repeats == 0 {
+					repeats = 1
+				}
+				for i := 0; i < repeats; i++ {
+					record(sim.Tick([]Input{{
+						MessageID: fmt.Sprintf("kite-%d", i),
+						Type:      "move_intent",
+						Move:      &MoveIntent{Direction: dir, DurationTicks: duration},
+					}}))
+				}
+			}
+			for i := 0; i < tc.WaitTicksAfterKite; i++ {
+				record(sim.Tick(nil))
+			}
+			for _, want := range tc.ExpectedEvents {
+				if !seen[want] {
+					t.Fatalf("missing event %s; saw %v", want, seen)
+				}
+			}
+			monster = firstEntityByKind(sim, monsterEntity)
+			if tc.ExpectedMonsterPosition != nil {
+				want := *tc.ExpectedMonsterPosition
+				if distance(monster.pos, want) > 0.001 {
+					t.Fatalf("monster position = %+v, want %+v", monster.pos, want)
+				}
+			}
+			if tc.ExpectedNearSpawn {
+				nav := rules.Navigation
+				if distance(monster.pos, spawn) > nav.StopDistance+0.001 {
+					t.Fatalf("monster %+v not near spawn %+v (dist=%.3f)", monster.pos, spawn, distance(monster.pos, spawn))
+				}
+			}
+		})
+	}
+}
+
+func TestMonsterChaseStaticDefault(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess", "01", rules, DefaultWorldID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	monster := firstEntityByKind(sim, monsterEntity)
+	before := monster.pos
+	for i := 0; i < 10; i++ {
+		sim.Tick(nil)
+	}
+	monster = firstEntityByKind(sim, monsterEntity)
+	if monster.pos != before {
+		t.Fatalf("static monster moved from %+v to %+v", before, monster.pos)
+	}
+}
+
+func TestMonsterChaseOpenField(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess", "01", rules, "chase_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	monster := firstEntityByKind(sim, monsterEntity)
+	before := monster.pos
+	var aggro bool
+	for i := 0; i < 40; i++ {
+		res := sim.Tick(nil)
+		if hasEvent(res, "monster_aggro") {
+			aggro = true
+		}
+	}
+	monster = firstEntityByKind(sim, monsterEntity)
+	player := sim.entities[sim.playerID]
+	if !aggro {
+		t.Fatal("expected monster_aggro")
+	}
+	if distance(monster.pos, before) < 0.5 {
+		t.Fatalf("monster did not move enough: before=%+v after=%+v", before, monster.pos)
+	}
+	if distance(monster.pos, player.pos) > 1.5 {
+		t.Fatalf("monster not within player distance: dist=%.3f max=1.5", distance(monster.pos, player.pos))
+	}
+}
+
+func TestMonsterChaseStopsWhenMeleeAdjacent(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess", "01", rules, "chase_maze")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 30; i++ {
+		sim.Tick(nil)
+	}
+	monster := firstEntityByKind(sim, monsterEntity)
+	player := sim.entities[sim.playerID]
+	at := monster.pos
+	for i := 0; i < 10; i++ {
+		res := sim.Tick(nil)
+		for _, ch := range res.Changes {
+			if ch.Op == OpEntityUpdate && ch.Entity != nil && ch.Entity.Type == "monster" {
+				t.Fatalf("tick %d: monster still moving at %+v after reaching player at dist=%.3f",
+					sim.CurrentTick(), monster.pos, distance(at, player.pos))
+			}
+		}
+	}
+	monster = firstEntityByKind(sim, monsterEntity)
+	if monster.pos != at {
+		t.Fatalf("monster drifted from %+v to %+v while adjacent to player", at, monster.pos)
+	}
+}
+
 func hasEvent(r TickResult, eventType string) bool {
 	for _, ev := range r.Events {
 		if ev.EventType == eventType {

@@ -77,6 +77,9 @@ func _character_clips() -> Dictionary:
 func _monster_clips() -> Dictionary:
 	return {
 		"idle": {"length": 1.0, "loop": true, "bones": {"pivot": [[0.0, 0, 0, 0]]}},
+		"walk": {"length": 0.8, "loop": true, "bones": {
+			"pivot": [[0.0, 0, 0, 0], [0.4, 0, 0, 8], [0.8, 0, 0, 0]],
+		}},
 		# hit: a quick wobble about the base.
 		"hit": {"length": 0.3, "loop": false, "bones": {
 			"pivot": [[0.0, 0, 0, 0], [0.1, 0, 0, 18], [0.3, 0, 0, 0]],

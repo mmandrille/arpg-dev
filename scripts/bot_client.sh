@@ -17,7 +17,7 @@ SCENARIO="${SCENARIO:-all}"
 # Set HEADLESS=1 for CI. Default is 0 (windowed) so you can watch the bot act.
 HEADLESS="${HEADLESS:-0}"
 # When windowed, pause this many seconds between steps so the action is visible.
-BOT_STEP_DELAY="${BOT_STEP_DELAY:-$([ "$HEADLESS" == "1" ] && echo 0.0 || echo 1.2)}"
+BOT_STEP_DELAY="${BOT_STEP_DELAY:-$([ "$HEADLESS" == "1" ] && echo 0.0 || echo 0.25)}"
 
 if ! command -v "$GODOT" >/dev/null 2>&1; then
   echo "[bot-client] FAIL: Godot runtime '$GODOT' not found on PATH." >&2

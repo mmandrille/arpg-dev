@@ -85,6 +85,8 @@ func _get_state() -> Dictionary:
 
 
 func _execute_action(action: Dictionary, state: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_show_action_shadow"):
+		_main.bot_show_action_shadow(action, state)
 	var stype := str(action.get("_type", action.get("type", "")))
 	match stype:
 		"press_key":

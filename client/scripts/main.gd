@@ -127,7 +127,6 @@ func _ready() -> void:
 			return
 		_debug("visual replay playlist loaded: %d scenario(s)" % visual_replay_scenarios.size())
 		_start_next_visual_replay()
-		_sync_input_shadow_active()
 		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
@@ -140,12 +139,15 @@ func _ready() -> void:
 		autoplay_phase = "move"
 		autoplay_step_delay = maxf(0.05, float(_env("ARPG_AUTOPLAY_STEP_DELAY", "0.35")))
 		_debug("visual bot enabled for session %s" % client.session_id)
-	_sync_input_shadow_active()
 	predicted_pos = Vector3.ZERO
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
 	bot_mode = _truthy_env("ARPG_BOT_CLIENT")
 	if bot_mode:
+		if input_shadow != null and DisplayServer.get_name() != "headless":
+			input_shadow.set_active(true)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 		var bot := preload("res://scripts/bot_controller.gd").new()
 		add_child(bot)
 
@@ -171,11 +173,11 @@ func _process(delta: float) -> void:
 	if player_anim != null:
 		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
 			and player_hp > 0 \
-			and not _input_locked() \
+			and not _user_input_blocked() \
 			and (Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
 			or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D))
 		player_anim.set_locomotion(moving)
-	if not _input_locked():
+	if not _user_input_blocked():
 		_update_facing_toward_mouse()
 	_update_debug()
 
@@ -220,7 +222,6 @@ func _apply_snapshot(p: Dictionary) -> void:
 
 func _apply_delta(p: Dictionary) -> void:
 	var changes: Array = p.get("changes", [])
-	var loot_positions := _capture_loot_positions()
 	for c in changes:
 		match c.get("op", ""):
 			"entity_spawn", "entity_update":
@@ -251,8 +252,6 @@ func _apply_delta(p: Dictionary) -> void:
 			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)
 			if hint != null:
 				inventory_panel.show_gesture_hint(str(hint))
-		if _input_locked():
-			_show_input_shadow_for_event(event_type, ev, changes, loot_positions)
 		if eid == player_id:
 			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
 			if player_clip == null or player_anim == null:
@@ -454,6 +453,8 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 func _unhandled_input(event: InputEvent) -> void:
 	if _input_locked():
 		return
+	if bot_mode and not (event is InputEventKey):
+		return
 	if event is InputEventKey and event.pressed and not event.echo and _is_inventory_key(event):
 		if inventory_panel != null:
 			inventory_panel.toggle()
@@ -471,7 +472,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _handle_input(delta: float) -> void:
-	if _input_locked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
+	if _user_input_blocked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		return
 	_send_cooldown -= delta
 	_attack_cooldown -= delta
@@ -499,8 +500,12 @@ func _is_inventory_key(event: InputEventKey) -> bool:
 
 func _input_locked() -> bool:
 	return visual_replay_enabled or autoplay_enabled
-	# bot_mode intentionally not included: bot synthetic events must pass through
-	# _unhandled_input() and _on_inventory_intent_requested() without locking.
+
+
+func _user_input_blocked() -> bool:
+	# Replay/autoplay fully lock input. Bot mode blocks real mouse/WASD but still
+	# allows push_input() key events through _unhandled_input().
+	return _input_locked() or bot_mode
 
 
 func _handle_autoplay(delta: float) -> void:
@@ -518,7 +523,6 @@ func _handle_autoplay(delta: float) -> void:
 				predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
 				_reconcile_player()
 				client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
-				_shadow_autoplay_move(dir)
 				autoplay_move_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -541,13 +545,11 @@ func _handle_autoplay(delta: float) -> void:
 				player_anim.play_one_shot("attack")
 			if autoplay_attack_cooldown <= 0.0:
 				client.send("action_intent", last_server_tick, {"target_id": target_id})
-				_shadow_autoplay_attack(target_node.global_position)
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
 		"pickup":
 			if not autoplay_pickup_sent and loot_ids.size() > 0:
 				client.send("action_intent", last_server_tick, {"target_id": loot_ids[0]})
-				_shadow_autoplay_pickup(str(loot_ids[0]))
 				autoplay_pickup_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -559,7 +561,6 @@ func _handle_autoplay(delta: float) -> void:
 			if not autoplay_equip_sent and inventory.size() > 0:
 				var item_id := str(inventory[0]["item_instance_id"])
 				client.send("equip_intent", last_server_tick, {"item_instance_id": item_id, "slot": "weapon"})
-				_shadow_inventory_equip(item_id)
 				autoplay_equip_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -833,22 +834,6 @@ func _sync_inventory_replay_display() -> void:
 		inventory_panel.hide_display()
 
 
-func _sync_input_shadow_active() -> void:
-	if input_shadow != null:
-		input_shadow.set_active(_input_locked())
-
-
-func _capture_loot_positions() -> Dictionary:
-	var out := {}
-	for loot_id in loot_ids:
-		if not entities.has(loot_id):
-			continue
-		var node := entities[loot_id]["node"] as Node3D
-		if node != null:
-			out[loot_id] = node.global_position
-	return out
-
-
 func _entity_world_center(entity_id: String) -> Vector3:
 	if not entities.has(entity_id):
 		return Vector3.ZERO
@@ -856,109 +841,6 @@ func _entity_world_center(entity_id: String) -> Vector3:
 	if node == null:
 		return Vector3.ZERO
 	return node.global_position
-
-
-func _loot_pickup_world_pos(changes: Array, loot_positions: Dictionary) -> Vector3:
-	for change in changes:
-		if str(change.get("op", "")) != "entity_remove":
-			continue
-		var loot_id := str(change.get("entity_id", ""))
-		if loot_positions.has(loot_id):
-			return loot_positions[loot_id]
-	if not loot_positions.is_empty():
-		return loot_positions.values()[0]
-	return Vector3.ZERO
-
-
-func _show_input_shadow_for_event(event_type: String, ev: Dictionary, changes: Array, loot_positions: Dictionary) -> void:
-	if input_shadow == null:
-		return
-	match event_type:
-		"monster_damaged", "monster_killed":
-			var world := _entity_world_center(str(ev.get("entity_id", "")))
-			if world != Vector3.ZERO:
-				input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
-		"item_picked_up":
-			var world := _loot_pickup_world_pos(changes, loot_positions)
-			if world != Vector3.ZERO:
-				input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
-		"item_equipped":
-			_shadow_inventory_equip(str(ev.get("entity_id", "")))
-		"item_unequipped":
-			_shadow_inventory_unequip()
-		"item_dropped":
-			var item_id := str(ev.get("item_instance_id", ev.get("entity_id", "")))
-			_shadow_inventory_drop(item_id)
-		"interactable_activated":
-			var world := _entity_world_center(str(ev.get("entity_id", "")))
-			if world != Vector3.ZERO:
-				input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
-
-
-func _shadow_inventory_equip(item_instance_id: String) -> void:
-	if input_shadow == null or inventory_panel == null:
-		return
-	if visual_replay_show_inventory or inventory.size() > 0:
-		inventory_panel.ensure_display_visible()
-	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
-	var to_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
-	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
-		return
-	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["dbl-click", "drag"]))
-
-
-func _shadow_inventory_unequip() -> void:
-	if input_shadow == null or inventory_panel == null:
-		return
-	var from_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
-	var to_pos: Vector2 = inventory_panel.get_bag_area_screen_center()
-	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
-		return
-	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "bag"]))
-
-
-func _shadow_inventory_drop(item_instance_id: String) -> void:
-	if input_shadow == null or inventory_panel == null:
-		return
-	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
-	if from_pos == Vector2.ZERO:
-		from_pos = inventory_panel.get_weapon_slot_screen_center()
-	var to_pos: Vector2 = inventory_panel.get_drop_outside_screen_point()
-	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
-		return
-	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "drop"]))
-
-
-func _shadow_autoplay_move(dir: Vector2) -> void:
-	if input_shadow == null or player_anchor == null:
-		return
-	var keys := PackedStringArray()
-	if dir.x > 0.1:
-		keys.append("D")
-	elif dir.x < -0.1:
-		keys.append("A")
-	if dir.y > 0.1:
-		keys.append("S")
-	elif dir.y < -0.1:
-		keys.append("W")
-	if keys.is_empty():
-		keys.append("move")
-	var ahead := player_anchor.global_position + Vector3(dir.x, 0.0, dir.y) * 1.4
-	input_shadow.pulse_world_target(ahead, keys)
-
-
-func _shadow_autoplay_attack(world_pos: Vector3) -> void:
-	if input_shadow == null:
-		return
-	input_shadow.pulse_world_target(world_pos, PackedStringArray(["LMB"]))
-
-
-func _shadow_autoplay_pickup(loot_id: String) -> void:
-	if input_shadow == null:
-		return
-	var world := _entity_world_center(loot_id)
-	if world != Vector3.ZERO:
-		input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
 
 
 # --- scene construction (placeholder primitives) ----------------------------
@@ -1222,6 +1104,87 @@ func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> 
 	_on_inventory_intent_requested(intent_type, payload)
 
 
+func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:
+	if not bot_mode or input_shadow == null or DisplayServer.get_name() == "headless":
+		return
+
+	var stype := str(action.get("_type", action.get("type", "")))
+	match stype:
+		"press_key":
+			var key_name := str(action.get("keycode", "")).trim_prefix("KEY_")
+			if key_name != "":
+				input_shadow.show_keys(PackedStringArray([key_name]))
+		"click_entity":
+			var ids_key := "%s_ids" % str(action.get("entity_type", ""))
+			var ids: Array = state.get(ids_key, [])
+			if ids.is_empty():
+				return
+			var world := _entity_world_center(str(ids[0]))
+			if world != Vector3.ZERO:
+				input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
+		"click_floor":
+			var wx := float(action.get("x", 0.0))
+			var wz := float(action.get("z", 0.0))
+			input_shadow.pulse_world_target(Vector3(wx, 0.0, wz), PackedStringArray(["LMB"]))
+		"drag_bag_to_weapon_slot":
+			var item_id := _bot_bag_item_id_for_def(str(action.get("item_def_id", "")), state)
+			if item_id != "":
+				_bot_shadow_inventory_equip(item_id)
+		"drag_weapon_to_bag":
+			_bot_shadow_inventory_unequip()
+		"drag_bag_to_outside":
+			var drop_id := _bot_bag_item_id_for_def(str(action.get("item_def_id", "")), state)
+			if drop_id != "":
+				_bot_shadow_inventory_drop(drop_id)
+
+
+func _bot_bag_item_id_for_def(item_def_id: String, state: Dictionary) -> String:
+	var inv: Array = state.get("inventory", [])
+	var eq: Dictionary = state.get("equipped", {})
+	var equipped_weapon = eq.get("weapon", null)
+	for item in inv:
+		if str(item.get("item_def_id", "")) == item_def_id:
+			var iid := str(item.get("item_instance_id", ""))
+			if str(equipped_weapon) != iid:
+				return iid
+	return ""
+
+
+func _bot_shadow_inventory_equip(item_instance_id: String) -> void:
+	if inventory_panel == null:
+		return
+	inventory_panel.ensure_display_visible()
+	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
+	var to_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
+		return
+	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag"]))
+
+
+func _bot_shadow_inventory_unequip() -> void:
+	if inventory_panel == null:
+		return
+	inventory_panel.ensure_display_visible()
+	var from_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
+	var to_pos: Vector2 = inventory_panel.get_bag_area_screen_center()
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
+		return
+	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "bag"]))
+
+
+func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
+	if inventory_panel == null:
+		return
+	inventory_panel.ensure_display_visible()
+	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
+	if from_pos == Vector2.ZERO:
+		from_pos = inventory_panel.get_weapon_slot_screen_center()
+	var to_pos: Vector2 = inventory_panel.get_drop_outside_screen_point()
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
+		return
+	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "drop"]))
+
+
 # --- debug ------------------------------------------------------------------
 
 func _update_debug() -> void:
@@ -1242,7 +1205,7 @@ func _update_debug() -> void:
 		min(visual_replay_index + 1, visual_replay_scenarios.size()),
 		visual_replay_scenarios.size(),
 		visual_replay_title,
-	] if visual_replay_enabled else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual")
+	] if visual_replay_enabled else ("bot-client" if bot_mode else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual"))
 	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB action  scroll zoom  I inventory" % [
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
 

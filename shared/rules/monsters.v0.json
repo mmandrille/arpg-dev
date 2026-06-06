@@ -22,7 +22,7 @@
     "training_dummy_ranged": {
       "name": "Training Dummy",
       "max_hp": 2,
-      "loot_table": "reward_drop",
+      "loot_table": "ranged_multi_drop",
       "retaliation_damage": { "min": 1, "max": 1 }
     }
   }

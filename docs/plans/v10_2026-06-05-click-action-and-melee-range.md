@@ -57,7 +57,7 @@ Branch: `feature/solid-collision-and-obstacles`
 
 ## Plugin Adoption Checklist
 
-- [x] Consulted `docs/godot-plugins-and-shortcuts.md`.
+- [x] Consulted `docs/researchs/godot-plugins-and-shortcuts.md`.
 - [x] Decision: **reject** door/collision plugins — server owns barrier; client uses simple box + tween.
 
 ## Task 1: Shared contracts

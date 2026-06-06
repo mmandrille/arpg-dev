@@ -38,7 +38,7 @@
 
 ## Plugin Adoption
 
-- [x] Consult `docs/godot-plugins-and-shortcuts.md`.
+- [x] Consult `docs/researchs/godot-plugins-and-shortcuts.md`.
 - [x] Decision: **reject** new Godot plugins for v14.
 - [x] Reason: this slice is test automation over existing `main.tscn`, ray-pick, and `InventoryPanel` paths. GUT, GLoot, Godot-Inventory, or UI plugins add dependency and setup weight without solving the required live-scene synthetic input problem. Keep the first bot as small in-repo GDScript.
 
@@ -214,8 +214,8 @@ ARPG_DEV_TOKEN="$DEV_TOKEN" \
 
 ```makefile
 bot-client:
-	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" \
-	SCENARIO="$(or $(SCENARIO),$(scenario),all)" ./scripts/bot_client.sh
+ GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" \
+ SCENARIO="$(or $(SCENARIO),$(scenario),all)" ./scripts/bot_client.sh
 ```
 
 - [ ] **Step 4.4:** Expose `bot-client` in top-level Makefile help if help text is maintained outside `make/agents.mk`.

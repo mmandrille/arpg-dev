@@ -48,7 +48,7 @@
 
 ## Plugin adoption
 
-- [x] Consult `docs/godot-plugins-and-shortcuts.md`.
+- [x] Consult `docs/researchs/godot-plugins-and-shortcuts.md`.
 - [x] Decision: **reject** GLoot, Godot-Inventory, Expresso Inventory System, Wyvernbox, and RPGNodes for v13.
 - [x] Reason: this slice only needs one weapon slot, a small bag grid, tooltips, and drag/drop intent sending. A plugin would add client-side inventory logic surface that must be stripped or wrapped, which is unnecessary for the first authoritative proof.
 

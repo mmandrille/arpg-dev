@@ -81,8 +81,9 @@ func TestReconstructFromInputsUsesWorldID(t *testing.T) {
 
 	snap := recon.Snapshot
 	player := entityByID(snap, "1001")
-	if player == nil || player.Position.X != 0 || player.Position.Y != 5 {
-		t.Fatalf("player = %+v, want 1001 at (0,5)", player)
+	wantPlayer := rules.Worlds["gear_before_combat"].Player.Position
+	if player == nil || player.Position != wantPlayer {
+		t.Fatalf("player = %+v, want 1001 at %+v", player, wantPlayer)
 	}
 	loot := entityByID(snap, "1002")
 	if loot == nil || loot.Type != "loot" || loot.ItemDefID != "rusty_sword" {
@@ -268,7 +269,8 @@ func (f *fakeRepo) AddInventoryItem(context.Context, store.InventoryItem) error 
 func (f *fakeRepo) SetEquipped(context.Context, string, string, string, bool) error {
 	return nil
 }
-func (f *fakeRepo) AppendInput(context.Context, store.SessionInput) error { return nil }
+func (f *fakeRepo) RemoveInventoryItem(context.Context, string, string) error { return nil }
+func (f *fakeRepo) AppendInput(context.Context, store.SessionInput) error     { return nil }
 func (f *fakeRepo) ListInputs(context.Context, string) ([]store.SessionInput, error) {
 	return f.inputs, nil
 }

@@ -152,6 +152,20 @@ func TestInventoryPersistAndEquip(t *testing.T) {
 	if err := s.SetEquipped(ctx, sess.ID, "nope", "weapon", true); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("equip missing item: expected ErrNotFound, got %v", err)
 	}
+
+	if err := s.RemoveInventoryItem(ctx, sess.ID, item.ID); err != nil {
+		t.Fatalf("remove inventory: %v", err)
+	}
+	items, err = s.ListInventory(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("list after remove: %v", err)
+	}
+	if len(items) != 0 {
+		t.Fatalf("inventory count after remove = %d, want 0", len(items))
+	}
+	if err := s.RemoveInventoryItem(ctx, sess.ID, item.ID); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("remove missing item: expected ErrNotFound, got %v", err)
+	}
 }
 
 func TestInputsAndEventsOrdering(t *testing.T) {

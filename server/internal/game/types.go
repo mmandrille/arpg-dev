@@ -39,10 +39,11 @@ type ItemView struct {
 
 // Event is an authoritative event emitted by the sim.
 type Event struct {
-	EventType     string `json:"event_type"`
-	EntityID      string `json:"entity_id,omitempty"`
-	CorrelationID string `json:"correlation_id,omitempty"`
-	Damage        *int   `json:"damage,omitempty"`
+	EventType      string `json:"event_type"`
+	EntityID       string `json:"entity_id,omitempty"`
+	CorrelationID  string `json:"correlation_id,omitempty"`
+	Damage         *int   `json:"damage,omitempty"`
+	ItemInstanceID string `json:"item_instance_id,omitempty"`
 }
 
 // Snapshot is the full authoritative state for rendering (session_snapshot).
@@ -63,6 +64,7 @@ const (
 	OpEntityRemove    = "entity_remove"
 	OpInventoryAdd    = "inventory_add"
 	OpInventoryUpdate = "inventory_update"
+	OpInventoryRemove = "inventory_remove"
 	OpEquippedUpdate  = "equipped_update"
 )
 
@@ -96,6 +98,15 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op   string    `json:"op"`
 			Item *ItemView `json:"item"`
 		}{c.Op, c.Item})
+	case OpInventoryRemove:
+		id := ""
+		if c.ItemInstanceID != nil {
+			id = *c.ItemInstanceID
+		}
+		return json.Marshal(struct {
+			Op             string `json:"op"`
+			ItemInstanceID string `json:"item_instance_id"`
+		}{c.Op, id})
 	case OpEquippedUpdate:
 		return json.Marshal(struct {
 			Op             string  `json:"op"`

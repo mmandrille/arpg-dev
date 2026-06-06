@@ -11,6 +11,7 @@ import (
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/inputdecode"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/metrics"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
@@ -183,8 +184,25 @@ func (r *runner) handleMessage(data []byte) {
 
 	in, ok := decodeInput(env)
 	if !ok {
+		if isInventoryIntentType(env.Type) {
+			r.log.Debug("inventory_debug_decode_failed",
+				"message_id", env.MessageID,
+				"correlation_id", env.CorrelationID,
+				"type", env.Type,
+				"payload", string(env.Payload),
+			)
+		}
 		r.rejectIntent(env.MessageID, "invalid_payload", env.CorrelationID)
 		return
+	}
+	if isInventoryIntentType(env.Type) {
+		r.log.Debug("inventory_debug_intent_received",
+			"message_id", env.MessageID,
+			"correlation_id", env.CorrelationID,
+			"type", env.Type,
+			"tick", env.Tick,
+			"payload", inventoryPayloadSummary(in),
+		)
 	}
 
 	// Buffer the input for its (clamped) tick under the lock, then persist
@@ -192,6 +210,13 @@ func (r *runner) handleMessage(data []byte) {
 	r.mu.Lock()
 	if r.seen[env.MessageID] {
 		r.mu.Unlock()
+		if isInventoryIntentType(env.Type) {
+			r.log.Debug("inventory_debug_intent_duplicate",
+				"message_id", env.MessageID,
+				"correlation_id", env.CorrelationID,
+				"type", env.Type,
+			)
+		}
 		r.rejectIntent(env.MessageID, "duplicate", env.CorrelationID)
 		return
 	}
@@ -205,6 +230,16 @@ func (r *runner) handleMessage(data []byte) {
 	r.seq++
 	r.buffer[t] = append(r.buffer[t], in)
 	r.received[env.MessageID] = time.Now()
+	if isInventoryIntentType(env.Type) {
+		r.log.Debug("inventory_debug_intent_buffered",
+			"message_id", env.MessageID,
+			"correlation_id", env.CorrelationID,
+			"type", env.Type,
+			"requested_tick", env.Tick,
+			"buffered_tick", t,
+			"sequence", in.Sequence,
+		)
+	}
 	rec := store.SessionInput{
 		ID:            ids.New("inp"),
 		SessionID:     r.sess.ID,
@@ -270,6 +305,10 @@ func (r *runner) doTick() {
 	r.mu.Lock()
 	t := r.sim.CurrentTick()
 	inputs := r.buffer[t]
+	inputTypes := make(map[string]string, len(inputs))
+	for _, in := range inputs {
+		inputTypes[in.MessageID] = in.Type
+	}
 	delete(r.buffer, t)
 	sortInputs(inputs)
 	res := r.sim.Tick(inputs)
@@ -290,9 +329,24 @@ func (r *runner) doTick() {
 
 	// Acks / rejects.
 	for _, a := range res.Acks {
+		if isInventoryIntentType(inputTypes[a.MessageID]) {
+			r.log.Debug("inventory_debug_intent_accepted",
+				"message_id", a.MessageID,
+				"type", inputTypes[a.MessageID],
+				"tick", res.Tick,
+			)
+		}
 		r.enqueue(r.acceptedEnvelope(a.MessageID, res.Tick, ""))
 	}
 	for _, rej := range res.Rejects {
+		if isInventoryIntentType(inputTypes[rej.MessageID]) {
+			r.log.Debug("inventory_debug_intent_rejected",
+				"message_id", rej.MessageID,
+				"type", inputTypes[rej.MessageID],
+				"tick", res.Tick,
+				"reason", rej.Reason,
+			)
+		}
 		r.rejectIntent(rej.MessageID, rej.Reason, "")
 	}
 
@@ -345,6 +399,14 @@ func (r *runner) persistTick(res game.TickResult) {
 			if c.Item == nil {
 				continue
 			}
+			r.log.Debug("inventory_debug_change",
+				"tick", res.Tick,
+				"op", c.Op,
+				"item_instance_id", c.Item.ItemInstanceID,
+				"item_def_id", c.Item.ItemDefID,
+				"slot", c.Item.Slot,
+				"equipped", c.Item.Equipped,
+			)
 			err := r.store.AddInventoryItem(ctx, store.InventoryItem{
 				ID:          c.Item.ItemInstanceID,
 				SessionID:   r.sess.ID,
@@ -362,9 +424,30 @@ func (r *runner) persistTick(res game.TickResult) {
 			if c.Item == nil {
 				continue
 			}
+			r.log.Debug("inventory_debug_change",
+				"tick", res.Tick,
+				"op", c.Op,
+				"item_instance_id", c.Item.ItemInstanceID,
+				"item_def_id", c.Item.ItemDefID,
+				"slot", c.Item.Slot,
+				"equipped", c.Item.Equipped,
+			)
 			if err := r.store.SetEquipped(ctx, r.sess.ID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory update", "error", err)
+			}
+		case game.OpInventoryRemove:
+			if c.ItemInstanceID == nil {
+				continue
+			}
+			r.log.Debug("inventory_debug_change",
+				"tick", res.Tick,
+				"op", c.Op,
+				"item_instance_id", *c.ItemInstanceID,
+			)
+			if err := r.store.RemoveInventoryItem(ctx, r.sess.ID, *c.ItemInstanceID); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist inventory remove", "error", err)
 			}
 		}
 	}
@@ -388,4 +471,23 @@ func less(a, b game.Input) bool {
 		return a.Sequence < b.Sequence
 	}
 	return a.MessageID < b.MessageID
+}
+
+func isInventoryIntentType(t string) bool {
+	return t == inputdecode.TypeEquip || t == inputdecode.TypeUnequip || t == inputdecode.TypeDrop
+}
+
+func inventoryPayloadSummary(in game.Input) map[string]string {
+	out := map[string]string{"type": in.Type}
+	if in.Equip != nil {
+		out["item_instance_id"] = in.Equip.ItemInstanceID
+		out["slot"] = in.Equip.Slot
+	}
+	if in.Unequip != nil {
+		out["slot"] = in.Unequip.Slot
+	}
+	if in.Drop != nil {
+		out["item_instance_id"] = in.Drop.ItemInstanceID
+	}
+	return out
 }

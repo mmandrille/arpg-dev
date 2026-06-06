@@ -242,6 +242,8 @@ type Input struct {
 	MoveTo        *MoveToIntent
 	Action        *ActionIntent
 	Equip         *EquipIntent
+	Unequip       *UnequipIntent
+	Drop          *DropIntent
 }
 
 // Intent payloads.
@@ -257,6 +259,12 @@ type (
 	EquipIntent  struct {
 		ItemInstanceID string
 		Slot           string
+	}
+	UnequipIntent struct {
+		Slot string
+	}
+	DropIntent struct {
+		ItemInstanceID string
 	}
 )
 
@@ -302,7 +310,7 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "action_intent", "equip_intent":
+		case "move_intent", "move_to_intent", "action_intent", "equip_intent", "unequip_intent", "drop_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -318,6 +326,10 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleAction(in, res)
 	case "equip_intent":
 		s.handleEquip(in, res)
+	case "unequip_intent":
+		s.handleUnequip(in, res)
+	case "drop_intent":
+		s.handleDrop(in, res)
 	default:
 		res.reject(in.MessageID, "unknown_type")
 	}
@@ -493,15 +505,17 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 }
 
 func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
-	itemDefID, ok := s.rules.RollLoot(monster.lootTable, s.rng)
-	if !ok {
-		return
+	for _, itemDefID := range s.rules.LootDrops(monster.lootTable, s.rng) {
+		dropPos, ok := s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
+		if !ok {
+			dropPos = monster.pos
+		}
+		loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID}
+		loot.id = s.alloc()
+		s.entities[loot.id] = loot
+		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
+		res.Events = append(res.Events, Event{EventType: "loot_dropped", EntityID: idStr(loot.id), CorrelationID: corr})
 	}
-	loot := &entity{kind: lootEntity, pos: monster.pos, itemDefID: itemDefID}
-	loot.id = s.alloc()
-	s.entities[loot.id] = loot
-	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
-	res.Events = append(res.Events, Event{EventType: "loot_dropped", EntityID: idStr(loot.id), CorrelationID: corr})
 }
 
 func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
@@ -591,6 +605,73 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 	res.ack(in.MessageID)
 }
 
+func (s *Sim) handleUnequip(in Input, res *TickResult) {
+	if in.Unequip == nil || in.Unequip.Slot != weaponSlot {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	instanceID := s.equipped[in.Unequip.Slot]
+	if instanceID == 0 {
+		res.reject(in.MessageID, "slot_empty")
+		return
+	}
+	item := s.findItemByID(instanceID)
+	if item == nil {
+		res.reject(in.MessageID, "slot_empty")
+		return
+	}
+	item.equipped = false
+	s.equipped[in.Unequip.Slot] = 0
+	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(item.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: in.Unequip.Slot, ItemInstanceID: nil})
+	idCopy := idStr(item.instanceID)
+	res.Events = append(res.Events, Event{EventType: "item_unequipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleDrop(in Input, res *TickResult) {
+	if in.Drop == nil || in.Drop.ItemInstanceID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	item := s.findItem(in.Drop.ItemInstanceID)
+	if item == nil {
+		res.reject(in.MessageID, "not_in_inventory")
+		return
+	}
+	dropPos, ok := s.findDropPosition()
+	if !ok {
+		res.reject(in.MessageID, "no_drop_space")
+		return
+	}
+
+	if item.equipped {
+		for slot, instanceID := range s.equipped {
+			if instanceID == item.instanceID {
+				s.equipped[slot] = 0
+				res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
+			}
+		}
+	}
+
+	removedID := idStr(item.instanceID)
+	itemDefID := item.itemDefID
+	s.removeItemByID(item.instanceID)
+	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
+
+	loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID}
+	loot.id = s.alloc()
+	s.entities[loot.id] = loot
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
+	res.Events = append(res.Events, Event{
+		EventType:      "item_dropped",
+		EntityID:       idStr(loot.id),
+		CorrelationID:  in.CorrelationID,
+		ItemInstanceID: removedID,
+	})
+	res.ack(in.MessageID)
+}
+
 func (s *Sim) applyMovement(res *TickResult) {
 	if s.autoNav != nil && s.move == nil {
 		s.applyAutoNav(res)
@@ -630,7 +711,7 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 	}
 	player := s.entities[s.playerID]
 	before := player.pos
-	step := normalize(s.autoNav.steps[0])
+	step := s.autoNav.steps[0]
 	s.autoNav.steps = s.autoNav.steps[1:]
 	player.pos = s.resolveMovement(player.pos, Vec2{X: step.X * moveSpeed, Y: step.Y * moveSpeed})
 	if player.pos != before {
@@ -703,6 +784,95 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 		}
 	}
 	return false
+}
+
+func (s *Sim) findDropPosition() (Vec2, bool) {
+	player := s.entities[s.playerID]
+	if player == nil {
+		return Vec2{}, false
+	}
+	return s.findAdjacentLootDropPosition(player.pos, playerRadius)
+}
+
+func (s *Sim) findEntityLootDropPosition(source Vec2, sourceRadius float64) (Vec2, bool) {
+	return s.findAdjacentLootDropPosition(source, sourceRadius)
+}
+
+func (s *Sim) findAdjacentLootDropPosition(source Vec2, sourceRadius float64) (Vec2, bool) {
+	step := s.rules.Navigation.CellSize
+	if step <= 0 {
+		step = 1.0
+	}
+	unitOffsets := []Vec2{
+		{X: 1, Y: 0},
+		{X: 0, Y: 1},
+		{X: -1, Y: 0},
+		{X: 0, Y: -1},
+		{X: 1, Y: 1},
+		{X: -1, Y: 1},
+		{X: -1, Y: -1},
+		{X: 1, Y: -1},
+	}
+	start := s.rng.IntN(len(unitOffsets))
+	for ring := 1; ring <= 6; ring++ {
+		scale := float64(ring) * step
+		for i := 0; i < len(unitOffsets); i++ {
+			offset := unitOffsets[(start+i)%len(unitOffsets)]
+			pos := Vec2{X: source.X + offset.X*scale, Y: source.Y + offset.Y*scale}
+			if distance(pos, source) < sourceRadius+lootInteractionRadius {
+				continue
+			}
+			if s.lootDropBlocked(pos) {
+				continue
+			}
+			if s.lootPositionBlocked(pos) {
+				continue
+			}
+			return pos, true
+		}
+	}
+	return Vec2{}, false
+}
+
+func (s *Sim) lootDropBlocked(pos Vec2) bool {
+	for _, wall := range s.walls {
+		if circleIntersectsAABB(pos, lootInteractionRadius, wall.pos, wall.size) {
+			return true
+		}
+	}
+	for _, id := range sortedEntityIDs(s.entities) {
+		e := s.entities[id]
+		if e.kind == interactableEntity && e.state == interactableClosed {
+			if def, ok := s.rules.Interactables[e.interactableDefID]; ok {
+				if circleIntersectsAABB(pos, lootInteractionRadius, e.pos, def.BarrierWhenClosed.Size) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (s *Sim) lootPositionBlocked(pos Vec2) bool {
+	for _, id := range sortedEntityIDs(s.entities) {
+		e := s.entities[id]
+		if e.kind != lootEntity {
+			continue
+		}
+		if circlesOverlap(pos, lootInteractionRadius, e.pos, lootInteractionRadius) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Sim) removeItemByID(id uint64) {
+	for i, it := range s.inventory {
+		if it.instanceID == id {
+			s.inventory = append(s.inventory[:i], s.inventory[i+1:]...)
+			return
+		}
+	}
 }
 
 func (s *Sim) buildBlockedFn() func(gx, gy int) bool {

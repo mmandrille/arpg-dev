@@ -190,6 +190,20 @@ func (s *Store) SetEquipped(ctx context.Context, sessionID, itemInstanceID, slot
 	return nil
 }
 
+func (s *Store) RemoveInventoryItem(ctx context.Context, sessionID, itemInstanceID string) error {
+	tag, err := s.pool.Exec(ctx,
+		`DELETE FROM inventory_items WHERE session_id = $1 AND id = $2`,
+		sessionID, itemInstanceID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: remove inventory item: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // --- inputs -----------------------------------------------------------------
 
 func (s *Store) AppendInput(ctx context.Context, in SessionInput) error {

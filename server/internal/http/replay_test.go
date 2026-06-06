@@ -236,8 +236,10 @@ func TestReplayTimelineEndpointUsesSessionWorld(t *testing.T) {
 	player := snapshotEntity(snap, "1001")
 	loot := snapshotEntity(snap, "1002")
 	monster := snapshotEntity(snap, "1003")
-	if player == nil || player.Position.X != 0 || player.Position.Y != 5 {
-		t.Fatalf("player = %+v, want gear world player", player)
+	_, rules := testStoreAndRules(t)
+	wantPlayer := rules.Worlds["gear_before_combat"].Player.Position
+	if player == nil || player.Position != wantPlayer {
+		t.Fatalf("player = %+v, want gear world player at %+v", player, wantPlayer)
 	}
 	if loot == nil || loot.Type != "loot" || loot.ItemDefID != "rusty_sword" {
 		t.Fatalf("loot = %+v, want initial rusty_sword", loot)

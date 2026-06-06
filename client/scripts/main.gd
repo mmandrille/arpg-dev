@@ -9,6 +9,8 @@ const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
+const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
@@ -31,6 +33,7 @@ var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
 var inventory: Array = []
 var equipped: Dictionary = {}
+var item_rules: Dictionary = {}
 var loot_ids: Array = []
 var monster_ids: Array = []
 var interactable_ids: Array = []
@@ -56,6 +59,14 @@ var visual_replay_debug_token: String = ""
 var visual_replay_exit_on_complete: bool = false
 var visual_replay_exit_requested: bool = false
 var visual_replay_exit_timer: float = 0.0
+var visual_replay_show_inventory: bool = false
+
+const INVENTORY_REPLAY_EVENT_HINTS := {
+	"item_picked_up": "Pickup",
+	"item_equipped": "Equip (double-click / drag)",
+	"item_unequipped": "Unequip (drag to bag)",
+	"item_dropped": "Drop (drag outside panel)",
+}
 
 # Slice v2 scene graph (spec §5.1): the local player is a humanoid under a
 # PlayerAnchor that follows authoritative position; monsters/loot live under
@@ -67,6 +78,8 @@ var damage_numbers_layer: CanvasLayer
 var health_bars_layer: CanvasLayer
 var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
 var walls_root: Node3D
+var inventory_panel: InventoryPanel
+var input_shadow: InputShadowOverlay
 
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
@@ -93,6 +106,7 @@ func _ready() -> void:
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
 	_build_scene()
+	_load_item_rules()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
 
@@ -111,6 +125,7 @@ func _ready() -> void:
 			return
 		_debug("visual replay playlist loaded: %d scenario(s)" % visual_replay_scenarios.size())
 		_start_next_visual_replay()
+		_sync_input_shadow_active()
 		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
@@ -123,6 +138,7 @@ func _ready() -> void:
 		autoplay_phase = "move"
 		autoplay_step_delay = maxf(0.05, float(_env("ARPG_AUTOPLAY_STEP_DELAY", "0.35")))
 		_debug("visual bot enabled for session %s" % client.session_id)
+	_sync_input_shadow_active()
 	predicted_pos = Vector3.ZERO
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
@@ -174,6 +190,8 @@ func _handle_message(env: Dictionary) -> void:
 
 
 func _apply_snapshot(p: Dictionary) -> void:
+		JSON.stringify(p.get("equipped", {})),
+	])
 	for id in entities.keys():
 		(entities[id]["node"] as Node3D).queue_free()
 	entities.clear()
@@ -192,11 +210,15 @@ func _apply_snapshot(p: Dictionary) -> void:
 	equipped = p.get("equipped", {})
 	if resolver != null:
 		resolver.apply_snapshot(p)
+	_refresh_inventory_panel()
 	_reconcile_player()
 
 
 func _apply_delta(p: Dictionary) -> void:
-	for c in p.get("changes", []):
+	var changes: Array = p.get("changes", [])
+	var loot_positions := _capture_loot_positions()
+	for c in changes:
+		if str(c.get("op", "")) in ["inventory_add", "inventory_update", "inventory_remove", "equipped_update"]:
 		match c.get("op", ""):
 			"entity_spawn", "entity_update":
 				_upsert_entity(c["entity"])
@@ -210,13 +232,24 @@ func _apply_delta(p: Dictionary) -> void:
 				_update_inventory_item(c["item"])
 				if resolver != null:
 					resolver.ingest_inventory_item(c["item"])
+			"inventory_remove":
+				_remove_inventory_item(str(c["item_instance_id"]))
 			"equipped_update":
 				equipped[c["slot"]] = c.get("item_instance_id")
 				if resolver != null:
 					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
+			_:
+				pass
+	_refresh_inventory_panel()
 	for ev in p.get("events", []):
 		var eid := str(ev.get("entity_id", ""))
 		var event_type := str(ev.get("event_type", ""))
+		if visual_replay_enabled and inventory_panel != null:
+			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)
+			if hint != null:
+				inventory_panel.show_gesture_hint(str(hint))
+		if _input_locked():
+			_show_input_shadow_for_event(event_type, ev, changes, loot_positions)
 		if eid == player_id:
 			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
 			if player_clip == null or player_anim == null:
@@ -234,6 +267,12 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_show_damage_number(eid, Color(1.0, 0.92, 0.25), ev.get("damage", null))
+		if event_type == "monster_killed":
+			_remove_monster_health_bar(eid)
+			if entities.has(eid):
+				var dead_rec: Dictionary = entities[eid]
+				dead_rec["hp"] = 0
+				_set_pickable(dead_rec["node"] as Node3D, false)
 		if autoplay_enabled and event_type == "monster_killed":
 			autoplay_phase = "pickup"
 			autoplay_timer = autoplay_step_delay
@@ -271,7 +310,7 @@ func _upsert_entity(e: Dictionary) -> void:
 		rec = entities[id]
 	else:
 		is_new = true
-		var node := _make_entity_node(e["type"])
+		var node := _make_entity_node(e)
 		entities_root.add_child(node)
 		var controller: AnimationController = null
 		if e["type"] == "monster":
@@ -307,8 +346,10 @@ func _upsert_entity(e: Dictionary) -> void:
 		var hp = e.get("hp", null)
 		var max_hp = e.get("max_hp", null)
 		if hp != null and max_hp != null:
+			rec["hp"] = int(hp)
 			_upsert_monster_health_bar(id, rec["node"] as Node3D, int(hp), int(max_hp))
 		if hp != null and int(hp) <= 0:
+			_set_pickable(rec["node"] as Node3D, false)
 			rec["controller"].enter_terminal("death")
 
 
@@ -321,11 +362,7 @@ func _remove_entity(id: String) -> void:
 				tween.kill()
 		(entities[id]["node"] as Node3D).queue_free()
 		entities.erase(id)
-	if monster_health_bars.has(id):
-		var bar = monster_health_bars[id]
-		if is_instance_valid(bar):
-			bar.queue_free()
-		monster_health_bars.erase(id)
+	_remove_monster_health_bar(id)
 	loot_ids.erase(id)
 	monster_ids.erase(id)
 	interactable_ids.erase(id)
@@ -337,6 +374,19 @@ func _update_inventory_item(item: Dictionary) -> void:
 			inventory[i] = item
 			return
 	inventory.append(item)
+
+
+func _remove_inventory_item(item_instance_id: String) -> void:
+	for i in range(inventory.size() - 1, -1, -1):
+		if str(inventory[i].get("item_instance_id", "")) == item_instance_id:
+			inventory.remove_at(i)
+
+
+func _refresh_inventory_panel() -> void:
+	if inventory_panel != null:
+		inventory_panel.set_inventory_state(inventory, equipped)
+		if visual_replay_enabled:
+			_sync_inventory_replay_display()
 
 
 func _reconcile_player() -> void:
@@ -369,7 +419,19 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null) -
 	pop.setup(_camera, target, world_position, amount, color, side)
 
 
+func _remove_monster_health_bar(entity_id: String) -> void:
+	if not monster_health_bars.has(entity_id):
+		return
+	var bar = monster_health_bars[entity_id]
+	if is_instance_valid(bar):
+		bar.queue_free()
+	monster_health_bars.erase(entity_id)
+
+
 func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_hp: int) -> void:
+	if hp <= 0:
+		_remove_monster_health_bar(entity_id)
+		return
 	if health_bars_layer == null or _camera == null or target == null:
 		return
 	if monster_health_bars.has(entity_id):
@@ -385,6 +447,11 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _input_locked():
+		return
+	if event is InputEventKey and event.pressed and not event.echo and _is_inventory_key(event):
+		if inventory_panel != null:
+			inventory_panel.toggle()
+		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
@@ -419,9 +486,9 @@ func _handle_input(delta: float) -> void:
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 		_send_cooldown = SEND_INTERVAL
 
-	if Input.is_key_pressed(KEY_Q) and inventory.size() > 0 and _send_cooldown <= 0.0:
-		client.send("equip_intent", last_server_tick, {"item_instance_id": inventory[0]["item_instance_id"], "slot": "weapon"})
-		_send_cooldown = SEND_INTERVAL
+
+func _is_inventory_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_I or event.physical_keycode == KEY_I or event.unicode == 105 or event.unicode == 73
 
 
 func _input_locked() -> bool:
@@ -443,6 +510,7 @@ func _handle_autoplay(delta: float) -> void:
 				predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
 				_reconcile_player()
 				client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
+				_shadow_autoplay_move(dir)
 				autoplay_move_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -465,11 +533,13 @@ func _handle_autoplay(delta: float) -> void:
 				player_anim.play_one_shot("attack")
 			if autoplay_attack_cooldown <= 0.0:
 				client.send("action_intent", last_server_tick, {"target_id": target_id})
+				_shadow_autoplay_attack(target_node.global_position)
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
 		"pickup":
 			if not autoplay_pickup_sent and loot_ids.size() > 0:
 				client.send("action_intent", last_server_tick, {"target_id": loot_ids[0]})
+				_shadow_autoplay_pickup(str(loot_ids[0]))
 				autoplay_pickup_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -479,7 +549,9 @@ func _handle_autoplay(delta: float) -> void:
 				autoplay_timer = autoplay_step_delay
 		"equip":
 			if not autoplay_equip_sent and inventory.size() > 0:
-				client.send("equip_intent", last_server_tick, {"item_instance_id": inventory[0]["item_instance_id"], "slot": "weapon"})
+				var item_id := str(inventory[0]["item_instance_id"])
+				client.send("equip_intent", last_server_tick, {"item_instance_id": item_id, "slot": "weapon"})
+				_shadow_inventory_equip(item_id)
 				autoplay_equip_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -498,9 +570,12 @@ func _try_action_at_mouse() -> void:
 	var target_id := _pick_entity_at_mouse()
 	if target_id == "" or not entities.has(target_id):
 		var ground := _mouse_ground_point()
-		client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
-		_attack_cooldown = SEND_INTERVAL
-		return
+		target_id = _nearest_loot_at_ground(ground)
+		if target_id != "":
+		else:
+			client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
+			_attack_cooldown = SEND_INTERVAL
+			return
 
 	var rec: Dictionary = entities[target_id]
 	var target_node := rec["node"] as Node3D
@@ -592,8 +667,49 @@ func _pick_entity_at_mouse() -> String:
 		return ""
 	var collider = hit.get("collider")
 	if collider != null and collider.has_meta("entity_id"):
-		return str(collider.get_meta("entity_id"))
+		var hit_entity_id := str(collider.get_meta("entity_id"))
+		if _is_dead_monster(hit_entity_id):
+			var loot_id := _nearest_loot_at_ground(hit.get("position", _mouse_ground_point()))
+			if loot_id != "":
+				return loot_id
+		return hit_entity_id
 	return ""
+
+
+func _is_dead_monster(entity_id: String) -> bool:
+	if not entities.has(entity_id):
+		return false
+	var rec: Dictionary = entities[entity_id]
+	return str(rec.get("type", "")) == "monster" and int(rec.get("hp", 1)) <= 0
+
+
+func _nearest_loot_at_ground(ground: Vector3) -> String:
+	var best_id := ""
+	var best_dist := 999999.0
+	for loot_id in loot_ids:
+		if not entities.has(loot_id):
+			continue
+		var node := entities[loot_id]["node"] as Node3D
+		if node == null:
+			continue
+		var flat_dist := Vector2(node.global_position.x - ground.x, node.global_position.z - ground.z).length()
+		if flat_dist < best_dist:
+			best_dist = flat_dist
+			best_id = str(loot_id)
+	if best_id != "" and best_dist <= 0.9:
+		return best_id
+	return ""
+
+
+func _set_pickable(node: Node3D, pickable: bool) -> void:
+	if node == null:
+		return
+	var body := node.find_child("PickBody", true, false) as CollisionObject3D
+	if body == null:
+		return
+	body.collision_layer = 1 if pickable else 0
+	body.collision_mask = 1 if pickable else 0
+	body.input_ray_pickable = pickable
 
 
 func _adjust_camera_zoom(delta_size: float) -> void:
@@ -635,6 +751,14 @@ func _start_next_visual_replay() -> void:
 	var session_id := str(scenario.get("session_id", ""))
 	var world_id := str(scenario.get("world_id", "vertical_slice"))
 	visual_replay_title = str(scenario.get("title", scenario.get("id", session_id)))
+	var visual_cfg: Dictionary = scenario.get("visual", {})
+	visual_replay_show_inventory = bool(visual_cfg.get("inventory_panel", false)) \
+		or world_id == "inventory_lab" \
+		or str(scenario.get("id", "")) == "inventory_lab"
+	if inventory_panel != null:
+		inventory_panel.set_interactive(false)
+		if not visual_replay_show_inventory:
+			inventory_panel.hide_display()
 	_render_world_walls(world_id)
 	if session_id == "":
 		_debug("visual replay entry missing session_id; skipping")
@@ -677,14 +801,157 @@ func _visual_replay_delay_for(env: Dictionary) -> float:
 	if str(env.get("type", "")) != "state_delta":
 		return autoplay_step_delay
 	var payload: Dictionary = env.get("payload", {})
+	var delay := autoplay_step_delay
 	for change in payload.get("changes", []):
-		if change.get("op", "") in ["entity_spawn", "entity_update"]:
+		var op := str(change.get("op", ""))
+		if op in ["entity_spawn", "entity_update"]:
 			var entity: Dictionary = change.get("entity", {})
 			if str(entity.get("type", "")) == "projectile":
 				return 0.05
-		if change.get("op", "") == "entity_remove":
+		if op == "entity_remove":
 			return 0.08
-	return autoplay_step_delay
+		if op in ["inventory_add", "inventory_update", "inventory_remove", "equipped_update"]:
+			delay = maxf(delay, autoplay_step_delay * 1.35)
+	return delay
+
+
+func _sync_inventory_replay_display() -> void:
+	if inventory_panel == null or not visual_replay_enabled:
+		return
+	var has_inventory := inventory.size() > 0 or equipped.get("weapon") != null
+	if visual_replay_show_inventory or has_inventory:
+		inventory_panel.ensure_display_visible()
+		inventory_panel.set_interactive(false)
+	else:
+		inventory_panel.hide_display()
+
+
+func _sync_input_shadow_active() -> void:
+	if input_shadow != null:
+		input_shadow.set_active(_input_locked())
+
+
+func _capture_loot_positions() -> Dictionary:
+	var out := {}
+	for loot_id in loot_ids:
+		if not entities.has(loot_id):
+			continue
+		var node := entities[loot_id]["node"] as Node3D
+		if node != null:
+			out[loot_id] = node.global_position
+	return out
+
+
+func _entity_world_center(entity_id: String) -> Vector3:
+	if not entities.has(entity_id):
+		return Vector3.ZERO
+	var node := entities[entity_id]["node"] as Node3D
+	if node == null:
+		return Vector3.ZERO
+	return node.global_position
+
+
+func _loot_pickup_world_pos(changes: Array, loot_positions: Dictionary) -> Vector3:
+	for change in changes:
+		if str(change.get("op", "")) != "entity_remove":
+			continue
+		var loot_id := str(change.get("entity_id", ""))
+		if loot_positions.has(loot_id):
+			return loot_positions[loot_id]
+	if not loot_positions.is_empty():
+		return loot_positions.values()[0]
+	return Vector3.ZERO
+
+
+func _show_input_shadow_for_event(event_type: String, ev: Dictionary, changes: Array, loot_positions: Dictionary) -> void:
+	if input_shadow == null:
+		return
+	match event_type:
+		"monster_damaged", "monster_killed":
+			var world := _entity_world_center(str(ev.get("entity_id", "")))
+			if world != Vector3.ZERO:
+				input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
+		"item_picked_up":
+			var world := _loot_pickup_world_pos(changes, loot_positions)
+			if world != Vector3.ZERO:
+				input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
+		"item_equipped":
+			_shadow_inventory_equip(str(ev.get("entity_id", "")))
+		"item_unequipped":
+			_shadow_inventory_unequip()
+		"item_dropped":
+			var item_id := str(ev.get("item_instance_id", ev.get("entity_id", "")))
+			_shadow_inventory_drop(item_id)
+		"interactable_activated":
+			var world := _entity_world_center(str(ev.get("entity_id", "")))
+			if world != Vector3.ZERO:
+				input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
+
+
+func _shadow_inventory_equip(item_instance_id: String) -> void:
+	if input_shadow == null or inventory_panel == null:
+		return
+	if visual_replay_show_inventory or inventory.size() > 0:
+		inventory_panel.ensure_display_visible()
+	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
+	var to_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
+		return
+	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["dbl-click", "drag"]))
+
+
+func _shadow_inventory_unequip() -> void:
+	if input_shadow == null or inventory_panel == null:
+		return
+	var from_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
+	var to_pos: Vector2 = inventory_panel.get_bag_area_screen_center()
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
+		return
+	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "bag"]))
+
+
+func _shadow_inventory_drop(item_instance_id: String) -> void:
+	if input_shadow == null or inventory_panel == null:
+		return
+	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
+	if from_pos == Vector2.ZERO:
+		from_pos = inventory_panel.get_weapon_slot_screen_center()
+	var to_pos: Vector2 = inventory_panel.get_drop_outside_screen_point()
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
+		return
+	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "drop"]))
+
+
+func _shadow_autoplay_move(dir: Vector2) -> void:
+	if input_shadow == null or player_anchor == null:
+		return
+	var keys := PackedStringArray()
+	if dir.x > 0.1:
+		keys.append("D")
+	elif dir.x < -0.1:
+		keys.append("A")
+	if dir.y > 0.1:
+		keys.append("S")
+	elif dir.y < -0.1:
+		keys.append("W")
+	if keys.is_empty():
+		keys.append("move")
+	var ahead := player_anchor.global_position + Vector3(dir.x, 0.0, dir.y) * 1.4
+	input_shadow.pulse_world_target(ahead, keys)
+
+
+func _shadow_autoplay_attack(world_pos: Vector3) -> void:
+	if input_shadow == null:
+		return
+	input_shadow.pulse_world_target(world_pos, PackedStringArray(["LMB"]))
+
+
+func _shadow_autoplay_pickup(loot_id: String) -> void:
+	if input_shadow == null:
+		return
+	var world := _entity_world_center(loot_id)
+	if world != Vector3.ZERO:
+		input_shadow.pulse_world_target(world, PackedStringArray(["LMB"]))
 
 
 # --- scene construction (placeholder primitives) ----------------------------
@@ -707,6 +974,13 @@ func _build_scene() -> void:
 	_debug_label = Label.new()
 	_debug_label.position = Vector2(12, 12)
 	ui.add_child(_debug_label)
+	inventory_panel = InventoryPanelScript.new()
+	inventory_panel.intent_requested.connect(_on_inventory_intent_requested)
+	ui.add_child(inventory_panel)
+
+	input_shadow = InputShadowOverlayScript.new()
+	add_child(input_shadow)
+	input_shadow.bind_camera(_camera)
 
 	damage_numbers_layer = CanvasLayer.new()
 	damage_numbers_layer.layer = 2
@@ -719,6 +993,12 @@ func _build_scene() -> void:
 	walls_root = Node3D.new()
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
+
+
+func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) -> void:
+	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	client.send(intent_type, last_server_tick, payload)
 
 
 func _render_world_walls(world_id: String) -> void:
@@ -757,7 +1037,8 @@ func _read_json(path: String):
 	return JSON.parse_string(f.get_as_text())
 
 
-func _make_entity_node(kind: String) -> Node3D:
+func _make_entity_node(e: Dictionary) -> Node3D:
+	var kind := str(e.get("type", ""))
 	# Monster adopts the rigged dummy scene (spec §5.3); loot stays a primitive.
 	if kind == "monster":
 		var packed := MonsterDummyScene
@@ -779,9 +1060,30 @@ func _make_entity_node(kind: String) -> Node3D:
 	box.size = Vector3(0.5, 0.5, 0.5)
 	node.mesh = box
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.85, 0.2)
+	mat.albedo_color = _loot_color(str(e.get("item_def_id", "")))
 	node.material_override = mat
 	return node
+
+
+func _loot_color(item_def_id: String) -> Color:
+	var def: Dictionary = item_rules.get(item_def_id, {})
+	var category := str(def.get("category", "equipment" if bool(def.get("equippable", false)) else "currency"))
+	match category:
+		"equipment":
+			return Color(0.62, 0.62, 0.62)
+		"quest":
+			return Color(0.2, 0.85, 0.35)
+		"consumable":
+			return Color(0.95, 0.15, 0.12)
+		_:
+			return Color(1.0, 0.85, 0.2)
+
+
+func _load_item_rules() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/items.v0.json")
+	var parsed = _read_json(path)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_rules = parsed.get("items", {})
 
 
 func _make_projectile_node() -> Node3D:
@@ -898,7 +1200,7 @@ func _update_debug() -> void:
 		visual_replay_scenarios.size(),
 		visual_replay_title,
 	] if visual_replay_enabled else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual")
-	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB action  scroll zoom  Q equip" % [
+	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB action  scroll zoom  I inventory" % [
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
 
 

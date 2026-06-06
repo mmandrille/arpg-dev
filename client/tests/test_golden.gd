@@ -126,7 +126,27 @@ func _initialize() -> void:
 			_fail("ranged projectile references unknown monster %s" % monster_id)
 			return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile)")
+	# 8. Inventory drop golden references shared item/world/navigation rules.
+	var inventory_drop := _read(shared.path_join("golden/inventory_drop.json"))
+	var drop_world_id := str(inventory_drop["world_id"])
+	var drop_item_id := str(inventory_drop["item_def_id"])
+	if not worlds["worlds"].has(drop_world_id):
+		_fail("inventory_drop references unknown world_id %s" % drop_world_id)
+		return
+	if not items["items"].has(drop_item_id):
+		_fail("inventory_drop references unknown item %s" % drop_item_id)
+		return
+	if float(inventory_drop["constants"]["loot_drop_radius"]) != 0.35:
+		_fail("inventory_drop loot_drop_radius mismatch")
+		return
+	if float(inventory_drop["constants"]["player_radius"]) != 0.45:
+		_fail("inventory_drop player_radius mismatch")
+		return
+	if float(inventory_drop["constants"]["drop_step"]) != float(navigation["cell_size"]):
+		_fail("inventory_drop drop_step != navigation.cell_size")
+		return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop)")
 	quit(0)
 
 

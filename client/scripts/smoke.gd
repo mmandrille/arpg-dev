@@ -15,6 +15,7 @@ extends SceneTree
 const NetClientScript := preload("res://scripts/net_client.gd")
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimControllerScript := preload("res://scripts/animation_controller.gd")
+const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScene := preload("res://scenes/monster_dummy.tscn")
 const TIMEOUT_S := 40.0
@@ -59,6 +60,8 @@ var item_id: String = ""
 
 
 func _initialize() -> void:
+	if not _verify_inventory_panel_model():
+		return
 	base = _env("BASE_URL", "http://localhost:8080")
 	dev = _env("DEV_TOKEN", "local-dev-token")
 	debug_token = _env("DEBUG_TOKEN", "local-debug-token")
@@ -359,6 +362,36 @@ func _make_resolver() -> EquipmentVisualResolver:
 	mount.add_child(socket)
 	get_root().add_child(mount)
 	return ResolverScript.new(mount)
+
+
+func _verify_inventory_panel_model() -> bool:
+	var panel = InventoryPanelScript.new()
+	get_root().add_child(panel)
+	panel.set_inventory_state([
+		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": false},
+		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
+	], {"weapon": null})
+	var state: Dictionary = panel.get_debug_state()
+	if int(state["bag_count"]) != 2 or state["equipped_weapon"] != null:
+		_fail("inventory panel initial state mismatch: %s" % state)
+		return false
+	panel.set_inventory_state([
+		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": true},
+		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
+	], {"weapon": "1004"})
+	state = panel.get_debug_state()
+	if str(state["equipped_weapon"]) != "1004":
+		_fail("inventory panel equipped state mismatch: %s" % state)
+		return false
+	panel.set_inventory_state([
+		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
+	], {"weapon": null})
+	state = panel.get_debug_state()
+	if int(state["bag_count"]) != 1 or state["weapon_item"] != {}:
+		_fail("inventory panel remove state mismatch: %s" % state)
+		return false
+	panel.queue_free()
+	return true
 
 
 func _fail(msg: String) -> void:

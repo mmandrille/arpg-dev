@@ -53,7 +53,7 @@ curl -fsS "$BASE_URL/readyz" >/dev/null
 "$GODOT" --headless --path "$ROOT/client" --import >/dev/null 2>&1 || true
 
 echo "[play] launching Godot client — close the window to stop the server."
-echo "[play] controls: W/A/S/D move, LMB attack (aim), scroll zoom, E pickup, Q equip."
+echo "[play] controls: W/A/S/D move, LMB action, scroll zoom, I inventory."
 ARPG_BASE_URL="$BASE_URL" ARPG_DEV_TOKEN="$DEV_TOKEN" \
   "$GODOT" --path "$ROOT/client"
 

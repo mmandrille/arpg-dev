@@ -1089,7 +1089,6 @@ func get_bot_state() -> Dictionary:
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
 		"pending_events": _bot_pending_events.duplicate(true),
 	}
-	_bot_pending_events.clear()
 	return out
 
 
@@ -1101,7 +1100,9 @@ func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 
 
 func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> void:
-	_on_inventory_intent_requested(intent_type, payload)
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	client.send(intent_type, last_server_tick, payload)
 
 
 func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:

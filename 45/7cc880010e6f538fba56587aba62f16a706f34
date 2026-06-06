@@ -1,0 +1,32 @@
+server/internal/game/pathfind_test.go
+  s_edbd5183536185::t_a9e55167b56818 47-49
+  s_edbd5183536185::t_69be5c0311c843 19-20,22
+  s_edbd5183536185::t_0c65985b728784 50-52,54-63
+  s_edbd5183536185::t_30cd98a592a08e 46,53
+server/internal/game/pathfind.go
+  s_edbd5183536185::t_d0f1987eac0dc2 128-130
+  s_edbd5183536185::t_2d3d8601913ffe 65,70
+  s_edbd5183536185::t_12bac098bd320b 137-141,143-147
+  s_edbd5183536185::t_c77d1beecd8fe4 26,29
+  s_edbd5183536185::t_59db36e5447d05 159
+  s_edbd5183536185::t_32e5720025ae89 157-158
+  s_edbd5183536185::t_aba99dc19e6570 133
+  s_edbd5183536185::t_97d9b905052d0a 58-59
+  s_edbd5183536185::t_39f642b215dfe1 53-57,60,63,66-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "457cc880010e6f538fba56587aba62f16a706f34",
+  "prompts": {},
+  "sessions": {
+    "s_edbd5183536185": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a33dc0d8-0fac-4c29-b5de-7125c22c683a",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

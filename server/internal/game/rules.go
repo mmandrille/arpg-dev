@@ -5,19 +5,21 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 // Rules is the in-memory form of the shared rules-as-data (shared/rules). The
 // Go server and the Godot client read the same files (ADR-0001 D6); this is the
 // server's loader and typed view.
 type Rules struct {
-	Combat        Combat
-	Navigation    NavigationRules
-	Items         map[string]ItemDef
-	Monsters      map[string]MonsterDef
-	LootTables    map[string]LootTable
-	Interactables map[string]InteractableDef
-	Worlds        map[string]WorldDef
+	Combat            Combat
+	Navigation        NavigationRules
+	Items             map[string]ItemDef
+	Monsters          map[string]MonsterDef
+	LootTables        map[string]LootTable
+	Interactables     map[string]InteractableDef
+	Worlds            map[string]WorldDef
+	DungeonGeneration DungeonGenerationRules
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -39,6 +41,27 @@ type NavigationRules struct {
 	MaxAutoSteps int        `json:"max_auto_steps"`
 	GridBounds   GridBounds `json:"grid_bounds"`
 	StopDistance float64    `json:"stop_distance"`
+}
+
+// DungeonGenerationRules controls deterministic generated dungeon floors.
+type DungeonGenerationRules struct {
+	FloorSize                DungeonFloorSize    `json:"floor_size"`
+	WallThickness            float64             `json:"wall_thickness"`
+	PlayerSpawn              Vec2                `json:"player_spawn"`
+	StairPlacement           StairPlacementRules `json:"stair_placement"`
+	LevelNames               map[string]string   `json:"level_names"`
+	DefaultLevelNameTemplate string              `json:"default_level_name_template"`
+}
+
+type DungeonFloorSize struct {
+	Width  float64 `json:"width"`
+	Height float64 `json:"height"`
+}
+
+type StairPlacementRules struct {
+	MinSeparation  float64 `json:"min_separation"`
+	MarginFromWall float64 `json:"margin_from_wall"`
+	MaxAttempts    int     `json:"max_attempts"`
 }
 
 // GridBounds is the inclusive grid rectangle searched by A*.
@@ -64,9 +87,10 @@ type ItemDef struct {
 
 // InteractableDef is a single activatable world object definition.
 type InteractableDef struct {
-	Name              string              `json:"name"`
-	InitialState      string              `json:"initial_state"`
-	BarrierWhenClosed InteractableBarrier `json:"barrier_when_closed"`
+	Name              string               `json:"name"`
+	InitialState      string               `json:"initial_state"`
+	Transition        string               `json:"transition,omitempty"`
+	BarrierWhenClosed *InteractableBarrier `json:"barrier_when_closed,omitempty"`
 }
 
 // InteractableBarrier is the closed-state movement blocker for an interactable.
@@ -116,6 +140,7 @@ type LootTable struct {
 
 // WorldDef is a deterministic initial session layout.
 type WorldDef struct {
+	Mode     string        `json:"mode,omitempty"`
 	Player   WorldPlayer   `json:"player"`
 	Entities []WorldEntity `json:"entities"`
 }
@@ -305,14 +330,73 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	for id, def := range interactables.Interactables {
-		if def.InitialState != interactableClosed {
-			return nil, fmt.Errorf("game: invalid rules interactables.%s.initial_state: must be closed", id)
-		}
-		if def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0 {
-			return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
+		switch def.InitialState {
+		case interactableClosed:
+			if def.Transition != "" {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: closed interactable must not declare transition", id)
+			}
+			if def.BarrierWhenClosed == nil {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: required for closed interactables", id)
+			}
+			if def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0 {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
+			}
+		case interactableReady:
+			if def.BarrierWhenClosed != nil {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: ready interactable must not declare barrier", id)
+			}
+			switch def.Transition {
+			case interactableTransitionAscend, interactableTransitionDescend:
+			default:
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: must be ascend or descend", id)
+			}
+		default:
+			return nil, fmt.Errorf("game: invalid rules interactables.%s.initial_state: unsupported state %s", id, def.InitialState)
 		}
 	}
 	r.Interactables = interactables.Interactables
+
+	var dungeonGeneration struct {
+		Version                  int                 `json:"version"`
+		FloorSize                DungeonFloorSize    `json:"floor_size"`
+		WallThickness            float64             `json:"wall_thickness"`
+		PlayerSpawn              Vec2                `json:"player_spawn"`
+		StairPlacement           StairPlacementRules `json:"stair_placement"`
+		LevelNames               map[string]string   `json:"level_names"`
+		DefaultLevelNameTemplate string              `json:"default_level_name_template"`
+	}
+	if err := readJSON(filepath.Join(dir, "dungeon_generation.v0.json"), &dungeonGeneration); err != nil {
+		return nil, err
+	}
+	if dungeonGeneration.FloorSize.Width < 16 || dungeonGeneration.FloorSize.Height < 10 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.floor_size: must be at least 16x10")
+	}
+	if dungeonGeneration.WallThickness <= 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.wall_thickness: must be positive")
+	}
+	if dungeonGeneration.StairPlacement.MinSeparation <= 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.stair_placement.min_separation: must be positive")
+	}
+	if dungeonGeneration.StairPlacement.MarginFromWall < 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.stair_placement.margin_from_wall: must be non-negative")
+	}
+	if dungeonGeneration.StairPlacement.MaxAttempts <= 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.stair_placement.max_attempts: must be positive")
+	}
+	for key := range dungeonGeneration.LevelNames {
+		level, err := strconv.Atoi(key)
+		if err != nil || level >= 0 {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.level_names.%s: key must be a negative integer string", key)
+		}
+	}
+	r.DungeonGeneration = DungeonGenerationRules{
+		FloorSize:                dungeonGeneration.FloorSize,
+		WallThickness:            dungeonGeneration.WallThickness,
+		PlayerSpawn:              dungeonGeneration.PlayerSpawn,
+		StairPlacement:           dungeonGeneration.StairPlacement,
+		LevelNames:               dungeonGeneration.LevelNames,
+		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
+	}
 
 	var worlds struct {
 		Worlds map[string]WorldDef `json:"worlds"`
@@ -321,6 +405,11 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	for worldID, world := range worlds.Worlds {
+		switch world.Mode {
+		case "", worldModeMultiLevel:
+		default:
+			return nil, fmt.Errorf("game: invalid rules worlds.%s.mode: unsupported mode %s", worldID, world.Mode)
+		}
 		for i, entity := range world.Entities {
 			label := fmt.Sprintf("worlds.%s.entities[%d]", worldID, i)
 			switch entity.Type {

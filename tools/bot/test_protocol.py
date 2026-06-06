@@ -89,6 +89,24 @@ def test_load_scenarios_discovers_path_maze():
     }]
 
 
+def test_load_scenarios_dungeon_levels_loots_coin_before_returning():
+    scenarios = load_scenarios()
+    dungeon = next(s for s in scenarios if s.id == "dungeon_levels")
+
+    assert dungeon.world_id == "dungeon_levels"
+    assert {"action": "pick_up_loot", "item_def_id": "training_badge"} in dungeon.steps
+    assert dungeon.steps[-1] == {
+        "action": "assert_player_at_used_stair",
+        "direction": "down",
+        "tolerance": 0.001,
+    }
+    assert {
+        "type": "inventory_contains",
+        "item_def_id": "training_badge",
+        "equipped": False,
+    } in dungeon.assertions
+
+
 def test_select_scenarios_all_returns_catalog_order():
     scenarios = load_scenarios()
 
@@ -189,6 +207,59 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
     assert find_loot(state, "rusty_sword") is None
     assert find_inventory_item(state.inventory, "rusty_sword") is None
     assert state.equipped["weapon"] == "1004"
+
+
+def test_runtime_state_waits_for_destination_level_delta():
+    state = RuntimeState()
+    ingest_message({
+        "type": "session_snapshot",
+        "tick": 0,
+        "payload": {
+            "server_tick": 0,
+            "current_level": -1,
+            "entities": [
+                {"id": "1001", "type": "player", "position": {"x": 14, "y": 18}, "hp": 10, "max_hp": 10},
+                {"id": "1002", "type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "position": {"x": 14, "y": 18}},
+            ],
+            "inventory": [],
+            "equipped": {"weapon": None},
+        },
+    }, state)
+
+    ingest_message({
+        "type": "state_delta",
+        "tick": 1,
+        "payload": {
+            "server_tick": 1,
+            "level": -1,
+            "changes": [{"op": "entity_remove", "entity_id": "1001"}],
+            "events": [{"event_type": "level_changed", "from_level": -1, "to_level": -2}],
+        },
+    }, state)
+
+    assert state.current_level == -2
+    assert state.pending_level_load == -2
+    assert find_interactable(state, "stairs_down") is None
+    assert find_interactable(state, "stairs_up") is None
+
+    ingest_message({
+        "type": "state_delta",
+        "tick": 1,
+        "payload": {
+            "server_tick": 1,
+            "level": -2,
+            "changes": [
+                {"op": "entity_spawn", "entity": {"id": "1001", "type": "player", "position": {"x": 9, "y": 11}, "hp": 10, "max_hp": 10}},
+                {"op": "entity_spawn", "entity": {"id": "1003", "type": "interactable", "interactable_def_id": "stairs_up", "state": "ready", "position": {"x": 9, "y": 11}}},
+                {"op": "entity_spawn", "entity": {"id": "1004", "type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "position": {"x": 28, "y": 14}}},
+            ],
+            "events": [],
+        },
+    }, state)
+
+    assert state.pending_level_load is None
+    assert find_player(state)["id"] == "1001"
+    assert find_interactable(state, "stairs_up")["id"] == "1003"
 
 
 def test_intent_accepted_increments_pending_attack_count():

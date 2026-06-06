@@ -1,0 +1,10 @@
+{
+  "server_tick": 44,
+  "level": -1,
+  "changes": [
+    { "op": "entity_remove", "entity_id": "1001" }
+  ],
+  "events": [
+    { "event_type": "level_changed", "from_level": -1, "to_level": -2 }
+  ]
+}

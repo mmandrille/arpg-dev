@@ -2,6 +2,7 @@
   "server_tick": 42,
   "session_id": "sess_01H00000000000000000000000",
   "seed": "deadbeefdeadbeef",
+  "current_level": 0,
   "entities": [
     { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 10, "max_hp": 10 },
     { "id": "1002", "type": "monster", "monster_def_id": "training_dummy", "position": { "x": 12, "y": 5 }, "hp": 3, "max_hp": 3 }

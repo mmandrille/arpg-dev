@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"strconv"
@@ -27,6 +28,12 @@ const (
 	monsterAIModeReturn           = "return"
 	interactableClosed            = "closed"
 	interactableOpen              = "open"
+	interactableReady             = "ready"
+	interactableTransitionAscend  = "ascend"
+	interactableTransitionDescend = "descend"
+	stairsDownDefID               = "stairs_down"
+	stairsUpDefID                 = "stairs_up"
+	worldModeMultiLevel           = "multi_level"
 	attackModeMelee               = "melee"
 	attackModeRanged              = "ranged"
 	trainingArrowProjectileDefID  = "training_arrow"
@@ -41,6 +48,11 @@ const (
 // DefaultWorldID is the compatibility world used when callers do not choose a
 // preset explicitly.
 const DefaultWorldID = "vertical_slice"
+
+const (
+	entryLevel = -1
+	levelZero  = 0
+)
 
 // entity is the internal mutable scene entity.
 type entity struct {
@@ -107,12 +119,15 @@ type Sim struct {
 	nextID   uint64
 	playerID uint64
 
-	entities  map[uint64]*entity
-	inventory []*invItem
-	equipped  map[string]uint64 // slot -> instanceID (0 = none)
-	move      *activeMove
-	autoNav   *autoNavState
-	walls     []wallObstacle
+	levels       map[int]*LevelState
+	currentLevel int
+	multiLevel   bool
+	entities     map[uint64]*entity
+	walls        []wallObstacle
+	move         *activeMove
+	autoNav      *autoNavState
+	inventory    []*invItem
+	equipped     map[string]uint64 // slot -> instanceID (0 = none)
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
@@ -131,19 +146,40 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 		return nil, ErrUnknownWorld{WorldID: worldID}
 	}
 	s := &Sim{
-		sessionID: sessionID,
-		seed:      seed,
-		rng:       NewRNG(SeedToUint64(seed)),
-		rules:     rules,
-		nextID:    baseEntityID,
-		entities:  make(map[uint64]*entity),
-		equipped:  map[string]uint64{weaponSlot: 0},
+		sessionID:    sessionID,
+		seed:         seed,
+		rng:          NewRNG(SeedToUint64(seed)),
+		rules:        rules,
+		nextID:       baseEntityID,
+		levels:       make(map[int]*LevelState),
+		currentLevel: levelZero,
+		multiLevel:   world.Mode == worldModeMultiLevel,
+		equipped:     map[string]uint64{weaponSlot: 0},
 	}
+
+	if s.multiLevel {
+		s.currentLevel = entryLevel
+		nav := dungeonNavigation(rules.Navigation, rules.DungeonGeneration)
+		level := newLevelState(entryLevel, &nav)
+		s.levels[entryLevel] = level
+		player := &entity{kind: playerEntity, pos: rules.DungeonGeneration.PlayerSpawn, hp: playerStartHP, maxHP: playerStartHP}
+		player.id = s.alloc()
+		s.playerID = player.id
+		level.entities[player.id] = player
+		if err := s.populateDungeonLevel(level); err != nil {
+			return nil, err
+		}
+		s.syncCompatibilityFields()
+		return s, nil
+	}
+
+	level := newLevelState(levelZero, &rules.Navigation)
+	s.levels[levelZero] = level
 
 	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: playerStartHP, maxHP: playerStartHP}
 	player.id = s.alloc()
 	s.playerID = player.id
-	s.entities[player.id] = player
+	level.entities[player.id] = player
 
 	for _, preset := range world.Entities {
 		switch preset.Type {
@@ -160,13 +196,13 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 				aiMode:       monsterAIModeIdle,
 			}
 			monster.id = s.alloc()
-			s.entities[monster.id] = monster
+			level.entities[monster.id] = monster
 		case lootEntity:
 			loot := &entity{kind: lootEntity, pos: preset.Position, itemDefID: preset.ItemDefID}
 			loot.id = s.alloc()
-			s.entities[loot.id] = loot
+			level.entities[loot.id] = loot
 		case wallEntity:
-			s.walls = append(s.walls, wallObstacle{pos: preset.Position, size: preset.Size})
+			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size})
 		case interactableEntity:
 			def := rules.Interactables[preset.InteractableDefID]
 			interactable := &entity{
@@ -176,12 +212,13 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 				state:             def.InitialState,
 			}
 			interactable.id = s.alloc()
-			s.entities[interactable.id] = interactable
+			level.entities[interactable.id] = interactable
 		default:
 			return nil, ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
 		}
 	}
 
+	s.syncCompatibilityFields()
 	return s, nil
 }
 
@@ -250,6 +287,8 @@ type Input struct {
 	Move          *MoveIntent
 	MoveTo        *MoveToIntent
 	Action        *ActionIntent
+	Descend       *DescendIntent
+	Ascend        *AscendIntent
 	Equip         *EquipIntent
 	Unequip       *UnequipIntent
 	Drop          *DropIntent
@@ -265,8 +304,10 @@ type (
 	MoveToIntent struct {
 		Position Vec2
 	}
-	ActionIntent struct{ TargetID string }
-	EquipIntent  struct {
+	ActionIntent  struct{ TargetID string }
+	DescendIntent struct{}
+	AscendIntent  struct{}
+	EquipIntent   struct {
 		ItemInstanceID string
 		Slot           string
 	}
@@ -293,6 +334,7 @@ type (
 // TickResult is everything a single tick produced.
 type TickResult struct {
 	Tick    uint64
+	Level   int
 	Changes []Change
 	Events  []Event
 	Acks    []Ack
@@ -304,27 +346,53 @@ func (r *TickResult) reject(id, reason string) {
 	r.Rejects = append(r.Rejects, Reject{MessageID: id, Reason: reason})
 }
 
-// Tick processes the inputs stamped for the current tick (already ordered by
-// the runner as (sequence, message_id)), applies continuous movement, advances
-// the tick counter, and returns the resulting changes/events/acks.
+// Tick processes one authoritative tick and returns the normal single-level
+// result. Runtime protocol code should use TickResults so stair transitions can
+// emit scoped from/to level deltas.
 func (s *Sim) Tick(inputs []Input) TickResult {
+	results := s.TickResults(inputs)
+	if len(results) == 0 {
+		return TickResult{Tick: s.tick, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}
+	}
+	return results[len(results)-1]
+}
+
+// TickResults processes the inputs stamped for the current tick (already
+// ordered by the runner as (sequence, message_id)), applies continuous
+// movement, advances the tick counter, and returns one or more scoped results.
+func (s *Sim) TickResults(inputs []Input) []TickResult {
 	// Changes/Events are always non-nil so they marshal as [] (not null),
 	// satisfying the state_delta schema.
-	res := TickResult{Tick: s.tick, Changes: []Change{}, Events: []Event{}}
+	res := TickResult{Tick: s.tick, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}
+	var transitionArrival *TickResult
 	for _, in := range inputs {
+		if in.Type == "descend_intent" || in.Type == "ascend_intent" {
+			if transitionArrival == nil {
+				transitionArrival = s.handleTransition(in, &res)
+			} else {
+				res.reject(in.MessageID, "invalid_level")
+			}
+			continue
+		}
 		s.applyInput(in, &res)
+	}
+	if transitionArrival != nil {
+		s.tick++
+		s.syncCompatibilityFields()
+		return []TickResult{res, *transitionArrival}
 	}
 	s.applyMovement(&res)
 	s.advanceMonsterMovement(&res)
 	s.advanceProjectiles(&res)
 	s.tick++
-	return res
+	s.syncCompatibilityFields()
+	return []TickResult{res}
 }
 
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "action_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent":
+		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -338,6 +406,11 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleMoveTo(in, res)
 	case "action_intent":
 		s.handleAction(in, res)
+	case "descend_intent", "ascend_intent":
+		if arrival := s.handleTransition(in, res); arrival != nil {
+			res.Changes = append(res.Changes, arrival.Changes...)
+			res.Events = append(res.Events, arrival.Events...)
+		}
 	case "equip_intent":
 		s.handleEquip(in, res)
 	case "unequip_intent":
@@ -349,6 +422,80 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 	default:
 		res.reject(in.MessageID, "unknown_type")
 	}
+}
+
+func (s *Sim) activeLevel() *LevelState {
+	level := s.levels[s.currentLevel]
+	if level == nil {
+		panic("game: active level missing")
+	}
+	return level
+}
+
+func (s *Sim) activeNav() NavigationRules {
+	level := s.activeLevel()
+	if level.nav == nil {
+		return s.rules.Navigation
+	}
+	return *level.nav
+}
+
+func (s *Sim) activeWalls() []wallObstacle {
+	level := s.activeLevel()
+	if s.walls != nil {
+		level.walls = s.walls
+	}
+	return level.walls
+}
+
+func (s *Sim) syncCompatibilityFields() {
+	level := s.activeLevel()
+	s.entities = level.entities
+	s.walls = level.walls
+	s.move = level.move
+	s.autoNav = level.autoNav
+}
+
+func (s *Sim) ensureDungeonLevel(levelNum int) (*LevelState, error) {
+	if level, ok := s.levels[levelNum]; ok {
+		return level, nil
+	}
+	nav := dungeonNavigation(s.rules.Navigation, s.rules.DungeonGeneration)
+	level := newLevelState(levelNum, &nav)
+	s.levels[levelNum] = level
+	if err := s.populateDungeonLevel(level); err != nil {
+		delete(s.levels, levelNum)
+		return nil, err
+	}
+	return level, nil
+}
+
+func (s *Sim) populateDungeonLevel(level *LevelState) error {
+	gen, err := GenerateDungeonLevel(s.seed, level.levelNum, s.rules.DungeonGeneration)
+	if err != nil {
+		return err
+	}
+	level.walls = gen.walls
+	for _, stair := range gen.stairs {
+		def := s.rules.Interactables[stair.defID]
+		e := &entity{
+			kind:              interactableEntity,
+			pos:               stair.pos,
+			interactableDefID: stair.defID,
+			state:             def.InitialState,
+		}
+		e.id = s.alloc()
+		level.entities[e.id] = e
+	}
+	for _, generated := range gen.loot {
+		if _, ok := s.rules.Items[generated.itemDefID]; !ok {
+			return fmt.Errorf("game: generate dungeon level %d: unknown loot item %s", level.levelNum, generated.itemDefID)
+		}
+		loot := &entity{kind: lootEntity, pos: generated.pos, itemDefID: generated.itemDefID}
+		loot.id = s.alloc()
+		level.entities[loot.id] = loot
+	}
+	return nil
 }
 
 func (s *Sim) handleMove(in Input, res *TickResult) {
@@ -363,7 +510,7 @@ func (s *Sim) handleMove(in Input, res *TickResult) {
 	}
 	if dir.X != 0 || dir.Y != 0 {
 		s.clearAutoNav()
-		s.move = &activeMove{dir: dir, remaining: dur}
+		s.activeLevel().move = &activeMove{dir: dir, remaining: dur}
 	}
 	res.ack(in.MessageID)
 }
@@ -373,27 +520,27 @@ func (s *Sim) handleMoveTo(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_payload")
 		return
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		res.reject(in.MessageID, "player_dead")
 		return
 	}
-	if distance(player.pos, in.MoveTo.Position) <= s.rules.Navigation.StopDistance {
+	if distance(player.pos, in.MoveTo.Position) <= s.activeNav().StopDistance {
 		s.clearAutoNav()
 		res.ack(in.MessageID)
 		return
 	}
-	steps, ok := PlanPath(s.rules.Navigation, player.pos, in.MoveTo.Position, s.buildBlockedFn())
+	steps, ok := PlanPath(s.activeNav(), player.pos, in.MoveTo.Position, s.buildBlockedFn())
 	if !ok {
 		res.reject(in.MessageID, "no_path")
 		return
 	}
-	if len(steps) > s.rules.Navigation.MaxAutoSteps {
+	if len(steps) > s.activeNav().MaxAutoSteps {
 		res.reject(in.MessageID, "path_too_long")
 		return
 	}
-	s.move = nil
-	s.autoNav = &autoNavState{steps: steps, sourceMsgID: in.MessageID, sourceCorrID: in.CorrelationID}
+	s.activeLevel().move = nil
+	s.activeLevel().autoNav = &autoNavState{steps: steps, sourceMsgID: in.MessageID, sourceCorrID: in.CorrelationID}
 	res.ack(in.MessageID)
 }
 
@@ -417,12 +564,12 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 		res.reject(in.MessageID, "no_path")
 		return
 	}
-	if len(steps) > s.rules.Navigation.MaxAutoSteps {
+	if len(steps) > s.activeNav().MaxAutoSteps {
 		res.reject(in.MessageID, "path_too_long")
 		return
 	}
-	s.move = nil
-	s.autoNav = &autoNavState{
+	s.activeLevel().move = nil
+	s.activeLevel().autoNav = &autoNavState{
 		steps:         steps,
 		pendingAction: &ActionIntent{TargetID: in.Action.TargetID},
 		sourceMsgID:   in.MessageID,
@@ -483,7 +630,7 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 		res.reject(in.MessageID, "projectile_busy")
 		return
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		res.reject(in.MessageID, "player_dead")
 		return
@@ -513,7 +660,7 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 		spawnTick:       s.tick,
 	}
 	projectile.id = s.alloc()
-	s.entities[projectile.id] = projectile
+	s.activeLevel().entities[projectile.id] = projectile
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(projectile.view())})
 	if ack {
 		res.ack(in.MessageID)
@@ -553,7 +700,7 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 
 		loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID}
 		loot.id = s.alloc()
-		s.entities[loot.id] = loot
+		s.activeLevel().entities[loot.id] = loot
 		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
 		res.Events = append(res.Events, Event{EventType: "loot_dropped", EntityID: idStr(loot.id), CorrelationID: corr})
 	}
@@ -564,7 +711,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	if def.RetaliationDamage == nil {
 		return
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil || player.hp <= 0 {
 		return
 	}
@@ -582,7 +729,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 }
 
 func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
-	delete(s.entities, e.id)
+	delete(s.activeLevel().entities, e.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
 
 	item := &invItem{
@@ -606,6 +753,100 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 	if ack {
 		res.ack(in.MessageID)
 	}
+}
+
+func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
+	if !s.multiLevel {
+		res.reject(in.MessageID, "not_dungeon_world")
+		return nil
+	}
+	if s.playerDead() {
+		res.reject(in.MessageID, "player_dead")
+		return nil
+	}
+
+	var (
+		stairDefID string
+		destLevel  int
+		arrivalDef string
+	)
+	switch in.Type {
+	case "descend_intent":
+		if in.Descend == nil {
+			res.reject(in.MessageID, "invalid_payload")
+			return nil
+		}
+		stairDefID = stairsDownDefID
+		destLevel = s.currentLevel - 1
+		arrivalDef = stairsUpDefID
+	case "ascend_intent":
+		if in.Ascend == nil {
+			res.reject(in.MessageID, "invalid_payload")
+			return nil
+		}
+		if s.currentLevel >= entryLevel {
+			res.reject(in.MessageID, "already_at_entry")
+			return nil
+		}
+		stairDefID = stairsUpDefID
+		destLevel = s.currentLevel + 1
+		arrivalDef = stairsDownDefID
+	default:
+		res.reject(in.MessageID, "invalid_payload")
+		return nil
+	}
+	if destLevel >= levelZero {
+		res.reject(in.MessageID, "invalid_level")
+		return nil
+	}
+
+	current := s.activeLevel()
+	player := current.entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return nil
+	}
+	stair := s.findReachableStair(current, stairDefID, player.pos)
+	if stair == nil {
+		res.reject(in.MessageID, "no_stair_in_range")
+		return nil
+	}
+
+	dest, err := s.ensureDungeonLevel(destLevel)
+	if err != nil {
+		res.reject(in.MessageID, "invalid_level")
+		return nil
+	}
+	arrival := s.findStair(dest, arrivalDef)
+	if arrival == nil {
+		res.reject(in.MessageID, "invalid_level")
+		return nil
+	}
+
+	fromLevel := s.currentLevel
+	delete(current.entities, player.id)
+	player.pos = arrival.pos
+	dest.entities[player.id] = player
+	s.currentLevel = destLevel
+	current.move = nil
+	current.autoNav = nil
+	dest.move = nil
+	dest.autoNav = nil
+
+	res.ack(in.MessageID)
+	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(player.id)})
+	res.Events = append(res.Events, Event{
+		EventType:     "level_changed",
+		CorrelationID: in.CorrelationID,
+		FromLevel:     intPtr(fromLevel),
+		ToLevel:       intPtr(destLevel),
+	})
+
+	arrivalRes := TickResult{Tick: res.Tick, Level: destLevel, Changes: []Change{}, Events: []Event{}}
+	for _, id := range sortedEntityIDs(dest.entities) {
+		arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(dest.entities[id].view())})
+	}
+	return &arrivalRes
 }
 
 func (s *Sim) handleEquip(in Input, res *TickResult) {
@@ -702,7 +943,7 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 
 	loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID}
 	loot.id = s.alloc()
-	s.entities[loot.id] = loot
+	s.activeLevel().entities[loot.id] = loot
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
 	res.Events = append(res.Events, Event{
 		EventType:      "item_dropped",
@@ -718,7 +959,7 @@ func (s *Sim) handleUse(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_payload")
 		return
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil || player.hp <= 0 {
 		res.reject(in.MessageID, "player_dead")
 		return
@@ -776,26 +1017,26 @@ func (s *Sim) handleUse(in Input, res *TickResult) {
 }
 
 func (s *Sim) applyMovement(res *TickResult) {
-	if s.autoNav != nil && s.move == nil {
+	if s.activeLevel().autoNav != nil && s.activeLevel().move == nil {
 		s.applyAutoNav(res)
 		return
 	}
-	if s.move == nil || s.move.remaining <= 0 {
+	if s.activeLevel().move == nil || s.activeLevel().move.remaining <= 0 {
 		return
 	}
 	if s.playerDead() {
-		s.move = nil
+		s.activeLevel().move = nil
 		return
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	before := player.pos
 	player.pos = s.resolveMovement(player.pos, Vec2{
-		X: s.move.dir.X * moveSpeed,
-		Y: s.move.dir.Y * moveSpeed,
+		X: s.activeLevel().move.dir.X * moveSpeed,
+		Y: s.activeLevel().move.dir.Y * moveSpeed,
 	})
-	s.move.remaining--
-	if s.move.remaining == 0 {
-		s.move = nil
+	s.activeLevel().move.remaining--
+	if s.activeLevel().move.remaining == 0 {
+		s.activeLevel().move = nil
 	}
 	if player.pos == before {
 		return
@@ -808,25 +1049,25 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 		s.clearAutoNav()
 		return
 	}
-	if len(s.autoNav.steps) == 0 {
+	if len(s.activeLevel().autoNav.steps) == 0 {
 		s.finishAutoNav(res)
 		return
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	before := player.pos
-	step := s.autoNav.steps[0]
-	s.autoNav.steps = s.autoNav.steps[1:]
+	step := s.activeLevel().autoNav.steps[0]
+	s.activeLevel().autoNav.steps = s.activeLevel().autoNav.steps[1:]
 	player.pos = s.resolveMovement(player.pos, Vec2{X: step.X * moveSpeed, Y: step.Y * moveSpeed})
 	if player.pos != before {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
 	}
-	if len(s.autoNav.steps) == 0 {
+	if len(s.activeLevel().autoNav.steps) == 0 {
 		s.finishAutoNav(res)
 	}
 }
 
 func (s *Sim) finishAutoNav(res *TickResult) {
-	nav := s.autoNav
+	nav := s.activeLevel().autoNav
 	s.clearAutoNav()
 	if nav == nil || nav.pendingAction == nil {
 		return
@@ -845,7 +1086,7 @@ func (s *Sim) finishAutoNav(res *TickResult) {
 }
 
 func (s *Sim) clearAutoNav() {
-	s.autoNav = nil
+	s.activeLevel().autoNav = nil
 }
 
 func (s *Sim) resolveMovement(pos, delta Vec2) Vec2 {
@@ -865,13 +1106,13 @@ func (s *Sim) resolveMovement(pos, delta Vec2) Vec2 {
 }
 
 func (s *Sim) playerPositionBlocked(pos Vec2) bool {
-	for _, wall := range s.walls {
+	for _, wall := range s.activeWalls() {
 		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
-	for _, id := range sortedEntityIDs(s.entities) {
-		e := s.entities[id]
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
 		if e.kind == monsterEntity && e.hp > 0 {
 			if circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
 				return true
@@ -879,7 +1120,7 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 			continue
 		}
 		if e.kind == interactableEntity && e.state == interactableClosed {
-			if def, ok := s.rules.Interactables[e.interactableDefID]; ok {
+			if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.BarrierWhenClosed != nil {
 				if circleIntersectsAABB(pos, playerRadius, e.pos, def.BarrierWhenClosed.Size) {
 					return true
 				}
@@ -890,7 +1131,7 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 }
 
 func (s *Sim) findDropPosition() (Vec2, bool) {
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		return Vec2{}, false
 	}
@@ -902,7 +1143,7 @@ func (s *Sim) findEntityLootDropPosition(source Vec2, sourceRadius float64) (Vec
 }
 
 func (s *Sim) findAdjacentLootDropPosition(source Vec2, sourceRadius float64) (Vec2, bool) {
-	step := s.rules.Navigation.CellSize
+	step := s.activeNav().CellSize
 	if step <= 0 {
 		step = 1.0
 	}
@@ -938,15 +1179,15 @@ func (s *Sim) findAdjacentLootDropPosition(source Vec2, sourceRadius float64) (V
 }
 
 func (s *Sim) lootDropBlocked(pos Vec2) bool {
-	for _, wall := range s.walls {
+	for _, wall := range s.activeWalls() {
 		if circleIntersectsAABB(pos, lootInteractionRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
-	for _, id := range sortedEntityIDs(s.entities) {
-		e := s.entities[id]
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
 		if e.kind == interactableEntity && e.state == interactableClosed {
-			if def, ok := s.rules.Interactables[e.interactableDefID]; ok {
+			if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.BarrierWhenClosed != nil {
 				if circleIntersectsAABB(pos, lootInteractionRadius, e.pos, def.BarrierWhenClosed.Size) {
 					return true
 				}
@@ -986,8 +1227,8 @@ func (s *Sim) findClusterLootDropPosition(anchor Vec2, index int) (Vec2, bool) {
 }
 
 func (s *Sim) lootPositionBlocked(pos Vec2) bool {
-	for _, id := range sortedEntityIDs(s.entities) {
-		e := s.entities[id]
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
 		if e.kind != lootEntity {
 			continue
 		}
@@ -1009,7 +1250,7 @@ func (s *Sim) removeItemByID(id uint64) {
 
 func (s *Sim) buildBlockedFn() func(gx, gy int) bool {
 	return func(gx, gy int) bool {
-		center := gridToWorld(s.rules.Navigation, gridCell{x: gx, y: gy})
+		center := gridToWorld(s.activeNav(), gridCell{x: gx, y: gy})
 		return s.playerPositionBlocked(center)
 	}
 }
@@ -1022,11 +1263,11 @@ func (s *Sim) findApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 }
 
 func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		return Vec2{}, nil, false
 	}
-	nav := s.rules.Navigation
+	nav := s.activeNav()
 	playerCell := worldToGrid(nav, player.pos)
 	blocked := s.buildBlockedFn()
 	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
@@ -1056,11 +1297,11 @@ func (s *Sim) findMeleeApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 }
 
 func (s *Sim) findApproachGoalMatching(target *entity, inRange func(Vec2, *entity) bool) (Vec2, []Vec2, bool) {
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		return Vec2{}, nil, false
 	}
-	nav := s.rules.Navigation
+	nav := s.activeNav()
 	targetCell := worldToGrid(nav, target.pos)
 	blocked := s.buildBlockedFn()
 	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
@@ -1130,13 +1371,13 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 	if s.playerDead() {
 		return
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		return
 	}
-	nav := s.rules.Navigation
-	for _, id := range sortedEntityIDs(s.entities) {
-		monster := s.entities[id]
+	nav := s.activeNav()
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		monster := s.activeLevel().entities[id]
 		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
 			continue
 		}
@@ -1174,7 +1415,7 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 }
 
 func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDef, prevMode string, res *TickResult) {
-	nav := s.rules.Navigation
+	nav := s.activeNav()
 	distPlayer := distance(monster.pos, player.pos)
 	distPlayerFromSpawn := distance(player.pos, monster.spawnPos)
 
@@ -1212,7 +1453,7 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 }
 
 func (s *Sim) monsterMovementGoal(monster *entity, player *entity) (Vec2, bool) {
-	nav := s.rules.Navigation
+	nav := s.activeNav()
 	switch monster.aiMode {
 	case monsterAIModeChase:
 		stopDist := playerRadius + monsterRadius
@@ -1233,7 +1474,7 @@ func (s *Sim) monsterMovementGoal(monster *entity, player *entity) (Vec2, bool) 
 }
 
 func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity) (Vec2, bool) {
-	nav := s.rules.Navigation
+	nav := s.activeNav()
 	playerCell := worldToGrid(nav, player.pos)
 	blocked := s.buildMonsterBlockedFn(monster.id)
 	maxReach := playerRadius + monsterRadius + nav.CellSize
@@ -1287,28 +1528,28 @@ func cellLess(a, b gridCell) bool {
 
 func (s *Sim) buildMonsterBlockedFn(excludeMonsterID uint64) func(gx, gy int) bool {
 	return func(gx, gy int) bool {
-		center := gridToWorld(s.rules.Navigation, gridCell{x: gx, y: gy})
+		center := gridToWorld(s.activeNav(), gridCell{x: gx, y: gy})
 		return s.monsterPositionBlocked(center, excludeMonsterID)
 	}
 }
 
 func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
-	for _, wall := range s.walls {
+	for _, wall := range s.activeWalls() {
 		if circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player != nil && player.hp > 0 {
 		if circlesOverlap(pos, monsterRadius, player.pos, playerRadius) {
 			return true
 		}
 	}
-	for _, id := range sortedEntityIDs(s.entities) {
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		if id == excludeMonsterID {
 			continue
 		}
-		e := s.entities[id]
+		e := s.activeLevel().entities[id]
 		if e == nil {
 			continue
 		}
@@ -1319,7 +1560,7 @@ func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
 			continue
 		}
 		if e.kind == interactableEntity && e.state == interactableClosed {
-			if def, ok := s.rules.Interactables[e.interactableDefID]; ok {
+			if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.BarrierWhenClosed != nil {
 				if circleIntersectsAABB(pos, monsterRadius, e.pos, def.BarrierWhenClosed.Size) {
 					return true
 				}
@@ -1348,9 +1589,9 @@ func (s *Sim) resolveMonsterMovement(monster *entity, delta Vec2) Vec2 {
 }
 
 func (s *Sim) advanceProjectiles(res *TickResult) {
-	ids := sortedEntityIDs(s.entities)
+	ids := sortedEntityIDs(s.activeLevel().entities)
 	for _, id := range ids {
-		p := s.entities[id]
+		p := s.activeLevel().entities[id]
 		if p == nil || p.kind != projectileEntity {
 			continue
 		}
@@ -1372,13 +1613,13 @@ func (s *Sim) advanceProjectile(p *entity, res *TickResult) {
 	if ok {
 		p.pos = hit.pos
 		s.resolveProjectileHit(p, hit, res)
-		delete(s.entities, p.id)
+		delete(s.activeLevel().entities, p.id)
 		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(p.id)})
 		return
 	}
 	if p.traveled+segmentLength >= p.maxDistance-meleeRangeEpsilon {
 		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
-		delete(s.entities, p.id)
+		delete(s.activeLevel().entities, p.id)
 		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(p.id)})
 		return
 	}
@@ -1413,13 +1654,13 @@ func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool
 			found = true
 		}
 	}
-	for _, wall := range s.walls {
+	for _, wall := range s.activeWalls() {
 		if t, ok := segmentIntersectsInflatedAABB(p.pos, candidate, wall.pos, wall.size, projectileRadius); ok {
 			consider(projectileHit{t: t, category: projectileHitWall})
 		}
 	}
-	for _, id := range sortedEntityIDs(s.entities) {
-		e := s.entities[id]
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
 		if e == nil || e.id == p.id {
 			continue
 		}
@@ -1429,7 +1670,7 @@ func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool
 				continue
 			}
 			def, ok := s.rules.Interactables[e.interactableDefID]
-			if !ok {
+			if !ok || def.BarrierWhenClosed == nil {
 				continue
 			}
 			if t, ok := segmentIntersectsInflatedAABB(p.pos, candidate, e.pos, def.BarrierWhenClosed.Size, projectileRadius); ok {
@@ -1462,7 +1703,7 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		res.Events = append(res.Events, Event{EventType: "projectile_blocked", CorrelationID: p.sourceCorrID})
 		return
 	}
-	target := s.entities[hit.entityID]
+	target := s.activeLevel().entities[hit.entityID]
 	if target == nil || target.kind != monsterEntity || target.hp <= 0 {
 		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
 		return
@@ -1624,7 +1865,7 @@ func (s *Sim) targetInteractionRadius(e *entity) float64 {
 }
 
 func (s *Sim) inMeleeRange(target *entity) bool {
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		return false
 	}
@@ -1632,7 +1873,7 @@ func (s *Sim) inMeleeRange(target *entity) bool {
 }
 
 func (s *Sim) inActionRange(target *entity) bool {
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		return false
 	}
@@ -1645,7 +1886,7 @@ func (s *Sim) inActionRangeFrom(pos Vec2, target *entity) bool {
 
 func (s *Sim) inDispatchRange(target *entity) bool {
 	if target.kind == monsterEntity && s.playerAttackMode() == attackModeRanged {
-		player := s.entities[s.playerID]
+		player := s.activeLevel().entities[s.playerID]
 		return player != nil && s.inActionRange(target) && s.hasClearRangedShot(player.pos, target)
 	}
 	return s.inMeleeRange(target)
@@ -1655,13 +1896,13 @@ func (s *Sim) hasClearRangedShot(from Vec2, target *entity) bool {
 	if target == nil || target.kind != monsterEntity || target.hp <= 0 {
 		return false
 	}
-	for _, wall := range s.walls {
+	for _, wall := range s.activeWalls() {
 		if _, ok := segmentIntersectsInflatedAABB(from, target.pos, wall.pos, wall.size, projectileRadius); ok {
 			return false
 		}
 	}
-	for _, id := range sortedEntityIDs(s.entities) {
-		e := s.entities[id]
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
 		if e == nil || e.id == target.id {
 			continue
 		}
@@ -1671,7 +1912,7 @@ func (s *Sim) hasClearRangedShot(from Vec2, target *entity) bool {
 				continue
 			}
 			def, ok := s.rules.Interactables[e.interactableDefID]
-			if !ok {
+			if !ok || def.BarrierWhenClosed == nil {
 				continue
 			}
 			if _, ok := segmentIntersectsInflatedAABB(from, target.pos, e.pos, def.BarrierWhenClosed.Size, projectileRadius); ok {
@@ -1728,7 +1969,7 @@ func (s *Sim) resolvePlayerAttackDamage() DamageRange {
 }
 
 func (s *Sim) playerProjectileInFlight() bool {
-	for _, e := range s.entities {
+	for _, e := range s.activeLevel().entities {
 		if e.kind == projectileEntity && e.ownerID == s.playerID {
 			return true
 		}
@@ -1745,7 +1986,7 @@ func (s *Sim) rollRange(d DamageRange) int {
 }
 
 func (s *Sim) playerDead() bool {
-	player := s.entities[s.playerID]
+	player := s.activeLevel().entities[s.playerID]
 	return player == nil || player.hp <= 0
 }
 
@@ -1754,7 +1995,28 @@ func (s *Sim) findEntity(id string) *entity {
 	if err != nil {
 		return nil
 	}
-	return s.entities[n]
+	return s.activeLevel().entities[n]
+}
+
+func (s *Sim) findReachableStair(level *LevelState, defID string, playerPos Vec2) *entity {
+	stair := s.findStair(level, defID)
+	if stair == nil {
+		return nil
+	}
+	if meleeInRange(distance(playerPos, stair.pos), s.rules.Combat.UnarmedReach, interactableInteractionRadius) {
+		return stair
+	}
+	return nil
+}
+
+func (s *Sim) findStair(level *LevelState, defID string) *entity {
+	for _, id := range sortedEntityIDs(level.entities) {
+		e := level.entities[id]
+		if e != nil && e.kind == interactableEntity && e.interactableDefID == defID {
+			return e
+		}
+	}
+	return nil
 }
 
 func (s *Sim) findItem(instanceID string) *invItem {
@@ -1785,11 +2047,11 @@ func sortedEntityIDs(entities map[uint64]*entity) []uint64 {
 
 // Snapshot returns the full authoritative state, with entities ordered by id.
 func (s *Sim) Snapshot() Snapshot {
-	ids := sortedEntityIDs(s.entities)
+	ids := sortedEntityIDs(s.activeLevel().entities)
 
 	entities := make([]EntityView, 0, len(ids))
 	for _, id := range ids {
-		entities = append(entities, s.entities[id].view())
+		entities = append(entities, s.activeLevel().entities[id].view())
 	}
 
 	inventory := make([]ItemView, 0, len(s.inventory))
@@ -1811,6 +2073,7 @@ func (s *Sim) Snapshot() Snapshot {
 		ServerTick:   s.tick,
 		SessionID:    s.sessionID,
 		Seed:         s.seed,
+		CurrentLevel: s.currentLevel,
 		Entities:     entities,
 		Inventory:    inventory,
 		Equipped:     equipped,

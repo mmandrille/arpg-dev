@@ -56,6 +56,7 @@ type Timeline struct {
 // importing the realtime package into replay.
 type StateDeltaPayload struct {
 	ServerTick uint64        `json:"server_tick"`
+	Level      int           `json:"level"`
 	Changes    []game.Change `json:"changes"`
 	Events     []game.Event  `json:"events"`
 }
@@ -168,21 +169,24 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 	for t := int64(0); t <= maxTick; t++ {
 		ins := byTick[t]
 		sortInputs(ins)
-		res := sim.Tick(ins)
-		if len(res.Changes) == 0 && len(res.Events) == 0 {
-			continue
+		results := sim.TickResults(ins)
+		for i, res := range results {
+			if len(res.Changes) == 0 && len(res.Events) == 0 {
+				continue
+			}
+			out.Envelopes = append(out.Envelopes, Envelope{
+				Type:      "state_delta",
+				MessageID: fmt.Sprintf("replay-tick-%d-%d", res.Tick, i),
+				SessionID: sessionID,
+				Tick:      res.Tick,
+				Payload: StateDeltaPayload{
+					ServerTick: res.Tick,
+					Level:      res.Level,
+					Changes:    res.Changes,
+					Events:     res.Events,
+				},
+			})
 		}
-		out.Envelopes = append(out.Envelopes, Envelope{
-			Type:      "state_delta",
-			MessageID: fmt.Sprintf("replay-tick-%d", res.Tick),
-			SessionID: sessionID,
-			Tick:      res.Tick,
-			Payload: StateDeltaPayload{
-				ServerTick: res.Tick,
-				Changes:    res.Changes,
-				Events:     res.Events,
-			},
-		})
 	}
 	return out, nil
 }
@@ -235,15 +239,19 @@ func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, worldID st
 	for t := int64(0); t <= throughTick; t++ {
 		ins := byTick[t]
 		sortInputs(ins)
-		res := sim.Tick(ins)
-		for i, ev := range res.Events {
-			payload, _ := json.Marshal(ev)
-			derived = append(derived, derivedEvent{
-				Tick:      int64(res.Tick),
-				Sequence:  int64(i),
-				EventType: ev.EventType,
-				Payload:   payload,
-			})
+		results := sim.TickResults(ins)
+		sequence := int64(0)
+		for _, res := range results {
+			for _, ev := range res.Events {
+				payload, _ := json.Marshal(ev)
+				derived = append(derived, derivedEvent{
+					Tick:      int64(res.Tick),
+					Sequence:  sequence,
+					EventType: ev.EventType,
+					Payload:   payload,
+				})
+				sequence++
+			}
 		}
 	}
 

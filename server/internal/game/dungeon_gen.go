@@ -1,0 +1,114 @@
+package game
+
+import (
+	"fmt"
+	"math"
+	"strconv"
+)
+
+const dungeonCoinStairDistance = 7.0
+
+type generatedDungeonLevel struct {
+	levelNum int
+	walls    []wallObstacle
+	stairs   []generatedStair
+	loot     []generatedLoot
+}
+
+type generatedStair struct {
+	defID string
+	pos   Vec2
+}
+
+type generatedLoot struct {
+	itemDefID string
+	pos       Vec2
+}
+
+// GenerateDungeonLevel builds the deterministic non-player contents for one
+// dungeon floor. It uses a local per-level RNG stream and never consumes Sim.rng.
+func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRules) (generatedDungeonLevel, error) {
+	if levelNum >= 0 {
+		return generatedDungeonLevel{}, fmt.Errorf("game: invalid dungeon level %d", levelNum)
+	}
+	levelSeed := SeedToUint64(seed + "|" + strconv.Itoa(absInt(levelNum)))
+	rng := NewRNG(levelSeed)
+	out := generatedDungeonLevel{
+		levelNum: levelNum,
+		walls:    perimeterWalls(rules.FloorSize, rules.WallThickness),
+	}
+
+	down, ok := randomStairPosition(rng, rules, nil)
+	if !ok {
+		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place down stairs", levelNum)
+	}
+	if levelNum == -1 {
+		out.stairs = append(out.stairs, generatedStair{defID: stairsDownDefID, pos: down})
+		return out, nil
+	}
+
+	up, ok := randomStairPosition(rng, rules, &down)
+	if !ok {
+		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place up stairs", levelNum)
+	}
+	out.stairs = append(out.stairs,
+		generatedStair{defID: stairsUpDefID, pos: up},
+		generatedStair{defID: stairsDownDefID, pos: down},
+	)
+	out.loot = append(out.loot, generatedLoot{
+		itemDefID: "training_badge",
+		pos:       stairDistantLootPosition(up, rules),
+	})
+	return out, nil
+}
+
+func perimeterWalls(size DungeonFloorSize, thickness float64) []wallObstacle {
+	half := thickness / 2
+	return []wallObstacle{
+		{pos: Vec2{X: size.Width / 2, Y: -half}, size: Vec2{X: size.Width + thickness*2, Y: thickness}},
+		{pos: Vec2{X: size.Width / 2, Y: size.Height + half}, size: Vec2{X: size.Width + thickness*2, Y: thickness}},
+		{pos: Vec2{X: -half, Y: size.Height / 2}, size: Vec2{X: thickness, Y: size.Height}},
+		{pos: Vec2{X: size.Width + half, Y: size.Height / 2}, size: Vec2{X: thickness, Y: size.Height}},
+	}
+}
+
+func randomStairPosition(rng *RNG, rules DungeonGenerationRules, separatedFrom *Vec2) (Vec2, bool) {
+	placement := rules.StairPlacement
+	minX := int(math.Ceil(placement.MarginFromWall))
+	maxX := int(math.Floor(rules.FloorSize.Width - placement.MarginFromWall))
+	minY := int(math.Ceil(placement.MarginFromWall))
+	maxY := int(math.Floor(rules.FloorSize.Height - placement.MarginFromWall))
+	if maxX < minX || maxY < minY {
+		return Vec2{}, false
+	}
+	for attempt := 0; attempt < placement.MaxAttempts; attempt++ {
+		pos := Vec2{
+			X: float64(minX + rng.IntN(maxX-minX+1)),
+			Y: float64(minY + rng.IntN(maxY-minY+1)),
+		}
+		if separatedFrom != nil && distance(pos, *separatedFrom) < placement.MinSeparation {
+			continue
+		}
+		return pos, true
+	}
+	return Vec2{}, false
+}
+
+func stairDistantLootPosition(anchor Vec2, rules DungeonGenerationRules) Vec2 {
+	margin := rules.StairPlacement.MarginFromWall
+	if anchor.X+dungeonCoinStairDistance <= rules.FloorSize.Width-margin {
+		return Vec2{X: anchor.X + dungeonCoinStairDistance, Y: anchor.Y}
+	}
+	return Vec2{X: anchor.X - dungeonCoinStairDistance, Y: anchor.Y}
+}
+
+func dungeonNavigation(global NavigationRules, gen DungeonGenerationRules) NavigationRules {
+	nav := global
+	nav.GridBounds = GridBounds{
+		MinX: 0,
+		MinY: 0,
+		MaxX: int(gen.FloorSize.Width / global.CellSize),
+		MaxY: int(gen.FloorSize.Height / global.CellSize),
+	}
+	return nav
+}

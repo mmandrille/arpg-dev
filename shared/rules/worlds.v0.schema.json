@@ -16,6 +16,7 @@
         "required": ["player", "entities"],
         "additionalProperties": false,
         "properties": {
+          "mode": { "type": "string", "enum": ["multi_level"] },
           "player": {
             "type": "object",
             "required": ["position"],

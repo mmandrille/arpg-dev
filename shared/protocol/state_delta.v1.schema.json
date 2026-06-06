@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/protocol/state_delta.v1.schema.json",
+  "title": "state_delta payload (v1)",
+  "description": "Ordered authoritative changes produced by a single tick, applied in array order. Unknown `op` values are protocol errors.",
+  "type": "object",
+  "required": ["server_tick", "level", "changes", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "server_tick": { "type": "integer", "minimum": 0 },
+    "level": { "type": "integer" },
+    "changes": { "type": "array", "items": { "$ref": "#/$defs/change" } },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+  },
+  "$defs": {
+    "prefixed_id": { "type": "string", "pattern": "^[a-z]+_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "decimal_id": { "type": "string", "pattern": "^[0-9]+$" },
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "type", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/decimal_id" },
+        "type": { "type": "string", "enum": ["player", "monster", "loot", "interactable", "projectile"] },
+        "position": { "$ref": "#/$defs/vec2" },
+        "hp": { "type": "integer", "minimum": 0 },
+        "max_hp": { "type": "integer", "minimum": 0 },
+        "monster_def_id": { "type": "string" },
+        "item_def_id": { "type": "string" },
+        "interactable_def_id": { "type": "string" },
+        "owner_id": { "$ref": "#/$defs/decimal_id" },
+        "target_id": { "$ref": "#/$defs/decimal_id" },
+        "projectile_def_id": { "type": "string" },
+        "state": { "type": "string", "enum": ["closed", "open", "ready"] }
+      }
+    },
+    "item": {
+      "type": "object",
+      "required": ["item_instance_id", "item_def_id", "slot", "equipped"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "item_def_id": { "type": "string" },
+        "slot": { "type": "string", "enum": ["weapon", ""] },
+        "equipped": { "type": "boolean" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_type"],
+      "properties": {
+        "event_type": { "type": "string" },
+        "entity_id": { "$ref": "#/$defs/decimal_id" },
+        "correlation_id": { "$ref": "#/$defs/prefixed_id" },
+        "damage": { "type": "integer", "minimum": 0 },
+        "heal": { "type": "integer", "minimum": 0 },
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "from_level": { "type": "integer" },
+        "to_level": { "type": "integer" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["monster_damaged", "player_damaged", "player_killed"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["damage"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["player_healed", "item_used"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["heal", "item_instance_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "interactable_activated" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "item_dropped" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "item_instance_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["monster_aggro", "monster_leashed"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "level_changed" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["from_level", "to_level"] }
+        }
+      ]
+    },
+    "change": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity"],
+          "properties": { "op": { "const": "entity_spawn" }, "entity": { "$ref": "#/$defs/entity" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity"],
+          "properties": { "op": { "const": "entity_update" }, "entity": { "$ref": "#/$defs/entity" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity_id"],
+          "properties": { "op": { "const": "entity_remove" }, "entity_id": { "$ref": "#/$defs/decimal_id" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "item"],
+          "properties": { "op": { "const": "inventory_add" }, "item": { "$ref": "#/$defs/item" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "item"],
+          "properties": { "op": { "const": "inventory_update" }, "item": { "$ref": "#/$defs/item" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "item_instance_id"],
+          "properties": {
+            "op": { "const": "inventory_remove" },
+            "item_instance_id": { "$ref": "#/$defs/decimal_id" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "slot", "item_instance_id"],
+          "properties": {
+            "op": { "const": "equipped_update" },
+            "slot": { "type": "string", "enum": ["weapon"] },
+            "item_instance_id": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+          }
+        }
+      ]
+    }
+  }
+}

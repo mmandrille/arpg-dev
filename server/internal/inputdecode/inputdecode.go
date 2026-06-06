@@ -13,6 +13,8 @@ const (
 	TypeMoveIntent  = "move_intent"
 	TypeMoveTo      = "move_to_intent"
 	TypeAction      = "action_intent"
+	TypeDescend     = "descend_intent"
+	TypeAscend      = "ascend_intent"
 	TypeEquip       = "equip_intent"
 	TypeUnequip     = "unequip_intent"
 	TypeDrop        = "drop_intent"
@@ -37,7 +39,9 @@ type (
 	actionPayloadWire struct {
 		TargetID string `json:"target_id"`
 	}
-	equipPayloadWire struct {
+	descendPayloadWire struct{}
+	ascendPayloadWire  struct{}
+	equipPayloadWire   struct {
 		ItemInstanceID string `json:"item_instance_id"`
 		Slot           string `json:"slot"`
 	}
@@ -55,7 +59,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeEquip, TypeUnequip, TypeDrop, TypeUse:
+	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeDescend, TypeAscend, TypeEquip, TypeUnequip, TypeDrop, TypeUse:
 		return true
 	}
 	return false
@@ -88,6 +92,18 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.Action = &game.ActionIntent{TargetID: p.TargetID}
+	case TypeDescend:
+		var p descendPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil {
+			return in, false
+		}
+		in.Descend = &game.DescendIntent{}
+	case TypeAscend:
+		var p ascendPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil {
+			return in, false
+		}
+		in.Ascend = &game.AscendIntent{}
 	case TypeEquip:
 		var p equipPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.ItemInstanceID == "" || p.Slot == "" {

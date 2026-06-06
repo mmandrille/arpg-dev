@@ -3,7 +3,7 @@
 **Read this file at the start of every new task** before writing specs, plans, or code.
 It is the canonical snapshot of what exists, what each slice proved, and what is still open.
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ---
 
@@ -11,9 +11,9 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v14 — `godot-client-bot` (Godot-native client bot, 5 CI scenarios, `make bot-client`) |
-| **Active branch** | `feature/godot-client-bot` |
-| **CI gate** | `make ci` green on 2026-06-05 |
+| **Latest completed slice** | v15 — `item-visuals-and-loot-presentation` (shared item presentation metadata, distinct inventory icons + ground loot) |
+| **Active branch** | `main` |
+| **CI gate** | `make ci` green on 2026-06-06 |
 | **Next slice** | TBD |
 
 ### Slice numbering note
@@ -30,6 +30,7 @@ v11_* = click-to-move-and-auto-path
 v12_* = ranged-projectile-combat
 v13_* = inventory-ui
 v14_* = godot-client-bot
+v15_* = item-visuals-and-loot-presentation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -64,6 +65,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v12** | `ranged-projectile-combat` | Complete (`make ci` green) | [`v12_spec-ranged-projectile-combat.md`](specs/v12_spec-ranged-projectile-combat.md) | [`v12_2026-06-05-ranged-projectile-combat.md`](plans/v12_2026-06-05-ranged-projectile-combat.md) |
 | **v13** | `inventory-ui` | Complete (`make ci` green) | [`v13_spec-inventory-ui.md`](specs/v13_spec-inventory-ui.md) | [`v13_2026-06-05-inventory-ui.md`](plans/v13_2026-06-05-inventory-ui.md) |
 | **v14** | `godot-client-bot` | Complete (`make ci` green) | [`v14_spec-godot-client-bot.md`](specs/v14_spec-godot-client-bot.md) | [`v14_2026-06-02-godot-client-bot.md`](plans/v14_2026-06-02-godot-client-bot.md) |
+| **v15** | `item-visuals-and-loot-presentation` | Complete (`make ci` green) | [`v15_spec-item-visuals-and-loot-presentation.md`](specs/v15_spec-item-visuals-and-loot-presentation.md) | [`v15_2026-06-06-item-visuals-and-loot-presentation.md`](plans/v15_2026-06-06-item-visuals-and-loot-presentation.md) |
 
 ---
 
@@ -310,6 +312,29 @@ correctly with a real display. Drag-and-drop inventory operations also use the d
 no competing/multiplayer bots, no headless ray-pick workaround, no v14 changes to Go server
 or shared protocol.
 
+### v15 — Item visuals and loot presentation
+
+**Proves:** Current item presentation can be shared-data-driven without making the client
+authoritative for inventory, loot, or equipment outcomes.
+
+- `shared/assets/item_presentations.v0.json` defines client-only icon and ground-loot presentation
+  metadata for every current item rule: `rusty_sword`, `training_bow`, `training_badge`,
+  `quest_leaf`, and `red_potion`.
+- `make validate-shared` schema-validates the presentation file and cross-checks that every item
+  rule has presentation metadata and no stale presentation keys exist.
+- Godot inventory slots draw distinct shape/color icons from shared presentation data instead of
+  text initials, while tooltips still resolve names/stats from item rules.
+- Godot ground loot renders distinct primitive silhouettes for sword, bow, badge/coin, leaf, and
+  potion from the same presentation metadata; missing metadata falls back to category coloring.
+- Equipped weapon GLB mounting remains unchanged through `item_visuals.v0.json` and
+  `assets.v0.json`; the server/protocol are unchanged.
+- Godot client bot now asserts loot and inventory presentation metadata on the inventory drop
+  scenario; `test_item_visuals.gd` checks presentation coverage for every current item.
+- `make ci` green on 2026-06-06.
+
+**Explicit non-goals:** no production art, imported icon pack, texture budget, Blender export
+pipeline, remote patcher, stash, vendors, crafting, consumable use, or new gameplay item stats.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -394,13 +419,17 @@ entities, swept collision, impact-time hit/damage, and a ranged-lab bot/replay p
 unequip/drop intents, deterministic adjacent loot placement, persisted inventory removal, and a
 display-only Godot panel that mirrors server snapshots/deltas.
 
+**Current item presentation is now shared-data-driven.** v15 adds presentation metadata for all
+current item definitions and uses it for inventory icons and ground loot silhouettes without
+server/protocol changes.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Cross-session **character-scoped** inventory | v0 as-built §10 |
 | Combat | Healing, armor, respawn, spell systems, piercing/AoE/homing projectiles, monster ranged AI | v0/v4/v12 non-goals |
-| Content | Visual mappings for items beyond `rusty_sword` | equip spec §4.9 |
+| Content | Production item art/icons, additional item families beyond current rules | v15 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |

@@ -17,6 +17,8 @@ func _initialize() -> void:
 	# 1. Golden expectations agree with the shared item_visuals metadata.
 	var golden := _read(shared.path_join("golden/item_visual_resolution.json"))
 	var visuals: Dictionary = _read(shared.path_join("assets/item_visuals.v0.json"))["item_visuals"]
+	var item_rules: Dictionary = _read(shared.path_join("rules/items.v0.json"))["items"]
+	var presentations: Dictionary = _read(shared.path_join("assets/item_presentations.v0.json"))["items"]
 
 	var def_id := str(golden["item_def_id"])
 	if not visuals.has(def_id):
@@ -47,7 +49,16 @@ func _initialize() -> void:
 		_fail("failed to load runtime asset %s" % res_path)
 		return
 
-	print("[gdtest] PASS: item visual resolution (golden + item_visuals + manifest -> %s)" % res_path)
+	for item_def_id in item_rules.keys():
+		if not presentations.has(str(item_def_id)):
+			_fail("item_presentations is missing item_def_id %s" % item_def_id)
+			return
+		var p: Dictionary = presentations[str(item_def_id)]
+		if not p.has("icon") or not p.has("ground"):
+			_fail("item_presentations %s must define icon and ground metadata" % item_def_id)
+			return
+
+	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
 	quit(0)
 
 

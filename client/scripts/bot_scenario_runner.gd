@@ -7,10 +7,12 @@ extends RefCounted
 const STEP_TYPES_WAIT := [
 	"wait_ws_open", "wait_entity", "wait_event", "wait_inventory_item",
 	"wait_loot_item", "wait_player_near", "assert_entity_removed",
+	"click_entity_until_event",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_equipped",
 	"assert_unequipped", "assert_inventory_missing",
+	"assert_loot_presentation", "assert_inventory_presentation",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_floor",
@@ -22,6 +24,8 @@ const ALL_STEP_TYPES: Array = [
 	"assert_unequipped", "assert_inventory_missing", "wait_loot_item",
 	"wait_player_near", "press_key", "click_entity", "click_floor",
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
+	"assert_loot_presentation", "assert_inventory_presentation",
+	"click_entity_until_event",
 ]
 
 var scenario: Dictionary = {}
@@ -29,6 +33,7 @@ var step_delay_s: float = 0.0  # pause after each completed step (visual mode)
 var _steps: Array = []
 var _step_index: int = 0
 var _step_elapsed: float = 0.0
+var _last_retry_at: float = -999.0
 var _post_step_wait: float = 0.0  # countdown after a step completes
 var _done: bool = false
 var _passed: bool = false
@@ -44,6 +49,7 @@ func load_scenario(data: Dictionary) -> bool:
 	_steps = data.get("client_steps", [])
 	_step_index = 0
 	_step_elapsed = 0.0
+	_last_retry_at = -999.0
 	_done = false
 	_passed = false
 	_failure_msg = ""
@@ -129,6 +135,21 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 				if str(ev.get("event_type", "")) == evtype:
 					return true
 			return false
+		"click_entity_until_event":
+			var evtype := str(step.get("event_type", ""))
+			var pending: Array = state.get("pending_events", [])
+			for ev in pending:
+				if str(ev.get("event_type", "")) == evtype:
+					return true
+			var retry_s := float(step.get("retry_s", 0.25))
+			if _step_elapsed - _last_retry_at >= retry_s:
+				_last_retry_at = _step_elapsed
+				pending_action = {
+					"type": "click_entity",
+					"_type": "click_entity",
+					"entity_type": str(step.get("entity_type", "")),
+				}
+			return false
 		"wait_inventory_item":
 			var def_id := str(step.get("item_def_id", ""))
 			var inv: Array = state.get("inventory", [])
@@ -199,6 +220,25 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 					])
 					return false
 			return true
+		"assert_loot_presentation":
+			var def_id := str(step.get("item_def_id", ""))
+			var presentations: Dictionary = state.get("loot_presentations", {})
+			if not bool(presentations.get(def_id, false)):
+				_fail("assert_loot_presentation failed: %s missing from loot presentation state step=%d scenario=%s" % [
+					def_id, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_inventory_presentation":
+			var def_id := str(step.get("item_def_id", ""))
+			var panel: Dictionary = state.get("inventory_panel", {})
+			var presentations: Dictionary = panel.get("item_presentations", {})
+			if not bool(presentations.get(def_id, false)):
+				_fail("assert_inventory_presentation failed: %s missing from inventory presentation state step=%d scenario=%s" % [
+					def_id, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
 	return true
 
 
@@ -210,6 +250,7 @@ func _queue_action(step: Dictionary, stype: String) -> void:
 func _advance() -> void:
 	_step_index += 1
 	_step_elapsed = 0.0
+	_last_retry_at = -999.0
 	if step_delay_s > 0.0:
 		_post_step_wait = step_delay_s
 
@@ -268,6 +309,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "wait_event":
 		if str(step.get("event_type", "")) == "":
 			return "client_steps[%d] (%s) requires event_type" % [index, stype]
+	if stype == "click_entity_until_event":
+		if str(step.get("entity_type", "")) == "" or str(step.get("event_type", "")) == "":
+			return "client_steps[%d] (%s) requires entity_type and event_type" % [index, stype]
 	if stype == "wait_player_near":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]

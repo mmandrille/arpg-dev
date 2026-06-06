@@ -34,6 +34,7 @@ var last_server_tick: int = 0
 var inventory: Array = []
 var equipped: Dictionary = {}
 var item_rules: Dictionary = {}
+var item_presentations: Dictionary = {}
 var loot_ids: Array = []
 var monster_ids: Array = []
 var interactable_ids: Array = []
@@ -109,6 +110,7 @@ func _ready() -> void:
 		player_anim = AnimationControllerScript.new(ap)
 	_build_scene()
 	_load_item_rules()
+	_load_item_presentations()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
 
@@ -325,6 +327,8 @@ func _upsert_entity(e: Dictionary) -> void:
 			else:
 				push_warning("[main] monster %s has no AnimationPlayer" % id)
 		rec = {"node": node, "controller": controller, "type": str(e["type"])}
+		if e.has("item_def_id"):
+			rec["item_def_id"] = str(e["item_def_id"])
 		entities[id] = rec
 		if e["type"] != "projectile":
 			_attach_pick_collider(node, id, str(e["type"]))
@@ -928,7 +932,8 @@ func _read_json(path: String):
 
 func _make_entity_node(e: Dictionary) -> Node3D:
 	var kind := str(e.get("type", ""))
-	# Monster adopts the rigged dummy scene (spec §5.3); loot stays a primitive.
+	# Monster adopts the rigged dummy scene (spec §5.3); loot uses shared
+	# presentation metadata while gameplay stays server-owned.
 	if kind == "monster":
 		var packed := MonsterDummyScene
 		if packed != null:
@@ -944,14 +949,63 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		return _make_door_node()
 	if kind == "projectile":
 		return _make_projectile_node()
-	var node := MeshInstance3D.new()  # loot
-	var box := BoxMesh.new()
-	box.size = Vector3(0.5, 0.5, 0.5)
-	node.mesh = box
+	return _make_loot_node(str(e.get("item_def_id", "")))
+
+
+func _make_loot_node(item_def_id: String) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Loot_%s" % item_def_id
+	var ground: Dictionary = item_presentations.get(item_def_id, {}).get("ground", {})
+	var shape := str(ground.get("shape", "box"))
+	var color := Color(str(ground.get("color", "#" + _loot_color(item_def_id).to_html(false))))
+	var accent := Color(str(ground.get("accent", "#f6e8b1")))
+	var scale := float(ground.get("scale", 1.0))
+	match shape:
+		"blade":
+			_add_loot_box(root, "Blade", Vector3(0.12, 0.08, 0.78) * scale, Vector3(0.0, 0.20, 0.0), color)
+			_add_loot_box(root, "Grip", Vector3(0.34, 0.10, 0.10) * scale, Vector3(0.0, 0.16, 0.34 * scale), accent)
+		"bow":
+			_add_loot_box(root, "BowTop", Vector3(0.10, 0.08, 0.42) * scale, Vector3(0.14 * scale, 0.20, -0.18 * scale), color)
+			_add_loot_box(root, "BowBottom", Vector3(0.10, 0.08, 0.42) * scale, Vector3(-0.14 * scale, 0.20, 0.18 * scale), color)
+			_add_loot_box(root, "String", Vector3(0.04, 0.06, 0.75) * scale, Vector3(0.0, 0.18, 0.0), accent)
+		"coin":
+			_add_loot_cylinder(root, "Badge", 0.24 * scale, 0.08 * scale, Vector3(0.0, 0.16, 0.0), color)
+			_add_loot_cylinder(root, "BadgeMark", 0.12 * scale, 0.10 * scale, Vector3(0.0, 0.21, 0.0), accent)
+		"leaf":
+			_add_loot_box(root, "Leaf", Vector3(0.42, 0.06, 0.24) * scale, Vector3(0.0, 0.16, 0.0), color)
+			_add_loot_box(root, "Stem", Vector3(0.06, 0.08, 0.46) * scale, Vector3(0.0, 0.18, 0.0), accent)
+		"potion":
+			_add_loot_cylinder(root, "Bottle", 0.17 * scale, 0.32 * scale, Vector3(0.0, 0.26, 0.0), color)
+			_add_loot_box(root, "Cork", Vector3(0.14, 0.10, 0.14) * scale, Vector3(0.0, 0.48 * scale, 0.0), accent)
+		_:
+			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
+	return root
+
+
+func _add_loot_box(parent: Node3D, name: String, size: Vector3, position: Vector3, color: Color) -> void:
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	_add_loot_mesh(parent, name, mesh, position, color)
+
+
+func _add_loot_cylinder(parent: Node3D, name: String, radius: float, height: float, position: Vector3, color: Color) -> void:
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = 16
+	_add_loot_mesh(parent, name, mesh, position, color)
+
+
+func _add_loot_mesh(parent: Node3D, name: String, mesh: Mesh, position: Vector3, color: Color) -> void:
+	var node := MeshInstance3D.new()
+	node.name = name
+	node.mesh = mesh
+	node.position = position
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = _loot_color(str(e.get("item_def_id", "")))
+	mat.albedo_color = color
 	node.material_override = mat
-	return node
+	parent.add_child(node)
 
 
 func _loot_color(item_def_id: String) -> Color:
@@ -973,6 +1027,13 @@ func _load_item_rules() -> void:
 	var parsed = _read_json(path)
 	if typeof(parsed) == TYPE_DICTIONARY:
 		item_rules = parsed.get("items", {})
+
+
+func _load_item_presentations() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
+	var parsed = _read_json(path)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_presentations = parsed.get("items", {})
 
 
 func _make_projectile_node() -> Node3D:
@@ -1086,9 +1147,21 @@ func get_bot_state() -> Dictionary:
 		"equipped": equipped.duplicate(true),
 		"monster_ids": live_monster_ids,
 		"loot_ids": loot_ids.duplicate(),
+		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
+		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
 	}
+	return out
+
+
+func _bot_loot_presentations() -> Dictionary:
+	var out := {}
+	for loot_id in loot_ids:
+		var rec: Dictionary = entities.get(loot_id, {})
+		var item_def_id := str(rec.get("item_def_id", ""))
+		if item_def_id != "":
+			out[item_def_id] = item_presentations.has(item_def_id)
 	return out
 
 

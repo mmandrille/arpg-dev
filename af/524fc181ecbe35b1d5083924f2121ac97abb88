@@ -1,0 +1,192 @@
+shared/protocol/state_delta.v1.schema.json
+  s_cb573fcea2344e::t_0442facb2c8cbd 1-2,5-6,8-10,12-39,41-62,66-101,109-166
+  s_cb573fcea2344e::t_11e4688ee31aac 3-4,7,11,40,63-65,102-108
+shared/protocol/examples/session_snapshot.json
+  s_cb573fcea2344e::t_d1a6dc528e252a 5
+docs/plans/v18_2026-06-06-dungeon-levels-and-stairs.md
+  s_a01d35968b7be2::t_b9d06a04efd9dc 1-2,4-70,73-103,110-111,120-131,133-137,140-154,162-173,178,180-243
+  s_8fefea38a8e917::t_5d23dfaa389ef7 132
+  s_8fefea38a8e917::t_02dde546e38049 155-161
+  s_cb573fcea2344e::t_5533335ae6c5dc 3
+  s_8fefea38a8e917::t_5f79968e35b89b 104-109,112-119
+  s_8fefea38a8e917::t_44092cfb009e76 174-177,179
+  s_8fefea38a8e917::t_ec1e9246c851f5 71-72
+  s_8fefea38a8e917::t_72dc4292d4e170 138-139
+server/internal/realtime/runner.go
+  s_cb573fcea2344e::t_d5c733a318c2c1 314,316-322,333-342,344-353,359-362,376,380-382
+tools/bot/test_protocol.py
+  s_cb573fcea2344e::t_ccbd79af589013 93-96,98-102,108-109
+  s_cb573fcea2344e::t_3a3fa800c9c00c 92,97,103-107
+  s_cb573fcea2344e::t_806a92d1307c7a 212-264
+server/internal/game/sim.go
+  s_cb573fcea2344e::t_38fe473bf35342 337,366,427-440,457-464,475,477-489
+  s_cb573fcea2344e::t_ed7727fbf8c6d0 149-161,165-168,173,176-178,182,199,203,205,215
+  s_cb573fcea2344e::t_6d5c3ebfb8f4b4 2001-2019
+  s_cb573fcea2344e::t_94ee60bc9c9326 513,523,528,533,538,542-543,567,571-572,633,663,703,714,732,946,962,1020,1024,1028,1031,1034-1035,1037-1039,1052,1056,1058-1059,1064,1070,1089,1114-1115,1134,1146,1187-1188,1230-1231,1253,1266,1270,1300,1304,1374,1378-1380,1418,1456,1477,1531,1542,1548,1552,1592,1594,1616,1622,1662-1663,1706,1868,1876,1889,1904-1905,1972,1989,1998,2050,2054
+  s_cb573fcea2344e::t_a1acd0e73581b3 1109,1182,1537,1657,1899
+  s_cb573fcea2344e::t_dcbd24458e605d 129-130,307,310
+  s_cb573fcea2344e::t_1d1ce139f24d9e 125-128,172,221,381,388,441-442,451-456
+  s_cb573fcea2344e::t_67e970d086f301 290-291,308-309
+  s_cb573fcea2344e::t_f43c15cd036088 4
+  s_cb573fcea2344e::t_f4d085db970bc1 162-164,169-171,465-473,476,498
+  s_cb573fcea2344e::t_670c7388cedcdd 349-351,353-363,367,369-376,379-380,382-383,389,395,409-413
+  s_cb573fcea2344e::t_beb792f1e02203 31-36,52-56,122-124
+  s_cb573fcea2344e::t_0eec2c1785a6a5 474
+  s_cb573fcea2344e::t_27cf4a808d7ab8 1123,1190,1563,1673,1915
+  s_cb573fcea2344e::t_95226bfd05f278 490-497
+  s_cb573fcea2344e::t_1e768b858d8b34 443-450
+  s_cb573fcea2344e::t_64c89ec2ead49b 758-851
+  s_cb573fcea2344e::t_0ca225e4a794ba 2076
+client/scripts/main.gd
+  s_cb573fcea2344e::t_39dd4c9dd0e8d3 1070
+  s_cb573fcea2344e::t_ab1592aca46752 851
+  s_cb573fcea2344e::t_8ddb2528fdaa5c 41,45-46,99,124,158,227-230,248-253,373-374,680-685,960-969,1015-1017,1106-1108,1199-1205,1263-1284
+  s_cb573fcea2344e::t_14e378aa974578 1034-1069,1071-1082
+  s_cb573fcea2344e::t_683424ab61cb5f 429-442
+server/internal/inputdecode/inputdecode.go
+  s_cb573fcea2344e::t_65c0b5624f41d7 16-17,42-43,62,95-106
+  s_cb573fcea2344e::t_c49469f44407be 44
+shared/rules/worlds.v0.json
+  s_cb573fcea2344e::t_b94ecae24a7423 353-357
+shared/rules/dungeon_generation.v0.json
+  s_cb573fcea2344e::t_b94ecae24a7423 1-17
+tools/bot/scenarios/12_dungeon_levels.json
+  s_cb573fcea2344e::t_4fa738a440b086 1-4,6-7,11-14,16-21
+  s_cb573fcea2344e::t_e0172f164e3b00 10
+  s_cb573fcea2344e::t_9620ba5d2d567f 9
+  s_cb573fcea2344e::t_638bd3d71b4c94 5,8,15
+shared/golden/dungeon_stairs.json
+  s_cb573fcea2344e::t_90b30228ed8eef 1-8,13-19
+  s_cb573fcea2344e::t_dcd1ea2d205b87 9-10,12
+  s_cb573fcea2344e::t_aea9cdb94b874a 11
+docs/PROGRESS.md
+  s_cb573fcea2344e::t_79afd9193959f6 17,36,74
+client/tests/test_golden.gd
+  s_cb573fcea2344e::t_e041fb93ea9d45 185-198,200-201,203-204,212-217
+  s_cb573fcea2344e::t_477ad6dbc2dd37 199,202,233-234
+  s_cb573fcea2344e::t_581627ecd92f3d 209
+  s_cb573fcea2344e::t_2ba8a3a38a6aef 205-208,210-211
+shared/rules/dungeon_generation.v0.schema.json
+  s_cb573fcea2344e::t_b94ecae24a7423 1-57
+shared/rules/worlds.v0.schema.json
+  s_cb573fcea2344e::t_b94ecae24a7423 19
+server/internal/realtime/protocol.go
+  s_cb573fcea2344e::t_d5c733a318c2c1 70
+shared/golden/dungeon_stairs.v0.schema.json
+  s_cb573fcea2344e::t_90b30228ed8eef 1-43,58-61
+  s_cb573fcea2344e::t_44e121e5c3dd3f 44-57
+server/internal/game/game_test.go
+  s_cb573fcea2344e::t_10adc2fa3d982d 1732-1737,1742-1745
+  s_cb573fcea2344e::t_b75f530db63635 1886-1891,1896-1918,1929-1971,1995-2008
+  s_cb573fcea2344e::t_cc76e6e4447e54 1926-1928
+  s_cb573fcea2344e::t_0735f9a77aac91 1972-1994
+  s_cb573fcea2344e::t_41580d578aa34a 2009-2015,2025-2058
+  s_cb573fcea2344e::t_cc4a2f60e665ac 1892-1895,1919-1925,2016-2024
+tools/bot/run.py
+  s_cb573fcea2344e::t_6e2270bb0abdaf 977-985
+  s_cb573fcea2344e::t_fe1d68593d94b5 1219-1222
+  s_cb573fcea2344e::t_8c1e41b374642f 403-410,416-432
+  s_cb573fcea2344e::t_ecce5f4772fe8e 1288
+  s_cb573fcea2344e::t_03a9c2a2d81352 99,287-300,411-415
+  s_cb573fcea2344e::t_7028c4e534a3ab 97-98,704,763-765,771-772,781,784-785,796-797,812-813,821-822,839-843
+  s_cb573fcea2344e::t_1f9f608bd08e8f 95-96
+  s_cb573fcea2344e::t_f48febbe108078 702-703,705-709
+  s_cb573fcea2344e::t_17aff2a1877a5b 769-770,773-774,819-820
+  s_cb573fcea2344e::t_2e855af3d61c50 1062,1112-1119,1209-1217
+shared/protocol/envelope.v1.schema.json
+  s_cb573fcea2344e::t_0442facb2c8cbd 1-2,5-16,19-21,23-43
+  s_cb573fcea2344e::t_11e4688ee31aac 3-4,17-18,22
+shared/protocol/examples/descend_intent.json
+  s_cb573fcea2344e::t_d1a6dc528e252a 1-8
+shared/rules/interactables.v0.json
+  s_cb573fcea2344e::t_b94ecae24a7423 10-19
+server/internal/game/dungeon_gen.go
+  s_cb573fcea2344e::t_a7bd8becbd88f2 1-8,11-14,16-22,28-37,39-57,62-94,103-114
+  s_cb573fcea2344e::t_286be02b5782b2 15,23-27,58-59,61,95-96,98,101
+  s_cb573fcea2344e::t_dcbd24458e605d 38
+  s_cb573fcea2344e::t_cf47d94c872d92 9-10,60,97,99-100,102
+shared/protocol/examples/state_delta.json
+  s_cb573fcea2344e::t_d1a6dc528e252a 3
+shared/protocol/examples/state_delta_level_transition.json
+  s_cb573fcea2344e::t_d1a6dc528e252a 1-10
+server/internal/game/rules.go
+  s_cb573fcea2344e::t_d19c005841e487 22,46-47,54-66,93,143
+  s_cb573fcea2344e::t_983d3299317d9f 333-354,359,367-392,398-400,408-412
+  s_cb573fcea2344e::t_dcbd24458e605d 15-21,48-53,90-92,360-366,393-397
+  s_cb573fcea2344e::t_f2a68d28b10fb2 8
+server/internal/replay/replay.go
+  s_cb573fcea2344e::t_3955a98d2483aa 59,172-188,242-254
+docs/specs/v18_spec-dungeon-levels-and-stairs.md
+  s_a01d35968b7be2::t_73df4c07b979d7 384-386,389-391,532-536,551,571-572
+  s_8fefea38a8e917::t_cb0d5f415fa349 300-305
+  s_a01d35968b7be2::t_10171beffc7864 226-229,234,241-242,262,276,278,282,284-285,289-298
+  s_8fefea38a8e917::t_d38127a0c9be59 348-351
+  s_8fefea38a8e917::t_465e43a8b5d256 542,544,546
+  s_48dd6613a9e9d1::t_88ed3f6021a746 1-17,27-45,48-113,116-123,125-144,146-185,188-225,235-240,243-261,263-275,277,279-281,283,286-288,299,306-312,319-347,352-367,369-383,387-388,392-531,537-541,543,545,547-550,552-570,573-595
+  s_a01d35968b7be2::t_72c55048ceea68 124
+  s_8fefea38a8e917::t_5fb768554b19fd 145
+  s_8fefea38a8e917::t_00e12703b77f20 186-187
+  s_8fefea38a8e917::t_9d6844762932b8 230-233
+  s_8fefea38a8e917::t_67c6541bbbbf90 313-318
+  s_a01d35968b7be2::t_e9f94bd16eff17 18-26,46-47,114-115
+  s_8fefea38a8e917::t_e0f1ff7114fa71 368
+server/internal/game/level.go
+  s_cb573fcea2344e::t_a7bd8becbd88f2 1-17,19-20
+  s_cb573fcea2344e::t_dcbd24458e605d 18
+shared/rules/interactables.v0.schema.json
+  s_cb573fcea2344e::t_b94ecae24a7423 15,19-20,29-51
+server/internal/game/types.go
+  s_cb573fcea2344e::t_1706b55d66aa17 48-49,57
+tools/validate_shared.py
+  s_cb573fcea2344e::t_d1a6dc528e252a 64-67
+  s_cb573fcea2344e::t_d0cca11526a745 122,254-269,316-323,478-479,481-507,509
+shared/protocol/messages.v1.schema.json
+  s_cb573fcea2344e::t_11e4688ee31aac 3-4,17-18,45-48,109-118
+  s_cb573fcea2344e::t_0442facb2c8cbd 1-2,5-16,19-44,49-108,119-181
+shared/protocol/examples/ascend_intent.json
+  s_cb573fcea2344e::t_d1a6dc528e252a 1-8
+shared/protocol/session_snapshot.v1.schema.json
+  s_cb573fcea2344e::t_0442facb2c8cbd 1-2,5-6,8-12,14-44,46-75,79-107,117-121
+  s_cb573fcea2344e::t_d1a6dc528e252a 76-78
+  s_cb573fcea2344e::t_11e4688ee31aac 3-4,7,13,45,108-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "af524fc181ecbe35b1d5083924f2121ac97abb88",
+  "prompts": {},
+  "sessions": {
+    "s_48dd6613a9e9d1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1d6bf372-81dd-421b-8b28-ef50c5d98916",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_8fefea38a8e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7e6c507c-4676-41ac-9f05-9394a2bebc1d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a01d35968b7be2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9d3b-eade-7c53-a3ff-d27eb996de0f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_cb573fcea2344e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9d44-96c0-7953-b990-32c47462df80",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

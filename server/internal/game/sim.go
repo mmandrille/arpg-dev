@@ -952,6 +952,13 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 	})
 
 	arrivalRes := TickResult{Tick: res.Tick, Level: destLevel, Changes: []Change{}, Events: []Event{}}
+	if s.multiLevel && destLevel < levelZero && !s.discoveredTeleporters[destLevel] {
+		arrivalRes.Changes = append(arrivalRes.Changes, Change{
+			Op:         OpTeleporterDiscoveryUpdate,
+			Level:      destLevel,
+			Discovered: false,
+		})
+	}
 	for _, id := range sortedEntityIDs(dest.entities) {
 		arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(dest.entities[id].view())})
 	}

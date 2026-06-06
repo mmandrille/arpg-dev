@@ -4,6 +4,8 @@
 # loot, and inventory outcomes. Visuals are placeholder primitives (slice v1).
 extends Node3D
 
+const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
+
 const NetClientScript := preload("res://scripts/net_client.gd")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
@@ -410,10 +412,6 @@ func _upsert_entity(e: Dictionary) -> void:
 			var moved := prev_pos.distance_to(server_pos) > 0.001
 			rec["controller"].set_locomotion(moved and hp_val > 0)
 	if rec["type"] == "interactable":
-		if str(e.get("interactable_def_id", rec.get("interactable_def_id", ""))) == "teleporter" \
-				and not discovered_teleporters.has(current_level):
-			discovered_teleporters[current_level] = false
-			_refresh_waypoint_panel()
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
 	# Resume/snapshot consistency: a monster already dead in the snapshot enters
@@ -1038,7 +1036,7 @@ func _setup_waypoint_panel(ui: CanvasLayer) -> void:
 	waypoint_panel = PanelContainer.new()
 	waypoint_panel.visible = false
 	waypoint_panel.position = Vector2(16, 96)
-	waypoint_panel.custom_minimum_size = Vector2(230, 0)
+	waypoint_panel.custom_minimum_size = Vector2(WaypointPanelConfig.PANEL_MIN_WIDTH_PX, 0)
 	var panel_box := VBoxContainer.new()
 	panel_box.add_theme_constant_override("separation", 6)
 	var title := Label.new()
@@ -1046,7 +1044,10 @@ func _setup_waypoint_panel(ui: CanvasLayer) -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	panel_box.add_child(title)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(220, 36 * 9)
+	scroll.custom_minimum_size = Vector2(
+		WaypointPanelConfig.SCROLL_MIN_WIDTH_PX,
+		WaypointPanelConfig.SCROLL_VIEWPORT_UNIT_PX * WaypointPanelConfig.SCROLL_MAX_VISIBLE_ROWS
+	)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	waypoint_rows = VBoxContainer.new()
 	waypoint_rows.add_theme_constant_override("separation", 4)
@@ -1084,7 +1085,7 @@ func _refresh_waypoint_panel() -> void:
 	var levels := discovered_teleporter_levels()
 	for level in levels:
 		var row := Button.new()
-		row.custom_minimum_size = Vector2(204, 32)
+		row.custom_minimum_size = Vector2(204, WaypointPanelConfig.ROW_HEIGHT_PX)
 		row.text = _waypoint_row_text(level)
 		row.disabled = not bool(discovered_teleporters.get(level, false))
 		row.pressed.connect(_on_waypoint_level_pressed.bind(level))

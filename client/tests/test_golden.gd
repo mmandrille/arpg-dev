@@ -223,7 +223,30 @@ func _initialize() -> void:
 		_fail("dungeon fallback level name mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs)")
+	# 12. Dungeon teleporters golden matches stairs seed and pinned travel outcome.
+	var dungeon_teleporters := _read(shared.path_join("golden/dungeon_teleporters.json"))
+	if str(dungeon_teleporters["seed"]) != str(dungeon_stairs["seed"]):
+		_fail("dungeon_teleporters seed mismatch")
+		return
+	var tp_outcome: Dictionary = dungeon_teleporters["discover_descend_teleport"]
+	if int(tp_outcome["expected_level"]) != -1:
+		_fail("dungeon teleporters expected level mismatch")
+		return
+	if not _vec2_equals(tp_outcome["expected_player_position"], 14.0, 12.0):
+		_fail("dungeon teleporters expected player position mismatch")
+		return
+
+	# 13. Waypoint panel golden matches client layout constants.
+	var waypoint_panel := _read(shared.path_join("golden/waypoint_panel.json"))
+	const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
+	if WaypointPanelConfig.SCROLL_MAX_VISIBLE_ROWS != int(waypoint_panel["scroll_max_visible_rows"]):
+		_fail("waypoint panel scroll max rows mismatch")
+		return
+	if WaypointPanelConfig.SCROLL_VIEWPORT_UNIT_PX != int(waypoint_panel["scroll_viewport_unit_px"]):
+		_fail("waypoint panel viewport unit mismatch")
+		return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, waypoint_panel)")
 	quit(0)
 
 

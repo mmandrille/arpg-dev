@@ -2067,6 +2067,123 @@ func TestDungeonTeleporterDiscoveryAndTravel(t *testing.T) {
 	}
 }
 
+func TestTeleportRejectsUndiscoveredTargetLevel(t *testing.T) {
+	var golden struct {
+		Seed                         string `json:"seed"`
+		VisitedUndiscoveredTarget    struct {
+			RejectReason            string `json:"reject_reason"`
+			DiscoveredTeleporters   []struct {
+				Level      int  `json:"level"`
+				Discovered bool `json:"discovered"`
+			} `json:"discovered_teleporters"`
+		} `json:"visited_undiscovered_target"`
+	}
+	loadGolden(t, "dungeon_teleporters.json", &golden)
+
+	sim, err := NewSimWithWorld("sess_dungeon_tp_reject", golden.Seed, loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	level1Teleporter := sim.findTeleporter(sim.activeLevel())
+	if level1Teleporter == nil {
+		t.Fatal("missing level -1 teleporter")
+	}
+	sim.entities[sim.playerID].pos = level1Teleporter.pos
+	discover1 := sim.Tick([]Input{{MessageID: "discover_1", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(level1Teleporter.id)}}})
+	assertAck(t, discover1, "discover_1")
+
+	down := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	sim.entities[sim.playerID].pos = down.pos
+	results := sim.TickResults([]Input{{MessageID: "descend", Type: "descend_intent", Descend: &DescendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("descend results = %d, want 2", len(results))
+	}
+	if !hasTeleporterDiscoveryUpdateWith(results[1], -2, false) {
+		t.Fatalf("descend arrival missing undiscovered teleporter update for -2: %+v", results[1].Changes)
+	}
+
+	up := sim.findStair(sim.activeLevel(), stairsUpDefID)
+	if up == nil {
+		t.Fatal("missing up stairs on level -2")
+	}
+	sim.entities[sim.playerID].pos = up.pos
+	results = sim.TickResults([]Input{{MessageID: "ascend", Type: "ascend_intent", Ascend: &AscendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("ascend results = %d, want 2", len(results))
+	}
+
+	level1Teleporter = sim.findTeleporter(sim.activeLevel())
+	sim.entities[sim.playerID].pos = level1Teleporter.pos
+	assertTeleporterDiscoveryView(t, sim.teleporterDiscoveryView(), golden.VisitedUndiscoveredTarget.DiscoveredTeleporters)
+
+	reject := sim.Tick([]Input{{MessageID: "tp_undiscovered_target", Type: "teleport_intent", Teleport: &TeleportIntent{TargetLevel: -2}}})
+	assertReject(t, reject, "tp_undiscovered_target", golden.VisitedUndiscoveredTarget.RejectReason)
+}
+
+func TestDungeonTeleportersGolden(t *testing.T) {
+	var golden struct {
+		Seed                    string `json:"seed"`
+		WorldID                 string `json:"world_id"`
+		DiscoverDescendTeleport struct {
+			ExpectedLevel          int  `json:"expected_level"`
+			ExpectedPlayerPosition Vec2 `json:"expected_player_position"`
+			DiscoveredTeleporters  []struct {
+				Level      int  `json:"level"`
+				Discovered bool `json:"discovered"`
+			} `json:"discovered_teleporters"`
+		} `json:"discover_descend_teleport"`
+	}
+	loadGolden(t, "dungeon_teleporters.json", &golden)
+
+	sim, err := NewSimWithWorld("sess_dungeon_tp_golden", golden.Seed, loadRules(t), golden.WorldID)
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	level1Teleporter := sim.findTeleporter(sim.activeLevel())
+	if level1Teleporter == nil {
+		t.Fatal("missing level -1 teleporter")
+	}
+	sim.entities[sim.playerID].pos = level1Teleporter.pos
+	assertAck(t, sim.Tick([]Input{{MessageID: "discover_1", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(level1Teleporter.id)}}}), "discover_1")
+
+	down := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	sim.entities[sim.playerID].pos = down.pos
+	sim.TickResults([]Input{{MessageID: "descend", Type: "descend_intent", Descend: &DescendIntent{}}})
+
+	level2Teleporter := sim.findTeleporter(sim.activeLevel())
+	if level2Teleporter == nil {
+		t.Fatal("missing level -2 teleporter")
+	}
+	sim.entities[sim.playerID].pos = level2Teleporter.pos
+	assertAck(t, sim.Tick([]Input{{MessageID: "discover_2", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(level2Teleporter.id)}}}), "discover_2")
+
+	sim.TickResults([]Input{{MessageID: "tp_to_1", Type: "teleport_intent", Teleport: &TeleportIntent{TargetLevel: -1}}})
+
+	want := golden.DiscoverDescendTeleport
+	if sim.currentLevel != want.ExpectedLevel {
+		t.Fatalf("currentLevel = %d, want %d", sim.currentLevel, want.ExpectedLevel)
+	}
+	if got := sim.entities[sim.playerID].pos; got != want.ExpectedPlayerPosition {
+		t.Fatalf("player position = %+v, want %+v", got, want.ExpectedPlayerPosition)
+	}
+	assertTeleporterDiscoveryView(t, sim.teleporterDiscoveryView(), want.DiscoveredTeleporters)
+}
+
+func assertTeleporterDiscoveryView(t *testing.T, got []TeleporterDiscoveryView, want []struct {
+	Level      int  `json:"level"`
+	Discovered bool `json:"discovered"`
+}) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("discovery view len = %d, want %d: got=%+v", len(got), len(want), got)
+	}
+	for i, row := range want {
+		if got[i].Level != row.Level || got[i].Discovered != row.Discovered {
+			t.Fatalf("discovery[%d] = %+v, want level=%d discovered=%v", i, got[i], row.Level, row.Discovered)
+		}
+	}
+}
+
 func generatedStairPos(level generatedDungeonLevel, defID string) Vec2 {
 	for _, stair := range level.stairs {
 		if stair.defID == defID {
@@ -2113,8 +2230,12 @@ func hasEntitySpawn(r TickResult, entityID string) bool {
 }
 
 func hasTeleporterDiscoveryUpdate(r TickResult, level int) bool {
+	return hasTeleporterDiscoveryUpdateWith(r, level, true)
+}
+
+func hasTeleporterDiscoveryUpdateWith(r TickResult, level int, discovered bool) bool {
 	for _, ch := range r.Changes {
-		if ch.Op == OpTeleporterDiscoveryUpdate && ch.Level == level && ch.Discovered {
+		if ch.Op == OpTeleporterDiscoveryUpdate && ch.Level == level && ch.Discovered == discovered {
 			return true
 		}
 	}

@@ -42,6 +42,7 @@
       "properties": {
         "stairs_down": { "$ref": "#/$defs/vec2" },
         "stairs_up": { "$ref": "#/$defs/vec2" },
+        "teleporter": { "$ref": "#/$defs/vec2" },
         "loot": {
           "type": "array",
           "items": { "$ref": "#/$defs/loot" }

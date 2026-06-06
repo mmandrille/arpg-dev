@@ -9,6 +9,7 @@
     "wall_thickness",
     "player_spawn",
     "stair_placement",
+    "teleporter_placement",
     "level_names",
     "default_level_name_template"
   ],
@@ -33,6 +34,16 @@
       "properties": {
         "min_separation": { "type": "number", "exclusiveMinimum": 0 },
         "margin_from_wall": { "type": "number", "minimum": 0 },
+        "max_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "teleporter_placement": {
+      "type": "object",
+      "required": ["margin_from_wall", "min_stair_distance", "max_attempts"],
+      "additionalProperties": false,
+      "properties": {
+        "margin_from_wall": { "type": "number", "minimum": 0 },
+        "min_stair_distance": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
       }
     },

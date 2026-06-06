@@ -81,6 +81,17 @@ for f in "${SCENARIO_FILES[@]}"; do
   validate_scenario_file "$f"
 done
 
+READY_URL="${BASE_URL%/}/readyz"
+if ! server_error="$(curl --max-time 2 -fsS "$READY_URL" 2>&1)"; then
+  echo "[bot-client] FAIL: server is not reachable at $READY_URL." >&2
+  echo "[bot-client] Start local dependencies and the server first:" >&2
+  echo "[bot-client]   make db-up" >&2
+  echo "[bot-client]   make server" >&2
+  echo "[bot-client] Or use make bot-visual, which starts its own temporary server." >&2
+  echo "[bot-client] Details: $server_error" >&2
+  exit 1
+fi
+
 # Import once before the scenario loop so headless --path runs cleanly.
 echo "[bot-client $(_ts)] Godot asset import starting (can take 30-90s on cold cache)..."
 import_started=$SECONDS

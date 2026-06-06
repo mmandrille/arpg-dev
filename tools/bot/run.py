@@ -97,6 +97,8 @@ class RuntimeState:
     last_delta_level: int | None = None
     pending_level_load: int | None = None
     used_stair_positions: dict[str, dict[str, float]] = field(default_factory=dict)
+    discovered_teleporters: dict[int, bool] = field(default_factory=dict)
+    used_teleporter_positions: dict[int, dict[str, float]] = field(default_factory=dict)
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -298,6 +300,28 @@ async def execute_step(
         )
         return
 
+    if action == "assert_teleporter_discovered":
+        level = int(step["level"])
+        want = bool(step.get("discovered", True))
+        got = bool(state.discovered_teleporters.get(level, False))
+        if got != want:
+            raise AssertionError(f"assert_teleporter_discovered: level {level} discovered={got}, want {want}")
+        return
+
+    if action == "assert_player_at_discovered_teleporter":
+        level = int(step.get("level", state.current_level))
+        pos = state.used_teleporter_positions.get(level)
+        if pos is None:
+            raise AssertionError(f"assert_player_at_discovered_teleporter: no recorded teleporter for level {level}")
+        assert_player_position(
+            state,
+            float(pos["x"]),
+            float(pos["y"]),
+            float(step.get("tolerance", 0.001)),
+            "runtime protocol",
+        )
+        return
+
     if action == "attack_until_event":
         target_id = str(step["target_id"]) if step.get("target_id") else None
         if target_id is None:
@@ -425,6 +449,40 @@ async def execute_step(
         msg_type = "descend_intent" if direction == "down" else "ascend_intent"
         previous_level = state.current_level
         env = make_envelope(msg_type, session_id, state.last_tick, {})
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_level_change(ws, state, previous_level, loop)
+        return
+
+    if action == "discover_teleporter":
+        target = find_interactable(state, "teleporter")
+        if target is None:
+            raise AssertionError(f"discover_teleporter: missing teleporter on level {state.current_level}")
+        await walk_toward(
+            ws,
+            session_id,
+            state,
+            target["position"],
+            loop,
+            stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
+            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+        )
+        target_pos = target.get("position", {})
+        state.used_teleporter_positions[state.current_level] = {
+            "x": float(target_pos.get("x", "nan")),
+            "y": float(target_pos.get("y", "nan")),
+        }
+        env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target["id"]})
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        if bool(step.get("wait_discovered", True)):
+            await wait_for_teleporter_discovery(ws, state, state.current_level, loop)
+        return
+
+    if action == "teleport_to_level":
+        target_level = int(step["target_level"])
+        previous_level = state.current_level
+        env = make_envelope("teleport_intent", session_id, state.last_tick, {"target_level": target_level})
         await ws.send(json.dumps(env))
         await wait_for_accept(ws, state, env["message_id"], loop)
         await wait_for_level_change(ws, state, previous_level, loop)
@@ -707,6 +765,14 @@ async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, lo
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loop) -> None:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while not state.discovered_teleporters.get(level, False):
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for teleporter discovery level {level}")
+        await pump_one(ws, state, timeout=0.1)
+
+
 async def wait_for_player_position(
     ws,
     state: RuntimeState,
@@ -809,6 +875,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         elif c["op"] == "equipped_update" and c.get("slot") == "weapon":
             state.equipped_item_id = c.get("item_instance_id")
             state.equipped[c["slot"]] = c.get("item_instance_id")
+        elif c["op"] == "teleporter_discovery_update":
+            state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
     if state.pending_level_load is not None and delta_level == state.pending_level_load:
         state.pending_level_load = None
     update_runtime_distances(state)
@@ -823,6 +891,7 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.entities = {str(e["id"]): dict(e) for e in payload.get("entities", [])}
     state.inventory = [dict(i) for i in payload.get("inventory", [])]
     state.equipped = dict(payload.get("equipped", {}))
+    state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
         entity_id
         for entity_id, entity in state.entities.items()
@@ -834,6 +903,13 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     for entity in state.entities.values():
         track_initial_monster_position(state, entity)
     update_runtime_distances(state)
+
+
+def parse_discovered_teleporters(payload: dict[str, Any]) -> dict[int, bool]:
+    return {
+        int(row["level"]): bool(row["discovered"])
+        for row in payload.get("discovered_teleporters", [])
+    }
 
 
 def clear_active_level_state(state: RuntimeState) -> None:
@@ -982,6 +1058,7 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             item_id,
             "reconnect snapshot",
             current_level=int(payload.get("current_level", 0)),
+            discovered_teleporters=parse_discovered_teleporters(payload),
         )
         log("reconnect snapshot restored expected scenario state")
 
@@ -1060,6 +1137,7 @@ def run_assertions(
     item_id: str | None,
     where: str,
     current_level: int | None = None,
+    discovered_teleporters: dict[int, bool] | None = None,
 ) -> None:
     for assertion in assertions:
         if isinstance(assertion, str):
@@ -1115,6 +1193,20 @@ def run_assertions(
             want = int(assertion["equals"])
             if current_level != want:
                 raise AssertionError(f"{where}: current_level {current_level} != {want}")
+        elif typ == "teleporter_discovered":
+            if discovered_teleporters is None:
+                raise AssertionError(f"{where}: discovered_teleporters unavailable")
+            level = int(assertion["level"])
+            want = bool(assertion.get("discovered", True))
+            got = bool(discovered_teleporters.get(level, False))
+            if got != want:
+                raise AssertionError(f"{where}: teleporter level {level} discovered={got}, want {want}")
+        elif typ == "teleporter_list_contains":
+            if discovered_teleporters is None:
+                raise AssertionError(f"{where}: discovered_teleporters unavailable")
+            level = int(assertion["level"])
+            if level not in discovered_teleporters:
+                raise AssertionError(f"{where}: teleporter level {level} missing; have {sorted(discovered_teleporters)}")
         elif typ == "visited_levels_contain":
             continue
         else:
@@ -1216,6 +1308,20 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             if want not in state.visited_levels:
                 raise AssertionError(f"{where}: level {want} not visited; have {sorted(state.visited_levels)}")
             continue
+        if typ == "teleporter_discovered":
+            level = int(assertion["level"])
+            want = bool(assertion.get("discovered", True))
+            got = bool(state.discovered_teleporters.get(level, False))
+            if got != want:
+                raise AssertionError(f"{where}: teleporter level {level} discovered={got}, want {want}")
+            continue
+        if typ == "teleporter_list_contains":
+            level = int(assertion["level"])
+            if level not in state.discovered_teleporters:
+                raise AssertionError(
+                    f"{where}: teleporter level {level} missing; have {sorted(state.discovered_teleporters)}"
+                )
+            continue
         if typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(state.inventory, str(assertion["item_def_id"]), expected_equipped, where)
@@ -1286,6 +1392,7 @@ def main() -> int:
                 observed.item_id,
                 "/state API",
                 current_level=int(state.get("current_level", 0)),
+                discovered_teleporters=parse_discovered_teleporters(state),
             )
             log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 

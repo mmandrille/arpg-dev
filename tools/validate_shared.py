@@ -256,6 +256,15 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation floor_size", "must be at least 16x10")
     else:
         report.ok("dungeon_generation floor_size is at least legacy arena size")
+    teleporter_placement = dungeon_generation.get("teleporter_placement", {})
+    if teleporter_placement.get("margin_from_wall", -1) < 0:
+        report.fail("dungeon_generation teleporter_placement", "margin_from_wall must be non-negative")
+    elif teleporter_placement.get("min_stair_distance", 0) <= 0:
+        report.fail("dungeon_generation teleporter_placement", "min_stair_distance must be positive")
+    elif teleporter_placement.get("max_attempts", 0) <= 0:
+        report.fail("dungeon_generation teleporter_placement", "max_attempts must be positive")
+    else:
+        report.ok("dungeon_generation teleporter placement is valid")
     for key in dungeon_generation["level_names"]:
         try:
             level_num = int(key)
@@ -490,8 +499,8 @@ def cross_checks(report: Report) -> None:
             continue
         if initial_state == "ready":
             transition = interactable.get("transition")
-            if transition not in ("ascend", "descend"):
-                report.fail("interactable transition", f"{interactable_id}: ready interactable needs ascend/descend")
+            if transition not in ("ascend", "descend", "waypoint"):
+                report.fail("interactable transition", f"{interactable_id}: ready interactable needs ascend/descend/waypoint")
             elif "barrier_when_closed" in interactable:
                 report.fail("interactable barrier", f"{interactable_id}: ready interactable must not block")
             else:
@@ -507,6 +516,13 @@ def cross_checks(report: Report) -> None:
             report.fail("stair interactable", f"{stair_id}: expected ready/{expected_transition}")
         else:
             report.ok(f"stair interactable {stair_id} is ready/{expected_transition}")
+    teleporter = interactables["interactables"].get("teleporter")
+    if teleporter is None:
+        report.fail("teleporter interactable", "missing teleporter")
+    elif teleporter.get("initial_state") != "ready" or teleporter.get("transition") != "waypoint":
+        report.fail("teleporter interactable", "expected ready/waypoint")
+    else:
+        report.ok("teleporter interactable is ready/waypoint")
 
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])

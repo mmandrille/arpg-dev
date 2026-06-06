@@ -16,6 +16,7 @@
         "action_intent",
         "descend_intent",
         "ascend_intent",
+        "teleport_intent",
         "equip_intent",
         "unequip_intent",
         "drop_intent",
@@ -46,6 +47,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/descend_intent" } } } },
     { "if": { "properties": { "type": { "const": "ascend_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/ascend_intent" } } } },
+    { "if": { "properties": { "type": { "const": "teleport_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/teleport_intent" } } } },
     { "if": { "properties": { "type": { "const": "equip_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/equip_intent" } } } },
     { "if": { "properties": { "type": { "const": "unequip_intent" } } },
@@ -116,6 +119,14 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {}
+    },
+    "teleport_intent": {
+      "type": "object",
+      "required": ["target_level"],
+      "additionalProperties": false,
+      "properties": {
+        "target_level": { "type": "integer", "maximum": -1 }
+      }
     },
     "equip_intent": {
       "type": "object",

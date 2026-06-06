@@ -194,13 +194,22 @@ func _initialize() -> void:
 	if str(dungeon_generation["level_names"]["-1"]) != "Entry Hall":
 		_fail("dungeon level -1 name mismatch")
 		return
+	if float(dungeon_generation["teleporter_placement"]["min_stair_distance"]) != 4.0:
+		_fail("dungeon teleporter placement mismatch")
+		return
 	var level1: Dictionary = dungeon_stairs["levels"]["-1"]
 	var level2: Dictionary = dungeon_stairs["levels"]["-2"]
 	if not _vec2_equals(level1["stairs_down"], 14.0, 18.0):
 		_fail("dungeon level -1 stairs_down mismatch")
 		return
+	if not _vec2_equals(level1["teleporter"], 14.0, 12.0):
+		_fail("dungeon level -1 teleporter mismatch")
+		return
 	if not _vec2_equals(level2["stairs_up"], 9.0, 11.0) or not _vec2_equals(level2["stairs_down"], 28.0, 14.0):
 		_fail("dungeon level -2 stairs mismatch")
+		return
+	if not _vec2_equals(level2["teleporter"], 10.0, 2.0):
+		_fail("dungeon level -2 teleporter mismatch")
 		return
 	var dungeon_loot: Array = level2["loot"]
 	if dungeon_loot.size() != 1:

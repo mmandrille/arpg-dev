@@ -17,6 +17,11 @@
       "name": "Stairs Up",
       "initial_state": "ready",
       "transition": "ascend"
+    },
+    "teleporter": {
+      "name": "Teleporter",
+      "initial_state": "ready",
+      "transition": "waypoint"
     }
   }
 }

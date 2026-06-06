@@ -9,40 +9,42 @@ import (
 
 // Simulation constants for the v0 slice.
 const (
-	baseEntityID                  = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
-	playerStartHP                 = 10
-	moveSpeed                     = 1.0
-	playerRadius                  = 0.45
-	monsterRadius                 = 0.45
-	monsterDefID                  = "training_dummy"
-	playerEntity                  = "player"
-	monsterEntity                 = "monster"
-	lootEntity                    = "loot"
-	projectileEntity              = "projectile"
-	wallEntity                    = "wall"
-	interactableEntity            = "interactable"
-	monsterBehaviorStatic         = "static"
-	monsterBehaviorChase          = "chase"
-	monsterAIModeIdle             = "idle"
-	monsterAIModeChase            = "chase"
-	monsterAIModeReturn           = "return"
-	interactableClosed            = "closed"
-	interactableOpen              = "open"
-	interactableReady             = "ready"
-	interactableTransitionAscend  = "ascend"
-	interactableTransitionDescend = "descend"
-	stairsDownDefID               = "stairs_down"
-	stairsUpDefID                 = "stairs_up"
-	worldModeMultiLevel           = "multi_level"
-	attackModeMelee               = "melee"
-	attackModeRanged              = "ranged"
-	trainingArrowProjectileDefID  = "training_arrow"
-	weaponSlot                    = "weapon"
-	lootInteractionRadius         = 0.35
-	interactableInteractionRadius = 0.50
-	meleeRangeEpsilon             = 0.000001
-	projectileRadius              = 0.10
-	tickDuration                  = 0.05
+	baseEntityID                   = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
+	playerStartHP                  = 10
+	moveSpeed                      = 1.0
+	playerRadius                   = 0.45
+	monsterRadius                  = 0.45
+	monsterDefID                   = "training_dummy"
+	playerEntity                   = "player"
+	monsterEntity                  = "monster"
+	lootEntity                     = "loot"
+	projectileEntity               = "projectile"
+	wallEntity                     = "wall"
+	interactableEntity             = "interactable"
+	monsterBehaviorStatic          = "static"
+	monsterBehaviorChase           = "chase"
+	monsterAIModeIdle              = "idle"
+	monsterAIModeChase             = "chase"
+	monsterAIModeReturn            = "return"
+	interactableClosed             = "closed"
+	interactableOpen               = "open"
+	interactableReady              = "ready"
+	interactableTransitionAscend   = "ascend"
+	interactableTransitionDescend  = "descend"
+	interactableTransitionWaypoint = "waypoint"
+	stairsDownDefID                = "stairs_down"
+	stairsUpDefID                  = "stairs_up"
+	teleporterDefID                = "teleporter"
+	worldModeMultiLevel            = "multi_level"
+	attackModeMelee                = "melee"
+	attackModeRanged               = "ranged"
+	trainingArrowProjectileDefID   = "training_arrow"
+	weaponSlot                     = "weapon"
+	lootInteractionRadius          = 0.35
+	interactableInteractionRadius  = 0.50
+	meleeRangeEpsilon              = 0.000001
+	projectileRadius               = 0.10
+	tickDuration                   = 0.05
 )
 
 // DefaultWorldID is the compatibility world used when callers do not choose a
@@ -119,15 +121,16 @@ type Sim struct {
 	nextID   uint64
 	playerID uint64
 
-	levels       map[int]*LevelState
-	currentLevel int
-	multiLevel   bool
-	entities     map[uint64]*entity
-	walls        []wallObstacle
-	move         *activeMove
-	autoNav      *autoNavState
-	inventory    []*invItem
-	equipped     map[string]uint64 // slot -> instanceID (0 = none)
+	levels                map[int]*LevelState
+	currentLevel          int
+	multiLevel            bool
+	entities              map[uint64]*entity
+	walls                 []wallObstacle
+	move                  *activeMove
+	autoNav               *autoNavState
+	inventory             []*invItem
+	equipped              map[string]uint64 // slot -> instanceID (0 = none)
+	discoveredTeleporters map[int]bool
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
@@ -146,15 +149,16 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 		return nil, ErrUnknownWorld{WorldID: worldID}
 	}
 	s := &Sim{
-		sessionID:    sessionID,
-		seed:         seed,
-		rng:          NewRNG(SeedToUint64(seed)),
-		rules:        rules,
-		nextID:       baseEntityID,
-		levels:       make(map[int]*LevelState),
-		currentLevel: levelZero,
-		multiLevel:   world.Mode == worldModeMultiLevel,
-		equipped:     map[string]uint64{weaponSlot: 0},
+		sessionID:             sessionID,
+		seed:                  seed,
+		rng:                   NewRNG(SeedToUint64(seed)),
+		rules:                 rules,
+		nextID:                baseEntityID,
+		levels:                make(map[int]*LevelState),
+		currentLevel:          levelZero,
+		multiLevel:            world.Mode == worldModeMultiLevel,
+		equipped:              map[string]uint64{weaponSlot: 0},
+		discoveredTeleporters: make(map[int]bool),
 	}
 
 	if s.multiLevel {
@@ -289,6 +293,7 @@ type Input struct {
 	Action        *ActionIntent
 	Descend       *DescendIntent
 	Ascend        *AscendIntent
+	Teleport      *TeleportIntent
 	Equip         *EquipIntent
 	Unequip       *UnequipIntent
 	Drop          *DropIntent
@@ -304,10 +309,13 @@ type (
 	MoveToIntent struct {
 		Position Vec2
 	}
-	ActionIntent  struct{ TargetID string }
-	DescendIntent struct{}
-	AscendIntent  struct{}
-	EquipIntent   struct {
+	ActionIntent   struct{ TargetID string }
+	DescendIntent  struct{}
+	AscendIntent   struct{}
+	TeleportIntent struct {
+		TargetLevel int
+	}
+	EquipIntent struct {
 		ItemInstanceID string
 		Slot           string
 	}
@@ -366,9 +374,9 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 	res := TickResult{Tick: s.tick, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}
 	var transitionArrival *TickResult
 	for _, in := range inputs {
-		if in.Type == "descend_intent" || in.Type == "ascend_intent" {
+		if in.Type == "descend_intent" || in.Type == "ascend_intent" || in.Type == "teleport_intent" {
 			if transitionArrival == nil {
-				transitionArrival = s.handleTransition(in, &res)
+				transitionArrival = s.handleLevelTravel(in, &res)
 			} else {
 				res.reject(in.MessageID, "invalid_level")
 			}
@@ -392,7 +400,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent":
+		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -406,8 +414,8 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleMoveTo(in, res)
 	case "action_intent":
 		s.handleAction(in, res)
-	case "descend_intent", "ascend_intent":
-		if arrival := s.handleTransition(in, res); arrival != nil {
+	case "descend_intent", "ascend_intent", "teleport_intent":
+		if arrival := s.handleLevelTravel(in, res); arrival != nil {
 			res.Changes = append(res.Changes, arrival.Changes...)
 			res.Events = append(res.Events, arrival.Events...)
 		}
@@ -482,6 +490,17 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			kind:              interactableEntity,
 			pos:               stair.pos,
 			interactableDefID: stair.defID,
+			state:             def.InitialState,
+		}
+		e.id = s.alloc()
+		level.entities[e.id] = e
+	}
+	for _, teleporter := range gen.teleporters {
+		def := s.rules.Interactables[teleporter.defID]
+		e := &entity{
+			kind:              interactableEntity,
+			pos:               teleporter.pos,
+			interactableDefID: teleporter.defID,
 			state:             def.InitialState,
 		}
 		e.id = s.alloc()
@@ -747,12 +766,44 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 }
 
 func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack bool) {
+	if e.interactableDefID == teleporterDefID {
+		s.activateTeleporter(e, in, res, ack)
+		return
+	}
 	e.state = interactableOpen
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
 	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
 	if ack {
 		res.ack(in.MessageID)
 	}
+}
+
+func (s *Sim) activateTeleporter(e *entity, in Input, res *TickResult, ack bool) {
+	if !s.multiLevel {
+		res.reject(in.MessageID, "not_dungeon_world")
+		return
+	}
+	if ack {
+		res.ack(in.MessageID)
+	}
+	if s.discoveredTeleporters[s.currentLevel] {
+		return
+	}
+	s.discoveredTeleporters[s.currentLevel] = true
+	res.Changes = append(res.Changes, Change{Op: OpTeleporterDiscoveryUpdate, Level: s.currentLevel, Discovered: true})
+	res.Events = append(res.Events, Event{
+		EventType:     "teleporter_discovered",
+		EntityID:      idStr(e.id),
+		CorrelationID: in.CorrelationID,
+		Level:         intPtr(s.currentLevel),
+	})
+}
+
+func (s *Sim) handleLevelTravel(in Input, res *TickResult) *TickResult {
+	if in.Type == "teleport_intent" {
+		return s.handleTeleport(in, res)
+	}
+	return s.handleTransition(in, res)
 }
 
 func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
@@ -822,10 +873,68 @@ func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
 		res.reject(in.MessageID, "invalid_level")
 		return nil
 	}
+	return s.movePlayerToLevel(in, res, current, dest, arrival.pos)
+}
 
+func (s *Sim) handleTeleport(in Input, res *TickResult) *TickResult {
+	if in.Teleport == nil {
+		res.reject(in.MessageID, "invalid_payload")
+		return nil
+	}
+	if !s.multiLevel {
+		res.reject(in.MessageID, "not_dungeon_world")
+		return nil
+	}
+	if s.playerDead() {
+		res.reject(in.MessageID, "player_dead")
+		return nil
+	}
+	targetLevel := in.Teleport.TargetLevel
+	if targetLevel >= levelZero {
+		res.reject(in.MessageID, "invalid_level")
+		return nil
+	}
+	if !s.discoveredTeleporters[s.currentLevel] {
+		res.reject(in.MessageID, "teleporter_not_discovered")
+		return nil
+	}
+	if !s.discoveredTeleporters[targetLevel] {
+		res.reject(in.MessageID, "target_level_not_discovered")
+		return nil
+	}
+	current := s.activeLevel()
+	player := current.entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return nil
+	}
+	if s.findReachableTeleporter(current, player.pos) == nil {
+		res.reject(in.MessageID, "no_teleporter_in_range")
+		return nil
+	}
+	dest, err := s.ensureDungeonLevel(targetLevel)
+	if err != nil {
+		res.reject(in.MessageID, "invalid_level")
+		return nil
+	}
+	arrival := s.findTeleporter(dest)
+	if arrival == nil {
+		res.reject(in.MessageID, "invalid_level")
+		return nil
+	}
+	return s.movePlayerToLevel(in, res, current, dest, arrival.pos)
+}
+
+func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelState, arrivalPos Vec2) *TickResult {
+	player := current.entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return nil
+	}
 	fromLevel := s.currentLevel
+	destLevel := dest.levelNum
 	delete(current.entities, player.id)
-	player.pos = arrival.pos
+	player.pos = arrivalPos
 	dest.entities[player.id] = player
 	s.currentLevel = destLevel
 	current.move = nil
@@ -1945,7 +2054,7 @@ func (s *Sim) actionable(e *entity) bool {
 	case lootEntity:
 		return true
 	case interactableEntity:
-		return e.state == interactableClosed
+		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)
 	default:
 		return false
 	}
@@ -2009,10 +2118,31 @@ func (s *Sim) findReachableStair(level *LevelState, defID string, playerPos Vec2
 	return nil
 }
 
+func (s *Sim) findReachableTeleporter(level *LevelState, playerPos Vec2) *entity {
+	teleporter := s.findTeleporter(level)
+	if teleporter == nil {
+		return nil
+	}
+	if meleeInRange(distance(playerPos, teleporter.pos), s.rules.Combat.UnarmedReach, interactableInteractionRadius) {
+		return teleporter
+	}
+	return nil
+}
+
 func (s *Sim) findStair(level *LevelState, defID string) *entity {
 	for _, id := range sortedEntityIDs(level.entities) {
 		e := level.entities[id]
 		if e != nil && e.kind == interactableEntity && e.interactableDefID == defID {
+			return e
+		}
+	}
+	return nil
+}
+
+func (s *Sim) findTeleporter(level *LevelState) *entity {
+	for _, id := range sortedEntityIDs(level.entities) {
+		e := level.entities[id]
+		if e != nil && e.kind == interactableEntity && e.interactableDefID == teleporterDefID {
 			return e
 		}
 	}
@@ -2070,15 +2200,34 @@ func (s *Sim) Snapshot() Snapshot {
 	}
 
 	return Snapshot{
-		ServerTick:   s.tick,
-		SessionID:    s.sessionID,
-		Seed:         s.seed,
-		CurrentLevel: s.currentLevel,
-		Entities:     entities,
-		Inventory:    inventory,
-		Equipped:     equipped,
-		RecentEvents: []Event{},
+		ServerTick:            s.tick,
+		SessionID:             s.sessionID,
+		Seed:                  s.seed,
+		CurrentLevel:          s.currentLevel,
+		Entities:              entities,
+		Inventory:             inventory,
+		Equipped:              equipped,
+		DiscoveredTeleporters: s.teleporterDiscoveryView(),
+		RecentEvents:          []Event{},
 	}
+}
+
+func (s *Sim) teleporterDiscoveryView() []TeleporterDiscoveryView {
+	if !s.multiLevel {
+		return []TeleporterDiscoveryView{}
+	}
+	levels := make([]int, 0, len(s.levels))
+	for levelNum := range s.levels {
+		if levelNum < levelZero {
+			levels = append(levels, levelNum)
+		}
+	}
+	sort.Ints(levels)
+	out := make([]TeleporterDiscoveryView, 0, len(levels))
+	for _, levelNum := range levels {
+		out = append(out, TeleporterDiscoveryView{Level: levelNum, Discovered: s.discoveredTeleporters[levelNum]})
+	}
+	return out
 }
 
 func (e *entity) view() EntityView {

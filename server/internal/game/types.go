@@ -45,31 +45,41 @@ type Event struct {
 	Damage         *int   `json:"damage,omitempty"`
 	Heal           *int   `json:"heal,omitempty"`
 	ItemInstanceID string `json:"item_instance_id,omitempty"`
+	Level          *int   `json:"level,omitempty"`
 	FromLevel      *int   `json:"from_level,omitempty"`
 	ToLevel        *int   `json:"to_level,omitempty"`
 }
 
+// TeleporterDiscoveryView is the protocol view of a generated dungeon level's
+// waypoint discovery state.
+type TeleporterDiscoveryView struct {
+	Level      int  `json:"level"`
+	Discovered bool `json:"discovered"`
+}
+
 // Snapshot is the full authoritative state for rendering (session_snapshot).
 type Snapshot struct {
-	ServerTick   uint64             `json:"server_tick"`
-	SessionID    string             `json:"session_id"`
-	Seed         string             `json:"seed"`
-	CurrentLevel int                `json:"current_level"`
-	Entities     []EntityView       `json:"entities"`
-	Inventory    []ItemView         `json:"inventory"`
-	Equipped     map[string]*string `json:"equipped"`
-	RecentEvents []Event            `json:"recent_events"`
+	ServerTick            uint64                    `json:"server_tick"`
+	SessionID             string                    `json:"session_id"`
+	Seed                  string                    `json:"seed"`
+	CurrentLevel          int                       `json:"current_level"`
+	Entities              []EntityView              `json:"entities"`
+	Inventory             []ItemView                `json:"inventory"`
+	Equipped              map[string]*string        `json:"equipped"`
+	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
+	RecentEvents          []Event                   `json:"recent_events"`
 }
 
 // Change operation names (the state_delta ops).
 const (
-	OpEntitySpawn     = "entity_spawn"
-	OpEntityUpdate    = "entity_update"
-	OpEntityRemove    = "entity_remove"
-	OpInventoryAdd    = "inventory_add"
-	OpInventoryUpdate = "inventory_update"
-	OpInventoryRemove = "inventory_remove"
-	OpEquippedUpdate  = "equipped_update"
+	OpEntitySpawn               = "entity_spawn"
+	OpEntityUpdate              = "entity_update"
+	OpEntityRemove              = "entity_remove"
+	OpInventoryAdd              = "inventory_add"
+	OpInventoryUpdate           = "inventory_update"
+	OpInventoryRemove           = "inventory_remove"
+	OpEquippedUpdate            = "equipped_update"
+	OpTeleporterDiscoveryUpdate = "teleporter_discovery_update"
 )
 
 // Change is one ordered authoritative change within a tick. It marshals to
@@ -82,6 +92,8 @@ type Change struct {
 	Item           *ItemView
 	Slot           string
 	ItemInstanceID *string // for equipped_update; nil marshals as null
+	Level          int
+	Discovered     bool
 }
 
 // MarshalJSON renders the change as the precise object for its op.
@@ -117,6 +129,12 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Slot           string  `json:"slot"`
 			ItemInstanceID *string `json:"item_instance_id"`
 		}{c.Op, c.Slot, c.ItemInstanceID})
+	case OpTeleporterDiscoveryUpdate:
+		return json.Marshal(struct {
+			Op         string `json:"op"`
+			Level      int    `json:"level"`
+			Discovered bool   `json:"discovered"`
+		}{c.Op, c.Level, c.Discovered})
 	default:
 		return nil, &json.UnsupportedValueError{Str: "unknown change op: " + c.Op}
 	}

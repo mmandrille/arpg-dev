@@ -17,7 +17,7 @@
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "initial_state": { "type": "string", "enum": ["closed", "ready"] },
-          "transition": { "type": "string", "enum": ["ascend", "descend"] },
+          "transition": { "type": "string", "enum": ["ascend", "descend", "waypoint"] },
           "barrier_when_closed": {
             "type": "object",
             "required": ["size"],

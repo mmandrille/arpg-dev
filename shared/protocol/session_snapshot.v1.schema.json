@@ -4,7 +4,7 @@
   "title": "session_snapshot payload (v1)",
   "description": "Full authoritative state needed to render the scene. This validates the bare payload body (the `payload` field of a session_snapshot envelope).",
   "type": "object",
-  "required": ["server_tick", "session_id", "seed", "current_level", "entities", "inventory", "equipped", "recent_events"],
+  "required": ["server_tick", "session_id", "seed", "current_level", "entities", "inventory", "equipped", "discovered_teleporters", "recent_events"],
   "additionalProperties": false,
   "properties": {
     "server_tick": { "type": "integer", "minimum": 0 },
@@ -14,6 +14,7 @@
     "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
     "inventory": { "type": "array", "items": { "$ref": "#/$defs/item" } },
     "equipped": { "$ref": "#/$defs/equipped" },
+    "discovered_teleporters": { "type": "array", "items": { "$ref": "#/$defs/teleporter_discovery" } },
     "recent_events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
   },
   "$defs": {
@@ -64,6 +65,15 @@
         "weapon": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
       }
     },
+    "teleporter_discovery": {
+      "type": "object",
+      "required": ["level", "discovered"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "maximum": -1 },
+        "discovered": { "type": "boolean" }
+      }
+    },
     "event": {
       "type": "object",
       "required": ["event_type"],
@@ -74,6 +84,7 @@
         "damage": { "type": "integer", "minimum": 0 },
         "heal": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "level": { "type": "integer" },
         "from_level": { "type": "integer" },
         "to_level": { "type": "integer" }
       },
@@ -114,6 +125,13 @@
           "then": {
             "required": ["from_level", "to_level"]
           }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "teleporter_discovered" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "level"] }
         }
       ]
     }

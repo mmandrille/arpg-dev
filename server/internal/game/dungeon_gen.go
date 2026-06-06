@@ -9,13 +9,19 @@ import (
 const dungeonCoinStairDistance = 7.0
 
 type generatedDungeonLevel struct {
-	levelNum int
-	walls    []wallObstacle
-	stairs   []generatedStair
-	loot     []generatedLoot
+	levelNum    int
+	walls       []wallObstacle
+	stairs      []generatedStair
+	teleporters []generatedTeleporter
+	loot        []generatedLoot
 }
 
 type generatedStair struct {
+	defID string
+	pos   Vec2
+}
+
+type generatedTeleporter struct {
 	defID string
 	pos   Vec2
 }
@@ -44,6 +50,11 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	}
 	if levelNum == -1 {
 		out.stairs = append(out.stairs, generatedStair{defID: stairsDownDefID, pos: down})
+		teleporter, ok := randomTeleporterPosition(rng, rules, out.stairPositions())
+		if !ok {
+			return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
+		}
+		out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
 		return out, nil
 	}
 
@@ -55,11 +66,24 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		generatedStair{defID: stairsUpDefID, pos: up},
 		generatedStair{defID: stairsDownDefID, pos: down},
 	)
+	teleporter, ok := randomTeleporterPosition(rng, rules, out.stairPositions())
+	if !ok {
+		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
+	}
+	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
 	out.loot = append(out.loot, generatedLoot{
 		itemDefID: "training_badge",
 		pos:       stairDistantLootPosition(up, rules),
 	})
 	return out, nil
+}
+
+func (g generatedDungeonLevel) stairPositions() []Vec2 {
+	positions := make([]Vec2, 0, len(g.stairs))
+	for _, stair := range g.stairs {
+		positions = append(positions, stair.pos)
+	}
+	return positions
 }
 
 func perimeterWalls(size DungeonFloorSize, thickness float64) []wallObstacle {
@@ -87,6 +111,35 @@ func randomStairPosition(rng *RNG, rules DungeonGenerationRules, separatedFrom *
 			Y: float64(minY + rng.IntN(maxY-minY+1)),
 		}
 		if separatedFrom != nil && distance(pos, *separatedFrom) < placement.MinSeparation {
+			continue
+		}
+		return pos, true
+	}
+	return Vec2{}, false
+}
+
+func randomTeleporterPosition(rng *RNG, rules DungeonGenerationRules, stairs []Vec2) (Vec2, bool) {
+	placement := rules.TeleporterPlacement
+	minX := int(math.Ceil(placement.MarginFromWall))
+	maxX := int(math.Floor(rules.FloorSize.Width - placement.MarginFromWall))
+	minY := int(math.Ceil(placement.MarginFromWall))
+	maxY := int(math.Floor(rules.FloorSize.Height - placement.MarginFromWall))
+	if maxX < minX || maxY < minY {
+		return Vec2{}, false
+	}
+	for attempt := 0; attempt < placement.MaxAttempts; attempt++ {
+		pos := Vec2{
+			X: float64(minX + rng.IntN(maxX-minX+1)),
+			Y: float64(minY + rng.IntN(maxY-minY+1)),
+		}
+		tooClose := false
+		for _, stair := range stairs {
+			if distance(pos, stair) < placement.MinStairDistance {
+				tooClose = true
+				break
+			}
+		}
+		if tooClose {
 			continue
 		}
 		return pos, true

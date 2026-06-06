@@ -9,5 +9,6 @@
   ],
   "inventory": [],
   "equipped": { "weapon": null },
+  "discovered_teleporters": [],
   "recent_events": []
 }

@@ -105,6 +105,21 @@ def test_select_scenarios_accepts_file_name_and_stem():
     assert [s.id for s in by_stem] == ["ranged_lab"]
 
 
+def test_load_scenarios_discovers_inventory_lab():
+    scenarios = load_scenarios()
+    inventory = next(s for s in scenarios if s.id == "inventory_lab")
+    raw = json.loads(inventory.path.read_text())
+
+    assert inventory.world_id == "inventory_lab"
+    assert {"action": "unequip_slot", "slot": "weapon"} in inventory.steps
+    assert {"action": "drop_inventory_item", "item_def_id": "rusty_sword"} in inventory.steps
+    assert {
+        "type": "equipped_weapon_def",
+        "item_def_id": "rusty_sword",
+    } in inventory.assertions
+    assert raw.get("visual", {}).get("inventory_panel") is True
+
+
 def test_select_scenarios_rejects_unknown_id():
     scenarios = load_scenarios()
 
@@ -165,13 +180,14 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
                 {"op": "inventory_add", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": False}},
                 {"op": "inventory_update", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": True}},
                 {"op": "equipped_update", "slot": "weapon", "item_instance_id": "1004"},
+                {"op": "inventory_remove", "item_instance_id": "1004"},
             ],
             "events": [],
         },
     }, state)
 
     assert find_loot(state, "rusty_sword") is None
-    assert find_inventory_item(state.inventory, "rusty_sword")["equipped"] is True
+    assert find_inventory_item(state.inventory, "rusty_sword") is None
     assert state.equipped["weapon"] == "1004"
 
 
@@ -234,6 +250,7 @@ def test_structured_assertions():
         {"type": "monster_dead", "monster_def_id": "training_dummy_reward"},
         {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
         {"type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open"},
+        {"type": "equipped_weapon_def", "item_def_id": "rusty_sword"},
     ], entities, inventory, {"weapon": "1004"}, None, "test")
 
 

@@ -11,8 +11,8 @@ Last updated: 2026-06-05
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v13 — `inventory-ui` (authoritative inventory panel, unequip, and drop) |
-| **Active branch** | `feature/solid-collision-and-obstacles` |
+| **Latest completed slice** | v14 — `godot-client-bot` (Godot-native client bot, 5 CI scenarios, `make bot-client`) |
+| **Active branch** | `feature/godot-client-bot` |
 | **CI gate** | `make ci` green on 2026-06-05 |
 | **Next slice** | TBD |
 
@@ -29,6 +29,7 @@ v4_* = take-a-hit        v10_* = click-action-and-melee-range
 v11_* = click-to-move-and-auto-path
 v12_* = ranged-projectile-combat
 v13_* = inventory-ui
+v14_* = godot-client-bot
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -62,6 +63,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v11** | `click-to-move-and-auto-path` | Complete (`make ci` green) | [`v11_spec-click-to-move-and-auto-path.md`](specs/v11_spec-click-to-move-and-auto-path.md) | [`v11_2026-06-05-click-to-move-and-auto-path.md`](plans/v11_2026-06-05-click-to-move-and-auto-path.md) |
 | **v12** | `ranged-projectile-combat` | Complete (`make ci` green) | [`v12_spec-ranged-projectile-combat.md`](specs/v12_spec-ranged-projectile-combat.md) | [`v12_2026-06-05-ranged-projectile-combat.md`](plans/v12_2026-06-05-ranged-projectile-combat.md) |
 | **v13** | `inventory-ui` | Complete (`make ci` green) | [`v13_spec-inventory-ui.md`](specs/v13_spec-inventory-ui.md) | [`v13_2026-06-05-inventory-ui.md`](plans/v13_2026-06-05-inventory-ui.md) |
+| **v14** | `godot-client-bot` | Complete (`make ci` green) | [`v14_spec-godot-client-bot.md`](specs/v14_spec-godot-client-bot.md) | [`v14_2026-06-02-godot-client-bot.md`](plans/v14_2026-06-02-godot-client-bot.md) |
 
 ---
 
@@ -272,6 +274,42 @@ intents mutate authoritative state, persistence, replay, and resume.
 beyond weapon, production item icons, Godot inventory plugins, character-scoped persistence, item
 destruction, or drop targeting/range gates.
 
+### v14 — Godot client bot
+
+**Proves:** The client input pipeline (ray-pick targeting, inventory UI, keyboard shortcuts) can be
+driven and asserted by an automated bot running inside `main.tscn` in headless Godot, in CI,
+without a human watching.
+
+- `BotController` mounts inside `main.tscn` when `ARPG_BOT_CLIENT=1`; `BotScenarioRunner`
+  executes client scenarios one frame-tick step at a time.
+- `get_bot_state()` exposes reconciled client state (ws_open, entities, inventory, equipped,
+  pending_events) as a read-only dictionary; the bot dispatches intents through `bot_dispatch_action`
+  and `bot_dispatch_inventory_intent` which route through the same `client.send()` and
+  `_on_inventory_intent_requested()` paths as human input.
+- `press_key KEY_I` pushes a real `InputEventKey` through `get_viewport().push_input()` and
+  toggles the actual `InventoryPanel` via `_unhandled_input()`.
+- Headless ray-pick fallback: `click_entity` dispatches `action_intent` directly (documented fallback;
+  `Input.warp_mouse()` has no effect without a real display server, making `get_mouse_position()`
+  unreliable for ray-pick targeting in `--headless` mode).
+- `scripts/bot_client.sh` discovers `tools/bot/scenarios/client/*.json`, validates each, and runs
+  one fresh Godot headless process per scenario, checking for the `[bot-client] PASS` sentinel.
+- 5 client scenarios: `click_to_kill`, `inventory_open_close`, `inventory_equip_unequip`,
+  `inventory_lab_drop_item`, `click_to_move` — all green against a live server.
+- 24 `test_client_bot.gd` unit tests cover scenario parsing, validation, timeout messages, and
+  PASS/FAIL sentinel formatting without requiring a live server — wired into `make client-unit`.
+- `make bot-client` added to `make/agents.mk`; step 7/8 added to `scripts/ci.sh`; all 8 CI steps green.
+- Python bot, replay verification, and visual replay are unchanged.
+
+**As-built headless constraint:** `Input.warp_mouse()` is a no-op in `--headless` mode (no display
+server); `click_entity` and `click_floor` therefore use the documented direct fallback (same
+`action_intent`/`move_to_intent` WebSocket send path). A manual windowed run confirms ray-pick works
+correctly with a real display. Drag-and-drop inventory operations also use the direct path through
+`bot_dispatch_inventory_intent`, since Control drag events require a real display server.
+
+**Explicit non-goals:** no multi-scenario concurrency per process, no pixel-level assertion,
+no competing/multiplayer bots, no headless ray-pick workaround, no v14 changes to Go server
+or shared protocol.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -312,7 +350,9 @@ inventory_lab: pick up rusty_sword → equip → unequip → drop → re-pickup 
 ```bash
 make db-up && make server    # terminal 1
 make bot                     # terminal 2 — all protocol bot scenarios
+make client-unit             # headless Godot unit gates (no server required)
 make client-smoke            # headless Godot gates + slice smoke
+make bot-client              # Godot client bot (all 5 scenarios; requires live server)
 make ci                      # full suite
 make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
 make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenario by file name or id

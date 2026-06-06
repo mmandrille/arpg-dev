@@ -1,0 +1,12 @@
+{
+  "id": "click_to_move",
+  "runner": "godot_client",
+  "world_id": "vertical_slice",
+  "title": "Click-to-move: synthetic floor click triggers move_to_intent",
+  "description": "Bot dispatches move_to_intent for an unobstructed floor position and waits until player position is within 2.5 units.",
+  "client_steps": [
+    { "type": "wait_ws_open",     "timeout_s": 10.0 },
+    { "type": "click_floor",      "x": 3.0, "z": 3.0 },
+    { "type": "wait_player_near", "x": 3.0, "z": 3.0, "distance": 2.5, "timeout_s": 10.0 }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "inventory_equip_unequip",
+  "runner": "godot_client",
+  "world_id": "inventory_lab",
+  "title": "Inventory equip/unequip: drag bag-to-slot and back",
+  "description": "Bot picks up rusty_sword, opens panel, equips via drag_bag_to_weapon_slot, waits for server item_equipped event, asserts equipped, then unequips via drag_weapon_to_bag, waits for item_unequipped, asserts unequipped.",
+  "client_steps": [
+    { "type": "wait_ws_open",             "timeout_s": 10.0 },
+    { "type": "wait_entity",              "entity_type": "loot", "timeout_s": 10.0 },
+    { "type": "click_entity",             "entity_type": "loot" },
+    { "type": "wait_inventory_item",      "timeout_s": 10.0 },
+    { "type": "press_key",                "keycode": "KEY_I" },
+    { "type": "assert_panel_visible",     "visible": true },
+    { "type": "drag_bag_to_weapon_slot",  "item_def_id": "rusty_sword" },
+    { "type": "wait_event",               "event_type": "item_equipped", "timeout_s": 10.0 },
+    { "type": "assert_equipped",          "slot": "weapon" },
+    { "type": "drag_weapon_to_bag" },
+    { "type": "wait_event",               "event_type": "item_unequipped", "timeout_s": 10.0 },
+    { "type": "assert_unequipped",        "slot": "weapon" }
+  ]
+}

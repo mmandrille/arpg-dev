@@ -1,6 +1,9 @@
 class_name InputShadowOverlay
 extends CanvasLayer
 
+# Ghost cursor overlay for windowed `make bot-client` runs — visualizes bot
+# actions (clicks, keys, inventory drags) without faking replay events.
+
 const CURSOR_COLOR := Color(0.35, 0.92, 1.0, 0.82)
 const CURSOR_OUTLINE := Color(0.05, 0.08, 0.12, 0.95)
 const KEY_BG := Color(0.08, 0.1, 0.14, 0.9)

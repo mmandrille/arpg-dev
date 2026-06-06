@@ -309,7 +309,7 @@ func TestAutoPathGolden(t *testing.T) {
 			if len(steps) > rules.Navigation.MaxAutoSteps {
 				t.Fatalf("path len %d exceeds max_auto_steps %d", len(steps), rules.Navigation.MaxAutoSteps)
 			}
-			if !meleeInRange(distance(end, target.pos), sim.playerReach(), sim.targetInteractionRadius(target)) {
+			if !meleeInRange(distance(end, target.pos), sim.playerMeleeReach(), sim.targetInteractionRadius(target)) {
 				t.Fatalf("path end %+v is not in melee reach of target %+v", end, target.pos)
 			}
 		})
@@ -471,6 +471,64 @@ func TestRangedDummyDropsThreeSeparatedLootItems(t *testing.T) {
 		if !seen {
 			t.Fatalf("missing ranged loot %s in %+v", itemDefID, r.Changes)
 		}
+	}
+}
+
+func TestRangedBowLootRequiresMeleeReach(t *testing.T) {
+	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	if sim.playerActionReach() != 16.0 {
+		t.Fatalf("playerActionReach = %v, want bow reach 16.0", sim.playerActionReach())
+	}
+	if sim.playerMeleeReach() != sim.rules.Combat.UnarmedReach {
+		t.Fatalf("playerMeleeReach = %v, want unarmed %v", sim.playerMeleeReach(), sim.rules.Combat.UnarmedReach)
+	}
+
+	sim.entities[sim.playerID].pos = Vec2{X: 2, Y: 8}
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.hp = 1
+	fire := sim.Tick([]Input{{MessageID: "kill", CorrelationID: "corr_kill", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, fire, "kill")
+	var loot *entity
+	for i := 0; i < 20; i++ {
+		r := sim.Tick(nil)
+		if hasEvent(r, "monster_killed") {
+			for _, c := range r.Changes {
+				if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == lootEntity {
+					loot = sim.findEntity(c.Entity.ID)
+					break
+				}
+			}
+		}
+		if loot != nil {
+			break
+		}
+	}
+	if loot == nil {
+		t.Fatal("missing loot after ranged kill")
+	}
+	if sim.inMeleeRange(loot) {
+		t.Fatalf("player at %+v should not be in melee range of loot at %+v with bow equipped", sim.entities[sim.playerID].pos, loot.pos)
+	}
+
+	pickup := sim.Tick([]Input{{MessageID: "loot_pick", CorrelationID: "corr_loot", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(loot.id)}}})
+	assertAck(t, pickup, "loot_pick")
+	if sim.autoNav == nil {
+		t.Fatal("loot pickup from range should queue auto-nav, not dispatch immediately")
+	}
+	if hasEvent(pickup, "item_picked_up") {
+		t.Fatal("loot picked up instantly from ranged distance")
+	}
+
+	picked := false
+	for i := 0; i < 80; i++ {
+		r := sim.Tick(nil)
+		if hasEvent(r, "item_picked_up") {
+			picked = true
+			break
+		}
+	}
+	if !picked {
+		t.Fatal("auto-nav did not complete loot pickup within tick budget")
 	}
 }
 

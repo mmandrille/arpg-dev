@@ -1,0 +1,7 @@
+{
+  "scroll_max_visible_rows": 9,
+  "scroll_viewport_unit_px": 36,
+  "row_height_px": 32,
+  "scroll_min_width_px": 220,
+  "panel_min_width_px": 230
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/waypoint_panel.v0.schema.json",
+  "title": "Waypoint panel UI golden fixture (v0)",
+  "type": "object",
+  "required": [
+    "scroll_max_visible_rows",
+    "scroll_viewport_unit_px",
+    "row_height_px",
+    "scroll_min_width_px",
+    "panel_min_width_px"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "scroll_max_visible_rows": { "type": "integer", "minimum": 1 },
+    "scroll_viewport_unit_px": { "type": "integer", "minimum": 1 },
+    "row_height_px": { "type": "integer", "minimum": 1 },
+    "scroll_min_width_px": { "type": "integer", "minimum": 1 },
+    "panel_min_width_px": { "type": "integer", "minimum": 1 }
+  }
+}

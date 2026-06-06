@@ -60,6 +60,9 @@ run_gate "GDScript animation test" "[gdtest] PASS: animation controller + scenes
 # 2d. Bot scenario runner unit tests (server-independent).
 run_gate "GDScript client bot unit test" "[gdtest] PASS: test_client_bot" res://tests/test_client_bot.gd
 
+# 2e. Waypoint panel scroll/layout test (server-independent; v19).
+run_gate "GDScript waypoint panel test" "[gdtest] PASS: test_waypoint_panel" res://tests/test_waypoint_panel.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0

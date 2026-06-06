@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/dungeon_teleporters.v0.schema.json",
+  "title": "Dungeon teleporters golden fixture (v0)",
+  "type": "object",
+  "required": ["seed", "world_id", "discover_descend_teleport", "visited_undiscovered_target"],
+  "additionalProperties": false,
+  "properties": {
+    "seed": { "type": "string", "minLength": 1 },
+    "world_id": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "discover_descend_teleport": { "$ref": "#/$defs/outcome" },
+    "visited_undiscovered_target": {
+      "type": "object",
+      "required": ["reject_reason", "discovered_teleporters"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "reject_reason": { "type": "string", "minLength": 1 },
+        "discovered_teleporters": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/teleporter_discovery" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "teleporter_discovery": {
+      "type": "object",
+      "required": ["level", "discovered"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer" },
+        "discovered": { "type": "boolean" }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["expected_level", "expected_player_position", "discovered_teleporters"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "expected_level": { "type": "integer" },
+        "expected_player_position": { "$ref": "#/$defs/vec2" },
+        "discovered_teleporters": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/teleporter_discovery" }
+        }
+      }
+    }
+  }
+}

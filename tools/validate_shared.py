@@ -130,6 +130,8 @@ def cross_checks(report: Report) -> None:
     inventory_drop_golden = load(GOLDEN / "inventory_drop.json")
     use_consumable_golden = load(GOLDEN / "use_consumable.json")
     monster_chase_golden = load(GOLDEN / "monster_chase.json")
+    dungeon_stairs_golden = load(GOLDEN / "dungeon_stairs.json")
+    dungeon_teleporters_golden = load(GOLDEN / "dungeon_teleporters.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -523,6 +525,17 @@ def cross_checks(report: Report) -> None:
         report.fail("teleporter interactable", "expected ready/waypoint")
     else:
         report.ok("teleporter interactable is ready/waypoint")
+
+    if dungeon_teleporters_golden["seed"] != dungeon_stairs_golden["seed"]:
+        report.fail("dungeon_teleporters golden", "seed must match dungeon_stairs.json")
+    else:
+        tp_outcome = dungeon_teleporters_golden["discover_descend_teleport"]
+        if tp_outcome["expected_level"] != -1:
+            report.fail("dungeon_teleporters golden", "discover_descend_teleport.expected_level must be -1")
+        elif tp_outcome["expected_player_position"] != dungeon_stairs_golden["levels"]["-1"]["teleporter"]:
+            report.fail("dungeon_teleporters golden", "expected_player_position must match level -1 teleporter")
+        else:
+            report.ok("dungeon_teleporters golden matches stairs seed and travel outcome")
 
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])

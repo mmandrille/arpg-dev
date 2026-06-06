@@ -1,0 +1,21 @@
+docs/adr/0008-world-structure-and-dungeon-progression.md
+  s_1391dbd55ae6c6::t_22a0d76be6c482 1-179
+docs/PROGRESS.md
+  s_1391dbd55ae6c6::t_73e6a06c8874fe 393,395-397
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "238d6596a920ca18621e4d2eebf935aebf01243a",
+  "prompts": {},
+  "sessions": {
+    "s_1391dbd55ae6c6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fddd9182-0713-4976-a5a3-de32e1e810ca",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

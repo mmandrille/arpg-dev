@@ -1,0 +1,21 @@
+client/scripts/main.gd
+  s_9329a4ac910fb5::t_c0c3835b0c3168 1103-1105
+tools/bot/scenarios/client/01_click_to_kill.json
+  s_9329a4ac910fb5::t_c0c3835b0c3168 11-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "193ff6c53c5ae3e10bd43a9abaad4d90752e5a83",
+  "prompts": {},
+  "sessions": {
+    "s_9329a4ac910fb5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b02-b5a2-74f0-b009-dd5ea3316935",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

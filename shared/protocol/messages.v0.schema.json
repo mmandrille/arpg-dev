@@ -17,6 +17,7 @@
         "equip_intent",
         "unequip_intent",
         "drop_intent",
+        "use_intent",
         "session_snapshot",
         "state_delta",
         "intent_accepted",
@@ -45,6 +46,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/unequip_intent" } } } },
     { "if": { "properties": { "type": { "const": "drop_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/drop_intent" } } } },
+    { "if": { "properties": { "type": { "const": "use_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/use_intent" } } } },
     { "if": { "properties": { "type": { "const": "intent_accepted" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/intent_accepted" } } } },
     { "if": { "properties": { "type": { "const": "intent_rejected" } } },
@@ -116,6 +119,14 @@
       }
     },
     "drop_intent": {
+      "type": "object",
+      "required": ["item_instance_id"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "use_intent": {
       "type": "object",
       "required": ["item_instance_id"],
       "additionalProperties": false,

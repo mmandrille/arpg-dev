@@ -412,6 +412,8 @@ func _slot_style(hover: bool) -> StyleBoxFlat:
 func _handle_double_click(item: Dictionary) -> void:
 	if _is_weapon(item):
 		intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": "weapon"})
+	elif _is_consumable(item):
+		intent_requested.emit("use_intent", {"item_instance_id": str(item.get("item_instance_id", ""))})
 
 
 func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
@@ -430,6 +432,12 @@ func _is_weapon(item: Dictionary) -> bool:
 	var def_id := str(item.get("item_def_id", ""))
 	var def: Dictionary = item_rules.get(def_id, {})
 	return bool(def.get("equippable", false)) and str(def.get("slot", "")) == "weapon"
+
+
+func _is_consumable(item: Dictionary) -> bool:
+	var def_id := str(item.get("item_def_id", ""))
+	var def: Dictionary = item_rules.get(def_id, {})
+	return str(def.get("category", "")) == "consumable"
 
 
 func _equipped_weapon_item() -> Dictionary:

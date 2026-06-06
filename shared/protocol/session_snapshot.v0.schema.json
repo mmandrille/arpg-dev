@@ -71,6 +71,7 @@
         "entity_id": { "$ref": "#/$defs/decimal_id" },
         "correlation_id": { "$ref": "#/$defs/prefixed_id" },
         "damage": { "type": "integer", "minimum": 0 },
+        "heal": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" }
       },
       "allOf": [
@@ -80,6 +81,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["damage"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["player_healed", "item_used"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["heal", "item_instance_id"] }
         },
         {
           "if": {

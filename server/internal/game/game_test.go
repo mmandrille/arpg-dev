@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -73,6 +74,10 @@ func TestLoadRules(t *testing.T) {
 	}
 	if r.Items["training_badge"].Damage != nil {
 		t.Fatalf("training_badge damage = %+v, want nil", r.Items["training_badge"].Damage)
+	}
+	potion := r.Items["red_potion"]
+	if potion.Category != "consumable" || potion.Heal == nil || potion.Heal.Min != 5 || potion.Heal.Max != 5 {
+		t.Fatalf("red_potion def = %+v, want consumable heal {5,5}", potion)
 	}
 	if _, ok := r.Worlds[DefaultWorldID]; !ok {
 		t.Fatalf("missing default world %q", DefaultWorldID)
@@ -1083,6 +1088,114 @@ func TestDropNoSpace(t *testing.T) {
 	}
 }
 
+func TestUseConsumableHealLab(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_heal_lab", "01", rules, "heal_lab")
+	if err != nil {
+		t.Fatalf("new heal lab: %v", err)
+	}
+	monster := findMonsterByDef(sim, "training_dummy_heal")
+	if monster == nil {
+		t.Fatal("missing heal_lab training_dummy_heal")
+	}
+
+	for i := 0; i < 2; i++ {
+		attack := sim.Tick([]Input{{
+			MessageID: "attack",
+			Type:      "action_intent",
+			Action:    &ActionIntent{TargetID: idStr(monster.id)},
+		}})
+		assertAck(t, attack, "attack")
+		if monster.hp == 0 {
+			break
+		}
+	}
+	player := sim.entities[sim.playerID]
+	if player.hp != 4 {
+		t.Fatalf("player hp after combat = %d, want 4", player.hp)
+	}
+	loots := findAllLootByDef(sim, "red_potion")
+	if len(loots) != 2 {
+		t.Fatalf("loot drops = %+v, want two red_potion", loots)
+	}
+
+	for i := 0; i < 2; i++ {
+		loot := findLootByDef(sim, "red_potion")
+		if loot == nil {
+			t.Fatalf("missing red_potion loot pickup %d", i)
+		}
+		pickup := sim.Tick([]Input{{
+			MessageID: fmt.Sprintf("pickup-%d", i),
+			Type:      "action_intent",
+			Action:    &ActionIntent{TargetID: idStr(loot.id)},
+		}})
+		assertAck(t, pickup, fmt.Sprintf("pickup-%d", i))
+		if sim.autoNav != nil {
+			for step := 0; step < 30 && findLootByDef(sim, "red_potion") != nil; step++ {
+				sim.Tick(nil)
+			}
+		}
+	}
+	if len(sim.inventory) != 2 {
+		t.Fatalf("inventory after pickups = %+v, want two items", sim.inventory)
+	}
+
+	firstID := idStr(sim.inventory[0].instanceID)
+	use1 := sim.Tick([]Input{{
+		MessageID: "use1",
+		Type:      "use_intent",
+		Use:       &UseIntent{ItemInstanceID: firstID},
+	}})
+	assertAck(t, use1, "use1")
+	if player.hp != 9 {
+		t.Fatalf("player hp after first use = %d, want 9", player.hp)
+	}
+	assertEventHeal(t, use1, "player_healed", 5)
+
+	secondID := idStr(sim.inventory[0].instanceID)
+	use2 := sim.Tick([]Input{{
+		MessageID: "use2",
+		Type:      "use_intent",
+		Use:       &UseIntent{ItemInstanceID: secondID},
+	}})
+	assertAck(t, use2, "use2")
+	if player.hp != 10 {
+		t.Fatalf("player hp after second use = %d, want 10", player.hp)
+	}
+	if len(sim.inventory) != 0 {
+		t.Fatalf("inventory after second use = %+v, want empty", sim.inventory)
+	}
+	assertEventHeal(t, use2, "player_healed", 1)
+}
+
+func TestUseConsumableRejectsFullHP(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_use_full", "01", rules, "heal_lab")
+	if err != nil {
+		t.Fatalf("new heal lab: %v", err)
+	}
+	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "red_potion", equipped: false})
+
+	r := sim.Tick([]Input{{MessageID: "use", Type: "use_intent", Use: &UseIntent{ItemInstanceID: "5000"}}})
+	assertReject(t, r, "use", "already_full_hp")
+	if len(sim.inventory) != 1 {
+		t.Fatalf("inventory mutated on rejected use: %+v", sim.inventory)
+	}
+}
+
+func TestUseConsumableRejectsNonConsumable(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_use_badge", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatalf("new inventory lab: %v", err)
+	}
+	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge", equipped: false})
+	sim.entities[sim.playerID].hp = 5
+
+	r := sim.Tick([]Input{{MessageID: "use", Type: "use_intent", Use: &UseIntent{ItemInstanceID: "5000"}}})
+	assertReject(t, r, "use", "not_consumable")
+}
+
 func TestAdjacentLootDropSpreadsAndAvoidsWalls(t *testing.T) {
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess_multi_drop", "01", rules, "inventory_lab")
@@ -1511,6 +1624,36 @@ func findLootByDef(sim *Sim, itemDefID string) *entity {
 	return nil
 }
 
+func findAllLootByDef(sim *Sim, itemDefID string) []*entity {
+	var out []*entity
+	for _, id := range sortedEntityIDs(sim.entities) {
+		e := sim.entities[id]
+		if e.kind == lootEntity && e.itemDefID == itemDefID {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+func findMonsterByDef(sim *Sim, monsterDefID string) *entity {
+	for _, id := range sortedEntityIDs(sim.entities) {
+		e := sim.entities[id]
+		if e.kind == monsterEntity && e.monsterDefID == monsterDefID {
+			return e
+		}
+	}
+	return nil
+}
+
+func findItemByDef(sim *Sim, itemDefID string) *invItem {
+	for _, item := range sim.inventory {
+		if item.itemDefID == itemDefID {
+			return item
+		}
+	}
+	return nil
+}
+
 func hasChange(r TickResult, op string) bool {
 	for _, c := range r.Changes {
 		if c.Op == op {
@@ -1591,6 +1734,20 @@ func hasEvent(r TickResult, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func assertEventHeal(t *testing.T, r TickResult, eventType string, want int) {
+	t.Helper()
+	for _, ev := range r.Events {
+		if ev.EventType != eventType {
+			continue
+		}
+		if ev.Heal == nil || *ev.Heal != want {
+			t.Fatalf("%s heal = %v, want %d in events %+v", eventType, ev.Heal, want, r.Events)
+		}
+		return
+	}
+	t.Fatalf("missing event %s in %+v", eventType, r.Events)
 }
 
 func assertEventDamage(t *testing.T, r TickResult, eventType string, want int) {

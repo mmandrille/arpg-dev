@@ -10,6 +10,8 @@ const AnimationControllerScript := preload("res://scripts/animation_controller.g
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
+const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MONSTER_EVENT_CLIPS := {
@@ -28,6 +30,7 @@ var player_anim: AnimationController
 var entities: Dictionary = {}        # id (String) -> {node:Node3D, controller:AnimationController|null, type:String}
 var player_id: String = ""
 var player_hp: int = PLAYER_START_HP
+var player_max_hp: int = PLAYER_START_HP
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
@@ -41,6 +44,7 @@ var interactable_ids: Array = []
 var ready_sent: bool = false
 var item_to_equip: String = ""
 var bot_mode: bool = false
+var _bot_logged_snapshot: bool = false
 var _bot_pending_events: Array = []
 var autoplay_enabled: bool = false
 var autoplay_phase: String = "idle"
@@ -82,7 +86,9 @@ var health_bars_layer: CanvasLayer
 var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
 var walls_root: Node3D
 var inventory_panel: InventoryPanel
+var consumable_bar: ConsumableBar
 var input_shadow: InputShadowOverlay
+var _health_bar: PlayerHealthBar
 
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
@@ -115,9 +121,14 @@ func _ready() -> void:
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
 
 	client = NetClientScript.new(base_url)
+	var bot_client_run := _truthy_env("ARPG_BOT_CLIENT")
 	if not client.login(_env("ARPG_EMAIL", "client@example.test"), dev_token):
+		if bot_client_run:
+			printerr("[bot-client] login failed base_url=%s" % base_url)
 		_debug("login failed")
 		return
+	if bot_client_run:
+		print("[bot-client] login ok")
 	visual_replay_manifest_path = _env("ARPG_VISUAL_REPLAY_MANIFEST", "")
 	visual_replay_enabled = visual_replay_manifest_path != ""
 	if visual_replay_enabled:
@@ -133,8 +144,12 @@ func _ready() -> void:
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
 	if not client.create_session(resume_session_id, requested_world_id):
+		if bot_client_run:
+			printerr("[bot-client] session failed world_id=%s resume=%s" % [requested_world_id, resume_session_id])
 		_debug("session failed")
 		return
+	if bot_client_run:
+		print("[bot-client] session ok id=%s world=%s" % [client.session_id, client.world_id])
 	_render_world_walls(client.world_id)
 	autoplay_enabled = _truthy_env("ARPG_AUTOPLAY")
 	if autoplay_enabled:
@@ -144,8 +159,9 @@ func _ready() -> void:
 	predicted_pos = Vector3.ZERO
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
-	bot_mode = _truthy_env("ARPG_BOT_CLIENT")
+	bot_mode = bot_client_run
 	if bot_mode:
+		print("[bot-client] ws connect requested session=%s" % client.session_id)
 		if input_shadow != null and DisplayServer.get_name() != "headless":
 			input_shadow.set_active(true)
 		else:
@@ -160,6 +176,8 @@ func _process(delta: float) -> void:
 
 	var state := client.ready_state()
 	if state == WebSocketPeer.STATE_OPEN and not ready_sent:
+		if bot_mode:
+			print("[bot-client] ws open, sending client_ready tick=%d" % last_server_tick)
 		client.send("client_ready", last_server_tick, {"client_version": "godot", "last_seen_tick": last_server_tick})
 		ready_sent = true
 
@@ -218,8 +236,13 @@ func _apply_snapshot(p: Dictionary) -> void:
 	equipped = p.get("equipped", {})
 	if resolver != null:
 		resolver.apply_snapshot(p)
-	_refresh_inventory_panel()
+	_refresh_inventory_ui()
 	_reconcile_player()
+	if bot_mode and not _bot_logged_snapshot:
+		_bot_logged_snapshot = true
+		print("[bot-client] snapshot applied entities=%d monsters=%d loot=%d hp=%d" % [
+			entities.size(), monster_ids.size(), loot_ids.size(), player_hp
+		])
 
 
 func _apply_delta(p: Dictionary) -> void:
@@ -246,7 +269,7 @@ func _apply_delta(p: Dictionary) -> void:
 					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
 			_:
 				pass
-	_refresh_inventory_panel()
+	_refresh_inventory_ui()
 	for ev in p.get("events", []):
 		var eid := str(ev.get("entity_id", ""))
 		var event_type := str(ev.get("event_type", ""))
@@ -255,6 +278,15 @@ func _apply_delta(p: Dictionary) -> void:
 			if hint != null:
 				inventory_panel.show_gesture_hint(str(hint))
 		if eid == player_id:
+			if event_type == "player_healed":
+				_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
+				if _health_bar != null:
+					_health_bar.update_hp(player_hp, player_max_hp, true)
+				continue
+			if event_type == "player_damaged":
+				_show_damage_number(eid, Color(1.0, 0.32, 0.2), ev.get("damage", null))
+				if _health_bar != null:
+					_health_bar.update_hp(player_hp, player_max_hp)
 			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
 			if player_clip == null or player_anim == null:
 				continue
@@ -304,6 +336,10 @@ func _upsert_entity(e: Dictionary) -> void:
 		player_id = id
 		if e.has("hp"):
 			player_hp = int(e["hp"])
+			if e.has("max_hp"):
+				player_max_hp = int(e["max_hp"])
+			if _health_bar != null:
+				_health_bar.update_hp(player_hp, player_max_hp)
 			if player_hp <= 0 and player_anim != null:
 				player_anim.enter_terminal("death")
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
@@ -391,11 +427,17 @@ func _remove_inventory_item(item_instance_id: String) -> void:
 			inventory.remove_at(i)
 
 
-func _refresh_inventory_panel() -> void:
+func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
 		inventory_panel.set_inventory_state(inventory, equipped)
-		if visual_replay_enabled:
-			_sync_inventory_replay_display()
+	if consumable_bar != null:
+		consumable_bar.set_inventory_state(inventory)
+
+
+func _refresh_inventory_panel() -> void:
+	_refresh_inventory_ui()
+	if visual_replay_enabled:
+		_sync_inventory_replay_display()
 
 
 func _reconcile_player() -> void:
@@ -403,14 +445,10 @@ func _reconcile_player() -> void:
 		player_anchor.position = predicted_pos
 
 
-func _show_damage_number(entity_id: String, color: Color, event_damage = null) -> void:
-	if damage_numbers_layer == null or _camera == null:
-		return
-
-	if event_damage == null:
+func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0) -> void:
+	if damage_numbers_layer == null or _camera == null or event_damage == null:
 		return
 	var amount := int(event_damage)
-
 	var target: Node3D = null
 	var world_position := Vector3.ZERO
 	if entity_id == player_id:
@@ -421,11 +459,10 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null) -
 		world_position = target.global_position
 	else:
 		return
-
 	var pop := DamageNumberScript.new() as DamageNumber
 	damage_numbers_layer.add_child(pop)
-	var side := -1.0 if entity_id == player_id else 1.0
-	pop.setup(_camera, target, world_position, amount, color, side)
+	var side := side_override if side_override != 0.0 else (-1.0 if entity_id == player_id else 1.0)
+	pop.setup(_camera, target, world_position, amount, color, side, prefix)
 
 
 func _remove_monster_health_bar(entity_id: String) -> void:
@@ -459,11 +496,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if bot_mode and not (event is InputEventKey):
 		return
-	if event is InputEventKey and event.pressed and not event.echo and _is_inventory_key(event):
-		if inventory_panel != null:
-			inventory_panel.toggle()
-		get_viewport().set_input_as_handled()
-		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var hotbar_slot := _hotbar_slot_for_key(event)
+		if hotbar_slot >= 0:
+			if consumable_bar != null:
+				consumable_bar.use_slot(hotbar_slot)
+			get_viewport().set_input_as_handled()
+			return
+		if _is_inventory_key(event):
+			if inventory_panel != null:
+				inventory_panel.toggle()
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
@@ -500,6 +544,15 @@ func _handle_input(delta: float) -> void:
 
 func _is_inventory_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_I or event.physical_keycode == KEY_I or event.unicode == 105 or event.unicode == 73
+
+
+func _hotbar_slot_for_key(event: InputEventKey) -> int:
+	var code := event.keycode if event.keycode != KEY_NONE else event.physical_keycode
+	if code >= KEY_1 and code <= KEY_9:
+		return int(code - KEY_1)
+	if code == KEY_0:
+		return 9
+	return -1
 
 
 func _input_locked() -> bool:
@@ -771,6 +824,8 @@ func _start_next_visual_replay() -> void:
 		inventory_panel.set_interactive(false)
 		if not visual_replay_show_inventory:
 			inventory_panel.hide_display()
+	if consumable_bar != null:
+		consumable_bar.set_interactive(false)
 	_render_world_walls(world_id)
 	if session_id == "":
 		_debug("visual replay entry missing session_id; skipping")
@@ -870,6 +925,11 @@ func _build_scene() -> void:
 	inventory_panel = InventoryPanelScript.new()
 	inventory_panel.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(inventory_panel)
+	consumable_bar = ConsumableBarScript.new()
+	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
+	ui.add_child(consumable_bar)
+	_health_bar = PlayerHealthBarScript.new()
+	ui.add_child(_health_bar)
 
 	input_shadow = InputShadowOverlayScript.new()
 	add_child(input_shadow)
@@ -1150,6 +1210,7 @@ func get_bot_state() -> Dictionary:
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
+		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
 	}
 	return out
@@ -1176,6 +1237,24 @@ func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> 
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
+
+
+func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:
+	if consumable_bar == null:
+		return
+	consumable_bar.assign_slot(slot_index, item_instance_id)
+
+
+func bot_use_consumable_hotbar(slot_index: int) -> void:
+	if consumable_bar == null:
+		return
+	consumable_bar.use_slot(slot_index)
+
+
+func bot_consume_pending_event_at(index: int) -> void:
+	if index < 0 or index >= _bot_pending_events.size():
+		return
+	_bot_pending_events.remove_at(index)
 
 
 func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:

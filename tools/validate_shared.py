@@ -127,6 +127,7 @@ def cross_checks(report: Report) -> None:
     auto_path_golden = load(GOLDEN / "auto_path.json")
     ranged_projectile_golden = load(GOLDEN / "ranged_projectile.json")
     inventory_drop_golden = load(GOLDEN / "inventory_drop.json")
+    use_consumable_golden = load(GOLDEN / "use_consumable.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -256,7 +257,7 @@ def cross_checks(report: Report) -> None:
         if table not in loot["loot_tables"]:
             report.fail("monster loot_table", f"{mid} -> unknown table {table}")
             continue
-        for entry in loot["loot_tables"][table]["entries"]:
+        for entry in loot["loot_tables"][table].get("entries", []):
             if entry["item_def_id"] not in items["items"]:
                 report.fail("loot entry item", f"{table} -> unknown item {entry['item_def_id']}")
                 break
@@ -371,6 +372,34 @@ def cross_checks(report: Report) -> None:
         report.fail("inventory_drop drop_step", "must match navigation.cell_size")
     else:
         report.ok("inventory_drop golden references valid rules and constants")
+
+    use_item_id = use_consumable_golden["item_def_id"]
+    use_heal = use_consumable_golden["heal"]
+    use_item = items["items"].get(use_item_id)
+    if use_item is None:
+        report.fail("use_consumable item", f"unknown item_def_id {use_item_id}")
+    elif use_item.get("category") != "consumable":
+        report.fail("use_consumable item", f"{use_item_id} is not consumable")
+    elif use_item.get("heal") != use_heal:
+        report.fail("use_consumable item", "heal range mismatch with item rules")
+    else:
+        report.ok("use_consumable golden matches consumable item rules")
+    umin = int(use_heal["min"])
+    umax = int(use_heal["max"])
+    if umax < umin:
+        report.fail("use_consumable heal", "max must be >= min")
+    else:
+        uspan = umax - umin + 1
+        bad_use = []
+        for case in use_consumable_golden["cases"]:
+            rolled = umin + (int(case["draw"]) % uspan)
+            capped = min(rolled, int(case["player_max_hp"]) - int(case["player_hp"]))
+            if capped != int(case["expected_heal"]) or int(case["player_hp"]) + capped != int(case["expected_player_hp"]):
+                bad_use.append(case["name"])
+        if bad_use:
+            report.fail("use_consumable cases", f"{len(bad_use)} case(s) violate heal cap formula: {bad_use}")
+        else:
+            report.ok("use_consumable cases satisfy heal roll + HP cap")
 
     for interactable_id, interactable in interactables["interactables"].items():
         if interactable.get("initial_state") != "closed":

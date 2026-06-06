@@ -6,26 +6,33 @@ extends RefCounted
 
 const STEP_TYPES_WAIT := [
 	"wait_ws_open", "wait_entity", "wait_event", "wait_inventory_item",
-	"wait_loot_item", "wait_player_near", "assert_entity_removed",
+	"wait_inventory_count", "wait_loot_item", "wait_loot_count",
+	"wait_player_near", "assert_entity_removed",
 	"click_entity_until_event",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_equipped",
-	"assert_unequipped", "assert_inventory_missing",
+	"assert_unequipped", "assert_inventory_missing", "assert_inventory_count",
 	"assert_loot_presentation", "assert_inventory_presentation",
+	"assert_hotbar_assigned", "assert_player_hp",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_floor",
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
+	"assign_hotbar_slot", "double_click_bag_item",
 ]
+const WAIT_LOG_INTERVAL_S := 2.0
+
 const ALL_STEP_TYPES: Array = [
 	"wait_ws_open", "wait_entity", "wait_event", "assert_entity_removed",
-	"assert_panel_visible", "wait_inventory_item", "assert_equipped",
-	"assert_unequipped", "assert_inventory_missing", "wait_loot_item",
+	"assert_panel_visible", "wait_inventory_item", "wait_inventory_count",
+	"assert_equipped", "assert_unequipped", "assert_inventory_missing",
+	"assert_inventory_count", "wait_loot_item", "wait_loot_count",
 	"wait_player_near", "press_key", "click_entity", "click_floor",
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
 	"assert_loot_presentation", "assert_inventory_presentation",
-	"click_entity_until_event",
+	"click_entity_until_event", "assign_hotbar_slot", "assert_hotbar_assigned",
+	"assert_player_hp", "double_click_bag_item",
 ]
 
 var scenario: Dictionary = {}
@@ -34,6 +41,8 @@ var _steps: Array = []
 var _step_index: int = 0
 var _step_elapsed: float = 0.0
 var _last_retry_at: float = -999.0
+var _last_wait_log_at: float = 0.0
+var _step_begin_logged: bool = false
 var _post_step_wait: float = 0.0  # countdown after a step completes
 var _done: bool = false
 var _passed: bool = false
@@ -50,6 +59,8 @@ func load_scenario(data: Dictionary) -> bool:
 	_step_index = 0
 	_step_elapsed = 0.0
 	_last_retry_at = -999.0
+	_last_wait_log_at = 0.0
+	_step_begin_logged = false
 	_done = false
 	_passed = false
 	_failure_msg = ""
@@ -91,6 +102,10 @@ func tick(delta: float, state: Dictionary) -> bool:
 	var stype := str(step.get("type", ""))
 	_step_elapsed += delta
 
+	if not _step_begin_logged:
+		_log_step_begin(step, stype)
+		_step_begin_logged = true
+
 	var timeout_s := float(step.get("timeout_s", 0.0))
 	if timeout_s > 0.0 and _step_elapsed > timeout_s:
 		_fail("timeout after %.1fs at step %d (%s) scenario=%s" % [
@@ -99,17 +114,20 @@ func tick(delta: float, state: Dictionary) -> bool:
 		return true
 
 	if stype in STEP_TYPES_WAIT:
+		if _step_elapsed - _last_wait_log_at >= WAIT_LOG_INTERVAL_S:
+			_log_wait_progress(step, stype, state)
+			_last_wait_log_at = _step_elapsed
 		if _eval_wait(step, stype, state):
-			_advance()
+			_advance(stype)
 			_check_complete()
 	elif stype in STEP_TYPES_ASSERT:
 		if not _eval_assert(step, stype, state):
 			return true  # _eval_assert already called _fail
-		_advance()
+		_advance(stype)
 		_check_complete()
 	elif stype in STEP_TYPES_ACTION:
 		_queue_action(step, stype)
-		_advance()
+		_advance(stype)
 		_check_complete()
 	else:
 		_fail("unknown step type '%s' at step %d scenario=%s" % [
@@ -131,10 +149,19 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 		"wait_event":
 			var evtype := str(step.get("event_type", ""))
 			var pending: Array = state.get("pending_events", [])
-			for ev in pending:
-				if str(ev.get("event_type", "")) == evtype:
+			for i in range(pending.size()):
+				if str(pending[i].get("event_type", "")) == evtype:
+					if _controller != null and _controller.has_method("consume_pending_event_at"):
+						_controller.consume_pending_event_at(i)
 					return true
 			return false
+		"wait_inventory_count":
+			var def_id := str(step.get("item_def_id", ""))
+			var want := int(step.get("equals", 0))
+			return _inventory_count(state, def_id) == want
+		"wait_loot_count":
+			var min_count := int(step.get("min_count", 1))
+			return (state.get("loot_ids", []) as Array).size() >= min_count
 		"click_entity_until_event":
 			var evtype := str(step.get("event_type", ""))
 			var pending: Array = state.get("pending_events", [])
@@ -239,7 +266,60 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 				])
 				return false
 			return true
+		"assert_hotbar_assigned":
+			var slot_index := int(step.get("slot_index", -1))
+			var want_def := str(step.get("item_def_id", ""))
+			var bar: Dictionary = state.get("consumable_bar", {})
+			var assigned: Array = bar.get("assigned_slots", [])
+			if slot_index < 0 or slot_index >= assigned.size():
+				_fail("assert_hotbar_assigned failed: invalid slot_index=%d step=%d scenario=%s" % [
+					slot_index, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			var slot_val = assigned[slot_index]
+			if slot_val == null or typeof(slot_val) != TYPE_DICTIONARY:
+				_fail("assert_hotbar_assigned failed: slot %d empty step=%d scenario=%s" % [
+					slot_index, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			if str((slot_val as Dictionary).get("item_def_id", "")) != want_def:
+				_fail("assert_hotbar_assigned failed: slot %d has %s want %s step=%d scenario=%s" % [
+					slot_index, str((slot_val as Dictionary).get("item_def_id", "")), want_def,
+					_step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_player_hp":
+			var want_hp := int(step.get("equals", -1))
+			var got_hp := int(state.get("player_hp", -1))
+			if got_hp != want_hp:
+				_fail("assert_player_hp failed: want=%d got=%d step=%d scenario=%s" % [
+					want_hp, got_hp, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_inventory_count":
+			var def_id := str(step.get("item_def_id", ""))
+			var want := int(step.get("equals", 0))
+			var got := _inventory_count(state, def_id)
+			if got != want:
+				_fail("assert_inventory_count failed: %s want=%d got=%d step=%d scenario=%s" % [
+					def_id, want, got, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
 	return true
+
+
+func _inventory_count(state: Dictionary, item_def_id: String) -> int:
+	var inv: Array = state.get("inventory", [])
+	if item_def_id == "":
+		return inv.size()
+	var count := 0
+	for item in inv:
+		if str(item.get("item_def_id", "")) == item_def_id:
+			count += 1
+	return count
 
 
 func _queue_action(step: Dictionary, stype: String) -> void:
@@ -247,12 +327,79 @@ func _queue_action(step: Dictionary, stype: String) -> void:
 	pending_action["_type"] = stype
 
 
-func _advance() -> void:
+func _advance(completed_type: String = "") -> void:
+	print("[bot-client] step done idx=%d type=%s elapsed=%.2fs scenario=%s" % [
+		_step_index, completed_type, _step_elapsed, str(scenario.get("id", "?"))
+	])
 	_step_index += 1
 	_step_elapsed = 0.0
 	_last_retry_at = -999.0
+	_last_wait_log_at = 0.0
+	_step_begin_logged = false
 	if step_delay_s > 0.0:
 		_post_step_wait = step_delay_s
+
+
+func _log_step_begin(step: Dictionary, stype: String) -> void:
+	var timeout_s := float(step.get("timeout_s", 0.0))
+	var detail := _step_detail(step, stype)
+	print("[bot-client] step begin idx=%d/%d type=%s timeout=%.1fs %s scenario=%s" % [
+		_step_index, _steps.size(), stype, timeout_s, detail, str(scenario.get("id", "?"))
+	])
+
+
+func _step_detail(step: Dictionary, stype: String) -> String:
+	match stype:
+		"wait_entity", "click_entity", "click_entity_until_event", "assert_entity_removed":
+			return "entity_type=%s" % str(step.get("entity_type", ""))
+		"wait_event", "click_entity_until_event":
+			return "event_type=%s entity_type=%s" % [
+				str(step.get("event_type", "")), str(step.get("entity_type", ""))
+			]
+		"wait_inventory_item", "wait_inventory_count", "assert_inventory_count", \
+		"assert_inventory_missing", "double_click_bag_item", "assign_hotbar_slot":
+			return "item_def_id=%s" % str(step.get("item_def_id", ""))
+		"wait_loot_count":
+			return "min_count=%s" % str(step.get("min_count", ""))
+		"assert_player_hp":
+			return "hp=%s" % str(step.get("equals", ""))
+		"press_key":
+			return "key=%s" % str(step.get("keycode", ""))
+		"click_entity":
+			return "entity_type=%s index=%s" % [
+				str(step.get("entity_type", "")), str(step.get("entity_index", 0))
+			]
+		_:
+			return ""
+
+
+func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> void:
+	var parts: PackedStringArray = PackedStringArray([
+		"waiting",
+		stype,
+		"elapsed=%.1fs" % _step_elapsed,
+		"ws=%s" % ("open" if bool(state.get("ws_open", false)) else "closed"),
+		"tick=%s" % str(state.get("last_tick", "?")),
+		"hp=%s" % str(state.get("player_hp", "?")),
+	])
+	if stype in ["wait_entity", "assert_entity_removed", "click_entity_until_event"]:
+		var etype := str(step.get("entity_type", ""))
+		var eids: Array = state.get("%s_ids" % etype, [])
+		parts.append("%s_count=%d" % [etype, eids.size()])
+	if stype in ["wait_event", "click_entity_until_event"]:
+		var pending: Array = state.get("pending_events", [])
+		var event_names: PackedStringArray = PackedStringArray()
+		for ev in pending:
+			event_names.append(str(ev.get("event_type", "?")))
+		parts.append("pending_events=[%s]" % ", ".join(event_names))
+	if stype in ["wait_inventory_count", "wait_inventory_item", "assert_inventory_count"]:
+		var def_id := str(step.get("item_def_id", ""))
+		parts.append("inventory_%s=%d" % [def_id, _inventory_count(state, def_id)])
+	if stype == "wait_loot_count":
+		parts.append("loot_count=%d" % (state.get("loot_ids", []) as Array).size())
+	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):
+		parts.append("next_attack_soon=true")
+	print("[bot-client] %s scenario=%s step=%d" % [" ".join(parts), str(scenario.get("id", "?")), _step_index])
 
 
 func _check_complete() -> void:
@@ -315,9 +462,24 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "wait_player_near":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]
-	if stype in ["drag_bag_to_weapon_slot", "drag_bag_to_outside"]:
+	if stype in ["drag_bag_to_weapon_slot", "drag_bag_to_outside", "assign_hotbar_slot", "double_click_bag_item"]:
 		if str(step.get("item_def_id", "")) == "":
 			return "client_steps[%d] (%s) requires item_def_id" % [index, stype]
+	if stype == "assign_hotbar_slot":
+		if not step.has("slot_index"):
+			return "client_steps[%d] (%s) requires slot_index" % [index, stype]
+	if stype in ["wait_inventory_count", "assert_inventory_count"]:
+		if not step.has("equals"):
+			return "client_steps[%d] (%s) requires equals" % [index, stype]
+	if stype == "wait_loot_count":
+		if not step.has("min_count"):
+			return "client_steps[%d] (%s) requires min_count" % [index, stype]
+	if stype == "assert_hotbar_assigned":
+		if not step.has("slot_index") or str(step.get("item_def_id", "")) == "":
+			return "client_steps[%d] (%s) requires slot_index and item_def_id" % [index, stype]
+	if stype == "assert_player_hp":
+		if not step.has("equals"):
+			return "client_steps[%d] (%s) requires equals" % [index, stype]
 	if stype == "press_key":
 		if str(step.get("keycode", "")) == "":
 			return "client_steps[%d] (%s) requires keycode" % [index, stype]

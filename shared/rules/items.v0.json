@@ -5,6 +5,6 @@
     "training_bow": { "name": "Training Bow", "category": "equipment", "slot": "weapon", "equippable": true, "attack_mode": "ranged", "damage": { "min": 2, "max": 4 }, "reach": 16.0, "projectile_speed": 50.0 },
     "training_badge": { "name": "Training Badge", "category": "currency", "equippable": false },
     "quest_leaf": { "name": "Quest Leaf", "category": "quest", "equippable": false },
-    "red_potion": { "name": "Red Potion", "category": "consumable", "equippable": false }
+    "red_potion": { "name": "Red Potion", "category": "consumable", "equippable": false, "heal": { "min": 5, "max": 5 } }
   }
 }

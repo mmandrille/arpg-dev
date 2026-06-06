@@ -67,6 +67,9 @@ func _process(delta: float) -> void:
 
 	var action: Dictionary = _runner.pending_action
 	if not action.is_empty():
+		print("[bot-client] action %s scenario=%s" % [
+			_format_action(action), _scenario_id
+		])
 		_execute_action(action, state)
 
 	if done:
@@ -92,7 +95,7 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 		"press_key":
 			_do_press_key(str(action.get("keycode", "")))
 		"click_entity":
-			_do_click_entity(str(action.get("entity_type", "")), state)
+			_do_click_entity(str(action.get("entity_type", "")), state, int(action.get("entity_index", 0)))
 		"click_floor":
 			_do_click_floor(float(action.get("x", 0.0)), float(action.get("z", 0.0)))
 		"drag_bag_to_weapon_slot":
@@ -101,6 +104,19 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_unequip_to_bag(state)
 		"drag_bag_to_outside":
 			_do_drop_from_bag(str(action.get("item_def_id", "")), state)
+		"assign_hotbar_slot":
+			_do_assign_hotbar_slot(
+				int(action.get("slot_index", -1)),
+				str(action.get("item_def_id", "")),
+				int(action.get("bag_index", 0)),
+				state,
+			)
+		"double_click_bag_item":
+			_do_double_click_bag_item(
+				str(action.get("item_def_id", "")),
+				int(action.get("bag_index", 0)),
+				state,
+			)
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -119,7 +135,12 @@ func _do_press_key(keycode_str: String) -> void:
 # through the same client.send() as _try_action_at_mouse(). Ray-pick via
 # direct_space_state is unreliable in headless because get_mouse_position()
 # returns (0,0) and Input.warp_mouse() has no effect without a real display server.
-func _do_click_entity(entity_type: String, state: Dictionary) -> void:
+func consume_pending_event_at(index: int) -> void:
+	if _main != null and _main.has_method("bot_consume_pending_event_at"):
+		_main.bot_consume_pending_event_at(index)
+
+
+func _do_click_entity(entity_type: String, state: Dictionary, entity_index: int = 0) -> void:
 	if _main == null:
 		return
 	var ids_key := "%s_ids" % entity_type
@@ -127,7 +148,10 @@ func _do_click_entity(entity_type: String, state: Dictionary) -> void:
 	if ids.is_empty():
 		printerr("[bot-client] click_entity: no %s entity found" % entity_type)
 		return
-	var target_id := str(ids[0])
+	if entity_index < 0 or entity_index >= ids.size():
+		printerr("[bot-client] click_entity: index %d out of range for %s" % [entity_index, entity_type])
+		return
+	var target_id := str(ids[entity_index])
 	if _main.has_method("bot_dispatch_action"):
 		_main.bot_dispatch_action("action_intent", {"target_id": target_id})
 
@@ -162,6 +186,28 @@ func _do_unequip_to_bag(state: Dictionary) -> void:
 		_main.bot_dispatch_inventory_intent("unequip_intent", {"item_instance_id": str(item_id), "slot": "weapon"})
 
 
+func _do_assign_hotbar_slot(slot_index: int, item_def_id: String, bag_index: int, state: Dictionary) -> void:
+	if _main == null:
+		return
+	var item_id := _find_bag_item_id(item_def_id, state, bag_index)
+	if item_id == "":
+		printerr("[bot-client] assign_hotbar_slot: item_def_id=%s bag_index=%d not in bag" % [item_def_id, bag_index])
+		return
+	if _main.has_method("bot_assign_consumable_hotbar"):
+		_main.bot_assign_consumable_hotbar(slot_index, item_id)
+
+
+func _do_double_click_bag_item(item_def_id: String, bag_index: int, state: Dictionary) -> void:
+	if _main == null:
+		return
+	var item_id := _find_bag_item_id(item_def_id, state, bag_index)
+	if item_id == "":
+		printerr("[bot-client] double_click_bag_item: item_def_id=%s bag_index=%d not in bag" % [item_def_id, bag_index])
+		return
+	if _main.has_method("bot_dispatch_inventory_intent"):
+		_main.bot_dispatch_inventory_intent("use_intent", {"item_instance_id": item_id})
+
+
 func _do_drop_from_bag(item_def_id: String, state: Dictionary) -> void:
 	if _main == null:
 		return
@@ -173,20 +219,33 @@ func _do_drop_from_bag(item_def_id: String, state: Dictionary) -> void:
 		_main.bot_dispatch_inventory_intent("drop_intent", {"item_instance_id": item_id})
 
 
-func _find_bag_item_id(item_def_id: String, state: Dictionary) -> String:
+func _find_bag_item_id(item_def_id: String, state: Dictionary, bag_index: int = 0) -> String:
 	var inv: Array = state.get("inventory", [])
 	var eq: Dictionary = state.get("equipped", {})
 	var equipped_weapon = eq.get("weapon", null)
+	var matches: Array = []
 	for item in inv:
 		if str(item.get("item_def_id", "")) == item_def_id:
 			var iid := str(item.get("item_instance_id", ""))
 			if str(equipped_weapon) != iid:
-				return iid
-	return ""
+				matches.append(iid)
+	if bag_index < 0 or bag_index >= matches.size():
+		return ""
+	return str(matches[bag_index])
 
 
 func _parse_keycode(name: String) -> Key:
 	match name:
+		"KEY_0": return KEY_0
+		"KEY_1": return KEY_1
+		"KEY_2": return KEY_2
+		"KEY_3": return KEY_3
+		"KEY_4": return KEY_4
+		"KEY_5": return KEY_5
+		"KEY_6": return KEY_6
+		"KEY_7": return KEY_7
+		"KEY_8": return KEY_8
+		"KEY_9": return KEY_9
 		"KEY_I": return KEY_I
 		"KEY_E": return KEY_E
 		"KEY_W": return KEY_W
@@ -195,6 +254,31 @@ func _parse_keycode(name: String) -> Key:
 		"KEY_D": return KEY_D
 		"KEY_ESCAPE": return KEY_ESCAPE
 	return KEY_NONE
+
+
+func _format_action(action: Dictionary) -> String:
+	var stype := str(action.get("_type", action.get("type", "")))
+	match stype:
+		"click_entity":
+			return "click_entity type=%s index=%s" % [
+				str(action.get("entity_type", "")), str(action.get("entity_index", 0))
+			]
+		"click_floor":
+			return "click_floor x=%s z=%s" % [str(action.get("x", "")), str(action.get("z", ""))]
+		"press_key":
+			return "press_key %s" % str(action.get("keycode", ""))
+		"assign_hotbar_slot":
+			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
+				str(action.get("slot_index", "")),
+				str(action.get("item_def_id", "")),
+				str(action.get("bag_index", "")),
+			]
+		"double_click_bag_item":
+			return "double_click_bag item=%s bag_index=%s" % [
+				str(action.get("item_def_id", "")), str(action.get("bag_index", ""))
+			]
+		_:
+			return stype
 
 
 func _fail_startup(msg: String) -> void:

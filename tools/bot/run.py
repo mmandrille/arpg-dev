@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import sys
+import time
 from typing import Any
 
 import httpx
@@ -32,6 +33,7 @@ import websockets
 from tools.bot.protocol import make_envelope, to_ws_url
 
 SLICE_TIMEOUT_S = 20.0
+WAIT_LOG_INTERVAL_S = 2.0
 DEFAULT_WORLD_ID = "vertical_slice"
 WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
@@ -49,7 +51,16 @@ KNOWN_WORLD_IDS = load_known_world_ids()
 
 
 def log(*args: Any) -> None:
-    print("[bot]", *args, file=sys.stderr, flush=True)
+    stamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+    print(f"[bot {stamp}]", *args, file=sys.stderr, flush=True)
+
+
+def log_wait_progress(label: str, loop, started_at: float, **details: Any) -> None:
+    elapsed = loop.time() - started_at
+    parts = [f"{label} elapsed={elapsed:.1f}s"]
+    for key, value in details.items():
+        parts.append(f"{key}={value}")
+    log(*parts)
 
 
 @dataclass(frozen=True)
@@ -201,8 +212,17 @@ async def drive_scenario(base_url: str, token: str, sess: dict[str, Any], scenar
         await ws.send(json.dumps(make_envelope(
             "client_ready", sid, state.last_tick, {"client_version": "bot", "last_seen_tick": state.last_tick})))
 
-        for step in scenario.steps:
-            await execute_step(ws, sid, state, step, loop)
+        total_steps = len(scenario.steps)
+        for index, step in enumerate(scenario.steps):
+            action = step.get("action", "?")
+            log(f"step {index + 1}/{total_steps} begin action={action}")
+            step_started = loop.time()
+            await execute_step(ws, sid, state, step, loop, index=index, total=total_steps)
+            log(
+                f"step {index + 1}/{total_steps} done action={action}",
+                f"elapsed={loop.time() - step_started:.2f}s",
+                f"tick={state.last_tick}",
+            )
 
         if state.equipped_item_id:
             log("equipped item", state.equipped_item_id, "- scenario complete over protocol")
@@ -211,7 +231,16 @@ async def drive_scenario(base_url: str, token: str, sess: dict[str, Any], scenar
         return state
 
 
-async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str, Any], loop) -> None:
+async def execute_step(
+    ws,
+    session_id: str,
+    state: RuntimeState,
+    step: dict[str, Any],
+    loop,
+    *,
+    index: int = 0,
+    total: int = 0,
+) -> None:
     action = step.get("action")
     if action == "move":
         direction = step["direction"]
@@ -250,10 +279,23 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
             target_id = str(monster["id"])
         event_type = str(step["event_type"])
         last_attack = 0.0
+        wait_started = loop.time()
+        last_wait_log = wait_started
         deadline = loop.time() + SLICE_TIMEOUT_S
         while event_type not in state.seen_events:
             if loop.time() > deadline:
                 raise TimeoutError(f"attack_until_event stalled waiting for {event_type}")
+            if loop.time() - last_wait_log >= WAIT_LOG_INTERVAL_S:
+                monster = state.entities.get(target_id)
+                log_wait_progress(
+                    f"attack_until_event waiting for {event_type}",
+                    loop,
+                    wait_started,
+                    monster_hp=(monster or {}).get("hp"),
+                    seen_events=sorted(state.seen_events),
+                    tick=state.last_tick,
+                )
+                last_wait_log = loop.time()
             if loop.time() - last_attack > 0.12:
                 monster = state.entities.get(target_id)
                 if monster is not None and monster.get("hp") == 0:
@@ -369,9 +411,21 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
         await ws.send(json.dumps(make_envelope(
             "action_intent", session_id, state.last_tick, {"target_id": loot["id"]})))
         log("picking up", item_def_id, "loot", loot["id"])
+        wait_started = loop.time()
+        last_wait_log = wait_started
         while find_inventory_item(state.inventory, item_def_id) is None:
             if loop.time() > deadline:
                 raise TimeoutError(f"pick_up_loot stalled waiting for {item_def_id}")
+            if loop.time() - last_wait_log >= WAIT_LOG_INTERVAL_S:
+                log_wait_progress(
+                    f"pick_up_loot waiting for {item_def_id}",
+                    loop,
+                    wait_started,
+                    inventory_count=len(state.inventory),
+                    loot_ids=state.loot_ids,
+                    tick=state.last_tick,
+                )
+                last_wait_log = loop.time()
             await pump_one(ws, state, timeout=0.1)
         item = find_inventory_item(state.inventory, item_def_id)
         if item is not None:
@@ -426,6 +480,45 @@ async def execute_step(ws, session_id: str, state: RuntimeState, step: dict[str,
         while state.equipped.get(slot) is not None:
             if loop.time() > deadline:
                 raise TimeoutError(f"unequip_slot stalled waiting for empty {slot}")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "assert_player_hp":
+        want = int(step["equals"])
+        player = find_player(state)
+        if player is None:
+            raise AssertionError("assert_player_hp: player not found in runtime state")
+        assert_player_hp_equals([player], want, "runtime protocol")
+        return
+
+    if action == "use_inventory_item":
+        item_def_id = str(step["item_def_id"])
+        bag_index = int(step.get("bag_index", 0))
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        item = find_inventory_item(state.inventory, item_def_id, bag_index)
+        if item is None:
+            raise AssertionError(f"use_inventory_item: missing inventory item {item_def_id} at bag_index={bag_index}")
+        item_id = str(item["item_instance_id"])
+        await ws.send(json.dumps(make_envelope(
+            "use_intent", session_id, state.last_tick, {"item_instance_id": item_id})))
+        log("using", item_def_id, item_id)
+        wait_started = loop.time()
+        last_wait_log = wait_started
+        while any(str(i.get("item_instance_id")) == item_id for i in state.inventory):
+            if loop.time() > deadline:
+                raise TimeoutError(f"use_inventory_item stalled waiting for removal of {item_id}")
+            if loop.time() - last_wait_log >= WAIT_LOG_INTERVAL_S:
+                player = find_player(state)
+                log_wait_progress(
+                    f"use_inventory_item waiting for removal of {item_id}",
+                    loop,
+                    wait_started,
+                    player_hp=(player or {}).get("hp"),
+                    inventory_count=len(state.inventory),
+                    seen_events=sorted(state.seen_events),
+                    tick=state.last_tick,
+                )
+                last_wait_log = loop.time()
             await pump_one(ws, state, timeout=0.1)
         return
 
@@ -736,11 +829,15 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
     raise AssertionError(f"{step.get('action')}: no target selector in {step}")
 
 
-def find_inventory_item(inventory: list[dict[str, Any]], item_def_id: str) -> dict[str, Any] | None:
-    for item in inventory:
-        if item.get("item_def_id") == item_def_id:
-            return item
-    return None
+def find_inventory_item(
+    inventory: list[dict[str, Any]],
+    item_def_id: str,
+    bag_index: int = 0,
+) -> dict[str, Any] | None:
+    matches = [item for item in inventory if item.get("item_def_id") == item_def_id]
+    if bag_index < 0 or bag_index >= len(matches):
+        return None
+    return matches[bag_index]
 
 
 def find_player(state: RuntimeState) -> dict[str, Any] | None:
@@ -774,6 +871,22 @@ def assert_equipped_sword(inventory: list[dict], equipped: dict, item_id: str | 
     expected_id = item_id or item["item_instance_id"]
     if equipped.get("weapon") != expected_id:
         raise AssertionError(f"{where}: equipped weapon {equipped.get('weapon')} != {item_id}")
+
+
+def assert_player_hp_equals(entities: list[dict], want: int, where: str) -> None:
+    player = find_player_entities(entities)
+    if player is None:
+        raise AssertionError(f"{where}: player not found")
+    hp = player.get("hp")
+    if hp != want:
+        raise AssertionError(f"{where}: player hp {hp} != {want}")
+
+
+def find_player_entities(entities: list[dict]) -> dict | None:
+    for entity in entities:
+        if entity.get("type") == "player":
+            return entity
+    return None
 
 
 def assert_player_damaged(entities: list[dict], where: str) -> None:
@@ -867,6 +980,8 @@ def run_assertions(
             continue
         elif typ == "player_never_in_melee_range_of":
             continue
+        elif typ == "player_hp_equals":
+            assert_player_hp_equals(entities, int(assertion["equals"]), where)
         else:
             raise AssertionError(f"{where}: unknown assertion type {typ}")
 
@@ -945,15 +1060,20 @@ def main() -> int:
     with httpx.Client(base_url=args.base_url, timeout=10.0) as client:
         _, token = dev_login(client, args.email, args.dev_token)
         for scenario in selected:
-            log("scenario", scenario.id, "-", scenario.title)
+            scenario_started = time.monotonic()
+            log("scenario begin", scenario.id, "-", scenario.title, f"world={scenario.world_id}")
             sess = create_session(client, token, scenario.world_id)
             session_id = sess["session_id"]
             last_session_id = session_id
+            log("session created", session_id, f"seed={sess.get('seed')}")
 
+            phase_started = time.monotonic()
             observed = asyncio.run(drive_scenario(args.base_url, token, sess, scenario))
+            log("phase drive done", f"elapsed={time.monotonic() - phase_started:.2f}s")
             run_runtime_assertions(scenario.assertions, observed, "runtime protocol")
 
             # Assert authoritative state through the inspection API.
+            phase_started = time.monotonic()
             state = fetch_state(client, token, args.debug_token, session_id)
             run_assertions(
                 scenario.assertions,
@@ -963,15 +1083,19 @@ def main() -> int:
                 observed.item_id,
                 "/state API",
             )
-            log("/state API confirms expected scenario state")
+            log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 
             # Assert replay reconstruction by reconnecting a fresh session loop.
+            phase_started = time.monotonic()
             asyncio.run(check_persistence(args.base_url, token, session_id, observed.item_id, scenario.assertions))
+            log("phase reconnect done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 
+            phase_started = time.monotonic()
             replay = fetch_replay(client, token, args.debug_token, session_id)
             if not replay.get("match", False):
                 raise AssertionError(f"replay mismatch for {session_id}: {replay.get('mismatch')}")
-            log("replay verified for", session_id)
+            log("phase replay done", f"elapsed={time.monotonic() - phase_started:.2f}s", session_id)
+            log("scenario done", scenario.id, f"elapsed={time.monotonic() - scenario_started:.2f}s")
 
             scenario_visual = json.loads(scenario.path.read_text()).get("visual")
             entry = {

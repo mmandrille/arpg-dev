@@ -13,12 +13,12 @@ var _age := 0.0
 var _side_offset := 0.0
 
 
-func setup(camera: Camera3D, target: Node3D, world_position: Vector3, amount: int, color: Color, side: float = 1.0) -> void:
+func setup(camera: Camera3D, target: Node3D, world_position: Vector3, amount: int, color: Color, side: float = 1.0, prefix: String = "") -> void:
 	_camera = camera
 	_target = target
 	_world_position = world_position
 	_side_offset = SIDE_PIXELS * side
-	text = str(amount)
+	text = prefix + str(amount)
 	z_index = 100
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

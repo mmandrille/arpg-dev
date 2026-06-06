@@ -11,6 +11,11 @@ CLIENT_DIR="$ROOT/client"
 SCENARIOS_DIR="$ROOT/tools/bot/scenarios/client"
 
 GODOT="${GODOT:-godot}"
+
+_ts() {
+  date -u +"%H:%M:%S"
+}
+
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
 SCENARIO="${SCENARIO:-all}"
@@ -25,7 +30,8 @@ if ! command -v "$GODOT" >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "[bot-client] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
+echo "[bot-client $(_ts)] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
+echo "[bot-client $(_ts)] SCENARIO=$SCENARIO HEADLESS=$HEADLESS BOT_STEP_DELAY=$BOT_STEP_DELAY"
 
 # Collect scenario files to run.
 declare -a SCENARIO_FILES=()
@@ -76,43 +82,57 @@ for f in "${SCENARIO_FILES[@]}"; do
 done
 
 # Import once before the scenario loop so headless --path runs cleanly.
-"$GODOT" --headless --path "$CLIENT_DIR" --import >/dev/null 2>&1 || true
+echo "[bot-client $(_ts)] Godot asset import starting (can take 30-90s on cold cache)..."
+import_started=$SECONDS
+if "$GODOT" --headless --path "$CLIENT_DIR" --import; then
+  echo "[bot-client $(_ts)] Godot asset import done elapsed=$((SECONDS - import_started))s"
+else
+  echo "[bot-client $(_ts)] Godot asset import finished with warnings elapsed=$((SECONDS - import_started))s" >&2
+fi
 
 PASS_COUNT=0
 FAIL_COUNT=0
 
 run_scenario() {
   local scenario_path="$1"
-  local scenario_id world_id out exit_code
+  local scenario_id world_id exit_code started_ts tmpfile
   scenario_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('id','unknown'))")"
   world_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('world_id',''))")"
+  started_ts="$SECONDS"
+  tmpfile="$(mktemp)"
 
-  echo "[bot-client] --- running scenario: $scenario_id (world=$world_id)"
+  echo "[bot-client $(_ts)] --- running scenario: $scenario_id (world=$world_id file=$(basename "$scenario_path"))"
   exit_code=0
   local godot_flags="--resolution 1280x720"
   [[ "$HEADLESS" == "1" ]] && godot_flags="--headless $godot_flags"
-  out="$(ARPG_BOT_CLIENT=1 \
+  echo "[bot-client $(_ts)] launching Godot for $scenario_id..."
+  local launch_started=$SECONDS
+  ARPG_BOT_CLIENT=1 \
     ARPG_BOT_SCENARIO="$scenario_path" \
     ARPG_WORLD_ID="$world_id" \
     ARPG_BASE_URL="$BASE_URL" \
     ARPG_DEV_TOKEN="$DEV_TOKEN" \
     ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
-    "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1)" \
-    || exit_code=$?
+    "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1 | tee "$tmpfile"
+  exit_code=${PIPESTATUS[0]}
 
-  printf '%s\n' "$out"
+  echo "[bot-client $(_ts)] Godot process exited code=$exit_code launch_elapsed=$((SECONDS - launch_started))s"
 
   if [[ $exit_code -ne 0 ]]; then
+    rm -f "$tmpfile"
     echo "[bot-client] FAIL $scenario_id -- exited with code $exit_code" >&2
     return 1
   fi
 
-  if ! grep -qF "[bot-client] PASS $scenario_id" <<<"$out"; then
+  if ! grep -qF "[bot-client] PASS $scenario_id" "$tmpfile"; then
+    rm -f "$tmpfile"
     echo "[bot-client] FAIL $scenario_id -- PASS sentinel not found in output" >&2
     return 1
   fi
 
-  echo "[bot-client] OK $scenario_id"
+  rm -f "$tmpfile"
+  local elapsed=$((SECONDS - started_ts))
+  echo "[bot-client $(_ts)] OK $scenario_id elapsed=${elapsed}s"
 }
 
 for f in "${SCENARIO_FILES[@]}"; do
@@ -123,7 +143,7 @@ for f in "${SCENARIO_FILES[@]}"; do
   fi
 done
 
-echo "[bot-client] Results: $PASS_COUNT passed, $FAIL_COUNT failed"
+echo "[bot-client $(_ts)] Results: $PASS_COUNT passed, $FAIL_COUNT failed"
 
 if [[ $FAIL_COUNT -gt 0 ]]; then
   exit 1

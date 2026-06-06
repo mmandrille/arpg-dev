@@ -16,6 +16,7 @@ const (
 	TypeEquip       = "equip_intent"
 	TypeUnequip     = "unequip_intent"
 	TypeDrop        = "drop_intent"
+	TypeUse         = "use_intent"
 )
 
 type envelope struct {
@@ -46,12 +47,15 @@ type (
 	dropPayloadWire struct {
 		ItemInstanceID string `json:"item_instance_id"`
 	}
+	usePayloadWire struct {
+		ItemInstanceID string `json:"item_instance_id"`
+	}
 )
 
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeEquip, TypeUnequip, TypeDrop:
+	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeEquip, TypeUnequip, TypeDrop, TypeUse:
 		return true
 	}
 	return false
@@ -102,6 +106,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.Drop = &game.DropIntent{ItemInstanceID: p.ItemInstanceID}
+	case TypeUse:
+		var p usePayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.ItemInstanceID == "" {
+			return in, false
+		}
+		in.Use = &game.UseIntent{ItemInstanceID: p.ItemInstanceID}
 	default:
 		return in, false
 	}

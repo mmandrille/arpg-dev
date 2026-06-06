@@ -235,6 +235,16 @@
           "position": { "x": 5, "y": 5 }
         }
       ]
+    },
+    "heal_lab": {
+      "player": { "position": { "x": 6, "y": 5 } },
+      "entities": [
+        {
+          "type": "monster",
+          "monster_def_id": "training_dummy_heal",
+          "position": { "x": 7, "y": 5 }
+        }
+      ]
     }
   }
 }

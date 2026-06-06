@@ -52,12 +52,14 @@ type GridBounds struct {
 // ItemDef is a single item definition.
 type ItemDef struct {
 	Name            string       `json:"name"`
+	Category        string       `json:"category"`
 	Slot            string       `json:"slot"`
 	Equippable      bool         `json:"equippable"`
 	AttackMode      string       `json:"attack_mode,omitempty"`
 	Damage          *DamageRange `json:"damage,omitempty"`
 	Reach           *float64     `json:"reach,omitempty"`
 	ProjectileSpeed *float64     `json:"projectile_speed,omitempty"`
+	Heal            *DamageRange `json:"heal,omitempty"`
 }
 
 // InteractableDef is a single activatable world object definition.

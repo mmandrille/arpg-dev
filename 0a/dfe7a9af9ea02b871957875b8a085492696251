@@ -1,0 +1,25 @@
+tools/bot/scenarios/client/03_inventory_equip_unequip.json
+  s_7c3b00e473c666::t_26626434a3f30b 6,15,18
+scripts/bot_client.sh
+  s_7c3b00e473c666::t_44c432f05a2d63 93
+tools/bot/scenarios/client/04_inventory_lab_drop_item.json
+  s_7c3b00e473c666::t_d6faead8b877ea 6,8-15,17-19
+client/scripts/main.gd
+  s_7c3b00e473c666::t_a186aebf14479a 1192-1198,1205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0adfe7a9af9ea02b871957875b8a085492696251",
+  "prompts": {},
+  "sessions": {
+    "s_7c3b00e473c666": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db5ffc9a-8944-4273-9c12-90167edf2468",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

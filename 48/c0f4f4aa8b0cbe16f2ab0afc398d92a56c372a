@@ -1,0 +1,78 @@
+server/internal/replay/replay_test.go
+  s_b4a68f28938d7e::t_eac45b8871cdfc 84-86
+  s_b4a68f28938d7e::t_707ec415d8c66b 272
+  s_b4a68f28938d7e::t_494f4c59184e16 273
+server/internal/http/replay_test.go
+  s_b4a68f28938d7e::t_eac45b8871cdfc 241-242
+  s_b4a68f28938d7e::t_301702176fa4b0 239-240
+server/internal/game/types.go
+  s_b4a68f28938d7e::t_80b23a464ec65b 42-46,67,101-109
+server/internal/store/interfaces.go
+  s_b4a68f28938d7e::t_707ec415d8c66b 34
+server/internal/inputdecode/inputdecode.go
+  s_b4a68f28938d7e::t_96f02e1c8e09bf 17-18,43-48,54,93-104
+server/internal/game/game_test.go
+  s_13d76ff3aef7a8::t_82b7da16e39b8e 434-439,446-476
+  s_b4a68f28938d7e::t_be3e5312946473 897-1008,1016-1024,1060-1090
+  s_13d76ff3aef7a8::t_02d3fbf3cb0415 1009-1015,1025-1059
+  s_b4a68f28938d7e::t_dc9513bdd0df53 92-94,1366-1367
+  s_13d76ff3aef7a8::t_e0e07b296ff5a7 771-780,1575-1581
+  s_13d76ff3aef7a8::t_614a7690b5388d 637-639
+  s_b4a68f28938d7e::t_b7cb70f3a5b606 1419-1464
+  s_13d76ff3aef7a8::t_75e5c0f88d034b 440-445
+  s_13d76ff3aef7a8::t_0b78a240a933cf 1584-1596
+server/internal/realtime/runner.go
+  s_13d76ff3aef7a8::t_a339f463cca509 187-194,198-206,213-219,233-242
+  s_13d76ff3aef7a8::t_88b075177d181d 308-311,332-338,342-349,402-409,427-434,443-447
+  s_13d76ff3aef7a8::t_2e217933e367dd 14
+  s_b4a68f28938d7e::t_707ec415d8c66b 439-442,448-451
+  s_13d76ff3aef7a8::t_edff3f0add68f7 475-493
+server/internal/game/rules.go
+  s_13d76ff3aef7a8::t_9042f67b0d359a 345-361
+  s_13d76ff3aef7a8::t_813c8b6fa67a9e 91
+  s_13d76ff3aef7a8::t_d0e25ee008235e 248-252
+server/internal/store/repos.go
+  s_b4a68f28938d7e::t_707ec415d8c66b 193-206
+server/internal/store/store_test.go
+  s_b4a68f28938d7e::t_5ad0cc6ecd8444 155-168
+server/internal/game/sim.go
+  s_b4a68f28938d7e::t_20094b8f078b48 313,329-332,608-671
+  s_13d76ff3aef7a8::t_9419c20ff8190a 817,825,835-853
+  s_b4a68f28938d7e::t_80b23a464ec65b 245-246,263-267
+  s_13d76ff3aef7a8::t_d4256329bb682f 508-517
+  s_13d76ff3aef7a8::t_df7ba495ba71e2 794-801,816,819-822
+  s_edbd5183536185::t_21b7630597521a 714
+  s_b4a68f28938d7e::t_8cfcac6ca9ab71 789-793,802-815,818,823-824,826-834,854-877
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "48c0f4f4aa8b0cbe16f2ab0afc398d92a56c372a",
+  "prompts": {},
+  "sessions": {
+    "s_13d76ff3aef7a8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9a74-9bea-7812-821c-e091213329fa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_b4a68f28938d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9a1b-efa7-7eb2-a486-176e0f53068c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_edbd5183536185": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a33dc0d8-0fac-4c29-b5de-7125c22c683a",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

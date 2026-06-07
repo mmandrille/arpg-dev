@@ -11,7 +11,7 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v28 — `full-equipment-and-belt-hotbar` |
+| **Latest completed slice** | v29 — `dungeon-equipment-drop-expansion` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
@@ -44,6 +44,7 @@ v25_* = treasure-classes-and-guarded-chests
 v26_* = character-stats-and-leveling
 v27_* = hold-click-controls
 v28_* = full-equipment-and-belt-hotbar
+v29_* = dungeon-equipment-drop-expansion
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -92,6 +93,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v26** | `character-stats-and-leveling` | Complete (`make ci` green) | [`v26_spec-character-stats-and-leveling.md`](specs/v26_spec-character-stats-and-leveling.md) | [`v26_2026-06-07-character-stats-and-leveling.md`](plans/v26_2026-06-07-character-stats-and-leveling.md) |
 | **v27** | `hold-click-controls` | Complete (`make ci` green) | [`v27_spec-hold-click-controls.md`](specs/v27_spec-hold-click-controls.md) | [`v27_2026-06-07-hold-click-controls.md`](plans/v27_2026-06-07-hold-click-controls.md) |
 | **v28** | `full-equipment-and-belt-hotbar` | Complete (`make ci` green) | [`v28_spec-full-equipment-and-belt-hotbar.md`](specs/v28_spec-full-equipment-and-belt-hotbar.md) | [`v28_2026-06-07-full-equipment-and-belt-hotbar.md`](plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md) |
+| **v29** | `dungeon-equipment-drop-expansion` | Complete (`make ci` green) | [`v29_spec-dungeon-equipment-drop-expansion.md`](specs/v29_spec-dungeon-equipment-drop-expansion.md) | [`v29_2026-06-07-dungeon-equipment-drop-expansion.md`](plans/v29_2026-06-07-dungeon-equipment-drop-expansion.md) |
 
 ---
 
@@ -665,6 +667,30 @@ keeping replay, persistence, bots, and the Godot UI in sync.
 **Explicit non-goals:** armor mitigation, block chance execution, affix grammar, comparison UI,
 stash/vendors, production icons/art, offhand abilities/dual-wield, and deeper dungeon drop economy.
 
+### v29 — Dungeon equipment drop expansion
+
+**Proves:** Real generated dungeon monsters and guarded chests can use the expanded v28 equipment
+catalog through deterministic, depth-aware treasure classes.
+
+- `shared/rules/dungeon_generation.v0.json` now declares temporary coarse loot bands for depth
+  `1`, `2`, and `3+`; level `0` town still does not use dungeon loot bands.
+- Depth-specific monster and guarded-chest loot tables bridge to new treasure classes, with chest
+  equipment odds intentionally better than normal monster odds.
+- Generated dungeon monsters and chests store their selected loot table at generation time, while
+  source kill/open still owns all reward rolls in the Go sim.
+- By depth `3+`, validation proves the configured dungeon/chest reward set can reach every v28
+  equipment template: weapons, shield, armor pieces, belt, boots, ring, and amulet.
+- `shared/golden/dungeon_equipment_drops.json` pins representative depth/source selection and
+  monster/chest outcomes; `treasure_class_rolls.json` now covers varied direct equipment,
+  potion, and money-like rolls.
+- Protocol bot scenario `20_dungeon_equipment_drops.json` descends into generated dungeon play,
+  opens a depth-band chest, picks up rolled equipment, equips it, and proves `/state`, reconnect,
+  replay, and fresh-session persistence.
+
+**Explicit non-goals:** final depth economy, item-level gates, Magic Find, affixes, unique/set
+items, real gold wallet, vendors/stash/crafting/trade, combat use of armor/block/crit/hit speed,
+production item/chest art, and client-side loot logic.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -709,6 +735,7 @@ main_menu_flow: menu settings → named character creation → pause input lock 
 treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob → open chest once → pick up chest loot
 character_stats_and_leveling: descend to dungeon → kill mobs for XP → level up → spend VIT → prove persistence
 full_equipment: pick up/equip paper-doll gear → prove hand occupancy → assign belt-gated hotbar → prove persistence
+dungeon_equipment_drops: descend to depth-banded dungeon → open chest → pick up/equip rolled equipment → prove persistence
 ```
 
 **Verify:**
@@ -807,14 +834,18 @@ weapon slot with full equipment slots, two-hand occupancy, droppable gear templa
 character hotbar layout, replay-safe session hotbar snapshots, and protocol/client bot proofs for
 server-synced paper-doll and belt capacity behavior.
 
+**Generated dungeon drops now reach the expanded equipment catalog.** v29 adds temporary depth
+bands, depth-specific monster/chest treasure classes, validation for full v28 template reachability
+by depth `3+`, golden fixtures for varied equipment outcomes, and a real generated dungeon bot proof.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Armor mitigation, block chance execution, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling, offhand abilities/dual-wield | v0/v4/v12/v17/v21/v23/v26/v28 non-goals |
-| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, depth-banded treasure classes, boss-floor chest integration, deeper dungeon drop economy | v23/v25/v26/v28 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28 non-goals |
+| Combat | Armor mitigation, block chance execution, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield | v0/v4/v12/v17/v21/v23/v26/v28/v29 non-goals |
+| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, final item-level/depth progression, boss-floor chest integration, richer dungeon drop economy | v23/v25/v26/v28/v29 non-goals, ADR-0009 deferred |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

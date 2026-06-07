@@ -342,7 +342,17 @@ func _initialize() -> void:
 	if str(interactables["interactables"][chest_def_id]["initial_state"]) != "closed":
 		_fail("guarded_chest interactable must start closed")
 		return
-	var chest_loot_table := str(dungeon_generation["chest_placement"]["loot_table"])
+	var guarded_depth: int = absi(int(guarded_chest["level"]))
+	var chest_loot_table := ""
+	for band in dungeon_generation["loot_bands"]:
+		var min_depth := int(band["min_depth"])
+		var max_depth: Variant = band["max_depth"]
+		if guarded_depth >= min_depth and (max_depth == null or guarded_depth <= int(max_depth)):
+			chest_loot_table = str(band["chest_loot_table"])
+			break
+	if chest_loot_table == "":
+		_fail("guarded_chest missing depth loot band")
+		return
 	if not loot["loot_tables"].has(chest_loot_table):
 		_fail("guarded_chest references unknown loot table")
 		return

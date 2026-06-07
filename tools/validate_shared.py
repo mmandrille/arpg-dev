@@ -139,6 +139,7 @@ def cross_checks(report: Report) -> None:
     dungeon_monster_attack_golden = load(GOLDEN / "dungeon_monster_attack.json")
     item_rolls_golden = load(GOLDEN / "item_rolls.json")
     treasure_class_rolls_golden = load(GOLDEN / "treasure_class_rolls.json")
+    dungeon_equipment_drops_golden = load(GOLDEN / "dungeon_equipment_drops.json")
     guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
     character_progression_golden = load(GOLDEN / "character_progression.json")
 
@@ -384,6 +385,32 @@ def cross_checks(report: Report) -> None:
         "cave_helm", "cave_mail", "cave_gloves", "cave_belt",
         "cave_boots", "cave_ring", "cave_amulet",
     }
+
+    def treasure_class_id_for_table(table_id: str) -> str | None:
+        table = loot["loot_tables"].get(table_id)
+        if not table:
+            return None
+        treasure_class_id = table.get("treasure_class_id")
+        if not treasure_class_id or treasure_class_id not in treasure_class_defs:
+            return None
+        return treasure_class_id
+
+    def templates_reachable_from_table(table_id: str) -> set[str]:
+        treasure_class_id = treasure_class_id_for_table(table_id)
+        if not treasure_class_id:
+            return set()
+        return {
+            entry["item_template_id"]
+            for attempt in treasure_class_defs[treasure_class_id].get("attempts", [])
+            for entry in attempt.get("entries", [])
+            if "item_template_id" in entry
+        }
+
+    def success_weight_for_table(table_id: str) -> int:
+        treasure_class_id = treasure_class_id_for_table(table_id)
+        if not treasure_class_id:
+            return 0
+        return sum(int(attempt.get("success_weight", 0)) for attempt in treasure_class_defs[treasure_class_id].get("attempts", []))
 
     # Item damage is hand-equipment only and the equipped_weapon_damage golden
     # must mirror the referenced item definition.
@@ -631,6 +658,69 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation chest_placement", "max_attempts must be positive")
     else:
         report.ok("dungeon_generation chest placement is valid")
+    loot_bands = dungeon_generation.get("loot_bands", [])
+    if not loot_bands:
+        report.fail("dungeon_generation loot_bands", "must define depth bands")
+    else:
+        failed_bands = False
+        coverage = set()
+        open_ended_bands = 0
+        for idx, band in enumerate(loot_bands):
+            min_depth = band.get("min_depth")
+            max_depth = band.get("max_depth")
+            label = f"band {idx}"
+            if not isinstance(min_depth, int) or min_depth <= 0:
+                report.fail("dungeon_generation loot_bands", f"{label}: min_depth must be positive")
+                failed_bands = True
+                break
+            if max_depth is not None and (not isinstance(max_depth, int) or max_depth < min_depth):
+                report.fail("dungeon_generation loot_bands", f"{label}: max_depth must be null or >= min_depth")
+                failed_bands = True
+                break
+            if max_depth is None:
+                open_ended_bands += 1
+                covered_depths = {min_depth}
+            else:
+                covered_depths = set(range(min_depth, max_depth + 1))
+            overlap = coverage & covered_depths
+            if overlap:
+                report.fail("dungeon_generation loot_bands", f"{label}: overlapping depths {sorted(overlap)}")
+                failed_bands = True
+                break
+            coverage |= covered_depths
+            for table_key in ("monster_loot_table", "chest_loot_table"):
+                table_id = band.get(table_key)
+                treasure_class_id = treasure_class_id_for_table(table_id)
+                if treasure_class_id is None:
+                    report.fail("dungeon_generation loot_bands", f"{label}.{table_key}: unknown table or treasure class {table_id}")
+                    failed_bands = True
+                    break
+                report.ok(f"dungeon_generation {label} {table_key} resolves {treasure_class_id}")
+            if failed_bands:
+                break
+            monster_success = success_weight_for_table(band["monster_loot_table"])
+            chest_success = success_weight_for_table(band["chest_loot_table"])
+            if chest_success <= monster_success:
+                report.fail("dungeon_generation loot_bands", f"{label}: chest equipment odds must exceed monster odds")
+                failed_bands = True
+                break
+        if not failed_bands:
+            if coverage != {1, 2, 3} or open_ended_bands != 1:
+                report.fail("dungeon_generation loot_bands", "must cover exactly depths 1, 2, and open-ended 3+")
+            elif loot_bands[-1].get("min_depth") != 3 or loot_bands[-1].get("max_depth") is not None:
+                report.fail("dungeon_generation loot_bands", "final band must be open-ended 3+")
+            else:
+                report.ok("dungeon_generation loot_bands cover 1, 2, and 3+ without overlap")
+                depth3_band = loot_bands[-1]
+                reachable_depth3 = (
+                    templates_reachable_from_table(depth3_band["monster_loot_table"])
+                    | templates_reachable_from_table(depth3_band["chest_loot_table"])
+                )
+                missing_depth3 = sorted(required_templates - reachable_depth3)
+                if missing_depth3:
+                    report.fail("dungeon_generation loot_bands 3+ reachability", f"missing templates: {missing_depth3}")
+                else:
+                    report.ok("dungeon_generation 3+ loot sources reach every v28 template")
     for key in dungeon_generation["level_names"]:
         try:
             level_num = int(key)
@@ -1048,6 +1138,79 @@ def cross_checks(report: Report) -> None:
         if not failed_tc_golden:
             report.ok("treasure_class_rolls golden references valid drop sources")
 
+    if dungeon_equipment_drops_golden.get("world_id") not in worlds["worlds"]:
+        report.fail("dungeon_equipment_drops golden", f"unknown world_id {dungeon_equipment_drops_golden.get('world_id')}")
+    elif worlds["worlds"][dungeon_equipment_drops_golden["world_id"]].get("mode") != "multi_level":
+        report.fail("dungeon_equipment_drops golden", "world_id must be a multi-level dungeon world")
+    else:
+        fixture_templates = set(dungeon_equipment_drops_golden.get("required_templates", []))
+        if fixture_templates != required_templates:
+            report.fail("dungeon_equipment_drops golden", f"required_templates mismatch: {sorted(fixture_templates)}")
+        else:
+            failed_dungeon_drop = False
+            bands_by_depth = {band["min_depth"]: band for band in loot_bands}
+            for band in dungeon_equipment_drops_golden["bands"]:
+                depth = abs(int(band["level"]))
+                rules_band = None
+                for candidate in loot_bands:
+                    max_depth = candidate.get("max_depth")
+                    if depth >= candidate["min_depth"] and (max_depth is None or depth <= max_depth):
+                        rules_band = candidate
+                        break
+                if rules_band is None:
+                    report.fail("dungeon_equipment_drops golden", f"{band['level']}: no matching rules band")
+                    failed_dungeon_drop = True
+                    break
+                if depth not in bands_by_depth and depth >= 3:
+                    expected_monster = loot_bands[-1]["monster_loot_table"]
+                    expected_chest = loot_bands[-1]["chest_loot_table"]
+                else:
+                    expected_monster = rules_band["monster_loot_table"]
+                    expected_chest = rules_band["chest_loot_table"]
+                if band["monster_loot_table"] != expected_monster or band["chest_loot_table"] != expected_chest:
+                    report.fail("dungeon_equipment_drops golden", f"{band['level']}: loot table mismatch")
+                    failed_dungeon_drop = True
+                    break
+            if not failed_dungeon_drop:
+                for case in dungeon_equipment_drops_golden["cases"]:
+                    table_id = case["loot_table"]
+                    treasure_class_id = treasure_class_id_for_table(table_id)
+                    if treasure_class_id != case["treasure_class_id"]:
+                        report.fail("dungeon_equipment_drops golden", f"{case['name']}: treasure class mismatch")
+                        failed_dungeon_drop = True
+                        break
+                    depth = abs(int(case["level"]))
+                    rules_band = None
+                    for candidate in loot_bands:
+                        max_depth = candidate.get("max_depth")
+                        if depth >= candidate["min_depth"] and (max_depth is None or depth <= max_depth):
+                            rules_band = candidate
+                            break
+                    table_key = "monster_loot_table" if case["source"] == "monster" else "chest_loot_table"
+                    if rules_band is None or case["loot_table"] != rules_band[table_key]:
+                        report.fail("dungeon_equipment_drops golden", f"{case['name']}: source table mismatch")
+                        failed_dungeon_drop = True
+                        break
+                    for drop in case["expected_drops"]:
+                        item_def_id = drop.get("item_def_id")
+                        item_template_id = drop.get("item_template_id")
+                        if bool(item_def_id) == bool(item_template_id):
+                            report.fail("dungeon_equipment_drops golden", f"{case['name']}: expected drop must declare one item source")
+                            failed_dungeon_drop = True
+                            break
+                        if item_def_id and item_def_id not in items["items"]:
+                            report.fail("dungeon_equipment_drops golden", f"{case['name']}: unknown item {item_def_id}")
+                            failed_dungeon_drop = True
+                            break
+                        if item_template_id and item_template_id not in item_templates["templates"]:
+                            report.fail("dungeon_equipment_drops golden", f"{case['name']}: unknown template {item_template_id}")
+                            failed_dungeon_drop = True
+                            break
+                    if failed_dungeon_drop:
+                        break
+            if not failed_dungeon_drop:
+                report.ok("dungeon_equipment_drops golden references valid depth bands and drop sources")
+
     if guarded_chest_generation_golden["base_monster_count"] != dungeon_generation["monster_placement"]["count"]:
         report.fail("guarded_chest_generation golden", "base_monster_count must match dungeon monster placement")
     elif guarded_chest_generation_golden["monster_count_bonus"] != dungeon_generation["chest_placement"]["monster_count_bonus"]:
@@ -1055,28 +1218,39 @@ def cross_checks(report: Report) -> None:
     elif guarded_chest_generation_golden["level"] >= 0:
         report.fail("guarded_chest_generation golden", "level must be a dungeon level")
     else:
-        failed_chest_golden = False
-        for case in guarded_chest_generation_golden["cases"]:
-            expected_chest = case["expected_chest"]
-            expected_count = case["expected_monster_count"]
-            if expected_chest is None:
-                if expected_count != dungeon_generation["monster_placement"]["count"]:
-                    report.fail("guarded_chest_generation golden", f"{case['name']}: no-chest count must equal base count")
+        guarded_depth = abs(int(guarded_chest_generation_golden["level"]))
+        guarded_band = None
+        for candidate in loot_bands:
+            max_depth = candidate.get("max_depth")
+            if guarded_depth >= candidate["min_depth"] and (max_depth is None or guarded_depth <= max_depth):
+                guarded_band = candidate
+                break
+        failed_chest_golden = guarded_band is None
+        if failed_chest_golden:
+            report.fail("guarded_chest_generation golden", "level must resolve to a loot band")
+        else:
+            expected_guarded_loot_table = guarded_band["chest_loot_table"]
+            for case in guarded_chest_generation_golden["cases"]:
+                expected_chest = case["expected_chest"]
+                expected_count = case["expected_monster_count"]
+                if expected_chest is None:
+                    if expected_count != dungeon_generation["monster_placement"]["count"]:
+                        report.fail("guarded_chest_generation golden", f"{case['name']}: no-chest count must equal base count")
+                        failed_chest_golden = True
+                        break
+                    continue
+                if expected_chest["interactable_def_id"] != dungeon_generation["chest_placement"]["interactable_def_id"]:
+                    report.fail("guarded_chest_generation golden", f"{case['name']}: interactable_def_id mismatch")
                     failed_chest_golden = True
                     break
-                continue
-            if expected_chest["interactable_def_id"] != dungeon_generation["chest_placement"]["interactable_def_id"]:
-                report.fail("guarded_chest_generation golden", f"{case['name']}: interactable_def_id mismatch")
-                failed_chest_golden = True
-                break
-            if expected_chest["loot_table"] != dungeon_generation["chest_placement"]["loot_table"]:
-                report.fail("guarded_chest_generation golden", f"{case['name']}: loot_table mismatch")
-                failed_chest_golden = True
-                break
-            if expected_count != dungeon_generation["monster_placement"]["count"] + dungeon_generation["chest_placement"]["monster_count_bonus"]:
-                report.fail("guarded_chest_generation golden", f"{case['name']}: guarded count must include bonus")
-                failed_chest_golden = True
-                break
+                if expected_chest["loot_table"] != expected_guarded_loot_table:
+                    report.fail("guarded_chest_generation golden", f"{case['name']}: loot_table mismatch")
+                    failed_chest_golden = True
+                    break
+                if expected_count != dungeon_generation["monster_placement"]["count"] + dungeon_generation["chest_placement"]["monster_count_bonus"]:
+                    report.fail("guarded_chest_generation golden", f"{case['name']}: guarded count must include bonus")
+                    failed_chest_golden = True
+                    break
         if not failed_chest_golden:
             report.ok("guarded_chest_generation golden references valid chest rules")
 

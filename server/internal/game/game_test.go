@@ -859,6 +859,83 @@ func TestTreasureClassRollsGolden(t *testing.T) {
 	}
 }
 
+func TestDungeonEquipmentDropsGolden(t *testing.T) {
+	rules := loadRules(t)
+	var golden struct {
+		WorldID           string   `json:"world_id"`
+		RequiredTemplates []string `json:"required_templates"`
+		Bands             []struct {
+			Level            int    `json:"level"`
+			Depth            int    `json:"depth"`
+			MonsterLootTable string `json:"monster_loot_table"`
+			ChestLootTable   string `json:"chest_loot_table"`
+		} `json:"bands"`
+		Cases []struct {
+			Name            string     `json:"name"`
+			Level           int        `json:"level"`
+			Source          string     `json:"source"`
+			LootTable       string     `json:"loot_table"`
+			TreasureClassID string     `json:"treasure_class_id"`
+			Seed            string     `json:"seed"`
+			ExpectedDrops   []LootDrop `json:"expected_drops"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "dungeon_equipment_drops.json", &golden)
+
+	if golden.WorldID != "dungeon_levels" {
+		t.Fatalf("world_id = %s, want dungeon_levels", golden.WorldID)
+	}
+	for _, bandGolden := range golden.Bands {
+		band, ok := rules.DungeonGeneration.LootBandForLevel(bandGolden.Level)
+		if !ok {
+			t.Fatalf("level %d missing loot band", bandGolden.Level)
+		}
+		if got := absInt(bandGolden.Level); got != bandGolden.Depth {
+			t.Fatalf("level %d depth = %d, want %d", bandGolden.Level, got, bandGolden.Depth)
+		}
+		if band.MonsterLootTable != bandGolden.MonsterLootTable || band.ChestLootTable != bandGolden.ChestLootTable {
+			t.Fatalf("level %d band = %+v, want monster=%s chest=%s", bandGolden.Level, band, bandGolden.MonsterLootTable, bandGolden.ChestLootTable)
+		}
+	}
+
+	reachable := rules.templatesReachableFromLootTable("dungeon_mob_drop_depth_3_plus")
+	for templateID := range rules.templatesReachableFromLootTable("guarded_chest_drop_depth_3_plus") {
+		reachable[templateID] = true
+	}
+	for _, templateID := range golden.RequiredTemplates {
+		if !reachable[templateID] {
+			t.Fatalf("3+ dungeon sources cannot reach required template %s", templateID)
+		}
+	}
+
+	for _, c := range golden.Cases {
+		table := rules.LootTables[c.LootTable]
+		if table.TreasureClassID != c.TreasureClassID {
+			t.Fatalf("%s: treasure class = %s, want %s", c.Name, table.TreasureClassID, c.TreasureClassID)
+		}
+		band, ok := rules.DungeonGeneration.LootBandForLevel(c.Level)
+		if !ok {
+			t.Fatalf("%s: missing band for level %d", c.Name, c.Level)
+		}
+		wantTable := band.MonsterLootTable
+		if c.Source == "chest" {
+			wantTable = band.ChestLootTable
+		}
+		if c.LootTable != wantTable {
+			t.Fatalf("%s: loot table = %s, want %s", c.Name, c.LootTable, wantTable)
+		}
+		got := rules.LootDrops(c.LootTable, NewRNG(SeedToUint64(c.Seed)))
+		if len(got) != len(c.ExpectedDrops) {
+			t.Fatalf("%s: drops = %+v, want %+v", c.Name, got, c.ExpectedDrops)
+		}
+		for i := range got {
+			if got[i] != c.ExpectedDrops[i] {
+				t.Fatalf("%s: drop %d = %+v, want %+v", c.Name, i, got[i], c.ExpectedDrops[i])
+			}
+		}
+	}
+}
+
 func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	rules.TreasureClasses["test_rolled_tc"] = TreasureClassDef{Attempts: []TreasureAttemptDef{{
@@ -2746,6 +2823,63 @@ func TestGuardedChestGenerationGolden(t *testing.T) {
 	}
 }
 
+func TestGeneratedDungeonSourcesUseDepthLootTables(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.DungeonGeneration.ChestPlacement.ChanceWeight = 1
+	rules.DungeonGeneration.ChestPlacement.NoChestWeight = 0
+	cases := []struct {
+		levelNum         int
+		monsterLootTable string
+		chestLootTable   string
+	}{
+		{-1, "dungeon_mob_drop_depth_1", "guarded_chest_drop_depth_1"},
+		{-2, "dungeon_mob_drop_depth_2", "guarded_chest_drop_depth_2"},
+		{-3, "dungeon_mob_drop_depth_3_plus", "guarded_chest_drop_depth_3_plus"},
+		{-10, "dungeon_mob_drop_depth_3_plus", "guarded_chest_drop_depth_3_plus"},
+	}
+	for _, c := range cases {
+		level, err := GenerateDungeonLevel("v29_source_tables", c.levelNum, rules.DungeonGeneration)
+		if err != nil {
+			t.Fatalf("level %d generate: %v", c.levelNum, err)
+		}
+		if len(level.monsters) == 0 {
+			t.Fatalf("level %d: missing generated monsters", c.levelNum)
+		}
+		for _, monster := range level.monsters {
+			if monster.lootTable != c.monsterLootTable {
+				t.Fatalf("level %d monster lootTable = %s, want %s", c.levelNum, monster.lootTable, c.monsterLootTable)
+			}
+		}
+		if len(level.chests) != 1 {
+			t.Fatalf("level %d: chests = %+v, want one", c.levelNum, level.chests)
+		}
+		if got := level.chests[0].lootTable; got != c.chestLootTable {
+			t.Fatalf("level %d chest lootTable = %s, want %s", c.levelNum, got, c.chestLootTable)
+		}
+	}
+}
+
+func TestDungeonEquipmentLootDeterminism(t *testing.T) {
+	first := dungeonEquipmentKillLootSequence(t, "v29_replay_equipment_0")
+	second := dungeonEquipmentKillLootSequence(t, "v29_replay_equipment_0")
+	if !sameStrings(first, second) {
+		t.Fatalf("same-seed loot sequence drifted: %v != %v", first, second)
+	}
+	if len(first) == 0 {
+		t.Fatal("expected at least one dungeon equipment drop")
+	}
+	foundEquipment := false
+	for _, drop := range first {
+		if drop == "cave_bow:cave_bow" {
+			foundEquipment = true
+			break
+		}
+	}
+	if !foundEquipment {
+		t.Fatalf("loot sequence = %v, want rolled cave_bow equipment", first)
+	}
+}
+
 func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 	var golden struct {
 		SessionSeed              string `json:"session_seed"`
@@ -3228,6 +3362,52 @@ func generatedLootPos(level generatedDungeonLevel, itemDefID string) (Vec2, bool
 		}
 	}
 	return Vec2{}, false
+}
+
+func dungeonEquipmentKillLootSequence(t *testing.T, seed string) []string {
+	t.Helper()
+	sim, err := NewSimWithWorld("sess_"+seed, seed, loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	descendFromCurrentLevel(t, sim, "descend_1")
+	descendFromCurrentLevel(t, sim, "descend_2")
+	descendFromCurrentLevel(t, sim, "descend_3")
+	if sim.currentLevel != -3 {
+		t.Fatalf("currentLevel = %d, want -3", sim.currentLevel)
+	}
+	var monster *entity
+	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
+		candidate := sim.activeLevel().entities[id]
+		if candidate.kind == monsterEntity && candidate.monsterDefID == "dungeon_mob" {
+			monster = candidate
+			break
+		}
+	}
+	if monster == nil {
+		t.Fatal("missing depth-3 dungeon mob")
+	}
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = monster.pos
+	monster.hp = 1
+	res := sim.Tick([]Input{{
+		MessageID:     "kill_depth3",
+		CorrelationID: "corr_depth3",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: idStr(monster.id)},
+	}})
+	assertAck(t, res, "kill_depth3")
+	if !hasEvent(res, "monster_killed") {
+		t.Fatalf("missing monster_killed: %+v", res.Events)
+	}
+	out := []string{}
+	for _, change := range res.Changes {
+		if change.Op != OpEntitySpawn || change.Entity == nil || change.Entity.Type != lootEntity {
+			continue
+		}
+		out = append(out, change.Entity.ItemTemplateID+":"+change.Entity.ItemDefID)
+	}
+	return out
 }
 
 func levelWithoutMonsterIndex(level generatedDungeonLevel, skip int) generatedDungeonLevel {

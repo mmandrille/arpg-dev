@@ -617,6 +617,24 @@ async def execute_step(
             await pump_one(ws, state, timeout=0.1)
         return
 
+    if action == "pick_up_first_rolled_loot":
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        loot = find_first_rolled_loot(state)
+        while loot is None:
+            if loop.time() > deadline:
+                raise TimeoutError("pick_up_first_rolled_loot stalled waiting for rolled loot")
+            await pump_one(ws, state, timeout=0.1)
+            loot = find_first_rolled_loot(state)
+        loot_id = str(loot["id"])
+        await ws.send(json.dumps(make_envelope(
+            "action_intent", session_id, state.last_tick, {"target_id": loot_id})))
+        log("picking up rolled loot", loot.get("item_template_id"), loot_id)
+        while state.item_id is None:
+            if loop.time() > deadline:
+                raise TimeoutError("pick_up_first_rolled_loot stalled waiting for inventory_add")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
     if action == "pick_up_loot":
         item_def_id = str(step["item_def_id"])
         bag_index = int(step.get("bag_index", 0))
@@ -654,7 +672,8 @@ async def execute_step(
             if loop.time() > deadline:
                 raise TimeoutError("equip_first_inventory_item stalled waiting for inventory")
             await pump_one(ws, state, timeout=0.1)
-        slot = str(step.get("slot", "main_hand"))
+        item = find_inventory_item_by_instance(state.inventory, state.item_id)
+        slot = str(step.get("slot", (item or {}).get("slot", "main_hand")))
         await ws.send(json.dumps(make_envelope(
             "equip_intent", session_id, state.last_tick, {"item_instance_id": state.item_id, "slot": slot})))
         log("equipping item", state.item_id)
@@ -685,6 +704,27 @@ async def execute_step(
             await pump_one(ws, state, timeout=0.1)
         state.equipped_item_id = item_id
         return
+
+    if action == "equip_last_inventory_item":
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        while state.item_id is None:
+            if loop.time() > deadline:
+                raise TimeoutError("equip_last_inventory_item stalled waiting for inventory")
+            await pump_one(ws, state, timeout=0.1)
+        item = find_inventory_item_by_instance(state.inventory, state.item_id)
+        if item is None:
+            raise AssertionError(f"equip_last_inventory_item: missing inventory item {state.item_id}")
+        slot = str(step.get("slot", item.get("slot", "main_hand")))
+        await ws.send(json.dumps(make_envelope(
+            "equip_intent", session_id, state.last_tick, {"item_instance_id": state.item_id, "slot": slot})))
+        log("equipping last item", state.item_id, "slot", slot)
+        while state.equipped.get(slot) != state.item_id:
+            if loop.time() > deadline:
+                raise TimeoutError(f"equip_last_inventory_item stalled waiting for equipped_update for {state.item_id}")
+            await pump_one(ws, state, timeout=0.1)
+        state.equipped_item_id = state.item_id
+        return
+
 
     if action == "unequip_slot":
         slot = str(step.get("slot", "main_hand"))
@@ -1211,6 +1251,14 @@ def find_loot(state: RuntimeState, item_def_id: str) -> dict[str, Any] | None:
     return None
 
 
+def find_first_rolled_loot(state: RuntimeState) -> dict[str, Any] | None:
+    for loot_id in state.loot_ids:
+        entity = state.entities.get(loot_id)
+        if entity is not None and entity.get("type") == "loot" and entity.get("item_template_id"):
+            return entity
+    return None
+
+
 def find_monster(state: RuntimeState, monster_def_id: str) -> dict[str, Any] | None:
     for entity in state.entities.values():
         if (
@@ -1262,6 +1310,12 @@ def find_inventory_item(
     if bag_index < 0 or bag_index >= len(matches):
         return None
     return matches[bag_index]
+
+
+def find_inventory_item_by_instance(inventory: list[dict[str, Any]], item_instance_id: str | None) -> dict[str, Any] | None:
+    if item_instance_id is None:
+        return None
+    return next((item for item in inventory if str(item.get("item_instance_id")) == str(item_instance_id)), None)
 
 
 def find_player(state: RuntimeState) -> dict[str, Any] | None:
@@ -1418,6 +1472,24 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
         raise AssertionError(f"{where}: effect_ids should be empty in v23: {item}")
 
 
+def assert_rolled_inventory_any(inventory: list[dict], equipped: bool | None, where: str) -> None:
+    matches = [
+        item for item in inventory
+        if item.get("item_template_id") and (equipped is None or bool(item.get("equipped")) == equipped)
+    ]
+    if not matches:
+        raise AssertionError(f"{where}: missing rolled inventory item equipped={equipped}: {inventory}")
+    item = matches[0]
+    stats = item.get("rolled_stats", {})
+    if not isinstance(stats, dict) or not stats:
+        raise AssertionError(f"{where}: rolled item missing stats: {item}")
+    req = item.get("requirements", {})
+    if int(req.get("level", 0)) != 1:
+        raise AssertionError(f"{where}: rolled item required level mismatch: {item}")
+    if item.get("effect_ids", []) != []:
+        raise AssertionError(f"{where}: rolled item effect_ids should be empty: {item}")
+
+
 def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: str) -> None:
     matches: list[dict] = []
     entity_type = str(assertion.get("entity_type", ""))
@@ -1508,6 +1580,9 @@ def run_assertions(
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
         elif typ == "rolled_inventory_item":
             assert_rolled_inventory_item(inventory, assertion, where)
+        elif typ == "rolled_inventory_any":
+            expected_equipped = assertion.get("equipped")
+            assert_rolled_inventory_any(inventory, expected_equipped, where)
         elif typ == "entity_count":
             assert_entity_count(entities, assertion, where)
         elif typ == "equipped_weapon_def":
@@ -1700,6 +1775,9 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             continue
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)
+        if typ == "rolled_inventory_any":
+            expected_equipped = assertion.get("equipped")
+            assert_rolled_inventory_any(state.inventory, expected_equipped, where)
             continue
         if typ == "equipped_slot_def":
             slot = str(assertion["slot"])

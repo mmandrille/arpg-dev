@@ -750,6 +750,9 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		if !ok {
 			return fmt.Errorf("game: generate dungeon level %d: unknown monster %s", level.levelNum, generated.defID)
 		}
+		if _, ok := s.rules.LootTables[generated.lootTable]; !ok {
+			return fmt.Errorf("game: generate dungeon level %d: unknown monster loot table %s", level.levelNum, generated.lootTable)
+		}
 		monster := &entity{
 			kind:         monsterEntity,
 			pos:          generated.pos,
@@ -757,7 +760,7 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			hp:           def.MaxHP,
 			maxHP:        def.MaxHP,
 			monsterDefID: generated.defID,
-			lootTable:    def.LootTable,
+			lootTable:    generated.lootTable,
 			aiMode:       monsterAIModeIdle,
 		}
 		monster.id = s.alloc()

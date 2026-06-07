@@ -25,8 +25,26 @@
     "dungeon_mob_drop": {
       "treasure_class_id": "dungeon_mob_tc_1"
     },
+    "dungeon_mob_drop_depth_1": {
+      "treasure_class_id": "dungeon_mob_tc_depth_1"
+    },
+    "dungeon_mob_drop_depth_2": {
+      "treasure_class_id": "dungeon_mob_tc_depth_2"
+    },
+    "dungeon_mob_drop_depth_3_plus": {
+      "treasure_class_id": "dungeon_mob_tc_depth_3_plus"
+    },
     "guarded_chest_drop": {
       "treasure_class_id": "guarded_chest_tc_1"
+    },
+    "guarded_chest_drop_depth_1": {
+      "treasure_class_id": "guarded_chest_tc_depth_1"
+    },
+    "guarded_chest_drop_depth_2": {
+      "treasure_class_id": "guarded_chest_tc_depth_2"
+    },
+    "guarded_chest_drop_depth_3_plus": {
+      "treasure_class_id": "guarded_chest_tc_depth_3_plus"
     },
     "no_drop": {
     }

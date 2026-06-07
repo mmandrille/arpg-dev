@@ -12,6 +12,8 @@
     "teleporter_placement",
     "monster_placement",
     "chest_placement",
+    "loot_band_note",
+    "loot_bands",
     "level_names",
     "default_level_name_template"
   ],
@@ -83,6 +85,27 @@
         "monster_count_bonus": { "type": "integer", "minimum": 0 },
         "min_stair_distance": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "loot_band_note": { "type": "string", "minLength": 1 },
+    "loot_bands": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["min_depth", "max_depth", "monster_loot_table", "chest_loot_table"],
+        "additionalProperties": false,
+        "properties": {
+          "min_depth": { "type": "integer", "minimum": 1 },
+          "max_depth": {
+            "anyOf": [
+              { "type": "integer", "minimum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "monster_loot_table": { "type": "string", "minLength": 1 },
+          "chest_loot_table": { "type": "string", "minLength": 1 }
+        }
       }
     },
     "level_names": {

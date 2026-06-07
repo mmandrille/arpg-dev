@@ -1,34 +1,50 @@
 {
-  "treasure_class_id": "dungeon_mob_tc_1",
+  "treasure_class_id": "guarded_chest_tc_depth_3_plus",
   "cases": [
     {
-      "name": "secondary_no_drop",
-      "seed": "treasure_1",
+      "name": "bow",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
-        { "item_template_id": "cave_blade" }
+        { "item_template_id": "cave_bow" }
       ]
     },
     {
-      "name": "multi_drop_money_like",
-      "seed": "treasure_0",
+      "name": "shield",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_13",
       "expected_drops": [
-        { "item_template_id": "cave_blade" },
-        { "item_def_id": "training_badge" }
+        { "item_template_id": "cave_shield" }
       ]
     },
     {
-      "name": "fixed_potion",
-      "seed": "treasure_7",
+      "name": "belt_and_jewelry",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_3",
+      "expected_drops": [
+        { "item_template_id": "cave_belt" },
+        { "item_template_id": "cave_ring" }
+      ]
+    },
+    {
+      "name": "armor_and_belt",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_4",
+      "expected_drops": [
+        { "item_template_id": "cave_mail" },
+        { "item_template_id": "cave_belt" }
+      ]
+    },
+    {
+      "name": "potion_bonus",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
         { "item_template_id": "cave_blade" },
         { "item_def_id": "red_potion" }
       ]
     },
     {
-      "name": "rolled_equipment_template",
-      "seed": "treasure_6",
+      "name": "money_like_bonus",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_14",
       "expected_drops": [
-        { "item_template_id": "cave_blade" }
+        { "item_template_id": "cave_boots" },
+        { "item_def_id": "training_badge" }
       ]
     }
   ]

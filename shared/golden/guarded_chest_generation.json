@@ -14,7 +14,7 @@
       "seed": "chest_seed_22",
       "expected_chest": {
         "interactable_def_id": "treasure_chest",
-        "loot_table": "guarded_chest_drop",
+        "loot_table": "guarded_chest_drop_depth_1",
         "position": { "x": 25, "y": 14 }
       },
       "expected_monster_count": 4

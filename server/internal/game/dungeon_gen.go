@@ -40,8 +40,9 @@ type generatedLoot struct {
 }
 
 type generatedMonster struct {
-	defID string
-	pos   Vec2
+	defID     string
+	lootTable string
+	pos       Vec2
 }
 
 // GenerateDungeonLevel builds the deterministic non-player contents for one
@@ -56,6 +57,10 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	out := generatedDungeonLevel{
 		levelNum: levelNum,
 		walls:    perimeterWalls(rules.FloorSize, rules.WallThickness),
+	}
+	lootBand, ok := rules.LootBandForLevel(levelNum)
+	if !ok {
+		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: missing loot band", levelNum)
 	}
 
 	down, ok := randomStairPosition(rng, rules, nil)
@@ -72,10 +77,10 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 			return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
 		}
 		out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
-		if err := maybePlaceGuardedChest(chestRNG, rules, &out); err != nil {
+		if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
-		if err := placeDungeonMonsters(rng, rules, &out); err != nil {
+		if err := placeDungeonMonsters(rng, rules, lootBand, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
 		return out, nil
@@ -94,10 +99,10 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
 	}
 	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
-	if err := maybePlaceGuardedChest(chestRNG, rules, &out); err != nil {
+	if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
-	if err := placeDungeonMonsters(rng, rules, &out); err != nil {
+	if err := placeDungeonMonsters(rng, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	out.loot = append(out.loot, generatedLoot{
@@ -192,7 +197,7 @@ func randomTeleporterPosition(rng *RNG, rules DungeonGenerationRules, stairs []V
 	return Vec2{}, false
 }
 
-func maybePlaceGuardedChest(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+func maybePlaceGuardedChest(rng *RNG, rules DungeonGenerationRules, lootBand DungeonLootBand, out *generatedDungeonLevel) error {
 	placement := rules.ChestPlacement
 	if !placement.Enabled {
 		return nil
@@ -207,7 +212,7 @@ func maybePlaceGuardedChest(rng *RNG, rules DungeonGenerationRules, out *generat
 	}
 	out.chests = append(out.chests, generatedChest{
 		defID:     placement.InteractableDefID,
-		lootTable: placement.LootTable,
+		lootTable: lootBand.ChestLootTable,
 		pos:       pos,
 	})
 	return nil
@@ -251,7 +256,7 @@ func randomChestPosition(rng *RNG, rules DungeonGenerationRules, out *generatedD
 	return Vec2{}, false
 }
 
-func placeDungeonMonsters(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+func placeDungeonMonsters(rng *RNG, rules DungeonGenerationRules, lootBand DungeonLootBand, out *generatedDungeonLevel) error {
 	placement := rules.MonsterPlacement
 	count := placement.Count
 	if len(out.chests) > 0 {
@@ -262,7 +267,7 @@ func placeDungeonMonsters(rng *RNG, rules DungeonGenerationRules, out *generated
 		if !ok {
 			return fmt.Errorf("game: generate dungeon level %d: could not place monster %d", out.levelNum, i)
 		}
-		out.monsters = append(out.monsters, generatedMonster{defID: placement.MonsterDefID, pos: pos})
+		out.monsters = append(out.monsters, generatedMonster{defID: placement.MonsterDefID, lootTable: lootBand.MonsterLootTable, pos: pos})
 	}
 	return nil
 }

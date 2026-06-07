@@ -11,8 +11,8 @@ Last updated: 2026-06-06
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v20 — `play-session-loop` (town entry + fresh playable dungeon loop) |
-| **Active branch** | `feature/play-session-loop` |
+| **Latest completed slice** | v21 — `dungeon-monster-combat` (generated dungeon mobs chase and proactively damage the player) |
+| **Active branch** | `feature/dungeon-monster-combat` |
 | **CI gate** | `make ci` green on 2026-06-06 |
 | **Next slice** | TBD |
 
@@ -36,6 +36,7 @@ v17_* = monster-chase-movement
 v18_* = dungeon-levels-and-stairs
 v19_* = teleporters-and-waypoint-ui
 v20_* = play-session-loop
+v21_* = dungeon-monster-combat
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -76,6 +77,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v18** | `dungeon-levels-and-stairs` | Complete (`make ci` green) | [`v18_spec-dungeon-levels-and-stairs.md`](specs/v18_spec-dungeon-levels-and-stairs.md) | [`v18_2026-06-06-dungeon-levels-and-stairs.md`](plans/v18_2026-06-06-dungeon-levels-and-stairs.md) |
 | **v19** | `teleporters-and-waypoint-ui` | Complete (`make ci` green) | [`v19_spec-teleporters-and-waypoint-ui.md`](specs/v19_spec-teleporters-and-waypoint-ui.md) | [`v19_2026-06-06-teleporters-and-waypoint-ui.md`](plans/v19_2026-06-06-teleporters-and-waypoint-ui.md) |
 | **v20** | `play-session-loop` | Complete (`make ci` green) | [`v20_spec-play-session-loop.md`](specs/v20_spec-play-session-loop.md) | [`v20_2026-06-06-play-session-loop.md`](plans/v20_2026-06-06-play-session-loop.md) |
+| **v21** | `dungeon-monster-combat` | Complete (`make ci` green) | [`v21_spec-dungeon-monster-combat.md`](specs/v21_spec-dungeon-monster-combat.md) | [`v21_2026-06-06-dungeon-monster-combat.md`](plans/v21_2026-06-06-dungeon-monster-combat.md) |
 
 ---
 
@@ -447,6 +449,28 @@ interactive play loop without changing the authoritative client/server boundary.
 **Explicit non-goals:** no character-scoped persistence, player-facing resume, safe-zone combat
 rules, NPCs/vendors/stash, production town art, or plugin adoption.
 
+### v21 — Dungeon monster combat
+
+**Proves:** Generated dungeon floors can be dangerous without changing the authoritative
+client/server boundary or adding client-side combat authority.
+
+- Shared monster rules define `dungeon_mob` as a chase monster with proactive melee attack damage
+  and tick-based cooldown.
+- Dungeon generation places deterministic `dungeon_mob` entities on negative dungeon levels only;
+  town level `0` remains monster-free.
+- Server `Sim.Tick` advances monster chase, then proactive monster attacks, then projectiles,
+  preserving deterministic replay order.
+- Proactive attacks emit existing `player_damaged` / `player_killed` events, so current Godot
+  player hit/death reactions work without a protocol schema change.
+- `shared/golden/dungeon_monster_attack.json` pins seed, level, monster def, first damage tick,
+  damage, and resulting HP for Go and Godot golden checks.
+- Bot scenario `14_dungeon_monsters.json` proves descend, passive damage, dungeon mob kill,
+  `/state`, reconnect resume, and replay.
+
+**Explicit non-goals:** no monster loot drops beyond `no_drop`, no monster attack animation,
+no depth scaling, no ranged/AoE monsters, no protocol-level town safe-zone guard, no
+character-scoped persistence, and no production monster art.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -547,17 +571,18 @@ goldens, server-owned inventory removal, and a client-only hotbar that sends use
 monster pathing around solids, leash return, chase/lab bot scenarios, and client walk presentation
 from position deltas.
 
-**Dungeon levels, stairs, teleporters, and town entry are now authoritative.** v18 adds multi-level
-dungeon state and generated stairs; v19 adds generated teleporters, session discovery, and
-server-owned fast travel with a client-only waypoint panel; v20 makes town level `0` the fresh
-play-session entry and keeps dungeon floors lazy.
+**Dungeon levels, stairs, teleporters, town entry, and dungeon monster threat are now authoritative.**
+v18 adds multi-level dungeon state and generated stairs; v19 adds generated teleporters, session
+discovery, and server-owned fast travel with a client-only waypoint panel; v20 makes town level `0`
+the fresh play-session entry and keeps dungeon floors lazy; v21 spawns deterministic hostile dungeon
+mobs that chase and proactively damage the player.
 
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Cross-session **character-scoped** inventory, waypoints, and player-facing resume | v0 as-built §10, v20 non-goals |
-| Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, proactive monster melee/ranged AI | v0/v4/v12/v17 non-goals |
+| Persistence | Cross-session **character-scoped** inventory, waypoints, and player-facing resume | v0 as-built §10, v20/v21 non-goals |
+| Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, monster loot/depth scaling | v0/v4/v12/v17/v21 non-goals |
 | Content | Production item art/icons, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

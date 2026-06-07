@@ -1,0 +1,19 @@
+docs/adr/0009-boss-floors-and-timing-mechanics.md
+  s_b88884fd907161::t_dcbac210e81ef6 1-273
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3c501690fc35ac352128d04d6660b4241f0c4c1b",
+  "prompts": {},
+  "sessions": {
+    "s_b88884fd907161": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2fa73d9c-36ac-4b87-bf39-f60c6ef20b21",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 ---
 name: finish
 description: >-
-  Close out a slice: verify PROGRESS.md, run make ci, and commit with
+  Close out a slice: update PROGRESS.md, run make ci, and commit with
   feat: vN: title format. Use when the user runs /finish or says the slice
   is done and wants a consolidated commit.
 disable-model-invocation: true

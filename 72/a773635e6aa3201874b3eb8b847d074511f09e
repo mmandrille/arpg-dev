@@ -1,0 +1,261 @@
+server/internal/game/rules.go
+  s_67d5190b324a42::t_9d4f5f76ba87a7 841
+  s_67d5190b324a42::t_e713780f2acc6c 154-167
+  s_67d5190b324a42::t_a9f3f4720465b6 136-137,410-411,418-419,435,467-468,470-471,473-497,503,509,522-524
+  s_67d5190b324a42::t_a5d807b905575f 988-1008
+  s_67d5190b324a42::t_ab9e219dd39072 270,836-840,842,844-847
+server/internal/store/repos.go
+  s_67d5190b324a42::t_6ce11b4752ec02 407-408,419,444-478,523-532,577-595
+  s_67d5190b324a42::t_89a71a0d3226dc 409-418,420-443
+  s_67d5190b324a42::t_b3405ed588ca5a 272-293
+server/internal/realtime/hub.go
+  s_67d5190b324a42::t_e63f09aeb1ced7 80,127-132
+server/internal/store/models.go
+  s_67d5190b324a42::t_f391e9c96926b1 101-102,108-109,116
+  s_67d5190b324a42::t_914eb1ddf4ecd3 103-107
+tools/bot/scenarios/15_character_persistence.json
+  s_67d5190b324a42::t_45f9fec2f68560 9
+server/internal/realtime/runner.go
+  s_67d5190b324a42::t_e63f09aeb1ced7 484-488
+tools/bot/scenarios/07_inventory_lab.json
+  s_67d5190b324a42::t_45f9fec2f68560 11-12,15
+tools/bot/scenarios/client/03_inventory_equip_unequip.json
+  s_67d5190b324a42::t_cac31da10a127e 16,19
+docs/specs/v28_spec-full-equipment-and-belt-hotbar.md
+  s_67d5190b324a42::t_c167fc5011e4d8 377
+  s_67d5190b324a42::t_728bdcc670425d 4,47-357,421-423
+  s_67d5190b324a42::t_991eff018e42f1 3
+  s_67d5190b324a42::t_aec807315c8cab 20-27
+server/internal/game/game_test.go
+  s_67d5190b324a42::t_08b5a45a504373 102
+  s_67d5190b324a42::t_1f512dc4b659fb 2295-2297
+  s_67d5190b324a42::t_ba20590d9c7521 2364-2372
+  s_67d5190b324a42::t_d55c8fa61c6a39 2311-2320,2338-2344,2346
+  s_67d5190b324a42::t_156075ba913eae 414,538,968,980,1207,1224,1254-1255,1257,1259-1260,1463,1466-1467,1520-1521,2128,2135,2160-2161,2235,2410
+  s_67d5190b324a42::t_0a044f02964a1f 1694-1701,1707-1710,1716-1785
+  s_67d5190b324a42::t_167423258b9fdc 1702-1706,1711-1715
+  s_67d5190b324a42::t_cee665a59c40eb 61
+  s_67d5190b324a42::t_760f5aaec6a85f 2281-2294,2298-2310,2321-2328,2345,2347-2363,2373-2382
+  s_67d5190b324a42::t_b73eb305a13a98 999-1163
+docs/plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md
+  s_67d5190b324a42::t_ab47c12e4bf280 341-348
+  s_67d5190b324a42::t_81c10d579a2d13 1-2,4-157,172-190,196-212,220-222,229-240,244-247,253-268,278-294,301-315,324-340,349-364,373-389,397-400,408-418,424-432,444-473
+  s_67d5190b324a42::t_eacf2cf112615d 170
+  s_67d5190b324a42::t_71a4733ff50c2b 295-300
+  s_67d5190b324a42::t_1a0131679f50fb 191-195
+  s_67d5190b324a42::t_12dfc86660e9b5 269-277
+  s_67d5190b324a42::t_cfdf5cbdf519b4 316-323
+  s_67d5190b324a42::t_299ea2b07929f1 158-169,171
+  s_67d5190b324a42::t_bf0a80215653aa 213-219,223-228
+  s_67d5190b324a42::t_4106a1b3b6e598 390-396,401-407
+  s_67d5190b324a42::t_e9ab20e441b28e 241-243,248-252
+  s_67d5190b324a42::t_991eff018e42f1 3,419-423,433-443
+  s_67d5190b324a42::t_04b75fcebfd844 365-372
+client/scripts/equipment_visuals.gd
+  s_67d5190b324a42::t_2cd81a5eb2b0e7 40,54
+shared/golden/slice_outcome.json
+  s_67d5190b324a42::t_5fec99843b9ea8 9,11
+server/internal/http/replay_test.go
+  s_67d5190b324a42::t_3820c418d10354 56-57,129
+shared/protocol/examples/state_delta.json
+  s_67d5190b324a42::t_5fec99843b9ea8 11-13
+shared/rules/item_templates.v0.schema.json
+  s_67d5190b324a42::t_1b7b2997f946bd 30,35-39,41-48,80-83,91
+shared/assets/item_visuals.v0.schema.json
+  s_67d5190b324a42::t_1b7b2997f946bd 32-35
+client/scripts/bot_scenario_runner.gd
+  s_67d5190b324a42::t_81ad3b027cce90 508-509,516-517
+  s_67d5190b324a42::t_619230e4f2de5e 27,41
+  s_67d5190b324a42::t_818e2c9fd9a83c 9,225-226,354-356,571,713
+  s_67d5190b324a42::t_e65ba72219d156 10,45-46,227-228,362-363,365-366,716
+  s_67d5190b324a42::t_cd9a37ab4c0ef9 361,364,370,372-373,375
+  s_67d5190b324a42::t_80c2d2ef8cf652 28-30,42-44,47
+  s_67d5190b324a42::t_1e4f0c1308f5ff 24,360,369
+  s_67d5190b324a42::t_150759e0b48a4c 371,374,376
+  s_67d5190b324a42::t_010100e3a5f612 510-515,717-718
+  s_67d5190b324a42::t_5de96d8e0bfcce 495-507
+  s_67d5190b324a42::t_42b49863fb9c2a 570,689-691
+  s_67d5190b324a42::t_cac31da10a127e 305,315
+  s_67d5190b324a42::t_14fa1bbadff403 695,698-700,704-706,719-720
+tools/bot/scenarios/client/10_full_equipment.json
+  s_67d5190b324a42::t_532e5b77ff4236 5-6,9-10,12-15,27-29,33
+  s_67d5190b324a42::t_1893aff86c9fc0 22-26,30-32
+  s_67d5190b324a42::t_25e7ae6a6ee6fd 1-4,7-8,11,16-21,34-35
+shared/protocol/envelope.v1.schema.json
+  s_67d5190b324a42::t_5fec99843b9ea8 24-26
+tools/bot/scenarios/02_gear_before_combat.json
+  s_67d5190b324a42::t_45f9fec2f68560 19
+tools/bot/run.py
+  s_67d5190b324a42::t_27b5d3c0e6dc78 657,677,690,703-726,728-731,734-736,738-741
+  s_67d5190b324a42::t_01980cde1ff6e7 1308-1309
+  s_67d5190b324a42::t_e7d98484fdb85d 86-87,337-338,340,343-363,365-370
+  s_67d5190b324a42::t_9c7e9e3091db5f 669,671,676
+  s_67d5190b324a42::t_0826c677440ac0 1081-1082
+  s_67d5190b324a42::t_2072a81f74c3f1 1127-1140
+  s_67d5190b324a42::t_51ae15c3713091 622,632,646
+  s_67d5190b324a42::t_c33d2d3aed1deb 1293-1294,1483-1484,1515-1516,1518,1521-1540,1816-1817
+  s_67d5190b324a42::t_6f4251d92fc5e3 1704-1724
+  s_67d5190b324a42::t_206c74fda81deb 1374-1388
+  s_67d5190b324a42::t_14a954e7ebafb5 364
+  s_67d5190b324a42::t_ee18ee7e419271 727,732-733
+  s_67d5190b324a42::t_b012664a42f455 737,1078,1083-1084,1103-1104
+shared/golden/slice_outcome.v0.schema.json
+  s_67d5190b324a42::t_5fec99843b9ea8 24,31,34
+tools/bot/scenarios/01_vertical_slice.json
+  s_67d5190b324a42::t_45f9fec2f68560 24
+assets/manifests/assets.v0.json
+  s_67d5190b324a42::t_1b7b2997f946bd 19,33
+shared/protocol/state_delta.v1.schema.json
+  s_67d5190b324a42::t_5fec99843b9ea8 62,72-75,269,272-280
+  s_67d5190b324a42::t_fd5c6d7160cc7b 270-271
+shared/rules/worlds.v0.json
+  s_67d5190b324a42::t_ab9e219dd39072 369-392
+client/scripts/inventory_panel.gd
+  s_67d5190b324a42::t_73f15e34ead121 7,9-21,24,29,76-77,79,152-155,161-165,187,239,241-242,258,262,264-276,294,296-297,301,328-329,446-448,459-462,464-477,480,483-490,499-501,504,509-532,551-556
+shared/assets/item_presentations.v0.schema.json
+  s_67d5190b324a42::t_21d8120098d60f 16
+  s_67d5190b324a42::t_3c18572eb9c4b2 20
+shared/golden/full_equipment.v0.schema.json
+  s_67d5190b324a42::t_5fec99843b9ea8 1-31
+shared/rules/items.v0.json
+  s_67d5190b324a42::t_1b7b2997f946bd 4-5
+shared/protocol/messages.v1.schema.json
+  s_67d5190b324a42::t_5fec99843b9ea8 24-25,63-66,146,154,173-197
+server/internal/http/session.go
+  s_67d5190b324a42::t_3820c418d10354 145-151
+tools/assets/test_validate_assets.py
+  s_67d5190b324a42::t_576b9f9da81e82 118,133
+tools/bot/test_protocol.py
+  s_67d5190b324a42::t_13c440efefda32 132,182-184,200-202,211,227-229,317,329
+shared/golden/full_equipment.json
+  s_67d5190b324a42::t_c00ec6aa52ac32 30-31
+  s_67d5190b324a42::t_5fec99843b9ea8 1-29,32-48
+tools/validate_shared.py
+  s_67d5190b324a42::t_3462ab4ff3f6ef 382-386
+  s_67d5190b324a42::t_21d8120098d60f 649
+  s_67d5190b324a42::t_576b9f9da81e82 377-381,387-389,394-395,402-403,412-413,423,433-436,438-439,441-463,470,492-496,498
+  s_67d5190b324a42::t_68f65e7a56663d 1133-1149,1159
+  s_67d5190b324a42::t_3a995b31fdcaec 549-564,776-779,781-782
+server/internal/game/sim.go
+  s_67d5190b324a42::t_1a849d513e120f 351-356,377-394
+  s_67d5190b324a42::t_f06681ed6b4585 2686,2829
+  s_67d5190b324a42::t_18dd4caa820bbf 2500-2530,2592-2625,2628
+  s_67d5190b324a42::t_88a99637b36428 202
+  s_67d5190b324a42::t_a7de54311c15df 1240-1243,1258-1261,1269-1274,1279-1280,1283,1300
+  s_67d5190b324a42::t_fae100d9b45fef 1422-1425,1448-1449,1452-1458,1462-1463,1465,1474,1487,1494,1498
+  s_67d5190b324a42::t_1fec60ee09ea06 44-47,57-68
+  s_67d5190b324a42::t_ab9e219dd39072 294-301
+  s_67d5190b324a42::t_bcb9cffb1332f7 1249,1254
+  s_67d5190b324a42::t_e21b209eb7909d 157,203
+  s_67d5190b324a42::t_ca50c995dde1db 53-54
+  s_67d5190b324a42::t_a9b21aa112c9d0 3072-3073
+  s_67d5190b324a42::t_abc608a879151f 1289,1293-1294,1317,1321-1322
+  s_67d5190b324a42::t_b0479a89afd84f 485-486,518-523
+  s_67d5190b324a42::t_03d99ca07250e4 1358,1373-1421,1426-1428,1444,1460,1480
+  s_67d5190b324a42::t_4b4aeb280dcef5 602,629-632
+  s_67d5190b324a42::t_fc2568f9a5d385 1290-1292,1318-1320
+  s_67d5190b324a42::t_41002e52027e50 2531-2591
+client/scripts/bot_controller.gd
+  s_67d5190b324a42::t_e0c300d3beb786 99-104,208-227,353-355
+  s_67d5190b324a42::t_cac31da10a127e 311
+  s_67d5190b324a42::t_850797f49274a6 109-110,113-114,124-125,238-241,249,253-256,260,262,265,279-283
+assets/manifests/assets.v0.schema.json
+  s_67d5190b324a42::t_21d8120098d60f 20-23
+server/internal/http/ws_test.go
+  s_67d5190b324a42::t_3820c418d10354 253-254,371,472,481,507,791-792
+server/internal/replay/replay_test.go
+  s_67d5190b324a42::t_b5a6de7086b8a4 128-163
+  s_67d5190b324a42::t_3820c418d10354 199,212,273-274,366-372
+  s_67d5190b324a42::t_9e56f373a5a672 253-256
+tools/bot/scenarios/client/06_use_potion_hotbar.json
+  s_67d5190b324a42::t_d5b6e410401193 19
+shared/rules/treasure_classes.v0.json
+  s_67d5190b324a42::t_ab9e219dd39072 45-74
+client/tests/test_golden.gd
+  s_67d5190b324a42::t_8cf8dfdead46d2 46
+client/scripts/smoke.gd
+  s_67d5190b324a42::t_7d2ea3332cd93c 139,270,300,377,379,381,385,387,389,394
+shared/rules/items.v0.schema.json
+  s_67d5190b324a42::t_1b7b2997f946bd 20-23,25-30,65,75,88
+server/internal/replay/replay.go
+  s_67d5190b324a42::t_e63f09aeb1ced7 117,166,231,234,254,309-315
+shared/protocol/examples/use_hotbar_intent.json
+  s_67d5190b324a42::t_5fec99843b9ea8 1-8
+shared/golden/item_visual_resolution.json
+  s_67d5190b324a42::t_5fec99843b9ea8 6
+shared/protocol/examples/equip_intent.json
+  s_67d5190b324a42::t_5fec99843b9ea8 7
+shared/protocol/examples/unequip_intent.json
+  s_67d5190b324a42::t_5fec99843b9ea8 7
+shared/protocol/examples/assign_hotbar_intent.json
+  s_67d5190b324a42::t_5fec99843b9ea8 1-8
+shared/assets/item_visuals.v0.json
+  s_67d5190b324a42::t_1b7b2997f946bd 6,16,26
+tools/bot/scenarios/19_full_equipment.json
+  s_67d5190b324a42::t_160cd6a432769a 46
+  s_67d5190b324a42::t_1952b51c7cff7f 1-36,38-44,47-58,60-70,72-76
+  s_67d5190b324a42::t_0d159f3ceb16bf 37,45,59,71
+tools/bot/scenarios/06_ranged_lab.json
+  s_67d5190b324a42::t_45f9fec2f68560 8
+shared/protocol/session_snapshot.v1.schema.json
+  s_67d5190b324a42::t_5fec99843b9ea8 7,17-23,76,86-89,106-123,125-131
+shared/rules/item_templates.v0.json
+  s_67d5190b324a42::t_1b7b2997f946bd 13,15-16,30-164
+shared/rules/worlds.v0.schema.json
+  s_67d5190b324a42::t_ab9e219dd39072 38,60-63
+server/internal/store/store_test.go
+  s_67d5190b324a42::t_b3405ed588ca5a 169,186,214-232,249-251,256,259-261,275,278-280,298-303
+client/tests/test_client_bot.gd
+  s_67d5190b324a42::t_c56f142a5f122a 133
+  s_67d5190b324a42::t_8320cdec4c0d52 139
+  s_67d5190b324a42::t_878000a15ea054 135
+  s_67d5190b324a42::t_39e2de6de2a5cc 27,128-132,134,136-137,140-143
+  s_67d5190b324a42::t_7b2f5720d22434 138
+server/internal/game/types.go
+  s_67d5190b324a42::t_ac0116f4044b21 124-129,163-164,179,194,235-240
+  s_67d5190b324a42::t_7629808de2f5cc 195,233-234
+client/scripts/main.gd
+  s_67d5190b324a42::t_0a3cf0f615d1a9 528-531
+  s_67d5190b324a42::t_64cbb3f1e53d77 996,1000,1434
+  s_67d5190b324a42::t_752560a3a12857 2072,2104-2111
+  s_67d5190b324a42::t_0a47f59eaf3b23 2246,2293
+  s_67d5190b324a42::t_157bf0b994bcd6 49-50,482-483,532-533,746
+  s_67d5190b324a42::t_e1f147178a7ee0 731-740
+docs/PROGRESS.md
+  s_67d5190b324a42::t_ebb2426bc3649a 805-809,815-817
+  s_67d5190b324a42::t_236d8ffbbc7aac 639-660,662-667
+  s_67d5190b324a42::t_c1e66389a893d2 661
+  s_67d5190b324a42::t_4409f56a7661fa 711,721
+  s_67d5190b324a42::t_f2e5cfc26efc12 14-15,46,94
+client/scripts/consumable_bar.gd
+  s_67d5190b324a42::t_f3f9a412b60ef6 14-15,55,57,96-115,127-128,132,141,161,271-272,294-296,299-300,302-308,310-312,319-320
+  s_67d5190b324a42::t_51df11bd79d8a9 18,44-45,77-83
+tools/bot/scenarios/16_rolled_drops.json
+  s_67d5190b324a42::t_45f9fec2f68560 11
+shared/protocol/examples/session_snapshot.json
+  s_67d5190b324a42::t_5fec99843b9ea8 12-26
+shared/assets/item_presentations.v0.json
+  s_67d5190b324a42::t_1b7b2997f946bd 16-55
+server/internal/inputdecode/inputdecode.go
+  s_67d5190b324a42::t_e89931378a3cd0 23-24,64-70,80,155-166
+server/internal/store/interfaces.go
+  s_67d5190b324a42::t_f391e9c96926b1 44-46
+server/migrations/0006_character_hotbar_and_equipment.sql
+  s_67d5190b324a42::t_f391e9c96926b1 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "72a773635e6aa3201874b3eb8b847d074511f09e",
+  "prompts": {},
+  "sessions": {
+    "s_67d5190b324a42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea09b-2231-7b42-991f-eed598453ae1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

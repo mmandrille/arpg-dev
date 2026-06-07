@@ -1,0 +1,19 @@
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_85fc0f14820f08::t_d1da083475cbeb 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fd02d035973c2606260155f01f5337e9d060fd33",
+  "prompts": {},
+  "sessions": {
+    "s_85fc0f14820f08": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9fdc-839e-7f60-b80b-770f1759ddb9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

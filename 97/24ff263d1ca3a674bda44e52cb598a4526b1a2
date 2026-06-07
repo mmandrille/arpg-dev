@@ -1,0 +1,106 @@
+server/internal/store/interfaces.go
+  s_0cec0098c9280e::t_1cb12894363c3e 19-20
+docs/PROGRESS.md
+  s_0cec0098c9280e::t_135ea3fe0071bd 14-15,42,86,529-555,596,674-677,682,685-686
+  s_0cec0098c9280e::t_4c37b63d8f99ae 606
+client/scripts/client_settings.gd
+  s_0cec0098c9280e::t_000c81e3f60b87 1-89
+client/scripts/character_select_panel.gd
+  s_0cec0098c9280e::t_06d4ebf64ba2fd 1-13,15-17,20-25,27,29-36,38,40-50,57-60,80-166
+  s_0cec0098c9280e::t_142131c89357e1 18-19,26,37,51-56
+  s_0cec0098c9280e::t_86e9d66e4ef525 14,28,39,61-79
+server/internal/http/auth_session_test.go
+  s_0cec0098c9280e::t_834109bea90f1a 10,72-81,83-86,89,104-119,156-230,289-361
+client/scripts/character_select_panel.gd.uid
+  s_0cec0098c9280e::t_aa6870fc33105e 1
+server/internal/replay/replay_test.go
+  s_0cec0098c9280e::t_72a79c79e42358 288-293
+README.md
+  s_0cec0098c9280e::t_4c37b63d8f99ae 62-66
+server/internal/http/session.go
+  s_0cec0098c9280e::t_72a79c79e42358 4
+  s_0cec0098c9280e::t_1cb12894363c3e 17,24,73-74,88-93,139-180
+docs/plans/v24_2026-06-07-main-menu-and-character-start.md
+  s_0cec0098c9280e::t_1e4978abfc1f47 172-175
+  s_0cec0098c9280e::t_fec86e9f8b1342 195,203-209
+  s_0cec0098c9280e::t_030f8353f34943 191-194
+  s_0cec0098c9280e::t_79f560ace60d3a 83-89
+  s_0cec0098c9280e::t_b929e60cd2cac7 60-69
+  s_d96095c96d942e::t_db5ec4f4a92529 1-59,70-82,90-105,118-131,138-152,159-171,176-190,196-202,210-218
+  s_0cec0098c9280e::t_82264e7981d2e3 106-117,132-137,153-158
+server/internal/store/repos.go
+  s_0cec0098c9280e::t_1cb12894363c3e 83-122
+server/internal/http/character.go
+  s_0cec0098c9280e::t_1cb12894363c3e 1-5,7-89,91-92
+  s_0cec0098c9280e::t_72a79c79e42358 6,90
+client/scripts/pause_menu.gd.uid
+  s_0cec0098c9280e::t_aa6870fc33105e 1
+client/scripts/bot_controller.gd
+  s_0cec0098c9280e::t_28197b70503d6d 120-127,142-161,300-307
+server/internal/realtime/runner.go
+  s_0cec0098c9280e::t_71e1a9aa3bd9de 332-335
+client/scripts/main_menu.gd.uid
+  s_0cec0098c9280e::t_aa6870fc33105e 1
+server/internal/http/server.go
+  s_0cec0098c9280e::t_1cb12894363c3e 79
+client/scripts/net_client.gd
+  s_0cec0098c9280e::t_000c81e3f60b87 86-104,111-115,128-135
+  s_0cec0098c9280e::t_317661e8ea4373 165
+client/scripts/main_menu.gd
+  s_0cec0098c9280e::t_142131c89357e1 11-12,19,21-26
+  s_0cec0098c9280e::t_06d4ebf64ba2fd 1-10,13-18,20,27-63
+client/scripts/client_settings.gd.uid
+  s_0cec0098c9280e::t_f798a049738274 1
+client/scripts/settings_panel.gd.uid
+  s_0cec0098c9280e::t_aa6870fc33105e 1
+client/scripts/bot_scenario_runner.gd
+  s_0cec0098c9280e::t_1343dd3a75fbc9 11-12,18-21,26-28,41-47,63,81,159-166,242-270,386,388-389,391,396-406,443-450,571-579
+  s_0cec0098c9280e::t_f987f4f9136fbc 143,385,387,390
+client/scripts/settings_panel.gd
+  s_0cec0098c9280e::t_06d4ebf64ba2fd 1-11,14-19,21-26,33-80
+  s_0cec0098c9280e::t_142131c89357e1 12-13,20,27-32
+client/tests/test_client_bot.gd
+  s_0cec0098c9280e::t_0a1bbe5e3999ac 7,34-36,211-229
+  s_0cec0098c9280e::t_7c65b7e5f127e5 27-30,123-152
+docs/specs/v24_spec-main-menu-and-character-start.md
+  s_d96095c96d942e::t_7ec4bf9e8d8e39 1-2,4-350
+  s_0cec0098c9280e::t_135ea3fe0071bd 3
+scripts/play.sh
+  s_0cec0098c9280e::t_72be3143ff7c83 56-63
+  s_0cec0098c9280e::t_31895f4201e79b 64-65
+client/scripts/pause_menu.gd
+  s_0cec0098c9280e::t_142131c89357e1 11-12,19,25-30
+  s_0cec0098c9280e::t_06d4ebf64ba2fd 1-10,13-18,20-24,31-66
+tools/bot/scenarios/client/08_main_menu_flow.json
+  s_0cec0098c9280e::t_7c65b7e5f127e5 1-38
+client/scripts/main.gd
+  s_0cec0098c9280e::t_317661e8ea4373 18-22,87-94,145-148,157,177-181,186-192,413-415
+  s_0cec0098c9280e::t_e1e56969c09e22 778-781,836-855,866,875-879
+  s_0cec0098c9280e::t_8240deedfab4e7 1333,1352-1383
+  s_0cec0098c9280e::t_a1e2b41062087f 1888-1895,1911,1918,1933,1950-1989
+  s_0cec0098c9280e::t_bebc2c06685947 195-211,216,219-228,231,237,240-399
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9724ff263d1ca3a674bda44e52cb598a4526b1a2",
+  "prompts": {},
+  "sessions": {
+    "s_0cec0098c9280e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea031-592c-7f10-9d55-e94932c0965b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_d96095c96d942e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea025-4019-7c03-9159-96bcabbff969",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

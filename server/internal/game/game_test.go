@@ -658,9 +658,165 @@ func TestLootRollGolden(t *testing.T) {
 	for seed := uint64(0); seed < 50; seed++ {
 		rng := NewRNG(seed)
 		got, ok := r.RollLoot(golden.LootTable, rng)
-		if !ok || got != golden.ExpectedItemDefID {
+		if !ok || got.ItemDefID != golden.ExpectedItemDefID || got.ItemTemplateID != "" {
 			t.Fatalf("roll %s with seed %d = (%q,%v), want %q", golden.LootTable, seed, got, ok, golden.ExpectedItemDefID)
 		}
+	}
+}
+
+func TestItemRollsGolden(t *testing.T) {
+	r := loadRules(t)
+	var golden struct {
+		TemplateID string `json:"template_id"`
+		Cases      []struct {
+			Name     string          `json:"name"`
+			Seed     string          `json:"seed"`
+			Expected ItemRollPayload `json:"expected"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "item_rolls.json", &golden)
+
+	for _, c := range golden.Cases {
+		sim := NewSim("sess_item_roll_"+c.Name, c.Seed, r)
+		got, ok := sim.rollItemTemplate(golden.TemplateID)
+		if !ok {
+			t.Fatalf("%s: rollItemTemplate returned false", c.Name)
+		}
+		if got.ItemTemplateID != c.Expected.ItemTemplateID ||
+			got.DisplayName != c.Expected.DisplayName ||
+			got.Rarity != c.Expected.Rarity ||
+			!sameIntMap(got.Stats, c.Expected.Stats) ||
+			!sameIntMap(got.Requirements, c.Expected.Requirements) ||
+			!sameStringSlice(got.EffectIDs, c.Expected.EffectIDs) {
+			t.Fatalf("%s: rolled payload = %+v, want %+v", c.Name, got, c.Expected)
+		}
+	}
+}
+
+func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_rolled_loot", "0000000000000004", rules)
+	player := sim.entities[sim.playerID]
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: player.pos.X + 0.5, Y: player.pos.Y},
+		hp:           1,
+		maxHP:        1,
+		monsterDefID: "dungeon_mob",
+		lootTable:    "dungeon_mob_drop",
+	}
+	sim.entities[monster.id] = monster
+
+	kill := sim.Tick([]Input{{
+		MessageID:     "kill_rolled",
+		CorrelationID: "corr_rolled",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: idStr(monster.id)},
+	}})
+	assertAck(t, kill, "kill_rolled")
+	if !hasEvent(kill, "loot_dropped") {
+		t.Fatalf("missing loot_dropped: %+v", kill.Events)
+	}
+	var loot *entity
+	for _, e := range sim.entities {
+		if e.kind == lootEntity && e.rollPayload != nil {
+			loot = e
+			break
+		}
+	}
+	if loot == nil {
+		t.Fatalf("missing rolled loot entity: %+v", sim.entities)
+	}
+	if loot.itemDefID != "cave_blade" || loot.rollPayload.ItemTemplateID != "cave_blade" || loot.rollPayload.Rarity == "" {
+		t.Fatalf("rolled loot payload = itemDefID %q payload %+v", loot.itemDefID, loot.rollPayload)
+	}
+	lootView := loot.view()
+	if lootView.ItemTemplateID != "cave_blade" || lootView.DisplayName == "" || lootView.RolledStats["damage_max"] == 0 {
+		t.Fatalf("loot view missing rolled fields: %+v", lootView)
+	}
+
+	pickup := sim.Tick([]Input{{
+		MessageID:     "pickup_rolled",
+		CorrelationID: "corr_pickup",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: idStr(loot.id)},
+	}})
+	assertAck(t, pickup, "pickup_rolled")
+	if len(sim.inventory) != 1 {
+		t.Fatalf("inventory size = %d, want 1", len(sim.inventory))
+	}
+	got := sim.inventory[0].view()
+	if got.ItemDefID != "cave_blade" || got.ItemTemplateID != "cave_blade" || got.DisplayName != loot.rollPayload.DisplayName {
+		t.Fatalf("inventory rolled view = %+v, loot payload %+v", got, loot.rollPayload)
+	}
+	if !sameIntMap(got.RolledStats, loot.rollPayload.Stats) {
+		t.Fatalf("inventory rolled stats = %+v, want %+v", got.RolledStats, loot.rollPayload.Stats)
+	}
+}
+
+func TestLegacyLootHasNoRolledPayload(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_legacy_loot", "01", rules)
+	player := sim.entities[sim.playerID]
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: player.pos.X + 0.5, Y: player.pos.Y},
+		hp:           1,
+		maxHP:        1,
+		monsterDefID: "training_dummy",
+		lootTable:    "basic_drop",
+	}
+	sim.entities[monster.id] = monster
+	res := sim.Tick([]Input{{MessageID: "kill_legacy", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, res, "kill_legacy")
+	for _, e := range sim.entities {
+		if e.kind == lootEntity && e.itemDefID == "rusty_sword" {
+			if e.rollPayload != nil {
+				t.Fatalf("legacy loot has rolled payload: %+v", e.rollPayload)
+			}
+			return
+		}
+	}
+	t.Fatal("missing legacy rusty_sword loot")
+}
+
+func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_rolled_damage", "01", rules)
+	player := sim.entities[sim.playerID]
+	item := &invItem{
+		instanceID: 5000,
+		itemDefID:  "cave_blade",
+		slot:       weaponSlot,
+		equipped:   true,
+		rollPayload: &ItemRollPayload{
+			ItemTemplateID: "cave_blade",
+			DisplayName:    "Test Cave Blade",
+			Rarity:         "rare",
+			Stats:          map[string]int{"damage_min": 7, "damage_max": 7, "max_hp": 3},
+			Requirements:   map[string]int{"level": 1},
+			EffectIDs:      []string{},
+		},
+	}
+	sim.inventory = append(sim.inventory, item)
+	sim.equipped[weaponSlot] = item.instanceID
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: player.pos.X + 0.5, Y: player.pos.Y},
+		hp:           10,
+		maxHP:        10,
+		monsterDefID: "training_dummy_reward",
+		lootTable:    "reward_drop",
+	}
+	sim.entities[monster.id] = monster
+	res := sim.Tick([]Input{{MessageID: "rolled_hit", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, res, "rolled_hit")
+	assertEventDamage(t, res, "monster_damaged", 7)
+	if player.hp != playerStartHP-1 {
+		t.Fatalf("rolled max_hp should be display-only; player hp = %d", player.hp)
 	}
 }
 
@@ -2614,6 +2770,30 @@ func assertEventDamageAtLeast(t *testing.T, r TickResult, eventType string, min 
 		return
 	}
 	t.Fatalf("missing event %s in %+v", eventType, r.Events)
+}
+
+func sameIntMap(a, b map[string]int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for key, av := range a {
+		if b[key] != av {
+			return false
+		}
+	}
+	return true
+}
+
+func sameStringSlice(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func hasLootSpawn(r TickResult, itemDefID string) bool {

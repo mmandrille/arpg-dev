@@ -286,10 +286,11 @@ func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {
 			continue
 		}
 		out = append(out, game.PersistedItem{
-			InstanceID: item.ID,
-			ItemDefID:  item.ItemDefID,
-			Slot:       item.Slot,
-			Equipped:   item.Equipped,
+			InstanceID:  item.ID,
+			ItemDefID:   item.ItemDefID,
+			Slot:        item.Slot,
+			Equipped:    item.Equipped,
+			RolledStats: item.RolledStats,
 		})
 	}
 	return out

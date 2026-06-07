@@ -275,7 +275,37 @@ func _initialize() -> void:
 		_fail("waypoint panel viewport unit mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel)")
+	# 15. Item roll golden references shared item template fields for tooltip display.
+	var item_templates := _read(shared.path_join("rules/item_templates.v0.json"))
+	var item_rolls := _read(shared.path_join("golden/item_rolls.json"))
+	var template_id := str(item_rolls["template_id"])
+	if not item_templates["templates"].has(template_id):
+		_fail("item_rolls references unknown template")
+		return
+	var template: Dictionary = item_templates["templates"][template_id]
+	for c in item_rolls["cases"]:
+		var expected: Dictionary = c["expected"]
+		if str(expected["item_template_id"]) != template_id:
+			_fail("item_rolls item_template_id mismatch")
+			return
+		if not str(expected["display_name"]).ends_with(str(template["name"])):
+			_fail("item_rolls display_name missing template name")
+			return
+		var stats: Dictionary = expected["stats"]
+		if not stats.has("damage_min") or not stats.has("damage_max"):
+			_fail("item_rolls missing damage stats")
+			return
+		if int(stats["damage_max"]) < int(stats["damage_min"]):
+			_fail("item_rolls damage range invalid")
+			return
+		if expected["requirements"] != template["requirements"]:
+			_fail("item_rolls requirements mismatch")
+			return
+		if (expected["effect_ids"] as Array).size() != 0:
+			_fail("item_rolls effect_ids should be empty in v23")
+			return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel, item_rolls)")
 	quit(0)
 
 

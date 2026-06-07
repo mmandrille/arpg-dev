@@ -121,9 +121,9 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		ID:          "1004",
 		AccountID:   acct.ID,
 		CharacterID: char.ID,
-		ItemDefID:   "rusty_sword",
+		ItemDefID:   "cave_blade",
 		Location:    store.ItemLocationInventory,
-		RolledStats: json.RawMessage(`{"prefix":"sharp"}`),
+		RolledStats: json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":5,"max_hp":3},"requirements":{"level":1},"effect_ids":[]}`),
 	}
 	if err := s.AddCharacterItem(ctx, item); err != nil {
 		t.Fatalf("add character item: %v", err)
@@ -149,11 +149,24 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(items) != 1 {
 		t.Fatalf("character item count = %d, want 1", len(items))
 	}
-	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "weapon" || items[0].ItemDefID != "rusty_sword" {
+	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "weapon" || items[0].ItemDefID != "cave_blade" {
 		t.Fatalf("character item not persisted/equipped correctly: %+v", items[0])
 	}
-	if string(items[0].RolledStats) != `{"prefix": "sharp"}` && string(items[0].RolledStats) != `{"prefix":"sharp"}` {
-		t.Fatalf("rolled stats not preserved: %s", string(items[0].RolledStats))
+	var payload struct {
+		ItemTemplateID string         `json:"item_template_id"`
+		DisplayName    string         `json:"display_name"`
+		Rarity         string         `json:"rarity"`
+		Stats          map[string]int `json:"stats"`
+		Requirements   map[string]int `json:"requirements"`
+		EffectIDs      []string       `json:"effect_ids"`
+	}
+	if err := json.Unmarshal(items[0].RolledStats, &payload); err != nil {
+		t.Fatalf("rolled stats payload invalid: %v", err)
+	}
+	if payload.ItemTemplateID != "cave_blade" || payload.DisplayName != "Rare Cave Blade" || payload.Rarity != "rare" ||
+		payload.Stats["damage_min"] != 4 || payload.Stats["damage_max"] != 5 || payload.Stats["max_hp"] != 3 ||
+		payload.Requirements["level"] != 1 || len(payload.EffectIDs) != 0 {
+		t.Fatalf("rolled stats not preserved: %+v raw=%s", payload, string(items[0].RolledStats))
 	}
 
 	waypoints, err := s.ListCharacterWaypoints(ctx, char.ID)

@@ -11,6 +11,16 @@
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
       }
     },
+    "cave_blade": {
+      "asset_id": "weapon_rusty_sword_v0",
+      "slot": "weapon",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
+      }
+    },
     "training_bow": {
       "asset_id": "weapon_training_bow_v0",
       "slot": "weapon",

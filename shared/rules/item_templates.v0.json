@@ -1,0 +1,30 @@
+{
+  "version": 0,
+  "rarities": {
+    "common": { "weight": 70, "stat_rolls": 1, "name_prefix": "Common" },
+    "magic": { "weight": 25, "stat_rolls": 2, "name_prefix": "Magic" },
+    "rare": { "weight": 5, "stat_rolls": 3, "name_prefix": "Rare" }
+  },
+  "templates": {
+    "cave_blade": {
+      "name": "Cave Blade",
+      "category": "equipment",
+      "item_type": "sword",
+      "slot": "weapon",
+      "equippable": true,
+      "attack_mode": "melee",
+      "reach": 1.5,
+      "requirements": { "level": 1 },
+      "base_stats": {
+        "damage_min": 2,
+        "damage_max": 4
+      },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 3 },
+        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 },
+        { "stat": "max_hp", "min": 1, "max": 3, "weight": 1 }
+      ],
+      "effect_pool": []
+    }
+  }
+}

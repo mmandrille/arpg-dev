@@ -22,6 +22,11 @@
     "heal_double_drop": {
       "drops": ["red_potion", "red_potion"]
     },
+    "dungeon_mob_drop": {
+      "entries": [
+        { "item_template_id": "cave_blade", "weight": 1 }
+      ]
+    },
     "no_drop": {
     }
   }

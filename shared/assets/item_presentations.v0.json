@@ -5,6 +5,10 @@
       "icon": { "shape": "blade", "color": "#b8bdc2", "accent": "#6d5a3a", "label": "Sw" },
       "ground": { "shape": "blade", "color": "#b8bdc2", "accent": "#6d5a3a", "scale": 1.0 }
     },
+    "cave_blade": {
+      "icon": { "shape": "blade", "color": "#78a7b8", "accent": "#d8f0ff", "label": "CB" },
+      "ground": { "shape": "blade", "color": "#78a7b8", "accent": "#d8f0ff", "scale": 1.0 }
+    },
     "training_bow": {
       "icon": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "label": "Bw" },
       "ground": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "scale": 1.0 }
@@ -23,4 +27,3 @@
     }
   }
 }
-

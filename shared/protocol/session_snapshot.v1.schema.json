@@ -39,6 +39,12 @@
         "max_hp": { "type": "integer", "minimum": 0 },
         "monster_def_id": { "type": "string" },
         "item_def_id": { "type": "string" },
+        "item_template_id": { "type": "string" },
+        "display_name": { "type": "string" },
+        "rarity": { "type": "string" },
+        "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
+        "requirements": { "$ref": "#/$defs/requirements" },
+        "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "interactable_def_id": { "type": "string" },
         "owner_id": { "$ref": "#/$defs/decimal_id" },
         "target_id": { "$ref": "#/$defs/decimal_id" },
@@ -53,9 +59,35 @@
       "properties": {
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
         "item_def_id": { "type": "string" },
+        "item_template_id": { "type": "string" },
+        "display_name": { "type": "string" },
+        "rarity": { "type": "string" },
+        "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
+        "requirements": { "$ref": "#/$defs/requirements" },
+        "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "slot": { "type": "string", "enum": ["weapon", ""] },
         "equipped": { "type": "boolean" }
       }
+    },
+    "rolled_stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "damage_min": { "type": "integer", "minimum": 0 },
+        "damage_max": { "type": "integer", "minimum": 0 },
+        "max_hp": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "effect_ids": {
+      "type": "array",
+      "items": { "type": "string" }
     },
     "equipped": {
       "type": "object",

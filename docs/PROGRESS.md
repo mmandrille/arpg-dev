@@ -3,7 +3,7 @@
 **Read this file at the start of every new task** before writing specs, plans, or code.
 It is the canonical snapshot of what exists, what each slice proved, and what is still open.
 
-Last updated: 2026-06-06
+Last updated: 2026-06-07
 
 ---
 
@@ -11,8 +11,8 @@ Last updated: 2026-06-06
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v22 — `character-scoped-persistence` (default-character items/equipment/waypoints survive fresh sessions) |
-| **Active branch** | `feature/character-scoped-persistence` |
+| **Latest completed slice** | v23 — `item-templates-and-rolled-drops` (dungeon mobs drop persistent rolled cave_blade weapons) |
+| **Active branch** | `feature/item-templates-and-rolled-drops` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
 
@@ -38,6 +38,7 @@ v19_* = teleporters-and-waypoint-ui
 v20_* = play-session-loop
 v21_* = dungeon-monster-combat
 v22_* = character-scoped-persistence
+v23_* = item-templates-and-rolled-drops
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -80,6 +81,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v20** | `play-session-loop` | Complete (`make ci` green) | [`v20_spec-play-session-loop.md`](specs/v20_spec-play-session-loop.md) | [`v20_2026-06-06-play-session-loop.md`](plans/v20_2026-06-06-play-session-loop.md) |
 | **v21** | `dungeon-monster-combat` | Complete (`make ci` green) | [`v21_spec-dungeon-monster-combat.md`](specs/v21_spec-dungeon-monster-combat.md) | [`v21_2026-06-06-dungeon-monster-combat.md`](plans/v21_2026-06-06-dungeon-monster-combat.md) |
 | **v22** | `character-scoped-persistence` | Complete (`make ci` green) | [`v22_spec-character-scoped-persistence.md`](specs/v22_spec-character-scoped-persistence.md) | [`v22_2026-06-07-character-scoped-persistence.md`](plans/v22_2026-06-07-character-scoped-persistence.md) |
+| **v23** | `item-templates-and-rolled-drops` | Complete (`make ci` green) | [`v23_spec-item-templates-and-rolled-drops.md`](specs/v23_spec-item-templates-and-rolled-drops.md) | [`v23_2026-06-07-item-templates-and-rolled-drops.md`](plans/v23_2026-06-07-item-templates-and-rolled-drops.md) |
 
 ---
 
@@ -496,6 +498,32 @@ survive fresh sessions while replay remains pinned to a session-start progressio
 vendors/gold/crafting/quests, character stats/skills/XP, respawn/checkpoints, durable dungeon
 maps/monsters/floor drops/HP, or random item stat generation.
 
+### v23 — Item templates and rolled drops
+
+**Proves:** Dungeon kills can produce deterministic rolled gear that remains server-authoritative
+through pickup, equip, combat, persistence, reconnect, fresh sessions, and replay.
+
+- Shared `item_templates.v0.json` defines `cave_blade`, rarity weights, bounded rollable stats,
+  requirements, and reserved effect ids as data.
+- Loot tables now support entries keyed by exactly one of `item_def_id` or `item_template_id`;
+  legacy fixed drops and empty `no_drop` remain valid.
+- `dungeon_mob` now uses `dungeon_mob_drop`, rolling a concrete `cave_blade` payload at monster
+  death with the seeded Go RNG.
+- Rolled item metadata is additive in protocol v1 item and loot entity views: `item_template_id`,
+  `display_name`, `rarity`, `rolled_stats`, `requirements`, and `effect_ids`.
+- Character item persistence stores the durable rolled payload in v22's `rolled_stats` JSON and
+  reloads it through session-start snapshots without re-rolling.
+- Equipped rolled weapons use rolled `damage_min` / `damage_max` for authoritative damage; rolled
+  `max_hp` is display-only in v23.
+- Godot inventory tooltips display instance rarity, display name, rolled damage, `max_hp`, and
+  requirements; `cave_blade` reuses placeholder blade visuals.
+- Bot scenario `16_rolled_drops.json` proves dungeon mob kill, rolled drop pickup, equip, damage
+  use, `/state`, reconnect, replay, and fresh-session persistence.
+
+**Explicit non-goals:** no affix grammar, procedural name generator, armor/jewelry/offhand,
+stash/crafting/vendors/gold/trade, special-effect execution, item comparison UI, loot filters,
+production item art, character stat requirements beyond level `1`, or Protobuf migration.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -535,6 +563,7 @@ heal_lab: pick up red_potion x2 → take damage → use potion twice → full HP
 chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond leash and return
 dungeon_levels / teleporter_lab: start in town, descend/ascend generated floors; discover teleporters and fast-travel back
 character_persistence: same-account fresh sessions retain gear/equipment and discovered waypoint access
+rolled_drops: kill dungeon mob → pick up/equip rolled cave_blade → prove rolled metadata persists
 ```
 
 **Verify:**
@@ -608,13 +637,18 @@ durable item instances and discovered waypoint levels to the default character, 
 session-start snapshots for deterministic replay and keeping HP, dungeon maps, monsters, corpses,
 opened doors, and floor drops session-scoped.
 
+**Dungeon mobs now drop rolled weapon gear.** v23 adds server-authoritative item templates,
+deterministic rarity/stat rolls, rolled weapon damage, rolled payload persistence, and tooltip
+presentation for the first rolled weapon template.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Character picker, player-facing old-session resume, stash/vendors/gold, quest progress, stats/skills/XP, respawn/checkpoints, durable dungeon map snapshots | v22 non-goals, ADR-0008 deferred |
-| Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, monster loot/depth scaling | v0/v4/v12/v17/v21 non-goals |
-| Content | Production item art/icons, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20 non-goals |
+| Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling | v0/v4/v12/v17/v21/v23 non-goals |
+| Itemization | Affix grammar, procedural item names, armor/jewelry/offhand, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade | v23 non-goals |
+| Content | Production item art/icons, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |

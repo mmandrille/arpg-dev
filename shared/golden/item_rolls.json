@@ -1,0 +1,36 @@
+{
+  "description": "Deterministic template item rolls for cave_blade.",
+  "template_id": "cave_blade",
+  "cases": [
+    {
+      "name": "common cave blade",
+      "seed": "0000000000000001",
+      "expected": {
+        "item_template_id": "cave_blade",
+        "display_name": "Common Cave Blade",
+        "rarity": "common",
+        "stats": {
+          "damage_min": 3,
+          "damage_max": 4
+        },
+        "requirements": { "level": 1 },
+        "effect_ids": []
+      }
+    },
+    {
+      "name": "rare cave blade",
+      "seed": "0000000000000004",
+      "expected": {
+        "item_template_id": "cave_blade",
+        "display_name": "Rare Cave Blade",
+        "rarity": "rare",
+        "stats": {
+          "damage_min": 4,
+          "damage_max": 5
+        },
+        "requirements": { "level": 1 },
+        "effect_ids": []
+      }
+    }
+  ]
+}

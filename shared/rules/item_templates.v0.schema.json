@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/item_templates.v0.schema.json",
+  "title": "Item templates (v0)",
+  "description": "Server-authoritative item roll templates. These are declarative ranges only; the Go sim owns roll execution.",
+  "type": "object",
+  "required": ["version", "rarities", "templates"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "rarities": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["weight", "stat_rolls", "name_prefix"],
+        "additionalProperties": false,
+        "properties": {
+          "weight": { "type": "integer", "minimum": 1 },
+          "stat_rolls": { "type": "integer", "minimum": 1 },
+          "name_prefix": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "templates": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "category", "item_type", "slot", "equippable", "attack_mode", "reach", "requirements", "base_stats", "rollable_stats", "effect_pool"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "category": { "type": "string", "enum": ["equipment"] },
+          "item_type": { "type": "string", "enum": ["sword"] },
+          "slot": { "type": "string", "enum": ["weapon"] },
+          "equippable": { "const": true },
+          "attack_mode": { "type": "string", "enum": ["melee"] },
+          "reach": { "type": "number", "exclusiveMinimum": 0 },
+          "requirements": { "$ref": "#/$defs/requirements" },
+          "base_stats": { "$ref": "#/$defs/stats" },
+          "rollable_stats": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/rollable_stat" }
+          },
+          "effect_pool": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["damage_min", "damage_max"],
+      "additionalProperties": false,
+      "properties": {
+        "damage_min": { "type": "integer", "minimum": 0 },
+        "damage_max": { "type": "integer", "minimum": 0 },
+        "max_hp": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "rollable_stat": {
+      "type": "object",
+      "required": ["stat", "min", "max", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "max_hp"] },
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 },
+        "weight": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

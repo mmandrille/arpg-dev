@@ -1,0 +1,75 @@
+scripts/client_smoke.sh
+  s_85fc0f14820f08::t_41418681a0ed74 16
+docs/plans/v22_2026-06-07-character-scoped-persistence.md
+  s_85fc0f14820f08::t_7373956f45b0be 102-127
+  s_85fc0f14820f08::t_509e092c2313c9 82-86
+  s_85fc0f14820f08::t_465f5ffea2bbe9 141-145
+  s_85fc0f14820f08::t_04b39cde4b7997 175-191
+  s_85fc0f14820f08::t_6997aebf8fffc5 160-162
+  s_85fc0f14820f08::t_526846288e2fd6 58-68
+tools/bot/scenarios/15_character_persistence.json
+  s_85fc0f14820f08::t_9a761baadd5a2b 1-66
+server/internal/replay/replay_test.go
+  s_85fc0f14820f08::t_71a5953e7fa4e5 273,296,299-300,303-317
+server/migrations/0004_character_item_key.sql
+  s_85fc0f14820f08::t_980d5dc53abdb7 1-8
+client/scripts/smoke.gd
+  s_85fc0f14820f08::t_5979f282c2506d 86-89,172-175
+server/internal/store/repos.go
+  s_85fc0f14820f08::t_e7dfba30fe8499 174
+  s_85fc0f14820f08::t_3fea2fbb1fc0ba 132,134,136-140,143,147,149-151,158,163-170,172-173,175-183,186-202,207,212-215,217-220,223,231,233-235,238,246-363
+server/internal/game/game_test.go
+  s_85fc0f14820f08::t_f5fc0ac7d67666 2272-2305
+server/internal/store/store_test.go
+  s_85fc0f14820f08::t_bf2f5755261e22 109,120,125-126,128-129,131-132,135,138-143,145,147,150-181,183-184,187-189,193-194,196,201,203
+server/internal/store/interfaces.go
+  s_85fc0f14820f08::t_4b5f8e87b587b5 29-40,60
+docs/PROGRESS.md
+  s_85fc0f14820f08::t_acdc1da07e008e 14-16,40,82,476-498,537,606-610,615
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_85fc0f14820f08::t_94101b9e1a4b29 15
+server/internal/http/ws_test.go
+  s_85fc0f14820f08::t_4e0500351d0c30 20
+  s_85fc0f14820f08::t_7186edc7ee2186 114
+  s_85fc0f14820f08::t_f884090950e77b 129-140,230-246
+server/internal/game/sim.go
+  s_85fc0f14820f08::t_983c63d3bd2ff1 280-293,2314,2317,2320-2327
+server/internal/realtime/runner.go
+  s_85fc0f14820f08::t_1e791f71676918 419-423,428,448,461,465-470
+server/internal/store/models.go
+  s_85fc0f14820f08::t_20a958059445f8 76
+  s_85fc0f14820f08::t_585accfa80acb8 44-46,51-52,54,56-75,77
+tools/bot/run.py
+  s_85fc0f14820f08::t_2b21b264e25c9b 74,122
+  s_85fc0f14820f08::t_d619429289da5e 549-556
+  s_85fc0f14820f08::t_88144c7c471d6e 313-331
+  s_85fc0f14820f08::t_73ad8ebc2ed546 1417-1480,1508-1518,1521-1540
+server/migrations/0003_character_progression.sql
+  s_85fc0f14820f08::t_0c8be913eceb93 5,15,70
+  s_85fc0f14820f08::t_46c3e25db3931c 1-4,6-14,16-69
+server/internal/replay/replay.go
+  s_85fc0f14820f08::t_719e5ee1e7cf2d 113-117,161-166,230-233,252-253,282-303
+server/internal/http/session.go
+  s_85fc0f14820f08::t_886cbe3fafbe88 110-126
+server/internal/realtime/hub.go
+  s_85fc0f14820f08::t_8553d61ddac214 73-81,92-114
+scripts/bot_client.sh
+  s_85fc0f14820f08::t_151b2875c9cf37 22,40-41,49,136
+  s_85fc0f14820f08::t_09cd6283538f9d 21,38-39,42-48,50-52,135,145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2290bfd58f06ce973df2c8479dccddfc96907eff",
+  "prompts": {},
+  "sessions": {
+    "s_85fc0f14820f08": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9fdc-839e-7f60-b80b-770f1759ddb9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

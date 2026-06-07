@@ -8,6 +8,10 @@
         "size": { "x": 1.0, "y": 0.25 }
       }
     },
+    "treasure_chest": {
+      "name": "Treasure Chest",
+      "initial_state": "closed"
+    },
     "stairs_down": {
       "name": "Stairs Down",
       "initial_state": "ready",

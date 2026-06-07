@@ -22,6 +22,7 @@ type createSessionRequest struct {
 	ResumeSessionID *string `json:"resume_session_id"`
 	WorldID         string  `json:"world_id"`
 	CharacterID     string  `json:"character_id"`
+	Seed            string  `json:"seed"`
 }
 
 type createSessionResponse struct {
@@ -96,10 +97,18 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seed, err := newSeed()
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not generate seed")
+	seed := req.Seed
+	if seed != "" && !s.cfg.IsLocal() {
+		writeError(w, http.StatusBadRequest, "invalid_seed", "custom session seeds are only available in local development")
 		return
+	}
+	if seed == "" {
+		var err error
+		seed, err = newSeed()
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not generate seed")
+			return
+		}
 	}
 
 	sess := store.Session{

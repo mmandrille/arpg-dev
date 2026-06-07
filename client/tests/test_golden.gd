@@ -305,7 +305,68 @@ func _initialize() -> void:
 			_fail("item_rolls effect_ids should be empty in v23")
 			return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel, item_rolls)")
+	# 16. Treasure class golden references shared item/template reward sources.
+	var treasure_classes := _read(shared.path_join("rules/treasure_classes.v0.json"))
+	var treasure_class_rolls := _read(shared.path_join("golden/treasure_class_rolls.json"))
+	var treasure_class_id := str(treasure_class_rolls["treasure_class_id"])
+	if not treasure_classes["classes"].has(treasure_class_id):
+		_fail("treasure_class_rolls references unknown treasure class")
+		return
+	for c in treasure_class_rolls["cases"]:
+		for drop in c["expected_drops"]:
+			var item_def_id := str(drop.get("item_def_id", ""))
+			var item_template_id := str(drop.get("item_template_id", ""))
+			if item_def_id == "" and item_template_id == "":
+				_fail("treasure_class_rolls expected drop missing item source")
+				return
+			if item_def_id != "" and not items["items"].has(item_def_id):
+				_fail("treasure_class_rolls references unknown item %s" % item_def_id)
+				return
+			if item_template_id != "" and not item_templates["templates"].has(item_template_id):
+				_fail("treasure_class_rolls references unknown template %s" % item_template_id)
+				return
+
+	# 17. Guarded chest golden references shared dungeon/interactable/loot rules.
+	var interactables := _read(shared.path_join("rules/interactables.v0.json"))
+	var guarded_chest := _read(shared.path_join("golden/guarded_chest_generation.json"))
+	if int(guarded_chest["base_monster_count"]) != int(dungeon_generation["monster_placement"]["count"]):
+		_fail("guarded_chest base monster count mismatch")
+		return
+	if int(guarded_chest["monster_count_bonus"]) != int(dungeon_generation["chest_placement"]["monster_count_bonus"]):
+		_fail("guarded_chest monster bonus mismatch")
+		return
+	var chest_def_id := str(dungeon_generation["chest_placement"]["interactable_def_id"])
+	if not interactables["interactables"].has(chest_def_id):
+		_fail("guarded_chest references unknown interactable")
+		return
+	if str(interactables["interactables"][chest_def_id]["initial_state"]) != "closed":
+		_fail("guarded_chest interactable must start closed")
+		return
+	var chest_loot_table := str(dungeon_generation["chest_placement"]["loot_table"])
+	if not loot["loot_tables"].has(chest_loot_table):
+		_fail("guarded_chest references unknown loot table")
+		return
+	if not loot["loot_tables"][chest_loot_table].has("treasure_class_id"):
+		_fail("guarded_chest loot table must resolve treasure class")
+		return
+	for c in guarded_chest["cases"]:
+		var expected_chest = c["expected_chest"]
+		if expected_chest == null:
+			if int(c["expected_monster_count"]) != int(dungeon_generation["monster_placement"]["count"]):
+				_fail("guarded_chest no-chest monster count mismatch")
+				return
+			continue
+		if str(expected_chest["interactable_def_id"]) != chest_def_id:
+			_fail("guarded_chest interactable mismatch")
+			return
+		if str(expected_chest["loot_table"]) != chest_loot_table:
+			_fail("guarded_chest loot table mismatch")
+			return
+		if int(c["expected_monster_count"]) != int(dungeon_generation["monster_placement"]["count"]) + int(dungeon_generation["chest_placement"]["monster_count_bonus"]):
+			_fail("guarded_chest guarded monster count mismatch")
+			return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation)")
 	quit(0)
 
 

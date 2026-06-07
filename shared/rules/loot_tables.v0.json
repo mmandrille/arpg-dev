@@ -23,9 +23,10 @@
       "drops": ["red_potion", "red_potion"]
     },
     "dungeon_mob_drop": {
-      "entries": [
-        { "item_template_id": "cave_blade", "weight": 1 }
-      ]
+      "treasure_class_id": "dungeon_mob_tc_1"
+    },
+    "guarded_chest_drop": {
+      "treasure_class_id": "guarded_chest_tc_1"
     },
     "no_drop": {
     }

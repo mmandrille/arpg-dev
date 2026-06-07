@@ -67,6 +67,7 @@ def log_wait_progress(label: str, loop, started_at: float, **details: Any) -> No
 class Scenario:
     id: str
     world_id: str
+    seed: str
     title: str
     description: str
     steps: list[dict[str, Any]]
@@ -116,6 +117,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
         scenarios.append(Scenario(
             id=sid,
             world_id=world_id,
+            seed=str(raw.get("seed", "")),
             title=raw.get("title", sid),
             description=raw.get("description", ""),
             steps=list(raw.get("steps", [])),
@@ -171,8 +173,11 @@ def dev_login(client: httpx.Client, email: str, dev_token: str) -> tuple[str, st
     return body["account_id"], body["access_token"]
 
 
-def create_session(client: httpx.Client, token: str, world_id: str) -> dict[str, Any]:
-    resp = client.post("/v0/sessions", headers=auth(token), json={"mode": "solo", "world_id": world_id})
+def create_session(client: httpx.Client, token: str, world_id: str, seed: str = "") -> dict[str, Any]:
+    body: dict[str, Any] = {"mode": "solo", "world_id": world_id}
+    if seed:
+        body["seed"] = seed
+    resp = client.post("/v0/sessions", headers=auth(token), json=body)
     resp.raise_for_status()
     body = resp.json()
     log("session", body["session_id"], "seed", body["seed"], "world", body.get("world_id"))
@@ -332,6 +337,10 @@ async def execute_step(
         item = next((i for i in state.inventory if str(i.get("item_instance_id")) == str(weapon_id)), None)
         if item is None or item.get("item_def_id") != expected_def:
             raise AssertionError(f"assert_equipped_weapon_def: weapon {weapon_id} row={item}, want {expected_def}")
+        return
+
+    if action == "assert_entity_count":
+        assert_entity_count(list(state.entities.values()), step, "runtime protocol")
         return
 
     if action == "assert_player_at_discovered_teleporter":
@@ -891,6 +900,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         monster_def_id = state.pending_attack_monsters.pop(rejected_id, None)
         if monster_def_id:
             reason = m.get("payload", {}).get("reason", "unknown")
+            if reason == "invalid_target" and monster_def_id in state.killed_monster_def_ids:
+                return
             raise AssertionError(f"action_intent for {monster_def_id} was rejected: {reason}")
         return
     if m.get("type") != "state_delta":
@@ -1245,6 +1256,32 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
         raise AssertionError(f"{where}: effect_ids should be empty in v23: {item}")
 
 
+def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: str) -> None:
+    matches: list[dict] = []
+    entity_type = str(assertion.get("entity_type", ""))
+    monster_def_id = str(assertion.get("monster_def_id", ""))
+    interactable_def_id = str(assertion.get("interactable_def_id", ""))
+    wanted_state = assertion.get("state")
+    for entity in entities:
+        if entity_type and str(entity.get("type", "")) != entity_type:
+            continue
+        if monster_def_id and str(entity.get("monster_def_id", "")) != monster_def_id:
+            continue
+        if interactable_def_id and str(entity.get("interactable_def_id", "")) != interactable_def_id:
+            continue
+        if wanted_state is not None and str(entity.get("state", "")) != str(wanted_state):
+            continue
+        matches.append(entity)
+    if "equals" in assertion:
+        want = int(assertion["equals"])
+        if len(matches) != want:
+            raise AssertionError(f"{where}: entity count {len(matches)} != {want} for {assertion}: {matches}")
+    if "at_least" in assertion:
+        want = int(assertion["at_least"])
+        if len(matches) < want:
+            raise AssertionError(f"{where}: entity count {len(matches)} < {want} for {assertion}: {matches}")
+
+
 def run_assertions(
     assertions: list[Any],
     entities: list[dict],
@@ -1280,6 +1317,8 @@ def run_assertions(
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
         elif typ == "rolled_inventory_item":
             assert_rolled_inventory_item(inventory, assertion, where)
+        elif typ == "entity_count":
+            assert_entity_count(entities, assertion, where)
         elif typ == "equipped_weapon_def":
             expected_def = str(assertion["item_def_id"])
             weapon_id = equipped.get("weapon")
@@ -1447,6 +1486,9 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)
             continue
+        if typ == "entity_count":
+            assert_entity_count(list(state.entities.values()), assertion, where)
+            continue
         if typ == "monster_damage_at_least":
             monster_def_id = str(assertion["monster_def_id"])
             got = state.max_monster_damage_by_def.get(monster_def_id, 0)
@@ -1489,8 +1531,9 @@ def run_verified_session(
     world_id: str,
     steps: list[dict[str, Any]],
     assertions: list[Any],
+    seed: str = "",
 ) -> tuple[dict[str, Any], RuntimeState]:
-    sess = create_session(client, token, world_id)
+    sess = create_session(client, token, world_id, seed)
     session_id = sess["session_id"]
     log("session created", session_id, f"seed={sess.get('seed')}")
 
@@ -1498,6 +1541,7 @@ def run_verified_session(
     run_scenario = Scenario(
         id=scenario.id,
         world_id=world_id,
+        seed=seed,
         title=scenario.title,
         description=scenario.description,
         steps=steps,
@@ -1572,6 +1616,7 @@ def main() -> int:
                 world_id=scenario.world_id,
                 steps=scenario.steps,
                 assertions=scenario.assertions,
+                seed=scenario.seed,
             )
             session_id = sess["session_id"]
             last_session_id = session_id
@@ -1590,6 +1635,7 @@ def main() -> int:
                     world_id=check_world,
                     steps=check_steps,
                     assertions=check_assertions,
+                    seed=str(check.get("seed", "")),
                 )
                 last_session_id = check_sess["session_id"]
                 observed = check_observed

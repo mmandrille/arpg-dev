@@ -34,7 +34,6 @@
               "required": ["initial_state"]
             },
             "then": {
-              "required": ["barrier_when_closed"],
               "not": { "required": ["transition"] }
             }
           },

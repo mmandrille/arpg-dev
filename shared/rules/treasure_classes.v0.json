@@ -1,0 +1,47 @@
+{
+  "version": 0,
+  "classes": {
+    "dungeon_mob_tc_1": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 1 }
+          ]
+        },
+        {
+          "attempt_id": "secondary",
+          "success_weight": 25,
+          "no_drop_weight": 75,
+          "entries": [
+            { "item_def_id": "red_potion", "weight": 60 },
+            { "item_def_id": "training_badge", "weight": 40 }
+          ]
+        }
+      ]
+    },
+    "guarded_chest_tc_1": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 60 },
+            { "item_def_id": "red_potion", "weight": 40 }
+          ]
+        },
+        {
+          "attempt_id": "bonus",
+          "success_weight": 35,
+          "no_drop_weight": 65,
+          "entries": [
+            { "item_def_id": "training_badge", "weight": 100 }
+          ]
+        }
+      ]
+    }
+  }
+}

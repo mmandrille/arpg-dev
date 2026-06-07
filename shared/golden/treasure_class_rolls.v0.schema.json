@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/treasure_class_rolls.v0.schema.json",
+  "title": "Treasure class roll golden (v0)",
+  "type": "object",
+  "required": ["treasure_class_id", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "treasure_class_id": { "type": "string", "minLength": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "seed", "expected_drops"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "seed": { "type": "string", "minLength": 1 },
+          "expected_drops": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "item_def_id": { "type": "string", "minLength": 1 },
+                "item_template_id": { "type": "string", "minLength": 1 }
+              },
+              "oneOf": [
+                { "required": ["item_def_id"] },
+                { "required": ["item_template_id"] }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

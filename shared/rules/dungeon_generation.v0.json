@@ -20,6 +20,16 @@
     "min_spawn_distance": 6.0,
     "max_attempts": 64
   },
+  "chest_placement": {
+    "enabled": true,
+    "chance_weight": 5,
+    "no_chest_weight": 95,
+    "interactable_def_id": "treasure_chest",
+    "loot_table": "guarded_chest_drop",
+    "monster_count_bonus": 2,
+    "min_stair_distance": 4.0,
+    "max_attempts": 32
+  },
   "level_names": {
     "-1": "Entry Hall",
     "-2": "Lower Depths",

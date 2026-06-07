@@ -37,11 +37,16 @@
                 { "required": ["item_template_id"] }
               ]
             }
+          },
+          "treasure_class_id": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "anyOf": [
           { "required": ["entries"] },
           { "required": ["drops"] },
+          { "required": ["treasure_class_id"] },
           { "maxProperties": 0 }
         ]
       }

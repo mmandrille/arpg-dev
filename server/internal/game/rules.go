@@ -19,6 +19,7 @@ type Rules struct {
 	ItemTemplates     map[string]ItemTemplateDef
 	Rarities          map[string]RarityDef
 	RarityOrder       []string
+	TreasureClasses   map[string]TreasureClassDef
 	Monsters          map[string]MonsterDef
 	LootTables        map[string]LootTable
 	Interactables     map[string]InteractableDef
@@ -55,6 +56,7 @@ type DungeonGenerationRules struct {
 	StairPlacement           StairPlacementRules      `json:"stair_placement"`
 	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
+	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
 	LevelNames               map[string]string        `json:"level_names"`
 	DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 }
@@ -82,6 +84,17 @@ type MonsterPlacementRules struct {
 	MarginFromWall   float64 `json:"margin_from_wall"`
 	MinSpawnDistance float64 `json:"min_spawn_distance"`
 	MaxAttempts      int     `json:"max_attempts"`
+}
+
+type ChestPlacementRules struct {
+	Enabled           bool    `json:"enabled"`
+	ChanceWeight      int     `json:"chance_weight"`
+	NoChestWeight     int     `json:"no_chest_weight"`
+	InteractableDefID string  `json:"interactable_def_id"`
+	LootTable         string  `json:"loot_table"`
+	MonsterCountBonus int     `json:"monster_count_bonus"`
+	MinStairDistance  float64 `json:"min_stair_distance"`
+	MaxAttempts       int     `json:"max_attempts"`
 }
 
 // GridBounds is the inclusive grid rectangle searched by A*.
@@ -185,10 +198,28 @@ type LootEntry struct {
 	Weight         int    `json:"weight"`
 }
 
+type TreasureClassEntry struct {
+	ItemDefID      string `json:"item_def_id"`
+	ItemTemplateID string `json:"item_template_id"`
+	Weight         int    `json:"weight"`
+}
+
+type TreasureAttemptDef struct {
+	AttemptID     string               `json:"attempt_id"`
+	SuccessWeight int                  `json:"success_weight"`
+	NoDropWeight  int                  `json:"no_drop_weight"`
+	Entries       []TreasureClassEntry `json:"entries"`
+}
+
+type TreasureClassDef struct {
+	Attempts []TreasureAttemptDef `json:"attempts"`
+}
+
 // LootTable is a weighted set of loot entries.
 type LootTable struct {
-	Drops   []string    `json:"drops,omitempty"`
-	Entries []LootEntry `json:"entries"`
+	Drops           []string    `json:"drops,omitempty"`
+	Entries         []LootEntry `json:"entries"`
+	TreasureClassID string      `json:"treasure_class_id,omitempty"`
 }
 
 // WorldDef is a deterministic initial session layout.
@@ -380,6 +411,53 @@ func LoadRules(dir string) (*Rules, error) {
 	r.Rarities = itemTemplates.Rarities
 	r.RarityOrder = rarityOrder
 
+	var treasureClasses struct {
+		Classes map[string]TreasureClassDef `json:"classes"`
+	}
+	if err := readJSON(filepath.Join(dir, "treasure_classes.v0.json"), &treasureClasses); err != nil {
+		return nil, err
+	}
+	for classID, classDef := range treasureClasses.Classes {
+		if len(classDef.Attempts) == 0 {
+			return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts: required", classID)
+		}
+		seenAttempts := map[string]bool{}
+		for _, attempt := range classDef.Attempts {
+			if attempt.AttemptID == "" {
+				return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts: attempt_id required", classID)
+			}
+			if seenAttempts[attempt.AttemptID] {
+				return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: duplicate attempt_id", classID, attempt.AttemptID)
+			}
+			seenAttempts[attempt.AttemptID] = true
+			if attempt.SuccessWeight < 0 || attempt.NoDropWeight < 0 || attempt.SuccessWeight+attempt.NoDropWeight <= 0 {
+				return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: success/no_drop total must be positive", classID, attempt.AttemptID)
+			}
+			if attempt.SuccessWeight > 0 && len(attempt.Entries) == 0 {
+				return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: success requires entries", classID, attempt.AttemptID)
+			}
+			for _, entry := range attempt.Entries {
+				if (entry.ItemDefID == "") == (entry.ItemTemplateID == "") {
+					return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: entry must declare exactly one of item_def_id or item_template_id", classID, attempt.AttemptID)
+				}
+				if entry.Weight <= 0 {
+					return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: entry weight must be positive", classID, attempt.AttemptID)
+				}
+				if entry.ItemDefID != "" {
+					if _, ok := r.Items[entry.ItemDefID]; !ok {
+						return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: unknown item %s", classID, attempt.AttemptID, entry.ItemDefID)
+					}
+				}
+				if entry.ItemTemplateID != "" {
+					if _, ok := r.ItemTemplates[entry.ItemTemplateID]; !ok {
+						return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: unknown item template %s", classID, attempt.AttemptID, entry.ItemTemplateID)
+					}
+				}
+			}
+		}
+	}
+	r.TreasureClasses = treasureClasses.Classes
+
 	var monsters struct {
 		Monsters map[string]MonsterDef `json:"monsters"`
 	}
@@ -435,6 +513,15 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	r.LootTables = loot.LootTables
 	for tableID, table := range r.LootTables {
+		if table.TreasureClassID != "" {
+			if len(table.Entries) > 0 || len(table.Drops) > 0 {
+				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: treasure_class_id cannot mix with drops or entries", tableID)
+			}
+			if _, ok := r.TreasureClasses[table.TreasureClassID]; !ok {
+				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown treasure class %s", tableID, table.TreasureClassID)
+			}
+			continue
+		}
 		for _, entry := range table.Entries {
 			if (entry.ItemDefID == "") == (entry.ItemTemplateID == "") {
 				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: entry must declare exactly one of item_def_id or item_template_id", tableID)
@@ -477,10 +564,7 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.Transition != "" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: closed interactable must not declare transition", id)
 			}
-			if def.BarrierWhenClosed == nil {
-				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: required for closed interactables", id)
-			}
-			if def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0 {
+			if def.BarrierWhenClosed != nil && (def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0) {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
 			}
 		case interactableReady:
@@ -506,6 +590,7 @@ func LoadRules(dir string) (*Rules, error) {
 		StairPlacement           StairPlacementRules      `json:"stair_placement"`
 		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
+		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
 		LevelNames               map[string]string        `json:"level_names"`
 		DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 	}
@@ -558,6 +643,34 @@ func LoadRules(dir string) (*Rules, error) {
 	if dungeonGeneration.MonsterPlacement.MaxAttempts <= 0 {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.max_attempts: must be positive")
 	}
+	chestPlacement := dungeonGeneration.ChestPlacement
+	if chestPlacement.Enabled {
+		if chestPlacement.ChanceWeight+chestPlacement.NoChestWeight <= 0 {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement: chance/no_chest total must be positive")
+		}
+		if chestPlacement.InteractableDefID != treasureChestDefID {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.interactable_def_id: must be %s", treasureChestDefID)
+		}
+		if _, ok := r.Interactables[chestPlacement.InteractableDefID]; !ok {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.interactable_def_id: unknown interactable %s", chestPlacement.InteractableDefID)
+		}
+		table, ok := r.LootTables[chestPlacement.LootTable]
+		if !ok {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.loot_table: unknown table %s", chestPlacement.LootTable)
+		}
+		if table.TreasureClassID == "" {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.loot_table: must resolve to a treasure class")
+		}
+		if chestPlacement.MonsterCountBonus < 0 {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.monster_count_bonus: must be non-negative")
+		}
+		if chestPlacement.MinStairDistance <= 0 {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.min_stair_distance: must be positive")
+		}
+		if chestPlacement.MaxAttempts <= 0 {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.max_attempts: must be positive")
+		}
+	}
 	for key := range dungeonGeneration.LevelNames {
 		level, err := strconv.Atoi(key)
 		if err != nil || level >= 0 {
@@ -571,6 +684,7 @@ func LoadRules(dir string) (*Rules, error) {
 		StairPlacement:           dungeonGeneration.StairPlacement,
 		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
 		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
+		ChestPlacement:           dungeonGeneration.ChestPlacement,
 		LevelNames:               dungeonGeneration.LevelNames,
 		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
 	}
@@ -627,8 +741,8 @@ func LoadRules(dir string) (*Rules, error) {
 
 // LootDrop is one resolved loot table result.
 type LootDrop struct {
-	ItemDefID      string
-	ItemTemplateID string
+	ItemDefID      string `json:"item_def_id,omitempty"`
+	ItemTemplateID string `json:"item_template_id,omitempty"`
 }
 
 // RollLoot selects an item or item template from a loot table using the RNG. A
@@ -663,6 +777,9 @@ func (r *Rules) LootDrops(tableID string, rng *RNG) []LootDrop {
 	if !ok {
 		return nil
 	}
+	if table.TreasureClassID != "" {
+		return r.RollTreasureClass(table.TreasureClassID, rng)
+	}
 	if len(table.Drops) > 0 {
 		out := make([]LootDrop, 0, len(table.Drops))
 		for _, itemDefID := range table.Drops {
@@ -675,6 +792,39 @@ func (r *Rules) LootDrops(tableID string, rng *RNG) []LootDrop {
 		return nil
 	}
 	return []LootDrop{drop}
+}
+
+func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
+	classDef, ok := r.TreasureClasses[classID]
+	if !ok {
+		return nil
+	}
+	out := []LootDrop{}
+	for _, attempt := range classDef.Attempts {
+		total := attempt.SuccessWeight + attempt.NoDropWeight
+		if total <= 0 {
+			continue
+		}
+		if rng.IntN(total) >= attempt.SuccessWeight {
+			continue
+		}
+		totalEntries := 0
+		for _, entry := range attempt.Entries {
+			totalEntries += entry.Weight
+		}
+		if totalEntries <= 0 {
+			continue
+		}
+		roll := rng.IntN(totalEntries)
+		for _, entry := range attempt.Entries {
+			roll -= entry.Weight
+			if roll < 0 {
+				out = append(out, LootDrop{ItemDefID: entry.ItemDefID, ItemTemplateID: entry.ItemTemplateID})
+				break
+			}
+		}
+	}
+	return out
 }
 
 func sortedStringKeys[V any](m map[string]V) []string {

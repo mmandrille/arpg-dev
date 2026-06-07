@@ -11,8 +11,8 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v24 — `main-menu-and-character-start` (menu shell, named characters, fresh-session continue) |
-| **Active branch** | `feature/main-menu-and-character-start` |
+| **Latest completed slice** | v25 — `treasure-classes-and-guarded-chests` (multi-attempt drops, rare guarded chests) |
+| **Active branch** | `feature/treasure-classes-and-guarded-chests` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
 
@@ -40,6 +40,7 @@ v21_* = dungeon-monster-combat
 v22_* = character-scoped-persistence
 v23_* = item-templates-and-rolled-drops
 v24_* = main-menu-and-character-start
+v25_* = treasure-classes-and-guarded-chests
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -84,6 +85,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v22** | `character-scoped-persistence` | Complete (`make ci` green) | [`v22_spec-character-scoped-persistence.md`](specs/v22_spec-character-scoped-persistence.md) | [`v22_2026-06-07-character-scoped-persistence.md`](plans/v22_2026-06-07-character-scoped-persistence.md) |
 | **v23** | `item-templates-and-rolled-drops` | Complete (`make ci` green) | [`v23_spec-item-templates-and-rolled-drops.md`](specs/v23_spec-item-templates-and-rolled-drops.md) | [`v23_2026-06-07-item-templates-and-rolled-drops.md`](plans/v23_2026-06-07-item-templates-and-rolled-drops.md) |
 | **v24** | `main-menu-and-character-start` | Complete (`make ci` green) | [`v24_spec-main-menu-and-character-start.md`](specs/v24_spec-main-menu-and-character-start.md) | [`v24_2026-06-07-main-menu-and-character-start.md`](plans/v24_2026-06-07-main-menu-and-character-start.md) |
+| **v25** | `treasure-classes-and-guarded-chests` | Complete (`make ci` green) | [`v25_spec-treasure-classes-and-guarded-chests.md`](specs/v25_spec-treasure-classes-and-guarded-chests.md) | [`v25_2026-06-07-treasure-classes-and-guarded-chests.md`](plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md) |
 
 ---
 
@@ -553,6 +555,35 @@ authoritative for accounts, characters, ownership checks, and fresh-session boot
 art/audio, richer settings, old-session resume UI, character summaries, stash/vendors/quests, or
 durable dungeon maps/monsters/floor drops/HP/current level.
 
+### v25 — Treasure classes and guarded chests
+
+**Proves:** Monster and chest rewards can resolve through data-driven treasure classes with
+multiple ordered drop attempts, while rare procedural chests create guarded dungeon floors.
+
+- Shared `treasure_classes.v0.json` defines ordered attempts with success/no-drop weights and
+  weighted fixed item or item-template entries.
+- `dungeon_mob_drop` now bridges through `dungeon_mob_tc_1`; its primary attempt produces a rolled
+  `cave_blade`, while a lower-probability secondary attempt can add `red_potion` or the money-like
+  `training_badge`.
+- `guarded_chest_drop` bridges through `guarded_chest_tc_1`, giving chests a primary reward and a
+  lower-probability bonus attempt.
+- Dungeon generation has rare `chest_placement`; successful chest floors spawn a `treasure_chest`
+  and apply `monster_count_bonus` on that same level.
+- Chest generation uses a labeled seed substream, so no-chest floors preserve existing stair and
+  monster generation expectations.
+- `treasure_chest` opens via existing `action_intent`, emits existing interactable/loot events,
+  rolls loot once, and rejects repeated opens without duplicating drops.
+- Bot scenario `17_treasure_classes_and_guarded_chests.json` pins a guarded chest floor, proves
+  monster treasure-class loot, chest open-once behavior, pickup, `/state`, reconnect, replay, and
+  fresh-session persistence.
+- Bot create-session now supports an optional pinned seed only in local development; normal remote
+  sessions keep server-generated OS-entropy seeds.
+- Gold wallet, Magic Find, unique/set catalogs, depth-banded treasure classes, boss-floor chest
+  integration, and production chest art remain deferred.
+
+**Explicit non-goals:** no Magic Find stat or rarity modifier, no unique/set catalogs, no real gold
+wallet, no boss-floor rules, no production chest art/animation/audio, and no client-side drop logic.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -594,6 +625,7 @@ dungeon_levels / teleporter_lab: start in town, descend/ascend generated floors;
 character_persistence: same-account fresh sessions retain gear/equipment and discovered waypoint access
 rolled_drops: kill dungeon mob → pick up/equip rolled cave_blade → prove rolled metadata persists
 main_menu_flow: menu settings → named character creation → pause input lock → return → continue fresh session
+treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob → open chest once → pick up chest loot
 ```
 
 **Verify:**
@@ -675,14 +707,18 @@ presentation for the first rolled weapon template.
 fresh-session Continue/New Game flows, local window-size settings, ESC pause, Return to Main Menu,
 and a Godot client bot proof for the complete menu path.
 
+**Treasure classes and guarded chests are now authoritative.** v25 adds data-driven multi-attempt
+monster/chest loot, deterministic rare chest generation with guarded monster bonus, open-once chest
+loot, and bot/golden coverage for the complete path.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, character summaries, stash/vendors/gold, quest progress, stats/skills/XP, respawn/checkpoints, durable dungeon map snapshots | v22/v24 non-goals, ADR-0008 deferred |
 | Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling | v0/v4/v12/v17/v21/v23 non-goals |
-| Itemization | Affix grammar, procedural item names, armor/jewelry/offhand, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade | v23 non-goals |
-| Content | Production item art/icons, production menu art/audio, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24 non-goals |
+| Itemization | Affix grammar, procedural item names, armor/jewelry/offhand, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, depth-banded treasure classes, boss-floor chest integration | v23/v25 non-goals, ADR-0009 deferred |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

@@ -11,6 +11,7 @@
     "stair_placement",
     "teleporter_placement",
     "monster_placement",
+    "chest_placement",
     "level_names",
     "default_level_name_template"
   ],
@@ -57,6 +58,30 @@
         "monster_def_id": { "type": "string", "minLength": 1 },
         "margin_from_wall": { "type": "number", "minimum": 0 },
         "min_spawn_distance": { "type": "number", "exclusiveMinimum": 0 },
+        "max_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "chest_placement": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "chance_weight",
+        "no_chest_weight",
+        "interactable_def_id",
+        "loot_table",
+        "monster_count_bonus",
+        "min_stair_distance",
+        "max_attempts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "chance_weight": { "type": "integer", "minimum": 0 },
+        "no_chest_weight": { "type": "integer", "minimum": 0 },
+        "interactable_def_id": { "type": "string", "minLength": 1 },
+        "loot_table": { "type": "string", "minLength": 1 },
+        "monster_count_bonus": { "type": "integer", "minimum": 0 },
+        "min_stair_distance": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
       }
     },

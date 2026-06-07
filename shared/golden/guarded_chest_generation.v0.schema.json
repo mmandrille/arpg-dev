@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/guarded_chest_generation.v0.schema.json",
+  "title": "Guarded chest generation golden (v0)",
+  "type": "object",
+  "required": ["level", "base_monster_count", "monster_count_bonus", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "level": { "type": "integer", "maximum": -1 },
+    "base_monster_count": { "type": "integer", "minimum": 0 },
+    "monster_count_bonus": { "type": "integer", "minimum": 0 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "seed", "expected_chest", "expected_monster_count"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "seed": { "type": "string", "minLength": 1 },
+          "expected_chest": {
+            "type": ["object", "null"],
+            "additionalProperties": false,
+            "required": ["interactable_def_id", "loot_table", "position"],
+            "properties": {
+              "interactable_def_id": { "type": "string", "minLength": 1 },
+              "loot_table": { "type": "string", "minLength": 1 },
+              "position": { "$ref": "#/$defs/position" }
+            }
+          },
+          "expected_monster_count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

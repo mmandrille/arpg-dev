@@ -1,0 +1,158 @@
+shared/protocol/messages.v1.schema.json
+  s_789b84af40c76d::t_025659bb6686a3 24,61-62,167-173
+shared/rules/monsters.v0.json
+  s_789b84af40c76d::t_8c6e8ae6437598 8,15,22,29,36,43,54
+shared/protocol/examples/session_snapshot.json
+  s_789b84af40c76d::t_3f103a9e15fffc 16-35
+client/scripts/character_stats_panel.gd
+  s_789b84af40c76d::t_d6d0f96da962a4 131,165-168
+  s_789b84af40c76d::t_ab9e4dc248a7e9 65-71,76,78-84
+  s_789b84af40c76d::t_ef7e842fadd47d 1-64,72-75,77,85-130,132-164,169-220
+server/internal/store/store_test.go
+  s_789b84af40c76d::t_cbb1097aeec6fc 115-148,214,223-230,241-247,254-258
+server/internal/inputdecode/inputdecode.go
+  s_789b84af40c76d::t_229759bcdbe90a 12-22
+  s_789b84af40c76d::t_61c0dd316086a0 23,62-65,71,146-151,158-163
+shared/protocol/examples/allocate_stat_intent.json
+  s_789b84af40c76d::t_3f103a9e15fffc 1-10
+server/internal/realtime/runner.go
+  s_789b84af40c76d::t_ba93788ebbe815 509-513
+  s_789b84af40c76d::t_322c5bbc2c7c18 491-498,507-508,514-519
+server/internal/replay/replay_test.go
+  s_789b84af40c76d::t_3fcbb2347f554f 317-326
+docs/PROGRESS.md
+  s_789b84af40c76d::t_94b4cd6237c84d 14-15,44,91
+  s_789b84af40c76d::t_22043be803bc65 679,765-768,777-779
+  s_500242ad71f2bc::t_53f2c62e54070f 795
+  s_789b84af40c76d::t_0a3c94e1fb8d99 591-618
+skills/next/SKILL.md
+  s_500242ad71f2bc::t_8e27368629b18f 79
+server/internal/game/types.go
+  s_789b84af40c76d::t_61c0dd316086a0 90-123,126-138,158,172,187,229-233
+  s_789b84af40c76d::t_229759bcdbe90a 164-171
+tools/bot/scenarios/18_character_stats_and_leveling.json
+  s_789b84af40c76d::t_dbd0e5c983eaa5 1-61
+shared/rules/monsters.v0.schema.json
+  s_789b84af40c76d::t_8c6e8ae6437598 22
+server/internal/store/models.go
+  s_789b84af40c76d::t_0d2a85443cf87a 91-98
+  s_789b84af40c76d::t_c23403dfc63326 72-90,99-100,104-107
+server/migrations/0005_character_progression_stats.sql
+  s_789b84af40c76d::t_c23403dfc63326 1-47
+skills/plan/SKILL.md
+  s_500242ad71f2bc::t_44030b8f8322d7 150
+shared/protocol/state_delta.v1.schema.json
+  s_789b84af40c76d::t_025659bb6686a3 98-102,153-173,177-218,279-286
+server/internal/inputdecode/inputdecode_test.go
+  s_789b84af40c76d::t_0ddc4bbbfbdbbb 35-59
+server/internal/realtime/hub.go
+  s_789b84af40c76d::t_322c5bbc2c7c18 73-78,92-106
+server/internal/replay/replay.go
+  s_789b84af40c76d::t_92350c1c215e14 117,157,161,230,233,248,307-321
+shared/protocol/session_snapshot.v1.schema.json
+  s_789b84af40c76d::t_025659bb6686a3 7,18,110-151,164-168,214-234
+client/tests/test_golden.gd
+  s_789b84af40c76d::t_76c774ddb12684 369-387,407-417
+client/scripts/character_stats_panel.gd.uid
+  s_789b84af40c76d::t_afc9a2d4d4ca60 1
+server/internal/http/session.go
+  s_789b84af40c76d::t_322c5bbc2c7c18 133-138,145,208-219
+docs/specs/v26_spec-character-stats-and-leveling.md
+  s_789b84af40c76d::t_0a97bbb848e3a9 1-2,4-455
+  s_789b84af40c76d::t_ed0fdf1acd75cb 3
+tools/bot/scenarios/client/09_character_stats_panel.json
+  s_789b84af40c76d::t_f2602fef13c51f 1-36
+tools/bot/run.py
+  s_789b84af40c76d::t_ff0dfcdddce1c3 1198,1661
+  s_789b84af40c76d::t_39841beee89d44 105,679-702,882-894,1009-1010,1025,1225-1233,1336-1361,1371,1425-1428,1581-1591
+tools/validate_shared.py
+  s_789b84af40c76d::t_6dbaec7160fed2 320-322
+  s_789b84af40c76d::t_4305022219a442 16,117,143,204-319,323-364,620-626
+AGENTS.md
+  s_500242ad71f2bc::t_61be8b2c3a91cb 34-37
+skills/finish/SKILL.md
+  s_500242ad71f2bc::t_b9dcef0a18c9c3 41
+client/scripts/main.gd
+  s_789b84af40c76d::t_93027e98039b25 2044,2046,2054,2057
+  s_789b84af40c76d::t_89131a173fcb11 16,49,118,374,402,427,480,484,531-533,817-822,873-876,993-994,1351-1352,1467-1469,1531-1557
+  s_789b84af40c76d::t_2c7baab76995ce 2122-2127
+  s_789b84af40c76d::t_31424498164521 263-264,400-401
+server/internal/store/interfaces.go
+  s_789b84af40c76d::t_c23403dfc63326 41-44
+server/internal/http/ws_test.go
+  s_789b84af40c76d::t_a66643c93accaf 108-113,614-670
+  s_789b84af40c76d::t_cff7e12c3347bd 81,90-96,258-302
+client/scripts/consumable_bar.gd
+  s_789b84af40c76d::t_3d3e0135c40ec6 369-385,400-404
+  s_789b84af40c76d::t_14a3754b90ce07 127-139
+  s_789b84af40c76d::t_99e4485b946212 12-13,18-19,66,87-91,156-157,188,201-231,242-253,291-306
+server/internal/store/repos.go
+  s_789b84af40c76d::t_c23403dfc63326 323-397,399-409,448-463
+client/scripts/bot_scenario_runner.gd
+  s_789b84af40c76d::t_b6ab60b0568cb7 12,21-22,29,49-51,171-172,256-263
+  s_789b84af40c76d::t_68d79487b7adb6 388-469
+  s_789b84af40c76d::t_af7d68bd932842 539-544,585-586
+  s_789b84af40c76d::t_0d173047622939 675-687
+shared/golden/character_progression.v0.schema.json
+  s_789b84af40c76d::t_8c6e8ae6437598 1-84
+client/tests/test_client_bot.gd
+  s_789b84af40c76d::t_43b05a79e22b1d 30-31,33-34,142-153,171-214
+docs/plans/v26_2026-06-07-character-stats-and-leveling.md
+  s_789b84af40c76d::t_6cc047ca55365a 138-146,162-167
+  s_789b84af40c76d::t_041bbd6b389331 95-100
+  s_789b84af40c76d::t_c3ba8b8d40ca4f 75-80
+  s_789b84af40c76d::t_4824d03e822d90 115-121
+  s_789b84af40c76d::t_b66444b59e2ed6 3,242-246,254-262
+  s_789b84af40c76d::t_08980d680403ae 1-2,4-74,81-94,101-114,122-137,147-161,168-179,187-200,209-222,228-241,247-253,263-274
+  s_789b84af40c76d::t_4c0a8845de6abf 180-186
+  s_789b84af40c76d::t_be9b466586ef60 201-208
+  s_789b84af40c76d::t_b6f585537abbbe 223-227
+.cursor/rules/no-branch-creation.mdc
+  s_500242ad71f2bc::t_a0d5fbf26690c0 1-13
+server/internal/game/rules.go
+  s_789b84af40c76d::t_97065635ba5cd1 16-22,24-28,325-327
+  s_789b84af40c76d::t_b6b424bcfb2596 23,65-85,198,323-324,328-389,558-560
+server/internal/game/game_test.go
+  s_789b84af40c76d::t_582a55467fadb1 6,108-246
+  s_789b84af40c76d::t_1298cd17fadf0a 3008-3036
+skills/execute/SKILL.md
+  s_500242ad71f2bc::t_d71cf888d9a69c 46
+shared/golden/character_progression.json
+  s_789b84af40c76d::t_19a20eda70aa69 115
+  s_789b84af40c76d::t_8c6e8ae6437598 1-114,116-164
+server/internal/game/sim.go
+  s_789b84af40c76d::t_61c0dd316086a0 430,461-464,538,565
+  s_789b84af40c76d::t_21c167b6359c8a 1341-1402,2160-2199,2563-2575,2577-2602,2608-2653
+  s_789b84af40c76d::t_322c5bbc2c7c18 2603-2607
+  s_789b84af40c76d::t_5b6bce6cb1be56 140-149,163-168,173,185,210-248,250-251,566,824,2155,2545,2549,2555,2560-2562,2787
+shared/rules/character_progression.v0.schema.json
+  s_789b84af40c76d::t_8c6e8ae6437598 1-92
+client/scripts/bot_controller.gd
+  s_789b84af40c76d::t_61ced19f62a176 128-129,164-168,290,316-317
+shared/rules/character_progression.v0.json
+  s_789b84af40c76d::t_8c6e8ae6437598 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a0a5ed3dec2d38d064af9a53bb8f0f773767a85f",
+  "prompts": {},
+  "sessions": {
+    "s_500242ad71f2bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1a6a1a1a-7ffb-4e87-a181-9d6cbb3ba26e",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_789b84af40c76d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea07b-7fb9-76f3-9678-b454053cfdcc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

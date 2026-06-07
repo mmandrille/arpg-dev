@@ -1,0 +1,53 @@
+client/tests/test_sustained_input.gd
+  s_b946268e9c2715::t_e91c7b05ff4158 1-100
+client/scripts/main.gd
+  s_b946268e9c2715::t_9d00ab72c25203 806-808
+  s_b946268e9c2715::t_b477ac0753b6d5 23
+  s_b946268e9c2715::t_4389d4034cf39a 962-967,969-972,976-1004,1028-1085
+  s_b946268e9c2715::t_a129ac31004409 817-818,820,824-825,842-845
+  s_b946268e9c2715::t_887092c3f557e6 780-781
+  s_b946268e9c2715::t_d5e7e0a3ea6b9e 121
+client/scripts/sustained_click_input.gd
+  s_b946268e9c2715::t_a54b59e893686a 1-71
+scripts/client_smoke.sh
+  s_b946268e9c2715::t_b88a470661dd82 67-69
+client/scripts/sustained_click_input.gd.uid
+  s_b946268e9c2715::t_1ea73c31c04975 1
+docs/plans/v27_2026-06-07-hold-click-controls.md
+  s_b946268e9c2715::t_f7defa7c49156a 175-177
+  s_b946268e9c2715::t_3ea35817e87fc6 79-80,83-85,88,93,97
+  s_b946268e9c2715::t_67d5de236d3850 1-2,4-57,61-63,67-78,81-82,86-87,89-92,94-96,98-110,119-146,149-153,155-163,166-174,178-204
+  s_b946268e9c2715::t_a1c048b45493ca 3
+  s_b946268e9c2715::t_ee7a3f19c8e8e3 147-148
+  s_b946268e9c2715::t_e52d5ef346d7c1 111-118
+  s_b946268e9c2715::t_2346f55df569eb 154
+  s_b946268e9c2715::t_3918d43097572c 58-60,64-66
+  s_b946268e9c2715::t_051991a4aa2371 164-165
+client/tests/test_sustained_input.gd.uid
+  s_b946268e9c2715::t_1ea73c31c04975 1
+docs/PROGRESS.md
+  s_b946268e9c2715::t_01b4ea71f165c6 14-15
+  s_b946268e9c2715::t_b9e79eff021f23 90
+  s_b946268e9c2715::t_a2028f04ba2f61 589-606
+  s_b946268e9c2715::t_f07fc3fc7eef34 734-737
+  s_b946268e9c2715::t_c0b48e28b65705 44
+docs/specs/v27_spec-hold-click-controls.md
+  s_b946268e9c2715::t_948af1103a5f56 1-2,4-293
+  s_b946268e9c2715::t_59cf680f422e2b 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "40d656a60f67ea909e347a72694aa4c0ea78e3d4",
+  "prompts": {},
+  "sessions": {
+    "s_b946268e9c2715": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8477ca29-f08f-4bb0-a752-2b3a8072ca27",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

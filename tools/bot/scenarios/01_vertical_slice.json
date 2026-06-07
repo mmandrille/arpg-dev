@@ -21,7 +21,7 @@
     },
     {
       "action": "equip_first_inventory_item",
-      "slot": "weapon"
+      "slot": "main_hand"
     }
   ],
   "assertions": [

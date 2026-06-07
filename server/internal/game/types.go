@@ -121,6 +121,12 @@ type CharacterProgressionView struct {
 	DerivedStats          DerivedStatsView `json:"derived_stats"`
 }
 
+// HotbarSlotView is one fixed hotbar assignment in the protocol snapshot.
+type HotbarSlotView struct {
+	SlotIndex      int     `json:"slot_index"`
+	ItemInstanceID *string `json:"item_instance_id"`
+}
+
 // Event is an authoritative event emitted by the sim.
 type Event struct {
 	EventType         string `json:"event_type"`
@@ -154,6 +160,8 @@ type Snapshot struct {
 	Entities              []EntityView              `json:"entities"`
 	Inventory             []ItemView                `json:"inventory"`
 	Equipped              map[string]*string        `json:"equipped"`
+	HotbarCapacity        int                       `json:"hotbar_capacity"`
+	Hotbar                []HotbarSlotView          `json:"hotbar"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	RecentEvents          []Event                   `json:"recent_events"`
@@ -168,6 +176,7 @@ const (
 	OpInventoryUpdate            = "inventory_update"
 	OpInventoryRemove            = "inventory_remove"
 	OpEquippedUpdate             = "equipped_update"
+	OpHotbarUpdate               = "hotbar_update"
 	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
 	OpCharacterProgressionUpdate = "character_progression_update"
 )
@@ -182,6 +191,8 @@ type Change struct {
 	Item           *ItemView
 	Slot           string
 	ItemInstanceID *string // for equipped_update; nil marshals as null
+	SlotIndex      int
+	HotbarCapacity *int
 	Level          int
 	Discovered     bool
 	Progression    *CharacterProgressionView
@@ -219,7 +230,14 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op             string  `json:"op"`
 			Slot           string  `json:"slot"`
 			ItemInstanceID *string `json:"item_instance_id"`
-		}{c.Op, c.Slot, c.ItemInstanceID})
+			HotbarCapacity *int    `json:"hotbar_capacity,omitempty"`
+		}{c.Op, c.Slot, c.ItemInstanceID, c.HotbarCapacity})
+	case OpHotbarUpdate:
+		return json.Marshal(struct {
+			Op             string  `json:"op"`
+			SlotIndex      int     `json:"slot_index"`
+			ItemInstanceID *string `json:"item_instance_id"`
+		}{c.Op, c.SlotIndex, c.ItemInstanceID})
 	case OpTeleporterDiscoveryUpdate:
 		return json.Marshal(struct {
 			Op         string `json:"op"`

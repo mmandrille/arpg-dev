@@ -43,7 +43,7 @@ func _initialize() -> void:
 	var items := _read(shared.path_join("rules/items.v0.json"))
 	var weapon_golden := _read(shared.path_join("golden/equipped_weapon_damage.json"))
 	var item_def: Dictionary = items["items"][weapon_golden["item_def_id"]]
-	if not bool(item_def["equippable"]) or str(item_def["slot"]) != "weapon":
+	if not bool(item_def["equippable"]) or str(item_def["slot"]) != "main_hand":
 		_fail("equipped weapon golden item is not an equippable weapon")
 		return
 	if item_def["damage"] != weapon_golden["damage"]:

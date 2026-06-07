@@ -481,6 +481,11 @@ func (r *runner) persistTick(res game.TickResult) {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist equipped update", "error", err)
 			}
+		case game.OpHotbarUpdate:
+			if err := r.store.SetCharacterHotbarSlot(ctx, r.sess.AccountID, r.sess.CharacterID, c.SlotIndex, c.ItemInstanceID); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist hotbar update", "error", err)
+			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
 				if err := r.store.AddCharacterWaypoint(ctx, r.sess.CharacterID, c.Level); err != nil {

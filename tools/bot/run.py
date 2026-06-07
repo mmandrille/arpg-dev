@@ -83,6 +83,8 @@ class RuntimeState:
     entities: dict[str, dict[str, Any]] = field(default_factory=dict)
     inventory: list[dict[str, Any]] = field(default_factory=list)
     equipped: dict[str, Any] = field(default_factory=dict)
+    hotbar_capacity: int = 2
+    hotbar: list[dict[str, Any]] = field(default_factory=list)
     loot_ids: list[str] = field(default_factory=list)
     item_id: str | None = None
     equipped_item_id: str | None = None
@@ -332,12 +334,40 @@ async def execute_step(
 
     if action == "assert_equipped_weapon_def":
         expected_def = str(step["item_def_id"])
-        weapon_id = state.equipped.get("weapon")
+        slot = str(step.get("slot", "main_hand"))
+        weapon_id = state.equipped.get(slot)
         if weapon_id is None:
-            raise AssertionError(f"assert_equipped_weapon_def: equipped weapon is empty, want {expected_def}")
+            raise AssertionError(f"assert_equipped_weapon_def: equipped {slot} is empty, want {expected_def}")
         item = next((i for i in state.inventory if str(i.get("item_instance_id")) == str(weapon_id)), None)
         if item is None or item.get("item_def_id") != expected_def:
-            raise AssertionError(f"assert_equipped_weapon_def: weapon {weapon_id} row={item}, want {expected_def}")
+            raise AssertionError(f"assert_equipped_weapon_def: {slot} {weapon_id} row={item}, want {expected_def}")
+        return
+
+    if action == "assert_equipped_slot_def":
+        slot = str(step["slot"])
+        expected_def = str(step["item_def_id"])
+        item_id = state.equipped.get(slot)
+        if item_id is None:
+            raise AssertionError(f"assert_equipped_slot_def: equipped {slot} is empty, want {expected_def}")
+        item = next((i for i in state.inventory if str(i.get("item_instance_id")) == str(item_id)), None)
+        if item is None or item.get("item_def_id") != expected_def:
+            raise AssertionError(f"assert_equipped_slot_def: {slot} {item_id} row={item}, want {expected_def}")
+        return
+
+    if action == "assert_equipped_slot_empty":
+        slot = str(step["slot"])
+        if state.equipped.get(slot) is not None:
+            raise AssertionError(f"assert_equipped_slot_empty: {slot}={state.equipped.get(slot)}, want empty")
+        return
+
+    if action == "assert_hotbar_slot":
+        assert_hotbar_slot(state.hotbar, int(step["slot_index"]), step.get("item_def_id"), "runtime protocol", state.inventory)
+        return
+
+    if action == "assert_hotbar_capacity":
+        want = int(step["equals"])
+        if state.hotbar_capacity != want:
+            raise AssertionError(f"assert_hotbar_capacity: {state.hotbar_capacity} != {want}")
         return
 
     if action == "assert_entity_count":
@@ -589,6 +619,7 @@ async def execute_step(
 
     if action == "pick_up_loot":
         item_def_id = str(step["item_def_id"])
+        bag_index = int(step.get("bag_index", 0))
         loot = find_loot(state, item_def_id)
         if loot is None:
             raise AssertionError(f"pick_up_loot: loot not found for item_def_id={item_def_id}")
@@ -598,7 +629,7 @@ async def execute_step(
         log("picking up", item_def_id, "loot", loot["id"])
         wait_started = loop.time()
         last_wait_log = wait_started
-        while find_inventory_item(state.inventory, item_def_id) is None:
+        while find_inventory_item(state.inventory, item_def_id, bag_index) is None:
             if loop.time() > deadline:
                 raise TimeoutError(f"pick_up_loot stalled waiting for {item_def_id}")
             if loop.time() - last_wait_log >= WAIT_LOG_INTERVAL_S:
@@ -612,7 +643,7 @@ async def execute_step(
                 )
                 last_wait_log = loop.time()
             await pump_one(ws, state, timeout=0.1)
-        item = find_inventory_item(state.inventory, item_def_id)
+        item = find_inventory_item(state.inventory, item_def_id, bag_index)
         if item is not None:
             state.item_id = item["item_instance_id"]
         return
@@ -623,7 +654,7 @@ async def execute_step(
             if loop.time() > deadline:
                 raise TimeoutError("equip_first_inventory_item stalled waiting for inventory")
             await pump_one(ws, state, timeout=0.1)
-        slot = str(step.get("slot", "weapon"))
+        slot = str(step.get("slot", "main_hand"))
         await ws.send(json.dumps(make_envelope(
             "equip_intent", session_id, state.last_tick, {"item_instance_id": state.item_id, "slot": slot})))
         log("equipping item", state.item_id)
@@ -635,14 +666,15 @@ async def execute_step(
 
     if action == "equip_inventory_item":
         item_def_id = str(step["item_def_id"])
+        bag_index = int(step.get("bag_index", 0))
         deadline = loop.time() + SLICE_TIMEOUT_S
-        item = find_inventory_item(state.inventory, item_def_id)
+        item = find_inventory_item(state.inventory, item_def_id, bag_index)
         while item is None:
             if loop.time() > deadline:
                 raise TimeoutError(f"equip_inventory_item stalled waiting for {item_def_id}")
             await pump_one(ws, state, timeout=0.1)
-            item = find_inventory_item(state.inventory, item_def_id)
-        slot = str(step.get("slot", item.get("slot", "weapon")))
+            item = find_inventory_item(state.inventory, item_def_id, bag_index)
+        slot = str(step.get("slot", item.get("slot", "main_hand")))
         item_id = str(item["item_instance_id"])
         await ws.send(json.dumps(make_envelope(
             "equip_intent", session_id, state.last_tick, {"item_instance_id": item_id, "slot": slot})))
@@ -655,7 +687,7 @@ async def execute_step(
         return
 
     if action == "unequip_slot":
-        slot = str(step.get("slot", "weapon"))
+        slot = str(step.get("slot", "main_hand"))
         deadline = loop.time() + SLICE_TIMEOUT_S
         if state.equipped.get(slot) is None:
             raise AssertionError(f"unequip_slot: slot {slot} is already empty")
@@ -665,6 +697,48 @@ async def execute_step(
         while state.equipped.get(slot) is not None:
             if loop.time() > deadline:
                 raise TimeoutError(f"unequip_slot stalled waiting for empty {slot}")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "assign_hotbar":
+        slot_index = int(step["slot_index"])
+        item_def_id = step.get("item_def_id")
+        item_id: str | None = None
+        if item_def_id is not None:
+            item = find_inventory_item(state.inventory, str(item_def_id))
+            if item is None:
+                raise AssertionError(f"assign_hotbar: missing inventory item {item_def_id}")
+            item_id = str(item["item_instance_id"])
+        await ws.send(json.dumps(make_envelope(
+            "assign_hotbar_intent",
+            session_id,
+            state.last_tick,
+            {"slot_index": slot_index, "item_instance_id": item_id},
+        )))
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        while hotbar_item_id(state.hotbar, slot_index) != item_id:
+            if loop.time() > deadline:
+                raise TimeoutError(f"assign_hotbar stalled waiting for slot {slot_index}={item_id}")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "use_hotbar_slot":
+        slot_index = int(step["slot_index"])
+        env = make_envelope(
+            "use_hotbar_intent",
+            session_id,
+            state.last_tick,
+            {"slot_index": slot_index},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        if expect_reject:
+            await wait_for_reject(ws, state, str(env["message_id"]), str(expect_reject), loop)
+            return
+        while hotbar_item_id(state.hotbar, slot_index) is not None:
+            if loop.time() > deadline:
+                raise TimeoutError(f"use_hotbar_slot stalled waiting for slot {slot_index} clear")
             await pump_one(ws, state, timeout=0.1)
         return
 
@@ -1001,9 +1075,13 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             upsert_inventory(state, c["item"])
         elif c["op"] == "inventory_remove":
             remove_inventory_item(state, str(c["item_instance_id"]))
-        elif c["op"] == "equipped_update" and c.get("slot") == "weapon":
+        elif c["op"] == "equipped_update":
             state.equipped_item_id = c.get("item_instance_id")
             state.equipped[c["slot"]] = c.get("item_instance_id")
+            if "hotbar_capacity" in c:
+                state.hotbar_capacity = int(c["hotbar_capacity"])
+        elif c["op"] == "hotbar_update":
+            upsert_hotbar(state, int(c["slot_index"]), c.get("item_instance_id"))
         elif c["op"] == "teleporter_discovery_update":
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
@@ -1022,6 +1100,8 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.entities = {str(e["id"]): dict(e) for e in payload.get("entities", [])}
     state.inventory = [dict(i) for i in payload.get("inventory", [])]
     state.equipped = dict(payload.get("equipped", {}))
+    state.hotbar_capacity = int(payload.get("hotbar_capacity", 2))
+    state.hotbar = [dict(slot) for slot in payload.get("hotbar", [])]
     state.character_progression = dict(payload.get("character_progression", {}))
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
@@ -1042,6 +1122,20 @@ def parse_discovered_teleporters(payload: dict[str, Any]) -> dict[int, bool]:
         int(row["level"]): bool(row["discovered"])
         for row in payload.get("discovered_teleporters", [])
     }
+
+
+def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any) -> None:
+    while len(state.hotbar) <= slot_index:
+        state.hotbar.append({"slot_index": len(state.hotbar), "item_instance_id": None})
+    state.hotbar[slot_index] = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+
+
+def hotbar_item_id(hotbar: list[dict[str, Any]], slot_index: int) -> str | None:
+    for slot in hotbar:
+        if int(slot.get("slot_index", -1)) == slot_index:
+            raw = slot.get("item_instance_id")
+            return None if raw is None else str(raw)
+    return None
 
 
 def clear_active_level_state(state: RuntimeState) -> None:
@@ -1196,6 +1290,8 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             current_level=int(payload.get("current_level", 0)),
             discovered_teleporters=parse_discovered_teleporters(payload),
             character_progression=payload.get("character_progression", {}),
+            hotbar_capacity=int(payload.get("hotbar_capacity", 2)),
+            hotbar=payload.get("hotbar", []),
         )
         log("reconnect snapshot restored expected scenario state")
 
@@ -1209,8 +1305,8 @@ def assert_equipped_sword(inventory: list[dict], equipped: dict, item_id: str | 
     if item["item_def_id"] != "rusty_sword" or not item["equipped"]:
         raise AssertionError(f"{where}: item not an equipped rusty_sword: {item}")
     expected_id = item_id or item["item_instance_id"]
-    if equipped.get("weapon") != expected_id:
-        raise AssertionError(f"{where}: equipped weapon {equipped.get('weapon')} != {item_id}")
+    if equipped.get("main_hand") != expected_id:
+        raise AssertionError(f"{where}: equipped main_hand {equipped.get('main_hand')} != {item_id}")
 
 
 def assert_player_hp_equals(entities: list[dict], want: int, where: str) -> None:
@@ -1273,6 +1369,21 @@ def assert_inventory_contains(inventory: list[dict], item_def_id: str, equipped:
         raise AssertionError(f"{where}: missing inventory item {item_def_id}: {inventory}")
     if equipped is not None and bool(item.get("equipped")) != equipped:
         raise AssertionError(f"{where}: {item_def_id} equipped={item.get('equipped')} want {equipped}")
+
+
+def assert_hotbar_slot(hotbar: list[dict], slot_index: int, item_def_id: Any, where: str, inventory: list[dict] | None = None) -> None:
+    assigned_id = hotbar_item_id(hotbar, slot_index)
+    if item_def_id is None:
+        if assigned_id is not None:
+            raise AssertionError(f"{where}: hotbar[{slot_index}]={assigned_id}, want empty")
+        return
+    if assigned_id is None:
+        raise AssertionError(f"{where}: hotbar[{slot_index}] is empty, want {item_def_id}")
+    if inventory is None:
+        return
+    item = next((i for i in inventory if str(i.get("item_instance_id")) == assigned_id), None)
+    if item is None or item.get("item_def_id") != str(item_def_id):
+        raise AssertionError(f"{where}: hotbar[{slot_index}] item={item}, want {item_def_id}")
 
 
 def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any], where: str) -> None:
@@ -1369,6 +1480,8 @@ def run_assertions(
     current_level: int | None = None,
     discovered_teleporters: dict[int, bool] | None = None,
     character_progression: dict[str, Any] | None = None,
+    hotbar_capacity: int | None = None,
+    hotbar: list[dict] | None = None,
 ) -> None:
     for assertion in assertions:
         if isinstance(assertion, str):
@@ -1399,12 +1512,32 @@ def run_assertions(
             assert_entity_count(entities, assertion, where)
         elif typ == "equipped_weapon_def":
             expected_def = str(assertion["item_def_id"])
-            weapon_id = equipped.get("weapon")
+            slot = str(assertion.get("slot", "main_hand"))
+            weapon_id = equipped.get(slot)
             if weapon_id is None:
-                raise AssertionError(f"{where}: equipped weapon is empty, want {expected_def}")
+                raise AssertionError(f"{where}: equipped {slot} is empty, want {expected_def}")
             item = next((i for i in inventory if str(i.get("item_instance_id")) == str(weapon_id)), None)
             if item is None or item.get("item_def_id") != expected_def:
-                raise AssertionError(f"{where}: equipped weapon {weapon_id} row = {item}, want {expected_def}")
+                raise AssertionError(f"{where}: equipped {slot} {weapon_id} row = {item}, want {expected_def}")
+        elif typ == "equipped_slot_def":
+            slot = str(assertion["slot"])
+            expected_def = str(assertion["item_def_id"])
+            item_id = equipped.get(slot)
+            if item_id is None:
+                raise AssertionError(f"{where}: equipped {slot} is empty, want {expected_def}")
+            item = next((i for i in inventory if str(i.get("item_instance_id")) == str(item_id)), None)
+            if item is None or item.get("item_def_id") != expected_def:
+                raise AssertionError(f"{where}: equipped {slot} {item_id} row = {item}, want {expected_def}")
+        elif typ == "equipped_slot_empty":
+            slot = str(assertion["slot"])
+            if equipped.get(slot) is not None:
+                raise AssertionError(f"{where}: equipped {slot}={equipped.get(slot)}, want empty")
+        elif typ == "hotbar_capacity":
+            want = int(assertion["equals"])
+            if hotbar_capacity != want:
+                raise AssertionError(f"{where}: hotbar_capacity {hotbar_capacity} != {want}")
+        elif typ == "hotbar_slot":
+            assert_hotbar_slot(hotbar or [], int(assertion["slot_index"]), assertion.get("item_def_id"), where, inventory)
         elif typ == "monster_dead":
             assert_monster_dead(entities, where, str(assertion["monster_def_id"]))
         elif typ == "interactable_state":
@@ -1568,6 +1701,27 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)
             continue
+        if typ == "equipped_slot_def":
+            slot = str(assertion["slot"])
+            expected_def = str(assertion["item_def_id"])
+            item_id = state.equipped.get(slot)
+            item = next((i for i in state.inventory if str(i.get("item_instance_id")) == str(item_id)), None)
+            if item_id is None or item is None or item.get("item_def_id") != expected_def:
+                raise AssertionError(f"{where}: equipped {slot} {item_id} row={item}, want {expected_def}")
+            continue
+        if typ == "equipped_slot_empty":
+            slot = str(assertion["slot"])
+            if state.equipped.get(slot) is not None:
+                raise AssertionError(f"{where}: equipped {slot}={state.equipped.get(slot)}, want empty")
+            continue
+        if typ == "hotbar_capacity":
+            want = int(assertion["equals"])
+            if state.hotbar_capacity != want:
+                raise AssertionError(f"{where}: hotbar_capacity {state.hotbar_capacity} != {want}")
+            continue
+        if typ == "hotbar_slot":
+            assert_hotbar_slot(state.hotbar, int(assertion["slot_index"]), assertion.get("item_def_id"), where, state.inventory)
+            continue
         if typ == "entity_count":
             assert_entity_count(list(state.entities.values()), assertion, where)
             continue
@@ -1659,6 +1813,8 @@ def run_verified_session(
         current_level=int(state.get("current_level", 0)),
         discovered_teleporters=parse_discovered_teleporters(state),
         character_progression=state.get("character_progression", {}),
+        hotbar_capacity=int(state.get("hotbar_capacity", 2)),
+        hotbar=state.get("hotbar", []),
     )
     log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 

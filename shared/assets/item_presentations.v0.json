@@ -13,6 +13,46 @@
       "icon": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "label": "Bw" },
       "ground": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "scale": 1.0 }
     },
+    "cave_greatsword": {
+      "icon": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "label": "2H" },
+      "ground": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "scale": 1.1 }
+    },
+    "cave_bow": {
+      "icon": { "shape": "bow", "color": "#8f6b42", "accent": "#e6c27b", "label": "CB" },
+      "ground": { "shape": "bow", "color": "#8f6b42", "accent": "#e6c27b", "scale": 1.0 }
+    },
+    "cave_shield": {
+      "icon": { "shape": "badge", "color": "#677489", "accent": "#cbd4df", "label": "Sh" },
+      "ground": { "shape": "badge", "color": "#677489", "accent": "#cbd4df", "scale": 1.0 }
+    },
+    "cave_helm": {
+      "icon": { "shape": "badge", "color": "#6f7780", "accent": "#e0e5e8", "label": "Hm" },
+      "ground": { "shape": "badge", "color": "#6f7780", "accent": "#e0e5e8", "scale": 0.9 }
+    },
+    "cave_mail": {
+      "icon": { "shape": "badge", "color": "#626b73", "accent": "#d7dde2", "label": "Ml" },
+      "ground": { "shape": "badge", "color": "#626b73", "accent": "#d7dde2", "scale": 1.0 }
+    },
+    "cave_gloves": {
+      "icon": { "shape": "badge", "color": "#736252", "accent": "#dcc6a8", "label": "Gl" },
+      "ground": { "shape": "badge", "color": "#736252", "accent": "#dcc6a8", "scale": 0.8 }
+    },
+    "cave_belt": {
+      "icon": { "shape": "badge", "color": "#7f5a35", "accent": "#e6c086", "label": "Bt" },
+      "ground": { "shape": "badge", "color": "#7f5a35", "accent": "#e6c086", "scale": 0.8 }
+    },
+    "cave_boots": {
+      "icon": { "shape": "badge", "color": "#514f4b", "accent": "#c4b9a5", "label": "Bo" },
+      "ground": { "shape": "badge", "color": "#514f4b", "accent": "#c4b9a5", "scale": 0.8 }
+    },
+    "cave_ring": {
+      "icon": { "shape": "coin", "color": "#d1b457", "accent": "#fff1a8", "label": "Rg" },
+      "ground": { "shape": "coin", "color": "#d1b457", "accent": "#fff1a8", "scale": 0.7 }
+    },
+    "cave_amulet": {
+      "icon": { "shape": "coin", "color": "#6aa7b8", "accent": "#d8f4ff", "label": "Am" },
+      "ground": { "shape": "coin", "color": "#6aa7b8", "accent": "#d8f4ff", "scale": 0.7 }
+    },
     "training_badge": {
       "icon": { "shape": "badge", "color": "#d5a928", "accent": "#fff0a6", "label": "Bd" },
       "ground": { "shape": "coin", "color": "#d5a928", "accent": "#fff0a6", "scale": 0.9 }

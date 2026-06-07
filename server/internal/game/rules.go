@@ -133,6 +133,8 @@ type ItemDef struct {
 	Category        string       `json:"category"`
 	Slot            string       `json:"slot"`
 	Equippable      bool         `json:"equippable"`
+	Handedness      string       `json:"handedness,omitempty"`
+	OccupiesHands   []string     `json:"occupies_hands,omitempty"`
 	AttackMode      string       `json:"attack_mode,omitempty"`
 	Damage          *DamageRange `json:"damage,omitempty"`
 	Reach           *float64     `json:"reach,omitempty"`
@@ -149,17 +151,20 @@ type RarityDef struct {
 
 // ItemTemplateDef is a server-authoritative rolled item template.
 type ItemTemplateDef struct {
-	Name          string            `json:"name"`
-	Category      string            `json:"category"`
-	ItemType      string            `json:"item_type"`
-	Slot          string            `json:"slot"`
-	Equippable    bool              `json:"equippable"`
-	AttackMode    string            `json:"attack_mode,omitempty"`
-	Reach         float64           `json:"reach"`
-	Requirements  map[string]int    `json:"requirements"`
-	BaseStats     map[string]int    `json:"base_stats"`
-	RollableStats []RollableStatDef `json:"rollable_stats"`
-	EffectPool    []string          `json:"effect_pool"`
+	Name            string            `json:"name"`
+	Category        string            `json:"category"`
+	ItemType        string            `json:"item_type"`
+	Slot            string            `json:"slot"`
+	Equippable      bool              `json:"equippable"`
+	Handedness      string            `json:"handedness,omitempty"`
+	OccupiesHands   []string          `json:"occupies_hands,omitempty"`
+	AttackMode      string            `json:"attack_mode,omitempty"`
+	Reach           float64           `json:"reach"`
+	ProjectileSpeed float64           `json:"projectile_speed,omitempty"`
+	Requirements    map[string]int    `json:"requirements"`
+	BaseStats       map[string]int    `json:"base_stats"`
+	RollableStats   []RollableStatDef `json:"rollable_stats"`
+	EffectPool      []string          `json:"effect_pool"`
 }
 
 // RollableStatDef is one weighted bounded stat increment.
@@ -262,6 +267,7 @@ type WorldEntity struct {
 	Type              string `json:"type"`
 	MonsterDefID      string `json:"monster_def_id,omitempty"`
 	ItemDefID         string `json:"item_def_id,omitempty"`
+	ItemTemplateID    string `json:"item_template_id,omitempty"`
 	InteractableDefID string `json:"interactable_def_id,omitempty"`
 	Position          Vec2   `json:"position"`
 	Size              Vec2   `json:"size,omitempty"`
@@ -401,16 +407,16 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules items.%s: non-equippable item must not declare slot", id)
 		}
 		if def.Damage != nil {
-			if !def.Equippable || def.Slot != weaponSlot {
-				return nil, fmt.Errorf("game: invalid rules items.%s.damage: damage is only valid on equippable weapons", id)
+			if !def.Equippable || !isHandSlot(def.Slot) {
+				return nil, fmt.Errorf("game: invalid rules items.%s.damage: damage is only valid on equippable hand items", id)
 			}
 			if err := validateDamageRange("items."+id+".damage", *def.Damage); err != nil {
 				return nil, err
 			}
 		}
 		if def.Reach != nil {
-			if !def.Equippable || def.Slot != weaponSlot {
-				return nil, fmt.Errorf("game: invalid rules items.%s.reach: reach is only valid on equippable weapons", id)
+			if !def.Equippable || !isHandSlot(def.Slot) {
+				return nil, fmt.Errorf("game: invalid rules items.%s.reach: reach is only valid on equippable hand items", id)
 			}
 			if *def.Reach <= 0 {
 				return nil, fmt.Errorf("game: invalid rules items.%s.reach: must be positive", id)
@@ -426,7 +432,7 @@ func LoadRules(dir string) (*Rules, error) {
 				return nil, fmt.Errorf("game: invalid rules items.%s.projectile_speed: only valid on ranged weapons", id)
 			}
 		case attackModeRanged:
-			if !def.Equippable || def.Slot != weaponSlot || def.Damage == nil || def.Reach == nil || def.ProjectileSpeed == nil {
+			if !def.Equippable || !isHandSlot(def.Slot) || def.Damage == nil || def.Reach == nil || def.ProjectileSpeed == nil {
 				return nil, fmt.Errorf("game: invalid rules items.%s: ranged weapons require slot, damage, reach, and projectile_speed", id)
 			}
 			if *def.ProjectileSpeed <= 0 {
@@ -458,29 +464,49 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 	for id, def := range itemTemplates.Templates {
-		if !def.Equippable || def.Slot != weaponSlot || def.Category != "equipment" {
-			return nil, fmt.Errorf("game: invalid rules item_templates.%s: v23 templates must be equippable equipment weapons", id)
+		if !def.Equippable || def.Category != "equipment" {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s: templates must be equippable equipment", id)
 		}
-		if def.AttackMode == "" {
-			def.AttackMode = attackModeMelee
+		if !isEquipmentSlot(def.Slot) && def.Slot != "ring" {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.slot: unsupported slot %s", id, def.Slot)
 		}
-		if def.AttackMode != attackModeMelee {
-			return nil, fmt.Errorf("game: invalid rules item_templates.%s.attack_mode: v23 supports melee only", id)
-		}
-		if def.Reach <= 0 {
-			return nil, fmt.Errorf("game: invalid rules item_templates.%s.reach: must be positive", id)
+		isWeaponTemplate := isHandSlot(def.Slot) && def.ItemType != "shield"
+		if isWeaponTemplate {
+			if def.AttackMode == "" {
+				def.AttackMode = attackModeMelee
+			}
+			if def.AttackMode != attackModeMelee && def.AttackMode != attackModeRanged {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.attack_mode: %s", id, def.AttackMode)
+			}
+			if def.Reach <= 0 {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.reach: must be positive", id)
+			}
+			if def.AttackMode == attackModeRanged && def.ProjectileSpeed <= 0 {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.projectile_speed: must be positive", id)
+			}
+			if def.Handedness != "one_handed" && def.Handedness != "two_handed" {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.handedness: required for hand item", id)
+			}
+			if def.Handedness == "two_handed" && !occupiesExactly(def.OccupiesHands, "main_hand", "off_hand") {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.occupies_hands: two-handed items must occupy both hands", id)
+			}
+			if def.Handedness == "one_handed" && len(def.OccupiesHands) == 0 {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.occupies_hands: one-handed items must occupy a hand", id)
+			}
+		} else if def.AttackMode != "" || def.Reach != 0 || def.ProjectileSpeed != 0 {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s: non-weapon equipment must not declare attack fields", id)
 		}
 		if def.Requirements["level"] > 1 {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s.requirements.level: v23 supports level <= 1", id)
 		}
 		min, max := def.BaseStats["damage_min"], def.BaseStats["damage_max"]
-		if max < min {
+		if _, ok := def.BaseStats["damage_min"]; ok && max < min {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s.base_stats: damage_max must be >= damage_min", id)
 		}
 		seen := map[string]bool{}
 		for _, roll := range def.RollableStats {
 			switch roll.Stat {
-			case "damage_min", "damage_max", "max_hp":
+			case "damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots":
 			default:
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: unsupported stat %s", id, roll.Stat)
 			}
@@ -493,7 +519,9 @@ func LoadRules(dir string) (*Rules, error) {
 			seen[roll.Stat] = true
 		}
 		if !seen["damage_min"] || !seen["damage_max"] {
-			return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: damage_min and damage_max are required", id)
+			if isWeaponTemplate {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: damage_min and damage_max are required", id)
+			}
 		}
 		itemTemplates.Templates[id] = def
 	}
@@ -805,11 +833,18 @@ func LoadRules(dir string) (*Rules, error) {
 					return nil, fmt.Errorf("game: invalid rules %s: unknown monster %s", label, entity.MonsterDefID)
 				}
 			case lootEntity:
-				if entity.ItemDefID == "" {
-					return nil, fmt.Errorf("game: invalid rules %s: missing item_def_id", label)
+				if (entity.ItemDefID == "") == (entity.ItemTemplateID == "") {
+					return nil, fmt.Errorf("game: invalid rules %s: declare exactly one of item_def_id or item_template_id", label)
 				}
-				if _, ok := r.Items[entity.ItemDefID]; !ok {
-					return nil, fmt.Errorf("game: invalid rules %s: unknown item %s", label, entity.ItemDefID)
+				if entity.ItemDefID != "" {
+					if _, ok := r.Items[entity.ItemDefID]; !ok {
+						return nil, fmt.Errorf("game: invalid rules %s: unknown item %s", label, entity.ItemDefID)
+					}
+				}
+				if entity.ItemTemplateID != "" {
+					if _, ok := r.ItemTemplates[entity.ItemTemplateID]; !ok {
+						return nil, fmt.Errorf("game: invalid rules %s: unknown item template %s", label, entity.ItemTemplateID)
+					}
 				}
 			case wallEntity:
 				if entity.Size.X <= 0 || entity.Size.Y <= 0 {
@@ -948,6 +983,27 @@ func validateDamageRange(label string, d DamageRange) error {
 		return fmt.Errorf("game: invalid rules %s: max must be >= min", label)
 	}
 	return nil
+}
+
+func isEquipmentSlot(slot string) bool {
+	switch slot {
+	case "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand":
+		return true
+	default:
+		return false
+	}
+}
+
+func isHandSlot(slot string) bool {
+	return slot == "main_hand" || slot == "off_hand"
+}
+
+func occupiesExactly(slots []string, wantA, wantB string) bool {
+	if len(slots) != 2 {
+		return false
+	}
+	seen := map[string]bool{slots[0]: true, slots[1]: true}
+	return seen[wantA] && seen[wantB]
 }
 
 // FindSharedRulesDir walks up from the current working directory looking for a

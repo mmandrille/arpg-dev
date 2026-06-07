@@ -3,5 +3,5 @@
   "item_def_id": "rusty_sword",
   "expected_asset_id": "weapon_rusty_sword_v0",
   "expected_mount_socket": "right_hand_socket",
-  "expected_slot": "weapon"
+  "expected_slot": "main_hand"
 }

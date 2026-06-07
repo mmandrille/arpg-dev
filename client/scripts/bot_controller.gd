@@ -96,12 +96,22 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_press_key(str(action.get("keycode", "")))
 		"click_entity":
 			_do_click_entity(str(action.get("entity_type", "")), state, int(action.get("entity_index", 0)))
+		"click_loot_item":
+			_do_click_loot_item(
+				str(action.get("item_def_id", "")),
+				state,
+				int(action.get("occurrence", 0)),
+			)
 		"click_floor":
 			_do_click_floor(float(action.get("x", 0.0)), float(action.get("z", 0.0)))
 		"drag_bag_to_weapon_slot":
 			_do_equip_from_bag(str(action.get("item_def_id", "")), state)
+		"drag_bag_to_equipment_slot":
+			_do_equip_from_bag_to_slot(str(action.get("item_def_id", "")), str(action.get("slot", "main_hand")), state)
 		"drag_weapon_to_bag":
 			_do_unequip_to_bag(state)
+		"drag_equipment_to_bag":
+			_do_unequip_slot_to_bag(str(action.get("slot", "main_hand")), state)
 		"drag_bag_to_outside":
 			_do_drop_from_bag(str(action.get("item_def_id", "")), state)
 		"assign_hotbar_slot":
@@ -111,6 +121,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 				int(action.get("bag_index", 0)),
 				state,
 			)
+		"use_hotbar_slot":
+			_do_use_hotbar_slot(int(action.get("slot_index", -1)))
 		"double_click_bag_item":
 			_do_double_click_bag_item(
 				str(action.get("item_def_id", "")),
@@ -193,6 +205,28 @@ func _do_click_entity(entity_type: String, state: Dictionary, entity_index: int 
 		_main.bot_dispatch_action("action_intent", {"target_id": target_id})
 
 
+func _do_click_loot_item(item_def_id: String, state: Dictionary, occurrence: int = 0) -> void:
+	if _main == null:
+		return
+	var loot: Array = state.get("loot", [])
+	var seen := 0
+	for row in loot:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if str(rec.get("item_def_id", "")) != item_def_id:
+			continue
+		if seen == occurrence:
+			var target_id := str(rec.get("id", ""))
+			if _main.has_method("bot_click_entity_id"):
+				_main.bot_click_entity_id(target_id)
+			elif _main.has_method("bot_dispatch_action"):
+				_main.bot_dispatch_action("action_intent", {"target_id": target_id})
+			return
+		seen += 1
+	printerr("[bot-client] click_loot_item: item_def_id=%s occurrence=%d not found" % [item_def_id, occurrence])
+
+
 func _do_click_floor(world_x: float, world_z: float) -> void:
 	if _main == null:
 		return
@@ -201,6 +235,10 @@ func _do_click_floor(world_x: float, world_z: float) -> void:
 
 
 func _do_equip_from_bag(item_def_id: String, state: Dictionary) -> void:
+	_do_equip_from_bag_to_slot(item_def_id, "main_hand", state)
+
+
+func _do_equip_from_bag_to_slot(item_def_id: String, slot: String, state: Dictionary) -> void:
 	if _main == null:
 		return
 	var item_id := _find_bag_item_id(item_def_id, state)
@@ -208,19 +246,23 @@ func _do_equip_from_bag(item_def_id: String, state: Dictionary) -> void:
 		printerr("[bot-client] drag_bag_to_weapon_slot: item_def_id=%s not in bag" % item_def_id)
 		return
 	if _main.has_method("bot_dispatch_inventory_intent"):
-		_main.bot_dispatch_inventory_intent("equip_intent", {"item_instance_id": item_id, "slot": "weapon"})
+		_main.bot_dispatch_inventory_intent("equip_intent", {"item_instance_id": item_id, "slot": slot})
 
 
 func _do_unequip_to_bag(state: Dictionary) -> void:
+	_do_unequip_slot_to_bag("main_hand", state)
+
+
+func _do_unequip_slot_to_bag(slot: String, state: Dictionary) -> void:
 	if _main == null:
 		return
 	var eq: Dictionary = state.get("equipped", {})
-	var item_id = eq.get("weapon", null)
+	var item_id = eq.get(slot, null)
 	if item_id == null or str(item_id) == "" or str(item_id) == "null":
-		printerr("[bot-client] drag_weapon_to_bag: nothing equipped in weapon slot")
+		printerr("[bot-client] drag_equipment_to_bag: nothing equipped in %s slot" % slot)
 		return
 	if _main.has_method("bot_dispatch_inventory_intent"):
-		_main.bot_dispatch_inventory_intent("unequip_intent", {"item_instance_id": str(item_id), "slot": "weapon"})
+		_main.bot_dispatch_inventory_intent("unequip_intent", {"item_instance_id": str(item_id), "slot": slot})
 
 
 func _do_assign_hotbar_slot(slot_index: int, item_def_id: String, bag_index: int, state: Dictionary) -> void:
@@ -232,6 +274,13 @@ func _do_assign_hotbar_slot(slot_index: int, item_def_id: String, bag_index: int
 		return
 	if _main.has_method("bot_assign_consumable_hotbar"):
 		_main.bot_assign_consumable_hotbar(slot_index, item_id)
+
+
+func _do_use_hotbar_slot(slot_index: int) -> void:
+	if _main == null:
+		return
+	if _main.has_method("bot_use_consumable_hotbar"):
+		_main.bot_use_consumable_hotbar(slot_index)
 
 
 func _do_double_click_bag_item(item_def_id: String, bag_index: int, state: Dictionary) -> void:
@@ -259,7 +308,7 @@ func _do_drop_from_bag(item_def_id: String, state: Dictionary) -> void:
 func _find_bag_item_id(item_def_id: String, state: Dictionary, bag_index: int = 0) -> String:
 	var inv: Array = state.get("inventory", [])
 	var eq: Dictionary = state.get("equipped", {})
-	var equipped_weapon = eq.get("weapon", null)
+	var equipped_weapon = eq.get("main_hand", null)
 	var matches: Array = []
 	for item in inv:
 		if str(item.get("item_def_id", "")) == item_def_id:
@@ -300,6 +349,10 @@ func _format_action(action: Dictionary) -> String:
 		"click_entity":
 			return "click_entity type=%s index=%s" % [
 				str(action.get("entity_type", "")), str(action.get("entity_index", 0))
+			]
+		"click_loot_item":
+			return "click_loot_item item=%s occurrence=%s" % [
+				str(action.get("item_def_id", "")), str(action.get("occurrence", 0))
 			]
 		"click_floor":
 			return "click_floor x=%s z=%s" % [str(action.get("x", "")), str(action.get("z", ""))]

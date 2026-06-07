@@ -24,6 +24,7 @@ func _initialize() -> void:
 	_test_missing_click_entity_type_rejected()
 	_test_missing_click_floor_coords_rejected()
 	_test_missing_drag_bag_item_def_id_rejected()
+	_test_full_equipment_step_types_load()
 	_test_missing_menu_button_rejected()
 	_test_missing_character_name_rejected()
 	_test_missing_window_size_rejected()
@@ -122,6 +123,24 @@ func _test_missing_click_floor_coords_rejected() -> void:
 func _test_missing_drag_bag_item_def_id_rejected() -> void:
 	var err := BotScenarioRunnerScript.validate_step({"type": "drag_bag_to_weapon_slot"}, 0)
 	_assert_ne("drag_bag_to_weapon_slot without item_def_id rejected", err, "")
+
+
+func _test_full_equipment_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "drag_bag_to_equipment_slot", "item_def_id": "cave_helm", "slot": "head"},
+		{"type": "drag_equipment_to_bag", "slot": "head"},
+		{"type": "click_loot_item", "item_def_id": "cave_belt"},
+		{"type": "assign_hotbar_slot", "slot_index": 5, "item_def_id": "red_potion"},
+		{"type": "wait_hotbar_assigned", "slot_index": 5, "item_def_id": "red_potion", "timeout_s": 1.0},
+		{"type": "use_hotbar_slot", "slot_index": 5},
+		{"type": "assert_hotbar_assigned", "slot_index": 5, "item_def_id": "red_potion"},
+		{"type": "assert_hotbar_capacity", "equals": 10},
+		{"type": "wait_hotbar_capacity", "at_least": 3, "timeout_s": 1.0},
+		{"type": "assert_hotbar_slot_disabled", "slot_index": 5},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("full equipment client step scenario valid", err, "")
 
 
 func _test_missing_menu_button_rejected() -> void:

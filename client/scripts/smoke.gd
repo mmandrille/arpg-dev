@@ -136,7 +136,7 @@ func _step_primary(delta: float) -> bool:
 		client.send("action_intent", last_tick, {"target_id": loot_id})
 		picked = true
 	if picked and item_id != "" and not equip_sent:
-		client.send("equip_intent", last_tick, {"item_instance_id": item_id, "slot": "weapon"})
+		client.send("equip_intent", last_tick, {"item_instance_id": item_id, "slot": "main_hand"})
 		equip_sent = true
 
 	if phase == "play" and equipped:
@@ -267,7 +267,7 @@ func _handle(env: Dictionary) -> void:
 				resolver.ingest_inventory_item(c["item"])
 			"equipped_update":
 				resolver.apply_equipped_update(c.get("slot", ""), c.get("item_instance_id"))
-				if c.get("slot", "") == "weapon" and str(c.get("item_instance_id", "")) == item_id:
+				if c.get("slot", "") == "main_hand" and str(c.get("item_instance_id", "")) == item_id:
 					equipped = true
 	for ev in p.get("events", []):
 		var et := str(ev.get("event_type", ""))
@@ -297,7 +297,7 @@ func _verify_equip() -> bool:
 	var server_ok: bool = inv.size() == 1 \
 		and inv[0].get("item_def_id", "") == "rusty_sword" \
 		and inv[0].get("equipped", false) \
-		and str(eq.get("weapon", "")) == item_id \
+		and str(eq.get("main_hand", "")) == item_id \
 		and hp >= 0 \
 		and hp < 10
 
@@ -374,24 +374,24 @@ func _verify_inventory_panel_model() -> bool:
 	var panel = InventoryPanelScript.new()
 	get_root().add_child(panel)
 	panel.set_inventory_state([
-		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": false},
+		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": false},
 		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
-	], {"weapon": null})
+	], {"main_hand": null})
 	var state: Dictionary = panel.get_debug_state()
-	if int(state["bag_count"]) != 2 or state["equipped_weapon"] != null:
+	if int(state["bag_count"]) != 2 or state["equipped_main_hand"] != null:
 		_fail("inventory panel initial state mismatch: %s" % state)
 		return false
 	panel.set_inventory_state([
-		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": true},
+		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": true},
 		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
-	], {"weapon": "1004"})
+	], {"main_hand": "1004"})
 	state = panel.get_debug_state()
-	if str(state["equipped_weapon"]) != "1004":
+	if str(state["equipped_main_hand"]) != "1004":
 		_fail("inventory panel equipped state mismatch: %s" % state)
 		return false
 	panel.set_inventory_state([
 		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
-	], {"weapon": null})
+	], {"main_hand": null})
 	state = panel.get_debug_state()
 	if int(state["bag_count"]) != 1 or state["weapon_item"] != {}:
 		_fail("inventory panel remove state mismatch: %s" % state)

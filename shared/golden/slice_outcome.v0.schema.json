@@ -21,17 +21,17 @@
         "additionalProperties": false,
         "properties": {
           "item_def_id": { "type": "string" },
-          "slot": { "type": "string", "enum": ["weapon"] },
+          "slot": { "type": "string", "enum": ["main_hand"] },
           "equipped": { "type": "boolean" }
         }
       }
     },
     "final_equipped": {
       "type": "object",
-      "required": ["weapon"],
+      "required": ["main_hand"],
       "additionalProperties": false,
       "properties": {
-        "weapon": { "type": ["string", "null"] }
+        "main_hand": { "type": ["string", "null"] }
       }
     }
   }

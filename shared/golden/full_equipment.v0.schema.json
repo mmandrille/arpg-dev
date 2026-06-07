@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/full_equipment.v0.schema.json",
+  "title": "Golden: full equipment and belt hotbar (v0)",
+  "type": "object",
+  "required": ["description", "world_id", "pinned_seed", "equipment_slots", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "world_id": { "type": "string" },
+    "pinned_seed": { "type": "string" },
+    "equipment_slots": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "expected"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "expected": { "type": "object" }
+        }
+      }
+    }
+  }
+}

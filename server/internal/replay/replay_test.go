@@ -125,6 +125,42 @@ func TestReconstructFromInputsUsesWorldID(t *testing.T) {
 	}
 }
 
+func TestReconstructLoadsSessionStartHotbarAndInputs(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, Seed: testSeed, WorldID: game.DefaultWorldID},
+		inputs: []store.SessionInput{
+			storedInput(t, "inp-assign-hotbar", "msg-assign-hotbar", 0, 0, "assign_hotbar_intent", map[string]any{"slot_index": 1, "item_instance_id": "9001"}),
+		},
+		start: store.SessionStartSnapshot{
+			Items: []store.CharacterItemInstance{{
+				ID:          "9001",
+				AccountID:   "acct_1",
+				CharacterID: "char_1",
+				ItemDefID:   "red_potion",
+				Location:    store.ItemLocationInventory,
+				RolledStats: json.RawMessage(`{}`),
+			}},
+			Hotbar: []store.CharacterHotbarSlot{
+				{AccountID: "acct_1", CharacterID: "char_1", SlotIndex: 0, ItemInstanceID: stringPtr("9001")},
+			},
+		},
+	}
+	recon, err := Reconstruct(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	if len(recon.Snapshot.Hotbar) != 10 {
+		t.Fatalf("hotbar len = %d, want 10", len(recon.Snapshot.Hotbar))
+	}
+	if recon.Snapshot.Hotbar[0].ItemInstanceID == nil || *recon.Snapshot.Hotbar[0].ItemInstanceID != "9001" {
+		t.Fatalf("session-start hotbar[0] = %+v, want 9001", recon.Snapshot.Hotbar[0])
+	}
+	if recon.Snapshot.Hotbar[1].ItemInstanceID == nil || *recon.Snapshot.Hotbar[1].ItemInstanceID != "9001" {
+		t.Fatalf("replayed hotbar[1] = %+v, want 9001", recon.Snapshot.Hotbar[1])
+	}
+}
+
 func scriptedRecordedInputs() ([]RecordedInput, int64) {
 	return []RecordedInput{
 		{
@@ -160,7 +196,7 @@ func scriptedRecordedInputs() ([]RecordedInput, int64) {
 				MessageID: "msg-equip",
 				Sequence:  3,
 				Type:      "equip_intent",
-				Equip:     &game.EquipIntent{ItemInstanceID: "1004", Slot: "weapon"},
+				Equip:     &game.EquipIntent{ItemInstanceID: "1004", Slot: "main_hand"},
 			},
 		},
 	}, 3
@@ -173,7 +209,7 @@ func scriptedStoredInputs(t *testing.T) []store.SessionInput {
 		storedInput(t, "inp-move-to", "msg-move-to", 0, 1, "move_to_intent", map[string]any{"position": map[string]any{"x": 10, "y": 5}}),
 		storedInput(t, "inp-attack", "msg-attack", 1, 2, "action_intent", map[string]any{"target_id": "1002"}),
 		storedInput(t, "inp-pickup", "msg-pickup", 2, 3, "action_intent", map[string]any{"target_id": "1003"}),
-		storedInput(t, "inp-equip", "msg-equip", 3, 4, "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "weapon"}),
+		storedInput(t, "inp-equip", "msg-equip", 3, 4, "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "main_hand"}),
 	}
 }
 
@@ -214,6 +250,10 @@ func storeEvents(events []derivedEvent) []store.SessionEvent {
 	return out
 }
 
+func stringPtr(v string) *string {
+	return &v
+}
+
 func assertRestoredSlice(t *testing.T, snap game.Snapshot) {
 	t.Helper()
 	if snap.ServerTick != 4 {
@@ -230,8 +270,8 @@ func assertRestoredSlice(t *testing.T, snap game.Snapshot) {
 	if len(snap.Inventory) != 1 || snap.Inventory[0].ItemDefID != "rusty_sword" || !snap.Inventory[0].Equipped {
 		t.Fatalf("inventory = %+v, want equipped rusty_sword", snap.Inventory)
 	}
-	if snap.Equipped["weapon"] == nil || *snap.Equipped["weapon"] != "1004" {
-		t.Fatalf("equipped weapon = %v, want 1004", snap.Equipped["weapon"])
+	if snap.Equipped["main_hand"] == nil || *snap.Equipped["main_hand"] != "1004" {
+		t.Fatalf("equipped main_hand = %v, want 1004", snap.Equipped["main_hand"])
 	}
 }
 
@@ -323,7 +363,13 @@ func (f *fakeRepo) GetCharacterProgression(context.Context, string, string) (sto
 func (f *fakeRepo) UpsertCharacterProgression(context.Context, string, store.CharacterProgression) error {
 	return nil
 }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, store.CharacterProgression) error {
+func (f *fakeRepo) ListCharacterHotbar(context.Context, string, string) ([]store.CharacterHotbarSlot, error) {
+	return nil, nil
+}
+func (f *fakeRepo) SetCharacterHotbarSlot(context.Context, string, string, int, *string) error {
+	return nil
+}
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterProgression) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {

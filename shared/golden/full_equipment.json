@@ -1,0 +1,48 @@
+{
+  "description": "Full paper-doll equipment, two-hand occupancy, shield rolled stats, and belt-gated hotbar behavior.",
+  "world_id": "equipment_lab",
+  "pinned_seed": "facefeed00000028",
+  "equipment_slots": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"],
+  "cases": [
+    {
+      "name": "one hand sword and shield can coexist",
+      "expected": {
+        "equipped": { "main_hand": "cave_blade", "off_hand": "cave_shield" },
+        "hotbar_capacity": 2
+      }
+    },
+    {
+      "name": "two handed sword clears offhand",
+      "expected": {
+        "equipped": { "main_hand": "cave_greatsword", "off_hand": null }
+      }
+    },
+    {
+      "name": "bow occupies both hands",
+      "expected": {
+        "equipped": { "main_hand": "cave_bow", "off_hand": null },
+        "occupies_hands": ["main_hand", "off_hand"]
+      }
+    },
+    {
+      "name": "belt expands hotbar and disabled assignments persist",
+      "expected": {
+        "belt_stats": { "hotbar_slots": 10 },
+        "capacity_with_belt": 10,
+        "capacity_without_belt": 2,
+        "assigned_slots": [
+          { "slot_index": 0, "active_with_belt": true, "active_without_belt": true },
+          { "slot_index": 2, "active_with_belt": true, "active_without_belt": false },
+          { "slot_index": 5, "active_with_belt": true, "active_without_belt": false }
+        ]
+      }
+    },
+    {
+      "name": "shield display rolls do not affect combat yet",
+      "expected": {
+        "rolled_stats": { "armor": 3, "block_percent": 8 },
+        "combat_effect": "display_only"
+      }
+    }
+  ]
+}

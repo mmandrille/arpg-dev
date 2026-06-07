@@ -374,22 +374,33 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok("retaliation_damage cases satisfy min + (draw mod span)")
 
-    # item damage is weapon-only and the equipped_weapon_damage golden must
-    # mirror the referenced item definition.
+    equipment_slots = {
+        "head", "amulet", "chest", "gloves", "belt", "boots",
+        "ring_left", "ring_right", "main_hand", "off_hand",
+    }
+    hand_slots = {"main_hand", "off_hand"}
+    required_templates = {
+        "cave_blade", "cave_greatsword", "cave_bow", "cave_shield",
+        "cave_helm", "cave_mail", "cave_gloves", "cave_belt",
+        "cave_boots", "cave_ring", "cave_amulet",
+    }
+
+    # Item damage is hand-equipment only and the equipped_weapon_damage golden
+    # must mirror the referenced item definition.
     for item_id, item in items["items"].items():
         dmg = item.get("damage")
         reach = item.get("reach")
         if dmg is not None:
-            if not item.get("equippable") or item.get("slot") != "weapon":
-                report.fail("item damage eligibility", f"{item_id}: damage is only valid on equippable weapons")
+            if not item.get("equippable") or item.get("slot") not in hand_slots:
+                report.fail("item damage eligibility", f"{item_id}: damage is only valid on equippable hand items")
                 continue
             if dmg["max"] < dmg["min"]:
                 report.fail("item damage range", f"{item_id}: max must be >= min")
             else:
                 report.ok(f"item {item_id} weapon damage range is valid")
         if reach is not None:
-            if not item.get("equippable") or item.get("slot") != "weapon":
-                report.fail("item reach eligibility", f"{item_id}: reach is only valid on equippable weapons")
+            if not item.get("equippable") or item.get("slot") not in hand_slots:
+                report.fail("item reach eligibility", f"{item_id}: reach is only valid on equippable hand items")
                 continue
             if reach <= 0:
                 report.fail("item reach", f"{item_id}: reach must be positive")
@@ -398,8 +409,8 @@ def cross_checks(report: Report) -> None:
         attack_mode = item.get("attack_mode", "melee")
         projectile_speed = item.get("projectile_speed")
         if attack_mode == "ranged":
-            if not item.get("equippable") or item.get("slot") != "weapon":
-                report.fail("item ranged eligibility", f"{item_id}: ranged mode is only valid on equippable weapons")
+            if not item.get("equippable") or item.get("slot") not in hand_slots:
+                report.fail("item ranged eligibility", f"{item_id}: ranged mode is only valid on equippable hand items")
             elif dmg is None or reach is None or projectile_speed is None:
                 report.fail("item ranged fields", f"{item_id}: ranged weapon requires damage, reach, and projectile_speed")
             elif projectile_speed <= 0:
@@ -409,7 +420,7 @@ def cross_checks(report: Report) -> None:
         elif projectile_speed is not None:
             report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
 
-    valid_roll_stats = {"damage_min", "damage_max", "max_hp"}
+    valid_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
         if rarity["weight"] <= 0:
@@ -419,21 +430,44 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"item template rarity {rarity_id} is valid")
     for template_id, template in item_templates["templates"].items():
-        if template.get("category") != "equipment" or not template.get("equippable") or template.get("slot") != "weapon":
-            report.fail("item template weapon", f"{template_id}: v23 templates must be equippable weapons")
+        slot = template.get("slot")
+        item_type = template.get("item_type")
+        if template.get("category") != "equipment" or not template.get("equippable"):
+            report.fail("item template equipment", f"{template_id}: templates must be equippable equipment")
             continue
-        if template.get("attack_mode") != "melee":
-            report.fail("item template attack_mode", f"{template_id}: v23 templates must be melee")
+        if slot not in equipment_slots and slot != "ring":
+            report.fail("item template slot", f"{template_id}: unsupported slot {slot}")
             continue
-        if template.get("reach", 0) <= 0:
-            report.fail("item template reach", f"{template_id}: reach must be positive")
+        attack_mode = template.get("attack_mode")
+        if slot in hand_slots and item_type != "shield":
+            if attack_mode not in {"melee", "ranged"}:
+                report.fail("item template attack_mode", f"{template_id}: hand weapons need attack_mode")
+                continue
+            if template.get("reach", 0) <= 0:
+                report.fail("item template reach", f"{template_id}: weapon reach must be positive")
+                continue
+            if attack_mode == "ranged" and template.get("projectile_speed", 0) <= 0:
+                report.fail("item template projectile_speed", f"{template_id}: ranged weapons need projectile_speed")
+                continue
+            if template.get("handedness") not in {"one_handed", "two_handed"}:
+                report.fail("item template handedness", f"{template_id}: hand weapons need handedness")
+                continue
+            occupies = set(template.get("occupies_hands", []))
+            if template["handedness"] == "one_handed" and not occupies:
+                report.fail("item template occupies_hands", f"{template_id}: one-handed item must occupy a hand")
+                continue
+            if template["handedness"] == "two_handed" and occupies != {"main_hand", "off_hand"}:
+                report.fail("item template occupies_hands", f"{template_id}: two-handed item must occupy both hands")
+                continue
+        elif attack_mode is not None or "reach" in template or "projectile_speed" in template:
+            report.fail("item template combat fields", f"{template_id}: non-weapon equipment must not define attack fields")
             continue
         requirements = template.get("requirements", {})
         if requirements.get("level", 1) > 1:
             report.fail("item template requirements", f"{template_id}: v23 only supports level <= 1")
             continue
         base_stats = template["base_stats"]
-        if base_stats["damage_max"] < base_stats["damage_min"]:
+        if "damage_min" in base_stats and "damage_max" in base_stats and base_stats["damage_max"] < base_stats["damage_min"]:
             report.fail("item template base_stats", f"{template_id}: damage_max must be >= damage_min")
             continue
         seen_roll_stats = set()
@@ -455,10 +489,13 @@ def cross_checks(report: Report) -> None:
                 break
         if failed_roll:
             continue
-        if "damage_min" not in seen_roll_stats or "damage_max" not in seen_roll_stats:
-            report.fail("item template rollable stats", f"{template_id}: must include damage_min and damage_max")
+        if slot in hand_slots and item_type != "shield":
+            if "damage_min" not in seen_roll_stats or "damage_max" not in seen_roll_stats:
+                report.fail("item template rollable stats", f"{template_id}: weapons must include damage_min and damage_max")
+            else:
+                report.ok(f"item template {template_id} weapon rolls are valid")
         else:
-            report.ok(f"item template {template_id} weapon rolls are valid")
+            report.ok(f"item template {template_id} roll ranges are valid")
 
     treasure_class_defs = treasure_classes["classes"]
     for class_id, treasure_class in treasure_class_defs.items():
@@ -508,6 +545,22 @@ def cross_checks(report: Report) -> None:
                 break
         if not failed_class:
             report.ok(f"treasure class {class_id} attempts are valid")
+
+    equipment_tc = treasure_class_defs.get("equipment_lab_tc_1")
+    if not equipment_tc:
+        report.fail("equipment_lab treasure class", "missing equipment_lab_tc_1")
+    else:
+        tc_templates = {
+            entry["item_template_id"]
+            for attempt in equipment_tc.get("attempts", [])
+            for entry in attempt.get("entries", [])
+            if "item_template_id" in entry
+        }
+        missing_tc_templates = sorted(required_templates - tc_templates)
+        if missing_tc_templates:
+            report.fail("equipment_lab treasure class", f"missing templates: {missing_tc_templates}")
+        else:
+            report.ok("equipment_lab treasure class covers every v28 template")
 
     if combat.get("unarmed_reach", 0) <= 0:
         report.fail("combat unarmed_reach", "must be positive")
@@ -593,7 +646,7 @@ def cross_checks(report: Report) -> None:
     golden_item = items["items"].get(golden_item_id)
     if golden_item is None:
         report.fail("equipped_weapon_damage golden", f"unknown item_def_id {golden_item_id}")
-    elif not golden_item.get("equippable") or golden_item.get("slot") != "weapon":
+    elif not golden_item.get("equippable") or golden_item.get("slot") not in hand_slots:
         report.fail("equipped_weapon_damage golden", f"{golden_item_id} is not an equippable weapon")
     elif golden_item.get("damage") != equipped_weapon_golden["damage"]:
         report.fail("equipped_weapon_damage golden", "damage range mismatch with item rules")
@@ -720,10 +773,13 @@ def cross_checks(report: Report) -> None:
                     report.ok(f"{label} monster reference resolves")
             elif etype == "loot":
                 item_id = entity.get("item_def_id")
-                if not item_id:
-                    report.fail("world loot entity", f"{label}: missing item_def_id")
-                elif item_id not in items["items"]:
+                template_id = entity.get("item_template_id")
+                if bool(item_id) == bool(template_id):
+                    report.fail("world loot entity", f"{label}: exactly one of item_def_id/item_template_id")
+                elif item_id and item_id not in items["items"]:
                     report.fail("world loot entity", f"{label}: unknown item {item_id}")
+                elif template_id and template_id not in item_templates["templates"]:
+                    report.fail("world loot entity", f"{label}: unknown item template {template_id}")
                 else:
                     report.ok(f"{label} loot item reference resolves")
             elif etype == "wall":
@@ -1074,6 +1130,23 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("item_visual_resolution golden matches item_visuals metadata")
 
+    full_equipment = load(GOLDEN / "full_equipment.json")
+    fixture_slots = set(full_equipment.get("equipment_slots", []))
+    if fixture_slots != equipment_slots:
+        report.fail("full_equipment golden", f"equipment_slots mismatch: {sorted(fixture_slots)}")
+    elif full_equipment.get("world_id") != "equipment_lab":
+        report.fail("full_equipment golden", "world_id must be equipment_lab")
+    elif not full_equipment.get("pinned_seed"):
+        report.fail("full_equipment golden", "missing pinned_seed")
+    else:
+        report.ok("full_equipment golden declares v28 slot set and pinned lab")
+
+    missing_templates = sorted(required_templates - set(item_templates["templates"]))
+    if missing_templates:
+        report.fail("full_equipment templates", f"missing templates: {missing_templates}")
+    else:
+        report.ok("full_equipment templates cover every equipment category")
+
     # item_presentations: every current item has display metadata, and no
     # presentation entry points at a missing item. This is client-only rendering
     # data, but drift would make loot/inventory presentation fall back silently.
@@ -1083,7 +1156,7 @@ def cross_checks(report: Report) -> None:
             report.fail("item_presentations key", f"{def_id} not in items.v0.json or item_templates.v0.json")
         else:
             report.ok(f"item_presentations {def_id} resolves to item/template rules")
-    missing_presentations = sorted(set(items["items"]) - set(presentations))
+    missing_presentations = sorted((set(items["items"]) | set(item_templates["templates"])) - set(presentations))
     if missing_presentations:
         report.fail("item_presentations coverage", f"missing entries: {missing_presentations}")
     else:

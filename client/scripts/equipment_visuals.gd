@@ -37,7 +37,7 @@ func apply_snapshot(payload: Dictionary) -> void:
 	_inventory.clear()
 	for item in payload.get("inventory", []):
 		_record_item(item)
-	var weapon = payload.get("equipped", {}).get("weapon", null)
+	var weapon = payload.get("equipped", {}).get("main_hand", null)
 	_equipped_weapon = str(weapon) if weapon != null else ""
 	_refresh_weapon()
 
@@ -51,7 +51,7 @@ func ingest_inventory_item(item: Dictionary) -> void:
 
 
 func apply_equipped_update(slot: String, item_instance_id) -> void:
-	if slot != "weapon":
+	if slot != "main_hand":
 		return
 	_equipped_weapon = str(item_instance_id) if item_instance_id != null else ""
 	_refresh_weapon()

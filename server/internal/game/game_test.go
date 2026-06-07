@@ -58,7 +58,7 @@ func TestLoadRules(t *testing.T) {
 	if dummy.RetaliationDamage == nil || dummy.RetaliationDamage.Min != 1 || dummy.RetaliationDamage.Max != 1 {
 		t.Fatalf("training_dummy retaliation_damage = %+v, want {1,1}", dummy.RetaliationDamage)
 	}
-	if !r.Items["rusty_sword"].Equippable || r.Items["rusty_sword"].Slot != "weapon" {
+	if !r.Items["rusty_sword"].Equippable || r.Items["rusty_sword"].Slot != "main_hand" {
 		t.Fatalf("rusty_sword def = %+v", r.Items["rusty_sword"])
 	}
 	if r.Items["rusty_sword"].Damage == nil || r.Items["rusty_sword"].Damage.Min != 3 || r.Items["rusty_sword"].Damage.Max != 5 {
@@ -99,7 +99,7 @@ func TestLoadRules(t *testing.T) {
 		t.Fatal("missing inventory_lab world")
 	}
 	bow := r.Items["training_bow"]
-	if !bow.Equippable || bow.Slot != weaponSlot || bow.AttackMode != attackModeRanged || bow.Damage == nil || bow.Reach == nil || bow.ProjectileSpeed == nil {
+	if !bow.Equippable || bow.Slot != "main_hand" || bow.AttackMode != attackModeRanged || bow.Damage == nil || bow.Reach == nil || bow.ProjectileSpeed == nil {
 		t.Fatalf("training_bow def = %+v, want ranged weapon", bow)
 	}
 	if r.Interactables["wooden_door"].InitialState != interactableClosed {
@@ -411,7 +411,7 @@ func TestEquippedWeaponDamageGolden(t *testing.T) {
 	loadGolden(t, "equipped_weapon_damage.json", &golden)
 
 	item := r.Items[golden.ItemDefID]
-	if !item.Equippable || item.Slot != weaponSlot || item.Damage == nil {
+	if !item.Equippable || item.Slot != mainHandSlot || item.Damage == nil {
 		t.Fatalf("golden item %s = %+v, want equippable weapon with damage", golden.ItemDefID, item)
 	}
 	if golden.Damage != *item.Damage {
@@ -535,7 +535,7 @@ func rangedLabWithEquippedBow(t *testing.T, rules *Rules, seed string) *Sim {
 	}
 	pickup := sim.Tick([]Input{{MessageID: "pick_bow", CorrelationID: "corr_pick", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
 	assertAck(t, pickup, "pick_bow")
-	equip := sim.Tick([]Input{{MessageID: "equip_bow", CorrelationID: "corr_equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: weaponSlot}}})
+	equip := sim.Tick([]Input{{MessageID: "equip_bow", CorrelationID: "corr_equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: mainHandSlot}}})
 	assertAck(t, equip, "equip_bow")
 	return sim
 }
@@ -965,7 +965,7 @@ func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
 	item := &invItem{
 		instanceID: 5000,
 		itemDefID:  "cave_blade",
-		slot:       weaponSlot,
+		slot:       mainHandSlot,
 		equipped:   true,
 		rollPayload: &ItemRollPayload{
 			ItemTemplateID: "cave_blade",
@@ -977,7 +977,7 @@ func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
 		},
 	}
 	sim.inventory = append(sim.inventory, item)
-	sim.equipped[weaponSlot] = item.instanceID
+	sim.equipped[mainHandSlot] = item.instanceID
 	monster := &entity{
 		id:           sim.alloc(),
 		kind:         monsterEntity,
@@ -994,6 +994,171 @@ func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
 	if player.hp != playerStartHP-1 {
 		t.Fatalf("rolled max_hp should be display-only; player hp = %d", player.hp)
 	}
+}
+
+func TestFullEquipmentSlotsGolden(t *testing.T) {
+	var golden struct {
+		EquipmentSlots []string `json:"equipment_slots"`
+	}
+	loadGolden(t, "full_equipment.json", &golden)
+	if len(golden.EquipmentSlots) != len(equipmentSlots) {
+		t.Fatalf("equipment slots = %v, want %v", equipmentSlots, golden.EquipmentSlots)
+	}
+	for i, want := range golden.EquipmentSlots {
+		if equipmentSlots[i] != want {
+			t.Fatalf("equipment slot[%d] = %q, want %q", i, equipmentSlots[i], want)
+		}
+	}
+	snap := NewSim("sess_equipment_slots", "01", loadRules(t)).Snapshot()
+	for _, slot := range golden.EquipmentSlots {
+		if _, ok := snap.Equipped[slot]; !ok {
+			t.Fatalf("snapshot missing equipped slot %q: %+v", slot, snap.Equipped)
+		}
+	}
+}
+
+func TestEquipmentSlotCompatibilityAndRings(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_equipment_slots", "01", rules)
+	cases := []struct {
+		templateID string
+		slot       string
+	}{
+		{"cave_helm", "head"},
+		{"cave_amulet", "amulet"},
+		{"cave_mail", "chest"},
+		{"cave_gloves", "gloves"},
+		{"cave_belt", "belt"},
+		{"cave_boots", "boots"},
+		{"cave_ring", ringLeftSlot},
+		{"cave_ring", ringRightSlot},
+		{"cave_blade", mainHandSlot},
+		{"cave_shield", offHandSlot},
+	}
+	for i, tc := range cases {
+		item := addRolledInventoryItem(t, sim, uint64(6000+i), tc.templateID, nil)
+		res := sim.Tick([]Input{{
+			MessageID: "equip_" + tc.templateID + "_" + tc.slot,
+			Type:      "equip_intent",
+			Equip:     &EquipIntent{ItemInstanceID: idStr(item.instanceID), Slot: tc.slot},
+		}})
+		assertAck(t, res, "equip_"+tc.templateID+"_"+tc.slot)
+		if sim.equipped[tc.slot] != item.instanceID || !item.equipped || item.slot != tc.slot {
+			t.Fatalf("%s in %s equipped=%d item=%+v", tc.templateID, tc.slot, sim.equipped[tc.slot], item)
+		}
+	}
+}
+
+func TestEquipmentWrongSlotRejects(t *testing.T) {
+	sim := NewSim("sess_wrong_slot", "01", loadRules(t))
+	shield := addRolledInventoryItem(t, sim, 6100, "cave_shield", nil)
+	res := sim.Tick([]Input{{
+		MessageID: "wrong",
+		Type:      "equip_intent",
+		Equip:     &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: mainHandSlot},
+	}})
+	assertReject(t, res, "wrong", "wrong_slot")
+}
+
+func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
+	var golden struct {
+		Cases []struct {
+			Name     string `json:"name"`
+			Expected struct {
+				Equipped      map[string]*string `json:"equipped"`
+				OccupiesHands []string           `json:"occupies_hands"`
+				RolledStats   map[string]int     `json:"rolled_stats"`
+				CombatEffect  string             `json:"combat_effect"`
+			} `json:"expected"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "full_equipment.json", &golden)
+	expected := map[string]struct {
+		equipped     map[string]*string
+		occupies     []string
+		rolledStats  map[string]int
+		combatEffect string
+	}{}
+	for _, c := range golden.Cases {
+		expected[c.Name] = struct {
+			equipped     map[string]*string
+			occupies     []string
+			rolledStats  map[string]int
+			combatEffect string
+		}{c.Expected.Equipped, c.Expected.OccupiesHands, c.Expected.RolledStats, c.Expected.CombatEffect}
+	}
+
+	t.Run("one hand sword and shield can coexist", func(t *testing.T) {
+		sim := NewSim("sess_one_hand_shield", "01", loadRules(t))
+		sword := addRolledInventoryItem(t, sim, 6200, "cave_blade", map[string]int{"damage_min": 4, "damage_max": 5})
+		shield := addRolledInventoryItem(t, sim, 6201, "cave_shield", map[string]int{"armor": 3, "block_percent": 8})
+		assertAck(t, sim.Tick([]Input{{MessageID: "sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "sword")
+		assertAck(t, sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}}), "shield")
+		want := expected["one hand sword and shield can coexist"].equipped
+		assertEquippedTemplate(t, sim, mainHandSlot, *want[mainHandSlot])
+		assertEquippedTemplate(t, sim, offHandSlot, *want[offHandSlot])
+		if got := sim.resolvePlayerAttackDamage(); got != (DamageRange{Min: 4, Max: 5}) {
+			t.Fatalf("primary attack damage = %+v, want rolled sword 4..5", got)
+		}
+	})
+
+	t.Run("two handed sword clears offhand", func(t *testing.T) {
+		sim := NewSim("sess_two_hand_clear", "01", loadRules(t))
+		shield := addRolledInventoryItem(t, sim, 6210, "cave_shield", nil)
+		greatsword := addRolledInventoryItem(t, sim, 6211, "cave_greatsword", nil)
+		assertAck(t, sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}}), "shield")
+		res := sim.Tick([]Input{{MessageID: "greatsword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}})
+		assertAck(t, res, "greatsword")
+		want := expected["two handed sword clears offhand"].equipped
+		assertEquippedTemplate(t, sim, mainHandSlot, *want[mainHandSlot])
+		if want[offHandSlot] != nil || sim.equipped[offHandSlot] != 0 || shield.equipped {
+			t.Fatalf("offhand after two-hand equip = %d shield=%+v", sim.equipped[offHandSlot], shield)
+		}
+		if !hasEquippedUpdate(res, offHandSlot, nil) {
+			t.Fatalf("missing offhand clear change: %+v", res.Changes)
+		}
+	})
+
+	t.Run("offhand blocked by two handed main hand", func(t *testing.T) {
+		sim := NewSim("sess_two_hand_block", "01", loadRules(t))
+		bow := addRolledInventoryItem(t, sim, 6220, "cave_bow", nil)
+		shield := addRolledInventoryItem(t, sim, 6221, "cave_shield", nil)
+		assertAck(t, sim.Tick([]Input{{MessageID: "bow", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(bow.instanceID), Slot: mainHandSlot}}}), "bow")
+		res := sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}})
+		assertReject(t, res, "shield", "hands_blocked")
+	})
+
+	t.Run("bow occupies both hands", func(t *testing.T) {
+		sim := NewSim("sess_bow_occupies", "01", loadRules(t))
+		bow := addRolledInventoryItem(t, sim, 6230, "cave_bow", map[string]int{"damage_min": 8, "damage_max": 8})
+		assertAck(t, sim.Tick([]Input{{MessageID: "bow", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(bow.instanceID), Slot: mainHandSlot}}}), "bow")
+		want := expected["bow occupies both hands"]
+		assertEquippedTemplate(t, sim, mainHandSlot, *want.equipped[mainHandSlot])
+		if sim.equipped[offHandSlot] != 0 {
+			t.Fatalf("offhand = %d, want empty for bow", sim.equipped[offHandSlot])
+		}
+		if got := sim.itemOccupiesHands(bow); !sameStrings(got, want.occupies) {
+			t.Fatalf("bow occupies_hands = %v, want %v", got, want.occupies)
+		}
+		if mode := sim.playerAttackMode(); mode != attackModeRanged {
+			t.Fatalf("bow attack mode = %q, want ranged", mode)
+		}
+	})
+
+	t.Run("shield display rolls do not affect combat yet", func(t *testing.T) {
+		sim := NewSim("sess_shield_display", "01", loadRules(t))
+		sword := addRolledInventoryItem(t, sim, 6240, "cave_blade", map[string]int{"damage_min": 4, "damage_max": 4})
+		shieldStats := expected["shield display rolls do not affect combat yet"].rolledStats
+		shield := addRolledInventoryItem(t, sim, 6241, "cave_shield", shieldStats)
+		assertAck(t, sim.Tick([]Input{{MessageID: "sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "sword")
+		assertAck(t, sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}}), "shield")
+		if got := shield.view().RolledStats; got["armor"] != shieldStats["armor"] || got["block_percent"] != shieldStats["block_percent"] {
+			t.Fatalf("shield display stats = %v, want %v", got, shieldStats)
+		}
+		if got := sim.resolvePlayerAttackDamage(); got != (DamageRange{Min: 4, Max: 4}) {
+			t.Fatalf("shield affected attack damage = %+v", got)
+		}
+	})
 }
 
 // --- scripted slice ---------------------------------------------------------
@@ -1039,7 +1204,7 @@ func runSlice(t *testing.T, seed string) *Sim {
 		t.Fatalf("inventory size = %d, want 1", len(snap.Inventory))
 	}
 	itemID := snap.Inventory[0].ItemInstanceID
-	sim.Tick([]Input{{MessageID: "e1", CorrelationID: "corr_e", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: itemID, Slot: "weapon"}}})
+	sim.Tick([]Input{{MessageID: "e1", CorrelationID: "corr_e", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: itemID, Slot: mainHandSlot}}})
 
 	return sim
 }
@@ -1056,9 +1221,7 @@ func TestScriptedSliceMatchesGolden(t *testing.T) {
 			Slot      string `json:"slot"`
 			Equipped  bool   `json:"equipped"`
 		} `json:"final_inventory"`
-		FinalEquipped struct {
-			Weapon string `json:"weapon"`
-		} `json:"final_equipped"`
+		FinalEquipped map[string]string `json:"final_equipped"`
 	}
 	loadGolden(t, "slice_outcome.json", &golden)
 
@@ -1088,13 +1251,13 @@ func TestScriptedSliceMatchesGolden(t *testing.T) {
 	if got.ItemDefID != want.ItemDefID || got.Slot != want.Slot || got.Equipped != want.Equipped {
 		t.Fatalf("inventory item = %+v, want %+v", got, want)
 	}
-	// equipped weapon instance must resolve to the expected item_def_id.
-	wp := snap.Equipped["weapon"]
+	// equipped main-hand instance must resolve to the expected item_def_id.
+	wp := snap.Equipped[mainHandSlot]
 	if wp == nil {
-		t.Fatal("no weapon equipped")
+		t.Fatal("no main_hand equipped")
 	}
-	if got.ItemInstanceID != *wp || got.ItemDefID != golden.FinalEquipped.Weapon {
-		t.Fatalf("equipped weapon = %v (%s), want def %s", *wp, got.ItemDefID, golden.FinalEquipped.Weapon)
+	if got.ItemInstanceID != *wp || got.ItemDefID != golden.FinalEquipped[mainHandSlot] {
+		t.Fatalf("equipped main_hand = %v (%s), want def %s", *wp, got.ItemDefID, golden.FinalEquipped[mainHandSlot])
 	}
 }
 
@@ -1297,11 +1460,11 @@ func TestUnequipWeapon(t *testing.T) {
 		MessageID:     "unequip",
 		CorrelationID: "corr_unequip",
 		Type:          "unequip_intent",
-		Unequip:       &UnequipIntent{Slot: weaponSlot},
+		Unequip:       &UnequipIntent{Slot: mainHandSlot},
 	}})
 	assertAck(t, r, "unequip")
-	if sim.equipped[weaponSlot] != 0 {
-		t.Fatalf("equipped weapon = %d, want cleared", sim.equipped[weaponSlot])
+	if sim.equipped[mainHandSlot] != 0 {
+		t.Fatalf("equipped main_hand = %d, want cleared", sim.equipped[mainHandSlot])
 	}
 	item := sim.findItem(itemID)
 	if item == nil || item.equipped {
@@ -1354,8 +1517,8 @@ func TestDropEquippedWeapon(t *testing.T) {
 		Drop:          &DropIntent{ItemInstanceID: itemID},
 	}})
 	assertAck(t, r, "drop")
-	if sim.equipped[weaponSlot] != 0 {
-		t.Fatalf("equipped weapon = %d, want cleared", sim.equipped[weaponSlot])
+	if sim.equipped[mainHandSlot] != 0 {
+		t.Fatalf("equipped main_hand = %d, want cleared", sim.equipped[mainHandSlot])
 	}
 	if sim.findItem(itemID) != nil {
 		t.Fatalf("dropped item %s still in inventory", itemID)
@@ -1526,6 +1689,98 @@ func TestUseConsumableRejectsNonConsumable(t *testing.T) {
 
 	r := sim.Tick([]Input{{MessageID: "use", Type: "use_intent", Use: &UseIntent{ItemInstanceID: "5000"}}})
 	assertReject(t, r, "use", "not_consumable")
+}
+
+func TestHotbarCapacityAndBelt(t *testing.T) {
+	sim := NewSim("sess_hotbar_capacity", "01", loadRules(t))
+	snap := sim.Snapshot()
+	if snap.HotbarCapacity != 2 || len(snap.Hotbar) != 10 {
+		t.Fatalf("base hotbar capacity=%d len=%d, want 2/10", snap.HotbarCapacity, len(snap.Hotbar))
+	}
+
+	belt := addRolledInventoryItem(t, sim, 7000, "cave_belt", map[string]int{"hotbar_slots": 6})
+	equipBelt := sim.Tick([]Input{{MessageID: "belt", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(belt.instanceID), Slot: "belt"}}})
+	assertAck(t, equipBelt, "belt")
+	if !hasEquippedUpdateCapacity(equipBelt, "belt", 6) {
+		t.Fatalf("belt equip missing capacity delta changes=%+v", equipBelt.Changes)
+	}
+	if got := sim.Snapshot().HotbarCapacity; got != 6 {
+		t.Fatalf("rolled belt capacity = %d, want 6", got)
+	}
+
+	unequipBelt := sim.Tick([]Input{{MessageID: "unbelt", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: "belt"}}})
+	assertAck(t, unequipBelt, "unbelt")
+	if !hasEquippedUpdateCapacity(unequipBelt, "belt", 2) {
+		t.Fatalf("belt unequip missing capacity delta changes=%+v", unequipBelt.Changes)
+	}
+	fallbackBelt := addRolledInventoryItem(t, sim, 7001, "cave_belt", map[string]int{"armor": 1})
+	assertAck(t, sim.Tick([]Input{{MessageID: "fallback", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(fallbackBelt.instanceID), Slot: "belt"}}}), "fallback")
+	if got := sim.Snapshot().HotbarCapacity; got != 3 {
+		t.Fatalf("belt base-stat fallback capacity = %d, want 3", got)
+	}
+
+	assertAck(t, sim.Tick([]Input{{MessageID: "unbelt2", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: "belt"}}}), "unbelt2")
+	maxBelt := addRolledInventoryItem(t, sim, 7002, "cave_belt", map[string]int{"hotbar_slots": 99})
+	assertAck(t, sim.Tick([]Input{{MessageID: "max", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(maxBelt.instanceID), Slot: "belt"}}}), "max")
+	if got := sim.Snapshot().HotbarCapacity; got != 10 {
+		t.Fatalf("clamped belt capacity = %d, want 10", got)
+	}
+}
+
+func TestHotbarAssignUseDirectUseAndReenable(t *testing.T) {
+	sim := NewSim("sess_hotbar_use", "01", loadRules(t))
+	player := sim.entities[sim.playerID]
+	player.hp = 4
+	first := addStaticInventoryItem(sim, 7100, "red_potion")
+	assign := sim.Tick([]Input{{MessageID: "assign_disabled", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 5, ItemInstanceID: stringPtr(idStr(first.instanceID))}}})
+	assertAck(t, assign, "assign_disabled")
+	if sim.hotbar[5] != first.instanceID || !hasHotbarUpdate(assign, 5, stringPtr(idStr(first.instanceID))) {
+		t.Fatalf("disabled assignment failed hotbar=%v changes=%+v", sim.hotbar, assign.Changes)
+	}
+
+	disabled := sim.Tick([]Input{{MessageID: "use_disabled", Type: "use_hotbar_intent", UseHotbar: &UseHotbarIntent{SlotIndex: 5}}})
+	assertReject(t, disabled, "use_disabled", "hotbar_slot_disabled")
+	direct := sim.Tick([]Input{{MessageID: "direct", Type: "use_intent", Use: &UseIntent{ItemInstanceID: idStr(first.instanceID)}}})
+	assertAck(t, direct, "direct")
+	if sim.hotbar[5] != 0 || !hasHotbarUpdate(direct, 5, nil) {
+		t.Fatalf("direct use did not clear disabled hotbar slot: hotbar=%v changes=%+v", sim.hotbar, direct.Changes)
+	}
+
+	player.hp = 4
+	second := addStaticInventoryItem(sim, 7101, "red_potion")
+	assign = sim.Tick([]Input{{MessageID: "assign_second", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 5, ItemInstanceID: stringPtr(idStr(second.instanceID))}}})
+	assertAck(t, assign, "assign_second")
+	belt := addRolledInventoryItem(t, sim, 7102, "cave_belt", map[string]int{"hotbar_slots": 6})
+	assertAck(t, sim.Tick([]Input{{MessageID: "belt", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(belt.instanceID), Slot: "belt"}}}), "belt")
+	assertAck(t, sim.Tick([]Input{{MessageID: "unbelt", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: "belt"}}}), "unbelt")
+	if got := sim.Snapshot().HotbarCapacity; got != 2 {
+		t.Fatalf("capacity after belt unequip = %d, want 2", got)
+	}
+	assertAck(t, sim.Tick([]Input{{MessageID: "rebelt", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(belt.instanceID), Slot: "belt"}}}), "rebelt")
+	use := sim.Tick([]Input{{MessageID: "use_hotbar", Type: "use_hotbar_intent", UseHotbar: &UseHotbarIntent{SlotIndex: 5}}})
+	assertAck(t, use, "use_hotbar")
+	if sim.findItemByID(second.instanceID) != nil || sim.hotbar[5] != 0 {
+		t.Fatalf("hotbar use did not consume/clear item=%+v hotbar=%v", sim.findItemByID(second.instanceID), sim.hotbar)
+	}
+}
+
+func TestHotbarRejectsAndDropClears(t *testing.T) {
+	sim := NewSim("sess_hotbar_rejects", "01", loadRules(t))
+	potion := addStaticInventoryItem(sim, 7200, "red_potion")
+	badge := addStaticInventoryItem(sim, 7201, "training_badge")
+
+	assertReject(t, sim.Tick([]Input{{MessageID: "bad_index", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 10, ItemInstanceID: stringPtr(idStr(potion.instanceID))}}}), "bad_index", "invalid_payload")
+	assertReject(t, sim.Tick([]Input{{MessageID: "missing", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr("9999")}}}), "missing", "not_in_inventory")
+	assertReject(t, sim.Tick([]Input{{MessageID: "non_consumable", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr(idStr(badge.instanceID))}}}), "non_consumable", "not_consumable")
+	assertReject(t, sim.Tick([]Input{{MessageID: "empty", Type: "use_hotbar_intent", UseHotbar: &UseHotbarIntent{SlotIndex: 0}}}), "empty", "slot_empty")
+
+	assertAck(t, sim.Tick([]Input{{MessageID: "assign0", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr(idStr(potion.instanceID))}}}), "assign0")
+	assertAck(t, sim.Tick([]Input{{MessageID: "assign1", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 1, ItemInstanceID: stringPtr(idStr(potion.instanceID))}}}), "assign1")
+	drop := sim.Tick([]Input{{MessageID: "drop", Type: "drop_intent", Drop: &DropIntent{ItemInstanceID: idStr(potion.instanceID)}}})
+	assertAck(t, drop, "drop")
+	if sim.hotbar[0] != 0 || sim.hotbar[1] != 0 || !hasHotbarUpdate(drop, 0, nil) || !hasHotbarUpdate(drop, 1, nil) {
+		t.Fatalf("drop did not clear hotbar refs: hotbar=%v changes=%+v", sim.hotbar, drop.Changes)
+	}
 }
 
 func TestAdjacentLootDropSpreadsAndAvoidsWalls(t *testing.T) {
@@ -1870,14 +2125,14 @@ func TestRejections(t *testing.T) {
 
 	t.Run("equip not in inventory", func(t *testing.T) {
 		sim := NewSim("s", "01", rules)
-		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: "weapon"}}})
+		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: mainHandSlot}}})
 		assertReject(t, r, "x", "not_in_inventory")
 	})
 
 	t.Run("equip non-equippable", func(t *testing.T) {
 		sim := NewSim("s", "01", rules)
 		sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge"})
-		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: "weapon"}}})
+		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: mainHandSlot}}})
 		assertReject(t, r, "x", "not_equippable")
 	})
 
@@ -1902,8 +2157,8 @@ func TestDeadPlayerRejectsIntentsAndStopsActiveMovement(t *testing.T) {
 		{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}},
 		{MessageID: "attack", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}},
 		{MessageID: "pickup", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}},
-		{MessageID: "equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: "weapon"}},
-		{MessageID: "unequip", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: weaponSlot}},
+		{MessageID: "equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: mainHandSlot}},
+		{MessageID: "unequip", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: mainHandSlot}},
 		{MessageID: "drop", Type: "drop_intent", Drop: &DropIntent{ItemInstanceID: "1004"}},
 	}
 	for _, in := range cases {
@@ -1977,7 +2232,7 @@ func inventoryLabEquippedSword(t *testing.T, rules *Rules) (*Sim, string) {
 		MessageID:     "equip",
 		CorrelationID: "corr_equip",
 		Type:          "equip_intent",
-		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: weaponSlot},
+		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: mainHandSlot},
 	}})
 	assertAck(t, equip, "equip")
 	return sim, itemID
@@ -2023,6 +2278,54 @@ func findItemByDef(sim *Sim, itemDefID string) *invItem {
 	return nil
 }
 
+func addRolledInventoryItem(t *testing.T, sim *Sim, instanceID uint64, templateID string, stats map[string]int) *invItem {
+	t.Helper()
+	template, ok := sim.rules.ItemTemplates[templateID]
+	if !ok {
+		t.Fatalf("missing item template %s", templateID)
+	}
+	payload := &ItemRollPayload{
+		ItemTemplateID: templateID,
+		DisplayName:    template.Name,
+		Rarity:         "test",
+		Stats:          cloneIntMap(template.BaseStats),
+		Requirements:   cloneIntMap(template.Requirements),
+		EffectIDs:      []string{},
+	}
+	if payload.Stats == nil && len(stats) > 0 {
+		payload.Stats = map[string]int{}
+	}
+	for key, value := range stats {
+		payload.Stats[key] = value
+	}
+	item := &invItem{
+		instanceID:  instanceID,
+		itemDefID:   templateID,
+		slot:        template.Slot,
+		rollPayload: payload,
+	}
+	sim.inventory = append(sim.inventory, item)
+	return item
+}
+
+func addStaticInventoryItem(sim *Sim, instanceID uint64, itemDefID string) *invItem {
+	item := &invItem{instanceID: instanceID, itemDefID: itemDefID}
+	sim.inventory = append(sim.inventory, item)
+	return item
+}
+
+func stringPtr(v string) *string {
+	return &v
+}
+
+func assertEquippedTemplate(t *testing.T, sim *Sim, slot, templateID string) {
+	t.Helper()
+	item := sim.findItemByID(sim.equipped[slot])
+	if item == nil || item.rollPayload == nil || item.rollPayload.ItemTemplateID != templateID {
+		t.Fatalf("equipped[%s] = %+v, want template %s", slot, item, templateID)
+	}
+}
+
 func hasChange(r TickResult, op string) bool {
 	for _, c := range r.Changes {
 		if c.Op == op {
@@ -2030,6 +2333,53 @@ func hasChange(r TickResult, op string) bool {
 		}
 	}
 	return false
+}
+
+func hasHotbarUpdate(r TickResult, slotIndex int, itemInstanceID *string) bool {
+	for _, c := range r.Changes {
+		if c.Op != OpHotbarUpdate || c.SlotIndex != slotIndex {
+			continue
+		}
+		if itemInstanceID == nil {
+			return c.ItemInstanceID == nil
+		}
+		return c.ItemInstanceID != nil && *c.ItemInstanceID == *itemInstanceID
+	}
+	return false
+}
+
+func hasEquippedUpdate(r TickResult, slot string, itemInstanceID *string) bool {
+	for _, c := range r.Changes {
+		if c.Op != OpEquippedUpdate || c.Slot != slot {
+			continue
+		}
+		if itemInstanceID == nil {
+			return c.ItemInstanceID == nil
+		}
+		return c.ItemInstanceID != nil && *c.ItemInstanceID == *itemInstanceID
+	}
+	return false
+}
+
+func hasEquippedUpdateCapacity(r TickResult, slot string, capacity int) bool {
+	for _, c := range r.Changes {
+		if c.Op == OpEquippedUpdate && c.Slot == slot && c.HotbarCapacity != nil && *c.HotbarCapacity == capacity {
+			return true
+		}
+	}
+	return false
+}
+
+func sameStrings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
@@ -2057,7 +2407,7 @@ func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
 		MessageID:     "e1",
 		CorrelationID: "corr_equip",
 		Type:          "equip_intent",
-		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: weaponSlot},
+		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: mainHandSlot},
 	}})
 	assertAck(t, equip, "e1")
 	moveTicks(sim, "to_dummy", Vec2{X: 1}, 6)

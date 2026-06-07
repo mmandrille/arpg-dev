@@ -8,11 +8,11 @@
   },
   "steps": [
     { "action": "pick_up_loot", "item_def_id": "rusty_sword" },
-    { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "weapon" },
-    { "action": "unequip_slot", "slot": "weapon" },
+    { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "main_hand" },
+    { "action": "unequip_slot", "slot": "main_hand" },
     { "action": "drop_inventory_item", "item_def_id": "rusty_sword" },
     { "action": "pick_up_loot", "item_def_id": "rusty_sword" },
-    { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "weapon" }
+    { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "main_hand" }
   ],
   "assertions": [
     { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },

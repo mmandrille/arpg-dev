@@ -13,11 +13,11 @@
     },
     "iconShape": {
       "type": "string",
-      "enum": ["blade", "bow", "badge", "leaf", "potion", "box"]
+      "enum": ["blade", "bow", "badge", "coin", "leaf", "potion", "box"]
     },
     "groundShape": {
       "type": "string",
-      "enum": ["blade", "bow", "coin", "leaf", "potion", "box"]
+      "enum": ["blade", "bow", "badge", "coin", "leaf", "potion", "box"]
     }
   },
   "properties": {
@@ -57,4 +57,3 @@
     }
   }
 }
-

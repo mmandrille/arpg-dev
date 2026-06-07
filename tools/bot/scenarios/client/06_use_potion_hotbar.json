@@ -16,7 +16,7 @@
     { "type": "press_key", "keycode": "KEY_I" },
     { "type": "assert_panel_visible", "visible": true },
     { "type": "assign_hotbar_slot", "slot_index": 0, "item_def_id": "red_potion", "bag_index": 1 },
-    { "type": "assert_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion" },
+    { "type": "wait_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion", "timeout_s": 15.0 },
     { "type": "double_click_bag_item", "item_def_id": "red_potion", "bag_index": 0 },
     { "type": "wait_event", "event_type": "player_healed", "timeout_s": 15.0 },
     { "type": "assert_player_hp", "equals": 9 },

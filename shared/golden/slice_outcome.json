@@ -6,7 +6,7 @@
   "final_player_hp": 9,
   "final_monster_hp": 0,
   "final_inventory": [
-    { "item_def_id": "rusty_sword", "slot": "weapon", "equipped": true }
+    { "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": true }
   ],
-  "final_equipped": { "weapon": "rusty_sword" }
+  "final_equipped": { "main_hand": "rusty_sword" }
 }

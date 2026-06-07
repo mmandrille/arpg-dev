@@ -8,8 +8,9 @@
     { "op": "entity_spawn", "entity": { "id": "1005", "type": "projectile", "position": { "x": 1, "y": 5 }, "owner_id": "1001", "target_id": "1002", "projectile_def_id": "training_arrow" } },
     { "op": "entity_update", "entity": { "id": "1005", "type": "projectile", "position": { "x": 1.3, "y": 5 }, "owner_id": "1001", "target_id": "1002", "projectile_def_id": "training_arrow" } },
     { "op": "entity_remove", "entity_id": "1005" },
-    { "op": "inventory_add", "item": { "item_instance_id": "1004", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "slot": "weapon", "equipped": false } },
-    { "op": "equipped_update", "slot": "weapon", "item_instance_id": null },
+    { "op": "inventory_add", "item": { "item_instance_id": "1004", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "slot": "main_hand", "equipped": false } },
+    { "op": "equipped_update", "slot": "main_hand", "item_instance_id": null },
+    { "op": "hotbar_update", "slot_index": 2, "item_instance_id": "1007" },
     { "op": "inventory_remove", "item_instance_id": "1004" },
     { "op": "entity_spawn", "entity": { "id": "1006", "type": "loot", "item_def_id": "rusty_sword", "position": { "x": 11, "y": 5 } } }
   ],

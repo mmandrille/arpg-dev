@@ -8,7 +8,7 @@
     { "action": "action_until_event", "monster_def_id": "dungeon_mob", "event_type": "monster_killed" },
     { "action": "pick_up_loot", "item_def_id": "cave_blade" },
     { "action": "assert_rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "stat_keys": ["damage_min", "damage_max"], "required_level": 1 },
-    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "weapon" },
+    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
     { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1 }
   ],
   "assertions": [

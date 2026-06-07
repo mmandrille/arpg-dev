@@ -4,5 +4,5 @@
   "session_id": "sess_01H00000000000000000000000",
   "tick": 70,
   "correlation_id": "corr_01H00000000000000000000005",
-  "payload": { "item_instance_id": "1004", "slot": "weapon" }
+  "payload": { "item_instance_id": "1004", "slot": "main_hand" }
 }

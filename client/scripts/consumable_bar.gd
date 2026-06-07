@@ -11,8 +11,11 @@ var item_rules: Dictionary = {}
 var item_presentations: Dictionary = {}
 var progression: Dictionary = {}
 var progression_rules: Dictionary = {}
+var hotbar_capacity: int = 2
+var hotbar: Array = []
 var _slots: Array = []
 var _slot_items: Array = []
+var _drag_data: Dictionary = {}
 var _interactive: bool = true
 var _panel: PanelContainer
 var _xp_bar: ProgressBar
@@ -38,7 +41,8 @@ class ConsumableSlotButton:
 		preview.text = str(item.get("item_def_id", "item"))
 		preview.add_theme_color_override("font_color", Color("#e8dcc8"))
 		set_drag_preview(preview)
-		return {"source": "consumable_bar", "slot_index": slot_index, "item": item}
+		bar._drag_data = {"source": "consumable_bar", "slot_index": slot_index, "item": item}
+		return bar._drag_data
 
 	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 		if not bar._interactive or typeof(data) != TYPE_DICTIONARY:
@@ -48,9 +52,9 @@ class ConsumableSlotButton:
 		if dragged.is_empty():
 			return false
 		if source == "bag":
-			return bar._is_consumable(dragged)
+			return bar._is_slot_enabled(slot_index) and bar._is_consumable(dragged)
 		if source == "consumable_bar":
-			return true
+			return bar._is_slot_enabled(slot_index)
 		return false
 
 	func _drop_data(_at_position: Vector2, data: Variant) -> void:
@@ -70,6 +74,15 @@ func _ready() -> void:
 	_build()
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_END and _interactive and not _drag_data.is_empty():
+		if not get_viewport().gui_is_drag_successful() and str(_drag_data.get("source", "")) == "consumable_bar":
+			var slot_index := int(_drag_data.get("slot_index", -1))
+			if slot_index >= 0 and slot_index < SLOT_COUNT:
+				intent_requested.emit("assign_hotbar_intent", {"slot_index": slot_index, "item_instance_id": null})
+		_drag_data = {}
+
+
 func set_interactive(enabled: bool) -> void:
 	_interactive = enabled
 	if _panel != null:
@@ -80,7 +93,26 @@ func set_inventory_state(next_inventory: Array) -> void:
 	inventory = []
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
-	_prune_slots()
+	_rebuild_slot_items()
+	_render()
+
+
+func set_hotbar_state(next_capacity: int, next_hotbar: Array) -> void:
+	hotbar_capacity = clamp(next_capacity, 2, SLOT_COUNT)
+	hotbar = []
+	for slot in next_hotbar:
+		hotbar.append((slot as Dictionary).duplicate(true))
+	_rebuild_slot_items()
+	_render()
+
+
+func apply_hotbar_update(slot_index: int, item_instance_id) -> void:
+	if slot_index < 0 or slot_index >= SLOT_COUNT:
+		return
+	while hotbar.size() < SLOT_COUNT:
+		hotbar.append({"slot_index": hotbar.size(), "item_instance_id": null})
+	hotbar[slot_index] = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+	_rebuild_slot_items()
 	_render()
 
 
@@ -92,14 +124,12 @@ func set_character_progression(next_progression: Dictionary) -> void:
 func use_slot(slot_index: int) -> void:
 	if not _interactive or slot_index < 0 or slot_index >= SLOT_COUNT:
 		return
+	if not _is_slot_enabled(slot_index):
+		return
 	var item: Dictionary = _slot_items[slot_index]
 	if item.is_empty():
 		return
-	if not _inventory_has_item(str(item.get("item_instance_id", ""))):
-		_slot_items[slot_index] = {}
-		_render()
-		return
-	intent_requested.emit("use_intent", {"item_instance_id": str(item.get("item_instance_id", ""))})
+	intent_requested.emit("use_hotbar_intent", {"slot_index": slot_index})
 
 
 func assign_slot(slot_index: int, item_instance_id: String) -> void:
@@ -108,8 +138,7 @@ func assign_slot(slot_index: int, item_instance_id: String) -> void:
 	var item := _find_inventory_item(item_instance_id)
 	if item.is_empty() or not _is_consumable(item):
 		return
-	_slot_items[slot_index] = item.duplicate(true)
-	_render()
+	intent_requested.emit("assign_hotbar_intent", {"slot_index": slot_index, "item_instance_id": item_instance_id})
 
 
 func get_debug_state() -> Dictionary:
@@ -129,6 +158,7 @@ func get_debug_state() -> Dictionary:
 	var remaining = progression.get("experience_to_next_level", null)
 	return {
 		"assigned_slots": assigned,
+		"hotbar_capacity": hotbar_capacity,
 		"xp_bar": {
 			"level": level,
 			"experience": xp,
@@ -238,6 +268,8 @@ func _render() -> void:
 		slot.item = item.duplicate(true) if not item.is_empty() else {}
 		slot.text = HOTKEY_LABELS[i]
 		slot.tooltip_text = _tooltip(item)
+		slot.disabled = not _is_slot_enabled(i)
+		slot.modulate.a = 1.0 if _is_slot_enabled(i) else 0.42
 		slot.queue_redraw()
 	_render_xp()
 
@@ -259,20 +291,33 @@ func _handle_drop_on_slot(slot_index: int, data: Variant) -> void:
 	var dragged: Dictionary = data.get("item", {})
 	if dragged.is_empty() or not _is_consumable(dragged):
 		return
-	_slot_items[slot_index] = dragged.duplicate(true)
+	if not _is_slot_enabled(slot_index):
+		return
+	intent_requested.emit("assign_hotbar_intent", {"slot_index": slot_index, "item_instance_id": str(dragged.get("item_instance_id", ""))})
 
 
-func _prune_slots() -> void:
+func _rebuild_slot_items() -> void:
+	_slot_items.resize(SLOT_COUNT)
 	for i in SLOT_COUNT:
-		var item: Dictionary = _slot_items[i]
-		if item.is_empty():
+		_slot_items[i] = {}
+	for slot in hotbar:
+		var slot_index := int((slot as Dictionary).get("slot_index", -1))
+		if slot_index < 0 or slot_index >= SLOT_COUNT:
 			continue
-		if not _inventory_has_item(str(item.get("item_instance_id", ""))):
-			_slot_items[i] = {}
+		var item_id = (slot as Dictionary).get("item_instance_id", null)
+		if item_id == null:
+			continue
+		var item := _find_inventory_item(str(item_id))
+		if not item.is_empty() and _is_consumable(item):
+			_slot_items[slot_index] = item.duplicate(true)
 
 
 func _inventory_has_item(item_instance_id: String) -> bool:
 	return not _find_inventory_item(item_instance_id).is_empty()
+
+
+func _is_slot_enabled(slot_index: int) -> bool:
+	return slot_index >= 0 and slot_index < hotbar_capacity
 
 
 func _find_inventory_item(item_instance_id: String) -> Dictionary:

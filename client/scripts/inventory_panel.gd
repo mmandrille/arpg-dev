@@ -4,16 +4,29 @@ extends Control
 signal intent_requested(intent_type: String, payload: Dictionary)
 
 const SLOT_KIND_BAG := "bag"
-const SLOT_KIND_WEAPON := "weapon"
+const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const SLOT_KIND_BAG_AREA := "bag_area"
+const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
+const EQUIPMENT_LABELS := {
+	"head": "Head",
+	"amulet": "Amulet",
+	"chest": "Chest",
+	"gloves": "Gloves",
+	"belt": "Belt",
+	"boots": "Boots",
+	"ring_left": "Ring L",
+	"ring_right": "Ring R",
+	"main_hand": "Main",
+	"off_hand": "Off"
+}
 
 var inventory: Array = []
-var equipped: Dictionary = {"weapon": null}
+var equipped: Dictionary = {}
 var item_rules: Dictionary = {}
 var item_templates: Dictionary = {}
 var item_presentations: Dictionary = {}
 var _panel: PanelContainer
-var _weapon_slot: InventorySlotButton
+var _equipment_slots: Dictionary = {}
 var _bag_grid: GridContainer
 var _drag_data: Dictionary = {}
 var _interactive: bool = true
@@ -60,10 +73,10 @@ class InventorySlotButton:
 		var dragged: Dictionary = data.get("item", {})
 		if dragged.is_empty():
 			return false
-		if slot_kind == SLOT_KIND_WEAPON:
-			return source == SLOT_KIND_BAG and panel._is_weapon(dragged)
+		if panel._slot_kind_is_equipment(slot_kind):
+			return source == SLOT_KIND_BAG and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 		if slot_kind == SLOT_KIND_BAG_AREA:
-			return source == SLOT_KIND_WEAPON
+			return panel._slot_kind_is_equipment(source)
 		return false
 
 	func _drop_data(_at_position: Vector2, data: Variant) -> void:
@@ -136,14 +149,20 @@ func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"bag_count": inventory.size(),
-		"equipped_weapon": equipped.get("weapon", null),
-		"weapon_item": _equipped_weapon_item(),
+		"equipped": equipped.duplicate(true),
+		"equipped_main_hand": equipped.get("main_hand", null),
+		"main_hand_item": _equipped_item("main_hand"),
+		"weapon_item": _equipped_item("main_hand"),
 		"item_presentations": _debug_presentations(),
 	}
 
 
 func get_weapon_slot_screen_center() -> Vector2:
-	return _slot_screen_center(_weapon_slot)
+	return get_equipment_slot_screen_center("main_hand")
+
+
+func get_equipment_slot_screen_center(slot: String) -> Vector2:
+	return _slot_screen_center(_equipment_slots.get(slot, null))
 
 
 func get_bag_area_screen_center() -> Vector2:
@@ -165,7 +184,7 @@ func get_bag_item_screen_center(item_instance_id: String = "") -> Vector2:
 	if item_instance_id != "":
 		var bag_index := 0
 		for item in inventory:
-			if str(item.get("item_instance_id", "")) == str(equipped.get("weapon", "")):
+			if _is_equipped_instance(str(item.get("item_instance_id", ""))):
 				if str(item.get("item_instance_id", "")) == item_instance_id:
 					return _bag_cell_screen_center(bag_index)
 				continue
@@ -217,10 +236,10 @@ func _notification(what: int) -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
-	_panel.custom_minimum_size = Vector2(430, 300)
+	_panel.custom_minimum_size = Vector2(500, 340)
 	_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_panel.offset_left = -450
-	_panel.offset_top = -330
+	_panel.offset_left = -520
+	_panel.offset_top = -370
 	_panel.offset_right = -20
 	_panel.offset_bottom = -30
 	_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -236,16 +255,25 @@ func _build() -> void:
 
 	var root := HBoxContainer.new()
 	root.add_theme_constant_override("separation", 18)
-	root.custom_minimum_size = Vector2(400, 270)
+	root.custom_minimum_size = Vector2(470, 310)
 	_panel.add_child(root)
 
 	var left := VBoxContainer.new()
-	left.custom_minimum_size = Vector2(120, 0)
+	left.custom_minimum_size = Vector2(190, 0)
 	root.add_child(left)
-	left.add_child(_title("Inventory"))
-	left.add_child(_caption("Weapon"))
-	_weapon_slot = _slot_button(SLOT_KIND_WEAPON, Vector2(76, 76))
-	left.add_child(_weapon_slot)
+	left.add_child(_title("Equipment"))
+	var equip_grid := GridContainer.new()
+	equip_grid.columns = 2
+	equip_grid.add_theme_constant_override("h_separation", 6)
+	equip_grid.add_theme_constant_override("v_separation", 6)
+	left.add_child(equip_grid)
+	for slot in EQUIPMENT_SLOTS:
+		var box := VBoxContainer.new()
+		box.add_child(_caption(str(EQUIPMENT_LABELS.get(slot, slot))))
+		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), Vector2(72, 52))
+		_equipment_slots[str(slot)] = btn
+		box.add_child(btn)
+		equip_grid.add_child(box)
 
 	var right := VBoxContainer.new()
 	right.custom_minimum_size = Vector2(250, 0)
@@ -263,13 +291,14 @@ func _build() -> void:
 
 
 func _render() -> void:
-	if _weapon_slot == null or _bag_grid == null:
+	if _bag_grid == null:
 		return
-	_fill_slot(_weapon_slot, _equipped_weapon_item())
+	for slot in EQUIPMENT_SLOTS:
+		_fill_slot(_equipment_slots.get(slot, null), _equipped_item(str(slot)))
 	for child in _bag_grid.get_children():
 		child.queue_free()
 	for item in inventory:
-		if str(item.get("item_instance_id", "")) == str(equipped.get("weapon", "")):
+		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
 			continue
 		var slot := _slot_button(SLOT_KIND_BAG, Vector2(48, 48))
 		_fill_slot(slot, item)
@@ -296,6 +325,8 @@ func _position_gesture_hint() -> void:
 
 
 func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
+	if slot == null:
+		return
 	slot.item = item.duplicate(true)
 	if item.is_empty():
 		slot.text = ""
@@ -412,8 +443,9 @@ func _slot_style(hover: bool) -> StyleBoxFlat:
 
 
 func _handle_double_click(item: Dictionary) -> void:
-	if _is_weapon(item):
-		intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": "weapon"})
+	var slot := _preferred_equip_slot(item)
+	if slot != "":
+		intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
 	elif _is_consumable(item):
 		intent_requested.emit("use_intent", {"item_instance_id": str(item.get("item_instance_id", ""))})
 
@@ -424,16 +456,38 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 	var item: Dictionary = data.get("item", {})
 	if item.is_empty():
 		return
-	if slot_kind == SLOT_KIND_WEAPON and _is_weapon(item):
-		intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": "weapon"})
+	if _slot_kind_is_equipment(slot_kind):
+		var slot := _slot_from_kind(slot_kind)
+		if _item_can_equip_to(item, slot):
+			intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
 	elif slot_kind == SLOT_KIND_BAG_AREA:
-		intent_requested.emit("unequip_intent", {"slot": "weapon"})
+		var source := str(data.get("source", ""))
+		if _slot_kind_is_equipment(source):
+			intent_requested.emit("unequip_intent", {"slot": _slot_from_kind(source)})
 
 
-func _is_weapon(item: Dictionary) -> bool:
+func _item_can_equip_to(item: Dictionary, slot: String) -> bool:
 	var def_id := str(item.get("item_def_id", ""))
 	var def: Dictionary = _item_definition(def_id)
-	return bool(def.get("equippable", false)) and str(def.get("slot", "")) == "weapon"
+	if not bool(def.get("equippable", false)):
+		return false
+	var item_slot := str(def.get("slot", ""))
+	if item_slot == "ring":
+		return slot == "ring_left" or slot == "ring_right"
+	return item_slot == slot
+
+
+func _preferred_equip_slot(item: Dictionary) -> String:
+	var def_id := str(item.get("item_def_id", ""))
+	var def: Dictionary = _item_definition(def_id)
+	if not bool(def.get("equippable", false)):
+		return ""
+	var item_slot := str(def.get("slot", ""))
+	if item_slot == "ring":
+		if equipped.get("ring_left", null) == null:
+			return "ring_left"
+		return "ring_right"
+	return item_slot
 
 
 func _is_consumable(item: Dictionary) -> bool:
@@ -442,14 +496,38 @@ func _is_consumable(item: Dictionary) -> bool:
 	return str(def.get("category", "")) == "consumable"
 
 
-func _equipped_weapon_item() -> Dictionary:
-	var weapon_id = equipped.get("weapon", null)
-	if weapon_id == null:
+func _equipped_item(slot: String) -> Dictionary:
+	var item_id = equipped.get(slot, null)
+	if item_id == null:
 		return {}
 	for item in inventory:
-		if str(item.get("item_instance_id", "")) == str(weapon_id):
+		if str(item.get("item_instance_id", "")) == str(item_id):
 			return item
 	return {}
+
+
+func _is_equipped_instance(item_instance_id: String) -> bool:
+	if item_instance_id == "":
+		return false
+	for slot in EQUIPMENT_SLOTS:
+		var equipped_id = equipped.get(str(slot), null)
+		if equipped_id != null and str(equipped_id) == item_instance_id:
+			return true
+	return false
+
+
+func _slot_kind_for_equipment(slot: String) -> String:
+	return SLOT_KIND_EQUIP_PREFIX + slot
+
+
+func _slot_kind_is_equipment(kind: String) -> bool:
+	return kind.begins_with(SLOT_KIND_EQUIP_PREFIX)
+
+
+func _slot_from_kind(kind: String) -> String:
+	if not _slot_kind_is_equipment(kind):
+		return ""
+	return kind.substr(SLOT_KIND_EQUIP_PREFIX.length())
 
 
 func _tooltip(item: Dictionary) -> String:
@@ -470,6 +548,12 @@ func _tooltip(item: Dictionary) -> String:
 		lines.append("Damage: %s-%s" % [str(dmg.get("min", "?")), str(dmg.get("max", "?"))])
 	if rolled_stats.has("max_hp"):
 		lines.append("Max HP: +%s" % str(rolled_stats.get("max_hp", "?")))
+	if rolled_stats.has("armor"):
+		lines.append("Armor: +%s" % str(rolled_stats.get("armor", "?")))
+	if rolled_stats.has("block_percent"):
+		lines.append("Block: %s%%" % str(rolled_stats.get("block_percent", "?")))
+	if rolled_stats.has("hotbar_slots"):
+		lines.append("Hotbar slots: %s" % str(rolled_stats.get("hotbar_slots", "?")))
 	if def.has("reach"):
 		lines.append("Reach: %s" % str(def["reach"]))
 	if def.has("attack_mode"):

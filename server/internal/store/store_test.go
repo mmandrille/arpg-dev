@@ -166,7 +166,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("re-add character item: %v", err)
 	}
 
-	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "weapon", true); err != nil {
+	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "main_hand", true); err != nil {
 		t.Fatalf("set equipped: %v", err)
 	}
 	if err := s.AddCharacterWaypoint(ctx, char.ID, -1); err != nil {
@@ -183,7 +183,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(items) != 1 {
 		t.Fatalf("character item count = %d, want 1", len(items))
 	}
-	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "weapon" || items[0].ItemDefID != "cave_blade" {
+	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "main_hand" || items[0].ItemDefID != "cave_blade" {
 		t.Fatalf("character item not persisted/equipped correctly: %+v", items[0])
 	}
 	var payload struct {
@@ -211,7 +211,25 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("waypoints = %+v, want level -1", waypoints)
 	}
 
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, loadedProgression); err != nil {
+	hotbar, err := s.ListCharacterHotbar(ctx, acct.ID, char.ID)
+	if err != nil {
+		t.Fatalf("list hotbar: %v", err)
+	}
+	if len(hotbar) != 10 {
+		t.Fatalf("hotbar slots = %d, want 10", len(hotbar))
+	}
+	if err := s.SetCharacterHotbarSlot(ctx, acct.ID, char.ID, 2, &item.ID); err != nil {
+		t.Fatalf("set hotbar slot: %v", err)
+	}
+	hotbar, err = s.ListCharacterHotbar(ctx, acct.ID, char.ID)
+	if err != nil {
+		t.Fatalf("reload hotbar: %v", err)
+	}
+	if hotbar[2].ItemInstanceID == nil || *hotbar[2].ItemInstanceID != item.ID {
+		t.Fatalf("hotbar slot 2 = %+v, want item %s", hotbar[2], item.ID)
+	}
+
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
@@ -228,12 +246,18 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, mutatedProgression); err != nil {
 		t.Fatalf("mutate live progression: %v", err)
 	}
+	if err := s.SetCharacterHotbarSlot(ctx, acct.ID, char.ID, 2, nil); err != nil {
+		t.Fatalf("mutate live hotbar: %v", err)
+	}
 	snap, err := s.LoadSessionStartSnapshot(ctx, sess.ID)
 	if err != nil {
 		t.Fatalf("load session snapshot: %v", err)
 	}
-	if len(snap.Items) != 1 || !snap.Items[0].Equipped || snap.Items[0].Slot != "weapon" {
+	if len(snap.Items) != 1 || !snap.Items[0].Equipped || snap.Items[0].Slot != "main_hand" {
 		t.Fatalf("snapshot item mutated with live state: %+v", snap.Items)
+	}
+	if len(snap.Hotbar) != 10 || snap.Hotbar[2].ItemInstanceID == nil || *snap.Hotbar[2].ItemInstanceID != item.ID {
+		t.Fatalf("snapshot hotbar mutated with live state: %+v", snap.Hotbar)
 	}
 	if len(snap.Waypoints) != 1 || snap.Waypoints[0].Level != -1 {
 		t.Fatalf("snapshot waypoints mutated with live state: %+v", snap.Waypoints)
@@ -248,8 +272,11 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 
 	otherAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "other+"+ids.Token()[:12]+"@example.test")
 	otherChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), otherAcct.ID, "Hero")
-	if err := s.SetCharacterItemEquipped(ctx, otherAcct.ID, otherChar.ID, item.ID, "weapon", true); !errors.Is(err, store.ErrNotFound) {
+	if err := s.SetCharacterItemEquipped(ctx, otherAcct.ID, otherChar.ID, item.ID, "main_hand", true); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("equip missing item: expected ErrNotFound, got %v", err)
+	}
+	if err := s.SetCharacterHotbarSlot(ctx, otherAcct.ID, otherChar.ID, 2, &item.ID); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("foreign hotbar assign: expected ErrNotFound, got %v", err)
 	}
 	if _, err := s.GetCharacterProgression(ctx, otherAcct.ID, char.ID); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("foreign get progression: expected ErrNotFound, got %v", err)
@@ -267,6 +294,13 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	if len(items) != 0 {
 		t.Fatalf("character item count after remove = %d, want 0", len(items))
+	}
+	hotbar, err = s.ListCharacterHotbar(ctx, acct.ID, char.ID)
+	if err != nil {
+		t.Fatalf("list hotbar after remove: %v", err)
+	}
+	if hotbar[2].ItemInstanceID != nil {
+		t.Fatalf("removed item still assigned in hotbar: %+v", hotbar[2])
 	}
 	if err := s.RemoveCharacterItem(ctx, acct.ID, char.ID, item.ID); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("remove missing item: expected ErrNotFound, got %v", err)

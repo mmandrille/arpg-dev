@@ -10,8 +10,10 @@
       "name": "Cave Blade",
       "category": "equipment",
       "item_type": "sword",
-      "slot": "weapon",
+      "slot": "main_hand",
       "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["main_hand"],
       "attack_mode": "melee",
       "reach": 1.5,
       "requirements": { "level": 1 },
@@ -24,6 +26,142 @@
         { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 },
         { "stat": "max_hp", "min": 1, "max": 3, "weight": 1 }
       ],
+      "effect_pool": []
+    },
+    "cave_greatsword": {
+      "name": "Cave Greatsword",
+      "category": "equipment",
+      "item_type": "greatsword",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "melee",
+      "reach": 1.8,
+      "requirements": { "level": 1 },
+      "base_stats": { "damage_min": 4, "damage_max": 7 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 4, "weight": 3 }
+      ],
+      "effect_pool": []
+    },
+    "cave_bow": {
+      "name": "Cave Bow",
+      "category": "equipment",
+      "item_type": "bow",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "ranged",
+      "reach": 16.0,
+      "projectile_speed": 50.0,
+      "requirements": { "level": 1 },
+      "base_stats": { "damage_min": 2, "damage_max": 5 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 }
+      ],
+      "effect_pool": []
+    },
+    "cave_shield": {
+      "name": "Cave Shield",
+      "category": "equipment",
+      "item_type": "shield",
+      "slot": "off_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["off_hand"],
+      "requirements": { "level": 1 },
+      "base_stats": { "armor": 2, "block_percent": 5 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 1, "max": 3, "weight": 3 },
+        { "stat": "block_percent", "min": 1, "max": 5, "weight": 2 }
+      ],
+      "effect_pool": []
+    },
+    "cave_helm": {
+      "name": "Cave Helm",
+      "category": "equipment",
+      "item_type": "helm",
+      "slot": "head",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "armor": 1 },
+      "rollable_stats": [{ "stat": "armor", "min": 1, "max": 3, "weight": 1 }],
+      "effect_pool": []
+    },
+    "cave_mail": {
+      "name": "Cave Mail",
+      "category": "equipment",
+      "item_type": "chest",
+      "slot": "chest",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "armor": 3 },
+      "rollable_stats": [{ "stat": "armor", "min": 2, "max": 5, "weight": 1 }],
+      "effect_pool": []
+    },
+    "cave_gloves": {
+      "name": "Cave Gloves",
+      "category": "equipment",
+      "item_type": "gloves",
+      "slot": "gloves",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "armor": 1 },
+      "rollable_stats": [{ "stat": "armor", "min": 1, "max": 2, "weight": 1 }],
+      "effect_pool": []
+    },
+    "cave_belt": {
+      "name": "Cave Belt",
+      "category": "equipment",
+      "item_type": "belt",
+      "slot": "belt",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "hotbar_slots": 3, "armor": 1 },
+      "rollable_stats": [
+        { "stat": "hotbar_slots", "min": 3, "max": 10, "weight": 4 },
+        { "stat": "armor", "min": 1, "max": 2, "weight": 1 }
+      ],
+      "effect_pool": []
+    },
+    "cave_boots": {
+      "name": "Cave Boots",
+      "category": "equipment",
+      "item_type": "boots",
+      "slot": "boots",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "armor": 1 },
+      "rollable_stats": [{ "stat": "armor", "min": 1, "max": 2, "weight": 1 }],
+      "effect_pool": []
+    },
+    "cave_ring": {
+      "name": "Cave Ring",
+      "category": "equipment",
+      "item_type": "ring",
+      "slot": "ring",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "max_hp": 1 },
+      "rollable_stats": [
+        { "stat": "max_hp", "min": 1, "max": 4, "weight": 2 },
+        { "stat": "armor", "min": 1, "max": 2, "weight": 1 }
+      ],
+      "effect_pool": []
+    },
+    "cave_amulet": {
+      "name": "Cave Amulet",
+      "category": "equipment",
+      "item_type": "amulet",
+      "slot": "amulet",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "max_hp": 2 },
+      "rollable_stats": [{ "stat": "max_hp", "min": 2, "max": 6, "weight": 1 }],
       "effect_pool": []
     }
   }

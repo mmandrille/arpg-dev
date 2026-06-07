@@ -17,8 +17,17 @@
         "properties": {
           "name": { "type": "string" },
           "category": { "type": "string", "enum": ["equipment", "currency", "quest", "consumable"] },
-          "slot": { "type": "string", "enum": ["weapon"] },
+          "slot": {
+            "type": "string",
+            "enum": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
+          },
           "equippable": { "type": "boolean" },
+          "handedness": { "type": "string", "enum": ["one_handed", "two_handed"] },
+          "occupies_hands": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["main_hand", "off_hand"] },
+            "uniqueItems": true
+          },
           "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
           "damage": { "$ref": "#/$defs/damage_range" },
           "reach": { "type": "number", "exclusiveMinimum": 0 },
@@ -53,7 +62,7 @@
             "then": {
               "properties": {
                 "equippable": { "const": true },
-                "slot": { "const": "weapon" }
+                "slot": { "enum": ["main_hand", "off_hand"] }
               },
               "required": ["equippable", "slot"]
             }
@@ -63,7 +72,7 @@
             "then": {
               "properties": {
                 "equippable": { "const": true },
-                "slot": { "const": "weapon" }
+                "slot": { "enum": ["main_hand", "off_hand"] }
               },
               "required": ["equippable", "slot"]
             }
@@ -76,7 +85,7 @@
             "then": {
               "properties": {
                 "equippable": { "const": true },
-                "slot": { "const": "weapon" }
+                "slot": { "enum": ["main_hand", "off_hand"] }
               },
               "required": ["equippable", "slot", "damage", "reach", "projectile_speed"]
             }

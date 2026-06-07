@@ -41,13 +41,31 @@ const (
 	attackModeMelee                = "melee"
 	attackModeRanged               = "ranged"
 	trainingArrowProjectileDefID   = "training_arrow"
-	weaponSlot                     = "weapon"
+	mainHandSlot                   = "main_hand"
+	offHandSlot                    = "off_hand"
+	ringLeftSlot                   = "ring_left"
+	ringRightSlot                  = "ring_right"
 	lootInteractionRadius          = 0.35
 	interactableInteractionRadius  = 0.50
 	meleeRangeEpsilon              = 0.000001
 	projectileRadius               = 0.10
 	tickDuration                   = 0.05
+	minHotbarCapacity              = 2
+	maxHotbarCapacity              = 10
 )
+
+var equipmentSlots = []string{
+	"head",
+	"amulet",
+	"chest",
+	"gloves",
+	"belt",
+	"boots",
+	ringLeftSlot,
+	ringRightSlot,
+	mainHandSlot,
+	offHandSlot,
+}
 
 // DefaultWorldID is the compatibility world used when callers do not choose a
 // preset explicitly.
@@ -136,6 +154,7 @@ type Sim struct {
 	autoNav               *autoNavState
 	inventory             []*invItem
 	equipped              map[string]uint64 // slot -> instanceID (0 = none)
+	hotbar                []uint64          // fixed 10-slot item instance assignments (0 = none)
 	discoveredTeleporters map[int]bool
 	progression           CharacterProgressionState
 }
@@ -180,7 +199,8 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		levels:                make(map[int]*LevelState),
 		currentLevel:          levelZero,
 		multiLevel:            world.Mode == worldModeMultiLevel,
-		equipped:              map[string]uint64{weaponSlot: 0},
+		equipped:              newEquippedMap(),
+		hotbar:                make([]uint64, 10),
 		discoveredTeleporters: make(map[int]bool),
 		progression:           progression,
 	}
@@ -271,6 +291,14 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			level.entities[monster.id] = monster
 		case lootEntity:
 			loot := &entity{kind: lootEntity, pos: preset.Position, itemDefID: preset.ItemDefID}
+			if preset.ItemTemplateID != "" {
+				rolled, ok := s.rollItemTemplate(preset.ItemTemplateID)
+				if !ok {
+					return ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
+				}
+				loot.itemDefID = rolled.ItemTemplateID
+				loot.rollPayload = &rolled
+			}
 			loot.id = s.alloc()
 			level.entities[loot.id] = loot
 		case wallEntity:
@@ -320,6 +348,12 @@ type PersistedItem struct {
 	RolledStats json.RawMessage
 }
 
+// PersistedHotbarSlot is a durable hotbar assignment reloaded on session resume.
+type PersistedHotbarSlot struct {
+	SlotIndex      int
+	ItemInstanceID *string
+}
+
 // LoadInventory restores persisted inventory into a fresh sim (used on resume).
 // The entity counter is advanced past any reloaded instance id so newly
 // allocated ids never collide with reloaded ones.
@@ -337,6 +371,27 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 		if id >= s.nextID {
 			s.nextID = id + 1
 		}
+	}
+}
+
+// LoadHotbar restores fixed hotbar assignments into a fresh sim.
+func (s *Sim) LoadHotbar(slots []PersistedHotbarSlot) {
+	if len(s.hotbar) != 10 {
+		s.hotbar = make([]uint64, 10)
+	}
+	for _, slot := range slots {
+		if slot.SlotIndex < 0 || slot.SlotIndex >= len(s.hotbar) {
+			continue
+		}
+		if slot.ItemInstanceID == nil || *slot.ItemInstanceID == "" {
+			s.hotbar[slot.SlotIndex] = 0
+			continue
+		}
+		id, err := strconv.ParseUint(*slot.ItemInstanceID, 10, 64)
+		if err != nil {
+			continue
+		}
+		s.hotbar[slot.SlotIndex] = id
 	}
 }
 
@@ -427,6 +482,8 @@ type Input struct {
 	Unequip       *UnequipIntent
 	Drop          *DropIntent
 	Use           *UseIntent
+	AssignHotbar  *AssignHotbarIntent
+	UseHotbar     *UseHotbarIntent
 	AllocateStat  *AllocateStatIntent
 }
 
@@ -457,6 +514,13 @@ type (
 	}
 	UseIntent struct {
 		ItemInstanceID string
+	}
+	AssignHotbarIntent struct {
+		SlotIndex      int
+		ItemInstanceID *string
+	}
+	UseHotbarIntent struct {
+		SlotIndex int
 	}
 	AllocateStatIntent struct {
 		Stat   string
@@ -535,7 +599,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "allocate_stat_intent":
+		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -562,6 +626,10 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleDrop(in, res)
 	case "use_intent":
 		s.handleUse(in, res)
+	case "assign_hotbar_intent":
+		s.handleAssignHotbar(in, res)
+	case "use_hotbar_intent":
+		s.handleUseHotbar(in, res)
 	case "allocate_stat_intent":
 		s.handleAllocateStat(in, res)
 	default:
@@ -1169,18 +1237,26 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_payload")
 		return
 	}
+	if !isEquipmentSlot(in.Equip.Slot) {
+		res.reject(in.MessageID, "wrong_slot")
+		return
+	}
 	item := s.findItem(in.Equip.ItemInstanceID)
 	if item == nil {
 		res.reject(in.MessageID, "not_in_inventory")
 		return
 	}
-	slot, ok := s.itemEquipSlot(item)
+	itemSlot, ok := s.itemEquipSlot(item)
 	if !ok {
 		res.reject(in.MessageID, "not_equippable")
 		return
 	}
-	if in.Equip.Slot != slot {
+	if !slotAcceptsItemSlot(in.Equip.Slot, itemSlot) {
 		res.reject(in.MessageID, "wrong_slot")
+		return
+	}
+	if s.slotBlockedByHands(in.Equip.Slot, item) {
+		res.reject(in.MessageID, "hands_blocked")
 		return
 	}
 	if item.rollPayload != nil {
@@ -1190,26 +1266,38 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		}
 	}
 
-	// Unequip whatever currently occupies the slot.
-	if prevID := s.equipped[in.Equip.Slot]; prevID != 0 && prevID != item.instanceID {
+	clearedSlots := s.slotsClearedByEquip(in.Equip.Slot, item)
+	for _, slot := range clearedSlots {
+		prevID := s.equipped[slot]
+		if prevID == 0 || prevID == item.instanceID {
+			continue
+		}
 		if prev := s.findItemByID(prevID); prev != nil {
 			prev.equipped = false
 			res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(prev.view())})
 		}
+		s.equipped[slot] = 0
+		res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
 	}
 
+	item.slot = in.Equip.Slot
 	item.equipped = true
 	s.equipped[in.Equip.Slot] = item.instanceID
 
 	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(item.view())})
 	idCopy := idStr(item.instanceID)
-	res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: in.Equip.Slot, ItemInstanceID: &idCopy})
+	res.Changes = append(res.Changes, Change{
+		Op:             OpEquippedUpdate,
+		Slot:           in.Equip.Slot,
+		ItemInstanceID: &idCopy,
+		HotbarCapacity: intPtr(s.hotbarCapacity()),
+	})
 	res.Events = append(res.Events, Event{EventType: "item_equipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
 	res.ack(in.MessageID)
 }
 
 func (s *Sim) handleUnequip(in Input, res *TickResult) {
-	if in.Unequip == nil || in.Unequip.Slot != weaponSlot {
+	if in.Unequip == nil || !isEquipmentSlot(in.Unequip.Slot) {
 		res.reject(in.MessageID, "invalid_payload")
 		return
 	}
@@ -1226,7 +1314,12 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 	item.equipped = false
 	s.equipped[in.Unequip.Slot] = 0
 	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(item.view())})
-	res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: in.Unequip.Slot, ItemInstanceID: nil})
+	res.Changes = append(res.Changes, Change{
+		Op:             OpEquippedUpdate,
+		Slot:           in.Unequip.Slot,
+		ItemInstanceID: nil,
+		HotbarCapacity: intPtr(s.hotbarCapacity()),
+	})
 	idCopy := idStr(item.instanceID)
 	res.Events = append(res.Events, Event{EventType: "item_unequipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
 	res.ack(in.MessageID)
@@ -1262,6 +1355,7 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 	rollPayload := cloneRollPayload(item.rollPayload)
 	s.removeItemByID(item.instanceID)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
+	s.clearHotbarReferences(item.instanceID, res)
 
 	loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID, rollPayload: rollPayload}
 	loot.id = s.alloc()
@@ -1273,6 +1367,62 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 		CorrelationID:  in.CorrelationID,
 		ItemInstanceID: removedID,
 	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleAssignHotbar(in Input, res *TickResult) {
+	if in.AssignHotbar == nil || !validHotbarSlot(in.AssignHotbar.SlotIndex) {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	if in.AssignHotbar.ItemInstanceID == nil {
+		s.hotbar[in.AssignHotbar.SlotIndex] = 0
+		res.Changes = append(res.Changes, Change{Op: OpHotbarUpdate, SlotIndex: in.AssignHotbar.SlotIndex, ItemInstanceID: nil})
+		res.ack(in.MessageID)
+		return
+	}
+	item := s.findItem(*in.AssignHotbar.ItemInstanceID)
+	if item == nil || item.equipped {
+		res.reject(in.MessageID, "not_in_inventory")
+		return
+	}
+	if !s.itemIsConsumable(item) {
+		res.reject(in.MessageID, "not_consumable")
+		return
+	}
+	s.hotbar[in.AssignHotbar.SlotIndex] = item.instanceID
+	idCopy := idStr(item.instanceID)
+	res.Changes = append(res.Changes, Change{Op: OpHotbarUpdate, SlotIndex: in.AssignHotbar.SlotIndex, ItemInstanceID: &idCopy})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleUseHotbar(in Input, res *TickResult) {
+	if in.UseHotbar == nil || !validHotbarSlot(in.UseHotbar.SlotIndex) {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	if in.UseHotbar.SlotIndex >= s.hotbarCapacity() {
+		res.reject(in.MessageID, "hotbar_slot_disabled")
+		return
+	}
+	itemID := s.hotbar[in.UseHotbar.SlotIndex]
+	if itemID == 0 {
+		res.reject(in.MessageID, "slot_empty")
+		return
+	}
+	item := s.findItemByID(itemID)
+	if item == nil || item.equipped {
+		res.reject(in.MessageID, "not_in_inventory")
+		return
+	}
+	if !s.itemIsConsumable(item) {
+		res.reject(in.MessageID, "not_consumable")
+		return
+	}
+	if ok, reason := s.consumeItem(item, in.CorrelationID, res); !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
 	res.ack(in.MessageID)
 }
 
@@ -1291,18 +1441,28 @@ func (s *Sim) handleUse(in Input, res *TickResult) {
 		res.reject(in.MessageID, "not_in_inventory")
 		return
 	}
-	def, ok := s.rules.Items[item.itemDefID]
-	if !ok || def.Category != "consumable" {
+	if !s.itemIsConsumable(item) {
 		res.reject(in.MessageID, "not_consumable")
 		return
 	}
-	if def.Heal == nil {
-		res.reject(in.MessageID, "not_usable")
+	if ok, reason := s.consumeItem(item, in.CorrelationID, res); !ok {
+		res.reject(in.MessageID, reason)
 		return
 	}
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) (bool, string) {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		return false, "player_dead"
+	}
+	def := s.rules.Items[item.itemDefID]
+	if def.Heal == nil {
+		return false, "not_usable"
+	}
 	if player.hp >= player.maxHP {
-		res.reject(in.MessageID, "already_full_hp")
-		return
+		return false, "already_full_hp"
 	}
 
 	rolled := s.rollRange(*def.Heal)
@@ -1311,31 +1471,31 @@ func (s *Sim) handleUse(in Input, res *TickResult) {
 		heal = player.maxHP - player.hp
 	}
 	if heal <= 0 {
-		res.reject(in.MessageID, "already_full_hp")
-		return
+		return false, "already_full_hp"
 	}
 
 	removedID := idStr(item.instanceID)
 	s.removeItemByID(item.instanceID)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
+	s.clearHotbarReferences(item.instanceID, res)
 
 	player.hp += heal
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
 	res.Events = append(res.Events, Event{
 		EventType:      "item_used",
 		EntityID:       idStr(player.id),
-		CorrelationID:  in.CorrelationID,
+		CorrelationID:  correlationID,
 		Heal:           intPtr(heal),
 		ItemInstanceID: removedID,
 	})
 	res.Events = append(res.Events, Event{
 		EventType:      "player_healed",
 		EntityID:       idStr(player.id),
-		CorrelationID:  in.CorrelationID,
+		CorrelationID:  correlationID,
 		Heal:           intPtr(heal),
 		ItemInstanceID: removedID,
 	})
-	res.ack(in.MessageID)
+	return true, ""
 }
 
 func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
@@ -2337,9 +2497,135 @@ func (s *Sim) itemSlot(itemDefID string, payload *ItemRollPayload) string {
 	return ""
 }
 
+func newEquippedMap() map[string]uint64 {
+	out := make(map[string]uint64, len(equipmentSlots))
+	for _, slot := range equipmentSlots {
+		out[slot] = 0
+	}
+	return out
+}
+
+func slotAcceptsItemSlot(slot, itemSlot string) bool {
+	if itemSlot == "ring" {
+		return slot == ringLeftSlot || slot == ringRightSlot
+	}
+	return slot == itemSlot
+}
+
+func (s *Sim) itemOccupiesHands(item *invItem) []string {
+	if item == nil {
+		return nil
+	}
+	if item.rollPayload != nil {
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok {
+			return cloneStringSlice(template.OccupiesHands)
+		}
+		return nil
+	}
+	if def, ok := s.rules.Items[item.itemDefID]; ok {
+		return cloneStringSlice(def.OccupiesHands)
+	}
+	return nil
+}
+
+func validHotbarSlot(slotIndex int) bool {
+	return slotIndex >= 0 && slotIndex < maxHotbarCapacity
+}
+
+func (s *Sim) hotbarCapacity() int {
+	capacity := minHotbarCapacity
+	belt := s.findItemByID(s.equipped["belt"])
+	if belt != nil {
+		if belt.rollPayload != nil {
+			if rolled := belt.rollPayload.Stats["hotbar_slots"]; rolled > 0 {
+				capacity = rolled
+			} else if template, ok := s.rules.ItemTemplates[belt.rollPayload.ItemTemplateID]; ok {
+				capacity = template.BaseStats["hotbar_slots"]
+			}
+		} else if template, ok := s.rules.ItemTemplates[belt.itemDefID]; ok {
+			capacity = template.BaseStats["hotbar_slots"]
+		}
+	}
+	if capacity < minHotbarCapacity {
+		return minHotbarCapacity
+	}
+	if capacity > maxHotbarCapacity {
+		return maxHotbarCapacity
+	}
+	return capacity
+}
+
+func (s *Sim) hotbarView() []HotbarSlotView {
+	if len(s.hotbar) != maxHotbarCapacity {
+		s.hotbar = make([]uint64, maxHotbarCapacity)
+	}
+	out := make([]HotbarSlotView, 0, maxHotbarCapacity)
+	for i, itemID := range s.hotbar {
+		slot := HotbarSlotView{SlotIndex: i}
+		if itemID != 0 {
+			id := idStr(itemID)
+			slot.ItemInstanceID = &id
+		}
+		out = append(out, slot)
+	}
+	return out
+}
+
+func (s *Sim) itemIsConsumable(item *invItem) bool {
+	if item == nil || item.rollPayload != nil {
+		return false
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	return ok && def.Category == "consumable"
+}
+
+func (s *Sim) clearHotbarReferences(instanceID uint64, res *TickResult) {
+	for i, assigned := range s.hotbar {
+		if assigned != instanceID {
+			continue
+		}
+		s.hotbar[i] = 0
+		res.Changes = append(res.Changes, Change{Op: OpHotbarUpdate, SlotIndex: i, ItemInstanceID: nil})
+	}
+}
+
+func (s *Sim) slotBlockedByHands(slot string, item *invItem) bool {
+	if slot != offHandSlot {
+		return false
+	}
+	mainHand := s.findItemByID(s.equipped[mainHandSlot])
+	if mainHand == nil || mainHand.instanceID == item.instanceID {
+		return false
+	}
+	for _, occupied := range s.itemOccupiesHands(mainHand) {
+		if occupied == offHandSlot {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Sim) slotsClearedByEquip(slot string, item *invItem) []string {
+	seen := map[string]bool{}
+	out := make([]string, 0, 2)
+	add := func(candidate string) {
+		if !isEquipmentSlot(candidate) || seen[candidate] {
+			return
+		}
+		seen[candidate] = true
+		out = append(out, candidate)
+	}
+	add(slot)
+	for _, occupied := range s.itemOccupiesHands(item) {
+		add(occupied)
+	}
+	sort.Strings(out)
+	return out
+}
+
 func (s *Sim) playerReach() float64 {
 	base := s.rules.Combat.UnarmedReach
-	instanceID := s.equipped[weaponSlot]
+	instanceID := s.equipped[mainHandSlot]
 	if instanceID == 0 {
 		return base
 	}
@@ -2397,7 +2683,7 @@ func (s *Sim) equippedWeaponDef() (ItemDef, bool) {
 }
 
 func (s *Sim) equippedWeaponItem() *invItem {
-	instanceID := s.equipped[weaponSlot]
+	instanceID := s.equipped[mainHandSlot]
 	if instanceID == 0 {
 		return nil
 	}
@@ -2540,7 +2826,7 @@ func (s *Sim) actionable(e *entity) bool {
 
 func (s *Sim) resolvePlayerAttackDamage() DamageRange {
 	base := s.rules.Combat.PlayerDamage
-	instanceID := s.equipped[weaponSlot]
+	instanceID := s.equipped[mainHandSlot]
 	if instanceID == 0 {
 		return s.applyStrengthDamageBonus(base)
 	}
@@ -2783,6 +3069,8 @@ func (s *Sim) Snapshot() Snapshot {
 		Entities:              entities,
 		Inventory:             inventory,
 		Equipped:              equipped,
+		HotbarCapacity:        s.hotbarCapacity(),
+		Hotbar:                s.hotbarView(),
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
 		CharacterProgression:  s.CharacterProgressionView(),
 		RecentEvents:          []Event{},

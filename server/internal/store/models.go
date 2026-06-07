@@ -98,12 +98,22 @@ type CharacterProgression struct {
 	UpdatedAt         time.Time
 }
 
+// CharacterHotbarSlot is one durable character-owned hotbar assignment.
+type CharacterHotbarSlot struct {
+	AccountID      string
+	CharacterID    string
+	SlotIndex      int
+	ItemInstanceID *string
+	UpdatedAt      time.Time
+}
+
 // SessionStartSnapshot freezes the character progression visible when a
 // session was created. Replay uses this instead of mutable live character rows.
 type SessionStartSnapshot struct {
 	SessionID   string
 	Items       []CharacterItemInstance
 	Waypoints   []CharacterWaypoint
+	Hotbar      []CharacterHotbarSlot
 	Progression *CharacterProgression
 }
 

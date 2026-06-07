@@ -20,6 +20,7 @@ const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
+const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
@@ -117,6 +118,7 @@ var _health_bar: PlayerHealthBar
 
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
+var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
 var _debug_label: Label
 var _level_label: Label
 var _camera: Camera3D
@@ -775,6 +777,8 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 # --- input + prediction -----------------------------------------------------
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		_sustained_click.clear()
 	if event is InputEventKey and event.pressed and not event.echo and _is_escape_key(event):
 		_handle_escape()
 		get_viewport().set_input_as_handled()
@@ -799,7 +803,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
-					_try_action_at_mouse()
+					var pick := _resolve_click_at_mouse()
+					_sustained_click.begin_from_pick(pick)
+					_execute_click_pick(pick)
 			MOUSE_BUTTON_WHEEL_UP:
 				_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			MOUSE_BUTTON_WHEEL_DOWN:
@@ -808,10 +814,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _handle_input(delta: float) -> void:
 	if _user_input_blocked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
+		if _sustained_click.active:
+			_sustained_click.clear()
 		return
+
 	_send_cooldown -= delta
 	_attack_cooldown -= delta
 	if player_hp <= 0:
+		if _sustained_click.active:
+			_sustained_click.clear()
 		return
 
 	var input := Vector2.ZERO
@@ -827,6 +838,11 @@ func _handle_input(delta: float) -> void:
 		_reconcile_player()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 		_send_cooldown = SEND_INTERVAL
+
+	if _hold_input_allowed():
+		_tick_sustained_click()
+	elif _sustained_click.active:
+		_sustained_click.clear()
 
 
 func _is_inventory_key(event: InputEventKey) -> bool:
@@ -943,18 +959,49 @@ func _handle_autoplay(delta: float) -> void:
 			return
 
 
-func _try_action_at_mouse() -> void:
-	if _attack_cooldown > 0.0 or player_hp <= 0:
-		return
+func _hold_input_allowed() -> bool:
+	if _input_locked() or bot_mode:
+		return false
 
+	if inventory_panel != null and inventory_panel.visible:
+		return false
+
+	return true
+
+
+func _resolve_click_at_mouse() -> Dictionary:
 	var target_id := _pick_entity_at_mouse()
 	if target_id == "" or not entities.has(target_id):
 		var ground := _mouse_ground_point()
-		target_id = _nearest_loot_at_ground(ground)
-		if target_id == "":
-			client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
-			_attack_cooldown = SEND_INTERVAL
-			return
+		var loot_id := _nearest_loot_at_ground(ground)
+		if loot_id == "":
+			return {"kind": "floor", "ground": ground}
+		return {"kind": "oneshot", "target_id": loot_id}
+
+	var rec: Dictionary = entities[target_id]
+	var typ := str(rec.get("type", ""))
+	if typ == "monster" and not _is_dead_monster(target_id):
+		return {"kind": "monster", "target_id": target_id}
+
+	return {"kind": "oneshot", "target_id": target_id}
+
+
+func _execute_click_pick(pick: Dictionary) -> void:
+	if _attack_cooldown > 0.0 or player_hp <= 0:
+		return
+
+	var kind := str(pick.get("kind", ""))
+	if kind == "floor":
+		var ground: Vector3 = pick.get("ground", Vector3.ZERO)
+		client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
+		_attack_cooldown = SEND_INTERVAL
+		if _sustained_click.mode == "move":
+			_sustained_click.mark_move_sent(ground)
+		return
+
+	var target_id := str(pick.get("target_id", ""))
+	if target_id == "" or not entities.has(target_id):
+		return
 
 	var rec: Dictionary = entities[target_id]
 	var target_node := rec["node"] as Node3D
@@ -976,6 +1023,66 @@ func _try_action_at_mouse() -> void:
 
 	client.send("action_intent", last_server_tick, {"target_id": target_id})
 	_attack_cooldown = SEND_INTERVAL
+
+
+func _tick_sustained_click() -> void:
+	if not _sustained_click.active:
+		return
+
+	if _attack_cooldown > 0.0:
+		return
+
+	if _sustained_click.should_stop(player_hp, entities):
+		_sustained_click.clear()
+		return
+
+	if _sustained_click.mode == "attack":
+		_repeat_hold_attack()
+	elif _sustained_click.mode == "move":
+		_repeat_hold_move()
+
+
+func _repeat_hold_attack() -> void:
+	var target_id := _sustained_click.target_id
+	if target_id == "" or not entities.has(target_id):
+		_sustained_click.clear()
+		return
+
+	var rec: Dictionary = entities[target_id]
+	var target_node := rec["node"] as Node3D
+	if target_node == null:
+		_sustained_click.clear()
+		return
+
+	var flat := Vector2(
+		target_node.global_position.x - player_anchor.global_position.x,
+		target_node.global_position.z - player_anchor.global_position.z
+	)
+	if flat.length_squared() > 0.0001:
+		_face_direction(flat.normalized())
+
+	if player_anim != null:
+		player_anim.play_one_shot("attack")
+
+	client.send("action_intent", last_server_tick, {"target_id": target_id})
+	_attack_cooldown = SEND_INTERVAL
+
+
+func _repeat_hold_move() -> void:
+	var ground := _mouse_ground_point()
+	if not _sustained_click.can_repeat_move(ground):
+		return
+
+	client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
+	_sustained_click.mark_move_sent(ground)
+	_attack_cooldown = SEND_INTERVAL
+
+
+func _try_action_at_mouse() -> void:
+	if _attack_cooldown > 0.0 or player_hp <= 0:
+		return
+
+	_execute_click_pick(_resolve_click_at_mouse())
 
 
 func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> void:

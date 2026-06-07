@@ -11,8 +11,8 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v25 — `treasure-classes-and-guarded-chests` (multi-attempt drops, rare guarded chests) |
-| **Active branch** | `feature/treasure-classes-and-guarded-chests` |
+| **Latest completed slice** | v27 — `hold-click-controls` (sustained LMB attack and floor follow-move) |
+| **Active branch** | `feature/hold-click-controls` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
 
@@ -41,6 +41,7 @@ v22_* = character-scoped-persistence
 v23_* = item-templates-and-rolled-drops
 v24_* = main-menu-and-character-start
 v25_* = treasure-classes-and-guarded-chests
+v27_* = hold-click-controls
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -86,6 +87,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v23** | `item-templates-and-rolled-drops` | Complete (`make ci` green) | [`v23_spec-item-templates-and-rolled-drops.md`](specs/v23_spec-item-templates-and-rolled-drops.md) | [`v23_2026-06-07-item-templates-and-rolled-drops.md`](plans/v23_2026-06-07-item-templates-and-rolled-drops.md) |
 | **v24** | `main-menu-and-character-start` | Complete (`make ci` green) | [`v24_spec-main-menu-and-character-start.md`](specs/v24_spec-main-menu-and-character-start.md) | [`v24_2026-06-07-main-menu-and-character-start.md`](plans/v24_2026-06-07-main-menu-and-character-start.md) |
 | **v25** | `treasure-classes-and-guarded-chests` | Complete (`make ci` green) | [`v25_spec-treasure-classes-and-guarded-chests.md`](specs/v25_spec-treasure-classes-and-guarded-chests.md) | [`v25_2026-06-07-treasure-classes-and-guarded-chests.md`](plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md) |
+| **v27** | `hold-click-controls` | Complete (`make ci` green) | [`v27_spec-hold-click-controls.md`](specs/v27_spec-hold-click-controls.md) | [`v27_2026-06-07-hold-click-controls.md`](plans/v27_2026-06-07-hold-click-controls.md) |
 
 ---
 
@@ -584,6 +586,24 @@ multiple ordered drop attempts, while rare procedural chests create guarded dung
 **Explicit non-goals:** no Magic Find stat or rarity modifier, no unique/set catalogs, no real gold
 wallet, no boss-floor rules, no production chest art/animation/audio, and no client-side drop logic.
 
+### v27 — Hold click controls
+
+**Proves:** Diablo-style sustained left-click input can live entirely in the Godot client by repeating
+existing intents at the current send cadence, without protocol or server changes.
+
+- Hold LMB on a live monster locks a sticky target and repeats `action_intent` at `SEND_INTERVAL`
+  until the monster dies, the player dies, LMB releases, or the target becomes invalid.
+- Hold LMB on floor repeats `move_to_intent` toward the mouse ground point when cursor movement
+  exceeds a 0.25 xz epsilon.
+- Loot, doors, stairs, teleporters, and chest clicks stay one-shot; open chests are non-actionable
+  and do not spam intents.
+- Out-of-range hold-attack still uses v11 auto-approach; WASD cancel of auto-nav is unchanged.
+- `SustainedClickInput` helper + `test_sustained_input.gd` cover hold start/stop/epsilon logic;
+  bot hold+drag scenario remains deferred.
+
+**Explicit non-goals:** no server swing cooldown, no hold-move walk animation, no controls remapping
+UI, no new bot drag scenario.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -710,6 +730,10 @@ and a Godot client bot proof for the complete menu path.
 **Treasure classes and guarded chests are now authoritative.** v25 adds data-driven multi-attempt
 monster/chest loot, deterministic rare chest generation with guarded monster bonus, open-once chest
 loot, and bot/golden coverage for the complete path.
+
+**Sustained left-click controls are now client-side.** v27 adds hold-to-attack on monsters and
+hold-to-move on floor by repeating existing `action_intent` / `move_to_intent` at `SEND_INTERVAL`,
+with sticky targets, move epsilon, and headless unit coverage — no protocol or server changes.
 
 ### Other deferred items (from specs / ADRs)
 

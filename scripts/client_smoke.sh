@@ -64,6 +64,9 @@ run_gate "GDScript client bot unit test" "[gdtest] PASS: test_client_bot" res://
 # 2e. Waypoint panel scroll/layout test (server-independent; v19).
 run_gate "GDScript waypoint panel test" "[gdtest] PASS: test_waypoint_panel" res://tests/test_waypoint_panel.gd
 
+# 2f. Sustained click hold state (server-independent; v27).
+run_gate "GDScript sustained input test" "[gdtest] PASS: test_sustained_input" res://tests/test_sustained_input.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0

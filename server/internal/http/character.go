@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ const maxCharacterNameRunes = 24
 func (s *Server) registerCharacterRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /v0/characters", s.requireAuth(http.HandlerFunc(s.handleListCharacters)))
 	mux.Handle("POST /v0/characters", s.requireAuth(http.HandlerFunc(s.handleCreateCharacter)))
+	mux.Handle("DELETE /v0/characters/{character_id}", s.requireAuth(http.HandlerFunc(s.handleDeleteCharacter)))
 }
 
 type characterResponse struct {
@@ -81,6 +83,33 @@ func (s *Server) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusCreated, characterToResponse(char))
+}
+
+func (s *Server) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account context")
+		return
+	}
+
+	characterID := strings.TrimSpace(r.PathValue("character_id"))
+	if characterID == "" {
+		writeError(w, http.StatusBadRequest, "bad_request", "character_id is required")
+		return
+	}
+
+	err := s.store.DeleteCharacter(r.Context(), accountID, characterID)
+	if errors.Is(err, store.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "not_found", "character not found")
+		return
+	}
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not delete character")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func characterToResponse(c store.Character) characterResponse {

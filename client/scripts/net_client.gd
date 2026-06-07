@@ -101,6 +101,14 @@ func create_character(name: String) -> Dictionary:
 	return {}
 
 
+func delete_character(character_id: String) -> bool:
+	if character_id == "":
+		return false
+	var r := _http(HTTPClient.METHOD_DELETE, "/v0/characters/" + character_id,
+		["Authorization: Bearer " + token], "")
+	return r.get("_code", 0) == 204
+
+
 func create_session(resume_session_id: String = "", requested_world_id: String = "", character_id: String = "") -> bool:
 	# resume_session_id rejoins an existing session: the server rehydrates
 	# inventory AND equipped state before the initial session_snapshot (no

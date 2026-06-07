@@ -51,6 +51,7 @@ func _assert_scroll_overflows_with_many_rows(golden: Dictionary) -> void:
 		rows.add_child(row)
 	if scroll.custom_minimum_size.y != viewport_h:
 		_fail("scroll viewport height mismatch")
+	scroll.free()
 
 
 func _read(path: String) -> Dictionary:

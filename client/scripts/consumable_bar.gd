@@ -179,8 +179,7 @@ func get_slot_screen_center(slot_index: int) -> Vector2:
 
 
 func _sync_viewport_size() -> void:
-	position = Vector2.ZERO
-	size = get_viewport_rect().size
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if _panel != null:
 		_position_panel()
 	if _xp_bar != null:

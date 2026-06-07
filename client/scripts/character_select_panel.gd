@@ -4,6 +4,7 @@ class_name CharacterSelectPanel
 signal back_requested
 signal start_requested(character_id: String)
 signal create_requested(name: String)
+signal delete_requested(character_id: String)
 
 var _title: Label
 var _rows: VBoxContainer
@@ -11,7 +12,10 @@ var _empty_label: Label
 var _name_edit: LineEdit
 var _create_button: Button
 var _error_label: Label
+var _confirm_dialog: ConfirmationDialog
 var _characters: Array = []
+var _delete_mode: bool = false
+var _pending_delete_id: String = ""
 
 
 func _ready() -> void:
@@ -26,6 +30,7 @@ func show_continue(characters: Array) -> void:
 	_sync_viewport_size()
 	visible = true
 	_characters = characters.duplicate(true)
+	_delete_mode = true
 	_title.text = "Continue"
 	_name_edit.visible = false
 	_create_button.visible = false
@@ -37,6 +42,7 @@ func show_new_game() -> void:
 	_sync_viewport_size()
 	visible = true
 	_characters = []
+	_delete_mode = false
 	_title.text = "New Game"
 	_name_edit.visible = true
 	_create_button.visible = true
@@ -51,9 +57,7 @@ func hide_panel() -> void:
 
 
 func _sync_viewport_size() -> void:
-	set_anchors_preset(Control.PRESET_TOP_LEFT)
-	position = Vector2.ZERO
-	size = get_viewport_rect().size
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func set_error(message: String) -> void:
@@ -136,6 +140,13 @@ func _build() -> void:
 	back.pressed.connect(back_requested.emit)
 	box.add_child(back)
 
+	_confirm_dialog = ConfirmationDialog.new()
+	_confirm_dialog.title = "Delete character?"
+	_confirm_dialog.ok_button_text = "Yes"
+	_confirm_dialog.cancel_button_text = "No"
+	_confirm_dialog.confirmed.connect(_on_delete_confirmed)
+	add_child(_confirm_dialog)
+
 
 func _render_characters(characters: Array) -> void:
 	for child in _rows.get_children():
@@ -144,15 +155,45 @@ func _render_characters(characters: Array) -> void:
 	for character in characters:
 		if typeof(character) != TYPE_DICTIONARY:
 			continue
-		var row := Button.new()
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		row.custom_minimum_size = Vector2(360, 38)
 		var name := str(character.get("name", "Hero"))
 		var created := str(character.get("created_at", ""))
-		row.text = name if created == "" else "%s  %s" % [name, created.left(10)]
-		row.custom_minimum_size = Vector2(360, 38)
-		row.pressed.connect(func() -> void:
+		var select_btn := Button.new()
+		select_btn.text = name if created == "" else "%s  %s" % [name, created.left(10)]
+		select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		select_btn.pressed.connect(func() -> void:
 			start_requested.emit(str(character.get("character_id", "")))
 		)
+		row.add_child(select_btn)
+		if _delete_mode:
+			var delete_btn := Button.new()
+			delete_btn.text = "🗑"
+			delete_btn.tooltip_text = "Delete character"
+			delete_btn.custom_minimum_size = Vector2(38, 38)
+			delete_btn.focus_mode = Control.FOCUS_NONE
+			var character_id := str(character.get("character_id", ""))
+			delete_btn.pressed.connect(func() -> void:
+				_prompt_delete(character_id, name)
+			)
+			row.add_child(delete_btn)
 		_rows.add_child(row)
+
+
+func _prompt_delete(character_id: String, character_name: String) -> void:
+	if character_id == "":
+		return
+	_pending_delete_id = character_id
+	_confirm_dialog.dialog_text = "Delete %s? This cannot be undone." % character_name
+	_confirm_dialog.popup_centered()
+
+
+func _on_delete_confirmed() -> void:
+	if _pending_delete_id == "":
+		return
+	delete_requested.emit(_pending_delete_id)
+	_pending_delete_id = ""
 
 
 func _create_from_input() -> void:

@@ -14,6 +14,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/auth"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/config"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/metrics"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
@@ -75,6 +76,16 @@ func postJSON(h http.Handler, path, bearer string, body any) *httptest.ResponseR
 
 func getJSON(h http.Handler, path, bearer string) *httptest.ResponseRecorder {
 	req := httptest.NewRequest(http.MethodGet, path, nil)
+	if bearer != "" {
+		req.Header.Set("Authorization", "Bearer "+bearer)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
+func deleteJSON(h http.Handler, path, bearer string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodDelete, path, nil)
 	if bearer != "" {
 		req.Header.Set("Authorization", "Bearer "+bearer)
 	}
@@ -168,6 +179,10 @@ func TestCharacterAPIRequiresAuth(t *testing.T) {
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("create status = %d, want 401", rec.Code)
 	}
+	rec = deleteJSON(h, "/v0/characters/char_missing", "")
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("delete status = %d, want 401", rec.Code)
+	}
 }
 
 func TestCreateCharacterValidationAndList(t *testing.T) {
@@ -230,6 +245,81 @@ func TestCharactersAreAccountScoped(t *testing.T) {
 			t.Fatalf("account B saw account A character: %+v", listed.Characters)
 		}
 	}
+}
+
+func TestDeleteCharacterRemovesOwnedCharacter(t *testing.T) {
+	h := fullServer(t)
+	_, token := loginEmail(t, h, "characters-delete+"+ids.Token()[:12]+"@example.test")
+	keep := createCharacter(t, h, token, "Keep")
+	remove := createCharacter(t, h, token, "Remove")
+
+	rec := deleteJSON(h, "/v0/characters/"+remove.CharacterID, token)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("delete status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	rec = getJSON(h, "/v0/characters", token)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var listed listCharactersResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listed); err != nil {
+		t.Fatalf("decode list: %v", err)
+	}
+	if len(listed.Characters) != 2 {
+		t.Fatalf("listed characters after delete = %+v, want 2 remaining", listed.Characters)
+	}
+	for _, c := range listed.Characters {
+		if c.CharacterID == remove.CharacterID {
+			t.Fatalf("deleted character still listed: %+v", listed.Characters)
+		}
+	}
+	var foundKeep bool
+	for _, c := range listed.Characters {
+		if c.CharacterID == keep.CharacterID {
+			foundKeep = true
+			break
+		}
+	}
+	if !foundKeep {
+		t.Fatalf("keep character missing after delete: %+v", listed.Characters)
+	}
+
+	rec = deleteJSON(h, "/v0/characters/"+remove.CharacterID, token)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("second delete status = %d, want 404", rec.Code)
+	}
+}
+
+func TestDeleteCharacterIsAccountScoped(t *testing.T) {
+	h := fullServer(t)
+	suffix := ids.Token()[:12]
+	_, tokenA := loginEmail(t, h, "characters-delete-a+"+suffix+"@example.test")
+	_, tokenB := loginEmail(t, h, "characters-delete-b+"+suffix+"@example.test")
+	charA := createCharacter(t, h, tokenA, "Account A Hero")
+
+	rec := deleteJSON(h, "/v0/characters/"+charA.CharacterID, tokenB)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("delete other account character status = %d, want 404", rec.Code)
+	}
+
+	rec = getJSON(h, "/v0/characters", tokenA)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var listed listCharactersResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listed); err != nil {
+		t.Fatalf("decode list: %v", err)
+	}
+	if len(listed.Characters) != 2 {
+		t.Fatalf("account A characters deleted by account B: %+v", listed.Characters)
+	}
+	for _, c := range listed.Characters {
+		if c.CharacterID == charA.CharacterID {
+			return
+		}
+	}
+	t.Fatalf("account A character missing after cross-account delete attempt: %+v", listed.Characters)
 }
 
 func TestCreateAndResumeSession(t *testing.T) {

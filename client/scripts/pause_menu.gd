@@ -25,9 +25,7 @@ func hide_pause() -> void:
 
 
 func _sync_viewport_size() -> void:
-	set_anchors_preset(Control.PRESET_TOP_LEFT)
-	position = Vector2.ZERO
-	size = get_viewport_rect().size
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _build() -> void:

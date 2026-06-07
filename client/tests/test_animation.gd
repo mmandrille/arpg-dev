@@ -51,7 +51,7 @@ func _test_controller_locomotion() -> void:
 	_assert(c.current_clip() == "idle", "idle when not moving, got %s" % c.current_clip())
 	c.set_locomotion(true)
 	_assert(c.current_clip() == "walk", "walk when moving, got %s" % c.current_clip())
-	ap.queue_free()
+	ap.free()
 
 
 func _test_controller_one_shot_returns() -> void:
@@ -63,7 +63,7 @@ func _test_controller_one_shot_returns() -> void:
 	# Simulate the clip finishing.
 	ap.emit_signal("animation_finished", "attack")
 	_assert(c.current_clip() == "walk", "returns to locomotion (walk) after one-shot, got %s" % c.current_clip())
-	ap.queue_free()
+	ap.free()
 
 
 func _test_controller_terminal_latches() -> void:
@@ -75,7 +75,7 @@ func _test_controller_terminal_latches() -> void:
 	c.set_locomotion(true)        # ignored
 	_assert(c.current_clip() == "death", "terminal latched, got %s" % c.current_clip())
 	_assert(c.get_debug_state()["terminal"] == true, "terminal flag set")
-	ap.queue_free()
+	ap.free()
 
 
 func _test_controller_hit_ignored_after_death() -> void:
@@ -84,7 +84,7 @@ func _test_controller_hit_ignored_after_death() -> void:
 	c.enter_terminal("death")
 	c.play_one_shot("hit")
 	_assert(c.current_clip() == "death", "hit ignored after terminal death, got %s" % c.current_clip())
-	ap.queue_free()
+	ap.free()
 
 
 func _test_controller_locomotion_change_during_one_shot() -> void:
@@ -96,7 +96,7 @@ func _test_controller_locomotion_change_during_one_shot() -> void:
 	_assert(c.current_clip() == "attack", "locomotion change ignored during one-shot, got %s" % c.current_clip())
 	ap.emit_signal("animation_finished", "attack")
 	_assert(c.current_clip() == "walk", "fallback honors latched _moving after one-shot, got %s" % c.current_clip())
-	ap.queue_free()
+	ap.free()
 
 
 func _test_character_scene() -> void:
@@ -112,7 +112,8 @@ func _test_character_scene() -> void:
 	if ap != null:
 		for clip in ["idle", "walk", "attack", "hit", "death"]:
 			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
-	s.queue_free()
+	s.free()
+	await process_frame
 
 
 func _test_player_snapshot_death_pose() -> void:
@@ -128,7 +129,8 @@ func _test_player_snapshot_death_pose() -> void:
 			player_controller.enter_terminal("death")
 		_assert(player_controller.get_debug_state()["terminal"] == true, "player snapshot hp<=0 enters terminal death")
 		_assert(player_controller.current_clip() == "death", "player snapshot death clip active, got %s" % player_controller.current_clip())
-	s.queue_free()
+	s.free()
+	await process_frame
 
 
 func _test_monster_scene() -> void:
@@ -140,7 +142,8 @@ func _test_monster_scene() -> void:
 	if ap != null:
 		for clip in ["idle", "hit", "death"]:
 			_assert(ap.has_animation(clip), "monster missing clip %s" % clip)
-	s.queue_free()
+	s.free()
+	await process_frame
 
 
 func _assert(cond: bool, msg: String) -> void:

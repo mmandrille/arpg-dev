@@ -18,6 +18,7 @@ type CharacterRepo interface {
 	GetCharacter(ctx context.Context, id string) (Character, error)
 	ListCharacters(ctx context.Context, accountID string) ([]Character, error)
 	CreateCharacter(ctx context.Context, charID, accountID, name string) (Character, error)
+	DeleteCharacter(ctx context.Context, accountID, characterID string) error
 }
 
 // SessionRepo manages session lifecycle records.

@@ -85,8 +85,7 @@ func bot_click_stat_button(stat: String) -> void:
 
 
 func _sync_viewport_size() -> void:
-	position = Vector2.ZERO
-	size = get_viewport_rect().size
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _build() -> void:

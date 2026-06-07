@@ -287,6 +287,15 @@ func _on_character_create_requested(name: String) -> void:
 	_start_character_session(str(character.get("character_id", "")))
 
 
+func _on_character_delete_requested(character_id: String) -> void:
+	if not client.delete_character(character_id):
+		if character_panel != null:
+			character_panel.set_error("Could not delete character")
+		return
+	if character_panel != null:
+		character_panel.show_continue(client.list_characters())
+
+
 func _start_character_session(character_id: String) -> void:
 	if character_id == "":
 		if character_panel != null:
@@ -1528,6 +1537,7 @@ func _setup_menu_layer() -> void:
 	)
 	character_panel.start_requested.connect(_start_character_session)
 	character_panel.create_requested.connect(_on_character_create_requested)
+	character_panel.delete_requested.connect(_on_character_delete_requested)
 	menu_layer.add_child(character_panel)
 
 	settings_panel = SettingsPanelScript.new()

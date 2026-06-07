@@ -1,0 +1,21 @@
+tools/bot/scenarios/client/07_town_teleporter_auto_approach.json
+  s_45057eb449e363::t_bd3b5c890ea8f2 12-15
+client/scripts/main.gd
+  s_45057eb449e363::t_bd3b5c890ea8f2 448,1637-1642
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d0a0b4e319f0cb3cf09c829d9a96781a7e5878a3",
+  "prompts": {},
+  "sessions": {
+    "s_45057eb449e363": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea38c-5ca0-7f61-b85e-47b72f0480f0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+server/internal/store/interfaces.go
+  s_0ba4ff58f3597f::t_66b55e44a84420 21
+client/scripts/net_client.gd
+  s_0ba4ff58f3597f::t_2830959df484ab 104-111
+client/scripts/inventory_panel.gd
+  s_0ba4ff58f3597f::t_6a2ea3e2d531f1 135
+server/internal/http/character.go
+  s_0ba4ff58f3597f::t_6b68943c2cc3d2 19
+  s_0ba4ff58f3597f::t_27c4a7f923da0d 4
+  s_0ba4ff58f3597f::t_b5f0aa9eca5d9e 88-114
+client/scripts/character_stats_panel.gd
+  s_0ba4ff58f3597f::t_7a0b396db7655d 88
+server/internal/store/repos.go
+  s_0ba4ff58f3597f::t_0c23d68083dcb4 123-182
+client/scripts/character_select_panel.gd
+  s_0ba4ff58f3597f::t_50ea9d7beb39ea 172
+  s_0ba4ff58f3597f::t_203b04131fc821 143-149
+  s_0ba4ff58f3597f::t_0ba863a966b990 7,15,17-18
+  s_0ba4ff58f3597f::t_8312ce943a101a 45
+  s_0ba4ff58f3597f::t_f93c46afcc19b4 158-160,163-166,169-171,173-180,184-196
+  s_0ba4ff58f3597f::t_9b24b9d5bcffdd 33
+  s_0ba4ff58f3597f::t_b2fe78a111c59f 60
+client/scripts/main.gd
+  s_0ba4ff58f3597f::t_76970d3ed3e9b0 1540
+  s_0ba4ff58f3597f::t_d3bb163df54ba5 290-298
+server/internal/replay/replay_test.go
+  s_0ba4ff58f3597f::t_26c793bb82f668 334
+client/tests/test_waypoint_panel.gd
+  s_0ba4ff58f3597f::t_a12ea96522690f 54
+client/scripts/main_menu.gd
+  s_0ba4ff58f3597f::t_25f90f3d0ece69 24
+client/scripts/settings_panel.gd
+  s_0ba4ff58f3597f::t_140d00e3e12ec6 30
+client/tests/test_animation.gd
+  s_0ba4ff58f3597f::t_593a5c60cefc0a 145-146
+  s_0ba4ff58f3597f::t_4f902b18e27778 87
+  s_0ba4ff58f3597f::t_36b1395113c1a3 115-116
+  s_0ba4ff58f3597f::t_1d6c171f00596b 132-133
+  s_0ba4ff58f3597f::t_e3a3f8c69ca9bd 78
+  s_0ba4ff58f3597f::t_c1e7c0510ee27b 66
+  s_0ba4ff58f3597f::t_611adeae873d71 54
+  s_0ba4ff58f3597f::t_b405dd667e19fa 99
+server/internal/store/store_test.go
+  s_0ba4ff58f3597f::t_b0d9a3a221c4e9 109-167
+client/scripts/pause_menu.gd
+  s_0ba4ff58f3597f::t_7f7ef247da846b 28
+client/scripts/consumable_bar.gd
+  s_0ba4ff58f3597f::t_6cf4b5748ff424 182
+server/internal/http/auth_session_test.go
+  s_0ba4ff58f3597f::t_a03e5ef2f5eaf4 269-285
+  s_0ba4ff58f3597f::t_e2256931d99134 296-298
+  s_0ba4ff58f3597f::t_26ad64b8b4bb9d 182-185
+  s_0ba4ff58f3597f::t_f4ef82c052ec10 17
+  s_0ba4ff58f3597f::t_fcfdac684663e7 314-315,317-322
+  s_0ba4ff58f3597f::t_bb2e22d2e4c1cc 87-96
+  s_0ba4ff58f3597f::t_8dad3897c9c2cb 250-251,253-268,286-295,299-313,316,323-324
+  s_0ba4ff58f3597f::t_3e2f55b0129560 252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "349322f5ba7f6be726ac4beed967426c26b55c4e",
+  "prompts": {},
+  "sessions": {
+    "s_0ba4ff58f3597f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "79b29e74-d037-4c8c-bcbd-30b30deee920",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

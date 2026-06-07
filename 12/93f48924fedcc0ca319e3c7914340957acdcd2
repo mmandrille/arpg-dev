@@ -1,0 +1,109 @@
+shared/rules/dungeon_generation.v0.json
+  s_9c5eb181053441::t_c95700007c1374 25-26
+  s_9c5eb181053441::t_72c22b3f87241e 23-24,27-32
+shared/golden/guarded_chest_generation.json
+  s_9c5eb181053441::t_9836c4d8402c91 1-23
+docs/PROGRESS.md
+  s_9c5eb181053441::t_8bbc714c24239c 14-15,43,88,558-586,628,710-713,720-721
+server/internal/game/dungeon_gen.go
+  s_9c5eb181053441::t_1633c27ac65214 16,31-36,76-77,98-99,126-133,195-253,256-260,307-308
+  s_9c5eb181053441::t_214d76fff333fc 55,75,97
+shared/golden/guarded_chest_generation.v0.schema.json
+  s_9c5eb181053441::t_9836c4d8402c91 1-48
+server/internal/game/rules.go
+  s_9c5eb181053441::t_503c7933faa4f6 780-782,797-827
+  s_9c5eb181053441::t_deacb3603bf39a 90-97
+  s_9c5eb181053441::t_d76bee9f9cf624 744-745
+  s_9c5eb181053441::t_065ec429afaa67 516-524,567,593,646-673,687
+  s_9c5eb181053441::t_45e7de49ae5682 414-460
+  s_9c5eb181053441::t_0b82870ff5c126 22,59,89,98-99,201-217,220-222
+docs/plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md
+  s_9c5eb181053441::t_17c36bb3034184 144-147,159-165
+  s_9c5eb181053441::t_a543e263e98b39 3,178-181,189-194
+  s_9c5eb181053441::t_ab434df0af55de 73-74,87-93,106-112,127-132
+  s_9c5eb181053441::t_67f2534dc0bedc 48-55,70-72
+  s_9c5eb181053441::t_2fecd3b53187d2 1-2,4-47,56-69,75-86,94-105,113-126,133-143,148-158,166-177,182-188,195-203
+server/internal/http/auth_session_test.go
+  s_9c5eb181053441::t_a9ec7957c41fca 29-32,54
+  s_9c5eb181053441::t_299568ece49d53 265-285
+shared/rules/interactables.v0.json
+  s_9c5eb181053441::t_72c22b3f87241e 11-14
+shared/rules/treasure_classes.v0.schema.json
+  s_9c5eb181053441::t_72c22b3f87241e 1-55
+docs/specs/v25_spec-treasure-classes-and-guarded-chests.md
+  s_9c5eb181053441::t_6e04a2745b36aa 1-2,4-281
+  s_9c5eb181053441::t_e74ceb9a62900c 3
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_9c5eb181053441::t_145c2b7c2f1be3 1-45
+shared/rules/loot_tables.v0.schema.json
+  s_9c5eb181053441::t_72c22b3f87241e 40-43,49
+shared/rules/treasure_classes.v0.json
+  s_9c5eb181053441::t_cf4ccf09f8e08a 8-9,11
+  s_9c5eb181053441::t_72c22b3f87241e 1-7,10,12-47
+tools/validate_shared.py
+  s_9c5eb181053441::t_c3b56dfa48bd21 118
+  s_9c5eb181053441::t_cee5989dc82029 513-514
+  s_9c5eb181053441::t_c8421969fd25e5 690-697
+  s_9c5eb181053441::t_f9bff0aff52b08 139-140,798-854
+  s_9c5eb181053441::t_1aeb78e5070025 299-347,393-416
+  s_9c5eb181053441::t_6436b4238795b9 476-484,497,512,515-521
+server/internal/game/sim.go
+  s_9c5eb181053441::t_564b4a736fe7cb 595-606
+  s_9c5eb181053441::t_85519cf192ad41 807-810,819,821,828,830,834,836,904-907,911-913
+  s_9c5eb181053441::t_1633c27ac65214 39
+server/internal/game/game_test.go
+  s_9c5eb181053441::t_5bc22482f6734a 696,698-720
+  s_9c5eb181053441::t_ea34ef7ce81245 722-732,742,1947-1949
+  s_9c5eb181053441::t_d76bee9f9cf624 1706
+  s_9c5eb181053441::t_40469873f8d2e0 1675-1705,1707-1711
+  s_9c5eb181053441::t_ef8cad4d75b55a 2783-2792
+  s_9c5eb181053441::t_0f3ef684fb16df 2210-2257
+docs/ideas/boss-floor-reward-gate.md
+  s_70e9d4ff09c2fb::t_d16703926aa49e 1-93
+shared/golden/treasure_class_rolls.v0.schema.json
+  s_9c5eb181053441::t_9836c4d8402c91 1-39
+shared/rules/loot_tables.v0.json
+  s_9c5eb181053441::t_72c22b3f87241e 26-29
+shared/rules/dungeon_generation.v0.schema.json
+  s_9c5eb181053441::t_72c22b3f87241e 14,64-84
+server/internal/http/session.go
+  s_9c5eb181053441::t_5718dbcd9859e0 101-102
+  s_9c5eb181053441::t_f97d78405ff9fa 25,100,105-111
+tools/bot/run.py
+  s_9c5eb181053441::t_73c17e8ecf6206 176-180
+  s_9c5eb181053441::t_ff13fd1d860136 70,120
+  s_9c5eb181053441::t_6b724ca5cfd231 1534,1536,1544,1619,1638
+  s_9c5eb181053441::t_82c41db23ab26c 342-345,1259-1282
+  s_9c5eb181053441::t_0eed0cdda162cb 903-904
+  s_9c5eb181053441::t_90a3ea96d83dc8 1320-1321,1489-1490
+shared/golden/treasure_class_rolls.json
+  s_9c5eb181053441::t_b6880d85987d62 6,13,21
+  s_9c5eb181053441::t_cf4ccf09f8e08a 5,7-9,15,23
+  s_9c5eb181053441::t_9836c4d8402c91 1-4,10-12,14,16-20,22,24-35
+client/tests/test_golden.gd
+  s_9c5eb181053441::t_35842cbe74ec5a 308-369
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1293f48924fedcc0ca319e3c7914340957acdcd2",
+  "prompts": {},
+  "sessions": {
+    "s_70e9d4ff09c2fb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea050-4889-7613-84c3-7247914341bf",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_9c5eb181053441": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea052-d111-7101-9d6c-460f2d8ef12c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

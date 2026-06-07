@@ -59,6 +59,11 @@ AUTOPLAY_STEP_DELAY=0.8 make bot-visual  # slower, easier to inspect
 GODOT=/path/to/godot make bot-visual       # override Godot binary
 ```
 
+To play manually, run `make play`. It starts Postgres + the local server and opens
+the Godot main menu; create or continue a named character to start a fresh
+`dungeon_levels` session. Direct session startup is a dev override only:
+`ARPG_AUTOSTART=1 ARPG_WORLD_ID=dungeon_levels make play`.
+
 Headless cross-language golden checks (including `retaliation_damage.json`) run in
 `make client-smoke` via `client/tests/test_golden.gd`.
 

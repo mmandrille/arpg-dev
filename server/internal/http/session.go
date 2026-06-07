@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -13,12 +14,14 @@ import (
 
 func (s *Server) registerSessionRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/sessions", s.requireAuth(http.HandlerFunc(s.handleCreateSession)))
+	mux.Handle("POST /v0/sessions/{session_id}/end", s.requireAuth(http.HandlerFunc(s.handleEndSession)))
 }
 
 type createSessionRequest struct {
 	Mode            string  `json:"mode"`
 	ResumeSessionID *string `json:"resume_session_id"`
 	WorldID         string  `json:"world_id"`
+	CharacterID     string  `json:"character_id"`
 }
 
 type createSessionResponse struct {
@@ -67,7 +70,8 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create path: ensure the account's default character, then a new session.
+	// Create path: use a selected character when provided, otherwise preserve
+	// the default-character compatibility path for bots, smoke, and dev flows.
 	worldID := req.WorldID
 	if worldID == "" {
 		worldID = game.DefaultWorldID
@@ -81,8 +85,12 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	char, err := s.store.GetOrCreateDefaultCharacter(ctx, ids.New("char"), accountID, "Hero")
-	if err != nil {
+	char, err := s.characterForSessionCreate(ctx, accountID, req.CharacterID)
+	switch {
+	case errors.Is(err, store.ErrNotFound):
+		writeError(w, http.StatusNotFound, "character_not_found", "character not found")
+		return
+	case err != nil:
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character")
 		return
@@ -126,6 +134,50 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusCreated, sessionResponse(sess))
+}
+
+func (s *Server) characterForSessionCreate(ctx context.Context, accountID, requestedCharacterID string) (store.Character, error) {
+	if requestedCharacterID == "" {
+		return s.store.GetOrCreateDefaultCharacter(ctx, ids.New("char"), accountID, "Hero")
+	}
+	char, err := s.store.GetCharacter(ctx, requestedCharacterID)
+	if err != nil {
+		return store.Character{}, err
+	}
+	if char.AccountID != accountID {
+		return store.Character{}, store.ErrNotFound
+	}
+	return char, nil
+}
+
+func (s *Server) handleEndSession(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account context")
+		return
+	}
+	sessionID := r.PathValue("session_id")
+	if sessionID == "" {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+
+	sess, err := s.store.GetSession(r.Context(), sessionID)
+	if errors.Is(err, store.ErrNotFound) || (err == nil && sess.AccountID != accountID) {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load session")
+		return
+	}
+	if err := s.store.SetSessionStatus(r.Context(), sessionID, store.SessionEnded); err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not end session")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": store.SessionEnded})
 }
 
 func sessionResponse(sess store.Session) createSessionResponse {

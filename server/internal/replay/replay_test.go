@@ -285,6 +285,12 @@ func (f *fakeRepo) GetOrCreateDefaultCharacter(context.Context, string, string, 
 func (f *fakeRepo) GetCharacter(context.Context, string) (store.Character, error) {
 	return store.Character{}, nil
 }
+func (f *fakeRepo) ListCharacters(context.Context, string) ([]store.Character, error) {
+	return nil, nil
+}
+func (f *fakeRepo) CreateCharacter(context.Context, string, string, string) (store.Character, error) {
+	return store.Character{}, nil
+}
 func (f *fakeRepo) CreateSession(context.Context, store.Session) error { return nil }
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil

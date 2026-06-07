@@ -4,6 +4,7 @@
 extends SceneTree
 
 const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
+const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -23,9 +24,16 @@ func _initialize() -> void:
 	_test_missing_click_entity_type_rejected()
 	_test_missing_click_floor_coords_rejected()
 	_test_missing_drag_bag_item_def_id_rejected()
+	_test_missing_menu_button_rejected()
+	_test_missing_character_name_rejected()
+	_test_missing_window_size_rejected()
+	_test_menu_step_types_load()
 	_test_timeout_failure_message_format()
 	_test_pass_sentinel_format()
 	_test_fail_sentinel_format()
+	_test_client_settings_supported_size_labels()
+	_test_client_settings_parse_size_label()
+	_test_client_settings_size_from_data()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -112,6 +120,38 @@ func _test_missing_drag_bag_item_def_id_rejected() -> void:
 	_assert_ne("drag_bag_to_weapon_slot without item_def_id rejected", err, "")
 
 
+func _test_missing_menu_button_rejected() -> void:
+	var err := BotScenarioRunnerScript.validate_step({"type": "click_menu_button"}, 0)
+	_assert_ne("click_menu_button without button rejected", err, "")
+
+
+func _test_missing_character_name_rejected() -> void:
+	var err := BotScenarioRunnerScript.validate_step({"type": "enter_character_name"}, 0)
+	_assert_ne("enter_character_name without name rejected", err, "")
+
+
+func _test_missing_window_size_rejected() -> void:
+	var err := BotScenarioRunnerScript.validate_step({"type": "select_window_size"}, 0)
+	_assert_ne("select_window_size without size rejected", err, "")
+
+
+func _test_menu_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "wait_main_menu", "timeout_s": 1.0},
+		{"type": "click_menu_button", "button": "new_game"},
+		{"type": "enter_character_name", "name": "Bot Hero"},
+		{"type": "select_character", "index": 0},
+		{"type": "select_window_size", "size": "1600x900"},
+		{"type": "remember_session"},
+		{"type": "assert_session_changed"},
+		{"type": "remember_player_position"},
+		{"type": "assert_player_position_unchanged"},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("menu step scenario valid", err, "")
+
+
 func _test_timeout_failure_message_format() -> void:
 	var runner := BotScenarioRunnerScript.new()
 	var data := {
@@ -166,6 +206,27 @@ func _test_fail_sentinel_format() -> void:
 	_assert_true("assert fail: done", runner.is_done())
 	_assert_true("assert fail: not passed", not runner.passed())
 	_assert_true("assert fail: message has scenario id", "sentinel_fail_test" in runner.failure_message())
+
+
+func _test_client_settings_supported_size_labels() -> void:
+	var labels := ClientSettingsScript.supported_size_labels()
+	_assert_true("settings include 1280x720", labels.has("1280x720"))
+	_assert_true("settings include 1600x900", labels.has("1600x900"))
+	_assert_true("settings include 1920x1080", labels.has("1920x1080"))
+
+
+func _test_client_settings_parse_size_label() -> void:
+	_assert_eq("settings parse valid size", ClientSettingsScript.parse_size_label("1600x900"), Vector2i(1600, 900))
+	_assert_eq("settings parse invalid size fallback", ClientSettingsScript.parse_size_label("1440x900"), Vector2i(1920, 1080))
+	_assert_eq("settings parse malformed fallback", ClientSettingsScript.parse_size_label("bad"), Vector2i(1920, 1080))
+
+
+func _test_client_settings_size_from_data() -> void:
+	var valid := {"window_size": {"width": 1280, "height": 720}}
+	_assert_eq("settings data valid", ClientSettingsScript.size_from_data(valid), Vector2i(1280, 720))
+	var invalid := {"window_size": {"width": 777, "height": 444}}
+	_assert_eq("settings data invalid fallback", ClientSettingsScript.size_from_data(invalid), Vector2i(1920, 1080))
+	_assert_eq("settings data missing fallback", ClientSettingsScript.size_from_data({}), Vector2i(1920, 1080))
 
 
 # --- helpers -----------------------------------------------------------------

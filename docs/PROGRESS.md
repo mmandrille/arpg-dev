@@ -11,8 +11,8 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v23 — `item-templates-and-rolled-drops` (dungeon mobs drop persistent rolled cave_blade weapons) |
-| **Active branch** | `feature/item-templates-and-rolled-drops` |
+| **Latest completed slice** | v24 — `main-menu-and-character-start` (menu shell, named characters, fresh-session continue) |
+| **Active branch** | `feature/main-menu-and-character-start` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
 
@@ -39,6 +39,7 @@ v20_* = play-session-loop
 v21_* = dungeon-monster-combat
 v22_* = character-scoped-persistence
 v23_* = item-templates-and-rolled-drops
+v24_* = main-menu-and-character-start
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -82,6 +83,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v21** | `dungeon-monster-combat` | Complete (`make ci` green) | [`v21_spec-dungeon-monster-combat.md`](specs/v21_spec-dungeon-monster-combat.md) | [`v21_2026-06-06-dungeon-monster-combat.md`](plans/v21_2026-06-06-dungeon-monster-combat.md) |
 | **v22** | `character-scoped-persistence` | Complete (`make ci` green) | [`v22_spec-character-scoped-persistence.md`](specs/v22_spec-character-scoped-persistence.md) | [`v22_2026-06-07-character-scoped-persistence.md`](plans/v22_2026-06-07-character-scoped-persistence.md) |
 | **v23** | `item-templates-and-rolled-drops` | Complete (`make ci` green) | [`v23_spec-item-templates-and-rolled-drops.md`](specs/v23_spec-item-templates-and-rolled-drops.md) | [`v23_2026-06-07-item-templates-and-rolled-drops.md`](plans/v23_2026-06-07-item-templates-and-rolled-drops.md) |
+| **v24** | `main-menu-and-character-start` | Complete (`make ci` green) | [`v24_spec-main-menu-and-character-start.md`](specs/v24_spec-main-menu-and-character-start.md) | [`v24_2026-06-07-main-menu-and-character-start.md`](plans/v24_2026-06-07-main-menu-and-character-start.md) |
 
 ---
 
@@ -524,6 +526,33 @@ through pickup, equip, combat, persistence, reconnect, fresh sessions, and repla
 stash/crafting/vendors/gold/trade, special-effect execution, item comparison UI, loot filters,
 production item art, character stat requirements beyond level `1`, or Protobuf migration.
 
+### v24 — Main menu and character start
+
+**Proves:** The Godot client can boot into a player-facing shell while the server remains
+authoritative for accounts, characters, ownership checks, and fresh-session bootstrap.
+
+- Authenticated HTTP APIs list and create account-scoped named characters; duplicate display names
+  are allowed in v24 and names are trimmed/length-limited server-side.
+- Fresh session creation accepts an optional selected `character_id`, rejects cross-account
+  character use, and preserves the default-character path for bots, smoke, replay, and dev flows.
+- Interactive Godot startup now opens a main menu with Continue, New Game, Settings, and Exit;
+  Continue starts a fresh `dungeon_levels` session from selected character progression.
+- New Game creates a named character and starts a fresh `dungeon_levels` session for that
+  character; old-world/session resume remains dev/debug-only.
+- Local settings persist a fixed window size (`1280x720`, `1600x900`, `1920x1080`) in
+  `user://settings.json` and apply immediately.
+- ESC opens a pause menu with Resume, Settings, Return to Main Menu, and Exit; overlay visibility
+  blocks gameplay clicks, WASD, hotbar, inventory, camera zoom, and bot-dispatched gameplay intents.
+- Return to Main Menu closes the WebSocket, marks the session ended through a small idempotent
+  owner-only route, clears client gameplay state, and offers only fresh character starts.
+- Client bot scenario `08_main_menu_flow.json` proves settings, named character creation, pause
+  input lock, return to menu, Continue, and fresh new session id; scenarios `01`-`07` keep their
+  explicit auto-start path.
+
+**Explicit non-goals:** no character delete/rename/class/customization/portraits, production menu
+art/audio, richer settings, old-session resume UI, character summaries, stash/vendors/quests, or
+durable dungeon maps/monsters/floor drops/HP/current level.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -564,6 +593,7 @@ chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond
 dungeon_levels / teleporter_lab: start in town, descend/ascend generated floors; discover teleporters and fast-travel back
 character_persistence: same-account fresh sessions retain gear/equipment and discovered waypoint access
 rolled_drops: kill dungeon mob → pick up/equip rolled cave_blade → prove rolled metadata persists
+main_menu_flow: menu settings → named character creation → pause input lock → return → continue fresh session
 ```
 
 **Verify:**
@@ -573,7 +603,7 @@ make db-up && make server    # terminal 1
 make bot                     # terminal 2 — all protocol bot scenarios
 make client-unit             # headless Godot unit gates (no server required)
 make client-smoke            # headless Godot gates + slice smoke
-make bot-client              # Godot client bot (all 6 scenarios; requires live server)
+make bot-client              # Godot client bot (all 8 scenarios; requires live server)
 make ci                      # full suite
 make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
 make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenario by file name or id
@@ -641,14 +671,19 @@ opened doors, and floor drops session-scoped.
 deterministic rarity/stat rolls, rolled weapon damage, rolled payload persistence, and tooltip
 presentation for the first rolled weapon template.
 
+**The client now has a player-facing menu shell.** v24 adds named character list/create APIs,
+fresh-session Continue/New Game flows, local window-size settings, ESC pause, Return to Main Menu,
+and a Godot client bot proof for the complete menu path.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Character picker, player-facing old-session resume, stash/vendors/gold, quest progress, stats/skills/XP, respawn/checkpoints, durable dungeon map snapshots | v22 non-goals, ADR-0008 deferred |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, character summaries, stash/vendors/gold, quest progress, stats/skills/XP, respawn/checkpoints, durable dungeon map snapshots | v22/v24 non-goals, ADR-0008 deferred |
 | Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling | v0/v4/v12/v17/v21/v23 non-goals |
 | Itemization | Affix grammar, procedural item names, armor/jewelry/offhand, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade | v23 non-goals |
-| Content | Production item art/icons, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23 non-goals |
+| Content | Production item art/icons, production menu art/audio, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24 non-goals |
+| Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |

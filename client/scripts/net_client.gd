@@ -83,15 +83,36 @@ func login(email: String, dev_token: String) -> bool:
 	return false
 
 
-func create_session(resume_session_id: String = "", requested_world_id: String = "") -> bool:
+func list_characters() -> Array:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/characters",
+		["Authorization: Bearer " + token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"].get("characters", [])
+	push_error("list_characters failed: %s" % r)
+	return []
+
+
+func create_character(name: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/characters",
+		["Authorization: Bearer " + token], JSON.stringify({"name": name}))
+	if r.get("_code", 0) == 201 and r.has("body"):
+		return r["body"]
+	push_error("create_character failed: %s" % r)
+	return {}
+
+
+func create_session(resume_session_id: String = "", requested_world_id: String = "", character_id: String = "") -> bool:
 	# resume_session_id rejoins an existing session: the server rehydrates
 	# inventory AND equipped state before the initial session_snapshot (no
 	# protocol change — see spec §4.5). Empty string mints a fresh session.
 	var body := {"mode": "solo"}
 	if resume_session_id != "":
 		body["resume_session_id"] = resume_session_id
-	elif requested_world_id != "":
-		body["world_id"] = requested_world_id
+	else:
+		if requested_world_id != "":
+			body["world_id"] = requested_world_id
+		if character_id != "":
+			body["character_id"] = character_id
 	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
 		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) in [200, 201] and r.has("body"):
@@ -101,6 +122,17 @@ func create_session(resume_session_id: String = "", requested_world_id: String =
 		ws_url = r["body"]["ws_url"]
 		return true
 	push_error("create_session failed: %s" % r)
+	return false
+
+
+func end_session() -> bool:
+	if session_id == "":
+		return true
+	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions/%s/end" % session_id,
+		["Authorization: Bearer " + token], "{}")
+	if r.get("_code", 0) == 200:
+		return true
+	push_warning("end_session failed: %s" % r)
 	return false
 
 
@@ -130,6 +162,7 @@ func connect_ws() -> void:
 	var scheme := "wss" if use_tls else "ws"
 	# Token via query param: WebSocketPeer cannot set the Authorization header.
 	var url := "%s://%s:%d%s&access_token=%s" % [scheme, host, port, ws_url, token]
+	_ws = WebSocketPeer.new()
 	_ws.connect_to_url(url)
 
 

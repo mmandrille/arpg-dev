@@ -329,6 +329,10 @@ func (r *runner) doTick() {
 		r.metrics.MessageLatency.Observe(l.Seconds())
 	}
 
+	for _, res := range results {
+		r.persistTick(res)
+	}
+
 	// Acks / rejects.
 	for _, res := range results {
 		for _, a := range res.Acks {
@@ -377,9 +381,6 @@ func (r *runner) doTick() {
 		})
 	}
 
-	for _, res := range results {
-		r.persistTick(res)
-	}
 }
 
 // persistTick writes events and inventory mutations produced by the tick.

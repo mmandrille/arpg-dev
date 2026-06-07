@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/dungeon_equipment_drops.v0.schema.json",
+  "title": "Dungeon equipment drops golden (v0)",
+  "type": "object",
+  "required": ["description", "world_id", "required_templates", "bands", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string", "minLength": 1 },
+    "world_id": { "type": "string", "minLength": 1 },
+    "required_templates": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "bands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["level", "depth", "monster_loot_table", "chest_loot_table"],
+        "additionalProperties": false,
+        "properties": {
+          "level": { "type": "integer", "maximum": -1 },
+          "depth": { "type": "integer", "minimum": 1 },
+          "monster_loot_table": { "type": "string", "minLength": 1 },
+          "chest_loot_table": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "level", "source", "loot_table", "treasure_class_id", "seed", "expected_drops"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "level": { "type": "integer", "maximum": -1 },
+          "source": { "type": "string", "enum": ["monster", "chest"] },
+          "loot_table": { "type": "string", "minLength": 1 },
+          "treasure_class_id": { "type": "string", "minLength": 1 },
+          "seed": { "type": "string", "minLength": 1 },
+          "expected_drops": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "item_def_id": { "type": "string", "minLength": 1 },
+                "item_template_id": { "type": "string", "minLength": 1 }
+              },
+              "oneOf": [
+                { "required": ["item_def_id"] },
+                { "required": ["item_template_id"] }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

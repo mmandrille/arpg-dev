@@ -1,0 +1,80 @@
+{
+  "description": "Depth-band dungeon source selection plus representative v29 generated dungeon equipment drops.",
+  "world_id": "dungeon_levels",
+  "required_templates": [
+    "cave_blade",
+    "cave_greatsword",
+    "cave_bow",
+    "cave_shield",
+    "cave_helm",
+    "cave_mail",
+    "cave_gloves",
+    "cave_belt",
+    "cave_boots",
+    "cave_ring",
+    "cave_amulet"
+  ],
+  "bands": [
+    {
+      "level": -1,
+      "depth": 1,
+      "monster_loot_table": "dungeon_mob_drop_depth_1",
+      "chest_loot_table": "guarded_chest_drop_depth_1"
+    },
+    {
+      "level": -2,
+      "depth": 2,
+      "monster_loot_table": "dungeon_mob_drop_depth_2",
+      "chest_loot_table": "guarded_chest_drop_depth_2"
+    },
+    {
+      "level": -3,
+      "depth": 3,
+      "monster_loot_table": "dungeon_mob_drop_depth_3_plus",
+      "chest_loot_table": "guarded_chest_drop_depth_3_plus"
+    },
+    {
+      "level": -10,
+      "depth": 10,
+      "monster_loot_table": "dungeon_mob_drop_depth_3_plus",
+      "chest_loot_table": "guarded_chest_drop_depth_3_plus"
+    }
+  ],
+  "cases": [
+    {
+      "name": "depth_3_monster_belt_and_badge",
+      "level": -3,
+      "source": "monster",
+      "loot_table": "dungeon_mob_drop_depth_3_plus",
+      "treasure_class_id": "dungeon_mob_tc_depth_3_plus",
+      "seed": "v29_dungeon_mob_tc_depth_3_plus_18",
+      "expected_drops": [
+        { "item_template_id": "cave_belt" },
+        { "item_def_id": "training_badge" }
+      ]
+    },
+    {
+      "name": "depth_3_chest_bow",
+      "level": -3,
+      "source": "chest",
+      "loot_table": "guarded_chest_drop_depth_3_plus",
+      "treasure_class_id": "guarded_chest_tc_depth_3_plus",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_5",
+      "expected_drops": [
+        { "item_template_id": "cave_bow" }
+      ]
+    },
+    {
+      "name": "depth_3_chest_potion_bonus",
+      "level": -3,
+      "source": "chest",
+      "loot_table": "guarded_chest_drop_depth_3_plus",
+      "treasure_class_id": "guarded_chest_tc_depth_3_plus",
+      "seed": "v29_guarded_chest_tc_depth_3_plus_8",
+      "expected_drops": [
+        { "item_template_id": "cave_blade" },
+        { "item_def_id": "red_potion" }
+      ]
+    }
+  ]
+}

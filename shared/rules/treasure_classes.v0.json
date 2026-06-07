@@ -22,6 +22,94 @@
         }
       ]
     },
+    "dungeon_mob_tc_depth_1": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 70,
+          "no_drop_weight": 30,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 45 },
+            { "item_template_id": "cave_bow", "weight": 15 },
+            { "item_template_id": "cave_helm", "weight": 10 },
+            { "item_template_id": "cave_boots", "weight": 10 },
+            { "item_def_id": "red_potion", "weight": 15 },
+            { "item_def_id": "training_badge", "weight": 5 }
+          ]
+        },
+        {
+          "attempt_id": "secondary",
+          "success_weight": 20,
+          "no_drop_weight": 80,
+          "entries": [
+            { "item_def_id": "red_potion", "weight": 60 },
+            { "item_def_id": "training_badge", "weight": 40 }
+          ]
+        }
+      ]
+    },
+    "dungeon_mob_tc_depth_2": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 75,
+          "no_drop_weight": 25,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 25 },
+            { "item_template_id": "cave_greatsword", "weight": 15 },
+            { "item_template_id": "cave_bow", "weight": 15 },
+            { "item_template_id": "cave_shield", "weight": 12 },
+            { "item_template_id": "cave_mail", "weight": 12 },
+            { "item_template_id": "cave_belt", "weight": 8 },
+            { "item_template_id": "cave_ring", "weight": 5 },
+            { "item_def_id": "red_potion", "weight": 5 },
+            { "item_def_id": "training_badge", "weight": 3 }
+          ]
+        },
+        {
+          "attempt_id": "secondary",
+          "success_weight": 25,
+          "no_drop_weight": 75,
+          "entries": [
+            { "item_def_id": "red_potion", "weight": 55 },
+            { "item_def_id": "training_badge", "weight": 45 }
+          ]
+        }
+      ]
+    },
+    "dungeon_mob_tc_depth_3_plus": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 80,
+          "no_drop_weight": 20,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 16 },
+            { "item_template_id": "cave_greatsword", "weight": 12 },
+            { "item_template_id": "cave_bow", "weight": 12 },
+            { "item_template_id": "cave_shield", "weight": 10 },
+            { "item_template_id": "cave_helm", "weight": 8 },
+            { "item_template_id": "cave_mail", "weight": 10 },
+            { "item_template_id": "cave_gloves", "weight": 8 },
+            { "item_template_id": "cave_belt", "weight": 8 },
+            { "item_template_id": "cave_boots", "weight": 8 },
+            { "item_template_id": "cave_ring", "weight": 5 },
+            { "item_template_id": "cave_amulet", "weight": 5 },
+            { "item_def_id": "red_potion", "weight": 8 },
+            { "item_def_id": "training_badge", "weight": 5 }
+          ]
+        },
+        {
+          "attempt_id": "secondary",
+          "success_weight": 30,
+          "no_drop_weight": 70,
+          "entries": [
+            { "item_def_id": "red_potion", "weight": 50 },
+            { "item_def_id": "training_badge", "weight": 50 }
+          ]
+        }
+      ]
+    },
     "guarded_chest_tc_1": {
       "attempts": [
         {
@@ -39,6 +127,99 @@
           "no_drop_weight": 65,
           "entries": [
             { "item_def_id": "training_badge", "weight": 100 }
+          ]
+        }
+      ]
+    },
+    "guarded_chest_tc_depth_1": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 35 },
+            { "item_template_id": "cave_bow", "weight": 15 },
+            { "item_template_id": "cave_helm", "weight": 15 },
+            { "item_template_id": "cave_boots", "weight": 15 },
+            { "item_def_id": "red_potion", "weight": 15 },
+            { "item_def_id": "training_badge", "weight": 5 }
+          ]
+        },
+        {
+          "attempt_id": "bonus",
+          "success_weight": 45,
+          "no_drop_weight": 55,
+          "entries": [
+            { "item_template_id": "cave_belt", "weight": 30 },
+            { "item_def_id": "red_potion", "weight": 40 },
+            { "item_def_id": "training_badge", "weight": 30 }
+          ]
+        }
+      ]
+    },
+    "guarded_chest_tc_depth_2": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 18 },
+            { "item_template_id": "cave_greatsword", "weight": 14 },
+            { "item_template_id": "cave_bow", "weight": 14 },
+            { "item_template_id": "cave_shield", "weight": 14 },
+            { "item_template_id": "cave_mail", "weight": 14 },
+            { "item_template_id": "cave_belt", "weight": 10 },
+            { "item_template_id": "cave_ring", "weight": 8 },
+            { "item_def_id": "red_potion", "weight": 5 },
+            { "item_def_id": "training_badge", "weight": 3 }
+          ]
+        },
+        {
+          "attempt_id": "bonus",
+          "success_weight": 55,
+          "no_drop_weight": 45,
+          "entries": [
+            { "item_template_id": "cave_helm", "weight": 20 },
+            { "item_template_id": "cave_gloves", "weight": 20 },
+            { "item_template_id": "cave_boots", "weight": 20 },
+            { "item_def_id": "red_potion", "weight": 20 },
+            { "item_def_id": "training_badge", "weight": 20 }
+          ]
+        }
+      ]
+    },
+    "guarded_chest_tc_depth_3_plus": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 12 },
+            { "item_template_id": "cave_greatsword", "weight": 11 },
+            { "item_template_id": "cave_bow", "weight": 11 },
+            { "item_template_id": "cave_shield", "weight": 10 },
+            { "item_template_id": "cave_helm", "weight": 8 },
+            { "item_template_id": "cave_mail", "weight": 10 },
+            { "item_template_id": "cave_gloves", "weight": 8 },
+            { "item_template_id": "cave_belt", "weight": 8 },
+            { "item_template_id": "cave_boots", "weight": 8 },
+            { "item_template_id": "cave_ring", "weight": 7 },
+            { "item_template_id": "cave_amulet", "weight": 7 }
+          ]
+        },
+        {
+          "attempt_id": "bonus",
+          "success_weight": 65,
+          "no_drop_weight": 35,
+          "entries": [
+            { "item_template_id": "cave_belt", "weight": 15 },
+            { "item_template_id": "cave_ring", "weight": 15 },
+            { "item_template_id": "cave_amulet", "weight": 15 },
+            { "item_def_id": "red_potion", "weight": 30 },
+            { "item_def_id": "training_badge", "weight": 25 }
           ]
         }
       ]

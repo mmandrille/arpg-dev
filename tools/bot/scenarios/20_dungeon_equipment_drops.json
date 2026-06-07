@@ -1,0 +1,39 @@
+{
+  "id": "dungeon_equipment_drops",
+  "world_id": "dungeon_levels",
+  "seed": "v29_bot_36",
+  "title": "Dungeon equipment drops",
+  "description": "Descend to a real generated depth-3 dungeon floor, open its guarded chest, equip generated rolled equipment drops, then prove state, reconnect, replay, and fresh-session persistence.",
+  "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 80 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 80 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 80 },
+    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "equals": 1 },
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
+    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
+    { "action": "pick_up_first_rolled_loot" },
+    { "action": "equip_last_inventory_item" }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": -3 },
+    { "type": "visited_levels_contain", "level": 0 },
+    { "type": "visited_levels_contain", "level": -1 },
+    { "type": "visited_levels_contain", "level": -2 },
+    { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
+    { "type": "event_seen", "event_type": "interactable_activated" },
+    { "type": "event_seen", "event_type": "loot_dropped" },
+    { "type": "rolled_inventory_any", "equipped": true }
+  ],
+  "fresh_session_checks": [
+    {
+      "world_id": "dungeon_levels",
+      "steps": [],
+      "assertions": [
+        { "type": "rolled_inventory_any", "equipped": true }
+      ]
+    }
+  ],
+  "visual": {
+    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+  }
+}

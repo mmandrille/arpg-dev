@@ -30,6 +30,27 @@
     "min_stair_distance": 4.0,
     "max_attempts": 32
   },
+  "loot_band_note": "Temporary v29 first-pass depth bands: level -1, level -2, and level -3+ are coarse hooks for broader dungeon drops until item-level, rarity curve, and economy progression work replaces them.",
+  "loot_bands": [
+    {
+      "min_depth": 1,
+      "max_depth": 1,
+      "monster_loot_table": "dungeon_mob_drop_depth_1",
+      "chest_loot_table": "guarded_chest_drop_depth_1"
+    },
+    {
+      "min_depth": 2,
+      "max_depth": 2,
+      "monster_loot_table": "dungeon_mob_drop_depth_2",
+      "chest_loot_table": "guarded_chest_drop_depth_2"
+    },
+    {
+      "min_depth": 3,
+      "max_depth": null,
+      "monster_loot_table": "dungeon_mob_drop_depth_3_plus",
+      "chest_loot_table": "guarded_chest_drop_depth_3_plus"
+    }
+  ],
   "level_names": {
     "-1": "Entry Hall",
     "-2": "Lower Depths",

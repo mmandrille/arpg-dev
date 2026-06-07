@@ -58,6 +58,8 @@ type DungeonGenerationRules struct {
 	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+	LootBandNote             string                   `json:"loot_band_note"`
+	LootBands                []DungeonLootBand        `json:"loot_bands"`
 	LevelNames               map[string]string        `json:"level_names"`
 	DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 }
@@ -117,6 +119,30 @@ type ChestPlacementRules struct {
 	MonsterCountBonus int     `json:"monster_count_bonus"`
 	MinStairDistance  float64 `json:"min_stair_distance"`
 	MaxAttempts       int     `json:"max_attempts"`
+}
+
+type DungeonLootBand struct {
+	MinDepth         int    `json:"min_depth"`
+	MaxDepth         *int   `json:"max_depth"`
+	MonsterLootTable string `json:"monster_loot_table"`
+	ChestLootTable   string `json:"chest_loot_table"`
+}
+
+func (d DungeonGenerationRules) LootBandForLevel(levelNum int) (DungeonLootBand, bool) {
+	if levelNum >= 0 {
+		return DungeonLootBand{}, false
+	}
+	depth := absInt(levelNum)
+	for _, band := range d.LootBands {
+		if depth < band.MinDepth {
+			continue
+		}
+		if band.MaxDepth != nil && depth > *band.MaxDepth {
+			continue
+		}
+		return band, true
+	}
+	return DungeonLootBand{}, false
 }
 
 // GridBounds is the inclusive grid rectangle searched by A*.
@@ -712,6 +738,8 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+		LootBandNote             string                   `json:"loot_band_note"`
+		LootBands                []DungeonLootBand        `json:"loot_bands"`
 		LevelNames               map[string]string        `json:"level_names"`
 		DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 	}
@@ -792,6 +820,12 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.max_attempts: must be positive")
 		}
 	}
+	if dungeonGeneration.LootBandNote == "" {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.loot_band_note: required")
+	}
+	if err := validateDungeonLootBands(dungeonGeneration.LootBands, r); err != nil {
+		return nil, err
+	}
 	for key := range dungeonGeneration.LevelNames {
 		level, err := strconv.Atoi(key)
 		if err != nil || level >= 0 {
@@ -806,6 +840,8 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
 		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
 		ChestPlacement:           dungeonGeneration.ChestPlacement,
+		LootBandNote:             dungeonGeneration.LootBandNote,
+		LootBands:                dungeonGeneration.LootBands,
 		LevelNames:               dungeonGeneration.LevelNames,
 		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
 	}
@@ -949,6 +985,119 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 			if roll < 0 {
 				out = append(out, LootDrop{ItemDefID: entry.ItemDefID, ItemTemplateID: entry.ItemTemplateID})
 				break
+			}
+		}
+	}
+	return out
+}
+
+func validateDungeonLootBands(bands []DungeonLootBand, r *Rules) error {
+	if len(bands) != 3 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands: expected exactly 3 bands")
+	}
+	coverage := map[int]bool{}
+	openEnded := 0
+	for idx, band := range bands {
+		if band.MinDepth <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands[%d].min_depth: must be positive", idx)
+		}
+		if band.MaxDepth != nil && *band.MaxDepth < band.MinDepth {
+			return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands[%d].max_depth: must be >= min_depth", idx)
+		}
+		if band.MaxDepth == nil {
+			openEnded++
+			if coverage[band.MinDepth] {
+				return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands[%d]: overlapping depth %d", idx, band.MinDepth)
+			}
+			coverage[band.MinDepth] = true
+		} else {
+			for depth := band.MinDepth; depth <= *band.MaxDepth; depth++ {
+				if coverage[depth] {
+					return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands[%d]: overlapping depth %d", idx, depth)
+				}
+				coverage[depth] = true
+			}
+		}
+		if _, ok := r.treasureClassIDForLootTable(band.MonsterLootTable); !ok {
+			return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands[%d].monster_loot_table: unknown treasure table %s", idx, band.MonsterLootTable)
+		}
+		if _, ok := r.treasureClassIDForLootTable(band.ChestLootTable); !ok {
+			return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands[%d].chest_loot_table: unknown treasure table %s", idx, band.ChestLootTable)
+		}
+		if r.treasureClassSuccessWeightForTable(band.ChestLootTable) <= r.treasureClassSuccessWeightForTable(band.MonsterLootTable) {
+			return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands[%d]: chest success weight must exceed monster success weight", idx)
+		}
+	}
+	if !coverage[1] || !coverage[2] || !coverage[3] || len(coverage) != 3 || openEnded != 1 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands: must cover depths 1, 2, and open-ended 3+")
+	}
+	last := bands[len(bands)-1]
+	if last.MinDepth != 3 || last.MaxDepth != nil {
+		return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands: final band must be open-ended 3+")
+	}
+	reachable := r.templatesReachableFromLootTable(last.MonsterLootTable)
+	for templateID := range r.templatesReachableFromLootTable(last.ChestLootTable) {
+		reachable[templateID] = true
+	}
+	requiredTemplates := []string{
+		"cave_blade",
+		"cave_greatsword",
+		"cave_bow",
+		"cave_shield",
+		"cave_helm",
+		"cave_mail",
+		"cave_gloves",
+		"cave_belt",
+		"cave_boots",
+		"cave_ring",
+		"cave_amulet",
+	}
+	missing := []string{}
+	for _, templateID := range requiredTemplates {
+		if !reachable[templateID] {
+			missing = append(missing, templateID)
+		}
+	}
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		return fmt.Errorf("game: invalid rules dungeon_generation.loot_bands 3+ reachability: missing templates %v", missing)
+	}
+	return nil
+}
+
+func (r *Rules) treasureClassIDForLootTable(tableID string) (string, bool) {
+	table, ok := r.LootTables[tableID]
+	if !ok || table.TreasureClassID == "" {
+		return "", false
+	}
+	if _, ok := r.TreasureClasses[table.TreasureClassID]; !ok {
+		return "", false
+	}
+	return table.TreasureClassID, true
+}
+
+func (r *Rules) treasureClassSuccessWeightForTable(tableID string) int {
+	classID, ok := r.treasureClassIDForLootTable(tableID)
+	if !ok {
+		return 0
+	}
+	total := 0
+	for _, attempt := range r.TreasureClasses[classID].Attempts {
+		total += attempt.SuccessWeight
+	}
+	return total
+}
+
+func (r *Rules) templatesReachableFromLootTable(tableID string) map[string]bool {
+	out := map[string]bool{}
+	classID, ok := r.treasureClassIDForLootTable(tableID)
+	if !ok {
+		return out
+	}
+	for _, attempt := range r.TreasureClasses[classID].Attempts {
+		for _, entry := range attempt.Entries {
+			if entry.ItemTemplateID != "" {
+				out[entry.ItemTemplateID] = true
 			}
 		}
 	}

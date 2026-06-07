@@ -445,6 +445,7 @@ func _process(delta: float) -> void:
 		_handle_autoplay(delta)
 	else:
 		_handle_input(delta)
+	_sync_waypoint_panel_reach()
 	if player_anim != null:
 		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
 			and player_hp > 0 \
@@ -1631,6 +1632,14 @@ func _show_waypoint_panel() -> void:
 func _hide_waypoint_panel() -> void:
 	if waypoint_panel != null:
 		waypoint_panel.visible = false
+
+
+func _sync_waypoint_panel_reach() -> void:
+	if waypoint_panel == null or not waypoint_panel.visible:
+		return
+	var teleporter := _current_teleporter_record()
+	if teleporter.is_empty() or not _interactable_in_activation_range(teleporter):
+		_hide_waypoint_panel()
 
 
 func _refresh_waypoint_panel() -> void:

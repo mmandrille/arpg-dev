@@ -9,6 +9,9 @@
     { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 10.0 },
     { "type": "click_entity", "entity_type": "interactable", "entity_index": 1 },
     { "type": "wait_player_near", "x": 4.0, "z": 13.0, "distance": 1.5, "timeout_s": 10.0 },
-    { "type": "assert_waypoint_panel_visible", "visible": true }
+    { "type": "assert_waypoint_panel_visible", "visible": true },
+    { "type": "click_floor", "x": 4.0, "z": 8.0 },
+    { "type": "wait_player_near", "x": 4.0, "z": 8.0, "distance": 1.5, "timeout_s": 10.0 },
+    { "type": "assert_waypoint_panel_visible", "visible": false }
   ]
 }

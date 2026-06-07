@@ -15,6 +15,11 @@ const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
+const ClientSettingsScript := preload("res://scripts/client_settings.gd")
+const MainMenuScript := preload("res://scripts/main_menu.gd")
+const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
+const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
+const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
@@ -79,6 +84,14 @@ var waypoint_panel: PanelContainer
 var waypoint_rows: VBoxContainer
 var visual_replay_exit_timer: float = 0.0
 var visual_replay_show_inventory: bool = false
+var client_settings: ClientSettings
+var menu_layer: CanvasLayer
+var main_menu: MainMenu
+var character_panel: CharacterSelectPanel
+var settings_panel: SettingsPanel
+var pause_menu: PauseMenu
+var gameplay_active: bool = false
+var settings_return_target: String = "main"
 
 const INVENTORY_REPLAY_EVENT_HINTS := {
 	"item_picked_up": "Pickup",
@@ -129,6 +142,10 @@ func _ready() -> void:
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
 	_build_scene()
+	client_settings = ClientSettingsScript.new()
+	client_settings.load()
+	client_settings.apply()
+	_sync_settings_panel()
 	_load_item_rules()
 	_load_item_presentations()
 	_load_dungeon_generation()
@@ -137,6 +154,7 @@ func _ready() -> void:
 
 	client = NetClientScript.new(base_url)
 	var bot_client_run := _truthy_env("ARPG_BOT_CLIENT")
+	var bot_menu_run := bot_client_run and _bot_uses_menu()
 	if not client.login(_env("ARPG_EMAIL", "client@example.test"), dev_token):
 		if bot_client_run:
 			printerr("[bot-client] login failed base_url=%s" % base_url)
@@ -156,36 +174,229 @@ func _ready() -> void:
 		_debug("visual replay playlist loaded: %d scenario(s)" % visual_replay_scenarios.size())
 		_start_next_visual_replay()
 		return
+	if bot_menu_run:
+		bot_mode = true
+		_show_main_menu()
+		_mount_bot_controller()
+		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
 	if requested_world_id == "" and not bot_client_run:
 		requested_world_id = "dungeon_levels"
+	if bot_client_run or resume_session_id != "" or _truthy_env("ARPG_AUTOSTART"):
+		if not _start_automation_session(resume_session_id, requested_world_id, bot_client_run):
+			return
+		if bot_client_run:
+			_mount_bot_controller()
+		return
+	_show_main_menu()
+
+
+func _bot_uses_menu() -> bool:
+	if _truthy_env("ARPG_BOT_MENU"):
+		return true
+	var scenario_path := _env("ARPG_BOT_SCENARIO", "")
+	return scenario_path.get_file().begins_with("08_main_menu_flow")
+
+
+func _mount_bot_controller() -> void:
+	if input_shadow != null and DisplayServer.get_name() != "headless":
+		input_shadow.set_active(true)
+	else:
+		Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
+	var bot := preload("res://scripts/bot_controller.gd").new()
+	add_child(bot)
+
+
+func _start_automation_session(resume_session_id: String, requested_world_id: String, bot_client_run: bool) -> bool:
 	if not client.create_session(resume_session_id, requested_world_id):
 		if bot_client_run:
 			printerr("[bot-client] session failed world_id=%s resume=%s" % [requested_world_id, resume_session_id])
 		_debug("session failed")
-		return
+		return false
 	if bot_client_run:
 		print("[bot-client] session ok id=%s world=%s" % [client.session_id, client.world_id])
+	bot_mode = bot_client_run
+	_begin_gameplay_connection(_truthy_env("ARPG_AUTOPLAY"))
+	if bot_client_run:
+		print("[bot-client] ws connect requested session=%s" % client.session_id)
+	return true
+
+
+func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
+	_hide_all_menus()
+	gameplay_active = true
 	current_world_id = client.world_id
 	_render_world_walls(client.world_id)
-	autoplay_enabled = _truthy_env("ARPG_AUTOPLAY")
+	autoplay_enabled = enable_autoplay
 	if autoplay_enabled:
 		autoplay_phase = "move"
 		autoplay_step_delay = maxf(0.05, float(_env("ARPG_AUTOPLAY_STEP_DELAY", "0.35")))
 		_debug("visual bot enabled for session %s" % client.session_id)
 	predicted_pos = Vector3.ZERO
+	ready_sent = false
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
-	bot_mode = bot_client_run
-	if bot_mode:
-		print("[bot-client] ws connect requested session=%s" % client.session_id)
-		if input_shadow != null and DisplayServer.get_name() != "headless":
-			input_shadow.set_active(true)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
-		var bot := preload("res://scripts/bot_controller.gd").new()
-		add_child(bot)
+
+
+func _show_main_menu() -> void:
+	_hide_all_menus()
+	gameplay_active = false
+	if main_menu != null:
+		main_menu.show_menu()
+
+
+func _hide_all_menus() -> void:
+	if main_menu != null:
+		main_menu.visible = false
+	if character_panel != null:
+		character_panel.hide_panel()
+	if settings_panel != null:
+		settings_panel.hide_panel()
+	if pause_menu != null:
+		pause_menu.hide_pause()
+
+
+func _on_continue_pressed() -> void:
+	var characters := client.list_characters()
+	if character_panel != null:
+		main_menu.visible = false
+		character_panel.show_continue(characters)
+
+
+func _on_new_game_pressed() -> void:
+	if character_panel != null:
+		main_menu.visible = false
+		character_panel.show_new_game()
+
+
+func _on_character_create_requested(name: String) -> void:
+	var character := client.create_character(name)
+	if character.is_empty():
+		character_panel.set_error("Could not create character")
+		return
+	_start_character_session(str(character.get("character_id", "")))
+
+
+func _start_character_session(character_id: String) -> void:
+	if character_id == "":
+		if character_panel != null:
+			character_panel.set_error("Could not start character")
+		return
+	_teardown_gameplay_state(false)
+	if not client.create_session("", "dungeon_levels", character_id):
+		if character_panel != null:
+			character_panel.set_error("Could not start session")
+		return
+	bot_mode = false
+	_begin_gameplay_connection(false)
+
+
+func _on_settings_from_main() -> void:
+	settings_return_target = "main"
+	main_menu.visible = false
+	if settings_panel != null:
+		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size))
+
+
+func _on_settings_from_pause() -> void:
+	settings_return_target = "pause"
+	if pause_menu != null:
+		pause_menu.hide_pause()
+	if settings_panel != null:
+		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size))
+
+
+func _on_settings_back() -> void:
+	if settings_panel != null:
+		settings_panel.hide_panel()
+	if settings_return_target == "pause" and pause_menu != null:
+		pause_menu.show_pause()
+	elif main_menu != null:
+		main_menu.show_menu()
+
+
+func _on_window_size_selected(label: String) -> void:
+	client_settings.set_window_size_label(label)
+	_sync_settings_panel()
+
+
+func _sync_settings_panel() -> void:
+	if settings_panel != null and client_settings != null:
+		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
+
+
+func _show_pause_menu() -> void:
+	if gameplay_active and pause_menu != null:
+		pause_menu.show_pause()
+
+
+func _resume_from_pause() -> void:
+	if pause_menu != null:
+		pause_menu.hide_pause()
+
+
+func _return_to_main_menu() -> void:
+	if client != null:
+		if client.session_id != "":
+			client.end_session()
+		client.close()
+	_teardown_gameplay_state(true)
+	_show_main_menu()
+
+
+func _exit_game() -> void:
+	if client != null:
+		if gameplay_active and client.session_id != "":
+			client.end_session()
+		client.close()
+	get_tree().quit(0)
+
+
+func _teardown_gameplay_state(clear_session: bool) -> void:
+	gameplay_active = false
+	ready_sent = false
+	player_id = ""
+	player_hp = PLAYER_START_HP
+	player_max_hp = PLAYER_START_HP
+	predicted_pos = Vector3.ZERO
+	reconciliation_delta = 0.0
+	last_server_tick = 0
+	inventory = []
+	equipped = {}
+	loot_ids.clear()
+	monster_ids.clear()
+	interactable_ids.clear()
+	discovered_teleporters.clear()
+	pending_interactable_action.clear()
+	pending_waypoint_target_level = 0
+	pending_waypoint_travel = false
+	autoplay_enabled = false
+	autoplay_phase = "idle"
+	autoplay_timer = 0.0
+	autoplay_attack_cooldown = 0.0
+	autoplay_move_sent = false
+	autoplay_pickup_sent = false
+	autoplay_equip_sent = false
+	_bot_pending_events.clear()
+	_bot_logged_snapshot = false
+	_clear_level_entities()
+	if walls_root != null:
+		for child in walls_root.get_children():
+			child.queue_free()
+	if resolver != null:
+		resolver.apply_snapshot({"inventory": [], "equipped": {}})
+	_refresh_inventory_ui()
+	if _health_bar != null:
+		_health_bar.update_hp(player_hp, player_max_hp)
+	_hide_waypoint_panel()
+	if player_anchor != null:
+		player_anchor.position = Vector3.ZERO
+	if clear_session and client != null:
+		client.session_id = ""
+		client.seed = ""
+		client.world_id = ""
+		client.ws_url = ""
 
 
 func _process(delta: float) -> void:
@@ -199,8 +410,9 @@ func _process(delta: float) -> void:
 		client.send("client_ready", last_server_tick, {"client_version": "godot", "last_seen_tick": last_server_tick})
 		ready_sent = true
 
-	for env in client.poll():
-		_handle_message(env)
+	if gameplay_active or visual_replay_enabled:
+		for env in client.poll():
+			_handle_message(env)
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
 
@@ -563,6 +775,10 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 # --- input + prediction -----------------------------------------------------
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and _is_escape_key(event):
+		_handle_escape()
+		get_viewport().set_input_as_handled()
+		return
 	if _input_locked():
 		return
 	if bot_mode and not (event is InputEventKey):
@@ -617,6 +833,26 @@ func _is_inventory_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_I or event.physical_keycode == KEY_I or event.unicode == 105 or event.unicode == 73
 
 
+func _is_escape_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_ESCAPE or event.physical_keycode == KEY_ESCAPE
+
+
+func _handle_escape() -> void:
+	if settings_panel != null and settings_panel.visible:
+		_on_settings_back()
+		return
+	if character_panel != null and character_panel.visible:
+		character_panel.hide_panel()
+		if main_menu != null:
+			main_menu.show_menu()
+		return
+	if pause_menu != null and pause_menu.visible:
+		_resume_from_pause()
+		return
+	if gameplay_active:
+		_show_pause_menu()
+
+
 func _hotbar_slot_for_key(event: InputEventKey) -> int:
 	var code := event.keycode if event.keycode != KEY_NONE else event.physical_keycode
 	if code >= KEY_1 and code <= KEY_9:
@@ -627,13 +863,20 @@ func _hotbar_slot_for_key(event: InputEventKey) -> int:
 
 
 func _input_locked() -> bool:
-	return visual_replay_enabled or autoplay_enabled
+	return visual_replay_enabled or autoplay_enabled or _menu_blocks_gameplay_input()
 
 
 func _user_input_blocked() -> bool:
 	# Replay/autoplay fully lock input. Bot mode blocks real mouse/WASD but still
 	# allows push_input() key events through _unhandled_input().
 	return _input_locked() or bot_mode
+
+
+func _menu_blocks_gameplay_input() -> bool:
+	return (main_menu != null and main_menu.visible) \
+		or (character_panel != null and character_panel.visible) \
+		or (settings_panel != null and settings_panel.visible) \
+		or (pause_menu != null and pause_menu.visible)
 
 
 func _handle_autoplay(delta: float) -> void:
@@ -1087,6 +1330,7 @@ func _build_scene() -> void:
 	ui.add_child(consumable_bar)
 	_health_bar = PlayerHealthBarScript.new()
 	ui.add_child(_health_bar)
+	_setup_menu_layer()
 
 	input_shadow = InputShadowOverlayScript.new()
 	add_child(input_shadow)
@@ -1103,6 +1347,40 @@ func _build_scene() -> void:
 	walls_root = Node3D.new()
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
+
+
+func _setup_menu_layer() -> void:
+	menu_layer = CanvasLayer.new()
+	menu_layer.layer = 10
+	add_child(menu_layer)
+
+	main_menu = MainMenuScript.new()
+	main_menu.continue_pressed.connect(_on_continue_pressed)
+	main_menu.new_game_pressed.connect(_on_new_game_pressed)
+	main_menu.settings_pressed.connect(_on_settings_from_main)
+	main_menu.exit_pressed.connect(_exit_game)
+	menu_layer.add_child(main_menu)
+
+	character_panel = CharacterSelectPanelScript.new()
+	character_panel.back_requested.connect(func() -> void:
+		character_panel.hide_panel()
+		main_menu.show_menu()
+	)
+	character_panel.start_requested.connect(_start_character_session)
+	character_panel.create_requested.connect(_on_character_create_requested)
+	menu_layer.add_child(character_panel)
+
+	settings_panel = SettingsPanelScript.new()
+	settings_panel.back_requested.connect(_on_settings_back)
+	settings_panel.size_selected.connect(_on_window_size_selected)
+	menu_layer.add_child(settings_panel)
+
+	pause_menu = PauseMenuScript.new()
+	pause_menu.resume_pressed.connect(_resume_from_pause)
+	pause_menu.settings_pressed.connect(_on_settings_from_pause)
+	pause_menu.return_to_menu_pressed.connect(_return_to_main_menu)
+	pause_menu.exit_pressed.connect(_exit_game)
+	menu_layer.add_child(pause_menu)
 
 
 func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) -> void:
@@ -1607,6 +1885,14 @@ func get_bot_state() -> Dictionary:
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
+		"main_menu_visible": main_menu != null and main_menu.visible,
+		"character_panel_visible": character_panel != null and character_panel.visible,
+		"settings_panel_visible": settings_panel != null and settings_panel.visible,
+		"pause_menu_visible": pause_menu != null and pause_menu.visible,
+		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
+		"known_characters": character_panel.known_characters() if character_panel != null else [],
+		"current_session_id": client.session_id if client != null else "",
+		"gameplay_active": gameplay_active,
 	}
 	return out
 
@@ -1622,14 +1908,14 @@ func _bot_loot_presentations() -> Dictionary:
 
 
 func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
 	_attack_cooldown = SEND_INTERVAL
 
 
 func bot_click_entity_id(target_id: String) -> void:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	if target_id == "" or not entities.has(target_id):
 		return
@@ -1644,7 +1930,7 @@ func bot_click_entity_id(target_id: String) -> void:
 
 
 func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> void:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
 
@@ -1659,6 +1945,48 @@ func bot_use_consumable_hotbar(slot_index: int) -> void:
 	if consumable_bar == null:
 		return
 	consumable_bar.use_slot(slot_index)
+
+
+func bot_click_menu_button(button: String) -> void:
+	match button:
+		"continue":
+			_on_continue_pressed()
+		"new_game":
+			_on_new_game_pressed()
+		"settings":
+			if pause_menu != null and pause_menu.visible:
+				_on_settings_from_pause()
+			else:
+				_on_settings_from_main()
+		"back":
+			if settings_panel != null and settings_panel.visible:
+				_on_settings_back()
+			elif character_panel != null and character_panel.visible:
+				character_panel.hide_panel()
+				main_menu.show_menu()
+		"start":
+			if character_panel != null:
+				character_panel.submit_name()
+		"resume":
+			_resume_from_pause()
+		"return_to_main_menu":
+			_return_to_main_menu()
+		"exit":
+			_exit_game()
+
+
+func bot_enter_character_name(name: String) -> void:
+	if character_panel != null:
+		character_panel.set_name_text(name)
+
+
+func bot_select_character(index: int) -> void:
+	if character_panel != null:
+		character_panel.start_character_at_index(index)
+
+
+func bot_select_window_size(size: String) -> void:
+	_on_window_size_selected(size)
 
 
 func bot_consume_pending_event_at(index: int) -> void:

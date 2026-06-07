@@ -80,6 +80,46 @@ func (s *Store) GetCharacter(ctx context.Context, id string) (Character, error) 
 	return c, nil
 }
 
+func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]Character, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT id, account_id, name, created_at
+		 FROM characters
+		 WHERE account_id = $1
+		 ORDER BY created_at ASC, id ASC`,
+		accountID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list characters: %w", err)
+	}
+	defer rows.Close()
+
+	var chars []Character
+	for rows.Next() {
+		var c Character
+		if err := rows.Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt); err != nil {
+			return nil, fmt.Errorf("store: scan character: %w", err)
+		}
+		chars = append(chars, c)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: list characters rows: %w", err)
+	}
+	return chars, nil
+}
+
+func (s *Store) CreateCharacter(ctx context.Context, charID, accountID, name string) (Character, error) {
+	var c Character
+	err := s.pool.QueryRow(ctx,
+		`INSERT INTO characters (id, account_id, name) VALUES ($1, $2, $3)
+		 RETURNING id, account_id, name, created_at`,
+		charID, accountID, name,
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt)
+	if err != nil {
+		return Character{}, fmt.Errorf("store: create character: %w", err)
+	}
+	return c, nil
+}
+
 // --- sessions ---------------------------------------------------------------
 
 func (s *Store) CreateSession(ctx context.Context, sess Session) error {

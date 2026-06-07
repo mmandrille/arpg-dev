@@ -117,6 +117,14 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 				int(action.get("bag_index", 0)),
 				state,
 			)
+		"click_menu_button":
+			_do_click_menu_button(str(action.get("button", "")))
+		"enter_character_name":
+			_do_enter_character_name(str(action.get("name", "")))
+		"select_character":
+			_do_select_character(int(action.get("index", 0)))
+		"select_window_size":
+			_do_select_window_size(str(action.get("size", "")))
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -129,6 +137,26 @@ func _do_press_key(keycode_str: String) -> void:
 	event.pressed = true
 	event.echo = false
 	get_viewport().push_input(event)
+
+
+func _do_click_menu_button(button: String) -> void:
+	if _main != null and _main.has_method("bot_click_menu_button"):
+		_main.bot_click_menu_button(button)
+
+
+func _do_enter_character_name(name: String) -> void:
+	if _main != null and _main.has_method("bot_enter_character_name"):
+		_main.bot_enter_character_name(name)
+
+
+func _do_select_character(index: int) -> void:
+	if _main != null and _main.has_method("bot_select_character"):
+		_main.bot_select_character(index)
+
+
+func _do_select_window_size(size: String) -> void:
+	if _main != null and _main.has_method("bot_select_window_size"):
+		_main.bot_select_window_size(size)
 
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
@@ -269,6 +297,14 @@ func _format_action(action: Dictionary) -> String:
 			return "click_floor x=%s z=%s" % [str(action.get("x", "")), str(action.get("z", ""))]
 		"press_key":
 			return "press_key %s" % str(action.get("keycode", ""))
+		"click_menu_button":
+			return "click_menu_button %s" % str(action.get("button", ""))
+		"enter_character_name":
+			return "enter_character_name %s" % str(action.get("name", ""))
+		"select_character":
+			return "select_character index=%s" % str(action.get("index", 0))
+		"select_window_size":
+			return "select_window_size %s" % str(action.get("size", ""))
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
 				str(action.get("slot_index", "")),

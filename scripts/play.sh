@@ -53,9 +53,15 @@ curl -fsS "$BASE_URL/readyz" >/dev/null
 "$GODOT" --headless --path "$ROOT/client" --import >/dev/null 2>&1 || true
 
 echo "[play] launching Godot client — close the window to stop the server."
-echo "[play] controls: W/A/S/D move, LMB action, scroll zoom, I inventory."
-ARPG_BASE_URL="$BASE_URL" ARPG_DEV_TOKEN="$DEV_TOKEN" \
-  ARPG_WORLD_ID="dungeon_levels" ARPG_SESSION_ID="" \
-  "$GODOT" --path "$ROOT/client"
+echo "[play] main menu opens first; gameplay controls: W/A/S/D move, LMB action, scroll zoom, I inventory."
+GODOT_ENV=(
+  "ARPG_BASE_URL=$BASE_URL"
+  "ARPG_DEV_TOKEN=$DEV_TOKEN"
+)
+[[ -n "${ARPG_AUTOSTART:-}" ]] && GODOT_ENV+=("ARPG_AUTOSTART=$ARPG_AUTOSTART")
+[[ -n "${ARPG_WORLD_ID:-}" ]] && GODOT_ENV+=("ARPG_WORLD_ID=$ARPG_WORLD_ID")
+[[ -n "${ARPG_SESSION_ID:-}" ]] && GODOT_ENV+=("ARPG_SESSION_ID=$ARPG_SESSION_ID")
+env -u ARPG_AUTOSTART -u ARPG_WORLD_ID -u ARPG_SESSION_ID \
+  "${GODOT_ENV[@]}" "$GODOT" --path "$ROOT/client"
 
 echo "[play] client closed; shutting down server."

@@ -8,18 +8,24 @@ const STEP_TYPES_WAIT := [
 	"wait_ws_open", "wait_entity", "wait_event", "wait_inventory_item",
 	"wait_inventory_count", "wait_loot_item", "wait_loot_count",
 	"wait_player_near", "assert_entity_removed",
-	"click_entity_until_event",
+	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
+	"wait_settings_panel", "wait_pause_menu",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
 	"assert_unequipped", "assert_inventory_missing", "assert_inventory_count",
 	"assert_loot_presentation", "assert_inventory_presentation",
-	"assert_hotbar_assigned", "assert_player_hp",
+	"assert_hotbar_assigned", "assert_player_hp", "assert_main_menu_visible",
+	"assert_character_panel_visible", "assert_settings_panel_visible",
+	"assert_pause_menu_visible", "assert_session_changed",
+	"assert_player_position_unchanged",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_floor",
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
-	"assign_hotbar_slot", "double_click_bag_item",
+	"assign_hotbar_slot", "double_click_bag_item", "click_menu_button",
+	"enter_character_name", "select_character", "select_window_size",
+	"remember_session", "remember_player_position",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -32,7 +38,13 @@ const ALL_STEP_TYPES: Array = [
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
 	"assert_loot_presentation", "assert_inventory_presentation",
 	"click_entity_until_event", "assign_hotbar_slot", "assert_hotbar_assigned",
-	"assert_player_hp", "double_click_bag_item",
+	"assert_player_hp", "double_click_bag_item", "wait_main_menu",
+	"wait_character_panel", "wait_settings_panel", "wait_pause_menu",
+	"assert_main_menu_visible", "assert_character_panel_visible",
+	"assert_settings_panel_visible", "assert_pause_menu_visible",
+	"click_menu_button", "enter_character_name", "select_character",
+	"select_window_size", "remember_session", "assert_session_changed",
+	"remember_player_position", "assert_player_position_unchanged",
 ]
 
 var scenario: Dictionary = {}
@@ -48,6 +60,7 @@ var _done: bool = false
 var _passed: bool = false
 var _failure_msg: String = ""
 var _controller = null  # BotController reference
+var _memory: Dictionary = {}
 
 # Filled by tick() on first action call; consumed by controller's _process.
 var pending_action: Dictionary = {}
@@ -65,6 +78,7 @@ func load_scenario(data: Dictionary) -> bool:
 	_passed = false
 	_failure_msg = ""
 	pending_action = {}
+	_memory = {}
 	return _steps.size() > 0
 
 
@@ -126,7 +140,7 @@ func tick(delta: float, state: Dictionary) -> bool:
 		_advance(stype)
 		_check_complete()
 	elif stype in STEP_TYPES_ACTION:
-		_queue_action(step, stype)
+		_queue_action(step, stype, state)
 		_advance(stype)
 		_check_complete()
 	else:
@@ -142,6 +156,14 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 	match stype:
 		"wait_ws_open":
 			return bool(state.get("ws_open", false))
+		"wait_main_menu":
+			return bool(state.get("main_menu_visible", false))
+		"wait_character_panel":
+			return bool(state.get("character_panel_visible", false))
+		"wait_settings_panel":
+			return bool(state.get("settings_panel_visible", false))
+		"wait_pause_menu":
+			return bool(state.get("pause_menu_visible", false))
 		"wait_entity":
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
@@ -214,6 +236,35 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			if want != got:
 				_fail("assert_panel_visible failed: want=%s got=%s step=%d scenario=%s" % [
 					want, got, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_main_menu_visible":
+			return _assert_bool_state("assert_main_menu_visible", "main_menu_visible", step, state)
+		"assert_character_panel_visible":
+			return _assert_bool_state("assert_character_panel_visible", "character_panel_visible", step, state)
+		"assert_settings_panel_visible":
+			return _assert_bool_state("assert_settings_panel_visible", "settings_panel_visible", step, state)
+		"assert_pause_menu_visible":
+			return _assert_bool_state("assert_pause_menu_visible", "pause_menu_visible", step, state)
+		"assert_session_changed":
+			var remembered_session := str(_memory.get("session_id", ""))
+			var current_session := str(state.get("current_session_id", ""))
+			if current_session == "" or remembered_session == "" or current_session == remembered_session:
+				_fail("assert_session_changed failed: remembered=%s current=%s step=%d scenario=%s" % [
+					remembered_session, current_session, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_player_position_unchanged":
+			var remembered_pos: Dictionary = _memory.get("player_pos", {})
+			var current_pos: Dictionary = state.get("player_pos", {})
+			var tolerance := float(step.get("tolerance", 0.01))
+			var dx := float(current_pos.get("x", 0.0)) - float(remembered_pos.get("x", 0.0))
+			var dz := float(current_pos.get("z", 0.0)) - float(remembered_pos.get("z", 0.0))
+			if sqrt(dx * dx + dz * dz) > tolerance:
+				_fail("assert_player_position_unchanged failed: remembered=%s current=%s step=%d scenario=%s" % [
+					str(remembered_pos), str(current_pos), _step_index, str(scenario.get("id", "?"))
 				])
 				return false
 			return true
@@ -331,9 +382,26 @@ func _inventory_count(state: Dictionary, item_def_id: String) -> int:
 	return count
 
 
-func _queue_action(step: Dictionary, stype: String) -> void:
+func _queue_action(step: Dictionary, stype: String, state: Dictionary) -> void:
+	if stype == "remember_session":
+		_memory["session_id"] = str(state.get("current_session_id", ""))
+		return
+	if stype == "remember_player_position":
+		_memory["player_pos"] = (state.get("player_pos", {}) as Dictionary).duplicate(true)
+		return
 	pending_action = step.duplicate()
 	pending_action["_type"] = stype
+
+
+func _assert_bool_state(label: String, key: String, step: Dictionary, state: Dictionary) -> bool:
+	var want := bool(step.get("visible", true))
+	var got := bool(state.get(key, false))
+	if want != got:
+		_fail("%s failed: want=%s got=%s step=%d scenario=%s" % [
+			label, want, got, _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
 
 
 func _advance(completed_type: String = "") -> void:
@@ -372,6 +440,14 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "min_count=%s" % str(step.get("min_count", ""))
 		"assert_player_hp":
 			return "hp=%s" % str(step.get("equals", ""))
+		"click_menu_button":
+			return "button=%s" % str(step.get("button", ""))
+		"enter_character_name":
+			return "name=%s" % str(step.get("name", ""))
+		"select_character":
+			return "index=%s" % str(step.get("index", 0))
+		"select_window_size":
+			return "size=%s" % str(step.get("size", ""))
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))
 		"click_entity":
@@ -492,6 +568,15 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "press_key":
 		if str(step.get("keycode", "")) == "":
 			return "client_steps[%d] (%s) requires keycode" % [index, stype]
+	if stype == "click_menu_button":
+		if str(step.get("button", "")) == "":
+			return "client_steps[%d] (%s) requires button" % [index, stype]
+	if stype == "enter_character_name":
+		if str(step.get("name", "")) == "":
+			return "client_steps[%d] (%s) requires name" % [index, stype]
+	if stype == "select_window_size":
+		if str(step.get("size", "")) == "":
+			return "client_steps[%d] (%s) requires size" % [index, stype]
 	if stype == "click_entity":
 		if str(step.get("entity_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type" % [index, stype]

@@ -76,6 +76,7 @@ func (s *Server) Handler() http.Handler {
 		mux.Handle("GET /metrics", s.metrics.Handler())
 	}
 	s.registerAuthRoutes(mux)
+	s.registerCharacterRoutes(mux)
 	s.registerSessionRoutes(mux)
 	s.registerInspectRoutes(mux)
 	s.registerRealtimeRoutes(mux)

@@ -41,17 +41,40 @@ const (
 // defaultWorldID is used when legacy rows omit world_id.
 const defaultWorldID = "vertical_slice"
 
-// InventoryItem is a session-scoped inventory entry (see migration note). ID is
-// the protocol item_instance_id (decimal string), unique within its session.
-type InventoryItem struct {
+// CharacterItemInstance is a durable character-owned item instance. ID is the
+// protocol item_instance_id loaded into fresh Sim snapshots.
+type CharacterItemInstance struct {
 	ID          string
-	SessionID   string
 	AccountID   string
 	CharacterID string
 	ItemDefID   string
-	Slot        string // "" when not slotted
+	Location    string
+	Slot        string
 	Equipped    bool
+	RolledStats json.RawMessage
 	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+const (
+	ItemLocationInventory = "inventory"
+	ItemLocationEquipped  = "equipped"
+	ItemLocationStash     = "stash"
+)
+
+// CharacterWaypoint is a durable unlocked waypoint level for a character.
+type CharacterWaypoint struct {
+	CharacterID  string
+	Level        int
+	DiscoveredAt time.Time
+}
+
+// SessionStartSnapshot freezes the character progression visible when a
+// session was created. Replay uses this instead of mutable live character rows.
+type SessionStartSnapshot struct {
+	SessionID string
+	Items     []CharacterItemInstance
+	Waypoints []CharacterWaypoint
 }
 
 // SessionInput is a recorded authoritative input (spec 4.6, ADR D8.2).

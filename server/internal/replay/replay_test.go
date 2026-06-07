@@ -270,6 +270,7 @@ type fakeRepo struct {
 	session store.Session
 	inputs  []store.SessionInput
 	events  []store.SessionEvent
+	start   store.SessionStartSnapshot
 }
 
 func (f *fakeRepo) UpsertAccountByEmail(context.Context, string, string) (store.Account, error) {
@@ -292,15 +293,28 @@ func (f *fakeRepo) TouchSession(context.Context, string) error { return nil }
 func (f *fakeRepo) SetSessionStatus(context.Context, string, string) error {
 	return nil
 }
-func (f *fakeRepo) ListInventory(context.Context, string) ([]store.InventoryItem, error) {
+func (f *fakeRepo) ListCharacterItems(context.Context, string, string) ([]store.CharacterItemInstance, error) {
 	return nil, nil
 }
-func (f *fakeRepo) AddInventoryItem(context.Context, store.InventoryItem) error { return nil }
-func (f *fakeRepo) SetEquipped(context.Context, string, string, string, bool) error {
+func (f *fakeRepo) AddCharacterItem(context.Context, store.CharacterItemInstance) error { return nil }
+func (f *fakeRepo) SetCharacterItemLocation(context.Context, string, string, string, string) error {
 	return nil
 }
-func (f *fakeRepo) RemoveInventoryItem(context.Context, string, string) error { return nil }
-func (f *fakeRepo) AppendInput(context.Context, store.SessionInput) error     { return nil }
+func (f *fakeRepo) SetCharacterItemEquipped(context.Context, string, string, string, string, bool) error {
+	return nil
+}
+func (f *fakeRepo) RemoveCharacterItem(context.Context, string, string, string) error { return nil }
+func (f *fakeRepo) ListCharacterWaypoints(context.Context, string) ([]store.CharacterWaypoint, error) {
+	return nil, nil
+}
+func (f *fakeRepo) AddCharacterWaypoint(context.Context, string, int) error { return nil }
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint) error {
+	return nil
+}
+func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {
+	return f.start, nil
+}
+func (f *fakeRepo) AppendInput(context.Context, store.SessionInput) error { return nil }
 func (f *fakeRepo) ListInputs(context.Context, string) ([]store.SessionInput, error) {
 	return f.inputs, nil
 }

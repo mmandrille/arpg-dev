@@ -416,12 +416,16 @@ func (r *runner) persistTick(res game.TickResult) {
 				"slot", c.Item.Slot,
 				"equipped", c.Item.Equipped,
 			)
-			err := r.store.AddInventoryItem(ctx, store.InventoryItem{
+			location := store.ItemLocationInventory
+			if c.Item.Equipped {
+				location = store.ItemLocationEquipped
+			}
+			err := r.store.AddCharacterItem(ctx, store.CharacterItemInstance{
 				ID:          c.Item.ItemInstanceID,
-				SessionID:   r.sess.ID,
 				AccountID:   r.sess.AccountID,
 				CharacterID: r.sess.CharacterID,
 				ItemDefID:   c.Item.ItemDefID,
+				Location:    location,
 				Slot:        c.Item.Slot,
 				Equipped:    c.Item.Equipped,
 			})
@@ -441,7 +445,7 @@ func (r *runner) persistTick(res game.TickResult) {
 				"slot", c.Item.Slot,
 				"equipped", c.Item.Equipped,
 			)
-			if err := r.store.SetEquipped(ctx, r.sess.ID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped); err != nil {
+			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory update", "error", err)
 			}
@@ -454,9 +458,16 @@ func (r *runner) persistTick(res game.TickResult) {
 				"op", c.Op,
 				"item_instance_id", *c.ItemInstanceID,
 			)
-			if err := r.store.RemoveInventoryItem(ctx, r.sess.ID, *c.ItemInstanceID); err != nil {
+			if err := r.store.RemoveCharacterItem(ctx, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory remove", "error", err)
+			}
+		case game.OpTeleporterDiscoveryUpdate:
+			if c.Discovered {
+				if err := r.store.AddCharacterWaypoint(ctx, r.sess.CharacterID, c.Level); err != nil {
+					r.metrics.PersistenceErrors.Inc()
+					r.log.Error("persist character waypoint", "error", err)
+				}
 			}
 		}
 	}

@@ -277,6 +277,20 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 	}
 }
 
+// LoadDiscoveredTeleporters restores durable character waypoint unlocks into a
+// fresh session. Town remains discovered even if callers omit it.
+func (s *Sim) LoadDiscoveredTeleporters(levels []int) {
+	if !s.multiLevel {
+		return
+	}
+	s.discoveredTeleporters[townLevel] = true
+	for _, level := range levels {
+		if level <= townLevel {
+			s.discoveredTeleporters[level] = true
+		}
+	}
+}
+
 func (s *Sim) alloc() uint64 {
 	id := s.nextID
 	s.nextID++
@@ -2297,11 +2311,20 @@ func (s *Sim) teleporterDiscoveryView() []TeleporterDiscoveryView {
 	if !s.multiLevel {
 		return []TeleporterDiscoveryView{}
 	}
-	levels := make([]int, 0, len(s.levels))
+	levelSet := make(map[int]bool, len(s.levels)+len(s.discoveredTeleporters))
 	for levelNum := range s.levels {
 		if levelNum <= townLevel {
-			levels = append(levels, levelNum)
+			levelSet[levelNum] = true
 		}
+	}
+	for levelNum := range s.discoveredTeleporters {
+		if levelNum <= townLevel {
+			levelSet[levelNum] = true
+		}
+	}
+	levels := make([]int, 0, len(levelSet))
+	for levelNum := range levelSet {
+		levels = append(levels, levelNum)
 	}
 	sort.Ints(levels)
 	out := make([]TeleporterDiscoveryView, 0, len(levels))

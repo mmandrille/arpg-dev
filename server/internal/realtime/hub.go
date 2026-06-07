@@ -70,6 +70,15 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
 			http.Error(w, "could not create session sim", http.StatusInternalServerError)
 			return
 		}
+		start, err := h.store.LoadSessionStartSnapshot(r.Context(), sess.ID)
+		if err != nil {
+			h.metrics.PersistenceErrors.Inc()
+			h.log.Error("load session start snapshot", "session_id", sess.ID, "error", err)
+			http.Error(w, "could not load session start snapshot", http.StatusInternalServerError)
+			return
+		}
+		sim.LoadInventory(persistedItems(start.Items))
+		sim.LoadDiscoveredTeleporters(waypointLevels(start.Waypoints))
 	}
 
 	conn, err := h.upgrader.Upgrade(w, r, nil)
@@ -79,4 +88,28 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
 	}
 
 	newRunner(conn, sim, sess, h.store, h.log, h.metrics, meta).run(r.Context())
+}
+
+func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {
+	out := make([]game.PersistedItem, 0, len(items))
+	for _, item := range items {
+		if item.Location != store.ItemLocationInventory && item.Location != store.ItemLocationEquipped {
+			continue
+		}
+		out = append(out, game.PersistedItem{
+			InstanceID: item.ID,
+			ItemDefID:  item.ItemDefID,
+			Slot:       item.Slot,
+			Equipped:   item.Equipped,
+		})
+	}
+	return out
+}
+
+func waypointLevels(waypoints []store.CharacterWaypoint) []int {
+	out := make([]int, 0, len(waypoints))
+	for _, wp := range waypoints {
+		out = append(out, wp.Level)
+	}
+	return out
 }

@@ -11,9 +11,9 @@ Last updated: 2026-06-06
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v21 — `dungeon-monster-combat` (generated dungeon mobs chase and proactively damage the player) |
-| **Active branch** | `feature/dungeon-monster-combat` |
-| **CI gate** | `make ci` green on 2026-06-06 |
+| **Latest completed slice** | v22 — `character-scoped-persistence` (default-character items/equipment/waypoints survive fresh sessions) |
+| **Active branch** | `feature/character-scoped-persistence` |
+| **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
 
 ### Slice numbering note
@@ -37,6 +37,7 @@ v18_* = dungeon-levels-and-stairs
 v19_* = teleporters-and-waypoint-ui
 v20_* = play-session-loop
 v21_* = dungeon-monster-combat
+v22_* = character-scoped-persistence
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -78,6 +79,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v19** | `teleporters-and-waypoint-ui` | Complete (`make ci` green) | [`v19_spec-teleporters-and-waypoint-ui.md`](specs/v19_spec-teleporters-and-waypoint-ui.md) | [`v19_2026-06-06-teleporters-and-waypoint-ui.md`](plans/v19_2026-06-06-teleporters-and-waypoint-ui.md) |
 | **v20** | `play-session-loop` | Complete (`make ci` green) | [`v20_spec-play-session-loop.md`](specs/v20_spec-play-session-loop.md) | [`v20_2026-06-06-play-session-loop.md`](plans/v20_2026-06-06-play-session-loop.md) |
 | **v21** | `dungeon-monster-combat` | Complete (`make ci` green) | [`v21_spec-dungeon-monster-combat.md`](specs/v21_spec-dungeon-monster-combat.md) | [`v21_2026-06-06-dungeon-monster-combat.md`](plans/v21_2026-06-06-dungeon-monster-combat.md) |
+| **v22** | `character-scoped-persistence` | Complete (`make ci` green) | [`v22_spec-character-scoped-persistence.md`](specs/v22_spec-character-scoped-persistence.md) | [`v22_2026-06-07-character-scoped-persistence.md`](plans/v22_2026-06-07-character-scoped-persistence.md) |
 
 ---
 
@@ -471,6 +473,29 @@ client/server boundary or adding client-side combat authority.
 no depth scaling, no ranged/AoE monsters, no protocol-level town safe-zone guard, no
 character-scoped persistence, and no production monster art.
 
+### v22 — Character-scoped persistence
+
+**Proves:** Default-character item instances, equipped weapon state, and waypoint unlocks can
+survive fresh sessions while replay remains pinned to a session-start progression snapshot.
+
+- Postgres now has character-owned item instances with `location`, `equipped`, `slot`, and
+  future-ready `rolled_stats`, plus character waypoint rows keyed by level.
+- Fresh session creation freezes the character's current items and waypoints into immutable
+  session-start snapshot tables; WebSocket fresh attach, `/state`, replay, and timeline all load
+  that snapshot before applying session inputs.
+- Live inventory add/update/remove changes persist against the session character; dropped and
+  consumed items are removed durably for v22.
+- Teleporter discovery changes persist as character waypoints; town level `0` remains always
+  available even when not explicitly stored.
+- Same-session reconnect continues to reconstruct from recorded inputs, not mutable live
+  character rows, so historical replay does not drift after later fresh-session progression.
+- Bot scenario `15_character_persistence.json` proves gear/equipment persistence, persisted
+  level `-1` waypoint access, fresh-session level generation, `/state`, reconnect, and replay.
+
+**Explicit non-goals:** no character picker, player-facing old-session resume, stash UI,
+vendors/gold/crafting/quests, character stats/skills/XP, respawn/checkpoints, durable dungeon
+maps/monsters/floor drops/HP, or random item stat generation.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -509,6 +534,7 @@ inventory_lab: pick up rusty_sword → equip → unequip → drop → re-pickup 
 heal_lab: pick up red_potion x2 → take damage → use potion twice → full HP
 chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond leash and return
 dungeon_levels / teleporter_lab: start in town, descend/ascend generated floors; discover teleporters and fast-travel back
+character_persistence: same-account fresh sessions retain gear/equipment and discovered waypoint access
 ```
 
 **Verify:**
@@ -577,11 +603,16 @@ discovery, and server-owned fast travel with a client-only waypoint panel; v20 m
 the fresh play-session entry and keeps dungeon floors lazy; v21 spawns deterministic hostile dungeon
 mobs that chase and proactively damage the player.
 
+**Character inventory/equipment and waypoint unlocks now persist across fresh sessions.** v22 moves
+durable item instances and discovered waypoint levels to the default character, while preserving
+session-start snapshots for deterministic replay and keeping HP, dungeon maps, monsters, corpses,
+opened doors, and floor drops session-scoped.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Cross-session **character-scoped** inventory, waypoints, and player-facing resume | v0 as-built §10, v20/v21 non-goals |
+| Persistence | Character picker, player-facing old-session resume, stash/vendors/gold, quest progress, stats/skills/XP, respawn/checkpoints, durable dungeon map snapshots | v22 non-goals, ADR-0008 deferred |
 | Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, monster loot/depth scaling | v0/v4/v12/v17/v21 non-goals |
 | Content | Production item art/icons, production town art, NPCs/vendors/stash, additional item families beyond current rules | v15/v20 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |

@@ -13,6 +13,7 @@ CLIENT_DIR="$ROOT/client"
 export BASE_URL="${BASE_URL:-http://localhost:8080}"
 export DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
 export DEBUG_TOKEN="${DEBUG_TOKEN:-local-debug-token}"
+export ARPG_EMAIL="${ARPG_EMAIL:-client-smoke+$(date -u +%Y%m%d%H%M%S)-$$@example.test}"
 
 if ! command -v "$GODOT" >/dev/null 2>&1; then
   echo "[client-smoke] SKIP: Godot runtime '$GODOT' not found on PATH."

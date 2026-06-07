@@ -107,6 +107,23 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session")
 		return
 	}
+	items, err := s.store.ListCharacterItems(ctx, accountID, char.ID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character items")
+		return
+	}
+	waypoints, err := s.store.ListCharacterWaypoints(ctx, char.ID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character waypoints")
+		return
+	}
+	if err := s.store.CreateSessionStartSnapshot(ctx, sess.ID, accountID, char.ID, items, waypoints); err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
+		return
+	}
 
 	writeJSON(w, http.StatusCreated, sessionResponse(sess))
 }

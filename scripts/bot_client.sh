@@ -18,6 +18,8 @@ _ts() {
 
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
+EMAIL="${ARPG_EMAIL:-client-bot@example.test}"
+EMAIL_RUN_ID="${ARPG_BOT_CLIENT_RUN_ID:-$(date -u +%Y%m%d%H%M%S)-$$}"
 SCENARIO="${SCENARIO:-all}"
 # Set HEADLESS=1 for CI. Default is 0 (windowed) so you can watch the bot act.
 HEADLESS="${HEADLESS:-0}"
@@ -32,6 +34,21 @@ fi
 
 echo "[bot-client $(_ts)] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
 echo "[bot-client $(_ts)] SCENARIO=$SCENARIO HEADLESS=$HEADLESS BOT_STEP_DELAY=$BOT_STEP_DELAY"
+
+scenario_email() {
+  local base_email="$1"
+  local run_id="$2"
+  local scenario_id="$3"
+  if [[ "$base_email" != *"@"* ]]; then
+    printf '%s\n' "$base_email"
+    return
+  fi
+  local local_part="${base_email%@*}"
+  local domain="${base_email#*@}"
+  local safe_id
+  safe_id="$(printf '%s-%s' "$run_id" "$scenario_id" | tr -c '[:alnum:]' '-')"
+  printf '%s+%s@%s\n' "$local_part" "$safe_id" "$domain"
+}
 
 # Collect scenario files to run.
 declare -a SCENARIO_FILES=()
@@ -115,6 +132,8 @@ run_scenario() {
   echo "[bot-client $(_ts)] --- running scenario: $scenario_id (world=$world_id file=$(basename "$scenario_path"))"
   exit_code=0
   local godot_flags="--resolution 1280x720"
+  local email
+  email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
   [[ "$HEADLESS" == "1" ]] && godot_flags="--headless $godot_flags"
   echo "[bot-client $(_ts)] launching Godot for $scenario_id..."
   local launch_started=$SECONDS
@@ -123,6 +142,7 @@ run_scenario() {
     ARPG_WORLD_ID="$world_id" \
     ARPG_BASE_URL="$BASE_URL" \
     ARPG_DEV_TOKEN="$DEV_TOKEN" \
+    ARPG_EMAIL="$email" \
     ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
     "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1 | tee "$tmpfile"
   exit_code=${PIPESTATUS[0]}

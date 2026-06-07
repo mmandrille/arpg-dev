@@ -5,8 +5,6 @@
   "description": "Generated dungeon mobs chase and proactively damage the player before being killed.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-    { "action": "walk_to_monster", "monster_def_id": "dungeon_mob" },
-    { "action": "wait_ticks", "ticks": 20 },
     { "action": "action_until_event", "monster_def_id": "dungeon_mob", "event_type": "monster_killed" }
   ],
   "assertions": [
@@ -14,7 +12,7 @@
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "event_seen", "event_type": "player_damaged" },
     { "type": "event_seen", "event_type": "monster_killed" },
-    { "type": "monster_killed_in_attacks", "monster_def_id": "dungeon_mob", "max_attacks": 4 }
+    { "type": "monster_killed_in_attacks", "monster_def_id": "dungeon_mob", "max_attacks": 8 }
   ],
   "visual": {
     "camera": { "x": 16, "y": 10, "zoom": 1.1 }

@@ -17,6 +17,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/auth"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/config"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/metrics"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/realtime"
@@ -110,7 +111,7 @@ func loginAndSessionWithWorld(t *testing.T, srv *httptest.Server, worldID string
 	t.Helper()
 	// dev-login
 	rec := doHTTP(t, srv, "POST", "/v0/auth/dev-login", "", map[string]string{
-		"email": "ws@example.test", "dev_token": testDevToken,
+		"email": "ws+" + ids.Token()[:12] + "@example.test", "dev_token": testDevToken,
 	})
 	var lr devLoginResponse
 	mustJSON(t, rec, &lr)
@@ -123,6 +124,18 @@ func loginAndSessionWithWorld(t *testing.T, srv *httptest.Server, worldID string
 	var sr createSessionResponse
 	mustJSON(t, rec, &sr)
 	return lr.AccessToken, sr.SessionID
+}
+
+func createSessionWithToken(t *testing.T, srv *httptest.Server, token, worldID string) string {
+	t.Helper()
+	body := map[string]any{"mode": "solo"}
+	if worldID != "" {
+		body["world_id"] = worldID
+	}
+	rec := doHTTP(t, srv, "POST", "/v0/sessions", token, body)
+	var sr createSessionResponse
+	mustJSON(t, rec, &sr)
+	return sr.SessionID
 }
 
 func dialWS(t *testing.T, srv *httptest.Server, token, sessionID string) *websocket.Conn {
@@ -211,6 +224,26 @@ func TestResumeSnapshotMatchesStateEndpoint(t *testing.T) {
 	rej := readRejected(t, conn, "msg-1")
 	if rej.Reason != "duplicate" {
 		t.Fatalf("duplicate rejection reason = %q, want duplicate", rej.Reason)
+	}
+}
+
+func TestCharacterPersistenceLoadsInventoryAndEquipmentAcrossFreshSessions(t *testing.T) {
+	srv := fullStack(t)
+	token, firstSessionID := loginAndSession(t, srv)
+	itemID := driveSlice(t, srv, token, firstSessionID)
+
+	secondSessionID := createSessionWithToken(t, srv, token, "")
+	conn := dialWS(t, srv, token, secondSessionID)
+	defer conn.Close()
+	snap := readSnapshot(t, conn)
+	if len(snap.Inventory) != 1 {
+		t.Fatalf("fresh persisted inventory count = %d, want 1: %+v", len(snap.Inventory), snap.Inventory)
+	}
+	if snap.Inventory[0].ItemInstanceID != itemID || snap.Inventory[0].ItemDefID != "rusty_sword" || !snap.Inventory[0].Equipped {
+		t.Fatalf("fresh persisted inventory item = %+v, want equipped rusty_sword %s", snap.Inventory[0], itemID)
+	}
+	if snap.Equipped["weapon"] == nil || *snap.Equipped["weapon"] != itemID {
+		t.Fatalf("fresh persisted equipped weapon = %v, want %s", snap.Equipped["weapon"], itemID)
 	}
 }
 

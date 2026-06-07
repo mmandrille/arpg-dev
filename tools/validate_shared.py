@@ -115,6 +115,7 @@ def cross_checks(report: Report) -> None:
     combat = load(RULES / "combat.v0.json")
     items = load(RULES / "items.v0.json")
     item_templates = load(RULES / "item_templates.v0.json")
+    treasure_classes = load(RULES / "treasure_classes.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
     interactables = load(RULES / "interactables.v0.json")
@@ -135,6 +136,8 @@ def cross_checks(report: Report) -> None:
     dungeon_teleporters_golden = load(GOLDEN / "dungeon_teleporters.json")
     dungeon_monster_attack_golden = load(GOLDEN / "dungeon_monster_attack.json")
     item_rolls_golden = load(GOLDEN / "item_rolls.json")
+    treasure_class_rolls_golden = load(GOLDEN / "treasure_class_rolls.json")
+    guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -293,6 +296,55 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"item template {template_id} weapon rolls are valid")
 
+    treasure_class_defs = treasure_classes["classes"]
+    for class_id, treasure_class in treasure_class_defs.items():
+        attempts = treasure_class.get("attempts", [])
+        if not attempts:
+            report.fail("treasure class attempts", f"{class_id}: must define at least one attempt")
+            continue
+        seen_attempt_ids = set()
+        failed_class = False
+        for attempt in attempts:
+            attempt_id = attempt.get("attempt_id")
+            if attempt_id in seen_attempt_ids:
+                report.fail("treasure class attempt_id", f"{class_id}: duplicate attempt_id {attempt_id}")
+                failed_class = True
+                break
+            seen_attempt_ids.add(attempt_id)
+            success_weight = attempt.get("success_weight", -1)
+            no_drop_weight = attempt.get("no_drop_weight", -1)
+            if success_weight < 0 or no_drop_weight < 0 or success_weight + no_drop_weight <= 0:
+                report.fail("treasure class weights", f"{class_id}.{attempt_id}: success/no_drop total must be positive")
+                failed_class = True
+                break
+            if success_weight > 0 and not attempt.get("entries"):
+                report.fail("treasure class entries", f"{class_id}.{attempt_id}: success requires entries")
+                failed_class = True
+                break
+            for entry in attempt.get("entries", []):
+                item_def_id = entry.get("item_def_id")
+                item_template_id = entry.get("item_template_id")
+                if bool(item_def_id) == bool(item_template_id):
+                    report.fail("treasure class entry", f"{class_id}.{attempt_id}: exactly one of item_def_id/item_template_id")
+                    failed_class = True
+                    break
+                if entry.get("weight", 0) <= 0:
+                    report.fail("treasure class entry", f"{class_id}.{attempt_id}: entry weight must be positive")
+                    failed_class = True
+                    break
+                if item_def_id and item_def_id not in items["items"]:
+                    report.fail("treasure class item", f"{class_id}.{attempt_id}: unknown item {item_def_id}")
+                    failed_class = True
+                    break
+                if item_template_id and item_template_id not in item_templates["templates"]:
+                    report.fail("treasure class template", f"{class_id}.{attempt_id}: unknown template {item_template_id}")
+                    failed_class = True
+                    break
+            if failed_class:
+                break
+        if not failed_class:
+            report.ok(f"treasure class {class_id} attempts are valid")
+
     if combat.get("unarmed_reach", 0) <= 0:
         report.fail("combat unarmed_reach", "must be positive")
     else:
@@ -338,6 +390,30 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation monster_placement", "max_attempts must be positive")
     else:
         report.ok("dungeon_generation monster placement is valid")
+    chest_placement = dungeon_generation.get("chest_placement", {})
+    chest_interactable_id = chest_placement.get("interactable_def_id")
+    chest_loot_table = chest_placement.get("loot_table")
+    chest_loot_def = loot["loot_tables"].get(chest_loot_table)
+    if chest_placement.get("enabled") and chest_placement.get("chance_weight", 0) + chest_placement.get("no_chest_weight", 0) <= 0:
+        report.fail("dungeon_generation chest_placement", "chance/no_chest total must be positive")
+    elif chest_interactable_id not in interactables["interactables"]:
+        report.fail("dungeon_generation chest_placement", f"unknown interactable_def_id {chest_interactable_id}")
+    elif chest_interactable_id != "treasure_chest":
+        report.fail("dungeon_generation chest_placement", "interactable_def_id must be treasure_chest in v25")
+    elif chest_loot_def is None:
+        report.fail("dungeon_generation chest_placement", f"unknown loot_table {chest_loot_table}")
+    elif not chest_loot_def.get("treasure_class_id"):
+        report.fail("dungeon_generation chest_placement", "loot_table must resolve to a treasure class")
+    elif chest_loot_def["treasure_class_id"] not in treasure_class_defs:
+        report.fail("dungeon_generation chest_placement", f"unknown treasure class {chest_loot_def['treasure_class_id']}")
+    elif chest_placement.get("monster_count_bonus", -1) < 0:
+        report.fail("dungeon_generation chest_placement", "monster_count_bonus must be non-negative")
+    elif chest_placement.get("min_stair_distance", 0) <= 0:
+        report.fail("dungeon_generation chest_placement", "min_stair_distance must be positive")
+    elif chest_placement.get("max_attempts", 0) <= 0:
+        report.fail("dungeon_generation chest_placement", "max_attempts must be positive")
+    else:
+        report.ok("dungeon_generation chest placement is valid")
     for key in dungeon_generation["level_names"]:
         try:
             level_num = int(key)
@@ -397,7 +473,15 @@ def cross_checks(report: Report) -> None:
         if table not in loot["loot_tables"]:
             report.fail("monster loot_table", f"{mid} -> unknown table {table}")
             continue
-        for entry in loot["loot_tables"][table].get("entries", []):
+        loot_table = loot["loot_tables"][table]
+        treasure_class_id = loot_table.get("treasure_class_id")
+        if treasure_class_id:
+            if treasure_class_id not in treasure_class_defs:
+                report.fail("loot treasure class", f"{table} -> unknown treasure class {treasure_class_id}")
+            else:
+                report.ok(f"monster {mid} loot table resolves treasure class {treasure_class_id}")
+            continue
+        for entry in loot_table.get("entries", []):
             item_def_id = entry.get("item_def_id")
             item_template_id = entry.get("item_template_id")
             if bool(item_def_id) == bool(item_template_id):
@@ -410,7 +494,7 @@ def cross_checks(report: Report) -> None:
                 report.fail("loot entry template", f"{table} -> unknown template {item_template_id}")
                 break
         else:
-            for item_id in loot["loot_tables"][table].get("drops", []):
+            for item_id in loot_table.get("drops", []):
                 if item_id not in items["items"]:
                     report.fail("loot drop item", f"{table} -> unknown item {item_id}")
                     break
@@ -424,6 +508,17 @@ def cross_checks(report: Report) -> None:
         report.fail("no_drop loot table", "must not define drops or entries")
     else:
         report.ok("no_drop loot table is empty")
+
+    for table_id, loot_table in loot["loot_tables"].items():
+        if "treasure_class_id" in loot_table and ("drops" in loot_table or "entries" in loot_table):
+            report.fail("loot table shape", f"{table_id}: treasure_class_id cannot mix with drops/entries")
+            continue
+        treasure_class_id = loot_table.get("treasure_class_id")
+        if treasure_class_id:
+            if treasure_class_id not in treasure_class_defs:
+                report.fail("loot table treasure_class_id", f"{table_id}: unknown {treasure_class_id}")
+            else:
+                report.ok(f"loot table {table_id} treasure_class_id resolves")
 
     # world presets: entity references resolve and type-specific fields are present.
     for world_id, world in worlds["worlds"].items():
@@ -592,13 +687,14 @@ def cross_checks(report: Report) -> None:
         initial_state = interactable.get("initial_state")
         if initial_state == "closed":
             report.ok(f"interactable {interactable_id} initial_state is closed")
-            size = interactable.get("barrier_when_closed", {}).get("size", {})
-            if not isinstance(size.get("x"), (int, float)) or not isinstance(size.get("y"), (int, float)):
-                report.fail("interactable barrier", f"{interactable_id}: size must have numeric x/y")
-            elif size["x"] <= 0 or size["y"] <= 0:
-                report.fail("interactable barrier", f"{interactable_id}: size must be positive")
-            else:
-                report.ok(f"interactable {interactable_id} barrier size is positive")
+            if "barrier_when_closed" in interactable:
+                size = interactable.get("barrier_when_closed", {}).get("size", {})
+                if not isinstance(size.get("x"), (int, float)) or not isinstance(size.get("y"), (int, float)):
+                    report.fail("interactable barrier", f"{interactable_id}: size must have numeric x/y")
+                elif size["x"] <= 0 or size["y"] <= 0:
+                    report.fail("interactable barrier", f"{interactable_id}: size must be positive")
+                else:
+                    report.ok(f"interactable {interactable_id} barrier size is positive")
             if "transition" in interactable:
                 report.fail("interactable transition", f"{interactable_id}: closed blocker must not declare transition")
             continue
@@ -698,6 +794,64 @@ def cross_checks(report: Report) -> None:
                 break
         if not golden_failed:
             report.ok("item_rolls golden references valid template results")
+
+    tc_id = treasure_class_rolls_golden["treasure_class_id"]
+    if tc_id not in treasure_class_defs:
+        report.fail("treasure_class_rolls golden", f"unknown treasure_class_id {tc_id}")
+    else:
+        failed_tc_golden = False
+        for case in treasure_class_rolls_golden["cases"]:
+            for drop in case["expected_drops"]:
+                item_def_id = drop.get("item_def_id")
+                item_template_id = drop.get("item_template_id")
+                if bool(item_def_id) == bool(item_template_id):
+                    report.fail("treasure_class_rolls golden", f"{case['name']}: expected drop must declare one item source")
+                    failed_tc_golden = True
+                    break
+                if item_def_id and item_def_id not in items["items"]:
+                    report.fail("treasure_class_rolls golden", f"{case['name']}: unknown item {item_def_id}")
+                    failed_tc_golden = True
+                    break
+                if item_template_id and item_template_id not in item_templates["templates"]:
+                    report.fail("treasure_class_rolls golden", f"{case['name']}: unknown template {item_template_id}")
+                    failed_tc_golden = True
+                    break
+            if failed_tc_golden:
+                break
+        if not failed_tc_golden:
+            report.ok("treasure_class_rolls golden references valid drop sources")
+
+    if guarded_chest_generation_golden["base_monster_count"] != dungeon_generation["monster_placement"]["count"]:
+        report.fail("guarded_chest_generation golden", "base_monster_count must match dungeon monster placement")
+    elif guarded_chest_generation_golden["monster_count_bonus"] != dungeon_generation["chest_placement"]["monster_count_bonus"]:
+        report.fail("guarded_chest_generation golden", "monster_count_bonus must match chest placement")
+    elif guarded_chest_generation_golden["level"] >= 0:
+        report.fail("guarded_chest_generation golden", "level must be a dungeon level")
+    else:
+        failed_chest_golden = False
+        for case in guarded_chest_generation_golden["cases"]:
+            expected_chest = case["expected_chest"]
+            expected_count = case["expected_monster_count"]
+            if expected_chest is None:
+                if expected_count != dungeon_generation["monster_placement"]["count"]:
+                    report.fail("guarded_chest_generation golden", f"{case['name']}: no-chest count must equal base count")
+                    failed_chest_golden = True
+                    break
+                continue
+            if expected_chest["interactable_def_id"] != dungeon_generation["chest_placement"]["interactable_def_id"]:
+                report.fail("guarded_chest_generation golden", f"{case['name']}: interactable_def_id mismatch")
+                failed_chest_golden = True
+                break
+            if expected_chest["loot_table"] != dungeon_generation["chest_placement"]["loot_table"]:
+                report.fail("guarded_chest_generation golden", f"{case['name']}: loot_table mismatch")
+                failed_chest_golden = True
+                break
+            if expected_count != dungeon_generation["monster_placement"]["count"] + dungeon_generation["chest_placement"]["monster_count_bonus"]:
+                report.fail("guarded_chest_generation golden", f"{case['name']}: guarded count must include bonus")
+                failed_chest_golden = True
+                break
+        if not failed_chest_golden:
+            report.ok("guarded_chest_generation golden references valid chest rules")
 
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])

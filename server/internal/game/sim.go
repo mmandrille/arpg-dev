@@ -36,6 +36,7 @@ const (
 	stairsDownDefID                = "stairs_down"
 	stairsUpDefID                  = "stairs_up"
 	teleporterDefID                = "teleporter"
+	treasureChestDefID             = "treasure_chest"
 	worldModeMultiLevel            = "multi_level"
 	attackModeMelee                = "melee"
 	attackModeRanged               = "ranged"
@@ -591,6 +592,18 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		e.id = s.alloc()
 		level.entities[e.id] = e
 	}
+	for _, chest := range gen.chests {
+		def := s.rules.Interactables[chest.defID]
+		e := &entity{
+			kind:              interactableEntity,
+			pos:               chest.pos,
+			interactableDefID: chest.defID,
+			state:             def.InitialState,
+			lootTable:         chest.lootTable,
+		}
+		e.id = s.alloc()
+		level.entities[e.id] = e
+	}
 	for _, generated := range gen.loot {
 		if _, ok := s.rules.Items[generated.itemDefID]; !ok {
 			return fmt.Errorf("game: generate dungeon level %d: unknown loot item %s", level.levelNum, generated.itemDefID)
@@ -791,6 +804,10 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 
 func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 	drops := s.rules.LootDrops(monster.lootTable, s.rng)
+	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res)
+}
+
+func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius float64, corr string, res *TickResult) {
 	var clusterAnchor Vec2
 	clusterReady := false
 
@@ -799,24 +816,24 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 		var ok bool
 
 		if i == 0 {
-			dropPos, ok = s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
+			dropPos, ok = s.findEntityLootDropPosition(sourcePos, sourceRadius)
 			if !ok {
-				dropPos = monster.pos
+				dropPos = sourcePos
 			}
 			clusterAnchor = dropPos
 			clusterReady = true
 		} else if clusterReady {
 			dropPos, ok = s.findClusterLootDropPosition(clusterAnchor, i)
 			if !ok {
-				dropPos, ok = s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
+				dropPos, ok = s.findEntityLootDropPosition(sourcePos, sourceRadius)
 				if !ok {
-					dropPos = monster.pos
+					dropPos = sourcePos
 				}
 			}
 		} else {
-			dropPos, ok = s.findEntityLootDropPosition(monster.pos, s.targetInteractionRadius(monster))
+			dropPos, ok = s.findEntityLootDropPosition(sourcePos, sourceRadius)
 			if !ok {
-				dropPos = monster.pos
+				dropPos = sourcePos
 			}
 		}
 
@@ -884,9 +901,16 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.activateTeleporter(e, in, res, ack)
 		return
 	}
+	if e.state != interactableClosed {
+		res.reject(in.MessageID, "already_open")
+		return
+	}
 	e.state = interactableOpen
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
 	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
+	if e.interactableDefID == treasureChestDefID && e.lootTable != "" {
+		s.spawnLootDrops(s.rules.LootDrops(e.lootTable, s.rng), e.pos, s.targetInteractionRadius(e), in.CorrelationID, res)
+	}
 	if ack {
 		res.ack(in.MessageID)
 	}

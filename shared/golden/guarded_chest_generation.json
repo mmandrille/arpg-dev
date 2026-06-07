@@ -1,0 +1,23 @@
+{
+  "level": -1,
+  "base_monster_count": 2,
+  "monster_count_bonus": 2,
+  "cases": [
+    {
+      "name": "no_chest",
+      "seed": "chest_seed_0",
+      "expected_chest": null,
+      "expected_monster_count": 2
+    },
+    {
+      "name": "guarded_chest",
+      "seed": "chest_seed_22",
+      "expected_chest": {
+        "interactable_def_id": "treasure_chest",
+        "loot_table": "guarded_chest_drop",
+        "position": { "x": 25, "y": 14 }
+      },
+      "expected_monster_count": 4
+    }
+  ]
+}

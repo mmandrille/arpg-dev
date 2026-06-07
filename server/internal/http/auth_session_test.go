@@ -26,6 +26,10 @@ const (
 
 // fullServer builds a server backed by real Postgres, or skips if unreachable.
 func fullServer(t *testing.T) http.Handler {
+	return fullServerWithConfig(t, config.Config{Addr: ":0", Env: "local", DevToken: testDevToken, MetricsEnabled: true})
+}
+
+func fullServerWithConfig(t *testing.T, cfg config.Config) http.Handler {
 	t.Helper()
 	url := "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable"
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -47,7 +51,7 @@ func fullServer(t *testing.T) http.Handler {
 		t.Fatalf("load rules: %v", err)
 	}
 	return New(Deps{
-		Config:  config.Config{Addr: ":0", Env: "local", DevToken: testDevToken, MetricsEnabled: true},
+		Config:  cfg,
 		Logger:  logging.NewTo(io.Discard, "local"),
 		Metrics: metrics.New(),
 		Store:   db,
@@ -255,6 +259,27 @@ func TestCreateAndResumeSession(t *testing.T) {
 	_ = json.Unmarshal(rec.Body.Bytes(), &resumed)
 	if resumed.SessionID != resumeID || resumed.Seed != created.Seed || resumed.WorldID != created.WorldID {
 		t.Fatalf("resume mismatch: %+v vs %+v", resumed, created)
+	}
+}
+
+func TestCreateSessionCustomSeedLocalOnly(t *testing.T) {
+	local := fullServer(t)
+	_, localToken := login(t, local)
+	rec := postJSON(local, "/v0/sessions", localToken, map[string]any{"mode": "solo", "seed": "pinned-test-seed"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("local custom seed status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var created createSessionResponse
+	_ = json.Unmarshal(rec.Body.Bytes(), &created)
+	if created.Seed != "pinned-test-seed" {
+		t.Fatalf("local seed = %q, want pinned-test-seed", created.Seed)
+	}
+
+	remote := fullServerWithConfig(t, config.Config{Addr: ":0", Env: "remote", DevToken: testDevToken, MetricsEnabled: true})
+	_, remoteToken := loginEmail(t, remote, "remote-seed@example.test")
+	rec = postJSON(remote, "/v0/sessions", remoteToken, map[string]any{"mode": "solo", "seed": "pinned-test-seed"})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("remote custom seed status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 }
 

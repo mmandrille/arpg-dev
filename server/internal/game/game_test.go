@@ -693,8 +693,43 @@ func TestItemRollsGolden(t *testing.T) {
 	}
 }
 
-func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
+func TestTreasureClassRollsGolden(t *testing.T) {
 	rules := loadRules(t)
+	var golden struct {
+		TreasureClassID string `json:"treasure_class_id"`
+		Cases           []struct {
+			Name          string     `json:"name"`
+			Seed          string     `json:"seed"`
+			ExpectedDrops []LootDrop `json:"expected_drops"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "treasure_class_rolls.json", &golden)
+
+	for _, c := range golden.Cases {
+		got := rules.RollTreasureClass(golden.TreasureClassID, NewRNG(SeedToUint64(c.Seed)))
+		if len(got) != len(c.ExpectedDrops) {
+			t.Fatalf("%s: drops = %+v, want %+v", c.Name, got, c.ExpectedDrops)
+		}
+		for i := range got {
+			if got[i] != c.ExpectedDrops[i] {
+				t.Fatalf("%s: drop %d = %+v, want %+v", c.Name, i, got[i], c.ExpectedDrops[i])
+			}
+		}
+	}
+}
+
+func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.TreasureClasses["test_rolled_tc"] = TreasureClassDef{Attempts: []TreasureAttemptDef{{
+		AttemptID:     "rolled",
+		SuccessWeight: 1,
+		NoDropWeight:  0,
+		Entries: []TreasureClassEntry{{
+			ItemTemplateID: "cave_blade",
+			Weight:         1,
+		}},
+	}}}
+	rules.LootTables["test_rolled_drop"] = LootTable{TreasureClassID: "test_rolled_tc"}
 	sim := NewSim("sess_rolled_loot", "0000000000000004", rules)
 	player := sim.entities[sim.playerID]
 	monster := &entity{
@@ -704,7 +739,7 @@ func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
 		hp:           1,
 		maxHP:        1,
 		monsterDefID: "dungeon_mob",
-		lootTable:    "dungeon_mob_drop",
+		lootTable:    "test_rolled_drop",
 	}
 	sim.entities[monster.id] = monster
 
@@ -1637,6 +1672,43 @@ func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
 	}
 }
 
+func TestTreasureChestOpensOnceAndDropsLoot(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_chest_open", "chest_seed_22", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	descendFromCurrentLevel(t, sim, "descend")
+	var chest *entity
+	for _, e := range sim.activeLevel().entities {
+		if e.kind == interactableEntity && e.interactableDefID == treasureChestDefID {
+			chest = e
+			break
+		}
+	}
+	if chest == nil {
+		t.Fatalf("missing generated chest: %+v", sim.activeLevel().entities)
+	}
+	sim.activeLevel().entities[sim.playerID].pos = chest.pos
+	beforeLoot := countEntitiesByKind(sim.activeLevel(), lootEntity)
+	open := sim.Tick([]Input{{MessageID: "open_chest", CorrelationID: "corr_chest", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(chest.id)}}})
+	assertAck(t, open, "open_chest")
+	if !hasEvent(open, "interactable_activated") || !hasEvent(open, "loot_dropped") {
+		t.Fatalf("open chest events = %+v", open.Events)
+	}
+	if chest.state != interactableOpen {
+		t.Fatalf("chest state = %s, want open", chest.state)
+	}
+	afterLoot := countEntitiesByKind(sim.activeLevel(), lootEntity)
+	if afterLoot <= beforeLoot {
+		t.Fatalf("loot count after open = %d, before %d", afterLoot, beforeLoot)
+	}
+	again := sim.Tick([]Input{{MessageID: "open_chest_again", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(chest.id)}}})
+	assertReject(t, again, "open_chest_again", "invalid_target")
+	if got := countEntitiesByKind(sim.activeLevel(), lootEntity); got != afterLoot {
+		t.Fatalf("reopen changed loot count = %d, want %d", got, afterLoot)
+	}
+}
+
 // --- rejections (criterion 12) ----------------------------------------------
 
 func TestRejections(t *testing.T) {
@@ -1871,6 +1943,10 @@ func cloneRules(r *Rules) *Rules {
 	out.LootTables = make(map[string]LootTable, len(r.LootTables))
 	for id, def := range r.LootTables {
 		out.LootTables[id] = def
+	}
+	out.TreasureClasses = make(map[string]TreasureClassDef, len(r.TreasureClasses))
+	for id, def := range r.TreasureClasses {
+		out.TreasureClasses[id] = def
 	}
 	out.Interactables = make(map[string]InteractableDef, len(r.Interactables))
 	for id, def := range r.Interactables {
@@ -2128,6 +2204,54 @@ func TestDungeonMonsterGeneration(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestGuardedChestGenerationGolden(t *testing.T) {
+	var golden struct {
+		Level             int `json:"level"`
+		BaseMonsterCount  int `json:"base_monster_count"`
+		MonsterCountBonus int `json:"monster_count_bonus"`
+		Cases             []struct {
+			Name                 string `json:"name"`
+			Seed                 string `json:"seed"`
+			ExpectedMonsterCount int    `json:"expected_monster_count"`
+			ExpectedChest        *struct {
+				InteractableDefID string `json:"interactable_def_id"`
+				LootTable         string `json:"loot_table"`
+				Position          Vec2   `json:"position"`
+			} `json:"expected_chest"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "guarded_chest_generation.json", &golden)
+	rules := loadRules(t)
+	if golden.BaseMonsterCount != rules.DungeonGeneration.MonsterPlacement.Count {
+		t.Fatalf("base monster count = %d, want rules %d", golden.BaseMonsterCount, rules.DungeonGeneration.MonsterPlacement.Count)
+	}
+	if golden.MonsterCountBonus != rules.DungeonGeneration.ChestPlacement.MonsterCountBonus {
+		t.Fatalf("monster bonus = %d, want rules %d", golden.MonsterCountBonus, rules.DungeonGeneration.ChestPlacement.MonsterCountBonus)
+	}
+	for _, c := range golden.Cases {
+		level, err := GenerateDungeonLevel(c.Seed, golden.Level, rules.DungeonGeneration)
+		if err != nil {
+			t.Fatalf("%s: generate: %v", c.Name, err)
+		}
+		if len(level.monsters) != c.ExpectedMonsterCount {
+			t.Fatalf("%s: monsters = %d, want %d", c.Name, len(level.monsters), c.ExpectedMonsterCount)
+		}
+		if c.ExpectedChest == nil {
+			if len(level.chests) != 0 {
+				t.Fatalf("%s: chests = %+v, want none", c.Name, level.chests)
+			}
+			continue
+		}
+		if len(level.chests) != 1 {
+			t.Fatalf("%s: chests = %+v, want one", c.Name, level.chests)
+		}
+		got := level.chests[0]
+		if got.defID != c.ExpectedChest.InteractableDefID || got.lootTable != c.ExpectedChest.LootTable || got.pos != c.ExpectedChest.Position {
+			t.Fatalf("%s: chest = %+v, want %+v", c.Name, got, *c.ExpectedChest)
+		}
 	}
 }
 
@@ -2650,6 +2774,16 @@ func countLiveMonstersByDef(level *LevelState, defID string) int {
 	count := 0
 	for _, entity := range level.entities {
 		if entity.kind == monsterEntity && entity.hp > 0 && entity.monsterDefID == defID {
+			count++
+		}
+	}
+	return count
+}
+
+func countEntitiesByKind(level *LevelState, kind string) int {
+	count := 0
+	for _, entity := range level.entities {
+		if entity.kind == kind {
 			count++
 		}
 	}

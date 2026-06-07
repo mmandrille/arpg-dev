@@ -106,6 +106,65 @@ func TestAccountCharacterSessionFlow(t *testing.T) {
 	}
 }
 
+func TestDeleteCharacterRemovesProgressionAndSessions(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+
+	acct, err := s.UpsertAccountByEmail(ctx, ids.New("acct"), "delete+"+ids.Token()[:12]+"@example.test")
+	if err != nil {
+		t.Fatalf("upsert account: %v", err)
+	}
+	keep, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Keep")
+	if err != nil {
+		t.Fatalf("create keep character: %v", err)
+	}
+	remove, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Remove")
+	if err != nil {
+		t.Fatalf("create remove character: %v", err)
+	}
+	defaultProgression := store.CharacterProgressionDefaults{
+		Level:             1,
+		Experience:        0,
+		UnspentStatPoints: 0,
+		Stats:             store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+	}
+	if _, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, remove.ID, defaultProgression); err != nil {
+		t.Fatalf("create progression: %v", err)
+	}
+	sess := store.Session{
+		ID:          ids.New("sess"),
+		AccountID:   acct.ID,
+		CharacterID: remove.ID,
+		Seed:        "deadbeef",
+		WorldID:     "dungeon_levels",
+		Status:      store.SessionActive,
+	}
+	if err := s.CreateSession(ctx, sess); err != nil {
+		t.Fatalf("create session: %v", err)
+	}
+
+	if err := s.DeleteCharacter(ctx, acct.ID, remove.ID); err != nil {
+		t.Fatalf("delete character: %v", err)
+	}
+	if _, err := s.GetCharacter(ctx, remove.ID); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("deleted character still exists: %v", err)
+	}
+	if _, err := s.GetSession(ctx, sess.ID); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("deleted character session still exists: %v", err)
+	}
+
+	chars, err := s.ListCharacters(ctx, acct.ID)
+	if err != nil {
+		t.Fatalf("list characters: %v", err)
+	}
+	if len(chars) != 1 || chars[0].ID != keep.ID {
+		t.Fatalf("remaining characters = %+v, want only %s", chars, keep.ID)
+	}
+	if err := s.DeleteCharacter(ctx, acct.ID, "char_missing"); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("delete missing character = %v, want ErrNotFound", err)
+	}
+}
+
 func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	s := newStore(t)
 	ctx := context.Background()

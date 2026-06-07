@@ -331,6 +331,7 @@ func (f *fakeRepo) ListCharacters(context.Context, string) ([]store.Character, e
 func (f *fakeRepo) CreateCharacter(context.Context, string, string, string) (store.Character, error) {
 	return store.Character{}, nil
 }
+func (f *fakeRepo) DeleteCharacter(context.Context, string, string) error { return nil }
 func (f *fakeRepo) CreateSession(context.Context, store.Session) error { return nil }
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil

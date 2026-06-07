@@ -120,6 +120,66 @@ func (s *Store) CreateCharacter(ctx context.Context, charID, accountID, name str
 	return c, nil
 }
 
+// DeleteCharacter removes a character and all durable progression rows owned by
+// that account. Historical session records for the character are removed as well.
+func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID string) error {
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var owner string
+		err := tx.QueryRow(ctx,
+			`SELECT account_id FROM characters WHERE id = $1`,
+			characterID,
+		).Scan(&owner)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: delete character lookup: %w", err)
+		}
+		if owner != accountID {
+			return ErrNotFound
+		}
+
+		sessionFilter := `session_id IN (
+			SELECT id FROM sessions WHERE account_id = $1 AND character_id = $2
+		)`
+		deletes := []struct {
+			query string
+			args  []any
+		}{
+			{`DELETE FROM session_inputs WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_events WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM inventory_items WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_hotbar_slots WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_item_instances WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_waypoints WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_character_progression WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM sessions WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM character_hotbar_slots WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM character_item_instances WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM character_waypoints WHERE character_id = $1`, []any{characterID}},
+			{`DELETE FROM character_progression WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+		}
+		for _, step := range deletes {
+			if _, err := tx.Exec(ctx, step.query, step.args...); err != nil {
+				return fmt.Errorf("store: delete character cascade: %w", err)
+			}
+		}
+
+		tag, err := tx.Exec(ctx,
+			`DELETE FROM characters WHERE id = $1 AND account_id = $2`,
+			characterID, accountID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: delete character: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+
+		return nil
+	})
+}
+
 // --- sessions ---------------------------------------------------------------
 
 func (s *Store) CreateSession(ctx context.Context, sess Session) error {

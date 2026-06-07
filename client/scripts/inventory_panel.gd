@@ -132,8 +132,7 @@ func show_gesture_hint(text: String) -> void:
 
 
 func _sync_viewport_size() -> void:
-	position = Vector2.ZERO
-	size = get_viewport_rect().size
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func set_inventory_state(next_inventory: Array, next_equipped: Dictionary) -> void:

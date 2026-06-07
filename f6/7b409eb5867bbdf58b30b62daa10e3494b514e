@@ -1,0 +1,87 @@
+server/internal/game/game_test.go
+  s_6d0d60ab4ec986::t_ff2977627eb944 862-938
+  s_6d0d60ab4ec986::t_ffd27e0d2d5818 2826-2882
+  s_6d0d60ab4ec986::t_ed1ec2902a1fb7 3367-3412
+docs/specs/v29_spec-dungeon-equipment-drop-expansion.md
+  s_614ebeb0539423::t_6e0aea72dad90a 1-2,4-79,84-283
+  s_6d0d60ab4ec986::t_31c68af797358b 3,80-83
+server/internal/game/rules.go
+  s_6d0d60ab4ec986::t_324af21e573efd 61-62,124,127-147,741-742,823-828,843-844
+  s_6d0d60ab4ec986::t_148343a9c929df 994-1106
+  s_6d0d60ab4ec986::t_f522b7336cafab 125-126
+docs/plans/v29_2026-06-07-dungeon-equipment-drop-expansion.md
+  s_6d0d60ab4ec986::t_5e59b8d3111a14 93,99,105,111
+  s_6d0d60ab4ec986::t_671e802ae5d9ce 125,131,137,143,149
+  s_6d0d60ab4ec986::t_82343bd46ea8e8 162,168,174,180,186
+  s_6d0d60ab4ec986::t_9c816d244c00cc 200,206,212,218,231,237,243,256,262
+  s_6d0d60ab4ec986::t_1faeb57b971a2c 3,268,276-282
+  s_6d0d60ab4ec986::t_34bc12a290902b 54,60,66,72,78
+  s_614ebeb0539423::t_906b13a87899df 1-2,4-53,55-59,61-65,67-71,73-77,79-92,94-98,100-104,106-110,112-124,126-130,132-136,138-142,144-148,150-161,163-167,169-173,175-179,181-185,187-199,201-205,207-211,213-217,219-230,232-236,238-242,244-255,257-261,263-267,269-275,283-290
+tools/validate_shared.py
+  s_6d0d60ab4ec986::t_a1c33ec968c990 142,389-414,661-723,1141-1212
+  s_6d0d60ab4ec986::t_50e936d4dcf55a 1221-1227,1230-1251
+  s_6d0d60ab4ec986::t_2cd743639e2703 1228-1229
+shared/rules/loot_tables.v0.json
+  s_6d0d60ab4ec986::t_dcb0fccc9846d3 28-36,40-47
+server/internal/game/dungeon_gen.go
+  s_6d0d60ab4ec986::t_ca3261dc57133a 43-45,61-64,80,83,102,105,200,215,259,270
+shared/golden/guarded_chest_generation.json
+  s_6d0d60ab4ec986::t_170c94b48706f3 17
+tools/bot/run.py
+  s_6d0d60ab4ec986::t_e6ab4cd5a4e8af 620-637,675-676,708-727,1475-1492,1583-1585,1778-1780
+  s_6d0d60ab4ec986::t_1aaa997ee020f1 1254-1261,1315-1318
+client/tests/test_golden.gd
+  s_6d0d60ab4ec986::t_5afeeef88228cc 345,349
+  s_6d0d60ab4ec986::t_df3c0e5b56a8b7 346-348,350-355
+tools/bot/scenarios/16_rolled_drops.json
+  s_6d0d60ab4ec986::t_1d6e8516565b84 22
+  s_6d0d60ab4ec986::t_ee293a3eef9261 11
+  s_6d0d60ab4ec986::t_2f14567ef37309 4
+  s_6d0d60ab4ec986::t_0f06df74106dbd 6,10,17,24
+shared/golden/dungeon_equipment_drops.json
+  s_6d0d60ab4ec986::t_b9572aae29e516 1-80
+tools/bot/scenarios/12_dungeon_levels.json
+  s_6d0d60ab4ec986::t_5251e5c640e3d2 9,12
+shared/rules/dungeon_generation.v0.json
+  s_6d0d60ab4ec986::t_dcb0fccc9846d3 33-53
+docs/PROGRESS.md
+  s_6d0d60ab4ec986::t_cb7d328a5f28ec 14,47,96,670-693,738,837-840,846-848
+shared/rules/dungeon_generation.v0.schema.json
+  s_6d0d60ab4ec986::t_dcb0fccc9846d3 15-16,90-108
+shared/golden/dungeon_equipment_drops.v0.schema.json
+  s_6d0d60ab4ec986::t_b9572aae29e516 1-64
+tools/bot/scenarios/20_dungeon_equipment_drops.json
+  s_6d0d60ab4ec986::t_d286e24166413d 1-5,7-13,16-24,26-31,33-39
+  s_6d0d60ab4ec986::t_1259dac8ae598d 6,14-15,25,32
+shared/rules/treasure_classes.v0.json
+  s_6d0d60ab4ec986::t_dcb0fccc9846d3 25-112,134-222
+server/internal/game/sim.go
+  s_6d0d60ab4ec986::t_f49a3b3d1e9c53 753-755
+  s_6d0d60ab4ec986::t_c9cd120e5ec74f 763
+shared/golden/treasure_class_rolls.json
+  s_6d0d60ab4ec986::t_b9572aae29e516 2,5-6,8,12-13,15-23,27-36,43-44,46-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f67b409eb5867bbdf58b30b62daa10e3494b514e",
+  "prompts": {},
+  "sessions": {
+    "s_614ebeb0539423": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea393-8e63-72d3-8888-b964d909e083",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_6d0d60ab4ec986": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea3a3-f1b2-78e2-bbbc-7ab24635b751",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

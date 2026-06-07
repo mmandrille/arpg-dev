@@ -25,12 +25,17 @@
             "minItems": 1,
             "items": {
               "type": "object",
-              "required": ["item_def_id", "weight"],
+              "required": ["weight"],
               "additionalProperties": false,
               "properties": {
                 "item_def_id": { "type": "string" },
+                "item_template_id": { "type": "string" },
                 "weight": { "type": "integer", "minimum": 1 }
-              }
+              },
+              "oneOf": [
+                { "required": ["item_def_id"] },
+                { "required": ["item_template_id"] }
+              ]
             }
           }
         },

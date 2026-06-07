@@ -15,26 +15,76 @@ type Vec2 struct {
 // HP/MaxHP are pointers so a value of 0 (a dead monster) is preserved while a
 // loot entity simply omits them.
 type EntityView struct {
-	ID                string `json:"id"`
-	Type              string `json:"type"`
-	Position          Vec2   `json:"position"`
-	HP                *int   `json:"hp,omitempty"`
-	MaxHP             *int   `json:"max_hp,omitempty"`
-	MonsterDefID      string `json:"monster_def_id,omitempty"`
-	ItemDefID         string `json:"item_def_id,omitempty"`
-	InteractableDefID string `json:"interactable_def_id,omitempty"`
-	OwnerID           string `json:"owner_id,omitempty"`
-	TargetID          string `json:"target_id,omitempty"`
-	ProjectileDefID   string `json:"projectile_def_id,omitempty"`
-	State             string `json:"state,omitempty"`
+	ID                string         `json:"id"`
+	Type              string         `json:"type"`
+	Position          Vec2           `json:"position"`
+	HP                *int           `json:"hp,omitempty"`
+	MaxHP             *int           `json:"max_hp,omitempty"`
+	MonsterDefID      string         `json:"monster_def_id,omitempty"`
+	ItemDefID         string         `json:"item_def_id,omitempty"`
+	ItemTemplateID    string         `json:"item_template_id,omitempty"`
+	DisplayName       string         `json:"display_name,omitempty"`
+	Rarity            string         `json:"rarity,omitempty"`
+	RolledStats       map[string]int `json:"rolled_stats,omitempty"`
+	Requirements      map[string]int `json:"requirements,omitempty"`
+	EffectIDs         []string       `json:"effect_ids,omitempty"`
+	InteractableDefID string         `json:"interactable_def_id,omitempty"`
+	OwnerID           string         `json:"owner_id,omitempty"`
+	TargetID          string         `json:"target_id,omitempty"`
+	ProjectileDefID   string         `json:"projectile_def_id,omitempty"`
+	State             string         `json:"state,omitempty"`
 }
 
 // ItemView is the protocol view of an inventory item.
 type ItemView struct {
-	ItemInstanceID string `json:"item_instance_id"`
-	ItemDefID      string `json:"item_def_id"`
-	Slot           string `json:"slot"`
-	Equipped       bool   `json:"equipped"`
+	ItemInstanceID string         `json:"item_instance_id"`
+	ItemDefID      string         `json:"item_def_id"`
+	ItemTemplateID string         `json:"item_template_id,omitempty"`
+	DisplayName    string         `json:"display_name,omitempty"`
+	Rarity         string         `json:"rarity,omitempty"`
+	RolledStats    map[string]int `json:"rolled_stats,omitempty"`
+	Requirements   map[string]int `json:"requirements,omitempty"`
+	EffectIDs      []string       `json:"effect_ids,omitempty"`
+	Slot           string         `json:"slot"`
+	Equipped       bool           `json:"equipped"`
+}
+
+// ItemRollPayload is the durable JSON payload stored in rolled_stats columns.
+type ItemRollPayload struct {
+	ItemTemplateID string         `json:"item_template_id"`
+	DisplayName    string         `json:"display_name"`
+	Rarity         string         `json:"rarity"`
+	Stats          map[string]int `json:"stats"`
+	Requirements   map[string]int `json:"requirements"`
+	EffectIDs      []string       `json:"effect_ids"`
+}
+
+func (p ItemRollPayload) itemViewFields(v *ItemView) {
+	if p.ItemTemplateID == "" {
+		return
+	}
+	v.ItemTemplateID = p.ItemTemplateID
+	v.DisplayName = p.DisplayName
+	v.Rarity = p.Rarity
+	v.RolledStats = cloneIntMap(p.Stats)
+	v.Requirements = cloneIntMap(p.Requirements)
+	v.EffectIDs = cloneStringSlice(p.EffectIDs)
+}
+
+// RollPayload returns the durable payload represented by optional rolled item
+// fields in this protocol view.
+func (v ItemView) RollPayload() *ItemRollPayload {
+	if v.ItemTemplateID == "" {
+		return nil
+	}
+	return &ItemRollPayload{
+		ItemTemplateID: v.ItemTemplateID,
+		DisplayName:    v.DisplayName,
+		Rarity:         v.Rarity,
+		Stats:          cloneIntMap(v.RolledStats),
+		Requirements:   cloneIntMap(v.Requirements),
+		EffectIDs:      cloneStringSlice(v.EffectIDs),
+	}
 }
 
 // Event is an authoritative event emitted by the sim.

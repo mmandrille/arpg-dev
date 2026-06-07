@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/item_rolls.v0.schema.json",
+  "title": "Golden: item rolls (v0)",
+  "type": "object",
+  "required": ["description", "template_id", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "template_id": { "type": "string" },
+    "cases": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["name", "seed", "expected"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "seed": { "type": "string" },
+          "expected": {
+            "type": "object",
+            "required": ["item_template_id", "display_name", "rarity", "stats", "requirements", "effect_ids"],
+            "additionalProperties": false,
+            "properties": {
+              "item_template_id": { "type": "string" },
+              "display_name": { "type": "string" },
+              "rarity": { "type": "string" },
+              "stats": { "$ref": "#/$defs/stats" },
+              "requirements": { "$ref": "#/$defs/requirements" },
+              "effect_ids": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["damage_min", "damage_max"],
+      "additionalProperties": false,
+      "properties": {
+        "damage_min": { "type": "integer", "minimum": 0 },
+        "damage_max": { "type": "integer", "minimum": 0 },
+        "max_hp": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

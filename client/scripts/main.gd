@@ -400,6 +400,9 @@ func _upsert_entity(e: Dictionary) -> void:
 		rec = {"node": node, "controller": controller, "type": str(e["type"])}
 		if e.has("item_def_id"):
 			rec["item_def_id"] = str(e["item_def_id"])
+		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "effect_ids"]:
+			if e.has(key):
+				rec[key] = e[key]
 		if e.has("interactable_def_id"):
 			rec["interactable_def_id"] = str(e["interactable_def_id"])
 		entities[id] = rec

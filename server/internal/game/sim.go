@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"sort"
@@ -65,6 +66,7 @@ type entity struct {
 	maxHP             int
 	monsterDefID      string
 	itemDefID         string
+	rollPayload       *ItemRollPayload
 	interactableDefID string
 	state             string
 	lootTable         string
@@ -87,10 +89,11 @@ type entity struct {
 
 // invItem is an internal inventory item.
 type invItem struct {
-	instanceID uint64
-	itemDefID  string
-	slot       string
-	equipped   bool
+	instanceID  uint64
+	itemDefID   string
+	rollPayload *ItemRollPayload
+	slot        string
+	equipped    bool
 }
 
 type activeMove struct {
@@ -251,10 +254,11 @@ func (e ErrUnknownWorldEntity) Error() string {
 
 // PersistedItem is a durable inventory item reloaded on session resume.
 type PersistedItem struct {
-	InstanceID string
-	ItemDefID  string
-	Slot       string
-	Equipped   bool
+	InstanceID  string
+	ItemDefID   string
+	Slot        string
+	Equipped    bool
+	RolledStats json.RawMessage
 }
 
 // LoadInventory restores persisted inventory into a fresh sim (used on resume).
@@ -266,7 +270,7 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 		if err != nil {
 			continue
 		}
-		it := &invItem{instanceID: id, itemDefID: p.ItemDefID, slot: p.Slot, equipped: p.Equipped}
+		it := &invItem{instanceID: id, itemDefID: p.ItemDefID, slot: p.Slot, equipped: p.Equipped, rollPayload: parseRollPayload(p.RolledStats)}
 		s.inventory = append(s.inventory, it)
 		if p.Equipped && p.Slot != "" {
 			s.equipped[p.Slot] = id
@@ -275,6 +279,54 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 			s.nextID = id + 1
 		}
 	}
+}
+
+func parseRollPayload(raw json.RawMessage) *ItemRollPayload {
+	if len(raw) == 0 || string(raw) == "{}" {
+		return nil
+	}
+	var payload ItemRollPayload
+	if err := json.Unmarshal(raw, &payload); err != nil || payload.ItemTemplateID == "" {
+		return nil
+	}
+	payload.Stats = cloneIntMap(payload.Stats)
+	payload.Requirements = cloneIntMap(payload.Requirements)
+	payload.EffectIDs = cloneStringSlice(payload.EffectIDs)
+	return &payload
+}
+
+func cloneRollPayload(in *ItemRollPayload) *ItemRollPayload {
+	if in == nil {
+		return nil
+	}
+	return &ItemRollPayload{
+		ItemTemplateID: in.ItemTemplateID,
+		DisplayName:    in.DisplayName,
+		Rarity:         in.Rarity,
+		Stats:          cloneIntMap(in.Stats),
+		Requirements:   cloneIntMap(in.Requirements),
+		EffectIDs:      cloneStringSlice(in.EffectIDs),
+	}
+}
+
+func cloneIntMap(in map[string]int) map[string]int {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]int, len(in))
+	for key, value := range in {
+		out[key] = value
+	}
+	return out
+}
+
+func cloneStringSlice(in []string) []string {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]string, len(in))
+	copy(out, in)
+	return out
 }
 
 // LoadDiscoveredTeleporters restores durable character waypoint unlocks into a
@@ -742,7 +794,7 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 	var clusterAnchor Vec2
 	clusterReady := false
 
-	for i, itemDefID := range drops {
+	for i, drop := range drops {
 		var dropPos Vec2
 		var ok bool
 
@@ -768,7 +820,17 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 			}
 		}
 
-		loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID}
+		itemDefID := drop.ItemDefID
+		var payload *ItemRollPayload
+		if drop.ItemTemplateID != "" {
+			rolled, ok := s.rollItemTemplate(drop.ItemTemplateID)
+			if !ok {
+				continue
+			}
+			payload = &rolled
+			itemDefID = rolled.ItemTemplateID
+		}
+		loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID, rollPayload: payload}
 		loot.id = s.alloc()
 		s.activeLevel().entities[loot.id] = loot
 		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
@@ -803,10 +865,11 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
 
 	item := &invItem{
-		instanceID: s.alloc(),
-		itemDefID:  e.itemDefID,
-		slot:       s.rules.Items[e.itemDefID].Slot,
-		equipped:   false,
+		instanceID:  s.alloc(),
+		itemDefID:   e.itemDefID,
+		rollPayload: cloneRollPayload(e.rollPayload),
+		slot:        s.itemSlot(e.itemDefID, e.rollPayload),
+		equipped:    false,
 	}
 	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
@@ -1021,14 +1084,20 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "not_in_inventory")
 		return
 	}
-	def, ok := s.rules.Items[item.itemDefID]
-	if !ok || !def.Equippable {
+	slot, ok := s.itemEquipSlot(item)
+	if !ok {
 		res.reject(in.MessageID, "not_equippable")
 		return
 	}
-	if in.Equip.Slot != def.Slot {
+	if in.Equip.Slot != slot {
 		res.reject(in.MessageID, "wrong_slot")
 		return
+	}
+	if item.rollPayload != nil {
+		if level := item.rollPayload.Requirements["level"]; level > 1 {
+			res.reject(in.MessageID, "requirements_not_met")
+			return
+		}
 	}
 
 	// Unequip whatever currently occupies the slot.
@@ -1100,10 +1169,11 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 
 	removedID := idStr(item.instanceID)
 	itemDefID := item.itemDefID
+	rollPayload := cloneRollPayload(item.rollPayload)
 	s.removeItemByID(item.instanceID)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
 
-	loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID}
+	loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID, rollPayload: rollPayload}
 	loot.id = s.alloc()
 	s.activeLevel().entities[loot.id] = loot
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
@@ -2002,6 +2072,76 @@ func (s *Sim) rollDamage() int {
 	return s.rollRange(s.resolvePlayerAttackDamage())
 }
 
+func (s *Sim) rollItemTemplate(templateID string) (ItemRollPayload, bool) {
+	template, ok := s.rules.ItemTemplates[templateID]
+	if !ok || len(s.rules.RarityOrder) == 0 {
+		return ItemRollPayload{}, false
+	}
+	total := 0
+	for _, rarityID := range s.rules.RarityOrder {
+		total += s.rules.Rarities[rarityID].Weight
+	}
+	if total <= 0 {
+		return ItemRollPayload{}, false
+	}
+	roll := s.rng.IntN(total)
+	rarityID := s.rules.RarityOrder[len(s.rules.RarityOrder)-1]
+	for _, candidate := range s.rules.RarityOrder {
+		roll -= s.rules.Rarities[candidate].Weight
+		if roll < 0 {
+			rarityID = candidate
+			break
+		}
+	}
+	rarity := s.rules.Rarities[rarityID]
+	stats := cloneIntMap(template.BaseStats)
+	for i := 0; i < rarity.StatRolls; i++ {
+		stat, ok := weightedRollableStat(template.RollableStats, s.rng)
+		if !ok {
+			continue
+		}
+		stats[stat.Stat] += stat.Min + s.rng.IntN(stat.Max-stat.Min+1)
+	}
+	return ItemRollPayload{
+		ItemTemplateID: templateID,
+		DisplayName:    rarity.NamePrefix + " " + template.Name,
+		Rarity:         rarityID,
+		Stats:          stats,
+		Requirements:   cloneIntMap(template.Requirements),
+		EffectIDs:      cloneStringSlice(template.EffectPool),
+	}, true
+}
+
+func weightedRollableStat(stats []RollableStatDef, rng *RNG) (RollableStatDef, bool) {
+	total := 0
+	for _, stat := range stats {
+		total += stat.Weight
+	}
+	if total <= 0 {
+		return RollableStatDef{}, false
+	}
+	roll := rng.IntN(total)
+	for _, stat := range stats {
+		roll -= stat.Weight
+		if roll < 0 {
+			return stat, true
+		}
+	}
+	return stats[len(stats)-1], true
+}
+
+func (s *Sim) itemSlot(itemDefID string, payload *ItemRollPayload) string {
+	if payload != nil {
+		if template, ok := s.rules.ItemTemplates[payload.ItemTemplateID]; ok {
+			return template.Slot
+		}
+	}
+	if def, ok := s.rules.Items[itemDefID]; ok {
+		return def.Slot
+	}
+	return ""
+}
+
 func (s *Sim) playerReach() float64 {
 	base := s.rules.Combat.UnarmedReach
 	instanceID := s.equipped[weaponSlot]
@@ -2012,22 +2152,23 @@ func (s *Sim) playerReach() float64 {
 	if item == nil {
 		return base
 	}
-	def, ok := s.rules.Items[item.itemDefID]
-	if !ok || def.Reach == nil {
+	reach, ok := s.itemReach(item)
+	if !ok {
 		return base
 	}
-	return *def.Reach
+	return reach
 }
 
 func (s *Sim) playerMeleeReach() float64 {
-	def, ok := s.equippedWeaponDef()
-	if !ok || def.AttackMode == attackModeRanged {
+	item := s.equippedWeaponItem()
+	if item == nil || s.playerAttackMode() == attackModeRanged {
 		return s.rules.Combat.UnarmedReach
 	}
-	if def.Reach == nil {
+	reach, ok := s.itemReach(item)
+	if !ok {
 		return s.rules.Combat.UnarmedReach
 	}
-	return *def.Reach
+	return reach
 }
 
 func (s *Sim) playerActionReach() float64 {
@@ -2035,7 +2176,16 @@ func (s *Sim) playerActionReach() float64 {
 }
 
 func (s *Sim) playerAttackMode() string {
-	def, ok := s.equippedWeaponDef()
+	item := s.equippedWeaponItem()
+	if item == nil {
+		return attackModeMelee
+	}
+	if item.rollPayload != nil {
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok && template.AttackMode != "" {
+			return template.AttackMode
+		}
+	}
+	def, ok := s.rules.Items[item.itemDefID]
 	if !ok || def.AttackMode == "" {
 		return attackModeMelee
 	}
@@ -2043,16 +2193,54 @@ func (s *Sim) playerAttackMode() string {
 }
 
 func (s *Sim) equippedWeaponDef() (ItemDef, bool) {
-	instanceID := s.equipped[weaponSlot]
-	if instanceID == 0 {
-		return ItemDef{}, false
-	}
-	item := s.findItemByID(instanceID)
-	if item == nil {
+	item := s.equippedWeaponItem()
+	if item == nil || item.rollPayload != nil {
 		return ItemDef{}, false
 	}
 	def, ok := s.rules.Items[item.itemDefID]
 	return def, ok
+}
+
+func (s *Sim) equippedWeaponItem() *invItem {
+	instanceID := s.equipped[weaponSlot]
+	if instanceID == 0 {
+		return nil
+	}
+	item := s.findItemByID(instanceID)
+	if item == nil {
+		return nil
+	}
+	return item
+}
+
+func (s *Sim) itemReach(item *invItem) (float64, bool) {
+	if item.rollPayload != nil {
+		template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+		if !ok || template.Reach <= 0 {
+			return 0, false
+		}
+		return template.Reach, true
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok || def.Reach == nil {
+		return 0, false
+	}
+	return *def.Reach, true
+}
+
+func (s *Sim) itemEquipSlot(item *invItem) (string, bool) {
+	if item.rollPayload != nil {
+		template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+		if !ok || !template.Equippable || template.Slot == "" {
+			return "", false
+		}
+		return template.Slot, true
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok || !def.Equippable {
+		return "", false
+	}
+	return def.Slot, true
 }
 
 func (s *Sim) targetInteractionRadius(e *entity) float64 {
@@ -2164,6 +2352,13 @@ func (s *Sim) resolvePlayerAttackDamage() DamageRange {
 	item := s.findItemByID(instanceID)
 	if item == nil {
 		return base
+	}
+	if item.rollPayload != nil {
+		min, minOK := item.rollPayload.Stats["damage_min"]
+		max, maxOK := item.rollPayload.Stats["damage_max"]
+		if minOK && maxOK && max >= min {
+			return DamageRange{Min: min, Max: max}
+		}
 	}
 	def, ok := s.rules.Items[item.itemDefID]
 	if !ok || def.Damage == nil {
@@ -2346,6 +2541,15 @@ func (e *entity) view() EntityView {
 		}
 	case lootEntity:
 		ev.ItemDefID = e.itemDefID
+		if e.rollPayload != nil {
+			ev.ItemDefID = e.rollPayload.ItemTemplateID
+			ev.ItemTemplateID = e.rollPayload.ItemTemplateID
+			ev.DisplayName = e.rollPayload.DisplayName
+			ev.Rarity = e.rollPayload.Rarity
+			ev.RolledStats = cloneIntMap(e.rollPayload.Stats)
+			ev.Requirements = cloneIntMap(e.rollPayload.Requirements)
+			ev.EffectIDs = cloneStringSlice(e.rollPayload.EffectIDs)
+		}
 	case interactableEntity:
 		ev.InteractableDefID = e.interactableDefID
 		ev.State = e.state
@@ -2358,12 +2562,16 @@ func (e *entity) view() EntityView {
 }
 
 func (it *invItem) view() ItemView {
-	return ItemView{
+	v := ItemView{
 		ItemInstanceID: idStr(it.instanceID),
 		ItemDefID:      it.itemDefID,
 		Slot:           it.slot,
 		Equipped:       it.equipped,
 	}
+	if it.rollPayload != nil {
+		it.rollPayload.itemViewFields(&v)
+	}
+	return v
 }
 
 func ptrEntityView(v EntityView) *EntityView { return &v }

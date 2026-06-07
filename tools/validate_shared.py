@@ -114,6 +114,7 @@ def cross_checks(report: Report) -> None:
     print("[3] cross-consistency drift guards")
     combat = load(RULES / "combat.v0.json")
     items = load(RULES / "items.v0.json")
+    item_templates = load(RULES / "item_templates.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
     interactables = load(RULES / "interactables.v0.json")
@@ -133,6 +134,7 @@ def cross_checks(report: Report) -> None:
     dungeon_stairs_golden = load(GOLDEN / "dungeon_stairs.json")
     dungeon_teleporters_golden = load(GOLDEN / "dungeon_teleporters.json")
     dungeon_monster_attack_golden = load(GOLDEN / "dungeon_monster_attack.json")
+    item_rolls_golden = load(GOLDEN / "item_rolls.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -240,6 +242,57 @@ def cross_checks(report: Report) -> None:
         elif projectile_speed is not None:
             report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
 
+    valid_roll_stats = {"damage_min", "damage_max", "max_hp"}
+    rarities = item_templates["rarities"]
+    for rarity_id, rarity in rarities.items():
+        if rarity["weight"] <= 0:
+            report.fail("item template rarity", f"{rarity_id}: weight must be positive")
+        elif rarity["stat_rolls"] <= 0:
+            report.fail("item template rarity", f"{rarity_id}: stat_rolls must be positive")
+        else:
+            report.ok(f"item template rarity {rarity_id} is valid")
+    for template_id, template in item_templates["templates"].items():
+        if template.get("category") != "equipment" or not template.get("equippable") or template.get("slot") != "weapon":
+            report.fail("item template weapon", f"{template_id}: v23 templates must be equippable weapons")
+            continue
+        if template.get("attack_mode") != "melee":
+            report.fail("item template attack_mode", f"{template_id}: v23 templates must be melee")
+            continue
+        if template.get("reach", 0) <= 0:
+            report.fail("item template reach", f"{template_id}: reach must be positive")
+            continue
+        requirements = template.get("requirements", {})
+        if requirements.get("level", 1) > 1:
+            report.fail("item template requirements", f"{template_id}: v23 only supports level <= 1")
+            continue
+        base_stats = template["base_stats"]
+        if base_stats["damage_max"] < base_stats["damage_min"]:
+            report.fail("item template base_stats", f"{template_id}: damage_max must be >= damage_min")
+            continue
+        seen_roll_stats = set()
+        failed_roll = False
+        for roll in template["rollable_stats"]:
+            stat = roll["stat"]
+            seen_roll_stats.add(stat)
+            if stat not in valid_roll_stats:
+                report.fail("item template rollable stat", f"{template_id}: unsupported stat {stat}")
+                failed_roll = True
+                break
+            if roll["max"] < roll["min"]:
+                report.fail("item template rollable stat", f"{template_id}.{stat}: max must be >= min")
+                failed_roll = True
+                break
+            if roll["weight"] <= 0:
+                report.fail("item template rollable stat", f"{template_id}.{stat}: weight must be positive")
+                failed_roll = True
+                break
+        if failed_roll:
+            continue
+        if "damage_min" not in seen_roll_stats or "damage_max" not in seen_roll_stats:
+            report.fail("item template rollable stats", f"{template_id}: must include damage_min and damage_max")
+        else:
+            report.ok(f"item template {template_id} weapon rolls are valid")
+
     if combat.get("unarmed_reach", 0) <= 0:
         report.fail("combat unarmed_reach", "must be positive")
     else:
@@ -345,8 +398,16 @@ def cross_checks(report: Report) -> None:
             report.fail("monster loot_table", f"{mid} -> unknown table {table}")
             continue
         for entry in loot["loot_tables"][table].get("entries", []):
-            if entry["item_def_id"] not in items["items"]:
-                report.fail("loot entry item", f"{table} -> unknown item {entry['item_def_id']}")
+            item_def_id = entry.get("item_def_id")
+            item_template_id = entry.get("item_template_id")
+            if bool(item_def_id) == bool(item_template_id):
+                report.fail("loot entry item", f"{table}: exactly one of item_def_id/item_template_id is required")
+                break
+            if item_def_id and item_def_id not in items["items"]:
+                report.fail("loot entry item", f"{table} -> unknown item {item_def_id}")
+                break
+            if item_template_id and item_template_id not in item_templates["templates"]:
+                report.fail("loot entry template", f"{table} -> unknown template {item_template_id}")
                 break
         else:
             for item_id in loot["loot_tables"][table].get("drops", []):
@@ -601,6 +662,43 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("dungeon_monster_attack golden matches proactive monster rules")
 
+    template_id = item_rolls_golden["template_id"]
+    template = item_templates["templates"].get(template_id)
+    if template is None:
+        report.fail("item_rolls golden", f"unknown template_id {template_id}")
+    else:
+        golden_failed = False
+        for case in item_rolls_golden["cases"]:
+            expected = case["expected"]
+            rarity = expected["rarity"]
+            stats = expected["stats"]
+            if expected["item_template_id"] != template_id:
+                report.fail("item_rolls golden", f"{case['name']}: item_template_id mismatch")
+                golden_failed = True
+                break
+            if rarity not in rarities:
+                report.fail("item_rolls golden", f"{case['name']}: unknown rarity {rarity}")
+                golden_failed = True
+                break
+            if not expected["display_name"].endswith(template["name"]):
+                report.fail("item_rolls golden", f"{case['name']}: display_name must include template name")
+                golden_failed = True
+                break
+            if stats["damage_max"] < stats["damage_min"]:
+                report.fail("item_rolls golden", f"{case['name']}: damage_max must be >= damage_min")
+                golden_failed = True
+                break
+            if expected.get("requirements", {}) != template.get("requirements", {}):
+                report.fail("item_rolls golden", f"{case['name']}: requirements mismatch template")
+                golden_failed = True
+                break
+            if expected.get("effect_ids", []) != []:
+                report.fail("item_rolls golden", f"{case['name']}: v23 effect_ids must be empty")
+                golden_failed = True
+                break
+        if not golden_failed:
+            report.ok("item_rolls golden references valid template results")
+
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])
     if not table:
@@ -630,12 +728,14 @@ def cross_checks(report: Report) -> None:
     visuals = load(ASSETS / "item_visuals.v0.json")["item_visuals"]
     for def_id, vis in visuals.items():
         item = items["items"].get(def_id)
-        if item is None:
-            report.fail("item_visuals key", f"{def_id} not in items.v0.json")
-        elif item.get("slot") != vis["slot"]:
-            report.fail("item_visuals slot", f"{def_id}: {vis['slot']} != items slot {item['slot']}")
+        template = item_templates["templates"].get(def_id)
+        slot = item.get("slot") if item is not None else (template or {}).get("slot")
+        if item is None and template is None:
+            report.fail("item_visuals key", f"{def_id} not in items.v0.json or item_templates.v0.json")
+        elif slot != vis["slot"]:
+            report.fail("item_visuals slot", f"{def_id}: {vis['slot']} != item/template slot {slot}")
         else:
-            report.ok(f"item_visuals {def_id} resolves to items.v0.json with matching slot")
+            report.ok(f"item_visuals {def_id} resolves to item/template rules with matching slot")
 
     visual_golden = load(GOLDEN / "item_visual_resolution.json")
     gdef = visual_golden["item_def_id"]
@@ -654,10 +754,10 @@ def cross_checks(report: Report) -> None:
     # data, but drift would make loot/inventory presentation fall back silently.
     presentations = load(ASSETS / "item_presentations.v0.json")["items"]
     for def_id in sorted(presentations):
-        if def_id not in items["items"]:
-            report.fail("item_presentations key", f"{def_id} not in items.v0.json")
+        if def_id not in items["items"] and def_id not in item_templates["templates"]:
+            report.fail("item_presentations key", f"{def_id} not in items.v0.json or item_templates.v0.json")
         else:
-            report.ok(f"item_presentations {def_id} resolves to items.v0.json")
+            report.ok(f"item_presentations {def_id} resolves to item/template rules")
     missing_presentations = sorted(set(items["items"]) - set(presentations))
     if missing_presentations:
         report.fail("item_presentations coverage", f"missing entries: {missing_presentations}")

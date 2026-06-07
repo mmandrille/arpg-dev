@@ -44,7 +44,7 @@
     "dungeon_mob": {
       "name": "Cave Wraith",
       "max_hp": 4,
-      "loot_table": "no_drop",
+      "loot_table": "dungeon_mob_drop",
       "behavior": "chase",
       "aggro_radius": 6.0,
       "leash_radius": 10.0,

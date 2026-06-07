@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 )
 
@@ -15,6 +16,9 @@ type Rules struct {
 	Combat            Combat
 	Navigation        NavigationRules
 	Items             map[string]ItemDef
+	ItemTemplates     map[string]ItemTemplateDef
+	Rarities          map[string]RarityDef
+	RarityOrder       []string
 	Monsters          map[string]MonsterDef
 	LootTables        map[string]LootTable
 	Interactables     map[string]InteractableDef
@@ -101,6 +105,36 @@ type ItemDef struct {
 	Heal            *DamageRange `json:"heal,omitempty"`
 }
 
+// RarityDef controls how many bounded stat rolls a rolled item gets.
+type RarityDef struct {
+	Weight     int    `json:"weight"`
+	StatRolls  int    `json:"stat_rolls"`
+	NamePrefix string `json:"name_prefix"`
+}
+
+// ItemTemplateDef is a server-authoritative rolled item template.
+type ItemTemplateDef struct {
+	Name          string            `json:"name"`
+	Category      string            `json:"category"`
+	ItemType      string            `json:"item_type"`
+	Slot          string            `json:"slot"`
+	Equippable    bool              `json:"equippable"`
+	AttackMode    string            `json:"attack_mode,omitempty"`
+	Reach         float64           `json:"reach"`
+	Requirements  map[string]int    `json:"requirements"`
+	BaseStats     map[string]int    `json:"base_stats"`
+	RollableStats []RollableStatDef `json:"rollable_stats"`
+	EffectPool    []string          `json:"effect_pool"`
+}
+
+// RollableStatDef is one weighted bounded stat increment.
+type RollableStatDef struct {
+	Stat   string `json:"stat"`
+	Min    int    `json:"min"`
+	Max    int    `json:"max"`
+	Weight int    `json:"weight"`
+}
+
 // InteractableDef is a single activatable world object definition.
 type InteractableDef struct {
 	Name              string               `json:"name"`
@@ -146,8 +180,9 @@ func (d MonsterDef) effectiveMoveSpeed(nav NavigationRules) float64 {
 
 // LootEntry is one weighted entry in a loot table.
 type LootEntry struct {
-	ItemDefID string `json:"item_def_id"`
-	Weight    int    `json:"weight"`
+	ItemDefID      string `json:"item_def_id"`
+	ItemTemplateID string `json:"item_template_id"`
+	Weight         int    `json:"weight"`
 }
 
 // LootTable is a weighted set of loot entries.
@@ -282,6 +317,69 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	r.Items = items.Items
 
+	var itemTemplates struct {
+		Rarities  map[string]RarityDef       `json:"rarities"`
+		Templates map[string]ItemTemplateDef `json:"templates"`
+	}
+	if err := readJSON(filepath.Join(dir, "item_templates.v0.json"), &itemTemplates); err != nil {
+		return nil, err
+	}
+	rarityOrder := sortedStringKeys(itemTemplates.Rarities)
+	for id, rarity := range itemTemplates.Rarities {
+		if rarity.Weight <= 0 {
+			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.weight: must be positive", id)
+		}
+		if rarity.StatRolls <= 0 {
+			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.stat_rolls: must be positive", id)
+		}
+		if rarity.NamePrefix == "" {
+			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.name_prefix: required", id)
+		}
+	}
+	for id, def := range itemTemplates.Templates {
+		if !def.Equippable || def.Slot != weaponSlot || def.Category != "equipment" {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s: v23 templates must be equippable equipment weapons", id)
+		}
+		if def.AttackMode == "" {
+			def.AttackMode = attackModeMelee
+		}
+		if def.AttackMode != attackModeMelee {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.attack_mode: v23 supports melee only", id)
+		}
+		if def.Reach <= 0 {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.reach: must be positive", id)
+		}
+		if def.Requirements["level"] > 1 {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.requirements.level: v23 supports level <= 1", id)
+		}
+		min, max := def.BaseStats["damage_min"], def.BaseStats["damage_max"]
+		if max < min {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.base_stats: damage_max must be >= damage_min", id)
+		}
+		seen := map[string]bool{}
+		for _, roll := range def.RollableStats {
+			switch roll.Stat {
+			case "damage_min", "damage_max", "max_hp":
+			default:
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: unsupported stat %s", id, roll.Stat)
+			}
+			if roll.Max < roll.Min {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats.%s: max must be >= min", id, roll.Stat)
+			}
+			if roll.Weight <= 0 {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats.%s: weight must be positive", id, roll.Stat)
+			}
+			seen[roll.Stat] = true
+		}
+		if !seen["damage_min"] || !seen["damage_max"] {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: damage_min and damage_max are required", id)
+		}
+		itemTemplates.Templates[id] = def
+	}
+	r.ItemTemplates = itemTemplates.Templates
+	r.Rarities = itemTemplates.Rarities
+	r.RarityOrder = rarityOrder
+
 	var monsters struct {
 		Monsters map[string]MonsterDef `json:"monsters"`
 	}
@@ -338,8 +436,21 @@ func LoadRules(dir string) (*Rules, error) {
 	r.LootTables = loot.LootTables
 	for tableID, table := range r.LootTables {
 		for _, entry := range table.Entries {
-			if _, ok := r.Items[entry.ItemDefID]; !ok {
-				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown item %s", tableID, entry.ItemDefID)
+			if (entry.ItemDefID == "") == (entry.ItemTemplateID == "") {
+				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: entry must declare exactly one of item_def_id or item_template_id", tableID)
+			}
+			if entry.ItemDefID != "" {
+				if _, ok := r.Items[entry.ItemDefID]; !ok {
+					return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown item %s", tableID, entry.ItemDefID)
+				}
+			}
+			if entry.ItemTemplateID != "" {
+				if _, ok := r.ItemTemplates[entry.ItemTemplateID]; !ok {
+					return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown item template %s", tableID, entry.ItemTemplateID)
+				}
+			}
+			if entry.Weight <= 0 {
+				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: entry weight must be positive", tableID)
 			}
 		}
 		for _, itemDefID := range table.Drops {
@@ -514,47 +625,65 @@ func LoadRules(dir string) (*Rules, error) {
 	return r, nil
 }
 
-// RollLoot selects an item_def_id from a loot table using the RNG. A
+// LootDrop is one resolved loot table result.
+type LootDrop struct {
+	ItemDefID      string
+	ItemTemplateID string
+}
+
+// RollLoot selects an item or item template from a loot table using the RNG. A
 // single-entry table is deterministic regardless of the draw.
-func (r *Rules) RollLoot(tableID string, rng *RNG) (string, bool) {
+func (r *Rules) RollLoot(tableID string, rng *RNG) (LootDrop, bool) {
 	table, ok := r.LootTables[tableID]
 	if !ok || len(table.Entries) == 0 {
-		return "", false
+		return LootDrop{}, false
 	}
 	total := 0
 	for _, e := range table.Entries {
 		total += e.Weight
 	}
 	if total <= 0 {
-		return "", false
+		return LootDrop{}, false
 	}
 	roll := rng.IntN(total)
 	for _, e := range table.Entries {
 		roll -= e.Weight
 		if roll < 0 {
-			return e.ItemDefID, true
+			return LootDrop{ItemDefID: e.ItemDefID, ItemTemplateID: e.ItemTemplateID}, true
 		}
 	}
-	return table.Entries[len(table.Entries)-1].ItemDefID, true
+	last := table.Entries[len(table.Entries)-1]
+	return LootDrop{ItemDefID: last.ItemDefID, ItemTemplateID: last.ItemTemplateID}, true
 }
 
 // LootDrops returns all guaranteed drops for a table, or one weighted roll for
 // legacy single-drop tables.
-func (r *Rules) LootDrops(tableID string, rng *RNG) []string {
+func (r *Rules) LootDrops(tableID string, rng *RNG) []LootDrop {
 	table, ok := r.LootTables[tableID]
 	if !ok {
 		return nil
 	}
 	if len(table.Drops) > 0 {
-		out := make([]string, len(table.Drops))
-		copy(out, table.Drops)
+		out := make([]LootDrop, 0, len(table.Drops))
+		for _, itemDefID := range table.Drops {
+			out = append(out, LootDrop{ItemDefID: itemDefID})
+		}
 		return out
 	}
-	itemDefID, ok := r.RollLoot(tableID, rng)
+	drop, ok := r.RollLoot(tableID, rng)
 	if !ok {
 		return nil
 	}
-	return []string{itemDefID}
+	return []LootDrop{drop}
+}
+
+func sortedStringKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func readJSON(path string, v any) error {

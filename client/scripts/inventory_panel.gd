@@ -10,6 +10,7 @@ const SLOT_KIND_BAG_AREA := "bag_area"
 var inventory: Array = []
 var equipped: Dictionary = {"weapon": null}
 var item_rules: Dictionary = {}
+var item_templates: Dictionary = {}
 var item_presentations: Dictionary = {}
 var _panel: PanelContainer
 var _weapon_slot: InventorySlotButton
@@ -74,6 +75,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_load_item_rules()
+	_load_item_templates()
 	_load_item_presentations()
 	_build()
 	visible = false
@@ -302,7 +304,7 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 		return
 	var def_id := str(item.get("item_def_id", ""))
 	slot.text = ""
-	slot.tooltip_text = _tooltip(def_id)
+	slot.tooltip_text = _tooltip(item)
 	slot.queue_redraw()
 
 
@@ -430,13 +432,13 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 
 func _is_weapon(item: Dictionary) -> bool:
 	var def_id := str(item.get("item_def_id", ""))
-	var def: Dictionary = item_rules.get(def_id, {})
+	var def: Dictionary = _item_definition(def_id)
 	return bool(def.get("equippable", false)) and str(def.get("slot", "")) == "weapon"
 
 
 func _is_consumable(item: Dictionary) -> bool:
 	var def_id := str(item.get("item_def_id", ""))
-	var def: Dictionary = item_rules.get(def_id, {})
+	var def: Dictionary = _item_definition(def_id)
 	return str(def.get("category", "")) == "consumable"
 
 
@@ -450,19 +452,31 @@ func _equipped_weapon_item() -> Dictionary:
 	return {}
 
 
-func _tooltip(def_id: String) -> String:
-	var def: Dictionary = item_rules.get(def_id, {})
-	var lines: Array[String] = [str(def.get("name", def_id))]
+func _tooltip(item: Dictionary) -> String:
+	var def_id := str(item.get("item_def_id", ""))
+	var def: Dictionary = _item_definition(def_id)
+	var lines: Array[String] = [str(item.get("display_name", def.get("name", def_id)))]
+	var rarity := str(item.get("rarity", ""))
+	if rarity != "":
+		lines.append("Rarity: %s" % rarity.capitalize())
 	var slot := str(def.get("slot", ""))
 	if slot != "":
 		lines.append("Slot: %s" % slot)
-	if def.has("damage"):
+	var rolled_stats: Dictionary = item.get("rolled_stats", {})
+	if rolled_stats.has("damage_min") and rolled_stats.has("damage_max"):
+		lines.append("Damage: %s-%s" % [str(rolled_stats.get("damage_min", "?")), str(rolled_stats.get("damage_max", "?"))])
+	elif def.has("damage"):
 		var dmg: Dictionary = def["damage"]
 		lines.append("Damage: %s-%s" % [str(dmg.get("min", "?")), str(dmg.get("max", "?"))])
+	if rolled_stats.has("max_hp"):
+		lines.append("Max HP: +%s" % str(rolled_stats.get("max_hp", "?")))
 	if def.has("reach"):
 		lines.append("Reach: %s" % str(def["reach"]))
 	if def.has("attack_mode"):
 		lines.append("Mode: %s" % str(def["attack_mode"]))
+	var requirements: Dictionary = item.get("requirements", {})
+	if requirements.has("level"):
+		lines.append("Requires level %s" % str(requirements["level"]))
 	return "\n".join(lines)
 
 
@@ -487,6 +501,24 @@ func _load_item_rules() -> void:
 	var parsed = JSON.parse_string(f.get_as_text())
 	if typeof(parsed) == TYPE_DICTIONARY:
 		item_rules = parsed.get("items", {})
+
+
+func _load_item_templates() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/item_templates.v0.json")
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_templates = parsed.get("templates", {})
+
+
+func _item_definition(def_id: String) -> Dictionary:
+	if item_rules.has(def_id):
+		return item_rules.get(def_id, {})
+	return item_templates.get(def_id, {})
 
 
 func _load_item_presentations() -> void:

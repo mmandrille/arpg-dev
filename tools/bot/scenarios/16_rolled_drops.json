@@ -1,0 +1,41 @@
+{
+  "id": "rolled_drops",
+  "world_id": "dungeon_levels",
+  "title": "Rolled drops",
+  "description": "Kill a dungeon mob, pick up its rolled cave_blade, equip it, use it in combat, then prove rolled metadata survives state, reconnect, replay, and a fresh same-account session.",
+  "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 40 },
+    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "event_type": "monster_killed" },
+    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
+    { "action": "assert_rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "stat_keys": ["damage_min", "damage_max"], "required_level": 1 },
+    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "weapon" },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1 }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": -1 },
+    { "type": "visited_levels_contain", "level": 0 },
+    { "type": "event_seen", "event_type": "monster_killed" },
+    { "type": "inventory_contains", "item_def_id": "cave_blade", "equipped": true },
+    { "type": "rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "equipped": true, "stat_keys": ["damage_min", "damage_max"], "required_level": 1 },
+    { "type": "equipped_weapon_def", "item_def_id": "cave_blade" },
+    { "type": "monster_damage_at_least", "monster_def_id": "dungeon_mob", "damage": 2 }
+  ],
+  "fresh_session_checks": [
+    {
+      "world_id": "dungeon_levels",
+      "steps": [
+        { "action": "assert_inventory_contains", "item_def_id": "cave_blade", "equipped": true },
+        { "action": "assert_rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "equipped": true, "stat_keys": ["damage_min", "damage_max"], "required_level": 1 },
+        { "action": "assert_equipped_weapon_def", "item_def_id": "cave_blade" }
+      ],
+      "assertions": [
+        { "type": "inventory_contains", "item_def_id": "cave_blade", "equipped": true },
+        { "type": "rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "equipped": true, "stat_keys": ["damage_min", "damage_max"], "required_level": 1 },
+        { "type": "equipped_weapon_def", "item_def_id": "cave_blade" }
+      ]
+    }
+  ],
+  "visual": {
+    "camera": { "x": 16, "y": 10, "zoom": 1.1 }
+  }
+}

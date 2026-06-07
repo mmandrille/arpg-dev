@@ -420,6 +420,15 @@ func (r *runner) persistTick(res game.TickResult) {
 			if c.Item.Equipped {
 				location = store.ItemLocationEquipped
 			}
+			rolledStats := json.RawMessage(`{}`)
+			if payload := c.Item.RollPayload(); payload != nil {
+				if raw, err := json.Marshal(payload); err == nil {
+					rolledStats = raw
+				} else {
+					r.metrics.PersistenceErrors.Inc()
+					r.log.Error("marshal rolled item payload", "error", err)
+				}
+			}
 			err := r.store.AddCharacterItem(ctx, store.CharacterItemInstance{
 				ID:          c.Item.ItemInstanceID,
 				AccountID:   r.sess.AccountID,
@@ -428,6 +437,7 @@ func (r *runner) persistTick(res game.TickResult) {
 				Location:    location,
 				Slot:        c.Item.Slot,
 				Equipped:    c.Item.Equipped,
+				RolledStats: rolledStats,
 			})
 			if err != nil {
 				r.metrics.PersistenceErrors.Inc()
@@ -461,6 +471,14 @@ func (r *runner) persistTick(res game.TickResult) {
 			if err := r.store.RemoveCharacterItem(ctx, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory remove", "error", err)
+			}
+		case game.OpEquippedUpdate:
+			if c.ItemInstanceID == nil || c.Slot == "" {
+				continue
+			}
+			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID, c.Slot, true); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist equipped update", "error", err)
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {

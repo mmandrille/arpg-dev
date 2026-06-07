@@ -89,6 +89,7 @@ class RuntimeState:
     pending_attack_monsters: dict[str, str] = field(default_factory=dict)
     accepted_attack_counts: dict[str, int] = field(default_factory=dict)
     killed_monster_def_ids: set[str] = field(default_factory=set)
+    max_monster_damage_by_def: dict[str, int] = field(default_factory=dict)
     accepted_message_ids: set[str] = field(default_factory=set)
     rejected_message_reasons: dict[str, str] = field(default_factory=dict)
     min_player_monster_distance: dict[str, float] = field(default_factory=dict)
@@ -317,6 +318,10 @@ async def execute_step(
             step.get("equipped"),
             "runtime protocol",
         )
+        return
+
+    if action == "assert_rolled_inventory_item":
+        assert_rolled_inventory_item(state.inventory, step, "runtime protocol")
         return
 
     if action == "assert_equipped_weapon_def":
@@ -911,6 +916,14 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             if entity is not None and entity.get("monster_def_id"):
                 state.killed_monster_def_ids.add(str(entity["monster_def_id"]))
             log("monster killed at tick", p.get("server_tick"))
+        if event_type == "monster_damaged":
+            entity = state.entities.get(str(ev.get("entity_id")))
+            if entity is not None and entity.get("monster_def_id") and isinstance(ev.get("damage"), int):
+                monster_def_id = str(entity["monster_def_id"])
+                state.max_monster_damage_by_def[monster_def_id] = max(
+                    state.max_monster_damage_by_def.get(monster_def_id, 0),
+                    int(ev["damage"]),
+                )
     apply_level_entities = delta_level == state.current_level
     for c in (p.get("changes") or []):
         if c["op"] in {"entity_spawn", "entity_update"}:
@@ -1200,6 +1213,38 @@ def assert_inventory_contains(inventory: list[dict], item_def_id: str, equipped:
         raise AssertionError(f"{where}: {item_def_id} equipped={item.get('equipped')} want {equipped}")
 
 
+def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any], where: str) -> None:
+    item_def_id = str(assertion["item_def_id"])
+    item = find_inventory_item(inventory, item_def_id)
+    if item is None:
+        raise AssertionError(f"{where}: missing rolled inventory item {item_def_id}: {inventory}")
+    template_id = str(assertion.get("item_template_id", item_def_id))
+    if item.get("item_template_id") != template_id:
+        raise AssertionError(f"{where}: item_template_id {item.get('item_template_id')} != {template_id}: {item}")
+    if assertion.get("equipped") is not None and bool(item.get("equipped")) != bool(assertion["equipped"]):
+        raise AssertionError(f"{where}: rolled item equipped={item.get('equipped')} want {assertion['equipped']}: {item}")
+    rarity = assertion.get("rarity")
+    if rarity is not None and item.get("rarity") != str(rarity):
+        raise AssertionError(f"{where}: rarity {item.get('rarity')} != {rarity}: {item}")
+    suffix = str(assertion.get("display_name_suffix", "Cave Blade"))
+    if not str(item.get("display_name", "")).endswith(suffix):
+        raise AssertionError(f"{where}: display_name missing suffix {suffix}: {item}")
+    stats = item.get("rolled_stats", {})
+    if not isinstance(stats, dict):
+        raise AssertionError(f"{where}: rolled_stats is not an object: {item}")
+    for key in assertion.get("stat_keys", []):
+        if key not in stats:
+            raise AssertionError(f"{where}: missing rolled stat {key}: {item}")
+    min_damage = assertion.get("min_damage")
+    if min_damage is not None and int(stats.get("damage_min", -1)) < int(min_damage):
+        raise AssertionError(f"{where}: damage_min {stats.get('damage_min')} < {min_damage}: {item}")
+    req = item.get("requirements", {})
+    if int(req.get("level", 0)) != int(assertion.get("required_level", 1)):
+        raise AssertionError(f"{where}: required level {req.get('level')} mismatch: {item}")
+    if item.get("effect_ids", []) != []:
+        raise AssertionError(f"{where}: effect_ids should be empty in v23: {item}")
+
+
 def run_assertions(
     assertions: list[Any],
     entities: list[dict],
@@ -1233,6 +1278,8 @@ def run_assertions(
         elif typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
+        elif typ == "rolled_inventory_item":
+            assert_rolled_inventory_item(inventory, assertion, where)
         elif typ == "equipped_weapon_def":
             expected_def = str(assertion["item_def_id"])
             weapon_id = equipped.get("weapon")
@@ -1254,7 +1301,7 @@ def run_assertions(
                 raise AssertionError(f"{where}: interactable {expected_id} state = {matches}, want {expected_state}")
         elif typ == "monster_killed_in_attacks":
             continue
-        elif typ in {"monster_moved", "monster_within_player_distance", "monster_near_spawn", "event_seen", "player_never_in_melee_range_of"}:
+        elif typ in {"monster_moved", "monster_within_player_distance", "monster_near_spawn", "event_seen", "player_never_in_melee_range_of", "monster_damage_at_least"}:
             continue
         elif typ == "player_hp_equals":
             assert_player_hp_equals(entities, int(assertion["equals"]), where)
@@ -1396,6 +1443,16 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(state.inventory, str(assertion["item_def_id"]), expected_equipped, where)
+            continue
+        if typ == "rolled_inventory_item":
+            assert_rolled_inventory_item(state.inventory, assertion, where)
+            continue
+        if typ == "monster_damage_at_least":
+            monster_def_id = str(assertion["monster_def_id"])
+            got = state.max_monster_damage_by_def.get(monster_def_id, 0)
+            want = int(assertion["damage"])
+            if got < want:
+                raise AssertionError(f"{where}: max damage to {monster_def_id} = {got}, want at least {want}")
             continue
 
 

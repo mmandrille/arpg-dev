@@ -16,7 +16,7 @@
     },
     "weapon_rusty_sword_v0": {
       "type": "equipment",
-      "slot": "weapon",
+      "slot": "main_hand",
       "source_path": "assets/equipment/weapons/rusty_sword/rusty_sword.blend",
       "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
       "format": "glb",
@@ -30,7 +30,7 @@
     },
     "weapon_training_bow_v0": {
       "type": "equipment",
-      "slot": "weapon",
+      "slot": "main_hand",
       "source_path": "assets/equipment/weapons/training_bow/training_bow.blend",
       "runtime_path": "client/assets/equipment/weapons/training_bow/training_bow.glb",
       "format": "glb",

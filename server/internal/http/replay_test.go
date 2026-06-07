@@ -53,8 +53,8 @@ func TestReplayVerifiesRecordedSlice(t *testing.T) {
 		t.Fatalf("expected recorded inputs+events, got %+v", rep)
 	}
 	// Reconstructed snapshot must show the equipped sword.
-	if rep.Snapshot.Equipped["weapon"] == nil || *rep.Snapshot.Equipped["weapon"] != itemID {
-		t.Fatalf("reconstructed equipped weapon = %v, want %s", rep.Snapshot.Equipped["weapon"], itemID)
+	if rep.Snapshot.Equipped["main_hand"] == nil || *rep.Snapshot.Equipped["main_hand"] != itemID {
+		t.Fatalf("reconstructed equipped main_hand = %v, want %s", rep.Snapshot.Equipped["main_hand"], itemID)
 	}
 }
 
@@ -126,7 +126,7 @@ func TestInspectionDebugAuth(t *testing.T) {
 	if err := json.NewDecoder(resp.Body).Decode(&snap); err != nil {
 		t.Fatalf("decode snapshot: %v", err)
 	}
-	if snap.Equipped["weapon"] == nil {
+	if snap.Equipped["main_hand"] == nil {
 		t.Fatal("state endpoint: no weapon equipped in reconstructed snapshot")
 	}
 }

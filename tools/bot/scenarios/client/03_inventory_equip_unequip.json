@@ -13,9 +13,9 @@
     { "type": "assert_panel_visible",     "visible": true },
     { "type": "drag_bag_to_weapon_slot",  "item_def_id": "rusty_sword" },
     { "type": "wait_event",               "event_type": "item_equipped", "timeout_s": 10.0 },
-    { "type": "assert_equipped",          "slot": "weapon" },
+    { "type": "assert_equipped",          "slot": "main_hand" },
     { "type": "drag_weapon_to_bag" },
     { "type": "wait_event",               "event_type": "item_unequipped", "timeout_s": 10.0 },
-    { "type": "assert_unequipped",        "slot": "weapon" }
+    { "type": "assert_unequipped",        "slot": "main_hand" }
   ]
 }

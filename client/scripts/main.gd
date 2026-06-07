@@ -46,6 +46,8 @@ var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
 var inventory: Array = []
 var equipped: Dictionary = {}
+var hotbar_capacity: int = 2
+var hotbar: Array = []
 var character_progression: Dictionary = {}
 var item_rules: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -477,6 +479,8 @@ func _apply_snapshot(p: Dictionary) -> void:
 		_upsert_entity(e)
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
+	hotbar_capacity = int(p.get("hotbar_capacity", 2))
+	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
 	if resolver != null:
 		resolver.apply_snapshot(p)
@@ -521,6 +525,12 @@ func _apply_delta(p: Dictionary) -> void:
 				equipped[c["slot"]] = c.get("item_instance_id")
 				if resolver != null:
 					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
+				if c.has("hotbar_capacity"):
+					hotbar_capacity = int(c.get("hotbar_capacity", hotbar_capacity))
+					if consumable_bar != null:
+						consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
+			"hotbar_update":
+				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"))
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
 				var discovered := bool(c.get("discovered", false))
@@ -718,11 +728,22 @@ func _remove_inventory_item(item_instance_id: String) -> void:
 			inventory.remove_at(i)
 
 
+func _apply_hotbar_update(slot_index: int, item_instance_id) -> void:
+	if slot_index < 0 or slot_index >= 10:
+		return
+	while hotbar.size() < 10:
+		hotbar.append({"slot_index": hotbar.size(), "item_instance_id": null})
+	hotbar[slot_index] = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+	if consumable_bar != null:
+		consumable_bar.apply_hotbar_update(slot_index, item_instance_id)
+
+
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
 		inventory_panel.set_inventory_state(inventory, equipped)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
+		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
 
 
 func _refresh_inventory_panel() -> void:
@@ -972,11 +993,11 @@ func _handle_autoplay(delta: float) -> void:
 		"equip":
 			if not autoplay_equip_sent and inventory.size() > 0:
 				var item_id := str(inventory[0]["item_instance_id"])
-				client.send("equip_intent", last_server_tick, {"item_instance_id": item_id, "slot": "weapon"})
+				client.send("equip_intent", last_server_tick, {"item_instance_id": item_id, "slot": "main_hand"})
 				autoplay_equip_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
-			var weapon_id = equipped.get("weapon", null)
+			var weapon_id = equipped.get("main_hand", null)
 			if weapon_id != null:
 				autoplay_phase = "done"
 				_debug("visual bot complete: equipped weapon %s, player_hp=%d" % [str(weapon_id), player_hp])
@@ -1410,7 +1431,7 @@ func _visual_replay_delay_for(env: Dictionary) -> float:
 func _sync_inventory_replay_display() -> void:
 	if inventory_panel == null or not visual_replay_enabled:
 		return
-	var has_inventory := inventory.size() > 0 or equipped.get("weapon") != null
+	var has_inventory := inventory.size() > 0 or equipped.get("main_hand") != null
 	if visual_replay_show_inventory or has_inventory:
 		inventory_panel.ensure_display_visible()
 		inventory_panel.set_interactive(false)
@@ -2048,6 +2069,7 @@ func get_bot_state() -> Dictionary:
 		"equipped": equipped.duplicate(true),
 		"monster_ids": live_monster_ids,
 		"loot_ids": loot_ids.duplicate(),
+		"loot": _bot_loot_debug(),
 		"interactable_ids": interactable_ids.duplicate(),
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
@@ -2076,6 +2098,17 @@ func _bot_loot_presentations() -> Dictionary:
 		var item_def_id := str(rec.get("item_def_id", ""))
 		if item_def_id != "":
 			out[item_def_id] = item_presentations.has(item_def_id)
+	return out
+
+
+func _bot_loot_debug() -> Array:
+	var out: Array = []
+	for loot_id in loot_ids:
+		var rec: Dictionary = entities.get(loot_id, {})
+		out.append({
+			"id": loot_id,
+			"item_def_id": str(rec.get("item_def_id", "")),
+		})
 	return out
 
 
@@ -2210,7 +2243,7 @@ func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:
 func _bot_bag_item_id_for_def(item_def_id: String, state: Dictionary) -> String:
 	var inv: Array = state.get("inventory", [])
 	var eq: Dictionary = state.get("equipped", {})
-	var equipped_weapon = eq.get("weapon", null)
+	var equipped_weapon = eq.get("main_hand", null)
 	for item in inv:
 		if str(item.get("item_def_id", "")) == item_def_id:
 			var iid := str(item.get("item_instance_id", ""))
@@ -2257,7 +2290,7 @@ func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 # --- debug ------------------------------------------------------------------
 
 func _update_debug() -> void:
-	var eq = equipped.get("weapon", null)
+	var eq = equipped.get("main_hand", null)
 	var ws_state := "?"
 	if client != null:
 		match client.ready_state():

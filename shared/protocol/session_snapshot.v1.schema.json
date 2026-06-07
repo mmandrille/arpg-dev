@@ -4,7 +4,7 @@
   "title": "session_snapshot payload (v1)",
   "description": "Full authoritative state needed to render the scene. This validates the bare payload body (the `payload` field of a session_snapshot envelope).",
   "type": "object",
-  "required": ["server_tick", "session_id", "seed", "current_level", "entities", "inventory", "equipped", "discovered_teleporters", "character_progression", "recent_events"],
+  "required": ["server_tick", "session_id", "seed", "current_level", "entities", "inventory", "equipped", "hotbar_capacity", "hotbar", "discovered_teleporters", "character_progression", "recent_events"],
   "additionalProperties": false,
   "properties": {
     "server_tick": { "type": "integer", "minimum": 0 },
@@ -14,6 +14,13 @@
     "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
     "inventory": { "type": "array", "items": { "$ref": "#/$defs/item" } },
     "equipped": { "$ref": "#/$defs/equipped" },
+    "hotbar_capacity": { "type": "integer", "minimum": 2, "maximum": 10 },
+    "hotbar": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/hotbar_slot" }
+    },
     "discovered_teleporters": { "type": "array", "items": { "$ref": "#/$defs/teleporter_discovery" } },
     "character_progression": { "$ref": "#/$defs/character_progression" },
     "recent_events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
@@ -66,7 +73,7 @@
         "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
         "requirements": { "$ref": "#/$defs/requirements" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
-        "slot": { "type": "string", "enum": ["weapon", ""] },
+        "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
         "equipped": { "type": "boolean" }
       }
     },
@@ -76,7 +83,10 @@
       "properties": {
         "damage_min": { "type": "integer", "minimum": 0 },
         "damage_max": { "type": "integer", "minimum": 0 },
-        "max_hp": { "type": "integer", "minimum": 0 }
+        "max_hp": { "type": "integer", "minimum": 0 },
+        "armor": { "type": "integer", "minimum": 0 },
+        "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "hotbar_slots": { "type": "integer", "minimum": 0, "maximum": 10 }
       }
     },
     "requirements": {
@@ -93,9 +103,32 @@
     "equipped": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["weapon"],
+      "required": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"],
       "properties": {
-        "weapon": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+        "head": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "amulet": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "chest": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "gloves": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "belt": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "boots": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "ring_left": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "ring_right": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "main_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "off_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+      }
+    },
+    "hotbar_slot": {
+      "type": "object",
+      "required": ["slot_index", "item_instance_id"],
+      "additionalProperties": false,
+      "properties": {
+        "slot_index": { "type": "integer", "minimum": 0, "maximum": 9 },
+        "item_instance_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/decimal_id" },
+            { "type": "null" }
+          ]
+        }
       }
     },
     "teleporter_discovery": {

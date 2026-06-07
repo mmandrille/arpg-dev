@@ -9,9 +9,22 @@
     { "id": "1003", "type": "loot", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "position": { "x": 13, "y": 5 } }
   ],
   "inventory": [
-    { "item_instance_id": "1004", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "slot": "weapon", "equipped": false }
+    { "item_instance_id": "1004", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "slot": "main_hand", "equipped": false }
   ],
-  "equipped": { "weapon": null },
+  "equipped": { "head": null, "amulet": null, "chest": null, "gloves": null, "belt": null, "boots": null, "ring_left": null, "ring_right": null, "main_hand": null, "off_hand": null },
+  "hotbar_capacity": 2,
+  "hotbar": [
+    { "slot_index": 0, "item_instance_id": null },
+    { "slot_index": 1, "item_instance_id": null },
+    { "slot_index": 2, "item_instance_id": "1007" },
+    { "slot_index": 3, "item_instance_id": null },
+    { "slot_index": 4, "item_instance_id": null },
+    { "slot_index": 5, "item_instance_id": null },
+    { "slot_index": 6, "item_instance_id": null },
+    { "slot_index": 7, "item_instance_id": null },
+    { "slot_index": 8, "item_instance_id": null },
+    { "slot_index": 9, "item_instance_id": null }
+  ],
   "discovered_teleporters": [],
   "character_progression": {
     "level": 1,

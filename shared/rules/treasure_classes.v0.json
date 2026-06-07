@@ -42,6 +42,36 @@
           ]
         }
       ]
+    },
+    "equipment_lab_tc_1": {
+      "attempts": [
+        {
+          "attempt_id": "equipment",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_blade", "weight": 1 },
+            { "item_template_id": "cave_greatsword", "weight": 1 },
+            { "item_template_id": "cave_bow", "weight": 1 },
+            { "item_template_id": "cave_shield", "weight": 1 },
+            { "item_template_id": "cave_helm", "weight": 1 },
+            { "item_template_id": "cave_mail", "weight": 1 },
+            { "item_template_id": "cave_gloves", "weight": 1 },
+            { "item_template_id": "cave_belt", "weight": 1 },
+            { "item_template_id": "cave_boots", "weight": 1 },
+            { "item_template_id": "cave_ring", "weight": 1 },
+            { "item_template_id": "cave_amulet", "weight": 1 }
+          ]
+        },
+        {
+          "attempt_id": "potion",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_def_id": "red_potion", "weight": 1 }
+          ]
+        }
+      ]
     }
   }
 }

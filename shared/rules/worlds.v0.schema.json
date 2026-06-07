@@ -35,6 +35,7 @@
                 "type": { "type": "string", "enum": ["monster", "loot", "wall", "interactable"] },
                 "monster_def_id": { "type": "string" },
                 "item_def_id": { "type": "string" },
+                "item_template_id": { "type": "string" },
                 "interactable_def_id": { "type": "string" },
                 "position": { "$ref": "#/$defs/position" },
                 "size": { "$ref": "#/$defs/size" }
@@ -56,7 +57,10 @@
                     "required": ["type"]
                   },
                   "then": {
-                    "required": ["item_def_id"],
+                    "oneOf": [
+                      { "required": ["item_def_id"] },
+                      { "required": ["item_template_id"] }
+                    ],
                     "not": { "required": ["monster_def_id"] }
                   }
                 },

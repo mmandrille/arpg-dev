@@ -20,6 +20,8 @@ const (
 	TypeUnequip      = "unequip_intent"
 	TypeDrop         = "drop_intent"
 	TypeUse          = "use_intent"
+	TypeAssignHotbar = "assign_hotbar_intent"
+	TypeUseHotbar    = "use_hotbar_intent"
 	TypeAllocateStat = "allocate_stat_intent"
 )
 
@@ -59,6 +61,13 @@ type (
 	usePayloadWire struct {
 		ItemInstanceID string `json:"item_instance_id"`
 	}
+	assignHotbarPayloadWire struct {
+		SlotIndex      int     `json:"slot_index"`
+		ItemInstanceID *string `json:"item_instance_id"`
+	}
+	useHotbarPayloadWire struct {
+		SlotIndex int `json:"slot_index"`
+	}
 	allocateStatPayloadWire struct {
 		Stat   string `json:"stat"`
 		Points int    `json:"points"`
@@ -68,7 +77,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAllocateStat:
+	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat:
 		return true
 	}
 	return false
@@ -143,6 +152,18 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.Use = &game.UseIntent{ItemInstanceID: p.ItemInstanceID}
+	case TypeAssignHotbar:
+		var p assignHotbarPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.SlotIndex < 0 || p.SlotIndex > 9 {
+			return in, false
+		}
+		in.AssignHotbar = &game.AssignHotbarIntent{SlotIndex: p.SlotIndex, ItemInstanceID: p.ItemInstanceID}
+	case TypeUseHotbar:
+		var p useHotbarPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.SlotIndex < 0 || p.SlotIndex > 9 {
+			return in, false
+		}
+		in.UseHotbar = &game.UseHotbarIntent{SlotIndex: p.SlotIndex}
 	case TypeAllocateStat:
 		var p allocateStatPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || !validStat(p.Stat) || p.Points <= 0 {

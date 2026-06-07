@@ -250,8 +250,8 @@ func TestCharacterPersistenceLoadsInventoryAndEquipmentAcrossFreshSessions(t *te
 	if snap.Inventory[0].ItemInstanceID != itemID || snap.Inventory[0].ItemDefID != "rusty_sword" || !snap.Inventory[0].Equipped {
 		t.Fatalf("fresh persisted inventory item = %+v, want equipped rusty_sword %s", snap.Inventory[0], itemID)
 	}
-	if snap.Equipped["weapon"] == nil || *snap.Equipped["weapon"] != itemID {
-		t.Fatalf("fresh persisted equipped weapon = %v, want %s", snap.Equipped["weapon"], itemID)
+	if snap.Equipped["main_hand"] == nil || *snap.Equipped["main_hand"] != itemID {
+		t.Fatalf("fresh persisted equipped main_hand = %v, want %s", snap.Equipped["main_hand"], itemID)
 	}
 }
 
@@ -368,7 +368,7 @@ func TestDeadPlayerResumeRejectsGameplayIntents(t *testing.T) {
 		{"msg-dead-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}},
 		{"msg-dead-attack", "action_intent", map[string]any{"target_id": "1002"}},
 		{"msg-dead-pickup", "action_intent", map[string]any{"target_id": "1003"}},
-		{"msg-dead-equip", "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "weapon"}},
+		{"msg-dead-equip", "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "main_hand"}},
 	}
 	for _, in := range intents {
 		sendIntent(t, resume, sessionID, snap.ServerTick, in.id, in.typ, in.payload)
@@ -469,7 +469,7 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 					itemID = c.Item.ItemInstanceID
 				}
 				// Equip is confirmed only when the authoritative delta reports it.
-				if c.Op == "equipped_update" && c.Slot == "weapon" && c.ItemInstanceID != nil && *c.ItemInstanceID == itemID {
+				if c.Op == "equipped_update" && c.Slot == "main_hand" && c.ItemInstanceID != nil && *c.ItemInstanceID == itemID {
 					equipped = true
 				}
 			}
@@ -478,7 +478,7 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 				pickedUp = true
 			}
 			if pickedUp && itemID != "" && !equipSent {
-				send("equip_intent", map[string]any{"item_instance_id": itemID, "slot": "weapon"})
+				send("equip_intent", map[string]any{"item_instance_id": itemID, "slot": "main_hand"})
 				equipSent = true
 			}
 		}
@@ -504,7 +504,7 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 			}
 			_ = json.Unmarshal(m.Payload, &s)
 			if len(s.Inventory) == 1 && s.Inventory[0].ItemDefID == "rusty_sword" && s.Inventory[0].Equipped &&
-				s.Equipped["weapon"] != nil && *s.Equipped["weapon"] == itemID {
+				s.Equipped["main_hand"] != nil && *s.Equipped["main_hand"] == itemID {
 				_ = conn.Close()
 				return itemID // success
 			}
@@ -788,8 +788,8 @@ func assertResumeSliceSnapshot(t *testing.T, snap game.Snapshot, itemID string) 
 	if len(snap.Inventory) != 1 || snap.Inventory[0].ItemDefID != "rusty_sword" || !snap.Inventory[0].Equipped {
 		t.Fatalf("resumed inventory = %+v, want equipped rusty_sword", snap.Inventory)
 	}
-	if snap.Equipped["weapon"] == nil || *snap.Equipped["weapon"] != itemID {
-		t.Fatalf("resumed equipped weapon = %v, want %s", snap.Equipped["weapon"], itemID)
+	if snap.Equipped["main_hand"] == nil || *snap.Equipped["main_hand"] != itemID {
+		t.Fatalf("resumed equipped main_hand = %v, want %s", snap.Equipped["main_hand"], itemID)
 	}
 }
 

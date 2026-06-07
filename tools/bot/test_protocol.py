@@ -129,7 +129,7 @@ def test_load_scenarios_discovers_inventory_lab():
     raw = json.loads(inventory.path.read_text())
 
     assert inventory.world_id == "inventory_lab"
-    assert {"action": "unequip_slot", "slot": "weapon"} in inventory.steps
+    assert {"action": "unequip_slot", "slot": "main_hand"} in inventory.steps
     assert {"action": "drop_inventory_item", "item_def_id": "rusty_sword"} in inventory.steps
     assert {
         "type": "equipped_weapon_def",
@@ -179,7 +179,9 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
                 {"id": "1004", "type": "interactable", "interactable_def_id": "wooden_door", "state": "closed", "position": {"x": 4, "y": 5}},
             ],
             "inventory": [],
-            "equipped": {"weapon": None},
+            "equipped": {"main_hand": None},
+            "hotbar_capacity": 2,
+            "hotbar": [{"slot_index": i, "item_instance_id": None} for i in range(10)],
         },
     }, state)
 
@@ -195,9 +197,9 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
             "server_tick": 1,
             "changes": [
                 {"op": "entity_remove", "entity_id": "1002"},
-                {"op": "inventory_add", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": False}},
-                {"op": "inventory_update", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": True}},
-                {"op": "equipped_update", "slot": "weapon", "item_instance_id": "1004"},
+                {"op": "inventory_add", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": False}},
+                {"op": "inventory_update", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": True}},
+                {"op": "equipped_update", "slot": "main_hand", "item_instance_id": "1004"},
                 {"op": "inventory_remove", "item_instance_id": "1004"},
             ],
             "events": [],
@@ -206,7 +208,7 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
 
     assert find_loot(state, "rusty_sword") is None
     assert find_inventory_item(state.inventory, "rusty_sword") is None
-    assert state.equipped["weapon"] == "1004"
+    assert state.equipped["main_hand"] == "1004"
 
 
 def test_runtime_state_waits_for_destination_level_delta():
@@ -222,7 +224,9 @@ def test_runtime_state_waits_for_destination_level_delta():
                 {"id": "1002", "type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "position": {"x": 14, "y": 18}},
             ],
             "inventory": [],
-            "equipped": {"weapon": None},
+            "equipped": {"main_hand": None},
+            "hotbar_capacity": 2,
+            "hotbar": [{"slot_index": i, "item_instance_id": None} for i in range(10)],
         },
     }, state)
 
@@ -310,7 +314,7 @@ def test_structured_assertions():
         {"id": "1007", "type": "interactable", "interactable_def_id": "wooden_door", "state": "open"},
     ]
     inventory = [
-        {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "weapon", "equipped": True},
+        {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": True},
         {"item_instance_id": "1006", "item_def_id": "training_badge", "slot": "", "equipped": False},
     ]
 
@@ -322,7 +326,7 @@ def test_structured_assertions():
         {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
         {"type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open"},
         {"type": "equipped_weapon_def", "item_def_id": "rusty_sword"},
-    ], entities, inventory, {"weapon": "1004"}, None, "test")
+    ], entities, inventory, {"main_hand": "1004"}, None, "test")
 
 
 def test_structured_assertions_reject_unknown_type():

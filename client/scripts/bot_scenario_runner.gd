@@ -6,7 +6,8 @@ extends RefCounted
 
 const STEP_TYPES_WAIT := [
 	"wait_ws_open", "wait_entity", "wait_event", "wait_inventory_item",
-	"wait_inventory_count", "wait_loot_item", "wait_loot_count",
+	"wait_inventory_count", "wait_loot_item", "wait_loot_count", "wait_hotbar_assigned",
+	"wait_hotbar_capacity",
 	"wait_player_near", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
 	"wait_settings_panel", "wait_pause_menu", "wait_character_progression",
@@ -20,11 +21,13 @@ const STEP_TYPES_ASSERT := [
 	"assert_pause_menu_visible", "assert_session_changed",
 	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
+	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
 ]
 const STEP_TYPES_ACTION := [
-	"press_key", "click_entity", "click_floor",
-	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
-	"assign_hotbar_slot", "double_click_bag_item", "click_menu_button",
+	"press_key", "click_entity", "click_loot_item", "click_floor",
+	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_equipment_slot",
+	"drag_equipment_to_bag", "drag_bag_to_outside", "assign_hotbar_slot",
+	"use_hotbar_slot", "double_click_bag_item", "click_menu_button",
 	"enter_character_name", "select_character", "select_window_size",
 	"remember_session", "remember_player_position", "click_stat_button",
 ]
@@ -35,10 +38,13 @@ const ALL_STEP_TYPES: Array = [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "wait_inventory_item", "wait_inventory_count",
 	"assert_equipped", "assert_unequipped", "assert_inventory_missing",
 	"assert_inventory_count", "wait_loot_item", "wait_loot_count",
-	"wait_player_near", "press_key", "click_entity", "click_floor",
-	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
-	"assert_loot_presentation", "assert_inventory_presentation",
-	"click_entity_until_event", "assign_hotbar_slot", "assert_hotbar_assigned",
+	"wait_player_near", "press_key", "click_entity", "click_loot_item", "click_floor",
+	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_equipment_slot",
+	"drag_equipment_to_bag", "drag_bag_to_outside", "assert_loot_presentation",
+	"assert_inventory_presentation", "click_entity_until_event", "assign_hotbar_slot",
+	"use_hotbar_slot", "assert_hotbar_assigned", "wait_hotbar_assigned",
+	"assert_hotbar_capacity", "wait_hotbar_capacity",
+	"assert_hotbar_slot_disabled",
 	"assert_player_hp", "double_click_bag_item", "wait_main_menu",
 	"wait_character_panel", "wait_settings_panel", "wait_pause_menu",
 	"assert_main_menu_visible", "assert_character_panel_visible",
@@ -216,6 +222,10 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return false
 		"wait_loot_item":
 			return (state.get("loot_ids", []) as Array).size() > 0
+		"wait_hotbar_assigned":
+			return _hotbar_slot_matches(step, state)
+		"wait_hotbar_capacity":
+			return _hotbar_capacity_matches(step, state)
 		"wait_player_near":
 			var tx := float(step.get("x", 0.0))
 			var tz := float(step.get("z", 0.0))
@@ -292,7 +302,7 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 				return false
 			return true
 		"assert_equipped":
-			var slot := str(step.get("slot", "weapon"))
+			var slot := str(step.get("slot", "main_hand"))
 			var eq: Dictionary = state.get("equipped", {})
 			var val = eq.get(slot, null)
 			if val == null or str(val) == "":
@@ -302,7 +312,7 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 				return false
 			return true
 		"assert_unequipped":
-			var slot := str(step.get("slot", "weapon"))
+			var slot := str(step.get("slot", "main_hand"))
 			var eq: Dictionary = state.get("equipped", {})
 			var val = eq.get(slot, null)
 			if val != null and str(val) != "" and str(val) != "null":
@@ -341,25 +351,29 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 				return false
 			return true
 		"assert_hotbar_assigned":
-			var slot_index := int(step.get("slot_index", -1))
-			var want_def := str(step.get("item_def_id", ""))
-			var bar: Dictionary = state.get("consumable_bar", {})
-			var assigned: Array = bar.get("assigned_slots", [])
-			if slot_index < 0 or slot_index >= assigned.size():
-				_fail("assert_hotbar_assigned failed: invalid slot_index=%d step=%d scenario=%s" % [
-					slot_index, _step_index, str(scenario.get("id", "?"))
-				])
-				return false
-			var slot_val = assigned[slot_index]
-			if slot_val == null or typeof(slot_val) != TYPE_DICTIONARY:
-				_fail("assert_hotbar_assigned failed: slot %d empty step=%d scenario=%s" % [
-					slot_index, _step_index, str(scenario.get("id", "?"))
-				])
-				return false
-			if str((slot_val as Dictionary).get("item_def_id", "")) != want_def:
-				_fail("assert_hotbar_assigned failed: slot %d has %s want %s step=%d scenario=%s" % [
-					slot_index, str((slot_val as Dictionary).get("item_def_id", "")), want_def,
+			if not _hotbar_slot_matches(step, state):
+				_fail("assert_hotbar_assigned failed: slot=%d item_def_id=%s step=%d scenario=%s" % [
+					int(step.get("slot_index", -1)), str(step.get("item_def_id", "")),
 					_step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_hotbar_capacity":
+			if not _hotbar_capacity_matches(step, state):
+				var bar: Dictionary = state.get("consumable_bar", {})
+				_fail("assert_hotbar_capacity failed: got=%d want=%d step=%d scenario=%s" % [
+					int(bar.get("hotbar_capacity", -1)), int(step.get("equals", -1)),
+					_step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_hotbar_slot_disabled":
+			var disabled_slot_index := int(step.get("slot_index", -1))
+			var bar: Dictionary = state.get("consumable_bar", {})
+			var cap := int(bar.get("hotbar_capacity", 2))
+			if disabled_slot_index < cap:
+				_fail("assert_hotbar_slot_disabled failed: slot=%d capacity=%d step=%d scenario=%s" % [
+					disabled_slot_index, cap, _step_index, str(scenario.get("id", "?"))
 				])
 				return false
 			return true
@@ -478,6 +492,29 @@ func _inventory_count(state: Dictionary, item_def_id: String) -> int:
 	return count
 
 
+func _hotbar_slot_matches(step: Dictionary, state: Dictionary) -> bool:
+	var slot_index := int(step.get("slot_index", -1))
+	var want_def := str(step.get("item_def_id", ""))
+	var bar: Dictionary = state.get("consumable_bar", {})
+	var assigned: Array = bar.get("assigned_slots", [])
+	if slot_index < 0 or slot_index >= assigned.size():
+		return false
+	var slot_val = assigned[slot_index]
+	if slot_val == null or typeof(slot_val) != TYPE_DICTIONARY:
+		return false
+	return str((slot_val as Dictionary).get("item_def_id", "")) == want_def
+
+
+func _hotbar_capacity_matches(step: Dictionary, state: Dictionary) -> bool:
+	var bar: Dictionary = state.get("consumable_bar", {})
+	var got := int(bar.get("hotbar_capacity", -1))
+	if step.has("equals"):
+		return got == int(step.get("equals", -1))
+	if step.has("at_least"):
+		return got >= int(step.get("at_least", -1))
+	return false
+
+
 func _queue_action(step: Dictionary, stype: String, state: Dictionary) -> void:
 	if stype == "remember_session":
 		_memory["session_id"] = str(state.get("current_session_id", ""))
@@ -530,7 +567,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 				str(step.get("event_type", "")), str(step.get("entity_type", ""))
 			]
 		"wait_inventory_item", "wait_inventory_count", "assert_inventory_count", \
-		"assert_inventory_missing", "double_click_bag_item", "assign_hotbar_slot":
+		"assert_inventory_missing", "double_click_bag_item", "assign_hotbar_slot", \
+		"click_loot_item", "wait_hotbar_assigned":
 			return "item_def_id=%s" % str(step.get("item_def_id", ""))
 		"wait_loot_count":
 			return "min_count=%s" % str(step.get("min_count", ""))
@@ -648,13 +686,22 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "click_entity_until_event":
 		if str(step.get("entity_type", "")) == "" or str(step.get("event_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type and event_type" % [index, stype]
+	if stype == "click_loot_item":
+		if str(step.get("item_def_id", "")) == "":
+			return "client_steps[%d] (%s) requires item_def_id" % [index, stype]
 	if stype == "wait_player_near":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]
-	if stype in ["drag_bag_to_weapon_slot", "drag_bag_to_outside", "assign_hotbar_slot", "double_click_bag_item"]:
+	if stype in ["drag_bag_to_weapon_slot", "drag_bag_to_equipment_slot", "drag_bag_to_outside", "assign_hotbar_slot", "double_click_bag_item"]:
 		if str(step.get("item_def_id", "")) == "":
 			return "client_steps[%d] (%s) requires item_def_id" % [index, stype]
+	if stype in ["drag_bag_to_equipment_slot", "drag_equipment_to_bag"]:
+		if str(step.get("slot", "")) == "":
+			return "client_steps[%d] (%s) requires slot" % [index, stype]
 	if stype == "assign_hotbar_slot":
+		if not step.has("slot_index"):
+			return "client_steps[%d] (%s) requires slot_index" % [index, stype]
+	if stype == "use_hotbar_slot":
 		if not step.has("slot_index"):
 			return "client_steps[%d] (%s) requires slot_index" % [index, stype]
 	if stype in ["wait_inventory_count", "assert_inventory_count"]:
@@ -663,9 +710,14 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "wait_loot_count":
 		if not step.has("min_count"):
 			return "client_steps[%d] (%s) requires min_count" % [index, stype]
-	if stype == "assert_hotbar_assigned":
+	if stype in ["assert_hotbar_assigned", "wait_hotbar_assigned"]:
 		if not step.has("slot_index") or str(step.get("item_def_id", "")) == "":
 			return "client_steps[%d] (%s) requires slot_index and item_def_id" % [index, stype]
+	if stype in ["assert_hotbar_capacity", "wait_hotbar_capacity", "assert_hotbar_slot_disabled"]:
+		if not step.has("equals") and not step.has("at_least") and stype in ["assert_hotbar_capacity", "wait_hotbar_capacity"]:
+			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
+		if not step.has("slot_index") and stype == "assert_hotbar_slot_disabled":
+			return "client_steps[%d] (%s) requires slot_index" % [index, stype]
 	if stype == "assert_player_hp":
 		if not step.has("equals"):
 			return "client_steps[%d] (%s) requires equals" % [index, stype]

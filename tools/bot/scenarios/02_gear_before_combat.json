@@ -16,7 +16,7 @@
     {
       "action": "equip_inventory_item",
       "item_def_id": "rusty_sword",
-      "slot": "weapon"
+      "slot": "main_hand"
     },
     {
       "action": "walk_to_monster",

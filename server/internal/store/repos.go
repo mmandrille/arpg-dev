@@ -269,18 +269,28 @@ func (s *Store) SetCharacterItemEquipped(ctx context.Context, accountID, charact
 }
 
 func (s *Store) RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error {
-	tag, err := s.pool.Exec(ctx,
-		`DELETE FROM character_item_instances
-		 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
-		accountID, characterID, itemInstanceID,
-	)
-	if err != nil {
-		return fmt.Errorf("store: remove character item: %w", err)
-	}
-	if tag.RowsAffected() == 0 {
-		return ErrNotFound
-	}
-	return nil
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		tag, err := tx.Exec(ctx,
+			`DELETE FROM character_item_instances
+			 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
+			accountID, characterID, itemInstanceID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: remove character item: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+		if _, err := tx.Exec(ctx,
+			`UPDATE character_hotbar_slots
+			 SET item_instance_id = NULL, updated_at = now()
+			 WHERE account_id = $1 AND character_id = $2 AND item_instance_id = $3`,
+			accountID, characterID, itemInstanceID,
+		); err != nil {
+			return fmt.Errorf("store: clear removed item hotbar slots: %w", err)
+		}
+		return nil
+	})
 }
 
 func (s *Store) ListCharacterWaypoints(ctx context.Context, characterID string) ([]CharacterWaypoint, error) {
@@ -394,7 +404,78 @@ func (s *Store) UpsertCharacterProgression(ctx context.Context, accountID string
 	return nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, progression CharacterProgression) error {
+func (s *Store) ListCharacterHotbar(ctx context.Context, accountID, characterID string) ([]CharacterHotbarSlot, error) {
+	var out []CharacterHotbarSlot
+	if err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO character_hotbar_slots (account_id, character_id, slot_index, item_instance_id)
+			 SELECT $1, $2, slots.slot_index, NULL
+			 FROM generate_series(0, 9) AS slots(slot_index)
+			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+			 ON CONFLICT (character_id, slot_index) DO NOTHING`,
+			accountID, characterID,
+		); err != nil {
+			return fmt.Errorf("store: initialize character hotbar: %w", err)
+		}
+		rows, err := tx.Query(ctx,
+			`SELECT account_id, character_id, slot_index, item_instance_id, updated_at
+			 FROM character_hotbar_slots
+			 WHERE account_id = $1 AND character_id = $2
+			 ORDER BY slot_index ASC`,
+			accountID, characterID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: list character hotbar: %w", err)
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var slot CharacterHotbarSlot
+			if err := rows.Scan(&slot.AccountID, &slot.CharacterID, &slot.SlotIndex, &slot.ItemInstanceID, &slot.UpdatedAt); err != nil {
+				return fmt.Errorf("store: scan character hotbar: %w", err)
+			}
+			out = append(out, slot)
+		}
+		if err := rows.Err(); err != nil {
+			return fmt.Errorf("store: list character hotbar rows: %w", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	if len(out) == 0 {
+		return nil, ErrNotFound
+	}
+	return out, nil
+}
+
+func (s *Store) SetCharacterHotbarSlot(ctx context.Context, accountID, characterID string, slotIndex int, itemInstanceID *string) error {
+	if slotIndex < 0 || slotIndex > 9 {
+		return ErrNotFound
+	}
+	tag, err := s.pool.Exec(ctx,
+		`INSERT INTO character_hotbar_slots (account_id, character_id, slot_index, item_instance_id)
+		 SELECT $1, $2, $3, $4
+		 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+		   AND ($4::text IS NULL OR EXISTS (
+		     SELECT 1 FROM character_item_instances
+		     WHERE account_id = $1 AND character_id = $2 AND id = $4
+		   ))
+		 ON CONFLICT (character_id, slot_index) DO UPDATE SET
+		   item_instance_id = EXCLUDED.item_instance_id,
+		   updated_at = now()
+		 WHERE character_hotbar_slots.account_id = EXCLUDED.account_id`,
+		accountID, characterID, slotIndex, itemInstanceID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: set character hotbar slot: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, progression CharacterProgression) error {
 	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO session_start_character_progression (
@@ -439,6 +520,16 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 				return fmt.Errorf("store: insert session start waypoint: %w", err)
 			}
 		}
+		for _, slot := range hotbar {
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_hotbar_slots (session_id, account_id, character_id, slot_index, item_instance_id)
+				 VALUES ($1, $2, $3, $4, $5)
+				 ON CONFLICT (session_id, slot_index) DO NOTHING`,
+				sessionID, accountID, characterID, slot.SlotIndex, slot.ItemInstanceID,
+			); err != nil {
+				return fmt.Errorf("store: insert session start hotbar: %w", err)
+			}
+		}
 		return nil
 	})
 }
@@ -480,6 +571,28 @@ func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) 
 		snap.Items = append(snap.Items, it)
 	}
 	if err := itemRows.Err(); err != nil {
+		return snap, err
+	}
+
+	hotbarRows, err := s.pool.Query(ctx,
+		`SELECT account_id, character_id, slot_index, item_instance_id, created_at
+		 FROM session_start_hotbar_slots
+		 WHERE session_id = $1
+		 ORDER BY slot_index ASC`,
+		sessionID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start hotbar: %w", err)
+	}
+	defer hotbarRows.Close()
+	for hotbarRows.Next() {
+		var slot CharacterHotbarSlot
+		if err := hotbarRows.Scan(&slot.AccountID, &slot.CharacterID, &slot.SlotIndex, &slot.ItemInstanceID, &slot.UpdatedAt); err != nil {
+			return snap, fmt.Errorf("store: scan session start hotbar: %w", err)
+		}
+		snap.Hotbar = append(snap.Hotbar, slot)
+	}
+	if err := hotbarRows.Err(); err != nil {
 		return snap, err
 	}
 

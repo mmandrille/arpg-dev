@@ -77,6 +77,7 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
 			return
 		}
 		sim.LoadInventory(persistedItems(start.Items))
+		sim.LoadHotbar(persistedHotbar(start.Hotbar))
 		sim.LoadDiscoveredTeleporters(waypointLevels(start.Waypoints))
 	}
 
@@ -118,6 +119,17 @@ func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {
 			Slot:        item.Slot,
 			Equipped:    item.Equipped,
 			RolledStats: item.RolledStats,
+		})
+	}
+	return out
+}
+
+func persistedHotbar(slots []store.CharacterHotbarSlot) []game.PersistedHotbarSlot {
+	out := make([]game.PersistedHotbarSlot, 0, len(slots))
+	for _, slot := range slots {
+		out = append(out, game.PersistedHotbarSlot{
+			SlotIndex:      slot.SlotIndex,
+			ItemInstanceID: slot.ItemInstanceID,
 		})
 	}
 	return out

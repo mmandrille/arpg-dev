@@ -142,7 +142,13 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character waypoints")
 		return
 	}
-	if err := s.store.CreateSessionStartSnapshot(ctx, sess.ID, accountID, char.ID, items, waypoints, progression); err != nil {
+	hotbar, err := s.store.ListCharacterHotbar(ctx, accountID, char.ID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character hotbar")
+		return
+	}
+	if err := s.store.CreateSessionStartSnapshot(ctx, sess.ID, accountID, char.ID, items, waypoints, hotbar, progression); err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
 		return

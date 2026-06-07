@@ -11,8 +11,8 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v27 — `hold-click-controls`; v26 — `character-stats-and-leveling` is complete on the current branch |
-| **Active branch** | `feature/character-stats-and-leveling` |
+| **Latest completed slice** | v28 — `full-equipment-and-belt-hotbar` |
+| **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
 
@@ -43,6 +43,7 @@ v24_* = main-menu-and-character-start
 v25_* = treasure-classes-and-guarded-chests
 v26_* = character-stats-and-leveling
 v27_* = hold-click-controls
+v28_* = full-equipment-and-belt-hotbar
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -90,6 +91,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v25** | `treasure-classes-and-guarded-chests` | Complete (`make ci` green) | [`v25_spec-treasure-classes-and-guarded-chests.md`](specs/v25_spec-treasure-classes-and-guarded-chests.md) | [`v25_2026-06-07-treasure-classes-and-guarded-chests.md`](plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md) |
 | **v26** | `character-stats-and-leveling` | Complete (`make ci` green) | [`v26_spec-character-stats-and-leveling.md`](specs/v26_spec-character-stats-and-leveling.md) | [`v26_2026-06-07-character-stats-and-leveling.md`](plans/v26_2026-06-07-character-stats-and-leveling.md) |
 | **v27** | `hold-click-controls` | Complete (`make ci` green) | [`v27_spec-hold-click-controls.md`](specs/v27_spec-hold-click-controls.md) | [`v27_2026-06-07-hold-click-controls.md`](plans/v27_2026-06-07-hold-click-controls.md) |
+| **v28** | `full-equipment-and-belt-hotbar` | Complete (`make ci` green) | [`v28_spec-full-equipment-and-belt-hotbar.md`](specs/v28_spec-full-equipment-and-belt-hotbar.md) | [`v28_2026-06-07-full-equipment-and-belt-hotbar.md`](plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md) |
 
 ---
 
@@ -634,6 +636,35 @@ existing intents at the current send cadence, without protocol or server changes
 **Explicit non-goals:** no server swing cooldown, no hold-move walk animation, no controls remapping
 UI, no new bot drag scenario.
 
+### v28 — Full equipment and belt hotbar
+
+**Proves:** The single weapon slot can be replaced by server-authoritative paper-doll equipment while
+keeping replay, persistence, bots, and the Godot UI in sync.
+
+- Wire `equipped` now exposes `head`, `amulet`, `chest`, `gloves`, `belt`, `boots`,
+  `ring_left`, `ring_right`, `main_hand`, and `off_hand`; legacy `weapon` was migrated to
+  `main_hand` across schemas, fixtures, bots, smoke, and client code.
+- Go sim enforces slot compatibility, logical ring slots, one-hand plus shield coexistence,
+  two-handed sword/bow occupancy, and offhand blocking when `main_hand` holds a two-handed item.
+- `use_hotbar_intent { slot_index }` resolves the assigned item server-side, while direct
+  `use_intent { item_instance_id }` remains valid for bag use.
+- Character hotbar layout persists in Postgres, session-start hotbar snapshots preserve replay
+  determinism, and stale item removal clears every referencing hotbar slot.
+- Base hotbar capacity is 2; belts roll `hotbar_slots` and expand capacity up to 10. Disabled slots
+  retain assignments, no-op client-side when pressed, and reject server-side if explicitly used.
+- `equipment_lab`, `equipment_lab_tc_1`, and `shared/golden/full_equipment.json` cover every v28
+  equipment category, shield display rolls, belt capacity, and hotbar re-enable behavior.
+- Godot inventory now renders named paper-doll slots and sends protocol-backed equip/unequip/hotbar
+  intents; the consumable bar is snapshot/delta driven and updates capacity from authoritative
+  equipment deltas.
+- Protocol bot scenario `19_full_equipment.json` proves full slot coverage, hand occupancy, pinned
+  belt capacity 10, disabled-slot persistence, reconnect/replay, and fresh-session persistence.
+- Client bot scenario `10_full_equipment.json` proves named loot pickup, paper-doll equip, disabled
+  hotbar assignment, belt expansion, and enabled hotbar use through the Godot UI path.
+
+**Explicit non-goals:** armor mitigation, block chance execution, affix grammar, comparison UI,
+stash/vendors, production icons/art, offhand abilities/dual-wield, and deeper dungeon drop economy.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -677,6 +708,7 @@ rolled_drops: kill dungeon mob → pick up/equip rolled cave_blade → prove rol
 main_menu_flow: menu settings → named character creation → pause input lock → return → continue fresh session
 treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob → open chest once → pick up chest loot
 character_stats_and_leveling: descend to dungeon → kill mobs for XP → level up → spend VIT → prove persistence
+full_equipment: pick up/equip paper-doll gear → prove hand occupancy → assign belt-gated hotbar → prove persistence
 ```
 
 **Verify:**
@@ -686,7 +718,7 @@ make db-up && make server    # terminal 1
 make bot                     # terminal 2 — all protocol bot scenarios
 make client-unit             # headless Godot unit gates (no server required)
 make client-smoke            # headless Godot gates + slice smoke
-make bot-client              # Godot client bot (all 8 scenarios; requires live server)
+make bot-client              # Godot client bot scenarios; requires live server
 make ci                      # full suite
 make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
 make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenario by file name or id
@@ -770,14 +802,19 @@ Godot character sheet, an XP bar, and protocol/client bot proofs.
 hold-to-move on floor by repeating existing `action_intent` / `move_to_intent` at `SEND_INTERVAL`,
 with sticky targets, move epsilon, and headless unit coverage — no protocol or server changes.
 
+**Full paper-doll equipment and belt-gated hotbar are now authoritative.** v28 replaces the single
+weapon slot with full equipment slots, two-hand occupancy, droppable gear templates, persisted
+character hotbar layout, replay-safe session hotbar snapshots, and protocol/client bot proofs for
+server-synced paper-doll and belt capacity behavior.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Armor mitigation, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling | v0/v4/v12/v17/v21/v23/v26 non-goals |
-| Itemization | Affix grammar, procedural item names, armor/jewelry/offhand, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, depth-banded treasure classes, boss-floor chest integration | v23/v25/v26 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25 non-goals |
+| Combat | Armor mitigation, block chance execution, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling, offhand abilities/dual-wield | v0/v4/v12/v17/v21/v23/v26/v28 non-goals |
+| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, depth-banded treasure classes, boss-floor chest integration, deeper dungeon drop economy | v23/v25/v26/v28 non-goals, ADR-0009 deferred |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

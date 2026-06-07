@@ -115,7 +115,7 @@ def default_manifest() -> dict:
             },
             "weapon_rusty_sword_v0": {
                 "type": "equipment",
-                "slot": "weapon",
+                "slot": "main_hand",
                 "runtime_path": SWORD_GLB,
                 "format": "glb",
                 "required_nodes": [],
@@ -130,7 +130,7 @@ def default_visuals() -> dict:
         "item_visuals": {
             "rusty_sword": {
                 "asset_id": "weapon_rusty_sword_v0",
-                "slot": "weapon",
+                "slot": "main_hand",
                 "mount_socket": "right_hand_socket",
                 "local_transform": {
                     "position": {"x": 0.0, "y": 0.0, "z": 0.0},

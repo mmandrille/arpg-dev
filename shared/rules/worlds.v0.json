@@ -366,6 +366,30 @@
           "position": { "x": 4, "y": 13 }
         }
       ]
+    },
+    "equipment_lab": {
+      "player": { "position": { "x": 2, "y": 5 } },
+      "entities": [
+        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 3, "y": 4 } },
+        { "type": "loot", "item_template_id": "cave_shield", "position": { "x": 4, "y": 4 } },
+        { "type": "loot", "item_template_id": "cave_greatsword", "position": { "x": 5, "y": 4 } },
+        { "type": "loot", "item_template_id": "cave_bow", "position": { "x": 6, "y": 4 } },
+        { "type": "loot", "item_template_id": "cave_helm", "position": { "x": 3, "y": 6 } },
+        { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 4, "y": 6 } },
+        { "type": "loot", "item_template_id": "cave_gloves", "position": { "x": 5, "y": 6 } },
+        { "type": "loot", "item_template_id": "cave_belt", "position": { "x": 6, "y": 6 } },
+        { "type": "loot", "item_template_id": "cave_boots", "position": { "x": 7, "y": 6 } },
+        { "type": "loot", "item_template_id": "cave_ring", "position": { "x": 8, "y": 4 } },
+        { "type": "loot", "item_template_id": "cave_ring", "position": { "x": 8, "y": 6 } },
+        { "type": "loot", "item_template_id": "cave_amulet", "position": { "x": 9, "y": 5 } },
+        { "type": "loot", "item_def_id": "red_potion", "position": { "x": 10, "y": 4 } },
+        { "type": "loot", "item_def_id": "red_potion", "position": { "x": 10, "y": 5 } },
+        { "type": "loot", "item_def_id": "red_potion", "position": { "x": 10, "y": 6 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+      ]
     }
   }
 }

@@ -1,0 +1,122 @@
+client/tests/test_golden.gd
+  s_9de01dec665089::t_bcc2c772a69882 278-308
+docs/specs/v23_spec-item-templates-and-rolled-drops.md
+  s_9de01dec665089::t_a6f3600c7152ce 3
+  s_a93206e6bfe861::t_5b58d43986f160 1-2,4-253
+shared/golden/item_rolls.v0.schema.json
+  s_9de01dec665089::t_844048cb2b0462 1-60
+shared/rules/item_templates.v0.schema.json
+  s_9de01dec665089::t_844048cb2b0462 1-86
+shared/rules/loot_tables.v0.json
+  s_9de01dec665089::t_844048cb2b0462 25-29
+shared/assets/item_presentations.v0.json
+  s_9de01dec665089::t_0bc1697f470230 8-11
+tools/bot/run.py
+  s_9de01dec665089::t_63a0ea7ee15160 92
+  s_9de01dec665089::t_1827b435d10b9c 919-926
+  s_9de01dec665089::t_e1f6ddb88e3509 1281-1282,1447-1455
+  s_9de01dec665089::t_a2cb6223328d1b 323-326
+  s_9de01dec665089::t_c76239d3ea9783 1216-1247
+  s_9de01dec665089::t_32a288bd02a3f1 1304
+server/internal/realtime/hub.go
+  s_9de01dec665089::t_514d5a50940e8c 100-104
+server/internal/realtime/runner.go
+  s_9de01dec665089::t_5ae272434a9084 423-431,440
+  s_9de01dec665089::t_40003fef7da3b3 475-482
+shared/protocol/examples/state_delta.json
+  s_9de01dec665089::t_df56e1052e1cad 6,11
+shared/protocol/examples/session_snapshot.json
+  s_9de01dec665089::t_df56e1052e1cad 8-12
+server/internal/game/rules.go
+  s_9de01dec665089::t_1ce5b6cb9ab231 439-452,628-634,636,639,646,652,655-656,661,667-670,673,677-686
+  s_9de01dec665089::t_3db011e1abdbae 19-21,108-137,183-185
+  s_9de01dec665089::t_76803cda2ddc5f 320-382
+  s_9de01dec665089::t_47109140e1477a 8,453
+tools/validate_shared.py
+  s_9de01dec665089::t_9a2fc6a273c458 731-736,738,757-758,760
+  s_9de01dec665089::t_3a5080e4859c2c 245-295
+  s_9de01dec665089::t_44d0976ffafea9 401-410
+  s_9de01dec665089::t_03d8bf5cb0661b 117,137
+  s_9de01dec665089::t_1119be2cb600a2 665-701
+client/scripts/main.gd
+  s_9de01dec665089::t_725e2df0acd618 403-405
+shared/rules/item_templates.v0.json
+  s_9de01dec665089::t_844048cb2b0462 1-30
+shared/rules/loot_tables.v0.schema.json
+  s_9de01dec665089::t_844048cb2b0462 28,32,34-38
+server/internal/game/types.go
+  s_9de01dec665089::t_f0c387bb64af7e 25-35,40-71
+  s_9de01dec665089::t_10df23dba1714d 74-87
+server/internal/game/sim.go
+  s_9de01dec665089::t_eb00b07cfffb4e 1172,1176
+  s_9de01dec665089::t_54f2f44c1e8e1e 284-331
+  s_9de01dec665089::t_abb4ce185647b9 1087-1088,1092,1096-1100,2163-2164,2167-2168,2171,2231-2243,2356-2361
+  s_9de01dec665089::t_ae7580f3c6913d 797,823-833,868-871
+  s_9de01dec665089::t_5c5a6c9f41fb5c 2075-2144,2155-2156,2159,2179-2188,2196-2204,2207,2211-2222,2225-2228
+  s_9de01dec665089::t_f4b604efab5db7 2544-2552,2565,2571-2574
+  s_9de01dec665089::t_db06e72e7adc11 4,69,92-96,257-261,273
+server/internal/replay/replay.go
+  s_9de01dec665089::t_514d5a50940e8c 289-293
+docs/plans/v23_2026-06-07-item-templates-and-rolled-drops.md
+  s_9de01dec665089::t_b6777ee95c02c6 206-211
+  s_9de01dec665089::t_abe4ce50a05877 1-2,4-76,86-98,107-119,128-139,146-163,171-183,190-205,212-223,227-233,242-257
+  s_9de01dec665089::t_93b70c20b9664c 77-85
+  s_9de01dec665089::t_a6f3600c7152ce 3
+  s_9de01dec665089::t_7679fec171d75c 120-127,140-145
+  s_9de01dec665089::t_d5ab97efcba830 234-241
+  s_9de01dec665089::t_62ee8d83366abb 164-170
+  s_9de01dec665089::t_53b7b8e6cf5946 224-226
+  s_9de01dec665089::t_ae81b0cbf31ea7 184-189
+  s_9de01dec665089::t_4971a9aed57953 99-106
+shared/protocol/state_delta.v1.schema.json
+  s_9de01dec665089::t_df56e1052e1cad 36-41,56-61,66-84
+client/scripts/inventory_panel.gd
+  s_9de01dec665089::t_ed0b0f1c8188a1 13,78,307,435,441,455-461,465-468,471-472,477-479,506-521
+tools/bot/scenarios/16_rolled_drops.json
+  s_9de01dec665089::t_a73b6ffcafb5cd 1-41
+shared/golden/item_rolls.json
+  s_9de01dec665089::t_844048cb2b0462 1-12,15-20,22-24,27,29-36
+  s_9de01dec665089::t_e00110f663bc07 13-14
+  s_9de01dec665089::t_66612ec85cb039 21,25-26,28
+shared/assets/item_visuals.v0.json
+  s_9de01dec665089::t_0bc1697f470230 14-23
+shared/protocol/session_snapshot.v1.schema.json
+  s_9de01dec665089::t_df56e1052e1cad 42-47,62-67,72-90
+docs/PROGRESS.md
+  s_9de01dec665089::t_e428979849c30e 566,640-643,649-651
+  s_9de01dec665089::t_d79d6e7a2fae43 14-15,84,501-525
+  s_a93206e6bfe861::t_5b58d43986f160 41
+  s_9de01dec665089::t_a6f3600c7152ce 6
+server/internal/game/game_test.go
+  s_9de01dec665089::t_d1e42db19a825d 2775-2798
+  s_9de01dec665089::t_c80385d66118de 696-822
+  s_9de01dec665089::t_b76fb77b73e254 661,667-691
+shared/rules/monsters.v0.json
+  s_9de01dec665089::t_844048cb2b0462 47
+server/internal/store/store_test.go
+  s_9de01dec665089::t_707151aebc0935 124,126,152,155-169
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8bd4a813d2a30559c743f388fc1a7e901295268d",
+  "prompts": {},
+  "sessions": {
+    "s_9de01dec665089": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea006-5c3d-7190-8d89-11f548d888e6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a93206e6bfe861": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9f79-19e5-76a1-af33-2503df5f4ab9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

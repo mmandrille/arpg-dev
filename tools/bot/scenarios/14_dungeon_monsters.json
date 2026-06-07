@@ -12,7 +12,7 @@
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "event_seen", "event_type": "player_damaged" },
     { "type": "event_seen", "event_type": "monster_killed" },
-    { "type": "monster_killed_in_attacks", "monster_def_id": "dungeon_mob", "max_attacks": 8 }
+    { "type": "monster_killed_in_attacks", "monster_def_id": "dungeon_mob", "max_attacks": 12 }
   ],
   "visual": {
     "camera": { "x": 16, "y": 10, "zoom": 1.1 }

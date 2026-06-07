@@ -1,0 +1,89 @@
+shared/rules/monsters.v0.schema.json
+  s_288cf3c2de6916::t_0b488b6f150bdc 31-40
+server/internal/game/game_test.go
+  s_288cf3c2de6916::t_a542d5bc216841 1941-1977
+  s_288cf3c2de6916::t_0169bec11cc0ca 1994,1998
+  s_288cf3c2de6916::t_77f597f5cf1981 2469-2479
+  s_288cf3c2de6916::t_35f8eba0f5ff44 2428-2439
+  s_288cf3c2de6916::t_f44384a2ccb02e 2016-2019,2021,2041
+  s_288cf3c2de6916::t_9efcb726d5ba57 1980-1985
+  s_288cf3c2de6916::t_0d286fceabda8c 1978-1979,1986-1993,1995-1997,1999-2015,2020,2022-2040,2042-2054
+  s_288cf3c2de6916::t_6fe872925eaf2e 2440-2468
+server/internal/game/sim.go
+  s_288cf3c2de6916::t_ef025ad4f8862a 84-85,398,536-553,1565-1602
+shared/rules/loot_tables.v0.json
+  s_288cf3c2de6916::t_0b488b6f150bdc 24-25
+client/tests/test_golden.gd
+  s_288cf3c2de6916::t_a9e0fc03e72b04 249-268,278
+shared/golden/dungeon_monster_attack.json
+  s_288cf3c2de6916::t_0b488b6f150bdc 1-2,4-5,9
+  s_288cf3c2de6916::t_54bd0a98d7a86e 7-8
+  s_288cf3c2de6916::t_f44384a2ccb02e 6
+  s_288cf3c2de6916::t_55bffe1c6cbe40 3
+tools/validate_shared.py
+  s_288cf3c2de6916::t_af0a9deee43868 271-287,582-602
+  s_288cf3c2de6916::t_b013f9d664fde5 135,327-342,359-365
+docs/specs/v21_spec-dungeon-monster-combat.md
+  s_1d7a74c9a6d867::t_25984f020bd666 1-215
+server/internal/game/dungeon_gen.go
+  s_288cf3c2de6916::t_d7d5c008c6c71b 16,35-39,67-69,86-88,104-111,173-227
+make/agents.mk
+  s_288cf3c2de6916::t_b4b3a47991e1c1 4
+  s_288cf3c2de6916::t_155c6d3f5d005d 3,5
+shared/rules/dungeon_generation.v0.json
+  s_288cf3c2de6916::t_0b488b6f150bdc 16-22
+tools/bot/run.py
+  s_288cf3c2de6916::t_74fbb0c7b25f32 722,727-729,738,746,748-749
+  s_288cf3c2de6916::t_a8d80a241990db 1029-1033
+  s_288cf3c2de6916::t_54028344836cfa 711,713-721,723-726,730-733,745,747
+  s_288cf3c2de6916::t_2ecb3b9c8b5ebc 422-447
+docs/plans/v21_2026-06-06-dungeon-monster-combat.md
+  s_288cf3c2de6916::t_8c4693e6d8cbf3 62,94-101
+  s_288cf3c2de6916::t_604e5503361f35 56-60
+  s_288cf3c2de6916::t_553434085956ec 1-55,61,63-75,82-93,102-190
+  s_288cf3c2de6916::t_afff5602142820 76-81
+server/internal/game/rules.go
+  s_288cf3c2de6916::t_fb6f5bebbdc1a5 53,75-82,123-124,297-306,313-315,397,428-449,462
+tools/bot/scenarios/13_teleporter_lab.json
+  s_288cf3c2de6916::t_0e75a2ee6fabfb 9,12
+  s_288cf3c2de6916::t_6bf809f426531a 10,16
+tools/bot/scenarios/12_dungeon_levels.json
+  s_288cf3c2de6916::t_1d8b751dba9fcc 8-10,12
+shared/rules/loot_tables.v0.schema.json
+  s_288cf3c2de6916::t_7704623b5e18e0 39-40
+shared/rules/dungeon_generation.v0.schema.json
+  s_288cf3c2de6916::t_0b488b6f150bdc 13,51-59
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_288cf3c2de6916::t_dfb0d413537ba7 1-22
+shared/rules/monsters.v0.json
+  s_288cf3c2de6916::t_0b488b6f150bdc 43-53
+shared/golden/dungeon_monster_attack.v0.schema.json
+  s_288cf3c2de6916::t_0b488b6f150bdc 1-25
+scripts/bot_local.sh
+  s_288cf3c2de6916::t_6bf8fb9f09d3c3 11-16,41-73
+  s_288cf3c2de6916::t_155c6d3f5d005d 1-10,17-40,74-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6ecfe1c4baf5baf3409167279f01eac562d53dd7",
+  "prompts": {},
+  "sessions": {
+    "s_1d7a74c9a6d867": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36b9a54e-79d4-4ceb-b66e-4e422761000d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_288cf3c2de6916": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9e2a-9606-7332-ac08-25a0a5c30d25",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

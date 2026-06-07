@@ -9,10 +9,14 @@ const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 var inventory: Array = []
 var item_rules: Dictionary = {}
 var item_presentations: Dictionary = {}
+var progression: Dictionary = {}
+var progression_rules: Dictionary = {}
 var _slots: Array = []
 var _slot_items: Array = []
 var _interactive: bool = true
 var _panel: PanelContainer
+var _xp_bar: ProgressBar
+var _xp_label: Label
 
 
 class ConsumableSlotButton:
@@ -59,6 +63,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_load_item_rules()
 	_load_item_presentations()
+	_load_progression_rules()
 	_slot_items.resize(SLOT_COUNT)
 	for i in SLOT_COUNT:
 		_slot_items[i] = {}
@@ -77,6 +82,11 @@ func set_inventory_state(next_inventory: Array) -> void:
 		inventory.append((item as Dictionary).duplicate(true))
 	_prune_slots()
 	_render()
+
+
+func set_character_progression(next_progression: Dictionary) -> void:
+	progression = next_progression.duplicate(true)
+	_render_xp()
 
 
 func use_slot(slot_index: int) -> void:
@@ -114,7 +124,19 @@ func get_debug_state() -> Dictionary:
 				"item_def_id": item.get("item_def_id", ""),
 				"item_instance_id": item.get("item_instance_id", ""),
 			})
-	return {"assigned_slots": assigned}
+	var level := int(progression.get("level", 1))
+	var xp := int(progression.get("experience", 0))
+	var remaining = progression.get("experience_to_next_level", null)
+	return {
+		"assigned_slots": assigned,
+		"xp_bar": {
+			"level": level,
+			"experience": xp,
+			"experience_to_next_level": remaining,
+			"progress": _xp_progress(level, xp, remaining),
+			"label": _xp_label.text if _xp_label != null else "",
+		},
+	}
 
 
 func get_slot_screen_center(slot_index: int) -> Vector2:
@@ -131,6 +153,8 @@ func _sync_viewport_size() -> void:
 	size = get_viewport_rect().size
 	if _panel != null:
 		_position_panel()
+	if _xp_bar != null:
+		_position_xp_bar()
 
 
 func _build() -> void:
@@ -161,6 +185,7 @@ func _build() -> void:
 		_slots.append(slot)
 
 	_position_panel()
+	_build_xp_bar()
 	_render()
 
 
@@ -173,6 +198,37 @@ func _position_panel() -> void:
 	_panel.size = Vector2(panel_w, 64)
 
 
+func _build_xp_bar() -> void:
+	_xp_bar = ProgressBar.new()
+	_xp_bar.min_value = 0.0
+	_xp_bar.max_value = 1.0
+	_xp_bar.step = 0.001
+	_xp_bar.show_percentage = false
+	_xp_bar.add_theme_stylebox_override("background", _xp_bar_bg_style())
+	_xp_bar.add_theme_stylebox_override("fill", _xp_bar_fill_style())
+	add_child(_xp_bar)
+	_xp_label = Label.new()
+	_xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_xp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_xp_label.add_theme_color_override("font_color", Color("#f0dfbb"))
+	_xp_label.add_theme_font_size_override("font_size", 9)
+	_xp_bar.add_child(_xp_label)
+	_position_xp_bar()
+	_render_xp()
+
+
+func _position_xp_bar() -> void:
+	if _xp_bar == null:
+		return
+	var vp := get_viewport_rect().size
+	var panel_w := float(SLOT_COUNT * 58)
+	_xp_bar.position = Vector2((vp.x - panel_w) * 0.5, vp.y - 12)
+	_xp_bar.size = Vector2(panel_w, 8)
+	if _xp_label != null:
+		_xp_label.position = Vector2.ZERO
+		_xp_label.size = _xp_bar.size
+
+
 func _render() -> void:
 	for i in SLOT_COUNT:
 		var slot: ConsumableSlotButton = _slots[i]
@@ -183,6 +239,18 @@ func _render() -> void:
 		slot.text = HOTKEY_LABELS[i]
 		slot.tooltip_text = _tooltip(item)
 		slot.queue_redraw()
+	_render_xp()
+
+
+func _render_xp() -> void:
+	if _xp_bar == null:
+		return
+	var level := int(progression.get("level", 1))
+	var xp := int(progression.get("experience", 0))
+	var remaining = progression.get("experience_to_next_level", null)
+	_xp_bar.value = _xp_progress(level, xp, remaining)
+	if _xp_label != null:
+		_xp_label.text = "Level %d" % level if remaining == null else "%d XP" % xp
 
 
 func _handle_drop_on_slot(slot_index: int, data: Variant) -> void:
@@ -218,6 +286,24 @@ func _is_consumable(item: Dictionary) -> bool:
 	var def_id := str(item.get("item_def_id", ""))
 	var def: Dictionary = item_rules.get(def_id, {})
 	return str(def.get("category", "")) == "consumable"
+
+
+func _xp_progress(level: int, xp: int, remaining) -> float:
+	if remaining == null:
+		return 1.0
+	var prev_threshold := 0
+	var next_threshold := xp + int(remaining)
+	var levels: Array = progression_rules.get("experience_curve", {}).get("levels", [])
+	for row in levels:
+		var row_level := int(row.get("level", 0))
+		var threshold := int(row.get("next_level_total_xp", 0))
+		if row_level == level - 1:
+			prev_threshold = threshold
+		if row_level == level:
+			next_threshold = threshold
+	var needed = max(1, next_threshold - prev_threshold)
+	var current = clamp(xp - prev_threshold, 0, needed)
+	return float(current) / float(needed)
 
 
 func _tooltip(item: Dictionary) -> String:
@@ -280,6 +366,23 @@ func _slot_style(hover: bool) -> StyleBoxFlat:
 	return s
 
 
+func _xp_bar_bg_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.025, 0.022, 0.018, 0.90)
+	s.border_color = Color("#3f3423")
+	s.border_width_left = 1
+	s.border_width_top = 1
+	s.border_width_right = 1
+	s.border_width_bottom = 1
+	return s
+
+
+func _xp_bar_fill_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color("#c9a227")
+	return s
+
+
 func _load_item_rules() -> void:
 	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/items.v0.json")
 	var parsed = _read_json(path)
@@ -292,6 +395,13 @@ func _load_item_presentations() -> void:
 	var parsed = _read_json(path)
 	if typeof(parsed) == TYPE_DICTIONARY:
 		item_presentations = parsed.get("items", {})
+
+
+func _load_progression_rules() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/character_progression.v0.json")
+	var parsed = _read_json(path)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		progression_rules = parsed
 
 
 func _read_json(path: String) -> Variant:

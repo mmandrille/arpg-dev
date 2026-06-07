@@ -9,7 +9,7 @@ const STEP_TYPES_WAIT := [
 	"wait_inventory_count", "wait_loot_item", "wait_loot_count",
 	"wait_player_near", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
-	"wait_settings_panel", "wait_pause_menu",
+	"wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -18,14 +18,15 @@ const STEP_TYPES_ASSERT := [
 	"assert_hotbar_assigned", "assert_player_hp", "assert_main_menu_visible",
 	"assert_character_panel_visible", "assert_settings_panel_visible",
 	"assert_pause_menu_visible", "assert_session_changed",
-	"assert_player_position_unchanged",
+	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
+	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_floor",
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_outside",
 	"assign_hotbar_slot", "double_click_bag_item", "click_menu_button",
 	"enter_character_name", "select_character", "select_window_size",
-	"remember_session", "remember_player_position",
+	"remember_session", "remember_player_position", "click_stat_button",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -45,6 +46,9 @@ const ALL_STEP_TYPES: Array = [
 	"click_menu_button", "enter_character_name", "select_character",
 	"select_window_size", "remember_session", "assert_session_changed",
 	"remember_player_position", "assert_player_position_unchanged",
+	"assert_character_stats_panel_visible", "wait_character_progression",
+	"assert_character_progression", "click_stat_button",
+	"assert_stat_button_enabled", "assert_xp_bar",
 ]
 
 var scenario: Dictionary = {}
@@ -164,6 +168,8 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return bool(state.get("settings_panel_visible", false))
 		"wait_pause_menu":
 			return bool(state.get("pause_menu_visible", false))
+		"wait_character_progression":
+			return _progression_matches(step, state)
 		"wait_entity":
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
@@ -247,6 +253,14 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_bool_state("assert_settings_panel_visible", "settings_panel_visible", step, state)
 		"assert_pause_menu_visible":
 			return _assert_bool_state("assert_pause_menu_visible", "pause_menu_visible", step, state)
+		"assert_character_stats_panel_visible":
+			return _assert_bool_state("assert_character_stats_panel_visible", "character_stats_panel_visible", step, state)
+		"assert_character_progression":
+			return _assert_character_progression(step, state)
+		"assert_stat_button_enabled":
+			return _assert_stat_button_enabled(step, state)
+		"assert_xp_bar":
+			return _assert_xp_bar(step, state)
 		"assert_session_changed":
 			var remembered_session := str(_memory.get("session_id", ""))
 			var current_session := str(state.get("current_session_id", ""))
@@ -371,6 +385,88 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 	return true
 
 
+func _assert_character_progression(step: Dictionary, state: Dictionary) -> bool:
+	if _progression_matches(step, state):
+		return true
+	var progression: Dictionary = state.get("character_progression", {})
+	_fail("assert_character_progression failed: want=%s got=%s step=%d scenario=%s" % [
+		str(_progression_expectation(step)), str(progression), _step_index, str(scenario.get("id", "?"))
+	])
+	return false
+
+
+func _progression_matches(step: Dictionary, state: Dictionary) -> bool:
+	var progression: Dictionary = state.get("character_progression", {})
+	if progression.is_empty():
+		return false
+	for key in ["level", "experience", "unspent_stat_points"]:
+		if step.has(key) and int(progression.get(key, -999999)) != int(step.get(key, 0)):
+			return false
+	var base: Dictionary = progression.get("base_stats", {})
+	for stat in ["str", "dex", "vit", "magic"]:
+		if step.has(stat) and int(base.get(stat, -999999)) != int(step.get(stat, 0)):
+			return false
+	if step.has("derived_stats"):
+		var expected: Dictionary = step.get("derived_stats", {})
+		var derived: Dictionary = progression.get("derived_stats", {})
+		for key in expected.keys():
+			if not _float_close(float(derived.get(key, -999999.0)), float(expected[key]), float(step.get("tolerance", 0.001))):
+				return false
+	if step.has("player_max_hp") and int(state.get("player_max_hp", -999999)) != int(step.get("player_max_hp", 0)):
+		return false
+	return true
+
+
+func _progression_expectation(step: Dictionary) -> Dictionary:
+	var out := {}
+	for key in ["level", "experience", "unspent_stat_points", "str", "dex", "vit", "magic", "derived_stats", "player_max_hp"]:
+		if step.has(key):
+			out[key] = step[key]
+	return out
+
+
+func _assert_stat_button_enabled(step: Dictionary, state: Dictionary) -> bool:
+	var stat := str(step.get("stat", ""))
+	var want := bool(step.get("enabled", true))
+	var panel: Dictionary = state.get("character_stats_panel", {})
+	var buttons: Dictionary = panel.get("stat_buttons", {})
+	var button: Dictionary = buttons.get(stat, {})
+	var got := bool(button.get("enabled", false))
+	if want != got:
+		_fail("assert_stat_button_enabled failed: stat=%s want=%s got=%s panel=%s step=%d scenario=%s" % [
+			stat, want, got, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
+func _assert_xp_bar(step: Dictionary, state: Dictionary) -> bool:
+	var bar: Dictionary = state.get("consumable_bar", {})
+	var xp_bar: Dictionary = bar.get("xp_bar", {})
+	for key in ["level", "experience"]:
+		if step.has(key) and int(xp_bar.get(key, -999999)) != int(step.get(key, 0)):
+			_fail("assert_xp_bar failed: %s want=%s got=%s xp_bar=%s step=%d scenario=%s" % [
+				key, str(step.get(key, "")), str(xp_bar.get(key, "")), str(xp_bar),
+				_step_index, str(scenario.get("id", "?"))
+			])
+			return false
+	if step.has("progress_min") and float(xp_bar.get("progress", -1.0)) < float(step.get("progress_min", 0.0)):
+		_fail("assert_xp_bar failed: progress below min xp_bar=%s step=%d scenario=%s" % [
+			str(xp_bar), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("progress_max") and float(xp_bar.get("progress", 2.0)) > float(step.get("progress_max", 1.0)):
+		_fail("assert_xp_bar failed: progress above max xp_bar=%s step=%d scenario=%s" % [
+			str(xp_bar), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
+func _float_close(got: float, want: float, tolerance: float) -> bool:
+	return absf(got - want) <= tolerance
+
+
 func _inventory_count(state: Dictionary, item_def_id: String) -> int:
 	var inv: Array = state.get("inventory", [])
 	if item_def_id == "":
@@ -440,6 +536,12 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "min_count=%s" % str(step.get("min_count", ""))
 		"assert_player_hp":
 			return "hp=%s" % str(step.get("equals", ""))
+		"wait_character_progression", "assert_character_progression":
+			return "progression=%s" % str(_progression_expectation(step))
+		"assert_stat_button_enabled", "click_stat_button":
+			return "stat=%s" % str(step.get("stat", ""))
+		"assert_xp_bar":
+			return "xp_bar=%s" % str(step)
 		"click_menu_button":
 			return "button=%s" % str(step.get("button", ""))
 		"enter_character_name":
@@ -480,6 +582,8 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 	if stype in ["wait_inventory_count", "wait_inventory_item", "assert_inventory_count"]:
 		var def_id := str(step.get("item_def_id", ""))
 		parts.append("inventory_%s=%d" % [def_id, _inventory_count(state, def_id)])
+	if stype == "wait_character_progression":
+		parts.append("progression=%s" % str(state.get("character_progression", {})))
 	if stype == "wait_loot_count":
 		parts.append("loot_count=%d" % (state.get("loot_ids", []) as Array).size())
 	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):
@@ -568,6 +672,19 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "press_key":
 		if str(step.get("keycode", "")) == "":
 			return "client_steps[%d] (%s) requires keycode" % [index, stype]
+	if stype in ["click_stat_button", "assert_stat_button_enabled"]:
+		if str(step.get("stat", "")) == "":
+			return "client_steps[%d] (%s) requires stat" % [index, stype]
+	if stype == "assert_stat_button_enabled":
+		if not step.has("enabled"):
+			return "client_steps[%d] (%s) requires enabled" % [index, stype]
+	if stype in ["wait_character_progression", "assert_character_progression"]:
+		var has_any := false
+		for key in ["level", "experience", "unspent_stat_points", "str", "dex", "vit", "magic", "derived_stats", "player_max_hp"]:
+			if step.has(key):
+				has_any = true
+		if not has_any:
+			return "client_steps[%d] (%s) requires at least one progression expectation" % [index, stype]
 	if stype == "click_menu_button":
 		if str(step.get("button", "")) == "":
 			return "client_steps[%d] (%s) requires button" % [index, stype]

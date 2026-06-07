@@ -87,17 +87,55 @@ func (v ItemView) RollPayload() *ItemRollPayload {
 	}
 }
 
+// BaseStatsView is the protocol view of allocated base stats.
+type BaseStatsView struct {
+	Str   int `json:"str"`
+	Dex   int `json:"dex"`
+	Vit   int `json:"vit"`
+	Magic int `json:"magic"`
+}
+
+// DerivedStatsView is the protocol view of stat-derived combat/display values.
+type DerivedStatsView struct {
+	DamageMin     float64 `json:"damage_min"`
+	DamageMax     float64 `json:"damage_max"`
+	Armor         float64 `json:"armor"`
+	AttackSpeed   float64 `json:"attack_speed"`
+	HitChance     float64 `json:"hit_chance"`
+	CritChance    float64 `json:"crit_chance"`
+	CritDamage    float64 `json:"crit_damage"`
+	MovementSpeed float64 `json:"movement_speed"`
+	MaxHP         float64 `json:"max_hp"`
+	MaxMana       float64 `json:"max_mana"`
+}
+
+// CharacterProgressionView is the protocol view of durable character XP/stat
+// progression plus derived display stats.
+type CharacterProgressionView struct {
+	Level                 int              `json:"level"`
+	Experience            int              `json:"experience"`
+	ExperienceToNextLevel *int             `json:"experience_to_next_level"`
+	LevelCap              int              `json:"level_cap"`
+	UnspentStatPoints     int              `json:"unspent_stat_points"`
+	BaseStats             BaseStatsView    `json:"base_stats"`
+	DerivedStats          DerivedStatsView `json:"derived_stats"`
+}
+
 // Event is an authoritative event emitted by the sim.
 type Event struct {
-	EventType      string `json:"event_type"`
-	EntityID       string `json:"entity_id,omitempty"`
-	CorrelationID  string `json:"correlation_id,omitempty"`
-	Damage         *int   `json:"damage,omitempty"`
-	Heal           *int   `json:"heal,omitempty"`
-	ItemInstanceID string `json:"item_instance_id,omitempty"`
-	Level          *int   `json:"level,omitempty"`
-	FromLevel      *int   `json:"from_level,omitempty"`
-	ToLevel        *int   `json:"to_level,omitempty"`
+	EventType         string `json:"event_type"`
+	EntityID          string `json:"entity_id,omitempty"`
+	CorrelationID     string `json:"correlation_id,omitempty"`
+	Damage            *int   `json:"damage,omitempty"`
+	Heal              *int   `json:"heal,omitempty"`
+	ItemInstanceID    string `json:"item_instance_id,omitempty"`
+	Level             *int   `json:"level,omitempty"`
+	FromLevel         *int   `json:"from_level,omitempty"`
+	ToLevel           *int   `json:"to_level,omitempty"`
+	Amount            *int   `json:"amount,omitempty"`
+	TotalExperience   *int   `json:"total_experience,omitempty"`
+	Stat              string `json:"stat,omitempty"`
+	UnspentStatPoints *int   `json:"unspent_stat_points,omitempty"`
 }
 
 // TeleporterDiscoveryView is the protocol view of a generated dungeon level's
@@ -117,19 +155,21 @@ type Snapshot struct {
 	Inventory             []ItemView                `json:"inventory"`
 	Equipped              map[string]*string        `json:"equipped"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
+	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	RecentEvents          []Event                   `json:"recent_events"`
 }
 
 // Change operation names (the state_delta ops).
 const (
-	OpEntitySpawn               = "entity_spawn"
-	OpEntityUpdate              = "entity_update"
-	OpEntityRemove              = "entity_remove"
-	OpInventoryAdd              = "inventory_add"
-	OpInventoryUpdate           = "inventory_update"
-	OpInventoryRemove           = "inventory_remove"
-	OpEquippedUpdate            = "equipped_update"
-	OpTeleporterDiscoveryUpdate = "teleporter_discovery_update"
+	OpEntitySpawn                = "entity_spawn"
+	OpEntityUpdate               = "entity_update"
+	OpEntityRemove               = "entity_remove"
+	OpInventoryAdd               = "inventory_add"
+	OpInventoryUpdate            = "inventory_update"
+	OpInventoryRemove            = "inventory_remove"
+	OpEquippedUpdate             = "equipped_update"
+	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
+	OpCharacterProgressionUpdate = "character_progression_update"
 )
 
 // Change is one ordered authoritative change within a tick. It marshals to
@@ -144,6 +184,7 @@ type Change struct {
 	ItemInstanceID *string // for equipped_update; nil marshals as null
 	Level          int
 	Discovered     bool
+	Progression    *CharacterProgressionView
 }
 
 // MarshalJSON renders the change as the precise object for its op.
@@ -185,6 +226,11 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Level      int    `json:"level"`
 			Discovered bool   `json:"discovered"`
 		}{c.Op, c.Level, c.Discovered})
+	case OpCharacterProgressionUpdate:
+		return json.Marshal(struct {
+			Op          string                    `json:"op"`
+			Progression *CharacterProgressionView `json:"character_progression"`
+		}{c.Op, c.Progression})
 	default:
 		return nil, &json.UnsupportedValueError{Str: "unknown change op: " + c.Op}
 	}

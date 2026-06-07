@@ -13,6 +13,7 @@ Exit code is non-zero if anything fails. Run via `make validate-shared`.
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -113,6 +114,7 @@ def validate_instances(report: Report) -> None:
 def cross_checks(report: Report) -> None:
     print("[3] cross-consistency drift guards")
     combat = load(RULES / "combat.v0.json")
+    character_progression = load(RULES / "character_progression.v0.json")
     items = load(RULES / "items.v0.json")
     item_templates = load(RULES / "item_templates.v0.json")
     treasure_classes = load(RULES / "treasure_classes.v0.json")
@@ -138,6 +140,7 @@ def cross_checks(report: Report) -> None:
     item_rolls_golden = load(GOLDEN / "item_rolls.json")
     treasure_class_rolls_golden = load(GOLDEN / "treasure_class_rolls.json")
     guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
+    character_progression_golden = load(GOLDEN / "character_progression.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -197,6 +200,167 @@ def cross_checks(report: Report) -> None:
         report.fail("retaliation_damage vs monster", "retaliation_damage mismatch")
     else:
         report.ok("retaliation_damage golden matches training_dummy")
+
+    progression_stats = {"str", "dex", "vit", "magic"}
+    derived_keys = {
+        "damage_min",
+        "damage_max",
+        "armor",
+        "attack_speed",
+        "hit_chance",
+        "crit_chance",
+        "crit_damage",
+        "movement_speed",
+        "max_hp",
+        "max_mana",
+    }
+    progression_base_stats = character_progression["base_stats"]
+    if set(progression_base_stats) != progression_stats:
+        report.fail("character_progression base_stats", "must define str/dex/vit/magic exactly")
+    elif any(value < 1 for value in progression_base_stats.values()):
+        report.fail("character_progression base_stats", "all base stats must be >= 1")
+    else:
+        report.ok("character_progression base_stats are valid")
+
+    if character_progression["points_per_level"] <= 0:
+        report.fail("character_progression points_per_level", "must be positive")
+    else:
+        report.ok("character_progression points_per_level is positive")
+
+    curve = character_progression["experience_curve"]
+    levels = curve["levels"]
+    if curve.get("type") != "table":
+        report.fail("character_progression experience_curve", "only table curves are supported")
+    elif len(levels) != character_progression["level_cap"] - 1:
+        report.fail("character_progression experience_curve", "must define one threshold for each level below cap")
+    else:
+        prev_xp = 0
+        failed_curve = False
+        for idx, entry in enumerate(levels, start=1):
+            if entry["level"] != idx:
+                report.fail("character_progression experience_curve", f"expected level {idx}, got {entry['level']}")
+                failed_curve = True
+                break
+            if entry["next_level_total_xp"] <= prev_xp:
+                report.fail("character_progression experience_curve", f"level {idx}: threshold must increase")
+                failed_curve = True
+                break
+            prev_xp = entry["next_level_total_xp"]
+        if not failed_curve:
+            report.ok("character_progression experience_curve is monotonic and complete")
+
+    formula_failed = False
+    for stat_id, formula in character_progression["derived_stats"].items():
+        if stat_id not in derived_keys:
+            report.fail("character_progression derived stat", f"unsupported derived stat {stat_id}")
+            formula_failed = True
+            break
+        if formula.get("type") != "linear":
+            report.fail("character_progression formula", f"{stat_id}: only linear is supported")
+            formula_failed = True
+            break
+        for key in formula:
+            if not key.startswith("per_"):
+                continue
+            if key.removeprefix("per_") not in progression_stats:
+                report.fail("character_progression formula", f"{stat_id}: unsupported coefficient {key}")
+                formula_failed = True
+                break
+        if formula_failed:
+            break
+        if "min" in formula and "max" in formula and formula["max"] < formula["min"]:
+            report.fail("character_progression formula", f"{stat_id}: max must be >= min")
+            formula_failed = True
+            break
+    if not formula_failed:
+        report.ok("character_progression derived stat formulas are bounded and supported")
+
+    def progression_level(experience: int) -> int:
+        level = 1
+        for entry in levels:
+            if experience >= entry["next_level_total_xp"]:
+                level = entry["level"] + 1
+        return min(level, character_progression["level_cap"])
+
+    def previous_threshold(level: int) -> int:
+        if level <= 1:
+            return 0
+        return levels[level - 2]["next_level_total_xp"]
+
+    def next_threshold(level: int) -> int:
+        if level >= character_progression["level_cap"]:
+            return previous_threshold(level)
+        return levels[level - 1]["next_level_total_xp"]
+
+    def evaluate_formula(formula: dict, stats: dict) -> float:
+        value = float(formula["base"])
+        for stat in progression_stats:
+            value += float(formula.get(f"per_{stat}", 0.0)) * float(stats[stat])
+        if "min" in formula:
+            value = max(value, float(formula["min"]))
+        if "max" in formula:
+            value = min(value, float(formula["max"]))
+        return round(value, 6)
+
+    def derived_stats_for(stats: dict) -> dict[str, float]:
+        return {
+            stat_id: evaluate_formula(character_progression["derived_stats"][stat_id], stats)
+            for stat_id in sorted(character_progression["derived_stats"])
+        }
+
+    if character_progression_golden["base_stats"] != progression_base_stats:
+        report.fail("character_progression golden", "base_stats must match character_progression.v0.json")
+    elif character_progression_golden["points_per_level"] != character_progression["points_per_level"]:
+        report.fail("character_progression golden", "points_per_level must match character_progression.v0.json")
+    else:
+        failed_progression_golden = False
+        for case in character_progression_golden["cases"]:
+            stats = dict(case["base_stats"])
+            unspent = int(case["starting_unspent_stat_points"])
+            level = progression_level(int(case["experience"]))
+            gained_levels = max(0, level - 1)
+            unspent += gained_levels * int(character_progression["points_per_level"])
+            if "allocated_stat" in case:
+                stat = case["allocated_stat"]
+                points = int(case.get("allocated_points", 0))
+                if points <= 0 or unspent < points:
+                    report.fail("character_progression golden", f"{case['name']}: invalid allocation")
+                    failed_progression_golden = True
+                    break
+                stats[stat] += points
+                unspent -= points
+            expected = case["expected"]
+            prev = previous_threshold(level)
+            next_total = next_threshold(level)
+            expected_current = int(case["experience"]) - prev
+            expected_next = max(0, next_total - prev)
+            if expected["level"] != level:
+                report.fail("character_progression golden", f"{case['name']}: level mismatch")
+                failed_progression_golden = True
+                break
+            if expected["current_level_xp"] != expected_current or expected["next_level_xp"] != expected_next:
+                report.fail("character_progression golden", f"{case['name']}: XP progress mismatch")
+                failed_progression_golden = True
+                break
+            if expected["unspent_stat_points"] != unspent:
+                report.fail("character_progression golden", f"{case['name']}: unspent points mismatch")
+                failed_progression_golden = True
+                break
+            if expected["base_stats"] != stats:
+                report.fail("character_progression golden", f"{case['name']}: base stats mismatch")
+                failed_progression_golden = True
+                break
+            got_derived = derived_stats_for(stats)
+            for stat_id, want in expected["derived_stats"].items():
+                got = got_derived[stat_id]
+                if not math.isclose(float(want), got, rel_tol=0, abs_tol=0.000001):
+                    report.fail("character_progression golden", f"{case['name']}.{stat_id}: got {got}, want {want}")
+                    failed_progression_golden = True
+                    break
+            if failed_progression_golden:
+                break
+        if not failed_progression_golden:
+            report.ok("character_progression golden matches rules and formulas")
 
     rmin = retaliation_golden["retaliation_damage"]["min"]
     rmax = retaliation_golden["retaliation_damage"]["max"]
@@ -453,6 +617,13 @@ def cross_checks(report: Report) -> None:
 
     # monster -> loot table -> item references resolve.
     for mid, mdef in monsters["monsters"].items():
+        xp_reward = mdef.get("xp_reward", 0)
+        if not isinstance(xp_reward, int) or xp_reward < 0:
+            report.fail("monster xp_reward", f"{mid}: xp_reward must be a non-negative integer")
+        elif mid == dungeon_generation["monster_placement"]["monster_def_id"] and xp_reward <= 0:
+            report.fail("monster xp_reward", f"{mid}: default dungeon monster must award XP")
+        else:
+            report.ok(f"monster {mid} xp_reward is valid")
         behavior = mdef.get("behavior", "static")
         if "attack_damage" in mdef:
             attack_damage = mdef["attack_damage"]

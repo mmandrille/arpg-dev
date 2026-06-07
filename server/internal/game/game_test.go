@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -103,6 +104,146 @@ func TestLoadRules(t *testing.T) {
 	}
 	if r.Interactables["wooden_door"].InitialState != interactableClosed {
 		t.Fatalf("wooden_door = %+v, want initially closed", r.Interactables["wooden_door"])
+	}
+	if r.CharacterProgression.PointsPerLevel != 5 || r.CharacterProgression.LevelCap != 20 {
+		t.Fatalf("character progression = %+v, want points_per_level 5 level_cap 20", r.CharacterProgression)
+	}
+	if r.Monsters["dungeon_mob"].XPReward <= 0 {
+		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
+	}
+}
+
+func TestCharacterProgressionGolden(t *testing.T) {
+	rules := loadRules(t)
+	var golden struct {
+		Cases []struct {
+			Name                      string        `json:"name"`
+			Experience                int           `json:"experience"`
+			BaseStats                 BaseStatsView `json:"base_stats"`
+			StartingUnspentStatPoints int           `json:"starting_unspent_stat_points"`
+			AllocatedStat             string        `json:"allocated_stat"`
+			AllocatedPoints           int           `json:"allocated_points"`
+			Expected                  struct {
+				Level             int              `json:"level"`
+				CurrentLevelXP    int              `json:"current_level_xp"`
+				NextLevelXP       int              `json:"next_level_xp"`
+				UnspentStatPoints int              `json:"unspent_stat_points"`
+				BaseStats         BaseStatsView    `json:"base_stats"`
+				DerivedStats      DerivedStatsView `json:"derived_stats"`
+			} `json:"expected"`
+		} `json:"cases"`
+	}
+	loadGolden(t, "character_progression.json", &golden)
+
+	for _, tc := range golden.Cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			sim := NewSim("sess_progression_"+tc.Name, "01", rules)
+			sim.progression.BaseStats = tc.BaseStats
+			sim.progression.UnspentStatPoints = tc.StartingUnspentStatPoints
+			res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
+			sim.awardExperience(tc.Experience, "corr_progression", &res)
+			if tc.AllocatedStat != "" {
+				sim.handleAllocateStat(Input{
+					MessageID:     "alloc",
+					CorrelationID: "corr_alloc",
+					Type:          "allocate_stat_intent",
+					AllocateStat:  &AllocateStatIntent{Stat: tc.AllocatedStat, Points: tc.AllocatedPoints},
+				}, &res)
+			}
+
+			view := sim.CharacterProgressionView()
+			if view.Level != tc.Expected.Level || view.Experience != tc.Experience || view.UnspentStatPoints != tc.Expected.UnspentStatPoints {
+				t.Fatalf("progression = %+v, want level %d exp %d unspent %d", view, tc.Expected.Level, tc.Experience, tc.Expected.UnspentStatPoints)
+			}
+			if view.ExperienceToNextLevel == nil || *view.ExperienceToNextLevel != tc.Expected.NextLevelXP-tc.Expected.CurrentLevelXP {
+				t.Fatalf("experience_to_next_level = %v, want %d", view.ExperienceToNextLevel, tc.Expected.NextLevelXP-tc.Expected.CurrentLevelXP)
+			}
+			if view.BaseStats != tc.Expected.BaseStats {
+				t.Fatalf("base stats = %+v, want %+v", view.BaseStats, tc.Expected.BaseStats)
+			}
+			assertDerivedStats(t, view.DerivedStats, tc.Expected.DerivedStats)
+		})
+	}
+}
+
+func TestExperienceGainAndLevelUpFromMonsterKill(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	def := rules.Monsters["dungeon_mob"]
+	def.XPReward = 20
+	rules.Monsters["dungeon_mob"] = def
+	sim := NewSim("sess_xp_kill", "01", rules)
+	player := sim.entities[sim.playerID]
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: player.pos.X + 0.5, Y: player.pos.Y},
+		hp:           1,
+		maxHP:        1,
+		monsterDefID: "dungeon_mob",
+		lootTable:    "no_drop",
+	}
+	sim.entities[monster.id] = monster
+
+	res := sim.Tick([]Input{{MessageID: "kill_xp", CorrelationID: "corr_xp", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, res, "kill_xp")
+	if !hasEvent(res, "monster_killed") || !hasEvent(res, "experience_gained") || !hasEvent(res, "character_leveled") {
+		t.Fatalf("missing kill/xp/level events: %+v", res.Events)
+	}
+	view := sim.CharacterProgressionView()
+	if view.Experience != 20 || view.Level != 2 || view.UnspentStatPoints != 5 {
+		t.Fatalf("progression after kill = %+v, want exp 20 level 2 unspent 5", view)
+	}
+	if !hasProgressionChange(res) {
+		t.Fatalf("missing progression update change: %+v", res.Changes)
+	}
+
+	reject := sim.Tick([]Input{{MessageID: "kill_again", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertReject(t, reject, "kill_again", "invalid_target")
+	if sim.CharacterProgressionView().Experience != 20 {
+		t.Fatalf("dead monster granted XP twice: %+v", sim.CharacterProgressionView())
+	}
+}
+
+func TestStatAllocationVitHPAndRejects(t *testing.T) {
+	sim := NewSim("sess_stat_alloc", "01", loadRules(t))
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
+	sim.awardExperience(20, "corr_xp", &res)
+	player := sim.entities[sim.playerID]
+	player.hp = 7
+
+	sim.handleAllocateStat(Input{MessageID: "vit", CorrelationID: "corr_vit", Type: "allocate_stat_intent", AllocateStat: &AllocateStatIntent{Stat: "vit", Points: 1}}, &res)
+	assertAck(t, res, "vit")
+	view := sim.CharacterProgressionView()
+	if view.BaseStats.Vit != 6 || view.UnspentStatPoints != 4 || player.maxHP != 11 || player.hp != 8 {
+		t.Fatalf("vit allocation progression=%+v player=%+v, want vit 6 unspent 4 hp 8/11", view, player)
+	}
+	if !hasEvent(res, "stat_allocated") || !hasProgressionChange(res) {
+		t.Fatalf("missing stat allocation outputs: changes=%+v events=%+v", res.Changes, res.Events)
+	}
+
+	overspend := sim.Tick([]Input{{MessageID: "overspend", Type: "allocate_stat_intent", AllocateStat: &AllocateStatIntent{Stat: "str", Points: 99}}})
+	assertReject(t, overspend, "overspend", "not_enough_stat_points")
+	invalid := sim.Tick([]Input{{MessageID: "invalid_stat", Type: "allocate_stat_intent", AllocateStat: &AllocateStatIntent{Stat: "luck", Points: 1}}})
+	assertReject(t, invalid, "invalid_stat", "invalid_payload")
+}
+
+func TestStrengthDamageBonusAdjustsMeleeDamageRange(t *testing.T) {
+	rules := loadRules(t)
+	base := NewSim("sess_damage_base", "01", rules)
+	strong, err := NewSimWithWorldProgression("sess_damage_str", "01", rules, DefaultWorldID, CharacterProgressionState{
+		Level:             1,
+		Experience:        0,
+		UnspentStatPoints: 0,
+		BaseStats:         BaseStatsView{Str: 10, Dex: 5, Vit: 5, Magic: 5},
+	})
+	if err != nil {
+		t.Fatalf("new strong sim: %v", err)
+	}
+	if got := base.resolvePlayerAttackDamage(); got != (DamageRange{Min: 2, Max: 4}) {
+		t.Fatalf("base damage range = %+v, want {2 4}", got)
+	}
+	if got := strong.resolvePlayerAttackDamage(); got != (DamageRange{Min: 3, Max: 6}) {
+		t.Fatalf("strong damage range = %+v, want {3 6}", got)
 	}
 }
 
@@ -2862,6 +3003,35 @@ func hasEvent(r TickResult, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func hasProgressionChange(r TickResult) bool {
+	for _, change := range r.Changes {
+		if change.Op == OpCharacterProgressionUpdate && change.Progression != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func assertDerivedStats(t *testing.T, got, want DerivedStatsView) {
+	t.Helper()
+	assertFloat := func(name string, got, want float64) {
+		t.Helper()
+		if math.Abs(got-want) > 0.000001 {
+			t.Fatalf("%s = %v, want %v; got=%+v want=%+v", name, got, want, got, want)
+		}
+	}
+	assertFloat("damage_min", got.DamageMin, want.DamageMin)
+	assertFloat("damage_max", got.DamageMax, want.DamageMax)
+	assertFloat("armor", got.Armor, want.Armor)
+	assertFloat("attack_speed", got.AttackSpeed, want.AttackSpeed)
+	assertFloat("hit_chance", got.HitChance, want.HitChance)
+	assertFloat("crit_chance", got.CritChance, want.CritChance)
+	assertFloat("crit_damage", got.CritDamage, want.CritDamage)
+	assertFloat("movement_speed", got.MovementSpeed, want.MovementSpeed)
+	assertFloat("max_hp", got.MaxHP, want.MaxHP)
+	assertFloat("max_mana", got.MaxMana, want.MaxMana)
 }
 
 func assertEventHeal(t *testing.T, r TickResult, eventType string, want int) {

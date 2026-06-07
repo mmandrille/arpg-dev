@@ -27,7 +27,11 @@ func _initialize() -> void:
 	_test_missing_menu_button_rejected()
 	_test_missing_character_name_rejected()
 	_test_missing_window_size_rejected()
+	_test_missing_stat_button_fields_rejected()
+	_test_missing_progression_expectation_rejected()
 	_test_menu_step_types_load()
+	_test_character_stats_step_types_load()
+	_test_character_progression_assertions()
 	_test_timeout_failure_message_format()
 	_test_pass_sentinel_format()
 	_test_fail_sentinel_format()
@@ -135,6 +139,18 @@ func _test_missing_window_size_rejected() -> void:
 	_assert_ne("select_window_size without size rejected", err, "")
 
 
+func _test_missing_stat_button_fields_rejected() -> void:
+	var click_err := BotScenarioRunnerScript.validate_step({"type": "click_stat_button"}, 0)
+	_assert_ne("click_stat_button without stat rejected", click_err, "")
+	var assert_err := BotScenarioRunnerScript.validate_step({"type": "assert_stat_button_enabled", "stat": "vit"}, 0)
+	_assert_ne("assert_stat_button_enabled without enabled rejected", assert_err, "")
+
+
+func _test_missing_progression_expectation_rejected() -> void:
+	var err := BotScenarioRunnerScript.validate_step({"type": "wait_character_progression", "timeout_s": 1.0}, 0)
+	_assert_ne("wait_character_progression without expectations rejected", err, "")
+
+
 func _test_menu_step_types_load() -> void:
 	var data := _make_valid_scenario()
 	data["client_steps"] = [
@@ -150,6 +166,52 @@ func _test_menu_step_types_load() -> void:
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("menu step scenario valid", err, "")
+
+
+func _test_character_stats_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "press_key", "keycode": "KEY_C"},
+		{"type": "assert_character_stats_panel_visible", "visible": true},
+		{"type": "wait_character_progression", "level": 2, "experience": 20, "timeout_s": 1.0},
+		{"type": "assert_character_progression", "level": 2, "unspent_stat_points": 5, "vit": 5},
+		{"type": "assert_stat_button_enabled", "stat": "vit", "enabled": true},
+		{"type": "click_stat_button", "stat": "vit"},
+		{"type": "assert_xp_bar", "level": 2, "experience": 20, "progress_min": 0.0, "progress_max": 0.01},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("character stats step scenario valid", err, "")
+
+
+func _test_character_progression_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "stats_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "assert_character_progression", "level": 2, "experience": 20, "unspent_stat_points": 5, "vit": 5, "derived_stats": {"max_hp": 10}, "player_max_hp": 10},
+			{"type": "assert_stat_button_enabled", "stat": "vit", "enabled": true},
+			{"type": "assert_xp_bar", "level": 2, "experience": 20, "progress_min": 0.0, "progress_max": 0.01},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"character_progression": {
+			"level": 2,
+			"experience": 20,
+			"unspent_stat_points": 5,
+			"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+			"derived_stats": {"max_hp": 10},
+		},
+		"player_max_hp": 10,
+		"character_stats_panel": {"stat_buttons": {"vit": {"enabled": true}}},
+		"consumable_bar": {"xp_bar": {"level": 2, "experience": 20, "progress": 0.0}},
+	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	_assert_true("character progression assertions pass", runner.is_done() and runner.passed())
 
 
 func _test_timeout_failure_message_format() -> void:

@@ -38,7 +38,7 @@ disable-model-invocation: true
 Determine `vN`, codename, and human title from (in order):
 
 1. Uncommitted / staged changes — look for `docs/specs/vN_spec-*.md`, `docs/plans/vN_*.md`.
-2. Current git branch — `feature/<codename>`.
+2. Current git branch (identify codename from branch name, spec, or plan — do not create branches).
 3. [`docs/PROGRESS.md`](../../docs/PROGRESS.md) — active branch, in-progress rows.
 4. Plan checkboxes — all or most marked `[x]`.
 

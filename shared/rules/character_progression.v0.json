@@ -1,0 +1,47 @@
+{
+  "version": 0,
+  "base_stats": {
+    "str": 5,
+    "dex": 5,
+    "vit": 5,
+    "magic": 5
+  },
+  "points_per_level": 5,
+  "level_cap": 20,
+  "experience_curve": {
+    "type": "table",
+    "levels": [
+      { "level": 1, "next_level_total_xp": 20 },
+      { "level": 2, "next_level_total_xp": 50 },
+      { "level": 3, "next_level_total_xp": 90 },
+      { "level": 4, "next_level_total_xp": 140 },
+      { "level": 5, "next_level_total_xp": 200 },
+      { "level": 6, "next_level_total_xp": 270 },
+      { "level": 7, "next_level_total_xp": 350 },
+      { "level": 8, "next_level_total_xp": 440 },
+      { "level": 9, "next_level_total_xp": 540 },
+      { "level": 10, "next_level_total_xp": 650 },
+      { "level": 11, "next_level_total_xp": 770 },
+      { "level": 12, "next_level_total_xp": 900 },
+      { "level": 13, "next_level_total_xp": 1040 },
+      { "level": 14, "next_level_total_xp": 1190 },
+      { "level": 15, "next_level_total_xp": 1350 },
+      { "level": 16, "next_level_total_xp": 1520 },
+      { "level": 17, "next_level_total_xp": 1700 },
+      { "level": 18, "next_level_total_xp": 1890 },
+      { "level": 19, "next_level_total_xp": 2090 }
+    ]
+  },
+  "derived_stats": {
+    "damage_min": { "type": "linear", "base": -1.0, "per_str": 0.2, "min": 0.0 },
+    "damage_max": { "type": "linear", "base": -2.0, "per_str": 0.4, "min": 0.0 },
+    "armor": { "type": "linear", "base": 0.0, "per_vit": 0.2, "min": 0.0 },
+    "attack_speed": { "type": "linear", "base": 1.0, "per_dex": 0.005, "min": 0.5, "max": 2.0 },
+    "hit_chance": { "type": "linear", "base": 1.0, "per_dex": 0.0, "min": 0.05, "max": 1.0 },
+    "crit_chance": { "type": "linear", "base": 0.05, "per_dex": 0.002, "min": 0.0, "max": 0.5 },
+    "crit_damage": { "type": "linear", "base": 1.5, "per_str": 0.005, "min": 1.0 },
+    "movement_speed": { "type": "linear", "base": 1.0, "per_dex": 0.002, "min": 0.5, "max": 2.0 },
+    "max_hp": { "type": "linear", "base": 5.0, "per_vit": 1.0, "min": 1.0 },
+    "max_mana": { "type": "linear", "base": 5.0, "per_magic": 1.0, "min": 0.0 }
+  }
+}

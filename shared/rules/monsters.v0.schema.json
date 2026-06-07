@@ -19,6 +19,7 @@
             "name": { "type": "string" },
             "max_hp": { "type": "integer", "minimum": 1 },
             "loot_table": { "type": "string" },
+            "xp_reward": { "type": "integer", "minimum": 0 },
             "retaliation_damage": {
               "type": "object",
               "required": ["min", "max"],

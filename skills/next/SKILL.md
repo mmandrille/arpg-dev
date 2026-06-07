@@ -76,7 +76,7 @@ Produce a structured brief for the **recommended** slice (or the user's idea if 
 
 **Proposed:** v{N} — `{codename}` — {human title}
 **Baseline:** v{X} `{prior-codename}` complete
-**Branch:** `feature/{codename}`
+**Branch:** current checkout (do not create branches)
 
 ### Why this slice now
 {2–4 sentences: player value, what it proves, why not something else}

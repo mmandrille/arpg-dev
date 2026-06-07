@@ -78,6 +78,7 @@ type wEntity struct {
 	Type      string `json:"type"`
 	ItemDefID string `json:"item_def_id"`
 	HP        *int   `json:"hp"`
+	MaxHP     *int   `json:"max_hp"`
 }
 type wItem struct {
 	ItemInstanceID string `json:"item_instance_id"`
@@ -86,12 +87,13 @@ type wItem struct {
 	Equipped       bool   `json:"equipped"`
 }
 type wChange struct {
-	Op             string   `json:"op"`
-	Entity         *wEntity `json:"entity"`
-	EntityID       string   `json:"entity_id"`
-	Item           *wItem   `json:"item"`
-	Slot           string   `json:"slot"`
-	ItemInstanceID *string  `json:"item_instance_id"`
+	Op                   string                         `json:"op"`
+	Entity               *wEntity                       `json:"entity"`
+	EntityID             string                         `json:"entity_id"`
+	Item                 *wItem                         `json:"item"`
+	Slot                 string                         `json:"slot"`
+	ItemInstanceID       *string                        `json:"item_instance_id"`
+	CharacterProgression *game.CharacterProgressionView `json:"character_progression"`
 }
 type wEvent struct {
 	EventType string `json:"event_type"`
@@ -101,6 +103,12 @@ type wMsg struct {
 	Type    string          `json:"type"`
 	Tick    uint64          `json:"tick"`
 	Payload json.RawMessage `json:"payload"`
+}
+
+type wireDelta struct {
+	Tick    uint64
+	Changes []wChange `json:"changes"`
+	Events  []wEvent  `json:"events"`
 }
 
 func loginAndSession(t *testing.T, srv *httptest.Server) (token, sessionID string) {
@@ -245,6 +253,53 @@ func TestCharacterPersistenceLoadsInventoryAndEquipmentAcrossFreshSessions(t *te
 	if snap.Equipped["weapon"] == nil || *snap.Equipped["weapon"] != itemID {
 		t.Fatalf("fresh persisted equipped weapon = %v, want %s", snap.Equipped["weapon"], itemID)
 	}
+}
+
+func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing.T) {
+	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		dummy := rules.Monsters["training_dummy"]
+		dummy.MaxHP = 1
+		dummy.XPReward = 20
+		dummy.LootTable = "no_drop"
+		dummy.RetaliationDamage = nil
+		rules.Monsters["training_dummy"] = dummy
+	})
+	token, sessionID := loginAndSession(t, srv)
+
+	conn := dialWS(t, srv, token, sessionID)
+	first := readSnapshot(t, conn)
+	if first.CharacterProgression.Level != 1 || first.CharacterProgression.UnspentStatPoints != 0 {
+		t.Fatalf("initial progression = %+v, want level 1 no points", first.CharacterProgression)
+	}
+
+	sendIntent(t, conn, sessionID, first.ServerTick, "msg-prog-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
+	tick := waitStateDeltaTick(t, conn, first.ServerTick)
+	sendIntent(t, conn, sessionID, tick, "msg-prog-kill", "action_intent", map[string]any{"target_id": "1002"})
+	levelDelta := readProgressionDelta(t, conn, 2, 5, 5)
+	if !hasWireEvent(levelDelta, "experience_gained") || !hasWireEvent(levelDelta, "character_leveled") {
+		t.Fatalf("level delta missing XP events: %+v", levelDelta.Events)
+	}
+
+	sendIntent(t, conn, sessionID, levelDelta.Tick, "msg-prog-vit", "allocate_stat_intent", map[string]any{"stat": "vit", "points": 1})
+	allocDelta := readProgressionDelta(t, conn, 2, 4, 6)
+	if !hasWireEvent(allocDelta, "stat_allocated") || !hasWirePlayerMaxHP(allocDelta, 11) {
+		t.Fatalf("allocation delta missing stat event/player max hp: changes=%+v events=%+v", allocDelta.Changes, allocDelta.Events)
+	}
+	_ = conn.Close()
+
+	state := fetchState(t, srv, token, sessionID)
+	assertProgressionSnapshot(t, state, 2, 4, 6)
+
+	resume := dialWS(t, srv, token, sessionID)
+	resumed := readSnapshot(t, resume)
+	assertProgressionSnapshot(t, resumed, 2, 4, 6)
+	_ = resume.Close()
+
+	freshSessionID := createSessionWithToken(t, srv, token, "")
+	fresh := dialWS(t, srv, token, freshSessionID)
+	freshSnap := readSnapshot(t, fresh)
+	assertProgressionSnapshot(t, freshSnap, 2, 4, 6)
+	_ = fresh.Close()
 }
 
 func TestPostResumePickupAllocatesAfterHistoricalEntities(t *testing.T) {
@@ -553,6 +608,66 @@ func readEvent(t *testing.T, conn *websocket.Conn, eventType string) {
 				return
 			}
 		}
+	}
+}
+
+func readProgressionDelta(t *testing.T, conn *websocket.Conn, level, unspent, vit int) wireDelta {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	for {
+		select {
+		case <-deadline:
+			t.Fatalf("no progression delta level=%d unspent=%d vit=%d", level, unspent, vit)
+		default:
+		}
+		m := readMsg(t, conn)
+		if m.Type != "state_delta" {
+			continue
+		}
+		var d wireDelta
+		d.Tick = m.Tick
+		if err := json.Unmarshal(m.Payload, &d); err != nil {
+			t.Fatalf("decode delta: %v", err)
+		}
+		for _, change := range d.Changes {
+			if change.Op != "character_progression_update" || change.CharacterProgression == nil {
+				continue
+			}
+			p := change.CharacterProgression
+			if p.Level == level && p.UnspentStatPoints == unspent && p.BaseStats.Vit == vit {
+				return d
+			}
+		}
+	}
+}
+
+func hasWireEvent(delta wireDelta, eventType string) bool {
+	for _, ev := range delta.Events {
+		if ev.EventType == eventType {
+			return true
+		}
+	}
+	return false
+}
+
+func hasWirePlayerMaxHP(delta wireDelta, maxHP int) bool {
+	for _, change := range delta.Changes {
+		if change.Op == "entity_update" && change.Entity != nil && change.Entity.Type == "player" && change.Entity.MaxHP != nil && *change.Entity.MaxHP == maxHP {
+			return true
+		}
+	}
+	return false
+}
+
+func assertProgressionSnapshot(t *testing.T, snap game.Snapshot, level, unspent, vit int) {
+	t.Helper()
+	p := snap.CharacterProgression
+	if p.Level != level || p.UnspentStatPoints != unspent || p.BaseStats.Vit != vit || int(p.DerivedStats.MaxHP) != 11 {
+		t.Fatalf("snapshot progression = %+v, want level=%d unspent=%d vit=%d max_hp=11", p, level, unspent, vit)
+	}
+	player := findEntity(snap, "1001")
+	if player == nil || player.MaxHP == nil || *player.MaxHP != 11 {
+		t.Fatalf("snapshot player = %+v, want max_hp 11", player)
 	}
 }
 

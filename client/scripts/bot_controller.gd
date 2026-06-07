@@ -125,6 +125,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_select_character(int(action.get("index", 0)))
 		"select_window_size":
 			_do_select_window_size(str(action.get("size", "")))
+		"click_stat_button":
+			_do_click_stat_button(str(action.get("stat", "")))
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -157,6 +159,11 @@ func _do_select_character(index: int) -> void:
 func _do_select_window_size(size: String) -> void:
 	if _main != null and _main.has_method("bot_select_window_size"):
 		_main.bot_select_window_size(size)
+
+
+func _do_click_stat_button(stat: String) -> void:
+	if _main != null and _main.has_method("bot_click_stat_button"):
+		_main.bot_click_stat_button(stat)
 
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
@@ -280,6 +287,7 @@ func _parse_keycode(name: String) -> Key:
 		"KEY_E": return KEY_E
 		"KEY_W": return KEY_W
 		"KEY_A": return KEY_A
+		"KEY_C": return KEY_C
 		"KEY_S": return KEY_S
 		"KEY_D": return KEY_D
 		"KEY_ESCAPE": return KEY_ESCAPE
@@ -305,6 +313,8 @@ func _format_action(action: Dictionary) -> String:
 			return "select_character index=%s" % str(action.get("index", 0))
 		"select_window_size":
 			return "select_window_size %s" % str(action.get("size", ""))
+		"click_stat_button":
+			return "click_stat_button %s" % str(action.get("stat", ""))
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
 				str(action.get("slot_index", "")),

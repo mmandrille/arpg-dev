@@ -9,17 +9,18 @@ import (
 )
 
 const (
-	TypeClientReady = "client_ready"
-	TypeMoveIntent  = "move_intent"
-	TypeMoveTo      = "move_to_intent"
-	TypeAction      = "action_intent"
-	TypeDescend     = "descend_intent"
-	TypeAscend      = "ascend_intent"
-	TypeTeleport    = "teleport_intent"
-	TypeEquip       = "equip_intent"
-	TypeUnequip     = "unequip_intent"
-	TypeDrop        = "drop_intent"
-	TypeUse         = "use_intent"
+	TypeClientReady  = "client_ready"
+	TypeMoveIntent   = "move_intent"
+	TypeMoveTo       = "move_to_intent"
+	TypeAction       = "action_intent"
+	TypeDescend      = "descend_intent"
+	TypeAscend       = "ascend_intent"
+	TypeTeleport     = "teleport_intent"
+	TypeEquip        = "equip_intent"
+	TypeUnequip      = "unequip_intent"
+	TypeDrop         = "drop_intent"
+	TypeUse          = "use_intent"
+	TypeAllocateStat = "allocate_stat_intent"
 )
 
 type envelope struct {
@@ -58,12 +59,16 @@ type (
 	usePayloadWire struct {
 		ItemInstanceID string `json:"item_instance_id"`
 	}
+	allocateStatPayloadWire struct {
+		Stat   string `json:"stat"`
+		Points int    `json:"points"`
+	}
 )
 
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse:
+	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAllocateStat:
 		return true
 	}
 	return false
@@ -138,10 +143,24 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.Use = &game.UseIntent{ItemInstanceID: p.ItemInstanceID}
+	case TypeAllocateStat:
+		var p allocateStatPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || !validStat(p.Stat) || p.Points <= 0 {
+			return in, false
+		}
+		in.AllocateStat = &game.AllocateStatIntent{Stat: p.Stat, Points: p.Points}
 	default:
 		return in, false
 	}
 	return in, true
+}
+
+func validStat(stat string) bool {
+	switch stat {
+	case "str", "dex", "vit", "magic":
+		return true
+	}
+	return false
 }
 
 // DecodeStored recovers a sim Input from a persisted input envelope. The caller

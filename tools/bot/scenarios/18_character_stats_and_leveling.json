@@ -1,0 +1,61 @@
+{
+  "id": "character_stats_and_leveling",
+  "world_id": "dungeon_levels",
+  "title": "Character stats and leveling",
+  "description": "Kill dungeon mobs for XP, level up, allocate VIT, reject overspend, and prove progression persists through replay/reconnect/fresh sessions.",
+  "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 40 },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2 },
+    {
+      "action": "assert_character_progression",
+      "level": 2,
+      "experience": 20,
+      "unspent_stat_points": 5,
+      "vit": 5,
+      "derived_stats": { "max_hp": 10 }
+    },
+    {
+      "action": "allocate_stat",
+      "stat": "vit",
+      "points": 1,
+      "expect_progression": {
+        "level": 2,
+        "experience": 20,
+        "unspent_stat_points": 4,
+        "vit": 6,
+        "derived_stats": { "max_hp": 11 }
+      }
+    },
+    { "action": "allocate_stat", "stat": "str", "points": 99, "expect_reject": "not_enough_stat_points" },
+    {
+      "action": "assert_character_progression",
+      "level": 2,
+      "experience": 20,
+      "unspent_stat_points": 4,
+      "vit": 6,
+      "derived_stats": { "max_hp": 11 }
+    }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": -1 },
+    { "type": "visited_levels_contain", "level": 0 },
+    { "type": "event_seen", "event_type": "experience_gained" },
+    { "type": "event_seen", "event_type": "character_leveled" },
+    { "type": "event_seen", "event_type": "stat_allocated" },
+    { "type": "character_progression", "level": 2, "experience": 20, "unspent_stat_points": 4, "vit": 6, "derived_stats": { "max_hp": 11 } },
+    { "type": "player_max_hp_equals", "equals": 11 }
+  ],
+  "fresh_session_checks": [
+    {
+      "world_id": "dungeon_levels",
+      "steps": [],
+      "assertions": [
+        { "type": "character_progression", "level": 2, "experience": 20, "unspent_stat_points": 4, "vit": 6, "derived_stats": { "max_hp": 11 } },
+        { "type": "player_max_hp_equals", "equals": 11 }
+      ]
+    }
+  ],
+  "visual": {
+    "camera": { "x": 16, "y": 10, "zoom": 1.1 }
+  }
+}

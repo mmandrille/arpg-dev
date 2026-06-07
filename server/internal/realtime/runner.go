@@ -488,11 +488,35 @@ func (r *runner) persistTick(res game.TickResult) {
 					r.log.Error("persist character waypoint", "error", err)
 				}
 			}
+		case game.OpCharacterProgressionUpdate:
+			if c.Progression == nil {
+				continue
+			}
+			if err := r.store.UpsertCharacterProgression(ctx, r.sess.AccountID, storeProgressionFromView(r.sess.AccountID, r.sess.CharacterID, *c.Progression)); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist character progression", "error", err)
+			}
 		}
 	}
 
 	if err := r.store.TouchSession(ctx, r.sess.ID); err != nil {
 		r.metrics.PersistenceErrors.Inc()
+	}
+}
+
+func storeProgressionFromView(accountID, characterID string, view game.CharacterProgressionView) store.CharacterProgression {
+	return store.CharacterProgression{
+		AccountID:         accountID,
+		CharacterID:       characterID,
+		Level:             view.Level,
+		Experience:        view.Experience,
+		UnspentStatPoints: view.UnspentStatPoints,
+		Stats: store.CharacterBaseStats{
+			Str:   view.BaseStats.Str,
+			Dex:   view.BaseStats.Dex,
+			Vit:   view.BaseStats.Vit,
+			Magic: view.BaseStats.Magic,
+		},
 	}
 }
 

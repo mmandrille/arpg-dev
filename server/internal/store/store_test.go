@@ -112,6 +112,40 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 
 	acct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "inv+"+ids.Token()[:12]+"@example.test")
 	char, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), acct.ID, "Hero")
+	defaultProgression := store.CharacterProgressionDefaults{
+		Level:             1,
+		Experience:        0,
+		UnspentStatPoints: 0,
+		Stats:             store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+	}
+	progression, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, char.ID, defaultProgression)
+	if err != nil {
+		t.Fatalf("get or create progression: %v", err)
+	}
+	if progression.Level != 1 || progression.Experience != 0 || progression.UnspentStatPoints != 0 ||
+		progression.Stats.Str != 5 || progression.Stats.Dex != 5 || progression.Stats.Vit != 5 || progression.Stats.Magic != 5 {
+		t.Fatalf("default progression mismatch: %+v", progression)
+	}
+	progression.Level = 2
+	progression.Experience = 25
+	progression.UnspentStatPoints = 5
+	progression.Stats.Vit = 6
+	if err := s.UpsertCharacterProgression(ctx, acct.ID, progression); err != nil {
+		t.Fatalf("upsert progression: %v", err)
+	}
+	loadedProgression, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, char.ID, store.CharacterProgressionDefaults{
+		Level:             9,
+		Experience:        999,
+		UnspentStatPoints: 99,
+		Stats:             store.CharacterBaseStats{Str: 1, Dex: 1, Vit: 1, Magic: 1},
+	})
+	if err != nil {
+		t.Fatalf("reload progression: %v", err)
+	}
+	if loadedProgression.Level != 2 || loadedProgression.Experience != 25 || loadedProgression.UnspentStatPoints != 5 || loadedProgression.Stats.Vit != 6 {
+		t.Fatalf("progression not persisted/stable: %+v", loadedProgression)
+	}
+
 	sess := store.Session{ID: ids.New("sess"), AccountID: acct.ID, CharacterID: char.ID, Seed: "ab", WorldID: "vertical_slice", Status: store.SessionActive}
 	if err := s.CreateSession(ctx, sess); err != nil {
 		t.Fatalf("create session: %v", err)
@@ -177,7 +211,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("waypoints = %+v, want level -1", waypoints)
 	}
 
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
@@ -185,6 +219,14 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	if err := s.AddCharacterWaypoint(ctx, char.ID, -2); err != nil {
 		t.Fatalf("mutate live waypoints: %v", err)
+	}
+	mutatedProgression := loadedProgression
+	mutatedProgression.Level = 3
+	mutatedProgression.Experience = 70
+	mutatedProgression.UnspentStatPoints = 10
+	mutatedProgression.Stats.Str = 7
+	if err := s.UpsertCharacterProgression(ctx, acct.ID, mutatedProgression); err != nil {
+		t.Fatalf("mutate live progression: %v", err)
 	}
 	snap, err := s.LoadSessionStartSnapshot(ctx, sess.ID)
 	if err != nil {
@@ -196,11 +238,24 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(snap.Waypoints) != 1 || snap.Waypoints[0].Level != -1 {
 		t.Fatalf("snapshot waypoints mutated with live state: %+v", snap.Waypoints)
 	}
+	if snap.Progression == nil {
+		t.Fatalf("snapshot progression missing")
+	}
+	if snap.Progression.Level != 2 || snap.Progression.Experience != 25 || snap.Progression.UnspentStatPoints != 5 ||
+		snap.Progression.Stats.Str != 5 || snap.Progression.Stats.Vit != 6 {
+		t.Fatalf("snapshot progression mutated with live state: %+v", snap.Progression)
+	}
 
 	otherAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "other+"+ids.Token()[:12]+"@example.test")
 	otherChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), otherAcct.ID, "Hero")
 	if err := s.SetCharacterItemEquipped(ctx, otherAcct.ID, otherChar.ID, item.ID, "weapon", true); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("equip missing item: expected ErrNotFound, got %v", err)
+	}
+	if _, err := s.GetCharacterProgression(ctx, otherAcct.ID, char.ID); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("foreign get progression: expected ErrNotFound, got %v", err)
+	}
+	if err := s.UpsertCharacterProgression(ctx, otherAcct.ID, mutatedProgression); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("foreign update progression: expected ErrNotFound, got %v", err)
 	}
 
 	if err := s.RemoveCharacterItem(ctx, acct.ID, char.ID, item.ID); err != nil {

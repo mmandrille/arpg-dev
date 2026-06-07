@@ -1,0 +1,21 @@
+docs/PROGRESS.md
+  s_a93206e6bfe861::t_ff4e233d226efc 14-15,39,80,452-473,574-578,584
+skills/finish/SKILL.md
+  h_6c904e338a0e5a 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a0759540fe71350d85ce83f329ae488989ed2857",
+  "prompts": {},
+  "sessions": {
+    "s_a93206e6bfe861": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9f79-19e5-76a1-af33-2503df5f4ab9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

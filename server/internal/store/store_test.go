@@ -106,7 +106,7 @@ func TestAccountCharacterSessionFlow(t *testing.T) {
 	}
 }
 
-func TestInventoryPersistAndEquip(t *testing.T) {
+func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	s := newStore(t)
 	ctx := context.Background()
 
@@ -117,53 +117,90 @@ func TestInventoryPersistAndEquip(t *testing.T) {
 		t.Fatalf("create session: %v", err)
 	}
 
-	item := store.InventoryItem{
+	item := store.CharacterItemInstance{
 		ID:          "1004",
-		SessionID:   sess.ID,
 		AccountID:   acct.ID,
 		CharacterID: char.ID,
 		ItemDefID:   "rusty_sword",
-		Slot:        "",
-		Equipped:    false,
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{"prefix":"sharp"}`),
 	}
-	if err := s.AddInventoryItem(ctx, item); err != nil {
-		t.Fatalf("add inventory: %v", err)
+	if err := s.AddCharacterItem(ctx, item); err != nil {
+		t.Fatalf("add character item: %v", err)
 	}
-	// Idempotent: adding the same (session, id) again is a no-op.
-	if err := s.AddInventoryItem(ctx, item); err != nil {
-		t.Fatalf("re-add inventory: %v", err)
+	if err := s.AddCharacterItem(ctx, item); err != nil {
+		t.Fatalf("re-add character item: %v", err)
 	}
 
-	if err := s.SetEquipped(ctx, sess.ID, item.ID, "weapon", true); err != nil {
+	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "weapon", true); err != nil {
 		t.Fatalf("set equipped: %v", err)
 	}
+	if err := s.AddCharacterWaypoint(ctx, char.ID, -1); err != nil {
+		t.Fatalf("add waypoint: %v", err)
+	}
+	if err := s.AddCharacterWaypoint(ctx, char.ID, -1); err != nil {
+		t.Fatalf("re-add waypoint: %v", err)
+	}
 
-	items, err := s.ListInventory(ctx, sess.ID)
+	items, err := s.ListCharacterItems(ctx, acct.ID, char.ID)
 	if err != nil {
-		t.Fatalf("list inventory: %v", err)
+		t.Fatalf("list character items: %v", err)
 	}
 	if len(items) != 1 {
-		t.Fatalf("inventory count = %d, want 1", len(items))
+		t.Fatalf("character item count = %d, want 1", len(items))
 	}
-	if !items[0].Equipped || items[0].Slot != "weapon" || items[0].ItemDefID != "rusty_sword" {
-		t.Fatalf("inventory item not persisted/equipped correctly: %+v", items[0])
+	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "weapon" || items[0].ItemDefID != "rusty_sword" {
+		t.Fatalf("character item not persisted/equipped correctly: %+v", items[0])
+	}
+	if string(items[0].RolledStats) != `{"prefix": "sharp"}` && string(items[0].RolledStats) != `{"prefix":"sharp"}` {
+		t.Fatalf("rolled stats not preserved: %s", string(items[0].RolledStats))
 	}
 
-	if err := s.SetEquipped(ctx, sess.ID, "nope", "weapon", true); !errors.Is(err, store.ErrNotFound) {
+	waypoints, err := s.ListCharacterWaypoints(ctx, char.ID)
+	if err != nil {
+		t.Fatalf("list waypoints: %v", err)
+	}
+	if len(waypoints) != 1 || waypoints[0].Level != -1 {
+		t.Fatalf("waypoints = %+v, want level -1", waypoints)
+	}
+
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints); err != nil {
+		t.Fatalf("create session snapshot: %v", err)
+	}
+	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
+		t.Fatalf("mutate live item: %v", err)
+	}
+	if err := s.AddCharacterWaypoint(ctx, char.ID, -2); err != nil {
+		t.Fatalf("mutate live waypoints: %v", err)
+	}
+	snap, err := s.LoadSessionStartSnapshot(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("load session snapshot: %v", err)
+	}
+	if len(snap.Items) != 1 || !snap.Items[0].Equipped || snap.Items[0].Slot != "weapon" {
+		t.Fatalf("snapshot item mutated with live state: %+v", snap.Items)
+	}
+	if len(snap.Waypoints) != 1 || snap.Waypoints[0].Level != -1 {
+		t.Fatalf("snapshot waypoints mutated with live state: %+v", snap.Waypoints)
+	}
+
+	otherAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "other+"+ids.Token()[:12]+"@example.test")
+	otherChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), otherAcct.ID, "Hero")
+	if err := s.SetCharacterItemEquipped(ctx, otherAcct.ID, otherChar.ID, item.ID, "weapon", true); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("equip missing item: expected ErrNotFound, got %v", err)
 	}
 
-	if err := s.RemoveInventoryItem(ctx, sess.ID, item.ID); err != nil {
-		t.Fatalf("remove inventory: %v", err)
+	if err := s.RemoveCharacterItem(ctx, acct.ID, char.ID, item.ID); err != nil {
+		t.Fatalf("remove character item: %v", err)
 	}
-	items, err = s.ListInventory(ctx, sess.ID)
+	items, err = s.ListCharacterItems(ctx, acct.ID, char.ID)
 	if err != nil {
 		t.Fatalf("list after remove: %v", err)
 	}
 	if len(items) != 0 {
-		t.Fatalf("inventory count after remove = %d, want 0", len(items))
+		t.Fatalf("character item count after remove = %d, want 0", len(items))
 	}
-	if err := s.RemoveInventoryItem(ctx, sess.ID, item.ID); !errors.Is(err, store.ErrNotFound) {
+	if err := s.RemoveCharacterItem(ctx, acct.ID, char.ID, item.ID); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("remove missing item: expected ErrNotFound, got %v", err)
 	}
 }

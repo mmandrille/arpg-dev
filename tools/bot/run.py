@@ -71,6 +71,7 @@ class Scenario:
     description: str
     steps: list[dict[str, Any]]
     assertions: list[Any]
+    fresh_session_checks: list[dict[str, Any]]
     path: Path
 
 
@@ -118,6 +119,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
             description=raw.get("description", ""),
             steps=list(raw.get("steps", [])),
             assertions=list(raw.get("assertions", [])),
+            fresh_session_checks=list(raw.get("fresh_session_checks", [])),
             path=path,
         ))
     if not scenarios:
@@ -306,6 +308,25 @@ async def execute_step(
         got = bool(state.discovered_teleporters.get(level, False))
         if got != want:
             raise AssertionError(f"assert_teleporter_discovered: level {level} discovered={got}, want {want}")
+        return
+
+    if action == "assert_inventory_contains":
+        assert_inventory_contains(
+            state.inventory,
+            str(step["item_def_id"]),
+            step.get("equipped"),
+            "runtime protocol",
+        )
+        return
+
+    if action == "assert_equipped_weapon_def":
+        expected_def = str(step["item_def_id"])
+        weapon_id = state.equipped.get("weapon")
+        if weapon_id is None:
+            raise AssertionError(f"assert_equipped_weapon_def: equipped weapon is empty, want {expected_def}")
+        item = next((i for i in state.inventory if str(i.get("item_instance_id")) == str(weapon_id)), None)
+        if item is None or item.get("item_def_id") != expected_def:
+            raise AssertionError(f"assert_equipped_weapon_def: weapon {weapon_id} row={item}, want {expected_def}")
         return
 
     if action == "assert_player_at_discovered_teleporter":
@@ -525,7 +546,14 @@ async def execute_step(
         monster = find_monster(state, str(step["monster_def_id"]))
         if monster is None:
             raise AssertionError(f"walk_to_monster: monster not found: {step}")
-        await walk_toward(ws, session_id, state, monster["position"], loop)
+        await walk_toward(
+            ws,
+            session_id,
+            state,
+            monster["position"],
+            loop,
+            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+        )
         return
 
     if action == "pick_up_first_loot":
@@ -1386,6 +1414,70 @@ def write_manifest(path: Path, base_url: str, results: list[dict[str, Any]]) -> 
     path.write_text(json.dumps(body, indent=2) + "\n")
 
 
+def scenario_email(base_email: str, scenario_id: str) -> str:
+    if "@" not in base_email:
+        return base_email
+    local, domain = base_email.split("@", 1)
+    safe_id = "".join(ch if ch.isalnum() else "-" for ch in scenario_id)
+    return f"{local}+{safe_id}-{int(time.time() * 1000)}@{domain}"
+
+
+def run_verified_session(
+    *,
+    client: httpx.Client,
+    base_url: str,
+    token: str,
+    debug_token: str,
+    scenario: Scenario,
+    world_id: str,
+    steps: list[dict[str, Any]],
+    assertions: list[Any],
+) -> tuple[dict[str, Any], RuntimeState]:
+    sess = create_session(client, token, world_id)
+    session_id = sess["session_id"]
+    log("session created", session_id, f"seed={sess.get('seed')}")
+
+    phase_started = time.monotonic()
+    run_scenario = Scenario(
+        id=scenario.id,
+        world_id=world_id,
+        title=scenario.title,
+        description=scenario.description,
+        steps=steps,
+        assertions=assertions,
+        fresh_session_checks=[],
+        path=scenario.path,
+    )
+    observed = asyncio.run(drive_scenario(base_url, token, sess, run_scenario))
+    log("phase drive done", f"elapsed={time.monotonic() - phase_started:.2f}s")
+    run_runtime_assertions(assertions, observed, "runtime protocol")
+
+    phase_started = time.monotonic()
+    state = fetch_state(client, token, debug_token, session_id)
+    run_assertions(
+        assertions,
+        state["entities"],
+        state["inventory"],
+        state["equipped"],
+        observed.item_id,
+        "/state API",
+        current_level=int(state.get("current_level", 0)),
+        discovered_teleporters=parse_discovered_teleporters(state),
+    )
+    log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
+
+    phase_started = time.monotonic()
+    asyncio.run(check_persistence(base_url, token, session_id, observed.item_id, assertions))
+    log("phase reconnect done", f"elapsed={time.monotonic() - phase_started:.2f}s")
+
+    phase_started = time.monotonic()
+    replay = fetch_replay(client, token, debug_token, session_id)
+    if not replay.get("match", False):
+        raise AssertionError(f"replay mismatch for {session_id}: {replay.get('mismatch')}")
+    log("phase replay done", f"elapsed={time.monotonic() - phase_started:.2f}s", session_id)
+    return sess, observed
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -1410,45 +1502,42 @@ def main() -> int:
     last_session_id = ""
 
     with httpx.Client(base_url=args.base_url, timeout=10.0) as client:
-        _, token = dev_login(client, args.email, args.dev_token)
         for scenario in selected:
             scenario_started = time.monotonic()
             log("scenario begin", scenario.id, "-", scenario.title, f"world={scenario.world_id}")
-            sess = create_session(client, token, scenario.world_id)
+            _, token = dev_login(client, scenario_email(args.email, scenario.id), args.dev_token)
+            sess, observed = run_verified_session(
+                client=client,
+                base_url=args.base_url,
+                token=token,
+                debug_token=args.debug_token,
+                scenario=scenario,
+                world_id=scenario.world_id,
+                steps=scenario.steps,
+                assertions=scenario.assertions,
+            )
             session_id = sess["session_id"]
             last_session_id = session_id
-            log("session created", session_id, f"seed={sess.get('seed')}")
 
-            phase_started = time.monotonic()
-            observed = asyncio.run(drive_scenario(args.base_url, token, sess, scenario))
-            log("phase drive done", f"elapsed={time.monotonic() - phase_started:.2f}s")
-            run_runtime_assertions(scenario.assertions, observed, "runtime protocol")
+            for idx, check in enumerate(scenario.fresh_session_checks, start=1):
+                log("fresh session check begin", scenario.id, f"#{idx}")
+                check_world = str(check.get("world_id", scenario.world_id))
+                check_steps = list(check.get("steps", []))
+                check_assertions = list(check.get("assertions", []))
+                check_sess, check_observed = run_verified_session(
+                    client=client,
+                    base_url=args.base_url,
+                    token=token,
+                    debug_token=args.debug_token,
+                    scenario=scenario,
+                    world_id=check_world,
+                    steps=check_steps,
+                    assertions=check_assertions,
+                )
+                last_session_id = check_sess["session_id"]
+                observed = check_observed
+                log("fresh session check done", scenario.id, f"#{idx}")
 
-            # Assert authoritative state through the inspection API.
-            phase_started = time.monotonic()
-            state = fetch_state(client, token, args.debug_token, session_id)
-            run_assertions(
-                scenario.assertions,
-                state["entities"],
-                state["inventory"],
-                state["equipped"],
-                observed.item_id,
-                "/state API",
-                current_level=int(state.get("current_level", 0)),
-                discovered_teleporters=parse_discovered_teleporters(state),
-            )
-            log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
-
-            # Assert replay reconstruction by reconnecting a fresh session loop.
-            phase_started = time.monotonic()
-            asyncio.run(check_persistence(args.base_url, token, session_id, observed.item_id, scenario.assertions))
-            log("phase reconnect done", f"elapsed={time.monotonic() - phase_started:.2f}s")
-
-            phase_started = time.monotonic()
-            replay = fetch_replay(client, token, args.debug_token, session_id)
-            if not replay.get("match", False):
-                raise AssertionError(f"replay mismatch for {session_id}: {replay.get('mismatch')}")
-            log("phase replay done", f"elapsed={time.monotonic() - phase_started:.2f}s", session_id)
             log("scenario done", scenario.id, f"elapsed={time.monotonic() - scenario_started:.2f}s")
 
             scenario_visual = json.loads(scenario.path.read_text()).get("visual")

@@ -129,60 +129,98 @@ func (s *Store) SetSessionStatus(ctx context.Context, id, status string) error {
 	return nil
 }
 
-// --- inventory --------------------------------------------------------------
+// --- character progression --------------------------------------------------
 
-func (s *Store) ListInventory(ctx context.Context, sessionID string) ([]InventoryItem, error) {
+func (s *Store) ListCharacterItems(ctx context.Context, accountID, characterID string) ([]CharacterItemInstance, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, session_id, account_id, character_id, item_def_id, COALESCE(slot, ''), equipped, created_at
-		 FROM inventory_items WHERE session_id = $1 ORDER BY created_at ASC, id ASC`,
-		sessionID,
+		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at
+		 FROM character_item_instances
+		 WHERE account_id = $1 AND character_id = $2
+		 ORDER BY created_at ASC, id ASC`,
+		accountID, characterID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("store: list inventory: %w", err)
+		return nil, fmt.Errorf("store: list character items: %w", err)
 	}
 	defer rows.Close()
 
-	var items []InventoryItem
+	var items []CharacterItemInstance
 	for rows.Next() {
-		var it InventoryItem
-		if err := rows.Scan(&it.ID, &it.SessionID, &it.AccountID, &it.CharacterID, &it.ItemDefID, &it.Slot, &it.Equipped, &it.CreatedAt); err != nil {
-			return nil, fmt.Errorf("store: scan inventory: %w", err)
+		var it CharacterItemInstance
+		if err := rows.Scan(&it.ID, &it.AccountID, &it.CharacterID, &it.ItemDefID, &it.Location, &it.Slot, &it.Equipped, &it.RolledStats, &it.CreatedAt, &it.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("store: scan character item: %w", err)
 		}
 		items = append(items, it)
 	}
 	return items, rows.Err()
 }
 
-// AddInventoryItem inserts a new inventory item. It is idempotent on
-// (session_id, id) so replaying a pickup does not duplicate the row.
-func (s *Store) AddInventoryItem(ctx context.Context, item InventoryItem) error {
+func (s *Store) AddCharacterItem(ctx context.Context, item CharacterItemInstance) error {
 	var slot any
 	if item.Slot != "" {
 		slot = item.Slot
 	}
+	location := item.Location
+	if location == "" {
+		location = ItemLocationInventory
+	}
+	rolledStats := item.RolledStats
+	if len(rolledStats) == 0 {
+		rolledStats = []byte(`{}`)
+	}
 	_, err := s.pool.Exec(ctx,
-		`INSERT INTO inventory_items (id, session_id, account_id, character_id, item_def_id, slot, equipped)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7)
-		 ON CONFLICT (session_id, id) DO NOTHING`,
-		item.ID, item.SessionID, item.AccountID, item.CharacterID, item.ItemDefID, slot, item.Equipped,
+		`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+		 ON CONFLICT (character_id, id) DO UPDATE SET
+		   item_def_id = EXCLUDED.item_def_id,
+		   location = EXCLUDED.location,
+		   slot = EXCLUDED.slot,
+		   equipped = EXCLUDED.equipped,
+		   rolled_stats = EXCLUDED.rolled_stats,
+		   updated_at = now()
+		 WHERE character_item_instances.account_id = EXCLUDED.account_id
+		   AND character_item_instances.character_id = EXCLUDED.character_id`,
+		item.ID, item.AccountID, item.CharacterID, item.ItemDefID, location, slot, item.Equipped, []byte(rolledStats),
 	)
 	if err != nil {
-		return fmt.Errorf("store: add inventory item: %w", err)
+		return fmt.Errorf("store: add character item: %w", err)
 	}
 	return nil
 }
 
-func (s *Store) SetEquipped(ctx context.Context, sessionID, itemInstanceID, slot string, equipped bool) error {
+func (s *Store) SetCharacterItemLocation(ctx context.Context, accountID, characterID, itemInstanceID, location string) error {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE character_item_instances
+		 SET location = $4, updated_at = now()
+		 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
+		accountID, characterID, itemInstanceID, location,
+	)
+	if err != nil {
+		return fmt.Errorf("store: set character item location: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (s *Store) SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool) error {
 	var slotArg any
 	if slot != "" {
 		slotArg = slot
 	}
+	location := ItemLocationInventory
+	if equipped {
+		location = ItemLocationEquipped
+	}
 	tag, err := s.pool.Exec(ctx,
-		`UPDATE inventory_items SET slot = $3, equipped = $4 WHERE session_id = $1 AND id = $2`,
-		sessionID, itemInstanceID, slotArg, equipped,
+		`UPDATE character_item_instances
+		 SET slot = $4, equipped = $5, location = $6, updated_at = now()
+		 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
+		accountID, characterID, itemInstanceID, slotArg, equipped, location,
 	)
 	if err != nil {
-		return fmt.Errorf("store: set equipped: %w", err)
+		return fmt.Errorf("store: set character item equipped: %w", err)
 	}
 	if tag.RowsAffected() == 0 {
 		return ErrNotFound
@@ -190,18 +228,139 @@ func (s *Store) SetEquipped(ctx context.Context, sessionID, itemInstanceID, slot
 	return nil
 }
 
-func (s *Store) RemoveInventoryItem(ctx context.Context, sessionID, itemInstanceID string) error {
+func (s *Store) RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error {
 	tag, err := s.pool.Exec(ctx,
-		`DELETE FROM inventory_items WHERE session_id = $1 AND id = $2`,
-		sessionID, itemInstanceID,
+		`DELETE FROM character_item_instances
+		 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
+		accountID, characterID, itemInstanceID,
 	)
 	if err != nil {
-		return fmt.Errorf("store: remove inventory item: %w", err)
+		return fmt.Errorf("store: remove character item: %w", err)
 	}
 	if tag.RowsAffected() == 0 {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func (s *Store) ListCharacterWaypoints(ctx context.Context, characterID string) ([]CharacterWaypoint, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT character_id, level, discovered_at
+		 FROM character_waypoints
+		 WHERE character_id = $1
+		 ORDER BY level DESC`,
+		characterID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list character waypoints: %w", err)
+	}
+	defer rows.Close()
+
+	var out []CharacterWaypoint
+	for rows.Next() {
+		var wp CharacterWaypoint
+		if err := rows.Scan(&wp.CharacterID, &wp.Level, &wp.DiscoveredAt); err != nil {
+			return nil, fmt.Errorf("store: scan character waypoint: %w", err)
+		}
+		out = append(out, wp)
+	}
+	return out, rows.Err()
+}
+
+func (s *Store) AddCharacterWaypoint(ctx context.Context, characterID string, level int) error {
+	_, err := s.pool.Exec(ctx,
+		`INSERT INTO character_waypoints (character_id, level)
+		 VALUES ($1, $2)
+		 ON CONFLICT (character_id, level) DO NOTHING`,
+		characterID, level,
+	)
+	if err != nil {
+		return fmt.Errorf("store: add character waypoint: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint) error {
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		for _, item := range items {
+			var slot any
+			if item.Slot != "" {
+				slot = item.Slot
+			}
+			location := item.Location
+			if location == "" {
+				location = ItemLocationInventory
+			}
+			rolledStats := item.RolledStats
+			if len(rolledStats) == 0 {
+				rolledStats = []byte(`{}`)
+			}
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_item_instances (session_id, id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
+				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+				 ON CONFLICT (session_id, id) DO NOTHING`,
+				sessionID, item.ID, accountID, characterID, item.ItemDefID, location, slot, item.Equipped, []byte(rolledStats),
+			); err != nil {
+				return fmt.Errorf("store: insert session start item: %w", err)
+			}
+		}
+		for _, wp := range waypoints {
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_waypoints (session_id, character_id, level)
+				 VALUES ($1, $2, $3)
+				 ON CONFLICT (session_id, level) DO NOTHING`,
+				sessionID, characterID, wp.Level,
+			); err != nil {
+				return fmt.Errorf("store: insert session start waypoint: %w", err)
+			}
+		}
+		return nil
+	})
+}
+
+func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error) {
+	snap := SessionStartSnapshot{SessionID: sessionID}
+	itemRows, err := s.pool.Query(ctx,
+		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, created_at
+		 FROM session_start_item_instances
+		 WHERE session_id = $1
+		 ORDER BY created_at ASC, id ASC`,
+		sessionID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start items: %w", err)
+	}
+	defer itemRows.Close()
+	for itemRows.Next() {
+		var it CharacterItemInstance
+		if err := itemRows.Scan(&it.ID, &it.AccountID, &it.CharacterID, &it.ItemDefID, &it.Location, &it.Slot, &it.Equipped, &it.RolledStats, &it.CreatedAt, &it.UpdatedAt); err != nil {
+			return snap, fmt.Errorf("store: scan session start item: %w", err)
+		}
+		snap.Items = append(snap.Items, it)
+	}
+	if err := itemRows.Err(); err != nil {
+		return snap, err
+	}
+
+	wpRows, err := s.pool.Query(ctx,
+		`SELECT character_id, level, discovered_at
+		 FROM session_start_waypoints
+		 WHERE session_id = $1
+		 ORDER BY level DESC`,
+		sessionID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start waypoints: %w", err)
+	}
+	defer wpRows.Close()
+	for wpRows.Next() {
+		var wp CharacterWaypoint
+		if err := wpRows.Scan(&wp.CharacterID, &wp.Level, &wp.DiscoveredAt); err != nil {
+			return snap, fmt.Errorf("store: scan session start waypoint: %w", err)
+		}
+		snap.Waypoints = append(snap.Waypoints, wp)
+	}
+	return snap, wpRows.Err()
 }
 
 // --- inputs -----------------------------------------------------------------

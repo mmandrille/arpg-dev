@@ -26,12 +26,18 @@ type SessionRepo interface {
 	SetSessionStatus(ctx context.Context, id, status string) error
 }
 
-// InventoryRepo manages session-scoped inventory.
-type InventoryRepo interface {
-	ListInventory(ctx context.Context, sessionID string) ([]InventoryItem, error)
-	AddInventoryItem(ctx context.Context, item InventoryItem) error
-	SetEquipped(ctx context.Context, sessionID, itemInstanceID, slot string, equipped bool) error
-	RemoveInventoryItem(ctx context.Context, sessionID, itemInstanceID string) error
+// CharacterProgressionRepo manages durable character items, waypoints, and the
+// immutable session-start progression boundary used by replay.
+type CharacterProgressionRepo interface {
+	ListCharacterItems(ctx context.Context, accountID, characterID string) ([]CharacterItemInstance, error)
+	AddCharacterItem(ctx context.Context, item CharacterItemInstance) error
+	SetCharacterItemLocation(ctx context.Context, accountID, characterID, itemInstanceID, location string) error
+	SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool) error
+	RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error
+	ListCharacterWaypoints(ctx context.Context, characterID string) ([]CharacterWaypoint, error)
+	AddCharacterWaypoint(ctx context.Context, characterID string, level int) error
+	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint) error
+	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
 }
 
 // InputRepo records and reads authoritative inputs for replay.
@@ -51,7 +57,7 @@ type Repository interface {
 	AccountRepo
 	CharacterRepo
 	SessionRepo
-	InventoryRepo
+	CharacterProgressionRepo
 	InputRepo
 	EventRepo
 	Ping(ctx context.Context) error

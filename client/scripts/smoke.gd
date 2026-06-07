@@ -83,7 +83,10 @@ func _initialize() -> void:
 	var mon_ap := mon.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	monster_anim = AnimControllerScript.new(mon_ap)
 	client = NetClientScript.new(base)
-	if not client.login("smoke@example.test", dev):
+	var email := OS.get_environment("ARPG_EMAIL")
+	if email == "":
+		email = "smoke@example.test"
+	if not client.login(email, dev):
 		_fail("login failed")
 		return
 	if not client.create_session():
@@ -166,7 +169,10 @@ func _begin_resume() -> void:
 	var resumed_id := client.session_id
 	client.close()
 	client2 = NetClientScript.new(base)
-	if not client2.login("smoke@example.test", dev):
+	var email := OS.get_environment("ARPG_EMAIL")
+	if email == "":
+		email = "smoke@example.test"
+	if not client2.login(email, dev):
 		_fail("resume login failed")
 		return
 	if not client2.create_session(resumed_id):

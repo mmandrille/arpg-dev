@@ -246,7 +246,26 @@ func _initialize() -> void:
 		_fail("dungeon teleporters expected player position mismatch")
 		return
 
-	# 13. Waypoint panel golden matches client layout constants.
+	# 13. Dungeon monster attack golden references shared proactive attack rules.
+	var dungeon_monster_attack := _read(shared.path_join("golden/dungeon_monster_attack.json"))
+	var dungeon_mob_id := str(dungeon_monster_attack["monster_def_id"])
+	if dungeon_mob_id != str(dungeon_generation["monster_placement"]["monster_def_id"]):
+		_fail("dungeon monster attack monster_def_id mismatch")
+		return
+	var dungeon_mob: Dictionary = monsters["monsters"][dungeon_mob_id]
+	if not dungeon_mob.has("attack_damage") or not dungeon_mob.has("attack_cooldown_ticks"):
+		_fail("dungeon monster missing proactive attack fields")
+		return
+	var attack_damage: Dictionary = dungeon_mob["attack_damage"]
+	var pinned_damage := int(dungeon_monster_attack["damage"])
+	if pinned_damage < int(attack_damage["min"]) or pinned_damage > int(attack_damage["max"]):
+		_fail("dungeon monster attack damage outside rules")
+		return
+	if int(dungeon_monster_attack["player_hp_after"]) != 10 - pinned_damage:
+		_fail("dungeon monster attack hp mismatch")
+		return
+
+	# 14. Waypoint panel golden matches client layout constants.
 	var waypoint_panel := _read(shared.path_join("golden/waypoint_panel.json"))
 	const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
 	if WaypointPanelConfig.SCROLL_MAX_VISIBLE_ROWS != int(waypoint_panel["scroll_max_visible_rows"]):
@@ -256,7 +275,7 @@ func _initialize() -> void:
 		_fail("waypoint panel viewport unit mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, waypoint_panel)")
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel)")
 	quit(0)
 
 

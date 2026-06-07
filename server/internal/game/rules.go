@@ -50,6 +50,7 @@ type DungeonGenerationRules struct {
 	PlayerSpawn              Vec2                     `json:"player_spawn"`
 	StairPlacement           StairPlacementRules      `json:"stair_placement"`
 	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
+	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 	LevelNames               map[string]string        `json:"level_names"`
 	DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 }
@@ -68,6 +69,14 @@ type StairPlacementRules struct {
 type TeleporterPlacementRules struct {
 	MarginFromWall   float64 `json:"margin_from_wall"`
 	MinStairDistance float64 `json:"min_stair_distance"`
+	MaxAttempts      int     `json:"max_attempts"`
+}
+
+type MonsterPlacementRules struct {
+	Count            int     `json:"count"`
+	MonsterDefID     string  `json:"monster_def_id"`
+	MarginFromWall   float64 `json:"margin_from_wall"`
+	MinSpawnDistance float64 `json:"min_spawn_distance"`
 	MaxAttempts      int     `json:"max_attempts"`
 }
 
@@ -111,6 +120,8 @@ type MonsterDef struct {
 	MaxHP             int          `json:"max_hp"`
 	LootTable         string       `json:"loot_table"`
 	RetaliationDamage *DamageRange `json:"retaliation_damage,omitempty"`
+	AttackDamage      *DamageRange `json:"attack_damage,omitempty"`
+	AttackCooldown    int          `json:"attack_cooldown_ticks,omitempty"`
 	Behavior          string       `json:"behavior,omitempty"`
 	AggroRadius       float64      `json:"aggro_radius,omitempty"`
 	LeashRadius       float64      `json:"leash_radius,omitempty"`
@@ -283,11 +294,24 @@ func LoadRules(dir string) (*Rules, error) {
 				return nil, err
 			}
 		}
+		if def.AttackDamage != nil {
+			if err := validateDamageRange("monsters."+id+".attack_damage", *def.AttackDamage); err != nil {
+				return nil, err
+			}
+			if def.AttackCooldown <= 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_cooldown_ticks: required when attack_damage is set", id)
+			}
+		} else if def.AttackCooldown > 0 {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_cooldown_ticks: requires attack_damage", id)
+		}
 		behavior := def.effectiveBehavior()
 		switch behavior {
 		case monsterBehaviorStatic:
 			if def.AggroRadius > 0 || def.LeashRadius > 0 || def.MoveSpeed > 0 {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s: aggro/leash/move_speed only valid for chase behavior", id)
+			}
+			if def.AttackDamage != nil {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: attack_damage only valid for chase behavior", id)
 			}
 		case monsterBehaviorChase:
 			if def.AggroRadius <= 0 {
@@ -370,6 +394,7 @@ func LoadRules(dir string) (*Rules, error) {
 		PlayerSpawn              Vec2                     `json:"player_spawn"`
 		StairPlacement           StairPlacementRules      `json:"stair_placement"`
 		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
+		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 		LevelNames               map[string]string        `json:"level_names"`
 		DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
 	}
@@ -400,6 +425,28 @@ func LoadRules(dir string) (*Rules, error) {
 	if dungeonGeneration.TeleporterPlacement.MaxAttempts <= 0 {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.teleporter_placement.max_attempts: must be positive")
 	}
+	if dungeonGeneration.MonsterPlacement.Count < 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.count: must be non-negative")
+	}
+	if dungeonGeneration.MonsterPlacement.Count > 0 {
+		monsterID := dungeonGeneration.MonsterPlacement.MonsterDefID
+		monsterDef, ok := r.Monsters[monsterID]
+		if !ok {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: unknown monster %s", monsterID)
+		}
+		if monsterDef.effectiveBehavior() != monsterBehaviorChase {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: %s must use chase behavior", monsterID)
+		}
+	}
+	if dungeonGeneration.MonsterPlacement.MarginFromWall < 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.margin_from_wall: must be non-negative")
+	}
+	if dungeonGeneration.MonsterPlacement.MinSpawnDistance <= 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.min_spawn_distance: must be positive")
+	}
+	if dungeonGeneration.MonsterPlacement.MaxAttempts <= 0 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.max_attempts: must be positive")
+	}
 	for key := range dungeonGeneration.LevelNames {
 		level, err := strconv.Atoi(key)
 		if err != nil || level >= 0 {
@@ -412,6 +459,7 @@ func LoadRules(dir string) (*Rules, error) {
 		PlayerSpawn:              dungeonGeneration.PlayerSpawn,
 		StairPlacement:           dungeonGeneration.StairPlacement,
 		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
+		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
 		LevelNames:               dungeonGeneration.LevelNames,
 		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
 	}

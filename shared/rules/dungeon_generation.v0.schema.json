@@ -10,6 +10,7 @@
     "player_spawn",
     "stair_placement",
     "teleporter_placement",
+    "monster_placement",
     "level_names",
     "default_level_name_template"
   ],
@@ -44,6 +45,18 @@
       "properties": {
         "margin_from_wall": { "type": "number", "minimum": 0 },
         "min_stair_distance": { "type": "number", "exclusiveMinimum": 0 },
+        "max_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "monster_placement": {
+      "type": "object",
+      "required": ["count", "monster_def_id", "margin_from_wall", "min_spawn_distance", "max_attempts"],
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 0 },
+        "monster_def_id": { "type": "string", "minLength": 1 },
+        "margin_from_wall": { "type": "number", "minimum": 0 },
+        "min_spawn_distance": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
       }
     },

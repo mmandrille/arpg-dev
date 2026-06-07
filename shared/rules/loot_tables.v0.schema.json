@@ -36,7 +36,8 @@
         },
         "anyOf": [
           { "required": ["entries"] },
-          { "required": ["drops"] }
+          { "required": ["drops"] },
+          { "maxProperties": 0 }
         ]
       }
     }

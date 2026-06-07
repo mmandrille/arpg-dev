@@ -1938,6 +1938,120 @@ func TestDungeonStairsGolden(t *testing.T) {
 	}
 }
 
+func TestDungeonMonsterGeneration(t *testing.T) {
+	rules := loadRules(t)
+	placement := rules.DungeonGeneration.MonsterPlacement
+	for _, levelNum := range []int{-1, -2} {
+		t.Run(fmt.Sprintf("level_%d", levelNum), func(t *testing.T) {
+			level, err := GenerateDungeonLevel("dungeon_monster_generation", levelNum, rules.DungeonGeneration)
+			if err != nil {
+				t.Fatalf("generate %d: %v", levelNum, err)
+			}
+			again, err := GenerateDungeonLevel("dungeon_monster_generation", levelNum, rules.DungeonGeneration)
+			if err != nil {
+				t.Fatalf("generate again %d: %v", levelNum, err)
+			}
+			if len(level.monsters) != placement.Count {
+				t.Fatalf("level %d monsters = %d, want %d", levelNum, len(level.monsters), placement.Count)
+			}
+			if len(again.monsters) != len(level.monsters) {
+				t.Fatalf("repeat level %d monsters = %d, want %d", levelNum, len(again.monsters), len(level.monsters))
+			}
+			for i, monster := range level.monsters {
+				if monster.defID != placement.MonsterDefID {
+					t.Fatalf("level %d monster %d defID = %s, want %s", levelNum, i, monster.defID, placement.MonsterDefID)
+				}
+				if monster != again.monsters[i] {
+					t.Fatalf("level %d monster %d = %+v, repeat %+v", levelNum, i, monster, again.monsters[i])
+				}
+				if distance(monster.pos, rules.DungeonGeneration.PlayerSpawn) < placement.MinSpawnDistance {
+					t.Fatalf("level %d monster %d too close to player spawn: %+v", levelNum, i, monster.pos)
+				}
+				if dungeonMonsterPositionBlocked(monster.pos, rules.DungeonGeneration, levelWithoutMonsterIndex(level, i)) {
+					t.Fatalf("level %d monster %d blocked at %+v", levelNum, i, monster.pos)
+				}
+			}
+		})
+	}
+}
+
+func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
+	var golden struct {
+		SessionSeed              string `json:"session_seed"`
+		Level                    int    `json:"level"`
+		MonsterDefID             string `json:"monster_def_id"`
+		TickOfFirstPlayerDamaged uint64 `json:"tick_of_first_player_damaged"`
+		Damage                   int    `json:"damage"`
+		PlayerHPAfter            int    `json:"player_hp_after"`
+	}
+	loadGolden(t, "dungeon_monster_attack.json", &golden)
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_dungeon_monster_attack", golden.SessionSeed, rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	results := descendFromCurrentLevel(t, sim, "descend")
+	assertLevelChanged(t, results[0], 0, golden.Level)
+
+	firstDamage, ok := waitForPlayerDamage(sim, 240)
+	if !ok {
+		t.Fatalf("expected proactive player_damaged event; player=%+v monsters=%+v", sim.activeLevel().entities[sim.playerID].pos, dungeonMonsterDebugPositions(sim.activeLevel()))
+	}
+	if firstDamage.Tick != golden.TickOfFirstPlayerDamaged {
+		t.Fatalf("first damage tick = %d, want %d", firstDamage.Tick, golden.TickOfFirstPlayerDamaged)
+	}
+	if eventDamage(firstDamage, "player_damaged") != golden.Damage {
+		t.Fatalf("first damage = %d, want %d", eventDamage(firstDamage, "player_damaged"), golden.Damage)
+	}
+	player := sim.activeLevel().entities[sim.playerID]
+	if player.hp != golden.PlayerHPAfter {
+		t.Fatalf("player hp = %d, want %d", player.hp, golden.PlayerHPAfter)
+	}
+	if countLiveMonstersByDef(sim.activeLevel(), golden.MonsterDefID) != rules.DungeonGeneration.MonsterPlacement.Count {
+		t.Fatalf("live %s count mismatch", golden.MonsterDefID)
+	}
+}
+
+func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
+	var golden struct {
+		SessionSeed string `json:"session_seed"`
+	}
+	loadGolden(t, "dungeon_monster_attack.json", &golden)
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_dungeon_monster_cooldown", golden.SessionSeed, rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	descendFromCurrentLevel(t, sim, "descend")
+	firstDamage, ok := waitForPlayerDamage(sim, 240)
+	if !ok {
+		t.Fatal("expected first proactive damage")
+	}
+	for i := 0; i < rules.Monsters["dungeon_mob"].AttackCooldown-1; i++ {
+		res := sim.Tick(nil)
+		if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
+			t.Fatalf("unexpected attack before cooldown on tick %d", res.Tick)
+		}
+	}
+	second := sim.Tick(nil)
+	if !hasEvent(second, "player_damaged") && !hasEvent(second, "player_killed") {
+		t.Fatalf("missing attack after cooldown; first tick %d second result %+v", firstDamage.Tick, second)
+	}
+
+	replay, err := NewSimWithWorld("sess_dungeon_monster_cooldown_replay", golden.SessionSeed, rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new replay sim: %v", err)
+	}
+	descendFromCurrentLevel(t, replay, "descend")
+	replayDamage, ok := waitForPlayerDamage(replay, 240)
+	if !ok {
+		t.Fatal("expected replay proactive damage")
+	}
+	if replayDamage.Tick != firstDamage.Tick || eventDamage(replayDamage, "player_damaged") != eventDamage(firstDamage, "player_damaged") {
+		t.Fatalf("replay first damage = tick %d damage %d, want tick %d damage %d", replayDamage.Tick, eventDamage(replayDamage, "player_damaged"), firstDamage.Tick, eventDamage(firstDamage, "player_damaged"))
+	}
+}
+
 func TestDungeonDescendAscendTransitions(t *testing.T) {
 	var golden struct {
 		Seed              string `json:"seed"`
@@ -2309,6 +2423,58 @@ func generatedLootPos(level generatedDungeonLevel, itemDefID string) (Vec2, bool
 		}
 	}
 	return Vec2{}, false
+}
+
+func levelWithoutMonsterIndex(level generatedDungeonLevel, skip int) generatedDungeonLevel {
+	out := level
+	out.monsters = make([]generatedMonster, 0, len(level.monsters)-1)
+	for i, monster := range level.monsters {
+		if i == skip {
+			continue
+		}
+		out.monsters = append(out.monsters, monster)
+	}
+	return out
+}
+
+func waitForPlayerDamage(sim *Sim, maxTicks int) (TickResult, bool) {
+	for i := 0; i < maxTicks; i++ {
+		res := sim.Tick(nil)
+		if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
+			return res, true
+		}
+	}
+	return TickResult{}, false
+}
+
+func eventDamage(r TickResult, eventType string) int {
+	for _, event := range r.Events {
+		if event.EventType == eventType && event.Damage != nil {
+			return *event.Damage
+		}
+	}
+	return 0
+}
+
+func countLiveMonstersByDef(level *LevelState, defID string) int {
+	count := 0
+	for _, entity := range level.entities {
+		if entity.kind == monsterEntity && entity.hp > 0 && entity.monsterDefID == defID {
+			count++
+		}
+	}
+	return count
+}
+
+func dungeonMonsterDebugPositions(level *LevelState) []Vec2 {
+	positions := []Vec2{}
+	for _, id := range sortedEntityIDs(level.entities) {
+		entity := level.entities[id]
+		if entity.kind == monsterEntity && entity.monsterDefID == "dungeon_mob" {
+			positions = append(positions, entity.pos)
+		}
+	}
+	return positions
 }
 
 func hasEntityRemove(r TickResult, entityID string) bool {

@@ -132,6 +132,7 @@ def cross_checks(report: Report) -> None:
     monster_chase_golden = load(GOLDEN / "monster_chase.json")
     dungeon_stairs_golden = load(GOLDEN / "dungeon_stairs.json")
     dungeon_teleporters_golden = load(GOLDEN / "dungeon_teleporters.json")
+    dungeon_monster_attack_golden = load(GOLDEN / "dungeon_monster_attack.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -267,6 +268,23 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation teleporter_placement", "max_attempts must be positive")
     else:
         report.ok("dungeon_generation teleporter placement is valid")
+    monster_placement = dungeon_generation.get("monster_placement", {})
+    monster_id = monster_placement.get("monster_def_id")
+    monster_def = monsters["monsters"].get(monster_id)
+    if monster_placement.get("count", -1) < 0:
+        report.fail("dungeon_generation monster_placement", "count must be non-negative")
+    elif monster_def is None:
+        report.fail("dungeon_generation monster_placement", f"unknown monster_def_id {monster_id}")
+    elif monster_def.get("behavior", "static") != "chase":
+        report.fail("dungeon_generation monster_placement", f"{monster_id} must be a chase monster")
+    elif monster_placement.get("margin_from_wall", -1) < 0:
+        report.fail("dungeon_generation monster_placement", "margin_from_wall must be non-negative")
+    elif monster_placement.get("min_spawn_distance", 0) <= 0:
+        report.fail("dungeon_generation monster_placement", "min_spawn_distance must be positive")
+    elif monster_placement.get("max_attempts", 0) <= 0:
+        report.fail("dungeon_generation monster_placement", "max_attempts must be positive")
+    else:
+        report.ok("dungeon_generation monster placement is valid")
     for key in dungeon_generation["level_names"]:
         try:
             level_num = int(key)
@@ -306,6 +324,22 @@ def cross_checks(report: Report) -> None:
 
     # monster -> loot table -> item references resolve.
     for mid, mdef in monsters["monsters"].items():
+        behavior = mdef.get("behavior", "static")
+        if "attack_damage" in mdef:
+            attack_damage = mdef["attack_damage"]
+            if attack_damage["max"] < attack_damage["min"]:
+                report.fail("monster attack_damage", f"{mid}: max must be >= min")
+            elif behavior != "chase":
+                report.fail("monster attack_damage", f"{mid}: proactive attack requires chase behavior")
+            else:
+                report.ok(f"monster {mid} attack damage is valid")
+        if "attack_cooldown_ticks" in mdef:
+            if "attack_damage" not in mdef:
+                report.fail("monster attack cooldown", f"{mid}: cooldown requires attack_damage")
+            elif behavior != "chase":
+                report.fail("monster attack cooldown", f"{mid}: proactive attack requires chase behavior")
+            else:
+                report.ok(f"monster {mid} attack cooldown is valid")
         table = mdef["loot_table"]
         if table not in loot["loot_tables"]:
             report.fail("monster loot_table", f"{mid} -> unknown table {table}")
@@ -321,6 +355,14 @@ def cross_checks(report: Report) -> None:
                     break
             else:
                 report.ok(f"monster {mid} loot table + items resolve")
+
+    no_drop = loot["loot_tables"].get("no_drop")
+    if no_drop is None:
+        report.fail("no_drop loot table", "missing table")
+    elif no_drop.get("drops") or no_drop.get("entries"):
+        report.fail("no_drop loot table", "must not define drops or entries")
+    else:
+        report.ok("no_drop loot table is empty")
 
     # world presets: entity references resolve and type-specific fields are present.
     for world_id, world in worlds["worlds"].items():
@@ -536,6 +578,28 @@ def cross_checks(report: Report) -> None:
             report.fail("dungeon_teleporters golden", "expected_player_position must match level -1 teleporter")
         else:
             report.ok("dungeon_teleporters golden matches stairs seed and travel outcome")
+
+    # dungeon_monster_attack golden references proactive dungeon monster rules.
+    golden_monster_id = dungeon_monster_attack_golden["monster_def_id"]
+    golden_monster = monsters["monsters"].get(golden_monster_id)
+    if golden_monster is None:
+        report.fail("dungeon_monster_attack golden", f"unknown monster_def_id {golden_monster_id}")
+    elif golden_monster_id != dungeon_generation["monster_placement"]["monster_def_id"]:
+        report.fail("dungeon_monster_attack golden", "monster_def_id must match dungeon monster placement")
+    elif dungeon_monster_attack_golden["level"] >= 0:
+        report.fail("dungeon_monster_attack golden", "level must be a dungeon level")
+    elif "attack_damage" not in golden_monster or "attack_cooldown_ticks" not in golden_monster:
+        report.fail("dungeon_monster_attack golden", f"{golden_monster_id} is missing proactive attack fields")
+    elif not (
+        golden_monster["attack_damage"]["min"]
+        <= dungeon_monster_attack_golden["damage"]
+        <= golden_monster["attack_damage"]["max"]
+    ):
+        report.fail("dungeon_monster_attack golden", "damage is outside monster attack_damage")
+    elif dungeon_monster_attack_golden["player_hp_after"] != 10 - dungeon_monster_attack_golden["damage"]:
+        report.fail("dungeon_monster_attack golden", "player_hp_after must reflect one hit from 10 HP")
+    else:
+        report.ok("dungeon_monster_attack golden matches proactive monster rules")
 
     # loot_roll golden: single-entry table resolves to the expected item.
     table = loot["loot_tables"].get(loot_golden["loot_table"])

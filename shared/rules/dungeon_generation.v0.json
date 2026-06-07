@@ -13,6 +13,13 @@
     "min_stair_distance": 4.0,
     "max_attempts": 64
   },
+  "monster_placement": {
+    "count": 2,
+    "monster_def_id": "dungeon_mob",
+    "margin_from_wall": 2.0,
+    "min_spawn_distance": 6.0,
+    "max_attempts": 64
+  },
   "level_names": {
     "-1": "Entry Hall",
     "-2": "Lower Depths",

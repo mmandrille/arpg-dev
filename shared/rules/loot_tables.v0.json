@@ -21,6 +21,8 @@
     },
     "heal_double_drop": {
       "drops": ["red_potion", "red_potion"]
+    },
+    "no_drop": {
     }
   }
 }

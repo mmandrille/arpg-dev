@@ -1,0 +1,9 @@
+{
+  "description": "dungeon_mob proactive attack: player takes damage without sending any action_intent",
+  "session_seed": "dungeon_mob_122",
+  "level": -1,
+  "monster_def_id": "dungeon_mob",
+  "tick_of_first_player_damaged": 5,
+  "damage": 2,
+  "player_hp_after": 8
+}

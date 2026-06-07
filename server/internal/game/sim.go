@@ -137,6 +137,16 @@ type Sim struct {
 	inventory             []*invItem
 	equipped              map[string]uint64 // slot -> instanceID (0 = none)
 	discoveredTeleporters map[int]bool
+	progression           CharacterProgressionState
+}
+
+// CharacterProgressionState is the authoritative mutable progression state for
+// one character inside a sim session.
+type CharacterProgressionState struct {
+	Level             int
+	Experience        int
+	UnspentStatPoints int
+	BaseStats         BaseStatsView
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
@@ -150,10 +160,17 @@ func NewSim(sessionID, seed string, rules *Rules) *Sim {
 
 // NewSimWithWorld builds a fresh session from a deterministic world preset.
 func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim, error) {
+	return NewSimWithWorldProgression(sessionID, seed, rules, worldID, rules.DefaultCharacterProgressionState())
+}
+
+// NewSimWithWorldProgression builds a session with a caller-supplied durable
+// character progression snapshot.
+func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID string, progression CharacterProgressionState) (*Sim, error) {
 	world, ok := rules.Worlds[worldID]
 	if !ok {
 		return nil, ErrUnknownWorld{WorldID: worldID}
 	}
+	progression = rules.normalizeProgressionState(progression)
 	s := &Sim{
 		sessionID:             sessionID,
 		seed:                  seed,
@@ -165,6 +182,7 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 		multiLevel:            world.Mode == worldModeMultiLevel,
 		equipped:              map[string]uint64{weaponSlot: 0},
 		discoveredTeleporters: make(map[int]bool),
+		progression:           progression,
 	}
 
 	if s.multiLevel {
@@ -189,8 +207,48 @@ func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim
 	return s, nil
 }
 
+// DefaultCharacterProgressionState returns the level/stat defaults from shared
+// character progression rules.
+func (r *Rules) DefaultCharacterProgressionState() CharacterProgressionState {
+	return CharacterProgressionState{
+		Level:             1,
+		Experience:        0,
+		UnspentStatPoints: 0,
+		BaseStats:         r.CharacterProgression.BaseStats,
+	}
+}
+
+func (r *Rules) normalizeProgressionState(in CharacterProgressionState) CharacterProgressionState {
+	if in.Level < 1 {
+		in.Level = 1
+	}
+	if in.Experience < 0 {
+		in.Experience = 0
+	}
+	if in.UnspentStatPoints < 0 {
+		in.UnspentStatPoints = 0
+	}
+	if in.BaseStats.Str <= 0 {
+		in.BaseStats.Str = r.CharacterProgression.BaseStats.Str
+	}
+	if in.BaseStats.Dex <= 0 {
+		in.BaseStats.Dex = r.CharacterProgression.BaseStats.Dex
+	}
+	if in.BaseStats.Vit <= 0 {
+		in.BaseStats.Vit = r.CharacterProgression.BaseStats.Vit
+	}
+	if in.BaseStats.Magic <= 0 {
+		in.BaseStats.Magic = r.CharacterProgression.BaseStats.Magic
+	}
+	if in.Level > r.CharacterProgression.LevelCap {
+		in.Level = r.CharacterProgression.LevelCap
+	}
+	return in
+}
+
 func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world WorldDef) error {
-	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: playerStartHP, maxHP: playerStartHP}
+	maxHP := s.currentMaxHP()
+	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: maxHP, maxHP: maxHP}
 	player.id = s.alloc()
 	s.playerID = player.id
 	level.entities[player.id] = player
@@ -369,6 +427,7 @@ type Input struct {
 	Unequip       *UnequipIntent
 	Drop          *DropIntent
 	Use           *UseIntent
+	AllocateStat  *AllocateStatIntent
 }
 
 // Intent payloads.
@@ -398,6 +457,10 @@ type (
 	}
 	UseIntent struct {
 		ItemInstanceID string
+	}
+	AllocateStatIntent struct {
+		Stat   string
+		Points int
 	}
 )
 
@@ -472,7 +535,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent":
+		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "allocate_stat_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -499,6 +562,8 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleDrop(in, res)
 	case "use_intent":
 		s.handleUse(in, res)
+	case "allocate_stat_intent":
+		s.handleAllocateStat(in, res)
 	default:
 		res.reject(in.MessageID, "unknown_type")
 	}
@@ -756,6 +821,7 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 	if target.hp == 0 {
 		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: in.CorrelationID})
 		s.dropLoot(target, in.CorrelationID, res)
+		s.awardMonsterExperience(target, in.CorrelationID, res)
 	}
 	s.retaliate(target, in.CorrelationID, res)
 }
@@ -1270,6 +1336,68 @@ func (s *Sim) handleUse(in Input, res *TickResult) {
 		ItemInstanceID: removedID,
 	})
 	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
+	if in.AllocateStat == nil || !isBaseStat(in.AllocateStat.Stat) || in.AllocateStat.Points <= 0 {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	if in.AllocateStat.Points > s.progression.UnspentStatPoints {
+		res.reject(in.MessageID, "not_enough_stat_points")
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+
+	beforeMaxHP := s.currentMaxHP()
+	switch in.AllocateStat.Stat {
+	case "str":
+		s.progression.BaseStats.Str += in.AllocateStat.Points
+	case "dex":
+		s.progression.BaseStats.Dex += in.AllocateStat.Points
+	case "vit":
+		s.progression.BaseStats.Vit += in.AllocateStat.Points
+	case "magic":
+		s.progression.BaseStats.Magic += in.AllocateStat.Points
+	}
+	s.progression.UnspentStatPoints -= in.AllocateStat.Points
+	afterMaxHP := s.currentMaxHP()
+	if afterMaxHP != player.maxHP {
+		player.maxHP = afterMaxHP
+		if delta := afterMaxHP - beforeMaxHP; delta > 0 {
+			player.hp += delta
+			if player.hp > player.maxHP {
+				player.hp = player.maxHP
+			}
+		}
+		if player.hp > player.maxHP {
+			player.hp = player.maxHP
+		}
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+	}
+
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	res.Events = append(res.Events, Event{
+		EventType:         "stat_allocated",
+		CorrelationID:     in.CorrelationID,
+		Stat:              in.AllocateStat.Stat,
+		Amount:            intPtr(in.AllocateStat.Points),
+		UnspentStatPoints: intPtr(s.progression.UnspentStatPoints),
+	})
+	res.ack(in.MessageID)
+}
+
+func isBaseStat(stat string) bool {
+	switch stat {
+	case "str", "dex", "vit", "magic":
+		return true
+	}
+	return false
 }
 
 func (s *Sim) applyMovement(res *TickResult) {
@@ -2024,8 +2152,51 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 	if target.hp == 0 {
 		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID})
 		s.dropLoot(target, p.sourceCorrID, res)
+		s.awardMonsterExperience(target, p.sourceCorrID, res)
 	}
 	s.retaliate(target, p.sourceCorrID, res)
+}
+
+func (s *Sim) awardMonsterExperience(monster *entity, corr string, res *TickResult) {
+	def, ok := s.rules.Monsters[monster.monsterDefID]
+	if !ok || def.XPReward <= 0 {
+		return
+	}
+	s.awardExperience(def.XPReward, corr, res)
+}
+
+func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
+	if amount <= 0 {
+		return
+	}
+	s.progression.Experience += amount
+	res.Events = append(res.Events, Event{
+		EventType:       "experience_gained",
+		CorrelationID:   corr,
+		Amount:          intPtr(amount),
+		TotalExperience: intPtr(s.progression.Experience),
+	})
+
+	for s.progression.Level < s.rules.CharacterProgression.LevelCap {
+		nextXP, ok := s.rules.nextLevelTotalXP(s.progression.Level)
+		if !ok || s.progression.Experience < nextXP {
+			break
+		}
+		from := s.progression.Level
+		s.progression.Level++
+		s.progression.UnspentStatPoints += s.rules.CharacterProgression.PointsPerLevel
+		to := s.progression.Level
+		res.Events = append(res.Events, Event{
+			EventType:         "character_leveled",
+			CorrelationID:     corr,
+			FromLevel:         intPtr(from),
+			ToLevel:           intPtr(to),
+			UnspentStatPoints: intPtr(s.progression.UnspentStatPoints),
+		})
+	}
+
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
 }
 
 func segmentIntersectsInflatedAABB(start, end, rectCenter, rectSize Vec2, inflate float64) (float64, bool) {
@@ -2371,24 +2542,115 @@ func (s *Sim) resolvePlayerAttackDamage() DamageRange {
 	base := s.rules.Combat.PlayerDamage
 	instanceID := s.equipped[weaponSlot]
 	if instanceID == 0 {
-		return base
+		return s.applyStrengthDamageBonus(base)
 	}
 	item := s.findItemByID(instanceID)
 	if item == nil {
-		return base
+		return s.applyStrengthDamageBonus(base)
 	}
 	if item.rollPayload != nil {
 		min, minOK := item.rollPayload.Stats["damage_min"]
 		max, maxOK := item.rollPayload.Stats["damage_max"]
 		if minOK && maxOK && max >= min {
-			return DamageRange{Min: min, Max: max}
+			return s.applyStrengthDamageBonus(DamageRange{Min: min, Max: max})
 		}
 	}
 	def, ok := s.rules.Items[item.itemDefID]
 	if !ok || def.Damage == nil {
-		return base
+		return s.applyStrengthDamageBonus(base)
 	}
-	return *def.Damage
+	return s.applyStrengthDamageBonus(*def.Damage)
+}
+
+func (s *Sim) applyStrengthDamageBonus(base DamageRange) DamageRange {
+	derived := s.DerivedStatsView()
+	out := DamageRange{
+		Min: base.Min + int(math.Floor(derived.DamageMin)),
+		Max: base.Max + int(math.Floor(derived.DamageMax)),
+	}
+	if out.Min < 0 {
+		out.Min = 0
+	}
+	if out.Max < out.Min {
+		out.Max = out.Min
+	}
+	return out
+}
+
+func (s *Sim) currentMaxHP() int {
+	maxHP := int(math.Round(s.DerivedStatsView().MaxHP))
+	if maxHP < 1 {
+		return 1
+	}
+	return maxHP
+}
+
+// CharacterProgressionView returns the authoritative protocol view of the
+// current progression state.
+func (s *Sim) CharacterProgressionView() CharacterProgressionView {
+	remaining := s.experienceToNextLevel()
+	return CharacterProgressionView{
+		Level:                 s.progression.Level,
+		Experience:            s.progression.Experience,
+		ExperienceToNextLevel: remaining,
+		LevelCap:              s.rules.CharacterProgression.LevelCap,
+		UnspentStatPoints:     s.progression.UnspentStatPoints,
+		BaseStats:             s.progression.BaseStats,
+		DerivedStats:          s.DerivedStatsView(),
+	}
+}
+
+// ProgressionState returns a copy of the mutable progression state.
+func (s *Sim) ProgressionState() CharacterProgressionState {
+	return s.progression
+}
+
+func (s *Sim) DerivedStatsView() DerivedStatsView {
+	stats := s.progression.BaseStats
+	eval := func(key string) float64 {
+		formula := s.rules.CharacterProgression.DerivedStats[key]
+		v := formula.Base +
+			formula.PerStr*float64(stats.Str) +
+			formula.PerDex*float64(stats.Dex) +
+			formula.PerVit*float64(stats.Vit) +
+			formula.PerMagic*float64(stats.Magic)
+		if formula.Min != nil && v < *formula.Min {
+			v = *formula.Min
+		}
+		if formula.Max != nil && v > *formula.Max {
+			v = *formula.Max
+		}
+		return v
+	}
+	return DerivedStatsView{
+		DamageMin:     eval("damage_min"),
+		DamageMax:     eval("damage_max"),
+		Armor:         eval("armor"),
+		AttackSpeed:   eval("attack_speed"),
+		HitChance:     eval("hit_chance"),
+		CritChance:    eval("crit_chance"),
+		CritDamage:    eval("crit_damage"),
+		MovementSpeed: eval("movement_speed"),
+		MaxHP:         eval("max_hp"),
+		MaxMana:       eval("max_mana"),
+	}
+}
+
+func (s *Sim) experienceToNextLevel() *int {
+	nextXP, ok := s.rules.nextLevelTotalXP(s.progression.Level)
+	if !ok {
+		return nil
+	}
+	remaining := nextXP - s.progression.Experience
+	if remaining < 0 {
+		remaining = 0
+	}
+	return &remaining
+}
+
+func (r *Rules) nextLevelTotalXP(level int) (int, bool) {
+	nextXP, ok := r.CharacterProgression.XPThresholds[level]
+	return nextXP, ok
 }
 
 func (s *Sim) playerProjectileInFlight() bool {
@@ -2522,6 +2784,7 @@ func (s *Sim) Snapshot() Snapshot {
 		Inventory:             inventory,
 		Equipped:              equipped,
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
+		CharacterProgression:  s.CharacterProgressionView(),
 		RecentEvents:          []Event{},
 	}
 }

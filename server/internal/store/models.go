@@ -69,12 +69,42 @@ type CharacterWaypoint struct {
 	DiscoveredAt time.Time
 }
 
+// CharacterBaseStats are the durable base stat allocations for a character.
+type CharacterBaseStats struct {
+	Str   int
+	Dex   int
+	Vit   int
+	Magic int
+}
+
+// CharacterProgressionDefaults is the seed row supplied by game rules when a
+// character has no durable progression yet.
+type CharacterProgressionDefaults struct {
+	Level             int
+	Experience        int
+	UnspentStatPoints int
+	Stats             CharacterBaseStats
+}
+
+// CharacterProgression is durable character-owned XP, level, and base stats.
+type CharacterProgression struct {
+	AccountID         string
+	CharacterID       string
+	Level             int
+	Experience        int
+	UnspentStatPoints int
+	Stats             CharacterBaseStats
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
 // SessionStartSnapshot freezes the character progression visible when a
 // session was created. Replay uses this instead of mutable live character rows.
 type SessionStartSnapshot struct {
-	SessionID string
-	Items     []CharacterItemInstance
-	Waypoints []CharacterWaypoint
+	SessionID   string
+	Items       []CharacterItemInstance
+	Waypoints   []CharacterWaypoint
+	Progression *CharacterProgression
 }
 
 // SessionInput is a recorded authoritative input (spec 4.6, ADR D8.2).

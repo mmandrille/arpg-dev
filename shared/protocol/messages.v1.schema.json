@@ -21,6 +21,7 @@
         "unequip_intent",
         "drop_intent",
         "use_intent",
+        "allocate_stat_intent",
         "session_snapshot",
         "state_delta",
         "intent_accepted",
@@ -57,6 +58,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/drop_intent" } } } },
     { "if": { "properties": { "type": { "const": "use_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/use_intent" } } } },
+    { "if": { "properties": { "type": { "const": "allocate_stat_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/allocate_stat_intent" } } } },
     { "if": { "properties": { "type": { "const": "intent_accepted" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/intent_accepted" } } } },
     { "if": { "properties": { "type": { "const": "intent_rejected" } } },
@@ -159,6 +162,15 @@
       "additionalProperties": false,
       "properties": {
         "item_instance_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "allocate_stat_intent": {
+      "type": "object",
+      "required": ["stat", "points"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "type": "string", "enum": ["str", "dex", "vit", "magic"] },
+        "points": { "type": "integer", "minimum": 1 }
       }
     },
     "intent_accepted": {

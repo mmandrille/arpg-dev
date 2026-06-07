@@ -366,7 +366,25 @@ func _initialize() -> void:
 			_fail("guarded_chest guarded monster count mismatch")
 			return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation)")
+	# 18. Character progression golden mirrors display-side derived formulas.
+	var progression_rules := _read(shared.path_join("rules/character_progression.v0.json"))
+	var progression_golden := _read(shared.path_join("golden/character_progression.json"))
+	if progression_rules["base_stats"] != progression_golden["base_stats"]:
+		_fail("character_progression base stats mismatch")
+		return
+	for c in progression_golden["cases"]:
+		var stats: Dictionary = c["base_stats"].duplicate(true)
+		if c.has("allocated_stat"):
+			stats[str(c["allocated_stat"])] = int(stats[str(c["allocated_stat"])]) + int(c["allocated_points"])
+		var expected: Dictionary = c["expected"]
+		for key in progression_rules["derived_stats"].keys():
+			var got := _eval_progression_formula(progression_rules["derived_stats"][key], stats)
+			var want := float(expected["derived_stats"][key])
+			if not is_equal_approx(got, want):
+				_fail("character_progression case %s %s got %.4f want %.4f" % [str(c["name"]), str(key), got, want])
+				return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression)")
 	quit(0)
 
 
@@ -384,6 +402,19 @@ func _read(path: String) -> Dictionary:
 
 func _vec2_equals(value: Dictionary, x: float, y: float) -> bool:
 	return is_equal_approx(float(value.get("x", NAN)), x) and is_equal_approx(float(value.get("y", NAN)), y)
+
+
+func _eval_progression_formula(formula: Dictionary, stats: Dictionary) -> float:
+	var value := float(formula.get("base", 0.0))
+	value += float(formula.get("per_str", 0.0)) * float(stats.get("str", 0))
+	value += float(formula.get("per_dex", 0.0)) * float(stats.get("dex", 0))
+	value += float(formula.get("per_vit", 0.0)) * float(stats.get("vit", 0))
+	value += float(formula.get("per_magic", 0.0)) * float(stats.get("magic", 0))
+	if formula.has("min"):
+		value = maxf(value, float(formula["min"]))
+	if formula.has("max"):
+		value = minf(value, float(formula["max"]))
+	return value
 
 
 func _fail(msg: String) -> void:

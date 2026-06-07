@@ -31,6 +31,10 @@ Workflow: `/next` → write spec → `/plan` → `/execute` → `/finish`. Do no
 
 Edit skills only under `skills/` — never duplicate into `.cursor/` or `.claude/`.
 
+## Git workflow
+
+Do **not** create new branches. Work only on the branch already checked out — even if it is `main`. If a feature branch is needed, the user creates and checks it out before development begins.
+
 ## Development priority
 
 While the game is still in active development, do **not** preserve backward compatibility just for its own sake. Prefer the cleanest, healthiest implementation and update contracts, fixtures, tests, tools, and docs together.

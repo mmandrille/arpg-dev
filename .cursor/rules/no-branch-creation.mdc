@@ -1,0 +1,13 @@
+---
+description: Never create git branches; work only on the current checkout
+alwaysApply: true
+---
+
+# Git branch policy
+
+Do **not** create, checkout, or suggest new git branches.
+
+- Work only on whatever branch is currently checked out — including `main`.
+- Never run `git checkout -b`, `git switch -c`, or equivalent branch-creation commands.
+- If a task would benefit from a feature branch, tell the user to create and check it out before development starts.
+- Commits, pushes, and PRs use the current branch unless the user explicitly directs otherwise.

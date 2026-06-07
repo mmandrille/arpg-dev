@@ -147,7 +147,7 @@ After writing the plan, tell the user:
 
 1. Plan path created/updated.
 2. Any spec edits you recommend (if not already applied).
-3. Suggested branch: `feature/<codename>` per spec.
+3. Reminder: work stays on the current branch (do not create branches).
 4. Next step: `/execute docs/plans/vN_YYYY-MM-DD-<codename>.md`
 
 ## Examples

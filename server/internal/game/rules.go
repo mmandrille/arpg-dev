@@ -13,18 +13,19 @@ import (
 // Go server and the Godot client read the same files (ADR-0001 D6); this is the
 // server's loader and typed view.
 type Rules struct {
-	Combat            Combat
-	Navigation        NavigationRules
-	Items             map[string]ItemDef
-	ItemTemplates     map[string]ItemTemplateDef
-	Rarities          map[string]RarityDef
-	RarityOrder       []string
-	TreasureClasses   map[string]TreasureClassDef
-	Monsters          map[string]MonsterDef
-	LootTables        map[string]LootTable
-	Interactables     map[string]InteractableDef
-	Worlds            map[string]WorldDef
-	DungeonGeneration DungeonGenerationRules
+	Combat               Combat
+	Navigation           NavigationRules
+	Items                map[string]ItemDef
+	ItemTemplates        map[string]ItemTemplateDef
+	Rarities             map[string]RarityDef
+	RarityOrder          []string
+	TreasureClasses      map[string]TreasureClassDef
+	CharacterProgression CharacterProgressionRules
+	Monsters             map[string]MonsterDef
+	LootTables           map[string]LootTable
+	Interactables        map[string]InteractableDef
+	Worlds               map[string]WorldDef
+	DungeonGeneration    DungeonGenerationRules
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -59,6 +60,27 @@ type DungeonGenerationRules struct {
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
 	LevelNames               map[string]string        `json:"level_names"`
 	DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
+}
+
+// CharacterProgressionRules controls XP thresholds, level-up points, base
+// stats, and derived-stat formulas.
+type CharacterProgressionRules struct {
+	BaseStats      BaseStatsView
+	PointsPerLevel int
+	LevelCap       int
+	XPThresholds   map[int]int
+	DerivedStats   map[string]LinearStatFormula
+}
+
+type LinearStatFormula struct {
+	Type     string   `json:"type"`
+	Base     float64  `json:"base"`
+	PerStr   float64  `json:"per_str"`
+	PerDex   float64  `json:"per_dex"`
+	PerVit   float64  `json:"per_vit"`
+	PerMagic float64  `json:"per_magic"`
+	Min      *float64 `json:"min"`
+	Max      *float64 `json:"max"`
 }
 
 type DungeonFloorSize struct {
@@ -173,6 +195,7 @@ type MonsterDef struct {
 	AggroRadius       float64      `json:"aggro_radius,omitempty"`
 	LeashRadius       float64      `json:"leash_radius,omitempty"`
 	MoveSpeed         float64      `json:"move_speed,omitempty"`
+	XPReward          int          `json:"xp_reward,omitempty"`
 }
 
 func (d MonsterDef) effectiveBehavior() string {
@@ -295,6 +318,73 @@ func LoadRules(dir string) (*Rules, error) {
 		MaxAutoSteps: navigation.MaxAutoSteps,
 		GridBounds:   navigation.GridBounds,
 		StopDistance: navigation.StopDistance,
+	}
+
+	var progression struct {
+		Version         int           `json:"version"`
+		BaseStats       BaseStatsView `json:"base_stats"`
+		PointsPerLevel  int           `json:"points_per_level"`
+		LevelCap        int           `json:"level_cap"`
+		ExperienceCurve struct {
+			Type   string `json:"type"`
+			Levels []struct {
+				Level            int `json:"level"`
+				NextLevelTotalXP int `json:"next_level_total_xp"`
+			} `json:"levels"`
+		} `json:"experience_curve"`
+		DerivedStats map[string]LinearStatFormula `json:"derived_stats"`
+	}
+	if err := readJSON(filepath.Join(dir, "character_progression.v0.json"), &progression); err != nil {
+		return nil, err
+	}
+	if progression.BaseStats.Str <= 0 || progression.BaseStats.Dex <= 0 || progression.BaseStats.Vit <= 0 || progression.BaseStats.Magic <= 0 {
+		return nil, fmt.Errorf("game: invalid rules character_progression.base_stats: all stats must be positive")
+	}
+	if progression.PointsPerLevel <= 0 {
+		return nil, fmt.Errorf("game: invalid rules character_progression.points_per_level: must be positive")
+	}
+	if progression.LevelCap < 2 {
+		return nil, fmt.Errorf("game: invalid rules character_progression.level_cap: must be >= 2")
+	}
+	if progression.ExperienceCurve.Type != "table" {
+		return nil, fmt.Errorf("game: invalid rules character_progression.experience_curve.type: %s", progression.ExperienceCurve.Type)
+	}
+	thresholds := make(map[int]int, len(progression.ExperienceCurve.Levels))
+	prevXP := 0
+	for _, row := range progression.ExperienceCurve.Levels {
+		if row.Level < 1 || row.Level >= progression.LevelCap {
+			return nil, fmt.Errorf("game: invalid rules character_progression.experience_curve.level: %d", row.Level)
+		}
+		if row.NextLevelTotalXP <= prevXP {
+			return nil, fmt.Errorf("game: invalid rules character_progression.experience_curve.%d: xp must increase", row.Level)
+		}
+		thresholds[row.Level] = row.NextLevelTotalXP
+		prevXP = row.NextLevelTotalXP
+	}
+	for level := 1; level < progression.LevelCap; level++ {
+		if _, ok := thresholds[level]; !ok {
+			return nil, fmt.Errorf("game: invalid rules character_progression.experience_curve: missing level %d", level)
+		}
+	}
+	requiredDerived := []string{"damage_min", "damage_max", "armor", "attack_speed", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana"}
+	for _, key := range requiredDerived {
+		formula, ok := progression.DerivedStats[key]
+		if !ok {
+			return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats: missing %s", key)
+		}
+		if formula.Type != "linear" {
+			return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats.%s.type: %s", key, formula.Type)
+		}
+		if formula.Min != nil && formula.Max != nil && *formula.Max < *formula.Min {
+			return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats.%s: max must be >= min", key)
+		}
+	}
+	r.CharacterProgression = CharacterProgressionRules{
+		BaseStats:      progression.BaseStats,
+		PointsPerLevel: progression.PointsPerLevel,
+		LevelCap:       progression.LevelCap,
+		XPThresholds:   thresholds,
+		DerivedStats:   progression.DerivedStats,
 	}
 
 	var items struct {
@@ -465,6 +555,9 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	for id, def := range monsters.Monsters {
+		if def.XPReward < 0 {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.xp_reward: must be non-negative", id)
+		}
 		if def.RetaliationDamage != nil {
 			if err := validateDamageRange("monsters."+id+".retaliation_damage", *def.RetaliationDamage); err != nil {
 				return nil, err

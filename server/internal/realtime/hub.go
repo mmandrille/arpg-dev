@@ -63,18 +63,17 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
 		if worldID == "" {
 			worldID = game.DefaultWorldID
 		}
-		var err error
-		sim, err = game.NewSimWithWorld(sess.ID, sess.Seed, h.rules, worldID)
-		if err != nil {
-			h.log.Error("create session sim", "session_id", sess.ID, "world_id", worldID, "error", err)
-			http.Error(w, "could not create session sim", http.StatusInternalServerError)
-			return
-		}
 		start, err := h.store.LoadSessionStartSnapshot(r.Context(), sess.ID)
 		if err != nil {
 			h.metrics.PersistenceErrors.Inc()
 			h.log.Error("load session start snapshot", "session_id", sess.ID, "error", err)
 			http.Error(w, "could not load session start snapshot", http.StatusInternalServerError)
+			return
+		}
+		sim, err = game.NewSimWithWorldProgression(sess.ID, sess.Seed, h.rules, worldID, progressionStateFromStore(h.rules, start.Progression))
+		if err != nil {
+			h.log.Error("create session sim", "session_id", sess.ID, "world_id", worldID, "error", err)
+			http.Error(w, "could not create session sim", http.StatusInternalServerError)
 			return
 		}
 		sim.LoadInventory(persistedItems(start.Items))
@@ -88,6 +87,23 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
 	}
 
 	newRunner(conn, sim, sess, h.store, h.log, h.metrics, meta).run(r.Context())
+}
+
+func progressionStateFromStore(rules *game.Rules, progression *store.CharacterProgression) game.CharacterProgressionState {
+	if progression == nil {
+		return rules.DefaultCharacterProgressionState()
+	}
+	return game.CharacterProgressionState{
+		Level:             progression.Level,
+		Experience:        progression.Experience,
+		UnspentStatPoints: progression.UnspentStatPoints,
+		BaseStats: game.BaseStatsView{
+			Str:   progression.Stats.Str,
+			Dex:   progression.Stats.Dex,
+			Vit:   progression.Stats.Vit,
+			Magic: progression.Stats.Magic,
+		},
+	}
 }
 
 func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {

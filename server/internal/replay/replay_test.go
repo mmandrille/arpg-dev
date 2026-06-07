@@ -314,7 +314,16 @@ func (f *fakeRepo) ListCharacterWaypoints(context.Context, string) ([]store.Char
 	return nil, nil
 }
 func (f *fakeRepo) AddCharacterWaypoint(context.Context, string, int) error { return nil }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint) error {
+func (f *fakeRepo) GetOrCreateCharacterProgression(context.Context, string, string, store.CharacterProgressionDefaults) (store.CharacterProgression, error) {
+	return store.CharacterProgression{}, nil
+}
+func (f *fakeRepo) GetCharacterProgression(context.Context, string, string) (store.CharacterProgression, error) {
+	return store.CharacterProgression{}, nil
+}
+func (f *fakeRepo) UpsertCharacterProgression(context.Context, string, store.CharacterProgression) error {
+	return nil
+}
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, store.CharacterProgression) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {

@@ -102,6 +102,7 @@ class RuntimeState:
     used_stair_positions: dict[str, dict[str, float]] = field(default_factory=dict)
     discovered_teleporters: dict[int, bool] = field(default_factory=dict)
     used_teleporter_positions: dict[int, dict[str, float]] = field(default_factory=dict)
+    character_progression: dict[str, Any] = field(default_factory=dict)
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -675,6 +676,30 @@ async def execute_step(
         assert_player_hp_equals([player], want, "runtime protocol")
         return
 
+    if action == "allocate_stat":
+        stat = str(step["stat"])
+        points = int(step.get("points", 1))
+        env = make_envelope(
+            "allocate_stat_intent",
+            session_id,
+            state.last_tick,
+            {"stat": stat, "points": points},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        expected = step.get("expect_progression")
+        if isinstance(expected, dict):
+            await wait_for_character_progression(ws, state, expected, loop)
+        return
+
+    if action == "assert_character_progression":
+        assert_character_progression(state.character_progression, step, "runtime protocol")
+        return
+
     if action == "use_inventory_item":
         item_def_id = str(step["item_def_id"])
         bag_index = int(step.get("bag_index", 0))
@@ -854,6 +879,19 @@ async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loo
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_character_progression(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while True:
+        try:
+            assert_character_progression(state.character_progression, expected, "runtime protocol")
+            return
+        except AssertionError:
+            pass
+        if loop.time() > deadline:
+            assert_character_progression(state.character_progression, expected, "runtime protocol")
+        await pump_one(ws, state, timeout=0.1)
+
+
 async def wait_for_player_position(
     ws,
     state: RuntimeState,
@@ -968,6 +1006,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.equipped[c["slot"]] = c.get("item_instance_id")
         elif c["op"] == "teleporter_discovery_update":
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
+        elif c["op"] == "character_progression_update":
+            state.character_progression = dict(c.get("character_progression") or {})
     if state.pending_level_load is not None and delta_level == state.pending_level_load:
         state.pending_level_load = None
     update_runtime_distances(state)
@@ -982,6 +1022,7 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.entities = {str(e["id"]): dict(e) for e in payload.get("entities", [])}
     state.inventory = [dict(i) for i in payload.get("inventory", [])]
     state.equipped = dict(payload.get("equipped", {}))
+    state.character_progression = dict(payload.get("character_progression", {}))
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
         entity_id
@@ -1154,6 +1195,7 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             "reconnect snapshot",
             current_level=int(payload.get("current_level", 0)),
             discovered_teleporters=parse_discovered_teleporters(payload),
+            character_progression=payload.get("character_progression", {}),
         )
         log("reconnect snapshot restored expected scenario state")
 
@@ -1178,6 +1220,15 @@ def assert_player_hp_equals(entities: list[dict], want: int, where: str) -> None
     hp = player.get("hp")
     if hp != want:
         raise AssertionError(f"{where}: player hp {hp} != {want}")
+
+
+def assert_player_max_hp_equals(entities: list[dict], want: int, where: str) -> None:
+    player = find_player_entities(entities)
+    if player is None:
+        raise AssertionError(f"{where}: player not found")
+    max_hp = player.get("max_hp")
+    if max_hp != want:
+        raise AssertionError(f"{where}: player max_hp {max_hp} != {want}")
 
 
 def find_player_entities(entities: list[dict]) -> dict | None:
@@ -1282,6 +1333,32 @@ def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: 
             raise AssertionError(f"{where}: entity count {len(matches)} < {want} for {assertion}: {matches}")
 
 
+def assert_character_progression(progression: dict[str, Any], assertion: dict[str, Any], where: str) -> None:
+    if not progression:
+        raise AssertionError(f"{where}: missing character_progression")
+    for key in ("level", "experience", "unspent_stat_points"):
+        if key in assertion:
+            want = int(assertion[key])
+            got = int(progression.get(key, -1))
+            if got != want:
+                raise AssertionError(f"{where}: character_progression.{key} {got} != {want}: {progression}")
+    base_stats = progression.get("base_stats", {})
+    for key in ("str", "dex", "vit", "magic"):
+        if key in assertion:
+            want = int(assertion[key])
+            got = int(base_stats.get(key, -1))
+            if got != want:
+                raise AssertionError(f"{where}: base_stats.{key} {got} != {want}: {progression}")
+    derived = progression.get("derived_stats", {})
+    expected_derived = assertion.get("derived_stats", {})
+    if isinstance(expected_derived, dict):
+        for key, want_raw in expected_derived.items():
+            got = float(derived.get(key, -999999))
+            want = float(want_raw)
+            if abs(got - want) > 0.000001:
+                raise AssertionError(f"{where}: derived_stats.{key} {got} != {want}: {progression}")
+
+
 def run_assertions(
     assertions: list[Any],
     entities: list[dict],
@@ -1291,6 +1368,7 @@ def run_assertions(
     where: str,
     current_level: int | None = None,
     discovered_teleporters: dict[int, bool] | None = None,
+    character_progression: dict[str, Any] | None = None,
 ) -> None:
     for assertion in assertions:
         if isinstance(assertion, str):
@@ -1344,6 +1422,10 @@ def run_assertions(
             continue
         elif typ == "player_hp_equals":
             assert_player_hp_equals(entities, int(assertion["equals"]), where)
+        elif typ == "player_max_hp_equals":
+            assert_player_max_hp_equals(entities, int(assertion["equals"]), where)
+        elif typ == "character_progression":
+            assert_character_progression(character_progression or {}, assertion, where)
         elif typ == "current_level":
             if current_level is None:
                 raise AssertionError(f"{where}: current_level unavailable")
@@ -1496,6 +1578,18 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             if got < want:
                 raise AssertionError(f"{where}: max damage to {monster_def_id} = {got}, want at least {want}")
             continue
+        if typ == "character_progression":
+            assert_character_progression(state.character_progression, assertion, where)
+            continue
+        if typ == "player_max_hp_equals":
+            player = find_player(state)
+            if player is None:
+                raise AssertionError(f"{where}: player not found")
+            got = int(player.get("max_hp", -1))
+            want = int(assertion["equals"])
+            if got != want:
+                raise AssertionError(f"{where}: player max_hp {got} != {want}")
+            continue
 
 
 def default_manifest_path() -> Path:
@@ -1564,6 +1658,7 @@ def run_verified_session(
         "/state API",
         current_level=int(state.get("current_level", 0)),
         discovered_teleporters=parse_discovered_teleporters(state),
+        character_progression=state.get("character_progression", {}),
     )
     log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 

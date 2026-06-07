@@ -13,6 +13,7 @@ const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
+const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
@@ -45,6 +46,7 @@ var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
 var inventory: Array = []
 var equipped: Dictionary = {}
+var character_progression: Dictionary = {}
 var item_rules: Dictionary = {}
 var item_presentations: Dictionary = {}
 var dungeon_generation: Dictionary = {}
@@ -113,6 +115,7 @@ var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
 var walls_root: Node3D
 var inventory_panel: InventoryPanel
 var consumable_bar: ConsumableBar
+var character_stats_panel: CharacterStatsPanel
 var input_shadow: InputShadowOverlay
 var _health_bar: PlayerHealthBar
 
@@ -257,6 +260,8 @@ func _hide_all_menus() -> void:
 		settings_panel.hide_panel()
 	if pause_menu != null:
 		pause_menu.hide_pause()
+	if character_stats_panel != null:
+		character_stats_panel.hide_display()
 
 
 func _on_continue_pressed() -> void:
@@ -366,6 +371,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	last_server_tick = 0
 	inventory = []
 	equipped = {}
+	character_progression = {}
 	loot_ids.clear()
 	monster_ids.clear()
 	interactable_ids.clear()
@@ -391,6 +397,9 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	_refresh_inventory_ui()
 	if _health_bar != null:
 		_health_bar.update_hp(player_hp, player_max_hp)
+	if character_stats_panel != null:
+		character_stats_panel.hide_display()
+	_refresh_progression_ui()
 	_hide_waypoint_panel()
 	if player_anchor != null:
 		player_anchor.position = Vector3.ZERO
@@ -415,6 +424,7 @@ func _process(delta: float) -> void:
 	if gameplay_active or visual_replay_enabled:
 		for env in client.poll():
 			_handle_message(env)
+	_sync_progression_interactivity()
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
 
@@ -467,9 +477,11 @@ func _apply_snapshot(p: Dictionary) -> void:
 		_upsert_entity(e)
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
+	character_progression = p.get("character_progression", {})
 	if resolver != null:
 		resolver.apply_snapshot(p)
 	_refresh_inventory_ui()
+	_refresh_progression_ui()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
 		_bot_logged_snapshot = true
@@ -516,6 +528,9 @@ func _apply_delta(p: Dictionary) -> void:
 				_refresh_waypoint_panel()
 				if discovered and discovered_level == current_level:
 					_show_waypoint_panel()
+			"character_progression_update":
+				character_progression = c.get("character_progression", {})
+				_refresh_progression_ui()
 			_:
 				pass
 	_refresh_inventory_ui()
@@ -799,6 +814,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				inventory_panel.toggle()
 			get_viewport().set_input_as_handled()
 			return
+		if _is_character_stats_key(event):
+			if character_stats_panel != null:
+				character_stats_panel.toggle()
+				_refresh_progression_ui()
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
@@ -847,6 +868,10 @@ func _handle_input(delta: float) -> void:
 
 func _is_inventory_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_I or event.physical_keycode == KEY_I or event.unicode == 105 or event.unicode == 73
+
+
+func _is_character_stats_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_C or event.physical_keycode == KEY_C or event.unicode == 99 or event.unicode == 67
 
 
 func _is_escape_key(event: InputEventKey) -> bool:
@@ -964,6 +989,8 @@ func _hold_input_allowed() -> bool:
 		return false
 
 	if inventory_panel != null and inventory_panel.visible:
+		return false
+	if character_stats_panel != null and character_stats_panel.visible:
 		return false
 
 	return true
@@ -1321,6 +1348,8 @@ func _start_next_visual_replay() -> void:
 			inventory_panel.hide_display()
 	if consumable_bar != null:
 		consumable_bar.set_interactive(false)
+	if character_stats_panel != null:
+		character_stats_panel.set_allocation_enabled(false)
 	_render_world_walls(world_id)
 	if session_id == "":
 		_debug("visual replay entry missing session_id; skipping")
@@ -1435,6 +1464,9 @@ func _build_scene() -> void:
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(consumable_bar)
+	character_stats_panel = CharacterStatsPanelScript.new()
+	character_stats_panel.allocate_stat_requested.connect(_on_character_stat_requested)
+	ui.add_child(character_stats_panel)
 	_health_bar = PlayerHealthBarScript.new()
 	ui.add_child(_health_bar)
 	_setup_menu_layer()
@@ -1494,6 +1526,35 @@ func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) ->
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
+
+
+func _on_character_stat_requested(stat: String) -> void:
+	if _stat_allocation_blocked():
+		return
+	client.send("allocate_stat_intent", last_server_tick, {"stat": stat, "points": 1})
+
+
+func _stat_allocation_blocked() -> bool:
+	return visual_replay_enabled \
+		or autoplay_enabled \
+		or _menu_blocks_gameplay_input() \
+		or client == null \
+		or client.ready_state() != WebSocketPeer.STATE_OPEN \
+		or player_hp <= 0 \
+		or int(character_progression.get("unspent_stat_points", 0)) <= 0
+
+
+func _refresh_progression_ui() -> void:
+	if character_stats_panel != null:
+		character_stats_panel.set_progression(character_progression)
+		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
+	if consumable_bar != null:
+		consumable_bar.set_character_progression(character_progression)
+
+
+func _sync_progression_interactivity() -> void:
+	if character_stats_panel != null:
+		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
 
 
 func _setup_waypoint_panel(ui: CanvasLayer) -> void:
@@ -1980,7 +2041,9 @@ func get_bot_state() -> Dictionary:
 	var out := {
 		"ws_open": client != null and client.ready_state() == WebSocketPeer.STATE_OPEN,
 		"player_hp": player_hp,
+		"player_max_hp": player_max_hp,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
+		"character_progression": character_progression.duplicate(true),
 		"inventory": inventory.duplicate(true),
 		"equipped": equipped.duplicate(true),
 		"monster_ids": live_monster_ids,
@@ -1988,8 +2051,10 @@ func get_bot_state() -> Dictionary:
 		"interactable_ids": interactable_ids.duplicate(),
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
+		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
+		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
 		"main_menu_visible": main_menu != null and main_menu.visible,
@@ -2052,6 +2117,12 @@ func bot_use_consumable_hotbar(slot_index: int) -> void:
 	if consumable_bar == null:
 		return
 	consumable_bar.use_slot(slot_index)
+
+
+func bot_click_stat_button(stat: String) -> void:
+	if character_stats_panel == null:
+		return
+	character_stats_panel.bot_click_stat_button(stat)
 
 
 func bot_click_menu_button(button: String) -> void:

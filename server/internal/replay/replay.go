@@ -114,7 +114,7 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 	if err != nil {
 		return Reconstruction{Session: sess}, err
 	}
-	recon, err := ReconstructFromInputsWithProgression(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID), recordedInputs, maxTick, persistedItems(start.Items), waypointLevels(start.Waypoints))
+	recon, err := ReconstructFromInputsWithProgression(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID), recordedInputs, maxTick, persistedItems(start.Items), waypointLevels(start.Waypoints), progressionStateFromStore(rules, start.Progression))
 	if err != nil {
 		return Reconstruction{Session: sess}, err
 	}
@@ -154,11 +154,11 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 	}
 
 	byTick := inputsByTick(recordedInputs)
-	sim, err := game.NewSimWithWorld(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID))
+	start, err := repo.LoadSessionStartSnapshot(ctx, sessionID)
 	if err != nil {
 		return Timeline{}, err
 	}
-	start, err := repo.LoadSessionStartSnapshot(ctx, sessionID)
+	sim, err := game.NewSimWithWorldProgression(sessionID, sess.Seed, rules, normalizeWorldID(sess.WorldID), progressionStateFromStore(rules, start.Progression))
 	if err != nil {
 		return Timeline{}, err
 	}
@@ -227,10 +227,10 @@ func StoredInputs(rows []store.SessionInput) ([]RecordedInput, int64, error) {
 // ReconstructFromInputs rebuilds a session from an already-decoded input stream.
 // throughTick is inclusive; pass -1 for a fresh untouched session.
 func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64) (Reconstruction, error) {
-	return ReconstructFromInputsWithProgression(sessionID, seed, rules, worldID, inputs, throughTick, nil, nil)
+	return ReconstructFromInputsWithProgression(sessionID, seed, rules, worldID, inputs, throughTick, nil, nil, rules.DefaultCharacterProgressionState())
 }
 
-func ReconstructFromInputsWithProgression(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64, items []game.PersistedItem, waypointLevels []int) (Reconstruction, error) {
+func ReconstructFromInputsWithProgression(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64, items []game.PersistedItem, waypointLevels []int, progression game.CharacterProgressionState) (Reconstruction, error) {
 	byTick := make(map[int64][]game.Input)
 	meta := ResumeMetadata{
 		SeenMessageIDs: make(map[string]bool, len(inputs)),
@@ -245,7 +245,7 @@ func ReconstructFromInputsWithProgression(sessionID, seed string, rules *game.Ru
 		}
 	}
 
-	sim, err := game.NewSimWithWorld(sessionID, seed, rules, worldID)
+	sim, err := game.NewSimWithWorldProgression(sessionID, seed, rules, worldID, progression)
 	if err != nil {
 		return Reconstruction{}, err
 	}
@@ -302,6 +302,23 @@ func waypointLevels(waypoints []store.CharacterWaypoint) []int {
 		out = append(out, wp.Level)
 	}
 	return out
+}
+
+func progressionStateFromStore(rules *game.Rules, progression *store.CharacterProgression) game.CharacterProgressionState {
+	if progression == nil {
+		return rules.DefaultCharacterProgressionState()
+	}
+	return game.CharacterProgressionState{
+		Level:             progression.Level,
+		Experience:        progression.Experience,
+		UnspentStatPoints: progression.UnspentStatPoints,
+		BaseStats: game.BaseStatsView{
+			Str:   progression.Stats.Str,
+			Dex:   progression.Stats.Dex,
+			Vit:   progression.Stats.Vit,
+			Magic: progression.Stats.Magic,
+		},
+	}
 }
 
 func inputsByTick(inputs []RecordedInput) map[int64][]game.Input {

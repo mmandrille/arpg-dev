@@ -32,3 +32,28 @@ func TestDecodeTeleportRejectsMissingOrPositiveTargetLevel(t *testing.T) {
 		})
 	}
 }
+
+func TestDecodeAllocateStatIntent(t *testing.T) {
+	in, ok := Decode(TypeAllocateStat, "msg_stat", "", json.RawMessage(`{"stat":"vit","points":1}`))
+	if !ok {
+		t.Fatal("Decode allocate_stat_intent rejected valid payload")
+	}
+	if in.AllocateStat == nil || in.AllocateStat.Stat != "vit" || in.AllocateStat.Points != 1 {
+		t.Fatalf("decoded allocate stat = %+v", in.AllocateStat)
+	}
+}
+
+func TestDecodeAllocateStatIntentRejectsInvalidPayload(t *testing.T) {
+	tests := []json.RawMessage{
+		json.RawMessage(`{"stat":"luck","points":1}`),
+		json.RawMessage(`{"stat":"str","points":0}`),
+		json.RawMessage(`{"stat":"str","points":-1}`),
+		json.RawMessage(`{"points":1}`),
+		json.RawMessage(`{"stat":"str"}`),
+	}
+	for _, payload := range tests {
+		if _, ok := Decode(TypeAllocateStat, "msg_stat", "", payload); ok {
+			t.Fatalf("Decode accepted invalid allocate stat payload %s", payload)
+		}
+	}
+}

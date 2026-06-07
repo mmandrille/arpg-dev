@@ -43,7 +43,7 @@ Review the plan before touching code. Produce a short **Plan Review** in chat.
 | **Verify commands** | Each task has runnable commands; final verification includes `make ci`. |
 | **Bot proof** | Gameplay/protocol tasks include scenario JSON + `make bot`. |
 | **Golden/contracts** | Shared changes have `make validate-shared`; golden lists Go + GDScript tests. |
-| **Branch** | Plan branch matches spec; not implementing on `main` without user consent. |
+| **Branch** | Work only on the current checkout; never create or switch branches. |
 | **Drift** | Plan still matches as-built code (prior slices may have landed since plan was written). |
 | **Plugin checklist** | Client tasks include adopt/borrow/reject if UI/art is in scope. |
 

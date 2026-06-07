@@ -38,7 +38,10 @@ type CharacterProgressionRepo interface {
 	RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error
 	ListCharacterWaypoints(ctx context.Context, characterID string) ([]CharacterWaypoint, error)
 	AddCharacterWaypoint(ctx context.Context, characterID string, level int) error
-	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint) error
+	GetOrCreateCharacterProgression(ctx context.Context, accountID, characterID string, defaults CharacterProgressionDefaults) (CharacterProgression, error)
+	GetCharacterProgression(ctx context.Context, accountID, characterID string) (CharacterProgression, error)
+	UpsertCharacterProgression(ctx context.Context, accountID string, progression CharacterProgression) error
+	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, progression CharacterProgression) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
 }
 

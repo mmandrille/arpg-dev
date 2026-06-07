@@ -130,13 +130,19 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character items")
 		return
 	}
+	progression, err := s.store.GetOrCreateCharacterProgression(ctx, accountID, char.ID, progressionDefaultsFromRules(s.rules))
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character progression")
+		return
+	}
 	waypoints, err := s.store.ListCharacterWaypoints(ctx, char.ID)
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character waypoints")
 		return
 	}
-	if err := s.store.CreateSessionStartSnapshot(ctx, sess.ID, accountID, char.ID, items, waypoints); err != nil {
+	if err := s.store.CreateSessionStartSnapshot(ctx, sess.ID, accountID, char.ID, items, waypoints, progression); err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
 		return
@@ -196,6 +202,21 @@ func sessionResponse(sess store.Session) createSessionResponse {
 		Seed:        sess.Seed,
 		WorldID:     sess.WorldID,
 		WSURL:       "/v0/ws?session_id=" + sess.ID,
+	}
+}
+
+func progressionDefaultsFromRules(rules *game.Rules) store.CharacterProgressionDefaults {
+	state := rules.DefaultCharacterProgressionState()
+	return store.CharacterProgressionDefaults{
+		Level:             state.Level,
+		Experience:        state.Experience,
+		UnspentStatPoints: state.UnspentStatPoints,
+		Stats: store.CharacterBaseStats{
+			Str:   state.BaseStats.Str,
+			Dex:   state.BaseStats.Dex,
+			Vit:   state.BaseStats.Vit,
+			Magic: state.BaseStats.Magic,
+		},
 	}
 }
 

@@ -11,8 +11,8 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v27 — `hold-click-controls` (sustained LMB attack and floor follow-move) |
-| **Active branch** | `feature/hold-click-controls` |
+| **Latest completed slice** | v27 — `hold-click-controls`; v26 — `character-stats-and-leveling` is complete on the current branch |
+| **Active branch** | `feature/character-stats-and-leveling` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
 
@@ -41,6 +41,7 @@ v22_* = character-scoped-persistence
 v23_* = item-templates-and-rolled-drops
 v24_* = main-menu-and-character-start
 v25_* = treasure-classes-and-guarded-chests
+v26_* = character-stats-and-leveling
 v27_* = hold-click-controls
 ```
 
@@ -87,6 +88,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v23** | `item-templates-and-rolled-drops` | Complete (`make ci` green) | [`v23_spec-item-templates-and-rolled-drops.md`](specs/v23_spec-item-templates-and-rolled-drops.md) | [`v23_2026-06-07-item-templates-and-rolled-drops.md`](plans/v23_2026-06-07-item-templates-and-rolled-drops.md) |
 | **v24** | `main-menu-and-character-start` | Complete (`make ci` green) | [`v24_spec-main-menu-and-character-start.md`](specs/v24_spec-main-menu-and-character-start.md) | [`v24_2026-06-07-main-menu-and-character-start.md`](plans/v24_2026-06-07-main-menu-and-character-start.md) |
 | **v25** | `treasure-classes-and-guarded-chests` | Complete (`make ci` green) | [`v25_spec-treasure-classes-and-guarded-chests.md`](specs/v25_spec-treasure-classes-and-guarded-chests.md) | [`v25_2026-06-07-treasure-classes-and-guarded-chests.md`](plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md) |
+| **v26** | `character-stats-and-leveling` | Complete (`make ci` green) | [`v26_spec-character-stats-and-leveling.md`](specs/v26_spec-character-stats-and-leveling.md) | [`v26_2026-06-07-character-stats-and-leveling.md`](plans/v26_2026-06-07-character-stats-and-leveling.md) |
 | **v27** | `hold-click-controls` | Complete (`make ci` green) | [`v27_spec-hold-click-controls.md`](specs/v27_spec-hold-click-controls.md) | [`v27_2026-06-07-hold-click-controls.md`](plans/v27_2026-06-07-hold-click-controls.md) |
 
 ---
@@ -586,6 +588,34 @@ multiple ordered drop attempts, while rare procedural chests create guarded dung
 **Explicit non-goals:** no Magic Find stat or rarity modifier, no unique/set catalogs, no real gold
 wallet, no boss-floor rules, no production chest art/animation/audio, and no client-side drop logic.
 
+### v26 — Character stats and leveling
+
+**Proves:** Character-owned XP, levels, stat points, and derived substats can be durable,
+server-authoritative progression while the Godot client remains a renderer/input surface.
+
+- Shared `character_progression.v0.json` defines base stats, a table XP curve, points per level,
+  and bounded derived-stat formulas for damage, armor, attack speed, hit chance, crit chance,
+  crit damage, movement speed, HP, and mana.
+- Dungeon mobs now award positive XP; monster kill XP applies exactly once, crosses level
+  thresholds in order, and grants 5 unspent stat points per level.
+- `character_progression` persists per character, and session-start progression snapshots preserve
+  deterministic reconnect/replay boundaries.
+- `allocate_stat_intent` is server-authoritative; invalid stats, dead-player allocation, and
+  overspending reject without mutating state.
+- `vit` allocation updates derived `max_hp` and raises current HP by the gained max; the first
+  `str` damage hook adds derived damage to melee/fixed weapon damage.
+- Armor, crit, hit chance, attack speed, movement speed, max mana, and magic damage are computed
+  and displayed but remain gameplay-deferred.
+- Godot adds a left-side `C`-toggle character sheet with stat `+` buttons and a compact XP bar
+  below the hotbar; client state only updates after authoritative snapshots/deltas.
+- Protocol bot scenario `18_character_stats_and_leveling.json` proves XP, level-up points, VIT
+  allocation, overspend rejection, `/state`, replay, reconnect, and fresh-session persistence.
+- Client bot scenario `09_character_stats_panel.json` proves the stats panel, XP bar, pause/menu
+  allocation lock, VIT spend through the `+` button, and max HP UI update.
+
+**Explicit non-goals:** no passive skill tree, no respec, no class selection, no stat requirements,
+no mana consumers, no armor/crit/hit/attack-speed gameplay, and no main-menu character summaries.
+
 ### v27 — Hold click controls
 
 **Proves:** Diablo-style sustained left-click input can live entirely in the Godot client by repeating
@@ -646,6 +676,7 @@ character_persistence: same-account fresh sessions retain gear/equipment and dis
 rolled_drops: kill dungeon mob → pick up/equip rolled cave_blade → prove rolled metadata persists
 main_menu_flow: menu settings → named character creation → pause input lock → return → continue fresh session
 treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob → open chest once → pick up chest loot
+character_stats_and_leveling: descend to dungeon → kill mobs for XP → level up → spend VIT → prove persistence
 ```
 
 **Verify:**
@@ -731,6 +762,10 @@ and a Godot client bot proof for the complete menu path.
 monster/chest loot, deterministic rare chest generation with guarded monster bonus, open-once chest
 loot, and bot/golden coverage for the complete path.
 
+**Character stats and leveling are now authoritative.** v26 adds durable XP, levels, stat points,
+base stats, derived substats, stat allocation, VIT max-HP effects, STR damage contribution, a
+Godot character sheet, an XP bar, and protocol/client bot proofs.
+
 **Sustained left-click controls are now client-side.** v27 adds hold-to-attack on monsters and
 hold-to-move on floor by repeating existing `action_intent` / `move_to_intent` at `SEND_INTERVAL`,
 with sticky targets, move epsilon, and headless unit coverage — no protocol or server changes.
@@ -739,9 +774,9 @@ with sticky targets, move epsilon, and headless unit coverage — no protocol or
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, character summaries, stash/vendors/gold, quest progress, stats/skills/XP, respawn/checkpoints, durable dungeon map snapshots | v22/v24 non-goals, ADR-0008 deferred |
-| Combat | Armor, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling | v0/v4/v12/v17/v21/v23 non-goals |
-| Itemization | Affix grammar, procedural item names, armor/jewelry/offhand, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, depth-banded treasure classes, boss-floor chest integration | v23/v25 non-goals, ADR-0009 deferred |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
+| Combat | Armor mitigation, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling | v0/v4/v12/v17/v21/v23/v26 non-goals |
+| Itemization | Affix grammar, procedural item names, armor/jewelry/offhand, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, depth-banded treasure classes, boss-floor chest integration | v23/v25/v26 non-goals, ADR-0009 deferred |
 | Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
@@ -757,7 +792,7 @@ with sticky targets, move epsilon, and headless unit coverage — no protocol or
 2. **Read ADR-0001** and any feature-specific ADRs listed above.
 3. **Spec first** — create or read `docs/specs/vN_spec-<feature>.md` (SDD; `N` = next execution order).
 4. **Plan second** — create `docs/plans/vN_<YYYY-MM-DD>-<feature>.md` with file map + verification commands.
-5. **Branch** — `feature/<codename>` off latest integration branch (today: merge target TBD).
+5. **Branch** — stay on the current checkout; do not create branches (user creates them before development if needed).
 6. **Implement** shared → server → client → bot/smoke → docs; keep `make ci` green.
 7. **Update this file** when the slice completes: new row in lifecycle table, summary, and any new gaps.
 

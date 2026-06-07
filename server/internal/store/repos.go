@@ -320,8 +320,93 @@ func (s *Store) AddCharacterWaypoint(ctx context.Context, characterID string, le
 	return nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint) error {
+func (s *Store) GetOrCreateCharacterProgression(ctx context.Context, accountID, characterID string, defaults CharacterProgressionDefaults) (CharacterProgression, error) {
+	prog := CharacterProgression{AccountID: accountID, CharacterID: characterID}
+	err := s.pool.QueryRow(ctx,
+		`INSERT INTO character_progression (
+		   account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic
+		 )
+		 SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9
+		 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+		 ON CONFLICT (character_id) DO NOTHING
+		 RETURNING account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic, created_at, updated_at`,
+		accountID, characterID, defaults.Level, defaults.Experience, defaults.UnspentStatPoints,
+		defaults.Stats.Str, defaults.Stats.Dex, defaults.Stats.Vit, defaults.Stats.Magic,
+	).Scan(
+		&prog.AccountID, &prog.CharacterID, &prog.Level, &prog.Experience, &prog.UnspentStatPoints,
+		&prog.Stats.Str, &prog.Stats.Dex, &prog.Stats.Vit, &prog.Stats.Magic, &prog.CreatedAt, &prog.UpdatedAt,
+	)
+	if err == nil {
+		return prog, nil
+	}
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return CharacterProgression{}, fmt.Errorf("store: create character progression: %w", err)
+	}
+	return s.GetCharacterProgression(ctx, accountID, characterID)
+}
+
+func (s *Store) GetCharacterProgression(ctx context.Context, accountID, characterID string) (CharacterProgression, error) {
+	var prog CharacterProgression
+	err := s.pool.QueryRow(ctx,
+		`SELECT account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic, created_at, updated_at
+		 FROM character_progression
+		 WHERE account_id = $1 AND character_id = $2`,
+		accountID, characterID,
+	).Scan(
+		&prog.AccountID, &prog.CharacterID, &prog.Level, &prog.Experience, &prog.UnspentStatPoints,
+		&prog.Stats.Str, &prog.Stats.Dex, &prog.Stats.Vit, &prog.Stats.Magic, &prog.CreatedAt, &prog.UpdatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return CharacterProgression{}, ErrNotFound
+	}
+	if err != nil {
+		return CharacterProgression{}, fmt.Errorf("store: get character progression: %w", err)
+	}
+	return prog, nil
+}
+
+func (s *Store) UpsertCharacterProgression(ctx context.Context, accountID string, progression CharacterProgression) error {
+	tag, err := s.pool.Exec(ctx,
+		`INSERT INTO character_progression (
+		   account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic
+		 )
+		 SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9
+		 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+		 ON CONFLICT (character_id) DO UPDATE SET
+		   level = EXCLUDED.level,
+		   experience = EXCLUDED.experience,
+		   unspent_stat_points = EXCLUDED.unspent_stat_points,
+		   stat_str = EXCLUDED.stat_str,
+		   stat_dex = EXCLUDED.stat_dex,
+		   stat_vit = EXCLUDED.stat_vit,
+		   stat_magic = EXCLUDED.stat_magic,
+		   updated_at = now()
+		 WHERE character_progression.account_id = EXCLUDED.account_id`,
+		accountID, progression.CharacterID, progression.Level, progression.Experience, progression.UnspentStatPoints,
+		progression.Stats.Str, progression.Stats.Dex, progression.Stats.Vit, progression.Stats.Magic,
+	)
+	if err != nil {
+		return fmt.Errorf("store: upsert character progression: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, progression CharacterProgression) error {
 	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO session_start_character_progression (
+			   session_id, account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic
+			 )
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			 ON CONFLICT (session_id) DO NOTHING`,
+			sessionID, accountID, characterID, progression.Level, progression.Experience, progression.UnspentStatPoints,
+			progression.Stats.Str, progression.Stats.Dex, progression.Stats.Vit, progression.Stats.Magic,
+		); err != nil {
+			return fmt.Errorf("store: insert session start progression: %w", err)
+		}
 		for _, item := range items {
 			var slot any
 			if item.Slot != "" {
@@ -360,6 +445,22 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 
 func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error) {
 	snap := SessionStartSnapshot{SessionID: sessionID}
+	var prog CharacterProgression
+	err := s.pool.QueryRow(ctx,
+		`SELECT account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic, created_at, created_at
+		 FROM session_start_character_progression
+		 WHERE session_id = $1`,
+		sessionID,
+	).Scan(
+		&prog.AccountID, &prog.CharacterID, &prog.Level, &prog.Experience, &prog.UnspentStatPoints,
+		&prog.Stats.Str, &prog.Stats.Dex, &prog.Stats.Vit, &prog.Stats.Magic, &prog.CreatedAt, &prog.UpdatedAt,
+	)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return snap, fmt.Errorf("store: load session start progression: %w", err)
+	}
+	if err == nil {
+		snap.Progression = &prog
+	}
 	itemRows, err := s.pool.Query(ctx,
 		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, created_at
 		 FROM session_start_item_instances

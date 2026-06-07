@@ -419,6 +419,32 @@ async def execute_step(
             await wait_for_event(ws, state, str(event_type), loop)
         return
 
+    if action == "kill_monsters":
+        monster_def_id = str(step["monster_def_id"])
+        max_count = int(step.get("count", 99))
+        killed = 0
+        while killed < max_count:
+            target = find_monster(state, monster_def_id)
+            if target is None:
+                return
+            target_id = str(target["id"])
+            deadline = loop.time() + SLICE_TIMEOUT_S
+            last_action = 0.0
+            while True:
+                current = state.entities.get(target_id)
+                if current is None or int(current.get("hp", 0)) <= 0:
+                    killed += 1
+                    break
+                if loop.time() > deadline:
+                    raise TimeoutError(f"kill_monsters stalled waiting for {monster_def_id} {target_id}")
+                if loop.time() - last_action > 0.12:
+                    env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target_id})
+                    state.pending_attack_monsters[env["message_id"]] = monster_def_id
+                    await ws.send(json.dumps(env))
+                    last_action = loop.time()
+                await pump_one(ws, state, timeout=0.1)
+        return
+
     if action == "move_until_in_range":
         target = resolve_target(state, step)
         await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)))
@@ -682,32 +708,45 @@ async def walk_toward(
         if max(abs(dx), abs(dy)) <= stop_distance:
             return
 
-        direction = {"x": 0, "y": 0}
+        candidates: list[dict[str, int]] = []
         if abs(dx) > 0:
-            direction["x"] = 1 if dx > 0 else -1
-        elif abs(dy) > 0:
-            direction["y"] = 1 if dy > 0 else -1
+            candidates.append({"x": 1 if dx > 0 else -1, "y": 0})
+        if abs(dy) > 0:
+            candidates.append({"x": 0, "y": 1 if dy > 0 else -1})
+        if abs(dx) > 0 and abs(dy) > 0:
+            candidates.append({"x": 1 if dx > 0 else -1, "y": 1 if dy > 0 else -1})
 
-        before = {"x": player_pos["x"], "y": player_pos["y"]}
-        await ws.send(json.dumps(make_envelope(
-            "move_intent",
-            session_id,
-            state.last_tick,
-            {"direction": direction, "duration_ticks": 1},
-        )))
-        await wait_for_player_move(ws, state, before, loop)
+        moved = False
+        for direction in candidates:
+            before = {"x": player_pos["x"], "y": player_pos["y"]}
+            env = make_envelope(
+                "move_intent",
+                session_id,
+                state.last_tick,
+                {"direction": direction, "duration_ticks": 1},
+            )
+            await ws.send(json.dumps(env))
+            if await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop):
+                moved = True
+                break
+        if moved:
+            continue
 
     raise TimeoutError(f"walk_toward exhausted {max_ticks} ticks toward {target_pos}")
 
 
-async def wait_for_player_move(ws, state: RuntimeState, before: dict[str, Any], loop) -> None:
+async def wait_for_player_move_or_accept(ws, state: RuntimeState, before: dict[str, Any], message_id: str, loop) -> bool:
     deadline = loop.time() + SLICE_TIMEOUT_S
     while True:
         player = find_player(state)
         if player is not None:
             pos = player["position"]
             if pos.get("x") != before.get("x") or pos.get("y") != before.get("y"):
-                return
+                return True
+        if message_id in state.accepted_message_ids:
+            return False
+        if message_id in state.rejected_message_reasons:
+            raise AssertionError(f"move_intent rejected: {state.rejected_message_reasons[message_id]}")
         if loop.time() > deadline:
             raise TimeoutError(f"stalled waiting for player movement from {before}")
         await pump_one(ws, state, timeout=0.1)
@@ -987,7 +1026,11 @@ def find_loot(state: RuntimeState, item_def_id: str) -> dict[str, Any] | None:
 
 def find_monster(state: RuntimeState, monster_def_id: str) -> dict[str, Any] | None:
     for entity in state.entities.values():
-        if entity.get("type") == "monster" and entity.get("monster_def_id") == monster_def_id:
+        if (
+            entity.get("type") == "monster"
+            and entity.get("monster_def_id") == monster_def_id
+            and int(entity.get("hp", 0)) > 0
+        ):
             return entity
     return None
 

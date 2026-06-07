@@ -40,6 +40,17 @@
       "aggro_radius": 8.0,
       "leash_radius": 8.0,
       "move_speed": 1.0
+    },
+    "dungeon_mob": {
+      "name": "Cave Wraith",
+      "max_hp": 4,
+      "loot_table": "no_drop",
+      "behavior": "chase",
+      "aggro_radius": 6.0,
+      "leash_radius": 10.0,
+      "move_speed": 1.0,
+      "attack_damage": { "min": 1, "max": 2 },
+      "attack_cooldown_ticks": 40
     }
   }
 }

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/dungeon_monster_attack.v0.schema.json",
+  "title": "Dungeon monster proactive attack golden fixture (v0)",
+  "type": "object",
+  "required": [
+    "description",
+    "session_seed",
+    "level",
+    "monster_def_id",
+    "tick_of_first_player_damaged",
+    "damage",
+    "player_hp_after"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string", "minLength": 1 },
+    "session_seed": { "type": "string", "minLength": 1 },
+    "level": { "type": "integer", "maximum": -1 },
+    "monster_def_id": { "type": "string", "minLength": 1 },
+    "tick_of_first_player_damaged": { "type": "integer", "minimum": 0 },
+    "damage": { "type": "integer", "minimum": 0 },
+    "player_hp_after": { "type": "integer", "minimum": 0 }
+  }
+}

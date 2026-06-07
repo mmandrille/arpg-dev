@@ -13,6 +13,7 @@ type generatedDungeonLevel struct {
 	walls       []wallObstacle
 	stairs      []generatedStair
 	teleporters []generatedTeleporter
+	monsters    []generatedMonster
 	loot        []generatedLoot
 }
 
@@ -29,6 +30,11 @@ type generatedTeleporter struct {
 type generatedLoot struct {
 	itemDefID string
 	pos       Vec2
+}
+
+type generatedMonster struct {
+	defID string
+	pos   Vec2
 }
 
 // GenerateDungeonLevel builds the deterministic non-player contents for one
@@ -58,6 +64,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 			return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
 		}
 		out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
+		if err := placeDungeonMonsters(rng, rules, &out); err != nil {
+			return generatedDungeonLevel{}, err
+		}
 		return out, nil
 	}
 
@@ -74,6 +83,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
 	}
 	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
+	if err := placeDungeonMonsters(rng, rules, &out); err != nil {
+		return generatedDungeonLevel{}, err
+	}
 	out.loot = append(out.loot, generatedLoot{
 		itemDefID: "training_badge",
 		pos:       stairDistantLootPosition(up, rules),
@@ -85,6 +97,14 @@ func (g generatedDungeonLevel) stairPositions() []Vec2 {
 	positions := make([]Vec2, 0, len(g.stairs))
 	for _, stair := range g.stairs {
 		positions = append(positions, stair.pos)
+	}
+	return positions
+}
+
+func (g generatedDungeonLevel) teleporterPositions() []Vec2 {
+	positions := make([]Vec2, 0, len(g.teleporters))
+	for _, teleporter := range g.teleporters {
+		positions = append(positions, teleporter.pos)
 	}
 	return positions
 }
@@ -148,6 +168,63 @@ func randomTeleporterPosition(rng *RNG, rules DungeonGenerationRules, stairs []V
 		return pos, true
 	}
 	return Vec2{}, false
+}
+
+func placeDungeonMonsters(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+	placement := rules.MonsterPlacement
+	for i := 0; i < placement.Count; i++ {
+		pos, ok := randomMonsterPosition(rng, rules, out)
+		if !ok {
+			return fmt.Errorf("game: generate dungeon level %d: could not place monster %d", out.levelNum, i)
+		}
+		out.monsters = append(out.monsters, generatedMonster{defID: placement.MonsterDefID, pos: pos})
+	}
+	return nil
+}
+
+func randomMonsterPosition(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) (Vec2, bool) {
+	placement := rules.MonsterPlacement
+	minX := int(math.Ceil(placement.MarginFromWall))
+	maxX := int(math.Floor(rules.FloorSize.Width - placement.MarginFromWall))
+	minY := int(math.Ceil(placement.MarginFromWall))
+	maxY := int(math.Floor(rules.FloorSize.Height - placement.MarginFromWall))
+	if maxX < minX || maxY < minY {
+		return Vec2{}, false
+	}
+	for attempt := 0; attempt < placement.MaxAttempts; attempt++ {
+		pos := Vec2{
+			X: float64(minX + rng.IntN(maxX-minX+1)),
+			Y: float64(minY + rng.IntN(maxY-minY+1)),
+		}
+		if dungeonMonsterPositionBlocked(pos, rules, *out) {
+			continue
+		}
+		return pos, true
+	}
+	return Vec2{}, false
+}
+
+func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out generatedDungeonLevel) bool {
+	placement := rules.MonsterPlacement
+	if distance(pos, rules.PlayerSpawn) < placement.MinSpawnDistance {
+		return true
+	}
+	for _, stair := range out.stairPositions() {
+		if distance(pos, stair) < placement.MarginFromWall {
+			return true
+		}
+	}
+	for _, teleporter := range out.teleporterPositions() {
+		if distance(pos, teleporter) < placement.MarginFromWall {
+			return true
+		}
+	}
+	for _, monster := range out.monsters {
+		if distance(pos, monster.pos) < placement.MarginFromWall {
+			return true
+		}
+	}
+	return false
 }
 
 func stairDistantLootPosition(anchor Vec2, rules DungeonGenerationRules) Vec2 {

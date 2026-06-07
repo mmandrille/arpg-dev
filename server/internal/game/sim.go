@@ -81,6 +81,8 @@ type entity struct {
 	spawnTick         uint64
 	spawnPos          Vec2
 	aiMode            string
+	lastAttackTick    uint64
+	hasAttacked       bool
 }
 
 // invItem is an internal inventory item.
@@ -393,6 +395,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 	}
 	s.applyMovement(&res)
 	s.advanceMonsterMovement(&res)
+	s.advanceMonsterAttack(&res)
 	s.advanceProjectiles(&res)
 	s.tick++
 	s.syncCompatibilityFields()
@@ -529,6 +532,24 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		loot := &entity{kind: lootEntity, pos: generated.pos, itemDefID: generated.itemDefID}
 		loot.id = s.alloc()
 		level.entities[loot.id] = loot
+	}
+	for _, generated := range gen.monsters {
+		def, ok := s.rules.Monsters[generated.defID]
+		if !ok {
+			return fmt.Errorf("game: generate dungeon level %d: unknown monster %s", level.levelNum, generated.defID)
+		}
+		monster := &entity{
+			kind:         monsterEntity,
+			pos:          generated.pos,
+			spawnPos:     generated.pos,
+			hp:           def.MaxHP,
+			maxHP:        def.MaxHP,
+			monsterDefID: generated.defID,
+			lootTable:    def.LootTable,
+			aiMode:       monsterAIModeIdle,
+		}
+		monster.id = s.alloc()
+		level.entities[monster.id] = monster
 	}
 	return nil
 }
@@ -1537,6 +1558,48 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		})
 		if monster.pos != before {
 			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(monster.view())})
+		}
+	}
+}
+
+func (s *Sim) advanceMonsterAttack(res *TickResult) {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		return
+	}
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		monster := s.activeLevel().entities[id]
+		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
+			continue
+		}
+		def, ok := s.rules.Monsters[monster.monsterDefID]
+		if !ok || def.AttackDamage == nil || def.AttackCooldown <= 0 {
+			continue
+		}
+		if monster.aiMode == monsterAIModeReturn {
+			continue
+		}
+		if !meleeInRange(distance(player.pos, monster.pos), s.playerMeleeReach(), s.targetInteractionRadius(monster)) {
+			continue
+		}
+		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(def.AttackCooldown) {
+			continue
+		}
+		dmg := s.rollRange(*def.AttackDamage)
+		player.hp -= dmg
+		if player.hp < 0 {
+			player.hp = 0
+		}
+		monster.lastAttackTick = s.tick
+		monster.hasAttacked = true
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+		eventType := "player_damaged"
+		if player.hp == 0 {
+			eventType = "player_killed"
+		}
+		res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), Damage: intPtr(dmg)})
+		if player.hp == 0 {
+			return
 		}
 	}
 }

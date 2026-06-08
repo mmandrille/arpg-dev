@@ -165,6 +165,148 @@ func TestDeleteCharacterRemovesProgressionAndSessions(t *testing.T) {
 	}
 }
 
+func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+
+	hostAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "host+"+ids.Token()[:12]+"@example.test")
+	hostChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), hostAcct.ID, "Host")
+	guestAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "guest+"+ids.Token()[:12]+"@example.test")
+	guestChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), guestAcct.ID, "Guest")
+	thirdAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "third+"+ids.Token()[:12]+"@example.test")
+	thirdChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), thirdAcct.ID, "Third")
+
+	sess := store.Session{
+		ID:           ids.New("sess"),
+		AccountID:    hostAcct.ID,
+		CharacterID:  hostChar.ID,
+		Seed:         "c001",
+		WorldID:      "dungeon_levels",
+		Mode:         store.SessionModeCoop,
+		JoinCodeHash: "join_hash",
+		Status:       store.SessionActive,
+	}
+	if err := s.CreateSession(ctx, sess); err != nil {
+		t.Fatalf("create coop session: %v", err)
+	}
+	loaded, err := s.GetSession(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("load coop session: %v", err)
+	}
+	if loaded.Mode != store.SessionModeCoop || loaded.JoinCodeHash != "join_hash" {
+		t.Fatalf("coop session metadata mismatch: %+v", loaded)
+	}
+
+	if err := s.CreateSessionHostMember(ctx, store.SessionMember{
+		SessionID:      sess.ID,
+		AccountID:      hostAcct.ID,
+		CharacterID:    hostChar.ID,
+		PlayerEntityID: "1001",
+		Role:           store.SessionMemberHost,
+		CurrentLevel:   -1,
+	}); err != nil {
+		t.Fatalf("create host member: %v", err)
+	}
+	if err := s.CreateSessionGuestMember(ctx, store.SessionMember{
+		SessionID:      sess.ID,
+		AccountID:      guestAcct.ID,
+		CharacterID:    guestChar.ID,
+		PlayerEntityID: "1007",
+		CurrentLevel:   0,
+	}); err != nil {
+		t.Fatalf("create guest member: %v", err)
+	}
+	if err := s.CreateSessionGuestMember(ctx, store.SessionMember{
+		SessionID:   sess.ID,
+		AccountID:   guestAcct.ID,
+		CharacterID: guestChar.ID,
+	}); !errors.Is(err, store.ErrConflict) {
+		t.Fatalf("duplicate guest = %v, want ErrConflict", err)
+	}
+	if err := s.CreateSessionGuestMember(ctx, store.SessionMember{
+		SessionID:   sess.ID,
+		AccountID:   thirdAcct.ID,
+		CharacterID: thirdChar.ID,
+	}); !errors.Is(err, store.ErrPartyFull) {
+		t.Fatalf("third guest = %v, want ErrPartyFull", err)
+	}
+
+	members, err := s.ListSessionMembers(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("list members: %v", err)
+	}
+	if len(members) != 2 || members[0].Role != store.SessionMemberHost || members[1].Role != store.SessionMemberGuest {
+		t.Fatalf("members order = %+v", members)
+	}
+	if err := s.SetSessionMemberConnected(ctx, sess.ID, guestAcct.ID, guestChar.ID, "1007", 0, 9); err != nil {
+		t.Fatalf("connect guest: %v", err)
+	}
+	member, err := s.GetSessionMemberByAccount(ctx, sess.ID, guestAcct.ID)
+	if err != nil {
+		t.Fatalf("get member by account: %v", err)
+	}
+	if !member.Connected || member.PlayerEntityID != "1007" || member.CurrentLevel != 0 {
+		t.Fatalf("connected member mismatch: %+v", member)
+	}
+	if err := s.SetSessionMemberDisconnected(ctx, sess.ID, guestAcct.ID, guestChar.ID, -1, 12); err != nil {
+		t.Fatalf("disconnect guest: %v", err)
+	}
+	member, _ = s.GetSessionMember(ctx, sess.ID, guestAcct.ID, guestChar.ID)
+	if member.Connected || member.LeftTick == nil || *member.LeftTick != 12 || member.CurrentLevel != -1 {
+		t.Fatalf("disconnected member mismatch: %+v", member)
+	}
+
+	if err := s.AppendInput(ctx, store.SessionInput{
+		ID:                  ids.New("inp"),
+		SessionID:           sess.ID,
+		Tick:                3,
+		Sequence:            1,
+		MessageID:           ids.New("msg"),
+		ActorAccountID:      guestAcct.ID,
+		ActorCharacterID:    guestChar.ID,
+		ActorPlayerEntityID: "1007",
+		Payload:             json.RawMessage(`{"type":"move_intent"}`),
+	}); err != nil {
+		t.Fatalf("append actor input: %v", err)
+	}
+	inputs, err := s.ListInputs(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("list inputs: %v", err)
+	}
+	if len(inputs) != 1 || inputs[0].ActorAccountID != guestAcct.ID || inputs[0].ActorCharacterID != guestChar.ID || inputs[0].ActorPlayerEntityID != "1007" {
+		t.Fatalf("actor input mismatch: %+v", inputs)
+	}
+
+	defaultProgression := store.CharacterProgressionDefaults{
+		Level:             1,
+		Experience:        0,
+		UnspentStatPoints: 0,
+		Stats:             store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+	}
+	hostProgression, _ := s.GetOrCreateCharacterProgression(ctx, hostAcct.ID, hostChar.ID, defaultProgression)
+	guestProgression, _ := s.GetOrCreateCharacterProgression(ctx, guestAcct.ID, guestChar.ID, defaultProgression)
+	hostItem := store.CharacterItemInstance{ID: "2001", AccountID: hostAcct.ID, CharacterID: hostChar.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory}
+	guestItem := store.CharacterItemInstance{ID: "2001", AccountID: guestAcct.ID, CharacterID: guestChar.ID, ItemDefID: "cave_bow", Location: store.ItemLocationInventory}
+	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
+	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, hostProgression); err != nil {
+		t.Fatalf("host start snapshot: %v", err)
+	}
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, guestProgression); err != nil {
+		t.Fatalf("guest start snapshot: %v", err)
+	}
+	snaps, err := s.LoadSessionStartSnapshots(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("load start snapshots: %v", err)
+	}
+	if len(snaps) != 2 || len(snaps[0].Items) != 1 || len(snaps[1].Items) != 1 {
+		t.Fatalf("snapshot count mismatch: %+v", snaps)
+	}
+	if snaps[0].Items[0].ItemDefID != "cave_blade" || snaps[1].Items[0].ItemDefID != "cave_bow" {
+		t.Fatalf("member snapshots collided: %+v", snaps)
+	}
+}
+
 func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	s := newStore(t)
 	ctx := context.Background()

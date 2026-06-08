@@ -20,22 +20,40 @@ type Character struct {
 	CreatedAt time.Time
 }
 
-// Session is one solo authoritative game session.
+// Session is one authoritative game session. Solo sessions have one host
+// member; co-op sessions have one host plus one guest.
 type Session struct {
-	ID          string
-	AccountID   string
-	CharacterID string
-	Seed        string // hex-encoded server seed
-	WorldID     string // shared/rules/worlds.v0.json preset id
-	Status      string // "active" | "ended"
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID           string
+	AccountID    string
+	CharacterID  string
+	Seed         string // hex-encoded server seed
+	WorldID      string // shared/rules/worlds.v0.json preset id
+	Mode         string // "solo" | "coop"
+	JoinCodeHash string
+	Status       string // "active" | "ended"
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // Session status values.
 const (
 	SessionActive = "active"
 	SessionEnded  = "ended"
+)
+
+// Session mode values.
+const (
+	SessionModeSolo = "solo"
+	SessionModeCoop = "coop"
+)
+
+// Session member roles and statuses.
+const (
+	SessionMemberHost  = "host"
+	SessionMemberGuest = "guest"
+
+	SessionMemberActive = "active"
+	SessionMemberLeft   = "left"
 )
 
 // defaultWorldID is used when legacy rows omit world_id.
@@ -111,22 +129,44 @@ type CharacterHotbarSlot struct {
 // session was created. Replay uses this instead of mutable live character rows.
 type SessionStartSnapshot struct {
 	SessionID   string
+	AccountID   string
+	CharacterID string
 	Items       []CharacterItemInstance
 	Waypoints   []CharacterWaypoint
 	Hotbar      []CharacterHotbarSlot
 	Progression *CharacterProgression
 }
 
+// SessionMember binds an authenticated account/character to one player entity
+// inside a session.
+type SessionMember struct {
+	SessionID      string
+	AccountID      string
+	CharacterID    string
+	PlayerEntityID string
+	Role           string
+	Status         string
+	Connected      bool
+	CurrentLevel   int
+	JoinedTick     int64
+	LeftTick       *int64
+	JoinedAt       time.Time
+	UpdatedAt      time.Time
+}
+
 // SessionInput is a recorded authoritative input (spec 4.6, ADR D8.2).
 type SessionInput struct {
-	ID            string
-	SessionID     string
-	Tick          int64
-	Sequence      int64
-	MessageID     string
-	CorrelationID string
-	Payload       json.RawMessage
-	CreatedAt     time.Time
+	ID                  string
+	SessionID           string
+	Tick                int64
+	Sequence            int64
+	MessageID           string
+	CorrelationID       string
+	ActorAccountID      string
+	ActorCharacterID    string
+	ActorPlayerEntityID string
+	Payload             json.RawMessage
+	CreatedAt           time.Time
 }
 
 // SessionEvent is a recorded authoritative output event (spec 4.6, ADR D8.2).

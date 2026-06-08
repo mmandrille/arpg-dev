@@ -1117,8 +1117,9 @@ func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
 			EffectIDs:      []string{},
 		},
 	}
-	sim.inventory = append(sim.inventory, item)
+	addTestInventoryItem(sim, item)
 	sim.equipped[mainHandSlot] = item.instanceID
+	sim.savePlayer(sim.defaultPlayer())
 	monster := &entity{
 		id:           sim.alloc(),
 		kind:         monsterEntity,
@@ -1736,7 +1737,7 @@ func TestDropInventoryItem(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new inventory lab: %v", err)
 	}
-	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge", slot: "", equipped: false})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge", slot: "", equipped: false})
 
 	r := sim.Tick([]Input{{
 		MessageID:     "drop",
@@ -1817,16 +1818,18 @@ func TestDropNoSpace(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new inventory lab: %v", err)
 	}
-	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge"})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge"})
 	player := sim.entities[sim.playerID]
+	level := sim.activeLevel()
 	for ring := 1; ring <= 6; ring++ {
 		for _, offset := range adjacentUnitOffsets() {
-			sim.walls = append(sim.walls, wallObstacle{
+			level.walls = append(level.walls, wallObstacle{
 				pos:  Vec2{X: player.pos.X + offset.X*float64(ring), Y: player.pos.Y + offset.Y*float64(ring)},
 				size: Vec2{X: 1, Y: 1},
 			})
 		}
 	}
+	sim.syncCompatibilityFields()
 
 	r := sim.Tick([]Input{{MessageID: "drop", Type: "drop_intent", Drop: &DropIntent{ItemInstanceID: "5000"}}})
 	assertReject(t, r, "drop", "no_drop_space")
@@ -1923,7 +1926,7 @@ func TestUseConsumableRejectsFullHP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new heal lab: %v", err)
 	}
-	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "red_potion", equipped: false})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "red_potion", equipped: false})
 
 	r := sim.Tick([]Input{{MessageID: "use", Type: "use_intent", Use: &UseIntent{ItemInstanceID: "5000"}}})
 	assertReject(t, r, "use", "already_full_hp")
@@ -1938,7 +1941,7 @@ func TestUseConsumableRejectsNonConsumable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new inventory lab: %v", err)
 	}
-	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge", equipped: false})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge", equipped: false})
 	sim.entities[sim.playerID].hp = 5
 
 	r := sim.Tick([]Input{{MessageID: "use", Type: "use_intent", Use: &UseIntent{ItemInstanceID: "5000"}}})
@@ -2084,7 +2087,7 @@ func TestInventoryDropGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new golden world: %v", err)
 	}
-	sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: golden.ItemDefID})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: golden.ItemDefID})
 	r := sim.Tick([]Input{{
 		MessageID: "drop",
 		Type:      "drop_intent",
@@ -2412,7 +2415,7 @@ func TestRejections(t *testing.T) {
 
 	t.Run("equip non-equippable", func(t *testing.T) {
 		sim := NewSim("s", "01", rules)
-		sim.inventory = append(sim.inventory, &invItem{instanceID: 5000, itemDefID: "training_badge"})
+		addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge"})
 		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: mainHandSlot}}})
 		assertReject(t, r, "x", "not_equippable")
 	})
@@ -2585,14 +2588,19 @@ func addRolledInventoryItem(t *testing.T, sim *Sim, instanceID uint64, templateI
 		slot:        template.Slot,
 		rollPayload: payload,
 	}
-	sim.inventory = append(sim.inventory, item)
+	addTestInventoryItem(sim, item)
 	return item
 }
 
 func addStaticInventoryItem(sim *Sim, instanceID uint64, itemDefID string) *invItem {
 	item := &invItem{instanceID: instanceID, itemDefID: itemDefID}
-	sim.inventory = append(sim.inventory, item)
+	addTestInventoryItem(sim, item)
 	return item
+}
+
+func addTestInventoryItem(sim *Sim, item *invItem) {
+	sim.inventory = append(sim.inventory, item)
+	sim.savePlayer(sim.defaultPlayer())
 }
 
 func stringPtr(v string) *string {
@@ -3192,6 +3200,182 @@ func TestStaticWorldMonstersDoNotGetGeneratedRarity(t *testing.T) {
 	if monster.view().Rarity != "" {
 		t.Fatalf("static monster view rarity = %q, want empty", monster.view().Rarity)
 	}
+}
+
+func TestCoopPlayersHaveIndependentLevelsMovementAndVisibility(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_coop_levels", "coop_levels_seed", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	hostID := sim.playerID
+	sim.SetPlayerMetadata(hostID, "acct_host", "char_host", "Host", "host")
+
+	down := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	if down == nil {
+		t.Fatal("missing town down stair")
+	}
+	sim.entities[hostID].pos = down.pos
+	results := sim.TickResults([]Input{{MessageID: "host_descend", ActorPlayerID: hostID, Type: "descend_intent", Descend: &DescendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("host descend results = %d, want 2", len(results))
+	}
+	if sim.players[hostID].CurrentLevel != -1 {
+		t.Fatalf("host level = %d, want -1", sim.players[hostID].CurrentLevel)
+	}
+
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", sim.rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	if sim.players[guestID].CurrentLevel != townLevel {
+		t.Fatalf("guest level = %d, want town", sim.players[guestID].CurrentLevel)
+	}
+	if countPlayers(sim.SnapshotForPlayer(hostID).Entities) != 1 {
+		t.Fatalf("host should not see town guest while in dungeon")
+	}
+	if countPlayers(sim.SnapshotForPlayer(guestID).Entities) != 1 {
+		t.Fatalf("guest should not see dungeon host while in town")
+	}
+
+	sim.usePlayer(sim.players[guestID])
+	down = sim.findStair(sim.activeLevel(), stairsDownDefID)
+	if down == nil {
+		t.Fatal("missing guest town down stair")
+	}
+	sim.entities[guestID].pos = down.pos
+	sim.savePlayer(sim.players[guestID])
+	results = sim.TickResults([]Input{{MessageID: "guest_descend", ActorPlayerID: guestID, Type: "descend_intent", Descend: &DescendIntent{}}})
+	if len(results) != 2 {
+		t.Fatalf("guest descend results = %d, want 2", len(results))
+	}
+	if got := countPlayers(sim.SnapshotForPlayer(hostID).Entities); got != 2 {
+		t.Fatalf("same-level host player count = %d, want 2", got)
+	}
+	if got := countPlayers(sim.SnapshotForPlayer(guestID).Entities); got != 2 {
+		t.Fatalf("same-level guest player count = %d, want 2", got)
+	}
+
+	hostBefore := sim.levels[-1].entities[hostID].pos
+	guestBefore := sim.levels[-1].entities[guestID].pos
+	sim.TickResults([]Input{{MessageID: "guest_move", ActorPlayerID: guestID, Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})
+	hostAfter := sim.levels[-1].entities[hostID].pos
+	guestAfter := sim.levels[-1].entities[guestID].pos
+	if hostAfter != hostBefore {
+		t.Fatalf("host moved from %+v to %+v after guest input", hostBefore, hostAfter)
+	}
+	if guestAfter == guestBefore {
+		t.Fatalf("guest did not move from %+v", guestBefore)
+	}
+}
+
+func TestCoopActorScopedLootExperienceAndMonsterTargeting(t *testing.T) {
+	rules := loadRules(t)
+	dmg := DamageRange{Min: 1, Max: 1}
+	dummy := rules.Monsters[monsterDefID]
+	dummy.AttackDamage = &dmg
+	dummy.AttackCooldown = 1
+	dummy.RetaliationDamage = nil
+	dummy.MaxHP = 1
+	dummy.XPReward = 10
+	rules.Monsters[monsterDefID] = dummy
+
+	sim, err := NewSimWithWorld("sess_coop_rewards", "coop_rewards_seed", rules, "vertical_slice")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	hostID := sim.playerID
+	sim.SetPlayerMetadata(hostID, "acct_host", "char_host", "Host", "host")
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+
+	monster := findMonsterByDef(sim, monsterDefID)
+	if monster == nil {
+		t.Fatal("missing monster")
+	}
+	sim.entities[hostID].pos = monster.pos
+	sim.entities[guestID].pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
+	kill := sim.Tick([]Input{{MessageID: "host_kill", ActorPlayerID: hostID, Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, kill, "host_kill")
+	if !hasEvent(kill, "monster_killed") || !hasEvent(kill, "experience_gained") {
+		t.Fatalf("kill events = %+v", kill.Events)
+	}
+	if sim.players[hostID].Progression.Experience != 10 || sim.players[guestID].Progression.Experience != 0 {
+		t.Fatalf("xp host=%d guest=%d, want host only", sim.players[hostID].Progression.Experience, sim.players[guestID].Progression.Experience)
+	}
+	var loot *entity
+	for _, e := range sim.entities {
+		if e.kind == lootEntity {
+			loot = e
+			break
+		}
+	}
+	if loot == nil {
+		t.Fatal("missing loot after kill")
+	}
+	sim.entities[guestID].pos = loot.pos
+	pickup := sim.Tick([]Input{{MessageID: "guest_pickup", ActorPlayerID: guestID, Type: "action_intent", Action: &ActionIntent{TargetID: idStr(loot.id)}}})
+	assertAck(t, pickup, "guest_pickup")
+	if len(sim.players[hostID].Inventory) != 0 || len(sim.players[guestID].Inventory) != 1 {
+		t.Fatalf("inventory host=%d guest=%d, want guest pickup only", len(sim.players[hostID].Inventory), len(sim.players[guestID].Inventory))
+	}
+
+	target := &entity{kind: monsterEntity, pos: Vec2{X: 10, Y: 10}, hp: 5, maxHP: 5, monsterDefID: monsterDefID, aiMode: monsterAIModeChase}
+	target.id = sim.alloc()
+	sim.entities[target.id] = target
+	sim.entities[hostID].pos = Vec2{X: 20, Y: 20}
+	sim.entities[guestID].pos = Vec2{X: 10.4, Y: 10}
+	hostHP := sim.entities[hostID].hp
+	guestHP := sim.entities[guestID].hp
+	sim.TickResults(nil)
+	if sim.entities[hostID].hp != hostHP {
+		t.Fatalf("host hp changed from %d to %d", hostHP, sim.entities[hostID].hp)
+	}
+	if sim.entities[guestID].hp >= guestHP {
+		t.Fatalf("guest hp = %d, want below %d", sim.entities[guestID].hp, guestHP)
+	}
+}
+
+func TestCoopDisconnectRemovalAndReconnectTownRespawn(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_coop_reconnect", "coop_reconnect_seed", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", sim.rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	if countPlayers(sim.SnapshotForPlayer(hostID).Entities) != 2 {
+		t.Fatalf("host should initially see guest in town")
+	}
+	sim.RemovePlayerEntity(guestID)
+	if sim.players[guestID].Connected {
+		t.Fatal("guest still connected after removal")
+	}
+	if countPlayers(sim.SnapshotForPlayer(hostID).Entities) != 1 {
+		t.Fatalf("host should not see disconnected guest")
+	}
+	if err := sim.RespawnPlayerInTown(guestID); err != nil {
+		t.Fatalf("respawn guest: %v", err)
+	}
+	if !sim.players[guestID].Connected || sim.players[guestID].CurrentLevel != townLevel {
+		t.Fatalf("guest reconnect state = %+v", sim.players[guestID])
+	}
+	if sim.levels[townLevel].entities[guestID] == nil {
+		t.Fatal("guest entity missing after respawn")
+	}
+}
+
+func countPlayers(entities []EntityView) int {
+	count := 0
+	for _, e := range entities {
+		if e.Type == playerEntity {
+			count++
+		}
+	}
+	return count
 }
 
 func TestDungeonEquipmentLootDeterminism(t *testing.T) {

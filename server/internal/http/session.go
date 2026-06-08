@@ -3,6 +3,8 @@ package httpapi
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/hex"
 	"errors"
 	"net/http"
@@ -14,6 +16,7 @@ import (
 
 func (s *Server) registerSessionRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/sessions", s.requireAuth(http.HandlerFunc(s.handleCreateSession)))
+	mux.Handle("POST /v0/sessions/{session_id}/join", s.requireAuth(http.HandlerFunc(s.handleJoinSession)))
 	mux.Handle("POST /v0/sessions/{session_id}/end", s.requireAuth(http.HandlerFunc(s.handleEndSession)))
 }
 
@@ -30,7 +33,14 @@ type createSessionResponse struct {
 	CharacterID string `json:"character_id"`
 	Seed        string `json:"seed"`
 	WorldID     string `json:"world_id"`
+	Mode        string `json:"mode"`
+	JoinCode    string `json:"join_code,omitempty"`
 	WSURL       string `json:"ws_url"`
+}
+
+type joinSessionRequest struct {
+	JoinCode    string `json:"join_code"`
+	CharacterID string `json:"character_id"`
 }
 
 func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +55,12 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	if req.Mode != "" && req.Mode != "solo" {
-		writeError(w, http.StatusBadRequest, "invalid_mode", "only mode \"solo\" is supported in v0")
+	mode := req.Mode
+	if mode == "" {
+		mode = store.SessionModeSolo
+	}
+	if mode != store.SessionModeSolo && mode != store.SessionModeCoop {
+		writeError(w, http.StatusBadRequest, "invalid_mode", "mode must be \"solo\" or \"coop\"")
 		return
 	}
 
@@ -55,11 +69,12 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 	// Resume path: the session must exist and belong to the caller.
 	if req.ResumeSessionID != nil && *req.ResumeSessionID != "" {
 		sess, err := s.store.GetSession(ctx, *req.ResumeSessionID)
-		if errors.Is(err, store.ErrNotFound) || (err == nil && sess.AccountID != accountID) {
+		member, memberErr := s.store.GetSessionMemberByAccount(ctx, *req.ResumeSessionID, accountID)
+		if errors.Is(err, store.ErrNotFound) || (err == nil && sess.AccountID != accountID && errors.Is(memberErr, store.ErrNotFound)) {
 			writeError(w, http.StatusNotFound, "session_not_found", "session not found")
 			return
 		}
-		if err != nil {
+		if err != nil || (memberErr != nil && !errors.Is(memberErr, store.ErrNotFound)) {
 			s.metrics.PersistenceErrors.Inc()
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not load session")
 			return
@@ -67,7 +82,11 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		if err := s.store.TouchSession(ctx, sess.ID); err != nil {
 			s.metrics.PersistenceErrors.Inc()
 		}
-		writeJSON(w, http.StatusOK, sessionResponse(sess))
+		characterID := sess.CharacterID
+		if member.CharacterID != "" {
+			characterID = member.CharacterID
+		}
+		writeJSON(w, http.StatusOK, sessionResponse(sess, characterID, ""))
 		return
 	}
 
@@ -111,50 +130,50 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var joinCode string
+	var joinHash string
+	if mode == store.SessionModeCoop {
+		var err error
+		joinCode, err = newJoinCode()
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not generate join code")
+			return
+		}
+		joinHash = hashJoinCode(joinCode)
+	}
+
 	sess := store.Session{
-		ID:          ids.New("sess"),
-		AccountID:   accountID,
-		CharacterID: char.ID,
-		Seed:        seed,
-		WorldID:     worldID,
-		Status:      store.SessionActive,
+		ID:           ids.New("sess"),
+		AccountID:    accountID,
+		CharacterID:  char.ID,
+		Seed:         seed,
+		WorldID:      worldID,
+		Mode:         mode,
+		JoinCodeHash: joinHash,
+		Status:       store.SessionActive,
 	}
 	if err := s.store.CreateSession(ctx, sess); err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session")
 		return
 	}
-	items, err := s.store.ListCharacterItems(ctx, accountID, char.ID)
-	if err != nil {
+	if err := s.store.CreateSessionHostMember(ctx, store.SessionMember{
+		SessionID:    sess.ID,
+		AccountID:    accountID,
+		CharacterID:  char.ID,
+		Role:         store.SessionMemberHost,
+		Status:       store.SessionMemberActive,
+		CurrentLevel: 0,
+	}); err != nil {
 		s.metrics.PersistenceErrors.Inc()
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character items")
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session member")
 		return
 	}
-	progression, err := s.store.GetOrCreateCharacterProgression(ctx, accountID, char.ID, progressionDefaultsFromRules(s.rules))
-	if err != nil {
-		s.metrics.PersistenceErrors.Inc()
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character progression")
-		return
-	}
-	waypoints, err := s.store.ListCharacterWaypoints(ctx, char.ID)
-	if err != nil {
-		s.metrics.PersistenceErrors.Inc()
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character waypoints")
-		return
-	}
-	hotbar, err := s.store.ListCharacterHotbar(ctx, accountID, char.ID)
-	if err != nil {
-		s.metrics.PersistenceErrors.Inc()
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character hotbar")
-		return
-	}
-	if err := s.store.CreateSessionStartSnapshot(ctx, sess.ID, accountID, char.ID, items, waypoints, hotbar, progression); err != nil {
-		s.metrics.PersistenceErrors.Inc()
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
+	if !s.createSessionStartSnapshot(w, ctx, sess.ID, accountID, char.ID) {
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, sessionResponse(sess))
+	writeJSON(w, http.StatusCreated, sessionResponse(sess, char.ID, joinCode))
 }
 
 func (s *Server) characterForSessionCreate(ctx context.Context, accountID, requestedCharacterID string) (store.Character, error) {
@@ -171,6 +190,116 @@ func (s *Server) characterForSessionCreate(ctx context.Context, accountID, reque
 	return char, nil
 }
 
+func (s *Server) handleJoinSession(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account context")
+		return
+	}
+	sessionID := r.PathValue("session_id")
+	if sessionID == "" {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+	var req joinSessionRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	if req.JoinCode == "" || req.CharacterID == "" {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+
+	ctx := r.Context()
+	sess, err := s.store.GetSession(ctx, sessionID)
+	if errors.Is(err, store.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load session")
+		return
+	}
+	if sess.Mode != store.SessionModeCoop || sess.JoinCodeHash == "" || !joinCodeMatches(sess.JoinCodeHash, req.JoinCode) {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+	if sess.Status == store.SessionEnded {
+		writeError(w, http.StatusConflict, "session_ended", "session has ended")
+		return
+	}
+	char, err := s.store.GetCharacter(ctx, req.CharacterID)
+	if errors.Is(err, store.ErrNotFound) || (err == nil && char.AccountID != accountID) {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character")
+		return
+	}
+	if err := s.store.CreateSessionGuestMember(ctx, store.SessionMember{
+		SessionID:    sess.ID,
+		AccountID:    accountID,
+		CharacterID:  char.ID,
+		Role:         store.SessionMemberGuest,
+		Status:       store.SessionMemberActive,
+		CurrentLevel: 0,
+	}); err != nil {
+		switch {
+		case errors.Is(err, store.ErrPartyFull):
+			writeError(w, http.StatusConflict, "party_full", "party is full")
+		case errors.Is(err, store.ErrConflict):
+			writeError(w, http.StatusConflict, "duplicate_member", "account or character already joined")
+		case errors.Is(err, store.ErrNotFound):
+			writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		default:
+			s.metrics.PersistenceErrors.Inc()
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not join session")
+		}
+		return
+	}
+	if !s.createSessionStartSnapshot(w, ctx, sess.ID, accountID, char.ID) {
+		return
+	}
+	writeJSON(w, http.StatusOK, sessionResponse(sess, char.ID, ""))
+}
+
+func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.Context, sessionID, accountID, characterID string) bool {
+	items, err := s.store.ListCharacterItems(ctx, accountID, characterID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character items")
+		return false
+	}
+	progression, err := s.store.GetOrCreateCharacterProgression(ctx, accountID, characterID, progressionDefaultsFromRules(s.rules))
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character progression")
+		return false
+	}
+	waypoints, err := s.store.ListCharacterWaypoints(ctx, characterID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character waypoints")
+		return false
+	}
+	hotbar, err := s.store.ListCharacterHotbar(ctx, accountID, characterID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character hotbar")
+		return false
+	}
+	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, progression); err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
+		return false
+	}
+	return true
+}
+
 func (s *Server) handleEndSession(w http.ResponseWriter, r *http.Request) {
 	accountID, ok := accountFromContext(r.Context())
 	if !ok {
@@ -184,13 +313,48 @@ func (s *Server) handleEndSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess, err := s.store.GetSession(r.Context(), sessionID)
-	if errors.Is(err, store.ErrNotFound) || (err == nil && sess.AccountID != accountID) {
+	member, memberErr := s.store.GetSessionMemberByAccount(r.Context(), sessionID, accountID)
+	if errors.Is(err, store.ErrNotFound) || (err == nil && sess.AccountID != accountID && errors.Is(memberErr, store.ErrNotFound)) {
 		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
 		return
 	}
-	if err != nil {
+	if err != nil || (memberErr != nil && !errors.Is(memberErr, store.ErrNotFound)) {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load session")
+		return
+	}
+	if sess.Mode == store.SessionModeCoop {
+		if member.CharacterID == "" {
+			member = store.SessionMember{SessionID: sess.ID, AccountID: sess.AccountID, CharacterID: sess.CharacterID}
+		}
+		if err := s.store.SetSessionMemberDisconnected(r.Context(), sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0); err != nil && !errors.Is(err, store.ErrNotFound) {
+			s.metrics.PersistenceErrors.Inc()
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not leave session")
+			return
+		}
+		members, err := s.store.ListSessionMembers(r.Context(), sess.ID)
+		if err != nil {
+			s.metrics.PersistenceErrors.Inc()
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not load session members")
+			return
+		}
+		anyConnected := false
+		for _, m := range members {
+			if m.Connected {
+				anyConnected = true
+				break
+			}
+		}
+		if !anyConnected {
+			if err := s.store.SetSessionStatus(r.Context(), sessionID, store.SessionEnded); err != nil {
+				s.metrics.PersistenceErrors.Inc()
+				writeError(w, http.StatusInternalServerError, "internal_error", "could not end session")
+				return
+			}
+			writeJSON(w, http.StatusOK, map[string]string{"status": store.SessionEnded})
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]string{"status": "left"})
 		return
 	}
 	if err := s.store.SetSessionStatus(r.Context(), sessionID, store.SessionEnded); err != nil {
@@ -201,12 +365,18 @@ func (s *Server) handleEndSession(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": store.SessionEnded})
 }
 
-func sessionResponse(sess store.Session) createSessionResponse {
+func sessionResponse(sess store.Session, characterID, joinCode string) createSessionResponse {
+	mode := sess.Mode
+	if mode == "" {
+		mode = store.SessionModeSolo
+	}
 	return createSessionResponse{
 		SessionID:   sess.ID,
-		CharacterID: sess.CharacterID,
+		CharacterID: characterID,
 		Seed:        sess.Seed,
 		WorldID:     sess.WorldID,
+		Mode:        mode,
+		JoinCode:    joinCode,
 		WSURL:       "/v0/ws?session_id=" + sess.ID,
 	}
 }
@@ -233,4 +403,22 @@ func newSeed() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(b[:]), nil
+}
+
+func newJoinCode() (string, error) {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", err
+	}
+	return "join_" + hex.EncodeToString(b[:]), nil
+}
+
+func hashJoinCode(code string) string {
+	sum := sha256.Sum256([]byte(code))
+	return hex.EncodeToString(sum[:])
+}
+
+func joinCodeMatches(hash, code string) bool {
+	got := hashJoinCode(code)
+	return subtle.ConstantTimeCompare([]byte(hash), []byte(got)) == 1
 }

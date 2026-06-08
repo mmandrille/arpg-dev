@@ -79,6 +79,8 @@ class Scenario:
 @dataclass
 class RuntimeState:
     world_id: str = DEFAULT_WORLD_ID
+    local_player_id: str = ""
+    party: list[dict[str, Any]] = field(default_factory=list)
     last_tick: int = 0
     killed: bool = False
     entities: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -107,6 +109,15 @@ class RuntimeState:
     discovered_teleporters: dict[int, bool] = field(default_factory=dict)
     used_teleporter_positions: dict[int, dict[str, float]] = field(default_factory=dict)
     character_progression: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class CoopPeer:
+    label: str
+    token: str
+    session: dict[str, Any]
+    state: RuntimeState
+    ws: Any
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -186,6 +197,56 @@ def create_session(client: httpx.Client, token: str, world_id: str, seed: str = 
     resp.raise_for_status()
     body = resp.json()
     log("session", body["session_id"], "seed", body["seed"], "world", body.get("world_id"))
+    return body
+
+
+def list_characters(client: httpx.Client, token: str) -> list[dict[str, Any]]:
+    resp = client.get("/v0/characters", headers=auth(token))
+    resp.raise_for_status()
+    return list(resp.json().get("characters", []))
+
+
+def create_character(client: httpx.Client, token: str, name: str) -> dict[str, Any]:
+    resp = client.post("/v0/characters", headers=auth(token), json={"name": name})
+    resp.raise_for_status()
+    return resp.json()
+
+
+def ensure_character(client: httpx.Client, token: str, name: str) -> str:
+    chars = list_characters(client, token)
+    if chars:
+        return str(chars[0]["character_id"])
+    return str(create_character(client, token, name)["character_id"])
+
+
+def create_coop_session(
+    client: httpx.Client,
+    token: str,
+    world_id: str,
+    character_id: str,
+    seed: str = "",
+) -> dict[str, Any]:
+    body: dict[str, Any] = {"mode": "coop", "world_id": world_id, "character_id": character_id}
+    if seed:
+        body["seed"] = seed
+    resp = client.post("/v0/sessions", headers=auth(token), json=body)
+    resp.raise_for_status()
+    body = resp.json()
+    if not body.get("join_code"):
+        raise AssertionError(f"co-op create did not return join_code: {body}")
+    log("co-op session", body["session_id"], "seed", body["seed"], "world", body.get("world_id"))
+    return body
+
+
+def join_coop_session(client: httpx.Client, token: str, session_id: str, join_code: str, character_id: str) -> dict[str, Any]:
+    resp = client.post(
+        f"/v0/sessions/{session_id}/join",
+        headers=auth(token),
+        json={"join_code": join_code, "character_id": character_id},
+    )
+    resp.raise_for_status()
+    body = resp.json()
+    log("joined co-op session", body["session_id"], "character", character_id)
     return body
 
 
@@ -1444,6 +1505,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
 def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.last_tick = max(state.last_tick, int(payload.get("server_tick", 0)))
     state.current_level = int(payload.get("current_level", 0))
+    state.local_player_id = str(payload.get("local_player_id", state.local_player_id))
+    state.party = [dict(row) for row in payload.get("party", [])]
     state.visited_levels.add(state.current_level)
     state.last_delta_level = state.current_level
     state.pending_level_load = None
@@ -1674,6 +1737,10 @@ def find_inventory_item_by_instance(inventory: list[dict[str, Any]], item_instan
 
 
 def find_player(state: RuntimeState) -> dict[str, Any] | None:
+    if state.local_player_id:
+        player = state.entities.get(state.local_player_id)
+        if player is not None and player.get("type") == "player":
+            return player
     for entity in state.entities.values():
         if entity.get("type") == "player":
             return entity
@@ -2357,6 +2424,182 @@ def run_verified_session(
     return sess, observed
 
 
+async def connect_coop_peer(base_url: str, token: str, sess: dict[str, Any], label: str, world_id: str) -> CoopPeer:
+    uri = to_ws_url(base_url, sess["ws_url"])
+    ws = await websockets.connect(uri, additional_headers=auth(token))
+    first = await recv_json(ws)
+    assert first["type"] == "session_snapshot", first["type"]
+    state = RuntimeState(world_id=world_id)
+    ingest_snapshot(first["payload"], state)
+    await ws.send(json.dumps(make_envelope(
+        "client_ready",
+        sess["session_id"],
+        state.last_tick,
+        {"client_version": f"bot-{label}", "last_seen_tick": state.last_tick},
+    )))
+    log("co-op peer connected", label, "local_player_id", state.local_player_id, "level", state.current_level)
+    return CoopPeer(label=label, token=token, session=sess, state=state, ws=ws)
+
+
+async def close_coop_peer(peer: CoopPeer) -> None:
+    await peer.ws.close()
+
+
+async def pump_coop(peers: list[CoopPeer], timeout: float = 0.1) -> None:
+    tasks = {asyncio.create_task(peer.ws.recv()): peer for peer in peers}
+    done, pending = await asyncio.wait(tasks.keys(), timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
+    for task in pending:
+        task.cancel()
+    for task in done:
+        peer = tasks[task]
+        ingest_message(json.loads(task.result()), peer.state)
+
+
+async def wait_coop_until(peers: list[CoopPeer], label: str, predicate, timeout_s: float = SLICE_TIMEOUT_S) -> None:
+    loop = asyncio.get_event_loop()
+    deadline = loop.time() + timeout_s
+    while not predicate():
+        if loop.time() > deadline:
+            raise TimeoutError(f"co-op wait timed out: {label}")
+        await pump_coop(peers, timeout=0.1)
+
+
+async def send_coop_intent(peer: CoopPeer, msg_type: str, payload: dict[str, Any]) -> str:
+    env = make_envelope(msg_type, peer.session["session_id"], peer.state.last_tick, payload)
+    await peer.ws.send(json.dumps(env))
+    return str(env["message_id"])
+
+
+async def wait_coop_accept(peers: list[CoopPeer], peer: CoopPeer, message_id: str) -> None:
+    await wait_coop_until(
+        peers,
+        f"{peer.label} accept {message_id}",
+        lambda: message_id in peer.state.accepted_message_ids or message_id in peer.state.rejected_message_reasons,
+    )
+    if message_id in peer.state.rejected_message_reasons:
+        raise AssertionError(f"{peer.label} intent {message_id} rejected: {peer.state.rejected_message_reasons[message_id]}")
+
+
+def player_position(state: RuntimeState) -> dict[str, Any]:
+    player = find_player(state)
+    if player is None:
+        raise AssertionError(f"missing local player {state.local_player_id}")
+    return dict(player.get("position", {}))
+
+
+def player_entity_ids(state: RuntimeState) -> set[str]:
+    return {str(entity_id) for entity_id, entity in state.entities.items() if entity.get("type") == "player"}
+
+
+def assert_party_contains_roles(state: RuntimeState, where: str) -> None:
+    roles = {str(row.get("role", "")) for row in state.party}
+    if not {"host", "guest"} <= roles:
+        raise AssertionError(f"{where}: party roles {roles}, want host+guest; party={state.party}")
+
+
+async def move_coop_peer(peers: list[CoopPeer], peer: CoopPeer, direction: dict[str, int]) -> None:
+    before = player_position(peer.state)
+    message_id = await send_coop_intent(peer, "move_intent", {"direction": direction, "duration_ticks": 1})
+    await wait_coop_accept(peers, peer, message_id)
+    await wait_coop_until(
+        peers,
+        f"{peer.label} local movement",
+        lambda: player_position(peer.state) != before,
+    )
+
+
+async def run_true_coop_session(
+    *,
+    client: httpx.Client,
+    base_url: str,
+    host_token: str,
+    guest_token: str,
+    debug_token: str,
+    scenario: Scenario,
+    host_character_id: str,
+    guest_character_id: str,
+) -> tuple[dict[str, Any], RuntimeState]:
+    sess = create_coop_session(client, host_token, scenario.world_id, host_character_id, scenario.seed)
+    session_id = sess["session_id"]
+    host = await connect_coop_peer(base_url, host_token, sess, "host", scenario.world_id)
+    try:
+        await execute_step(host.ws, session_id, host.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
+        if host.state.current_level != -1:
+            raise AssertionError(f"host level after descend = {host.state.current_level}, want -1")
+
+        joined = join_coop_session(client, guest_token, session_id, str(sess["join_code"]), guest_character_id)
+        guest = await connect_coop_peer(base_url, guest_token, joined, "guest", scenario.world_id)
+        try:
+            if guest.state.current_level != 0:
+                raise AssertionError(f"guest joined level {guest.state.current_level}, want town level 0")
+            if host.state.local_player_id == guest.state.local_player_id:
+                raise AssertionError(f"host and guest local_player_id match: {host.state.local_player_id}")
+            assert_party_contains_roles(guest.state, "guest initial snapshot")
+
+            await execute_step(guest.ws, session_id, guest.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
+            peers = [host, guest]
+            await wait_coop_until(
+                peers,
+                "both clients see both player entities on shared level",
+                lambda: player_entity_ids(host.state) >= {host.state.local_player_id, guest.state.local_player_id}
+                and player_entity_ids(guest.state) >= {host.state.local_player_id, guest.state.local_player_id},
+            )
+
+            host_before = player_position(host.state)
+            guest_before = player_position(guest.state)
+            await move_coop_peer(peers, host, {"x": 1, "y": 0})
+            await move_coop_peer(peers, guest, {"x": 0, "y": 1})
+            if player_position(host.state) == host_before:
+                raise AssertionError("host did not move its local player")
+            if player_position(guest.state) == guest_before:
+                raise AssertionError("guest did not move its local player")
+
+            await close_coop_peer(guest)
+            await wait_coop_until(
+                [host],
+                "guest entity removed after disconnect",
+                lambda: guest.state.local_player_id not in player_entity_ids(host.state),
+            )
+            moved_after_disconnect = player_position(host.state)
+            await move_coop_peer([host], host, {"x": -1, "y": 0})
+            if player_position(host.state) == moved_after_disconnect:
+                raise AssertionError("host stopped moving after guest disconnected")
+
+            guest_reconnect = await connect_coop_peer(base_url, guest_token, joined, "guest-reconnect", scenario.world_id)
+            try:
+                if guest_reconnect.state.local_player_id != guest.state.local_player_id:
+                    raise AssertionError(
+                        f"guest reconnect local_player_id={guest_reconnect.state.local_player_id}, want {guest.state.local_player_id}"
+                    )
+                await wait_coop_until(
+                    [host, guest_reconnect],
+                    "guest reconnect town snapshot",
+                    lambda: guest_reconnect.state.current_level == 0,
+                    timeout_s=3.0,
+                )
+                if guest_reconnect.state.current_level != 0:
+                    raise AssertionError(f"guest reconnect level {guest_reconnect.state.current_level}, want town")
+                assert_party_contains_roles(guest_reconnect.state, "guest reconnect snapshot")
+            finally:
+                await close_coop_peer(guest_reconnect)
+        finally:
+            try:
+                await close_coop_peer(guest)
+            except Exception:
+                pass
+    finally:
+        try:
+            await close_coop_peer(host)
+        except Exception:
+            pass
+
+    replay = fetch_replay(client, host_token, debug_token, session_id)
+    if not replay.get("match", False):
+        raise AssertionError(f"co-op replay mismatch for {session_id}: {replay.get('mismatch')}")
+    log("co-op replay matched", session_id)
+    return sess, host.state
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -2384,22 +2627,41 @@ def main() -> int:
         for scenario in selected:
             scenario_started = time.monotonic()
             log("scenario begin", scenario.id, "-", scenario.title, f"world={scenario.world_id}")
-            _, token = dev_login(client, scenario_email(args.email, scenario.id), args.dev_token)
-            sess, observed = run_verified_session(
-                client=client,
-                base_url=args.base_url,
-                token=token,
-                debug_token=args.debug_token,
-                scenario=scenario,
-                world_id=scenario.world_id,
-                steps=scenario.steps,
-                assertions=scenario.assertions,
-                seed=scenario.seed,
-            )
+            if scenario.id == "true_coop_session":
+                _, host_token = dev_login(client, scenario_email(args.email, scenario.id + "-host"), args.dev_token)
+                _, guest_token = dev_login(client, scenario_email(args.email, scenario.id + "-guest"), args.dev_token)
+                host_character_id = ensure_character(client, host_token, "Coop Host")
+                guest_character_id = ensure_character(client, guest_token, "Coop Guest")
+                sess, observed = asyncio.run(run_true_coop_session(
+                    client=client,
+                    base_url=args.base_url,
+                    host_token=host_token,
+                    guest_token=guest_token,
+                    debug_token=args.debug_token,
+                    scenario=scenario,
+                    host_character_id=host_character_id,
+                    guest_character_id=guest_character_id,
+                ))
+                token = host_token
+            else:
+                _, token = dev_login(client, scenario_email(args.email, scenario.id), args.dev_token)
+                sess, observed = run_verified_session(
+                    client=client,
+                    base_url=args.base_url,
+                    token=token,
+                    debug_token=args.debug_token,
+                    scenario=scenario,
+                    world_id=scenario.world_id,
+                    steps=scenario.steps,
+                    assertions=scenario.assertions,
+                    seed=scenario.seed,
+                )
             session_id = sess["session_id"]
             last_session_id = session_id
 
             for idx, check in enumerate(scenario.fresh_session_checks, start=1):
+                if scenario.id == "true_coop_session":
+                    break
                 log("fresh session check begin", scenario.id, f"#{idx}")
                 check_world = str(check.get("world_id", scenario.world_id))
                 check_steps = list(check.get("steps", []))

@@ -46,6 +46,7 @@ var resolver: EquipmentVisualResolver
 var player_anim: AnimationController
 var entities: Dictionary = {}        # id (String) -> {node:Node3D, controller:AnimationController|null, type:String}
 var player_id: String = ""
+var party: Array = []
 var player_hp: int = PLAYER_START_HP
 var player_max_hp: int = PLAYER_START_HP
 var predicted_pos := Vector3.ZERO    # client-predicted player position
@@ -392,6 +393,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	gameplay_active = false
 	ready_sent = false
 	player_id = ""
+	party = []
 	player_hp = PLAYER_START_HP
 	player_max_hp = PLAYER_START_HP
 	predicted_pos = Vector3.ZERO
@@ -492,8 +494,31 @@ func _handle_message(env: Dictionary) -> void:
 			_debug("error: %s" % env["payload"].get("message", "?"))
 
 
+func _snapshot_local_player_id(p: Dictionary) -> String:
+	var explicit := str(p.get("local_player_id", ""))
+	if explicit != "":
+		return explicit
+	for e in p.get("entities", []):
+		if str(e.get("type", "")) == "player":
+			return str(e.get("id", ""))
+	return player_id
+
+
+func _event_subject_entity_id(ev: Dictionary) -> String:
+	var event_type := str(ev.get("event_type", ""))
+	if event_type in ["monster_damaged", "monster_killed", "player_damaged", "player_killed"]:
+		var target_id := str(ev.get("target_entity_id", ""))
+		if target_id != "":
+			return target_id
+	return str(ev.get("entity_id", ""))
+
+
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
+	var local_id := _snapshot_local_player_id(p)
+	if local_id != "":
+		player_id = local_id
+	party = p.get("party", [])
 	pending_interactable_action.clear()
 	pending_waypoint_travel = false
 	_apply_teleporter_snapshot(p.get("discovered_teleporters", []))
@@ -572,7 +597,7 @@ func _apply_delta(p: Dictionary) -> void:
 				pass
 	_refresh_inventory_ui()
 	for ev in p.get("events", []):
-		var eid := str(ev.get("entity_id", ""))
+		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
 		if visual_replay_enabled and inventory_panel != null:
 			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)
@@ -597,6 +622,20 @@ func _apply_delta(p: Dictionary) -> void:
 				player_anim.enter_terminal("death")
 			else:
 				player_anim.play_one_shot(player_clip)
+			continue
+		if PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
+			if event_type == "player_damaged":
+				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
+			if event_type == "player_killed":
+				var remote_dead: Dictionary = entities[eid]
+				remote_dead["hp"] = 0
+			var remote_player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
+			var remote_ctrl = entities[eid].get("controller", null)
+			if remote_ctrl != null:
+				if remote_player_clip == "death":
+					remote_ctrl.enter_terminal("death")
+				else:
+					remote_ctrl.play_one_shot(remote_player_clip)
 			continue
 		if event_type == "interactable_activated" and entities.has(eid):
 			_set_interactable_state(eid, entities[eid], "open")
@@ -636,7 +675,7 @@ func _upsert_entity(e: Dictionary) -> void:
 	var id := str(e["id"])
 	var pos: Dictionary = e["position"]
 	var server_pos := Vector3(pos["x"], 0.0, pos["y"])
-	if e["type"] == "player":
+	if e["type"] == "player" and (id == player_id or player_id == ""):
 		# The player is the humanoid under PlayerAnchor, not an entity-dict node.
 		player_id = id
 		if e.has("hp"):
@@ -672,13 +711,13 @@ func _upsert_entity(e: Dictionary) -> void:
 			rec["item_def_id"] = str(e["item_def_id"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "effect_ids"]:
+		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "effect_ids", "character_id"]:
 			if e.has(key):
 				rec[key] = e[key]
 		if e.has("interactable_def_id"):
 			rec["interactable_def_id"] = str(e["interactable_def_id"])
 		entities[id] = rec
-		if e["type"] != "projectile":
+		if e["type"] != "projectile" and e["type"] != "player":
 			_attach_pick_collider(node, id, str(e["type"]))
 		if e["type"] == "loot" and not loot_ids.has(id):
 			loot_ids.append(id)
@@ -700,6 +739,9 @@ func _upsert_entity(e: Dictionary) -> void:
 			var hp_val := int(e.get("hp", rec.get("hp", 1)))
 			var moved := prev_pos.distance_to(server_pos) > 0.001
 			rec["controller"].set_locomotion(moved and hp_val > 0)
+		if rec["type"] == "player":
+			rec["hp"] = int(e.get("hp", rec.get("hp", PLAYER_START_HP)))
+			rec["max_hp"] = int(e.get("max_hp", rec.get("max_hp", PLAYER_START_HP)))
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
@@ -719,6 +761,8 @@ func _upsert_entity(e: Dictionary) -> void:
 func _remove_entity(id: String) -> void:
 	if str(pending_interactable_action.get("target_id", "")) == id:
 		pending_interactable_action.clear()
+	if id == player_id:
+		return
 	if entities.has(id):
 		var rec: Dictionary = entities[id]
 		if rec.has("move_tween"):
@@ -1862,6 +1906,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		fallback.mesh = BoxMesh.new()
 		fallback.material_override = fm
 		return fallback
+	if kind == "player":
+		return _make_remote_player_node(e)
 	if kind == "interactable":
 		var def_id := str(e.get("interactable_def_id", ""))
 		if def_id == "stairs_down" or def_id == "stairs_up":
@@ -1872,6 +1918,33 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	if kind == "projectile":
 		return _make_projectile_node()
 	return _make_loot_node(str(e.get("item_def_id", "")))
+
+
+func _make_remote_player_node(e: Dictionary) -> Node3D:
+	var root := Node3D.new()
+	root.name = "RemotePlayer_%s" % str(e.get("id", ""))
+	var body := MeshInstance3D.new()
+	body.name = "Body"
+	var body_mesh := CapsuleMesh.new()
+	body_mesh.radius = 0.28
+	body_mesh.height = 1.25
+	body.mesh = body_mesh
+	body.position = Vector3(0.0, 0.72, 0.0)
+	var body_mat := StandardMaterial3D.new()
+	body_mat.albedo_color = Color("#8fb8ff")
+	body.material_override = body_mat
+	root.add_child(body)
+	var head := MeshInstance3D.new()
+	head.name = "Head"
+	var head_mesh := SphereMesh.new()
+	head_mesh.radius = 0.22
+	head.mesh = head_mesh
+	head.position = Vector3(0.0, 1.48, 0.0)
+	var head_mat := StandardMaterial3D.new()
+	head_mat.albedo_color = Color("#d9e6ff")
+	head.material_override = head_mat
+	root.add_child(head)
+	return root
 
 
 func _monster_tint(rarity: String) -> Color:
@@ -2139,6 +2212,9 @@ func get_bot_state() -> Dictionary:
 			live_monster_ids.append(mid)
 	var out := {
 		"ws_open": client != null and client.ready_state() == WebSocketPeer.STATE_OPEN,
+		"local_player_id": player_id,
+		"party": party.duplicate(true),
+		"remote_player_ids": _remote_player_ids(),
 		"player_hp": player_hp,
 		"player_max_hp": player_max_hp,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
@@ -2169,6 +2245,16 @@ func get_bot_state() -> Dictionary:
 		"current_session_id": client.session_id if client != null else "",
 		"gameplay_active": gameplay_active,
 	}
+	return out
+
+
+func _remote_player_ids() -> Array:
+	var out: Array = []
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		if str(rec.get("type", "")) == "player":
+			out.append(str(id))
+	out.sort()
 	return out
 
 

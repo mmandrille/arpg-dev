@@ -1,0 +1,9 @@
+{
+  "id": "true_coop_session",
+  "world_id": "dungeon_levels",
+  "seed": "v33-true-coop-session",
+  "title": "True co-op session",
+  "description": "Dedicated two-account/two-WebSocket protocol scenario for v33 co-op join, local player binding, shared-level visibility, disconnect, reconnect, and replay verification.",
+  "steps": [],
+  "assertions": []
+}

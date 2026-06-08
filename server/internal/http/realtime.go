@@ -27,15 +27,29 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess, err := s.store.GetSession(r.Context(), sessionID)
-	if errors.Is(err, store.ErrNotFound) || (err == nil && sess.AccountID != accountID) {
+	member, memberErr := s.store.GetSessionMemberByAccount(r.Context(), sessionID, accountID)
+	if errors.Is(err, store.ErrNotFound) || (err == nil && sess.AccountID != accountID && errors.Is(memberErr, store.ErrNotFound)) {
 		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
 		return
 	}
-	if err != nil {
+	if err != nil || (memberErr != nil && !errors.Is(memberErr, store.ErrNotFound)) {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load session")
 		return
 	}
+	if sess.Mode == store.SessionModeCoop && member.CharacterID == "" {
+		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+		return
+	}
+	if member.CharacterID == "" {
+		member = store.SessionMember{
+			SessionID:   sess.ID,
+			AccountID:   accountID,
+			CharacterID: sess.CharacterID,
+			Role:        store.SessionMemberHost,
+			Status:      store.SessionMemberActive,
+		}
+	}
 
-	s.realtime.Run(w, r, sess)
+	s.realtime.Run(w, r, sess, member)
 }

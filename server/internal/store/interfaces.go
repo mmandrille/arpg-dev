@@ -27,6 +27,14 @@ type SessionRepo interface {
 	GetSession(ctx context.Context, id string) (Session, error)
 	TouchSession(ctx context.Context, id string) error
 	SetSessionStatus(ctx context.Context, id, status string) error
+	CreateSessionHostMember(ctx context.Context, m SessionMember) error
+	CreateSessionGuestMember(ctx context.Context, m SessionMember) error
+	ListSessionMembers(ctx context.Context, sessionID string) ([]SessionMember, error)
+	GetSessionMemberByAccount(ctx context.Context, sessionID, accountID string) (SessionMember, error)
+	GetSessionMember(ctx context.Context, sessionID, accountID, characterID string) (SessionMember, error)
+	SetSessionMemberConnected(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, tick int64) error
+	SetSessionMemberDisconnected(ctx context.Context, sessionID, accountID, characterID string, currentLevel int, tick int64) error
+	SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int) error
 }
 
 // CharacterProgressionRepo manages durable character items, waypoints, and the
@@ -46,6 +54,8 @@ type CharacterProgressionRepo interface {
 	SetCharacterHotbarSlot(ctx context.Context, accountID, characterID string, slotIndex int, itemInstanceID *string) error
 	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, progression CharacterProgression) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
+	LoadSessionStartSnapshotForMember(ctx context.Context, sessionID, accountID, characterID string) (SessionStartSnapshot, error)
+	LoadSessionStartSnapshots(ctx context.Context, sessionID string) ([]SessionStartSnapshot, error)
 }
 
 // InputRepo records and reads authoritative inputs for replay.

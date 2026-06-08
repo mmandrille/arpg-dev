@@ -65,15 +65,18 @@ var hotbar_capacity: int = 2
 var hotbar: Array = []
 var character_progression: Dictionary = {}
 var item_rules: Dictionary = {}
+var item_templates: Dictionary = {}
 var item_presentations: Dictionary = {}
 var dungeon_generation: Dictionary = {}
 var loot_ids: Array = []
+var hovered_loot_id: String = ""
 var monster_ids: Array = []
 var interactable_ids: Array = []
 var current_world_id: String = "vertical_slice"
 var current_level: int = 0
 var discovered_teleporters: Dictionary = {}
 var pending_interactable_action: Dictionary = {}
+var pending_action_targets: Dictionary = {}
 var pending_waypoint_target_level: int = 0
 var pending_waypoint_travel: bool = false
 var ready_sent: bool = false
@@ -172,6 +175,7 @@ func _ready() -> void:
 	client_settings.apply()
 	_sync_settings_panel()
 	_load_item_rules()
+	_load_item_templates()
 	_load_item_presentations()
 	_load_dungeon_generation()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
@@ -496,9 +500,12 @@ func _handle_message(env: Dictionary) -> void:
 			_apply_snapshot(env["payload"])
 		"state_delta":
 			_apply_delta(env["payload"])
+		"intent_accepted":
+			pending_action_targets.erase(str(env["payload"].get("accepted_message_id", "")))
 		"intent_rejected":
 			pending_interactable_action.clear()
 			pending_waypoint_travel = false
+			_handle_intent_rejected(env["payload"])
 			_debug("rejected: %s" % env["payload"].get("reason", "?"))
 		"error":
 			_debug("error: %s" % env["payload"].get("message", "?"))
@@ -521,6 +528,17 @@ func _event_subject_entity_id(ev: Dictionary) -> String:
 		if target_id != "":
 			return target_id
 	return str(ev.get("entity_id", ""))
+
+
+func _handle_intent_rejected(payload: Dictionary) -> void:
+	var message_id := str(payload.get("rejected_message_id", ""))
+	var reason := str(payload.get("reason", ""))
+	var pending: Dictionary = pending_action_targets.get(message_id, {})
+	if message_id != "":
+		pending_action_targets.erase(message_id)
+	if reason == "inventory_full":
+		var target_id := str(pending.get("target_id", ""))
+		_show_inventory_full_text(target_id)
 
 
 func _apply_snapshot(p: Dictionary) -> void:
@@ -809,6 +827,8 @@ func _upsert_entity(e: Dictionary) -> void:
 func _remove_entity(id: String) -> void:
 	if str(pending_interactable_action.get("target_id", "")) == id:
 		pending_interactable_action.clear()
+	if hovered_loot_id == id:
+		hovered_loot_id = ""
 	if id == player_id:
 		return
 	if entities.has(id):
@@ -835,6 +855,7 @@ func _clear_level_entities() -> void:
 			bar.queue_free()
 	monster_health_bars.clear()
 	loot_ids.clear()
+	hovered_loot_id = ""
 	monster_ids.clear()
 	interactable_ids.clear()
 
@@ -1002,6 +1023,29 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null, p
 	pop.setup(_camera, target, world_position, amount, color, side, prefix, variant, text_override)
 
 
+func _show_inventory_full_text(target_id: String) -> void:
+	if damage_numbers_layer == null or _camera == null:
+		return
+	if target_id == "" or not entities.has(target_id):
+		return
+	var rec: Dictionary = entities[target_id]
+	if str(rec.get("type", "")) != "loot":
+		return
+	var target := rec.get("node", null) as Node3D
+	if target == null:
+		return
+	var pop := DamageNumberScript.new() as DamageNumber
+	damage_numbers_layer.add_child(pop)
+	pop.setup(_camera, target, target.global_position, null, Color("#ffcf5a"), 0.0, "", "inventory", "BAG FULL")
+
+
+func _send_action_intent(target_id: String) -> void:
+	if client == null or target_id == "":
+		return
+	var message_id := client.send("action_intent", last_server_tick, {"target_id": target_id})
+	pending_action_targets[message_id] = {"target_id": target_id}
+
+
 func _remove_monster_health_bar(entity_id: String) -> void:
 	if not monster_health_bars.has(entity_id):
 		return
@@ -1071,6 +1115,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _handle_input(delta: float) -> void:
+	_update_loot_hover_label()
 	if _user_input_blocked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		if _sustained_click.active:
 			_sustained_click.clear()
@@ -1193,12 +1238,12 @@ func _handle_autoplay(delta: float) -> void:
 			if player_anim != null:
 				player_anim.play_one_shot("attack")
 			if autoplay_attack_cooldown <= 0.0:
-				client.send("action_intent", last_server_tick, {"target_id": target_id})
+				_send_action_intent(target_id)
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
 		"pickup":
 			if not autoplay_pickup_sent and loot_ids.size() > 0:
-				client.send("action_intent", last_server_tick, {"target_id": loot_ids[0]})
+				_send_action_intent(str(loot_ids[0]))
 				autoplay_pickup_sent = true
 				autoplay_timer = autoplay_step_delay
 				return
@@ -1285,7 +1330,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")):
 		player_anim.play_one_shot("attack")
 
-	client.send("action_intent", last_server_tick, {"target_id": target_id})
+	_send_action_intent(target_id)
 	_attack_cooldown = SEND_INTERVAL
 
 
@@ -1328,7 +1373,7 @@ func _repeat_hold_attack() -> void:
 	if player_anim != null:
 		player_anim.play_one_shot("attack")
 
-	client.send("action_intent", last_server_tick, {"target_id": target_id})
+	_send_action_intent(target_id)
 	_attack_cooldown = SEND_INTERVAL
 
 
@@ -1359,7 +1404,7 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 		"interactable_def_id": interactable_def_id,
 	}
 	if interactable_def_id == "teleporter":
-		client.send("action_intent", last_server_tick, {"target_id": target_id})
+		_send_action_intent(target_id)
 		_attack_cooldown = SEND_INTERVAL
 		return
 	var target_node := rec["node"] as Node3D
@@ -1411,7 +1456,7 @@ func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
 		if bool(discovered_teleporters.get(current_level, false)):
 			_show_waypoint_panel()
 		else:
-			client.send("action_intent", last_server_tick, {"target_id": target_id})
+			_send_action_intent(target_id)
 			_attack_cooldown = SEND_INTERVAL
 
 
@@ -1522,6 +1567,32 @@ func _nearest_loot_at_ground(ground: Vector3) -> String:
 	if best_id != "" and best_dist <= 0.9:
 		return best_id
 	return ""
+
+
+func _update_loot_hover_label() -> void:
+	var next_hover := ""
+	if not _input_locked() and _camera != null:
+		var target_id := _pick_entity_at_mouse()
+		if target_id != "" and entities.has(target_id) and str(entities[target_id].get("type", "")) == "loot":
+			next_hover = target_id
+		else:
+			next_hover = _nearest_loot_at_ground(_mouse_ground_point())
+	if next_hover == hovered_loot_id:
+		return
+	_set_loot_label_visible(hovered_loot_id, false)
+	hovered_loot_id = next_hover
+	_set_loot_label_visible(hovered_loot_id, true)
+
+
+func _set_loot_label_visible(loot_id: String, shown: bool) -> void:
+	if loot_id == "" or not entities.has(loot_id):
+		return
+	var node := entities[loot_id].get("node", null) as Node3D
+	if node == null:
+		return
+	var label := node.find_child("LootLabel", true, false) as Label3D
+	if label != null:
+		label.visible = shown
 
 
 func _set_pickable(node: Node3D, pickable: bool) -> void:
@@ -2165,7 +2236,26 @@ func _make_loot_node(item_def_id: String) -> Node3D:
 			_add_loot_box(root, "Cork", Vector3(0.14, 0.10, 0.14) * scale, Vector3(0.0, 0.48 * scale, 0.0), accent)
 		_:
 			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
+	_add_loot_label(root, _generic_loot_name(item_def_id), scale)
 	return root
+
+
+func _add_loot_label(parent: Node3D, text: String, scale: float) -> void:
+	if text == "":
+		return
+	var label := Label3D.new()
+	label.name = "LootLabel"
+	label.text = text
+	label.visible = false
+	label.position = Vector3(0.0, 0.58 * maxf(scale, 0.8), 0.0)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = true
+	label.fixed_size = true
+	label.pixel_size = 0.0018
+	label.modulate = Color("#f4ead8")
+	label.outline_modulate = Color(0.06, 0.045, 0.035, 0.92)
+	label.outline_size = 4
+	parent.add_child(label)
 
 
 func _add_loot_box(parent: Node3D, name: String, size: Vector3, position: Vector3, color: Color) -> void:
@@ -2215,11 +2305,60 @@ func _load_item_rules() -> void:
 		item_rules = parsed.get("items", {})
 
 
+func _load_item_templates() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/item_templates.v0.json")
+	var parsed = _read_json(path)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_templates = parsed.get("templates", {})
+
+
 func _load_item_presentations() -> void:
 	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
 	var parsed = _read_json(path)
 	if typeof(parsed) == TYPE_DICTIONARY:
 		item_presentations = parsed.get("items", {})
+
+
+func _item_definition(item_def_id: String) -> Dictionary:
+	if item_rules.has(item_def_id):
+		return item_rules.get(item_def_id, {})
+	return item_templates.get(item_def_id, {})
+
+
+func _generic_loot_name(item_def_id: String) -> String:
+	var def := _item_definition(item_def_id)
+	var slot := str(def.get("slot", ""))
+	match slot:
+		"main_hand":
+			var attack_mode := str(def.get("attack_mode", "melee"))
+			if attack_mode == "ranged":
+				return "Bow"
+			return "Sword"
+		"off_hand":
+			return "Shield"
+		"head":
+			return "Helm"
+		"chest":
+			return "Armor"
+		"gloves":
+			return "Gloves"
+		"belt":
+			return "Belt"
+		"boots":
+			return "Boots"
+		"amulet":
+			return "Amulet"
+		"ring":
+			return "Ring"
+	var category := str(def.get("category", ""))
+	match category:
+		"consumable":
+			return "Potion"
+		"currency":
+			return "Badge"
+		"quest":
+			return "Item"
+	return "Item"
 
 
 func _load_dungeon_generation() -> void:
@@ -2591,7 +2730,7 @@ func bot_click_entity_id(target_id: String) -> void:
 	if typ == "interactable" and interactable_def_id in ["stairs_down", "stairs_up", "teleporter"]:
 		_activate_or_approach_interactable(target_id, rec)
 		return
-	client.send("action_intent", last_server_tick, {"target_id": target_id})
+	_send_action_intent(target_id)
 	_attack_cooldown = SEND_INTERVAL
 
 

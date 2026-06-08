@@ -197,15 +197,17 @@ func next_message_id() -> String:
 	return "cmsg-%d" % _msg_counter
 
 
-func send(msg_type: String, tick: int, payload: Dictionary) -> void:
+func send(msg_type: String, tick: int, payload: Dictionary) -> String:
+	var message_id := next_message_id()
 	var env := {
 		"type": msg_type,
-		"message_id": next_message_id(),
+		"message_id": message_id,
 		"session_id": session_id,
 		"tick": tick,
 		"payload": payload,
 	}
 	_ws.send_text(JSON.stringify(env))
+	return message_id
 
 
 func close() -> void:

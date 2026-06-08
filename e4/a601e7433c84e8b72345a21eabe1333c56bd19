@@ -1,0 +1,198 @@
+tools/validate_shared.py
+  s_6bed1b82ef9a3c::t_4ab0637b8a171f 146
+  s_6bed1b82ef9a3c::t_dee58aebb03308 309,313-315
+  s_6bed1b82ef9a3c::t_0b2d8346ba05f3 607-629
+  s_6bed1b82ef9a3c::t_2ef17be246bfd3 455-456,503-506,536
+  s_6bed1b82ef9a3c::t_2f6a64fbdbd399 952-968
+  s_6bed1b82ef9a3c::t_03906819997fad 1136-1193
+  s_6bed1b82ef9a3c::t_a9434fa2a046a3 1100-1130
+client/scripts/bot_controller.gd
+  s_6bed1b82ef9a3c::t_7c53cfc7d55b43 140-141,178-180
+shared/protocol/examples/session_snapshot.json
+  s_6bed1b82ef9a3c::t_83582cc0597fe7 47-71
+client/scripts/character_stats_panel.gd
+  s_6bed1b82ef9a3c::t_79e0203ef41cf6 15
+  s_6bed1b82ef9a3c::t_4ff031efecbec3 78,165,187-215
+shared/golden/combat_stat_effects.v0.schema.json
+  s_6bed1b82ef9a3c::t_3a75f63791ba4d 1-74
+client/scripts/main.gd
+  s_6bed1b82ef9a3c::t_5e7893ac850ce5 810-811
+  s_6bed1b82ef9a3c::t_c9b9da14b0674c 588,591-592,606-607,610
+  s_6bed1b82ef9a3c::t_334dbabe2397c4 823
+  s_6bed1b82ef9a3c::t_a490fc59522e71 326,334,351-357,361
+  s_6bed1b82ef9a3c::t_9ac8a49584675f 800-809,812-817,819-822,837
+  s_6bed1b82ef9a3c::t_faada584611752 1588
+  s_6bed1b82ef9a3c::t_93e93687566d36 2163-2164,2172-2185,2295-2296
+shared/rules/monsters.v0.json
+  s_6bed1b82ef9a3c::t_36500afa354980 161-162
+  s_6bed1b82ef9a3c::t_d2f10847dcf3ba 9-13,21-25,33-37,45-49,57-61,69-73,85-89,96-143,146-160,163-165
+  s_6bed1b82ef9a3c::t_33c4593050392f 144-145
+server/internal/game/types.go
+  s_6bed1b82ef9a3c::t_fe90c674d28a06 132-138
+  s_6bed1b82ef9a3c::t_022a18d0bbd0c2 112-128,139,152-153,156-160
+tools/bot/test_protocol.py
+  s_6bed1b82ef9a3c::t_3cc99972c8eb08 285-325,383-423
+client/tests/test_client_bot.gd
+  s_6bed1b82ef9a3c::t_b5726d755bcc63 329
+  s_6bed1b82ef9a3c::t_0c8043deeb8ad9 42-44,316-328,330-377
+client/scripts/settings_panel.gd
+  s_6bed1b82ef9a3c::t_77ffbacdc6eaeb 6,10,21,25,43-48,84-91
+client/scripts/damage_number.gd
+  s_6bed1b82ef9a3c::t_8252d4df5e35f0 14-15,18,23-25,30-31,35,51-52
+  s_6bed1b82ef9a3c::t_a61233350ff541 32
+shared/golden/combat_stat_effects.json
+  s_6bed1b82ef9a3c::t_7c49712bf3f3d3 1-62,64-74,76-98,100-142
+  s_6bed1b82ef9a3c::t_4590139f365d56 63,75,99
+server/internal/game/rules.go
+  s_6bed1b82ef9a3c::t_c07c76a28da141 736,739,742
+  s_6bed1b82ef9a3c::t_8a516f0e1f02da 404-411,419-433,437-445,737-738,740-741,743-750
+  s_6bed1b82ef9a3c::t_d128b2e3f5bbd7 40-46,296-297
+  s_6bed1b82ef9a3c::t_4e35e784ddba50 293-295,324-342
+server/internal/http/ws_test.go
+  s_6bed1b82ef9a3c::t_24e54b14d08c47 335
+tools/bot/scenarios/16_rolled_drops.json
+  s_6bed1b82ef9a3c::t_fef1e6aa731034 4,8-10,17
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_6bed1b82ef9a3c::t_37cd3d40018752 15,25,30,32
+docs/specs/v31_spec-combat-stat-effects-and-feedback.md
+  s_ddb6f19b72b4d5::t_606159891da8d5 1-2,4-453
+  s_6bed1b82ef9a3c::t_a61233350ff541 3
+shared/rules/monsters.v0.schema.json
+  s_6bed1b82ef9a3c::t_16cc11ec59b8e7 23-27
+server/internal/game/game_test.go
+  s_6bed1b82ef9a3c::t_1feb2a73f685b2 1900-1901,1911,1915-1916
+  s_6bed1b82ef9a3c::t_7d856959625905 1864-1865,3142,3148
+  s_6bed1b82ef9a3c::t_4e941341264ff0 3856-3864
+  s_6bed1b82ef9a3c::t_828d59531b809a 1376-1396
+  s_6bed1b82ef9a3c::t_d9e25b9103710a 3847-3855,3865-3873
+  s_6bed1b82ef9a3c::t_3aac453799c458 1305-1310,1313,1323-1343
+  s_6bed1b82ef9a3c::t_1940821ba39abd 1311-1312,1314-1322
+  s_6bed1b82ef9a3c::t_b7dc7f2727d435 1344-1375,1397-1418
+server/internal/game/sim.go
+  s_6bed1b82ef9a3c::t_8e7de69dc0f0d3 2375-2379,2382,2387
+  s_6bed1b82ef9a3c::t_6cffbfd9fcec00 1372-1391
+  s_6bed1b82ef9a3c::t_6fd1beaa3036c1 3277-3297
+  s_6bed1b82ef9a3c::t_7004e390ad07ad 943-944,960,962
+  s_6bed1b82ef9a3c::t_2fe12ca360cad7 1408,1429-1431
+  s_6bed1b82ef9a3c::t_2c65486b8786ca 3193
+  s_6bed1b82ef9a3c::t_ca758e997ecbf0 3001-3005,3007-3008,3010,3014,3029-3030,3049,3059-3075,3106-3192,3194-3274
+  s_6bed1b82ef9a3c::t_987255bfa74065 149-158
+  s_6bed1b82ef9a3c::t_2ad2a4a508e4c2 3531,3533-3540,3548-3556
+  s_6bed1b82ef9a3c::t_a9a408b2809b4a 3532
+  s_6bed1b82ef9a3c::t_1fd94e86f634bd 907-914,918,923,1037-1044,1053
+  s_6bed1b82ef9a3c::t_362057a41af97f 2851-2869
+  s_6bed1b82ef9a3c::t_8ca25a07f396e3 2056-2065,2074
+  s_6bed1b82ef9a3c::t_a28b62202d9be4 3541-3547
+  s_6bed1b82ef9a3c::t_70358c3121e548 138-148
+  s_6bed1b82ef9a3c::t_f21eed98a15e66 2511-2583
+  s_6bed1b82ef9a3c::t_819672317a7738 1337,1366
+tools/bot/scenarios/client/06_use_potion_hotbar.json
+  s_6bed1b82ef9a3c::t_a783c91dd7632a 22,26-27
+shared/rules/combat.v0.schema.json
+  s_6bed1b82ef9a3c::t_a53883a46458c8 7,12-15
+shared/golden/character_progression.json
+  s_6bed1b82ef9a3c::t_b6225f471ebca5 23-24,48-49,73-74,98-99,125-126,150-151
+docs/PROGRESS.md
+  s_6bed1b82ef9a3c::t_a61233350ff541 6,14,16,49,100
+  s_6bed1b82ef9a3c::t_132f8e4fa8267e 727-753,800-801,909-912,918,920
+tools/bot/scenarios/22_combat_stat_effects.json
+  s_6bed1b82ef9a3c::t_ae03a8611a6bda 55,59-60,108
+  s_6bed1b82ef9a3c::t_084fe019388e28 69
+  s_6bed1b82ef9a3c::t_473fb97e8d7abc 1-54,56-58,61-68,70-107,109-128
+shared/protocol/session_snapshot.v1.schema.json
+  s_6bed1b82ef9a3c::t_4c883b17a469db 221-222,225-229
+  s_6bed1b82ef9a3c::t_623c5f89938197 171-196,208-212
+shared/protocol/examples/state_delta.json
+  s_6bed1b82ef9a3c::t_32e878635caf0f 18-21,24
+client/scripts/client_settings.gd
+  s_6bed1b82ef9a3c::t_eb1071c46e19fd 14,55-60,64,69,82,100-105
+client/tests/test_golden.gd
+  s_6bed1b82ef9a3c::t_7be6df4d8d1cd5 438-440,442-443,445-466
+  s_6bed1b82ef9a3c::t_d69c724c325523 441,444
+  s_6bed1b82ef9a3c::t_2d152ea499abab 418,429-432
+client/scripts/bot_scenario_runner.gd
+  s_6bed1b82ef9a3c::t_65a8be6626ac32 633-635
+  s_6bed1b82ef9a3c::t_be7af648f94037 460-461,467,473-540
+  s_6bed1b82ef9a3c::t_24924c39f702a7 223
+  s_6bed1b82ef9a3c::t_4e97db8878dfdf 14,61,185-186,698,734
+  s_6bed1b82ef9a3c::t_27ed479daec524 287,636
+  s_6bed1b82ef9a3c::t_47199244c3340b 26,34,60
+  s_6bed1b82ef9a3c::t_8eda1847c51487 696-697,699,735,846,851-856
+  s_6bed1b82ef9a3c::t_31722080092301 213
+  s_6bed1b82ef9a3c::t_2e48690d439cf2 183-184,195,212,286,288-302
+  s_6bed1b82ef9a3c::t_b79d30ae05e794 210-211,214
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_6bed1b82ef9a3c::t_38170111ff5f70 10-11
+  s_6bed1b82ef9a3c::t_f7437816f06d45 30-31,41-42
+  s_6bed1b82ef9a3c::t_21c703ea83c185 29,44-46
+  s_6bed1b82ef9a3c::t_3124cecdb5122d 36
+  s_6bed1b82ef9a3c::t_fda1f11f7173a9 28,32,37,43
+  s_6bed1b82ef9a3c::t_8ab2b5642befc2 1-9,12-27,33-35,38-40,47-48
+docs/plans/v31_2026-06-07-combat-stat-effects-and-feedback.md
+  s_6bed1b82ef9a3c::t_222526916c8c76 238
+  s_6bed1b82ef9a3c::t_c786ba449a3269 205
+  s_6bed1b82ef9a3c::t_b1e95352191d9f 152
+  s_6bed1b82ef9a3c::t_6b47990cbb5fcf 157,162,167
+  s_6bed1b82ef9a3c::t_0bb11616d10c01 260
+  s_6bed1b82ef9a3c::t_cd1ed92a7161a3 200
+  s_6bed1b82ef9a3c::t_a61233350ff541 3,278,283,288,293,308,313,318,331,336,341,354,359,364,369,382,387,392,407,412
+  s_6bed1b82ef9a3c::t_b7f9f48cb172af 180
+  s_6bed1b82ef9a3c::t_f8ea5339067c9f 417,424-430
+  s_6bed1b82ef9a3c::t_58f2d51ad9ff8e 114,119,124,129,134
+  s_6bed1b82ef9a3c::t_0833a62fc0b1db 185
+  s_6bed1b82ef9a3c::t_c4e85b00fc2f61 190
+  s_6bed1b82ef9a3c::t_dc8f40600d7acd 78,83,88,93,98
+  s_6bed1b82ef9a3c::t_915c5c13fa4dbf 218
+  s_6bed1b82ef9a3c::t_708f74d235e35c 147
+  s_6bed1b82ef9a3c::t_35034bfd0cd512 233
+  s_6bed1b82ef9a3c::t_b61c905b67469f 265
+  s_ddb6f19b72b4d5::t_974d95357166c4 1-2,4-77,79-82,84-87,89-92,94-97,99-113,115-118,120-123,125-128,130-133,135-146,148-151,153-156,158-161,163-166,168-179,181-184,186-189,191-194,196-199,201-204,206-217,219-222,224-227,229-232,234-237,239-249,251-254,256-259,261-264,266-277,279-282,284-287,289-292,294-307,309-312,314-317,319-330,332-335,337-340,342-353,355-358,360-363,365-368,370-381,383-386,388-391,393-406,408-411,413-416,418-423,431-438
+  s_6bed1b82ef9a3c::t_f71abce37ada74 223,228
+  s_6bed1b82ef9a3c::t_2f9d4ac6ab066b 250,255
+  s_6bed1b82ef9a3c::t_7f9e0be2fc6e3b 195
+tools/bot/run.py
+  s_6bed1b82ef9a3c::t_a9819fa9eb4da6 267-275
+  s_6bed1b82ef9a3c::t_6ff922b98a2f2e 1626-1664
+  s_6bed1b82ef9a3c::t_cc088db07d020e 1023-1037,1045-1049,1051-1055
+  s_6bed1b82ef9a3c::t_34e7d78f04b1a1 864-865,867-870
+  s_6bed1b82ef9a3c::t_2fe48a4a064b6a 92,458-490,1146-1147
+  s_6bed1b82ef9a3c::t_e631aa6f4b120f 1038-1044,1050
+  s_6bed1b82ef9a3c::t_8a87e1fdf7cb9f 1751-1759,1829-1833
+shared/golden/dungeon_monster_attack.json
+  s_6bed1b82ef9a3c::t_dc60a0aa5b0c16 7-8
+shared/protocol/state_delta.v1.schema.json
+  s_6bed1b82ef9a3c::t_c66dcc30f5a5f5 95-96,99-103,215-240,252-256
+tools/bot/scenarios/08_heal_lab.json
+  s_6bed1b82ef9a3c::t_517f1e09e369cc 10,12-13,17
+shared/rules/worlds.v0.json
+  s_6bed1b82ef9a3c::t_033dc4409e596e 265
+  s_6bed1b82ef9a3c::t_f105e151be011a 229-254,256-259,261-264,266-269,271-293
+  s_6bed1b82ef9a3c::t_bff81a50016434 255,260
+  s_6bed1b82ef9a3c::t_0a96c26956121c 270
+shared/rules/combat.v0.json
+  s_6bed1b82ef9a3c::t_5e3c470e7f8fc6 4-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e4a601e7433c84e8b72345a21eabe1333c56bd19",
+  "prompts": {},
+  "sessions": {
+    "s_6bed1b82ef9a3c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea4ed-eaa2-7ad2-ada2-3e522adc9cd5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_ddb6f19b72b4d5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea4d5-b0d9-77a0-8eb8-3afb9b00a260",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

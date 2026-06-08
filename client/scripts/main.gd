@@ -670,6 +670,8 @@ func _upsert_entity(e: Dictionary) -> void:
 		rec = {"node": node, "controller": controller, "type": str(e["type"])}
 		if e.has("item_def_id"):
 			rec["item_def_id"] = str(e["item_def_id"])
+		if e.has("monster_def_id"):
+			rec["monster_def_id"] = str(e["monster_def_id"])
 		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "effect_ids"]:
 			if e.has(key):
 				rec[key] = e[key]
@@ -2144,6 +2146,7 @@ func get_bot_state() -> Dictionary:
 		"inventory": inventory.duplicate(true),
 		"equipped": equipped.duplicate(true),
 		"monster_ids": live_monster_ids,
+		"entities_debug": _bot_entities_debug(live_monster_ids),
 		"loot_ids": loot_ids.duplicate(),
 		"loot": _bot_loot_debug(),
 		"interactable_ids": interactable_ids.duplicate(),
@@ -2166,6 +2169,24 @@ func get_bot_state() -> Dictionary:
 		"current_session_id": client.session_id if client != null else "",
 		"gameplay_active": gameplay_active,
 	}
+	return out
+
+
+func _bot_entities_debug(live_monster_ids: Array) -> Array:
+	var out: Array = []
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		if str(rec.get("type", "")) == "monster" and not live_monster_ids.has(id):
+			continue
+		out.append({
+			"id": str(id),
+			"type": str(rec.get("type", "")),
+			"monster_def_id": str(rec.get("monster_def_id", "")),
+			"interactable_def_id": str(rec.get("interactable_def_id", "")),
+			"item_def_id": str(rec.get("item_def_id", "")),
+			"rarity": str(rec.get("rarity", "")),
+			"state": str(rec.get("state", "")),
+		})
 	return out
 
 

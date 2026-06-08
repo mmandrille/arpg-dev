@@ -11,7 +11,7 @@ Last updated: 2026-06-08
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v31 — `combat-stat-effects-and-feedback` |
+| **Latest completed slice** | v32 — `test-floor-and-resilient-scenarios` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-08 |
 | **Next slice** | TBD |
@@ -47,6 +47,7 @@ v28_* = full-equipment-and-belt-hotbar
 v29_* = dungeon-equipment-drop-expansion
 v30_* = monster-rarity-and-loot-scaling
 v31_* = combat-stat-effects-and-feedback
+v32_* = test-floor-and-resilient-scenarios
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -98,6 +99,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v29** | `dungeon-equipment-drop-expansion` | Complete (`make ci` green) | [`v29_spec-dungeon-equipment-drop-expansion.md`](specs/v29_spec-dungeon-equipment-drop-expansion.md) | [`v29_2026-06-07-dungeon-equipment-drop-expansion.md`](plans/v29_2026-06-07-dungeon-equipment-drop-expansion.md) |
 | **v30** | `monster-rarity-and-loot-scaling` | Complete (`make ci` green) | [`v30_spec-monster-rarity-and-loot-scaling.md`](specs/v30_spec-monster-rarity-and-loot-scaling.md) | [`v30_2026-06-07-monster-rarity-and-loot-scaling.md`](plans/v30_2026-06-07-monster-rarity-and-loot-scaling.md) |
 | **v31** | `combat-stat-effects-and-feedback` | Complete (`make ci` green) | [`v31_spec-combat-stat-effects-and-feedback.md`](specs/v31_spec-combat-stat-effects-and-feedback.md) | [`v31_2026-06-07-combat-stat-effects-and-feedback.md`](plans/v31_2026-06-07-combat-stat-effects-and-feedback.md) |
+| **v32** | `test-floor-and-resilient-scenarios` | Complete (`make ci` green) | [`v32_spec-test-floor-and-resilient-scenarios.md`](specs/v32_spec-test-floor-and-resilient-scenarios.md) | [`v32_2026-06-08-test-floor-and-resilient-scenarios.md`](plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md) |
 
 ---
 
@@ -751,6 +753,31 @@ and Godot renders those outcomes from server event metadata.
 status effects, affix grammar, polished comparison UI, enemy equipment inventories, production
 combat VFX/audio, and Protobuf migration.
 
+### v32 — Test floor and resilient scenarios
+
+**Proves:** CI distinguishes intentional contract locks from mutable tuning details, so normal
+dungeon, population, movement, loot-weight, and presentation tuning can proceed without weakening
+replay, schema, formula, persistence, or protocol coverage.
+
+- `CLAUDE.md` now documents the durable Test Locking Policy for future slices.
+- The v32 plan audit record classifies exact assertions as contract locks, behavior proofs, or
+  tuning details before changing tests.
+- Python bot assertions now support semantic entity filters, range comparators, inventory filters,
+  eventual assertions, and generated dungeon walk budgets derived from map size.
+- Protocol scenarios now prove chase/leash/dungeon behavior through eventual or semantic assertions
+  instead of fixed tick waits and incidental total population counts.
+- Character leveling keeps formula, level, max-HP, stat allocation, event, replay, reconnect, and
+  persistence locks while avoiding an exact generated-XP tuning total.
+- Go, shared validation, and GDScript golden tests keep schema and formula contracts exact while
+  deriving or structurally validating generated population, rarity tuning, and loot-depth offsets.
+- Client bot scenarios can target entities by debug metadata such as monster definition,
+  interactable definition, item definition, rarity, and state instead of fragile entity indexes.
+- Local reverted probes changed dungeon floor size, generated monster population, and movement speed;
+  the focused checks stayed green with no committed tuning changes.
+
+**Explicit non-goals:** no gameplay, balance, protocol, or UI feature work; no committed tuning
+changes; no broad test framework migration; no `tuning_sensitive` metadata.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -910,14 +937,19 @@ proof for non-common rarity.
 damage, and effective stat breakdowns across player and monster combat, then renders normal, crit,
 miss, and block feedback from protocol events in Godot.
 
+**The test floor now separates contracts from tuning details.** v32 keeps exact locks for replay,
+schema, formula parity, persistence boundaries, and named UI/protocol contracts, while converting
+brittle dungeon size, generated population, movement timing, rarity tuning, and selector-index
+assumptions to semantic, range, derived, or eventual checks.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers/boss floors | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31 non-goals |
+| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers/boss floors | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32 non-goals |
 | Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, boss-floor chest integration, richer dungeon drop economy | v23/v25/v26/v28/v29/v30 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production combat VFX/audio, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31 non-goals |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production combat VFX/audio, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

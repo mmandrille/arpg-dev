@@ -6,7 +6,11 @@
   "description": "Generated dungeon mobs spawn and run chase/leash AI after descent.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-    { "action": "wait_ticks", "ticks": 120 }
+    {
+      "action": "wait_until_assertion",
+      "timeout_s": 15.0,
+      "assertion": { "type": "event_seen", "event_type": "monster_leashed" }
+    }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },

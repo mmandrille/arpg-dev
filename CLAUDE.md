@@ -59,6 +59,26 @@ GODOT=/path/to/godot make bot-visual
 SESSION_ID=abc123 make replay
 ```
 
+## Test Locking Policy
+
+Use exact values only when the test intentionally owns a stable contract: protocol/schema shape,
+replay determinism for the same seed and ordered inputs, persistence boundaries, formula goldens,
+and Go/GDScript evaluator parity. Full snapshots and exact event ordering are appropriate when
+replay equality or protocol shape is the subject of the test.
+
+Gameplay tuning values should use semantic, range, derived, or eventual assertions unless a named
+golden explicitly owns the value. This includes dungeon size, generated population, movement speed,
+timing budgets, damage tuning, loot weights, and generated coordinates.
+
+Examples:
+- Dungeon placement: prefer "down stair exists, is within generated bounds, and is reachable from
+  spawn" over pinning its exact generated coordinate.
+- Population: prefer "at least one champion dungeon mob exists for this pinned rarity scenario" or
+  "monster count is within rule-derived bounds" over duplicating a first-pass total in unrelated
+  scenarios.
+- Movement speed: prefer "monster moves closer / leashes within a timeout derived from current
+  rules" over "position equals X after exactly N ticks" unless fixed-tick stepping is the feature.
+
 ## Architecture
 
 ```

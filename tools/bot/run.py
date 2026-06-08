@@ -277,6 +277,30 @@ async def execute_step(
             await wait_for_accept(ws, state, env["message_id"], loop)
         return
 
+    if action == "wait_until_assertion":
+        assertion = step.get("assertion")
+        if not isinstance(assertion, dict):
+            raise AssertionError(f"wait_until_assertion: assertion must be object: {step}")
+        timeout_s = float(step.get("timeout_s", SLICE_TIMEOUT_S))
+        deadline = loop.time() + timeout_s
+        last_error: AssertionError | None = None
+        while loop.time() <= deadline:
+            try:
+                run_runtime_assertions([assertion], state, "runtime protocol")
+                return
+            except AssertionError as exc:
+                last_error = exc
+            env = make_envelope(
+                "move_intent",
+                session_id,
+                state.last_tick,
+                {"direction": {"x": 0, "y": 0}, "duration_ticks": 1},
+            )
+            await ws.send(json.dumps(env))
+            await wait_for_accept(ws, state, env["message_id"], loop)
+        detail = f": {last_error}" if last_error is not None else ""
+        raise TimeoutError(f"wait_until_assertion timed out after {timeout_s:.1f}s{detail}")
+
     if action == "move":
         direction = step["direction"]
         duration = int(step.get("duration_ticks", 1))
@@ -374,9 +398,7 @@ async def execute_step(
         return
 
     if action == "assert_hotbar_capacity":
-        want = int(step["equals"])
-        if state.hotbar_capacity != want:
-            raise AssertionError(f"assert_hotbar_capacity: {state.hotbar_capacity} != {want}")
+        assert_count_matches(state.hotbar_capacity, step, "assert_hotbar_capacity")
         return
 
     if action == "assert_entity_count":
@@ -634,7 +656,7 @@ async def execute_step(
             target["position"],
             loop,
             stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
-            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+            max_ticks=derived_walk_max_ticks(state, target["position"], int(step.get("max_ticks", WALK_MAX_TICKS))),
         )
         msg_type = "descend_intent" if direction == "down" else "ascend_intent"
         previous_level = state.current_level
@@ -655,7 +677,7 @@ async def execute_step(
             target["position"],
             loop,
             stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
-            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+            max_ticks=derived_walk_max_ticks(state, target["position"], int(step.get("max_ticks", WALK_MAX_TICKS))),
         )
         target_pos = target.get("position", {})
         state.used_teleporter_positions[state.current_level] = {
@@ -889,11 +911,10 @@ async def execute_step(
         return
 
     if action == "assert_player_hp":
-        want = int(step["equals"])
         player = find_player(state)
         if player is None:
             raise AssertionError("assert_player_hp: player not found in runtime state")
-        assert_player_hp_equals([player], want, "runtime protocol")
+        assert_count_matches(int(player.get("hp", -1)), step, "assert_player_hp")
         return
 
     if action == "allocate_stat":
@@ -1029,6 +1050,17 @@ async def walk_toward(
     raise TimeoutError(f"walk_toward exhausted {max_ticks} ticks toward {target_pos}")
 
 
+def derived_walk_max_ticks(state: RuntimeState, target_pos: dict[str, Any], requested: int) -> int:
+    player = find_player(state)
+    if player is None:
+        return requested
+    player_pos = player.get("position", {})
+    dx = abs(float(target_pos.get("x", 0.0)) - float(player_pos.get("x", 0.0)))
+    dy = abs(float(target_pos.get("y", 0.0)) - float(player_pos.get("y", 0.0)))
+    distance_ticks = int(max(dx, dy) * 20) + 160
+    return max(requested, distance_ticks, WALK_MAX_TICKS)
+
+
 async def move_to_position(
     ws,
     session_id: str,
@@ -1051,6 +1083,9 @@ async def move_to_position(
     await ws.send(json.dumps(env))
     before = {"x": player_pos["x"], "y": player_pos["y"]}
     await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop)
+    unchanged_ticks = 0
+    stalled_reissues = 0
+    last_pos = before
     for _ in range(max_ticks):
         player = find_player(state)
         if player is None:
@@ -1060,7 +1095,26 @@ async def move_to_position(
         dy = float(target_pos["y"]) - float(player_pos["y"])
         if max(abs(dx), abs(dy)) <= stop_distance:
             return
-        await pump_one(ws, state, timeout=0.1)
+        current_pos = {"x": player_pos["x"], "y": player_pos["y"]}
+        if current_pos == last_pos:
+            unchanged_ticks += 1
+            if unchanged_ticks >= 120:
+                stalled_reissues += 1
+                if stalled_reissues > 3:
+                    raise TimeoutError(
+                        f"move_to_position made no progress after {stalled_reissues} move_to_intent attempts "
+                        f"toward {target_pos}; player={current_pos}"
+                    )
+                env = make_envelope("move_to_intent", session_id, state.last_tick, {"position": target_pos})
+                await ws.send(json.dumps(env))
+                await wait_for_player_move_or_accept(ws, state, current_pos, env["message_id"], loop)
+                unchanged_ticks = 0
+                last_pos = current_pos
+        else:
+            unchanged_ticks = 0
+            stalled_reissues = 0
+            last_pos = current_pos
+        await pump_one(ws, state, timeout=0.05)
     raise TimeoutError(f"move_to_position exhausted {max_ticks} ticks toward {target_pos}")
 
 
@@ -1171,6 +1225,9 @@ async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop) -> None
 async def wait_for_accept(ws, state: RuntimeState, message_id: str, loop) -> None:
     deadline = loop.time() + SLICE_TIMEOUT_S
     while message_id not in state.accepted_message_ids:
+        reason = state.rejected_message_reasons.get(message_id)
+        if reason is not None:
+            raise AssertionError(f"intent {message_id} rejected while waiting for accept: {reason}")
         if loop.time() > deadline:
             raise TimeoutError(f"stalled waiting for accept {message_id}")
         await pump_one(ws, state, timeout=0.1)
@@ -1790,31 +1847,58 @@ def assert_rolled_inventory_any(inventory: list[dict], equipped: bool | None, wh
 
 def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: str) -> None:
     matches: list[dict] = []
-    entity_type = str(assertion.get("entity_type", ""))
-    monster_def_id = str(assertion.get("monster_def_id", ""))
-    interactable_def_id = str(assertion.get("interactable_def_id", ""))
-    rarity = assertion.get("rarity")
-    wanted_state = assertion.get("state")
     for entity in entities:
-        if entity_type and str(entity.get("type", "")) != entity_type:
-            continue
-        if monster_def_id and str(entity.get("monster_def_id", "")) != monster_def_id:
-            continue
-        if interactable_def_id and str(entity.get("interactable_def_id", "")) != interactable_def_id:
-            continue
-        if rarity is not None and str(entity.get("rarity", "")) != str(rarity):
-            continue
-        if wanted_state is not None and str(entity.get("state", "")) != str(wanted_state):
-            continue
-        matches.append(entity)
+        if entity_matches_selector(entity, assertion):
+            matches.append(entity)
+    assert_count_matches(len(matches), assertion, f"{where}: entity count", f" for {assertion}: {matches}")
+
+
+def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) -> bool:
+    string_filters = {
+        "entity_type": "type",
+        "monster_def_id": "monster_def_id",
+        "interactable_def_id": "interactable_def_id",
+        "item_def_id": "item_def_id",
+        "item_template_id": "item_template_id",
+        "rarity": "rarity",
+        "state": "state",
+    }
+    for selector_key, entity_key in string_filters.items():
+        if selector_key in selector and selector[selector_key] is not None:
+            if str(entity.get(entity_key, "")) != str(selector[selector_key]):
+                return False
+    if "level" in selector and selector["level"] is not None:
+        if int(entity.get("level", -999999)) != int(selector["level"]):
+            return False
+    if selector.get("alive") is not None:
+        hp = entity.get("hp")
+        is_alive = not isinstance(hp, int) or hp > 0
+        if is_alive != bool(selector["alive"]):
+            return False
+    return True
+
+
+def assert_count_matches(got: int, assertion: dict[str, Any], label: str, suffix: str = "") -> None:
     if "equals" in assertion:
         want = int(assertion["equals"])
-        if len(matches) != want:
-            raise AssertionError(f"{where}: entity count {len(matches)} != {want} for {assertion}: {matches}")
+        if got != want:
+            raise AssertionError(f"{label} {got} != {want}{suffix}")
     if "at_least" in assertion:
         want = int(assertion["at_least"])
-        if len(matches) < want:
-            raise AssertionError(f"{where}: entity count {len(matches)} < {want} for {assertion}: {matches}")
+        if got < want:
+            raise AssertionError(f"{label} {got} < {want}{suffix}")
+    if "at_most" in assertion:
+        want = int(assertion["at_most"])
+        if got > want:
+            raise AssertionError(f"{label} {got} > {want}{suffix}")
+    if "between" in assertion:
+        bounds = assertion["between"]
+        if not isinstance(bounds, list) or len(bounds) != 2:
+            raise AssertionError(f"{label}: between must be [min, max]{suffix}")
+        low = int(bounds[0])
+        high = int(bounds[1])
+        if got < low or got > high:
+            raise AssertionError(f"{label} {got} not between {low} and {high}{suffix}")
 
 
 def assert_character_progression(progression: dict[str, Any], assertion: dict[str, Any], where: str) -> None:
@@ -1912,9 +1996,14 @@ def run_assertions(
 
         typ = assertion.get("type")
         if typ == "inventory_count":
-            want = int(assertion["equals"])
-            if len(inventory) != want:
-                raise AssertionError(f"{where}: inventory count {len(inventory)} != {want}: {inventory}")
+            matches = inventory
+            if assertion.get("item_def_id") is not None:
+                matches = [item for item in matches if str(item.get("item_def_id", "")) == str(assertion["item_def_id"])]
+            if assertion.get("item_template_id") is not None:
+                matches = [item for item in matches if str(item.get("item_template_id", "")) == str(assertion["item_template_id"])]
+            if assertion.get("equipped") is not None:
+                matches = [item for item in matches if bool(item.get("equipped")) == bool(assertion["equipped"])]
+            assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")
         elif typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
@@ -1948,9 +2037,7 @@ def run_assertions(
             if equipped.get(slot) is not None:
                 raise AssertionError(f"{where}: equipped {slot}={equipped.get(slot)}, want empty")
         elif typ == "hotbar_capacity":
-            want = int(assertion["equals"])
-            if hotbar_capacity != want:
-                raise AssertionError(f"{where}: hotbar_capacity {hotbar_capacity} != {want}")
+            assert_count_matches(int(hotbar_capacity or 0), assertion, f"{where}: hotbar_capacity")
         elif typ == "hotbar_slot":
             assert_hotbar_slot(hotbar or [], int(assertion["slot_index"]), assertion.get("item_def_id"), where, inventory)
         elif typ == "monster_dead":
@@ -2127,6 +2214,16 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(state.inventory, str(assertion["item_def_id"]), expected_equipped, where)
             continue
+        if typ == "inventory_count":
+            matches = state.inventory
+            if assertion.get("item_def_id") is not None:
+                matches = [item for item in matches if str(item.get("item_def_id", "")) == str(assertion["item_def_id"])]
+            if assertion.get("item_template_id") is not None:
+                matches = [item for item in matches if str(item.get("item_template_id", "")) == str(assertion["item_template_id"])]
+            if assertion.get("equipped") is not None:
+                matches = [item for item in matches if bool(item.get("equipped")) == bool(assertion["equipped"])]
+            assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")
+            continue
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)
         if typ == "rolled_inventory_any":
@@ -2147,9 +2244,7 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                 raise AssertionError(f"{where}: equipped {slot}={state.equipped.get(slot)}, want empty")
             continue
         if typ == "hotbar_capacity":
-            want = int(assertion["equals"])
-            if state.hotbar_capacity != want:
-                raise AssertionError(f"{where}: hotbar_capacity {state.hotbar_capacity} != {want}")
+            assert_count_matches(state.hotbar_capacity, assertion, f"{where}: hotbar_capacity")
             continue
         if typ == "hotbar_slot":
             assert_hotbar_slot(state.hotbar, int(assertion["slot_index"]), assertion.get("item_def_id"), where, state.inventory)

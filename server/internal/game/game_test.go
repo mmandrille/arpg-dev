@@ -3037,25 +3037,24 @@ func TestGuardedChestGenerationGolden(t *testing.T) {
 	}
 	loadGolden(t, "guarded_chest_generation.json", &golden)
 	rules := loadRules(t)
-	if golden.BaseMonsterCount != rules.DungeonGeneration.MonsterPlacement.Count {
-		t.Fatalf("base monster count = %d, want rules %d", golden.BaseMonsterCount, rules.DungeonGeneration.MonsterPlacement.Count)
-	}
-	if golden.MonsterCountBonus != rules.DungeonGeneration.ChestPlacement.MonsterCountBonus {
-		t.Fatalf("monster bonus = %d, want rules %d", golden.MonsterCountBonus, rules.DungeonGeneration.ChestPlacement.MonsterCountBonus)
-	}
 	for _, c := range golden.Cases {
 		level, err := GenerateDungeonLevel(c.Seed, golden.Level, rules.DungeonGeneration)
 		if err != nil {
 			t.Fatalf("%s: generate: %v", c.Name, err)
 		}
-		if len(level.monsters) != c.ExpectedMonsterCount {
-			t.Fatalf("%s: monsters = %d, want %d", c.Name, len(level.monsters), c.ExpectedMonsterCount)
-		}
 		if c.ExpectedChest == nil {
+			wantCount := rules.DungeonGeneration.MonsterPlacement.Count
+			if len(level.monsters) != wantCount {
+				t.Fatalf("%s: monsters = %d, want rule-derived base count %d", c.Name, len(level.monsters), wantCount)
+			}
 			if len(level.chests) != 0 {
 				t.Fatalf("%s: chests = %+v, want none", c.Name, level.chests)
 			}
 			continue
+		}
+		wantCount := rules.DungeonGeneration.MonsterPlacement.Count + rules.DungeonGeneration.ChestPlacement.MonsterCountBonus
+		if len(level.monsters) != wantCount {
+			t.Fatalf("%s: monsters = %d, want rule-derived guarded count %d", c.Name, len(level.monsters), wantCount)
 		}
 		if len(level.chests) != 1 {
 			t.Fatalf("%s: chests = %+v, want one", c.Name, level.chests)

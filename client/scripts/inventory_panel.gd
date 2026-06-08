@@ -133,6 +133,7 @@ func show_gesture_hint(text: String) -> void:
 
 func _sync_viewport_size() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_reposition_panel()
 
 
 func set_inventory_state(next_inventory: Array, next_equipped: Dictionary) -> void:
@@ -235,12 +236,9 @@ func _notification(what: int) -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
-	_panel.custom_minimum_size = Vector2(500, 340)
+	_panel.custom_minimum_size = Vector2(560, 410)
 	_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_panel.offset_left = -520
-	_panel.offset_top = -370
-	_panel.offset_right = -20
-	_panel.offset_bottom = -30
+	_reposition_panel()
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(_panel)
@@ -249,16 +247,16 @@ func _build() -> void:
 	_gesture_hint.visible = false
 	_gesture_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_gesture_hint.add_theme_color_override("font_color", Color("#c9a227"))
-	_gesture_hint.add_theme_font_size_override("font_size", 11)
+	_gesture_hint.add_theme_font_size_override("font_size", 15)
 	_panel.add_child(_gesture_hint)
 
 	var root := HBoxContainer.new()
 	root.add_theme_constant_override("separation", 18)
-	root.custom_minimum_size = Vector2(470, 310)
+	root.custom_minimum_size = Vector2(530, 380)
 	_panel.add_child(root)
 
 	var left := VBoxContainer.new()
-	left.custom_minimum_size = Vector2(190, 0)
+	left.custom_minimum_size = Vector2(220, 0)
 	root.add_child(left)
 	left.add_child(_title("Equipment"))
 	var equip_grid := GridContainer.new()
@@ -269,17 +267,17 @@ func _build() -> void:
 	for slot in EQUIPMENT_SLOTS:
 		var box := VBoxContainer.new()
 		box.add_child(_caption(str(EQUIPMENT_LABELS.get(slot, slot))))
-		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), Vector2(72, 52))
+		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), Vector2(84, 62))
 		_equipment_slots[str(slot)] = btn
 		box.add_child(btn)
 		equip_grid.add_child(box)
 
 	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(250, 0)
+	right.custom_minimum_size = Vector2(290, 0)
 	root.add_child(right)
 	right.add_child(_caption("Bag"))
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(245, 225)
+	scroll.custom_minimum_size = Vector2(285, 288)
 	right.add_child(scroll)
 	_bag_grid = GridContainer.new()
 	_bag_grid.columns = 4
@@ -299,10 +297,10 @@ func _render() -> void:
 	for item in inventory:
 		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
 			continue
-		var slot := _slot_button(SLOT_KIND_BAG, Vector2(48, 48))
+		var slot := _slot_button(SLOT_KIND_BAG, Vector2(58, 58))
 		_fill_slot(slot, item)
 		_bag_grid.add_child(slot)
-	var bag_drop := _slot_button(SLOT_KIND_BAG_AREA, Vector2(48, 48))
+	var bag_drop := _slot_button(SLOT_KIND_BAG_AREA, Vector2(58, 58))
 	bag_drop.text = "+"
 	bag_drop.tooltip_text = "Bag"
 	_bag_grid.add_child(bag_drop)
@@ -349,7 +347,7 @@ func _slot_button(kind: String, size: Vector2) -> InventorySlotButton:
 	btn.add_theme_stylebox_override("hover", _slot_style(true))
 	btn.add_theme_stylebox_override("pressed", _slot_style(true))
 	btn.add_theme_color_override("font_color", Color("#e8dcc8"))
-	btn.add_theme_font_size_override("font_size", 10)
+	btn.add_theme_font_size_override("font_size", 14)
 	return btn
 
 
@@ -392,14 +390,14 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 			slot.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
 
 	var font := slot.get_theme_default_font()
-	var font_size := 9
+	var font_size := 12
 	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.38), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#f4ead8"))
 
 
 func _title(text: String) -> Label:
 	var label := _caption(text)
-	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_size_override("font_size", 22)
 	return label
 
 
@@ -407,8 +405,24 @@ func _caption(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_color_override("font_color", Color("#c9a227"))
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", 15)
 	return label
+
+
+func _reposition_panel() -> void:
+	if _panel == null:
+		return
+	var margin := 20.0
+	var panel_size := _panel.custom_minimum_size
+	var viewport_size := get_viewport_rect().size
+	_panel.offset_right = -margin
+	_panel.offset_bottom = -maxf(margin, minf(90.0, viewport_size.y * 0.10))
+	_panel.offset_left = _panel.offset_right - panel_size.x
+	_panel.offset_top = _panel.offset_bottom - panel_size.y
+	if viewport_size.y > 0.0 and viewport_size.y + _panel.offset_top < margin:
+		_panel.offset_top = -viewport_size.y + margin
+	if viewport_size.x > 0.0 and viewport_size.x + _panel.offset_left < margin:
+		_panel.offset_left = -viewport_size.x + margin
 
 
 func _panel_style() -> StyleBoxFlat:

@@ -40,7 +40,7 @@
     "hit_chance": { "type": "linear", "base": 1.0, "per_dex": 0.0, "min": 0.05, "max": 1.0 },
     "crit_chance": { "type": "linear", "base": 0.05, "per_dex": 0.002, "min": 0.0, "max": 0.5 },
     "crit_damage": { "type": "linear", "base": 1.5, "per_str": 0.005, "min": 1.0 },
-    "movement_speed": { "type": "linear", "base": 1.0, "per_dex": 0.002, "min": 0.5, "max": 2.0 },
+    "movement_speed": { "type": "linear", "base": 0.7, "per_dex": 0.002, "min": 0.5, "max": 2.0 },
     "max_hp": { "type": "linear", "base": 5.0, "per_vit": 1.0, "min": 1.0 },
     "max_mana": { "type": "linear", "base": 5.0, "per_magic": 1.0, "min": 0.0 }
   }

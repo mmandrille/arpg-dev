@@ -7,6 +7,7 @@ import (
 )
 
 const dungeonCoinStairDistance = 7.0
+const championCommonMinionCount = 2
 
 type generatedDungeonLevel struct {
 	levelNum    int
@@ -284,8 +285,64 @@ func placeDungeonMonsters(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules
 			lootTable: effectiveLootBand.MonsterLootTable,
 			pos:       pos,
 		})
+		if rarity.ID == "champion" {
+			if err := placeChampionCommonMinions(rng, rules, out, pos); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
+}
+
+func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2) error {
+	common, ok := rules.MonsterRarity("common")
+	if !ok {
+		return fmt.Errorf("game: generate dungeon level %d: missing common monster rarity", out.levelNum)
+	}
+	effectiveDepth := absInt(out.levelNum) + common.LootDepthOffset
+	effectiveLootBand, ok := rules.LootBandForDepth(effectiveDepth)
+	if !ok {
+		return fmt.Errorf("game: generate dungeon level %d: missing common minion loot band for effective depth %d", out.levelNum, effectiveDepth)
+	}
+	for i := 0; i < championCommonMinionCount; i++ {
+		pos, ok := randomChampionMinionPosition(rng, rules, out, championPos)
+		if !ok {
+			return fmt.Errorf("game: generate dungeon level %d: could not place champion minion %d", out.levelNum, i)
+		}
+		out.monsters = append(out.monsters, generatedMonster{
+			defID:     rules.MonsterPlacement.MonsterDefID,
+			rarityID:  common.ID,
+			lootTable: effectiveLootBand.MonsterLootTable,
+			pos:       pos,
+		})
+	}
+	return nil
+}
+
+func randomChampionMinionPosition(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2) (Vec2, bool) {
+	const ringDistance = 1.75
+	baseOffsets := []Vec2{
+		{X: ringDistance, Y: 0},
+		{X: -ringDistance, Y: 0},
+		{X: 0, Y: ringDistance},
+		{X: 0, Y: -ringDistance},
+		{X: ringDistance, Y: ringDistance},
+		{X: -ringDistance, Y: ringDistance},
+		{X: ringDistance, Y: -ringDistance},
+		{X: -ringDistance, Y: -ringDistance},
+	}
+	start := 0
+	if len(baseOffsets) > 0 {
+		start = rng.IntN(len(baseOffsets))
+	}
+	for i := 0; i < len(baseOffsets); i++ {
+		offset := baseOffsets[(start+i)%len(baseOffsets)]
+		pos := Vec2{X: championPos.X + offset.X, Y: championPos.Y + offset.Y}
+		if !dungeonMonsterPositionBlocked(pos, rules, *out) && insideDungeonFloor(pos, rules) {
+			return pos, true
+		}
+	}
+	return Vec2{}, false
 }
 
 func randomMonsterPosition(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) (Vec2, bool) {
@@ -338,6 +395,14 @@ func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out g
 	return false
 }
 
+func insideDungeonFloor(pos Vec2, rules DungeonGenerationRules) bool {
+	margin := rules.MonsterPlacement.MarginFromWall
+	return pos.X >= margin &&
+		pos.Y >= margin &&
+		pos.X <= rules.FloorSize.Width-margin &&
+		pos.Y <= rules.FloorSize.Height-margin
+}
+
 func stairDistantLootPosition(anchor Vec2, rules DungeonGenerationRules) Vec2 {
 	margin := rules.StairPlacement.MarginFromWall
 	if anchor.X+dungeonCoinStairDistance <= rules.FloorSize.Width-margin {
@@ -354,5 +419,6 @@ func dungeonNavigation(global NavigationRules, gen DungeonGenerationRules) Navig
 		MaxX: int(gen.FloorSize.Width / global.CellSize),
 		MaxY: int(gen.FloorSize.Height / global.CellSize),
 	}
+	nav.MaxAutoSteps = maxInt(nav.MaxAutoSteps, int(gen.FloorSize.Width+gen.FloorSize.Height))
 	return nav
 }

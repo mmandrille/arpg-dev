@@ -4,7 +4,7 @@
   "description": "Pinned outcome after town descend, discover -1, descend to -2, discover -2, teleport back to -1 teleporter.",
   "discover_descend_teleport": {
     "expected_level": -1,
-    "expected_player_position": { "x": 14, "y": 12 },
+    "expected_player_position": { "x": 82, "y": 12 },
     "discovered_teleporters": [
       { "level": -2, "discovered": true },
       { "level": -1, "discovered": true },

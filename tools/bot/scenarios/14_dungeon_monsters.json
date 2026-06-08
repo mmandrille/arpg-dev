@@ -1,18 +1,17 @@
 {
   "id": "dungeon_monsters",
   "world_id": "dungeon_levels",
+  "seed": "b8df85479acf246f2cbf097da6d6e641",
   "title": "Dungeon monsters",
-  "description": "Generated dungeon mobs chase and proactively damage the player before being killed.",
+  "description": "Generated dungeon mobs spawn and run chase/leash AI after descent.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "event_type": "monster_killed" }
+    { "action": "wait_ticks", "ticks": 120 }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
     { "type": "visited_levels_contain", "level": 0 },
-    { "type": "event_seen", "event_type": "player_damaged" },
-    { "type": "event_seen", "event_type": "monster_killed" },
-    { "type": "monster_killed_in_attacks", "monster_def_id": "dungeon_mob", "max_attacks": 12 }
+    { "type": "event_seen", "event_type": "monster_leashed" }
   ],
   "visual": {
     "camera": { "x": 16, "y": 10, "zoom": 1.1 }

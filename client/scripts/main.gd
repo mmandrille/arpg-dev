@@ -136,7 +136,7 @@ var _level_label: Label
 var _camera: Camera3D
 
 const SEND_INTERVAL := 0.1
-const PLAYER_SPEED := 4.0
+const PLAYER_SPEED := 2.8
 const CAMERA_ZOOM_DEFAULT := 20.0
 const CAMERA_ZOOM_STEP := 1.5
 const CAMERA_ZOOM_MIN := 8.0

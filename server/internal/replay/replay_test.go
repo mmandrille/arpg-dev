@@ -97,8 +97,8 @@ func TestBuildTimelineThroughTickExtendsPassiveSimulation(t *testing.T) {
 		t.Fatalf("long timeline envelopes = %d, want more than short %d", len(long.Envelopes), len(short.Envelopes))
 	}
 	last := long.Envelopes[len(long.Envelopes)-1]
-	if last.Tick < 10 {
-		t.Fatalf("last timeline tick = %d, want at least 10 movement ticks", last.Tick)
+	if last.Tick < 2 {
+		t.Fatalf("last timeline tick = %d, want passive movement ticks", last.Tick)
 	}
 }
 

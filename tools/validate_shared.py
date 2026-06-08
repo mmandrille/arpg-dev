@@ -194,8 +194,8 @@ def cross_checks(report: Report) -> None:
                 report.fail("monster leash_radius", f"{mid}: leash_radius must be >= aggro_radius")
                 continue
         move_speed = mdef.get("move_speed", navigation["cell_size"])
-        if move_speed != navigation["cell_size"]:
-            report.fail("monster move_speed", f"{mid}: move_speed must equal navigation.cell_size in v17")
+        if move_speed <= 0 or move_speed > navigation["cell_size"]:
+            report.fail("monster move_speed", f"{mid}: move_speed must be > 0 and <= navigation.cell_size")
         else:
             report.ok(f"monster {mid} chase behavior is valid")
 

@@ -84,7 +84,19 @@ func save() -> void:
 
 
 func apply() -> void:
-	DisplayServer.window_set_size(window_size)
+	var target_size := window_size
+	var screen := DisplayServer.window_get_current_screen()
+	var scale := DisplayServer.screen_get_scale(screen)
+	if scale > 1.0:
+		target_size = Vector2i(roundi(float(window_size.x) * scale), roundi(float(window_size.y) * scale))
+	DisplayServer.window_set_size(target_size)
+	var screen_pos := DisplayServer.screen_get_position(screen)
+	var screen_size := DisplayServer.screen_get_size(screen)
+	var centered := screen_pos + Vector2i(
+		maxi(0, int((screen_size.x - target_size.x) / 2)),
+		maxi(0, int((screen_size.y - target_size.y) / 2))
+	)
+	DisplayServer.window_set_position(centered)
 
 
 func set_window_size(size: Vector2i, persist: bool = true, apply_now: bool = true) -> void:

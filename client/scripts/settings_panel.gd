@@ -53,12 +53,12 @@ func _build() -> void:
 	add_child(bg)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(360, 300)
+	panel.custom_minimum_size = Vector2(420, 340)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.offset_left = -180
-	panel.offset_right = 180
-	panel.offset_top = -150
-	panel.offset_bottom = 150
+	panel.offset_left = -210
+	panel.offset_right = 210
+	panel.offset_top = -170
+	panel.offset_bottom = 170
 	add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -68,13 +68,14 @@ func _build() -> void:
 	var title := Label.new()
 	title.text = "Settings"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_font_size_override("font_size", 30)
 	box.add_child(title)
 
 	for label in ["1280x720", "1600x900", "1920x1080"]:
 		var button := Button.new()
 		button.text = label
-		button.custom_minimum_size = Vector2(280, 40)
+		button.custom_minimum_size = Vector2(320, 46)
+		button.add_theme_font_size_override("font_size", 17)
 		button.pressed.connect(func() -> void:
 			size_selected.emit(label)
 		)
@@ -84,7 +85,8 @@ func _build() -> void:
 	_floating_toggle = CheckButton.new()
 	_floating_toggle.text = "Floating combat text"
 	_floating_toggle.button_pressed = true
-	_floating_toggle.custom_minimum_size = Vector2(280, 34)
+	_floating_toggle.custom_minimum_size = Vector2(320, 42)
+	_floating_toggle.add_theme_font_size_override("font_size", 17)
 	_floating_toggle.toggled.connect(func(enabled: bool) -> void:
 		floating_combat_text_toggled.emit(enabled)
 	)
@@ -92,5 +94,7 @@ func _build() -> void:
 
 	var back := Button.new()
 	back.text = "Back"
+	back.custom_minimum_size = Vector2(320, 44)
+	back.add_theme_font_size_override("font_size", 17)
 	back.pressed.connect(back_requested.emit)
 	box.add_child(back)

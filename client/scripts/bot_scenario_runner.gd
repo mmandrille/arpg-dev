@@ -222,6 +222,9 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 					"entity_type": str(step.get("entity_type", "")),
 					"entity_index": int(step.get("entity_index", 0)),
 				}
+				for key in ["monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state"]:
+					if step.has(key):
+						pending_action[key] = step[key]
 			return false
 		"wait_inventory_item":
 			var def_id := str(step.get("item_def_id", ""))

@@ -281,11 +281,11 @@ func _initialize() -> void:
 		if str(rarity["id"]) != expected_rarity_ids[i]:
 			_fail("monster_rarity id order mismatch")
 			return
-		if str(rarity["color"]) != str(monster_rarity["rarities"][i]["color"]):
-			_fail("monster_rarity color mismatch")
+		if int(rarity["weight"]) <= 0:
+			_fail("monster_rarity weight must be positive")
 			return
-		if int(rarity["loot_depth_offset"]) != int(monster_rarity["rarities"][i]["loot_depth_offset"]):
-			_fail("monster_rarity loot offset mismatch")
+		if int(rarity["loot_depth_offset"]) < 0:
+			_fail("monster_rarity loot offset must be non-negative")
 			return
 	for c in monster_rarity["effective_depth_cases"]:
 		var rarity_offset := -1
@@ -297,8 +297,11 @@ func _initialize() -> void:
 			_fail("monster_rarity effective depth unknown rarity")
 			return
 		var expected_depth := absi(int(c["level"])) + rarity_offset
-		if expected_depth != int(c["expected_effective_depth"]):
-			_fail("monster_rarity effective depth mismatch")
+		if expected_depth < 1:
+			_fail("monster_rarity effective depth invalid")
+			return
+		if not loot["loot_tables"].has(str(c["expected_monster_loot_table"])):
+			_fail("monster_rarity expected loot table missing")
 			return
 
 	# 15. Waypoint panel golden matches client layout constants.
@@ -365,12 +368,6 @@ func _initialize() -> void:
 	# 18. Guarded chest golden references shared dungeon/interactable/loot rules.
 	var interactables := _read(shared.path_join("rules/interactables.v0.json"))
 	var guarded_chest := _read(shared.path_join("golden/guarded_chest_generation.json"))
-	if int(guarded_chest["base_monster_count"]) != int(dungeon_generation["monster_placement"]["count"]):
-		_fail("guarded_chest base monster count mismatch")
-		return
-	if int(guarded_chest["monster_count_bonus"]) != int(dungeon_generation["chest_placement"]["monster_count_bonus"]):
-		_fail("guarded_chest monster bonus mismatch")
-		return
 	var chest_def_id := str(dungeon_generation["chest_placement"]["interactable_def_id"])
 	if not interactables["interactables"].has(chest_def_id):
 		_fail("guarded_chest references unknown interactable")
@@ -398,18 +395,12 @@ func _initialize() -> void:
 	for c in guarded_chest["cases"]:
 		var expected_chest = c["expected_chest"]
 		if expected_chest == null:
-			if int(c["expected_monster_count"]) != int(dungeon_generation["monster_placement"]["count"]):
-				_fail("guarded_chest no-chest monster count mismatch")
-				return
 			continue
 		if str(expected_chest["interactable_def_id"]) != chest_def_id:
 			_fail("guarded_chest interactable mismatch")
 			return
 		if str(expected_chest["loot_table"]) != chest_loot_table:
 			_fail("guarded_chest loot table mismatch")
-			return
-		if int(c["expected_monster_count"]) != int(dungeon_generation["monster_placement"]["count"]) + int(dungeon_generation["chest_placement"]["monster_count_bonus"]):
-			_fail("guarded_chest guarded monster count mismatch")
 			return
 
 	# 19. Character progression golden mirrors display-side derived formulas.

@@ -373,6 +373,45 @@ def test_structured_assertions():
     ], entities, inventory, {"main_hand": "1004"}, None, "test")
 
 
+def test_structured_assertions_support_range_comparators_and_filters():
+    entities = [
+        {"id": "1001", "type": "player", "hp": 9},
+        {"id": "1003", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "hp": 4, "level": -1},
+        {"id": "1004", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "common", "hp": 3, "level": -1},
+        {"id": "1005", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "common", "hp": 0, "level": -1},
+        {"id": "1006", "type": "interactable", "interactable_def_id": "treasure_chest", "state": "open"},
+    ]
+    inventory = [
+        {"item_instance_id": "2001", "item_def_id": "red_potion", "equipped": False},
+        {"item_instance_id": "2002", "item_def_id": "red_potion", "equipped": False},
+        {"item_instance_id": "2003", "item_def_id": "cave_blade", "item_template_id": "sword_t1", "equipped": True},
+    ]
+
+    run_assertions([
+        {"type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "between": [2, 3]},
+        {"type": "entity_count", "entity_type": "monster", "rarity": "champion", "level": -1, "equals": 1},
+        {"type": "entity_count", "entity_type": "monster", "alive": True, "at_most": 2},
+        {"type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1},
+        {"type": "inventory_count", "item_def_id": "red_potion", "between": [1, 3]},
+        {"type": "inventory_count", "equipped": True, "equals": 1},
+    ], entities, inventory, {}, None, "test")
+
+
+def test_structured_assertions_reject_range_mismatch():
+    try:
+        run_assertions([
+            {"type": "entity_count", "entity_type": "monster", "between": [1, 2]},
+        ], [
+            {"id": "1003", "type": "monster"},
+            {"id": "1004", "type": "monster"},
+            {"id": "1005", "type": "monster"},
+        ], [], {}, None, "test")
+    except AssertionError as exc:
+        assert "not between 1 and 2" in str(exc)
+    else:
+        raise AssertionError("expected AssertionError")
+
+
 def test_structured_assertions_reject_unknown_type():
     try:
         run_assertions([{"type": "nope"}], [], [], {}, None, "test")

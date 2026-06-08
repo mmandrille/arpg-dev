@@ -4,7 +4,15 @@
   "title": "Chase lab",
   "description": "A chase monster closes distance while the player stands still.",
   "steps": [
-    { "action": "wait_ticks", "ticks": 25 }
+    {
+      "action": "wait_until_assertion",
+      "timeout_s": 5.0,
+      "assertion": {
+        "type": "monster_within_player_distance",
+        "monster_def_id": "training_dummy_chase",
+        "max_distance": 1.5
+      }
+    }
   ],
   "assertions": [
     { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.5 },

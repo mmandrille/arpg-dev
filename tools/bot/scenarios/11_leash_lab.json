@@ -4,7 +4,11 @@
   "title": "Leash lab",
   "description": "A chase monster aggros and moves under slower standard speed.",
   "steps": [
-    { "action": "wait_ticks", "ticks": 25 }
+    {
+      "action": "wait_until_assertion",
+      "timeout_s": 5.0,
+      "assertion": { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.5 }
+    }
   ],
   "assertions": [
     { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.5 },

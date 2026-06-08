@@ -95,7 +95,7 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 		"press_key":
 			_do_press_key(str(action.get("keycode", "")))
 		"click_entity":
-			_do_click_entity(str(action.get("entity_type", "")), state, int(action.get("entity_index", 0)))
+			_do_click_entity(action, state)
 		"click_loot_item":
 			_do_click_loot_item(
 				str(action.get("item_def_id", "")),
@@ -194,11 +194,15 @@ func consume_pending_event_at(index: int) -> void:
 		_main.bot_consume_pending_event_at(index)
 
 
-func _do_click_entity(entity_type: String, state: Dictionary, entity_index: int = 0) -> void:
+func _do_click_entity(action: Dictionary, state: Dictionary) -> void:
 	if _main == null:
 		return
+	var entity_type := str(action.get("entity_type", ""))
+	var entity_index := int(action.get("entity_index", 0))
 	var ids_key := "%s_ids" % entity_type
-	var ids: Array = state.get(ids_key, [])
+	var ids: Array = _select_entity_ids(state, action)
+	if ids.is_empty():
+		ids = state.get(ids_key, [])
 	if ids.is_empty():
 		printerr("[bot-client] click_entity: no %s entity found" % entity_type)
 		return
@@ -210,6 +214,25 @@ func _do_click_entity(entity_type: String, state: Dictionary, entity_index: int 
 		_main.bot_click_entity_id(target_id)
 	elif _main.has_method("bot_dispatch_action"):
 		_main.bot_dispatch_action("action_intent", {"target_id": target_id})
+
+
+func _select_entity_ids(state: Dictionary, selector: Dictionary) -> Array:
+	var out: Array = []
+	var entity_type := str(selector.get("entity_type", ""))
+	for row in state.get("entities_debug", []):
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if entity_type != "" and str(rec.get("type", "")) != entity_type:
+			continue
+		var ok := true
+		for key in ["monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state"]:
+			if selector.has(key) and str(selector.get(key, "")) != "" and str(rec.get(key, "")) != str(selector[key]):
+				ok = false
+				break
+		if ok:
+			out.append(str(rec.get("id", "")))
+	return out
 
 
 func _do_click_loot_item(item_def_id: String, state: Dictionary, occurrence: int = 0) -> void:

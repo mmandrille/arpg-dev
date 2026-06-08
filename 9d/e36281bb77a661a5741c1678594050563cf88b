@@ -1,0 +1,21 @@
+tools/bot/run.py
+  s_065d7bcc9f8fa4::t_b3fcc7858b37de 582-583
+server/internal/realtime/protocol.go
+  s_065d7bcc9f8fa4::t_fb6f831d8d987a 14-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9de36281bb77a661a5741c1678594050563cf88b",
+  "prompts": {},
+  "sessions": {
+    "s_065d7bcc9f8fa4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea7c0-0ac7-7651-a296-1d83f3a5816e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

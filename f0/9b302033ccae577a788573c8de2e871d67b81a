@@ -1,0 +1,23 @@
+make/client.mk
+  s_deaa8bce387d78::t_f029d9e7526d6e 3-5,12-16
+client/scripts/main.gd
+  s_deaa8bce387d78::t_9adf943db40427 94,186,1478-1483
+tools/bot/run.py
+  s_deaa8bce387d78::t_b3d35def81fd07 2631-2634,2649-2650,2696
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f09b302033ccae577a788573c8de2e871d67b81a",
+  "prompts": {},
+  "sessions": {
+    "s_deaa8bce387d78": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea77e-4672-70d3-a2e1-f3582dc80fe0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

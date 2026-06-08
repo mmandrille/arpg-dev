@@ -1,0 +1,84 @@
+docs/PROGRESS.md
+  s_d85898b82bba68::t_4cbae9dd1f9fba 756-780
+  s_d85898b82bba68::t_3fdbcc8fbdf7dc 14,50,102
+  s_d85898b82bba68::t_099e8070a1bc88 940-944
+  s_d85898b82bba68::t_2d67b6ff08bf94 950,952
+client/scripts/main.gd
+  s_d85898b82bba68::t_b0f6a461a20df6 673-674,2149,2175-2189
+tools/bot/run.py
+  s_d85898b82bba68::t_db89c24259866f 401,917
+  s_d85898b82bba68::t_ab9a37a60e43bb 2217-2226
+  s_d85898b82bba68::t_8bbbb109183f67 280-303
+  s_d85898b82bba68::t_5018edf4ebc4a5 659,680,1053-1059,1061
+  s_d85898b82bba68::t_367026480089c1 1087,1102-1112,1115
+  s_d85898b82bba68::t_d6e72839695c45 1060,1086,1088,1098-1101,1113-1114,1116-1117
+  s_d85898b82bba68::t_25800e5704cde8 1999-2006,2040,2247
+  s_d85898b82bba68::t_4e052718219248 1228-1230
+  s_d85898b82bba68::t_b34ba9f3ca0bc0 1851-1881,1884-1885,1888-1901
+docs/plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md
+  s_d17b6b343beeb6::t_b72287ffb7dd4f 1-2,4-50,52-57,59,61,63-69,71,73,75-76,78-87,89,91,93,95,97-107,109,111,113,115-117,119-130,132,134,136,138-150,152,154-155,157,159,161-173,175,177,179-190,192,195,198,201-212,214,216,219-225,234-244,246,251-252
+  s_d85898b82bba68::t_5f47d8cc6f002f 151,153,156,158,160
+  s_d85898b82bba68::t_479b4f565e8eee 88,90,92,94,96
+  s_d85898b82bba68::t_7dd7038456f55d 131,133,135,137
+  s_d85898b82bba68::t_36b21e2cb56176 3,213,215,217-218,226-233
+  s_d85898b82bba68::t_c10ad777c1973d 51,58,60,62,245,247-250,253-268
+  s_d85898b82bba68::t_454936357bb4a1 108,110,112,114,118
+  s_d85898b82bba68::t_f4a717a108ca83 174,176,178
+  s_d85898b82bba68::t_478cfb90a53248 70,72,74,77
+  s_d85898b82bba68::t_c1c18477c14453 191,193-194,196-197,199-200,269-277
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_d85898b82bba68::t_855093f5fe7c81 9-13
+tools/bot/scenarios/client/07_town_teleporter_auto_approach.json
+  s_d85898b82bba68::t_8e64f765dc40ac 10
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_d85898b82bba68::t_7ac16b8645f3b8 6,9,20
+CLAUDE.md
+  s_d85898b82bba68::t_f105652fc5e55c 62-81
+client/scripts/bot_scenario_runner.gd
+  s_d85898b82bba68::t_5161cb6c254ad5 225-227
+tools/validate_shared.py
+  s_d85898b82bba68::t_af80ddd9f4c284 709-710,731-732,739,822,868-869
+  s_d85898b82bba68::t_67af8336acd40a 1484
+tools/bot/scenarios/18_character_stats_and_leveling.json
+  s_d85898b82bba68::t_2742c5af61f10b 43,51
+server/internal/game/game_test.go
+  s_d85898b82bba68::t_6ebd1d510c572d 3046-3049,3055-3057
+tools/bot/test_protocol.py
+  s_d85898b82bba68::t_304303d529f188 376-414
+tools/bot/scenarios/11_leash_lab.json
+  s_d85898b82bba68::t_72d2dc185d4d3c 7-11
+client/tests/test_golden.gd
+  s_d85898b82bba68::t_e19b88ad57841b 284-285,287-288,300-304
+docs/specs/v32_spec-test-floor-and-resilient-scenarios.md
+  s_d17b6b343beeb6::t_98deac8997e52a 1-232
+tools/bot/scenarios/09_chase_lab.json
+  s_d85898b82bba68::t_afd170257e61a9 7-15
+client/scripts/bot_controller.gd
+  s_d85898b82bba68::t_46288bf0872b08 98,197,200-201,203-205,219-235
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_d85898b82bba68::t_a68579e4441e86 28,32,37,43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "57598ee1184e91b106e9b7fee444b2d422b3bd28",
+  "prompts": {},
+  "sessions": {
+    "s_d17b6b343beeb6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea57d-3424-7a70-b6e8-e0e2f0e2840b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_d85898b82bba68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea588-233a-77d0-a68e-0ce196209343",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

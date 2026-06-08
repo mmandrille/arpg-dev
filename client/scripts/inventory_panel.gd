@@ -20,6 +20,12 @@ const EQUIPMENT_LABELS := {
 	"main_hand": "Main",
 	"off_hand": "Off"
 }
+const ITEM_RARITY_BACKGROUNDS := {
+	"common": Color("#343432"),
+	"magic": Color("#1b3458"),
+	"rare": Color("#5a4520"),
+	"unique": Color("#5a2f17"),
+}
 const PAPER_DOLL_SLOT_POSITIONS := {
 	"head": Vector2(123, 10),
 	"amulet": Vector2(214, 40),
@@ -378,12 +384,12 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 			slot.add_theme_stylebox_override("pressed", _slot_style(true))
 		slot.queue_redraw()
 		return
-	var def_id := str(item.get("item_def_id", ""))
 	slot.text = ""
 	slot.tooltip_text = _tooltip(item)
-	slot.add_theme_stylebox_override("normal", _slot_style(false))
-	slot.add_theme_stylebox_override("hover", _slot_style(true))
-	slot.add_theme_stylebox_override("pressed", _slot_style(true))
+	var rarity := str(item.get("rarity", "common"))
+	slot.add_theme_stylebox_override("normal", _item_slot_style(rarity, false))
+	slot.add_theme_stylebox_override("hover", _item_slot_style(rarity, true))
+	slot.add_theme_stylebox_override("pressed", _item_slot_style(rarity, true))
 	slot.queue_redraw()
 
 
@@ -503,6 +509,14 @@ func _slot_style(hover: bool) -> StyleBoxFlat:
 	s.content_margin_top = 4
 	s.content_margin_right = 4
 	s.content_margin_bottom = 4
+	return s
+
+
+func _item_slot_style(rarity: String, hover: bool) -> StyleBoxFlat:
+	var s := _slot_style(hover)
+	var base: Color = ITEM_RARITY_BACKGROUNDS.get(rarity.to_lower(), ITEM_RARITY_BACKGROUNDS["common"])
+	s.bg_color = base.lightened(0.12) if hover else base
+	s.border_color = base.lightened(0.46) if hover else base.lightened(0.28)
 	return s
 
 

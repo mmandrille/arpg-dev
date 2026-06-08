@@ -43,6 +43,12 @@ const MONSTER_RARITY_TINTS := {
 	"rare": Color("#ff9b9b"),
 	"unique": Color("#ffd978"),
 }
+const ITEM_RARITY_BACKGROUNDS := {
+	"common": Color("#343432"),
+	"magic": Color("#1b3458"),
+	"rare": Color("#5a4520"),
+	"unique": Color("#5a2f17"),
+}
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
 
 var client: NetClient
@@ -2115,7 +2121,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		return _make_door_node()
 	if kind == "projectile":
 		return _make_projectile_node()
-	return _make_loot_node(str(e.get("item_def_id", "")))
+	return _make_loot_node(e)
 
 
 func _make_remote_player_node(e: Dictionary) -> Node3D:
@@ -2209,7 +2215,8 @@ func _apply_model_tint(root: Node, color: Color) -> void:
 		_apply_model_tint(child, color)
 
 
-func _make_loot_node(item_def_id: String) -> Node3D:
+func _make_loot_node(e: Dictionary) -> Node3D:
+	var item_def_id := str(e.get("item_def_id", ""))
 	var root := Node3D.new()
 	root.name = "Loot_%s" % item_def_id
 	var ground: Dictionary = item_presentations.get(item_def_id, {}).get("ground", {})
@@ -2217,6 +2224,7 @@ func _make_loot_node(item_def_id: String) -> Node3D:
 	var color := Color(str(ground.get("color", "#" + _loot_color(item_def_id).to_html(false))))
 	var accent := Color(str(ground.get("accent", "#f6e8b1")))
 	var scale := float(ground.get("scale", 1.0))
+	_add_loot_rarity_background(root, _item_rarity_background(str(e.get("rarity", "common"))), scale)
 	match shape:
 		"blade":
 			_add_loot_box(root, "Blade", Vector3(0.12, 0.08, 0.78) * scale, Vector3(0.0, 0.20, 0.0), color)
@@ -2238,6 +2246,12 @@ func _make_loot_node(item_def_id: String) -> Node3D:
 			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
 	_add_loot_label(root, _generic_loot_name(item_def_id), scale)
 	return root
+
+
+func _add_loot_rarity_background(parent: Node3D, color: Color, scale: float) -> void:
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.82, 0.04, 0.82) * maxf(scale, 0.85)
+	_add_loot_mesh(parent, "RarityBackground", mesh, Vector3(0.0, 0.045, 0.0), color)
 
 
 func _add_loot_label(parent: Node3D, text: String, scale: float) -> void:
@@ -2296,6 +2310,11 @@ func _loot_color(item_def_id: String) -> Color:
 			return Color(0.95, 0.15, 0.12)
 		_:
 			return Color(1.0, 0.85, 0.2)
+
+
+func _item_rarity_background(rarity: String) -> Color:
+	var key := rarity.to_lower()
+	return ITEM_RARITY_BACKGROUNDS.get(key, ITEM_RARITY_BACKGROUNDS["common"])
 
 
 func _load_item_rules() -> void:

@@ -1,0 +1,142 @@
+{
+  "combat": {
+    "minimum_damage": 1,
+    "block_cap_percent": 75,
+    "base_crit_damage": 1.5
+  },
+  "world_id": "combat_stat_lab",
+  "cases": [
+    {
+      "name": "player_miss",
+      "attack_kind": "player_melee",
+      "attacker": "player",
+      "defender": "combat_lab_soft_target",
+      "outcome": "miss",
+      "raw_damage": 0,
+      "mitigated_damage": 0,
+      "final_damage": 0,
+      "blocked": false,
+      "critical": false
+    },
+    {
+      "name": "player_crit",
+      "attack_kind": "player_melee",
+      "attacker": "player",
+      "defender": "combat_lab_soft_target",
+      "outcome": "crit",
+      "raw_damage": 10,
+      "mitigated_damage": 10,
+      "final_damage": 10,
+      "blocked": false,
+      "critical": true
+    },
+    {
+      "name": "monster_armor_minimum_damage",
+      "attack_kind": "player_melee",
+      "attacker": "player",
+      "defender": "combat_lab_armored_target",
+      "outcome": "hit",
+      "raw_damage": 8,
+      "mitigated_damage": -91,
+      "final_damage": 1,
+      "blocked": false,
+      "critical": false
+    },
+    {
+      "name": "player_armor_minimum_damage",
+      "attack_kind": "monster_attack",
+      "attacker": "combat_lab_crit_attacker",
+      "defender": "player",
+      "outcome": "hit",
+      "raw_damage": 2,
+      "mitigated_damage": -4,
+      "final_damage": 1,
+      "blocked": false,
+      "critical": false
+    },
+    {
+      "name": "player_block",
+      "attack_kind": "monster_attack",
+      "attacker": "combat_lab_crit_attacker",
+      "defender": "player",
+      "outcome": "block",
+      "raw_damage": 0,
+      "mitigated_damage": 0,
+      "final_damage": 0,
+      "blocked": true,
+      "critical": false
+    },
+    {
+      "name": "block_cap_75",
+      "attack_kind": "monster_attack",
+      "attacker": "combat_lab_crit_attacker",
+      "defender": "player",
+      "outcome": "block",
+      "raw_damage": 0,
+      "mitigated_damage": 0,
+      "final_damage": 0,
+      "blocked": true,
+      "critical": false
+    },
+    {
+      "name": "monster_crit",
+      "attack_kind": "monster_attack",
+      "attacker": "combat_lab_crit_attacker",
+      "defender": "player",
+      "outcome": "crit",
+      "raw_damage": 4,
+      "mitigated_damage": 4,
+      "final_damage": 4,
+      "blocked": false,
+      "critical": true
+    },
+    {
+      "name": "monster_block",
+      "attack_kind": "player_melee",
+      "attacker": "player",
+      "defender": "combat_lab_blocking_target",
+      "outcome": "block",
+      "raw_damage": 0,
+      "mitigated_damage": 0,
+      "final_damage": 0,
+      "blocked": true,
+      "critical": false
+    },
+    {
+      "name": "projectile_impact",
+      "attack_kind": "player_projectile",
+      "attacker": "player",
+      "defender": "combat_lab_soft_target",
+      "outcome": "hit",
+      "raw_damage": 5,
+      "mitigated_damage": 5,
+      "final_damage": 5,
+      "blocked": false,
+      "critical": false
+    }
+  ],
+  "stat_breakdowns": [
+    {
+      "key": "armor",
+      "value": 6,
+      "uncapped_value": 6,
+      "cap": null,
+      "sources": [
+        { "label": "Vitality", "value": 1, "kind": "character_formula" },
+        { "label": "Cave Mail", "value": 3, "kind": "equipment_base" },
+        { "label": "Rolled armor", "value": 2, "kind": "equipment_roll" }
+      ]
+    },
+    {
+      "key": "block_percent",
+      "value": 75,
+      "uncapped_value": 82,
+      "cap": 75,
+      "sources": [
+        { "label": "Cave Shield", "value": 5, "kind": "equipment_base" },
+        { "label": "Rolled block", "value": 77, "kind": "equipment_roll" },
+        { "label": "Block cap", "value": -7, "kind": "cap" }
+      ]
+    }
+  ]
+}

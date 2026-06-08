@@ -20,6 +20,11 @@
             "max_hp": { "type": "integer", "minimum": 1 },
             "loot_table": { "type": "string" },
             "xp_reward": { "type": "integer", "minimum": 0 },
+            "hit_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "crit_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "crit_damage": { "type": "number", "minimum": 1 },
+            "armor": { "type": "integer", "minimum": 0 },
+            "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
             "retaliation_damage": {
               "type": "object",
               "required": ["min", "max"],

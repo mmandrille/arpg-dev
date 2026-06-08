@@ -11,6 +11,7 @@ const STEP_TYPES_WAIT := [
 	"wait_player_near", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
 	"wait_settings_panel", "wait_pause_menu", "wait_character_progression",
+	"wait_damage_number", "wait_no_damage_number",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -22,6 +23,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
+	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",
@@ -29,7 +31,7 @@ const STEP_TYPES_ACTION := [
 	"drag_equipment_to_bag", "drag_bag_to_outside", "assign_hotbar_slot",
 	"use_hotbar_slot", "double_click_bag_item", "click_menu_button",
 	"enter_character_name", "select_character", "select_window_size",
-	"remember_session", "remember_player_position", "click_stat_button",
+	"set_floating_combat_text", "remember_session", "remember_player_position", "click_stat_button",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -55,6 +57,8 @@ const ALL_STEP_TYPES: Array = [
 	"assert_character_stats_panel_visible", "wait_character_progression",
 	"assert_character_progression", "click_stat_button",
 	"assert_stat_button_enabled", "assert_xp_bar",
+	"set_floating_combat_text", "assert_floating_combat_text_enabled",
+	"wait_damage_number", "wait_no_damage_number", "assert_damage_number", "assert_no_damage_number",
 ]
 
 var scenario: Dictionary = {}
@@ -176,6 +180,10 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return bool(state.get("pause_menu_visible", false))
 		"wait_character_progression":
 			return _progression_matches(step, state)
+		"wait_damage_number":
+			return _damage_number_matches(step, state)
+		"wait_no_damage_number":
+			return (state.get("damage_numbers", []) as Array).is_empty()
 		"wait_entity":
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
@@ -184,7 +192,7 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			var evtype := str(step.get("event_type", ""))
 			var pending: Array = state.get("pending_events", [])
 			for i in range(pending.size()):
-				if str(pending[i].get("event_type", "")) == evtype:
+				if str(pending[i].get("event_type", "")) == evtype and _event_matches(step, pending[i]):
 					if _controller != null and _controller.has_method("consume_pending_event_at"):
 						_controller.consume_pending_event_at(i)
 					return true
@@ -199,8 +207,11 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 		"click_entity_until_event":
 			var evtype := str(step.get("event_type", ""))
 			var pending: Array = state.get("pending_events", [])
-			for ev in pending:
-				if str(ev.get("event_type", "")) == evtype:
+			for i in range(pending.size()):
+				var ev = pending[i]
+				if str(ev.get("event_type", "")) == evtype and _event_matches(step, ev):
+					if bool(step.get("consume_event", false)) and _controller != null and _controller.has_method("consume_pending_event_at"):
+						_controller.consume_pending_event_at(i)
 					return true
 			var retry_s := float(step.get("retry_s", 0.25))
 			if _step_elapsed - _last_retry_at >= retry_s:
@@ -209,6 +220,7 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 					"type": "click_entity",
 					"_type": "click_entity",
 					"entity_type": str(step.get("entity_type", "")),
+					"entity_index": int(step.get("entity_index", 0)),
 				}
 			return false
 		"wait_inventory_item":
@@ -271,6 +283,23 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_stat_button_enabled(step, state)
 		"assert_xp_bar":
 			return _assert_xp_bar(step, state)
+		"assert_floating_combat_text_enabled":
+			return _assert_bool_value("assert_floating_combat_text_enabled", step, bool(state.get("floating_combat_text_enabled", false)), bool(step.get("enabled", true)))
+		"assert_damage_number":
+			if not _damage_number_matches(step, state):
+				_fail("assert_damage_number failed: want=%s damage_numbers=%s step=%d scenario=%s" % [
+					str(step), str(state.get("damage_numbers", [])), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_no_damage_number":
+			var numbers: Array = state.get("damage_numbers", [])
+			if not numbers.is_empty():
+				_fail("assert_no_damage_number failed: damage_numbers=%s step=%d scenario=%s" % [
+					str(numbers), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_session_changed":
 			var remembered_session := str(_memory.get("session_id", ""))
 			var current_session := str(state.get("current_session_id", ""))
@@ -428,15 +457,87 @@ func _progression_matches(step: Dictionary, state: Dictionary) -> bool:
 				return false
 	if step.has("player_max_hp") and int(state.get("player_max_hp", -999999)) != int(step.get("player_max_hp", 0)):
 		return false
+	if step.has("stat_breakdowns") and not _stat_breakdowns_match(step.get("stat_breakdowns", []), progression):
+		return false
 	return true
 
 
 func _progression_expectation(step: Dictionary) -> Dictionary:
 	var out := {}
-	for key in ["level", "experience", "unspent_stat_points", "str", "dex", "vit", "magic", "derived_stats", "player_max_hp"]:
+	for key in ["level", "experience", "unspent_stat_points", "str", "dex", "vit", "magic", "derived_stats", "player_max_hp", "stat_breakdowns"]:
 		if step.has(key):
 			out[key] = step[key]
 	return out
+
+
+func _stat_breakdowns_match(expected_rows, progression: Dictionary) -> bool:
+	if typeof(expected_rows) != TYPE_ARRAY:
+		return false
+	var by_key := {}
+	var actual_rows: Array = progression.get("stat_breakdowns", [])
+	for row in actual_rows:
+		if typeof(row) == TYPE_DICTIONARY:
+			by_key[str((row as Dictionary).get("key", ""))] = row
+	for expected in expected_rows:
+		if typeof(expected) != TYPE_DICTIONARY:
+			return false
+		var want := expected as Dictionary
+		var key := str(want.get("key", ""))
+		if not by_key.has(key):
+			return false
+		var got: Dictionary = by_key[key]
+		var tolerance := float(want.get("tolerance", 0.001))
+		if want.has("value") and not _float_close(float(got.get("value", -999999.0)), float(want.get("value", 0.0)), tolerance):
+			return false
+		if want.has("min_value") and float(got.get("value", -999999.0)) < float(want.get("min_value", 0.0)):
+			return false
+		if want.has("uncapped_value") and not _float_close(float(got.get("uncapped_value", -999999.0)), float(want.get("uncapped_value", 0.0)), tolerance):
+			return false
+		if want.has("min_uncapped_value") and float(got.get("uncapped_value", -999999.0)) < float(want.get("min_uncapped_value", 0.0)):
+			return false
+		if want.has("cap"):
+			var got_cap = got.get("cap", null)
+			if got_cap == null or not _float_close(float(got_cap), float(want.get("cap", 0.0)), tolerance):
+				return false
+		if want.has("source_kinds"):
+			var source_kinds: Array = []
+			for source in got.get("sources", []):
+				if typeof(source) == TYPE_DICTIONARY:
+					source_kinds.append(str((source as Dictionary).get("kind", "")))
+			for kind in want.get("source_kinds", []):
+				if not source_kinds.has(str(kind)):
+					return false
+	return true
+
+
+func _event_matches(step: Dictionary, event) -> bool:
+	if typeof(event) != TYPE_DICTIONARY:
+		return false
+	var ev := event as Dictionary
+	for key in ["outcome", "source_entity_id", "target_entity_id"]:
+		if step.has(key) and str(ev.get(key, "")) != str(step.get(key, "")):
+			return false
+	for key in ["damage", "raw_damage", "mitigated_damage"]:
+		if step.has(key) and int(ev.get(key, -999999)) != int(step.get(key, 0)):
+			return false
+	for key in ["blocked", "critical"]:
+		if step.has(key) and bool(ev.get(key, false)) != bool(step.get(key, false)):
+			return false
+	return true
+
+
+func _damage_number_matches(step: Dictionary, state: Dictionary) -> bool:
+	var numbers: Array = state.get("damage_numbers", [])
+	for number in numbers:
+		if typeof(number) != TYPE_DICTIONARY:
+			continue
+		var rec := number as Dictionary
+		if step.has("text") and str(rec.get("text", "")) != str(step.get("text", "")):
+			continue
+		if step.has("variant") and str(rec.get("variant", "")) != str(step.get("variant", "")):
+			continue
+		return true
+	return false
 
 
 func _assert_stat_button_enabled(step: Dictionary, state: Dictionary) -> bool:
@@ -529,6 +630,10 @@ func _queue_action(step: Dictionary, stype: String, state: Dictionary) -> void:
 func _assert_bool_state(label: String, key: String, step: Dictionary, state: Dictionary) -> bool:
 	var want := bool(step.get("visible", true))
 	var got := bool(state.get(key, false))
+	return _assert_bool_value(label, step, got, want)
+
+
+func _assert_bool_value(label: String, step: Dictionary, got: bool, want: bool) -> bool:
 	if want != got:
 		_fail("%s failed: want=%s got=%s step=%d scenario=%s" % [
 			label, want, got, _step_index, str(scenario.get("id", "?"))
@@ -588,6 +693,10 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "index=%s" % str(step.get("index", 0))
 		"select_window_size":
 			return "size=%s" % str(step.get("size", ""))
+		"set_floating_combat_text", "assert_floating_combat_text_enabled":
+			return "enabled=%s" % str(step.get("enabled", true))
+		"wait_damage_number", "wait_no_damage_number", "assert_damage_number", "assert_no_damage_number":
+			return "damage_number=%s" % str(step)
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))
 		"click_entity":
@@ -622,6 +731,8 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		parts.append("inventory_%s=%d" % [def_id, _inventory_count(state, def_id)])
 	if stype == "wait_character_progression":
 		parts.append("progression=%s" % str(state.get("character_progression", {})))
+	if stype in ["wait_damage_number", "wait_no_damage_number"]:
+		parts.append("damage_numbers=%s" % str(state.get("damage_numbers", [])))
 	if stype == "wait_loot_count":
 		parts.append("loot_count=%d" % (state.get("loot_ids", []) as Array).size())
 	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):
@@ -732,11 +843,17 @@ static func validate_step(step: Dictionary, index: int) -> String:
 			return "client_steps[%d] (%s) requires enabled" % [index, stype]
 	if stype in ["wait_character_progression", "assert_character_progression"]:
 		var has_any := false
-		for key in ["level", "experience", "unspent_stat_points", "str", "dex", "vit", "magic", "derived_stats", "player_max_hp"]:
+		for key in ["level", "experience", "unspent_stat_points", "str", "dex", "vit", "magic", "derived_stats", "player_max_hp", "stat_breakdowns"]:
 			if step.has(key):
 				has_any = true
 		if not has_any:
 			return "client_steps[%d] (%s) requires at least one progression expectation" % [index, stype]
+	if stype in ["set_floating_combat_text", "assert_floating_combat_text_enabled"]:
+		if not step.has("enabled"):
+			return "client_steps[%d] (%s) requires enabled" % [index, stype]
+	if stype in ["wait_damage_number", "assert_damage_number"]:
+		if not step.has("text") and not step.has("variant"):
+			return "client_steps[%d] (%s) requires text or variant" % [index, stype]
 	if stype == "click_menu_button":
 		if str(step.get("button", "")) == "":
 			return "client_steps[%d] (%s) requires button" % [index, stype]

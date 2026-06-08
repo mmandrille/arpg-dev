@@ -89,6 +89,7 @@ class RuntimeState:
     item_id: str | None = None
     equipped_item_id: str | None = None
     seen_events: set[str] = field(default_factory=set)
+    combat_events: list[dict[str, Any]] = field(default_factory=list)
     pending_attack_monsters: dict[str, str] = field(default_factory=dict)
     accepted_attack_counts: dict[str, int] = field(default_factory=dict)
     killed_monster_def_ids: set[str] = field(default_factory=set)
@@ -263,10 +264,15 @@ async def execute_step(
     action = step.get("action")
     if action == "wait_ticks":
         ticks = int(step["ticks"])
-        deadline = loop.time() + (ticks * 0.05) + 0.15
-        while loop.time() < deadline:
-            await pump_one(ws, state, timeout=0.05)
-
+        for _ in range(ticks):
+            env = make_envelope(
+                "move_intent",
+                session_id,
+                state.last_tick,
+                {"direction": {"x": 0, "y": 0}, "duration_ticks": 1},
+            )
+            await ws.send(json.dumps(env))
+            await wait_for_accept(ws, state, env["message_id"], loop)
         return
 
     if action == "move":
@@ -446,6 +452,39 @@ async def execute_step(
                     state.pending_attack_monsters[env["message_id"]] = monster_def_id
                 await ws.send(json.dumps(env))
                 last_action = loop.time()
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "action_until_combat_event":
+        target = resolve_target(state, step)
+        target_id = str(target["id"])
+        last_action = 0.0
+        start_index = len(state.combat_events)
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        while not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
+            if loop.time() > deadline:
+                raise TimeoutError(f"action_until_combat_event stalled waiting for {combat_event_summary(step)}")
+            if loop.time() - last_action > 0.12:
+                current = state.entities.get(target_id)
+                if current is not None and current.get("type") == "monster" and current.get("hp") == 0:
+                    break
+                monster_def_id = str(step.get("monster_def_id") or (current or {}).get("monster_def_id") or "")
+                env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target_id})
+                if monster_def_id:
+                    state.pending_attack_monsters[env["message_id"]] = monster_def_id
+                await ws.send(json.dumps(env))
+                last_action = loop.time()
+            await pump_one(ws, state, timeout=0.1)
+        if not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
+            raise AssertionError(f"action_until_combat_event target ended before {combat_event_summary(step)}")
+        return
+
+    if action == "wait_for_combat_event":
+        start_index = len(state.combat_events)
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        while not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
+            if loop.time() > deadline:
+                raise TimeoutError(f"wait_for_combat_event stalled waiting for {combat_event_summary(step)}")
             await pump_one(ws, state, timeout=0.1)
         return
 
@@ -822,9 +861,13 @@ async def execute_step(
         if item is None:
             raise AssertionError(f"use_inventory_item: missing inventory item {item_def_id} at bag_index={bag_index}")
         item_id = str(item["item_instance_id"])
-        await ws.send(json.dumps(make_envelope(
-            "use_intent", session_id, state.last_tick, {"item_instance_id": item_id})))
+        env = make_envelope("use_intent", session_id, state.last_tick, {"item_instance_id": item_id})
+        await ws.send(json.dumps(env))
         log("using", item_def_id, item_id)
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
         wait_started = loop.time()
         last_wait_log = wait_started
         while any(str(i.get("item_instance_id")) == item_id for i in state.inventory):
@@ -977,6 +1020,39 @@ async def wait_for_event(ws, state: RuntimeState, event_type: str, loop) -> None
         await pump_one(ws, state, timeout=0.1)
 
 
+def combat_event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
+    for key in (
+        "event_type",
+        "outcome",
+        "damage",
+        "raw_damage",
+        "mitigated_damage",
+        "blocked",
+        "critical",
+        "source_entity_id",
+        "target_entity_id",
+        "entity_id",
+    ):
+        if key in expected and event.get(key) != expected[key]:
+            return False
+    for key, event_key in (
+        ("min_damage", "damage"),
+        ("min_raw_damage", "raw_damage"),
+        ("min_mitigated_damage", "mitigated_damage"),
+    ):
+        if key in expected and int(event.get(event_key, -999999)) < int(expected[key]):
+            return False
+    return True
+
+
+def combat_event_summary(expected: dict[str, Any]) -> str:
+    parts = []
+    for key in ("event_type", "outcome", "damage", "min_damage", "blocked", "critical"):
+        if key in expected:
+            parts.append(f"{key}={expected[key]}")
+    return ", ".join(parts) or str(expected)
+
+
 async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, loop) -> None:
     deadline = loop.time() + SLICE_TIMEOUT_S
     while state.current_level == previous_level or state.pending_level_load is not None:
@@ -1067,6 +1143,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
     for ev in (p.get("events") or []):
         event_type = ev["event_type"]
         state.seen_events.add(event_type)
+        if event_type in {"monster_damaged", "player_damaged", "player_killed", "attack_missed", "attack_blocked"}:
+            state.combat_events.append(dict(ev))
         if event_type == "level_changed":
             state.current_level = int(ev["to_level"])
             state.pending_level_load = state.current_level
@@ -1545,6 +1623,45 @@ def assert_character_progression(progression: dict[str, Any], assertion: dict[st
             want = float(want_raw)
             if abs(got - want) > 0.000001:
                 raise AssertionError(f"{where}: derived_stats.{key} {got} != {want}: {progression}")
+    expected_breakdowns = assertion.get("stat_breakdowns", [])
+    if isinstance(expected_breakdowns, list):
+        assert_stat_breakdowns(progression.get("stat_breakdowns", []), expected_breakdowns, where)
+
+
+def assert_stat_breakdowns(actual: Any, expected_rows: list[dict[str, Any]], where: str) -> None:
+    if not isinstance(actual, list):
+        raise AssertionError(f"{where}: stat_breakdowns is not a list: {actual}")
+    for expected in expected_rows:
+        key = str(expected["key"])
+        row = next((r for r in actual if isinstance(r, dict) and str(r.get("key")) == key), None)
+        if row is None:
+            raise AssertionError(f"{where}: missing stat_breakdown {key}: {actual}")
+        for number_key in ("value", "uncapped_value", "cap"):
+            if number_key not in expected:
+                continue
+            want_raw = expected[number_key]
+            got_raw = row.get(number_key)
+            if want_raw is None:
+                if got_raw is not None:
+                    raise AssertionError(f"{where}: stat_breakdown {key}.{number_key} {got_raw} != None: {row}")
+                continue
+            got = float(got_raw)
+            want = float(want_raw)
+            if abs(got - want) > 0.000001:
+                raise AssertionError(f"{where}: stat_breakdown {key}.{number_key} {got} != {want}: {row}")
+        min_value = expected.get("min_value")
+        if min_value is not None and float(row.get("value", -999999)) < float(min_value):
+            raise AssertionError(f"{where}: stat_breakdown {key}.value {row.get('value')} < {min_value}: {row}")
+        min_uncapped = expected.get("min_uncapped_value")
+        if min_uncapped is not None and float(row.get("uncapped_value", -999999)) < float(min_uncapped):
+            raise AssertionError(f"{where}: stat_breakdown {key}.uncapped_value {row.get('uncapped_value')} < {min_uncapped}: {row}")
+        sources = row.get("sources", [])
+        if not isinstance(sources, list):
+            raise AssertionError(f"{where}: stat_breakdown {key}.sources is not a list: {row}")
+        source_kinds = {str(source.get("kind")) for source in sources if isinstance(source, dict)}
+        for kind in expected.get("source_kinds", []):
+            if str(kind) not in source_kinds:
+                raise AssertionError(f"{where}: stat_breakdown {key} missing source kind {kind}: {row}")
 
 
 def run_assertions(
@@ -1631,7 +1748,15 @@ def run_assertions(
                 raise AssertionError(f"{where}: interactable {expected_id} state = {matches}, want {expected_state}")
         elif typ == "monster_killed_in_attacks":
             continue
-        elif typ in {"monster_moved", "monster_within_player_distance", "monster_near_spawn", "event_seen", "player_never_in_melee_range_of", "monster_damage_at_least"}:
+        elif typ in {
+            "monster_moved",
+            "monster_within_player_distance",
+            "monster_near_spawn",
+            "event_seen",
+            "combat_event_seen",
+            "player_never_in_melee_range_of",
+            "monster_damage_at_least",
+        }:
             continue
         elif typ == "player_hp_equals":
             assert_player_hp_equals(entities, int(assertion["equals"]), where)
@@ -1700,6 +1825,12 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             event_type = str(assertion["event_type"])
             if event_type not in state.seen_events:
                 raise AssertionError(f"{where}: event {event_type} not seen; have {sorted(state.seen_events)}")
+            continue
+        if typ == "combat_event_seen":
+            if not any(combat_event_matches(event, assertion) for event in state.combat_events):
+                raise AssertionError(
+                    f"{where}: combat event {combat_event_summary(assertion)} not seen; have {state.combat_events}"
+                )
             continue
         if typ == "monster_moved":
             monster_def_id = str(assertion["monster_def_id"])

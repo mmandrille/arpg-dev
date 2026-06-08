@@ -7,13 +7,13 @@
     { "action": "attack_until_event", "monster_def_id": "training_dummy_heal", "event_type": "monster_killed" },
     { "action": "pick_up_loot", "item_def_id": "red_potion" },
     { "action": "pick_up_loot", "item_def_id": "red_potion" },
-    { "action": "assert_player_hp", "equals": 4 },
+    { "action": "assert_player_hp", "equals": 5 },
     { "action": "use_inventory_item", "item_def_id": "red_potion", "bag_index": 0 },
-    { "action": "assert_player_hp", "equals": 9 },
-    { "action": "use_inventory_item", "item_def_id": "red_potion", "bag_index": 0 }
+    { "action": "assert_player_hp", "equals": 10 },
+    { "action": "use_inventory_item", "item_def_id": "red_potion", "bag_index": 0, "expect_reject": "already_full_hp" }
   ],
   "assertions": [
     { "type": "player_hp_equals", "equals": 10 },
-    { "type": "inventory_count", "equals": 0 }
+    { "type": "inventory_count", "equals": 1 }
   ]
 }

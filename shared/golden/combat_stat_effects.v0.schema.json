@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/combat_stat_effects.v0.schema.json",
+  "title": "Combat stat effects golden fixture (v0)",
+  "type": "object",
+  "required": ["combat", "world_id", "cases", "stat_breakdowns"],
+  "additionalProperties": false,
+  "properties": {
+    "combat": {
+      "type": "object",
+      "required": ["minimum_damage", "block_cap_percent", "base_crit_damage"],
+      "additionalProperties": false,
+      "properties": {
+        "minimum_damage": { "type": "integer", "minimum": 1 },
+        "block_cap_percent": { "type": "integer", "minimum": 0, "maximum": 75 },
+        "base_crit_damage": { "type": "number", "minimum": 1 }
+      }
+    },
+    "world_id": { "type": "string", "minLength": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    },
+    "stat_breakdowns": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/stat_breakdown" }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "required": ["name", "attack_kind", "attacker", "defender", "outcome", "raw_damage", "mitigated_damage", "final_damage", "blocked", "critical"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "attack_kind": { "type": "string", "enum": ["player_melee", "player_projectile", "monster_attack", "retaliation"] },
+        "attacker": { "type": "string", "minLength": 1 },
+        "defender": { "type": "string", "minLength": 1 },
+        "outcome": { "type": "string", "enum": ["hit", "crit", "miss", "block"] },
+        "raw_damage": { "type": "integer", "minimum": 0 },
+        "mitigated_damage": { "type": "integer" },
+        "final_damage": { "type": "integer", "minimum": 0 },
+        "blocked": { "type": "boolean" },
+        "critical": { "type": "boolean" }
+      }
+    },
+    "stat_breakdown": {
+      "type": "object",
+      "required": ["key", "value", "uncapped_value", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "max_hp", "block_percent"] },
+        "value": { "type": "number" },
+        "uncapped_value": { "type": "number" },
+        "cap": { "type": ["number", "null"] },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "value", "kind"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string", "minLength": 1 },
+              "value": { "type": "number" },
+              "kind": { "type": "string", "enum": ["character_formula", "equipment_base", "equipment_roll", "cap", "clamp"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -137,6 +137,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_select_character(int(action.get("index", 0)))
 		"select_window_size":
 			_do_select_window_size(str(action.get("size", "")))
+		"set_floating_combat_text":
+			_do_set_floating_combat_text(bool(action.get("enabled", true)))
 		"click_stat_button":
 			_do_click_stat_button(str(action.get("stat", "")))
 
@@ -171,6 +173,11 @@ func _do_select_character(index: int) -> void:
 func _do_select_window_size(size: String) -> void:
 	if _main != null and _main.has_method("bot_select_window_size"):
 		_main.bot_select_window_size(size)
+
+
+func _do_set_floating_combat_text(enabled: bool) -> void:
+	if _main != null and _main.has_method("bot_set_floating_combat_text"):
+		_main.bot_set_floating_combat_text(enabled)
 
 
 func _do_click_stat_button(stat: String) -> void:

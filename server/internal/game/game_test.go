@@ -1302,6 +1302,120 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	})
 }
 
+func TestCombatStatBreakdownsIncludeEquipmentAndCap(t *testing.T) {
+	sim := NewSim("sess_combat_breakdown", "01", loadRules(t))
+	sword := addRolledInventoryItem(t, sim, 6250, "cave_blade", map[string]int{"damage_min": 4, "damage_max": 6})
+	shield := addRolledInventoryItem(t, sim, 6251, "cave_shield", map[string]int{"armor": 5, "block_percent": 82})
+	ring := addRolledInventoryItem(t, sim, 6252, "cave_ring", map[string]int{"max_hp": 4})
+	assertAck(t, sim.Tick([]Input{{MessageID: "sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "sword")
+	shieldResult := sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}})
+	assertAck(t, shieldResult, "shield")
+	assertAck(t, sim.Tick([]Input{{MessageID: "ring", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "ring")
+
+	shieldUpdate := characterProgressionUpdate(shieldResult)
+	if shieldUpdate == nil {
+		t.Fatalf("shield equip did not publish character progression update: %+v", shieldResult.Changes)
+	}
+	shieldBlock := findStatBreakdown(shieldUpdate.StatBreakdowns, "block_percent")
+	if shieldBlock == nil || !hasBreakdownSource(shieldBlock.Sources, "equipment_base") || !hasBreakdownSource(shieldBlock.Sources, "equipment_roll") {
+		t.Fatalf("shield equip progression block breakdown = %+v", shieldBlock)
+	}
+
+	view := sim.CharacterProgressionView()
+	if view.DerivedStats.DamageMin != 4 || view.DerivedStats.DamageMax != 6 {
+		t.Fatalf("effective damage = %v..%v, want 4..6", view.DerivedStats.DamageMin, view.DerivedStats.DamageMax)
+	}
+	if view.DerivedStats.Armor != 6 || view.DerivedStats.MaxHP != 14 {
+		t.Fatalf("effective armor/maxHP = %v/%v, want 6/14", view.DerivedStats.Armor, view.DerivedStats.MaxHP)
+	}
+
+	block := findStatBreakdown(view.StatBreakdowns, "block_percent")
+	if block == nil {
+		t.Fatalf("missing block breakdown: %+v", view.StatBreakdowns)
+	}
+	if block.Value != 75 || block.UncappedValue != 82 || block.Cap == nil || *block.Cap != 75 {
+		t.Fatalf("block breakdown = %+v, want capped 75 from uncapped 82", block)
+	}
+	if !hasBreakdownSource(block.Sources, "equipment_base") || !hasBreakdownSource(block.Sources, "equipment_roll") || !hasBreakdownSource(block.Sources, "cap") {
+		t.Fatalf("block breakdown sources = %+v, want base, roll, cap", block.Sources)
+	}
+}
+
+func TestCombatStatEffectsGolden(t *testing.T) {
+	var golden struct {
+		Cases []struct {
+			Name            string `json:"name"`
+			Outcome         string `json:"outcome"`
+			RawDamage       int    `json:"raw_damage"`
+			MitigatedDamage int    `json:"mitigated_damage"`
+			FinalDamage     int    `json:"final_damage"`
+			Blocked         bool   `json:"blocked"`
+			Critical        bool   `json:"critical"`
+		} `json:"cases"`
+		StatBreakdowns []StatBreakdownView `json:"stat_breakdowns"`
+	}
+	loadGolden(t, "combat_stat_effects.json", &golden)
+
+	sim := NewSim("sess_combat_stat_golden", "01", loadRules(t))
+	for _, c := range golden.Cases {
+		attacker, defender, damageRange := combatGoldenStats(c.Name)
+		got := sim.resolveCombat(attacker, defender, damageRange)
+		if got.Outcome != c.Outcome || got.RawDamage != c.RawDamage || got.MitigatedDamage != c.MitigatedDamage ||
+			got.Damage != c.FinalDamage || got.Blocked != c.Blocked || got.Critical != c.Critical {
+			t.Fatalf("%s outcome = %+v, want outcome=%s raw=%d mitigated=%d final=%d blocked=%v critical=%v",
+				c.Name, got, c.Outcome, c.RawDamage, c.MitigatedDamage, c.FinalDamage, c.Blocked, c.Critical)
+		}
+	}
+
+	block := findStatBreakdown(golden.StatBreakdowns, "block_percent")
+	if block == nil || block.Value != 75 || block.UncappedValue <= block.Value || block.Cap == nil || *block.Cap != 75 {
+		t.Fatalf("golden block breakdown = %+v, want capped 75", block)
+	}
+}
+
+func TestMonsterCombatStatsEffective(t *testing.T) {
+	sim := NewSim("sess_monster_combat_stats", "01", loadRules(t))
+	monster := &entity{
+		id:           7001,
+		kind:         monsterEntity,
+		maxHP:        12,
+		hp:           12,
+		monsterDefID: "combat_lab_blocking_target",
+	}
+	stats := sim.monsterEffectiveCombatStats(monster, DamageRange{Min: 3, Max: 5})
+	if stats.DamageMin != 3 || stats.DamageMax != 5 {
+		t.Fatalf("monster damage = %v..%v, want 3..5", stats.DamageMin, stats.DamageMax)
+	}
+	if stats.HitChance != 1 || stats.CritChance != 0 || stats.CritDamage != 1.5 || stats.Armor != 0 {
+		t.Fatalf("monster chance/crit/armor stats = %+v", stats)
+	}
+	if stats.BlockPercent != 75 {
+		t.Fatalf("monster block percent = %v, want capped 75", stats.BlockPercent)
+	}
+}
+
+func combatGoldenStats(name string) (effectiveCombatStats, effectiveCombatStats, DamageRange) {
+	alwaysHit := effectiveCombatStats{HitChance: 1, CritDamage: 1.5}
+	switch name {
+	case "player_miss":
+		return effectiveCombatStats{HitChance: 0, CritDamage: 1.5}, effectiveCombatStats{}, DamageRange{Min: 5, Max: 5}
+	case "player_crit":
+		return effectiveCombatStats{HitChance: 1, CritChance: 1, CritDamage: 2}, effectiveCombatStats{}, DamageRange{Min: 5, Max: 5}
+	case "monster_armor_minimum_damage":
+		return alwaysHit, effectiveCombatStats{Armor: 99}, DamageRange{Min: 8, Max: 8}
+	case "player_armor_minimum_damage":
+		return alwaysHit, effectiveCombatStats{Armor: 6}, DamageRange{Min: 2, Max: 2}
+	case "player_block", "block_cap_75", "monster_block":
+		return alwaysHit, effectiveCombatStats{BlockPercent: 100}, DamageRange{Min: 2, Max: 2}
+	case "monster_crit":
+		return effectiveCombatStats{HitChance: 1, CritChance: 1, CritDamage: 2}, effectiveCombatStats{}, DamageRange{Min: 2, Max: 2}
+	case "projectile_impact":
+		return alwaysHit, effectiveCombatStats{}, DamageRange{Min: 5, Max: 5}
+	default:
+		return alwaysHit, effectiveCombatStats{}, DamageRange{Min: 1, Max: 1}
+	}
+}
+
 // --- scripted slice ---------------------------------------------------------
 
 // runSlice drives a sim through the full vertical-slice flow and returns it.
@@ -1747,8 +1861,8 @@ func TestUseConsumableHealLab(t *testing.T) {
 		}
 	}
 	player := sim.entities[sim.playerID]
-	if player.hp != 4 {
-		t.Fatalf("player hp after combat = %d, want 4", player.hp)
+	if player.hp != 5 {
+		t.Fatalf("player hp after combat = %d, want 5", player.hp)
 	}
 	loots := findAllLootByDef(sim, "red_potion")
 	if len(loots) != 2 {
@@ -1783,8 +1897,8 @@ func TestUseConsumableHealLab(t *testing.T) {
 		Use:       &UseIntent{ItemInstanceID: firstID},
 	}})
 	assertAck(t, use1, "use1")
-	if player.hp != 9 {
-		t.Fatalf("player hp after first use = %d, want 9", player.hp)
+	if player.hp != 10 {
+		t.Fatalf("player hp after first use = %d, want 10", player.hp)
 	}
 	assertEventHeal(t, use1, "player_healed", 5)
 
@@ -1794,14 +1908,13 @@ func TestUseConsumableHealLab(t *testing.T) {
 		Type:      "use_intent",
 		Use:       &UseIntent{ItemInstanceID: secondID},
 	}})
-	assertAck(t, use2, "use2")
+	assertReject(t, use2, "use2", "already_full_hp")
 	if player.hp != 10 {
 		t.Fatalf("player hp after second use = %d, want 10", player.hp)
 	}
-	if len(sim.inventory) != 0 {
-		t.Fatalf("inventory after second use = %+v, want empty", sim.inventory)
+	if len(sim.inventory) != 1 {
+		t.Fatalf("inventory after second use = %+v, want one unused potion", sim.inventory)
 	}
-	assertEventHeal(t, use2, "player_healed", 1)
 }
 
 func TestUseConsumableRejectsFullHP(t *testing.T) {
@@ -3026,13 +3139,13 @@ func TestDungeonEquipmentLootDeterminism(t *testing.T) {
 	}
 	foundEquipment := false
 	for _, drop := range first {
-		if drop == "cave_bow:cave_bow" {
+		if drop == "cave_belt:cave_belt" {
 			foundEquipment = true
 			break
 		}
 	}
 	if !foundEquipment {
-		t.Fatalf("loot sequence = %v, want rolled cave_bow equipment", first)
+		t.Fatalf("loot sequence = %v, want rolled cave_belt equipment", first)
 	}
 }
 
@@ -3729,6 +3842,33 @@ func assertDerivedStats(t *testing.T, got, want DerivedStatsView) {
 	assertFloat("movement_speed", got.MovementSpeed, want.MovementSpeed)
 	assertFloat("max_hp", got.MaxHP, want.MaxHP)
 	assertFloat("max_mana", got.MaxMana, want.MaxMana)
+}
+
+func findStatBreakdown(rows []StatBreakdownView, key string) *StatBreakdownView {
+	for i := range rows {
+		if rows[i].Key == key {
+			return &rows[i]
+		}
+	}
+	return nil
+}
+
+func characterProgressionUpdate(r TickResult) *CharacterProgressionView {
+	for i := range r.Changes {
+		if r.Changes[i].Op == OpCharacterProgressionUpdate {
+			return r.Changes[i].Progression
+		}
+	}
+	return nil
+}
+
+func hasBreakdownSource(rows []StatBreakdownSourceView, kind string) bool {
+	for _, row := range rows {
+		if row.Kind == kind {
+			return true
+		}
+	}
+	return false
 }
 
 func assertEventHeal(t *testing.T, r TickResult, eventType string, want int) {

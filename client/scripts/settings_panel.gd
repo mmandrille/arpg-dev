@@ -3,9 +3,11 @@ class_name SettingsPanel
 
 signal back_requested
 signal size_selected(label: String)
+signal floating_combat_text_toggled(enabled: bool)
 
 var _buttons: Dictionary = {}
 var _selected_label: String = ""
+var _floating_toggle: CheckButton
 
 
 func _ready() -> void:
@@ -16,10 +18,11 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String) -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true) -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
+	set_floating_combat_text_enabled(floating_combat_text_enabled)
 
 
 func hide_panel() -> void:
@@ -35,6 +38,12 @@ func set_selected_size_label(label: String) -> void:
 	for key in _buttons.keys():
 		var button: Button = _buttons[key]
 		button.disabled = str(key) == _selected_label
+
+
+func set_floating_combat_text_enabled(enabled: bool) -> void:
+	if _floating_toggle == null:
+		return
+	_floating_toggle.button_pressed = enabled
 
 
 func _build() -> void:
@@ -71,6 +80,15 @@ func _build() -> void:
 		)
 		_buttons[label] = button
 		box.add_child(button)
+
+	_floating_toggle = CheckButton.new()
+	_floating_toggle.text = "Floating combat text"
+	_floating_toggle.button_pressed = true
+	_floating_toggle.custom_minimum_size = Vector2(280, 34)
+	_floating_toggle.toggled.connect(func(enabled: bool) -> void:
+		floating_combat_text_toggled.emit(enabled)
+	)
+	box.add_child(_floating_toggle)
 
 	var back := Button.new()
 	back.text = "Back"

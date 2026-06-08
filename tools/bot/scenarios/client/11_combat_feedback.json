@@ -1,0 +1,48 @@
+{
+  "id": "client_combat_feedback",
+  "runner": "godot_client",
+  "world_id": "combat_stat_lab",
+  "seed": "facefeed00000031",
+  "title": "Client combat feedback",
+  "description": "Equip shield gear, verify stat breakdowns in client state, render block/miss/crit floating combat text, and prove the settings toggle suppresses new combat text.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "set_floating_combat_text", "enabled": true },
+    { "type": "assert_floating_combat_text_enabled", "enabled": true },
+    { "type": "wait_loot_count", "min_count": 3, "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "cave_blade" },
+    { "type": "wait_inventory_item", "item_def_id": "cave_blade", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "cave_shield" },
+    { "type": "wait_inventory_item", "item_def_id": "cave_shield", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "cave_blade", "slot": "main_hand" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "cave_shield", "slot": "off_hand" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    {
+      "type": "assert_character_progression",
+      "stat_breakdowns": [
+        { "key": "armor", "min_value": 1, "source_kinds": ["character_formula"] },
+        { "key": "block_percent", "min_value": 6, "cap": 75, "source_kinds": ["equipment_base", "equipment_roll"] }
+      ]
+    },
+    { "type": "click_entity_until_event", "entity_type": "monster", "entity_index": 0, "event_type": "monster_damaged", "outcome": "hit", "blocked": false, "critical": false, "consume_event": true, "retry_s": 0.25, "timeout_s": 15.0 },
+    { "type": "wait_damage_number", "variant": "normal", "timeout_s": 2.0 },
+    { "type": "click_floor", "x": 9.2, "z": 6.0 },
+    { "type": "wait_player_near", "x": 9.2, "z": 6.0, "distance": 1.2, "timeout_s": 8.0 },
+    { "type": "click_entity_until_event", "entity_type": "monster", "entity_index": 2, "event_type": "monster_damaged", "outcome": "block", "blocked": true, "consume_event": true, "retry_s": 0.25, "timeout_s": 15.0 },
+    { "type": "wait_damage_number", "variant": "block", "text": "BLOCK", "timeout_s": 2.0 },
+    { "type": "set_floating_combat_text", "enabled": false },
+    { "type": "assert_floating_combat_text_enabled", "enabled": false },
+    { "type": "wait_no_damage_number", "timeout_s": 2.0 },
+    { "type": "click_entity_until_event", "entity_type": "monster", "entity_index": 2, "event_type": "monster_damaged", "outcome": "block", "blocked": true, "consume_event": true, "retry_s": 0.25, "timeout_s": 15.0 },
+    { "type": "assert_no_damage_number" },
+    { "type": "set_floating_combat_text", "enabled": true },
+    { "type": "assert_floating_combat_text_enabled", "enabled": true },
+    { "type": "click_floor", "x": 13.2, "z": 8.0 },
+    { "type": "wait_player_near", "x": 13.2, "z": 8.0, "distance": 1.4, "timeout_s": 10.0 },
+    { "type": "click_entity_until_event", "entity_type": "monster", "entity_index": 3, "event_type": "player_damaged", "outcome": "crit", "critical": true, "consume_event": true, "retry_s": 0.25, "timeout_s": 20.0 },
+    { "type": "wait_damage_number", "variant": "crit", "timeout_s": 2.0 },
+    { "type": "wait_event", "event_type": "attack_missed", "outcome": "miss", "timeout_s": 8.0 },
+    { "type": "wait_damage_number", "variant": "miss", "text": "MISS", "timeout_s": 2.0 }
+  ]
+}

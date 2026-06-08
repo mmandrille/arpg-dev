@@ -323,7 +323,7 @@ func _on_settings_from_main() -> void:
 	settings_return_target = "main"
 	main_menu.visible = false
 	if settings_panel != null:
-		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size))
+		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text)
 
 
 func _on_settings_from_pause() -> void:
@@ -331,7 +331,7 @@ func _on_settings_from_pause() -> void:
 	if pause_menu != null:
 		pause_menu.hide_pause()
 	if settings_panel != null:
-		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size))
+		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text)
 
 
 func _on_settings_back() -> void:
@@ -348,9 +348,17 @@ func _on_window_size_selected(label: String) -> void:
 	_sync_settings_panel()
 
 
+func _on_floating_combat_text_toggled(enabled: bool) -> void:
+	if client_settings == null:
+		return
+	client_settings.set_floating_combat_text(enabled)
+	_sync_settings_panel()
+
+
 func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
 		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
+		settings_panel.set_floating_combat_text_enabled(client_settings.floating_combat_text)
 
 
 func _show_pause_menu() -> void:
@@ -577,9 +585,11 @@ func _apply_delta(p: Dictionary) -> void:
 					_health_bar.update_hp(player_hp, player_max_hp, true)
 				continue
 			if event_type == "player_damaged":
-				_show_damage_number(eid, Color(1.0, 0.32, 0.2), ev.get("damage", null))
+				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if _health_bar != null:
 					_health_bar.update_hp(player_hp, player_max_hp)
+			if event_type == "attack_missed":
+				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
 			if player_clip == null or player_anim == null:
 				continue
@@ -593,9 +603,11 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
+			if event_type == "attack_missed":
+				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
-			_show_damage_number(eid, Color(1.0, 0.92, 0.25), ev.get("damage", null))
+			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_killed":
 			_remove_monster_health_bar(eid)
 			if entities.has(eid):
@@ -785,10 +797,30 @@ func _sync_camera_to_player() -> void:
 	_camera.look_at(target, Vector3.UP)
 
 
-func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0) -> void:
-	if damage_numbers_layer == null or _camera == null or event_damage == null:
+func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
+	var outcome := str(ev.get("outcome", ""))
+	var damage = ev.get("damage", null)
+	if outcome == "miss":
+		_show_damage_number(entity_id, Color(0.82, 0.86, 0.92), null, "", 0.0, "miss", "MISS")
 		return
-	var amount := int(event_damage)
+	if outcome == "block":
+		_show_damage_number(entity_id, Color(0.35, 0.78, 1.0), null, "", 0.0, "block", "BLOCK")
+		return
+	if outcome == "crit" or bool(ev.get("critical", false)):
+		var crit_damage := 0 if damage == null else int(damage)
+		_show_damage_number(entity_id, Color(1.0, 0.58, 0.22), crit_damage, "", 0.0, "crit", "%d!" % crit_damage)
+		return
+	_show_damage_number(entity_id, default_color, damage)
+
+
+func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0, variant: String = "normal", text_override: String = "") -> void:
+	if damage_numbers_layer == null or _camera == null:
+		return
+	if client_settings != null and not client_settings.floating_combat_text:
+		return
+	if event_damage == null and text_override == "":
+		return
+	var amount := 0 if event_damage == null else int(event_damage)
 	var target: Node3D = null
 	var world_position := Vector3.ZERO
 	if entity_id == player_id:
@@ -802,7 +834,7 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null, p
 	var pop := DamageNumberScript.new() as DamageNumber
 	damage_numbers_layer.add_child(pop)
 	var side := side_override if side_override != 0.0 else (-1.0 if entity_id == player_id else 1.0)
-	pop.setup(_camera, target, world_position, amount, color, side, prefix)
+	pop.setup(_camera, target, world_position, amount, color, side, prefix, variant, text_override)
 
 
 func _remove_monster_health_bar(entity_id: String) -> void:
@@ -1553,6 +1585,7 @@ func _setup_menu_layer() -> void:
 	settings_panel = SettingsPanelScript.new()
 	settings_panel.back_requested.connect(_on_settings_back)
 	settings_panel.size_selected.connect(_on_window_size_selected)
+	settings_panel.floating_combat_text_toggled.connect(_on_floating_combat_text_toggled)
 	menu_layer.add_child(settings_panel)
 
 	pause_menu = PauseMenuScript.new()
@@ -2127,10 +2160,26 @@ func get_bot_state() -> Dictionary:
 		"settings_panel_visible": settings_panel != null and settings_panel.visible,
 		"pause_menu_visible": pause_menu != null and pause_menu.visible,
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
+		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
+		"damage_numbers": _bot_damage_numbers(),
 		"known_characters": character_panel.known_characters() if character_panel != null else [],
 		"current_session_id": client.session_id if client != null else "",
 		"gameplay_active": gameplay_active,
 	}
+	return out
+
+
+func _bot_damage_numbers() -> Array:
+	var out: Array = []
+	if damage_numbers_layer == null:
+		return out
+	for child in damage_numbers_layer.get_children():
+		if child is DamageNumber:
+			var pop := child as DamageNumber
+			out.append({
+				"text": pop.combat_text,
+				"variant": pop.combat_variant,
+			})
 	return out
 
 
@@ -2241,6 +2290,10 @@ func bot_select_character(index: int) -> void:
 
 func bot_select_window_size(size: String) -> void:
 	_on_window_size_selected(size)
+
+
+func bot_set_floating_combat_text(enabled: bool) -> void:
+	_on_floating_combat_text_toggled(enabled)
 
 
 func bot_consume_pending_event_at(index: int) -> void:

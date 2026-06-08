@@ -3,7 +3,7 @@
 **Read this file at the start of every new task** before writing specs, plans, or code.
 It is the canonical snapshot of what exists, what each slice proved, and what is still open.
 
-Last updated: 2026-06-07
+Last updated: 2026-06-08
 
 ---
 
@@ -11,9 +11,9 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v30 — `monster-rarity-and-loot-scaling` |
+| **Latest completed slice** | v31 — `combat-stat-effects-and-feedback` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-07 |
+| **CI gate** | `make ci` green on 2026-06-08 |
 | **Next slice** | TBD |
 
 ### Slice numbering note
@@ -46,6 +46,7 @@ v27_* = hold-click-controls
 v28_* = full-equipment-and-belt-hotbar
 v29_* = dungeon-equipment-drop-expansion
 v30_* = monster-rarity-and-loot-scaling
+v31_* = combat-stat-effects-and-feedback
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -96,6 +97,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v28** | `full-equipment-and-belt-hotbar` | Complete (`make ci` green) | [`v28_spec-full-equipment-and-belt-hotbar.md`](specs/v28_spec-full-equipment-and-belt-hotbar.md) | [`v28_2026-06-07-full-equipment-and-belt-hotbar.md`](plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md) |
 | **v29** | `dungeon-equipment-drop-expansion` | Complete (`make ci` green) | [`v29_spec-dungeon-equipment-drop-expansion.md`](specs/v29_spec-dungeon-equipment-drop-expansion.md) | [`v29_2026-06-07-dungeon-equipment-drop-expansion.md`](plans/v29_2026-06-07-dungeon-equipment-drop-expansion.md) |
 | **v30** | `monster-rarity-and-loot-scaling` | Complete (`make ci` green) | [`v30_spec-monster-rarity-and-loot-scaling.md`](specs/v30_spec-monster-rarity-and-loot-scaling.md) | [`v30_2026-06-07-monster-rarity-and-loot-scaling.md`](plans/v30_2026-06-07-monster-rarity-and-loot-scaling.md) |
+| **v31** | `combat-stat-effects-and-feedback` | Complete (`make ci` green) | [`v31_spec-combat-stat-effects-and-feedback.md`](specs/v31_spec-combat-stat-effects-and-feedback.md) | [`v31_2026-06-07-combat-stat-effects-and-feedback.md`](plans/v31_2026-06-07-combat-stat-effects-and-feedback.md) |
 
 ---
 
@@ -722,6 +724,33 @@ challenge, XP, loot depth, protocol state, replay, bot assertions, and Godot pre
 elite packs, minions, aura modifiers, boss floors, Magic Find, final item-level/depth economy,
 chest rarity, production monster art/VFX/audio, and colorblind/accessibility-safe rarity treatment.
 
+### v31 — Combat stat effects and feedback
+
+**Proves:** Player and monster combat stats now drive deterministic authoritative combat outcomes
+and Godot renders those outcomes from server event metadata.
+
+- Shared combat rules now define base hit/crit values, minimum non-blocked damage, and the global
+  `75%` block cap.
+- Monster rules support hit chance, crit chance, crit damage, armor, and block chance, with explicit
+  combat-lab targets for miss, crit, armor-floor, block, and monster-side proofs.
+- Go combat uses one deterministic resolution path for melee, projectiles, proactive monster
+  attacks, and retaliation: hit roll, block roll, damage roll, crit roll, armor mitigation, and
+  minimum damage.
+- Misses and blocks emit combat events but do not mutate HP, trigger retaliation, kill entities,
+  drop loot, or award XP; successful non-blocked hits always deal at least `1`.
+- Protocol v1 combat events now expose source/target ids, outcome, raw and mitigated damage,
+  `blocked`, and `critical`; progression snapshots/deltas expose effective stat breakdown rows.
+- Equipped base stats, rolled equipment stats, derived character formulas, caps, and clamps are
+  visible through server-owned stat breakdowns and the Godot character stats panel.
+- Godot floating combat text now renders normal damage, crits, misses, and blocks from authoritative
+  events, with a persisted settings toggle to suppress the presentation only.
+- Protocol scenario `22_combat_stat_effects.json` and client scenario `11_combat_feedback.json`
+  prove the complete path through `/state`, reconnect, replay, and headless Godot presentation.
+
+**Explicit non-goals:** attack-speed gameplay, movement-speed gameplay, spells, mana consumers,
+status effects, affix grammar, polished comparison UI, enemy equipment inventories, production
+combat VFX/audio, and Protobuf migration.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -768,6 +797,8 @@ character_stats_and_leveling: descend to dungeon → kill mobs for XP → level 
 full_equipment: pick up/equip paper-doll gear → prove hand occupancy → assign belt-gated hotbar → prove persistence
 dungeon_equipment_drops: descend to depth-banded dungeon → open chest → pick up/equip rolled equipment → prove persistence
 monster_rarity_loot_scaling: descend to generated dungeon → assert champion rarity → kill → pick up rolled loot → prove persistence
+combat_stat_effects: combat lab proofs for miss, crit, armor floor, block, monster crit/block, projectile impact, and stat breakdowns
+client_combat_feedback: equip gear → assert stat breakdowns → prove normal/crit/miss/block floating text and settings toggle
 ```
 
 **Verify:**
@@ -875,14 +906,18 @@ generated monster rarity tiers, scaled HP/damage/XP, effective monster loot dept
 monster rarity in protocol/replay state, player/enemy tinting, and a real generated dungeon bot
 proof for non-common rarity.
 
+**Combat stats now affect authoritative outcomes.** v31 applies hit, crit, armor, block, minimum
+damage, and effective stat breakdowns across player and monster combat, then renders normal, crit,
+miss, and block feedback from protocol events in Godot.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Armor mitigation, block chance execution, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers/boss floors | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30 non-goals |
+| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers/boss floors | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31 non-goals |
 | Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, boss-floor chest integration, richer dungeon drop economy | v23/v25/v26/v28/v29/v30 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30 non-goals |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production combat VFX/audio, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

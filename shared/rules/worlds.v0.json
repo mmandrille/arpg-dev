@@ -226,6 +226,71 @@
         }
       ]
     },
+    "combat_stat_lab": {
+      "player": { "position": { "x": 2, "y": 5 } },
+      "entities": [
+        {
+          "type": "loot",
+          "item_template_id": "cave_blade",
+          "position": { "x": 3, "y": 5 }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_shield",
+          "position": { "x": 3, "y": 6 }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_bow",
+          "position": { "x": 3, "y": 4 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": { "x": 6, "y": 5 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_armored_target",
+          "position": { "x": 8, "y": 4 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_blocking_target",
+          "position": { "x": 10, "y": 6 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_crit_attacker",
+          "position": { "x": 14, "y": 8 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_miss_attacker",
+          "position": { "x": 12, "y": 7 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        }
+      ]
+    },
     "inventory_lab": {
       "player": { "position": { "x": 4, "y": 5 } },
       "entities": [

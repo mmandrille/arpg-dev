@@ -332,7 +332,7 @@ func TestPostResumePickupAllocatesAfterHistoricalEntities(t *testing.T) {
 
 func TestDeadPlayerResumeRejectsGameplayIntents(t *testing.T) {
 	srv := fullStackWithRules(t, func(rules *game.Rules) {
-		dmg := game.DamageRange{Min: 10, Max: 10}
+		dmg := game.DamageRange{Min: 11, Max: 11}
 		dummy := rules.Monsters["training_dummy"]
 		dummy.MaxHP = 100
 		dummy.RetaliationDamage = &dmg

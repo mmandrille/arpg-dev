@@ -4,6 +4,6 @@
   "level": -1,
   "monster_def_id": "dungeon_mob",
   "tick_of_first_player_damaged": 5,
-  "damage": 3,
-  "player_hp_after": 7
+  "damage": 2,
+  "player_hp_after": 8
 }

@@ -143,6 +143,7 @@ def cross_checks(report: Report) -> None:
     monster_rarity_golden = load(GOLDEN / "monster_rarity.json")
     guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
     character_progression_golden = load(GOLDEN / "character_progression.json")
+    combat_stat_effects_golden = load(GOLDEN / "combat_stat_effects.json")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -305,10 +306,13 @@ def cross_checks(report: Report) -> None:
         return round(value, 6)
 
     def derived_stats_for(stats: dict) -> dict[str, float]:
-        return {
+        derived = {
             stat_id: evaluate_formula(character_progression["derived_stats"][stat_id], stats)
             for stat_id in sorted(character_progression["derived_stats"])
         }
+        derived["damage_min"] += combat["player_damage"]["min"]
+        derived["damage_max"] += combat["player_damage"]["max"]
+        return derived
 
     if character_progression_golden["base_stats"] != progression_base_stats:
         report.fail("character_progression golden", "base_stats must match character_progression.v0.json")
@@ -448,7 +452,8 @@ def cross_checks(report: Report) -> None:
         elif projectile_speed is not None:
             report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
 
-    valid_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent"}
+    valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
         if rarity["weight"] <= 0:
@@ -495,6 +500,10 @@ def cross_checks(report: Report) -> None:
             report.fail("item template requirements", f"{template_id}: v23 only supports level <= 1")
             continue
         base_stats = template["base_stats"]
+        invalid_base_stats = sorted(set(base_stats) - valid_roll_stats)
+        if invalid_base_stats:
+            report.fail("item template base_stats", f"{template_id}: unsupported stat(s) {invalid_base_stats}")
+            continue
         if "damage_min" in base_stats and "damage_max" in base_stats and base_stats["damage_max"] < base_stats["damage_min"]:
             report.fail("item template base_stats", f"{template_id}: damage_max must be >= damage_min")
             continue
@@ -524,6 +533,7 @@ def cross_checks(report: Report) -> None:
                 report.ok(f"item template {template_id} weapon rolls are valid")
         else:
             report.ok(f"item template {template_id} roll ranges are valid")
+    report.ok("item template combat stat keys are restricted to v31-supported rolls")
 
     treasure_class_defs = treasure_classes["classes"]
     for class_id, treasure_class in treasure_class_defs.items():
@@ -594,6 +604,29 @@ def cross_checks(report: Report) -> None:
         report.fail("combat unarmed_reach", "must be positive")
     else:
         report.ok("combat unarmed_reach is positive")
+    if not 0 <= float(combat.get("base_hit_chance", -1)) <= 1:
+        report.fail("combat base_hit_chance", "must be within [0, 1]")
+    else:
+        report.ok("combat base_hit_chance is bounded")
+    if not 0 <= float(combat.get("base_crit_chance", -1)) <= 1:
+        report.fail("combat base_crit_chance", "must be within [0, 1]")
+    else:
+        report.ok("combat base_crit_chance is bounded")
+    if float(combat.get("base_crit_damage", 0)) < 1:
+        report.fail("combat base_crit_damage", "must be >= 1")
+    else:
+        report.ok("combat base_crit_damage is valid")
+    if int(combat.get("minimum_damage", 0)) < 1:
+        report.fail("combat minimum_damage", "must be >= 1")
+    else:
+        report.ok("combat minimum_damage is valid")
+    block_cap_percent = int(combat.get("block_cap_percent", -1))
+    if block_cap_percent < 0:
+        report.fail("combat block_cap_percent", "must be non-negative")
+    elif block_cap_percent > 75:
+        report.fail("combat block_cap_percent", "must not exceed 75")
+    else:
+        report.ok("combat block_cap_percent is within cap")
 
     if navigation.get("cell_size") != 1.0:
         report.fail("navigation cell_size", "must be 1.0 for v11 moveSpeed parity")
@@ -916,6 +949,23 @@ def cross_checks(report: Report) -> None:
 
     # monster -> loot table -> item references resolve.
     for mid, mdef in monsters["monsters"].items():
+        for chance_key in ("hit_chance", "crit_chance"):
+            chance = mdef.get(chance_key, combat["base_hit_chance"] if chance_key == "hit_chance" else combat["base_crit_chance"])
+            if not isinstance(chance, (int, float)) or not 0 <= float(chance) <= 1:
+                report.fail("monster combat chance", f"{mid}.{chance_key}: must be within [0, 1]")
+                break
+        else:
+            crit_damage = mdef.get("crit_damage", combat["base_crit_damage"])
+            armor = mdef.get("armor", 0)
+            block_percent = mdef.get("block_percent", 0)
+            if not isinstance(crit_damage, (int, float)) or float(crit_damage) < 1:
+                report.fail("monster combat crit_damage", f"{mid}: must be >= 1")
+            elif not isinstance(armor, int) or armor < 0:
+                report.fail("monster combat armor", f"{mid}: must be a non-negative integer")
+            elif not isinstance(block_percent, int) or block_percent < 0 or block_percent > 100:
+                report.fail("monster combat block_percent", f"{mid}: raw stat must be within 0..100")
+            else:
+                report.ok(f"monster {mid} combat stats are bounded")
         xp_reward = mdef.get("xp_reward", 0)
         if not isinstance(xp_reward, int) or xp_reward < 0:
             report.fail("monster xp_reward", f"{mid}: xp_reward must be a non-negative integer")
@@ -1047,10 +1097,99 @@ def cross_checks(report: Report) -> None:
             else:
                 report.fail("world entity type", f"{label}: unknown type {etype}")
 
+    combat_lab = worlds["worlds"].get("combat_stat_lab")
+    required_combat_lab_monsters = {
+        "combat_lab_soft_target",
+        "combat_lab_armored_target",
+        "combat_lab_blocking_target",
+        "combat_lab_crit_attacker",
+        "combat_lab_miss_attacker",
+    }
+    required_combat_lab_templates = {"cave_blade", "cave_shield", "cave_bow"}
+    if combat_lab is None:
+        report.fail("combat_stat_lab world", "missing world")
+    else:
+        lab_monsters = {
+            entity.get("monster_def_id")
+            for entity in combat_lab["entities"]
+            if entity.get("type") == "monster"
+        }
+        lab_templates = {
+            entity.get("item_template_id")
+            for entity in combat_lab["entities"]
+            if entity.get("type") == "loot" and entity.get("item_template_id")
+        }
+        missing_monsters = sorted(required_combat_lab_monsters - lab_monsters)
+        missing_templates = sorted(required_combat_lab_templates - lab_templates)
+        if missing_monsters:
+            report.fail("combat_stat_lab monsters", f"missing {missing_monsters}")
+        elif missing_templates:
+            report.fail("combat_stat_lab equipment", f"missing {missing_templates}")
+        else:
+            report.ok("combat_stat_lab includes v31 proof monsters and equipment")
+
     if auto_path_golden["navigation"] != navigation:
         report.fail("auto_path navigation", "golden navigation block must match navigation.v0.json")
     else:
         report.ok("auto_path golden navigation matches navigation.v0.json")
+
+    golden_combat = combat_stat_effects_golden["combat"]
+    if golden_combat["minimum_damage"] != combat["minimum_damage"]:
+        report.fail("combat_stat_effects combat", "minimum_damage must match combat.v0.json")
+    elif golden_combat["block_cap_percent"] != combat["block_cap_percent"]:
+        report.fail("combat_stat_effects combat", "block_cap_percent must match combat.v0.json")
+    elif not math.isclose(float(golden_combat["base_crit_damage"]), float(combat["base_crit_damage"]), rel_tol=0, abs_tol=0.000001):
+        report.fail("combat_stat_effects combat", "base_crit_damage must match combat.v0.json")
+    elif combat_stat_effects_golden["world_id"] not in worlds["worlds"]:
+        report.fail("combat_stat_effects world", f"unknown world_id {combat_stat_effects_golden['world_id']}")
+    else:
+        report.ok("combat_stat_effects golden matches combat constants and world")
+    required_combat_case_names = {
+        "player_miss",
+        "player_crit",
+        "monster_armor_minimum_damage",
+        "player_armor_minimum_damage",
+        "player_block",
+        "block_cap_75",
+        "monster_crit",
+        "monster_block",
+        "projectile_impact",
+    }
+    case_names = {case["name"] for case in combat_stat_effects_golden["cases"]}
+    missing_case_names = sorted(required_combat_case_names - case_names)
+    if missing_case_names:
+        report.fail("combat_stat_effects cases", f"missing {missing_case_names}")
+    else:
+        failed_combat_case = False
+        for case in combat_stat_effects_golden["cases"]:
+            if case["outcome"] == "miss" and case["final_damage"] != 0:
+                report.fail("combat_stat_effects cases", f"{case['name']}: miss must deal 0")
+                failed_combat_case = True
+                break
+            if case["outcome"] == "block" and (not case["blocked"] or case["final_damage"] != 0):
+                report.fail("combat_stat_effects cases", f"{case['name']}: block must set blocked and deal 0")
+                failed_combat_case = True
+                break
+            if case["outcome"] == "crit" and not case["critical"]:
+                report.fail("combat_stat_effects cases", f"{case['name']}: crit must set critical")
+                failed_combat_case = True
+                break
+            if case["outcome"] not in {"miss", "block"} and case["final_damage"] < combat["minimum_damage"]:
+                report.fail("combat_stat_effects cases", f"{case['name']}: non-blocked hit must respect minimum_damage")
+                failed_combat_case = True
+                break
+        if not failed_combat_case:
+            report.ok("combat_stat_effects cases cover v31 combat outcomes")
+    breakdowns_by_key = {row["key"]: row for row in combat_stat_effects_golden["stat_breakdowns"]}
+    block_breakdown = breakdowns_by_key.get("block_percent")
+    if block_breakdown is None:
+        report.fail("combat_stat_effects breakdowns", "missing block_percent breakdown")
+    elif block_breakdown.get("cap") != combat["block_cap_percent"]:
+        report.fail("combat_stat_effects breakdowns", "block cap must match combat.v0.json")
+    elif block_breakdown["uncapped_value"] <= block_breakdown["value"]:
+        report.fail("combat_stat_effects breakdowns", "block cap case must have uncapped_value > value")
+    else:
+        report.ok("combat_stat_effects breakdowns include capped block proof")
 
     for case in auto_path_golden["cases"]:
         world_id = case["world_id"]

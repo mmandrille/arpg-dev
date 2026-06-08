@@ -1,0 +1,23 @@
+server/internal/realtime/session_loop_test.go
+  s_deaa8bce387d78::t_aee73357f92fc3 99-100,146-179,181
+  s_deaa8bce387d78::t_8414caaece414e 1-38,67-98,101-145,180,182
+  s_deaa8bce387d78::t_2e866ead32c292 39-66
+server/internal/realtime/session_loop.go
+  s_deaa8bce387d78::t_031075dda4dfe1 507-522
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8aae3c21ce3857103f5febcc6b2aad8c52577d76",
+  "prompts": {},
+  "sessions": {
+    "s_deaa8bce387d78": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea77e-4672-70d3-a2e1-f3582dc80fe0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

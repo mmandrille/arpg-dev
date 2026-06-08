@@ -128,6 +128,20 @@
       ],
       "effect_pool": []
     },
+    "cave_pack_belt": {
+      "name": "Cave Pack Belt",
+      "category": "equipment",
+      "item_type": "belt",
+      "slot": "belt",
+      "equippable": true,
+      "requirements": { "level": 1 },
+      "base_stats": { "hotbar_slots": 3, "inventory_rows": 1, "armor": 1 },
+      "rollable_stats": [
+        { "stat": "hotbar_slots", "min": 3, "max": 10, "weight": 3 },
+        { "stat": "armor", "min": 1, "max": 2, "weight": 1 }
+      ],
+      "effect_pool": []
+    },
     "cave_boots": {
       "name": "Cave Boots",
       "category": "equipment",

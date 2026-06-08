@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/boss_floor_-5.v0.schema.json",
+  "title": "Boss floor -5 golden",
+  "type": "object",
+  "required": ["seed", "level", "is_boss_floor", "floor_size", "expected"],
+  "additionalProperties": false,
+  "properties": {
+    "seed": { "type": "string", "minLength": 1 },
+    "level": { "type": "integer", "maximum": -1 },
+    "is_boss_floor": { "type": "boolean" },
+    "floor_size": { "$ref": "#/$defs/size" },
+    "expected": {
+      "type": "object",
+      "required": [
+        "boss_count",
+        "chest_count",
+        "stairs_down_count",
+        "teleporter_count",
+        "stairs_down_initial_state",
+        "teleporter_initial_state",
+        "unlocked_state",
+        "locked_reason",
+        "boss"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "boss_count": { "type": "integer", "minimum": 1 },
+        "chest_count": { "type": "integer", "minimum": 1 },
+        "stairs_down_count": { "type": "integer", "minimum": 1 },
+        "teleporter_count": { "type": "integer", "minimum": 1 },
+        "stairs_down_initial_state": { "type": "string", "minLength": 1 },
+        "teleporter_initial_state": { "type": "string", "minLength": 1 },
+        "unlocked_state": { "type": "string", "minLength": 1 },
+        "locked_reason": { "type": "string", "minLength": 1 },
+        "boss": {
+          "type": "object",
+          "required": [
+            "template_id",
+            "base_monster_def_id",
+            "visual_model",
+            "visual_color",
+            "visual_scale"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "template_id": { "type": "string", "minLength": 1 },
+            "base_monster_def_id": { "type": "string", "minLength": 1 },
+            "visual_model": { "type": "string", "minLength": 1 },
+            "visual_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+            "visual_scale": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "size": {
+      "type": "object",
+      "required": ["width", "height"],
+      "additionalProperties": false,
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

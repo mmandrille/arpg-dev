@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/boss_patterns.v0.schema.json",
+  "title": "Boss attack patterns (v0)",
+  "type": "object",
+  "required": ["version", "minimum_telegraph_ticks", "patterns"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "minimum_telegraph_ticks": { "type": "integer", "minimum": 1 },
+    "patterns": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["phases", "cooldown_ticks"],
+        "additionalProperties": false,
+        "properties": {
+          "phases": {
+            "type": "array",
+            "minItems": 2,
+            "items": { "$ref": "#/$defs/phase" }
+          },
+          "cooldown_ticks": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "required": ["kind", "duration_ticks"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["telegraph", "active", "recovery"] },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "telegraph_type": {
+          "type": "string",
+          "enum": ["body_color_charge", "circle", "line", "cone", "rectangle"]
+        },
+        "from_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "to_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "hit_shape": {
+          "type": "string",
+          "enum": ["melee_contact", "circle", "line", "cone", "rectangle"]
+        },
+        "shape": {
+          "type": "string",
+          "enum": ["melee_contact", "circle", "line", "cone", "rectangle"]
+        },
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "damage": { "$ref": "#/$defs/damage" }
+      }
+    },
+    "damage": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "integer", "minimum": 1 },
+        "max": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

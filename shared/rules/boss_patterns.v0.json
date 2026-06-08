@@ -1,0 +1,31 @@
+{
+  "version": 0,
+  "minimum_telegraph_ticks": 20,
+  "patterns": {
+    "charged_melee": {
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 30,
+          "telegraph_type": "body_color_charge",
+          "from_color": "#b77cff",
+          "to_color": "#ff0000",
+          "hit_shape": "melee_contact",
+          "radius": 1.6
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 4,
+          "shape": "melee_contact",
+          "radius": 1.6,
+          "damage": { "min": 4, "max": 6 }
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 20
+        }
+      ],
+      "cooldown_ticks": 40
+    }
+  }
+}

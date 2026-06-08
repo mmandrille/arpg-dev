@@ -11,7 +11,7 @@ Last updated: 2026-06-08
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v34 — `model-reaction-polish` |
+| **Latest completed slice** | v36 — `inventory-paper-doll-capacity` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-08 |
 | **Next slice** | TBD |
@@ -50,6 +50,8 @@ v31_* = combat-stat-effects-and-feedback
 v32_* = test-floor-and-resilient-scenarios
 v33_* = true-coop-session
 v34_* = model-reaction-polish
+v35_* = boss-floor-gate
+v36_* = inventory-paper-doll-capacity
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -104,6 +106,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v32** | `test-floor-and-resilient-scenarios` | Complete (`make ci` green) | [`v32_spec-test-floor-and-resilient-scenarios.md`](specs/v32_spec-test-floor-and-resilient-scenarios.md) | [`v32_2026-06-08-test-floor-and-resilient-scenarios.md`](plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md) |
 | **v33** | `true-coop-session` | Complete (`make ci` green) | [`v33_spec-true-coop-session.md`](specs/v33_spec-true-coop-session.md) | [`v33_2026-06-08-true-coop-session.md`](plans/v33_2026-06-08-true-coop-session.md) |
 | **v34** | `model-reaction-polish` | Complete (`make ci` green) | [`v34_spec-model-reaction-polish.md`](specs/v34_spec-model-reaction-polish.md) | [`v34_2026-06-08-model-reaction-polish.md`](plans/v34_2026-06-08-model-reaction-polish.md) |
+| **v35** | `boss-floor-gate` | Complete (`make ci` green) | [`v35_spec-boss-floor-gate.md`](specs/v35_spec-boss-floor-gate.md) | [`v35_2026-06-08-boss-floor-gate.md`](plans/v35_2026-06-08-boss-floor-gate.md) |
+| **v36** | `inventory-paper-doll-capacity` | Complete (`make ci` green) | [`v36_spec-inventory-paper-doll-capacity.md`](specs/v36_spec-inventory-paper-doll-capacity.md) | [`v36_2026-06-08-inventory-paper-doll-capacity.md`](plans/v36_2026-06-08-inventory-paper-doll-capacity.md) |
 
 ---
 
@@ -837,6 +841,59 @@ staying client-only and driven by existing authoritative combat events.
 production customization/cosmetics, no monster art replacement, no corpse collision/despawn, and no
 respawn/revive behavior.
 
+### v35 — Boss floor gate
+
+**Proves:** The generated dungeon can introduce a compact skill-gated boss floor with locked exits,
+telegraphed damage, boss presentation metadata, and deterministic replay coverage.
+
+- Dungeon level `-5` is generated as a compact `30 x 30` boss floor with fixed up/down stairs,
+  one disabled teleporter, one pre-boss chest, one humanoid boss, and reduced trash population.
+- Boss floor down stairs and teleporter start locked/disabled with reason `boss_alive`; both
+  transition to `ready` and emit state-change events when the boss dies.
+- Shared boss template and pattern rules define the first humanoid `cave_warden` boss, visual
+  model/tint/scale metadata, and a telegraphed charged melee pattern with active-only damage.
+- Go sim owns boss phase timing, hit predicates, locked-exit rejection, unlock, level transition,
+  boss loot/chest hooks, and deterministic replay reconstruction.
+- Protocol schemas now carry optional boss/visual metadata, boss phase events, lock/unlock events,
+  and disabled/locked interactable state without requiring a client intent shape change.
+- Godot renders boss entities through the humanoid model path, applies authoritative visual scale
+  and tint, shows telegraph tinting, and presents locked/ready exit state from server data.
+- Protocol bot scenario `24_boss_floor_gate.json` proves descent to `-5`, compact floor metadata,
+  locked exit rejects, boss phase observation, boss kill, exit unlock, descent to `-6`, `/state`,
+  reconnect, and replay verification.
+
+**Explicit non-goals:** no additional boss templates, enrage phases, summoned adds, production
+boss art/VFX/audio, boss health bar UI, co-op boss scaling, durable boss/map snapshots, quest
+integration, or gameplay collision/reach scaling from visual scale.
+
+### v36 — Inventory paper-doll capacity
+
+**Proves:** Inventory capacity can be server-owned, item-derived, and rendered as a fixed
+paper-doll bag grid without making the Godot UI authoritative.
+
+- Shared item template rules now allow `inventory_rows` and include deterministic
+  `cave_pack_belt`, with `shared/golden/inventory_capacity.json` pinning base rows `3`,
+  5-column base capacity `15`, +1 row capacity `20`, hotbar/equipped exemptions, and rejection
+  reasons.
+- Session snapshots expose `inventory_rows` and `inventory_capacity`; relevant equipped/hotbar
+  deltas publish the same fields so client, bot, reconnect, and replay observe identical capacity.
+- Go sim derives capacity from equipped items, counts only bag entries that are not equipped and not
+  assigned to hotbar, rejects full pickups with `inventory_full`, and rejects capacity-shrinking
+  unequip/unassign paths before mutation with `capacity_would_overflow`.
+- Godot replaces the two-column equipment list with a named paper-doll layout around a
+  `character_paper_doll` placeholder, renders a 5-column bag with exactly `inventory_capacity`
+  visible cells, and keeps the bag drop target outside grid math.
+- Inventory debug state now reports paper-doll slot ids/positions, preview status, capacity rows,
+  bag columns, available slot count, and empty-slot style markers for headless assertions.
+- Protocol bot scenario `25_inventory_capacity_and_paper_doll.json` proves base capacity, full-bag
+  rejection, +1 row equip to capacity 20, five more bag entries, reconnect, and replay.
+- Client bot scenario `13_inventory_paper_doll.json` proves base 15-cell grid, all paper-doll slot
+  ids, the preview node, belt equip, and expanded 20-cell grid.
+
+**Explicit non-goals:** no stash, vendors, crafting, item sorting/filtering, comparison UI,
+multi-cell item footprints, passive skill sources for inventory rows, production paper-doll art,
+or full model-backed SubViewport preview.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -887,6 +944,8 @@ combat_stat_effects: combat lab proofs for miss, crit, armor floor, block, monst
 client_combat_feedback: equip gear → assert stat breakdowns → prove normal/crit/miss/block floating text and settings toggle
 true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
 model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
+boss_floor_gate: descend to level -5 → assert compact boss floor and locked exits → observe boss phase → kill boss → unlock exits → descend to -6
+inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 ```
 
 **Verify:**
@@ -1012,14 +1071,22 @@ disconnect/reconnect, and replay.
 hit/death transform and tint reactions for local players, remote co-op players, and monsters;
 remote co-op players now reuse the humanoid character model with a distinct dark tint.
 
+**The first boss floor gate is now authoritative.** v35 adds a compact level `-5` boss arena,
+telegraphed boss phases, locked down-stair/teleporter exits until boss death, boss visual scale
+metadata, and protocol/replay/bot proof for unlock and descent.
+
+**Inventory capacity and the paper-doll bag grid are now authoritative.** v36 adds server-derived
+`inventory_rows` / `inventory_capacity`, an item-granted row source, full-bag and overflow rejection
+guards, a 5-column capacity grid, and protocol/client bot proofs.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers/boss floors | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32 non-goals |
-| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, boss-floor chest integration, richer dungeon drop economy | v23/v25/v26/v28/v29/v30 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production combat VFX/audio, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32 non-goals |
+| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35 non-goals |
+| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows | v23/v25/v26/v28/v29/v30/v35/v36 non-goals, ADR-0009 deferred |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

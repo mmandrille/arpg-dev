@@ -80,7 +80,8 @@
         "max_hp": { "type": "integer", "minimum": 0 },
         "armor": { "type": "integer", "minimum": 0 },
         "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "hotbar_slots": { "type": "integer", "minimum": 2, "maximum": 10 }
+        "hotbar_slots": { "type": "integer", "minimum": 2, "maximum": 10 },
+        "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
     },
     "rollable_stat": {
@@ -88,7 +89,7 @@
       "required": ["stat", "min", "max", "weight"],
       "additionalProperties": false,
       "properties": {
-        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots"] },
+        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots", "inventory_rows"] },
         "min": { "type": "integer", "minimum": 0 },
         "max": { "type": "integer", "minimum": 0 },
         "weight": { "type": "integer", "minimum": 1 }

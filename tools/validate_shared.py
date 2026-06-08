@@ -124,6 +124,8 @@ def cross_checks(report: Report) -> None:
     navigation = load(RULES / "navigation.v0.json")
     worlds = load(RULES / "worlds.v0.json")
     dungeon_generation = load(RULES / "dungeon_generation.v0.json")
+    boss_templates = load(RULES / "boss_templates.v0.json")
+    boss_patterns = load(RULES / "boss_patterns.v0.json")
     damage_golden = load(GOLDEN / "damage_formula.json")
     retaliation_golden = load(GOLDEN / "retaliation_damage.json")
     equipped_weapon_golden = load(GOLDEN / "equipped_weapon_damage.json")
@@ -144,6 +146,9 @@ def cross_checks(report: Report) -> None:
     guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
     character_progression_golden = load(GOLDEN / "character_progression.json")
     combat_stat_effects_golden = load(GOLDEN / "combat_stat_effects.json")
+    boss_floor_golden = load(GOLDEN / "boss_floor_-5.json")
+    boss_pattern_golden = load(GOLDEN / "boss_pattern_timeline.json")
+    inventory_capacity_golden = load(GOLDEN / "inventory_capacity.json")
 
     v2_protocol_files = [
         PROTOCOL / "envelope.v2.schema.json",
@@ -481,7 +486,7 @@ def cross_checks(report: Report) -> None:
             report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
 
     valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent"}
-    valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots"}
+    valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
         if rarity["weight"] <= 0:
@@ -561,7 +566,38 @@ def cross_checks(report: Report) -> None:
                 report.ok(f"item template {template_id} weapon rolls are valid")
         else:
             report.ok(f"item template {template_id} roll ranges are valid")
-    report.ok("item template combat stat keys are restricted to v31-supported rolls")
+    report.ok("item template stat keys are restricted to supported rolls")
+
+    inventory_columns = int(inventory_capacity_golden["columns"])
+    base_inventory_rows = int(inventory_capacity_golden["base_inventory_rows"])
+    row_item_id = str(inventory_capacity_golden["row_granting_item"])
+    row_item = item_templates["templates"].get(row_item_id)
+    row_item_bonus = int(inventory_capacity_golden["row_item_bonus"])
+    if inventory_columns != 5:
+        report.fail("inventory_capacity golden", "columns must be 5")
+    elif base_inventory_rows != 3:
+        report.fail("inventory_capacity golden", "base_inventory_rows must be 3")
+    elif inventory_capacity_golden["base_capacity"] != base_inventory_rows * inventory_columns:
+        report.fail("inventory_capacity golden", "base_capacity must be base_inventory_rows * columns")
+    elif not row_item:
+        report.fail("inventory_capacity golden", f"row_granting_item {row_item_id} is missing")
+    elif int(row_item.get("base_stats", {}).get("inventory_rows", 0)) != row_item_bonus:
+        report.fail("inventory_capacity golden", f"{row_item_id}.base_stats.inventory_rows must match row_item_bonus")
+    elif inventory_capacity_golden["row_item_capacity"] != (base_inventory_rows + row_item_bonus) * inventory_columns:
+        report.fail("inventory_capacity golden", "row_item_capacity must include the row item bonus")
+    elif inventory_capacity_golden["bag_occupancy"] != {
+        "equipped_counts": False,
+        "hotbar_assigned_counts": False,
+        "bag_item_counts": True,
+    }:
+        report.fail("inventory_capacity golden", "bag occupancy flags must match v36 contract")
+    elif inventory_capacity_golden["rejections"] != {
+        "pickup_full_bag": "inventory_full",
+        "capacity_shrink_overflow": "capacity_would_overflow",
+    }:
+        report.fail("inventory_capacity golden", "rejection reasons must match v36 contract")
+    else:
+        report.ok("inventory_capacity golden matches item templates and v36 contract")
 
     treasure_class_defs = treasure_classes["classes"]
     for class_id, treasure_class in treasure_class_defs.items():
@@ -721,6 +757,7 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("dungeon_generation chest placement is valid")
     monster_rarities = dungeon_generation.get("monster_rarities", [])
+    rarity_by_id = {r["id"]: r for r in monster_rarities}
     expected_rarity_order = ["common", "champion", "rare", "unique"]
     if [r.get("id") for r in monster_rarities] != expected_rarity_order:
         report.fail("dungeon_generation monster_rarities", f"must be ordered {expected_rarity_order}")
@@ -765,6 +802,186 @@ def cross_checks(report: Report) -> None:
                 report.fail("dungeon_generation monster_rarities", "must define common/champion/rare/unique exactly")
             else:
                 report.ok("dungeon_generation monster rarities are structurally valid")
+                required_visual_scales = {
+                    "common": 1.0,
+                    "champion": 1.25,
+                    "rare": 1.0,
+                    "unique": 1.5,
+                }
+                scale_mismatches = [
+                    f"{rarity_id}={rarity_by_id.get(rarity_id, {}).get('visual_scale')}"
+                    for rarity_id, expected in required_visual_scales.items()
+                    if rarity_by_id.get(rarity_id, {}).get("visual_scale") != expected
+                ]
+                if scale_mismatches:
+                    report.fail("dungeon_generation monster_rarities visual_scale", ", ".join(scale_mismatches))
+                else:
+                    report.ok("dungeon_generation monster rarity visual_scale matches v35")
+    boss_floor = dungeon_generation.get("boss_floor", {})
+    if boss_floor.get("cadence") != 5 or boss_floor.get("first_level") != -5:
+        report.fail("boss_floor cadence", "cadence must be 5 and first_level must be -5")
+    elif boss_floor.get("floor_size") != {"width": 30, "height": 30}:
+        report.fail("boss_floor floor_size", "v35 boss floor must be 30 x 30")
+    elif boss_floor.get("locked_exit_reason") != "boss_alive":
+        report.fail("boss_floor locked_exit_reason", "must be boss_alive")
+    else:
+        report.ok("boss_floor cadence, size, and lock reason match v35")
+
+    boss_floor_failed = False
+    boss_floor_size = boss_floor.get("floor_size", {})
+    width = boss_floor_size.get("width", 0)
+    height = boss_floor_size.get("height", 0)
+    for label in ("boss_spawn", "chest_position", "stairs_up_position", "stairs_down_position", "teleporter_position"):
+        point = boss_floor.get(label, {})
+        if not (0 <= point.get("x", -1) <= width and 0 <= point.get("y", -1) <= height):
+            report.fail("boss_floor placement", f"{label} outside 30 x 30 floor")
+            boss_floor_failed = True
+            break
+    if not boss_floor_failed:
+        report.ok("boss_floor fixed placements fit 30 x 30 floor")
+
+    boss_chest_id = boss_floor.get("chest_interactable_def_id")
+    boss_chest_table = boss_floor.get("chest_loot_table")
+    if boss_chest_id != "treasure_chest" or boss_chest_id not in interactables["interactables"]:
+        report.fail("boss_floor chest", "chest_interactable_def_id must resolve to treasure_chest")
+    elif boss_chest_table not in loot["loot_tables"]:
+        report.fail("boss_floor chest", f"unknown chest_loot_table {boss_chest_table}")
+    else:
+        report.ok("boss_floor chest rules resolve")
+
+    missing_pool_templates = [
+        template_id for template_id in boss_floor.get("boss_template_pool", [])
+        if template_id not in boss_templates["bosses"]
+    ]
+    if missing_pool_templates:
+        report.fail("boss_floor template pool", f"missing {missing_pool_templates}")
+    else:
+        report.ok("boss_floor template pool resolves")
+
+    for template_id, template in boss_templates["bosses"].items():
+        template_failed = False
+        if template["base_monster_def_id"] not in monsters["monsters"]:
+            report.fail("boss template base monster", f"{template_id}: {template['base_monster_def_id']} missing")
+            template_failed = True
+        elif template["loot_table"] not in loot["loot_tables"]:
+            report.fail("boss template loot table", f"{template_id}: {template['loot_table']} missing")
+            template_failed = True
+        else:
+            missing_patterns = [
+                pattern_id for pattern_id in template["pattern_deck"]
+                if pattern_id not in boss_patterns["patterns"]
+            ]
+            if missing_patterns:
+                report.fail("boss template pattern deck", f"{template_id}: missing {missing_patterns}")
+                template_failed = True
+        visual = template.get("visual", {})
+        if not template_failed and (visual.get("model") != "current_humanoid_player" or visual.get("scale") != 2.0):
+            report.fail("boss template visual", f"{template_id}: v35 requires current_humanoid_player at 2.0 scale")
+            template_failed = True
+        if not template_failed:
+            report.ok(f"boss template {template_id} references valid rules")
+
+    min_telegraph_ticks = int(boss_patterns["minimum_telegraph_ticks"])
+    for pattern_id, pattern in boss_patterns["patterns"].items():
+        pattern_failed = False
+        previous_telegraph = None
+        for index, phase in enumerate(pattern["phases"]):
+            if phase["duration_ticks"] <= 0:
+                report.fail("boss pattern duration", f"{pattern_id}[{index}] must be positive")
+                pattern_failed = True
+                break
+            if phase["kind"] == "telegraph":
+                if phase["duration_ticks"] < min_telegraph_ticks:
+                    report.fail("boss pattern telegraph duration", f"{pattern_id}[{index}] below {min_telegraph_ticks}")
+                    pattern_failed = True
+                    break
+                previous_telegraph = phase
+                continue
+            if "damage" not in phase:
+                continue
+            if previous_telegraph is None:
+                report.fail("boss pattern telegraph guarantee", f"{pattern_id}[{index}] damages without prior telegraph")
+                pattern_failed = True
+                break
+            damage = phase["damage"]
+            if damage["max"] < damage["min"]:
+                report.fail("boss pattern damage", f"{pattern_id}[{index}] max must be >= min")
+                pattern_failed = True
+                break
+            if phase.get("shape") != previous_telegraph.get("hit_shape"):
+                report.fail("boss pattern hit predicate", f"{pattern_id}[{index}] active shape must match telegraph hit_shape")
+                pattern_failed = True
+                break
+            if phase.get("radius") != previous_telegraph.get("radius"):
+                report.fail("boss pattern hit predicate", f"{pattern_id}[{index}] active radius must match telegraph radius")
+                pattern_failed = True
+                break
+        if not pattern_failed:
+            report.ok(f"boss pattern {pattern_id} satisfies telegraph guarantee")
+
+    if boss_floor_golden["level"] != boss_floor["first_level"]:
+        report.fail("boss_floor golden", "level must match boss_floor.first_level")
+    elif boss_floor_golden["floor_size"] != boss_floor["floor_size"]:
+        report.fail("boss_floor golden", "floor_size must match boss_floor rules")
+    else:
+        expected = boss_floor_golden["expected"]
+        template_id = expected["boss"]["template_id"]
+        template = boss_templates["bosses"].get(template_id)
+        if template is None:
+            report.fail("boss_floor golden", f"unknown boss template {template_id}")
+        elif expected["locked_reason"] != boss_floor["locked_exit_reason"]:
+            report.fail("boss_floor golden", "locked reason must match boss_floor rules")
+        elif expected["stairs_down_initial_state"] != "locked" or expected["teleporter_initial_state"] != "disabled":
+            report.fail("boss_floor golden", "initial exit states must be locked/disabled")
+        elif expected["boss"]["base_monster_def_id"] != template["base_monster_def_id"]:
+            report.fail("boss_floor golden", "boss base_monster_def_id mismatch")
+        elif expected["boss"]["visual_model"] != template["visual"]["model"] or expected["boss"]["visual_scale"] != template["visual"]["scale"]:
+            report.fail("boss_floor golden", "boss visual metadata mismatch")
+        else:
+            report.ok("boss_floor golden matches boss-floor rules")
+
+    pattern = boss_patterns["patterns"].get(boss_pattern_golden["pattern_id"])
+    if pattern is None:
+        report.fail("boss_pattern_timeline golden", f"unknown pattern {boss_pattern_golden['pattern_id']}")
+    elif boss_pattern_golden["minimum_telegraph_ticks"] != boss_patterns["minimum_telegraph_ticks"]:
+        report.fail("boss_pattern_timeline golden", "minimum telegraph ticks mismatch")
+    elif boss_pattern_golden["cooldown_ticks"] != pattern["cooldown_ticks"]:
+        report.fail("boss_pattern_timeline golden", "cooldown ticks mismatch")
+    elif len(boss_pattern_golden["timeline"]) != len(pattern["phases"]):
+        report.fail("boss_pattern_timeline golden", "phase count mismatch")
+    else:
+        failed_pattern_golden = False
+        cursor = 0
+        for expected_phase, rule_phase in zip(boss_pattern_golden["timeline"], pattern["phases"]):
+            duration = rule_phase["duration_ticks"]
+            if expected_phase["kind"] != rule_phase["kind"]:
+                report.fail("boss_pattern_timeline golden", f"phase {expected_phase['phase_index']} kind mismatch")
+                failed_pattern_golden = True
+                break
+            if expected_phase["start_tick"] != cursor or expected_phase["end_tick"] != cursor + duration - 1:
+                report.fail("boss_pattern_timeline golden", f"phase {expected_phase['phase_index']} tick boundary mismatch")
+                failed_pattern_golden = True
+                break
+            if expected_phase["duration_ticks"] != duration:
+                report.fail("boss_pattern_timeline golden", f"phase {expected_phase['phase_index']} duration mismatch")
+                failed_pattern_golden = True
+                break
+            for key in ("telegraph_type", "hit_shape", "shape", "radius", "damage"):
+                if key in expected_phase and expected_phase[key] != rule_phase.get(key):
+                    report.fail("boss_pattern_timeline golden", f"phase {expected_phase['phase_index']} {key} mismatch")
+                    failed_pattern_golden = True
+                    break
+            if failed_pattern_golden:
+                break
+            cursor += duration
+        if not failed_pattern_golden:
+            dodge = boss_pattern_golden["dodge_case"]
+            if not dodge["player_starts_in_contact"] or dodge["break_contact_before_tick"] >= boss_pattern_golden["timeline"][1]["start_tick"]:
+                report.fail("boss_pattern_timeline golden", "dodge case must break contact before active starts")
+            elif dodge["expected_damage"] != 0:
+                report.fail("boss_pattern_timeline golden", "dodge case expected damage must be 0")
+            else:
+                report.ok("boss_pattern_timeline golden matches boss pattern rules")
     loot_bands = dungeon_generation.get("loot_bands", [])
     if not loot_bands:
         report.fail("dungeon_generation loot_bands", "must define depth bands")
@@ -828,7 +1045,6 @@ def cross_checks(report: Report) -> None:
                     report.fail("dungeon_generation loot_bands 3+ reachability", f"missing templates: {missing_depth3}")
                 else:
                     report.ok("dungeon_generation 3+ loot sources reach every v28 template")
-    rarity_by_id = {r["id"]: r for r in monster_rarities}
     if monster_rarity_golden["monster_def_id"] != dungeon_generation["monster_placement"]["monster_def_id"]:
         report.fail("monster_rarity golden", "monster_def_id must match dungeon_generation monster placement")
     elif monster_rarity_golden["monster_def_id"] not in monsters["monsters"]:

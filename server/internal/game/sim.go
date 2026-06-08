@@ -30,6 +30,8 @@ const (
 	interactableClosed             = "closed"
 	interactableOpen               = "open"
 	interactableReady              = "ready"
+	interactableLocked             = "locked"
+	interactableDisabled           = "disabled"
 	interactableTransitionAscend   = "ascend"
 	interactableTransitionDescend  = "descend"
 	interactableTransitionWaypoint = "waypoint"
@@ -52,6 +54,9 @@ const (
 	tickDuration                   = 0.05
 	minHotbarCapacity              = 2
 	maxHotbarCapacity              = 10
+	baseInventoryRows              = 3
+	inventoryColumns               = 5
+	maxInventoryRows               = 20
 )
 
 var equipmentSlots = []string{
@@ -89,6 +94,18 @@ type entity struct {
 	monsterRarityID     string
 	monsterAttackDamage *DamageRange
 	monsterXPReward     int
+	isBoss              bool
+	bossTemplateID      string
+	visualModel         string
+	visualTint          string
+	visualScale         float64
+	bossPatternID       string
+	bossPhaseIndex      int
+	bossPhaseKind       string
+	bossPhaseStarted    uint64
+	bossPhaseEnds       uint64
+	bossCooldownEnds    uint64
+	bossActiveHit       map[uint64]bool
 	itemDefID           string
 	rollPayload         *ItemRollPayload
 	interactableDefID   string
@@ -156,6 +173,12 @@ type combatResolution struct {
 	Blocked         bool
 	Critical        bool
 	Hit             bool
+}
+
+type bossPhaseRuntime struct {
+	patternID string
+	index     int
+	phase     BossPatternPhase
 }
 
 type playerState struct {
@@ -964,6 +987,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.syncCompatibilityFields()
 			res := resultFor(levelNum, 0)
 			s.advanceMonsterMovement(res)
+			s.advanceBossPhases(res)
 			s.advanceMonsterAttack(res)
 			s.advanceProjectiles(res)
 		}
@@ -1065,7 +1089,7 @@ func (s *Sim) ensureDungeonLevel(levelNum int) (*LevelState, error) {
 	if level, ok := s.levels[levelNum]; ok {
 		return level, nil
 	}
-	nav := dungeonNavigation(s.rules.Navigation, s.rules.DungeonGeneration)
+	nav := dungeonNavigationForLevel(s.rules.Navigation, s.rules.DungeonGeneration, levelNum)
 	level := newLevelState(levelNum, &nav)
 	s.levels[levelNum] = level
 	if err := s.populateDungeonLevel(level); err != nil {
@@ -1094,22 +1118,30 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 	level.walls = gen.walls
 	for _, stair := range gen.stairs {
 		def := s.rules.Interactables[stair.defID]
+		state := def.InitialState
+		if stair.state != "" {
+			state = stair.state
+		}
 		e := &entity{
 			kind:              interactableEntity,
 			pos:               stair.pos,
 			interactableDefID: stair.defID,
-			state:             def.InitialState,
+			state:             state,
 		}
 		e.id = s.alloc()
 		level.entities[e.id] = e
 	}
 	for _, teleporter := range gen.teleporters {
 		def := s.rules.Interactables[teleporter.defID]
+		state := def.InitialState
+		if teleporter.state != "" {
+			state = teleporter.state
+		}
 		e := &entity{
 			kind:              interactableEntity,
 			pos:               teleporter.pos,
 			interactableDefID: teleporter.defID,
-			state:             def.InitialState,
+			state:             state,
 		}
 		e.id = s.alloc()
 		level.entities[e.id] = e
@@ -1139,8 +1171,25 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		if !ok {
 			return fmt.Errorf("game: generate dungeon level %d: unknown monster %s", level.levelNum, generated.defID)
 		}
-		if _, ok := s.rules.LootTables[generated.lootTable]; !ok {
-			return fmt.Errorf("game: generate dungeon level %d: unknown monster loot table %s", level.levelNum, generated.lootTable)
+		lootTable := generated.lootTable
+		if generated.isBoss {
+			template, ok := s.rules.BossTemplates[generated.bossTemplate]
+			if !ok {
+				return fmt.Errorf("game: generate dungeon level %d: unknown boss template %s", level.levelNum, generated.bossTemplate)
+			}
+			var baseOK bool
+			def, baseOK = s.rules.Monsters[template.BaseMonsterDefID]
+			if !baseOK {
+				return fmt.Errorf("game: generate dungeon level %d: unknown boss base monster %s", level.levelNum, template.BaseMonsterDefID)
+			}
+			generated.defID = template.BaseMonsterDefID
+			lootTable = template.LootTable
+			generated.visualModel = template.Visual.Model
+			generated.visualTint = template.Visual.Color
+			generated.visualScale = template.Visual.Scale
+		}
+		if _, ok := s.rules.LootTables[lootTable]; !ok {
+			return fmt.Errorf("game: generate dungeon level %d: unknown monster loot table %s", level.levelNum, lootTable)
 		}
 		monster := &entity{
 			kind:            monsterEntity,
@@ -1150,12 +1199,32 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			maxHP:           def.MaxHP,
 			monsterDefID:    generated.defID,
 			monsterRarityID: generated.rarityID,
-			lootTable:       generated.lootTable,
+			lootTable:       lootTable,
 			aiMode:          monsterAIModeIdle,
+			isBoss:          generated.isBoss,
+			bossTemplateID:  generated.bossTemplate,
+			visualModel:     generated.visualModel,
+			visualTint:      generated.visualTint,
+			visualScale:     generated.visualScale,
+			bossPhaseIndex:  -1,
 		}
-		if rarity, ok := s.rules.DungeonGeneration.MonsterRarity(generated.rarityID); ok {
+		if generated.isBoss {
+			template := s.rules.BossTemplates[generated.bossTemplate]
+			if len(template.PatternDeck) > 0 {
+				monster.bossPatternID = template.PatternDeck[0]
+			}
+			monster.maxHP = roundPositive(float64(def.MaxHP) * template.HPMultiplier)
+			monster.hp = monster.maxHP
+			if def.AttackDamage != nil {
+				scaledAttack := scaleDamageRange(*def.AttackDamage, template.DamageMultiplier)
+				monster.monsterAttackDamage = &scaledAttack
+			}
+			monster.monsterXPReward = roundPositive(float64(def.XPReward) * template.HPMultiplier)
+		} else if rarity, ok := s.rules.DungeonGeneration.MonsterRarity(generated.rarityID); ok {
 			monster.maxHP = roundPositive(float64(def.MaxHP) * rarity.HPMultiplier)
 			monster.hp = monster.maxHP
+			monster.visualScale = rarity.VisualScale
+			monster.visualTint = rarity.Color
 			if def.AttackDamage != nil {
 				scaledAttack := scaleDamageRange(*def.AttackDamage, rarity.DamageMultiplier)
 				monster.monsterAttackDamage = &scaledAttack
@@ -1288,15 +1357,7 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), s.playerID, target.id, in.CorrelationID, outcome))
 
 	if target.hp == 0 {
-		res.Events = append(res.Events, Event{
-			EventType:      "monster_killed",
-			EntityID:       idStr(target.id),
-			SourceEntityID: idStr(s.playerID),
-			TargetEntityID: idStr(target.id),
-			CorrelationID:  in.CorrelationID,
-		})
-		s.dropLoot(target, in.CorrelationID, res)
-		s.awardMonsterExperience(target, in.CorrelationID, res)
+		s.finishMonsterKill(target, s.playerID, in.CorrelationID, res)
 	}
 	s.retaliate(target, in.CorrelationID, res)
 }
@@ -1348,6 +1409,45 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res)
 }
 
+func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, res *TickResult) {
+	res.Events = append(res.Events, Event{
+		EventType:      "monster_killed",
+		EntityID:       idStr(monster.id),
+		SourceEntityID: idStr(sourceID),
+		TargetEntityID: idStr(monster.id),
+		CorrelationID:  corr,
+	})
+	s.dropLoot(monster, corr, res)
+	s.awardMonsterExperience(monster, corr, res)
+	if monster.isBoss {
+		s.unlockBossFloorExits(corr, res)
+	}
+}
+
+func (s *Sim) unlockBossFloorExits(corr string, res *TickResult) {
+	level := s.activeLevel()
+	for _, id := range sortedEntityIDs(level.entities) {
+		e := level.entities[id]
+		if e == nil || e.kind != interactableEntity {
+			continue
+		}
+		if e.interactableDefID != stairsDownDefID && e.interactableDefID != teleporterDefID {
+			continue
+		}
+		if e.state != interactableLocked && e.state != interactableDisabled {
+			continue
+		}
+		e.state = interactableReady
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
+		res.Events = append(res.Events, Event{
+			EventType:     "interactable_state_changed",
+			EntityID:      idStr(e.id),
+			CorrelationID: corr,
+			State:         interactableReady,
+		})
+	}
+}
+
 func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius float64, corr string, res *TickResult) {
 	var clusterAnchor Vec2
 	clusterReady := false
@@ -1397,6 +1497,9 @@ func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius floa
 }
 
 func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
+	if monster.isBoss {
+		return
+	}
 	def := s.rules.Monsters[monster.monsterDefID]
 	if def.RetaliationDamage == nil {
 		return
@@ -1425,8 +1528,10 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 }
 
 func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
-	delete(s.activeLevel().entities, e.id)
-	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
+	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
+		res.reject(in.MessageID, "inventory_full")
+		return
+	}
 
 	item := &invItem{
 		instanceID:  s.alloc(),
@@ -1435,6 +1540,10 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 		slot:        s.itemSlot(e.itemDefID, e.rollPayload),
 		equipped:    false,
 	}
+
+	delete(s.activeLevel().entities, e.id)
+	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
+
 	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
 	res.Events = append(res.Events, Event{
@@ -1471,6 +1580,11 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 func (s *Sim) activateTeleporter(e *entity, in Input, res *TickResult, ack bool) {
 	if !s.multiLevel {
 		res.reject(in.MessageID, "not_dungeon_world")
+		return
+	}
+	if e.state == interactableDisabled || e.state == interactableLocked {
+		res.reject(in.MessageID, s.rules.DungeonGeneration.BossFloor.LockedExitReason)
+		res.Events = append(res.Events, Event{EventType: "teleport_blocked", EntityID: idStr(e.id), CorrelationID: in.CorrelationID, Reason: s.rules.DungeonGeneration.BossFloor.LockedExitReason})
 		return
 	}
 	if ack {
@@ -1547,6 +1661,19 @@ func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
 		res.reject(in.MessageID, "no_stair_in_range")
 		return nil
 	}
+	if stair.state == interactableLocked || stair.state == interactableDisabled {
+		reason := s.rules.DungeonGeneration.BossFloor.LockedExitReason
+		if reason == "" {
+			reason = "locked"
+		}
+		res.reject(in.MessageID, reason)
+		eventType := "descend_blocked"
+		if in.Type == "ascend_intent" {
+			eventType = "ascend_blocked"
+		}
+		res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(stair.id), CorrelationID: in.CorrelationID, Reason: reason})
+		return nil
+	}
 
 	dest, err := s.ensureTravelLevel(destLevel)
 	if err != nil {
@@ -1593,8 +1720,18 @@ func (s *Sim) handleTeleport(in Input, res *TickResult) *TickResult {
 		res.reject(in.MessageID, "player_dead")
 		return nil
 	}
-	if s.findReachableTeleporter(current, player.pos) == nil {
+	teleporter := s.findReachableTeleporter(current, player.pos)
+	if teleporter == nil {
 		res.reject(in.MessageID, "no_teleporter_in_range")
+		return nil
+	}
+	if teleporter.state == interactableDisabled || teleporter.state == interactableLocked {
+		reason := s.rules.DungeonGeneration.BossFloor.LockedExitReason
+		if reason == "" {
+			reason = "locked"
+		}
+		res.reject(in.MessageID, reason)
+		res.Events = append(res.Events, Event{EventType: "teleport_blocked", EntityID: idStr(teleporter.id), CorrelationID: in.CorrelationID, Reason: reason})
 		return nil
 	}
 	dest, err := s.ensureTravelLevel(targetLevel)
@@ -1685,6 +1822,25 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 	}
 
 	clearedSlots := s.slotsClearedByEquip(in.Equip.Slot, item)
+	bagCountAfter := s.bagOccupancyCount()
+	for _, slot := range clearedSlots {
+		prevID := s.equipped[slot]
+		if prevID == 0 || prevID == item.instanceID {
+			continue
+		}
+		prev := s.findItemByID(prevID)
+		if prev != nil && !s.hotbarHasItem(prev.instanceID) {
+			bagCountAfter++
+		}
+	}
+	if !item.equipped && !s.hotbarHasItem(item.instanceID) {
+		bagCountAfter--
+	}
+	capacityAfter := inventoryCapacityForRows(s.inventoryRowsAfterEquip(in.Equip.Slot, item, clearedSlots))
+	if bagCountAfter > capacityAfter {
+		res.reject(in.MessageID, "capacity_would_overflow")
+		return
+	}
 	for _, slot := range clearedSlots {
 		prevID := s.equipped[slot]
 		if prevID == 0 || prevID == item.instanceID {
@@ -1709,6 +1865,8 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		Slot:           in.Equip.Slot,
 		ItemInstanceID: &idCopy,
 		HotbarCapacity: intPtr(s.hotbarCapacity()),
+		InventoryRows:  intPtr(s.inventoryRows()),
+		InventoryCap:   intPtr(s.inventoryCapacity()),
 	})
 	s.appendEquipmentProgressionChanges(res)
 	res.Events = append(res.Events, Event{EventType: "item_equipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
@@ -1730,6 +1888,15 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "slot_empty")
 		return
 	}
+	capacityAfter := s.inventoryCapacityWithItemUnequipped(item)
+	bagCountAfter := s.bagOccupancyCount()
+	if !s.hotbarHasItem(item.instanceID) {
+		bagCountAfter++
+	}
+	if bagCountAfter > capacityAfter {
+		res.reject(in.MessageID, "capacity_would_overflow")
+		return
+	}
 	item.equipped = false
 	s.equipped[in.Unequip.Slot] = 0
 	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(item.view())})
@@ -1738,6 +1905,8 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 		Slot:           in.Unequip.Slot,
 		ItemInstanceID: nil,
 		HotbarCapacity: intPtr(s.hotbarCapacity()),
+		InventoryRows:  intPtr(s.inventoryRows()),
+		InventoryCap:   intPtr(s.inventoryCapacity()),
 	})
 	s.appendEquipmentProgressionChanges(res)
 	idCopy := idStr(item.instanceID)
@@ -1820,8 +1989,19 @@ func (s *Sim) handleAssignHotbar(in Input, res *TickResult) {
 		return
 	}
 	if in.AssignHotbar.ItemInstanceID == nil {
+		assignedID := s.hotbar[in.AssignHotbar.SlotIndex]
+		if assignedID != 0 && s.bagOccupancyCount()+1 > s.inventoryCapacity() {
+			res.reject(in.MessageID, "inventory_full")
+			return
+		}
 		s.hotbar[in.AssignHotbar.SlotIndex] = 0
-		res.Changes = append(res.Changes, Change{Op: OpHotbarUpdate, SlotIndex: in.AssignHotbar.SlotIndex, ItemInstanceID: nil})
+		res.Changes = append(res.Changes, Change{
+			Op:             OpHotbarUpdate,
+			SlotIndex:      in.AssignHotbar.SlotIndex,
+			ItemInstanceID: nil,
+			InventoryRows:  intPtr(s.inventoryRows()),
+			InventoryCap:   intPtr(s.inventoryCapacity()),
+		})
 		res.ack(in.MessageID)
 		return
 	}
@@ -1836,7 +2016,13 @@ func (s *Sim) handleAssignHotbar(in Input, res *TickResult) {
 	}
 	s.hotbar[in.AssignHotbar.SlotIndex] = item.instanceID
 	idCopy := idStr(item.instanceID)
-	res.Changes = append(res.Changes, Change{Op: OpHotbarUpdate, SlotIndex: in.AssignHotbar.SlotIndex, ItemInstanceID: &idCopy})
+	res.Changes = append(res.Changes, Change{
+		Op:             OpHotbarUpdate,
+		SlotIndex:      in.AssignHotbar.SlotIndex,
+		ItemInstanceID: &idCopy,
+		InventoryRows:  intPtr(s.inventoryRows()),
+		InventoryCap:   intPtr(s.inventoryCapacity()),
+	})
 	res.ack(in.MessageID)
 }
 
@@ -2362,6 +2548,9 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
 			continue
 		}
+		if monster.isBoss {
+			continue
+		}
 		def, ok := s.rules.Monsters[monster.monsterDefID]
 		if !ok || def.effectiveBehavior() != monsterBehaviorChase {
 			continue
@@ -2408,6 +2597,9 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		monster := s.activeLevel().entities[id]
 		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
+			continue
+		}
+		if monster.isBoss {
 			continue
 		}
 		def, ok := s.rules.Monsters[monster.monsterDefID]
@@ -2662,6 +2854,189 @@ func (s *Sim) resolveMonsterMovement(monster *entity, delta Vec2) Vec2 {
 	return monster.pos
 }
 
+func (s *Sim) advanceBossPhases(res *TickResult) {
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		boss := s.activeLevel().entities[id]
+		if boss == nil || boss.kind != monsterEntity || !boss.isBoss || boss.hp <= 0 {
+			continue
+		}
+		runtime, ok := s.ensureBossPhase(boss, res)
+		if !ok {
+			continue
+		}
+		if boss.bossPhaseKind == "active" {
+			s.applyBossActivePhase(boss, runtime.phase, res)
+		}
+		if s.tick+1 >= boss.bossPhaseEnds {
+			s.endBossPhase(boss, runtime, res)
+		}
+	}
+}
+
+func (s *Sim) ensureBossPhase(boss *entity, res *TickResult) (bossPhaseRuntime, bool) {
+	if boss.bossPhaseKind != "" && s.tick < boss.bossPhaseEnds {
+		return s.currentBossPhase(boss)
+	}
+	if boss.bossCooldownEnds > s.tick {
+		return bossPhaseRuntime{}, false
+	}
+	next, ok := s.nextBossPhase(boss)
+	if !ok {
+		return bossPhaseRuntime{}, false
+	}
+	boss.bossPatternID = next.patternID
+	boss.bossPhaseIndex = next.index
+	boss.bossPhaseKind = next.phase.Kind
+	boss.bossPhaseStarted = s.tick
+	boss.bossPhaseEnds = s.tick + uint64(next.phase.DurationTicks)
+	boss.bossActiveHit = map[uint64]bool{}
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(boss.view())})
+	res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
+	return next, true
+}
+
+func (s *Sim) currentBossPhase(boss *entity) (bossPhaseRuntime, bool) {
+	pattern, ok := s.rules.BossPatterns[boss.bossPatternID]
+	if !ok || boss.bossPhaseIndex < 0 || boss.bossPhaseIndex >= len(pattern.Phases) {
+		return bossPhaseRuntime{}, false
+	}
+	return bossPhaseRuntime{
+		patternID: boss.bossPatternID,
+		index:     boss.bossPhaseIndex,
+		phase:     pattern.Phases[boss.bossPhaseIndex],
+	}, true
+}
+
+func (s *Sim) nextBossPhase(boss *entity) (bossPhaseRuntime, bool) {
+	template, ok := s.rules.BossTemplates[boss.bossTemplateID]
+	if !ok || len(template.PatternDeck) == 0 {
+		return bossPhaseRuntime{}, false
+	}
+	patternID := boss.bossPatternID
+	if patternID == "" {
+		patternID = template.PatternDeck[0]
+	}
+	pattern, ok := s.rules.BossPatterns[patternID]
+	if !ok || len(pattern.Phases) == 0 {
+		return bossPhaseRuntime{}, false
+	}
+	nextIndex := boss.bossPhaseIndex + 1
+	if boss.bossPhaseKind == "" {
+		nextIndex = 0
+	}
+	if nextIndex >= len(pattern.Phases) {
+		nextIndex = 0
+	}
+	return bossPhaseRuntime{patternID: patternID, index: nextIndex, phase: pattern.Phases[nextIndex]}, true
+}
+
+func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResult) {
+	res.Events = append(res.Events, bossPhaseEvent("boss_phase_ended", boss, runtime))
+	pattern := s.rules.BossPatterns[runtime.patternID]
+	if runtime.index >= len(pattern.Phases)-1 {
+		boss.bossCooldownEnds = s.tick + 1 + uint64(pattern.CooldownTicks)
+		boss.bossPhaseKind = ""
+		boss.bossPhaseIndex = -1
+		boss.bossPhaseStarted = 0
+		boss.bossPhaseEnds = 0
+		boss.bossActiveHit = nil
+	} else {
+		next := bossPhaseRuntime{patternID: runtime.patternID, index: runtime.index + 1, phase: pattern.Phases[runtime.index+1]}
+		boss.bossPhaseIndex = next.index
+		boss.bossPhaseKind = next.phase.Kind
+		boss.bossPhaseStarted = s.tick + 1
+		boss.bossPhaseEnds = s.tick + 1 + uint64(next.phase.DurationTicks)
+		boss.bossActiveHit = map[uint64]bool{}
+		res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
+	}
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(boss.view())})
+}
+
+func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *TickResult) {
+	if phase.Damage == nil {
+		return
+	}
+	for _, playerID := range sortedPlayerIDs(s.players) {
+		ps := s.players[playerID]
+		if ps == nil || !ps.Connected || ps.CurrentLevel != s.currentLevel || boss.bossActiveHit[playerID] {
+			continue
+		}
+		player := s.activeLevel().entities[playerID]
+		if player == nil || player.hp <= 0 || !bossPhaseHitsPlayer(boss, player, phase) {
+			continue
+		}
+		s.usePlayer(ps)
+		attackerStats := s.monsterEffectiveCombatStats(boss, *phase.Damage)
+		defenderStats, _ := s.playerEffectiveCombatStats()
+		outcome := s.resolveCombat(attackerStats, defenderStats, *phase.Damage)
+		boss.bossActiveHit[playerID] = true
+		if !outcome.Hit || outcome.Blocked {
+			res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), boss.id, player.id, "", outcome))
+			continue
+		}
+		player.hp -= outcome.Damage
+		if player.hp < 0 {
+			player.hp = 0
+		}
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+		eventType := "player_damaged"
+		if player.hp == 0 {
+			eventType = "player_killed"
+		}
+		res.Events = append(res.Events, combatEvent(eventType, boss.id, player.id, "", outcome))
+	}
+}
+
+func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {
+	switch phase.Shape {
+	case "melee_contact":
+		radius := phase.Radius
+		if radius <= 0 {
+			radius = monsterRadius + playerRadius
+		}
+		return distance(boss.pos, player.pos) <= radius
+	default:
+		return false
+	}
+}
+
+func bossPhaseEvent(eventType string, boss *entity, runtime bossPhaseRuntime) Event {
+	return Event{
+		EventType:     eventType,
+		EntityID:      idStr(boss.id),
+		PatternID:     runtime.patternID,
+		PhaseIndex:    intPtr(runtime.index),
+		PhaseKind:     runtime.phase.Kind,
+		DurationTicks: intPtr(runtime.phase.DurationTicks),
+		Telegraph:     bossTelegraphView(runtime.phase),
+		HitShape:      bossHitShapeView(runtime.phase),
+	}
+}
+
+func bossTelegraphView(phase BossPatternPhase) *BossTelegraphView {
+	if phase.TelegraphType == "" {
+		return nil
+	}
+	return &BossTelegraphView{
+		Type:      phase.TelegraphType,
+		FromColor: phase.FromColor,
+		ToColor:   phase.ToColor,
+		HitShape:  phase.HitShape,
+		Radius:    phase.Radius,
+	}
+}
+
+func bossHitShapeView(phase BossPatternPhase) *BossHitShapeView {
+	shape := phase.Shape
+	if shape == "" {
+		shape = phase.HitShape
+	}
+	if shape == "" {
+		return nil
+	}
+	return &BossHitShapeView{Shape: shape, Radius: phase.Radius}
+}
+
 func (s *Sim) advanceProjectiles(res *TickResult) {
 	ids := sortedEntityIDs(s.activeLevel().entities)
 	for _, id := range ids {
@@ -2802,15 +3177,7 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), p.ownerID, target.id, p.sourceCorrID, outcome))
 
 	if target.hp == 0 {
-		res.Events = append(res.Events, Event{
-			EventType:      "monster_killed",
-			EntityID:       idStr(target.id),
-			SourceEntityID: idStr(p.ownerID),
-			TargetEntityID: idStr(target.id),
-			CorrelationID:  p.sourceCorrID,
-		})
-		s.dropLoot(target, p.sourceCorrID, res)
-		s.awardMonsterExperience(target, p.sourceCorrID, res)
+		s.finishMonsterKill(target, p.ownerID, p.sourceCorrID, res)
 	}
 	s.retaliate(target, p.sourceCorrID, res)
 }
@@ -3132,6 +3499,122 @@ func (s *Sim) hotbarCapacity() int {
 	return capacity
 }
 
+func (s *Sim) inventoryRows() int {
+	rows := baseInventoryRows
+	for _, slot := range equipmentSlots {
+		item := s.findItemByID(s.equipped[slot])
+		rows += s.itemInventoryRows(item)
+	}
+	if rows < 0 {
+		return 0
+	}
+	if rows > maxInventoryRows {
+		return maxInventoryRows
+	}
+	return rows
+}
+
+func inventoryCapacityForRows(rows int) int {
+	if rows < 0 {
+		rows = 0
+	}
+	if rows > maxInventoryRows {
+		rows = maxInventoryRows
+	}
+	return rows * inventoryColumns
+}
+
+func (s *Sim) inventoryCapacity() int {
+	return inventoryCapacityForRows(s.inventoryRows())
+}
+
+func (s *Sim) inventoryCapacityWithItemUnequipped(item *invItem) int {
+	rows := s.inventoryRows()
+	if item != nil && item.equipped {
+		rows -= s.itemInventoryRows(item)
+	}
+	return inventoryCapacityForRows(rows)
+}
+
+func (s *Sim) inventoryRowsAfterEquip(slot string, item *invItem, clearedSlots []string) int {
+	rows := s.inventoryRows()
+	cleared := map[string]bool{}
+	for _, clearedSlot := range clearedSlots {
+		if cleared[clearedSlot] {
+			continue
+		}
+		cleared[clearedSlot] = true
+		prevID := s.equipped[clearedSlot]
+		if prevID == 0 {
+			continue
+		}
+		prev := s.findItemByID(prevID)
+		if prev != nil && prev != item {
+			rows -= s.itemInventoryRows(prev)
+		}
+	}
+	if item != nil {
+		if item.equipped {
+			currentSlot := ""
+			for eqSlot, instanceID := range s.equipped {
+				if instanceID == item.instanceID {
+					currentSlot = eqSlot
+					break
+				}
+			}
+			if currentSlot == "" || currentSlot != slot {
+				rows -= s.itemInventoryRows(item)
+				rows += s.itemInventoryRows(item)
+			}
+		} else {
+			rows += s.itemInventoryRows(item)
+		}
+	}
+	return rows
+}
+
+func (s *Sim) itemInventoryRows(item *invItem) int {
+	if item == nil {
+		return 0
+	}
+	if item.rollPayload != nil {
+		if rolled := item.rollPayload.Stats["inventory_rows"]; rolled > 0 {
+			return rolled
+		}
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok {
+			return template.BaseStats["inventory_rows"]
+		}
+		return 0
+	}
+	if template, ok := s.rules.ItemTemplates[item.itemDefID]; ok {
+		return template.BaseStats["inventory_rows"]
+	}
+	return 0
+}
+
+func (s *Sim) bagOccupancyCount() int {
+	count := 0
+	for _, item := range s.inventory {
+		if item == nil || item.equipped || s.hotbarHasItem(item.instanceID) {
+			continue
+		}
+		count++
+	}
+	return count
+}
+
+func (s *Sim) hotbarHasItem(instanceID uint64) bool {
+	if instanceID == 0 {
+		return false
+	}
+	for _, assigned := range s.hotbar {
+		if assigned == instanceID {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Sim) hotbarView() []HotbarSlotView {
 	if len(s.hotbar) != maxHotbarCapacity {
 		s.hotbar = make([]uint64, maxHotbarCapacity)
@@ -3162,7 +3645,13 @@ func (s *Sim) clearHotbarReferences(instanceID uint64, res *TickResult) {
 			continue
 		}
 		s.hotbar[i] = 0
-		res.Changes = append(res.Changes, Change{Op: OpHotbarUpdate, SlotIndex: i, ItemInstanceID: nil})
+		res.Changes = append(res.Changes, Change{
+			Op:             OpHotbarUpdate,
+			SlotIndex:      i,
+			ItemInstanceID: nil,
+			InventoryRows:  intPtr(s.inventoryRows()),
+			InventoryCap:   intPtr(s.inventoryCapacity()),
+		})
 	}
 }
 
@@ -3414,6 +3903,9 @@ func (s *Sim) actionable(e *entity) bool {
 	case lootEntity:
 		return true
 	case interactableEntity:
+		if e.interactableDefID == teleporterDefID && (e.state == interactableReady || e.state == interactableLocked || e.state == interactableDisabled) {
+			return true
+		}
 		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)
 	default:
 		return false
@@ -3849,15 +4341,17 @@ func (s *Sim) Snapshot() Snapshot {
 		return s.SnapshotForPlayer(ps.PlayerID)
 	}
 	return Snapshot{
-		ServerTick:   s.tick,
-		SessionID:    s.sessionID,
-		Seed:         s.seed,
-		CurrentLevel: s.currentLevel,
-		Entities:     []EntityView{},
-		Inventory:    []ItemView{},
-		Equipped:     newSnapshotEquippedMap(newEquippedMap()),
-		Hotbar:       []HotbarSlotView{},
-		RecentEvents: []Event{},
+		ServerTick:        s.tick,
+		SessionID:         s.sessionID,
+		Seed:              s.seed,
+		CurrentLevel:      s.currentLevel,
+		Entities:          []EntityView{},
+		Inventory:         []ItemView{},
+		Equipped:          newSnapshotEquippedMap(newEquippedMap()),
+		Hotbar:            []HotbarSlotView{},
+		InventoryRows:     baseInventoryRows,
+		InventoryCapacity: inventoryCapacityForRows(baseInventoryRows),
+		RecentEvents:      []Event{},
 	}
 }
 
@@ -3897,6 +4391,8 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		Equipped:              equipped,
 		HotbarCapacity:        s.hotbarCapacity(),
 		Hotbar:                s.hotbarView(),
+		InventoryRows:         s.inventoryRows(),
+		InventoryCapacity:     s.inventoryCapacity(),
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
 		CharacterProgression:  s.CharacterProgressionView(),
 		RecentEvents:          []Event{},
@@ -3981,6 +4477,14 @@ func (e *entity) view() EntityView {
 			if e.monsterRarityID != "" {
 				ev.Rarity = e.monsterRarityID
 			}
+			ev.IsBoss = e.isBoss
+			ev.BossTemplateID = e.bossTemplateID
+			ev.VisualModel = e.visualModel
+			ev.VisualScale = e.visualScale
+			ev.VisualTint = e.visualTint
+			if e.isBoss && e.bossPhaseKind != "" {
+				ev.BossPhase = e.bossPhaseView()
+			}
 		}
 	case lootEntity:
 		ev.ItemDefID = e.itemDefID
@@ -4002,6 +4506,16 @@ func (e *entity) view() EntityView {
 		ev.ProjectileDefID = e.projectileDefID
 	}
 	return ev
+}
+
+func (e *entity) bossPhaseView() *BossPhaseView {
+	return &BossPhaseView{
+		PatternID:     e.bossPatternID,
+		PhaseIndex:    e.bossPhaseIndex,
+		PhaseKind:     e.bossPhaseKind,
+		StartedTick:   e.bossPhaseStarted,
+		DurationTicks: int(e.bossPhaseEnds - e.bossPhaseStarted),
+	}
 }
 
 func (it *invItem) view() ItemView {

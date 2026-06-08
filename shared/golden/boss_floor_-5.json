@@ -1,0 +1,23 @@
+{
+  "seed": "boss_floor_gate",
+  "level": -5,
+  "is_boss_floor": true,
+  "floor_size": { "width": 30, "height": 30 },
+  "expected": {
+    "boss_count": 1,
+    "chest_count": 1,
+    "stairs_down_count": 1,
+    "teleporter_count": 1,
+    "stairs_down_initial_state": "locked",
+    "teleporter_initial_state": "disabled",
+    "unlocked_state": "ready",
+    "locked_reason": "boss_alive",
+    "boss": {
+      "template_id": "cave_warden",
+      "base_monster_def_id": "dungeon_mob",
+      "visual_model": "current_humanoid_player",
+      "visual_color": "#b77cff",
+      "visual_scale": 2.0
+    }
+  }
+}

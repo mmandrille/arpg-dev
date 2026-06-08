@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/inventory_capacity.v0.schema.json",
+  "title": "Inventory capacity golden",
+  "type": "object",
+  "required": [
+    "base_inventory_rows",
+    "columns",
+    "base_capacity",
+    "row_granting_item",
+    "row_item_bonus",
+    "row_item_capacity",
+    "bag_occupancy",
+    "rejections"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "base_inventory_rows": { "type": "integer", "minimum": 0 },
+    "columns": { "type": "integer", "minimum": 1 },
+    "base_capacity": { "type": "integer", "minimum": 0 },
+    "row_granting_item": { "type": "string", "minLength": 1 },
+    "row_item_bonus": { "type": "integer", "minimum": 0 },
+    "row_item_capacity": { "type": "integer", "minimum": 0 },
+    "bag_occupancy": {
+      "type": "object",
+      "required": ["equipped_counts", "hotbar_assigned_counts", "bag_item_counts"],
+      "additionalProperties": false,
+      "properties": {
+        "equipped_counts": { "type": "boolean" },
+        "hotbar_assigned_counts": { "type": "boolean" },
+        "bag_item_counts": { "type": "boolean" }
+      }
+    },
+    "rejections": {
+      "type": "object",
+      "required": ["pickup_full_bag", "capacity_shrink_overflow"],
+      "additionalProperties": false,
+      "properties": {
+        "pickup_full_bag": { "type": "string", "minLength": 1 },
+        "capacity_shrink_overflow": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

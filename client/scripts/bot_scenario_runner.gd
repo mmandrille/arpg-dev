@@ -23,6 +23,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
+	"assert_inventory_capacity", "assert_bag_grid", "assert_paper_doll_layout",
 	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
 	"assert_entity_reaction",
 ]
@@ -47,7 +48,8 @@ const ALL_STEP_TYPES: Array = [
 	"assert_inventory_presentation", "click_entity_until_event", "assign_hotbar_slot",
 	"use_hotbar_slot", "assert_hotbar_assigned", "wait_hotbar_assigned",
 	"assert_hotbar_capacity", "wait_hotbar_capacity",
-	"assert_hotbar_slot_disabled",
+	"assert_hotbar_slot_disabled", "assert_inventory_capacity", "assert_bag_grid",
+	"assert_paper_doll_layout",
 	"assert_player_hp", "double_click_bag_item", "wait_main_menu",
 	"wait_character_panel", "wait_settings_panel", "wait_pause_menu",
 	"assert_main_menu_visible", "assert_character_panel_visible",
@@ -421,6 +423,12 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 				])
 				return false
 			return true
+		"assert_inventory_capacity":
+			return _assert_inventory_capacity(step, state)
+		"assert_bag_grid":
+			return _assert_bag_grid(step, state)
+		"assert_paper_doll_layout":
+			return _assert_paper_doll_layout(step, state)
 		"assert_player_hp":
 			var want_hp := int(step.get("equals", -1))
 			var got_hp := int(state.get("player_hp", -1))
@@ -624,6 +632,61 @@ func _assert_xp_bar(step: Dictionary, state: Dictionary) -> bool:
 			str(xp_bar), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
+	return true
+
+
+func _assert_inventory_capacity(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("inventory_panel", {})
+	var got_rows := int(panel.get("inventory_rows", state.get("inventory_rows", -1)))
+	var got_capacity := int(panel.get("inventory_capacity", state.get("inventory_capacity", -1)))
+	if step.has("rows") and got_rows != int(step.get("rows", -1)):
+		_fail("assert_inventory_capacity failed: rows want=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("rows", -1)), got_rows, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("capacity") and got_capacity != int(step.get("capacity", -1)):
+		_fail("assert_inventory_capacity failed: capacity want=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("capacity", -1)), got_capacity, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
+func _assert_bag_grid(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("inventory_panel", {})
+	var got_columns := int(panel.get("bag_columns", -1))
+	var got_slots := int(panel.get("available_slot_count", -1))
+	if step.has("columns") and got_columns != int(step.get("columns", -1)):
+		_fail("assert_bag_grid failed: columns want=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("columns", -1)), got_columns, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("available_slot_count") and got_slots != int(step.get("available_slot_count", -1)):
+		_fail("assert_bag_grid failed: slots want=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("available_slot_count", -1)), got_slots, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
+func _assert_paper_doll_layout(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("inventory_panel", {})
+	var preview: Dictionary = panel.get("paper_doll_preview", {})
+	if bool(step.get("preview", true)) and (not bool(preview.get("exists", false)) or not bool(preview.get("visible", false))):
+		_fail("assert_paper_doll_layout failed: preview missing preview=%s step=%d scenario=%s" % [
+			str(preview), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	var slots: Dictionary = panel.get("paper_doll_slots", {})
+	var expected_slots: Array = step.get("slots", [])
+	for slot in expected_slots:
+		var slot_id := str(slot)
+		var rec: Dictionary = slots.get(slot_id, {})
+		if not bool(rec.get("exists", false)):
+			_fail("assert_paper_doll_layout failed: missing slot=%s slots=%s step=%d scenario=%s" % [
+				slot_id, str(slots.keys()), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
 	return true
 
 
@@ -883,6 +946,15 @@ static func validate_step(step: Dictionary, index: int) -> String:
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
 		if not step.has("slot_index") and stype == "assert_hotbar_slot_disabled":
 			return "client_steps[%d] (%s) requires slot_index" % [index, stype]
+	if stype == "assert_inventory_capacity":
+		if not step.has("rows") and not step.has("capacity"):
+			return "client_steps[%d] (%s) requires rows or capacity" % [index, stype]
+	if stype == "assert_bag_grid":
+		if not step.has("columns") and not step.has("available_slot_count"):
+			return "client_steps[%d] (%s) requires columns or available_slot_count" % [index, stype]
+	if stype == "assert_paper_doll_layout":
+		if not step.has("slots"):
+			return "client_steps[%d] (%s) requires slots" % [index, stype]
 	if stype == "assert_player_hp":
 		if not step.has("equals"):
 			return "client_steps[%d] (%s) requires equals" % [index, stype]

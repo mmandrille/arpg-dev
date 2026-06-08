@@ -88,6 +88,8 @@ class RuntimeState:
     equipped: dict[str, Any] = field(default_factory=dict)
     hotbar_capacity: int = 2
     hotbar: list[dict[str, Any]] = field(default_factory=list)
+    inventory_rows: int = 3
+    inventory_capacity: int = 15
     loot_ids: list[str] = field(default_factory=list)
     item_id: str | None = None
     equipped_item_id: str | None = None
@@ -432,6 +434,17 @@ async def execute_step(
         )
         return
 
+    if action == "assert_inventory_count":
+        matches = state.inventory
+        if step.get("item_def_id") is not None:
+            matches = [item for item in matches if str(item.get("item_def_id", "")) == str(step["item_def_id"])]
+        if step.get("item_template_id") is not None:
+            matches = [item for item in matches if str(item.get("item_template_id", "")) == str(step["item_template_id"])]
+        if step.get("equipped") is not None:
+            matches = [item for item in matches if bool(item.get("equipped")) == bool(step["equipped"])]
+        assert_count_matches(len(matches), step, "assert_inventory_count", f": {matches}")
+        return
+
     if action == "assert_rolled_inventory_item":
         assert_rolled_inventory_item(state.inventory, step, "runtime protocol")
         return
@@ -472,6 +485,12 @@ async def execute_step(
         assert_count_matches(state.hotbar_capacity, step, "assert_hotbar_capacity")
         return
 
+    if action == "assert_inventory_capacity":
+        if "rows" in step:
+            assert_count_matches(state.inventory_rows, {"equals": int(step["rows"])}, "assert_inventory_capacity rows")
+        assert_count_matches(state.inventory_capacity, step, "assert_inventory_capacity")
+        return
+
     if action == "assert_entity_count":
         assert_entity_count(list(state.entities.values()), step, "runtime protocol")
         return
@@ -500,6 +519,7 @@ async def execute_step(
             event_type,
             monster_def_id=str(step["monster_def_id"]) if step.get("monster_def_id") else None,
             rarity=str(step["rarity"]) if step.get("rarity") is not None else None,
+            is_boss=bool(step["is_boss"]) if step.get("is_boss") is not None else None,
             target_id=str(step["target_id"]) if step.get("target_id") else None,
             timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
         )
@@ -507,7 +527,7 @@ async def execute_step(
 
     if action == "action_until_event":
         event_type = str(step["event_type"])
-        if step.get("monster_def_id") or step.get("target_id"):
+        if step.get("monster_def_id") or step.get("target_id") or step.get("is_boss") is not None:
             await attack_until_monster_event(
                 ws,
                 session_id,
@@ -516,6 +536,7 @@ async def execute_step(
                 event_type,
                 monster_def_id=str(step["monster_def_id"]) if step.get("monster_def_id") else None,
                 rarity=str(step["rarity"]) if step.get("rarity") is not None else None,
+                is_boss=bool(step["is_boss"]) if step.get("is_boss") is not None else None,
                 target_id=str(step["target_id"]) if step.get("target_id") else None,
                 timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
             )
@@ -739,6 +760,10 @@ async def execute_step(
         previous_level = state.current_level
         env = make_envelope(msg_type, session_id, state.last_tick, {})
         await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
         await wait_for_accept(ws, state, env["message_id"], loop)
         await wait_for_level_change(ws, state, previous_level, loop)
         return
@@ -1208,6 +1233,7 @@ async def attack_until_monster_event(
     *,
     monster_def_id: str | None = None,
     rarity: str | None = None,
+    is_boss: bool | None = None,
     target_id: str | None = None,
     timeout_s: float = SLICE_TIMEOUT_S,
 ) -> None:
@@ -1223,18 +1249,19 @@ async def attack_until_monster_event(
     while event_type not in state.seen_events:
         if loop.time() > deadline:
             raise TimeoutError(f"attack_until_monster_event stalled waiting for {event_type}")
-        if monster_def_id and (active_target_id is None or active_target_id in skipped_ids):
+        if (monster_def_id or is_boss is not None) and (active_target_id is None or active_target_id in skipped_ids):
             candidates = find_live_monsters_sorted(
                 state,
-                monster_def_id,
+                monster_def_id or "",
                 rarity=rarity,
+                is_boss=is_boss,
                 exclude_ids=skipped_ids,
             )
             if not candidates:
                 if skipped_ids:
                     skipped_ids.clear()
                     continue
-                raise AssertionError(f"attack_until_monster_event: no live {monster_def_id} targets")
+                raise AssertionError(f"attack_until_monster_event: no live {monster_def_id or 'boss'} targets")
             active_target_id = str(candidates[0]["id"])
         if active_target_id is None:
             raise AssertionError("attack_until_monster_event: no target")
@@ -1511,8 +1538,16 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.equipped[c["slot"]] = c.get("item_instance_id")
             if "hotbar_capacity" in c:
                 state.hotbar_capacity = int(c["hotbar_capacity"])
+            if "inventory_rows" in c:
+                state.inventory_rows = int(c["inventory_rows"])
+            if "inventory_capacity" in c:
+                state.inventory_capacity = int(c["inventory_capacity"])
         elif c["op"] == "hotbar_update":
             upsert_hotbar(state, int(c["slot_index"]), c.get("item_instance_id"))
+            if "inventory_rows" in c:
+                state.inventory_rows = int(c["inventory_rows"])
+            if "inventory_capacity" in c:
+                state.inventory_capacity = int(c["inventory_capacity"])
         elif c["op"] == "teleporter_discovery_update":
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
@@ -1535,6 +1570,8 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.equipped = dict(payload.get("equipped", {}))
     state.hotbar_capacity = int(payload.get("hotbar_capacity", 2))
     state.hotbar = [dict(slot) for slot in payload.get("hotbar", [])]
+    state.inventory_rows = int(payload.get("inventory_rows", 3))
+    state.inventory_capacity = int(payload.get("inventory_capacity", state.inventory_rows * 5))
     state.character_progression = dict(payload.get("character_progression", {}))
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
@@ -1656,7 +1693,7 @@ def find_monster(state: RuntimeState, monster_def_id: str, rarity: str | None = 
     for entity in state.entities.values():
         if (
             entity.get("type") == "monster"
-            and entity.get("monster_def_id") == monster_def_id
+            and (not monster_def_id or entity.get("monster_def_id") == monster_def_id)
             and (rarity is None or entity.get("rarity") == rarity)
             and int(entity.get("hp", 0)) > 0
         ):
@@ -1668,9 +1705,10 @@ def find_nearest_monster(
     state: RuntimeState,
     monster_def_id: str,
     rarity: str | None = None,
+    is_boss: bool | None = None,
     exclude_ids: set[str] | None = None,
 ) -> dict[str, Any] | None:
-    monsters = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, exclude_ids=exclude_ids)
+    monsters = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, is_boss=is_boss, exclude_ids=exclude_ids)
     if not monsters:
         return None
     return monsters[0]
@@ -1680,6 +1718,7 @@ def find_live_monsters_sorted(
     state: RuntimeState,
     monster_def_id: str,
     rarity: str | None = None,
+    is_boss: bool | None = None,
     exclude_ids: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     excluded = exclude_ids or set()
@@ -1694,8 +1733,9 @@ def find_live_monsters_sorted(
         entity_id = str(entity.get("id", ""))
         if (
             entity.get("type") != "monster"
-            or entity.get("monster_def_id") != monster_def_id
+            or (monster_def_id and entity.get("monster_def_id") != monster_def_id)
             or (rarity is not None and entity.get("rarity") != rarity)
+            or (is_boss is not None and bool(entity.get("is_boss", False)) != is_boss)
             or int(entity.get("hp", 0)) <= 0
             or entity_id in excluded
         ):
@@ -1722,7 +1762,12 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
         return target
     if step.get("monster_def_id"):
         rarity = str(step["rarity"]) if step.get("rarity") is not None else None
-        target = find_nearest_monster(state, str(step["monster_def_id"]), rarity)
+        target = find_nearest_monster(state, str(step["monster_def_id"]), rarity, bool(step["is_boss"]) if step.get("is_boss") is not None else None)
+        if target is None:
+            raise AssertionError(f"{step.get('action')}: monster not found: {step}")
+        return target
+    if step.get("is_boss") is not None:
+        target = find_nearest_monster(state, "", None, bool(step["is_boss"]))
         if target is None:
             raise AssertionError(f"{step.get('action')}: monster not found: {step}")
         return target
@@ -1788,6 +1833,8 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             character_progression=payload.get("character_progression", {}),
             hotbar_capacity=int(payload.get("hotbar_capacity", 2)),
             hotbar=payload.get("hotbar", []),
+            inventory_rows=int(payload.get("inventory_rows", 3)),
+            inventory_capacity=int(payload.get("inventory_capacity", int(payload.get("inventory_rows", 3)) * 5)),
         )
         log("reconnect snapshot restored expected scenario state")
 
@@ -1949,6 +1996,8 @@ def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) ->
         "item_template_id": "item_template_id",
         "rarity": "rarity",
         "state": "state",
+        "boss_template_id": "boss_template_id",
+        "visual_model": "visual_model",
     }
     for selector_key, entity_key in string_filters.items():
         if selector_key in selector and selector[selector_key] is not None:
@@ -1956,6 +2005,12 @@ def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) ->
                 return False
     if "level" in selector and selector["level"] is not None:
         if int(entity.get("level", -999999)) != int(selector["level"]):
+            return False
+    if selector.get("is_boss") is not None:
+        if bool(entity.get("is_boss", False)) != bool(selector["is_boss"]):
+            return False
+    if selector.get("visual_scale") is not None:
+        if abs(float(entity.get("visual_scale", 1.0)) - float(selector["visual_scale"])) > 0.000001:
             return False
     if selector.get("alive") is not None:
         hp = entity.get("hp")
@@ -2065,6 +2120,8 @@ def run_assertions(
     character_progression: dict[str, Any] | None = None,
     hotbar_capacity: int | None = None,
     hotbar: list[dict] | None = None,
+    inventory_rows: int | None = None,
+    inventory_capacity: int | None = None,
 ) -> None:
     for assertion in assertions:
         if isinstance(assertion, str):
@@ -2127,6 +2184,10 @@ def run_assertions(
             assert_count_matches(int(hotbar_capacity or 0), assertion, f"{where}: hotbar_capacity")
         elif typ == "hotbar_slot":
             assert_hotbar_slot(hotbar or [], int(assertion["slot_index"]), assertion.get("item_def_id"), where, inventory)
+        elif typ == "inventory_capacity":
+            if "rows" in assertion:
+                assert_count_matches(int(inventory_rows or 0), {"equals": int(assertion["rows"])}, f"{where}: inventory_rows")
+            assert_count_matches(int(inventory_capacity or 0), assertion, f"{where}: inventory_capacity")
         elif typ == "monster_dead":
             assert_monster_dead(entities, where, str(assertion["monster_def_id"]))
         elif typ == "interactable_state":
@@ -2336,6 +2397,11 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "hotbar_slot":
             assert_hotbar_slot(state.hotbar, int(assertion["slot_index"]), assertion.get("item_def_id"), where, state.inventory)
             continue
+        if typ == "inventory_capacity":
+            if "rows" in assertion:
+                assert_count_matches(state.inventory_rows, {"equals": int(assertion["rows"])}, f"{where}: inventory_rows")
+            assert_count_matches(state.inventory_capacity, assertion, f"{where}: inventory_capacity")
+            continue
         if typ == "entity_count":
             assert_entity_count(list(state.entities.values()), assertion, where)
             continue
@@ -2429,6 +2495,8 @@ def run_verified_session(
         character_progression=state.get("character_progression", {}),
         hotbar_capacity=int(state.get("hotbar_capacity", 2)),
         hotbar=state.get("hotbar", []),
+        inventory_rows=int(state.get("inventory_rows", 3)),
+        inventory_capacity=int(state.get("inventory_capacity", int(state.get("inventory_rows", 3)) * 5)),
     )
     log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 

@@ -22,11 +22,13 @@ type generatedDungeonLevel struct {
 type generatedStair struct {
 	defID string
 	pos   Vec2
+	state string
 }
 
 type generatedTeleporter struct {
 	defID string
 	pos   Vec2
+	state string
 }
 
 type generatedChest struct {
@@ -43,6 +45,11 @@ type generatedLoot struct {
 type generatedMonster struct {
 	defID        string
 	rarityID     string
+	bossTemplate string
+	isBoss       bool
+	visualModel  string
+	visualTint   string
+	visualScale  float64
 	lootTable    string
 	pos          Vec2
 	maxHP        int
@@ -67,6 +74,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	lootBand, ok := rules.LootBandForLevel(levelNum)
 	if !ok {
 		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: missing loot band", levelNum)
+	}
+	if isBossFloor(levelNum, rules) {
+		return generateBossDungeonLevel(seed, levelNum, rules, lootBand)
 	}
 
 	down, ok := randomStairPosition(rng, rules, nil)
@@ -115,6 +125,63 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		itemDefID: "training_badge",
 		pos:       stairDistantLootPosition(up, rules),
 	})
+	return out, nil
+}
+
+func isBossFloor(levelNum int, rules DungeonGenerationRules) bool {
+	return levelNum < 0 && rules.BossFloor.Cadence > 0 && absInt(levelNum)%rules.BossFloor.Cadence == 0
+}
+
+func generateBossDungeonLevel(seed string, levelNum int, rules DungeonGenerationRules, lootBand DungeonLootBand) (generatedDungeonLevel, error) {
+	boss := rules.BossFloor
+	bossRules := rules
+	bossRules.FloorSize = boss.FloorSize
+	out := generatedDungeonLevel{
+		levelNum: levelNum,
+		walls:    perimeterWalls(boss.FloorSize, rules.WallThickness),
+	}
+	out.stairs = append(out.stairs,
+		generatedStair{defID: stairsUpDefID, pos: boss.StairsUpPosition, state: interactableReady},
+		generatedStair{defID: stairsDownDefID, pos: boss.StairsDownPosition, state: interactableLocked},
+	)
+	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: boss.TeleporterPosition, state: interactableDisabled})
+	out.chests = append(out.chests, generatedChest{
+		defID:     boss.ChestInteractableDefID,
+		lootTable: boss.ChestLootTable,
+		pos:       boss.ChestPosition,
+	})
+	if len(boss.BossTemplatePool) == 0 {
+		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: missing boss template pool", levelNum)
+	}
+	templateID := boss.BossTemplatePool[0]
+	out.monsters = append(out.monsters, generatedMonster{
+		defID:        rules.MonsterPlacement.MonsterDefID,
+		rarityID:     "unique",
+		bossTemplate: templateID,
+		isBoss:       true,
+		lootTable:    lootBand.MonsterLootTable,
+		pos:          boss.BossSpawn,
+	})
+	rng := NewRNG(SeedToUint64(seed + "|boss_trash|" + strconv.Itoa(absInt(levelNum))))
+	rarityRNG := NewRNG(SeedToUint64(seed + "|boss_trash_rarity|" + strconv.Itoa(absInt(levelNum))))
+	for i := 0; i < boss.MonsterCount; i++ {
+		pos, ok := randomMonsterPosition(rng, bossRules, &out)
+		if !ok {
+			return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place boss-floor trash %d", levelNum, i)
+		}
+		rarity := rules.RollMonsterRarity(rarityRNG)
+		effectiveDepth := absInt(levelNum) + rarity.LootDepthOffset
+		effectiveLootBand, ok := rules.LootBandForDepth(effectiveDepth)
+		if !ok {
+			return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: missing loot band for effective depth %d", levelNum, effectiveDepth)
+		}
+		out.monsters = append(out.monsters, generatedMonster{
+			defID:     rules.MonsterPlacement.MonsterDefID,
+			rarityID:  rarity.ID,
+			lootTable: effectiveLootBand.MonsterLootTable,
+			pos:       pos,
+		})
+	}
 	return out, nil
 }
 
@@ -412,13 +479,21 @@ func stairDistantLootPosition(anchor Vec2, rules DungeonGenerationRules) Vec2 {
 }
 
 func dungeonNavigation(global NavigationRules, gen DungeonGenerationRules) NavigationRules {
+	return dungeonNavigationForLevel(global, gen, -1)
+}
+
+func dungeonNavigationForLevel(global NavigationRules, gen DungeonGenerationRules, levelNum int) NavigationRules {
 	nav := global
+	size := gen.FloorSize
+	if isBossFloor(levelNum, gen) && gen.BossFloor.FloorSize.Width > 0 && gen.BossFloor.FloorSize.Height > 0 {
+		size = gen.BossFloor.FloorSize
+	}
 	nav.GridBounds = GridBounds{
 		MinX: 0,
 		MinY: 0,
-		MaxX: int(gen.FloorSize.Width / global.CellSize),
-		MaxY: int(gen.FloorSize.Height / global.CellSize),
+		MaxX: int(size.Width / global.CellSize),
+		MaxY: int(size.Height / global.CellSize),
 	}
-	nav.MaxAutoSteps = maxInt(nav.MaxAutoSteps, int(gen.FloorSize.Width+gen.FloorSize.Height))
+	nav.MaxAutoSteps = maxInt(nav.MaxAutoSteps, int(size.Width+size.Height))
 	return nav
 }

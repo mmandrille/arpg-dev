@@ -504,7 +504,22 @@ func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, i
 			}
 		}
 		events := filterEventsForClient(res.Events, res.ActorPlayerID, client.playerID)
-		if level != res.Level && len(events) == 0 {
+		if level != res.Level {
+			if len(events) == 0 {
+				continue
+			}
+			client.enqueue(outEnvelope{
+				Type:      typeStateDelta,
+				MessageID: ids.New("msg"),
+				SessionID: l.sess.ID,
+				Tick:      res.Tick,
+				Payload: stateDeltaPayload{
+					ServerTick: res.Tick,
+					Level:      level,
+					Changes:    []game.Change{},
+					Events:     events,
+				},
+			})
 			continue
 		}
 		changes := filterChangesForClient(res.Changes, res.ActorPlayerID, client.playerID)

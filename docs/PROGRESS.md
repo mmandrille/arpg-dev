@@ -11,7 +11,7 @@ Last updated: 2026-06-08
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v36 — `inventory-paper-doll-capacity` |
+| **Latest completed slice** | v37 — `combat-control-and-boss-ai-fixes` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-08 |
 | **Next slice** | TBD |
@@ -52,6 +52,7 @@ v33_* = true-coop-session
 v34_* = model-reaction-polish
 v35_* = boss-floor-gate
 v36_* = inventory-paper-doll-capacity
+v37_* = combat-control-and-boss-ai-fixes
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -108,6 +109,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v34** | `model-reaction-polish` | Complete (`make ci` green) | [`v34_spec-model-reaction-polish.md`](specs/v34_spec-model-reaction-polish.md) | [`v34_2026-06-08-model-reaction-polish.md`](plans/v34_2026-06-08-model-reaction-polish.md) |
 | **v35** | `boss-floor-gate` | Complete (`make ci` green) | [`v35_spec-boss-floor-gate.md`](specs/v35_spec-boss-floor-gate.md) | [`v35_2026-06-08-boss-floor-gate.md`](plans/v35_2026-06-08-boss-floor-gate.md) |
 | **v36** | `inventory-paper-doll-capacity` | Complete (`make ci` green) | [`v36_spec-inventory-paper-doll-capacity.md`](specs/v36_spec-inventory-paper-doll-capacity.md) | [`v36_2026-06-08-inventory-paper-doll-capacity.md`](plans/v36_2026-06-08-inventory-paper-doll-capacity.md) |
+| **v37** | `combat-control-and-boss-ai-fixes` | Complete (`make ci` green) | [`v37_spec-combat-control-and-boss-ai-fixes.md`](specs/v37_spec-combat-control-and-boss-ai-fixes.md) | [`v37_2026-06-08-combat-control-and-boss-ai-fixes.md`](plans/v37_2026-06-08-combat-control-and-boss-ai-fixes.md) |
 
 ---
 
@@ -416,8 +418,8 @@ heal-over-time, production potion art, stash, vendors, or crafting.
   a minimal walk clip.
 - `make ci` green on 2026-06-06.
 
-**Explicit non-goals:** no proactive monster attacks, behavior trees/LimboAI, group aggro, fractional
-chase speeds, or NavMesh authority.
+**Explicit non-goals:** no proactive monster attacks, behavior trees/LimboAI, fractional chase speeds,
+or NavMesh authority. Nearby group aggro was added later in v37.
 
 ### v18 — Dungeon levels and stairs
 
@@ -894,6 +896,40 @@ paper-doll bag grid without making the Godot UI authoritative.
 multi-cell item footprints, passive skill sources for inventory rows, production paper-doll art,
 or full model-backed SubViewport preview.
 
+### v37 — Combat control and boss AI fixes
+
+**Proves:** Force-stand directional attacks, aggro-on-hit, nearby group aggro, and boss chase/damage
+behavior can be repaired while keeping combat authority in the Go sim.
+
+- Shared protocol now accepts `directional_attack_intent` with a direction-only payload, validates
+  an example, and documents zero-vector `move_intent` as the authoritative stop/cancel path.
+- Server movement cancel semantics clear active movement and auto-approach before the player advances,
+  and directional attacks also cancel movement before resolving melee or ranged combat.
+- Directional melee selects targets through a deterministic server-owned forward capsule; directional
+  ranged shots reuse authoritative projectile spawning and swept collision while omitting `target_id`
+  for free shots.
+- Player-to-monster damage now centralizes damage events, kill/drop/XP follow-up, and aggro-on-hit.
+  A damaged live chase-capable monster records the attacking player as its preferred target, and aggro
+  also wakes other chase-capable monsters whose own aggro radius contains the attacking player.
+  Propagation then chains through nearby live chase-capable monsters on the same level so close packs
+  wake as a group while monsters outside attacker and group radius stay idle.
+- Bosses now participate in hostile movement during idle, cooldown, telegraph, and recovery, pause
+  during active damage ticks, prefer the player that aggroed them, and damage a stationary failed-dodge
+  target during active phases.
+- Locked boss-floor exits remain server-owned; disabled boss teleporters now reject immediately with
+  `boss_alive` instead of starting an unusable auto-approach.
+- Godot `SHIFT` force-stand sends the stop intent, suppresses movement while held, and `SHIFT+LMB`
+  sends repeated direction-only attacks using existing facing/attack presentation.
+- Protocol bot scenarios prove directional ranged aggro/movement and the repaired boss floor path.
+  Godot helper/unit tests cover force-stand and directional hold behavior; the full headless
+  modifier/mouse client bot scenario remains deferred because the current bot controller fallback is
+  not reliable for that proof.
+
+**Explicit non-goals:** no final attack-speed/cooldown gameplay, skill bar, mana system, active
+ability catalog, homing/target-prediction projectiles, client hit detection, PvP/friendly fire, new
+boss templates, boss enrage/adds, production boss/combat VFX/audio/art, co-op boss scaling, broad
+monster AI rewrite, Protobuf migration, or a reliable full-scene headless `SHIFT+LMB` client bot proof.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -946,6 +982,7 @@ true_coop_session: host creates co-op → guest joins → shared-level visibilit
 model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
 boss_floor_gate: descend to level -5 → assert compact boss floor and locked exits → observe boss phase → kill boss → unlock exits → descend to -6
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
+combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 ```
 
 **Verify:**
@@ -1079,14 +1116,19 @@ metadata, and protocol/replay/bot proof for unlock and descent.
 `inventory_rows` / `inventory_capacity`, an item-granted row source, full-bag and overflow rejection
 guards, a 5-column capacity grid, and protocol/client bot proofs.
 
+**Combat control and boss AI fixes are now authoritative.** v37 adds server-owned directional attacks,
+authoritative stop movement, aggro-on-hit with nearby contagious group aggro, boss chase/damage repair,
+and protocol/client unit proofs.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35 non-goals |
+| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill bar and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37 non-goals |
 | Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows | v23/v25/v26/v28/v29/v30/v35/v36 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36 non-goals |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37 non-goals |
+| Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

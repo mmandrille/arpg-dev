@@ -12,6 +12,7 @@ const (
 	TypeClientReady  = "client_ready"
 	TypeMoveIntent   = "move_intent"
 	TypeMoveTo       = "move_to_intent"
+	TypeDirectional  = "directional_attack_intent"
 	TypeAction       = "action_intent"
 	TypeDescend      = "descend_intent"
 	TypeAscend       = "ascend_intent"
@@ -39,6 +40,9 @@ type (
 	}
 	moveToPayloadWire struct {
 		Position game.Vec2 `json:"position"`
+	}
+	directionalPayloadWire struct {
+		Direction *game.Vec2 `json:"direction"`
 	}
 	actionPayloadWire struct {
 		TargetID string `json:"target_id"`
@@ -77,7 +81,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat:
 		return true
 	}
 	return false
@@ -104,6 +108,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.MoveTo = &game.MoveToIntent{Position: p.Position}
+	case TypeDirectional:
+		var p directionalPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.Direction == nil {
+			return in, false
+		}
+		in.DirectionalAttack = &game.DirectionalAttackIntent{Direction: *p.Direction}
 	case TypeAction:
 		var p actionPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.TargetID == "" {

@@ -70,6 +70,9 @@ run_gate "GDScript waypoint panel test" "[gdtest] PASS: test_waypoint_panel" res
 # 2g. Sustained click hold state (server-independent; v27).
 run_gate "GDScript sustained input test" "[gdtest] PASS: test_sustained_input" res://tests/test_sustained_input.gd
 
+# 2h. Force-stand directional attack helpers (server-independent; v37).
+run_gate "GDScript directional attack input test" "[gdtest] PASS: test_directional_attack_input" res://tests/test_directional_attack_input.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0

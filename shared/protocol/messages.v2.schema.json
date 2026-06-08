@@ -13,6 +13,7 @@
         "client_ready",
         "move_intent",
         "move_to_intent",
+        "directional_attack_intent",
         "action_intent",
         "descend_intent",
         "ascend_intent",
@@ -44,6 +45,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/move_intent" } } } },
     { "if": { "properties": { "type": { "const": "move_to_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/move_to_intent" } } } },
+    { "if": { "properties": { "type": { "const": "directional_attack_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/directional_attack_intent" } } } },
     { "if": { "properties": { "type": { "const": "action_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/action_intent" } } } },
     { "if": { "properties": { "type": { "const": "descend_intent" } } },
@@ -112,6 +115,14 @@
       "required": ["position"],
       "additionalProperties": false,
       "properties": { "position": { "$ref": "#/$defs/vec2" } }
+    },
+    "directional_attack_intent": {
+      "type": "object",
+      "required": ["direction"],
+      "additionalProperties": false,
+      "properties": {
+        "direction": { "$ref": "#/$defs/vec2" }
+      }
     },
     "action_intent": {
       "type": "object",

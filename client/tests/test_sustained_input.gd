@@ -11,6 +11,7 @@ var _fail_count: int = 0
 func _initialize() -> void:
 	_test_begin_monster_hold()
 	_test_begin_floor_hold()
+	_test_begin_directional_attack_hold()
 	_test_begin_oneshot_no_hold()
 	_test_should_stop_missing_target()
 	_test_should_stop_dead_monster()
@@ -40,6 +41,14 @@ func _test_begin_floor_hold() -> void:
 	_assert_eq("floor hold mode", hold.mode, "move")
 	_assert_eq("floor last ground x", hold.last_ground.x, 3.0)
 	_assert_eq("floor last ground y", hold.last_ground.y, 4.0)
+
+
+func _test_begin_directional_attack_hold() -> void:
+	var hold := SustainedClickInputScript.new()
+	_assert_true("directional attack hold starts", hold.begin_directional_attack())
+	_assert_true("directional attack hold active", hold.active)
+	_assert_eq("directional attack hold mode", hold.mode, "directional_attack")
+	_assert_eq("directional attack target empty", hold.target_id, "")
 
 
 func _test_begin_oneshot_no_hold() -> void:

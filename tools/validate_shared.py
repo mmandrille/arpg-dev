@@ -62,10 +62,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v1.schema.json"
+            return PROTOCOL / "session_snapshot.v2.schema.json"
         if name.startswith("state_delta"):
-            return PROTOCOL / "state_delta.v1.schema.json"
-        return PROTOCOL / "messages.v1.schema.json"
+            return PROTOCOL / "state_delta.v2.schema.json"
+        return PROTOCOL / "messages.v2.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 

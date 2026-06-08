@@ -3,7 +3,7 @@
   "world_id": "dungeon_levels",
   "seed": "boss_floor_gate",
   "title": "Boss floor gate",
-  "description": "Reach the compact level -5 boss floor, prove the boss metadata and locked exits, observe a boss phase, kill the boss, then prove exits unlock and descent to -6 works.",
+  "description": "Reach the compact level -5 boss floor, prove boss movement and damage, verify locked exits, kill the boss, then prove exits unlock and descent to -6 works.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
     { "action": "use_stair", "direction": "down", "max_ticks": 360 },
@@ -13,10 +13,24 @@
     { "action": "assert_entity_count", "entity_type": "monster", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "current_humanoid_player", "visual_scale": 2.0, "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "locked", "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "teleporter", "state": "disabled", "equals": 1 },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_moved",
+        "entity_type": "monster",
+        "is_boss": true,
+        "min_distance": 0.5
+      },
+      "timeout_s": 5
+    },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "use_stair", "direction": "down", "expect_reject": "boss_alive", "max_ticks": 120 },
     { "action": "action_entity", "interactable_def_id": "teleporter", "expect_reject": "boss_alive" },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_phase_started" }, "timeout_s": 10 },
+    { "action": "record_player_hp" },
+    { "action": "move_until_player_position", "x": 19, "y": 15, "tolerance": 0.5, "max_ticks": 120 },
+    { "action": "wait_for_combat_event", "event_type": "player_damaged", "timeout_s": 12 },
+    { "action": "wait_until_assertion", "assertion": { "type": "player_hp_decreased_from_recorded" }, "timeout_s": 1 },
     { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 120 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "interactable_state_changed" }, "timeout_s": 5 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "equals": 1 },
@@ -28,6 +42,8 @@
     { "type": "visited_levels_contain", "level": -5 },
     { "type": "visited_levels_contain", "level": -6 },
     { "type": "event_seen", "event_type": "boss_phase_started" },
+    { "type": "event_seen", "event_type": "player_damaged" },
+    { "type": "player_hp_decreased_from_recorded" },
     { "type": "event_seen", "event_type": "descend_blocked" },
     { "type": "event_seen", "event_type": "teleport_blocked" },
     { "type": "event_seen", "event_type": "monster_killed" },

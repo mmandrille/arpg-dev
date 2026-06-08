@@ -3,6 +3,7 @@ import json
 from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
 from tools.bot.run import (
     RuntimeState,
+    directional_attack_direction,
     find_inventory_item,
     find_interactable,
     find_loot,
@@ -145,6 +146,21 @@ def test_load_scenarios_discovers_inventory_capacity_lab():
     assert capacity.world_id == "inventory_capacity_lab"
     assert {"type": "inventory_capacity", "rows": 4, "equals": 20} in capacity.assertions
     assert any(step.get("expect_reject") == "inventory_full" for step in capacity.steps)
+
+
+def test_load_scenarios_discovers_combat_control_and_boss_ai_fixes():
+    scenarios = load_scenarios()
+    combat = next(s for s in scenarios if s.id == "combat_control_and_boss_ai_fixes")
+
+    assert combat.world_id == "combat_control_lab"
+    assert any(step.get("action") == "directional_attack" for step in combat.steps)
+    assert {"type": "event_seen", "event_type": "monster_aggro"} in combat.assertions
+    assert {
+        "type": "entity_moved",
+        "entity_type": "monster",
+        "monster_def_id": "dungeon_mob",
+        "min_distance": 0.5,
+    } in combat.assertions
 
 
 def test_select_scenarios_rejects_unknown_id():
@@ -333,6 +349,51 @@ def test_runtime_state_records_combat_event_metadata():
     }]
     run_runtime_assertions([
         {"type": "combat_event_seen", "event_type": "monster_damaged", "outcome": "block", "blocked": True, "damage": 0}
+    ], state, "test")
+
+
+def test_directional_attack_direction_supports_explicit_and_target_direction():
+    state = RuntimeState(local_player_id="1001")
+    state.entities = {
+        "1001": {"id": "1001", "type": "player", "position": {"x": 2, "y": 5}, "hp": 10},
+        "1002": {
+            "id": "1002",
+            "type": "monster",
+            "monster_def_id": "dungeon_mob",
+            "position": {"x": 5, "y": 9},
+            "hp": 4,
+        },
+    }
+
+    assert directional_attack_direction(state, {"direction": {"x": 0, "y": -1}}) == {"x": 0.0, "y": -1.0}
+
+    direction = directional_attack_direction(state, {"monster_def_id": "dungeon_mob"})
+    assert round(direction["x"], 3) == 0.6
+    assert round(direction["y"], 3) == 0.8
+
+
+def test_runtime_assertion_entity_moved_and_player_hp_drop():
+    state = RuntimeState(local_player_id="1001", recorded_player_hp=10)
+    state.entities = {
+        "1001": {"id": "1001", "type": "player", "position": {"x": 2, "y": 5}, "hp": 6},
+        "1002": {
+            "id": "1002",
+            "type": "monster",
+            "monster_def_id": "dungeon_mob",
+            "position": {"x": 12.3, "y": 5},
+            "hp": 4,
+        },
+    }
+    state.initial_entity_positions["1002"] = {"x": 13, "y": 5}
+
+    run_runtime_assertions([
+        {
+            "type": "entity_moved",
+            "entity_type": "monster",
+            "monster_def_id": "dungeon_mob",
+            "min_distance": 0.5,
+        },
+        {"type": "player_hp_decreased_from_recorded"},
     ], state, "test")
 
 

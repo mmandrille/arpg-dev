@@ -103,6 +103,8 @@ class RuntimeState:
     rejected_message_reasons: dict[str, str] = field(default_factory=dict)
     min_player_monster_distance: dict[str, float] = field(default_factory=dict)
     initial_monster_positions: dict[str, dict[str, float]] = field(default_factory=dict)
+    initial_entity_positions: dict[str, dict[str, float]] = field(default_factory=dict)
+    recorded_player_hp: int | None = None
     current_level: int = 0
     visited_levels: set[int] = field(default_factory=lambda: {0})
     last_delta_level: int | None = None
@@ -393,6 +395,13 @@ async def execute_step(
         assert_player_position(state, float(step["x"]), float(step["y"]), float(step.get("tolerance", 0.001)), "runtime protocol")
         return
 
+    if action == "record_player_hp":
+        player = find_player(state)
+        if player is None or not isinstance(player.get("hp"), int):
+            raise AssertionError(f"record_player_hp: missing player hp: {player}")
+        state.recorded_player_hp = int(player["hp"])
+        return
+
     if action == "assert_player_at_used_stair":
         direction = str(step["direction"])
         pos = state.used_stair_positions.get(direction)
@@ -525,6 +534,25 @@ async def execute_step(
         )
         return
 
+    if action == "directional_attack":
+        direction = directional_attack_direction(state, step)
+        env = make_envelope(
+            "directional_attack_intent",
+            session_id,
+            state.last_tick,
+            {"direction": direction},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event_type = step.get("event_type")
+        if event_type:
+            await wait_for_event(ws, state, str(event_type), loop)
+        return
+
     if action == "action_until_event":
         event_type = str(step["event_type"])
         if step.get("monster_def_id") or step.get("target_id") or step.get("is_boss") is not None:
@@ -611,7 +639,7 @@ async def execute_step(
 
     if action == "wait_for_combat_event":
         start_index = len(state.combat_events)
-        deadline = loop.time() + SLICE_TIMEOUT_S
+        deadline = loop.time() + float(step.get("timeout_s", SLICE_TIMEOUT_S))
         while not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
             if loop.time() > deadline:
                 raise TimeoutError(f"wait_for_combat_event stalled waiting for {combat_event_summary(step)}")
@@ -1514,6 +1542,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             existing = state.entities.get(entity["id"], {})
             existing.update(entity)
             state.entities[entity["id"]] = existing
+            track_initial_entity_position(state, existing)
             track_initial_monster_position(state, existing)
             if c["op"] == "entity_spawn" and entity["type"] == "loot":
                 loot_id = entity["id"]
@@ -1583,6 +1612,7 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
         if item.get("equipped"):
             state.equipped_item_id = item.get("item_instance_id")
     for entity in state.entities.values():
+        track_initial_entity_position(state, entity)
         track_initial_monster_position(state, entity)
     update_runtime_distances(state)
 
@@ -1613,6 +1643,20 @@ def clear_active_level_state(state: RuntimeState) -> None:
     state.loot_ids.clear()
     state.min_player_monster_distance.clear()
     state.initial_monster_positions.clear()
+    state.initial_entity_positions.clear()
+
+
+def track_initial_entity_position(state: RuntimeState, entity: dict[str, Any]) -> None:
+    entity_id = str(entity.get("id", ""))
+    if not entity_id or entity_id in state.initial_entity_positions:
+        return
+    pos = entity.get("position")
+    if not isinstance(pos, dict):
+        return
+    state.initial_entity_positions[entity_id] = {
+        "x": float(pos.get("x", 0.0)),
+        "y": float(pos.get("y", 0.0)),
+    }
 
 
 def track_initial_monster_position(state: RuntimeState, entity: dict[str, Any]) -> None:
@@ -1782,6 +1826,24 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
             raise AssertionError(f"{step.get('action')}: interactable not found: {step}")
         return target
     raise AssertionError(f"{step.get('action')}: no target selector in {step}")
+
+
+def directional_attack_direction(state: RuntimeState, step: dict[str, Any]) -> dict[str, float]:
+    if isinstance(step.get("direction"), dict):
+        raw = step["direction"]
+        return {"x": float(raw.get("x", 0.0)), "y": float(raw.get("y", 0.0))}
+    target = resolve_target(state, step)
+    player = find_player(state)
+    if player is None:
+        raise AssertionError("directional_attack: missing player")
+    ppos = player.get("position", {})
+    tpos = target.get("position", {})
+    dx = float(tpos.get("x", 0.0)) - float(ppos.get("x", 0.0))
+    dy = float(tpos.get("y", 0.0)) - float(ppos.get("y", 0.0))
+    length = (dx * dx + dy * dy) ** 0.5
+    if length <= 0.000001:
+        raise AssertionError(f"directional_attack: target overlaps player, no direction: {target}")
+    return {"x": dx / length, "y": dy / length}
 
 
 def find_inventory_item(
@@ -2203,12 +2265,14 @@ def run_assertions(
             continue
         elif typ in {
             "monster_moved",
+            "entity_moved",
             "monster_within_player_distance",
             "monster_near_spawn",
             "event_seen",
             "combat_event_seen",
             "player_never_in_melee_range_of",
             "monster_damage_at_least",
+            "player_hp_decreased_from_recorded",
         }:
             continue
         elif typ == "player_hp_equals":
@@ -2301,6 +2365,26 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                     f"{where}: monster {monster_def_id} moved {dist:.3f} < min_distance {min_distance}"
                 )
             continue
+        if typ == "entity_moved":
+            min_distance = float(assertion["min_distance"])
+            matches = [entity for entity in state.entities.values() if entity_matches_selector(entity, assertion)]
+            if not matches:
+                raise AssertionError(f"{where}: no entity matched {assertion}")
+            matches.sort(key=lambda entity: str(entity.get("id", "")))
+            entity = matches[0]
+            entity_id = str(entity.get("id", ""))
+            initial = state.initial_entity_positions.get(entity_id)
+            if initial is None:
+                raise AssertionError(f"{where}: missing initial position for entity {entity_id}")
+            pos = entity.get("position", {})
+            dx = float(pos.get("x", 0.0)) - initial["x"]
+            dy = float(pos.get("y", 0.0)) - initial["y"]
+            dist = (dx * dx + dy * dy) ** 0.5
+            if dist < min_distance:
+                raise AssertionError(
+                    f"{where}: entity {entity_id} moved {dist:.3f} < min_distance {min_distance}"
+                )
+            continue
         if typ == "monster_within_player_distance":
             monster_def_id = str(assertion["monster_def_id"])
             max_distance = float(assertion["max_distance"])
@@ -2332,6 +2416,18 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             if dist > max_distance_from_spawn:
                 raise AssertionError(
                     f"{where}: monster {monster_def_id} spawn distance {dist:.3f} > {max_distance_from_spawn}"
+                )
+            continue
+        if typ == "player_hp_decreased_from_recorded":
+            if state.recorded_player_hp is None:
+                raise AssertionError(f"{where}: no recorded player hp")
+            player = find_player(state)
+            if player is None or not isinstance(player.get("hp"), int):
+                raise AssertionError(f"{where}: missing current player hp: {player}")
+            current_hp = int(player["hp"])
+            if current_hp >= state.recorded_player_hp:
+                raise AssertionError(
+                    f"{where}: player hp {current_hp} did not decrease below recorded {state.recorded_player_hp}"
                 )
             continue
         if typ == "current_level":

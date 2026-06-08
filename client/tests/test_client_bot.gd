@@ -42,6 +42,8 @@ func _initialize() -> void:
 	_test_client_settings_floating_combat_text_from_data()
 	_test_combat_feedback_step_types_load()
 	_test_combat_event_and_damage_number_assertions()
+	_test_inventory_paper_doll_step_types_load()
+	_test_inventory_paper_doll_assertions()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -375,6 +377,56 @@ func _test_combat_event_and_damage_number_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("combat feedback assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_inventory_paper_doll_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "assert_inventory_capacity", "rows": 3, "capacity": 15},
+		{"type": "assert_bag_grid", "columns": 5, "available_slot_count": 15},
+		{"type": "assert_paper_doll_layout", "slots": ["head", "belt"], "preview": true},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("inventory paper doll client step scenario valid", err, "")
+	_assert_ne("inventory capacity without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_inventory_capacity"}, 0), "")
+	_assert_ne("bag grid without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_bag_grid"}, 0), "")
+	_assert_ne("paper doll layout without slots rejected", BotScenarioRunnerScript.validate_step({"type": "assert_paper_doll_layout"}, 0), "")
+
+
+func _test_inventory_paper_doll_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "inventory_paper_doll_assert_test",
+		"runner": "godot_client",
+		"world_id": "inventory_capacity_lab",
+		"client_steps": [
+			{"type": "assert_inventory_capacity", "rows": 4, "capacity": 20},
+			{"type": "assert_bag_grid", "columns": 5, "available_slot_count": 20},
+			{"type": "assert_paper_doll_layout", "slots": ["head", "belt", "main_hand", "off_hand"], "preview": true},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"inventory_rows": 4,
+		"inventory_capacity": 20,
+		"inventory_panel": {
+			"inventory_rows": 4,
+			"inventory_capacity": 20,
+			"bag_columns": 5,
+			"available_slot_count": 20,
+			"paper_doll_preview": {"exists": true, "visible": true},
+			"paper_doll_slots": {
+				"head": {"exists": true},
+				"belt": {"exists": true},
+				"main_hand": {"exists": true},
+				"off_hand": {"exists": true},
+			},
+		},
+	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	_assert_true("inventory paper doll assertions pass", runner.is_done() and runner.passed())
 
 
 # --- helpers -----------------------------------------------------------------

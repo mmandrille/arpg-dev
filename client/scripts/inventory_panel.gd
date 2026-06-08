@@ -5,7 +5,8 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
-const SLOT_KIND_BAG_AREA := "bag_area"
+const BAG_COLUMNS := 5
+const BASE_INVENTORY_ROWS := 3
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 const EQUIPMENT_LABELS := {
 	"head": "Head",
@@ -19,15 +20,30 @@ const EQUIPMENT_LABELS := {
 	"main_hand": "Main",
 	"off_hand": "Off"
 }
+const PAPER_DOLL_SLOT_POSITIONS := {
+	"head": Vector2(123, 10),
+	"amulet": Vector2(214, 40),
+	"main_hand": Vector2(20, 116),
+	"off_hand": Vector2(244, 116),
+	"chest": Vector2(132, 112),
+	"gloves": Vector2(36, 210),
+	"belt": Vector2(132, 194),
+	"ring_left": Vector2(244, 198),
+	"ring_right": Vector2(244, 264),
+	"boots": Vector2(132, 276),
+}
 
 var inventory: Array = []
 var equipped: Dictionary = {}
+var inventory_rows: int = BASE_INVENTORY_ROWS
+var inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS
 var item_rules: Dictionary = {}
 var item_templates: Dictionary = {}
 var item_presentations: Dictionary = {}
 var _panel: PanelContainer
 var _equipment_slots: Dictionary = {}
 var _bag_grid: GridContainer
+var _paper_doll_preview: Control
 var _drag_data: Dictionary = {}
 var _interactive: bool = true
 var _gesture_hint: Label
@@ -75,7 +91,7 @@ class InventorySlotButton:
 			return false
 		if panel._slot_kind_is_equipment(slot_kind):
 			return source == SLOT_KIND_BAG and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
-		if slot_kind == SLOT_KIND_BAG_AREA:
+		if slot_kind == SLOT_KIND_BAG:
 			return panel._slot_kind_is_equipment(source)
 		return false
 
@@ -136,11 +152,13 @@ func _sync_viewport_size() -> void:
 	_reposition_panel()
 
 
-func set_inventory_state(next_inventory: Array, next_equipped: Dictionary) -> void:
+func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS) -> void:
 	inventory = []
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
 	equipped = next_equipped.duplicate(true)
+	inventory_rows = max(0, next_inventory_rows)
+	inventory_capacity = max(0, next_inventory_capacity)
 	if _bag_grid != null:
 		_render()
 
@@ -154,6 +172,18 @@ func get_debug_state() -> Dictionary:
 		"main_hand_item": _equipped_item("main_hand"),
 		"weapon_item": _equipped_item("main_hand"),
 		"item_presentations": _debug_presentations(),
+		"inventory_rows": inventory_rows,
+		"inventory_capacity": inventory_capacity,
+		"bag_columns": _bag_grid.columns if _bag_grid != null else 0,
+		"available_slot_count": inventory_capacity,
+		"paper_doll_slot_ids": EQUIPMENT_SLOTS.duplicate(),
+		"paper_doll_slots": _debug_paper_doll_slots(),
+		"paper_doll_preview": {
+			"exists": _paper_doll_preview != null,
+			"name": _paper_doll_preview.name if _paper_doll_preview != null else "",
+			"visible": _paper_doll_preview.visible if _paper_doll_preview != null else false,
+		},
+		"empty_slot_style": "gray_block",
 	}
 
 
@@ -169,7 +199,10 @@ func get_bag_area_screen_center() -> Vector2:
 	if _bag_grid == null:
 		return Vector2.ZERO
 	for child in _bag_grid.get_children():
-		if child is InventorySlotButton and child.slot_kind == SLOT_KIND_BAG_AREA:
+		if child is InventorySlotButton and child.slot_kind == SLOT_KIND_BAG and child.item.is_empty():
+			return _slot_screen_center(child)
+	for child in _bag_grid.get_children():
+		if child is InventorySlotButton and child.slot_kind == SLOT_KIND_BAG:
 			return _slot_screen_center(child)
 	return Vector2.ZERO
 
@@ -236,7 +269,7 @@ func _notification(what: int) -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
-	_panel.custom_minimum_size = Vector2(560, 410)
+	_panel.custom_minimum_size = Vector2(750, 460)
 	_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_reposition_panel()
 	_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -252,35 +285,39 @@ func _build() -> void:
 
 	var root := HBoxContainer.new()
 	root.add_theme_constant_override("separation", 18)
-	root.custom_minimum_size = Vector2(530, 380)
+	root.custom_minimum_size = Vector2(720, 430)
 	_panel.add_child(root)
 
 	var left := VBoxContainer.new()
-	left.custom_minimum_size = Vector2(220, 0)
+	left.custom_minimum_size = Vector2(350, 0)
 	root.add_child(left)
 	left.add_child(_title("Equipment"))
-	var equip_grid := GridContainer.new()
-	equip_grid.columns = 2
-	equip_grid.add_theme_constant_override("h_separation", 6)
-	equip_grid.add_theme_constant_override("v_separation", 6)
-	left.add_child(equip_grid)
+	var paper := Control.new()
+	paper.custom_minimum_size = Vector2(340, 360)
+	left.add_child(paper)
+	_paper_doll_preview = Panel.new()
+	_paper_doll_preview.name = "character_paper_doll"
+	_paper_doll_preview.position = Vector2(124, 78)
+	_paper_doll_preview.custom_minimum_size = Vector2(92, 210)
+	_paper_doll_preview.size = _paper_doll_preview.custom_minimum_size
+	_paper_doll_preview.add_theme_stylebox_override("panel", _paper_doll_style())
+	paper.add_child(_paper_doll_preview)
 	for slot in EQUIPMENT_SLOTS:
-		var box := VBoxContainer.new()
-		box.add_child(_caption(str(EQUIPMENT_LABELS.get(slot, slot))))
-		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), Vector2(84, 62))
+		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), Vector2(72, 54))
+		btn.position = PAPER_DOLL_SLOT_POSITIONS.get(str(slot), Vector2.ZERO)
+		btn.size = btn.custom_minimum_size
 		_equipment_slots[str(slot)] = btn
-		box.add_child(btn)
-		equip_grid.add_child(box)
+		paper.add_child(btn)
 
 	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(290, 0)
+	right.custom_minimum_size = Vector2(350, 0)
 	root.add_child(right)
 	right.add_child(_caption("Bag"))
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(285, 288)
+	scroll.custom_minimum_size = Vector2(340, 382)
 	right.add_child(scroll)
 	_bag_grid = GridContainer.new()
-	_bag_grid.columns = 4
+	_bag_grid.columns = BAG_COLUMNS
 	_bag_grid.add_theme_constant_override("h_separation", 6)
 	_bag_grid.add_theme_constant_override("v_separation", 6)
 	scroll.add_child(_bag_grid)
@@ -294,16 +331,16 @@ func _render() -> void:
 		_fill_slot(_equipment_slots.get(slot, null), _equipped_item(str(slot)))
 	for child in _bag_grid.get_children():
 		child.queue_free()
+	var bag_items: Array = []
 	for item in inventory:
 		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
 			continue
+		bag_items.append(item)
+	for i in range(inventory_capacity):
 		var slot := _slot_button(SLOT_KIND_BAG, Vector2(58, 58))
+		var item: Dictionary = bag_items[i] if i < bag_items.size() else {}
 		_fill_slot(slot, item)
 		_bag_grid.add_child(slot)
-	var bag_drop := _slot_button(SLOT_KIND_BAG_AREA, Vector2(58, 58))
-	bag_drop.text = "+"
-	bag_drop.tooltip_text = "Bag"
-	_bag_grid.add_child(bag_drop)
 	_position_gesture_hint()
 
 
@@ -326,13 +363,27 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 		return
 	slot.item = item.duplicate(true)
 	if item.is_empty():
-		slot.text = ""
-		slot.tooltip_text = "Empty"
+		if _slot_kind_is_equipment(slot.slot_kind):
+			var slot_name := _slot_from_kind(slot.slot_kind)
+			slot.text = str(EQUIPMENT_LABELS.get(slot_name, slot_name))
+			slot.tooltip_text = "Empty %s" % str(EQUIPMENT_LABELS.get(slot_name, slot_name))
+			slot.add_theme_stylebox_override("normal", _empty_slot_style(false))
+			slot.add_theme_stylebox_override("hover", _empty_slot_style(true))
+			slot.add_theme_stylebox_override("pressed", _empty_slot_style(true))
+		else:
+			slot.text = ""
+			slot.tooltip_text = "Empty"
+			slot.add_theme_stylebox_override("normal", _slot_style(false))
+			slot.add_theme_stylebox_override("hover", _slot_style(true))
+			slot.add_theme_stylebox_override("pressed", _slot_style(true))
 		slot.queue_redraw()
 		return
 	var def_id := str(item.get("item_def_id", ""))
 	slot.text = ""
 	slot.tooltip_text = _tooltip(item)
+	slot.add_theme_stylebox_override("normal", _slot_style(false))
+	slot.add_theme_stylebox_override("hover", _slot_style(true))
+	slot.add_theme_stylebox_override("pressed", _slot_style(true))
 	slot.queue_redraw()
 
 
@@ -416,7 +467,7 @@ func _reposition_panel() -> void:
 	var panel_size := _panel.custom_minimum_size
 	var viewport_size := get_viewport_rect().size
 	_panel.offset_right = -margin
-	_panel.offset_bottom = -maxf(margin, minf(90.0, viewport_size.y * 0.10))
+	_panel.offset_bottom = -maxf(margin, minf(140.0, viewport_size.y * 0.16))
 	_panel.offset_left = _panel.offset_right - panel_size.x
 	_panel.offset_top = _panel.offset_bottom - panel_size.y
 	if viewport_size.y > 0.0 and viewport_size.y + _panel.offset_top < margin:
@@ -455,6 +506,36 @@ func _slot_style(hover: bool) -> StyleBoxFlat:
 	return s
 
 
+func _empty_slot_style(hover: bool) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color("#3a3a37") if hover else Color("#242422")
+	s.border_color = Color("#8a877d") if hover else Color("#5f5b52")
+	s.border_width_left = 1
+	s.border_width_top = 1
+	s.border_width_right = 1
+	s.border_width_bottom = 1
+	s.content_margin_left = 4
+	s.content_margin_top = 4
+	s.content_margin_right = 4
+	s.content_margin_bottom = 4
+	return s
+
+
+func _paper_doll_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color("#171715")
+	s.border_color = Color("#5f5b52")
+	s.border_width_left = 1
+	s.border_width_top = 1
+	s.border_width_right = 1
+	s.border_width_bottom = 1
+	s.corner_radius_top_left = 8
+	s.corner_radius_top_right = 8
+	s.corner_radius_bottom_right = 8
+	s.corner_radius_bottom_left = 8
+	return s
+
+
 func _handle_double_click(item: Dictionary) -> void:
 	var slot := _preferred_equip_slot(item)
 	if slot != "":
@@ -473,7 +554,7 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 		var slot := _slot_from_kind(slot_kind)
 		if _item_can_equip_to(item, slot):
 			intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
-	elif slot_kind == SLOT_KIND_BAG_AREA:
+	elif slot_kind == SLOT_KIND_BAG:
 		var source := str(data.get("source", ""))
 		if _slot_kind_is_equipment(source):
 			intent_requested.emit("unequip_intent", {"slot": _slot_from_kind(source)})
@@ -567,6 +648,12 @@ func _tooltip(item: Dictionary) -> String:
 		lines.append("Block: %s%%" % str(rolled_stats.get("block_percent", "?")))
 	if rolled_stats.has("hotbar_slots"):
 		lines.append("Hotbar slots: %s" % str(rolled_stats.get("hotbar_slots", "?")))
+	if rolled_stats.has("inventory_rows"):
+		lines.append("Inventory rows: +%s" % str(rolled_stats.get("inventory_rows", "?")))
+	else:
+		var base_stats: Dictionary = def.get("base_stats", {})
+		if base_stats.has("inventory_rows"):
+			lines.append("Inventory rows: +%s" % str(base_stats.get("inventory_rows", "?")))
 	if def.has("reach"):
 		lines.append("Reach: %s" % str(def["reach"]))
 	if def.has("attack_mode"):
@@ -636,4 +723,20 @@ func _debug_presentations() -> Dictionary:
 		var def_id := str(item.get("item_def_id", ""))
 		if def_id != "":
 			out[def_id] = item_presentations.has(def_id)
+	return out
+
+
+func _debug_paper_doll_slots() -> Dictionary:
+	var out := {}
+	for slot in EQUIPMENT_SLOTS:
+		var btn: InventorySlotButton = _equipment_slots.get(str(slot), null)
+		out[str(slot)] = {
+			"exists": btn != null,
+			"position": {
+				"x": btn.position.x if btn != null else 0.0,
+				"y": btn.position.y if btn != null else 0.0,
+			},
+			"empty": _equipped_item(str(slot)).is_empty(),
+			"label": str(EQUIPMENT_LABELS.get(str(slot), str(slot))),
+		}
 	return out

@@ -1,0 +1,27 @@
+{
+  "id": "client_inventory_paper_doll",
+  "runner": "godot_client",
+  "world_id": "inventory_capacity_lab",
+  "title": "Client inventory paper doll and capacity grid",
+  "description": "Open the paper-doll inventory, verify the base 5x3 bag grid, equip the capacity belt, and verify the expanded 5x4 bag grid.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_loot_count", "min_count": 21, "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "cave_pack_belt" },
+    { "type": "wait_inventory_item", "item_def_id": "cave_pack_belt", "timeout_s": 15.0 },
+    { "type": "press_key", "keycode": "KEY_I" },
+    { "type": "assert_panel_visible", "visible": true },
+    { "type": "assert_inventory_capacity", "rows": 3, "capacity": 15 },
+    { "type": "assert_bag_grid", "columns": 5, "available_slot_count": 15 },
+    {
+      "type": "assert_paper_doll_layout",
+      "slots": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"],
+      "preview": true
+    },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "cave_pack_belt", "slot": "belt" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "assert_equipped", "slot": "belt" },
+    { "type": "assert_inventory_capacity", "rows": 4, "capacity": 20 },
+    { "type": "assert_bag_grid", "columns": 5, "available_slot_count": 20 }
+  ]
+}

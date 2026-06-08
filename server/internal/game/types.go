@@ -22,6 +22,12 @@ type EntityView struct {
 	MaxHP             *int           `json:"max_hp,omitempty"`
 	CharacterID       string         `json:"character_id,omitempty"`
 	MonsterDefID      string         `json:"monster_def_id,omitempty"`
+	IsBoss            bool           `json:"is_boss,omitempty"`
+	BossTemplateID    string         `json:"boss_template_id,omitempty"`
+	VisualModel       string         `json:"visual_model,omitempty"`
+	VisualScale       float64        `json:"visual_scale,omitempty"`
+	VisualTint        string         `json:"visual_tint,omitempty"`
+	BossPhase         *BossPhaseView `json:"boss_phase,omitempty"`
 	ItemDefID         string         `json:"item_def_id,omitempty"`
 	ItemTemplateID    string         `json:"item_template_id,omitempty"`
 	DisplayName       string         `json:"display_name,omitempty"`
@@ -146,28 +152,62 @@ type HotbarSlotView struct {
 	ItemInstanceID *string `json:"item_instance_id"`
 }
 
+// BossPhaseView is the protocol view of an authoritative boss pattern phase.
+type BossPhaseView struct {
+	PatternID     string             `json:"pattern_id"`
+	PhaseIndex    int                `json:"phase_index"`
+	PhaseKind     string             `json:"phase_kind"`
+	StartedTick   uint64             `json:"started_tick"`
+	DurationTicks int                `json:"duration_ticks"`
+	Telegraph     *BossTelegraphView `json:"telegraph,omitempty"`
+	HitShape      *BossHitShapeView  `json:"hit_shape,omitempty"`
+}
+
+// BossTelegraphView describes the warning data clients render before damage.
+type BossTelegraphView struct {
+	Type      string  `json:"type"`
+	FromColor string  `json:"from_color,omitempty"`
+	ToColor   string  `json:"to_color,omitempty"`
+	HitShape  string  `json:"hit_shape,omitempty"`
+	Radius    float64 `json:"radius,omitempty"`
+}
+
+// BossHitShapeView describes the authoritative active hit predicate.
+type BossHitShapeView struct {
+	Shape  string  `json:"shape"`
+	Radius float64 `json:"radius,omitempty"`
+}
+
 // Event is an authoritative event emitted by the sim.
 type Event struct {
-	EventType         string `json:"event_type"`
-	EntityID          string `json:"entity_id,omitempty"`
-	SourceEntityID    string `json:"source_entity_id,omitempty"`
-	TargetEntityID    string `json:"target_entity_id,omitempty"`
-	CorrelationID     string `json:"correlation_id,omitempty"`
-	Damage            *int   `json:"damage,omitempty"`
-	Outcome           string `json:"outcome,omitempty"`
-	RawDamage         *int   `json:"raw_damage,omitempty"`
-	MitigatedDamage   *int   `json:"mitigated_damage,omitempty"`
-	Blocked           *bool  `json:"blocked,omitempty"`
-	Critical          *bool  `json:"critical,omitempty"`
-	Heal              *int   `json:"heal,omitempty"`
-	ItemInstanceID    string `json:"item_instance_id,omitempty"`
-	Level             *int   `json:"level,omitempty"`
-	FromLevel         *int   `json:"from_level,omitempty"`
-	ToLevel           *int   `json:"to_level,omitempty"`
-	Amount            *int   `json:"amount,omitempty"`
-	TotalExperience   *int   `json:"total_experience,omitempty"`
-	Stat              string `json:"stat,omitempty"`
-	UnspentStatPoints *int   `json:"unspent_stat_points,omitempty"`
+	EventType         string             `json:"event_type"`
+	EntityID          string             `json:"entity_id,omitempty"`
+	SourceEntityID    string             `json:"source_entity_id,omitempty"`
+	TargetEntityID    string             `json:"target_entity_id,omitempty"`
+	CorrelationID     string             `json:"correlation_id,omitempty"`
+	Damage            *int               `json:"damage,omitempty"`
+	Outcome           string             `json:"outcome,omitempty"`
+	RawDamage         *int               `json:"raw_damage,omitempty"`
+	MitigatedDamage   *int               `json:"mitigated_damage,omitempty"`
+	Blocked           *bool              `json:"blocked,omitempty"`
+	Critical          *bool              `json:"critical,omitempty"`
+	Heal              *int               `json:"heal,omitempty"`
+	ItemInstanceID    string             `json:"item_instance_id,omitempty"`
+	Level             *int               `json:"level,omitempty"`
+	FromLevel         *int               `json:"from_level,omitempty"`
+	ToLevel           *int               `json:"to_level,omitempty"`
+	Amount            *int               `json:"amount,omitempty"`
+	TotalExperience   *int               `json:"total_experience,omitempty"`
+	Stat              string             `json:"stat,omitempty"`
+	UnspentStatPoints *int               `json:"unspent_stat_points,omitempty"`
+	Reason            string             `json:"reason,omitempty"`
+	PatternID         string             `json:"pattern_id,omitempty"`
+	PhaseIndex        *int               `json:"phase_index,omitempty"`
+	PhaseKind         string             `json:"phase_kind,omitempty"`
+	DurationTicks     *int               `json:"duration_ticks,omitempty"`
+	Telegraph         *BossTelegraphView `json:"telegraph,omitempty"`
+	HitShape          *BossHitShapeView  `json:"hit_shape,omitempty"`
+	State             string             `json:"state,omitempty"`
 }
 
 // TeleporterDiscoveryView is the protocol view of a generated dungeon level's
@@ -200,6 +240,8 @@ type Snapshot struct {
 	Equipped              map[string]*string        `json:"equipped"`
 	HotbarCapacity        int                       `json:"hotbar_capacity"`
 	Hotbar                []HotbarSlotView          `json:"hotbar"`
+	InventoryRows         int                       `json:"inventory_rows"`
+	InventoryCapacity     int                       `json:"inventory_capacity"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	RecentEvents          []Event                   `json:"recent_events"`
@@ -231,6 +273,8 @@ type Change struct {
 	ItemInstanceID *string // for equipped_update; nil marshals as null
 	SlotIndex      int
 	HotbarCapacity *int
+	InventoryRows  *int
+	InventoryCap   *int
 	Level          int
 	Discovered     bool
 	Progression    *CharacterProgressionView
@@ -269,13 +313,17 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Slot           string  `json:"slot"`
 			ItemInstanceID *string `json:"item_instance_id"`
 			HotbarCapacity *int    `json:"hotbar_capacity,omitempty"`
-		}{c.Op, c.Slot, c.ItemInstanceID, c.HotbarCapacity})
+			InventoryRows  *int    `json:"inventory_rows,omitempty"`
+			InventoryCap   *int    `json:"inventory_capacity,omitempty"`
+		}{c.Op, c.Slot, c.ItemInstanceID, c.HotbarCapacity, c.InventoryRows, c.InventoryCap})
 	case OpHotbarUpdate:
 		return json.Marshal(struct {
 			Op             string  `json:"op"`
 			SlotIndex      int     `json:"slot_index"`
 			ItemInstanceID *string `json:"item_instance_id"`
-		}{c.Op, c.SlotIndex, c.ItemInstanceID})
+			InventoryRows  *int    `json:"inventory_rows,omitempty"`
+			InventoryCap   *int    `json:"inventory_capacity,omitempty"`
+		}{c.Op, c.SlotIndex, c.ItemInstanceID, c.InventoryRows, c.InventoryCap})
 	case OpTeleporterDiscoveryUpdate:
 		return json.Marshal(struct {
 			Op         string `json:"op"`

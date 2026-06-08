@@ -46,6 +46,12 @@
     "guarded_chest_drop_depth_3_plus": {
       "treasure_class_id": "guarded_chest_tc_depth_3_plus"
     },
+    "boss_chest_drop_tier_1": {
+      "treasure_class_id": "guarded_chest_tc_depth_3_plus"
+    },
+    "boss_drop_tier_1": {
+      "treasure_class_id": "dungeon_mob_tc_depth_3_plus"
+    },
     "no_drop": {
     }
   }

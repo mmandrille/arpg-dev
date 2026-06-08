@@ -145,6 +145,133 @@ func TestBuildTimelineIncludesGeneratedMonsterRarity(t *testing.T) {
 	}
 }
 
+func TestVerifyBossFloorGateReplay(t *testing.T) {
+	rules := loadRules(t)
+	progression := game.CharacterProgressionState{
+		Level: 1,
+		BaseStats: game.BaseStatsView{
+			Str:   200,
+			Dex:   5,
+			Vit:   200,
+			Magic: 5,
+		},
+	}
+	sim, err := game.NewSimWithWorldProgression(testSessionID, "boss_floor_gate", rules, "dungeon_levels", progression)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actorID := sim.DefaultPlayerID()
+	rows := []store.SessionInput{}
+	events := []store.SessionEvent{}
+	sequence := int64(0)
+	tick := int64(0)
+
+	for level := 0; level > -5; level-- {
+		down := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "stairs_down")
+		if down == nil {
+			t.Fatalf("missing stairs_down on level %d", level)
+		}
+		tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
+		tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
+			ActorPlayerID: actorID,
+			Type:          "descend_intent",
+			Descend:       &game.DescendIntent{},
+		})
+	}
+
+	down := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "stairs_down")
+	if down == nil || down.State != "locked" {
+		t.Fatalf("boss floor down = %+v, want locked", down)
+	}
+	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
+	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: actorID,
+		Type:          "descend_intent",
+		Descend:       &game.DescendIntent{},
+	})
+	if !hasStoreEvent(events, "descend_blocked") {
+		t.Fatalf("missing descend_blocked in recorded events")
+	}
+
+	teleporter := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "teleporter")
+	if teleporter == nil || teleporter.State != "disabled" {
+		t.Fatalf("boss floor teleporter = %+v, want disabled", teleporter)
+	}
+	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, teleporter.Position)
+	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: actorID,
+		Type:          "action_intent",
+		Action:        &game.ActionIntent{TargetID: teleporter.ID},
+	})
+	if !hasStoreEvent(events, "teleport_blocked") {
+		t.Fatalf("missing teleport_blocked in recorded events")
+	}
+
+	boss := findBossSnapshotEntity(t, sim.SnapshotForPlayer(actorID))
+	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: actorID,
+		Type:          "action_intent",
+		Action:        &game.ActionIntent{TargetID: boss.ID},
+	})
+	for guard := 0; guard < 2000 && !hasStoreEvent(events, "monster_killed"); guard++ {
+		results := sim.TickResults(nil)
+		collectReplayEvents(&events, results)
+		tick++
+	}
+	if !hasStoreEvent(events, "monster_killed") || !hasStoreEvent(events, "interactable_state_changed") {
+		t.Fatalf("missing boss kill/unlock events")
+	}
+
+	down = findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "stairs_down")
+	if down == nil || down.State != "ready" {
+		t.Fatalf("unlocked down = %+v, want ready", down)
+	}
+	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
+	_ = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: actorID,
+		Type:          "descend_intent",
+		Descend:       &game.DescendIntent{},
+	})
+
+	repo := &fakeRepo{
+		session: store.Session{
+			ID:          testSessionID,
+			AccountID:   "acct_host",
+			CharacterID: "char_host",
+			Seed:        "boss_floor_gate",
+			WorldID:     "dungeon_levels",
+		},
+		inputs: rows,
+		events: events,
+		start: store.SessionStartSnapshot{
+			SessionID:   testSessionID,
+			AccountID:   "acct_host",
+			CharacterID: "char_host",
+			Progression: &store.CharacterProgression{
+				AccountID:   "acct_host",
+				CharacterID: "char_host",
+				Level:       progression.Level,
+				Stats: store.CharacterBaseStats{
+					Str:   progression.BaseStats.Str,
+					Dex:   progression.BaseStats.Dex,
+					Vit:   progression.BaseStats.Vit,
+					Magic: progression.BaseStats.Magic,
+				},
+			},
+		},
+	}
+	rep, err := Verify(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if !rep.Match {
+		t.Fatalf("verify mismatch: %s", rep.Mismatch)
+	}
+	if rep.Snapshot.CurrentLevel != -6 {
+		t.Fatalf("replay current level = %d, want -6", rep.Snapshot.CurrentLevel)
+	}
+}
+
 func TestReconstructFromInputsUsesWorldID(t *testing.T) {
 	rules := loadRules(t)
 	recon, err := ReconstructFromInputs(testSessionID, testSeed, rules, "gear_before_combat", nil, -1)
@@ -707,6 +834,18 @@ func findSnapshotEntity(snap game.Snapshot, typ, defID string) *game.EntityView 
 			return e
 		}
 	}
+	return nil
+}
+
+func findBossSnapshotEntity(t *testing.T, snap game.Snapshot) *game.EntityView {
+	t.Helper()
+	for i := range snap.Entities {
+		e := &snap.Entities[i]
+		if e.Type == "monster" && e.IsBoss {
+			return e
+		}
+	}
+	t.Fatal("missing boss entity in snapshot")
 	return nil
 }
 

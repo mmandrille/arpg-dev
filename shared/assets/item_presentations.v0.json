@@ -41,6 +41,10 @@
       "icon": { "shape": "badge", "color": "#7f5a35", "accent": "#e6c086", "label": "Bt" },
       "ground": { "shape": "badge", "color": "#7f5a35", "accent": "#e6c086", "scale": 0.8 }
     },
+    "cave_pack_belt": {
+      "icon": { "shape": "badge", "color": "#5f7043", "accent": "#d2e6a4", "label": "Pk" },
+      "ground": { "shape": "badge", "color": "#5f7043", "accent": "#d2e6a4", "scale": 0.8 }
+    },
     "cave_boots": {
       "icon": { "shape": "badge", "color": "#514f4b", "accent": "#c4b9a5", "label": "Bo" },
       "ground": { "shape": "badge", "color": "#514f4b", "accent": "#c4b9a5", "scale": 0.8 }

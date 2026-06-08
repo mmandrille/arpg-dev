@@ -16,7 +16,7 @@
         "additionalProperties": false,
         "properties": {
           "name": { "type": "string", "minLength": 1 },
-          "initial_state": { "type": "string", "enum": ["closed", "ready"] },
+          "initial_state": { "type": "string", "enum": ["closed", "ready", "locked", "disabled"] },
           "transition": { "type": "string", "enum": ["ascend", "descend", "waypoint"] },
           "barrier_when_closed": {
             "type": "object",
@@ -39,7 +39,7 @@
           },
           {
             "if": {
-              "properties": { "initial_state": { "const": "ready" } },
+              "properties": { "initial_state": { "enum": ["ready", "locked", "disabled"] } },
               "required": ["initial_state"]
             },
             "then": {

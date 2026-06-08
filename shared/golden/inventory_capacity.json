@@ -1,0 +1,17 @@
+{
+  "base_inventory_rows": 3,
+  "columns": 5,
+  "base_capacity": 15,
+  "row_granting_item": "cave_pack_belt",
+  "row_item_bonus": 1,
+  "row_item_capacity": 20,
+  "bag_occupancy": {
+    "equipped_counts": false,
+    "hotbar_assigned_counts": false,
+    "bag_item_counts": true
+  },
+  "rejections": {
+    "pickup_full_bag": "inventory_full",
+    "capacity_shrink_overflow": "capacity_would_overflow"
+  }
+}

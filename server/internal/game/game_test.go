@@ -177,6 +177,126 @@ func TestMonsterRarityGolden(t *testing.T) {
 	}
 }
 
+func TestBossRulesAndGoldens(t *testing.T) {
+	rules := loadRules(t)
+
+	var floorGolden struct {
+		Seed        string           `json:"seed"`
+		Level       int              `json:"level"`
+		IsBossFloor bool             `json:"is_boss_floor"`
+		FloorSize   DungeonFloorSize `json:"floor_size"`
+		Expected    struct {
+			BossCount              int    `json:"boss_count"`
+			ChestCount             int    `json:"chest_count"`
+			StairsDownCount        int    `json:"stairs_down_count"`
+			TeleporterCount        int    `json:"teleporter_count"`
+			StairsDownInitialState string `json:"stairs_down_initial_state"`
+			TeleporterInitialState string `json:"teleporter_initial_state"`
+			UnlockedState          string `json:"unlocked_state"`
+			LockedReason           string `json:"locked_reason"`
+			Boss                   struct {
+				TemplateID       string  `json:"template_id"`
+				BaseMonsterDefID string  `json:"base_monster_def_id"`
+				VisualModel      string  `json:"visual_model"`
+				VisualColor      string  `json:"visual_color"`
+				VisualScale      float64 `json:"visual_scale"`
+			} `json:"boss"`
+		} `json:"expected"`
+	}
+	loadGolden(t, "boss_floor_-5.json", &floorGolden)
+	if !floorGolden.IsBossFloor || floorGolden.Level != rules.DungeonGeneration.BossFloor.FirstLevel {
+		t.Fatalf("boss floor golden level/classification = %d/%v", floorGolden.Level, floorGolden.IsBossFloor)
+	}
+	if floorGolden.FloorSize != rules.DungeonGeneration.BossFloor.FloorSize {
+		t.Fatalf("boss floor size = %+v, want %+v", floorGolden.FloorSize, rules.DungeonGeneration.BossFloor.FloorSize)
+	}
+	if floorGolden.Expected.BossCount != 1 || floorGolden.Expected.ChestCount != 1 || floorGolden.Expected.StairsDownCount != 1 || floorGolden.Expected.TeleporterCount != 1 {
+		t.Fatalf("boss floor entity counts = %+v", floorGolden.Expected)
+	}
+	if floorGolden.Expected.StairsDownInitialState != interactableLocked || floorGolden.Expected.TeleporterInitialState != interactableDisabled || floorGolden.Expected.UnlockedState != interactableReady {
+		t.Fatalf("boss floor exit states = %+v", floorGolden.Expected)
+	}
+	if floorGolden.Expected.LockedReason != rules.DungeonGeneration.BossFloor.LockedExitReason {
+		t.Fatalf("boss floor locked reason = %s, want %s", floorGolden.Expected.LockedReason, rules.DungeonGeneration.BossFloor.LockedExitReason)
+	}
+	template, ok := rules.BossTemplates[floorGolden.Expected.Boss.TemplateID]
+	if !ok {
+		t.Fatalf("boss template %s missing", floorGolden.Expected.Boss.TemplateID)
+	}
+	if template.BaseMonsterDefID != floorGolden.Expected.Boss.BaseMonsterDefID {
+		t.Fatalf("boss base monster = %s, want %s", template.BaseMonsterDefID, floorGolden.Expected.Boss.BaseMonsterDefID)
+	}
+	if template.Visual.Model != floorGolden.Expected.Boss.VisualModel || template.Visual.Color != floorGolden.Expected.Boss.VisualColor || template.Visual.Scale != floorGolden.Expected.Boss.VisualScale {
+		t.Fatalf("boss visual = %+v, want golden %+v", template.Visual, floorGolden.Expected.Boss)
+	}
+
+	var timelineGolden struct {
+		PatternID             string `json:"pattern_id"`
+		MinimumTelegraphTicks int    `json:"minimum_telegraph_ticks"`
+		Timeline              []struct {
+			PhaseIndex    int          `json:"phase_index"`
+			Kind          string       `json:"kind"`
+			StartTick     int          `json:"start_tick"`
+			EndTick       int          `json:"end_tick"`
+			DurationTicks int          `json:"duration_ticks"`
+			TelegraphType string       `json:"telegraph_type"`
+			HitShape      string       `json:"hit_shape"`
+			Shape         string       `json:"shape"`
+			Radius        float64      `json:"radius"`
+			Damage        *DamageRange `json:"damage"`
+		} `json:"timeline"`
+		CooldownTicks int `json:"cooldown_ticks"`
+		DodgeCase     struct {
+			PlayerStartsInContact  bool `json:"player_starts_in_contact"`
+			BreakContactBeforeTick int  `json:"break_contact_before_tick"`
+			ExpectedDamage         int  `json:"expected_damage"`
+		} `json:"dodge_case"`
+	}
+	loadGolden(t, "boss_pattern_timeline.json", &timelineGolden)
+	pattern, ok := rules.BossPatterns[timelineGolden.PatternID]
+	if !ok {
+		t.Fatalf("boss pattern %s missing", timelineGolden.PatternID)
+	}
+	if pattern.CooldownTicks != timelineGolden.CooldownTicks {
+		t.Fatalf("cooldown = %d, want %d", pattern.CooldownTicks, timelineGolden.CooldownTicks)
+	}
+	if len(pattern.Phases) != len(timelineGolden.Timeline) {
+		t.Fatalf("phase count = %d, want %d", len(pattern.Phases), len(timelineGolden.Timeline))
+	}
+	cursor := 0
+	for i, want := range timelineGolden.Timeline {
+		got := pattern.Phases[i]
+		if want.PhaseIndex != i || got.Kind != want.Kind || got.DurationTicks != want.DurationTicks {
+			t.Fatalf("phase %d = %+v, want %+v", i, got, want)
+		}
+		if want.StartTick != cursor || want.EndTick != cursor+got.DurationTicks-1 {
+			t.Fatalf("phase %d bounds = %d..%d, want %d..%d", i, want.StartTick, want.EndTick, cursor, cursor+got.DurationTicks-1)
+		}
+		if want.TelegraphType != "" && got.TelegraphType != want.TelegraphType {
+			t.Fatalf("phase %d telegraph type = %s, want %s", i, got.TelegraphType, want.TelegraphType)
+		}
+		if want.HitShape != "" && got.HitShape != want.HitShape {
+			t.Fatalf("phase %d hit shape = %s, want %s", i, got.HitShape, want.HitShape)
+		}
+		if want.Shape != "" && got.Shape != want.Shape {
+			t.Fatalf("phase %d shape = %s, want %s", i, got.Shape, want.Shape)
+		}
+		if want.Radius != 0 && got.Radius != want.Radius {
+			t.Fatalf("phase %d radius = %v, want %v", i, got.Radius, want.Radius)
+		}
+		if want.Damage != nil && (got.Damage == nil || *got.Damage != *want.Damage) {
+			t.Fatalf("phase %d damage = %+v, want %+v", i, got.Damage, want.Damage)
+		}
+		cursor += got.DurationTicks
+	}
+	if !timelineGolden.DodgeCase.PlayerStartsInContact || timelineGolden.DodgeCase.ExpectedDamage != 0 {
+		t.Fatalf("invalid dodge case = %+v", timelineGolden.DodgeCase)
+	}
+	if timelineGolden.DodgeCase.BreakContactBeforeTick >= timelineGolden.Timeline[1].StartTick {
+		t.Fatalf("dodge breaks contact at %d, active starts at %d", timelineGolden.DodgeCase.BreakContactBeforeTick, timelineGolden.Timeline[1].StartTick)
+	}
+}
+
 func TestCharacterProgressionGolden(t *testing.T) {
 	rules := loadRules(t)
 	var golden struct {
@@ -1984,6 +2104,127 @@ func TestHotbarCapacityAndBelt(t *testing.T) {
 	}
 }
 
+func TestInventoryCapacityBaseItemBonusAndGolden(t *testing.T) {
+	var golden struct {
+		BaseInventoryRows int    `json:"base_inventory_rows"`
+		Columns           int    `json:"columns"`
+		BaseCapacity      int    `json:"base_capacity"`
+		RowGrantingItem   string `json:"row_granting_item"`
+		RowItemBonus      int    `json:"row_item_bonus"`
+		RowItemCapacity   int    `json:"row_item_capacity"`
+	}
+	loadGolden(t, "inventory_capacity.json", &golden)
+	if golden.BaseInventoryRows != baseInventoryRows || golden.Columns != inventoryColumns || golden.BaseCapacity != inventoryCapacityForRows(baseInventoryRows) {
+		t.Fatalf("inventory capacity constants = rows %d columns %d cap %d, want golden %+v", baseInventoryRows, inventoryColumns, inventoryCapacityForRows(baseInventoryRows), golden)
+	}
+
+	sim := NewSim("sess_inventory_capacity", "01", loadRules(t))
+	snap := sim.Snapshot()
+	if snap.InventoryRows != golden.BaseInventoryRows || snap.InventoryCapacity != golden.BaseCapacity {
+		t.Fatalf("base snapshot rows/capacity = %d/%d, want %d/%d", snap.InventoryRows, snap.InventoryCapacity, golden.BaseInventoryRows, golden.BaseCapacity)
+	}
+	if sim.bagOccupancyCount() != 0 {
+		t.Fatalf("empty bag occupancy = %d, want 0", sim.bagOccupancyCount())
+	}
+
+	belt := addRolledInventoryItem(t, sim, 7300, golden.RowGrantingItem, map[string]int{"inventory_rows": golden.RowItemBonus})
+	equip := sim.Tick([]Input{{MessageID: "pack_belt", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(belt.instanceID), Slot: "belt"}}})
+	assertAck(t, equip, "pack_belt")
+	if !hasEquippedUpdateInventoryCapacity(equip, "belt", golden.BaseInventoryRows+golden.RowItemBonus, golden.RowItemCapacity) {
+		t.Fatalf("pack belt equip missing inventory capacity update: %+v", equip.Changes)
+	}
+	snap = sim.Snapshot()
+	if snap.InventoryRows != golden.BaseInventoryRows+golden.RowItemBonus || snap.InventoryCapacity != golden.RowItemCapacity {
+		t.Fatalf("pack belt snapshot rows/capacity = %d/%d, want %d/%d", snap.InventoryRows, snap.InventoryCapacity, golden.BaseInventoryRows+golden.RowItemBonus, golden.RowItemCapacity)
+	}
+
+	sim.progression.UnspentStatPoints = 1
+	sim.savePlayer(sim.defaultPlayer())
+	assertAck(t, sim.Tick([]Input{{MessageID: "stat", Type: "allocate_stat_intent", AllocateStat: &AllocateStatIntent{Stat: "str", Points: 1}}}), "stat")
+	snap = sim.Snapshot()
+	if snap.InventoryRows != golden.BaseInventoryRows+golden.RowItemBonus || snap.InventoryCapacity != golden.RowItemCapacity {
+		t.Fatalf("stat allocation changed inventory capacity to %d/%d", snap.InventoryRows, snap.InventoryCapacity)
+	}
+}
+
+func TestInventoryCapacityOccupancyExemptsEquippedAndHotbar(t *testing.T) {
+	sim := NewSim("sess_inventory_occupancy", "01", loadRules(t))
+	sword := addStaticInventoryItem(sim, 7310, "rusty_sword")
+	potion := addStaticInventoryItem(sim, 7311, "red_potion")
+	badge := addStaticInventoryItem(sim, 7312, "training_badge")
+
+	if got := sim.bagOccupancyCount(); got != 3 {
+		t.Fatalf("bag occupancy = %d, want 3", got)
+	}
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "equip_sword")
+	if got := sim.bagOccupancyCount(); got != 2 {
+		t.Fatalf("bag occupancy after equip = %d, want 2", got)
+	}
+	assign := sim.Tick([]Input{{MessageID: "assign_potion", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr(idStr(potion.instanceID))}}})
+	assertAck(t, assign, "assign_potion")
+	if !hasHotbarUpdateInventoryCapacity(assign, 0, baseInventoryRows, inventoryCapacityForRows(baseInventoryRows)) {
+		t.Fatalf("hotbar assignment missing inventory capacity update: %+v", assign.Changes)
+	}
+	if got := sim.bagOccupancyCount(); got != 1 {
+		t.Fatalf("bag occupancy after hotbar assign = %d, want 1", got)
+	}
+	if badge.equipped {
+		t.Fatal("badge unexpectedly equipped")
+	}
+}
+
+func TestInventoryCapacityPickupRejectsFullBagBeforeMutation(t *testing.T) {
+	sim := NewSim("sess_inventory_full_pickup", "01", loadRules(t))
+	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
+		addStaticInventoryItem(sim, uint64(7400+i), "training_badge")
+	}
+	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "training_badge"}
+	sim.entities[loot.id] = loot
+	beforeNextID := sim.nextID
+
+	res := sim.Tick([]Input{{MessageID: "pick_full", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(loot.id)}}})
+	assertReject(t, res, "pick_full", "inventory_full")
+	if sim.entities[loot.id] == nil {
+		t.Fatalf("full-bag pickup removed loot")
+	}
+	if len(sim.inventory) != inventoryCapacityForRows(baseInventoryRows) || sim.nextID != beforeNextID {
+		t.Fatalf("full-bag pickup mutated inventory/ids: len=%d next=%d want next=%d", len(sim.inventory), sim.nextID, beforeNextID)
+	}
+}
+
+func TestInventoryCapacityUnequipAndShrinkRejectBeforeMutation(t *testing.T) {
+	sim := NewSim("sess_inventory_unequip_full", "01", loadRules(t))
+	sword := addStaticInventoryItem(sim, 7500, "rusty_sword")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "equip_sword")
+	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
+		addStaticInventoryItem(sim, uint64(7510+i), "training_badge")
+	}
+	rejectUnequip := sim.Tick([]Input{{MessageID: "unequip_full", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: mainHandSlot}}})
+	assertReject(t, rejectUnequip, "unequip_full", "capacity_would_overflow")
+	if !sword.equipped || sim.equipped[mainHandSlot] != sword.instanceID {
+		t.Fatalf("rejected unequip mutated sword/equipped: item=%+v equipped=%v", sword, sim.equipped)
+	}
+
+	sim = NewSim("sess_inventory_shrink_full", "01", loadRules(t))
+	pack := addRolledInventoryItem(t, sim, 7600, "cave_pack_belt", map[string]int{"inventory_rows": 1})
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_pack", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(pack.instanceID), Slot: "belt"}}}), "equip_pack")
+	for i := 0; i < inventoryCapacityForRows(baseInventoryRows)+1; i++ {
+		addStaticInventoryItem(sim, uint64(7610+i), "training_badge")
+	}
+	rejectShrink := sim.Tick([]Input{{MessageID: "unequip_pack", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: "belt"}}})
+	assertReject(t, rejectShrink, "unequip_pack", "capacity_would_overflow")
+	if !pack.equipped || sim.equipped["belt"] != pack.instanceID || sim.Snapshot().InventoryCapacity != 20 {
+		t.Fatalf("rejected shrink mutated pack/equipped/capacity: item=%+v equipped=%v snap=%+v", pack, sim.equipped, sim.Snapshot())
+	}
+
+	normal := addRolledInventoryItem(t, sim, 7700, "cave_belt", map[string]int{"armor": 1})
+	rejectReplace := sim.Tick([]Input{{MessageID: "replace_pack", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(normal.instanceID), Slot: "belt"}}})
+	assertReject(t, rejectReplace, "replace_pack", "capacity_would_overflow")
+	if sim.equipped["belt"] != pack.instanceID || normal.equipped {
+		t.Fatalf("rejected replacement mutated belts: equipped=%v normal=%+v", sim.equipped, normal)
+	}
+}
+
 func TestHotbarAssignUseDirectUseAndReenable(t *testing.T) {
 	sim := NewSim("sess_hotbar_use", "01", loadRules(t))
 	player := sim.entities[sim.playerID]
@@ -2659,6 +2900,28 @@ func hasEquippedUpdateCapacity(r TickResult, slot string, capacity int) bool {
 	return false
 }
 
+func hasEquippedUpdateInventoryCapacity(r TickResult, slot string, rows, capacity int) bool {
+	for _, c := range r.Changes {
+		if c.Op == OpEquippedUpdate && c.Slot == slot &&
+			c.InventoryRows != nil && *c.InventoryRows == rows &&
+			c.InventoryCap != nil && *c.InventoryCap == capacity {
+			return true
+		}
+	}
+	return false
+}
+
+func hasHotbarUpdateInventoryCapacity(r TickResult, slotIndex int, rows, capacity int) bool {
+	for _, c := range r.Changes {
+		if c.Op == OpHotbarUpdate && c.SlotIndex == slotIndex &&
+			c.InventoryRows != nil && *c.InventoryRows == rows &&
+			c.InventoryCap != nil && *c.InventoryCap == capacity {
+			return true
+		}
+	}
+	return false
+}
+
 func sameStrings(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
@@ -2959,6 +3222,215 @@ func TestDungeonStairsGolden(t *testing.T) {
 	}
 }
 
+func TestBossFloorGenerationGolden(t *testing.T) {
+	var golden struct {
+		Seed      string           `json:"seed"`
+		Level     int              `json:"level"`
+		FloorSize DungeonFloorSize `json:"floor_size"`
+		Expected  struct {
+			BossCount              int    `json:"boss_count"`
+			ChestCount             int    `json:"chest_count"`
+			StairsDownCount        int    `json:"stairs_down_count"`
+			TeleporterCount        int    `json:"teleporter_count"`
+			StairsDownInitialState string `json:"stairs_down_initial_state"`
+			TeleporterInitialState string `json:"teleporter_initial_state"`
+			Boss                   struct {
+				TemplateID       string  `json:"template_id"`
+				BaseMonsterDefID string  `json:"base_monster_def_id"`
+				VisualModel      string  `json:"visual_model"`
+				VisualColor      string  `json:"visual_color"`
+				VisualScale      float64 `json:"visual_scale"`
+			} `json:"boss"`
+		} `json:"expected"`
+	}
+	loadGolden(t, "boss_floor_-5.json", &golden)
+	rules := loadRules(t)
+	level, err := GenerateDungeonLevel(golden.Seed, golden.Level, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate boss floor: %v", err)
+	}
+	again, err := GenerateDungeonLevel(golden.Seed, golden.Level, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate boss floor again: %v", err)
+	}
+	if len(level.stairs) != len(again.stairs) || len(level.teleporters) != len(again.teleporters) || len(level.chests) != len(again.chests) || len(level.monsters) != len(again.monsters) {
+		t.Fatalf("repeat boss floor counts changed")
+	}
+	for i := range level.monsters {
+		if level.monsters[i].defID != again.monsters[i].defID || level.monsters[i].rarityID != again.monsters[i].rarityID || level.monsters[i].bossTemplate != again.monsters[i].bossTemplate || level.monsters[i].pos != again.monsters[i].pos {
+			t.Fatalf("repeat boss monster %d = %+v, want %+v", i, again.monsters[i], level.monsters[i])
+		}
+	}
+	if !isBossFloor(golden.Level, rules.DungeonGeneration) {
+		t.Fatalf("level %d not classified as boss floor", golden.Level)
+	}
+	if rules.DungeonGeneration.BossFloor.FloorSize != golden.FloorSize {
+		t.Fatalf("boss floor size = %+v, want %+v", rules.DungeonGeneration.BossFloor.FloorSize, golden.FloorSize)
+	}
+	if len(level.chests) != golden.Expected.ChestCount {
+		t.Fatalf("chests = %d, want %d", len(level.chests), golden.Expected.ChestCount)
+	}
+	bosses := 0
+	for _, monster := range level.monsters {
+		if monster.isBoss {
+			bosses++
+			if monster.bossTemplate != golden.Expected.Boss.TemplateID {
+				t.Fatalf("boss template = %s, want %s", monster.bossTemplate, golden.Expected.Boss.TemplateID)
+			}
+		}
+	}
+	if bosses != golden.Expected.BossCount {
+		t.Fatalf("boss count = %d, want %d", bosses, golden.Expected.BossCount)
+	}
+	downCount := 0
+	for _, stair := range level.stairs {
+		if stair.defID == stairsDownDefID {
+			downCount++
+			if stair.state != golden.Expected.StairsDownInitialState {
+				t.Fatalf("stairs_down state = %s, want %s", stair.state, golden.Expected.StairsDownInitialState)
+			}
+		}
+	}
+	if downCount != golden.Expected.StairsDownCount {
+		t.Fatalf("stairs_down count = %d, want %d", downCount, golden.Expected.StairsDownCount)
+	}
+	if len(level.teleporters) != golden.Expected.TeleporterCount {
+		t.Fatalf("teleporter count = %d, want %d", len(level.teleporters), golden.Expected.TeleporterCount)
+	}
+	if level.teleporters[0].state != golden.Expected.TeleporterInitialState {
+		t.Fatalf("teleporter state = %s, want %s", level.teleporters[0].state, golden.Expected.TeleporterInitialState)
+	}
+
+	sim, err := NewSimWithWorld("sess", golden.Seed, rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	levelState, err := sim.ensureDungeonLevel(golden.Level)
+	if err != nil {
+		t.Fatalf("ensure boss floor: %v", err)
+	}
+	var bossView *EntityView
+	for _, id := range sortedEntityIDs(levelState.entities) {
+		view := levelState.entities[id].view()
+		if view.IsBoss {
+			bossView = &view
+			break
+		}
+	}
+	if bossView == nil {
+		t.Fatal("missing boss entity view")
+	}
+	if bossView.BossTemplateID != golden.Expected.Boss.TemplateID || bossView.MonsterDefID != golden.Expected.Boss.BaseMonsterDefID {
+		t.Fatalf("boss view ids = template %s def %s", bossView.BossTemplateID, bossView.MonsterDefID)
+	}
+	if bossView.VisualModel != golden.Expected.Boss.VisualModel || bossView.VisualTint != golden.Expected.Boss.VisualColor || bossView.VisualScale != golden.Expected.Boss.VisualScale {
+		t.Fatalf("boss view visual = model %s tint %s scale %v", bossView.VisualModel, bossView.VisualTint, bossView.VisualScale)
+	}
+}
+
+func TestBossPhaseTimingAndDodge(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess", "boss_floor_gate", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	level, err := sim.ensureDungeonLevel(-5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.currentLevel = -5
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 15, Y: 15})
+	sim.syncCompatibilityFields()
+	boss := findBossEntity(t, level)
+	player := level.entities[sim.playerID]
+	player.pos = boss.pos
+	start := sim.Tick(nil)
+	if !hasEvent(start, "boss_phase_started") || hasEvent(start, "player_damaged") {
+		t.Fatalf("boss telegraph start events = %+v", start.Events)
+	}
+	for i := 0; i < 28; i++ {
+		res := sim.Tick(nil)
+		if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
+			t.Fatalf("player damaged during telegraph tick %d: %+v", i, res.Events)
+		}
+	}
+	player.pos = Vec2{X: boss.pos.X - 5, Y: boss.pos.Y}
+	activeStart := sim.Tick(nil)
+	if !hasEvent(activeStart, "boss_phase_ended") || !hasEvent(activeStart, "boss_phase_started") {
+		t.Fatalf("missing telegraph end/active start: %+v", activeStart.Events)
+	}
+	for i := 0; i < 4; i++ {
+		res := sim.Tick(nil)
+		if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
+			t.Fatalf("player damaged after breaking contact tick %d: %+v", i, res.Events)
+		}
+	}
+}
+
+func TestBossFloorExitsUnlockAfterBossKill(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess", "boss_floor_gate", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	level, err := sim.ensureDungeonLevel(-5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.currentLevel = -5
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 15, Y: 15})
+	sim.syncCompatibilityFields()
+	player := level.entities[sim.playerID]
+	down := sim.findStair(level, stairsDownDefID)
+	if down == nil {
+		t.Fatal("missing boss-floor down stairs")
+	}
+	player.pos = down.pos
+	blockedDescend := sim.Tick([]Input{{MessageID: "blocked_descend", Type: "descend_intent", Descend: &DescendIntent{}}})
+	assertReject(t, blockedDescend, "blocked_descend", rules.DungeonGeneration.BossFloor.LockedExitReason)
+	if !hasEvent(blockedDescend, "descend_blocked") {
+		t.Fatalf("missing descend_blocked: %+v", blockedDescend.Events)
+	}
+	teleporter := sim.findTeleporter(level)
+	if teleporter == nil {
+		t.Fatal("missing boss-floor teleporter")
+	}
+	player.pos = teleporter.pos
+	blockedTeleport := sim.Tick([]Input{{MessageID: "blocked_tp_action", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(teleporter.id)}}})
+	assertReject(t, blockedTeleport, "blocked_tp_action", rules.DungeonGeneration.BossFloor.LockedExitReason)
+	if !hasEvent(blockedTeleport, "teleport_blocked") {
+		t.Fatalf("missing teleport_blocked: %+v", blockedTeleport.Events)
+	}
+
+	boss := findBossEntity(t, level)
+	player.pos = boss.pos
+	boss.hp = 1
+	kill := sim.Tick([]Input{{MessageID: "kill_boss", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(boss.id)}}})
+	assertAck(t, kill, "kill_boss")
+	if !hasEvent(kill, "monster_killed") || !hasEvent(kill, "interactable_state_changed") {
+		t.Fatalf("missing boss kill/unlock events: %+v", kill.Events)
+	}
+	if down.state != interactableReady {
+		t.Fatalf("down state = %s, want %s", down.state, interactableReady)
+	}
+	if teleporter.state != interactableReady {
+		t.Fatalf("teleporter state = %s, want %s", teleporter.state, interactableReady)
+	}
+	player.pos = teleporter.pos
+	discover := sim.Tick([]Input{{MessageID: "discover_after_boss", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(teleporter.id)}}})
+	assertAck(t, discover, "discover_after_boss")
+	if !hasTeleporterDiscoveryUpdate(discover, -5) || !hasTeleporterDiscoveredEvent(discover, -5) {
+		t.Fatalf("missing unlocked teleporter discovery: changes=%+v events=%+v", discover.Changes, discover.Events)
+	}
+	player.pos = down.pos
+	descend := sim.TickResults([]Input{{MessageID: "descend_after_boss", Type: "descend_intent", Descend: &DescendIntent{}}})
+	if len(descend) != 2 {
+		t.Fatalf("descend after boss results = %d, want 2: %+v", len(descend), descend)
+	}
+	assertAck(t, descend[0], "descend_after_boss")
+	assertLevelChanged(t, descend[0], -5, -6)
+}
+
 func TestDungeonMonsterGeneration(t *testing.T) {
 	rules := loadRules(t)
 	placement := rules.DungeonGeneration.MonsterPlacement
@@ -3085,7 +3557,7 @@ func TestGeneratedDungeonSourcesUseDepthLootTables(t *testing.T) {
 		{-1, "guarded_chest_drop_depth_1"},
 		{-2, "guarded_chest_drop_depth_2"},
 		{-3, "guarded_chest_drop_depth_3_plus"},
-		{-10, "guarded_chest_drop_depth_3_plus"},
+		{-4, "guarded_chest_drop_depth_3_plus"},
 	}
 	for _, c := range cases {
 		level, err := GenerateDungeonLevel("v29_source_tables", c.levelNum, rules.DungeonGeneration)
@@ -3892,6 +4364,43 @@ func liveDungeonMonsters(level *LevelState) []*entity {
 		}
 	}
 	return out
+}
+
+func findBossEntity(t *testing.T, level *LevelState) *entity {
+	t.Helper()
+	for _, id := range sortedEntityIDs(level.entities) {
+		candidate := level.entities[id]
+		if candidate != nil && candidate.kind == monsterEntity && candidate.isBoss {
+			return candidate
+		}
+	}
+	t.Fatal("missing boss entity")
+	return nil
+}
+
+func placeDefaultPlayerOnLevel(t *testing.T, sim *Sim, level *LevelState, pos Vec2) {
+	t.Helper()
+	playerID := sim.playerID
+	player := (*entity)(nil)
+	for _, existing := range sim.levels {
+		if existing == nil {
+			continue
+		}
+		if candidate := existing.entities[playerID]; candidate != nil {
+			player = candidate
+			delete(existing.entities, playerID)
+		}
+	}
+	if player == nil {
+		t.Fatalf("missing default player %d", playerID)
+	}
+	player.pos = pos
+	level.entities[playerID] = player
+	if ps := sim.players[playerID]; ps != nil {
+		ps.CurrentLevel = level.levelNum
+	}
+	sim.currentLevel = level.levelNum
+	sim.usePlayer(sim.players[playerID])
 }
 
 func dungeonEquipmentKillLootSequence(t *testing.T, seed string) []string {

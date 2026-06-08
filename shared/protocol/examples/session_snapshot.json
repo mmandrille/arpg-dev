@@ -6,6 +6,9 @@
   "entities": [
     { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 10, "max_hp": 10 },
     { "id": "1002", "type": "monster", "monster_def_id": "training_dummy", "rarity": "common", "position": { "x": 12, "y": 5 }, "hp": 3, "max_hp": 3 },
+    { "id": "1010", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "unique", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "current_humanoid_player", "visual_scale": 2.0, "visual_tint": "#b77cff", "boss_phase": { "pattern_id": "charged_melee", "phase_index": 0, "phase_kind": "telegraph", "started_tick": 42, "remaining_ticks": 30, "telegraph": { "type": "body_color_charge", "from_color": "#b77cff", "to_color": "#ff0000", "radius": 1.6 }, "hit_shape": { "shape": "melee_contact", "radius": 1.6 } }, "position": { "x": 22, "y": 15 }, "hp": 24, "max_hp": 24 },
+    { "id": "1011", "type": "interactable", "interactable_def_id": "stairs_down", "state": "locked", "position": { "x": 27, "y": 15 } },
+    { "id": "1012", "type": "interactable", "interactable_def_id": "teleporter", "state": "disabled", "position": { "x": 25, "y": 7 } },
     { "id": "1003", "type": "loot", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "position": { "x": 13, "y": 5 } }
   ],
   "inventory": [
@@ -25,6 +28,8 @@
     { "slot_index": 8, "item_instance_id": null },
     { "slot_index": 9, "item_instance_id": null }
   ],
+  "inventory_rows": 3,
+  "inventory_capacity": 15,
   "discovered_teleporters": [],
   "character_progression": {
     "level": 1,

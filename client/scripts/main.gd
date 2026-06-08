@@ -43,6 +43,7 @@ const MONSTER_RARITY_TINTS := {
 	"rare": Color("#ff9b9b"),
 	"unique": Color("#ffd978"),
 }
+const BOSS_VISUAL_MODEL := "current_humanoid_player"
 
 var client: NetClient
 var resolver: EquipmentVisualResolver
@@ -58,6 +59,8 @@ var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
 var inventory: Array = []
 var equipped: Dictionary = {}
+var inventory_rows: int = 3
+var inventory_capacity: int = 15
 var hotbar_capacity: int = 2
 var hotbar: Array = []
 var character_progression: Dictionary = {}
@@ -538,6 +541,8 @@ func _apply_snapshot(p: Dictionary) -> void:
 		_upsert_entity(e)
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
+	inventory_rows = int(p.get("inventory_rows", inventory_rows))
+	inventory_capacity = int(p.get("inventory_capacity", inventory_capacity))
 	hotbar_capacity = int(p.get("hotbar_capacity", 2))
 	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
@@ -584,11 +589,19 @@ func _apply_delta(p: Dictionary) -> void:
 				equipped[c["slot"]] = c.get("item_instance_id")
 				if resolver != null:
 					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
+				if c.has("inventory_rows"):
+					inventory_rows = int(c.get("inventory_rows", inventory_rows))
+				if c.has("inventory_capacity"):
+					inventory_capacity = int(c.get("inventory_capacity", inventory_capacity))
 				if c.has("hotbar_capacity"):
 					hotbar_capacity = int(c.get("hotbar_capacity", hotbar_capacity))
 					if consumable_bar != null:
 						consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
 			"hotbar_update":
+				if c.has("inventory_rows"):
+					inventory_rows = int(c.get("inventory_rows", inventory_rows))
+				if c.has("inventory_capacity"):
+					inventory_capacity = int(c.get("inventory_capacity", inventory_capacity))
 				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"))
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
@@ -651,6 +664,12 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "interactable_activated" and entities.has(eid):
 			_set_interactable_state(eid, entities[eid], "open")
+			continue
+		if event_type == "boss_phase_started" and entities.has(eid):
+			_apply_boss_phase_started(eid, ev)
+			continue
+		if event_type == "boss_phase_ended" and entities.has(eid):
+			_apply_boss_phase_ended(eid, ev)
 			continue
 		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
@@ -732,9 +751,13 @@ func _upsert_entity(e: Dictionary) -> void:
 			rec["item_def_id"] = str(e["item_def_id"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "effect_ids", "character_id"]:
+		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
 			if e.has(key):
 				rec[key] = e[key]
+		if e.has("is_boss"):
+			rec["is_boss"] = bool(e["is_boss"])
+		if e.has("visual_scale"):
+			rec["visual_scale"] = float(e["visual_scale"])
 		if e.has("interactable_def_id"):
 			rec["interactable_def_id"] = str(e["interactable_def_id"])
 		entities[id] = rec
@@ -768,6 +791,8 @@ func _upsert_entity(e: Dictionary) -> void:
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
+	if rec["type"] == "monster":
+		_apply_entity_visual_metadata(rec, e)
 	# Resume/snapshot consistency: a monster already dead in the snapshot enters
 	# the terminal death pose without waiting for an event (spec §5.4).
 	if rec["type"] == "monster" and rec["controller"] != null:
@@ -840,7 +865,7 @@ func _apply_hotbar_update(slot_index: int, item_instance_id) -> void:
 
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
-		inventory_panel.set_inventory_state(inventory, equipped)
+		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
@@ -1994,17 +2019,19 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	# Monster adopts the rigged dummy scene (spec §5.3); loot uses shared
 	# presentation metadata while gameplay stays server-owned.
 	if kind == "monster":
-		var packed := MonsterDummyScene
+		var packed := CharacterScene if str(e.get("visual_model", "")) == BOSS_VISUAL_MODEL else MonsterDummyScene
 		if packed != null:
 			var monster := packed.instantiate()
-			_apply_model_tint(monster, _monster_tint(str(e.get("rarity", "common"))))
+			monster.scale = Vector3.ONE * _entity_visual_scale(e)
+			_apply_model_tint(monster, _entity_base_tint(e))
 			return monster
 		# Fallback: red primitive so positioning/targeting still works.
 		var fallback := MeshInstance3D.new()
 		var fm := StandardMaterial3D.new()
-		fm.albedo_color = _monster_tint(str(e.get("rarity", "common")))
+		fm.albedo_color = _entity_base_tint(e)
 		fallback.mesh = BoxMesh.new()
 		fallback.material_override = fm
+		fallback.scale = Vector3.ONE * _entity_visual_scale(e)
 		return fallback
 	if kind == "player":
 		return _make_remote_player_node(e)
@@ -2036,8 +2063,70 @@ func _entity_base_tint(e: Dictionary) -> Color:
 	if kind == "player":
 		return REMOTE_PLAYER_TINT
 	if kind == "monster":
+		if e.has("visual_tint"):
+			return Color(str(e.get("visual_tint", "#ffffff")))
 		return _monster_tint(str(e.get("rarity", "common")))
 	return Color.WHITE
+
+
+func _entity_visual_scale(e: Dictionary) -> float:
+	var scale := float(e.get("visual_scale", 1.0))
+	if scale <= 0.0:
+		return 1.0
+	return scale
+
+
+func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
+	for key in ["boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
+		if e.has(key):
+			rec[key] = e[key]
+	if e.has("is_boss"):
+		rec["is_boss"] = bool(e["is_boss"])
+	if e.has("visual_scale"):
+		rec["visual_scale"] = float(e["visual_scale"])
+	var node := rec.get("node", null) as Node3D
+	if node == null:
+		return
+	node.scale = Vector3.ONE * float(rec.get("visual_scale", 1.0))
+	var base_tint := _entity_base_tint(e)
+	rec["base_tint"] = base_tint.to_html(false)
+	if not bool(rec.get("boss_telegraph_active", false)):
+		_apply_model_tint(node, base_tint)
+
+
+func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
+	var rec: Dictionary = entities.get(entity_id, {})
+	if rec.is_empty():
+		return
+	rec["boss_phase"] = {
+		"pattern_id": str(ev.get("pattern_id", "")),
+		"phase_index": int(ev.get("phase_index", -1)),
+		"phase_kind": str(ev.get("phase_kind", "")),
+		"duration_ticks": int(ev.get("duration_ticks", 0)),
+	}
+	var node := rec.get("node", null) as Node3D
+	if node == null:
+		return
+	var phase_kind := str(ev.get("phase_kind", ""))
+	if phase_kind == "telegraph":
+		var telegraph: Dictionary = ev.get("telegraph", {})
+		var tint := Color(str(telegraph.get("to_color", "#ff0000")))
+		rec["boss_telegraph_active"] = true
+		rec["telegraph_tint"] = tint.to_html(false)
+		_apply_model_tint(node, tint)
+	else:
+		rec["boss_telegraph_active"] = false
+		_apply_model_tint(node, Color("#" + str(rec.get("base_tint", "ffffff"))))
+
+
+func _apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
+	var rec: Dictionary = entities.get(entity_id, {})
+	if rec.is_empty():
+		return
+	rec["boss_telegraph_active"] = false
+	var node := rec.get("node", null) as Node3D
+	if node != null:
+		_apply_model_tint(node, Color("#" + str(rec.get("base_tint", "ffffff"))))
 
 
 func _apply_model_tint(root: Node, color: Color) -> void:
@@ -2281,12 +2370,44 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 	var node := rec["node"] as Node3D
 	if node == null:
 		return
+	_apply_interactable_state_tint(rec, state)
 	var pivot := node.find_child("DoorPivot", true, false) as Node3D
 	if pivot == null:
 		return
 	var target_rot := deg_to_rad(90.0) if state == "open" else 0.0
 	var tween := create_tween()
 	tween.tween_property(pivot, "rotation:y", target_rot, 0.25)
+
+
+func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
+	var node := rec.get("node", null) as Node3D
+	if node == null:
+		return
+	var def_id := str(rec.get("interactable_def_id", ""))
+	if def_id == "teleporter":
+		var core := node.get_child(1) as MeshInstance3D if node.get_child_count() > 1 else null
+		if core == null:
+			return
+		var mat := StandardMaterial3D.new()
+		if state == "disabled" or state == "locked":
+			mat.albedo_color = Color(0.30, 0.16, 0.18)
+			mat.emission_enabled = false
+		else:
+			mat.albedo_color = Color(0.15, 0.62, 0.70)
+			mat.emission_enabled = true
+			mat.emission = Color(0.05, 0.55, 0.68)
+		core.material_override = mat
+		return
+	if def_id == "stairs_down" or def_id == "stairs_up":
+		var base := node.get_child(0) as MeshInstance3D if node.get_child_count() > 0 else null
+		if base == null:
+			return
+		var mat := StandardMaterial3D.new()
+		if state == "locked" or state == "disabled":
+			mat.albedo_color = Color(0.42, 0.18, 0.18)
+		else:
+			mat.albedo_color = Color(0.22, 0.24, 0.27) if def_id == "stairs_down" else Color(0.46, 0.48, 0.50)
+		base.material_override = mat
 
 
 # --- bot API (read-only state + intent dispatch) ----------------------------
@@ -2310,6 +2431,8 @@ func get_bot_state() -> Dictionary:
 		"character_progression": character_progression.duplicate(true),
 		"inventory": inventory.duplicate(true),
 		"equipped": equipped.duplicate(true),
+		"inventory_rows": inventory_rows,
+		"inventory_capacity": inventory_capacity,
 		"monster_ids": live_monster_ids,
 		"entities_debug": _bot_entities_debug(live_monster_ids),
 		"local_player_presentation": _bot_local_player_presentation(),
@@ -2391,6 +2514,12 @@ func _bot_entities_presentation_debug() -> Array:
 			"monster_def_id": str(rec.get("monster_def_id", "")),
 			"character_id": str(rec.get("character_id", "")),
 			"visual_model": _visual_model_name(rec, node),
+			"visual_scale": float(rec.get("visual_scale", 1.0)),
+			"is_boss": bool(rec.get("is_boss", false)),
+			"boss_template_id": str(rec.get("boss_template_id", "")),
+			"boss_phase": rec.get("boss_phase", {}),
+			"boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
+			"telegraph_tint": str(rec.get("telegraph_tint", "")),
 			"base_tint": str(rec.get("base_tint", "")),
 			"hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {},
@@ -2400,6 +2529,8 @@ func _bot_entities_presentation_debug() -> Array:
 
 
 func _visual_model_name(rec: Dictionary, node: Node3D) -> String:
+	if str(rec.get("visual_model", "")) != "":
+		return str(rec.get("visual_model", ""))
 	if node != null and node.find_child("ModelRoot", true, false) != null:
 		return "character"
 	if str(rec.get("type", "")) == "player":

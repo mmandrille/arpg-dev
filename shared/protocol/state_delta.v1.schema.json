@@ -36,6 +36,12 @@
         "item_template_id": { "type": "string" },
         "display_name": { "type": "string" },
         "rarity": { "type": "string" },
+        "is_boss": { "type": "boolean" },
+        "boss_template_id": { "type": "string" },
+        "visual_model": { "type": "string" },
+        "visual_scale": { "type": "number", "exclusiveMinimum": 0 },
+        "visual_tint": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "boss_phase": { "$ref": "#/$defs/boss_phase" },
         "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
         "requirements": { "$ref": "#/$defs/requirements" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
@@ -43,7 +49,7 @@
         "owner_id": { "$ref": "#/$defs/decimal_id" },
         "target_id": { "$ref": "#/$defs/decimal_id" },
         "projectile_def_id": { "type": "string" },
-        "state": { "type": "string", "enum": ["closed", "open", "ready"] }
+        "state": { "type": "string", "enum": ["closed", "open", "ready", "locked", "disabled"] }
       }
     },
     "item": {
@@ -72,7 +78,8 @@
         "max_hp": { "type": "integer", "minimum": 0 },
         "armor": { "type": "integer", "minimum": 0 },
         "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "hotbar_slots": { "type": "integer", "minimum": 0, "maximum": 10 }
+        "hotbar_slots": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
     },
     "requirements": {
@@ -109,7 +116,15 @@
         "amount": { "type": "integer", "minimum": 0 },
         "total_experience": { "type": "integer", "minimum": 0 },
         "stat": { "type": "string", "enum": ["str", "dex", "vit", "magic"] },
-        "unspent_stat_points": { "type": "integer", "minimum": 0 }
+        "unspent_stat_points": { "type": "integer", "minimum": 0 },
+        "reason": { "type": "string" },
+        "pattern_id": { "type": "string" },
+        "phase_index": { "type": "integer", "minimum": 0 },
+        "phase_kind": { "type": "string", "enum": ["telegraph", "active", "recovery", "cooldown"] },
+        "duration_ticks": { "type": "integer", "minimum": 0 },
+        "telegraph": { "$ref": "#/$defs/boss_telegraph" },
+        "hit_shape": { "$ref": "#/$defs/boss_hit_shape" },
+        "state": { "type": "string", "enum": ["closed", "open", "ready", "locked", "disabled"] }
       },
       "allOf": [
         {
@@ -181,8 +196,63 @@
             "required": ["event_type"]
           },
           "then": { "required": ["stat", "amount", "unspent_stat_points"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["boss_phase_started", "boss_phase_ended"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "pattern_id", "phase_index", "phase_kind"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "enum": ["descend_blocked", "teleport_blocked"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["reason"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "interactable_state_changed" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "state"] }
         }
       ]
+    },
+    "boss_phase": {
+      "type": "object",
+      "required": ["pattern_id", "phase_index", "phase_kind", "started_tick", "remaining_ticks"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern_id": { "type": "string" },
+        "phase_index": { "type": "integer", "minimum": 0 },
+        "phase_kind": { "type": "string", "enum": ["telegraph", "active", "recovery", "cooldown"] },
+        "started_tick": { "type": "integer", "minimum": 0 },
+        "remaining_ticks": { "type": "integer", "minimum": 0 },
+        "telegraph": { "$ref": "#/$defs/boss_telegraph" },
+        "hit_shape": { "$ref": "#/$defs/boss_hit_shape" }
+      }
+    },
+    "boss_telegraph": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["body_color_charge", "circle", "line", "cone", "rectangle"] },
+        "from_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "to_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "radius": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "boss_hit_shape": {
+      "type": "object",
+      "required": ["shape"],
+      "additionalProperties": false,
+      "properties": {
+        "shape": { "type": "string", "enum": ["melee_contact", "circle", "line", "cone", "rectangle"] },
+        "radius": { "type": "number", "exclusiveMinimum": 0 }
+      }
     },
     "base_stats": {
       "type": "object",
@@ -305,7 +375,9 @@
             "op": { "const": "equipped_update" },
             "slot": { "type": "string", "enum": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
             "item_instance_id": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
-            "hotbar_capacity": { "type": "integer", "minimum": 2, "maximum": 10 }
+            "hotbar_capacity": { "type": "integer", "minimum": 2, "maximum": 10 },
+            "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 },
+            "inventory_capacity": { "type": "integer", "minimum": 0, "maximum": 100 }
           }
         },
         {
@@ -315,7 +387,9 @@
           "properties": {
             "op": { "const": "hotbar_update" },
             "slot_index": { "type": "integer", "minimum": 0, "maximum": 9 },
-            "item_instance_id": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+            "item_instance_id": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+            "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 },
+            "inventory_capacity": { "type": "integer", "minimum": 0, "maximum": 100 }
           }
         },
         {

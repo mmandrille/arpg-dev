@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/boss_pattern_timeline.v0.schema.json",
+  "title": "Boss pattern timeline golden",
+  "type": "object",
+  "required": ["pattern_id", "minimum_telegraph_ticks", "timeline", "cooldown_ticks", "dodge_case"],
+  "additionalProperties": false,
+  "properties": {
+    "pattern_id": { "type": "string", "minLength": 1 },
+    "minimum_telegraph_ticks": { "type": "integer", "minimum": 1 },
+    "timeline": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/phase" }
+    },
+    "cooldown_ticks": { "type": "integer", "minimum": 0 },
+    "dodge_case": {
+      "type": "object",
+      "required": ["player_starts_in_contact", "break_contact_before_tick", "expected_damage"],
+      "additionalProperties": false,
+      "properties": {
+        "player_starts_in_contact": { "type": "boolean" },
+        "break_contact_before_tick": { "type": "integer", "minimum": 0 },
+        "expected_damage": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "required": ["phase_index", "kind", "start_tick", "end_tick", "duration_ticks"],
+      "additionalProperties": false,
+      "properties": {
+        "phase_index": { "type": "integer", "minimum": 0 },
+        "kind": { "type": "string", "enum": ["telegraph", "active", "recovery"] },
+        "start_tick": { "type": "integer", "minimum": 0 },
+        "end_tick": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "telegraph_type": { "type": "string" },
+        "hit_shape": { "type": "string" },
+        "shape": { "type": "string" },
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "damage": {
+          "type": "object",
+          "required": ["min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "integer", "minimum": 1 },
+            "max": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    }
+  }
+}

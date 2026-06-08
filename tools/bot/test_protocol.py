@@ -138,6 +138,15 @@ def test_load_scenarios_discovers_inventory_lab():
     assert raw.get("visual", {}).get("inventory_panel") is True
 
 
+def test_load_scenarios_discovers_inventory_capacity_lab():
+    scenarios = load_scenarios()
+    capacity = next(s for s in scenarios if s.id == "inventory_capacity_and_paper_doll")
+
+    assert capacity.world_id == "inventory_capacity_lab"
+    assert {"type": "inventory_capacity", "rows": 4, "equals": 20} in capacity.assertions
+    assert any(step.get("expect_reject") == "inventory_full" for step in capacity.steps)
+
+
 def test_select_scenarios_rejects_unknown_id():
     scenarios = load_scenarios()
 
@@ -182,6 +191,8 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
             "equipped": {"main_hand": None},
             "hotbar_capacity": 2,
             "hotbar": [{"slot_index": i, "item_instance_id": None} for i in range(10)],
+            "inventory_rows": 3,
+            "inventory_capacity": 15,
         },
     }, state)
 
@@ -201,7 +212,7 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
                 {"op": "entity_remove", "entity_id": "1002"},
                 {"op": "inventory_add", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": False}},
                 {"op": "inventory_update", "item": {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": True}},
-                {"op": "equipped_update", "slot": "main_hand", "item_instance_id": "1004"},
+                {"op": "equipped_update", "slot": "main_hand", "item_instance_id": "1004", "inventory_rows": 4, "inventory_capacity": 20},
                 {"op": "inventory_remove", "item_instance_id": "1004"},
             ],
             "events": [],
@@ -211,6 +222,8 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
     assert find_loot(state, "rusty_sword") is None
     assert find_inventory_item(state.inventory, "rusty_sword") is None
     assert state.equipped["main_hand"] == "1004"
+    assert state.inventory_rows == 4
+    assert state.inventory_capacity == 20
 
 
 def test_runtime_state_waits_for_destination_level_delta():
@@ -327,10 +340,13 @@ def test_runtime_assertion_monster_killed_in_attacks_passes():
     state = RuntimeState(
         accepted_attack_counts={"training_dummy_reward": 1},
         killed_monster_def_ids={"training_dummy_reward"},
+        inventory_rows=4,
+        inventory_capacity=20,
     )
 
     run_runtime_assertions([
-        {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1}
+        {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
+        {"type": "inventory_capacity", "rows": 4, "equals": 20},
     ], state, "test")
 
 
@@ -370,7 +386,8 @@ def test_structured_assertions():
         {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
         {"type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open"},
         {"type": "equipped_weapon_def", "item_def_id": "rusty_sword"},
-    ], entities, inventory, {"main_hand": "1004"}, None, "test")
+        {"type": "inventory_capacity", "rows": 3, "equals": 15},
+    ], entities, inventory, {"main_hand": "1004"}, None, "test", inventory_rows=3, inventory_capacity=15)
 
 
 def test_structured_assertions_support_range_comparators_and_filters():
@@ -379,6 +396,17 @@ def test_structured_assertions_support_range_comparators_and_filters():
         {"id": "1003", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "hp": 4, "level": -1},
         {"id": "1004", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "common", "hp": 3, "level": -1},
         {"id": "1005", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "common", "hp": 0, "level": -1},
+        {
+            "id": "1008",
+            "type": "monster",
+            "monster_def_id": "dungeon_mob",
+            "rarity": "unique",
+            "hp": 32,
+            "is_boss": True,
+            "boss_template_id": "cave_warden",
+            "visual_model": "current_humanoid_player",
+            "visual_scale": 2.0,
+        },
         {"id": "1006", "type": "interactable", "interactable_def_id": "treasure_chest", "state": "open"},
     ]
     inventory = [
@@ -388,9 +416,10 @@ def test_structured_assertions_support_range_comparators_and_filters():
     ]
 
     run_assertions([
-        {"type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "between": [2, 3]},
+        {"type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "between": [2, 4]},
         {"type": "entity_count", "entity_type": "monster", "rarity": "champion", "level": -1, "equals": 1},
-        {"type": "entity_count", "entity_type": "monster", "alive": True, "at_most": 2},
+        {"type": "entity_count", "entity_type": "monster", "is_boss": True, "boss_template_id": "cave_warden", "visual_model": "current_humanoid_player", "visual_scale": 2.0, "equals": 1},
+        {"type": "entity_count", "entity_type": "monster", "alive": True, "at_most": 3},
         {"type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1},
         {"type": "inventory_count", "item_def_id": "red_potion", "between": [1, 3]},
         {"type": "inventory_count", "equipped": True, "equals": 1},

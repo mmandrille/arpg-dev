@@ -27,6 +27,8 @@ type Rules struct {
 	Interactables        map[string]InteractableDef
 	Worlds               map[string]WorldDef
 	DungeonGeneration    DungeonGenerationRules
+	BossTemplates        map[string]BossTemplateDef
+	BossPatterns         map[string]BossPatternDef
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -63,6 +65,7 @@ type DungeonGenerationRules struct {
 	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+	BossFloor                BossFloorRules           `json:"boss_floor"`
 	MonsterRarityNote        string                   `json:"monster_rarity_note"`
 	MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 	LootBandNote             string                   `json:"loot_band_note"`
@@ -95,6 +98,22 @@ type LinearStatFormula struct {
 type DungeonFloorSize struct {
 	Width  float64 `json:"width"`
 	Height float64 `json:"height"`
+}
+
+type BossFloorRules struct {
+	Cadence                int              `json:"cadence"`
+	FirstLevel             int              `json:"first_level"`
+	FloorSize              DungeonFloorSize `json:"floor_size"`
+	MonsterCount           int              `json:"monster_count"`
+	ChestInteractableDefID string           `json:"chest_interactable_def_id"`
+	ChestLootTable         string           `json:"chest_loot_table"`
+	BossTemplatePool       []string         `json:"boss_template_pool"`
+	BossSpawn              Vec2             `json:"boss_spawn"`
+	ChestPosition          Vec2             `json:"chest_position"`
+	StairsUpPosition       Vec2             `json:"stairs_up_position"`
+	StairsDownPosition     Vec2             `json:"stairs_down_position"`
+	TeleporterPosition     Vec2             `json:"teleporter_position"`
+	LockedExitReason       string           `json:"locked_exit_reason"`
 }
 
 type StairPlacementRules struct {
@@ -143,6 +162,40 @@ type MonsterRarityDef struct {
 	DamageMultiplier float64 `json:"damage_multiplier"`
 	XPMultiplier     float64 `json:"xp_multiplier"`
 	LootDepthOffset  int     `json:"loot_depth_offset"`
+	VisualScale      float64 `json:"visual_scale"`
+}
+
+type BossTemplateDef struct {
+	Name             string        `json:"name"`
+	BaseMonsterDefID string        `json:"base_monster_def_id"`
+	PatternDeck      []string      `json:"pattern_deck"`
+	HPMultiplier     float64       `json:"hp_multiplier"`
+	DamageMultiplier float64       `json:"damage_multiplier"`
+	LootTable        string        `json:"loot_table"`
+	Visual           BossVisualDef `json:"visual"`
+}
+
+type BossVisualDef struct {
+	Model string  `json:"model"`
+	Color string  `json:"color"`
+	Scale float64 `json:"scale"`
+}
+
+type BossPatternDef struct {
+	Phases        []BossPatternPhase `json:"phases"`
+	CooldownTicks int                `json:"cooldown_ticks"`
+}
+
+type BossPatternPhase struct {
+	Kind          string       `json:"kind"`
+	DurationTicks int          `json:"duration_ticks"`
+	TelegraphType string       `json:"telegraph_type,omitempty"`
+	FromColor     string       `json:"from_color,omitempty"`
+	ToColor       string       `json:"to_color,omitempty"`
+	HitShape      string       `json:"hit_shape,omitempty"`
+	Shape         string       `json:"shape,omitempty"`
+	Radius        float64      `json:"radius,omitempty"`
+	Damage        *DamageRange `json:"damage,omitempty"`
 }
 
 func (d DungeonGenerationRules) LootBandForLevel(levelNum int) (DungeonLootBand, bool) {
@@ -656,7 +709,7 @@ func LoadRules(dir string) (*Rules, error) {
 		seen := map[string]bool{}
 		for _, roll := range def.RollableStats {
 			switch roll.Stat {
-			case "damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots":
+			case "damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots", "inventory_rows":
 			default:
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: unsupported stat %s", id, roll.Stat)
 			}
@@ -853,9 +906,9 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.BarrierWhenClosed != nil && (def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0) {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
 			}
-		case interactableReady:
+		case interactableReady, interactableLocked, interactableDisabled:
 			if def.BarrierWhenClosed != nil {
-				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: ready interactable must not declare barrier", id)
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: transition interactable must not declare barrier", id)
 			}
 			switch def.Transition {
 			case interactableTransitionAscend, interactableTransitionDescend, interactableTransitionWaypoint:
@@ -877,6 +930,7 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+		BossFloor                BossFloorRules           `json:"boss_floor"`
 		MonsterRarityNote        string                   `json:"monster_rarity_note"`
 		MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 		LootBandNote             string                   `json:"loot_band_note"`
@@ -970,6 +1024,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateMonsterRarities(dungeonGeneration.MonsterRarities); err != nil {
 		return nil, err
 	}
+	if err := validateBossFloorRules(dungeonGeneration.BossFloor, r); err != nil {
+		return nil, err
+	}
 	if err := validateDungeonLootBands(dungeonGeneration.LootBands, r); err != nil {
 		return nil, err
 	}
@@ -987,6 +1044,7 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
 		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
 		ChestPlacement:           dungeonGeneration.ChestPlacement,
+		BossFloor:                dungeonGeneration.BossFloor,
 		MonsterRarityNote:        dungeonGeneration.MonsterRarityNote,
 		MonsterRarities:          dungeonGeneration.MonsterRarities,
 		LootBandNote:             dungeonGeneration.LootBandNote,
@@ -994,6 +1052,32 @@ func LoadRules(dir string) (*Rules, error) {
 		LevelNames:               dungeonGeneration.LevelNames,
 		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
 	}
+
+	var bossPatterns struct {
+		MinimumTelegraphTicks int                       `json:"minimum_telegraph_ticks"`
+		Patterns              map[string]BossPatternDef `json:"patterns"`
+	}
+	if err := readJSON(filepath.Join(dir, "boss_patterns.v0.json"), &bossPatterns); err != nil {
+		return nil, err
+	}
+	if bossPatterns.MinimumTelegraphTicks <= 0 {
+		return nil, fmt.Errorf("game: invalid rules boss_patterns.minimum_telegraph_ticks: must be positive")
+	}
+	if err := validateBossPatterns(bossPatterns.Patterns, bossPatterns.MinimumTelegraphTicks); err != nil {
+		return nil, err
+	}
+	r.BossPatterns = bossPatterns.Patterns
+
+	var bossTemplates struct {
+		Bosses map[string]BossTemplateDef `json:"bosses"`
+	}
+	if err := readJSON(filepath.Join(dir, "boss_templates.v0.json"), &bossTemplates); err != nil {
+		return nil, err
+	}
+	if err := validateBossTemplates(bossTemplates.Bosses, r); err != nil {
+		return nil, err
+	}
+	r.BossTemplates = bossTemplates.Bosses
 
 	var worlds struct {
 		Worlds map[string]WorldDef `json:"worlds"`
@@ -1154,6 +1238,12 @@ func validateMonsterRarities(rarities []MonsterRarityDef) error {
 		"rare":     2,
 		"unique":   3,
 	}
+	expectedVisualScales := map[string]float64{
+		"common":   1.0,
+		"champion": 1.25,
+		"rare":     1.0,
+		"unique":   1.5,
+	}
 	expectedColors := map[string]string{
 		"common":   "#f2f2ec",
 		"champion": "#9fc7ff",
@@ -1184,6 +1274,140 @@ func validateMonsterRarities(rarities []MonsterRarityDef) error {
 		}
 		if rarity.LootDepthOffset != expectedOffsets[rarity.ID] {
 			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].loot_depth_offset: expected %d", idx, expectedOffsets[rarity.ID])
+		}
+		if rarity.VisualScale != expectedVisualScales[rarity.ID] {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].visual_scale: expected %.2f", idx, expectedVisualScales[rarity.ID])
+		}
+	}
+	return nil
+}
+
+func validateBossFloorRules(b BossFloorRules, r *Rules) error {
+	if b.Cadence != 5 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.cadence: expected 5")
+	}
+	if b.FirstLevel != -5 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.first_level: expected -5")
+	}
+	if b.FloorSize.Width != 30 || b.FloorSize.Height != 30 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.floor_size: expected 30x30")
+	}
+	if b.MonsterCount < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.monster_count: must be non-negative")
+	}
+	if b.ChestInteractableDefID != treasureChestDefID {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.chest_interactable_def_id: expected %s", treasureChestDefID)
+	}
+	if _, ok := r.Interactables[b.ChestInteractableDefID]; !ok {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.chest_interactable_def_id: unknown interactable %s", b.ChestInteractableDefID)
+	}
+	if table, ok := r.LootTables[b.ChestLootTable]; !ok {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.chest_loot_table: unknown table %s", b.ChestLootTable)
+	} else if table.TreasureClassID == "" {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.chest_loot_table: must resolve to a treasure class")
+	}
+	if len(b.BossTemplatePool) == 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.boss_template_pool: required")
+	}
+	if b.LockedExitReason != "boss_alive" {
+		return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.locked_exit_reason: expected boss_alive")
+	}
+	for label, point := range map[string]Vec2{
+		"boss_spawn":           b.BossSpawn,
+		"chest_position":       b.ChestPosition,
+		"stairs_up_position":   b.StairsUpPosition,
+		"stairs_down_position": b.StairsDownPosition,
+		"teleporter_position":  b.TeleporterPosition,
+	} {
+		if point.X < 0 || point.Y < 0 || point.X > b.FloorSize.Width || point.Y > b.FloorSize.Height {
+			return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.%s: outside floor", label)
+		}
+	}
+	return nil
+}
+
+func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks int) error {
+	if len(patterns) == 0 {
+		return fmt.Errorf("game: invalid rules boss_patterns.patterns: required")
+	}
+	for patternID, pattern := range patterns {
+		if len(pattern.Phases) == 0 {
+			return fmt.Errorf("game: invalid rules boss_patterns.%s.phases: required", patternID)
+		}
+		if pattern.CooldownTicks < 0 {
+			return fmt.Errorf("game: invalid rules boss_patterns.%s.cooldown_ticks: must be non-negative", patternID)
+		}
+		var priorTelegraph *BossPatternPhase
+		for idx, phase := range pattern.Phases {
+			if phase.DurationTicks <= 0 {
+				return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].duration_ticks: must be positive", patternID, idx)
+			}
+			switch phase.Kind {
+			case "telegraph":
+				if phase.DurationTicks < minTelegraphTicks {
+					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].duration_ticks: below minimum telegraph", patternID, idx)
+				}
+				if phase.TelegraphType == "" || phase.HitShape == "" {
+					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: telegraph_type and hit_shape required", patternID, idx)
+				}
+				if phase.Radius <= 0 {
+					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].radius: must be positive", patternID, idx)
+				}
+				copy := phase
+				priorTelegraph = &copy
+			case "active":
+				if phase.Damage != nil {
+					if priorTelegraph == nil {
+						return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: damage requires prior telegraph", patternID, idx)
+					}
+					if err := validateDamageRange(fmt.Sprintf("boss_patterns.%s.phases[%d].damage", patternID, idx), *phase.Damage); err != nil {
+						return err
+					}
+					if phase.Shape != priorTelegraph.HitShape || phase.Radius != priorTelegraph.Radius {
+						return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: active hit predicate must match telegraph", patternID, idx)
+					}
+				}
+			case "recovery":
+			default:
+				return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].kind: %s", patternID, idx, phase.Kind)
+			}
+		}
+	}
+	return nil
+}
+
+func validateBossTemplates(templates map[string]BossTemplateDef, r *Rules) error {
+	if len(templates) == 0 {
+		return fmt.Errorf("game: invalid rules boss_templates.bosses: required")
+	}
+	for templateID, template := range templates {
+		if _, ok := r.Monsters[template.BaseMonsterDefID]; !ok {
+			return fmt.Errorf("game: invalid rules boss_templates.%s.base_monster_def_id: unknown monster %s", templateID, template.BaseMonsterDefID)
+		}
+		if len(template.PatternDeck) == 0 {
+			return fmt.Errorf("game: invalid rules boss_templates.%s.pattern_deck: required", templateID)
+		}
+		for _, patternID := range template.PatternDeck {
+			if _, ok := r.BossPatterns[patternID]; !ok {
+				return fmt.Errorf("game: invalid rules boss_templates.%s.pattern_deck: unknown pattern %s", templateID, patternID)
+			}
+		}
+		if template.HPMultiplier <= 0 || template.DamageMultiplier <= 0 {
+			return fmt.Errorf("game: invalid rules boss_templates.%s: multipliers must be positive", templateID)
+		}
+		if _, ok := r.LootTables[template.LootTable]; !ok {
+			return fmt.Errorf("game: invalid rules boss_templates.%s.loot_table: unknown table %s", templateID, template.LootTable)
+		}
+		if template.Visual.Model != "current_humanoid_player" {
+			return fmt.Errorf("game: invalid rules boss_templates.%s.visual.model: expected current_humanoid_player", templateID)
+		}
+		if template.Visual.Scale != 2.0 {
+			return fmt.Errorf("game: invalid rules boss_templates.%s.visual.scale: expected 2.0", templateID)
+		}
+	}
+	for _, templateID := range r.DungeonGeneration.BossFloor.BossTemplatePool {
+		if _, ok := templates[templateID]; !ok {
+			return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.boss_template_pool: unknown template %s", templateID)
 		}
 	}
 	return nil

@@ -1,0 +1,99 @@
+docs/PROGRESS.md
+  s_d8f4a9c1526b99::t_de592d2a071675 14,48,98,696-723
+  s_d8f4a9c1526b99::t_e379c5d9709b52 770,873-877,883-885
+client/scripts/net_client.gd
+  s_d8f4a9c1526b99::t_a1230f12f3f9fe 112,124-125
+tools/bot/scenarios/client/09_character_stats_panel.json
+  s_d8f4a9c1526b99::t_1009cb8580286a 16,20,25,30,32
+  s_d8f4a9c1526b99::t_14349b813dd7eb 5
+server/internal/game/rules.go
+  s_d8f4a9c1526b99::t_dd6d9cac2b3360 135-141
+  s_d8f4a9c1526b99::t_96e8c66b375919 6,62-63,134,142-143,161-212
+  s_d8f4a9c1526b99::t_4d207b559f4783 1071-1119
+  s_d8f4a9c1526b99::t_5ec6e94030acc6 808-809,895-900,918-919
+tools/validate_shared.py
+  s_d8f4a9c1526b99::t_e809ab7b5c3442 1223-1224,1226-1227,1229
+  s_d8f4a9c1526b99::t_f2eb99333fbd47 662-728
+  s_d8f4a9c1526b99::t_77f997e32b52f2 143,792-879
+shared/rules/dungeon_generation.v0.json
+  s_d8f4a9c1526b99::t_6827e52fbdd26b 33-71
+server/internal/game/sim.go
+  s_d8f4a9c1526b99::t_6ae288b097c1e1 88,769-777
+  s_d8f4a9c1526b99::t_dd6d9cac2b3360 81-87,89-109,760-768
+  s_d8f4a9c1526b99::t_320172ccc46318 2000-2004
+  s_d8f4a9c1526b99::t_5be683c466676b 2345-2349
+  s_d8f4a9c1526b99::t_afd44b64891e06 3140-3142
+docs/specs/v30_spec-monster-rarity-and-loot-scaling.md
+  s_d8f4a9c1526b99::t_f0abb9ee12814d 1-2,4-290,294-344,360-365
+  s_d8f4a9c1526b99::t_0374ef69515048 3,291-293,345-359
+docs/plans/v30_2026-06-07-monster-rarity-and-loot-scaling.md
+  s_d8f4a9c1526b99::t_3b63894a6cb232 125,278,284
+  s_d8f4a9c1526b99::t_d91f7ae26244d8 60,66,72,78,84
+  s_d8f4a9c1526b99::t_0824b6daff078a 334,342-349
+  s_d8f4a9c1526b99::t_3b85f5a764061b 3,297,303,309,322,328
+  s_d8f4a9c1526b99::t_45a61c5b561f8e 209
+  s_d8f4a9c1526b99::t_cb2845d27bd488 223,229,235,241,247,260,266,272
+  s_d8f4a9c1526b99::t_52fce05977dd1b 1-2,4-59,61-65,67-71,73-77,79-83,85-100,102-106,108-112,114-118,120-124,126-138,140-144,146-150,152-156,158-162,164-178,180-184,186-190,192-196,198-202,204-208,210-222,224-228,230-234,236-240,242-246,248-259,261-265,267-271,273-277,279-283,285-296,298-302,304-308,310-321,323-327,329-333,335-341,350-357
+  s_d8f4a9c1526b99::t_d4cab50c134013 113,139,145,151,157,163,179,185,191,197,203
+  s_d8f4a9c1526b99::t_867b73811b9a88 101,107,119
+shared/golden/dungeon_monster_attack.json
+  s_d8f4a9c1526b99::t_5d2854f22ce3b3 7-8
+server/internal/replay/replay_test.go
+  s_d8f4a9c1526b99::t_0eea70e22d2e46 112-114
+  s_d8f4a9c1526b99::t_7a3e1fc889db8d 105-111,115-116,119-120,122-145
+  s_d8f4a9c1526b99::t_24e5175d8b463a 117-118,121
+  s_d8f4a9c1526b99::t_07302088441404 376
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_d8f4a9c1526b99::t_9160a517833b59 1-34
+scripts/bot_client.sh
+  s_d8f4a9c1526b99::t_822938d74d3974 126,129,144
+tools/bot/test_protocol.py
+  s_d8f4a9c1526b99::t_6cf91550e37a57 178,191-192,315,328
+shared/rules/dungeon_generation.v0.schema.json
+  s_d8f4a9c1526b99::t_d720e64ba25f84 15-16,93-120
+shared/protocol/examples/state_delta.json
+  s_d8f4a9c1526b99::t_d351cc3c4fa994 5
+shared/golden/monster_rarity.v0.schema.json
+  s_d8f4a9c1526b99::t_1f0c71bb122d0b 1-111
+tools/bot/run.py
+  s_d8f4a9c1526b99::t_cad0e7f4e7d13a 1262,1267,1288-1289,1500,1509
+tools/bot/scenarios/18_character_stats_and_leveling.json
+  s_d8f4a9c1526b99::t_6070ef22d31627 4,13,24,34,46,54
+client/tests/test_golden.gd
+  s_d8f4a9c1526b99::t_3f803e915d92b8 261-269,276-290,301-304,314,344,365,415,433,453-454
+  s_d8f4a9c1526b99::t_95ae9d365ae343 291-300
+shared/golden/monster_rarity.json
+  s_d8f4a9c1526b99::t_6dcff96c26b398 1-87,113
+  s_d8f4a9c1526b99::t_93ed2313479a08 88-112
+shared/protocol/examples/session_snapshot.json
+  s_d8f4a9c1526b99::t_a10301828ec69d 8
+server/internal/game/dungeon_gen.go
+  s_d8f4a9c1526b99::t_fe6ec2f31cc239 43-49,276-282,284-286
+  s_d8f4a9c1526b99::t_dd6d9cac2b3360 283
+  s_d8f4a9c1526b99::t_35bd98c7923e8a 61,88,110,264,275
+client/scripts/main.gd
+  s_d8f4a9c1526b99::t_644b0b959ff811 36-42,158,1820-1822,1826,1842-1852
+  s_d8f4a9c1526b99::t_e7fb4effeea354 199,203,227-228
+server/internal/game/game_test.go
+  s_d8f4a9c1526b99::t_a95ba6cadc2652 3523-3533
+  s_d8f4a9c1526b99::t_5b3e14b9360222 2934-3017
+  s_d8f4a9c1526b99::t_29c33426352afb 120-127
+  s_d8f4a9c1526b99::t_f919b197d94b58 2895-2896,2898-2901,2912-2922
+  s_d8f4a9c1526b99::t_3d1e8afc2dd195 116-119,128-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a04643b28856765f30f69fcbb32c7b35d11177ec",
+  "prompts": {},
+  "sessions": {
+    "s_d8f4a9c1526b99": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea393-ff15-7713-abbb-a2b7d16ee7c0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

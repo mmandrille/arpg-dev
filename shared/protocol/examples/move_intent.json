@@ -4,5 +4,5 @@
   "session_id": "sess_01H00000000000000000000000",
   "tick": 42,
   "correlation_id": "corr_01H00000000000000000000002",
-  "payload": { "direction": { "x": 1, "y": 0 }, "duration_ticks": 5 }
+  "payload": { "direction": { "x": 0, "y": 0 }, "duration_ticks": 1 }
 }

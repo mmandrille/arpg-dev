@@ -57,3 +57,29 @@ func TestDecodeAllocateStatIntentRejectsInvalidPayload(t *testing.T) {
 		}
 	}
 }
+
+func TestDecodeDirectionalAttackIntent(t *testing.T) {
+	in, ok := Decode(TypeDirectional, "msg_dir", "corr_dir", json.RawMessage(`{"direction":{"x":1,"y":0}}`))
+	if !ok {
+		t.Fatal("Decode directional_attack_intent rejected valid payload")
+	}
+	if in.DirectionalAttack == nil || in.DirectionalAttack.Direction.X != 1 || in.DirectionalAttack.Direction.Y != 0 {
+		t.Fatalf("decoded directional attack = %+v", in.DirectionalAttack)
+	}
+	if !IsClientIntent(TypeDirectional) {
+		t.Fatal("directional_attack_intent not marked as client intent")
+	}
+}
+
+func TestDecodeDirectionalAttackIntentRejectsInvalidPayload(t *testing.T) {
+	tests := []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"direction":null}`),
+		json.RawMessage(`{"direction":{"x":"bad","y":0}}`),
+	}
+	for _, payload := range tests {
+		if _, ok := Decode(TypeDirectional, "msg_dir", "", payload); ok {
+			t.Fatalf("Decode accepted invalid directional attack payload %s", payload)
+		}
+	}
+}

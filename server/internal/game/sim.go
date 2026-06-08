@@ -50,6 +50,7 @@ const (
 	lootInteractionRadius          = 0.35
 	interactableInteractionRadius  = 0.50
 	meleeRangeEpsilon              = 0.000001
+	directionalMeleeHalfWidth      = 0.35
 	projectileRadius               = 0.10
 	tickDuration                   = 0.05
 	minHotbarCapacity              = 2
@@ -124,6 +125,7 @@ type entity struct {
 	spawnTick           uint64
 	spawnPos            Vec2
 	aiMode              string
+	aiTargetPlayerID    uint64
 	lastAttackTick      uint64
 	hasAttacked         bool
 }
@@ -824,24 +826,25 @@ func (s *Sim) CurrentTick() uint64 { return s.tick }
 
 // Input is a decoded client intent applied to a specific tick.
 type Input struct {
-	MessageID     string
-	CorrelationID string
-	Sequence      int64
-	ActorPlayerID uint64
-	Type          string
-	Move          *MoveIntent
-	MoveTo        *MoveToIntent
-	Action        *ActionIntent
-	Descend       *DescendIntent
-	Ascend        *AscendIntent
-	Teleport      *TeleportIntent
-	Equip         *EquipIntent
-	Unequip       *UnequipIntent
-	Drop          *DropIntent
-	Use           *UseIntent
-	AssignHotbar  *AssignHotbarIntent
-	UseHotbar     *UseHotbarIntent
-	AllocateStat  *AllocateStatIntent
+	MessageID         string
+	CorrelationID     string
+	Sequence          int64
+	ActorPlayerID     uint64
+	Type              string
+	Move              *MoveIntent
+	MoveTo            *MoveToIntent
+	DirectionalAttack *DirectionalAttackIntent
+	Action            *ActionIntent
+	Descend           *DescendIntent
+	Ascend            *AscendIntent
+	Teleport          *TeleportIntent
+	Equip             *EquipIntent
+	Unequip           *UnequipIntent
+	Drop              *DropIntent
+	Use               *UseIntent
+	AssignHotbar      *AssignHotbarIntent
+	UseHotbar         *UseHotbarIntent
+	AllocateStat      *AllocateStatIntent
 }
 
 // Intent payloads.
@@ -852,6 +855,9 @@ type (
 	}
 	MoveToIntent struct {
 		Position Vec2
+	}
+	DirectionalAttackIntent struct {
+		Direction Vec2
 	}
 	ActionIntent   struct{ TargetID string }
 	DescendIntent  struct{}
@@ -1012,7 +1018,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent":
+		case "move_intent", "move_to_intent", "directional_attack_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -1024,6 +1030,8 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleMove(in, res)
 	case "move_to_intent":
 		s.handleMoveTo(in, res)
+	case "directional_attack_intent":
+		s.handleDirectionalAttack(in, res)
 	case "action_intent":
 		s.handleAction(in, res)
 	case "descend_intent", "ascend_intent", "teleport_intent":
@@ -1247,11 +1255,39 @@ func (s *Sim) handleMove(in Input, res *TickResult) {
 	if dur < 1 {
 		dur = 1
 	}
-	if dir.X != 0 || dir.Y != 0 {
+	if dir.X == 0 && dir.Y == 0 {
+		s.activeLevel().move = nil
 		s.clearAutoNav()
-		s.activeLevel().move = &activeMove{dir: dir, remaining: dur}
+		res.ack(in.MessageID)
+		return
+	}
+	s.clearAutoNav()
+	s.activeLevel().move = &activeMove{dir: dir, remaining: dur}
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleDirectionalAttack(in Input, res *TickResult) {
+	if in.DirectionalAttack == nil || !finiteVec2(in.DirectionalAttack.Direction) {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	dir := normalize(in.DirectionalAttack.Direction)
+	if dir.X == 0 && dir.Y == 0 {
+		res.reject(in.MessageID, "invalid_direction")
+		return
+	}
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	if s.playerAttackMode() == attackModeRanged {
+		s.fireProjectileInDirection(dir, 0, in, res, true)
+		return
 	}
 	res.ack(in.MessageID)
+	target := s.directionalMeleeTarget(dir)
+	if target == nil {
+		return
+	}
+	s.damageMonsterByPlayer(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamage())
 }
 
 func (s *Sim) handleMoveTo(in Input, res *TickResult) {
@@ -1291,6 +1327,12 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 	target := s.findEntity(in.Action.TargetID)
 	if target == nil || !s.actionable(target) {
 		res.reject(in.MessageID, "invalid_target")
+		return
+	}
+	if target.kind == interactableEntity &&
+		target.interactableDefID == teleporterDefID &&
+		(target.state == interactableDisabled || target.state == interactableLocked) {
+		s.activateTeleporter(target, in, res, true)
 		return
 	}
 	if s.inDispatchRange(target) {
@@ -1338,15 +1380,16 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 	if ack {
 		res.ack(in.MessageID)
 	}
+	s.damageMonsterByPlayer(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamage())
+}
+
+func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
 	attackerStats, _ := s.playerEffectiveCombatStats()
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
-	outcome := s.resolveCombat(attackerStats, defenderStats, DamageRange{
-		Min: int(math.Floor(attackerStats.DamageMin)),
-		Max: int(math.Floor(attackerStats.DamageMax)),
-	})
+	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
 	if !outcome.Hit || outcome.Blocked {
-		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), s.playerID, target.id, in.CorrelationID, outcome))
-		return
+		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
+		return outcome
 	}
 
 	target.hp -= outcome.Damage
@@ -1354,15 +1397,32 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
-	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), s.playerID, target.id, in.CorrelationID, outcome))
+	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
 
-	if target.hp == 0 {
-		s.finishMonsterKill(target, s.playerID, in.CorrelationID, res)
+	if outcome.Damage > 0 && target.hp > 0 {
+		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
-	s.retaliate(target, in.CorrelationID, res)
+	if target.hp == 0 {
+		s.finishMonsterKill(target, playerID, corr, res)
+	}
+	s.retaliate(target, corr, res)
+	return outcome
 }
 
 func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool) {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	dir := normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
+	if dir.X == 0 && dir.Y == 0 {
+		dir = Vec2{X: 1}
+	}
+	s.fireProjectileInDirection(dir, target.id, in, res, ack)
+}
+
+func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res *TickResult, ack bool) {
 	if s.playerProjectileInFlight() {
 		res.reject(in.MessageID, "projectile_busy")
 		return
@@ -1377,16 +1437,17 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 		res.reject(in.MessageID, "invalid_target")
 		return
 	}
-	dir := normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
+	dir = normalize(dir)
 	if dir.X == 0 && dir.Y == 0 {
-		dir = Vec2{X: 1}
+		res.reject(in.MessageID, "invalid_direction")
+		return
 	}
 	maxDistance := s.playerActionReach()
 	projectile := &entity{
 		kind:            projectileEntity,
 		pos:             player.pos,
 		ownerID:         player.id,
-		targetID:        target.id,
+		targetID:        targetID,
 		projectileDefID: trainingArrowProjectileDefID,
 		dir:             dir,
 		speed:           projectileSpeed,
@@ -1402,6 +1463,38 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 	if ack {
 		res.ack(in.MessageID)
 	}
+}
+
+func (s *Sim) directionalMeleeTarget(dir Vec2) *entity {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil {
+		return nil
+	}
+	reach := s.playerMeleeReach()
+	var best *entity
+	bestDist := math.MaxFloat64
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
+		if e == nil || e.kind != monsterEntity || e.hp <= 0 {
+			continue
+		}
+		toTarget := Vec2{X: e.pos.X - player.pos.X, Y: e.pos.Y - player.pos.Y}
+		projection := toTarget.X*dir.X + toTarget.Y*dir.Y
+		targetRadius := s.targetInteractionRadius(e)
+		if projection < 0 || projection > reach+targetRadius+meleeRangeEpsilon {
+			continue
+		}
+		lateral := math.Abs(toTarget.X*dir.Y - toTarget.Y*dir.X)
+		if lateral > directionalMeleeHalfWidth+targetRadius+meleeRangeEpsilon {
+			continue
+		}
+		dist := distance(player.pos, e.pos)
+		if best == nil || dist < bestDist-1e-9 || (math.Abs(dist-bestDist) <= 1e-9 && e.id < best.id) {
+			best = e
+			bestDist = dist
+		}
+	}
+	return best
 }
 
 func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
@@ -2548,11 +2641,11 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
 			continue
 		}
-		if monster.isBoss {
-			continue
-		}
 		def, ok := s.rules.Monsters[monster.monsterDefID]
 		if !ok || def.effectiveBehavior() != monsterBehaviorChase {
+			continue
+		}
+		if monster.isBoss && monster.bossPhaseKind == "active" {
 			continue
 		}
 		targetPlayer := s.nearestLivingPlayerForMonster(s.activeLevel(), monster)
@@ -2565,7 +2658,11 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		}
 		s.usePlayer(targetPlayer)
 		prevMode := monster.aiMode
-		s.updateMonsterAIMode(monster, player, def, prevMode, res)
+		if monster.isBoss {
+			monster.aiMode = monsterAIModeChase
+		} else {
+			s.updateMonsterAIMode(monster, player, def, prevMode, res)
+		}
 		if monster.aiMode == monsterAIModeIdle {
 			continue
 		}
@@ -2654,6 +2751,14 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 }
 
 func (s *Sim) nearestLivingPlayerForMonster(level *LevelState, monster *entity) *playerState {
+	if monster != nil && monster.aiTargetPlayerID != 0 {
+		ps := s.players[monster.aiTargetPlayerID]
+		e := level.entities[monster.aiTargetPlayerID]
+		if ps != nil && ps.Connected && ps.CurrentLevel == level.levelNum && e != nil && e.kind == playerEntity && e.hp > 0 {
+			return ps
+		}
+		monster.aiTargetPlayerID = 0
+	}
 	var best *playerState
 	bestDist := math.MaxFloat64
 	for _, playerID := range sortedPlayerIDs(s.players) {
@@ -2694,6 +2799,11 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 		}
 		monster.aiMode = monsterAIModeChase
 
+		return
+	}
+
+	if monster.aiTargetPlayerID != 0 && prevMode == monsterAIModeChase {
+		monster.aiMode = monsterAIModeChase
 		return
 	}
 
@@ -3162,24 +3272,85 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
 		return
 	}
-	attackerStats, _ := s.playerEffectiveCombatStats()
-	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
-	outcome := s.resolveCombat(attackerStats, defenderStats, p.damageRange)
-	if !outcome.Hit || outcome.Blocked {
-		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), p.ownerID, target.id, p.sourceCorrID, outcome))
+	s.damageMonsterByPlayer(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+}
+
+func (s *Sim) aggroMonsterOnHit(monster *entity, playerID uint64, corr string, res *TickResult) {
+	if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 || playerID == 0 {
 		return
 	}
-	target.hp -= outcome.Damage
-	if target.hp < 0 {
-		target.hp = 0
+	level := s.activeLevel()
+	player := level.entities[playerID]
+	queue := []*entity{monster}
+	queued := map[uint64]bool{monster.id: true}
+	if player != nil && player.kind == playerEntity && player.hp > 0 {
+		for _, candidateID := range sortedEntityIDs(level.entities) {
+			candidate := level.entities[candidateID]
+			if candidate == nil || queued[candidate.id] || !s.canAggroAttackingPlayer(candidate, player) {
+				continue
+			}
+			queued[candidate.id] = true
+			queue = append(queue, candidate)
+		}
 	}
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
-	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), p.ownerID, target.id, p.sourceCorrID, outcome))
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+		if current == nil || current.kind != monsterEntity || current.hp <= 0 {
+			continue
+		}
+		s.aggroSingleMonster(current, playerID, corr, res)
+		for _, candidateID := range sortedEntityIDs(level.entities) {
+			candidate := level.entities[candidateID]
+			if candidate == nil || queued[candidate.id] || !s.canJoinGroupAggro(current, candidate) {
+				continue
+			}
+			queued[candidate.id] = true
+			queue = append(queue, candidate)
+		}
+	}
+}
 
-	if target.hp == 0 {
-		s.finishMonsterKill(target, p.ownerID, p.sourceCorrID, res)
+func (s *Sim) aggroSingleMonster(monster *entity, playerID uint64, corr string, res *TickResult) {
+	wasChasingTarget := monster.aiMode == monsterAIModeChase && monster.aiTargetPlayerID == playerID
+	monster.aiTargetPlayerID = playerID
+	monster.aiMode = monsterAIModeChase
+	if wasChasingTarget {
+		return
 	}
-	s.retaliate(target, p.sourceCorrID, res)
+	res.Events = append(res.Events, Event{
+		EventType:      "monster_aggro",
+		EntityID:       idStr(monster.id),
+		SourceEntityID: idStr(playerID),
+		TargetEntityID: idStr(monster.id),
+		CorrelationID:  corr,
+	})
+}
+
+func (s *Sim) canAggroAttackingPlayer(candidate, player *entity) bool {
+	if candidate == nil || player == nil || candidate.kind != monsterEntity || candidate.hp <= 0 || player.kind != playerEntity || player.hp <= 0 {
+		return false
+	}
+	def, ok := s.rules.Monsters[candidate.monsterDefID]
+	if !ok || def.effectiveBehavior() != monsterBehaviorChase || def.AggroRadius <= 0 {
+		return false
+	}
+	return distance(candidate.pos, player.pos) <= def.AggroRadius
+}
+
+func (s *Sim) canJoinGroupAggro(source, candidate *entity) bool {
+	if source == nil || candidate == nil || source.id == candidate.id || candidate.kind != monsterEntity || candidate.hp <= 0 {
+		return false
+	}
+	def, ok := s.rules.Monsters[candidate.monsterDefID]
+	if !ok || def.effectiveBehavior() != monsterBehaviorChase {
+		return false
+	}
+	radius := def.AggroRadius
+	if radius <= 0 {
+		return false
+	}
+	return distance(source.pos, candidate.pos) <= radius
 }
 
 func (s *Sim) awardMonsterExperience(monster *entity, corr string, res *TickResult) {
@@ -4502,7 +4673,9 @@ func (e *entity) view() EntityView {
 		ev.State = e.state
 	case projectileEntity:
 		ev.OwnerID = idStr(e.ownerID)
-		ev.TargetID = idStr(e.targetID)
+		if e.targetID != 0 {
+			ev.TargetID = idStr(e.targetID)
+		}
 		ev.ProjectileDefID = e.projectileDefID
 	}
 	return ev

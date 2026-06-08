@@ -44,6 +44,40 @@ func TestReconstructFromInputsRestoresCombatStateAndMetadata(t *testing.T) {
 	}
 }
 
+func TestReconstructFromInputsWithDirectionalAttackAggro(t *testing.T) {
+	rules := loadRules(t)
+	mob := rules.Monsters["dungeon_mob"]
+	mob.MaxHP = 20
+	rules.Monsters["dungeon_mob"] = mob
+	rows := []store.SessionInput{
+		storedInput(t, "inp-pick", "msg-pick", 0, 0, "action_intent", map[string]any{"target_id": "1002"}),
+		storedInput(t, "inp-equip", "msg-equip", 1, 1, "equip_intent", map[string]any{"item_instance_id": "1004", "slot": "main_hand"}),
+		storedInput(t, "inp-move", "msg-move", 2, 2, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
+		storedInput(t, "inp-dir", "msg-dir", 3, 3, "directional_attack_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}}),
+	}
+	inputs, _, err := StoredInputs(rows)
+	if err != nil {
+		t.Fatalf("stored inputs: %v", err)
+	}
+	recon, err := ReconstructFromInputs(testSessionID, "cafebabecafebabe", rules, "combat_control_lab", inputs, 10)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	if !hasDerivedEvent(recon.DerivedEvents, "monster_damaged") || !hasDerivedEvent(recon.DerivedEvents, "monster_aggro") {
+		t.Fatalf("derived events missing directional hit/aggro: %+v", recon.DerivedEvents)
+	}
+	monster := findSnapshotEntity(recon.Snapshot, "monster", "dungeon_mob")
+	if monster == nil {
+		t.Fatal("missing dungeon_mob after replay")
+	}
+	if monster.HP == nil || monster.MaxHP == nil || *monster.HP >= *monster.MaxHP {
+		t.Fatalf("monster hp = %v/%v, want damaged", monster.HP, monster.MaxHP)
+	}
+	if monster.Position.X >= 13 {
+		t.Fatalf("monster position = %+v, want chased left after aggro", monster.Position)
+	}
+}
+
 func TestVerifyUsesReconstructedSnapshot(t *testing.T) {
 	rules := loadRules(t)
 	rows := scriptedStoredInputs(t)
@@ -197,7 +231,6 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	if teleporter == nil || teleporter.State != "disabled" {
 		t.Fatalf("boss floor teleporter = %+v, want disabled", teleporter)
 	}
-	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, teleporter.Position)
 	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
 		ActorPlayerID: actorID,
 		Type:          "action_intent",
@@ -208,12 +241,18 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	}
 
 	boss := findBossSnapshotEntity(t, sim.SnapshotForPlayer(actorID))
-	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
-		ActorPlayerID: actorID,
-		Type:          "action_intent",
-		Action:        &game.ActionIntent{TargetID: boss.ID},
-	})
 	for guard := 0; guard < 2000 && !hasStoreEvent(events, "monster_killed"); guard++ {
+		if hasStoreEvent(events, "player_killed") {
+			t.Fatalf("player died before boss kill")
+		}
+		if guard%3 == 0 {
+			tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
+				ActorPlayerID: actorID,
+				Type:          "action_intent",
+				Action:        &game.ActionIntent{TargetID: boss.ID},
+			})
+			continue
+		}
 		results := sim.TickResults(nil)
 		collectReplayEvents(&events, results)
 		tick++

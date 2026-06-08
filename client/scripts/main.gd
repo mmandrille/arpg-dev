@@ -23,6 +23,7 @@ const CharacterSelectPanelScript := preload("res://scripts/character_select_pane
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
+const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MONSTER_EVENT_CLIPS := {
@@ -149,6 +150,8 @@ var _health_bar: PlayerHealthBar
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
 var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
+var _movement_requires_fresh_input: bool = false
+var _last_facing_direction := Vector2(1.0, 0.0)
 var _debug_label: Label
 var _level_label: Label
 var _camera: Camera3D
@@ -489,6 +492,8 @@ func _process(delta: float) -> void:
 		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
 			and player_hp > 0 \
 			and not _user_input_blocked() \
+			and not _is_force_stand_held() \
+			and not _movement_requires_fresh_input \
 			and (Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
 			or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D))
 		player_anim.set_locomotion(moving)
@@ -1089,6 +1094,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if bot_mode and not (event is InputEventKey):
 		return
+	if event is InputEventKey and not event.echo and _is_force_stand_key(event):
+		if event.pressed:
+			_begin_force_stand()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var hotbar_slot := _hotbar_slot_for_key(event)
 		if hotbar_slot >= 0:
@@ -1111,6 +1121,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
+					if _is_force_stand_held():
+						_start_directional_attack_hold()
+						get_viewport().set_input_as_handled()
+						return
 					var pick := _resolve_click_at_mouse()
 					_sustained_click.begin_from_pick(pick)
 					_execute_click_pick(pick)
@@ -1139,8 +1153,13 @@ func _handle_input(delta: float) -> void:
 	if Input.is_key_pressed(KEY_S): input.y += 1
 	if Input.is_key_pressed(KEY_A): input.x -= 1
 	if Input.is_key_pressed(KEY_D): input.x += 1
+	if _is_force_stand_held():
+		_movement_requires_fresh_input = true
+		input = Vector2.ZERO
+	elif input == Vector2.ZERO:
+		_movement_requires_fresh_input = false
 
-	if input != Vector2.ZERO and _send_cooldown <= 0.0:
+	if input != Vector2.ZERO and not _movement_requires_fresh_input and _send_cooldown <= 0.0:
 		var dir := _camera_relative_flat_direction(input)
 		# Local prediction: move immediately for responsive feel.
 		predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
@@ -1164,6 +1183,31 @@ func _is_character_stats_key(event: InputEventKey) -> bool:
 
 func _is_escape_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_ESCAPE or event.physical_keycode == KEY_ESCAPE
+
+
+func _is_force_stand_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_SHIFT or event.physical_keycode == KEY_SHIFT
+
+
+func _is_force_stand_held() -> bool:
+	return Input.is_key_pressed(KEY_SHIFT)
+
+
+func _begin_force_stand() -> void:
+	if not _hold_input_allowed() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	_sustained_click.clear()
+	_movement_requires_fresh_input = true
+	if player_anchor != null:
+		predicted_pos = player_anchor.global_position
+		_reconcile_player()
+	_send_stop_movement_intent()
+
+
+func _send_stop_movement_intent() -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	client.send("move_intent", last_server_tick, {"direction": {"x": 0, "y": 0}, "duration_ticks": 1})
 
 
 func _handle_escape() -> void:
@@ -1304,6 +1348,9 @@ func _resolve_click_at_mouse() -> Dictionary:
 func _execute_click_pick(pick: Dictionary) -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
 		return
+	if _is_force_stand_held():
+		_start_directional_attack_hold()
+		return
 
 	var kind := str(pick.get("kind", ""))
 	if kind == "floor":
@@ -1353,6 +1400,8 @@ func _tick_sustained_click() -> void:
 
 	if _sustained_click.mode == "attack":
 		_repeat_hold_attack()
+	elif _sustained_click.mode == "directional_attack":
+		_repeat_directional_attack()
 	elif _sustained_click.mode == "move":
 		_repeat_hold_move()
 
@@ -1384,6 +1433,9 @@ func _repeat_hold_attack() -> void:
 
 
 func _repeat_hold_move() -> void:
+	if _is_force_stand_held():
+		_sustained_click.clear()
+		return
 	var ground := _mouse_ground_point()
 	if not _sustained_click.can_repeat_move(ground):
 		return
@@ -1395,6 +1447,9 @@ func _repeat_hold_move() -> void:
 
 func _try_action_at_mouse() -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
+		return
+	if _is_force_stand_held():
+		_start_directional_attack_hold()
 		return
 
 	_execute_click_pick(_resolve_click_at_mouse())
@@ -1475,6 +1530,8 @@ func _update_facing_toward_mouse() -> void:
 func _face_direction(flat_dir: Vector2) -> void:
 	if character_visual == null or player_anchor == null:
 		return
+	if flat_dir.length_squared() > 0.0001:
+		_last_facing_direction = flat_dir.normalized()
 
 	var target := player_anchor.global_position + Vector3(flat_dir.x, 0.0, flat_dir.y)
 	character_visual.look_at(target, Vector3.UP)
@@ -1511,6 +1568,29 @@ func _aim_direction_from_mouse() -> Vector2:
 		return Vector2.ZERO
 
 	return flat.normalized()
+
+
+func _start_directional_attack_hold() -> void:
+	_sustained_click.begin_directional_attack()
+	_try_send_directional_attack()
+
+
+func _repeat_directional_attack() -> void:
+	if not DirectionalAttackInputScript.can_repeat(_is_force_stand_held(), Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT), _hold_input_allowed(), player_hp):
+		_sustained_click.clear()
+		return
+	_try_send_directional_attack()
+
+
+func _try_send_directional_attack() -> void:
+	if _attack_cooldown > 0.0 or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	var direction := DirectionalAttackInputScript.direction_or_fallback(_aim_direction_from_mouse(), _last_facing_direction)
+	_face_direction(direction)
+	if player_anim != null:
+		player_anim.play_one_shot("attack")
+	client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(direction))
+	_attack_cooldown = SEND_INTERVAL
 
 
 func _mouse_ground_point() -> Vector3:

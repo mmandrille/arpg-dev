@@ -13,6 +13,7 @@
         "client_ready",
         "move_intent",
         "move_to_intent",
+        "directional_attack_intent",
         "action_intent",
         "descend_intent",
         "ascend_intent",

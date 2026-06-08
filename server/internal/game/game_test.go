@@ -111,6 +111,9 @@ func TestLoadRules(t *testing.T) {
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
 	}
+	if _, ok := r.Worlds["combat_control_lab"]; !ok {
+		t.Fatal("missing combat_control_lab world")
+	}
 }
 
 func TestMonsterRarityGolden(t *testing.T) {
@@ -724,6 +727,41 @@ func rangedLabWithEquippedBow(t *testing.T, rules *Rules, seed string) *Sim {
 	return sim
 }
 
+func combatControlLabWithEquippedBow(t *testing.T, rules *Rules, seed string) *Sim {
+	t.Helper()
+	sim, err := NewSimWithWorld("sess_combat_control", seed, rules, "combat_control_lab")
+	if err != nil {
+		t.Fatalf("combat_control_lab world: %v", err)
+	}
+	pickup := sim.Tick([]Input{{MessageID: "pick_bow", CorrelationID: "corr_pick", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+	assertAck(t, pickup, "pick_bow")
+	equip := sim.Tick([]Input{{MessageID: "equip_bow", CorrelationID: "corr_equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: mainHandSlot}}})
+	assertAck(t, equip, "equip_bow")
+	return sim
+}
+
+func equipStaticBow(t *testing.T, sim *Sim) {
+	t.Helper()
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_bow"})
+	equip := sim.Tick([]Input{{MessageID: "equip_bow", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: mainHandSlot}}})
+	assertAck(t, equip, "equip_bow")
+}
+
+func rulesWithTrainingBowReach(t *testing.T, reach float64) *Rules {
+	t.Helper()
+	base := loadRules(t)
+	copyRules := *base
+	items := make(map[string]ItemDef, len(base.Items))
+	for k, v := range base.Items {
+		items[k] = v
+	}
+	bow := items["training_bow"]
+	bow.Reach = &reach
+	items["training_bow"] = bow
+	copyRules.Items = items
+	return &copyRules
+}
+
 func TestProjectileBusyRejectsSecondFire(t *testing.T) {
 	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
 	monster := firstEntityByKind(sim, monsterEntity)
@@ -731,6 +769,363 @@ func TestProjectileBusyRejectsSecondFire(t *testing.T) {
 	assertAck(t, first, "fire1")
 	second := sim.Tick([]Input{{MessageID: "fire2", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
 	assertReject(t, second, "fire2", "projectile_busy")
+}
+
+func TestDirectionalAttackRejectsInvalidDirection(t *testing.T) {
+	sim := NewSim("sess_directional_invalid", "01", loadRules(t))
+	r := sim.Tick([]Input{{MessageID: "dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{}}}})
+	assertReject(t, r, "dir", "invalid_direction")
+}
+
+func TestDirectionalMeleeHitsMonsterInFront(t *testing.T) {
+	sim := NewSim("sess_directional_melee", "01", loadRules(t))
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.pos = Vec2{X: 11.2, Y: 5}
+	monster.hp = 10
+	monster.maxHP = 10
+
+	r := sim.Tick([]Input{{MessageID: "dir", CorrelationID: "corr_dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, r, "dir")
+	if !hasEvent(r, "monster_damaged") {
+		t.Fatalf("directional melee events = %+v, want monster_damaged", r.Events)
+	}
+	if monster.hp >= monster.maxHP {
+		t.Fatalf("monster hp = %d, want reduced", monster.hp)
+	}
+}
+
+func TestDirectionalMeleeMissesBehindAndOutsideCapsule(t *testing.T) {
+	t.Run("behind", func(t *testing.T) {
+		sim := NewSim("sess_directional_behind", "01", loadRules(t))
+		monster := firstEntityByKind(sim, monsterEntity)
+		monster.pos = Vec2{X: 9.2, Y: 5}
+		initialHP := monster.hp
+		r := sim.Tick([]Input{{MessageID: "dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+		assertAck(t, r, "dir")
+		if len(r.Events) != 0 {
+			t.Fatalf("behind swing emitted events: %+v", r.Events)
+		}
+		if monster.hp != initialHP {
+			t.Fatalf("behind monster hp = %d, want %d", monster.hp, initialHP)
+		}
+	})
+
+	t.Run("outside capsule", func(t *testing.T) {
+		sim := NewSim("sess_directional_lateral", "01", loadRules(t))
+		monster := firstEntityByKind(sim, monsterEntity)
+		monster.pos = Vec2{X: 11.0, Y: 6.2}
+		initialHP := monster.hp
+		r := sim.Tick([]Input{{MessageID: "dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+		assertAck(t, r, "dir")
+		if len(r.Events) != 0 {
+			t.Fatalf("outside capsule swing emitted events: %+v", r.Events)
+		}
+		if monster.hp != initialHP {
+			t.Fatalf("outside capsule monster hp = %d, want %d", monster.hp, initialHP)
+		}
+	})
+}
+
+func TestDirectionalMeleeTieBreaksByEntityID(t *testing.T) {
+	sim := NewSim("sess_directional_tie", "01", loadRules(t))
+	first := firstEntityByKind(sim, monsterEntity)
+	first.pos = Vec2{X: 11, Y: 4.8}
+	first.hp = 10
+	first.maxHP = 10
+	second := addTestMonster(sim, "training_dummy", Vec2{X: 11, Y: 5.2}, 10)
+
+	r := sim.Tick([]Input{{MessageID: "dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, r, "dir")
+	if first.hp >= first.maxHP {
+		t.Fatalf("first monster hp = %d, want damaged", first.hp)
+	}
+	if second.hp != second.maxHP {
+		t.Fatalf("second monster hp = %d, want unchanged %d", second.hp, second.maxHP)
+	}
+}
+
+func TestDirectionalMeleeStopsMovementAndAcksEmptySwing(t *testing.T) {
+	sim := NewSim("sess_directional_stop", "01", loadRules(t))
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.pos = Vec2{X: 9, Y: 5}
+	move := sim.Tick([]Input{{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 3}}})
+	assertAck(t, move, "move")
+	beforeAttack := sim.entities[sim.playerID].pos
+
+	r := sim.Tick([]Input{{MessageID: "dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, r, "dir")
+	if len(r.Events) != 0 {
+		t.Fatalf("empty directional swing emitted events: %+v", r.Events)
+	}
+	if sim.move != nil {
+		t.Fatalf("directional attack did not clear movement: %+v", sim.move)
+	}
+	if sim.entities[sim.playerID].pos != beforeAttack {
+		t.Fatalf("directional attack moved player from %+v to %+v", beforeAttack, sim.entities[sim.playerID].pos)
+	}
+}
+
+func TestDirectionalRangedFreeShotHitsAndOmitsTargetID(t *testing.T) {
+	sim := combatControlLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 3, Y: 5}
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.hp = 20
+	monster.maxHP = 20
+	initialDistance := distance(monster.pos, player.pos)
+
+	fire := sim.Tick([]Input{{MessageID: "dir_fire", CorrelationID: "corr_dir_fire", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, fire, "dir_fire")
+	spawn := firstChangeEntityByType(fire, projectileEntity)
+	if spawn == nil {
+		t.Fatalf("directional ranged did not spawn projectile: %+v", fire.Changes)
+	}
+	if spawn.TargetID != "" {
+		t.Fatalf("free-shot projectile target_id = %q, want omitted", spawn.TargetID)
+	}
+
+	var impact TickResult
+	for i := 0; i < 20; i++ {
+		impact = sim.Tick(nil)
+		if hasEvent(impact, "monster_damaged") || hasEvent(impact, "monster_killed") || hasEvent(impact, "attack_missed") {
+			break
+		}
+	}
+	if !hasEvent(impact, "monster_damaged") {
+		t.Fatalf("directional ranged impact events = %+v, want monster_damaged", impact.Events)
+	}
+	if !hasEvent(impact, "monster_aggro") {
+		t.Fatalf("directional ranged impact events = %+v, want monster_aggro", impact.Events)
+	}
+	if monster.aiTargetPlayerID != sim.playerID || monster.aiMode != monsterAIModeChase {
+		t.Fatalf("monster ai target/mode = %d/%s, want %d/%s", monster.aiTargetPlayerID, monster.aiMode, sim.playerID, monsterAIModeChase)
+	}
+
+	moved := false
+	for i := 0; i < 10; i++ {
+		sim.Tick(nil)
+		if distance(monster.pos, player.pos) < initialDistance-0.01 {
+			moved = true
+			break
+		}
+	}
+	if !moved {
+		t.Fatalf("aggroed monster did not move toward player: start dist %.3f now %.3f", initialDistance, distance(monster.pos, player.pos))
+	}
+}
+
+func TestDirectionalRangedProjectileBusy(t *testing.T) {
+	sim := combatControlLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	first := sim.Tick([]Input{{MessageID: "fire1", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, first, "fire1")
+	second := sim.Tick([]Input{{MessageID: "fire2", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertReject(t, second, "fire2", "projectile_busy")
+}
+
+func TestDirectionalRangedProjectileBlockedAndExpires(t *testing.T) {
+	t.Run("closed interactable blocks", func(t *testing.T) {
+		sim, err := NewSimWithWorld("sess_directional_blocked", "01", loadRules(t), "door_lab")
+		if err != nil {
+			t.Fatalf("door world: %v", err)
+		}
+		equipStaticBow(t, sim)
+		fire := sim.Tick([]Input{{MessageID: "fire", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+		assertAck(t, fire, "fire")
+		var resolved TickResult
+		for i := 0; i < 10; i++ {
+			resolved = sim.Tick(nil)
+			if hasEvent(resolved, "projectile_blocked") {
+				break
+			}
+		}
+		if !hasEvent(resolved, "projectile_blocked") {
+			t.Fatalf("blocked projectile events = %+v, want projectile_blocked", resolved.Events)
+		}
+	})
+
+	t.Run("expires without hit", func(t *testing.T) {
+		rules := rulesWithTrainingBowReach(t, 2.0)
+		sim := combatControlLabWithEquippedBow(t, rules, "cafebabecafebabe")
+		sim.entities[sim.playerID].pos = Vec2{X: 3, Y: 5}
+		fire := sim.Tick([]Input{{MessageID: "fire", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{Y: 1}}}})
+		assertAck(t, fire, "fire")
+		var resolved TickResult
+		for i := 0; i < 10; i++ {
+			resolved = sim.Tick(nil)
+			if hasEvent(resolved, "projectile_expired") {
+				break
+			}
+		}
+		if !hasEvent(resolved, "projectile_expired") {
+			t.Fatalf("expired projectile events = %+v, want projectile_expired", resolved.Events)
+		}
+	})
+}
+
+func TestAggroOnHitDirectionalRangedMovesFromOutsidePassiveRadius(t *testing.T) {
+	sim := combatControlLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 3, Y: 5}
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.hp = 20
+	monster.maxHP = 20
+	if distance(player.pos, monster.pos) <= sim.rules.Monsters[monster.monsterDefID].AggroRadius {
+		t.Fatalf("setup inside passive aggro radius: player=%+v monster=%+v", player.pos, monster.pos)
+	}
+
+	fire := sim.Tick([]Input{{MessageID: "fire", CorrelationID: "corr_aggro", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, fire, "fire")
+	var impact TickResult
+	for i := 0; i < 20; i++ {
+		impact = sim.Tick(nil)
+		if hasEvent(impact, "monster_aggro") {
+			break
+		}
+	}
+	if !hasEvent(impact, "monster_aggro") {
+		t.Fatalf("impact events = %+v, want monster_aggro", impact.Events)
+	}
+	before := monster.pos
+	sim.Tick(nil)
+	if distance(monster.pos, player.pos) >= distance(before, player.pos)-0.01 {
+		t.Fatalf("monster did not chase aggro target: before=%+v after=%+v player=%+v", before, monster.pos, player.pos)
+	}
+}
+
+func TestAggroOnHitPrefersAttackingPlayerInCoop(t *testing.T) {
+	rules := loadRules(t)
+	sim := combatControlLabWithEquippedBow(t, rules, "cafebabecafebabe")
+	hostID := sim.playerID
+	sim.SetPlayerMetadata(hostID, "acct_host", "char_host", "Host", "host")
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.hp = 20
+	monster.maxHP = 20
+	sim.entities[hostID].pos = Vec2{X: 3, Y: 5}
+	sim.entities[guestID].pos = Vec2{X: 12.4, Y: 5}
+	sim.savePlayer(sim.players[hostID])
+	sim.savePlayer(sim.players[guestID])
+	sim.usePlayer(sim.players[hostID])
+
+	fire := sim.TickResults([]Input{{MessageID: "fire", ActorPlayerID: hostID, CorrelationID: "corr_aggro", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	if len(fire) == 0 {
+		t.Fatal("directional fire produced no results")
+	}
+	assertAck(t, fire[0], "fire")
+	for i := 0; i < 20 && monster.aiTargetPlayerID == 0; i++ {
+		sim.TickResults(nil)
+	}
+	if monster.aiTargetPlayerID != hostID {
+		t.Fatalf("monster ai target = %d, want host %d", monster.aiTargetPlayerID, hostID)
+	}
+	targetPlayer := sim.nearestLivingPlayerForMonster(sim.activeLevel(), monster)
+	if targetPlayer == nil || targetPlayer.PlayerID != hostID {
+		t.Fatalf("target player = %+v, want host %d", targetPlayer, hostID)
+	}
+}
+
+func TestAggroOnHitPropagatesToNearbyMonsterGroup(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_group_aggro", "group_aggro", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("dungeon world: %v", err)
+	}
+	level, err := sim.ensureDungeonLevel(-1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, candidate := range level.entities {
+		if candidate.kind == monsterEntity {
+			delete(level.entities, id)
+		}
+	}
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 2, Y: 5})
+	sim.syncCompatibilityFields()
+
+	primary := addTestMonster(sim, "dungeon_mob", Vec2{X: 20, Y: 10}, 20)
+	near := addTestMonster(sim, "dungeon_mob", Vec2{X: 25, Y: 10}, 20)
+	chained := addTestMonster(sim, "dungeon_mob", Vec2{X: 30, Y: 10}, 20)
+	far := addTestMonster(sim, "dungeon_mob", Vec2{X: 45, Y: 10}, 20)
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+
+	sim.aggroMonsterOnHit(primary, sim.playerID, "corr_group", &res)
+
+	for _, monster := range []*entity{primary, near, chained} {
+		if monster.aiTargetPlayerID != sim.playerID || monster.aiMode != monsterAIModeChase {
+			t.Fatalf("monster %d target/mode = %d/%s, want %d/%s", monster.id, monster.aiTargetPlayerID, monster.aiMode, sim.playerID, monsterAIModeChase)
+		}
+	}
+	if far.aiTargetPlayerID != 0 || far.aiMode != monsterAIModeIdle {
+		t.Fatalf("far monster target/mode = %d/%s, want idle outside group radius", far.aiTargetPlayerID, far.aiMode)
+	}
+
+	aggroEvents := map[string]bool{}
+	for _, ev := range res.Events {
+		if ev.EventType == "monster_aggro" {
+			aggroEvents[ev.EntityID] = true
+		}
+	}
+	for _, monster := range []*entity{primary, near, chained} {
+		if !aggroEvents[idStr(monster.id)] {
+			t.Fatalf("missing monster_aggro for %d in events %+v", monster.id, res.Events)
+		}
+	}
+	if aggroEvents[idStr(far.id)] {
+		t.Fatalf("unexpected far monster_aggro for %d in events %+v", far.id, res.Events)
+	}
+}
+
+func TestAggroOnHitAlsoAggrosMonstersWithAttackerInRange(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_attack_range_aggro", "range_aggro", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("dungeon world: %v", err)
+	}
+	level, err := sim.ensureDungeonLevel(-1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, candidate := range level.entities {
+		if candidate.kind == monsterEntity {
+			delete(level.entities, id)
+		}
+	}
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 2, Y: 5})
+	sim.syncCompatibilityFields()
+
+	primary := addTestMonster(sim, "dungeon_mob", Vec2{X: 20, Y: 10}, 20)
+	attackerRange := addTestMonster(sim, "dungeon_mob", Vec2{X: 7, Y: 5}, 20)
+	outsideBoth := addTestMonster(sim, "dungeon_mob", Vec2{X: 45, Y: 10}, 20)
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+
+	sim.aggroMonsterOnHit(primary, sim.playerID, "corr_attacker_range", &res)
+
+	for _, monster := range []*entity{primary, attackerRange} {
+		if monster.aiTargetPlayerID != sim.playerID || monster.aiMode != monsterAIModeChase {
+			t.Fatalf("monster %d target/mode = %d/%s, want %d/%s", monster.id, monster.aiTargetPlayerID, monster.aiMode, sim.playerID, monsterAIModeChase)
+		}
+	}
+	if outsideBoth.aiTargetPlayerID != 0 || outsideBoth.aiMode != monsterAIModeIdle {
+		t.Fatalf("outside monster target/mode = %d/%s, want idle outside attacker and group radius", outsideBoth.aiTargetPlayerID, outsideBoth.aiMode)
+	}
+
+	aggroEvents := map[string]bool{}
+	for _, ev := range res.Events {
+		if ev.EventType == "monster_aggro" {
+			aggroEvents[ev.EntityID] = true
+		}
+	}
+	for _, monster := range []*entity{primary, attackerRange} {
+		if !aggroEvents[idStr(monster.id)] {
+			t.Fatalf("missing monster_aggro for %d in events %+v", monster.id, res.Events)
+		}
+	}
+	if aggroEvents[idStr(outsideBoth.id)] {
+		t.Fatalf("unexpected outside monster_aggro for %d in events %+v", outsideBoth.id, res.Events)
+	}
 }
 
 func TestRangedAutoApproachThenFire(t *testing.T) {
@@ -942,6 +1337,85 @@ func TestMoveToIntentArrivesAndManualMoveCancels(t *testing.T) {
 	}
 }
 
+func TestStopMovementIntentCancelsActiveMove(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_stop_move", "abcd", loadRules(t), "gear_before_combat")
+	if err != nil {
+		t.Fatalf("gear world: %v", err)
+	}
+	start := sim.entities[sim.playerID].pos
+	move := sim.Tick([]Input{{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 3}}})
+	assertAck(t, move, "move")
+	moved := sim.entities[sim.playerID].pos
+	if moved.X <= start.X {
+		t.Fatalf("setup failed: player did not move from %+v to %+v", start, moved)
+	}
+
+	stop := sim.Tick([]Input{{MessageID: "stop", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{}, DurationTicks: 1}}})
+	assertAck(t, stop, "stop")
+	if sim.move != nil {
+		t.Fatalf("stop did not clear active move: %+v", sim.move)
+	}
+	if sim.entities[sim.playerID].pos != moved {
+		t.Fatalf("stop tick moved player from %+v to %+v", moved, sim.entities[sim.playerID].pos)
+	}
+
+	sim.Tick(nil)
+	if sim.entities[sim.playerID].pos != moved {
+		t.Fatalf("player moved after stop from %+v to %+v", moved, sim.entities[sim.playerID].pos)
+	}
+}
+
+func TestStopMovementIntentCancelsAutoNavAndPendingAction(t *testing.T) {
+	t.Run("move_to", func(t *testing.T) {
+		sim, err := NewSimWithWorld("sess_stop_nav", "01", loadRules(t), "collision_lab")
+		if err != nil {
+			t.Fatalf("collision world: %v", err)
+		}
+		goNav := sim.Tick([]Input{{MessageID: "go", Type: "move_to_intent", MoveTo: &MoveToIntent{Position: Vec2{X: 7, Y: 2}}}})
+		assertAck(t, goNav, "go")
+		if sim.autoNav == nil {
+			t.Fatal("setup failed: move_to did not queue autoNav")
+		}
+		beforeStop := sim.entities[sim.playerID].pos
+		stop := sim.Tick([]Input{{MessageID: "stop", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{}, DurationTicks: 1}}})
+		assertAck(t, stop, "stop")
+		if sim.autoNav != nil {
+			t.Fatalf("stop did not clear autoNav: %+v", sim.autoNav)
+		}
+		if sim.entities[sim.playerID].pos != beforeStop {
+			t.Fatalf("stop tick advanced autoNav from %+v to %+v", beforeStop, sim.entities[sim.playerID].pos)
+		}
+	})
+
+	t.Run("pending action", func(t *testing.T) {
+		sim, err := NewSimWithWorld("sess_stop_action", "01", loadRules(t), "path_maze")
+		if err != nil {
+			t.Fatalf("path_maze world: %v", err)
+		}
+		target := firstEntityByKind(sim, monsterEntity)
+		queue := sim.Tick([]Input{{MessageID: "attack", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(target.id)}}})
+		assertAck(t, queue, "attack")
+		if sim.autoNav == nil || sim.autoNav.pendingAction == nil {
+			t.Fatal("setup failed: action did not queue pending autoNav")
+		}
+		beforeStop := sim.entities[sim.playerID].pos
+		stop := sim.Tick([]Input{{MessageID: "stop", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{}, DurationTicks: 1}}})
+		assertAck(t, stop, "stop")
+		if sim.autoNav != nil {
+			t.Fatalf("stop did not clear pending action autoNav: %+v", sim.autoNav)
+		}
+		if sim.entities[sim.playerID].pos != beforeStop {
+			t.Fatalf("stop tick advanced pending action from %+v to %+v", beforeStop, sim.entities[sim.playerID].pos)
+		}
+		for i := 0; i < 20; i++ {
+			r := sim.Tick(nil)
+			if hasEvent(r, "monster_damaged") || hasEvent(r, "monster_killed") {
+				t.Fatalf("canceled pending action still attacked on tick %d: %+v", i, r.Events)
+			}
+		}
+	})
+}
+
 func firstEntityByKind(sim *Sim, kind string) *entity {
 	for _, id := range sortedEntityIDs(sim.entities) {
 		if sim.entities[id].kind == kind {
@@ -949,6 +1423,32 @@ func firstEntityByKind(sim *Sim, kind string) *entity {
 		}
 	}
 	return nil
+}
+
+func firstChangeEntityByType(r TickResult, kind string) *EntityView {
+	for _, c := range r.Changes {
+		if c.Entity != nil && c.Entity.Type == kind {
+			return c.Entity
+		}
+	}
+	return nil
+}
+
+func addTestMonster(sim *Sim, monsterDefID string, pos Vec2, hp int) *entity {
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          pos,
+		spawnPos:     pos,
+		hp:           hp,
+		maxHP:        hp,
+		monsterDefID: monsterDefID,
+		lootTable:    sim.rules.Monsters[monsterDefID].LootTable,
+		aiMode:       monsterAIModeIdle,
+	}
+	sim.activeLevel().entities[monster.id] = monster
+	sim.syncCompatibilityFields()
+	return monster
 }
 
 func TestMeleeReachGolden(t *testing.T) {
@@ -2680,6 +3180,7 @@ func TestDeadPlayerRejectsIntentsAndStopsActiveMovement(t *testing.T) {
 
 	cases := []Input{
 		{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}},
+		{MessageID: "directional", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}},
 		{MessageID: "attack", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}},
 		{MessageID: "pickup", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}},
 		{MessageID: "equip", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "1004", Slot: mainHandSlot}},
@@ -3364,6 +3865,123 @@ func TestBossPhaseTimingAndDodge(t *testing.T) {
 		if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
 			t.Fatalf("player damaged after breaking contact tick %d: %+v", i, res.Events)
 		}
+	}
+}
+
+func TestBossMovesDuringTelegraphAndPausesDuringActive(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_boss_move", "boss_floor_gate", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	level, err := sim.ensureDungeonLevel(-5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.currentLevel = -5
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 15, Y: 15})
+	sim.syncCompatibilityFields()
+	boss := findBossEntity(t, level)
+	player := level.entities[sim.playerID]
+	player.pos = Vec2{X: boss.pos.X - 4, Y: boss.pos.Y}
+	before := boss.pos
+	start := sim.Tick(nil)
+	if !hasEvent(start, "boss_phase_started") {
+		t.Fatalf("boss start events = %+v, want boss_phase_started", start.Events)
+	}
+	if boss.pos == before {
+		t.Fatalf("boss did not move during initial telegraph tick from %+v", before)
+	}
+
+	for guard := 0; guard < 40 && boss.bossPhaseKind != "active"; guard++ {
+		sim.Tick(nil)
+	}
+	if boss.bossPhaseKind != "active" {
+		t.Fatalf("boss phase = %s, want active", boss.bossPhaseKind)
+	}
+	activePos := boss.pos
+	sim.Tick(nil)
+	if boss.pos != activePos {
+		t.Fatalf("boss moved during active phase from %+v to %+v", activePos, boss.pos)
+	}
+}
+
+func TestBossAggroPreferredTargetWinsOverNearestPlayer(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_boss_preferred", "boss_floor_gate", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	level, err := sim.ensureDungeonLevel(-5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.currentLevel = -5
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 15, Y: 15})
+	sim.syncCompatibilityFields()
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	guest := sim.levels[townLevel].entities[guestID]
+	delete(sim.levels[townLevel].entities, guestID)
+	guest.pos = Vec2{X: 0, Y: 0}
+	level.entities[guestID] = guest
+	sim.players[guestID].CurrentLevel = -5
+	sim.savePlayer(sim.players[guestID])
+	sim.usePlayer(sim.players[hostID])
+	boss := findBossEntity(t, level)
+	level.entities[hostID].pos = Vec2{X: boss.pos.X - 4, Y: boss.pos.Y}
+	level.entities[guestID].pos = Vec2{X: boss.pos.X, Y: boss.pos.Y + 0.8}
+	boss.aiTargetPlayerID = hostID
+	boss.aiMode = monsterAIModeChase
+
+	targetPlayer := sim.nearestLivingPlayerForMonster(level, boss)
+	if targetPlayer == nil || targetPlayer.PlayerID != hostID {
+		t.Fatalf("boss target = %+v, want host %d", targetPlayer, hostID)
+	}
+	beforeHostDist := distance(boss.pos, level.entities[hostID].pos)
+	beforeGuestDist := distance(boss.pos, level.entities[guestID].pos)
+	sim.Tick(nil)
+	if distance(boss.pos, level.entities[hostID].pos) >= beforeHostDist-0.01 {
+		t.Fatalf("boss did not move toward preferred host: before %.3f after %.3f", beforeHostDist, distance(boss.pos, level.entities[hostID].pos))
+	}
+	if distance(boss.pos, level.entities[guestID].pos) < beforeGuestDist-0.01 {
+		t.Fatalf("boss moved toward nearer guest despite preferred host: before %.3f after %.3f", beforeGuestDist, distance(boss.pos, level.entities[guestID].pos))
+	}
+}
+
+func TestBossDamagesStationaryPlayer(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_boss_damage", "boss_floor_gate", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	level, err := sim.ensureDungeonLevel(-5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.currentLevel = -5
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 15, Y: 15})
+	sim.syncCompatibilityFields()
+	boss := findBossEntity(t, level)
+	player := level.entities[sim.playerID]
+	player.pos = boss.pos
+	startHP := player.hp
+	sawDamage := false
+	for i := 0; i < 60; i++ {
+		res := sim.Tick(nil)
+		if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
+			sawDamage = true
+			break
+		}
+	}
+	if !sawDamage {
+		t.Fatal("boss did not damage stationary player during active phase")
+	}
+	if player.hp >= startHP {
+		t.Fatalf("player hp = %d, want below %d", player.hp, startHP)
 	}
 }
 

@@ -35,6 +35,14 @@ func begin_from_pick(pick: Dictionary) -> bool:
 			return false
 
 
+func begin_directional_attack() -> bool:
+	active = true
+	mode = "directional_attack"
+	target_id = ""
+	last_ground = Vector2.ZERO
+	return true
+
+
 func should_stop(player_hp: int, entities: Dictionary) -> bool:
 	if not active:
 		return true

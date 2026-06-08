@@ -102,6 +102,47 @@ func TestBuildTimelineThroughTickExtendsPassiveSimulation(t *testing.T) {
 	}
 }
 
+func TestBuildTimelineIncludesGeneratedMonsterRarity(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{
+			ID:      testSessionID,
+			Seed:    "v30_monster_rarity",
+			WorldID: "dungeon_levels",
+		},
+		start: store.SessionStartSnapshot{
+			Waypoints: []store.CharacterWaypoint{{Level: -2}},
+		},
+		inputs: []store.SessionInput{
+			storedInput(t, "inp-town-teleporter", "msg-town-teleporter", 0, 0, "move_intent", map[string]any{"direction": map[string]any{"x": 0, "y": 1}, "duration_ticks": 3}),
+			storedInput(t, "inp-teleport-2", "msg-teleport-2", 5, 1, "teleport_intent", map[string]any{"target_level": -2}),
+		},
+	}
+	timeline, err := BuildTimeline(context.Background(), repo, rules, testSessionID, 5)
+	if err != nil {
+		t.Fatalf("timeline: %v", err)
+	}
+	found := false
+	for _, envelope := range timeline.Envelopes {
+		if envelope.Type != "state_delta" {
+			continue
+		}
+		delta, ok := envelope.Payload.(StateDeltaPayload)
+		if !ok {
+			t.Fatalf("delta payload type = %T", envelope.Payload)
+		}
+		for _, change := range delta.Changes {
+			if change.Op == game.OpEntitySpawn && change.Entity != nil &&
+				change.Entity.Type == "monster" && change.Entity.Rarity == "unique" {
+				found = true
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("timeline did not include unique generated monster rarity: %+v", timeline.Envelopes)
+	}
+}
+
 func TestReconstructFromInputsUsesWorldID(t *testing.T) {
 	rules := loadRules(t)
 	recon, err := ReconstructFromInputs(testSessionID, testSeed, rules, "gear_before_combat", nil, -1)
@@ -332,7 +373,7 @@ func (f *fakeRepo) CreateCharacter(context.Context, string, string, string) (sto
 	return store.Character{}, nil
 }
 func (f *fakeRepo) DeleteCharacter(context.Context, string, string) error { return nil }
-func (f *fakeRepo) CreateSession(context.Context, store.Session) error { return nil }
+func (f *fakeRepo) CreateSession(context.Context, store.Session) error    { return nil }
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil
 }

@@ -33,6 +33,13 @@ const PLAYER_EVENT_CLIPS := {
 }
 const PLAYER_START_HP := 10
 const INTERACTABLE_ACTIVATION_RANGE := 1.5
+const PLAYER_TINT := Color("#8fe8a7")
+const MONSTER_RARITY_TINTS := {
+	"common": Color("#f2f2ec"),
+	"champion": Color("#9fc7ff"),
+	"rare": Color("#ff9b9b"),
+	"unique": Color("#ffd978"),
+}
 
 var client: NetClient
 var resolver: EquipmentVisualResolver
@@ -148,6 +155,7 @@ func _ready() -> void:
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
+	_apply_model_tint(character_visual, PLAYER_TINT)
 	_build_scene()
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
@@ -188,10 +196,11 @@ func _ready() -> void:
 		return
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
+	var requested_seed := _env("ARPG_SEED", "")
 	if requested_world_id == "" and not bot_client_run:
 		requested_world_id = "dungeon_levels"
 	if bot_client_run or resume_session_id != "" or _truthy_env("ARPG_AUTOSTART"):
-		if not _start_automation_session(resume_session_id, requested_world_id, bot_client_run):
+		if not _start_automation_session(resume_session_id, requested_world_id, requested_seed, bot_client_run):
 			return
 		if bot_client_run:
 			_mount_bot_controller()
@@ -215,8 +224,8 @@ func _mount_bot_controller() -> void:
 	add_child(bot)
 
 
-func _start_automation_session(resume_session_id: String, requested_world_id: String, bot_client_run: bool) -> bool:
-	if not client.create_session(resume_session_id, requested_world_id):
+func _start_automation_session(resume_session_id: String, requested_world_id: String, requested_seed: String, bot_client_run: bool) -> bool:
+	if not client.create_session(resume_session_id, requested_world_id, "", requested_seed):
 		if bot_client_run:
 			printerr("[bot-client] session failed world_id=%s resume=%s" % [requested_world_id, resume_session_id])
 		_debug("session failed")
@@ -1808,11 +1817,13 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	if kind == "monster":
 		var packed := MonsterDummyScene
 		if packed != null:
-			return packed.instantiate()
+			var monster := packed.instantiate()
+			_apply_model_tint(monster, _monster_tint(str(e.get("rarity", "common"))))
+			return monster
 		# Fallback: red primitive so positioning/targeting still works.
 		var fallback := MeshInstance3D.new()
 		var fm := StandardMaterial3D.new()
-		fm.albedo_color = Color(1.0, 0.3, 0.3)
+		fm.albedo_color = _monster_tint(str(e.get("rarity", "common")))
 		fallback.mesh = BoxMesh.new()
 		fallback.material_override = fm
 		return fallback
@@ -1826,6 +1837,19 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	if kind == "projectile":
 		return _make_projectile_node()
 	return _make_loot_node(str(e.get("item_def_id", "")))
+
+
+func _monster_tint(rarity: String) -> Color:
+	return MONSTER_RARITY_TINTS.get(rarity, MONSTER_RARITY_TINTS["common"])
+
+
+func _apply_model_tint(root: Node, color: Color) -> void:
+	if root is MeshInstance3D:
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = color
+		(root as MeshInstance3D).material_override = mat
+	for child in root.get_children():
+		_apply_model_tint(child, color)
 
 
 func _make_loot_node(item_def_id: String) -> Node3D:

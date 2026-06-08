@@ -12,6 +12,8 @@
     "teleporter_placement",
     "monster_placement",
     "chest_placement",
+    "monster_rarity_note",
+    "monster_rarities",
     "loot_band_note",
     "loot_bands",
     "level_names",
@@ -88,6 +90,34 @@
       }
     },
     "loot_band_note": { "type": "string", "minLength": 1 },
+    "monster_rarity_note": { "type": "string", "minLength": 1 },
+    "monster_rarities": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "weight",
+          "color",
+          "hp_multiplier",
+          "damage_multiplier",
+          "xp_multiplier",
+          "loot_depth_offset"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "weight": { "type": "integer", "minimum": 1 },
+          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+          "hp_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "damage_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "xp_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "loot_depth_offset": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
     "loot_bands": {
       "type": "array",
       "minItems": 3,

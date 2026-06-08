@@ -78,32 +78,35 @@ const (
 
 // entity is the internal mutable scene entity.
 type entity struct {
-	id                uint64
-	kind              string
-	pos               Vec2
-	hp                int
-	maxHP             int
-	monsterDefID      string
-	itemDefID         string
-	rollPayload       *ItemRollPayload
-	interactableDefID string
-	state             string
-	lootTable         string
-	ownerID           uint64
-	targetID          uint64
-	projectileDefID   string
-	dir               Vec2
-	speed             float64
-	traveled          float64
-	maxDistance       float64
-	damageRange       DamageRange
-	sourceMsgID       string
-	sourceCorrID      string
-	spawnTick         uint64
-	spawnPos          Vec2
-	aiMode            string
-	lastAttackTick    uint64
-	hasAttacked       bool
+	id                  uint64
+	kind                string
+	pos                 Vec2
+	hp                  int
+	maxHP               int
+	monsterDefID        string
+	monsterRarityID     string
+	monsterAttackDamage *DamageRange
+	monsterXPReward     int
+	itemDefID           string
+	rollPayload         *ItemRollPayload
+	interactableDefID   string
+	state               string
+	lootTable           string
+	ownerID             uint64
+	targetID            uint64
+	projectileDefID     string
+	dir                 Vec2
+	speed               float64
+	traveled            float64
+	maxDistance         float64
+	damageRange         DamageRange
+	sourceMsgID         string
+	sourceCorrID        string
+	spawnTick           uint64
+	spawnPos            Vec2
+	aiMode              string
+	lastAttackTick      uint64
+	hasAttacked         bool
 }
 
 // invItem is an internal inventory item.
@@ -754,14 +757,24 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			return fmt.Errorf("game: generate dungeon level %d: unknown monster loot table %s", level.levelNum, generated.lootTable)
 		}
 		monster := &entity{
-			kind:         monsterEntity,
-			pos:          generated.pos,
-			spawnPos:     generated.pos,
-			hp:           def.MaxHP,
-			maxHP:        def.MaxHP,
-			monsterDefID: generated.defID,
-			lootTable:    generated.lootTable,
-			aiMode:       monsterAIModeIdle,
+			kind:            monsterEntity,
+			pos:             generated.pos,
+			spawnPos:        generated.pos,
+			hp:              def.MaxHP,
+			maxHP:           def.MaxHP,
+			monsterDefID:    generated.defID,
+			monsterRarityID: generated.rarityID,
+			lootTable:       generated.lootTable,
+			aiMode:          monsterAIModeIdle,
+		}
+		if rarity, ok := s.rules.DungeonGeneration.MonsterRarity(generated.rarityID); ok {
+			monster.maxHP = roundPositive(float64(def.MaxHP) * rarity.HPMultiplier)
+			monster.hp = monster.maxHP
+			if def.AttackDamage != nil {
+				scaledAttack := scaleDamageRange(*def.AttackDamage, rarity.DamageMultiplier)
+				monster.monsterAttackDamage = &scaledAttack
+			}
+			monster.monsterXPReward = roundPositive(float64(def.XPReward) * rarity.XPMultiplier)
 		}
 		monster.id = s.alloc()
 		level.entities[monster.id] = monster
@@ -1984,7 +1997,11 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(def.AttackCooldown) {
 			continue
 		}
-		dmg := s.rollRange(*def.AttackDamage)
+		attackDamage := def.AttackDamage
+		if monster.monsterAttackDamage != nil {
+			attackDamage = monster.monsterAttackDamage
+		}
+		dmg := s.rollRange(*attackDamage)
 		player.hp -= dmg
 		if player.hp < 0 {
 			player.hp = 0
@@ -2325,7 +2342,11 @@ func (s *Sim) awardMonsterExperience(monster *entity, corr string, res *TickResu
 	if !ok || def.XPReward <= 0 {
 		return
 	}
-	s.awardExperience(def.XPReward, corr, res)
+	xpReward := def.XPReward
+	if monster.monsterXPReward > 0 {
+		xpReward = monster.monsterXPReward
+	}
+	s.awardExperience(xpReward, corr, res)
 }
 
 func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
@@ -3116,6 +3137,9 @@ func (e *entity) view() EntityView {
 		ev.MaxHP = &maxHP
 		if e.kind == monsterEntity {
 			ev.MonsterDefID = e.monsterDefID
+			if e.monsterRarityID != "" {
+				ev.Rarity = e.monsterRarityID
+			}
 		}
 	case lootEntity:
 		ev.ItemDefID = e.itemDefID

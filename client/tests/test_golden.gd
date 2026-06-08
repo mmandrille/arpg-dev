@@ -258,14 +258,50 @@ func _initialize() -> void:
 		return
 	var attack_damage: Dictionary = dungeon_mob["attack_damage"]
 	var pinned_damage := int(dungeon_monster_attack["damage"])
-	if pinned_damage < int(attack_damage["min"]) or pinned_damage > int(attack_damage["max"]):
+	var damage_matches_rarity := false
+	for rarity in dungeon_generation["monster_rarities"]:
+		var damage_mult := float(rarity["damage_multiplier"])
+		var scaled_min := _round_positive(float(attack_damage["min"]) * damage_mult)
+		var scaled_max := _round_positive(float(attack_damage["max"]) * damage_mult)
+		if pinned_damage >= scaled_min and pinned_damage <= scaled_max:
+			damage_matches_rarity = true
+			break
+	if not damage_matches_rarity:
 		_fail("dungeon monster attack damage outside rules")
 		return
 	if int(dungeon_monster_attack["player_hp_after"]) != 10 - pinned_damage:
 		_fail("dungeon monster attack hp mismatch")
 		return
 
-	# 14. Waypoint panel golden matches client layout constants.
+	# 14. Monster rarity golden mirrors shared dungeon-generation presentation/scaling data.
+	var monster_rarity := _read(shared.path_join("golden/monster_rarity.json"))
+	var expected_rarity_ids := ["common", "champion", "rare", "unique"]
+	for i in range(expected_rarity_ids.size()):
+		var rarity: Dictionary = dungeon_generation["monster_rarities"][i]
+		if str(rarity["id"]) != expected_rarity_ids[i]:
+			_fail("monster_rarity id order mismatch")
+			return
+		if str(rarity["color"]) != str(monster_rarity["rarities"][i]["color"]):
+			_fail("monster_rarity color mismatch")
+			return
+		if int(rarity["loot_depth_offset"]) != int(monster_rarity["rarities"][i]["loot_depth_offset"]):
+			_fail("monster_rarity loot offset mismatch")
+			return
+	for c in monster_rarity["effective_depth_cases"]:
+		var rarity_offset := -1
+		for rarity in dungeon_generation["monster_rarities"]:
+			if str(rarity["id"]) == str(c["rarity"]):
+				rarity_offset = int(rarity["loot_depth_offset"])
+				break
+		if rarity_offset < 0:
+			_fail("monster_rarity effective depth unknown rarity")
+			return
+		var expected_depth := absi(int(c["level"])) + rarity_offset
+		if expected_depth != int(c["expected_effective_depth"]):
+			_fail("monster_rarity effective depth mismatch")
+			return
+
+	# 15. Waypoint panel golden matches client layout constants.
 	var waypoint_panel := _read(shared.path_join("golden/waypoint_panel.json"))
 	const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
 	if WaypointPanelConfig.SCROLL_MAX_VISIBLE_ROWS != int(waypoint_panel["scroll_max_visible_rows"]):
@@ -275,7 +311,7 @@ func _initialize() -> void:
 		_fail("waypoint panel viewport unit mismatch")
 		return
 
-	# 15. Item roll golden references shared item template fields for tooltip display.
+	# 16. Item roll golden references shared item template fields for tooltip display.
 	var item_templates := _read(shared.path_join("rules/item_templates.v0.json"))
 	var item_rolls := _read(shared.path_join("golden/item_rolls.json"))
 	var template_id := str(item_rolls["template_id"])
@@ -305,7 +341,7 @@ func _initialize() -> void:
 			_fail("item_rolls effect_ids should be empty in v23")
 			return
 
-	# 16. Treasure class golden references shared item/template reward sources.
+	# 17. Treasure class golden references shared item/template reward sources.
 	var treasure_classes := _read(shared.path_join("rules/treasure_classes.v0.json"))
 	var treasure_class_rolls := _read(shared.path_join("golden/treasure_class_rolls.json"))
 	var treasure_class_id := str(treasure_class_rolls["treasure_class_id"])
@@ -326,7 +362,7 @@ func _initialize() -> void:
 				_fail("treasure_class_rolls references unknown template %s" % item_template_id)
 				return
 
-	# 17. Guarded chest golden references shared dungeon/interactable/loot rules.
+	# 18. Guarded chest golden references shared dungeon/interactable/loot rules.
 	var interactables := _read(shared.path_join("rules/interactables.v0.json"))
 	var guarded_chest := _read(shared.path_join("golden/guarded_chest_generation.json"))
 	if int(guarded_chest["base_monster_count"]) != int(dungeon_generation["monster_placement"]["count"]):
@@ -376,7 +412,7 @@ func _initialize() -> void:
 			_fail("guarded_chest guarded monster count mismatch")
 			return
 
-	# 18. Character progression golden mirrors display-side derived formulas.
+	# 19. Character progression golden mirrors display-side derived formulas.
 	var progression_rules := _read(shared.path_join("rules/character_progression.v0.json"))
 	var progression_golden := _read(shared.path_join("golden/character_progression.json"))
 	if progression_rules["base_stats"] != progression_golden["base_stats"]:
@@ -394,7 +430,7 @@ func _initialize() -> void:
 				_fail("character_progression case %s %s got %.4f want %.4f" % [str(c["name"]), str(key), got, want])
 				return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression)")
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression)")
 	quit(0)
 
 
@@ -412,6 +448,10 @@ func _read(path: String) -> Dictionary:
 
 func _vec2_equals(value: Dictionary, x: float, y: float) -> bool:
 	return is_equal_approx(float(value.get("x", NAN)), x) and is_equal_approx(float(value.get("y", NAN)), y)
+
+
+func _round_positive(value: float) -> int:
+	return maxi(1, int(floor(value + 0.5)))
 
 
 func _eval_progression_formula(formula: Dictionary, stats: Dictionary) -> float:

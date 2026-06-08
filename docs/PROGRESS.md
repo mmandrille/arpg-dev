@@ -11,7 +11,7 @@ Last updated: 2026-06-07
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v29 — `dungeon-equipment-drop-expansion` |
+| **Latest completed slice** | v30 — `monster-rarity-and-loot-scaling` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-07 |
 | **Next slice** | TBD |
@@ -45,6 +45,7 @@ v26_* = character-stats-and-leveling
 v27_* = hold-click-controls
 v28_* = full-equipment-and-belt-hotbar
 v29_* = dungeon-equipment-drop-expansion
+v30_* = monster-rarity-and-loot-scaling
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -94,6 +95,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v27** | `hold-click-controls` | Complete (`make ci` green) | [`v27_spec-hold-click-controls.md`](specs/v27_spec-hold-click-controls.md) | [`v27_2026-06-07-hold-click-controls.md`](plans/v27_2026-06-07-hold-click-controls.md) |
 | **v28** | `full-equipment-and-belt-hotbar` | Complete (`make ci` green) | [`v28_spec-full-equipment-and-belt-hotbar.md`](specs/v28_spec-full-equipment-and-belt-hotbar.md) | [`v28_2026-06-07-full-equipment-and-belt-hotbar.md`](plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md) |
 | **v29** | `dungeon-equipment-drop-expansion` | Complete (`make ci` green) | [`v29_spec-dungeon-equipment-drop-expansion.md`](specs/v29_spec-dungeon-equipment-drop-expansion.md) | [`v29_2026-06-07-dungeon-equipment-drop-expansion.md`](plans/v29_2026-06-07-dungeon-equipment-drop-expansion.md) |
+| **v30** | `monster-rarity-and-loot-scaling` | Complete (`make ci` green) | [`v30_spec-monster-rarity-and-loot-scaling.md`](specs/v30_spec-monster-rarity-and-loot-scaling.md) | [`v30_2026-06-07-monster-rarity-and-loot-scaling.md`](plans/v30_2026-06-07-monster-rarity-and-loot-scaling.md) |
 
 ---
 
@@ -691,6 +693,35 @@ catalog through deterministic, depth-aware treasure classes.
 items, real gold wallet, vendors/stash/crafting/trade, combat use of armor/block/crit/hit speed,
 production item/chest art, and client-side loot logic.
 
+### v30 — Monster rarity and loot scaling
+
+**Proves:** Generated dungeon monster population can roll server-authoritative rarity that changes
+challenge, XP, loot depth, protocol state, replay, bot assertions, and Godot presentation.
+
+- `shared/rules/dungeon_generation.v0.json` now declares generated monster rarities:
+  `common`, `champion`, `rare`, and `unique`, with weights `100/15/6/3`, pastel colors, challenge
+  multipliers, and loot-depth offsets `+0/+1/+2/+3`.
+- Shared/golden validation pins rarity tuning, scaled `dungeon_mob` HP/damage/XP, seeded generated
+  roll order, and the unique `level -5 -> effective depth 8 -> 3+ loot band` case.
+- Go generation rolls rarity from a separate deterministic rarity RNG stream so existing floor and
+  chest layout streams do not drift.
+- Generated monsters store rarity, scaled HP, scaled proactive attack damage, scaled XP reward, and
+  a monster loot table selected from `abs(level) + loot_depth_offset`.
+- Static/lab/world-preset monsters remain unscaled and do not emit v30 generated rarity.
+- Existing protocol v1 entity `rarity` now carries monster rarity through snapshots, deltas,
+  `/state`, reconnect, and replay timelines.
+- Godot keeps server authority unchanged and applies a green player tint plus rarity tints on the
+  existing monster model: pastel white, blue, red, and golden.
+- Protocol bot scenario `21_monster_rarity_loot_scaling.json` descends into a generated dungeon,
+  observes a champion mob, kills it, picks up rolled loot, and proves `/state`, reconnect, replay,
+  and fresh-session persistence.
+- Existing character leveling bot coverage now pins a generated-dungeon seed because v30-scaled XP
+  changes the expected XP total from generated mobs.
+
+**Explicit non-goals:** unique/set item catalogs, unique monster special drops, affixes, named
+elite packs, minions, aura modifiers, boss floors, Magic Find, final item-level/depth economy,
+chest rarity, production monster art/VFX/audio, and colorblind/accessibility-safe rarity treatment.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -736,6 +767,7 @@ treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob →
 character_stats_and_leveling: descend to dungeon → kill mobs for XP → level up → spend VIT → prove persistence
 full_equipment: pick up/equip paper-doll gear → prove hand occupancy → assign belt-gated hotbar → prove persistence
 dungeon_equipment_drops: descend to depth-banded dungeon → open chest → pick up/equip rolled equipment → prove persistence
+monster_rarity_loot_scaling: descend to generated dungeon → assert champion rarity → kill → pick up rolled loot → prove persistence
 ```
 
 **Verify:**
@@ -838,14 +870,19 @@ server-synced paper-doll and belt capacity behavior.
 bands, depth-specific monster/chest treasure classes, validation for full v28 template reachability
 by depth `3+`, golden fixtures for varied equipment outcomes, and a real generated dungeon bot proof.
 
+**Generated dungeon monster rarity now scales challenge and loot depth.** v30 adds deterministic
+generated monster rarity tiers, scaled HP/damage/XP, effective monster loot depth offsets,
+monster rarity in protocol/replay state, player/enemy tinting, and a real generated dungeon bot
+proof for non-common rarity.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Armor mitigation, block chance execution, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield | v0/v4/v12/v17/v21/v23/v26/v28/v29 non-goals |
-| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, final item-level/depth progression, boss-floor chest integration, richer dungeon drop economy | v23/v25/v26/v28/v29 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29 non-goals |
+| Combat | Armor mitigation, block chance execution, crit/hit chance gameplay, attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers/boss floors | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30 non-goals |
+| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, boss-floor chest integration, richer dungeon drop economy | v23/v25/v26/v28/v29/v30 non-goals, ADR-0009 deferred |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30 non-goals |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

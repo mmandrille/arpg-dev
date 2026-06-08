@@ -175,7 +175,7 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
             "entities": [
                 {"id": "1001", "type": "player", "position": {"x": 0, "y": 5}, "hp": 10, "max_hp": 10},
                 {"id": "1002", "type": "loot", "item_def_id": "rusty_sword", "position": {"x": 6, "y": 5}},
-                {"id": "1003", "type": "monster", "monster_def_id": "training_dummy_reward", "position": {"x": 12, "y": 5}, "hp": 3, "max_hp": 3},
+                {"id": "1003", "type": "monster", "monster_def_id": "training_dummy_reward", "rarity": "champion", "position": {"x": 12, "y": 5}, "hp": 3, "max_hp": 3},
                 {"id": "1004", "type": "interactable", "interactable_def_id": "wooden_door", "state": "closed", "position": {"x": 4, "y": 5}},
             ],
             "inventory": [],
@@ -188,6 +188,8 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
     assert find_player(state)["id"] == "1001"
     assert find_loot(state, "rusty_sword")["id"] == "1002"
     assert find_monster(state, "training_dummy_reward")["id"] == "1003"
+    assert find_monster(state, "training_dummy_reward", "champion")["id"] == "1003"
+    assert find_monster(state, "training_dummy_reward", "rare") is None
     assert find_interactable(state, "wooden_door")["id"] == "1004"
 
     ingest_message({
@@ -310,7 +312,7 @@ def test_runtime_assertion_monster_killed_in_attacks_fails_over_max():
 def test_structured_assertions():
     entities = [
         {"id": "1001", "type": "player", "hp": 9},
-        {"id": "1003", "type": "monster", "monster_def_id": "training_dummy_reward", "hp": 0},
+        {"id": "1003", "type": "monster", "monster_def_id": "training_dummy_reward", "rarity": "champion", "hp": 0},
         {"id": "1007", "type": "interactable", "interactable_def_id": "wooden_door", "state": "open"},
     ]
     inventory = [
@@ -323,6 +325,7 @@ def test_structured_assertions():
         {"type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": True},
         {"type": "inventory_contains", "item_def_id": "training_badge", "equipped": False},
         {"type": "monster_dead", "monster_def_id": "training_dummy_reward"},
+        {"type": "entity_count", "entity_type": "monster", "monster_def_id": "training_dummy_reward", "rarity": "champion", "equals": 1},
         {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
         {"type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open"},
         {"type": "equipped_weapon_def", "item_def_id": "rusty_sword"},

@@ -2,7 +2,7 @@
   "server_tick": 43,
   "level": 0,
   "changes": [
-    { "op": "entity_update", "entity": { "id": "1002", "type": "monster", "position": { "x": 12, "y": 5 }, "hp": 0, "max_hp": 3 } },
+    { "op": "entity_update", "entity": { "id": "1002", "type": "monster", "monster_def_id": "training_dummy", "rarity": "common", "position": { "x": 12, "y": 5 }, "hp": 0, "max_hp": 3 } },
     { "op": "entity_spawn", "entity": { "id": "1003", "type": "loot", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "position": { "x": 12, "y": 5 } } },
     { "op": "entity_update", "entity": { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 9, "max_hp": 10 } },
     { "op": "entity_spawn", "entity": { "id": "1005", "type": "projectile", "position": { "x": 1, "y": 5 }, "owner_id": "1001", "target_id": "1002", "projectile_def_id": "training_arrow" } },

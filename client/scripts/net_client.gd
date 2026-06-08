@@ -109,7 +109,7 @@ func delete_character(character_id: String) -> bool:
 	return r.get("_code", 0) == 204
 
 
-func create_session(resume_session_id: String = "", requested_world_id: String = "", character_id: String = "") -> bool:
+func create_session(resume_session_id: String = "", requested_world_id: String = "", character_id: String = "", requested_seed: String = "") -> bool:
 	# resume_session_id rejoins an existing session: the server rehydrates
 	# inventory AND equipped state before the initial session_snapshot (no
 	# protocol change — see spec §4.5). Empty string mints a fresh session.
@@ -121,6 +121,8 @@ func create_session(resume_session_id: String = "", requested_world_id: String =
 			body["world_id"] = requested_world_id
 		if character_id != "":
 			body["character_id"] = character_id
+		if requested_seed != "":
+			body["seed"] = requested_seed
 	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
 		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) in [200, 201] and r.has("body"):

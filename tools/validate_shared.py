@@ -140,6 +140,7 @@ def cross_checks(report: Report) -> None:
     item_rolls_golden = load(GOLDEN / "item_rolls.json")
     treasure_class_rolls_golden = load(GOLDEN / "treasure_class_rolls.json")
     dungeon_equipment_drops_golden = load(GOLDEN / "dungeon_equipment_drops.json")
+    monster_rarity_golden = load(GOLDEN / "monster_rarity.json")
     guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
     character_progression_golden = load(GOLDEN / "character_progression.json")
 
@@ -658,6 +659,73 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation chest_placement", "max_attempts must be positive")
     else:
         report.ok("dungeon_generation chest placement is valid")
+    monster_rarities = dungeon_generation.get("monster_rarities", [])
+    expected_rarity_order = ["common", "champion", "rare", "unique"]
+    expected_rarity_weights = {
+        "common": 100,
+        "champion": 15,
+        "rare": 6,
+        "unique": 3,
+    }
+    expected_rarity_offsets = {
+        "common": 0,
+        "champion": 1,
+        "rare": 2,
+        "unique": 3,
+    }
+    expected_rarity_colors = {
+        "common": "#f2f2ec",
+        "champion": "#9fc7ff",
+        "rare": "#ff9b9b",
+        "unique": "#ffd978",
+    }
+    if [r.get("id") for r in monster_rarities] != expected_rarity_order:
+        report.fail("dungeon_generation monster_rarities", f"must be ordered {expected_rarity_order}")
+    else:
+        failed_rarity = False
+        seen_rarity_ids = set()
+        for rarity in monster_rarities:
+            rarity_id = rarity["id"]
+            seen_rarity_ids.add(rarity_id)
+            if rarity_id.lower() != rarity_id or not rarity_id.replace("_", "").isalnum():
+                report.fail("dungeon_generation monster_rarities", f"{rarity_id}: id must be stable lowercase")
+                failed_rarity = True
+                break
+            if rarity.get("weight") != expected_rarity_weights[rarity_id]:
+                report.fail("dungeon_generation monster_rarities", f"{rarity_id}: weight must be {expected_rarity_weights[rarity_id]}")
+                failed_rarity = True
+                break
+            color = rarity.get("color")
+            if color != expected_rarity_colors[rarity_id]:
+                report.fail("dungeon_generation monster_rarities", f"{rarity_id}: color must be {expected_rarity_colors[rarity_id]}")
+                failed_rarity = True
+                break
+            if not isinstance(color, str) or len(color) != 7 or not color.startswith("#"):
+                report.fail("dungeon_generation monster_rarities", f"{rarity_id}: color must be #RRGGBB")
+                failed_rarity = True
+                break
+            try:
+                int(color[1:], 16)
+            except ValueError:
+                report.fail("dungeon_generation monster_rarities", f"{rarity_id}: color must be hex")
+                failed_rarity = True
+                break
+            for field in ("hp_multiplier", "damage_multiplier", "xp_multiplier"):
+                if not isinstance(rarity.get(field), (int, float)) or rarity[field] <= 0:
+                    report.fail("dungeon_generation monster_rarities", f"{rarity_id}.{field}: must be positive")
+                    failed_rarity = True
+                    break
+            if failed_rarity:
+                break
+            if rarity.get("loot_depth_offset") != expected_rarity_offsets[rarity_id]:
+                report.fail("dungeon_generation monster_rarities", f"{rarity_id}: loot_depth_offset must be {expected_rarity_offsets[rarity_id]}")
+                failed_rarity = True
+                break
+        if not failed_rarity:
+            if seen_rarity_ids != set(expected_rarity_order):
+                report.fail("dungeon_generation monster_rarities", "must define common/champion/rare/unique exactly")
+            else:
+                report.ok("dungeon_generation monster rarities match v30 first-pass tuning")
     loot_bands = dungeon_generation.get("loot_bands", [])
     if not loot_bands:
         report.fail("dungeon_generation loot_bands", "must define depth bands")
@@ -721,6 +789,94 @@ def cross_checks(report: Report) -> None:
                     report.fail("dungeon_generation loot_bands 3+ reachability", f"missing templates: {missing_depth3}")
                 else:
                     report.ok("dungeon_generation 3+ loot sources reach every v28 template")
+    rarity_by_id = {r["id"]: r for r in monster_rarities}
+    if monster_rarity_golden["monster_def_id"] != dungeon_generation["monster_placement"]["monster_def_id"]:
+        report.fail("monster_rarity golden", "monster_def_id must match dungeon_generation monster placement")
+    elif monster_rarity_golden["monster_def_id"] not in monsters["monsters"]:
+        report.fail("monster_rarity golden", f"unknown monster_def_id {monster_rarity_golden['monster_def_id']}")
+    else:
+        failed_monster_rarity_golden = False
+        base_monster = monsters["monsters"][monster_rarity_golden["monster_def_id"]]
+
+        def rounded_positive(value: float) -> int:
+            return max(1, int(math.floor(value + 0.5)))
+
+        for golden_rarity in monster_rarity_golden["rarities"]:
+            rarity_id = golden_rarity["id"]
+            rule_rarity = rarity_by_id.get(rarity_id)
+            if rule_rarity is None:
+                report.fail("monster_rarity golden", f"{rarity_id}: missing from dungeon_generation monster_rarities")
+                failed_monster_rarity_golden = True
+                break
+            for field in ("weight", "color", "hp_multiplier", "damage_multiplier", "xp_multiplier", "loot_depth_offset"):
+                if golden_rarity[field] != rule_rarity[field]:
+                    report.fail("monster_rarity golden", f"{rarity_id}.{field}: mismatch with dungeon_generation")
+                    failed_monster_rarity_golden = True
+                    break
+            if failed_monster_rarity_golden:
+                break
+            expected = golden_rarity["expected"]
+            expected_hp = rounded_positive(base_monster["max_hp"] * rule_rarity["hp_multiplier"])
+            base_attack = base_monster["attack_damage"]
+            expected_attack = {
+                "min": rounded_positive(base_attack["min"] * rule_rarity["damage_multiplier"]),
+                "max": rounded_positive(base_attack["max"] * rule_rarity["damage_multiplier"]),
+            }
+            expected_xp = rounded_positive(base_monster["xp_reward"] * rule_rarity["xp_multiplier"])
+            if expected["max_hp"] != expected_hp:
+                report.fail("monster_rarity golden", f"{rarity_id}: max_hp mismatch")
+                failed_monster_rarity_golden = True
+                break
+            if expected["attack_damage"] != expected_attack:
+                report.fail("monster_rarity golden", f"{rarity_id}: attack_damage mismatch")
+                failed_monster_rarity_golden = True
+                break
+            if expected["xp_reward"] != expected_xp:
+                report.fail("monster_rarity golden", f"{rarity_id}: xp_reward mismatch")
+                failed_monster_rarity_golden = True
+                break
+        for case in monster_rarity_golden["effective_depth_cases"]:
+            rarity = rarity_by_id.get(case["rarity"])
+            if rarity is None:
+                report.fail("monster_rarity effective depth", f"{case['rarity']}: unknown rarity")
+                failed_monster_rarity_golden = True
+                break
+            effective_depth = abs(int(case["level"])) + int(rarity["loot_depth_offset"])
+            if effective_depth != case["expected_effective_depth"]:
+                report.fail("monster_rarity effective depth", f"{case['level']} {case['rarity']}: depth mismatch")
+                failed_monster_rarity_golden = True
+                break
+            matching_band = next(
+                (
+                    band for band in loot_bands
+                    if effective_depth >= band["min_depth"]
+                    and (band["max_depth"] is None or effective_depth <= band["max_depth"])
+                ),
+                None,
+            )
+            if matching_band is None:
+                report.fail("monster_rarity effective depth", f"{case['level']} {case['rarity']}: no loot band")
+                failed_monster_rarity_golden = True
+                break
+            if matching_band["monster_loot_table"] != case["expected_monster_loot_table"]:
+                report.fail("monster_rarity effective depth", f"{case['level']} {case['rarity']}: loot table mismatch")
+                failed_monster_rarity_golden = True
+                break
+        for case in monster_rarity_golden["generated_cases"]:
+            for expected_monster in case["expected_monsters"]:
+                rarity = rarity_by_id.get(expected_monster["rarity"])
+                if rarity is None:
+                    report.fail("monster_rarity generated case", f"{case['name']}: unknown rarity {expected_monster['rarity']}")
+                    failed_monster_rarity_golden = True
+                    break
+                if expected_monster["loot_table"] not in loot["loot_tables"]:
+                    report.fail("monster_rarity generated case", f"{case['name']}: unknown loot table {expected_monster['loot_table']}")
+                    failed_monster_rarity_golden = True
+                    break
+            if failed_monster_rarity_golden:
+                break
+        if not failed_monster_rarity_golden:
+            report.ok("monster_rarity golden matches rarity rules and depth bands")
     for key in dungeon_generation["level_names"]:
         try:
             level_num = int(key)
@@ -1064,12 +1220,13 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_monster_attack golden", "level must be a dungeon level")
     elif "attack_damage" not in golden_monster or "attack_cooldown_ticks" not in golden_monster:
         report.fail("dungeon_monster_attack golden", f"{golden_monster_id} is missing proactive attack fields")
-    elif not (
-        golden_monster["attack_damage"]["min"]
+    elif not any(
+        rounded_positive(golden_monster["attack_damage"]["min"] * rarity["damage_multiplier"])
         <= dungeon_monster_attack_golden["damage"]
-        <= golden_monster["attack_damage"]["max"]
+        <= rounded_positive(golden_monster["attack_damage"]["max"] * rarity["damage_multiplier"])
+        for rarity in monster_rarities
     ):
-        report.fail("dungeon_monster_attack golden", "damage is outside monster attack_damage")
+        report.fail("dungeon_monster_attack golden", "damage is outside configured rarity-scaled monster attack_damage")
     elif dungeon_monster_attack_golden["player_hp_after"] != 10 - dungeon_monster_attack_golden["damage"]:
         report.fail("dungeon_monster_attack golden", "player_hp_after must reflect one hit from 10 HP")
     else:

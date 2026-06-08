@@ -113,6 +113,70 @@ func TestLoadRules(t *testing.T) {
 	}
 }
 
+func TestMonsterRarityGolden(t *testing.T) {
+	var golden struct {
+		MonsterDefID string `json:"monster_def_id"`
+		Rarities     []struct {
+			ID               string  `json:"id"`
+			Weight           int     `json:"weight"`
+			Color            string  `json:"color"`
+			HPMultiplier     float64 `json:"hp_multiplier"`
+			DamageMultiplier float64 `json:"damage_multiplier"`
+			XPMultiplier     float64 `json:"xp_multiplier"`
+			LootDepthOffset  int     `json:"loot_depth_offset"`
+			Expected         struct {
+				MaxHP        int         `json:"max_hp"`
+				AttackDamage DamageRange `json:"attack_damage"`
+				XPReward     int         `json:"xp_reward"`
+			} `json:"expected"`
+		} `json:"rarities"`
+		EffectiveDepthCases []struct {
+			Level                    int    `json:"level"`
+			Rarity                   string `json:"rarity"`
+			ExpectedEffectiveDepth   int    `json:"expected_effective_depth"`
+			ExpectedMonsterLootTable string `json:"expected_monster_loot_table"`
+		} `json:"effective_depth_cases"`
+	}
+	loadGolden(t, "monster_rarity.json", &golden)
+	rules := loadRules(t)
+	base := rules.Monsters[golden.MonsterDefID]
+	for _, c := range golden.Rarities {
+		rarity, ok := rules.DungeonGeneration.MonsterRarity(c.ID)
+		if !ok {
+			t.Fatalf("rarity %s missing", c.ID)
+		}
+		if rarity.Weight != c.Weight || rarity.Color != c.Color || rarity.LootDepthOffset != c.LootDepthOffset {
+			t.Fatalf("rarity %s = %+v, want golden weight/color/offset", c.ID, rarity)
+		}
+		if roundPositive(float64(base.MaxHP)*rarity.HPMultiplier) != c.Expected.MaxHP {
+			t.Fatalf("rarity %s max hp mismatch", c.ID)
+		}
+		if got := scaleDamageRange(*base.AttackDamage, rarity.DamageMultiplier); got != c.Expected.AttackDamage {
+			t.Fatalf("rarity %s damage = %+v, want %+v", c.ID, got, c.Expected.AttackDamage)
+		}
+		if roundPositive(float64(base.XPReward)*rarity.XPMultiplier) != c.Expected.XPReward {
+			t.Fatalf("rarity %s xp mismatch", c.ID)
+		}
+	}
+	for _, c := range golden.EffectiveDepthCases {
+		rarity, ok := rules.DungeonGeneration.MonsterRarity(c.Rarity)
+		if !ok {
+			t.Fatalf("rarity %s missing", c.Rarity)
+		}
+		effectiveDepth := absInt(c.Level) + rarity.LootDepthOffset
+		if effectiveDepth != c.ExpectedEffectiveDepth {
+			t.Fatalf("level %d rarity %s effective depth = %d, want %d", c.Level, c.Rarity, effectiveDepth, c.ExpectedEffectiveDepth)
+		}
+		band, ok := rules.DungeonGeneration.LootBandForDepth(effectiveDepth)
+		if !ok {
+			t.Fatalf("effective depth %d has no band", effectiveDepth)
+		}
+		if band.MonsterLootTable != c.ExpectedMonsterLootTable {
+			t.Fatalf("effective depth %d loot table = %s, want %s", effectiveDepth, band.MonsterLootTable, c.ExpectedMonsterLootTable)
+		}
+	}
+}
+
 func TestCharacterProgressionGolden(t *testing.T) {
 	rules := loadRules(t)
 	var golden struct {
@@ -2828,14 +2892,13 @@ func TestGeneratedDungeonSourcesUseDepthLootTables(t *testing.T) {
 	rules.DungeonGeneration.ChestPlacement.ChanceWeight = 1
 	rules.DungeonGeneration.ChestPlacement.NoChestWeight = 0
 	cases := []struct {
-		levelNum         int
-		monsterLootTable string
-		chestLootTable   string
+		levelNum       int
+		chestLootTable string
 	}{
-		{-1, "dungeon_mob_drop_depth_1", "guarded_chest_drop_depth_1"},
-		{-2, "dungeon_mob_drop_depth_2", "guarded_chest_drop_depth_2"},
-		{-3, "dungeon_mob_drop_depth_3_plus", "guarded_chest_drop_depth_3_plus"},
-		{-10, "dungeon_mob_drop_depth_3_plus", "guarded_chest_drop_depth_3_plus"},
+		{-1, "guarded_chest_drop_depth_1"},
+		{-2, "guarded_chest_drop_depth_2"},
+		{-3, "guarded_chest_drop_depth_3_plus"},
+		{-10, "guarded_chest_drop_depth_3_plus"},
 	}
 	for _, c := range cases {
 		level, err := GenerateDungeonLevel("v29_source_tables", c.levelNum, rules.DungeonGeneration)
@@ -2846,8 +2909,17 @@ func TestGeneratedDungeonSourcesUseDepthLootTables(t *testing.T) {
 			t.Fatalf("level %d: missing generated monsters", c.levelNum)
 		}
 		for _, monster := range level.monsters {
-			if monster.lootTable != c.monsterLootTable {
-				t.Fatalf("level %d monster lootTable = %s, want %s", c.levelNum, monster.lootTable, c.monsterLootTable)
+			rarity, ok := rules.DungeonGeneration.MonsterRarity(monster.rarityID)
+			if !ok {
+				t.Fatalf("level %d monster rarity %q missing from rules", c.levelNum, monster.rarityID)
+			}
+			effectiveDepth := absInt(c.levelNum) + rarity.LootDepthOffset
+			band, ok := rules.DungeonGeneration.LootBandForDepth(effectiveDepth)
+			if !ok {
+				t.Fatalf("level %d effective depth %d has no loot band", c.levelNum, effectiveDepth)
+			}
+			if monster.lootTable != band.MonsterLootTable {
+				t.Fatalf("level %d rarity %s monster lootTable = %s, want %s", c.levelNum, monster.rarityID, monster.lootTable, band.MonsterLootTable)
 			}
 		}
 		if len(level.chests) != 1 {
@@ -2856,6 +2928,90 @@ func TestGeneratedDungeonSourcesUseDepthLootTables(t *testing.T) {
 		if got := level.chests[0].lootTable; got != c.chestLootTable {
 			t.Fatalf("level %d chest lootTable = %s, want %s", c.levelNum, got, c.chestLootTable)
 		}
+	}
+}
+
+func TestGeneratedDungeonMonsterRarityGolden(t *testing.T) {
+	var golden struct {
+		GeneratedCases []struct {
+			Name             string `json:"name"`
+			Seed             string `json:"seed"`
+			Level            int    `json:"level"`
+			ExpectedMonsters []struct {
+				Index        int         `json:"index"`
+				Rarity       string      `json:"rarity"`
+				LootTable    string      `json:"loot_table"`
+				MaxHP        int         `json:"max_hp"`
+				AttackDamage DamageRange `json:"attack_damage"`
+				XPReward     int         `json:"xp_reward"`
+			} `json:"expected_monsters"`
+		} `json:"generated_cases"`
+	}
+	loadGolden(t, "monster_rarity.json", &golden)
+	rules := loadRules(t)
+	for _, c := range golden.GeneratedCases {
+		level, err := GenerateDungeonLevel(c.Seed, c.Level, rules.DungeonGeneration)
+		if err != nil {
+			t.Fatalf("%s: generate: %v", c.Name, err)
+		}
+		for _, expected := range c.ExpectedMonsters {
+			if expected.Index >= len(level.monsters) {
+				t.Fatalf("%s: missing monster index %d in %+v", c.Name, expected.Index, level.monsters)
+			}
+			got := level.monsters[expected.Index]
+			if got.rarityID != expected.Rarity || got.lootTable != expected.LootTable {
+				t.Fatalf("%s monster %d rarity/table = %s/%s, want %s/%s", c.Name, expected.Index, got.rarityID, got.lootTable, expected.Rarity, expected.LootTable)
+			}
+		}
+
+		sim, err := NewSimWithWorld("sess_"+c.Name, c.Seed, rules, "dungeon_levels")
+		if err != nil {
+			t.Fatalf("%s: new sim: %v", c.Name, err)
+		}
+		for levelNum := 0; levelNum > c.Level; levelNum-- {
+			results := descendFromCurrentLevel(t, sim, fmt.Sprintf("%s_descend_%d", c.Name, -levelNum+1))
+			assertLevelChanged(t, results[0], levelNum, levelNum-1)
+		}
+		monsters := liveDungeonMonsters(sim.activeLevel())
+		for _, expected := range c.ExpectedMonsters {
+			if expected.Index >= len(monsters) {
+				t.Fatalf("%s: missing live monster index %d in %+v", c.Name, expected.Index, monsters)
+			}
+			got := monsters[expected.Index]
+			if got.monsterRarityID != expected.Rarity || got.lootTable != expected.LootTable {
+				t.Fatalf("%s entity %d rarity/table = %s/%s, want %s/%s", c.Name, expected.Index, got.monsterRarityID, got.lootTable, expected.Rarity, expected.LootTable)
+			}
+			if got.maxHP != expected.MaxHP || got.hp != expected.MaxHP {
+				t.Fatalf("%s entity %d hp = %d/%d, want %d", c.Name, expected.Index, got.hp, got.maxHP, expected.MaxHP)
+			}
+			if got.monsterAttackDamage == nil || *got.monsterAttackDamage != expected.AttackDamage {
+				t.Fatalf("%s entity %d attack = %+v, want %+v", c.Name, expected.Index, got.monsterAttackDamage, expected.AttackDamage)
+			}
+			if got.monsterXPReward != expected.XPReward {
+				t.Fatalf("%s entity %d xp = %d, want %d", c.Name, expected.Index, got.monsterXPReward, expected.XPReward)
+			}
+			view := got.view()
+			if view.Rarity != expected.Rarity {
+				t.Fatalf("%s entity %d view rarity = %s, want %s", c.Name, expected.Index, view.Rarity, expected.Rarity)
+			}
+		}
+	}
+}
+
+func TestStaticWorldMonstersDoNotGetGeneratedRarity(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_static_rarity", "static_rarity_seed", loadRules(t), "vertical_slice")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	monster := findMonsterByDef(sim, monsterDefID)
+	if monster == nil {
+		t.Fatal("missing vertical slice monster")
+	}
+	if monster.monsterRarityID != "" || monster.monsterAttackDamage != nil || monster.monsterXPReward != 0 {
+		t.Fatalf("static monster has generated rarity fields: %+v", monster)
+	}
+	if monster.view().Rarity != "" {
+		t.Fatalf("static monster view rarity = %q, want empty", monster.view().Rarity)
 	}
 }
 
@@ -3362,6 +3518,17 @@ func generatedLootPos(level generatedDungeonLevel, itemDefID string) (Vec2, bool
 		}
 	}
 	return Vec2{}, false
+}
+
+func liveDungeonMonsters(level *LevelState) []*entity {
+	out := []*entity{}
+	for _, id := range sortedEntityIDs(level.entities) {
+		candidate := level.entities[id]
+		if candidate != nil && candidate.kind == monsterEntity && candidate.monsterDefID == "dungeon_mob" && candidate.hp > 0 {
+			out = append(out, candidate)
+		}
+	}
+	return out
 }
 
 func dungeonEquipmentKillLootSequence(t *testing.T, seed string) []string {

@@ -1,6 +1,6 @@
 {
   "version": 0,
-  "floor_size": { "width": 32, "height": 20 },
+  "floor_size": { "width": 100, "height": 50 },
   "wall_thickness": 1.0,
   "player_spawn": { "x": 4, "y": 10 },
   "stair_placement": {
@@ -14,11 +14,11 @@
     "max_attempts": 64
   },
   "monster_placement": {
-    "count": 2,
+    "count": 8,
     "monster_def_id": "dungeon_mob",
     "margin_from_wall": 2.0,
     "min_spawn_distance": 6.0,
-    "max_attempts": 64
+    "max_attempts": 512
   },
   "chest_placement": {
     "enabled": true,

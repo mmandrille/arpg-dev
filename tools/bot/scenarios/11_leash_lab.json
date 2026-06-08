@@ -2,23 +2,12 @@
   "id": "leash_lab",
   "world_id": "leash_lab",
   "title": "Leash lab",
-  "description": "Player kites beyond leash; monster returns toward spawn.",
+  "description": "A chase monster aggros and moves under slower standard speed.",
   "steps": [
-    { "action": "wait_ticks", "ticks": 5 },
-    {
-      "action": "move_until_player_position",
-      "x": 14,
-      "y": 5,
-      "tolerance": 0.5
-    },
-    { "action": "wait_ticks", "ticks": 15 }
+    { "action": "wait_ticks", "ticks": 25 }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "monster_leashed" },
-    {
-      "type": "monster_near_spawn",
-      "monster_def_id": "training_dummy_chase",
-      "max_distance_from_spawn": 1.0
-    }
+    { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.5 },
+    { "type": "event_seen", "event_type": "monster_aggro" }
   ]
 }

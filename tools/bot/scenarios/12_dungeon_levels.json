@@ -4,12 +4,10 @@
   "title": "Dungeon levels",
   "description": "Descend from town to generated level -2, pick up the currency coin, then ascend back to level -1 at the matching down stair.",
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 220 },
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 80 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 360 },
     { "action": "pick_up_loot", "item_def_id": "training_badge" },
-    { "action": "use_stair", "direction": "up", "max_ticks": 220 },
+    { "action": "use_stair", "direction": "up", "max_ticks": 360 },
     { "action": "assert_player_at_used_stair", "direction": "down", "tolerance": 0.001 }
   ],
   "assertions": [

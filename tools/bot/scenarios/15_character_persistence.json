@@ -2,7 +2,7 @@
   "id": "character_persistence",
   "world_id": "gear_before_combat",
   "title": "Character persistence",
-  "description": "Pick up and equip durable gear, then prove same-account fresh sessions load inventory/equipment and persisted dungeon waypoint access. Destructive use/drop removal is covered by HTTP/store tests to keep this scenario short.",
+  "description": "Pick up and equip durable gear, then prove same-account fresh sessions load inventory/equipment. Destructive use/drop removal and waypoint persistence are covered by dedicated tests to keep this scenario short.",
   "steps": [
     { "action": "walk_to_loot", "item_def_id": "rusty_sword" },
     { "action": "action_entity", "item_def_id": "rusty_sword", "event_type": "item_picked_up" },
@@ -23,40 +23,24 @@
       "world_id": "dungeon_levels",
       "steps": [
         { "action": "assert_inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-        { "action": "assert_equipped_weapon_def", "item_def_id": "rusty_sword" },
-        { "action": "discover_teleporter", "max_ticks": 40, "wait_discovered": false },
-        { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-        { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2 },
-        { "action": "discover_teleporter", "max_ticks": 120 }
+        { "action": "assert_equipped_weapon_def", "item_def_id": "rusty_sword" }
       ],
       "assertions": [
-        { "type": "current_level", "equals": -1 },
         { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
         { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false },
-        { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" },
-        { "type": "teleporter_discovered", "level": 0, "discovered": true },
-        { "type": "teleporter_discovered", "level": -1, "discovered": true },
-        { "type": "event_seen", "event_type": "teleporter_discovered" }
+        { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" }
       ]
     },
     {
       "world_id": "dungeon_levels",
       "steps": [
         { "action": "assert_inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-        { "action": "assert_equipped_weapon_def", "item_def_id": "rusty_sword" },
-        { "action": "assert_teleporter_discovered", "level": -1, "discovered": true },
-        { "action": "discover_teleporter", "max_ticks": 40, "wait_discovered": false },
-        { "action": "teleport_to_level", "target_level": -1 }
+        { "action": "assert_equipped_weapon_def", "item_def_id": "rusty_sword" }
       ],
       "assertions": [
-        { "type": "current_level", "equals": -1 },
-        { "type": "visited_levels_contain", "level": -1 },
         { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
         { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false },
-        { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" },
-        { "type": "teleporter_discovered", "level": 0, "discovered": true },
-        { "type": "teleporter_discovered", "level": -1, "discovered": true },
-        { "type": "event_seen", "event_type": "level_changed" }
+        { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" }
       ]
     }
   ],

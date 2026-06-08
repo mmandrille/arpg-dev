@@ -49,7 +49,7 @@
       "treasure_class_id": "dungeon_mob_tc_depth_3_plus",
       "seed": "v29_dungeon_mob_tc_depth_3_plus_18",
       "expected_drops": [
-        { "item_template_id": "cave_belt" },
+        { "item_template_id": "cave_bow" },
         { "item_def_id": "training_badge" }
       ]
     },
@@ -61,7 +61,7 @@
       "treasure_class_id": "guarded_chest_tc_depth_3_plus",
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
-        { "item_template_id": "cave_bow" }
+        { "item_template_id": "cave_greatsword" }
       ]
     },
     {
@@ -72,7 +72,7 @@
       "treasure_class_id": "guarded_chest_tc_depth_3_plus",
       "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
-        { "item_template_id": "cave_blade" },
+        { "item_template_id": "cave_greatsword" },
         { "item_def_id": "red_potion" }
       ]
     }

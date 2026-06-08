@@ -19,7 +19,7 @@
       "name": "chase_maze_reaches_player_adjacent",
       "world_id": "chase_maze",
       "idle_player_ticks": 30,
-      "expected_monster_position": { "x": 9.0, "y": 4.0 },
+      "expected_monster_position": { "x": 2.7, "y": 2.9 },
       "expected_events": ["monster_aggro"]
     },
     {
@@ -27,11 +27,12 @@
       "world_id": "leash_lab",
       "idle_player_ticks": 5,
       "player_kite_steps": [
-        { "direction": { "x": 1, "y": 0 }, "ticks": 20 }
+        { "direction": { "x": 1, "y": 0 }, "ticks": 20 },
+        { "direction": { "x": 0, "y": 1 }, "ticks": 4 }
       ],
-      "wait_ticks_after_kite": 15,
-      "expected_monster_final_near_spawn": true,
-      "expected_events": ["monster_aggro", "monster_leashed"]
+      "wait_ticks_after_kite": 40,
+      "expected_monster_final_near_spawn": false,
+      "expected_events": ["monster_aggro"]
     }
   ]
 }

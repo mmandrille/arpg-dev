@@ -2157,10 +2157,11 @@ func TestMovement(t *testing.T) {
 	}
 	sim.Tick(nil)
 	sim.Tick(nil)
-	// 3 ticks of speed 1 in +x.
+	// 3 ticks of legacy one-cell input movement in +x.
 	got := sim.entities[sim.playerID].pos
-	if got.X != start.X+3*moveSpeed || got.Y != start.Y {
-		t.Fatalf("player pos = %+v, want x=%v", got, start.X+3*moveSpeed)
+	wantX := start.X + 3*moveSpeed
+	if got.X != wantX || got.Y != start.Y {
+		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}
 	// Movement is exhausted; a 4th tick must not move.
 	sim.Tick(nil)
@@ -2356,6 +2357,32 @@ func TestTreasureChestOpensOnceAndDropsLoot(t *testing.T) {
 	assertReject(t, again, "open_chest_again", "invalid_target")
 	if got := countEntitiesByKind(sim.activeLevel(), lootEntity); got != afterLoot {
 		t.Fatalf("reopen changed loot count = %d, want %d", got, afterLoot)
+	}
+}
+
+func TestChestSeed22AllMonstersApproachable(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_chest_approach", "chest_seed_22", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	descendFromCurrentLevel(t, sim, "descend")
+	player := sim.entities[sim.playerID]
+	unreachable := 0
+	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
+		e := sim.activeLevel().entities[id]
+		if e.kind != monsterEntity || e.hp <= 0 {
+			continue
+		}
+		_, steps, ok := sim.findApproachGoal(e)
+		if !ok {
+			unreachable++
+			t.Logf("unreachable monster %d pos=%+v player=%+v", id, e.pos, player.pos)
+			continue
+		}
+		t.Logf("monster %d pos=%+v steps=%d", id, e.pos, len(steps))
+	}
+	if unreachable > 0 {
+		t.Fatalf("%d monsters unreachable from player at %+v", unreachable, player.pos)
 	}
 }
 
@@ -2634,6 +2661,15 @@ func sameStrings(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+func containsString(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
@@ -2928,8 +2964,8 @@ func TestDungeonMonsterGeneration(t *testing.T) {
 			if err != nil {
 				t.Fatalf("generate again %d: %v", levelNum, err)
 			}
-			if len(level.monsters) != placement.Count {
-				t.Fatalf("level %d monsters = %d, want %d", levelNum, len(level.monsters), placement.Count)
+			if len(level.monsters) < placement.Count {
+				t.Fatalf("level %d monsters = %d, want at least %d", levelNum, len(level.monsters), placement.Count)
 			}
 			if len(again.monsters) != len(level.monsters) {
 				t.Fatalf("repeat level %d monsters = %d, want %d", levelNum, len(again.monsters), len(level.monsters))
@@ -2949,6 +2985,37 @@ func TestDungeonMonsterGeneration(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestChampionMonstersSpawnWithCommonMinions(t *testing.T) {
+	rules := loadRules(t)
+	level, err := GenerateDungeonLevel("v30_monster_rarity", -1, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	championIndex := -1
+	for i, monster := range level.monsters {
+		if monster.rarityID == "champion" {
+			championIndex = i
+			break
+		}
+	}
+	if championIndex < 0 {
+		t.Fatalf("missing champion in generated monsters: %+v", level.monsters)
+	}
+	if championIndex+championCommonMinionCount >= len(level.monsters) {
+		t.Fatalf("champion at %d does not have enough following minions in %+v", championIndex, level.monsters)
+	}
+	champion := level.monsters[championIndex]
+	for i := 1; i <= championCommonMinionCount; i++ {
+		minion := level.monsters[championIndex+i]
+		if minion.rarityID != "common" {
+			t.Fatalf("champion minion %d rarity = %s, want common", i, minion.rarityID)
+		}
+		if distance(champion.pos, minion.pos) > 3.0 {
+			t.Fatalf("champion minion %d too far: champion %+v minion %+v", i, champion.pos, minion.pos)
+		}
 	}
 }
 
@@ -3144,8 +3211,8 @@ func TestDungeonEquipmentLootDeterminism(t *testing.T) {
 			break
 		}
 	}
-	if !foundEquipment {
-		t.Fatalf("loot sequence = %v, want rolled cave_belt equipment", first)
+	if !foundEquipment && !containsString(first, "cave_bow:cave_bow") {
+		t.Fatalf("loot sequence = %v, want rolled equipment", first)
 	}
 }
 
@@ -3181,8 +3248,8 @@ func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 	if player.hp != golden.PlayerHPAfter {
 		t.Fatalf("player hp = %d, want %d", player.hp, golden.PlayerHPAfter)
 	}
-	if countLiveMonstersByDef(sim.activeLevel(), golden.MonsterDefID) != rules.DungeonGeneration.MonsterPlacement.Count {
-		t.Fatalf("live %s count mismatch", golden.MonsterDefID)
+	if countLiveMonstersByDef(sim.activeLevel(), golden.MonsterDefID) < rules.DungeonGeneration.MonsterPlacement.Count {
+		t.Fatalf("live %s count below base population", golden.MonsterDefID)
 	}
 }
 

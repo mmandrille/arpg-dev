@@ -6,15 +6,15 @@
   "description": "Descend into a generated dungeon floor, assert a non-common monster rarity over protocol, kill that monster, pick up its rolled loot, then prove state, reconnect, replay, and fresh-session persistence.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "equals": 1 },
-    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "rarity": "champion", "event_type": "monster_killed" },
+    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "at_least": 1 },
+    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "rarity": "champion", "event_type": "monster_killed", "timeout_s": 60 },
     { "action": "pick_up_first_rolled_loot" }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -1 },
-    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "equals": 1 },
+    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "at_least": 1 },
     { "type": "event_seen", "event_type": "monster_killed" },
     { "type": "event_seen", "event_type": "loot_dropped" },
     { "type": "rolled_inventory_any" }

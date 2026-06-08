@@ -93,7 +93,7 @@ func _sync_viewport_size() -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
-	_panel.custom_minimum_size = Vector2(286, 420)
+	_panel.custom_minimum_size = Vector2(330, 500)
 	_panel.position = Vector2(16, 118)
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -101,12 +101,12 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
-	root.custom_minimum_size = Vector2(260, 390)
+	root.custom_minimum_size = Vector2(304, 470)
 	_panel.add_child(root)
 
 	var title := Label.new()
 	title.text = "Character"
-	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_font_size_override("font_size", 22)
 	title.add_theme_color_override("font_color", Color("#f0dfbb"))
 	root.add_child(title)
 
@@ -122,12 +122,12 @@ func _build() -> void:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
 		var label := _value_label()
-		label.custom_minimum_size = Vector2(126, 24)
+		label.custom_minimum_size = Vector2(160, 28)
 		row.add_child(label)
 		var btn := Button.new()
 		btn.text = "+"
 		btn.tooltip_text = "Spend point"
-		btn.custom_minimum_size = Vector2(32, 24)
+		btn.custom_minimum_size = Vector2(36, 28)
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.pressed.connect(_on_stat_button_pressed.bind(stat))
 		row.add_child(btn)
@@ -218,7 +218,7 @@ func _breakdown_summary(key: String) -> String:
 func _value_label() -> Label:
 	var label := Label.new()
 	label.add_theme_color_override("font_color", Color("#d8c7a6"))
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", 15)
 	return label
 
 

@@ -782,8 +782,8 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.LeashRadius > 0 && def.LeashRadius < def.AggroRadius {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s: leash_radius must be >= aggro_radius", id)
 			}
-			if def.MoveSpeed > 0 && def.MoveSpeed != r.Navigation.CellSize {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s: move_speed must equal navigation.cell_size %.1f in v17", id, r.Navigation.CellSize)
+			if def.MoveSpeed > 0 && def.MoveSpeed > r.Navigation.CellSize {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: move_speed must be <= navigation.cell_size %.1f", id, r.Navigation.CellSize)
 			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.behavior: %s", id, def.Behavior)

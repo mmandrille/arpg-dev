@@ -75,7 +75,7 @@
       "behavior": "chase",
       "aggro_radius": 8.0,
       "leash_radius": 8.0,
-      "move_speed": 1.0
+      "move_speed": 0.7
     },
     "dungeon_mob": {
       "name": "Cave Wraith",
@@ -90,7 +90,7 @@
       "behavior": "chase",
       "aggro_radius": 6.0,
       "leash_radius": 10.0,
-      "move_speed": 1.0,
+      "move_speed": 0.7,
       "attack_damage": { "min": 1, "max": 2 },
       "attack_cooldown_ticks": 40
     },
@@ -143,7 +143,7 @@
       "behavior": "chase",
       "aggro_radius": 4.0,
       "leash_radius": 6.0,
-      "move_speed": 1.0,
+      "move_speed": 0.7,
       "attack_damage": { "min": 2, "max": 2 },
       "attack_cooldown_ticks": 20
     },
@@ -160,7 +160,7 @@
       "behavior": "chase",
       "aggro_radius": 4.0,
       "leash_radius": 6.0,
-      "move_speed": 1.0,
+      "move_speed": 0.7,
       "attack_damage": { "min": 2, "max": 2 },
       "attack_cooldown_ticks": 20
     }

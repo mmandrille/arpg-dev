@@ -78,6 +78,7 @@ class Scenario:
 
 @dataclass
 class RuntimeState:
+    world_id: str = DEFAULT_WORLD_ID
     last_tick: int = 0
     killed: bool = False
     entities: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -226,6 +227,7 @@ async def drive_scenario(base_url: str, token: str, sess: dict[str, Any], scenar
         first = await recv_json(ws)
         assert first["type"] == "session_snapshot", first["type"]
         state = RuntimeState()
+        state.world_id = scenario.world_id
         ingest_snapshot(first["payload"], state)
         log("connected; initial snapshot tick", state.last_tick)
 
@@ -296,6 +298,7 @@ async def execute_step(
             {"x": float(step["x"]), "y": float(step["y"])},
             loop,
             stop_distance=float(step.get("tolerance", 0.25)),
+            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
         )
         return
 
@@ -395,47 +398,36 @@ async def execute_step(
         return
 
     if action == "attack_until_event":
-        target_id = str(step["target_id"]) if step.get("target_id") else None
-        if target_id is None:
-            monster = find_monster(state, str(step.get("monster_def_id", "training_dummy")))
-            if monster is None:
-                raise AssertionError(f"attack_until_event: monster not found: {step}")
-            target_id = str(monster["id"])
         event_type = str(step["event_type"])
-        last_attack = 0.0
-        wait_started = loop.time()
-        last_wait_log = wait_started
-        deadline = loop.time() + SLICE_TIMEOUT_S
-        while event_type not in state.seen_events:
-            if loop.time() > deadline:
-                raise TimeoutError(f"attack_until_event stalled waiting for {event_type}")
-            if loop.time() - last_wait_log >= WAIT_LOG_INTERVAL_S:
-                monster = state.entities.get(target_id)
-                log_wait_progress(
-                    f"attack_until_event waiting for {event_type}",
-                    loop,
-                    wait_started,
-                    monster_hp=(monster or {}).get("hp"),
-                    seen_events=sorted(state.seen_events),
-                    tick=state.last_tick,
-                )
-                last_wait_log = loop.time()
-            if loop.time() - last_attack > 0.12:
-                monster = state.entities.get(target_id)
-                if monster is not None and monster.get("hp") == 0:
-                    break
-                monster_def_id = str(step.get("monster_def_id") or (monster or {}).get("monster_def_id") or "")
-                env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target_id})
-                if monster_def_id:
-                    state.pending_attack_monsters[env["message_id"]] = monster_def_id
-                await ws.send(json.dumps(env))
-                last_attack = loop.time()
-            await pump_one(ws, state, timeout=0.1)
+        await attack_until_monster_event(
+            ws,
+            session_id,
+            state,
+            loop,
+            event_type,
+            monster_def_id=str(step["monster_def_id"]) if step.get("monster_def_id") else None,
+            rarity=str(step["rarity"]) if step.get("rarity") is not None else None,
+            target_id=str(step["target_id"]) if step.get("target_id") else None,
+            timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
+        )
         return
 
     if action == "action_until_event":
-        target = resolve_target(state, step)
         event_type = str(step["event_type"])
+        if step.get("monster_def_id") or step.get("target_id"):
+            await attack_until_monster_event(
+                ws,
+                session_id,
+                state,
+                loop,
+                event_type,
+                monster_def_id=str(step["monster_def_id"]) if step.get("monster_def_id") else None,
+                rarity=str(step["rarity"]) if step.get("rarity") is not None else None,
+                target_id=str(step["target_id"]) if step.get("target_id") else None,
+                timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
+            )
+            return
+        target = resolve_target(state, step)
         target_id = str(target["id"])
         last_action = 0.0
         deadline = loop.time() + SLICE_TIMEOUT_S
@@ -443,13 +435,7 @@ async def execute_step(
             if loop.time() > deadline:
                 raise TimeoutError(f"action_until_event stalled waiting for {event_type}")
             if loop.time() - last_action > 0.12:
-                current = state.entities.get(target_id)
-                if current is not None and current.get("type") == "monster" and current.get("hp") == 0:
-                    break
-                monster_def_id = str(step.get("monster_def_id") or (current or {}).get("monster_def_id") or "")
                 env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target_id})
-                if monster_def_id:
-                    state.pending_attack_monsters[env["message_id"]] = monster_def_id
                 await ws.send(json.dumps(env))
                 last_action = loop.time()
             await pump_one(ws, state, timeout=0.1)
@@ -458,23 +444,51 @@ async def execute_step(
     if action == "action_until_combat_event":
         target = resolve_target(state, step)
         target_id = str(target["id"])
+        monster_def_id = str(step.get("monster_def_id") or target.get("monster_def_id") or "")
+        rarity = str(step["rarity"]) if step.get("rarity") is not None else None
+        is_monster = target.get("type") == "monster"
+        skipped_ids: set[str] = set()
         last_action = 0.0
+        pending_message_id = ""
         start_index = len(state.combat_events)
         deadline = loop.time() + SLICE_TIMEOUT_S
         while not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
             if loop.time() > deadline:
                 raise TimeoutError(f"action_until_combat_event stalled waiting for {combat_event_summary(step)}")
+            if is_monster and monster_def_id and target_id in skipped_ids:
+                candidates = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, exclude_ids=skipped_ids)
+                if not candidates:
+                    if skipped_ids:
+                        skipped_ids.clear()
+                        continue
+                    raise AssertionError(f"action_until_combat_event: no live {monster_def_id} targets")
+                target_id = str(candidates[0]["id"])
             if loop.time() - last_action > 0.12:
                 current = state.entities.get(target_id)
-                if current is not None and current.get("type") == "monster" and current.get("hp") == 0:
+                if current is not None and current.get("type") == "monster" and int(current.get("hp", 0)) <= 0:
                     break
-                monster_def_id = str(step.get("monster_def_id") or (current or {}).get("monster_def_id") or "")
                 env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target_id})
-                if monster_def_id:
-                    state.pending_attack_monsters[env["message_id"]] = monster_def_id
+                pending_message_id = str(env["message_id"])
                 await ws.send(json.dumps(env))
                 last_action = loop.time()
             await pump_one(ws, state, timeout=0.1)
+            if not pending_message_id:
+                continue
+            if pending_message_id in state.accepted_message_ids:
+                pending_message_id = ""
+                continue
+            reason = state.rejected_message_reasons.pop(pending_message_id, None)
+            if reason is None:
+                continue
+            pending_message_id = ""
+            if is_monster and reason in {"no_path", "path_too_long"}:
+                skipped_ids.add(target_id)
+                continue
+            if reason == "invalid_target" and monster_def_id and monster_def_id in state.killed_monster_def_ids:
+                continue
+            if reason == "player_dead":
+                raise AssertionError("action_until_combat_event: player died")
+            raise AssertionError(f"action_intent for {monster_def_id or target_id} was rejected: {reason}")
         if not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
             raise AssertionError(f"action_until_combat_event target ended before {combat_event_summary(step)}")
         return
@@ -527,27 +541,72 @@ async def execute_step(
     if action == "kill_monsters":
         monster_def_id = str(step["monster_def_id"])
         max_count = int(step.get("count", 99))
+        step_timeout_s = float(step.get("timeout_s", SLICE_TIMEOUT_S * max(1, max_count)))
         killed = 0
+        skipped_ids: set[str] = set()
+        step_deadline = loop.time() + step_timeout_s
+        for _ in range(5):
+            if find_player(state) is not None:
+                break
+            await pump_one(ws, state, timeout=0.1)
         while killed < max_count:
-            target = find_monster(state, monster_def_id)
-            if target is None:
+            if loop.time() > step_deadline:
+                raise TimeoutError(f"kill_monsters timed out after killing {killed}/{max_count} {monster_def_id}")
+            if find_player(state) is None:
+                await pump_one(ws, state, timeout=0.1)
+                continue
+            candidates = find_live_monsters_sorted(state, monster_def_id, exclude_ids=skipped_ids)
+            if not candidates:
+                if skipped_ids:
+                    skipped_ids.clear()
+                    continue
+                if killed == 0:
+                    raise AssertionError(f"kill_monsters: no live {monster_def_id} targets")
                 return
+            target = candidates[0]
             target_id = str(target["id"])
-            deadline = loop.time() + SLICE_TIMEOUT_S
+            target_deadline = loop.time() + SLICE_TIMEOUT_S
             last_action = 0.0
+            pending_message_id = ""
             while True:
                 current = state.entities.get(target_id)
                 if current is None or int(current.get("hp", 0)) <= 0:
                     killed += 1
+                    skipped_ids.discard(target_id)
                     break
-                if loop.time() > deadline:
-                    raise TimeoutError(f"kill_monsters stalled waiting for {monster_def_id} {target_id}")
+                if loop.time() > target_deadline:
+                    skipped_ids.add(target_id)
+                    break
                 if loop.time() - last_action > 0.12:
                     env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": target_id})
-                    state.pending_attack_monsters[env["message_id"]] = monster_def_id
+                    pending_message_id = str(env["message_id"])
                     await ws.send(json.dumps(env))
                     last_action = loop.time()
                 await pump_one(ws, state, timeout=0.1)
+                if not pending_message_id:
+                    continue
+                if pending_message_id in state.accepted_message_ids:
+                    pending_message_id = ""
+                    continue
+                reason = state.rejected_message_reasons.pop(pending_message_id, None)
+                if reason is None:
+                    continue
+                pending_message_id = ""
+                if reason == "invalid_target" and monster_def_id in state.killed_monster_def_ids:
+                    killed += 1
+                    break
+                if reason in {"no_path", "path_too_long"}:
+                    skipped_ids.add(target_id)
+                    live = find_live_monsters_sorted(state, monster_def_id)
+                    if live and len(skipped_ids) >= len(live):
+                        raise AssertionError(
+                            f"kill_monsters: all live {monster_def_id} targets rejected {reason}; player="
+                            f"{(find_player(state) or {}).get('position')}"
+                        )
+                    break
+                if reason == "player_dead":
+                    raise AssertionError(f"kill_monsters: player died after killing {killed}/{max_count}")
+                raise AssertionError(f"action_intent for {monster_def_id} {target_id} was rejected: {reason}")
         return
 
     if action == "move_until_in_range":
@@ -681,6 +740,14 @@ async def execute_step(
         if loot is None:
             raise AssertionError(f"pick_up_loot: loot not found for item_def_id={item_def_id}")
         deadline = loop.time() + SLICE_TIMEOUT_S
+        await walk_toward(
+            ws,
+            session_id,
+            state,
+            loot["position"],
+            loop,
+            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+        )
         await ws.send(json.dumps(make_envelope(
             "action_intent", session_id, state.last_tick, {"target_id": loot["id"]})))
         log("picking up", item_def_id, "loot", loot["id"])
@@ -922,6 +989,9 @@ async def walk_toward(
     max_ticks: int = WALK_MAX_TICKS,
     stop_distance: float = WALK_STOP_DISTANCE,
 ) -> None:
+    if state.world_id == "dungeon_levels" and state.current_level < 0:
+        await move_to_position(ws, session_id, state, target_pos, loop, max_ticks=max_ticks, stop_distance=stop_distance)
+        return
     for _ in range(max_ticks):
         player = find_player(state)
         if player is None:
@@ -957,6 +1027,111 @@ async def walk_toward(
             continue
 
     raise TimeoutError(f"walk_toward exhausted {max_ticks} ticks toward {target_pos}")
+
+
+async def move_to_position(
+    ws,
+    session_id: str,
+    state: RuntimeState,
+    target_pos: dict[str, Any],
+    loop,
+    max_ticks: int = WALK_MAX_TICKS,
+    stop_distance: float = WALK_STOP_DISTANCE,
+) -> None:
+    player = find_player(state)
+    if player is None:
+        raise AssertionError("move_to_position: player not found")
+    player_pos = player["position"]
+    dx = float(target_pos["x"]) - float(player_pos["x"])
+    dy = float(target_pos["y"]) - float(player_pos["y"])
+    if max(abs(dx), abs(dy)) <= stop_distance:
+        return
+
+    env = make_envelope("move_to_intent", session_id, state.last_tick, {"position": target_pos})
+    await ws.send(json.dumps(env))
+    before = {"x": player_pos["x"], "y": player_pos["y"]}
+    await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop)
+    for _ in range(max_ticks):
+        player = find_player(state)
+        if player is None:
+            raise AssertionError("move_to_position: player not found")
+        player_pos = player["position"]
+        dx = float(target_pos["x"]) - float(player_pos["x"])
+        dy = float(target_pos["y"]) - float(player_pos["y"])
+        if max(abs(dx), abs(dy)) <= stop_distance:
+            return
+        await pump_one(ws, state, timeout=0.1)
+    raise TimeoutError(f"move_to_position exhausted {max_ticks} ticks toward {target_pos}")
+
+
+async def attack_until_monster_event(
+    ws,
+    session_id: str,
+    state: RuntimeState,
+    loop,
+    event_type: str,
+    *,
+    monster_def_id: str | None = None,
+    rarity: str | None = None,
+    target_id: str | None = None,
+    timeout_s: float = SLICE_TIMEOUT_S,
+) -> None:
+    deadline = loop.time() + timeout_s
+    skipped_ids: set[str] = set()
+    active_target_id = target_id
+    pending_message_id = ""
+    last_action = 0.0
+    for _ in range(5):
+        if find_player(state) is not None:
+            break
+        await pump_one(ws, state, timeout=0.1)
+    while event_type not in state.seen_events:
+        if loop.time() > deadline:
+            raise TimeoutError(f"attack_until_monster_event stalled waiting for {event_type}")
+        if monster_def_id and (active_target_id is None or active_target_id in skipped_ids):
+            candidates = find_live_monsters_sorted(
+                state,
+                monster_def_id,
+                rarity=rarity,
+                exclude_ids=skipped_ids,
+            )
+            if not candidates:
+                if skipped_ids:
+                    skipped_ids.clear()
+                    continue
+                raise AssertionError(f"attack_until_monster_event: no live {monster_def_id} targets")
+            active_target_id = str(candidates[0]["id"])
+        if active_target_id is None:
+            raise AssertionError("attack_until_monster_event: no target")
+        current = state.entities.get(active_target_id)
+        if current is not None and current.get("type") == "monster" and int(current.get("hp", 0)) <= 0:
+            await pump_one(ws, state, timeout=0.1)
+            continue
+        if loop.time() - last_action > 0.12:
+            env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": active_target_id})
+            pending_message_id = str(env["message_id"])
+            await ws.send(json.dumps(env))
+            last_action = loop.time()
+        await pump_one(ws, state, timeout=0.1)
+        if not pending_message_id:
+            continue
+        if pending_message_id in state.accepted_message_ids:
+            pending_message_id = ""
+            continue
+        reason = state.rejected_message_reasons.pop(pending_message_id, None)
+        if reason is None:
+            continue
+        pending_message_id = ""
+        if reason in {"no_path", "path_too_long"}:
+            skipped_ids.add(active_target_id)
+            active_target_id = None
+            continue
+        if reason == "invalid_target" and monster_def_id and monster_def_id in state.killed_monster_def_ids:
+            continue
+        if reason == "player_dead":
+            raise AssertionError(f"attack_until_monster_event: player died waiting for {event_type}")
+        label = monster_def_id or active_target_id
+        raise AssertionError(f"action_intent for {label} was rejected: {reason}")
 
 
 async def wait_for_player_move_or_accept(ws, state: RuntimeState, before: dict[str, Any], message_id: str, loop) -> bool:
@@ -1349,6 +1524,49 @@ def find_monster(state: RuntimeState, monster_def_id: str, rarity: str | None = 
     return None
 
 
+def find_nearest_monster(
+    state: RuntimeState,
+    monster_def_id: str,
+    rarity: str | None = None,
+    exclude_ids: set[str] | None = None,
+) -> dict[str, Any] | None:
+    monsters = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, exclude_ids=exclude_ids)
+    if not monsters:
+        return None
+    return monsters[0]
+
+
+def find_live_monsters_sorted(
+    state: RuntimeState,
+    monster_def_id: str,
+    rarity: str | None = None,
+    exclude_ids: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    excluded = exclude_ids or set()
+    player = find_player(state)
+    if player is None:
+        return []
+    player_pos = player.get("position", {})
+    player_x = float(player_pos.get("x", 0.0))
+    player_y = float(player_pos.get("y", 0.0))
+    ranked: list[tuple[float, str, dict[str, Any]]] = []
+    for entity in state.entities.values():
+        entity_id = str(entity.get("id", ""))
+        if (
+            entity.get("type") != "monster"
+            or entity.get("monster_def_id") != monster_def_id
+            or (rarity is not None and entity.get("rarity") != rarity)
+            or int(entity.get("hp", 0)) <= 0
+            or entity_id in excluded
+        ):
+            continue
+        pos = entity.get("position", {})
+        distance = max(abs(float(pos.get("x", 0.0)) - player_x), abs(float(pos.get("y", 0.0)) - player_y))
+        ranked.append((distance, entity_id, entity))
+    ranked.sort(key=lambda item: (item[0], item[1]))
+    return [entity for _, _, entity in ranked]
+
+
 def find_interactable(state: RuntimeState, interactable_def_id: str) -> dict[str, Any] | None:
     for entity in state.entities.values():
         if entity.get("type") == "interactable" and entity.get("interactable_def_id") == interactable_def_id:
@@ -1364,7 +1582,7 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
         return target
     if step.get("monster_def_id"):
         rarity = str(step["rarity"]) if step.get("rarity") is not None else None
-        target = find_monster(state, str(step["monster_def_id"]), rarity)
+        target = find_nearest_monster(state, str(step["monster_def_id"]), rarity)
         if target is None:
             raise AssertionError(f"{step.get('action')}: monster not found: {step}")
         return target

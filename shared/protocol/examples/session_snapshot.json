@@ -41,7 +41,7 @@
       "hit_chance": 1,
       "crit_chance": 0.06,
       "crit_damage": 1.525,
-      "movement_speed": 1.01,
+      "movement_speed": 0.71,
       "max_hp": 10,
       "max_mana": 10
     },

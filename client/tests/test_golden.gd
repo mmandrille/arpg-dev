@@ -185,10 +185,10 @@ func _initialize() -> void:
 	# 11. Dungeon stairs golden references generated floor rules and level labels.
 	var dungeon_generation := _read(shared.path_join("rules/dungeon_generation.v0.json"))
 	var dungeon_stairs := _read(shared.path_join("golden/dungeon_stairs.json"))
-	if float(dungeon_generation["floor_size"]["width"]) != 32.0:
+	if float(dungeon_generation["floor_size"]["width"]) != 100.0:
 		_fail("dungeon_generation width mismatch")
 		return
-	if float(dungeon_generation["floor_size"]["height"]) != 20.0:
+	if float(dungeon_generation["floor_size"]["height"]) != 50.0:
 		_fail("dungeon_generation height mismatch")
 		return
 	if str(dungeon_generation["level_names"]["-1"]) != "Entry Hall":
@@ -209,23 +209,23 @@ func _initialize() -> void:
 	if not _vec2_equals(level1["stairs_up"], 4.0, 10.0):
 		_fail("dungeon level -1 stairs_up mismatch")
 		return
-	if not _vec2_equals(level1["stairs_down"], 14.0, 18.0):
+	if not _vec2_equals(level1["stairs_down"], 27.0, 22.0):
 		_fail("dungeon level -1 stairs_down mismatch")
 		return
-	if not _vec2_equals(level1["teleporter"], 14.0, 12.0):
+	if not _vec2_equals(level1["teleporter"], 82.0, 12.0):
 		_fail("dungeon level -1 teleporter mismatch")
 		return
-	if not _vec2_equals(level2["stairs_up"], 9.0, 11.0) or not _vec2_equals(level2["stairs_down"], 28.0, 14.0):
+	if not _vec2_equals(level2["stairs_up"], 24.0, 43.0) or not _vec2_equals(level2["stairs_down"], 30.0, 2.0):
 		_fail("dungeon level -2 stairs mismatch")
 		return
-	if not _vec2_equals(level2["teleporter"], 10.0, 2.0):
+	if not _vec2_equals(level2["teleporter"], 92.0, 47.0):
 		_fail("dungeon level -2 teleporter mismatch")
 		return
 	var dungeon_loot: Array = level2["loot"]
 	if dungeon_loot.size() != 1:
 		_fail("dungeon level -2 loot count mismatch")
 		return
-	if str(dungeon_loot[0]["item_def_id"]) != "training_badge" or not _vec2_equals(dungeon_loot[0]["position"], 16.0, 11.0):
+	if str(dungeon_loot[0]["item_def_id"]) != "training_badge" or not _vec2_equals(dungeon_loot[0]["position"], 31.0, 43.0):
 		_fail("dungeon level -2 coin loot mismatch")
 		return
 	var fallback := str(dungeon_generation["default_level_name_template"]).replace("{n}", str(abs(-9)))
@@ -242,7 +242,7 @@ func _initialize() -> void:
 	if int(tp_outcome["expected_level"]) != -1:
 		_fail("dungeon teleporters expected level mismatch")
 		return
-	if not _vec2_equals(tp_outcome["expected_player_position"], 14.0, 12.0):
+	if not _vec2_equals(tp_outcome["expected_player_position"], 82.0, 12.0):
 		_fail("dungeon teleporters expected player position mismatch")
 		return
 

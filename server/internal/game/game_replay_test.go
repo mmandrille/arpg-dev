@@ -144,14 +144,14 @@ func appendMoveToAndAdvance(
 		},
 	})
 	sim.TickResults([]game.Input{(*inputs)[len(*inputs)-1].Input})
-	for guard := 0; guard < 200; guard++ {
+	for guard := 0; guard < 2000; guard++ {
 		player := snapshotEntityByID(sim.Snapshot(), "1001")
 		if player != nil && distance(player.Position, pos) <= rules.Navigation.StopDistance+0.001 {
 			break
 		}
 		tick++
 		sim.Tick(nil)
-		if guard == 199 {
+		if guard == 1999 {
 			t.Fatalf("player did not reach %+v; last pos %+v", pos, player)
 		}
 	}

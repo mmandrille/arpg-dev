@@ -1,0 +1,147 @@
+server/internal/game/rules.go
+  s_6dc8a4fcf8f5e2::t_8d50a483f87a0b 785-786
+tools/bot/scenarios/15_character_persistence.json
+  s_6dc8a4fcf8f5e2::t_b5f50a772fcf97 5,26,31,38,43
+shared/golden/guarded_chest_generation.json
+  s_6dc8a4fcf8f5e2::t_c5acaadd3901ad 14
+  s_6dc8a4fcf8f5e2::t_b91cbeb0955737 18
+  s_6dc8a4fcf8f5e2::t_f558bec5b0bd0d 3,10,20
+  s_6dc8a4fcf8f5e2::t_6c758e44cdbcf9 8
+server/internal/game/game_test.go
+  s_6dc8a4fcf8f5e2::t_8d50a483f87a0b 2163-2164
+  s_6dc8a4fcf8f5e2::t_4e4ca599924e05 2666-2674
+  s_6dc8a4fcf8f5e2::t_d6b95ecda92d43 2160,2162
+  s_fb4e3f9235a936::t_b19b357111a928 2379
+  s_6dc8a4fcf8f5e2::t_5befa2bfc8ef88 2967-2968,2991-3018
+  s_6dc8a4fcf8f5e2::t_c47c69a3c5492b 3214-3215
+  s_fb4e3f9235a936::t_377ab1067c6b42 2363-2378,2380-2388
+  s_6dc8a4fcf8f5e2::t_fb9eb17d252cc3 3251-3252
+shared/golden/dungeon_monster_attack.json
+  s_6dc8a4fcf8f5e2::t_23895cc8bdded1 3
+  s_6dc8a4fcf8f5e2::t_2d91a464864e8d 6
+  s_6dc8a4fcf8f5e2::t_55b079ce01df63 7-8
+tools/validate_shared.py
+  s_6dc8a4fcf8f5e2::t_5ce05e40b06d9e 197-198
+tools/bot/scenarios/12_dungeon_levels.json
+  s_6dc8a4fcf8f5e2::t_cc74f7cb77c2be 7-8,10
+client/scripts/character_stats_panel.gd
+  s_6dc8a4fcf8f5e2::t_0e9e2a485ec31d 96,104,109,125,130,221
+shared/rules/dungeon_generation.v0.json
+  s_6dc8a4fcf8f5e2::t_53d6a0affbe3b4 21
+  s_6dc8a4fcf8f5e2::t_5e33b83369d192 3,17
+shared/golden/dungeon_teleporters.json
+  s_6dc8a4fcf8f5e2::t_b91cbeb0955737 7
+client/scenes/monster_dummy.tscn
+  s_6dc8a4fcf8f5e2::t_0e9e2a485ec31d 6
+shared/golden/dungeon_equipment_drops.json
+  s_6dc8a4fcf8f5e2::t_fb9eb17d252cc3 52
+  s_6dc8a4fcf8f5e2::t_c47c69a3c5492b 64
+  s_6dc8a4fcf8f5e2::t_c4b74de864813d 75
+tools/bot/scenarios/16_rolled_drops.json
+  s_6dc8a4fcf8f5e2::t_3ce5a8becc34a7 9,17
+  s_fb4e3f9235a936::t_30925f20ff74d4 10
+shared/protocol/examples/session_snapshot.json
+  s_6dc8a4fcf8f5e2::t_5ce05e40b06d9e 44
+tools/bot/scenarios/13_teleporter_lab.json
+  s_6dc8a4fcf8f5e2::t_fed9c2a89d9d1f 9-10,14
+shared/rules/character_progression.v0.json
+  s_6dc8a4fcf8f5e2::t_8d50a483f87a0b 43
+server/internal/game/dungeon_gen.go
+  s_6dc8a4fcf8f5e2::t_c47c69a3c5492b 422
+  s_6dc8a4fcf8f5e2::t_53d6a0affbe3b4 10,288-292,297-347,398-403
+shared/golden/dungeon_stairs.json
+  s_6dc8a4fcf8f5e2::t_fa81075f4db614 16
+  s_6dc8a4fcf8f5e2::t_45b2d666bdda94 15
+  s_6dc8a4fcf8f5e2::t_6c8e3f57270eed 18
+  s_6dc8a4fcf8f5e2::t_b91cbeb0955737 10-11
+  s_6dc8a4fcf8f5e2::t_d518a89760d700 14
+tools/bot/run.py
+  s_fb4e3f9235a936::t_8999ab3df1e814 1546,1550-1551,1553,1555-1559,1561-1564,1568-1569
+  s_6dc8a4fcf8f5e2::t_0fdd7ebf3fd6b4 992
+  s_6dc8a4fcf8f5e2::t_fe80984b575851 301
+  s_6dc8a4fcf8f5e2::t_5bebabeea4a671 1049
+  s_6dc8a4fcf8f5e2::t_46e4babb91e390 1033-1039,1041-1048,1050-1064
+  s_fb4e3f9235a936::t_aefb3bf96f68cc 447-450,452,458-465,468,471,475-491
+  s_fb4e3f9235a936::t_26f61397c15fdb 1067-1136
+  s_fb4e3f9235a936::t_66679d844f1851 1527-1545,1547-1549,1552,1554,1560,1565-1567
+  s_6dc8a4fcf8f5e2::t_dc96c7d1c7bb5f 743-750
+  s_6dc8a4fcf8f5e2::t_18f0922f04e6d0 1032,1040
+  s_6dc8a4fcf8f5e2::t_a17bcec136d04b 81,230,993-994
+  s_fb4e3f9235a936::t_4858e8b3cf0a83 1585
+  s_fb4e3f9235a936::t_b133fdc8e42cfa 544,546-547,553-564,566,568,570,575-578,582,586-599,606,609
+  s_fb4e3f9235a936::t_98b45d5f0d4102 600-605
+  s_fb4e3f9235a936::t_84961ac296ec3b 548-551
+  s_fb4e3f9235a936::t_c881328b2404a8 402-412,417-430
+  s_fb4e3f9235a936::t_e8a3213c007cab 607-608
+client/scripts/main.gd
+  s_6dc8a4fcf8f5e2::t_aff0b0275f30e8 139
+client/scripts/settings_panel.gd
+  s_6dc8a4fcf8f5e2::t_0e9e2a485ec31d 56,58-61,71,77-78,88-89,97-98
+client/scripts/client_settings.gd
+  s_6dc8a4fcf8f5e2::t_0e9e2a485ec31d 87-99
+shared/rules/treasure_classes.v0.json
+  s_6dc8a4fcf8f5e2::t_53d6a0affbe3b4 32-33,58,60,87,89,141-142,168,170,200,202
+client/scripts/inventory_panel.gd
+  s_6dc8a4fcf8f5e2::t_0e9e2a485ec31d 136,239,241,250,255,259,270,276,280,300,303,350,393,400,408,412-425
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_fb4e3f9235a936::t_871f6d3c048e53 6,9
+  s_fb4e3f9235a936::t_0c8cfbc9920d60 11
+  s_fb4e3f9235a936::t_7a24e3d98cc866 20
+server/internal/replay/replay_test.go
+  s_6dc8a4fcf8f5e2::t_42c1cf063a35bf 100-101
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_6dc8a4fcf8f5e2::t_3ce5a8becc34a7 9,17
+  s_fb4e3f9235a936::t_cbbcb233fabe1c 10
+shared/golden/monster_chase.json
+  s_6dc8a4fcf8f5e2::t_1666a9d22ed79f 30-31
+  s_6dc8a4fcf8f5e2::t_6029b208027281 34-35
+  s_6dc8a4fcf8f5e2::t_2d91a464864e8d 22,33
+client/tests/test_golden.gd
+  s_6dc8a4fcf8f5e2::t_8766e6f5d9e7a6 212,215,218,221,228,245
+  s_6dc8a4fcf8f5e2::t_5e33b83369d192 188,191
+shared/golden/treasure_class_rolls.json
+  s_6dc8a4fcf8f5e2::t_53c819b9382a94 30
+  s_6dc8a4fcf8f5e2::t_fb9eb17d252cc3 8
+  s_6dc8a4fcf8f5e2::t_51cc7376f54cf0 38
+  s_6dc8a4fcf8f5e2::t_ec52b3dcfbf9a5 46
+  s_6dc8a4fcf8f5e2::t_c47c69a3c5492b 15
+  s_6dc8a4fcf8f5e2::t_c4b74de864813d 22
+tools/bot/scenarios/11_leash_lab.json
+  s_6dc8a4fcf8f5e2::t_b76f6d9237a5f8 5,7,10-11
+shared/rules/monsters.v0.json
+  s_6dc8a4fcf8f5e2::t_8d50a483f87a0b 78,93,146,163
+shared/golden/character_progression.json
+  s_6dc8a4fcf8f5e2::t_5ce05e40b06d9e 30,55,80,105,132,157
+tools/bot/scenarios/10_chase_maze.json
+  s_6dc8a4fcf8f5e2::t_6056c2601c3fae 7
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_6dc8a4fcf8f5e2::t_f9d2f2d038cd85 6,14
+  s_6dc8a4fcf8f5e2::t_1f63c71c244598 4
+  s_6dc8a4fcf8f5e2::t_bf1cdde7ac77c4 9
+server/internal/game/game_replay_test.go
+  s_6dc8a4fcf8f5e2::t_fb9eb17d252cc3 147,154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4aecb194b372e3806f6b321704e58099dbdc3c61",
+  "prompts": {},
+  "sessions": {
+    "s_6dc8a4fcf8f5e2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea543-6501-7233-bbd8-a5edd606c0ce",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_fb4e3f9235a936": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "03127b09-bac3-4ad2-bb90-2bfb54329542",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

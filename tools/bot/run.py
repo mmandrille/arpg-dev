@@ -579,6 +579,8 @@ async def execute_step(
                 continue
             if reason == "invalid_target" and monster_def_id and monster_def_id in state.killed_monster_def_ids:
                 continue
+            if reason == "projectile_busy":
+                continue
             if reason == "player_dead":
                 raise AssertionError("action_until_combat_event: player died")
             raise AssertionError(f"action_intent for {monster_def_id or target_id} was rejected: {reason}")

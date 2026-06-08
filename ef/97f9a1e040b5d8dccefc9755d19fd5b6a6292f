@@ -1,0 +1,25 @@
+scripts/play.sh
+  s_deaa8bce387d78::t_3dcd6f9046cc37 66-67,78-79,103
+  s_deaa8bce387d78::t_5fac9bc52f9af1 85,88
+  s_deaa8bce387d78::t_03c401cdedc252 16-21,30,33-35,65,68-77,80-84,86-87,89-101
+tools/play/coop_setup.py
+  s_deaa8bce387d78::t_903b4960bdd50f 1-91
+make/client.mk
+  s_deaa8bce387d78::t_71c15dfd4ca829 5-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ef97f9a1e040b5d8dccefc9755d19fd5b6a6292f",
+  "prompts": {},
+  "sessions": {
+    "s_deaa8bce387d78": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea77e-4672-70d3-a2e1-f3582dc80fe0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

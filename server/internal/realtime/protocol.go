@@ -11,8 +11,10 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/inputdecode"
 )
 
-// tickHz is the authoritative simulation rate (20 Hz, 50 ms/tick).
-const tickHz = 20
+// tickHz is the live authoritative session rate. The deterministic sim still
+// advances one fixed tick per loop; lowering the loop rate slows live gameplay
+// without changing replay tick semantics.
+const tickHz = 15
 
 // Client-to-server message types.
 const (

@@ -282,6 +282,47 @@ def test_intent_accepted_increments_pending_attack_count():
     assert "msg-attack" not in state.pending_attack_monsters
 
 
+def test_runtime_state_records_combat_event_metadata():
+    state = RuntimeState()
+
+    ingest_message({
+        "type": "state_delta",
+        "tick": 7,
+        "payload": {
+            "server_tick": 7,
+            "events": [{
+                "event_type": "monster_damaged",
+                "entity_id": "1003",
+                "source_entity_id": "1001",
+                "target_entity_id": "1003",
+                "damage": 0,
+                "outcome": "block",
+                "raw_damage": 0,
+                "mitigated_damage": 0,
+                "blocked": True,
+                "critical": False,
+            }],
+            "changes": [],
+        },
+    }, state)
+
+    assert state.combat_events == [{
+        "event_type": "monster_damaged",
+        "entity_id": "1003",
+        "source_entity_id": "1001",
+        "target_entity_id": "1003",
+        "damage": 0,
+        "outcome": "block",
+        "raw_damage": 0,
+        "mitigated_damage": 0,
+        "blocked": True,
+        "critical": False,
+    }]
+    run_runtime_assertions([
+        {"type": "combat_event_seen", "event_type": "monster_damaged", "outcome": "block", "blocked": True, "damage": 0}
+    ], state, "test")
+
+
 def test_runtime_assertion_monster_killed_in_attacks_passes():
     state = RuntimeState(
         accepted_attack_counts={"training_dummy_reward": 1},
@@ -339,3 +380,44 @@ def test_structured_assertions_reject_unknown_type():
         assert "unknown assertion type" in str(exc)
     else:
         raise AssertionError("expected AssertionError")
+
+
+def test_structured_character_progression_stat_breakdowns():
+    progression = {
+        "level": 1,
+        "experience": 0,
+        "unspent_stat_points": 0,
+        "base_stats": {"str": 1, "dex": 1, "vit": 1, "magic": 1},
+        "derived_stats": {"armor": 4, "block_percent": 8},
+        "stat_breakdowns": [
+            {
+                "key": "armor",
+                "value": 4,
+                "uncapped_value": 4,
+                "cap": None,
+                "sources": [
+                    {"kind": "character_formula", "label": "Vitality", "value": 1},
+                    {"kind": "equipment_base", "label": "Shield", "value": 2},
+                    {"kind": "equipment_roll", "label": "Rolled armor", "value": 1},
+                ],
+            },
+            {
+                "key": "block_percent",
+                "value": 8,
+                "uncapped_value": 8,
+                "cap": 75,
+                "sources": [{"kind": "equipment_base", "label": "Shield", "value": 8}],
+            },
+        ],
+    }
+
+    run_assertions([
+        {
+            "type": "character_progression",
+            "level": 1,
+            "stat_breakdowns": [
+                {"key": "armor", "min_value": 4, "source_kinds": ["character_formula", "equipment_base", "equipment_roll"]},
+                {"key": "block_percent", "min_uncapped_value": 8, "cap": 75, "source_kinds": ["equipment_base"]},
+            ],
+        }
+    ], [], [], {}, None, "test", character_progression=progression)

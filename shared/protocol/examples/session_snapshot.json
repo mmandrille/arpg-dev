@@ -44,7 +44,31 @@
       "movement_speed": 1.01,
       "max_hp": 10,
       "max_mana": 10
-    }
+    },
+    "stat_breakdowns": [
+      {
+        "key": "armor",
+        "value": 6,
+        "uncapped_value": 6,
+        "cap": null,
+        "sources": [
+          { "label": "Vitality", "value": 1, "kind": "character_formula" },
+          { "label": "Cave Mail", "value": 3, "kind": "equipment_base", "item_instance_id": "1004" },
+          { "label": "Rolled armor", "value": 2, "kind": "equipment_roll", "item_instance_id": "1004" }
+        ]
+      },
+      {
+        "key": "block_percent",
+        "value": 75,
+        "uncapped_value": 82,
+        "cap": 75,
+        "sources": [
+          { "label": "Cave Shield", "value": 5, "kind": "equipment_base", "item_instance_id": "1004" },
+          { "label": "Rolled block", "value": 7, "kind": "equipment_roll", "item_instance_id": "1004" },
+          { "label": "Block cap", "value": -7, "kind": "cap" }
+        ]
+      }
+    ]
   },
   "recent_events": []
 }

@@ -4,11 +4,15 @@
   "title": "Combat rules (v0)",
   "description": "Declarative combat parameters. Authoritative damage is rolled by the server PRNG within [min, max]; the cross-language damage formula is pinned by shared/golden/damage_formula.json.",
   "type": "object",
-  "required": ["version", "base_hit_chance", "player_damage", "unarmed_reach"],
+  "required": ["version", "base_hit_chance", "base_crit_chance", "base_crit_damage", "minimum_damage", "block_cap_percent", "player_damage", "unarmed_reach"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
     "base_hit_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "base_crit_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "base_crit_damage": { "type": "number", "minimum": 1 },
+    "minimum_damage": { "type": "integer", "minimum": 1 },
+    "block_cap_percent": { "type": "integer", "minimum": 0, "maximum": 75 },
     "player_damage": {
       "type": "object",
       "required": ["min", "max"],

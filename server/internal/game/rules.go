@@ -37,9 +37,13 @@ type DamageRange struct {
 
 // Combat holds combat parameters.
 type Combat struct {
-	BaseHitChance float64     `json:"base_hit_chance"`
-	PlayerDamage  DamageRange `json:"player_damage"`
-	UnarmedReach  float64     `json:"unarmed_reach"`
+	BaseHitChance  float64     `json:"base_hit_chance"`
+	BaseCritChance float64     `json:"base_crit_chance"`
+	BaseCritDamage float64     `json:"base_crit_damage"`
+	MinimumDamage  int         `json:"minimum_damage"`
+	BlockCap       int         `json:"block_cap_percent"`
+	PlayerDamage   DamageRange `json:"player_damage"`
+	UnarmedReach   float64     `json:"unarmed_reach"`
 }
 
 // NavigationRules bounds server-owned auto-navigation.
@@ -286,6 +290,11 @@ type MonsterDef struct {
 	Name              string       `json:"name"`
 	MaxHP             int          `json:"max_hp"`
 	LootTable         string       `json:"loot_table"`
+	HitChance         *float64     `json:"hit_chance,omitempty"`
+	CritChance        *float64     `json:"crit_chance,omitempty"`
+	CritDamage        *float64     `json:"crit_damage,omitempty"`
+	Armor             int          `json:"armor,omitempty"`
+	BlockPercent      int          `json:"block_percent,omitempty"`
 	RetaliationDamage *DamageRange `json:"retaliation_damage,omitempty"`
 	AttackDamage      *DamageRange `json:"attack_damage,omitempty"`
 	AttackCooldown    int          `json:"attack_cooldown_ticks,omitempty"`
@@ -310,6 +319,27 @@ func (d MonsterDef) effectiveMoveSpeed(nav NavigationRules) float64 {
 	}
 
 	return nav.CellSize
+}
+
+func (d MonsterDef) effectiveHitChance(combat Combat) float64 {
+	if d.HitChance != nil {
+		return clampFloat(*d.HitChance, 0, 1)
+	}
+	return combat.BaseHitChance
+}
+
+func (d MonsterDef) effectiveCritChance(combat Combat) float64 {
+	if d.CritChance != nil {
+		return clampFloat(*d.CritChance, 0, 1)
+	}
+	return combat.BaseCritChance
+}
+
+func (d MonsterDef) effectiveCritDamage(combat Combat) float64 {
+	if d.CritDamage != nil {
+		return maxFloat(1, *d.CritDamage)
+	}
+	return combat.BaseCritDamage
 }
 
 // LootEntry is one weighted entry in a loot table.
@@ -371,10 +401,14 @@ func LoadRules(dir string) (*Rules, error) {
 	r := &Rules{}
 
 	var combat struct {
-		Version       int         `json:"version"`
-		BaseHitChance float64     `json:"base_hit_chance"`
-		PlayerDamage  DamageRange `json:"player_damage"`
-		UnarmedReach  float64     `json:"unarmed_reach"`
+		Version        int         `json:"version"`
+		BaseHitChance  float64     `json:"base_hit_chance"`
+		BaseCritChance float64     `json:"base_crit_chance"`
+		BaseCritDamage float64     `json:"base_crit_damage"`
+		MinimumDamage  int         `json:"minimum_damage"`
+		BlockCap       int         `json:"block_cap_percent"`
+		PlayerDamage   DamageRange `json:"player_damage"`
+		UnarmedReach   float64     `json:"unarmed_reach"`
 	}
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
@@ -382,10 +416,33 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateDamageRange("combat.player_damage", combat.PlayerDamage); err != nil {
 		return nil, err
 	}
+	if combat.BaseHitChance < 0 || combat.BaseHitChance > 1 {
+		return nil, fmt.Errorf("game: invalid rules combat.base_hit_chance: must be within [0,1]")
+	}
+	if combat.BaseCritChance < 0 || combat.BaseCritChance > 1 {
+		return nil, fmt.Errorf("game: invalid rules combat.base_crit_chance: must be within [0,1]")
+	}
+	if combat.BaseCritDamage < 1 {
+		return nil, fmt.Errorf("game: invalid rules combat.base_crit_damage: must be >= 1")
+	}
+	if combat.MinimumDamage < 1 {
+		return nil, fmt.Errorf("game: invalid rules combat.minimum_damage: must be >= 1")
+	}
+	if combat.BlockCap < 0 || combat.BlockCap > 75 {
+		return nil, fmt.Errorf("game: invalid rules combat.block_cap_percent: must be within [0,75]")
+	}
 	if combat.UnarmedReach <= 0 {
 		return nil, fmt.Errorf("game: invalid rules combat.unarmed_reach: must be positive")
 	}
-	r.Combat = Combat{BaseHitChance: combat.BaseHitChance, PlayerDamage: combat.PlayerDamage, UnarmedReach: combat.UnarmedReach}
+	r.Combat = Combat{
+		BaseHitChance:  combat.BaseHitChance,
+		BaseCritChance: combat.BaseCritChance,
+		BaseCritDamage: combat.BaseCritDamage,
+		MinimumDamage:  combat.MinimumDamage,
+		BlockCap:       combat.BlockCap,
+		PlayerDamage:   combat.PlayerDamage,
+		UnarmedReach:   combat.UnarmedReach,
+	}
 
 	var navigation struct {
 		Version      int        `json:"version"`
@@ -676,6 +733,21 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	for id, def := range monsters.Monsters {
+		if def.HitChance != nil && (*def.HitChance < 0 || *def.HitChance > 1) {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.hit_chance: must be within [0,1]", id)
+		}
+		if def.CritChance != nil && (*def.CritChance < 0 || *def.CritChance > 1) {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.crit_chance: must be within [0,1]", id)
+		}
+		if def.CritDamage != nil && *def.CritDamage < 1 {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.crit_damage: must be >= 1", id)
+		}
+		if def.Armor < 0 {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.armor: must be non-negative", id)
+		}
+		if def.BlockPercent < 0 || def.BlockPercent > 100 {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.block_percent: must be within [0,100]", id)
+		}
 		if def.XPReward < 0 {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.xp_reward: must be non-negative", id)
 		}

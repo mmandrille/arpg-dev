@@ -135,6 +135,27 @@ type wallObstacle struct {
 	size Vec2
 }
 
+type effectiveCombatStats struct {
+	DamageMin    float64
+	DamageMax    float64
+	HitChance    float64
+	CritChance   float64
+	CritDamage   float64
+	Armor        float64
+	BlockPercent float64
+	MaxHP        float64
+}
+
+type combatResolution struct {
+	Outcome         string
+	Damage          int
+	RawDamage       int
+	MitigatedDamage int
+	Blocked         bool
+	Critical        bool
+	Hit             bool
+}
+
 // Sim is the deterministic authoritative simulation for one solo session.
 // Given the same seed and the same ordered inputs, it produces identical
 // outputs (entity ids, events, final state) on every run (ADR-0001 D8.1).
@@ -880,27 +901,26 @@ func (s *Sim) dispatchAction(target *entity, in Input, res *TickResult, ack bool
 }
 
 func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) {
-	// Always consume two draws (hit, damage) so the RNG stream is independent
-	// of the hit/miss branch (base_hit_chance is 1.0 in v0).
-	hitDraw := s.rng.Next()
-	dmg := s.rollDamage()
-	hit := s.rules.Combat.BaseHitChance >= 1.0 ||
-		float64(hitDraw%10000)/10000.0 < s.rules.Combat.BaseHitChance
-
 	if ack {
 		res.ack(in.MessageID)
 	}
-	if !hit {
-		res.Events = append(res.Events, Event{EventType: "attack_missed", EntityID: idStr(target.id), CorrelationID: in.CorrelationID})
+	attackerStats, _ := s.playerEffectiveCombatStats()
+	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
+	outcome := s.resolveCombat(attackerStats, defenderStats, DamageRange{
+		Min: int(math.Floor(attackerStats.DamageMin)),
+		Max: int(math.Floor(attackerStats.DamageMax)),
+	})
+	if !outcome.Hit || outcome.Blocked {
+		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), s.playerID, target.id, in.CorrelationID, outcome))
 		return
 	}
 
-	target.hp -= dmg
+	target.hp -= outcome.Damage
 	if target.hp < 0 {
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
-	res.Events = append(res.Events, Event{EventType: "monster_damaged", EntityID: idStr(target.id), CorrelationID: in.CorrelationID, Damage: intPtr(dmg)})
+	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), s.playerID, target.id, in.CorrelationID, outcome))
 
 	if target.hp == 0 {
 		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: in.CorrelationID})
@@ -920,8 +940,8 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 		res.reject(in.MessageID, "player_dead")
 		return
 	}
-	weapon, ok := s.equippedWeaponDef()
-	if !ok || weapon.AttackMode != attackModeRanged || weapon.ProjectileSpeed == nil {
+	projectileSpeed, ok := s.playerProjectileSpeed()
+	if !ok {
 		res.reject(in.MessageID, "invalid_target")
 		return
 	}
@@ -937,9 +957,9 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 		targetID:        target.id,
 		projectileDefID: trainingArrowProjectileDefID,
 		dir:             dir,
-		speed:           *weapon.ProjectileSpeed,
+		speed:           projectileSpeed,
 		maxDistance:     maxDistance,
-		damageRange:     *weapon.Damage,
+		damageRange:     s.resolvePlayerAttackDamage(),
 		sourceMsgID:     in.MessageID,
 		sourceCorrID:    in.CorrelationID,
 		spawnTick:       s.tick,
@@ -1014,8 +1034,14 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	if player == nil || player.hp <= 0 {
 		return
 	}
-	dmg := s.rollRange(*def.RetaliationDamage)
-	player.hp -= dmg
+	attackerStats := s.monsterEffectiveCombatStats(monster, *def.RetaliationDamage)
+	defenderStats, _ := s.playerEffectiveCombatStats()
+	outcome := s.resolveCombat(attackerStats, defenderStats, *def.RetaliationDamage)
+	if !outcome.Hit || outcome.Blocked {
+		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
+		return
+	}
+	player.hp -= outcome.Damage
 	if player.hp < 0 {
 		player.hp = 0
 	}
@@ -1024,7 +1050,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	if player.hp == 0 {
 		eventType = "player_killed"
 	}
-	res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), CorrelationID: corr, Damage: intPtr(dmg)})
+	res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, corr, outcome))
 }
 
 func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
@@ -1308,6 +1334,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		ItemInstanceID: &idCopy,
 		HotbarCapacity: intPtr(s.hotbarCapacity()),
 	})
+	s.appendEquipmentProgressionChanges(res)
 	res.Events = append(res.Events, Event{EventType: "item_equipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
 	res.ack(in.MessageID)
 }
@@ -1336,9 +1363,30 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 		ItemInstanceID: nil,
 		HotbarCapacity: intPtr(s.hotbarCapacity()),
 	})
+	s.appendEquipmentProgressionChanges(res)
 	idCopy := idStr(item.instanceID)
 	res.Events = append(res.Events, Event{EventType: "item_unequipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
 	res.ack(in.MessageID)
+}
+
+func (s *Sim) appendEquipmentProgressionChanges(res *TickResult) {
+	player := s.activeLevel().entities[s.playerID]
+	if player != nil {
+		maxHP := s.currentMaxHP()
+		if maxHP != player.maxHP {
+			delta := maxHP - player.maxHP
+			player.maxHP = maxHP
+			if delta > 0 {
+				player.hp += delta
+			}
+			if player.hp > player.maxHP {
+				player.hp = player.maxHP
+			}
+			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+		}
+	}
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
 }
 
 func (s *Sim) handleDrop(in Input, res *TickResult) {
@@ -1357,6 +1405,7 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 		return
 	}
 
+	wasEquipped := item.equipped
 	if item.equipped {
 		for slot, instanceID := range s.equipped {
 			if instanceID == item.instanceID {
@@ -1377,6 +1426,9 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 	loot.id = s.alloc()
 	s.activeLevel().entities[loot.id] = loot
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
+	if wasEquipped {
+		s.appendEquipmentProgressionChanges(res)
+	}
 	res.Events = append(res.Events, Event{
 		EventType:      "item_dropped",
 		EntityID:       idStr(loot.id),
@@ -2001,19 +2053,25 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if monster.monsterAttackDamage != nil {
 			attackDamage = monster.monsterAttackDamage
 		}
-		dmg := s.rollRange(*attackDamage)
-		player.hp -= dmg
+		monster.lastAttackTick = s.tick
+		monster.hasAttacked = true
+		attackerStats := s.monsterEffectiveCombatStats(monster, *attackDamage)
+		defenderStats, _ := s.playerEffectiveCombatStats()
+		outcome := s.resolveCombat(attackerStats, defenderStats, *attackDamage)
+		if !outcome.Hit || outcome.Blocked {
+			res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, "", outcome))
+			continue
+		}
+		player.hp -= outcome.Damage
 		if player.hp < 0 {
 			player.hp = 0
 		}
-		monster.lastAttackTick = s.tick
-		monster.hasAttacked = true
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
 		eventType := "player_damaged"
 		if player.hp == 0 {
 			eventType = "player_killed"
 		}
-		res.Events = append(res.Events, Event{EventType: eventType, EntityID: idStr(player.id), Damage: intPtr(dmg)})
+		res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, "", outcome))
 		if player.hp == 0 {
 			return
 		}
@@ -2314,20 +2372,19 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
 		return
 	}
-	hitDraw := s.rng.Next()
-	hitOK := s.rules.Combat.BaseHitChance >= 1.0 ||
-		float64(hitDraw%10000)/10000.0 < s.rules.Combat.BaseHitChance
-	if !hitOK {
-		res.Events = append(res.Events, Event{EventType: "attack_missed", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID})
+	attackerStats, _ := s.playerEffectiveCombatStats()
+	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
+	outcome := s.resolveCombat(attackerStats, defenderStats, p.damageRange)
+	if !outcome.Hit || outcome.Blocked {
+		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), p.ownerID, target.id, p.sourceCorrID, outcome))
 		return
 	}
-	dmg := s.rollRange(p.damageRange)
-	target.hp -= dmg
+	target.hp -= outcome.Damage
 	if target.hp < 0 {
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
-	res.Events = append(res.Events, Event{EventType: "monster_damaged", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID, Damage: intPtr(dmg)})
+	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), p.ownerID, target.id, p.sourceCorrID, outcome))
 
 	if target.hp == 0 {
 		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID})
@@ -2449,6 +2506,79 @@ func segmentIntersectsCircle(start, end, center Vec2, radius float64) (float64, 
 
 func (s *Sim) rollDamage() int {
 	return s.rollRange(s.resolvePlayerAttackDamage())
+}
+
+func (s *Sim) resolveCombat(attacker, defender effectiveCombatStats, damageRange DamageRange) combatResolution {
+	hit := s.rollChance(attacker.HitChance)
+	if !hit {
+		return combatResolution{Outcome: "miss", Hit: false}
+	}
+	blocked := s.rollChance(defender.BlockPercent / 100.0)
+	if blocked {
+		return combatResolution{Outcome: "block", Hit: true, Blocked: true}
+	}
+	if damageRange.Max < damageRange.Min {
+		damageRange.Max = damageRange.Min
+	}
+	raw := s.rollRange(damageRange)
+	critical := s.rollChance(attacker.CritChance)
+	rawOrCrit := raw
+	outcome := "hit"
+	if critical {
+		rawOrCrit = roundPositive(float64(raw) * attacker.CritDamage)
+		outcome = "crit"
+	}
+	mitigated := rawOrCrit - int(math.Round(defender.Armor))
+	finalDamage := mitigated
+	if finalDamage < s.rules.Combat.MinimumDamage {
+		finalDamage = s.rules.Combat.MinimumDamage
+	}
+	return combatResolution{
+		Outcome:         outcome,
+		Damage:          finalDamage,
+		RawDamage:       rawOrCrit,
+		MitigatedDamage: mitigated,
+		Blocked:         false,
+		Critical:        critical,
+		Hit:             true,
+	}
+}
+
+func (s *Sim) rollChance(chance float64) bool {
+	draw := s.rng.Next()
+	if chance <= 0 {
+		return false
+	}
+	if chance >= 1 {
+		return true
+	}
+	return float64(draw%10000)/10000.0 < chance
+}
+
+func (s *Sim) combatEventType(defenderKind string, outcome combatResolution) string {
+	if outcome.Outcome == "miss" {
+		return "attack_missed"
+	}
+	if defenderKind == playerEntity {
+		return "player_damaged"
+	}
+	return "monster_damaged"
+}
+
+func combatEvent(eventType string, sourceID, targetID uint64, corr string, outcome combatResolution) Event {
+	return Event{
+		EventType:       eventType,
+		EntityID:        idStr(targetID),
+		SourceEntityID:  idStr(sourceID),
+		TargetEntityID:  idStr(targetID),
+		CorrelationID:   corr,
+		Damage:          intPtr(outcome.Damage),
+		Outcome:         outcome.Outcome,
+		RawDamage:       intPtr(outcome.RawDamage),
+		MitigatedDamage: intPtr(outcome.MitigatedDamage),
+		Blocked:         boolPtr(outcome.Blocked),
+		Critical:        boolPtr(outcome.Critical),
+	}
 }
 
 func (s *Sim) rollItemTemplate(templateID string) (ItemRollPayload, bool) {
@@ -2718,6 +2848,25 @@ func (s *Sim) equippedWeaponItem() *invItem {
 	return item
 }
 
+func (s *Sim) playerProjectileSpeed() (float64, bool) {
+	item := s.equippedWeaponItem()
+	if item == nil {
+		return 0, false
+	}
+	if item.rollPayload != nil {
+		template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+		if !ok || template.AttackMode != attackModeRanged || template.ProjectileSpeed <= 0 {
+			return 0, false
+		}
+		return template.ProjectileSpeed, true
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok || def.AttackMode != attackModeRanged || def.ProjectileSpeed == nil || *def.ProjectileSpeed <= 0 {
+		return 0, false
+	}
+	return *def.ProjectileSpeed, true
+}
+
 func (s *Sim) itemReach(item *invItem) (float64, bool) {
 	if item.rollPayload != nil {
 		template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
@@ -2849,31 +2998,20 @@ func (s *Sim) actionable(e *entity) bool {
 }
 
 func (s *Sim) resolvePlayerAttackDamage() DamageRange {
-	base := s.rules.Combat.PlayerDamage
-	instanceID := s.equipped[mainHandSlot]
-	if instanceID == 0 {
-		return s.applyStrengthDamageBonus(base)
+	stats, _ := s.playerEffectiveCombatStats()
+	minDamage := int(math.Floor(stats.DamageMin))
+	maxDamage := int(math.Floor(stats.DamageMax))
+	if minDamage < 0 {
+		minDamage = 0
 	}
-	item := s.findItemByID(instanceID)
-	if item == nil {
-		return s.applyStrengthDamageBonus(base)
+	if maxDamage < minDamage {
+		maxDamage = minDamage
 	}
-	if item.rollPayload != nil {
-		min, minOK := item.rollPayload.Stats["damage_min"]
-		max, maxOK := item.rollPayload.Stats["damage_max"]
-		if minOK && maxOK && max >= min {
-			return s.applyStrengthDamageBonus(DamageRange{Min: min, Max: max})
-		}
-	}
-	def, ok := s.rules.Items[item.itemDefID]
-	if !ok || def.Damage == nil {
-		return s.applyStrengthDamageBonus(base)
-	}
-	return s.applyStrengthDamageBonus(*def.Damage)
+	return DamageRange{Min: minDamage, Max: maxDamage}
 }
 
 func (s *Sim) applyStrengthDamageBonus(base DamageRange) DamageRange {
-	derived := s.DerivedStatsView()
+	derived := s.characterDerivedStatsView()
 	out := DamageRange{
 		Min: base.Min + int(math.Floor(derived.DamageMin)),
 		Max: base.Max + int(math.Floor(derived.DamageMax)),
@@ -2888,7 +3026,8 @@ func (s *Sim) applyStrengthDamageBonus(base DamageRange) DamageRange {
 }
 
 func (s *Sim) currentMaxHP() int {
-	maxHP := int(math.Round(s.DerivedStatsView().MaxHP))
+	stats, _ := s.playerEffectiveCombatStats()
+	maxHP := int(math.Round(stats.MaxHP))
 	if maxHP < 1 {
 		return 1
 	}
@@ -2907,6 +3046,7 @@ func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 		UnspentStatPoints:     s.progression.UnspentStatPoints,
 		BaseStats:             s.progression.BaseStats,
 		DerivedStats:          s.DerivedStatsView(),
+		StatBreakdowns:        s.StatBreakdownViews(),
 	}
 }
 
@@ -2916,6 +3056,23 @@ func (s *Sim) ProgressionState() CharacterProgressionState {
 }
 
 func (s *Sim) DerivedStatsView() DerivedStatsView {
+	effective, _ := s.playerEffectiveCombatStats()
+	character := s.characterDerivedStatsView()
+	return DerivedStatsView{
+		DamageMin:     effective.DamageMin,
+		DamageMax:     effective.DamageMax,
+		Armor:         effective.Armor,
+		AttackSpeed:   character.AttackSpeed,
+		HitChance:     effective.HitChance,
+		CritChance:    effective.CritChance,
+		CritDamage:    effective.CritDamage,
+		MovementSpeed: character.MovementSpeed,
+		MaxHP:         effective.MaxHP,
+		MaxMana:       character.MaxMana,
+	}
+}
+
+func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 	stats := s.progression.BaseStats
 	eval := func(key string) float64 {
 		formula := s.rules.CharacterProgression.DerivedStats[key]
@@ -2943,6 +3100,198 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 		MovementSpeed: eval("movement_speed"),
 		MaxHP:         eval("max_hp"),
 		MaxMana:       eval("max_mana"),
+	}
+}
+
+func (s *Sim) StatBreakdownViews() []StatBreakdownView {
+	_, breakdowns := s.playerEffectiveCombatStats()
+	return breakdowns
+}
+
+func (s *Sim) playerEffectiveCombatStats() (effectiveCombatStats, []StatBreakdownView) {
+	character := s.characterDerivedStatsView()
+	damageMin := float64(s.rules.Combat.PlayerDamage.Min) + character.DamageMin
+	damageMax := float64(s.rules.Combat.PlayerDamage.Max) + character.DamageMax
+	armor := character.Armor
+	maxHP := character.MaxHP
+	blockPercent := 0.0
+
+	damageMinSources := []StatBreakdownSourceView{
+		{Label: "Base damage", Value: float64(s.rules.Combat.PlayerDamage.Min), Kind: "character_formula"},
+		{Label: "Strength", Value: character.DamageMin, Kind: "character_formula"},
+	}
+	damageMaxSources := []StatBreakdownSourceView{
+		{Label: "Base damage", Value: float64(s.rules.Combat.PlayerDamage.Max), Kind: "character_formula"},
+		{Label: "Strength", Value: character.DamageMax, Kind: "character_formula"},
+	}
+	armorSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.Armor, Kind: "character_formula"}}
+	maxHPSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.MaxHP, Kind: "character_formula"}}
+	blockSources := []StatBreakdownSourceView{}
+
+	if weapon := s.equippedWeaponItem(); weapon != nil {
+		baseMin, baseMax, minRoll, maxRoll, label, itemID, ok := s.weaponDamageContributions(weapon)
+		if ok {
+			damageMin = character.DamageMin + baseMin + minRoll
+			damageMax = character.DamageMax + baseMax + maxRoll
+			damageMinSources = []StatBreakdownSourceView{
+				{Label: label, Value: baseMin, Kind: "equipment_base", ItemInstanceID: itemID},
+				{Label: "Rolled damage", Value: minRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
+				{Label: "Strength", Value: character.DamageMin, Kind: "character_formula"},
+			}
+			damageMaxSources = []StatBreakdownSourceView{
+				{Label: label, Value: baseMax, Kind: "equipment_base", ItemInstanceID: itemID},
+				{Label: "Rolled damage", Value: maxRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
+				{Label: "Strength", Value: character.DamageMax, Kind: "character_formula"},
+			}
+		}
+	}
+
+	for _, slot := range equipmentSlots {
+		item := s.findItemByID(s.equipped[slot])
+		if item == nil {
+			continue
+		}
+		label := s.itemDisplayName(item)
+		itemID := idStr(item.instanceID)
+		baseStats, rolledStats := s.itemBaseAndRollStats(item)
+		if value := baseStats["armor"]; value != 0 {
+			armor += float64(value)
+			armorSources = append(armorSources, StatBreakdownSourceView{Label: label, Value: float64(value), Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["armor"]; value != 0 {
+			armor += float64(value)
+			armorSources = append(armorSources, StatBreakdownSourceView{Label: "Rolled armor", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+		if value := baseStats["max_hp"]; value != 0 {
+			maxHP += float64(value)
+			maxHPSources = append(maxHPSources, StatBreakdownSourceView{Label: label, Value: float64(value), Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["max_hp"]; value != 0 {
+			maxHP += float64(value)
+			maxHPSources = append(maxHPSources, StatBreakdownSourceView{Label: "Rolled max HP", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+		if value := baseStats["block_percent"]; value != 0 {
+			blockPercent += float64(value)
+			blockSources = append(blockSources, StatBreakdownSourceView{Label: label, Value: float64(value), Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["block_percent"]; value != 0 {
+			blockPercent += float64(value)
+			blockSources = append(blockSources, StatBreakdownSourceView{Label: "Rolled block", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+	}
+
+	uncappedBlock := blockPercent
+	blockCap := float64(s.rules.Combat.BlockCap)
+	if blockPercent > blockCap {
+		blockPercent = blockCap
+		blockSources = append(blockSources, StatBreakdownSourceView{Label: "Block cap", Value: blockPercent - uncappedBlock, Kind: "cap"})
+	}
+
+	effective := effectiveCombatStats{
+		DamageMin:    maxFloat(0, damageMin),
+		DamageMax:    maxFloat(0, damageMax),
+		HitChance:    clampFloat(minFloat(character.HitChance, s.rules.Combat.BaseHitChance), 0, 1),
+		CritChance:   clampFloat(character.CritChance, 0, 1),
+		CritDamage:   maxFloat(1, character.CritDamage),
+		Armor:        maxFloat(0, armor),
+		BlockPercent: maxFloat(0, blockPercent),
+		MaxHP:        maxFloat(1, maxHP),
+	}
+	if effective.DamageMax < effective.DamageMin {
+		effective.DamageMax = effective.DamageMin
+	}
+
+	breakdowns := []StatBreakdownView{
+		{Key: "damage_min", Value: effective.DamageMin, UncappedValue: effective.DamageMin, Cap: nil, Sources: damageMinSources},
+		{Key: "damage_max", Value: effective.DamageMax, UncappedValue: effective.DamageMax, Cap: nil, Sources: damageMaxSources},
+		{Key: "armor", Value: effective.Armor, UncappedValue: effective.Armor, Cap: nil, Sources: armorSources},
+		{Key: "max_hp", Value: effective.MaxHP, UncappedValue: effective.MaxHP, Cap: nil, Sources: maxHPSources},
+		{Key: "block_percent", Value: effective.BlockPercent, UncappedValue: uncappedBlock, Cap: floatPtr(blockCap), Sources: blockSources},
+	}
+	return effective, breakdowns
+}
+
+func (s *Sim) weaponDamageContributions(item *invItem) (baseMin, baseMax, rollMin, rollMax float64, label, itemID string, ok bool) {
+	itemID = idStr(item.instanceID)
+	label = s.itemDisplayName(item)
+	if item.rollPayload != nil {
+		template, found := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+		if !found {
+			return 0, 0, 0, 0, "", "", false
+		}
+		totalMin, minOK := item.rollPayload.Stats["damage_min"]
+		totalMax, maxOK := item.rollPayload.Stats["damage_max"]
+		if !minOK || !maxOK || totalMax < totalMin {
+			return 0, 0, 0, 0, "", "", false
+		}
+		baseMinInt := template.BaseStats["damage_min"]
+		baseMaxInt := template.BaseStats["damage_max"]
+		return float64(baseMinInt), float64(baseMaxInt), float64(totalMin - baseMinInt), float64(totalMax - baseMaxInt), label, itemID, true
+	}
+	def, found := s.rules.Items[item.itemDefID]
+	if !found || def.Damage == nil {
+		return 0, 0, 0, 0, "", "", false
+	}
+	return float64(def.Damage.Min), float64(def.Damage.Max), 0, 0, label, itemID, true
+}
+
+func (s *Sim) itemBaseAndRollStats(item *invItem) (map[string]int, map[string]int) {
+	baseStats := map[string]int{}
+	rolledStats := map[string]int{}
+	if item == nil || item.rollPayload == nil {
+		return baseStats, rolledStats
+	}
+	template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+	if !ok {
+		return baseStats, rolledStats
+	}
+	for key, value := range template.BaseStats {
+		baseStats[key] = value
+	}
+	for key, total := range item.rollPayload.Stats {
+		if base := template.BaseStats[key]; total != base {
+			rolledStats[key] = total - base
+		}
+	}
+	return baseStats, rolledStats
+}
+
+func (s *Sim) itemDisplayName(item *invItem) string {
+	if item == nil {
+		return "Item"
+	}
+	if item.rollPayload != nil {
+		if item.rollPayload.DisplayName != "" {
+			return item.rollPayload.DisplayName
+		}
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok {
+			return template.Name
+		}
+	}
+	if def, ok := s.rules.Items[item.itemDefID]; ok {
+		return def.Name
+	}
+	return item.itemDefID
+}
+
+func (s *Sim) monsterEffectiveCombatStats(monster *entity, damage DamageRange) effectiveCombatStats {
+	if monster == nil {
+		return effectiveCombatStats{
+			HitChance:  s.rules.Combat.BaseHitChance,
+			CritDamage: s.rules.Combat.BaseCritDamage,
+			MaxHP:      1,
+		}
+	}
+	def := s.rules.Monsters[monster.monsterDefID]
+	return effectiveCombatStats{
+		DamageMin:    float64(damage.Min),
+		DamageMax:    float64(damage.Max),
+		HitChance:    def.effectiveHitChance(s.rules.Combat),
+		CritChance:   def.effectiveCritChance(s.rules.Combat),
+		CritDamage:   def.effectiveCritDamage(s.rules.Combat),
+		Armor:        float64(def.Armor),
+		BlockPercent: clampFloat(float64(def.BlockPercent), 0, float64(s.rules.Combat.BlockCap)),
+		MaxHP:        float64(monster.maxHP),
 	}
 }
 
@@ -3179,6 +3528,32 @@ func (it *invItem) view() ItemView {
 func ptrEntityView(v EntityView) *EntityView { return &v }
 func ptrItemView(v ItemView) *ItemView       { return &v }
 func intPtr(v int) *int                      { return &v }
+func floatPtr(v float64) *float64            { return &v }
+func boolPtr(v bool) *bool                   { return &v }
+
+func maxFloat(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func minFloat(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func clampFloat(v, minValue, maxValue float64) float64 {
+	if v < minValue {
+		return minValue
+	}
+	if v > maxValue {
+		return maxValue
+	}
+	return v
+}
 
 func normalize(v Vec2) Vec2 {
 	length := math.Hypot(v.X, v.Y)

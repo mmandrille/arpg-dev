@@ -12,6 +12,7 @@ const DERIVED_LABELS := {
 	"hit_chance": "Hit chance",
 	"crit_chance": "Crit chance",
 	"crit_damage": "Crit damage",
+	"block_percent": "Block",
 	"movement_speed": "Move speed",
 	"max_hp": "HP",
 	"max_mana": "Mana",
@@ -74,6 +75,7 @@ func get_debug_state() -> Dictionary:
 		"progression": progression.duplicate(true),
 		"allocation_enabled": allocation_enabled,
 		"stat_buttons": stat_buttons,
+		"stat_breakdowns": _breakdowns_by_key(),
 	}
 
 
@@ -160,6 +162,7 @@ func _render() -> void:
 		var label: Label = _derived_labels.get(key, null)
 		if label != null:
 			label.text = "%s  %s" % [DERIVED_LABELS[key], _format_number(float(derived.get(key, 0.0)))]
+			label.tooltip_text = _breakdown_summary(key)
 	_render_buttons()
 
 
@@ -179,6 +182,37 @@ func _format_number(value: float) -> String:
 	if absf(value - roundf(value)) < 0.0001:
 		return str(int(roundf(value)))
 	return "%.2f" % value
+
+
+func _breakdowns_by_key() -> Dictionary:
+	var out := {}
+	var rows: Array = progression.get("stat_breakdowns", [])
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		out[str(rec.get("key", ""))] = rec.duplicate(true)
+	return out
+
+
+func _breakdown_summary(key: String) -> String:
+	var rec: Dictionary = _breakdowns_by_key().get(key, {})
+	if rec.is_empty():
+		return ""
+	var parts: PackedStringArray = PackedStringArray()
+	var value := _format_number(float(rec.get("value", 0.0)))
+	if rec.get("cap", null) != null:
+		parts.append("%s: %s (cap %s)" % [DERIVED_LABELS.get(key, key), value, _format_number(float(rec.get("cap", 0.0)))])
+	else:
+		parts.append("%s: %s" % [DERIVED_LABELS.get(key, key), value])
+	var sources: Array = rec.get("sources", [])
+	for source in sources:
+		if typeof(source) != TYPE_DICTIONARY:
+			continue
+		var source_rec := source as Dictionary
+		var label := str(source_rec.get("label", source_rec.get("kind", "")))
+		parts.append("%s %s" % [label, _format_number(float(source_rec.get("value", 0.0)))])
+	return "\n".join(parts)
 
 
 func _value_label() -> Label:

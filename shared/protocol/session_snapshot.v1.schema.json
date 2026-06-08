@@ -168,6 +168,32 @@
         "max_mana": { "type": "number", "minimum": 0 }
       }
     },
+    "stat_breakdown_source": {
+      "type": "object",
+      "required": ["label", "value", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "value": { "type": "number" },
+        "kind": { "type": "string", "enum": ["character_formula", "equipment_base", "equipment_roll", "cap", "clamp"] },
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "stat_breakdown": {
+      "type": "object",
+      "required": ["key", "value", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "hit_chance", "crit_chance", "crit_damage", "max_hp", "block_percent"] },
+        "value": { "type": "number" },
+        "uncapped_value": { "type": "number" },
+        "cap": { "type": ["number", "null"] },
+        "sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stat_breakdown_source" }
+        }
+      }
+    },
     "character_progression": {
       "type": "object",
       "required": ["level", "experience", "experience_to_next_level", "level_cap", "unspent_stat_points", "base_stats", "derived_stats"],
@@ -179,7 +205,11 @@
         "level_cap": { "type": "integer", "minimum": 1 },
         "unspent_stat_points": { "type": "integer", "minimum": 0 },
         "base_stats": { "$ref": "#/$defs/base_stats" },
-        "derived_stats": { "$ref": "#/$defs/derived_stats" }
+        "derived_stats": { "$ref": "#/$defs/derived_stats" },
+        "stat_breakdowns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stat_breakdown" }
+        }
       }
     },
     "event": {
@@ -188,8 +218,15 @@
       "properties": {
         "event_type": { "type": "string" },
         "entity_id": { "$ref": "#/$defs/decimal_id" },
+        "source_entity_id": { "$ref": "#/$defs/decimal_id" },
+        "target_entity_id": { "$ref": "#/$defs/decimal_id" },
         "correlation_id": { "$ref": "#/$defs/prefixed_id" },
         "damage": { "type": "integer", "minimum": 0 },
+        "outcome": { "type": "string", "enum": ["hit", "crit", "miss", "block", "kill"] },
+        "raw_damage": { "type": "integer", "minimum": 0 },
+        "mitigated_damage": { "type": "integer" },
+        "blocked": { "type": "boolean" },
+        "critical": { "type": "boolean" },
         "heal": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
         "level": { "type": "integer" },

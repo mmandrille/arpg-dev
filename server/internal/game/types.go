@@ -109,16 +109,34 @@ type DerivedStatsView struct {
 	MaxMana       float64 `json:"max_mana"`
 }
 
+// StatBreakdownSourceView is one source row for an effective combat stat.
+type StatBreakdownSourceView struct {
+	Label          string  `json:"label"`
+	Value          float64 `json:"value"`
+	Kind           string  `json:"kind"`
+	ItemInstanceID string  `json:"item_instance_id,omitempty"`
+}
+
+// StatBreakdownView explains how one effective stat was assembled.
+type StatBreakdownView struct {
+	Key           string                    `json:"key"`
+	Value         float64                   `json:"value"`
+	UncappedValue float64                   `json:"uncapped_value,omitempty"`
+	Cap           *float64                  `json:"cap"`
+	Sources       []StatBreakdownSourceView `json:"sources"`
+}
+
 // CharacterProgressionView is the protocol view of durable character XP/stat
 // progression plus derived display stats.
 type CharacterProgressionView struct {
-	Level                 int              `json:"level"`
-	Experience            int              `json:"experience"`
-	ExperienceToNextLevel *int             `json:"experience_to_next_level"`
-	LevelCap              int              `json:"level_cap"`
-	UnspentStatPoints     int              `json:"unspent_stat_points"`
-	BaseStats             BaseStatsView    `json:"base_stats"`
-	DerivedStats          DerivedStatsView `json:"derived_stats"`
+	Level                 int                 `json:"level"`
+	Experience            int                 `json:"experience"`
+	ExperienceToNextLevel *int                `json:"experience_to_next_level"`
+	LevelCap              int                 `json:"level_cap"`
+	UnspentStatPoints     int                 `json:"unspent_stat_points"`
+	BaseStats             BaseStatsView       `json:"base_stats"`
+	DerivedStats          DerivedStatsView    `json:"derived_stats"`
+	StatBreakdowns        []StatBreakdownView `json:"stat_breakdowns,omitempty"`
 }
 
 // HotbarSlotView is one fixed hotbar assignment in the protocol snapshot.
@@ -131,8 +149,15 @@ type HotbarSlotView struct {
 type Event struct {
 	EventType         string `json:"event_type"`
 	EntityID          string `json:"entity_id,omitempty"`
+	SourceEntityID    string `json:"source_entity_id,omitempty"`
+	TargetEntityID    string `json:"target_entity_id,omitempty"`
 	CorrelationID     string `json:"correlation_id,omitempty"`
 	Damage            *int   `json:"damage,omitempty"`
+	Outcome           string `json:"outcome,omitempty"`
+	RawDamage         *int   `json:"raw_damage,omitempty"`
+	MitigatedDamage   *int   `json:"mitigated_damage,omitempty"`
+	Blocked           *bool  `json:"blocked,omitempty"`
+	Critical          *bool  `json:"critical,omitempty"`
 	Heal              *int   `json:"heal,omitempty"`
 	ItemInstanceID    string `json:"item_instance_id,omitempty"`
 	Level             *int   `json:"level,omitempty"`

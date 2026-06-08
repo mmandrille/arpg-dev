@@ -39,6 +39,9 @@ func _initialize() -> void:
 	_test_client_settings_supported_size_labels()
 	_test_client_settings_parse_size_label()
 	_test_client_settings_size_from_data()
+	_test_client_settings_floating_combat_text_from_data()
+	_test_combat_feedback_step_types_load()
+	_test_combat_event_and_damage_number_assertions()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -308,6 +311,70 @@ func _test_client_settings_size_from_data() -> void:
 	var invalid := {"window_size": {"width": 777, "height": 444}}
 	_assert_eq("settings data invalid fallback", ClientSettingsScript.size_from_data(invalid), Vector2i(1920, 1080))
 	_assert_eq("settings data missing fallback", ClientSettingsScript.size_from_data({}), Vector2i(1920, 1080))
+
+
+func _test_client_settings_floating_combat_text_from_data() -> void:
+	_assert_eq("settings floating text defaults on", ClientSettingsScript.floating_combat_text_from_data({}), true)
+	_assert_eq("settings floating text parses off", ClientSettingsScript.floating_combat_text_from_data({"floating_combat_text": false}), false)
+
+
+func _test_combat_feedback_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "set_floating_combat_text", "enabled": false},
+		{"type": "assert_floating_combat_text_enabled", "enabled": false},
+		{"type": "set_floating_combat_text", "enabled": true},
+		{"type": "wait_event", "event_type": "monster_damaged", "outcome": "block", "blocked": true, "timeout_s": 1.0},
+		{"type": "wait_damage_number", "variant": "block", "text": "BLOCK", "timeout_s": 1.0},
+		{"type": "wait_no_damage_number", "timeout_s": 1.0},
+		{"type": "assert_damage_number", "variant": "block", "text": "BLOCK"},
+		{"type": "assert_no_damage_number"},
+		{"type": "assert_character_progression", "stat_breakdowns": [
+			{"key": "block_percent", "min_value": 6, "cap": 75, "source_kinds": ["equipment_base", "equipment_roll"]}
+		]},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("combat feedback client step scenario valid", err, "")
+
+
+func _test_combat_event_and_damage_number_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "combat_feedback_assert_test",
+		"runner": "godot_client",
+		"world_id": "combat_stat_lab",
+		"client_steps": [
+			{"type": "wait_event", "event_type": "monster_damaged", "outcome": "block", "blocked": true, "timeout_s": 1.0},
+			{"type": "assert_damage_number", "variant": "block", "text": "BLOCK"},
+			{"type": "assert_floating_combat_text_enabled", "enabled": true},
+			{"type": "assert_character_progression", "stat_breakdowns": [
+				{"key": "block_percent", "min_value": 6, "cap": 75, "source_kinds": ["equipment_base", "equipment_roll"]}
+			]},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"pending_events": [{"event_type": "monster_damaged", "outcome": "block", "blocked": true}],
+		"damage_numbers": [{"variant": "block", "text": "BLOCK"}],
+		"floating_combat_text_enabled": true,
+		"character_progression": {
+			"stat_breakdowns": [{
+				"key": "block_percent",
+				"value": 10,
+				"uncapped_value": 10,
+				"cap": 75,
+				"sources": [
+					{"kind": "equipment_base", "value": 5},
+					{"kind": "equipment_roll", "value": 5}
+				],
+			}],
+		},
+	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	_assert_true("combat feedback assertions pass", runner.is_done() and runner.passed())
 
 
 # --- helpers -----------------------------------------------------------------

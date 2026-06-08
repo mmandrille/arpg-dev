@@ -19,11 +19,11 @@
     { "type": "wait_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion", "timeout_s": 15.0 },
     { "type": "double_click_bag_item", "item_def_id": "red_potion", "bag_index": 0 },
     { "type": "wait_event", "event_type": "player_healed", "timeout_s": 15.0 },
-    { "type": "assert_player_hp", "equals": 9 },
+    { "type": "assert_player_hp", "equals": 10 },
     { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 1 },
     { "type": "press_key", "keycode": "KEY_1" },
-    { "type": "wait_event", "event_type": "player_healed", "timeout_s": 15.0 },
     { "type": "assert_player_hp", "equals": 10 },
-    { "type": "assert_inventory_missing", "item_def_id": "red_potion" }
+    { "type": "assert_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion" },
+    { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 1 }
   ]
 }

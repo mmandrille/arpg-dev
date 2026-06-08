@@ -415,6 +415,7 @@ func _initialize() -> void:
 	# 19. Character progression golden mirrors display-side derived formulas.
 	var progression_rules := _read(shared.path_join("rules/character_progression.v0.json"))
 	var progression_golden := _read(shared.path_join("golden/character_progression.json"))
+	var progression_combat_rules := _read(shared.path_join("rules/combat.v0.json"))
 	if progression_rules["base_stats"] != progression_golden["base_stats"]:
 		_fail("character_progression base stats mismatch")
 		return
@@ -425,12 +426,44 @@ func _initialize() -> void:
 		var expected: Dictionary = c["expected"]
 		for key in progression_rules["derived_stats"].keys():
 			var got := _eval_progression_formula(progression_rules["derived_stats"][key], stats)
+			if key == "damage_min":
+				got += float(progression_combat_rules["player_damage"]["min"])
+			elif key == "damage_max":
+				got += float(progression_combat_rules["player_damage"]["max"])
 			var want := float(expected["derived_stats"][key])
 			if not is_equal_approx(got, want):
 				_fail("character_progression case %s %s got %.4f want %.4f" % [str(c["name"]), str(key), got, want])
 				return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression)")
+	# 20. Combat stat effects golden is available to the display client.
+	var combat_rules := _read(shared.path_join("rules/combat.v0.json"))
+	var combat_effects := _read(shared.path_join("golden/combat_stat_effects.json"))
+	if int(combat_rules["minimum_damage"]) != int(combat_effects["combat"]["minimum_damage"]):
+		_fail("combat_stat_effects minimum_damage mismatch")
+		return
+	if float(combat_rules["block_cap_percent"]) != float(combat_effects["combat"]["block_cap_percent"]):
+		_fail("combat_stat_effects block_cap mismatch")
+		return
+	var outcomes := {}
+	for c in combat_effects["cases"]:
+		outcomes[str(c["outcome"])] = true
+	for required in ["hit", "crit", "miss", "block"]:
+		if not outcomes.has(required):
+			_fail("combat_stat_effects missing outcome %s" % required)
+			return
+	var breakdowns: Array = combat_effects.get("stat_breakdowns", [])
+	var has_armor := false
+	var has_capped_block := false
+	for row in breakdowns:
+		if str(row.get("key", "")) == "armor" and float(row.get("value", 0.0)) >= 1.0:
+			has_armor = true
+		if str(row.get("key", "")) == "block_percent" and row.get("cap", null) != null and float(row.get("value", 0.0)) <= float(row.get("cap", 0.0)):
+			has_capped_block = true
+	if not has_armor or not has_capped_block:
+		_fail("combat_stat_effects stat breakdown mismatch")
+		return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression, combat_stat_effects)")
 	quit(0)
 
 

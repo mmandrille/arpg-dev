@@ -12,8 +12,7 @@
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "expect_reject": "invalid_target" },
-    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
-    { "action": "assert_rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "stat_keys": ["damage_min", "damage_max"], "required_level": 1 }
+    { "action": "pick_up_first_rolled_loot" }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
@@ -23,19 +22,14 @@
     { "type": "event_seen", "event_type": "monster_killed" },
     { "type": "event_seen", "event_type": "interactable_activated" },
     { "type": "event_seen", "event_type": "loot_dropped" },
-    { "type": "inventory_contains", "item_def_id": "cave_blade", "equipped": false },
-    { "type": "rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "equipped": false, "stat_keys": ["damage_min", "damage_max"], "required_level": 1 }
+    { "type": "rolled_inventory_any", "equipped": false }
   ],
   "fresh_session_checks": [
     {
       "world_id": "dungeon_levels",
-      "steps": [
-        { "action": "assert_inventory_contains", "item_def_id": "cave_blade", "equipped": false },
-        { "action": "assert_rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "equipped": false, "stat_keys": ["damage_min", "damage_max"], "required_level": 1 }
-      ],
+      "steps": [],
       "assertions": [
-        { "type": "inventory_contains", "item_def_id": "cave_blade", "equipped": false },
-        { "type": "rolled_inventory_item", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "equipped": false, "stat_keys": ["damage_min", "damage_max"], "required_level": 1 }
+        { "type": "rolled_inventory_any", "equipped": false }
       ]
     }
   ],

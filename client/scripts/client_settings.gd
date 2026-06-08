@@ -11,6 +11,7 @@ const SUPPORTED_SIZES := [
 
 var path: String = "user://settings.json"
 var window_size: Vector2i = DEFAULT_SIZE
+var floating_combat_text: bool = true
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -51,13 +52,21 @@ static func size_from_data(data) -> Vector2i:
 	return normalize_size(Vector2i(int(window.get("width", DEFAULT_SIZE.x)), int(window.get("height", DEFAULT_SIZE.y))))
 
 
+static func floating_combat_text_from_data(data) -> bool:
+	if typeof(data) != TYPE_DICTIONARY or not (data as Dictionary).has("floating_combat_text"):
+		return true
+	return bool((data as Dictionary).get("floating_combat_text", true))
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
+		floating_combat_text = true
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
 	window_size = size_from_data(parsed)
+	floating_combat_text = floating_combat_text_from_data(parsed)
 
 
 func save() -> void:
@@ -70,6 +79,7 @@ func save() -> void:
 			"width": window_size.x,
 			"height": window_size.y,
 		},
+		"floating_combat_text": floating_combat_text,
 	}))
 
 
@@ -87,3 +97,9 @@ func set_window_size(size: Vector2i, persist: bool = true, apply_now: bool = tru
 
 func set_window_size_label(label: String, persist: bool = true, apply_now: bool = true) -> void:
 	set_window_size(parse_size_label(label), persist, apply_now)
+
+
+func set_floating_combat_text(enabled: bool, persist: bool = true) -> void:
+	floating_combat_text = enabled
+	if persist:
+		save()

@@ -2628,8 +2628,10 @@ def main() -> int:
             scenario_started = time.monotonic()
             log("scenario begin", scenario.id, "-", scenario.title, f"world={scenario.world_id}")
             if scenario.id == "true_coop_session":
-                _, host_token = dev_login(client, scenario_email(args.email, scenario.id + "-host"), args.dev_token)
-                _, guest_token = dev_login(client, scenario_email(args.email, scenario.id + "-guest"), args.dev_token)
+                replay_email = scenario_email(args.email, scenario.id + "-host")
+                guest_email = scenario_email(args.email, scenario.id + "-guest")
+                _, host_token = dev_login(client, replay_email, args.dev_token)
+                _, guest_token = dev_login(client, guest_email, args.dev_token)
                 host_character_id = ensure_character(client, host_token, "Coop Host")
                 guest_character_id = ensure_character(client, guest_token, "Coop Guest")
                 sess, observed = asyncio.run(run_true_coop_session(
@@ -2644,7 +2646,8 @@ def main() -> int:
                 ))
                 token = host_token
             else:
-                _, token = dev_login(client, scenario_email(args.email, scenario.id), args.dev_token)
+                replay_email = scenario_email(args.email, scenario.id)
+                _, token = dev_login(client, replay_email, args.dev_token)
                 sess, observed = run_verified_session(
                     client=client,
                     base_url=args.base_url,
@@ -2690,6 +2693,7 @@ def main() -> int:
                 "description": scenario.description,
                 "world_id": scenario.world_id,
                 "session_id": session_id,
+                "replay_email": replay_email,
                 "seed": sess["seed"],
                 "final_tick": observed.last_tick,
                 "status": "passed",

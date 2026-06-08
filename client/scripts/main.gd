@@ -91,6 +91,7 @@ var visual_replay_envelope_index: int = 0
 var visual_replay_timer: float = 0.0
 var visual_replay_title: String = ""
 var visual_replay_debug_token: String = ""
+var visual_replay_dev_token: String = ""
 var visual_replay_exit_on_complete: bool = false
 var visual_replay_exit_requested: bool = false
 var waypoint_panel: PanelContainer
@@ -182,6 +183,7 @@ func _ready() -> void:
 	visual_replay_enabled = visual_replay_manifest_path != ""
 	if visual_replay_enabled:
 		visual_replay_debug_token = _env("ARPG_DEBUG_TOKEN", "local-debug-token")
+		visual_replay_dev_token = dev_token
 		visual_replay_exit_on_complete = _truthy_text(_env("ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE", "1"))
 		autoplay_step_delay = maxf(0.05, float(_env("ARPG_AUTOPLAY_STEP_DELAY", "0.35")))
 		if not _load_visual_replay_manifest(visual_replay_manifest_path):
@@ -1473,6 +1475,12 @@ func _start_next_visual_replay() -> void:
 		_debug("visual replay entry missing session_id; skipping")
 		_start_next_visual_replay()
 		return
+	var replay_email := str(scenario.get("replay_email", ""))
+	if replay_email != "" and replay_email != _env("ARPG_EMAIL", "client@example.test"):
+		if not client.login(replay_email, visual_replay_dev_token):
+			_debug("visual replay login failed for %s; skipping %s" % [replay_email, visual_replay_title])
+			_start_next_visual_replay()
+			return
 	var through_tick := int(scenario.get("final_tick", -1))
 	var timeline := client.get_replay_timeline(visual_replay_debug_token, session_id, through_tick)
 	visual_replay_envelopes = timeline.get("envelopes", [])

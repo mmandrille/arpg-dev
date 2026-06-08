@@ -396,13 +396,23 @@ async def execute_step(
         pos = state.used_stair_positions.get(direction)
         if pos is None:
             raise AssertionError(f"assert_player_at_used_stair: no recorded {direction} stair")
-        assert_player_position(
-            state,
-            float(pos["x"]),
-            float(pos["y"]),
-            float(step.get("tolerance", 0.001)),
-            "runtime protocol",
-        )
+        deadline = loop.time() + float(step.get("wait_for_player_s", 3.0))
+        last_error: AssertionError | None = None
+        while loop.time() < deadline:
+            try:
+                assert_player_position(
+                    state,
+                    float(pos["x"]),
+                    float(pos["y"]),
+                    float(step.get("tolerance", 0.001)),
+                    "runtime protocol",
+                )
+                return
+            except AssertionError as exc:
+                last_error = exc
+                await pump_one(ws, state, timeout=0.1)
+        if last_error is not None:
+            raise last_error
         return
 
     if action == "assert_teleporter_discovered":
@@ -703,6 +713,10 @@ async def execute_step(
             raise AssertionError(f"use_stair: direction must be down/up: {step}")
         stair_def_id = "stairs_down" if direction == "down" else "stairs_up"
         target = find_interactable(state, stair_def_id)
+        deadline = loop.time() + float(step.get("wait_for_stair_s", 3.0))
+        while target is None and loop.time() < deadline:
+            await pump_one(ws, state, timeout=0.1)
+            target = find_interactable(state, stair_def_id)
         if target is None:
             raise AssertionError(f"use_stair: missing {stair_def_id} on level {state.current_level}")
         target_pos = target.get("position", {})
@@ -820,6 +834,10 @@ async def execute_step(
         item_def_id = str(step["item_def_id"])
         bag_index = int(step.get("bag_index", 0))
         loot = find_loot(state, item_def_id)
+        deadline = loop.time() + float(step.get("wait_for_loot_s", 3.0))
+        while loot is None and loop.time() < deadline:
+            await pump_one(ws, state, timeout=0.1)
+            loot = find_loot(state, item_def_id)
         if loot is None:
             raise AssertionError(f"pick_up_loot: loot not found for item_def_id={item_def_id}")
         deadline = loop.time() + SLICE_TIMEOUT_S
@@ -1497,7 +1515,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
             state.character_progression = dict(c.get("character_progression") or {})
-    if state.pending_level_load is not None and delta_level == state.pending_level_load:
+    if state.pending_level_load is not None and delta_level == state.pending_level_load and find_player(state) is not None:
         state.pending_level_load = None
     update_runtime_distances(state)
 

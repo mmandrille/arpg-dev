@@ -11,7 +11,7 @@ Last updated: 2026-06-08
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v33 — `true-coop-session` |
+| **Latest completed slice** | v34 — `model-reaction-polish` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-08 |
 | **Next slice** | TBD |
@@ -49,6 +49,7 @@ v30_* = monster-rarity-and-loot-scaling
 v31_* = combat-stat-effects-and-feedback
 v32_* = test-floor-and-resilient-scenarios
 v33_* = true-coop-session
+v34_* = model-reaction-polish
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -102,6 +103,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v31** | `combat-stat-effects-and-feedback` | Complete (`make ci` green) | [`v31_spec-combat-stat-effects-and-feedback.md`](specs/v31_spec-combat-stat-effects-and-feedback.md) | [`v31_2026-06-07-combat-stat-effects-and-feedback.md`](plans/v31_2026-06-07-combat-stat-effects-and-feedback.md) |
 | **v32** | `test-floor-and-resilient-scenarios` | Complete (`make ci` green) | [`v32_spec-test-floor-and-resilient-scenarios.md`](specs/v32_spec-test-floor-and-resilient-scenarios.md) | [`v32_2026-06-08-test-floor-and-resilient-scenarios.md`](plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md) |
 | **v33** | `true-coop-session` | Complete (`make ci` green) | [`v33_spec-true-coop-session.md`](specs/v33_spec-true-coop-session.md) | [`v33_2026-06-08-true-coop-session.md`](plans/v33_2026-06-08-true-coop-session.md) |
+| **v34** | `model-reaction-polish` | Complete (`make ci` green) | [`v34_spec-model-reaction-polish.md`](specs/v34_spec-model-reaction-polish.md) | [`v34_2026-06-08-model-reaction-polish.md`](plans/v34_2026-06-08-model-reaction-polish.md) |
 
 ---
 
@@ -811,6 +813,30 @@ polish, chat/emotes/ready checks, trade, XP sharing, party bonuses, loot allocat
 friendly fire/PvP, production remote-player art, more than two players, and distributed session
 ownership across server processes.
 
+### v34 — Model reaction polish
+
+**Proves:** Damage/death presentation can be improved for all character-like visible entities while
+staying client-only and driven by existing authoritative combat events.
+
+- Godot now attaches a `ModelReactionController` to the local player, remote co-op players, and
+  monsters, layering transform/material reactions over the existing `AnimationController`.
+- Hit reactions lean away from the resolved attacker when possible, briefly dark-blink the model,
+  then restore the entity's base tint.
+- Death reactions supersede active hit/locomotion presentation, rotate the model down, and leave a
+  persistent darker corpse presentation.
+- Snapshot/render paths apply terminal death presentation from `hp <= 0`, so already-dead monsters
+  and players do not need the original kill event to look dead.
+- Remote co-op players now instantiate the same humanoid character scene as the local player and
+  use a readable dark charcoal tint while remaining server-authoritative and unpredicted.
+- Client bot debug state exposes local/entity presentation metadata for headless assertions without
+  pixel matching.
+- Client scenario `12_model_reaction_polish.json` proves monster hit, local-player hit from
+  retaliation, and monster terminal death presentation through the real Godot client.
+
+**Explicit non-goals:** no server/protocol/schema changes, no external animation plugin, no
+production customization/cosmetics, no monster art replacement, no corpse collision/despawn, and no
+respawn/revive behavior.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -860,6 +886,7 @@ monster_rarity_loot_scaling: descend to generated dungeon → assert champion ra
 combat_stat_effects: combat lab proofs for miss, crit, armor floor, block, monster crit/block, projectile impact, and stat breakdowns
 client_combat_feedback: equip gear → assert stat breakdowns → prove normal/crit/miss/block floating text and settings toggle
 true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
+model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
 ```
 
 **Verify:**
@@ -980,6 +1007,10 @@ assumptions to semantic, range, derived, or eventual checks.
 membership, hashed join codes, actor-tagged inputs, per-player sim state, recipient-scoped realtime
 snapshots/deltas, remote-player Godot rendering, and a protocol bot proof for join, movement,
 disconnect/reconnect, and replay.
+
+**Character-like model reactions are now unified in the Godot client.** v34 adds client-only
+hit/death transform and tint reactions for local players, remote co-op players, and monsters;
+remote co-op players now reuse the humanoid character model with a distinct dark tint.
 
 ### Other deferred items (from specs / ADRs)
 

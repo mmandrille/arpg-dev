@@ -11,7 +11,7 @@ const STEP_TYPES_WAIT := [
 	"wait_player_near", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
 	"wait_settings_panel", "wait_pause_menu", "wait_character_progression",
-	"wait_damage_number", "wait_no_damage_number",
+	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -24,6 +24,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
 	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
+	"assert_entity_reaction",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",
@@ -59,6 +60,7 @@ const ALL_STEP_TYPES: Array = [
 	"assert_stat_button_enabled", "assert_xp_bar",
 	"set_floating_combat_text", "assert_floating_combat_text_enabled",
 	"wait_damage_number", "wait_no_damage_number", "assert_damage_number", "assert_no_damage_number",
+	"wait_entity_reaction", "assert_entity_reaction",
 ]
 
 var scenario: Dictionary = {}
@@ -184,6 +186,8 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _damage_number_matches(step, state)
 		"wait_no_damage_number":
 			return (state.get("damage_numbers", []) as Array).is_empty()
+		"wait_entity_reaction":
+			return _presentation_matches(step, state)
 		"wait_entity":
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
@@ -300,6 +304,14 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			if not numbers.is_empty():
 				_fail("assert_no_damage_number failed: damage_numbers=%s step=%d scenario=%s" % [
 					str(numbers), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_entity_reaction":
+			if not _presentation_matches(step, state):
+				_fail("assert_entity_reaction failed: want=%s local=%s entities=%s step=%d scenario=%s" % [
+					str(step), str(state.get("local_player_presentation", {})),
+					str(state.get("entities_presentation_debug", [])), _step_index, str(scenario.get("id", "?"))
 				])
 				return false
 			return true
@@ -543,6 +555,40 @@ func _damage_number_matches(step: Dictionary, state: Dictionary) -> bool:
 	return false
 
 
+func _presentation_matches(step: Dictionary, state: Dictionary) -> bool:
+	var rows: Array = []
+	if bool(step.get("local_player", false)):
+		rows.append(state.get("local_player_presentation", {}))
+	else:
+		rows = state.get("entities_presentation_debug", [])
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if not _presentation_row_matches(step, rec):
+			continue
+		return true
+	return false
+
+
+func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
+	if step.has("entity_type") and str(rec.get("type", "")) != str(step.get("entity_type", "")):
+		return false
+	for key in ["id", "monster_def_id", "character_id", "visual_model", "base_tint"]:
+		if step.has(key) and str(rec.get(key, "")) != str(step.get(key, "")):
+			return false
+	if step.has("hp") and int(rec.get("hp", -999999)) != int(step.get("hp", 0)):
+		return false
+	var reaction: Dictionary = rec.get("reaction", {})
+	if step.has("reaction") and str(reaction.get("last_reaction", "")) != str(step.get("reaction", "")):
+		return false
+	if step.has("terminal") and bool(reaction.get("terminal", false)) != bool(step.get("terminal", false)):
+		return false
+	if step.has("current_tint") and str(reaction.get("current_tint", "")) != str(step.get("current_tint", "")):
+		return false
+	return true
+
+
 func _assert_stat_button_enabled(step: Dictionary, state: Dictionary) -> bool:
 	var stat := str(step.get("stat", ""))
 	var want := bool(step.get("enabled", true))
@@ -700,6 +746,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "enabled=%s" % str(step.get("enabled", true))
 		"wait_damage_number", "wait_no_damage_number", "assert_damage_number", "assert_no_damage_number":
 			return "damage_number=%s" % str(step)
+		"wait_entity_reaction", "assert_entity_reaction":
+			return "presentation=%s" % str(step)
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))
 		"click_entity":
@@ -736,6 +784,9 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		parts.append("progression=%s" % str(state.get("character_progression", {})))
 	if stype in ["wait_damage_number", "wait_no_damage_number"]:
 		parts.append("damage_numbers=%s" % str(state.get("damage_numbers", [])))
+	if stype == "wait_entity_reaction":
+		parts.append("local_presentation=%s" % str(state.get("local_player_presentation", {})))
+		parts.append("entity_presentations=%s" % str(state.get("entities_presentation_debug", [])))
 	if stype == "wait_loot_count":
 		parts.append("loot_count=%d" % (state.get("loot_ids", []) as Array).size())
 	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):

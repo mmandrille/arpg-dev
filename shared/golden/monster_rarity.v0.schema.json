@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/monster_rarity.v0.schema.json",
+  "title": "Monster rarity golden fixture (v0)",
+  "type": "object",
+  "required": ["description", "monster_def_id", "rarities", "effective_depth_cases", "generated_cases"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string", "minLength": 1 },
+    "monster_def_id": { "type": "string", "minLength": 1 },
+    "rarities": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "weight",
+          "color",
+          "hp_multiplier",
+          "damage_multiplier",
+          "xp_multiplier",
+          "loot_depth_offset",
+          "expected"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "weight": { "type": "integer", "minimum": 1 },
+          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+          "hp_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "damage_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "xp_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "loot_depth_offset": { "type": "integer", "minimum": 0 },
+          "expected": {
+            "type": "object",
+            "required": ["max_hp", "attack_damage", "xp_reward"],
+            "additionalProperties": false,
+            "properties": {
+              "max_hp": { "type": "integer", "minimum": 1 },
+              "attack_damage": {
+                "type": "object",
+                "required": ["min", "max"],
+                "additionalProperties": false,
+                "properties": {
+                  "min": { "type": "integer", "minimum": 1 },
+                  "max": { "type": "integer", "minimum": 1 }
+                }
+              },
+              "xp_reward": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "effective_depth_cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["level", "rarity", "expected_effective_depth", "expected_monster_loot_table"],
+        "additionalProperties": false,
+        "properties": {
+          "level": { "type": "integer", "maximum": -1 },
+          "rarity": { "type": "string", "minLength": 1 },
+          "expected_effective_depth": { "type": "integer", "minimum": 1 },
+          "expected_monster_loot_table": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "generated_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "seed", "level", "expected_monsters"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "seed": { "type": "string", "minLength": 1 },
+          "level": { "type": "integer", "maximum": -1 },
+          "expected_monsters": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["index", "rarity", "loot_table", "max_hp", "attack_damage", "xp_reward"],
+              "additionalProperties": false,
+              "properties": {
+                "index": { "type": "integer", "minimum": 0 },
+                "rarity": { "type": "string", "minLength": 1 },
+                "loot_table": { "type": "string", "minLength": 1 },
+                "max_hp": { "type": "integer", "minimum": 1 },
+                "attack_damage": {
+                  "type": "object",
+                  "required": ["min", "max"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "min": { "type": "integer", "minimum": 1 },
+                    "max": { "type": "integer", "minimum": 1 }
+                  }
+                },
+                "xp_reward": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

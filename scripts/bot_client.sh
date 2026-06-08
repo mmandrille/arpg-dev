@@ -123,9 +123,10 @@ FAIL_COUNT=0
 
 run_scenario() {
   local scenario_path="$1"
-  local scenario_id world_id exit_code started_ts tmpfile
+  local scenario_id world_id seed exit_code started_ts tmpfile
   scenario_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('id','unknown'))")"
   world_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('world_id',''))")"
+  seed="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('seed',''))")"
   started_ts="$SECONDS"
   tmpfile="$(mktemp)"
 
@@ -140,6 +141,7 @@ run_scenario() {
   ARPG_BOT_CLIENT=1 \
     ARPG_BOT_SCENARIO="$scenario_path" \
     ARPG_WORLD_ID="$world_id" \
+    ARPG_SEED="$seed" \
     ARPG_BASE_URL="$BASE_URL" \
     ARPG_DEV_TOKEN="$DEV_TOKEN" \
     ARPG_EMAIL="$email" \

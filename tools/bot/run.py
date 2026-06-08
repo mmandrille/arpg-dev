@@ -1259,11 +1259,12 @@ def find_first_rolled_loot(state: RuntimeState) -> dict[str, Any] | None:
     return None
 
 
-def find_monster(state: RuntimeState, monster_def_id: str) -> dict[str, Any] | None:
+def find_monster(state: RuntimeState, monster_def_id: str, rarity: str | None = None) -> dict[str, Any] | None:
     for entity in state.entities.values():
         if (
             entity.get("type") == "monster"
             and entity.get("monster_def_id") == monster_def_id
+            and (rarity is None or entity.get("rarity") == rarity)
             and int(entity.get("hp", 0)) > 0
         ):
             return entity
@@ -1284,7 +1285,8 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
             raise AssertionError(f"{step.get('action')}: target not found: {step['target_id']}")
         return target
     if step.get("monster_def_id"):
-        target = find_monster(state, str(step["monster_def_id"]))
+        rarity = str(step["rarity"]) if step.get("rarity") is not None else None
+        target = find_monster(state, str(step["monster_def_id"]), rarity)
         if target is None:
             raise AssertionError(f"{step.get('action')}: monster not found: {step}")
         return target
@@ -1495,6 +1497,7 @@ def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: 
     entity_type = str(assertion.get("entity_type", ""))
     monster_def_id = str(assertion.get("monster_def_id", ""))
     interactable_def_id = str(assertion.get("interactable_def_id", ""))
+    rarity = assertion.get("rarity")
     wanted_state = assertion.get("state")
     for entity in entities:
         if entity_type and str(entity.get("type", "")) != entity_type:
@@ -1502,6 +1505,8 @@ def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: 
         if monster_def_id and str(entity.get("monster_def_id", "")) != monster_def_id:
             continue
         if interactable_def_id and str(entity.get("interactable_def_id", "")) != interactable_def_id:
+            continue
+        if rarity is not None and str(entity.get("rarity", "")) != str(rarity):
             continue
         if wanted_state is not None and str(entity.get("state", "")) != str(wanted_state):
             continue

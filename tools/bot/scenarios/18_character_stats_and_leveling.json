@@ -1,6 +1,7 @@
 {
   "id": "character_stats_and_leveling",
   "world_id": "dungeon_levels",
+  "seed": "38b98b6062fac372bd0a9d4f6495c1da",
   "title": "Character stats and leveling",
   "description": "Kill dungeon mobs for XP, level up, allocate VIT, reject overspend, and prove progression persists through replay/reconnect/fresh sessions.",
   "steps": [
@@ -9,7 +10,7 @@
     {
       "action": "assert_character_progression",
       "level": 2,
-      "experience": 20,
+      "experience": 40,
       "unspent_stat_points": 5,
       "vit": 5,
       "derived_stats": { "max_hp": 10 }
@@ -20,7 +21,7 @@
       "points": 1,
       "expect_progression": {
         "level": 2,
-        "experience": 20,
+        "experience": 40,
         "unspent_stat_points": 4,
         "vit": 6,
         "derived_stats": { "max_hp": 11 }
@@ -30,7 +31,7 @@
     {
       "action": "assert_character_progression",
       "level": 2,
-      "experience": 20,
+      "experience": 40,
       "unspent_stat_points": 4,
       "vit": 6,
       "derived_stats": { "max_hp": 11 }
@@ -42,7 +43,7 @@
     { "type": "event_seen", "event_type": "experience_gained" },
     { "type": "event_seen", "event_type": "character_leveled" },
     { "type": "event_seen", "event_type": "stat_allocated" },
-    { "type": "character_progression", "level": 2, "experience": 20, "unspent_stat_points": 4, "vit": 6, "derived_stats": { "max_hp": 11 } },
+    { "type": "character_progression", "level": 2, "experience": 40, "unspent_stat_points": 4, "vit": 6, "derived_stats": { "max_hp": 11 } },
     { "type": "player_max_hp_equals", "equals": 11 }
   ],
   "fresh_session_checks": [
@@ -50,7 +51,7 @@
       "world_id": "dungeon_levels",
       "steps": [],
       "assertions": [
-        { "type": "character_progression", "level": 2, "experience": 20, "unspent_stat_points": 4, "vit": 6, "derived_stats": { "max_hp": 11 } },
+        { "type": "character_progression", "level": 2, "experience": 40, "unspent_stat_points": 4, "vit": 6, "derived_stats": { "max_hp": 11 } },
         { "type": "player_max_hp_equals", "equals": 11 }
       ]
     }

@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -58,6 +59,8 @@ type DungeonGenerationRules struct {
 	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+	MonsterRarityNote        string                   `json:"monster_rarity_note"`
+	MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 	LootBandNote             string                   `json:"loot_band_note"`
 	LootBands                []DungeonLootBand        `json:"loot_bands"`
 	LevelNames               map[string]string        `json:"level_names"`
@@ -128,6 +131,16 @@ type DungeonLootBand struct {
 	ChestLootTable   string `json:"chest_loot_table"`
 }
 
+type MonsterRarityDef struct {
+	ID               string  `json:"id"`
+	Weight           int     `json:"weight"`
+	Color            string  `json:"color"`
+	HPMultiplier     float64 `json:"hp_multiplier"`
+	DamageMultiplier float64 `json:"damage_multiplier"`
+	XPMultiplier     float64 `json:"xp_multiplier"`
+	LootDepthOffset  int     `json:"loot_depth_offset"`
+}
+
 func (d DungeonGenerationRules) LootBandForLevel(levelNum int) (DungeonLootBand, bool) {
 	if levelNum >= 0 {
 		return DungeonLootBand{}, false
@@ -143,6 +156,60 @@ func (d DungeonGenerationRules) LootBandForLevel(levelNum int) (DungeonLootBand,
 		return band, true
 	}
 	return DungeonLootBand{}, false
+}
+
+func (d DungeonGenerationRules) LootBandForDepth(depth int) (DungeonLootBand, bool) {
+	if depth <= 0 {
+		return DungeonLootBand{}, false
+	}
+	for _, band := range d.LootBands {
+		if depth < band.MinDepth {
+			continue
+		}
+		if band.MaxDepth != nil && depth > *band.MaxDepth {
+			continue
+		}
+		return band, true
+	}
+	return DungeonLootBand{}, false
+}
+
+func (d DungeonGenerationRules) MonsterRarity(id string) (MonsterRarityDef, bool) {
+	for _, rarity := range d.MonsterRarities {
+		if rarity.ID == id {
+			return rarity, true
+		}
+	}
+	return MonsterRarityDef{}, false
+}
+
+func (d DungeonGenerationRules) RollMonsterRarity(rng *RNG) MonsterRarityDef {
+	total := 0
+	for _, rarity := range d.MonsterRarities {
+		total += rarity.Weight
+	}
+	if total <= 0 {
+		return MonsterRarityDef{ID: "common", Weight: 1, HPMultiplier: 1, DamageMultiplier: 1, XPMultiplier: 1}
+	}
+	roll := rng.IntN(total)
+	for _, rarity := range d.MonsterRarities {
+		roll -= rarity.Weight
+		if roll < 0 {
+			return rarity
+		}
+	}
+	return d.MonsterRarities[len(d.MonsterRarities)-1]
+}
+
+func roundPositive(value float64) int {
+	return max(1, int(math.Floor(value+0.5)))
+}
+
+func scaleDamageRange(base DamageRange, multiplier float64) DamageRange {
+	return DamageRange{
+		Min: roundPositive(float64(base.Min) * multiplier),
+		Max: roundPositive(float64(base.Max) * multiplier),
+	}
 }
 
 // GridBounds is the inclusive grid rectangle searched by A*.
@@ -738,6 +805,8 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+		MonsterRarityNote        string                   `json:"monster_rarity_note"`
+		MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 		LootBandNote             string                   `json:"loot_band_note"`
 		LootBands                []DungeonLootBand        `json:"loot_bands"`
 		LevelNames               map[string]string        `json:"level_names"`
@@ -823,6 +892,12 @@ func LoadRules(dir string) (*Rules, error) {
 	if dungeonGeneration.LootBandNote == "" {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.loot_band_note: required")
 	}
+	if dungeonGeneration.MonsterRarityNote == "" {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_rarity_note: required")
+	}
+	if err := validateMonsterRarities(dungeonGeneration.MonsterRarities); err != nil {
+		return nil, err
+	}
 	if err := validateDungeonLootBands(dungeonGeneration.LootBands, r); err != nil {
 		return nil, err
 	}
@@ -840,6 +915,8 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
 		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
 		ChestPlacement:           dungeonGeneration.ChestPlacement,
+		MonsterRarityNote:        dungeonGeneration.MonsterRarityNote,
+		MonsterRarities:          dungeonGeneration.MonsterRarities,
 		LootBandNote:             dungeonGeneration.LootBandNote,
 		LootBands:                dungeonGeneration.LootBands,
 		LevelNames:               dungeonGeneration.LevelNames,
@@ -989,6 +1066,55 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 		}
 	}
 	return out
+}
+
+func validateMonsterRarities(rarities []MonsterRarityDef) error {
+	expectedIDs := []string{"common", "champion", "rare", "unique"}
+	expectedWeights := map[string]int{
+		"common":   100,
+		"champion": 15,
+		"rare":     6,
+		"unique":   3,
+	}
+	expectedOffsets := map[string]int{
+		"common":   0,
+		"champion": 1,
+		"rare":     2,
+		"unique":   3,
+	}
+	expectedColors := map[string]string{
+		"common":   "#f2f2ec",
+		"champion": "#9fc7ff",
+		"rare":     "#ff9b9b",
+		"unique":   "#ffd978",
+	}
+	if len(rarities) != len(expectedIDs) {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities: expected exactly %d rarities", len(expectedIDs))
+	}
+	for idx, rarity := range rarities {
+		if rarity.ID != expectedIDs[idx] {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].id: expected %s", idx, expectedIDs[idx])
+		}
+		if rarity.Weight != expectedWeights[rarity.ID] {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].weight: expected %d", idx, expectedWeights[rarity.ID])
+		}
+		if rarity.Color != expectedColors[rarity.ID] {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].color: expected %s", idx, expectedColors[rarity.ID])
+		}
+		if rarity.HPMultiplier <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].hp_multiplier: must be positive", idx)
+		}
+		if rarity.DamageMultiplier <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].damage_multiplier: must be positive", idx)
+		}
+		if rarity.XPMultiplier <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].xp_multiplier: must be positive", idx)
+		}
+		if rarity.LootDepthOffset != expectedOffsets[rarity.ID] {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].loot_depth_offset: expected %d", idx, expectedOffsets[rarity.ID])
+		}
+	}
+	return nil
 }
 
 func validateDungeonLootBands(bands []DungeonLootBand, r *Rules) error {

@@ -40,9 +40,13 @@ type generatedLoot struct {
 }
 
 type generatedMonster struct {
-	defID     string
-	lootTable string
-	pos       Vec2
+	defID        string
+	rarityID     string
+	lootTable    string
+	pos          Vec2
+	maxHP        int
+	attackDamage *DamageRange
+	xpReward     int
 }
 
 // GenerateDungeonLevel builds the deterministic non-player contents for one
@@ -54,6 +58,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	levelSeed := SeedToUint64(seed + "|" + strconv.Itoa(absInt(levelNum)))
 	rng := NewRNG(levelSeed)
 	chestRNG := NewRNG(SeedToUint64(seed + "|chest|" + strconv.Itoa(absInt(levelNum))))
+	rarityRNG := NewRNG(SeedToUint64(seed + "|monster_rarity|" + strconv.Itoa(absInt(levelNum))))
 	out := generatedDungeonLevel{
 		levelNum: levelNum,
 		walls:    perimeterWalls(rules.FloorSize, rules.WallThickness),
@@ -80,7 +85,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
-		if err := placeDungeonMonsters(rng, rules, lootBand, &out); err != nil {
+		if err := placeDungeonMonsters(rng, rarityRNG, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
 		return out, nil
@@ -102,7 +107,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
-	if err := placeDungeonMonsters(rng, rules, lootBand, &out); err != nil {
+	if err := placeDungeonMonsters(rng, rarityRNG, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	out.loot = append(out.loot, generatedLoot{
@@ -256,7 +261,7 @@ func randomChestPosition(rng *RNG, rules DungeonGenerationRules, out *generatedD
 	return Vec2{}, false
 }
 
-func placeDungeonMonsters(rng *RNG, rules DungeonGenerationRules, lootBand DungeonLootBand, out *generatedDungeonLevel) error {
+func placeDungeonMonsters(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
 	placement := rules.MonsterPlacement
 	count := placement.Count
 	if len(out.chests) > 0 {
@@ -267,7 +272,18 @@ func placeDungeonMonsters(rng *RNG, rules DungeonGenerationRules, lootBand Dunge
 		if !ok {
 			return fmt.Errorf("game: generate dungeon level %d: could not place monster %d", out.levelNum, i)
 		}
-		out.monsters = append(out.monsters, generatedMonster{defID: placement.MonsterDefID, lootTable: lootBand.MonsterLootTable, pos: pos})
+		rarity := rules.RollMonsterRarity(rarityRNG)
+		effectiveDepth := absInt(out.levelNum) + rarity.LootDepthOffset
+		effectiveLootBand, ok := rules.LootBandForDepth(effectiveDepth)
+		if !ok {
+			return fmt.Errorf("game: generate dungeon level %d: missing loot band for effective depth %d", out.levelNum, effectiveDepth)
+		}
+		out.monsters = append(out.monsters, generatedMonster{
+			defID:     placement.MonsterDefID,
+			rarityID:  rarity.ID,
+			lootTable: effectiveLootBand.MonsterLootTable,
+			pos:       pos,
+		})
 	}
 	return nil
 }

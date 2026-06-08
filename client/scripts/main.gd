@@ -9,6 +9,7 @@ const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
+const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
@@ -22,6 +23,7 @@ const CharacterSelectPanelScript := preload("res://scripts/character_select_pane
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
+const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
@@ -34,6 +36,7 @@ const PLAYER_EVENT_CLIPS := {
 const PLAYER_START_HP := 10
 const INTERACTABLE_ACTIVATION_RANGE := 1.5
 const PLAYER_TINT := Color("#8fe8a7")
+const REMOTE_PLAYER_TINT := Color("#202934")
 const MONSTER_RARITY_TINTS := {
 	"common": Color("#f2f2ec"),
 	"champion": Color("#9fc7ff"),
@@ -44,6 +47,7 @@ const MONSTER_RARITY_TINTS := {
 var client: NetClient
 var resolver: EquipmentVisualResolver
 var player_anim: AnimationController
+var player_reaction: ModelReactionController
 var entities: Dictionary = {}        # id (String) -> {node:Node3D, controller:AnimationController|null, type:String}
 var player_id: String = ""
 var party: Array = []
@@ -158,6 +162,7 @@ func _ready() -> void:
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
 	_apply_model_tint(character_visual, PLAYER_TINT)
+	player_reaction = ModelReactionControllerScript.new(character_visual, PLAYER_TINT)
 	_build_scene()
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
@@ -613,8 +618,11 @@ func _apply_delta(p: Dictionary) -> void:
 				continue
 			if event_type == "player_damaged":
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
+				_play_entity_reaction(eid, ev, "hit")
 				if _health_bar != null:
 					_health_bar.update_hp(player_hp, player_max_hp)
+			if event_type == "player_killed":
+				_play_entity_reaction(eid, ev, "death")
 			if event_type == "attack_missed":
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
@@ -628,9 +636,11 @@ func _apply_delta(p: Dictionary) -> void:
 		if PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
 			if event_type == "player_damaged":
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
+				_play_entity_reaction(eid, ev, "hit")
 			if event_type == "player_killed":
 				var remote_dead: Dictionary = entities[eid]
 				remote_dead["hp"] = 0
+				_play_entity_reaction(eid, ev, "death")
 			var remote_player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
 			var remote_ctrl = entities[eid].get("controller", null)
 			if remote_ctrl != null:
@@ -649,12 +659,15 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
+		if event_type == "monster_damaged":
+			_play_entity_reaction(eid, ev, "hit")
 		if event_type == "monster_killed":
 			_remove_monster_health_bar(eid)
 			if entities.has(eid):
 				var dead_rec: Dictionary = entities[eid]
 				dead_rec["hp"] = 0
 				_set_pickable(dead_rec["node"] as Node3D, false)
+				_play_entity_reaction(eid, ev, "death")
 		if autoplay_enabled and event_type == "monster_killed":
 			autoplay_phase = "pickup"
 			autoplay_timer = autoplay_step_delay
@@ -688,6 +701,8 @@ func _upsert_entity(e: Dictionary) -> void:
 				_health_bar.update_hp(player_hp, player_max_hp)
 			if player_hp <= 0 and player_anim != null:
 				player_anim.enter_terminal("death")
+			if player_hp <= 0 and player_reaction != null:
+				player_reaction.enter_death()
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
@@ -702,13 +717,17 @@ func _upsert_entity(e: Dictionary) -> void:
 		var node := _make_entity_node(e)
 		entities_root.add_child(node)
 		var controller: AnimationController = null
-		if e["type"] == "monster":
+		if e["type"] == "monster" or e["type"] == "player":
 			var ap := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 			if ap != null:
 				controller = AnimationControllerScript.new(ap)
 			else:
-				push_warning("[main] monster %s has no AnimationPlayer" % id)
-		rec = {"node": node, "controller": controller, "type": str(e["type"])}
+				push_warning("[main] %s %s has no AnimationPlayer" % [str(e["type"]), id])
+		var base_tint := _entity_base_tint(e)
+		var reaction = null
+		if e["type"] == "monster" or e["type"] == "player":
+			reaction = ModelReactionControllerScript.new(node, base_tint)
+		rec = {"node": node, "controller": controller, "reaction": reaction, "type": str(e["type"]), "base_tint": base_tint.to_html(false)}
 		if e.has("item_def_id"):
 			rec["item_def_id"] = str(e["item_def_id"])
 		if e.has("monster_def_id"):
@@ -744,6 +763,8 @@ func _upsert_entity(e: Dictionary) -> void:
 		if rec["type"] == "player":
 			rec["hp"] = int(e.get("hp", rec.get("hp", PLAYER_START_HP)))
 			rec["max_hp"] = int(e.get("max_hp", rec.get("max_hp", PLAYER_START_HP)))
+			if int(rec["hp"]) <= 0:
+				_enter_entity_terminal_death(id, rec)
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
@@ -757,7 +778,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			_upsert_monster_health_bar(id, rec["node"] as Node3D, int(hp), int(max_hp))
 		if hp != null and int(hp) <= 0:
 			_set_pickable(rec["node"] as Node3D, false)
-			rec["controller"].enter_terminal("death")
+			_enter_entity_terminal_death(id, rec)
 
 
 func _remove_entity(id: String) -> void:
@@ -859,6 +880,77 @@ func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_colo
 		_show_damage_number(entity_id, Color(1.0, 0.58, 0.22), crit_damage, "", 0.0, "crit", "%d!" % crit_damage)
 		return
 	_show_damage_number(entity_id, default_color, damage)
+
+
+func _play_entity_reaction(entity_id: String, ev: Dictionary, reaction_name: String) -> void:
+	var reaction = _reaction_for_entity(entity_id)
+	if reaction == null:
+		return
+	var source_pos := _source_position_for_event(ev)
+	var fallback := _fallback_reaction_direction(entity_id)
+	if reaction_name == "death":
+		reaction.enter_death(source_pos, fallback)
+	else:
+		reaction.play_hit(source_pos, fallback)
+
+
+func _reaction_for_entity(entity_id: String):
+	if entity_id == player_id:
+		return player_reaction
+	if entities.has(entity_id):
+		var rec: Dictionary = entities[entity_id]
+		return rec.get("reaction", null)
+	return null
+
+
+func _source_position_for_event(ev: Dictionary) -> Vector3:
+	var source_id := str(ev.get("source_entity_id", ""))
+	if source_id == "":
+		return ModelReactionControllerScript.UNRESOLVED_SOURCE
+	if source_id == player_id and player_anchor != null:
+		return _node_world_or_local_position(player_anchor)
+	if entities.has(source_id):
+		var rec: Dictionary = entities[source_id]
+		var node := rec.get("node", null) as Node3D
+		if node != null:
+			return _node_world_or_local_position(node)
+	return ModelReactionControllerScript.UNRESOLVED_SOURCE
+
+
+func _fallback_reaction_direction(entity_id: String) -> Vector3:
+	var target := _entity_world_position(entity_id)
+	if target != ModelReactionControllerScript.UNRESOLVED_SOURCE and player_anchor != null:
+		var direction := target - _node_world_or_local_position(player_anchor)
+		direction.y = 0.0
+		if direction.length() > 0.001:
+			return direction.normalized()
+	return Vector3.BACK
+
+
+func _entity_world_position(entity_id: String) -> Vector3:
+	if entity_id == player_id and player_anchor != null:
+		return _node_world_or_local_position(player_anchor)
+	if entities.has(entity_id):
+		var rec: Dictionary = entities[entity_id]
+		var node := rec.get("node", null) as Node3D
+		if node != null:
+			return _node_world_or_local_position(node)
+	return ModelReactionControllerScript.UNRESOLVED_SOURCE
+
+
+func _node_world_or_local_position(node: Node3D) -> Vector3:
+	if node.is_inside_tree():
+		return node.global_position
+	return node.position
+
+
+func _enter_entity_terminal_death(entity_id: String, rec: Dictionary) -> void:
+	var ctrl = rec.get("controller", null)
+	if ctrl != null:
+		ctrl.enter_terminal("death")
+	var reaction = rec.get("reaction", null)
+	if reaction != null:
+		reaction.enter_death()
 
 
 func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0, variant: String = "normal", text_override: String = "") -> void:
@@ -1929,34 +2021,23 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 
 
 func _make_remote_player_node(e: Dictionary) -> Node3D:
-	var root := Node3D.new()
+	var root = CharacterScene.instantiate() as Node3D
 	root.name = "RemotePlayer_%s" % str(e.get("id", ""))
-	var body := MeshInstance3D.new()
-	body.name = "Body"
-	var body_mesh := CapsuleMesh.new()
-	body_mesh.radius = 0.28
-	body_mesh.height = 1.25
-	body.mesh = body_mesh
-	body.position = Vector3(0.0, 0.72, 0.0)
-	var body_mat := StandardMaterial3D.new()
-	body_mat.albedo_color = Color("#8fb8ff")
-	body.material_override = body_mat
-	root.add_child(body)
-	var head := MeshInstance3D.new()
-	head.name = "Head"
-	var head_mesh := SphereMesh.new()
-	head_mesh.radius = 0.22
-	head.mesh = head_mesh
-	head.position = Vector3(0.0, 1.48, 0.0)
-	var head_mat := StandardMaterial3D.new()
-	head_mat.albedo_color = Color("#d9e6ff")
-	head.material_override = head_mat
-	root.add_child(head)
+	_apply_model_tint(root, REMOTE_PLAYER_TINT)
 	return root
 
 
 func _monster_tint(rarity: String) -> Color:
 	return MONSTER_RARITY_TINTS.get(rarity, MONSTER_RARITY_TINTS["common"])
+
+
+func _entity_base_tint(e: Dictionary) -> Color:
+	var kind := str(e.get("type", ""))
+	if kind == "player":
+		return REMOTE_PLAYER_TINT
+	if kind == "monster":
+		return _monster_tint(str(e.get("rarity", "common")))
+	return Color.WHITE
 
 
 func _apply_model_tint(root: Node, color: Color) -> void:
@@ -2231,6 +2312,8 @@ func get_bot_state() -> Dictionary:
 		"equipped": equipped.duplicate(true),
 		"monster_ids": live_monster_ids,
 		"entities_debug": _bot_entities_debug(live_monster_ids),
+		"local_player_presentation": _bot_local_player_presentation(),
+		"entities_presentation_debug": _bot_entities_presentation_debug(),
 		"loot_ids": loot_ids.duplicate(),
 		"loot": _bot_loot_debug(),
 		"interactable_ids": interactable_ids.duplicate(),
@@ -2282,6 +2365,46 @@ func _bot_entities_debug(live_monster_ids: Array) -> Array:
 			"state": str(rec.get("state", "")),
 		})
 	return out
+
+
+func _bot_local_player_presentation() -> Dictionary:
+	return {
+		"id": player_id,
+		"type": "player",
+		"visual_model": "character",
+		"base_tint": PLAYER_TINT.to_html(false),
+		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
+		"animation": player_anim.get_debug_state() if player_anim != null else {},
+	}
+
+
+func _bot_entities_presentation_debug() -> Array:
+	var out: Array = []
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		var node := rec.get("node", null) as Node3D
+		var reaction = rec.get("reaction", null)
+		var controller = rec.get("controller", null)
+		out.append({
+			"id": str(id),
+			"type": str(rec.get("type", "")),
+			"monster_def_id": str(rec.get("monster_def_id", "")),
+			"character_id": str(rec.get("character_id", "")),
+			"visual_model": _visual_model_name(rec, node),
+			"base_tint": str(rec.get("base_tint", "")),
+			"hp": int(rec.get("hp", 1)),
+			"reaction": reaction.get_debug_state() if reaction != null else {},
+			"animation": controller.get_debug_state() if controller != null else {},
+		})
+	return out
+
+
+func _visual_model_name(rec: Dictionary, node: Node3D) -> String:
+	if node != null and node.find_child("ModelRoot", true, false) != null:
+		return "character"
+	if str(rec.get("type", "")) == "player":
+		return "primitive"
+	return ""
 
 
 func _bot_damage_numbers() -> Array:

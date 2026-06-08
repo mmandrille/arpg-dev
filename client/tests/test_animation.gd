@@ -2,6 +2,7 @@ extends SceneTree
 # Headless tests for the v3 animation layer (spec §10). Server-independent.
 # Run: godot --headless --path client --script res://tests/test_animation.gd
 const ControllerScript := preload("res://scripts/animation_controller.gd")
+const ReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 
 
 var _failed: bool = false
@@ -17,6 +18,10 @@ func _initialize() -> void:
 	_test_controller_hit_ignored_after_death()
 	if _failed: quit(1); return
 	_test_controller_locomotion_change_during_one_shot()
+	if _failed: quit(1); return
+	await _test_model_reaction_hit_restores()
+	if _failed: quit(1); return
+	await _test_model_reaction_death_terminal()
 	if _failed: quit(1); return
 	# Scene tests exercise runtime _ready (socket attach). add_child() inside
 	# _initialize() does NOT enter the tree synchronously in Godot 4.6, so we
@@ -97,6 +102,60 @@ func _test_controller_locomotion_change_during_one_shot() -> void:
 	ap.emit_signal("animation_finished", "attack")
 	_assert(c.current_clip() == "walk", "fallback honors latched _moving after one-shot, got %s" % c.current_clip())
 	ap.free()
+
+
+func _make_reaction_root(color: Color = Color("#8fe8a7")) -> Node3D:
+	var root := Node3D.new()
+	var mesh_node := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3.ONE
+	mesh_node.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mesh_node.material_override = mat
+	root.add_child(mesh_node)
+	get_root().add_child(root)
+	return root
+
+
+func _reaction_mesh_color(root: Node3D) -> Color:
+	var mesh_node := root.get_child(0) as MeshInstance3D
+	var mat := mesh_node.material_override as StandardMaterial3D
+	return mat.albedo_color
+
+
+func _test_model_reaction_hit_restores() -> void:
+	var root := _make_reaction_root(Color("#8fe8a7"))
+	await process_frame
+	var c = ReactionControllerScript.new(root, Color("#8fe8a7"))
+	c.play_hit(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
+	await create_timer(0.50).timeout
+	var state: Dictionary = c.get_debug_state()
+	_assert(state["terminal"] == false, "hit reaction should not be terminal")
+	_assert(str(state["last_reaction"]) == "hit", "last reaction should be hit")
+	_assert(root.rotation.distance_to(Vector3.ZERO) <= 0.001, "hit reaction restores rotation, got %s" % root.rotation)
+	var color := _reaction_mesh_color(root)
+	_assert(color.is_equal_approx(Color("#8fe8a7")), "hit reaction restores color, got %s" % color)
+	root.free()
+	await process_frame
+
+
+func _test_model_reaction_death_terminal() -> void:
+	var root := _make_reaction_root(Color("#8fe8a7"))
+	await process_frame
+	var c = ReactionControllerScript.new(root, Color("#8fe8a7"))
+	c.play_hit(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
+	c.enter_death(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
+	c.play_hit(Vector3(-1.0, 0.0, 0.0), Vector3.FORWARD)
+	await create_timer(0.50).timeout
+	var state: Dictionary = c.get_debug_state()
+	_assert(state["terminal"] == true, "death reaction should be terminal")
+	_assert(str(state["last_reaction"]) == "death", "hit after death ignored")
+	_assert(absf(root.rotation.x) > 0.1 or absf(root.rotation.z) > 0.1, "death reaction rotates model down, got %s" % root.rotation)
+	var color := _reaction_mesh_color(root)
+	_assert(color.r < Color("#8fe8a7").r and color.g < Color("#8fe8a7").g, "death reaction darkens color, got %s" % color)
+	root.free()
+	await process_frame
 
 
 func _test_character_scene() -> void:

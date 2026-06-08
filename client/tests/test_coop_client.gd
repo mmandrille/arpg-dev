@@ -24,6 +24,9 @@ func _make_main():
 	main.player_anchor = Node3D.new()
 	main.entities_root = Node3D.new()
 	main.walls_root = Node3D.new()
+	get_root().add_child(main.player_anchor)
+	get_root().add_child(main.entities_root)
+	get_root().add_child(main.walls_root)
 	return main
 
 
@@ -51,7 +54,14 @@ func _test_local_and_remote_players_apply_from_snapshot() -> void:
 	_assert_true("remote player entity stored", main.entities.has("1002"))
 	_assert_eq("remote entity type", str(main.entities["1002"].get("type", "")), "player")
 	_assert_eq("remote character metadata", str(main.entities["1002"].get("character_id", "")), "char_guest")
+	_assert_eq("remote visual tint", str(main.entities["1002"].get("base_tint", "")), MainScript.REMOTE_PLAYER_TINT.to_html(false))
+	_assert_true("remote player has character model", (main.entities["1002"]["node"] as Node3D).find_child("ModelRoot", true, false) != null)
+	_assert_true("remote player has animation controller", main.entities["1002"].get("controller", null) != null)
+	_assert_true("remote player has reaction controller", main.entities["1002"].get("reaction", null) != null)
 	_assert_eq("party count", main.party.size(), 2)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
 	main.free()
 
 
@@ -81,9 +91,20 @@ func _test_remote_player_delta_and_remove() -> void:
 	})
 	_assert_vec3("remote player authoritative position", (main.entities["1002"]["node"] as Node3D).position, Vector3(6.0, 0.0, 7.0))
 	_assert_eq("remote hp updated", int(main.entities["1002"].get("hp", 0)), 8)
+	_assert_eq("remote hit reaction", str(main.entities["1002"]["reaction"].get_debug_state().get("last_reaction", "")), "hit")
 	_assert_vec3("local prediction untouched by remote delta", main.predicted_pos, Vector3(2.0, 0.0, 3.0))
+	main._apply_delta({
+		"events": [
+			{"event_type": "player_killed", "entity_id": "1002", "target_entity_id": "1002", "source_entity_id": "1003", "damage": 8},
+		],
+		"changes": [],
+	})
+	_assert_true("remote death terminal reaction", bool(main.entities["1002"]["reaction"].get_debug_state().get("terminal", false)))
 	main._apply_delta({"events": [], "changes": [{"op": "entity_remove", "entity_id": "1002"}]})
 	_assert_true("remote player removed", not main.entities.has("1002"))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
 	main.free()
 
 

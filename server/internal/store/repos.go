@@ -11,6 +11,14 @@ import (
 // ErrNotFound is returned when a requested row does not exist.
 var ErrNotFound = errors.New("store: not found")
 
+// ErrConflict is returned when a unique session/member invariant would be
+// violated.
+var ErrConflict = errors.New("store: conflict")
+
+// ErrPartyFull is returned when a co-op session already has its maximum active
+// members.
+var ErrPartyFull = errors.New("store: party full")
+
 // --- accounts ---------------------------------------------------------------
 
 func (s *Store) UpsertAccountByEmail(ctx context.Context, id, email string) (Account, error) {
@@ -153,6 +161,12 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_start_item_instances WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_waypoints WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_character_progression WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_members WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_hotbar_slots WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM session_start_item_instances WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM session_start_waypoints WHERE character_id = $1`, []any{characterID}},
+			{`DELETE FROM session_start_character_progression WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM session_members WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM sessions WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_hotbar_slots WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_item_instances WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
@@ -183,10 +197,14 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 // --- sessions ---------------------------------------------------------------
 
 func (s *Store) CreateSession(ctx context.Context, sess Session) error {
+	mode := sess.Mode
+	if mode == "" {
+		mode = SessionModeSolo
+	}
 	_, err := s.pool.Exec(ctx,
-		`INSERT INTO sessions (id, account_id, character_id, seed, world_id, status)
-		 VALUES ($1, $2, $3, $4, $5, $6)`,
-		sess.ID, sess.AccountID, sess.CharacterID, sess.Seed, sess.WorldID, sess.Status,
+		`INSERT INTO sessions (id, account_id, character_id, seed, world_id, mode, join_code_hash, status)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		sess.ID, sess.AccountID, sess.CharacterID, sess.Seed, sess.WorldID, mode, nullableStr(sess.JoinCodeHash), sess.Status,
 	)
 	if err != nil {
 		return fmt.Errorf("store: create session: %w", err)
@@ -197,9 +215,9 @@ func (s *Store) CreateSession(ctx context.Context, sess Session) error {
 func (s *Store) GetSession(ctx context.Context, id string) (Session, error) {
 	var sess Session
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, account_id, character_id, seed, world_id, status, created_at, updated_at
+		`SELECT id, account_id, character_id, seed, world_id, mode, COALESCE(join_code_hash, ''), status, created_at, updated_at
 		 FROM sessions WHERE id = $1`, id,
-	).Scan(&sess.ID, &sess.AccountID, &sess.CharacterID, &sess.Seed, &sess.WorldID, &sess.Status, &sess.CreatedAt, &sess.UpdatedAt)
+	).Scan(&sess.ID, &sess.AccountID, &sess.CharacterID, &sess.Seed, &sess.WorldID, &sess.Mode, &sess.JoinCodeHash, &sess.Status, &sess.CreatedAt, &sess.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Session{}, ErrNotFound
 	}
@@ -208,6 +226,9 @@ func (s *Store) GetSession(ctx context.Context, id string) (Session, error) {
 	}
 	if sess.WorldID == "" {
 		sess.WorldID = defaultWorldID
+	}
+	if sess.Mode == "" {
+		sess.Mode = SessionModeSolo
 	}
 	return sess, nil
 }
@@ -227,6 +248,217 @@ func (s *Store) SetSessionStatus(ctx context.Context, id, status string) error {
 		return fmt.Errorf("store: set session status: %w", err)
 	}
 	return nil
+}
+
+func (s *Store) CreateSessionHostMember(ctx context.Context, m SessionMember) error {
+	if m.Role == "" {
+		m.Role = SessionMemberHost
+	}
+	if m.Status == "" {
+		m.Status = SessionMemberActive
+	}
+	_, err := s.pool.Exec(ctx,
+		`INSERT INTO session_members (
+		   session_id, account_id, character_id, player_entity_id, role, status, connected, current_level, joined_tick
+		 )
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		 ON CONFLICT (session_id, account_id, character_id) DO NOTHING`,
+		m.SessionID, m.AccountID, m.CharacterID, m.PlayerEntityID, m.Role, m.Status, m.Connected, m.CurrentLevel, m.JoinedTick,
+	)
+	if err != nil {
+		return fmt.Errorf("store: create host member: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) CreateSessionGuestMember(ctx context.Context, m SessionMember) error {
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var mode, status string
+		err := tx.QueryRow(ctx,
+			`SELECT mode, status FROM sessions WHERE id = $1 FOR UPDATE`,
+			m.SessionID,
+		).Scan(&mode, &status)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: guest member session lookup: %w", err)
+		}
+		if mode != SessionModeCoop || status != SessionActive {
+			return ErrConflict
+		}
+
+		var duplicate bool
+		if err := tx.QueryRow(ctx,
+			`SELECT EXISTS (
+			   SELECT 1 FROM session_members
+			   WHERE session_id = $1 AND status = 'active' AND (account_id = $2 OR character_id = $3)
+			 )`,
+			m.SessionID, m.AccountID, m.CharacterID,
+		).Scan(&duplicate); err != nil {
+			return fmt.Errorf("store: guest member duplicate check: %w", err)
+		}
+		if duplicate {
+			return ErrConflict
+		}
+
+		var count int
+		if err := tx.QueryRow(ctx,
+			`SELECT count(*) FROM session_members WHERE session_id = $1 AND status = 'active'`,
+			m.SessionID,
+		).Scan(&count); err != nil {
+			return fmt.Errorf("store: guest member count: %w", err)
+		}
+		if count >= 2 {
+			return ErrPartyFull
+		}
+
+		role := m.Role
+		if role == "" {
+			role = SessionMemberGuest
+		}
+		status = m.Status
+		if status == "" {
+			status = SessionMemberActive
+		}
+		tag, err := tx.Exec(ctx,
+			`INSERT INTO session_members (
+			   session_id, account_id, character_id, player_entity_id, role, status, connected, current_level, joined_tick
+			 )
+			 SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9
+			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $3 AND account_id = $2)`,
+			m.SessionID, m.AccountID, m.CharacterID, m.PlayerEntityID, role, status, m.Connected, m.CurrentLevel, m.JoinedTick,
+		)
+		if err != nil {
+			return fmt.Errorf("store: create guest member: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+		return nil
+	})
+}
+
+func (s *Store) ListSessionMembers(ctx context.Context, sessionID string) ([]SessionMember, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT session_id, account_id, character_id, player_entity_id, role, status, connected, current_level, joined_tick, left_tick, joined_at, updated_at
+		 FROM session_members
+		 WHERE session_id = $1 AND status = 'active'
+		 ORDER BY joined_tick ASC, CASE role WHEN 'host' THEN 0 ELSE 1 END ASC, joined_at ASC, account_id ASC, character_id ASC`,
+		sessionID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list session members: %w", err)
+	}
+	defer rows.Close()
+	var out []SessionMember
+	for rows.Next() {
+		m, err := scanSessionMember(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, m)
+	}
+	return out, rows.Err()
+}
+
+func (s *Store) GetSessionMemberByAccount(ctx context.Context, sessionID, accountID string) (SessionMember, error) {
+	row := s.pool.QueryRow(ctx,
+		`SELECT session_id, account_id, character_id, player_entity_id, role, status, connected, current_level, joined_tick, left_tick, joined_at, updated_at
+		 FROM session_members
+		 WHERE session_id = $1 AND account_id = $2 AND status = 'active'
+		 ORDER BY joined_tick ASC, CASE role WHEN 'host' THEN 0 ELSE 1 END ASC, character_id ASC
+		 LIMIT 1`,
+		sessionID, accountID,
+	)
+	return scanSessionMember(row)
+}
+
+func (s *Store) GetSessionMember(ctx context.Context, sessionID, accountID, characterID string) (SessionMember, error) {
+	row := s.pool.QueryRow(ctx,
+		`SELECT session_id, account_id, character_id, player_entity_id, role, status, connected, current_level, joined_tick, left_tick, joined_at, updated_at
+		 FROM session_members
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3 AND status = 'active'`,
+		sessionID, accountID, characterID,
+	)
+	return scanSessionMember(row)
+}
+
+func (s *Store) SetSessionMemberConnected(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, tick int64) error {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE session_members
+		 SET connected = TRUE, status = 'active', player_entity_id = $4, current_level = $5, joined_tick = CASE WHEN joined_tick = 0 THEN $6 ELSE joined_tick END, left_tick = NULL, updated_at = now()
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3`,
+		sessionID, accountID, characterID, playerEntityID, currentLevel, tick,
+	)
+	if err != nil {
+		return fmt.Errorf("store: set member connected: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (s *Store) SetSessionMemberDisconnected(ctx context.Context, sessionID, accountID, characterID string, currentLevel int, tick int64) error {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE session_members
+		 SET connected = FALSE, current_level = $4, left_tick = $5, updated_at = now()
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3 AND status = 'active'`,
+		sessionID, accountID, characterID, currentLevel, tick,
+	)
+	if err != nil {
+		return fmt.Errorf("store: set member disconnected: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (s *Store) SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int) error {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE session_members
+		 SET player_entity_id = $4, current_level = $5, updated_at = now()
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3 AND status = 'active'`,
+		sessionID, accountID, characterID, playerEntityID, currentLevel,
+	)
+	if err != nil {
+		return fmt.Errorf("store: set member player: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+type rowScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanSessionMember(row rowScanner) (SessionMember, error) {
+	var m SessionMember
+	err := row.Scan(
+		&m.SessionID,
+		&m.AccountID,
+		&m.CharacterID,
+		&m.PlayerEntityID,
+		&m.Role,
+		&m.Status,
+		&m.Connected,
+		&m.CurrentLevel,
+		&m.JoinedTick,
+		&m.LeftTick,
+		&m.JoinedAt,
+		&m.UpdatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return SessionMember{}, ErrNotFound
+	}
+	if err != nil {
+		return SessionMember{}, fmt.Errorf("store: scan session member: %w", err)
+	}
+	return m, nil
 }
 
 // --- character progression --------------------------------------------------
@@ -542,7 +774,7 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 			   session_id, account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic
 			 )
 			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-			 ON CONFLICT (session_id) DO NOTHING`,
+			 ON CONFLICT (session_id, account_id, character_id) DO NOTHING`,
 			sessionID, accountID, characterID, progression.Level, progression.Experience, progression.UnspentStatPoints,
 			progression.Stats.Str, progression.Stats.Dex, progression.Stats.Vit, progression.Stats.Magic,
 		); err != nil {
@@ -564,7 +796,7 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 			if _, err := tx.Exec(ctx,
 				`INSERT INTO session_start_item_instances (session_id, id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
 				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
-				 ON CONFLICT (session_id, id) DO NOTHING`,
+				 ON CONFLICT (session_id, account_id, character_id, id) DO NOTHING`,
 				sessionID, item.ID, accountID, characterID, item.ItemDefID, location, slot, item.Equipped, []byte(rolledStats),
 			); err != nil {
 				return fmt.Errorf("store: insert session start item: %w", err)
@@ -574,7 +806,7 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 			if _, err := tx.Exec(ctx,
 				`INSERT INTO session_start_waypoints (session_id, character_id, level)
 				 VALUES ($1, $2, $3)
-				 ON CONFLICT (session_id, level) DO NOTHING`,
+				 ON CONFLICT (session_id, character_id, level) DO NOTHING`,
 				sessionID, characterID, wp.Level,
 			); err != nil {
 				return fmt.Errorf("store: insert session start waypoint: %w", err)
@@ -584,7 +816,7 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 			if _, err := tx.Exec(ctx,
 				`INSERT INTO session_start_hotbar_slots (session_id, account_id, character_id, slot_index, item_instance_id)
 				 VALUES ($1, $2, $3, $4, $5)
-				 ON CONFLICT (session_id, slot_index) DO NOTHING`,
+				 ON CONFLICT (session_id, account_id, character_id, slot_index) DO NOTHING`,
 				sessionID, accountID, characterID, slot.SlotIndex, slot.ItemInstanceID,
 			); err != nil {
 				return fmt.Errorf("store: insert session start hotbar: %w", err)
@@ -595,13 +827,42 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 }
 
 func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error) {
+	sess, err := s.GetSession(ctx, sessionID)
+	if err != nil {
+		return SessionStartSnapshot{SessionID: sessionID}, err
+	}
+	return s.LoadSessionStartSnapshotForMember(ctx, sessionID, sess.AccountID, sess.CharacterID)
+}
+
+func (s *Store) LoadSessionStartSnapshots(ctx context.Context, sessionID string) ([]SessionStartSnapshot, error) {
+	members, err := s.ListSessionMembers(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	if len(members) == 0 {
+		return nil, ErrNotFound
+	}
+	out := make([]SessionStartSnapshot, 0, len(members))
+	for _, member := range members {
+		snap, err := s.LoadSessionStartSnapshotForMember(ctx, sessionID, member.AccountID, member.CharacterID)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, snap)
+	}
+	return out, nil
+}
+
+func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID, accountID, characterID string) (SessionStartSnapshot, error) {
 	snap := SessionStartSnapshot{SessionID: sessionID}
+	snap.AccountID = accountID
+	snap.CharacterID = characterID
 	var prog CharacterProgression
 	err := s.pool.QueryRow(ctx,
 		`SELECT account_id, character_id, level, experience, unspent_stat_points, stat_str, stat_dex, stat_vit, stat_magic, created_at, created_at
 		 FROM session_start_character_progression
-		 WHERE session_id = $1`,
-		sessionID,
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3`,
+		sessionID, accountID, characterID,
 	).Scan(
 		&prog.AccountID, &prog.CharacterID, &prog.Level, &prog.Experience, &prog.UnspentStatPoints,
 		&prog.Stats.Str, &prog.Stats.Dex, &prog.Stats.Vit, &prog.Stats.Magic, &prog.CreatedAt, &prog.UpdatedAt,
@@ -615,9 +876,9 @@ func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) 
 	itemRows, err := s.pool.Query(ctx,
 		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, created_at
 		 FROM session_start_item_instances
-		 WHERE session_id = $1
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3
 		 ORDER BY created_at ASC, id ASC`,
-		sessionID,
+		sessionID, accountID, characterID,
 	)
 	if err != nil {
 		return snap, fmt.Errorf("store: load session start items: %w", err)
@@ -637,9 +898,9 @@ func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) 
 	hotbarRows, err := s.pool.Query(ctx,
 		`SELECT account_id, character_id, slot_index, item_instance_id, created_at
 		 FROM session_start_hotbar_slots
-		 WHERE session_id = $1
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3
 		 ORDER BY slot_index ASC`,
-		sessionID,
+		sessionID, accountID, characterID,
 	)
 	if err != nil {
 		return snap, fmt.Errorf("store: load session start hotbar: %w", err)
@@ -659,9 +920,9 @@ func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) 
 	wpRows, err := s.pool.Query(ctx,
 		`SELECT character_id, level, discovered_at
 		 FROM session_start_waypoints
-		 WHERE session_id = $1
+		 WHERE session_id = $1 AND character_id = $2
 		 ORDER BY level DESC`,
-		sessionID,
+		sessionID, characterID,
 	)
 	if err != nil {
 		return snap, fmt.Errorf("store: load session start waypoints: %w", err)
@@ -681,10 +942,14 @@ func (s *Store) LoadSessionStartSnapshot(ctx context.Context, sessionID string) 
 
 func (s *Store) AppendInput(ctx context.Context, in SessionInput) error {
 	_, err := s.pool.Exec(ctx,
-		`INSERT INTO session_inputs (id, session_id, tick, sequence, message_id, correlation_id, payload)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+		`INSERT INTO session_inputs (
+		   id, session_id, tick, sequence, message_id, correlation_id,
+		   actor_account_id, actor_character_id, actor_player_entity_id, payload
+		 )
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
 		 ON CONFLICT (session_id, message_id) DO NOTHING`,
-		in.ID, in.SessionID, in.Tick, in.Sequence, in.MessageID, nullableStr(in.CorrelationID), []byte(in.Payload),
+		in.ID, in.SessionID, in.Tick, in.Sequence, in.MessageID, nullableStr(in.CorrelationID),
+		nullableStr(in.ActorAccountID), nullableStr(in.ActorCharacterID), nullableStr(in.ActorPlayerEntityID), []byte(in.Payload),
 	)
 	if err != nil {
 		return fmt.Errorf("store: append input: %w", err)
@@ -694,7 +959,9 @@ func (s *Store) AppendInput(ctx context.Context, in SessionInput) error {
 
 func (s *Store) ListInputs(ctx context.Context, sessionID string) ([]SessionInput, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, session_id, tick, sequence, message_id, COALESCE(correlation_id, ''), payload, created_at
+		`SELECT id, session_id, tick, sequence, message_id, COALESCE(correlation_id, ''),
+		        COALESCE(actor_account_id, ''), COALESCE(actor_character_id, ''), COALESCE(actor_player_entity_id, ''),
+		        payload, created_at
 		 FROM session_inputs WHERE session_id = $1 ORDER BY tick ASC, sequence ASC, message_id ASC`,
 		sessionID,
 	)
@@ -707,7 +974,11 @@ func (s *Store) ListInputs(ctx context.Context, sessionID string) ([]SessionInpu
 	for rows.Next() {
 		var in SessionInput
 		var payload []byte
-		if err := rows.Scan(&in.ID, &in.SessionID, &in.Tick, &in.Sequence, &in.MessageID, &in.CorrelationID, &payload, &in.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&in.ID, &in.SessionID, &in.Tick, &in.Sequence, &in.MessageID, &in.CorrelationID,
+			&in.ActorAccountID, &in.ActorCharacterID, &in.ActorPlayerEntityID,
+			&payload, &in.CreatedAt,
+		); err != nil {
 			return nil, fmt.Errorf("store: scan input: %w", err)
 		}
 		in.Payload = payload

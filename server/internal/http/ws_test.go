@@ -177,6 +177,126 @@ func TestWebSocketRejectsUnauthenticated(t *testing.T) {
 	}
 }
 
+func TestCoopWebSocketAllowsJoinedMemberAndRejectsNonMember(t *testing.T) {
+	srv := fullStack(t)
+
+	loginReq := func(email string) devLoginResponse {
+		resp := doHTTP(t, srv, http.MethodPost, "/v0/auth/dev-login", "", map[string]string{
+			"email": email, "dev_token": testDevToken,
+		})
+		var res devLoginResponse
+		mustJSON(t, resp, &res)
+		return res
+	}
+	createChar := func(token, name string) characterResponse {
+		resp := doHTTP(t, srv, http.MethodPost, "/v0/characters", token, map[string]string{"name": name})
+		var res characterResponse
+		mustJSON(t, resp, &res)
+		return res
+	}
+
+	host := loginReq("ws-coop-host+" + ids.Token()[:12] + "@example.test")
+	guest := loginReq("ws-coop-guest+" + ids.Token()[:12] + "@example.test")
+	outsider := loginReq("ws-coop-outsider+" + ids.Token()[:12] + "@example.test")
+	guestChar := createChar(guest.AccessToken, "Guest")
+
+	resp := doHTTP(t, srv, http.MethodPost, "/v0/sessions", host.AccessToken, map[string]any{"mode": "coop"})
+	var created createSessionResponse
+	mustJSON(t, resp, &created)
+	resp = doHTTP(t, srv, http.MethodPost, "/v0/sessions/"+created.SessionID+"/join", guest.AccessToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": guestChar.CharacterID,
+	})
+	var joined createSessionResponse
+	mustJSON(t, resp, &joined)
+
+	guestConn := dialWS(t, srv, guest.AccessToken, created.SessionID)
+	guestSnap := readSnapshot(t, guestConn)
+	if guestSnap.SessionID != created.SessionID {
+		t.Fatalf("guest snapshot session = %s, want %s", guestSnap.SessionID, created.SessionID)
+	}
+	_ = guestConn.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "/v0/ws?session_id=" + created.SessionID
+	hdr := http.Header{}
+	hdr.Set("Authorization", "Bearer "+outsider.AccessToken)
+	_, rejectResp, err := websocket.DefaultDialer.Dial(wsURL, hdr)
+	if err == nil {
+		t.Fatal("expected outsider websocket handshake failure")
+	}
+	if rejectResp == nil || rejectResp.StatusCode != http.StatusNotFound {
+		t.Fatalf("outsider status = %v, want 404", rejectResp)
+	}
+}
+
+func TestCoopWebSocketSharedSessionLoopMovementDisconnectAndReconnect(t *testing.T) {
+	srv := fullStack(t)
+	host, guest := loginWS(t, srv, "ws-coop-loop-host"), loginWS(t, srv, "ws-coop-loop-guest")
+	guestChar := createCharacterWS(t, srv, guest.AccessToken, "Guest")
+
+	resp := doHTTP(t, srv, http.MethodPost, "/v0/sessions", host.AccessToken, map[string]any{"mode": "coop"})
+	var created createSessionResponse
+	mustJSON(t, resp, &created)
+	resp = doHTTP(t, srv, http.MethodPost, "/v0/sessions/"+created.SessionID+"/join", guest.AccessToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": guestChar.CharacterID,
+	})
+	var joined createSessionResponse
+	mustJSON(t, resp, &joined)
+
+	hostConn := dialWS(t, srv, host.AccessToken, created.SessionID)
+	hostSnap := readSnapshot(t, hostConn)
+	guestConn := dialWS(t, srv, guest.AccessToken, created.SessionID)
+	guestSnap := readSnapshotEventually(t, guestConn)
+	hostSnap = readSnapshotEventually(t, hostConn)
+	guestSnap = readSnapshotEventually(t, guestConn)
+	if hostSnap.LocalPlayerID == "" || guestSnap.LocalPlayerID == "" || hostSnap.LocalPlayerID == guestSnap.LocalPlayerID {
+		t.Fatalf("local player ids host=%q guest=%q", hostSnap.LocalPlayerID, guestSnap.LocalPlayerID)
+	}
+	if len(hostSnap.Party) != 2 || len(guestSnap.Party) != 2 {
+		t.Fatalf("party metadata host=%+v guest=%+v", hostSnap.Party, guestSnap.Party)
+	}
+
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "/v0/ws?session_id=" + created.SessionID
+	hdr := http.Header{}
+	hdr.Set("Authorization", "Bearer "+guest.AccessToken)
+	_, dupResp, err := websocket.DefaultDialer.Dial(wsURL, hdr)
+	if err == nil {
+		t.Fatal("expected duplicate guest websocket rejection")
+	}
+	if dupResp == nil || dupResp.StatusCode != http.StatusConflict {
+		t.Fatalf("duplicate status = %v, want 409", dupResp)
+	}
+
+	hostBefore := entityPosition(t, hostSnap, hostSnap.LocalPlayerID)
+	guestBefore := entityPosition(t, guestSnap, guestSnap.LocalPlayerID)
+	sendIntent(t, guestConn, created.SessionID, guestSnap.ServerTick, "msg-guest-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
+	readAccepted(t, guestConn, "msg-guest-move")
+	requestSnapshot(t, hostConn, created.SessionID, "msg-host-ready")
+	requestSnapshot(t, guestConn, created.SessionID, "msg-guest-ready")
+	hostAfterGuestMove := readSnapshotEventually(t, hostConn)
+	guestAfterMove := readSnapshotEventually(t, guestConn)
+	if got := entityPosition(t, hostAfterGuestMove, hostSnap.LocalPlayerID); got != hostBefore {
+		t.Fatalf("host moved after guest input: before=%+v after=%+v", hostBefore, got)
+	}
+	if got := entityPosition(t, guestAfterMove, guestSnap.LocalPlayerID); got == guestBefore {
+		t.Fatalf("guest did not move from %+v", guestBefore)
+	}
+
+	_ = guestConn.Close()
+	readEntityRemove(t, hostConn, guestSnap.LocalPlayerID)
+	sendIntent(t, hostConn, created.SessionID, hostAfterGuestMove.ServerTick, "msg-host-move-after-disconnect", "move_intent", map[string]any{"direction": map[string]any{"x": 0, "y": 1}, "duration_ticks": 1})
+	readAccepted(t, hostConn, "msg-host-move-after-disconnect")
+
+	reconnected := dialWS(t, srv, guest.AccessToken, created.SessionID)
+	defer reconnected.Close()
+	reconnectSnap := readSnapshotEventually(t, reconnected)
+	if reconnectSnap.LocalPlayerID != guestSnap.LocalPlayerID || reconnectSnap.CurrentLevel != 0 {
+		t.Fatalf("reconnect snapshot = %+v, want same player in town", reconnectSnap)
+	}
+	if findEntity(reconnectSnap, guestSnap.LocalPlayerID) == nil {
+		t.Fatalf("reconnected guest entity missing from snapshot: %+v", reconnectSnap.Entities)
+	}
+}
+
 func TestWebSocketMalformedMessageGetsError(t *testing.T) {
 	srv := fullStack(t)
 	token, sessionID := loginAndSession(t, srv)
@@ -514,6 +634,24 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 
 // --- small helpers ----------------------------------------------------------
 
+func loginWS(t *testing.T, srv *httptest.Server, label string) devLoginResponse {
+	t.Helper()
+	resp := doHTTP(t, srv, http.MethodPost, "/v0/auth/dev-login", "", map[string]string{
+		"email": label + "+" + ids.Token()[:12] + "@example.test", "dev_token": testDevToken,
+	})
+	var res devLoginResponse
+	mustJSON(t, resp, &res)
+	return res
+}
+
+func createCharacterWS(t *testing.T, srv *httptest.Server, token, name string) characterResponse {
+	t.Helper()
+	resp := doHTTP(t, srv, http.MethodPost, "/v0/characters", token, map[string]string{"name": name})
+	var res characterResponse
+	mustJSON(t, resp, &res)
+	return res
+}
+
 func readSnapshot(t *testing.T, conn *websocket.Conn) game.Snapshot {
 	t.Helper()
 	m := readMsg(t, conn)
@@ -525,6 +663,27 @@ func readSnapshot(t *testing.T, conn *websocket.Conn) game.Snapshot {
 		t.Fatalf("decode snapshot: %v", err)
 	}
 	return snap
+}
+
+func readSnapshotEventually(t *testing.T, conn *websocket.Conn) game.Snapshot {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	for {
+		select {
+		case <-deadline:
+			t.Fatal("no session_snapshot before timeout")
+		default:
+		}
+		m := readMsg(t, conn)
+		if m.Type != "session_snapshot" {
+			continue
+		}
+		var snap game.Snapshot
+		if err := json.Unmarshal(m.Payload, &snap); err != nil {
+			t.Fatalf("decode snapshot: %v", err)
+		}
+		return snap
+	}
 }
 
 func readMsg(t *testing.T, conn *websocket.Conn) wMsg {
@@ -542,6 +701,11 @@ func readMsg(t *testing.T, conn *websocket.Conn) wMsg {
 	return m
 }
 
+func requestSnapshot(t *testing.T, conn *websocket.Conn, sessionID, messageID string) {
+	t.Helper()
+	sendIntent(t, conn, sessionID, 0, messageID, "client_ready", map[string]any{"client_version": "test", "last_seen_tick": 0})
+}
+
 func sendIntent(t *testing.T, conn *websocket.Conn, sessionID string, tick uint64, messageID, typ string, payload any) {
 	t.Helper()
 	env := map[string]any{
@@ -553,6 +717,31 @@ func sendIntent(t *testing.T, conn *websocket.Conn, sessionID string, tick uint6
 	}
 	if err := conn.WriteJSON(env); err != nil {
 		t.Fatalf("send %s: %v", typ, err)
+	}
+}
+
+func readAccepted(t *testing.T, conn *websocket.Conn, messageID string) {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	for {
+		select {
+		case <-deadline:
+			t.Fatalf("no intent_accepted for %s", messageID)
+		default:
+		}
+		m := readMsg(t, conn)
+		if m.Type != "intent_accepted" {
+			continue
+		}
+		var p struct {
+			AcceptedMessageID string `json:"accepted_message_id"`
+		}
+		if err := json.Unmarshal(m.Payload, &p); err != nil {
+			t.Fatalf("decode accepted: %v", err)
+		}
+		if p.AcceptedMessageID == messageID {
+			return
+		}
 	}
 }
 
@@ -580,6 +769,31 @@ func readRejected(t *testing.T, conn *websocket.Conn, messageID string) rejectPa
 		}
 		if p.RejectedMessageID == messageID {
 			return p
+		}
+	}
+}
+
+func readEntityRemove(t *testing.T, conn *websocket.Conn, entityID string) {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	for {
+		select {
+		case <-deadline:
+			t.Fatalf("no entity_remove for %s", entityID)
+		default:
+		}
+		m := readMsg(t, conn)
+		if m.Type != "state_delta" {
+			continue
+		}
+		var d wireDelta
+		if err := json.Unmarshal(m.Payload, &d); err != nil {
+			t.Fatalf("decode delta: %v", err)
+		}
+		for _, change := range d.Changes {
+			if change.Op == "entity_remove" && change.EntityID == entityID {
+				return
+			}
 		}
 	}
 }
@@ -800,6 +1014,15 @@ func findEntity(snap game.Snapshot, id string) *game.EntityView {
 		}
 	}
 	return nil
+}
+
+func entityPosition(t *testing.T, snap game.Snapshot, id string) game.Vec2 {
+	t.Helper()
+	entity := findEntity(snap, id)
+	if entity == nil {
+		t.Fatalf("snapshot missing entity %s: %+v", id, snap.Entities)
+	}
+	return entity.Position
 }
 
 func doHTTP(t *testing.T, srv *httptest.Server, method, path, bearer string, body any) *http.Response {

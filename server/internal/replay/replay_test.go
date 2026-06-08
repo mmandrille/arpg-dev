@@ -3,6 +3,8 @@ package replay
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"math"
 	"reflect"
 	"testing"
 
@@ -202,6 +204,314 @@ func TestReconstructLoadsSessionStartHotbarAndInputs(t *testing.T) {
 	}
 }
 
+func TestReconstructCoopSessionRestoresMembersAndActorInputs(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, Seed: testSeed, WorldID: game.DefaultWorldID, Mode: store.SessionModeCoop},
+		members: []store.SessionMember{
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_host",
+				CharacterID:    "char_host",
+				PlayerEntityID: "1001",
+				Role:           store.SessionMemberHost,
+				Status:         store.SessionMemberActive,
+				Connected:      true,
+			},
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_guest",
+				CharacterID:    "char_guest",
+				PlayerEntityID: "1003",
+				Role:           store.SessionMemberGuest,
+				Status:         store.SessionMemberActive,
+				Connected:      true,
+			},
+		},
+		starts: map[string]store.SessionStartSnapshot{
+			startKey("acct_host", "char_host"): {
+				SessionID:   testSessionID,
+				AccountID:   "acct_host",
+				CharacterID: "char_host",
+			},
+			startKey("acct_guest", "char_guest"): {
+				SessionID:   testSessionID,
+				AccountID:   "acct_guest",
+				CharacterID: "char_guest",
+				Items: []store.CharacterItemInstance{{
+					ID:          "9003",
+					AccountID:   "acct_guest",
+					CharacterID: "char_guest",
+					ItemDefID:   "red_potion",
+					Location:    store.ItemLocationInventory,
+					RolledStats: json.RawMessage(`{}`),
+				}},
+			},
+		},
+		inputs: []store.SessionInput{
+			storedInputWithActor(t, "inp-guest-hotbar", "msg-guest-hotbar", "1003", 0, 0, "assign_hotbar_intent", map[string]any{"slot_index": 1, "item_instance_id": "9003"}),
+		},
+	}
+	recorded, _, err := StoredInputs(repo.inputs)
+	if err != nil {
+		t.Fatalf("stored inputs: %v", err)
+	}
+	if recorded[0].Input.ActorPlayerID != 1003 {
+		t.Fatalf("actor player id = %d, want 1003", recorded[0].Input.ActorPlayerID)
+	}
+
+	recon, err := Reconstruct(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	if recon.Metadata.NextSequence != 1 || !recon.Metadata.SeenMessageIDs["msg-guest-hotbar"] {
+		t.Fatalf("metadata = %+v, want replay resume after guest input", recon.Metadata)
+	}
+	hostSnap := recon.Sim.SnapshotForPlayer(1001)
+	guestSnap := recon.Sim.SnapshotForPlayer(1003)
+	if hostSnap.LocalPlayerID != "1001" || guestSnap.LocalPlayerID != "1003" {
+		t.Fatalf("local players host=%q guest=%q", hostSnap.LocalPlayerID, guestSnap.LocalPlayerID)
+	}
+	if len(guestSnap.Party) != 2 {
+		t.Fatalf("guest party = %+v, want host and guest", guestSnap.Party)
+	}
+	if entityByID(guestSnap, "1003") == nil || entityByID(guestSnap, "1003").CharacterID != "char_guest" {
+		t.Fatalf("guest entity = %+v, want char_guest", entityByID(guestSnap, "1003"))
+	}
+	if guestSnap.Hotbar[1].ItemInstanceID == nil || *guestSnap.Hotbar[1].ItemInstanceID != "9003" {
+		t.Fatalf("guest hotbar[1] = %+v, want 9003", guestSnap.Hotbar[1])
+	}
+	if hostSnap.Hotbar[1].ItemInstanceID != nil {
+		t.Fatalf("host hotbar[1] = %+v, want untouched by guest input", hostSnap.Hotbar[1])
+	}
+}
+
+func TestReconstructCoopDisconnectedMemberIsRemovedForReconnect(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, Seed: testSeed, WorldID: game.DefaultWorldID, Mode: store.SessionModeCoop},
+		members: []store.SessionMember{
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_host",
+				CharacterID:    "char_host",
+				PlayerEntityID: "1001",
+				Role:           store.SessionMemberHost,
+				Status:         store.SessionMemberActive,
+				Connected:      true,
+			},
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_guest",
+				CharacterID:    "char_guest",
+				PlayerEntityID: "1003",
+				Role:           store.SessionMemberGuest,
+				Status:         store.SessionMemberActive,
+				Connected:      false,
+				CurrentLevel:   -1,
+			},
+		},
+		starts: map[string]store.SessionStartSnapshot{
+			startKey("acct_host", "char_host"):   {SessionID: testSessionID, AccountID: "acct_host", CharacterID: "char_host"},
+			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
+		},
+	}
+
+	recon, err := Reconstruct(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	if recon.Sim.PlayerConnected(1003) {
+		t.Fatal("guest should be disconnected after applying current member state")
+	}
+	if entityByID(recon.Sim.SnapshotForPlayer(1001), "1003") != nil {
+		t.Fatalf("disconnected guest entity still visible: %+v", recon.Sim.SnapshotForPlayer(1001).Entities)
+	}
+	if err := recon.Sim.RespawnPlayerInTown(1003); err != nil {
+		t.Fatalf("respawn guest: %v", err)
+	}
+	recon.Sim.SetPlayerConnected(1003, true)
+	if level, ok := recon.Sim.PlayerCurrentLevel(1003); !ok || level != 0 {
+		t.Fatalf("guest reconnect level = %d,%v want town", level, ok)
+	}
+}
+
+func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, Seed: "v33_coop_replay", WorldID: "dungeon_levels", Mode: store.SessionModeCoop},
+		members: []store.SessionMember{
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_host",
+				CharacterID:    "char_host",
+				PlayerEntityID: "1001",
+				Role:           store.SessionMemberHost,
+				Status:         store.SessionMemberActive,
+				Connected:      true,
+			},
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_guest",
+				CharacterID:    "char_guest",
+				PlayerEntityID: "1004",
+				Role:           store.SessionMemberGuest,
+				Status:         store.SessionMemberActive,
+				Connected:      true,
+			},
+		},
+		starts: map[string]store.SessionStartSnapshot{
+			startKey("acct_host", "char_host"):   {SessionID: testSessionID, AccountID: "acct_host", CharacterID: "char_host"},
+			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
+		},
+	}
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	if err != nil {
+		t.Fatalf("scratch sim: %v", err)
+	}
+
+	var rows []store.SessionInput
+	var events []store.SessionEvent
+	tick := int64(0)
+	sequence := int64(0)
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1004, game.Vec2{X: 5, Y: 10})
+
+	stairs := findSnapshotEntity(scratch.SnapshotForPlayer(1001), "interactable", "stairs_down")
+	if stairs == nil {
+		t.Fatal("missing town stairs down")
+	}
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1001, stairs.Position)
+	tick = appendInputAndAdvanceReplay(t, scratch, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: 1001,
+		Type:          "descend_intent",
+		Descend:       &game.DescendIntent{},
+	})
+	if scratch.SnapshotForPlayer(1001).CurrentLevel != -1 {
+		t.Fatalf("host level after descend = %d, want -1", scratch.SnapshotForPlayer(1001).CurrentLevel)
+	}
+
+	if loot := findSnapshotEntity(scratch.SnapshotForPlayer(1001), "loot", ""); loot != nil {
+		tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1001, loot.Position)
+		tick = appendInputAndAdvanceReplay(t, scratch, &rows, &events, tick, &sequence, game.Input{
+			ActorPlayerID: 1001,
+			Type:          "action_intent",
+			Action:        &game.ActionIntent{TargetID: loot.ID},
+		})
+	}
+
+	repo.inputs = rows
+	repo.events = events
+	for i := range repo.members {
+		if repo.members[i].CharacterID == "char_guest" {
+			repo.members[i].Connected = false
+			repo.members[i].CurrentLevel = 0
+		}
+	}
+
+	rep, err := Verify(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if !rep.Match {
+		t.Fatalf("verify mismatch: %s", rep.Mismatch)
+	}
+	if entityByID(rep.Snapshot, "1004") != nil {
+		t.Fatalf("disconnected guest should be absent from replay snapshot: %+v", rep.Snapshot.Entities)
+	}
+	if hasStoreEvent(events, "item_picked_up") {
+		assertRecordedEventHasEntity(t, events, "item_picked_up", "1001")
+	}
+}
+
+func TestVerifyCoopReplayMatchesActorCombatAndLootEvents(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, Seed: "v33_coop_combat_replay", WorldID: "gear_before_combat", Mode: store.SessionModeCoop},
+		members: []store.SessionMember{
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_host",
+				CharacterID:    "char_host",
+				PlayerEntityID: "1001",
+				Role:           store.SessionMemberHost,
+				Status:         store.SessionMemberActive,
+				Connected:      true,
+			},
+			{
+				SessionID:      testSessionID,
+				AccountID:      "acct_guest",
+				CharacterID:    "char_guest",
+				PlayerEntityID: "1004",
+				Role:           store.SessionMemberGuest,
+				Status:         store.SessionMemberActive,
+				Connected:      true,
+			},
+		},
+		starts: map[string]store.SessionStartSnapshot{
+			startKey("acct_host", "char_host"):   {SessionID: testSessionID, AccountID: "acct_host", CharacterID: "char_host"},
+			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
+		},
+	}
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	if err != nil {
+		t.Fatalf("scratch sim: %v", err)
+	}
+
+	var rows []store.SessionInput
+	var events []store.SessionEvent
+	tick := int64(0)
+	sequence := int64(0)
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1004, game.Vec2{X: 3, Y: 5})
+
+	loot := findSnapshotEntity(scratch.SnapshotForPlayer(1001), "loot", "")
+	if loot == nil {
+		t.Fatal("missing static loot")
+	}
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1001, loot.Position)
+	tick = appendInputAndAdvanceReplay(t, scratch, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: 1001,
+		Type:          "action_intent",
+		Action:        &game.ActionIntent{TargetID: loot.ID},
+	})
+
+	monster := findSnapshotEntity(scratch.SnapshotForPlayer(1001), "monster", "")
+	if monster == nil {
+		t.Fatal("missing static monster")
+	}
+	attackPosition := game.Vec2{X: monster.Position.X - 1, Y: monster.Position.Y}
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1001, attackPosition)
+	monsterKilled := false
+	for guard := 0; guard < 20 && !monsterKilled; guard++ {
+		before := len(events)
+		tick = appendInputAndAdvanceReplay(t, scratch, &rows, &events, tick, &sequence, game.Input{
+			ActorPlayerID: 1001,
+			Type:          "action_intent",
+			Action:        &game.ActionIntent{TargetID: monster.ID},
+		})
+		for _, ev := range events[before:] {
+			if ev.EventType == "monster_killed" {
+				monsterKilled = true
+				break
+			}
+		}
+	}
+	if !monsterKilled {
+		t.Fatalf("monster was not killed; events=%+v", events)
+	}
+	repo.inputs = rows
+	repo.events = events
+
+	rep, err := Verify(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if !rep.Match {
+		t.Fatalf("verify mismatch: %s", rep.Mismatch)
+	}
+	assertRecordedEventHasActor(t, events, "monster_killed", "1001", monster.ID)
+	assertRecordedEventHasEntity(t, events, "item_picked_up", "1001")
+}
+
 func scriptedRecordedInputs() ([]RecordedInput, int64) {
 	return []RecordedInput{
 		{
@@ -256,6 +566,11 @@ func scriptedStoredInputs(t *testing.T) []store.SessionInput {
 
 func storedInput(t *testing.T, id, messageID string, tick, sequence int64, typ string, payload any) store.SessionInput {
 	t.Helper()
+	return storedInputWithActor(t, id, messageID, "", tick, sequence, typ, payload)
+}
+
+func storedInputWithActor(t *testing.T, id, messageID, actorPlayerID string, tick, sequence int64, typ string, payload any) store.SessionInput {
+	t.Helper()
 	raw, err := json.Marshal(map[string]any{
 		"type":       typ,
 		"message_id": messageID,
@@ -267,12 +582,13 @@ func storedInput(t *testing.T, id, messageID string, tick, sequence int64, typ s
 		t.Fatalf("marshal input: %v", err)
 	}
 	return store.SessionInput{
-		ID:        id,
-		SessionID: testSessionID,
-		Tick:      tick,
-		Sequence:  sequence,
-		MessageID: messageID,
-		Payload:   raw,
+		ID:                  id,
+		SessionID:           testSessionID,
+		Tick:                tick,
+		Sequence:            sequence,
+		MessageID:           messageID,
+		ActorPlayerEntityID: actorPlayerID,
+		Payload:             raw,
 	}
 }
 
@@ -293,6 +609,152 @@ func storeEvents(events []derivedEvent) []store.SessionEvent {
 
 func stringPtr(v string) *string {
 	return &v
+}
+
+func appendMoveToAndAdvanceReplay(
+	t *testing.T,
+	sim *game.Sim,
+	rules *game.Rules,
+	rows *[]store.SessionInput,
+	events *[]store.SessionEvent,
+	tick int64,
+	sequence *int64,
+	actorID uint64,
+	pos game.Vec2,
+) int64 {
+	t.Helper()
+	tick = appendInputAndAdvanceReplay(t, sim, rows, events, tick, sequence, game.Input{
+		ActorPlayerID: actorID,
+		Type:          "move_to_intent",
+		MoveTo:        &game.MoveToIntent{Position: pos},
+	})
+	for guard := 0; guard < 2000; guard++ {
+		player := entityByID(sim.SnapshotForPlayer(actorID), fmt.Sprintf("%d", actorID))
+		if player != nil && replayDistance(player.Position, pos) <= rules.Navigation.StopDistance+0.001 {
+			return tick
+		}
+		results := sim.TickResults(nil)
+		collectReplayEvents(events, results)
+		tick++
+	}
+	t.Fatalf("player %d did not reach %+v", actorID, pos)
+	return tick
+}
+
+func appendInputAndAdvanceReplay(
+	t *testing.T,
+	sim *game.Sim,
+	rows *[]store.SessionInput,
+	events *[]store.SessionEvent,
+	tick int64,
+	sequence *int64,
+	in game.Input,
+) int64 {
+	t.Helper()
+	if in.MessageID == "" {
+		in.MessageID = fmt.Sprintf("msg-%03d", *sequence)
+	}
+	in.Sequence = *sequence
+	*sequence = *sequence + 1
+	*rows = append(*rows, storedInputFromGameInput(t, fmt.Sprintf("inp-%03d", len(*rows)), tick, in))
+	results := sim.TickResults([]game.Input{in})
+	collectReplayEvents(events, results)
+	return tick + 1
+}
+
+func collectReplayEvents(events *[]store.SessionEvent, results []game.TickResult) {
+	sequence := int64(0)
+	for _, res := range results {
+		for _, ev := range res.Events {
+			payload, _ := json.Marshal(ev)
+			*events = append(*events, store.SessionEvent{
+				ID:            fmt.Sprintf("evt-%03d", len(*events)),
+				SessionID:     testSessionID,
+				Tick:          int64(res.Tick),
+				Sequence:      sequence,
+				EventType:     ev.EventType,
+				CorrelationID: ev.CorrelationID,
+				Payload:       payload,
+			})
+			sequence++
+		}
+	}
+}
+
+func storedInputFromGameInput(t *testing.T, id string, tick int64, in game.Input) store.SessionInput {
+	t.Helper()
+	var payload any
+	switch in.Type {
+	case "move_to_intent":
+		payload = map[string]any{"position": map[string]any{"x": in.MoveTo.Position.X, "y": in.MoveTo.Position.Y}}
+	case "action_intent":
+		payload = map[string]any{"target_id": in.Action.TargetID}
+	case "descend_intent":
+		payload = map[string]any{}
+	default:
+		t.Fatalf("unsupported replay test input type %s", in.Type)
+	}
+	return storedInputWithActor(t, id, in.MessageID, fmt.Sprintf("%d", in.ActorPlayerID), tick, in.Sequence, in.Type, payload)
+}
+
+func findSnapshotEntity(snap game.Snapshot, typ, defID string) *game.EntityView {
+	for i := range snap.Entities {
+		e := &snap.Entities[i]
+		if e.Type != typ {
+			continue
+		}
+		if defID == "" || e.InteractableDefID == defID || e.MonsterDefID == defID || e.ItemDefID == defID {
+			return e
+		}
+	}
+	return nil
+}
+
+func assertRecordedEventHasActor(t *testing.T, events []store.SessionEvent, eventType, sourceID, targetID string) {
+	t.Helper()
+	for _, ev := range events {
+		if ev.EventType != eventType {
+			continue
+		}
+		var payload game.Event
+		if err := json.Unmarshal(ev.Payload, &payload); err != nil {
+			t.Fatalf("unmarshal event %s: %v", ev.EventType, err)
+		}
+		if payload.SourceEntityID == sourceID && (targetID == "" || payload.TargetEntityID == targetID) {
+			return
+		}
+	}
+	t.Fatalf("missing %s with source=%s target=%s in %+v", eventType, sourceID, targetID, events)
+}
+
+func assertRecordedEventHasEntity(t *testing.T, events []store.SessionEvent, eventType, entityID string) {
+	t.Helper()
+	for _, ev := range events {
+		if ev.EventType != eventType {
+			continue
+		}
+		var payload game.Event
+		if err := json.Unmarshal(ev.Payload, &payload); err != nil {
+			t.Fatalf("unmarshal event %s: %v", ev.EventType, err)
+		}
+		if payload.EntityID == entityID {
+			return
+		}
+	}
+	t.Fatalf("missing %s with entity=%s in %+v", eventType, entityID, events)
+}
+
+func hasStoreEvent(events []store.SessionEvent, eventType string) bool {
+	for _, ev := range events {
+		if ev.EventType == eventType {
+			return true
+		}
+	}
+	return false
+}
+
+func replayDistance(a, b game.Vec2) float64 {
+	return math.Hypot(a.X-b.X, a.Y-b.Y)
 }
 
 func assertRestoredSlice(t *testing.T, snap game.Snapshot) {
@@ -352,6 +814,8 @@ type fakeRepo struct {
 	inputs  []store.SessionInput
 	events  []store.SessionEvent
 	start   store.SessionStartSnapshot
+	starts  map[string]store.SessionStartSnapshot
+	members []store.SessionMember
 }
 
 func (f *fakeRepo) UpsertAccountByEmail(context.Context, string, string) (store.Account, error) {
@@ -379,6 +843,30 @@ func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 }
 func (f *fakeRepo) TouchSession(context.Context, string) error { return nil }
 func (f *fakeRepo) SetSessionStatus(context.Context, string, string) error {
+	return nil
+}
+func (f *fakeRepo) CreateSessionHostMember(context.Context, store.SessionMember) error {
+	return nil
+}
+func (f *fakeRepo) CreateSessionGuestMember(context.Context, store.SessionMember) error {
+	return nil
+}
+func (f *fakeRepo) ListSessionMembers(context.Context, string) ([]store.SessionMember, error) {
+	return f.members, nil
+}
+func (f *fakeRepo) GetSessionMemberByAccount(context.Context, string, string) (store.SessionMember, error) {
+	return store.SessionMember{}, nil
+}
+func (f *fakeRepo) GetSessionMember(context.Context, string, string, string) (store.SessionMember, error) {
+	return store.SessionMember{}, nil
+}
+func (f *fakeRepo) SetSessionMemberConnected(context.Context, string, string, string, string, int, int64) error {
+	return nil
+}
+func (f *fakeRepo) SetSessionMemberDisconnected(context.Context, string, string, string, int, int64) error {
+	return nil
+}
+func (f *fakeRepo) SetSessionMemberPlayer(context.Context, string, string, string, string, int) error {
 	return nil
 }
 func (f *fakeRepo) ListCharacterItems(context.Context, string, string) ([]store.CharacterItemInstance, error) {
@@ -417,6 +905,27 @@ func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, s
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {
 	return f.start, nil
 }
+func (f *fakeRepo) LoadSessionStartSnapshotForMember(_ context.Context, sessionID, accountID, characterID string) (store.SessionStartSnapshot, error) {
+	if f.starts != nil {
+		if snap, ok := f.starts[startKey(accountID, characterID)]; ok {
+			return snap, nil
+		}
+	}
+	if f.start.SessionID == sessionID && f.start.AccountID == accountID && f.start.CharacterID == characterID {
+		return f.start, nil
+	}
+	return store.SessionStartSnapshot{}, store.ErrNotFound
+}
+func (f *fakeRepo) LoadSessionStartSnapshots(context.Context, string) ([]store.SessionStartSnapshot, error) {
+	out := make([]store.SessionStartSnapshot, 0, len(f.starts))
+	for _, snap := range f.starts {
+		out = append(out, snap)
+	}
+	if len(out) == 0 && f.start.SessionID != "" {
+		out = append(out, f.start)
+	}
+	return out, nil
+}
 func (f *fakeRepo) AppendInput(context.Context, store.SessionInput) error { return nil }
 func (f *fakeRepo) ListInputs(context.Context, string) ([]store.SessionInput, error) {
 	return f.inputs, nil
@@ -426,3 +935,7 @@ func (f *fakeRepo) ListEvents(context.Context, string) ([]store.SessionEvent, er
 	return f.events, nil
 }
 func (f *fakeRepo) Ping(context.Context) error { return nil }
+
+func startKey(accountID, characterID string) string {
+	return accountID + "/" + characterID
+}

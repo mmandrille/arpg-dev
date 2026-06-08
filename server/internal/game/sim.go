@@ -83,6 +83,8 @@ type entity struct {
 	pos                 Vec2
 	hp                  int
 	maxHP               int
+	characterID         string
+	displayName         string
 	monsterDefID        string
 	monsterRarityID     string
 	monsterAttackDamage *DamageRange
@@ -156,6 +158,23 @@ type combatResolution struct {
 	Hit             bool
 }
 
+type playerState struct {
+	PlayerID              uint64
+	AccountID             string
+	CharacterID           string
+	DisplayName           string
+	Role                  string
+	Connected             bool
+	CurrentLevel          int
+	Move                  *activeMove
+	AutoNav               *autoNavState
+	Inventory             []*invItem
+	Equipped              map[string]uint64
+	Hotbar                []uint64
+	DiscoveredTeleporters map[int]bool
+	Progression           CharacterProgressionState
+}
+
 // Sim is the deterministic authoritative simulation for one solo session.
 // Given the same seed and the same ordered inputs, it produces identical
 // outputs (entity ids, events, final state) on every run (ADR-0001 D8.1).
@@ -168,6 +187,7 @@ type Sim struct {
 	tick     uint64
 	nextID   uint64
 	playerID uint64
+	players  map[uint64]*playerState
 
 	levels                map[int]*LevelState
 	currentLevel          int
@@ -220,6 +240,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		rng:                   NewRNG(SeedToUint64(seed)),
 		rules:                 rules,
 		nextID:                baseEntityID,
+		players:               make(map[uint64]*playerState),
 		levels:                make(map[int]*LevelState),
 		currentLevel:          levelZero,
 		multiLevel:            world.Mode == worldModeMultiLevel,
@@ -292,10 +313,21 @@ func (r *Rules) normalizeProgressionState(in CharacterProgressionState) Characte
 
 func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world WorldDef) error {
 	maxHP := s.currentMaxHP()
-	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: maxHP, maxHP: maxHP}
+	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: maxHP, maxHP: maxHP, displayName: "Hero"}
 	player.id = s.alloc()
 	s.playerID = player.id
 	level.entities[player.id] = player
+	s.players[player.id] = &playerState{
+		PlayerID:              player.id,
+		DisplayName:           "Hero",
+		Role:                  "host",
+		Connected:             true,
+		CurrentLevel:          level.levelNum,
+		Equipped:              s.equipped,
+		Hotbar:                s.hotbar,
+		DiscoveredTeleporters: s.discoveredTeleporters,
+		Progression:           s.progression,
+	}
 
 	for _, preset := range world.Entities {
 		switch preset.Type {
@@ -396,6 +428,7 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 			s.nextID = id + 1
 		}
 	}
+	s.savePlayer(s.defaultPlayer())
 }
 
 // LoadHotbar restores fixed hotbar assignments into a fresh sim.
@@ -417,6 +450,7 @@ func (s *Sim) LoadHotbar(slots []PersistedHotbarSlot) {
 		}
 		s.hotbar[slot.SlotIndex] = id
 	}
+	s.savePlayer(s.defaultPlayer())
 }
 
 func parseRollPayload(raw json.RawMessage) *ItemRollPayload {
@@ -479,12 +513,287 @@ func (s *Sim) LoadDiscoveredTeleporters(levels []int) {
 			s.discoveredTeleporters[level] = true
 		}
 	}
+	s.savePlayer(s.defaultPlayer())
+}
+
+func (s *Sim) LoadInventoryForPlayer(playerID uint64, items []PersistedItem) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadInventory(items)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+}
+
+func (s *Sim) LoadHotbarForPlayer(playerID uint64, slots []PersistedHotbarSlot) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadHotbar(slots)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+}
+
+func (s *Sim) LoadDiscoveredTeleportersForPlayer(playerID uint64, levels []int) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadDiscoveredTeleporters(levels)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
 }
 
 func (s *Sim) alloc() uint64 {
 	id := s.nextID
 	s.nextID++
 	return id
+}
+
+// AddGuestPlayer creates a second connected player in level 0 town. It is the
+// deterministic v33 co-op join path; player-vs-player collision remains disabled.
+func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progression CharacterProgressionState) (uint64, error) {
+	if displayName == "" {
+		displayName = "Guest"
+	}
+	level, err := s.ensureTravelLevel(townLevel)
+	if err != nil {
+		return 0, err
+	}
+	spawn := s.findTownSpawnPosition(level)
+	progression = s.rules.normalizeProgressionState(progression)
+	equipped := newEquippedMap()
+	hotbar := make([]uint64, maxHotbarCapacity)
+	discovered := map[int]bool{townLevel: true}
+	character := progression
+	s.equipped = equipped
+	s.hotbar = hotbar
+	s.discoveredTeleporters = discovered
+	s.progression = character
+	maxHP := s.currentMaxHP()
+	player := &entity{
+		kind:        playerEntity,
+		pos:         spawn,
+		hp:          maxHP,
+		maxHP:       maxHP,
+		characterID: characterID,
+		displayName: displayName,
+	}
+	player.id = s.alloc()
+	level.entities[player.id] = player
+	s.players[player.id] = &playerState{
+		PlayerID:              player.id,
+		AccountID:             accountID,
+		CharacterID:           characterID,
+		DisplayName:           displayName,
+		Role:                  "guest",
+		Connected:             true,
+		CurrentLevel:          townLevel,
+		Equipped:              equipped,
+		Hotbar:                hotbar,
+		DiscoveredTeleporters: discovered,
+		Progression:           character,
+	}
+	s.usePlayer(s.defaultPlayer())
+	return player.id, nil
+}
+
+// SetPlayerMetadata fills party/player metadata for an existing player, usually
+// the host player created with the Sim.
+func (s *Sim) SetPlayerMetadata(playerID uint64, accountID, characterID, displayName, role string) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	if displayName == "" {
+		displayName = ps.DisplayName
+	}
+	if role == "" {
+		role = ps.Role
+	}
+	ps.AccountID = accountID
+	ps.CharacterID = characterID
+	ps.DisplayName = displayName
+	ps.Role = role
+	if e := s.levels[ps.CurrentLevel].entities[playerID]; e != nil {
+		e.characterID = characterID
+		e.displayName = displayName
+	}
+}
+
+func (s *Sim) SetPlayerConnected(playerID uint64, connected bool) {
+	if ps := s.players[playerID]; ps != nil {
+		ps.Connected = connected
+	}
+}
+
+func (s *Sim) DefaultPlayerID() uint64 {
+	if ps := s.defaultPlayer(); ps != nil {
+		return ps.PlayerID
+	}
+	return 0
+}
+
+func (s *Sim) PlayerCurrentLevel(playerID uint64) (int, bool) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return 0, false
+	}
+	return ps.CurrentLevel, true
+}
+
+func (s *Sim) PlayerConnected(playerID uint64) bool {
+	ps := s.players[playerID]
+	return ps != nil && ps.Connected
+}
+
+func (s *Sim) PlayerIDs() []uint64 {
+	return sortedPlayerIDs(s.players)
+}
+
+func (s *Sim) PlayerIDForCharacter(characterID string) (uint64, bool) {
+	if characterID == "" {
+		return 0, false
+	}
+	for _, playerID := range sortedPlayerIDs(s.players) {
+		ps := s.players[playerID]
+		if ps != nil && ps.CharacterID == characterID {
+			return playerID, true
+		}
+	}
+	return 0, false
+}
+
+func ParseEntityID(id string) (uint64, bool) {
+	n, err := strconv.ParseUint(id, 10, 64)
+	return n, err == nil
+}
+
+func (s *Sim) RemovePlayerEntity(playerID uint64) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	if level := s.levels[ps.CurrentLevel]; level != nil {
+		delete(level.entities, playerID)
+	}
+	ps.Connected = false
+	if s.playerID == playerID {
+		s.usePlayer(s.defaultPlayer())
+	}
+}
+
+func (s *Sim) RespawnPlayerInTown(playerID uint64) error {
+	ps := s.players[playerID]
+	if ps == nil {
+		return fmt.Errorf("game: unknown player %d", playerID)
+	}
+	level, err := s.ensureTravelLevel(townLevel)
+	if err != nil {
+		return err
+	}
+	for _, lvl := range s.levels {
+		delete(lvl.entities, playerID)
+	}
+	s.usePlayer(ps)
+	maxHP := s.currentMaxHP()
+	player := &entity{
+		id:          playerID,
+		kind:        playerEntity,
+		pos:         s.findTownSpawnPosition(level),
+		hp:          maxHP,
+		maxHP:       maxHP,
+		characterID: ps.CharacterID,
+		displayName: ps.DisplayName,
+	}
+	level.entities[playerID] = player
+	s.currentLevel = townLevel
+	ps.CurrentLevel = townLevel
+	ps.Connected = true
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+	return nil
+}
+
+func (s *Sim) findTownSpawnPosition(level *LevelState) Vec2 {
+	if host := s.players[s.playerID]; host != nil {
+		if lvl := s.levels[host.CurrentLevel]; lvl != nil && host.CurrentLevel == level.levelNum {
+			if e := lvl.entities[host.PlayerID]; e != nil {
+				return e.pos
+			}
+		}
+	}
+	for _, id := range sortedEntityIDs(level.entities) {
+		e := level.entities[id]
+		if e != nil && e.kind == playerEntity {
+			return e.pos
+		}
+	}
+	return Vec2{X: 4, Y: 10}
+}
+
+func (s *Sim) defaultPlayer() *playerState {
+	if ps := s.players[s.playerID]; ps != nil {
+		return ps
+	}
+	for _, id := range sortedPlayerIDs(s.players) {
+		return s.players[id]
+	}
+	return nil
+}
+
+func (s *Sim) playerForInput(in Input) *playerState {
+	if in.ActorPlayerID != 0 {
+		return s.players[in.ActorPlayerID]
+	}
+	return s.defaultPlayer()
+}
+
+func (s *Sim) usePlayer(ps *playerState) {
+	if ps == nil {
+		return
+	}
+	s.playerID = ps.PlayerID
+	s.currentLevel = ps.CurrentLevel
+	s.inventory = ps.Inventory
+	s.equipped = ps.Equipped
+	s.hotbar = ps.Hotbar
+	s.discoveredTeleporters = ps.DiscoveredTeleporters
+	s.progression = ps.Progression
+	level := s.activeLevel()
+	level.move = ps.Move
+	level.autoNav = ps.AutoNav
+	s.syncCompatibilityFields()
+}
+
+func (s *Sim) savePlayer(ps *playerState) {
+	if ps == nil {
+		return
+	}
+	ps.CurrentLevel = s.currentLevel
+	ps.Inventory = s.inventory
+	ps.Equipped = s.equipped
+	ps.Hotbar = s.hotbar
+	ps.DiscoveredTeleporters = s.discoveredTeleporters
+	ps.Progression = s.progression
+	if level := s.levels[ps.CurrentLevel]; level != nil {
+		ps.Move = level.move
+		ps.AutoNav = level.autoNav
+	}
+}
+
+func sortedPlayerIDs(players map[uint64]*playerState) []uint64 {
+	ids := make([]uint64, 0, len(players))
+	for id := range players {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
 }
 
 // CurrentTick returns the next tick to be processed.
@@ -495,6 +804,7 @@ type Input struct {
 	MessageID     string
 	CorrelationID string
 	Sequence      int64
+	ActorPlayerID uint64
 	Type          string
 	Move          *MoveIntent
 	MoveTo        *MoveToIntent
@@ -563,12 +873,13 @@ type (
 
 // TickResult is everything a single tick produced.
 type TickResult struct {
-	Tick    uint64
-	Level   int
-	Changes []Change
-	Events  []Event
-	Acks    []Ack
-	Rejects []Reject
+	Tick          uint64
+	Level         int
+	ActorPlayerID uint64
+	Changes       []Change
+	Events        []Event
+	Acks          []Ack
+	Rejects       []Reject
 }
 
 func (r *TickResult) ack(id string) { r.Acks = append(r.Acks, Ack{MessageID: id}) }
@@ -584,6 +895,11 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 	if len(results) == 0 {
 		return TickResult{Tick: s.tick, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}
 	}
+	for _, res := range results {
+		if len(res.Acks) > 0 || len(res.Rejects) > 0 {
+			return res
+		}
+	}
 	return results[len(results)-1]
 }
 
@@ -591,33 +907,82 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 // ordered by the runner as (sequence, message_id)), applies continuous
 // movement, advances the tick counter, and returns one or more scoped results.
 func (s *Sim) TickResults(inputs []Input) []TickResult {
-	// Changes/Events are always non-nil so they marshal as [] (not null),
-	// satisfying the state_delta schema.
-	res := TickResult{Tick: s.tick, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}
-	var transitionArrival *TickResult
+	type resultKey struct {
+		level int
+		actor uint64
+	}
+	resultByKey := map[resultKey]*TickResult{}
+	var ordered []*TickResult
+	transitionThisTick := false
+	resultFor := func(level int, actor uint64) *TickResult {
+		key := resultKey{level: level, actor: actor}
+		if res := resultByKey[key]; res != nil {
+			return res
+		}
+		res := &TickResult{Tick: s.tick, Level: level, ActorPlayerID: actor, Changes: []Change{}, Events: []Event{}}
+		resultByKey[key] = res
+		ordered = append(ordered, res)
+		return res
+	}
+
 	for _, in := range inputs {
-		if in.Type == "descend_intent" || in.Type == "ascend_intent" || in.Type == "teleport_intent" {
-			if transitionArrival == nil {
-				transitionArrival = s.handleLevelTravel(in, &res)
-			} else {
-				res.reject(in.MessageID, "invalid_level")
-			}
+		ps := s.playerForInput(in)
+		if ps == nil || !ps.Connected {
+			res := resultFor(s.currentLevel, 0)
+			res.reject(in.MessageID, "unknown_actor")
 			continue
 		}
-		s.applyInput(in, &res)
+		s.usePlayer(ps)
+		res := resultFor(ps.CurrentLevel, ps.PlayerID)
+		if in.Type == "descend_intent" || in.Type == "ascend_intent" || in.Type == "teleport_intent" {
+			if arrival := s.handleLevelTravel(in, res); arrival != nil {
+				arrival.ActorPlayerID = ps.PlayerID
+				ordered = append(ordered, arrival)
+				transitionThisTick = true
+			}
+			s.savePlayer(ps)
+			continue
+		}
+		s.applyInput(in, res)
+		s.savePlayer(ps)
 	}
-	if transitionArrival != nil {
-		s.tick++
-		s.syncCompatibilityFields()
-		return []TickResult{res, *transitionArrival}
+
+	if !transitionThisTick {
+		for _, playerID := range sortedPlayerIDs(s.players) {
+			ps := s.players[playerID]
+			if ps == nil || !ps.Connected {
+				continue
+			}
+			s.usePlayer(ps)
+			res := resultFor(ps.CurrentLevel, ps.PlayerID)
+			s.applyMovement(res)
+			s.savePlayer(ps)
+		}
+
+		for _, levelNum := range s.sortedLevelNums() {
+			s.currentLevel = levelNum
+			s.syncCompatibilityFields()
+			res := resultFor(levelNum, 0)
+			s.advanceMonsterMovement(res)
+			s.advanceMonsterAttack(res)
+			s.advanceProjectiles(res)
+		}
 	}
-	s.applyMovement(&res)
-	s.advanceMonsterMovement(&res)
-	s.advanceMonsterAttack(&res)
-	s.advanceProjectiles(&res)
+
 	s.tick++
-	s.syncCompatibilityFields()
-	return []TickResult{res}
+	s.usePlayer(s.defaultPlayer())
+
+	results := make([]TickResult, 0, len(ordered))
+	for _, res := range ordered {
+		if len(res.Changes) == 0 && len(res.Events) == 0 && len(res.Acks) == 0 && len(res.Rejects) == 0 {
+			continue
+		}
+		results = append(results, *res)
+	}
+	if len(results) == 0 {
+		return []TickResult{{Tick: s.tick - 1, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}}
+	}
+	return results
 }
 
 func (s *Sim) applyInput(in Input, res *TickResult) {
@@ -923,7 +1288,13 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), s.playerID, target.id, in.CorrelationID, outcome))
 
 	if target.hp == 0 {
-		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: in.CorrelationID})
+		res.Events = append(res.Events, Event{
+			EventType:      "monster_killed",
+			EntityID:       idStr(target.id),
+			SourceEntityID: idStr(s.playerID),
+			TargetEntityID: idStr(target.id),
+			CorrelationID:  in.CorrelationID,
+		})
 		s.dropLoot(target, in.CorrelationID, res)
 		s.awardMonsterExperience(target, in.CorrelationID, res)
 	}
@@ -1066,7 +1437,12 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 	}
 	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
-	res.Events = append(res.Events, Event{EventType: "item_picked_up", EntityID: idStr(item.instanceID), CorrelationID: in.CorrelationID})
+	res.Events = append(res.Events, Event{
+		EventType:      "item_picked_up",
+		EntityID:       idStr(s.playerID),
+		CorrelationID:  in.CorrelationID,
+		ItemInstanceID: idStr(item.instanceID),
+	})
 	if ack {
 		res.ack(in.MessageID)
 	}
@@ -1980,13 +2356,6 @@ func circleIntersectsAABB(center Vec2, radius float64, rectCenter Vec2, rectSize
 }
 
 func (s *Sim) advanceMonsterMovement(res *TickResult) {
-	if s.playerDead() {
-		return
-	}
-	player := s.activeLevel().entities[s.playerID]
-	if player == nil {
-		return
-	}
 	nav := s.activeNav()
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		monster := s.activeLevel().entities[id]
@@ -1997,6 +2366,15 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		if !ok || def.effectiveBehavior() != monsterBehaviorChase {
 			continue
 		}
+		targetPlayer := s.nearestLivingPlayerForMonster(s.activeLevel(), monster)
+		if targetPlayer == nil {
+			continue
+		}
+		player := s.activeLevel().entities[targetPlayer.PlayerID]
+		if player == nil {
+			continue
+		}
+		s.usePlayer(targetPlayer)
 		prevMode := monster.aiMode
 		s.updateMonsterAIMode(monster, player, def, prevMode, res)
 		if monster.aiMode == monsterAIModeIdle {
@@ -2027,10 +2405,6 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 }
 
 func (s *Sim) advanceMonsterAttack(res *TickResult) {
-	player := s.activeLevel().entities[s.playerID]
-	if player == nil || player.hp <= 0 {
-		return
-	}
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		monster := s.activeLevel().entities[id]
 		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
@@ -2043,6 +2417,15 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if monster.aiMode == monsterAIModeReturn {
 			continue
 		}
+		targetPlayer := s.nearestLivingPlayerForMonster(s.activeLevel(), monster)
+		if targetPlayer == nil {
+			continue
+		}
+		player := s.activeLevel().entities[targetPlayer.PlayerID]
+		if player == nil || player.hp <= 0 {
+			continue
+		}
+		s.usePlayer(targetPlayer)
 		if !meleeInRange(distance(player.pos, monster.pos), s.playerMeleeReach(), s.targetInteractionRadius(monster)) {
 			continue
 		}
@@ -2073,9 +2456,30 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		}
 		res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, "", outcome))
 		if player.hp == 0 {
-			return
+			continue
 		}
 	}
+}
+
+func (s *Sim) nearestLivingPlayerForMonster(level *LevelState, monster *entity) *playerState {
+	var best *playerState
+	bestDist := math.MaxFloat64
+	for _, playerID := range sortedPlayerIDs(s.players) {
+		ps := s.players[playerID]
+		if ps == nil || !ps.Connected || ps.CurrentLevel != level.levelNum {
+			continue
+		}
+		e := level.entities[playerID]
+		if e == nil || e.kind != playerEntity || e.hp <= 0 {
+			continue
+		}
+		dist := distance(monster.pos, e.pos)
+		if best == nil || dist < bestDist-1e-9 || (math.Abs(dist-bestDist) <= 1e-9 && playerID < best.PlayerID) {
+			best = ps
+			bestDist = dist
+		}
+	}
+	return best
 }
 
 func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDef, prevMode string, res *TickResult) {
@@ -2203,10 +2607,16 @@ func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
 			return true
 		}
 	}
-	player := s.activeLevel().entities[s.playerID]
-	if player != nil && player.hp > 0 {
-		if circlesOverlap(pos, monsterRadius, player.pos, playerRadius) {
-			return true
+	for _, playerID := range sortedPlayerIDs(s.players) {
+		ps := s.players[playerID]
+		if ps == nil || !ps.Connected || ps.CurrentLevel != s.currentLevel {
+			continue
+		}
+		player := s.activeLevel().entities[playerID]
+		if player != nil && player.hp > 0 {
+			if circlesOverlap(pos, monsterRadius, player.pos, playerRadius) {
+				return true
+			}
 		}
 	}
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
@@ -2363,6 +2773,11 @@ func projectileHitLess(a, b projectileHit) bool {
 }
 
 func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult) {
+	owner := s.players[p.ownerID]
+	if owner != nil {
+		s.usePlayer(owner)
+		defer s.savePlayer(owner)
+	}
 	if hit.category != projectileHitMonster {
 		res.Events = append(res.Events, Event{EventType: "projectile_blocked", CorrelationID: p.sourceCorrID})
 		return
@@ -2387,7 +2802,13 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), p.ownerID, target.id, p.sourceCorrID, outcome))
 
 	if target.hp == 0 {
-		res.Events = append(res.Events, Event{EventType: "monster_killed", EntityID: idStr(target.id), CorrelationID: p.sourceCorrID})
+		res.Events = append(res.Events, Event{
+			EventType:      "monster_killed",
+			EntityID:       idStr(target.id),
+			SourceEntityID: idStr(p.ownerID),
+			TargetEntityID: idStr(target.id),
+			CorrelationID:  p.sourceCorrID,
+		})
 		s.dropLoot(target, p.sourceCorrID, res)
 		s.awardMonsterExperience(target, p.sourceCorrID, res)
 	}
@@ -2413,6 +2834,7 @@ func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
 	s.progression.Experience += amount
 	res.Events = append(res.Events, Event{
 		EventType:       "experience_gained",
+		EntityID:        idStr(s.playerID),
 		CorrelationID:   corr,
 		Amount:          intPtr(amount),
 		TotalExperience: intPtr(s.progression.Experience),
@@ -2429,6 +2851,7 @@ func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
 		to := s.progression.Level
 		res.Events = append(res.Events, Event{
 			EventType:         "character_leveled",
+			EntityID:          idStr(s.playerID),
 			CorrelationID:     corr,
 			FromLevel:         intPtr(from),
 			ToLevel:           intPtr(to),
@@ -3410,8 +3833,43 @@ func sortedEntityIDs(entities map[uint64]*entity) []uint64 {
 	return ids
 }
 
-// Snapshot returns the full authoritative state, with entities ordered by id.
+func (s *Sim) sortedLevelNums() []int {
+	levels := make([]int, 0, len(s.levels))
+	for levelNum := range s.levels {
+		levels = append(levels, levelNum)
+	}
+	sort.Ints(levels)
+	return levels
+}
+
+// Snapshot returns the default player's authoritative state, with entities
+// ordered by id. Solo callers keep using this compatibility path.
 func (s *Sim) Snapshot() Snapshot {
+	if ps := s.defaultPlayer(); ps != nil {
+		return s.SnapshotForPlayer(ps.PlayerID)
+	}
+	return Snapshot{
+		ServerTick:   s.tick,
+		SessionID:    s.sessionID,
+		Seed:         s.seed,
+		CurrentLevel: s.currentLevel,
+		Entities:     []EntityView{},
+		Inventory:    []ItemView{},
+		Equipped:     newSnapshotEquippedMap(newEquippedMap()),
+		Hotbar:       []HotbarSlotView{},
+		RecentEvents: []Event{},
+	}
+}
+
+// SnapshotForPlayer returns a recipient-scoped snapshot. Entities are limited
+// to the player's current level; inventory/progression fields belong only to
+// the receiving player.
+func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
+	ps := s.players[playerID]
+	if ps == nil {
+		return s.Snapshot()
+	}
+	s.usePlayer(ps)
 	ids := sortedEntityIDs(s.activeLevel().entities)
 
 	entities := make([]EntityView, 0, len(ids))
@@ -3424,21 +3882,16 @@ func (s *Sim) Snapshot() Snapshot {
 		inventory = append(inventory, it.view())
 	}
 
-	equipped := make(map[string]*string, len(s.equipped))
-	for slot, instanceID := range s.equipped {
-		if instanceID == 0 {
-			equipped[slot] = nil
-			continue
-		}
-		v := idStr(instanceID)
-		equipped[slot] = &v
-	}
+	equipped := newSnapshotEquippedMap(s.equipped)
+	party := s.partyView()
 
-	return Snapshot{
+	snap := Snapshot{
 		ServerTick:            s.tick,
 		SessionID:             s.sessionID,
 		Seed:                  s.seed,
 		CurrentLevel:          s.currentLevel,
+		LocalPlayerID:         idStr(ps.PlayerID),
+		Party:                 party,
 		Entities:              entities,
 		Inventory:             inventory,
 		Equipped:              equipped,
@@ -3448,6 +3901,41 @@ func (s *Sim) Snapshot() Snapshot {
 		CharacterProgression:  s.CharacterProgressionView(),
 		RecentEvents:          []Event{},
 	}
+	s.savePlayer(ps)
+	return snap
+}
+
+func newSnapshotEquippedMap(equipped map[string]uint64) map[string]*string {
+	out := make(map[string]*string, len(equipmentSlots))
+	for _, slot := range equipmentSlots {
+		instanceID := equipped[slot]
+		if instanceID == 0 {
+			out[slot] = nil
+			continue
+		}
+		v := idStr(instanceID)
+		out[slot] = &v
+	}
+	return out
+}
+
+func (s *Sim) partyView() []PartyMemberView {
+	out := make([]PartyMemberView, 0, len(s.players))
+	for _, playerID := range sortedPlayerIDs(s.players) {
+		ps := s.players[playerID]
+		if ps == nil {
+			continue
+		}
+		out = append(out, PartyMemberView{
+			PlayerID:     idStr(ps.PlayerID),
+			CharacterID:  ps.CharacterID,
+			DisplayName:  ps.DisplayName,
+			Role:         ps.Role,
+			Connected:    ps.Connected,
+			CurrentLevel: ps.CurrentLevel,
+		})
+	}
+	return out
 }
 
 func (s *Sim) teleporterDiscoveryView() []TeleporterDiscoveryView {
@@ -3484,6 +3972,10 @@ func (e *entity) view() EntityView {
 		hp, maxHP := e.hp, e.maxHP
 		ev.HP = &hp
 		ev.MaxHP = &maxHP
+		if e.kind == playerEntity {
+			ev.CharacterID = e.characterID
+			ev.DisplayName = e.displayName
+		}
 		if e.kind == monsterEntity {
 			ev.MonsterDefID = e.monsterDefID
 			if e.monsterRarityID != "" {

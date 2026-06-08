@@ -1,14 +1,15 @@
 package realtime
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/websocket"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/metrics"
-	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -19,6 +20,8 @@ type Hub struct {
 	log      *slog.Logger
 	metrics  *metrics.Metrics
 	upgrader websocket.Upgrader
+	mu       sync.Mutex
+	loops    map[string]*sessionLoop
 }
 
 // NewHub constructs a realtime hub.
@@ -28,6 +31,7 @@ func NewHub(st store.Repository, rules *game.Rules, log *slog.Logger, m *metrics
 		rules:   rules,
 		log:     log,
 		metrics: m,
+		loops:   make(map[string]*sessionLoop),
 		upgrader: websocket.Upgrader{
 			// v0 dev default: accept any origin. Remote deployments must
 			// restrict this (deferred to the wire-protocol / auth ADRs).
@@ -36,58 +40,58 @@ func NewHub(st store.Repository, rules *game.Rules, log *slog.Logger, m *metrics
 	}
 }
 
-// Run upgrades the request to a WebSocket and runs the authoritative session
-// loop. The caller must have already validated session ownership.
-func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session) {
-	storedInputs, err := h.store.ListInputs(r.Context(), sess.ID)
+// Run upgrades the request to a WebSocket and attaches it to the authoritative
+// session loop. The caller must have already validated session membership.
+func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session, member store.SessionMember) {
+	loop, err := h.loopForSession(r.Context(), sess)
 	if err != nil {
 		h.metrics.PersistenceErrors.Inc()
-		http.Error(w, "could not load session inputs", http.StatusInternalServerError)
+		h.log.Error("load session loop", "session_id", sess.ID, "error", err)
+		http.Error(w, "could not load session", http.StatusInternalServerError)
 		return
 	}
-
-	var sim *game.Sim
-	var meta *replay.ResumeMetadata
-	if len(storedInputs) > 0 {
-		recon, err := replay.Reconstruct(r.Context(), h.store, h.rules, sess.ID)
-		if err != nil {
-			h.metrics.PersistenceErrors.Inc()
-			h.log.Error("reconstruct session for websocket resume", "session_id", sess.ID, "error", err)
-			http.Error(w, "could not reconstruct session", http.StatusInternalServerError)
-			return
-		}
-		sim = recon.Sim
-		meta = &recon.Metadata
-	} else {
-		worldID := sess.WorldID
-		if worldID == "" {
-			worldID = game.DefaultWorldID
-		}
-		start, err := h.store.LoadSessionStartSnapshot(r.Context(), sess.ID)
-		if err != nil {
-			h.metrics.PersistenceErrors.Inc()
-			h.log.Error("load session start snapshot", "session_id", sess.ID, "error", err)
-			http.Error(w, "could not load session start snapshot", http.StatusInternalServerError)
-			return
-		}
-		sim, err = game.NewSimWithWorldProgression(sess.ID, sess.Seed, h.rules, worldID, progressionStateFromStore(h.rules, start.Progression))
-		if err != nil {
-			h.log.Error("create session sim", "session_id", sess.ID, "world_id", worldID, "error", err)
-			http.Error(w, "could not create session sim", http.StatusInternalServerError)
-			return
-		}
-		sim.LoadInventory(persistedItems(start.Items))
-		sim.LoadHotbar(persistedHotbar(start.Hotbar))
-		sim.LoadDiscoveredTeleporters(waypointLevels(start.Waypoints))
+	if loop.hasConnectedMember(memberKey(member)) {
+		http.Error(w, "member_already_connected", http.StatusConflict)
+		return
 	}
-
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		// Upgrade writes its own HTTP error response on failure.
 		return
 	}
+	loop.attach(r.Context(), conn, member)
+}
 
-	newRunner(conn, sim, sess, h.store, h.log, h.metrics, meta).run(r.Context())
+func (h *Hub) loopForSession(ctx context.Context, sess store.Session) (*sessionLoop, error) {
+	h.mu.Lock()
+	if loop := h.loops[sess.ID]; loop != nil {
+		h.mu.Unlock()
+		return loop, nil
+	}
+	h.mu.Unlock()
+
+	loop, err := newSessionLoop(ctx, h, sess)
+	if err != nil {
+		return nil, err
+	}
+	h.mu.Lock()
+	if existing := h.loops[sess.ID]; existing != nil {
+		h.mu.Unlock()
+		loop.stop()
+		return existing, nil
+	}
+	h.loops[sess.ID] = loop
+	h.mu.Unlock()
+	loop.start()
+	return loop, nil
+}
+
+func (h *Hub) removeLoop(sessionID string, loop *sessionLoop) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.loops[sessionID] == loop {
+		delete(h.loops, sessionID)
+	}
 }
 
 func progressionStateFromStore(rules *game.Rules, progression *store.CharacterProgression) game.CharacterProgressionState {

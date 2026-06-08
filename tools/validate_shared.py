@@ -145,6 +145,34 @@ def cross_checks(report: Report) -> None:
     character_progression_golden = load(GOLDEN / "character_progression.json")
     combat_stat_effects_golden = load(GOLDEN / "combat_stat_effects.json")
 
+    v2_protocol_files = [
+        PROTOCOL / "envelope.v2.schema.json",
+        PROTOCOL / "messages.v2.schema.json",
+        PROTOCOL / "session_snapshot.v2.schema.json",
+        PROTOCOL / "state_delta.v2.schema.json",
+    ]
+    missing_v2 = [str(path.relative_to(ROOT)) for path in v2_protocol_files if not path.exists()]
+    if missing_v2:
+        report.fail("protocol v2 schema set", f"missing {', '.join(missing_v2)}")
+    else:
+        report.ok("protocol v2 schema set is present")
+
+    messages_v2 = load(PROTOCOL / "messages.v2.schema.json")
+    actor_fields = {"player_id", "account_id", "character_id"}
+    intent_names = [name for name in messages_v2["$defs"] if name.endswith("_intent") or name == "client_ready"]
+    actor_leaks: list[str] = []
+    for name in sorted(intent_names):
+        intent_schema = messages_v2["$defs"][name]
+        if intent_schema.get("additionalProperties") is not False:
+            actor_leaks.append(f"{name}: additionalProperties must be false")
+        leaked = actor_fields.intersection(intent_schema.get("properties", {}))
+        if leaked:
+            actor_leaks.append(f"{name}: actor fields {sorted(leaked)}")
+    if actor_leaks:
+        report.fail("protocol v2 actor-free intents", "; ".join(actor_leaks))
+    else:
+        report.ok("protocol v2 intents are actor-free")
+
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
         report.fail("damage_formula vs combat", "player_damage mismatch")

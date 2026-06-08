@@ -352,6 +352,99 @@ func TestCreateAndResumeSession(t *testing.T) {
 	}
 }
 
+func TestCreateCoopSessionAndJoinLifecycle(t *testing.T) {
+	h := fullServer(t)
+	_, hostToken := loginEmail(t, h, "coop-host+"+ids.Token()[:12]+"@example.test")
+	_, guestToken := loginEmail(t, h, "coop-guest+"+ids.Token()[:12]+"@example.test")
+	_, thirdToken := loginEmail(t, h, "coop-third+"+ids.Token()[:12]+"@example.test")
+	guestChar := createCharacter(t, h, guestToken, "Guest Hero")
+	thirdChar := createCharacter(t, h, thirdToken, "Third Hero")
+
+	rec := postJSON(h, "/v0/sessions", hostToken, map[string]any{"mode": "coop", "world_id": "dungeon_levels"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create coop status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var created createSessionResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &created); err != nil {
+		t.Fatalf("decode coop create: %v", err)
+	}
+	if created.Mode != store.SessionModeCoop || created.JoinCode == "" || created.WorldID != "dungeon_levels" {
+		t.Fatalf("coop create response mismatch: %+v", created)
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", guestToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": guestChar.CharacterID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("join status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var joined createSessionResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &joined); err != nil {
+		t.Fatalf("decode join: %v", err)
+	}
+	if joined.SessionID != created.SessionID || joined.CharacterID != guestChar.CharacterID || joined.Mode != store.SessionModeCoop || joined.JoinCode != "" {
+		t.Fatalf("join response mismatch: %+v", joined)
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", guestToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": guestChar.CharacterID,
+	})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("duplicate join status = %d, want 409, body = %s", rec.Code, rec.Body.String())
+	}
+	var body errorBody
+	_ = json.Unmarshal(rec.Body.Bytes(), &body)
+	if body.Error.Code != "duplicate_member" {
+		t.Fatalf("duplicate code = %q", body.Error.Code)
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", thirdToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": thirdChar.CharacterID,
+	})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("third join status = %d, want 409, body = %s", rec.Code, rec.Body.String())
+	}
+	_ = json.Unmarshal(rec.Body.Bytes(), &body)
+	if body.Error.Code != "party_full" {
+		t.Fatalf("third join code = %q", body.Error.Code)
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", thirdToken, map[string]any{
+		"join_code": "join_wrong", "character_id": thirdChar.CharacterID,
+	})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("wrong code status = %d, want 404", rec.Code)
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", thirdToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": created.CharacterID,
+	})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign character status = %d, want 404", rec.Code)
+	}
+
+	rec = postJSON(h, "/v0/sessions", hostToken, map[string]any{"mode": "coop"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create second coop status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var ended createSessionResponse
+	_ = json.Unmarshal(rec.Body.Bytes(), &ended)
+	rec = postJSON(h, "/v0/sessions/"+ended.SessionID+"/end", hostToken, map[string]any{})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("end coop status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/sessions/"+ended.SessionID+"/join", guestToken, map[string]any{
+		"join_code": ended.JoinCode, "character_id": guestChar.CharacterID,
+	})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("join ended status = %d, want 409, body = %s", rec.Code, rec.Body.String())
+	}
+	_ = json.Unmarshal(rec.Body.Bytes(), &body)
+	if body.Error.Code != "session_ended" {
+		t.Fatalf("ended join code = %q", body.Error.Code)
+	}
+}
+
 func TestCreateSessionCustomSeedLocalOnly(t *testing.T) {
 	local := fullServer(t)
 	_, localToken := login(t, local)

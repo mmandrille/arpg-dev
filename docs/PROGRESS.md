@@ -11,7 +11,7 @@ Last updated: 2026-06-08
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v32 — `test-floor-and-resilient-scenarios` |
+| **Latest completed slice** | v33 — `true-coop-session` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-08 |
 | **Next slice** | TBD |
@@ -48,6 +48,7 @@ v29_* = dungeon-equipment-drop-expansion
 v30_* = monster-rarity-and-loot-scaling
 v31_* = combat-stat-effects-and-feedback
 v32_* = test-floor-and-resilient-scenarios
+v33_* = true-coop-session
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -100,6 +101,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v30** | `monster-rarity-and-loot-scaling` | Complete (`make ci` green) | [`v30_spec-monster-rarity-and-loot-scaling.md`](specs/v30_spec-monster-rarity-and-loot-scaling.md) | [`v30_2026-06-07-monster-rarity-and-loot-scaling.md`](plans/v30_2026-06-07-monster-rarity-and-loot-scaling.md) |
 | **v31** | `combat-stat-effects-and-feedback` | Complete (`make ci` green) | [`v31_spec-combat-stat-effects-and-feedback.md`](specs/v31_spec-combat-stat-effects-and-feedback.md) | [`v31_2026-06-07-combat-stat-effects-and-feedback.md`](plans/v31_2026-06-07-combat-stat-effects-and-feedback.md) |
 | **v32** | `test-floor-and-resilient-scenarios` | Complete (`make ci` green) | [`v32_spec-test-floor-and-resilient-scenarios.md`](specs/v32_spec-test-floor-and-resilient-scenarios.md) | [`v32_2026-06-08-test-floor-and-resilient-scenarios.md`](plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md) |
+| **v33** | `true-coop-session` | Complete (`make ci` green) | [`v33_spec-true-coop-session.md`](specs/v33_spec-true-coop-session.md) | [`v33_2026-06-08-true-coop-session.md`](plans/v33_2026-06-08-true-coop-session.md) |
 
 ---
 
@@ -778,6 +780,37 @@ replay, schema, formula, persistence, or protocol coverage.
 **Explicit non-goals:** no gameplay, balance, protocol, or UI feature work; no committed tuning
 changes; no broad test framework migration; no `tuning_sensitive` metadata.
 
+### v33 — True co-op session
+
+**Proves:** Two authenticated clients can join one Go-authoritative session, each controlling a
+distinct character/player entity while replay, persistence, reconnect, and solo compatibility stay
+deterministic.
+
+- Protocol v2 schemas add `local_player_id`, `party[]`, actor metadata on player/combat/reward
+  events, and actor-free client intents; v1 schemas remain intact.
+- Sessions now support `mode: "coop"`, hashed join codes, deterministic `session_members`,
+  per-member start snapshots, and actor-tagged input rows.
+- HTTP create/join lets a host create a co-op session and a guest join by session id + join code;
+  non-members are denied WebSocket access and duplicate member sockets are rejected.
+- The sim now owns multiple player states with independent levels, inventories, hotbars,
+  waypoints, progression, reconnect-to-town behavior, and non-solid player/player collision.
+- A shared realtime session loop runs one authoritative sim per active session, binds each socket
+  to its server-derived actor, sends recipient-scoped snapshots, and fans out level-visible deltas.
+- Disconnecting a co-op member removes only that player's entity from other same-level clients;
+  solo disconnects continue to preserve same-session resume behavior.
+- Replay reconstructs host and late-joined guest members with actor-tagged inputs, member start
+  snapshots, disconnect/reconnect state, and per-tick event sequence ordering.
+- Godot stores `local_player_id`, keeps the local `PlayerAnchor` for camera/prediction/input, and
+  renders other visible players as remote entity nodes with authoritative movement only.
+- Protocol bot scenario `23_true_coop_session.json` proves host create, guest join, distinct local
+  player ids, party metadata, same-level visibility, independent movement, guest disconnect/removal,
+  guest reconnect to town, and replay verification.
+
+**Explicit non-goals:** matchmaking/lobby, public discovery, Steam lobby/invites, party panel
+polish, chat/emotes/ready checks, trade, XP sharing, party bonuses, loot allocation rules,
+friendly fire/PvP, production remote-player art, more than two players, and distributed session
+ownership across server processes.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -826,6 +859,7 @@ dungeon_equipment_drops: descend to depth-banded dungeon → open chest → pick
 monster_rarity_loot_scaling: descend to generated dungeon → assert champion rarity → kill → pick up rolled loot → prove persistence
 combat_stat_effects: combat lab proofs for miss, crit, armor floor, block, monster crit/block, projectile impact, and stat breakdowns
 client_combat_feedback: equip gear → assert stat breakdowns → prove normal/crit/miss/block floating text and settings toggle
+true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
 ```
 
 **Verify:**
@@ -942,6 +976,11 @@ schema, formula parity, persistence boundaries, and named UI/protocol contracts,
 brittle dungeon size, generated population, movement timing, rarity tuning, and selector-index
 assumptions to semantic, range, derived, or eventual checks.
 
+**True two-player co-op sessions are now authoritative.** v33 adds server-owned co-op session
+membership, hashed join codes, actor-tagged inputs, per-player sim state, recipient-scoped realtime
+snapshots/deltas, remote-player Godot rendering, and a protocol bot proof for join, movement,
+disconnect/reconnect, and replay.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -954,7 +993,7 @@ assumptions to semantic, range, derived, or eventual checks.
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking, multi-player sessions, split deployables | v0 non-goals, ADR-0001 |
+| Multiplayer | Matchmaking/lobby, public session discovery, Steam lobby/invites, friend flows, party UI polish, chat/emotes/ready checks, trade, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, more than two players, split deployables / cross-process session ownership | v0/v33 non-goals, ADR-0001 |
 
 ---
 

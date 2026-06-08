@@ -20,6 +20,7 @@ type EntityView struct {
 	Position          Vec2           `json:"position"`
 	HP                *int           `json:"hp,omitempty"`
 	MaxHP             *int           `json:"max_hp,omitempty"`
+	CharacterID       string         `json:"character_id,omitempty"`
 	MonsterDefID      string         `json:"monster_def_id,omitempty"`
 	ItemDefID         string         `json:"item_def_id,omitempty"`
 	ItemTemplateID    string         `json:"item_template_id,omitempty"`
@@ -176,12 +177,24 @@ type TeleporterDiscoveryView struct {
 	Discovered bool `json:"discovered"`
 }
 
+// PartyMemberView describes one co-op member in recipient-scoped snapshots.
+type PartyMemberView struct {
+	PlayerID     string `json:"player_id"`
+	CharacterID  string `json:"character_id"`
+	DisplayName  string `json:"display_name"`
+	Role         string `json:"role"`
+	Connected    bool   `json:"connected"`
+	CurrentLevel int    `json:"current_level"`
+}
+
 // Snapshot is the full authoritative state for rendering (session_snapshot).
 type Snapshot struct {
 	ServerTick            uint64                    `json:"server_tick"`
 	SessionID             string                    `json:"session_id"`
 	Seed                  string                    `json:"seed"`
 	CurrentLevel          int                       `json:"current_level"`
+	LocalPlayerID         string                    `json:"local_player_id,omitempty"`
+	Party                 []PartyMemberView         `json:"party,omitempty"`
 	Entities              []EntityView              `json:"entities"`
 	Inventory             []ItemView                `json:"inventory"`
 	Equipped              map[string]*string        `json:"equipped"`

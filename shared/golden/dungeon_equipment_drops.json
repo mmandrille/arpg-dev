@@ -42,15 +42,14 @@
   ],
   "cases": [
     {
-      "name": "depth_3_monster_belt_and_badge",
+      "name": "depth_3_monster_single_bow",
       "level": -3,
       "source": "monster",
       "loot_table": "dungeon_mob_drop_depth_3_plus",
       "treasure_class_id": "dungeon_mob_tc_depth_3_plus",
-      "seed": "v29_dungeon_mob_tc_depth_3_plus_18",
+      "seed": "v29_dungeon_mob_tc_depth_3_plus_41",
       "expected_drops": [
-        { "item_template_id": "cave_bow" },
-        { "item_def_id": "gold" }
+        { "item_template_id": "cave_bow" }
       ]
     },
     {

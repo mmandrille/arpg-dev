@@ -5,19 +5,10 @@
       "attempts": [
         {
           "attempt_id": "primary",
-          "success_weight": 100,
-          "no_drop_weight": 0,
+          "success_weight": 15,
+          "no_drop_weight": 85,
           "entries": [
             { "item_template_id": "cave_blade", "weight": 1 }
-          ]
-        },
-        {
-          "attempt_id": "secondary",
-          "success_weight": 25,
-          "no_drop_weight": 75,
-          "entries": [
-            { "item_def_id": "red_potion", "weight": 60 },
-            { "item_def_id": "gold", "weight": 40 }
           ]
         }
       ]
@@ -26,8 +17,8 @@
       "attempts": [
         {
           "attempt_id": "primary",
-          "success_weight": 70,
-          "no_drop_weight": 30,
+          "success_weight": 15,
+          "no_drop_weight": 85,
           "entries": [
             { "item_template_id": "cave_blade", "weight": 35 },
             { "item_template_id": "cave_bow", "weight": 30 },
@@ -36,15 +27,6 @@
             { "item_def_id": "red_potion", "weight": 15 },
             { "item_def_id": "gold", "weight": 5 }
           ]
-        },
-        {
-          "attempt_id": "secondary",
-          "success_weight": 20,
-          "no_drop_weight": 80,
-          "entries": [
-            { "item_def_id": "red_potion", "weight": 60 },
-            { "item_def_id": "gold", "weight": 40 }
-          ]
         }
       ]
     },
@@ -52,8 +34,8 @@
       "attempts": [
         {
           "attempt_id": "primary",
-          "success_weight": 75,
-          "no_drop_weight": 25,
+          "success_weight": 15,
+          "no_drop_weight": 85,
           "entries": [
             { "item_template_id": "cave_blade", "weight": 20 },
             { "item_template_id": "cave_greatsword", "weight": 15 },
@@ -65,15 +47,6 @@
             { "item_def_id": "red_potion", "weight": 5 },
             { "item_def_id": "gold", "weight": 3 }
           ]
-        },
-        {
-          "attempt_id": "secondary",
-          "success_weight": 25,
-          "no_drop_weight": 75,
-          "entries": [
-            { "item_def_id": "red_potion", "weight": 55 },
-            { "item_def_id": "gold", "weight": 45 }
-          ]
         }
       ]
     },
@@ -81,8 +54,8 @@
       "attempts": [
         {
           "attempt_id": "primary",
-          "success_weight": 80,
-          "no_drop_weight": 20,
+          "success_weight": 15,
+          "no_drop_weight": 85,
           "entries": [
             { "item_template_id": "cave_blade", "weight": 14 },
             { "item_template_id": "cave_greatsword", "weight": 12 },
@@ -97,15 +70,6 @@
             { "item_template_id": "cave_amulet", "weight": 5 },
             { "item_def_id": "red_potion", "weight": 8 },
             { "item_def_id": "gold", "weight": 5 }
-          ]
-        },
-        {
-          "attempt_id": "secondary",
-          "success_weight": 30,
-          "no_drop_weight": 70,
-          "entries": [
-            { "item_def_id": "red_potion", "weight": 50 },
-            { "item_def_id": "gold", "weight": 50 }
           ]
         }
       ]

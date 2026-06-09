@@ -4,14 +4,15 @@
 # use `make ci` for the full integration pipeline. Use `make test-all` for
 # every local suite including CI and headless bot-visual.
 .PHONY: test test-py test-all
-test: ## Run unit tests (shared validation, Go, Python, client unit)
-	$(MAKE) validate-shared
-	$(MAKE) test-go
-	$(MAKE) test-py
-	$(MAKE) client-unit
+test: ## Run unit tests (quiet; VERBOSE=1 for full logs)
+	@$(RUN_QUIET) --label validate-shared $(MAKE) validate-shared
+	@$(RUN_QUIET) --label test-go $(MAKE) test-go
+	@$(RUN_QUIET) --label test-py $(MAKE) test-py
+	@$(RUN_QUIET) --label client-unit $(MAKE) client-unit
+	@echo "test OK"
 
 test-py: tools ## Run Python unit tests (tools/)
 	$(PY) -m pytest -q tools
 
-test-all: ## Run every test suite (make test + make ci + headless bot-visual)
+test-all: ## Run every test suite (quiet; VERBOSE=1 for full logs)
 	./scripts/test_all.sh

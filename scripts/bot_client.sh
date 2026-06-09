@@ -9,6 +9,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLIENT_DIR="$ROOT/client"
 SCENARIOS_DIR="$ROOT/tools/bot/scenarios/client"
+# shellcheck source=quiet_helpers.sh
+source "$ROOT/scripts/quiet_helpers.sh"
 
 GODOT="${GODOT:-godot}"
 
@@ -110,12 +112,16 @@ if ! server_error="$(curl --max-time 2 -fsS "$READY_URL" 2>&1)"; then
 fi
 
 # Import once before the scenario loop so headless --path runs cleanly.
-echo "[bot-client $(_ts)] Godot asset import starting (can take 30-90s on cold cache)..."
-import_started=$SECONDS
-if "$GODOT" --headless --path "$CLIENT_DIR" --import; then
-  echo "[bot-client $(_ts)] Godot asset import done elapsed=$((SECONDS - import_started))s"
+if is_quiet_mode; then
+  "$RUN_QUIET" --label "Godot asset import" -- bash -c '"$1" --headless --path "$2" --import || true' _ "$GODOT" "$CLIENT_DIR"
 else
-  echo "[bot-client $(_ts)] Godot asset import finished with warnings elapsed=$((SECONDS - import_started))s" >&2
+  echo "[bot-client $(_ts)] Godot asset import starting (can take 30-90s on cold cache)..."
+  import_started=$SECONDS
+  if "$GODOT" --headless --path "$CLIENT_DIR" --import; then
+    echo "[bot-client $(_ts)] Godot asset import done elapsed=$((SECONDS - import_started))s"
+  else
+    echo "[bot-client $(_ts)] Godot asset import finished with warnings elapsed=$((SECONDS - import_started))s" >&2
+  fi
 fi
 
 PASS_COUNT=0
@@ -136,36 +142,58 @@ run_scenario() {
   local email
   email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
   [[ "$HEADLESS" == "1" ]] && godot_flags="--headless $godot_flags"
-  echo "[bot-client $(_ts)] launching Godot for $scenario_id..."
-  local launch_started=$SECONDS
-  ARPG_BOT_CLIENT=1 \
-    ARPG_BOT_SCENARIO="$scenario_path" \
-    ARPG_WORLD_ID="$world_id" \
-    ARPG_SEED="$seed" \
-    ARPG_BASE_URL="$BASE_URL" \
-    ARPG_DEV_TOKEN="$DEV_TOKEN" \
-    ARPG_EMAIL="$email" \
-    ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
-    "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1 | tee "$tmpfile"
-  exit_code=${PIPESTATUS[0]}
-
-  echo "[bot-client $(_ts)] Godot process exited code=$exit_code launch_elapsed=$((SECONDS - launch_started))s"
+  if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
+    ARPG_BOT_CLIENT=1 \
+      ARPG_BOT_SCENARIO="$scenario_path" \
+      ARPG_WORLD_ID="$world_id" \
+      ARPG_SEED="$seed" \
+      ARPG_BASE_URL="$BASE_URL" \
+      ARPG_DEV_TOKEN="$DEV_TOKEN" \
+      ARPG_EMAIL="$email" \
+      ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
+      "$GODOT" $godot_flags --path "$CLIENT_DIR" >"$tmpfile" 2>&1
+    exit_code=$?
+  else
+    echo "[bot-client $(_ts)] launching Godot for $scenario_id..."
+    local launch_started=$SECONDS
+    ARPG_BOT_CLIENT=1 \
+      ARPG_BOT_SCENARIO="$scenario_path" \
+      ARPG_WORLD_ID="$world_id" \
+      ARPG_SEED="$seed" \
+      ARPG_BASE_URL="$BASE_URL" \
+      ARPG_DEV_TOKEN="$DEV_TOKEN" \
+      ARPG_EMAIL="$email" \
+      ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
+      "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1 | tee "$tmpfile"
+    exit_code=${PIPESTATUS[0]}
+    echo "[bot-client $(_ts)] Godot process exited code=$exit_code launch_elapsed=$((SECONDS - launch_started))s"
+  fi
 
   if [[ $exit_code -ne 0 ]]; then
-    rm -f "$tmpfile"
     echo "[bot-client] FAIL $scenario_id -- exited with code $exit_code" >&2
+    if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
+      show_log "$tmpfile" "$scenario_id"
+    fi
+    rm -f "$tmpfile"
     return 1
   fi
 
   if ! grep -qF "[bot-client] PASS $scenario_id" "$tmpfile"; then
-    rm -f "$tmpfile"
     echo "[bot-client] FAIL $scenario_id -- PASS sentinel not found in output" >&2
+    if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
+      show_log "$tmpfile" "$scenario_id"
+    fi
+    rm -f "$tmpfile"
     return 1
   fi
 
   rm -f "$tmpfile"
   local elapsed=$((SECONDS - started_ts))
-  echo "[bot-client $(_ts)] OK $scenario_id elapsed=${elapsed}s"
+  if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
+    echo "OK: bot-client $scenario_id (${elapsed}s)"
+  else
+    echo "[bot-client $(_ts)] OK $scenario_id elapsed=${elapsed}s"
+  fi
 }
 
 for f in "${SCENARIO_FILES[@]}"; do

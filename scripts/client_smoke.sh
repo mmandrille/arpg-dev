@@ -9,6 +9,8 @@ set -euo pipefail
 GODOT="${GODOT:-godot}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLIENT_DIR="$ROOT/client"
+# shellcheck source=quiet_helpers.sh
+source "$ROOT/scripts/quiet_helpers.sh"
 
 export BASE_URL="${BASE_URL:-http://localhost:8080}"
 export DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
@@ -29,18 +31,36 @@ echo "[client-smoke] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
 # failing nonzero (with a clear message) if it does not.
 run_gate() {
   local label="$1" sentinel="$2" script="$3"
-  local out
+  local gate_log
+  gate_log="$(mktemp -t arpg-client-gate.XXXXXX.log)"
+
   echo "[client-smoke] running $label"
-  if ! out="$("$GODOT" --headless --path "$CLIENT_DIR" --script "$script" 2>&1)"; then
-    printf '%s\n' "$out"
-    echo "[client-smoke] FAIL: $label exited nonzero" >&2
+  set +e
+  "$GODOT" --headless --path "$CLIENT_DIR" --script "$script" >"$gate_log" 2>&1
+  local status=$?
+  set -e
+
+  if [[ $status -ne 0 ]]; then
+    echo "FAILED: $label (exit $status)"
+    show_log "$gate_log" "$label"
+    rm -f "$gate_log"
     exit 1
   fi
-  printf '%s\n' "$out"
-  if ! grep -qF -- "$sentinel" <<<"$out"; then
-    echo "[client-smoke] FAIL: $label did not emit expected sentinel: $sentinel" >&2
+
+  if ! grep -qF -- "$sentinel" "$gate_log"; then
+    echo "FAILED: $label (missing sentinel: $sentinel)"
+    show_log "$gate_log" "$label"
+    rm -f "$gate_log"
     exit 1
   fi
+
+  if is_quiet_mode; then
+    echo "OK: $label"
+  else
+    cat "$gate_log"
+  fi
+
+  rm -f "$gate_log"
 }
 
 # Import resources once so headless --script runs cleanly.

@@ -6,6 +6,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=quiet_helpers.sh
+source "$ROOT/scripts/quiet_helpers.sh"
 
 DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
 ADDR="${ARPG_ADDR:-:8080}"
@@ -22,7 +24,7 @@ trap cleanup EXIT
 
 echo "[bot-client-local] building server..."
 SERVER_BIN="$(mktemp -t arpg-bot-client-server.XXXXXX)"
-(cd server && go build -o "$SERVER_BIN" ./cmd/arpg-server)
+"$RUN_QUIET" --label "go build arpg-server" -- bash -c "cd server && go build -o \"$SERVER_BIN\" ./cmd/arpg-server"
 
 echo "[bot-client-local] starting server on $ADDR (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
@@ -35,13 +37,17 @@ echo "[bot-client-local] waiting for server readiness..."
 for i in $(seq 1 60); do
   if curl -fsS "${BASE_URL%/}/readyz" >/dev/null 2>&1; then break; fi
   if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-    echo "[bot-client-local] server exited early; log:"; cat "$SERVER_LOG"; exit 1
+    echo "[bot-client-local] server exited early; log:"
+    show_log "$SERVER_LOG" "server"
+    exit 1
   fi
   sleep 1
 done
 curl -fsS "${BASE_URL%/}/readyz" >/dev/null
 if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-  echo "[bot-client-local] server exited before bot-client could start; log:"; cat "$SERVER_LOG"; exit 1
+  echo "[bot-client-local] server exited before bot-client could start; log:"
+  show_log "$SERVER_LOG" "server"
+  exit 1
 fi
 
 GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \

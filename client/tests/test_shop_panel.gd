@@ -4,6 +4,7 @@ extends SceneTree
 
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -61,6 +62,9 @@ func _run() -> void:
 	_assert_true("tooltip requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "Level 1"))
 	var comparison_entries: Array = panel._comparison_entries(offers[2])
 	_assert_true("tooltip comparison extracted", not comparison_entries.is_empty() and str((comparison_entries[0] as Dictionary).get("text", "")).contains("vs equipped"))
+	var offer_tooltip := panel._make_offer_tooltip(offers[2])
+	_assert_eq("vendor tooltip uses shared panel", offer_tooltip.get_script(), ItemTooltipPanelScript)
+	offer_tooltip.queue_free()
 
 	panel.bot_click_buy_offer("fixed:red_potion")
 	_assert_eq("buy emitted count", emitted.size(), 1)
@@ -86,6 +90,12 @@ func _run() -> void:
 		inventory_emitted.append({"type": intent_type, "payload": payload.duplicate(true)})
 	)
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
+	var inventory_tooltip := inventory_panel._make_item_tooltip(sell_appraisals[0])
+	_assert_eq("inventory tooltip uses shared panel", inventory_tooltip.get_script(), ItemTooltipPanelScript)
+	_assert_false("inventory tooltip stats exclude requirements", _array_contains_text(inventory_panel._tooltip_lines(sell_appraisals[0]), "Requires"))
+	_assert_true("inventory tooltip requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "Level 1"))
+	_assert_true("inventory tooltip comparison extracted", not inventory_panel._comparison_entries(sell_appraisals[0]).is_empty())
+	inventory_tooltip.queue_free()
 	inventory_panel._handle_drop_on_slot("bag", {
 		"source": "shop_offer",
 		"shop_entity_id": "1004",

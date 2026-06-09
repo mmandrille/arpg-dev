@@ -3,6 +3,7 @@ extends Control
 
 signal intent_requested(intent_type: String, payload: Dictionary)
 
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const PANEL_SIZE := Vector2(360, 680)
 const VENDOR_COLUMNS := 5
 const VENDOR_ROWS := 10
@@ -579,82 +580,24 @@ func _tooltip(row: Dictionary) -> String:
 
 
 func _make_offer_tooltip(offer: Dictionary) -> Control:
-	return _make_item_stats_tooltip(
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup(
+		offer,
+		item_presentations,
 		_tooltip_lines(offer),
 		_requirement_lines(offer),
 		_comparison_entries(offer),
 		int(offer.get("buy_price", 0)),
-		_offer_affordable(offer)
+		_offer_affordable(offer),
+		_short_label(str(offer.get("item_def_id", "")))
 	)
-
-
-func _make_text_tooltip(text: String) -> Control:
-	return _make_item_stats_tooltip([text], [], [], -1, true)
-
-
-func _make_item_stats_tooltip(main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int, affordable: bool) -> Control:
-	var tooltip := PanelContainer.new()
-	tooltip.add_theme_stylebox_override("panel", _tooltip_style())
-
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 2)
-	root.custom_minimum_size = Vector2(320, 0)
-	tooltip.add_child(root)
-
-	for line in main_lines:
-		root.add_child(_tooltip_label(str(line), Color("#e8dcc8")))
-	if not requirement_lines.is_empty():
-		root.add_child(_tooltip_spacer(8))
-		root.add_child(_tooltip_label("Requirements", Color("#c9a227")))
-		for line in requirement_lines:
-			root.add_child(_tooltip_label(str(line), Color("#d8c7a6")))
-	if not comparison_entries.is_empty():
-		root.add_child(_tooltip_spacer(6))
-		root.add_child(_tooltip_separator())
-		root.add_child(_tooltip_spacer(4))
-		for entry in comparison_entries:
-			if typeof(entry) != TYPE_DICTIONARY:
-				continue
-			var rec := entry as Dictionary
-			root.add_child(_tooltip_label(str(rec.get("text", "")), rec.get("color", Color("#d8c7a6"))))
-	if price >= 0:
-		root.add_child(_tooltip_spacer(4))
-		var footer := HBoxContainer.new()
-		var spacer := Control.new()
-		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		footer.add_child(spacer)
-		var price_label := Label.new()
-		price_label.text = str(price)
-		price_label.custom_minimum_size = Vector2(80, 0)
-		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		price_label.add_theme_color_override("font_color", Color("#f4c84f") if affordable else Color("#ff6f6f"))
-		price_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-		footer.add_child(price_label)
-		root.add_child(footer)
 	return tooltip
 
 
-func _tooltip_label(text: String, color: Color) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_color_override("font_color", color)
-	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	return label
-
-
-func _tooltip_spacer(height: int) -> Control:
-	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(0, height)
-	return spacer
-
-
-func _tooltip_separator() -> ColorRect:
-	var separator := ColorRect.new()
-	separator.color = Color("#6b5420")
-	separator.custom_minimum_size = Vector2(0, 1)
-	separator.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	return separator
+func _make_text_tooltip(text: String) -> Control:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup({}, item_presentations, [text], [], [], -1, true, "")
+	return tooltip
 
 
 func _tooltip_lines(row: Dictionary) -> Array:

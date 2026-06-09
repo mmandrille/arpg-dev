@@ -3,6 +3,7 @@ extends Control
 
 signal intent_requested(intent_type: String, payload: Dictionary)
 
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -119,7 +120,9 @@ class InventorySlotButton:
 	func _make_custom_tooltip(for_text: String) -> Object:
 		if panel == null:
 			return null
-		return panel._make_item_tooltip(for_text)
+		if item.is_empty():
+			return panel._make_text_tooltip(for_text)
+		return panel._make_item_tooltip(item)
 
 
 func _ready() -> void:
@@ -528,17 +531,24 @@ func _caption(text: String) -> Label:
 	return label
 
 
-func _make_item_tooltip(text: String) -> Control:
-	var tooltip := PanelContainer.new()
-	tooltip.add_theme_stylebox_override("panel", _tooltip_style())
+func _make_item_tooltip(item: Dictionary) -> Control:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup(
+		item,
+		item_presentations,
+		_tooltip_lines(item),
+		_requirement_lines(item),
+		_comparison_entries(item),
+		-1,
+		true,
+		_short_label(str(item.get("item_def_id", "")))
+	)
+	return tooltip
 
-	var label := Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(300, 0)
-	label.add_theme_color_override("font_color", Color("#e8dcc8"))
-	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	tooltip.add_child(label)
+
+func _make_text_tooltip(text: String) -> Control:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup({}, item_presentations, [text], [], [], -1, true, "")
 	return tooltip
 
 
@@ -741,12 +751,20 @@ func _slot_from_kind(kind: String) -> String:
 
 
 func _tooltip(item: Dictionary) -> String:
+	return "\n".join(_tooltip_lines(item) + _requirement_lines_as_summary(item) + _comparison_lines(item.get("comparison", {})))
+
+
+func _tooltip_lines(item: Dictionary) -> Array:
 	var def_id := str(item.get("item_def_id", ""))
 	var def: Dictionary = _item_definition(def_id)
-	var lines: Array[String] = [str(item.get("display_name", def.get("name", def_id)))]
+	var lines: Array = [str(item.get("display_name", def.get("name", def_id)))]
 	var rarity := str(item.get("rarity", ""))
 	if rarity != "":
 		lines.append("Rarity: %s" % rarity.capitalize())
+	var summary_lines := _detail_lines(item, false, false)
+	if not summary_lines.is_empty():
+		lines.append_array(summary_lines)
+		return lines
 	var slot := str(def.get("slot", ""))
 	if slot != "":
 		lines.append("Slot: %s" % slot)
@@ -774,10 +792,167 @@ func _tooltip(item: Dictionary) -> String:
 		lines.append("Reach: %s" % str(def["reach"]))
 	if def.has("attack_mode"):
 		lines.append("Mode: %s" % str(def["attack_mode"]))
+	return lines
+
+
+func _detail_lines(item: Dictionary, include_requirements: bool = true, include_comparison: bool = true) -> Array:
+	var lines: Array = []
+	var summary = item.get("summary_lines", [])
+	if typeof(summary) != TYPE_ARRAY:
+		return lines
+	for line in summary:
+		var text := str(line)
+		if text == "":
+			continue
+		if not include_requirements and _is_requirement_summary_line(text):
+			continue
+		if not include_comparison and _is_comparison_summary_line(text):
+			continue
+		lines.append(text)
+	return lines
+
+
+func _requirement_lines(item: Dictionary) -> Array:
+	var lines: Array = []
 	var requirements: Dictionary = item.get("requirements", {})
 	if requirements.has("level"):
-		lines.append("Requires level %s" % str(requirements["level"]))
-	return "\n".join(lines)
+		lines.append("Level %s" % str(requirements["level"]))
+	for key in requirements.keys():
+		var stat := str(key)
+		if stat == "level":
+			continue
+		lines.append("%s %s" % [_display_stat(stat), str(requirements.get(key, ""))])
+	var summary = item.get("summary_lines", [])
+	if typeof(summary) == TYPE_ARRAY:
+		for line in summary:
+			var parsed := _requirement_from_summary_line(str(line))
+			if parsed != "" and not lines.has(parsed):
+				lines.append(parsed)
+	return lines
+
+
+func _requirement_lines_as_summary(item: Dictionary) -> Array:
+	var lines: Array = []
+	for line in _requirement_lines(item):
+		var text := str(line)
+		if text.to_lower().begins_with("level "):
+			lines.append("Requires %s" % text.to_lower())
+		else:
+			lines.append("Requires %s" % text)
+	return lines
+
+
+func _is_requirement_summary_line(text: String) -> bool:
+	return _requirement_from_summary_line(text) != ""
+
+
+func _is_comparison_summary_line(text: String) -> bool:
+	return _comparison_delta_from_line(text) != null
+
+
+func _requirement_from_summary_line(text: String) -> String:
+	var normalized := text.strip_edges()
+	if not normalized.to_lower().begins_with("requires "):
+		return ""
+	var rest := normalized.substr("Requires ".length()).strip_edges()
+	if rest.to_lower().begins_with("level "):
+		return "Level %s" % rest.substr("level ".length()).strip_edges()
+	return rest.capitalize()
+
+
+func _comparison_entries(item: Dictionary) -> Array:
+	var entries: Array = []
+	var comparison = item.get("comparison", {})
+	if typeof(comparison) == TYPE_DICTIONARY:
+		var deltas = (comparison as Dictionary).get("deltas", [])
+		if typeof(deltas) == TYPE_ARRAY:
+			for delta in deltas:
+				if typeof(delta) != TYPE_DICTIONARY:
+					continue
+				var rec := delta as Dictionary
+				var diff := int(rec.get("delta", 0))
+				var sign := "+" if diff >= 0 else ""
+				entries.append({
+					"text": "%s%s %s vs equipped" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))],
+					"color": _comparison_color(diff),
+				})
+	var summary = item.get("summary_lines", [])
+	if typeof(summary) == TYPE_ARRAY:
+		for line in summary:
+			var text := str(line)
+			var diff_value = _comparison_delta_from_line(text)
+			if diff_value == null:
+				continue
+			var duplicate := false
+			for entry in entries:
+				if typeof(entry) == TYPE_DICTIONARY and str((entry as Dictionary).get("text", "")) == text:
+					duplicate = true
+					break
+			if duplicate:
+				continue
+			entries.append({
+				"text": text,
+				"color": _comparison_color(int(diff_value)),
+			})
+	return entries
+
+
+func _comparison_delta_from_line(text: String):
+	var stripped := text.strip_edges()
+	if not stripped.contains("vs equipped"):
+		return null
+	if stripped.length() == 0 or (not stripped.begins_with("+") and not stripped.begins_with("-")):
+		return null
+	var first_space := stripped.find(" ")
+	if first_space <= 1:
+		return null
+	return int(stripped.substr(0, first_space))
+
+
+func _comparison_lines(comparison_value: Variant) -> Array:
+	if typeof(comparison_value) != TYPE_DICTIONARY:
+		return []
+	var comparison := comparison_value as Dictionary
+	var deltas = comparison.get("deltas", [])
+	if typeof(deltas) != TYPE_ARRAY:
+		return []
+	var lines: Array = []
+	for delta in deltas:
+		if typeof(delta) != TYPE_DICTIONARY:
+			continue
+		var rec := delta as Dictionary
+		var diff := int(rec.get("delta", 0))
+		var sign := "+" if diff >= 0 else ""
+		lines.append("%s%s %s vs equipped" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))])
+	return lines
+
+
+func _comparison_color(delta: int) -> Color:
+	if delta > 0:
+		return Color("#9ee6a8")
+	if delta < 0:
+		return Color("#ff9f7a")
+	return Color("#d8c7a6")
+
+
+func _display_stat(stat: String) -> String:
+	match stat:
+		"damage_min":
+			return "Min damage"
+		"damage_max":
+			return "Max damage"
+		"armor":
+			return "Armor"
+		"block_percent":
+			return "Block"
+		"max_hp":
+			return "Max HP"
+		"hotbar_slots":
+			return "Hotbar slots"
+		"inventory_rows":
+			return "Inventory rows"
+		_:
+			return stat
 
 
 func _short_label(def_id: String) -> String:

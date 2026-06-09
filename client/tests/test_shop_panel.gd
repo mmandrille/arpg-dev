@@ -95,6 +95,8 @@ func _run() -> void:
 		inventory_emitted.append({"type": intent_type, "payload": payload.duplicate(true)})
 	)
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
+	_assert_true("inventory red potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines(inventory[1]), "Restores 5 HP"))
+	_assert_true("inventory blue potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines({"item_def_id": "blue_potion"}), "Restores 5 mana"))
 	inventory_panel.set_inventory_state([sell_appraisals[0]], {}, 3, 15, 60)
 	var inventory_state := inventory_panel.get_debug_state()
 	_assert_true("inventory requirements rendered", int(inventory_state.get("requirement_row_count", 0)) >= 2)

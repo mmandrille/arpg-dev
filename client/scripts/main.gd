@@ -1386,11 +1386,11 @@ func _is_character_info_key(event: InputEventKey) -> bool:
 
 
 func _close_gameplay_panels(except: String = "") -> void:
-	if not (except in ["inventory", "shop_with_inventory"]) and inventory_panel != null:
+	if not (except in ["inventory", "stats", "shop_with_inventory"]) and inventory_panel != null:
 		inventory_panel.hide_display()
 	if not (except in ["shop", "shop_with_inventory"]):
 		_hide_shop_panel()
-	if except != "stats" and character_stats_panel != null:
+	if not (except in ["stats", "inventory"]) and character_stats_panel != null:
 		character_stats_panel.hide_display()
 	if except != "character_info":
 		_hide_character_info_panel()

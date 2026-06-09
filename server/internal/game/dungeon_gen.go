@@ -88,11 +88,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 			generatedStair{defID: stairsUpDefID, pos: rules.PlayerSpawn},
 			generatedStair{defID: stairsDownDefID, pos: down},
 		)
-		teleporter, ok := randomTeleporterPosition(rng, rules, out.stairPositions())
-		if !ok {
-			return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
+		if err := addCadencedTeleporter(rng, rules, &out); err != nil {
+			return generatedDungeonLevel{}, err
 		}
-		out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
 		if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
@@ -116,11 +114,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		generatedStair{defID: stairsUpDefID, pos: up},
 		generatedStair{defID: stairsDownDefID, pos: down},
 	)
-	teleporter, ok := randomTeleporterPosition(rng, rules, out.stairPositions())
-	if !ok {
-		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place teleporter", levelNum)
+	if err := addCadencedTeleporter(rng, rules, &out); err != nil {
+		return generatedDungeonLevel{}, err
 	}
-	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
 	if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
@@ -144,6 +140,22 @@ func isBossFloor(levelNum int, rules DungeonGenerationRules) bool {
 	return levelNum < 0 && rules.BossFloor.Cadence > 0 && absInt(levelNum)%rules.BossFloor.Cadence == 0
 }
 
+func addCadencedTeleporter(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+	if !dungeonLevelHasTeleporter(out.levelNum) {
+		return nil
+	}
+	teleporter, ok := randomTeleporterPosition(rng, rules, out.stairPositions())
+	if !ok {
+		return fmt.Errorf("game: generate dungeon level %d: could not place teleporter", out.levelNum)
+	}
+	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
+	return nil
+}
+
+func dungeonLevelHasTeleporter(levelNum int) bool {
+	return levelNum < 0 && absInt(levelNum)%3 == 0
+}
+
 func generateBossDungeonLevel(seed string, levelNum int, rules DungeonGenerationRules, lootBand DungeonLootBand) (generatedDungeonLevel, error) {
 	boss := rules.BossFloor
 	bossRules := rules
@@ -156,7 +168,6 @@ func generateBossDungeonLevel(seed string, levelNum int, rules DungeonGeneration
 		generatedStair{defID: stairsUpDefID, pos: boss.StairsUpPosition, state: interactableReady},
 		generatedStair{defID: stairsDownDefID, pos: boss.StairsDownPosition, state: interactableLocked},
 	)
-	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: boss.TeleporterPosition, state: interactableDisabled})
 	out.chests = append(out.chests, generatedChest{
 		defID:     boss.ChestInteractableDefID,
 		lootTable: boss.ChestLootTable,

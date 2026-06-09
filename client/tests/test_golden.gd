@@ -199,6 +199,7 @@ func _initialize() -> void:
 		return
 	var level1: Dictionary = dungeon_stairs["levels"]["-1"]
 	var level2: Dictionary = dungeon_stairs["levels"]["-2"]
+	var level3: Dictionary = dungeon_stairs["levels"]["-3"]
 	var town: Dictionary = dungeon_stairs["levels"]["0"]
 	if not _vec2_equals(town["stairs_down"], 8.0, 10.0):
 		_fail("town stairs_down mismatch")
@@ -212,14 +213,20 @@ func _initialize() -> void:
 	if not _vec2_equals(level1["stairs_down"], 27.0, 22.0):
 		_fail("dungeon level -1 stairs_down mismatch")
 		return
-	if not _vec2_equals(level1["teleporter"], 82.0, 12.0):
-		_fail("dungeon level -1 teleporter mismatch")
+	if level1.has("teleporter"):
+		_fail("dungeon level -1 should not have teleporter")
 		return
 	if not _vec2_equals(level2["stairs_up"], 24.0, 43.0) or not _vec2_equals(level2["stairs_down"], 30.0, 2.0):
 		_fail("dungeon level -2 stairs mismatch")
 		return
-	if not _vec2_equals(level2["teleporter"], 92.0, 47.0):
-		_fail("dungeon level -2 teleporter mismatch")
+	if level2.has("teleporter"):
+		_fail("dungeon level -2 should not have teleporter")
+		return
+	if not _vec2_equals(level3["stairs_up"], 14.0, 30.0) or not _vec2_equals(level3["stairs_down"], 69.0, 34.0):
+		_fail("dungeon level -3 stairs mismatch")
+		return
+	if not _vec2_equals(level3["teleporter"], 60.0, 22.0):
+		_fail("dungeon level -3 teleporter mismatch")
 		return
 	var dungeon_loot: Array = level2["loot"]
 	if dungeon_loot.size() != 1:
@@ -239,10 +246,10 @@ func _initialize() -> void:
 		_fail("dungeon_teleporters seed mismatch")
 		return
 	var tp_outcome: Dictionary = dungeon_teleporters["discover_descend_teleport"]
-	if int(tp_outcome["expected_level"]) != -1:
+	if int(tp_outcome["expected_level"]) != -3:
 		_fail("dungeon teleporters expected level mismatch")
 		return
-	if not _vec2_equals(tp_outcome["expected_player_position"], 83.0, 12.0):
+	if not _vec2_equals(tp_outcome["expected_player_position"], 61.0, 22.0):
 		_fail("dungeon teleporters expected player position mismatch")
 		return
 

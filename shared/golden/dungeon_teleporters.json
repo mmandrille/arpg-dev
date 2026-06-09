@@ -1,22 +1,20 @@
 {
   "seed": "deadbeefdeadbeef",
   "world_id": "dungeon_levels",
-  "description": "Pinned outcome after town descend, discover -1, descend to -2, discover -2, teleport back to -1 teleporter.",
+  "description": "Pinned outcome after town descend to floor -3, discover the floor -3 teleporter, return to town, then teleport back to floor -3.",
   "discover_descend_teleport": {
-    "expected_level": -1,
-    "expected_player_position": { "x": 83, "y": 12 },
+    "expected_level": -3,
+    "expected_player_position": { "x": 61, "y": 22 },
     "discovered_teleporters": [
-      { "level": -2, "discovered": true },
-      { "level": -1, "discovered": true },
+      { "level": -3, "discovered": true },
       { "level": 0, "discovered": true }
     ]
   },
   "visited_undiscovered_target": {
-    "description": "After visiting -2 without discovering it, teleport from -1 to -2 is rejected.",
+    "description": "After visiting -4, teleport from -3 to -4 is rejected because floor -4 has no discovered teleporter.",
     "reject_reason": "target_level_not_discovered",
     "discovered_teleporters": [
-      { "level": -2, "discovered": false },
-      { "level": -1, "discovered": true },
+      { "level": -3, "discovered": true },
       { "level": 0, "discovered": true }
     ]
   }

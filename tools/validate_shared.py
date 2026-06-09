@@ -1055,8 +1055,8 @@ def cross_checks(report: Report) -> None:
             report.fail("boss_floor golden", f"unknown boss template {template_id}")
         elif expected["locked_reason"] != boss_floor["locked_exit_reason"]:
             report.fail("boss_floor golden", "locked reason must match boss_floor rules")
-        elif expected["stairs_down_initial_state"] != "locked" or expected["teleporter_initial_state"] != "disabled":
-            report.fail("boss_floor golden", "initial exit states must be locked/disabled")
+        elif expected["stairs_down_initial_state"] != "locked" or expected["teleporter_initial_state"] != "absent":
+            report.fail("boss_floor golden", "initial exit states must be locked/absent")
         elif expected["boss"]["base_monster_def_id"] != template["base_monster_def_id"]:
             report.fail("boss_floor golden", "boss base_monster_def_id mismatch")
         elif expected["boss"]["visual_model"] != template["visual"]["model"] or expected["boss"]["visual_scale"] != template["visual"]["scale"]:
@@ -2058,10 +2058,10 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_teleporters golden", "seed must match dungeon_stairs.json")
     else:
         tp_outcome = dungeon_teleporters_golden["discover_descend_teleport"]
-        if tp_outcome["expected_level"] != -1:
-            report.fail("dungeon_teleporters golden", "discover_descend_teleport.expected_level must be -1")
-        elif not adjacent_to(tp_outcome["expected_player_position"], dungeon_stairs_golden["levels"]["-1"]["teleporter"]):
-            report.fail("dungeon_teleporters golden", "expected_player_position must be adjacent to level -1 teleporter")
+        if tp_outcome["expected_level"] != -3:
+            report.fail("dungeon_teleporters golden", "discover_descend_teleport.expected_level must be -3")
+        elif not adjacent_to(tp_outcome["expected_player_position"], dungeon_stairs_golden["levels"]["-3"]["teleporter"]):
+            report.fail("dungeon_teleporters golden", "expected_player_position must be adjacent to level -3 teleporter")
         else:
             report.ok("dungeon_teleporters golden matches stairs seed and travel outcome")
 

@@ -563,7 +563,7 @@ func (s *Sim) LoadDiscoveredTeleporters(levels []int) {
 	}
 	s.discoveredTeleporters[townLevel] = true
 	for _, level := range levels {
-		if level <= townLevel {
+		if s.levelHasTeleporter(level) {
 			s.discoveredTeleporters[level] = true
 		}
 	}
@@ -2172,7 +2172,7 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 
 	arrivalRes := TickResult{Tick: res.Tick, Level: destLevel, Changes: []Change{}, Events: []Event{}}
 	arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpWallLayoutUpdate, Walls: wallViewsForLevel(dest)})
-	if s.multiLevel && !s.discoveredTeleporters[destLevel] {
+	if s.multiLevel && s.levelHasTeleporter(destLevel) && !s.discoveredTeleporters[destLevel] {
 		arrivalRes.Changes = append(arrivalRes.Changes, Change{
 			Op:         OpTeleporterDiscoveryUpdate,
 			Level:      destLevel,
@@ -5433,12 +5433,12 @@ func (s *Sim) teleporterDiscoveryView() []TeleporterDiscoveryView {
 	}
 	levelSet := make(map[int]bool, len(s.levels)+len(s.discoveredTeleporters))
 	for levelNum := range s.levels {
-		if levelNum <= townLevel {
+		if s.levelHasTeleporter(levelNum) {
 			levelSet[levelNum] = true
 		}
 	}
 	for levelNum := range s.discoveredTeleporters {
-		if levelNum <= townLevel {
+		if s.levelHasTeleporter(levelNum) {
 			levelSet[levelNum] = true
 		}
 	}
@@ -5452,6 +5452,16 @@ func (s *Sim) teleporterDiscoveryView() []TeleporterDiscoveryView {
 		out = append(out, TeleporterDiscoveryView{Level: levelNum, Discovered: s.discoveredTeleporters[levelNum]})
 	}
 	return out
+}
+
+func (s *Sim) levelHasTeleporter(levelNum int) bool {
+	if !s.multiLevel {
+		return false
+	}
+	if levelNum == townLevel {
+		return true
+	}
+	return dungeonLevelHasTeleporter(levelNum)
 }
 
 func (e *entity) view() EntityView {

@@ -1,0 +1,267 @@
+client/scripts/main.gd
+  s_6716ca95c0aecc::t_1274cfb645c4b6 341-342,1356-1362,1367-1371,1440-1447,1455-1456,1617
+  s_6716ca95c0aecc::t_c1c7d263422206 2078-2081,2338-2339
+  s_6716ca95c0aecc::t_1786973b13339b 2208-2213
+  s_6716ca95c0aecc::t_15a48149c61d94 2355-2364,2375-2394,2403-2412,2416-2494
+  s_6716ca95c0aecc::t_d66e211ae275da 3401,3417-3418,3435,3441-3442
+  s_6716ca95c0aecc::t_60eb4d73772207 3683-3684
+  s_6716ca95c0aecc::t_19d96f0d207a9b 3691-3704
+  s_6716ca95c0aecc::t_2ad008cd08036f 578-579,608-609,612
+  s_6716ca95c0aecc::t_c57d27ff4a35d3 3677-3682,3685-3690
+  s_6716ca95c0aecc::t_46612c5bb626da 19-20,94-95,177-178
+  s_6716ca95c0aecc::t_d75e964509b2b0 840-849
+  s_6716ca95c0aecc::t_529d8022bf94aa 749-750,755,828-833
+shared/protocol/examples/state_delta.json
+  s_6716ca95c0aecc::t_f88297a17da3ed 52,62-76,96-100
+server/internal/realtime/runner.go
+  s_6716ca95c0aecc::t_5372411ace9524 534
+  s_6716ca95c0aecc::t_8071f1d3469280 535,547-555
+server/internal/game/rules.go
+  s_6716ca95c0aecc::t_f33ef2325d68cc 771-775,868-870,883,899-903,905
+  s_6716ca95c0aecc::t_677d9957b90a0a 927-937
+  s_6716ca95c0aecc::t_f7f441710663af 1981-1989
+  s_6716ca95c0aecc::t_b961cf8eee036a 677,697-705,745
+  s_6716ca95c0aecc::t_77e6705bc259b9 21,96,98,583-593,674-676,678
+  s_6716ca95c0aecc::t_9330246d1f8e5a 616-624,629-638
+  s_6716ca95c0aecc::t_f5eb9a24117927 1907-1958
+  s_6716ca95c0aecc::t_000a5a5cd0ad3d 44-53,88,94-95,97,99-100,349,375,384-414
+shared/protocol/examples/allocate_skill_point_intent.json
+  s_6716ca95c0aecc::t_f88297a17da3ed 1-9
+client/tests/test_skills_panel.gd
+  s_6716ca95c0aecc::t_772b1a447df01b 1-72
+shared/rules/combat.v0.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 8-10
+shared/rules/skills.v0.schema.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 1-61
+shared/golden/character_progression.v0.schema.json
+  s_6716ca95c0aecc::t_46eeaa28bc226c 28,35,63,77
+server/migrations/0012_character_skills.sql
+  s_6716ca95c0aecc::t_fdf85ab280a658 1-38
+server/internal/game/sim.go
+  s_6716ca95c0aecc::t_76df9ecb33fc1e 1015-1018,1036
+  s_6716ca95c0aecc::t_38fedec533e73c 45,174-184,203-207,223,254,264-265
+  s_6716ca95c0aecc::t_728a18a1816944 5367-5368
+  s_6716ca95c0aecc::t_c8c17b6fa33bee 5409-5410,5423,5441-5444,5479-5486,5495-5504,5507-5517,5527-5528
+  s_6716ca95c0aecc::t_77e6705bc259b9 1058-1076,1078-1080,1129-1130,2924-2929
+  s_6716ca95c0aecc::t_46c40035ff7fab 2859-2923,2930-2977
+  s_6716ca95c0aecc::t_23ffbbd3f2425c 5834-5835,5882-5883
+  s_6716ca95c0aecc::t_ed48a0728501fe 1077,1125-1128,1131
+  s_6716ca95c0aecc::t_1c6d01cbc94d0c 5082,5090-5117,5119-5121,5123
+  s_6716ca95c0aecc::t_4386602f64dd1e 2986-3113
+  s_6716ca95c0aecc::t_3f322ff1b49847 1270,1305-1308
+  s_6716ca95c0aecc::t_7e9a6c764c0076 307,384-385,402-405,484
+  s_6716ca95c0aecc::t_7f626760d0b55c 5118
+  s_6716ca95c0aecc::t_19e3499532dc69 5138-5148,5170-5180
+  s_6716ca95c0aecc::t_c77fcac76f24e8 430-466
+  s_6716ca95c0aecc::t_694329a94d37ac 5088
+  s_6716ca95c0aecc::t_fd8dcd1bf88065 729,736,764
+  s_6716ca95c0aecc::t_d94cf247cba886 5559-5602
+  s_6716ca95c0aecc::t_4d44e43ee7c776 4299-4308,4313-4314
+  s_6716ca95c0aecc::t_a0d36cbeb4d9c4 5680-5690
+  s_6716ca95c0aecc::t_0be9217c71031c 5129-5131
+client/tests/test_client_bot.gd
+  s_6716ca95c0aecc::t_6500180a5f3db9 265,310,320
+  s_6716ca95c0aecc::t_337cac8876c88d 33,38,41
+  s_6716ca95c0aecc::t_61653e673257a5 190-198,274-288,334-358
+client/scripts/skill_bar.gd.uid
+  s_6716ca95c0aecc::t_b685aa2d1a1bb8 1
+client/tests/test_skills_panel.gd.uid
+  s_6716ca95c0aecc::t_b685aa2d1a1bb8 1
+shared/rules/shops.v0.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 41
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_6716ca95c0aecc::t_50204b1282fe46 1-114
+tools/bot/run.py
+  s_6716ca95c0aecc::t_977698d763f046 1873,1875-1876,1974-1977,2000-2001
+  s_6716ca95c0aecc::t_306ff24a5ba534 121-122
+  s_6716ca95c0aecc::t_c933ec222de340 387,390-391
+  s_6716ca95c0aecc::t_7aa24f5f29ff5c 389,403-416
+  s_6716ca95c0aecc::t_0917cba06a7525 2720-2758
+  s_6716ca95c0aecc::t_d47d0e656b1f2a 1869,1874,2400-2401,2811-2812,2931-2934,3212-3217,3319-3320
+  s_6716ca95c0aecc::t_5fb11bc1c007cd 388,400-402,417-418
+  s_6716ca95c0aecc::t_093d3dbbea8b71 1185-1244
+  s_6716ca95c0aecc::t_2901b0ccc210c3 1793-1818
+  s_6716ca95c0aecc::t_f77e96a492fc48 2031-2042
+shared/protocol/messages.v5.schema.json
+  s_6716ca95c0aecc::t_ea9c56628f8514 3-4
+  s_6716ca95c0aecc::t_83684becb0f6a5 28-29,76-79,230-251
+  s_6716ca95c0aecc::t_082c1e7213822b 1-2,5-27,30-75,80-229,252-299
+scripts/client_smoke.sh
+  s_6716ca95c0aecc::t_ba98b7690d7b8d 99-102
+tools/bot/scenarios/18_character_stats_and_leveling.json
+  s_6716ca95c0aecc::t_6500180a5f3db9 13,23,32,43,51
+shared/protocol/session_snapshot.v5.schema.json
+  s_6716ca95c0aecc::t_082c1e7213822b 1-2,5-6,8-31,34-142,144-254,256-261,263-286,288-314,348-375,383-497,533-592
+  s_6716ca95c0aecc::t_ea9c56628f8514 3-4
+  s_6716ca95c0aecc::t_1e2e4e633ce20b 7,32-33,143,255,262,287,315-347
+  s_6716ca95c0aecc::t_d4f4ab8314607b 376-382,498-532
+client/tests/test_skill_bar.gd
+  s_6716ca95c0aecc::t_3ad6b4709763cc 1-81
+server/internal/game/shop.go
+  s_6716ca95c0aecc::t_4ca2a3da92fea8 343-344,442,457-458
+shared/rules/item_templates.v0.schema.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 49,88,98-100,102-122
+shared/rules/items.v0.schema.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 32,72-74
+server/internal/store/store_test.go
+  s_6716ca95c0aecc::t_a700e8fe55e050 126-131,426,428-429,435,438,443-448,454,555,558,582
+server/internal/http/ws_test.go
+  s_6716ca95c0aecc::t_4b57467bc6752b 1066-1131
+  s_6716ca95c0aecc::t_e7e7b245cdc853 574-618
+  s_6716ca95c0aecc::t_39202c960c57ea 547,553,560
+  s_6716ca95c0aecc::t_d0a064809523b5 77-84,100-101,106
+  s_6716ca95c0aecc::t_72d958b195a547 564,570
+shared/rules/combat.v0.schema.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 7,16-18
+server/internal/inputdecode/inputdecode.go
+  s_6716ca95c0aecc::t_77e6705bc259b9 12-26,28-30
+  s_6716ca95c0aecc::t_a45e047295eaf6 27,83-90,104,203-214
+tools/validate_shared.py
+  s_6716ca95c0aecc::t_159fbe0c80bc62 129,161,298-311,464-492
+  s_6716ca95c0aecc::t_7acc9658483625 394-396,399-405,444-445
+  s_6716ca95c0aecc::t_3cea6c4f37f8e7 76,78-79,178-183,189-193,196,198-211
+  s_6716ca95c0aecc::t_e505747c190574 548-558,589,613-615,648-655,668-675,695-708
+  s_6716ca95c0aecc::t_9a754a0a743728 872-964
+  s_6716ca95c0aecc::t_e966dc6d4bfef3 1861
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_6716ca95c0aecc::t_a58e7885123144 36,40
+  s_6716ca95c0aecc::t_82261f824619a9 1-35,37-39,41-45
+server/internal/game/game_test.go
+  s_6716ca95c0aecc::t_eab35f0a3c3fae 328-334
+  s_6716ca95c0aecc::t_5a48ded80b4d45 517
+  s_6716ca95c0aecc::t_0f0e3efb254ea4 439
+  s_6716ca95c0aecc::t_0eaf032dc288a8 360-361
+  s_6716ca95c0aecc::t_205caf56c40cd9 6208-6225
+  s_6716ca95c0aecc::t_e25a85a4561438 3953-3964
+  s_6716ca95c0aecc::t_77e62fba42f6ce 435-438,440-516,518-593
+  s_6716ca95c0aecc::t_b9b33071d48730 116-123,398-399,422-423,6179-6181
+shared/protocol/examples/session_snapshot.json
+  s_6716ca95c0aecc::t_f88297a17da3ed 74,107-115
+server/internal/store/models.go
+  s_6716ca95c0aecc::t_fdf85ab280a658 121,125,128-129,136,140
+docs/plans/v44_2026-06-09-skill-points-and-magic-bolt.md
+  s_6716ca95c0aecc::t_7eae1bed114d63 109-116
+  s_6716ca95c0aecc::t_cb98c72e5d9fbc 153-158
+  s_6716ca95c0aecc::t_b5d4289e187ed6 133-138
+  s_6716ca95c0aecc::t_d88bdfbba9041b 312-313,330-334,336-337
+  s_6716ca95c0aecc::t_42c184cd76489f 172-175,192-197,213-219,233-236,253-257
+  s_6716ca95c0aecc::t_89d625136bd14f 314,339
+  s_6716ca95c0aecc::t_15b309abe71481 89,176,277-284,295,298-300,303,324,335,338
+  s_7782e8b3c9750f::t_ec9ec0e3771381 1-88,90-108,117-132,139-152,159-171,177-191,198-212,220-232,237-252,258-276,285-294,296-297,301-302,304-311,315-323,325-329,340-347
+shared/golden/character_progression.json
+  s_6716ca95c0aecc::t_8a34f6d8aba988 21,28,48,55,75,82,102,109,131,138,158,165
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 2,9,74,101,130,157
+server/internal/realtime/hub.go
+  s_6716ca95c0aecc::t_76697462260562 124-125
+docs/PROGRESS.md
+  s_6716ca95c0aecc::t_b4ff5dee539c1d 1337-1340,1345-1346
+  s_6716ca95c0aecc::t_607e96056084d7 14,62,126
+  s_6716ca95c0aecc::t_18d6970a5f83b0 1170-1171
+  s_6716ca95c0aecc::t_b320df1e1a287b 1349
+  s_6716ca95c0aecc::t_708e7c92341316 1075-1103
+shared/rules/item_templates.v0.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 18,41,60,79,135-139
+shared/rules/character_progression.v0.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 9-14
+shared/protocol/envelope.v5.schema.json
+  s_6716ca95c0aecc::t_ea9c56628f8514 3-4
+  s_6716ca95c0aecc::t_83684becb0f6a5 28-29
+  s_6716ca95c0aecc::t_082c1e7213822b 1-2,5-27,30-52
+client/scripts/skill_bar.gd
+  s_6716ca95c0aecc::t_e36786261f15dc 1-192
+shared/golden/skill_points_and_magic_bolt.v0.schema.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 1-102
+shared/protocol/state_delta.v5.schema.json
+  s_6716ca95c0aecc::t_082c1e7213822b 1-2,5-189,191-274,282-412,441-443,451-539,541-546,548-571,573-598,622,633-735,754-759
+  s_6716ca95c0aecc::t_13727cb8daf3e0 190,275-281,413-440,444-450,540,547,572,599-621,623-632,736-753
+  s_6716ca95c0aecc::t_ea9c56628f8514 3-4
+server/internal/game/types.go
+  s_6716ca95c0aecc::t_d47d0e656b1f2a 181
+  s_6716ca95c0aecc::t_474fb9693954e3 117-127,190-192,196-201,203-210,394-395,413-414,436-437,509-518
+  s_6716ca95c0aecc::t_77e6705bc259b9 193-195,202,314-355,421-435
+  s_6716ca95c0aecc::t_925a0b3873caf4 187
+server/internal/replay/replay.go
+  s_6716ca95c0aecc::t_e040e3e8f30bbb 567-568,580-588
+server/internal/inputdecode/inputdecode_test.go
+  s_6716ca95c0aecc::t_4bb2188fd08632 61-115
+server/internal/replay/replay_test.go
+  s_6716ca95c0aecc::t_40aad6d33e21b5 82
+  s_6716ca95c0aecc::t_8339e398db3b2f 81,83-122
+shared/rules/items.v0.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 4-5
+docs/specs/v44_spec-skill-points-and-magic-bolt.md
+  s_7782e8b3c9750f::t_e4372bb7606504 1-155,157-422
+  s_6716ca95c0aecc::t_5c711014e824ef 156
+shared/rules/character_progression.v0.schema.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 5,7,13-22
+server/internal/store/repos.go
+  s_6716ca95c0aecc::t_d694c02b8977ec 822,824,827-828,831,835-840,852,857,866-870,875-908
+  s_6716ca95c0aecc::t_e919795aa0cf03 911-947,950,952-960,962-967
+  s_6716ca95c0aecc::t_00ca9433174d1a 968-992
+  s_6716ca95c0aecc::t_210230547ba904 1086,1088,1090,1095-1107,1187,1192,1199-1203
+  s_6716ca95c0aecc::t_87112bce2c8af3 194,200,207
+client/scripts/character_stats_panel.gd
+  s_6716ca95c0aecc::t_df0d542679fe55 13
+shared/protocol/examples/cast_skill_intent.json
+  s_6716ca95c0aecc::t_f88297a17da3ed 1-11
+tools/bot/scenarios/31_equipment_requirements_and_preview.json
+  s_6716ca95c0aecc::t_6500180a5f3db9 26,35,55,75
+tools/bot/scenarios/client/09_character_stats_panel.json
+  s_6716ca95c0aecc::t_6500180a5f3db9 16,34,39
+client/scripts/bot_controller.gd
+  s_6716ca95c0aecc::t_3192d0b864cfa3 205-208,463,468
+  s_6716ca95c0aecc::t_eb717d37b1cb14 144-147,196-204,209-218,222,224-225,422,424,460-462,464-466,469
+  s_6716ca95c0aecc::t_650f28c99bf90d 219-221
+  s_6716ca95c0aecc::t_b48cf753c2afdf 223,467
+client/scripts/skills_panel.gd.uid
+  s_6716ca95c0aecc::t_b685aa2d1a1bb8 1
+server/internal/http/session.go
+  s_6716ca95c0aecc::t_68447a26940e7d 457-458,470-478
+client/tests/test_skill_bar.gd.uid
+  s_6716ca95c0aecc::t_b685aa2d1a1bb8 1
+client/scripts/skills_panel.gd
+  s_6716ca95c0aecc::t_e36786261f15dc 1-167
+client/tests/test_golden.gd
+  s_6716ca95c0aecc::t_82680a342a0c00 636-640,643-669
+  s_6716ca95c0aecc::t_8f898c0540ce8a 641-642
+  s_6716ca95c0aecc::t_858ede772a7661 435-496,498,526,573,612
+tools/bot/test_protocol.py
+  s_6716ca95c0aecc::t_50204b1282fe46 800-838
+shared/rules/skills.v0.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 1-24
+client/scripts/bot_scenario_runner.gd
+  s_6716ca95c0aecc::t_a269a52bdee2fe 1256-1261,1318-1321
+  s_6716ca95c0aecc::t_65d3839a646297 731-732
+  s_6716ca95c0aecc::t_9d0140311ccbed 728
+  s_6716ca95c0aecc::t_ce8db3068f3072 1463-1479
+  s_6716ca95c0aecc::t_407609ece778d6 595-680
+  s_6716ca95c0aecc::t_0af8ad31bff3c6 14,29-30,47,76-78
+  s_6716ca95c0aecc::t_9def3271985aae 209-212,335-347
+  s_6716ca95c0aecc::t_caad0dbf734488 725
+shared/golden/skill_points_and_magic_bolt.json
+  s_6716ca95c0aecc::t_f546c6d2bf2fbf 1-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c9eb008fb09a4a95504c12967ea35ff5d8920c7a",
+  "prompts": {},
+  "sessions": {
+    "s_6716ca95c0aecc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eadc9-8e0a-7b10-b9bb-e16f699a5824",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_7782e8b3c9750f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead00-7cc3-7f53-a150-35e60f702a71",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

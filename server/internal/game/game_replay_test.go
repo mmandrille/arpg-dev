@@ -15,6 +15,11 @@ import (
 func TestDungeonTeleportersReplayGolden(t *testing.T) {
 	golden := loadDungeonTeleportersGolden(t)
 	rules := loadRules(t)
+	// This replay fixture owns teleporter determinism, not dungeon combat pressure.
+	dungeonMob := rules.Monsters["dungeon_mob"]
+	dungeonMob.Behavior = ""
+	dungeonMob.AttackDamage = nil
+	rules.Monsters["dungeon_mob"] = dungeonMob
 	inputs, maxTick := buildDungeonTeleporterReplayInputs(t, rules, golden.Seed, golden.WorldID)
 
 	recon, err := replay.ReconstructFromInputs("sess_dungeon_tp_replay", golden.Seed, rules, golden.WorldID, inputs, maxTick)

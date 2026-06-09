@@ -1,0 +1,92 @@
+tools/validate_shared.py
+  s_90240264ed6f35::t_d05ee7a8ecf39b 167,1606-1697
+client/scripts/main.gd
+  s_90240264ed6f35::t_275dc4355b13e8 2363-2364
+shared/golden/shop_appraisals.json
+  s_90240264ed6f35::t_25b6c27763e919 22,32-34,36-37,40,42-43
+  s_90240264ed6f35::t_f31276e3f5c551 1-21,23-31,35,38-39,41,44-51
+client/tests/test_shop_panel.gd
+  s_90240264ed6f35::t_739252775ec346 26-29,35-39,48,51,90-100
+  s_90240264ed6f35::t_18919ed590e9ec 49-50
+client/scripts/bot_scenario_runner.gd
+  s_90240264ed6f35::t_58a5b28e2e6e03 371-374
+  s_90240264ed6f35::t_158f748b8b21a9 904-925,944-969
+  s_90240264ed6f35::t_06292b78bd236d 33-34,77-78
+  s_90240264ed6f35::t_568e331547f791 827-885
+  s_90240264ed6f35::t_c1972db21e6643 1119,1312
+scripts/bot_client.sh
+  s_ac3b5ed95307e7::t_f96f3e9192e6f0 65
+server/internal/game/shop_test.go
+  s_90240264ed6f35::t_047d086741e02b 450-467,469-476
+  s_90240264ed6f35::t_8703d0dd14b802 173-222,224-226,228-249
+  s_90240264ed6f35::t_eb11e536173639 223,227,468
+client/scripts/shop_panel.gd
+  s_90240264ed6f35::t_33483aa275ab6c 15,38,43,84,86-87
+  s_90240264ed6f35::t_52d3c12a006123 326-341
+  s_90240264ed6f35::t_b5313e045cb7b9 221-226,232,234,238,247-249,258,263-268,274-280,288-290
+  s_90240264ed6f35::t_50d59a21bde7fe 392,401-403
+  s_90240264ed6f35::t_08b932833c8b6e 398-400,417-418,420-422
+  s_90240264ed6f35::t_a7e24cf711eff8 408-416,419,423-439
+  s_90240264ed6f35::t_79c1d345b311ed 454-556
+shared/golden/shop_appraisals.v0.schema.json
+  s_90240264ed6f35::t_47e82045349998 1-99
+docs/PROGRESS.md
+  s_ac3b5ed95307e7::t_ab1a2602ed7672 14,60,122,1046-1070,1128-1129,1286-1289,1296-1297
+server/internal/game/shop.go
+  s_90240264ed6f35::t_38df1cafd0473d 6,28,30-38,76,85-87,91-92,182-406,409-431
+  s_90240264ed6f35::t_db7693272c6769 407-408
+server/internal/game/sim.go
+  s_90240264ed6f35::t_4ca8d1573283f1 1844-1849
+docs/specs/v42_spec-vendor-appraisal-and-item-comparison.md
+  s_90240264ed6f35::t_81064511792e0b 1-172
+docs/plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md
+  s_ac3b5ed95307e7::t_13ae981ff1b9dd 3,151-152,165-170
+  s_90240264ed6f35::t_b9914fd6339509 1-2,4-64,66,68,71,73-86,88,90,92,96-108,111,113-128,130,132,135,137-148,150,153-164,171-177
+  s_90240264ed6f35::t_e8dce11499d9b3 65,67,69-70,72,87,89,91,93-95
+  s_ac3b5ed95307e7::t_302323b01856fc 109-110,112,129,131,133-134,136,149
+shared/protocol/state_delta.v4.schema.json
+  s_90240264ed6f35::t_0ee669297f5622 104-105,110-111,116-168,225-227
+tools/bot/scenarios/29_town_vendor_gold_sink.json
+  s_ac3b5ed95307e7::t_5222ea1b18e3ed 6,28-29,38-39
+tools/bot/scenarios/30_vendor_appraisal_quotes.json
+  s_90240264ed6f35::t_8f7a51756828f9 6,26-28
+  s_90240264ed6f35::t_5af1edf2e2ec00 1-5,7-25,29-37,39-45
+  s_ac3b5ed95307e7::t_e6e613f8a00e03 38
+tools/bot/scenarios/client/16_vendor_item_comparison.json
+  s_90240264ed6f35::t_66ceaea26648f9 1-49
+shared/protocol/examples/state_delta.json
+  s_90240264ed6f35::t_f3e0c817e6c68e 99,116-120,122,126,128,130-131
+  s_90240264ed6f35::t_6f90895e0f6bc4 85-98,100-115,121,123-125,127,129,132-134
+server/internal/game/types.go
+  s_90240264ed6f35::t_35399964475e16 163-206,250-275
+tools/bot/run.py
+  s_90240264ed6f35::t_d71e19ee8fa765 2151-2163,2175-2203
+  s_90240264ed6f35::t_69ecf2eaccbd70 2864-2877
+  s_90240264ed6f35::t_16f136e4326ccd 1178-1194
+  s_90240264ed6f35::t_d475c7b86c3a11 122,1766-1768
+  s_ac3b5ed95307e7::t_536e45edabf0ba 2647-2649
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cd8a369f75f12ccd824697b52ef06669a6c47aca",
+  "prompts": {},
+  "sessions": {
+    "s_90240264ed6f35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaad2-2d56-74b2-8cce-d16138a98113",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_ac3b5ed95307e7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eac60-8158-79e3-b07c-4b4c9c9b17af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

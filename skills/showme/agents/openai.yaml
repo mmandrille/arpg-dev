@@ -1,0 +1,4 @@
+interface:
+  display_name: "Show Me"
+  short_description: "Capture focused Godot client visuals for fast iteration."
+  default_prompt: "Render a focused screenshot of the client visual we are improving."

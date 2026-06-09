@@ -381,6 +381,13 @@ func _verify_inventory_panel_model() -> bool:
 	if int(state["bag_count"]) != 2 or state["equipped_main_hand"] != null:
 		_fail("inventory panel initial state mismatch: %s" % state)
 		return false
+	var paper_slots: Dictionary = state["paper_doll_slots"]
+	if float(paper_slots["ring_left"]["position"]["x"]) != float(paper_slots["main_hand"]["position"]["x"]) \
+			or float(paper_slots["ring_left"]["position"]["y"]) <= float(paper_slots["main_hand"]["position"]["y"]) \
+			or float(paper_slots["ring_right"]["position"]["x"]) != float(paper_slots["off_hand"]["position"]["x"]) \
+			or float(paper_slots["ring_right"]["position"]["y"]) <= float(paper_slots["off_hand"]["position"]["y"]):
+		_fail("inventory panel ring slot placement mismatch: %s" % state)
+		return false
 	panel.set_inventory_state([
 		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": true},
 		{"item_instance_id": "1005", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
@@ -403,7 +410,9 @@ func _verify_inventory_panel_model() -> bool:
 		{"item_instance_id": "1008", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
 	], {"main_hand": null}, 0, 2)
 	state = panel.get_debug_state()
-	if int(state["available_slot_count"]) != 2 or int(state["rendered_slot_count"]) < int(state["bag_count"]):
+	if int(state["available_slot_count"]) != 2 \
+			or int(state["rendered_slot_count"]) < int(state["bag_count"]) \
+			or int(state["rendered_slot_count"]) % int(state["bag_columns"]) != 0:
 		_fail("inventory panel overflow render mismatch: %s" % state)
 		return false
 	panel.queue_free()

@@ -136,11 +136,35 @@ func _verify_equipped_fallback_resolver() -> bool:
 		if not bool(mounted.get("visible", false)):
 			_fail("resolver mounted invisible slot %s: %s" % [slot, mounted])
 			return false
+	for slot in ["head", "chest", "boots", "off_hand"]:
+		if not bool((equipped_visuals[slot] as Dictionary).get("procedural_fallback", false)):
+			_fail("resolver did not use procedural fallback for slot %s: %s" % [slot, equipped_visuals[slot]])
+			return false
 	if str(equipped_visuals["ring_right"].get("mount_socket", "")) != "ring_right_socket":
 		_fail("ring_right mounted to wrong socket: %s" % equipped_visuals["ring_right"])
 		return false
 	if str(equipped_visuals["head"].get("tint", "")) != "ffd75e":
 		_fail("rare head tint mismatch: %s" % equipped_visuals["head"])
+		return false
+	var head_node := mount.find_child("fallback_equipment_head_v0", true, false) as Node3D
+	if head_node == null or head_node.position.y < 0.12:
+		_fail("helmet fallback not raised above head socket: %s" % str(head_node.position if head_node != null else null))
+		return false
+	var chest_node := mount.find_child("fallback_equipment_chest_v0", true, false) as Node3D
+	if chest_node == null or chest_node.position.z < 0.10:
+		_fail("chest fallback not pushed out from torso: %s" % str(chest_node.position if chest_node != null else null))
+		return false
+	var boots_node := mount.find_child("fallback_equipment_boots_v0", true, false) as Node3D
+	if boots_node == null or absf(boots_node.rotation_degrees.z) > 0.001:
+		_fail("boots fallback rotated away from left/right foot layout: %s" % str(boots_node.rotation_degrees if boots_node != null else null))
+		return false
+	var left_boot := boots_node.find_child("left_boot", true, false) as Node3D
+	var right_boot := boots_node.find_child("right_boot", true, false) as Node3D
+	if left_boot == null or right_boot == null or left_boot.position.x > -0.5 or right_boot.position.x < 0.5:
+		_fail("boots fallback not split across feet: left=%s right=%s" % [
+			str(left_boot.position if left_boot != null else null),
+			str(right_boot.position if right_boot != null else null),
+		])
 		return false
 
 	resolver.apply_snapshot({

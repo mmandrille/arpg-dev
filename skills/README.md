@@ -8,6 +8,7 @@ Canonical skill definitions for this repo. **Edit files here only** — tool-spe
 | [`plan/`](plan/SKILL.md) | `/plan {spec}` → review spec, write `docs/plans/` |
 | [`execute/`](execute/SKILL.md) | `/execute {plan}` → implement until `make ci` green |
 | [`finish/`](finish/SKILL.md) | `/finish` → consolidate PROGRESS, CI, `feat: vN:` commit |
+| [`showme/`](showme/SKILL.md) | `$showme` → focused Godot screenshot/live preview for visual tuning |
 
 ## Discovery paths
 

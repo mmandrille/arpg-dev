@@ -169,6 +169,7 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	inventory_rows = max(0, next_inventory_rows)
 	inventory_capacity = max(0, next_inventory_capacity)
 	gold = max(0, next_gold)
+	_rendered_bag_slot_count = _target_bag_slot_count()
 	if _bag_grid != null:
 		_render()
 
@@ -185,7 +186,7 @@ func get_debug_state() -> Dictionary:
 		"inventory_rows": inventory_rows,
 		"inventory_capacity": inventory_capacity,
 		"gold": gold,
-		"bag_columns": _bag_grid.columns if _bag_grid != null else 0,
+		"bag_columns": _bag_grid.columns if _bag_grid != null else BAG_COLUMNS,
 		"available_slot_count": inventory_capacity,
 		"rendered_slot_count": _rendered_bag_slot_count,
 		"paper_doll_slot_ids": EQUIPMENT_SLOTS.duplicate(),
@@ -349,12 +350,8 @@ func _render() -> void:
 		_fill_slot(_equipment_slots.get(slot, null), _equipped_item(str(slot)))
 	for child in _bag_grid.get_children():
 		child.queue_free()
-	var bag_items: Array = []
-	for item in inventory:
-		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
-			continue
-		bag_items.append(item)
-	_rendered_bag_slot_count = max(inventory_capacity, bag_items.size())
+	var bag_items := _bag_items()
+	_rendered_bag_slot_count = _target_bag_slot_count()
 	for i in range(_rendered_bag_slot_count):
 		var slot := _slot_button(SLOT_KIND_BAG, Vector2(58, 58))
 		var item: Dictionary = bag_items[i] if i < bag_items.size() else {}
@@ -363,6 +360,19 @@ func _render() -> void:
 	if _gold_label != null:
 		_gold_label.text = "Gold: %d" % gold
 	_position_gesture_hint()
+
+
+func _bag_items() -> Array:
+	var items: Array = []
+	for item in inventory:
+		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
+			continue
+		items.append(item)
+	return items
+
+
+func _target_bag_slot_count() -> int:
+	return max(inventory_capacity, _bag_items().size())
 
 
 func _apply_interaction_filters() -> void:

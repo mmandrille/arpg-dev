@@ -1,0 +1,223 @@
+client/tests/test_golden.gd
+  s_f9f339aa75f64b::t_686e2419aaa2d7 245
+client/scripts/character_visual.gd
+  s_f74d8eec21a4f4::t_1a3bbfbd5595c9 2-4,8-18,22-26,32,39-48
+client/scripts/net_client.gd
+  s_f9f339aa75f64b::t_1241a10dbadd00 20-21,144-145,165-166,189-190
+  s_f9f339aa75f64b::t_e881029337e6a9 26,30-32,34-36,45-50,67,152-164,167-188,191-196,231,236-239
+server/migrations/0008_listed_sessions.sql
+  s_f9f339aa75f64b::t_3c4cc1a2499204 1-11
+README.md
+  s_f9f339aa75f64b::t_3207bcd5b7a9e3 67-83
+client/scripts/bot_scenario_runner.gd
+  s_f9f339aa75f64b::t_c2bdac354f36cd 478-495
+  s_f9f339aa75f64b::t_0dcf53750549eb 299-302
+  s_f9f339aa75f64b::t_94938d2689e470 1025-1027
+  s_f9f339aa75f64b::t_917758131d756b 789-811,1041-1043
+  s_f9f339aa75f64b::t_b80e9bfa887744 13,23,58-59,185-186,289-292
+  s_f9f339aa75f64b::t_373d60c9f62f71 25,63-64
+docs/PROGRESS.md
+  s_f9f339aa75f64b::t_cfa4faa40311d2 1153-1154
+  s_f9f339aa75f64b::t_2940fd20b6710c 14,56,114,935-959,1013,1151-1152,1169
+server/internal/store/stale_sessions_test.go
+  s_f9f339aa75f64b::t_e916f6bfa70a2d 1-83,90,92-132,135-153
+  s_f9f339aa75f64b::t_90e1d325ea6fcf 84-89,91
+  s_f9f339aa75f64b::t_ae40e9ea3f4fd9 154-180,183-187
+  s_f74d8eec21a4f4::t_b7585b76730c0e 133-134
+  s_f9f339aa75f64b::t_ef2eca6c278372 181-182
+shared/golden/dungeon_stairs.json
+  s_f9f339aa75f64b::t_2ee8a5802ec3fa 24
+assets/manifests/assets.v0.json
+  s_f74d8eec21a4f4::t_a0e58ca8d3cb7d 45-116
+server/internal/store/repos.go
+  s_f9f339aa75f64b::t_0c166780af9612 530-542
+  s_f9f339aa75f64b::t_3c4cc1a2499204 202-204,215,217,233-254,256-285
+  s_f9f339aa75f64b::t_1ff597f0d327f5 255,305-325
+  s_f9f339aa75f64b::t_f620c29a7aa59a 7,326-327,340-372,374-404
+  s_f9f339aa75f64b::t_5713f5958b9155 328-339
+  s_f9f339aa75f64b::t_1d2f0ae5260216 373
+server/internal/http/session.go
+  s_f9f339aa75f64b::t_3c4cc1a2499204 20,31,40,45-61,173,201-225,256,272,280-285,430
+  s_f9f339aa75f64b::t_43530403cb0f21 11
+server/internal/game/sim.go
+  s_f9f339aa75f64b::t_17866a7722e7aa 749-780,797-844
+  s_f9f339aa75f64b::t_9e4897923a4f01 583-584
+  s_f9f339aa75f64b::t_ac326da4ccfc06 1861,1920,1963-2034
+server/internal/realtime/session_loop.go
+  s_f9f339aa75f64b::t_9e4897923a4f01 732-739
+  s_f9f339aa75f64b::t_60668ef6ac0e39 278-283
+server/internal/replay/replay.go
+  s_f9f339aa75f64b::t_9e4897923a4f01 502-509
+client/tests/test_client_bot.gd
+  s_f9f339aa75f64b::t_526c41132393e8 257-268,300-322
+  s_f9f339aa75f64b::t_1496735a610c94 34-35,199-239
+  s_f9f339aa75f64b::t_641f8fcc2aba8f 37,39
+make/client.mk
+  s_f9f339aa75f64b::t_3207bcd5b7a9e3 2-3,5,19,21-23
+server/internal/store/store_test.go
+  s_f9f339aa75f64b::t_71a10184140505 250-252,268-272,274-275,277-279,290-303,306-314,318-325,399-405
+  s_f9f339aa75f64b::t_13f11c565b63df 305
+  s_f9f339aa75f64b::t_783d2f481ee132 217,234
+  s_f9f339aa75f64b::t_0f84e6a091068a 253-266,280-289
+  s_f9f339aa75f64b::t_43530403cb0f21 186,197,229-233,235-236,243,246-249,273,276
+  s_f9f339aa75f64b::t_892feb332cce57 267
+  s_f9f339aa75f64b::t_3a1ee903c0c039 371,374,377,384-386,391,394
+server/internal/http/auth_session_test.go
+  s_f9f339aa75f64b::t_059ca572861ee1 507-508
+  s_f9f339aa75f64b::t_43530403cb0f21 360,363,376-378,409-410,412-416,455-506,509-536
+client/scripts/main.gd
+  s_f9f339aa75f64b::t_3f2c8156d95b98 2109-2211
+  s_f9f339aa75f64b::t_2c881833ad1d0f 316
+  s_f9f339aa75f64b::t_03add75b3d0add 2937,2941
+  s_f9f339aa75f64b::t_03a8bddc964e28 688
+  s_f9f339aa75f64b::t_ff187784c59463 2002
+  s_f9f339aa75f64b::t_c8a237a11b0671 753
+  s_f9f339aa75f64b::t_de385ef633ed05 2999-3007
+  s_f9f339aa75f64b::t_d16329d05ca47b 1236-1239,1304-1305
+  s_f9f339aa75f64b::t_b8c9b65e432114 562-563,1986,1989,2399,2401-2408
+  s_f9f339aa75f64b::t_e881029337e6a9 23,125,130-131,304-305,324,330-375,381,393-402,417-440,1343-1349,1382,2032,2040-2043,2045,2050-2059,2946,2953,3132-3142,3153-3158
+  s_f9f339aa75f64b::t_6f320d814e12f7 312
+  s_f9f339aa75f64b::t_2dca147e61100d 706
+  s_f74d8eec21a4f4::t_be6d436dd710c4 651-653
+  s_f74d8eec21a4f4::t_265c72e0841356 91,1163
+  s_f9f339aa75f64b::t_acf34200e186e9 553
+  s_f9f339aa75f64b::t_e04a56b3a88a7e 153-156
+  s_f74d8eec21a4f4::t_b476aa321aa696 42,657-658,1162,1164-1166
+scripts/play.sh
+  s_f9f339aa75f64b::t_3207bcd5b7a9e3 79,81-82
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_f9f339aa75f64b::t_f885ea7313db75 31
+client/scripts/equipment_visuals.gd
+  s_f74d8eec21a4f4::t_e4adda7782dd87 72-77,84-87,91,93-94,100-104,106,116,119,121-123,125-134,137-138,142,145-147,153,157,159-160,162,167,173-175,177-180,183-185,191-221
+  s_f74d8eec21a4f4::t_c2629d704876ce 235-243
+  s_f74d8eec21a4f4::t_bd40726e7d8b68 11-12,16-47,51-54
+client/tests/test_item_visuals.gd
+  s_f74d8eec21a4f4::t_d46942c0c3dc0a 12-13,23,63-70,96-181
+server/internal/replay/replay_test.go
+  s_f9f339aa75f64b::t_9e4897923a4f01 455-481,484-510,1082-1083
+  s_f9f339aa75f64b::t_5c233cb56295dd 220,268
+  s_f9f339aa75f64b::t_889ac78f3f827a 866,868-869
+  s_f9f339aa75f64b::t_bbd6f2774ee55f 482-483
+  s_f9f339aa75f64b::t_d60eb9db33fdac 867
+  s_f9f339aa75f64b::t_0b2d99b7850f1d 1089-1091
+  s_f9f339aa75f64b::t_8631a487438838 1107-1109
+scripts/play_remote.sh
+  s_f9f339aa75f64b::t_3207bcd5b7a9e3 1-58
+tools/bot/run.py
+  s_f9f339aa75f64b::t_516348bbca1105 3079-3082
+  s_f9f339aa75f64b::t_0ca991b5b38923 2888-2889,2891-2896
+  s_f9f339aa75f64b::t_59c0af696c22d6 3005,3007
+  s_f9f339aa75f64b::t_6424e6d1c3dbe9 3002-3004,3006,3008-3019
+  s_f9f339aa75f64b::t_5a9e876671c58e 25,457,462,556,561,2007-2018
+  s_f9f339aa75f64b::t_71049118217b06 43,2586-2602
+  s_f9f339aa75f64b::t_f104874e4b99bc 73,144,249-273,286-296,2644,2863-2887,2890,2897-2953
+client/tests/test_coop_client.gd
+  s_f74d8eec21a4f4::t_15aefd26fdfe0a 18,131-139
+  s_f74d8eec21a4f4::t_ab2bcfb6149dc8 17,116-130
+  s_f9f339aa75f64b::t_2c881833ad1d0f 6,13,16,38-48,58,63,79-115
+  s_f74d8eec21a4f4::t_1293e4b50fa7ed 140
+client/scripts/multiplayer_sessions_panel.gd
+  s_f9f339aa75f64b::t_e881029337e6a9 1-154
+server/internal/realtime/hub.go
+  s_f9f339aa75f64b::t_226c6f2fc60358 57-72,76-78
+client/scripts/bot_controller.gd
+  s_f9f339aa75f64b::t_b76282b964f5de 366
+server/internal/game/game_test.go
+  s_f9f339aa75f64b::t_d111285510cae5 5109-5126
+  s_f9f339aa75f64b::t_9e4897923a4f01 4461-4515
+  s_f9f339aa75f64b::t_60824ee0f9d2d1 5080
+  s_f74d8eec21a4f4::t_b050c95bde01a0 1884-1923
+  s_f74d8eec21a4f4::t_c8bb5cd89d9372 3427-3431
+  s_f9f339aa75f64b::t_94d93798027224 4403-4460
+  s_f9f339aa75f64b::t_d3fb52ddd321d9 4743,4795,4824,4839,4932,4942
+  s_f9f339aa75f64b::t_edb39370d594ad 4664-4668,4700-4704,4725-4729
+tools/bot/scenarios/client/09_character_stats_panel.json
+  s_f9f339aa75f64b::t_06680623118696 17-19
+server/cmd/arpg-server/main.go
+  s_f9f339aa75f64b::t_33aa0afc3c681f 76
+  s_f9f339aa75f64b::t_dbd06ed609b930 70,81,84-88
+  s_f9f339aa75f64b::t_e6d81af497581b 71,77-80,82-83
+  s_f9f339aa75f64b::t_6c3ef192bff6ed 72-75
+server/internal/store/interfaces.go
+  s_f9f339aa75f64b::t_3c4cc1a2499204 28
+  s_f9f339aa75f64b::t_252f3a110f6b5f 31
+  s_f9f339aa75f64b::t_748c3e35344e04 37
+server/internal/store/models.go
+  s_f9f339aa75f64b::t_3e1b552aec2e5f 42-51
+  s_f9f339aa75f64b::t_3c4cc1a2499204 24,32,39-41
+tools/bot/scenarios/27_session_browser_uncapped_coop.json
+  s_f9f339aa75f64b::t_6424e6d1c3dbe9 1-10
+shared/golden/dungeon_teleporters.json
+  s_f9f339aa75f64b::t_2f4065444d9d09 7
+client/scripts/main_menu.gd
+  s_f9f339aa75f64b::t_e881029337e6a9 6,53
+docs/plans/v38_2026-06-08-session-browser-and-uncapped-coop-menu.md
+  s_f9f339aa75f64b::t_33084ea8b05069 207,213,219,225,231,237,243
+  s_f9f339aa75f64b::t_61d2cbc50a8e3a 292,298,304,310,316
+  s_286eb00b1416a9::t_ca8e6ab02530b4 1-26,28-77,79-83,85-89,91-95,97-101,103-107,109-113,115-129,131-135,137-141,143-147,149-153,155-159,161-172,174-178,180-184,186-190,192-206,208-212,214-218,220-224,226-230,232-236,238-242,244-256,258-262,264-268,272-276,278-291,293-297,299-303,305-309,311-315,317-327,329,331,333-339,341-345,347-351,353-357,359-363,365-369,371-375,377-381,383-387,389-394,396-407
+  s_f9f339aa75f64b::t_6e13095508e3e0 257,263,269-271
+  s_f9f339aa75f64b::t_aa2a25d280940e 78,84,90,96,102,108,114
+  s_f9f339aa75f64b::t_aa459a6bf907d6 27
+  s_f9f339aa75f64b::t_58d581259ab47a 173,179,185,191
+  s_f9f339aa75f64b::t_e667e298e4a4c7 328,330,332
+  s_f9f339aa75f64b::t_fb24f32037323b 130,136,142,148,154,160
+  s_f9f339aa75f64b::t_a65b73a37c2f11 277
+  s_f9f339aa75f64b::t_86c6fd49c55d7f 340,346,352,358,364,370,376,382,388,395
+tools/bot/test_protocol.py
+  s_f9f339aa75f64b::t_a7df28041e945f 6,8,22,48-70
+  s_f9f339aa75f64b::t_6424e6d1c3dbe9 7,16-17,197-267
+server/internal/http/ws_test.go
+  s_f9f339aa75f64b::t_9e4897923a4f01 341-345,347-348,350-397,399-423,425-426,441-442,1171-1178
+  s_f9f339aa75f64b::t_e0aa2ff0d399bd 346,349,398,424,427-440
+  s_f9f339aa75f64b::t_0cd9729f2a54e4 257
+  s_f9f339aa75f64b::t_bca175572201f0 231-256,258-271
+  s_f9f339aa75f64b::t_99803761cb9cc9 1181-1208
+client/scripts/multiplayer_sessions_panel.gd.uid
+  s_f9f339aa75f64b::t_45d343843302f6 1
+tools/play/coop_setup.py
+  s_f9f339aa75f64b::t_3207bcd5b7a9e3 2,4-6
+tools/validate_shared.py
+  s_f74d8eec21a4f4::t_adb020071aaf2a 1806-1808,1810-1812,1814-1816,1818
+  s_f9f339aa75f64b::t_6dd0fe4a99de59 49-53
+  s_f74d8eec21a4f4::t_3e6e3825dc2f9c 54-59
+  s_f9f339aa75f64b::t_18765c389624f0 1575-1576
+  s_f74d8eec21a4f4::t_b938ca59761d6f 1802,1809,1813,1817,1819
+docs/specs/v38_spec-session-browser-and-uncapped-coop-menu.md
+  s_286eb00b1416a9::t_28508b314e8dd8 1-137,142-175,177,179-591
+  s_f9f339aa75f64b::t_e458e94298e3bb 138-141,176,178
+shared/assets/item_visuals.v0.json
+  s_f74d8eec21a4f4::t_4c50ae900df4ad 24-33,43-44
+  s_f74d8eec21a4f4::t_1705971d2a606a 53-142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6187e7013d85b8d3839e8aef4598128e36a8b718",
+  "prompts": {},
+  "sessions": {
+    "s_286eb00b1416a9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea93d-c874-7af3-b268-e029c4f09ca7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_f74d8eec21a4f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea9f6-9f60-7961-9e8e-50ee9e4da8f9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_f9f339aa75f64b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea955-1bd2-7402-93e2-1df0e8da2baa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -80,8 +80,9 @@ var equipmentSlots = []string{
 const DefaultWorldID = "vertical_slice"
 
 const (
-	townLevel = 0
-	levelZero = 0
+	townLevel                 = 0
+	levelZero                 = 0
+	townNavigationMarginCells = 8.0
 )
 
 // entity is the internal mutable scene entity.
@@ -296,7 +297,8 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 
 	if s.multiLevel {
 		s.currentLevel = townLevel
-		level := newLevelState(townLevel, &rules.Navigation)
+		townNav := townNavigationForWorld(rules.Navigation, world)
+		level := newLevelState(townLevel, &townNav)
 		s.levels[townLevel] = level
 		if err := s.populatePresetLevel(level, worldID, world); err != nil {
 			return nil, err
@@ -314,6 +316,49 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 
 	s.syncCompatibilityFields()
 	return s, nil
+}
+
+func townNavigationForWorld(global NavigationRules, world WorldDef) NavigationRules {
+	nav := global
+	cellSize := nav.CellSize
+	if cellSize <= 0 {
+		cellSize = 1.0
+	}
+	minX := world.Player.Position.X
+	maxX := world.Player.Position.X
+	minY := world.Player.Position.Y
+	maxY := world.Player.Position.Y
+	for _, entity := range world.Entities {
+		entityMinX := entity.Position.X
+		entityMaxX := entity.Position.X
+		entityMinY := entity.Position.Y
+		entityMaxY := entity.Position.Y
+		if entity.Type == wallEntity {
+			entityMinX -= entity.Size.X / 2
+			entityMaxX += entity.Size.X / 2
+			entityMinY -= entity.Size.Y / 2
+			entityMaxY += entity.Size.Y / 2
+		}
+		minX = math.Min(minX, entityMinX)
+		maxX = math.Max(maxX, entityMaxX)
+		minY = math.Min(minY, entityMinY)
+		maxY = math.Max(maxY, entityMaxY)
+	}
+	margin := townNavigationMarginCells * cellSize
+	bounds := GridBounds{
+		MinX: int(math.Floor((minX - margin) / cellSize)),
+		MinY: int(math.Floor((minY - margin) / cellSize)),
+		MaxX: int(math.Ceil((maxX + margin) / cellSize)),
+		MaxY: int(math.Ceil((maxY + margin) / cellSize)),
+	}
+	nav.GridBounds = GridBounds{
+		MinX: minInt(global.GridBounds.MinX, bounds.MinX),
+		MinY: minInt(global.GridBounds.MinY, bounds.MinY),
+		MaxX: maxInt(global.GridBounds.MaxX, bounds.MaxX),
+		MaxY: maxInt(global.GridBounds.MaxY, bounds.MaxY),
+	}
+	nav.MaxAutoSteps = maxInt(nav.MaxAutoSteps, (nav.GridBounds.MaxX-nav.GridBounds.MinX)+(nav.GridBounds.MaxY-nav.GridBounds.MinY))
+	return nav
 }
 
 // DefaultCharacterProgressionState returns the level/stat defaults from shared
@@ -5583,6 +5628,13 @@ func normalize(v Vec2) Vec2 {
 
 func maxInt(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+func minInt(a, b int) int {
+	if a < b {
 		return a
 	}
 	return b

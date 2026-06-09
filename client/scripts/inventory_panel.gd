@@ -5,8 +5,14 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
+const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
 const BAG_COLUMNS := 5
 const BASE_INVENTORY_ROWS := 3
+const TITLE_FONT_SIZE := 33
+const BODY_FONT_SIZE := 23
+const SLOT_FONT_SIZE := 23
+const ICON_FONT_SIZE := 22
+const EQUIPMENT_SLOT_SIZE := Vector2(96, 58)
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 const EQUIPMENT_LABELS := {
 	"head": "Head",
@@ -27,16 +33,16 @@ const ITEM_RARITY_BACKGROUNDS := {
 	"unique": Color("#5a2f17"),
 }
 const PAPER_DOLL_SLOT_POSITIONS := {
-	"head": Vector2(123, 10),
-	"amulet": Vector2(214, 40),
+	"head": Vector2(122, 10),
+	"amulet": Vector2(208, 40),
 	"main_hand": Vector2(20, 116),
-	"off_hand": Vector2(244, 116),
-	"chest": Vector2(132, 112),
+	"off_hand": Vector2(236, 116),
+	"chest": Vector2(122, 112),
 	"ring_left": Vector2(20, 198),
-	"ring_right": Vector2(244, 198),
+	"ring_right": Vector2(236, 198),
 	"gloves": Vector2(36, 276),
-	"belt": Vector2(132, 194),
-	"boots": Vector2(132, 276),
+	"belt": Vector2(122, 194),
+	"boots": Vector2(122, 276),
 }
 
 var inventory: Array = []
@@ -57,6 +63,7 @@ var _interactive: bool = true
 var _gesture_hint: Label
 var _gesture_tween: Tween
 var _rendered_bag_slot_count: int = 0
+var _shop_sell_entity_id: String = ""
 
 
 class InventorySlotButton:
@@ -101,11 +108,18 @@ class InventorySlotButton:
 		if panel._slot_kind_is_equipment(slot_kind):
 			return source == SLOT_KIND_BAG and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 		if slot_kind == SLOT_KIND_BAG:
+			if source == DRAG_SOURCE_SHOP_OFFER and str(data.get("offer_id", "")) != "" and str(data.get("shop_entity_id", "")) != "":
+				return true
 			return panel._slot_kind_is_equipment(source)
 		return false
 
 	func _drop_data(_at_position: Vector2, data: Variant) -> void:
 		panel._handle_drop_on_slot(slot_kind, data)
+
+	func _make_custom_tooltip(for_text: String) -> Object:
+		if panel == null:
+			return null
+		return panel._make_item_tooltip(for_text)
 
 
 func _ready() -> void:
@@ -130,6 +144,14 @@ func toggle() -> void:
 func set_interactive(enabled: bool) -> void:
 	_interactive = enabled
 	_apply_interaction_filters()
+
+
+func set_shop_sell_context(shop_entity_id: String) -> void:
+	_shop_sell_entity_id = shop_entity_id
+
+
+func clear_shop_sell_context() -> void:
+	_shop_sell_entity_id = ""
 
 
 func ensure_display_visible() -> void:
@@ -321,7 +343,7 @@ func _build() -> void:
 	_paper_doll_preview.add_theme_stylebox_override("panel", _paper_doll_style())
 	paper.add_child(_paper_doll_preview)
 	for slot in EQUIPMENT_SLOTS:
-		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), Vector2(72, 54))
+		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), EQUIPMENT_SLOT_SIZE)
 		btn.position = PAPER_DOLL_SLOT_POSITIONS.get(str(slot), Vector2.ZERO)
 		btn.size = btn.custom_minimum_size
 		_equipment_slots[str(slot)] = btn
@@ -444,7 +466,7 @@ func _slot_button(kind: String, size: Vector2) -> InventorySlotButton:
 	btn.add_theme_stylebox_override("hover", _slot_style(true))
 	btn.add_theme_stylebox_override("pressed", _slot_style(true))
 	btn.add_theme_color_override("font_color", Color("#e8dcc8"))
-	btn.add_theme_font_size_override("font_size", 21)
+	btn.add_theme_font_size_override("font_size", SLOT_FONT_SIZE)
 	return btn
 
 
@@ -487,14 +509,14 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 			slot.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
 
 	var font := slot.get_theme_default_font()
-	var font_size := 18
+	var font_size := ICON_FONT_SIZE
 	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.38), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#f4ead8"))
 
 
 func _title(text: String) -> Label:
 	var label := _caption(text)
-	label.add_theme_font_size_override("font_size", 33)
+	label.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 	return label
 
 
@@ -502,8 +524,22 @@ func _caption(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_color_override("font_color", Color("#c9a227"))
-	label.add_theme_font_size_override("font_size", 23)
+	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	return label
+
+
+func _make_item_tooltip(text: String) -> Control:
+	var tooltip := PanelContainer.new()
+	tooltip.add_theme_stylebox_override("panel", _tooltip_style())
+
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(300, 0)
+	label.add_theme_color_override("font_color", Color("#e8dcc8"))
+	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	tooltip.add_child(label)
+	return tooltip
 
 
 func _reposition_panel() -> void:
@@ -590,7 +626,28 @@ func _paper_doll_style() -> StyleBoxFlat:
 	return s
 
 
+func _tooltip_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.07, 0.06, 0.05, 0.97)
+	s.border_color = Color("#8b6914")
+	s.border_width_left = 1
+	s.border_width_top = 1
+	s.border_width_right = 1
+	s.border_width_bottom = 1
+	s.content_margin_left = 10
+	s.content_margin_top = 8
+	s.content_margin_right = 10
+	s.content_margin_bottom = 8
+	return s
+
+
 func _handle_double_click(item: Dictionary) -> void:
+	if _shop_sell_entity_id != "" and not _is_equipped_instance(str(item.get("item_instance_id", ""))):
+		intent_requested.emit("shop_sell_intent", {
+			"shop_entity_id": _shop_sell_entity_id,
+			"item_instance_id": str(item.get("item_instance_id", "")),
+		})
+		return
 	var slot := _preferred_equip_slot(item)
 	if slot != "":
 		intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
@@ -610,7 +667,12 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 			intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
 	elif slot_kind == SLOT_KIND_BAG:
 		var source := str(data.get("source", ""))
-		if _slot_kind_is_equipment(source):
+		if source == DRAG_SOURCE_SHOP_OFFER:
+			intent_requested.emit("shop_buy_intent", {
+				"shop_entity_id": str(data.get("shop_entity_id", "")),
+				"offer_id": str(data.get("offer_id", "")),
+			})
+		elif _slot_kind_is_equipment(source):
 			intent_requested.emit("unequip_intent", {"slot": _slot_from_kind(source)})
 
 

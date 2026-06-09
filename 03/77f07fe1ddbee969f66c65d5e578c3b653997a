@@ -1,0 +1,60 @@
+shared/golden/dungeon_stairs.v0.schema.json
+  s_983717d5c0c276::t_5f46f184fb1002 12,17-18
+shared/golden/boss_floor_-5.v0.schema.json
+  s_983717d5c0c276::t_012ffe541d41c0 31
+server/internal/game/game_replay_test.go
+  s_983717d5c0c276::t_a3832115ed5716 74-94,96,102,111-113,119-121,123,129
+  s_983717d5c0c276::t_6d9cf13ef29a35 156,168-169
+server/internal/game/sim.go
+  s_983717d5c0c276::t_a354e7e3556501 566,2175,5436,5441,5457-5464
+server/internal/game/game_test.go
+  s_983717d5c0c276::t_c605e474d50ae1 5431-5437,5450-5454,5456-5459,5461,5463-5466,5468-5469,5472,5476,5481-5490,5498-5500,5507,5514,5518-5520,5522-5523
+  s_983717d5c0c276::t_92a9451215c185 4355-4356
+  s_983717d5c0c276::t_6f7edcb06560e7 224,227,4144
+  s_983717d5c0c276::t_8c7b3e2ac5a27c 4026-4027,4040-4041,4053-4065
+  s_983717d5c0c276::t_83265a6d5666e7 5544-5549,5551-5553,5561-5562,5575-5576,5579,5602-5603,5605-5607,5609-5610,5612-5618,5627
+server/internal/game/dungeon_gen.go
+  s_983717d5c0c276::t_fee3bdd40e5ced 143-158
+  s_983717d5c0c276::t_c368056a552135 91-92,117-118
+shared/golden/dungeon_stairs.json
+  s_983717d5c0c276::t_5582cb4d81d42c 10,18-22
+shared/protocol/examples/teleport_intent.json
+  s_983717d5c0c276::t_1f3e513dfa1eca 7
+shared/golden/dungeon_teleporters.json
+  s_983717d5c0c276::t_fe692d15acf8f3 4,6-7,9,14,17
+tools/validate_shared.py
+  s_983717d5c0c276::t_548421cb0b93f0 1058-1059
+  s_983717d5c0c276::t_60229ead652062 2061-2064
+server/internal/replay/replay_test.go
+  s_983717d5c0c276::t_6bb70426211cd0 235,275
+  s_983717d5c0c276::t_8d8bf3c060bd36 246-247
+  s_983717d5c0c276::t_010c3122999de3 1089
+  s_983717d5c0c276::t_8fc5cd77e04815 1088
+  s_983717d5c0c276::t_bcc3e1d784bf55 143-163,170,172,862,873-874
+tools/bot/scenarios/13_teleporter_lab.json
+  s_983717d5c0c276::t_e14cd8afef8e6f 6,10-12,15-20,27,29,31,33
+shared/golden/boss_floor_-5.json
+  s_983717d5c0c276::t_0250ac9661ce54 10,12
+shared/golden/dungeon_obstacles.json
+  s_983717d5c0c276::t_2c1bb9a707b6c3 74,81
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_983717d5c0c276::t_52a80dde3bf9eb 15,36
+client/tests/test_golden.gd
+  s_983717d5c0c276::t_6e9b0b4c6506f5 202,216-217,222-229,249,252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0377f07fe1ddbee969f66c65d5e578c3b653997a",
+  "prompts": {},
+  "sessions": {
+    "s_983717d5c0c276": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead24-fd53-7fa1-a324-554b6d97874f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

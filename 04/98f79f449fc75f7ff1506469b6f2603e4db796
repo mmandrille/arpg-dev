@@ -1,0 +1,29 @@
+client/scripts/main.gd
+  s_82919e88fa0503::t_4b003c5ee23f2c 2860-2862,2864-2871
+  s_82919e88fa0503::t_8f5776d522f30b 1891-1894,1902,1905-1909,1912-1914,1917-1918,1922,1939-1947
+  s_82919e88fa0503::t_0b0dedb1a67b16 2863
+  s_82919e88fa0503::t_8453992692c9a8 67,981,1915-1916,1919,1925-1938
+  s_82919e88fa0503::t_35de92ba6f6a86 2792,2802,2814
+  s_82919e88fa0503::t_5cfcf87d484b55 56-66,98
+  s_82919e88fa0503::t_600ccd055ee1d9 3165,3334-3346
+client/tests/test_item_visuals.gd
+  s_82919e88fa0503::t_06fe85817bca1e 215-218
+  s_82919e88fa0503::t_df704ebb2fc978 247-252,257-269
+  s_82919e88fa0503::t_e5b9dffa947001 13,72-73,189-214,219-246,253-256,270-289,312-318
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0498f79f449fc75f7ff1506469b6f2603e4db796",
+  "prompts": {},
+  "sessions": {
+    "s_82919e88fa0503": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaceb-0433-7ff3-9d12-a50fa8023da2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

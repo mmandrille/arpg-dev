@@ -51,6 +51,8 @@ func _initialize() -> void:
 	_test_inventory_paper_doll_assertions()
 	_test_wall_layout_step_types_load()
 	_test_wall_layout_assertions()
+	_test_shop_step_types_load()
+	_test_shop_assertions()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -361,6 +363,60 @@ func _test_wall_layout_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("wall layout assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_shop_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "wait_shop_panel", "equals": 7, "timeout_s": 1.0},
+		{"type": "assert_shop_panel_visible", "visible": true},
+		{"type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2},
+		{"type": "assert_shop_offer_count", "offer_kind": "generated", "equals": 5},
+		{"type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true},
+		{"type": "assert_shop_sell_rows", "rolled": true, "at_least": 1},
+		{"type": "click_shop_buy_offer", "offer_id": "fixed:red_potion"},
+		{"type": "click_shop_buy_offer", "offer_kind": "generated", "offer_index": 0},
+		{"type": "click_shop_sell_item", "rolled": true, "bag_index": 0},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("shop client step scenario valid", err, "")
+	_assert_ne("shop panel wait without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "wait_shop_panel", "timeout_s": 1.0}, 0), "")
+	_assert_ne("shop buy button without offer rejected", BotScenarioRunnerScript.validate_step({"type": "assert_shop_buy_button"}, 0), "")
+	_assert_ne("shop click buy without selector rejected", BotScenarioRunnerScript.validate_step({"type": "click_shop_buy_offer"}, 0), "")
+
+
+func _test_shop_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "shop_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "wait_shop_panel", "equals": 7, "timeout_s": 1.0},
+			{"type": "assert_shop_panel_visible", "visible": true},
+			{"type": "assert_shop_offer_count", "offer_kind": "generated", "equals": 5},
+			{"type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true},
+			{"type": "assert_shop_sell_rows", "rolled": true, "at_least": 1},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"shop_panel_visible": true,
+		"shop_panel": {
+			"offer_count": 7,
+			"fixed_offer_count": 2,
+			"generated_offer_count": 5,
+			"buy_buttons": {
+				"fixed:red_potion": {"enabled": true},
+			},
+			"sell_rows": [
+				{"item_instance_id": "1", "item_def_id": "cave_bow", "item_template_id": "cave_bow"},
+			],
+		},
+	}
+	for _i in range(5):
+		runner.tick(0.016, state)
+	_assert_true("shop assertions pass", runner.is_done() and runner.passed())
 
 
 func _test_timeout_failure_message_format() -> void:

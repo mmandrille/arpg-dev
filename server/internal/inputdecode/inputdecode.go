@@ -24,6 +24,8 @@ const (
 	TypeAssignHotbar = "assign_hotbar_intent"
 	TypeUseHotbar    = "use_hotbar_intent"
 	TypeAllocateStat = "allocate_stat_intent"
+	TypeShopBuy      = "shop_buy_intent"
+	TypeShopSell     = "shop_sell_intent"
 )
 
 type envelope struct {
@@ -76,12 +78,20 @@ type (
 		Stat   string `json:"stat"`
 		Points int    `json:"points"`
 	}
+	shopBuyPayloadWire struct {
+		ShopEntityID string `json:"shop_entity_id"`
+		OfferID      string `json:"offer_id"`
+	}
+	shopSellPayloadWire struct {
+		ShopEntityID   string `json:"shop_entity_id"`
+		ItemInstanceID string `json:"item_instance_id"`
+	}
 )
 
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeShopBuy, TypeShopSell:
 		return true
 	}
 	return false
@@ -180,6 +190,18 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.AllocateStat = &game.AllocateStatIntent{Stat: p.Stat, Points: p.Points}
+	case TypeShopBuy:
+		var p shopBuyPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.ShopEntityID == "" || p.OfferID == "" {
+			return in, false
+		}
+		in.ShopBuy = &game.ShopBuyIntent{ShopEntityID: p.ShopEntityID, OfferID: p.OfferID}
+	case TypeShopSell:
+		var p shopSellPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.ShopEntityID == "" || p.ItemInstanceID == "" {
+			return in, false
+		}
+		in.ShopSell = &game.ShopSellIntent{ShopEntityID: p.ShopEntityID, ItemInstanceID: p.ItemInstanceID}
 	default:
 		return in, false
 	}

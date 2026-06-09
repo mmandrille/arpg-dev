@@ -146,9 +146,26 @@ type CharacterProgressionView struct {
 	LevelCap              int                 `json:"level_cap"`
 	UnspentStatPoints     int                 `json:"unspent_stat_points"`
 	Gold                  int                 `json:"gold"`
+	DeepestDungeonDepth   int                 `json:"deepest_dungeon_depth"`
 	BaseStats             BaseStatsView       `json:"base_stats"`
 	DerivedStats          DerivedStatsView    `json:"derived_stats"`
 	StatBreakdowns        []StatBreakdownView `json:"stat_breakdowns,omitempty"`
+}
+
+// ShopOfferView is one server-authoritative offer rendered inside shop events.
+type ShopOfferView struct {
+	OfferID        string         `json:"offer_id"`
+	Kind           string         `json:"kind"`
+	ItemDefID      string         `json:"item_def_id"`
+	ItemTemplateID string         `json:"item_template_id,omitempty"`
+	DisplayName    string         `json:"display_name"`
+	Rarity         string         `json:"rarity,omitempty"`
+	RolledStats    map[string]int `json:"rolled_stats,omitempty"`
+	Requirements   map[string]int `json:"requirements,omitempty"`
+	EffectIDs      []string       `json:"effect_ids,omitempty"`
+	BuyPrice       int            `json:"buy_price"`
+	Source         string         `json:"source,omitempty"`
+	Depth          int            `json:"depth,omitempty"`
 }
 
 // HotbarSlotView is one fixed hotbar assignment in the protocol snapshot.
@@ -215,6 +232,10 @@ type Event struct {
 	Stat              string             `json:"stat,omitempty"`
 	UnspentStatPoints *int               `json:"unspent_stat_points,omitempty"`
 	Reason            string             `json:"reason,omitempty"`
+	ShopID            string             `json:"shop_id,omitempty"`
+	Offers            []ShopOfferView    `json:"offers,omitempty"`
+	OfferID           string             `json:"offer_id,omitempty"`
+	Price             *int               `json:"price,omitempty"`
 	PatternID         string             `json:"pattern_id,omitempty"`
 	PhaseIndex        *int               `json:"phase_index,omitempty"`
 	PhaseKind         string             `json:"phase_kind,omitempty"`

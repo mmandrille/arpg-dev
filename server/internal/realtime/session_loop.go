@@ -553,7 +553,7 @@ func filterChangesForClient(changes []game.Change, actorPlayerID, clientPlayerID
 		switch change.Op {
 		case game.OpInventoryAdd, game.OpInventoryUpdate, game.OpInventoryRemove,
 			game.OpEquippedUpdate, game.OpHotbarUpdate, game.OpTeleporterDiscoveryUpdate,
-			game.OpCharacterProgressionUpdate:
+			game.OpGoldUpdate, game.OpCharacterProgressionUpdate:
 			if actorPlayerID == 0 || actorPlayerID != clientPlayerID {
 				continue
 			}
@@ -566,8 +566,11 @@ func filterChangesForClient(changes []game.Change, actorPlayerID, clientPlayerID
 func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID uint64) []game.Event {
 	out := make([]game.Event, 0, len(events))
 	for _, event := range events {
-		if event.EventType == "level_changed" && actorPlayerID != clientPlayerID {
-			continue
+		switch event.EventType {
+		case "level_changed", "shop_opened", "shop_purchase", "shop_sale":
+			if actorPlayerID != clientPlayerID {
+				continue
+			}
 		}
 		out = append(out, event)
 	}

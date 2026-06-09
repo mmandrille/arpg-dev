@@ -454,7 +454,54 @@ func _initialize() -> void:
 		_fail("combat_stat_effects stat breakdown mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression, combat_stat_effects)")
+	# 21. Shop pricing/offers goldens are available to the display client.
+	var shops := _read(shared.path_join("rules/shops.v0.json"))
+	var shop_pricing := _read(shared.path_join("golden/shop_pricing.json"))
+	var shop_offers := _read(shared.path_join("golden/shop_offers.json"))
+	if not shops["shops"].has("town_vendor"):
+		_fail("shops missing town_vendor")
+		return
+	var town_vendor: Dictionary = shops["shops"]["town_vendor"]
+	if str(shop_pricing["shop_id"]) != "town_vendor" or str(shop_offers["shop_id"]) != "town_vendor":
+		_fail("shop goldens must target town_vendor")
+		return
+	if (town_vendor["fixed_offers"] as Array).size() != 2:
+		_fail("town_vendor fixed offer count mismatch")
+		return
+	for offer in town_vendor["fixed_offers"]:
+		var item_id := str(offer["item_def_id"])
+		if not items["items"].has(item_id):
+			_fail("town_vendor fixed offer unknown item %s" % item_id)
+			return
+		if int(offer["buy_price"]) <= 0:
+			_fail("town_vendor fixed offer has non-positive price")
+			return
+	var pricing_cases: Array = shop_pricing["cases"]
+	if pricing_cases.size() < 5:
+		_fail("shop_pricing must cover fixed/common/magic/rare cases")
+		return
+		for pricing_case in pricing_cases:
+			if int(pricing_case["expected"]["buy_price"]) <= 0 or int(pricing_case["expected"]["sell_price"]) <= 0:
+				_fail("shop_pricing case %s has non-positive price" % str(pricing_case["name"]))
+				return
+		for offer_case in shop_offers["cases"]:
+			var expected: Array = offer_case["expected"]
+			if expected.size() != int(offer_case["expected_offer_count"]):
+				_fail("shop_offers case %s count mismatch" % str(offer_case["name"]))
+				return
+			for offer in expected:
+				var offer_template_id := str(offer["item_template_id"])
+				if not item_templates["templates"].has(offer_template_id):
+					_fail("shop_offers references unknown template %s" % offer_template_id)
+					return
+				if not str(offer["offer_id"]).begins_with("generated:depth"):
+					_fail("shop_offers offer_id must be generated depth id")
+					return
+				if int(offer["buy_price"]) <= 0:
+					_fail("shop_offers buy_price must be positive")
+					return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression, combat_stat_effects, shop_pricing, shop_offers)")
 	quit(0)
 
 

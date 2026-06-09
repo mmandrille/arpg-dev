@@ -7,6 +7,7 @@ from tools.bot.run import (
     create_listed_coop_session,
     default_manifest_path,
     directional_attack_direction,
+    filtered_shop_offers,
     find_inventory_item,
     find_interactable,
     find_loot,
@@ -18,6 +19,7 @@ from tools.bot.run import (
     load_scenarios,
     run_assertions,
     run_runtime_assertions,
+    select_shop_offer,
     select_scenarios,
     should_clean_bot_run_artifacts,
 )
@@ -75,6 +77,7 @@ def test_load_scenarios_discovers_vertical_slice():
     ids = {scenario.id for scenario in scenarios}
 
     assert "vertical_slice" in ids
+    assert "town_vendor_gold_sink" in ids
     vertical = next(s for s in scenarios if s.id == "vertical_slice")
     assert vertical.world_id == "vertical_slice"
 
@@ -84,6 +87,67 @@ def test_load_scenarios_catalog_order():
 
     assert [s.path.name for s in scenarios[:2]] == ["01_vertical_slice.json", "02_gear_before_combat.json"]
     assert [s.id for s in scenarios[:2]] == ["vertical_slice", "gear_before_combat"]
+
+
+def test_select_shop_offer_prefers_cheapest_affordable_generated():
+    state = RuntimeState(gold=70)
+    state.shop_offers = {
+        "town_vendor": {
+            "fixed:red_potion": {
+                "offer_id": "fixed:red_potion",
+                "kind": "fixed",
+                "item_def_id": "red_potion",
+                "buy_price": 20,
+            },
+            "generated:depth3:000": {
+                "offer_id": "generated:depth3:000",
+                "kind": "generated",
+                "item_def_id": "cave_blade",
+                "item_template_id": "cave_blade",
+                "buy_price": 120,
+            },
+            "generated:depth3:001": {
+                "offer_id": "generated:depth3:001",
+                "kind": "generated",
+                "item_def_id": "cave_boots",
+                "item_template_id": "cave_boots",
+                "buy_price": 40,
+            },
+        }
+    }
+
+    offer = select_shop_offer(state, {"action": "buy_shop_offer", "offer_kind": "generated", "affordable": True})
+
+    assert offer["offer_id"] == "generated:depth3:001"
+    assert [o["offer_id"] for o in filtered_shop_offers(state, {"shop_id": "town_vendor", "offer_kind": "generated"})] == [
+        "generated:depth3:001",
+        "generated:depth3:000",
+    ]
+
+
+def test_runtime_assertions_support_shop_offer_count_and_events():
+    state = RuntimeState(gold=50)
+    state.shop_offers = {
+        "town_vendor": {
+            "fixed:red_potion": {"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "buy_price": 20},
+            "fixed:blue_potion": {"offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "buy_price": 20},
+            "generated:depth3:000": {"offer_id": "generated:depth3:000", "kind": "generated", "item_def_id": "cave_boots", "buy_price": 40},
+        }
+    }
+    state.shop_events = [
+        {"event_type": "shop_opened", "shop_id": "town_vendor"},
+        {"event_type": "shop_purchase", "shop_id": "town_vendor"},
+    ]
+
+    run_runtime_assertions(
+        [
+            {"type": "shop_offer_count", "shop_id": "town_vendor", "equals": 3},
+            {"type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2},
+            {"type": "shop_event", "shop_id": "town_vendor", "event_type": "shop_purchase", "equals": 1},
+        ],
+        state,
+        "unit",
+    )
 
 
 def test_load_scenarios_gear_asserts_outcome_not_timing():

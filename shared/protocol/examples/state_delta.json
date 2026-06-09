@@ -33,6 +33,31 @@
     { "op": "hotbar_update", "slot_index": 2, "item_instance_id": "1007", "inventory_rows": 3, "inventory_capacity": 15 },
     { "op": "inventory_remove", "item_instance_id": "1004" },
     { "op": "gold_update", "gold": 8 },
+    {
+      "op": "character_progression_update",
+      "character_progression": {
+        "level": 1,
+        "experience": 0,
+        "experience_to_next_level": 20,
+        "level_cap": 20,
+        "unspent_stat_points": 0,
+        "gold": 8,
+        "deepest_dungeon_depth": 3,
+        "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+        "derived_stats": {
+          "damage_min": 0,
+          "damage_max": 0,
+          "armor": 1,
+          "attack_speed": 1.025,
+          "hit_chance": 1,
+          "crit_chance": 0.06,
+          "crit_damage": 1.525,
+          "movement_speed": 0.71,
+          "max_hp": 10,
+          "max_mana": 10
+        }
+      }
+    },
     { "op": "entity_spawn", "entity": { "id": "1006", "type": "loot", "item_def_id": "rusty_sword", "position": { "x": 11, "y": 5 } } }
   ],
   "events": [
@@ -51,6 +76,18 @@
     { "event_type": "descend_blocked", "entity_id": "1011", "reason": "boss_alive", "level": -5 },
     { "event_type": "teleport_blocked", "entity_id": "1012", "reason": "boss_alive", "level": -5 },
     { "event_type": "interactable_state_changed", "entity_id": "1011", "state": "ready" },
-    { "event_type": "interactable_state_changed", "entity_id": "1012", "state": "ready" }
+    { "event_type": "interactable_state_changed", "entity_id": "1012", "state": "ready" },
+    {
+      "event_type": "shop_opened",
+      "entity_id": "1013",
+      "shop_id": "town_vendor",
+      "offers": [
+        { "offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "buy_price": 20 },
+        { "offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "buy_price": 20 },
+        { "offer_id": "generated:depth3:000", "kind": "generated", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Magic Cave Blade", "rarity": "magic", "rolled_stats": { "damage_min": 3, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "buy_price": 135, "source": "common_dungeon_mob", "depth": 3 }
+      ]
+    },
+    { "event_type": "shop_purchase", "entity_id": "1013", "shop_id": "town_vendor", "offer_id": "fixed:red_potion", "item_instance_id": "1014", "price": 20, "total_gold": 80 },
+    { "event_type": "shop_sale", "entity_id": "1013", "shop_id": "town_vendor", "item_instance_id": "1004", "price": 27, "total_gold": 107 }
   ]
 }

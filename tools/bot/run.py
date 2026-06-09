@@ -118,6 +118,11 @@ class RuntimeState:
     discovered_teleporters: dict[int, bool] = field(default_factory=dict)
     used_teleporter_positions: dict[int, dict[str, float]] = field(default_factory=dict)
     character_progression: dict[str, Any] = field(default_factory=dict)
+    shop_offers: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
+    shop_events: list[dict[str, Any]] = field(default_factory=list)
+    last_shop_event: dict[str, Any] | None = None
+    last_gold_before_action: int | None = None
+    last_gold_after_action: int | None = None
 
 
 @dataclass
@@ -938,13 +943,15 @@ async def execute_step(
             await pump_one(ws, state, timeout=0.1)
             loot = find_first_rolled_loot(state)
         loot_id = str(loot["id"])
+        before_inventory_count = len(state.inventory)
         await ws.send(json.dumps(make_envelope(
             "action_intent", session_id, state.last_tick, {"target_id": loot_id})))
         log("picking up rolled loot", loot.get("item_template_id"), loot_id)
-        while state.item_id is None:
+        while len(state.inventory) <= before_inventory_count:
             if loop.time() > deadline:
                 raise TimeoutError("pick_up_first_rolled_loot stalled waiting for inventory_add")
             await pump_one(ws, state, timeout=0.1)
+        state.item_id = str(state.inventory[-1].get("item_instance_id", state.item_id))
         return
 
     if action == "pick_up_loot":
@@ -1138,6 +1145,137 @@ async def execute_step(
 
     if action == "assert_character_progression":
         assert_character_progression(state.character_progression, step, "runtime protocol")
+        return
+
+    if action == "open_shop":
+        shop_id = str(step.get("shop_id", "town_vendor"))
+        interactable_def_id = str(step.get("interactable_def_id", "town_vendor"))
+        target = find_interactable(state, interactable_def_id)
+        if target is None:
+            raise AssertionError(f"open_shop: missing {interactable_def_id} on level {state.current_level}")
+        await walk_toward(
+            ws,
+            session_id,
+            state,
+            target["position"],
+            loop,
+            stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
+            max_ticks=derived_walk_max_ticks(state, target["position"], int(step.get("max_ticks", WALK_MAX_TICKS))),
+        )
+        start_index = len(state.shop_events)
+        env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": str(target["id"])})
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_shop_event(ws, state, "shop_opened", loop, shop_id=shop_id, start_index=start_index)
+        return
+
+    if action == "assert_shop_offer_count":
+        offers = filtered_shop_offers(state, step)
+        assert_count_matches(len(offers), step, "assert_shop_offer_count", f": {offers}")
+        return
+
+    if action == "buy_shop_offer":
+        shop_id = str(step.get("shop_id", "town_vendor"))
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_vendor")))
+        if target is None:
+            raise AssertionError(f"buy_shop_offer: missing shop entity on level {state.current_level}")
+        offer = select_shop_offer(state, step)
+        before_gold = state.gold
+        before_inventory_count = len(state.inventory)
+        start_index = len(state.shop_events)
+        env = make_envelope(
+            "shop_buy_intent",
+            session_id,
+            state.last_tick,
+            {"shop_entity_id": str(target["id"]), "offer_id": str(offer["offer_id"])},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_shop_event(ws, state, "shop_purchase", loop, shop_id=shop_id, start_index=start_index)
+        state.last_gold_before_action = before_gold
+        state.last_gold_after_action = state.gold
+        if int(event.get("price", 0)) != int(offer.get("buy_price", 0)):
+            raise AssertionError(f"buy_shop_offer: event price {event.get('price')} != offer price {offer.get('buy_price')}")
+        if len(state.inventory) <= before_inventory_count:
+            raise AssertionError(f"buy_shop_offer: inventory did not grow after {offer}")
+        return
+
+    if action == "sell_inventory_item":
+        shop_id = str(step.get("shop_id", "town_vendor"))
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_vendor")))
+        if target is None:
+            raise AssertionError(f"sell_inventory_item: missing shop entity on level {state.current_level}")
+        candidates = state.inventory
+        if step.get("item_def_id") is not None:
+            candidates = [item for item in candidates if str(item.get("item_def_id", "")) == str(step["item_def_id"])]
+        if step.get("item_template_id") is not None:
+            candidates = [item for item in candidates if str(item.get("item_template_id", "")) == str(step["item_template_id"])]
+        if step.get("rolled") is not None:
+            want_rolled = bool(step["rolled"])
+            candidates = [item for item in candidates if bool(item.get("item_template_id")) == want_rolled]
+        if step.get("equipped") is not None:
+            candidates = [item for item in candidates if bool(item.get("equipped")) == bool(step["equipped"])]
+        candidates = sorted(candidates, key=lambda item: str(item.get("item_instance_id", "")))
+        if not candidates:
+            raise AssertionError(f"sell_inventory_item: no matching inventory item for {step}; inventory={state.inventory}")
+        item = candidates[int(step.get("bag_index", 0))]
+        item_id = str(item["item_instance_id"])
+        before_gold = state.gold
+        start_index = len(state.shop_events)
+        env = make_envelope(
+            "shop_sell_intent",
+            session_id,
+            state.last_tick,
+            {"shop_entity_id": str(target["id"]), "item_instance_id": item_id},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_shop_event(ws, state, "shop_sale", loop, shop_id=shop_id, start_index=start_index)
+        state.last_gold_before_action = before_gold
+        state.last_gold_after_action = state.gold
+        if str(event.get("item_instance_id")) != item_id:
+            raise AssertionError(f"sell_inventory_item: event item {event.get('item_instance_id')} != {item_id}")
+        if find_inventory_item_by_instance(state.inventory, item_id) is not None:
+            raise AssertionError(f"sell_inventory_item: item {item_id} still in inventory")
+        return
+
+    if action == "assert_gold_changed":
+        before = state.last_gold_before_action
+        after = state.last_gold_after_action
+        if before is None or after is None:
+            raise AssertionError("assert_gold_changed: no recorded shop gold change")
+        direction = str(step.get("direction", ""))
+        if direction == "decrease" and not after < before:
+            raise AssertionError(f"assert_gold_changed: gold {after} did not decrease from {before}")
+        if direction == "increase" and not after > before:
+            raise AssertionError(f"assert_gold_changed: gold {after} did not increase from {before}")
+        if "by_at_least" in step and abs(after - before) < int(step["by_at_least"]):
+            raise AssertionError(f"assert_gold_changed: |{after} - {before}| < {step['by_at_least']}")
+        return
+
+    if action == "assert_deepest_dungeon_depth":
+        got = int(state.character_progression.get("deepest_dungeon_depth", 0))
+        assert_count_matches(got, step, "assert_deepest_dungeon_depth")
+        return
+
+    if action == "assert_shop_event":
+        event_type = str(step["event_type"])
+        shop_id = str(step.get("shop_id", "town_vendor"))
+        matches = [
+            event for event in state.shop_events
+            if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id
+        ]
+        if step.get("offer_id") is not None:
+            matches = [event for event in matches if str(event.get("offer_id", "")) == str(step["offer_id"])]
+        assert_count_matches(len(matches), step, "assert_shop_event", f": {matches}")
         return
 
     if action == "use_inventory_item":
@@ -1455,6 +1593,25 @@ async def wait_for_event(ws, state: RuntimeState, event_type: str, loop) -> None
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_shop_event(
+    ws,
+    state: RuntimeState,
+    event_type: str,
+    loop,
+    *,
+    shop_id: str = "town_vendor",
+    start_index: int = 0,
+) -> dict[str, Any]:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while True:
+        for event in state.shop_events[start_index:]:
+            if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id:
+                return event
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for shop event {event_type} shop_id={shop_id}")
+        await pump_one(ws, state, timeout=0.1)
+
+
 def combat_event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
     for key in (
         "event_type",
@@ -1578,6 +1735,16 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
     for ev in (p.get("events") or []):
         event_type = ev["event_type"]
         state.seen_events.add(event_type)
+        if event_type in {"shop_opened", "shop_purchase", "shop_sale"}:
+            shop_event = dict(ev)
+            state.shop_events.append(shop_event)
+            state.last_shop_event = shop_event
+            shop_id = str(ev.get("shop_id", ""))
+            if event_type == "shop_opened" and shop_id:
+                state.shop_offers[shop_id] = {
+                    str(offer["offer_id"]): dict(offer)
+                    for offer in ev.get("offers", [])
+                }
         if event_type in {"monster_damaged", "player_damaged", "player_killed", "attack_missed", "attack_blocked"}:
             state.combat_events.append(dict(ev))
         if event_type == "level_changed":
@@ -1653,6 +1820,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
             state.character_progression = dict(c.get("character_progression") or {})
+            if "gold" in state.character_progression:
+                state.gold = int(state.character_progression["gold"])
     if state.pending_level_load is not None and delta_level == state.pending_level_load and find_player(state) is not None:
         state.pending_level_load = None
     update_runtime_distances(state)
@@ -1674,8 +1843,8 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.hotbar = [dict(slot) for slot in payload.get("hotbar", [])]
     state.inventory_rows = int(payload.get("inventory_rows", 3))
     state.inventory_capacity = int(payload.get("inventory_capacity", state.inventory_rows * 5))
-    state.gold = int(payload.get("gold", 0))
     state.character_progression = dict(payload.get("character_progression", {}))
+    state.gold = int(payload.get("gold", state.character_progression.get("gold", 0)))
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
         entity_id
@@ -1936,6 +2105,36 @@ def find_inventory_item_by_instance(inventory: list[dict[str, Any]], item_instan
     if item_instance_id is None:
         return None
     return next((item for item in inventory if str(item.get("item_instance_id")) == str(item_instance_id)), None)
+
+
+def filtered_shop_offers(state: RuntimeState, step: dict[str, Any]) -> list[dict[str, Any]]:
+    shop_id = str(step.get("shop_id", "town_vendor"))
+    offers = list(state.shop_offers.get(shop_id, {}).values())
+    if step.get("offer_id") is not None:
+        offers = [offer for offer in offers if str(offer.get("offer_id")) == str(step["offer_id"])]
+    if step.get("offer_kind") is not None:
+        offers = [offer for offer in offers if str(offer.get("kind")) == str(step["offer_kind"])]
+    if step.get("item_def_id") is not None:
+        offers = [offer for offer in offers if str(offer.get("item_def_id")) == str(step["item_def_id"])]
+    if step.get("item_template_id") is not None:
+        offers = [offer for offer in offers if str(offer.get("item_template_id")) == str(step["item_template_id"])]
+    if bool(step.get("affordable")):
+        reserve_gold = int(step.get("reserve_gold", 0))
+        budget = max(0, state.gold - reserve_gold)
+        offers = [offer for offer in offers if int(offer.get("buy_price", 0)) <= budget]
+    offers.sort(key=lambda offer: (int(offer.get("buy_price", 0)), str(offer.get("offer_id", ""))))
+    return offers
+
+
+def select_shop_offer(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
+    offers = filtered_shop_offers(state, step)
+    if not offers:
+        shop_id = str(step.get("shop_id", "town_vendor"))
+        raise AssertionError(f"{step.get('action')}: no matching shop offers in {shop_id}: {step}; have={state.shop_offers.get(shop_id, {})}")
+    index = int(step.get("offer_index", 0))
+    if index < 0 or index >= len(offers):
+        raise AssertionError(f"{step.get('action')}: offer_index {index} out of range for {offers}")
+    return offers[index]
 
 
 def find_player(state: RuntimeState) -> dict[str, Any] | None:
@@ -2199,7 +2398,7 @@ def assert_count_matches(got: int, assertion: dict[str, Any], label: str, suffix
 def assert_character_progression(progression: dict[str, Any], assertion: dict[str, Any], where: str) -> None:
     if not progression:
         raise AssertionError(f"{where}: missing character_progression")
-    for key in ("level", "experience", "unspent_stat_points"):
+    for key in ("level", "experience", "unspent_stat_points", "gold", "deepest_dungeon_depth"):
         if key in assertion:
             want = int(assertion[key])
             got = int(progression.get(key, -1))
@@ -2378,6 +2577,8 @@ def run_assertions(
             "player_never_in_melee_range_of",
             "monster_damage_at_least",
             "player_hp_decreased_from_recorded",
+            "shop_offer_count",
+            "shop_event",
         }:
             continue
         elif typ == "player_hp_equals":
@@ -2586,6 +2787,19 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             continue
         if typ == "gold":
             assert_count_matches(state.gold, assertion, f"{where}: gold")
+            continue
+        if typ == "shop_offer_count":
+            offers = filtered_shop_offers(state, assertion)
+            assert_count_matches(len(offers), assertion, f"{where}: shop_offer_count", f": {offers}")
+            continue
+        if typ == "shop_event":
+            shop_id = str(assertion.get("shop_id", "town_vendor"))
+            event_type = str(assertion["event_type"])
+            matches = [
+                event for event in state.shop_events
+                if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id
+            ]
+            assert_count_matches(len(matches), assertion, f"{where}: shop_event", f": {matches}")
             continue
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)

@@ -247,11 +247,12 @@ type Sim struct {
 // CharacterProgressionState is the authoritative mutable progression state for
 // one character inside a sim session.
 type CharacterProgressionState struct {
-	Level             int
-	Experience        int
-	UnspentStatPoints int
-	BaseStats         BaseStatsView
-	Gold              int
+	Level               int
+	Experience          int
+	UnspentStatPoints   int
+	BaseStats           BaseStatsView
+	Gold                int
+	DeepestDungeonDepth int
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
@@ -319,11 +320,12 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 // character progression rules.
 func (r *Rules) DefaultCharacterProgressionState() CharacterProgressionState {
 	return CharacterProgressionState{
-		Level:             1,
-		Experience:        0,
-		UnspentStatPoints: 0,
-		BaseStats:         r.CharacterProgression.BaseStats,
-		Gold:              0,
+		Level:               1,
+		Experience:          0,
+		UnspentStatPoints:   0,
+		BaseStats:           r.CharacterProgression.BaseStats,
+		Gold:                0,
+		DeepestDungeonDepth: 0,
 	}
 }
 
@@ -339,6 +341,9 @@ func (r *Rules) normalizeProgressionState(in CharacterProgressionState) Characte
 	}
 	if in.Gold < 0 {
 		in.Gold = 0
+	}
+	if in.DeepestDungeonDepth < 0 {
+		in.DeepestDungeonDepth = 0
 	}
 	if in.BaseStats.Str <= 0 {
 		in.BaseStats.Str = r.CharacterProgression.BaseStats.Str
@@ -959,6 +964,8 @@ type Input struct {
 	AssignHotbar      *AssignHotbarIntent
 	UseHotbar         *UseHotbarIntent
 	AllocateStat      *AllocateStatIntent
+	ShopBuy           *ShopBuyIntent
+	ShopSell          *ShopSellIntent
 }
 
 // Intent payloads.
@@ -1002,6 +1009,14 @@ type (
 	AllocateStatIntent struct {
 		Stat   string
 		Points int
+	}
+	ShopBuyIntent struct {
+		ShopEntityID string
+		OfferID      string
+	}
+	ShopSellIntent struct {
+		ShopEntityID   string
+		ItemInstanceID string
 	}
 )
 
@@ -1132,7 +1147,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "directional_attack_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent":
+		case "move_intent", "move_to_intent", "directional_attack_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent", "shop_buy_intent", "shop_sell_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -1167,6 +1182,10 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleUseHotbar(in, res)
 	case "allocate_stat_intent":
 		s.handleAllocateStat(in, res)
+	case "shop_buy_intent":
+		s.handleShopBuy(in, res)
+	case "shop_sell_intent":
+		s.handleShopSell(in, res)
 	default:
 		res.reject(in.MessageID, "unknown_type")
 	}
@@ -1792,6 +1811,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.activateTeleporter(e, in, res, ack)
 		return
 	}
+	if shopID := s.shopIDForInteractable(e); shopID != "" {
+		s.openShop(e, shopID, in, res, ack)
+		return
+	}
 	if e.state != interactableClosed {
 		res.reject(in.MessageID, "already_open")
 		return
@@ -1805,6 +1828,149 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 	if ack {
 		res.ack(in.MessageID)
 	}
+}
+
+func (s *Sim) openShop(e *entity, shopID string, in Input, res *TickResult, ack bool) {
+	if e.state != interactableReady {
+		res.reject(in.MessageID, "not_actionable")
+		return
+	}
+	offers, ok := s.shopCatalog(shopID)
+	if !ok {
+		res.reject(in.MessageID, "invalid_target")
+		return
+	}
+	res.Events = append(res.Events, Event{
+		EventType:     "shop_opened",
+		EntityID:      idStr(e.id),
+		CorrelationID: in.CorrelationID,
+		ShopID:        shopID,
+		Offers:        offers,
+	})
+	if ack {
+		res.ack(in.MessageID)
+	}
+}
+
+func (s *Sim) handleShopBuy(in Input, res *TickResult) {
+	if in.ShopBuy == nil || in.ShopBuy.ShopEntityID == "" || in.ShopBuy.OfferID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	shopEntity, shopID, ok, reason := s.resolveShopIntentTarget(in.ShopBuy.ShopEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	offer, ok := s.findShopOffer(shopID, in.ShopBuy.OfferID)
+	if !ok {
+		res.reject(in.MessageID, "unknown_offer")
+		return
+	}
+	if s.gold < offer.BuyPrice {
+		res.reject(in.MessageID, "insufficient_gold")
+		return
+	}
+	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
+		res.reject(in.MessageID, "inventory_full")
+		return
+	}
+
+	item := s.itemFromShopOffer(offer, s.alloc())
+	s.inventory = append(s.inventory, item)
+	s.gold -= offer.BuyPrice
+	s.progression.Gold = s.gold
+
+	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
+	res.Events = append(res.Events, Event{
+		EventType:      "shop_purchase",
+		EntityID:       idStr(shopEntity.id),
+		CorrelationID:  in.CorrelationID,
+		ShopID:         shopID,
+		OfferID:        offer.OfferID,
+		ItemInstanceID: idStr(item.instanceID),
+		Price:          intPtr(offer.BuyPrice),
+		TotalGold:      intPtr(s.gold),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleShopSell(in Input, res *TickResult) {
+	if in.ShopSell == nil || in.ShopSell.ShopEntityID == "" || in.ShopSell.ItemInstanceID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	shopEntity, shopID, ok, reason := s.resolveShopIntentTarget(in.ShopSell.ShopEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	item := s.findItem(in.ShopSell.ItemInstanceID)
+	if item == nil {
+		res.reject(in.MessageID, "not_in_inventory")
+		return
+	}
+	if item.equipped {
+		res.reject(in.MessageID, "item_equipped")
+		return
+	}
+	price, ok := s.inventorySellPrice(shopID, item)
+	if !ok {
+		res.reject(in.MessageID, "unsellable_item")
+		return
+	}
+
+	removedID := idStr(item.instanceID)
+	s.removeItemByID(item.instanceID)
+	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
+	s.clearHotbarReferences(item.instanceID, res)
+
+	s.gold += price
+	s.progression.Gold = s.gold
+	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	res.Events = append(res.Events, Event{
+		EventType:      "shop_sale",
+		EntityID:       idStr(shopEntity.id),
+		CorrelationID:  in.CorrelationID,
+		ShopID:         shopID,
+		ItemInstanceID: removedID,
+		Price:          intPtr(price),
+		TotalGold:      intPtr(s.gold),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) resolveShopIntentTarget(shopEntityID string) (*entity, string, bool, string) {
+	shopEntity, levelNum, ok := s.findEntityAnyLevel(shopEntityID)
+	if !ok || shopEntity.kind != interactableEntity {
+		return nil, "", false, "invalid_target"
+	}
+	shopID := s.shopIDForInteractable(shopEntity)
+	if shopID == "" {
+		return nil, "", false, "invalid_target"
+	}
+	if levelNum != s.currentLevel || s.currentLevel != townLevel {
+		return nil, "", false, "out_of_range"
+	}
+	if !s.inDispatchRange(shopEntity) {
+		return nil, "", false, "out_of_range"
+	}
+	if shopEntity.state != interactableReady {
+		return nil, "", false, "not_actionable"
+	}
+	return shopEntity, shopID, true, ""
+}
+
+func (s *Sim) shopIDForInteractable(e *entity) string {
+	if e == nil || e.kind != interactableEntity {
+		return ""
+	}
+	return s.rules.Interactables[e.interactableDefID].ShopID
 }
 
 func (s *Sim) activateTeleporter(e *entity, in Input, res *TickResult, ack bool) {
@@ -2012,10 +2178,24 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 			Discovered: false,
 		})
 	}
+	s.appendDeepestDungeonDepthChange(destLevel, &arrivalRes)
 	for _, id := range sortedEntityIDs(dest.entities) {
 		arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(dest.entities[id].view())})
 	}
 	return &arrivalRes
+}
+
+func (s *Sim) appendDeepestDungeonDepthChange(destLevel int, res *TickResult) {
+	if destLevel >= townLevel {
+		return
+	}
+	depth := absInt(destLevel)
+	if depth <= s.progression.DeepestDungeonDepth {
+		return
+	}
+	s.progression.DeepestDungeonDepth = depth
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
 }
 
 func (s *Sim) travelArrivalPosition(level *LevelState, marker Vec2, movingPlayerID uint64) Vec2 {
@@ -3879,43 +4059,7 @@ func combatEvent(eventType string, sourceID, targetID uint64, corr string, outco
 }
 
 func (s *Sim) rollItemTemplate(templateID string) (ItemRollPayload, bool) {
-	template, ok := s.rules.ItemTemplates[templateID]
-	if !ok || len(s.rules.RarityOrder) == 0 {
-		return ItemRollPayload{}, false
-	}
-	total := 0
-	for _, rarityID := range s.rules.RarityOrder {
-		total += s.rules.Rarities[rarityID].Weight
-	}
-	if total <= 0 {
-		return ItemRollPayload{}, false
-	}
-	roll := s.rng.IntN(total)
-	rarityID := s.rules.RarityOrder[len(s.rules.RarityOrder)-1]
-	for _, candidate := range s.rules.RarityOrder {
-		roll -= s.rules.Rarities[candidate].Weight
-		if roll < 0 {
-			rarityID = candidate
-			break
-		}
-	}
-	rarity := s.rules.Rarities[rarityID]
-	stats := cloneIntMap(template.BaseStats)
-	for i := 0; i < rarity.StatRolls; i++ {
-		stat, ok := weightedRollableStat(template.RollableStats, s.rng)
-		if !ok {
-			continue
-		}
-		stats[stat.Stat] += stat.Min + s.rng.IntN(stat.Max-stat.Min+1)
-	}
-	return ItemRollPayload{
-		ItemTemplateID: templateID,
-		DisplayName:    rarity.NamePrefix + " " + template.Name,
-		Rarity:         rarityID,
-		Stats:          stats,
-		Requirements:   cloneIntMap(template.Requirements),
-		EffectIDs:      cloneStringSlice(template.EffectPool),
-	}, true
+	return s.rules.rollItemTemplateWithRNG(templateID, s.rng)
 }
 
 func weightedRollableStat(stats []RollableStatDef, rng *RNG) (RollableStatDef, bool) {
@@ -4473,6 +4617,9 @@ func (s *Sim) actionable(e *entity) bool {
 		if e.interactableDefID == teleporterDefID && (e.state == interactableReady || e.state == interactableLocked || e.state == interactableDisabled) {
 			return true
 		}
+		if s.shopIDForInteractable(e) != "" && e.state == interactableReady {
+			return true
+		}
 		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)
 	default:
 		return false
@@ -4535,6 +4682,7 @@ func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 		LevelCap:              s.rules.CharacterProgression.LevelCap,
 		UnspentStatPoints:     s.progression.UnspentStatPoints,
 		Gold:                  s.gold,
+		DeepestDungeonDepth:   s.progression.DeepestDungeonDepth,
 		BaseStats:             s.progression.BaseStats,
 		DerivedStats:          s.DerivedStatsView(),
 		StatBreakdowns:        s.StatBreakdownViews(),
@@ -4833,6 +4981,23 @@ func (s *Sim) findEntity(id string) *entity {
 		return nil
 	}
 	return s.activeLevel().entities[n]
+}
+
+func (s *Sim) findEntityAnyLevel(id string) (*entity, int, bool) {
+	n, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, 0, false
+	}
+	for _, levelNum := range s.sortedLevelNums() {
+		level := s.levels[levelNum]
+		if level == nil {
+			continue
+		}
+		if e := level.entities[n]; e != nil {
+			return e, levelNum, true
+		}
+	}
+	return nil, 0, false
 }
 
 func (s *Sim) findReachableStair(level *LevelState, defID string, playerPos Vec2) *entity {

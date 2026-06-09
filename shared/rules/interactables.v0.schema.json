@@ -18,6 +18,7 @@
           "name": { "type": "string", "minLength": 1 },
           "initial_state": { "type": "string", "enum": ["closed", "ready", "locked", "disabled"] },
           "transition": { "type": "string", "enum": ["ascend", "descend", "waypoint"] },
+          "shop_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
           "barrier_when_closed": {
             "type": "object",
             "required": ["size"],
@@ -34,7 +35,12 @@
               "required": ["initial_state"]
             },
             "then": {
-              "not": { "required": ["transition"] }
+              "not": {
+                "anyOf": [
+                  { "required": ["transition"] },
+                  { "required": ["shop_id"] }
+                ]
+              }
             }
           },
           {
@@ -43,7 +49,10 @@
               "required": ["initial_state"]
             },
             "then": {
-              "required": ["transition"],
+              "oneOf": [
+                { "required": ["transition"] },
+                { "required": ["shop_id"] }
+              ],
               "not": { "required": ["barrier_when_closed"] }
             }
           }

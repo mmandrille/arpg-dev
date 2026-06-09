@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/shops.v0.schema.json",
+  "title": "Shop definitions (v0)",
+  "type": "object",
+  "required": ["version", "shops"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "shops": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "fixed_offers", "generated_offers", "pricing"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "fixed_offers": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/fixed_offer" }
+          },
+          "generated_offers": { "$ref": "#/$defs/generated_offers" },
+          "pricing": { "$ref": "#/$defs/pricing" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "fixed_offer": {
+      "type": "object",
+      "required": ["offer_id", "item_def_id", "buy_price"],
+      "additionalProperties": false,
+      "properties": {
+        "offer_id": { "type": "string", "pattern": "^[a-z0-9_:-]+$" },
+        "item_def_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "buy_price": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "generated_offers": {
+      "type": "object",
+      "required": ["offer_count", "source", "min_depth", "max_roll_attempts"],
+      "additionalProperties": false,
+      "properties": {
+        "offer_count": { "type": "integer", "minimum": 1 },
+        "source": { "type": "string", "enum": ["common_dungeon_mob"] },
+        "min_depth": { "type": "integer", "minimum": 1 },
+        "max_roll_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "pricing": {
+      "type": "object",
+      "required": ["sell_multiplier", "round_buy_to", "rarity_multipliers", "slot_base", "stat_weights"],
+      "additionalProperties": false,
+      "properties": {
+        "sell_multiplier": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "round_buy_to": { "type": "integer", "minimum": 1 },
+        "rarity_multipliers": {
+          "type": "object",
+          "required": ["common", "magic", "rare", "unique"],
+          "additionalProperties": { "type": "number", "exclusiveMinimum": 0 },
+          "properties": {
+            "common": { "type": "number", "exclusiveMinimum": 0 },
+            "magic": { "type": "number", "exclusiveMinimum": 0 },
+            "rare": { "type": "number", "exclusiveMinimum": 0 },
+            "unique": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "slot_base": {
+          "type": "object",
+          "required": ["main_hand", "off_hand", "head", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+          "additionalProperties": { "type": "integer", "minimum": 1 },
+          "properties": {
+            "main_hand": { "type": "integer", "minimum": 1 },
+            "off_hand": { "type": "integer", "minimum": 1 },
+            "head": { "type": "integer", "minimum": 1 },
+            "chest": { "type": "integer", "minimum": 1 },
+            "gloves": { "type": "integer", "minimum": 1 },
+            "belt": { "type": "integer", "minimum": 1 },
+            "boots": { "type": "integer", "minimum": 1 },
+            "ring": { "type": "integer", "minimum": 1 },
+            "amulet": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "stat_weights": {
+          "type": "object",
+          "required": ["damage_min", "damage_max", "armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"],
+          "additionalProperties": { "type": "integer", "minimum": 0 },
+          "properties": {
+            "damage_min": { "type": "integer", "minimum": 0 },
+            "damage_max": { "type": "integer", "minimum": 0 },
+            "armor": { "type": "integer", "minimum": 0 },
+            "block_percent": { "type": "integer", "minimum": 0 },
+            "max_hp": { "type": "integer", "minimum": 0 },
+            "hotbar_slots": { "type": "integer", "minimum": 0 },
+            "inventory_rows": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    }
+  }
+}

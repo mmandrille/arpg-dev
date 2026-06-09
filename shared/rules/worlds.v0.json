@@ -464,6 +464,11 @@
           "type": "interactable",
           "interactable_def_id": "teleporter",
           "position": { "x": 4, "y": 13 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_vendor",
+          "position": { "x": 6, "y": 13 }
         }
       ]
     },

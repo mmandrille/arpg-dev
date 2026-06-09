@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/shop_offers.v0.schema.json",
+  "title": "Shop generated offers golden fixture (v0)",
+  "type": "object",
+  "required": ["shop_id", "seed", "character_id", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "shop_id": { "type": "string" },
+    "seed": { "type": "string" },
+    "character_id": { "type": "string" },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "deepest_dungeon_depth", "expected_offer_count", "expected"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "deepest_dungeon_depth": { "type": "integer", "minimum": 0 },
+          "expected_offer_count": { "type": "integer", "minimum": 1 },
+          "expected": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["offer_id", "kind", "item_template_id", "display_name", "rarity", "rolled_stats", "buy_price", "source", "depth"],
+              "additionalProperties": false,
+              "properties": {
+                "offer_id": { "type": "string" },
+                "kind": { "const": "generated" },
+                "item_template_id": { "type": "string" },
+                "display_name": { "type": "string" },
+                "rarity": { "type": "string" },
+                "rolled_stats": {
+                  "type": "object",
+                  "additionalProperties": { "type": "integer", "minimum": 0 }
+                },
+                "buy_price": { "type": "integer", "minimum": 1 },
+                "source": { "type": "string" },
+                "depth": { "type": "integer", "minimum": 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

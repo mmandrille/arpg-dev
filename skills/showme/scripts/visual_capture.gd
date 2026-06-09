@@ -54,10 +54,10 @@ func _initialize() -> void:
 	var image := get_root().get_texture().get_image()
 	var err := image.save_png(_output)
 	if err != OK:
-		printerr("[visual-feedback] failed to save screenshot: %s err=%d" % [_output, err])
+		printerr("[showme] failed to save screenshot: %s err=%d" % [_output, err])
 		quit(1)
 		return
-	print("[visual-feedback] saved %s" % _output)
+	print("[showme] saved %s" % _output)
 	quit(0)
 
 
@@ -97,7 +97,7 @@ func _parse_args() -> void:
 				_items = _split_items(str(args[i]))
 		i += 1
 	if _output == "":
-		_output = ProjectSettings.globalize_path("res://").path_join("../.artifacts/visual-feedback/capture.png")
+		_output = ProjectSettings.globalize_path("res://").path_join("../.artifacts/showme/capture.png")
 
 
 func _split_items(raw: String) -> Array:

@@ -118,10 +118,11 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 		return rules.DefaultCharacterProgressionState()
 	}
 	return game.CharacterProgressionState{
-		Level:             progression.Level,
-		Experience:        progression.Experience,
-		UnspentStatPoints: progression.UnspentStatPoints,
-		Gold:              progression.Gold,
+		Level:               progression.Level,
+		Experience:          progression.Experience,
+		UnspentStatPoints:   progression.UnspentStatPoints,
+		Gold:                progression.Gold,
+		DeepestDungeonDepth: progression.DeepestDungeonDepth,
 		BaseStats: game.BaseStatsView{
 			Str:   progression.Stats.Str,
 			Dex:   progression.Stats.Dex,

@@ -8,7 +8,7 @@ CODEX_SKILLS="${CODEX_HOME:-$HOME/.codex}/skills"
 
 mkdir -p "$CODEX_SKILLS"
 
-for name in next plan execute finish showme; do
+for name in next spec plan execute finish showme; do
   target="$CODEX_SKILLS/$name"
   source="$REPO_ROOT/skills/$name"
   if [[ ! -d "$source" ]]; then
@@ -21,4 +21,4 @@ done
 
 echo ""
 echo "Codex: restart the session (or start a new one) to pick up skills."
-echo "Invoke with \$next / \$plan / \$execute / \$finish / \$showme or ask per AGENTS.md slash commands."
+echo "Invoke with \$next / \$spec / \$plan / \$execute / \$finish / \$showme or ask per AGENTS.md slash commands."

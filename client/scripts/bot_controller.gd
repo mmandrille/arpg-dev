@@ -141,6 +141,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_set_floating_combat_text(bool(action.get("enabled", true)))
 		"click_stat_button":
 			_do_click_stat_button(str(action.get("stat", "")))
+		"click_shop_buy_offer":
+			_do_click_shop_buy_offer(action)
+		"click_shop_sell_item":
+			_do_click_shop_sell_item(action)
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -183,6 +187,24 @@ func _do_set_floating_combat_text(enabled: bool) -> void:
 func _do_click_stat_button(stat: String) -> void:
 	if _main != null and _main.has_method("bot_click_stat_button"):
 		_main.bot_click_stat_button(stat)
+
+
+func _do_click_shop_buy_offer(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_shop_buy_offer"):
+		_main.bot_click_shop_buy_offer(
+			str(action.get("offer_id", "")),
+			str(action.get("offer_kind", "")),
+			int(action.get("offer_index", 0))
+		)
+
+
+func _do_click_shop_sell_item(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_shop_sell_item"):
+		_main.bot_click_shop_sell_item(
+			str(action.get("item_def_id", "")),
+			action.get("rolled", null),
+			int(action.get("bag_index", 0))
+		)
 
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
@@ -399,6 +421,18 @@ func _format_action(action: Dictionary) -> String:
 			return "select_window_size %s" % str(action.get("size", ""))
 		"click_stat_button":
 			return "click_stat_button %s" % str(action.get("stat", ""))
+		"click_shop_buy_offer":
+			return "click_shop_buy offer_id=%s kind=%s index=%s" % [
+				str(action.get("offer_id", "")),
+				str(action.get("offer_kind", "")),
+				str(action.get("offer_index", 0)),
+			]
+		"click_shop_sell_item":
+			return "click_shop_sell item=%s rolled=%s bag_index=%s" % [
+				str(action.get("item_def_id", "")),
+				str(action.get("rolled", "")),
+				str(action.get("bag_index", 0)),
+			]
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
 				str(action.get("slot_index", "")),

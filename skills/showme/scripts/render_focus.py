@@ -15,7 +15,7 @@ def _repo_root() -> Path:
 
 def _default_output(root: Path, focus: str) -> Path:
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    return root / ".artifacts" / "visual-feedback" / f"{stamp}-{focus}.png"
+    return root / ".artifacts" / "showme" / f"{stamp}-{focus}.png"
 
 
 def main() -> int:
@@ -34,7 +34,7 @@ def main() -> int:
     output = Path(args.output) if args.output else _default_output(root, args.focus)
     output = output if output.is_absolute() else root / output
     output.parent.mkdir(parents=True, exist_ok=True)
-    log_file = root / ".artifacts" / "visual-feedback" / "godot.log"
+    log_file = root / ".artifacts" / "showme" / "godot.log"
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     width = args.width
@@ -79,15 +79,15 @@ def main() -> int:
     if args.items:
         cmd += ["--items", args.items]
 
-    print("[visual-feedback] running:", " ".join(cmd))
+    print("[showme] running:", " ".join(cmd))
     result = subprocess.run(cmd, cwd=root)
     if result.returncode != 0:
         return result.returncode
     if args.mode == "screenshot":
         if not output.exists():
-            print(f"[visual-feedback] expected screenshot missing: {output}", file=sys.stderr)
+            print(f"[showme] expected screenshot missing: {output}", file=sys.stderr)
             return 1
-        print(f"[visual-feedback] screenshot: {output}")
+        print(f"[showme] screenshot: {output}")
     return 0
 
 

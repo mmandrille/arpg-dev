@@ -122,6 +122,40 @@ func TestFanoutLevelTravelScopesDepartureAndArrival(t *testing.T) {
 	}
 }
 
+func TestShopDeltasAreActorScoped(t *testing.T) {
+	actorID := uint64(1001)
+	otherID := uint64(1002)
+	gold := 80
+	changes := []game.Change{
+		{Op: game.OpGoldUpdate, Gold: &gold},
+		{Op: game.OpInventoryAdd, Item: &game.ItemView{ItemInstanceID: "2001", ItemDefID: "red_potion"}},
+		{Op: game.OpEntityUpdate, Entity: &game.EntityView{ID: "3001", Type: "monster"}},
+	}
+	events := []game.Event{
+		{EventType: "shop_opened", EntityID: "1013", ShopID: "town_vendor", Offers: []game.ShopOfferView{{OfferID: "fixed:red_potion", Kind: "fixed", ItemDefID: "red_potion", DisplayName: "Red Potion", BuyPrice: 20}}},
+		{EventType: "shop_purchase", EntityID: "1013", ShopID: "town_vendor", OfferID: "fixed:red_potion", Price: &gold},
+		{EventType: "monster_aggro", EntityID: "3001"},
+	}
+
+	actorChanges := filterChangesForClient(changes, actorID, actorID)
+	if len(actorChanges) != 3 {
+		t.Fatalf("actor changes = %d, want 3: %+v", len(actorChanges), actorChanges)
+	}
+	otherChanges := filterChangesForClient(changes, actorID, otherID)
+	if len(otherChanges) != 1 || otherChanges[0].Op != game.OpEntityUpdate {
+		t.Fatalf("other changes = %+v, want only public entity update", otherChanges)
+	}
+
+	actorEvents := filterEventsForClient(events, actorID, actorID)
+	if len(actorEvents) != 3 {
+		t.Fatalf("actor events = %d, want 3: %+v", len(actorEvents), actorEvents)
+	}
+	otherEvents := filterEventsForClient(events, actorID, otherID)
+	if len(otherEvents) != 1 || otherEvents[0].EventType != "monster_aggro" {
+		t.Fatalf("other events = %+v, want only public monster_aggro", otherEvents)
+	}
+}
+
 func mustReceiveDelta(t *testing.T, client *loopClient) stateDeltaPayload {
 	t.Helper()
 	select {

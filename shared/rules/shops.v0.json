@@ -1,0 +1,48 @@
+{
+  "version": 0,
+  "shops": {
+    "town_vendor": {
+      "name": "Town Vendor",
+      "fixed_offers": [
+        { "offer_id": "fixed:red_potion", "item_def_id": "red_potion", "buy_price": 20 },
+        { "offer_id": "fixed:blue_potion", "item_def_id": "blue_potion", "buy_price": 20 }
+      ],
+      "generated_offers": {
+        "offer_count": 5,
+        "source": "common_dungeon_mob",
+        "min_depth": 1,
+        "max_roll_attempts": 64
+      },
+      "pricing": {
+        "sell_multiplier": 0.25,
+        "round_buy_to": 5,
+        "rarity_multipliers": {
+          "common": 1.0,
+          "magic": 1.6,
+          "rare": 2.4,
+          "unique": 4.0
+        },
+        "slot_base": {
+          "main_hand": 30,
+          "off_hand": 25,
+          "head": 20,
+          "chest": 35,
+          "gloves": 18,
+          "belt": 22,
+          "boots": 18,
+          "ring": 24,
+          "amulet": 28
+        },
+        "stat_weights": {
+          "damage_min": 10,
+          "damage_max": 12,
+          "armor": 7,
+          "block_percent": 4,
+          "max_hp": 5,
+          "hotbar_slots": 20,
+          "inventory_rows": 35
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+docs/adr/0012-item-upgrades-and-item-levels.md
+  s_7782e8b3c9750f::t_28bd2e3aa89fce 1-79
+docs/adr/0011-player-market-and-multi-item-trade-offers.md
+  s_7782e8b3c9750f::t_28bd2e3aa89fce 1-76
+docs/adr/0010-mercenaries-from-player-characters.md
+  s_7782e8b3c9750f::t_28bd2e3aa89fce 1-72
+docs/PROGRESS.md
+  s_7782e8b3c9750f::t_bd3b33f146a12d 1083-1086,1089-1091,1308,1310-1311,1319-1320
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "19ffc8b1fb8ef467e08f090520e52800145a02b0",
+  "prompts": {},
+  "sessions": {
+    "s_7782e8b3c9750f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead00-7cc3-7f53-a150-35e60f702a71",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

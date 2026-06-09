@@ -5,6 +5,9 @@
   "base_crit_damage": 1.5,
   "minimum_damage": 1,
   "block_cap_percent": 75,
+  "base_attack_interval_ticks": 20,
+  "min_effective_attack_speed": 0.25,
+  "max_effective_attack_speed": 3.0,
   "player_damage": { "min": 2, "max": 4 },
   "unarmed_reach": 1.0
 }

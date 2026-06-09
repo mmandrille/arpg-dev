@@ -340,8 +340,8 @@ func statSummaryLines(stats map[string]int) []string {
 		if stat == "damage_min" || stat == "damage_max" {
 			continue
 		}
-		if value := stats[stat]; value > 0 {
-			lines = append(lines, fmt.Sprintf("%s +%d", displayStatName(stat), value))
+		if value := stats[stat]; value != 0 {
+			lines = append(lines, fmt.Sprintf("%s %+d", displayStatName(stat), value))
 		}
 	}
 	return lines
@@ -439,7 +439,7 @@ func (s *Sim) statsForInventoryItem(item *invItem) map[string]int {
 }
 
 func shopStatOrder() []string {
-	return []string{"damage_min", "damage_max", "armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"}
+	return []string{"damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "hotbar_slots", "inventory_rows"}
 }
 
 func displayStatName(stat string) string {
@@ -454,6 +454,8 @@ func displayStatName(stat string) string {
 		return "Max HP"
 	case "block_percent":
 		return "Block"
+	case "attack_speed_percent":
+		return "Attack speed %"
 	case "hotbar_slots":
 		return "Hotbar slots"
 	case "inventory_rows":

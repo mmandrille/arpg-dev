@@ -531,6 +531,8 @@ func storeProgressionFromView(accountID, characterID string, view game.Character
 		Level:               view.Level,
 		Experience:          view.Experience,
 		UnspentStatPoints:   view.UnspentStatPoints,
+		UnspentSkillPoints:  view.UnspentSkillPoints,
+		SkillRanks:          cloneSkillRanks(view.SkillRanks),
 		Gold:                view.Gold,
 		DeepestDungeonDepth: view.DeepestDungeonDepth,
 		Stats: store.CharacterBaseStats{
@@ -540,6 +542,17 @@ func storeProgressionFromView(accountID, characterID string, view game.Character
 			Magic: view.BaseStats.Magic,
 		},
 	}
+}
+
+func cloneSkillRanks(in map[string]int) map[string]int {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]int, len(in))
+	for skillID, rank := range in {
+		out[skillID] = rank
+	}
+	return out
 }
 
 // sortInputs orders inputs deterministically by (sequence, message_id).

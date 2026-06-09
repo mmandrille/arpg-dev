@@ -432,8 +432,70 @@ func _initialize() -> void:
 			if not is_equal_approx(got, want):
 				_fail("character_progression case %s %s got %.4f want %.4f" % [str(c["name"]), str(key), got, want])
 				return
+		if expected["derived_stats"].has("attack_interval_ticks"):
+			var attack_speed := float(expected["derived_stats"]["attack_speed"])
+			var got_interval := _attack_interval_ticks(progression_combat_rules, attack_speed)
+			var want_interval := int(expected["derived_stats"]["attack_interval_ticks"])
+			if got_interval != want_interval:
+				_fail("character_progression case %s attack_interval_ticks got %d want %d" % [str(c["name"]), got_interval, want_interval])
+				return
 
-	# 20. Combat stat effects golden is available to the display client.
+	# 20. Skill points and Magic Bolt golden mirrors v44 shared rules.
+	var skill_golden := _read(shared.path_join("golden/skill_points_and_magic_bolt.json"))
+	var skill_rules := _read(shared.path_join("rules/skills.v0.json"))
+	if int(skill_golden["progression"]["points_per_level"]) != int(progression_rules["points_per_level"]):
+		_fail("skill golden points_per_level mismatch")
+		return
+	if skill_golden["progression"]["skill_points"] != progression_rules["skill_points"]:
+		_fail("skill golden skill point cadence mismatch")
+		return
+	for c in skill_golden["progression"]["level_cases"]:
+		var level := int(c["level"])
+		var expected_stats := (level - 1) * int(progression_rules["points_per_level"])
+		var expected_skills := _skill_points_for_level(level, progression_rules["skill_points"])
+		if expected_stats != int(c["expected_unspent_stat_points"]) or expected_skills != int(c["expected_unspent_skill_points"]):
+			_fail("skill golden level %d cadence mismatch" % level)
+			return
+	if int(skill_golden["attack_speed"]["base_attack_interval_ticks"]) != int(progression_combat_rules["base_attack_interval_ticks"]):
+		_fail("skill golden base attack interval mismatch")
+		return
+	if float(skill_golden["attack_speed"]["min_effective_attack_speed"]) != float(progression_combat_rules["min_effective_attack_speed"]):
+		_fail("skill golden min attack speed mismatch")
+		return
+	if float(skill_golden["attack_speed"]["max_effective_attack_speed"]) != float(progression_combat_rules["max_effective_attack_speed"]):
+		_fail("skill golden max attack speed mismatch")
+		return
+	var skill_id := str(skill_golden["skill"]["skill_id"])
+	if not skill_rules["skills"].has(skill_id):
+		_fail("skill golden references unknown skill %s" % skill_id)
+		return
+	var magic_bolt: Dictionary = skill_rules["skills"][skill_id]
+	if int(skill_golden["skill"]["max_rank"]) != int(magic_bolt["max_rank"]):
+		_fail("skill golden max rank mismatch")
+		return
+	var cooldown_multiplier := float(magic_bolt["cooldown"]["multiplier"])
+	for c in skill_golden["attack_speed"]["cases"]:
+		var effective := float(c["dex_attack_speed"]) * float(c["weapon_attack_speed"]) * (1.0 + float(c["item_attack_speed_percent"]) / 100.0)
+		effective = clampf(effective, float(progression_combat_rules["min_effective_attack_speed"]), float(progression_combat_rules["max_effective_attack_speed"]))
+		if not is_equal_approx(effective, float(c["expected_effective_attack_speed"])):
+			_fail("skill golden attack speed case %s effective mismatch" % str(c["name"]))
+			return
+		var interval := _attack_interval_ticks(progression_combat_rules, effective)
+		var cooldown := maxi(1, int(ceil(float(interval) * cooldown_multiplier)))
+		if interval != int(c["expected_attack_interval_ticks"]) or cooldown != int(c["expected_magic_bolt_cooldown_ticks"]):
+			_fail("skill golden attack speed case %s interval/cooldown mismatch" % str(c["name"]))
+			return
+	for c in skill_golden["skill"]["rank_cases"]:
+		var rank := int(c["rank"])
+		if _skill_mana_cost(magic_bolt, rank) != int(c["mana_cost"]):
+			_fail("skill golden rank %d mana mismatch" % rank)
+			return
+		var expected_damage: Dictionary = c["damage"]
+		if _skill_damage_min(magic_bolt, rank) != int(expected_damage["min"]) or _skill_damage_max(magic_bolt, rank) != int(expected_damage["max"]):
+			_fail("skill golden rank %d damage mismatch" % rank)
+			return
+
+	# 21. Combat stat effects golden is available to the display client.
 	var combat_rules := _read(shared.path_join("rules/combat.v0.json"))
 	var combat_effects := _read(shared.path_join("golden/combat_stat_effects.json"))
 	if int(combat_rules["minimum_damage"]) != int(combat_effects["combat"]["minimum_damage"]):
@@ -461,7 +523,7 @@ func _initialize() -> void:
 		_fail("combat_stat_effects stat breakdown mismatch")
 		return
 
-	# 21. Shop pricing/offers goldens are available to the display client.
+	# 22. Shop pricing/offers goldens are available to the display client.
 	var shops := _read(shared.path_join("rules/shops.v0.json"))
 	var shop_pricing := _read(shared.path_join("golden/shop_pricing.json"))
 	var shop_offers := _read(shared.path_join("golden/shop_offers.json"))
@@ -508,7 +570,7 @@ func _initialize() -> void:
 				_fail("shop_offers buy_price must be positive")
 				return
 
-	# 22. Equipment requirements golden mirrors shared item requirements and client-readable status rows.
+	# 23. Equipment requirements golden mirrors shared item requirements and client-readable status rows.
 	var equipment_requirements := _read(shared.path_join("golden/equipment_requirements.json"))
 	var req_template_id := str(equipment_requirements["template_id"])
 	if not item_templates["templates"].has(req_template_id):
@@ -547,7 +609,7 @@ func _initialize() -> void:
 		_fail("equipment_requirements expected reject mismatch")
 		return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression, combat_stat_effects, shop_pricing, shop_offers, equipment_requirements)")
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression, skill_points_and_magic_bolt, combat_stat_effects, shop_pricing, shop_offers, equipment_requirements)")
 	quit(0)
 
 
@@ -569,6 +631,40 @@ func _vec2_equals(value: Dictionary, x: float, y: float) -> bool:
 
 func _round_positive(value: float) -> int:
 	return maxi(1, int(floor(value + 0.5)))
+
+
+func _skill_points_for_level(level: int, cadence: Dictionary) -> int:
+	var first := int(cadence["first_grant_level"])
+	if level < first:
+		return 0
+	var every := maxi(1, int(cadence["grant_every_levels"]))
+	var grants := int(floor(float(level - first) / float(every))) + 1
+	return grants * int(cadence["points_per_grant"])
+
+
+func _attack_interval_ticks(combat: Dictionary, effective_attack_speed: float) -> int:
+	var min_speed := float(combat["min_effective_attack_speed"])
+	var max_speed := float(combat["max_effective_attack_speed"])
+	var speed := clampf(effective_attack_speed, min_speed, max_speed)
+	if speed <= 0.0:
+		speed = 1.0
+	return maxi(1, int(ceil(float(combat["base_attack_interval_ticks"]) / speed)))
+
+
+func _skill_mana_cost(skill: Dictionary, rank: int) -> int:
+	var mana: Dictionary = skill["mana_cost"]
+	return maxi(0, int(mana["base"]) + int(mana["per_rank"]) * maxi(0, rank - 1))
+
+
+func _skill_damage_min(skill: Dictionary, rank: int) -> int:
+	var damage: Dictionary = skill["damage"]
+	return maxi(0, int(damage["min_base"]) + int(damage["min_per_rank"]) * maxi(0, rank - 1))
+
+
+func _skill_damage_max(skill: Dictionary, rank: int) -> int:
+	var damage: Dictionary = skill["damage"]
+	var min_damage := _skill_damage_min(skill, rank)
+	return maxi(min_damage, int(damage["max_base"]) + int(damage["max_per_rank"]) * maxi(0, rank - 1))
 
 
 func _eval_progression_formula(formula: Dictionary, stats: Dictionary) -> float:

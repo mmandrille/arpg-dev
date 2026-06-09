@@ -42,6 +42,7 @@ const (
 	worldModeMultiLevel            = "multi_level"
 	attackModeMelee                = "melee"
 	attackModeRanged               = "ranged"
+	magicBoltSkillID               = "magic_bolt"
 	trainingArrowProjectileDefID   = "training_arrow"
 	goldItemDefID                  = "gold"
 	mainHandSlot                   = "main_hand"
@@ -170,15 +171,17 @@ type wallObstacle struct {
 }
 
 type effectiveCombatStats struct {
-	DamageMin    float64
-	DamageMax    float64
-	HitChance    float64
-	CritChance   float64
-	CritDamage   float64
-	Armor        float64
-	BlockPercent float64
-	MaxHP        float64
-	MaxMana      float64
+	DamageMin           float64
+	DamageMax           float64
+	HitChance           float64
+	CritChance          float64
+	CritDamage          float64
+	Armor               float64
+	BlockPercent        float64
+	AttackSpeed         float64
+	AttackIntervalTicks int
+	MaxHP               float64
+	MaxMana             float64
 }
 
 type combatResolution struct {
@@ -197,6 +200,11 @@ type bossPhaseRuntime struct {
 	phase     BossPatternPhase
 }
 
+type skillCooldownState struct {
+	EndsTick   uint64
+	TotalTicks int
+}
+
 type playerState struct {
 	PlayerID              uint64
 	AccountID             string
@@ -212,6 +220,7 @@ type playerState struct {
 	Hotbar                []uint64
 	DiscoveredTeleporters map[int]bool
 	Progression           CharacterProgressionState
+	SkillCooldowns        map[string]skillCooldownState
 	Gold                  int
 }
 
@@ -242,6 +251,7 @@ type Sim struct {
 	hotbar                []uint64          // fixed 10-slot item instance assignments (0 = none)
 	discoveredTeleporters map[int]bool
 	progression           CharacterProgressionState
+	skillCooldowns        map[string]skillCooldownState
 	gold                  int
 }
 
@@ -251,6 +261,8 @@ type CharacterProgressionState struct {
 	Level               int
 	Experience          int
 	UnspentStatPoints   int
+	UnspentSkillPoints  int
+	SkillRanks          map[string]int
 	BaseStats           BaseStatsView
 	Gold                int
 	DeepestDungeonDepth int
@@ -292,6 +304,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		hotbar:                make([]uint64, 10),
 		discoveredTeleporters: make(map[int]bool),
 		progression:           progression,
+		skillCooldowns:        make(map[string]skillCooldownState),
 		gold:                  progression.Gold,
 	}
 
@@ -368,6 +381,8 @@ func (r *Rules) DefaultCharacterProgressionState() CharacterProgressionState {
 		Level:               1,
 		Experience:          0,
 		UnspentStatPoints:   0,
+		UnspentSkillPoints:  0,
+		SkillRanks:          r.defaultSkillRanks(),
 		BaseStats:           r.CharacterProgression.BaseStats,
 		Gold:                0,
 		DeepestDungeonDepth: 0,
@@ -384,6 +399,10 @@ func (r *Rules) normalizeProgressionState(in CharacterProgressionState) Characte
 	if in.UnspentStatPoints < 0 {
 		in.UnspentStatPoints = 0
 	}
+	if in.UnspentSkillPoints < 0 {
+		in.UnspentSkillPoints = 0
+	}
+	in.SkillRanks = r.normalizeSkillRanks(in.SkillRanks)
 	if in.Gold < 0 {
 		in.Gold = 0
 	}
@@ -408,6 +427,43 @@ func (r *Rules) normalizeProgressionState(in CharacterProgressionState) Characte
 	return in
 }
 
+func (r *Rules) defaultSkillRanks() map[string]int {
+	out := make(map[string]int, len(r.Skills))
+	for skillID := range r.Skills {
+		out[skillID] = 0
+	}
+	return out
+}
+
+func (r *Rules) normalizeSkillRanks(in map[string]int) map[string]int {
+	out := r.defaultSkillRanks()
+	for skillID, rank := range in {
+		def, ok := r.Skills[skillID]
+		if !ok {
+			continue
+		}
+		if rank < 0 {
+			rank = 0
+		}
+		if rank > def.MaxRank {
+			rank = def.MaxRank
+		}
+		out[skillID] = rank
+	}
+	return out
+}
+
+func cloneSkillCooldowns(in map[string]skillCooldownState) map[string]skillCooldownState {
+	if len(in) == 0 {
+		return make(map[string]skillCooldownState)
+	}
+	out := make(map[string]skillCooldownState, len(in))
+	for skillID, cooldown := range in {
+		out[skillID] = cooldown
+	}
+	return out
+}
+
 func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world WorldDef) error {
 	maxHP := s.currentMaxHP()
 	maxMana := s.currentMaxMana()
@@ -425,6 +481,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		Hotbar:                s.hotbar,
 		DiscoveredTeleporters: s.discoveredTeleporters,
 		Progression:           s.progression,
+		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
 		Gold:                  s.gold,
 	}
 
@@ -669,12 +726,14 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	equipped := newEquippedMap()
 	hotbar := make([]uint64, maxHotbarCapacity)
 	discovered := map[int]bool{townLevel: true}
+	cooldowns := make(map[string]skillCooldownState)
 	character := progression
 	gold := progression.Gold
 	s.equipped = equipped
 	s.hotbar = hotbar
 	s.discoveredTeleporters = discovered
 	s.progression = character
+	s.skillCooldowns = cooldowns
 	s.gold = gold
 	maxHP := s.currentMaxHP()
 	maxMana := s.currentMaxMana()
@@ -702,6 +761,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		Hotbar:                hotbar,
 		DiscoveredTeleporters: discovered,
 		Progression:           character,
+		SkillCooldowns:        cooldowns,
 		Gold:                  gold,
 	}
 	s.usePlayer(s.defaultPlayer())
@@ -952,6 +1012,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	s.hotbar = ps.Hotbar
 	s.discoveredTeleporters = ps.DiscoveredTeleporters
 	s.progression = ps.Progression
+	s.skillCooldowns = ps.SkillCooldowns
+	if s.skillCooldowns == nil {
+		s.skillCooldowns = make(map[string]skillCooldownState)
+	}
 	s.gold = ps.Gold
 	level := s.activeLevel()
 	level.move = ps.Move
@@ -969,6 +1033,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.Hotbar = s.hotbar
 	ps.DiscoveredTeleporters = s.discoveredTeleporters
 	ps.Progression = s.progression
+	ps.SkillCooldowns = s.skillCooldowns
 	ps.Gold = s.gold
 	if level := s.levels[ps.CurrentLevel]; level != nil {
 		ps.Move = level.move
@@ -990,27 +1055,29 @@ func (s *Sim) CurrentTick() uint64 { return s.tick }
 
 // Input is a decoded client intent applied to a specific tick.
 type Input struct {
-	MessageID         string
-	CorrelationID     string
-	Sequence          int64
-	ActorPlayerID     uint64
-	Type              string
-	Move              *MoveIntent
-	MoveTo            *MoveToIntent
-	DirectionalAttack *DirectionalAttackIntent
-	Action            *ActionIntent
-	Descend           *DescendIntent
-	Ascend            *AscendIntent
-	Teleport          *TeleportIntent
-	Equip             *EquipIntent
-	Unequip           *UnequipIntent
-	Drop              *DropIntent
-	Use               *UseIntent
-	AssignHotbar      *AssignHotbarIntent
-	UseHotbar         *UseHotbarIntent
-	AllocateStat      *AllocateStatIntent
-	ShopBuy           *ShopBuyIntent
-	ShopSell          *ShopSellIntent
+	MessageID          string
+	CorrelationID      string
+	Sequence           int64
+	ActorPlayerID      uint64
+	Type               string
+	Move               *MoveIntent
+	MoveTo             *MoveToIntent
+	DirectionalAttack  *DirectionalAttackIntent
+	Action             *ActionIntent
+	Descend            *DescendIntent
+	Ascend             *AscendIntent
+	Teleport           *TeleportIntent
+	Equip              *EquipIntent
+	Unequip            *UnequipIntent
+	Drop               *DropIntent
+	Use                *UseIntent
+	AssignHotbar       *AssignHotbarIntent
+	UseHotbar          *UseHotbarIntent
+	AllocateStat       *AllocateStatIntent
+	AllocateSkillPoint *AllocateSkillPointIntent
+	CastSkill          *CastSkillIntent
+	ShopBuy            *ShopBuyIntent
+	ShopSell           *ShopSellIntent
 }
 
 // Intent payloads.
@@ -1054,6 +1121,14 @@ type (
 	AllocateStatIntent struct {
 		Stat   string
 		Points int
+	}
+	AllocateSkillPointIntent struct {
+		SkillID string
+	}
+	CastSkillIntent struct {
+		SkillID   string
+		TargetID  string
+		Direction *Vec2
 	}
 	ShopBuyIntent struct {
 		ShopEntityID string
@@ -1192,7 +1267,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "directional_attack_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent", "shop_buy_intent", "shop_sell_intent":
+		case "move_intent", "move_to_intent", "directional_attack_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent", "allocate_skill_point_intent", "cast_skill_intent", "shop_buy_intent", "shop_sell_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -1227,6 +1302,10 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleUseHotbar(in, res)
 	case "allocate_stat_intent":
 		s.handleAllocateStat(in, res)
+	case "allocate_skill_point_intent":
+		s.handleAllocateSkillPoint(in, res)
+	case "cast_skill_intent":
+		s.handleCastSkill(in, res)
 	case "shop_buy_intent":
 		s.handleShopBuy(in, res)
 	case "shop_sell_intent":
@@ -2777,12 +2856,259 @@ func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
 	res.ack(in.MessageID)
 }
 
+func (s *Sim) handleAllocateSkillPoint(in Input, res *TickResult) {
+	if in.AllocateSkillPoint == nil || in.AllocateSkillPoint.SkillID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	skillID := in.AllocateSkillPoint.SkillID
+	def, ok := s.rules.Skills[skillID]
+	if !ok {
+		res.reject(in.MessageID, "unknown_skill")
+		return
+	}
+	if s.progression.UnspentSkillPoints <= 0 {
+		res.reject(in.MessageID, "not_enough_skill_points")
+		return
+	}
+	rank := s.progression.SkillRanks[skillID]
+	if rank >= def.MaxRank {
+		res.reject(in.MessageID, "skill_max_rank")
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+
+	rank++
+	s.progression.SkillRanks[skillID] = rank
+	s.progression.UnspentSkillPoints--
+	s.appendProgressionAndSkillUpdates(res)
+	res.Events = append(res.Events, Event{
+		EventType:          "skill_rank_updated",
+		EntityID:           idStr(player.id),
+		CorrelationID:      in.CorrelationID,
+		SkillID:            skillID,
+		Rank:               intPtr(rank),
+		MaxRank:            intPtr(def.MaxRank),
+		UnspentSkillPoints: intPtr(s.progression.UnspentSkillPoints),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleCastSkill(in Input, res *TickResult) {
+	if in.CastSkill == nil || in.CastSkill.SkillID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	skillID := in.CastSkill.SkillID
+	def, ok := s.rules.Skills[skillID]
+	if !ok {
+		res.reject(in.MessageID, "unknown_skill")
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	rank := s.progression.SkillRanks[skillID]
+	if rank <= 0 {
+		res.reject(in.MessageID, "skill_not_learned")
+		return
+	}
+	if remaining, onCooldown := s.skillCooldownRemaining(skillID); onCooldown {
+		res.Events = append(res.Events, Event{
+			EventType:      "skill_cooldown_rejected",
+			EntityID:       idStr(player.id),
+			CorrelationID:  in.CorrelationID,
+			SkillID:        skillID,
+			Reason:         "skill_on_cooldown",
+			RemainingTicks: intPtr(remaining),
+		})
+		res.reject(in.MessageID, "skill_on_cooldown")
+		return
+	}
+	manaCost := skillManaCost(def, rank)
+	if player.mana < manaCost {
+		res.reject(in.MessageID, "not_enough_mana")
+		return
+	}
+	dir, targetID, rejectReason := s.skillCastDirection(def, in.CastSkill, player)
+	if rejectReason != "" {
+		res.reject(in.MessageID, rejectReason)
+		return
+	}
+
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	player.mana -= manaCost
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	cooldownTicks := s.skillCooldownTicks(def)
+	s.skillCooldowns[skillID] = skillCooldownState{EndsTick: s.tick + uint64(cooldownTicks), TotalTicks: cooldownTicks}
+	projectile := s.spawnSkillProjectile(player, skillID, def, rank, dir, targetID, in)
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
+	s.appendSkillCooldownUpdate(res)
+	res.Events = append(res.Events, Event{
+		EventType:       "skill_cast",
+		EntityID:        idStr(player.id),
+		SourceEntityID:  idStr(player.id),
+		CorrelationID:   in.CorrelationID,
+		SkillID:         skillID,
+		Rank:            intPtr(rank),
+		Mana:            intPtr(manaCost),
+		ProjectileDefID: skillID,
+	})
+	if targetID != 0 {
+		res.Events[len(res.Events)-1].TargetEntityID = idStr(targetID)
+	}
+	res.Events = append(res.Events, Event{
+		EventType:      "skill_cooldown_started",
+		EntityID:       idStr(player.id),
+		CorrelationID:  in.CorrelationID,
+		SkillID:        skillID,
+		RemainingTicks: intPtr(cooldownTicks),
+		TotalTicks:     intPtr(cooldownTicks),
+	})
+	res.ack(in.MessageID)
+}
+
 func isBaseStat(stat string) bool {
 	switch stat {
 	case "str", "dex", "vit", "magic":
 		return true
 	}
 	return false
+}
+
+func (s *Sim) appendProgressionAndSkillUpdates(res *TickResult) {
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	skillView := s.SkillProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpSkillProgressionUpdate, SkillProgression: &skillView})
+	s.appendInventoryPresentationUpdates(res)
+}
+
+func (s *Sim) appendSkillCooldownUpdate(res *TickResult) {
+	res.Changes = append(res.Changes, Change{Op: OpSkillCooldownUpdate, SkillCooldowns: s.SkillCooldownViews()})
+}
+
+func (s *Sim) skillCooldownRemaining(skillID string) (int, bool) {
+	cooldown, ok := s.skillCooldowns[skillID]
+	if !ok || cooldown.TotalTicks <= 0 {
+		return 0, false
+	}
+	if cooldown.EndsTick <= s.tick {
+		delete(s.skillCooldowns, skillID)
+		return 0, false
+	}
+	return int(cooldown.EndsTick - s.tick), true
+}
+
+func (s *Sim) skillCooldownView(skillID string) (SkillCooldownView, bool) {
+	cooldown, ok := s.skillCooldowns[skillID]
+	if !ok || cooldown.TotalTicks <= 0 {
+		return SkillCooldownView{}, false
+	}
+	remaining, active := s.skillCooldownRemaining(skillID)
+	if !active {
+		return SkillCooldownView{}, false
+	}
+	return SkillCooldownView{SkillID: skillID, RemainingTicks: remaining, TotalTicks: cooldown.TotalTicks}, true
+}
+
+func (s *Sim) skillCooldownTicks(def SkillDef) int {
+	interval := s.DerivedStatsView().AttackIntervalTicks
+	if interval < 1 {
+		interval = s.rules.Combat.BaseAttackIntervalTicks
+	}
+	cooldown := int(math.Ceil(float64(interval) * def.Cooldown.Multiplier))
+	if cooldown < 1 {
+		return 1
+	}
+	return cooldown
+}
+
+func skillManaCost(def SkillDef, rank int) int {
+	if rank < 1 {
+		rank = 1
+	}
+	cost := def.ManaCost.Base + def.ManaCost.PerRank*(rank-1)
+	if cost < 0 {
+		return 0
+	}
+	return cost
+}
+
+func skillDamageRange(def SkillDef, rank int) DamageRange {
+	if rank < 1 {
+		rank = 1
+	}
+	minDamage := def.Damage.MinBase + def.Damage.MinPerRank*(rank-1)
+	maxDamage := def.Damage.MaxBase + def.Damage.MaxPerRank*(rank-1)
+	if minDamage < 0 {
+		minDamage = 0
+	}
+	if maxDamage < minDamage {
+		maxDamage = minDamage
+	}
+	return DamageRange{Min: minDamage, Max: maxDamage}
+}
+
+func (s *Sim) skillCastDirection(def SkillDef, cast *CastSkillIntent, player *entity) (Vec2, uint64, string) {
+	if cast == nil || player == nil {
+		return Vec2{}, 0, "invalid_payload"
+	}
+	if cast.TargetID != "" {
+		target := s.findEntity(cast.TargetID)
+		if target == nil || target.kind != monsterEntity || target.hp <= 0 {
+			return Vec2{}, 0, "invalid_target"
+		}
+		if distance(player.pos, target.pos) > def.Range+meleeRangeEpsilon {
+			return Vec2{}, 0, "target_out_of_range"
+		}
+		dir := normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
+		if dir.X == 0 && dir.Y == 0 {
+			if cast.Direction == nil {
+				return Vec2{}, 0, "invalid_direction"
+			}
+			dir = normalize(*cast.Direction)
+		}
+		if dir.X == 0 && dir.Y == 0 {
+			return Vec2{}, 0, "invalid_direction"
+		}
+		return dir, target.id, ""
+	}
+	if cast.Direction == nil || !finiteVec2(*cast.Direction) {
+		return Vec2{}, 0, "invalid_payload"
+	}
+	dir := normalize(*cast.Direction)
+	if dir.X == 0 && dir.Y == 0 {
+		return Vec2{}, 0, "invalid_direction"
+	}
+	return dir, 0, ""
+}
+
+func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef, rank int, dir Vec2, targetID uint64, in Input) *entity {
+	projectile := &entity{
+		kind:            projectileEntity,
+		pos:             player.pos,
+		ownerID:         player.id,
+		targetID:        targetID,
+		projectileDefID: skillID,
+		dir:             normalize(dir),
+		speed:           def.ProjectileSpeed,
+		maxDistance:     def.Range,
+		damageRange:     skillDamageRange(def, rank),
+		sourceMsgID:     in.MessageID,
+		sourceCorrID:    in.CorrelationID,
+		spawnTick:       s.tick,
+	}
+	projectile.id = s.alloc()
+	s.activeLevel().entities[projectile.id] = projectile
+	return projectile
 }
 
 func (s *Sim) applyMovement(res *TickResult) {
@@ -3970,10 +4296,22 @@ func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
 			ToLevel:           intPtr(to),
 			UnspentStatPoints: intPtr(s.progression.UnspentStatPoints),
 		})
+		if gained := s.rules.skillPointsGrantedAtLevel(to); gained > 0 {
+			s.progression.UnspentSkillPoints += gained
+			res.Events = append(res.Events, Event{
+				EventType:          "skill_point_gained",
+				EntityID:           idStr(s.playerID),
+				CorrelationID:      corr,
+				Amount:             intPtr(gained),
+				UnspentSkillPoints: intPtr(s.progression.UnspentSkillPoints),
+			})
+		}
 	}
 
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	skillView := s.SkillProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpSkillProgressionUpdate, SkillProgression: &skillView})
 	s.appendInventoryPresentationUpdates(res)
 }
 
@@ -4741,34 +5079,73 @@ func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 		ExperienceToNextLevel: remaining,
 		LevelCap:              s.rules.CharacterProgression.LevelCap,
 		UnspentStatPoints:     s.progression.UnspentStatPoints,
+		UnspentSkillPoints:    s.progression.UnspentSkillPoints,
 		Gold:                  s.gold,
 		DeepestDungeonDepth:   s.progression.DeepestDungeonDepth,
 		BaseStats:             s.progression.BaseStats,
 		DerivedStats:          s.DerivedStatsView(),
 		StatBreakdowns:        s.StatBreakdownViews(),
+		SkillRanks:            cloneIntMap(s.progression.SkillRanks),
 	}
+}
+
+// SkillProgressionView returns the authoritative protocol view of skill points
+// and known skill ranks.
+func (s *Sim) SkillProgressionView() SkillProgressionView {
+	skills := make([]SkillProgressionSkillView, 0, len(s.rules.Skills))
+	for _, skillID := range sortedStringKeys(s.rules.Skills) {
+		def := s.rules.Skills[skillID]
+		rank := s.progression.SkillRanks[skillID]
+		skills = append(skills, SkillProgressionSkillView{
+			SkillID:  skillID,
+			Rank:     rank,
+			MaxRank:  def.MaxRank,
+			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank,
+		})
+	}
+	return SkillProgressionView{
+		UnspentSkillPoints: s.progression.UnspentSkillPoints,
+		Skills:             skills,
+	}
+}
+
+// SkillCooldownViews returns active server-owned skill cooldowns.
+func (s *Sim) SkillCooldownViews() []SkillCooldownView {
+	if len(s.skillCooldowns) == 0 {
+		return []SkillCooldownView{}
+	}
+	out := []SkillCooldownView{}
+	for _, skillID := range sortedStringKeys(s.skillCooldowns) {
+		if view, ok := s.skillCooldownView(skillID); ok {
+			out = append(out, view)
+		}
+	}
+	return out
 }
 
 // ProgressionState returns a copy of the mutable progression state.
 func (s *Sim) ProgressionState() CharacterProgressionState {
 	s.progression.Gold = s.gold
-	return s.progression
+	out := s.progression
+	out.SkillRanks = cloneIntMap(s.progression.SkillRanks)
+	return out
 }
 
 func (s *Sim) DerivedStatsView() DerivedStatsView {
 	effective, _ := s.playerEffectiveCombatStats()
 	character := s.characterDerivedStatsView()
 	return DerivedStatsView{
-		DamageMin:     effective.DamageMin,
-		DamageMax:     effective.DamageMax,
-		Armor:         effective.Armor,
-		AttackSpeed:   character.AttackSpeed,
-		HitChance:     effective.HitChance,
-		CritChance:    effective.CritChance,
-		CritDamage:    effective.CritDamage,
-		MovementSpeed: character.MovementSpeed,
-		MaxHP:         effective.MaxHP,
-		MaxMana:       effective.MaxMana,
+		DamageMin:           effective.DamageMin,
+		DamageMax:           effective.DamageMax,
+		Armor:               effective.Armor,
+		AttackSpeed:         effective.AttackSpeed,
+		AttackIntervalTicks: effective.AttackIntervalTicks,
+		HitChance:           effective.HitChance,
+		CritChance:          effective.CritChance,
+		CritDamage:          effective.CritDamage,
+		MovementSpeed:       character.MovementSpeed,
+		MaxHP:               effective.MaxHP,
+		MaxMana:             effective.MaxMana,
 	}
 }
 
@@ -4790,16 +5167,17 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 		return v
 	}
 	return DerivedStatsView{
-		DamageMin:     eval("damage_min"),
-		DamageMax:     eval("damage_max"),
-		Armor:         eval("armor"),
-		AttackSpeed:   eval("attack_speed"),
-		HitChance:     eval("hit_chance"),
-		CritChance:    eval("crit_chance"),
-		CritDamage:    eval("crit_damage"),
-		MovementSpeed: eval("movement_speed"),
-		MaxHP:         eval("max_hp"),
-		MaxMana:       eval("max_mana"),
+		DamageMin:           eval("damage_min"),
+		DamageMax:           eval("damage_max"),
+		Armor:               eval("armor"),
+		AttackSpeed:         eval("attack_speed"),
+		AttackIntervalTicks: s.attackIntervalTicksFromSpeed(eval("attack_speed")),
+		HitChance:           eval("hit_chance"),
+		CritChance:          eval("crit_chance"),
+		CritDamage:          eval("crit_damage"),
+		MovementSpeed:       eval("movement_speed"),
+		MaxHP:               eval("max_hp"),
+		MaxMana:             eval("max_mana"),
 	}
 }
 
@@ -4986,6 +5364,8 @@ func equipPreviewDeltas(current, preview effectiveCombatStats) []EquipPreviewDel
 		{"damage_max", current.DamageMax, preview.DamageMax},
 		{"armor", current.Armor, preview.Armor},
 		{"block_percent", current.BlockPercent, preview.BlockPercent},
+		{"attack_speed", current.AttackSpeed, preview.AttackSpeed},
+		{"attack_interval_ticks", float64(current.AttackIntervalTicks), float64(preview.AttackIntervalTicks)},
 		{"max_hp", current.MaxHP, preview.MaxHP},
 		{"max_mana", current.MaxMana, preview.MaxMana},
 	}
@@ -5026,6 +5406,8 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	armor := character.Armor
 	maxHP := character.MaxHP
 	blockPercent := 0.0
+	weaponSpeed := 1.0
+	itemSpeedPercent := 0.0
 
 	damageMinSources := []StatBreakdownSourceView{
 		{Label: "Base damage", Value: float64(s.rules.Combat.PlayerDamage.Min), Kind: "character_formula"},
@@ -5038,6 +5420,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	armorSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.Armor, Kind: "character_formula"}}
 	maxHPSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.MaxHP, Kind: "character_formula"}}
 	blockSources := []StatBreakdownSourceView{}
+	attackSpeedSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.AttackSpeed, Kind: "character_formula"}}
 
 	if weapon := equippedItems[mainHandSlot]; weapon != nil {
 		baseMin, baseMax, minRoll, maxRoll, label, itemID, ok := s.weaponDamageContributions(weapon)
@@ -5054,6 +5437,10 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 				{Label: "Rolled damage", Value: maxRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
 				{Label: "Strength", Value: character.DamageMax, Kind: "character_formula"},
 			}
+		}
+		if speed, label, itemID, ok := s.weaponAttackSpeedContribution(weapon); ok {
+			weaponSpeed = speed
+			attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: label, Value: speed, Kind: "equipment_base", ItemInstanceID: itemID})
 		}
 	}
 
@@ -5089,6 +5476,14 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			blockPercent += float64(value)
 			blockSources = append(blockSources, StatBreakdownSourceView{Label: "Rolled block", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
+		if value := baseStats["attack_speed_percent"]; value != 0 {
+			itemSpeedPercent += float64(value)
+			attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: label, Value: float64(value), Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["attack_speed_percent"]; value != 0 {
+			itemSpeedPercent += float64(value)
+			attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: "Rolled attack speed", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
 	}
 
 	uncappedBlock := blockPercent
@@ -5097,17 +5492,29 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		blockPercent = blockCap
 		blockSources = append(blockSources, StatBreakdownSourceView{Label: "Block cap", Value: blockPercent - uncappedBlock, Kind: "cap"})
 	}
+	uncappedAttackSpeed := character.AttackSpeed * weaponSpeed * (1 + itemSpeedPercent/100.0)
+	attackSpeed := s.clampEffectiveAttackSpeed(uncappedAttackSpeed)
+	if math.Abs(attackSpeed-uncappedAttackSpeed) > 0.000001 {
+		attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: "Attack speed clamp", Value: attackSpeed - uncappedAttackSpeed, Kind: "cap"})
+	}
+	attackInterval := s.attackIntervalTicksFromSpeed(attackSpeed)
+	attackIntervalSources := []StatBreakdownSourceView{
+		{Label: "Base attack interval", Value: float64(s.rules.Combat.BaseAttackIntervalTicks), Kind: "combat_rule"},
+		{Label: "Effective attack speed", Value: attackSpeed, Kind: "derived"},
+	}
 
 	effective := effectiveCombatStats{
-		DamageMin:    maxFloat(0, damageMin),
-		DamageMax:    maxFloat(0, damageMax),
-		HitChance:    clampFloat(minFloat(character.HitChance, s.rules.Combat.BaseHitChance), 0, 1),
-		CritChance:   clampFloat(character.CritChance, 0, 1),
-		CritDamage:   maxFloat(1, character.CritDamage),
-		Armor:        maxFloat(0, armor),
-		BlockPercent: maxFloat(0, blockPercent),
-		MaxHP:        maxFloat(1, maxHP),
-		MaxMana:      maxFloat(0, character.MaxMana),
+		DamageMin:           maxFloat(0, damageMin),
+		DamageMax:           maxFloat(0, damageMax),
+		HitChance:           clampFloat(minFloat(character.HitChance, s.rules.Combat.BaseHitChance), 0, 1),
+		CritChance:          clampFloat(character.CritChance, 0, 1),
+		CritDamage:          maxFloat(1, character.CritDamage),
+		Armor:               maxFloat(0, armor),
+		BlockPercent:        maxFloat(0, blockPercent),
+		AttackSpeed:         attackSpeed,
+		AttackIntervalTicks: attackInterval,
+		MaxHP:               maxFloat(1, maxHP),
+		MaxMana:             maxFloat(0, character.MaxMana),
 	}
 	if effective.DamageMax < effective.DamageMin {
 		effective.DamageMax = effective.DamageMin
@@ -5117,6 +5524,8 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		{Key: "damage_min", Value: effective.DamageMin, UncappedValue: effective.DamageMin, Cap: nil, Sources: damageMinSources},
 		{Key: "damage_max", Value: effective.DamageMax, UncappedValue: effective.DamageMax, Cap: nil, Sources: damageMaxSources},
 		{Key: "armor", Value: effective.Armor, UncappedValue: effective.Armor, Cap: nil, Sources: armorSources},
+		{Key: "attack_speed", Value: effective.AttackSpeed, UncappedValue: uncappedAttackSpeed, Cap: floatPtr(s.rules.Combat.MaxEffectiveAttackSpeed), Sources: attackSpeedSources},
+		{Key: "attack_interval_ticks", Value: float64(effective.AttackIntervalTicks), UncappedValue: float64(effective.AttackIntervalTicks), Cap: nil, Sources: attackIntervalSources},
 		{Key: "max_hp", Value: effective.MaxHP, UncappedValue: effective.MaxHP, Cap: nil, Sources: maxHPSources},
 		{Key: "block_percent", Value: effective.BlockPercent, UncappedValue: uncappedBlock, Cap: floatPtr(blockCap), Sources: blockSources},
 	}
@@ -5145,6 +5554,50 @@ func (s *Sim) weaponDamageContributions(item *invItem) (baseMin, baseMax, rollMi
 		return 0, 0, 0, 0, "", "", false
 	}
 	return float64(def.Damage.Min), float64(def.Damage.Max), 0, 0, label, itemID, true
+}
+
+func (s *Sim) weaponAttackSpeedContribution(item *invItem) (speed float64, label, itemID string, ok bool) {
+	if item == nil {
+		return 0, "", "", false
+	}
+	itemID = idStr(item.instanceID)
+	label = s.itemDisplayName(item)
+	if item.rollPayload != nil {
+		template, found := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+		if !found || template.AttackSpeed <= 0 {
+			return 0, "", "", false
+		}
+		return template.AttackSpeed, label, itemID, true
+	}
+	def, found := s.rules.Items[item.itemDefID]
+	if !found || def.AttackSpeed <= 0 {
+		return 0, "", "", false
+	}
+	return def.AttackSpeed, label, itemID, true
+}
+
+func (s *Sim) clampEffectiveAttackSpeed(speed float64) float64 {
+	minSpeed := s.rules.Combat.MinEffectiveAttackSpeed
+	maxSpeed := s.rules.Combat.MaxEffectiveAttackSpeed
+	if minSpeed <= 0 {
+		minSpeed = 0.25
+	}
+	if maxSpeed < minSpeed {
+		maxSpeed = minSpeed
+	}
+	return clampFloat(speed, minSpeed, maxSpeed)
+}
+
+func (s *Sim) attackIntervalTicksFromSpeed(speed float64) int {
+	speed = s.clampEffectiveAttackSpeed(speed)
+	if speed <= 0 {
+		speed = 1
+	}
+	interval := int(math.Ceil(float64(s.rules.Combat.BaseAttackIntervalTicks) / speed))
+	if interval < 1 {
+		return 1
+	}
+	return interval
 }
 
 func (s *Sim) itemBaseAndRollStats(item *invItem) (map[string]int, map[string]int) {
@@ -5222,6 +5675,17 @@ func (s *Sim) experienceToNextLevel() *int {
 func (r *Rules) nextLevelTotalXP(level int) (int, bool) {
 	nextXP, ok := r.CharacterProgression.XPThresholds[level]
 	return nextXP, ok
+}
+
+func (r *Rules) skillPointsGrantedAtLevel(level int) int {
+	cadence := r.CharacterProgression.SkillPoints
+	if cadence.PointsPerGrant <= 0 || cadence.GrantEveryLevels <= 0 || level < cadence.FirstGrantLevel {
+		return 0
+	}
+	if (level-cadence.FirstGrantLevel)%cadence.GrantEveryLevels != 0 {
+		return 0
+	}
+	return cadence.PointsPerGrant
 }
 
 func (s *Sim) playerProjectileInFlight() bool {
@@ -5367,6 +5831,8 @@ func (s *Sim) Snapshot() Snapshot {
 		InventoryRows:     baseInventoryRows,
 		InventoryCapacity: inventoryCapacityForRows(baseInventoryRows),
 		Gold:              0,
+		SkillProgression:  SkillProgressionView{Skills: []SkillProgressionSkillView{}},
+		SkillCooldowns:    []SkillCooldownView{},
 		RecentEvents:      []Event{},
 	}
 }
@@ -5413,6 +5879,8 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		Gold:                  s.gold,
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
 		CharacterProgression:  s.CharacterProgressionView(),
+		SkillProgression:      s.SkillProgressionView(),
+		SkillCooldowns:        s.SkillCooldownViews(),
 		RecentEvents:          []Event{},
 	}
 	s.savePlayer(ps)

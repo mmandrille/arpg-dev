@@ -49,6 +49,7 @@
           "damage_max": 0,
           "armor": 1,
           "attack_speed": 1.025,
+          "attack_interval_ticks": 20,
           "hit_chance": 1,
           "crit_chance": 0.06,
           "crit_damage": 1.525,
@@ -57,6 +58,21 @@
           "max_mana": 10
         }
       }
+    },
+    {
+      "op": "skill_progression_update",
+      "skill_progression": {
+        "unspent_skill_points": 0,
+        "skills": [
+          { "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false }
+        ]
+      }
+    },
+    {
+      "op": "skill_cooldown_update",
+      "skill_cooldowns": [
+        { "skill_id": "magic_bolt", "remaining_ticks": 40, "total_ticks": 40 }
+      ]
     },
     { "op": "entity_spawn", "entity": { "id": "1006", "type": "loot", "item_def_id": "rusty_sword", "position": { "x": 11, "y": 5 } } }
   ],
@@ -77,6 +93,11 @@
     { "event_type": "teleport_blocked", "entity_id": "1012", "reason": "boss_alive", "level": -5 },
     { "event_type": "interactable_state_changed", "entity_id": "1011", "state": "ready" },
     { "event_type": "interactable_state_changed", "entity_id": "1012", "state": "ready" },
+    { "event_type": "skill_point_gained", "entity_id": "1001", "amount": 1, "unspent_skill_points": 1 },
+    { "event_type": "skill_rank_updated", "entity_id": "1001", "skill_id": "magic_bolt", "rank": 1, "unspent_skill_points": 0 },
+    { "event_type": "skill_cast", "entity_id": "1001", "target_entity_id": "1002", "skill_id": "magic_bolt", "rank": 1, "mana": 3, "projectile_def_id": "magic_bolt" },
+    { "event_type": "skill_cooldown_started", "entity_id": "1001", "skill_id": "magic_bolt", "remaining_ticks": 40, "total_ticks": 40 },
+    { "event_type": "skill_cooldown_rejected", "entity_id": "1001", "skill_id": "magic_bolt", "reason": "skill_on_cooldown", "remaining_ticks": 38 },
     {
       "event_type": "shop_opened",
       "entity_id": "1013",

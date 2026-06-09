@@ -141,6 +141,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_set_floating_combat_text(bool(action.get("enabled", true)))
 		"click_stat_button":
 			_do_click_stat_button(str(action.get("stat", "")))
+		"click_skill_button":
+			_do_click_skill_button(str(action.get("skill_id", "magic_bolt")))
+		"use_skill_slot":
+			_do_use_skill_slot(action, state)
 		"click_shop_buy_offer":
 			_do_click_shop_buy_offer(action)
 		"click_shop_sell_item":
@@ -187,6 +191,36 @@ func _do_set_floating_combat_text(enabled: bool) -> void:
 func _do_click_stat_button(stat: String) -> void:
 	if _main != null and _main.has_method("bot_click_stat_button"):
 		_main.bot_click_stat_button(stat)
+
+
+func _do_click_skill_button(skill_id: String) -> void:
+	if _main != null and _main.has_method("bot_click_skill_button"):
+		_main.bot_click_skill_button(skill_id)
+
+
+func _do_use_skill_slot(action: Dictionary, state: Dictionary) -> void:
+	if _main == null:
+		return
+	var skill_id := str(action.get("skill_id", "magic_bolt"))
+	if action.has("direction") and typeof(action.get("direction")) == TYPE_DICTIONARY:
+		if _main.has_method("bot_cast_skill_direction"):
+			_main.bot_cast_skill_direction(skill_id, action.get("direction", {}))
+		return
+	var target_id := str(action.get("target_id", ""))
+	if target_id == "":
+		var selector := {
+			"entity_type": str(action.get("entity_type", "monster")),
+		}
+		for key in ["monster_def_id", "rarity", "state"]:
+			if action.has(key):
+				selector[key] = action[key]
+		var ids := _select_entity_ids(state, selector)
+		if not ids.is_empty():
+			var entity_index := int(action.get("entity_index", 0))
+			if entity_index >= 0 and entity_index < ids.size():
+				target_id = str(ids[entity_index])
+	if _main.has_method("bot_use_skill_bar"):
+		_main.bot_use_skill_bar(skill_id, target_id, bool(action.get("force_direct", false)))
 
 
 func _do_click_shop_buy_offer(action: Dictionary) -> void:
@@ -385,7 +419,9 @@ func _parse_keycode(name: String) -> Key:
 		"KEY_8": return KEY_8
 		"KEY_9": return KEY_9
 		"KEY_I": return KEY_I
+		"KEY_K": return KEY_K
 		"KEY_P": return KEY_P
+		"KEY_Q": return KEY_Q
 		"KEY_E": return KEY_E
 		"KEY_W": return KEY_W
 		"KEY_A": return KEY_A
@@ -421,6 +457,16 @@ func _format_action(action: Dictionary) -> String:
 			return "select_window_size %s" % str(action.get("size", ""))
 		"click_stat_button":
 			return "click_stat_button %s" % str(action.get("stat", ""))
+		"click_skill_button":
+			return "click_skill_button %s" % str(action.get("skill_id", "magic_bolt"))
+		"use_skill_slot":
+			return "use_skill_slot skill=%s target=%s monster=%s force=%s direction=%s" % [
+				str(action.get("skill_id", "magic_bolt")),
+				str(action.get("target_id", "")),
+				str(action.get("monster_def_id", "")),
+				str(action.get("force_direct", false)),
+				str(action.get("direction", {})),
+			]
 		"click_shop_buy_offer":
 			return "click_shop_buy offer_id=%s kind=%s index=%s" % [
 				str(action.get("offer_id", "")),

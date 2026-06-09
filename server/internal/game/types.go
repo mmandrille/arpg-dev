@@ -114,16 +114,17 @@ type BaseStatsView struct {
 
 // DerivedStatsView is the protocol view of stat-derived combat/display values.
 type DerivedStatsView struct {
-	DamageMin     float64 `json:"damage_min"`
-	DamageMax     float64 `json:"damage_max"`
-	Armor         float64 `json:"armor"`
-	AttackSpeed   float64 `json:"attack_speed"`
-	HitChance     float64 `json:"hit_chance"`
-	CritChance    float64 `json:"crit_chance"`
-	CritDamage    float64 `json:"crit_damage"`
-	MovementSpeed float64 `json:"movement_speed"`
-	MaxHP         float64 `json:"max_hp"`
-	MaxMana       float64 `json:"max_mana"`
+	DamageMin           float64 `json:"damage_min"`
+	DamageMax           float64 `json:"damage_max"`
+	Armor               float64 `json:"armor"`
+	AttackSpeed         float64 `json:"attack_speed"`
+	AttackIntervalTicks int     `json:"attack_interval_ticks"`
+	HitChance           float64 `json:"hit_chance"`
+	CritChance          float64 `json:"crit_chance"`
+	CritDamage          float64 `json:"crit_damage"`
+	MovementSpeed       float64 `json:"movement_speed"`
+	MaxHP               float64 `json:"max_hp"`
+	MaxMana             float64 `json:"max_mana"`
 }
 
 // RequirementStatusView is the server-authored usability state for one item
@@ -177,11 +178,36 @@ type CharacterProgressionView struct {
 	ExperienceToNextLevel *int                `json:"experience_to_next_level"`
 	LevelCap              int                 `json:"level_cap"`
 	UnspentStatPoints     int                 `json:"unspent_stat_points"`
+	UnspentSkillPoints    int                 `json:"-"`
 	Gold                  int                 `json:"gold"`
 	DeepestDungeonDepth   int                 `json:"deepest_dungeon_depth"`
 	BaseStats             BaseStatsView       `json:"base_stats"`
 	DerivedStats          DerivedStatsView    `json:"derived_stats"`
 	StatBreakdowns        []StatBreakdownView `json:"stat_breakdowns,omitempty"`
+	SkillRanks            map[string]int      `json:"-"`
+}
+
+// SkillProgressionSkillView is one skill row in the server-owned skill
+// progression state.
+type SkillProgressionSkillView struct {
+	SkillID  string `json:"skill_id"`
+	Rank     int    `json:"rank"`
+	MaxRank  int    `json:"max_rank"`
+	CanSpend bool   `json:"can_spend"`
+}
+
+// SkillProgressionView is the protocol view of spendable skill points and
+// server-known ranks.
+type SkillProgressionView struct {
+	UnspentSkillPoints int                         `json:"unspent_skill_points"`
+	Skills             []SkillProgressionSkillView `json:"skills"`
+}
+
+// SkillCooldownView is one active skill cooldown row.
+type SkillCooldownView struct {
+	SkillID        string `json:"skill_id"`
+	RemainingTicks int    `json:"remaining_ticks"`
+	TotalTicks     int    `json:"total_ticks"`
 }
 
 // ShopOfferView is one server-authoritative offer rendered inside shop events.
@@ -285,41 +311,48 @@ type BossHitShapeView struct {
 
 // Event is an authoritative event emitted by the sim.
 type Event struct {
-	EventType         string                  `json:"event_type"`
-	EntityID          string                  `json:"entity_id,omitempty"`
-	SourceEntityID    string                  `json:"source_entity_id,omitempty"`
-	TargetEntityID    string                  `json:"target_entity_id,omitempty"`
-	CorrelationID     string                  `json:"correlation_id,omitempty"`
-	Damage            *int                    `json:"damage,omitempty"`
-	Outcome           string                  `json:"outcome,omitempty"`
-	RawDamage         *int                    `json:"raw_damage,omitempty"`
-	MitigatedDamage   *int                    `json:"mitigated_damage,omitempty"`
-	Blocked           *bool                   `json:"blocked,omitempty"`
-	Critical          *bool                   `json:"critical,omitempty"`
-	Heal              *int                    `json:"heal,omitempty"`
-	Mana              *int                    `json:"mana,omitempty"`
-	ItemInstanceID    string                  `json:"item_instance_id,omitempty"`
-	Level             *int                    `json:"level,omitempty"`
-	FromLevel         *int                    `json:"from_level,omitempty"`
-	ToLevel           *int                    `json:"to_level,omitempty"`
-	Amount            *int                    `json:"amount,omitempty"`
-	TotalExperience   *int                    `json:"total_experience,omitempty"`
-	TotalGold         *int                    `json:"total_gold,omitempty"`
-	Stat              string                  `json:"stat,omitempty"`
-	UnspentStatPoints *int                    `json:"unspent_stat_points,omitempty"`
-	Reason            string                  `json:"reason,omitempty"`
-	ShopID            string                  `json:"shop_id,omitempty"`
-	Offers            []ShopOfferView         `json:"offers,omitempty"`
-	SellAppraisals    []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
-	OfferID           string                  `json:"offer_id,omitempty"`
-	Price             *int                    `json:"price,omitempty"`
-	PatternID         string                  `json:"pattern_id,omitempty"`
-	PhaseIndex        *int                    `json:"phase_index,omitempty"`
-	PhaseKind         string                  `json:"phase_kind,omitempty"`
-	DurationTicks     *int                    `json:"duration_ticks,omitempty"`
-	Telegraph         *BossTelegraphView      `json:"telegraph,omitempty"`
-	HitShape          *BossHitShapeView       `json:"hit_shape,omitempty"`
-	State             string                  `json:"state,omitempty"`
+	EventType          string                  `json:"event_type"`
+	EntityID           string                  `json:"entity_id,omitempty"`
+	SourceEntityID     string                  `json:"source_entity_id,omitempty"`
+	TargetEntityID     string                  `json:"target_entity_id,omitempty"`
+	CorrelationID      string                  `json:"correlation_id,omitempty"`
+	Damage             *int                    `json:"damage,omitempty"`
+	Outcome            string                  `json:"outcome,omitempty"`
+	RawDamage          *int                    `json:"raw_damage,omitempty"`
+	MitigatedDamage    *int                    `json:"mitigated_damage,omitempty"`
+	Blocked            *bool                   `json:"blocked,omitempty"`
+	Critical           *bool                   `json:"critical,omitempty"`
+	Heal               *int                    `json:"heal,omitempty"`
+	Mana               *int                    `json:"mana,omitempty"`
+	ItemInstanceID     string                  `json:"item_instance_id,omitempty"`
+	Level              *int                    `json:"level,omitempty"`
+	FromLevel          *int                    `json:"from_level,omitempty"`
+	ToLevel            *int                    `json:"to_level,omitempty"`
+	Amount             *int                    `json:"amount,omitempty"`
+	TotalExperience    *int                    `json:"total_experience,omitempty"`
+	TotalGold          *int                    `json:"total_gold,omitempty"`
+	Stat               string                  `json:"stat,omitempty"`
+	UnspentStatPoints  *int                    `json:"unspent_stat_points,omitempty"`
+	UnspentSkillPoints *int                    `json:"unspent_skill_points,omitempty"`
+	SkillID            string                  `json:"skill_id,omitempty"`
+	Rank               *int                    `json:"rank,omitempty"`
+	MaxRank            *int                    `json:"max_rank,omitempty"`
+	RemainingTicks     *int                    `json:"remaining_ticks,omitempty"`
+	TotalTicks         *int                    `json:"total_ticks,omitempty"`
+	ProjectileDefID    string                  `json:"projectile_def_id,omitempty"`
+	Reason             string                  `json:"reason,omitempty"`
+	ShopID             string                  `json:"shop_id,omitempty"`
+	Offers             []ShopOfferView         `json:"offers,omitempty"`
+	SellAppraisals     []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
+	OfferID            string                  `json:"offer_id,omitempty"`
+	Price              *int                    `json:"price,omitempty"`
+	PatternID          string                  `json:"pattern_id,omitempty"`
+	PhaseIndex         *int                    `json:"phase_index,omitempty"`
+	PhaseKind          string                  `json:"phase_kind,omitempty"`
+	DurationTicks      *int                    `json:"duration_ticks,omitempty"`
+	Telegraph          *BossTelegraphView      `json:"telegraph,omitempty"`
+	HitShape           *BossHitShapeView       `json:"hit_shape,omitempty"`
+	State              string                  `json:"state,omitempty"`
 }
 
 // TeleporterDiscoveryView is the protocol view of a generated dungeon level's
@@ -358,6 +391,8 @@ type Snapshot struct {
 	Gold                  int                       `json:"gold"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
+	SkillProgression      SkillProgressionView      `json:"skill_progression"`
+	SkillCooldowns        []SkillCooldownView       `json:"skill_cooldowns"`
 	RecentEvents          []Event                   `json:"recent_events"`
 }
 
@@ -375,27 +410,31 @@ const (
 	OpWallLayoutUpdate           = "wall_layout_update"
 	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
 	OpCharacterProgressionUpdate = "character_progression_update"
+	OpSkillProgressionUpdate     = "skill_progression_update"
+	OpSkillCooldownUpdate        = "skill_cooldown_update"
 )
 
 // Change is one ordered authoritative change within a tick. It marshals to
 // exactly the fields required for its op (matching the state_delta schema's
 // oneOf), which is why it has a custom MarshalJSON.
 type Change struct {
-	Op             string
-	Entity         *EntityView
-	EntityID       string
-	Item           *ItemView
-	Slot           string
-	ItemInstanceID *string // for equipped_update; nil marshals as null
-	SlotIndex      int
-	HotbarCapacity *int
-	InventoryRows  *int
-	InventoryCap   *int
-	Gold           *int
-	Walls          []WallView
-	Level          int
-	Discovered     bool
-	Progression    *CharacterProgressionView
+	Op               string
+	Entity           *EntityView
+	EntityID         string
+	Item             *ItemView
+	Slot             string
+	ItemInstanceID   *string // for equipped_update; nil marshals as null
+	SlotIndex        int
+	HotbarCapacity   *int
+	InventoryRows    *int
+	InventoryCap     *int
+	Gold             *int
+	Walls            []WallView
+	Level            int
+	Discovered       bool
+	Progression      *CharacterProgressionView
+	SkillProgression *SkillProgressionView
+	SkillCooldowns   []SkillCooldownView
 }
 
 // MarshalJSON renders the change as the precise object for its op.
@@ -467,6 +506,16 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op          string                    `json:"op"`
 			Progression *CharacterProgressionView `json:"character_progression"`
 		}{c.Op, c.Progression})
+	case OpSkillProgressionUpdate:
+		return json.Marshal(struct {
+			Op               string                `json:"op"`
+			SkillProgression *SkillProgressionView `json:"skill_progression"`
+		}{c.Op, c.SkillProgression})
+	case OpSkillCooldownUpdate:
+		return json.Marshal(struct {
+			Op             string              `json:"op"`
+			SkillCooldowns []SkillCooldownView `json:"skill_cooldowns"`
+		}{c.Op, c.SkillCooldowns})
 	default:
 		return nil, &json.UnsupportedValueError{Str: "unknown change op: " + c.Op}
 	}

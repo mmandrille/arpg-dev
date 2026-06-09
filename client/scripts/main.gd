@@ -16,6 +16,8 @@ const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
+const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
+const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
@@ -89,6 +91,8 @@ var gold: int = 0
 var hotbar_capacity: int = 2
 var hotbar: Array = []
 var character_progression: Dictionary = {}
+var skill_progression: Dictionary = {}
+var skill_cooldowns: Array = []
 var item_rules: Dictionary = {}
 var item_templates: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -170,6 +174,8 @@ var inventory_panel: InventoryPanel
 var shop_panel: ShopPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
+var skills_panel: SkillsPanel
+var skill_bar: SkillBar
 var character_info_panel: PanelContainer
 var character_info_name_label: Label
 var character_info_level_label: Label
@@ -332,6 +338,8 @@ func _hide_all_menus() -> void:
 		loss_popup.visible = false
 	if character_stats_panel != null:
 		character_stats_panel.hide_display()
+	if skills_panel != null:
+		skills_panel.hide_display()
 	_hide_character_info_panel()
 
 
@@ -567,6 +575,8 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	equipped = {}
 	gold = 0
 	character_progression = {}
+	skill_progression = {}
+	skill_cooldowns = []
 	loot_ids.clear()
 	monster_ids.clear()
 	interactable_ids.clear()
@@ -595,8 +605,11 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		_health_bar.update_mana(player_mana, player_max_mana)
 	if character_stats_panel != null:
 		character_stats_panel.hide_display()
+	if skills_panel != null:
+		skills_panel.hide_display()
 	_hide_character_info_panel()
 	_refresh_progression_ui()
+	_refresh_skill_ui()
 	_hide_waypoint_panel()
 	if player_anchor != null:
 		player_anchor.position = Vector3.ZERO
@@ -733,10 +746,13 @@ func _apply_snapshot(p: Dictionary) -> void:
 	hotbar_capacity = int(p.get("hotbar_capacity", 2))
 	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
+	skill_progression = p.get("skill_progression", {})
+	skill_cooldowns = p.get("skill_cooldowns", [])
 	if resolver != null:
 		resolver.apply_snapshot(p)
 	_refresh_inventory_ui()
 	_refresh_progression_ui()
+	_refresh_skill_ui()
 	_update_character_info_panel()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
@@ -809,12 +825,28 @@ func _apply_delta(p: Dictionary) -> void:
 				character_progression = c.get("character_progression", {})
 				_refresh_progression_ui()
 				_update_character_info_panel()
+			"skill_progression_update":
+				skill_progression = c.get("skill_progression", {})
+				_refresh_skill_ui()
+			"skill_cooldown_update":
+				skill_cooldowns = c.get("skill_cooldowns", [])
+				_refresh_skill_ui()
 			_:
 				pass
 	_refresh_inventory_ui()
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
+		if event_type == "skill_cast" and eid == player_id:
+			if skill_bar != null:
+				skill_bar.flash_cast()
+			if player_anim != null:
+				player_anim.play_one_shot("attack")
+			continue
+		if event_type == "skill_cooldown_rejected" and eid == player_id:
+			if skill_bar != null:
+				skill_bar.flash_rejected()
+			continue
 		if visual_replay_enabled and inventory_panel != null:
 			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)
 			if hint != null:
@@ -1321,8 +1353,20 @@ func _unhandled_input(event: InputEvent) -> void:
 				_refresh_progression_ui()
 			get_viewport().set_input_as_handled()
 			return
+		if _is_skills_key(event):
+			if skills_panel != null:
+				_close_gameplay_panels("skills")
+				skills_panel.toggle()
+				_refresh_skill_ui()
+			get_viewport().set_input_as_handled()
+			return
 		if _is_character_info_key(event):
 			_toggle_character_info_panel()
+			get_viewport().set_input_as_handled()
+			return
+		if _is_skill_slot_key(event):
+			if skill_bar != null:
+				skill_bar.use_slot()
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.pressed:
@@ -1393,6 +1437,14 @@ func _is_character_info_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_P or event.physical_keycode == KEY_P or event.unicode == 112 or event.unicode == 80
 
 
+func _is_skills_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_K or event.physical_keycode == KEY_K or event.unicode == 107 or event.unicode == 75
+
+
+func _is_skill_slot_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_Q or event.physical_keycode == KEY_Q or event.unicode == 113 or event.unicode == 81
+
+
 func _close_gameplay_panels(except: String = "") -> void:
 	if not (except in ["inventory", "stats", "shop_with_inventory"]) and inventory_panel != null:
 		inventory_panel.hide_display()
@@ -1400,6 +1452,8 @@ func _close_gameplay_panels(except: String = "") -> void:
 		_hide_shop_panel()
 	if not (except in ["stats", "inventory"]) and character_stats_panel != null:
 		character_stats_panel.hide_display()
+	if except != "skills" and skills_panel != null:
+		skills_panel.hide_display()
 	if except != "character_info":
 		_hide_character_info_panel()
 	if except != "waypoint":
@@ -1559,6 +1613,8 @@ func _hold_input_allowed() -> bool:
 	if shop_panel != null and shop_panel.visible:
 		return false
 	if character_stats_panel != null and character_stats_panel.visible:
+		return false
+	if skills_panel != null and skills_panel.visible:
 		return false
 	if character_info_panel != null and character_info_panel.visible:
 		return false
@@ -2019,6 +2075,10 @@ func _start_next_visual_replay() -> void:
 		consumable_bar.set_interactive(false)
 	if character_stats_panel != null:
 		character_stats_panel.set_allocation_enabled(false)
+	if skills_panel != null:
+		skills_panel.set_interactive(false)
+	if skill_bar != null:
+		skill_bar.set_interactive(false)
 	_render_world_walls(world_id)
 	if session_id == "":
 		_debug("visual replay entry missing session_id; skipping")
@@ -2145,6 +2205,12 @@ func _build_scene() -> void:
 	character_stats_panel = CharacterStatsPanelScript.new()
 	character_stats_panel.allocate_stat_requested.connect(_on_character_stat_requested)
 	ui.add_child(character_stats_panel)
+	skills_panel = SkillsPanelScript.new()
+	skills_panel.allocate_skill_point_requested.connect(_on_skill_point_requested)
+	ui.add_child(skills_panel)
+	skill_bar = SkillBarScript.new()
+	skill_bar.cast_skill_requested.connect(_on_skill_cast_requested)
+	ui.add_child(skill_bar)
 	_setup_character_info_panel(ui)
 	_health_bar = PlayerHealthBarScript.new()
 	ui.add_child(_health_bar)
@@ -2269,6 +2335,8 @@ func _show_loss_popup() -> void:
 		pause_menu.hide_pause()
 	_hide_waypoint_panel()
 	_hide_shop_panel()
+	if skills_panel != null:
+		skills_panel.hide_display()
 	loss_popup.visible = true
 
 
@@ -2284,6 +2352,16 @@ func _on_character_stat_requested(stat: String) -> void:
 	client.send("allocate_stat_intent", last_server_tick, {"stat": stat, "points": 1})
 
 
+func _on_skill_point_requested(skill_id: String) -> void:
+	if _skill_allocation_blocked():
+		return
+	client.send("allocate_skill_point_intent", last_server_tick, {"skill_id": skill_id})
+
+
+func _on_skill_cast_requested(skill_id: String) -> void:
+	_send_skill_cast_intent(skill_id)
+
+
 func _stat_allocation_blocked() -> bool:
 	return visual_replay_enabled \
 		or autoplay_enabled \
@@ -2294,6 +2372,26 @@ func _stat_allocation_blocked() -> bool:
 		or int(character_progression.get("unspent_stat_points", 0)) <= 0
 
 
+func _skill_allocation_blocked() -> bool:
+	return visual_replay_enabled \
+		or autoplay_enabled \
+		or _menu_blocks_gameplay_input() \
+		or client == null \
+		or client.ready_state() != WebSocketPeer.STATE_OPEN \
+		or player_hp <= 0 \
+		or int(skill_progression.get("unspent_skill_points", 0)) <= 0
+
+
+func _skill_cast_blocked(skill_id: String = "magic_bolt") -> bool:
+	return visual_replay_enabled \
+		or autoplay_enabled \
+		or _menu_blocks_gameplay_input() \
+		or client == null \
+		or client.ready_state() != WebSocketPeer.STATE_OPEN \
+		or player_hp <= 0 \
+		or _skill_rank(skill_id) <= 0
+
+
 func _refresh_progression_ui() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_progression(character_progression)
@@ -2302,9 +2400,98 @@ func _refresh_progression_ui() -> void:
 		consumable_bar.set_character_progression(character_progression)
 
 
+func _refresh_skill_ui() -> void:
+	if skills_panel != null:
+		skills_panel.set_skill_progression(skill_progression)
+		skills_panel.set_interactive(not _skill_allocation_blocked())
+	if skill_bar != null:
+		skill_bar.set_skill_progression(skill_progression)
+		skill_bar.set_skill_cooldowns(skill_cooldowns)
+		skill_bar.set_interactive(not _skill_cast_blocked())
+
+
 func _sync_progression_interactivity() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
+	if skills_panel != null:
+		skills_panel.set_interactive(not _skill_allocation_blocked())
+	if skill_bar != null:
+		skill_bar.set_interactive(not _skill_cast_blocked())
+
+
+func _send_skill_cast_intent(skill_id: String, target_id: String = "") -> void:
+	if _skill_cast_blocked(skill_id):
+		return
+	var payload := _skill_cast_payload(skill_id, target_id)
+	if payload.is_empty():
+		return
+	client.send("cast_skill_intent", last_server_tick, payload)
+	_attack_cooldown = SEND_INTERVAL
+	if player_anim != null:
+		player_anim.play_one_shot("attack")
+
+
+func _skill_cast_payload(skill_id: String, target_id: String = "") -> Dictionary:
+	var payload := {"skill_id": skill_id}
+	var chosen_target := target_id
+	if chosen_target == "":
+		chosen_target = _nearest_live_monster_id()
+	if chosen_target != "":
+		payload["target_id"] = chosen_target
+		_face_toward_entity(chosen_target)
+		return payload
+	var dir := _last_facing_direction
+	if dir.length_squared() <= 0.0001:
+		dir = Vector2(1.0, 0.0)
+	payload["direction"] = {"x": dir.x, "y": dir.y}
+	return payload
+
+
+func _skill_rank(skill_id: String) -> int:
+	var row := _skill_progression_row(skill_id)
+	return int(row.get("rank", 0))
+
+
+func _skill_progression_row(skill_id: String) -> Dictionary:
+	var rows: Array = skill_progression.get("skills", [])
+	for row in rows:
+		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("skill_id", "")) == skill_id:
+			return row as Dictionary
+	return {}
+
+
+func _nearest_live_monster_id() -> String:
+	var best_id := ""
+	var best_dist := INF
+	for mid in monster_ids:
+		var id := str(mid)
+		if not entities.has(id):
+			continue
+		var rec: Dictionary = entities[id]
+		if int(rec.get("hp", 1)) <= 0:
+			continue
+		var node := rec.get("node", null) as Node3D
+		if node == null:
+			continue
+		var pos := _node_world_or_local_position(node)
+		var dist := Vector2(pos.x - predicted_pos.x, pos.z - predicted_pos.z).length()
+		if dist < best_dist:
+			best_dist = dist
+			best_id = id
+	return best_id
+
+
+func _face_toward_entity(target_id: String) -> void:
+	if target_id == "" or not entities.has(target_id):
+		return
+	var rec: Dictionary = entities[target_id]
+	var node := rec.get("node", null) as Node3D
+	if node == null:
+		return
+	var pos := _node_world_or_local_position(node)
+	var flat := Vector2(pos.x - predicted_pos.x, pos.z - predicted_pos.z)
+	if flat.length_squared() > 0.0001:
+		_face_direction(flat.normalized())
 
 
 func _setup_character_info_panel(ui: CanvasLayer) -> void:
@@ -3211,6 +3398,7 @@ func get_bot_state() -> Dictionary:
 			live_monster_ids.append(mid)
 	var out := {
 		"ws_open": client != null and client.ready_state() == WebSocketPeer.STATE_OPEN,
+		"last_tick": last_server_tick,
 		"local_player_id": player_id,
 		"party": party.duplicate(true),
 		"remote_player_ids": _remote_player_ids(),
@@ -3226,6 +3414,8 @@ func get_bot_state() -> Dictionary:
 		"generated_wall_count": _wall_count_by_source("generated"),
 		"non_perimeter_wall_count": _non_perimeter_wall_count(),
 		"character_progression": character_progression.duplicate(true),
+		"skill_progression": skill_progression.duplicate(true),
+		"skill_cooldowns": skill_cooldowns.duplicate(true),
 		"inventory": inventory.duplicate(true),
 		"equipped": equipped.duplicate(true),
 		"inventory_rows": inventory_rows,
@@ -3242,11 +3432,14 @@ func get_bot_state() -> Dictionary:
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
 		"shop_panel_visible": shop_panel != null and shop_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
+		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
 		"shop_panel": shop_panel.get_debug_state() if shop_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
+		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
+		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
@@ -3479,6 +3672,34 @@ func bot_click_stat_button(stat: String) -> void:
 	if character_stats_panel == null:
 		return
 	character_stats_panel.bot_click_stat_button(stat)
+
+
+func bot_click_skill_button(skill_id: String = "magic_bolt") -> void:
+	if skills_panel == null:
+		return
+	skills_panel.bot_click_skill_button(skill_id)
+
+
+func bot_use_skill_bar(skill_id: String = "magic_bolt", target_id: String = "", force_direct: bool = false) -> void:
+	if force_direct or target_id != "":
+		_send_skill_cast_intent(skill_id, target_id)
+		return
+	if skill_bar != null:
+		skill_bar.use_slot()
+
+
+func bot_cast_skill_direction(skill_id: String = "magic_bolt", direction: Dictionary = {}) -> void:
+	if _skill_cast_blocked(skill_id):
+		return
+	var dir := Vector2(float(direction.get("x", _last_facing_direction.x)), float(direction.get("y", _last_facing_direction.y)))
+	if dir.length_squared() <= 0.0001:
+		dir = Vector2(1.0, 0.0)
+	dir = dir.normalized()
+	_face_direction(dir)
+	client.send("cast_skill_intent", last_server_tick, {"skill_id": skill_id, "direction": {"x": dir.x, "y": dir.y}})
+	_attack_cooldown = SEND_INTERVAL
+	if player_anim != null:
+		player_anim.play_one_shot("attack")
 
 
 func bot_click_menu_button(button: String) -> void:

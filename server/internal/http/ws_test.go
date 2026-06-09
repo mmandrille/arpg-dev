@@ -74,11 +74,14 @@ func fullStackWithRules(t *testing.T, tweak func(*game.Rules)) *httptest.Server 
 
 // wire-decoding structs for the client side of the test.
 type wEntity struct {
-	ID        string `json:"id"`
-	Type      string `json:"type"`
-	ItemDefID string `json:"item_def_id"`
-	HP        *int   `json:"hp"`
-	MaxHP     *int   `json:"max_hp"`
+	ID              string `json:"id"`
+	Type            string `json:"type"`
+	ItemDefID       string `json:"item_def_id"`
+	ProjectileDefID string `json:"projectile_def_id"`
+	HP              *int   `json:"hp"`
+	MaxHP           *int   `json:"max_hp"`
+	Mana            *int   `json:"mana"`
+	MaxMana         *int   `json:"max_mana"`
 }
 type wItem struct {
 	ItemInstanceID string `json:"item_instance_id"`
@@ -94,10 +97,13 @@ type wChange struct {
 	Slot                 string                         `json:"slot"`
 	ItemInstanceID       *string                        `json:"item_instance_id"`
 	CharacterProgression *game.CharacterProgressionView `json:"character_progression"`
+	SkillProgression     *game.SkillProgressionView     `json:"skill_progression"`
+	SkillCooldowns       []game.SkillCooldownView       `json:"skill_cooldowns"`
 }
 type wEvent struct {
 	EventType string `json:"event_type"`
 	EntityID  string `json:"entity_id"`
+	SkillID   string `json:"skill_id"`
 }
 type wMsg struct {
 	Type    string          `json:"type"`
@@ -538,31 +544,76 @@ func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing
 	sendIntent(t, conn, sessionID, first.ServerTick, "msg-prog-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
 	tick := waitStateDeltaTick(t, conn, first.ServerTick)
 	sendIntent(t, conn, sessionID, tick, "msg-prog-kill", "action_intent", map[string]any{"target_id": "1002"})
-	levelDelta := readProgressionDelta(t, conn, 2, 5, 5)
+	levelDelta := readProgressionDelta(t, conn, 2, 3, 5)
 	if !hasWireEvent(levelDelta, "experience_gained") || !hasWireEvent(levelDelta, "character_leveled") {
 		t.Fatalf("level delta missing XP events: %+v", levelDelta.Events)
 	}
 
 	sendIntent(t, conn, sessionID, levelDelta.Tick, "msg-prog-vit", "allocate_stat_intent", map[string]any{"stat": "vit", "points": 1})
-	allocDelta := readProgressionDelta(t, conn, 2, 4, 6)
+	allocDelta := readProgressionDelta(t, conn, 2, 2, 6)
 	if !hasWireEvent(allocDelta, "stat_allocated") || !hasWirePlayerMaxHP(allocDelta, 11) {
 		t.Fatalf("allocation delta missing stat event/player max hp: changes=%+v events=%+v", allocDelta.Changes, allocDelta.Events)
 	}
 	_ = conn.Close()
 
 	state := fetchState(t, srv, token, sessionID)
-	assertProgressionSnapshot(t, state, 2, 4, 6)
+	assertProgressionSnapshot(t, state, 2, 2, 6)
 
 	resume := dialWS(t, srv, token, sessionID)
 	resumed := readSnapshot(t, resume)
-	assertProgressionSnapshot(t, resumed, 2, 4, 6)
+	assertProgressionSnapshot(t, resumed, 2, 2, 6)
 	_ = resume.Close()
 
 	freshSessionID := createSessionWithToken(t, srv, token, "")
 	fresh := dialWS(t, srv, token, freshSessionID)
 	freshSnap := readSnapshot(t, fresh)
-	assertProgressionSnapshot(t, freshSnap, 2, 4, 6)
+	assertProgressionSnapshot(t, freshSnap, 2, 2, 6)
 	_ = fresh.Close()
+}
+
+func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
+	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		dummy := rules.Monsters["training_dummy"]
+		dummy.MaxHP = 1
+		dummy.XPReward = 50
+		dummy.LootTable = "no_drop"
+		dummy.RetaliationDamage = nil
+		rules.Monsters["training_dummy"] = dummy
+	})
+	token, sessionID := loginAndSession(t, srv)
+
+	conn := dialWS(t, srv, token, sessionID)
+	first := readSnapshot(t, conn)
+	if first.SkillProgression.UnspentSkillPoints != 0 || len(first.SkillProgression.Skills) == 0 || first.SkillProgression.Skills[0].Rank != 0 {
+		t.Fatalf("initial skill progression = %+v, want rank 0 and no points", first.SkillProgression)
+	}
+
+	sendIntent(t, conn, sessionID, first.ServerTick, "msg-skill-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
+	tick := waitStateDeltaTick(t, conn, first.ServerTick)
+	sendIntent(t, conn, sessionID, tick, "msg-skill-kill", "action_intent", map[string]any{"target_id": "1002"})
+	levelDelta := readSkillProgressionDelta(t, conn, 1, 0)
+	if !hasWireEvent(levelDelta, "skill_point_gained") {
+		t.Fatalf("skill point delta missing event: %+v", levelDelta.Events)
+	}
+
+	sendIntent(t, conn, sessionID, levelDelta.Tick, "msg-skill-spend", "allocate_skill_point_intent", map[string]any{"skill_id": "magic_bolt"})
+	spendDelta := readSkillProgressionDelta(t, conn, 0, 1)
+	if !hasWireEvent(spendDelta, "skill_rank_updated") {
+		t.Fatalf("skill spend delta missing event: %+v", spendDelta.Events)
+	}
+
+	sendIntent(t, conn, sessionID, spendDelta.Tick, "msg-skill-cast", "cast_skill_intent", map[string]any{"skill_id": "magic_bolt", "direction": map[string]any{"x": 1, "y": 0}})
+	castDelta := readSkillCooldownDelta(t, conn, "magic_bolt", 40, 40)
+	if !hasWireEvent(castDelta, "skill_cast") || !hasWireEvent(castDelta, "skill_cooldown_started") {
+		t.Fatalf("cast delta missing skill events: %+v", castDelta.Events)
+	}
+
+	sendIntent(t, conn, sessionID, castDelta.Tick, "msg-skill-recast", "cast_skill_intent", map[string]any{"skill_id": "magic_bolt", "direction": map[string]any{"x": 1, "y": 0}})
+	reject := readRejected(t, conn, "msg-skill-recast")
+	if reject.Reason != "skill_on_cooldown" {
+		t.Fatalf("recast reject = %+v, want skill_on_cooldown", reject)
+	}
+	_ = conn.Close()
 }
 
 func TestPostResumePickupAllocatesAfterHistoricalEntities(t *testing.T) {
@@ -1007,6 +1058,72 @@ func readProgressionDelta(t *testing.T, conn *websocket.Conn, level, unspent, vi
 			p := change.CharacterProgression
 			if p.Level == level && p.UnspentStatPoints == unspent && p.BaseStats.Vit == vit {
 				return d
+			}
+		}
+	}
+}
+
+func readSkillProgressionDelta(t *testing.T, conn *websocket.Conn, unspent, rank int) wireDelta {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	for {
+		select {
+		case <-deadline:
+			t.Fatalf("no skill progression delta unspent=%d rank=%d", unspent, rank)
+		default:
+		}
+		m := readMsg(t, conn)
+		if m.Type != "state_delta" {
+			continue
+		}
+		var d wireDelta
+		d.Tick = m.Tick
+		if err := json.Unmarshal(m.Payload, &d); err != nil {
+			t.Fatalf("decode delta: %v", err)
+		}
+		for _, change := range d.Changes {
+			if change.Op != "skill_progression_update" || change.SkillProgression == nil {
+				continue
+			}
+			p := change.SkillProgression
+			if p.UnspentSkillPoints != unspent {
+				continue
+			}
+			for _, skill := range p.Skills {
+				if skill.SkillID == "magic_bolt" && skill.Rank == rank {
+					return d
+				}
+			}
+		}
+	}
+}
+
+func readSkillCooldownDelta(t *testing.T, conn *websocket.Conn, skillID string, remaining, total int) wireDelta {
+	t.Helper()
+	deadline := time.After(5 * time.Second)
+	for {
+		select {
+		case <-deadline:
+			t.Fatalf("no skill cooldown delta %s %d/%d", skillID, remaining, total)
+		default:
+		}
+		m := readMsg(t, conn)
+		if m.Type != "state_delta" {
+			continue
+		}
+		var d wireDelta
+		d.Tick = m.Tick
+		if err := json.Unmarshal(m.Payload, &d); err != nil {
+			t.Fatalf("decode delta: %v", err)
+		}
+		for _, change := range d.Changes {
+			if change.Op != "skill_cooldown_update" {
+				continue
+			}
+			for _, cooldown := range change.SkillCooldowns {
+				if cooldown.SkillID == skillID && cooldown.RemainingTicks == remaining && cooldown.TotalTicks == total {
+					return d
+				}
 			}
 		}
 	}

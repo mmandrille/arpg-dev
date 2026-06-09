@@ -9,23 +9,25 @@ import (
 )
 
 const (
-	TypeClientReady  = "client_ready"
-	TypeMoveIntent   = "move_intent"
-	TypeMoveTo       = "move_to_intent"
-	TypeDirectional  = "directional_attack_intent"
-	TypeAction       = "action_intent"
-	TypeDescend      = "descend_intent"
-	TypeAscend       = "ascend_intent"
-	TypeTeleport     = "teleport_intent"
-	TypeEquip        = "equip_intent"
-	TypeUnequip      = "unequip_intent"
-	TypeDrop         = "drop_intent"
-	TypeUse          = "use_intent"
-	TypeAssignHotbar = "assign_hotbar_intent"
-	TypeUseHotbar    = "use_hotbar_intent"
-	TypeAllocateStat = "allocate_stat_intent"
-	TypeShopBuy      = "shop_buy_intent"
-	TypeShopSell     = "shop_sell_intent"
+	TypeClientReady        = "client_ready"
+	TypeMoveIntent         = "move_intent"
+	TypeMoveTo             = "move_to_intent"
+	TypeDirectional        = "directional_attack_intent"
+	TypeAction             = "action_intent"
+	TypeDescend            = "descend_intent"
+	TypeAscend             = "ascend_intent"
+	TypeTeleport           = "teleport_intent"
+	TypeEquip              = "equip_intent"
+	TypeUnequip            = "unequip_intent"
+	TypeDrop               = "drop_intent"
+	TypeUse                = "use_intent"
+	TypeAssignHotbar       = "assign_hotbar_intent"
+	TypeUseHotbar          = "use_hotbar_intent"
+	TypeAllocateStat       = "allocate_stat_intent"
+	TypeAllocateSkillPoint = "allocate_skill_point_intent"
+	TypeCastSkill          = "cast_skill_intent"
+	TypeShopBuy            = "shop_buy_intent"
+	TypeShopSell           = "shop_sell_intent"
 )
 
 type envelope struct {
@@ -78,6 +80,14 @@ type (
 		Stat   string `json:"stat"`
 		Points int    `json:"points"`
 	}
+	allocateSkillPointPayloadWire struct {
+		SkillID string `json:"skill_id"`
+	}
+	castSkillPayloadWire struct {
+		SkillID   string     `json:"skill_id"`
+		TargetID  string     `json:"target_id"`
+		Direction *game.Vec2 `json:"direction"`
+	}
 	shopBuyPayloadWire struct {
 		ShopEntityID string `json:"shop_entity_id"`
 		OfferID      string `json:"offer_id"`
@@ -91,7 +101,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeShopBuy, TypeShopSell:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeShopBuy, TypeShopSell:
 		return true
 	}
 	return false
@@ -190,6 +200,18 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.AllocateStat = &game.AllocateStatIntent{Stat: p.Stat, Points: p.Points}
+	case TypeAllocateSkillPoint:
+		var p allocateSkillPointPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.SkillID == "" {
+			return in, false
+		}
+		in.AllocateSkillPoint = &game.AllocateSkillPointIntent{SkillID: p.SkillID}
+	case TypeCastSkill:
+		var p castSkillPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.SkillID == "" || (p.TargetID == "" && p.Direction == nil) {
+			return in, false
+		}
+		in.CastSkill = &game.CastSkillIntent{SkillID: p.SkillID, TargetID: p.TargetID, Direction: p.Direction}
 	case TypeShopBuy:
 		var p shopBuyPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.ShopEntityID == "" || p.OfferID == "" {

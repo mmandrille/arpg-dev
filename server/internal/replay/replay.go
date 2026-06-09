@@ -564,6 +564,8 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 		Level:               progression.Level,
 		Experience:          progression.Experience,
 		UnspentStatPoints:   progression.UnspentStatPoints,
+		UnspentSkillPoints:  progression.UnspentSkillPoints,
+		SkillRanks:          cloneSkillRanks(progression.SkillRanks),
 		Gold:                progression.Gold,
 		DeepestDungeonDepth: progression.DeepestDungeonDepth,
 		BaseStats: game.BaseStatsView{
@@ -573,6 +575,17 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 			Magic: progression.Stats.Magic,
 		},
 	}
+}
+
+func cloneSkillRanks(in map[string]int) map[string]int {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]int, len(in))
+	for skillID, rank := range in {
+		out[skillID] = rank
+	}
+	return out
 }
 
 func inputsByTick(inputs []RecordedInput) map[int64][]game.Input {

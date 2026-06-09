@@ -25,13 +25,14 @@
           "allocated_points": { "type": "integer", "minimum": 1 },
           "expected": {
             "type": "object",
-            "required": ["level", "current_level_xp", "next_level_xp", "unspent_stat_points", "base_stats", "derived_stats"],
+            "required": ["level", "current_level_xp", "next_level_xp", "unspent_stat_points", "unspent_skill_points", "base_stats", "derived_stats"],
             "additionalProperties": false,
             "properties": {
               "level": { "type": "integer", "minimum": 1 },
               "current_level_xp": { "type": "integer", "minimum": 0 },
               "next_level_xp": { "type": "integer", "minimum": 0 },
               "unspent_stat_points": { "type": "integer", "minimum": 0 },
+              "unspent_skill_points": { "type": "integer", "minimum": 0 },
               "base_stats": { "$ref": "#/$defs/base_stats" },
               "derived_stats": { "$ref": "#/$defs/derived_stats" }
             }
@@ -59,6 +60,7 @@
         "damage_max",
         "armor",
         "attack_speed",
+        "attack_interval_ticks",
         "hit_chance",
         "crit_chance",
         "crit_damage",
@@ -72,6 +74,7 @@
         "damage_max": { "type": "number" },
         "armor": { "type": "number" },
         "attack_speed": { "type": "number" },
+        "attack_interval_ticks": { "type": "integer", "minimum": 1 },
         "hit_chance": { "type": "number" },
         "crit_chance": { "type": "number" },
         "crit_damage": { "type": "number" },

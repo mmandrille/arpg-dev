@@ -18,6 +18,7 @@ type Rules struct {
 	Navigation           NavigationRules
 	Items                map[string]ItemDef
 	ItemTemplates        map[string]ItemTemplateDef
+	Skills               map[string]SkillDef
 	Rarities             map[string]RarityDef
 	RarityOrder          []string
 	TreasureClasses      map[string]TreasureClassDef
@@ -40,13 +41,16 @@ type DamageRange struct {
 
 // Combat holds combat parameters.
 type Combat struct {
-	BaseHitChance  float64     `json:"base_hit_chance"`
-	BaseCritChance float64     `json:"base_crit_chance"`
-	BaseCritDamage float64     `json:"base_crit_damage"`
-	MinimumDamage  int         `json:"minimum_damage"`
-	BlockCap       int         `json:"block_cap_percent"`
-	PlayerDamage   DamageRange `json:"player_damage"`
-	UnarmedReach   float64     `json:"unarmed_reach"`
+	BaseHitChance           float64     `json:"base_hit_chance"`
+	BaseCritChance          float64     `json:"base_crit_chance"`
+	BaseCritDamage          float64     `json:"base_crit_damage"`
+	MinimumDamage           int         `json:"minimum_damage"`
+	BlockCap                int         `json:"block_cap_percent"`
+	BaseAttackIntervalTicks int         `json:"base_attack_interval_ticks"`
+	MinEffectiveAttackSpeed float64     `json:"min_effective_attack_speed"`
+	MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
+	PlayerDamage            DamageRange `json:"player_damage"`
+	UnarmedReach            float64     `json:"unarmed_reach"`
 }
 
 // NavigationRules bounds server-owned auto-navigation.
@@ -81,9 +85,17 @@ type DungeonGenerationRules struct {
 type CharacterProgressionRules struct {
 	BaseStats      BaseStatsView
 	PointsPerLevel int
+	SkillPoints    SkillPointRules
 	LevelCap       int
 	XPThresholds   map[int]int
 	DerivedStats   map[string]LinearStatFormula
+}
+
+// SkillPointRules controls deterministic skill-point grants on level-up.
+type SkillPointRules struct {
+	PointsPerGrant   int `json:"points_per_grant"`
+	GrantEveryLevels int `json:"grant_every_levels"`
+	FirstGrantLevel  int `json:"first_grant_level"`
 }
 
 type LinearStatFormula struct {
@@ -334,6 +346,7 @@ type ItemDef struct {
 	Handedness      string       `json:"handedness,omitempty"`
 	OccupiesHands   []string     `json:"occupies_hands,omitempty"`
 	AttackMode      string       `json:"attack_mode,omitempty"`
+	AttackSpeed     float64      `json:"attack_speed,omitempty"`
 	Damage          *DamageRange `json:"damage,omitempty"`
 	Reach           *float64     `json:"reach,omitempty"`
 	ProjectileSpeed *float64     `json:"projectile_speed,omitempty"`
@@ -359,12 +372,46 @@ type ItemTemplateDef struct {
 	Handedness      string            `json:"handedness,omitempty"`
 	OccupiesHands   []string          `json:"occupies_hands,omitempty"`
 	AttackMode      string            `json:"attack_mode,omitempty"`
+	AttackSpeed     float64           `json:"attack_speed,omitempty"`
 	Reach           float64           `json:"reach"`
 	ProjectileSpeed float64           `json:"projectile_speed,omitempty"`
 	Requirements    map[string]int    `json:"requirements"`
 	BaseStats       map[string]int    `json:"base_stats"`
 	RollableStats   []RollableStatDef `json:"rollable_stats"`
 	EffectPool      []string          `json:"effect_pool"`
+}
+
+// SkillDef is a server-authoritative active skill definition.
+type SkillDef struct {
+	Name            string            `json:"name"`
+	Kind            string            `json:"kind"`
+	MaxRank         int               `json:"max_rank"`
+	Targeting       string            `json:"targeting"`
+	Range           float64           `json:"range"`
+	ProjectileSpeed float64           `json:"projectile_speed"`
+	ManaCost        SkillRankValueDef `json:"mana_cost"`
+	Damage          SkillDamageDef    `json:"damage"`
+	Cooldown        SkillCooldownDef  `json:"cooldown"`
+}
+
+// SkillRankValueDef is a rank-scaled integer value. Rank 1 uses Base.
+type SkillRankValueDef struct {
+	Base    int `json:"base"`
+	PerRank int `json:"per_rank"`
+}
+
+// SkillDamageDef controls the deterministic rank-scaled damage range.
+type SkillDamageDef struct {
+	MinBase    int `json:"min_base"`
+	MaxBase    int `json:"max_base"`
+	MinPerRank int `json:"min_per_rank"`
+	MaxPerRank int `json:"max_per_rank"`
+}
+
+// SkillCooldownDef defines how a skill cooldown is derived.
+type SkillCooldownDef struct {
+	Type       string  `json:"type"`
+	Multiplier float64 `json:"multiplier"`
 }
 
 // RollableStatDef is one weighted bounded stat increment.
@@ -533,14 +580,17 @@ func LoadRules(dir string) (*Rules, error) {
 	r := &Rules{}
 
 	var combat struct {
-		Version        int         `json:"version"`
-		BaseHitChance  float64     `json:"base_hit_chance"`
-		BaseCritChance float64     `json:"base_crit_chance"`
-		BaseCritDamage float64     `json:"base_crit_damage"`
-		MinimumDamage  int         `json:"minimum_damage"`
-		BlockCap       int         `json:"block_cap_percent"`
-		PlayerDamage   DamageRange `json:"player_damage"`
-		UnarmedReach   float64     `json:"unarmed_reach"`
+		Version                 int         `json:"version"`
+		BaseHitChance           float64     `json:"base_hit_chance"`
+		BaseCritChance          float64     `json:"base_crit_chance"`
+		BaseCritDamage          float64     `json:"base_crit_damage"`
+		MinimumDamage           int         `json:"minimum_damage"`
+		BlockCap                int         `json:"block_cap_percent"`
+		BaseAttackIntervalTicks int         `json:"base_attack_interval_ticks"`
+		MinEffectiveAttackSpeed float64     `json:"min_effective_attack_speed"`
+		MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
+		PlayerDamage            DamageRange `json:"player_damage"`
+		UnarmedReach            float64     `json:"unarmed_reach"`
 	}
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
@@ -563,17 +613,29 @@ func LoadRules(dir string) (*Rules, error) {
 	if combat.BlockCap < 0 || combat.BlockCap > 75 {
 		return nil, fmt.Errorf("game: invalid rules combat.block_cap_percent: must be within [0,75]")
 	}
+	if combat.BaseAttackIntervalTicks <= 0 {
+		return nil, fmt.Errorf("game: invalid rules combat.base_attack_interval_ticks: must be positive")
+	}
+	if combat.MinEffectiveAttackSpeed <= 0 {
+		return nil, fmt.Errorf("game: invalid rules combat.min_effective_attack_speed: must be positive")
+	}
+	if combat.MaxEffectiveAttackSpeed < combat.MinEffectiveAttackSpeed {
+		return nil, fmt.Errorf("game: invalid rules combat.max_effective_attack_speed: must be >= min_effective_attack_speed")
+	}
 	if combat.UnarmedReach <= 0 {
 		return nil, fmt.Errorf("game: invalid rules combat.unarmed_reach: must be positive")
 	}
 	r.Combat = Combat{
-		BaseHitChance:  combat.BaseHitChance,
-		BaseCritChance: combat.BaseCritChance,
-		BaseCritDamage: combat.BaseCritDamage,
-		MinimumDamage:  combat.MinimumDamage,
-		BlockCap:       combat.BlockCap,
-		PlayerDamage:   combat.PlayerDamage,
-		UnarmedReach:   combat.UnarmedReach,
+		BaseHitChance:           combat.BaseHitChance,
+		BaseCritChance:          combat.BaseCritChance,
+		BaseCritDamage:          combat.BaseCritDamage,
+		MinimumDamage:           combat.MinimumDamage,
+		BlockCap:                combat.BlockCap,
+		BaseAttackIntervalTicks: combat.BaseAttackIntervalTicks,
+		MinEffectiveAttackSpeed: combat.MinEffectiveAttackSpeed,
+		MaxEffectiveAttackSpeed: combat.MaxEffectiveAttackSpeed,
+		PlayerDamage:            combat.PlayerDamage,
+		UnarmedReach:            combat.UnarmedReach,
 	}
 
 	var navigation struct {
@@ -609,10 +671,11 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 
 	var progression struct {
-		Version         int           `json:"version"`
-		BaseStats       BaseStatsView `json:"base_stats"`
-		PointsPerLevel  int           `json:"points_per_level"`
-		LevelCap        int           `json:"level_cap"`
+		Version         int             `json:"version"`
+		BaseStats       BaseStatsView   `json:"base_stats"`
+		PointsPerLevel  int             `json:"points_per_level"`
+		SkillPoints     SkillPointRules `json:"skill_points"`
+		LevelCap        int             `json:"level_cap"`
 		ExperienceCurve struct {
 			Type   string `json:"type"`
 			Levels []struct {
@@ -630,6 +693,15 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if progression.PointsPerLevel <= 0 {
 		return nil, fmt.Errorf("game: invalid rules character_progression.points_per_level: must be positive")
+	}
+	if progression.SkillPoints.PointsPerGrant <= 0 {
+		return nil, fmt.Errorf("game: invalid rules character_progression.skill_points.points_per_grant: must be positive")
+	}
+	if progression.SkillPoints.GrantEveryLevels <= 0 {
+		return nil, fmt.Errorf("game: invalid rules character_progression.skill_points.grant_every_levels: must be positive")
+	}
+	if progression.SkillPoints.FirstGrantLevel < 1 {
+		return nil, fmt.Errorf("game: invalid rules character_progression.skill_points.first_grant_level: must be >= 1")
 	}
 	if progression.LevelCap < 2 {
 		return nil, fmt.Errorf("game: invalid rules character_progression.level_cap: must be >= 2")
@@ -670,6 +742,7 @@ func LoadRules(dir string) (*Rules, error) {
 	r.CharacterProgression = CharacterProgressionRules{
 		BaseStats:      progression.BaseStats,
 		PointsPerLevel: progression.PointsPerLevel,
+		SkillPoints:    progression.SkillPoints,
 		LevelCap:       progression.LevelCap,
 		XPThresholds:   thresholds,
 		DerivedStats:   progression.DerivedStats,
@@ -695,6 +768,11 @@ func LoadRules(dir string) (*Rules, error) {
 			if err := validateDamageRange("items."+id+".damage", *def.Damage); err != nil {
 				return nil, err
 			}
+			if def.AttackSpeed <= 0 {
+				return nil, fmt.Errorf("game: invalid rules items.%s.attack_speed: weapon attack speed must be positive", id)
+			}
+		} else if def.AttackSpeed != 0 {
+			return nil, fmt.Errorf("game: invalid rules items.%s.attack_speed: only valid on weapons", id)
 		}
 		if def.Reach != nil {
 			if !def.Equippable || !isHandSlot(def.Slot) {
@@ -787,6 +865,9 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.Reach <= 0 {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.reach: must be positive", id)
 			}
+			if def.AttackSpeed <= 0 {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.attack_speed: must be positive", id)
+			}
 			if def.AttackMode == attackModeRanged && def.ProjectileSpeed <= 0 {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.projectile_speed: must be positive", id)
 			}
@@ -799,7 +880,7 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.Handedness == "one_handed" && len(def.OccupiesHands) == 0 {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.occupies_hands: one-handed items must occupy a hand", id)
 			}
-		} else if def.AttackMode != "" || def.Reach != 0 || def.ProjectileSpeed != 0 {
+		} else if def.AttackMode != "" || def.Reach != 0 || def.ProjectileSpeed != 0 || def.AttackSpeed != 0 {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s: non-weapon equipment must not declare attack fields", id)
 		}
 		for stat, required := range def.Requirements {
@@ -815,10 +896,13 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s.base_stats: damage_max must be >= damage_min", id)
 		}
 		seen := map[string]bool{}
+		for stat := range def.BaseStats {
+			if !isSupportedItemStat(stat) {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.base_stats: unsupported stat %s", id, stat)
+			}
+		}
 		for _, roll := range def.RollableStats {
-			switch roll.Stat {
-			case "damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots", "inventory_rows":
-			default:
+			if !isSupportedItemStat(roll.Stat) {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: unsupported stat %s", id, roll.Stat)
 			}
 			if roll.Max < roll.Min {
@@ -839,6 +923,17 @@ func LoadRules(dir string) (*Rules, error) {
 	r.ItemTemplates = itemTemplates.Templates
 	r.Rarities = itemTemplates.Rarities
 	r.RarityOrder = rarityOrder
+
+	var skills struct {
+		Skills map[string]SkillDef `json:"skills"`
+	}
+	if err := readJSON(filepath.Join(dir, "skills.v0.json"), &skills); err != nil {
+		return nil, err
+	}
+	if err := validateSkillRules(skills.Skills); err != nil {
+		return nil, err
+	}
+	r.Skills = skills.Skills
 
 	var treasureClasses struct {
 		Classes map[string]TreasureClassDef `json:"classes"`
@@ -1809,6 +1904,58 @@ func validateDamageRange(label string, d DamageRange) error {
 	return nil
 }
 
+func validateSkillRules(skills map[string]SkillDef) error {
+	if len(skills) == 0 {
+		return fmt.Errorf("game: invalid rules skills: at least one skill is required")
+	}
+	def, ok := skills[magicBoltSkillID]
+	if !ok {
+		return fmt.Errorf("game: invalid rules skills: missing %s", magicBoltSkillID)
+	}
+	if def.Name == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.name: required", magicBoltSkillID)
+	}
+	if def.Kind != "projectile" {
+		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", magicBoltSkillID, def.Kind)
+	}
+	if def.MaxRank <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.max_rank: must be positive", magicBoltSkillID)
+	}
+	if def.Targeting != "direction_or_target" {
+		return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s", magicBoltSkillID, def.Targeting)
+	}
+	if def.Range <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.range: must be positive", magicBoltSkillID)
+	}
+	if def.ProjectileSpeed <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.projectile_speed: must be positive", magicBoltSkillID)
+	}
+	if def.ManaCost.Base < 0 || def.ManaCost.PerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.mana_cost: values must be non-negative", magicBoltSkillID)
+	}
+	if def.Damage.MinBase < 0 || def.Damage.MaxBase < def.Damage.MinBase {
+		return fmt.Errorf("game: invalid rules skills.%s.damage: base damage must be valid", magicBoltSkillID)
+	}
+	if def.Damage.MinPerRank < 0 || def.Damage.MaxPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.damage: per-rank damage must be non-negative", magicBoltSkillID)
+	}
+	if def.Cooldown.Type != "attack_interval_multiplier" {
+		return fmt.Errorf("game: invalid rules skills.%s.cooldown.type: unsupported %s", magicBoltSkillID, def.Cooldown.Type)
+	}
+	if def.Cooldown.Multiplier <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.cooldown.multiplier: must be positive", magicBoltSkillID)
+	}
+	for id, skill := range skills {
+		if id == magicBoltSkillID {
+			continue
+		}
+		if skill.MaxRank <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.max_rank: must be positive", id)
+		}
+	}
+	return nil
+}
+
 func isEquipmentSlot(slot string) bool {
 	switch slot {
 	case "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand":
@@ -1825,6 +1972,15 @@ func isHandSlot(slot string) bool {
 func isSupportedRequirementStat(stat string) bool {
 	switch stat {
 	case "level", "str", "dex", "vit", "magic":
+		return true
+	default:
+		return false
+	}
+}
+
+func isSupportedItemStat(stat string) bool {
+	switch stat {
+	case "damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent", "hotbar_slots", "inventory_rows":
 		return true
 	default:
 		return false

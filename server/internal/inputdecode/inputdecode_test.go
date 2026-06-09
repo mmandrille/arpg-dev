@@ -58,6 +58,61 @@ func TestDecodeAllocateStatIntentRejectsInvalidPayload(t *testing.T) {
 	}
 }
 
+func TestDecodeAllocateSkillPointIntent(t *testing.T) {
+	in, ok := Decode(TypeAllocateSkillPoint, "msg_skill", "", json.RawMessage(`{"skill_id":"magic_bolt"}`))
+	if !ok {
+		t.Fatal("Decode allocate_skill_point_intent rejected valid payload")
+	}
+	if in.AllocateSkillPoint == nil || in.AllocateSkillPoint.SkillID != "magic_bolt" {
+		t.Fatalf("decoded allocate skill point = %+v", in.AllocateSkillPoint)
+	}
+	if !IsClientIntent(TypeAllocateSkillPoint) {
+		t.Fatal("allocate_skill_point_intent not marked as client intent")
+	}
+}
+
+func TestDecodeCastSkillIntent(t *testing.T) {
+	targeted, ok := Decode(TypeCastSkill, "msg_cast_target", "", json.RawMessage(`{"skill_id":"magic_bolt","target_id":"1002"}`))
+	if !ok {
+		t.Fatal("Decode cast_skill_intent rejected target payload")
+	}
+	if targeted.CastSkill == nil || targeted.CastSkill.SkillID != "magic_bolt" || targeted.CastSkill.TargetID != "1002" || targeted.CastSkill.Direction != nil {
+		t.Fatalf("decoded targeted cast skill = %+v", targeted.CastSkill)
+	}
+
+	directional, ok := Decode(TypeCastSkill, "msg_cast_dir", "", json.RawMessage(`{"skill_id":"magic_bolt","direction":{"x":1,"y":0}}`))
+	if !ok {
+		t.Fatal("Decode cast_skill_intent rejected direction payload")
+	}
+	if directional.CastSkill == nil || directional.CastSkill.Direction == nil || directional.CastSkill.Direction.X != 1 || directional.CastSkill.Direction.Y != 0 {
+		t.Fatalf("decoded directional cast skill = %+v", directional.CastSkill)
+	}
+	if !IsClientIntent(TypeCastSkill) {
+		t.Fatal("cast_skill_intent not marked as client intent")
+	}
+}
+
+func TestDecodeSkillIntentsRejectInvalidPayload(t *testing.T) {
+	for _, payload := range []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"skill_id":""}`),
+	} {
+		if _, ok := Decode(TypeAllocateSkillPoint, "msg_skill", "", payload); ok {
+			t.Fatalf("Decode accepted invalid allocate skill payload %s", payload)
+		}
+	}
+	for _, payload := range []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"skill_id":"magic_bolt"}`),
+		json.RawMessage(`{"skill_id":"","target_id":"1002"}`),
+		json.RawMessage(`{"skill_id":"magic_bolt","direction":null}`),
+	} {
+		if _, ok := Decode(TypeCastSkill, "msg_cast", "", payload); ok {
+			t.Fatalf("Decode accepted invalid cast skill payload %s", payload)
+		}
+	}
+}
+
 func TestDecodeDirectionalAttackIntent(t *testing.T) {
 	in, ok := Decode(TypeDirectional, "msg_dir", "corr_dir", json.RawMessage(`{"direction":{"x":1,"y":0}}`))
 	if !ok {

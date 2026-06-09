@@ -11,6 +11,7 @@ const STEP_TYPES_WAIT := [
 	"wait_player_near", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
+	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 	"wait_wall_layout", "wait_shop_panel",
 ]
@@ -25,6 +26,8 @@ const STEP_TYPES_ASSERT := [
 	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
 	"assert_character_info_panel_visible", "assert_character_info",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
+	"assert_skills_panel_visible", "assert_skill_progression",
+	"assert_skill_button_enabled", "assert_skill_bar",
 	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
 	"assert_inventory_capacity", "assert_bag_grid", "assert_paper_doll_layout",
 	"assert_inventory_panel_details",
@@ -41,7 +44,7 @@ const STEP_TYPES_ACTION := [
 	"use_hotbar_slot", "double_click_bag_item", "click_menu_button",
 	"enter_character_name", "select_character", "select_window_size",
 	"set_floating_combat_text", "remember_session", "remember_player_position", "click_stat_button",
-	"click_shop_buy_offer", "click_shop_sell_item",
+	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_sell_item",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -70,6 +73,9 @@ const ALL_STEP_TYPES: Array = [
 	"wait_character_progression",
 	"assert_character_progression", "click_stat_button",
 	"assert_stat_button_enabled", "assert_xp_bar",
+	"wait_skill_progression", "assert_skills_panel_visible",
+	"assert_skill_progression", "assert_skill_button_enabled", "click_skill_button",
+	"wait_skill_bar", "assert_skill_bar", "use_skill_slot",
 	"set_floating_combat_text", "assert_floating_combat_text_enabled",
 	"wait_damage_number", "wait_no_damage_number", "assert_damage_number", "assert_no_damage_number",
 	"wait_entity_reaction", "assert_entity_reaction",
@@ -200,6 +206,10 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return bool(state.get("pause_menu_visible", false))
 		"wait_character_progression":
 			return _progression_matches(step, state)
+		"wait_skill_progression":
+			return _skill_progression_matches(step, state)
+		"wait_skill_bar":
+			return _skill_bar_matches(step, state)
 		"wait_damage_number":
 			return _damage_number_matches(step, state)
 		"wait_no_damage_number":
@@ -322,6 +332,19 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_stat_button_enabled(step, state)
 		"assert_xp_bar":
 			return _assert_xp_bar(step, state)
+		"assert_skills_panel_visible":
+			return _assert_bool_state("assert_skills_panel_visible", "skills_panel_visible", step, state)
+		"assert_skill_progression":
+			return _assert_skill_progression(step, state)
+		"assert_skill_button_enabled":
+			return _assert_skill_button_enabled(step, state)
+		"assert_skill_bar":
+			if not _skill_bar_matches(step, state):
+				_fail("assert_skill_bar failed: want=%s got=%s step=%d scenario=%s" % [
+					str(_skill_bar_expectation(step)), str(state.get("skill_bar", {})), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_floating_combat_text_enabled":
 			return _assert_bool_value("assert_floating_combat_text_enabled", step, bool(state.get("floating_combat_text_enabled", false)), bool(step.get("enabled", true)))
 		"assert_damage_number":
@@ -569,6 +592,92 @@ func _progression_expectation(step: Dictionary) -> Dictionary:
 	return out
 
 
+func _assert_skill_progression(step: Dictionary, state: Dictionary) -> bool:
+	if _skill_progression_matches(step, state):
+		return true
+	var progression: Dictionary = state.get("skill_progression", {})
+	_fail("assert_skill_progression failed: want=%s got=%s step=%d scenario=%s" % [
+		str(_skill_progression_expectation(step)), str(progression), _step_index, str(scenario.get("id", "?"))
+	])
+	return false
+
+
+func _skill_progression_matches(step: Dictionary, state: Dictionary) -> bool:
+	var progression: Dictionary = state.get("skill_progression", {})
+	if progression.is_empty():
+		return false
+	if step.has("unspent_skill_points") and int(progression.get("unspent_skill_points", -999999)) != int(step.get("unspent_skill_points", 0)):
+		return false
+	var skill_id := str(step.get("skill_id", "magic_bolt"))
+	var row := _skill_progression_row(progression, skill_id)
+	for key in ["rank", "max_rank"]:
+		if step.has(key) and int(row.get(key, -999999)) != int(step.get(key, 0)):
+			return false
+	if step.has("can_spend") and bool(row.get("can_spend", false)) != bool(step.get("can_spend", false)):
+		return false
+	return true
+
+
+func _skill_progression_row(progression: Dictionary, skill_id: String) -> Dictionary:
+	var rows: Array = progression.get("skills", [])
+	for row in rows:
+		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("skill_id", "")) == skill_id:
+			return row as Dictionary
+	return {}
+
+
+func _skill_progression_expectation(step: Dictionary) -> Dictionary:
+	var out := {}
+	for key in ["unspent_skill_points", "skill_id", "rank", "max_rank", "can_spend"]:
+		if step.has(key):
+			out[key] = step[key]
+	return out
+
+
+func _assert_skill_button_enabled(step: Dictionary, state: Dictionary) -> bool:
+	var want := bool(step.get("enabled", true))
+	var panel: Dictionary = state.get("skills_panel", {})
+	var got := bool(panel.get("spend_button_enabled", false))
+	if want != got:
+		_fail("assert_skill_button_enabled failed: skill=%s want=%s got=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("skill_id", "magic_bolt")), want, got, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
+func _skill_bar_matches(step: Dictionary, state: Dictionary) -> bool:
+	var bar: Dictionary = state.get("skill_bar", {})
+	if bar.is_empty():
+		return false
+	if step.has("skill_id") and str(bar.get("skill_id", "")) != str(step.get("skill_id", "")):
+		return false
+	for key in ["rank", "max_rank", "remaining_ticks", "total_ticks"]:
+		if step.has(key) and int(bar.get(key, -999999)) != int(step.get(key, 0)):
+			return false
+	if step.has("enabled") and bool(bar.get("enabled", false)) != bool(step.get("enabled", false)):
+		return false
+	if step.has("disabled") and bool(bar.get("disabled", false)) != bool(step.get("disabled", false)):
+		return false
+	if step.has("remaining_ticks_min") and int(bar.get("remaining_ticks", -999999)) < int(step.get("remaining_ticks_min", 0)):
+		return false
+	if step.has("remaining_ticks_max") and int(bar.get("remaining_ticks", 999999)) > int(step.get("remaining_ticks_max", 0)):
+		return false
+	if step.has("cooldown_fraction_min") and float(bar.get("cooldown_fraction", -1.0)) < float(step.get("cooldown_fraction_min", 0.0)):
+		return false
+	if step.has("cooldown_fraction_max") and float(bar.get("cooldown_fraction", 2.0)) > float(step.get("cooldown_fraction_max", 1.0)):
+		return false
+	return true
+
+
+func _skill_bar_expectation(step: Dictionary) -> Dictionary:
+	var out := {}
+	for key in ["skill_id", "rank", "max_rank", "enabled", "disabled", "remaining_ticks", "remaining_ticks_min", "remaining_ticks_max", "total_ticks", "cooldown_fraction_min", "cooldown_fraction_max"]:
+		if step.has(key):
+			out[key] = step[key]
+	return out
+
+
 func _stat_breakdowns_match(expected_rows, progression: Dictionary) -> bool:
 	if typeof(expected_rows) != TYPE_ARRAY:
 		return false
@@ -613,12 +722,14 @@ func _event_matches(step: Dictionary, event) -> bool:
 	if typeof(event) != TYPE_DICTIONARY:
 		return false
 	var ev := event as Dictionary
-	for key in ["outcome", "source_entity_id", "target_entity_id", "shop_id", "offer_id", "item_instance_id"]:
+	for key in ["outcome", "source_entity_id", "target_entity_id", "shop_id", "offer_id", "item_instance_id", "skill_id"]:
 		if step.has(key) and str(ev.get(key, "")) != str(step.get(key, "")):
 			return false
-	for key in ["damage", "raw_damage", "mitigated_damage", "price", "total_gold", "level", "from_level", "to_level"]:
+	for key in ["damage", "raw_damage", "mitigated_damage", "price", "total_gold", "level", "from_level", "to_level", "rank", "mana", "remaining_ticks", "total_ticks", "amount", "unspent_skill_points"]:
 		if step.has(key) and int(ev.get(key, -999999)) != int(step.get(key, 0)):
 			return false
+	if step.has("min_damage") and int(ev.get("damage", -999999)) < int(step.get("min_damage", 0)):
+		return false
 	for key in ["blocked", "critical"]:
 		if step.has(key) and bool(ev.get(key, false)) != bool(step.get(key, false)):
 			return false
@@ -1142,6 +1253,12 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "progression=%s" % str(_progression_expectation(step))
 		"assert_stat_button_enabled", "click_stat_button":
 			return "stat=%s" % str(step.get("stat", ""))
+		"wait_skill_progression", "assert_skill_progression":
+			return "skill_progression=%s" % str(_skill_progression_expectation(step))
+		"assert_skill_button_enabled", "click_skill_button":
+			return "skill_id=%s" % str(step.get("skill_id", "magic_bolt"))
+		"wait_skill_bar", "assert_skill_bar", "use_skill_slot":
+			return "skill_bar=%s" % str(_skill_bar_expectation(step))
 		"assert_xp_bar":
 			return "xp_bar=%s" % str(step)
 		"click_menu_button":
@@ -1198,6 +1315,10 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		parts.append("inventory_%s=%d" % [def_id, _inventory_count(state, def_id)])
 	if stype == "wait_character_progression":
 		parts.append("progression=%s" % str(state.get("character_progression", {})))
+	if stype == "wait_skill_progression":
+		parts.append("skill_progression=%s" % str(state.get("skill_progression", {})))
+	if stype == "wait_skill_bar":
+		parts.append("skill_bar=%s" % str(state.get("skill_bar", {})))
 	if stype in ["wait_damage_number", "wait_no_damage_number"]:
 		parts.append("damage_numbers=%s" % str(state.get("damage_numbers", [])))
 	if stype == "wait_entity_reaction":
@@ -1339,6 +1460,23 @@ static func validate_step(step: Dictionary, index: int) -> String:
 				has_any = true
 		if not has_any:
 			return "client_steps[%d] (%s) requires at least one progression expectation" % [index, stype]
+	if stype in ["wait_skill_progression", "assert_skill_progression"]:
+		var has_skill_expectation := false
+		for key in ["unspent_skill_points", "rank", "max_rank", "can_spend"]:
+			if step.has(key):
+				has_skill_expectation = true
+		if not has_skill_expectation:
+			return "client_steps[%d] (%s) requires at least one skill progression expectation" % [index, stype]
+	if stype == "assert_skill_button_enabled":
+		if not step.has("enabled"):
+			return "client_steps[%d] (%s) requires enabled" % [index, stype]
+	if stype in ["wait_skill_bar", "assert_skill_bar"]:
+		var has_bar_expectation := false
+		for key in ["rank", "max_rank", "enabled", "disabled", "remaining_ticks", "remaining_ticks_min", "remaining_ticks_max", "total_ticks", "cooldown_fraction_min", "cooldown_fraction_max"]:
+			if step.has(key):
+				has_bar_expectation = true
+		if not has_bar_expectation:
+			return "client_steps[%d] (%s) requires at least one skill bar expectation" % [index, stype]
 	if stype in ["set_floating_combat_text", "assert_floating_combat_text_enabled"]:
 		if not step.has("enabled"):
 			return "client_steps[%d] (%s) requires enabled" % [index, stype]

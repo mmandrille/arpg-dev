@@ -1,0 +1,24 @@
+{
+  "version": 0,
+  "skills": {
+    "magic_bolt": {
+      "name": "Magic Bolt",
+      "kind": "projectile",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "range": 9.0,
+      "projectile_speed": 10.0,
+      "mana_cost": { "base": 3, "per_rank": 0 },
+      "damage": {
+        "min_base": 4,
+        "max_base": 6,
+        "min_per_rank": 1,
+        "max_per_rank": 1
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.0
+      }
+    }
+  }
+}

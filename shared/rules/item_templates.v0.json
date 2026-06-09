@@ -15,6 +15,7 @@
       "handedness": "one_handed",
       "occupies_hands": ["main_hand"],
       "attack_mode": "melee",
+      "attack_speed": 1.0,
       "reach": 1.5,
       "requirements": { "level": 1 },
       "base_stats": {
@@ -37,6 +38,7 @@
       "handedness": "two_handed",
       "occupies_hands": ["main_hand", "off_hand"],
       "attack_mode": "melee",
+      "attack_speed": 0.70,
       "reach": 1.8,
       "requirements": { "level": 1 },
       "base_stats": { "damage_min": 4, "damage_max": 7 },
@@ -55,6 +57,7 @@
       "handedness": "one_handed",
       "occupies_hands": ["main_hand"],
       "attack_mode": "melee",
+      "attack_speed": 1.0,
       "reach": 1.5,
       "requirements": { "level": 2, "str": 6 },
       "base_stats": { "damage_min": 5, "damage_max": 8 },
@@ -73,6 +76,7 @@
       "handedness": "two_handed",
       "occupies_hands": ["main_hand", "off_hand"],
       "attack_mode": "ranged",
+      "attack_speed": 0.85,
       "reach": 16.0,
       "projectile_speed": 50.0,
       "requirements": { "level": 1 },
@@ -128,8 +132,11 @@
       "slot": "gloves",
       "equippable": true,
       "requirements": { "level": 1 },
-      "base_stats": { "armor": 1 },
-      "rollable_stats": [{ "stat": "armor", "min": 1, "max": 2, "weight": 1 }],
+      "base_stats": { "armor": 1, "attack_speed_percent": 5 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 1, "max": 2, "weight": 2 },
+        { "stat": "attack_speed_percent", "min": -5, "max": 10, "weight": 1 }
+      ],
       "effect_pool": []
     },
     "cave_belt": {

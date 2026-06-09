@@ -23,7 +23,7 @@
     {
       "action": "assert_character_progression",
       "level": 2,
-      "unspent_stat_points": 5,
+      "unspent_stat_points": 3,
       "str": 5
     },
     {
@@ -32,7 +32,7 @@
       "points": 1,
       "expect_progression": {
         "level": 2,
-        "unspent_stat_points": 4,
+        "unspent_stat_points": 2,
         "str": 6
       }
     },
@@ -52,7 +52,7 @@
   "assertions": [
     { "type": "event_seen", "event_type": "character_leveled" },
     { "type": "event_seen", "event_type": "stat_allocated" },
-    { "type": "character_progression", "level": 2, "unspent_stat_points": 4, "str": 6 },
+    { "type": "character_progression", "level": 2, "unspent_stat_points": 2, "str": 6 },
     { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_war_sword" },
     {
       "type": "inventory_requirement_status",
@@ -72,7 +72,7 @@
       "world_id": "requirements_lab",
       "steps": [],
       "assertions": [
-        { "type": "character_progression", "level": 2, "unspent_stat_points": 4, "str": 6 },
+        { "type": "character_progression", "level": 2, "unspent_stat_points": 2, "str": 6 },
         { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_war_sword" },
         {
           "type": "inventory_requirement_status",

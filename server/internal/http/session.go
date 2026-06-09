@@ -454,6 +454,8 @@ func progressionDefaultsFromRules(rules *game.Rules) store.CharacterProgressionD
 		Level:               state.Level,
 		Experience:          state.Experience,
 		UnspentStatPoints:   state.UnspentStatPoints,
+		UnspentSkillPoints:  state.UnspentSkillPoints,
+		SkillRanks:          cloneSkillRanks(state.SkillRanks),
 		Gold:                state.Gold,
 		DeepestDungeonDepth: state.DeepestDungeonDepth,
 		Stats: store.CharacterBaseStats{
@@ -463,6 +465,17 @@ func progressionDefaultsFromRules(rules *game.Rules) store.CharacterProgressionD
 			Magic: state.BaseStats.Magic,
 		},
 	}
+}
+
+func cloneSkillRanks(in map[string]int) map[string]int {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]int, len(in))
+	for skillID, rank := range in {
+		out[skillID] = rank
+	}
+	return out
 }
 
 // newSeed returns a fresh 128-bit hex-encoded server seed from OS entropy.

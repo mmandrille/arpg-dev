@@ -78,6 +78,48 @@ func TestReconstructFromInputsWithDirectionalAttackAggro(t *testing.T) {
 	}
 }
 
+func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
+	rules := loadRules(t)
+	zero := 0.0
+	crit := rules.CharacterProgression.DerivedStats["crit_chance"]
+	crit.Base = 0
+	crit.PerDex = 0
+	crit.Min = &zero
+	crit.Max = &zero
+	rules.CharacterProgression.DerivedStats["crit_chance"] = crit
+	progress := rules.DefaultCharacterProgressionState()
+	progress.Level = 3
+	progress.UnspentStatPoints = 6
+	progress.UnspentSkillPoints = 1
+	progress.SkillRanks = map[string]int{"magic_bolt": 0}
+
+	rows := []store.SessionInput{
+		storedInput(t, "inp-skill-spend", "msg-skill-spend", 0, 0, "allocate_skill_point_intent", map[string]any{"skill_id": "magic_bolt"}),
+		storedInput(t, "inp-skill-cast", "msg-skill-cast", 1, 1, "cast_skill_intent", map[string]any{"skill_id": "magic_bolt", "target_id": "1002"}),
+	}
+	inputs, _, err := StoredInputs(rows)
+	if err != nil {
+		t.Fatalf("stored inputs: %v", err)
+	}
+	recon, err := ReconstructFromInputsWithProgression(testSessionID, testSeed, rules, game.DefaultWorldID, inputs, 20, nil, nil, nil, progress)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	if recon.Snapshot.SkillProgression.UnspentSkillPoints != 0 || len(recon.Snapshot.SkillProgression.Skills) == 0 || recon.Snapshot.SkillProgression.Skills[0].Rank != 1 {
+		t.Fatalf("skill progression snapshot = %+v, want rank 1 and no unspent points", recon.Snapshot.SkillProgression)
+	}
+	if len(recon.Snapshot.SkillCooldowns) == 0 || recon.Snapshot.SkillCooldowns[0].SkillID != "magic_bolt" {
+		t.Fatalf("skill cooldown snapshot = %+v, want active magic_bolt cooldown", recon.Snapshot.SkillCooldowns)
+	}
+	if !hasDerivedEvent(recon.DerivedEvents, "skill_rank_updated") || !hasDerivedEvent(recon.DerivedEvents, "skill_cast") || !hasDerivedEvent(recon.DerivedEvents, "monster_damaged") {
+		t.Fatalf("derived skill events = %+v, want rank, cast, and damage", recon.DerivedEvents)
+	}
+	monster := findSnapshotEntity(recon.Snapshot, "monster", "training_dummy")
+	if monster == nil || monster.HP == nil || monster.MaxHP == nil || *monster.HP >= *monster.MaxHP {
+		t.Fatalf("monster after magic bolt = %+v, want damaged", monster)
+	}
+}
+
 func TestVerifyUsesReconstructedSnapshot(t *testing.T) {
 	rules := loadRules(t)
 	rows := scriptedStoredInputs(t)

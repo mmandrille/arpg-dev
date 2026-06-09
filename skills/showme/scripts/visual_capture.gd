@@ -163,6 +163,7 @@ func _setup_inventory() -> void:
 
 
 func _setup_shop() -> void:
+	var offers := _shop_offers()
 	var inventory_panel = InventoryPanelScript.new()
 	get_root().add_child(inventory_panel)
 	await process_frame
@@ -173,7 +174,10 @@ func _setup_shop() -> void:
 	var panel = ShopPanelScript.new()
 	get_root().add_child(panel)
 	await process_frame
-	panel.show_shop("1004", "town_vendor", _shop_offers(), 550, _shop_inventory(), {}, "Town Vendor", _shop_sell_appraisals())
+	panel.show_shop("1004", "town_vendor", offers, 550, _shop_inventory(), {}, "Town Vendor", _shop_sell_appraisals())
+	var tooltip = panel._make_offer_tooltip(offers[3])
+	tooltip.position = Vector2(286, 142)
+	get_root().add_child(tooltip)
 
 
 func _add_light(root: Node3D) -> void:
@@ -273,9 +277,9 @@ func _shop_offers() -> Array:
 			"item_template_id": "cave_blade",
 			"display_name": "Rare Cave Blade",
 			"rarity": "rare",
-			"buy_price": 180,
+			"buy_price": 680,
 			"slot": "main_hand",
-			"summary_lines": ["Slot: main hand", "Damage 3-7", "+2 Min damage vs equipped", "+2 Max damage vs equipped"],
+			"summary_lines": ["Slot: main hand", "Damage 3-7", "Requires level 1", "+2 Min damage vs equipped", "+2 Max damage vs equipped", "-1 Armor vs equipped"],
 		},
 		{
 			"offer_id": "generated:1:cave_shield",

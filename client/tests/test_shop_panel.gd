@@ -54,6 +54,13 @@ func _run() -> void:
 	_assert_eq("vendor grid rows", int(state.get("vendor_rows", 0)), 10)
 	_assert_eq("vendor slot count", int(state.get("vendor_slot_count", 0)), 50)
 	_assert_eq("occupied vendor slots", int(state.get("occupied_vendor_slot_count", 0)), 4)
+	_assert_false("header gold hidden", bool(state.get("header_gold_visible", true)))
+	var tooltip_lines: Array = panel._tooltip_lines(offers[2])
+	_assert_false("tooltip stats exclude requirements", _array_contains_text(tooltip_lines, "Requires"))
+	_assert_false("tooltip stats exclude comparison", _array_contains_text(tooltip_lines, "vs equipped"))
+	_assert_true("tooltip requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "Level 1"))
+	var comparison_entries: Array = panel._comparison_entries(offers[2])
+	_assert_true("tooltip comparison extracted", not comparison_entries.is_empty() and str((comparison_entries[0] as Dictionary).get("text", "")).contains("vs equipped"))
 
 	panel.bot_click_buy_offer("fixed:red_potion")
 	_assert_eq("buy emitted count", emitted.size(), 1)
@@ -132,3 +139,10 @@ func _rows_have_summary(rows: Variant) -> bool:
 		if (row as Dictionary).get("summary_lines", []).is_empty():
 			return false
 	return true
+
+
+func _array_contains_text(rows: Array, needle: String) -> bool:
+	for row in rows:
+		if str(row).contains(needle):
+			return true
+	return false

@@ -15,7 +15,7 @@
     }
   ],
   "entities": [
-    { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 10, "max_hp": 10 },
+    { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 10, "max_hp": 10, "mana": 10, "max_mana": 10 },
     { "id": "1002", "type": "monster", "monster_def_id": "training_dummy", "rarity": "common", "position": { "x": 12, "y": 5 }, "hp": 3, "max_hp": 3 },
     { "id": "1010", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "unique", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "current_humanoid_player", "visual_scale": 2.0, "visual_tint": "#b77cff", "boss_phase": { "pattern_id": "charged_melee", "phase_index": 0, "phase_kind": "telegraph", "started_tick": 42, "remaining_ticks": 30, "telegraph": { "type": "body_color_charge", "from_color": "#b77cff", "to_color": "#ff0000", "radius": 1.6 }, "hit_shape": { "shape": "melee_contact", "radius": 1.6 } }, "position": { "x": 22, "y": 15 }, "hp": 24, "max_hp": 24 },
     { "id": "1011", "type": "interactable", "interactable_def_id": "stairs_down", "state": "locked", "position": { "x": 27, "y": 15 } },
@@ -41,6 +41,7 @@
   ],
   "inventory_rows": 3,
   "inventory_capacity": 15,
+  "gold": 8,
   "discovered_teleporters": [],
   "character_progression": {
     "level": 1,
@@ -48,6 +49,7 @@
     "experience_to_next_level": 20,
     "level_cap": 20,
     "unspent_stat_points": 0,
+    "gold": 8,
     "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
     "derived_stats": {
       "damage_min": 0,
@@ -68,7 +70,7 @@
         "uncapped_value": 6,
         "cap": null,
         "sources": [
-          { "label": "Vitality", "value": 1, "kind": "character_formula" },
+          { "label": "Dexterity", "value": 1, "kind": "character_formula" },
           { "label": "Cave Mail", "value": 3, "kind": "equipment_base", "item_instance_id": "1004" },
           { "label": "Rolled armor", "value": 2, "kind": "equipment_roll", "item_instance_id": "1004" }
         ]

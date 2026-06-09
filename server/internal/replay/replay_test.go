@@ -1075,7 +1075,10 @@ func (f *fakeRepo) CreateCharacter(context.Context, string, string, string) (sto
 	return store.Character{}, nil
 }
 func (f *fakeRepo) DeleteCharacter(context.Context, string, string) error { return nil }
-func (f *fakeRepo) CreateSession(context.Context, store.Session) error    { return nil }
+func (f *fakeRepo) RenameCharacter(context.Context, string, string, string) (store.Character, error) {
+	return store.Character{}, nil
+}
+func (f *fakeRepo) CreateSession(context.Context, store.Session) error { return nil }
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil
 }
@@ -1138,6 +1141,9 @@ func (f *fakeRepo) GetCharacterProgression(context.Context, string, string) (sto
 	return store.CharacterProgression{}, nil
 }
 func (f *fakeRepo) UpsertCharacterProgression(context.Context, string, store.CharacterProgression) error {
+	return nil
+}
+func (f *fakeRepo) SetCharacterGold(context.Context, string, string, int) error {
 	return nil
 }
 func (f *fakeRepo) ListCharacterHotbar(context.Context, string, string) ([]store.CharacterHotbarSlot, error) {

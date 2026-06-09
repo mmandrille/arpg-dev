@@ -70,15 +70,22 @@ func TestLoadRules(t *testing.T) {
 	if r.Combat.UnarmedReach != 1.0 {
 		t.Fatalf("unarmed reach = %v, want 1.0", r.Combat.UnarmedReach)
 	}
-	if r.Items["training_badge"].Equippable || r.Items["training_badge"].Slot != "" {
-		t.Fatalf("training_badge def = %+v, want non-equippable without slot", r.Items["training_badge"])
+	if r.Items["quest_leaf"].Equippable || r.Items["quest_leaf"].Slot != "" {
+		t.Fatalf("quest_leaf def = %+v, want non-equippable without slot", r.Items["quest_leaf"])
 	}
-	if r.Items["training_badge"].Damage != nil {
-		t.Fatalf("training_badge damage = %+v, want nil", r.Items["training_badge"].Damage)
+	if r.Items["quest_leaf"].Damage != nil {
+		t.Fatalf("quest_leaf damage = %+v, want nil", r.Items["quest_leaf"].Damage)
+	}
+	if r.Items["gold"].Category != "currency" || r.Items["gold"].Gold == nil || r.Items["gold"].Gold.Min != 6 || r.Items["gold"].Gold.Max != 12 {
+		t.Fatalf("gold def = %+v, want currency amount {6,12}", r.Items["gold"])
 	}
 	potion := r.Items["red_potion"]
 	if potion.Category != "consumable" || potion.Heal == nil || potion.Heal.Min != 5 || potion.Heal.Max != 5 {
 		t.Fatalf("red_potion def = %+v, want consumable heal {5,5}", potion)
+	}
+	manaPotion := r.Items["blue_potion"]
+	if manaPotion.Category != "consumable" || manaPotion.ManaRestore == nil || manaPotion.ManaRestore.Min != 5 || manaPotion.ManaRestore.Max != 5 {
+		t.Fatalf("blue_potion def = %+v, want consumable mana_restore {5,5}", manaPotion)
 	}
 	if _, ok := r.Worlds[DefaultWorldID]; !ok {
 		t.Fatalf("missing default world %q", DefaultWorldID)
@@ -487,7 +494,7 @@ func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
 	}
 	assertEntity(t, dsnap, "1001", playerEntity, "", "", Vec2{X: 2, Y: 2})
 	assertInteractable(t, dsnap, "1002", "wooden_door", interactableClosed, Vec2{X: 4, Y: 2})
-	assertEntity(t, dsnap, "1003", lootEntity, "", "training_badge", Vec2{X: 8, Y: 2})
+	assertEntity(t, dsnap, "1003", lootEntity, "", "quest_leaf", Vec2{X: 8, Y: 2})
 
 	ranged, err := NewSimWithWorld("sess_ranged", "01", rules, "ranged_lab")
 	if err != nil {
@@ -1156,7 +1163,7 @@ func TestRangedAutoApproachThenFire(t *testing.T) {
 	}
 }
 
-func TestRangedDummyDropsThreeSeparatedLootItems(t *testing.T) {
+func TestRangedDummyDropsSeparatedLootItems(t *testing.T) {
 	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
 	monster := firstEntityByKind(sim, monsterEntity)
 	monster.hp = 1
@@ -1170,9 +1177,10 @@ func TestRangedDummyDropsThreeSeparatedLootItems(t *testing.T) {
 	}
 
 	want := map[string]bool{
-		"training_badge": false,
-		"quest_leaf":     false,
-		"red_potion":     false,
+		"gold":        false,
+		"quest_leaf":  false,
+		"red_potion":  false,
+		"blue_potion": false,
 	}
 	positions := map[Vec2]string{}
 	for _, c := range r.Changes {
@@ -1240,14 +1248,18 @@ func TestRangedBowLootRequiresMeleeReach(t *testing.T) {
 	if sim.autoNav == nil {
 		t.Fatal("loot pickup from range should queue auto-nav, not dispatch immediately")
 	}
-	if hasEvent(pickup, "item_picked_up") {
+	pickupEvent := "item_picked_up"
+	if loot.itemDefID == goldItemDefID {
+		pickupEvent = "gold_picked_up"
+	}
+	if hasEvent(pickup, pickupEvent) {
 		t.Fatal("loot picked up instantly from ranged distance")
 	}
 
 	picked := false
 	for i := 0; i < 80; i++ {
 		r := sim.Tick(nil)
-		if hasEvent(r, "item_picked_up") {
+		if hasEvent(r, pickupEvent) {
 			picked = true
 			break
 		}
@@ -1908,7 +1920,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 		assertAck(t, sim.Tick([]Input{{MessageID: "sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "sword")
 		assertAck(t, sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}}), "shield")
 		for i := 0; i < inventoryCapacityForRows(baseInventoryRows)-1; i++ {
-			addStaticInventoryItem(sim, uint64(6218+i), "training_badge")
+			addStaticInventoryItem(sim, uint64(6218+i), "quest_leaf")
 		}
 		if got := sim.bagOccupancyCount(); got != inventoryCapacityForRows(baseInventoryRows) {
 			t.Fatalf("setup bag occupancy = %d, want full capacity", got)
@@ -2239,12 +2251,12 @@ func TestEquippedWeaponOneShotsRewardDummy(t *testing.T) {
 		t.Fatalf("missing equipped attack events: %+v", r.Events)
 	}
 	assertEventDamageAtLeast(t, r, "monster_damaged", 3)
-	if !hasLootSpawn(r, "training_badge") {
-		t.Fatalf("missing training_badge loot spawn: %+v", r.Changes)
+	if !hasLootSpawn(r, "gold") {
+		t.Fatalf("missing gold loot spawn: %+v", r.Changes)
 	}
-	lootPos, ok := lootSpawnPosition(r, "training_badge")
+	lootPos, ok := lootSpawnPosition(r, "gold")
 	if !ok {
-		t.Fatalf("missing training_badge loot spawn position: %+v", r.Changes)
+		t.Fatalf("missing gold loot spawn position: %+v", r.Changes)
 	}
 	if lootPos == monster.pos {
 		t.Fatalf("loot spawned on monster body at %+v", lootPos)
@@ -2397,7 +2409,7 @@ func TestDropInventoryItem(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new inventory lab: %v", err)
 	}
-	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge", slot: "", equipped: false})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "quest_leaf", slot: "", equipped: false})
 
 	r := sim.Tick([]Input{{
 		MessageID:     "drop",
@@ -2409,9 +2421,9 @@ func TestDropInventoryItem(t *testing.T) {
 	if len(sim.inventory) != 0 {
 		t.Fatalf("inventory after drop = %+v, want empty", sim.inventory)
 	}
-	loot := findLootByDef(sim, "training_badge")
+	loot := findLootByDef(sim, "quest_leaf")
 	if loot == nil {
-		t.Fatal("missing dropped training_badge loot")
+		t.Fatal("missing dropped quest_leaf loot")
 	}
 	player := sim.entities[sim.playerID]
 	if distance(loot.pos, player.pos) < playerRadius+lootInteractionRadius {
@@ -2478,7 +2490,7 @@ func TestDropNoSpace(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new inventory lab: %v", err)
 	}
-	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge"})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "quest_leaf"})
 	player := sim.entities[sim.playerID]
 	level := sim.activeLevel()
 	for ring := 1; ring <= 6; ring++ {
@@ -2496,7 +2508,7 @@ func TestDropNoSpace(t *testing.T) {
 	if len(sim.inventory) != 1 {
 		t.Fatalf("inventory mutated on rejected drop: %+v", sim.inventory)
 	}
-	if findLootByDef(sim, "training_badge") != nil {
+	if findLootByDef(sim, "quest_leaf") != nil {
 		t.Fatal("rejected drop spawned loot")
 	}
 }
@@ -2527,24 +2539,26 @@ func TestUseConsumableHealLab(t *testing.T) {
 	if player.hp != 5 {
 		t.Fatalf("player hp after combat = %d, want 5", player.hp)
 	}
-	loots := findAllLootByDef(sim, "red_potion")
-	if len(loots) != 2 {
-		t.Fatalf("loot drops = %+v, want two red_potion", loots)
+	redLoots := findAllLootByDef(sim, "red_potion")
+	blueLoots := findAllLootByDef(sim, "blue_potion")
+	if len(redLoots) != 1 || len(blueLoots) != 1 {
+		t.Fatalf("loot drops red=%+v blue=%+v, want one red_potion and one blue_potion", redLoots, blueLoots)
 	}
 
-	for i := 0; i < 2; i++ {
-		loot := findLootByDef(sim, "red_potion")
+	for _, itemDefID := range []string{"red_potion", "blue_potion"} {
+		loot := findLootByDef(sim, itemDefID)
 		if loot == nil {
-			t.Fatalf("missing red_potion loot pickup %d", i)
+			t.Fatalf("missing %s loot pickup", itemDefID)
 		}
+		messageID := "pickup-" + itemDefID
 		pickup := sim.Tick([]Input{{
-			MessageID: fmt.Sprintf("pickup-%d", i),
+			MessageID: messageID,
 			Type:      "action_intent",
 			Action:    &ActionIntent{TargetID: idStr(loot.id)},
 		}})
-		assertAck(t, pickup, fmt.Sprintf("pickup-%d", i))
+		assertAck(t, pickup, messageID)
 		if sim.autoNav != nil {
-			for step := 0; step < 30 && findLootByDef(sim, "red_potion") != nil; step++ {
+			for step := 0; step < 30 && findLootByDef(sim, itemDefID) != nil; step++ {
 				sim.Tick(nil)
 			}
 		}
@@ -2553,7 +2567,11 @@ func TestUseConsumableHealLab(t *testing.T) {
 		t.Fatalf("inventory after pickups = %+v, want two items", sim.inventory)
 	}
 
-	firstID := idStr(sim.inventory[0].instanceID)
+	redPotion := findItemByDef(sim, "red_potion")
+	if redPotion == nil {
+		t.Fatalf("missing red_potion in inventory %+v", sim.inventory)
+	}
+	firstID := idStr(redPotion.instanceID)
 	use1 := sim.Tick([]Input{{
 		MessageID: "use1",
 		Type:      "use_intent",
@@ -2565,18 +2583,24 @@ func TestUseConsumableHealLab(t *testing.T) {
 	}
 	assertEventHeal(t, use1, "player_healed", 5)
 
-	secondID := idStr(sim.inventory[0].instanceID)
+	bluePotion := findItemByDef(sim, "blue_potion")
+	if bluePotion == nil {
+		t.Fatalf("missing blue_potion in inventory %+v", sim.inventory)
+	}
+	player.mana = 5
+	secondID := idStr(bluePotion.instanceID)
 	use2 := sim.Tick([]Input{{
 		MessageID: "use2",
 		Type:      "use_intent",
 		Use:       &UseIntent{ItemInstanceID: secondID},
 	}})
-	assertReject(t, use2, "use2", "already_full_hp")
-	if player.hp != 10 {
-		t.Fatalf("player hp after second use = %d, want 10", player.hp)
+	assertAck(t, use2, "use2")
+	if player.mana != 10 {
+		t.Fatalf("player mana after blue potion = %d, want 10", player.mana)
 	}
-	if len(sim.inventory) != 1 {
-		t.Fatalf("inventory after second use = %+v, want one unused potion", sim.inventory)
+	assertEventMana(t, use2, "player_mana_restored", 5)
+	if len(sim.inventory) != 0 {
+		t.Fatalf("inventory after potion uses = %+v, want empty", sim.inventory)
 	}
 }
 
@@ -2601,7 +2625,7 @@ func TestUseConsumableRejectsNonConsumable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new inventory lab: %v", err)
 	}
-	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge", equipped: false})
+	addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "quest_leaf", equipped: false})
 	sim.entities[sim.playerID].hp = 5
 
 	r := sim.Tick([]Input{{MessageID: "use", Type: "use_intent", Use: &UseIntent{ItemInstanceID: "5000"}}})
@@ -2691,7 +2715,7 @@ func TestInventoryCapacityOccupancyExemptsEquippedAndHotbar(t *testing.T) {
 	sim := NewSim("sess_inventory_occupancy", "01", loadRules(t))
 	sword := addStaticInventoryItem(sim, 7310, "rusty_sword")
 	potion := addStaticInventoryItem(sim, 7311, "red_potion")
-	badge := addStaticInventoryItem(sim, 7312, "training_badge")
+	badge := addStaticInventoryItem(sim, 7312, "quest_leaf")
 
 	if got := sim.bagOccupancyCount(); got != 3 {
 		t.Fatalf("bag occupancy = %d, want 3", got)
@@ -2716,9 +2740,9 @@ func TestInventoryCapacityOccupancyExemptsEquippedAndHotbar(t *testing.T) {
 func TestInventoryCapacityPickupRejectsFullBagBeforeMutation(t *testing.T) {
 	sim := NewSim("sess_inventory_full_pickup", "01", loadRules(t))
 	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
-		addStaticInventoryItem(sim, uint64(7400+i), "training_badge")
+		addStaticInventoryItem(sim, uint64(7400+i), "quest_leaf")
 	}
-	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "training_badge"}
+	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "quest_leaf"}
 	sim.entities[loot.id] = loot
 	beforeNextID := sim.nextID
 
@@ -2737,7 +2761,7 @@ func TestInventoryCapacityUnequipAndShrinkRejectBeforeMutation(t *testing.T) {
 	sword := addStaticInventoryItem(sim, 7500, "rusty_sword")
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "equip_sword")
 	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
-		addStaticInventoryItem(sim, uint64(7510+i), "training_badge")
+		addStaticInventoryItem(sim, uint64(7510+i), "quest_leaf")
 	}
 	rejectUnequip := sim.Tick([]Input{{MessageID: "unequip_full", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: mainHandSlot}}})
 	assertReject(t, rejectUnequip, "unequip_full", "capacity_would_overflow")
@@ -2749,7 +2773,7 @@ func TestInventoryCapacityUnequipAndShrinkRejectBeforeMutation(t *testing.T) {
 	pack := addRolledInventoryItem(t, sim, 7600, "cave_pack_belt", map[string]int{"inventory_rows": 1})
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_pack", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(pack.instanceID), Slot: "belt"}}}), "equip_pack")
 	for i := 0; i < inventoryCapacityForRows(baseInventoryRows)+1; i++ {
-		addStaticInventoryItem(sim, uint64(7610+i), "training_badge")
+		addStaticInventoryItem(sim, uint64(7610+i), "quest_leaf")
 	}
 	rejectShrink := sim.Tick([]Input{{MessageID: "unequip_pack", Type: "unequip_intent", Unequip: &UnequipIntent{Slot: "belt"}}})
 	assertReject(t, rejectShrink, "unequip_pack", "capacity_would_overflow")
@@ -2805,7 +2829,7 @@ func TestHotbarAssignUseDirectUseAndReenable(t *testing.T) {
 func TestHotbarRejectsAndDropClears(t *testing.T) {
 	sim := NewSim("sess_hotbar_rejects", "01", loadRules(t))
 	potion := addStaticInventoryItem(sim, 7200, "red_potion")
-	badge := addStaticInventoryItem(sim, 7201, "training_badge")
+	badge := addStaticInventoryItem(sim, 7201, "quest_leaf")
 
 	assertReject(t, sim.Tick([]Input{{MessageID: "bad_index", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 10, ItemInstanceID: stringPtr(idStr(potion.instanceID))}}}), "bad_index", "invalid_payload")
 	assertReject(t, sim.Tick([]Input{{MessageID: "missing", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr("9999")}}}), "missing", "not_in_inventory")
@@ -2847,7 +2871,7 @@ func TestAdjacentLootDropSpreadsAndAvoidsWalls(t *testing.T) {
 			t.Fatalf("drop %d overlaps source body: %+v", i, pos)
 		}
 		positions[pos] = true
-		loot := &entity{kind: lootEntity, pos: pos, itemDefID: "training_badge"}
+		loot := &entity{kind: lootEntity, pos: pos, itemDefID: "quest_leaf"}
 		loot.id = sim.alloc()
 		sim.entities[loot.id] = loot
 	}
@@ -3196,7 +3220,7 @@ func TestRejections(t *testing.T) {
 
 	t.Run("equip non-equippable", func(t *testing.T) {
 		sim := NewSim("s", "01", rules)
-		addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "training_badge"})
+		addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "quest_leaf"})
 		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: mainHandSlot}}})
 		assertReject(t, r, "x", "not_equippable")
 	})
@@ -3707,6 +3731,38 @@ func TestMonsterChaseStopsWhenMeleeAdjacent(t *testing.T) {
 	monster = firstEntityByKind(sim, monsterEntity)
 	if monster.pos != at {
 		t.Fatalf("monster drifted from %+v to %+v while adjacent to player", at, monster.pos)
+	}
+}
+
+func TestMonsterPackFindsAttackSlotsAroundOffsetPlayer(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 4.49, Y: 5.49}
+	player.hp = playerStartHP
+	for _, pos := range []Vec2{
+		{X: 8.3, Y: 5.49},
+		{X: 8.3, Y: 4.49},
+		{X: 8.3, Y: 6.49},
+	} {
+		addTestMonster(sim, "dungeon_mob", pos, rules.Monsters["dungeon_mob"].MaxHP)
+	}
+
+	attackers := map[string]bool{}
+	for i := 0; i < 160 && len(attackers) < 2; i++ {
+		res := sim.Tick(nil)
+		for _, ev := range res.Events {
+			if ev.EventType == "player_damaged" || ev.EventType == "player_killed" {
+				attackers[ev.SourceEntityID] = true
+			}
+		}
+	}
+	if len(attackers) < 2 {
+		t.Fatalf("monster pack did not surround and attack; attackers=%v player=%+v monsters=%+v",
+			attackers, player.pos, dungeonMonsterDebugPositions(sim.activeLevel()))
 	}
 }
 
@@ -4793,21 +4849,25 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 		t.Fatal("missing up stairs on level -2")
 	}
 	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, up.pos)
-	coin := findLootByDef(sim, "training_badge")
+	coin := findLootByDef(sim, "gold")
 	if coin == nil {
-		t.Fatal("missing dungeon training_badge coin")
+		t.Fatal("missing dungeon gold coin")
+	}
+	wantGold := coin.goldAmount
+	if wantGold < 8 || wantGold > 15 {
+		t.Fatalf("dungeon coin amount = %d, want scaled level -2 range 8..15", wantGold)
 	}
 	pickup := sim.Tick([]Input{{MessageID: "pick_coin", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(coin.id)}}})
 	assertAck(t, pickup, "pick_coin")
-	if len(sim.inventory) != 0 {
-		t.Fatalf("coin picked up without leaving stair: %+v", sim.inventory)
+	if len(sim.inventory) != 0 || sim.gold != 0 {
+		t.Fatalf("coin picked up without leaving stair: inventory=%+v gold=%d", sim.inventory, sim.gold)
 	}
 	pickupTicks := 1
-	for ; pickupTicks < 20 && len(sim.inventory) == 0; pickupTicks++ {
+	for ; pickupTicks < 20 && sim.gold == 0; pickupTicks++ {
 		sim.Tick(nil)
 	}
-	if len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "training_badge" {
-		t.Fatalf("inventory after coin pickup = %+v, want training_badge", sim.inventory)
+	if len(sim.inventory) != 0 || sim.gold != wantGold {
+		t.Fatalf("after coin pickup inventory=%+v gold=%d, want inventory empty gold %d", sim.inventory, sim.gold, wantGold)
 	}
 	if pickupTicks < 5 {
 		t.Fatalf("coin pickup took %d ticks from stair, want at least 5", pickupTicks)
@@ -5434,6 +5494,20 @@ func assertEventHeal(t *testing.T, r TickResult, eventType string, want int) {
 		}
 		if ev.Heal == nil || *ev.Heal != want {
 			t.Fatalf("%s heal = %v, want %d in events %+v", eventType, ev.Heal, want, r.Events)
+		}
+		return
+	}
+	t.Fatalf("missing event %s in %+v", eventType, r.Events)
+}
+
+func assertEventMana(t *testing.T, r TickResult, eventType string, want int) {
+	t.Helper()
+	for _, ev := range r.Events {
+		if ev.EventType != eventType {
+			continue
+		}
+		if ev.Mana == nil || *ev.Mana != want {
+			t.Fatalf("%s mana = %v, want %d in events %+v", eventType, ev.Mana, want, r.Events)
 		}
 		return
 	}

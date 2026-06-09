@@ -35,7 +35,7 @@
   "derived_stats": {
     "damage_min": { "type": "linear", "base": -1.0, "per_str": 0.2, "min": 0.0 },
     "damage_max": { "type": "linear", "base": -2.0, "per_str": 0.4, "min": 0.0 },
-    "armor": { "type": "linear", "base": 0.0, "per_vit": 0.2, "min": 0.0 },
+    "armor": { "type": "linear", "base": 0.0, "per_dex": 0.2, "min": 0.0 },
     "attack_speed": { "type": "linear", "base": 1.0, "per_dex": 0.005, "min": 0.5, "max": 2.0 },
     "hit_chance": { "type": "linear", "base": 1.0, "per_dex": 0.0, "min": 0.05, "max": 1.0 },
     "crit_chance": { "type": "linear", "base": 0.05, "per_dex": 0.002, "min": 0.0, "max": 0.5 },

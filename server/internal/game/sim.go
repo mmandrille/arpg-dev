@@ -43,6 +43,7 @@ const (
 	attackModeMelee                = "melee"
 	attackModeRanged               = "ranged"
 	trainingArrowProjectileDefID   = "training_arrow"
+	goldItemDefID                  = "gold"
 	mainHandSlot                   = "main_hand"
 	offHandSlot                    = "off_hand"
 	ringLeftSlot                   = "ring_left"
@@ -89,6 +90,8 @@ type entity struct {
 	pos                 Vec2
 	hp                  int
 	maxHP               int
+	mana                int
+	maxMana             int
 	characterID         string
 	displayName         string
 	monsterDefID        string
@@ -108,6 +111,7 @@ type entity struct {
 	bossCooldownEnds    uint64
 	bossActiveHit       map[uint64]bool
 	itemDefID           string
+	goldAmount          int
 	rollPayload         *ItemRollPayload
 	interactableDefID   string
 	state               string
@@ -139,6 +143,11 @@ type invItem struct {
 	equipped    bool
 }
 
+type goldRollContext struct {
+	levelNum        int
+	monsterRarityID string
+}
+
 type activeMove struct {
 	dir       Vec2
 	remaining int
@@ -165,6 +174,7 @@ type effectiveCombatStats struct {
 	Armor        float64
 	BlockPercent float64
 	MaxHP        float64
+	MaxMana      float64
 }
 
 type combatResolution struct {
@@ -198,6 +208,7 @@ type playerState struct {
 	Hotbar                []uint64
 	DiscoveredTeleporters map[int]bool
 	Progression           CharacterProgressionState
+	Gold                  int
 }
 
 // Sim is the deterministic authoritative simulation for one solo session.
@@ -213,6 +224,7 @@ type Sim struct {
 	nextID   uint64
 	playerID uint64
 	players  map[uint64]*playerState
+	goldRoll uint64
 
 	levels                map[int]*LevelState
 	currentLevel          int
@@ -226,6 +238,7 @@ type Sim struct {
 	hotbar                []uint64          // fixed 10-slot item instance assignments (0 = none)
 	discoveredTeleporters map[int]bool
 	progression           CharacterProgressionState
+	gold                  int
 }
 
 // CharacterProgressionState is the authoritative mutable progression state for
@@ -235,6 +248,7 @@ type CharacterProgressionState struct {
 	Experience        int
 	UnspentStatPoints int
 	BaseStats         BaseStatsView
+	Gold              int
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
@@ -273,6 +287,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		hotbar:                make([]uint64, 10),
 		discoveredTeleporters: make(map[int]bool),
 		progression:           progression,
+		gold:                  progression.Gold,
 	}
 
 	if s.multiLevel {
@@ -305,6 +320,7 @@ func (r *Rules) DefaultCharacterProgressionState() CharacterProgressionState {
 		Experience:        0,
 		UnspentStatPoints: 0,
 		BaseStats:         r.CharacterProgression.BaseStats,
+		Gold:              0,
 	}
 }
 
@@ -317,6 +333,9 @@ func (r *Rules) normalizeProgressionState(in CharacterProgressionState) Characte
 	}
 	if in.UnspentStatPoints < 0 {
 		in.UnspentStatPoints = 0
+	}
+	if in.Gold < 0 {
+		in.Gold = 0
 	}
 	if in.BaseStats.Str <= 0 {
 		in.BaseStats.Str = r.CharacterProgression.BaseStats.Str
@@ -338,7 +357,8 @@ func (r *Rules) normalizeProgressionState(in CharacterProgressionState) Characte
 
 func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world WorldDef) error {
 	maxHP := s.currentMaxHP()
-	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: maxHP, maxHP: maxHP, displayName: "Hero"}
+	maxMana := s.currentMaxMana()
+	player := &entity{kind: playerEntity, pos: world.Player.Position, hp: maxHP, maxHP: maxHP, mana: maxMana, maxMana: maxMana, displayName: "Hero"}
 	player.id = s.alloc()
 	s.playerID = player.id
 	level.entities[player.id] = player
@@ -352,6 +372,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		Hotbar:                s.hotbar,
 		DiscoveredTeleporters: s.discoveredTeleporters,
 		Progression:           s.progression,
+		Gold:                  s.gold,
 	}
 
 	for _, preset := range world.Entities {
@@ -371,7 +392,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			monster.id = s.alloc()
 			level.entities[monster.id] = monster
 		case lootEntity:
-			loot := &entity{kind: lootEntity, pos: preset.Position, itemDefID: preset.ItemDefID}
+			loot := s.newLootEntity(preset.ItemDefID, preset.Position, nil, goldRollContext{levelNum: level.levelNum})
 			if preset.ItemTemplateID != "" {
 				rolled, ok := s.rollItemTemplate(preset.ItemTemplateID)
 				if !ok {
@@ -596,16 +617,21 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	hotbar := make([]uint64, maxHotbarCapacity)
 	discovered := map[int]bool{townLevel: true}
 	character := progression
+	gold := progression.Gold
 	s.equipped = equipped
 	s.hotbar = hotbar
 	s.discoveredTeleporters = discovered
 	s.progression = character
+	s.gold = gold
 	maxHP := s.currentMaxHP()
+	maxMana := s.currentMaxMana()
 	player := &entity{
 		kind:        playerEntity,
 		pos:         spawn,
 		hp:          maxHP,
 		maxHP:       maxHP,
+		mana:        maxMana,
+		maxMana:     maxMana,
 		characterID: characterID,
 		displayName: displayName,
 	}
@@ -623,6 +649,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		Hotbar:                hotbar,
 		DiscoveredTeleporters: discovered,
 		Progression:           character,
+		Gold:                  gold,
 	}
 	s.usePlayer(s.defaultPlayer())
 	return player.id, nil
@@ -733,6 +760,8 @@ func (s *Sim) RespawnPlayerInTown(playerID uint64) error {
 		pos:         s.findTownSpawnPosition(level),
 		hp:          maxHP,
 		maxHP:       maxHP,
+		mana:        s.currentMaxMana(),
+		maxMana:     s.currentMaxMana(),
 		characterID: ps.CharacterID,
 		displayName: ps.DisplayName,
 	}
@@ -870,6 +899,7 @@ func (s *Sim) usePlayer(ps *playerState) {
 	s.hotbar = ps.Hotbar
 	s.discoveredTeleporters = ps.DiscoveredTeleporters
 	s.progression = ps.Progression
+	s.gold = ps.Gold
 	level := s.activeLevel()
 	level.move = ps.Move
 	level.autoNav = ps.AutoNav
@@ -886,6 +916,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.Hotbar = s.hotbar
 	ps.DiscoveredTeleporters = s.discoveredTeleporters
 	ps.Progression = s.progression
+	ps.Gold = s.gold
 	if level := s.levels[ps.CurrentLevel]; level != nil {
 		ps.Move = level.move
 		ps.AutoNav = level.autoNav
@@ -1250,7 +1281,7 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		if _, ok := s.rules.Items[generated.itemDefID]; !ok {
 			return fmt.Errorf("game: generate dungeon level %d: unknown loot item %s", level.levelNum, generated.itemDefID)
 		}
-		loot := &entity{kind: lootEntity, pos: generated.pos, itemDefID: generated.itemDefID}
+		loot := s.newLootEntity(generated.itemDefID, generated.pos, nil, goldRollContext{levelNum: level.levelNum})
 		loot.id = s.alloc()
 		level.entities[loot.id] = loot
 	}
@@ -1579,7 +1610,10 @@ func (s *Sim) directionalMeleeTarget(dir Vec2) *entity {
 
 func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 	drops := s.rules.LootDrops(monster.lootTable, s.rng)
-	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res)
+	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res, goldRollContext{
+		levelNum:        s.activeLevel().levelNum,
+		monsterRarityID: monster.monsterRarityID,
+	})
 }
 
 func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, res *TickResult) {
@@ -1621,7 +1655,7 @@ func (s *Sim) unlockBossFloorExits(corr string, res *TickResult) {
 	}
 }
 
-func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius float64, corr string, res *TickResult) {
+func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius float64, corr string, res *TickResult, goldCtx goldRollContext) {
 	var clusterAnchor Vec2
 	clusterReady := false
 
@@ -1661,7 +1695,7 @@ func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius floa
 			payload = &rolled
 			itemDefID = rolled.ItemTemplateID
 		}
-		loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID, rollPayload: payload}
+		loot := s.newLootEntity(itemDefID, dropPos, payload, goldCtx)
 		loot.id = s.alloc()
 		s.activeLevel().entities[loot.id] = loot
 		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
@@ -1701,6 +1735,26 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 }
 
 func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
+	if amount := e.goldAmount; e.itemDefID == goldItemDefID && amount > 0 {
+		delete(s.activeLevel().entities, e.id)
+		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
+		s.gold += amount
+		s.progression.Gold = s.gold
+		res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
+		view := s.CharacterProgressionView()
+		res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+		res.Events = append(res.Events, Event{
+			EventType:     "gold_picked_up",
+			EntityID:      idStr(s.playerID),
+			CorrelationID: in.CorrelationID,
+			Amount:        intPtr(amount),
+			TotalGold:     intPtr(s.gold),
+		})
+		if ack {
+			res.ack(in.MessageID)
+		}
+		return
+	}
 	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
 		res.reject(in.MessageID, "inventory_full")
 		return
@@ -1743,7 +1797,7 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
 	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
 	if e.interactableDefID == treasureChestDefID && e.lootTable != "" {
-		s.spawnLootDrops(s.rules.LootDrops(e.lootTable, s.rng), e.pos, s.targetInteractionRadius(e), in.CorrelationID, res)
+		s.spawnLootDrops(s.rules.LootDrops(e.lootTable, s.rng), e.pos, s.targetInteractionRadius(e), in.CorrelationID, res, goldRollContext{levelNum: s.activeLevel().levelNum})
 	}
 	if ack {
 		res.ack(in.MessageID)
@@ -2214,7 +2268,7 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
 	s.clearHotbarReferences(item.instanceID, res)
 
-	loot := &entity{kind: lootEntity, pos: dropPos, itemDefID: itemDefID, rollPayload: rollPayload}
+	loot := s.newLootEntity(itemDefID, dropPos, rollPayload, goldRollContext{levelNum: s.activeLevel().levelNum})
 	loot.id = s.alloc()
 	s.activeLevel().entities[loot.id] = loot
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
@@ -2335,20 +2389,34 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 		return false, "player_dead"
 	}
 	def := s.rules.Items[item.itemDefID]
-	if def.Heal == nil {
+	if def.Heal == nil && def.ManaRestore == nil {
 		return false, "not_usable"
 	}
-	if player.hp >= player.maxHP {
-		return false, "already_full_hp"
+	heal := 0
+	mana := 0
+	if def.Heal != nil {
+		if player.hp >= player.maxHP {
+			return false, "already_full_hp"
+		}
+		heal = s.rollRange(*def.Heal)
+		if player.hp+heal > player.maxHP {
+			heal = player.maxHP - player.hp
+		}
+		if heal <= 0 {
+			return false, "already_full_hp"
+		}
 	}
-
-	rolled := s.rollRange(*def.Heal)
-	heal := rolled
-	if player.hp+heal > player.maxHP {
-		heal = player.maxHP - player.hp
-	}
-	if heal <= 0 {
-		return false, "already_full_hp"
+	if def.ManaRestore != nil {
+		if player.mana >= player.maxMana {
+			return false, "already_full_mana"
+		}
+		mana = s.rollRange(*def.ManaRestore)
+		if player.mana+mana > player.maxMana {
+			mana = player.maxMana - player.mana
+		}
+		if mana <= 0 {
+			return false, "already_full_mana"
+		}
 	}
 
 	removedID := idStr(item.instanceID)
@@ -2357,21 +2425,39 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 	s.clearHotbarReferences(item.instanceID, res)
 
 	player.hp += heal
+	player.mana += mana
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
-	res.Events = append(res.Events, Event{
+	used := Event{
 		EventType:      "item_used",
 		EntityID:       idStr(player.id),
 		CorrelationID:  correlationID,
-		Heal:           intPtr(heal),
 		ItemInstanceID: removedID,
-	})
-	res.Events = append(res.Events, Event{
-		EventType:      "player_healed",
-		EntityID:       idStr(player.id),
-		CorrelationID:  correlationID,
-		Heal:           intPtr(heal),
-		ItemInstanceID: removedID,
-	})
+	}
+	if heal > 0 {
+		used.Heal = intPtr(heal)
+	}
+	if mana > 0 {
+		used.Mana = intPtr(mana)
+	}
+	res.Events = append(res.Events, used)
+	if heal > 0 {
+		res.Events = append(res.Events, Event{
+			EventType:      "player_healed",
+			EntityID:       idStr(player.id),
+			CorrelationID:  correlationID,
+			Heal:           intPtr(heal),
+			ItemInstanceID: removedID,
+		})
+	}
+	if mana > 0 {
+		res.Events = append(res.Events, Event{
+			EventType:      "player_mana_restored",
+			EntityID:       idStr(player.id),
+			CorrelationID:  correlationID,
+			Mana:           intPtr(mana),
+			ItemInstanceID: removedID,
+		})
+	}
 	return true, ""
 }
 
@@ -2391,6 +2477,7 @@ func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
 	}
 
 	beforeMaxHP := s.currentMaxHP()
+	beforeMaxMana := s.currentMaxMana()
 	switch in.AllocateStat.Stat {
 	case "str":
 		s.progression.BaseStats.Str += in.AllocateStat.Points
@@ -2403,6 +2490,8 @@ func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
 	}
 	s.progression.UnspentStatPoints -= in.AllocateStat.Points
 	afterMaxHP := s.currentMaxHP()
+	afterMaxMana := s.currentMaxMana()
+	entityChanged := false
 	if afterMaxHP != player.maxHP {
 		player.maxHP = afterMaxHP
 		if delta := afterMaxHP - beforeMaxHP; delta > 0 {
@@ -2414,6 +2503,22 @@ func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
 		if player.hp > player.maxHP {
 			player.hp = player.maxHP
 		}
+		entityChanged = true
+	}
+	if afterMaxMana != player.maxMana {
+		player.maxMana = afterMaxMana
+		if delta := afterMaxMana - beforeMaxMana; delta > 0 {
+			player.mana += delta
+			if player.mana > player.maxMana {
+				player.mana = player.maxMana
+			}
+		}
+		if player.mana > player.maxMana {
+			player.mana = player.maxMana
+		}
+		entityChanged = true
+	}
+	if entityChanged {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
 	}
 
@@ -2820,24 +2925,23 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		if monster.aiMode == monsterAIModeIdle {
 			continue
 		}
-		goal, hasGoal := s.monsterMovementGoal(monster, player)
+		goal, hasGoal := s.monsterMovementGoal(monster, player, def)
 		if !hasGoal {
 			continue
 		}
-		if distance(monster.pos, goal) <= nav.StopDistance {
+		if distance(monster.pos, goal) <= nav.StopDistance && s.monsterInAttackRange(monster, player, def) {
 			continue
 		}
 		blocked := s.buildMonsterBlockedFn(monster.id)
 		steps, ok := PlanPath(nav, monster.pos, goal, blocked)
 		if !ok || len(steps) == 0 {
-			continue
+			if distance(monster.pos, goal) > nav.CellSize+nav.StopDistance {
+				continue
+			}
 		}
 		moveSpeed := def.effectiveMoveSpeed(nav)
 		before := monster.pos
-		monster.pos = s.resolveMonsterMovement(monster, Vec2{
-			X: steps[0].X * moveSpeed,
-			Y: steps[0].Y * moveSpeed,
-		})
+		monster.pos = s.resolveMonsterMovement(monster, s.monsterMoveDelta(monster.pos, goal, steps, moveSpeed))
 		if monster.pos != before {
 			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(monster.view())})
 		}
@@ -2869,7 +2973,7 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 			continue
 		}
 		s.usePlayer(targetPlayer)
-		if !meleeInRange(distance(player.pos, monster.pos), s.playerMeleeReach(), s.targetInteractionRadius(monster)) {
+		if !s.monsterInAttackRange(monster, player, def) {
 			continue
 		}
 		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(def.AttackCooldown) {
@@ -2976,16 +3080,15 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 	monster.aiMode = monsterAIModeIdle
 }
 
-func (s *Sim) monsterMovementGoal(monster *entity, player *entity) (Vec2, bool) {
+func (s *Sim) monsterMovementGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {
 	nav := s.activeNav()
 	switch monster.aiMode {
 	case monsterAIModeChase:
-		stopDist := playerRadius + monsterRadius
-		if distance(monster.pos, player.pos) <= stopDist+1e-9 {
+		if s.monsterInAttackRange(monster, player, def) {
 			return Vec2{}, false
 		}
 
-		return s.findMonsterChaseGoal(monster, player)
+		return s.findMonsterChaseGoal(monster, player, def)
 	case monsterAIModeReturn:
 		if distance(monster.pos, monster.spawnPos) <= nav.StopDistance {
 			return Vec2{}, false
@@ -2997,42 +3100,35 @@ func (s *Sim) monsterMovementGoal(monster *entity, player *entity) (Vec2, bool) 
 	}
 }
 
-func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity) (Vec2, bool) {
+func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {
 	nav := s.activeNav()
-	playerCell := worldToGrid(nav, player.pos)
-	blocked := s.buildMonsterBlockedFn(monster.id)
-	maxReach := playerRadius + monsterRadius + nav.CellSize
-	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
+	candidates := s.monsterAttackSlotCandidates(monster, player, def)
 	var (
 		bestGoal       Vec2
-		bestPlayerDist = math.MaxFloat64
-		bestCell       gridCell
+		bestPathLen    int
+		bestMonsterDst = math.MaxFloat64
 		found          bool
 	)
-	for radius := 0; radius <= maxRadius; radius++ {
-		for _, cell := range ringCells(playerCell, radius) {
-			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
-				continue
-			}
-			goal := gridToWorld(nav, cell)
-			goalDist := distance(goal, player.pos)
-			if goalDist > maxReach {
-				continue
-			}
-			steps, ok := PlanPath(nav, monster.pos, goal, blocked)
-			if !ok {
-				continue
-			}
-			if len(steps) == 0 && distance(monster.pos, goal) > nav.StopDistance+1e-9 {
-				continue
-			}
-			if !found || goalDist < bestPlayerDist-1e-9 ||
-				(math.Abs(goalDist-bestPlayerDist) <= 1e-9 && cellLess(cell, bestCell)) {
-				bestGoal = goal
-				bestPlayerDist = goalDist
-				bestCell = cell
-				found = true
-			}
+	for _, goal := range candidates {
+		if !s.positionInNavigationBounds(nav, goal) || s.monsterPositionBlocked(goal, monster.id) {
+			continue
+		}
+		blocked := s.buildMonsterBlockedFn(monster.id)
+		steps, ok := PlanPath(nav, monster.pos, goal, blocked)
+		if !ok {
+			continue
+		}
+		if len(steps) == 0 && distance(monster.pos, goal) > nav.CellSize+nav.StopDistance {
+			continue
+		}
+		monsterDst := distance(monster.pos, goal)
+		if !found || len(steps) < bestPathLen ||
+			(len(steps) == bestPathLen && monsterDst < bestMonsterDst-1e-9) ||
+			(len(steps) == bestPathLen && math.Abs(monsterDst-bestMonsterDst) <= 1e-9 && vecLess(goal, bestGoal)) {
+			bestGoal = goal
+			bestPathLen = len(steps)
+			bestMonsterDst = monsterDst
+			found = true
 		}
 	}
 	if !found {
@@ -3042,12 +3138,81 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity) (Vec2, bool)
 	return bestGoal, true
 }
 
+func (s *Sim) monsterAttackSlotCandidates(monster *entity, player *entity, def MonsterDef) []Vec2 {
+	attackDistance := s.monsterAttackReach(def) + playerRadius - 0.05
+	minSeparation := playerRadius + monsterRadius + 0.05
+	if attackDistance < minSeparation {
+		attackDistance = minSeparation
+	}
+	directions := []Vec2{}
+	addDirection := func(dir Vec2) {
+		if dir.X == 0 && dir.Y == 0 {
+			return
+		}
+		normalized := normalize(dir)
+		for _, existing := range directions {
+			if math.Abs(existing.X-normalized.X) <= 1e-6 && math.Abs(existing.Y-normalized.Y) <= 1e-6 {
+				return
+			}
+		}
+		directions = append(directions, normalized)
+	}
+	addDirection(Vec2{X: monster.pos.X - player.pos.X, Y: monster.pos.Y - player.pos.Y})
+	for i := 0; i < 16; i++ {
+		angle := (2 * math.Pi * float64(i)) / 16
+		addDirection(Vec2{X: math.Cos(angle), Y: math.Sin(angle)})
+	}
+	candidates := make([]Vec2, 0, len(directions))
+	for _, dir := range directions {
+		candidates = append(candidates, Vec2{
+			X: player.pos.X + dir.X*attackDistance,
+			Y: player.pos.Y + dir.Y*attackDistance,
+		})
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		di := distance(monster.pos, candidates[i])
+		dj := distance(monster.pos, candidates[j])
+		if math.Abs(di-dj) > 1e-9 {
+			return di < dj
+		}
+		return vecLess(candidates[i], candidates[j])
+	})
+	return candidates
+}
+
+func (s *Sim) monsterMoveDelta(pos Vec2, goal Vec2, steps []Vec2, speed float64) Vec2 {
+	toGoal := Vec2{X: goal.X - pos.X, Y: goal.Y - pos.Y}
+	dist := distance(pos, goal)
+	if dist <= 1e-9 {
+		return Vec2{}
+	}
+	if len(steps) == 0 || dist <= speed+1e-9 || dist <= s.activeNav().CellSize+s.activeNav().StopDistance {
+		if dist <= speed+1e-9 {
+			return toGoal
+		}
+		dir := normalize(toGoal)
+		return Vec2{X: dir.X * speed, Y: dir.Y * speed}
+	}
+	return Vec2{
+		X: steps[0].X * speed,
+		Y: steps[0].Y * speed,
+	}
+}
+
 func cellLess(a, b gridCell) bool {
 	if a.y != b.y {
 		return a.y < b.y
 	}
 
 	return a.x < b.x
+}
+
+func vecLess(a, b Vec2) bool {
+	if math.Abs(a.Y-b.Y) > 1e-9 {
+		return a.Y < b.Y
+	}
+
+	return a.X < b.X-1e-9
 }
 
 func (s *Sim) buildMonsterBlockedFn(excludeMonsterID uint64) func(gx, gy int) bool {
@@ -3964,6 +4129,58 @@ func (s *Sim) itemIsConsumable(item *invItem) bool {
 	return ok && def.Category == "consumable"
 }
 
+func (s *Sim) newLootEntity(itemDefID string, pos Vec2, payload *ItemRollPayload, goldCtx goldRollContext) *entity {
+	loot := &entity{kind: lootEntity, pos: pos, itemDefID: itemDefID, rollPayload: cloneRollPayload(payload)}
+	if payload == nil && itemDefID == goldItemDefID {
+		if amount, ok := s.rollGoldAmount(itemDefID, goldCtx); ok {
+			loot.goldAmount = amount
+		}
+	}
+	return loot
+}
+
+func (s *Sim) rollGoldAmount(itemDefID string, goldCtx goldRollContext) (int, bool) {
+	def, ok := s.rules.Items[itemDefID]
+	if !ok || def.Category != "currency" || def.Gold == nil {
+		return 0, false
+	}
+	r := s.goldRangeForContext(*def.Gold, goldCtx)
+	span := r.Max - r.Min + 1
+	if span <= 1 {
+		return r.Min, r.Min > 0
+	}
+	rollSeed := fmt.Sprintf("%s|gold|%d|%d|%s", s.seed, s.goldRoll, goldCtx.levelNum, goldCtx.monsterRarityID)
+	s.goldRoll++
+	amount := r.Min + NewRNG(SeedToUint64(rollSeed)).IntN(span)
+	if amount <= 0 {
+		return 0, false
+	}
+	return amount, true
+}
+
+func (s *Sim) goldRangeForContext(base DamageRange, goldCtx goldRollContext) DamageRange {
+	scale := 1.0
+	depth := 0
+	if goldCtx.levelNum < 0 {
+		depth = absInt(goldCtx.levelNum)
+	}
+	if goldCtx.monsterRarityID != "" {
+		if rarity, ok := s.rules.DungeonGeneration.MonsterRarity(goldCtx.monsterRarityID); ok {
+			scale *= rarity.XPMultiplier
+			depth += rarity.LootDepthOffset
+		}
+	}
+	if depth > 1 {
+		scale *= 1.0 + float64(depth-1)*0.25
+	}
+	minAmount := roundPositive(float64(base.Min) * scale)
+	maxAmount := roundPositive(float64(base.Max) * scale)
+	if maxAmount < minAmount {
+		maxAmount = minAmount
+	}
+	return DamageRange{Min: minAmount, Max: maxAmount}
+}
+
 func (s *Sim) clearHotbarReferences(instanceID uint64, res *TickResult) {
 	for i, assigned := range s.hotbar {
 		if assigned != instanceID {
@@ -4147,6 +4364,14 @@ func (s *Sim) targetInteractionRadius(e *entity) float64 {
 	}
 }
 
+func (s *Sim) monsterAttackReach(def MonsterDef) float64 {
+	return s.rules.Combat.UnarmedReach
+}
+
+func (s *Sim) monsterInAttackRange(monster *entity, player *entity, def MonsterDef) bool {
+	return meleeInRange(distance(player.pos, monster.pos), s.monsterAttackReach(def), playerRadius)
+}
+
 func (s *Sim) inMeleeRange(target *entity) bool {
 	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
@@ -4274,6 +4499,14 @@ func (s *Sim) currentMaxHP() int {
 	return maxHP
 }
 
+func (s *Sim) currentMaxMana() int {
+	mana := int(math.Round(s.characterDerivedStatsView().MaxMana))
+	if mana < 0 {
+		return 0
+	}
+	return mana
+}
+
 // CharacterProgressionView returns the authoritative protocol view of the
 // current progression state.
 func (s *Sim) CharacterProgressionView() CharacterProgressionView {
@@ -4284,6 +4517,7 @@ func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 		ExperienceToNextLevel: remaining,
 		LevelCap:              s.rules.CharacterProgression.LevelCap,
 		UnspentStatPoints:     s.progression.UnspentStatPoints,
+		Gold:                  s.gold,
 		BaseStats:             s.progression.BaseStats,
 		DerivedStats:          s.DerivedStatsView(),
 		StatBreakdowns:        s.StatBreakdownViews(),
@@ -4292,6 +4526,7 @@ func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 
 // ProgressionState returns a copy of the mutable progression state.
 func (s *Sim) ProgressionState() CharacterProgressionState {
+	s.progression.Gold = s.gold
 	return s.progression
 }
 
@@ -4308,7 +4543,7 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 		CritDamage:    effective.CritDamage,
 		MovementSpeed: character.MovementSpeed,
 		MaxHP:         effective.MaxHP,
-		MaxMana:       character.MaxMana,
+		MaxMana:       effective.MaxMana,
 	}
 }
 
@@ -4364,7 +4599,7 @@ func (s *Sim) playerEffectiveCombatStats() (effectiveCombatStats, []StatBreakdow
 		{Label: "Base damage", Value: float64(s.rules.Combat.PlayerDamage.Max), Kind: "character_formula"},
 		{Label: "Strength", Value: character.DamageMax, Kind: "character_formula"},
 	}
-	armorSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.Armor, Kind: "character_formula"}}
+	armorSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.Armor, Kind: "character_formula"}}
 	maxHPSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.MaxHP, Kind: "character_formula"}}
 	blockSources := []StatBreakdownSourceView{}
 
@@ -4436,6 +4671,7 @@ func (s *Sim) playerEffectiveCombatStats() (effectiveCombatStats, []StatBreakdow
 		Armor:        maxFloat(0, armor),
 		BlockPercent: maxFloat(0, blockPercent),
 		MaxHP:        maxFloat(1, maxHP),
+		MaxMana:      maxFloat(0, character.MaxMana),
 	}
 	if effective.DamageMax < effective.DamageMin {
 		effective.DamageMax = effective.DamageMin
@@ -4563,7 +4799,7 @@ func (s *Sim) playerProjectileInFlight() bool {
 
 func (s *Sim) rollRange(d DamageRange) int {
 	span := d.Max - d.Min + 1
-	if span <= 0 {
+	if span <= 1 {
 		return d.Min
 	}
 	return d.Min + s.rng.IntN(span)
@@ -4676,6 +4912,7 @@ func (s *Sim) Snapshot() Snapshot {
 		Hotbar:            []HotbarSlotView{},
 		InventoryRows:     baseInventoryRows,
 		InventoryCapacity: inventoryCapacityForRows(baseInventoryRows),
+		Gold:              0,
 		RecentEvents:      []Event{},
 	}
 }
@@ -4718,6 +4955,7 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		Hotbar:                s.hotbarView(),
 		InventoryRows:         s.inventoryRows(),
 		InventoryCapacity:     s.inventoryCapacity(),
+		Gold:                  s.gold,
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
 		CharacterProgression:  s.CharacterProgressionView(),
 		RecentEvents:          []Event{},
@@ -4794,6 +5032,9 @@ func (e *entity) view() EntityView {
 		ev.HP = &hp
 		ev.MaxHP = &maxHP
 		if e.kind == playerEntity {
+			mana, maxMana := e.mana, e.maxMana
+			ev.Mana = &mana
+			ev.MaxMana = &maxMana
 			ev.CharacterID = e.characterID
 			ev.DisplayName = e.displayName
 		}
@@ -4813,6 +5054,10 @@ func (e *entity) view() EntityView {
 		}
 	case lootEntity:
 		ev.ItemDefID = e.itemDefID
+		if e.goldAmount > 0 {
+			amount := e.goldAmount
+			ev.Amount = &amount
+		}
 		if e.rollPayload != nil {
 			ev.ItemDefID = e.rollPayload.ItemTemplateID
 			ev.ItemTemplateID = e.rollPayload.ItemTemplateID

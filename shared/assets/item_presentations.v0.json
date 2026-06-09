@@ -57,8 +57,8 @@
       "icon": { "shape": "coin", "color": "#6aa7b8", "accent": "#d8f4ff", "label": "Am" },
       "ground": { "shape": "coin", "color": "#6aa7b8", "accent": "#d8f4ff", "scale": 0.7 }
     },
-    "training_badge": {
-      "icon": { "shape": "badge", "color": "#d5a928", "accent": "#fff0a6", "label": "Bd" },
+    "gold": {
+      "icon": { "shape": "coin", "color": "#d5a928", "accent": "#fff0a6", "label": "Au" },
       "ground": { "shape": "coin", "color": "#d5a928", "accent": "#fff0a6", "scale": 0.9 }
     },
     "quest_leaf": {
@@ -68,6 +68,10 @@
     "red_potion": {
       "icon": { "shape": "potion", "color": "#d63b32", "accent": "#ffd3c9", "label": "Pt" },
       "ground": { "shape": "potion", "color": "#d63b32", "accent": "#ffd3c9", "scale": 0.9 }
+    },
+    "blue_potion": {
+      "icon": { "shape": "potion", "color": "#42b9e8", "accent": "#d8f7ff", "label": "Mn" },
+      "ground": { "shape": "potion", "color": "#42b9e8", "accent": "#d8f7ff", "scale": 0.9 }
     }
   }
 }

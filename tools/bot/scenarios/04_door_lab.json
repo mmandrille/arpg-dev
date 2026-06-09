@@ -11,12 +11,12 @@
     },
     {
       "action": "action_entity",
-      "item_def_id": "training_badge",
+      "item_def_id": "quest_leaf",
       "event_type": "item_picked_up"
     }
   ],
   "assertions": [
     { "type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open" },
-    { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false }
+    { "type": "inventory_contains", "item_def_id": "quest_leaf", "equipped": false }
   ]
 }

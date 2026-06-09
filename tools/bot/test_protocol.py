@@ -126,17 +126,13 @@ def test_load_scenarios_dungeon_levels_loots_coin_before_returning():
     dungeon = next(s for s in scenarios if s.id == "dungeon_levels")
 
     assert dungeon.world_id == "dungeon_levels"
-    assert {"action": "pick_up_loot", "item_def_id": "training_badge"} in dungeon.steps
+    assert {"action": "pick_up_loot", "item_def_id": "gold"} in dungeon.steps
     assert dungeon.steps[-1] == {
         "action": "assert_player_at_used_stair",
         "direction": "down",
         "tolerance": 0.001,
     }
-    assert {
-        "type": "inventory_contains",
-        "item_def_id": "training_badge",
-        "equipped": False,
-    } in dungeon.assertions
+    assert {"type": "gold", "at_least": 8} in dungeon.assertions
 
 
 def test_select_scenarios_all_returns_catalog_order():
@@ -539,13 +535,13 @@ def test_structured_assertions():
     ]
     inventory = [
         {"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": True},
-        {"item_instance_id": "1006", "item_def_id": "training_badge", "slot": "", "equipped": False},
+        {"item_instance_id": "1006", "item_def_id": "quest_leaf", "slot": "", "equipped": False},
     ]
 
     run_assertions([
         {"type": "inventory_count", "equals": 2},
         {"type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": True},
-        {"type": "inventory_contains", "item_def_id": "training_badge", "equipped": False},
+        {"type": "inventory_contains", "item_def_id": "quest_leaf", "equipped": False},
         {"type": "monster_dead", "monster_def_id": "training_dummy_reward"},
         {"type": "entity_count", "entity_type": "monster", "monster_def_id": "training_dummy_reward", "rarity": "champion", "equals": 1},
         {"type": "monster_killed_in_attacks", "monster_def_id": "training_dummy_reward", "max_attacks": 1},
@@ -629,7 +625,7 @@ def test_structured_character_progression_stat_breakdowns():
                 "uncapped_value": 4,
                 "cap": None,
                 "sources": [
-                    {"kind": "character_formula", "label": "Vitality", "value": 1},
+                    {"kind": "character_formula", "label": "Dexterity", "value": 1},
                     {"kind": "equipment_base", "label": "Shield", "value": 2},
                     {"kind": "equipment_roll", "label": "Rolled armor", "value": 1},
                 ],

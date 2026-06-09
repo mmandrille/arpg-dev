@@ -5,6 +5,7 @@ signal back_requested
 signal start_requested(character_id: String)
 signal create_requested(name: String)
 signal delete_requested(character_id: String)
+signal rename_requested(character_id: String, name: String)
 
 var _title: Label
 var _rows: VBoxContainer
@@ -13,9 +14,12 @@ var _name_edit: LineEdit
 var _create_button: Button
 var _error_label: Label
 var _confirm_dialog: ConfirmationDialog
+var _rename_dialog: ConfirmationDialog
+var _rename_edit: LineEdit
 var _characters: Array = []
 var _delete_mode: bool = false
 var _pending_delete_id: String = ""
+var _pending_rename_id: String = ""
 
 
 func _ready() -> void:
@@ -104,7 +108,7 @@ func _build() -> void:
 
 	_title = Label.new()
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title.add_theme_font_size_override("font_size", 24)
+	_title.add_theme_font_size_override("font_size", 36)
 	box.add_child(_title)
 
 	_empty_label = Label.new()
@@ -147,6 +151,24 @@ func _build() -> void:
 	_confirm_dialog.confirmed.connect(_on_delete_confirmed)
 	add_child(_confirm_dialog)
 
+	_rename_dialog = ConfirmationDialog.new()
+	_rename_dialog.title = "Rename character"
+	_rename_dialog.ok_button_text = "Save"
+	_rename_dialog.cancel_button_text = "Cancel"
+	_rename_dialog.confirmed.connect(_on_rename_confirmed)
+	var rename_box := VBoxContainer.new()
+	rename_box.add_theme_constant_override("separation", 8)
+	_rename_edit = LineEdit.new()
+	_rename_edit.placeholder_text = "Character name"
+	_rename_edit.max_length = 24
+	_rename_edit.text_submitted.connect(func(_text: String) -> void:
+		_on_rename_confirmed()
+		_rename_dialog.hide()
+	)
+	rename_box.add_child(_rename_edit)
+	_rename_dialog.add_child(rename_box)
+	add_child(_rename_dialog)
+
 
 func _render_characters(characters: Array) -> void:
 	for child in _rows.get_children():
@@ -168,6 +190,17 @@ func _render_characters(characters: Array) -> void:
 		)
 		row.add_child(select_btn)
 		if _delete_mode:
+			var rename_btn := Button.new()
+			rename_btn.text = "✎"
+			rename_btn.tooltip_text = "Rename character"
+			rename_btn.custom_minimum_size = Vector2(38, 38)
+			rename_btn.focus_mode = Control.FOCUS_NONE
+			var rename_character_id := str(character.get("character_id", ""))
+			rename_btn.pressed.connect(func() -> void:
+				_prompt_rename(rename_character_id, name)
+			)
+			row.add_child(rename_btn)
+
 			var delete_btn := Button.new()
 			delete_btn.text = "🗑"
 			delete_btn.tooltip_text = "Delete character"
@@ -189,11 +222,35 @@ func _prompt_delete(character_id: String, character_name: String) -> void:
 	_confirm_dialog.popup_centered()
 
 
+func _prompt_rename(character_id: String, character_name: String) -> void:
+	if character_id == "":
+		return
+	_pending_rename_id = character_id
+	_rename_edit.text = character_name
+	_rename_dialog.popup_centered(Vector2i(320, 120))
+	_rename_edit.grab_focus()
+	_rename_edit.select_all()
+
+
 func _on_delete_confirmed() -> void:
 	if _pending_delete_id == "":
 		return
 	delete_requested.emit(_pending_delete_id)
 	_pending_delete_id = ""
+
+
+func _on_rename_confirmed() -> void:
+	if _pending_rename_id == "":
+		return
+	var name := _rename_edit.text.strip_edges()
+	if name == "":
+		set_error("Name required")
+		return
+	if name.length() > 24:
+		set_error("Name is too long")
+		return
+	rename_requested.emit(_pending_rename_id, name)
+	_pending_rename_id = ""
 
 
 func _create_from_input() -> void:

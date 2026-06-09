@@ -439,6 +439,7 @@ func progressionDefaultsFromRules(rules *game.Rules) store.CharacterProgressionD
 		Level:             state.Level,
 		Experience:        state.Experience,
 		UnspentStatPoints: state.UnspentStatPoints,
+		Gold:              state.Gold,
 		Stats: store.CharacterBaseStats{
 			Str:   state.BaseStats.Str,
 			Dex:   state.BaseStats.Dex,

@@ -118,6 +118,7 @@ type CharacterProgressionDefaults struct {
 	Experience        int
 	UnspentStatPoints int
 	Stats             CharacterBaseStats
+	Gold              int
 }
 
 // CharacterProgression is durable character-owned XP, level, and base stats.
@@ -128,6 +129,7 @@ type CharacterProgression struct {
 	Experience        int
 	UnspentStatPoints int
 	Stats             CharacterBaseStats
+	Gold              int
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }

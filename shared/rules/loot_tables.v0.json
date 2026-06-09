@@ -8,19 +8,20 @@
     },
     "reward_drop": {
       "entries": [
-        { "item_def_id": "training_badge", "weight": 1 }
+        { "item_def_id": "gold", "weight": 1 }
       ]
     },
     "ranged_multi_drop": {
-      "drops": ["training_badge", "quest_leaf", "red_potion"],
+      "drops": ["gold", "quest_leaf", "red_potion", "blue_potion"],
       "entries": [
-        { "item_def_id": "training_badge", "weight": 1 },
+        { "item_def_id": "gold", "weight": 1 },
         { "item_def_id": "quest_leaf", "weight": 1 },
-        { "item_def_id": "red_potion", "weight": 1 }
+        { "item_def_id": "red_potion", "weight": 1 },
+        { "item_def_id": "blue_potion", "weight": 1 }
       ]
     },
     "heal_double_drop": {
-      "drops": ["red_potion", "red_potion"]
+      "drops": ["red_potion", "blue_potion"]
     },
     "dungeon_mob_drop": {
       "treasure_class_id": "dungeon_mob_tc_1"

@@ -122,7 +122,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, err
 	}
 	out.loot = append(out.loot, generatedLoot{
-		itemDefID: "training_badge",
+		itemDefID: "gold",
 		pos:       stairDistantLootPosition(up, rules),
 	})
 	return out, nil

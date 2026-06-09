@@ -58,7 +58,14 @@
     },
     { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
     { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" },
-    { "action": "walk_to_monster", "monster_def_id": "combat_lab_crit_attacker", "max_ticks": 80 },
+    {
+      "action": "move_until_player_position",
+      "x": 13,
+      "y": 8,
+      "pathfind": true,
+      "max_ticks": 120,
+      "tolerance": 1.0
+    },
     {
       "action": "wait_for_combat_event",
       "event_type": "player_damaged",

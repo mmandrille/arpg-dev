@@ -20,6 +20,8 @@ type EntityView struct {
 	Position          Vec2           `json:"position"`
 	HP                *int           `json:"hp,omitempty"`
 	MaxHP             *int           `json:"max_hp,omitempty"`
+	Mana              *int           `json:"mana,omitempty"`
+	MaxMana           *int           `json:"max_mana,omitempty"`
 	CharacterID       string         `json:"character_id,omitempty"`
 	MonsterDefID      string         `json:"monster_def_id,omitempty"`
 	IsBoss            bool           `json:"is_boss,omitempty"`
@@ -29,6 +31,7 @@ type EntityView struct {
 	VisualTint        string         `json:"visual_tint,omitempty"`
 	BossPhase         *BossPhaseView `json:"boss_phase,omitempty"`
 	ItemDefID         string         `json:"item_def_id,omitempty"`
+	Amount            *int           `json:"amount,omitempty"`
 	ItemTemplateID    string         `json:"item_template_id,omitempty"`
 	DisplayName       string         `json:"display_name,omitempty"`
 	Rarity            string         `json:"rarity,omitempty"`
@@ -141,6 +144,7 @@ type CharacterProgressionView struct {
 	ExperienceToNextLevel *int                `json:"experience_to_next_level"`
 	LevelCap              int                 `json:"level_cap"`
 	UnspentStatPoints     int                 `json:"unspent_stat_points"`
+	Gold                  int                 `json:"gold"`
 	BaseStats             BaseStatsView       `json:"base_stats"`
 	DerivedStats          DerivedStatsView    `json:"derived_stats"`
 	StatBreakdowns        []StatBreakdownView `json:"stat_breakdowns,omitempty"`
@@ -192,12 +196,14 @@ type Event struct {
 	Blocked           *bool              `json:"blocked,omitempty"`
 	Critical          *bool              `json:"critical,omitempty"`
 	Heal              *int               `json:"heal,omitempty"`
+	Mana              *int               `json:"mana,omitempty"`
 	ItemInstanceID    string             `json:"item_instance_id,omitempty"`
 	Level             *int               `json:"level,omitempty"`
 	FromLevel         *int               `json:"from_level,omitempty"`
 	ToLevel           *int               `json:"to_level,omitempty"`
 	Amount            *int               `json:"amount,omitempty"`
 	TotalExperience   *int               `json:"total_experience,omitempty"`
+	TotalGold         *int               `json:"total_gold,omitempty"`
 	Stat              string             `json:"stat,omitempty"`
 	UnspentStatPoints *int               `json:"unspent_stat_points,omitempty"`
 	Reason            string             `json:"reason,omitempty"`
@@ -242,6 +248,7 @@ type Snapshot struct {
 	Hotbar                []HotbarSlotView          `json:"hotbar"`
 	InventoryRows         int                       `json:"inventory_rows"`
 	InventoryCapacity     int                       `json:"inventory_capacity"`
+	Gold                  int                       `json:"gold"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	RecentEvents          []Event                   `json:"recent_events"`
@@ -257,6 +264,7 @@ const (
 	OpInventoryRemove            = "inventory_remove"
 	OpEquippedUpdate             = "equipped_update"
 	OpHotbarUpdate               = "hotbar_update"
+	OpGoldUpdate                 = "gold_update"
 	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
 	OpCharacterProgressionUpdate = "character_progression_update"
 )
@@ -275,6 +283,7 @@ type Change struct {
 	HotbarCapacity *int
 	InventoryRows  *int
 	InventoryCap   *int
+	Gold           *int
 	Level          int
 	Discovered     bool
 	Progression    *CharacterProgressionView
@@ -324,6 +333,15 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			InventoryRows  *int    `json:"inventory_rows,omitempty"`
 			InventoryCap   *int    `json:"inventory_capacity,omitempty"`
 		}{c.Op, c.SlotIndex, c.ItemInstanceID, c.InventoryRows, c.InventoryCap})
+	case OpGoldUpdate:
+		gold := 0
+		if c.Gold != nil {
+			gold = *c.Gold
+		}
+		return json.Marshal(struct {
+			Op   string `json:"op"`
+			Gold int    `json:"gold"`
+		}{c.Op, gold})
 	case OpTeleporterDiscoveryUpdate:
 		return json.Marshal(struct {
 			Op         string `json:"op"`

@@ -43,12 +43,14 @@ var inventory: Array = []
 var equipped: Dictionary = {}
 var inventory_rows: int = BASE_INVENTORY_ROWS
 var inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS
+var gold: int = 0
 var item_rules: Dictionary = {}
 var item_templates: Dictionary = {}
 var item_presentations: Dictionary = {}
 var _panel: PanelContainer
 var _equipment_slots: Dictionary = {}
 var _bag_grid: GridContainer
+var _gold_label: Label
 var _paper_doll_preview: Control
 var _drag_data: Dictionary = {}
 var _interactive: bool = true
@@ -158,13 +160,14 @@ func _sync_viewport_size() -> void:
 	_reposition_panel()
 
 
-func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS) -> void:
+func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0) -> void:
 	inventory = []
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
 	equipped = next_equipped.duplicate(true)
 	inventory_rows = max(0, next_inventory_rows)
 	inventory_capacity = max(0, next_inventory_capacity)
+	gold = max(0, next_gold)
 	if _bag_grid != null:
 		_render()
 
@@ -180,6 +183,7 @@ func get_debug_state() -> Dictionary:
 		"item_presentations": _debug_presentations(),
 		"inventory_rows": inventory_rows,
 		"inventory_capacity": inventory_capacity,
+		"gold": gold,
 		"bag_columns": _bag_grid.columns if _bag_grid != null else 0,
 		"available_slot_count": inventory_capacity,
 		"paper_doll_slot_ids": EQUIPMENT_SLOTS.duplicate(),
@@ -286,7 +290,7 @@ func _build() -> void:
 	_gesture_hint.visible = false
 	_gesture_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_gesture_hint.add_theme_color_override("font_color", Color("#c9a227"))
-	_gesture_hint.add_theme_font_size_override("font_size", 15)
+	_gesture_hint.add_theme_font_size_override("font_size", 23)
 	_panel.add_child(_gesture_hint)
 
 	var root := HBoxContainer.new()
@@ -327,6 +331,12 @@ func _build() -> void:
 	_bag_grid.add_theme_constant_override("h_separation", 6)
 	_bag_grid.add_theme_constant_override("v_separation", 6)
 	scroll.add_child(_bag_grid)
+	_gold_label = Label.new()
+	_gold_label.text = "Gold: 0"
+	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_gold_label.add_theme_color_override("font_color", Color("#f4c84f"))
+	_gold_label.add_theme_font_size_override("font_size", 26)
+	right.add_child(_gold_label)
 	_render()
 
 
@@ -347,6 +357,8 @@ func _render() -> void:
 		var item: Dictionary = bag_items[i] if i < bag_items.size() else {}
 		_fill_slot(slot, item)
 		_bag_grid.add_child(slot)
+	if _gold_label != null:
+		_gold_label.text = "Gold: %d" % gold
 	_position_gesture_hint()
 
 
@@ -404,7 +416,7 @@ func _slot_button(kind: String, size: Vector2) -> InventorySlotButton:
 	btn.add_theme_stylebox_override("hover", _slot_style(true))
 	btn.add_theme_stylebox_override("pressed", _slot_style(true))
 	btn.add_theme_color_override("font_color", Color("#e8dcc8"))
-	btn.add_theme_font_size_override("font_size", 14)
+	btn.add_theme_font_size_override("font_size", 21)
 	return btn
 
 
@@ -428,7 +440,7 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 		"bow":
 			slot.draw_arc(center, min_side * 0.28, -1.25, 1.25, 18, color, 4.0, true)
 			slot.draw_line(center + Vector2(min_side * 0.18, -min_side * 0.26), center + Vector2(min_side * 0.18, min_side * 0.26), accent, 2.0, true)
-		"badge":
+		"badge", "coin":
 			slot.draw_circle(center, min_side * 0.24, color)
 			slot.draw_arc(center, min_side * 0.17, 0.0, TAU, 18, accent, 2.0, true)
 		"leaf":
@@ -447,14 +459,14 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 			slot.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
 
 	var font := slot.get_theme_default_font()
-	var font_size := 12
+	var font_size := 18
 	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.38), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#f4ead8"))
 
 
 func _title(text: String) -> Label:
 	var label := _caption(text)
-	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_font_size_override("font_size", 33)
 	return label
 
 
@@ -462,7 +474,7 @@ func _caption(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_color_override("font_color", Color("#c9a227"))
-	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_font_size_override("font_size", 23)
 	return label
 
 

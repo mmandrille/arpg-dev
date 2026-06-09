@@ -375,7 +375,7 @@ func _verify_inventory_panel_model() -> bool:
 	get_root().add_child(panel)
 	panel.set_inventory_state([
 		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": false},
-		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
+		{"item_instance_id": "1005", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
 	], {"main_hand": null})
 	var state: Dictionary = panel.get_debug_state()
 	if int(state["bag_count"]) != 2 or state["equipped_main_hand"] != null:
@@ -383,14 +383,14 @@ func _verify_inventory_panel_model() -> bool:
 		return false
 	panel.set_inventory_state([
 		{"item_instance_id": "1004", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": true},
-		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
+		{"item_instance_id": "1005", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
 	], {"main_hand": "1004"})
 	state = panel.get_debug_state()
 	if str(state["equipped_main_hand"]) != "1004":
 		_fail("inventory panel equipped state mismatch: %s" % state)
 		return false
 	panel.set_inventory_state([
-		{"item_instance_id": "1005", "item_def_id": "training_badge", "slot": "", "equipped": false},
+		{"item_instance_id": "1005", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
 	], {"main_hand": null})
 	state = panel.get_debug_state()
 	if int(state["bag_count"]) != 1 or state["weapon_item"] != {}:

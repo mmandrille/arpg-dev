@@ -1,0 +1,233 @@
+skills/spec/SKILL.md
+  s_42525de3b4103c::t_c76052783c3770 1-34
+client/tests/test_shop_panel.gd.uid
+  s_6d812f5d381f75::t_215c71c809b61a 1
+server/internal/inputdecode/inputdecode_test.go
+  s_6d812f5d381f75::t_d0f658b7859cb4 86-155
+skills/spec/agents/openai.yaml
+  s_42525de3b4103c::t_c76052783c3770 1-4
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_6d812f5d381f75::t_339d3457880a7a 5-6,11,17
+  s_6d812f5d381f75::t_66578bab40bdb8 9-10,14
+client/scripts/shop_panel.gd.uid
+  s_6d812f5d381f75::t_215c71c809b61a 1
+server/internal/game/shop.go
+  s_6d812f5d381f75::t_e7b8bd890644f9 1-242
+shared/protocol/examples/shop_out_of_range_rejected.json
+  s_6d812f5d381f75::t_4fa21a607c7d05 1-8
+shared/protocol/envelope.v4.schema.json
+  s_6d812f5d381f75::t_72c2d36407d291 3-4,28-29
+  s_6d812f5d381f75::t_76f746ca7b562f 1-2,5-27,30-50
+shared/protocol/messages.v4.schema.json
+  s_6d812f5d381f75::t_76f746ca7b562f 1-2,5-27,30-73,78-222,241-271
+  s_6d812f5d381f75::t_ea1ba3cbc6d89c 3-4,28-29,74-77,223-240
+shared/rules/shops.v0.json
+  s_6d812f5d381f75::t_bc2157b0e4f80d 1-48
+server/migrations/0010_character_deepest_dungeon_depth.sql
+  s_6d812f5d381f75::t_1ae23aaad54b91 1-13
+server/internal/store/models.go
+  s_6d812f5d381f75::t_8b7492faaf70ed 117-121,127-133,135-136
+  s_6d812f5d381f75::t_1ae23aaad54b91 122,134
+scripts/client_smoke.sh
+  s_6d812f5d381f75::t_ad189fc70efd1e 76-78
+AGENTS.md
+  s_42525de3b4103c::t_c76052783c3770 18,22,24,30,32
+shared/protocol/state_delta.v4.schema.json
+  s_6d812f5d381f75::t_11ac1ddd7ec00c 3-4,93-111,163-169,310-330,424,433
+  s_6d812f5d381f75::t_76f746ca7b562f 1-2,5-92,112-162,170-309,331-423,425-432,434-548
+server/internal/replay/replay_test.go
+  s_6d812f5d381f75::t_e1f75f034e29bb 579,599,640
+server/internal/replay/replay.go
+  s_6d812f5d381f75::t_8b7492faaf70ed 564-567
+  s_6d812f5d381f75::t_1ed79dd79562a4 568
+shared/rules/worlds.v0.json
+  s_6d812f5d381f75::t_ce1a25acc607ab 467-471
+server/internal/realtime/session_loop.go
+  s_6d812f5d381f75::t_7cb3af299a9b4b 556,569-573
+tools/bot/run.py
+  s_6d812f5d381f75::t_d8eb9d069e4cad 946,950,954
+  s_6d812f5d381f75::t_76c4f6187feae5 121-125
+  s_6d812f5d381f75::t_91b7f8023cd676 1150-1280
+  s_6d812f5d381f75::t_f5228ad966c28d 2791-2803
+  s_6d812f5d381f75::t_47500b14958dff 2110-2139
+  s_6d812f5d381f75::t_e2b9159630d840 1596-1614
+  s_6d812f5d381f75::t_697e7e670652cc 1823-1824,1847
+  s_6d812f5d381f75::t_3d1dffe962c996 1738-1747
+  s_6d812f5d381f75::t_a6c2b9de6dd3f2 2580-2581
+  s_6d812f5d381f75::t_e58a8e819c4b2d 2401
+server/internal/game/rules.go
+  s_6d812f5d381f75::t_c2b1efd2df2a77 997-1007,1020-1022,1030-1043
+  s_6d812f5d381f75::t_ee0e454394b94c 1592-1663
+  s_6d812f5d381f75::t_d1bab4c52a6ee6 483,502-505
+  s_6d812f5d381f75::t_cc322e5e38a084 27,383,480-482,484-501
+client/tests/test_golden.gd
+  s_6d812f5d381f75::t_17be3e90d73165 457-482,491,503-504
+  s_6d812f5d381f75::t_2e60ed5ccc51c9 483-490
+  s_6d812f5d381f75::t_372e37c66ee189 497-502
+  s_6d812f5d381f75::t_7be2b2ee0a5c19 492-496
+server/internal/realtime/hub.go
+  s_6d812f5d381f75::t_1ed79dd79562a4 125
+  s_6d812f5d381f75::t_8b7492faaf70ed 121-124
+tools/bot/scenarios/16_rolled_drops.json
+  s_6d812f5d381f75::t_339d3457880a7a 3-4,6,12,17
+skills/README.md
+  s_42525de3b4103c::t_c76052783c3770 8,12,18,20
+server/internal/realtime/session_loop_test.go
+  s_6d812f5d381f75::t_652ae5d71871e8 125-158
+shared/rules/interactables.v0.json
+  s_6d812f5d381f75::t_9c6040a9cd0ec6 29-33
+shared/protocol/examples/state_delta.json
+  s_6d812f5d381f75::t_4fa21a607c7d05 36-60,79-91
+client/scripts/shop_panel.gd
+  s_6d812f5d381f75::t_66d4e8078ed3da 1-91,97-103,105-465
+  s_6d812f5d381f75::t_e753d555c625f5 92-96
+  s_6d812f5d381f75::t_36a616075d7057 104
+server/internal/game/types.go
+  s_6d812f5d381f75::t_621e7918c7f344 155-170,235-238
+  s_6d812f5d381f75::t_7f8528211e5233 149
+shared/rules/interactables.v0.schema.json
+  s_6d812f5d381f75::t_b917046f1ecd4c 21,38-43,52-55
+shared/protocol/examples/shop_sell_intent.json
+  s_6d812f5d381f75::t_4fa21a607c7d05 1-8
+server/internal/game/sim.go
+  s_6d812f5d381f75::t_a18096a90ef91b 967-968,1013-1020,1150,1185-1188,1814-1817,1833-1849,2181,2188-2198
+  s_6d812f5d381f75::t_9e7379a894efc6 1855-1975
+  s_6d812f5d381f75::t_7f8528211e5233 255,328,345-347,4685
+  s_6d812f5d381f75::t_8b7492faaf70ed 250-254,323-327
+  s_6d812f5d381f75::t_aeac4bf51ecf51 4062
+  s_6d812f5d381f75::t_72cffe999429c3 4620-4622,4986-5000
+server/internal/inputdecode/inputdecode.go
+  s_6d812f5d381f75::t_c6a22bafba8fc8 27-28,81-88,94,193-204
+server/internal/game/shop_test.go
+  s_6d812f5d381f75::t_728046769d7364 1-409
+tools/bot/scenarios/29_town_vendor_gold_sink.json
+  s_6d812f5d381f75::t_32b55a2c897693 11
+  s_6d812f5d381f75::t_4ac55dbb47b3a3 17
+  s_6d812f5d381f75::t_4403a2b860311f 22
+  s_6d812f5d381f75::t_df381436e5225f 15-16
+  s_6d812f5d381f75::t_a597288400de31 1-3,5,7-8,14,18-21,23-32,34-37,40-42,45-50,52-59
+  s_6d812f5d381f75::t_a055bd7a028ea5 44
+  s_6d812f5d381f75::t_92edb5f97aba71 6,12-13,38-39,51
+  s_6d812f5d381f75::t_b422398da40dac 4
+  s_6d812f5d381f75::t_2ed46c19cf29fc 33,43
+  s_6d812f5d381f75::t_4f654d9b728b1f 9-10
+client/tests/test_shop_panel.gd
+  s_6d812f5d381f75::t_fb76d25593f225 1-81
+docs/PROGRESS.md
+  s_6d812f5d381f75::t_cb84b0409c2c5a 1016-1043
+  s_6d812f5d381f75::t_4f92683d4da26c 14,59,120
+  s_6d812f5d381f75::t_ee572888870e9b 1252-1256,1261,1263-1264
+skills/showme/scripts/render_focus.py
+  s_42525de3b4103c::t_c76052783c3770 18,37,82,88,90
+shared/golden/shop_pricing.v0.schema.json
+  s_6d812f5d381f75::t_bc2157b0e4f80d 1-45
+server/internal/realtime/runner.go
+  s_6d812f5d381f75::t_1ed79dd79562a4 528
+  s_6d812f5d381f75::t_8b7492faaf70ed 522-527
+scripts/link-agent-skills.sh
+  s_42525de3b4103c::t_c76052783c3770 11,24
+server/internal/store/repos.go
+  s_6d812f5d381f75::t_15bab790e52b1f 803,805,808,810,813,827,833,847,849,860,864,966,968,971,1054,1060
+tools/bot/scenarios/client/15_town_vendor_shop_panel.json
+  s_6d812f5d381f75::t_71dcfbf33df0ce 1-6,8-46
+  s_6d812f5d381f75::t_3c57e768df1ea3 7
+client/scripts/inventory_panel.gd
+  s_6d812f5d381f75::t_741696a95088b2 118-119,173,180,286-287,351-354
+  s_6d812f5d381f75::t_1b9867ba6b0e5e 514
+skills/showme/SKILL.md
+  s_42525de3b4103c::t_c76052783c3770 22,25
+client/scripts/bot_controller.gd
+  s_6d812f5d381f75::t_51d992870b2a9b 144-147,192-209,424-435
+docs/specs/v41_spec-town-vendor-gold-sink.md
+  s_1a8007e1c29bf5::t_0b5829a569f758 1-628
+server/internal/store/store_test.go
+  s_6d812f5d381f75::t_57a1ad04d46132 425,433,446-447,548,572
+shared/protocol/examples/shop_buy_intent.json
+  s_6d812f5d381f75::t_4fa21a607c7d05 1-8
+tools/validate_shared.py
+  s_6d812f5d381f75::t_2eb7497a2cde8f 1882-1883,1887-1893,1896-1897
+  s_6d812f5d381f75::t_0d6f0e04b560e4 76,78-79,134,165-172,174-176,178,180,182,185,192,194
+  s_6d812f5d381f75::t_35f8d7b7c068af 1340-1612
+client/scripts/bot_scenario_runner.gd
+  s_6d812f5d381f75::t_f5007745d437ff 535,557,1176
+  s_6d812f5d381f75::t_b5adddb4c312f7 15,32-33,42,75-76,208-211,361-368
+  s_6d812f5d381f75::t_9b561c113fcc34 851
+  s_6d812f5d381f75::t_ba01b26f015c86 1003-1005
+  s_6d812f5d381f75::t_43e4378500d586 1054-1055
+  s_6d812f5d381f75::t_51755e03b37b69 1190-1201
+  s_6d812f5d381f75::t_45032be731e611 607,610,777-850,852-854
+skills/showme/scripts/visual_capture.gd
+  s_42525de3b4103c::t_c76052783c3770 57,60,100
+docs/plans/v41_2026-06-09-town-vendor-gold-sink.md
+  s_1a8007e1c29bf5::t_7c600db7ed62c9 1-2,4-24,27-40,42-43,45-46,52-53,55,57,59,62-70,72-74,76-77,79-80,83-92,94-96,98,103-104,106-110,112-124,126-129,131-132,134-136,138-142,144-147,149-151,153-169,173,176,178-186,188-190,192-198,200-206,208-217,219-221,223-225,228,231-233,235-241,243-246,249-253,256-264,266-270,282-290
+  s_6d812f5d381f75::t_75d25a3ab7dfcc 93,97,105,111,125,130,133,137,143,148,152,170-172,174-175,177
+  s_6d812f5d381f75::t_af34cc12611222 3,247-248,254-255,265,271-281
+  s_6d812f5d381f75::t_e37a99ebc25d90 71,75,78,81-82
+  s_6d812f5d381f75::t_98a01bf2240b69 25-26,47,49-50,56,99-102
+  s_6d812f5d381f75::t_63ce474e58066c 187,191,199,207
+  s_6d812f5d381f75::t_2907907691e8ac 218,222,226-227,229-230,234,242
+  s_6d812f5d381f75::t_aeca53b06be5fb 41,44,48,51,54,58,60-61
+tools/bot/test_protocol.py
+  s_6d812f5d381f75::t_815ce9900b1b3d 10,22
+  s_6d812f5d381f75::t_fb0802c83c562e 80,92-150
+shared/golden/shop_pricing.json
+  s_6d812f5d381f75::t_1cbb751ffbe0de 32,42
+  s_6d812f5d381f75::t_bc2157b0e4f80d 1-31,33-41,43-45
+shared/golden/shop_offers.v0.schema.json
+  s_6d812f5d381f75::t_bc2157b0e4f80d 1-48
+server/internal/http/session.go
+  s_6d812f5d381f75::t_8b7492faaf70ed 439-442
+  s_6d812f5d381f75::t_1ed79dd79562a4 443
+shared/golden/shop_offers.json
+  s_6d812f5d381f75::t_b574fffc1674de 10-16,22-28,34-40
+  s_6d812f5d381f75::t_bc2157b0e4f80d 1-9,17-21,29-33,41-43
+shared/protocol/session_snapshot.v4.schema.json
+  s_6d812f5d381f75::t_3b2a10b31b9a1d 3-4,246,255
+  s_6d812f5d381f75::t_76f746ca7b562f 1-2,5-245,247-254,256-464
+shared/rules/shops.v0.schema.json
+  s_6d812f5d381f75::t_bc2157b0e4f80d 1-102
+shared/protocol/examples/session_snapshot.json
+  s_6d812f5d381f75::t_4fa21a607c7d05 67
+shared/protocol/examples/shop_insufficient_gold_rejected.json
+  s_6d812f5d381f75::t_4fa21a607c7d05 1-8
+client/scripts/main.gd
+  s_6d812f5d381f75::t_11d19074c87c1b 1536-1537
+  s_6d812f5d381f75::t_2e313f75639014 2350-2379
+  s_6d812f5d381f75::t_f3e276ce644115 16,156,688-689,745,853-861,1072-1073,1377-1378,2082-2084,3102,3107
+  s_6d812f5d381f75::t_caa743c794a35d 3295-3306
+client/tests/test_client_bot.gd
+  s_6d812f5d381f75::t_1f6109c5dd86b2 368-419
+  s_6d812f5d381f75::t_d1fbb5d032e693 54-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "00aa35ff55a94c061e94d0fb02dff6b6a28124a1",
+  "prompts": {},
+  "sessions": {
+    "s_1a8007e1c29bf5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaab1-8d17-74f0-a965-1fb4cbaf7560",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_42525de3b4103c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaaaf-4987-7811-8178-6d53261f824b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_6d812f5d381f75": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaacb-046d-79a0-a6ba-80dcd79995d9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

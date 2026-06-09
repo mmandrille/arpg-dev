@@ -1,0 +1,63 @@
+CLAUDE.md
+  s_f9a6628fab0a93::t_8ad48b3c5614ec 35-36,38
+  s_f9a6628fab0a93::t_c0cc2b5cacc8b9 32,37
+  s_f9a6628fab0a93::t_fb7fd10ab6ed24 27-28
+  s_f9a6628fab0a93::t_af1ff0caa3c38b 58
+scripts/run_quiet.sh
+  s_f9a6628fab0a93::t_2b1ae3929b8c76 69,71
+  s_f9a6628fab0a93::t_9b5626411acd7e 1-68,70,72-74
+Makefile
+  s_f9a6628fab0a93::t_0253908d4ddde5 40
+  s_f9a6628fab0a93::t_a02e82d30ddd21 26-34
+  s_f9a6628fab0a93::t_e5288173bd0d45 39
+scripts/bot_local.sh
+  s_f9a6628fab0a93::t_7d95a6a881db6d 9-10
+  s_f9a6628fab0a93::t_61921080aec338 33
+  s_f9a6628fab0a93::t_388bb44cc7f446 68-70
+  s_f9a6628fab0a93::t_015e2a58a38147 89-91,95-96
+  s_f9a6628fab0a93::t_0a02cab70853b9 81-83
+make/agents.mk
+  s_f9a6628fab0a93::t_5ac34d763ac3ce 3
+  s_f9a6628fab0a93::t_46ec9b1c06124d 7,10
+scripts/bot_visual.sh
+  s_f9a6628fab0a93::t_fcf0d8b2189923 71
+  s_f9a6628fab0a93::t_a253875e3f888b 9-10,24-27,44,57-59,66-67,75-86
+make/client.mk
+  s_f9a6628fab0a93::t_ee73223f229d57 13,16
+make/test.mk
+  s_f9a6628fab0a93::t_1fd11067e55c28 17
+  s_f9a6628fab0a93::t_84d6fab3d79913 7-12
+scripts/client_smoke.sh
+  s_f9a6628fab0a93::t_895dcb4dc84995 12-13,34-36,38-46,49-53,56-63
+scripts/ci.sh
+  s_f9a6628fab0a93::t_73a0da1f493499 26-27,29-30,32-33,35,37,39,44,55-59,82-83,86-87,91-92
+  s_f9a6628fab0a93::t_3e774c51c0d595 10-11
+  s_f9a6628fab0a93::t_a3a565cee226e2 62-63,66-80
+make/ci.mk
+  s_f9a6628fab0a93::t_279e9378d364bc 3
+scripts/bot_client.sh
+  s_f9a6628fab0a93::t_40adc32c4b356c 116
+  s_f9a6628fab0a93::t_896e5a20b06f31 145-170,174-177,183-186,192-196
+  s_f9a6628fab0a93::t_80f80a3594b49c 115,118-124
+  s_f9a6628fab0a93::t_d507b84f18f018 12-13
+scripts/bot_client_local.sh
+  s_f9a6628fab0a93::t_598ec22aec5ea4 9-10,27,40-42,48-50
+scripts/quiet_helpers.sh
+  s_f9a6628fab0a93::t_1d6f652541c407 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f7c78e4b492000c2b706058e83ae1cd8f1805fc5",
+  "prompts": {},
+  "sessions": {
+    "s_f9a6628fab0a93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fe46a24f-3066-48f0-8e64-38cb68792e31",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

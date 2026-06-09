@@ -1,0 +1,13 @@
+{
+  "id": "town_floor_click_to_move",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "title": "Town floor click-to-move",
+  "description": "Clicking visible town floor beyond the old global nav bounds still sends a valid move_to_intent and moves the player.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 10.0 },
+    { "type": "click_floor", "x": 4.0, "z": 16.0 },
+    { "type": "wait_player_near", "x": 4.0, "z": 16.0, "distance": 1.5, "timeout_s": 10.0 }
+  ]
+}

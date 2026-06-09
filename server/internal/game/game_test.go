@@ -5470,6 +5470,31 @@ func TestDungeonTownBootstrapAndDeepDescent(t *testing.T) {
 	}
 }
 
+func TestDungeonTownNavigationCoversVisibleHubFloor(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_dungeon_town_nav", "deadbeefdeadbeef", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	nav := sim.activeNav()
+	if nav.GridBounds.MaxY <= rules.Navigation.GridBounds.MaxY {
+		t.Fatalf("town nav max_y = %d, want expanded beyond global %d", nav.GridBounds.MaxY, rules.Navigation.GridBounds.MaxY)
+	}
+	target := Vec2{X: 4, Y: 16}
+	if !sim.positionInNavigationBounds(nav, target) {
+		t.Fatalf("town floor target %+v is outside nav bounds %+v", target, nav.GridBounds)
+	}
+	result := sim.Tick([]Input{{
+		MessageID: "walk_town_floor",
+		Type:      "move_to_intent",
+		MoveTo:    &MoveToIntent{Position: target},
+	}})
+	assertAck(t, result, "walk_town_floor")
+	if sim.activeLevel().autoNav == nil {
+		t.Fatal("town floor move did not queue auto-navigation")
+	}
+}
+
 func TestDungeonTeleporterDiscoveryAndTravel(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_dungeon_tp", "deadbeefdeadbeef", loadRules(t), "dungeon_levels")
 	if err != nil {

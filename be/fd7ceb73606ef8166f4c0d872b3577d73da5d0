@@ -1,0 +1,49 @@
+client/scripts/inventory_panel.gd
+  s_42525de3b4103c::t_867fcdc06ec2e6 35-37,377-379
+  s_42525de3b4103c::t_95601f64eb418d 375-376
+client/tests/test_coop_client.gd
+  s_42525de3b4103c::t_739b062b765e47 212,216
+  s_42525de3b4103c::t_3ab7f6ad45702d 219
+  s_42525de3b4103c::t_b50c68362364b2 19,207-211,213-215,217-218,220-226,351-354
+client/scripts/equipment_visuals.gd
+  s_42525de3b4103c::t_c79559810fb01d 266-267
+  s_42525de3b4103c::t_867fcdc06ec2e6 165-174,192,249-265,268-306
+client/scripts/main.gd
+  s_42525de3b4103c::t_b50c68362364b2 1730-1733
+  s_42525de3b4103c::t_b5f6328c4964f1 1735
+scripts/link-agent-skills.sh
+  s_42525de3b4103c::t_59da5c445a67a9 11,24
+skills/showme/scripts/render_focus.py
+  s_42525de3b4103c::t_59da5c445a67a9 1-95
+skills/showme/agents/openai.yaml
+  s_42525de3b4103c::t_59da5c445a67a9 1-4
+client/scripts/smoke.gd
+  s_42525de3b4103c::t_24cd2ccf570440 384-390
+  s_42525de3b4103c::t_867fcdc06ec2e6 413-415
+shared/assets/item_visuals.v0.json
+  s_42525de3b4103c::t_e0123d68061774 79,120
+  s_42525de3b4103c::t_c79559810fb01d 69,71,91
+skills/README.md
+  s_42525de3b4103c::t_59da5c445a67a9 11
+skills/showme/SKILL.md
+  s_42525de3b4103c::t_59da5c445a67a9 1-59
+client/tests/test_item_visuals.gd
+  s_42525de3b4103c::t_24cd2ccf570440 139-142
+  s_42525de3b4103c::t_e0123d68061774 149-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "befd7ceb73606ef8166f4c0d872b3577d73da5d0",
+  "prompts": {},
+  "sessions": {
+    "s_42525de3b4103c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaaaf-4987-7811-8178-6d53261f824b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -165,6 +165,7 @@ def cross_checks(report: Report) -> None:
     shop_pricing_golden = load(GOLDEN / "shop_pricing.json")
     shop_offers_golden = load(GOLDEN / "shop_offers.json")
     shop_appraisals_golden = load(GOLDEN / "shop_appraisals.json")
+    equipment_requirements_golden = load(GOLDEN / "equipment_requirements.json")
 
     v4_protocol_files = [
         PROTOCOL / "envelope.v4.schema.json",
@@ -545,8 +546,12 @@ def cross_checks(report: Report) -> None:
             report.fail("item template combat fields", f"{template_id}: non-weapon equipment must not define attack fields")
             continue
         requirements = template.get("requirements", {})
-        if requirements.get("level", 1) > 1:
-            report.fail("item template requirements", f"{template_id}: v23 only supports level <= 1")
+        invalid_requirements = sorted(set(requirements) - (progression_stats | {"level"}))
+        if invalid_requirements:
+            report.fail("item template requirements", f"{template_id}: unsupported requirement(s) {invalid_requirements}")
+            continue
+        if any(int(value) < 1 for value in requirements.values()):
+            report.fail("item template requirements", f"{template_id}: requirement values must be >= 1")
             continue
         base_stats = template["base_stats"]
         invalid_base_stats = sorted(set(base_stats) - valid_roll_stats)
@@ -583,6 +588,45 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"item template {template_id} roll ranges are valid")
     report.ok("item template stat keys are restricted to supported rolls")
+
+    req_template_id = str(equipment_requirements_golden["template_id"])
+    req_template = item_templates["templates"].get(req_template_id)
+    if not req_template:
+        report.fail("equipment_requirements golden", f"unknown template {req_template_id}")
+    elif equipment_requirements_golden["requirements"] != req_template.get("requirements", {}):
+        report.fail("equipment_requirements golden", "requirements must match item template")
+    else:
+        failed_equipment_requirements = False
+        for case_key in ("fresh_character", "after_allocation"):
+            case = equipment_requirements_golden[case_key]
+            stats = case["base_stats"]
+            if set(stats) != progression_stats:
+                report.fail("equipment_requirements golden", f"{case_key}: base stats must define str/dex/vit/magic")
+                failed_equipment_requirements = True
+                break
+            status = case["status"]
+            expected_status = []
+            for stat in ("level", "str", "dex", "vit", "magic"):
+                if stat not in req_template["requirements"]:
+                    continue
+                current = int(case["level"]) if stat == "level" else int(stats[stat])
+                required = int(req_template["requirements"][stat])
+                expected_status.append({
+                    "stat": stat,
+                    "required": required,
+                    "current": current,
+                    "met": current >= required,
+                })
+            if status != expected_status:
+                report.fail("equipment_requirements golden", f"{case_key}: status mismatch")
+                failed_equipment_requirements = True
+                break
+            if bool(case["requirements_met"]) != all(row["met"] for row in expected_status):
+                report.fail("equipment_requirements golden", f"{case_key}: requirements_met mismatch")
+                failed_equipment_requirements = True
+                break
+        if not failed_equipment_requirements:
+            report.ok("equipment_requirements golden matches template requirements")
 
     inventory_columns = int(inventory_capacity_golden["columns"])
     base_inventory_rows = int(inventory_capacity_golden["base_inventory_rows"])

@@ -1529,7 +1529,7 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 	if target.hp < 0 {
 		target.hp = 0
 	}
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(target.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
 
 	if outcome.Damage > 0 && target.hp > 0 {
@@ -1592,7 +1592,7 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 	}
 	projectile.id = s.alloc()
 	s.activeLevel().entities[projectile.id] = projectile
-	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(projectile.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
 	if ack {
 		res.ack(in.MessageID)
 	}
@@ -1667,7 +1667,7 @@ func (s *Sim) unlockBossFloorExits(corr string, res *TickResult) {
 			continue
 		}
 		e.state = interactableReady
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(e))})
 		res.Events = append(res.Events, Event{
 			EventType:     "interactable_state_changed",
 			EntityID:      idStr(e.id),
@@ -1720,7 +1720,7 @@ func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius floa
 		loot := s.newLootEntity(itemDefID, dropPos, payload, goldCtx)
 		loot.id = s.alloc()
 		s.activeLevel().entities[loot.id] = loot
-		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
+		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(loot))})
 		res.Events = append(res.Events, Event{EventType: "loot_dropped", EntityID: idStr(loot.id), CorrelationID: corr})
 	}
 }
@@ -1748,7 +1748,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	if player.hp < 0 {
 		player.hp = 0
 	}
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	eventType := "player_damaged"
 	if player.hp == 0 {
 		eventType = "player_killed"
@@ -1794,7 +1794,7 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
 
 	s.inventory = append(s.inventory, item)
-	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
 	res.Events = append(res.Events, Event{
 		EventType:      "item_picked_up",
 		EntityID:       idStr(s.playerID),
@@ -1820,7 +1820,7 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		return
 	}
 	e.state = interactableOpen
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(e.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(e))})
 	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
 	if e.interactableDefID == treasureChestDefID && e.lootTable != "" {
 		s.spawnLootDrops(s.rules.LootDrops(e.lootTable, s.rng), e.pos, s.targetInteractionRadius(e), in.CorrelationID, res, goldRollContext{levelNum: s.activeLevel().levelNum})
@@ -1885,7 +1885,7 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
-	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(item.view())})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
 	res.Events = append(res.Events, Event{
 		EventType:      "shop_purchase",
 		EntityID:       idStr(shopEntity.id),
@@ -2181,7 +2181,7 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 	}
 	s.appendDeepestDungeonDepthChange(destLevel, &arrivalRes)
 	for _, id := range sortedEntityIDs(dest.entities) {
-		arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(dest.entities[id].view())})
+		arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(dest.entities[id]))})
 	}
 	return &arrivalRes
 }
@@ -2300,11 +2300,9 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "hands_blocked")
 		return
 	}
-	if item.rollPayload != nil {
-		if level := item.rollPayload.Requirements["level"]; level > 1 {
-			res.reject(in.MessageID, "requirements_not_met")
-			return
-		}
+	if item.rollPayload != nil && !s.requirementsMet(item.rollPayload.Requirements) {
+		res.reject(in.MessageID, "requirements_not_met")
+		return
 	}
 
 	clearedSlots := s.slotsClearedByEquip(in.Equip.Slot, item)
@@ -2334,7 +2332,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		}
 		if prev := s.findItemByID(prevID); prev != nil {
 			prev.equipped = false
-			res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(prev.view())})
+			res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(prev))})
 		}
 		s.equipped[slot] = 0
 		res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
@@ -2344,7 +2342,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 	item.equipped = true
 	s.equipped[in.Equip.Slot] = item.instanceID
 
-	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(item.view())})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item))})
 	idCopy := idStr(item.instanceID)
 	res.Changes = append(res.Changes, Change{
 		Op:             OpEquippedUpdate,
@@ -2385,7 +2383,7 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 	}
 	item.equipped = false
 	s.equipped[in.Unequip.Slot] = 0
-	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(item.view())})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item))})
 	res.Changes = append(res.Changes, Change{
 		Op:             OpEquippedUpdate,
 		Slot:           in.Unequip.Slot,
@@ -2413,11 +2411,25 @@ func (s *Sim) appendEquipmentProgressionChanges(res *TickResult) {
 			if player.hp > player.maxHP {
 				player.hp = player.maxHP
 			}
-			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 		}
 	}
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	s.appendInventoryPresentationUpdates(res)
+}
+
+func (s *Sim) appendInventoryPresentationUpdates(res *TickResult) {
+	for _, item := range s.inventory {
+		if item == nil {
+			continue
+		}
+		view := s.itemView(item)
+		if len(view.RequirementStatus) == 0 && view.EquipPreview == nil {
+			continue
+		}
+		res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(view)})
+	}
 }
 
 func (s *Sim) handleDrop(in Input, res *TickResult) {
@@ -2456,7 +2468,7 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 	loot := s.newLootEntity(itemDefID, dropPos, rollPayload, goldRollContext{levelNum: s.activeLevel().levelNum})
 	loot.id = s.alloc()
 	s.activeLevel().entities[loot.id] = loot
-	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(loot.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(loot))})
 	if wasEquipped {
 		s.appendEquipmentProgressionChanges(res)
 	}
@@ -2611,7 +2623,7 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 
 	player.hp += heal
 	player.mana += mana
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	used := Event{
 		EventType:      "item_used",
 		EntityID:       idStr(player.id),
@@ -2704,11 +2716,12 @@ func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
 		entityChanged = true
 	}
 	if entityChanged {
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	}
 
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	s.appendInventoryPresentationUpdates(res)
 	res.Events = append(res.Events, Event{
 		EventType:         "stat_allocated",
 		CorrelationID:     in.CorrelationID,
@@ -2752,7 +2765,7 @@ func (s *Sim) applyMovement(res *TickResult) {
 	if player.pos == before {
 		return
 	}
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 }
 
 func (s *Sim) applyAutoNav(res *TickResult) {
@@ -2770,7 +2783,7 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 	s.activeLevel().autoNav.steps = s.activeLevel().autoNav.steps[1:]
 	player.pos = s.resolveMovement(player.pos, Vec2{X: step.X * moveSpeed, Y: step.Y * moveSpeed})
 	if player.pos != before {
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	}
 	if len(s.activeLevel().autoNav.steps) == 0 {
 		s.finishAutoNav(res)
@@ -3128,7 +3141,7 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		before := monster.pos
 		monster.pos = s.resolveMonsterMovement(monster, s.monsterMoveDelta(monster.pos, goal, steps, moveSpeed))
 		if monster.pos != before {
-			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(monster.view())})
+			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(monster))})
 		}
 	}
 }
@@ -3181,7 +3194,7 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if player.hp < 0 {
 			player.hp = 0
 		}
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 		eventType := "player_damaged"
 		if player.hp == 0 {
 			eventType = "player_killed"
@@ -3517,7 +3530,7 @@ func (s *Sim) ensureBossPhase(boss *entity, res *TickResult) (bossPhaseRuntime, 
 	boss.bossPhaseStarted = s.tick
 	boss.bossPhaseEnds = s.tick + uint64(next.phase.DurationTicks)
 	boss.bossActiveHit = map[uint64]bool{}
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(boss.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(boss))})
 	res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
 	return next, true
 }
@@ -3576,7 +3589,7 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		boss.bossActiveHit = map[uint64]bool{}
 		res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
 	}
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(boss.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(boss))})
 }
 
 func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *TickResult) {
@@ -3605,7 +3618,7 @@ func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *Ti
 		if player.hp < 0 {
 			player.hp = 0
 		}
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(player.view())})
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 		eventType := "player_damaged"
 		if player.hp == 0 {
 			eventType = "player_killed"
@@ -3701,7 +3714,7 @@ func (s *Sim) advanceProjectile(p *entity, res *TickResult) {
 	}
 	p.pos = candidate
 	p.traveled += segmentLength
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(p.view())})
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(p))})
 }
 
 type projectileHit struct {
@@ -3916,6 +3929,7 @@ func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
 
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	s.appendInventoryPresentationUpdates(res)
 }
 
 func segmentIntersectsInflatedAABB(start, end, rectCenter, rectSize Vec2, inflate float64) (float64, bool) {
@@ -4749,7 +4763,218 @@ func (s *Sim) StatBreakdownViews() []StatBreakdownView {
 	return breakdowns
 }
 
+func (s *Sim) requirementStatus(requirements map[string]int) ([]RequirementStatusView, bool) {
+	if len(requirements) == 0 {
+		return nil, true
+	}
+	status := []RequirementStatusView{}
+	allMet := true
+	for _, stat := range requirementStatOrder() {
+		required := requirements[stat]
+		if required <= 0 {
+			continue
+		}
+		current := s.requirementCurrentValue(stat)
+		met := current >= required
+		if !met {
+			allMet = false
+		}
+		status = append(status, RequirementStatusView{
+			Stat:     stat,
+			Required: required,
+			Current:  current,
+			Met:      met,
+		})
+	}
+	return status, allMet
+}
+
+func requirementStatOrder() []string {
+	return []string{"level", "str", "dex", "vit", "magic"}
+}
+
+func (s *Sim) requirementCurrentValue(stat string) int {
+	switch stat {
+	case "level":
+		return s.progression.Level
+	case "str":
+		return s.progression.BaseStats.Str
+	case "dex":
+		return s.progression.BaseStats.Dex
+	case "vit":
+		return s.progression.BaseStats.Vit
+	case "magic":
+		return s.progression.BaseStats.Magic
+	default:
+		return 0
+	}
+}
+
+func (s *Sim) requirementsMet(requirements map[string]int) bool {
+	_, met := s.requirementStatus(requirements)
+	return met
+}
+
+func (s *Sim) annotateRequirementStatus(requirements map[string]int, set func([]RequirementStatusView, *bool)) {
+	status, met := s.requirementStatus(requirements)
+	if len(status) == 0 {
+		return
+	}
+	metCopy := met
+	set(status, &metCopy)
+}
+
+func (s *Sim) itemView(item *invItem) ItemView {
+	view := item.view()
+	s.annotateItemView(&view, item)
+	return view
+}
+
+func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
+	if item == nil {
+		return
+	}
+	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+		view.RequirementStatus = status
+		view.RequirementsMet = met
+	})
+	if preview := s.equipPreviewForItem(item, view.Slot); preview != nil {
+		view.EquipPreview = preview
+	}
+}
+
+func (s *Sim) entityView(e *entity) EntityView {
+	if e == nil {
+		return EntityView{}
+	}
+	view := e.view()
+	if e.kind != lootEntity {
+		return view
+	}
+	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+		view.RequirementStatus = status
+		view.RequirementsMet = met
+	})
+	if preview := s.equipPreviewForLoot(e); preview != nil {
+		view.EquipPreview = preview
+	}
+	return view
+}
+
+func (s *Sim) equipPreviewForLoot(e *entity) *EquipPreviewView {
+	if e == nil || e.kind != lootEntity {
+		return nil
+	}
+	if e.rollPayload != nil {
+		template, ok := s.rules.ItemTemplates[e.rollPayload.ItemTemplateID]
+		if !ok {
+			return nil
+		}
+		item := &invItem{
+			instanceID:  previewItemInstanceID(),
+			itemDefID:   e.rollPayload.ItemTemplateID,
+			rollPayload: cloneRollPayload(e.rollPayload),
+		}
+		return s.equipPreviewForItemWithSlot(item, template.Slot)
+	}
+	def, ok := s.rules.Items[e.itemDefID]
+	if !ok || !def.Equippable {
+		return nil
+	}
+	item := &invItem{instanceID: previewItemInstanceID(), itemDefID: e.itemDefID}
+	return s.equipPreviewForItemWithSlot(item, def.Slot)
+}
+
+func (s *Sim) equipPreviewForItem(item *invItem, currentSlot string) *EquipPreviewView {
+	if item == nil {
+		return nil
+	}
+	slot, ok := s.itemEquipSlot(item)
+	if !ok {
+		return nil
+	}
+	if currentSlot != "" && currentSlot != slot && !slotAcceptsItemSlot(currentSlot, slot) {
+		return nil
+	}
+	return s.equipPreviewForItemWithSlot(item, s.comparisonSlot(slot))
+}
+
+func (s *Sim) equipPreviewForItemWithSlot(item *invItem, slot string) *EquipPreviewView {
+	if item == nil || slot == "" {
+		return nil
+	}
+	requirements := map[string]int{}
+	if item.rollPayload != nil {
+		requirements = item.rollPayload.Requirements
+	}
+	requirementsMet := s.requirementsMet(requirements)
+	current, _ := s.playerEffectiveCombatStats()
+	preview := s.previewEffectiveCombatStats(item, slot)
+	deltas := equipPreviewDeltas(current, preview)
+	if len(deltas) == 0 && len(requirements) == 0 {
+		return nil
+	}
+	return &EquipPreviewView{Slot: slot, RequirementsMet: requirementsMet, Deltas: deltas}
+}
+
+func (s *Sim) previewEffectiveCombatStats(item *invItem, slot string) effectiveCombatStats {
+	loadout := s.currentEquippedItems()
+	for _, clearedSlot := range s.slotsClearedByEquip(slot, item) {
+		delete(loadout, clearedSlot)
+	}
+	loadout[slot] = item
+	stats, _ := s.playerEffectiveCombatStatsFor(loadout)
+	return stats
+}
+
+func previewItemInstanceID() uint64 {
+	return ^uint64(0)
+}
+
+func equipPreviewDeltas(current, preview effectiveCombatStats) []EquipPreviewDeltaView {
+	values := []struct {
+		stat    string
+		current float64
+		preview float64
+	}{
+		{"damage_min", current.DamageMin, preview.DamageMin},
+		{"damage_max", current.DamageMax, preview.DamageMax},
+		{"armor", current.Armor, preview.Armor},
+		{"block_percent", current.BlockPercent, preview.BlockPercent},
+		{"max_hp", current.MaxHP, preview.MaxHP},
+		{"max_mana", current.MaxMana, preview.MaxMana},
+	}
+	deltas := []EquipPreviewDeltaView{}
+	for _, value := range values {
+		delta := value.preview - value.current
+		if math.Abs(delta) < 0.000001 {
+			continue
+		}
+		deltas = append(deltas, EquipPreviewDeltaView{
+			Stat:    value.stat,
+			Current: value.current,
+			Preview: value.preview,
+			Delta:   delta,
+		})
+	}
+	return deltas
+}
+
+func (s *Sim) currentEquippedItems() map[string]*invItem {
+	out := make(map[string]*invItem, len(equipmentSlots))
+	for _, slot := range equipmentSlots {
+		if item := s.findItemByID(s.equipped[slot]); item != nil {
+			out[slot] = item
+		}
+	}
+	return out
+}
+
 func (s *Sim) playerEffectiveCombatStats() (effectiveCombatStats, []StatBreakdownView) {
+	return s.playerEffectiveCombatStatsFor(s.currentEquippedItems())
+}
+
+func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (effectiveCombatStats, []StatBreakdownView) {
 	character := s.characterDerivedStatsView()
 	damageMin := float64(s.rules.Combat.PlayerDamage.Min) + character.DamageMin
 	damageMax := float64(s.rules.Combat.PlayerDamage.Max) + character.DamageMax
@@ -4769,7 +4994,7 @@ func (s *Sim) playerEffectiveCombatStats() (effectiveCombatStats, []StatBreakdow
 	maxHPSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.MaxHP, Kind: "character_formula"}}
 	blockSources := []StatBreakdownSourceView{}
 
-	if weapon := s.equippedWeaponItem(); weapon != nil {
+	if weapon := equippedItems[mainHandSlot]; weapon != nil {
 		baseMin, baseMax, minRoll, maxRoll, label, itemID, ok := s.weaponDamageContributions(weapon)
 		if ok {
 			damageMin = character.DamageMin + baseMin + minRoll
@@ -4788,7 +5013,7 @@ func (s *Sim) playerEffectiveCombatStats() (effectiveCombatStats, []StatBreakdow
 	}
 
 	for _, slot := range equipmentSlots {
-		item := s.findItemByID(s.equipped[slot])
+		item := equippedItems[slot]
 		if item == nil {
 			continue
 		}
@@ -5114,12 +5339,12 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 
 	entities := make([]EntityView, 0, len(ids))
 	for _, id := range ids {
-		entities = append(entities, s.activeLevel().entities[id].view())
+		entities = append(entities, s.entityView(s.activeLevel().entities[id]))
 	}
 
 	inventory := make([]ItemView, 0, len(s.inventory))
 	for _, it := range s.inventory {
-		inventory = append(inventory, it.view())
+		inventory = append(inventory, s.itemView(it))
 	}
 
 	equipped := newSnapshotEquippedMap(s.equipped)

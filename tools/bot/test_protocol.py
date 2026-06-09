@@ -239,6 +239,15 @@ def test_load_scenarios_discovers_inventory_capacity_lab():
     assert any(step.get("expect_reject") == "inventory_full" for step in capacity.steps)
 
 
+def test_load_scenarios_discovers_equipment_requirements_and_preview():
+    scenarios = load_scenarios()
+    requirements = next(s for s in scenarios if s.id == "equipment_requirements_and_preview")
+
+    assert requirements.world_id == "requirements_lab"
+    assert any(step.get("expect_reject") == "requirements_not_met" for step in requirements.steps)
+    assert any(assertion.get("type") == "inventory_requirement_status" for assertion in requirements.assertions)
+
+
 def test_load_scenarios_discovers_combat_control_and_boss_ai_fixes():
     scenarios = load_scenarios()
     combat = next(s for s in scenarios if s.id == "combat_control_and_boss_ai_fixes")
@@ -624,6 +633,69 @@ def test_structured_assertions():
         {"type": "equipped_weapon_def", "item_def_id": "rusty_sword"},
         {"type": "inventory_capacity", "rows": 3, "equals": 15},
     ], entities, inventory, {"main_hand": "1004"}, None, "test", inventory_rows=3, inventory_capacity=15)
+
+
+def test_structured_requirement_and_shop_preview_assertions():
+    requirement_payload = {
+        "item_instance_id": "2004",
+        "item_def_id": "cave_war_sword",
+        "slot": "main_hand",
+        "equipped": False,
+        "requirements_met": False,
+        "requirement_status": [
+            {"stat": "level", "required": 2, "current": 1, "met": False},
+            {"stat": "str", "required": 6, "current": 5, "met": False},
+        ],
+        "equip_preview": {
+            "slot": "main_hand",
+            "requirements_met": False,
+            "deltas": [{"stat": "damage_max", "current": 4, "preview": 8, "delta": 4}],
+        },
+    }
+
+    run_assertions([
+        {
+            "type": "inventory_requirement_status",
+            "item_def_id": "cave_war_sword",
+            "equipped": False,
+            "requirements_met": False,
+            "preview_slot": "main_hand",
+            "preview_requirements_met": False,
+            "preview_delta_stats": ["damage_max"],
+            "status": [
+                {"stat": "level", "required": 2, "current": 1, "met": False},
+                {"stat": "str", "required": 6, "current": 5, "met": False},
+            ],
+        }
+    ], [], [requirement_payload], {}, None, "test")
+
+    state = RuntimeState(gold=100)
+    state.inventory = [requirement_payload]
+    state.shop_offers = {"town_vendor": {"generated:depth1:000": dict(requirement_payload, offer_id="generated:depth1:000", kind="generated", buy_price=50, summary_lines=["Requires STR 6"], category="equipment")}}
+    state.shop_sell_appraisals = {"town_vendor": {"2004": dict(requirement_payload, sell_price=12, summary_lines=["Requires STR 6"], category="equipment")}}
+
+    run_runtime_assertions([
+        {
+            "type": "inventory_requirement_status",
+            "item_def_id": "cave_war_sword",
+            "requirements_met": False,
+            "requires_equip_preview": True,
+        },
+        {
+            "type": "shop_offer_details",
+            "shop_id": "town_vendor",
+            "equals": 1,
+            "requires_requirement_status": True,
+            "requires_equip_preview": True,
+        },
+        {
+            "type": "shop_sell_appraisal_details",
+            "shop_id": "town_vendor",
+            "equals": 1,
+            "requires_requirement_status": True,
+            "requires_equip_preview": True,
+        },
+    ], state, "test")
 
 
 def test_structured_assertions_support_range_comparators_and_filters():

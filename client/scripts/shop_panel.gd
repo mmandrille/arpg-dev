@@ -157,6 +157,8 @@ func get_debug_state() -> Dictionary:
 		"sell_rows": _debug_sell_rows(),
 		"sell_row_count": _sell_rows().size(),
 		"comparison_row_count": _comparison_row_count(),
+		"requirement_row_count": _requirement_row_count(),
+		"equip_preview_row_count": _equip_preview_row_count(),
 		"vendor_columns": VENDOR_COLUMNS,
 		"vendor_rows": VENDOR_ROWS,
 		"vendor_slot_count": VENDOR_SLOT_COUNT,
@@ -516,6 +518,8 @@ func _debug_sell_rows() -> Array:
 			"sell_price": int(item.get("sell_price", 0)),
 			"summary_lines": _detail_lines(item),
 			"comparison_count": _comparison_count(item),
+			"requirement_count": _requirement_lines(item).size(),
+			"equip_preview_count": _equip_preview_count(item),
 		})
 	return out
 
@@ -538,6 +542,8 @@ func _debug_offer_rows() -> Array:
 			"buy_price": int(rec.get("buy_price", 0)),
 			"summary_lines": _detail_lines(rec),
 			"comparison_count": _comparison_count(rec),
+			"requirement_count": _requirement_lines(rec).size(),
+			"equip_preview_count": _equip_preview_count(rec),
 		})
 	return out
 
@@ -549,6 +555,26 @@ func _comparison_row_count() -> int:
 			total += _comparison_count(offer as Dictionary)
 	for item in _sell_rows():
 		total += _comparison_count(item)
+	return total
+
+
+func _requirement_row_count() -> int:
+	var total := 0
+	for offer in offers:
+		if typeof(offer) == TYPE_DICTIONARY:
+			total += _requirement_lines(offer as Dictionary).size()
+	for item in _sell_rows():
+		total += _requirement_lines(item).size()
+	return total
+
+
+func _equip_preview_row_count() -> int:
+	var total := 0
+	for offer in offers:
+		if typeof(offer) == TYPE_DICTIONARY:
+			total += _equip_preview_count(offer as Dictionary)
+	for item in _sell_rows():
+		total += _equip_preview_count(item)
 	return total
 
 
@@ -640,6 +666,25 @@ func _detail_lines(row: Dictionary, include_requirements: bool = true, include_c
 
 func _requirement_lines(row: Dictionary) -> Array:
 	var lines: Array = []
+	var statuses = row.get("requirement_status", [])
+	if typeof(statuses) == TYPE_ARRAY:
+		for status in statuses:
+			if typeof(status) != TYPE_DICTIONARY:
+				continue
+			var status_rec := status as Dictionary
+			var stat := str(status_rec.get("stat", ""))
+			var required := int(status_rec.get("required", 0))
+			if stat == "" or required <= 0:
+				continue
+			var current := int(status_rec.get("current", 0))
+			var met := bool(status_rec.get("met", current >= required))
+			var suffix := "" if met else "(%d)" % (current - required)
+			lines.append({
+				"text": "%s %d%s" % [_display_stat(stat), required, suffix],
+				"color": _requirement_color(met),
+			})
+	if not lines.is_empty():
+		return lines
 	var req = row.get("requirements", {})
 	if typeof(req) == TYPE_DICTIONARY:
 		var rec := req as Dictionary
@@ -679,6 +724,7 @@ func _requirement_from_summary_line(text: String) -> String:
 
 func _comparison_entries(row: Dictionary) -> Array:
 	var entries: Array = []
+	_append_equip_preview_entries(entries, row)
 	var comparison = row.get("comparison", {})
 	if typeof(comparison) == TYPE_DICTIONARY:
 		var deltas = (comparison as Dictionary).get("deltas", [])
@@ -712,6 +758,25 @@ func _comparison_entries(row: Dictionary) -> Array:
 				"color": _comparison_color(int(diff_value)),
 			})
 	return entries
+
+
+func _append_equip_preview_entries(entries: Array, row: Dictionary) -> void:
+	var preview = row.get("equip_preview", {})
+	if typeof(preview) != TYPE_DICTIONARY:
+		return
+	var deltas = (preview as Dictionary).get("deltas", [])
+	if typeof(deltas) != TYPE_ARRAY:
+		return
+	for delta in deltas:
+		if typeof(delta) != TYPE_DICTIONARY:
+			continue
+		var rec := delta as Dictionary
+		var diff := int(rec.get("delta", 0))
+		var sign := "+" if diff >= 0 else ""
+		entries.append({
+			"text": "%s%s %s preview" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))],
+			"color": _comparison_color(diff),
+		})
 
 
 func _comparison_delta_from_line(text: String):
@@ -776,8 +841,32 @@ func _comparison_count(row: Dictionary) -> int:
 	return (deltas as Array).size()
 
 
+func _requirement_color(met: bool) -> Color:
+	return Color("#9ee6a8") if met else Color("#ff6f6f")
+
+
+func _equip_preview_count(row: Dictionary) -> int:
+	var preview = row.get("equip_preview", {})
+	if typeof(preview) != TYPE_DICTIONARY:
+		return 0
+	var deltas = (preview as Dictionary).get("deltas", [])
+	if typeof(deltas) != TYPE_ARRAY:
+		return 0
+	return (deltas as Array).size()
+
+
 func _display_stat(stat: String) -> String:
 	match stat:
+		"level":
+			return "Level"
+		"str":
+			return "STR"
+		"dex":
+			return "DEX"
+		"vit":
+			return "VIT"
+		"magic":
+			return "Magic"
 		"damage_min":
 			return "Min damage"
 		"damage_max":

@@ -85,6 +85,9 @@
         "boss_phase": { "$ref": "#/$defs/boss_phase" },
         "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
         "requirements": { "$ref": "#/$defs/requirements" },
+        "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
+        "requirements_met": { "type": "boolean" },
+        "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "interactable_def_id": { "type": "string" },
         "owner_id": { "$ref": "#/$defs/decimal_id" },
@@ -118,6 +121,9 @@
         "rarity": { "type": "string" },
         "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
         "requirements": { "$ref": "#/$defs/requirements" },
+        "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
+        "requirements_met": { "type": "boolean" },
+        "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
         "equipped": { "type": "boolean" }
@@ -140,7 +146,50 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "level": { "type": "integer", "minimum": 1 }
+        "level": { "type": "integer", "minimum": 1 },
+        "str": { "type": "integer", "minimum": 1 },
+        "dex": { "type": "integer", "minimum": 1 },
+        "vit": { "type": "integer", "minimum": 1 },
+        "magic": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "requirement_status": {
+      "type": "object",
+      "required": ["stat", "required", "current", "met"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "type": "string", "enum": ["level", "str", "dex", "vit", "magic"] },
+        "required": { "type": "integer", "minimum": 1 },
+        "current": { "type": "integer", "minimum": 0 },
+        "met": { "type": "boolean" }
+      }
+    },
+    "requirement_status_list": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/requirement_status" }
+    },
+    "equip_preview_delta": {
+      "type": "object",
+      "required": ["stat", "current", "preview", "delta"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "type": "string" },
+        "current": { "type": "number" },
+        "preview": { "type": "number" },
+        "delta": { "type": "number" }
+      }
+    },
+    "equip_preview": {
+      "type": "object",
+      "required": ["slot", "requirements_met", "deltas"],
+      "additionalProperties": false,
+      "properties": {
+        "slot": { "type": "string", "enum": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring", "ring_left", "ring_right", "main_hand", "off_hand"] },
+        "requirements_met": { "type": "boolean" },
+        "deltas": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/equip_preview_delta" }
+        }
       }
     },
     "effect_ids": {

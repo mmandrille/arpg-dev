@@ -27,7 +27,7 @@ func _run() -> void:
 	var offers := [
 		{"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
 		{"offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 mana"]},
-		{"offer_id": "generated:depth3:000", "kind": "generated", "item_template_id": "cave_bow", "item_def_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "rolled_stats": {"damage_min": 2, "damage_max": 5}, "buy_price": 50, "summary_lines": ["Slot: Main hand", "Damage 2-5", "Requires level 1"], "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 5, "equipped": 4, "delta": 1}]}},
+		{"offer_id": "generated:depth3:000", "kind": "generated", "item_template_id": "cave_bow", "item_def_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "rolled_stats": {"damage_min": 2, "damage_max": 5}, "buy_price": 50, "summary_lines": ["Slot: Main hand", "Damage 2-5", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 9, "delta": 5}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 5, "equipped": 4, "delta": 1}]}},
 		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "cave_gloves", "item_def_id": "cave_gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"], "comparison": {"slot": "gloves", "deltas": [{"stat": "armor", "offered": 3, "equipped": 0, "delta": 3}]}},
 	]
 	var inventory := [
@@ -35,7 +35,7 @@ func _run() -> void:
 		{"item_instance_id": "2002", "item_def_id": "red_potion"},
 	]
 	var sell_appraisals := [
-		{"item_instance_id": "2001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "sell_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-5", "Requires level 1"], "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 5, "equipped": 4, "delta": 1}]}},
+		{"item_instance_id": "2001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "sell_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-5", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 9, "delta": 5}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 5, "equipped": 4, "delta": 1}]}},
 		{"item_instance_id": "2002", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "sell_price": 5, "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
 	]
 	panel.show_shop("1004", "town_vendor", offers, 60, inventory, {}, "Town Vendor", sell_appraisals)
@@ -51,6 +51,8 @@ func _run() -> void:
 	var sell_rows: Array = state.get("sell_rows", [])
 	_assert_true("sell rows include price", not sell_rows.is_empty() and int((sell_rows[0] as Dictionary).get("sell_price", 0)) > 0)
 	_assert_true("comparisons rendered", int(state.get("comparison_row_count", 0)) >= 2)
+	_assert_true("requirements rendered", int(state.get("requirement_row_count", 0)) >= 4)
+	_assert_true("equip previews rendered", int(state.get("equip_preview_row_count", 0)) >= 2)
 	_assert_eq("vendor grid columns", int(state.get("vendor_columns", 0)), 5)
 	_assert_eq("vendor grid rows", int(state.get("vendor_rows", 0)), 10)
 	_assert_eq("vendor slot count", int(state.get("vendor_slot_count", 0)), 50)
@@ -59,9 +61,11 @@ func _run() -> void:
 	var tooltip_lines: Array = panel._tooltip_lines(offers[2])
 	_assert_false("tooltip stats exclude requirements", _array_contains_text(tooltip_lines, "Requires"))
 	_assert_false("tooltip stats exclude comparison", _array_contains_text(tooltip_lines, "vs equipped"))
-	_assert_true("tooltip requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "Level 1"))
+	_assert_true("tooltip requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "Level 2"))
+	_assert_true("tooltip stat requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "STR 15(-3)"))
 	var comparison_entries: Array = panel._comparison_entries(offers[2])
-	_assert_true("tooltip comparison extracted", not comparison_entries.is_empty() and str((comparison_entries[0] as Dictionary).get("text", "")).contains("vs equipped"))
+	_assert_true("tooltip preview extracted", _array_contains_text(comparison_entries, "preview"))
+	_assert_true("tooltip comparison extracted", _array_contains_text(comparison_entries, "vs equipped"))
 	var offer_tooltip := panel._make_offer_tooltip(offers[2])
 	_assert_eq("vendor tooltip uses shared panel", offer_tooltip.get_script(), ItemTooltipPanelScript)
 	offer_tooltip.queue_free()
@@ -90,12 +94,19 @@ func _run() -> void:
 		inventory_emitted.append({"type": intent_type, "payload": payload.duplicate(true)})
 	)
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
+	inventory_panel.set_inventory_state([sell_appraisals[0]], {}, 3, 15, 60)
+	var inventory_state := inventory_panel.get_debug_state()
+	_assert_true("inventory requirements rendered", int(inventory_state.get("requirement_row_count", 0)) >= 2)
+	_assert_true("inventory equip previews rendered", int(inventory_state.get("equip_preview_row_count", 0)) >= 1)
 	var inventory_tooltip := inventory_panel._make_item_tooltip(sell_appraisals[0])
 	_assert_eq("inventory tooltip uses shared panel", inventory_tooltip.get_script(), ItemTooltipPanelScript)
 	_assert_false("inventory tooltip stats exclude requirements", _array_contains_text(inventory_panel._tooltip_lines(sell_appraisals[0]), "Requires"))
-	_assert_true("inventory tooltip requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "Level 1"))
-	_assert_true("inventory tooltip comparison extracted", not inventory_panel._comparison_entries(sell_appraisals[0]).is_empty())
+	_assert_true("inventory tooltip requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "Level 2"))
+	_assert_true("inventory tooltip stat requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "STR 15(-3)"))
+	_assert_true("inventory tooltip preview extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "preview"))
+	_assert_true("inventory tooltip comparison extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "vs equipped"))
 	inventory_tooltip.queue_free()
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
 	inventory_panel._handle_drop_on_slot("bag", {
 		"source": "shop_offer",
 		"shop_entity_id": "1004",

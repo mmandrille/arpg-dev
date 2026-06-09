@@ -496,6 +496,18 @@
         { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
       ]
     },
+    "requirements_lab": {
+      "player": { "position": { "x": 2, "y": 5 } },
+      "entities": [
+        { "type": "loot", "item_template_id": "cave_war_sword", "position": { "x": 3, "y": 5 } },
+        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 7, "y": 4 } },
+        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 7, "y": 6 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+      ]
+    },
     "inventory_capacity_lab": {
       "player": { "position": { "x": 2, "y": 5 } },
       "entities": [

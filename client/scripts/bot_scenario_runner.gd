@@ -27,6 +27,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
 	"assert_inventory_capacity", "assert_bag_grid", "assert_paper_doll_layout",
+	"assert_inventory_panel_details",
 	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
 	"assert_entity_reaction",
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
@@ -56,7 +57,7 @@ const ALL_STEP_TYPES: Array = [
 	"use_hotbar_slot", "assert_hotbar_assigned", "wait_hotbar_assigned",
 	"assert_hotbar_capacity", "wait_hotbar_capacity",
 	"assert_hotbar_slot_disabled", "assert_inventory_capacity", "assert_bag_grid",
-	"assert_paper_doll_layout",
+	"assert_paper_doll_layout", "assert_inventory_panel_details",
 	"assert_player_hp", "double_click_bag_item", "wait_main_menu",
 	"wait_character_panel", "wait_settings_panel", "wait_pause_menu",
 	"assert_main_menu_visible", "assert_character_panel_visible",
@@ -484,6 +485,8 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_bag_grid(step, state)
 		"assert_paper_doll_layout":
 			return _assert_paper_doll_layout(step, state)
+		"assert_inventory_panel_details":
+			return _assert_inventory_panel_details(step, state)
 		"assert_player_hp":
 			var want_hp := int(step.get("equals", -1))
 			var got_hp := int(state.get("player_hp", -1))
@@ -780,6 +783,38 @@ func _assert_paper_doll_layout(step: Dictionary, state: Dictionary) -> bool:
 	return true
 
 
+func _assert_inventory_panel_details(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("inventory_panel", {})
+	if bool(step.get("visible", false)) and not bool(state.get("inventory_panel_visible", false)):
+		_fail("assert_inventory_panel_details failed: panel hidden step=%d scenario=%s" % [
+			_step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	var requirement_rows := int(panel.get("requirement_row_count", 0))
+	var preview_rows := int(panel.get("equip_preview_row_count", 0))
+	if bool(step.get("requires_requirement_status", false)) and requirement_rows <= 0:
+		_fail("assert_inventory_panel_details failed: missing requirement rows panel=%s step=%d scenario=%s" % [
+			str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if bool(step.get("requires_equip_preview", false)) and preview_rows <= 0:
+		_fail("assert_inventory_panel_details failed: missing equip preview rows panel=%s step=%d scenario=%s" % [
+			str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("requirement_rows_at_least") and requirement_rows < int(step.get("requirement_rows_at_least", 0)):
+		_fail("assert_inventory_panel_details failed: requirement rows want>=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("requirement_rows_at_least", 0)), requirement_rows, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("equip_preview_rows_at_least") and preview_rows < int(step.get("equip_preview_rows_at_least", 0)):
+		_fail("assert_inventory_panel_details failed: preview rows want>=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("equip_preview_rows_at_least", 0)), preview_rows, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
 func _assert_shop_offer_count(step: Dictionary, state: Dictionary) -> bool:
 	if _shop_offer_count_matches(step, state):
 		return true
@@ -862,6 +897,16 @@ func _assert_shop_detail_rows(label: String, step: Dictionary, rows: Array, pric
 			return false
 		if bool(step.get("requires_comparison", false)) and int(rec.get("comparison_count", 0)) <= 0:
 			_fail("%s failed: missing comparison row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("requires_requirement_status", false)) and int(rec.get("requirement_count", 0)) <= 0:
+			_fail("%s failed: missing requirement status row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("requires_equip_preview", false)) and int(rec.get("equip_preview_count", 0)) <= 0:
+			_fail("%s failed: missing equip preview row=%s step=%d scenario=%s" % [
 				label, str(rec), _step_index, str(scenario.get("id", "?"))
 			])
 			return false

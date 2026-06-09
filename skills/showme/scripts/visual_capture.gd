@@ -10,6 +10,7 @@ const ITEM_SLOT := {
 	"rusty_sword": "main_hand",
 	"cave_blade": "main_hand",
 	"cave_greatsword": "main_hand",
+	"cave_war_sword": "main_hand",
 	"training_bow": "main_hand",
 	"cave_bow": "main_hand",
 	"cave_shield": "off_hand",
@@ -147,7 +148,8 @@ func _setup_inventory() -> void:
 	var panel = InventoryPanelScript.new()
 	get_root().add_child(panel)
 	await process_frame
-	panel.set_inventory_state(_inventory_items(), {
+	var items := _inventory_items()
+	panel.set_inventory_state(items, {
 		"head": "2001",
 		"amulet": null,
 		"chest": "2002",
@@ -160,6 +162,9 @@ func _setup_inventory() -> void:
 		"off_hand": "2006",
 	}, 4, 20, 145)
 	panel.ensure_display_visible()
+	var tooltip = panel._make_item_tooltip(items[items.size() - 1])
+	tooltip.position = Vector2(524, 28)
+	get_root().add_child(tooltip)
 
 
 func _setup_shop() -> void:
@@ -234,6 +239,30 @@ func _inventory_items() -> Array:
 		{"item_instance_id": "2007", "item_def_id": "red_potion", "slot": "", "equipped": false, "rarity": "common"},
 		{"item_instance_id": "2008", "item_def_id": "blue_potion", "slot": "", "equipped": false, "rarity": "common"},
 		{"item_instance_id": "2009", "item_def_id": "cave_ring", "slot": "ring_left", "equipped": false, "rarity": "rare"},
+		{
+			"item_instance_id": "2010",
+			"item_def_id": "cave_war_sword",
+			"item_template_id": "cave_war_sword",
+			"display_name": "Rare Cave War Sword",
+			"slot": "main_hand",
+			"equipped": false,
+			"rarity": "rare",
+			"rolled_stats": {"damage_min": 6, "damage_max": 11},
+			"requirements": {"level": 2, "str": 15},
+			"requirement_status": [
+				{"stat": "level", "required": 2, "current": 2, "met": true},
+				{"stat": "str", "required": 15, "current": 12, "met": false}
+			],
+			"requirements_met": false,
+			"equip_preview": {
+				"slot": "main_hand",
+				"requirements_met": false,
+				"deltas": [
+					{"stat": "damage_max", "current": 7, "preview": 11, "delta": 4}
+				]
+			},
+			"summary_lines": ["Slot: main hand", "Damage 6-11"],
+		},
 	]
 
 

@@ -16,48 +16,54 @@ type Vec2 struct {
 // HP/MaxHP are pointers so a value of 0 (a dead monster) is preserved while a
 // loot entity simply omits them.
 type EntityView struct {
-	ID                string         `json:"id"`
-	Type              string         `json:"type"`
-	Position          Vec2           `json:"position"`
-	HP                *int           `json:"hp,omitempty"`
-	MaxHP             *int           `json:"max_hp,omitempty"`
-	Mana              *int           `json:"mana,omitempty"`
-	MaxMana           *int           `json:"max_mana,omitempty"`
-	CharacterID       string         `json:"character_id,omitempty"`
-	MonsterDefID      string         `json:"monster_def_id,omitempty"`
-	IsBoss            bool           `json:"is_boss,omitempty"`
-	BossTemplateID    string         `json:"boss_template_id,omitempty"`
-	VisualModel       string         `json:"visual_model,omitempty"`
-	VisualScale       float64        `json:"visual_scale,omitempty"`
-	VisualTint        string         `json:"visual_tint,omitempty"`
-	BossPhase         *BossPhaseView `json:"boss_phase,omitempty"`
-	ItemDefID         string         `json:"item_def_id,omitempty"`
-	Amount            *int           `json:"amount,omitempty"`
-	ItemTemplateID    string         `json:"item_template_id,omitempty"`
-	DisplayName       string         `json:"display_name,omitempty"`
-	Rarity            string         `json:"rarity,omitempty"`
-	RolledStats       map[string]int `json:"rolled_stats,omitempty"`
-	Requirements      map[string]int `json:"requirements,omitempty"`
-	EffectIDs         []string       `json:"effect_ids,omitempty"`
-	InteractableDefID string         `json:"interactable_def_id,omitempty"`
-	OwnerID           string         `json:"owner_id,omitempty"`
-	TargetID          string         `json:"target_id,omitempty"`
-	ProjectileDefID   string         `json:"projectile_def_id,omitempty"`
-	State             string         `json:"state,omitempty"`
+	ID                string                  `json:"id"`
+	Type              string                  `json:"type"`
+	Position          Vec2                    `json:"position"`
+	HP                *int                    `json:"hp,omitempty"`
+	MaxHP             *int                    `json:"max_hp,omitempty"`
+	Mana              *int                    `json:"mana,omitempty"`
+	MaxMana           *int                    `json:"max_mana,omitempty"`
+	CharacterID       string                  `json:"character_id,omitempty"`
+	MonsterDefID      string                  `json:"monster_def_id,omitempty"`
+	IsBoss            bool                    `json:"is_boss,omitempty"`
+	BossTemplateID    string                  `json:"boss_template_id,omitempty"`
+	VisualModel       string                  `json:"visual_model,omitempty"`
+	VisualScale       float64                 `json:"visual_scale,omitempty"`
+	VisualTint        string                  `json:"visual_tint,omitempty"`
+	BossPhase         *BossPhaseView          `json:"boss_phase,omitempty"`
+	ItemDefID         string                  `json:"item_def_id,omitempty"`
+	Amount            *int                    `json:"amount,omitempty"`
+	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
+	DisplayName       string                  `json:"display_name,omitempty"`
+	Rarity            string                  `json:"rarity,omitempty"`
+	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
+	Requirements      map[string]int          `json:"requirements,omitempty"`
+	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
+	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
+	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
+	EffectIDs         []string                `json:"effect_ids,omitempty"`
+	InteractableDefID string                  `json:"interactable_def_id,omitempty"`
+	OwnerID           string                  `json:"owner_id,omitempty"`
+	TargetID          string                  `json:"target_id,omitempty"`
+	ProjectileDefID   string                  `json:"projectile_def_id,omitempty"`
+	State             string                  `json:"state,omitempty"`
 }
 
 // ItemView is the protocol view of an inventory item.
 type ItemView struct {
-	ItemInstanceID string         `json:"item_instance_id"`
-	ItemDefID      string         `json:"item_def_id"`
-	ItemTemplateID string         `json:"item_template_id,omitempty"`
-	DisplayName    string         `json:"display_name,omitempty"`
-	Rarity         string         `json:"rarity,omitempty"`
-	RolledStats    map[string]int `json:"rolled_stats,omitempty"`
-	Requirements   map[string]int `json:"requirements,omitempty"`
-	EffectIDs      []string       `json:"effect_ids,omitempty"`
-	Slot           string         `json:"slot"`
-	Equipped       bool           `json:"equipped"`
+	ItemInstanceID    string                  `json:"item_instance_id"`
+	ItemDefID         string                  `json:"item_def_id"`
+	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
+	DisplayName       string                  `json:"display_name,omitempty"`
+	Rarity            string                  `json:"rarity,omitempty"`
+	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
+	Requirements      map[string]int          `json:"requirements,omitempty"`
+	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
+	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
+	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
+	EffectIDs         []string                `json:"effect_ids,omitempty"`
+	Slot              string                  `json:"slot"`
+	Equipped          bool                    `json:"equipped"`
 }
 
 // ItemRollPayload is the durable JSON payload stored in rolled_stats columns.
@@ -120,6 +126,32 @@ type DerivedStatsView struct {
 	MaxMana       float64 `json:"max_mana"`
 }
 
+// RequirementStatusView is the server-authored usability state for one item
+// requirement against the current character.
+type RequirementStatusView struct {
+	Stat     string `json:"stat"`
+	Required int    `json:"required"`
+	Current  int    `json:"current"`
+	Met      bool   `json:"met"`
+}
+
+// EquipPreviewDeltaView describes one derived-stat change if an item were
+// equipped through the same server stat path used by combat.
+type EquipPreviewDeltaView struct {
+	Stat    string  `json:"stat"`
+	Current float64 `json:"current"`
+	Preview float64 `json:"preview"`
+	Delta   float64 `json:"delta"`
+}
+
+// EquipPreviewView is a server-authored equipment preview rendered by the
+// inventory and shop UI.
+type EquipPreviewView struct {
+	Slot            string                  `json:"slot"`
+	RequirementsMet bool                    `json:"requirements_met"`
+	Deltas          []EquipPreviewDeltaView `json:"deltas"`
+}
+
 // StatBreakdownSourceView is one source row for an effective combat stat.
 type StatBreakdownSourceView struct {
 	Label          string  `json:"label"`
@@ -154,22 +186,25 @@ type CharacterProgressionView struct {
 
 // ShopOfferView is one server-authoritative offer rendered inside shop events.
 type ShopOfferView struct {
-	OfferID        string              `json:"offer_id"`
-	Kind           string              `json:"kind"`
-	ItemDefID      string              `json:"item_def_id"`
-	ItemTemplateID string              `json:"item_template_id,omitempty"`
-	DisplayName    string              `json:"display_name"`
-	Rarity         string              `json:"rarity,omitempty"`
-	Slot           string              `json:"slot,omitempty"`
-	Category       string              `json:"category,omitempty"`
-	RolledStats    map[string]int      `json:"rolled_stats,omitempty"`
-	Requirements   map[string]int      `json:"requirements,omitempty"`
-	EffectIDs      []string            `json:"effect_ids,omitempty"`
-	BuyPrice       int                 `json:"buy_price"`
-	SummaryLines   []string            `json:"summary_lines,omitempty"`
-	Comparison     *ShopComparisonView `json:"comparison,omitempty"`
-	Source         string              `json:"source,omitempty"`
-	Depth          int                 `json:"depth,omitempty"`
+	OfferID           string                  `json:"offer_id"`
+	Kind              string                  `json:"kind"`
+	ItemDefID         string                  `json:"item_def_id"`
+	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
+	DisplayName       string                  `json:"display_name"`
+	Rarity            string                  `json:"rarity,omitempty"`
+	Slot              string                  `json:"slot,omitempty"`
+	Category          string                  `json:"category,omitempty"`
+	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
+	Requirements      map[string]int          `json:"requirements,omitempty"`
+	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
+	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
+	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
+	EffectIDs         []string                `json:"effect_ids,omitempty"`
+	BuyPrice          int                     `json:"buy_price"`
+	SummaryLines      []string                `json:"summary_lines,omitempty"`
+	Comparison        *ShopComparisonView     `json:"comparison,omitempty"`
+	Source            string                  `json:"source,omitempty"`
+	Depth             int                     `json:"depth,omitempty"`
 }
 
 // ShopComparisonDeltaView describes one direct stat comparison between a
@@ -191,19 +226,22 @@ type ShopComparisonView struct {
 // ShopSellAppraisalView is one server-authored sell quote for an unequipped
 // inventory item at the currently opened vendor.
 type ShopSellAppraisalView struct {
-	ItemInstanceID string              `json:"item_instance_id"`
-	ItemDefID      string              `json:"item_def_id"`
-	ItemTemplateID string              `json:"item_template_id,omitempty"`
-	DisplayName    string              `json:"display_name"`
-	Rarity         string              `json:"rarity,omitempty"`
-	Slot           string              `json:"slot,omitempty"`
-	Category       string              `json:"category,omitempty"`
-	RolledStats    map[string]int      `json:"rolled_stats,omitempty"`
-	Requirements   map[string]int      `json:"requirements,omitempty"`
-	EffectIDs      []string            `json:"effect_ids,omitempty"`
-	SellPrice      int                 `json:"sell_price"`
-	SummaryLines   []string            `json:"summary_lines,omitempty"`
-	Comparison     *ShopComparisonView `json:"comparison,omitempty"`
+	ItemInstanceID    string                  `json:"item_instance_id"`
+	ItemDefID         string                  `json:"item_def_id"`
+	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
+	DisplayName       string                  `json:"display_name"`
+	Rarity            string                  `json:"rarity,omitempty"`
+	Slot              string                  `json:"slot,omitempty"`
+	Category          string                  `json:"category,omitempty"`
+	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
+	Requirements      map[string]int          `json:"requirements,omitempty"`
+	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
+	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
+	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
+	EffectIDs         []string                `json:"effect_ids,omitempty"`
+	SellPrice         int                     `json:"sell_price"`
+	SummaryLines      []string                `json:"summary_lines,omitempty"`
+	Comparison        *ShopComparisonView     `json:"comparison,omitempty"`
 }
 
 // HotbarSlotView is one fixed hotbar assignment in the protocol snapshot.

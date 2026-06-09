@@ -964,7 +964,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			rec["item_def_id"] = str(e["item_def_id"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
+		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
 			if e.has(key):
 				rec[key] = e[key]
 		if e.has("is_boss"):

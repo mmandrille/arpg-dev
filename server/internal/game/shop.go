@@ -26,7 +26,7 @@ func (s *Sim) shopCatalogFor(shopID, characterID string, deepestDepth int) ([]Sh
 	for _, offer := range shop.FixedOffers {
 		item := s.rules.Items[offer.ItemDefID]
 		stats := fixedItemStats(item)
-		offers = append(offers, ShopOfferView{
+		view := ShopOfferView{
 			OfferID:      offer.OfferID,
 			Kind:         shopOfferKindFixed,
 			ItemDefID:    offer.ItemDefID,
@@ -36,7 +36,9 @@ func (s *Sim) shopCatalogFor(shopID, characterID string, deepestDepth int) ([]Sh
 			BuyPrice:     offer.BuyPrice,
 			SummaryLines: s.itemSummaryLines(item.Category, item.Slot, stats, nil, nil, &item),
 			Comparison:   s.shopComparisonForItem(item.Slot, stats),
-		})
+		}
+		s.annotateShopOfferView(&view, &invItem{instanceID: previewItemInstanceID(), itemDefID: offer.ItemDefID})
+		offers = append(offers, view)
 	}
 	offers = append(offers, s.generatedShopOffers(shopID, shop, characterID, deepestDepth)...)
 	return offers, true
@@ -75,7 +77,12 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 			}
 			stats := cloneIntMap(payload.Stats)
 			offerIndex := len(offers)
-			offers = append(offers, ShopOfferView{
+			item := &invItem{
+				instanceID:  previewItemInstanceID(),
+				itemDefID:   templateID,
+				rollPayload: cloneRollPayload(&payload),
+			}
+			view := ShopOfferView{
 				OfferID:        fmt.Sprintf("generated:depth%d:%03d", depth, offerIndex),
 				Kind:           shopOfferKindGenerated,
 				ItemDefID:      templateID,
@@ -92,7 +99,9 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 				Comparison:     s.shopComparisonForItem(template.Slot, stats),
 				Source:         gen.Source,
 				Depth:          depth,
-			})
+			}
+			s.annotateShopOfferView(&view, item)
+			offers = append(offers, view)
 			if len(offers) >= gen.OfferCount {
 				break
 			}
@@ -198,7 +207,7 @@ func (s *Sim) shopSellAppraisals(shopID string) []ShopSellAppraisalView {
 }
 
 func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellAppraisalView {
-	view := item.view()
+	view := s.itemView(item)
 	category := ""
 	stats := fixedItemStats(s.rules.Items[item.itemDefID])
 	if item.rollPayload != nil {
@@ -210,19 +219,35 @@ func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellApprai
 		category = def.Category
 	}
 	return ShopSellAppraisalView{
-		ItemInstanceID: view.ItemInstanceID,
-		ItemDefID:      view.ItemDefID,
-		ItemTemplateID: view.ItemTemplateID,
-		DisplayName:    s.displayNameForItem(item),
-		Rarity:         view.Rarity,
-		Slot:           view.Slot,
-		Category:       category,
-		RolledStats:    view.RolledStats,
-		Requirements:   view.Requirements,
-		EffectIDs:      view.EffectIDs,
-		SellPrice:      sellPrice,
-		SummaryLines:   s.itemSummaryLines(category, view.Slot, stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
-		Comparison:     s.shopComparisonForItem(view.Slot, stats),
+		ItemInstanceID:    view.ItemInstanceID,
+		ItemDefID:         view.ItemDefID,
+		ItemTemplateID:    view.ItemTemplateID,
+		DisplayName:       s.displayNameForItem(item),
+		Rarity:            view.Rarity,
+		Slot:              view.Slot,
+		Category:          category,
+		RolledStats:       view.RolledStats,
+		Requirements:      view.Requirements,
+		RequirementStatus: view.RequirementStatus,
+		RequirementsMet:   view.RequirementsMet,
+		EquipPreview:      view.EquipPreview,
+		EffectIDs:         view.EffectIDs,
+		SellPrice:         sellPrice,
+		SummaryLines:      s.itemSummaryLines(category, view.Slot, stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
+		Comparison:        s.shopComparisonForItem(view.Slot, stats),
+	}
+}
+
+func (s *Sim) annotateShopOfferView(view *ShopOfferView, item *invItem) {
+	if view == nil || item == nil {
+		return
+	}
+	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+		view.RequirementStatus = status
+		view.RequirementsMet = met
+	})
+	if preview := s.equipPreviewForItem(item, view.Slot); preview != nil {
+		view.EquipPreview = preview
 	}
 }
 
@@ -271,10 +296,12 @@ func (s *Sim) itemSummaryLines(category, slot string, stats map[string]int, requ
 		}
 	}
 	lines = append(lines, statSummaryLines(stats)...)
-	if level := requirements["level"]; level > 1 {
-		lines = append(lines, fmt.Sprintf("Requires level %d", level))
-	} else if level == 1 {
-		lines = append(lines, "Requires level 1")
+	for _, stat := range requirementStatOrder() {
+		required := requirements[stat]
+		if required <= 0 {
+			continue
+		}
+		lines = append(lines, fmt.Sprintf("Requires %s %d", displayRequirementName(stat), required))
 	}
 	for _, effectID := range effectIDs {
 		if effectID != "" {
@@ -282,6 +309,23 @@ func (s *Sim) itemSummaryLines(category, slot string, stats map[string]int, requ
 		}
 	}
 	return lines
+}
+
+func displayRequirementName(stat string) string {
+	switch stat {
+	case "level":
+		return "level"
+	case "str":
+		return "STR"
+	case "dex":
+		return "DEX"
+	case "vit":
+		return "VIT"
+	case "magic":
+		return "Magic"
+	default:
+		return displayStatName(stat)
+	}
 }
 
 func statSummaryLines(stats map[string]int) []string {

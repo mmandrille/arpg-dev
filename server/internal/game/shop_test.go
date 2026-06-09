@@ -247,6 +247,104 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 	}
 }
 
+func TestShopRequirementPreviewAndPurchase(t *testing.T) {
+	var golden struct {
+		TemplateID     string                     `json:"template_id"`
+		FreshCharacter equipmentRequirementGolden `json:"fresh_character"`
+		ExpectedReject string                     `json:"expected_reject"`
+	}
+	loadGolden(t, "equipment_requirements.json", &golden)
+
+	rules := cloneRules(loadRules(t))
+	rules.TreasureClasses["test_requirements_shop_tc"] = TreasureClassDef{Attempts: []TreasureAttemptDef{{
+		AttemptID:     "requirements_offer",
+		SuccessWeight: 1,
+		NoDropWeight:  0,
+		Entries: []TreasureClassEntry{{
+			ItemTemplateID: golden.TemplateID,
+			Weight:         1,
+		}},
+	}}}
+	rules.LootTables["test_requirements_shop_drop"] = LootTable{TreasureClassID: "test_requirements_shop_tc"}
+	rules.DungeonGeneration.LootBands = []DungeonLootBand{{
+		MinDepth:         1,
+		MonsterLootTable: "test_requirements_shop_drop",
+		ChestLootTable:   "test_requirements_shop_drop",
+	}}
+	sim, err := NewSimWithWorldProgression("sess_shop_requirements", "v43_requirements_shop", rules, "dungeon_levels", CharacterProgressionState{
+		Level:               1,
+		Gold:                1000,
+		DeepestDungeonDepth: 1,
+		BaseStats:           rules.CharacterProgression.BaseStats,
+	})
+	if err != nil {
+		t.Fatalf("new requirements shop sim: %v", err)
+	}
+	sim.SetPlayerMetadata(sim.DefaultPlayerID(), "acct_shop", "char_01H00000000000000000000043", "Hero", "host")
+	vendor := townVendorEntity(t, sim)
+	moveDefaultPlayerTo(sim, Vec2{X: 6, Y: 12})
+	sim.savePlayer(sim.defaultPlayer())
+
+	open := sim.Tick([]Input{{
+		Type:      "action_intent",
+		MessageID: "msg_open_requirements_shop",
+		Action:    &ActionIntent{TargetID: idStr(vendor.id)},
+	}})
+	opened := findEvent(open.Events, "shop_opened")
+	if opened == nil {
+		t.Fatalf("missing shop_opened event: %+v", open)
+	}
+	offer := findGeneratedOfferByTemplate(opened.Offers, golden.TemplateID)
+	if offer == nil {
+		t.Fatalf("missing generated %s offer: %+v", golden.TemplateID, opened.Offers)
+	}
+	assertRequirementStatus(t, offer.RequirementStatus, golden.FreshCharacter.Status)
+	if offer.RequirementsMet == nil || *offer.RequirementsMet || offer.EquipPreview == nil || offer.EquipPreview.RequirementsMet {
+		t.Fatalf("shop offer requirement preview = %+v", offer)
+	}
+	if !containsShopString(offer.SummaryLines, "Requires level 2") || !containsShopString(offer.SummaryLines, "Requires STR 6") {
+		t.Fatalf("shop offer summary lines = %+v", offer.SummaryLines)
+	}
+	if findPreviewDelta(offer.EquipPreview.Deltas, "damage_max") == nil {
+		t.Fatalf("shop offer preview missing damage_max delta: %+v", offer.EquipPreview.Deltas)
+	}
+
+	beforeGold := sim.gold
+	buy := sim.Tick([]Input{{
+		Type:      "shop_buy_intent",
+		MessageID: "msg_buy_requirements",
+		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: offer.OfferID},
+	}})
+	if !hasAck(buy, "msg_buy_requirements") {
+		t.Fatalf("buy requirements offer was not acked: %+v", buy)
+	}
+	bought := sim.inventory[len(sim.inventory)-1]
+	if bought.itemDefID != golden.TemplateID || sim.gold != beforeGold-offer.BuyPrice {
+		t.Fatalf("bought item/gold = %+v/%d, want %s/%d", bought, sim.gold, golden.TemplateID, beforeGold-offer.BuyPrice)
+	}
+	inventoryView := sim.itemView(bought)
+	assertRequirementStatus(t, inventoryView.RequirementStatus, golden.FreshCharacter.Status)
+	if inventoryView.RequirementsMet == nil || *inventoryView.RequirementsMet || inventoryView.EquipPreview == nil {
+		t.Fatalf("bought inventory requirement view = %+v", inventoryView)
+	}
+	equip := sim.Tick([]Input{{
+		Type:      "equip_intent",
+		MessageID: "msg_equip_unmet_shop_item",
+		Equip:     &EquipIntent{ItemInstanceID: idStr(bought.instanceID), Slot: mainHandSlot},
+	}})
+	if !hasReject(equip, "msg_equip_unmet_shop_item", golden.ExpectedReject) || bought.equipped || sim.equipped[mainHandSlot] != 0 {
+		t.Fatalf("unmet shop item equip result=%+v item=%+v equipped=%v", equip, bought, sim.equipped)
+	}
+	appraisals := sim.shopSellAppraisals("town_vendor")
+	if len(appraisals) != 1 || appraisals[0].ItemTemplateID != golden.TemplateID {
+		t.Fatalf("requirements sell appraisals = %+v", appraisals)
+	}
+	assertRequirementStatus(t, appraisals[0].RequirementStatus, golden.FreshCharacter.Status)
+	if appraisals[0].RequirementsMet == nil || *appraisals[0].RequirementsMet || appraisals[0].EquipPreview == nil {
+		t.Fatalf("requirements appraisal preview = %+v", appraisals[0])
+	}
+}
+
 func TestShopBuyFailureDoesNotMutate(t *testing.T) {
 	t.Run("insufficient gold", func(t *testing.T) {
 		sim := newTownVendorSim(t, 0, 1)

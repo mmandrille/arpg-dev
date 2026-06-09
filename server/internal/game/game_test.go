@@ -1847,6 +1847,80 @@ func TestEquipmentWrongSlotRejects(t *testing.T) {
 	assertReject(t, res, "wrong", "wrong_slot")
 }
 
+func TestEquipmentRequirementsRejectAndPreview(t *testing.T) {
+	var golden struct {
+		TemplateID      string                     `json:"template_id"`
+		Requirements    map[string]int             `json:"requirements"`
+		FreshCharacter  equipmentRequirementGolden `json:"fresh_character"`
+		AfterAllocation equipmentRequirementGolden `json:"after_allocation"`
+		ExpectedReject  string                     `json:"expected_reject"`
+	}
+	loadGolden(t, "equipment_requirements.json", &golden)
+
+	sim := NewSim("sess_equipment_requirements", "01", loadRules(t))
+	item := addRolledInventoryItem(t, sim, 6110, golden.TemplateID, map[string]int{"damage_min": 5, "damage_max": 8})
+	view := sim.itemView(item)
+	assertRequirementStatus(t, view.RequirementStatus, golden.FreshCharacter.Status)
+	if view.RequirementsMet == nil || *view.RequirementsMet != golden.FreshCharacter.RequirementsMet {
+		t.Fatalf("fresh requirements_met = %v, want %v", view.RequirementsMet, golden.FreshCharacter.RequirementsMet)
+	}
+	if view.EquipPreview == nil || view.EquipPreview.Slot != mainHandSlot || view.EquipPreview.RequirementsMet {
+		t.Fatalf("fresh equip preview = %+v, want unmet main-hand preview", view.EquipPreview)
+	}
+	if findPreviewDelta(view.EquipPreview.Deltas, "damage_max") == nil {
+		t.Fatalf("fresh equip preview missing damage_max delta: %+v", view.EquipPreview.Deltas)
+	}
+
+	beforeSlot := item.slot
+	beforeEquipped := item.equipped
+	reject := sim.Tick([]Input{{
+		MessageID: "equip_unmet",
+		Type:      "equip_intent",
+		Equip:     &EquipIntent{ItemInstanceID: idStr(item.instanceID), Slot: mainHandSlot},
+	}})
+	assertReject(t, reject, "equip_unmet", golden.ExpectedReject)
+	if item.equipped != beforeEquipped || item.slot != beforeSlot || sim.equipped[mainHandSlot] != 0 {
+		t.Fatalf("unmet equip mutated item=%+v equipped=%v", item, sim.equipped)
+	}
+
+	sim.progression.Level = golden.AfterAllocation.Level
+	sim.progression.UnspentStatPoints = 1
+	sim.savePlayer(sim.defaultPlayer())
+
+	allocate := sim.Tick([]Input{{
+		MessageID: "allocate_str",
+		Type:      "allocate_stat_intent",
+		AllocateStat: &AllocateStatIntent{
+			Stat:   "str",
+			Points: 1,
+		},
+	}})
+	assertAck(t, allocate, "allocate_str")
+	update := inventoryUpdateForItem(allocate, item.instanceID)
+	if update == nil {
+		t.Fatalf("stat allocation did not refresh inventory item: %+v", allocate.Changes)
+	}
+	assertRequirementStatus(t, update.RequirementStatus, golden.AfterAllocation.Status)
+	if update.RequirementsMet == nil || !*update.RequirementsMet || update.EquipPreview == nil || !update.EquipPreview.RequirementsMet {
+		t.Fatalf("allocation inventory update = %+v", update)
+	}
+
+	view = sim.itemView(item)
+	assertRequirementStatus(t, view.RequirementStatus, golden.AfterAllocation.Status)
+	if view.RequirementsMet == nil || !*view.RequirementsMet || view.EquipPreview == nil || !view.EquipPreview.RequirementsMet {
+		t.Fatalf("met item view = %+v", view)
+	}
+	equip := sim.Tick([]Input{{
+		MessageID: "equip_met",
+		Type:      "equip_intent",
+		Equip:     &EquipIntent{ItemInstanceID: idStr(item.instanceID), Slot: mainHandSlot},
+	}})
+	assertAck(t, equip, "equip_met")
+	if sim.equipped[mainHandSlot] != item.instanceID || !item.equipped {
+		t.Fatalf("met equip failed item=%+v equipped=%v", item, sim.equipped)
+	}
+}
+
 func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	var golden struct {
 		Cases []struct {
@@ -3380,6 +3454,45 @@ func assertAck(t *testing.T, r TickResult, msgID string) {
 		}
 	}
 	t.Fatalf("expected ack of %q; rejects=%+v acks=%+v", msgID, r.Rejects, r.Acks)
+}
+
+type equipmentRequirementGolden struct {
+	Level           int                     `json:"level"`
+	BaseStats       BaseStatsView           `json:"base_stats"`
+	RequirementsMet bool                    `json:"requirements_met"`
+	Status          []RequirementStatusView `json:"status"`
+}
+
+func assertRequirementStatus(t *testing.T, got, want []RequirementStatusView) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("requirement status = %+v, want %+v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("requirement status[%d] = %+v, want %+v", i, got[i], want[i])
+		}
+	}
+}
+
+func findPreviewDelta(deltas []EquipPreviewDeltaView, stat string) *EquipPreviewDeltaView {
+	for i := range deltas {
+		if deltas[i].Stat == stat {
+			return &deltas[i]
+		}
+	}
+	return nil
+}
+
+func inventoryUpdateForItem(r TickResult, instanceID uint64) *ItemView {
+	want := idStr(instanceID)
+	for i := range r.Changes {
+		change := r.Changes[i]
+		if change.Op == OpInventoryUpdate && change.Item != nil && change.Item.ItemInstanceID == want {
+			return change.Item
+		}
+	}
+	return nil
 }
 
 func inventoryLabEquippedSword(t *testing.T, rules *Rules) (*Sim, string) {

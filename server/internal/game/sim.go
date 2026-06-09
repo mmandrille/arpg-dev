@@ -162,8 +162,10 @@ type autoNavState struct {
 }
 
 type wallObstacle struct {
-	pos  Vec2
-	size Vec2
+	pos         Vec2
+	size        Vec2
+	source      string
+	shapeFamily string
 }
 
 type effectiveCombatStats struct {
@@ -405,7 +407,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			loot.id = s.alloc()
 			level.entities[loot.id] = loot
 		case wallEntity:
-			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size})
+			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, source: "preset"})
 		case interactableEntity:
 			def := s.rules.Interactables[preset.InteractableDefID]
 			interactable := &entity{
@@ -2002,6 +2004,7 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 	})
 
 	arrivalRes := TickResult{Tick: res.Tick, Level: destLevel, Changes: []Change{}, Events: []Event{}}
+	arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpWallLayoutUpdate, Walls: wallViewsForLevel(dest)})
 	if s.multiLevel && !s.discoveredTeleporters[destLevel] {
 		arrivalRes.Changes = append(arrivalRes.Changes, Change{
 			Op:         OpTeleporterDiscoveryUpdate,
@@ -4920,6 +4923,7 @@ func (s *Sim) Snapshot() Snapshot {
 		SessionID:         s.sessionID,
 		Seed:              s.seed,
 		CurrentLevel:      s.currentLevel,
+		Walls:             []WallView{},
 		Entities:          []EntityView{},
 		Inventory:         []ItemView{},
 		Equipped:          newSnapshotEquippedMap(newEquippedMap()),
@@ -4962,6 +4966,7 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		CurrentLevel:          s.currentLevel,
 		LocalPlayerID:         idStr(ps.PlayerID),
 		Party:                 party,
+		Walls:                 wallViewsForLevel(s.activeLevel()),
 		Entities:              entities,
 		Inventory:             inventory,
 		Equipped:              equipped,
@@ -4976,6 +4981,26 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 	}
 	s.savePlayer(ps)
 	return snap
+}
+
+func wallViewsForLevel(level *LevelState) []WallView {
+	if level == nil {
+		return []WallView{}
+	}
+	out := make([]WallView, 0, len(level.walls))
+	for i, wall := range level.walls {
+		source := wall.source
+		if source == "" {
+			source = "preset"
+		}
+		out = append(out, WallView{
+			ID:       wallID(level.levelNum, i),
+			Position: wall.pos,
+			Size:     wall.size,
+			Source:   source,
+		})
+	}
+	return out
 }
 
 func newSnapshotEquippedMap(equipped map[string]uint64) map[string]*string {

@@ -12,6 +12,7 @@ const STEP_TYPES_WAIT := [
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
+	"wait_wall_layout",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -28,6 +29,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_inventory_capacity", "assert_bag_grid", "assert_paper_doll_layout",
 	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
 	"assert_entity_reaction",
+	"assert_wall_layout",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",
@@ -67,6 +69,7 @@ const ALL_STEP_TYPES: Array = [
 	"set_floating_combat_text", "assert_floating_combat_text_enabled",
 	"wait_damage_number", "wait_no_damage_number", "assert_damage_number", "assert_no_damage_number",
 	"wait_entity_reaction", "assert_entity_reaction",
+	"wait_wall_layout", "assert_wall_layout",
 ]
 
 var scenario: Dictionary = {}
@@ -196,6 +199,8 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return (state.get("damage_numbers", []) as Array).is_empty()
 		"wait_entity_reaction":
 			return _presentation_matches(step, state)
+		"wait_wall_layout":
+			return _wall_layout_matches(step, state)
 		"wait_entity":
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
@@ -328,6 +333,20 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 				_fail("assert_entity_reaction failed: want=%s local=%s entities=%s step=%d scenario=%s" % [
 					str(step), str(state.get("local_player_presentation", {})),
 					str(state.get("entities_presentation_debug", [])), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_wall_layout":
+			if not _wall_layout_matches(step, state):
+				_fail("assert_wall_layout failed: want=%s wall_count=%d generated=%d non_perimeter=%d level=%d walls=%s step=%d scenario=%s" % [
+					str(step),
+					int(state.get("wall_count", 0)),
+					int(state.get("generated_wall_count", 0)),
+					int(state.get("non_perimeter_wall_count", 0)),
+					int(state.get("current_level", 0)),
+					str(state.get("walls", [])),
+					_step_index,
+					str(scenario.get("id", "?"))
 				])
 				return false
 			return true
@@ -629,6 +648,23 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 	return true
 
 
+func _wall_layout_matches(step: Dictionary, state: Dictionary) -> bool:
+	if step.has("current_level") and int(state.get("current_level", -999999)) != int(step.get("current_level", 0)):
+		return false
+	var wall_count := int(state.get("wall_count", 0))
+	var generated_count := int(state.get("generated_wall_count", 0))
+	var non_perimeter_count := int(state.get("non_perimeter_wall_count", 0))
+	if step.has("equals") and wall_count != int(step.get("equals", 0)):
+		return false
+	if step.has("at_least") and wall_count < int(step.get("at_least", 0)):
+		return false
+	if step.has("generated_at_least") and generated_count < int(step.get("generated_at_least", 0)):
+		return false
+	if step.has("non_perimeter_at_least") and non_perimeter_count < int(step.get("non_perimeter_at_least", 0)):
+		return false
+	return true
+
+
 func _assert_stat_button_enabled(step: Dictionary, state: Dictionary) -> bool:
 	var stat := str(step.get("stat", ""))
 	var want := bool(step.get("enabled", true))
@@ -866,6 +902,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "damage_number=%s" % str(step)
 		"wait_entity_reaction", "assert_entity_reaction":
 			return "presentation=%s" % str(step)
+		"wait_wall_layout", "assert_wall_layout":
+			return "wall_layout=%s" % str(step)
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))
 		"click_entity":
@@ -907,6 +945,13 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		parts.append("entity_presentations=%s" % str(state.get("entities_presentation_debug", [])))
 	if stype == "wait_loot_count":
 		parts.append("loot_count=%d" % (state.get("loot_ids", []) as Array).size())
+	if stype == "wait_wall_layout":
+		parts.append("wall_count=%d generated=%d non_perimeter=%d level=%d" % [
+			int(state.get("wall_count", 0)),
+			int(state.get("generated_wall_count", 0)),
+			int(state.get("non_perimeter_wall_count", 0)),
+			int(state.get("current_level", 0)),
+		])
 	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):
 		parts.append("next_attack_soon=true")
 	print("[bot-client] %s scenario=%s step=%d" % [" ".join(parts), str(scenario.get("id", "?")), _step_index])
@@ -1038,6 +1083,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_damage_number", "assert_damage_number"]:
 		if not step.has("text") and not step.has("variant"):
 			return "client_steps[%d] (%s) requires text or variant" % [index, stype]
+	if stype in ["wait_wall_layout", "assert_wall_layout"]:
+		if not step.has("equals") and not step.has("at_least") and not step.has("generated_at_least") and not step.has("non_perimeter_at_least") and not step.has("current_level"):
+			return "client_steps[%d] (%s) requires a wall count or current_level expectation" % [index, stype]
 	if stype == "assert_multiplayer_session_rows":
 		if not step.has("min_count") and not step.has("selected") and not step.has("listed"):
 			return "client_steps[%d] (%s) requires min_count, selected, or listed" % [index, stype]

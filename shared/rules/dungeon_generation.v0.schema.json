@@ -12,6 +12,7 @@
     "teleporter_placement",
     "monster_placement",
     "chest_placement",
+    "obstacle_generation",
     "boss_floor",
     "monster_rarity_note",
     "monster_rarities",
@@ -88,6 +89,67 @@
         "monster_count_bonus": { "type": "integer", "minimum": 0 },
         "min_stair_distance": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "obstacle_generation": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "max_attempts",
+        "target_group_count",
+        "wall_segment",
+        "solid_block",
+        "shape_weights",
+        "clearance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "max_attempts": { "type": "integer", "minimum": 1 },
+        "target_group_count": { "$ref": "#/$defs/int_range" },
+        "wall_segment": {
+          "type": "object",
+          "required": ["min_length", "max_length", "thickness"],
+          "additionalProperties": false,
+          "properties": {
+            "min_length": { "type": "integer", "minimum": 1 },
+            "max_length": { "type": "integer", "minimum": 1 },
+            "thickness": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "solid_block": {
+          "type": "object",
+          "required": ["min_size", "max_size"],
+          "additionalProperties": false,
+          "properties": {
+            "min_size": { "$ref": "#/$defs/positive_size" },
+            "max_size": { "$ref": "#/$defs/positive_size" }
+          }
+        },
+        "shape_weights": {
+          "type": "object",
+          "required": ["line", "l", "t", "block"],
+          "additionalProperties": false,
+          "properties": {
+            "line": { "type": "integer", "minimum": 0 },
+            "l": { "type": "integer", "minimum": 0 },
+            "t": { "type": "integer", "minimum": 0 },
+            "block": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "clearance": {
+          "type": "object",
+          "required": ["player_spawn", "stairs", "teleporter", "chest", "monster", "loot"],
+          "additionalProperties": false,
+          "properties": {
+            "player_spawn": { "type": "number", "minimum": 0 },
+            "stairs": { "type": "number", "minimum": 0 },
+            "teleporter": { "type": "number", "minimum": 0 },
+            "chest": { "type": "number", "minimum": 0 },
+            "monster": { "type": "number", "minimum": 0 },
+            "loot": { "type": "number", "minimum": 0 }
+          }
+        }
       }
     },
     "boss_floor": {
@@ -204,6 +266,24 @@
       "properties": {
         "width": { "type": "number", "exclusiveMinimum": 0 },
         "height": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "int_range": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "positive_size": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "y": { "type": "number", "exclusiveMinimum": 0 }
       }
     }
   }

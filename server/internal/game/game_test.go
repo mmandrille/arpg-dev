@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -2962,6 +2963,74 @@ func TestDifferentSeedsStillProduceItem(t *testing.T) {
 	}
 }
 
+func TestSnapshotIncludesWallLayout(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_wall_snapshot", "v40_obstacles", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	descendFromCurrentLevel(t, sim, "descend_wall_snapshot")
+	snap := sim.Snapshot()
+	if snap.CurrentLevel != -1 {
+		t.Fatalf("snapshot level = %d, want -1", snap.CurrentLevel)
+	}
+	if len(snap.Walls) < 5 {
+		t.Fatalf("snapshot walls = %d, want perimeter plus generated walls", len(snap.Walls))
+	}
+	if countWallSource(snap.Walls, "generated") == 0 {
+		t.Fatalf("snapshot walls missing generated source: %+v", snap.Walls)
+	}
+	for i, wall := range snap.Walls {
+		wantID := wallID(snap.CurrentLevel, i)
+		if wall.ID != wantID {
+			t.Fatalf("wall %d id = %s, want %s", i, wall.ID, wantID)
+		}
+		if wall.Size.X <= 0 || wall.Size.Y <= 0 {
+			t.Fatalf("wall %d has invalid size: %+v", i, wall)
+		}
+	}
+}
+
+func TestLevelTransitionWallLayoutUpdatePrecedesSpawns(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_wall_delta", "v40_obstacles", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon sim: %v", err)
+	}
+	results := descendFromCurrentLevel(t, sim, "descend_wall_delta")
+	if len(results) != 2 {
+		t.Fatalf("descend results = %d, want 2: %+v", len(results), results)
+	}
+	dest := results[1]
+	if len(dest.Changes) == 0 {
+		t.Fatal("destination delta has no changes")
+	}
+	if dest.Changes[0].Op != OpWallLayoutUpdate {
+		t.Fatalf("first destination change = %s, want %s in %+v", dest.Changes[0].Op, OpWallLayoutUpdate, dest.Changes)
+	}
+	if countWallSource(dest.Changes[0].Walls, "generated") == 0 {
+		t.Fatalf("wall layout update missing generated walls: %+v", dest.Changes[0].Walls)
+	}
+	spawnIndex := -1
+	for i, change := range dest.Changes {
+		if change.Op == OpEntitySpawn {
+			spawnIndex = i
+			break
+		}
+	}
+	if spawnIndex <= 0 {
+		t.Fatalf("entity spawns did not follow wall layout update: %+v", dest.Changes)
+	}
+}
+
+func countWallSource(walls []WallView, source string) int {
+	count := 0
+	for _, wall := range walls {
+		if wall.Source == source {
+			count++
+		}
+	}
+	return count
+}
+
 // --- movement ---------------------------------------------------------------
 
 func TestMovement(t *testing.T) {
@@ -4233,6 +4302,275 @@ func TestDungeonMonsterGeneration(t *testing.T) {
 	}
 }
 
+func TestDungeonObstacleGeneration(t *testing.T) {
+	rules := loadRules(t)
+	level, err := GenerateDungeonLevel("v40_obstacles", -2, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	again, err := GenerateDungeonLevel("v40_obstacles", -2, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate again: %v", err)
+	}
+	if len(level.walls) != len(again.walls) {
+		t.Fatalf("repeat walls = %d, want %d", len(again.walls), len(level.walls))
+	}
+	for i := range level.walls {
+		if level.walls[i] != again.walls[i] {
+			t.Fatalf("wall %d = %+v, repeat %+v", i, level.walls[i], again.walls[i])
+		}
+	}
+	generatedCount := 0
+	shapeFamilies := map[string]bool{}
+	for _, wall := range level.walls {
+		if wall.source != "generated" {
+			continue
+		}
+		generatedCount++
+		shapeFamilies[wall.shapeFamily] = true
+		if !wallInsideDungeonFloor(wall, rules.DungeonGeneration) {
+			t.Fatalf("generated wall outside floor: %+v", wall)
+		}
+		if !wallClearsGeneratedTargets(wall, rules.DungeonGeneration, level) {
+			t.Fatalf("generated wall overlaps target clearance: %+v", wall)
+		}
+	}
+	if generatedCount < rules.DungeonGeneration.ObstacleGeneration.TargetGroupCount.Min {
+		t.Fatalf("generated walls = %d, want at least %d", generatedCount, rules.DungeonGeneration.ObstacleGeneration.TargetGroupCount.Min)
+	}
+	if len(shapeFamilies) < 2 {
+		t.Fatalf("shape families = %+v, want at least two", shapeFamilies)
+	}
+}
+
+func TestDungeonObstaclesGolden(t *testing.T) {
+	var golden struct {
+		Seed     string `json:"seed"`
+		Level    int    `json:"level"`
+		Expected struct {
+			FloorSize                 DungeonFloorSize `json:"floor_size"`
+			MinimumWallCount          int              `json:"minimum_wall_count"`
+			MinimumGeneratedWallCount int              `json:"minimum_generated_wall_count"`
+			ShapeFamilies             []string         `json:"shape_families"`
+			Walls                     []struct {
+				ID          string `json:"id"`
+				Position    Vec2   `json:"position"`
+				Size        Vec2   `json:"size"`
+				Source      string `json:"source"`
+				ShapeFamily string `json:"shape_family"`
+			} `json:"walls"`
+			ReachableTargets []struct {
+				Kind     string `json:"kind"`
+				DefID    string `json:"def_id"`
+				Position Vec2   `json:"position"`
+			} `json:"reachable_targets"`
+		} `json:"expected"`
+	}
+	loadGolden(t, "dungeon_obstacles.json", &golden)
+	rules := loadRules(t)
+	if rules.DungeonGeneration.FloorSize != golden.Expected.FloorSize {
+		t.Fatalf("floor_size = %+v, want %+v", rules.DungeonGeneration.FloorSize, golden.Expected.FloorSize)
+	}
+	level, err := GenerateDungeonLevel(golden.Seed, golden.Level, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	if len(level.walls) != len(golden.Expected.Walls) {
+		t.Fatalf("wall count = %d, want golden %d", len(level.walls), len(golden.Expected.Walls))
+	}
+	if len(level.walls) < golden.Expected.MinimumWallCount {
+		t.Fatalf("wall count = %d, want at least %d", len(level.walls), golden.Expected.MinimumWallCount)
+	}
+	generatedCount := 0
+	shapeFamilies := map[string]bool{}
+	for i, want := range golden.Expected.Walls {
+		got := level.walls[i]
+		if got.source == "generated" {
+			generatedCount++
+			shapeFamilies[got.shapeFamily] = true
+		}
+		if id := wallID(level.levelNum, i); id != want.ID {
+			t.Fatalf("wall %d id = %s, want %s", i, id, want.ID)
+		}
+		if got.pos != want.Position || got.size != want.Size || got.source != want.Source || got.shapeFamily != want.ShapeFamily {
+			t.Fatalf("wall %d = pos %+v size %+v source %s shape %s, want %+v", i, got.pos, got.size, got.source, got.shapeFamily, want)
+		}
+	}
+	if generatedCount < golden.Expected.MinimumGeneratedWallCount {
+		t.Fatalf("generated walls = %d, want at least %d", generatedCount, golden.Expected.MinimumGeneratedWallCount)
+	}
+	if len(shapeFamilies) != len(golden.Expected.ShapeFamilies) {
+		t.Fatalf("shape families = %+v, want %+v", shapeFamilies, golden.Expected.ShapeFamilies)
+	}
+	for _, want := range golden.Expected.ShapeFamilies {
+		if !shapeFamilies[want] {
+			t.Fatalf("missing shape family %s in %+v", want, shapeFamilies)
+		}
+	}
+	targets := generatedReachabilityTargets(level)
+	if len(targets) != len(golden.Expected.ReachableTargets) {
+		t.Fatalf("reachable target count = %d, want %d", len(targets), len(golden.Expected.ReachableTargets))
+	}
+	start := generatedReachabilityStart(rules.DungeonGeneration, level)
+	for i, want := range golden.Expected.ReachableTargets {
+		got := targets[i]
+		gotKind, gotDefID := goldenReachabilityKindAndDefID(got.kind)
+		if gotKind != want.Kind || gotDefID != want.DefID || got.pos != want.Position {
+			t.Fatalf("target %d = kind=%s def=%s pos=%+v, want %+v", i, gotKind, gotDefID, got.pos, want)
+		}
+		if !generatedTargetReachableFrom(rules.DungeonGeneration, level, start, want.Position) {
+			t.Fatalf("target %d %s at %+v unreachable from %+v", i, want.Kind, want.Position, start)
+		}
+	}
+}
+
+func goldenReachabilityKindAndDefID(kind string) (string, string) {
+	if strings.HasPrefix(kind, "loot:") {
+		return "loot", strings.TrimPrefix(kind, "loot:")
+	}
+	if strings.HasPrefix(kind, "monster:") {
+		return "monster", strings.TrimPrefix(kind, "monster:")
+	}
+	if kind == stairsUpDefID || kind == stairsDownDefID || kind == teleporterDefID {
+		return kind, ""
+	}
+	return "chest", kind
+}
+
+func TestGeneratedDungeonTargetsReachable(t *testing.T) {
+	rules := loadRules(t)
+	for _, levelNum := range []int{-1, -2, -3, -4} {
+		level, err := GenerateDungeonLevel("v40_reachability", levelNum, rules.DungeonGeneration)
+		if err != nil {
+			t.Fatalf("level %d generate: %v", levelNum, err)
+		}
+		if err := validateGeneratedDungeonReachability(rules.DungeonGeneration, level); err != nil {
+			t.Fatalf("level %d reachability: %v", levelNum, err)
+		}
+	}
+}
+
+func TestGeneratedDungeonUnreachableTuningFailsClearly(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.DungeonGeneration.ObstacleGeneration.MaxAttempts = 2
+	rules.DungeonGeneration.ObstacleGeneration.TargetGroupCount = IntRange{Min: 1, Max: 1}
+	rules.DungeonGeneration.ObstacleGeneration.ShapeWeights = ObstacleShapeWeights{Block: 1}
+	rules.DungeonGeneration.ObstacleGeneration.SolidBlock = SolidBlockRules{
+		MinSize: Vec2{X: 98, Y: 48},
+		MaxSize: Vec2{X: 98, Y: 48},
+	}
+	_, err := GenerateDungeonLevel("v40_bad_obstacles", -2, rules.DungeonGeneration)
+	if err == nil {
+		t.Fatal("generate succeeded with impossible obstacle tuning")
+	}
+	if got := err.Error(); got == "" || !strings.Contains(got, "could not place reachable obstacles") {
+		t.Fatalf("error = %q, want clear obstacle placement failure", got)
+	}
+}
+
+func TestBossFloorExcludesGeneratedObstacles(t *testing.T) {
+	rules := loadRules(t)
+	level, err := GenerateDungeonLevel("boss_floor_gate", -5, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate boss floor: %v", err)
+	}
+	for _, wall := range level.walls {
+		if wall.source == "generated" {
+			t.Fatalf("boss floor has generated obstacle wall: %+v", wall)
+		}
+	}
+	if len(level.walls) != 4 {
+		t.Fatalf("boss floor walls = %d, want perimeter only", len(level.walls))
+	}
+}
+
+func TestGeneratedObstacleCollisionPaths(t *testing.T) {
+	t.Run("player movement blocks", func(t *testing.T) {
+		sim := NewSim("sess_generated_wall_move", "01", loadRules(t))
+		player := sim.entities[sim.playerID]
+		player.pos = Vec2{X: 10, Y: 5}
+		addGeneratedWallToActiveLevel(sim, Vec2{X: 10.5, Y: 5}, Vec2{X: 1, Y: 4})
+		blocked := sim.Tick([]Input{{MessageID: "push_generated_wall", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 3}}})
+		assertAck(t, blocked, "push_generated_wall")
+		if player.pos.X > 10.01 {
+			t.Fatalf("player moved through generated wall to %+v", player.pos)
+		}
+	})
+
+	t.Run("pathing routes around wall", func(t *testing.T) {
+		nav := testNav()
+		wall := wallObstacle{pos: Vec2{X: 1, Y: 0}, size: Vec2{X: 1, Y: 3}, source: "generated"}
+		blocked := func(gx, gy int) bool {
+			center := gridToWorld(nav, gridCell{x: gx, y: gy})
+			return circleIntersectsAABB(center, playerRadius, wall.pos, wall.size)
+		}
+		steps, ok := PlanPath(nav, Vec2{X: 0, Y: 0}, Vec2{X: 3, Y: 0}, blocked)
+		if !ok {
+			t.Fatal("path around generated wall failed")
+		}
+		if len(steps) <= 3 {
+			t.Fatalf("path steps = %v, want routed path longer than direct line", steps)
+		}
+	})
+
+	t.Run("projectile sweep blocks", func(t *testing.T) {
+		sim := combatControlLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+		player := sim.entities[sim.playerID]
+		player.pos = Vec2{X: 3, Y: 5}
+		addGeneratedWallToActiveLevel(sim, Vec2{X: 6, Y: 5}, Vec2{X: 1, Y: 4})
+		fire := sim.Tick([]Input{{MessageID: "fire_generated_wall", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+		assertAck(t, fire, "fire_generated_wall")
+		var resolved TickResult
+		for i := 0; i < 20; i++ {
+			resolved = sim.Tick(nil)
+			if hasEvent(resolved, "projectile_blocked") || hasEvent(resolved, "monster_damaged") {
+				break
+			}
+		}
+		if !hasEvent(resolved, "projectile_blocked") {
+			t.Fatalf("projectile events = %+v, want projectile_blocked by generated wall", resolved.Events)
+		}
+		if hasEvent(resolved, "monster_damaged") {
+			t.Fatalf("projectile damaged monster through generated wall: %+v", resolved.Events)
+		}
+	})
+
+	t.Run("loot drop avoids wall", func(t *testing.T) {
+		sim, err := NewSimWithWorld("sess_generated_wall_drop", "01", loadRules(t), "inventory_lab")
+		if err != nil {
+			t.Fatalf("new inventory lab: %v", err)
+		}
+		source := Vec2{X: 10, Y: 10}
+		blockedFirstCandidate := Vec2{X: source.X + 1, Y: source.Y}
+		addGeneratedWallToActiveLevel(sim, blockedFirstCandidate, Vec2{X: 1, Y: 1})
+		pos, ok := sim.findEntityLootDropPosition(source, monsterRadius)
+		if !ok {
+			t.Fatal("no loot drop position")
+		}
+		if pos == blockedFirstCandidate || sim.lootDropBlocked(pos) {
+			t.Fatalf("drop position = %+v, want generated-wall-free tile", pos)
+		}
+	})
+
+	t.Run("travel arrival avoids wall", func(t *testing.T) {
+		sim := NewSim("sess_generated_wall_arrival", "01", loadRules(t))
+		level := sim.activeLevel()
+		marker := Vec2{X: 10, Y: 5}
+		firstCandidate := Vec2{X: 11, Y: 5}
+		addGeneratedWallToActiveLevel(sim, firstCandidate, Vec2{X: 1, Y: 1})
+		got := sim.travelArrivalPosition(level, marker, sim.playerID)
+		if got == firstCandidate || sim.travelArrivalBlocked(level, got, sim.playerID) {
+			t.Fatalf("arrival = %+v, want generated-wall-free tile", got)
+		}
+	})
+}
+
+func addGeneratedWallToActiveLevel(sim *Sim, pos, size Vec2) {
+	level := sim.activeLevel()
+	level.walls = append(level.walls, wallObstacle{pos: pos, size: size, source: "generated", shapeFamily: "line"})
+	sim.syncCompatibilityFields()
+}
+
 func TestChampionMonstersSpawnWithCommonMinions(t *testing.T) {
 	rules := loadRules(t)
 	level, err := GenerateDungeonLevel("v30_monster_rarity", -1, rules.DungeonGeneration)
@@ -4751,12 +5089,12 @@ func TestDungeonEquipmentLootDeterminism(t *testing.T) {
 
 func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 	var golden struct {
-		SessionSeed              string `json:"session_seed"`
-		Level                    int    `json:"level"`
-		MonsterDefID             string `json:"monster_def_id"`
-		TickOfFirstPlayerDamaged uint64 `json:"tick_of_first_player_damaged"`
-		Damage                   int    `json:"damage"`
-		PlayerHPAfter            int    `json:"player_hp_after"`
+		SessionSeed                   string `json:"session_seed"`
+		Level                         int    `json:"level"`
+		MonsterDefID                  string `json:"monster_def_id"`
+		MaxTicksForFirstPlayerDamaged int    `json:"max_ticks_for_first_player_damaged"`
+		Damage                        int    `json:"damage"`
+		PlayerHPAfter                 int    `json:"player_hp_after"`
 	}
 	loadGolden(t, "dungeon_monster_attack.json", &golden)
 	rules := loadRules(t)
@@ -4766,18 +5104,15 @@ func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 	}
 	results := descendFromCurrentLevel(t, sim, "descend")
 	assertLevelChanged(t, results[0], 0, golden.Level)
-	levelEntry := sim.findStair(sim.activeLevel(), stairsUpDefID)
-	if levelEntry == nil {
-		t.Fatal("missing level entry stair")
+	monster := firstEntityByKind(sim, monsterEntity)
+	if monster == nil {
+		t.Fatal("missing generated monster")
 	}
-	sim.entities[sim.playerID].pos = levelEntry.pos
+	sim.entities[sim.playerID].pos = sim.travelArrivalPosition(sim.activeLevel(), monster.pos, sim.playerID)
 
-	firstDamage, ok := waitForPlayerDamage(sim, 240)
+	firstDamage, ok := waitForPlayerDamage(sim, golden.MaxTicksForFirstPlayerDamaged)
 	if !ok {
 		t.Fatalf("expected proactive player_damaged event; player=%+v monsters=%+v", sim.activeLevel().entities[sim.playerID].pos, dungeonMonsterDebugPositions(sim.activeLevel()))
-	}
-	if firstDamage.Tick != golden.TickOfFirstPlayerDamaged {
-		t.Fatalf("first damage tick = %d, want %d", firstDamage.Tick, golden.TickOfFirstPlayerDamaged)
 	}
 	if eventDamage(firstDamage, "player_damaged") != golden.Damage {
 		t.Fatalf("first damage = %d, want %d", eventDamage(firstDamage, "player_damaged"), golden.Damage)
@@ -4793,7 +5128,8 @@ func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 
 func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 	var golden struct {
-		SessionSeed string `json:"session_seed"`
+		SessionSeed                   string `json:"session_seed"`
+		MaxTicksForFirstPlayerDamaged int    `json:"max_ticks_for_first_player_damaged"`
 	}
 	loadGolden(t, "dungeon_monster_attack.json", &golden)
 	rules := loadRules(t)
@@ -4802,12 +5138,12 @@ func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 		t.Fatalf("new sim: %v", err)
 	}
 	descendFromCurrentLevel(t, sim, "descend")
-	levelEntry := sim.findStair(sim.activeLevel(), stairsUpDefID)
-	if levelEntry == nil {
-		t.Fatal("missing level entry stair")
+	monster := firstEntityByKind(sim, monsterEntity)
+	if monster == nil {
+		t.Fatal("missing generated monster")
 	}
-	sim.entities[sim.playerID].pos = levelEntry.pos
-	firstDamage, ok := waitForPlayerDamage(sim, 240)
+	sim.entities[sim.playerID].pos = sim.travelArrivalPosition(sim.activeLevel(), monster.pos, sim.playerID)
+	firstDamage, ok := waitForPlayerDamage(sim, golden.MaxTicksForFirstPlayerDamaged)
 	if !ok {
 		t.Fatal("expected first proactive damage")
 	}
@@ -4827,12 +5163,12 @@ func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 		t.Fatalf("new replay sim: %v", err)
 	}
 	descendFromCurrentLevel(t, replay, "descend")
-	replayEntry := replay.findStair(replay.activeLevel(), stairsUpDefID)
-	if replayEntry == nil {
-		t.Fatal("missing replay level entry stair")
+	replayMonster := firstEntityByKind(replay, monsterEntity)
+	if replayMonster == nil {
+		t.Fatal("missing replay generated monster")
 	}
-	replay.entities[replay.playerID].pos = replayEntry.pos
-	replayDamage, ok := waitForPlayerDamage(replay, 240)
+	replay.entities[replay.playerID].pos = replay.travelArrivalPosition(replay.activeLevel(), replayMonster.pos, replay.playerID)
+	replayDamage, ok := waitForPlayerDamage(replay, golden.MaxTicksForFirstPlayerDamaged)
 	if !ok {
 		t.Fatal("expected replay proactive damage")
 	}

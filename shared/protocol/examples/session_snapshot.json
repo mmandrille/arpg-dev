@@ -14,6 +14,20 @@
       "current_level": 0
     }
   ],
+  "walls": [
+    {
+      "id": "wall_-1_0000",
+      "position": { "x": 50, "y": -0.5 },
+      "size": { "x": 102, "y": 1 },
+      "source": "perimeter"
+    },
+    {
+      "id": "wall_-1_0004",
+      "position": { "x": 28, "y": 14 },
+      "size": { "x": 8, "y": 1 },
+      "source": "generated"
+    }
+  ],
   "entities": [
     { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 10, "max_hp": 10, "mana": 10, "max_mana": 10 },
     { "id": "1002", "type": "monster", "monster_def_id": "training_dummy", "rarity": "common", "position": { "x": 12, "y": 5 }, "hp": 3, "max_hp": 3 },

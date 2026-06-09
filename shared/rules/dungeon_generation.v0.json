@@ -30,6 +30,34 @@
     "min_stair_distance": 4.0,
     "max_attempts": 32
   },
+  "obstacle_generation": {
+    "enabled": true,
+    "max_attempts": 64,
+    "target_group_count": { "min": 4, "max": 8 },
+    "wall_segment": {
+      "min_length": 4,
+      "max_length": 14,
+      "thickness": 1.0
+    },
+    "solid_block": {
+      "min_size": { "x": 2, "y": 2 },
+      "max_size": { "x": 6, "y": 5 }
+    },
+    "shape_weights": {
+      "line": 4,
+      "l": 3,
+      "t": 2,
+      "block": 2
+    },
+    "clearance": {
+      "player_spawn": 3.0,
+      "stairs": 2.0,
+      "teleporter": 2.0,
+      "chest": 2.0,
+      "monster": 1.5,
+      "loot": 1.5
+    }
+  },
   "boss_floor": {
     "cadence": 5,
     "first_level": -5,

@@ -12,6 +12,10 @@ var _fail_count: int = 0
 func _initialize() -> void:
 	_test_net_client_base_url_and_ws_url()
 	_test_local_and_remote_players_apply_from_snapshot()
+	_test_snapshot_wall_layout_rendering()
+	_test_delta_wall_layout_replacement()
+	_test_teardown_clears_wall_layout()
+	_test_preset_world_wall_fallback()
 	_test_remote_player_delta_and_remove()
 	_test_multiple_remote_players_update_and_remove_independently()
 	_test_path_reject_clears_held_click_state()
@@ -79,6 +83,120 @@ func _test_local_and_remote_players_apply_from_snapshot() -> void:
 	_assert_true("second remote player entity stored", main.entities.has("1003"))
 	_assert_eq("second remote character metadata", str(main.entities["1003"].get("character_id", "")), "char_guest_2")
 	_assert_eq("party count", main.party.size(), 3)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_snapshot_wall_layout_rendering() -> void:
+	var main = _make_main()
+	main.current_world_id = "dungeon_levels"
+	main._apply_snapshot({
+		"server_tick": 1,
+		"current_level": -1,
+		"local_player_id": "1001",
+		"party": [],
+		"walls": [
+			{"id": "wall_-1_0000", "position": {"x": 5.0, "y": 0.0}, "size": {"x": 10.0, "y": 1.0}, "source": "perimeter"},
+			{"id": "wall_-1_0001", "position": {"x": 12.0, "y": 8.0}, "size": {"x": 3.0, "y": 1.0}, "source": "generated"},
+		],
+		"entities": [
+			{"id": "1001", "type": "player", "position": {"x": 2.0, "y": 3.0}, "hp": 10, "max_hp": 10},
+		],
+		"inventory": [],
+		"equipped": {},
+		"hotbar": [],
+		"character_progression": {},
+	})
+	_assert_eq("snapshot wall nodes", main.walls_root.get_child_count(), 2)
+	_assert_eq("snapshot wall layout count", main.current_wall_layout.size(), 2)
+	_assert_eq("snapshot generated wall count", int(main.get_bot_state().get("generated_wall_count", 0)), 1)
+	_assert_eq("snapshot wall metadata source", str(main.walls_root.get_child(1).get_meta("source", "")), "generated")
+	_assert_vec3("snapshot generated wall position", (main.walls_root.get_child(1) as Node3D).position, Vector3(12.0, 0.5, 8.0))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_delta_wall_layout_replacement() -> void:
+	var main = _make_main()
+	main.current_world_id = "dungeon_levels"
+	main._apply_snapshot({
+		"server_tick": 1,
+		"current_level": -1,
+		"local_player_id": "1001",
+		"party": [],
+		"walls": [
+			{"id": "wall_-1_old", "position": {"x": 1.0, "y": 1.0}, "size": {"x": 1.0, "y": 1.0}, "source": "generated"},
+		],
+		"entities": [
+			{"id": "1001", "type": "player", "position": {"x": 2.0, "y": 3.0}, "hp": 10, "max_hp": 10},
+		],
+		"inventory": [],
+		"equipped": {},
+		"hotbar": [],
+		"character_progression": {},
+	})
+	main._apply_delta({
+		"events": [
+			{"event_type": "level_changed", "entity_id": "1001", "to_level": -2},
+		],
+		"changes": [
+			{"op": "wall_layout_update", "walls": [
+				{"id": "wall_-2_0000", "position": {"x": 4.0, "y": 0.0}, "size": {"x": 8.0, "y": 1.0}, "source": "perimeter"},
+				{"id": "wall_-2_0001", "position": {"x": 9.0, "y": 6.0}, "size": {"x": 1.0, "y": 4.0}, "source": "generated"},
+			]},
+			{"op": "entity_spawn", "entity": {"id": "2001", "type": "loot", "item_def_id": "gold", "position": {"x": 6.0, "y": 6.0}}},
+		],
+	})
+	_assert_eq("delta current level", main.current_level, -2)
+	_assert_eq("delta wall nodes replaced", main.walls_root.get_child_count(), 2)
+	_assert_eq("delta generated wall count", int(main.get_bot_state().get("generated_wall_count", 0)), 1)
+	_assert_eq("delta removed old wall", str(main.walls_root.get_child(0).get_meta("wall_id", "")), "wall_-2_0000")
+	_assert_true("delta entity spawned after wall update", main.entities.has("2001"))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_teardown_clears_wall_layout() -> void:
+	var main = _make_main()
+	main.current_world_id = "dungeon_levels"
+	main._render_wall_layout([
+		{"id": "wall_test", "position": {"x": 1.0, "y": 2.0}, "size": {"x": 3.0, "y": 4.0}, "source": "generated"},
+	])
+	_assert_eq("teardown precondition wall nodes", main.walls_root.get_child_count(), 1)
+	main._teardown_gameplay_state(false)
+	_assert_eq("teardown clears wall nodes", main.walls_root.get_child_count(), 0)
+	_assert_eq("teardown clears wall layout", main.current_wall_layout.size(), 0)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_preset_world_wall_fallback() -> void:
+	var main = _make_main()
+	main.current_world_id = "vertical_slice"
+	main._apply_snapshot({
+		"server_tick": 1,
+		"current_level": 0,
+		"local_player_id": "1001",
+		"party": [],
+		"entities": [
+			{"id": "1001", "type": "player", "position": {"x": 2.0, "y": 3.0}, "hp": 10, "max_hp": 10},
+		],
+		"inventory": [],
+		"equipped": {},
+		"hotbar": [],
+		"character_progression": {},
+	})
+	_assert_eq("preset fallback wall nodes", main.walls_root.get_child_count(), 4)
+	_assert_eq("preset fallback wall source", str(main.walls_root.get_child(0).get_meta("source", "")), "preset")
+	_assert_eq("preset fallback debug wall count", int(main.get_bot_state().get("wall_count", 0)), 4)
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

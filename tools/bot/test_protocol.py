@@ -350,6 +350,7 @@ def test_runtime_state_waits_for_destination_level_delta():
         "payload": {
             "server_tick": 0,
             "current_level": -1,
+            "walls": [{"id": "wall_-1_0000", "position": {"x": 1, "y": 1}, "size": {"x": 2, "y": 1}, "source": "perimeter"}],
             "entities": [
                 {"id": "1001", "type": "player", "position": {"x": 14, "y": 18}, "hp": 10, "max_hp": 10},
                 {"id": "1002", "type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "position": {"x": 14, "y": 18}},
@@ -374,6 +375,7 @@ def test_runtime_state_waits_for_destination_level_delta():
 
     assert state.current_level == -2
     assert state.pending_level_load == -2
+    assert state.walls == []
     assert find_interactable(state, "stairs_down") is None
     assert find_interactable(state, "stairs_up") is None
 
@@ -384,6 +386,13 @@ def test_runtime_state_waits_for_destination_level_delta():
             "server_tick": 1,
             "level": -2,
             "changes": [
+                {
+                    "op": "wall_layout_update",
+                    "walls": [
+                        {"id": "wall_-2_0000", "position": {"x": 2, "y": 2}, "size": {"x": 2, "y": 1}, "source": "perimeter"},
+                        {"id": "wall_-2_0004", "position": {"x": 6, "y": 6}, "size": {"x": 4, "y": 1}, "source": "generated"},
+                    ],
+                },
                 {"op": "entity_spawn", "entity": {"id": "1001", "type": "player", "position": {"x": 9, "y": 11}, "hp": 10, "max_hp": 10}},
                 {"op": "entity_spawn", "entity": {"id": "1003", "type": "interactable", "interactable_def_id": "stairs_up", "state": "ready", "position": {"x": 9, "y": 11}}},
                 {"op": "entity_spawn", "entity": {"id": "1004", "type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "position": {"x": 28, "y": 14}}},
@@ -393,6 +402,8 @@ def test_runtime_state_waits_for_destination_level_delta():
     }, state)
 
     assert state.pending_level_load is None
+    assert len(state.walls) == 2
+    assert state.walls[1]["source"] == "generated"
     assert find_player(state)["id"] == "1001"
     assert find_interactable(state, "stairs_up")["id"] == "1003"
 

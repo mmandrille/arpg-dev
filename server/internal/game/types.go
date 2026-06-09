@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -156,6 +157,13 @@ type HotbarSlotView struct {
 	ItemInstanceID *string `json:"item_instance_id"`
 }
 
+type WallView struct {
+	ID       string `json:"id"`
+	Position Vec2   `json:"position"`
+	Size     Vec2   `json:"size"`
+	Source   string `json:"source,omitempty"`
+}
+
 // BossPhaseView is the protocol view of an authoritative boss pattern phase.
 type BossPhaseView struct {
 	PatternID     string             `json:"pattern_id"`
@@ -241,6 +249,7 @@ type Snapshot struct {
 	CurrentLevel          int                       `json:"current_level"`
 	LocalPlayerID         string                    `json:"local_player_id,omitempty"`
 	Party                 []PartyMemberView         `json:"party,omitempty"`
+	Walls                 []WallView                `json:"walls"`
 	Entities              []EntityView              `json:"entities"`
 	Inventory             []ItemView                `json:"inventory"`
 	Equipped              map[string]*string        `json:"equipped"`
@@ -265,6 +274,7 @@ const (
 	OpEquippedUpdate             = "equipped_update"
 	OpHotbarUpdate               = "hotbar_update"
 	OpGoldUpdate                 = "gold_update"
+	OpWallLayoutUpdate           = "wall_layout_update"
 	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
 	OpCharacterProgressionUpdate = "character_progression_update"
 )
@@ -284,6 +294,7 @@ type Change struct {
 	InventoryRows  *int
 	InventoryCap   *int
 	Gold           *int
+	Walls          []WallView
 	Level          int
 	Discovered     bool
 	Progression    *CharacterProgressionView
@@ -342,6 +353,11 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op   string `json:"op"`
 			Gold int    `json:"gold"`
 		}{c.Op, gold})
+	case OpWallLayoutUpdate:
+		return json.Marshal(struct {
+			Op    string     `json:"op"`
+			Walls []WallView `json:"walls"`
+		}{c.Op, c.Walls})
 	case OpTeleporterDiscoveryUpdate:
 		return json.Marshal(struct {
 			Op         string `json:"op"`
@@ -360,3 +376,7 @@ func (c Change) MarshalJSON() ([]byte, error) {
 
 // idStr renders an unsigned 64-bit entity id as a decimal string.
 func idStr(id uint64) string { return strconv.FormatUint(id, 10) }
+
+func wallID(levelNum int, index int) string {
+	return fmt.Sprintf("wall_%d_%04d", levelNum, index)
+}

@@ -1727,11 +1727,12 @@ func _update_facing_toward_mouse() -> void:
 func _face_direction(flat_dir: Vector2) -> void:
 	if character_visual == null or player_anchor == null:
 		return
-	if flat_dir.length_squared() > 0.0001:
-		_last_facing_direction = flat_dir.normalized()
+	if flat_dir.length_squared() <= 0.0001:
+		return
+	var facing := flat_dir.normalized()
+	_last_facing_direction = facing
 
-	var target := player_anchor.global_position + Vector3(flat_dir.x, 0.0, flat_dir.y)
-	character_visual.look_at(target, Vector3.UP)
+	character_visual.rotation.y = atan2(facing.x, facing.y)
 
 
 func _camera_relative_flat_direction(input: Vector2) -> Vector2:

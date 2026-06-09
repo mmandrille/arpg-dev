@@ -66,9 +66,9 @@
       "slot": "head",
       "mount_socket": "head_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "position": { "x": 0.0, "y": 0.20, "z": 0.0 },
         "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.28, "y": 0.28, "z": 0.28 }
+        "scale": { "x": 0.36, "y": 0.36, "z": 0.36 }
       }
     },
     "cave_mail": {
@@ -76,7 +76,7 @@
       "slot": "chest",
       "mount_socket": "chest_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "position": { "x": 0.0, "y": 0.0, "z": 0.14 },
         "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 0.55, "y": 0.55, "z": 0.55 }
       }
@@ -88,7 +88,7 @@
       "local_transform": {
         "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.24, "y": 0.24, "z": 0.24 }
+        "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
       }
     },
     "cave_belt": {
@@ -117,7 +117,7 @@
       "mount_socket": "boots_socket",
       "local_transform": {
         "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 0.24, "y": 0.24, "z": 0.24 }
       }
     },

@@ -162,12 +162,16 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		_warn({"code": "missing_mount_socket", "mount_socket": mount_socket, "slot": slot})
 		return
 
-	var packed = load(_res_path(str(entry["runtime_path"])))
-	if packed == null:
-		_warn({"code": "unknown_asset_id", "asset_id": asset_id, "item_def_id": def_id, "slot": slot})
-		return
-
-	var inst := (packed as PackedScene).instantiate()
+	var procedural_fallback := _procedural_fallback_visual(asset_id, slot)
+	var inst: Node3D
+	if procedural_fallback != null:
+		inst = procedural_fallback
+	else:
+		var packed = load(_res_path(str(entry["runtime_path"])))
+		if packed == null:
+			_warn({"code": "unknown_asset_id", "asset_id": asset_id, "item_def_id": def_id, "slot": slot})
+			return
+		inst = (packed as PackedScene).instantiate()
 	inst.name = asset_id
 	_apply_transform(inst, vis.get("local_transform", {}))
 	var rarity := str(item.get("rarity", "common")).to_lower()
@@ -185,6 +189,7 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		"tint": tint.to_html(false),
 		"node_path": (str(inst.get_path()) if inst.is_inside_tree() else ""),
 		"visible": inst.visible,
+		"procedural_fallback": procedural_fallback != null,
 	}
 
 
@@ -239,6 +244,66 @@ func _apply_tint(root: Node, color: Color) -> void:
 		(root as MeshInstance3D).material_override = mat
 	for child in root.get_children():
 		_apply_tint(child, color)
+
+
+func _procedural_fallback_visual(asset_id: String, slot: String) -> Node3D:
+	if not asset_id.begins_with("fallback_equipment_"):
+		return null
+	var root := Node3D.new()
+	match slot:
+		"off_hand":
+			root.add_child(_mesh_part("round_shield_face", _cylinder_mesh(0.48, 0.08, 32), Vector3.ZERO, Vector3(90, 0, 0)))
+			root.add_child(_mesh_part("round_shield_boss", _cylinder_mesh(0.16, 0.10, 24), Vector3(0, 0, 0.05), Vector3(90, 0, 0)))
+			root.add_child(_mesh_part("round_shield_grip", _box_mesh(Vector3(0.12, 0.62, 0.07)), Vector3(0, 0, -0.07)))
+		"head":
+			root.add_child(_mesh_part("helmet_cap", _cylinder_mesh(0.62, 0.56, 24), Vector3.ZERO))
+			root.add_child(_mesh_part("helmet_brow", _box_mesh(Vector3(1.0, 0.12, 0.62)), Vector3(0, -0.18, -0.16)))
+		"chest":
+			root.add_child(_mesh_part("chest_plate", _box_mesh(Vector3(0.86, 1.0, 0.28)), Vector3.ZERO))
+			root.add_child(_mesh_part("left_pauldron", _box_mesh(Vector3(0.32, 0.18, 0.34)), Vector3(-0.58, 0.34, 0)))
+			root.add_child(_mesh_part("right_pauldron", _box_mesh(Vector3(0.32, 0.18, 0.34)), Vector3(0.58, 0.34, 0)))
+		"boots":
+			root.add_child(_mesh_part("left_boot", _box_mesh(Vector3(0.48, 0.62, 0.78)), Vector3(-0.52, 0, -0.08)))
+			root.add_child(_mesh_part("right_boot", _box_mesh(Vector3(0.48, 0.62, 0.78)), Vector3(0.52, 0, -0.08)))
+		"gloves":
+			root.add_child(_mesh_part("left_glove", _box_mesh(Vector3(0.42, 0.42, 0.36)), Vector3(-0.36, 0, 0)))
+			root.add_child(_mesh_part("right_glove", _box_mesh(Vector3(0.42, 0.42, 0.36)), Vector3(0.36, 0, 0)))
+		"belt":
+			root.add_child(_mesh_part("belt_band", _box_mesh(Vector3(1.05, 0.24, 0.34)), Vector3.ZERO))
+			root.add_child(_mesh_part("belt_buckle", _box_mesh(Vector3(0.24, 0.28, 0.40)), Vector3(0, 0, -0.04)))
+		"amulet":
+			root.add_child(_mesh_part("amulet_chain", _cylinder_mesh(0.34, 0.04, 24), Vector3.ZERO, Vector3(90, 0, 0)))
+			root.add_child(_mesh_part("amulet_gem", _box_mesh(Vector3(0.20, 0.24, 0.12)), Vector3(0, -0.32, 0)))
+		"ring_left", "ring_right":
+			root.add_child(_mesh_part("ring_band", _cylinder_mesh(0.32, 0.06, 24), Vector3.ZERO, Vector3(90, 0, 0)))
+			root.add_child(_mesh_part("ring_stone", _box_mesh(Vector3(0.14, 0.12, 0.10)), Vector3(0, -0.30, 0)))
+		_:
+			return null
+	return root
+
+
+func _mesh_part(name: String, mesh: Mesh, position: Vector3, rotation_degrees: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.name = name
+	part.mesh = mesh
+	part.position = position
+	part.rotation_degrees = rotation_degrees
+	return part
+
+
+func _box_mesh(size: Vector3) -> BoxMesh:
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	return mesh
+
+
+func _cylinder_mesh(radius: float, height: float, radial_segments: int) -> CylinderMesh:
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = radial_segments
+	return mesh
 
 
 func _res_path(runtime_path: String) -> String:

@@ -32,10 +32,10 @@ const PAPER_DOLL_SLOT_POSITIONS := {
 	"main_hand": Vector2(20, 116),
 	"off_hand": Vector2(244, 116),
 	"chest": Vector2(132, 112),
-	"gloves": Vector2(36, 210),
+	"ring_left": Vector2(20, 198),
+	"ring_right": Vector2(244, 198),
+	"gloves": Vector2(36, 276),
 	"belt": Vector2(132, 194),
-	"ring_left": Vector2(244, 198),
-	"ring_right": Vector2(244, 264),
 	"boots": Vector2(132, 276),
 }
 
@@ -372,7 +372,11 @@ func _bag_items() -> Array:
 
 
 func _target_bag_slot_count() -> int:
-	return max(inventory_capacity, _bag_items().size())
+	var bag_item_count := int(_bag_items().size())
+	var required_slots: int = inventory_capacity if inventory_capacity > bag_item_count else bag_item_count
+	if required_slots <= 0:
+		return 0
+	return int(ceil(float(required_slots) / float(BAG_COLUMNS))) * BAG_COLUMNS
 
 
 func _apply_interaction_filters() -> void:

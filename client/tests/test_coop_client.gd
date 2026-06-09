@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_test_delta_wall_layout_replacement()
 	_test_teardown_clears_wall_layout()
 	_test_preset_world_wall_fallback()
+	_test_local_player_model_front_faces_direction()
 	_test_remote_player_delta_and_remove()
 	_test_multiple_remote_players_update_and_remove_independently()
 	_test_path_reject_clears_held_click_state()
@@ -203,6 +204,26 @@ func _test_preset_world_wall_fallback() -> void:
 	main.free()
 
 
+func _test_local_player_model_front_faces_direction() -> void:
+	var main = _make_main()
+	main.character_visual = Node3D.new()
+	main.player_anchor.add_child(main.character_visual)
+	main._face_direction(Vector2(1.0, 0.0))
+	var front: Vector3 = main.character_visual.transform.basis.z
+	front.y = 0.0
+	_assert_vec3("local player visual front faces east", front.normalized(), Vector3(1.0, 0.0, 0.0))
+	main._face_direction(Vector2(0.0, 1.0))
+	front = main.character_visual.transform.basis.z
+	front.y = 0.0
+	_assert_vec3("local player visual front faces south", front.normalized(), Vector3(0.0, 0.0, 1.0))
+	main._face_direction(Vector2.ZERO)
+	_assert_vec3("local player zero facing ignored", _vec2_as_vec3(main._last_facing_direction), Vector3(0.0, 0.0, 1.0))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
 func _test_multiple_remote_players_update_and_remove_independently() -> void:
 	var main = _make_main()
 	main._apply_snapshot({
@@ -327,3 +348,7 @@ func _assert_vec3(name: String, got: Vector3, want: Vector3) -> void:
 		return
 	_fail_count += 1
 	printerr("[gdtest] FAIL: %s got=%s want=%s" % [name, str(got), str(want)])
+
+
+func _vec2_as_vec3(v: Vector2) -> Vector3:
+	return Vector3(v.x, 0.0, v.y)

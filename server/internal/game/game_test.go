@@ -1645,6 +1645,38 @@ func TestDungeonEquipmentDropsGolden(t *testing.T) {
 	}
 }
 
+func TestDungeonMonsterLootRate(t *testing.T) {
+	rules := loadRules(t)
+	tableIDs := []string{"dungeon_mob_drop"}
+	for _, band := range rules.DungeonGeneration.LootBands {
+		tableIDs = append(tableIDs, band.MonsterLootTable)
+	}
+	seen := map[string]bool{}
+	for _, tableID := range tableIDs {
+		if seen[tableID] {
+			continue
+		}
+		seen[tableID] = true
+		table := rules.LootTables[tableID]
+		got := treasureClassAtLeastOneDropChance(rules.TreasureClasses[table.TreasureClassID])
+		if math.Abs(got-0.15) > 0.000001 {
+			t.Fatalf("%s at-least-one drop chance = %.4f, want 0.1500", tableID, got)
+		}
+	}
+}
+
+func treasureClassAtLeastOneDropChance(tc TreasureClassDef) float64 {
+	noDropChance := 1.0
+	for _, attempt := range tc.Attempts {
+		total := attempt.SuccessWeight + attempt.NoDropWeight
+		if total <= 0 {
+			continue
+		}
+		noDropChance *= float64(attempt.NoDropWeight) / float64(total)
+	}
+	return 1 - noDropChance
+}
+
 func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	rules.TreasureClasses["test_rolled_tc"] = TreasureClassDef{Attempts: []TreasureAttemptDef{{
@@ -5178,8 +5210,8 @@ func countPlayers(entities []EntityView) int {
 }
 
 func TestDungeonEquipmentLootDeterminism(t *testing.T) {
-	first := dungeonEquipmentKillLootSequence(t, "v29_replay_equipment_0")
-	second := dungeonEquipmentKillLootSequence(t, "v29_replay_equipment_0")
+	first := dungeonEquipmentKillLootSequence(t, "v29_replay_equipment_16")
+	second := dungeonEquipmentKillLootSequence(t, "v29_replay_equipment_16")
 	if !sameStrings(first, second) {
 		t.Fatalf("same-seed loot sequence drifted: %v != %v", first, second)
 	}
@@ -5188,12 +5220,12 @@ func TestDungeonEquipmentLootDeterminism(t *testing.T) {
 	}
 	foundEquipment := false
 	for _, drop := range first {
-		if drop == "cave_belt:cave_belt" {
+		if drop == "cave_shield:cave_shield" {
 			foundEquipment = true
 			break
 		}
 	}
-	if !foundEquipment && !containsString(first, "cave_bow:cave_bow") {
+	if !foundEquipment {
 		t.Fatalf("loot sequence = %v, want rolled equipment", first)
 	}
 }

@@ -56,6 +56,7 @@ var _drag_data: Dictionary = {}
 var _interactive: bool = true
 var _gesture_hint: Label
 var _gesture_tween: Tween
+var _rendered_bag_slot_count: int = 0
 
 
 class InventorySlotButton:
@@ -186,6 +187,7 @@ func get_debug_state() -> Dictionary:
 		"gold": gold,
 		"bag_columns": _bag_grid.columns if _bag_grid != null else 0,
 		"available_slot_count": inventory_capacity,
+		"rendered_slot_count": _rendered_bag_slot_count,
 		"paper_doll_slot_ids": EQUIPMENT_SLOTS.duplicate(),
 		"paper_doll_slots": _debug_paper_doll_slots(),
 		"paper_doll_preview": {
@@ -352,7 +354,8 @@ func _render() -> void:
 		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
 			continue
 		bag_items.append(item)
-	for i in range(inventory_capacity):
+	_rendered_bag_slot_count = max(inventory_capacity, bag_items.size())
+	for i in range(_rendered_bag_slot_count):
 		var slot := _slot_button(SLOT_KIND_BAG, Vector2(58, 58))
 		var item: Dictionary = bag_items[i] if i < bag_items.size() else {}
 		_fill_slot(slot, item)

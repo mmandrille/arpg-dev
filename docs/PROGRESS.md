@@ -3,7 +3,7 @@
 **Read this file at the start of every new task** before writing specs, plans, or code.
 It is the canonical snapshot of what exists, what each slice proved, and what is still open.
 
-Last updated: 2026-06-08
+Last updated: 2026-06-09
 
 ---
 
@@ -11,9 +11,9 @@ Last updated: 2026-06-08
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v38 — `session-browser-and-uncapped-coop-menu` |
+| **Latest completed slice** | v39 — `ui-currency-and-mana-polish` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-08 |
+| **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
 
 ### Slice numbering note
@@ -54,6 +54,7 @@ v35_* = boss-floor-gate
 v36_* = inventory-paper-doll-capacity
 v37_* = combat-control-and-boss-ai-fixes
 v38_* = session-browser-and-uncapped-coop-menu
+v39_* = ui-currency-and-mana-polish
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -112,6 +113,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v36** | `inventory-paper-doll-capacity` | Complete (`make ci` green) | [`v36_spec-inventory-paper-doll-capacity.md`](specs/v36_spec-inventory-paper-doll-capacity.md) | [`v36_2026-06-08-inventory-paper-doll-capacity.md`](plans/v36_2026-06-08-inventory-paper-doll-capacity.md) |
 | **v37** | `combat-control-and-boss-ai-fixes` | Complete (`make ci` green) | [`v37_spec-combat-control-and-boss-ai-fixes.md`](specs/v37_spec-combat-control-and-boss-ai-fixes.md) | [`v37_2026-06-08-combat-control-and-boss-ai-fixes.md`](plans/v37_2026-06-08-combat-control-and-boss-ai-fixes.md) |
 | **v38** | `session-browser-and-uncapped-coop-menu` | Complete (`make ci` green) | [`v38_spec-session-browser-and-uncapped-coop-menu.md`](specs/v38_spec-session-browser-and-uncapped-coop-menu.md) | [`v38_2026-06-08-session-browser-and-uncapped-coop-menu.md`](plans/v38_2026-06-08-session-browser-and-uncapped-coop-menu.md) |
+| **v39** | `ui-currency-and-mana-polish` | Complete (`make ci` green) | [`v39_spec-ui-currency-and-mana-polish.md`](specs/v39_spec-ui-currency-and-mana-polish.md) | [`v39_2026-06-09-ui-currency-and-mana-polish.md`](plans/v39_2026-06-09-ui-currency-and-mana-polish.md) |
 
 ---
 
@@ -957,6 +959,27 @@ checks, chat/emotes, party panel polish, trade, XP sharing, party bonuses, proxi
 loot allocation, PvP/friendly fire, load-aware capacity limits, split deployables, or cross-process
 session ownership.
 
+### v39 — UI currency and mana polish
+
+**Proves:** Character gold and player mana can extend the existing authoritative economy,
+progression, protocol, and Godot UI paths without making coins occupy inventory space.
+
+- Gold is now durable character progression state, persisted through the store and surfaced in
+  snapshots, deltas, `/state`, replay, and the Godot HUD/inventory presentation.
+- Currency loot uses `item_def_id: "gold"` with rolled amounts; pickup removes the loot, emits
+  `gold_picked_up`, and updates the character wallet instead of adding a bag item.
+- Generated dungeon gold rolls scale by depth and monster rarity, while static/town rewards use the
+  base gold range.
+- Player entity views now carry `mana` / `max_mana`; blue potions declare `mana_restore`, restore
+  mana authoritatively, and reject use while mana is already full.
+- Character-derived armor now comes from DEX instead of VIT, with shared golden and client formula
+  coverage updated together.
+- Godot UI adds the mana bar, gold counter, larger interface text, mutually exclusive panels,
+  character rename affordance, top-right debug text setting, and sword hand-pose polish.
+
+**Explicit non-goals:** no gold sinks, vendors, stash, trade, crafting, multiple currencies, mana
+regeneration, spells, skill bar, active ability catalog, production UI art, or broader UI redesign.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1011,6 +1034,7 @@ boss_floor_gate: descend to level -5 → assert compact boss floor and locked ex
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
+ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions
 ```
 
 **Verify:**
@@ -1153,14 +1177,18 @@ active session summaries, listed join without join code, three-plus-member realt
 Godot Multiplayer menu path, and local/remote multi-client menu launchers. Empty listed sessions are
 hidden from discovery, and a listed session is ended when its last connected player disconnects.
 
+**Character gold, mana, and related UI polish are now authoritative.** v39 adds durable character
+gold, currency loot pickup, generated gold scaling, snapshot/delta/replay wallet coverage, player
+mana, blue mana potions, DEX-sourced armor, and Godot HUD/inventory/menu polish.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors/gold, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26 non-goals, ADR-0008 deferred |
-| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill bar and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37 non-goals |
-| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/gold/trade, real gold wallet, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows | v23/v25/v26/v28/v29/v30/v35/v36 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37 non-goals |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39 non-goals, ADR-0008 deferred |
+| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill bar and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39 non-goals |
+| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/trade, gold sinks, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows | v23/v25/v26/v28/v29/v30/v35/v36/v39 non-goals, ADR-0009 deferred |
+| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |

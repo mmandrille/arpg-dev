@@ -1,6 +1,7 @@
 {
   "id": "teleporter_lab",
   "world_id": "dungeon_levels",
+  "seed": "5e5a4562087ad93bee38e6916be48d0b",
   "title": "Teleporter lab",
   "description": "Descend from town, discover generated teleporters on level -1 and -2, teleport back to level -1, then return to town.",
   "steps": [

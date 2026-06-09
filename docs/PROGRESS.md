@@ -11,7 +11,7 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v44 — `skill-points-and-magic-bolt` |
+| **Latest completed slice** | v45 — `menu-create-join-flow` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
@@ -60,6 +60,7 @@ v41_* = town-vendor-gold-sink
 v42_* = vendor-appraisal-and-item-comparison
 v43_* = equipment-requirements-and-preview
 v44_* = skill-points-and-magic-bolt
+v45_* = menu-create-join-flow
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -124,6 +125,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v42** | `vendor-appraisal-and-item-comparison` | Complete (`make ci` green) | [`v42_spec-vendor-appraisal-and-item-comparison.md`](specs/v42_spec-vendor-appraisal-and-item-comparison.md) | [`v42_2026-06-09-vendor-appraisal-and-item-comparison.md`](plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md) |
 | **v43** | `equipment-requirements-and-preview` | Complete (`make ci` green) | [`v43_spec-equipment-requirements-and-preview.md`](specs/v43_spec-equipment-requirements-and-preview.md) | [`v43_2026-06-09-equipment-requirements-and-preview.md`](plans/v43_2026-06-09-equipment-requirements-and-preview.md) |
 | **v44** | `skill-points-and-magic-bolt` | Complete (`make ci` green) | [`v44_spec-skill-points-and-magic-bolt.md`](specs/v44_spec-skill-points-and-magic-bolt.md) | [`v44_2026-06-09-skill-points-and-magic-bolt.md`](plans/v44_2026-06-09-skill-points-and-magic-bolt.md) |
+| **v45** | `menu-create-join-flow` | Complete (`make ci` green) | [`v45_spec-menu-create-join-flow.md`](specs/v45_spec-menu-create-join-flow.md) | [`v45_2026-06-09-menu-create-join-flow.md`](plans/v45_2026-06-09-menu-create-join-flow.md) |
 
 ---
 
@@ -1101,6 +1103,33 @@ rank spend, mana/cooldown mutation, projectile cast, replay, persistence, and Go
 skills, basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, buffs/debuffs,
 AoE/homing/summons/DOT/status effects, production skill VFX/audio, or final combat balance.
 
+### v45 — Menu create/join flow
+
+**Proves:** The player-facing menu now starts from backend-backed Create Game or Join Game flows
+without implying offline play or old-session resume.
+
+- Root menu actions are `Create Game`, `Join Game`, `Settings`, and `Exit`; `Continue`, `New Game`,
+  and root `Multiplayer` are compatibility aliases for bots only.
+- Settings persists a local `Create Game Type` preference with `Co-op` and `Solo`; `Co-op` remains
+  the default and creates a listed co-op backend session.
+- Create Game lists or creates characters, then starts a fresh backend `dungeon_levels` session as
+  either listed co-op or solo based on the setting.
+- Join Game opens the active listed-session browser first; character selection only appears after a
+  selected listed session id exists.
+- Character selection now exposes explicit choose-or-create and forced-create modes, keeps dead
+  rows disabled, and preserves rename/delete affordances without reintroducing old root copy.
+- Client debug state and bot actions now expose root menu labels/actions, character panel mode,
+  create-game session type, selected join session id, and current session mode/listed flags.
+- Client bot scenarios `08_main_menu_flow.json` and `20_menu_create_join_flow.json` prove the root
+  menu, settings persistence, listed co-op create, solo create, Return to Main Menu, existing
+  character reuse, and Join Game empty-state behavior.
+- Protocol bot scenario `27_session_browser_uncapped_coop.json` remains the real backend listed
+  discovery/join proof.
+
+**Explicit non-goals:** no offline/local-only gameplay, player-facing old-session resume, Steam
+lobbies/invites, matchmaking, chat, ready checks, filters/search/sorting, production menu art/audio,
+or real multi-account Godot Join Game bot proof.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1146,7 +1175,7 @@ chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond
 dungeon_levels / teleporter_lab: start in town, descend/ascend generated floors; discover teleporters and fast-travel back
 character_persistence: same-account fresh sessions retain gear/equipment and discovered waypoint access
 rolled_drops: kill dungeon mob → pick up/equip rolled cave_blade → prove rolled metadata persists
-main_menu_flow: menu settings → named character creation → pause input lock → return → continue fresh session
+main_menu_flow: Create Game root flow → settings → listed co-op session → pause input lock → return → existing-character fresh session
 treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob → open chest once → pick up chest loot
 character_stats_and_leveling: descend to dungeon → kill mobs for XP → level up → spend VIT → prove persistence
 full_equipment: pick up/equip paper-doll gear → prove hand occupancy → assign belt-gated hotbar → prove persistence
@@ -1169,6 +1198,7 @@ equipment_requirements_and_preview: pick up requirement-gated gear → reject un
 client_equipment_requirements_and_preview: headless Godot client opens inventory → assert requirement-status and equip-preview rows
 skill_points_and_magic_bolt: level to 3 → spend Magic Bolt → cast → reject cooldown recast → recover → prove replay/fresh persistence
 client_skill_points_and_magic_bolt: headless Godot client opens skill panel → spends Magic Bolt → observes skill bar cooldown and recovery
+menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
 ```
 
 **Verify:**
@@ -1338,22 +1368,27 @@ protocol and Godot client bot scenarios.
 protocol v5 skill state, attack-speed-derived cooldowns, a server-owned Magic Bolt cast/reject/recover
 loop, and protocol/client bot proofs through replay, reconnect, and fresh-session persistence.
 
+**Menu Create Game and Join Game flows now match the backend session model.** v45 replaces the
+player-facing Continue/New Game/Multiplayer root menu with Create Game, Join Game, Settings, and
+Exit; persists the Create Game Type setting; and proves co-op/solo create plus Join Game empty-state
+behavior through client bot scenarios.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39/v40/v41/v44 non-goals, ADR-0008 deferred, ADR-0011 |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39/v40/v41/v44/v45 non-goals, ADR-0008 deferred, ADR-0011 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43 non-goals, ADR-0009 deferred, ADR-0012 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items | v33/v38/v41/v42 non-goals, ADR-0011, ADR-0012 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44 non-goals |
+| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45 non-goals |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38 non-goals, ADR-0001 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, real multi-account Godot Join Game bot proof, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45 non-goals, ADR-0001 |
 | Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
 
 ---

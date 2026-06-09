@@ -7,6 +7,9 @@ signal create_requested(name: String)
 signal delete_requested(character_id: String)
 signal rename_requested(character_id: String, name: String)
 
+const MODE_CHOOSE_OR_CREATE := "choose_or_create"
+const MODE_FORCED_CREATE := "forced_create"
+
 var _title: Label
 var _rows: VBoxContainer
 var _empty_label: Label
@@ -20,6 +23,7 @@ var _characters: Array = []
 var _delete_mode: bool = false
 var _pending_delete_id: String = ""
 var _pending_rename_id: String = ""
+var _mode: String = MODE_FORCED_CREATE
 
 
 func _ready() -> void:
@@ -31,25 +35,40 @@ func _ready() -> void:
 
 
 func show_continue(characters: Array) -> void:
+	show_choose_or_create(characters)
+
+
+func show_new_game() -> void:
+	show_forced_create()
+
+
+func show_choose_or_create(characters: Array, title: String = "Choose Character") -> void:
 	_sync_viewport_size()
 	visible = true
 	_characters = characters.duplicate(true)
 	_delete_mode = true
-	_title.text = "Continue"
-	_name_edit.visible = false
-	_create_button.visible = false
+	_mode = MODE_CHOOSE_OR_CREATE
+	_title.text = title
+	_name_edit.visible = true
+	_create_button.visible = true
+	_create_button.text = "Create Character"
+	_name_edit.placeholder_text = "New character name"
+	_name_edit.text = ""
 	_error_label.text = ""
 	_render_characters(characters)
 
 
-func show_new_game() -> void:
+func show_forced_create(title: String = "Create Character") -> void:
 	_sync_viewport_size()
 	visible = true
 	_characters = []
 	_delete_mode = false
-	_title.text = "New Game"
+	_mode = MODE_FORCED_CREATE
+	_title.text = title
 	_name_edit.visible = true
 	_create_button.visible = true
+	_create_button.text = "Create Character"
+	_name_edit.placeholder_text = "Character name"
 	_name_edit.text = ""
 	_error_label.text = ""
 	_render_characters([])
@@ -70,6 +89,27 @@ func set_error(message: String) -> void:
 
 func known_characters() -> Array:
 	return _characters.duplicate(true)
+
+
+func mode() -> String:
+	return _mode
+
+
+func title_text() -> String:
+	return _title.text if _title != null else ""
+
+
+func get_debug_state() -> Dictionary:
+	return {
+		"visible": visible,
+		"mode": _mode,
+		"title": title_text(),
+		"characters": known_characters(),
+		"name_field_visible": _name_edit != null and _name_edit.visible,
+		"create_button_visible": _create_button != null and _create_button.visible,
+		"empty_visible": _empty_label != null and _empty_label.visible,
+		"error": _error_label.text if _error_label != null else "",
+	}
 
 
 func set_name_text(name: String) -> void:
@@ -175,7 +215,7 @@ func _build() -> void:
 func _render_characters(characters: Array) -> void:
 	for child in _rows.get_children():
 		child.queue_free()
-	_empty_label.visible = characters.is_empty() and not _name_edit.visible
+	_empty_label.visible = characters.is_empty() and _mode == MODE_CHOOSE_OR_CREATE and not _name_edit.visible
 	for character in characters:
 		if typeof(character) != TYPE_DICTIONARY:
 			continue

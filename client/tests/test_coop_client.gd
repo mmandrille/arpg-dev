@@ -5,6 +5,7 @@ extends SceneTree
 const MainScript := preload("res://scripts/main.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
+const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -24,6 +25,8 @@ func _initialize() -> void:
 	_test_capacity_reject_shows_bag_full_unequip_message()
 	_test_loss_popup_shows_for_dead_local_player()
 	_test_dead_character_rows_are_disabled()
+	_test_character_panel_modes_for_v45()
+	_test_settings_panel_create_game_type_sync()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -235,6 +238,7 @@ func _test_loss_popup_shows_for_dead_local_player() -> void:
 func _test_dead_character_rows_are_disabled() -> void:
 	var panel: CharacterSelectPanel = CharacterSelectPanelScript.new()
 	get_root().add_child(panel)
+	panel._build()
 	panel.show_continue([
 		{"character_id": "char_dead", "name": "Fallen", "created_at": "2026-06-09T00:00:00Z", "dead": true},
 		{"character_id": "char_live", "name": "Alive", "created_at": "2026-06-09T00:00:00Z", "dead": false},
@@ -251,6 +255,38 @@ func _test_dead_character_rows_are_disabled() -> void:
 	_assert_eq("dead character did not start", str(started["id"]), "")
 	panel.start_character_at_index(1)
 	_assert_eq("live character starts", str(started["id"]), "char_live")
+	panel.queue_free()
+
+
+func _test_character_panel_modes_for_v45() -> void:
+	var panel: CharacterSelectPanel = CharacterSelectPanelScript.new()
+	get_root().add_child(panel)
+	panel._build()
+	panel.show_forced_create("Create Character")
+	var forced := panel.get_debug_state()
+	_assert_eq("forced create mode", str(forced.get("mode", "")), "forced_create")
+	_assert_eq("forced create title", str(forced.get("title", "")), "Create Character")
+	_assert_true("forced create hides empty label", not bool(forced.get("empty_visible", true)))
+	panel.show_choose_or_create([
+		{"character_id": "char_live", "name": "Alive", "created_at": "", "dead": false},
+	], "Choose Character")
+	var choose := panel.get_debug_state()
+	_assert_eq("choose mode", str(choose.get("mode", "")), "choose_or_create")
+	_assert_eq("choose title", str(choose.get("title", "")), "Choose Character")
+	_assert_true("choose keeps create affordance", bool(choose.get("create_button_visible", false)))
+	_assert_eq("choose character count", (choose.get("characters", []) as Array).size(), 1)
+	panel.queue_free()
+
+
+func _test_settings_panel_create_game_type_sync() -> void:
+	var panel: SettingsPanel = SettingsPanelScript.new()
+	get_root().add_child(panel)
+	panel._build()
+	panel.show_settings("1920x1080", true, true, "solo")
+	_assert_true("solo create game type selected", (panel._session_type_buttons["solo"] as Button).disabled)
+	_assert_true("coop create game type available", not (panel._session_type_buttons["coop"] as Button).disabled)
+	panel.set_create_game_session_type("coop")
+	_assert_true("coop create game type selected", (panel._session_type_buttons["coop"] as Button).disabled)
 	panel.queue_free()
 
 

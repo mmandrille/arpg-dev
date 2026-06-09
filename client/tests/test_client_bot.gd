@@ -34,6 +34,8 @@ func _initialize() -> void:
 	_test_menu_step_types_load()
 	_test_multiplayer_menu_step_types_load()
 	_test_multiplayer_menu_assertions()
+	_test_v45_menu_step_types_load()
+	_test_v45_menu_assertions()
 	_test_character_stats_step_types_load()
 	_test_skill_step_types_load()
 	_test_character_info_step_types_load()
@@ -48,6 +50,8 @@ func _initialize() -> void:
 	_test_client_settings_size_from_data()
 	_test_client_settings_floating_combat_text_from_data()
 	_test_client_settings_top_right_status_text_from_data()
+	_test_client_settings_create_game_session_type_from_data()
+	_test_client_settings_create_game_session_type_save_shape()
 	_test_combat_feedback_step_types_load()
 	_test_combat_event_and_damage_number_assertions()
 	_test_inventory_paper_doll_step_types_load()
@@ -218,6 +222,7 @@ func _test_multiplayer_menu_step_types_load() -> void:
 	data["client_steps"] = [
 		{"type": "wait_multiplayer_panel", "timeout_s": 1.0},
 		{"type": "assert_multiplayer_panel_visible", "visible": true},
+		{"type": "assert_multiplayer_session_rows", "equals": 0},
 		{"type": "assert_multiplayer_session_rows", "min_count": 1, "listed": true},
 		{"type": "click_menu_button", "button": "refresh_sessions"},
 		{"type": "click_menu_button", "button": "host_listed_session"},
@@ -254,6 +259,63 @@ func _test_multiplayer_menu_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("multiplayer menu assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_v45_menu_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "wait_main_menu", "timeout_s": 1.0},
+		{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Settings", "Exit"], "actions": ["create_game", "join_game", "settings", "exit"]},
+		{"type": "click_menu_button", "button": "create_game"},
+		{"type": "assert_character_panel", "mode": "forced_create", "title": "Create Character", "name_field_visible": true, "create_button_visible": true},
+		{"type": "select_create_game_type", "session_type": "solo"},
+		{"type": "assert_create_game_type", "session_type": "solo"},
+		{"type": "click_menu_button", "button": "join_game"},
+		{"type": "click_menu_button", "button": "join_selected_session"},
+		{"type": "assert_current_session", "exists": true, "mode": "solo", "listed": false},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("v45 menu step scenario valid", err, "")
+	_assert_ne("create game type action validates session_type", BotScenarioRunnerScript.validate_step({"type": "select_create_game_type"}, 0), "")
+	_assert_ne("main menu actions requires expectation", BotScenarioRunnerScript.validate_step({"type": "assert_main_menu_actions"}, 0), "")
+	_assert_ne("character panel assertion requires expectation", BotScenarioRunnerScript.validate_step({"type": "assert_character_panel"}, 0), "")
+	_assert_ne("current session assertion requires expectation", BotScenarioRunnerScript.validate_step({"type": "assert_current_session"}, 0), "")
+
+
+func _test_v45_menu_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "v45_menu_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Settings", "Exit"], "actions": ["create_game", "join_game"]},
+			{"type": "assert_character_panel", "mode": "choose_or_create", "title": "Choose Character", "min_character_count": 1, "name_field_visible": true, "create_button_visible": true},
+			{"type": "assert_create_game_type", "session_type": "coop"},
+			{"type": "assert_current_session", "exists": true, "mode": "coop", "listed": true},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"main_menu_button_labels": ["Create Game", "Join Game", "Settings", "Exit"],
+		"main_menu_actions": ["create_game", "join_game", "settings", "exit"],
+		"character_panel": {
+			"mode": "choose_or_create",
+			"title": "Choose Character",
+			"characters": [{"character_id": "char_1", "dead": false}],
+			"name_field_visible": true,
+			"create_button_visible": true,
+		},
+		"create_game_session_type": "coop",
+		"current_session_id": "sess_1",
+		"current_session_mode": "coop",
+		"current_session_listed": true,
+	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	_assert_true("v45 menu assertions pass", runner.is_done() and runner.passed())
 
 
 func _test_character_stats_step_types_load() -> void:
@@ -560,6 +622,30 @@ func _test_client_settings_floating_combat_text_from_data() -> void:
 func _test_client_settings_top_right_status_text_from_data() -> void:
 	_assert_eq("settings top-right text defaults on", ClientSettingsScript.top_right_status_text_from_data({}), true)
 	_assert_eq("settings top-right text parses off", ClientSettingsScript.top_right_status_text_from_data({"top_right_status_text": false}), false)
+
+
+func _test_client_settings_create_game_session_type_from_data() -> void:
+	_assert_eq("settings create game type defaults coop", ClientSettingsScript.create_game_session_type_from_data({}), "coop")
+	_assert_eq("settings create game type parses solo", ClientSettingsScript.create_game_session_type_from_data({"create_game_session_type": "solo"}), "solo")
+	_assert_eq("settings create game type normalizes invalid", ClientSettingsScript.create_game_session_type_from_data({"create_game_session_type": "lan"}), "coop")
+	_assert_eq("settings create game label coop", ClientSettingsScript.create_game_session_type_label("coop"), "Co-op")
+	_assert_eq("settings create game label solo", ClientSettingsScript.create_game_session_type_label("solo"), "Solo")
+
+
+func _test_client_settings_create_game_session_type_save_shape() -> void:
+	var path := "user://test_settings_v45.json"
+	var absolute_path := ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(absolute_path)
+	var settings = ClientSettingsScript.new(path)
+	settings.set_create_game_session_type("solo", false)
+	settings.save()
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+	_assert_eq("settings save includes create game session type", str((parsed as Dictionary).get("create_game_session_type", "")), "solo")
+	var reloaded = ClientSettingsScript.new(path)
+	reloaded.load()
+	_assert_eq("settings reload restores create game session type", reloaded.create_game_session_type, "solo")
+	DirAccess.remove_absolute(absolute_path)
 
 
 func _test_combat_feedback_step_types_load() -> void:

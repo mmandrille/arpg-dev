@@ -68,6 +68,11 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 }
 const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
+const CHARACTER_FLOW_CREATE_GAME := "create_game"
+const CHARACTER_FLOW_JOIN_GAME := "join_game"
+const CHARACTER_FLOW_LEGACY_SOLO := "solo"
+const CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST := "multiplayer_host"
+const CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN := "multiplayer_join"
 
 var client: NetClient
 var resolver: EquipmentVisualResolver
@@ -150,7 +155,7 @@ var pause_menu: PauseMenu
 var loss_popup: Control
 var gameplay_active: bool = false
 var settings_return_target: String = "main"
-var character_flow: String = "solo"
+var character_flow: String = CHARACTER_FLOW_CREATE_GAME
 var pending_join_session_id: String = ""
 
 const INVENTORY_REPLAY_EVENT_HINTS := {
@@ -272,7 +277,8 @@ func _bot_uses_menu() -> bool:
 	if _truthy_env("ARPG_BOT_MENU"):
 		return true
 	var scenario_path := _env("ARPG_BOT_SCENARIO", "")
-	return scenario_path.get_file().begins_with("08_main_menu_flow")
+	var file_name := scenario_path.get_file()
+	return file_name.begins_with("08_main_menu_flow") or file_name.begins_with("20_menu_create_join_flow")
 
 
 func _mount_bot_controller() -> void:
@@ -343,26 +349,38 @@ func _hide_all_menus() -> void:
 	_hide_character_info_panel()
 
 
-func _on_continue_pressed() -> void:
-	character_flow = "solo"
+func _on_create_game_pressed() -> void:
+	character_flow = CHARACTER_FLOW_CREATE_GAME
+	pending_join_session_id = ""
 	var characters := client.list_characters()
 	if character_panel != null:
-		main_menu.visible = false
-		character_panel.show_continue(characters)
+		if main_menu != null:
+			main_menu.visible = false
+		if characters.is_empty():
+			character_panel.show_forced_create("Create Character")
+		else:
+			character_panel.show_choose_or_create(characters, "Choose Character")
+
+
+func _on_join_game_pressed() -> void:
+	character_flow = CHARACTER_FLOW_JOIN_GAME
+	pending_join_session_id = ""
+	_show_join_game_panel(true)
+
+
+func _on_continue_pressed() -> void:
+	_on_create_game_pressed()
 
 
 func _on_new_game_pressed() -> void:
-	character_flow = "solo"
-	if character_panel != null:
-		main_menu.visible = false
-		character_panel.show_new_game()
+	_on_create_game_pressed()
 
 
 func _on_multiplayer_pressed() -> void:
-	_show_multiplayer_panel(true)
+	_on_join_game_pressed()
 
 
-func _show_multiplayer_panel(refresh: bool = false) -> void:
+func _show_join_game_panel(refresh: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = false
 	if multiplayer_panel == null:
@@ -372,6 +390,10 @@ func _show_multiplayer_panel(refresh: bool = false) -> void:
 		_refresh_multiplayer_sessions()
 
 
+func _show_multiplayer_panel(refresh: bool = false) -> void:
+	_show_join_game_panel(refresh)
+
+
 func _refresh_multiplayer_sessions() -> void:
 	if multiplayer_panel == null:
 		return
@@ -379,29 +401,43 @@ func _refresh_multiplayer_sessions() -> void:
 
 
 func _on_host_listed_session_requested() -> void:
-	character_flow = "multiplayer_host"
+	character_flow = CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST
 	pending_join_session_id = ""
-	_show_character_picker_for_multiplayer()
+	_show_character_picker_for_flow("Choose Character")
 
 
 func _on_join_listed_session_requested(session_id: String) -> void:
 	if session_id == "":
 		return
-	character_flow = "multiplayer_join"
+	character_flow = CHARACTER_FLOW_JOIN_GAME
 	pending_join_session_id = session_id
-	_show_character_picker_for_multiplayer()
+	_show_character_picker_for_flow("Choose Character")
 
 
-func _show_character_picker_for_multiplayer() -> void:
+func _on_character_panel_back() -> void:
+	if character_panel != null:
+		character_panel.hide_panel()
+	match character_flow:
+		CHARACTER_FLOW_JOIN_GAME, CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN, CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST:
+			_show_join_game_panel(false)
+		_:
+			pending_join_session_id = ""
+			if main_menu != null:
+				main_menu.show_menu()
+
+
+func _show_character_picker_for_flow(title: String = "Choose Character") -> void:
 	if character_panel == null:
 		return
 	var characters := client.list_characters()
 	if multiplayer_panel != null:
 		multiplayer_panel.hide_panel()
+	if main_menu != null:
+		main_menu.visible = false
 	if characters.is_empty():
-		character_panel.show_new_game()
+		character_panel.show_forced_create("Create Character")
 	else:
-		character_panel.show_continue(characters)
+		character_panel.show_choose_or_create(characters, title)
 
 
 func _on_character_create_requested(name: String) -> void:
@@ -418,7 +454,7 @@ func _on_character_delete_requested(character_id: String) -> void:
 			character_panel.set_error("Could not delete character")
 		return
 	if character_panel != null:
-		character_panel.show_continue(client.list_characters())
+		_refresh_character_panel_for_current_flow()
 
 
 func _on_character_rename_requested(character_id: String, name: String) -> void:
@@ -427,14 +463,28 @@ func _on_character_rename_requested(character_id: String, name: String) -> void:
 			character_panel.set_error("Could not rename character")
 		return
 	if character_panel != null:
-		character_panel.show_continue(client.list_characters())
+		_refresh_character_panel_for_current_flow()
+
+
+func _refresh_character_panel_for_current_flow() -> void:
+	if character_panel == null:
+		return
+	var characters := client.list_characters()
+	if characters.is_empty():
+		character_panel.show_forced_create("Create Character")
+	else:
+		character_panel.show_choose_or_create(characters, "Choose Character")
 
 
 func _start_selected_character(character_id: String) -> void:
 	match character_flow:
-		"multiplayer_host":
+		CHARACTER_FLOW_CREATE_GAME:
+			_start_create_game_session(character_id)
+		CHARACTER_FLOW_JOIN_GAME:
+			_start_listed_join_session(character_id)
+		CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST:
 			_start_listed_host_session(character_id)
-		"multiplayer_join":
+		CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN:
 			_start_listed_join_session(character_id)
 		_:
 			_start_character_session(character_id)
@@ -454,6 +504,13 @@ func _start_character_session(character_id: String) -> void:
 	_begin_gameplay_connection(false)
 
 
+func _start_create_game_session(character_id: String) -> void:
+	if client_settings != null and client_settings.create_game_session_type == ClientSettingsScript.CREATE_GAME_SESSION_TYPE_SOLO:
+		_start_character_session(character_id)
+	else:
+		_start_listed_host_session(character_id)
+
+
 func _start_listed_host_session(character_id: String) -> void:
 	if character_id == "":
 		character_panel.set_error("Could not host session")
@@ -463,7 +520,7 @@ func _start_listed_host_session(character_id: String) -> void:
 		character_panel.set_error("Could not host listed session")
 		return
 	bot_mode = false
-	character_flow = "solo"
+	character_flow = CHARACTER_FLOW_CREATE_GAME
 	_begin_gameplay_connection(false)
 
 
@@ -476,7 +533,7 @@ func _start_listed_join_session(character_id: String) -> void:
 		character_panel.set_error("Could not join listed session")
 		return
 	bot_mode = false
-	character_flow = "solo"
+	character_flow = CHARACTER_FLOW_CREATE_GAME
 	pending_join_session_id = ""
 	_begin_gameplay_connection(false)
 
@@ -485,7 +542,12 @@ func _on_settings_from_main() -> void:
 	settings_return_target = "main"
 	main_menu.visible = false
 	if settings_panel != null:
-		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text, client_settings.top_right_status_text)
+		settings_panel.show_settings(
+			ClientSettingsScript.size_label(client_settings.window_size),
+			client_settings.floating_combat_text,
+			client_settings.top_right_status_text,
+			client_settings.create_game_session_type
+		)
 
 
 func _on_settings_from_pause() -> void:
@@ -493,7 +555,12 @@ func _on_settings_from_pause() -> void:
 	if pause_menu != null:
 		pause_menu.hide_pause()
 	if settings_panel != null:
-		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text, client_settings.top_right_status_text)
+		settings_panel.show_settings(
+			ClientSettingsScript.size_label(client_settings.window_size),
+			client_settings.floating_combat_text,
+			client_settings.top_right_status_text,
+			client_settings.create_game_session_type
+		)
 
 
 func _on_settings_back() -> void:
@@ -525,11 +592,19 @@ func _on_top_right_status_text_toggled(enabled: bool) -> void:
 	_update_level_hud()
 
 
+func _on_create_game_session_type_selected(session_type: String) -> void:
+	if client_settings == null:
+		return
+	client_settings.set_create_game_session_type(session_type)
+	_sync_settings_panel()
+
+
 func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
 		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
 		settings_panel.set_floating_combat_text_enabled(client_settings.floating_combat_text)
 		settings_panel.set_top_right_status_text_enabled(client_settings.top_right_status_text)
+		settings_panel.set_create_game_session_type(client_settings.create_game_session_type)
 
 
 func _show_pause_menu() -> void:
@@ -1494,11 +1569,7 @@ func _handle_escape() -> void:
 		_on_settings_back()
 		return
 	if character_panel != null and character_panel.visible:
-		character_panel.hide_panel()
-		if character_flow in ["multiplayer_host", "multiplayer_join"]:
-			_show_multiplayer_panel(false)
-		elif main_menu != null:
-			main_menu.show_menu()
+		_on_character_panel_back()
 		return
 	if multiplayer_panel != null and multiplayer_panel.visible:
 		multiplayer_panel.hide_panel()
@@ -2239,21 +2310,14 @@ func _setup_menu_layer() -> void:
 	add_child(menu_layer)
 
 	main_menu = MainMenuScript.new()
-	main_menu.continue_pressed.connect(_on_continue_pressed)
-	main_menu.new_game_pressed.connect(_on_new_game_pressed)
-	main_menu.multiplayer_pressed.connect(_on_multiplayer_pressed)
+	main_menu.create_game_pressed.connect(_on_create_game_pressed)
+	main_menu.join_game_pressed.connect(_on_join_game_pressed)
 	main_menu.settings_pressed.connect(_on_settings_from_main)
 	main_menu.exit_pressed.connect(_exit_game)
 	menu_layer.add_child(main_menu)
 
 	character_panel = CharacterSelectPanelScript.new()
-	character_panel.back_requested.connect(func() -> void:
-		character_panel.hide_panel()
-		if character_flow in ["multiplayer_host", "multiplayer_join"]:
-			_show_multiplayer_panel(false)
-		else:
-			main_menu.show_menu()
-	)
+	character_panel.back_requested.connect(_on_character_panel_back)
 	character_panel.start_requested.connect(_start_selected_character)
 	character_panel.create_requested.connect(_on_character_create_requested)
 	character_panel.delete_requested.connect(_on_character_delete_requested)
@@ -2261,7 +2325,6 @@ func _setup_menu_layer() -> void:
 	menu_layer.add_child(character_panel)
 
 	multiplayer_panel = MultiplayerSessionsPanelScript.new()
-	multiplayer_panel.host_requested.connect(_on_host_listed_session_requested)
 	multiplayer_panel.refresh_requested.connect(_refresh_multiplayer_sessions)
 	multiplayer_panel.join_requested.connect(_on_join_listed_session_requested)
 	multiplayer_panel.back_requested.connect(func() -> void:
@@ -2275,6 +2338,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.size_selected.connect(_on_window_size_selected)
 	settings_panel.floating_combat_text_toggled.connect(_on_floating_combat_text_toggled)
 	settings_panel.top_right_status_text_toggled.connect(_on_top_right_status_text_toggled)
+	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
 	menu_layer.add_child(settings_panel)
 
 	pause_menu = PauseMenuScript.new()
@@ -3444,7 +3508,12 @@ func get_bot_state() -> Dictionary:
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
 		"main_menu_visible": main_menu != null and main_menu.visible,
+		"main_menu_button_labels": main_menu.button_labels() if main_menu != null else [],
+		"main_menu_actions": main_menu.available_actions() if main_menu != null else [],
 		"character_panel_visible": character_panel != null and character_panel.visible,
+		"character_panel": character_panel.get_debug_state() if character_panel != null else {},
+		"character_panel_mode": character_panel.mode() if character_panel != null else "",
+		"character_panel_title": character_panel.title_text() if character_panel != null else "",
 		"multiplayer_panel_visible": multiplayer_panel != null and multiplayer_panel.visible,
 		"settings_panel_visible": settings_panel != null and settings_panel.visible,
 		"pause_menu_visible": pause_menu != null and pause_menu.visible,
@@ -3452,10 +3521,14 @@ func get_bot_state() -> Dictionary:
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
 		"top_right_status_text_enabled": client_settings != null and client_settings.top_right_status_text,
+		"create_game_session_type": client_settings.create_game_session_type if client_settings != null else ClientSettingsScript.DEFAULT_CREATE_GAME_SESSION_TYPE,
 		"damage_numbers": _bot_damage_numbers(),
 		"known_characters": character_panel.known_characters() if character_panel != null else [],
 		"multiplayer_panel": multiplayer_panel.get_debug_state() if multiplayer_panel != null else {},
+		"join_game_selected_session_id": pending_join_session_id if pending_join_session_id != "" else (str(multiplayer_panel.get_debug_state().get("selected_session_id", "")) if multiplayer_panel != null else ""),
 		"current_session_id": client.session_id if client != null else "",
+		"current_session_mode": client.session_mode if client != null else "",
+		"current_session_listed": client.session_listed if client != null else false,
 		"gameplay_active": gameplay_active,
 	}
 	return out
@@ -3704,12 +3777,16 @@ func bot_cast_skill_direction(skill_id: String = "magic_bolt", direction: Dictio
 
 func bot_click_menu_button(button: String) -> void:
 	match button:
+		"create_game":
+			_on_create_game_pressed()
+		"join_game":
+			_on_join_game_pressed()
 		"continue":
-			_on_continue_pressed()
+			_on_create_game_pressed()
 		"new_game":
-			_on_new_game_pressed()
+			_on_create_game_pressed()
 		"multiplayer":
-			_on_multiplayer_pressed()
+			_on_join_game_pressed()
 		"refresh_sessions":
 			_refresh_multiplayer_sessions()
 		"host_listed_session":
@@ -3717,6 +3794,10 @@ func bot_click_menu_button(button: String) -> void:
 		"join_first_listed_session":
 			if multiplayer_panel != null:
 				multiplayer_panel.select_first_session()
+				var state := multiplayer_panel.get_debug_state()
+				_on_join_listed_session_requested(str(state.get("selected_session_id", "")))
+		"join_selected_session":
+			if multiplayer_panel != null:
 				var state := multiplayer_panel.get_debug_state()
 				_on_join_listed_session_requested(str(state.get("selected_session_id", "")))
 		"settings":
@@ -3728,11 +3809,7 @@ func bot_click_menu_button(button: String) -> void:
 			if settings_panel != null and settings_panel.visible:
 				_on_settings_back()
 			elif character_panel != null and character_panel.visible:
-				character_panel.hide_panel()
-				if character_flow in ["multiplayer_host", "multiplayer_join"]:
-					_show_multiplayer_panel(false)
-				else:
-					main_menu.show_menu()
+				_on_character_panel_back()
 			elif multiplayer_panel != null and multiplayer_panel.visible:
 				multiplayer_panel.hide_panel()
 				main_menu.show_menu()
@@ -3763,6 +3840,10 @@ func bot_select_window_size(size: String) -> void:
 
 func bot_set_floating_combat_text(enabled: bool) -> void:
 	_on_floating_combat_text_toggled(enabled)
+
+
+func bot_select_create_game_type(session_type: String) -> void:
+	_on_create_game_session_type_selected(session_type)
 
 
 func bot_consume_pending_event_at(index: int) -> void:

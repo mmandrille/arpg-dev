@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/dungeon_obstacles.v0.schema.json",
+  "title": "Dungeon obstacles golden fixture (v0)",
+  "type": "object",
+  "required": ["seed", "level", "expected"],
+  "additionalProperties": false,
+  "properties": {
+    "seed": { "type": "string", "minLength": 1 },
+    "level": { "type": "integer", "maximum": -1 },
+    "expected": {
+      "type": "object",
+      "required": [
+        "floor_size",
+        "minimum_wall_count",
+        "minimum_generated_wall_count",
+        "shape_families",
+        "walls",
+        "reachable_targets"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "floor_size": { "$ref": "#/$defs/size" },
+        "minimum_wall_count": { "type": "integer", "minimum": 4 },
+        "minimum_generated_wall_count": { "type": "integer", "minimum": 1 },
+        "shape_families": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "enum": ["line", "l", "t", "block"] },
+          "uniqueItems": true
+        },
+        "walls": {
+          "type": "array",
+          "minItems": 5,
+          "items": { "$ref": "#/$defs/wall" }
+        },
+        "reachable_targets": {
+          "type": "array",
+          "minItems": 4,
+          "items": { "$ref": "#/$defs/reachable_target" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "size": {
+      "type": "object",
+      "required": ["width", "height"],
+      "additionalProperties": false,
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "wall_size": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "y": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "wall": {
+      "type": "object",
+      "required": ["id", "position", "size", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+        "position": { "$ref": "#/$defs/vec2" },
+        "size": { "$ref": "#/$defs/wall_size" },
+        "source": { "type": "string", "enum": ["perimeter", "generated"] },
+        "shape_family": { "type": "string", "enum": ["line", "l", "t", "block"] }
+      }
+    },
+    "reachable_target": {
+      "type": "object",
+      "required": ["kind", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["player_spawn", "stairs_up", "stairs_down", "teleporter", "chest", "loot", "monster"] },
+        "def_id": { "type": "string", "minLength": 1 },
+        "position": { "$ref": "#/$defs/vec2" }
+      }
+    }
+  }
+}

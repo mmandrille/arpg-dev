@@ -11,7 +11,7 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v39 — `ui-currency-and-mana-polish` |
+| **Latest completed slice** | v40 — `reachable-dungeon-obstacles` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
@@ -55,6 +55,7 @@ v36_* = inventory-paper-doll-capacity
 v37_* = combat-control-and-boss-ai-fixes
 v38_* = session-browser-and-uncapped-coop-menu
 v39_* = ui-currency-and-mana-polish
+v40_* = reachable-dungeon-obstacles
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -114,6 +115,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v37** | `combat-control-and-boss-ai-fixes` | Complete (`make ci` green) | [`v37_spec-combat-control-and-boss-ai-fixes.md`](specs/v37_spec-combat-control-and-boss-ai-fixes.md) | [`v37_2026-06-08-combat-control-and-boss-ai-fixes.md`](plans/v37_2026-06-08-combat-control-and-boss-ai-fixes.md) |
 | **v38** | `session-browser-and-uncapped-coop-menu` | Complete (`make ci` green) | [`v38_spec-session-browser-and-uncapped-coop-menu.md`](specs/v38_spec-session-browser-and-uncapped-coop-menu.md) | [`v38_2026-06-08-session-browser-and-uncapped-coop-menu.md`](plans/v38_2026-06-08-session-browser-and-uncapped-coop-menu.md) |
 | **v39** | `ui-currency-and-mana-polish` | Complete (`make ci` green) | [`v39_spec-ui-currency-and-mana-polish.md`](specs/v39_spec-ui-currency-and-mana-polish.md) | [`v39_2026-06-09-ui-currency-and-mana-polish.md`](plans/v39_2026-06-09-ui-currency-and-mana-polish.md) |
+| **v40** | `reachable-dungeon-obstacles` | Complete (`make ci` green) | [`v40_spec-reachable-dungeon-obstacles.md`](specs/v40_spec-reachable-dungeon-obstacles.md) | [`v40_2026-06-09-reachable-dungeon-obstacles.md`](plans/v40_2026-06-09-reachable-dungeon-obstacles.md) |
 
 ---
 
@@ -980,6 +982,35 @@ progression, protocol, and Godot UI paths without making coins occupy inventory 
 **Explicit non-goals:** no gold sinks, vendors, stash, trade, crafting, multiple currencies, mana
 regeneration, spells, skill bar, active ability catalog, production UI art, or broader UI redesign.
 
+### v40 — Reachable dungeon obstacles
+
+**Proves:** Generated dungeon floors can include deterministic interior wall obstacles while the
+server still guarantees all generated targets remain reachable and the client renders only
+authoritative wall layouts.
+
+- Shared dungeon generation rules now include data-driven obstacle generation tuning for group
+  counts, wall segments, solid blocks, shape weights, and clearance rules.
+- Protocol v3 snapshots include complete current-level `walls[]`; level transitions emit
+  `wall_layout_update` before destination entity spawns so clients replace static layout before
+  rendering new floor contents.
+- Go dungeon generation creates deterministic non-boss interior obstacle groups on a separate
+  obstacle RNG stream, retries unreachable layouts, and keeps boss floors perimeter-only.
+- Reachability checks use the same grid assumptions as authoritative auto-pathing and validate
+  stairs, teleporters, chests, loot, and generated monster spawns.
+- Generated walls are solid for player movement, auto-pathing, monster chase, projectile sweeps,
+  loot/drop placement, and travel arrival.
+- Godot renders dungeon walls from snapshot/delta payloads and exposes wall counts for client bot
+  assertions; preset single-level worlds still render local `worlds.v0.json` walls.
+- `shared/golden/dungeon_obstacles.json` pins the `v40_obstacles` level `-2` wall order, shape
+  family coverage, and reachable target positions.
+- Protocol bot scenario `28_reachable_dungeon_obstacles.json` and client bot scenario
+  `14_dungeon_wall_rendering.json` prove generated interior walls through `/state`, reconnect,
+  replay, and headless Godot client rendering.
+
+**Explicit non-goals:** no generated doors in obstacle walls, full room/corridor PCG, rotated or
+destructible/secret obstacles, production dungeon art/lighting/sound, boss-floor obstacle generation,
+durable dungeon map snapshots across fresh sessions, or final density/biome/difficulty balance.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1035,6 +1066,8 @@ inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pic
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
 ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions
+reachable_dungeon_obstacles: descend through generated dungeon floors → assert generated interior wall layout → route to loot beyond obstacles → prove replay
+dungeon_wall_rendering: headless Godot client descends to generated floors → assert authoritative non-perimeter wall rendering state
 ```
 
 **Verify:**
@@ -1181,14 +1214,20 @@ hidden from discovery, and a listed session is ended when its last connected pla
 gold, currency loot pickup, generated gold scaling, snapshot/delta/replay wallet coverage, player
 mana, blue mana potions, DEX-sourced armor, and Godot HUD/inventory/menu polish.
 
+**Reachable generated dungeon obstacles are now authoritative.** v40 adds deterministic generated
+interior dungeon walls, obstacle reachability retries, authoritative protocol wall layouts,
+Godot server-layout rendering, and protocol/client bot proofs that generated walls exist without
+blocking generated targets.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39 non-goals, ADR-0008 deferred |
-| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill bar and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39 non-goals |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash/vendors, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39/v40 non-goals, ADR-0008 deferred |
+| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill bar and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40 non-goals |
 | Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/vendors/trade, gold sinks, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows | v23/v25/v26/v28/v29/v30/v35/v36/v39 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39 non-goals |
+| Content | Production item art/icons, production menu art/audio, production town art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, NPCs/vendors/stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40 non-goals |
+| Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |

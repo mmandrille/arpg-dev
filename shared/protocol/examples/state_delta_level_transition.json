@@ -2,6 +2,23 @@
   "server_tick": 44,
   "level": -1,
   "changes": [
+    {
+      "op": "wall_layout_update",
+      "walls": [
+        {
+          "id": "wall_-2_0000",
+          "position": { "x": 50, "y": -0.5 },
+          "size": { "x": 102, "y": 1 },
+          "source": "perimeter"
+        },
+        {
+          "id": "wall_-2_0004",
+          "position": { "x": 32, "y": 18 },
+          "size": { "x": 1, "y": 10 },
+          "source": "generated"
+        }
+      ]
+    },
     { "op": "entity_remove", "entity_id": "1001" }
   ],
   "events": [

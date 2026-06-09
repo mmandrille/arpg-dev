@@ -49,6 +49,8 @@ func _initialize() -> void:
 	_test_combat_event_and_damage_number_assertions()
 	_test_inventory_paper_doll_step_types_load()
 	_test_inventory_paper_doll_assertions()
+	_test_wall_layout_step_types_load()
+	_test_wall_layout_assertions()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -321,6 +323,44 @@ func _test_character_info_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("character info assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_wall_layout_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "wait_wall_layout", "current_level": -1, "at_least": 5, "generated_at_least": 1, "non_perimeter_at_least": 1, "timeout_s": 1.0},
+		{"type": "assert_wall_layout", "current_level": -1, "generated_at_least": 1},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("wall layout step scenario valid", err, "")
+	_assert_ne("wall layout assertion without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_wall_layout"}, 0), "")
+
+
+func _test_wall_layout_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "wall_layout_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "wait_wall_layout", "current_level": -1, "at_least": 5, "generated_at_least": 1, "non_perimeter_at_least": 1, "timeout_s": 1.0},
+			{"type": "assert_wall_layout", "current_level": -1, "generated_at_least": 1},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"current_level": -1,
+		"wall_count": 8,
+		"generated_wall_count": 3,
+		"non_perimeter_wall_count": 3,
+		"walls": [
+			{"id": "wall_-1_0000", "source": "perimeter"},
+			{"id": "wall_-1_0004", "source": "generated"},
+		],
+	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	_assert_true("wall layout assertions pass", runner.is_done() and runner.passed())
 
 
 func _test_timeout_failure_message_format() -> void:

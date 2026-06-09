@@ -73,10 +73,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v2.schema.json"
+            return PROTOCOL / "session_snapshot.v3.schema.json"
         if name.startswith("state_delta"):
-            return PROTOCOL / "state_delta.v2.schema.json"
-        return PROTOCOL / "messages.v2.schema.json"
+            return PROTOCOL / "state_delta.v3.schema.json"
+        return PROTOCOL / "messages.v3.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 
@@ -160,34 +160,35 @@ def cross_checks(report: Report) -> None:
     boss_floor_golden = load(GOLDEN / "boss_floor_-5.json")
     boss_pattern_golden = load(GOLDEN / "boss_pattern_timeline.json")
     inventory_capacity_golden = load(GOLDEN / "inventory_capacity.json")
+    dungeon_obstacles_golden = load(GOLDEN / "dungeon_obstacles.json")
 
-    v2_protocol_files = [
-        PROTOCOL / "envelope.v2.schema.json",
-        PROTOCOL / "messages.v2.schema.json",
-        PROTOCOL / "session_snapshot.v2.schema.json",
-        PROTOCOL / "state_delta.v2.schema.json",
+    v3_protocol_files = [
+        PROTOCOL / "envelope.v3.schema.json",
+        PROTOCOL / "messages.v3.schema.json",
+        PROTOCOL / "session_snapshot.v3.schema.json",
+        PROTOCOL / "state_delta.v3.schema.json",
     ]
-    missing_v2 = [str(path.relative_to(ROOT)) for path in v2_protocol_files if not path.exists()]
-    if missing_v2:
-        report.fail("protocol v2 schema set", f"missing {', '.join(missing_v2)}")
+    missing_v3 = [str(path.relative_to(ROOT)) for path in v3_protocol_files if not path.exists()]
+    if missing_v3:
+        report.fail("protocol v3 schema set", f"missing {', '.join(missing_v3)}")
     else:
-        report.ok("protocol v2 schema set is present")
+        report.ok("protocol v3 schema set is present")
 
-    messages_v2 = load(PROTOCOL / "messages.v2.schema.json")
+    messages_v3 = load(PROTOCOL / "messages.v3.schema.json")
     actor_fields = {"player_id", "account_id", "character_id"}
-    intent_names = [name for name in messages_v2["$defs"] if name.endswith("_intent") or name == "client_ready"]
+    intent_names = [name for name in messages_v3["$defs"] if name.endswith("_intent") or name == "client_ready"]
     actor_leaks: list[str] = []
     for name in sorted(intent_names):
-        intent_schema = messages_v2["$defs"][name]
+        intent_schema = messages_v3["$defs"][name]
         if intent_schema.get("additionalProperties") is not False:
             actor_leaks.append(f"{name}: additionalProperties must be false")
         leaked = actor_fields.intersection(intent_schema.get("properties", {}))
         if leaked:
             actor_leaks.append(f"{name}: actor fields {sorted(leaked)}")
     if actor_leaks:
-        report.fail("protocol v2 actor-free intents", "; ".join(actor_leaks))
+        report.fail("protocol v3 actor-free intents", "; ".join(actor_leaks))
     else:
-        report.ok("protocol v2 intents are actor-free")
+        report.ok("protocol v3 intents are actor-free")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -767,6 +768,52 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation chest_placement", "max_attempts must be positive")
     else:
         report.ok("dungeon_generation chest placement is valid")
+    obstacle_generation = dungeon_generation.get("obstacle_generation", {})
+    target_group_count = obstacle_generation.get("target_group_count", {})
+    wall_segment = obstacle_generation.get("wall_segment", {})
+    solid_block = obstacle_generation.get("solid_block", {})
+    shape_weights = obstacle_generation.get("shape_weights", {})
+    clearance = obstacle_generation.get("clearance", {})
+    obstacle_failed = False
+    if obstacle_generation.get("max_attempts", 0) <= 0:
+        report.fail("dungeon_generation obstacle_generation", "max_attempts must be positive")
+        obstacle_failed = True
+    elif target_group_count.get("min", -1) < 0 or target_group_count.get("max", -1) < target_group_count.get("min", 0):
+        report.fail("dungeon_generation obstacle_generation.target_group_count", "min/max range is invalid")
+        obstacle_failed = True
+    elif wall_segment.get("min_length", 0) <= 0 or wall_segment.get("max_length", 0) < wall_segment.get("min_length", 0):
+        report.fail("dungeon_generation obstacle_generation.wall_segment", "min/max length range is invalid")
+        obstacle_failed = True
+    elif wall_segment.get("thickness", 0) <= 0:
+        report.fail("dungeon_generation obstacle_generation.wall_segment", "thickness must be positive")
+        obstacle_failed = True
+    else:
+        min_size = solid_block.get("min_size", {})
+        max_size = solid_block.get("max_size", {})
+        for axis in ("x", "y"):
+            if min_size.get(axis, 0) <= 0 or max_size.get(axis, 0) < min_size.get(axis, 0):
+                report.fail("dungeon_generation obstacle_generation.solid_block", f"{axis} min/max range is invalid")
+                obstacle_failed = True
+                break
+    if not obstacle_failed:
+        weight_total = sum(int(shape_weights.get(name, 0)) for name in ("line", "l", "t", "block"))
+        if weight_total <= 0:
+            report.fail("dungeon_generation obstacle_generation.shape_weights", "at least one shape must have positive weight")
+            obstacle_failed = True
+        elif any(float(clearance.get(name, -1)) < 0 for name in ("player_spawn", "stairs", "teleporter", "chest", "monster", "loot")):
+            report.fail("dungeon_generation obstacle_generation.clearance", "clearances must be non-negative")
+            obstacle_failed = True
+    if not obstacle_failed:
+        max_shape_span = max(
+            float(wall_segment.get("max_length", 0)),
+            float(solid_block.get("max_size", {}).get("x", 0)),
+            float(solid_block.get("max_size", {}).get("y", 0)),
+        )
+        floor_min_axis = min(float(floor_size.get("width", 0)), float(floor_size.get("height", 0)))
+        if max_shape_span >= floor_min_axis:
+            report.fail("dungeon_generation obstacle_generation", "largest obstacle span must fit inside floor")
+        else:
+            report.ok("dungeon_generation obstacle generation tuning is valid")
     monster_rarities = dungeon_generation.get("monster_rarities", [])
     rarity_by_id = {r["id"]: r for r in monster_rarities}
     expected_rarity_order = ["common", "champion", "rare", "unique"]
@@ -850,6 +897,24 @@ def cross_checks(report: Report) -> None:
             break
     if not boss_floor_failed:
         report.ok("boss_floor fixed placements fit 30 x 30 floor")
+
+    obstacle_expected = dungeon_obstacles_golden.get("expected", {})
+    obstacle_floor = obstacle_expected.get("floor_size", {})
+    obstacle_shapes = set(obstacle_expected.get("shape_families", []))
+    obstacle_walls = obstacle_expected.get("walls", [])
+    generated_walls = [wall for wall in obstacle_walls if wall.get("source") == "generated"]
+    if dungeon_obstacles_golden.get("level", 0) >= 0:
+        report.fail("dungeon_obstacles golden", "level must be a generated dungeon floor")
+    elif obstacle_floor != floor_size:
+        report.fail("dungeon_obstacles golden", "floor_size must match dungeon_generation floor_size")
+    elif len(obstacle_shapes) < 2:
+        report.fail("dungeon_obstacles golden", "must name at least two shape families")
+    elif obstacle_expected.get("minimum_generated_wall_count", 0) <= 0:
+        report.fail("dungeon_obstacles golden", "minimum_generated_wall_count must be positive")
+    elif len(generated_walls) > 0 and not obstacle_shapes.intersection({wall.get("shape_family") for wall in generated_walls}):
+        report.fail("dungeon_obstacles golden", "generated wall shape_family must be represented in shape_families")
+    else:
+        report.ok("dungeon_obstacles golden declares v40 wall-layout contract")
 
     boss_chest_id = boss_floor.get("chest_interactable_def_id")
     boss_chest_table = boss_floor.get("chest_loot_table")

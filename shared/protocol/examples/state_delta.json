@@ -2,6 +2,23 @@
   "server_tick": 43,
   "level": 0,
   "changes": [
+    {
+      "op": "wall_layout_update",
+      "walls": [
+        {
+          "id": "wall_0_0000",
+          "position": { "x": 20, "y": -0.5 },
+          "size": { "x": 42, "y": 1 },
+          "source": "preset"
+        },
+        {
+          "id": "wall_0_0001",
+          "position": { "x": 13, "y": 8 },
+          "size": { "x": 6, "y": 1 },
+          "source": "generated"
+        }
+      ]
+    },
     { "op": "entity_update", "entity": { "id": "1002", "type": "monster", "monster_def_id": "training_dummy", "rarity": "common", "position": { "x": 12, "y": 5 }, "hp": 0, "max_hp": 3 } },
     { "op": "entity_update", "entity": { "id": "1010", "type": "monster", "monster_def_id": "dungeon_mob", "rarity": "unique", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "current_humanoid_player", "visual_scale": 2.0, "visual_tint": "#b77cff", "boss_phase": { "pattern_id": "charged_melee", "phase_index": 0, "phase_kind": "telegraph", "started_tick": 43, "remaining_ticks": 30, "telegraph": { "type": "body_color_charge", "from_color": "#b77cff", "to_color": "#ff0000", "radius": 1.6 }, "hit_shape": { "shape": "melee_contact", "radius": 1.6 } }, "position": { "x": 22, "y": 15 }, "hp": 24, "max_hp": 24 } },
     { "op": "entity_update", "entity": { "id": "1011", "type": "interactable", "interactable_def_id": "stairs_down", "state": "locked", "position": { "x": 27, "y": 15 } } },

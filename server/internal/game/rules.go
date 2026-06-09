@@ -65,6 +65,7 @@ type DungeonGenerationRules struct {
 	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+	ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 	BossFloor                BossFloorRules           `json:"boss_floor"`
 	MonsterRarityNote        string                   `json:"monster_rarity_note"`
 	MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
@@ -145,6 +146,52 @@ type ChestPlacementRules struct {
 	MonsterCountBonus int     `json:"monster_count_bonus"`
 	MinStairDistance  float64 `json:"min_stair_distance"`
 	MaxAttempts       int     `json:"max_attempts"`
+}
+
+type ObstacleGenerationRules struct {
+	Enabled          bool                   `json:"enabled"`
+	MaxAttempts      int                    `json:"max_attempts"`
+	TargetGroupCount IntRange               `json:"target_group_count"`
+	WallSegment      WallSegmentRules       `json:"wall_segment"`
+	SolidBlock       SolidBlockRules        `json:"solid_block"`
+	ShapeWeights     ObstacleShapeWeights   `json:"shape_weights"`
+	Clearance        ObstacleClearanceRules `json:"clearance"`
+}
+
+type IntRange struct {
+	Min int `json:"min"`
+	Max int `json:"max"`
+}
+
+type WallSegmentRules struct {
+	MinLength int     `json:"min_length"`
+	MaxLength int     `json:"max_length"`
+	Thickness float64 `json:"thickness"`
+}
+
+type SolidBlockRules struct {
+	MinSize Vec2 `json:"min_size"`
+	MaxSize Vec2 `json:"max_size"`
+}
+
+type ObstacleShapeWeights struct {
+	Line  int `json:"line"`
+	L     int `json:"l"`
+	T     int `json:"t"`
+	Block int `json:"block"`
+}
+
+func (w ObstacleShapeWeights) total() int {
+	return w.Line + w.L + w.T + w.Block
+}
+
+type ObstacleClearanceRules struct {
+	PlayerSpawn float64 `json:"player_spawn"`
+	Stairs      float64 `json:"stairs"`
+	Teleporter  float64 `json:"teleporter"`
+	Chest       float64 `json:"chest"`
+	Monster     float64 `json:"monster"`
+	Loot        float64 `json:"loot"`
 }
 
 type DungeonLootBand struct {
@@ -956,6 +1003,7 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+		ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 		BossFloor                BossFloorRules           `json:"boss_floor"`
 		MonsterRarityNote        string                   `json:"monster_rarity_note"`
 		MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
@@ -1041,6 +1089,9 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.max_attempts: must be positive")
 		}
 	}
+	if err := validateObstacleGenerationRules(dungeonGeneration.ObstacleGeneration, dungeonGeneration.FloorSize); err != nil {
+		return nil, err
+	}
 	if dungeonGeneration.LootBandNote == "" {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.loot_band_note: required")
 	}
@@ -1070,6 +1121,7 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
 		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
 		ChestPlacement:           dungeonGeneration.ChestPlacement,
+		ObstacleGeneration:       dungeonGeneration.ObstacleGeneration,
 		BossFloor:                dungeonGeneration.BossFloor,
 		MonsterRarityNote:        dungeonGeneration.MonsterRarityNote,
 		MonsterRarities:          dungeonGeneration.MonsterRarities,
@@ -1248,6 +1300,50 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 		}
 	}
 	return out
+}
+
+func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFloorSize) error {
+	if o.MaxAttempts <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.max_attempts: must be positive")
+	}
+	if o.TargetGroupCount.Min < 0 || o.TargetGroupCount.Max < o.TargetGroupCount.Min {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.target_group_count: invalid min/max")
+	}
+	if o.WallSegment.MinLength <= 0 || o.WallSegment.MaxLength < o.WallSegment.MinLength {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.wall_segment: invalid min/max length")
+	}
+	if o.WallSegment.Thickness <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.wall_segment.thickness: must be positive")
+	}
+	if o.SolidBlock.MinSize.X <= 0 || o.SolidBlock.MinSize.Y <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.solid_block.min_size: must be positive")
+	}
+	if o.SolidBlock.MaxSize.X < o.SolidBlock.MinSize.X || o.SolidBlock.MaxSize.Y < o.SolidBlock.MinSize.Y {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.solid_block: invalid min/max size")
+	}
+	if o.ShapeWeights.Line < 0 || o.ShapeWeights.L < 0 || o.ShapeWeights.T < 0 || o.ShapeWeights.Block < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.shape_weights: must be non-negative")
+	}
+	if o.ShapeWeights.total() <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.shape_weights: at least one shape must be enabled")
+	}
+	for label, value := range map[string]float64{
+		"player_spawn": o.Clearance.PlayerSpawn,
+		"stairs":       o.Clearance.Stairs,
+		"teleporter":   o.Clearance.Teleporter,
+		"chest":        o.Clearance.Chest,
+		"monster":      o.Clearance.Monster,
+		"loot":         o.Clearance.Loot,
+	} {
+		if value < 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.clearance.%s: must be non-negative", label)
+		}
+	}
+	maxSpan := math.Max(float64(o.WallSegment.MaxLength), math.Max(o.SolidBlock.MaxSize.X, o.SolidBlock.MaxSize.Y))
+	if maxSpan >= math.Min(floor.Width, floor.Height) {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation: largest obstacle must fit inside floor")
+	}
+	return nil
 }
 
 func validateMonsterRarities(rarities []MonsterRarityDef) error {

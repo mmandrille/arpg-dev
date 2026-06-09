@@ -86,6 +86,7 @@ var monster_ids: Array = []
 var interactable_ids: Array = []
 var current_world_id: String = "vertical_slice"
 var current_level: int = 0
+var current_wall_layout: Array = []
 var discovered_teleporters: Dictionary = {}
 var pending_interactable_action: Dictionary = {}
 var pending_action_targets: Dictionary = {}
@@ -280,6 +281,7 @@ func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = true
 	current_world_id = client.world_id
+	current_wall_layout = []
 	_render_world_walls(client.world_id)
 	autoplay_enabled = enable_autoplay
 	if autoplay_enabled:
@@ -550,6 +552,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	loot_ids.clear()
 	monster_ids.clear()
 	interactable_ids.clear()
+	current_wall_layout = []
 	discovered_teleporters.clear()
 	pending_interactable_action.clear()
 	pending_waypoint_target_level = 0
@@ -565,8 +568,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	_bot_logged_snapshot = false
 	_clear_level_entities()
 	if walls_root != null:
-		for child in walls_root.get_children():
-			child.queue_free()
+		_clear_wall_nodes()
 	if resolver != null:
 		resolver.apply_snapshot({"inventory": [], "equipped": {}})
 	_refresh_inventory_ui()
@@ -693,7 +695,11 @@ func _apply_snapshot(p: Dictionary) -> void:
 	pending_waypoint_travel = false
 	_apply_teleporter_snapshot(p.get("discovered_teleporters", []))
 	_clear_level_entities()
-	_render_world_walls(current_world_id)
+	var snapshot_walls = p.get("walls", null)
+	if typeof(snapshot_walls) == TYPE_ARRAY:
+		_render_wall_layout(snapshot_walls as Array)
+	else:
+		_render_world_walls(current_world_id)
 	_update_level_hud()
 	_refresh_waypoint_panel()
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
@@ -727,13 +733,16 @@ func _apply_delta(p: Dictionary) -> void:
 			pending_interactable_action.clear()
 			pending_waypoint_travel = false
 			_clear_level_entities()
-			_render_world_walls(current_world_id)
+			current_wall_layout = []
+			_clear_wall_nodes()
 			_update_level_hud()
 			_update_character_info_panel()
 			_hide_waypoint_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
+			"wall_layout_update":
+				_render_wall_layout(c.get("walls", []))
 			"entity_spawn", "entity_update":
 				_upsert_entity(c["entity"])
 			"entity_remove":
@@ -2395,8 +2404,8 @@ func _current_teleporter_record() -> Dictionary:
 func _render_world_walls(world_id: String) -> void:
 	if walls_root == null:
 		return
-	for child in walls_root.get_children():
-		child.queue_free()
+	current_wall_layout = []
+	_clear_wall_nodes()
 
 	var rules_path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/worlds.v0.json")
 	var parsed = _read_json(rules_path)
@@ -2406,51 +2415,83 @@ func _render_world_walls(world_id: String) -> void:
 	var worlds: Dictionary = parsed.get("worlds", {})
 	var world: Dictionary = worlds.get(world_id, {})
 	if str(world.get("mode", "")) == "multi_level":
-		if current_level < 0:
-			_render_dungeon_walls()
 		return
+	var local_walls: Array = []
+	var local_index := 0
 	for entity in world.get("entities", []):
 		if str(entity.get("type", "")) != "wall":
 			continue
 		var pos: Dictionary = entity.get("position", {})
 		var size: Dictionary = entity.get("size", {})
-		var node := MeshInstance3D.new()
-		var mesh := BoxMesh.new()
-		mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
-		node.mesh = mesh
-		node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.32, 0.34, 0.36)
-		node.material_override = mat
-		walls_root.add_child(node)
+		local_walls.append({
+			"id": "%s_wall_%03d" % [world_id, local_index],
+			"position": {"x": float(pos.get("x", 0.0)), "y": float(pos.get("y", 0.0))},
+			"size": {"x": float(size.get("x", 1.0)), "y": float(size.get("y", 1.0))},
+			"source": "preset",
+		})
+		local_index += 1
+	_render_wall_layout(local_walls)
 
 
-func _render_dungeon_walls() -> void:
-	if dungeon_generation.is_empty():
+func _render_wall_layout(walls: Array) -> void:
+	if walls_root == null:
 		return
-	var floor_size: Dictionary = dungeon_generation.get("floor_size", {})
-	var width := float(floor_size.get("width", 32.0))
-	var height := float(floor_size.get("height", 20.0))
-	var thickness := float(dungeon_generation.get("wall_thickness", 1.0))
-	var half := thickness / 2.0
-	var walls := [
-		{"position": {"x": width / 2.0, "y": -half}, "size": {"x": width + thickness * 2.0, "y": thickness}},
-		{"position": {"x": width / 2.0, "y": height + half}, "size": {"x": width + thickness * 2.0, "y": thickness}},
-		{"position": {"x": -half, "y": height / 2.0}, "size": {"x": thickness, "y": height}},
-		{"position": {"x": width + half, "y": height / 2.0}, "size": {"x": thickness, "y": height}},
-	]
+	current_wall_layout = []
+	_clear_wall_nodes()
 	for wall in walls:
-		var pos: Dictionary = wall["position"]
-		var size: Dictionary = wall["size"]
-		var node := MeshInstance3D.new()
-		var mesh := BoxMesh.new()
-		mesh.size = Vector3(float(size["x"]), 1.0, float(size["y"]))
-		node.mesh = mesh
-		node.position = Vector3(float(pos["x"]), 0.5, float(pos["y"]))
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.24, 0.25, 0.27)
-		node.material_override = mat
-		walls_root.add_child(node)
+		if typeof(wall) != TYPE_DICTIONARY:
+			continue
+		var normalized := _normalized_wall_view(wall as Dictionary, current_wall_layout.size())
+		current_wall_layout.append(normalized)
+		walls_root.add_child(_make_wall_node(normalized))
+
+
+func _clear_wall_nodes() -> void:
+	if walls_root == null:
+		return
+	for child in walls_root.get_children():
+		walls_root.remove_child(child)
+		child.queue_free()
+
+
+func _normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
+	var pos: Dictionary = {}
+	var size: Dictionary = {}
+	if typeof(wall.get("position", {})) == TYPE_DICTIONARY:
+		pos = wall.get("position", {})
+	if typeof(wall.get("size", {})) == TYPE_DICTIONARY:
+		size = wall.get("size", {})
+	var out := {
+		"id": str(wall.get("id", "wall_%03d" % index)),
+		"position": {"x": float(pos.get("x", 0.0)), "y": float(pos.get("y", 0.0))},
+		"size": {"x": float(size.get("x", 1.0)), "y": float(size.get("y", 1.0))},
+	}
+	if wall.has("source"):
+		out["source"] = str(wall.get("source", ""))
+	return out
+
+
+func _make_wall_node(wall: Dictionary) -> MeshInstance3D:
+	var pos: Dictionary = wall.get("position", {})
+	var size: Dictionary = wall.get("size", {})
+	var node := MeshInstance3D.new()
+	node.name = "Wall_%s" % str(wall.get("id", ""))
+	node.set_meta("wall_id", str(wall.get("id", "")))
+	node.set_meta("source", str(wall.get("source", "")))
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
+	node.mesh = mesh
+	node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
+	var mat := StandardMaterial3D.new()
+	match str(wall.get("source", "")):
+		"generated":
+			mat.albedo_color = Color(0.37, 0.34, 0.30)
+		"perimeter":
+			mat.albedo_color = Color(0.24, 0.25, 0.27)
+		_:
+			mat.albedo_color = Color(0.32, 0.34, 0.36)
+	node.material_override = mat
+	return node
 
 
 func _update_level_hud() -> void:
@@ -2985,6 +3026,11 @@ func get_bot_state() -> Dictionary:
 		"player_max_mana": player_max_mana,
 		"gold": gold,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
+		"current_level": current_level,
+		"walls": current_wall_layout.duplicate(true),
+		"wall_count": current_wall_layout.size(),
+		"generated_wall_count": _wall_count_by_source("generated"),
+		"non_perimeter_wall_count": _non_perimeter_wall_count(),
 		"character_progression": character_progression.duplicate(true),
 		"inventory": inventory.duplicate(true),
 		"equipped": equipped.duplicate(true),
@@ -3022,6 +3068,24 @@ func get_bot_state() -> Dictionary:
 		"gameplay_active": gameplay_active,
 	}
 	return out
+
+
+func _wall_count_by_source(source: String) -> int:
+	var count := 0
+	for wall in current_wall_layout:
+		if typeof(wall) == TYPE_DICTIONARY and str((wall as Dictionary).get("source", "")) == source:
+			count += 1
+	return count
+
+
+func _non_perimeter_wall_count() -> int:
+	var count := 0
+	for wall in current_wall_layout:
+		if typeof(wall) != TYPE_DICTIONARY:
+			continue
+		if str((wall as Dictionary).get("source", "")) != "perimeter":
+			count += 1
+	return count
 
 
 func _remote_player_ids() -> Array:

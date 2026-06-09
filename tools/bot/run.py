@@ -86,6 +86,7 @@ class RuntimeState:
     party: list[dict[str, Any]] = field(default_factory=list)
     last_tick: int = 0
     killed: bool = False
+    walls: list[dict[str, Any]] = field(default_factory=list)
     entities: dict[str, dict[str, Any]] = field(default_factory=dict)
     inventory: list[dict[str, Any]] = field(default_factory=list)
     equipped: dict[str, Any] = field(default_factory=dict)
@@ -1601,7 +1602,10 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                 )
     apply_level_entities = delta_level == state.current_level
     for c in (p.get("changes") or []):
-        if c["op"] in {"entity_spawn", "entity_update"}:
+        if c["op"] == "wall_layout_update":
+            if apply_level_entities:
+                state.walls = [dict(wall) for wall in c.get("walls", [])]
+        elif c["op"] in {"entity_spawn", "entity_update"}:
             if not apply_level_entities:
                 continue
             entity = c["entity"]
@@ -1662,6 +1666,7 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.visited_levels.add(state.current_level)
     state.last_delta_level = state.current_level
     state.pending_level_load = None
+    state.walls = [dict(wall) for wall in payload.get("walls", [])]
     state.entities = {str(e["id"]): dict(e) for e in payload.get("entities", [])}
     state.inventory = [dict(i) for i in payload.get("inventory", [])]
     state.equipped = dict(payload.get("equipped", {}))
@@ -1708,6 +1713,7 @@ def hotbar_item_id(hotbar: list[dict[str, Any]], slot_index: int) -> str | None:
 
 
 def clear_active_level_state(state: RuntimeState) -> None:
+    state.walls.clear()
     state.entities.clear()
     state.loot_ids.clear()
     state.min_player_monster_distance.clear()
@@ -1960,6 +1966,7 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             item_id,
             "reconnect snapshot",
             current_level=int(payload.get("current_level", 0)),
+            walls=payload.get("walls", []),
             discovered_teleporters=parse_discovered_teleporters(payload),
             character_progression=payload.get("character_progression", {}),
             hotbar_capacity=int(payload.get("hotbar_capacity", 2)),
@@ -2262,6 +2269,7 @@ def run_assertions(
     item_id: str | None,
     where: str,
     current_level: int | None = None,
+    walls: list[dict] | None = None,
     discovered_teleporters: dict[int, bool] | None = None,
     character_progression: dict[str, Any] | None = None,
     hotbar_capacity: int | None = None,
@@ -2300,6 +2308,16 @@ def run_assertions(
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
         elif typ == "gold":
             assert_count_matches(int(gold or 0), assertion, f"{where}: gold")
+        elif typ == "wall_count":
+            wall_rows = list(walls or [])
+            if assertion.get("source") is not None:
+                source = str(assertion["source"])
+                wall_rows = [wall for wall in wall_rows if str(wall.get("source", "")) == source]
+            assert_count_matches(len(wall_rows), assertion, f"{where}: wall count", f": {wall_rows}")
+        elif typ == "non_perimeter_wall_exists":
+            wall_rows = list(walls or [])
+            if not any(str(wall.get("source", "")) != "perimeter" for wall in wall_rows):
+                raise AssertionError(f"{where}: no non-perimeter wall in {wall_rows}")
         elif typ == "rolled_inventory_item":
             assert_rolled_inventory_item(inventory, assertion, where)
         elif typ == "rolled_inventory_any":
@@ -2522,6 +2540,17 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             if state.current_level != want:
                 raise AssertionError(f"{where}: current_level {state.current_level} != {want}")
             continue
+        if typ == "wall_count":
+            walls = state.walls
+            if assertion.get("source") is not None:
+                source = str(assertion["source"])
+                walls = [wall for wall in walls if str(wall.get("source", "")) == source]
+            assert_count_matches(len(walls), assertion, f"{where}: wall count", f": {walls}")
+            continue
+        if typ == "non_perimeter_wall_exists":
+            if not any(str(wall.get("source", "")) != "perimeter" for wall in state.walls):
+                raise AssertionError(f"{where}: no non-perimeter wall in {state.walls}")
+            continue
         if typ == "visited_levels_contain":
             want = int(assertion["level"])
             if want not in state.visited_levels:
@@ -2694,6 +2723,7 @@ def run_verified_session(
         observed.item_id,
         "/state API",
         current_level=int(state.get("current_level", 0)),
+        walls=state.get("walls", []),
         discovered_teleporters=parse_discovered_teleporters(state),
         character_progression=state.get("character_progression", {}),
         hotbar_capacity=int(state.get("hotbar_capacity", 2)),

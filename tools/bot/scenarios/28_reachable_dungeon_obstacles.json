@@ -1,0 +1,30 @@
+{
+  "id": "reachable_dungeon_obstacles",
+  "world_id": "dungeon_levels",
+  "seed": "v40_obstacles",
+  "title": "Reachable dungeon obstacles",
+  "description": "Descend into pinned generated dungeon floors, prove authoritative interior walls are present, then route to guaranteed floor gold through the same protocol path.",
+  "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "source": "generated", "at_least": 1 }, "timeout_s": 5 },
+    { "action": "wait_until_assertion", "assertion": { "type": "non_perimeter_wall_exists" }, "timeout_s": 5 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 480 },
+    { "action": "wait_until_assertion", "assertion": { "type": "current_level", "equals": -2 }, "timeout_s": 5 },
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "source": "generated", "at_least": 1 }, "timeout_s": 5 },
+    { "action": "pick_up_loot", "item_def_id": "gold" }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": -2 },
+    { "type": "visited_levels_contain", "level": 0 },
+    { "type": "visited_levels_contain", "level": -1 },
+    { "type": "visited_levels_contain", "level": -2 },
+    { "type": "wall_count", "source": "generated", "at_least": 1 },
+    { "type": "non_perimeter_wall_exists" },
+    { "type": "gold", "at_least": 8 },
+    { "type": "event_seen", "event_type": "level_changed" },
+    { "type": "event_seen", "event_type": "gold_picked_up" }
+  ],
+  "visual": {
+    "camera": { "x": 34, "y": 22, "zoom": 0.9 }
+  }
+}

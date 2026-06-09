@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/protocol/envelope.v3.schema.json",
+  "title": "WebSocket message envelope (v3)",
+  "description": "Common envelope for every realtime message in both directions. Client-to-server intents stamp `tick` with the intended authoritative tick; server-to-client messages stamp `tick` with the authoritative tick that produced the payload.",
+  "type": "object",
+  "required": ["type", "message_id", "session_id", "tick", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "client_ready",
+        "move_intent",
+        "move_to_intent",
+        "directional_attack_intent",
+        "action_intent",
+        "descend_intent",
+        "ascend_intent",
+        "teleport_intent",
+        "equip_intent",
+        "unequip_intent",
+        "drop_intent",
+        "use_intent",
+        "assign_hotbar_intent",
+        "use_hotbar_intent",
+        "allocate_stat_intent",
+        "session_snapshot",
+        "state_delta",
+        "intent_accepted",
+        "intent_rejected",
+        "error"
+      ]
+    },
+    "message_id": { "$ref": "#/$defs/prefixed_id" },
+    "session_id": { "$ref": "#/$defs/prefixed_id" },
+    "tick": { "type": "integer", "minimum": 0 },
+    "correlation_id": { "$ref": "#/$defs/prefixed_id" },
+    "payload": { "type": "object" }
+  },
+  "$defs": {
+    "prefixed_id": {
+      "type": "string",
+      "description": "Lowercase prefix + ULID (Crockford base32, 26 chars). Example: msg_01H00000000000000000000000.",
+      "pattern": "^[a-z]+_[0-9A-HJKMNP-TV-Z]{26}$"
+    }
+  }
+}

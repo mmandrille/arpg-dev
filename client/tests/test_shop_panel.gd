@@ -5,6 +5,7 @@ extends SceneTree
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const StatLabels := preload("res://scripts/stat_labels.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -62,7 +63,7 @@ func _run() -> void:
 	_assert_false("tooltip stats exclude requirements", _array_contains_text(tooltip_lines, "Requires"))
 	_assert_false("tooltip stats exclude comparison", _array_contains_text(tooltip_lines, "vs equipped"))
 	_assert_true("tooltip requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "Level 2"))
-	_assert_true("tooltip stat requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "STR 15(-3)"))
+	_assert_true("tooltip stat requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "%s 15(-3)" % StatLabels.display_name("str")))
 	var comparison_entries: Array = panel._comparison_entries(offers[2])
 	_assert_true("tooltip preview extracted", _array_contains_text(comparison_entries, "preview"))
 	_assert_true("tooltip comparison extracted", _array_contains_text(comparison_entries, "vs equipped"))
@@ -102,7 +103,7 @@ func _run() -> void:
 	_assert_eq("inventory tooltip uses shared panel", inventory_tooltip.get_script(), ItemTooltipPanelScript)
 	_assert_false("inventory tooltip stats exclude requirements", _array_contains_text(inventory_panel._tooltip_lines(sell_appraisals[0]), "Requires"))
 	_assert_true("inventory tooltip requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "Level 2"))
-	_assert_true("inventory tooltip stat requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "STR 15(-3)"))
+	_assert_true("inventory tooltip stat requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "%s 15(-3)" % StatLabels.display_name("str")))
 	_assert_true("inventory tooltip preview extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "preview"))
 	_assert_true("inventory tooltip comparison extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "vs equipped"))
 	inventory_tooltip.queue_free()

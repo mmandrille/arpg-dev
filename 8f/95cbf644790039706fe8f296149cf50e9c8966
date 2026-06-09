@@ -1,0 +1,58 @@
+scripts/bot_client.sh
+  s_6b2245ae58ef96::t_f37253cf91270e 146-148
+  s_6b2245ae58ef96::t_f67c75629a22bc 16-19,180
+  s_6b2245ae58ef96::t_41b6daa2a579e7 133-145,149-179,181-209,213,219-220,227-235,245,259,271-272,281-282,286-287
+client/scripts/multiplayer_sessions_panel.gd
+  s_6b2245ae58ef96::t_40efb5e61079c4 52-59
+client/scripts/bot_scenario_runner.gd
+  s_6b2245ae58ef96::t_29bf89f5ee1471 17,42,94
+  s_6b2245ae58ef96::t_401e759574b9f8 234-235,418-424
+  s_6b2245ae58ef96::t_874d9269b61b1e 1296,1302-1306,1323,1339-1341,1343-1351,1357-1377,1381-1396
+  s_6b2245ae58ef96::t_82e29d881edb59 1690-1691,1711-1715
+tools/bot/scenarios/29_town_vendor_gold_sink.json
+  s_6b2245ae58ef96::t_180b2c66d89d36 19,21,36
+tools/bot/scenarios/client/16_vendor_item_comparison.json
+  s_6b2245ae58ef96::t_180b2c66d89d36 33,36,38
+docs/PROGRESS.md
+  s_6b2245ae58ef96::t_9c68cb2af203d1 14,64,130,1135-1157,1227,1402-1406,1422
+tools/bot/client_join_preflight.py
+  s_6b2245ae58ef96::t_a2f41614f5f9af 1-94,96-113,118-119,125-165
+  s_6b2245ae58ef96::t_766d4a20de8381 95,114-117,120-124
+client/tests/test_client_bot.gd
+  s_6b2245ae58ef96::t_af027cfc41d310 227,231-233,238,250-252,264-267,272-273,288
+  s_6b2245ae58ef96::t_cf2d63e30452bc 261
+docs/plans/v46_2026-06-09-client-join-game-proof.md
+  s_6b2245ae58ef96::t_dcc0dcc2208c5c 1-82,84,86,88,90,92,94-105,107,109,111,113,115,117,119-132,134-135,137-138,140-141,143,146-158,160,162,164-165,168,170,172,174-186,188,190,192,194,196-210,212,214,216-229,231,233,237-243,254-263
+  s_6b2245ae58ef96::t_1ee244bd40b155 246-247,252-253
+  s_6b2245ae58ef96::t_3bab057580d0dd 230,232,234-236
+  s_6b2245ae58ef96::t_cdac4e7d5ecfa6 83,85,87,89,91,93,106,108,110,112,114,116,118,133,136,139,142,144-145,159,161,163,166-167,169,171,173,187,189,191,193,195,211,213,215,244-245,248-251
+tools/bot/scenarios/30_vendor_appraisal_quotes.json
+  s_6b2245ae58ef96::t_180b2c66d89d36 19,21,36
+tools/bot/scenarios/client/21_join_game_listed_session.json
+  s_6b2245ae58ef96::t_ae8c43921ff674 1-71
+tools/bot/scenarios/client/15_town_vendor_shop_panel.json
+  s_6b2245ae58ef96::t_180b2c66d89d36 33,36
+client/scripts/main.gd
+  s_6b2245ae58ef96::t_7a5a336b230b1b 281-283
+  s_6b2245ae58ef96::t_b1bb934eaa567a 3801-3803
+tools/bot/test_protocol.py
+  s_6b2245ae58ef96::t_867016c8272291 3,76-104
+docs/specs/v46_spec-client-join-game-proof.md
+  s_6b2245ae58ef96::t_0af1d259cd4fea 1-217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8f95cbf644790039706fe8f296149cf50e9c8966",
+  "prompts": {},
+  "sessions": {
+    "s_6b2245ae58ef96": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eae5a-d425-7521-80dc-1320f8eff4fe",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

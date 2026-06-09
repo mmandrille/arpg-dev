@@ -1,0 +1,21 @@
+client/scripts/smoke.gd
+  s_3bd2be314dbf2d::t_2b8ec8c5f9f228 399-408
+client/scripts/inventory_panel.gd
+  s_3bd2be314dbf2d::t_572d1e29ad0205 59,190,357-358
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6ea439100cf5e92b8d35896f378972c94ec9e2e0",
+  "prompts": {},
+  "sessions": {
+    "s_3bd2be314dbf2d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaa2e-6ca2-7150-9b97-a6e32249cc3f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

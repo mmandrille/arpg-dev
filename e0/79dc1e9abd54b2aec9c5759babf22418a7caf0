@@ -1,0 +1,38 @@
+server/internal/store/interfaces.go
+  s_983717d5c0c276::t_3074aeac8cc08a 22
+server/internal/http/character.go
+  s_983717d5c0c276::t_9286d8e7fcb908 26,165
+server/migrations/0011_character_death.sql
+  s_983717d5c0c276::t_4286a828706241 1-4
+server/internal/realtime/session_loop.go
+  s_983717d5c0c276::t_a435300f118839 597-604
+  s_983717d5c0c276::t_fd49e62a9654ed 6
+  s_983717d5c0c276::t_08450d16394078 762-774
+server/internal/realtime/runner.go
+  s_983717d5c0c276::t_c8d5aff0b618b5 6,405-409
+server/internal/store/repos.go
+  s_983717d5c0c276::t_e55b3706440f42 54,56,65,67,77-78,90,104,119,121,134,136,144-159
+server/internal/store/models.go
+  s_983717d5c0c276::t_2e3080211977b8 20
+server/internal/http/session.go
+  s_983717d5c0c276::t_b27c834aaf7896 18-19
+  s_983717d5c0c276::t_0b13f95add3fc4 136-138,232-233,235-237,245-247,307-308
+server/internal/http/ws_test.go
+  s_983717d5c0c276::t_e7309a74ef04df 618-631
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e079dc1e9abd54b2aec9c5759babf22418a7caf0",
+  "prompts": {},
+  "sessions": {
+    "s_983717d5c0c276": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead24-fd53-7fa1-a324-554b6d97874f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

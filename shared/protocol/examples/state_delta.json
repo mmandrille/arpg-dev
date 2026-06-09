@@ -82,9 +82,56 @@
       "entity_id": "1013",
       "shop_id": "town_vendor",
       "offers": [
-        { "offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "buy_price": 20 },
-        { "offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "buy_price": 20 },
-        { "offer_id": "generated:depth3:000", "kind": "generated", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Magic Cave Blade", "rarity": "magic", "rolled_stats": { "damage_min": 3, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "buy_price": 135, "source": "common_dungeon_mob", "depth": 3 }
+        { "offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 HP"] },
+        { "offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 mana"] },
+        {
+          "offer_id": "generated:depth3:000",
+          "kind": "generated",
+          "item_def_id": "cave_blade",
+          "item_template_id": "cave_blade",
+          "display_name": "Magic Cave Blade",
+          "rarity": "magic",
+          "slot": "main_hand",
+          "category": "equipment",
+          "rolled_stats": { "damage_min": 3, "damage_max": 6 },
+          "requirements": { "level": 1 },
+          "effect_ids": [],
+          "buy_price": 215,
+          "summary_lines": ["Slot: Main hand", "Damage 3-6", "Requires level 1"],
+          "comparison": {
+            "slot": "main_hand",
+            "equipped_item_instance_id": "1004",
+            "deltas": [
+              { "stat": "damage_min", "offered": 3, "equipped": 2, "delta": 1 },
+              { "stat": "damage_max", "offered": 6, "equipped": 6, "delta": 0 }
+            ]
+          },
+          "source": "common_dungeon_mob",
+          "depth": 3
+        }
+      ],
+      "sell_appraisals": [
+        {
+          "item_instance_id": "1008",
+          "item_def_id": "cave_shield",
+          "item_template_id": "cave_shield",
+          "display_name": "Magic Cave Shield",
+          "rarity": "magic",
+          "slot": "off_hand",
+          "category": "equipment",
+          "rolled_stats": { "armor": 5, "block_percent": 9 },
+          "requirements": { "level": 1 },
+          "effect_ids": [],
+          "sell_price": 38,
+          "summary_lines": ["Slot: Off hand", "Armor +5", "Block +9", "Requires level 1"],
+          "comparison": {
+            "slot": "off_hand",
+            "deltas": [
+              { "stat": "armor", "offered": 5, "equipped": 0, "delta": 5 },
+              { "stat": "block_percent", "offered": 9, "equipped": 0, "delta": 9 }
+            ]
+          }
+        }
       ]
     },
     { "event_type": "shop_purchase", "entity_id": "1013", "shop_id": "town_vendor", "offer_id": "fixed:red_potion", "item_instance_id": "1014", "price": 20, "total_gold": 80 },

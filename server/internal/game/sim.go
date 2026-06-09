@@ -1841,11 +1841,12 @@ func (s *Sim) openShop(e *entity, shopID string, in Input, res *TickResult, ack 
 		return
 	}
 	res.Events = append(res.Events, Event{
-		EventType:     "shop_opened",
-		EntityID:      idStr(e.id),
-		CorrelationID: in.CorrelationID,
-		ShopID:        shopID,
-		Offers:        offers,
+		EventType:      "shop_opened",
+		EntityID:       idStr(e.id),
+		CorrelationID:  in.CorrelationID,
+		ShopID:         shopID,
+		Offers:         offers,
+		SellAppraisals: s.shopSellAppraisals(shopID),
 	})
 	if ack {
 		res.ack(in.MessageID)

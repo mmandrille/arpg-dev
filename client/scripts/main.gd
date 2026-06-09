@@ -2360,7 +2360,8 @@ func _show_shop_panel(ev: Dictionary) -> void:
 		gold,
 		inventory,
 		equipped,
-		_shop_title(next_shop_id)
+		_shop_title(next_shop_id),
+		ev.get("sell_appraisals", [])
 	)
 
 

@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"math"
+	"sort"
 )
 
 const (
@@ -24,12 +25,17 @@ func (s *Sim) shopCatalogFor(shopID, characterID string, deepestDepth int) ([]Sh
 	offers := make([]ShopOfferView, 0, len(shop.FixedOffers)+shop.GeneratedOffers.OfferCount)
 	for _, offer := range shop.FixedOffers {
 		item := s.rules.Items[offer.ItemDefID]
+		stats := fixedItemStats(item)
 		offers = append(offers, ShopOfferView{
-			OfferID:     offer.OfferID,
-			Kind:        shopOfferKindFixed,
-			ItemDefID:   offer.ItemDefID,
-			DisplayName: item.Name,
-			BuyPrice:    offer.BuyPrice,
+			OfferID:      offer.OfferID,
+			Kind:         shopOfferKindFixed,
+			ItemDefID:    offer.ItemDefID,
+			DisplayName:  item.Name,
+			Slot:         item.Slot,
+			Category:     item.Category,
+			BuyPrice:     offer.BuyPrice,
+			SummaryLines: s.itemSummaryLines(item.Category, item.Slot, stats, nil, nil, &item),
+			Comparison:   s.shopComparisonForItem(item.Slot, stats),
 		})
 	}
 	offers = append(offers, s.generatedShopOffers(shopID, shop, characterID, deepestDepth)...)
@@ -67,6 +73,7 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 			if !ok {
 				continue
 			}
+			stats := cloneIntMap(payload.Stats)
 			offerIndex := len(offers)
 			offers = append(offers, ShopOfferView{
 				OfferID:        fmt.Sprintf("generated:depth%d:%03d", depth, offerIndex),
@@ -75,10 +82,14 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 				ItemTemplateID: templateID,
 				DisplayName:    payload.DisplayName,
 				Rarity:         payload.Rarity,
-				RolledStats:    cloneIntMap(payload.Stats),
+				Slot:           template.Slot,
+				Category:       template.Category,
+				RolledStats:    stats,
 				Requirements:   cloneIntMap(payload.Requirements),
 				EffectIDs:      cloneStringSlice(payload.EffectIDs),
 				BuyPrice:       buyPrice,
+				SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, stats, payload.Requirements, payload.EffectIDs, nil),
+				Comparison:     s.shopComparisonForItem(template.Slot, stats),
 				Source:         gen.Source,
 				Depth:          depth,
 			})
@@ -166,6 +177,258 @@ func (s *Sim) inventorySellPrice(shopID string, item *invItem) (int, bool) {
 		return shop.sellPrice(buyPrice), true
 	}
 	return 0, false
+}
+
+func (s *Sim) shopSellAppraisals(shopID string) []ShopSellAppraisalView {
+	appraisals := make([]ShopSellAppraisalView, 0, len(s.inventory))
+	for _, item := range s.inventory {
+		if item == nil || item.equipped {
+			continue
+		}
+		price, ok := s.inventorySellPrice(shopID, item)
+		if !ok {
+			continue
+		}
+		appraisals = append(appraisals, s.shopSellAppraisalView(item, price))
+	}
+	sort.Slice(appraisals, func(i, j int) bool {
+		return appraisals[i].ItemInstanceID < appraisals[j].ItemInstanceID
+	})
+	return appraisals
+}
+
+func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellAppraisalView {
+	view := item.view()
+	category := ""
+	stats := fixedItemStats(s.rules.Items[item.itemDefID])
+	if item.rollPayload != nil {
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok {
+			category = template.Category
+		}
+		stats = cloneIntMap(item.rollPayload.Stats)
+	} else if def, ok := s.rules.Items[item.itemDefID]; ok {
+		category = def.Category
+	}
+	return ShopSellAppraisalView{
+		ItemInstanceID: view.ItemInstanceID,
+		ItemDefID:      view.ItemDefID,
+		ItemTemplateID: view.ItemTemplateID,
+		DisplayName:    s.displayNameForItem(item),
+		Rarity:         view.Rarity,
+		Slot:           view.Slot,
+		Category:       category,
+		RolledStats:    view.RolledStats,
+		Requirements:   view.Requirements,
+		EffectIDs:      view.EffectIDs,
+		SellPrice:      sellPrice,
+		SummaryLines:   s.itemSummaryLines(category, view.Slot, stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
+		Comparison:     s.shopComparisonForItem(view.Slot, stats),
+	}
+}
+
+func (s *Sim) displayNameForItem(item *invItem) string {
+	if item == nil {
+		return ""
+	}
+	if item.rollPayload != nil && item.rollPayload.DisplayName != "" {
+		return item.rollPayload.DisplayName
+	}
+	if def, ok := s.rules.Items[item.itemDefID]; ok {
+		return def.Name
+	}
+	return item.itemDefID
+}
+
+func fixedItemStats(item ItemDef) map[string]int {
+	stats := map[string]int{}
+	if item.Damage != nil {
+		stats["damage_min"] = item.Damage.Min
+		stats["damage_max"] = item.Damage.Max
+	}
+	return stats
+}
+
+func itemDefPtr(item ItemDef) *ItemDef {
+	if item.Name == "" {
+		return nil
+	}
+	return &item
+}
+
+func (s *Sim) itemSummaryLines(category, slot string, stats map[string]int, requirements map[string]int, effectIDs []string, fixed *ItemDef) []string {
+	lines := []string{}
+	if slot != "" {
+		lines = append(lines, fmt.Sprintf("Slot: %s", displaySlotName(slot)))
+	} else if category != "" {
+		lines = append(lines, fmt.Sprintf("Kind: %s", displayStatName(category)))
+	}
+	if fixed != nil {
+		if fixed.Heal != nil {
+			lines = append(lines, fmt.Sprintf("Restores %s HP", displayRange(*fixed.Heal)))
+		}
+		if fixed.ManaRestore != nil {
+			lines = append(lines, fmt.Sprintf("Restores %s mana", displayRange(*fixed.ManaRestore)))
+		}
+	}
+	lines = append(lines, statSummaryLines(stats)...)
+	if level := requirements["level"]; level > 1 {
+		lines = append(lines, fmt.Sprintf("Requires level %d", level))
+	} else if level == 1 {
+		lines = append(lines, "Requires level 1")
+	}
+	for _, effectID := range effectIDs {
+		if effectID != "" {
+			lines = append(lines, fmt.Sprintf("Effect: %s", effectID))
+		}
+	}
+	return lines
+}
+
+func statSummaryLines(stats map[string]int) []string {
+	if len(stats) == 0 {
+		return nil
+	}
+	lines := []string{}
+	if stats["damage_min"] > 0 || stats["damage_max"] > 0 {
+		lines = append(lines, fmt.Sprintf("Damage %d-%d", stats["damage_min"], stats["damage_max"]))
+	}
+	for _, stat := range shopStatOrder() {
+		if stat == "damage_min" || stat == "damage_max" {
+			continue
+		}
+		if value := stats[stat]; value > 0 {
+			lines = append(lines, fmt.Sprintf("%s +%d", displayStatName(stat), value))
+		}
+	}
+	return lines
+}
+
+func displayRange(r DamageRange) string {
+	if r.Min == r.Max {
+		return fmt.Sprintf("%d", r.Min)
+	}
+	return fmt.Sprintf("%d-%d", r.Min, r.Max)
+}
+
+func (s *Sim) shopComparisonForItem(slot string, stats map[string]int) *ShopComparisonView {
+	if slot == "" || len(stats) == 0 {
+		return nil
+	}
+	equippedSlot := s.comparisonSlot(slot)
+	equipped := s.findItemByID(s.equipped[equippedSlot])
+	equippedStats := map[string]int{}
+	equippedID := ""
+	if equipped != nil {
+		equippedID = idStr(equipped.instanceID)
+		equippedStats = s.statsForInventoryItem(equipped)
+	}
+	deltas := make([]ShopComparisonDeltaView, 0, len(stats))
+	seen := map[string]bool{}
+	for _, stat := range shopStatOrder() {
+		offered := stats[stat]
+		equippedValue := equippedStats[stat]
+		if offered == 0 && equippedValue == 0 {
+			continue
+		}
+		deltas = append(deltas, ShopComparisonDeltaView{
+			Stat:     stat,
+			Offered:  offered,
+			Equipped: equippedValue,
+			Delta:    offered - equippedValue,
+		})
+		seen[stat] = true
+	}
+	extras := make([]string, 0, len(stats)+len(equippedStats))
+	for stat := range stats {
+		if !seen[stat] {
+			extras = append(extras, stat)
+		}
+	}
+	for stat := range equippedStats {
+		if !seen[stat] {
+			extras = append(extras, stat)
+		}
+	}
+	sort.Strings(extras)
+	for _, stat := range extras {
+		offered := stats[stat]
+		equippedValue := equippedStats[stat]
+		if offered == 0 && equippedValue == 0 {
+			continue
+		}
+		deltas = append(deltas, ShopComparisonDeltaView{Stat: stat, Offered: offered, Equipped: equippedValue, Delta: offered - equippedValue})
+	}
+	if len(deltas) == 0 {
+		return nil
+	}
+	return &ShopComparisonView{
+		Slot:                   equippedSlot,
+		EquippedItemInstanceID: equippedID,
+		Deltas:                 deltas,
+	}
+}
+
+func (s *Sim) comparisonSlot(slot string) string {
+	if slot == "ring" {
+		if s.equipped[ringLeftSlot] != 0 {
+			return ringLeftSlot
+		}
+		if s.equipped[ringRightSlot] != 0 {
+			return ringRightSlot
+		}
+		return ringLeftSlot
+	}
+	return slot
+}
+
+func (s *Sim) statsForInventoryItem(item *invItem) map[string]int {
+	if item == nil {
+		return map[string]int{}
+	}
+	if item.rollPayload != nil {
+		return cloneIntMap(item.rollPayload.Stats)
+	}
+	if def, ok := s.rules.Items[item.itemDefID]; ok {
+		return fixedItemStats(def)
+	}
+	return map[string]int{}
+}
+
+func shopStatOrder() []string {
+	return []string{"damage_min", "damage_max", "armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"}
+}
+
+func displayStatName(stat string) string {
+	switch stat {
+	case "damage_min":
+		return "Min damage"
+	case "damage_max":
+		return "Max damage"
+	case "armor":
+		return "Armor"
+	case "max_hp":
+		return "Max HP"
+	case "block_percent":
+		return "Block"
+	case "hotbar_slots":
+		return "Hotbar slots"
+	case "inventory_rows":
+		return "Inventory rows"
+	case "main_hand":
+		return "Main hand"
+	case "off_hand":
+		return "Off hand"
+	case "ring_left":
+		return "Left ring"
+	case "ring_right":
+		return "Right ring"
+	default:
+		return stat
+	}
+}
+
+func displaySlotName(slot string) string {
+	return displayStatName(slot)
 }
 
 func (offer ShopOfferView) inventoryItem(instanceID uint64) *invItem {

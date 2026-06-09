@@ -164,6 +164,7 @@ def cross_checks(report: Report) -> None:
     dungeon_obstacles_golden = load(GOLDEN / "dungeon_obstacles.json")
     shop_pricing_golden = load(GOLDEN / "shop_pricing.json")
     shop_offers_golden = load(GOLDEN / "shop_offers.json")
+    shop_appraisals_golden = load(GOLDEN / "shop_appraisals.json")
 
     v4_protocol_files = [
         PROTOCOL / "envelope.v4.schema.json",
@@ -1601,6 +1602,99 @@ def cross_checks(report: Report) -> None:
                 break
         if not failed_offers:
             report.ok("shop_offers golden matches deterministic catalog")
+
+        stat_order = ["damage_min", "damage_max", "armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"]
+
+        def comparison_deltas(offered: dict, equipped: dict) -> list[dict]:
+            out = []
+            for stat in stat_order:
+                offered_value = int(offered.get(stat, 0))
+                equipped_value = int(equipped.get(stat, 0))
+                if offered_value == 0 and equipped_value == 0:
+                    continue
+                out.append({
+                    "stat": stat,
+                    "offered": offered_value,
+                    "equipped": equipped_value,
+                    "delta": offered_value - equipped_value,
+                })
+            return out
+
+        failed_appraisals = False
+        if shop_appraisals_golden["shop_id"] != "town_vendor":
+            report.fail("shop_appraisals golden", "shop_id must be town_vendor")
+            failed_appraisals = True
+        if not failed_appraisals:
+            fixed_case = shop_appraisals_golden["fixed_offer"]
+            item = items["items"].get(fixed_case["item_def_id"])
+            expected = fixed_case["expected"]
+            if item is None:
+                report.fail("shop_appraisals golden", f"unknown fixed item {fixed_case['item_def_id']}")
+                failed_appraisals = True
+            elif fixed_buy_price(fixed_case["item_def_id"]) != int(expected["buy_price"]):
+                report.fail("shop_appraisals golden", f"fixed buy price mismatch for {fixed_case['item_def_id']}")
+                failed_appraisals = True
+            elif item.get("name") != expected["display_name"] or item.get("category") != expected["category"]:
+                report.fail("shop_appraisals golden", "fixed display/category mismatch")
+                failed_appraisals = True
+            elif item.get("heal") and f"Restores {item['heal']['min']} HP" not in expected["summary_lines"]:
+                report.fail("shop_appraisals golden", "fixed heal summary missing")
+                failed_appraisals = True
+        if not failed_appraisals:
+            generated_case = shop_appraisals_golden["generated_offer"]
+            template_id = generated_case["item_template_id"]
+            template = item_templates["templates"].get(template_id)
+            rarity = generated_case["rarity"]
+            expected = generated_case["expected"]
+            if template is None:
+                report.fail("shop_appraisals golden", f"unknown generated template {template_id}")
+                failed_appraisals = True
+            elif rarity not in rarities:
+                report.fail("shop_appraisals golden", f"unknown generated rarity {rarity}")
+                failed_appraisals = True
+            else:
+                got_buy = generated_buy_price(template_id, rarity, generated_case["rolled_stats"])
+                got_name = f"{rarities[rarity]['name_prefix']} {template['name']}"
+                got_comparison = comparison_deltas(generated_case["rolled_stats"], generated_case["equipped_stats"])
+                if got_buy != int(expected["buy_price"]):
+                    report.fail("shop_appraisals golden", f"generated buy price {got_buy} != {expected['buy_price']}")
+                    failed_appraisals = True
+                elif got_name != expected["display_name"] or template["slot"] != expected["slot"] or template["category"] != expected["category"]:
+                    report.fail("shop_appraisals golden", "generated display/slot/category mismatch")
+                    failed_appraisals = True
+                elif got_comparison != expected.get("comparison", []):
+                    report.fail("shop_appraisals golden", f"comparison mismatch: {got_comparison} != {expected.get('comparison', [])}")
+                    failed_appraisals = True
+        if not failed_appraisals:
+            sell_case = shop_appraisals_golden["sell_appraisal"]
+            template_id = sell_case["item_template_id"]
+            template = item_templates["templates"].get(template_id)
+            rarity = sell_case["rarity"]
+            expected = sell_case["expected"]
+            if template is None:
+                report.fail("shop_appraisals golden", f"unknown sell template {template_id}")
+                failed_appraisals = True
+            elif rarity not in rarities:
+                report.fail("shop_appraisals golden", f"unknown sell rarity {rarity}")
+                failed_appraisals = True
+            else:
+                got_sell = sell_price(generated_buy_price(template_id, rarity, sell_case["rolled_stats"]))
+                got_name = f"{rarities[rarity]['name_prefix']} {template['name']}"
+                got_comparison = comparison_deltas(sell_case["rolled_stats"], {})
+                if got_sell != int(expected["sell_price"]):
+                    report.fail("shop_appraisals golden", f"sell price {got_sell} != {expected['sell_price']}")
+                    failed_appraisals = True
+                elif got_name != expected["display_name"] or template["slot"] != expected["slot"] or template["category"] != expected["category"]:
+                    report.fail("shop_appraisals golden", "sell display/slot/category mismatch")
+                    failed_appraisals = True
+                elif got_comparison != expected.get("comparison", []):
+                    report.fail("shop_appraisals golden", f"sell comparison mismatch: {got_comparison} != {expected.get('comparison', [])}")
+                    failed_appraisals = True
+        if not failed_appraisals:
+            if not shop_appraisals_golden["equipped_item_exclusion"].get("expected_excluded"):
+                report.fail("shop_appraisals golden", "equipped_item_exclusion must expect exclusion")
+            else:
+                report.ok("shop_appraisals golden matches v42 appraisal contract")
 
     town_vendor = interactables["interactables"].get("town_vendor")
     if town_vendor is None:

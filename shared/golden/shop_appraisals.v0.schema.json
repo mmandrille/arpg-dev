@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/shop_appraisals.v0.schema.json",
+  "title": "Shop appraisal golden fixture (v0)",
+  "type": "object",
+  "required": ["shop_id", "fixed_offer", "generated_offer", "sell_appraisal", "equipped_item_exclusion"],
+  "additionalProperties": false,
+  "properties": {
+    "shop_id": { "type": "string" },
+    "fixed_offer": {
+      "type": "object",
+      "required": ["item_def_id", "expected"],
+      "additionalProperties": false,
+      "properties": {
+        "item_def_id": { "type": "string" },
+        "expected": { "$ref": "#/$defs/item_expectation" }
+      }
+    },
+    "generated_offer": {
+      "type": "object",
+      "required": ["item_template_id", "rarity", "rolled_stats", "equipped_stats", "expected"],
+      "additionalProperties": false,
+      "properties": {
+        "item_template_id": { "type": "string" },
+        "rarity": { "type": "string" },
+        "rolled_stats": { "$ref": "#/$defs/stats" },
+        "equipped_stats": { "$ref": "#/$defs/stats" },
+        "expected": { "$ref": "#/$defs/item_expectation" }
+      }
+    },
+    "sell_appraisal": {
+      "type": "object",
+      "required": ["item_instance_id", "item_template_id", "rarity", "rolled_stats", "expected"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "type": "string" },
+        "item_template_id": { "type": "string" },
+        "rarity": { "type": "string" },
+        "rolled_stats": { "$ref": "#/$defs/stats" },
+        "expected": { "$ref": "#/$defs/item_expectation" }
+      }
+    },
+    "equipped_item_exclusion": {
+      "type": "object",
+      "required": ["item_instance_id", "expected_excluded"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "type": "string" },
+        "expected_excluded": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "damage_min": { "type": "integer", "minimum": 0 },
+        "damage_max": { "type": "integer", "minimum": 0 },
+        "armor": { "type": "integer", "minimum": 0 },
+        "block_percent": { "type": "integer", "minimum": 0 },
+        "max_hp": { "type": "integer", "minimum": 0 },
+        "hotbar_slots": { "type": "integer", "minimum": 0 },
+        "inventory_rows": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "comparison_delta": {
+      "type": "object",
+      "required": ["stat", "offered", "equipped", "delta"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "type": "string" },
+        "offered": { "type": "integer" },
+        "equipped": { "type": "integer" },
+        "delta": { "type": "integer" }
+      }
+    },
+    "item_expectation": {
+      "type": "object",
+      "required": ["display_name", "slot", "category", "summary_lines"],
+      "additionalProperties": false,
+      "properties": {
+        "display_name": { "type": "string" },
+        "slot": { "type": "string" },
+        "category": { "type": "string" },
+        "buy_price": { "type": "integer", "minimum": 1 },
+        "sell_price": { "type": "integer", "minimum": 1 },
+        "summary_lines": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "comparison": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/comparison_delta" }
+        }
+      }
+    }
+  }
+}

@@ -30,7 +30,8 @@ const STEP_TYPES_ASSERT := [
 	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
 	"assert_entity_reaction",
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
-	"assert_shop_buy_button", "assert_shop_sell_rows",
+	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
+	"assert_shop_sell_details",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",
@@ -73,7 +74,8 @@ const ALL_STEP_TYPES: Array = [
 	"wait_entity_reaction", "assert_entity_reaction",
 	"wait_wall_layout", "assert_wall_layout",
 	"wait_shop_panel", "assert_shop_panel_visible", "assert_shop_offer_count",
-	"assert_shop_buy_button", "assert_shop_sell_rows", "click_shop_buy_offer", "click_shop_sell_item",
+	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
+	"assert_shop_sell_details", "click_shop_buy_offer", "click_shop_sell_item",
 ]
 
 var scenario: Dictionary = {}
@@ -366,6 +368,10 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_shop_buy_button(step, state)
 		"assert_shop_sell_rows":
 			return _assert_shop_sell_rows(step, state)
+		"assert_shop_offer_details":
+			return _assert_shop_offer_details(step, state)
+		"assert_shop_sell_details":
+			return _assert_shop_sell_details(step, state)
 		"assert_session_changed":
 			var remembered_session := str(_memory.get("session_id", ""))
 			var current_session := str(state.get("current_session_id", ""))
@@ -818,6 +824,65 @@ func _assert_shop_sell_rows(step: Dictionary, state: Dictionary) -> bool:
 	return true
 
 
+func _assert_shop_offer_details(step: Dictionary, state: Dictionary) -> bool:
+	return _assert_shop_detail_rows("assert_shop_offer_details", step, _matching_shop_offer_rows(step, state), "buy_price")
+
+
+func _assert_shop_sell_details(step: Dictionary, state: Dictionary) -> bool:
+	return _assert_shop_detail_rows("assert_shop_sell_details", step, _matching_shop_sell_rows(step, state), "sell_price")
+
+
+func _assert_shop_detail_rows(label: String, step: Dictionary, rows: Array, price_key: String) -> bool:
+	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
+		_fail("%s failed: equals want=%d got=%d rows=%s step=%d scenario=%s" % [
+			label, int(step.get("equals", 0)), rows.size(), str(rows), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("at_least") and rows.size() < int(step.get("at_least", 0)):
+		_fail("%s failed: at_least want=%d got=%d rows=%s step=%d scenario=%s" % [
+			label, int(step.get("at_least", 0)), rows.size(), str(rows), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			_fail("%s failed: non-dictionary row=%s step=%d scenario=%s" % [
+				label, str(row), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		var rec := row as Dictionary
+		if bool(step.get("requires_price", false)) and int(rec.get(price_key, 0)) <= 0:
+			_fail("%s failed: missing positive %s row=%s step=%d scenario=%s" % [
+				label, price_key, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("requires_summary", false)) and _row_summary_lines(rec).is_empty():
+			_fail("%s failed: missing summary row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("requires_comparison", false)) and int(rec.get("comparison_count", 0)) <= 0:
+			_fail("%s failed: missing comparison row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("requires_slot", false)) and str(rec.get("slot", "")) == "":
+			_fail("%s failed: missing slot row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("requires_category", false)) and str(rec.get("category", "")) == "":
+			_fail("%s failed: missing category row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if step.has("summary_contains") and not _row_summary_contains(rec, step.get("summary_contains", "")):
+			_fail("%s failed: summary_contains=%s row=%s step=%d scenario=%s" % [
+				label, str(step.get("summary_contains", "")), str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+	return true
+
+
 func _shop_offer_count_matches(step: Dictionary, state: Dictionary) -> bool:
 	if not step.has("equals") and not step.has("at_least"):
 		return true
@@ -836,6 +901,28 @@ func _shop_offer_count_matches(step: Dictionary, state: Dictionary) -> bool:
 	return true
 
 
+func _matching_shop_offer_rows(step: Dictionary, state: Dictionary) -> Array:
+	var panel: Dictionary = state.get("shop_panel", {})
+	var rows: Array = panel.get("offer_rows", [])
+	var out: Array = []
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if step.has("offer_kind") and str(rec.get("kind", "")) != str(step.get("offer_kind", "")):
+			continue
+		if step.has("offer_id") and str(rec.get("offer_id", "")) != str(step.get("offer_id", "")):
+			continue
+		if step.has("item_def_id") and str(rec.get("item_def_id", "")) != str(step.get("item_def_id", "")):
+			continue
+		if step.has("item_template_id") and str(rec.get("item_template_id", "")) != str(step.get("item_template_id", "")):
+			continue
+		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
+			continue
+		out.append(rec)
+	return out
+
+
 func _matching_shop_sell_rows(step: Dictionary, state: Dictionary) -> Array:
 	var panel: Dictionary = state.get("shop_panel", {})
 	var rows: Array = panel.get("sell_rows", [])
@@ -852,6 +939,34 @@ func _matching_shop_sell_rows(step: Dictionary, state: Dictionary) -> Array:
 			continue
 		out.append(rec)
 	return out
+
+
+func _row_summary_lines(row: Dictionary) -> Array:
+	var summary = row.get("summary_lines", [])
+	if typeof(summary) != TYPE_ARRAY:
+		return []
+	return summary as Array
+
+
+func _row_summary_contains(row: Dictionary, needle_value: Variant) -> bool:
+	var needles: Array = []
+	if typeof(needle_value) == TYPE_ARRAY:
+		needles = needle_value as Array
+	else:
+		needles.append(str(needle_value))
+	var lines := _row_summary_lines(row)
+	for needle in needles:
+		var text := str(needle)
+		if text == "":
+			continue
+		var matched := false
+		for line in lines:
+			if str(line).findn(text) >= 0:
+				matched = true
+				break
+		if not matched:
+			return false
+	return true
 
 
 func _float_close(got: float, want: float, tolerance: float) -> bool:
@@ -1001,6 +1116,7 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"wait_wall_layout", "assert_wall_layout":
 			return "wall_layout=%s" % str(step)
 		"wait_shop_panel", "assert_shop_offer_count", "assert_shop_buy_button", "assert_shop_sell_rows", \
+		"assert_shop_offer_details", "assert_shop_sell_details", \
 		"click_shop_buy_offer", "click_shop_sell_item":
 			return "shop=%s" % str(step)
 		"press_key":
@@ -1193,7 +1309,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "assert_shop_buy_button":
 		if str(step.get("offer_id", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id" % [index, stype]
-	if stype == "assert_shop_sell_rows":
+	if stype in ["assert_shop_sell_rows", "assert_shop_offer_details", "assert_shop_sell_details"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
 	if stype == "click_shop_buy_offer":

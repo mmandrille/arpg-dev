@@ -62,7 +62,7 @@ else
   # Treat as a scenario id: match against file basenames.
   while IFS= read -r -d '' f; do
     bn="$(basename "$f" .json)"
-    if [[ "$bn" == "$SCENARIO" || "$bn" == *"_$SCENARIO" || "$bn" == "$SCENARIO"* ]]; then
+    if [[ "$bn" == "$SCENARIO" || "$bn.json" == "$SCENARIO" || "$bn" == *"_$SCENARIO" || "$bn" == "$SCENARIO"* ]]; then
       SCENARIO_FILES+=("$f")
     fi
   done < <(find "$SCENARIOS_DIR" -maxdepth 1 -name '*.json' -print0 | sort -z)

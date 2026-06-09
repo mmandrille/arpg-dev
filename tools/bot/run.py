@@ -119,6 +119,7 @@ class RuntimeState:
     used_teleporter_positions: dict[int, dict[str, float]] = field(default_factory=dict)
     character_progression: dict[str, Any] = field(default_factory=dict)
     shop_offers: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
+    shop_sell_appraisals: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     shop_events: list[dict[str, Any]] = field(default_factory=list)
     last_shop_event: dict[str, Any] | None = None
     last_gold_before_action: int | None = None
@@ -1174,6 +1175,23 @@ async def execute_step(
         assert_count_matches(len(offers), step, "assert_shop_offer_count", f": {offers}")
         return
 
+    if action == "assert_shop_offer_details":
+        offers = filtered_shop_offers(state, step)
+        assert_shop_detail_rows(offers, step, "assert_shop_offer_details")
+        return
+
+    if action == "assert_shop_sell_appraisal_count":
+        rows = filtered_shop_sell_appraisals(state, step)
+        assert_count_matches(len(rows), step, "assert_shop_sell_appraisal_count", f": {rows}")
+        return
+
+    if action == "assert_shop_sell_appraisal_details":
+        rows = filtered_shop_sell_appraisals(state, step)
+        step = dict(step)
+        step.setdefault("price_key", "sell_price")
+        assert_shop_detail_rows(rows, step, "assert_shop_sell_appraisal_details")
+        return
+
     if action == "buy_shop_offer":
         shop_id = str(step.get("shop_id", "town_vendor"))
         target = find_interactable(state, str(step.get("interactable_def_id", "town_vendor")))
@@ -1745,6 +1763,10 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                     str(offer["offer_id"]): dict(offer)
                     for offer in ev.get("offers", [])
                 }
+                state.shop_sell_appraisals[shop_id] = {
+                    str(appraisal["item_instance_id"]): dict(appraisal)
+                    for appraisal in ev.get("sell_appraisals", [])
+                }
         if event_type in {"monster_damaged", "player_damaged", "player_killed", "attack_missed", "attack_blocked"}:
             state.combat_events.append(dict(ev))
         if event_type == "level_changed":
@@ -2126,6 +2148,19 @@ def filtered_shop_offers(state: RuntimeState, step: dict[str, Any]) -> list[dict
     return offers
 
 
+def filtered_shop_sell_appraisals(state: RuntimeState, step: dict[str, Any]) -> list[dict[str, Any]]:
+    shop_id = str(step.get("shop_id", "town_vendor"))
+    rows = list(state.shop_sell_appraisals.get(shop_id, {}).values())
+    if step.get("item_instance_id") is not None:
+        rows = [row for row in rows if str(row.get("item_instance_id")) == str(step["item_instance_id"])]
+    if step.get("item_def_id") is not None:
+        rows = [row for row in rows if str(row.get("item_def_id")) == str(step["item_def_id"])]
+    if step.get("item_template_id") is not None:
+        rows = [row for row in rows if str(row.get("item_template_id")) == str(step["item_template_id"])]
+    rows.sort(key=lambda row: (int(row.get("sell_price", 0)), str(row.get("item_instance_id", ""))))
+    return rows
+
+
 def select_shop_offer(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
     offers = filtered_shop_offers(state, step)
     if not offers:
@@ -2135,6 +2170,37 @@ def select_shop_offer(state: RuntimeState, step: dict[str, Any]) -> dict[str, An
     if index < 0 or index >= len(offers):
         raise AssertionError(f"{step.get('action')}: offer_index {index} out of range for {offers}")
     return offers[index]
+
+
+def assert_shop_detail_rows(rows: list[dict[str, Any]], step: dict[str, Any], label: str) -> None:
+    assert_count_matches(len(rows), step, label, f": {rows}")
+    if not rows:
+        return
+    if step.get("requires_summary", True):
+        missing = [row for row in rows if not row.get("summary_lines")]
+        if missing:
+            raise AssertionError(f"{label}: rows missing summary_lines: {missing}")
+    if step.get("requires_price", True):
+        price_key = str(step.get("price_key", "buy_price"))
+        missing = [row for row in rows if int(row.get(price_key, 0)) <= 0]
+        if missing:
+            raise AssertionError(f"{label}: rows missing positive {price_key}: {missing}")
+    if step.get("requires_slot"):
+        missing = [row for row in rows if not row.get("slot")]
+        if missing:
+            raise AssertionError(f"{label}: rows missing slot: {missing}")
+    if step.get("requires_category"):
+        missing = [row for row in rows if not row.get("category")]
+        if missing:
+            raise AssertionError(f"{label}: rows missing category: {missing}")
+    if step.get("requires_comparison"):
+        missing = [row for row in rows if not row.get("comparison", {}).get("deltas")]
+        if missing:
+            raise AssertionError(f"{label}: rows missing comparison deltas: {missing}")
+    if step.get("summary_contains") is not None:
+        needle = str(step["summary_contains"])
+        if not any(needle in str(line) for row in rows for line in row.get("summary_lines", [])):
+            raise AssertionError(f"{label}: no summary line contains {needle!r}: {rows}")
 
 
 def find_player(state: RuntimeState) -> dict[str, Any] | None:
@@ -2578,6 +2644,9 @@ def run_assertions(
             "monster_damage_at_least",
             "player_hp_decreased_from_recorded",
             "shop_offer_count",
+            "shop_offer_details",
+            "shop_sell_appraisal_count",
+            "shop_sell_appraisal_details",
             "shop_event",
         }:
             continue
@@ -2791,6 +2860,20 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "shop_offer_count":
             offers = filtered_shop_offers(state, assertion)
             assert_count_matches(len(offers), assertion, f"{where}: shop_offer_count", f": {offers}")
+            continue
+        if typ == "shop_offer_details":
+            offers = filtered_shop_offers(state, assertion)
+            assert_shop_detail_rows(offers, assertion, f"{where}: shop_offer_details")
+            continue
+        if typ == "shop_sell_appraisal_count":
+            rows = filtered_shop_sell_appraisals(state, assertion)
+            assert_count_matches(len(rows), assertion, f"{where}: shop_sell_appraisal_count", f": {rows}")
+            continue
+        if typ == "shop_sell_appraisal_details":
+            rows = filtered_shop_sell_appraisals(state, assertion)
+            assertion = dict(assertion)
+            assertion.setdefault("price_key", "sell_price")
+            assert_shop_detail_rows(rows, assertion, f"{where}: shop_sell_appraisal_details")
             continue
         if typ == "shop_event":
             shop_id = str(assertion.get("shop_id", "town_vendor"))

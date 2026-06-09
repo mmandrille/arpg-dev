@@ -11,7 +11,7 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v41 — `town-vendor-gold-sink` |
+| **Latest completed slice** | v42 — `vendor-appraisal-and-item-comparison` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
@@ -57,6 +57,7 @@ v38_* = session-browser-and-uncapped-coop-menu
 v39_* = ui-currency-and-mana-polish
 v40_* = reachable-dungeon-obstacles
 v41_* = town-vendor-gold-sink
+v42_* = vendor-appraisal-and-item-comparison
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -118,6 +119,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v39** | `ui-currency-and-mana-polish` | Complete (`make ci` green) | [`v39_spec-ui-currency-and-mana-polish.md`](specs/v39_spec-ui-currency-and-mana-polish.md) | [`v39_2026-06-09-ui-currency-and-mana-polish.md`](plans/v39_2026-06-09-ui-currency-and-mana-polish.md) |
 | **v40** | `reachable-dungeon-obstacles` | Complete (`make ci` green) | [`v40_spec-reachable-dungeon-obstacles.md`](specs/v40_spec-reachable-dungeon-obstacles.md) | [`v40_2026-06-09-reachable-dungeon-obstacles.md`](plans/v40_2026-06-09-reachable-dungeon-obstacles.md) |
 | **v41** | `town-vendor-gold-sink` | Complete (`make ci` green) | [`v41_spec-town-vendor-gold-sink.md`](specs/v41_spec-town-vendor-gold-sink.md) | [`v41_2026-06-09-town-vendor-gold-sink.md`](plans/v41_2026-06-09-town-vendor-gold-sink.md) |
+| **v42** | `vendor-appraisal-and-item-comparison` | Complete (`make ci` green) | [`v42_spec-vendor-appraisal-and-item-comparison.md`](specs/v42_spec-vendor-appraisal-and-item-comparison.md) | [`v42_2026-06-09-vendor-appraisal-and-item-comparison.md`](plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md) |
 
 ---
 
@@ -1041,6 +1043,31 @@ while generated stock keys off the player's deepest reached dungeon depth.
 **Explicit non-goals:** no vendor stock refresh timers, multiple vendors, buyback tab, item
 comparison UI, stash, player trade, crafting, or final economy balance.
 
+### v42 — Vendor appraisal and item comparison
+
+**Proves:** The vendor can show decision-ready, server-authored item summaries, sell appraisals,
+and direct item-stat comparisons without moving economy authority into the Godot client.
+
+- Protocol v4 `shop_opened` payloads now include display-ready offer metadata: slot/category,
+  summary lines, requirements/effects, and direct comparison deltas where equipment stats apply.
+- Shared `shop_appraisals` golden fixtures pin one fixed consumable, a generated equipment offer,
+  an unequipped sell appraisal, and equipped-item exclusion.
+- The Go sim computes stable item summary lines, generated-offer comparison data, and actor-scoped
+  sell appraisals for unequipped sellable inventory items.
+- Equipped items stay excluded from sell appraisals and still reject `shop_sell_intent` with the
+  existing equipped-item guard.
+- Godot renders richer buy/sell rows with item identity, price, kind/slot, stat/effect summaries,
+  and comparison lines while continuing to send unchanged v41 buy/sell intents.
+- Protocol bot scenario `30_vendor_appraisal_quotes.json` proves offer details, sell appraisals,
+  comparison deltas, buy/sell mutations, `/state`, reconnect, and replay.
+- Client bot scenario `16_vendor_item_comparison.json` proves the real shop panel exposes fixed
+  offer summaries, generated offer comparisons, sell appraisal rows, buy, and sell in headless
+  Godot.
+
+**Explicit non-goals:** no derived character-stat preview after hypothetical equip, buyback,
+stash, repair, crafting, search, sorting, filters, bulk operations, external shop/inventory UI
+plugin adoption, or item/economy rebalance.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1098,6 +1125,8 @@ session_browser_uncapped_coop: host creates listed co-op → two peers join from
 ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions
 reachable_dungeon_obstacles: descend through generated dungeon floors → assert generated interior wall layout → route to loot beyond obstacles → prove replay
 dungeon_wall_rendering: headless Godot client descends to generated floors → assert authoritative non-perimeter wall rendering state
+vendor_appraisal_quotes: open town vendor after dungeon loot → assert server-authored offer summaries, comparisons, sell appraisals, buy, sell, replay
+vendor_item_comparison: headless Godot client opens vendor → assert visible offer/sell details, comparison rows, buy, and sell
 ```
 
 **Verify:**
@@ -1254,14 +1283,18 @@ v4 shop buy/sell contracts, fixed potion stock, deterministic generated offers b
 dungeon depth, durable gold mutations, deepest-depth persistence, and protocol/client bot proofs for
 shop open, buy, sell, reconnect, replay, and fresh-session persistence.
 
+**Vendor appraisals and direct item comparison are now authoritative.** v42 extends `shop_opened`
+with server-authored summary, appraisal, and comparison views, and proves the richer protocol plus
+Godot panel through protocol/client bot scenarios.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39/v40/v41 non-goals, ADR-0008 deferred |
 | Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill bar and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40 non-goals |
-| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, comparison UI, loot filters, crafting/player trade, richer gold sinks, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41 non-goals, ADR-0009 deferred |
-| Content | Production item art/icons, production menu art/audio, production town art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41 non-goals |
+| Itemization | Affix grammar, procedural item names, stat requirements, special-effect execution, derived character-stat previews after hypothetical equip, loot filters, crafting/player trade, richer gold sinks, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42 non-goals, ADR-0009 deferred |
+| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42 non-goals |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |

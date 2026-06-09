@@ -1,0 +1,51 @@
+{
+  "shop_id": "town_vendor",
+  "fixed_offer": {
+    "item_def_id": "red_potion",
+    "expected": {
+      "display_name": "Red Potion",
+      "slot": "",
+      "category": "consumable",
+      "buy_price": 20,
+      "summary_lines": ["Kind: consumable", "Restores 5 HP"]
+    }
+  },
+  "generated_offer": {
+    "item_template_id": "cave_blade",
+    "rarity": "magic",
+    "rolled_stats": { "damage_min": 3, "damage_max": 6 },
+    "equipped_stats": { "damage_min": 2, "damage_max": 4 },
+    "expected": {
+      "display_name": "Magic Cave Blade",
+      "slot": "main_hand",
+      "category": "equipment",
+      "buy_price": 215,
+      "summary_lines": ["Slot: Main hand", "Damage 3-6", "Requires level 1"],
+      "comparison": [
+        { "stat": "damage_min", "offered": 3, "equipped": 2, "delta": 1 },
+        { "stat": "damage_max", "offered": 6, "equipped": 4, "delta": 2 }
+      ]
+    }
+  },
+  "sell_appraisal": {
+    "item_instance_id": "2001",
+    "item_template_id": "cave_shield",
+    "rarity": "magic",
+    "rolled_stats": { "armor": 5, "block_percent": 9 },
+    "expected": {
+      "display_name": "Magic Cave Shield",
+      "slot": "off_hand",
+      "category": "equipment",
+      "sell_price": 38,
+      "summary_lines": ["Slot: Off hand", "Armor +5", "Block +9", "Requires level 1"],
+      "comparison": [
+        { "stat": "armor", "offered": 5, "equipped": 0, "delta": 5 },
+        { "stat": "block_percent", "offered": 9, "equipped": 0, "delta": 9 }
+      ]
+    }
+  },
+  "equipped_item_exclusion": {
+    "item_instance_id": "2002",
+    "expected_excluded": true
+  }
+}

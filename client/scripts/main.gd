@@ -143,6 +143,7 @@ var character_panel: CharacterSelectPanel
 var multiplayer_panel: MultiplayerSessionsPanel
 var settings_panel: SettingsPanel
 var pause_menu: PauseMenu
+var loss_popup: Control
 var gameplay_active: bool = false
 var settings_return_target: String = "main"
 var character_flow: String = "solo"
@@ -327,6 +328,8 @@ func _hide_all_menus() -> void:
 		settings_panel.hide_panel()
 	if pause_menu != null:
 		pause_menu.hide_pause()
+	if loss_popup != null:
+		loss_popup.visible = false
 	if character_stats_panel != null:
 		character_stats_panel.hide_display()
 	_hide_character_info_panel()
@@ -834,6 +837,7 @@ func _apply_delta(p: Dictionary) -> void:
 					_health_bar.update_hp(player_hp, player_max_hp)
 			if event_type == "player_killed":
 				_play_entity_reaction(eid, ev, "death")
+				_show_loss_popup()
 			if event_type == "attack_missed":
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
@@ -929,6 +933,8 @@ func _upsert_entity(e: Dictionary) -> void:
 				player_anim.enter_terminal("death")
 			if player_hp <= 0 and player_reaction != null:
 				player_reaction.enter_death()
+			if player_hp <= 0:
+				_show_loss_popup()
 		if e.has("mana"):
 			player_mana = int(e["mana"])
 			if e.has("max_mana"):
@@ -1474,7 +1480,8 @@ func _menu_blocks_gameplay_input() -> bool:
 		or (character_panel != null and character_panel.visible) \
 		or (multiplayer_panel != null and multiplayer_panel.visible) \
 		or (settings_panel != null and settings_panel.visible) \
-		or (pause_menu != null and pause_menu.visible)
+		or (pause_menu != null and pause_menu.visible) \
+		or (loss_popup != null and loss_popup.visible)
 
 
 func _handle_autoplay(delta: float) -> void:
@@ -2208,6 +2215,59 @@ func _setup_menu_layer() -> void:
 	pause_menu.return_to_menu_pressed.connect(_return_to_main_menu)
 	pause_menu.exit_pressed.connect(_exit_game)
 	menu_layer.add_child(pause_menu)
+
+	loss_popup = _build_loss_popup()
+	menu_layer.add_child(loss_popup)
+
+
+func _build_loss_popup() -> Control:
+	var root := Control.new()
+	root.visible = false
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var shade := ColorRect.new()
+	shade.color = Color(0.02, 0.02, 0.025, 0.78)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(shade)
+
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(340, 160)
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.offset_left = -170
+	panel.offset_right = 170
+	panel.offset_top = -80
+	panel.offset_bottom = 80
+	root.add_child(panel)
+
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 14)
+	panel.add_child(box)
+
+	var title := Label.new()
+	title.text = "You lost"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 34)
+	title.add_theme_color_override("font_color", Color("#f1efe4"))
+	box.add_child(title)
+
+	var button := Button.new()
+	button.text = "Return to Main Menu"
+	button.custom_minimum_size = Vector2(240, 42)
+	button.pressed.connect(_return_to_main_menu)
+	box.add_child(button)
+	return root
+
+
+func _show_loss_popup() -> void:
+	if loss_popup == null or loss_popup.visible:
+		return
+	if pause_menu != null:
+		pause_menu.hide_pause()
+	_hide_waypoint_panel()
+	_hide_shop_panel()
+	loss_popup.visible = true
 
 
 func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) -> void:
@@ -3181,6 +3241,7 @@ func get_bot_state() -> Dictionary:
 		"multiplayer_panel_visible": multiplayer_panel != null and multiplayer_panel.visible,
 		"settings_panel_visible": settings_panel != null and settings_panel.visible,
 		"pause_menu_visible": pause_menu != null and pause_menu.visible,
+		"loss_popup_visible": loss_popup != null and loss_popup.visible,
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
 		"top_right_status_text_enabled": client_settings != null and client_settings.top_right_status_text,

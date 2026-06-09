@@ -118,21 +118,26 @@ type CharacterProgressionDefaults struct {
 	Level               int
 	Experience          int
 	UnspentStatPoints   int
+	UnspentSkillPoints  int
 	Stats               CharacterBaseStats
 	Gold                int
 	DeepestDungeonDepth int
+	SkillRanks          map[string]int
 }
 
-// CharacterProgression is durable character-owned XP, level, and base stats.
+// CharacterProgression is durable character-owned XP, level, base stats, and
+// skill progression.
 type CharacterProgression struct {
 	AccountID           string
 	CharacterID         string
 	Level               int
 	Experience          int
 	UnspentStatPoints   int
+	UnspentSkillPoints  int
 	Stats               CharacterBaseStats
 	Gold                int
 	DeepestDungeonDepth int
+	SkillRanks          map[string]int
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 }

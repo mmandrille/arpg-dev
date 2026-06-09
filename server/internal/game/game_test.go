@@ -113,8 +113,14 @@ func TestLoadRules(t *testing.T) {
 	if r.Interactables["wooden_door"].InitialState != interactableClosed {
 		t.Fatalf("wooden_door = %+v, want initially closed", r.Interactables["wooden_door"])
 	}
-	if r.CharacterProgression.PointsPerLevel != 5 || r.CharacterProgression.LevelCap != 20 {
-		t.Fatalf("character progression = %+v, want points_per_level 5 level_cap 20", r.CharacterProgression)
+	if r.CharacterProgression.PointsPerLevel != 3 || r.CharacterProgression.LevelCap != 20 {
+		t.Fatalf("character progression = %+v, want points_per_level 3 level_cap 20", r.CharacterProgression)
+	}
+	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 3 {
+		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 3", r.CharacterProgression.SkillPoints)
+	}
+	if skill := r.Skills[magicBoltSkillID]; skill.MaxRank != 5 || skill.Kind != "projectile" || skill.Cooldown.Type != "attack_interval_multiplier" {
+		t.Fatalf("magic_bolt skill = %+v, want projectile max rank 5 attack interval cooldown", skill)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
@@ -319,12 +325,13 @@ func TestCharacterProgressionGolden(t *testing.T) {
 			AllocatedStat             string        `json:"allocated_stat"`
 			AllocatedPoints           int           `json:"allocated_points"`
 			Expected                  struct {
-				Level             int              `json:"level"`
-				CurrentLevelXP    int              `json:"current_level_xp"`
-				NextLevelXP       int              `json:"next_level_xp"`
-				UnspentStatPoints int              `json:"unspent_stat_points"`
-				BaseStats         BaseStatsView    `json:"base_stats"`
-				DerivedStats      DerivedStatsView `json:"derived_stats"`
+				Level              int              `json:"level"`
+				CurrentLevelXP     int              `json:"current_level_xp"`
+				NextLevelXP        int              `json:"next_level_xp"`
+				UnspentStatPoints  int              `json:"unspent_stat_points"`
+				UnspentSkillPoints int              `json:"unspent_skill_points"`
+				BaseStats          BaseStatsView    `json:"base_stats"`
+				DerivedStats       DerivedStatsView `json:"derived_stats"`
 			} `json:"expected"`
 		} `json:"cases"`
 	}
@@ -349,6 +356,9 @@ func TestCharacterProgressionGolden(t *testing.T) {
 			view := sim.CharacterProgressionView()
 			if view.Level != tc.Expected.Level || view.Experience != tc.Experience || view.UnspentStatPoints != tc.Expected.UnspentStatPoints {
 				t.Fatalf("progression = %+v, want level %d exp %d unspent %d", view, tc.Expected.Level, tc.Experience, tc.Expected.UnspentStatPoints)
+			}
+			if view.UnspentSkillPoints != tc.Expected.UnspentSkillPoints {
+				t.Fatalf("unspent skill points = %d, want %d; progression=%+v", view.UnspentSkillPoints, tc.Expected.UnspentSkillPoints, view)
 			}
 			if view.ExperienceToNextLevel == nil || *view.ExperienceToNextLevel != tc.Expected.NextLevelXP-tc.Expected.CurrentLevelXP {
 				t.Fatalf("experience_to_next_level = %v, want %d", view.ExperienceToNextLevel, tc.Expected.NextLevelXP-tc.Expected.CurrentLevelXP)
@@ -385,8 +395,8 @@ func TestExperienceGainAndLevelUpFromMonsterKill(t *testing.T) {
 		t.Fatalf("missing kill/xp/level events: %+v", res.Events)
 	}
 	view := sim.CharacterProgressionView()
-	if view.Experience != 20 || view.Level != 2 || view.UnspentStatPoints != 5 {
-		t.Fatalf("progression after kill = %+v, want exp 20 level 2 unspent 5", view)
+	if view.Experience != 20 || view.Level != 2 || view.UnspentStatPoints != 3 {
+		t.Fatalf("progression after kill = %+v, want exp 20 level 2 unspent 3", view)
 	}
 	if !hasProgressionChange(res) {
 		t.Fatalf("missing progression update change: %+v", res.Changes)
@@ -409,8 +419,8 @@ func TestStatAllocationVitHPAndRejects(t *testing.T) {
 	sim.handleAllocateStat(Input{MessageID: "vit", CorrelationID: "corr_vit", Type: "allocate_stat_intent", AllocateStat: &AllocateStatIntent{Stat: "vit", Points: 1}}, &res)
 	assertAck(t, res, "vit")
 	view := sim.CharacterProgressionView()
-	if view.BaseStats.Vit != 6 || view.UnspentStatPoints != 4 || player.maxHP != 11 || player.hp != 8 {
-		t.Fatalf("vit allocation progression=%+v player=%+v, want vit 6 unspent 4 hp 8/11", view, player)
+	if view.BaseStats.Vit != 6 || view.UnspentStatPoints != 2 || player.maxHP != 11 || player.hp != 8 {
+		t.Fatalf("vit allocation progression=%+v player=%+v, want vit 6 unspent 2 hp 8/11", view, player)
 	}
 	if !hasEvent(res, "stat_allocated") || !hasProgressionChange(res) {
 		t.Fatalf("missing stat allocation outputs: changes=%+v events=%+v", res.Changes, res.Events)
@@ -420,6 +430,165 @@ func TestStatAllocationVitHPAndRejects(t *testing.T) {
 	assertReject(t, overspend, "overspend", "not_enough_stat_points")
 	invalid := sim.Tick([]Input{{MessageID: "invalid_stat", Type: "allocate_stat_intent", AllocateStat: &AllocateStatIntent{Stat: "luck", Points: 1}}})
 	assertReject(t, invalid, "invalid_stat", "invalid_payload")
+}
+
+func TestSkillPointCadenceAndSpend(t *testing.T) {
+	sim := NewSim("sess_skill_points", "01", loadRules(t))
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
+	sim.awardExperience(50, "corr_skill_xp", &res)
+	sim.savePlayer(sim.defaultPlayer())
+
+	view := sim.CharacterProgressionView()
+	if view.Level != 3 || view.UnspentStatPoints != 6 || view.UnspentSkillPoints != 1 {
+		t.Fatalf("progression after level 3 = %+v, want level 3, 6 stat points, 1 skill point", view)
+	}
+	if !hasEvent(res, "skill_point_gained") {
+		t.Fatalf("missing skill_point_gained event: %+v", res.Events)
+	}
+	skillView := sim.SkillProgressionView()
+	if len(skillView.Skills) != 1 || skillView.Skills[0].SkillID != magicBoltSkillID || skillView.Skills[0].Rank != 0 || !skillView.Skills[0].CanSpend {
+		t.Fatalf("skill progression before spend = %+v", skillView)
+	}
+
+	spend := sim.Tick([]Input{{
+		MessageID:          "spend_magic",
+		CorrelationID:      "corr_spend",
+		Type:               "allocate_skill_point_intent",
+		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
+	}})
+	assertAck(t, spend, "spend_magic")
+	if !hasEvent(spend, "skill_rank_updated") || skillProgressionUpdate(spend) == nil {
+		t.Fatalf("missing skill spend outputs: changes=%+v events=%+v", spend.Changes, spend.Events)
+	}
+	skillView = sim.SkillProgressionView()
+	if skillView.UnspentSkillPoints != 0 || skillView.Skills[0].Rank != 1 || skillView.Skills[0].CanSpend {
+		t.Fatalf("skill progression after spend = %+v, want rank 1 and no spendable points", skillView)
+	}
+
+	overspend := sim.Tick([]Input{{
+		MessageID:          "overspend_skill",
+		Type:               "allocate_skill_point_intent",
+		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
+	}})
+	assertReject(t, overspend, "overspend_skill", "not_enough_skill_points")
+	if sim.SkillProgressionView().Skills[0].Rank != 1 {
+		t.Fatalf("overspend mutated rank: %+v", sim.SkillProgressionView())
+	}
+}
+
+func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
+	sim := NewSim("sess_attack_speed", "01", loadRules(t))
+	blade := addRolledInventoryItem(t, sim, 6400, "cave_blade", nil)
+	gloves := addRolledInventoryItem(t, sim, 6401, "cave_gloves", map[string]int{"attack_speed_percent": 10})
+	assertAck(t, sim.Tick([]Input{{MessageID: "blade", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "blade")
+	assertAck(t, sim.Tick([]Input{{MessageID: "gloves", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(gloves.instanceID), Slot: "gloves"}}}), "gloves")
+
+	view := sim.CharacterProgressionView()
+	if math.Abs(view.DerivedStats.AttackSpeed-1.1275) > 0.000001 || view.DerivedStats.AttackIntervalTicks != 18 {
+		t.Fatalf("attack speed/interval with blade+gloves = %+v, want 1.1275 / 18", view.DerivedStats)
+	}
+	speed := findStatBreakdown(view.StatBreakdowns, "attack_speed")
+	interval := findStatBreakdown(view.StatBreakdowns, "attack_interval_ticks")
+	if speed == nil || interval == nil || !hasBreakdownSource(speed.Sources, "equipment_base") || !hasBreakdownSource(speed.Sources, "equipment_roll") {
+		t.Fatalf("attack speed breakdowns = speed:%+v interval:%+v all:%+v", speed, interval, view.StatBreakdowns)
+	}
+
+	slow := NewSim("sess_attack_speed_slow", "01", loadRules(t))
+	greatsword := addRolledInventoryItem(t, slow, 6402, "cave_greatsword", nil)
+	assertAck(t, slow.Tick([]Input{{MessageID: "greatsword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}}), "greatsword")
+	slowView := slow.CharacterProgressionView()
+	if math.Abs(slowView.DerivedStats.AttackSpeed-0.7175) > 0.000001 || slowView.DerivedStats.AttackIntervalTicks != 28 {
+		t.Fatalf("attack speed/interval with greatsword = %+v, want 0.7175 / 28", slowView.DerivedStats)
+	}
+}
+
+func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	zero := 0.0
+	crit := rules.CharacterProgression.DerivedStats["crit_chance"]
+	crit.Base = 0
+	crit.PerDex = 0
+	crit.Min = &zero
+	crit.Max = &zero
+	rules.CharacterProgression.DerivedStats["crit_chance"] = crit
+
+	sim := NewSim("sess_magic_bolt", "01", rules)
+	sim.progression.SkillRanks[magicBoltSkillID] = 1
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: player.pos.X + 5, Y: player.pos.Y},
+		hp:           20,
+		maxHP:        20,
+		monsterDefID: monsterDefID,
+		lootTable:    "no_drop",
+	}
+	sim.entities[monster.id] = monster
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_magic",
+		CorrelationID: "corr_cast",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
+	}})
+	assertAck(t, cast, "cast_magic")
+	if player.mana != 7 {
+		t.Fatalf("mana after cast = %d, want 7", player.mana)
+	}
+	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_cooldown_started") {
+		t.Fatalf("missing cast/cooldown events: %+v", cast.Events)
+	}
+	cooldowns := skillCooldownUpdate(cast)
+	if len(cooldowns) != 1 || cooldowns[0].SkillID != magicBoltSkillID || cooldowns[0].RemainingTicks != 40 || cooldowns[0].TotalTicks != 40 {
+		t.Fatalf("cooldown update = %+v, want magic_bolt 40/40", cooldowns)
+	}
+	spawn := firstChangeEntityByType(cast, projectileEntity)
+	if spawn == nil || spawn.ProjectileDefID != magicBoltSkillID || spawn.TargetID != idStr(monster.id) {
+		t.Fatalf("magic bolt projectile spawn = %+v", spawn)
+	}
+
+	recast := sim.Tick([]Input{{
+		MessageID: "recast_magic",
+		Type:      "cast_skill_intent",
+		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
+	}})
+	assertReject(t, recast, "recast_magic", "skill_on_cooldown")
+	if player.mana != 7 {
+		t.Fatalf("recast spent mana: %d", player.mana)
+	}
+	if !hasEvent(recast, "skill_cooldown_rejected") {
+		t.Fatalf("missing cooldown rejected event: %+v", recast.Events)
+	}
+
+	var impact TickResult
+	for i := 0; i < 30; i++ {
+		impact = sim.Tick(nil)
+		if hasEvent(impact, "monster_damaged") {
+			break
+		}
+	}
+	damage := eventDamage(impact, "monster_damaged")
+	if damage < 4 || damage > 6 {
+		t.Fatalf("magic bolt impact damage = %d, want rank 1 damage 4..6; events=%+v", damage, impact.Events)
+	}
+
+	for i := 0; i < 50; i++ {
+		if _, active := sim.skillCooldownRemaining(magicBoltSkillID); !active {
+			break
+		}
+		sim.Tick(nil)
+	}
+	if remaining, active := sim.skillCooldownRemaining(magicBoltSkillID); active {
+		t.Fatalf("cooldown still active with %d ticks remaining", remaining)
+	}
+	second := sim.Tick([]Input{{
+		MessageID: "cast_magic_again",
+		Type:      "cast_skill_intent",
+		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, Direction: &Vec2{X: 1}},
+	}})
+	assertAck(t, second, "cast_magic_again")
 }
 
 func TestStrengthDamageBonusAdjustsMeleeDamageRange(t *testing.T) {
@@ -3781,6 +3950,18 @@ func cloneRules(r *Rules) *Rules {
 	for id, def := range r.Items {
 		out.Items[id] = def
 	}
+	out.ItemTemplates = make(map[string]ItemTemplateDef, len(r.ItemTemplates))
+	for id, def := range r.ItemTemplates {
+		out.ItemTemplates[id] = def
+	}
+	out.Skills = make(map[string]SkillDef, len(r.Skills))
+	for id, def := range r.Skills {
+		out.Skills[id] = def
+	}
+	out.CharacterProgression.DerivedStats = make(map[string]LinearStatFormula, len(r.CharacterProgression.DerivedStats))
+	for id, def := range r.CharacterProgression.DerivedStats {
+		out.CharacterProgression.DerivedStats[id] = def
+	}
 	out.Monsters = make(map[string]MonsterDef, len(r.Monsters))
 	for id, def := range r.Monsters {
 		out.Monsters[id] = def
@@ -5995,6 +6176,9 @@ func assertDerivedStats(t *testing.T, got, want DerivedStatsView) {
 	assertFloat("damage_max", got.DamageMax, want.DamageMax)
 	assertFloat("armor", got.Armor, want.Armor)
 	assertFloat("attack_speed", got.AttackSpeed, want.AttackSpeed)
+	if got.AttackIntervalTicks != want.AttackIntervalTicks {
+		t.Fatalf("attack_interval_ticks = %d, want %d; got=%+v want=%+v", got.AttackIntervalTicks, want.AttackIntervalTicks, got, want)
+	}
 	assertFloat("hit_chance", got.HitChance, want.HitChance)
 	assertFloat("crit_chance", got.CritChance, want.CritChance)
 	assertFloat("crit_damage", got.CritDamage, want.CritDamage)
@@ -6016,6 +6200,24 @@ func characterProgressionUpdate(r TickResult) *CharacterProgressionView {
 	for i := range r.Changes {
 		if r.Changes[i].Op == OpCharacterProgressionUpdate {
 			return r.Changes[i].Progression
+		}
+	}
+	return nil
+}
+
+func skillProgressionUpdate(r TickResult) *SkillProgressionView {
+	for i := range r.Changes {
+		if r.Changes[i].Op == OpSkillProgressionUpdate {
+			return r.Changes[i].SkillProgression
+		}
+	}
+	return nil
+}
+
+func skillCooldownUpdate(r TickResult) []SkillCooldownView {
+	for i := range r.Changes {
+		if r.Changes[i].Op == OpSkillCooldownUpdate {
+			return r.Changes[i].SkillCooldowns
 		}
 	}
 	return nil

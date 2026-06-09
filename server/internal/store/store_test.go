@@ -123,10 +123,12 @@ func TestDeleteCharacterRemovesProgressionAndSessions(t *testing.T) {
 		t.Fatalf("create remove character: %v", err)
 	}
 	defaultProgression := store.CharacterProgressionDefaults{
-		Level:             1,
-		Experience:        0,
-		UnspentStatPoints: 0,
-		Stats:             store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+		Level:              1,
+		Experience:         0,
+		UnspentStatPoints:  0,
+		UnspentSkillPoints: 0,
+		Stats:              store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+		SkillRanks:         map[string]int{"magic_bolt": 0},
 	}
 	if _, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, remove.ID, defaultProgression); err != nil {
 		t.Fatalf("create progression: %v", err)
@@ -421,29 +423,35 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get or create progression: %v", err)
 	}
-	if progression.Level != 1 || progression.Experience != 0 || progression.UnspentStatPoints != 0 ||
+	if progression.Level != 1 || progression.Experience != 0 || progression.UnspentStatPoints != 0 || progression.UnspentSkillPoints != 0 ||
 		progression.DeepestDungeonDepth != 0 ||
-		progression.Stats.Str != 5 || progression.Stats.Dex != 5 || progression.Stats.Vit != 5 || progression.Stats.Magic != 5 {
+		progression.Stats.Str != 5 || progression.Stats.Dex != 5 || progression.Stats.Vit != 5 || progression.Stats.Magic != 5 ||
+		progression.SkillRanks["magic_bolt"] != 0 {
 		t.Fatalf("default progression mismatch: %+v", progression)
 	}
 	progression.Level = 2
 	progression.Experience = 25
 	progression.UnspentStatPoints = 5
+	progression.UnspentSkillPoints = 1
 	progression.Stats.Vit = 6
 	progression.DeepestDungeonDepth = 2
+	progression.SkillRanks["magic_bolt"] = 1
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, progression); err != nil {
 		t.Fatalf("upsert progression: %v", err)
 	}
 	loadedProgression, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, char.ID, store.CharacterProgressionDefaults{
-		Level:             9,
-		Experience:        999,
-		UnspentStatPoints: 99,
-		Stats:             store.CharacterBaseStats{Str: 1, Dex: 1, Vit: 1, Magic: 1},
+		Level:              9,
+		Experience:         999,
+		UnspentStatPoints:  99,
+		UnspentSkillPoints: 99,
+		Stats:              store.CharacterBaseStats{Str: 1, Dex: 1, Vit: 1, Magic: 1},
+		SkillRanks:         map[string]int{"magic_bolt": 5},
 	})
 	if err != nil {
 		t.Fatalf("reload progression: %v", err)
 	}
 	if loadedProgression.Level != 2 || loadedProgression.Experience != 25 || loadedProgression.UnspentStatPoints != 5 ||
+		loadedProgression.UnspentSkillPoints != 1 || loadedProgression.SkillRanks["magic_bolt"] != 1 ||
 		loadedProgression.DeepestDungeonDepth != 2 || loadedProgression.Stats.Vit != 6 {
 		t.Fatalf("progression not persisted/stable: %+v", loadedProgression)
 	}
@@ -544,8 +552,10 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	mutatedProgression.Level = 3
 	mutatedProgression.Experience = 70
 	mutatedProgression.UnspentStatPoints = 10
+	mutatedProgression.UnspentSkillPoints = 0
 	mutatedProgression.Stats.Str = 7
 	mutatedProgression.DeepestDungeonDepth = 5
+	mutatedProgression.SkillRanks["magic_bolt"] = 2
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, mutatedProgression); err != nil {
 		t.Fatalf("mutate live progression: %v", err)
 	}
@@ -569,6 +579,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("snapshot progression missing")
 	}
 	if snap.Progression.Level != 2 || snap.Progression.Experience != 25 || snap.Progression.UnspentStatPoints != 5 ||
+		snap.Progression.UnspentSkillPoints != 1 || snap.Progression.SkillRanks["magic_bolt"] != 1 ||
 		snap.Progression.DeepestDungeonDepth != 2 || snap.Progression.Stats.Str != 5 || snap.Progression.Stats.Vit != 6 {
 		t.Fatalf("snapshot progression mutated with live state: %+v", snap.Progression)
 	}

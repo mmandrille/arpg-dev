@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/skills.v0.schema.json",
+  "title": "Skill rules (v0)",
+  "description": "Declarative active-skill catalog. The Go sim owns authoritative validation, cooldowns, mana spend, projectiles, and damage.",
+  "type": "object",
+  "required": ["version", "skills"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "skills": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "kind", "max_rank", "targeting", "range", "projectile_speed", "mana_cost", "damage", "cooldown"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "enum": ["projectile"] },
+          "max_rank": { "type": "integer", "minimum": 1 },
+          "targeting": { "type": "string", "enum": ["direction_or_target"] },
+          "range": { "type": "number", "exclusiveMinimum": 0 },
+          "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
+          "mana_cost": { "$ref": "#/$defs/rank_linear_integer" },
+          "damage": {
+            "type": "object",
+            "required": ["min_base", "max_base", "min_per_rank", "max_per_rank"],
+            "additionalProperties": false,
+            "properties": {
+              "min_base": { "type": "integer", "minimum": 0 },
+              "max_base": { "type": "integer", "minimum": 0 },
+              "min_per_rank": { "type": "integer", "minimum": 0 },
+              "max_per_rank": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "cooldown": {
+            "type": "object",
+            "required": ["type", "multiplier"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "const": "attack_interval_multiplier" },
+              "multiplier": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "rank_linear_integer": {
+      "type": "object",
+      "required": ["base", "per_rank"],
+      "additionalProperties": false,
+      "properties": {
+        "base": { "type": "integer", "minimum": 0 },
+        "per_rank": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

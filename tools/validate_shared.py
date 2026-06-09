@@ -73,10 +73,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v4.schema.json"
+            return PROTOCOL / "session_snapshot.v5.schema.json"
         if name.startswith("state_delta"):
-            return PROTOCOL / "state_delta.v4.schema.json"
-        return PROTOCOL / "messages.v4.schema.json"
+            return PROTOCOL / "state_delta.v5.schema.json"
+        return PROTOCOL / "messages.v5.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 
@@ -126,6 +126,7 @@ def cross_checks(report: Report) -> None:
     print("[3] cross-consistency drift guards")
     combat = load(RULES / "combat.v0.json")
     character_progression = load(RULES / "character_progression.v0.json")
+    skills = load(RULES / "skills.v0.json")
     items = load(RULES / "items.v0.json")
     item_templates = load(RULES / "item_templates.v0.json")
     treasure_classes = load(RULES / "treasure_classes.v0.json")
@@ -157,6 +158,7 @@ def cross_checks(report: Report) -> None:
     monster_rarity_golden = load(GOLDEN / "monster_rarity.json")
     guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
     character_progression_golden = load(GOLDEN / "character_progression.json")
+    skill_magic_golden = load(GOLDEN / "skill_points_and_magic_bolt.json")
     combat_stat_effects_golden = load(GOLDEN / "combat_stat_effects.json")
     boss_floor_golden = load(GOLDEN / "boss_floor_-5.json")
     boss_pattern_golden = load(GOLDEN / "boss_pattern_timeline.json")
@@ -173,27 +175,40 @@ def cross_checks(report: Report) -> None:
         PROTOCOL / "session_snapshot.v4.schema.json",
         PROTOCOL / "state_delta.v4.schema.json",
     ]
+    v5_protocol_files = [
+        PROTOCOL / "envelope.v5.schema.json",
+        PROTOCOL / "messages.v5.schema.json",
+        PROTOCOL / "session_snapshot.v5.schema.json",
+        PROTOCOL / "state_delta.v5.schema.json",
+    ]
     missing_v4 = [str(path.relative_to(ROOT)) for path in v4_protocol_files if not path.exists()]
     if missing_v4:
         report.fail("protocol v4 schema set", f"missing {', '.join(missing_v4)}")
     else:
         report.ok("protocol v4 schema set is present")
+    missing_v5 = [str(path.relative_to(ROOT)) for path in v5_protocol_files if not path.exists()]
+    if missing_v5:
+        report.fail("protocol v5 schema set", f"missing {', '.join(missing_v5)}")
+    else:
+        report.ok("protocol v5 schema set is present")
 
     messages_v4 = load(PROTOCOL / "messages.v4.schema.json")
+    messages_v5 = load(PROTOCOL / "messages.v5.schema.json")
     actor_fields = {"player_id", "account_id", "character_id"}
-    intent_names = [name for name in messages_v4["$defs"] if name.endswith("_intent") or name == "client_ready"]
-    actor_leaks: list[str] = []
-    for name in sorted(intent_names):
-        intent_schema = messages_v4["$defs"][name]
-        if intent_schema.get("additionalProperties") is not False:
-            actor_leaks.append(f"{name}: additionalProperties must be false")
-        leaked = actor_fields.intersection(intent_schema.get("properties", {}))
-        if leaked:
-            actor_leaks.append(f"{name}: actor fields {sorted(leaked)}")
-    if actor_leaks:
-        report.fail("protocol v4 actor-free intents", "; ".join(actor_leaks))
-    else:
-        report.ok("protocol v4 intents are actor-free")
+    for protocol_version, messages_schema in (("v4", messages_v4), ("v5", messages_v5)):
+        intent_names = [name for name in messages_schema["$defs"] if name.endswith("_intent") or name == "client_ready"]
+        actor_leaks: list[str] = []
+        for name in sorted(intent_names):
+            intent_schema = messages_schema["$defs"][name]
+            if intent_schema.get("additionalProperties") is not False:
+                actor_leaks.append(f"{name}: additionalProperties must be false")
+            leaked = actor_fields.intersection(intent_schema.get("properties", {}))
+            if leaked:
+                actor_leaks.append(f"{name}: actor fields {sorted(leaked)}")
+        if actor_leaks:
+            report.fail(f"protocol {protocol_version} actor-free intents", "; ".join(actor_leaks))
+        else:
+            report.ok(f"protocol {protocol_version} intents are actor-free")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -280,6 +295,20 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("character_progression points_per_level is positive")
 
+    skill_point_rules = character_progression.get("skill_points", {})
+    if not skill_point_rules:
+        report.fail("character_progression skill_points", "must define v44 skill-point cadence")
+    elif int(skill_point_rules.get("points_per_grant", 0)) <= 0:
+        report.fail("character_progression skill_points.points_per_grant", "must be positive")
+    elif int(skill_point_rules.get("grant_every_levels", 0)) <= 0:
+        report.fail("character_progression skill_points.grant_every_levels", "must be positive")
+    elif int(skill_point_rules.get("first_grant_level", 0)) < 2:
+        report.fail("character_progression skill_points.first_grant_level", "must be at least 2")
+    elif int(skill_point_rules["first_grant_level"]) > int(character_progression["level_cap"]):
+        report.fail("character_progression skill_points.first_grant_level", "must be within level cap")
+    else:
+        report.ok("character_progression skill-point cadence is valid")
+
     curve = character_progression["experience_curve"]
     levels = curve["levels"]
     if curve.get("type") != "table":
@@ -362,7 +391,17 @@ def cross_checks(report: Report) -> None:
         }
         derived["damage_min"] += combat["player_damage"]["min"]
         derived["damage_max"] += combat["player_damage"]["max"]
+        attack_speed = max(float(combat["min_effective_attack_speed"]), min(float(combat["max_effective_attack_speed"]), float(derived["attack_speed"])))
+        derived["attack_speed"] = round(attack_speed, 6)
+        derived["attack_interval_ticks"] = int(math.ceil(int(combat["base_attack_interval_ticks"]) / attack_speed))
         return derived
+
+    def expected_skill_points_for_level(level: int) -> int:
+        cadence = character_progression["skill_points"]
+        if level < int(cadence["first_grant_level"]):
+            return 0
+        grants = ((level - int(cadence["first_grant_level"])) // int(cadence["grant_every_levels"])) + 1
+        return grants * int(cadence["points_per_grant"])
 
     if character_progression_golden["base_stats"] != progression_base_stats:
         report.fail("character_progression golden", "base_stats must match character_progression.v0.json")
@@ -402,6 +441,10 @@ def cross_checks(report: Report) -> None:
                 report.fail("character_progression golden", f"{case['name']}: unspent points mismatch")
                 failed_progression_golden = True
                 break
+            if expected["unspent_skill_points"] != expected_skill_points_for_level(level):
+                report.fail("character_progression golden", f"{case['name']}: unspent skill points mismatch")
+                failed_progression_golden = True
+                break
             if expected["base_stats"] != stats:
                 report.fail("character_progression golden", f"{case['name']}: base stats mismatch")
                 failed_progression_golden = True
@@ -417,6 +460,36 @@ def cross_checks(report: Report) -> None:
                 break
         if not failed_progression_golden:
             report.ok("character_progression golden matches rules and formulas")
+
+    if skill_magic_golden["progression"]["points_per_level"] != character_progression["points_per_level"]:
+        report.fail("skill_points golden progression", "points_per_level must match character_progression.v0.json")
+    elif skill_magic_golden["progression"]["skill_points"] != skill_point_rules:
+        report.fail("skill_points golden progression", "skill point cadence must match character_progression.v0.json")
+    else:
+        failed_skill_progression = False
+
+        def skill_points_for_level(level: int) -> int:
+            first = int(skill_point_rules["first_grant_level"])
+            every = int(skill_point_rules["grant_every_levels"])
+            points = int(skill_point_rules["points_per_grant"])
+            if level < first:
+                return 0
+            return ((level - first) // every + 1) * points
+
+        for case in skill_magic_golden["progression"]["level_cases"]:
+            level = int(case["level"])
+            expected_stat_points = max(0, level - 1) * int(character_progression["points_per_level"])
+            expected_skill_points = skill_points_for_level(level)
+            if int(case["expected_unspent_stat_points"]) != expected_stat_points:
+                report.fail("skill_points golden progression", f"level {level}: stat points mismatch")
+                failed_skill_progression = True
+                break
+            if int(case["expected_unspent_skill_points"]) != expected_skill_points:
+                report.fail("skill_points golden progression", f"level {level}: skill points mismatch")
+                failed_skill_progression = True
+                break
+        if not failed_skill_progression:
+            report.ok("skill_points golden progression cadence matches rules")
 
     rmin = retaliation_golden["retaliation_damage"]["min"]
     rmax = retaliation_golden["retaliation_damage"]["max"]
@@ -472,6 +545,17 @@ def cross_checks(report: Report) -> None:
     for item_id, item in items["items"].items():
         dmg = item.get("damage")
         reach = item.get("reach")
+        attack_speed = item.get("attack_speed")
+        is_weapon_item = item.get("equippable") and item.get("slot") in hand_slots and (dmg is not None or reach is not None or item.get("attack_mode"))
+        if is_weapon_item:
+            if not isinstance(attack_speed, (int, float)):
+                report.fail("item weapon attack_speed", f"{item_id}: weapon must declare attack_speed")
+            elif attack_speed <= 0:
+                report.fail("item weapon attack_speed", f"{item_id}: attack_speed must be positive")
+            else:
+                report.ok(f"item {item_id} weapon attack_speed is valid")
+        elif attack_speed is not None:
+            report.fail("item attack_speed eligibility", f"{item_id}: attack_speed is only valid on weapons")
         if dmg is not None:
             if not item.get("equippable") or item.get("slot") not in hand_slots:
                 report.fail("item damage eligibility", f"{item_id}: damage is only valid on equippable hand items")
@@ -502,7 +586,7 @@ def cross_checks(report: Report) -> None:
         elif projectile_speed is not None:
             report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -525,6 +609,9 @@ def cross_checks(report: Report) -> None:
         if slot in hand_slots and item_type != "shield":
             if attack_mode not in {"melee", "ranged"}:
                 report.fail("item template attack_mode", f"{template_id}: hand weapons need attack_mode")
+                continue
+            if not isinstance(template.get("attack_speed"), (int, float)) or template.get("attack_speed", 0) <= 0:
+                report.fail("item template attack_speed", f"{template_id}: weapons must declare positive attack_speed")
                 continue
             if template.get("reach", 0) <= 0:
                 report.fail("item template reach", f"{template_id}: weapon reach must be positive")
@@ -558,6 +645,14 @@ def cross_checks(report: Report) -> None:
         if invalid_base_stats:
             report.fail("item template base_stats", f"{template_id}: unsupported stat(s) {invalid_base_stats}")
             continue
+        invalid_base_values = [
+            stat for stat, value in base_stats.items()
+            if (stat == "attack_speed_percent" and not -75 <= int(value) <= 100)
+            or (stat != "attack_speed_percent" and int(value) < 0)
+        ]
+        if invalid_base_values:
+            report.fail("item template base_stats", f"{template_id}: invalid value(s) for {invalid_base_values}")
+            continue
         if "damage_min" in base_stats and "damage_max" in base_stats and base_stats["damage_max"] < base_stats["damage_min"]:
             report.fail("item template base_stats", f"{template_id}: damage_max must be >= damage_min")
             continue
@@ -568,6 +663,14 @@ def cross_checks(report: Report) -> None:
             seen_roll_stats.add(stat)
             if stat not in valid_roll_stats:
                 report.fail("item template rollable stat", f"{template_id}: unsupported stat {stat}")
+                failed_roll = True
+                break
+            if stat == "attack_speed_percent" and (roll["min"] < -50 or roll["max"] > 50):
+                report.fail("item template rollable stat", f"{template_id}.{stat}: min/max must be within -50..50")
+                failed_roll = True
+                break
+            if stat != "attack_speed_percent" and roll["min"] < 0:
+                report.fail("item template rollable stat", f"{template_id}.{stat}: min must be non-negative")
                 failed_roll = True
                 break
             if roll["max"] < roll["min"]:
@@ -588,6 +691,21 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"item template {template_id} roll ranges are valid")
     report.ok("item template stat keys are restricted to supported rolls")
+
+    blade_speed = item_templates["templates"].get("cave_blade", {}).get("attack_speed")
+    greatsword_speed = item_templates["templates"].get("cave_greatsword", {}).get("attack_speed")
+    training_bow_speed = items["items"].get("training_bow", {}).get("attack_speed")
+    cave_bow_speed = item_templates["templates"].get("cave_bow", {}).get("attack_speed")
+    if not isinstance(blade_speed, (int, float)) or not isinstance(greatsword_speed, (int, float)):
+        report.fail("weapon attack_speed relationships", "cave_blade and cave_greatsword speeds are required")
+    elif float(greatsword_speed) > float(blade_speed) * 0.70:
+        report.fail("weapon attack_speed relationships", "cave_greatsword must be at least 30% slower than cave_blade")
+    elif not isinstance(training_bow_speed, (int, float)) or not isinstance(cave_bow_speed, (int, float)):
+        report.fail("weapon attack_speed relationships", "training_bow and cave_bow speeds are required")
+    elif float(training_bow_speed) <= float(cave_bow_speed):
+        report.fail("weapon attack_speed relationships", "training_bow short-bow proof must be faster than cave_bow")
+    else:
+        report.ok("weapon attack_speed relationships match v44")
 
     req_template_id = str(equipment_requirements_golden["template_id"])
     req_template = item_templates["templates"].get(req_template_id)
@@ -751,6 +869,99 @@ def cross_checks(report: Report) -> None:
         report.fail("combat block_cap_percent", "must not exceed 75")
     else:
         report.ok("combat block_cap_percent is within cap")
+    base_attack_interval = int(combat.get("base_attack_interval_ticks", 0))
+    min_attack_speed = float(combat.get("min_effective_attack_speed", 0))
+    max_attack_speed = float(combat.get("max_effective_attack_speed", 0))
+    if base_attack_interval <= 0:
+        report.fail("combat base_attack_interval_ticks", "must be positive")
+    elif min_attack_speed <= 0 or max_attack_speed <= 0 or max_attack_speed < min_attack_speed:
+        report.fail("combat attack speed clamps", "min/max effective attack speed are invalid")
+    else:
+        report.ok("combat attack interval and speed clamps are valid")
+
+    magic_bolt = skills.get("skills", {}).get("magic_bolt")
+    if magic_bolt is None:
+        report.fail("skills magic_bolt", "missing magic_bolt")
+    elif magic_bolt.get("kind") != "projectile":
+        report.fail("skills magic_bolt", "kind must be projectile")
+    elif int(magic_bolt.get("max_rank", 0)) <= 0:
+        report.fail("skills magic_bolt", "max_rank must be positive")
+    elif magic_bolt.get("targeting") != "direction_or_target":
+        report.fail("skills magic_bolt", "targeting must be direction_or_target")
+    elif float(magic_bolt.get("range", 0)) <= 0 or float(magic_bolt.get("projectile_speed", 0)) <= 0:
+        report.fail("skills magic_bolt", "range/projectile_speed must be positive")
+    elif magic_bolt.get("cooldown", {}).get("type") != "attack_interval_multiplier":
+        report.fail("skills magic_bolt", "cooldown type must be attack_interval_multiplier")
+    elif float(magic_bolt.get("cooldown", {}).get("multiplier", 0)) <= 0:
+        report.fail("skills magic_bolt", "cooldown multiplier must be positive")
+    else:
+        dmg = magic_bolt["damage"]
+        rank_one_min = int(dmg["min_base"])
+        rank_one_max = int(dmg["max_base"])
+        rank_max_min = rank_one_min + int(dmg["min_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
+        rank_max_max = rank_one_max + int(dmg["max_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
+        if rank_one_max < rank_one_min or rank_max_max < rank_max_min:
+            report.fail("skills magic_bolt damage", "damage max must be >= min at every rank")
+        else:
+            report.ok("skills magic_bolt declarative tuning is valid")
+
+    failed_skill_magic = False
+    if magic_bolt is None:
+        failed_skill_magic = True
+    elif skill_magic_golden["skill"]["skill_id"] != "magic_bolt":
+        report.fail("skill_points golden skill", "skill_id must be magic_bolt")
+        failed_skill_magic = True
+    elif int(skill_magic_golden["skill"]["max_rank"]) != int(magic_bolt["max_rank"]):
+        report.fail("skill_points golden skill", "max_rank must match skills.v0.json")
+        failed_skill_magic = True
+    elif int(skill_magic_golden["attack_speed"]["base_attack_interval_ticks"]) != base_attack_interval:
+        report.fail("skill_points golden attack_speed", "base interval must match combat.v0.json")
+        failed_skill_magic = True
+    elif not math.isclose(float(skill_magic_golden["attack_speed"]["min_effective_attack_speed"]), min_attack_speed, rel_tol=0, abs_tol=0.000001):
+        report.fail("skill_points golden attack_speed", "min clamp must match combat.v0.json")
+        failed_skill_magic = True
+    elif not math.isclose(float(skill_magic_golden["attack_speed"]["max_effective_attack_speed"]), max_attack_speed, rel_tol=0, abs_tol=0.000001):
+        report.fail("skill_points golden attack_speed", "max clamp must match combat.v0.json")
+        failed_skill_magic = True
+    if not failed_skill_magic and magic_bolt is not None:
+        cooldown_multiplier = float(magic_bolt["cooldown"]["multiplier"])
+        for case in skill_magic_golden["attack_speed"]["cases"]:
+            raw_speed = float(case["dex_attack_speed"]) * float(case["weapon_attack_speed"]) * (1 + int(case["item_attack_speed_percent"]) / 100.0)
+            effective_speed = min(max(raw_speed, min_attack_speed), max_attack_speed)
+            attack_interval = int(math.ceil(base_attack_interval / effective_speed))
+            cooldown_ticks = int(math.ceil(attack_interval * cooldown_multiplier))
+            if not math.isclose(float(case["expected_effective_attack_speed"]), round(effective_speed, 6), rel_tol=0, abs_tol=0.000001):
+                report.fail("skill_points golden attack_speed", f"{case['name']}: effective speed mismatch")
+                failed_skill_magic = True
+                break
+            if int(case["expected_attack_interval_ticks"]) != attack_interval:
+                report.fail("skill_points golden attack_speed", f"{case['name']}: attack interval mismatch")
+                failed_skill_magic = True
+                break
+            if int(case["expected_magic_bolt_cooldown_ticks"]) != cooldown_ticks:
+                report.fail("skill_points golden attack_speed", f"{case['name']}: cooldown mismatch")
+                failed_skill_magic = True
+                break
+    if not failed_skill_magic and magic_bolt is not None:
+        cost = magic_bolt["mana_cost"]
+        dmg = magic_bolt["damage"]
+        for case in skill_magic_golden["skill"]["rank_cases"]:
+            rank = int(case["rank"])
+            if rank < 1 or rank > int(magic_bolt["max_rank"]):
+                report.fail("skill_points golden skill", f"rank {rank}: outside max_rank")
+                failed_skill_magic = True
+                break
+            mana_cost = int(cost["base"]) + int(cost["per_rank"]) * (rank - 1)
+            damage = {
+                "min": int(dmg["min_base"]) + int(dmg["min_per_rank"]) * (rank - 1),
+                "max": int(dmg["max_base"]) + int(dmg["max_per_rank"]) * (rank - 1),
+            }
+            if int(case["mana_cost"]) != mana_cost or case["damage"] != damage:
+                report.fail("skill_points golden skill", f"rank {rank}: mana/damage mismatch")
+                failed_skill_magic = True
+                break
+        if not failed_skill_magic:
+            report.ok("skill_points golden matches combat and skills rules")
 
     if navigation.get("cell_size") != 1.0:
         report.fail("navigation cell_size", "must be 1.0 for v11 moveSpeed parity")
@@ -1647,7 +1858,7 @@ def cross_checks(report: Report) -> None:
         if not failed_offers:
             report.ok("shop_offers golden matches deterministic catalog")
 
-        stat_order = ["damage_min", "damage_max", "armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"]
+        stat_order = ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "hotbar_slots", "inventory_rows"]
 
         def comparison_deltas(offered: dict, equipped: dict) -> list[dict]:
             out = []

@@ -10,6 +10,7 @@ const DERIVED_LABELS := {
 	"damage_max": "Damage max",
 	"armor": "Armor",
 	"attack_speed": "Attack speed",
+	"attack_interval_ticks": "Attack interval",
 	"hit_chance": "Hit chance",
 	"crit_chance": "Crit chance",
 	"crit_damage": "Crit damage",

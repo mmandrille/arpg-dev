@@ -29,6 +29,7 @@
             "uniqueItems": true
           },
           "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
+          "attack_speed": { "type": "number", "exclusiveMinimum": 0 },
           "damage": { "$ref": "#/$defs/damage_range" },
           "reach": { "type": "number", "exclusiveMinimum": 0 },
           "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
@@ -61,6 +62,16 @@
           },
           {
             "if": { "required": ["damage"] },
+            "then": {
+              "properties": {
+                "equippable": { "const": true },
+                "slot": { "enum": ["main_hand", "off_hand"] }
+              },
+              "required": ["equippable", "slot"]
+            }
+          },
+          {
+            "if": { "required": ["attack_speed"] },
             "then": {
               "properties": {
                 "equippable": { "const": true },

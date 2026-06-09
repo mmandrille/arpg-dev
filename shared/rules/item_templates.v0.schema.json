@@ -46,6 +46,7 @@
           },
           "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
           "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
+          "attack_speed": { "type": "number", "exclusiveMinimum": 0 },
           "reach": { "type": "number", "exclusiveMinimum": 0 },
           "requirements": { "$ref": "#/$defs/requirements" },
           "base_stats": { "$ref": "#/$defs/stats" },
@@ -84,6 +85,7 @@
         "max_hp": { "type": "integer", "minimum": 0 },
         "armor": { "type": "integer", "minimum": 0 },
         "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "attack_speed_percent": { "type": "integer", "minimum": -75, "maximum": 100 },
         "hotbar_slots": { "type": "integer", "minimum": 2, "maximum": 10 },
         "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
@@ -93,11 +95,31 @@
       "required": ["stat", "min", "max", "weight"],
       "additionalProperties": false,
       "properties": {
-        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "max_hp", "armor", "block_percent", "hotbar_slots", "inventory_rows"] },
-        "min": { "type": "integer", "minimum": 0 },
-        "max": { "type": "integer", "minimum": 0 },
+        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent", "hotbar_slots", "inventory_rows"] },
+        "min": { "type": "integer" },
+        "max": { "type": "integer" },
         "weight": { "type": "integer", "minimum": 1 }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "stat": { "const": "attack_speed_percent" } },
+            "required": ["stat"]
+          },
+          "then": {
+            "properties": {
+              "min": { "minimum": -50, "maximum": 50 },
+              "max": { "minimum": -50, "maximum": 50 }
+            }
+          },
+          "else": {
+            "properties": {
+              "min": { "minimum": 0 },
+              "max": { "minimum": 0 }
+            }
+          }
+        }
+      ]
     }
   }
 }

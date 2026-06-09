@@ -797,3 +797,42 @@ def test_structured_character_progression_stat_breakdowns():
             ],
         }
     ], [], [], {}, None, "test", character_progression=progression)
+
+
+def test_skill_progression_assertions_for_runtime_and_state_payloads():
+    progression = {
+        "unspent_skill_points": 0,
+        "skills": [
+            {"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": False},
+        ],
+    }
+    assertion = {"type": "skill_progression", "unspent_skill_points": 0, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": False}
+
+    state = RuntimeState(skill_progression=progression)
+    run_runtime_assertions([assertion], state, "unit runtime")
+    run_assertions([assertion], [], [], {}, None, "unit state", skill_progression=progression)
+
+
+def test_skill_cooldown_assertions_support_ranges_and_absence():
+    cooldowns = [{"skill_id": "magic_bolt", "remaining_ticks": 18, "total_ticks": 40}]
+    assertion = {"type": "skill_cooldown", "skill_id": "magic_bolt", "remaining_ticks": {"between": [1, 40]}, "total_ticks": 40}
+
+    state = RuntimeState(skill_cooldowns=list(cooldowns))
+    run_runtime_assertions([assertion], state, "unit runtime")
+    run_assertions([assertion], [], [], {}, None, "unit state", skill_cooldowns=list(cooldowns))
+    run_assertions([{"type": "skill_cooldown", "skill_id": "magic_bolt", "absent": True}], [], [], {}, None, "unit state", skill_cooldowns=[])
+
+
+def test_state_delta_ingest_decays_skill_cooldowns_by_tick_delta():
+    state = RuntimeState(last_tick=10, current_level=-1, skill_cooldowns=[{"skill_id": "magic_bolt", "remaining_ticks": 5, "total_ticks": 40}])
+
+    ingest_message(
+        {
+            "type": "state_delta",
+            "tick": 12,
+            "payload": {"server_tick": 12, "level": -1, "changes": [], "events": []},
+        },
+        state,
+    )
+
+    assert state.skill_cooldowns == [{"skill_id": "magic_bolt", "remaining_ticks": 3, "total_ticks": 40}]

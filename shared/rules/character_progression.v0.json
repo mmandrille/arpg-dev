@@ -6,7 +6,12 @@
     "vit": 5,
     "magic": 5
   },
-  "points_per_level": 5,
+  "points_per_level": 3,
+  "skill_points": {
+    "points_per_grant": 1,
+    "grant_every_levels": 3,
+    "first_grant_level": 3
+  },
   "level_cap": 20,
   "experience_curve": {
     "type": "table",

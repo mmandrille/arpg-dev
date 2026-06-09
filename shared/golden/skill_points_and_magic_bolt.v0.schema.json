@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/skill_points_and_magic_bolt.v0.schema.json",
+  "title": "Golden: skill points and magic bolt (v0)",
+  "type": "object",
+  "required": ["description", "progression", "attack_speed", "skill"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "progression": {
+      "type": "object",
+      "required": ["points_per_level", "skill_points", "level_cases"],
+      "additionalProperties": false,
+      "properties": {
+        "points_per_level": { "type": "integer", "minimum": 1 },
+        "skill_points": {
+          "type": "object",
+          "required": ["points_per_grant", "grant_every_levels", "first_grant_level"],
+          "additionalProperties": false,
+          "properties": {
+            "points_per_grant": { "type": "integer", "minimum": 1 },
+            "grant_every_levels": { "type": "integer", "minimum": 1 },
+            "first_grant_level": { "type": "integer", "minimum": 2 }
+          }
+        },
+        "level_cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["level", "expected_unspent_stat_points", "expected_unspent_skill_points"],
+            "additionalProperties": false,
+            "properties": {
+              "level": { "type": "integer", "minimum": 1 },
+              "expected_unspent_stat_points": { "type": "integer", "minimum": 0 },
+              "expected_unspent_skill_points": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "attack_speed": {
+      "type": "object",
+      "required": ["base_attack_interval_ticks", "min_effective_attack_speed", "max_effective_attack_speed", "cases"],
+      "additionalProperties": false,
+      "properties": {
+        "base_attack_interval_ticks": { "type": "integer", "minimum": 1 },
+        "min_effective_attack_speed": { "type": "number", "exclusiveMinimum": 0 },
+        "max_effective_attack_speed": { "type": "number", "exclusiveMinimum": 0 },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "dex_attack_speed", "weapon_attack_speed", "item_attack_speed_percent", "expected_effective_attack_speed", "expected_attack_interval_ticks", "expected_magic_bolt_cooldown_ticks"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "dex_attack_speed": { "type": "number", "exclusiveMinimum": 0 },
+              "weapon_attack_speed": { "type": "number", "exclusiveMinimum": 0 },
+              "item_attack_speed_percent": { "type": "integer" },
+              "expected_effective_attack_speed": { "type": "number", "exclusiveMinimum": 0 },
+              "expected_attack_interval_ticks": { "type": "integer", "minimum": 1 },
+              "expected_magic_bolt_cooldown_ticks": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "skill": {
+      "type": "object",
+      "required": ["skill_id", "max_rank", "rank_cases"],
+      "additionalProperties": false,
+      "properties": {
+        "skill_id": { "type": "string", "minLength": 1 },
+        "max_rank": { "type": "integer", "minimum": 1 },
+        "rank_cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["rank", "mana_cost", "damage"],
+            "additionalProperties": false,
+            "properties": {
+              "rank": { "type": "integer", "minimum": 1 },
+              "mana_cost": { "type": "integer", "minimum": 0 },
+              "damage": {
+                "type": "object",
+                "required": ["min", "max"],
+                "additionalProperties": false,
+                "properties": {
+                  "min": { "type": "integer", "minimum": 0 },
+                  "max": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

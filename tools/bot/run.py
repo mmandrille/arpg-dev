@@ -118,6 +118,8 @@ class RuntimeState:
     discovered_teleporters: dict[int, bool] = field(default_factory=dict)
     used_teleporter_positions: dict[int, dict[str, float]] = field(default_factory=dict)
     character_progression: dict[str, Any] = field(default_factory=dict)
+    skill_progression: dict[str, Any] = field(default_factory=dict)
+    skill_cooldowns: list[dict[str, Any]] = field(default_factory=list)
     shop_offers: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     shop_sell_appraisals: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     shop_events: list[dict[str, Any]] = field(default_factory=list)
@@ -382,7 +384,11 @@ async def execute_step(
     action = step.get("action")
     if action == "wait_ticks":
         ticks = int(step["ticks"])
-        for _ in range(ticks):
+        target_tick = state.last_tick + ticks
+        deadline = loop.time() + float(step.get("timeout_s", SLICE_TIMEOUT_S))
+        pulse_count = 0
+        while state.last_tick < target_tick:
+            before = state.last_tick
             env = make_envelope(
                 "move_intent",
                 session_id,
@@ -391,6 +397,25 @@ async def execute_step(
             )
             await ws.send(json.dumps(env))
             await wait_for_accept(ws, state, env["message_id"], loop)
+            pulse_deadline = min(deadline, loop.time() + 0.5)
+            while state.last_tick <= before and loop.time() <= pulse_deadline:
+                await pump_one(ws, state, timeout=0.1)
+            if state.last_tick <= before and loop.time() <= deadline:
+                direction = {"x": 1 if pulse_count % 2 == 0 else -1, "y": 0}
+                pulse_count += 1
+                env = make_envelope(
+                    "move_intent",
+                    session_id,
+                    state.last_tick,
+                    {"direction": direction, "duration_ticks": 1},
+                )
+                await ws.send(json.dumps(env))
+                await wait_for_accept(ws, state, env["message_id"], loop)
+                pulse_deadline = min(deadline, loop.time() + 0.5)
+                while state.last_tick <= before and loop.time() <= pulse_deadline:
+                    await pump_one(ws, state, timeout=0.1)
+            if loop.time() > deadline:
+                raise TimeoutError(f"stalled waiting for tick {target_tick}")
         return
 
     if action == "wait_until_assertion":
@@ -1157,6 +1182,66 @@ async def execute_step(
             await wait_for_character_progression(ws, state, expected, loop)
         return
 
+    if action == "allocate_skill_point":
+        skill_id = str(step.get("skill_id", "magic_bolt"))
+        env = make_envelope(
+            "allocate_skill_point_intent",
+            session_id,
+            state.last_tick,
+            {"skill_id": skill_id},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        expected = step.get("expect_skill_progression")
+        if isinstance(expected, dict):
+            await wait_for_skill_progression(ws, state, expected, loop)
+        return
+
+    if action == "cast_skill":
+        skill_id = str(step.get("skill_id", "magic_bolt"))
+        payload: dict[str, Any] = {"skill_id": skill_id}
+        if step.get("target_id") is not None:
+            payload["target_id"] = str(step["target_id"])
+        elif step.get("monster_def_id") is not None:
+            target = resolve_target(state, step)
+            payload["target_id"] = str(target["id"])
+        else:
+            direction = step.get("direction", {"x": 1, "y": 0})
+            payload["direction"] = {"x": float(direction.get("x", 0)), "y": float(direction.get("y", 0))}
+        env = make_envelope("cast_skill_intent", session_id, state.last_tick, payload)
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        if step.get("event_type"):
+            await wait_for_event(ws, state, str(step["event_type"]), loop)
+        expected = step.get("expect_skill_cooldown")
+        if isinstance(expected, dict):
+            await wait_for_skill_cooldown(ws, state, expected, loop)
+        return
+
+    if action == "assert_skill_progression":
+        assert_skill_progression(state.skill_progression, step, "runtime protocol")
+        return
+
+    if action == "wait_skill_progression":
+        await wait_for_skill_progression(ws, state, step, loop)
+        return
+
+    if action == "assert_skill_cooldown":
+        assert_skill_cooldown(state.skill_cooldowns, step, "runtime protocol")
+        return
+
+    if action == "wait_skill_cooldown":
+        await wait_for_skill_cooldown(ws, state, step, loop)
+        return
+
     if action == "assert_character_progression":
         assert_character_progression(state.character_progression, step, "runtime protocol")
         return
@@ -1705,6 +1790,32 @@ async def wait_for_character_progression(ws, state: RuntimeState, expected: dict
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_skill_progression(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
+    deadline = loop.time() + float(expected.get("timeout_s", SLICE_TIMEOUT_S))
+    while True:
+        try:
+            assert_skill_progression(state.skill_progression, expected, "runtime protocol")
+            return
+        except AssertionError:
+            pass
+        if loop.time() > deadline:
+            assert_skill_progression(state.skill_progression, expected, "runtime protocol")
+        await pump_one(ws, state, timeout=0.1)
+
+
+async def wait_for_skill_cooldown(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
+    deadline = loop.time() + float(expected.get("timeout_s", SLICE_TIMEOUT_S))
+    while True:
+        try:
+            assert_skill_cooldown(state.skill_cooldowns, expected, "runtime protocol")
+            return
+        except AssertionError:
+            pass
+        if loop.time() > deadline:
+            assert_skill_cooldown(state.skill_cooldowns, expected, "runtime protocol")
+        await pump_one(ws, state, timeout=0.1)
+
+
 async def wait_for_player_position(
     ws,
     state: RuntimeState,
@@ -1734,7 +1845,6 @@ async def pump_one(ws, state: RuntimeState, timeout: float) -> None:
 
 
 def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
-    state.last_tick = max(state.last_tick, int(m.get("tick", 0)))
     if m.get("type") == "session_snapshot":
         ingest_snapshot(m["payload"], state)
         return
@@ -1756,10 +1866,14 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             raise AssertionError(f"action_intent for {monster_def_id} was rejected: {reason}")
         return
     if m.get("type") != "state_delta":
+        state.last_tick = max(state.last_tick, int(m.get("tick", 0)))
         return
 
     p = m["payload"]
-    state.last_tick = max(state.last_tick, int(p.get("server_tick", state.last_tick)))
+    previous_tick = state.last_tick
+    next_tick = max(state.last_tick, int(m.get("tick", 0)), int(p.get("server_tick", state.last_tick)))
+    decay_skill_cooldowns(state, next_tick - previous_tick)
+    state.last_tick = next_tick
     delta_level = int(p.get("level", state.current_level))
     state.last_delta_level = delta_level
     state.visited_levels.add(delta_level)
@@ -1857,6 +1971,10 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.character_progression = dict(c.get("character_progression") or {})
             if "gold" in state.character_progression:
                 state.gold = int(state.character_progression["gold"])
+        elif c["op"] == "skill_progression_update":
+            state.skill_progression = dict(c.get("skill_progression") or {})
+        elif c["op"] == "skill_cooldown_update":
+            state.skill_cooldowns = [dict(row) for row in c.get("skill_cooldowns", [])]
     if state.pending_level_load is not None and delta_level == state.pending_level_load and find_player(state) is not None:
         state.pending_level_load = None
     update_runtime_distances(state)
@@ -1879,6 +1997,8 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.inventory_rows = int(payload.get("inventory_rows", 3))
     state.inventory_capacity = int(payload.get("inventory_capacity", state.inventory_rows * 5))
     state.character_progression = dict(payload.get("character_progression", {}))
+    state.skill_progression = dict(payload.get("skill_progression", {}))
+    state.skill_cooldowns = [dict(row) for row in payload.get("skill_cooldowns", [])]
     state.gold = int(payload.get("gold", state.character_progression.get("gold", 0)))
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
@@ -1906,6 +2026,20 @@ def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any) -
     while len(state.hotbar) <= slot_index:
         state.hotbar.append({"slot_index": len(state.hotbar), "item_instance_id": None})
     state.hotbar[slot_index] = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+
+
+def decay_skill_cooldowns(state: RuntimeState, ticks: int) -> None:
+    if ticks <= 0 or not state.skill_cooldowns:
+        return
+    next_rows: list[dict[str, Any]] = []
+    for row in state.skill_cooldowns:
+        remaining = max(0, int(row.get("remaining_ticks", 0)) - ticks)
+        if remaining <= 0:
+            continue
+        updated = dict(row)
+        updated["remaining_ticks"] = remaining
+        next_rows.append(updated)
+    state.skill_cooldowns = next_rows
 
 
 def hotbar_item_id(hotbar: list[dict[str, Any]], slot_index: int) -> str | None:
@@ -2263,6 +2397,8 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             inventory_rows=int(payload.get("inventory_rows", 3)),
             inventory_capacity=int(payload.get("inventory_capacity", int(payload.get("inventory_rows", 3)) * 5)),
             gold=int(payload.get("gold", 0)),
+            skill_progression=payload.get("skill_progression", {}),
+            skill_cooldowns=payload.get("skill_cooldowns", []),
         )
         log("reconnect snapshot restored expected scenario state")
 
@@ -2581,6 +2717,45 @@ def assert_character_progression(progression: dict[str, Any], assertion: dict[st
         assert_stat_breakdowns(progression.get("stat_breakdowns", []), expected_breakdowns, where)
 
 
+def assert_skill_progression(progression: dict[str, Any], assertion: dict[str, Any], where: str) -> None:
+    if not progression:
+        raise AssertionError(f"{where}: missing skill_progression")
+    if "unspent_skill_points" in assertion:
+        want = int(assertion["unspent_skill_points"])
+        got = int(progression.get("unspent_skill_points", -1))
+        if got != want:
+            raise AssertionError(f"{where}: skill_progression.unspent_skill_points {got} != {want}: {progression}")
+    skill_id = str(assertion.get("skill_id", "magic_bolt"))
+    skill = next((row for row in progression.get("skills", []) if str(row.get("skill_id")) == skill_id), None)
+    if skill is None:
+        raise AssertionError(f"{where}: missing skill {skill_id}: {progression}")
+    for key in ("rank", "max_rank"):
+        if key in assertion:
+            want = int(assertion[key])
+            got = int(skill.get(key, -1))
+            if got != want:
+                raise AssertionError(f"{where}: skill {skill_id}.{key} {got} != {want}: {progression}")
+    if "can_spend" in assertion:
+        want = bool(assertion["can_spend"])
+        got = bool(skill.get("can_spend", False))
+        if got != want:
+            raise AssertionError(f"{where}: skill {skill_id}.can_spend {got} != {want}: {progression}")
+
+
+def assert_skill_cooldown(cooldowns: list[dict[str, Any]], assertion: dict[str, Any], where: str) -> None:
+    skill_id = str(assertion.get("skill_id", "magic_bolt"))
+    row = next((cooldown for cooldown in cooldowns if str(cooldown.get("skill_id")) == skill_id), None)
+    if bool(assertion.get("absent", False)):
+        if row is not None:
+            raise AssertionError(f"{where}: cooldown {skill_id} present, want absent: {cooldowns}")
+        return
+    if row is None:
+        raise AssertionError(f"{where}: missing cooldown {skill_id}: {cooldowns}")
+    for field in ("remaining_ticks", "total_ticks"):
+        if field in assertion:
+            assert_count_matches(int(row.get(field, -1)), assertion[field] if isinstance(assertion[field], dict) else {"equals": int(assertion[field])}, f"{where}: cooldown {skill_id}.{field}")
+
+
 def assert_stat_breakdowns(actual: Any, expected_rows: list[dict[str, Any]], where: str) -> None:
     if not isinstance(actual, list):
         raise AssertionError(f"{where}: stat_breakdowns is not a list: {actual}")
@@ -2633,6 +2808,8 @@ def run_assertions(
     inventory_rows: int | None = None,
     inventory_capacity: int | None = None,
     gold: int | None = None,
+    skill_progression: dict[str, Any] | None = None,
+    skill_cooldowns: list[dict[str, Any]] | None = None,
 ) -> None:
     for assertion in assertions:
         if isinstance(assertion, str):
@@ -2751,6 +2928,10 @@ def run_assertions(
             assert_player_max_hp_equals(entities, int(assertion["equals"]), where)
         elif typ == "character_progression":
             assert_character_progression(character_progression or {}, assertion, where)
+        elif typ == "skill_progression":
+            assert_skill_progression(skill_progression or {}, assertion, where)
+        elif typ == "skill_cooldown":
+            assert_skill_cooldown(skill_cooldowns or [], assertion, where)
         elif typ == "current_level":
             if current_level is None:
                 raise AssertionError(f"{where}: current_level unavailable")
@@ -3028,6 +3209,12 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "character_progression":
             assert_character_progression(state.character_progression, assertion, where)
             continue
+        if typ == "skill_progression":
+            assert_skill_progression(state.skill_progression, assertion, where)
+            continue
+        if typ == "skill_cooldown":
+            assert_skill_cooldown(state.skill_cooldowns, assertion, where)
+            continue
         if typ == "player_max_hp_equals":
             player = find_player(state)
             if player is None:
@@ -3129,6 +3316,8 @@ def run_verified_session(
         inventory_rows=int(state.get("inventory_rows", 3)),
         inventory_capacity=int(state.get("inventory_capacity", int(state.get("inventory_rows", 3)) * 5)),
         gold=int(state.get("gold", 0)),
+        skill_progression=state.get("skill_progression", {}),
+        skill_cooldowns=state.get("skill_cooldowns", []),
     )
     log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 

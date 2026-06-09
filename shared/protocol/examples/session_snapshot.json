@@ -71,6 +71,7 @@
       "damage_max": 0,
       "armor": 1,
       "attack_speed": 1.025,
+      "attack_interval_ticks": 20,
       "hit_chance": 1,
       "crit_chance": 0.06,
       "crit_damage": 1.525,
@@ -103,5 +104,14 @@
       }
     ]
   },
+  "skill_progression": {
+    "unspent_skill_points": 1,
+    "skills": [
+      { "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false }
+    ]
+  },
+  "skill_cooldowns": [
+    { "skill_id": "magic_bolt", "remaining_ticks": 12, "total_ticks": 40 }
+  ],
   "recent_events": []
 }

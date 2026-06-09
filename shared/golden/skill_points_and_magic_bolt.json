@@ -1,0 +1,69 @@
+{
+  "description": "Pinned v44 stat/skill point cadence, attack-speed cooldown foundation, and Magic Bolt rank scaling.",
+  "progression": {
+    "points_per_level": 3,
+    "skill_points": {
+      "points_per_grant": 1,
+      "grant_every_levels": 3,
+      "first_grant_level": 3
+    },
+    "level_cases": [
+      { "level": 1, "expected_unspent_stat_points": 0, "expected_unspent_skill_points": 0 },
+      { "level": 2, "expected_unspent_stat_points": 3, "expected_unspent_skill_points": 0 },
+      { "level": 3, "expected_unspent_stat_points": 6, "expected_unspent_skill_points": 1 },
+      { "level": 6, "expected_unspent_stat_points": 15, "expected_unspent_skill_points": 2 }
+    ]
+  },
+  "attack_speed": {
+    "base_attack_interval_ticks": 20,
+    "min_effective_attack_speed": 0.25,
+    "max_effective_attack_speed": 3.0,
+    "cases": [
+      {
+        "name": "baseline_rusty_sword",
+        "dex_attack_speed": 1.025,
+        "weapon_attack_speed": 1.0,
+        "item_attack_speed_percent": 0,
+        "expected_effective_attack_speed": 1.025,
+        "expected_attack_interval_ticks": 20,
+        "expected_magic_bolt_cooldown_ticks": 40
+      },
+      {
+        "name": "greatsword_slow",
+        "dex_attack_speed": 1.025,
+        "weapon_attack_speed": 0.70,
+        "item_attack_speed_percent": 0,
+        "expected_effective_attack_speed": 0.7175,
+        "expected_attack_interval_ticks": 28,
+        "expected_magic_bolt_cooldown_ticks": 56
+      },
+      {
+        "name": "positive_speed_item",
+        "dex_attack_speed": 1.025,
+        "weapon_attack_speed": 1.0,
+        "item_attack_speed_percent": 10,
+        "expected_effective_attack_speed": 1.1275,
+        "expected_attack_interval_ticks": 18,
+        "expected_magic_bolt_cooldown_ticks": 36
+      },
+      {
+        "name": "negative_speed_item",
+        "dex_attack_speed": 1.025,
+        "weapon_attack_speed": 1.0,
+        "item_attack_speed_percent": -20,
+        "expected_effective_attack_speed": 0.82,
+        "expected_attack_interval_ticks": 25,
+        "expected_magic_bolt_cooldown_ticks": 50
+      }
+    ]
+  },
+  "skill": {
+    "skill_id": "magic_bolt",
+    "max_rank": 5,
+    "rank_cases": [
+      { "rank": 1, "mana_cost": 3, "damage": { "min": 4, "max": 6 } },
+      { "rank": 2, "mana_cost": 3, "damage": { "min": 5, "max": 7 } },
+      { "rank": 5, "mana_cost": 3, "damage": { "min": 8, "max": 10 } }
+    ]
+  }
+}

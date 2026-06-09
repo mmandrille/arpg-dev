@@ -11,7 +11,7 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v43 — `equipment-requirements-and-preview` |
+| **Latest completed slice** | v44 — `skill-points-and-magic-bolt` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
@@ -59,6 +59,7 @@ v40_* = reachable-dungeon-obstacles
 v41_* = town-vendor-gold-sink
 v42_* = vendor-appraisal-and-item-comparison
 v43_* = equipment-requirements-and-preview
+v44_* = skill-points-and-magic-bolt
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -122,6 +123,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v41** | `town-vendor-gold-sink` | Complete (`make ci` green) | [`v41_spec-town-vendor-gold-sink.md`](specs/v41_spec-town-vendor-gold-sink.md) | [`v41_2026-06-09-town-vendor-gold-sink.md`](plans/v41_2026-06-09-town-vendor-gold-sink.md) |
 | **v42** | `vendor-appraisal-and-item-comparison` | Complete (`make ci` green) | [`v42_spec-vendor-appraisal-and-item-comparison.md`](specs/v42_spec-vendor-appraisal-and-item-comparison.md) | [`v42_2026-06-09-vendor-appraisal-and-item-comparison.md`](plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md) |
 | **v43** | `equipment-requirements-and-preview` | Complete (`make ci` green) | [`v43_spec-equipment-requirements-and-preview.md`](specs/v43_spec-equipment-requirements-and-preview.md) | [`v43_2026-06-09-equipment-requirements-and-preview.md`](plans/v43_2026-06-09-equipment-requirements-and-preview.md) |
+| **v44** | `skill-points-and-magic-bolt` | Complete (`make ci` green) | [`v44_spec-skill-points-and-magic-bolt.md`](specs/v44_spec-skill-points-and-magic-bolt.md) | [`v44_2026-06-09-skill-points-and-magic-bolt.md`](plans/v44_2026-06-09-skill-points-and-magic-bolt.md) |
 
 ---
 
@@ -1070,6 +1072,35 @@ and direct item-stat comparisons without moving economy authority into the Godot
 stash, repair, crafting, search, sorting, filters, bulk operations, external shop/inventory UI
 plugin adoption, or item/economy rebalance.
 
+### v44 — Skill points and Magic Bolt
+
+**Proves:** The first active skill loop is server-authoritative from progression grant through
+rank spend, mana/cooldown mutation, projectile cast, replay, persistence, and Godot presentation.
+
+- Character progression now grants 3 stat points per level and 1 skill point every 3 levels
+  starting at level 3.
+- Protocol v5 adds skill point allocation, skill casting, skill progression snapshots/deltas,
+  cooldown views, and skill events.
+- `magic_bolt` is data-driven from `shared/rules/skills.v0.json`; rank increases damage, cast
+  spends mana, and cooldown is `2x` the current server-authored attack interval.
+- Effective attack speed now combines DEX-derived speed, weapon `attack_speed`, and signed
+  equipment `attack_speed_percent`; character stats expose `attack_interval_ticks`.
+- Character skill points and ranks persist durably and are frozen into session-start snapshots for
+  deterministic replay.
+- Godot adds a one-skill panel (`K`) and one Magic Bolt slot (`Q`) with local cooldown interpolation
+  reconciled from server `skill_cooldowns`.
+- Protocol bot scenario `32_skill_points_and_magic_bolt.json` proves level-to-3, VIT allocation,
+  skill spend, cast, cooldown rejection/recovery, damage, `/state`, reconnect, replay, and
+  fresh-session persistence.
+- Client bot scenario `19_skill_points_and_magic_bolt.json` proves the real Godot skill panel,
+  spend button, skill bar disabled/recovery state, and directional Magic Bolt cast/reject path.
+- The protocol bot `wait_ticks` helper now falls back to oscillating one-tick movement pulses when
+  zero-direction pulses do not produce authoritative ticks, preserving older idle-settle scenarios.
+
+**Explicit non-goals:** no classes, skill tree, respec/refund, passive skills, multiple active
+skills, basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, buffs/debuffs,
+AoE/homing/summons/DOT/status effects, production skill VFX/audio, or final combat balance.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1136,6 +1167,8 @@ vendor_appraisal_quotes: open town vendor after dungeon loot → assert server-a
 vendor_item_comparison: headless Godot client opens vendor → assert visible offer/sell details, comparison rows, buy, and sell
 equipment_requirements_and_preview: pick up requirement-gated gear → reject unmet equip → level and allocate STR → equip → prove persistence
 client_equipment_requirements_and_preview: headless Godot client opens inventory → assert requirement-status and equip-preview rows
+skill_points_and_magic_bolt: level to 3 → spend Magic Bolt → cast → reject cooldown recast → recover → prove replay/fresh persistence
+client_skill_points_and_magic_bolt: headless Godot client opens skill panel → spends Magic Bolt → observes skill bar cooldown and recovery
 ```
 
 **Verify:**
@@ -1301,15 +1334,19 @@ requirements to level/base stats, rejects unmet equips before mutation, annotate
 views with server-authored requirement status and equip-preview deltas, and proves the path through
 protocol and Godot client bot scenarios.
 
+**Skill points and Magic Bolt are now authoritative.** v44 adds durable skill points/ranks,
+protocol v5 skill state, attack-speed-derived cooldowns, a server-owned Magic Bolt cast/reject/recover
+loop, and protocol/client bot proofs through replay, reconnect, and fresh-session persistence.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39/v40/v41 non-goals, ADR-0008 deferred, ADR-0011 |
-| Combat | Attack-speed gameplay, mana consumers/regeneration, respawn, spell systems, piercing/AoE/homing projectiles, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill bar and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40 non-goals |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39/v40/v41/v44 non-goals, ADR-0008 deferred, ADR-0011 |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43 non-goals, ADR-0009 deferred, ADR-0012 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items | v33/v38/v41/v42 non-goals, ADR-0011, ADR-0012 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43 non-goals |
+| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44 non-goals |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |

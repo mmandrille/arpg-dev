@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/golden/equipment_requirements.v0.schema.json",
+  "title": "Equipment requirements golden fixture (v0)",
+  "type": "object",
+  "required": ["template_id", "requirements", "fresh_character", "after_allocation", "expected_reject"],
+  "additionalProperties": false,
+  "properties": {
+    "template_id": { "type": "string" },
+    "requirements": { "$ref": "#/$defs/requirements" },
+    "fresh_character": { "$ref": "#/$defs/character_case" },
+    "after_allocation": { "$ref": "#/$defs/character_case" },
+    "expected_reject": { "type": "string", "const": "requirements_not_met" }
+  },
+  "$defs": {
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 },
+        "str": { "type": "integer", "minimum": 1 },
+        "dex": { "type": "integer", "minimum": 1 },
+        "vit": { "type": "integer", "minimum": 1 },
+        "magic": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "base_stats": {
+      "type": "object",
+      "required": ["str", "dex", "vit", "magic"],
+      "additionalProperties": false,
+      "properties": {
+        "str": { "type": "integer", "minimum": 0 },
+        "dex": { "type": "integer", "minimum": 0 },
+        "vit": { "type": "integer", "minimum": 0 },
+        "magic": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "requirement_status": {
+      "type": "object",
+      "required": ["stat", "required", "current", "met"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "type": "string", "enum": ["level", "str", "dex", "vit", "magic"] },
+        "required": { "type": "integer", "minimum": 1 },
+        "current": { "type": "integer", "minimum": 0 },
+        "met": { "type": "boolean" }
+      }
+    },
+    "character_case": {
+      "type": "object",
+      "required": ["level", "base_stats", "requirements_met", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 },
+        "base_stats": { "$ref": "#/$defs/base_stats" },
+        "requirements_met": { "type": "boolean" },
+        "status": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/requirement_status" }
+        }
+      }
+    }
+  }
+}

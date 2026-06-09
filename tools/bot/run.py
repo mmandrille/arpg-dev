@@ -511,6 +511,10 @@ async def execute_step(
         assert_rolled_inventory_item(state.inventory, step, "runtime protocol")
         return
 
+    if action == "assert_inventory_requirement_status":
+        assert_inventory_requirement_status(state.inventory, step, "runtime protocol")
+        return
+
     if action == "assert_equipped_weapon_def":
         expected_def = str(step["item_def_id"])
         slot = str(step.get("slot", "main_hand"))
@@ -1030,9 +1034,18 @@ async def execute_step(
             item = find_inventory_item(state.inventory, item_def_id, bag_index)
         slot = str(step.get("slot", item.get("slot", "main_hand")))
         item_id = str(item["item_instance_id"])
-        await ws.send(json.dumps(make_envelope(
-            "equip_intent", session_id, state.last_tick, {"item_instance_id": item_id, "slot": slot})))
+        env = make_envelope(
+            "equip_intent",
+            session_id,
+            state.last_tick,
+            {"item_instance_id": item_id, "slot": slot},
+        )
+        await ws.send(json.dumps(env))
         log("equipping", item_def_id, item_id)
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
         while state.equipped.get(slot) != item_id:
             if loop.time() > deadline:
                 raise TimeoutError(f"equip_inventory_item stalled waiting for equipped_update for {item_def_id}")
@@ -2197,6 +2210,17 @@ def assert_shop_detail_rows(rows: list[dict[str, Any]], step: dict[str, Any], la
         missing = [row for row in rows if not row.get("comparison", {}).get("deltas")]
         if missing:
             raise AssertionError(f"{label}: rows missing comparison deltas: {missing}")
+    if step.get("requires_requirement_status"):
+        missing = [row for row in rows if not row.get("requirement_status") or "requirements_met" not in row]
+        if missing:
+            raise AssertionError(f"{label}: rows missing requirement status: {missing}")
+    if step.get("requires_equip_preview"):
+        missing = [
+            row for row in rows
+            if not isinstance(row.get("equip_preview"), dict) or "requirements_met" not in row.get("equip_preview", {})
+        ]
+        if missing:
+            raise AssertionError(f"{label}: rows missing equip preview: {missing}")
     if step.get("summary_contains") is not None:
         needle = str(step["summary_contains"])
         if not any(needle in str(line) for row in rows for line in row.get("summary_lines", [])):
@@ -2330,6 +2354,73 @@ def assert_inventory_contains(inventory: list[dict], item_def_id: str, equipped:
         raise AssertionError(f"{where}: missing inventory item {item_def_id}: {inventory}")
     if equipped is not None and bool(item.get("equipped")) != equipped:
         raise AssertionError(f"{where}: {item_def_id} equipped={item.get('equipped')} want {equipped}")
+
+
+def assert_inventory_requirement_status(inventory: list[dict], assertion: dict[str, Any], where: str) -> None:
+    item_def_id = str(assertion["item_def_id"])
+    bag_index = int(assertion.get("bag_index", 0))
+    item = find_inventory_item(inventory, item_def_id, bag_index)
+    if item is None:
+        raise AssertionError(f"{where}: missing inventory item {item_def_id}: {inventory}")
+    if assertion.get("equipped") is not None and bool(item.get("equipped")) != bool(assertion["equipped"]):
+        raise AssertionError(f"{where}: inventory {item_def_id} equipped={item.get('equipped')} want {assertion['equipped']}: {item}")
+    assert_requirement_payload(item, assertion, f"{where}: inventory {item_def_id}")
+
+
+def assert_loot_requirement_status(entities: list[dict], assertion: dict[str, Any], where: str) -> None:
+    item_def_id = str(assertion["item_def_id"])
+    matches = [
+        entity for entity in entities
+        if entity.get("type") == "loot" and str(entity.get("item_def_id", "")) == item_def_id
+    ]
+    if not matches:
+        raise AssertionError(f"{where}: missing loot {item_def_id}: {entities}")
+    assert_requirement_payload(matches[0], assertion, f"{where}: loot {item_def_id}")
+
+
+def assert_requirement_payload(row: dict[str, Any], assertion: dict[str, Any], where: str) -> None:
+    if "requirements_met" in assertion:
+        want = bool(assertion["requirements_met"])
+        got = bool(row.get("requirements_met"))
+        if got != want:
+            raise AssertionError(f"{where}: requirements_met {got} != {want}: {row}")
+    expected_status = assertion.get("status", [])
+    if expected_status:
+        actual_status = row.get("requirement_status", [])
+        if not isinstance(actual_status, list):
+            raise AssertionError(f"{where}: requirement_status is not a list: {row}")
+        for expected in expected_status:
+            stat = str(expected["stat"])
+            actual = next((entry for entry in actual_status if str(entry.get("stat", "")) == stat), None)
+            if actual is None:
+                raise AssertionError(f"{where}: missing requirement status {stat}: {actual_status}")
+            for key in ("required", "current"):
+                if key in expected and int(actual.get(key, -1)) != int(expected[key]):
+                    raise AssertionError(f"{where}: requirement {stat}.{key} {actual.get(key)} != {expected[key]}: {actual}")
+            if "met" in expected and bool(actual.get("met")) != bool(expected["met"]):
+                raise AssertionError(f"{where}: requirement {stat}.met {actual.get('met')} != {expected['met']}: {actual}")
+    if assertion.get("requires_requirement_status"):
+        if not row.get("requirement_status") or "requirements_met" not in row:
+            raise AssertionError(f"{where}: missing requirement status payload: {row}")
+    if assertion.get("requires_equip_preview"):
+        preview = row.get("equip_preview")
+        if not isinstance(preview, dict):
+            raise AssertionError(f"{where}: missing equip_preview: {row}")
+        if "requirements_met" not in preview:
+            raise AssertionError(f"{where}: equip_preview missing requirements_met: {preview}")
+    preview = row.get("equip_preview")
+    if isinstance(preview, dict):
+        if assertion.get("preview_slot") is not None and str(preview.get("slot", "")) != str(assertion["preview_slot"]):
+            raise AssertionError(f"{where}: preview slot {preview.get('slot')} != {assertion['preview_slot']}: {preview}")
+        if assertion.get("preview_requirements_met") is not None:
+            want = bool(assertion["preview_requirements_met"])
+            got = bool(preview.get("requirements_met"))
+            if got != want:
+                raise AssertionError(f"{where}: preview requirements_met {got} != {want}: {preview}")
+        delta_stats = [str(delta.get("stat", "")) for delta in preview.get("deltas", []) if isinstance(delta, dict)]
+        for stat in assertion.get("preview_delta_stats", []):
+            if str(stat) not in delta_stats:
+                raise AssertionError(f"{where}: preview missing delta stat {stat}: {preview}")
 
 
 def assert_hotbar_slot(hotbar: list[dict], slot_index: int, item_def_id: Any, where: str, inventory: list[dict] | None = None) -> None:
@@ -2571,6 +2662,10 @@ def run_assertions(
         elif typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
+        elif typ == "inventory_requirement_status":
+            assert_inventory_requirement_status(inventory, assertion, where)
+        elif typ == "loot_requirement_status":
+            assert_loot_requirement_status(entities, assertion, where)
         elif typ == "gold":
             assert_count_matches(int(gold or 0), assertion, f"{where}: gold")
         elif typ == "wall_count":
@@ -2843,6 +2938,12 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(state.inventory, str(assertion["item_def_id"]), expected_equipped, where)
+            continue
+        if typ == "inventory_requirement_status":
+            assert_inventory_requirement_status(state.inventory, assertion, where)
+            continue
+        if typ == "loot_requirement_status":
+            assert_loot_requirement_status(list(state.entities.values()), assertion, where)
             continue
         if typ == "inventory_count":
             matches = state.inventory

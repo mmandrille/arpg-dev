@@ -1,0 +1,23 @@
+{
+  "template_id": "cave_war_sword",
+  "requirements": { "level": 2, "str": 6 },
+  "fresh_character": {
+    "level": 1,
+    "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+    "requirements_met": false,
+    "status": [
+      { "stat": "level", "required": 2, "current": 1, "met": false },
+      { "stat": "str", "required": 6, "current": 5, "met": false }
+    ]
+  },
+  "after_allocation": {
+    "level": 2,
+    "base_stats": { "str": 6, "dex": 5, "vit": 5, "magic": 5 },
+    "requirements_met": true,
+    "status": [
+      { "stat": "level", "required": 2, "current": 2, "met": true },
+      { "stat": "str", "required": 6, "current": 6, "met": true }
+    ]
+  },
+  "expected_reject": "requirements_not_met"
+}

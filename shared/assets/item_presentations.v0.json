@@ -17,6 +17,10 @@
       "icon": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "label": "2H" },
       "ground": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "scale": 1.1 }
     },
+    "cave_war_sword": {
+      "icon": { "shape": "blade", "color": "#a57458", "accent": "#ffd0a3", "label": "WS" },
+      "ground": { "shape": "blade", "color": "#a57458", "accent": "#ffd0a3", "scale": 1.05 }
+    },
     "cave_bow": {
       "icon": { "shape": "bow", "color": "#8f6b42", "accent": "#e6c27b", "label": "CB" },
       "ground": { "shape": "bow", "color": "#8f6b42", "accent": "#e6c27b", "scale": 1.0 }

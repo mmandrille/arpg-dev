@@ -802,8 +802,13 @@ func LoadRules(dir string) (*Rules, error) {
 		} else if def.AttackMode != "" || def.Reach != 0 || def.ProjectileSpeed != 0 {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s: non-weapon equipment must not declare attack fields", id)
 		}
-		if def.Requirements["level"] > 1 {
-			return nil, fmt.Errorf("game: invalid rules item_templates.%s.requirements.level: v23 supports level <= 1", id)
+		for stat, required := range def.Requirements {
+			if !isSupportedRequirementStat(stat) {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.requirements.%s: unsupported requirement", id, stat)
+			}
+			if required < 1 {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.requirements.%s: must be >= 1", id, stat)
+			}
 		}
 		min, max := def.BaseStats["damage_min"], def.BaseStats["damage_max"]
 		if _, ok := def.BaseStats["damage_min"]; ok && max < min {
@@ -1815,6 +1820,15 @@ func isEquipmentSlot(slot string) bool {
 
 func isHandSlot(slot string) bool {
 	return slot == "main_hand" || slot == "off_hand"
+}
+
+func isSupportedRequirementStat(stat string) bool {
+	switch stat {
+	case "level", "str", "dex", "vit", "magic":
+		return true
+	default:
+		return false
+	}
 }
 
 func occupiesExactly(slots []string, wantA, wantB string) bool {

@@ -2,6 +2,7 @@ class_name ItemTooltipPanel
 extends PanelContainer
 
 const BODY_FONT_SIZE := 23
+const REQUIREMENT_FONT_SIZE := BODY_FONT_SIZE - 1
 const ICON_FONT_SIZE := 32
 const PREVIEW_SIZE := Vector2(96, 96)
 const PREVIEW_GAP := 8
@@ -122,7 +123,7 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 		root.add_child(_tooltip_spacer(8))
 		root.add_child(_tooltip_label("Requirements", Color("#c9a227")))
 		for line in requirement_lines:
-			root.add_child(_tooltip_label(str(line), Color("#d8c7a6")))
+			root.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#d8c7a6")), CONTENT_WIDTH, REQUIREMENT_FONT_SIZE))
 	if not comparison_entries.is_empty():
 		root.add_child(_tooltip_spacer(6))
 		root.add_child(_tooltip_separator())
@@ -150,13 +151,13 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 		root.add_child(footer)
 
 
-func _tooltip_label(text: String, color: Color, width: float = CONTENT_WIDTH) -> Label:
+func _tooltip_label(text: String, color: Color, width: float = CONTENT_WIDTH, font_size: int = BODY_FONT_SIZE) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(width, 0)
 	label.add_theme_color_override("font_color", color)
-	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	label.add_theme_font_size_override("font_size", font_size)
 	return label
 
 
@@ -192,3 +193,19 @@ func _tooltip_style() -> StyleBoxFlat:
 func _clear_children(node: Node) -> void:
 	for child in node.get_children():
 		child.queue_free()
+
+
+func _entry_text(value) -> String:
+	if typeof(value) == TYPE_DICTIONARY:
+		return str((value as Dictionary).get("text", ""))
+	return str(value)
+
+
+func _entry_color(value, fallback: Color) -> Color:
+	if typeof(value) != TYPE_DICTIONARY:
+		return fallback
+	var rec := value as Dictionary
+	var color = rec.get("color", fallback)
+	if color is Color:
+		return color
+	return fallback

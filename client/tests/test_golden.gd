@@ -480,28 +480,67 @@ func _initialize() -> void:
 	if pricing_cases.size() < 5:
 		_fail("shop_pricing must cover fixed/common/magic/rare cases")
 		return
-		for pricing_case in pricing_cases:
-			if int(pricing_case["expected"]["buy_price"]) <= 0 or int(pricing_case["expected"]["sell_price"]) <= 0:
-				_fail("shop_pricing case %s has non-positive price" % str(pricing_case["name"]))
+	for pricing_case in pricing_cases:
+		if int(pricing_case["expected"]["buy_price"]) <= 0 or int(pricing_case["expected"]["sell_price"]) <= 0:
+			_fail("shop_pricing case %s has non-positive price" % str(pricing_case["name"]))
+			return
+	for offer_case in shop_offers["cases"]:
+		var expected: Array = offer_case["expected"]
+		if expected.size() != int(offer_case["expected_offer_count"]):
+			_fail("shop_offers case %s count mismatch" % str(offer_case["name"]))
+			return
+		for offer in expected:
+			var offer_template_id := str(offer["item_template_id"])
+			if not item_templates["templates"].has(offer_template_id):
+				_fail("shop_offers references unknown template %s" % offer_template_id)
 				return
-		for offer_case in shop_offers["cases"]:
-			var expected: Array = offer_case["expected"]
-			if expected.size() != int(offer_case["expected_offer_count"]):
-				_fail("shop_offers case %s count mismatch" % str(offer_case["name"]))
+			if not str(offer["offer_id"]).begins_with("generated:depth"):
+				_fail("shop_offers offer_id must be generated depth id")
 				return
-			for offer in expected:
-				var offer_template_id := str(offer["item_template_id"])
-				if not item_templates["templates"].has(offer_template_id):
-					_fail("shop_offers references unknown template %s" % offer_template_id)
-					return
-				if not str(offer["offer_id"]).begins_with("generated:depth"):
-					_fail("shop_offers offer_id must be generated depth id")
-					return
-				if int(offer["buy_price"]) <= 0:
-					_fail("shop_offers buy_price must be positive")
-					return
+			if int(offer["buy_price"]) <= 0:
+				_fail("shop_offers buy_price must be positive")
+				return
 
-	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression, combat_stat_effects, shop_pricing, shop_offers)")
+	# 22. Equipment requirements golden mirrors shared item requirements and client-readable status rows.
+	var equipment_requirements := _read(shared.path_join("golden/equipment_requirements.json"))
+	var req_template_id := str(equipment_requirements["template_id"])
+	if not item_templates["templates"].has(req_template_id):
+		_fail("equipment_requirements references unknown template")
+		return
+	var req_template: Dictionary = item_templates["templates"][req_template_id]
+	var expected_requirements: Dictionary = equipment_requirements["requirements"]
+	if req_template["requirements"] != expected_requirements:
+		_fail("equipment_requirements requirements mismatch")
+		return
+	for case_name in ["fresh_character", "after_allocation"]:
+		var character_case: Dictionary = equipment_requirements[case_name]
+		var status_rows: Array = character_case["status"]
+		if status_rows.size() != expected_requirements.keys().size():
+			_fail("equipment_requirements %s status count mismatch" % str(case_name))
+			return
+		var all_met := true
+		for row in status_rows:
+			var rec := row as Dictionary
+			var stat := str(rec["stat"])
+			if not expected_requirements.has(stat):
+				_fail("equipment_requirements %s unknown stat %s" % [str(case_name), stat])
+				return
+			var required := int(expected_requirements[stat])
+			var current := int(character_case["level"]) if stat == "level" else int(character_case["base_stats"][stat])
+			var met := current >= required
+			if int(rec["required"]) != required or int(rec["current"]) != current or bool(rec["met"]) != met:
+				_fail("equipment_requirements %s status mismatch for %s" % [str(case_name), stat])
+				return
+			if not met:
+				all_met = false
+		if bool(character_case["requirements_met"]) != all_met:
+			_fail("equipment_requirements %s aggregate mismatch" % str(case_name))
+			return
+	if str(equipment_requirements["expected_reject"]) != "requirements_not_met":
+		_fail("equipment_requirements expected reject mismatch")
+		return
+
+	print("[gdtest] PASS: consumed shared/golden fixtures (damage_formula, retaliation_damage, equipped_weapon_damage, melee_reach, loot_roll, auto_path, ranged_projectile, inventory_drop, use_consumable, monster_chase, dungeon_stairs, dungeon_teleporters, dungeon_monster_attack, monster_rarity, waypoint_panel, item_rolls, treasure_class_rolls, guarded_chest_generation, character_progression, combat_stat_effects, shop_pricing, shop_offers, equipment_requirements)")
 	quit(0)
 
 

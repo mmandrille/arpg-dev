@@ -4,7 +4,7 @@
   "title": "session_snapshot payload (v2)",
   "description": "Full authoritative state needed to render the scene. This validates the bare payload body (the `payload` field of a session_snapshot envelope).",
   "type": "object",
-  "required": ["server_tick", "session_id", "seed", "current_level", "local_player_id", "party", "entities", "inventory", "equipped", "hotbar_capacity", "hotbar", "inventory_rows", "inventory_capacity", "discovered_teleporters", "character_progression", "recent_events"],
+  "required": ["server_tick", "session_id", "seed", "current_level", "local_player_id", "party", "entities", "inventory", "equipped", "hotbar_capacity", "hotbar", "inventory_rows", "inventory_capacity", "gold", "discovered_teleporters", "character_progression", "recent_events"],
   "additionalProperties": false,
   "properties": {
     "server_tick": { "type": "integer", "minimum": 0 },
@@ -25,6 +25,7 @@
     },
     "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 },
     "inventory_capacity": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "gold": { "type": "integer", "minimum": 0 },
     "discovered_teleporters": { "type": "array", "items": { "$ref": "#/$defs/teleporter_discovery" } },
     "character_progression": { "$ref": "#/$defs/character_progression" },
     "recent_events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
@@ -49,9 +50,12 @@
         "position": { "$ref": "#/$defs/vec2" },
         "hp": { "type": "integer", "minimum": 0 },
         "max_hp": { "type": "integer", "minimum": 0 },
+        "mana": { "type": "integer", "minimum": 0 },
+        "max_mana": { "type": "integer", "minimum": 0 },
         "monster_def_id": { "type": "string" },
         "character_id": { "$ref": "#/$defs/prefixed_id" },
         "item_def_id": { "type": "string" },
+        "amount": { "type": "integer", "minimum": 1 },
         "item_template_id": { "type": "string" },
         "display_name": { "type": "string" },
         "rarity": { "type": "string" },
@@ -221,7 +225,7 @@
     },
     "character_progression": {
       "type": "object",
-      "required": ["level", "experience", "experience_to_next_level", "level_cap", "unspent_stat_points", "base_stats", "derived_stats"],
+      "required": ["level", "experience", "experience_to_next_level", "level_cap", "unspent_stat_points", "gold", "base_stats", "derived_stats"],
       "additionalProperties": false,
       "properties": {
         "level": { "type": "integer", "minimum": 1 },
@@ -229,6 +233,7 @@
         "experience_to_next_level": { "type": ["integer", "null"], "minimum": 0 },
         "level_cap": { "type": "integer", "minimum": 1 },
         "unspent_stat_points": { "type": "integer", "minimum": 0 },
+        "gold": { "type": "integer", "minimum": 0 },
         "base_stats": { "$ref": "#/$defs/base_stats" },
         "derived_stats": { "$ref": "#/$defs/derived_stats" },
         "stat_breakdowns": {
@@ -253,12 +258,14 @@
         "blocked": { "type": "boolean" },
         "critical": { "type": "boolean" },
         "heal": { "type": "integer", "minimum": 0 },
+        "mana": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
         "level": { "type": "integer" },
         "from_level": { "type": "integer" },
         "to_level": { "type": "integer" },
         "amount": { "type": "integer", "minimum": 0 },
         "total_experience": { "type": "integer", "minimum": 0 },
+        "total_gold": { "type": "integer", "minimum": 0 },
         "stat": { "type": "string", "enum": ["str", "dex", "vit", "magic"] },
         "unspent_stat_points": { "type": "integer", "minimum": 0 },
         "reason": { "type": "string" },
@@ -294,10 +301,37 @@
         },
         {
           "if": {
-            "properties": { "event_type": { "enum": ["player_healed", "item_used"] } },
+            "properties": { "event_type": { "const": "gold_picked_up" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "amount", "total_gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "player_healed" } },
             "required": ["event_type"]
           },
           "then": { "required": ["heal", "item_instance_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "item_used" } },
+            "required": ["event_type"]
+          },
+          "then": {
+            "required": ["item_instance_id"],
+            "anyOf": [
+              { "required": ["heal"] },
+              { "required": ["mana"] }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "player_mana_restored" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["mana", "item_instance_id"] }
         },
         {
           "if": {

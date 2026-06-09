@@ -50,7 +50,7 @@
       "seed": "v29_dungeon_mob_tc_depth_3_plus_18",
       "expected_drops": [
         { "item_template_id": "cave_bow" },
-        { "item_def_id": "training_badge" }
+        { "item_def_id": "gold" }
       ]
     },
     {

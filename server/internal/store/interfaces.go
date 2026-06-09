@@ -18,6 +18,7 @@ type CharacterRepo interface {
 	GetCharacter(ctx context.Context, id string) (Character, error)
 	ListCharacters(ctx context.Context, accountID string) ([]Character, error)
 	CreateCharacter(ctx context.Context, charID, accountID, name string) (Character, error)
+	RenameCharacter(ctx context.Context, accountID, characterID, name string) (Character, error)
 	DeleteCharacter(ctx context.Context, accountID, characterID string) error
 }
 
@@ -53,6 +54,7 @@ type CharacterProgressionRepo interface {
 	GetOrCreateCharacterProgression(ctx context.Context, accountID, characterID string, defaults CharacterProgressionDefaults) (CharacterProgression, error)
 	GetCharacterProgression(ctx context.Context, accountID, characterID string) (CharacterProgression, error)
 	UpsertCharacterProgression(ctx context.Context, accountID string, progression CharacterProgression) error
+	SetCharacterGold(ctx context.Context, accountID, characterID string, gold int) error
 	ListCharacterHotbar(ctx context.Context, accountID, characterID string) ([]CharacterHotbarSlot, error)
 	SetCharacterHotbarSlot(ctx context.Context, accountID, characterID string, slotIndex int, itemInstanceID *string) error
 	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, progression CharacterProgression) error

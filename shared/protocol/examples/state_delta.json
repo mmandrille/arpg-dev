@@ -7,7 +7,7 @@
     { "op": "entity_update", "entity": { "id": "1011", "type": "interactable", "interactable_def_id": "stairs_down", "state": "locked", "position": { "x": 27, "y": 15 } } },
     { "op": "entity_update", "entity": { "id": "1012", "type": "interactable", "interactable_def_id": "teleporter", "state": "disabled", "position": { "x": 25, "y": 7 } } },
     { "op": "entity_spawn", "entity": { "id": "1003", "type": "loot", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "effect_ids": [], "position": { "x": 12, "y": 5 } } },
-    { "op": "entity_update", "entity": { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 9, "max_hp": 10 } },
+    { "op": "entity_update", "entity": { "id": "1001", "type": "player", "position": { "x": 10, "y": 5 }, "hp": 9, "max_hp": 10, "mana": 10, "max_mana": 10 } },
     { "op": "entity_spawn", "entity": { "id": "1005", "type": "projectile", "position": { "x": 1, "y": 5 }, "owner_id": "1001", "projectile_def_id": "training_arrow" } },
     { "op": "entity_update", "entity": { "id": "1005", "type": "projectile", "position": { "x": 1.3, "y": 5 }, "owner_id": "1001", "projectile_def_id": "training_arrow" } },
     { "op": "entity_remove", "entity_id": "1005" },
@@ -15,6 +15,7 @@
     { "op": "equipped_update", "slot": "main_hand", "item_instance_id": null, "inventory_rows": 3, "inventory_capacity": 15 },
     { "op": "hotbar_update", "slot_index": 2, "item_instance_id": "1007", "inventory_rows": 3, "inventory_capacity": 15 },
     { "op": "inventory_remove", "item_instance_id": "1004" },
+    { "op": "gold_update", "gold": 8 },
     { "op": "entity_spawn", "entity": { "id": "1006", "type": "loot", "item_def_id": "rusty_sword", "position": { "x": 11, "y": 5 } } }
   ],
   "events": [
@@ -26,6 +27,7 @@
     { "event_type": "loot_dropped", "entity_id": "1003", "correlation_id": "corr_01H00000000000000000000000" },
     { "event_type": "player_damaged", "entity_id": "1001", "source_entity_id": "1002", "target_entity_id": "1001", "correlation_id": "corr_01H00000000000000000000000", "damage": 1, "outcome": "hit", "raw_damage": 5, "mitigated_damage": 1, "blocked": false, "critical": false },
     { "event_type": "projectile_blocked", "correlation_id": "corr_01H00000000000000000000000" },
+    { "event_type": "gold_picked_up", "entity_id": "1001", "amount": 8, "total_gold": 8, "correlation_id": "corr_01H00000000000000000000000" },
     { "event_type": "item_dropped", "entity_id": "1006", "item_instance_id": "1004", "correlation_id": "corr_01H00000000000000000000000" },
     { "event_type": "boss_phase_started", "entity_id": "1010", "pattern_id": "charged_melee", "phase_index": 0, "phase_kind": "telegraph", "duration_ticks": 30, "telegraph": { "type": "body_color_charge", "from_color": "#b77cff", "to_color": "#ff0000", "radius": 1.6 }, "hit_shape": { "shape": "melee_contact", "radius": 1.6 } },
     { "event_type": "boss_phase_ended", "entity_id": "1010", "pattern_id": "charged_melee", "phase_index": 0, "phase_kind": "telegraph" },

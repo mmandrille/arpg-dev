@@ -32,7 +32,9 @@
           "damage": { "$ref": "#/$defs/damage_range" },
           "reach": { "type": "number", "exclusiveMinimum": 0 },
           "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
-          "heal": { "$ref": "#/$defs/heal_range" }
+          "heal": { "$ref": "#/$defs/use_range" },
+          "mana_restore": { "$ref": "#/$defs/use_range" },
+          "gold": { "$ref": "#/$defs/use_range" }
         },
         "allOf": [
           {
@@ -107,7 +109,12 @@
               "properties": { "category": { "const": "consumable" } },
               "required": ["category"]
             },
-            "then": { "required": ["heal"] }
+            "then": {
+              "anyOf": [
+                { "required": ["heal"] },
+                { "required": ["mana_restore"] }
+              ]
+            }
           },
           {
             "if": {
@@ -120,13 +127,37 @@
               },
               "required": ["category", "equippable"]
             }
+          },
+          {
+            "if": {
+              "required": ["mana_restore"]
+            },
+            "then": {
+              "properties": {
+                "category": { "const": "consumable" },
+                "equippable": { "const": false }
+              },
+              "required": ["category", "equippable"]
+            }
+          },
+          {
+            "if": {
+              "required": ["gold"]
+            },
+            "then": {
+              "properties": {
+                "category": { "const": "currency" },
+                "equippable": { "const": false }
+              },
+              "required": ["category", "equippable"]
+            }
           }
         ]
       }
     }
   },
   "$defs": {
-    "heal_range": {
+    "use_range": {
       "type": "object",
       "required": ["min", "max"],
       "additionalProperties": false,

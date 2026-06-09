@@ -6,7 +6,7 @@
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
     { "action": "use_stair", "direction": "down", "max_ticks": 360 },
-    { "action": "pick_up_loot", "item_def_id": "training_badge" },
+    { "action": "pick_up_loot", "item_def_id": "gold" },
     { "action": "use_stair", "direction": "up", "max_ticks": 360 },
     { "action": "assert_player_at_used_stair", "direction": "down", "tolerance": 0.001 }
   ],
@@ -14,7 +14,7 @@
     { "type": "current_level", "equals": -1 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -2 },
-    { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false },
+    { "type": "gold", "at_least": 8 },
     { "type": "event_seen", "event_type": "level_changed" }
   ],
   "visual": {

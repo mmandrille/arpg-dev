@@ -122,7 +122,7 @@
       "uncapped_value": 6,
       "cap": null,
       "sources": [
-        { "label": "Vitality", "value": 1, "kind": "character_formula" },
+        { "label": "Dexterity", "value": 1, "kind": "character_formula" },
         { "label": "Cave Mail", "value": 3, "kind": "equipment_base" },
         { "label": "Rolled armor", "value": 2, "kind": "equipment_roll" }
       ]

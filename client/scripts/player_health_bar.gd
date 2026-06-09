@@ -4,11 +4,15 @@ extends Control
 const BAR_W := 110.0
 const BAR_H := 9.0
 
-var _fill: ColorRect
-var _label: Label
+var _hp_fill: ColorRect
+var _hp_label: Label
+var _mana_fill: ColorRect
+var _mana_label: Label
 var _panel: PanelContainer
 var _hp: int = 10
 var _max_hp: int = 10
+var _mana: int = 10
+var _max_mana: int = 10
 var _tween: Tween
 
 
@@ -23,22 +27,33 @@ func update_hp(hp: int, max_hp: int, is_heal: bool = false) -> void:
 	var was_hp := _hp
 	_hp = hp
 	_max_hp = max_hp
-	_update_bar()
+	_update_bars()
 	if is_heal and hp > was_hp:
-		_flash(Color(0.35, 1.0, 0.45))
+		_flash(_hp_fill, Color(0.35, 1.0, 0.45), _hp_bar_color())
 	elif hp < was_hp:
-		_flash(Color(1.0, 0.22, 0.18))
+		_flash(_hp_fill, Color(1.0, 0.22, 0.18), _hp_bar_color())
 
 
-func _flash(color: Color) -> void:
+func update_mana(mana: int, max_mana: int, is_restore: bool = false) -> void:
+	var was_mana := _mana
+	_mana = mana
+	_max_mana = max_mana
+	_update_bars()
+	if is_restore and mana > was_mana:
+		_flash(_mana_fill, Color(0.45, 0.90, 1.0), _mana_bar_color())
+
+
+func _flash(target: ColorRect, color: Color, return_color: Color) -> void:
+	if target == null:
+		return
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
 	_tween = create_tween()
-	_tween.tween_property(_fill, "color", color, 0.05)
-	_tween.tween_property(_fill, "color", _bar_color(), 0.45)
+	_tween.tween_property(target, "color", color, 0.05)
+	_tween.tween_property(target, "color", return_color, 0.45)
 
 
-func _bar_color() -> Color:
+func _hp_bar_color() -> Color:
 	var pct := float(_hp) / float(maxi(_max_hp, 1))
 	if pct > 0.6:
 		return Color(0.22, 0.78, 0.28)
@@ -47,14 +62,22 @@ func _bar_color() -> Color:
 	return Color(0.90, 0.18, 0.14)
 
 
-func _update_bar() -> void:
-	if _fill == null or _label == null:
+func _mana_bar_color() -> Color:
+	return Color("#48aeea")
+
+
+func _update_bars() -> void:
+	if _hp_fill == null or _hp_label == null or _mana_fill == null or _mana_label == null:
 		return
-	var pct := float(_hp) / float(maxi(_max_hp, 1))
-	_fill.size.x = BAR_W * clampf(pct, 0.0, 1.0)
+	var hp_pct := float(_hp) / float(maxi(_max_hp, 1))
+	_hp_fill.size.x = BAR_W * clampf(hp_pct, 0.0, 1.0)
+	var mana_pct := float(_mana) / float(maxi(_max_mana, 1))
+	_mana_fill.size.x = BAR_W * clampf(mana_pct, 0.0, 1.0)
 	if _tween == null or not _tween.is_valid() or not _tween.is_running():
-		_fill.color = _bar_color()
-	_label.text = "%d / %d" % [_hp, _max_hp]
+		_hp_fill.color = _hp_bar_color()
+		_mana_fill.color = _mana_bar_color()
+	_hp_label.text = "%d / %d" % [_hp, _max_hp]
+	_mana_label.text = "%d / %d" % [_mana, _max_mana]
 
 
 func _build() -> void:
@@ -76,39 +99,52 @@ func _build() -> void:
 	_panel.add_theme_stylebox_override("panel", style)
 	add_child(_panel)
 
+	var root := HBoxContainer.new()
+	root.add_theme_constant_override("separation", 10)
+	_panel.add_child(root)
+	_build_meter(root, "♥", Color("#c0392b"), true)
+	_build_meter(root, "✦", Color("#48aeea"), false)
+	_update_bars()
+
+
+func _build_meter(parent: HBoxContainer, icon_text: String, icon_color: Color, is_hp: bool) -> void:
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 4)
-	_panel.add_child(vbox)
+	parent.add_child(vbox)
 
-	# Top row: heart + "HP: X / Y"
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 5)
 	vbox.add_child(row)
 
-	var heart := Label.new()
-	heart.text = "♥"
-	heart.add_theme_color_override("font_color", Color("#c0392b"))
-	heart.add_theme_font_size_override("font_size", 13)
-	row.add_child(heart)
+	var icon := Label.new()
+	icon.text = icon_text
+	icon.add_theme_color_override("font_color", icon_color)
+	icon.add_theme_font_size_override("font_size", 20)
+	row.add_child(icon)
 
-	_label = Label.new()
-	_label.add_theme_color_override("font_color", Color("#d8d0bd"))
-	_label.add_theme_font_size_override("font_size", 11)
-	_label.text = "10 / 10"
-	row.add_child(_label)
+	var label := Label.new()
+	label.add_theme_color_override("font_color", Color("#d8d0bd"))
+	label.add_theme_font_size_override("font_size", 17)
+	label.text = "10 / 10"
+	row.add_child(label)
 
-	# Bar row: background + fill overlay
 	var bar_bg := ColorRect.new()
 	bar_bg.custom_minimum_size = Vector2(BAR_W, BAR_H)
 	bar_bg.color = Color(0.13, 0.10, 0.08)
 	vbox.add_child(bar_bg)
 
-	_fill = ColorRect.new()
-	_fill.size = Vector2(BAR_W, BAR_H)
-	_fill.position = Vector2.ZERO
-	_fill.color = _bar_color()
-	_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar_bg.add_child(_fill)
+	var fill := ColorRect.new()
+	fill.size = Vector2(BAR_W, BAR_H)
+	fill.position = Vector2.ZERO
+	fill.color = _hp_bar_color() if is_hp else _mana_bar_color()
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar_bg.add_child(fill)
+	if is_hp:
+		_hp_label = label
+		_hp_fill = fill
+	else:
+		_mana_label = label
+		_mana_fill = fill
 
 
 func _sync_position() -> void:

@@ -47,7 +47,7 @@ func _build() -> void:
 	var title := Label.new()
 	title.text = "Paused"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_font_size_override("font_size", 39)
 	box.add_child(title)
 
 	box.add_child(_button("Resume", resume_pressed.emit))

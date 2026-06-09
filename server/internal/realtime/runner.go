@@ -486,6 +486,14 @@ func (r *runner) persistTick(res game.TickResult) {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist hotbar update", "error", err)
 			}
+		case game.OpGoldUpdate:
+			if c.Gold == nil {
+				continue
+			}
+			if err := r.store.SetCharacterGold(ctx, r.sess.AccountID, r.sess.CharacterID, *c.Gold); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist character gold", "error", err)
+			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
 				if err := r.store.AddCharacterWaypoint(ctx, r.sess.CharacterID, c.Level); err != nil {
@@ -516,6 +524,7 @@ func storeProgressionFromView(accountID, characterID string, view game.Character
 		Level:             view.Level,
 		Experience:        view.Experience,
 		UnspentStatPoints: view.UnspentStatPoints,
+		Gold:              view.Gold,
 		Stats: store.CharacterBaseStats{
 			Str:   view.BaseStats.Str,
 			Dex:   view.BaseStats.Dex,

@@ -6,8 +6,8 @@
       "slot": "main_hand",
       "mount_socket": "right_hand_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "position": { "x": 0.0, "y": -0.08, "z": 0.0 },
+        "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
       }
     },
@@ -16,8 +16,8 @@
       "slot": "main_hand",
       "mount_socket": "right_hand_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "position": { "x": 0.0, "y": -0.08, "z": 0.0 },
+        "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
       }
     },
@@ -26,8 +26,8 @@
       "slot": "main_hand",
       "mount_socket": "right_hand_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "position": { "x": 0.0, "y": -0.08, "z": 0.0 },
+        "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 1.25, "y": 1.25, "z": 1.25 }
       }
     },

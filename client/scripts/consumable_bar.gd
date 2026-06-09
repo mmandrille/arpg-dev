@@ -208,7 +208,7 @@ func _build() -> void:
 		slot.add_theme_stylebox_override("hover", _slot_style(true))
 		slot.add_theme_stylebox_override("pressed", _slot_style(true))
 		slot.add_theme_color_override("font_color", Color("#8b7a62"))
-		slot.add_theme_font_size_override("font_size", 10)
+		slot.add_theme_font_size_override("font_size", 15)
 		slot.text = HOTKEY_LABELS[i]
 		row.add_child(slot)
 		_slots.append(slot)
@@ -357,6 +357,9 @@ func _tooltip(item: Dictionary) -> String:
 	var def: Dictionary = item_rules.get(def_id, {})
 	var name := str(def.get("name", def_id))
 	var heal: Dictionary = def.get("heal", {})
+	var mana_restore: Dictionary = def.get("mana_restore", {})
+	if not mana_restore.is_empty():
+		return "%s (mana %s-%s)" % [name, str(mana_restore.get("min", "?")), str(mana_restore.get("max", "?"))]
 	if heal.is_empty():
 		return name
 	return "%s (heal %s-%s)" % [name, str(heal.get("min", "?")), str(heal.get("max", "?"))]

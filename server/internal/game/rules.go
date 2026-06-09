@@ -290,6 +290,8 @@ type ItemDef struct {
 	Reach           *float64     `json:"reach,omitempty"`
 	ProjectileSpeed *float64     `json:"projectile_speed,omitempty"`
 	Heal            *DamageRange `json:"heal,omitempty"`
+	ManaRestore     *DamageRange `json:"mana_restore,omitempty"`
+	Gold            *DamageRange `json:"gold,omitempty"`
 }
 
 // RarityDef controls how many bounded stat rolls a rolled item gets.
@@ -623,6 +625,30 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 			if *def.Reach <= 0 {
 				return nil, fmt.Errorf("game: invalid rules items.%s.reach: must be positive", id)
+			}
+		}
+		if def.Heal != nil {
+			if def.Category != "consumable" || def.Equippable {
+				return nil, fmt.Errorf("game: invalid rules items.%s.heal: heal is only valid on non-equippable consumables", id)
+			}
+			if err := validateDamageRange("items."+id+".heal", *def.Heal); err != nil {
+				return nil, err
+			}
+		}
+		if def.ManaRestore != nil {
+			if def.Category != "consumable" || def.Equippable {
+				return nil, fmt.Errorf("game: invalid rules items.%s.mana_restore: mana_restore is only valid on non-equippable consumables", id)
+			}
+			if err := validateDamageRange("items."+id+".mana_restore", *def.ManaRestore); err != nil {
+				return nil, err
+			}
+		}
+		if def.Gold != nil {
+			if def.Category != "currency" || def.Equippable {
+				return nil, fmt.Errorf("game: invalid rules items.%s.gold: gold is only valid on non-equippable currency", id)
+			}
+			if err := validateDamageRange("items."+id+".gold", *def.Gold); err != nil {
+				return nil, err
 			}
 		}
 		mode := def.AttackMode

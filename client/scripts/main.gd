@@ -63,6 +63,8 @@ var player_id: String = ""
 var party: Array = []
 var player_hp: int = PLAYER_START_HP
 var player_max_hp: int = PLAYER_START_HP
+var player_mana: int = 10
+var player_max_mana: int = 10
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
@@ -70,6 +72,7 @@ var inventory: Array = []
 var equipped: Dictionary = {}
 var inventory_rows: int = 3
 var inventory_capacity: int = 15
+var gold: int = 0
 var hotbar_capacity: int = 2
 var hotbar: Array = []
 var character_progression: Dictionary = {}
@@ -390,6 +393,15 @@ func _on_character_delete_requested(character_id: String) -> void:
 		character_panel.show_continue(client.list_characters())
 
 
+func _on_character_rename_requested(character_id: String, name: String) -> void:
+	if client.rename_character(character_id, name).is_empty():
+		if character_panel != null:
+			character_panel.set_error("Could not rename character")
+		return
+	if character_panel != null:
+		character_panel.show_continue(client.list_characters())
+
+
 func _start_selected_character(character_id: String) -> void:
 	match character_flow:
 		"multiplayer_host":
@@ -445,7 +457,7 @@ func _on_settings_from_main() -> void:
 	settings_return_target = "main"
 	main_menu.visible = false
 	if settings_panel != null:
-		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text)
+		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text, client_settings.top_right_status_text)
 
 
 func _on_settings_from_pause() -> void:
@@ -453,7 +465,7 @@ func _on_settings_from_pause() -> void:
 	if pause_menu != null:
 		pause_menu.hide_pause()
 	if settings_panel != null:
-		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text)
+		settings_panel.show_settings(ClientSettingsScript.size_label(client_settings.window_size), client_settings.floating_combat_text, client_settings.top_right_status_text)
 
 
 func _on_settings_back() -> void:
@@ -477,10 +489,19 @@ func _on_floating_combat_text_toggled(enabled: bool) -> void:
 	_sync_settings_panel()
 
 
+func _on_top_right_status_text_toggled(enabled: bool) -> void:
+	if client_settings == null:
+		return
+	client_settings.set_top_right_status_text(enabled)
+	_sync_settings_panel()
+	_update_level_hud()
+
+
 func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
 		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
 		settings_panel.set_floating_combat_text_enabled(client_settings.floating_combat_text)
+		settings_panel.set_top_right_status_text_enabled(client_settings.top_right_status_text)
 
 
 func _show_pause_menu() -> void:
@@ -517,11 +538,14 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	party = []
 	player_hp = PLAYER_START_HP
 	player_max_hp = PLAYER_START_HP
+	player_mana = 10
+	player_max_mana = 10
 	predicted_pos = Vector3.ZERO
 	reconciliation_delta = 0.0
 	last_server_tick = 0
 	inventory = []
 	equipped = {}
+	gold = 0
 	character_progression = {}
 	loot_ids.clear()
 	monster_ids.clear()
@@ -548,6 +572,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	_refresh_inventory_ui()
 	if _health_bar != null:
 		_health_bar.update_hp(player_hp, player_max_hp)
+		_health_bar.update_mana(player_mana, player_max_mana)
 	if character_stats_panel != null:
 		character_stats_panel.hide_display()
 	_hide_character_info_panel()
@@ -678,6 +703,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	equipped = p.get("equipped", {})
 	inventory_rows = int(p.get("inventory_rows", inventory_rows))
 	inventory_capacity = int(p.get("inventory_capacity", inventory_capacity))
+	gold = int(p.get("gold", gold))
 	hotbar_capacity = int(p.get("hotbar_capacity", 2))
 	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
@@ -740,6 +766,8 @@ func _apply_delta(p: Dictionary) -> void:
 				if c.has("inventory_capacity"):
 					inventory_capacity = int(c.get("inventory_capacity", inventory_capacity))
 				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"))
+			"gold_update":
+				gold = int(c.get("gold", gold))
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
 				var discovered := bool(c.get("discovered", false))
@@ -766,6 +794,11 @@ func _apply_delta(p: Dictionary) -> void:
 				_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
 				if _health_bar != null:
 					_health_bar.update_hp(player_hp, player_max_hp, true)
+				continue
+			if event_type == "player_mana_restored":
+				_show_damage_number(eid, Color("#54c7f3"), ev.get("mana", null), "+", 1.0)
+				if _health_bar != null:
+					_health_bar.update_mana(player_mana, player_max_mana, true)
 				continue
 			if event_type == "player_damaged":
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
@@ -860,6 +893,12 @@ func _upsert_entity(e: Dictionary) -> void:
 				player_anim.enter_terminal("death")
 			if player_hp <= 0 and player_reaction != null:
 				player_reaction.enter_death()
+		if e.has("mana"):
+			player_mana = int(e["mana"])
+			if e.has("max_mana"):
+				player_max_mana = int(e["max_mana"])
+			if _health_bar != null:
+				_health_bar.update_mana(player_mana, player_max_mana)
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
@@ -1006,7 +1045,7 @@ func _apply_hotbar_update(slot_index: int, item_instance_id) -> void:
 
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
-		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity)
+		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
@@ -1224,11 +1263,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if _is_inventory_key(event):
 			if inventory_panel != null:
+				_close_gameplay_panels("inventory")
 				inventory_panel.toggle()
 			get_viewport().set_input_as_handled()
 			return
 		if _is_character_stats_key(event):
 			if character_stats_panel != null:
+				_close_gameplay_panels("stats")
 				character_stats_panel.toggle()
 				_refresh_progression_ui()
 			get_viewport().set_input_as_handled()
@@ -1303,6 +1344,17 @@ func _is_character_stats_key(event: InputEventKey) -> bool:
 
 func _is_character_info_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_P or event.physical_keycode == KEY_P or event.unicode == 112 or event.unicode == 80
+
+
+func _close_gameplay_panels(except: String = "") -> void:
+	if except != "inventory" and inventory_panel != null:
+		inventory_panel.hide_display()
+	if except != "stats" and character_stats_panel != null:
+		character_stats_panel.hide_display()
+	if except != "character_info":
+		_hide_character_info_panel()
+	if except != "waypoint":
+		_hide_waypoint_panel()
 
 
 func _is_escape_key(event: InputEventKey) -> bool:
@@ -1455,6 +1507,10 @@ func _hold_input_allowed() -> bool:
 	if inventory_panel != null and inventory_panel.visible:
 		return false
 	if character_stats_panel != null and character_stats_panel.visible:
+		return false
+	if character_info_panel != null and character_info_panel.visible:
+		return false
+	if waypoint_panel != null and waypoint_panel.visible:
 		return false
 
 	return true
@@ -2045,6 +2101,7 @@ func _setup_menu_layer() -> void:
 	character_panel.start_requested.connect(_start_selected_character)
 	character_panel.create_requested.connect(_on_character_create_requested)
 	character_panel.delete_requested.connect(_on_character_delete_requested)
+	character_panel.rename_requested.connect(_on_character_rename_requested)
 	menu_layer.add_child(character_panel)
 
 	multiplayer_panel = MultiplayerSessionsPanelScript.new()
@@ -2061,6 +2118,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.back_requested.connect(_on_settings_back)
 	settings_panel.size_selected.connect(_on_window_size_selected)
 	settings_panel.floating_combat_text_toggled.connect(_on_floating_combat_text_toggled)
+	settings_panel.top_right_status_text_toggled.connect(_on_top_right_status_text_toggled)
 	menu_layer.add_child(settings_panel)
 
 	pause_menu = PauseMenuScript.new()
@@ -2125,7 +2183,7 @@ func _setup_character_info_panel(ui: CanvasLayer) -> void:
 
 	var title := Label.new()
 	title.text = "Character"
-	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_font_size_override("font_size", 24)
 	title.add_theme_color_override("font_color", Color("#f0dfbb"))
 	root.add_child(title)
 
@@ -2142,6 +2200,7 @@ func _setup_character_info_panel(ui: CanvasLayer) -> void:
 func _toggle_character_info_panel() -> void:
 	if character_info_panel == null or not gameplay_active:
 		return
+	_close_gameplay_panels("character_info")
 	character_info_panel.visible = not character_info_panel.visible
 	if character_info_panel.visible:
 		_update_character_info_panel()
@@ -2185,7 +2244,7 @@ func _current_area_label() -> String:
 func _character_info_label() -> Label:
 	var label := Label.new()
 	label.add_theme_color_override("font_color", Color("#d8c7a6"))
-	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_font_size_override("font_size", 21)
 	label.clip_text = true
 	return label
 
@@ -2245,6 +2304,7 @@ func _apply_teleporter_snapshot(rows: Array) -> void:
 func _show_waypoint_panel() -> void:
 	if waypoint_panel == null:
 		return
+	_close_gameplay_panels("waypoint")
 	_refresh_waypoint_panel()
 	waypoint_panel.visible = true
 
@@ -2395,6 +2455,9 @@ func _render_dungeon_walls() -> void:
 
 func _update_level_hud() -> void:
 	if _level_label == null:
+		return
+	if client_settings != null and not client_settings.top_right_status_text:
+		_level_label.visible = false
 		return
 	var lines: Array[String] = []
 	if current_level == 0:
@@ -2566,7 +2629,7 @@ func _make_loot_node(e: Dictionary) -> Node3D:
 			_add_loot_box(root, "BowTop", Vector3(0.10, 0.08, 0.42) * scale, Vector3(0.14 * scale, 0.20, -0.18 * scale), color)
 			_add_loot_box(root, "BowBottom", Vector3(0.10, 0.08, 0.42) * scale, Vector3(-0.14 * scale, 0.20, 0.18 * scale), color)
 			_add_loot_box(root, "String", Vector3(0.04, 0.06, 0.75) * scale, Vector3(0.0, 0.18, 0.0), accent)
-		"coin":
+		"badge", "coin":
 			_add_loot_cylinder(root, "Badge", 0.24 * scale, 0.08 * scale, Vector3(0.0, 0.16, 0.0), color)
 			_add_loot_cylinder(root, "BadgeMark", 0.12 * scale, 0.10 * scale, Vector3(0.0, 0.21, 0.0), accent)
 		"leaf":
@@ -2918,6 +2981,9 @@ func get_bot_state() -> Dictionary:
 		"remote_player_ids": _remote_player_ids(),
 		"player_hp": player_hp,
 		"player_max_hp": player_max_hp,
+		"player_mana": player_mana,
+		"player_max_mana": player_max_mana,
+		"gold": gold,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
 		"character_progression": character_progression.duplicate(true),
 		"inventory": inventory.duplicate(true),
@@ -2948,6 +3014,7 @@ func get_bot_state() -> Dictionary:
 		"pause_menu_visible": pause_menu != null and pause_menu.visible,
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
+		"top_right_status_text_enabled": client_settings != null and client_settings.top_right_status_text,
 		"damage_numbers": _bot_damage_numbers(),
 		"known_characters": character_panel.known_characters() if character_panel != null else [],
 		"multiplayer_panel": multiplayer_panel.get_debug_state() if multiplayer_panel != null else {},

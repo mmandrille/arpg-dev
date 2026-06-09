@@ -564,6 +564,7 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 		Level:             progression.Level,
 		Experience:        progression.Experience,
 		UnspentStatPoints: progression.UnspentStatPoints,
+		Gold:              progression.Gold,
 		BaseStats: game.BaseStatsView{
 			Str:   progression.Stats.Str,
 			Dex:   progression.Stats.Dex,

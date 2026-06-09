@@ -136,7 +136,7 @@
         },
         {
           "type": "loot",
-          "item_def_id": "training_badge",
+          "item_def_id": "quest_leaf",
           "position": { "x": 8, "y": 2 }
         }
       ]
@@ -495,26 +495,26 @@
       "player": { "position": { "x": 2, "y": 5 } },
       "entities": [
         { "type": "loot", "item_template_id": "cave_pack_belt", "position": { "x": 3, "y": 5 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 4, "y": 3 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 5, "y": 3 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 6, "y": 3 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 7, "y": 3 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 8, "y": 3 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 4, "y": 4 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 5, "y": 4 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 6, "y": 4 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 7, "y": 4 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 8, "y": 4 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 4, "y": 5 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 5, "y": 5 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 6, "y": 5 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 7, "y": 5 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 8, "y": 5 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 4, "y": 6 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 5, "y": 6 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 6, "y": 6 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 7, "y": 6 } },
-        { "type": "loot", "item_def_id": "training_badge", "position": { "x": 8, "y": 6 } }
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 3 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 3 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 3 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 3 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 3 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 4 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 4 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 4 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 4 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 4 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 5 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 5 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 5 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 5 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 5 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 6 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 6 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 6 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 6 } },
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 6 } }
       ]
     }
   }

@@ -124,7 +124,7 @@
         "derived_stats": {
           "damage_min": 2,
           "damage_max": 4,
-          "armor": 1.2,
+          "armor": 1,
           "attack_speed": 1.025,
           "hit_chance": 1,
           "crit_chance": 0.06,

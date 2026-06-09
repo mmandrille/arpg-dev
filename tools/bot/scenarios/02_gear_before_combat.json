@@ -2,7 +2,7 @@
   "id": "gear_before_combat",
   "world_id": "gear_before_combat",
   "title": "Gear before combat",
-  "description": "Walk to an initial sword, equip it, kill the reward dummy, pick up the badge, and verify replay state.",
+  "description": "Walk to an initial sword, equip it, kill the reward dummy, pick up gold, and verify replay state.",
   "steps": [
     {
       "action": "walk_to_loot",
@@ -29,14 +29,14 @@
     },
     {
       "action": "action_entity",
-      "item_def_id": "training_badge",
-      "event_type": "item_picked_up"
+      "item_def_id": "gold",
+      "event_type": "gold_picked_up"
     }
   ],
   "assertions": [
-    { "type": "inventory_count", "equals": 2 },
+    { "type": "inventory_count", "equals": 1 },
     { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-    { "type": "inventory_contains", "item_def_id": "training_badge", "equipped": false },
+    { "type": "gold", "at_least": 6 },
     { "type": "monster_dead", "monster_def_id": "training_dummy_reward" }
   ]
 }

@@ -15,7 +15,7 @@
       "stairs_down": { "x": 30, "y": 2 },
       "teleporter": { "x": 92, "y": 47 },
       "loot": [
-        { "item_def_id": "training_badge", "position": { "x": 31, "y": 43 } }
+        { "item_def_id": "gold", "position": { "x": 31, "y": 43 } }
       ]
     }
   },

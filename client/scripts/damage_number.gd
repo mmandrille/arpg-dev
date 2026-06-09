@@ -32,7 +32,7 @@ func setup(camera: Camera3D, target: Node3D, world_position: Vector3, amount = n
 	rotation = deg_to_rad(4.0 * side) if variant == "crit" else 0.0
 
 	var settings := LabelSettings.new()
-	settings.font_size = 26 if variant == "crit" else 20 if variant in ["miss", "block"] else 22
+	settings.font_size = 39 if variant == "crit" else 30 if variant in ["miss", "block"] else 33
 	settings.font_color = color
 	settings.outline_size = 4
 	settings.outline_color = Color(0.08, 0.06, 0.04, 0.85)

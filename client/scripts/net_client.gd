@@ -113,6 +113,17 @@ func create_character(name: String) -> Dictionary:
 	return {}
 
 
+func rename_character(character_id: String, name: String) -> Dictionary:
+	if character_id == "":
+		return {}
+	var r := _http(HTTPClient.METHOD_PATCH, "/v0/characters/" + character_id,
+		["Authorization: Bearer " + token], JSON.stringify({"name": name}))
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("rename_character failed: %s" % r)
+	return {}
+
+
 func delete_character(character_id: String) -> bool:
 	if character_id == "":
 		return false

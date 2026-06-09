@@ -2,15 +2,15 @@
   "id": "heal_lab",
   "world_id": "heal_lab",
   "title": "Heal lab",
-  "description": "Fight training_dummy_heal, loot two dropped potions, double-potion heal path restores full HP.",
+  "description": "Fight training_dummy_heal, loot red and blue potions, heal with red, and reject blue while mana is full.",
   "steps": [
     { "action": "attack_until_event", "monster_def_id": "training_dummy_heal", "event_type": "monster_killed" },
-    { "action": "pick_up_loot", "item_def_id": "red_potion" },
+    { "action": "pick_up_loot", "item_def_id": "blue_potion" },
     { "action": "pick_up_loot", "item_def_id": "red_potion" },
     { "action": "assert_player_hp", "equals": 5 },
     { "action": "use_inventory_item", "item_def_id": "red_potion", "bag_index": 0 },
     { "action": "assert_player_hp", "equals": 10 },
-    { "action": "use_inventory_item", "item_def_id": "red_potion", "bag_index": 0, "expect_reject": "already_full_hp" }
+    { "action": "use_inventory_item", "item_def_id": "blue_potion", "bag_index": 0, "expect_reject": "already_full_mana" }
   ],
   "assertions": [
     { "type": "player_hp_equals", "equals": 10 },

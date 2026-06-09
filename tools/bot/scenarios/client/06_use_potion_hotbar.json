@@ -2,8 +2,8 @@
   "id": "use_potion_hotbar",
   "runner": "godot_client",
   "world_id": "heal_lab",
-  "title": "Use potion hotbar: fight, loot two, drag + double-click + key 1",
-  "description": "Bot kills training_dummy_heal, picks up two red potions, opens inventory, drags the second to hotbar slot 1, double-clicks the first for a partial heal, then presses KEY_1 to finish healing.",
+  "title": "Use potion hotbar: fight, loot red/blue, drag + double-click + key 1",
+  "description": "Bot kills training_dummy_heal, picks up red and blue potions, opens inventory, drags blue to hotbar slot 1, double-clicks red to heal, then presses KEY_1 while mana is full.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
@@ -12,18 +12,18 @@
     { "type": "click_entity", "entity_type": "loot", "entity_index": 0 },
     { "type": "wait_inventory_count", "item_def_id": "red_potion", "equals": 1, "timeout_s": 15.0 },
     { "type": "click_entity", "entity_type": "loot", "entity_index": 0 },
-    { "type": "wait_inventory_count", "item_def_id": "red_potion", "equals": 2, "timeout_s": 15.0 },
+    { "type": "wait_inventory_count", "item_def_id": "blue_potion", "equals": 1, "timeout_s": 15.0 },
     { "type": "press_key", "keycode": "KEY_I" },
     { "type": "assert_panel_visible", "visible": true },
-    { "type": "assign_hotbar_slot", "slot_index": 0, "item_def_id": "red_potion", "bag_index": 1 },
-    { "type": "wait_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion", "timeout_s": 15.0 },
+    { "type": "assign_hotbar_slot", "slot_index": 0, "item_def_id": "blue_potion" },
+    { "type": "wait_hotbar_assigned", "slot_index": 0, "item_def_id": "blue_potion", "timeout_s": 15.0 },
     { "type": "double_click_bag_item", "item_def_id": "red_potion", "bag_index": 0 },
     { "type": "wait_event", "event_type": "player_healed", "timeout_s": 15.0 },
     { "type": "assert_player_hp", "equals": 10 },
-    { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 1 },
+    { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 0 },
     { "type": "press_key", "keycode": "KEY_1" },
     { "type": "assert_player_hp", "equals": 10 },
-    { "type": "assert_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion" },
-    { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 1 }
+    { "type": "assert_hotbar_assigned", "slot_index": 0, "item_def_id": "blue_potion" },
+    { "type": "assert_inventory_count", "item_def_id": "blue_potion", "equals": 1 }
   ]
 }

@@ -225,7 +225,7 @@ func _initialize() -> void:
 	if dungeon_loot.size() != 1:
 		_fail("dungeon level -2 loot count mismatch")
 		return
-	if str(dungeon_loot[0]["item_def_id"]) != "training_badge" or not _vec2_equals(dungeon_loot[0]["position"], 31.0, 43.0):
+	if str(dungeon_loot[0]["item_def_id"]) != "gold" or not _vec2_equals(dungeon_loot[0]["position"], 31.0, 43.0):
 		_fail("dungeon level -2 coin loot mismatch")
 		return
 	var fallback := str(dungeon_generation["default_level_name_template"]).replace("{n}", str(abs(-9)))

@@ -106,7 +106,7 @@ func _build() -> void:
 
 	var title := Label.new()
 	title.text = "Character"
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", 33)
 	title.add_theme_color_override("font_color", Color("#f0dfbb"))
 	root.add_child(title)
 
@@ -218,7 +218,7 @@ func _breakdown_summary(key: String) -> String:
 func _value_label() -> Label:
 	var label := Label.new()
 	label.add_theme_color_override("font_color", Color("#d8c7a6"))
-	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_font_size_override("font_size", 23)
 	return label
 
 

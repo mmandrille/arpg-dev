@@ -93,6 +93,7 @@ class RuntimeState:
     hotbar: list[dict[str, Any]] = field(default_factory=list)
     inventory_rows: int = 3
     inventory_capacity: int = 15
+    gold: int = 0
     loot_ids: list[str] = field(default_factory=list)
     item_id: str | None = None
     equipped_item_id: str | None = None
@@ -423,7 +424,8 @@ async def execute_step(
         return
 
     if action == "move_until_player_position":
-        await walk_toward(
+        move_fn = move_to_position if bool(step.get("pathfind")) else walk_toward
+        await move_fn(
             ws,
             session_id,
             state,
@@ -716,6 +718,9 @@ async def execute_step(
             return
         await wait_for_accept(ws, state, env["message_id"], loop)
         if target_type == "loot" and target_item_def_id:
+            if target_item_def_id == "gold":
+                await wait_for_event(ws, state, "gold_picked_up", loop)
+                return
             deadline = loop.time() + SLICE_TIMEOUT_S
             while find_inventory_item(state.inventory, target_item_def_id) is None:
                 if loop.time() > deadline:
@@ -886,6 +891,17 @@ async def execute_step(
         monster = find_monster(state, str(step["monster_def_id"]))
         if monster is None:
             raise AssertionError(f"walk_to_monster: monster not found: {step}")
+        if bool(step.get("pathfind")):
+            await move_to_position(
+                ws,
+                session_id,
+                state,
+                monster["position"],
+                loop,
+                max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+                stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
+            )
+            return
         await walk_toward(
             ws,
             session_id,
@@ -952,6 +968,9 @@ async def execute_step(
         await ws.send(json.dumps(make_envelope(
             "action_intent", session_id, state.last_tick, {"target_id": loot["id"]})))
         log("picking up", item_def_id, "loot", loot["id"])
+        if item_def_id == "gold":
+            await wait_for_event(ws, state, "gold_picked_up", loop)
+            return
         wait_started = loop.time()
         last_wait_log = wait_started
         while find_inventory_item(state.inventory, item_def_id, bag_index) is None:
@@ -1294,7 +1313,9 @@ async def move_to_position(
             stalled_reissues = 0
             last_pos = current_pos
         await pump_one(ws, state, timeout=0.05)
-    raise TimeoutError(f"move_to_position exhausted {max_ticks} ticks toward {target_pos}")
+    player = find_player(state)
+    player_pos = (player or {}).get("position")
+    raise TimeoutError(f"move_to_position exhausted {max_ticks} ticks toward {target_pos}; player={player_pos}")
 
 
 async def attack_until_monster_event(
@@ -1622,6 +1643,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                 state.inventory_rows = int(c["inventory_rows"])
             if "inventory_capacity" in c:
                 state.inventory_capacity = int(c["inventory_capacity"])
+        elif c["op"] == "gold_update":
+            state.gold = int(c.get("gold", state.gold))
         elif c["op"] == "teleporter_discovery_update":
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
@@ -1646,6 +1669,7 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.hotbar = [dict(slot) for slot in payload.get("hotbar", [])]
     state.inventory_rows = int(payload.get("inventory_rows", 3))
     state.inventory_capacity = int(payload.get("inventory_capacity", state.inventory_rows * 5))
+    state.gold = int(payload.get("gold", 0))
     state.character_progression = dict(payload.get("character_progression", {}))
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
@@ -1942,6 +1966,7 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             hotbar=payload.get("hotbar", []),
             inventory_rows=int(payload.get("inventory_rows", 3)),
             inventory_capacity=int(payload.get("inventory_capacity", int(payload.get("inventory_rows", 3)) * 5)),
+            gold=int(payload.get("gold", 0)),
         )
         log("reconnect snapshot restored expected scenario state")
 
@@ -2243,6 +2268,7 @@ def run_assertions(
     hotbar: list[dict] | None = None,
     inventory_rows: int | None = None,
     inventory_capacity: int | None = None,
+    gold: int | None = None,
 ) -> None:
     for assertion in assertions:
         if isinstance(assertion, str):
@@ -2272,6 +2298,8 @@ def run_assertions(
         elif typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
+        elif typ == "gold":
+            assert_count_matches(int(gold or 0), assertion, f"{where}: gold")
         elif typ == "rolled_inventory_item":
             assert_rolled_inventory_item(inventory, assertion, where)
         elif typ == "rolled_inventory_any":
@@ -2527,6 +2555,9 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                 matches = [item for item in matches if bool(item.get("equipped")) == bool(assertion["equipped"])]
             assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")
             continue
+        if typ == "gold":
+            assert_count_matches(state.gold, assertion, f"{where}: gold")
+            continue
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)
         if typ == "rolled_inventory_any":
@@ -2669,6 +2700,7 @@ def run_verified_session(
         hotbar=state.get("hotbar", []),
         inventory_rows=int(state.get("inventory_rows", 3)),
         inventory_capacity=int(state.get("inventory_capacity", int(state.get("inventory_rows", 3)) * 5)),
+        gold=int(state.get("gold", 0)),
     )
     log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 

@@ -44,6 +44,7 @@ func _initialize() -> void:
 	_test_client_settings_parse_size_label()
 	_test_client_settings_size_from_data()
 	_test_client_settings_floating_combat_text_from_data()
+	_test_client_settings_top_right_status_text_from_data()
 	_test_combat_feedback_step_types_load()
 	_test_combat_event_and_damage_number_assertions()
 	_test_inventory_paper_doll_step_types_load()
@@ -402,6 +403,11 @@ func _test_client_settings_size_from_data() -> void:
 func _test_client_settings_floating_combat_text_from_data() -> void:
 	_assert_eq("settings floating text defaults on", ClientSettingsScript.floating_combat_text_from_data({}), true)
 	_assert_eq("settings floating text parses off", ClientSettingsScript.floating_combat_text_from_data({"floating_combat_text": false}), false)
+
+
+func _test_client_settings_top_right_status_text_from_data() -> void:
+	_assert_eq("settings top-right text defaults on", ClientSettingsScript.top_right_status_text_from_data({}), true)
+	_assert_eq("settings top-right text parses off", ClientSettingsScript.top_right_status_text_from_data({"top_right_status_text": false}), false)
 
 
 func _test_combat_feedback_step_types_load() -> void:

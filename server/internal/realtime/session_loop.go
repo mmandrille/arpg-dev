@@ -664,6 +664,14 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist hotbar update", "error", err)
 			}
+		case game.OpGoldUpdate:
+			if c.Gold == nil {
+				continue
+			}
+			if err := l.hub.store.SetCharacterGold(ctx, member.AccountID, member.CharacterID, *c.Gold); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist character gold", "error", err)
+			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
 				if err := l.hub.store.AddCharacterWaypoint(ctx, member.CharacterID, c.Level); err != nil {

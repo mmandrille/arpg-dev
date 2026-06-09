@@ -1,0 +1,25 @@
+client/scripts/inventory_panel.gd
+  s_3bd2be314dbf2d::t_1a4d8dda288116 172,189,353-354,365-375
+docs/plans/v39_2026-06-09-ui-currency-and-mana-polish.md
+  s_3bd2be314dbf2d::t_3c9e4849651e47 7-11
+tools/bot/scenarios/13_teleporter_lab.json
+  s_3bd2be314dbf2d::t_3e0311dfc99937 4
+docs/PROGRESS.md
+  s_3bd2be314dbf2d::t_3c9e4849651e47 6,14,16,57,116,962-982,1037,1180-1183,1188-1191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9eae07bbc71cd78e0c8f4fb6fccfe97a553af53e",
+  "prompts": {},
+  "sessions": {
+    "s_3bd2be314dbf2d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaa2e-6ca2-7150-9b97-a6e32249cc3f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -3,16 +3,24 @@ extends RefCounted
 class_name ClientSettings
 
 const DEFAULT_SIZE := Vector2i(1920, 1080)
+const CREATE_GAME_SESSION_TYPE_COOP := "coop"
+const CREATE_GAME_SESSION_TYPE_SOLO := "solo"
+const DEFAULT_CREATE_GAME_SESSION_TYPE := CREATE_GAME_SESSION_TYPE_COOP
 const SUPPORTED_SIZES := [
 	Vector2i(1280, 720),
 	Vector2i(1600, 900),
 	Vector2i(1920, 1080),
+]
+const SUPPORTED_CREATE_GAME_SESSION_TYPES := [
+	CREATE_GAME_SESSION_TYPE_COOP,
+	CREATE_GAME_SESSION_TYPE_SOLO,
 ]
 
 var path: String = "user://settings.json"
 var window_size: Vector2i = DEFAULT_SIZE
 var floating_combat_text: bool = true
 var top_right_status_text: bool = true
+var create_game_session_type: String = DEFAULT_CREATE_GAME_SESSION_TYPE
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -44,6 +52,21 @@ static func normalize_size(size: Vector2i) -> Vector2i:
 	return DEFAULT_SIZE
 
 
+static func normalize_create_game_session_type(session_type: String) -> String:
+	var normalized := session_type.strip_edges().to_lower()
+	if normalized in SUPPORTED_CREATE_GAME_SESSION_TYPES:
+		return normalized
+	return DEFAULT_CREATE_GAME_SESSION_TYPE
+
+
+static func create_game_session_type_label(session_type: String) -> String:
+	match normalize_create_game_session_type(session_type):
+		CREATE_GAME_SESSION_TYPE_SOLO:
+			return "Solo"
+		_:
+			return "Co-op"
+
+
 static func size_from_data(data) -> Vector2i:
 	if typeof(data) != TYPE_DICTIONARY:
 		return DEFAULT_SIZE
@@ -65,17 +88,25 @@ static func top_right_status_text_from_data(data) -> bool:
 	return bool((data as Dictionary).get("top_right_status_text", true))
 
 
+static func create_game_session_type_from_data(data) -> String:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_CREATE_GAME_SESSION_TYPE
+	return normalize_create_game_session_type(str((data as Dictionary).get("create_game_session_type", DEFAULT_CREATE_GAME_SESSION_TYPE)))
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
 		floating_combat_text = true
 		top_right_status_text = true
+		create_game_session_type = DEFAULT_CREATE_GAME_SESSION_TYPE
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
 	window_size = size_from_data(parsed)
 	floating_combat_text = floating_combat_text_from_data(parsed)
 	top_right_status_text = top_right_status_text_from_data(parsed)
+	create_game_session_type = create_game_session_type_from_data(parsed)
 
 
 func save() -> void:
@@ -90,6 +121,7 @@ func save() -> void:
 		},
 		"floating_combat_text": floating_combat_text,
 		"top_right_status_text": top_right_status_text,
+		"create_game_session_type": create_game_session_type,
 	}))
 
 
@@ -129,5 +161,11 @@ func set_floating_combat_text(enabled: bool, persist: bool = true) -> void:
 
 func set_top_right_status_text(enabled: bool, persist: bool = true) -> void:
 	top_right_status_text = enabled
+	if persist:
+		save()
+
+
+func set_create_game_session_type(session_type: String, persist: bool = true) -> void:
+	create_game_session_type = normalize_create_game_session_type(session_type)
 	if persist:
 		save()

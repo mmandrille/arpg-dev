@@ -1,11 +1,12 @@
 extends Control
 class_name MainMenu
 
-signal continue_pressed
-signal new_game_pressed
-signal multiplayer_pressed
+signal create_game_pressed
+signal join_game_pressed
 signal settings_pressed
 signal exit_pressed
+
+var _button_labels: Array = []
 
 
 func _ready() -> void:
@@ -48,16 +49,26 @@ func _build() -> void:
 	title.add_theme_color_override("font_color", Color("#f1efe4"))
 	box.add_child(title)
 
-	box.add_child(_button("Continue", continue_pressed.emit))
-	box.add_child(_button("New Game", new_game_pressed.emit))
-	box.add_child(_button("Multiplayer", multiplayer_pressed.emit))
+	box.add_child(_button("Create Game", create_game_pressed.emit, "create_game"))
+	box.add_child(_button("Join Game", join_game_pressed.emit, "join_game"))
 	box.add_child(_button("Settings", settings_pressed.emit))
 	box.add_child(_button("Exit", exit_pressed.emit))
 
 
-func _button(text: String, callback: Callable) -> Button:
+func _button(text: String, callback: Callable, action: String = "") -> Button:
 	var button := Button.new()
 	button.text = text
+	if action != "":
+		button.set_meta("action", action)
+	_button_labels.append(text)
 	button.custom_minimum_size = Vector2(260, 44)
 	button.pressed.connect(callback)
 	return button
+
+
+func button_labels() -> Array:
+	return _button_labels.duplicate()
+
+
+func available_actions() -> Array:
+	return ["create_game", "join_game", "settings", "exit"]

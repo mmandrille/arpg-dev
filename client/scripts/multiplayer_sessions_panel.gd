@@ -1,11 +1,11 @@
 extends Control
 class_name MultiplayerSessionsPanel
 
-signal host_requested
 signal refresh_requested
 signal join_requested(session_id: String)
 signal back_requested
 
+var _title: Label
 var _rows: VBoxContainer
 var _empty_label: Label
 var _error_label: Label
@@ -52,9 +52,11 @@ func select_first_session() -> void:
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
+		"title": _title.text if _title != null else "",
 		"sessions": _sessions.duplicate(true),
 		"selected_session_id": _selected_session_id,
 		"error": _error_label.text if _error_label != null else "",
+		"actions": ["refresh_sessions", "join_selected_session", "back"],
 	}
 
 
@@ -81,20 +83,19 @@ func _build() -> void:
 	box.add_theme_constant_override("separation", 8)
 	panel.add_child(box)
 
-	var title := Label.new()
-	title.text = "Multiplayer"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 36)
-	box.add_child(title)
+	_title = Label.new()
+	_title.text = "Join Game"
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title.add_theme_font_size_override("font_size", 36)
+	box.add_child(_title)
 
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 8)
 	box.add_child(actions)
-	actions.add_child(_button("Host Listed Session", host_requested.emit))
-	actions.add_child(_button("Refresh Sessions", refresh_requested.emit))
+	actions.add_child(_button("Refresh", refresh_requested.emit))
 
 	_empty_label = Label.new()
-	_empty_label.text = "No listed sessions"
+	_empty_label.text = "No active games"
 	_empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_empty_label)
 

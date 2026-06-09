@@ -5,9 +5,12 @@ signal back_requested
 signal size_selected(label: String)
 signal floating_combat_text_toggled(enabled: bool)
 signal top_right_status_text_toggled(enabled: bool)
+signal create_game_session_type_selected(session_type: String)
 
 var _buttons: Dictionary = {}
+var _session_type_buttons: Dictionary = {}
 var _selected_label: String = ""
+var _selected_session_type: String = "coop"
 var _floating_toggle: CheckButton
 var _top_right_toggle: CheckButton
 
@@ -20,12 +23,13 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, top_right_status_text_enabled: bool = true) -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, top_right_status_text_enabled: bool = true, create_game_session_type: String = "coop") -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
 	set_floating_combat_text_enabled(floating_combat_text_enabled)
 	set_top_right_status_text_enabled(top_right_status_text_enabled)
+	set_create_game_session_type(create_game_session_type)
 
 
 func hide_panel() -> void:
@@ -55,6 +59,13 @@ func set_top_right_status_text_enabled(enabled: bool) -> void:
 	_top_right_toggle.button_pressed = enabled
 
 
+func set_create_game_session_type(session_type: String) -> void:
+	_selected_session_type = _normalize_session_type(session_type)
+	for key in _session_type_buttons.keys():
+		var button: Button = _session_type_buttons[key]
+		button.disabled = str(key) == _selected_session_type
+
+
 func _build() -> void:
 	var bg := ColorRect.new()
 	bg.color = Color(0.03, 0.035, 0.04, 0.88)
@@ -62,12 +73,12 @@ func _build() -> void:
 	add_child(bg)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(460, 420)
+	panel.custom_minimum_size = Vector2(460, 520)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left = -230
 	panel.offset_right = 230
-	panel.offset_top = -210
-	panel.offset_bottom = 210
+	panel.offset_top = -260
+	panel.offset_bottom = 260
 	add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -90,6 +101,18 @@ func _build() -> void:
 		)
 		_buttons[label] = button
 		box.add_child(button)
+
+	var session_type_label := Label.new()
+	session_type_label.text = "Create Game Type"
+	session_type_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	session_type_label.add_theme_font_size_override("font_size", 30)
+	box.add_child(session_type_label)
+
+	var session_type_row := HBoxContainer.new()
+	session_type_row.add_theme_constant_override("separation", 8)
+	box.add_child(session_type_row)
+	_add_session_type_button(session_type_row, "Co-op", "coop")
+	_add_session_type_button(session_type_row, "Solo", "solo")
 
 	_floating_toggle = CheckButton.new()
 	_floating_toggle.text = "Floating combat text"
@@ -117,3 +140,22 @@ func _build() -> void:
 	back.add_theme_font_size_override("font_size", 39)
 	back.pressed.connect(back_requested.emit)
 	box.add_child(back)
+
+
+func _add_session_type_button(parent: Control, label: String, session_type: String) -> void:
+	var button := Button.new()
+	button.text = label
+	button.custom_minimum_size = Vector2(154, 42)
+	button.add_theme_font_size_override("font_size", 34)
+	button.pressed.connect(func() -> void:
+		create_game_session_type_selected.emit(session_type)
+	)
+	_session_type_buttons[session_type] = button
+	parent.add_child(button)
+
+
+func _normalize_session_type(session_type: String) -> String:
+	var normalized := session_type.strip_edges().to_lower()
+	if normalized == "solo":
+		return "solo"
+	return "coop"

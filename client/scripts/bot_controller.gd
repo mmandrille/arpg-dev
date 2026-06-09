@@ -139,6 +139,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_select_window_size(str(action.get("size", "")))
 		"set_floating_combat_text":
 			_do_set_floating_combat_text(bool(action.get("enabled", true)))
+		"select_create_game_type":
+			_do_select_create_game_type(str(action.get("session_type", "")))
 		"click_stat_button":
 			_do_click_stat_button(str(action.get("stat", "")))
 		"click_skill_button":
@@ -186,6 +188,11 @@ func _do_select_window_size(size: String) -> void:
 func _do_set_floating_combat_text(enabled: bool) -> void:
 	if _main != null and _main.has_method("bot_set_floating_combat_text"):
 		_main.bot_set_floating_combat_text(enabled)
+
+
+func _do_select_create_game_type(session_type: String) -> void:
+	if _main != null and _main.has_method("bot_select_create_game_type"):
+		_main.bot_select_create_game_type(session_type)
 
 
 func _do_click_stat_button(stat: String) -> void:
@@ -455,6 +462,8 @@ func _format_action(action: Dictionary) -> String:
 			return "select_character index=%s" % str(action.get("index", 0))
 		"select_window_size":
 			return "select_window_size %s" % str(action.get("size", ""))
+		"select_create_game_type":
+			return "select_create_game_type %s" % str(action.get("session_type", ""))
 		"click_stat_button":
 			return "click_stat_button %s" % str(action.get("stat", ""))
 		"click_skill_button":

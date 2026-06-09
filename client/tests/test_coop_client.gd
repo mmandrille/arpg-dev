@@ -4,6 +4,7 @@ extends SceneTree
 
 const MainScript := preload("res://scripts/main.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
+const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -21,6 +22,8 @@ func _initialize() -> void:
 	_test_multiple_remote_players_update_and_remove_independently()
 	_test_path_reject_clears_held_click_state()
 	_test_capacity_reject_shows_bag_full_unequip_message()
+	_test_loss_popup_shows_for_dead_local_player()
+	_test_dead_character_rows_are_disabled()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -202,6 +205,53 @@ func _test_preset_world_wall_fallback() -> void:
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
+
+
+func _test_loss_popup_shows_for_dead_local_player() -> void:
+	var main = _make_main()
+	main.loss_popup = main._build_loss_popup()
+	get_root().add_child(main.loss_popup)
+	main._apply_snapshot({
+		"server_tick": 1,
+		"current_level": 0,
+		"local_player_id": "1001",
+		"party": [],
+		"entities": [
+			{"id": "1001", "type": "player", "position": {"x": 2.0, "y": 3.0}, "hp": 0, "max_hp": 10},
+		],
+		"inventory": [],
+		"equipped": {},
+		"hotbar": [],
+		"character_progression": {},
+	})
+	_assert_true("dead local player shows loss popup", bool(main.get_bot_state().get("loss_popup_visible", false)))
+	main.loss_popup.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_dead_character_rows_are_disabled() -> void:
+	var panel: CharacterSelectPanel = CharacterSelectPanelScript.new()
+	get_root().add_child(panel)
+	panel.show_continue([
+		{"character_id": "char_dead", "name": "Fallen", "created_at": "2026-06-09T00:00:00Z", "dead": true},
+		{"character_id": "char_live", "name": "Alive", "created_at": "2026-06-09T00:00:00Z", "dead": false},
+	])
+	var dead_row := panel._rows.get_child(0) as HBoxContainer
+	var dead_button := dead_row.get_child(0) as Button
+	_assert_true("dead character select disabled", dead_button.disabled)
+	_assert_true("dead character has skull marker", dead_button.text.begins_with("☠"))
+	var started := {"id": ""}
+	panel.start_requested.connect(func(character_id: String) -> void:
+		started["id"] = character_id
+	)
+	panel.start_character_at_index(0)
+	_assert_eq("dead character did not start", str(started["id"]), "")
+	panel.start_character_at_index(1)
+	_assert_eq("live character starts", str(started["id"]), "char_live")
+	panel.queue_free()
 
 
 func _test_local_player_model_front_faces_direction() -> void:

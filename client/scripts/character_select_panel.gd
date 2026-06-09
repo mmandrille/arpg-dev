@@ -84,6 +84,8 @@ func start_character_at_index(index: int) -> void:
 	if index < 0 or index >= _characters.size():
 		return
 	var character: Dictionary = _characters[index]
+	if bool(character.get("dead", false)):
+		return
 	start_requested.emit(str(character.get("character_id", "")))
 
 
@@ -182,11 +184,19 @@ func _render_characters(characters: Array) -> void:
 		row.custom_minimum_size = Vector2(360, 38)
 		var name := str(character.get("name", "Hero"))
 		var created := str(character.get("created_at", ""))
+		var dead := bool(character.get("dead", false))
 		var select_btn := Button.new()
-		select_btn.text = name if created == "" else "%s  %s" % [name, created.left(10)]
+		var label := name if created == "" else "%s  %s" % [name, created.left(10)]
+		if dead:
+			label = "☠  " + label
+		select_btn.text = label
 		select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		select_btn.disabled = dead
+		if dead:
+			select_btn.tooltip_text = "Dead"
 		select_btn.pressed.connect(func() -> void:
-			start_requested.emit(str(character.get("character_id", "")))
+			if not dead:
+				start_requested.emit(str(character.get("character_id", "")))
 		)
 		row.add_child(select_btn)
 		if _delete_mode:

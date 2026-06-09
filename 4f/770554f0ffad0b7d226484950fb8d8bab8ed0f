@@ -1,0 +1,26 @@
+shared/rules/treasure_classes.v0.json
+  s_983717d5c0c276::t_f250cffe07a676 8-9,20-21,37-38,57-58
+server/internal/game/game_test.go
+  s_983717d5c0c276::t_93a6da47230d66 1648-1679
+  s_983717d5c0c276::t_c4da66f3e838eb 5213-5214,5223,5228
+shared/golden/dungeon_equipment_drops.json
+  s_983717d5c0c276::t_fb6758616d587d 45,50,52
+shared/golden/shop_offers.json
+  s_983717d5c0c276::t_fb6758616d587d 11-15,23-27,35-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4f770554f0ffad0b7d226484950fb8d8bab8ed0f",
+  "prompts": {},
+  "sessions": {
+    "s_983717d5c0c276": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead24-fd53-7fa1-a324-554b6d97874f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

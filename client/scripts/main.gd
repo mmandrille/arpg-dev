@@ -53,6 +53,18 @@ const ITEM_RARITY_BACKGROUNDS := {
 	"rare": Color("#5a4520"),
 	"unique": Color("#5a2f17"),
 }
+const LOOT_LABEL_RARITY_COLORS := {
+	"common": Color("#e8dcc8"),
+	"magic": Color("#93c5fd"),
+	"rare": Color("#f4d481"),
+	"unique": Color("#ffb26b"),
+}
+const LOOT_LABEL_CATEGORY_COLORS := {
+	"currency": Color("#ffd75e"),
+	"quest": Color("#6ee68b"),
+	"consumable": Color("#ff8f70"),
+}
+const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
 
 var client: NetClient
@@ -83,6 +95,7 @@ var item_presentations: Dictionary = {}
 var dungeon_generation: Dictionary = {}
 var loot_ids: Array = []
 var hovered_loot_id: String = ""
+var loot_label_reveal_held: bool = false
 var monster_ids: Array = []
 var interactable_ids: Array = []
 var current_world_id: String = "vertical_slice"
@@ -965,6 +978,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			_attach_pick_collider(node, id, str(e["type"]))
 		if e["type"] == "loot" and not loot_ids.has(id):
 			loot_ids.append(id)
+			_set_loot_label_visible(id, loot_label_reveal_held or id == hovered_loot_id, id == hovered_loot_id)
 		if e["type"] == "monster" and not monster_ids.has(id):
 			monster_ids.append(id)
 		if e["type"] == "interactable" and not interactable_ids.has(id):
@@ -1874,6 +1888,10 @@ func _nearest_loot_at_ground(ground: Vector3) -> String:
 
 
 func _update_loot_hover_label() -> void:
+	var reveal_held := _is_loot_label_reveal_held()
+	var reveal_changed := reveal_held != loot_label_reveal_held
+	loot_label_reveal_held = reveal_held
+
 	var next_hover := ""
 	if not _input_locked() and _camera != null:
 		var target_id := _pick_entity_at_mouse()
@@ -1881,22 +1899,52 @@ func _update_loot_hover_label() -> void:
 			next_hover = target_id
 		else:
 			next_hover = _nearest_loot_at_ground(_mouse_ground_point())
-	if next_hover == hovered_loot_id:
+	if next_hover == hovered_loot_id and not reveal_changed:
 		return
-	_set_loot_label_visible(hovered_loot_id, false)
 	hovered_loot_id = next_hover
-	_set_loot_label_visible(hovered_loot_id, true)
+	_refresh_loot_label_visibility()
 
 
-func _set_loot_label_visible(loot_id: String, shown: bool) -> void:
+func _is_loot_label_reveal_held() -> bool:
+	return Input.is_key_pressed(KEY_ALT)
+
+
+func _refresh_loot_label_visibility() -> void:
+	for loot_id in loot_ids:
+		var id := str(loot_id)
+		var highlighted := id == hovered_loot_id
+		_set_loot_label_visible(id, loot_label_reveal_held or highlighted, highlighted)
+
+
+func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = false) -> void:
 	if loot_id == "" or not entities.has(loot_id):
 		return
-	var node := entities[loot_id].get("node", null) as Node3D
-	if node == null:
-		return
-	var label := node.find_child("LootLabel", true, false) as Label3D
+	var label := _loot_label_node(loot_id)
 	if label != null:
 		label.visible = shown
+		label.modulate = _loot_label_display_color(loot_id, highlighted)
+
+
+func _loot_label_display_color(loot_id: String, highlighted: bool) -> Color:
+	var rec: Dictionary = entities.get(loot_id, {})
+	var base := _loot_label_color(rec)
+	if highlighted:
+		return base
+	return Color(
+		base.r * LOOT_LABEL_REVEAL_DIM_FACTOR,
+		base.g * LOOT_LABEL_REVEAL_DIM_FACTOR,
+		base.b * LOOT_LABEL_REVEAL_DIM_FACTOR,
+		base.a
+	)
+
+
+func _loot_label_node(loot_id: String) -> Label3D:
+	if loot_id == "" or not entities.has(loot_id):
+		return null
+	var node := entities[loot_id].get("node", null) as Node3D
+	if node == null:
+		return null
+	return node.find_child("LootLabel", true, false) as Label3D
 
 
 func _set_pickable(node: Node3D, pickable: bool) -> void:
@@ -2741,7 +2789,7 @@ func _make_loot_node(e: Dictionary) -> Node3D:
 			_add_loot_box(root, "Cork", Vector3(0.14, 0.10, 0.14) * scale, Vector3(0.0, 0.48 * scale, 0.0), accent)
 		_:
 			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
-	_add_loot_label(root, _generic_loot_name(item_def_id), scale)
+	_add_loot_label(root, _generic_loot_name(item_def_id), scale, _loot_label_color(e))
 	return root
 
 
@@ -2751,7 +2799,7 @@ func _add_loot_rarity_background(parent: Node3D, color: Color, scale: float) -> 
 	_add_loot_mesh(parent, "RarityBackground", mesh, Vector3(0.0, 0.045, 0.0), color)
 
 
-func _add_loot_label(parent: Node3D, text: String, scale: float) -> void:
+func _add_loot_label(parent: Node3D, text: String, scale: float, color: Color = Color("#f4ead8")) -> void:
 	if text == "":
 		return
 	var label := Label3D.new()
@@ -2763,7 +2811,7 @@ func _add_loot_label(parent: Node3D, text: String, scale: float) -> void:
 	label.no_depth_test = true
 	label.fixed_size = true
 	label.pixel_size = 0.0018
-	label.modulate = Color("#f4ead8")
+	label.modulate = color
 	label.outline_modulate = Color(0.06, 0.045, 0.035, 0.92)
 	label.outline_size = 4
 	parent.add_child(label)
@@ -2807,6 +2855,18 @@ func _loot_color(item_def_id: String) -> Color:
 			return Color(0.95, 0.15, 0.12)
 		_:
 			return Color(1.0, 0.85, 0.2)
+
+
+func _loot_label_color(e: Dictionary) -> Color:
+	var item_def_id := str(e.get("item_def_id", ""))
+	var def := _item_definition(item_def_id)
+	var category := str(def.get("category", "")).to_lower()
+	if item_def_id == "gold" or category == "currency":
+		return LOOT_LABEL_CATEGORY_COLORS["currency"]
+	if LOOT_LABEL_CATEGORY_COLORS.has(category):
+		return LOOT_LABEL_CATEGORY_COLORS[category]
+	var rarity := str(e.get("rarity", "common")).to_lower()
+	return LOOT_LABEL_RARITY_COLORS.get(rarity, LOOT_LABEL_RARITY_COLORS["common"])
 
 
 func _item_rarity_background(rarity: String) -> Color:
@@ -3102,6 +3162,7 @@ func get_bot_state() -> Dictionary:
 		"entities_presentation_debug": _bot_entities_presentation_debug(),
 		"loot_ids": loot_ids.duplicate(),
 		"loot": _bot_loot_debug(),
+		"loot_labels": _bot_loot_label_debug(),
 		"interactable_ids": interactable_ids.duplicate(),
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
@@ -3266,6 +3327,23 @@ func _bot_loot_debug() -> Array:
 		out.append({
 			"id": loot_id,
 			"item_def_id": str(rec.get("item_def_id", "")),
+		})
+	return out
+
+
+func _bot_loot_label_debug() -> Array:
+	var out: Array = []
+	for loot_id in loot_ids:
+		var id := str(loot_id)
+		var rec: Dictionary = entities.get(id, {})
+		var label := _loot_label_node(id)
+		out.append({
+			"id": id,
+			"item_def_id": str(rec.get("item_def_id", "")),
+			"rarity": str(rec.get("rarity", "")),
+			"text": label.text if label != null else "",
+			"visible": label.visible if label != null else false,
+			"color": label.modulate.to_html(false) if label != null else "",
 		})
 	return out
 

@@ -282,7 +282,7 @@ func TestShopRequirementPreviewAndPurchase(t *testing.T) {
 	}
 	sim.SetPlayerMetadata(sim.DefaultPlayerID(), "acct_shop", "char_01H00000000000000000000043", "Hero", "host")
 	vendor := townVendorEntity(t, sim)
-	moveDefaultPlayerTo(sim, Vec2{X: 6, Y: 12})
+	moveDefaultPlayerTo(sim, Vec2{X: vendor.pos.X, Y: vendor.pos.Y - 1})
 	sim.savePlayer(sim.defaultPlayer())
 
 	open := sim.Tick([]Input{{
@@ -506,7 +506,8 @@ func newTownVendorSim(t *testing.T, gold int, deepestDepth int) *Sim {
 		t.Fatalf("new dungeon sim: %v", err)
 	}
 	sim.SetPlayerMetadata(sim.DefaultPlayerID(), "acct_shop", "char_01H00000000000000000000000", "Hero", "host")
-	moveDefaultPlayerTo(sim, Vec2{X: 6, Y: 12})
+	vendor := townVendorEntity(t, sim)
+	moveDefaultPlayerTo(sim, Vec2{X: vendor.pos.X, Y: vendor.pos.Y - 1})
 	sim.savePlayer(sim.defaultPlayer())
 	return sim
 }

@@ -458,17 +458,17 @@
         {
           "type": "interactable",
           "interactable_def_id": "stairs_down",
-          "position": { "x": 8, "y": 10 }
+          "position": { "x": 11, "y": 8 }
         },
         {
           "type": "interactable",
           "interactable_def_id": "teleporter",
-          "position": { "x": 4, "y": 13 }
+          "position": { "x": 2, "y": 12 }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_vendor",
-          "position": { "x": 6, "y": 13 }
+          "position": { "x": 15, "y": 12 }
         }
       ]
     },

@@ -1,0 +1,48 @@
+Makefile
+  s_983717d5c0c276::t_dcea850aa7c8a4 14,17
+tools/bot/run.py
+  s_983717d5c0c276::t_dcea850aa7c8a4 3421
+  s_983717d5c0c276::t_e92c80aa6ffd38 14
+tools/bot/test_protocol.py
+  s_983717d5c0c276::t_dcea850aa7c8a4 29
+client/scripts/smoke.gd
+  s_983717d5c0c276::t_dcea850aa7c8a4 65
+client/scripts/main.gd
+  s_983717d5c0c276::t_dcea850aa7c8a4 220
+scripts/ci.sh
+  s_983717d5c0c276::t_dcea850aa7c8a4 14-15
+scripts/play_remote.sh
+  s_983717d5c0c276::t_dcea850aa7c8a4 11
+server/internal/config/config.go
+  s_983717d5c0c276::t_dcea850aa7c8a4 13,28
+tools/play/coop_setup.py
+  s_983717d5c0c276::t_dcea850aa7c8a4 49
+scripts/play.sh
+  s_983717d5c0c276::t_dcea850aa7c8a4 12-13
+scripts/bot_client_local.sh
+  s_983717d5c0c276::t_dcea850aa7c8a4 13-14
+scripts/bot_visual.sh
+  s_983717d5c0c276::t_dcea850aa7c8a4 15-16
+scripts/client_smoke.sh
+  s_983717d5c0c276::t_dcea850aa7c8a4 15
+scripts/bot_client.sh
+  s_983717d5c0c276::t_dcea850aa7c8a4 21
+tools/bot/protocol.py
+  s_983717d5c0c276::t_dcea850aa7c8a4 42-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c37c4f9a151c6bc62bd38b29ede7bcd34b4b95b8",
+  "prompts": {},
+  "sessions": {
+    "s_983717d5c0c276": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead24-fd53-7fa1-a324-554b6d97874f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

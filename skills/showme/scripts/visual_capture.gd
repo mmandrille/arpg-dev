@@ -162,7 +162,7 @@ func _setup_inventory() -> void:
 		"off_hand": "2006",
 	}, 4, 20, 145)
 	panel.ensure_display_visible()
-	var tooltip = panel._make_item_tooltip(items[items.size() - 1])
+	var tooltip = panel._make_item_tooltip(items[6])
 	tooltip.position = Vector2(524, 28)
 	get_root().add_child(tooltip)
 

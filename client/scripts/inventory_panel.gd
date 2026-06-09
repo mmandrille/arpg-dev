@@ -771,6 +771,11 @@ func _tooltip_lines(item: Dictionary) -> Array:
 	var slot := str(def.get("slot", ""))
 	if slot != "":
 		lines.append("Slot: %s" % slot)
+	else:
+		var category := str(def.get("category", ""))
+		if category != "":
+			lines.append("Kind: %s" % category)
+	lines.append_array(_consumable_effect_lines(def))
 	var rolled_stats: Dictionary = item.get("rolled_stats", {})
 	if rolled_stats.has("damage_min") and rolled_stats.has("damage_max"):
 		lines.append("Damage: %s-%s" % [str(rolled_stats.get("damage_min", "?")), str(rolled_stats.get("damage_max", "?"))])
@@ -796,6 +801,25 @@ func _tooltip_lines(item: Dictionary) -> Array:
 	if def.has("attack_mode"):
 		lines.append("Mode: %s" % str(def["attack_mode"]))
 	return lines
+
+
+func _consumable_effect_lines(def: Dictionary) -> Array:
+	var lines: Array = []
+	var heal = def.get("heal", {})
+	if typeof(heal) == TYPE_DICTIONARY and not (heal as Dictionary).is_empty():
+		lines.append("Restores %s HP" % _range_text(heal as Dictionary))
+	var mana_restore = def.get("mana_restore", {})
+	if typeof(mana_restore) == TYPE_DICTIONARY and not (mana_restore as Dictionary).is_empty():
+		lines.append("Restores %s mana" % _range_text(mana_restore as Dictionary))
+	return lines
+
+
+func _range_text(value: Dictionary) -> String:
+	var min_value := int(value.get("min", 0))
+	var max_value := int(value.get("max", min_value))
+	if min_value == max_value:
+		return str(min_value)
+	return "%d-%d" % [min_value, max_value]
 
 
 func _detail_lines(item: Dictionary, include_requirements: bool = true, include_comparison: bool = true) -> Array:

@@ -1,0 +1,45 @@
+{
+  "shop_id": "town_vendor",
+  "cases": [
+    {
+      "name": "fixed red potion",
+      "input": { "item_def_id": "red_potion" },
+      "expected": { "buy_price": 20, "sell_price": 5 }
+    },
+    {
+      "name": "fixed blue potion",
+      "input": { "item_def_id": "blue_potion" },
+      "expected": { "buy_price": 20, "sell_price": 5 }
+    },
+    {
+      "name": "common cave blade low roll",
+      "input": {
+        "item_def_id": "cave_blade",
+        "item_template_id": "cave_blade",
+        "rarity": "common",
+        "rolled_stats": { "damage_min": 2, "damage_max": 5 }
+      },
+      "expected": { "buy_price": 110, "sell_price": 27 }
+    },
+    {
+      "name": "magic cave shield high roll",
+      "input": {
+        "item_def_id": "cave_shield",
+        "item_template_id": "cave_shield",
+        "rarity": "magic",
+        "rolled_stats": { "armor": 5, "block_percent": 9 }
+      },
+      "expected": { "buy_price": 155, "sell_price": 38 }
+    },
+    {
+      "name": "rare cave amulet high roll",
+      "input": {
+        "item_def_id": "cave_amulet",
+        "item_template_id": "cave_amulet",
+        "rarity": "rare",
+        "rolled_stats": { "max_hp": 8 }
+      },
+      "expected": { "buy_price": 165, "sell_price": 41 }
+    }
+  ]
+}

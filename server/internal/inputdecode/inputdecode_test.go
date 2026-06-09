@@ -83,3 +83,73 @@ func TestDecodeDirectionalAttackIntentRejectsInvalidPayload(t *testing.T) {
 		}
 	}
 }
+
+func TestDecodeShopBuyIntent(t *testing.T) {
+	in, ok := Decode(TypeShopBuy, "msg_buy", "corr_buy", json.RawMessage(`{"shop_entity_id":"1013","offer_id":"fixed:red_potion"}`))
+	if !ok {
+		t.Fatal("Decode shop_buy_intent rejected valid payload")
+	}
+	if in.ShopBuy == nil || in.ShopBuy.ShopEntityID != "1013" || in.ShopBuy.OfferID != "fixed:red_potion" {
+		t.Fatalf("decoded shop buy = %+v", in.ShopBuy)
+	}
+	if !IsClientIntent(TypeShopBuy) {
+		t.Fatal("shop_buy_intent not marked as client intent")
+	}
+}
+
+func TestDecodeShopBuyIntentRejectsInvalidPayload(t *testing.T) {
+	tests := []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"shop_entity_id":"1013"}`),
+		json.RawMessage(`{"offer_id":"fixed:red_potion"}`),
+		json.RawMessage(`{"shop_entity_id":1013,"offer_id":"fixed:red_potion"}`),
+	}
+	for _, payload := range tests {
+		if _, ok := Decode(TypeShopBuy, "msg_buy", "", payload); ok {
+			t.Fatalf("Decode accepted invalid shop buy payload %s", payload)
+		}
+	}
+}
+
+func TestDecodeShopSellIntent(t *testing.T) {
+	in, ok := Decode(TypeShopSell, "msg_sell", "corr_sell", json.RawMessage(`{"shop_entity_id":"1013","item_instance_id":"1004"}`))
+	if !ok {
+		t.Fatal("Decode shop_sell_intent rejected valid payload")
+	}
+	if in.ShopSell == nil || in.ShopSell.ShopEntityID != "1013" || in.ShopSell.ItemInstanceID != "1004" {
+		t.Fatalf("decoded shop sell = %+v", in.ShopSell)
+	}
+	if !IsClientIntent(TypeShopSell) {
+		t.Fatal("shop_sell_intent not marked as client intent")
+	}
+}
+
+func TestDecodeShopSellIntentRejectsInvalidPayload(t *testing.T) {
+	tests := []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"shop_entity_id":"1013"}`),
+		json.RawMessage(`{"item_instance_id":"1004"}`),
+		json.RawMessage(`{"shop_entity_id":"1013","item_instance_id":1004}`),
+	}
+	for _, payload := range tests {
+		if _, ok := Decode(TypeShopSell, "msg_sell", "", payload); ok {
+			t.Fatalf("Decode accepted invalid shop sell payload %s", payload)
+		}
+	}
+}
+
+func TestDecodeStoredShopIntent(t *testing.T) {
+	raw := []byte(`{
+		"type":"shop_buy_intent",
+		"message_id":"msg_buy_stored",
+		"correlation_id":"corr_buy_stored",
+		"payload":{"shop_entity_id":"1013","offer_id":"generated:depth3:000"}
+	}`)
+	in, ok := DecodeStored(raw)
+	if !ok {
+		t.Fatal("DecodeStored rejected shop_buy_intent")
+	}
+	if in.ShopBuy == nil || in.ShopBuy.ShopEntityID != "1013" || in.ShopBuy.OfferID != "generated:depth3:000" {
+		t.Fatalf("decoded stored shop buy = %+v", in.ShopBuy)
+	}
+}

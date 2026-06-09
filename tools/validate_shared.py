@@ -73,10 +73,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v3.schema.json"
+            return PROTOCOL / "session_snapshot.v4.schema.json"
         if name.startswith("state_delta"):
-            return PROTOCOL / "state_delta.v3.schema.json"
-        return PROTOCOL / "messages.v3.schema.json"
+            return PROTOCOL / "state_delta.v4.schema.json"
+        return PROTOCOL / "messages.v4.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 
@@ -131,6 +131,7 @@ def cross_checks(report: Report) -> None:
     treasure_classes = load(RULES / "treasure_classes.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
+    shops = load(RULES / "shops.v0.json")
     interactables = load(RULES / "interactables.v0.json")
     navigation = load(RULES / "navigation.v0.json")
     worlds = load(RULES / "worlds.v0.json")
@@ -161,34 +162,36 @@ def cross_checks(report: Report) -> None:
     boss_pattern_golden = load(GOLDEN / "boss_pattern_timeline.json")
     inventory_capacity_golden = load(GOLDEN / "inventory_capacity.json")
     dungeon_obstacles_golden = load(GOLDEN / "dungeon_obstacles.json")
+    shop_pricing_golden = load(GOLDEN / "shop_pricing.json")
+    shop_offers_golden = load(GOLDEN / "shop_offers.json")
 
-    v3_protocol_files = [
-        PROTOCOL / "envelope.v3.schema.json",
-        PROTOCOL / "messages.v3.schema.json",
-        PROTOCOL / "session_snapshot.v3.schema.json",
-        PROTOCOL / "state_delta.v3.schema.json",
+    v4_protocol_files = [
+        PROTOCOL / "envelope.v4.schema.json",
+        PROTOCOL / "messages.v4.schema.json",
+        PROTOCOL / "session_snapshot.v4.schema.json",
+        PROTOCOL / "state_delta.v4.schema.json",
     ]
-    missing_v3 = [str(path.relative_to(ROOT)) for path in v3_protocol_files if not path.exists()]
-    if missing_v3:
-        report.fail("protocol v3 schema set", f"missing {', '.join(missing_v3)}")
+    missing_v4 = [str(path.relative_to(ROOT)) for path in v4_protocol_files if not path.exists()]
+    if missing_v4:
+        report.fail("protocol v4 schema set", f"missing {', '.join(missing_v4)}")
     else:
-        report.ok("protocol v3 schema set is present")
+        report.ok("protocol v4 schema set is present")
 
-    messages_v3 = load(PROTOCOL / "messages.v3.schema.json")
+    messages_v4 = load(PROTOCOL / "messages.v4.schema.json")
     actor_fields = {"player_id", "account_id", "character_id"}
-    intent_names = [name for name in messages_v3["$defs"] if name.endswith("_intent") or name == "client_ready"]
+    intent_names = [name for name in messages_v4["$defs"] if name.endswith("_intent") or name == "client_ready"]
     actor_leaks: list[str] = []
     for name in sorted(intent_names):
-        intent_schema = messages_v3["$defs"][name]
+        intent_schema = messages_v4["$defs"][name]
         if intent_schema.get("additionalProperties") is not False:
             actor_leaks.append(f"{name}: additionalProperties must be false")
         leaked = actor_fields.intersection(intent_schema.get("properties", {}))
         if leaked:
             actor_leaks.append(f"{name}: actor fields {sorted(leaked)}")
     if actor_leaks:
-        report.fail("protocol v3 actor-free intents", "; ".join(actor_leaks))
+        report.fail("protocol v4 actor-free intents", "; ".join(actor_leaks))
     else:
-        report.ok("protocol v3 intents are actor-free")
+        report.ok("protocol v4 intents are actor-free")
 
     # damage_formula golden must match combat rules and the pinned formula.
     if damage_golden["player_damage"] != combat["player_damage"]:
@@ -1334,6 +1337,279 @@ def cross_checks(report: Report) -> None:
             else:
                 report.ok(f"loot table {table_id} treasure_class_id resolves")
 
+    shop_defs = shops["shops"]
+    town_shop = shop_defs.get("town_vendor")
+    if town_shop is None:
+        report.fail("shop town_vendor", "missing town_vendor")
+    else:
+        pricing = town_shop["pricing"]
+        fixed_offer_ids = [offer["offer_id"] for offer in town_shop["fixed_offers"]]
+        if len(set(fixed_offer_ids)) != len(fixed_offer_ids):
+            report.fail("shop fixed offers", "duplicate offer_id")
+        else:
+            report.ok("shop fixed offer ids are unique")
+        expected_fixed = {"fixed:red_potion": "red_potion", "fixed:blue_potion": "blue_potion"}
+        got_fixed = {offer["offer_id"]: offer["item_def_id"] for offer in town_shop["fixed_offers"]}
+        if got_fixed != expected_fixed:
+            report.fail("shop fixed offers", f"expected {expected_fixed}, got {got_fixed}")
+        else:
+            report.ok("shop fixed offers are red and blue potion")
+        for offer in town_shop["fixed_offers"]:
+            item = items["items"].get(offer["item_def_id"])
+            if item is None:
+                report.fail("shop fixed item", f"{offer['item_def_id']}: unknown item")
+            elif item.get("category") in {"currency", "quest"}:
+                report.fail("shop fixed item", f"{offer['item_def_id']}: currency/quest items cannot be fixed offers")
+            elif offer["buy_price"] <= 0:
+                report.fail("shop fixed price", f"{offer['offer_id']}: buy_price must be positive")
+            else:
+                report.ok(f"shop fixed offer {offer['offer_id']} resolves")
+
+        generated = town_shop["generated_offers"]
+        if generated.get("source") != "common_dungeon_mob":
+            report.fail("shop generated source", "v41 source must be common_dungeon_mob")
+        elif generated.get("offer_count") != 5:
+            report.fail("shop generated count", "v41 offer_count must be 5")
+        elif generated.get("min_depth") != 1:
+            report.fail("shop generated min_depth", "v41 min_depth must be 1")
+        elif generated.get("max_roll_attempts", 0) < generated.get("offer_count", 0):
+            report.fail("shop generated max_roll_attempts", "must be >= offer_count")
+        else:
+            report.ok("shop generated offer config matches v41")
+
+        rarity_missing = sorted(set(rarities) - set(pricing["rarity_multipliers"]))
+        if rarity_missing:
+            report.fail("shop rarity multipliers", f"missing current rarities {rarity_missing}")
+        elif "unique" not in pricing["rarity_multipliers"]:
+            report.fail("shop rarity multipliers", "must allow future unique multiplier")
+        else:
+            report.ok("shop rarity multipliers cover current rarities plus unique")
+        template_slots = {template["slot"] for template in item_templates["templates"].values()}
+        missing_slots = sorted(template_slots - set(pricing["slot_base"]))
+        if missing_slots:
+            report.fail("shop slot_base", f"missing template slots {missing_slots}")
+        else:
+            report.ok("shop slot_base covers current template slots")
+        template_stats = set()
+        for template in item_templates["templates"].values():
+            template_stats.update(template.get("base_stats", {}))
+            template_stats.update(roll["stat"] for roll in template.get("rollable_stats", []))
+        missing_weights = sorted(template_stats - set(pricing["stat_weights"]))
+        if missing_weights:
+            report.fail("shop stat_weights", f"missing template stats {missing_weights}")
+        else:
+            report.ok("shop stat_weights cover current base and rollable stats")
+
+        def ceil_to_multiple(value: float, multiple: int) -> int:
+            return int(math.ceil(value / multiple) * multiple)
+
+        def fixed_buy_price(item_def_id: str) -> int | None:
+            for offer in town_shop["fixed_offers"]:
+                if offer["item_def_id"] == item_def_id:
+                    return int(offer["buy_price"])
+            return None
+
+        def generated_buy_price(item_template_id: str, rarity: str, final_stats: dict) -> int:
+            template = item_templates["templates"][item_template_id]
+            base_stats = template.get("base_stats", {})
+            base_score = int(pricing["slot_base"][template["slot"]])
+            for stat, weight in pricing["stat_weights"].items():
+                base_score += int(base_stats.get(stat, 0)) * int(weight)
+            roll_score = 0
+            for stat, weight in pricing["stat_weights"].items():
+                roll_score += max(0, int(final_stats.get(stat, 0)) - int(base_stats.get(stat, 0))) * int(weight)
+            raw_buy = (base_score + roll_score) * float(pricing["rarity_multipliers"][rarity])
+            return ceil_to_multiple(max(1, raw_buy), int(pricing["round_buy_to"]))
+
+        def sell_price(buy_price: int) -> int:
+            return max(1, int(math.floor(buy_price * float(pricing["sell_multiplier"]))))
+
+        failed_pricing = False
+        if shop_pricing_golden["shop_id"] != "town_vendor":
+            report.fail("shop_pricing golden", "shop_id must be town_vendor")
+            failed_pricing = True
+        for case in shop_pricing_golden["cases"]:
+            if failed_pricing:
+                break
+            inp = case["input"]
+            if inp.get("item_template_id"):
+                buy = generated_buy_price(inp["item_template_id"], inp["rarity"], inp.get("rolled_stats", {}))
+            else:
+                fixed = fixed_buy_price(inp["item_def_id"])
+                if fixed is None:
+                    report.fail("shop_pricing golden", f"{case['name']}: item is not a fixed offer")
+                    failed_pricing = True
+                    break
+                buy = fixed
+            expected = case["expected"]
+            got = {"buy_price": buy, "sell_price": sell_price(buy)}
+            if got != expected:
+                report.fail("shop_pricing golden", f"{case['name']}: got {got}, want {expected}")
+                failed_pricing = True
+                break
+        if not failed_pricing:
+            report.ok("shop_pricing golden matches v41 formula")
+
+        class ShopRNG:
+            def __init__(self, state: int) -> None:
+                self.state = state & ((1 << 64) - 1)
+
+            def next(self) -> int:
+                self.state = (self.state + 0x9E3779B97F4A7C15) & ((1 << 64) - 1)
+                z = self.state
+                z = ((z ^ (z >> 30)) * 0xBF58476D1CE4E5B9) & ((1 << 64) - 1)
+                z = ((z ^ (z >> 27)) * 0x94D049BB133111EB) & ((1 << 64) - 1)
+                return (z ^ (z >> 31)) & ((1 << 64) - 1)
+
+            def intn(self, n: int) -> int:
+                if n <= 0:
+                    return 0
+                return int(self.next() % n)
+
+        def seed_to_uint64(seed: str) -> int:
+            try:
+                raw = bytes.fromhex(seed)
+                if not raw:
+                    raw = seed.encode()
+            except ValueError:
+                raw = seed.encode()
+            value = 1469598103934665603
+            for byte in raw:
+                value ^= byte
+                value = (value * 1099511628211) & ((1 << 64) - 1)
+            return value
+
+        def roll_treasure_class(class_id: str, rng: ShopRNG) -> list[dict]:
+            out = []
+            for attempt in treasure_class_defs[class_id].get("attempts", []):
+                total = int(attempt.get("success_weight", 0)) + int(attempt.get("no_drop_weight", 0))
+                if total <= 0 or rng.intn(total) >= int(attempt.get("success_weight", 0)):
+                    continue
+                total_entries = sum(int(entry["weight"]) for entry in attempt.get("entries", []))
+                if total_entries <= 0:
+                    continue
+                roll = rng.intn(total_entries)
+                for entry in attempt.get("entries", []):
+                    roll -= int(entry["weight"])
+                    if roll < 0:
+                        out.append(entry)
+                        break
+            return out
+
+        rarity_order = sorted(rarities)
+
+        def weighted_rollable_stat(template: dict, rng: ShopRNG) -> dict | None:
+            stats = template.get("rollable_stats", [])
+            total = sum(int(stat["weight"]) for stat in stats)
+            if total <= 0:
+                return None
+            roll = rng.intn(total)
+            for stat in stats:
+                roll -= int(stat["weight"])
+                if roll < 0:
+                    return stat
+            return stats[-1]
+
+        def roll_template(template_id: str, rng: ShopRNG) -> dict:
+            template = item_templates["templates"][template_id]
+            total = sum(int(rarities[rarity_id]["weight"]) for rarity_id in rarity_order)
+            roll = rng.intn(total)
+            rarity_id = rarity_order[-1]
+            for candidate in rarity_order:
+                roll -= int(rarities[candidate]["weight"])
+                if roll < 0:
+                    rarity_id = candidate
+                    break
+            stats = dict(template.get("base_stats", {}))
+            for _ in range(int(rarities[rarity_id]["stat_rolls"])):
+                stat = weighted_rollable_stat(template, rng)
+                if stat is None:
+                    continue
+                stats[stat["stat"]] = int(stats.get(stat["stat"], 0)) + int(stat["min"]) + rng.intn(int(stat["max"]) - int(stat["min"]) + 1)
+            return {
+                "item_template_id": template_id,
+                "display_name": f"{rarities[rarity_id]['name_prefix']} {template['name']}",
+                "rarity": rarity_id,
+                "rolled_stats": stats,
+            }
+
+        def loot_band_for_depth(depth: int) -> dict | None:
+            for band in dungeon_generation.get("loot_bands", []):
+                if depth < int(band["min_depth"]):
+                    continue
+                max_depth = band.get("max_depth")
+                if max_depth is not None and depth > int(max_depth):
+                    continue
+                return band
+            return None
+
+        def generated_shop_offers(seed: str, character_id: str, deepest_depth: int) -> list[dict]:
+            depth = max(int(generated["min_depth"]), int(deepest_depth))
+            label = f"{seed}|shop|town_vendor|{character_id}|{depth}|offers"
+            rng = ShopRNG(seed_to_uint64(label))
+            band = loot_band_for_depth(depth)
+            if band is None:
+                return []
+            table = loot["loot_tables"].get(band["monster_loot_table"], {})
+            class_id = table.get("treasure_class_id")
+            if not class_id:
+                return []
+            out = []
+            attempts = 0
+            while len(out) < int(generated["offer_count"]) and attempts < int(generated["max_roll_attempts"]):
+                attempts += 1
+                for drop in roll_treasure_class(class_id, rng):
+                    template_id = drop.get("item_template_id")
+                    if not template_id:
+                        continue
+                    template = item_templates["templates"].get(template_id)
+                    if not template or template.get("category") != "equipment" or not template.get("equippable"):
+                        continue
+                    payload = roll_template(template_id, rng)
+                    buy = generated_buy_price(template_id, payload["rarity"], payload["rolled_stats"])
+                    offer_index = len(out)
+                    out.append({
+                        "offer_id": f"generated:depth{depth}:{offer_index:03d}",
+                        "kind": "generated",
+                        "item_template_id": template_id,
+                        "display_name": payload["display_name"],
+                        "rarity": payload["rarity"],
+                        "rolled_stats": payload["rolled_stats"],
+                        "buy_price": buy,
+                        "source": "common_dungeon_mob",
+                        "depth": depth,
+                    })
+                    if len(out) >= int(generated["offer_count"]):
+                        break
+            return out
+
+        failed_offers = False
+        if shop_offers_golden["shop_id"] != "town_vendor":
+            report.fail("shop_offers golden", "shop_id must be town_vendor")
+            failed_offers = True
+        for case in shop_offers_golden["cases"]:
+            if failed_offers:
+                break
+            got = generated_shop_offers(shop_offers_golden["seed"], shop_offers_golden["character_id"], int(case["deepest_dungeon_depth"]))
+            if len(got) != int(case["expected_offer_count"]):
+                report.fail("shop_offers golden", f"{case['name']}: got {len(got)} offers")
+                failed_offers = True
+                break
+            if got != case["expected"]:
+                report.fail("shop_offers golden", f"{case['name']}: generated catalog drift")
+                failed_offers = True
+                break
+        if not failed_offers:
+            report.ok("shop_offers golden matches deterministic catalog")
+
+    town_vendor = interactables["interactables"].get("town_vendor")
+    if town_vendor is None:
+        report.fail("town_vendor interactable", "missing town_vendor")
+    elif town_vendor.get("shop_id") != "town_vendor" or town_vendor.get("initial_state") != "ready":
+        report.fail("town_vendor interactable", "must be ready and reference shop_id town_vendor")
+    else:
+        report.ok("town_vendor interactable references town_vendor shop")
+
     # world presets: entity references resolve and type-specific fields are present.
     for world_id, world in worlds["worlds"].items():
         mode = world.get("mode")
@@ -1603,13 +1879,22 @@ def cross_checks(report: Report) -> None:
                     report.ok(f"interactable {interactable_id} barrier size is positive")
             if "transition" in interactable:
                 report.fail("interactable transition", f"{interactable_id}: closed blocker must not declare transition")
+            if "shop_id" in interactable:
+                report.fail("interactable shop", f"{interactable_id}: closed blocker must not declare shop_id")
             continue
         if initial_state == "ready":
             transition = interactable.get("transition")
-            if transition not in ("ascend", "descend", "waypoint"):
-                report.fail("interactable transition", f"{interactable_id}: ready interactable needs ascend/descend/waypoint")
+            shop_id = interactable.get("shop_id")
+            if bool(transition) == bool(shop_id):
+                report.fail("interactable action", f"{interactable_id}: ready interactable needs exactly one transition or shop_id")
+            elif transition and transition not in ("ascend", "descend", "waypoint"):
+                report.fail("interactable transition", f"{interactable_id}: unsupported transition {transition}")
+            elif shop_id and shop_id not in shop_defs:
+                report.fail("interactable shop", f"{interactable_id}: unknown shop_id {shop_id}")
             elif "barrier_when_closed" in interactable:
                 report.fail("interactable barrier", f"{interactable_id}: ready interactable must not block")
+            elif shop_id:
+                report.ok(f"interactable {interactable_id} ready shop is {shop_id}")
             else:
                 report.ok(f"interactable {interactable_id} ready transition is {transition}")
             continue

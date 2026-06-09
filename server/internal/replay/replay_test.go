@@ -576,7 +576,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 				SessionID:      testSessionID,
 				AccountID:      "acct_guest",
 				CharacterID:    "char_guest",
-				PlayerEntityID: "1004",
+				PlayerEntityID: "1005",
 				Role:           store.SessionMemberGuest,
 				Status:         store.SessionMemberActive,
 				Connected:      true,
@@ -596,7 +596,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	var events []store.SessionEvent
 	tick := int64(0)
 	sequence := int64(0)
-	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1004, game.Vec2{X: 5, Y: 10})
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1005, game.Vec2{X: 5, Y: 10})
 
 	stairs := findSnapshotEntity(scratch.SnapshotForPlayer(1001), "interactable", "stairs_down")
 	if stairs == nil {
@@ -637,7 +637,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	if !rep.Match {
 		t.Fatalf("verify mismatch: %s", rep.Mismatch)
 	}
-	if entityByID(rep.Snapshot, "1004") != nil {
+	if entityByID(rep.Snapshot, "1005") != nil {
 		t.Fatalf("disconnected guest should be absent from replay snapshot: %+v", rep.Snapshot.Entities)
 	}
 	if hasStoreEvent(events, "item_picked_up") {

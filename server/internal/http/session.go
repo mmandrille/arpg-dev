@@ -436,10 +436,11 @@ func sessionResponse(sess store.Session, characterID, joinCode string) createSes
 func progressionDefaultsFromRules(rules *game.Rules) store.CharacterProgressionDefaults {
 	state := rules.DefaultCharacterProgressionState()
 	return store.CharacterProgressionDefaults{
-		Level:             state.Level,
-		Experience:        state.Experience,
-		UnspentStatPoints: state.UnspentStatPoints,
-		Gold:              state.Gold,
+		Level:               state.Level,
+		Experience:          state.Experience,
+		UnspentStatPoints:   state.UnspentStatPoints,
+		Gold:                state.Gold,
+		DeepestDungeonDepth: state.DeepestDungeonDepth,
 		Stats: store.CharacterBaseStats{
 			Str:   state.BaseStats.Str,
 			Dex:   state.BaseStats.Dex,

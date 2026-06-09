@@ -115,7 +115,8 @@ func _ready() -> void:
 	_load_item_rules()
 	_load_item_templates()
 	_load_item_presentations()
-	_build()
+	_ensure_built()
+	_render()
 	visible = false
 
 
@@ -169,12 +170,14 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	inventory_rows = max(0, next_inventory_rows)
 	inventory_capacity = max(0, next_inventory_capacity)
 	gold = max(0, next_gold)
+	_ensure_built()
 	_rendered_bag_slot_count = _target_bag_slot_count()
 	if _bag_grid != null:
 		_render()
 
 
 func get_debug_state() -> Dictionary:
+	_ensure_built()
 	return {
 		"visible": visible,
 		"bag_count": inventory.size(),
@@ -280,6 +283,8 @@ func _notification(what: int) -> void:
 
 
 func _build() -> void:
+	if _panel != null:
+		return
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
 	_panel.custom_minimum_size = Vector2(750, 460)
@@ -341,6 +346,12 @@ func _build() -> void:
 	_gold_label.add_theme_font_size_override("font_size", 26)
 	right.add_child(_gold_label)
 	_render()
+
+
+func _ensure_built() -> void:
+	if _panel != null:
+		return
+	_build()
 
 
 func _render() -> void:
@@ -500,7 +511,7 @@ func _reposition_panel() -> void:
 		return
 	var margin := 20.0
 	var panel_size := _panel.custom_minimum_size
-	var viewport_size := get_viewport_rect().size
+	var viewport_size := get_viewport_rect().size if is_inside_tree() else Vector2(1280, 720)
 	_panel.offset_right = -margin
 	_panel.offset_bottom = -maxf(margin, minf(140.0, viewport_size.y * 0.16))
 	_panel.offset_left = _panel.offset_right - panel_size.x

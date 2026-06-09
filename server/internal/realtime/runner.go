@@ -519,12 +519,13 @@ func (r *runner) persistTick(res game.TickResult) {
 
 func storeProgressionFromView(accountID, characterID string, view game.CharacterProgressionView) store.CharacterProgression {
 	return store.CharacterProgression{
-		AccountID:         accountID,
-		CharacterID:       characterID,
-		Level:             view.Level,
-		Experience:        view.Experience,
-		UnspentStatPoints: view.UnspentStatPoints,
-		Gold:              view.Gold,
+		AccountID:           accountID,
+		CharacterID:         characterID,
+		Level:               view.Level,
+		Experience:          view.Experience,
+		UnspentStatPoints:   view.UnspentStatPoints,
+		Gold:                view.Gold,
+		DeepestDungeonDepth: view.DeepestDungeonDepth,
 		Stats: store.CharacterBaseStats{
 			Str:   view.BaseStats.Str,
 			Dex:   view.BaseStats.Dex,

@@ -24,6 +24,7 @@ type Rules struct {
 	CharacterProgression CharacterProgressionRules
 	Monsters             map[string]MonsterDef
 	LootTables           map[string]LootTable
+	Shops                map[string]ShopDef
 	Interactables        map[string]InteractableDef
 	Worlds               map[string]WorldDef
 	DungeonGeneration    DungeonGenerationRules
@@ -379,6 +380,7 @@ type InteractableDef struct {
 	Name              string               `json:"name"`
 	InitialState      string               `json:"initial_state"`
 	Transition        string               `json:"transition,omitempty"`
+	ShopID            string               `json:"shop_id,omitempty"`
 	BarrierWhenClosed *InteractableBarrier `json:"barrier_when_closed,omitempty"`
 }
 
@@ -473,6 +475,34 @@ type LootTable struct {
 	Drops           []string    `json:"drops,omitempty"`
 	Entries         []LootEntry `json:"entries"`
 	TreasureClassID string      `json:"treasure_class_id,omitempty"`
+}
+
+type ShopFixedOffer struct {
+	OfferID   string `json:"offer_id"`
+	ItemDefID string `json:"item_def_id"`
+	BuyPrice  int    `json:"buy_price"`
+}
+
+type ShopGeneratedOffers struct {
+	OfferCount      int    `json:"offer_count"`
+	Source          string `json:"source"`
+	MinDepth        int    `json:"min_depth"`
+	MaxRollAttempts int    `json:"max_roll_attempts"`
+}
+
+type ShopPricing struct {
+	SellMultiplier    float64            `json:"sell_multiplier"`
+	RoundBuyTo        int                `json:"round_buy_to"`
+	RarityMultipliers map[string]float64 `json:"rarity_multipliers"`
+	SlotBase          map[string]int     `json:"slot_base"`
+	StatWeights       map[string]int     `json:"stat_weights"`
+}
+
+type ShopDef struct {
+	Name            string              `json:"name"`
+	FixedOffers     []ShopFixedOffer    `json:"fixed_offers"`
+	GeneratedOffers ShopGeneratedOffers `json:"generated_offers"`
+	Pricing         ShopPricing         `json:"pricing"`
 }
 
 // WorldDef is a deterministic initial session layout.
@@ -964,6 +994,17 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 
+	var shops struct {
+		Shops map[string]ShopDef `json:"shops"`
+	}
+	if err := readJSON(filepath.Join(dir, "shops.v0.json"), &shops); err != nil {
+		return nil, err
+	}
+	r.Shops = shops.Shops
+	if err := validateShopRules(r); err != nil {
+		return nil, err
+	}
+
 	var interactables struct {
 		Interactables map[string]InteractableDef `json:"interactables"`
 	}
@@ -976,6 +1017,9 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.Transition != "" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: closed interactable must not declare transition", id)
 			}
+			if def.ShopID != "" {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.shop_id: closed interactable must not declare shop_id", id)
+			}
 			if def.BarrierWhenClosed != nil && (def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0) {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
 			}
@@ -983,10 +1027,20 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.BarrierWhenClosed != nil {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: transition interactable must not declare barrier", id)
 			}
-			switch def.Transition {
-			case interactableTransitionAscend, interactableTransitionDescend, interactableTransitionWaypoint:
-			default:
-				return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: must be ascend, descend, or waypoint", id)
+			if (def.Transition == "") == (def.ShopID == "") {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s: must declare exactly one of transition or shop_id", id)
+			}
+			if def.Transition != "" {
+				switch def.Transition {
+				case interactableTransitionAscend, interactableTransitionDescend, interactableTransitionWaypoint:
+				default:
+					return nil, fmt.Errorf("game: invalid rules interactables.%s.transition: must be ascend, descend, or waypoint", id)
+				}
+			}
+			if def.ShopID != "" {
+				if _, ok := r.Shops[def.ShopID]; !ok {
+					return nil, fmt.Errorf("game: invalid rules interactables.%s.shop_id: unknown shop %s", id, def.ShopID)
+				}
 			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules interactables.%s.initial_state: unsupported state %s", id, def.InitialState)
@@ -1530,6 +1584,78 @@ func validateBossTemplates(templates map[string]BossTemplateDef, r *Rules) error
 	for _, templateID := range r.DungeonGeneration.BossFloor.BossTemplatePool {
 		if _, ok := templates[templateID]; !ok {
 			return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.boss_template_pool: unknown template %s", templateID)
+		}
+	}
+	return nil
+}
+
+func validateShopRules(r *Rules) error {
+	for shopID, shop := range r.Shops {
+		if shop.Name == "" {
+			return fmt.Errorf("game: invalid rules shops.%s.name: required", shopID)
+		}
+		seenOffers := map[string]bool{}
+		for _, offer := range shop.FixedOffers {
+			if offer.OfferID == "" {
+				return fmt.Errorf("game: invalid rules shops.%s.fixed_offers: offer_id required", shopID)
+			}
+			if seenOffers[offer.OfferID] {
+				return fmt.Errorf("game: invalid rules shops.%s.fixed_offers: duplicate offer_id %s", shopID, offer.OfferID)
+			}
+			seenOffers[offer.OfferID] = true
+			item, ok := r.Items[offer.ItemDefID]
+			if !ok {
+				return fmt.Errorf("game: invalid rules shops.%s.fixed_offers.%s: unknown item %s", shopID, offer.OfferID, offer.ItemDefID)
+			}
+			if item.Category == "currency" || item.Category == "quest" {
+				return fmt.Errorf("game: invalid rules shops.%s.fixed_offers.%s: currency/quest items cannot be sold", shopID, offer.OfferID)
+			}
+			if offer.BuyPrice <= 0 {
+				return fmt.Errorf("game: invalid rules shops.%s.fixed_offers.%s.buy_price: must be positive", shopID, offer.OfferID)
+			}
+		}
+		gen := shop.GeneratedOffers
+		if gen.OfferCount <= 0 {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.offer_count: must be positive", shopID)
+		}
+		if gen.Source != "common_dungeon_mob" {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.source: unsupported source %s", shopID, gen.Source)
+		}
+		if gen.MinDepth <= 0 {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.min_depth: must be positive", shopID)
+		}
+		if gen.MaxRollAttempts < gen.OfferCount {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.max_roll_attempts: must be >= offer_count", shopID)
+		}
+		pricing := shop.Pricing
+		if pricing.SellMultiplier <= 0 || pricing.SellMultiplier > 1 {
+			return fmt.Errorf("game: invalid rules shops.%s.pricing.sell_multiplier: must be within (0,1]", shopID)
+		}
+		if pricing.RoundBuyTo <= 0 {
+			return fmt.Errorf("game: invalid rules shops.%s.pricing.round_buy_to: must be positive", shopID)
+		}
+		for rarityID := range r.Rarities {
+			if pricing.RarityMultipliers[rarityID] <= 0 {
+				return fmt.Errorf("game: invalid rules shops.%s.pricing.rarity_multipliers.%s: must be positive", shopID, rarityID)
+			}
+		}
+		if pricing.RarityMultipliers["unique"] <= 0 {
+			return fmt.Errorf("game: invalid rules shops.%s.pricing.rarity_multipliers.unique: must be positive", shopID)
+		}
+		for templateID, template := range r.ItemTemplates {
+			if pricing.SlotBase[template.Slot] <= 0 {
+				return fmt.Errorf("game: invalid rules shops.%s.pricing.slot_base.%s: required by template %s", shopID, template.Slot, templateID)
+			}
+			for stat := range template.BaseStats {
+				if _, ok := pricing.StatWeights[stat]; !ok {
+					return fmt.Errorf("game: invalid rules shops.%s.pricing.stat_weights.%s: required by template %s", shopID, stat, templateID)
+				}
+			}
+			for _, roll := range template.RollableStats {
+				if _, ok := pricing.StatWeights[roll.Stat]; !ok {
+					return fmt.Errorf("game: invalid rules shops.%s.pricing.stat_weights.%s: required by template %s", shopID, roll.Stat, templateID)
+				}
+			}
 		}
 	}
 	return nil

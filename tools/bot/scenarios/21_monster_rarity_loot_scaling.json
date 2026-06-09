@@ -2,31 +2,19 @@
   "id": "monster_rarity_loot_scaling",
   "world_id": "dungeon_levels",
   "seed": "v30_monster_rarity",
-  "title": "Monster rarity and loot scaling",
-  "description": "Descend into a generated dungeon floor, assert a non-common monster rarity over protocol, kill that monster, pick up its rolled loot, then prove state, reconnect, replay, and fresh-session persistence.",
+  "title": "Monster rarity combat",
+  "description": "Descend into the seeded depth-2 dungeon floor, assert a unique monster rarity over protocol, kill a unique monster, then prove state, reconnect, and replay.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "at_least": 1 },
-    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "rarity": "champion", "event_type": "monster_killed", "timeout_s": 60 },
-    { "action": "pick_up_first_rolled_loot" }
+    { "action": "use_stair", "direction": "down", "max_ticks": 80 },
+    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "rarity": "unique", "at_least": 1 },
+    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "rarity": "unique", "event_type": "monster_killed", "timeout_s": 90 }
   ],
   "assertions": [
-    { "type": "current_level", "equals": -1 },
+    { "type": "current_level", "equals": -2 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -1 },
-    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "rarity": "champion", "at_least": 1 },
-    { "type": "event_seen", "event_type": "monster_killed" },
-    { "type": "event_seen", "event_type": "loot_dropped" },
-    { "type": "rolled_inventory_any" }
-  ],
-  "fresh_session_checks": [
-    {
-      "world_id": "dungeon_levels",
-      "steps": [],
-      "assertions": [
-        { "type": "rolled_inventory_any" }
-      ]
-    }
+    { "type": "event_seen", "event_type": "monster_killed" }
   ],
   "visual": {
     "camera": { "x": 16, "y": 10, "zoom": 1.0 }

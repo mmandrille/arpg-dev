@@ -64,6 +64,7 @@
     "level_cap": 20,
     "unspent_stat_points": 0,
     "gold": 8,
+    "deepest_dungeon_depth": 3,
     "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
     "derived_stats": {
       "damage_min": 0,

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec"
+  short_description: "Draft SDD slice specs before planning."
+  default_prompt: "Draft a spec for the next slice."

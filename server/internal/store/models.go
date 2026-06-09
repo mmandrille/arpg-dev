@@ -114,24 +114,26 @@ type CharacterBaseStats struct {
 // CharacterProgressionDefaults is the seed row supplied by game rules when a
 // character has no durable progression yet.
 type CharacterProgressionDefaults struct {
-	Level             int
-	Experience        int
-	UnspentStatPoints int
-	Stats             CharacterBaseStats
-	Gold              int
+	Level               int
+	Experience          int
+	UnspentStatPoints   int
+	Stats               CharacterBaseStats
+	Gold                int
+	DeepestDungeonDepth int
 }
 
 // CharacterProgression is durable character-owned XP, level, and base stats.
 type CharacterProgression struct {
-	AccountID         string
-	CharacterID       string
-	Level             int
-	Experience        int
-	UnspentStatPoints int
-	Stats             CharacterBaseStats
-	Gold              int
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	AccountID           string
+	CharacterID         string
+	Level               int
+	Experience          int
+	UnspentStatPoints   int
+	Stats               CharacterBaseStats
+	Gold                int
+	DeepestDungeonDepth int
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 // CharacterHotbarSlot is one durable character-owned hotbar assignment.

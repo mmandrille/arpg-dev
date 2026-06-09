@@ -13,6 +13,7 @@ const ModelReactionControllerScript := preload("res://scripts/model_reaction_con
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
@@ -152,6 +153,7 @@ var health_bars_layer: CanvasLayer
 var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
 var walls_root: Node3D
 var inventory_panel: InventoryPanel
+var shop_panel: ShopPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var character_info_panel: PanelContainer
@@ -683,6 +685,8 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		_show_inventory_full_text(target_id)
 	elif reason == "capacity_would_overflow":
 		_show_bag_full_cant_unequip_text()
+	elif shop_panel != null and shop_panel.visible:
+		shop_panel.show_status(reason.replace("_", " "), true)
 
 
 func _apply_snapshot(p: Dictionary) -> void:
@@ -738,6 +742,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_update_level_hud()
 			_update_character_info_panel()
 			_hide_waypoint_panel()
+			_hide_shop_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -844,6 +849,15 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "interactable_activated" and entities.has(eid):
 			_set_interactable_state(eid, entities[eid], "open")
+			continue
+		if event_type == "shop_opened":
+			_show_shop_panel(ev)
+			continue
+		if event_type == "shop_purchase" and shop_panel != null and shop_panel.visible:
+			shop_panel.show_status("Bought for %d" % int(ev.get("price", 0)))
+			continue
+		if event_type == "shop_sale" and shop_panel != null and shop_panel.visible:
+			shop_panel.show_status("Sold for %d" % int(ev.get("price", 0)))
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
 			_apply_boss_phase_started(eid, ev)
@@ -1055,6 +1069,8 @@ func _apply_hotbar_update(slot_index: int, item_instance_id) -> void:
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
 		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold)
+	if shop_panel != null and shop_panel.visible:
+		shop_panel.set_inventory_state(inventory, equipped, gold)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
@@ -1358,6 +1374,8 @@ func _is_character_info_key(event: InputEventKey) -> bool:
 func _close_gameplay_panels(except: String = "") -> void:
 	if except != "inventory" and inventory_panel != null:
 		inventory_panel.hide_display()
+	if except != "shop":
+		_hide_shop_panel()
 	if except != "stats" and character_stats_panel != null:
 		character_stats_panel.hide_display()
 	if except != "character_info":
@@ -1514,6 +1532,8 @@ func _hold_input_allowed() -> bool:
 		return false
 
 	if inventory_panel != null and inventory_panel.visible:
+		return false
+	if shop_panel != null and shop_panel.visible:
 		return false
 	if character_stats_panel != null and character_stats_panel.visible:
 		return false
@@ -2059,6 +2079,9 @@ func _build_scene() -> void:
 	inventory_panel = InventoryPanelScript.new()
 	inventory_panel.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(inventory_panel)
+	shop_panel = ShopPanelScript.new()
+	shop_panel.intent_requested.connect(_on_inventory_intent_requested)
+	ui.add_child(shop_panel)
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(consumable_bar)
@@ -2322,6 +2345,36 @@ func _show_waypoint_panel() -> void:
 func _hide_waypoint_panel() -> void:
 	if waypoint_panel != null:
 		waypoint_panel.visible = false
+
+
+func _show_shop_panel(ev: Dictionary) -> void:
+	if shop_panel == null:
+		return
+	_close_gameplay_panels("shop")
+	var next_shop_id := str(ev.get("shop_id", "town_vendor"))
+	var next_entity_id := str(ev.get("entity_id", ""))
+	shop_panel.show_shop(
+		next_entity_id,
+		next_shop_id,
+		ev.get("offers", []),
+		gold,
+		inventory,
+		equipped,
+		_shop_title(next_shop_id)
+	)
+
+
+func _hide_shop_panel() -> void:
+	if shop_panel != null:
+		shop_panel.hide_display()
+
+
+func _shop_title(next_shop_id: String) -> String:
+	match next_shop_id:
+		"town_vendor":
+			return "Town Vendor"
+		_:
+			return next_shop_id.replace("_", " ").capitalize()
 
 
 func _sync_waypoint_panel_reach() -> void:
@@ -3046,10 +3099,12 @@ func get_bot_state() -> Dictionary:
 		"interactable_ids": interactable_ids.duplicate(),
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
+		"shop_panel_visible": shop_panel != null and shop_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
+		"shop_panel": shop_panel.get_debug_state() if shop_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
@@ -3235,6 +3290,18 @@ func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> 
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
+
+
+func bot_click_shop_buy_offer(offer_id: String = "", offer_kind: String = "", offer_index: int = 0) -> void:
+	if shop_panel == null:
+		return
+	shop_panel.bot_click_buy_offer(offer_id, offer_kind, offer_index)
+
+
+func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
+	if shop_panel == null:
+		return
+	shop_panel.bot_click_sell_item(item_def_id, rolled, bag_index)
 
 
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:

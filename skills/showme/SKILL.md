@@ -19,10 +19,10 @@ Use this skill to produce quick visual proof for the exact client element being 
 Run from the repo root:
 
 ```bash
-python3 skills/visual-feedback/scripts/render_focus.py --focus gear
+python3 skills/showme/scripts/render_focus.py --focus gear
 ```
 
-The script prints the screenshot path under `.artifacts/visual-feedback/`.
+The script prints the screenshot path under `.artifacts/showme/`.
 
 Common examples:
 

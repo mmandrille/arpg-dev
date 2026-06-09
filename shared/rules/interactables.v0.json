@@ -26,6 +26,11 @@
       "name": "Teleporter",
       "initial_state": "ready",
       "transition": "waypoint"
+    },
+    "town_vendor": {
+      "name": "Town Vendor",
+      "initial_state": "ready",
+      "shop_id": "town_vendor"
     }
   }
 }

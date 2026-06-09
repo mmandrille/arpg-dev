@@ -101,12 +101,69 @@
         "item_template_id": { "type": "string" },
         "display_name": { "type": "string", "minLength": 1 },
         "rarity": { "type": "string" },
+        "slot": { "$ref": "#/$defs/shop_slot" },
+        "category": { "type": "string" },
         "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
         "requirements": { "$ref": "#/$defs/requirements" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "buy_price": { "type": "integer", "minimum": 1 },
+        "summary_lines": { "$ref": "#/$defs/shop_summary_lines" },
+        "comparison": { "$ref": "#/$defs/shop_item_comparison" },
         "source": { "type": "string" },
         "depth": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "shop_slot": {
+      "type": "string",
+      "enum": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring", "ring_left", "ring_right", "main_hand", "off_hand"]
+    },
+    "shop_summary_lines": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "shop_item_comparison_delta": {
+      "type": "object",
+      "required": ["stat", "offered", "equipped", "delta"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "type": "string" },
+        "offered": { "type": "integer" },
+        "equipped": { "type": "integer" },
+        "delta": { "type": "integer" }
+      }
+    },
+    "shop_item_comparison": {
+      "type": "object",
+      "required": ["slot", "deltas"],
+      "additionalProperties": false,
+      "properties": {
+        "slot": { "$ref": "#/$defs/shop_slot" },
+        "equipped_item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "deltas": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/shop_item_comparison_delta" }
+        }
+      }
+    },
+    "shop_sell_appraisal": {
+      "type": "object",
+      "required": ["item_instance_id", "item_def_id", "display_name", "sell_price"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "item_def_id": { "type": "string" },
+        "item_template_id": { "type": "string" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "rarity": { "type": "string" },
+        "slot": { "$ref": "#/$defs/shop_slot" },
+        "category": { "type": "string" },
+        "rolled_stats": { "$ref": "#/$defs/rolled_stats" },
+        "requirements": { "$ref": "#/$defs/requirements" },
+        "effect_ids": { "$ref": "#/$defs/effect_ids" },
+        "sell_price": { "type": "integer", "minimum": 1 },
+        "summary_lines": { "$ref": "#/$defs/shop_summary_lines" },
+        "comparison": { "$ref": "#/$defs/shop_item_comparison" }
       }
     },
     "rolled_stats": {
@@ -164,6 +221,10 @@
         "offers": {
           "type": "array",
           "items": { "$ref": "#/$defs/shop_offer" }
+        },
+        "sell_appraisals": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/shop_sell_appraisal" }
         },
         "offer_id": { "type": "string", "pattern": "^(fixed|generated):[a-z0-9_:-]+$" },
         "price": { "type": "integer", "minimum": 1 },

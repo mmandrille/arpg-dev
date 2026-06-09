@@ -12,6 +12,7 @@ var shop_title: String = "Vendor"
 var offers: Array = []
 var inventory: Array = []
 var equipped: Dictionary = {}
+var sell_appraisals: Array = []
 var gold: int = 0
 
 var _panel: PanelContainer
@@ -34,11 +35,12 @@ func _ready() -> void:
 	visible = false
 
 
-func show_shop(next_shop_entity_id: String, next_shop_id: String, next_offers: Array, next_gold: int, next_inventory: Array, next_equipped: Dictionary, next_title: String = "Town Vendor") -> void:
+func show_shop(next_shop_entity_id: String, next_shop_id: String, next_offers: Array, next_gold: int, next_inventory: Array, next_equipped: Dictionary, next_title: String = "Town Vendor", next_sell_appraisals: Array = []) -> void:
 	shop_entity_id = next_shop_entity_id
 	shop_id = next_shop_id
 	shop_title = next_title
 	offers = _dup_array(next_offers)
+	sell_appraisals = _dup_array(next_sell_appraisals)
 	set_inventory_state(next_inventory, next_equipped, next_gold)
 	visible = true
 	_apply_interaction_filters()
@@ -79,8 +81,10 @@ func get_debug_state() -> Dictionary:
 		"fixed_offer_count": _offers_by_kind("fixed").size(),
 		"generated_offer_count": _offers_by_kind("generated").size(),
 		"buy_buttons": _debug_buy_buttons(),
+		"offer_rows": _debug_offer_rows(),
 		"sell_rows": _debug_sell_rows(),
-		"sell_row_count": _sellable_items().size(),
+		"sell_row_count": _sell_rows().size(),
+		"comparison_row_count": _comparison_row_count(),
 		"status": _status_label.text if _status_label != null else "",
 	}
 
@@ -214,21 +218,24 @@ func _render_offer_list(list: VBoxContainer, rows: Array) -> void:
 		if typeof(offer) != TYPE_DICTIONARY:
 			continue
 		var rec := offer as Dictionary
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 6)
-		row.custom_minimum_size = Vector2(0, 34)
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 2)
+		row.custom_minimum_size = Vector2(0, 62)
+		var top := HBoxContainer.new()
+		top.add_theme_constant_override("separation", 6)
+		row.add_child(top)
 		var name := Label.new()
 		name.text = _offer_name(rec)
 		name.clip_text = true
 		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name.add_theme_color_override("font_color", _rarity_color(str(rec.get("rarity", "common"))))
-		row.add_child(name)
+		top.add_child(name)
 		var price := Label.new()
-		price.text = str(int(rec.get("buy_price", 0)))
+		price.text = "%d" % int(rec.get("buy_price", 0))
 		price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		price.custom_minimum_size = Vector2(48, 0)
 		price.add_theme_color_override("font_color", Color("#f4c84f"))
-		row.add_child(price)
+		top.add_child(price)
 		var btn := Button.new()
 		btn.text = "Buy"
 		btn.custom_minimum_size = Vector2(58, 30)
@@ -237,7 +244,9 @@ func _render_offer_list(list: VBoxContainer, rows: Array) -> void:
 		btn.pressed.connect(func() -> void:
 			_emit_buy(rec)
 		)
-		row.add_child(btn)
+		top.add_child(btn)
+		for line in _detail_lines(rec):
+			row.add_child(_detail_label(line, _detail_color(line)))
 		_buy_buttons[str(rec.get("offer_id", ""))] = btn
 		list.add_child(row)
 
@@ -246,20 +255,29 @@ func _render_sell_list() -> void:
 	if _sell_list == null:
 		return
 	_clear_children(_sell_list)
-	var sellable := _sellable_items()
+	var sellable := _sell_rows()
 	if sellable.is_empty():
 		_sell_list.add_child(_empty_row("Bag is empty"))
 		return
 	for item in sellable:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 6)
-		row.custom_minimum_size = Vector2(0, 34)
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 2)
+		row.custom_minimum_size = Vector2(0, 62)
+		var top := HBoxContainer.new()
+		top.add_theme_constant_override("separation", 6)
+		row.add_child(top)
 		var name := Label.new()
 		name.text = _item_name(item)
 		name.clip_text = true
 		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name.add_theme_color_override("font_color", _rarity_color(str(item.get("rarity", "common"))))
-		row.add_child(name)
+		top.add_child(name)
+		var price := Label.new()
+		price.text = "%d" % int(item.get("sell_price", 0))
+		price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		price.custom_minimum_size = Vector2(42, 0)
+		price.add_theme_color_override("font_color", Color("#f4c84f"))
+		top.add_child(price)
 		var btn := Button.new()
 		btn.text = "Sell"
 		btn.custom_minimum_size = Vector2(58, 30)
@@ -267,7 +285,9 @@ func _render_sell_list() -> void:
 		btn.pressed.connect(func() -> void:
 			_emit_sell(item)
 		)
-		row.add_child(btn)
+		top.add_child(btn)
+		for line in _detail_lines(item):
+			row.add_child(_detail_label(line, _detail_color(line)))
 		_sell_buttons[str(item.get("item_instance_id", ""))] = btn
 		_sell_list.add_child(row)
 
@@ -300,6 +320,22 @@ func _sellable_items() -> Array:
 		if item_id == "" or _is_equipped_instance(item_id):
 			continue
 		out.append(rec)
+	return out
+
+
+func _sell_rows() -> Array:
+	if sell_appraisals.is_empty():
+		return _sellable_items()
+	var live_ids := {}
+	for item in _sellable_items():
+		live_ids[str(item.get("item_instance_id", ""))] = true
+	var out: Array = []
+	for appraisal in sell_appraisals:
+		if typeof(appraisal) != TYPE_DICTIONARY:
+			continue
+		var rec := appraisal as Dictionary
+		if live_ids.get(str(rec.get("item_instance_id", "")), false):
+			out.append(rec)
 	return out
 
 
@@ -353,14 +389,52 @@ func _debug_buy_buttons() -> Dictionary:
 
 func _debug_sell_rows() -> Array:
 	var out: Array = []
-	for item in _sellable_items():
+	for item in _sell_rows():
 		out.append({
 			"item_instance_id": str(item.get("item_instance_id", "")),
 			"item_def_id": str(item.get("item_def_id", "")),
 			"item_template_id": str(item.get("item_template_id", "")),
 			"display_name": _item_name(item),
+			"rarity": str(item.get("rarity", "")),
+			"slot": str(item.get("slot", "")),
+			"category": str(item.get("category", "")),
+			"sell_price": int(item.get("sell_price", 0)),
+			"summary_lines": _detail_lines(item),
+			"comparison_count": _comparison_count(item),
 		})
 	return out
+
+
+func _debug_offer_rows() -> Array:
+	var out: Array = []
+	for offer in offers:
+		if typeof(offer) != TYPE_DICTIONARY:
+			continue
+		var rec := offer as Dictionary
+		out.append({
+			"offer_id": str(rec.get("offer_id", "")),
+			"kind": str(rec.get("kind", "")),
+			"item_def_id": str(rec.get("item_def_id", "")),
+			"item_template_id": str(rec.get("item_template_id", "")),
+			"display_name": _offer_name(rec),
+			"rarity": str(rec.get("rarity", "")),
+			"slot": str(rec.get("slot", "")),
+			"category": str(rec.get("category", "")),
+			"buy_price": int(rec.get("buy_price", 0)),
+			"summary_lines": _detail_lines(rec),
+			"comparison_count": _comparison_count(rec),
+		})
+	return out
+
+
+func _comparison_row_count() -> int:
+	var total := 0
+	for offer in offers:
+		if typeof(offer) == TYPE_DICTIONARY:
+			total += _comparison_count(offer as Dictionary)
+	for item in _sell_rows():
+		total += _comparison_count(item)
+	return total
 
 
 func _offer_name(offer: Dictionary) -> String:
@@ -375,6 +449,109 @@ func _item_name(item: Dictionary) -> String:
 	if name != "":
 		return name
 	return str(item.get("item_template_id", item.get("item_def_id", "item")))
+
+
+func _detail_lines(row: Dictionary) -> Array:
+	var lines: Array = []
+	var summary = row.get("summary_lines", [])
+	if typeof(summary) == TYPE_ARRAY:
+		for line in summary:
+			var text := str(line)
+			if text != "":
+				lines.append(text)
+	if lines.is_empty():
+		var slot := str(row.get("slot", ""))
+		if slot != "":
+			lines.append("Slot: %s" % slot)
+		else:
+			var category := str(row.get("category", ""))
+			if category != "":
+				lines.append("Kind: %s" % category)
+		lines.append_array(_stat_lines(row.get("rolled_stats", {})))
+		var req = row.get("requirements", {})
+		if typeof(req) == TYPE_DICTIONARY and int((req as Dictionary).get("level", 0)) > 0:
+			lines.append("Requires level %d" % int((req as Dictionary).get("level", 0)))
+	lines.append_array(_comparison_lines(row.get("comparison", {})))
+	return lines
+
+
+func _stat_lines(stats_value: Variant) -> Array:
+	if typeof(stats_value) != TYPE_DICTIONARY:
+		return []
+	var stats := stats_value as Dictionary
+	var lines: Array = []
+	if int(stats.get("damage_min", 0)) > 0 or int(stats.get("damage_max", 0)) > 0:
+		lines.append("Damage %d-%d" % [int(stats.get("damage_min", 0)), int(stats.get("damage_max", 0))])
+	for key in ["armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"]:
+		var value := int(stats.get(key, 0))
+		if value > 0:
+			lines.append("%s +%d" % [_display_stat(key), value])
+	return lines
+
+
+func _comparison_lines(comparison_value: Variant) -> Array:
+	if typeof(comparison_value) != TYPE_DICTIONARY:
+		return []
+	var comparison := comparison_value as Dictionary
+	var deltas = comparison.get("deltas", [])
+	if typeof(deltas) != TYPE_ARRAY:
+		return []
+	var lines: Array = []
+	for delta in deltas:
+		if typeof(delta) != TYPE_DICTIONARY:
+			continue
+		var rec := delta as Dictionary
+		var diff := int(rec.get("delta", 0))
+		var sign := "+" if diff >= 0 else ""
+		lines.append("%s%s %s vs equipped" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))])
+	return lines
+
+
+func _comparison_count(row: Dictionary) -> int:
+	var comparison = row.get("comparison", {})
+	if typeof(comparison) != TYPE_DICTIONARY:
+		return 0
+	var deltas = (comparison as Dictionary).get("deltas", [])
+	if typeof(deltas) != TYPE_ARRAY:
+		return 0
+	return (deltas as Array).size()
+
+
+func _detail_label(text: String, color: Color) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.clip_text = true
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_font_size_override("font_size", 13)
+	return label
+
+
+func _detail_color(text: String) -> Color:
+	if text.begins_with("+"):
+		return Color("#9ee6a8")
+	if text.begins_with("-"):
+		return Color("#ff9f7a")
+	return Color("#b8aa91")
+
+
+func _display_stat(stat: String) -> String:
+	match stat:
+		"damage_min":
+			return "Min damage"
+		"damage_max":
+			return "Max damage"
+		"armor":
+			return "Armor"
+		"block_percent":
+			return "Block"
+		"max_hp":
+			return "Max HP"
+		"hotbar_slots":
+			return "Hotbar slots"
+		"inventory_rows":
+			return "Inventory rows"
+		_:
+			return stat
 
 
 func _rarity_color(rarity: String) -> Color:

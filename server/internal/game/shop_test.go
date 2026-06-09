@@ -170,6 +170,83 @@ func TestShopOpenBuyAndSell(t *testing.T) {
 	}
 }
 
+func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
+	sim := newTownVendorSim(t, 500, 2)
+	vendor := townVendorEntity(t, sim)
+	equipped := &invItem{
+		instanceID: 7001,
+		itemDefID:  "cave_blade",
+		slot:       mainHandSlot,
+		equipped:   true,
+		rollPayload: &ItemRollPayload{
+			ItemTemplateID: "cave_blade",
+			DisplayName:    "Common Cave Blade",
+			Rarity:         "common",
+			Stats:          map[string]int{"damage_min": 2, "damage_max": 4},
+			Requirements:   map[string]int{"level": 1},
+			EffectIDs:      []string{},
+		},
+	}
+	sellable := &invItem{
+		instanceID: 7002,
+		itemDefID:  "cave_shield",
+		slot:       offHandSlot,
+		rollPayload: &ItemRollPayload{
+			ItemTemplateID: "cave_shield",
+			DisplayName:    "Magic Cave Shield",
+			Rarity:         "magic",
+			Stats:          map[string]int{"armor": 5, "block_percent": 9},
+			Requirements:   map[string]int{"level": 1},
+			EffectIDs:      []string{},
+		},
+	}
+	sim.inventory = append(sim.inventory, equipped, sellable)
+	sim.equipped[mainHandSlot] = equipped.instanceID
+	sim.savePlayer(sim.defaultPlayer())
+
+	open := sim.Tick([]Input{{
+		Type:      "action_intent",
+		MessageID: "msg_open_shop_appraisal",
+		Action:    &ActionIntent{TargetID: idStr(vendor.id)},
+	}})
+	opened := findEvent(open.Events, "shop_opened")
+	if opened == nil {
+		t.Fatalf("missing shop_opened event: %+v", open)
+	}
+	if len(opened.SellAppraisals) != 1 {
+		t.Fatalf("sell appraisals = %+v, want only unequipped sellable item", opened.SellAppraisals)
+	}
+	appraisal := opened.SellAppraisals[0]
+	if appraisal.ItemInstanceID != idStr(sellable.instanceID) || appraisal.DisplayName != "Magic Cave Shield" || appraisal.SellPrice != 38 {
+		t.Fatalf("sell appraisal = %+v", appraisal)
+	}
+	if !containsShopString(appraisal.SummaryLines, "Armor +5") || !containsShopString(appraisal.SummaryLines, "Block +9") {
+		t.Fatalf("sell appraisal summary lines = %+v", appraisal.SummaryLines)
+	}
+	redPotion := findOffer(opened.Offers, "fixed:red_potion")
+	if redPotion == nil || redPotion.Category != "consumable" || !containsShopString(redPotion.SummaryLines, "Restores 5 HP") {
+		t.Fatalf("red potion offer = %+v", redPotion)
+	}
+	blade := findGeneratedOfferByTemplate(opened.Offers, "cave_blade")
+	if blade == nil {
+		t.Fatalf("missing generated cave_blade offer: %+v", opened.Offers)
+	}
+	if blade.Slot != mainHandSlot || blade.Category != "equipment" || blade.Comparison == nil {
+		t.Fatalf("generated blade appraisal = %+v", blade)
+	}
+	if blade.Comparison.EquippedItemInstanceID != idStr(equipped.instanceID) {
+		t.Fatalf("comparison equipped id = %q, want %s", blade.Comparison.EquippedItemInstanceID, idStr(equipped.instanceID))
+	}
+	if len(blade.Comparison.Deltas) == 0 {
+		t.Fatalf("comparison deltas empty for %+v", blade)
+	}
+	for _, delta := range blade.Comparison.Deltas {
+		if delta.Stat == "damage_max" && delta.Equipped != 4 {
+			t.Fatalf("damage_max delta = %+v, want equipped 4", delta)
+		}
+	}
+}
+
 func TestShopBuyFailureDoesNotMutate(t *testing.T) {
 	t.Run("insufficient gold", func(t *testing.T) {
 		sim := newTownVendorSim(t, 0, 1)
@@ -368,6 +445,33 @@ func firstGeneratedOffer(t *testing.T, sim *Sim) ShopOfferView {
 	}
 	t.Fatal("missing generated offer")
 	return ShopOfferView{}
+}
+
+func findOffer(offers []ShopOfferView, offerID string) *ShopOfferView {
+	for i := range offers {
+		if offers[i].OfferID == offerID {
+			return &offers[i]
+		}
+	}
+	return nil
+}
+
+func findGeneratedOfferByTemplate(offers []ShopOfferView, templateID string) *ShopOfferView {
+	for i := range offers {
+		if offers[i].Kind == shopOfferKindGenerated && offers[i].ItemTemplateID == templateID {
+			return &offers[i]
+		}
+	}
+	return nil
+}
+
+func containsShopString(rows []string, want string) bool {
+	for _, row := range rows {
+		if row == want {
+			return true
+		}
+	}
+	return false
 }
 
 func hasAck(res TickResult, messageID string) bool {

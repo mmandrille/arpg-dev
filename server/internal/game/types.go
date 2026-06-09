@@ -154,18 +154,56 @@ type CharacterProgressionView struct {
 
 // ShopOfferView is one server-authoritative offer rendered inside shop events.
 type ShopOfferView struct {
-	OfferID        string         `json:"offer_id"`
-	Kind           string         `json:"kind"`
-	ItemDefID      string         `json:"item_def_id"`
-	ItemTemplateID string         `json:"item_template_id,omitempty"`
-	DisplayName    string         `json:"display_name"`
-	Rarity         string         `json:"rarity,omitempty"`
-	RolledStats    map[string]int `json:"rolled_stats,omitempty"`
-	Requirements   map[string]int `json:"requirements,omitempty"`
-	EffectIDs      []string       `json:"effect_ids,omitempty"`
-	BuyPrice       int            `json:"buy_price"`
-	Source         string         `json:"source,omitempty"`
-	Depth          int            `json:"depth,omitempty"`
+	OfferID        string              `json:"offer_id"`
+	Kind           string              `json:"kind"`
+	ItemDefID      string              `json:"item_def_id"`
+	ItemTemplateID string              `json:"item_template_id,omitempty"`
+	DisplayName    string              `json:"display_name"`
+	Rarity         string              `json:"rarity,omitempty"`
+	Slot           string              `json:"slot,omitempty"`
+	Category       string              `json:"category,omitempty"`
+	RolledStats    map[string]int      `json:"rolled_stats,omitempty"`
+	Requirements   map[string]int      `json:"requirements,omitempty"`
+	EffectIDs      []string            `json:"effect_ids,omitempty"`
+	BuyPrice       int                 `json:"buy_price"`
+	SummaryLines   []string            `json:"summary_lines,omitempty"`
+	Comparison     *ShopComparisonView `json:"comparison,omitempty"`
+	Source         string              `json:"source,omitempty"`
+	Depth          int                 `json:"depth,omitempty"`
+}
+
+// ShopComparisonDeltaView describes one direct stat comparison between a
+// vendor item and the actor's currently equipped item in the same slot.
+type ShopComparisonDeltaView struct {
+	Stat     string `json:"stat"`
+	Offered  int    `json:"offered"`
+	Equipped int    `json:"equipped"`
+	Delta    int    `json:"delta"`
+}
+
+// ShopComparisonView is server-authored comparison data rendered by the shop UI.
+type ShopComparisonView struct {
+	Slot                   string                    `json:"slot"`
+	EquippedItemInstanceID string                    `json:"equipped_item_instance_id,omitempty"`
+	Deltas                 []ShopComparisonDeltaView `json:"deltas"`
+}
+
+// ShopSellAppraisalView is one server-authored sell quote for an unequipped
+// inventory item at the currently opened vendor.
+type ShopSellAppraisalView struct {
+	ItemInstanceID string              `json:"item_instance_id"`
+	ItemDefID      string              `json:"item_def_id"`
+	ItemTemplateID string              `json:"item_template_id,omitempty"`
+	DisplayName    string              `json:"display_name"`
+	Rarity         string              `json:"rarity,omitempty"`
+	Slot           string              `json:"slot,omitempty"`
+	Category       string              `json:"category,omitempty"`
+	RolledStats    map[string]int      `json:"rolled_stats,omitempty"`
+	Requirements   map[string]int      `json:"requirements,omitempty"`
+	EffectIDs      []string            `json:"effect_ids,omitempty"`
+	SellPrice      int                 `json:"sell_price"`
+	SummaryLines   []string            `json:"summary_lines,omitempty"`
+	Comparison     *ShopComparisonView `json:"comparison,omitempty"`
 }
 
 // HotbarSlotView is one fixed hotbar assignment in the protocol snapshot.
@@ -209,40 +247,41 @@ type BossHitShapeView struct {
 
 // Event is an authoritative event emitted by the sim.
 type Event struct {
-	EventType         string             `json:"event_type"`
-	EntityID          string             `json:"entity_id,omitempty"`
-	SourceEntityID    string             `json:"source_entity_id,omitempty"`
-	TargetEntityID    string             `json:"target_entity_id,omitempty"`
-	CorrelationID     string             `json:"correlation_id,omitempty"`
-	Damage            *int               `json:"damage,omitempty"`
-	Outcome           string             `json:"outcome,omitempty"`
-	RawDamage         *int               `json:"raw_damage,omitempty"`
-	MitigatedDamage   *int               `json:"mitigated_damage,omitempty"`
-	Blocked           *bool              `json:"blocked,omitempty"`
-	Critical          *bool              `json:"critical,omitempty"`
-	Heal              *int               `json:"heal,omitempty"`
-	Mana              *int               `json:"mana,omitempty"`
-	ItemInstanceID    string             `json:"item_instance_id,omitempty"`
-	Level             *int               `json:"level,omitempty"`
-	FromLevel         *int               `json:"from_level,omitempty"`
-	ToLevel           *int               `json:"to_level,omitempty"`
-	Amount            *int               `json:"amount,omitempty"`
-	TotalExperience   *int               `json:"total_experience,omitempty"`
-	TotalGold         *int               `json:"total_gold,omitempty"`
-	Stat              string             `json:"stat,omitempty"`
-	UnspentStatPoints *int               `json:"unspent_stat_points,omitempty"`
-	Reason            string             `json:"reason,omitempty"`
-	ShopID            string             `json:"shop_id,omitempty"`
-	Offers            []ShopOfferView    `json:"offers,omitempty"`
-	OfferID           string             `json:"offer_id,omitempty"`
-	Price             *int               `json:"price,omitempty"`
-	PatternID         string             `json:"pattern_id,omitempty"`
-	PhaseIndex        *int               `json:"phase_index,omitempty"`
-	PhaseKind         string             `json:"phase_kind,omitempty"`
-	DurationTicks     *int               `json:"duration_ticks,omitempty"`
-	Telegraph         *BossTelegraphView `json:"telegraph,omitempty"`
-	HitShape          *BossHitShapeView  `json:"hit_shape,omitempty"`
-	State             string             `json:"state,omitempty"`
+	EventType         string                  `json:"event_type"`
+	EntityID          string                  `json:"entity_id,omitempty"`
+	SourceEntityID    string                  `json:"source_entity_id,omitempty"`
+	TargetEntityID    string                  `json:"target_entity_id,omitempty"`
+	CorrelationID     string                  `json:"correlation_id,omitempty"`
+	Damage            *int                    `json:"damage,omitempty"`
+	Outcome           string                  `json:"outcome,omitempty"`
+	RawDamage         *int                    `json:"raw_damage,omitempty"`
+	MitigatedDamage   *int                    `json:"mitigated_damage,omitempty"`
+	Blocked           *bool                   `json:"blocked,omitempty"`
+	Critical          *bool                   `json:"critical,omitempty"`
+	Heal              *int                    `json:"heal,omitempty"`
+	Mana              *int                    `json:"mana,omitempty"`
+	ItemInstanceID    string                  `json:"item_instance_id,omitempty"`
+	Level             *int                    `json:"level,omitempty"`
+	FromLevel         *int                    `json:"from_level,omitempty"`
+	ToLevel           *int                    `json:"to_level,omitempty"`
+	Amount            *int                    `json:"amount,omitempty"`
+	TotalExperience   *int                    `json:"total_experience,omitempty"`
+	TotalGold         *int                    `json:"total_gold,omitempty"`
+	Stat              string                  `json:"stat,omitempty"`
+	UnspentStatPoints *int                    `json:"unspent_stat_points,omitempty"`
+	Reason            string                  `json:"reason,omitempty"`
+	ShopID            string                  `json:"shop_id,omitempty"`
+	Offers            []ShopOfferView         `json:"offers,omitempty"`
+	SellAppraisals    []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
+	OfferID           string                  `json:"offer_id,omitempty"`
+	Price             *int                    `json:"price,omitempty"`
+	PatternID         string                  `json:"pattern_id,omitempty"`
+	PhaseIndex        *int                    `json:"phase_index,omitempty"`
+	PhaseKind         string                  `json:"phase_kind,omitempty"`
+	DurationTicks     *int                    `json:"duration_ticks,omitempty"`
+	Telegraph         *BossTelegraphView      `json:"telegraph,omitempty"`
+	HitShape          *BossHitShapeView       `json:"hit_shape,omitempty"`
+	State             string                  `json:"state,omitempty"`
 }
 
 // TeleporterDiscoveryView is the protocol view of a generated dungeon level's

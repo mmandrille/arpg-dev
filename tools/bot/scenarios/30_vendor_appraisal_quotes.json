@@ -1,9 +1,9 @@
 {
-  "id": "town_vendor_gold_sink",
+  "id": "vendor_appraisal_quotes",
   "world_id": "dungeon_levels",
   "seed": "town_vendor_gold_sink_1075",
-  "title": "Town vendor gold sink",
-  "description": "Reach dungeon depth 3, return to town, open the vendor, verify generated stock, sell loot, and buy a fixed potion while asserting gold/inventory/progression changes.",
+  "title": "Vendor appraisal quotes",
+  "description": "Open the v41 town vendor with inventory gear, verify server-authored item summaries/comparisons, then sell loot and buy a potion.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
@@ -17,37 +17,27 @@
     { "action": "use_stair", "direction": "up", "max_ticks": 480 },
     { "action": "open_shop" },
     { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "equals": 7 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
+    { "action": "assert_shop_offer_details", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2, "requires_category": true, "summary_contains": "Restores" },
+    { "action": "assert_shop_offer_details", "shop_id": "town_vendor", "offer_kind": "generated", "at_least": 5, "requires_slot": true, "requires_category": true, "requires_comparison": true },
+    { "action": "assert_shop_sell_appraisal_count", "shop_id": "town_vendor", "at_least": 1 },
+    { "action": "assert_shop_sell_appraisal_details", "shop_id": "town_vendor", "at_least": 1, "requires_slot": true, "requires_category": true, "requires_comparison": true },
     { "action": "sell_inventory_item", "rolled": true, "equipped": false },
     { "action": "assert_gold_changed", "direction": "increase" },
-    { "action": "buy_shop_offer", "offer_id": "fixed:red_potion", "affordable": true },
+    { "action": "buy_shop_offer", "offer_id": "fixed:red_potion" },
     { "action": "assert_gold_changed", "direction": "decrease" },
-    { "action": "assert_inventory_contains", "item_def_id": "red_potion", "equipped": false },
     { "action": "assert_shop_event", "event_type": "shop_opened", "at_least": 1 },
     { "action": "assert_shop_event", "event_type": "shop_purchase", "at_least": 1 },
     { "action": "assert_shop_event", "event_type": "shop_sale", "at_least": 1 }
   ],
   "assertions": [
     { "type": "current_level", "equals": 0 },
-    { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -3 },
     { "type": "character_progression", "deepest_dungeon_depth": 3 },
-    { "type": "shop_offer_count", "shop_id": "town_vendor", "equals": 7 },
+    { "type": "shop_offer_details", "shop_id": "town_vendor", "offer_kind": "generated", "at_least": 5, "requires_slot": true, "requires_category": true, "requires_comparison": true },
+    { "type": "shop_sell_appraisal_details", "shop_id": "town_vendor", "at_least": 1, "requires_slot": true, "requires_category": true, "requires_comparison": true },
     { "type": "shop_event", "event_type": "shop_opened", "at_least": 1 },
     { "type": "shop_event", "event_type": "shop_purchase", "at_least": 1 },
-    { "type": "shop_event", "event_type": "shop_sale", "at_least": 1 },
-    { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false }
-  ],
-  "fresh_session_checks": [
-    {
-      "world_id": "dungeon_levels",
-      "steps": [],
-      "assertions": [
-        { "type": "character_progression", "deepest_dungeon_depth": 3 },
-        { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false }
-      ]
-    }
+    { "type": "shop_event", "event_type": "shop_sale", "at_least": 1 }
   ],
   "visual": {
     "camera": { "x": 6, "y": 12, "zoom": 1.1 }

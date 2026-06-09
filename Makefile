@@ -23,9 +23,20 @@ export ARPG_ADDR = $(ADDR)
 export ARPG_DEV_TOKEN = $(DEV_TOKEN)
 export ARPG_DEBUG_TOKEN = $(DEBUG_TOKEN)
 
+# Quiet output for agent-friendly runs (test/ci/bot). Full logs: VERBOSE=1 or V=1.
+VERBOSE ?=
+V ?=
+ifneq ($(filter 1 true yes on,$(VERBOSE) $(V)),)
+export ARPG_VERBOSE := 1
+endif
+export ARPG_QUIET_TAIL_LINES ?= 100
+RUN_QUIET := $(ROOT)/scripts/run_quiet.sh
+
 .PHONY: help
 help: ## List available commands
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "  Output: make test/ci/bot/test-all/client-* are quiet by default. Use VERBOSE=1 (or V=1) for full logs."
 
 include make/subfiles.mk

@@ -1,13 +1,13 @@
 # --- Agents -------------------------------------------------------------------
 .PHONY: bot bot-visual bot-client replay
-bot: db-up tools ## Run all Python protocol bot scenarios with local Postgres + temporary server
+bot: db-up tools ## Run all Python protocol bot scenarios (quiet; VERBOSE=1 for full logs)
 	DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" \
 	SCENARIO="$(or $(SCENARIO),$(scenario),all)" ./scripts/bot_local.sh
 
-bot-visual: db-up tools ## Record bot scenario(s) and open a Godot visual replay playlist; pass scenario=<id|file>
+bot-visual: db-up tools ## Record bot scenarios + Godot replay (quiet when headless; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" SCENARIO="$(or $(SCENARIO),$(scenario),all)" ./scripts/bot_visual.sh
 
-bot-client: db-up ## Run Godot client bot scenarios with a temporary local server; pass scenario=<id|all>, HEADLESS=1
+bot-client: db-up ## Run Godot client bot scenarios (quiet when HEADLESS=1; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" \
 	SCENARIO="$(or $(SCENARIO),$(scenario),all)" \
 	HEADLESS="$(or $(HEADLESS),0)" ./scripts/bot_client_local.sh

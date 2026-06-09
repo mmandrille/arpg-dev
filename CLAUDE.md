@@ -24,17 +24,18 @@ make db-reset        # destroy + recreate Postgres (drops all data)
 
 # Running
 make server          # run Go server (requires db-up first)
-make bot             # run Python protocol bot end-to-end (server must be up)
-make bot-visual      # server + interactive Godot window with ARPG_AUTOPLAY=1
+make bot             # run Python protocol bot end-to-end (quiet; add VERBOSE=1 for full logs)
+make bot-visual      # server + Godot replay (quiet when headless; VERBOSE=1 for full logs)
 make play            # Postgres + server + interactive Godot client
 
 # Testing
-make test            # unit tests: shared validation + Go + Python + client unit
+make test            # unit tests (quiet; add VERBOSE=1 for full logs)
 make test-go         # all Go tests  (`cd server && go test ./...`)
 make test-py         # Python unit tests (`pytest tools/`)
-make client-unit     # Godot headless unit tests (no server required)
-make client-smoke    # Godot headless smoke + slice (slice needs server)
-make ci              # full local CI suite (shared validation + Go tests + bot + replay)
+make client-unit     # Godot headless unit tests (quiet; add VERBOSE=1 for full logs)
+make client-smoke    # Godot headless smoke + slice (quiet; add VERBOSE=1 for full logs)
+make ci              # full local CI suite (quiet; add VERBOSE=1 for full logs)
+make test-all        # test + ci + headless bot-visual (quiet; add VERBOSE=1 for full logs)
 
 # Shared contracts
 make validate-shared # validate all shared JSON against their schemas
@@ -54,6 +55,7 @@ make replay SESSION_ID=<id>   # re-simulate a recorded session and verify output
 
 **Override env vars on the command line:**
 ```bash
+VERBOSE=1 make ci                       # full CI logs (also: V=1)
 AUTOPLAY_STEP_DELAY=0.8 make bot-visual   # slower playback
 GODOT=/path/to/godot make bot-visual
 SESSION_ID=abc123 make replay

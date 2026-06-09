@@ -10,10 +10,10 @@ $(PLAY_CLIENTS_FROM_GOALS):
 endif
 endif
 
-client-unit: ## Run Godot headless unit tests (no server required)
+client-unit: ## Run Godot headless unit tests (quiet; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" CLIENT_UNIT_ONLY=1 ./scripts/client_smoke.sh
 
-client-smoke: ## Run Godot headless client smoke test (requires pinned Godot; slice needs server)
+client-smoke: ## Run Godot headless client smoke test (quiet; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" ./scripts/client_smoke.sh
 
 play: db-up ## Play locally: pass a client count as `make play 3` for menu co-op

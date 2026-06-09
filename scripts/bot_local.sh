@@ -6,6 +6,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=quiet_helpers.sh
+source "$ROOT/scripts/quiet_helpers.sh"
 
 DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
 if [[ -n "${ARPG_ADDR:-}" ]]; then
@@ -28,7 +30,7 @@ trap cleanup EXIT
 
 echo "[bot-local] building server..."
 SERVER_BIN="$(mktemp -t arpg-bot-server.XXXXXX)"
-(cd server && go build -o "$SERVER_BIN" ./cmd/arpg-server)
+"$RUN_QUIET" --label "go build arpg-server" -- bash -c "cd server && go build -o \"$SERVER_BIN\" ./cmd/arpg-server"
 
 echo "[bot-local] starting server on $ADDR (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
@@ -63,7 +65,9 @@ PY
 )" && break
     fi
     if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-      echo "[bot-local] server exited early; log:"; cat "$SERVER_LOG"; exit 1
+      echo "[bot-local] server exited early; log:"
+      show_log "$SERVER_LOG" "server"
+      exit 1
     fi
     sleep 0.1
   done
@@ -74,17 +78,22 @@ fi
 for i in $(seq 1 60); do
   if curl -fsS "${BASE_URL%/}/readyz" >/dev/null 2>&1; then break; fi
   if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-    echo "[bot-local] server exited early; log:"; cat "$SERVER_LOG"; exit 1
+    echo "[bot-local] server exited early; log:"
+    show_log "$SERVER_LOG" "server"
+    exit 1
   fi
   sleep 1
 done
 curl -fsS "${BASE_URL%/}/readyz" >/dev/null
 if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-  echo "[bot-local] server exited before bot could start; log:"; cat "$SERVER_LOG"; exit 1
+  echo "[bot-local] server exited before bot could start; log:"
+  show_log "$SERVER_LOG" "server"
+  exit 1
 fi
 
 echo "[bot-local] running protocol bot scenario selection '$SCENARIO'..."
-"$ROOT/.venv/bin/python" -m tools.bot.run \
+"$RUN_QUIET" --label "protocol bot ($SCENARIO)" -- \
+  "$ROOT/.venv/bin/python" -m tools.bot.run \
   --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
   --email "$EMAIL" --scenario "$SCENARIO"
 

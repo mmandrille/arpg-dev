@@ -278,7 +278,9 @@ func _bot_uses_menu() -> bool:
 		return true
 	var scenario_path := _env("ARPG_BOT_SCENARIO", "")
 	var file_name := scenario_path.get_file()
-	return file_name.begins_with("08_main_menu_flow") or file_name.begins_with("20_menu_create_join_flow")
+	return file_name.begins_with("08_main_menu_flow") \
+		or file_name.begins_with("20_menu_create_join_flow") \
+		or file_name.begins_with("21_join_game_listed_session")
 
 
 func _mount_bot_controller() -> void:
@@ -3796,6 +3798,9 @@ func bot_click_menu_button(button: String) -> void:
 				multiplayer_panel.select_first_session()
 				var state := multiplayer_panel.get_debug_state()
 				_on_join_listed_session_requested(str(state.get("selected_session_id", "")))
+		"select_expected_join_session":
+			if multiplayer_panel != null:
+				multiplayer_panel.select_session(OS.get_environment("ARPG_EXPECTED_JOIN_SESSION_ID"))
 		"join_selected_session":
 			if multiplayer_panel != null:
 				var state := multiplayer_panel.get_debug_state()

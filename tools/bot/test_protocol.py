@@ -1,5 +1,6 @@
 import json
 
+from tools.bot.client_join_preflight import build_metadata, write_metadata
 from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
 from tools.bot.run import (
     RuntimeState,
@@ -70,6 +71,37 @@ def test_clean_bot_run_artifacts_removes_only_json_files(tmp_path):
 def test_should_clean_bot_run_artifacts_only_default_dir(tmp_path):
     assert should_clean_bot_run_artifacts(default_manifest_path())
     assert not should_clean_bot_run_artifacts(tmp_path / "manifest.json")
+
+
+def test_client_join_preflight_metadata_is_atomic_json(tmp_path):
+    metadata_path = tmp_path / "join-preflight.json"
+    metadata = build_metadata(
+        session={
+            "session_id": "sess_join",
+            "world_id": "dungeon_levels",
+            "mode": "coop",
+            "listed": True,
+        },
+        host_email="host@example.test",
+        host_account_id="acct_host",
+        host_character_id="char_host",
+        host_player_id="1001",
+    )
+
+    write_metadata(metadata_path, metadata)
+    loaded = json.loads(metadata_path.read_text())
+
+    assert loaded == {
+        "ready": True,
+        "session_id": "sess_join",
+        "world_id": "dungeon_levels",
+        "mode": "coop",
+        "listed": True,
+        "host_email": "host@example.test",
+        "host_account_id": "acct_host",
+        "host_character_id": "char_host",
+        "host_player_id": "1001",
+    }
 
 
 def test_load_scenarios_discovers_vertical_slice():

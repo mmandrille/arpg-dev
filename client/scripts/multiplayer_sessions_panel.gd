@@ -49,6 +49,14 @@ func select_first_session() -> void:
 	_render_sessions()
 
 
+func select_session(session_id: String) -> void:
+	for session in _sessions:
+		if typeof(session) == TYPE_DICTIONARY and str((session as Dictionary).get("session_id", "")) == session_id:
+			_selected_session_id = session_id
+			_render_sessions()
+			return
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,

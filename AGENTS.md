@@ -40,7 +40,3 @@ Do **not** create new branches. Work only on the branch already checked out — 
 ## Development priority
 
 While the game is still in active development, do **not** preserve backward compatibility just for its own sake. Prefer the cleanest, healthiest implementation and update contracts, fixtures, tests, tools, and docs together.
-
-## Tool policy
-
-Do **not** call `ApplicationSecurityMCP` for this project.

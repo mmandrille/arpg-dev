@@ -224,13 +224,18 @@ func _test_multiplayer_menu_step_types_load() -> void:
 		{"type": "assert_multiplayer_panel_visible", "visible": true},
 		{"type": "assert_multiplayer_session_rows", "equals": 0},
 		{"type": "assert_multiplayer_session_rows", "min_count": 1, "listed": true},
+		{"type": "assert_multiplayer_session_rows", "session_id_env": "ARPG_EXPECTED_JOIN_SESSION_ID", "mode": "coop", "member_count_min": 1, "connected_count_min": 1},
 		{"type": "click_menu_button", "button": "refresh_sessions"},
 		{"type": "click_menu_button", "button": "host_listed_session"},
 		{"type": "click_menu_button", "button": "join_first_listed_session"},
+		{"type": "click_menu_button", "button": "select_expected_join_session"},
+		{"type": "wait_remote_player_count", "at_least": 1, "timeout_s": 1.0},
+		{"type": "assert_remote_player_count", "equals": 1},
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("multiplayer menu step scenario valid", err, "")
 	_assert_ne("multiplayer row assertion without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_multiplayer_session_rows"}, 0), "")
+	_assert_ne("remote player count requires expectation", BotScenarioRunnerScript.validate_step({"type": "assert_remote_player_count"}, 0), "")
 
 
 func _test_multiplayer_menu_assertions() -> void:
@@ -242,7 +247,9 @@ func _test_multiplayer_menu_assertions() -> void:
 		"client_steps": [
 			{"type": "wait_multiplayer_panel", "timeout_s": 1.0},
 			{"type": "assert_multiplayer_panel_visible", "visible": true},
-			{"type": "assert_multiplayer_session_rows", "min_count": 1, "selected": true, "listed": true},
+			{"type": "assert_multiplayer_session_rows", "session_id": "sess_1", "min_count": 1, "selected": true, "listed": true, "mode": "coop", "member_count_min": 3, "connected_count_min": 1},
+			{"type": "assert_current_session", "session_id": "sess_1", "mode": "coop", "listed": true},
+			{"type": "assert_remote_player_count", "equals": 1},
 		],
 	}
 	runner.load_scenario(data)
@@ -251,10 +258,16 @@ func _test_multiplayer_menu_assertions() -> void:
 		"multiplayer_panel": {
 			"selected_session_id": "sess_1",
 			"sessions": [
-				{"session_id": "sess_1", "listed": true, "member_count": 3},
+				{"session_id": "sess_1", "mode": "coop", "listed": true, "member_count": 3, "connected_count": 1},
 			],
 		},
+		"current_session_id": "sess_1",
+		"current_session_mode": "coop",
+		"current_session_listed": true,
+		"remote_player_ids": ["1002"],
 	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
@@ -272,7 +285,7 @@ func _test_v45_menu_step_types_load() -> void:
 		{"type": "assert_create_game_type", "session_type": "solo"},
 		{"type": "click_menu_button", "button": "join_game"},
 		{"type": "click_menu_button", "button": "join_selected_session"},
-		{"type": "assert_current_session", "exists": true, "mode": "solo", "listed": false},
+		{"type": "assert_current_session", "exists": true, "mode": "solo", "listed": false, "session_id": "sess_1"},
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("v45 menu step scenario valid", err, "")

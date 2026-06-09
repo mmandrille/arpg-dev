@@ -11,7 +11,7 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v45 — `menu-create-join-flow` |
+| **Latest completed slice** | v46 — `client-join-game-proof` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
@@ -61,6 +61,7 @@ v42_* = vendor-appraisal-and-item-comparison
 v43_* = equipment-requirements-and-preview
 v44_* = skill-points-and-magic-bolt
 v45_* = menu-create-join-flow
+v46_* = client-join-game-proof
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -126,6 +127,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v43** | `equipment-requirements-and-preview` | Complete (`make ci` green) | [`v43_spec-equipment-requirements-and-preview.md`](specs/v43_spec-equipment-requirements-and-preview.md) | [`v43_2026-06-09-equipment-requirements-and-preview.md`](plans/v43_2026-06-09-equipment-requirements-and-preview.md) |
 | **v44** | `skill-points-and-magic-bolt` | Complete (`make ci` green) | [`v44_spec-skill-points-and-magic-bolt.md`](specs/v44_spec-skill-points-and-magic-bolt.md) | [`v44_2026-06-09-skill-points-and-magic-bolt.md`](plans/v44_2026-06-09-skill-points-and-magic-bolt.md) |
 | **v45** | `menu-create-join-flow` | Complete (`make ci` green) | [`v45_spec-menu-create-join-flow.md`](specs/v45_spec-menu-create-join-flow.md) | [`v45_2026-06-09-menu-create-join-flow.md`](plans/v45_2026-06-09-menu-create-join-flow.md) |
+| **v46** | `client-join-game-proof` | Complete (`make ci` green) | [`v46_spec-client-join-game-proof.md`](specs/v46_spec-client-join-game-proof.md) | [`v46_2026-06-09-client-join-game-proof.md`](plans/v46_2026-06-09-client-join-game-proof.md) |
 
 ---
 
@@ -1130,6 +1132,29 @@ without implying offline play or old-session resume.
 lobbies/invites, matchmaking, chat, ready checks, filters/search/sorting, production menu art/audio,
 or real multi-account Godot Join Game bot proof.
 
+### v46 — Real Godot Join Game co-op proof
+
+**Proves:** The player-facing Godot `Join Game` flow can join a real active listed co-op backend
+session as a distinct guest account while a protocol-level host remains connected.
+
+- Client bot preflight now creates a unique host account, creates a listed co-op `dungeon_levels`
+  session, opens the host WebSocket, sends `client_ready`, and exposes the prepared session id to
+  the Godot guest run.
+- `scripts/bot_client.sh` supports scenario-scoped preflight setup and cleanup without changing
+  normal non-preflight client-bot scenarios.
+- `MultiplayerSessionsPanel` can select a specific session id for deterministic bot targeting.
+- Client bot assertions can match active-session rows by expected id, verify current session id,
+  and wait for remote-player presence through structured debug state.
+- Client bot scenario `21_join_game_listed_session.json` proves root Join Game, active-list row
+  visibility, Back-to-root behavior, selected listed join, co-op WebSocket metadata, and remote host
+  presence in the real Godot client path.
+- Existing v45 menu scenarios and protocol scenario `27_session_browser_uncapped_coop.json` remain
+  green.
+
+**Explicit non-goals:** no gameplay/protocol changes, Steam lobby, matchmaking, chat, ready checks,
+filters/search/sorting, two-window Godot choreography, production lobby art/audio, or server model
+change.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1199,6 +1224,7 @@ client_equipment_requirements_and_preview: headless Godot client opens inventory
 skill_points_and_magic_bolt: level to 3 → spend Magic Bolt → cast → reject cooldown recast → recover → prove replay/fresh persistence
 client_skill_points_and_magic_bolt: headless Godot client opens skill panel → spends Magic Bolt → observes skill bar cooldown and recovery
 menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
+join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible
 ```
 
 **Verify:**
@@ -1373,6 +1399,11 @@ player-facing Continue/New Game/Multiplayer root menu with Create Game, Join Gam
 Exit; persists the Create Game Type setting; and proves co-op/solo create plus Join Game empty-state
 behavior through client bot scenarios.
 
+**The real Godot Join Game path now has a multi-account listed-session proof.** v46 adds a
+client-bot preflight host that holds an active listed co-op backend session, then drives a separate
+Godot guest through Join Game, character selection, listed join, WebSocket connect, and remote-player
+presence assertions.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -1388,7 +1419,7 @@ behavior through client bot scenarios.
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, real multi-account Godot Join Game bot proof, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45 non-goals, ADR-0001 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46 non-goals, ADR-0001 |
 | Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
 
 ---

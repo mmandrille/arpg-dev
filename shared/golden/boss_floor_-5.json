@@ -7,9 +7,9 @@
     "boss_count": 1,
     "chest_count": 1,
     "stairs_down_count": 1,
-    "teleporter_count": 1,
+    "teleporter_count": 0,
     "stairs_down_initial_state": "locked",
-    "teleporter_initial_state": "disabled",
+    "teleporter_initial_state": "absent",
     "unlocked_state": "ready",
     "locked_reason": "boss_alive",
     "boss": {

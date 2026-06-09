@@ -140,21 +140,36 @@ func TestBuildTimelineThroughTickExtendsPassiveSimulation(t *testing.T) {
 
 func TestBuildTimelineIncludesGeneratedMonsterRarity(t *testing.T) {
 	rules := loadRules(t)
+	sim, err := game.NewSimWithWorld(testSessionID, "v30_monster_rarity", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	actorID := sim.DefaultPlayerID()
+	rows := []store.SessionInput{}
+	events := []store.SessionEvent{}
+	sequence := int64(0)
+	tick := int64(0)
+	for level := 0; level > -2; level-- {
+		down := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "stairs_down")
+		if down == nil {
+			t.Fatalf("missing stairs_down on level %d", level)
+		}
+		tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
+		tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
+			ActorPlayerID: actorID,
+			Type:          "descend_intent",
+			Descend:       &game.DescendIntent{},
+		})
+	}
 	repo := &fakeRepo{
 		session: store.Session{
 			ID:      testSessionID,
 			Seed:    "v30_monster_rarity",
 			WorldID: "dungeon_levels",
 		},
-		start: store.SessionStartSnapshot{
-			Waypoints: []store.CharacterWaypoint{{Level: -2}},
-		},
-		inputs: []store.SessionInput{
-			storedInput(t, "inp-town-teleporter", "msg-town-teleporter", 0, 0, "move_intent", map[string]any{"direction": map[string]any{"x": 0, "y": 1}, "duration_ticks": 3}),
-			storedInput(t, "inp-teleport-2", "msg-teleport-2", 5, 1, "teleport_intent", map[string]any{"target_level": -2}),
-		},
+		inputs: rows,
 	}
-	timeline, err := BuildTimeline(context.Background(), repo, rules, testSessionID, 5)
+	timeline, err := BuildTimeline(context.Background(), repo, rules, testSessionID, tick)
 	if err != nil {
 		t.Fatalf("timeline: %v", err)
 	}
@@ -217,7 +232,7 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	if down == nil || down.State != "locked" {
 		t.Fatalf("boss floor down = %+v, want locked", down)
 	}
-	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, adjacentMarkerPosition(down.Position))
+	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
 	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
 		ActorPlayerID: actorID,
 		Type:          "descend_intent",
@@ -228,16 +243,8 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	}
 
 	teleporter := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "teleporter")
-	if teleporter == nil || teleporter.State != "disabled" {
-		t.Fatalf("boss floor teleporter = %+v, want disabled", teleporter)
-	}
-	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
-		ActorPlayerID: actorID,
-		Type:          "action_intent",
-		Action:        &game.ActionIntent{TargetID: teleporter.ID},
-	})
-	if !hasStoreEvent(events, "teleport_blocked") {
-		t.Fatalf("missing teleport_blocked in recorded events")
+	if teleporter != nil {
+		t.Fatalf("boss floor teleporter = %+v, want absent", teleporter)
 	}
 
 	boss := findBossSnapshotEntity(t, sim.SnapshotForPlayer(actorID))
@@ -265,7 +272,7 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	if down == nil || down.State != "ready" {
 		t.Fatalf("unlocked down = %+v, want ready", down)
 	}
-	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, adjacentMarkerPosition(down.Position))
+	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
 	_ = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
 		ActorPlayerID: actorID,
 		Type:          "descend_intent",
@@ -852,7 +859,7 @@ func appendMoveToAndAdvanceReplay(
 	})
 	for guard := 0; guard < 2000; guard++ {
 		player := entityByID(sim.SnapshotForPlayer(actorID), fmt.Sprintf("%d", actorID))
-		if player != nil && replayDistance(player.Position, pos) <= rules.Navigation.StopDistance+0.001 {
+		if player != nil && replayDistance(player.Position, pos) <= replayInteractableReach(rules) {
 			return tick
 		}
 		results := sim.TickResults(nil)
@@ -863,8 +870,8 @@ func appendMoveToAndAdvanceReplay(
 	return tick
 }
 
-func adjacentMarkerPosition(pos game.Vec2) game.Vec2 {
-	return game.Vec2{X: pos.X - 1, Y: pos.Y}
+func replayInteractableReach(rules *game.Rules) float64 {
+	return rules.Combat.UnarmedReach + 0.5 + 0.001
 }
 
 func appendInputAndAdvanceReplay(
@@ -1078,7 +1085,8 @@ func (f *fakeRepo) DeleteCharacter(context.Context, string, string) error { retu
 func (f *fakeRepo) RenameCharacter(context.Context, string, string, string) (store.Character, error) {
 	return store.Character{}, nil
 }
-func (f *fakeRepo) CreateSession(context.Context, store.Session) error { return nil }
+func (f *fakeRepo) MarkCharacterDead(context.Context, string, string) error { return nil }
+func (f *fakeRepo) CreateSession(context.Context, store.Session) error      { return nil }
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil
 }

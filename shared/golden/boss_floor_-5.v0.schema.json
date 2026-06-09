@@ -28,7 +28,7 @@
         "boss_count": { "type": "integer", "minimum": 1 },
         "chest_count": { "type": "integer", "minimum": 1 },
         "stairs_down_count": { "type": "integer", "minimum": 1 },
-        "teleporter_count": { "type": "integer", "minimum": 1 },
+        "teleporter_count": { "type": "integer", "minimum": 0 },
         "stairs_down_initial_state": { "type": "string", "minLength": 1 },
         "teleporter_initial_state": { "type": "string", "minLength": 1 },
         "unlocked_state": { "type": "string", "minLength": 1 },

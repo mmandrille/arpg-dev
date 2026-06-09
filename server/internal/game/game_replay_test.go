@@ -71,49 +71,35 @@ func buildDungeonTeleporterReplayInputs(t *testing.T, rules *game.Rules, seed, w
 	scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
 	tick++
 
-	level1Teleporter := findSnapshotTeleporter(scratch.Snapshot())
-	if level1Teleporter == nil {
-		t.Fatal("missing level -1 teleporter")
+	for depth := 2; depth <= 3; depth++ {
+		down := findSnapshotInteractable(scratch.Snapshot(), "stairs_down")
+		if down == nil {
+			t.Fatalf("missing down stairs before level -%d", depth)
+		}
+		tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), down.Position)
+		inputs = append(inputs, replay.RecordedInput{
+			Tick: tick,
+			Input: game.Input{
+				MessageID: nextMsg("descend"),
+				Type:      "descend_intent",
+				Descend:   &game.DescendIntent{},
+			},
+		})
+		scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
+		tick++
 	}
-	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), level1Teleporter.Position)
+
+	level3Teleporter := findSnapshotTeleporter(scratch.Snapshot())
+	if level3Teleporter == nil {
+		t.Fatal("missing level -3 teleporter")
+	}
+	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), level3Teleporter.Position)
 	inputs = append(inputs, replay.RecordedInput{
 		Tick: tick,
 		Input: game.Input{
 			MessageID: nextMsg("discover"),
 			Type:      "action_intent",
-			Action:    &game.ActionIntent{TargetID: level1Teleporter.ID},
-		},
-	})
-	scratch.Tick([]game.Input{inputs[len(inputs)-1].Input})
-	tick++
-
-	down := findSnapshotInteractable(scratch.Snapshot(), "stairs_down")
-	if down == nil {
-		t.Fatal("missing down stairs on level -1")
-	}
-	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), down.Position)
-	inputs = append(inputs, replay.RecordedInput{
-		Tick: tick,
-		Input: game.Input{
-			MessageID: nextMsg("descend"),
-			Type:      "descend_intent",
-			Descend:   &game.DescendIntent{},
-		},
-	})
-	scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
-	tick++
-
-	level2Teleporter := findSnapshotTeleporter(scratch.Snapshot())
-	if level2Teleporter == nil {
-		t.Fatal("missing level -2 teleporter")
-	}
-	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), level2Teleporter.Position)
-	inputs = append(inputs, replay.RecordedInput{
-		Tick: tick,
-		Input: game.Input{
-			MessageID: nextMsg("discover"),
-			Type:      "action_intent",
-			Action:    &game.ActionIntent{TargetID: level2Teleporter.ID},
+			Action:    &game.ActionIntent{TargetID: level3Teleporter.ID},
 		},
 	})
 	scratch.Tick([]game.Input{inputs[len(inputs)-1].Input})
@@ -124,7 +110,23 @@ func buildDungeonTeleporterReplayInputs(t *testing.T, rules *game.Rules, seed, w
 		Input: game.Input{
 			MessageID: nextMsg("teleport"),
 			Type:      "teleport_intent",
-			Teleport:  &game.TeleportIntent{TargetLevel: -1},
+			Teleport:  &game.TeleportIntent{TargetLevel: 0},
+		},
+	})
+	scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
+	tick++
+
+	townTeleporter := findSnapshotTeleporter(scratch.Snapshot())
+	if townTeleporter == nil {
+		t.Fatal("missing town teleporter")
+	}
+	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), townTeleporter.Position)
+	inputs = append(inputs, replay.RecordedInput{
+		Tick: tick,
+		Input: game.Input{
+			MessageID: nextMsg("teleport"),
+			Type:      "teleport_intent",
+			Teleport:  &game.TeleportIntent{TargetLevel: -3},
 		},
 	})
 	return inputs, tick
@@ -151,7 +153,7 @@ func appendMoveToAndAdvance(
 	sim.TickResults([]game.Input{(*inputs)[len(*inputs)-1].Input})
 	for guard := 0; guard < 2000; guard++ {
 		player := snapshotEntityByID(sim.Snapshot(), "1001")
-		if player != nil && distance(player.Position, pos) <= rules.Navigation.StopDistance+0.001 {
+		if player != nil && distance(player.Position, pos) <= replayInteractableReach(rules) {
 			break
 		}
 		tick++
@@ -161,6 +163,10 @@ func appendMoveToAndAdvance(
 		}
 	}
 	return tick + 1
+}
+
+func replayInteractableReach(rules *game.Rules) float64 {
+	return rules.Combat.UnarmedReach + 0.5 + 0.001
 }
 
 func findSnapshotTeleporter(snap game.Snapshot) *game.EntityView {

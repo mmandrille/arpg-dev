@@ -8,18 +8,50 @@
 #
 # The mount-root node is INJECTED (never an absolute /root/Main/... lookup) so the
 # full interactive scene (main.gd) and the headless SceneTree smoke (smoke.gd)
-# drive one code path. The resolver owns the inventory->def cache and the
-# currently-equipped weapon instance, so callers just forward protocol events.
+# drive one code path. The resolver owns the inventory cache and currently
+# equipped slot instances, so callers just forward protocol events.
 extends RefCounted
 class_name EquipmentVisualResolver
+
+const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
+const FALLBACK_ASSET_BY_SLOT := {
+	"head": "fallback_equipment_head_v0",
+	"amulet": "fallback_equipment_amulet_v0",
+	"chest": "fallback_equipment_chest_v0",
+	"gloves": "fallback_equipment_gloves_v0",
+	"belt": "fallback_equipment_belt_v0",
+	"boots": "fallback_equipment_boots_v0",
+	"ring_left": "fallback_equipment_ring_left_v0",
+	"ring_right": "fallback_equipment_ring_right_v0",
+	"main_hand": "weapon_rusty_sword_v0",
+	"off_hand": "fallback_equipment_off_hand_v0",
+}
+const SOCKET_BY_SLOT := {
+	"head": "head_socket",
+	"amulet": "amulet_socket",
+	"chest": "chest_socket",
+	"gloves": "gloves_socket",
+	"belt": "belt_socket",
+	"boots": "boots_socket",
+	"ring_left": "ring_left_socket",
+	"ring_right": "ring_right_socket",
+	"main_hand": "right_hand_socket",
+	"off_hand": "off_hand_socket",
+}
+const RARITY_TINTS := {
+	"common": Color("#f2f2ec"),
+	"magic": Color("#5aa7ff"),
+	"rare": Color("#ffd75e"),
+	"unique": Color("#ff9b45"),
+}
 
 var _mount_root: Node3D
 var _visuals: Dictionary = {}      # item_def_id -> visual metadata
 var _assets: Dictionary = {}       # asset_id -> manifest entry
-var _inventory: Dictionary = {}    # item_instance_id (String) -> item_def_id (String)
-var _equipped_weapon: String = ""  # equipped weapon instance id ("" = none)
-var _mounted_node: Node3D = null
-var _mounted_state: Dictionary = {}
+var _inventory: Dictionary = {}    # item_instance_id (String) -> inventory item Dictionary
+var _equipped: Dictionary = {}      # slot -> item_instance_id
+var _mounted_nodes: Dictionary = {} # slot -> Node3D
+var _mounted_state: Dictionary = {} # slot -> debug state
 var _warnings: Array = []
 
 
@@ -37,32 +69,41 @@ func apply_snapshot(payload: Dictionary) -> void:
 	_inventory.clear()
 	for item in payload.get("inventory", []):
 		_record_item(item)
-	var weapon = payload.get("equipped", {}).get("main_hand", null)
-	_equipped_weapon = str(weapon) if weapon != null else ""
-	_refresh_weapon()
+	_equipped.clear()
+	var equipped: Dictionary = payload.get("equipped", {})
+	for slot in EQUIPMENT_SLOTS:
+		var item_id = equipped.get(str(slot), null)
+		_equipped[str(slot)] = str(item_id) if item_id != null else ""
+	_refresh_all()
 
 
 func ingest_inventory_item(item: Dictionary) -> void:
 	# Handles inventory_add / inventory_update. If it's the equipped item finally
 	# arriving/resolving, (re)mount.
 	_record_item(item)
-	if str(item.get("item_instance_id", "")) == _equipped_weapon:
-		_refresh_weapon()
+	var item_id := str(item.get("item_instance_id", ""))
+	for slot in _equipped.keys():
+		if str(_equipped.get(slot, "")) == item_id:
+			_refresh_slot(str(slot))
 
 
 func apply_equipped_update(slot: String, item_instance_id) -> void:
-	if slot != "main_hand":
+	if not EQUIPMENT_SLOTS.has(slot):
 		return
-	_equipped_weapon = str(item_instance_id) if item_instance_id != null else ""
-	_refresh_weapon()
+	_equipped[slot] = str(item_instance_id) if item_instance_id != null else ""
+	_refresh_slot(slot)
 
 
 # --- debug surface (spec §4.4 / §4.7) ---------------------------------------
 
 func get_debug_state() -> Dictionary:
-	var weapon = _mounted_state if not _mounted_state.is_empty() else null
+	var visuals := {}
+	for slot in EQUIPMENT_SLOTS:
+		if _mounted_state.has(str(slot)):
+			visuals[str(slot)] = (_mounted_state[str(slot)] as Dictionary).duplicate(true)
+	visuals["weapon"] = visuals.get("main_hand", null)
 	return {
-		"equipped_visuals": {"weapon": weapon},
+		"equipped_visuals": visuals,
 		"warnings": _warnings,
 	}
 
@@ -72,69 +113,112 @@ func get_debug_state() -> Dictionary:
 func _record_item(item: Dictionary) -> void:
 	var iid := str(item.get("item_instance_id", ""))
 	if iid != "":
-		_inventory[iid] = str(item.get("item_def_id", ""))
+		_inventory[iid] = item.duplicate(true)
 
 
-func _refresh_weapon() -> void:
-	# Each refresh recomputes from scratch: clear the prior mount (spec §7: no
-	# duplicate stale nodes) and reset transient warnings for this attempt.
+func _refresh_all() -> void:
 	_warnings = []
-	_clear_mounted()
-	_mounted_state = {}
+	for slot in EQUIPMENT_SLOTS:
+		_refresh_slot(str(slot), false)
 
-	if _equipped_weapon == "":
+
+func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
+	# Each slot refresh recomputes from scratch: clear the prior mount (spec §7:
+	# no duplicate stale nodes) and reset transient warnings for this attempt.
+	if reset_warnings:
+		_warnings = []
+	_clear_mounted(slot)
+	_mounted_state.erase(slot)
+
+	var item_instance_id := str(_equipped.get(slot, ""))
+	if item_instance_id == "":
 		return
 
-	var def_id: String = str(_inventory.get(_equipped_weapon, ""))
+	var item: Dictionary = _inventory.get(item_instance_id, {})
+	var def_id: String = str(item.get("item_def_id", ""))
 	if def_id == "":
 		# Equipped instance not (yet) in the inventory cache; a later
 		# inventory_add/snapshot will resolve it. Surface it, render nothing.
-		_warn({"code": "unknown_item_instance_id", "item_instance_id": _equipped_weapon})
+		_warn({"code": "unknown_item_instance_id", "item_instance_id": item_instance_id, "slot": slot})
 		return
 
-	var vis = _visuals.get(def_id, null)
-	if vis == null:
-		_warn({"code": "unknown_item_def_id", "item_def_id": def_id})
+	var vis: Dictionary = _visual_for(def_id, slot)
+	if vis.is_empty():
+		_warn({"code": "missing_fallback_visual", "item_def_id": def_id, "slot": slot})
 		return
 
 	var asset_id: String = str(vis["asset_id"])
 	var entry = _assets.get(asset_id, null)
 	if entry == null:
-		_warn({"code": "unknown_asset_id", "asset_id": asset_id})
+		_warn({"code": "unknown_asset_id", "asset_id": asset_id, "item_def_id": def_id, "slot": slot})
 		return
 
 	if _mount_root == null:
-		_warn({"code": "missing_mount_socket", "mount_socket": str(vis["mount_socket"])})
+		_warn({"code": "missing_mount_socket", "mount_socket": str(vis["mount_socket"]), "slot": slot})
 		return
-	var socket := _mount_root.find_child(str(vis["mount_socket"]), true, false)
+	var mount_socket := _mount_socket_for_slot(slot, vis)
+	var socket := _mount_root.find_child(mount_socket, true, false)
 	if socket == null:
-		_warn({"code": "missing_mount_socket", "mount_socket": str(vis["mount_socket"])})
+		_warn({"code": "missing_mount_socket", "mount_socket": mount_socket, "slot": slot})
 		return
 
 	var packed = load(_res_path(str(entry["runtime_path"])))
 	if packed == null:
-		_warn({"code": "unknown_asset_id", "asset_id": asset_id})
+		_warn({"code": "unknown_asset_id", "asset_id": asset_id, "item_def_id": def_id, "slot": slot})
 		return
 
 	var inst := (packed as PackedScene).instantiate()
 	inst.name = asset_id
 	_apply_transform(inst, vis.get("local_transform", {}))
+	var rarity := str(item.get("rarity", "common")).to_lower()
+	var tint: Color = RARITY_TINTS.get(rarity, RARITY_TINTS["common"])
+	_apply_tint(inst, tint)
 	socket.add_child(inst)
-	_mounted_node = inst
-	_mounted_state = {
-		"item_instance_id": _equipped_weapon,
+	_mounted_nodes[slot] = inst
+	_mounted_state[slot] = {
+		"slot": slot,
+		"item_instance_id": item_instance_id,
 		"item_def_id": def_id,
 		"asset_id": asset_id,
-		"mount_socket": str(vis["mount_socket"]),
+		"mount_socket": mount_socket,
+		"rarity": rarity,
+		"tint": tint.to_html(false),
 		"node_path": (str(inst.get_path()) if inst.is_inside_tree() else ""),
 		"visible": inst.visible,
 	}
 
 
-func _clear_mounted() -> void:
-	if _mounted_node != null and is_instance_valid(_mounted_node):
-		_mounted_node.queue_free()
-	_mounted_node = null
+func _visual_for(def_id: String, slot: String) -> Dictionary:
+	var vis = _visuals.get(def_id, null)
+	if typeof(vis) == TYPE_DICTIONARY:
+		return (vis as Dictionary).duplicate(true)
+	var asset_id := str(FALLBACK_ASSET_BY_SLOT.get(slot, ""))
+	var socket := str(SOCKET_BY_SLOT.get(slot, ""))
+	if asset_id == "" or socket == "":
+		return {}
+	return {
+		"asset_id": asset_id,
+		"slot": slot,
+		"mount_socket": socket,
+		"local_transform": {
+			"position": {"x": 0.0, "y": 0.0, "z": 0.0},
+			"rotation_degrees": {"x": 0.0, "y": 0.0, "z": 0.0},
+			"scale": {"x": 0.25, "y": 0.25, "z": 0.25},
+		},
+	}
+
+
+func _mount_socket_for_slot(slot: String, vis: Dictionary) -> String:
+	if str(vis.get("slot", slot)) != slot and SOCKET_BY_SLOT.has(slot):
+		return str(SOCKET_BY_SLOT[slot])
+	return str(vis.get("mount_socket", SOCKET_BY_SLOT.get(slot, "right_hand_socket")))
+
+
+func _clear_mounted(slot: String) -> void:
+	var mounted = _mounted_nodes.get(slot, null)
+	if mounted != null and is_instance_valid(mounted):
+		(mounted as Node3D).queue_free()
+	_mounted_nodes.erase(slot)
 
 
 func _apply_transform(node: Node3D, t: Dictionary) -> void:
@@ -146,6 +230,15 @@ func _apply_transform(node: Node3D, t: Dictionary) -> void:
 	node.rotation_degrees = Vector3(r.get("x", 0.0), r.get("y", 0.0), r.get("z", 0.0))
 	var s = t.get("scale", {})
 	node.scale = Vector3(s.get("x", 1.0), s.get("y", 1.0), s.get("z", 1.0))
+
+
+func _apply_tint(root: Node, color: Color) -> void:
+	if root is MeshInstance3D:
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = color
+		(root as MeshInstance3D).material_override = mat
+	for child in root.get_children():
+		_apply_tint(child, color)
 
 
 func _res_path(runtime_path: String) -> String:

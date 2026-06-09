@@ -357,8 +357,10 @@ func TestCreateCoopSessionAndJoinLifecycle(t *testing.T) {
 	_, hostToken := loginEmail(t, h, "coop-host+"+ids.Token()[:12]+"@example.test")
 	_, guestToken := loginEmail(t, h, "coop-guest+"+ids.Token()[:12]+"@example.test")
 	_, thirdToken := loginEmail(t, h, "coop-third+"+ids.Token()[:12]+"@example.test")
+	_, fourthToken := loginEmail(t, h, "coop-fourth+"+ids.Token()[:12]+"@example.test")
 	guestChar := createCharacter(t, h, guestToken, "Guest Hero")
 	thirdChar := createCharacter(t, h, thirdToken, "Third Hero")
+	fourthChar := createCharacter(t, h, fourthToken, "Fourth Hero")
 
 	rec := postJSON(h, "/v0/sessions", hostToken, map[string]any{"mode": "coop", "world_id": "dungeon_levels"})
 	if rec.Code != http.StatusCreated {
@@ -370,6 +372,9 @@ func TestCreateCoopSessionAndJoinLifecycle(t *testing.T) {
 	}
 	if created.Mode != store.SessionModeCoop || created.JoinCode == "" || created.WorldID != "dungeon_levels" {
 		t.Fatalf("coop create response mismatch: %+v", created)
+	}
+	if created.Listed {
+		t.Fatalf("private coop unexpectedly listed: %+v", created)
 	}
 
 	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", guestToken, map[string]any{
@@ -401,12 +406,14 @@ func TestCreateCoopSessionAndJoinLifecycle(t *testing.T) {
 	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", thirdToken, map[string]any{
 		"join_code": created.JoinCode, "character_id": thirdChar.CharacterID,
 	})
-	if rec.Code != http.StatusConflict {
-		t.Fatalf("third join status = %d, want 409, body = %s", rec.Code, rec.Body.String())
+	if rec.Code != http.StatusOK {
+		t.Fatalf("third join status = %d, want 200, body = %s", rec.Code, rec.Body.String())
 	}
-	_ = json.Unmarshal(rec.Body.Bytes(), &body)
-	if body.Error.Code != "party_full" {
-		t.Fatalf("third join code = %q", body.Error.Code)
+	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", fourthToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": fourthChar.CharacterID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("fourth join status = %d, want 200, body = %s", rec.Code, rec.Body.String())
 	}
 
 	rec = postJSON(h, "/v0/sessions/"+created.SessionID+"/join", thirdToken, map[string]any{
@@ -442,6 +449,91 @@ func TestCreateCoopSessionAndJoinLifecycle(t *testing.T) {
 	_ = json.Unmarshal(rec.Body.Bytes(), &body)
 	if body.Error.Code != "session_ended" {
 		t.Fatalf("ended join code = %q", body.Error.Code)
+	}
+}
+
+func TestListedSessionListAndJoinWithoutCode(t *testing.T) {
+	h := fullServer(t)
+	_, hostToken := loginEmail(t, h, "listed-host+"+ids.Token()[:12]+"@example.test")
+	_, guestToken := loginEmail(t, h, "listed-guest+"+ids.Token()[:12]+"@example.test")
+	_, outsiderToken := loginEmail(t, h, "listed-outsider+"+ids.Token()[:12]+"@example.test")
+	hostChar := createCharacter(t, h, hostToken, "Listed Host")
+	guestChar := createCharacter(t, h, guestToken, "Listed Guest")
+	outsiderChar := createCharacter(t, h, outsiderToken, "Listed Outsider")
+
+	privateRec := postJSON(h, "/v0/sessions", hostToken, map[string]any{
+		"mode": "coop", "world_id": "dungeon_levels", "character_id": hostChar.CharacterID,
+	})
+	if privateRec.Code != http.StatusCreated {
+		t.Fatalf("private create status = %d, body = %s", privateRec.Code, privateRec.Body.String())
+	}
+	soloRec := postJSON(h, "/v0/sessions", hostToken, map[string]any{
+		"mode": "solo", "world_id": "dungeon_levels", "character_id": hostChar.CharacterID,
+	})
+	if soloRec.Code != http.StatusCreated {
+		t.Fatalf("solo create status = %d, body = %s", soloRec.Code, soloRec.Body.String())
+	}
+	listedRec := postJSON(h, "/v0/sessions", hostToken, map[string]any{
+		"mode": "coop", "listed": true, "world_id": "dungeon_levels", "character_id": hostChar.CharacterID,
+	})
+	if listedRec.Code != http.StatusCreated {
+		t.Fatalf("listed create status = %d, body = %s", listedRec.Code, listedRec.Body.String())
+	}
+	var listed createSessionResponse
+	if err := json.Unmarshal(listedRec.Body.Bytes(), &listed); err != nil {
+		t.Fatalf("decode listed create: %v", err)
+	}
+	if !listed.Listed || listed.JoinCode == "" {
+		t.Fatalf("listed create response mismatch: %+v", listed)
+	}
+
+	rec := getJSON(h, "/v0/sessions/active", guestToken)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("active list status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var active activeSessionsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &active); err != nil {
+		t.Fatalf("decode active sessions: %v", err)
+	}
+	var found activeSessionSummaryResponse
+	for _, sess := range active.Sessions {
+		if sess.SessionID == listed.SessionID {
+			found = sess
+		}
+		if strings.Contains(rec.Body.String(), "join_") {
+			t.Fatalf("active list exposed join code: %s", rec.Body.String())
+		}
+	}
+	if found.SessionID != "" {
+		t.Fatalf("unconnected listed session should not be active-browser visible: %+v", found)
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+listed.SessionID+"/join", guestToken, map[string]any{
+		"character_id": guestChar.CharacterID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("listed join status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var joined createSessionResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &joined); err != nil {
+		t.Fatalf("decode listed join: %v", err)
+	}
+	if joined.SessionID != listed.SessionID || joined.CharacterID != guestChar.CharacterID || !joined.Listed || joined.JoinCode != "" {
+		t.Fatalf("listed join response mismatch: %+v", joined)
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+listed.SessionID+"/join", outsiderToken, map[string]any{
+		"character_id": guestChar.CharacterID,
+	})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("cross-account listed join status = %d, want 404, body = %s", rec.Code, rec.Body.String())
+	}
+
+	rec = postJSON(h, "/v0/sessions/"+listed.SessionID+"/join", outsiderToken, map[string]any{
+		"character_id": outsiderChar.CharacterID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("second listed join status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 }
 

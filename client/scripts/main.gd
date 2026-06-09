@@ -20,6 +20,7 @@ const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
+const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
@@ -38,6 +39,7 @@ const PLAYER_START_HP := 10
 const INTERACTABLE_ACTIVATION_RANGE := 1.5
 const PLAYER_TINT := Color("#8fe8a7")
 const REMOTE_PLAYER_TINT := Color("#202934")
+const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
 const MONSTER_RARITY_TINTS := {
 	"common": Color("#f2f2ec"),
 	"champion": Color("#9fc7ff"),
@@ -86,6 +88,7 @@ var pending_interactable_action: Dictionary = {}
 var pending_action_targets: Dictionary = {}
 var pending_waypoint_target_level: int = 0
 var pending_waypoint_travel: bool = false
+var _last_inventory_feedback_text: String = ""
 var ready_sent: bool = false
 var item_to_equip: String = ""
 var bot_mode: bool = false
@@ -119,10 +122,13 @@ var client_settings: ClientSettings
 var menu_layer: CanvasLayer
 var main_menu: MainMenu
 var character_panel: CharacterSelectPanel
+var multiplayer_panel: MultiplayerSessionsPanel
 var settings_panel: SettingsPanel
 var pause_menu: PauseMenu
 var gameplay_active: bool = false
 var settings_return_target: String = "main"
+var character_flow: String = "solo"
+var pending_join_session_id: String = ""
 
 const INVENTORY_REPLAY_EVENT_HINTS := {
 	"item_picked_up": "Pickup",
@@ -144,6 +150,10 @@ var walls_root: Node3D
 var inventory_panel: InventoryPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
+var character_info_panel: PanelContainer
+var character_info_name_label: Label
+var character_info_level_label: Label
+var character_info_area_label: Label
 var input_shadow: InputShadowOverlay
 var _health_bar: PlayerHealthBar
 
@@ -291,15 +301,19 @@ func _hide_all_menus() -> void:
 		main_menu.visible = false
 	if character_panel != null:
 		character_panel.hide_panel()
+	if multiplayer_panel != null:
+		multiplayer_panel.hide_panel()
 	if settings_panel != null:
 		settings_panel.hide_panel()
 	if pause_menu != null:
 		pause_menu.hide_pause()
 	if character_stats_panel != null:
 		character_stats_panel.hide_display()
+	_hide_character_info_panel()
 
 
 func _on_continue_pressed() -> void:
+	character_flow = "solo"
 	var characters := client.list_characters()
 	if character_panel != null:
 		main_menu.visible = false
@@ -307,9 +321,56 @@ func _on_continue_pressed() -> void:
 
 
 func _on_new_game_pressed() -> void:
+	character_flow = "solo"
 	if character_panel != null:
 		main_menu.visible = false
 		character_panel.show_new_game()
+
+
+func _on_multiplayer_pressed() -> void:
+	_show_multiplayer_panel(true)
+
+
+func _show_multiplayer_panel(refresh: bool = false) -> void:
+	_hide_all_menus()
+	gameplay_active = false
+	if multiplayer_panel == null:
+		return
+	multiplayer_panel.show_panel()
+	if refresh:
+		_refresh_multiplayer_sessions()
+
+
+func _refresh_multiplayer_sessions() -> void:
+	if multiplayer_panel == null:
+		return
+	multiplayer_panel.set_sessions(client.list_active_sessions())
+
+
+func _on_host_listed_session_requested() -> void:
+	character_flow = "multiplayer_host"
+	pending_join_session_id = ""
+	_show_character_picker_for_multiplayer()
+
+
+func _on_join_listed_session_requested(session_id: String) -> void:
+	if session_id == "":
+		return
+	character_flow = "multiplayer_join"
+	pending_join_session_id = session_id
+	_show_character_picker_for_multiplayer()
+
+
+func _show_character_picker_for_multiplayer() -> void:
+	if character_panel == null:
+		return
+	var characters := client.list_characters()
+	if multiplayer_panel != null:
+		multiplayer_panel.hide_panel()
+	if characters.is_empty():
+		character_panel.show_new_game()
+	else:
+		character_panel.show_continue(characters)
 
 
 func _on_character_create_requested(name: String) -> void:
@@ -317,7 +378,7 @@ func _on_character_create_requested(name: String) -> void:
 	if character.is_empty():
 		character_panel.set_error("Could not create character")
 		return
-	_start_character_session(str(character.get("character_id", "")))
+	_start_selected_character(str(character.get("character_id", "")))
 
 
 func _on_character_delete_requested(character_id: String) -> void:
@@ -327,6 +388,16 @@ func _on_character_delete_requested(character_id: String) -> void:
 		return
 	if character_panel != null:
 		character_panel.show_continue(client.list_characters())
+
+
+func _start_selected_character(character_id: String) -> void:
+	match character_flow:
+		"multiplayer_host":
+			_start_listed_host_session(character_id)
+		"multiplayer_join":
+			_start_listed_join_session(character_id)
+		_:
+			_start_character_session(character_id)
 
 
 func _start_character_session(character_id: String) -> void:
@@ -340,6 +411,33 @@ func _start_character_session(character_id: String) -> void:
 			character_panel.set_error("Could not start session")
 		return
 	bot_mode = false
+	_begin_gameplay_connection(false)
+
+
+func _start_listed_host_session(character_id: String) -> void:
+	if character_id == "":
+		character_panel.set_error("Could not host session")
+		return
+	_teardown_gameplay_state(false)
+	if not client.create_listed_coop_session(character_id):
+		character_panel.set_error("Could not host listed session")
+		return
+	bot_mode = false
+	character_flow = "solo"
+	_begin_gameplay_connection(false)
+
+
+func _start_listed_join_session(character_id: String) -> void:
+	if character_id == "" or pending_join_session_id == "":
+		character_panel.set_error("Could not join session")
+		return
+	_teardown_gameplay_state(false)
+	if not client.join_listed_session(pending_join_session_id, character_id):
+		character_panel.set_error("Could not join listed session")
+		return
+	bot_mode = false
+	character_flow = "solo"
+	pending_join_session_id = ""
 	_begin_gameplay_connection(false)
 
 
@@ -452,6 +550,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		_health_bar.update_hp(player_hp, player_max_hp)
 	if character_stats_panel != null:
 		character_stats_panel.hide_display()
+	_hide_character_info_panel()
 	_refresh_progression_ui()
 	_hide_waypoint_panel()
 	if player_anchor != null:
@@ -460,6 +559,8 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		client.session_id = ""
 		client.seed = ""
 		client.world_id = ""
+		client.session_mode = ""
+		client.session_listed = false
 		client.ws_url = ""
 
 
@@ -547,9 +648,14 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 	var pending: Dictionary = pending_action_targets.get(message_id, {})
 	if message_id != "":
 		pending_action_targets.erase(message_id)
+	if reason == "no_path" or reason == "path_too_long":
+		_sustained_click.clear()
+		pending_interactable_action.clear()
 	if reason == "inventory_full":
 		var target_id := str(pending.get("target_id", ""))
 		_show_inventory_full_text(target_id)
+	elif reason == "capacity_would_overflow":
+		_show_bag_full_cant_unequip_text()
 
 
 func _apply_snapshot(p: Dictionary) -> void:
@@ -579,6 +685,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 		resolver.apply_snapshot(p)
 	_refresh_inventory_ui()
 	_refresh_progression_ui()
+	_update_character_info_panel()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
 		_bot_logged_snapshot = true
@@ -596,6 +703,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_clear_level_entities()
 			_render_world_walls(current_world_id)
 			_update_level_hud()
+			_update_character_info_panel()
 			_hide_waypoint_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
@@ -642,6 +750,7 @@ func _apply_delta(p: Dictionary) -> void:
 			"character_progression_update":
 				character_progression = c.get("character_progression", {})
 				_refresh_progression_ui()
+				_update_character_info_panel()
 			_:
 				pass
 	_refresh_inventory_ui()
@@ -1050,6 +1159,13 @@ func _show_inventory_full_text(target_id: String) -> void:
 	pop.setup(_camera, target, target.global_position, null, Color("#ffcf5a"), 0.0, "", "inventory", "BAG FULL")
 
 
+func _show_bag_full_cant_unequip_text() -> void:
+	_last_inventory_feedback_text = BAG_FULL_CANT_UNEQUIP_TEXT
+	if inventory_panel != null:
+		inventory_panel.show_gesture_hint(BAG_FULL_CANT_UNEQUIP_TEXT)
+	_show_damage_number(player_id, Color("#ffcf5a"), null, "", 0.0, "inventory", BAG_FULL_CANT_UNEQUIP_TEXT)
+
+
 func _send_action_intent(target_id: String) -> void:
 	if client == null or target_id == "":
 		return
@@ -1117,6 +1233,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_refresh_progression_ui()
 			get_viewport().set_input_as_handled()
 			return
+		if _is_character_info_key(event):
+			_toggle_character_info_panel()
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
@@ -1181,6 +1301,10 @@ func _is_character_stats_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_C or event.physical_keycode == KEY_C or event.unicode == 99 or event.unicode == 67
 
 
+func _is_character_info_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_P or event.physical_keycode == KEY_P or event.unicode == 112 or event.unicode == 80
+
+
 func _is_escape_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_ESCAPE or event.physical_keycode == KEY_ESCAPE
 
@@ -1216,6 +1340,13 @@ func _handle_escape() -> void:
 		return
 	if character_panel != null and character_panel.visible:
 		character_panel.hide_panel()
+		if character_flow in ["multiplayer_host", "multiplayer_join"]:
+			_show_multiplayer_panel(false)
+		elif main_menu != null:
+			main_menu.show_menu()
+		return
+	if multiplayer_panel != null and multiplayer_panel.visible:
+		multiplayer_panel.hide_panel()
 		if main_menu != null:
 			main_menu.show_menu()
 		return
@@ -1248,6 +1379,7 @@ func _user_input_blocked() -> bool:
 func _menu_blocks_gameplay_input() -> bool:
 	return (main_menu != null and main_menu.visible) \
 		or (character_panel != null and character_panel.visible) \
+		or (multiplayer_panel != null and multiplayer_panel.visible) \
 		or (settings_panel != null and settings_panel.visible) \
 		or (pause_menu != null and pause_menu.visible)
 
@@ -1851,10 +1983,10 @@ func _build_scene() -> void:
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_level_label.position = Vector2(0, 12)
 	_level_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_level_label.offset_left = -260
+	_level_label.offset_left = -460
 	_level_label.offset_right = -12
 	_level_label.offset_top = 12
-	_level_label.offset_bottom = 44
+	_level_label.offset_bottom = 64
 	ui.add_child(_level_label)
 	_update_level_hud()
 	_setup_waypoint_panel(ui)
@@ -1867,6 +1999,7 @@ func _build_scene() -> void:
 	character_stats_panel = CharacterStatsPanelScript.new()
 	character_stats_panel.allocate_stat_requested.connect(_on_character_stat_requested)
 	ui.add_child(character_stats_panel)
+	_setup_character_info_panel(ui)
 	_health_bar = PlayerHealthBarScript.new()
 	ui.add_child(_health_bar)
 	_setup_menu_layer()
@@ -1896,6 +2029,7 @@ func _setup_menu_layer() -> void:
 	main_menu = MainMenuScript.new()
 	main_menu.continue_pressed.connect(_on_continue_pressed)
 	main_menu.new_game_pressed.connect(_on_new_game_pressed)
+	main_menu.multiplayer_pressed.connect(_on_multiplayer_pressed)
 	main_menu.settings_pressed.connect(_on_settings_from_main)
 	main_menu.exit_pressed.connect(_exit_game)
 	menu_layer.add_child(main_menu)
@@ -1903,12 +2037,25 @@ func _setup_menu_layer() -> void:
 	character_panel = CharacterSelectPanelScript.new()
 	character_panel.back_requested.connect(func() -> void:
 		character_panel.hide_panel()
-		main_menu.show_menu()
+		if character_flow in ["multiplayer_host", "multiplayer_join"]:
+			_show_multiplayer_panel(false)
+		else:
+			main_menu.show_menu()
 	)
-	character_panel.start_requested.connect(_start_character_session)
+	character_panel.start_requested.connect(_start_selected_character)
 	character_panel.create_requested.connect(_on_character_create_requested)
 	character_panel.delete_requested.connect(_on_character_delete_requested)
 	menu_layer.add_child(character_panel)
+
+	multiplayer_panel = MultiplayerSessionsPanelScript.new()
+	multiplayer_panel.host_requested.connect(_on_host_listed_session_requested)
+	multiplayer_panel.refresh_requested.connect(_refresh_multiplayer_sessions)
+	multiplayer_panel.join_requested.connect(_on_join_listed_session_requested)
+	multiplayer_panel.back_requested.connect(func() -> void:
+		multiplayer_panel.hide_panel()
+		main_menu.show_menu()
+	)
+	menu_layer.add_child(multiplayer_panel)
 
 	settings_panel = SettingsPanelScript.new()
 	settings_panel.back_requested.connect(_on_settings_back)
@@ -1957,6 +2104,109 @@ func _refresh_progression_ui() -> void:
 func _sync_progression_interactivity() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
+
+
+func _setup_character_info_panel(ui: CanvasLayer) -> void:
+	character_info_panel = PanelContainer.new()
+	character_info_panel.visible = false
+	character_info_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	character_info_panel.offset_left = -292
+	character_info_panel.offset_right = -12
+	character_info_panel.offset_top = 76
+	character_info_panel.offset_bottom = 190
+	character_info_panel.custom_minimum_size = Vector2(280, 114)
+	character_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	character_info_panel.add_theme_stylebox_override("panel", _character_info_panel_style())
+	ui.add_child(character_info_panel)
+
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 6)
+	character_info_panel.add_child(root)
+
+	var title := Label.new()
+	title.text = "Character"
+	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_color_override("font_color", Color("#f0dfbb"))
+	root.add_child(title)
+
+	character_info_name_label = _character_info_label()
+	character_info_level_label = _character_info_label()
+	character_info_area_label = _character_info_label()
+	character_info_area_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	root.add_child(character_info_name_label)
+	root.add_child(character_info_level_label)
+	root.add_child(character_info_area_label)
+	_update_character_info_panel()
+
+
+func _toggle_character_info_panel() -> void:
+	if character_info_panel == null or not gameplay_active:
+		return
+	character_info_panel.visible = not character_info_panel.visible
+	if character_info_panel.visible:
+		_update_character_info_panel()
+
+
+func _hide_character_info_panel() -> void:
+	if character_info_panel != null:
+		character_info_panel.visible = false
+
+
+func _update_character_info_panel() -> void:
+	if character_info_panel == null:
+		return
+	if character_info_name_label != null:
+		character_info_name_label.text = "Name  %s" % _local_character_display_name()
+	if character_info_level_label != null:
+		character_info_level_label.text = "Level  %d" % int(character_progression.get("level", 1))
+	if character_info_area_label != null:
+		character_info_area_label.text = "Area  %s" % _current_area_label()
+
+
+func _local_character_display_name() -> String:
+	for member in party:
+		if typeof(member) != TYPE_DICTIONARY:
+			continue
+		var rec := member as Dictionary
+		if str(rec.get("player_id", "")) == player_id:
+			var display_name := str(rec.get("display_name", "")).strip_edges()
+			if display_name != "":
+				return display_name
+	return "Hero"
+
+
+func _current_area_label() -> String:
+	if current_level == 0:
+		return "Town"
+	var depth: int = abs(current_level)
+	return "Dungeon lvl%d - %s" % [depth, _dungeon_level_name(current_level)]
+
+
+func _character_info_label() -> Label:
+	var label := Label.new()
+	label.add_theme_color_override("font_color", Color("#d8c7a6"))
+	label.add_theme_font_size_override("font_size", 14)
+	label.clip_text = true
+	return label
+
+
+func _character_info_panel_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.055, 0.055, 0.06, 0.9)
+	s.border_color = Color("#53636f")
+	s.border_width_left = 1
+	s.border_width_top = 1
+	s.border_width_right = 1
+	s.border_width_bottom = 1
+	s.corner_radius_top_left = 6
+	s.corner_radius_top_right = 6
+	s.corner_radius_bottom_left = 6
+	s.corner_radius_bottom_right = 6
+	s.content_margin_left = 12
+	s.content_margin_right = 12
+	s.content_margin_top = 10
+	s.content_margin_bottom = 10
+	return s
 
 
 func _setup_waypoint_panel(ui: CanvasLayer) -> void:
@@ -2146,13 +2396,16 @@ func _render_dungeon_walls() -> void:
 func _update_level_hud() -> void:
 	if _level_label == null:
 		return
+	var lines: Array[String] = []
 	if current_level == 0:
-		_level_label.visible = false
-		_level_label.text = ""
-		return
-	_level_label.visible = true
-	var depth: int = abs(current_level)
-	_level_label.text = "Level %d - %s" % [depth, _dungeon_level_name(current_level)]
+		lines.append("Town")
+	else:
+		var depth: int = abs(current_level)
+		lines.append("Level %d - %s" % [depth, _dungeon_level_name(current_level)])
+	if client != null and client.session_id != "" and (client.session_mode == "coop" or client.session_listed):
+		lines.append("Session %s" % client.session_id)
+	_level_label.visible = lines.size() > 0
+	_level_label.text = "\n".join(lines)
 
 
 func _dungeon_level_name(level: int) -> String:
@@ -2681,19 +2934,23 @@ func get_bot_state() -> Dictionary:
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
+		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
+		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
 		"main_menu_visible": main_menu != null and main_menu.visible,
 		"character_panel_visible": character_panel != null and character_panel.visible,
+		"multiplayer_panel_visible": multiplayer_panel != null and multiplayer_panel.visible,
 		"settings_panel_visible": settings_panel != null and settings_panel.visible,
 		"pause_menu_visible": pause_menu != null and pause_menu.visible,
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
 		"damage_numbers": _bot_damage_numbers(),
 		"known_characters": character_panel.known_characters() if character_panel != null else [],
+		"multiplayer_panel": multiplayer_panel.get_debug_state() if multiplayer_panel != null else {},
 		"current_session_id": client.session_id if client != null else "",
 		"gameplay_active": gameplay_active,
 	}
@@ -2736,6 +2993,15 @@ func _bot_local_player_presentation() -> Dictionary:
 		"base_tint": PLAYER_TINT.to_html(false),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
+	}
+
+
+func _character_info_debug_state() -> Dictionary:
+	return {
+		"visible": character_info_panel != null and character_info_panel.visible,
+		"name": _local_character_display_name(),
+		"level": int(character_progression.get("level", 1)),
+		"area": _current_area_label(),
 	}
 
 
@@ -2863,6 +3129,17 @@ func bot_click_menu_button(button: String) -> void:
 			_on_continue_pressed()
 		"new_game":
 			_on_new_game_pressed()
+		"multiplayer":
+			_on_multiplayer_pressed()
+		"refresh_sessions":
+			_refresh_multiplayer_sessions()
+		"host_listed_session":
+			_on_host_listed_session_requested()
+		"join_first_listed_session":
+			if multiplayer_panel != null:
+				multiplayer_panel.select_first_session()
+				var state := multiplayer_panel.get_debug_state()
+				_on_join_listed_session_requested(str(state.get("selected_session_id", "")))
 		"settings":
 			if pause_menu != null and pause_menu.visible:
 				_on_settings_from_pause()
@@ -2873,6 +3150,12 @@ func bot_click_menu_button(button: String) -> void:
 				_on_settings_back()
 			elif character_panel != null and character_panel.visible:
 				character_panel.hide_panel()
+				if character_flow in ["multiplayer_host", "multiplayer_join"]:
+					_show_multiplayer_panel(false)
+				else:
+					main_menu.show_menu()
+			elif multiplayer_panel != null and multiplayer_panel.visible:
+				multiplayer_panel.hide_panel()
 				main_menu.show_menu()
 		"start":
 			if character_panel != null:

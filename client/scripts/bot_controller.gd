@@ -363,6 +363,7 @@ func _parse_keycode(name: String) -> Key:
 		"KEY_8": return KEY_8
 		"KEY_9": return KEY_9
 		"KEY_I": return KEY_I
+		"KEY_P": return KEY_P
 		"KEY_E": return KEY_E
 		"KEY_W": return KEY_W
 		"KEY_A": return KEY_A

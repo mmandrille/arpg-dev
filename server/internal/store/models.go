@@ -21,7 +21,7 @@ type Character struct {
 }
 
 // Session is one authoritative game session. Solo sessions have one host
-// member; co-op sessions have one host plus one guest.
+// member; co-op sessions have one host plus zero or more guests.
 type Session struct {
 	ID           string
 	AccountID    string
@@ -29,10 +29,26 @@ type Session struct {
 	Seed         string // hex-encoded server seed
 	WorldID      string // shared/rules/worlds.v0.json preset id
 	Mode         string // "solo" | "coop"
+	Listed       bool
 	JoinCodeHash string
 	Status       string // "active" | "ended"
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+// SessionSummary is the public active-session browser row. It intentionally
+// omits raw join codes and account ids.
+type SessionSummary struct {
+	SessionID       string
+	WorldID         string
+	Mode            string
+	Listed          bool
+	HostCharacterID string
+	HostDisplayName string
+	MemberCount     int
+	ConnectedCount  int
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 // Session status values.

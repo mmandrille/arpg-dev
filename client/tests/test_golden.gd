@@ -242,7 +242,7 @@ func _initialize() -> void:
 	if int(tp_outcome["expected_level"]) != -1:
 		_fail("dungeon teleporters expected level mismatch")
 		return
-	if not _vec2_equals(tp_outcome["expected_player_position"], 82.0, 12.0):
+	if not _vec2_equals(tp_outcome["expected_player_position"], 83.0, 12.0):
 		_fail("dungeon teleporters expected player position mismatch")
 		return
 

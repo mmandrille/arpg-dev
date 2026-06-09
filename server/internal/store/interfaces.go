@@ -25,13 +25,16 @@ type CharacterRepo interface {
 type SessionRepo interface {
 	CreateSession(ctx context.Context, s Session) error
 	GetSession(ctx context.Context, id string) (Session, error)
+	ListActiveListedSessions(ctx context.Context) ([]SessionSummary, error)
 	TouchSession(ctx context.Context, id string) error
 	SetSessionStatus(ctx context.Context, id, status string) error
+	EndListedSessionIfNoConnected(ctx context.Context, id string) (bool, error)
 	CreateSessionHostMember(ctx context.Context, m SessionMember) error
 	CreateSessionGuestMember(ctx context.Context, m SessionMember) error
 	ListSessionMembers(ctx context.Context, sessionID string) ([]SessionMember, error)
 	GetSessionMemberByAccount(ctx context.Context, sessionID, accountID string) (SessionMember, error)
 	GetSessionMember(ctx context.Context, sessionID, accountID, characterID string) (SessionMember, error)
+	ClaimSessionMemberConnection(ctx context.Context, sessionID, accountID, characterID string) (bool, error)
 	SetSessionMemberConnected(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, tick int64) error
 	SetSessionMemberDisconnected(ctx context.Context, sessionID, accountID, characterID string, currentLevel int, tick int64) error
 	SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int) error

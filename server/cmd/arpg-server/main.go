@@ -67,6 +67,25 @@ func run(cfg config.Config, log *slog.Logger, migrateOnly bool) error {
 		return nil
 	}
 
+	cleanupCtx, cleanupCancel := context.WithTimeout(ctx, 15*time.Second)
+	resetConnected, err := db.ResetConnectedSessionMembers(cleanupCtx)
+	if err != nil {
+		cleanupCancel()
+		return err
+	}
+	if resetConnected > 0 {
+		log.Info("reset stale session connection flags", "count", resetConnected)
+	}
+	staleCutoff := time.Now().Add(-12 * time.Hour)
+	deleted, deleteErr := db.DeleteStaleEmptySessions(cleanupCtx, staleCutoff)
+	cleanupCancel()
+	if deleteErr != nil {
+		return deleteErr
+	}
+	if deleted > 0 {
+		log.Info("deleted stale empty sessions", "count", deleted, "older_than", "12h")
+	}
+
 	authSvc := auth.NewService(cfg.DevToken, db, db)
 
 	rulesDir, err := game.FindSharedRulesDir()

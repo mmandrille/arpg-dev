@@ -28,7 +28,7 @@
     { "action": "action_entity", "interactable_def_id": "teleporter", "expect_reject": "boss_alive" },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_phase_started" }, "timeout_s": 10 },
     { "action": "record_player_hp" },
-    { "action": "move_until_player_position", "x": 19, "y": 15, "tolerance": 0.5, "max_ticks": 120 },
+    { "action": "move_until_player_position", "x": 26, "y": 15, "tolerance": 0.5, "max_ticks": 120 },
     { "action": "wait_for_combat_event", "event_type": "player_damaged", "timeout_s": 12 },
     { "action": "wait_until_assertion", "assertion": { "type": "player_hp_decreased_from_recorded" }, "timeout_s": 1 },
     { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 120 },

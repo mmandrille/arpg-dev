@@ -1881,6 +1881,46 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 		}
 	})
 
+	t.Run("two handed sword clears occupied hands", func(t *testing.T) {
+		sim := NewSim("sess_two_hand_clear_both", "01", loadRules(t))
+		sword := addRolledInventoryItem(t, sim, 6212, "cave_blade", nil)
+		shield := addRolledInventoryItem(t, sim, 6213, "cave_shield", nil)
+		greatsword := addRolledInventoryItem(t, sim, 6214, "cave_greatsword", nil)
+		assertAck(t, sim.Tick([]Input{{MessageID: "sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "sword")
+		assertAck(t, sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}}), "shield")
+
+		res := sim.Tick([]Input{{MessageID: "greatsword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}})
+		assertAck(t, res, "greatsword")
+		assertEquippedTemplate(t, sim, mainHandSlot, "cave_greatsword")
+		if sword.equipped || shield.equipped || sim.equipped[offHandSlot] != 0 {
+			t.Fatalf("2H equip did not clear occupied hands: sword=%+v shield=%+v equipped=%v", sword, shield, sim.equipped)
+		}
+		if !hasEquippedUpdate(res, mainHandSlot, stringPtr(idStr(greatsword.instanceID))) || !hasEquippedUpdate(res, offHandSlot, nil) {
+			t.Fatalf("missing hand slot updates for 2H replacement: %+v", res.Changes)
+		}
+	})
+
+	t.Run("two handed sword full bag reject preserves occupied hands", func(t *testing.T) {
+		sim := NewSim("sess_two_hand_full_bag_preserve", "01", loadRules(t))
+		sword := addRolledInventoryItem(t, sim, 6215, "cave_blade", nil)
+		shield := addRolledInventoryItem(t, sim, 6216, "cave_shield", nil)
+		greatsword := addRolledInventoryItem(t, sim, 6217, "cave_greatsword", nil)
+		assertAck(t, sim.Tick([]Input{{MessageID: "sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "sword")
+		assertAck(t, sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}}), "shield")
+		for i := 0; i < inventoryCapacityForRows(baseInventoryRows)-1; i++ {
+			addStaticInventoryItem(sim, uint64(6218+i), "training_badge")
+		}
+		if got := sim.bagOccupancyCount(); got != inventoryCapacityForRows(baseInventoryRows) {
+			t.Fatalf("setup bag occupancy = %d, want full capacity", got)
+		}
+
+		res := sim.Tick([]Input{{MessageID: "greatsword_full", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}})
+		assertReject(t, res, "greatsword_full", "capacity_would_overflow")
+		if !sword.equipped || !shield.equipped || greatsword.equipped || sim.equipped[mainHandSlot] != sword.instanceID || sim.equipped[offHandSlot] != shield.instanceID {
+			t.Fatalf("full-bag 2H reject mutated hands: sword=%+v shield=%+v greatsword=%+v equipped=%v", sword, shield, greatsword, sim.equipped)
+		}
+	})
+
 	t.Run("offhand blocked by two handed main hand", func(t *testing.T) {
 		sim := NewSim("sess_two_hand_block", "01", loadRules(t))
 		bow := addRolledInventoryItem(t, sim, 6220, "cave_bow", nil)
@@ -3384,10 +3424,12 @@ func hasEquippedUpdate(r TickResult, slot string, itemInstanceID *string) bool {
 		if c.Op != OpEquippedUpdate || c.Slot != slot {
 			continue
 		}
-		if itemInstanceID == nil {
-			return c.ItemInstanceID == nil
+		if itemInstanceID == nil && c.ItemInstanceID == nil {
+			return true
 		}
-		return c.ItemInstanceID != nil && *c.ItemInstanceID == *itemInstanceID
+		if itemInstanceID != nil && c.ItemInstanceID != nil && *c.ItemInstanceID == *itemInstanceID {
+			return true
+		}
 	}
 	return false
 }
@@ -4358,6 +4400,119 @@ func TestCoopPlayersHaveIndependentLevelsMovementAndVisibility(t *testing.T) {
 	}
 }
 
+func TestCoopGuestsSpawnOnFreeTownTiles(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_coop_spawn", "coop_spawn_seed", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	hostID := sim.playerID
+	guestAID, err := sim.AddGuestPlayer("acct_guest_a", "char_guest_a", "Guest A", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest A: %v", err)
+	}
+	guestBID, err := sim.AddGuestPlayer("acct_guest_b", "char_guest_b", "Guest B", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest B: %v", err)
+	}
+
+	level := sim.levels[townLevel]
+	positions := map[uint64]Vec2{
+		hostID:   level.entities[hostID].pos,
+		guestAID: level.entities[guestAID].pos,
+		guestBID: level.entities[guestBID].pos,
+	}
+	for id, pos := range positions {
+		for otherID, otherPos := range positions {
+			if id >= otherID {
+				continue
+			}
+			if circlesOverlap(pos, playerRadius, otherPos, playerRadius) {
+				t.Fatalf("players %d and %d overlap at %+v / %+v", id, otherID, pos, otherPos)
+			}
+		}
+	}
+}
+
+func TestRespawnPlayerInTownUsesFreeTile(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_coop_respawn", "coop_respawn_seed", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	level := sim.levels[townLevel]
+	hostPos := level.entities[hostID].pos
+	delete(level.entities, guestID)
+
+	if err := sim.RespawnPlayerInTown(guestID); err != nil {
+		t.Fatalf("respawn guest: %v", err)
+	}
+	guestPos := sim.levels[townLevel].entities[guestID].pos
+	if circlesOverlap(hostPos, playerRadius, guestPos, playerRadius) {
+		t.Fatalf("respawned guest overlaps host at %+v / %+v", guestPos, hostPos)
+	}
+}
+
+func TestCoopThreePlayersSameLevelVisibilityAndActorMovement(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_three_coop", "cafebabecafebabe", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	hostID := sim.playerID
+	sim.SetPlayerMetadata(hostID, "acct_host", "char_host", "Host", "host")
+	guestAID, err := sim.AddGuestPlayer("acct_guest_a", "char_guest_a", "Guest A", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest A: %v", err)
+	}
+	guestBID, err := sim.AddGuestPlayer("acct_guest_b", "char_guest_b", "Guest B", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest B: %v", err)
+	}
+
+	for _, playerID := range []uint64{hostID, guestAID, guestBID} {
+		sim.usePlayer(sim.players[playerID])
+		down := sim.findStair(sim.activeLevel(), stairsDownDefID)
+		if down == nil {
+			t.Fatalf("missing down stair for player %d", playerID)
+		}
+		sim.entities[playerID].pos = down.pos
+		sim.savePlayer(sim.players[playerID])
+		results := sim.TickResults([]Input{{MessageID: fmt.Sprintf("descend_%d", playerID), ActorPlayerID: playerID, Type: "descend_intent", Descend: &DescendIntent{}}})
+		if len(results) != 2 {
+			t.Fatalf("descend results for %d = %d, want 2", playerID, len(results))
+		}
+	}
+
+	if got := countPlayers(sim.SnapshotForPlayer(hostID).Entities); got != 3 {
+		t.Fatalf("host same-level player count = %d, want 3", got)
+	}
+	if got := countPlayers(sim.SnapshotForPlayer(guestAID).Entities); got != 3 {
+		t.Fatalf("guest A same-level player count = %d, want 3", got)
+	}
+	if got := countPlayers(sim.SnapshotForPlayer(guestBID).Entities); got != 3 {
+		t.Fatalf("guest B same-level player count = %d, want 3", got)
+	}
+	hostBefore := sim.levels[-1].entities[hostID].pos
+	guestABefore := sim.levels[-1].entities[guestAID].pos
+	guestBBefore := sim.levels[-1].entities[guestBID].pos
+	sim.TickResults([]Input{{MessageID: "guest_b_move", ActorPlayerID: guestBID, Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})
+	if got := sim.levels[-1].entities[hostID].pos; got != hostBefore {
+		t.Fatalf("host moved from %+v to %+v after third-player input", hostBefore, got)
+	}
+	if got := sim.levels[-1].entities[guestAID].pos; got != guestABefore {
+		t.Fatalf("guest A moved from %+v to %+v after third-player input", guestABefore, got)
+	}
+	if got := sim.levels[-1].entities[guestBID].pos; got == guestBBefore {
+		t.Fatalf("guest B did not move from %+v", guestBBefore)
+	}
+}
+
 func TestCoopActorScopedLootExperienceAndMonsterTargeting(t *testing.T) {
 	rules := loadRules(t)
 	dmg := DamageRange{Min: 1, Max: 1}
@@ -4506,6 +4661,11 @@ func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 	}
 	results := descendFromCurrentLevel(t, sim, "descend")
 	assertLevelChanged(t, results[0], 0, golden.Level)
+	levelEntry := sim.findStair(sim.activeLevel(), stairsUpDefID)
+	if levelEntry == nil {
+		t.Fatal("missing level entry stair")
+	}
+	sim.entities[sim.playerID].pos = levelEntry.pos
 
 	firstDamage, ok := waitForPlayerDamage(sim, 240)
 	if !ok {
@@ -4537,6 +4697,11 @@ func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 		t.Fatalf("new sim: %v", err)
 	}
 	descendFromCurrentLevel(t, sim, "descend")
+	levelEntry := sim.findStair(sim.activeLevel(), stairsUpDefID)
+	if levelEntry == nil {
+		t.Fatal("missing level entry stair")
+	}
+	sim.entities[sim.playerID].pos = levelEntry.pos
 	firstDamage, ok := waitForPlayerDamage(sim, 240)
 	if !ok {
 		t.Fatal("expected first proactive damage")
@@ -4557,6 +4722,11 @@ func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 		t.Fatalf("new replay sim: %v", err)
 	}
 	descendFromCurrentLevel(t, replay, "descend")
+	replayEntry := replay.findStair(replay.activeLevel(), stairsUpDefID)
+	if replayEntry == nil {
+		t.Fatal("missing replay level entry stair")
+	}
+	replay.entities[replay.playerID].pos = replayEntry.pos
 	replayDamage, ok := waitForPlayerDamage(replay, 240)
 	if !ok {
 		t.Fatal("expected replay proactive damage")
@@ -4570,8 +4740,7 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 	var golden struct {
 		Seed              string `json:"seed"`
 		DescendThenAscend struct {
-			ExpectedLevel          int  `json:"expected_level"`
-			ExpectedPlayerPosition Vec2 `json:"expected_player_position"`
+			ExpectedLevel int `json:"expected_level"`
 		} `json:"descend_then_ascend"`
 	}
 	loadGolden(t, "dungeon_stairs.json", &golden)
@@ -4623,9 +4792,7 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 	if up == nil {
 		t.Fatal("missing up stairs on level -2")
 	}
-	if got := sim.entities[sim.playerID].pos; got != up.pos {
-		t.Fatalf("player position after descend = %+v, want up stair %+v", got, up.pos)
-	}
+	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, up.pos)
 	coin := findLootByDef(sim, "training_badge")
 	if coin == nil {
 		t.Fatal("missing dungeon training_badge coin")
@@ -4654,9 +4821,7 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 	if sim.currentLevel != -1 {
 		t.Fatalf("currentLevel = %d, want -1", sim.currentLevel)
 	}
-	if got := sim.entities[sim.playerID].pos; got != down.pos {
-		t.Fatalf("player position after ascend = %+v, want %+v", got, down.pos)
-	}
+	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, down.pos)
 	assertLevelChanged(t, results[0], -2, -1)
 
 	up = sim.findStair(sim.activeLevel(), stairsUpDefID)
@@ -4671,9 +4836,7 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 	if sim.currentLevel != golden.DescendThenAscend.ExpectedLevel {
 		t.Fatalf("currentLevel after town ascend = %d, want %d", sim.currentLevel, golden.DescendThenAscend.ExpectedLevel)
 	}
-	if got := sim.entities[sim.playerID].pos; got != golden.DescendThenAscend.ExpectedPlayerPosition {
-		t.Fatalf("player position after town ascend = %+v, want %+v", got, golden.DescendThenAscend.ExpectedPlayerPosition)
-	}
+	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, townDown.pos)
 	assertLevelChanged(t, results[0], -1, townLevel)
 }
 
@@ -4766,9 +4929,7 @@ func TestDungeonTeleporterDiscoveryAndTravel(t *testing.T) {
 	if sim.currentLevel != -1 {
 		t.Fatalf("currentLevel = %d, want -1", sim.currentLevel)
 	}
-	if got := sim.entities[sim.playerID].pos; got != level1Teleporter.pos {
-		t.Fatalf("player position after teleport = %+v, want %+v", got, level1Teleporter.pos)
-	}
+	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, level1Teleporter.pos)
 
 	results = sim.TickResults([]Input{{MessageID: "tp_to_town", Type: "teleport_intent", Teleport: &TeleportIntent{TargetLevel: townLevel}}})
 	if len(results) != 2 {
@@ -4778,9 +4939,7 @@ func TestDungeonTeleporterDiscoveryAndTravel(t *testing.T) {
 	if sim.currentLevel != townLevel {
 		t.Fatalf("currentLevel = %d, want town", sim.currentLevel)
 	}
-	if got := sim.entities[sim.playerID].pos; got != townTeleporter.pos {
-		t.Fatalf("player position after town teleport = %+v, want %+v", got, townTeleporter.pos)
-	}
+	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, townTeleporter.pos)
 }
 
 func TestLoadDiscoveredTeleportersAllowsFreshSessionWaypointTravel(t *testing.T) {
@@ -4918,6 +5077,7 @@ func TestDungeonTeleportersGolden(t *testing.T) {
 	if got := sim.entities[sim.playerID].pos; got != want.ExpectedPlayerPosition {
 		t.Fatalf("player position = %+v, want %+v", got, want.ExpectedPlayerPosition)
 	}
+	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, level1Teleporter.pos)
 	assertTeleporterDiscoveryView(t, sim.teleporterDiscoveryView(), want.DiscoveredTeleporters)
 }
 
@@ -4944,6 +5104,24 @@ func descendFromCurrentLevel(t *testing.T, sim *Sim, messageID string) []TickRes
 	}
 	sim.entities[sim.playerID].pos = down.pos
 	return sim.TickResults([]Input{{MessageID: messageID, Type: "descend_intent", Descend: &DescendIntent{}}})
+}
+
+func assertTravelArrivalNextToMarker(t *testing.T, sim *Sim, level *LevelState, got, marker Vec2) {
+	t.Helper()
+	if got == marker {
+		t.Fatalf("arrival position = marker %+v, want adjacent free tile", marker)
+	}
+	nav := sim.navigationForLevel(level)
+	step := nav.CellSize
+	if step <= 0 {
+		step = 1.0
+	}
+	if distance(got, marker) > math.Sqrt2*step+1e-9 {
+		t.Fatalf("arrival position = %+v, want adjacent to marker %+v", got, marker)
+	}
+	if sim.travelArrivalBlocked(level, got, sim.playerID) {
+		t.Fatalf("arrival position = %+v, want unblocked free tile near %+v", got, marker)
+	}
 }
 
 func generatedStairPos(level generatedDungeonLevel, defID string) Vec2 {

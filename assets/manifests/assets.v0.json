@@ -42,6 +42,78 @@
         "sha256": "2432bad3494376faf1f2c8a6afefb815c80c0fa86b2f3f10d6a918539eb6b979"
       }
     },
+    "fallback_equipment_off_hand_v0": {
+      "type": "equipment",
+      "slot": "off_hand",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_head_v0": {
+      "type": "equipment",
+      "slot": "head",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_chest_v0": {
+      "type": "equipment",
+      "slot": "chest",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_gloves_v0": {
+      "type": "equipment",
+      "slot": "gloves",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_belt_v0": {
+      "type": "equipment",
+      "slot": "belt",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_boots_v0": {
+      "type": "equipment",
+      "slot": "boots",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_ring_left_v0": {
+      "type": "equipment",
+      "slot": "ring_left",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_ring_right_v0": {
+      "type": "equipment",
+      "slot": "ring_right",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
+    "fallback_equipment_amulet_v0": {
+      "type": "equipment",
+      "slot": "amulet",
+      "runtime_path": "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": []
+    },
     "monster_dummy_v0": {
       "type": "monster",
       "source_path": "assets/monsters/dummy/monster_dummy.blend",

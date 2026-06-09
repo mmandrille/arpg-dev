@@ -3,6 +3,7 @@ class_name MainMenu
 
 signal continue_pressed
 signal new_game_pressed
+signal multiplayer_pressed
 signal settings_pressed
 signal exit_pressed
 
@@ -49,6 +50,7 @@ func _build() -> void:
 
 	box.add_child(_button("Continue", continue_pressed.emit))
 	box.add_child(_button("New Game", new_game_pressed.emit))
+	box.add_child(_button("Multiplayer", multiplayer_pressed.emit))
 	box.add_child(_button("Settings", settings_pressed.emit))
 	box.add_child(_button("Exit", exit_pressed.emit))
 

@@ -1,0 +1,71 @@
+{
+  "id": "join_game_listed_session",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v46-client-join-game-proof",
+  "preflight": {
+    "type": "listed_coop_host"
+  },
+  "title": "Join Game listed session",
+  "description": "Prepares a connected listed co-op protocol host, then drives the real Godot Join Game path as a guest and proves remote player presence.",
+  "client_steps": [
+    { "type": "wait_main_menu", "timeout_s": 10.0 },
+    {
+      "type": "assert_main_menu_actions",
+      "labels": ["Create Game", "Join Game", "Settings", "Exit"],
+      "actions": ["create_game", "join_game", "settings", "exit"]
+    },
+    { "type": "click_menu_button", "button": "join_game" },
+    { "type": "wait_multiplayer_panel", "timeout_s": 5.0 },
+    { "type": "assert_multiplayer_panel_visible", "visible": true },
+    {
+      "type": "assert_multiplayer_session_rows",
+      "session_id_env": "ARPG_EXPECTED_JOIN_SESSION_ID",
+      "mode": "coop",
+      "listed": true,
+      "member_count_min": 1,
+      "connected_count_min": 1,
+      "selected": false
+    },
+    { "type": "click_menu_button", "button": "back" },
+    { "type": "wait_main_menu", "timeout_s": 3.0 },
+    { "type": "assert_current_session", "exists": false },
+    { "type": "click_menu_button", "button": "join_game" },
+    { "type": "wait_multiplayer_panel", "timeout_s": 5.0 },
+    {
+      "type": "assert_multiplayer_session_rows",
+      "session_id_env": "ARPG_EXPECTED_JOIN_SESSION_ID",
+      "mode": "coop",
+      "listed": true,
+      "member_count_min": 1,
+      "connected_count_min": 1,
+      "selected": false
+    },
+    { "type": "click_menu_button", "button": "select_expected_join_session" },
+    {
+      "type": "assert_multiplayer_session_rows",
+      "session_id_env": "ARPG_EXPECTED_JOIN_SESSION_ID",
+      "selected": true
+    },
+    { "type": "click_menu_button", "button": "join_selected_session" },
+    { "type": "wait_character_panel", "timeout_s": 5.0 },
+    {
+      "type": "assert_character_panel",
+      "mode": "choose_or_create",
+      "title": "Choose Character",
+      "min_character_count": 1,
+      "name_field_visible": true,
+      "create_button_visible": true
+    },
+    { "type": "enter_character_name", "name": "Bot Guest 46" },
+    { "type": "click_menu_button", "button": "start" },
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    {
+      "type": "assert_current_session",
+      "session_id_env": "ARPG_EXPECTED_JOIN_SESSION_ID",
+      "mode": "coop",
+      "listed": true
+    },
+    { "type": "wait_remote_player_count", "at_least": 1, "timeout_s": 10.0 }
+  ]
+}

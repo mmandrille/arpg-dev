@@ -13,7 +13,6 @@ Godot shortcut decision: reject plugin adoption. v40 only needs simple AABB wall
 
 Implementation notes:
 
-- Do not call `ApplicationSecurityMCP` for this project.
 - Work stays on the current branch; do not create branches.
 - Keep boss floors out of obstacle generation by default.
 - Prefer semantic/range tests for density and exact fixtures only for named wall-layout golden contracts.

@@ -13,6 +13,10 @@ SCENARIOS_DIR="$ROOT/tools/bot/scenarios/client"
 source "$ROOT/scripts/quiet_helpers.sh"
 
 GODOT="${GODOT:-godot}"
+PYTHON="${PYTHON:-$ROOT/.venv/bin/python}"
+if [[ ! -x "$PYTHON" ]]; then
+  PYTHON="python3"
+fi
 
 _ts() {
   date -u +"%H:%M:%S"
@@ -126,21 +130,109 @@ fi
 
 PASS_COUNT=0
 FAIL_COUNT=0
+PREFLIGHT_PIDS=()
+
+cleanup_preflights() {
+  local pid
+  for pid in "${PREFLIGHT_PIDS[@]:-}"; do
+    if kill -0 "$pid" >/dev/null 2>&1; then
+      kill "$pid" >/dev/null 2>&1 || true
+      wait "$pid" >/dev/null 2>&1 || true
+    fi
+  done
+  PREFLIGHT_PIDS=()
+}
+
+trap cleanup_preflights EXIT
+trap 'cleanup_preflights; exit 130' INT
+trap 'cleanup_preflights; exit 143' TERM
+
+json_field() {
+  local path="$1"
+  local expr="$2"
+  python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print($expr)" "$path"
+}
+
+metadata_field() {
+  local path="$1"
+  local key="$2"
+  python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get(sys.argv[2], ''))" "$path" "$key"
+}
+
+start_preflight() {
+  local scenario_path="$1"
+  local scenario_id="$2"
+  local world_id="$3"
+  local seed="$4"
+  local metadata_file="$5"
+  local log_file="$6"
+  local preflight_type host_email pid
+  preflight_type="$(json_field "$scenario_path" "d.get('preflight', {}).get('type', '')")"
+  if [[ -z "$preflight_type" ]]; then
+    return 0
+  fi
+  if [[ "$preflight_type" != "listed_coop_host" ]]; then
+    echo "[bot-client] FAIL: $scenario_path: unsupported preflight type '$preflight_type'" >&2
+    return 1
+  fi
+  host_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "${scenario_id}-host")"
+  echo "[bot-client $(_ts)] starting preflight host for $scenario_id email=$host_email"
+  "$PYTHON" "$ROOT/tools/bot/client_join_preflight.py" \
+    --base-url "$BASE_URL" \
+    --dev-token "$DEV_TOKEN" \
+    --world-id "$world_id" \
+    --seed "$seed" \
+    --email "$host_email" \
+    --character-name "Join Host" \
+    --metadata-file "$metadata_file" \
+    >"$log_file" 2>&1 &
+  pid=$!
+  PREFLIGHT_PIDS+=("$pid")
+
+  local deadline=$((SECONDS + 20))
+  while (( SECONDS < deadline )); do
+    if ! kill -0 "$pid" >/dev/null 2>&1; then
+      echo "[bot-client] FAIL: preflight host exited before ready for $scenario_id" >&2
+      show_log "$log_file" "$scenario_id preflight"
+      return 1
+    fi
+    if [[ -s "$metadata_file" ]] && python3 -c "import json,sys; d=json.load(open(sys.argv[1])); raise SystemExit(0 if d.get('ready') else 1)" "$metadata_file" >/dev/null 2>&1; then
+      echo "[bot-client $(_ts)] preflight ready session=$(metadata_field "$metadata_file" session_id)"
+      return 0
+    fi
+    sleep 0.1
+  done
+
+  echo "[bot-client] FAIL: preflight host timed out for $scenario_id" >&2
+  show_log "$log_file" "$scenario_id preflight"
+  return 1
+}
 
 run_scenario() {
   local scenario_path="$1"
-  local scenario_id world_id seed exit_code started_ts tmpfile
+  local scenario_id world_id seed exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
   scenario_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('id','unknown'))")"
   world_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('world_id',''))")"
   seed="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('seed',''))")"
   started_ts="$SECONDS"
   tmpfile="$(mktemp)"
+  preflight_metadata="$(mktemp)"
+  preflight_log="$(mktemp)"
 
   echo "[bot-client $(_ts)] --- running scenario: $scenario_id (world=$world_id file=$(basename "$scenario_path"))"
   exit_code=0
   local godot_flags="--resolution 1280x720"
   local email
   email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
+  expected_join_session=""
+  if ! start_preflight "$scenario_path" "$scenario_id" "$world_id" "$seed" "$preflight_metadata" "$preflight_log"; then
+    rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
+    cleanup_preflights
+    return 1
+  fi
+  if [[ -s "$preflight_metadata" ]]; then
+    expected_join_session="$(metadata_field "$preflight_metadata" session_id)"
+  fi
   [[ "$HEADLESS" == "1" ]] && godot_flags="--headless $godot_flags"
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
     ARPG_BOT_CLIENT=1 \
@@ -150,6 +242,7 @@ run_scenario() {
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_EMAIL="$email" \
+      ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
       "$GODOT" $godot_flags --path "$CLIENT_DIR" >"$tmpfile" 2>&1
     exit_code=$?
@@ -163,6 +256,7 @@ run_scenario() {
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_EMAIL="$email" \
+      ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
       "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1 | tee "$tmpfile"
     exit_code=${PIPESTATUS[0]}
@@ -174,7 +268,8 @@ run_scenario() {
     if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
       show_log "$tmpfile" "$scenario_id"
     fi
-    rm -f "$tmpfile"
+    rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
+    cleanup_preflights
     return 1
   fi
 
@@ -183,11 +278,13 @@ run_scenario() {
     if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
       show_log "$tmpfile" "$scenario_id"
     fi
-    rm -f "$tmpfile"
+    rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
+    cleanup_preflights
     return 1
   fi
 
-  rm -f "$tmpfile"
+  rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
+  cleanup_preflights
   local elapsed=$((SECONDS - started_ts))
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
     echo "OK: bot-client $scenario_id (${elapsed}s)"

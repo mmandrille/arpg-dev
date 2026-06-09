@@ -14,6 +14,7 @@ const STEP_TYPES_WAIT := [
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 	"wait_wall_layout", "wait_shop_panel",
+	"wait_remote_player_count",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -38,6 +39,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details",
+	"assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",
@@ -89,6 +91,7 @@ const ALL_STEP_TYPES: Array = [
 	"wait_shop_panel", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "click_shop_buy_offer", "click_shop_sell_item",
+	"wait_remote_player_count", "assert_remote_player_count",
 ]
 
 var scenario: Dictionary = {}
@@ -228,6 +231,8 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			if not bool(state.get("shop_panel_visible", false)):
 				return false
 			return _shop_offer_count_matches(step, state)
+		"wait_remote_player_count":
+			return _remote_player_count_matches(step, state)
 		"wait_entity":
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
@@ -410,6 +415,13 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_shop_offer_details(step, state)
 		"assert_shop_sell_details":
 			return _assert_shop_sell_details(step, state)
+		"assert_remote_player_count":
+			if not _remote_player_count_matches(step, state):
+				_fail("assert_remote_player_count failed: want=%s remote_player_ids=%s step=%d scenario=%s" % [
+					str(step), str(state.get("remote_player_ids", [])), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_session_changed":
 			var remembered_session := str(_memory.get("session_id", ""))
 			var current_session := str(state.get("current_session_id", ""))
@@ -1281,9 +1293,15 @@ func _assert_create_game_type(step: Dictionary, state: Dictionary) -> bool:
 
 func _assert_current_session(step: Dictionary, state: Dictionary) -> bool:
 	var session_id := str(state.get("current_session_id", ""))
+	var expected_session_id := _expected_session_id(step)
 	if step.has("exists") and bool(step.get("exists", true)) != (session_id != ""):
 		_fail("assert_current_session exists failed: want=%s got_session=%s step=%d scenario=%s" % [
 			str(step.get("exists", true)), session_id, _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if expected_session_id != "" and session_id != expected_session_id:
+		_fail("assert_current_session session_id failed: want=%s got=%s step=%d scenario=%s" % [
+			expected_session_id, session_id, _step_index, str(scenario.get("id", "?"))
 		])
 		return false
 	if step.has("mode") and str(state.get("current_session_mode", "")) != str(step.get("mode", "")):
@@ -1302,6 +1320,7 @@ func _assert_current_session(step: Dictionary, state: Dictionary) -> bool:
 func _assert_multiplayer_session_rows(step: Dictionary, state: Dictionary) -> bool:
 	var panel: Dictionary = state.get("multiplayer_panel", {})
 	var sessions: Array = panel.get("sessions", [])
+	var expected_session_id := _expected_session_id(step)
 	if step.has("equals") and sessions.size() != int(step.get("equals", 0)):
 		_fail("assert_multiplayer_session_rows equals failed: count=%d equals=%d rows=%s step=%d scenario=%s" % [
 			sessions.size(), int(step.get("equals", 0)), str(sessions), _step_index, str(scenario.get("id", "?"))
@@ -1317,14 +1336,64 @@ func _assert_multiplayer_session_rows(step: Dictionary, state: Dictionary) -> bo
 			str(panel.get("selected_session_id", "")), str(step.get("selected", false)), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
-	if step.has("listed"):
+	var rows_to_check: Array = sessions
+	if expected_session_id != "":
+		rows_to_check = []
 		for row in sessions:
+			if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("session_id", "")) == expected_session_id:
+				rows_to_check.append(row)
+		if rows_to_check.is_empty():
+			_fail("assert_multiplayer_session_rows session_id missing: want=%s rows=%s step=%d scenario=%s" % [
+				expected_session_id, str(sessions), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+	if step.has("listed"):
+		for row in rows_to_check:
 			if typeof(row) == TYPE_DICTIONARY and bool((row as Dictionary).get("listed", false)) != bool(step.get("listed", true)):
 				_fail("assert_multiplayer_session_rows listed failed: row=%s step=%d scenario=%s" % [
 					str(row), _step_index, str(scenario.get("id", "?"))
 				])
 				return false
+	if step.has("mode"):
+		for row in rows_to_check:
+			if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("mode", "")) != str(step.get("mode", "")):
+				_fail("assert_multiplayer_session_rows mode failed: row=%s want=%s step=%d scenario=%s" % [
+					str(row), str(step.get("mode", "")), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+	if step.has("member_count_min"):
+		for row in rows_to_check:
+			if typeof(row) == TYPE_DICTIONARY and int((row as Dictionary).get("member_count", 0)) < int(step.get("member_count_min", 0)):
+				_fail("assert_multiplayer_session_rows member_count_min failed: row=%s step=%d scenario=%s" % [
+					str(row), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+	if step.has("connected_count_min"):
+		for row in rows_to_check:
+			if typeof(row) == TYPE_DICTIONARY and int((row as Dictionary).get("connected_count", 0)) < int(step.get("connected_count_min", 0)):
+				_fail("assert_multiplayer_session_rows connected_count_min failed: row=%s step=%d scenario=%s" % [
+					str(row), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
 	return true
+
+
+func _expected_session_id(step: Dictionary) -> String:
+	if step.has("session_id"):
+		return str(step.get("session_id", ""))
+	var env_key := str(step.get("session_id_env", ""))
+	if env_key != "":
+		return OS.get_environment(env_key)
+	return ""
+
+
+func _remote_player_count_matches(step: Dictionary, state: Dictionary) -> bool:
+	var remote_ids: Array = state.get("remote_player_ids", [])
+	if step.has("equals") and remote_ids.size() != int(step.get("equals", 0)):
+		return false
+	if step.has("at_least") and remote_ids.size() < int(step.get("at_least", 0)):
+		return false
+	return step.has("equals") or step.has("at_least")
 
 
 func _advance(completed_type: String = "") -> void:
@@ -1618,8 +1687,8 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if not has_panel_expectation:
 			return "client_steps[%d] (%s) requires a panel expectation" % [index, stype]
 	if stype == "assert_current_session":
-		if not step.has("exists") and not step.has("mode") and not step.has("listed"):
-			return "client_steps[%d] (%s) requires exists, mode, or listed" % [index, stype]
+		if not step.has("exists") and not step.has("mode") and not step.has("listed") and not step.has("session_id") and not step.has("session_id_env"):
+			return "client_steps[%d] (%s) requires exists, mode, listed, session_id, or session_id_env" % [index, stype]
 	if stype in ["wait_damage_number", "assert_damage_number"]:
 		if not step.has("text") and not step.has("variant"):
 			return "client_steps[%d] (%s) requires text or variant" % [index, stype]
@@ -1639,8 +1708,11 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if str(step.get("offer_id", "")) == "" and str(step.get("offer_kind", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id or offer_kind" % [index, stype]
 	if stype == "assert_multiplayer_session_rows":
-		if not step.has("equals") and not step.has("min_count") and not step.has("selected") and not step.has("listed"):
-			return "client_steps[%d] (%s) requires equals, min_count, selected, or listed" % [index, stype]
+		if not step.has("equals") and not step.has("min_count") and not step.has("selected") and not step.has("listed") and not step.has("session_id") and not step.has("session_id_env") and not step.has("mode") and not step.has("member_count_min") and not step.has("connected_count_min"):
+			return "client_steps[%d] (%s) requires a row expectation" % [index, stype]
+	if stype in ["wait_remote_player_count", "assert_remote_player_count"]:
+		if not step.has("equals") and not step.has("at_least"):
+			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
 	if stype == "click_menu_button":
 		if str(step.get("button", "")) == "":
 			return "client_steps[%d] (%s) requires button" % [index, stype]

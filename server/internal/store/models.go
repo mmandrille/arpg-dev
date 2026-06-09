@@ -17,6 +17,7 @@ type Character struct {
 	ID        string
 	AccountID string
 	Name      string
+	Dead      bool
 	CreatedAt time.Time
 }
 

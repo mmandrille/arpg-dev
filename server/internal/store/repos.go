@@ -51,9 +51,9 @@ func (s *Store) GetAccount(ctx context.Context, id string) (Account, error) {
 func (s *Store) GetOrCreateDefaultCharacter(ctx context.Context, charID, accountID, name string) (Character, error) {
 	var c Character
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, account_id, name, created_at FROM characters WHERE account_id = $1 ORDER BY created_at ASC LIMIT 1`,
+		`SELECT id, account_id, name, dead, created_at FROM characters WHERE account_id = $1 ORDER BY created_at ASC LIMIT 1`,
 		accountID,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt)
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
 	if err == nil {
 		return c, nil
 	}
@@ -62,9 +62,9 @@ func (s *Store) GetOrCreateDefaultCharacter(ctx context.Context, charID, account
 	}
 	err = s.pool.QueryRow(ctx,
 		`INSERT INTO characters (id, account_id, name) VALUES ($1, $2, $3)
-		 RETURNING id, account_id, name, created_at`,
+		 RETURNING id, account_id, name, dead, created_at`,
 		charID, accountID, name,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt)
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
 	if err != nil {
 		return Character{}, fmt.Errorf("store: create character: %w", err)
 	}
@@ -74,8 +74,8 @@ func (s *Store) GetOrCreateDefaultCharacter(ctx context.Context, charID, account
 func (s *Store) GetCharacter(ctx context.Context, id string) (Character, error) {
 	var c Character
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, account_id, name, created_at FROM characters WHERE id = $1`, id,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt)
+		`SELECT id, account_id, name, dead, created_at FROM characters WHERE id = $1`, id,
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Character{}, ErrNotFound
 	}
@@ -87,7 +87,7 @@ func (s *Store) GetCharacter(ctx context.Context, id string) (Character, error) 
 
 func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]Character, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, account_id, name, created_at
+		`SELECT id, account_id, name, dead, created_at
 		 FROM characters
 		 WHERE account_id = $1
 		 ORDER BY created_at ASC, id ASC`,
@@ -101,7 +101,7 @@ func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]Charact
 	var chars []Character
 	for rows.Next() {
 		var c Character
-		if err := rows.Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt); err != nil {
 			return nil, fmt.Errorf("store: scan character: %w", err)
 		}
 		chars = append(chars, c)
@@ -116,9 +116,9 @@ func (s *Store) CreateCharacter(ctx context.Context, charID, accountID, name str
 	var c Character
 	err := s.pool.QueryRow(ctx,
 		`INSERT INTO characters (id, account_id, name) VALUES ($1, $2, $3)
-		 RETURNING id, account_id, name, created_at`,
+		 RETURNING id, account_id, name, dead, created_at`,
 		charID, accountID, name,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt)
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
 	if err != nil {
 		return Character{}, fmt.Errorf("store: create character: %w", err)
 	}
@@ -131,9 +131,9 @@ func (s *Store) RenameCharacter(ctx context.Context, accountID, characterID, nam
 		`UPDATE characters
 		 SET name = $3
 		 WHERE account_id = $1 AND id = $2
-		 RETURNING id, account_id, name, created_at`,
+		 RETURNING id, account_id, name, dead, created_at`,
 		accountID, characterID, name,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CreatedAt)
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Character{}, ErrNotFound
 	}
@@ -141,6 +141,22 @@ func (s *Store) RenameCharacter(ctx context.Context, accountID, characterID, nam
 		return Character{}, fmt.Errorf("store: rename character: %w", err)
 	}
 	return c, nil
+}
+
+func (s *Store) MarkCharacterDead(ctx context.Context, accountID, characterID string) error {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE characters
+		    SET dead = TRUE
+		  WHERE account_id = $1 AND id = $2`,
+		accountID, characterID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: mark character dead: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 // DeleteCharacter removes a character and all durable progression rows owned by

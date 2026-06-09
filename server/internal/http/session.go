@@ -15,6 +15,8 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
+var errCharacterDead = errors.New("character is dead")
+
 func (s *Server) registerSessionRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/sessions", s.requireAuth(http.HandlerFunc(s.handleCreateSession)))
 	mux.Handle("GET /v0/sessions/active", s.requireAuth(http.HandlerFunc(s.handleListActiveSessions)))
@@ -131,6 +133,9 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, store.ErrNotFound):
 		writeError(w, http.StatusNotFound, "character_not_found", "character not found")
 		return
+	case errors.Is(err, errCharacterDead):
+		writeError(w, http.StatusConflict, "character_dead", "character is dead")
+		return
 	case err != nil:
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character")
@@ -224,15 +229,21 @@ func (s *Server) handleListActiveSessions(w http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) characterForSessionCreate(ctx context.Context, accountID, requestedCharacterID string) (store.Character, error) {
+	var char store.Character
+	var err error
 	if requestedCharacterID == "" {
-		return s.store.GetOrCreateDefaultCharacter(ctx, ids.New("char"), accountID, "Hero")
+		char, err = s.store.GetOrCreateDefaultCharacter(ctx, ids.New("char"), accountID, "Hero")
+	} else {
+		char, err = s.store.GetCharacter(ctx, requestedCharacterID)
 	}
-	char, err := s.store.GetCharacter(ctx, requestedCharacterID)
 	if err != nil {
 		return store.Character{}, err
 	}
 	if char.AccountID != accountID {
 		return store.Character{}, store.ErrNotFound
+	}
+	if char.Dead {
+		return store.Character{}, errCharacterDead
 	}
 	return char, nil
 }
@@ -291,6 +302,10 @@ func (s *Server) handleJoinSession(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character")
+		return
+	}
+	if char.Dead {
+		writeError(w, http.StatusConflict, "character_dead", "character is dead")
 		return
 	}
 	if err := s.store.CreateSessionGuestMember(ctx, store.SessionMember{

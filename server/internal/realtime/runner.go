@@ -3,6 +3,7 @@ package realtime
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"sync"
 	"time"
@@ -400,6 +401,12 @@ func (r *runner) persistTick(res game.TickResult) {
 		if err != nil {
 			r.metrics.PersistenceErrors.Inc()
 			r.log.Error("persist event", "error", err)
+		}
+		if ev.EventType == "player_killed" {
+			if err := r.store.MarkCharacterDead(ctx, r.sess.AccountID, r.sess.CharacterID); err != nil && !errors.Is(err, store.ErrNotFound) {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist character death", "error", err)
+			}
 		}
 	}
 

@@ -615,6 +615,20 @@ func TestDeadPlayerResumeRejectsGameplayIntents(t *testing.T) {
 	readEvent(t, conn, "player_killed")
 	_ = conn.Close()
 
+	charactersResp := doHTTP(t, srv, http.MethodGet, "/v0/characters", token, nil)
+	var characters listCharactersResponse
+	mustJSON(t, charactersResp, &characters)
+	if len(characters.Characters) == 0 || !characters.Characters[0].Dead {
+		t.Fatalf("dead character not listed as dead: %+v", characters.Characters)
+	}
+	createResp := doHTTP(t, srv, http.MethodPost, "/v0/sessions", token, map[string]any{"mode": "solo"})
+	if createResp.StatusCode != http.StatusConflict {
+		body, _ := io.ReadAll(createResp.Body)
+		_ = createResp.Body.Close()
+		t.Fatalf("fresh session after death status = %d, want 409, body = %s", createResp.StatusCode, body)
+	}
+	_ = createResp.Body.Close()
+
 	resume := dialWS(t, srv, token, sessionID)
 	defer resume.Close()
 	snap := readSnapshot(t, resume)

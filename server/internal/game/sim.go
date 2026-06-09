@@ -59,6 +59,7 @@ const (
 	baseInventoryRows              = 3
 	inventoryColumns               = 5
 	maxInventoryRows               = 20
+	minimumChaseLeashTiles         = 25.0
 )
 
 var equipmentSlots = []string{
@@ -3041,8 +3042,9 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 	nav := s.activeNav()
 	distPlayer := distance(monster.pos, player.pos)
 	distPlayerFromSpawn := distance(player.pos, monster.spawnPos)
+	leashRadius := effectiveMonsterLeashRadius(def, nav)
 
-	if def.LeashRadius > 0 && distPlayerFromSpawn > def.LeashRadius {
+	if leashRadius > 0 && distPlayerFromSpawn > leashRadius {
 		if prevMode != monsterAIModeReturn {
 			res.Events = append(res.Events, Event{EventType: "monster_leashed", EntityID: idStr(monster.id)})
 		}
@@ -3054,6 +3056,9 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 	if distPlayer <= def.AggroRadius {
 		if prevMode != monsterAIModeChase {
 			res.Events = append(res.Events, Event{EventType: "monster_aggro", EntityID: idStr(monster.id)})
+		}
+		if monster.aiTargetPlayerID == 0 {
+			monster.aiTargetPlayerID = player.id
 		}
 		monster.aiMode = monsterAIModeChase
 
@@ -3078,6 +3083,15 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 	}
 
 	monster.aiMode = monsterAIModeIdle
+}
+
+func effectiveMonsterLeashRadius(def MonsterDef, nav NavigationRules) float64 {
+	minimumRadius := minimumChaseLeashTiles * nav.CellSize
+	if def.LeashRadius <= 0 {
+		return minimumRadius
+	}
+
+	return maxFloat(def.LeashRadius, minimumRadius)
 }
 
 func (s *Sim) monsterMovementGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {

@@ -1022,8 +1022,20 @@ func TestAggroOnHitPrefersAttackingPlayerInCoop(t *testing.T) {
 		t.Fatal("directional fire produced no results")
 	}
 	assertAck(t, fire[0], "fire")
-	for i := 0; i < 20 && monster.aiTargetPlayerID == 0; i++ {
-		sim.TickResults(nil)
+	var impact TickResult
+	for i := 0; i < 20; i++ {
+		for _, res := range sim.TickResults(nil) {
+			if hasEvent(res, "monster_damaged") || hasEvent(res, "attack_missed") {
+				impact = res
+				break
+			}
+		}
+		if hasEvent(impact, "monster_damaged") || hasEvent(impact, "attack_missed") {
+			break
+		}
+	}
+	if !hasEvent(impact, "monster_damaged") && !hasEvent(impact, "attack_missed") {
+		t.Fatalf("projectile impact events = %+v, want monster_damaged or attack_missed", impact.Events)
 	}
 	if monster.aiTargetPlayerID != hostID {
 		t.Fatalf("monster ai target = %d, want host %d", monster.aiTargetPlayerID, hostID)
@@ -3704,6 +3716,43 @@ func TestMonsterChaseOpenField(t *testing.T) {
 	}
 	if distance(monster.pos, player.pos) > 1.5 {
 		t.Fatalf("monster not within player distance: dist=%.3f max=1.5", distance(monster.pos, player.pos))
+	}
+}
+
+func TestMonsterChaseLeashLastsAtLeastTwentyFiveTiles(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess", "01", rules, "chase_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	monster := firstEntityByKind(sim, monsterEntity)
+	player := sim.entities[sim.playerID]
+	def := rules.Monsters[monster.monsterDefID]
+	if def.LeashRadius >= minimumChaseLeashTiles*rules.Navigation.CellSize {
+		t.Fatalf("test requires a monster leash below the minimum; got %.3f", def.LeashRadius)
+	}
+
+	aggro := TickResult{}
+	player.pos = Vec2{X: monster.pos.X, Y: monster.pos.Y + def.AggroRadius - 1}
+	sim.updateMonsterAIMode(monster, player, def, monster.aiMode, &aggro)
+	if !hasEvent(aggro, "monster_aggro") || monster.aiMode != monsterAIModeChase || monster.aiTargetPlayerID != sim.playerID {
+		t.Fatalf("monster did not acquire aggro target: mode=%s target=%d events=%+v", monster.aiMode, monster.aiTargetPlayerID, aggro.Events)
+	}
+
+	prevMode := monster.aiMode
+	player.pos = Vec2{X: monster.spawnPos.X + minimumChaseLeashTiles*rules.Navigation.CellSize - 1, Y: monster.spawnPos.Y}
+	inside := TickResult{}
+	sim.updateMonsterAIMode(monster, player, def, prevMode, &inside)
+	if hasEvent(inside, "monster_leashed") || monster.aiMode != monsterAIModeChase {
+		t.Fatalf("monster leashed before 25 tiles: mode=%s events=%+v", monster.aiMode, inside.Events)
+	}
+
+	prevMode = monster.aiMode
+	player.pos = Vec2{X: monster.spawnPos.X + minimumChaseLeashTiles*rules.Navigation.CellSize + 1, Y: monster.spawnPos.Y}
+	outside := TickResult{}
+	sim.updateMonsterAIMode(monster, player, def, prevMode, &outside)
+	if !hasEvent(outside, "monster_leashed") || monster.aiMode != monsterAIModeReturn {
+		t.Fatalf("monster did not leash after passing 25 tiles: mode=%s events=%+v", monster.aiMode, outside.Events)
 	}
 }
 

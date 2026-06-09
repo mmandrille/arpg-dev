@@ -3,7 +3,8 @@ extends Control
 
 signal allocate_stat_requested(stat: String)
 
-const BASE_STATS := ["str", "dex", "vit", "magic"]
+const StatLabels := preload("res://scripts/stat_labels.gd")
+const BASE_STATS := StatLabels.BASE_STATS
 const DERIVED_LABELS := {
 	"damage_min": "Damage min",
 	"damage_max": "Damage max",
@@ -156,7 +157,7 @@ func _render() -> void:
 	for stat in BASE_STATS:
 		var label: Label = _stat_value_labels.get(stat, null)
 		if label != null:
-			label.text = "%s  %d" % [stat.to_upper(), int(base.get(stat, 0))]
+			label.text = "%s  %d" % [StatLabels.display_name(stat), int(base.get(stat, 0))]
 	var derived: Dictionary = progression.get("derived_stats", {})
 	for key in DERIVED_LABELS.keys():
 		var label: Label = _derived_labels.get(key, null)

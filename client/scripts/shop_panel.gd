@@ -4,6 +4,7 @@ extends Control
 signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const StatLabels := preload("res://scripts/stat_labels.gd")
 const PANEL_SIZE := Vector2(360, 680)
 const VENDOR_COLUMNS := 5
 const VENDOR_ROWS := 10
@@ -856,33 +857,7 @@ func _equip_preview_count(row: Dictionary) -> int:
 
 
 func _display_stat(stat: String) -> String:
-	match stat:
-		"level":
-			return "Level"
-		"str":
-			return "STR"
-		"dex":
-			return "DEX"
-		"vit":
-			return "VIT"
-		"magic":
-			return "Magic"
-		"damage_min":
-			return "Min damage"
-		"damage_max":
-			return "Max damage"
-		"armor":
-			return "Armor"
-		"block_percent":
-			return "Block"
-		"max_hp":
-			return "Max HP"
-		"hotbar_slots":
-			return "Hotbar slots"
-		"inventory_rows":
-			return "Inventory rows"
-		_:
-			return stat
+	return StatLabels.display_name(stat)
 
 
 func _rarity_color(rarity: String) -> Color:

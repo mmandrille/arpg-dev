@@ -13,6 +13,7 @@ const TITLE_FONT_SIZE := 33
 const BODY_FONT_SIZE := 23
 const DETAIL_FONT_SIZE := 20
 const ICON_FONT_SIZE := 20
+const PRICE_FONT_SIZE := 13
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
 const DRAG_SOURCE_INVENTORY_BAG := "bag"
 const ITEM_RARITY_BACKGROUNDS := {
@@ -36,7 +37,6 @@ var item_presentations: Dictionary = {}
 
 var _panel: PanelContainer
 var _title_label: Label
-var _gold_label: Label
 var _status_label: Label
 var _vendor_grid: GridContainer
 var _buy_buttons: Dictionary = {}
@@ -160,6 +160,7 @@ func get_debug_state() -> Dictionary:
 		"vendor_rows": VENDOR_ROWS,
 		"vendor_slot_count": VENDOR_SLOT_COUNT,
 		"occupied_vendor_slot_count": _vendor_items().size(),
+		"header_gold_visible": false,
 		"status": _status_label.text if _status_label != null else "",
 	}
 
@@ -216,11 +217,6 @@ func _build() -> void:
 	_title_label.add_theme_color_override("font_color", Color("#f4d481"))
 	_title_label.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 	header.add_child(_title_label)
-	_gold_label = Label.new()
-	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_gold_label.add_theme_color_override("font_color", Color("#f4c84f"))
-	_gold_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	header.add_child(_gold_label)
 
 	_status_label = Label.new()
 	_status_label.text = ""
@@ -246,7 +242,6 @@ func _render() -> void:
 		return
 	_buy_buttons = {}
 	_title_label.text = shop_title
-	_gold_label.text = "Gold: %d" % gold
 	_clear_children(_vendor_grid)
 	var rows := _vendor_items()
 	for i in range(VENDOR_SLOT_COUNT):
@@ -342,7 +337,20 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 
 	var font := slot.get_theme_default_font()
 	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE)
-	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.38), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
+	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.10), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
+
+	var price := str(int(item.get("buy_price", 0)))
+	var price_color := Color("#f4c84f") if _offer_affordable(item) else Color("#ff6f6f")
+	var price_size := font.get_string_size(price, HORIZONTAL_ALIGNMENT_LEFT, -1, PRICE_FONT_SIZE)
+	slot.draw_string(
+		font,
+		Vector2(slot.size.x - price_size.x - 3.0, slot.size.y - 4.0),
+		price,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		PRICE_FONT_SIZE,
+		price_color
+	)
 
 
 func _drag_preview(offer: Dictionary) -> Control:
@@ -566,36 +574,109 @@ func _tooltip(row: Dictionary) -> String:
 	var rarity := str(row.get("rarity", ""))
 	if rarity != "":
 		lines.append("Rarity: %s" % rarity.capitalize())
-	lines.append("Buy: %d gold" % int(row.get("buy_price", 0)))
-	lines.append_array(_detail_lines(row))
+	lines.append_array(_detail_lines(row, true, true))
 	return "\n".join(lines)
 
 
 func _make_offer_tooltip(offer: Dictionary) -> Control:
-	return _make_text_tooltip(_tooltip(offer))
+	return _make_item_stats_tooltip(
+		_tooltip_lines(offer),
+		_requirement_lines(offer),
+		_comparison_entries(offer),
+		int(offer.get("buy_price", 0)),
+		_offer_affordable(offer)
+	)
 
 
 func _make_text_tooltip(text: String) -> Control:
+	return _make_item_stats_tooltip([text], [], [], -1, true)
+
+
+func _make_item_stats_tooltip(main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int, affordable: bool) -> Control:
 	var tooltip := PanelContainer.new()
 	tooltip.add_theme_stylebox_override("panel", _tooltip_style())
 
-	var label := Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(320, 0)
-	label.add_theme_color_override("font_color", Color("#e8dcc8"))
-	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	tooltip.add_child(label)
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 2)
+	root.custom_minimum_size = Vector2(320, 0)
+	tooltip.add_child(root)
+
+	for line in main_lines:
+		root.add_child(_tooltip_label(str(line), Color("#e8dcc8")))
+	if not requirement_lines.is_empty():
+		root.add_child(_tooltip_spacer(8))
+		root.add_child(_tooltip_label("Requirements", Color("#c9a227")))
+		for line in requirement_lines:
+			root.add_child(_tooltip_label(str(line), Color("#d8c7a6")))
+	if not comparison_entries.is_empty():
+		root.add_child(_tooltip_spacer(6))
+		root.add_child(_tooltip_separator())
+		root.add_child(_tooltip_spacer(4))
+		for entry in comparison_entries:
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			var rec := entry as Dictionary
+			root.add_child(_tooltip_label(str(rec.get("text", "")), rec.get("color", Color("#d8c7a6"))))
+	if price >= 0:
+		root.add_child(_tooltip_spacer(4))
+		var footer := HBoxContainer.new()
+		var spacer := Control.new()
+		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		footer.add_child(spacer)
+		var price_label := Label.new()
+		price_label.text = str(price)
+		price_label.custom_minimum_size = Vector2(80, 0)
+		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		price_label.add_theme_color_override("font_color", Color("#f4c84f") if affordable else Color("#ff6f6f"))
+		price_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+		footer.add_child(price_label)
+		root.add_child(footer)
 	return tooltip
 
 
-func _detail_lines(row: Dictionary) -> Array:
+func _tooltip_label(text: String, color: Color) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	return label
+
+
+func _tooltip_spacer(height: int) -> Control:
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, height)
+	return spacer
+
+
+func _tooltip_separator() -> ColorRect:
+	var separator := ColorRect.new()
+	separator.color = Color("#6b5420")
+	separator.custom_minimum_size = Vector2(0, 1)
+	separator.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return separator
+
+
+func _tooltip_lines(row: Dictionary) -> Array:
+	var lines: Array = [_offer_name(row)]
+	var rarity := str(row.get("rarity", ""))
+	if rarity != "":
+		lines.append("Rarity: %s" % rarity.capitalize())
+	lines.append_array(_detail_lines(row, false, false))
+	return lines
+
+
+func _detail_lines(row: Dictionary, include_requirements: bool = true, include_comparison: bool = true) -> Array:
 	var lines: Array = []
 	var summary = row.get("summary_lines", [])
 	if typeof(summary) == TYPE_ARRAY:
 		for line in summary:
 			var text := str(line)
 			if text != "":
+				if not include_requirements and _is_requirement_summary_line(text):
+					continue
+				if not include_comparison and _is_comparison_summary_line(text):
+					continue
 				lines.append(text)
 	if lines.is_empty():
 		var slot := str(row.get("slot", ""))
@@ -607,10 +688,107 @@ func _detail_lines(row: Dictionary) -> Array:
 				lines.append("Kind: %s" % category)
 		lines.append_array(_stat_lines(row.get("rolled_stats", {})))
 		var req = row.get("requirements", {})
-		if typeof(req) == TYPE_DICTIONARY and int((req as Dictionary).get("level", 0)) > 0:
+		if include_requirements and typeof(req) == TYPE_DICTIONARY and int((req as Dictionary).get("level", 0)) > 0:
 			lines.append("Requires level %d" % int((req as Dictionary).get("level", 0)))
-	lines.append_array(_comparison_lines(row.get("comparison", {})))
+	if include_comparison:
+		lines.append_array(_comparison_lines(row.get("comparison", {})))
 	return lines
+
+
+func _requirement_lines(row: Dictionary) -> Array:
+	var lines: Array = []
+	var req = row.get("requirements", {})
+	if typeof(req) == TYPE_DICTIONARY:
+		var rec := req as Dictionary
+		if int(rec.get("level", 0)) > 0:
+			lines.append("Level %d" % int(rec.get("level", 0)))
+		for key in rec.keys():
+			var stat := str(key)
+			if stat == "level":
+				continue
+			lines.append("%s %s" % [_display_stat(stat), str(rec.get(key, ""))])
+	var summary = row.get("summary_lines", [])
+	if typeof(summary) == TYPE_ARRAY:
+		for line in summary:
+			var parsed := _requirement_from_summary_line(str(line))
+			if parsed != "" and not lines.has(parsed):
+				lines.append(parsed)
+	return lines
+
+
+func _is_requirement_summary_line(text: String) -> bool:
+	return _requirement_from_summary_line(text) != ""
+
+
+func _is_comparison_summary_line(text: String) -> bool:
+	return _comparison_delta_from_line(text) != null
+
+
+func _requirement_from_summary_line(text: String) -> String:
+	var normalized := text.strip_edges()
+	if not normalized.to_lower().begins_with("requires "):
+		return ""
+	var rest := normalized.substr("Requires ".length()).strip_edges()
+	if rest.to_lower().begins_with("level "):
+		return "Level %s" % rest.substr("level ".length()).strip_edges()
+	return rest.capitalize()
+
+
+func _comparison_entries(row: Dictionary) -> Array:
+	var entries: Array = []
+	var comparison = row.get("comparison", {})
+	if typeof(comparison) == TYPE_DICTIONARY:
+		var deltas = (comparison as Dictionary).get("deltas", [])
+		if typeof(deltas) == TYPE_ARRAY:
+			for delta in deltas:
+				if typeof(delta) != TYPE_DICTIONARY:
+					continue
+				var rec := delta as Dictionary
+				var diff := int(rec.get("delta", 0))
+				var sign := "+" if diff >= 0 else ""
+				entries.append({
+					"text": "%s%s %s vs equipped" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))],
+					"color": _comparison_color(diff),
+				})
+	var summary = row.get("summary_lines", [])
+	if typeof(summary) == TYPE_ARRAY:
+		for line in summary:
+			var text := str(line)
+			var diff_value = _comparison_delta_from_line(text)
+			if diff_value == null:
+				continue
+			var duplicate := false
+			for entry in entries:
+				if typeof(entry) == TYPE_DICTIONARY and str((entry as Dictionary).get("text", "")) == text:
+					duplicate = true
+					break
+			if duplicate:
+				continue
+			entries.append({
+				"text": text,
+				"color": _comparison_color(int(diff_value)),
+			})
+	return entries
+
+
+func _comparison_delta_from_line(text: String):
+	var stripped := text.strip_edges()
+	if not stripped.contains("vs equipped"):
+		return null
+	if stripped.length() == 0 or (not stripped.begins_with("+") and not stripped.begins_with("-")):
+		return null
+	var first_space := stripped.find(" ")
+	if first_space <= 1:
+		return null
+	return int(stripped.substr(0, first_space))
+
+
+func _comparison_color(delta: int) -> Color:
+	if delta > 0:
+		return Color("#9ee6a8")
+	if delta < 0:
+		return Color("#ff9f7a")
+	return Color("#d8c7a6")
 
 
 func _stat_lines(stats_value: Variant) -> Array:

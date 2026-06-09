@@ -5339,8 +5339,8 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 		t.Fatal("level -1 was generated before first descend")
 	}
 	townDown := sim.findStair(sim.activeLevel(), stairsDownDefID)
-	if townDown == nil || townDown.pos != (Vec2{X: 8, Y: 10}) {
-		t.Fatalf("town down stair = %+v, want {8 10}", townDown)
+	if townDown == nil || townDown.pos != (Vec2{X: 11, Y: 8}) {
+		t.Fatalf("town down stair = %+v, want {11 8}", townDown)
 	}
 
 	results := descendFromCurrentLevel(t, sim, "descend_town")

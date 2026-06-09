@@ -8,7 +8,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 GODOT="${GODOT:-godot}"
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-local-dev-token}"
 PLAY_CLIENTS="${PLAY_CLIENTS:-1}"
 

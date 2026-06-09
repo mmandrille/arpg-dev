@@ -12,7 +12,7 @@ CLIENT_DIR="$ROOT/client"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
 
-export BASE_URL="${BASE_URL:-http://localhost:8080}"
+export BASE_URL="${BASE_URL:-http://localhost:8888}"
 export DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
 export DEBUG_TOKEN="${DEBUG_TOKEN:-local-debug-token}"
 export ARPG_EMAIL="${ARPG_EMAIL:-client-smoke+$(date -u +%Y%m%d%H%M%S)-$$@example.test}"

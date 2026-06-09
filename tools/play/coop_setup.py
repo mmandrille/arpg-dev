@@ -46,7 +46,7 @@ def ensure_character(base_url: str, token: str, name: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="prepare a local co-op play session")
-    parser.add_argument("--base-url", default="http://localhost:8080")
+    parser.add_argument("--base-url", default="http://localhost:8888")
     parser.add_argument("--dev-token", default="local-dev-token")
     parser.add_argument("--clients", type=int, required=True)
     parser.add_argument("--email-prefix", default="player")

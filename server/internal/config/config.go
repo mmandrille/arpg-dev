@@ -10,7 +10,7 @@ import (
 
 // Config holds all runtime settings for the server.
 type Config struct {
-	// Addr is the listen address, e.g. ":8080".
+	// Addr is the listen address, e.g. ":8888".
 	Addr string
 	// DatabaseURL is the Postgres connection string.
 	DatabaseURL string
@@ -25,7 +25,7 @@ type Config struct {
 }
 
 const (
-	defaultAddr        = ":8080"
+	defaultAddr        = ":8888"
 	defaultDatabaseURL = "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable"
 	defaultDevToken    = "local-dev-token"
 	defaultDebugToken  = "local-debug-token"

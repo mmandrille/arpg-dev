@@ -18,7 +18,7 @@ _ts() {
   date -u +"%H:%M:%S"
 }
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
 EMAIL="${ARPG_EMAIL:-client-bot@example.test}"
 EMAIL_RUN_ID="${ARPG_BOT_CLIENT_RUN_ID:-$(date -u +%Y%m%d%H%M%S)-$$}"

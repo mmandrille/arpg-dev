@@ -46,6 +46,17 @@ class Report:
         print(f"  FAIL {label}: {detail}")
 
 
+def adjacent_to(pos: dict, marker: dict, *, cell_size: float = 1.0) -> bool:
+    dist = math.hypot(float(pos["x"]) - float(marker["x"]), float(pos["y"]) - float(marker["y"]))
+    return dist > 1e-9 and dist <= math.sqrt(2) * cell_size + 1e-9
+
+
+def equipment_visual_slot_matches(rule_slot: str | None, visual_slot: str) -> bool:
+    if rule_slot == "ring":
+        return visual_slot in {"ring_left", "ring_right"}
+    return rule_slot == visual_slot
+
+
 def schema_for(instance_path: Path) -> Path:
     """Map an instance file to the schema that should validate it."""
     rel = instance_path.relative_to(SHARED)
@@ -1561,8 +1572,8 @@ def cross_checks(report: Report) -> None:
         tp_outcome = dungeon_teleporters_golden["discover_descend_teleport"]
         if tp_outcome["expected_level"] != -1:
             report.fail("dungeon_teleporters golden", "discover_descend_teleport.expected_level must be -1")
-        elif tp_outcome["expected_player_position"] != dungeon_stairs_golden["levels"]["-1"]["teleporter"]:
-            report.fail("dungeon_teleporters golden", "expected_player_position must match level -1 teleporter")
+        elif not adjacent_to(tp_outcome["expected_player_position"], dungeon_stairs_golden["levels"]["-1"]["teleporter"]):
+            report.fail("dungeon_teleporters golden", "expected_player_position must be adjacent to level -1 teleporter")
         else:
             report.ok("dungeon_teleporters golden matches stairs seed and travel outcome")
 
@@ -1788,10 +1799,24 @@ def cross_checks(report: Report) -> None:
         slot = item.get("slot") if item is not None else (template or {}).get("slot")
         if item is None and template is None:
             report.fail("item_visuals key", f"{def_id} not in items.v0.json or item_templates.v0.json")
-        elif slot != vis["slot"]:
+        elif not equipment_visual_slot_matches(slot, vis["slot"]):
             report.fail("item_visuals slot", f"{def_id}: {vis['slot']} != item/template slot {slot}")
         else:
             report.ok(f"item_visuals {def_id} resolves to item/template rules with matching slot")
+    visual_required = {
+        def_id
+        for def_id, item in items["items"].items()
+        if item.get("category") == "equipment" and item.get("equippable") and item.get("slot")
+    } | {
+        def_id
+        for def_id, template in item_templates["templates"].items()
+        if template.get("category") == "equipment" and template.get("equippable") and template.get("slot")
+    }
+    missing_visuals = sorted(visual_required - set(visuals))
+    if missing_visuals:
+        report.fail("item_visuals equipment coverage", f"missing equipment visual mappings: {missing_visuals}")
+    else:
+        report.ok("item_visuals covers all equippable equipment")
 
     visual_golden = load(GOLDEN / "item_visual_resolution.json")
     gdef = visual_golden["item_def_id"]

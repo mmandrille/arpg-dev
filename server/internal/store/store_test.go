@@ -183,6 +183,7 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 		Seed:         "c001",
 		WorldID:      "dungeon_levels",
 		Mode:         store.SessionModeCoop,
+		Listed:       true,
 		JoinCodeHash: "join_hash",
 		Status:       store.SessionActive,
 	}
@@ -193,7 +194,7 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load coop session: %v", err)
 	}
-	if loaded.Mode != store.SessionModeCoop || loaded.JoinCodeHash != "join_hash" {
+	if loaded.Mode != store.SessionModeCoop || !loaded.Listed || loaded.JoinCodeHash != "join_hash" {
 		t.Fatalf("coop session metadata mismatch: %+v", loaded)
 	}
 
@@ -213,6 +214,7 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 		CharacterID:    guestChar.ID,
 		PlayerEntityID: "1007",
 		CurrentLevel:   0,
+		JoinedTick:     1,
 	}); err != nil {
 		t.Fatalf("create guest member: %v", err)
 	}
@@ -224,22 +226,103 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 		t.Fatalf("duplicate guest = %v, want ErrConflict", err)
 	}
 	if err := s.CreateSessionGuestMember(ctx, store.SessionMember{
-		SessionID:   sess.ID,
-		AccountID:   thirdAcct.ID,
-		CharacterID: thirdChar.ID,
-	}); !errors.Is(err, store.ErrPartyFull) {
-		t.Fatalf("third guest = %v, want ErrPartyFull", err)
+		SessionID:      sess.ID,
+		AccountID:      thirdAcct.ID,
+		CharacterID:    thirdChar.ID,
+		PlayerEntityID: "1011",
+		CurrentLevel:   0,
+		JoinedTick:     2,
+	}); err != nil {
+		t.Fatalf("third guest: %v", err)
 	}
 
 	members, err := s.ListSessionMembers(ctx, sess.ID)
 	if err != nil {
 		t.Fatalf("list members: %v", err)
 	}
-	if len(members) != 2 || members[0].Role != store.SessionMemberHost || members[1].Role != store.SessionMemberGuest {
+	if len(members) != 3 || members[0].Role != store.SessionMemberHost || members[1].Role != store.SessionMemberGuest || members[2].Role != store.SessionMemberGuest {
 		t.Fatalf("members order = %+v", members)
+	}
+	summaries, err := s.ListActiveListedSessions(ctx)
+	if err != nil {
+		t.Fatalf("list active sessions: %v", err)
+	}
+	if summaryByID(summaries, sess.ID).SessionID != "" {
+		t.Fatalf("inactive listed session with no connected members was listed: %+v", summaries)
+	}
+	claimed, err := s.ClaimSessionMemberConnection(ctx, sess.ID, hostAcct.ID, hostChar.ID)
+	if err != nil {
+		t.Fatalf("claim host connection: %v", err)
+	}
+	if !claimed {
+		t.Fatalf("host connection was not claimed")
+	}
+	claimed, err = s.ClaimSessionMemberConnection(ctx, sess.ID, hostAcct.ID, hostChar.ID)
+	if err != nil {
+		t.Fatalf("claim duplicate host connection: %v", err)
+	}
+	if claimed {
+		t.Fatalf("duplicate host connection was claimed")
+	}
+	if err := s.SetSessionMemberConnected(ctx, sess.ID, hostAcct.ID, hostChar.ID, "1001", 0, 0); err != nil {
+		t.Fatalf("connect host: %v", err)
+	}
+	summaries, err = s.ListActiveListedSessions(ctx)
+	if err != nil {
+		t.Fatalf("list active sessions after connect: %v", err)
+	}
+	found := summaryByID(summaries, sess.ID)
+	if found.SessionID == "" || found.HostCharacterID != hostChar.ID || found.HostDisplayName != hostChar.Name || found.MemberCount != 3 || found.ConnectedCount != 1 || !found.Listed {
+		t.Fatalf("active listed summary mismatch: %+v", found)
+	}
+	if err := s.SetSessionMemberDisconnected(ctx, sess.ID, hostAcct.ID, hostChar.ID, 0, 10); err != nil {
+		t.Fatalf("disconnect host: %v", err)
+	}
+	claimed, err = s.ClaimSessionMemberConnection(ctx, sess.ID, hostAcct.ID, hostChar.ID)
+	if err != nil {
+		t.Fatalf("claim host connection after disconnect: %v", err)
+	}
+	if !claimed {
+		t.Fatalf("host connection was not claimable after disconnect")
+	}
+	if err := s.SetSessionMemberDisconnected(ctx, sess.ID, hostAcct.ID, hostChar.ID, 0, 11); err != nil {
+		t.Fatalf("disconnect host after claim: %v", err)
+	}
+	summaries, err = s.ListActiveListedSessions(ctx)
+	if err != nil {
+		t.Fatalf("list active sessions after disconnect: %v", err)
+	}
+	if summaryByID(summaries, sess.ID).SessionID != "" {
+		t.Fatalf("empty listed session was still listed: %+v", summaries)
+	}
+	ended, err := s.EndListedSessionIfNoConnected(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("end empty listed session: %v", err)
+	}
+	if !ended {
+		t.Fatalf("empty listed session was not ended")
+	}
+	loaded, err = s.GetSession(ctx, sess.ID)
+	if err != nil {
+		t.Fatalf("get ended session: %v", err)
+	}
+	if loaded.Status != store.SessionEnded {
+		t.Fatalf("session status = %q, want ended", loaded.Status)
+	}
+	if ended, err := s.EndListedSessionIfNoConnected(ctx, sess.ID); err != nil || ended {
+		t.Fatalf("second empty listed end = %v, %v; want false, nil", ended, err)
 	}
 	if err := s.SetSessionMemberConnected(ctx, sess.ID, guestAcct.ID, guestChar.ID, "1007", 0, 9); err != nil {
 		t.Fatalf("connect guest: %v", err)
+	}
+	summaries, err = s.ListActiveListedSessions(ctx)
+	if err != nil {
+		t.Fatalf("list active sessions after ended reconnect: %v", err)
+	}
+	for _, summary := range summaries {
+		if summary.SessionID == sess.ID {
+			t.Fatalf("ended listed session was listed: %+v", summaries)
+		}
 	}
 	member, err := s.GetSessionMemberByAccount(ctx, sess.ID, guestAcct.ID)
 	if err != nil {
@@ -285,26 +368,41 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	}
 	hostProgression, _ := s.GetOrCreateCharacterProgression(ctx, hostAcct.ID, hostChar.ID, defaultProgression)
 	guestProgression, _ := s.GetOrCreateCharacterProgression(ctx, guestAcct.ID, guestChar.ID, defaultProgression)
+	thirdProgression, _ := s.GetOrCreateCharacterProgression(ctx, thirdAcct.ID, thirdChar.ID, defaultProgression)
 	hostItem := store.CharacterItemInstance{ID: "2001", AccountID: hostAcct.ID, CharacterID: hostChar.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory}
 	guestItem := store.CharacterItemInstance{ID: "2001", AccountID: guestAcct.ID, CharacterID: guestChar.ID, ItemDefID: "cave_bow", Location: store.ItemLocationInventory}
+	thirdItem := store.CharacterItemInstance{ID: "2001", AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, ItemDefID: "cave_helm", Location: store.ItemLocationInventory}
 	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
 	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
+	thirdHotbar := []store.CharacterHotbarSlot{{AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, SlotIndex: 0, ItemInstanceID: &thirdItem.ID}}
 	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, hostProgression); err != nil {
 		t.Fatalf("host start snapshot: %v", err)
 	}
 	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, guestProgression); err != nil {
 		t.Fatalf("guest start snapshot: %v", err)
 	}
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, thirdProgression); err != nil {
+		t.Fatalf("third start snapshot: %v", err)
+	}
 	snaps, err := s.LoadSessionStartSnapshots(ctx, sess.ID)
 	if err != nil {
 		t.Fatalf("load start snapshots: %v", err)
 	}
-	if len(snaps) != 2 || len(snaps[0].Items) != 1 || len(snaps[1].Items) != 1 {
+	if len(snaps) != 3 || len(snaps[0].Items) != 1 || len(snaps[1].Items) != 1 || len(snaps[2].Items) != 1 {
 		t.Fatalf("snapshot count mismatch: %+v", snaps)
 	}
-	if snaps[0].Items[0].ItemDefID != "cave_blade" || snaps[1].Items[0].ItemDefID != "cave_bow" {
+	if snaps[0].Items[0].ItemDefID != "cave_blade" || snaps[1].Items[0].ItemDefID != "cave_bow" || snaps[2].Items[0].ItemDefID != "cave_helm" {
 		t.Fatalf("member snapshots collided: %+v", snaps)
 	}
+}
+
+func summaryByID(summaries []store.SessionSummary, sessionID string) store.SessionSummary {
+	for _, summary := range summaries {
+		if summary.SessionID == sessionID {
+			return summary
+		}
+	}
+	return store.SessionSummary{}
 }
 
 func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {

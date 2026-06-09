@@ -10,7 +10,7 @@ const STEP_TYPES_WAIT := [
 	"wait_hotbar_capacity",
 	"wait_player_near", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
-	"wait_settings_panel", "wait_pause_menu", "wait_character_progression",
+	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 ]
 const STEP_TYPES_ASSERT := [
@@ -20,7 +20,9 @@ const STEP_TYPES_ASSERT := [
 	"assert_hotbar_assigned", "assert_player_hp", "assert_main_menu_visible",
 	"assert_character_panel_visible", "assert_settings_panel_visible",
 	"assert_pause_menu_visible", "assert_session_changed",
+	"assert_multiplayer_panel_visible", "assert_multiplayer_session_rows",
 	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
+	"assert_character_info_panel_visible", "assert_character_info",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
 	"assert_inventory_capacity", "assert_bag_grid", "assert_paper_doll_layout",
@@ -53,11 +55,13 @@ const ALL_STEP_TYPES: Array = [
 	"assert_player_hp", "double_click_bag_item", "wait_main_menu",
 	"wait_character_panel", "wait_settings_panel", "wait_pause_menu",
 	"assert_main_menu_visible", "assert_character_panel_visible",
-	"assert_settings_panel_visible", "assert_pause_menu_visible",
+	"wait_multiplayer_panel", "assert_multiplayer_panel_visible",
+	"assert_multiplayer_session_rows", "assert_settings_panel_visible", "assert_pause_menu_visible",
 	"click_menu_button", "enter_character_name", "select_character",
 	"select_window_size", "remember_session", "assert_session_changed",
 	"remember_player_position", "assert_player_position_unchanged",
-	"assert_character_stats_panel_visible", "wait_character_progression",
+	"assert_character_stats_panel_visible", "assert_character_info_panel_visible", "assert_character_info",
+	"wait_character_progression",
 	"assert_character_progression", "click_stat_button",
 	"assert_stat_button_enabled", "assert_xp_bar",
 	"set_floating_combat_text", "assert_floating_combat_text_enabled",
@@ -178,6 +182,8 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return bool(state.get("main_menu_visible", false))
 		"wait_character_panel":
 			return bool(state.get("character_panel_visible", false))
+		"wait_multiplayer_panel":
+			return bool(state.get("multiplayer_panel_visible", false))
 		"wait_settings_panel":
 			return bool(state.get("settings_panel_visible", false))
 		"wait_pause_menu":
@@ -280,12 +286,20 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_bool_state("assert_main_menu_visible", "main_menu_visible", step, state)
 		"assert_character_panel_visible":
 			return _assert_bool_state("assert_character_panel_visible", "character_panel_visible", step, state)
+		"assert_multiplayer_panel_visible":
+			return _assert_bool_state("assert_multiplayer_panel_visible", "multiplayer_panel_visible", step, state)
+		"assert_multiplayer_session_rows":
+			return _assert_multiplayer_session_rows(step, state)
 		"assert_settings_panel_visible":
 			return _assert_bool_state("assert_settings_panel_visible", "settings_panel_visible", step, state)
 		"assert_pause_menu_visible":
 			return _assert_bool_state("assert_pause_menu_visible", "pause_menu_visible", step, state)
 		"assert_character_stats_panel_visible":
 			return _assert_bool_state("assert_character_stats_panel_visible", "character_stats_panel_visible", step, state)
+		"assert_character_info_panel_visible":
+			return _assert_bool_state("assert_character_info_panel_visible", "character_info_panel_visible", step, state)
+		"assert_character_info":
+			return _assert_character_info(step, state)
 		"assert_character_progression":
 			return _assert_character_progression(step, state)
 		"assert_stat_button_enabled":
@@ -459,6 +473,24 @@ func _assert_character_progression(step: Dictionary, state: Dictionary) -> bool:
 		str(_progression_expectation(step)), str(progression), _step_index, str(scenario.get("id", "?"))
 	])
 	return false
+
+
+func _assert_character_info(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("character_info_panel", {})
+	for key in ["name", "area"]:
+		if step.has(key) and str(panel.get(key, "")) != str(step.get(key, "")):
+			_fail("assert_character_info failed: %s want=%s got=%s panel=%s step=%d scenario=%s" % [
+				key, str(step.get(key, "")), str(panel.get(key, "")), str(panel),
+				_step_index, str(scenario.get("id", "?"))
+			])
+			return false
+	if step.has("level") and int(panel.get("level", -999999)) != int(step.get("level", 0)):
+		_fail("assert_character_info failed: level want=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("level", 0)), int(panel.get("level", -999999)), str(panel),
+			_step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
 
 
 func _progression_matches(step: Dictionary, state: Dictionary) -> bool:
@@ -754,6 +786,29 @@ func _assert_bool_value(label: String, step: Dictionary, got: bool, want: bool) 
 	return true
 
 
+func _assert_multiplayer_session_rows(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("multiplayer_panel", {})
+	var sessions: Array = panel.get("sessions", [])
+	if step.has("min_count") and sessions.size() < int(step.get("min_count", 0)):
+		_fail("assert_multiplayer_session_rows failed: count=%d min_count=%d rows=%s step=%d scenario=%s" % [
+			sessions.size(), int(step.get("min_count", 0)), str(sessions), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("selected") and bool(step.get("selected", false)) != (str(panel.get("selected_session_id", "")) != ""):
+		_fail("assert_multiplayer_session_rows selected failed: selected_id=%s want_selected=%s step=%d scenario=%s" % [
+			str(panel.get("selected_session_id", "")), str(step.get("selected", false)), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("listed"):
+		for row in sessions:
+			if typeof(row) == TYPE_DICTIONARY and bool((row as Dictionary).get("listed", false)) != bool(step.get("listed", true)):
+				_fail("assert_multiplayer_session_rows listed failed: row=%s step=%d scenario=%s" % [
+					str(row), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+	return true
+
+
 func _advance(completed_type: String = "") -> void:
 	print("[bot-client] step done idx=%d type=%s elapsed=%.2fs scenario=%s" % [
 		_step_index, completed_type, _step_elapsed, str(scenario.get("id", "?"))
@@ -967,6 +1022,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "assert_stat_button_enabled":
 		if not step.has("enabled"):
 			return "client_steps[%d] (%s) requires enabled" % [index, stype]
+	if stype == "assert_character_info":
+		if not step.has("name") and not step.has("level") and not step.has("area"):
+			return "client_steps[%d] (%s) requires name, level, or area" % [index, stype]
 	if stype in ["wait_character_progression", "assert_character_progression"]:
 		var has_any := false
 		for key in ["level", "experience", "unspent_stat_points", "str", "dex", "vit", "magic", "derived_stats", "player_max_hp", "stat_breakdowns"]:
@@ -980,6 +1038,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_damage_number", "assert_damage_number"]:
 		if not step.has("text") and not step.has("variant"):
 			return "client_steps[%d] (%s) requires text or variant" % [index, stype]
+	if stype == "assert_multiplayer_session_rows":
+		if not step.has("min_count") and not step.has("selected") and not step.has("listed"):
+			return "client_steps[%d] (%s) requires min_count, selected, or listed" % [index, stype]
 	if stype == "click_menu_button":
 		if str(step.get("button", "")) == "":
 			return "client_steps[%d] (%s) requires button" % [index, stype]

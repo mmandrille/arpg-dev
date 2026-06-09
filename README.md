@@ -64,6 +64,23 @@ the Godot main menu; create or continue a named character to start a fresh
 `dungeon_levels` session. Direct session startup is a dev override only:
 `ARPG_AUTOSTART=1 ARPG_WORLD_ID=dungeon_levels make play`.
 
+For local co-op menu testing, pass a client count. Each client gets a distinct
+dev account and opens at the main menu; use Multiplayer to host or join listed
+sessions.
+
+```bash
+make play
+make play 3
+```
+
+To point clients at an already running backend without starting local Postgres
+or the local Go server, use `play-remote`:
+
+```bash
+BASE_URL=http://localhost:8080 make play-remote
+BASE_URL=https://your-backend.example make play-remote 3
+```
+
 Headless cross-language golden checks (including `retaliation_damage.json`) run in
 `make client-smoke` via `client/tests/test_golden.gd`.
 

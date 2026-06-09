@@ -11,7 +11,7 @@ Last updated: 2026-06-08
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v37 — `combat-control-and-boss-ai-fixes` |
+| **Latest completed slice** | v38 — `session-browser-and-uncapped-coop-menu` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-08 |
 | **Next slice** | TBD |
@@ -53,6 +53,7 @@ v34_* = model-reaction-polish
 v35_* = boss-floor-gate
 v36_* = inventory-paper-doll-capacity
 v37_* = combat-control-and-boss-ai-fixes
+v38_* = session-browser-and-uncapped-coop-menu
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -110,6 +111,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v35** | `boss-floor-gate` | Complete (`make ci` green) | [`v35_spec-boss-floor-gate.md`](specs/v35_spec-boss-floor-gate.md) | [`v35_2026-06-08-boss-floor-gate.md`](plans/v35_2026-06-08-boss-floor-gate.md) |
 | **v36** | `inventory-paper-doll-capacity` | Complete (`make ci` green) | [`v36_spec-inventory-paper-doll-capacity.md`](specs/v36_spec-inventory-paper-doll-capacity.md) | [`v36_2026-06-08-inventory-paper-doll-capacity.md`](plans/v36_2026-06-08-inventory-paper-doll-capacity.md) |
 | **v37** | `combat-control-and-boss-ai-fixes` | Complete (`make ci` green) | [`v37_spec-combat-control-and-boss-ai-fixes.md`](specs/v37_spec-combat-control-and-boss-ai-fixes.md) | [`v37_2026-06-08-combat-control-and-boss-ai-fixes.md`](plans/v37_2026-06-08-combat-control-and-boss-ai-fixes.md) |
+| **v38** | `session-browser-and-uncapped-coop-menu` | Complete (`make ci` green) | [`v38_spec-session-browser-and-uncapped-coop-menu.md`](specs/v38_spec-session-browser-and-uncapped-coop-menu.md) | [`v38_2026-06-08-session-browser-and-uncapped-coop-menu.md`](plans/v38_2026-06-08-session-browser-and-uncapped-coop-menu.md) |
 
 ---
 
@@ -930,6 +932,31 @@ ability catalog, homing/target-prediction projectiles, client hit detection, PvP
 boss templates, boss enrage/adds, production boss/combat VFX/audio/art, co-op boss scaling, broad
 monster AI rewrite, Protobuf migration, or a reliable full-scene headless `SHIFT+LMB` client bot proof.
 
+### v38 — Session browser and uncapped co-op menu
+
+**Proves:** Co-op can be hosted and joined from the main menu through server-listed sessions while
+the authoritative session, realtime, replay, and persistence model supports more than two members.
+
+- Sessions now persist a `listed` flag; authenticated `GET /v0/sessions/active` returns active listed
+  co-op summaries without exposing join codes or account ids.
+- Listed co-op creation and listed join are available through HTTP, Python bot helpers, and Godot
+  `NetClient`; private co-op still uses the join-code path.
+- The previous two-member cap is removed. Store, HTTP, realtime WebSocket, sim, and replay tests prove
+  third and fourth joins, three connected clients, actor-scoped movement, distinct local player ids,
+  same-level visibility, disconnect survival, and deterministic replay reconstruction.
+- Godot adds a Multiplayer main-menu path with Host Listed Session, Refresh Sessions, Join Selected,
+  and Back. Host/join flows reuse the character picker and connect through the existing WebSocket.
+- Local `make play 3` now launches independent menu clients with distinct accounts and no pre-created
+  co-op session. `BASE_URL=<url> make play-remote 3` launches menu clients against a remote backend
+  after probing `/readyz`, without starting local DB/server.
+- Protocol bot scenario `27_session_browser_uncapped_coop.json` proves listed discovery, two listed
+  joins, three-peer visibility/movement, disconnect, reconnect, `/state`, and replay verification.
+
+**Explicit non-goals:** no filters/search/sorting controls, Steam lobby/invites/friend flows, ready
+checks, chat/emotes, party panel polish, trade, XP sharing, party bonuses, proximity reward rules,
+loot allocation, PvP/friendly fire, load-aware capacity limits, split deployables, or cross-process
+session ownership.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -983,6 +1010,7 @@ model_reaction_polish: attack training dummy → prove monster hit reaction → 
 boss_floor_gate: descend to level -5 → assert compact boss floor and locked exits → observe boss phase → kill boss → unlock exits → descend to -6
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
+session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
 ```
 
 **Verify:**
@@ -1120,6 +1148,11 @@ guards, a 5-column capacity grid, and protocol/client bot proofs.
 authoritative stop movement, aggro-on-hit with nearby contagious group aggro, boss chase/damage repair,
 and protocol/client unit proofs.
 
+**Session browser and uncapped co-op are now authoritative.** v38 adds persisted listed co-op sessions,
+active session summaries, listed join without join code, three-plus-member realtime/replay proofs, a
+Godot Multiplayer menu path, and local/remote multi-client menu launchers. Empty listed sessions are
+hidden from discovery, and a listed session is ended when its last connected player disconnects.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -1133,7 +1166,7 @@ and protocol/client unit proofs.
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking/lobby, public session discovery, Steam lobby/invites, friend flows, party UI polish, chat/emotes/ready checks, trade, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, more than two players, split deployables / cross-process session ownership | v0/v33 non-goals, ADR-0001 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, trade, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38 non-goals, ADR-0001 |
 
 ---
 

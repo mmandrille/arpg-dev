@@ -275,6 +275,12 @@ func (l *sessionLoop) detach(client *loopClient) {
 	tick := l.sim.CurrentTick()
 	l.mu.Unlock()
 
+	if isCoopSession(l.sess) && l.sess.Listed && remaining == 0 {
+		if _, err := l.hub.store.EndListedSessionIfNoConnected(context.Background(), l.sess.ID); err != nil {
+			l.log.Error("end empty listed session", "session_id", l.sess.ID, "error", err)
+		}
+	}
+
 	if isCoopSession(l.sess) {
 		remove := outEnvelope{
 			Type:      typeStateDelta,
@@ -723,7 +729,14 @@ func displayNameForMember(member store.SessionMember) string {
 	if member.Role == store.SessionMemberHost {
 		return "Hero"
 	}
-	return "Guest"
+	if member.CharacterID == "" {
+		return "Guest"
+	}
+	suffix := member.CharacterID
+	if len(suffix) > 6 {
+		suffix = suffix[len(suffix)-6:]
+	}
+	return "Guest " + suffix
 }
 
 func isCoopSession(sess store.Session) bool {

@@ -3,6 +3,9 @@ import json
 from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
 from tools.bot.run import (
     RuntimeState,
+    clean_bot_run_artifacts,
+    create_listed_coop_session,
+    default_manifest_path,
     directional_attack_direction,
     find_inventory_item,
     find_interactable,
@@ -10,10 +13,13 @@ from tools.bot.run import (
     find_monster,
     find_player,
     ingest_message,
+    join_listed_session,
+    list_active_sessions,
     load_scenarios,
     run_assertions,
     run_runtime_assertions,
     select_scenarios,
+    should_clean_bot_run_artifacts,
 )
 
 
@@ -37,6 +43,31 @@ def test_make_envelope_required_fields():
 
 def test_message_ids_unique():
     assert next_message_id() != next_message_id()
+
+
+def test_clean_bot_run_artifacts_removes_only_json_files(tmp_path):
+    old_manifest = tmp_path / "old.json"
+    visual_manifest = tmp_path / "old-visual.json"
+    keep_note = tmp_path / "notes.txt"
+    nested = tmp_path / "nested"
+    nested.mkdir()
+    nested_manifest = nested / "nested.json"
+
+    old_manifest.write_text("{}\n")
+    visual_manifest.write_text("{}\n")
+    keep_note.write_text("keep\n")
+    nested_manifest.write_text("{}\n")
+
+    assert clean_bot_run_artifacts(tmp_path) == 2
+    assert not old_manifest.exists()
+    assert not visual_manifest.exists()
+    assert keep_note.exists()
+    assert nested_manifest.exists()
+
+
+def test_should_clean_bot_run_artifacts_only_default_dir(tmp_path):
+    assert should_clean_bot_run_artifacts(default_manifest_path())
+    assert not should_clean_bot_run_artifacts(tmp_path / "manifest.json")
 
 
 def test_load_scenarios_discovers_vertical_slice():
@@ -161,6 +192,79 @@ def test_load_scenarios_discovers_combat_control_and_boss_ai_fixes():
         "monster_def_id": "dungeon_mob",
         "min_distance": 0.5,
     } in combat.assertions
+
+
+def test_load_scenarios_discovers_session_browser_uncapped_coop():
+    scenarios = load_scenarios()
+    coop = next(s for s in scenarios if s.id == "session_browser_uncapped_coop")
+
+    assert coop.world_id == "dungeon_levels"
+    assert coop.peer_count == 3
+    assert coop.steps == []
+    assert coop.assertions == []
+
+
+def test_listed_session_http_helpers():
+    requests: list[tuple[str, str, dict | None]] = []
+
+    def handler(request):
+        payload = json.loads(request.content.decode() or "{}") if request.content else None
+        requests.append((request.method, request.url.path, payload))
+        if request.method == "POST" and request.url.path == "/v0/sessions":
+            assert payload == {
+                "mode": "coop",
+                "listed": True,
+                "world_id": "dungeon_levels",
+                "character_id": "char_host",
+                "seed": "seed-1",
+            }
+            return httpx.Response(201, json={
+                "session_id": "sess_1",
+                "character_id": "char_host",
+                "seed": "seed-1",
+                "world_id": "dungeon_levels",
+                "mode": "coop",
+                "listed": True,
+                "join_code": "join_secret",
+                "ws_url": "/v0/ws?session_id=sess_1",
+            })
+        if request.method == "GET" and request.url.path == "/v0/sessions/active":
+            return httpx.Response(200, json={"sessions": [{
+                "session_id": "sess_1",
+                "world_id": "dungeon_levels",
+                "mode": "coop",
+                "listed": True,
+                "host_character_id": "char_host",
+                "host_display_name": "Host",
+                "member_count": 1,
+                "connected_count": 0,
+                "created_at": "2026-06-08T00:00:00Z",
+                "updated_at": "2026-06-08T00:00:00Z",
+            }]})
+        if request.method == "POST" and request.url.path == "/v0/sessions/sess_1/join":
+            assert payload == {"character_id": "char_guest"}
+            return httpx.Response(200, json={
+                "session_id": "sess_1",
+                "character_id": "char_guest",
+                "seed": "seed-1",
+                "world_id": "dungeon_levels",
+                "mode": "coop",
+                "listed": True,
+                "ws_url": "/v0/ws?session_id=sess_1",
+            })
+        return httpx.Response(404)
+
+    import httpx
+    transport = httpx.MockTransport(handler)
+    with httpx.Client(base_url="http://testserver", transport=transport) as client:
+        created = create_listed_coop_session(client, "token", "dungeon_levels", "char_host", "seed-1")
+        active = list_active_sessions(client, "token")
+        joined = join_listed_session(client, "token", "sess_1", "char_guest")
+
+    assert created["listed"] is True
+    assert active[0]["session_id"] == "sess_1"
+    assert joined["character_id"] == "char_guest"
+    assert all(req[2] is None or "join_code" not in req[2] for req in requests)
 
 
 def test_select_scenarios_rejects_unknown_id():

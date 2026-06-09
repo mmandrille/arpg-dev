@@ -1,0 +1,10 @@
+{
+  "id": "session_browser_uncapped_coop",
+  "world_id": "dungeon_levels",
+  "seed": "v38-session-browser-uncapped-coop",
+  "peer_count": 3,
+  "title": "Session browser uncapped co-op",
+  "description": "Listed co-op protocol proof for active session discovery, code-free listed joins, three distinct local players, same-level visibility, independent movement, disconnect survival, reconnect, and replay verification.",
+  "steps": [],
+  "assertions": []
+}

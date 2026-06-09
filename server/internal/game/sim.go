@@ -580,8 +580,8 @@ func (s *Sim) alloc() uint64 {
 	return id
 }
 
-// AddGuestPlayer creates a second connected player in level 0 town. It is the
-// deterministic v33 co-op join path; player-vs-player collision remains disabled.
+// AddGuestPlayer creates another connected player in level 0 town. It is the
+// deterministic co-op join path; player-vs-player collision remains disabled.
 func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progression CharacterProgressionState) (uint64, error) {
 	if displayName == "" {
 		displayName = "Guest"
@@ -746,6 +746,38 @@ func (s *Sim) RespawnPlayerInTown(playerID uint64) error {
 }
 
 func (s *Sim) findTownSpawnPosition(level *LevelState) Vec2 {
+	preferred := s.preferredTownSpawnPosition(level)
+	if !s.spawnPositionBlocked(level, preferred) {
+		return preferred
+	}
+	nav := s.navigationForLevel(level)
+	step := nav.CellSize
+	if step <= 0 {
+		step = 1.0
+	}
+	for ring := 1; ring <= 8; ring++ {
+		for dy := -ring; dy <= ring; dy++ {
+			for dx := -ring; dx <= ring; dx++ {
+				if absInt(dx) != ring && absInt(dy) != ring {
+					continue
+				}
+				candidate := Vec2{
+					X: preferred.X + float64(dx)*step,
+					Y: preferred.Y + float64(dy)*step,
+				}
+				if !s.positionInNavigationBounds(nav, candidate) {
+					continue
+				}
+				if !s.spawnPositionBlocked(level, candidate) {
+					return candidate
+				}
+			}
+		}
+	}
+	return preferred
+}
+
+func (s *Sim) preferredTownSpawnPosition(level *LevelState) Vec2 {
 	if host := s.players[s.playerID]; host != nil {
 		if lvl := s.levels[host.CurrentLevel]; lvl != nil && host.CurrentLevel == level.levelNum {
 			if e := lvl.entities[host.PlayerID]; e != nil {
@@ -760,6 +792,54 @@ func (s *Sim) findTownSpawnPosition(level *LevelState) Vec2 {
 		}
 	}
 	return Vec2{X: 4, Y: 10}
+}
+
+func (s *Sim) spawnPositionBlocked(level *LevelState, pos Vec2) bool {
+	if level == nil {
+		return true
+	}
+	for _, wall := range level.walls {
+		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+			return true
+		}
+	}
+	for _, id := range sortedEntityIDs(level.entities) {
+		e := level.entities[id]
+		if e == nil {
+			continue
+		}
+		switch e.kind {
+		case playerEntity:
+			if e.hp > 0 && circlesOverlap(pos, playerRadius, e.pos, playerRadius) {
+				return true
+			}
+		case monsterEntity:
+			if e.hp > 0 && circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
+				return true
+			}
+		case interactableEntity:
+			if e.state == interactableClosed {
+				if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.BarrierWhenClosed != nil {
+					if circleIntersectsAABB(pos, playerRadius, e.pos, def.BarrierWhenClosed.Size) {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (s *Sim) navigationForLevel(level *LevelState) NavigationRules {
+	if level != nil && level.nav != nil {
+		return *level.nav
+	}
+	return s.rules.Navigation
+}
+
+func (s *Sim) positionInNavigationBounds(nav NavigationRules, pos Vec2) bool {
+	cell := worldToGrid(nav, pos)
+	return cellInBounds(nav, cell)
 }
 
 func (s *Sim) defaultPlayer() *playerState {
@@ -1778,7 +1858,7 @@ func (s *Sim) handleTransition(in Input, res *TickResult) *TickResult {
 		res.reject(in.MessageID, "invalid_level")
 		return nil
 	}
-	return s.movePlayerToLevel(in, res, current, dest, arrival.pos)
+	return s.movePlayerToLevel(in, res, current, dest, s.travelArrivalPosition(dest, arrival.pos, s.playerID))
 }
 
 func (s *Sim) handleTeleport(in Input, res *TickResult) *TickResult {
@@ -1837,7 +1917,7 @@ func (s *Sim) handleTeleport(in Input, res *TickResult) *TickResult {
 		res.reject(in.MessageID, "invalid_level")
 		return nil
 	}
-	return s.movePlayerToLevel(in, res, current, dest, arrival.pos)
+	return s.movePlayerToLevel(in, res, current, dest, s.travelArrivalPosition(dest, arrival.pos, s.playerID))
 }
 
 func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelState, arrivalPos Vec2) *TickResult {
@@ -1878,6 +1958,80 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 		arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(dest.entities[id].view())})
 	}
 	return &arrivalRes
+}
+
+func (s *Sim) travelArrivalPosition(level *LevelState, marker Vec2, movingPlayerID uint64) Vec2 {
+	nav := s.navigationForLevel(level)
+	step := nav.CellSize
+	if step <= 0 {
+		step = 1.0
+	}
+	unitOffsets := []Vec2{
+		{X: 1, Y: 0},
+		{X: 0, Y: 1},
+		{X: -1, Y: 0},
+		{X: 0, Y: -1},
+		{X: 1, Y: 1},
+		{X: -1, Y: 1},
+		{X: -1, Y: -1},
+		{X: 1, Y: -1},
+	}
+	for ring := 1; ring <= 8; ring++ {
+		scale := float64(ring) * step
+		for _, offset := range unitOffsets {
+			candidate := Vec2{X: marker.X + offset.X*scale, Y: marker.Y + offset.Y*scale}
+			if !s.positionInNavigationBounds(nav, candidate) {
+				continue
+			}
+			if s.travelArrivalBlocked(level, candidate, movingPlayerID) {
+				continue
+			}
+			return candidate
+		}
+	}
+	return marker
+}
+
+func (s *Sim) travelArrivalBlocked(level *LevelState, pos Vec2, movingPlayerID uint64) bool {
+	if level == nil {
+		return true
+	}
+	for _, wall := range level.walls {
+		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+			return true
+		}
+	}
+	for _, id := range sortedEntityIDs(level.entities) {
+		if id == movingPlayerID {
+			continue
+		}
+		e := level.entities[id]
+		if e == nil {
+			continue
+		}
+		switch e.kind {
+		case playerEntity:
+			if e.hp > 0 && circlesOverlap(pos, playerRadius, e.pos, playerRadius) {
+				return true
+			}
+		case monsterEntity:
+			if e.hp > 0 && circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
+				return true
+			}
+		case interactableEntity:
+			if circlesOverlap(pos, playerRadius, e.pos, interactableInteractionRadius) {
+				return true
+			}
+			if e.state == interactableClosed {
+				if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.BarrierWhenClosed != nil {
+					if circleIntersectsAABB(pos, playerRadius, e.pos, def.BarrierWhenClosed.Size) {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
 
 func (s *Sim) handleEquip(in Input, res *TickResult) {

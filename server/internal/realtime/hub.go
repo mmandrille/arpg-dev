@@ -54,9 +54,28 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session, me
 		http.Error(w, "member_already_connected", http.StatusConflict)
 		return
 	}
+	claimed := false
+	if isCoopSession(sess) && member.CharacterID != "" {
+		ok, err := h.store.ClaimSessionMemberConnection(r.Context(), sess.ID, member.AccountID, member.CharacterID)
+		if err != nil {
+			h.metrics.PersistenceErrors.Inc()
+			h.log.Error("claim session member connection", "session_id", sess.ID, "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
+			http.Error(w, "could not claim session member connection", http.StatusInternalServerError)
+			return
+		}
+		if !ok {
+			http.Error(w, "member_already_connected", http.StatusConflict)
+			return
+		}
+		claimed = true
+		member.Connected = true
+	}
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		// Upgrade writes its own HTTP error response on failure.
+		if claimed {
+			_ = h.store.SetSessionMemberDisconnected(context.Background(), sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0)
+		}
 		return
 	}
 	loop.attach(r.Context(), conn, member)

@@ -22,6 +22,7 @@ import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 import sys
 import time
@@ -39,6 +40,7 @@ WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
 ROOT = Path(__file__).resolve().parent.parent.parent
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
+BOT_RUN_ARTIFACT_DIR = ROOT / ".artifacts" / "bot-runs"
 
 
 def load_known_world_ids() -> set[str]:
@@ -68,6 +70,7 @@ class Scenario:
     id: str
     world_id: str
     seed: str
+    peer_count: int
     title: str
     description: str
     steps: list[dict[str, Any]]
@@ -138,6 +141,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
             id=sid,
             world_id=world_id,
             seed=str(raw.get("seed", "")),
+            peer_count=int(raw.get("peer_count", 2)),
             title=raw.get("title", sid),
             description=raw.get("description", ""),
             steps=list(raw.get("steps", [])),
@@ -242,6 +246,31 @@ def create_coop_session(
     return body
 
 
+def create_listed_coop_session(
+    client: httpx.Client,
+    token: str,
+    world_id: str,
+    character_id: str,
+    seed: str = "",
+) -> dict[str, Any]:
+    body: dict[str, Any] = {"mode": "coop", "listed": True, "world_id": world_id, "character_id": character_id}
+    if seed:
+        body["seed"] = seed
+    resp = client.post("/v0/sessions", headers=auth(token), json=body)
+    resp.raise_for_status()
+    body = resp.json()
+    if not body.get("listed"):
+        raise AssertionError(f"listed co-op create did not return listed=true: {body}")
+    log("listed co-op session", body["session_id"], "seed", body["seed"], "world", body.get("world_id"))
+    return body
+
+
+def list_active_sessions(client: httpx.Client, token: str) -> list[dict[str, Any]]:
+    resp = client.get("/v0/sessions/active", headers=auth(token))
+    resp.raise_for_status()
+    return list(resp.json().get("sessions", []))
+
+
 def join_coop_session(client: httpx.Client, token: str, session_id: str, join_code: str, character_id: str) -> dict[str, Any]:
     resp = client.post(
         f"/v0/sessions/{session_id}/join",
@@ -251,6 +280,20 @@ def join_coop_session(client: httpx.Client, token: str, session_id: str, join_co
     resp.raise_for_status()
     body = resp.json()
     log("joined co-op session", body["session_id"], "character", character_id)
+    return body
+
+
+def join_listed_session(client: httpx.Client, token: str, session_id: str, character_id: str) -> dict[str, Any]:
+    resp = client.post(
+        f"/v0/sessions/{session_id}/join",
+        headers=auth(token),
+        json={"character_id": character_id},
+    )
+    resp.raise_for_status()
+    body = resp.json()
+    if body.get("join_code"):
+        raise AssertionError(f"listed join leaked join_code: {body}")
+    log("joined listed co-op session", body["session_id"], "character", character_id)
     return body
 
 
@@ -411,11 +454,12 @@ async def execute_step(
         last_error: AssertionError | None = None
         while loop.time() < deadline:
             try:
-                assert_player_position(
+                assert_player_adjacent_to_position(
                     state,
                     float(pos["x"]),
                     float(pos["y"]),
                     float(step.get("tolerance", 0.001)),
+                    float(step.get("max_distance", 1.415)),
                     "runtime protocol",
                 )
                 return
@@ -509,11 +553,12 @@ async def execute_step(
         pos = state.used_teleporter_positions.get(level)
         if pos is None:
             raise AssertionError(f"assert_player_at_discovered_teleporter: no recorded teleporter for level {level}")
-        assert_player_position(
+        assert_player_adjacent_to_position(
             state,
             float(pos["x"]),
             float(pos["y"]),
             float(step.get("tolerance", 0.001)),
+            float(step.get("max_distance", 1.415)),
             "runtime protocol",
         )
         return
@@ -1959,6 +2004,20 @@ def assert_player_position(state: RuntimeState, x: float, y: float, tolerance: f
         raise AssertionError(f"{where}: player position ({got_x}, {got_y}) != ({x}, {y})")
 
 
+def assert_player_adjacent_to_position(state: RuntimeState, x: float, y: float, tolerance: float, max_distance: float, where: str) -> None:
+    player = find_player(state)
+    if player is None:
+        raise AssertionError(f"{where}: missing player entity")
+    pos = player.get("position", {})
+    got_x = float(pos.get("x", "nan"))
+    got_y = float(pos.get("y", "nan"))
+    dist = math.hypot(got_x - x, got_y - y)
+    if dist <= tolerance:
+        raise AssertionError(f"{where}: player position ({got_x}, {got_y}) is on marker ({x}, {y})")
+    if dist > max_distance:
+        raise AssertionError(f"{where}: player position ({got_x}, {got_y}) is not adjacent to marker ({x}, {y}); distance={dist}")
+
+
 def assert_monster_dead(entities: list[dict], where: str, monster_def_id: str = "training_dummy") -> None:
     monsters = [e for e in entities if e.get("monster_def_id") == monster_def_id and e.get("type") == "monster"]
     if len(monsters) != 1:
@@ -2524,7 +2583,23 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
 
 def default_manifest_path() -> Path:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    return ROOT / ".artifacts" / "bot-runs" / f"{stamp}.json"
+    return BOT_RUN_ARTIFACT_DIR / f"{stamp}.json"
+
+
+def should_clean_bot_run_artifacts(manifest_path: Path) -> bool:
+    return manifest_path.parent.resolve() == BOT_RUN_ARTIFACT_DIR.resolve()
+
+
+def clean_bot_run_artifacts(artifact_dir: Path = BOT_RUN_ARTIFACT_DIR) -> int:
+    if not artifact_dir.exists():
+        return 0
+
+    removed = 0
+    for path in artifact_dir.glob("*.json"):
+        if path.is_file():
+            path.unlink()
+            removed += 1
+    return removed
 
 
 def write_manifest(path: Path, base_url: str, results: list[dict[str, Any]]) -> None:
@@ -2566,6 +2641,7 @@ def run_verified_session(
         id=scenario.id,
         world_id=world_id,
         seed=seed,
+        peer_count=scenario.peer_count,
         title=scenario.title,
         description=scenario.description,
         steps=steps,
@@ -2784,6 +2860,100 @@ async def run_true_coop_session(
     return sess, host.state
 
 
+def assert_active_session_row(rows: list[dict[str, Any]], session_id: str, *, min_members: int = 1) -> None:
+    row = next((row for row in rows if str(row.get("session_id")) == session_id), None)
+    if row is None:
+        raise AssertionError(f"active sessions missing {session_id}: {rows}")
+    if row.get("join_code") is not None:
+        raise AssertionError(f"active session row leaked join_code: {row}")
+    if row.get("mode") != "coop" or row.get("listed") is not True:
+        raise AssertionError(f"active session row shape mismatch: {row}")
+    if int(row.get("member_count", 0)) < min_members:
+        raise AssertionError(f"active session member_count={row.get('member_count')}, want >= {min_members}: {row}")
+    if not row.get("host_display_name"):
+        raise AssertionError(f"active session missing host_display_name: {row}")
+
+
+async def run_session_browser_uncapped_coop(
+    *,
+    client: httpx.Client,
+    base_url: str,
+    tokens: list[str],
+    debug_token: str,
+    scenario: Scenario,
+    character_ids: list[str],
+) -> tuple[dict[str, Any], RuntimeState]:
+    if len(tokens) < scenario.peer_count or len(character_ids) < scenario.peer_count:
+        raise AssertionError(f"{scenario.id}: peer_count={scenario.peer_count} requires enough tokens/characters")
+    sess = create_listed_coop_session(client, tokens[0], scenario.world_id, character_ids[0], scenario.seed)
+    session_id = str(sess["session_id"])
+
+    host = await connect_coop_peer(base_url, tokens[0], sess, "host", scenario.world_id)
+    peers = [host]
+    joined_sessions = [sess]
+    try:
+        assert_active_session_row(list_active_sessions(client, tokens[1]), session_id, min_members=1)
+        for index in range(1, scenario.peer_count):
+            joined = join_listed_session(client, tokens[index], session_id, character_ids[index])
+            joined_sessions.append(joined)
+            assert_active_session_row(list_active_sessions(client, tokens[index]), session_id, min_members=index + 1)
+            peers.append(await connect_coop_peer(base_url, tokens[index], joined, f"peer-{index}", scenario.world_id))
+
+        await wait_coop_until(
+            peers,
+            f"{scenario.peer_count} peers see same-level players",
+            lambda: all(len(peer.state.party) >= scenario.peer_count for peer in peers)
+            and all(player_entity_ids(peer.state) >= {p.state.local_player_id for p in peers} for peer in peers),
+        )
+        if len({peer.state.local_player_id for peer in peers}) != scenario.peer_count:
+            raise AssertionError(f"local_player_id values are not distinct: {[peer.state.local_player_id for peer in peers]}")
+        for peer in peers:
+            assert_party_contains_roles(peer.state, f"{peer.label} party")
+
+        for index, peer in enumerate(list(peers)):
+            before = {other.label: player_position(other.state) for other in peers}
+            await move_coop_peer(peers, peer, {"x": 1 if index % 2 == 0 else 0, "y": 0 if index % 2 == 0 else 1})
+            after = {other.label: player_position(other.state) for other in peers}
+            if after[peer.label] == before[peer.label]:
+                raise AssertionError(f"{peer.label} did not move independently")
+            for other in peers:
+                if other is not peer and after[other.label] != before[other.label]:
+                    raise AssertionError(f"{other.label} local player moved after {peer.label} input")
+
+        disconnected = peers[-1]
+        disconnected_id = disconnected.state.local_player_id
+        await close_coop_peer(disconnected)
+        remaining = peers[:-1]
+        await wait_coop_until(
+            remaining,
+            "disconnected peer removed from remaining clients",
+            lambda: all(disconnected_id not in player_entity_ids(peer.state) for peer in remaining),
+        )
+        moved_after_disconnect = player_position(remaining[0].state)
+        await move_coop_peer(remaining, remaining[0], {"x": -1, "y": 0})
+        if player_position(remaining[0].state) == moved_after_disconnect:
+            raise AssertionError("remaining peer stopped moving after disconnect")
+
+        reconnect = await connect_coop_peer(base_url, tokens[-1], joined_sessions[-1], "peer-reconnect", scenario.world_id)
+        try:
+            if reconnect.state.local_player_id != disconnected_id:
+                raise AssertionError(f"reconnect local_player_id={reconnect.state.local_player_id}, want {disconnected_id}")
+        finally:
+            await close_coop_peer(reconnect)
+    finally:
+        for peer in peers:
+            try:
+                await close_coop_peer(peer)
+            except Exception:
+                pass
+
+    replay = fetch_replay(client, tokens[0], debug_token, session_id)
+    if not replay.get("match", False):
+        raise AssertionError(f"listed co-op replay mismatch for {session_id}: {replay.get('mismatch')}")
+    log("listed uncapped co-op replay matched", session_id)
+    return sess, host.state
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -2829,6 +2999,24 @@ def main() -> int:
                     guest_character_id=guest_character_id,
                 ))
                 token = host_token
+            elif scenario.id == "session_browser_uncapped_coop":
+                tokens: list[str] = []
+                character_ids: list[str] = []
+                replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
+                for index in range(scenario.peer_count):
+                    email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                    _, peer_token = dev_login(client, email, args.dev_token)
+                    tokens.append(peer_token)
+                    character_ids.append(ensure_character(client, peer_token, f"Coop Peer {index + 1}"))
+                sess, observed = asyncio.run(run_session_browser_uncapped_coop(
+                    client=client,
+                    base_url=args.base_url,
+                    tokens=tokens,
+                    debug_token=args.debug_token,
+                    scenario=scenario,
+                    character_ids=character_ids,
+                ))
+                token = tokens[0]
             else:
                 replay_email = scenario_email(args.email, scenario.id)
                 _, token = dev_login(client, replay_email, args.dev_token)
@@ -2888,6 +3076,10 @@ def main() -> int:
             results.append(entry)
 
     if args.write_manifest:
+        if should_clean_bot_run_artifacts(args.write_manifest):
+            removed = clean_bot_run_artifacts(args.write_manifest.parent)
+            if removed:
+                log("deleted old bot run artifacts", removed)
         write_manifest(args.write_manifest, args.base_url, results)
         log("wrote manifest", args.write_manifest)
 

@@ -228,6 +228,47 @@ func TestCoopWebSocketAllowsJoinedMemberAndRejectsNonMember(t *testing.T) {
 	}
 }
 
+func TestCoopWebSocketRejectsPersistedConnectedMember(t *testing.T) {
+	srv := fullStack(t)
+	host := loginWS(t, srv, "ws-connected-host")
+	guest := loginWS(t, srv, "ws-connected-guest")
+	guestChar := createCharacterWS(t, srv, guest.AccessToken, "Connected Guest")
+
+	resp := doHTTP(t, srv, http.MethodPost, "/v0/sessions", host.AccessToken, map[string]any{"mode": "coop"})
+	var created createSessionResponse
+	mustJSON(t, resp, &created)
+	resp = doHTTP(t, srv, http.MethodPost, "/v0/sessions/"+created.SessionID+"/join", guest.AccessToken, map[string]any{
+		"join_code": created.JoinCode, "character_id": guestChar.CharacterID,
+	})
+	var joined createSessionResponse
+	mustJSON(t, resp, &joined)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	db, err := store.Connect(ctx, "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable")
+	if err != nil {
+		t.Skipf("skipping persisted connected member test: no Postgres: %v", err)
+	}
+	if err := db.SetSessionMemberConnected(ctx, created.SessionID, guest.AccountID, guestChar.CharacterID, "1007", 0, 0); err != nil {
+		t.Fatalf("mark guest connected: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = db.SetSessionMemberDisconnected(context.Background(), created.SessionID, guest.AccountID, guestChar.CharacterID, 0, 0)
+		db.Close()
+	})
+
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "/v0/ws?session_id=" + created.SessionID
+	hdr := http.Header{}
+	hdr.Set("Authorization", "Bearer "+guest.AccessToken)
+	_, rejectResp, err := websocket.DefaultDialer.Dial(wsURL, hdr)
+	if err == nil {
+		t.Fatal("expected persisted connected member websocket rejection")
+	}
+	if rejectResp == nil || rejectResp.StatusCode != http.StatusConflict {
+		t.Fatalf("persisted connected status = %v, want 409", rejectResp)
+	}
+}
+
 func TestCoopWebSocketSharedSessionLoopMovementDisconnectAndReconnect(t *testing.T) {
 	srv := fullStack(t)
 	host, guest := loginWS(t, srv, "ws-coop-loop-host"), loginWS(t, srv, "ws-coop-loop-guest")
@@ -295,6 +336,108 @@ func TestCoopWebSocketSharedSessionLoopMovementDisconnectAndReconnect(t *testing
 	if findEntity(reconnectSnap, guestSnap.LocalPlayerID) == nil {
 		t.Fatalf("reconnected guest entity missing from snapshot: %+v", reconnectSnap.Entities)
 	}
+}
+
+func TestThreeClientListedCoopWebSocketVisibilityMovementAndDisconnect(t *testing.T) {
+	srv := fullStack(t)
+	host := loginWS(t, srv, "ws-three-host")
+	guestA := loginWS(t, srv, "ws-three-guest-a")
+	guestB := loginWS(t, srv, "ws-three-guest-b")
+	lateGuest := loginWS(t, srv, "ws-three-late-guest")
+	guestAChar := createCharacterWS(t, srv, guestA.AccessToken, "Guest A")
+	guestBChar := createCharacterWS(t, srv, guestB.AccessToken, "Guest B")
+	lateGuestChar := createCharacterWS(t, srv, lateGuest.AccessToken, "Late Guest")
+
+	resp := doHTTP(t, srv, http.MethodPost, "/v0/sessions", host.AccessToken, map[string]any{
+		"mode": "coop", "listed": true, "world_id": "dungeon_levels",
+	})
+	var created createSessionResponse
+	mustJSON(t, resp, &created)
+	for _, peer := range []struct {
+		token string
+		char  characterResponse
+	}{
+		{guestA.AccessToken, guestAChar},
+		{guestB.AccessToken, guestBChar},
+	} {
+		resp = doHTTP(t, srv, http.MethodPost, "/v0/sessions/"+created.SessionID+"/join", peer.token, map[string]any{
+			"character_id": peer.char.CharacterID,
+		})
+		var joined createSessionResponse
+		mustJSON(t, resp, &joined)
+		if joined.SessionID != created.SessionID || !joined.Listed || joined.JoinCode != "" {
+			t.Fatalf("listed join response = %+v", joined)
+		}
+	}
+
+	hostConn := dialWS(t, srv, host.AccessToken, created.SessionID)
+	hostSnap := readSnapshotEventually(t, hostConn)
+	guestAConn := dialWS(t, srv, guestA.AccessToken, created.SessionID)
+	guestASnap := readSnapshotEventually(t, guestAConn)
+	guestBConn := dialWS(t, srv, guestB.AccessToken, created.SessionID)
+	guestBSnap := readSnapshotEventually(t, guestBConn)
+	requestSnapshot(t, hostConn, created.SessionID, "msg-three-host-ready")
+	requestSnapshot(t, guestAConn, created.SessionID, "msg-three-guest-a-ready")
+	requestSnapshot(t, guestBConn, created.SessionID, "msg-three-guest-b-ready")
+	hostSnap = readSnapshotEventually(t, hostConn)
+	guestASnap = readSnapshotEventually(t, guestAConn)
+	guestBSnap = readSnapshotEventually(t, guestBConn)
+
+	ids := map[string]bool{hostSnap.LocalPlayerID: true, guestASnap.LocalPlayerID: true, guestBSnap.LocalPlayerID: true}
+	if len(ids) != 3 {
+		t.Fatalf("local player ids not distinct: host=%q guestA=%q guestB=%q", hostSnap.LocalPlayerID, guestASnap.LocalPlayerID, guestBSnap.LocalPlayerID)
+	}
+	for label, snap := range map[string]game.Snapshot{"host": hostSnap, "guestA": guestASnap, "guestB": guestBSnap} {
+		if len(snap.Party) != 3 {
+			t.Fatalf("%s party = %+v, want 3 members", label, snap.Party)
+		}
+		if countSnapshotPlayers(snap) != 3 {
+			t.Fatalf("%s visible players = %+v, want 3", label, snap.Entities)
+		}
+	}
+	assertActiveSessionVisible(t, srv, guestA.AccessToken, created.SessionID, 3, 3)
+
+	hostBefore := entityPosition(t, hostSnap, hostSnap.LocalPlayerID)
+	guestABefore := entityPosition(t, guestASnap, guestASnap.LocalPlayerID)
+	guestBBefore := entityPosition(t, guestBSnap, guestBSnap.LocalPlayerID)
+	sendIntent(t, guestBConn, created.SessionID, guestBSnap.ServerTick, "msg-three-guest-b-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
+	readAccepted(t, guestBConn, "msg-three-guest-b-move")
+	requestSnapshot(t, hostConn, created.SessionID, "msg-three-host-after-move")
+	requestSnapshot(t, guestAConn, created.SessionID, "msg-three-guest-a-after-move")
+	requestSnapshot(t, guestBConn, created.SessionID, "msg-three-guest-b-after-move")
+	hostAfter := readSnapshotEventually(t, hostConn)
+	guestAAfter := readSnapshotEventually(t, guestAConn)
+	guestBAfter := readSnapshotEventually(t, guestBConn)
+	if got := entityPosition(t, hostAfter, hostSnap.LocalPlayerID); got != hostBefore {
+		t.Fatalf("host moved from %+v to %+v after guest B input", hostBefore, got)
+	}
+	if got := entityPosition(t, guestAAfter, guestASnap.LocalPlayerID); got != guestABefore {
+		t.Fatalf("guest A moved from %+v to %+v after guest B input", guestABefore, got)
+	}
+	if got := entityPosition(t, guestBAfter, guestBSnap.LocalPlayerID); got == guestBBefore {
+		t.Fatalf("guest B did not move from %+v", guestBBefore)
+	}
+
+	_ = guestBConn.Close()
+	readEntityRemove(t, hostConn, guestBSnap.LocalPlayerID)
+	readEntityRemove(t, guestAConn, guestBSnap.LocalPlayerID)
+	assertActiveSessionVisible(t, srv, guestA.AccessToken, created.SessionID, 3, 2)
+	sendIntent(t, guestAConn, created.SessionID, guestAAfter.ServerTick, "msg-three-guest-a-move-after-disconnect", "move_intent", map[string]any{"direction": map[string]any{"x": 0, "y": 1}, "duration_ticks": 1})
+	readAccepted(t, guestAConn, "msg-three-guest-a-move-after-disconnect")
+
+	_ = guestAConn.Close()
+	_ = hostConn.Close()
+	time.Sleep(100 * time.Millisecond)
+	assertActiveSessionHidden(t, srv, lateGuest.AccessToken, created.SessionID)
+	resp = doHTTP(t, srv, http.MethodPost, "/v0/sessions/"+created.SessionID+"/join", lateGuest.AccessToken, map[string]any{
+		"character_id": lateGuestChar.CharacterID,
+	})
+	if resp.StatusCode != http.StatusConflict {
+		b, _ := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		t.Fatalf("late listed join after empty session status = %d, want 409, body = %s", resp.StatusCode, b)
+	}
+	_ = resp.Body.Close()
 }
 
 func TestWebSocketMalformedMessageGetsError(t *testing.T) {
@@ -1023,6 +1166,44 @@ func entityPosition(t *testing.T, snap game.Snapshot, id string) game.Vec2 {
 		t.Fatalf("snapshot missing entity %s: %+v", id, snap.Entities)
 	}
 	return entity.Position
+}
+
+func countSnapshotPlayers(snap game.Snapshot) int {
+	count := 0
+	for _, ent := range snap.Entities {
+		if ent.Type == "player" {
+			count++
+		}
+	}
+	return count
+}
+
+func assertActiveSessionVisible(t *testing.T, srv *httptest.Server, token, sessionID string, wantMembers, wantConnected int) {
+	t.Helper()
+	resp := doHTTP(t, srv, http.MethodGet, "/v0/sessions/active", token, nil)
+	var active activeSessionsResponse
+	mustJSON(t, resp, &active)
+	for _, sess := range active.Sessions {
+		if sess.SessionID == sessionID {
+			if sess.MemberCount != wantMembers || sess.ConnectedCount != wantConnected {
+				t.Fatalf("active session counts = members %d connected %d, want %d/%d: %+v", sess.MemberCount, sess.ConnectedCount, wantMembers, wantConnected, sess)
+			}
+			return
+		}
+	}
+	t.Fatalf("active session %s not found in %+v", sessionID, active.Sessions)
+}
+
+func assertActiveSessionHidden(t *testing.T, srv *httptest.Server, token, sessionID string) {
+	t.Helper()
+	resp := doHTTP(t, srv, http.MethodGet, "/v0/sessions/active", token, nil)
+	var active activeSessionsResponse
+	mustJSON(t, resp, &active)
+	for _, sess := range active.Sessions {
+		if sess.SessionID == sessionID {
+			t.Fatalf("session %s should be hidden from active list: %+v", sessionID, active.Sessions)
+		}
+	}
 }
 
 func doHTTP(t *testing.T, srv *httptest.Server, method, path, bearer string, body any) *http.Response {

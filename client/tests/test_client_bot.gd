@@ -31,8 +31,12 @@ func _initialize() -> void:
 	_test_missing_stat_button_fields_rejected()
 	_test_missing_progression_expectation_rejected()
 	_test_menu_step_types_load()
+	_test_multiplayer_menu_step_types_load()
+	_test_multiplayer_menu_assertions()
 	_test_character_stats_step_types_load()
+	_test_character_info_step_types_load()
 	_test_character_progression_assertions()
+	_test_character_info_assertions()
 	_test_timeout_failure_message_format()
 	_test_pass_sentinel_format()
 	_test_fail_sentinel_format()
@@ -192,6 +196,49 @@ func _test_menu_step_types_load() -> void:
 	_assert_eq("menu step scenario valid", err, "")
 
 
+func _test_multiplayer_menu_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "wait_multiplayer_panel", "timeout_s": 1.0},
+		{"type": "assert_multiplayer_panel_visible", "visible": true},
+		{"type": "assert_multiplayer_session_rows", "min_count": 1, "listed": true},
+		{"type": "click_menu_button", "button": "refresh_sessions"},
+		{"type": "click_menu_button", "button": "host_listed_session"},
+		{"type": "click_menu_button", "button": "join_first_listed_session"},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("multiplayer menu step scenario valid", err, "")
+	_assert_ne("multiplayer row assertion without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_multiplayer_session_rows"}, 0), "")
+
+
+func _test_multiplayer_menu_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "multiplayer_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "wait_multiplayer_panel", "timeout_s": 1.0},
+			{"type": "assert_multiplayer_panel_visible", "visible": true},
+			{"type": "assert_multiplayer_session_rows", "min_count": 1, "selected": true, "listed": true},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"multiplayer_panel_visible": true,
+		"multiplayer_panel": {
+			"selected_session_id": "sess_1",
+			"sessions": [
+				{"session_id": "sess_1", "listed": true, "member_count": 3},
+			],
+		},
+	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	_assert_true("multiplayer menu assertions pass", runner.is_done() and runner.passed())
+
+
 func _test_character_stats_step_types_load() -> void:
 	var data := _make_valid_scenario()
 	data["client_steps"] = [
@@ -205,6 +252,18 @@ func _test_character_stats_step_types_load() -> void:
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("character stats step scenario valid", err, "")
+
+
+func _test_character_info_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "press_key", "keycode": "KEY_P"},
+		{"type": "assert_character_info_panel_visible", "visible": true},
+		{"type": "assert_character_info", "name": "Hero", "level": 2, "area": "Town"},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("character info step scenario valid", err, "")
+	_assert_ne("character info assertion without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_character_info"}, 0), "")
 
 
 func _test_character_progression_assertions() -> void:
@@ -236,6 +295,31 @@ func _test_character_progression_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("character progression assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_character_info_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "character_info_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "assert_character_info_panel_visible", "visible": true},
+			{"type": "assert_character_info", "name": "Hero", "level": 2, "area": "Dungeon lvl5 - Depth 5"},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"character_info_panel_visible": true,
+		"character_info_panel": {
+			"name": "Hero",
+			"level": 2,
+			"area": "Dungeon lvl5 - Depth 5",
+		},
+	}
+	runner.tick(0.016, state)
+	runner.tick(0.016, state)
+	_assert_true("character info assertions pass", runner.is_done() and runner.passed())
 
 
 func _test_timeout_failure_message_format() -> void:

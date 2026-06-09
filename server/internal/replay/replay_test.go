@@ -217,7 +217,7 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	if down == nil || down.State != "locked" {
 		t.Fatalf("boss floor down = %+v, want locked", down)
 	}
-	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
+	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, adjacentMarkerPosition(down.Position))
 	tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
 		ActorPlayerID: actorID,
 		Type:          "descend_intent",
@@ -265,7 +265,7 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	if down == nil || down.State != "ready" {
 		t.Fatalf("unlocked down = %+v, want ready", down)
 	}
-	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
+	tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, adjacentMarkerPosition(down.Position))
 	_ = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
 		ActorPlayerID: actorID,
 		Type:          "descend_intent",
@@ -449,6 +449,62 @@ func TestReconstructCoopSessionRestoresMembersAndActorInputs(t *testing.T) {
 	}
 	if hostSnap.Hotbar[1].ItemInstanceID != nil {
 		t.Fatalf("host hotbar[1] = %+v, want untouched by guest input", hostSnap.Hotbar[1])
+	}
+}
+
+func TestReconstructThreeMemberCoopSessionRestoresActorScopes(t *testing.T) {
+	rules := loadRules(t)
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, Seed: testSeed, WorldID: game.DefaultWorldID, Mode: store.SessionModeCoop, Listed: true},
+		members: []store.SessionMember{
+			{SessionID: testSessionID, AccountID: "acct_host", CharacterID: "char_host", PlayerEntityID: "1001", Role: store.SessionMemberHost, Status: store.SessionMemberActive, Connected: true},
+			{SessionID: testSessionID, AccountID: "acct_guest_a", CharacterID: "char_guest_a", PlayerEntityID: "1003", Role: store.SessionMemberGuest, Status: store.SessionMemberActive, Connected: true, JoinedTick: 1},
+			{SessionID: testSessionID, AccountID: "acct_guest_b", CharacterID: "char_guest_b", PlayerEntityID: "1004", Role: store.SessionMemberGuest, Status: store.SessionMemberActive, Connected: true, JoinedTick: 2},
+		},
+		starts: map[string]store.SessionStartSnapshot{
+			startKey("acct_host", "char_host"):       {SessionID: testSessionID, AccountID: "acct_host", CharacterID: "char_host"},
+			startKey("acct_guest_a", "char_guest_a"): {SessionID: testSessionID, AccountID: "acct_guest_a", CharacterID: "char_guest_a"},
+			startKey("acct_guest_b", "char_guest_b"): {
+				SessionID:   testSessionID,
+				AccountID:   "acct_guest_b",
+				CharacterID: "char_guest_b",
+				Items: []store.CharacterItemInstance{{
+					ID:          "9100",
+					AccountID:   "acct_guest_b",
+					CharacterID: "char_guest_b",
+					ItemDefID:   "red_potion",
+					Location:    store.ItemLocationInventory,
+					RolledStats: json.RawMessage(`{}`),
+				}},
+			},
+		},
+		inputs: []store.SessionInput{
+			storedInputWithActor(t, "inp-guest-b-hotbar", "msg-guest-b-hotbar", "1004", 2, 0, "assign_hotbar_intent", map[string]any{"slot_index": 2, "item_instance_id": "9100"}),
+			storedInputWithActor(t, "inp-guest-b-move", "msg-guest-b-move", "1004", 3, 1, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
+		},
+	}
+
+	recon, err := Reconstruct(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	if recon.Metadata.NextSequence != 2 || !recon.Metadata.SeenMessageIDs["msg-guest-b-hotbar"] || !recon.Metadata.SeenMessageIDs["msg-guest-b-move"] {
+		t.Fatalf("metadata = %+v, want both guest B messages", recon.Metadata)
+	}
+	hostSnap := recon.Sim.SnapshotForPlayer(1001)
+	guestASnap := recon.Sim.SnapshotForPlayer(1003)
+	guestBSnap := recon.Sim.SnapshotForPlayer(1004)
+	if hostSnap.LocalPlayerID != "1001" || guestASnap.LocalPlayerID != "1003" || guestBSnap.LocalPlayerID != "1004" {
+		t.Fatalf("local players host=%q guestA=%q guestB=%q", hostSnap.LocalPlayerID, guestASnap.LocalPlayerID, guestBSnap.LocalPlayerID)
+	}
+	if len(hostSnap.Party) != 3 || len(guestASnap.Party) != 3 || len(guestBSnap.Party) != 3 {
+		t.Fatalf("party lengths host=%d guestA=%d guestB=%d", len(hostSnap.Party), len(guestASnap.Party), len(guestBSnap.Party))
+	}
+	if guestBSnap.Hotbar[2].ItemInstanceID == nil || *guestBSnap.Hotbar[2].ItemInstanceID != "9100" {
+		t.Fatalf("guest B hotbar[2] = %+v, want 9100", guestBSnap.Hotbar[2])
+	}
+	if hostSnap.Hotbar[2].ItemInstanceID != nil || guestASnap.Hotbar[2].ItemInstanceID != nil {
+		t.Fatalf("guest B hotbar assignment leaked host=%+v guestA=%+v", hostSnap.Hotbar[2], guestASnap.Hotbar[2])
 	}
 }
 
@@ -807,6 +863,10 @@ func appendMoveToAndAdvanceReplay(
 	return tick
 }
 
+func adjacentMarkerPosition(pos game.Vec2) game.Vec2 {
+	return game.Vec2{X: pos.X - 1, Y: pos.Y}
+}
+
 func appendInputAndAdvanceReplay(
 	t *testing.T,
 	sim *game.Sim,
@@ -1019,9 +1079,15 @@ func (f *fakeRepo) CreateSession(context.Context, store.Session) error    { retu
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil
 }
+func (f *fakeRepo) ListActiveListedSessions(context.Context) ([]store.SessionSummary, error) {
+	return nil, nil
+}
 func (f *fakeRepo) TouchSession(context.Context, string) error { return nil }
 func (f *fakeRepo) SetSessionStatus(context.Context, string, string) error {
 	return nil
+}
+func (f *fakeRepo) EndListedSessionIfNoConnected(context.Context, string) (bool, error) {
+	return false, nil
 }
 func (f *fakeRepo) CreateSessionHostMember(context.Context, store.SessionMember) error {
 	return nil
@@ -1037,6 +1103,9 @@ func (f *fakeRepo) GetSessionMemberByAccount(context.Context, string, string) (s
 }
 func (f *fakeRepo) GetSessionMember(context.Context, string, string, string) (store.SessionMember, error) {
 	return store.SessionMember{}, nil
+}
+func (f *fakeRepo) ClaimSessionMemberConnection(context.Context, string, string, string) (bool, error) {
+	return true, nil
 }
 func (f *fakeRepo) SetSessionMemberConnected(context.Context, string, string, string, string, int, int64) error {
 	return nil

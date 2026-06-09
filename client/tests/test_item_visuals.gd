@@ -9,6 +9,8 @@
 # Exits 0 on success, 1 on failure. Requires no server.
 extends SceneTree
 
+const ResolverScript := preload("res://scripts/equipment_visuals.gd")
+
 
 func _initialize() -> void:
 	var shared := ProjectSettings.globalize_path("res://").path_join("../shared")
@@ -18,6 +20,7 @@ func _initialize() -> void:
 	var golden := _read(shared.path_join("golden/item_visual_resolution.json"))
 	var visuals: Dictionary = _read(shared.path_join("assets/item_visuals.v0.json"))["item_visuals"]
 	var item_rules: Dictionary = _read(shared.path_join("rules/items.v0.json"))["items"]
+	var item_templates: Dictionary = _read(shared.path_join("rules/item_templates.v0.json"))["templates"]
 	var presentations: Dictionary = _read(shared.path_join("assets/item_presentations.v0.json"))["items"]
 
 	var def_id := str(golden["item_def_id"])
@@ -57,6 +60,14 @@ func _initialize() -> void:
 		if not p.has("icon") or not p.has("ground"):
 			_fail("item_presentations %s must define icon and ground metadata" % item_def_id)
 			return
+	for item_def_id in item_templates.keys():
+		var template: Dictionary = item_templates[item_def_id]
+		if bool(template.get("equippable", false)) and not visuals.has(str(item_def_id)):
+			_fail("item_visuals is missing equippable template %s" % item_def_id)
+			return
+
+	if not _verify_equipped_fallback_resolver():
+		return
 
 	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
 	quit(0)
@@ -80,6 +91,94 @@ func _read(path: String) -> Dictionary:
 		_fail("invalid JSON in %s" % path)
 		return {}
 	return parsed
+
+
+func _verify_equipped_fallback_resolver() -> bool:
+	var mount := _make_mount_root()
+	var resolver = ResolverScript.new(mount)
+	var inventory := [
+		{"item_instance_id": "2001", "item_def_id": "cave_helm", "slot": "head", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2002", "item_def_id": "cave_amulet", "slot": "amulet", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2003", "item_def_id": "cave_mail", "slot": "chest", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "2004", "item_def_id": "cave_gloves", "slot": "gloves", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2005", "item_def_id": "cave_belt", "slot": "belt", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2006", "item_def_id": "cave_boots", "slot": "boots", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "2007", "item_def_id": "cave_ring", "slot": "ring_left", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2008", "item_def_id": "cave_ring", "slot": "ring_right", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2009", "item_def_id": "cave_bow", "slot": "main_hand", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2010", "item_def_id": "cave_shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
+	]
+	resolver.apply_snapshot({
+		"inventory": inventory,
+		"equipped": {
+			"head": "2001",
+			"amulet": "2002",
+			"chest": "2003",
+			"gloves": "2004",
+			"belt": "2005",
+			"boots": "2006",
+			"ring_left": "2007",
+			"ring_right": "2008",
+			"main_hand": "2009",
+			"off_hand": "2010",
+		},
+	})
+	var state: Dictionary = resolver.get_debug_state()
+	if not state["warnings"].is_empty():
+		_fail("resolver emitted warnings for complete equipment fallback map: %s" % state["warnings"])
+		return false
+	var equipped_visuals: Dictionary = state["equipped_visuals"]
+	for slot in ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]:
+		if not equipped_visuals.has(slot):
+			_fail("resolver did not mount slot %s: %s" % [slot, equipped_visuals])
+			return false
+		var mounted: Dictionary = equipped_visuals[slot]
+		if not bool(mounted.get("visible", false)):
+			_fail("resolver mounted invisible slot %s: %s" % [slot, mounted])
+			return false
+	if str(equipped_visuals["ring_right"].get("mount_socket", "")) != "ring_right_socket":
+		_fail("ring_right mounted to wrong socket: %s" % equipped_visuals["ring_right"])
+		return false
+	if str(equipped_visuals["head"].get("tint", "")) != "ffd75e":
+		_fail("rare head tint mismatch: %s" % equipped_visuals["head"])
+		return false
+
+	resolver.apply_snapshot({
+		"inventory": [{"item_instance_id": "3001", "item_def_id": "future_helmet", "slot": "head", "equipped": true, "rarity": "magic"}],
+		"equipped": {"head": "3001"},
+	})
+	state = resolver.get_debug_state()
+	equipped_visuals = state["equipped_visuals"]
+	if not equipped_visuals.has("head") or str(equipped_visuals["head"].get("asset_id", "")) != "fallback_equipment_head_v0":
+		_fail("unmapped future item did not use head fallback: %s" % equipped_visuals)
+		return false
+	if str(equipped_visuals["head"].get("tint", "")) != "5aa7ff":
+		_fail("unmapped future item magic tint mismatch: %s" % equipped_visuals["head"])
+		return false
+	mount.queue_free()
+	return true
+
+
+func _make_mount_root() -> Node3D:
+	var mount := Node3D.new()
+	mount.name = "CharacterVisual"
+	for socket_name in [
+		"right_hand_socket",
+		"off_hand_socket",
+		"head_socket",
+		"amulet_socket",
+		"chest_socket",
+		"gloves_socket",
+		"belt_socket",
+		"boots_socket",
+		"ring_left_socket",
+		"ring_right_socket",
+	]:
+		var socket := Node3D.new()
+		socket.name = str(socket_name)
+		mount.add_child(socket)
+	get_root().add_child(mount)
+	return mount
 
 
 func _fail(msg: String) -> void:

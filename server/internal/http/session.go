@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
@@ -16,6 +17,7 @@ import (
 
 func (s *Server) registerSessionRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/sessions", s.requireAuth(http.HandlerFunc(s.handleCreateSession)))
+	mux.Handle("GET /v0/sessions/active", s.requireAuth(http.HandlerFunc(s.handleListActiveSessions)))
 	mux.Handle("POST /v0/sessions/{session_id}/join", s.requireAuth(http.HandlerFunc(s.handleJoinSession)))
 	mux.Handle("POST /v0/sessions/{session_id}/end", s.requireAuth(http.HandlerFunc(s.handleEndSession)))
 }
@@ -26,6 +28,7 @@ type createSessionRequest struct {
 	WorldID         string  `json:"world_id"`
 	CharacterID     string  `json:"character_id"`
 	Seed            string  `json:"seed"`
+	Listed          bool    `json:"listed"`
 }
 
 type createSessionResponse struct {
@@ -34,8 +37,26 @@ type createSessionResponse struct {
 	Seed        string `json:"seed"`
 	WorldID     string `json:"world_id"`
 	Mode        string `json:"mode"`
+	Listed      bool   `json:"listed"`
 	JoinCode    string `json:"join_code,omitempty"`
 	WSURL       string `json:"ws_url"`
+}
+
+type activeSessionSummaryResponse struct {
+	SessionID       string `json:"session_id"`
+	WorldID         string `json:"world_id"`
+	Mode            string `json:"mode"`
+	Listed          bool   `json:"listed"`
+	HostCharacterID string `json:"host_character_id"`
+	HostDisplayName string `json:"host_display_name"`
+	MemberCount     int    `json:"member_count"`
+	ConnectedCount  int    `json:"connected_count"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+}
+
+type activeSessionsResponse struct {
+	Sessions []activeSessionSummaryResponse `json:"sessions"`
 }
 
 type joinSessionRequest struct {
@@ -149,6 +170,7 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		Seed:         seed,
 		WorldID:      worldID,
 		Mode:         mode,
+		Listed:       mode == store.SessionModeCoop && req.Listed,
 		JoinCodeHash: joinHash,
 		Status:       store.SessionActive,
 	}
@@ -174,6 +196,31 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusCreated, sessionResponse(sess, char.ID, joinCode))
+}
+
+func (s *Server) handleListActiveSessions(w http.ResponseWriter, r *http.Request) {
+	summaries, err := s.store.ListActiveListedSessions(r.Context())
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not list sessions")
+		return
+	}
+	res := activeSessionsResponse{Sessions: make([]activeSessionSummaryResponse, 0, len(summaries))}
+	for _, summary := range summaries {
+		res.Sessions = append(res.Sessions, activeSessionSummaryResponse{
+			SessionID:       summary.SessionID,
+			WorldID:         summary.WorldID,
+			Mode:            summary.Mode,
+			Listed:          summary.Listed,
+			HostCharacterID: summary.HostCharacterID,
+			HostDisplayName: summary.HostDisplayName,
+			MemberCount:     summary.MemberCount,
+			ConnectedCount:  summary.ConnectedCount,
+			CreatedAt:       summary.CreatedAt.UTC().Format(time.RFC3339Nano),
+			UpdatedAt:       summary.UpdatedAt.UTC().Format(time.RFC3339Nano),
+		})
+	}
+	writeJSON(w, http.StatusOK, res)
 }
 
 func (s *Server) characterForSessionCreate(ctx context.Context, accountID, requestedCharacterID string) (store.Character, error) {
@@ -206,7 +253,7 @@ func (s *Server) handleJoinSession(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	if req.JoinCode == "" || req.CharacterID == "" {
+	if req.CharacterID == "" {
 		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
 		return
 	}
@@ -222,13 +269,19 @@ func (s *Server) handleJoinSession(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load session")
 		return
 	}
-	if sess.Mode != store.SessionModeCoop || sess.JoinCodeHash == "" || !joinCodeMatches(sess.JoinCodeHash, req.JoinCode) {
+	if sess.Mode != store.SessionModeCoop {
 		writeError(w, http.StatusNotFound, "session_not_found", "session not found")
 		return
 	}
 	if sess.Status == store.SessionEnded {
 		writeError(w, http.StatusConflict, "session_ended", "session has ended")
 		return
+	}
+	if !sess.Listed {
+		if req.JoinCode == "" || sess.JoinCodeHash == "" || !joinCodeMatches(sess.JoinCodeHash, req.JoinCode) {
+			writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+			return
+		}
 	}
 	char, err := s.store.GetCharacter(ctx, req.CharacterID)
 	if errors.Is(err, store.ErrNotFound) || (err == nil && char.AccountID != accountID) {
@@ -249,8 +302,6 @@ func (s *Server) handleJoinSession(w http.ResponseWriter, r *http.Request) {
 		CurrentLevel: 0,
 	}); err != nil {
 		switch {
-		case errors.Is(err, store.ErrPartyFull):
-			writeError(w, http.StatusConflict, "party_full", "party is full")
 		case errors.Is(err, store.ErrConflict):
 			writeError(w, http.StatusConflict, "duplicate_member", "account or character already joined")
 		case errors.Is(err, store.ErrNotFound):
@@ -376,6 +427,7 @@ func sessionResponse(sess store.Session, characterID, joinCode string) createSes
 		Seed:        sess.Seed,
 		WorldID:     sess.WorldID,
 		Mode:        mode,
+		Listed:      sess.Listed,
 		JoinCode:    joinCode,
 		WSURL:       "/v0/ws?session_id=" + sess.ID,
 	}

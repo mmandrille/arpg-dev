@@ -21,6 +21,16 @@
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
       }
     },
+    "cave_greatsword": {
+      "asset_id": "weapon_rusty_sword_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.25, "y": 1.25, "z": 1.25 }
+      }
+    },
     "training_bow": {
       "asset_id": "weapon_training_bow_v0",
       "slot": "main_hand",
@@ -29,6 +39,106 @@
         "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
+      }
+    },
+    "cave_bow": {
+      "asset_id": "weapon_training_bow_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
+      }
+    },
+    "cave_shield": {
+      "asset_id": "fallback_equipment_off_hand_v0",
+      "slot": "off_hand",
+      "mount_socket": "off_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
+        "scale": { "x": 0.65, "y": 0.65, "z": 0.65 }
+      }
+    },
+    "cave_helm": {
+      "asset_id": "fallback_equipment_head_v0",
+      "slot": "head",
+      "mount_socket": "head_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.28, "y": 0.28, "z": 0.28 }
+      }
+    },
+    "cave_mail": {
+      "asset_id": "fallback_equipment_chest_v0",
+      "slot": "chest",
+      "mount_socket": "chest_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.55, "y": 0.55, "z": 0.55 }
+      }
+    },
+    "cave_gloves": {
+      "asset_id": "fallback_equipment_gloves_v0",
+      "slot": "gloves",
+      "mount_socket": "gloves_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.24, "y": 0.24, "z": 0.24 }
+      }
+    },
+    "cave_belt": {
+      "asset_id": "fallback_equipment_belt_v0",
+      "slot": "belt",
+      "mount_socket": "belt_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
+        "scale": { "x": 0.26, "y": 0.26, "z": 0.26 }
+      }
+    },
+    "cave_pack_belt": {
+      "asset_id": "fallback_equipment_belt_v0",
+      "slot": "belt",
+      "mount_socket": "belt_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
+        "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
+      }
+    },
+    "cave_boots": {
+      "asset_id": "fallback_equipment_boots_v0",
+      "slot": "boots",
+      "mount_socket": "boots_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
+        "scale": { "x": 0.24, "y": 0.24, "z": 0.24 }
+      }
+    },
+    "cave_ring": {
+      "asset_id": "fallback_equipment_ring_left_v0",
+      "slot": "ring_left",
+      "mount_socket": "ring_left_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
+        "scale": { "x": 0.12, "y": 0.12, "z": 0.12 }
+      }
+    },
+    "cave_amulet": {
+      "asset_id": "fallback_equipment_amulet_v0",
+      "slot": "amulet",
+      "mount_socket": "amulet_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
+        "scale": { "x": 0.16, "y": 0.16, "z": 0.16 }
       }
     }
   }

@@ -3,14 +3,19 @@
 extends SceneTree
 
 const MainScript := preload("res://scripts/main.gd")
+const NetClientScript := preload("res://scripts/net_client.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
 
 
 func _initialize() -> void:
+	_test_net_client_base_url_and_ws_url()
 	_test_local_and_remote_players_apply_from_snapshot()
 	_test_remote_player_delta_and_remove()
+	_test_multiple_remote_players_update_and_remove_independently()
+	_test_path_reject_clears_held_click_state()
+	_test_capacity_reject_shows_bag_full_unequip_message()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -30,6 +35,17 @@ func _make_main():
 	return main
 
 
+func _test_net_client_base_url_and_ws_url() -> void:
+	var http_client = NetClientScript.new("http://localhost:18080")
+	http_client.ws_url = "/v0/ws?session_id=sess_1"
+	http_client.token = "tok"
+	_assert_eq("http websocket URL", http_client.websocket_url(), "ws://localhost:18080/v0/ws?session_id=sess_1&access_token=tok")
+	var https_client = NetClientScript.new("https://example.test/some/path")
+	https_client.ws_url = "/v0/ws?session_id=sess_2"
+	https_client.token = "tok2"
+	_assert_eq("https websocket URL", https_client.websocket_url(), "wss://example.test:443/v0/ws?session_id=sess_2&access_token=tok2")
+
+
 func _test_local_and_remote_players_apply_from_snapshot() -> void:
 	var main = _make_main()
 	main._apply_snapshot({
@@ -39,10 +55,12 @@ func _test_local_and_remote_players_apply_from_snapshot() -> void:
 		"party": [
 			{"player_id": "1001", "role": "host", "connected": true},
 			{"player_id": "1002", "role": "guest", "connected": true},
+			{"player_id": "1003", "role": "guest", "connected": true},
 		],
 		"entities": [
 			{"id": "1001", "type": "player", "position": {"x": 2.0, "y": 3.0}, "hp": 9, "max_hp": 10, "character_id": "char_host"},
 			{"id": "1002", "type": "player", "position": {"x": 4.0, "y": 5.0}, "hp": 8, "max_hp": 10, "character_id": "char_guest"},
+			{"id": "1003", "type": "player", "position": {"x": 6.0, "y": 7.0}, "hp": 10, "max_hp": 10, "character_id": "char_guest_2"},
 		],
 		"inventory": [],
 		"equipped": {},
@@ -58,7 +76,68 @@ func _test_local_and_remote_players_apply_from_snapshot() -> void:
 	_assert_true("remote player has character model", (main.entities["1002"]["node"] as Node3D).find_child("ModelRoot", true, false) != null)
 	_assert_true("remote player has animation controller", main.entities["1002"].get("controller", null) != null)
 	_assert_true("remote player has reaction controller", main.entities["1002"].get("reaction", null) != null)
-	_assert_eq("party count", main.party.size(), 2)
+	_assert_true("second remote player entity stored", main.entities.has("1003"))
+	_assert_eq("second remote character metadata", str(main.entities["1003"].get("character_id", "")), "char_guest_2")
+	_assert_eq("party count", main.party.size(), 3)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_multiple_remote_players_update_and_remove_independently() -> void:
+	var main = _make_main()
+	main._apply_snapshot({
+		"server_tick": 1,
+		"current_level": 0,
+		"local_player_id": "1001",
+		"party": [],
+		"entities": [
+			{"id": "1001", "type": "player", "position": {"x": 1.0, "y": 1.0}, "hp": 10, "max_hp": 10},
+			{"id": "1002", "type": "player", "position": {"x": 2.0, "y": 2.0}, "hp": 10, "max_hp": 10},
+			{"id": "1003", "type": "player", "position": {"x": 3.0, "y": 3.0}, "hp": 10, "max_hp": 10},
+		],
+		"inventory": [],
+		"equipped": {},
+		"hotbar": [],
+		"character_progression": {},
+	})
+	main._apply_delta({
+		"events": [],
+		"changes": [
+			{"op": "entity_update", "entity": {"id": "1003", "type": "player", "position": {"x": 8.0, "y": 9.0}, "hp": 7, "max_hp": 10}},
+		],
+	})
+	_assert_vec3("second remote player authoritative position", (main.entities["1003"]["node"] as Node3D).position, Vector3(8.0, 0.0, 9.0))
+	_assert_vec3("first remote player untouched", (main.entities["1002"]["node"] as Node3D).position, Vector3(2.0, 0.0, 2.0))
+	main._apply_delta({"events": [], "changes": [{"op": "entity_remove", "entity_id": "1003"}]})
+	_assert_true("second remote removed", not main.entities.has("1003"))
+	_assert_true("first remote remains", main.entities.has("1002"))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_path_reject_clears_held_click_state() -> void:
+	var main = _make_main()
+	main._sustained_click.begin_from_pick({"kind": "monster", "target_id": "2001"})
+	main.pending_interactable_action = {"target_id": "3001", "interactable_def_id": "stairs_down"}
+	main.pending_action_targets["msg-no-path"] = {"target_id": "2001"}
+	main._handle_intent_rejected({"rejected_message_id": "msg-no-path", "reason": "no_path"})
+	_assert_true("no_path clears sustained click", not main._sustained_click.active)
+	_assert_true("no_path clears pending interactable action", main.pending_interactable_action.is_empty())
+	_assert_true("no_path removes pending action target", not main.pending_action_targets.has("msg-no-path"))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_capacity_reject_shows_bag_full_unequip_message() -> void:
+	var main = _make_main()
+	main._handle_intent_rejected({"rejected_message_id": "msg-capacity", "reason": "capacity_would_overflow"})
+	_assert_eq("capacity overflow hint text", main._last_inventory_feedback_text, MainScript.BAG_FULL_CANT_UNEQUIP_TEXT)
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

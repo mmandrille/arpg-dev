@@ -17,23 +17,35 @@ var account_id: String = ""
 var session_id: String = ""
 var seed: String = ""
 var world_id: String = ""
+var session_mode: String = ""
+var session_listed: bool = false
 var ws_url: String = ""
 
 var _ws := WebSocketPeer.new()
 var _msg_counter: int = 0
+var _path_prefix: String = ""
 
 
 func _init(p_base_url: String) -> void:
-	base_url = p_base_url
-	use_tls = p_base_url.begins_with("https")
-	var rest := p_base_url.replace("https://", "").replace("http://", "")
+	base_url = p_base_url.strip_edges().trim_suffix("/")
+	use_tls = base_url.begins_with("https://")
+	var rest := base_url.replace("https://", "").replace("http://", "")
 	var hostport := rest.split("/")[0]
+	_path_prefix = ""
+	if rest.find("/") >= 0:
+		_path_prefix = "/" + rest.substr(rest.find("/") + 1).trim_suffix("/")
 	var parts := hostport.split(":")
 	host = parts[0]
 	if parts.size() > 1:
 		port = int(parts[1])
 	else:
 		port = 443 if use_tls else 80
+
+
+func _request_path(path: String) -> String:
+	# BASE_URL paths are accepted for launcher ergonomics, but the game API is
+	# rooted at /v0 on the backend, so strip any path component.
+	return path
 
 
 # --- HTTP (blocking, dev-only) ---------------------------------------------
@@ -52,7 +64,7 @@ func _http(method: int, path: String, headers: Array, body: String) -> Dictionar
 
 	var all_headers := ["Content-Type: application/json"]
 	all_headers.append_array(headers)
-	err = client.request(method, path, all_headers, body)
+	err = client.request(method, _request_path(path), all_headers, body)
 	if err != OK:
 		return {"_error": "request failed: %d" % err}
 	while client.get_status() == HTTPClient.STATUS_REQUESTING:
@@ -129,9 +141,56 @@ func create_session(resume_session_id: String = "", requested_world_id: String =
 		session_id = r["body"]["session_id"]
 		seed = r["body"]["seed"]
 		world_id = str(r["body"].get("world_id", "vertical_slice"))
+		session_mode = str(r["body"].get("mode", "solo"))
+		session_listed = bool(r["body"].get("listed", false))
 		ws_url = r["body"]["ws_url"]
 		return true
 	push_error("create_session failed: %s" % r)
+	return false
+
+
+func create_listed_coop_session(character_id: String) -> bool:
+	var body := {
+		"mode": "coop",
+		"listed": true,
+		"world_id": "dungeon_levels",
+		"character_id": character_id,
+	}
+	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
+		["Authorization: Bearer " + token], JSON.stringify(body))
+	if r.get("_code", 0) == 201 and r.has("body"):
+		session_id = r["body"]["session_id"]
+		seed = r["body"]["seed"]
+		world_id = str(r["body"].get("world_id", "dungeon_levels"))
+		session_mode = str(r["body"].get("mode", "coop"))
+		session_listed = bool(r["body"].get("listed", false))
+		ws_url = r["body"]["ws_url"]
+		return bool(r["body"].get("listed", false))
+	push_error("create_listed_coop_session failed: %s" % r)
+	return false
+
+
+func list_active_sessions() -> Array:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/sessions/active",
+		["Authorization: Bearer " + token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"].get("sessions", [])
+	push_error("list_active_sessions failed: %s" % r)
+	return []
+
+
+func join_listed_session(listed_session_id: String, character_id: String) -> bool:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions/%s/join" % listed_session_id,
+		["Authorization: Bearer " + token], JSON.stringify({"character_id": character_id}))
+	if r.get("_code", 0) == 200 and r.has("body"):
+		session_id = r["body"]["session_id"]
+		seed = r["body"]["seed"]
+		world_id = str(r["body"].get("world_id", "dungeon_levels"))
+		session_mode = str(r["body"].get("mode", "coop"))
+		session_listed = bool(r["body"].get("listed", false))
+		ws_url = r["body"]["ws_url"]
+		return bool(r["body"].get("listed", false))
+	push_error("join_listed_session failed: %s" % r)
 	return false
 
 
@@ -169,11 +228,15 @@ func get_replay_timeline(debug_token: String, replay_session_id: String, through
 # --- WebSocket --------------------------------------------------------------
 
 func connect_ws() -> void:
-	var scheme := "wss" if use_tls else "ws"
-	# Token via query param: WebSocketPeer cannot set the Authorization header.
-	var url := "%s://%s:%d%s&access_token=%s" % [scheme, host, port, ws_url, token]
+	var url := websocket_url()
 	_ws = WebSocketPeer.new()
 	_ws.connect_to_url(url)
+
+
+func websocket_url() -> String:
+	var scheme := "wss" if use_tls else "ws"
+	# Token via query param: WebSocketPeer cannot set the Authorization header.
+	return "%s://%s:%d%s&access_token=%s" % [scheme, host, port, ws_url, token]
 
 
 func ready_state() -> int:

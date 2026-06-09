@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -14,10 +15,6 @@ var ErrNotFound = errors.New("store: not found")
 // ErrConflict is returned when a unique session/member invariant would be
 // violated.
 var ErrConflict = errors.New("store: conflict")
-
-// ErrPartyFull is returned when a co-op session already has its maximum active
-// members.
-var ErrPartyFull = errors.New("store: party full")
 
 // --- accounts ---------------------------------------------------------------
 
@@ -202,9 +199,9 @@ func (s *Store) CreateSession(ctx context.Context, sess Session) error {
 		mode = SessionModeSolo
 	}
 	_, err := s.pool.Exec(ctx,
-		`INSERT INTO sessions (id, account_id, character_id, seed, world_id, mode, join_code_hash, status)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-		sess.ID, sess.AccountID, sess.CharacterID, sess.Seed, sess.WorldID, mode, nullableStr(sess.JoinCodeHash), sess.Status,
+		`INSERT INTO sessions (id, account_id, character_id, seed, world_id, mode, listed, join_code_hash, status)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		sess.ID, sess.AccountID, sess.CharacterID, sess.Seed, sess.WorldID, mode, sess.Listed, nullableStr(sess.JoinCodeHash), sess.Status,
 	)
 	if err != nil {
 		return fmt.Errorf("store: create session: %w", err)
@@ -215,9 +212,9 @@ func (s *Store) CreateSession(ctx context.Context, sess Session) error {
 func (s *Store) GetSession(ctx context.Context, id string) (Session, error) {
 	var sess Session
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, account_id, character_id, seed, world_id, mode, COALESCE(join_code_hash, ''), status, created_at, updated_at
+		`SELECT id, account_id, character_id, seed, world_id, mode, listed, COALESCE(join_code_hash, ''), status, created_at, updated_at
 		 FROM sessions WHERE id = $1`, id,
-	).Scan(&sess.ID, &sess.AccountID, &sess.CharacterID, &sess.Seed, &sess.WorldID, &sess.Mode, &sess.JoinCodeHash, &sess.Status, &sess.CreatedAt, &sess.UpdatedAt)
+	).Scan(&sess.ID, &sess.AccountID, &sess.CharacterID, &sess.Seed, &sess.WorldID, &sess.Mode, &sess.Listed, &sess.JoinCodeHash, &sess.Status, &sess.CreatedAt, &sess.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Session{}, ErrNotFound
 	}
@@ -231,6 +228,61 @@ func (s *Store) GetSession(ctx context.Context, id string) (Session, error) {
 		sess.Mode = SessionModeSolo
 	}
 	return sess, nil
+}
+
+func (s *Store) ListActiveListedSessions(ctx context.Context) ([]SessionSummary, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT
+		   sess.id,
+		   sess.world_id,
+		   sess.mode,
+		   sess.listed,
+		   sess.character_id,
+		   COALESCE(host_char.name, ''),
+		   COUNT(m.*)::int,
+		   COUNT(*) FILTER (WHERE m.connected)::int,
+		   sess.created_at,
+		   sess.updated_at
+		 FROM sessions sess
+		 JOIN session_members m
+		   ON m.session_id = sess.id AND m.status = 'active'
+		 LEFT JOIN characters host_char
+		   ON host_char.id = sess.character_id
+		 WHERE sess.listed = TRUE
+		   AND sess.status = 'active'
+		   AND sess.mode = 'coop'
+		 GROUP BY sess.id, host_char.name
+		 HAVING COUNT(*) FILTER (WHERE m.connected)::int > 0
+		 ORDER BY sess.updated_at DESC, sess.id ASC`,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list active listed sessions: %w", err)
+	}
+	defer rows.Close()
+
+	var out []SessionSummary
+	for rows.Next() {
+		var summary SessionSummary
+		if err := rows.Scan(
+			&summary.SessionID,
+			&summary.WorldID,
+			&summary.Mode,
+			&summary.Listed,
+			&summary.HostCharacterID,
+			&summary.HostDisplayName,
+			&summary.MemberCount,
+			&summary.ConnectedCount,
+			&summary.CreatedAt,
+			&summary.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("store: scan session summary: %w", err)
+		}
+		out = append(out, summary)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: list active listed sessions rows: %w", err)
+	}
+	return out, nil
 }
 
 func (s *Store) TouchSession(ctx context.Context, id string) error {
@@ -248,6 +300,108 @@ func (s *Store) SetSessionStatus(ctx context.Context, id, status string) error {
 		return fmt.Errorf("store: set session status: %w", err)
 	}
 	return nil
+}
+
+func (s *Store) EndListedSessionIfNoConnected(ctx context.Context, id string) (bool, error) {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE sessions sess
+		    SET status = 'ended', updated_at = now()
+		  WHERE sess.id = $1
+		    AND sess.status = 'active'
+		    AND sess.listed = TRUE
+		    AND sess.mode = 'coop'
+		    AND NOT EXISTS (
+		      SELECT 1
+		        FROM session_members m
+		       WHERE m.session_id = sess.id
+		         AND m.status = 'active'
+		         AND m.connected = TRUE
+		    )`,
+		id,
+	)
+	if err != nil {
+		return false, fmt.Errorf("store: end listed session if no connected: %w", err)
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
+func (s *Store) ResetConnectedSessionMembers(ctx context.Context) (int64, error) {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE session_members
+		    SET connected = FALSE, updated_at = now()
+		  WHERE connected = TRUE`,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("store: reset connected session members: %w", err)
+	}
+	return tag.RowsAffected(), nil
+}
+
+func (s *Store) DeleteStaleEmptySessions(ctx context.Context, updatedBefore time.Time) (int64, error) {
+	var deleted int64
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		rows, err := tx.Query(ctx,
+			`SELECT sess.id
+			   FROM sessions sess
+			  WHERE sess.updated_at <= $1
+			    AND NOT EXISTS (
+			      SELECT 1
+			        FROM session_members m
+			       WHERE m.session_id = sess.id
+			         AND m.connected = TRUE
+			    )
+			  ORDER BY sess.updated_at ASC, sess.id ASC
+			  FOR UPDATE`,
+			updatedBefore,
+		)
+		if err != nil {
+			return fmt.Errorf("store: stale empty session candidates: %w", err)
+		}
+		defer rows.Close()
+
+		var sessionIDs []string
+		for rows.Next() {
+			var id string
+			if err := rows.Scan(&id); err != nil {
+				return fmt.Errorf("store: scan stale empty session: %w", err)
+			}
+			sessionIDs = append(sessionIDs, id)
+		}
+		if err := rows.Err(); err != nil {
+			return fmt.Errorf("store: stale empty session rows: %w", err)
+		}
+		rows.Close()
+		if len(sessionIDs) == 0 {
+			return nil
+		}
+
+		deletes := []string{
+			`DELETE FROM session_inputs WHERE session_id = ANY($1)`,
+			`DELETE FROM session_events WHERE session_id = ANY($1)`,
+			`DELETE FROM inventory_items WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_hotbar_slots WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_item_instances WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_waypoints WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_character_progression WHERE session_id = ANY($1)`,
+			`DELETE FROM session_members WHERE session_id = ANY($1)`,
+		}
+		for _, query := range deletes {
+			if _, err := tx.Exec(ctx, query, sessionIDs); err != nil {
+				return fmt.Errorf("store: delete stale empty session rows: %w", err)
+			}
+		}
+
+		tag, err := tx.Exec(ctx, `DELETE FROM sessions WHERE id = ANY($1)`, sessionIDs)
+		if err != nil {
+			return fmt.Errorf("store: delete stale empty sessions: %w", err)
+		}
+		deleted = tag.RowsAffected()
+		return nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	return deleted, nil
 }
 
 func (s *Store) CreateSessionHostMember(ctx context.Context, m SessionMember) error {
@@ -300,17 +454,6 @@ func (s *Store) CreateSessionGuestMember(ctx context.Context, m SessionMember) e
 		}
 		if duplicate {
 			return ErrConflict
-		}
-
-		var count int
-		if err := tx.QueryRow(ctx,
-			`SELECT count(*) FROM session_members WHERE session_id = $1 AND status = 'active'`,
-			m.SessionID,
-		).Scan(&count); err != nil {
-			return fmt.Errorf("store: guest member count: %w", err)
-		}
-		if count >= 2 {
-			return ErrPartyFull
 		}
 
 		role := m.Role
@@ -382,6 +525,19 @@ func (s *Store) GetSessionMember(ctx context.Context, sessionID, accountID, char
 		sessionID, accountID, characterID,
 	)
 	return scanSessionMember(row)
+}
+
+func (s *Store) ClaimSessionMemberConnection(ctx context.Context, sessionID, accountID, characterID string) (bool, error) {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE session_members
+		 SET connected = TRUE, status = 'active', left_tick = NULL, updated_at = now()
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3 AND status = 'active' AND connected = FALSE`,
+		sessionID, accountID, characterID,
+	)
+	if err != nil {
+		return false, fmt.Errorf("store: claim member connection: %w", err)
+	}
+	return tag.RowsAffected() > 0, nil
 }
 
 func (s *Store) SetSessionMemberConnected(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, tick int64) error {

@@ -499,7 +499,14 @@ func displayNameForMember(member store.SessionMember) string {
 	if member.Role == store.SessionMemberHost {
 		return "Hero"
 	}
-	return "Guest"
+	if member.CharacterID == "" {
+		return "Guest"
+	}
+	suffix := member.CharacterID
+	if len(suffix) > 6 {
+		suffix = suffix[len(suffix)-6:]
+	}
+	return "Guest " + suffix
 }
 
 func applyCurrentMemberConnectivity(sim *game.Sim, sess store.Session, players []memberPlayer) {

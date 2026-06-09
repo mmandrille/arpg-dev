@@ -21,6 +21,6 @@
   },
   "descend_then_ascend": {
     "expected_level": 0,
-    "expected_player_position": { "x": 8, "y": 10 }
+    "expected_player_position": { "x": 9, "y": 10 }
   }
 }

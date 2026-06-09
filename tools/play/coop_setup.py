@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Create a local co-op session for `make play N`.
+"""Create a local co-op session for explicit development/debug use.
 
-The launcher keeps Godot simple: this script creates the host session, joins
-the remaining accounts, then each client resumes the shared session by ID.
+`make play N` now launches independent menu clients. This helper is kept for
+manual protocol/debug setup when a pre-created private join-code session is
+useful.
 """
 
 from __future__ import annotations

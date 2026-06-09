@@ -3,8 +3,24 @@ extends Control
 
 signal intent_requested(intent_type: String, payload: Dictionary)
 
-const PANEL_SIZE := Vector2(560, 520)
-const SECTION_GAP := 8
+const PANEL_SIZE := Vector2(360, 680)
+const VENDOR_COLUMNS := 5
+const VENDOR_ROWS := 10
+const VENDOR_SLOT_COUNT := VENDOR_COLUMNS * VENDOR_ROWS
+const SLOT_SIZE := Vector2(52, 52)
+const SLOT_GAP := 6
+const TITLE_FONT_SIZE := 33
+const BODY_FONT_SIZE := 23
+const DETAIL_FONT_SIZE := 20
+const ICON_FONT_SIZE := 20
+const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
+const DRAG_SOURCE_INVENTORY_BAG := "bag"
+const ITEM_RARITY_BACKGROUNDS := {
+	"common": Color("#343432"),
+	"magic": Color("#1b3458"),
+	"rare": Color("#5a4520"),
+	"unique": Color("#5a2f17"),
+}
 
 var shop_id: String = ""
 var shop_entity_id: String = ""
@@ -14,23 +30,78 @@ var inventory: Array = []
 var equipped: Dictionary = {}
 var sell_appraisals: Array = []
 var gold: int = 0
+var item_rules: Dictionary = {}
+var item_templates: Dictionary = {}
+var item_presentations: Dictionary = {}
 
 var _panel: PanelContainer
 var _title_label: Label
 var _gold_label: Label
 var _status_label: Label
-var _fixed_list: VBoxContainer
-var _generated_list: VBoxContainer
-var _sell_list: VBoxContainer
+var _vendor_grid: GridContainer
 var _buy_buttons: Dictionary = {}
-var _sell_buttons: Dictionary = {}
 var _interactive: bool = true
+
+
+class ShopSlotButton:
+	extends Button
+
+	var panel: ShopPanel
+	var offer: Dictionary = {}
+
+	func _draw() -> void:
+		if offer.is_empty():
+			return
+		panel._draw_item_icon(self, offer)
+
+	func _gui_input(event: InputEvent) -> void:
+		if not panel._interactive:
+			return
+		if event is InputEventMouseButton \
+				and event.button_index == MOUSE_BUTTON_LEFT \
+				and event.double_click \
+				and not offer.is_empty():
+			panel._handle_offer_double_click(offer)
+
+	func _get_drag_data(_at_position: Vector2) -> Variant:
+		if not panel._interactive or offer.is_empty() or not panel._offer_affordable(offer):
+			return null
+		var data := {
+			"source": DRAG_SOURCE_SHOP_OFFER,
+			"shop_entity_id": panel.shop_entity_id,
+			"offer_id": str(offer.get("offer_id", "")),
+			"item": offer,
+		}
+		set_drag_preview(panel._drag_preview(offer))
+		return data
+
+	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+		if not panel._interactive or typeof(data) != TYPE_DICTIONARY:
+			return false
+		var rec := data as Dictionary
+		if str(rec.get("source", "")) != DRAG_SOURCE_INVENTORY_BAG:
+			return false
+		var item: Dictionary = rec.get("item", {})
+		return panel._inventory_item_sellable(item)
+
+	func _drop_data(_at_position: Vector2, data: Variant) -> void:
+		panel._handle_inventory_drop(data)
+
+	func _make_custom_tooltip(for_text: String) -> Object:
+		if panel == null:
+			return null
+		if offer.is_empty():
+			return panel._make_text_tooltip("Drop inventory items here to sell.")
+		return panel._make_offer_tooltip(offer)
 
 
 func _ready() -> void:
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_load_item_rules()
+	_load_item_templates()
+	_load_item_presentations()
 	_build()
 	visible = false
 
@@ -85,6 +156,10 @@ func get_debug_state() -> Dictionary:
 		"sell_rows": _debug_sell_rows(),
 		"sell_row_count": _sell_rows().size(),
 		"comparison_row_count": _comparison_row_count(),
+		"vendor_columns": VENDOR_COLUMNS,
+		"vendor_rows": VENDOR_ROWS,
+		"vendor_slot_count": VENDOR_SLOT_COUNT,
+		"occupied_vendor_slot_count": _vendor_items().size(),
 		"status": _status_label.text if _status_label != null else "",
 	}
 
@@ -94,8 +169,7 @@ func bot_click_buy_offer(offer_id: String = "", offer_kind: String = "", offer_i
 	if offer_index < 0 or offer_index >= matches.size():
 		return
 	var selected: Dictionary = matches[offer_index]
-	var btn := _buy_buttons.get(str(selected.get("offer_id", "")), null) as Button
-	if btn != null and btn.disabled:
+	if not _offer_affordable(selected):
 		return
 	_emit_buy(selected)
 
@@ -122,14 +196,14 @@ func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
 	_panel.custom_minimum_size = PANEL_SIZE
-	_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(_panel)
 	_reposition_panel()
 
 	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", SECTION_GAP)
+	root.add_theme_constant_override("separation", 8)
 	root.custom_minimum_size = Vector2(PANEL_SIZE.x - 28, PANEL_SIZE.y - 24)
 	_panel.add_child(root)
 
@@ -140,156 +214,159 @@ func _build() -> void:
 	_title_label.text = shop_title
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_title_label.add_theme_color_override("font_color", Color("#f4d481"))
-	_title_label.add_theme_font_size_override("font_size", 28)
+	_title_label.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 	header.add_child(_title_label)
 	_gold_label = Label.new()
 	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_gold_label.add_theme_color_override("font_color", Color("#f4c84f"))
-	_gold_label.add_theme_font_size_override("font_size", 24)
+	_gold_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	header.add_child(_gold_label)
 
 	_status_label = Label.new()
 	_status_label.text = ""
-	_status_label.clip_text = true
-	_status_label.add_theme_color_override("font_color", Color("#9ee6a8"))
+	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status_label.add_theme_color_override("font_color", Color("#b8aa91"))
+	_status_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	root.add_child(_status_label)
 
-	var columns := HBoxContainer.new()
-	columns.add_theme_constant_override("separation", 12)
-	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(columns)
-
-	var buy_col := VBoxContainer.new()
-	buy_col.custom_minimum_size = Vector2(300, 0)
-	buy_col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columns.add_child(buy_col)
-	buy_col.add_child(_caption("Buy"))
-	var buy_scroll := ScrollContainer.new()
-	buy_scroll.custom_minimum_size = Vector2(300, 390)
-	buy_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	buy_col.add_child(buy_scroll)
-	var buy_lists := VBoxContainer.new()
-	buy_lists.add_theme_constant_override("separation", 10)
-	buy_scroll.add_child(buy_lists)
-	buy_lists.add_child(_subcaption("Potions"))
-	_fixed_list = VBoxContainer.new()
-	_fixed_list.add_theme_constant_override("separation", 5)
-	buy_lists.add_child(_fixed_list)
-	buy_lists.add_child(_subcaption("Generated"))
-	_generated_list = VBoxContainer.new()
-	_generated_list.add_theme_constant_override("separation", 5)
-	buy_lists.add_child(_generated_list)
-
-	var sell_col := VBoxContainer.new()
-	sell_col.custom_minimum_size = Vector2(210, 0)
-	sell_col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columns.add_child(sell_col)
-	sell_col.add_child(_caption("Sell"))
-	var sell_scroll := ScrollContainer.new()
-	sell_scroll.custom_minimum_size = Vector2(210, 390)
-	sell_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	sell_col.add_child(sell_scroll)
-	_sell_list = VBoxContainer.new()
-	_sell_list.add_theme_constant_override("separation", 5)
-	sell_scroll.add_child(_sell_list)
+	_vendor_grid = GridContainer.new()
+	_vendor_grid.columns = VENDOR_COLUMNS
+	_vendor_grid.add_theme_constant_override("h_separation", SLOT_GAP)
+	_vendor_grid.add_theme_constant_override("v_separation", SLOT_GAP)
+	_vendor_grid.custom_minimum_size = Vector2(
+		VENDOR_COLUMNS * SLOT_SIZE.x + (VENDOR_COLUMNS - 1) * SLOT_GAP,
+		VENDOR_ROWS * SLOT_SIZE.y + (VENDOR_ROWS - 1) * SLOT_GAP
+	)
+	root.add_child(_vendor_grid)
 	_render()
 
 
 func _render() -> void:
-	if _panel == null:
+	if _panel == null or _vendor_grid == null:
 		return
 	_buy_buttons = {}
-	_sell_buttons = {}
 	_title_label.text = shop_title
 	_gold_label.text = "Gold: %d" % gold
-	_render_offer_list(_fixed_list, _offers_by_kind("fixed"))
-	_render_offer_list(_generated_list, _offers_by_kind("generated"))
-	_render_sell_list()
+	_clear_children(_vendor_grid)
+	var rows := _vendor_items()
+	for i in range(VENDOR_SLOT_COUNT):
+		var slot := _slot_button()
+		var offer: Dictionary = rows[i] if i < rows.size() else {}
+		_fill_slot(slot, offer)
+		_vendor_grid.add_child(slot)
 
 
-func _render_offer_list(list: VBoxContainer, rows: Array) -> void:
-	if list == null:
-		return
-	_clear_children(list)
-	if rows.is_empty():
-		list.add_child(_empty_row("No offers"))
-		return
-	for offer in rows:
-		if typeof(offer) != TYPE_DICTIONARY:
-			continue
-		var rec := offer as Dictionary
-		var row := VBoxContainer.new()
-		row.add_theme_constant_override("separation", 2)
-		row.custom_minimum_size = Vector2(0, 62)
-		var top := HBoxContainer.new()
-		top.add_theme_constant_override("separation", 6)
-		row.add_child(top)
-		var name := Label.new()
-		name.text = _offer_name(rec)
-		name.clip_text = true
-		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name.add_theme_color_override("font_color", _rarity_color(str(rec.get("rarity", "common"))))
-		top.add_child(name)
-		var price := Label.new()
-		price.text = "%d" % int(rec.get("buy_price", 0))
-		price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		price.custom_minimum_size = Vector2(48, 0)
-		price.add_theme_color_override("font_color", Color("#f4c84f"))
-		top.add_child(price)
-		var btn := Button.new()
-		btn.text = "Buy"
-		btn.custom_minimum_size = Vector2(58, 30)
-		btn.disabled = gold < int(rec.get("buy_price", 0))
-		btn.tooltip_text = "Buy %s" % _offer_name(rec)
-		btn.pressed.connect(func() -> void:
-			_emit_buy(rec)
-		)
-		top.add_child(btn)
-		for line in _detail_lines(rec):
-			row.add_child(_detail_label(line, _detail_color(line)))
-		_buy_buttons[str(rec.get("offer_id", ""))] = btn
-		list.add_child(row)
+func _vendor_items() -> Array:
+	var rows: Array = []
+	for offer in offers:
+		if typeof(offer) == TYPE_DICTIONARY:
+			rows.append((offer as Dictionary).duplicate(true))
+	return rows
 
 
-func _render_sell_list() -> void:
-	if _sell_list == null:
+func _slot_button() -> ShopSlotButton:
+	var btn := ShopSlotButton.new()
+	btn.panel = self
+	btn.custom_minimum_size = SLOT_SIZE
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.clip_text = true
+	btn.add_theme_stylebox_override("normal", _slot_style(false))
+	btn.add_theme_stylebox_override("hover", _slot_style(true))
+	btn.add_theme_stylebox_override("pressed", _slot_style(true))
+	btn.add_theme_color_override("font_color", Color("#e8dcc8"))
+	btn.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	return btn
+
+
+func _fill_slot(slot: ShopSlotButton, offer: Dictionary) -> void:
+	slot.offer = offer.duplicate(true)
+	if offer.is_empty():
+		slot.text = ""
+		slot.tooltip_text = "Drop item to sell"
+		slot.add_theme_stylebox_override("normal", _slot_style(false))
+		slot.add_theme_stylebox_override("hover", _slot_style(true))
+		slot.add_theme_stylebox_override("pressed", _slot_style(true))
+		slot.queue_redraw()
 		return
-	_clear_children(_sell_list)
-	var sellable := _sell_rows()
-	if sellable.is_empty():
-		_sell_list.add_child(_empty_row("Bag is empty"))
+	slot.text = ""
+	slot.tooltip_text = _tooltip(offer)
+	var rarity := str(offer.get("rarity", "common"))
+	var affordable := _offer_affordable(offer)
+	slot.add_theme_stylebox_override("normal", _item_slot_style(rarity, false, affordable))
+	slot.add_theme_stylebox_override("hover", _item_slot_style(rarity, true, affordable))
+	slot.add_theme_stylebox_override("pressed", _item_slot_style(rarity, true, affordable))
+	_buy_buttons[str(offer.get("offer_id", ""))] = slot
+	slot.queue_redraw()
+
+
+func _draw_item_icon(slot: Control, item: Dictionary) -> void:
+	var def_id := str(item.get("item_def_id", ""))
+	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
+	var shape := str(icon.get("shape", "box"))
+	var color := Color(str(icon.get("color", "#d8d0bd")))
+	var accent := Color(str(icon.get("accent", "#6b5420")))
+	if not _offer_affordable(item):
+		color = color.darkened(0.35)
+		accent = accent.darkened(0.35)
+	var rect := Rect2(Vector2.ZERO, slot.size)
+	var center := rect.get_center()
+	var min_side = min(rect.size.x, rect.size.y)
+	var label := str(icon.get("label", _short_label(def_id)))
+
+	match shape:
+		"blade":
+			var a := center + Vector2(-min_side * 0.22, min_side * 0.22)
+			var b := center + Vector2(min_side * 0.22, -min_side * 0.22)
+			slot.draw_line(a, b, color, 5.0, true)
+			slot.draw_line(a + Vector2(-4, 4), a + Vector2(5, -5), accent, 4.0, true)
+		"bow":
+			slot.draw_arc(center, min_side * 0.28, -1.25, 1.25, 18, color, 4.0, true)
+			slot.draw_line(center + Vector2(min_side * 0.18, -min_side * 0.26), center + Vector2(min_side * 0.18, min_side * 0.26), accent, 2.0, true)
+		"badge", "coin":
+			slot.draw_circle(center, min_side * 0.24, color)
+			slot.draw_arc(center, min_side * 0.17, 0.0, TAU, 18, accent, 2.0, true)
+		"leaf":
+			var pts := PackedVector2Array([
+				center + Vector2(0, -min_side * 0.30),
+				center + Vector2(min_side * 0.24, -min_side * 0.02),
+				center + Vector2(0, min_side * 0.28),
+				center + Vector2(-min_side * 0.24, -min_side * 0.02),
+			])
+			slot.draw_colored_polygon(pts, color)
+			slot.draw_line(center + Vector2(0, -min_side * 0.22), center + Vector2(0, min_side * 0.22), accent, 2.0, true)
+		"potion":
+			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.13, -min_side * 0.05), Vector2(min_side * 0.26, min_side * 0.28)), color, true)
+			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.08, -min_side * 0.22), Vector2(min_side * 0.16, min_side * 0.16)), accent, true)
+		_:
+			slot.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
+
+	var font := slot.get_theme_default_font()
+	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE)
+	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.38), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
+
+
+func _drag_preview(offer: Dictionary) -> Control:
+	var label := Label.new()
+	label.text = _offer_name(offer)
+	label.add_theme_color_override("font_color", _rarity_color(str(offer.get("rarity", "common"))))
+	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	return label
+
+
+func _handle_offer_double_click(offer: Dictionary) -> void:
+	if not _offer_affordable(offer):
+		show_status("insufficient gold", true)
 		return
-	for item in sellable:
-		var row := VBoxContainer.new()
-		row.add_theme_constant_override("separation", 2)
-		row.custom_minimum_size = Vector2(0, 62)
-		var top := HBoxContainer.new()
-		top.add_theme_constant_override("separation", 6)
-		row.add_child(top)
-		var name := Label.new()
-		name.text = _item_name(item)
-		name.clip_text = true
-		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name.add_theme_color_override("font_color", _rarity_color(str(item.get("rarity", "common"))))
-		top.add_child(name)
-		var price := Label.new()
-		price.text = "%d" % int(item.get("sell_price", 0))
-		price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		price.custom_minimum_size = Vector2(42, 0)
-		price.add_theme_color_override("font_color", Color("#f4c84f"))
-		top.add_child(price)
-		var btn := Button.new()
-		btn.text = "Sell"
-		btn.custom_minimum_size = Vector2(58, 30)
-		btn.tooltip_text = "Sell %s" % _item_name(item)
-		btn.pressed.connect(func() -> void:
-			_emit_sell(item)
-		)
-		top.add_child(btn)
-		for line in _detail_lines(item):
-			row.add_child(_detail_label(line, _detail_color(line)))
-		_sell_buttons[str(item.get("item_instance_id", ""))] = btn
-		_sell_list.add_child(row)
+	_emit_buy(offer)
+
+
+func _handle_inventory_drop(data: Variant) -> void:
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	var item: Dictionary = (data as Dictionary).get("item", {})
+	if not _inventory_item_sellable(item):
+		return
+	_emit_sell(item)
 
 
 func _emit_buy(offer: Dictionary) -> void:
@@ -310,25 +387,51 @@ func _emit_sell(item: Dictionary) -> void:
 	})
 
 
+func _offer_affordable(offer: Dictionary) -> bool:
+	return gold >= int(offer.get("buy_price", 0))
+
+
+func _inventory_item_sellable(item: Dictionary) -> bool:
+	var item_id := str(item.get("item_instance_id", ""))
+	if item_id == "" or _is_equipped_instance(item_id):
+		return false
+	if sell_appraisals.is_empty():
+		return true
+	for row in _sell_rows():
+		if str((row as Dictionary).get("item_instance_id", "")) == item_id:
+			return true
+	return false
+
+
 func _sellable_items() -> Array:
 	var out: Array = []
 	for item in inventory:
 		if typeof(item) != TYPE_DICTIONARY:
 			continue
 		var rec := item as Dictionary
-		var item_id := str(rec.get("item_instance_id", ""))
-		if item_id == "" or _is_equipped_instance(item_id):
-			continue
-		out.append(rec)
+		if _inventory_item_sellable(rec):
+			out.append(rec)
 	return out
 
 
 func _sell_rows() -> Array:
 	if sell_appraisals.is_empty():
-		return _sellable_items()
+		var items: Array = []
+		for item in inventory:
+			if typeof(item) == TYPE_DICTIONARY:
+				var rec := item as Dictionary
+				var item_id := str(rec.get("item_instance_id", ""))
+				if item_id != "" and not _is_equipped_instance(item_id):
+					items.append(rec)
+		return items
 	var live_ids := {}
-	for item in _sellable_items():
-		live_ids[str(item.get("item_instance_id", ""))] = true
+	for item in inventory:
+		if typeof(item) != TYPE_DICTIONARY:
+			continue
+		var rec := item as Dictionary
+		var item_id := str(rec.get("item_instance_id", ""))
+		if item_id != "" and not _is_equipped_instance(item_id):
+			live_ids[item_id] = true
 	var out: Array = []
 	for appraisal in sell_appraisals:
 		if typeof(appraisal) != TYPE_DICTIONARY:
@@ -378,11 +481,14 @@ func _matching_offers(offer_id: String, offer_kind: String) -> Array:
 
 func _debug_buy_buttons() -> Dictionary:
 	var out := {}
-	for offer_id in _buy_buttons.keys():
-		var btn := _buy_buttons[offer_id] as Button
-		out[str(offer_id)] = {
-			"enabled": btn != null and not btn.disabled,
-			"text": btn.text if btn != null else "",
+	for offer in offers:
+		if typeof(offer) != TYPE_DICTIONARY:
+			continue
+		var rec := offer as Dictionary
+		var offer_id := str(rec.get("offer_id", ""))
+		out[offer_id] = {
+			"enabled": _offer_affordable(rec),
+			"text": "Buy",
 		}
 	return out
 
@@ -441,14 +547,46 @@ func _offer_name(offer: Dictionary) -> String:
 	var name := str(offer.get("display_name", ""))
 	if name != "":
 		return name
-	return str(offer.get("item_template_id", offer.get("item_def_id", "item")))
+	var def_id := str(offer.get("item_def_id", ""))
+	var def := _item_definition(def_id)
+	return str(def.get("name", offer.get("item_template_id", def_id if def_id != "" else "item")))
 
 
 func _item_name(item: Dictionary) -> String:
 	var name := str(item.get("display_name", ""))
 	if name != "":
 		return name
-	return str(item.get("item_template_id", item.get("item_def_id", "item")))
+	var def_id := str(item.get("item_def_id", ""))
+	var def := _item_definition(def_id)
+	return str(def.get("name", item.get("item_template_id", def_id if def_id != "" else "item")))
+
+
+func _tooltip(row: Dictionary) -> String:
+	var lines: Array = [_offer_name(row)]
+	var rarity := str(row.get("rarity", ""))
+	if rarity != "":
+		lines.append("Rarity: %s" % rarity.capitalize())
+	lines.append("Buy: %d gold" % int(row.get("buy_price", 0)))
+	lines.append_array(_detail_lines(row))
+	return "\n".join(lines)
+
+
+func _make_offer_tooltip(offer: Dictionary) -> Control:
+	return _make_text_tooltip(_tooltip(offer))
+
+
+func _make_text_tooltip(text: String) -> Control:
+	var tooltip := PanelContainer.new()
+	tooltip.add_theme_stylebox_override("panel", _tooltip_style())
+
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(320, 0)
+	label.add_theme_color_override("font_color", Color("#e8dcc8"))
+	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	tooltip.add_child(label)
+	return tooltip
 
 
 func _detail_lines(row: Dictionary) -> Array:
@@ -517,23 +655,6 @@ func _comparison_count(row: Dictionary) -> int:
 	return (deltas as Array).size()
 
 
-func _detail_label(text: String, color: Color) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.clip_text = true
-	label.add_theme_color_override("font_color", color)
-	label.add_theme_font_size_override("font_size", 13)
-	return label
-
-
-func _detail_color(text: String) -> Color:
-	if text.begins_with("+"):
-		return Color("#9ee6a8")
-	if text.begins_with("-"):
-		return Color("#ff9f7a")
-	return Color("#b8aa91")
-
-
 func _display_stat(stat: String) -> String:
 	match stat:
 		"damage_min":
@@ -566,27 +687,57 @@ func _rarity_color(rarity: String) -> Color:
 			return Color("#e8dcc8")
 
 
-func _empty_row(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.add_theme_color_override("font_color", Color("#a99d8b"))
-	return label
+func _short_label(def_id: String) -> String:
+	var def: Dictionary = _item_definition(def_id)
+	var name := str(def.get("name", def_id))
+	var parts := name.split(" ")
+	var out := ""
+	for part in parts:
+		if part.length() > 0:
+			out += part.substr(0, 1).to_upper()
+	return out.substr(0, 3)
 
 
-func _caption(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.add_theme_color_override("font_color", Color("#c9a227"))
-	label.add_theme_font_size_override("font_size", 22)
-	return label
+func _item_definition(def_id: String) -> Dictionary:
+	if item_rules.has(def_id):
+		return item_rules.get(def_id, {})
+	return item_templates.get(def_id, {})
 
 
-func _subcaption(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.add_theme_color_override("font_color", Color("#9b8a6b"))
-	label.add_theme_font_size_override("font_size", 16)
-	return label
+func _load_item_rules() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/items.v0.json")
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_rules = parsed.get("items", {})
+
+
+func _load_item_templates() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/item_templates.v0.json")
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_templates = parsed.get("templates", {})
+
+
+func _load_item_presentations() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		item_presentations = parsed.get("items", {})
 
 
 func _panel_style() -> StyleBoxFlat:
@@ -604,21 +755,64 @@ func _panel_style() -> StyleBoxFlat:
 	return s
 
 
+func _slot_style(hover: bool) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color("#3d2e10") if hover else Color("#0a0908")
+	s.border_color = Color("#8b6914") if hover else Color("#5c4a1f")
+	s.border_width_left = 1
+	s.border_width_top = 1
+	s.border_width_right = 1
+	s.border_width_bottom = 1
+	s.content_margin_left = 4
+	s.content_margin_top = 4
+	s.content_margin_right = 4
+	s.content_margin_bottom = 4
+	return s
+
+
+func _item_slot_style(rarity: String, hover: bool, affordable: bool) -> StyleBoxFlat:
+	var s := _slot_style(hover)
+	var base: Color = ITEM_RARITY_BACKGROUNDS.get(rarity.to_lower(), ITEM_RARITY_BACKGROUNDS["common"])
+	if not affordable:
+		base = base.darkened(0.45)
+	s.bg_color = base.lightened(0.12) if hover else base
+	s.border_color = base.lightened(0.46) if hover else base.lightened(0.28)
+	return s
+
+
+func _tooltip_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.07, 0.06, 0.05, 0.97)
+	s.border_color = Color("#8b6914")
+	s.border_width_left = 1
+	s.border_width_top = 1
+	s.border_width_right = 1
+	s.border_width_bottom = 1
+	s.content_margin_left = 10
+	s.content_margin_top = 8
+	s.content_margin_right = 10
+	s.content_margin_bottom = 8
+	return s
+
+
 func _reposition_panel() -> void:
 	if _panel == null:
 		return
 	var margin := 20.0
+	var panel_size := _panel.custom_minimum_size
 	var viewport_size := get_viewport_rect().size
-	_panel.offset_right = -margin
-	_panel.offset_left = _panel.offset_right - PANEL_SIZE.x
+	_panel.offset_left = margin
 	_panel.offset_top = margin + 54.0
-	_panel.offset_bottom = _panel.offset_top + PANEL_SIZE.y
-	if viewport_size.x > 0.0 and viewport_size.x + _panel.offset_left < margin:
-		_panel.offset_left = -viewport_size.x + margin
+	_panel.offset_right = _panel.offset_left + panel_size.x
+	_panel.offset_bottom = _panel.offset_top + panel_size.y
 	if viewport_size.y > 0.0 and _panel.offset_bottom > viewport_size.y - margin:
 		var overflow := _panel.offset_bottom - (viewport_size.y - margin)
 		_panel.offset_top -= overflow
 		_panel.offset_bottom -= overflow
+	if viewport_size.x > 0.0 and _panel.offset_right > viewport_size.x - margin:
+		var overflow_x := _panel.offset_right - (viewport_size.x - margin)
+		_panel.offset_left -= overflow_x
+		_panel.offset_right -= overflow_x
 
 
 func _apply_interaction_filters() -> void:

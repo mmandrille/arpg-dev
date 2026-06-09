@@ -3,6 +3,7 @@
 extends SceneTree
 
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
+const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -49,6 +50,10 @@ func _run() -> void:
 	var sell_rows: Array = state.get("sell_rows", [])
 	_assert_true("sell rows include price", not sell_rows.is_empty() and int((sell_rows[0] as Dictionary).get("sell_price", 0)) > 0)
 	_assert_true("comparisons rendered", int(state.get("comparison_row_count", 0)) >= 2)
+	_assert_eq("vendor grid columns", int(state.get("vendor_columns", 0)), 5)
+	_assert_eq("vendor grid rows", int(state.get("vendor_rows", 0)), 10)
+	_assert_eq("vendor slot count", int(state.get("vendor_slot_count", 0)), 50)
+	_assert_eq("occupied vendor slots", int(state.get("occupied_vendor_slot_count", 0)), 4)
 
 	panel.bot_click_buy_offer("fixed:red_potion")
 	_assert_eq("buy emitted count", emitted.size(), 1)
@@ -60,6 +65,35 @@ func _run() -> void:
 	_assert_eq("sell emitted count", emitted.size(), 2)
 	_assert_eq("sell emitted type", str(emitted[1]["type"]), "shop_sell_intent")
 	_assert_eq("sell emitted item", str(emitted[1]["payload"].get("item_instance_id", "")), "2001")
+
+	panel._handle_inventory_drop({"source": "bag", "item": inventory[0]})
+	_assert_eq("drop sell emitted count", emitted.size(), 3)
+	_assert_eq("drop sell emitted type", str(emitted[2]["type"]), "shop_sell_intent")
+	_assert_eq("drop sell emitted item", str(emitted[2]["payload"].get("item_instance_id", "")), "2001")
+
+	var inventory_panel := InventoryPanelScript.new()
+	root.add_child(inventory_panel)
+	await process_frame
+	var inventory_emitted: Array = []
+	inventory_panel.intent_requested.connect(func(intent_type: String, payload: Dictionary) -> void:
+		inventory_emitted.append({"type": intent_type, "payload": payload.duplicate(true)})
+	)
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
+	inventory_panel._handle_drop_on_slot("bag", {
+		"source": "shop_offer",
+		"shop_entity_id": "1004",
+		"offer_id": "fixed:red_potion",
+		"item": offers[0],
+	})
+	_assert_eq("inventory drop buy emitted count", inventory_emitted.size(), 1)
+	_assert_eq("inventory drop buy emitted type", str(inventory_emitted[0]["type"]), "shop_buy_intent")
+	_assert_eq("inventory drop buy emitted offer", str(inventory_emitted[0]["payload"].get("offer_id", "")), "fixed:red_potion")
+	inventory_panel.set_shop_sell_context("1004")
+	inventory_panel._handle_double_click(inventory[0])
+	_assert_eq("inventory double click sell emitted count", inventory_emitted.size(), 2)
+	_assert_eq("inventory double click sell emitted type", str(inventory_emitted[1]["type"]), "shop_sell_intent")
+	_assert_eq("inventory double click sell item", str(inventory_emitted[1]["payload"].get("item_instance_id", "")), "2001")
+	inventory_panel.queue_free()
 
 	panel.show_status("insufficient gold", true)
 	_assert_eq("status text", str(panel.get_debug_state().get("status", "")), "insufficient gold")

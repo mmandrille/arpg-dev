@@ -1372,9 +1372,9 @@ func _is_character_info_key(event: InputEventKey) -> bool:
 
 
 func _close_gameplay_panels(except: String = "") -> void:
-	if except != "inventory" and inventory_panel != null:
+	if not (except in ["inventory", "shop_with_inventory"]) and inventory_panel != null:
 		inventory_panel.hide_display()
-	if except != "shop":
+	if not (except in ["shop", "shop_with_inventory"]):
 		_hide_shop_panel()
 	if except != "stats" and character_stats_panel != null:
 		character_stats_panel.hide_display()
@@ -2350,9 +2350,12 @@ func _hide_waypoint_panel() -> void:
 func _show_shop_panel(ev: Dictionary) -> void:
 	if shop_panel == null:
 		return
-	_close_gameplay_panels("shop")
+	_close_gameplay_panels("shop_with_inventory")
 	var next_shop_id := str(ev.get("shop_id", "town_vendor"))
 	var next_entity_id := str(ev.get("entity_id", ""))
+	if inventory_panel != null:
+		inventory_panel.ensure_display_visible()
+		inventory_panel.set_shop_sell_context(next_entity_id)
 	shop_panel.show_shop(
 		next_entity_id,
 		next_shop_id,
@@ -2368,6 +2371,8 @@ func _show_shop_panel(ev: Dictionary) -> void:
 func _hide_shop_panel() -> void:
 	if shop_panel != null:
 		shop_panel.hide_display()
+	if inventory_panel != null:
+		inventory_panel.clear_shop_sell_context()
 
 
 func _shop_title(next_shop_id: String) -> String:

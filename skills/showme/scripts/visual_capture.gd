@@ -3,6 +3,7 @@ extends SceneTree
 const CharacterScene := preload("res://scenes/character.tscn")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 
 const DEFAULT_GEAR_ITEMS := ["cave_blade", "cave_shield", "cave_helm", "cave_mail", "cave_boots"]
 const ITEM_SLOT := {
@@ -37,10 +38,13 @@ func _initialize() -> void:
 	DisplayServer.window_set_size(Vector2i(_width, _height))
 	get_root().size = Vector2i(_width, _height)
 
-	if _focus == "inventory":
-		await _setup_inventory()
-	else:
-		await _setup_gear()
+	match _focus:
+		"inventory":
+			await _setup_inventory()
+		"shop":
+			await _setup_shop()
+		_:
+			await _setup_gear()
 
 	for _i in range(8):
 		await process_frame
@@ -158,6 +162,20 @@ func _setup_inventory() -> void:
 	panel.ensure_display_visible()
 
 
+func _setup_shop() -> void:
+	var inventory_panel = InventoryPanelScript.new()
+	get_root().add_child(inventory_panel)
+	await process_frame
+	inventory_panel.set_inventory_state(_shop_inventory(), {}, 3, 15, 550)
+	inventory_panel.set_shop_sell_context("1004")
+	inventory_panel.ensure_display_visible()
+
+	var panel = ShopPanelScript.new()
+	get_root().add_child(panel)
+	await process_frame
+	panel.show_shop("1004", "town_vendor", _shop_offers(), 550, _shop_inventory(), {}, "Town Vendor", _shop_sell_appraisals())
+
+
 func _add_light(root: Node3D) -> void:
 	var light := DirectionalLight3D.new()
 	light.name = "key_light"
@@ -212,6 +230,96 @@ func _inventory_items() -> Array:
 		{"item_instance_id": "2007", "item_def_id": "red_potion", "slot": "", "equipped": false, "rarity": "common"},
 		{"item_instance_id": "2008", "item_def_id": "blue_potion", "slot": "", "equipped": false, "rarity": "common"},
 		{"item_instance_id": "2009", "item_def_id": "cave_ring", "slot": "ring_left", "equipped": false, "rarity": "rare"},
+	]
+
+
+func _shop_offers() -> Array:
+	return [
+		{
+			"offer_id": "fixed:red_potion",
+			"kind": "fixed",
+			"item_def_id": "red_potion",
+			"display_name": "Red Potion",
+			"rarity": "common",
+			"buy_price": 20,
+			"category": "consumable",
+			"summary_lines": ["Kind: consumable", "Restores 5 HP"],
+		},
+		{
+			"offer_id": "fixed:blue_potion",
+			"kind": "fixed",
+			"item_def_id": "blue_potion",
+			"display_name": "Blue Potion",
+			"rarity": "common",
+			"buy_price": 20,
+			"category": "consumable",
+			"summary_lines": ["Kind: consumable", "Restores 5 mana"],
+		},
+		{
+			"offer_id": "generated:1:cave_helm",
+			"kind": "generated",
+			"item_def_id": "cave_helm",
+			"item_template_id": "cave_helm",
+			"display_name": "Magic Cave Helm",
+			"rarity": "magic",
+			"buy_price": 110,
+			"slot": "head",
+			"summary_lines": ["Slot: head", "Armor +5", "+0 Min damage vs equipped", "+1 Max damage vs equipped"],
+		},
+		{
+			"offer_id": "generated:1:cave_blade",
+			"kind": "generated",
+			"item_def_id": "cave_blade",
+			"item_template_id": "cave_blade",
+			"display_name": "Rare Cave Blade",
+			"rarity": "rare",
+			"buy_price": 180,
+			"slot": "main_hand",
+			"summary_lines": ["Slot: main hand", "Damage 3-7", "+2 Min damage vs equipped", "+2 Max damage vs equipped"],
+		},
+		{
+			"offer_id": "generated:1:cave_shield",
+			"kind": "generated",
+			"item_def_id": "cave_shield",
+			"item_template_id": "cave_shield",
+			"display_name": "Guarding Cave Shield",
+			"rarity": "magic",
+			"buy_price": 95,
+			"slot": "off_hand",
+			"summary_lines": ["Slot: off hand", "Block +8", "+8 Block vs equipped"],
+		},
+	]
+
+
+func _shop_inventory() -> Array:
+	return [
+		{"item_instance_id": "3001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Magic Cave Bow", "slot": "main_hand", "equipped": false, "rarity": "magic", "sell_price": 42},
+		{"item_instance_id": "3002", "item_def_id": "cave_mail", "item_template_id": "cave_mail", "display_name": "Rare Cave Mail", "slot": "chest", "equipped": false, "rarity": "rare", "sell_price": 88},
+	]
+
+
+func _shop_sell_appraisals() -> Array:
+	return [
+		{
+			"item_instance_id": "3001",
+			"item_def_id": "cave_bow",
+			"item_template_id": "cave_bow",
+			"display_name": "Magic Cave Bow",
+			"rarity": "magic",
+			"slot": "main_hand",
+			"sell_price": 42,
+			"summary_lines": ["Slot: main hand", "Damage 2-5", "+1 Min damage vs equipped"],
+		},
+		{
+			"item_instance_id": "3002",
+			"item_def_id": "cave_mail",
+			"item_template_id": "cave_mail",
+			"display_name": "Rare Cave Mail",
+			"rarity": "rare",
+			"slot": "chest",
+			"sell_price": 88,
+			"summary_lines": ["Slot: chest", "Armor +9", "+9 Armor vs equipped"],
+		},
 	]
 
 

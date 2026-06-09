@@ -1,0 +1,24 @@
+server/internal/game/sim.go
+  s_983717d5c0c276::t_bf7b4f834eb2cf 83-84
+  s_983717d5c0c276::t_6728f1203db05e 85,300-301,321-363,5635-5637
+server/internal/game/game_test.go
+  s_983717d5c0c276::t_c312b3236d1329 5473-5497
+tools/bot/scenarios/client/18_town_floor_click_to_move.json
+  s_983717d5c0c276::t_0db1402e8ef143 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ed84b8e196500ee1559e0e33f062286029bdeed4",
+  "prompts": {},
+  "sessions": {
+    "s_983717d5c0c276": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead24-fd53-7fa1-a324-554b6d97874f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -3,6 +3,7 @@ package realtime
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"sort"
@@ -593,6 +594,14 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			l.hub.metrics.PersistenceErrors.Inc()
 			l.log.Error("persist event", "error", err)
 		}
+		if ev.EventType == "player_killed" {
+			if member, ok := killedEventMember(ev, membersByPlayerID); ok {
+				if err := l.hub.store.MarkCharacterDead(ctx, member.AccountID, member.CharacterID); err != nil && !errors.Is(err, store.ErrNotFound) {
+					l.hub.metrics.PersistenceErrors.Inc()
+					l.log.Error("persist character death", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
+				}
+			}
+		}
 		eventSequence++
 	}
 
@@ -748,6 +757,19 @@ func displayNameForMember(member store.SessionMember) string {
 		suffix = suffix[len(suffix)-6:]
 	}
 	return "Guest " + suffix
+}
+
+func killedEventMember(ev game.Event, membersByPlayerID map[uint64]store.SessionMember) (store.SessionMember, bool) {
+	entityID := ev.TargetEntityID
+	if entityID == "" {
+		entityID = ev.EntityID
+	}
+	playerID, ok := game.ParseEntityID(entityID)
+	if !ok {
+		return store.SessionMember{}, false
+	}
+	member, ok := membersByPlayerID[playerID]
+	return member, ok
 }
 
 func isCoopSession(sess store.Session) bool {

@@ -19,6 +19,7 @@ type CharacterRepo interface {
 	ListCharacters(ctx context.Context, accountID string) ([]Character, error)
 	CreateCharacter(ctx context.Context, charID, accountID, name string) (Character, error)
 	RenameCharacter(ctx context.Context, accountID, characterID, name string) (Character, error)
+	MarkCharacterDead(ctx context.Context, accountID, characterID string) error
 	DeleteCharacter(ctx context.Context, accountID, characterID string) error
 }
 

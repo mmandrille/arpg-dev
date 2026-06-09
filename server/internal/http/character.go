@@ -23,6 +23,7 @@ func (s *Server) registerCharacterRoutes(mux *http.ServeMux) {
 type characterResponse struct {
 	CharacterID string `json:"character_id"`
 	Name        string `json:"name"`
+	Dead        bool   `json:"dead"`
 	CreatedAt   string `json:"created_at"`
 }
 
@@ -161,6 +162,7 @@ func characterToResponse(c store.Character) characterResponse {
 	return characterResponse{
 		CharacterID: c.ID,
 		Name:        c.Name,
+		Dead:        c.Dead,
 		CreatedAt:   c.CreatedAt.UTC().Format(time.RFC3339),
 	}
 }

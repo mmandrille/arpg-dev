@@ -217,10 +217,15 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		main.free()
 		return false
 
-	var gold_node := main._make_loot_node({"item_def_id": "gold", "rarity": "common"})
+	var gold_node := main._make_loot_node({"item_def_id": "gold", "rarity": "common", "amount": 7})
 	var gold_label := gold_node.find_child("LootLabel", true, false) as Label3D
 	if gold_label == null or gold_label.modulate.to_html(false) != "ffd75e":
 		_fail("gold loot node label color mismatch")
+		gold_node.free()
+		main.free()
+		return false
+	if gold_label.text != "7 gold":
+		_fail("gold loot node label text mismatch: %s" % gold_label.text)
 		gold_node.free()
 		main.free()
 		return false

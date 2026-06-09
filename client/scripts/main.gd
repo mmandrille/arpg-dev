@@ -968,6 +968,8 @@ func _upsert_entity(e: Dictionary) -> void:
 		rec = {"node": node, "controller": controller, "reaction": reaction, "type": str(e["type"]), "base_tint": base_tint.to_html(false)}
 		if e.has("item_def_id"):
 			rec["item_def_id"] = str(e["item_def_id"])
+		if e.has("amount"):
+			rec["amount"] = int(e["amount"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
 		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
@@ -2849,7 +2851,7 @@ func _make_loot_node(e: Dictionary) -> Node3D:
 			_add_loot_box(root, "Cork", Vector3(0.14, 0.10, 0.14) * scale, Vector3(0.0, 0.48 * scale, 0.0), accent)
 		_:
 			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
-	_add_loot_label(root, _generic_loot_name(item_def_id), scale, _loot_label_color(e))
+	_add_loot_label(root, _loot_label_text(e), scale, _loot_label_color(e))
 	return root
 
 
@@ -2927,6 +2929,18 @@ func _loot_label_color(e: Dictionary) -> Color:
 		return LOOT_LABEL_CATEGORY_COLORS[category]
 	var rarity := str(e.get("rarity", "common")).to_lower()
 	return LOOT_LABEL_RARITY_COLORS.get(rarity, LOOT_LABEL_RARITY_COLORS["common"])
+
+
+func _loot_label_text(e: Dictionary) -> String:
+	var item_def_id := str(e.get("item_def_id", ""))
+	var def := _item_definition(item_def_id)
+	var category := str(def.get("category", "")).to_lower()
+	if item_def_id == "gold" or category == "currency":
+		var amount := int(e.get("amount", 0))
+		if amount > 0:
+			return "%d gold" % amount
+		return "gold"
+	return _generic_loot_name(item_def_id)
 
 
 func _item_rarity_background(rarity: String) -> Color:

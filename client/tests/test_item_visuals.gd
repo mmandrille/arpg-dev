@@ -10,6 +10,7 @@
 extends SceneTree
 
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
+const MainScript := preload("res://scripts/main.gd")
 
 
 func _initialize() -> void:
@@ -67,6 +68,8 @@ func _initialize() -> void:
 			return
 
 	if not _verify_equipped_fallback_resolver():
+		return
+	if not _verify_loot_label_presentation(item_rules, item_templates, presentations):
 		return
 
 	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
@@ -183,6 +186,107 @@ func _verify_equipped_fallback_resolver() -> bool:
 	return true
 
 
+func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dictionary, presentations: Dictionary) -> bool:
+	var main = MainScript.new()
+	main.item_rules = item_rules.duplicate(true)
+	main.item_templates = item_templates.duplicate(true)
+	main.item_presentations = presentations.duplicate(true)
+
+	if main._loot_label_color({"item_def_id": "gold"}).to_html(false) != "ffd75e":
+		_fail("gold loot label is not yellow")
+		main.free()
+		return false
+	if main._loot_label_color({"item_def_id": "quest_leaf"}).to_html(false) != "6ee68b":
+		_fail("quest loot label is not green")
+		main.free()
+		return false
+	if main._loot_label_color({"item_def_id": "red_potion"}).to_html(false) != "ff8f70":
+		_fail("consumable loot label is not category-colored")
+		main.free()
+		return false
+	if main._loot_label_color({"item_def_id": "cave_blade", "rarity": "magic"}).to_html(false) != "93c5fd":
+		_fail("magic equipment loot label is not magic-colored")
+		main.free()
+		return false
+	if main._loot_label_color({"item_def_id": "cave_blade", "rarity": "rare"}).to_html(false) != "f4d481":
+		_fail("rare equipment loot label is not rare-colored")
+		main.free()
+		return false
+	if main._loot_label_color({"item_def_id": "future_item"}).to_html(false) != "e8dcc8":
+		_fail("unknown loot label did not fall back to common rarity color")
+		main.free()
+		return false
+
+	var gold_node := main._make_loot_node({"item_def_id": "gold", "rarity": "common"})
+	var gold_label := gold_node.find_child("LootLabel", true, false) as Label3D
+	if gold_label == null or gold_label.modulate.to_html(false) != "ffd75e":
+		_fail("gold loot node label color mismatch")
+		gold_node.free()
+		main.free()
+		return false
+	gold_node.free()
+
+	var loot_a := _make_labelled_loot_node()
+	var loot_b := _make_labelled_loot_node()
+	main.entities = {
+		"loot_a": {"node": loot_a, "type": "loot", "item_def_id": "gold"},
+		"loot_b": {"node": loot_b, "type": "loot", "item_def_id": "cave_blade"},
+	}
+	main.loot_ids = ["loot_a", "loot_b"]
+	main.hovered_loot_id = "loot_a"
+	main.loot_label_reveal_held = false
+	main._refresh_loot_label_visibility()
+	var label_a := loot_a.find_child("LootLabel", true, false) as Label3D
+	var label_b := loot_b.find_child("LootLabel", true, false) as Label3D
+	if label_a == null or label_b == null or not label_a.visible or label_b.visible:
+		_fail("hover visibility did not isolate one loot label")
+		loot_a.free()
+		loot_b.free()
+		main.free()
+		return false
+	if label_a.modulate.to_html(false) != "ffd75e":
+		_fail("hovered loot label did not use full item color")
+		loot_a.free()
+		loot_b.free()
+		main.free()
+		return false
+	main.loot_label_reveal_held = true
+	main._refresh_loot_label_visibility()
+	if not label_a.visible or not label_b.visible:
+		_fail("ALT reveal visibility did not show all loot labels")
+		loot_a.free()
+		loot_b.free()
+		main.free()
+		return false
+	var label_b_full := main._loot_label_color({"item_def_id": "cave_blade"})
+	if label_a.modulate.to_html(false) != "ffd75e":
+		_fail("ALT-hovered loot label did not stay highlighted")
+		loot_a.free()
+		loot_b.free()
+		main.free()
+		return false
+	if label_b.modulate.r >= label_b_full.r or label_b.modulate.g >= label_b_full.g or label_b.modulate.b >= label_b_full.b:
+		_fail("ALT-only loot label did not dim below full item color")
+		loot_a.free()
+		loot_b.free()
+		main.free()
+		return false
+	main.loot_label_reveal_held = false
+	main.hovered_loot_id = ""
+	main._refresh_loot_label_visibility()
+	if label_a.visible or label_b.visible:
+		_fail("loot labels remained visible after reveal and hover cleared")
+		loot_a.free()
+		loot_b.free()
+		main.free()
+		return false
+
+	loot_a.free()
+	loot_b.free()
+	main.free()
+	return true
+
+
 func _make_mount_root() -> Node3D:
 	var mount := Node3D.new()
 	mount.name = "CharacterVisual"
@@ -203,6 +307,15 @@ func _make_mount_root() -> Node3D:
 		mount.add_child(socket)
 	get_root().add_child(mount)
 	return mount
+
+
+func _make_labelled_loot_node() -> Node3D:
+	var node := Node3D.new()
+	var label := Label3D.new()
+	label.name = "LootLabel"
+	label.visible = false
+	node.add_child(label)
+	return node
 
 
 func _fail(msg: String) -> void:

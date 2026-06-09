@@ -1,0 +1,27 @@
+server/internal/game/game_replay_test.go
+  s_f5a0c890eb1525::t_8b3846bb007e87 18
+  s_f5a0c890eb1525::t_e80c3144417c83 19-22
+server/internal/game/game_test.go
+  s_f5a0c890eb1525::t_53940c11a0f076 3735-3741
+  s_f5a0c890eb1525::t_ae4e76c95b091a 3722-3734,3742-3758
+  s_f5a0c890eb1525::t_ca0781c261498f 1025-1038
+server/internal/game/sim.go
+  s_f5a0c890eb1525::t_e852feb53a3577 3060-3062
+  s_f5a0c890eb1525::t_b8bf755ab8cda1 62,3045,3047,3088-3094
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "06b07e55aa32230c23feffd723fb9e55c1292227",
+  "prompts": {},
+  "sessions": {
+    "s_f5a0c890eb1525": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaa25-c485-7892-9394-470d6225b5b6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

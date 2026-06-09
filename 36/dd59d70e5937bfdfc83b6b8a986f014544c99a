@@ -1,0 +1,118 @@
+client/tests/test_golden.gd
+  s_7782e8b3c9750f::t_8ca0a34811dac3 483-498,500-501,504-543
+tools/bot/run.py
+  s_7782e8b3c9750f::t_0e9c0909d8c9fd 514-517,1045-1048
+  s_7782e8b3c9750f::t_eec54e58fde21e 2665-2668,2942-2946
+  s_7782e8b3c9750f::t_133a7cd4f7afd3 1037-1043
+  s_7782e8b3c9750f::t_24e4417ba870af 2359-2364,2367-2425
+  s_7782e8b3c9750f::t_23265dbe9770df 2365-2366
+  s_7782e8b3c9750f::t_568e576938235a 2213-2223
+client/scripts/main.gd
+  s_7782e8b3c9750f::t_bd6c8785f83205 967
+tools/bot/scenarios/client/16_vendor_item_comparison.json
+  s_7782e8b3c9750f::t_18c3a0cef7071c 38,40
+shared/protocol/session_snapshot.v4.schema.json
+  s_7782e8b3c9750f::t_50b1850e12a66b 88-90,124-126,149-192
+shared/protocol/examples/session_snapshot.json
+  s_7782e8b3c9750f::t_f3e45fac3d50f6 37,40
+server/internal/game/game_test.go
+  s_7782e8b3c9750f::t_fb357179f297a7 1852-1856
+  s_7782e8b3c9750f::t_d64ee1fe018e80 3459-3486
+  s_7782e8b3c9750f::t_69596b2b1ab8b6 1887,1889-1906
+  s_7782e8b3c9750f::t_7a8feb22e9b67f 1850-1851,1857-1886,1888,1907-1923
+  s_7782e8b3c9750f::t_4cec809ada811d 3487-3497
+client/scripts/bot_scenario_runner.gd
+  s_7782e8b3c9750f::t_c21e66ddc23973 30,60,488-489,786-817,903-909
+tools/bot/scenarios/client/17_equipment_requirements_and_preview.json
+  s_7782e8b3c9750f::t_ac00580fb7ce08 1-25
+client/scripts/item_tooltip_panel.gd
+  s_7782e8b3c9750f::t_e3559bd505b498 196-211
+  s_7782e8b3c9750f::t_cd362eca854e35 5,126,154,160
+docs/specs/v43_spec-equipment-requirements-and-preview.md
+  s_7782e8b3c9750f::t_752b05aa517724 1-176
+tools/bot/scenarios/30_vendor_appraisal_quotes.json
+  s_7782e8b3c9750f::t_2d21f5d5071d48 21,23,36-37
+shared/rules/item_templates.v0.json
+  s_7782e8b3c9750f::t_0424fddcf5f93d 49-66
+tools/validate_shared.py
+  s_7782e8b3c9750f::t_2f8bb6daed1180 168,549-554,592-629
+shared/assets/item_presentations.v0.json
+  s_7782e8b3c9750f::t_981077451b9587 20-23
+client/scripts/inventory_panel.gd
+  s_7782e8b3c9750f::t_7053b6d7cb4ad9 227-228,756,819-829,836-837,886,922-940,971-976,987-1022,1033-1042
+  s_7782e8b3c9750f::t_10a985b7073386 830,832-835,858,977-986
+  s_7782e8b3c9750f::t_ed44f7305708cf 831
+server/internal/game/sim.go
+  s_7782e8b3c9750f::t_4a87942ac753f3 4874-4875
+  s_7782e8b3c9750f::t_3328984384e5d8 2419-2432
+  s_7782e8b3c9750f::t_12139db5dd0ae5 2303-2305
+  s_7782e8b3c9750f::t_7a39cb8c941a90 4921,4923,4925-4926,4961-4970,4974-4977,4997,5016
+  s_7782e8b3c9750f::t_695480503d1db9 4847-4849,4851
+  s_7782e8b3c9750f::t_ce5a1db9661648 1532,1595,1670,1723,1751,1797,1823,1888,2184,2335,2345,2386,2414,2471,2626,2719,2768,2786,3144,3197,3533,3592,3621,3717,5342,5347
+  s_7782e8b3c9750f::t_d3f32db9079658 4766-4846,4850,4852-4873,4876-4920,4922,4924,4927-4960,4971-4972
+  s_7782e8b3c9750f::t_1c974f1eeccaf4 2724,3932
+docs/plans/v43_2026-06-09-equipment-requirements-and-preview.md
+  s_7782e8b3c9750f::t_b8b2e5b275be64 3,19,60-63,80,82,84,86,88,104-106,108-109,111,113,126,128,131,144-145,147,150,152-155,169,171,185-192
+  s_7782e8b3c9750f::t_d672ad88ef874b 172,193
+  s_7782e8b3c9750f::t_c97608e17a35a3 43,73
+  s_7782e8b3c9750f::t_0ffc13f91bbd33 1-2,4-18,20-42,44-59,64-72,74-79,81,83,85,87,89-103,107,110,112,114-125,127,129-130,132-143,146,148-149,151,156-168,170,173-184,194-201
+shared/golden/equipment_requirements.json
+  s_7782e8b3c9750f::t_9fd29f8fa8c0a6 1-23
+docs/PROGRESS.md
+  s_7782e8b3c9750f::t_3bda3e4f1a79b4 14,61,124,1132-1133,1294-1298,1305-1306
+shared/protocol/examples/state_delta.json
+  s_7782e8b3c9750f::t_f3e45fac3d50f6 26,31,98-100,127-129
+client/scripts/shop_panel.gd
+  s_7782e8b3c9750f::t_c32d415f1da411 680,682-685,844-845
+  s_7782e8b3c9750f::t_5f117f0c5f77a2 160-161,521-522,545-546,561-580,669-679,686-687,727,763-781,846-857,860-869
+  s_7782e8b3c9750f::t_67c2eb8b9bc35f 681
+server/internal/game/types.go
+  s_7782e8b3c9750f::t_0e2a72d9b0788b 41-43,61-63,129-154,199-201,238-240
+  s_7782e8b3c9750f::t_4a87942ac753f3 19-40,44-49,54-60,64-66,189-198,202-207,229-237,241-244
+shared/rules/worlds.v0.json
+  s_7782e8b3c9750f::t_08ad41166ff833 499-508
+tools/bot/test_protocol.py
+  s_7782e8b3c9750f::t_22a6a164d46ecd 242-250,638-698
+shared/golden/equipment_requirements.v0.schema.json
+  s_7782e8b3c9750f::t_5ed0c5840bf112 1-64
+shared/assets/item_visuals.v0.json
+  s_7782e8b3c9750f::t_981077451b9587 34-43
+server/internal/game/shop_test.go
+  s_7782e8b3c9750f::t_6eb6e75e9c204a 250-347
+server/internal/game/shop.go
+  s_7782e8b3c9750f::t_77aa8f5415ae68 29,39-41,80,83-85,102-104,231-233,238-250
+  s_7782e8b3c9750f::t_a1c0d2d5b29a9a 299-304,314-328
+  s_7782e8b3c9750f::t_704beae2a148d2 210
+  s_7782e8b3c9750f::t_4a87942ac753f3 81-82,222-230,234-237
+tools/bot/scenarios/31_equipment_requirements_and_preview.json
+  s_7782e8b3c9750f::t_fd1c1a20e0bd2b 1-95
+server/internal/game/rules.go
+  s_7782e8b3c9750f::t_922b6a6c7f2f5d 805-811
+  s_7782e8b3c9750f::t_6f23b95f64ca4e 1825-1833
+client/tests/test_shop_panel.gd
+  s_7782e8b3c9750f::t_00157a6f3050b5 30,38,64-65,104-105
+  s_7782e8b3c9750f::t_15c7afbf32e732 54-55,67-68,97-100,106-107,109
+skills/showme/scripts/visual_capture.gd
+  s_7782e8b3c9750f::t_f5bdf36fa0a3d2 13,151-152,165-167,242-263,265
+  s_7782e8b3c9750f::t_ebe6233bf4c65c 264
+shared/rules/item_templates.v0.schema.json
+  s_7782e8b3c9750f::t_5b4e2b30219341 71-75
+shared/protocol/state_delta.v4.schema.json
+  s_7782e8b3c9750f::t_7508de7b075b9e 68-70,91-93,114-116,172-174,198-241
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "36dd59d70e5937bfdfc83b6b8a986f014544c99a",
+  "prompts": {},
+  "sessions": {
+    "s_7782e8b3c9750f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ead00-7cc3-7f53-a150-35e60f702a71",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

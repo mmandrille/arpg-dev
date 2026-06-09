@@ -1,0 +1,86 @@
+client/tests/test_client_bot.gd
+  s_77074fe6e29170::t_61ce111b13887a 225
+  s_77074fe6e29170::t_97a404553be2f3 627-650
+  s_77074fe6e29170::t_a3726c2181b0f9 37-38,53-54
+  s_77074fe6e29170::t_88a45ec071f06a 264-320
+client/scripts/main_menu.gd
+  s_77074fe6e29170::t_08a7b918ed4f1f 4-5,9-10,52-53,58,61-63,67-74
+client/scripts/multiplayer_sessions_panel.gd
+  s_77074fe6e29170::t_d6d8e1b32073cf 8,55,59,86-90,95,98
+docs/plans/v45_2026-06-09-menu-create-join-flow.md
+  s_77074fe6e29170::t_3338cc6b33e852 151-156,170-179
+  s_be66348a4bd706::t_a345e1da7eaaad 1-68,74-88,94-107,116-127,138-150,157-169,180-193,200-206,215-222
+  s_77074fe6e29170::t_ee48f1865ec84d 69-73,89-93,108-115
+  s_77074fe6e29170::t_bb6a8aea9d9bf8 128-137
+  s_77074fe6e29170::t_5ce883bde533a2 194-199,207-214
+tools/bot/scenarios/client/08_main_menu_flow.json
+  s_77074fe6e29170::t_98ed2c876a9a90 6
+  s_77074fe6e29170::t_24f5ebbd8299fb 26-28
+  s_77074fe6e29170::t_e5fbaffa12da94 16
+  s_77074fe6e29170::t_768871aaa26afc 5,9-13,17,22,24-25,29-33,36,49,51-59,61
+docs/specs/v45_spec-menu-create-join-flow.md
+  s_be66348a4bd706::t_439a058e67dde0 1-276
+client/scripts/character_select_panel.gd
+  s_77074fe6e29170::t_326ab3534f338e 10-12,26,38-45,50-56,61,66-67,70-71,94-114,218
+client/scripts/settings_panel.gd
+  s_77074fe6e29170::t_17fcd777f750bc 8,11,13,26,32,62-68,105-116,143-161
+  s_77074fe6e29170::t_3a34ebbf55b600 76,80-81
+client/scripts/main.gd
+  s_77074fe6e29170::t_08b83de7b7b811 71-75,158,280-281,352-354,357-372,376,380,383,393-396,404,406,412,414,429,435-436,438,440,457,466-476,481-485,487,507-513,523,536
+  s_77074fe6e29170::t_748506eb1c2614 417-428
+  s_77074fe6e29170::t_0676bcd10871af 1572
+  s_77074fe6e29170::t_c8c184306218a3 2313-2314,2320,2341
+  s_77074fe6e29170::t_ee23aa3979cf84 3780-3783,3785,3787,3789,3799-3802,3812,3845-3846
+  s_77074fe6e29170::t_957b32d4f7735c 3511-3512,3514-3516,3524,3528,3530-3531
+  s_77074fe6e29170::t_125a0520ee65aa 545-550,558-563,595-601,607
+tools/bot/scenarios/client/20_menu_create_join_flow.json
+  s_77074fe6e29170::t_87446380250842 6
+  s_77074fe6e29170::t_50fa05955b7e8b 22
+  s_77074fe6e29170::t_bd53fb4bc3a997 32-34
+  s_77074fe6e29170::t_1ff724e1574c35 1-5,7-21,23-31,35-62
+client/scripts/client_settings.gd
+  s_77074fe6e29170::t_17a21d172d6d13 6-8,14-17,23,55-69,91-96,102,109,124,166-169
+client/scripts/bot_controller.gd
+  s_77074fe6e29170::t_500483db3a3cc9 142-143,193-195
+  s_77074fe6e29170::t_952bdb077e128e 465-466
+docs/PROGRESS.md
+  s_77074fe6e29170::t_fbfd296ae309fb 1380,1384,1391
+  s_77074fe6e29170::t_5484c00c178a5b 1106-1132
+  s_77074fe6e29170::t_fbe4193992e15d 14,63,128
+  s_77074fe6e29170::t_534dbc8ef2ab58 1371-1375
+  s_77074fe6e29170::t_4cef77258f9462 1178,1201
+client/tests/test_coop_client.gd
+  s_77074fe6e29170::t_92e6adf15d051a 8,28-29,261-263,265-283,285-289
+  s_77074fe6e29170::t_04bd9e7c17f03f 241,264,284
+client/scripts/bot_scenario_runner.gd
+  s_77074fe6e29170::t_4926fea600acf0 1305-1309,1642-1643
+  s_77074fe6e29170::t_fe58fe2bfc3ce1 1206-1301
+  s_77074fe6e29170::t_396fd23ca96a94 23-24,48-49,69-71,76
+  s_77074fe6e29170::t_c657467d04c298 319-320,323-328
+  s_77074fe6e29170::t_6c5b6312b3b374 1381-1388
+  s_77074fe6e29170::t_925f60749fe19c 1606-1622
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2f167160c64af9719a758dc826d08c95fe1eee32",
+  "prompts": {},
+  "sessions": {
+    "s_77074fe6e29170": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eae3a-5a90-76d0-b50d-2625e3420931",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_be66348a4bd706": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eadc6-6bb1-7fd2-9bb0-ce2be36490ec",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

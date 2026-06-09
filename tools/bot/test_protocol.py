@@ -26,7 +26,7 @@ from tools.bot.run import (
 
 
 def test_to_ws_url_http():
-    assert to_ws_url("http://localhost:8080", "/v0/ws?session_id=s") == "ws://localhost:8080/v0/ws?session_id=s"
+    assert to_ws_url("http://localhost:8888", "/v0/ws?session_id=s") == "ws://localhost:8888/v0/ws?session_id=s"
 
 
 def test_to_ws_url_https():

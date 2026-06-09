@@ -39,8 +39,8 @@ def make_envelope(
 def to_ws_url(base_url: str, ws_path: str) -> str:
     """Combine an http(s) base URL and a ws path into a ws(s) URL.
 
-    >>> to_ws_url("http://localhost:8080", "/v0/ws?session_id=s")
-    'ws://localhost:8080/v0/ws?session_id=s'
+    >>> to_ws_url("http://localhost:8888", "/v0/ws?session_id=s")
+    'ws://localhost:8888/v0/ws?session_id=s'
     """
     if base_url.startswith("https"):
         scheme, rest = "wss", base_url[len("https"):]

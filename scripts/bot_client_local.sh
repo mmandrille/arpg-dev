@@ -10,8 +10,8 @@ cd "$ROOT"
 source "$ROOT/scripts/quiet_helpers.sh"
 
 DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
-ADDR="${ARPG_ADDR:-:8080}"
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+ADDR="${ARPG_ADDR:-:8888}"
+BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
 

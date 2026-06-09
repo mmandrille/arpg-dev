@@ -217,7 +217,7 @@ func _ready() -> void:
 	_load_item_templates()
 	_load_item_presentations()
 	_load_dungeon_generation()
-	var base_url := _env("ARPG_BASE_URL", "http://localhost:8080")
+	var base_url := _env("ARPG_BASE_URL", "http://localhost:8888")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
 
 	client = NetClientScript.new(base_url)

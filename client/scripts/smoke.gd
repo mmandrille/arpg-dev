@@ -62,7 +62,7 @@ var item_id: String = ""
 func _initialize() -> void:
 	if not _verify_inventory_panel_model():
 		return
-	base = _env("BASE_URL", "http://localhost:8080")
+	base = _env("BASE_URL", "http://localhost:8888")
 	dev = _env("DEV_TOKEN", "local-dev-token")
 	debug_token = _env("DEBUG_TOKEN", "local-debug-token")
 

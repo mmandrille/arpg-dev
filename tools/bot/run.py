@@ -11,7 +11,7 @@ Progress goes to stderr; with --print-session-id the recorded session id is
 written to stdout (and nothing else) so it can be captured for replay.
 
 Usage:
-    python -m tools.bot.run --base-url http://localhost:8080 \
+    python -m tools.bot.run --base-url http://localhost:8888 \
         --dev-token local-dev-token --debug-token local-debug-token \
         [--scenario all] [--write-manifest path] [--print-session-id]
 """
@@ -3418,7 +3418,7 @@ async def run_session_browser_uncapped_coop(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="arpg headless protocol bot")
-    parser.add_argument("--base-url", default="http://localhost:8080")
+    parser.add_argument("--base-url", default="http://localhost:8888")
     parser.add_argument("--dev-token", default="local-dev-token")
     parser.add_argument("--debug-token", default="local-debug-token")
     parser.add_argument("--email", default="bot@example.test")

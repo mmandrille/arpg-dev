@@ -11,10 +11,10 @@ SERVER_DIR := $(ROOT)/server
 
 # Connection + runtime settings (override on the command line as needed).
 DATABASE_URL ?= postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable
-ADDR ?= :8080
+ADDR ?= :8888
 DEV_TOKEN ?= local-dev-token
 DEBUG_TOKEN ?= local-debug-token
-BASE_URL ?= http://localhost:8080
+BASE_URL ?= http://localhost:8888
 GODOT ?= godot
 SESSION_ID ?=
 

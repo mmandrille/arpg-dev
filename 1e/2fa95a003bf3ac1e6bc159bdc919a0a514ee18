@@ -1,0 +1,21 @@
+tools/bot/run.py
+  s_27577ac914d158::t_5be6a0fa3740c8 33
+tools/bot/test_protocol.py
+  s_27577ac914d158::t_3e6db6eaa1fed8 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1e2fa95a003bf3ac1e6bc159bdc919a0a514ee18",
+  "prompts": {},
+  "sessions": {
+    "s_27577ac914d158": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df627ccd-97cc-45eb-813d-99c038bf4269",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+shared/golden/ranged_projectile.json
+  s_0f1bceeefb38b1::t_adc5bfa7e23155 13,24
+client/tests/test_golden.gd
+  s_0f1bceeefb38b1::t_ca23408c76ff9e 721-729
+shared/rules/monsters.v0.json
+  s_0f1bceeefb38b1::t_b23bea2742f616 9,21,33,45,57,69,85,102,123,135,147
+server/internal/game/shop_test.go
+  s_0f1bceeefb38b1::t_3559961e4d11eb 789
+tools/validate_shared.py
+  s_0f1bceeefb38b1::t_da98ed12e85b19 542-544,547-555,591-596
+shared/golden/shop_appraisals.json
+  s_0f1bceeefb38b1::t_60ff1b3f24fb5a 40
+shared/rules/combat.v0.json
+  s_0f1bceeefb38b1::t_74f4bdcefafdc1 3
+client/tests/test_coop_client.gd
+  s_0f1bceeefb38b1::t_db02a27716dfb5 408,421
+  s_0f1bceeefb38b1::t_95229adc946b96 44,406-407,409-420
+server/internal/game/rules.go
+  s_0f1bceeefb38b1::t_be6ef77cb8430b 138-149,881,884-892
+server/internal/game/shop.go
+  s_0f1bceeefb38b1::t_68b01a4f8c5f25 885,891-895
+client/scripts/shop_panel.gd
+  s_0f1bceeefb38b1::t_faecb158d22a77 905,909-912
+shared/rules/character_progression.v0.json
+  s_0f1bceeefb38b1::t_8305c9f8d79e29 125
+shared/rules/character_progression.v0.schema.json
+  s_0f1bceeefb38b1::t_186ca5c0d8c537 63-74,90-95,110-121
+shared/golden/character_progression.json
+  s_0f1bceeefb38b1::t_f089c8db21f24a 186-214
+  s_0f1bceeefb38b1::t_93af0f6178e5c5 29,58,87,116,147,176
+server/internal/game/game_test.go
+  s_0f1bceeefb38b1::t_9005b563d15fb3 1052-1058,2840
+shared/protocol/examples/state_delta.json
+  s_0f1bceeefb38b1::t_575f4438f3069a 56,158
+shared/protocol/examples/session_snapshot.json
+  s_0f1bceeefb38b1::t_81ce67ae7c1165 80
+client/scripts/stash_panel.gd
+  s_0f1bceeefb38b1::t_cc02a851146101 565,569-572
+client/scripts/character_stats_panel.gd
+  s_0f1bceeefb38b1::t_f36f412cba7ffa 24-25,79-83,89,176,199-206,223,225,234
+server/internal/game/sim.go
+  s_0f1bceeefb38b1::t_ffa52c42d9cd9b 4942,4961-5004,5409
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "aacf22b1408a3abf8fd705af123888aa953bc9ec",
+  "prompts": {},
+  "sessions": {
+    "s_0f1bceeefb38b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb333-0d41-75b0-82de-79fc5e756865",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

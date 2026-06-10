@@ -233,6 +233,52 @@
       "sell_appraisals": []
     },
     {
+      "event_type": "shop_opened",
+      "entity_id": "1016",
+      "shop_id": "town_mystery_seller",
+      "offers": [
+        {
+          "offer_id": "mystery:wp:-3:main_hand:000",
+          "kind": "mystery",
+          "concealed": true,
+          "mystery_label": "Unidentified Main Hand",
+          "slot": "main_hand",
+          "category": "equipment",
+          "buy_price": 430,
+          "source": "common_dungeon_mob",
+          "source_depth_min": 1,
+          "source_depth_max": 3
+        }
+      ],
+      "sell_appraisals": []
+    },
+    {
+      "event_type": "shop_purchase",
+      "entity_id": "1016",
+      "shop_id": "town_mystery_seller",
+      "offer_id": "mystery:wp:-3:main_hand:000",
+      "item_instance_id": "1017",
+      "price": 430,
+      "total_gold": 120,
+      "item": {
+        "item_instance_id": "1017",
+        "item_def_id": "cave_blade",
+        "item_template_id": "cave_blade",
+        "display_name": "Magic Cave Blade",
+        "rarity": "magic",
+        "rolled_stats": { "damage_min": 3, "damage_max": 6 },
+        "requirements": { "level": 1 },
+        "requirement_status": [{ "stat": "level", "required": 1, "current": 1, "met": true }],
+        "requirements_met": true,
+        "equip_preview": { "slot": "main_hand", "requirements_met": true, "deltas": [{ "stat": "damage_min", "current": 2, "preview": 3, "delta": 1 }, { "stat": "damage_max", "current": 4, "preview": 6, "delta": 2 }] },
+        "effect_ids": [],
+        "slot": "main_hand",
+        "equipped": false
+      },
+      "offers": [],
+      "sell_appraisals": []
+    },
+    {
       "event_type": "stash_opened",
       "entity_id": "1015",
       "stash_id": "account_stash",

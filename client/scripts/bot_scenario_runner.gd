@@ -52,7 +52,7 @@ const STEP_TYPES_ACTION := [
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_sell_item",
 	"click_stash_deposit_item", "click_stash_withdraw_item", "click_stash_deposit_gold",
-	"click_stash_withdraw_gold",
+	"click_stash_withdraw_gold", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -97,6 +97,7 @@ const ALL_STEP_TYPES: Array = [
 	"wait_stash_panel", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "click_stash_deposit_item", "click_stash_withdraw_item",
 	"click_stash_deposit_gold", "click_stash_withdraw_gold",
+	"click_waypoint_level",
 	"wait_remote_player_count", "assert_remote_player_count",
 ]
 
@@ -1099,6 +1100,21 @@ func _assert_shop_detail_rows(label: String, step: Dictionary, rows: Array, pric
 				label, str(rec), _step_index, str(scenario.get("id", "?"))
 			])
 			return false
+		if bool(step.get("requires_concealed", false)) and not bool(rec.get("concealed", false)):
+			_fail("%s failed: missing concealed flag row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("requires_mystery_label", false)) and str(rec.get("mystery_label", "")) == "":
+			_fail("%s failed: missing mystery label row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+		if bool(step.get("forbids_item_identity", false)) and _row_has_item_identity(rec):
+			_fail("%s failed: item identity leaked row=%s step=%d scenario=%s" % [
+				label, str(rec), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
 		if step.has("summary_contains") and not _row_summary_contains(rec, step.get("summary_contains", "")):
 			_fail("%s failed: summary_contains=%s row=%s step=%d scenario=%s" % [
 				label, str(step.get("summary_contains", "")), str(rec), _step_index, str(scenario.get("id", "?"))
@@ -1117,6 +1133,8 @@ func _shop_offer_count_matches(step: Dictionary, state: Dictionary) -> bool:
 			key = "fixed_offer_count"
 		"generated":
 			key = "generated_offer_count"
+		"mystery":
+			key = "mystery_offer_count"
 		"buyback":
 			key = "buyback_offer_count"
 	var got := int(panel.get(key, 0))
@@ -1174,9 +1192,15 @@ func _matching_shop_offer_rows(step: Dictionary, state: Dictionary) -> Array:
 			continue
 		if step.has("item_template_id") and str(rec.get("item_template_id", "")) != str(step.get("item_template_id", "")):
 			continue
-		if step.has("source_depth_min") and int(rec.get("source_depth", 0)) < int(step.get("source_depth_min", 0)):
+		if step.has("concealed") and bool(rec.get("concealed", false)) != bool(step.get("concealed", false)):
 			continue
-		if step.has("source_depth_max") and int(rec.get("source_depth", 0)) > int(step.get("source_depth_max", 0)):
+		if step.has("mystery_label") and str(rec.get("mystery_label", "")) != str(step.get("mystery_label", "")):
+			continue
+		var row_source_min := int(rec.get("source_depth_min", rec.get("source_depth", 0)))
+		var row_source_max := int(rec.get("source_depth_max", rec.get("source_depth", 0)))
+		if step.has("source_depth_min") and row_source_min < int(step.get("source_depth_min", 0)):
+			continue
+		if step.has("source_depth_max") and row_source_max > int(step.get("source_depth_max", 0)):
 			continue
 		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
 			continue
@@ -1200,6 +1224,15 @@ func _matching_shop_sell_rows(step: Dictionary, state: Dictionary) -> Array:
 			continue
 		out.append(rec)
 	return out
+
+
+func _row_has_item_identity(row: Dictionary) -> bool:
+	if int(row.get("identity_field_count", 0)) > 0:
+		return true
+	for key in ["item_def_id", "item_template_id", "rarity"]:
+		if str(row.get(key, "")) != "":
+			return true
+	return false
 
 
 func _row_summary_lines(row: Dictionary) -> Array:
@@ -1552,6 +1585,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"assert_shop_offer_details", "assert_shop_sell_details", \
 		"click_shop_buy_offer", "click_shop_sell_item":
 			return "shop=%s" % str(step)
+		"click_waypoint_level":
+			return "target_level=%s" % str(step.get("target_level", ""))
 		"wait_stash_panel", "assert_stash_item_count", "assert_stash_gold", "assert_stash_panel_visible", \
 		"click_stash_deposit_item", "click_stash_withdraw_item", \
 		"click_stash_deposit_gold", "click_stash_withdraw_gold":
@@ -1822,6 +1857,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "click_entity":
 		if str(step.get("entity_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type" % [index, stype]
+	if stype == "click_waypoint_level":
+		if not step.has("target_level"):
+			return "client_steps[%d] (%s) requires target_level" % [index, stype]
 	if stype == "click_floor":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]

@@ -21,6 +21,7 @@
             "items": { "$ref": "#/$defs/fixed_offer" }
           },
           "generated_offers": { "$ref": "#/$defs/generated_offers" },
+          "mystery_offers": { "$ref": "#/$defs/mystery_offers" },
           "pricing": { "$ref": "#/$defs/pricing" },
           "buyback": { "$ref": "#/$defs/buyback" }
         }
@@ -52,6 +53,27 @@
         },
         "max_rarity": { "type": "string", "enum": ["common", "magic", "rare"] },
         "refresh_on": { "type": "string", "enum": ["new_non_town_waypoint"] },
+        "max_roll_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "mystery_offers": {
+      "type": "object",
+      "required": ["enabled", "eligible_slots", "source", "source_depth_window", "min_rarity", "max_rarity", "refresh_on", "price_multiplier", "max_roll_attempts"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "eligible_slots": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["main_hand", "off_hand", "head", "chest", "gloves", "belt", "boots", "ring", "amulet"] }
+        },
+        "source": { "type": "string", "enum": ["common_dungeon_mob"] },
+        "source_depth_window": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "min_rarity": { "type": "string", "enum": ["magic", "rare"] },
+        "max_rarity": { "type": "string", "enum": ["magic", "rare"] },
+        "refresh_on": { "type": "string", "enum": ["new_non_town_waypoint"] },
+        "price_multiplier": { "type": "number", "exclusiveMinimum": 1 },
         "max_roll_attempts": { "type": "integer", "minimum": 1 }
       }
     },

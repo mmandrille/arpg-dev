@@ -32,6 +32,11 @@
       "initial_state": "ready",
       "shop_id": "town_vendor"
     },
+    "town_mystery_seller": {
+      "name": "Mystery Seller",
+      "initial_state": "ready",
+      "shop_id": "town_mystery_seller"
+    },
     "town_stash": {
       "name": "Town Stash",
       "initial_state": "ready",

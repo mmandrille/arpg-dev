@@ -427,6 +427,7 @@ func (s *Store) DeleteStaleEmptySessions(ctx context.Context, updatedBefore time
 			`DELETE FROM session_start_hotbar_slots WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_item_instances WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_waypoints WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_character_skill_ranks WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_character_progression WHERE session_id = ANY($1)`,
 			`DELETE FROM session_members WHERE session_id = ANY($1)`,
 		}

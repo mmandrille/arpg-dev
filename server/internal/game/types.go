@@ -259,9 +259,11 @@ type SkillCooldownView struct {
 type ShopOfferView struct {
 	OfferID           string                  `json:"offer_id"`
 	Kind              string                  `json:"kind"`
-	ItemDefID         string                  `json:"item_def_id"`
+	Concealed         bool                    `json:"concealed,omitempty"`
+	MysteryLabel      string                  `json:"mystery_label,omitempty"`
+	ItemDefID         string                  `json:"item_def_id,omitempty"`
 	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
-	DisplayName       string                  `json:"display_name"`
+	DisplayName       string                  `json:"display_name,omitempty"`
 	Rarity            string                  `json:"rarity,omitempty"`
 	Slot              string                  `json:"slot,omitempty"`
 	Category          string                  `json:"category,omitempty"`
@@ -277,6 +279,8 @@ type ShopOfferView struct {
 	Source            string                  `json:"source,omitempty"`
 	Depth             int                     `json:"depth,omitempty"`
 	SourceDepth       int                     `json:"source_depth,omitempty"`
+	SourceDepthMin    int                     `json:"source_depth_min,omitempty"`
+	SourceDepthMax    int                     `json:"source_depth_max,omitempty"`
 }
 
 // PersistedShopStockItem is a generated shop-stock row carried between the
@@ -407,6 +411,7 @@ type Event struct {
 	SellAppraisals     []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
 	OfferID            string                  `json:"offer_id,omitempty"`
 	Price              *int                    `json:"price,omitempty"`
+	Item               *ItemView               `json:"item,omitempty"`
 	StashID            string                  `json:"stash_id,omitempty"`
 	StashItemID        string                  `json:"stash_item_id,omitempty"`
 	StashItems         []StashItemView         `json:"stash_items,omitempty"`

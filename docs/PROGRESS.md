@@ -11,7 +11,7 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v50 — `account-stash-storage` |
+| **Latest completed slice** | v51 — `mystery-seller-core` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 |
 | **Next slice** | TBD |
@@ -66,6 +66,7 @@ v47_* = shop-stock-lifecycle
 v48_* = coop-rewards-and-scaling
 v49_* = gold-autopickup-and-shared-loot-rules
 v50_* = account-stash-storage
+v51_* = mystery-seller-core
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -136,6 +137,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v48** | `coop-rewards-and-scaling` | Complete (`make ci` green) | [`v48_spec-coop-rewards-and-scaling.md`](specs/v48_spec-coop-rewards-and-scaling.md) | [`v48_2026-06-09-coop-rewards-and-scaling.md`](plans/v48_2026-06-09-coop-rewards-and-scaling.md) |
 | **v49** | `gold-autopickup-and-shared-loot-rules` | Complete (`make ci` green) | [`v49_spec-gold-autopickup-and-shared-loot-rules.md`](specs/v49_spec-gold-autopickup-and-shared-loot-rules.md) | [`v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md`](plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md) |
 | **v50** | `account-stash-storage` | Complete (`make ci` green) | [`v50_spec-account-stash-storage.md`](specs/v50_spec-account-stash-storage.md) | [`v50_2026-06-10-account-stash-storage.md`](plans/v50_2026-06-10-account-stash-storage.md) |
+| **v51** | `mystery-seller-core` | Complete (`make ci` green) | [`v51_spec-mystery-seller-core.md`](specs/v51_spec-mystery-seller-core.md) | [`v51_2026-06-10-mystery-seller-core.md`](plans/v51_2026-06-10-mystery-seller-core.md) |
 
 ---
 
@@ -1264,6 +1266,29 @@ capacity upgrades, item stacks, direct equip/use/sell/upgrade from stash, player
 crafting/material tabs, arbitrary numeric gold entry, production stash art/audio, or real-time
 cross-session push for another already-open session on the same account.
 
+### v51 — Mystery seller core
+
+**Proves:** Town can host a server-owned blind-buy equipment seller without leaking item identity
+before purchase.
+
+- Shared rules add `town_mystery_seller` on `dungeon_levels` town level `0`; protocol v8 adds
+  concealed `mystery` shop rows and post-purchase revealed item payloads.
+- Mystery stock is deterministic, per-character, finite, durable through `character_shop_stock`,
+  and replay-safe through session-start shop stock snapshots.
+- The seller rolls one hidden row per supported equipment slot from the character progression
+  source-depth window, requires `magic` or `rare` rarity, and prices rows through a conservative
+  mystery-specific table with final economy tuning deferred.
+- Concealed rows expose only safe metadata: offer id, kind, category, slot, source-depth bounds,
+  mystery label, availability, and buy price. Actual template, display name, rarity, stats,
+  requirements, effects, comparison, and equip preview remain hidden until purchase.
+- Successful purchases validate gold, range, capacity, availability, and hidden roll integrity,
+  then subtract gold, consume the row, add the revealed item, and emit actor-private purchase,
+  gold, inventory, progression, and refreshed-offer payloads.
+- Protocol bot scenario `37_mystery_seller_core.json` proves funding through dungeon loot vendor
+  sales, hidden-row assertions, reveal-on-purchase, replay, reconnect, `/state`, and fresh-session
+  consumed-stock persistence; client bot scenario `24_mystery_seller_core.json` proves the live
+  Godot shop panel renders and buys concealed offers.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1541,15 +1566,19 @@ stash contracts, account-owned item/gold persistence, replay-safe session-start 
 server-owned item/gold transfers, owner-private realtime fanout, and protocol/client bot proofs for
 item and gold storage across fresh sessions.
 
+**Mystery seller core is now authoritative.** v51 adds a town mystery seller, protocol v8 concealed
+shop rows, deterministic per-character hidden stock, reveal-on-purchase events, and protocol/client
+bot proofs for hidden offers, purchase reveal, replay, and fresh-session consumed stock.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50 non-goals, ADR-0008 deferred, ADR-0011 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48 non-goals |
-| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, mystery-seller non-common rarity floor, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
-| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, expensive mystery-seller blind-buy gold sink with progression-window stock, clock-based shop refresh | v33/v38/v41/v42/v47 non-goals, ADR-0011, ADR-0012, ADR-0013 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor/stash art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50 non-goals, ADR-0013 |
+| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
+| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51 non-goals, ADR-0013 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |

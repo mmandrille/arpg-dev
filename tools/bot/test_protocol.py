@@ -185,6 +185,70 @@ def test_runtime_assertions_support_shop_offer_count_and_events():
     )
 
 
+def test_runtime_assertions_support_concealed_mystery_offers_and_reveal_event():
+    state = RuntimeState(gold=250)
+    state.shop_offers = {
+        "town_mystery_seller": {
+            "mystery:main_hand:000": {
+                "offer_id": "mystery:main_hand:000",
+                "kind": "mystery",
+                "concealed": True,
+                "mystery_label": "Unidentified main hand",
+                "slot": "main_hand",
+                "category": "weapon",
+                "buy_price": 120,
+                "source_depth_min": 1,
+                "source_depth_max": 3,
+            }
+        }
+    }
+    state.shop_events = [
+        {
+            "event_type": "shop_purchase",
+            "shop_id": "town_mystery_seller",
+            "offer_id": "mystery:main_hand:000",
+            "item": {
+                "item_instance_id": "itm_1",
+                "item_def_id": "cave_blade",
+                "item_template_id": "cave_blade",
+                "display_name": "Bright Cave Blade",
+                "rarity": "magic",
+            },
+        }
+    ]
+
+    run_runtime_assertions(
+        [
+            {
+                "type": "shop_offer_details",
+                "shop_id": "town_mystery_seller",
+                "offer_kind": "mystery",
+                "concealed": True,
+                "equals": 1,
+                "source_depth_min": 1,
+                "source_depth_max": 3,
+                "requires_summary": False,
+                "requires_slot": True,
+                "requires_category": True,
+                "requires_concealed": True,
+                "requires_mystery_label": True,
+                "forbids_item_identity": True,
+            },
+            {
+                "type": "shop_event",
+                "shop_id": "town_mystery_seller",
+                "event_type": "shop_purchase",
+                "offer_kind": "mystery",
+                "requires_revealed_item": True,
+                "rarity_in": ["magic", "rare"],
+                "equals": 1,
+            },
+        ],
+        state,
+        "unit",
+    )
+
+
 def test_shop_purchase_event_refreshes_cached_offers():
     state = RuntimeState(gold=100)
     ingest_message(

@@ -73,10 +73,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v7.schema.json"
+            return PROTOCOL / "session_snapshot.v8.schema.json"
         if name.startswith("state_delta"):
-            return PROTOCOL / "state_delta.v7.schema.json"
-        return PROTOCOL / "messages.v7.schema.json"
+            return PROTOCOL / "state_delta.v8.schema.json"
+        return PROTOCOL / "messages.v8.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 
@@ -194,6 +194,12 @@ def cross_checks(report: Report) -> None:
         PROTOCOL / "session_snapshot.v7.schema.json",
         PROTOCOL / "state_delta.v7.schema.json",
     ]
+    v8_protocol_files = [
+        PROTOCOL / "envelope.v8.schema.json",
+        PROTOCOL / "messages.v8.schema.json",
+        PROTOCOL / "session_snapshot.v8.schema.json",
+        PROTOCOL / "state_delta.v8.schema.json",
+    ]
     missing_v4 = [str(path.relative_to(ROOT)) for path in v4_protocol_files if not path.exists()]
     if missing_v4:
         report.fail("protocol v4 schema set", f"missing {', '.join(missing_v4)}")
@@ -214,13 +220,19 @@ def cross_checks(report: Report) -> None:
         report.fail("protocol v7 schema set", f"missing {', '.join(missing_v7)}")
     else:
         report.ok("protocol v7 schema set is present")
+    missing_v8 = [str(path.relative_to(ROOT)) for path in v8_protocol_files if not path.exists()]
+    if missing_v8:
+        report.fail("protocol v8 schema set", f"missing {', '.join(missing_v8)}")
+    else:
+        report.ok("protocol v8 schema set is present")
 
     messages_v4 = load(PROTOCOL / "messages.v4.schema.json")
     messages_v5 = load(PROTOCOL / "messages.v5.schema.json")
     messages_v6 = load(PROTOCOL / "messages.v6.schema.json")
     messages_v7 = load(PROTOCOL / "messages.v7.schema.json")
+    messages_v8 = load(PROTOCOL / "messages.v8.schema.json")
     actor_fields = {"player_id", "account_id", "character_id"}
-    for protocol_version, messages_schema in (("v4", messages_v4), ("v5", messages_v5), ("v6", messages_v6), ("v7", messages_v7)):
+    for protocol_version, messages_schema in (("v4", messages_v4), ("v5", messages_v5), ("v6", messages_v6), ("v7", messages_v7), ("v8", messages_v8)):
         intent_names = [name for name in messages_schema["$defs"] if name.endswith("_intent") or name == "client_ready"]
         actor_leaks: list[str] = []
         for name in sorted(intent_names):

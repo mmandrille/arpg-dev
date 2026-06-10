@@ -4884,7 +4884,7 @@ func (s *Sim) SkillProgressionView() SkillProgressionView {
 			SkillID:  skillID,
 			Rank:     rank,
 			MaxRank:  def.MaxRank,
-			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank && s.skillRequirementsMet(def),
+			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank && s.skillRequirementsMet(def, rank+1),
 		})
 	}
 	return SkillProgressionView{
@@ -5059,8 +5059,8 @@ func (s *Sim) requirementsMet(requirements map[string]int) bool {
 	return met
 }
 
-func (s *Sim) skillRequirementsMet(def SkillDef) bool {
-	if !s.requirementsMet(skillBaseRequirements(def.Requirements)) {
+func (s *Sim) skillRequirementsMet(def SkillDef, rank int) bool {
+	if !s.requirementsMet(skillRequirementsForRank(def.Requirements, rank)) {
 		return false
 	}
 	for _, prereq := range def.Requirements.Skills {
@@ -5071,13 +5071,18 @@ func (s *Sim) skillRequirementsMet(def SkillDef) bool {
 	return true
 }
 
-func skillBaseRequirements(req SkillRequirementDef) map[string]int {
+func skillRequirementsForRank(req SkillRequirementDef, rank int) map[string]int {
+	if rank < 1 {
+		rank = 1
+	}
+	rankOffset := rank - 1
 	out := map[string]int{}
-	if req.Level > 0 {
-		out["level"] = req.Level
+	level := req.Level + req.LevelPerRank*rankOffset
+	if level > 0 {
+		out["level"] = level
 	}
 	for _, stat := range []string{"str", "dex", "vit", "magic"} {
-		if required := req.Stats[stat]; required > 0 {
+		if required := req.Stats[stat] + req.StatsPerRank[stat]*rankOffset; required > 0 {
 			out[stat] = required
 		}
 	}

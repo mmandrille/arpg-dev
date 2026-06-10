@@ -389,7 +389,8 @@ func _requirement_status(skill_id: String) -> Array:
 	var def := _skill_def(skill_id)
 	var requirements: Dictionary = def.get("requirements", {})
 	var out: Array = []
-	var level_required := int(requirements.get("level", 0))
+	var target_rank := _requirement_target_rank(skill_id)
+	var level_required := _ranked_requirement_value(int(requirements.get("level", 0)), int(requirements.get("level_per_rank", 0)), target_rank)
 	if level_required > 0:
 		var current_level := int(character_progression.get("level", 1))
 		out.append({
@@ -400,10 +401,11 @@ func _requirement_status(skill_id: String) -> Array:
 			"met": current_level >= level_required,
 		})
 	var stats: Dictionary = requirements.get("stats", {})
+	var stats_per_rank: Dictionary = requirements.get("stats_per_rank", {})
 	for stat in ["str", "dex", "vit", "magic"]:
-		if not stats.has(stat):
+		if not stats.has(stat) and not stats_per_rank.has(stat):
 			continue
-		var required := int(stats.get(stat, 0))
+		var required := _ranked_requirement_value(int(stats.get(stat, 0)), int(stats_per_rank.get(stat, 0)), target_rank)
 		if required <= 0:
 			continue
 		var current := _current_stat_value(stat)
@@ -432,6 +434,21 @@ func _requirement_status(skill_id: String) -> Array:
 			"met": current_rank >= required_rank,
 		})
 	return out
+
+
+func _requirement_target_rank(skill_id: String) -> int:
+	var skill := _skill_row(skill_id)
+	var rank := int(skill.get("rank", 0))
+	var max_rank := int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 1))))
+	if max_rank <= 0:
+		max_rank = 1
+	if rank >= max_rank:
+		return max_rank
+	return rank + 1
+
+
+func _ranked_requirement_value(base: int, per_rank: int, rank: int) -> int:
+	return maxi(0, base + per_rank * maxi(0, rank - 1))
 
 
 func _requirements_met(rows: Array) -> bool:

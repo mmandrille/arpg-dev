@@ -10,7 +10,9 @@
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
+        "level_per_rank": 1,
         "stats": { "magic": 15 },
+        "stats_per_rank": { "magic": 5 },
         "skills": []
       },
       "cost": {

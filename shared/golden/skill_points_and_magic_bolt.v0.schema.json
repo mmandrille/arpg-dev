@@ -69,7 +69,7 @@
     },
     "skill": {
       "type": "object",
-      "required": ["skill_id", "class", "tree", "kind", "max_rank", "requirements", "rank_cases"],
+      "required": ["skill_id", "class", "tree", "kind", "max_rank", "requirements", "rank_requirement_cases", "rank_cases"],
       "additionalProperties": false,
       "properties": {
         "skill_id": { "type": "string", "minLength": 1 },
@@ -91,6 +91,7 @@
           "additionalProperties": false,
           "properties": {
             "level": { "type": "integer", "minimum": 1 },
+            "level_per_rank": { "type": "integer", "minimum": 0 },
             "stats": {
               "type": "object",
               "additionalProperties": false,
@@ -99,6 +100,16 @@
                 "dex": { "type": "integer", "minimum": 1 },
                 "vit": { "type": "integer", "minimum": 1 },
                 "magic": { "type": "integer", "minimum": 1 }
+              }
+            },
+            "stats_per_rank": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "str": { "type": "integer", "minimum": 0 },
+                "dex": { "type": "integer", "minimum": 0 },
+                "vit": { "type": "integer", "minimum": 0 },
+                "magic": { "type": "integer", "minimum": 0 }
               }
             },
             "skills": {
@@ -110,6 +121,29 @@
                 "properties": {
                   "skill_id": { "type": "string", "minLength": 1 },
                   "rank": { "type": "integer", "minimum": 1 }
+                }
+              }
+            }
+          }
+        },
+        "rank_requirement_cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["rank", "level", "stats"],
+            "additionalProperties": false,
+            "properties": {
+              "rank": { "type": "integer", "minimum": 1 },
+              "level": { "type": "integer", "minimum": 1 },
+              "stats": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "str": { "type": "integer", "minimum": 1 },
+                  "dex": { "type": "integer", "minimum": 1 },
+                  "vit": { "type": "integer", "minimum": 1 },
+                  "magic": { "type": "integer", "minimum": 1 }
                 }
               }
             }

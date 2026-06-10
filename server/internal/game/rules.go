@@ -457,9 +457,11 @@ type SkillTreeDef struct {
 // SkillRequirementDef declares deterministic requirements for learning and
 // using a skill.
 type SkillRequirementDef struct {
-	Level  int                    `json:"level"`
-	Stats  map[string]int         `json:"stats"`
-	Skills []SkillPrerequisiteDef `json:"skills"`
+	Level        int                    `json:"level"`
+	LevelPerRank int                    `json:"level_per_rank"`
+	Stats        map[string]int         `json:"stats"`
+	StatsPerRank map[string]int         `json:"stats_per_rank"`
+	Skills       []SkillPrerequisiteDef `json:"skills"`
 }
 
 type SkillPrerequisiteDef struct {
@@ -2346,12 +2348,23 @@ func validateSkillRequirements(skillID string, req SkillRequirementDef, skills m
 	if req.Level <= 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.requirements.level: must be positive", skillID)
 	}
+	if req.LevelPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.requirements.level_per_rank: must be non-negative", skillID)
+	}
 	for stat, value := range req.Stats {
 		if !isSupportedRequirementStat(stat) {
 			return fmt.Errorf("game: invalid rules skills.%s.requirements.stats.%s: unsupported requirement", skillID, stat)
 		}
 		if value <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.requirements.stats.%s: must be positive", skillID, stat)
+		}
+	}
+	for stat, value := range req.StatsPerRank {
+		if !isSupportedRequirementStat(stat) {
+			return fmt.Errorf("game: invalid rules skills.%s.requirements.stats_per_rank.%s: unsupported requirement", skillID, stat)
+		}
+		if value < 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.requirements.stats_per_rank.%s: must be non-negative", skillID, stat)
 		}
 	}
 	for _, prereq := range req.Skills {

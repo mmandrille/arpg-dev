@@ -2747,6 +2747,28 @@ def cross_checks(report: Report) -> None:
         report.ok("full_equipment templates cover every equipment category")
 
     # item_presentations: every current item has display metadata, and no
+    # health_regen naming contract: item modifiers use _per_10_seconds (integer)
+    # and the sim converts them to _per_second (float) for derived stats and the
+    # protocol. Both names must stay consistent across rules, schemas, and goldens;
+    # a rename on either side silently breaks the conversion in sim.go.
+    item_rollable_stat_keys: set[str] = set()
+    for template in item_templates.get("templates", {}).values():
+        for roll in template.get("rollable_stats", []):
+            item_rollable_stat_keys.add(roll.get("stat", ""))
+    shop_stat_weight_keys: set[str] = set()
+    for shop_entry in shops.get("shops", {}).values():
+        gen = shop_entry.get("generated_offers", {})
+        shop_stat_weight_keys.update(gen.get("stat_weights", {}).keys())
+    if "health_regen_per_10_seconds" not in item_rollable_stat_keys | shop_stat_weight_keys:
+        report.fail("health_regen stat name contract", "health_regen_per_10_seconds not found in item_templates rollable_stats or shop stat_weights — was it renamed?")
+    else:
+        report.ok("health_regen_per_10_seconds present in item/shop rules")
+    progression_formulae = character_progression.get("derived_stats", {})
+    if "health_regen_per_second" not in progression_formulae:
+        report.fail("health_regen stat name contract", "health_regen_per_second not found in character_progression derived_stats — was it renamed?")
+    else:
+        report.ok("health_regen_per_second present in character_progression derived_stats")
+
     # presentation entry points at a missing item. This is client-only rendering
     # data, but drift would make loot/inventory presentation fall back silently.
     presentations = load(ASSETS / "item_presentations.v0.json")["items"]

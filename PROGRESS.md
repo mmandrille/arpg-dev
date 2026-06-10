@@ -12,9 +12,9 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v54 — `character-select-summaries` |
+| **Latest completed slice** | v55 — `consolidation-and-quality-gates` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-10 |
+| **CI gate** | `make ci` green on 2026-06-10 (9 phases) |
 | **Next slice** | TBD |
 | **Last engineering review** | v53 — [`docs/reviews/20260610_v53-overview.md`](docs/reviews/20260610_v53-overview.md) (2026-06-10) |
 | **Next engineering review** | v60 (~every 10 slices) |
@@ -73,6 +73,7 @@ v51_* = mystery-seller-core
 v52_* = ranged-monster-ai
 v53_* = boss-health-bar-ui
 v54_* = character-select-summaries
+v55_* = consolidation-and-quality-gates
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -167,6 +168,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v52** | `ranged-monster-ai` | Complete (`make ci` green) | [`v52_spec-ranged-monster-ai.md`](docs/specs/v52_spec-ranged-monster-ai.md) | [`v52_2026-06-10-ranged-monster-ai.md`](docs/plans/v52_2026-06-10-ranged-monster-ai.md) | [`as-built`](docs/as-built/v52_ranged-monster-ai.md) |
 | **v53** | `boss-health-bar-ui` | Complete (`make ci` green) | [`v53_spec-boss-health-bar-ui.md`](docs/specs/v53_spec-boss-health-bar-ui.md) | [`v53_2026-06-10-boss-health-bar-ui.md`](docs/plans/v53_2026-06-10-boss-health-bar-ui.md) | [`as-built`](docs/as-built/v53_boss-health-bar-ui.md) |
 | **v54** | `character-select-summaries` | Complete (`make ci` green) | [`v54_spec-character-select-summaries.md`](docs/specs/v54_spec-character-select-summaries.md) | [`v54_2026-06-10-character-select-summaries.md`](docs/plans/v54_2026-06-10-character-select-summaries.md) | [`as-built`](docs/as-built/v54_character-select-summaries.md) |
+| **v55** | `consolidation-and-quality-gates` | Complete (`make ci` green) | [`v55_spec-consolidation-and-quality-gates.md`](docs/specs/v55_spec-consolidation-and-quality-gates.md) | [`v55_2026-06-10-consolidation-and-quality-gates.md`](docs/plans/v55_2026-06-10-consolidation-and-quality-gates.md) | — |
 
 ---
 
@@ -473,6 +475,16 @@ for the first `cave_warden` boss floor.
 level, gold, and deepest-depth summary fields, renders them in the Godot character picker, and
 proves the menu path with focused store, HTTP, client-unit, and client-bot coverage.
 
+**Monolith decomposition and quality gates are now in place.** v55 proves that the god-file
+tax from the v53 review can be paid down without behavior change: the sim.go handler registry
+(handlers.go, −1,056 LOC from sim.go) means new intents never touch the dispatcher; ItemRulesLoader
+eliminates ×5 GDScript item-loader duplication; ShopRNG and bot_types.py are now importable
+independently. The determinism lint (`make lint-determinism`) converts the core sim invariant from
+CLAUDE.md prose to a failing CI step; `make regen-golden` closes the manual-edit correctness
+hazard on golden fixtures; and `test_delta_apply.gd` adds the first unit coverage to the
+highest-risk zero-tested client code. All 265 Go tests, 59 Python tests, and 15 GDScript unit
+tests pass; CI is now 9 phases.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -527,9 +539,17 @@ the next autoloop pass unless code changes make them stale.
 ### Invariants (do not break)
 
 - Go sim determinism: seeded RNG only, no wall-clock in `game/`, stable ordering.
+  **Enforced by CI gate:** `make lint-determinism` (step 3/9) — fails on `time.Now()`,
+  `math/rand` import, or bare map range (key+value) in `sim.go` / `handlers.go`.
+- New intents: register one entry in `handlers.go inputHandlers` map — do **not** edit
+  `applyInput` in `sim.go`. The dispatcher is a registry lookup now.
 - Shared rules are **data**; formulas evaluated in Go + GDScript from the same golden fixtures.
+  After intentional formula changes: `make regen-golden` → `make ci` to keep goldens current.
 - Animation is client-only; new reactions need a **server event** first, then client mapping.
 - Golden changes require Go tests **and** GDScript `test_golden.gd` / `validate_shared.py` updates.
+- GDScript shared data singletons: use `class_name Foo extends RefCounted` with `static var`
+  and `ensure_loaded()` guard. Do **not** use Godot autoload for anything that headless tests
+  `preload()` — autoload names are not resolvable at GDScript compile time without `--import`.
 
 ---
 

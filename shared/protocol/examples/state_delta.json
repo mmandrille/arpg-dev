@@ -42,7 +42,7 @@
         "level": 1,
         "experience": 0,
         "experience_to_next_level": 20,
-        "level_cap": 20,
+        "level_cap": 100,
         "unspent_stat_points": 0,
         "gold": 8,
         "deepest_dungeon_depth": 3,

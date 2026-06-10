@@ -1,0 +1,103 @@
+{
+  "id": "mystery_seller_core",
+  "world_id": "dungeon_levels",
+  "seed": "v51_mystery_0504",
+  "title": "Mystery seller core",
+  "description": "Reach dungeon depth 3, fund one mystery purchase, assert concealed shop rows hide item identity, then buy one mystery offer and verify the revealed payload and consumed stock persist.",
+  "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
+    { "action": "pick_up_first_rolled_loot" },
+    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
+    { "action": "pick_up_first_rolled_loot" },
+    { "action": "assert_deepest_dungeon_depth", "at_least": 3 },
+    { "action": "discover_teleporter", "max_ticks": 520 },
+    { "action": "teleport_to_level", "target_level": 0 },
+    { "action": "open_shop" },
+    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
+    { "action": "assert_gold_changed", "direction": "increase" },
+    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
+    { "action": "assert_gold_changed", "direction": "increase" },
+    {
+      "action": "open_shop",
+      "shop_id": "town_mystery_seller",
+      "interactable_def_id": "town_mystery_seller",
+      "max_ticks": 160
+    },
+    { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "concealed": true, "equals": 9 },
+    {
+      "action": "assert_shop_offer_details",
+      "shop_id": "town_mystery_seller",
+      "offer_kind": "mystery",
+      "concealed": true,
+      "equals": 9,
+      "source_depth_min": 1,
+      "source_depth_max": 3,
+      "requires_summary": false,
+      "requires_slot": true,
+      "requires_category": true,
+      "requires_concealed": true,
+      "requires_mystery_label": true,
+      "forbids_item_identity": true
+    },
+    {
+      "action": "buy_shop_offer",
+      "shop_id": "town_mystery_seller",
+      "interactable_def_id": "town_mystery_seller",
+      "offer_kind": "mystery",
+      "concealed": true,
+      "affordable": true,
+      "requires_revealed_item": true,
+      "rarity_in": ["magic", "rare"]
+    },
+    { "action": "assert_gold_changed", "direction": "decrease", "by_at_least": 1 },
+    { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 },
+    {
+      "action": "assert_shop_event",
+      "shop_id": "town_mystery_seller",
+      "event_type": "shop_purchase",
+      "offer_kind": "mystery",
+      "requires_revealed_item": true,
+      "rarity_in": ["magic", "rare"],
+      "at_least": 1
+    }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": 0 },
+    { "type": "visited_levels_contain", "level": -3 },
+    { "type": "character_progression", "deepest_dungeon_depth": 3 },
+    { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 },
+    {
+      "type": "shop_event",
+      "shop_id": "town_mystery_seller",
+      "event_type": "shop_purchase",
+      "offer_kind": "mystery",
+      "requires_revealed_item": true,
+      "rarity_in": ["magic", "rare"],
+      "at_least": 1
+    }
+  ],
+  "fresh_session_checks": [
+    {
+      "world_id": "dungeon_levels",
+      "steps": [
+        {
+          "action": "open_shop",
+          "shop_id": "town_mystery_seller",
+          "interactable_def_id": "town_mystery_seller",
+          "max_ticks": 160
+        },
+        { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 }
+      ],
+      "assertions": [
+        { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 },
+        { "type": "character_progression", "deepest_dungeon_depth": 3 }
+      ]
+    }
+  ],
+  "visual": {
+    "camera": { "x": 17, "y": 12, "zoom": 1.1 }
+  }
+}

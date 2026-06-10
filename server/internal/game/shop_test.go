@@ -171,6 +171,125 @@ func TestShopOpenBuyAndSell(t *testing.T) {
 	}
 }
 
+func TestMysterySellerOpenShowsConcealedOffers(t *testing.T) {
+	sim := newMysterySellerSim(t, 1000, 3)
+	seller := townMysterySellerEntity(t, sim)
+
+	open := sim.Tick([]Input{{
+		Type:      "action_intent",
+		MessageID: "msg_open_mystery",
+		Action:    &ActionIntent{TargetID: idStr(seller.id)},
+	}})
+	if !hasAck(open, "msg_open_mystery") {
+		t.Fatalf("open mystery seller was not acked: %+v", open)
+	}
+	opened := findEvent(open.Events, "shop_opened")
+	if opened == nil || opened.ShopID != "town_mystery_seller" {
+		t.Fatalf("shop_opened event = %+v", opened)
+	}
+	if got, want := countShopOffersByKind(opened.Offers, shopOfferKindMystery), len(sim.rules.Shops["town_mystery_seller"].MysteryOffers.EligibleSlots); got != want {
+		t.Fatalf("mystery offer count = %d, want %d: %+v", got, want, opened.Offers)
+	}
+	seenSlots := map[string]bool{}
+	for _, offer := range opened.Offers {
+		if offer.Kind != shopOfferKindMystery {
+			t.Fatalf("unexpected mystery seller offer kind: %+v", offer)
+		}
+		if !offer.Concealed || offer.MysteryLabel == "" || offer.BuyPrice <= 0 {
+			t.Fatalf("mystery offer missing concealed fields: %+v", offer)
+		}
+		if offer.ItemDefID != "" || offer.ItemTemplateID != "" || offer.DisplayName != "" || offer.Rarity != "" || len(offer.RolledStats) != 0 || offer.Comparison != nil || offer.EquipPreview != nil {
+			t.Fatalf("mystery offer leaked item identity/detail: %+v", offer)
+		}
+		if offer.SourceDepthMin < 1 || offer.SourceDepthMax < offer.SourceDepthMin {
+			t.Fatalf("mystery offer source window invalid: %+v", offer)
+		}
+		seenSlots[offer.Slot] = true
+	}
+	for _, slot := range sim.rules.Shops["town_mystery_seller"].MysteryOffers.EligibleSlots {
+		if !seenSlots[slot] {
+			t.Fatalf("missing mystery offer for slot %s in %+v", slot, opened.Offers)
+		}
+	}
+}
+
+func TestMysterySellerPurchaseRevealsAndConsumesOffer(t *testing.T) {
+	sim := newMysterySellerSim(t, 2000, 3)
+	seller := townMysterySellerEntity(t, sim)
+	offer := firstMysteryOffer(t, sim)
+	beforeGold := sim.gold
+
+	buy := sim.Tick([]Input{{
+		Type:      "shop_buy_intent",
+		MessageID: "msg_buy_mystery",
+		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(seller.id), OfferID: offer.OfferID},
+	}})
+	if !hasAck(buy, "msg_buy_mystery") {
+		t.Fatalf("buy mystery was not acked: %+v", buy)
+	}
+	if !hasShopStockAvailability(buy, offer.OfferID, false) {
+		t.Fatalf("mystery purchase did not consume stock: %+v", buy.Changes)
+	}
+	if sim.gold != beforeGold-offer.BuyPrice {
+		t.Fatalf("gold after mystery buy = %d, want %d", sim.gold, beforeGold-offer.BuyPrice)
+	}
+	bought := sim.inventory[len(sim.inventory)-1]
+	if bought.rollPayload == nil || !mysteryRarityAllowed(bought.rollPayload.Rarity, "magic", "rare") {
+		t.Fatalf("mystery purchase item = %+v", bought)
+	}
+	ev := findEvent(buy.Events, "shop_purchase")
+	if ev == nil || ev.Item == nil || ev.Item.ItemTemplateID == "" || ev.Item.Rarity == "" {
+		t.Fatalf("shop_purchase reveal event = %+v", ev)
+	}
+	if ev.Item.ItemTemplateID != bought.rollPayload.ItemTemplateID || ev.Item.ItemInstanceID != idStr(bought.instanceID) {
+		t.Fatalf("reveal item %+v does not match inventory item %+v", ev.Item, bought)
+	}
+	if findOffer(ev.Offers, offer.OfferID) != nil {
+		t.Fatalf("consumed mystery offer still visible: %+v", ev.Offers)
+	}
+}
+
+func TestMysterySellerPurchaseRejectsWithoutMutation(t *testing.T) {
+	t.Run("insufficient gold", func(t *testing.T) {
+		sim := newMysterySellerSim(t, 0, 3)
+		seller := townMysterySellerEntity(t, sim)
+		offer := firstMysteryOffer(t, sim)
+		res := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buy_mystery_no_gold",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(seller.id), OfferID: offer.OfferID},
+		}})
+		if !hasReject(res, "msg_buy_mystery_no_gold", "insufficient_gold") {
+			t.Fatalf("buy reject = %+v", res.Rejects)
+		}
+		if sim.gold != 0 || len(sim.inventory) != 0 || findOffer(mysteryOffers(t, sim), offer.OfferID) == nil {
+			t.Fatalf("insufficient gold mutated state: gold=%d inv=%+v offers=%+v", sim.gold, sim.inventory, mysteryOffers(t, sim))
+		}
+	})
+
+	t.Run("full inventory", func(t *testing.T) {
+		sim := newMysterySellerSim(t, 2000, 3)
+		seller := townMysterySellerEntity(t, sim)
+		offer := firstMysteryOffer(t, sim)
+		for i := 0; i < sim.inventoryCapacity(); i++ {
+			sim.inventory = append(sim.inventory, &invItem{instanceID: uint64(9100 + i), itemDefID: "red_potion"})
+		}
+		sim.savePlayer(sim.defaultPlayer())
+		beforeGold := sim.gold
+		res := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buy_mystery_full",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(seller.id), OfferID: offer.OfferID},
+		}})
+		if !hasReject(res, "msg_buy_mystery_full", "inventory_full") {
+			t.Fatalf("buy reject = %+v", res.Rejects)
+		}
+		if sim.gold != beforeGold || len(sim.inventory) != sim.inventoryCapacity() || findOffer(mysteryOffers(t, sim), offer.OfferID) == nil {
+			t.Fatalf("full inventory mutated state: gold=%d inv=%d offers=%+v", sim.gold, len(sim.inventory), mysteryOffers(t, sim))
+		}
+	})
+}
+
 func TestShopStockSourceDepthPolicyAndRarityCap(t *testing.T) {
 	cases := []struct {
 		name       string
@@ -473,6 +592,72 @@ func TestShopStockAndBuybackArePerCharacterInCoop(t *testing.T) {
 		countShopOffersByKind(guestReopened.Offers, shopOfferKindGenerated) != 5 ||
 		countShopOffersByKind(guestReopened.Offers, shopOfferKindBuyback) != 0 {
 		t.Fatalf("guest stock leaked host mutation: %+v", guestReopened)
+	}
+}
+
+func TestMysterySellerStockIsPerCharacterInCoop(t *testing.T) {
+	sim := newMysterySellerSim(t, 2000, 3)
+	hostID := sim.DefaultPlayerID()
+	guestProgress := sim.rules.DefaultCharacterProgressionState()
+	guestProgress.Gold = 2000
+	guestProgress.DeepestDungeonDepth = 3
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", guestProgress)
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	seller := townMysterySellerEntity(t, sim)
+	nearSeller := Vec2{X: seller.pos.X, Y: seller.pos.Y - 1}
+	sim.levels[townLevel].entities[hostID].pos = nearSeller
+	sim.levels[townLevel].entities[guestID].pos = nearSeller
+
+	hostOpen := tickOne(t, sim, Input{
+		ActorPlayerID: hostID,
+		Type:          "action_intent",
+		MessageID:     "msg_host_open_mystery",
+		Action:        &ActionIntent{TargetID: idStr(seller.id)},
+	})
+	hostOpened := findEvent(hostOpen.Events, "shop_opened")
+	if hostOpened == nil || countShopOffersByKind(hostOpened.Offers, shopOfferKindMystery) != len(sim.rules.Shops["town_mystery_seller"].MysteryOffers.EligibleSlots) {
+		t.Fatalf("host mystery open = %+v", hostOpen)
+	}
+	guestOpen := tickOne(t, sim, Input{
+		ActorPlayerID: guestID,
+		Type:          "action_intent",
+		MessageID:     "msg_guest_open_mystery",
+		Action:        &ActionIntent{TargetID: idStr(seller.id)},
+	})
+	guestOpened := findEvent(guestOpen.Events, "shop_opened")
+	if guestOpened == nil || countShopOffersByKind(guestOpened.Offers, shopOfferKindMystery) != len(sim.rules.Shops["town_mystery_seller"].MysteryOffers.EligibleSlots) {
+		t.Fatalf("guest mystery open = %+v", guestOpen)
+	}
+	if sim.players[hostID].ShopStock["town_mystery_seller"] == sim.players[guestID].ShopStock["town_mystery_seller"] {
+		t.Fatalf("host and guest share mystery stock pointer")
+	}
+
+	hostMystery := firstMysteryOfferFrom(hostOpened.Offers)
+	if hostMystery == nil {
+		t.Fatalf("host missing mystery offer: %+v", hostOpened.Offers)
+	}
+	hostBuy := tickOne(t, sim, Input{
+		ActorPlayerID: hostID,
+		Type:          "shop_buy_intent",
+		MessageID:     "msg_host_buy_mystery",
+		ShopBuy:       &ShopBuyIntent{ShopEntityID: idStr(seller.id), OfferID: hostMystery.OfferID},
+	})
+	hostPurchase := findEvent(hostBuy.Events, "shop_purchase")
+	if hostPurchase == nil || countShopOffersByKind(hostPurchase.Offers, shopOfferKindMystery) != len(sim.rules.Shops["town_mystery_seller"].MysteryOffers.EligibleSlots)-1 {
+		t.Fatalf("host mystery purchase = %+v", hostBuy)
+	}
+
+	guestOpenAfterHostMutation := tickOne(t, sim, Input{
+		ActorPlayerID: guestID,
+		Type:          "action_intent",
+		MessageID:     "msg_guest_reopen_mystery",
+		Action:        &ActionIntent{TargetID: idStr(seller.id)},
+	})
+	guestReopened := findEvent(guestOpenAfterHostMutation.Events, "shop_opened")
+	if guestReopened == nil || countShopOffersByKind(guestReopened.Offers, shopOfferKindMystery) != len(sim.rules.Shops["town_mystery_seller"].MysteryOffers.EligibleSlots) {
+		t.Fatalf("guest mystery stock leaked host mutation: %+v", guestReopened)
 	}
 }
 
@@ -998,6 +1183,25 @@ func newTownVendorSimWithLevel(t *testing.T, gold int, deepestDepth int, level i
 	return sim
 }
 
+func newMysterySellerSim(t *testing.T, gold int, deepestDepth int) *Sim {
+	t.Helper()
+	rules := loadRules(t)
+	sim, err := NewSimWithWorldProgression("sess_mystery_shop", "v51_mystery_seller", rules, "dungeon_levels", CharacterProgressionState{
+		Level:               1,
+		Gold:                gold,
+		DeepestDungeonDepth: deepestDepth,
+		BaseStats:           rules.CharacterProgression.BaseStats,
+	})
+	if err != nil {
+		t.Fatalf("new mystery seller sim: %v", err)
+	}
+	sim.SetPlayerMetadata(sim.DefaultPlayerID(), "acct_shop", "char_01H00000000000000000000000", "Hero", "host")
+	seller := townMysterySellerEntity(t, sim)
+	moveDefaultPlayerTo(sim, Vec2{X: seller.pos.X, Y: seller.pos.Y - 1})
+	sim.savePlayer(sim.defaultPlayer())
+	return sim
+}
+
 func townVendorEntity(t *testing.T, sim *Sim) *entity {
 	t.Helper()
 	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
@@ -1007,6 +1211,18 @@ func townVendorEntity(t *testing.T, sim *Sim) *entity {
 		}
 	}
 	t.Fatal("missing town vendor")
+	return nil
+}
+
+func townMysterySellerEntity(t *testing.T, sim *Sim) *entity {
+	t.Helper()
+	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
+		e := sim.activeLevel().entities[id]
+		if e != nil && e.kind == interactableEntity && e.interactableDefID == "town_mystery_seller" {
+			return e
+		}
+	}
+	t.Fatal("missing town mystery seller")
 	return nil
 }
 
@@ -1030,6 +1246,35 @@ func firstGeneratedOffer(t *testing.T, sim *Sim) ShopOfferView {
 	}
 	t.Fatal("missing generated offer")
 	return ShopOfferView{}
+}
+
+func firstMysteryOffer(t *testing.T, sim *Sim) ShopOfferView {
+	t.Helper()
+	for _, offer := range mysteryOffers(t, sim) {
+		if offer.Kind == shopOfferKindMystery {
+			return offer
+		}
+	}
+	t.Fatal("missing mystery offer")
+	return ShopOfferView{}
+}
+
+func firstMysteryOfferFrom(offers []ShopOfferView) *ShopOfferView {
+	for i := range offers {
+		if offers[i].Kind == shopOfferKindMystery {
+			return &offers[i]
+		}
+	}
+	return nil
+}
+
+func mysteryOffers(t *testing.T, sim *Sim) []ShopOfferView {
+	t.Helper()
+	offers, ok := sim.shopCatalog("town_mystery_seller")
+	if !ok {
+		t.Fatal("mystery shop catalog failed")
+	}
+	return offers
 }
 
 func firstGeneratedOfferFrom(offers []ShopOfferView) *ShopOfferView {

@@ -2960,6 +2960,8 @@ func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:
 		"town_vendor":
 			return "Town Vendor"
+		"town_mystery_seller":
+			return "Mystery Seller"
 		_:
 			return next_shop_id.replace("_", " ").capitalize()
 
@@ -3026,6 +3028,14 @@ func _on_waypoint_level_pressed(level: int) -> void:
 			"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
 		})
 	_hide_waypoint_panel()
+
+
+func bot_click_waypoint_level(level: int) -> void:
+	if waypoint_panel == null or not waypoint_panel.visible:
+		return
+	if not bool(discovered_teleporters.get(level, false)):
+		return
+	_on_waypoint_level_pressed(level)
 
 
 func _try_complete_pending_waypoint_travel() -> void:

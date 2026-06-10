@@ -2325,6 +2325,12 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 			return
 		}
 		item = cloneInvItem(row.Item)
+	} else if entry.Generated != nil && offer.Kind == shopOfferKindMystery {
+		item = s.itemFromShopStock(entry.Generated, s.alloc())
+		if item == nil || item.rollPayload == nil {
+			res.reject(in.MessageID, "invalid_offer")
+			return
+		}
 	} else {
 		item = s.itemFromShopOffer(offer, s.alloc())
 	}
@@ -2350,6 +2356,7 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 		ItemInstanceID: idStr(item.instanceID),
 		Price:          intPtr(offer.BuyPrice),
 		TotalGold:      intPtr(s.gold),
+		Item:           ptrItemView(s.itemView(item)),
 		Offers:         offers,
 		SellAppraisals: s.shopSellAppraisals(shopID),
 	})

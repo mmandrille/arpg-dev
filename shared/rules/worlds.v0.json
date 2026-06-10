@@ -472,6 +472,11 @@
         },
         {
           "type": "interactable",
+          "interactable_def_id": "town_mystery_seller",
+          "position": { "x": 17, "y": 12 }
+        },
+        {
+          "type": "interactable",
           "interactable_def_id": "town_stash",
           "position": { "x": 13, "y": 12 }
         }

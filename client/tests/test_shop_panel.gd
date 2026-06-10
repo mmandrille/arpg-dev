@@ -106,6 +106,47 @@ func _run() -> void:
 	_assert_eq("sell appraisals refreshed", int(state.get("sell_row_count", 0)), 1)
 	_assert_eq("source depth debug refreshed", int(_row_for_offer(state.get("offer_rows", []), "generated:depth3:001").get("source_depth", 0)), 3)
 
+	var mystery_offer := {
+		"offer_id": "mystery:wp:-3:ring:000",
+		"kind": "mystery",
+		"concealed": true,
+		"mystery_label": "Unidentified ring",
+		"slot": "ring",
+		"category": "equipment",
+		"buy_price": 75,
+		"source_depth_min": 1,
+		"source_depth_max": 3,
+	}
+	panel.show_shop("1005", "town_mystery_seller", [mystery_offer], 100, inventory, {}, "Mystery Seller", [])
+	state = panel.get_debug_state()
+	_assert_eq("mystery offer count", int(state.get("mystery_offer_count", 0)), 1)
+	_assert_eq("mystery fixed count", int(state.get("fixed_offer_count", 0)), 0)
+	_assert_true("mystery buy enabled", bool(state.get("buy_buttons", {}).get("mystery:wp:-3:ring:000", {}).get("enabled", false)))
+	var mystery_row := _row_for_offer(state.get("offer_rows", []), "mystery:wp:-3:ring:000")
+	_assert_true("mystery row concealed", bool(mystery_row.get("concealed", false)))
+	_assert_eq("mystery row label", str(mystery_row.get("mystery_label", "")), "Unidentified ring")
+	_assert_eq("mystery identity hidden", int(mystery_row.get("identity_field_count", -1)), 0)
+	_assert_eq("mystery item def hidden", str(mystery_row.get("item_def_id", "")), "")
+	_assert_eq("mystery rarity hidden", str(mystery_row.get("rarity", "")), "")
+	_assert_eq("mystery source min", int(mystery_row.get("source_depth_min", 0)), 1)
+	_assert_eq("mystery source max", int(mystery_row.get("source_depth_max", 0)), 3)
+	_assert_true("mystery summary source window", _array_contains_text(mystery_row.get("summary_lines", []), "Source depths: 1-3"))
+	_assert_eq("mystery no comparison", int(mystery_row.get("comparison_count", -1)), 0)
+	_assert_eq("mystery no requirements", int(mystery_row.get("requirement_count", -1)), 0)
+	_assert_eq("mystery no equip preview", int(mystery_row.get("equip_preview_count", -1)), 0)
+	var mystery_tooltip_lines: Array = panel._tooltip_lines(mystery_offer)
+	_assert_true("mystery tooltip label", _array_contains_text(mystery_tooltip_lines, "Unidentified ring"))
+	_assert_false("mystery tooltip hides rarity", _array_contains_text(mystery_tooltip_lines, "Rarity:"))
+	_assert_false("mystery tooltip hides requirements", _array_contains_text(mystery_tooltip_lines, "Requires"))
+	_assert_false("mystery tooltip hides comparison", _array_contains_text(mystery_tooltip_lines, "vs equipped"))
+	var mystery_tooltip := panel._make_offer_tooltip(mystery_offer)
+	_assert_eq("mystery tooltip uses shared panel", mystery_tooltip.get_script(), ItemTooltipPanelScript)
+	mystery_tooltip.queue_free()
+	panel.bot_click_buy_offer("", "mystery", 0)
+	_assert_eq("mystery buy emitted count", emitted.size(), 4)
+	_assert_eq("mystery buy emitted entity", str(emitted[3]["payload"].get("shop_entity_id", "")), "1005")
+	_assert_eq("mystery buy emitted offer", str(emitted[3]["payload"].get("offer_id", "")), "mystery:wp:-3:ring:000")
+
 	var inventory_panel := InventoryPanelScript.new()
 	root.add_child(inventory_panel)
 	await process_frame

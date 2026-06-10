@@ -152,6 +152,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_shop_buy_offer(action)
 		"click_shop_sell_item":
 			_do_click_shop_sell_item(action)
+		"click_waypoint_level":
+			_do_click_waypoint_level(action)
 		"click_stash_deposit_item":
 			_do_click_stash_deposit_item(action)
 		"click_stash_withdraw_item":
@@ -255,6 +257,11 @@ func _do_click_shop_sell_item(action: Dictionary) -> void:
 			action.get("rolled", null),
 			int(action.get("bag_index", 0))
 		)
+
+
+func _do_click_waypoint_level(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_waypoint_level"):
+		_main.bot_click_waypoint_level(int(action.get("target_level", 0)))
 
 
 func _do_click_stash_deposit_item(action: Dictionary) -> void:
@@ -538,6 +545,8 @@ func _format_action(action: Dictionary) -> String:
 				str(action.get("rolled", "")),
 				str(action.get("bag_index", 0)),
 			]
+		"click_waypoint_level":
+			return "click_waypoint_level target=%s" % str(action.get("target_level", ""))
 		"click_stash_deposit_item":
 			return "click_stash_deposit item=%s rolled=%s bag_index=%s" % [
 				str(action.get("item_def_id", "")),

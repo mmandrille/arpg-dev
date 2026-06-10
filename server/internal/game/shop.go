@@ -11,6 +11,7 @@ const (
 	shopOfferKindFixed     = "fixed"
 	shopOfferKindGenerated = "generated"
 	shopOfferKindBuyback   = "buyback"
+	shopOfferKindMystery   = "mystery"
 	shopSourceCommonMob    = "common_dungeon_mob"
 )
 
@@ -229,6 +230,9 @@ func (s *Sim) refreshExistingGeneratedShopStock(res *TickResult) {
 }
 
 func (s *Sim) rollGeneratedShopStock(shopID string, shop ShopDef, refreshKey string) []*shopStockItem {
+	if shop.MysteryOffers.Enabled {
+		return s.rollMysteryShopStock(shopID, shop, refreshKey)
+	}
 	gen := shop.GeneratedOffers
 	characterID := s.currentShopCharacterID()
 	rng := NewRNG(SeedToUint64(fmt.Sprintf("%s|shop_stock|%s|%s|%s|offers", s.seed, shopID, characterID, refreshKey)))
@@ -276,6 +280,123 @@ func (s *Sim) rollGeneratedShopStock(shopID string, shop ShopDef, refreshKey str
 		}
 	}
 	return rows
+}
+
+func (s *Sim) rollMysteryShopStock(shopID string, shop ShopDef, refreshKey string) []*shopStockItem {
+	mystery := shop.MysteryOffers
+	characterID := s.currentShopCharacterID()
+	rng := NewRNG(SeedToUint64(fmt.Sprintf("%s|mystery_stock|%s|%s|%s|offers", s.seed, shopID, characterID, refreshKey)))
+	rows := make([]*shopStockItem, 0, len(mystery.EligibleSlots))
+	for _, slot := range mystery.EligibleSlots {
+		row, ok := s.rollMysteryShopStockForSlot(shop, refreshKey, slot, len(rows), rng)
+		if ok {
+			rows = append(rows, row)
+		}
+	}
+	return rows
+}
+
+func (s *Sim) rollMysteryShopStockForSlot(shop ShopDef, refreshKey, slot string, offerIndex int, rng *RNG) (*shopStockItem, bool) {
+	mystery := shop.MysteryOffers
+	for attempts := 0; attempts < mystery.MaxRollAttempts; attempts++ {
+		sourceDepth := s.rollMysterySourceDepth(mystery, rng)
+		templateID, ok := s.rollMysteryTemplateForSlot(slot, sourceDepth, rng)
+		if !ok {
+			templateID, ok = s.fallbackMysteryTemplateForSlot(slot, rng)
+			if !ok {
+				continue
+			}
+		}
+		payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng)
+		if !ok || !mysteryRarityAllowed(payload.Rarity, mystery.MinRarity, mystery.MaxRarity) {
+			continue
+		}
+		buyPrice, ok := shop.generatedBuyPrice(templateID, payload.Rarity, payload.Stats, s.rules)
+		if !ok {
+			continue
+		}
+		buyPrice = ceilToMultiple(maxFloat(1, float64(buyPrice)*mystery.PriceMultiplier), shop.Pricing.RoundBuyTo)
+		return &shopStockItem{
+			OfferIndex:     offerIndex,
+			OfferID:        fmt.Sprintf("mystery:%s:%s:%03d", refreshKey, slot, offerIndex),
+			SourceDepth:    sourceDepth,
+			ItemTemplateID: templateID,
+			Payload:        payload,
+			BuyPrice:       buyPrice,
+			Available:      true,
+		}, true
+	}
+	return nil, false
+}
+
+func (s *Sim) rollMysteryTemplateForSlot(slot string, sourceDepth int, rng *RNG) (string, bool) {
+	band, ok := s.rules.DungeonGeneration.LootBandForDepth(sourceDepth)
+	if !ok {
+		return "", false
+	}
+	table, ok := s.rules.LootTables[band.MonsterLootTable]
+	if !ok || table.TreasureClassID == "" {
+		return "", false
+	}
+	for _, drop := range s.rules.RollTreasureClass(table.TreasureClassID, rng) {
+		templateID := drop.ItemTemplateID
+		if templateID == "" {
+			continue
+		}
+		template, ok := s.rules.ItemTemplates[templateID]
+		if ok && template.Category == "equipment" && template.Equippable && template.Slot == slot {
+			return templateID, true
+		}
+	}
+	return "", false
+}
+
+func (s *Sim) fallbackMysteryTemplateForSlot(slot string, rng *RNG) (string, bool) {
+	matches := make([]string, 0, 2)
+	for templateID, template := range s.rules.ItemTemplates {
+		if template.Category == "equipment" && template.Equippable && template.Slot == slot {
+			matches = append(matches, templateID)
+		}
+	}
+	sort.Strings(matches)
+	if len(matches) == 0 {
+		return "", false
+	}
+	return matches[rng.IntN(len(matches))], true
+}
+
+func mysteryRarityAllowed(rarity, minRarity, maxRarity string) bool {
+	rank, ok := shopRarityRank(rarity)
+	if !ok {
+		return false
+	}
+	minRank, ok := shopRarityRank(minRarity)
+	if !ok {
+		return false
+	}
+	maxRank, ok := shopRarityRank(maxRarity)
+	if !ok {
+		return false
+	}
+	return rank >= minRank && rank <= maxRank
+}
+
+func (s *Sim) rollMysterySourceDepth(mystery ShopMysteryOffers, rng *RNG) int {
+	minDepth, maxDepth := s.mysterySourceDepthBounds(mystery)
+	if maxDepth < minDepth {
+		return minDepth
+	}
+	return minDepth + rng.IntN(maxDepth-minDepth+1)
+}
+
+func (s *Sim) mysterySourceDepthBounds(mystery ShopMysteryOffers) (int, int) {
+	maxDepth := maxInt(3, maxInt(1, s.progression.DeepestDungeonDepth))
+	window := mystery.SourceDepthWindow
+	if window <= 0 {
+		window = 1
+	}
+	minDepth := maxInt(1, maxDepth-window+1)
+	return minDepth, maxDepth
 }
 
 func (s *Sim) rollShopSourceDepth(gen ShopGeneratedOffers, rng *RNG) int {
@@ -355,6 +476,22 @@ func (s *Sim) shopOfferViewFromGeneratedStock(shop ShopDef, row *shopStockItem) 
 	template, ok := s.rules.ItemTemplates[row.ItemTemplateID]
 	if !ok {
 		return ShopOfferView{}, false
+	}
+	if shop.MysteryOffers.Enabled {
+		minDepth, maxDepth := s.mysterySourceDepthBounds(shop.MysteryOffers)
+		return ShopOfferView{
+			OfferID:        row.OfferID,
+			Kind:           shopOfferKindMystery,
+			Concealed:      true,
+			MysteryLabel:   "Unidentified " + displaySlotName(template.Slot),
+			Slot:           template.Slot,
+			Category:       template.Category,
+			BuyPrice:       row.BuyPrice,
+			Source:         shop.MysteryOffers.Source,
+			SourceDepth:    row.SourceDepth,
+			SourceDepthMin: minDepth,
+			SourceDepthMax: maxDepth,
+		}, true
 	}
 	stats := cloneIntMap(row.Payload.Stats)
 	item := &invItem{
@@ -911,6 +1048,20 @@ func (s *Sim) itemFromShopOffer(offer ShopOfferView, instanceID uint64) *invItem
 		return item
 	}
 	item.slot = s.itemSlot(offer.ItemDefID, nil)
+	return item
+}
+
+func (s *Sim) itemFromShopStock(row *shopStockItem, instanceID uint64) *invItem {
+	if row == nil {
+		return nil
+	}
+	item := &invItem{
+		instanceID:  instanceID,
+		itemDefID:   row.ItemTemplateID,
+		rollPayload: cloneRollPayload(&row.Payload),
+		equipped:    false,
+	}
+	item.slot = s.itemSlot(item.itemDefID, item.rollPayload)
 	return item
 }
 

@@ -577,6 +577,18 @@ type ShopGeneratedOffers struct {
 	MaxRollAttempts   int    `json:"max_roll_attempts"`
 }
 
+type ShopMysteryOffers struct {
+	Enabled           bool     `json:"enabled"`
+	EligibleSlots     []string `json:"eligible_slots"`
+	Source            string   `json:"source"`
+	SourceDepthWindow int      `json:"source_depth_window"`
+	MinRarity         string   `json:"min_rarity"`
+	MaxRarity         string   `json:"max_rarity"`
+	RefreshOn         string   `json:"refresh_on"`
+	PriceMultiplier   float64  `json:"price_multiplier"`
+	MaxRollAttempts   int      `json:"max_roll_attempts"`
+}
+
 type ShopBuyback struct {
 	Enabled            bool    `json:"enabled"`
 	Scope              string  `json:"scope"`
@@ -596,21 +608,27 @@ type ShopDef struct {
 	Name            string              `json:"name"`
 	FixedOffers     []ShopFixedOffer    `json:"fixed_offers"`
 	GeneratedOffers ShopGeneratedOffers `json:"generated_offers"`
+	MysteryOffers   ShopMysteryOffers   `json:"mystery_offers"`
 	Buyback         ShopBuyback         `json:"buyback"`
 	Pricing         ShopPricing         `json:"pricing"`
 }
 
 func shopRarityAllowedByCap(rarity, maxRarity string) bool {
-	rank := map[string]int{"common": 0, "magic": 1, "rare": 2}
-	r, ok := rank[rarity]
+	r, ok := shopRarityRank(rarity)
 	if !ok {
 		return false
 	}
-	maxRank, ok := rank[maxRarity]
+	maxRank, ok := shopRarityRank(maxRarity)
 	if !ok {
 		return false
 	}
 	return r <= maxRank
+}
+
+func shopRarityRank(rarity string) (int, bool) {
+	rank := map[string]int{"common": 0, "magic": 1, "rare": 2}
+	out, ok := rank[rarity]
+	return out, ok
 }
 
 // WorldDef is a deterministic initial session layout.
@@ -1824,7 +1842,10 @@ func validateShopRules(r *Rules) error {
 		if gen.MaxRollAttempts < gen.OfferCount {
 			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.max_roll_attempts: must be >= offer_count", shopID)
 		}
-		if !shop.Buyback.Enabled {
+		if err := validateMysteryShopRules(r, shopID, shop); err != nil {
+			return err
+		}
+		if !shop.MysteryOffers.Enabled && !shop.Buyback.Enabled {
 			return fmt.Errorf("game: invalid rules shops.%s.buyback.enabled: must be true", shopID)
 		}
 		if shop.Buyback.Scope != "session_town_visit" {
@@ -1865,6 +1886,57 @@ func validateShopRules(r *Rules) error {
 					return fmt.Errorf("game: invalid rules shops.%s.pricing.stat_weights.%s: required by template %s", shopID, roll.Stat, templateID)
 				}
 			}
+		}
+	}
+	return nil
+}
+
+func validateMysteryShopRules(r *Rules, shopID string, shop ShopDef) error {
+	mystery := shop.MysteryOffers
+	if !mystery.Enabled {
+		return nil
+	}
+	if mystery.Source != "common_dungeon_mob" {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.source: unsupported source %s", shopID, mystery.Source)
+	}
+	if mystery.SourceDepthWindow <= 0 {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.source_depth_window: must be positive", shopID)
+	}
+	minRank, ok := shopRarityRank(mystery.MinRarity)
+	if !ok || minRank < 1 {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.min_rarity: must be magic or rare", shopID)
+	}
+	maxRank, ok := shopRarityRank(mystery.MaxRarity)
+	if !ok || maxRank < 1 {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.max_rarity: must be magic or rare", shopID)
+	}
+	if minRank > maxRank {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers: min_rarity must not exceed max_rarity", shopID)
+	}
+	if mystery.RefreshOn != "new_non_town_waypoint" {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.refresh_on: unsupported trigger %s", shopID, mystery.RefreshOn)
+	}
+	if mystery.PriceMultiplier <= 1 {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.price_multiplier: must be > 1", shopID)
+	}
+	if mystery.MaxRollAttempts < len(mystery.EligibleSlots) {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.max_roll_attempts: must be >= eligible slot count", shopID)
+	}
+	slotsWithTemplates := map[string]bool{}
+	for _, template := range r.ItemTemplates {
+		slotsWithTemplates[template.Slot] = true
+	}
+	seenSlots := map[string]bool{}
+	for _, slot := range mystery.EligibleSlots {
+		if !isEquipmentSlot(slot) && slot != "ring" {
+			return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.eligible_slots: unsupported slot %s", shopID, slot)
+		}
+		if seenSlots[slot] {
+			return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.eligible_slots: duplicate slot %s", shopID, slot)
+		}
+		seenSlots[slot] = true
+		if !slotsWithTemplates[slot] {
+			return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.eligible_slots: no template for slot %s", shopID, slot)
 		}
 	}
 	return nil

@@ -1325,6 +1325,7 @@ async def execute_step(
         state.last_gold_after_action = state.gold
         if int(event.get("price", 0)) != int(offer.get("buy_price", 0)):
             raise AssertionError(f"buy_shop_offer: event price {event.get('price')} != offer price {offer.get('buy_price')}")
+        assert_shop_event_details([event], step, "buy_shop_offer")
         if len(state.inventory) <= before_inventory_count:
             raise AssertionError(f"buy_shop_offer: inventory did not grow after {offer}")
         return
@@ -1392,15 +1393,9 @@ async def execute_step(
         return
 
     if action == "assert_shop_event":
-        event_type = str(step["event_type"])
-        shop_id = str(step.get("shop_id", "town_vendor"))
-        matches = [
-            event for event in state.shop_events
-            if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id
-        ]
-        if step.get("offer_id") is not None:
-            matches = [event for event in matches if str(event.get("offer_id", "")) == str(step["offer_id"])]
+        matches = filtered_shop_events(state, step)
         assert_count_matches(len(matches), step, "assert_shop_event", f": {matches}")
+        assert_shop_event_details(matches, step, "assert_shop_event")
         return
 
     if action == "open_stash":
@@ -2575,15 +2570,96 @@ def filtered_shop_offers(state: RuntimeState, step: dict[str, Any]) -> list[dict
     if step.get("item_template_id") is not None:
         offers = [offer for offer in offers if str(offer.get("item_template_id")) == str(step["item_template_id"])]
     if step.get("source_depth_min") is not None:
-        offers = [offer for offer in offers if int(offer.get("source_depth", 0)) >= int(step["source_depth_min"])]
+        offers = [offer for offer in offers if shop_row_source_depth_bounds(offer)[0] >= int(step["source_depth_min"])]
     if step.get("source_depth_max") is not None:
-        offers = [offer for offer in offers if int(offer.get("source_depth", 0)) <= int(step["source_depth_max"])]
+        offers = [offer for offer in offers if shop_row_source_depth_bounds(offer)[1] <= int(step["source_depth_max"])]
+    if step.get("concealed") is not None:
+        want_concealed = bool(step["concealed"])
+        offers = [offer for offer in offers if bool(offer.get("concealed")) == want_concealed]
     if bool(step.get("affordable")):
         reserve_gold = int(step.get("reserve_gold", 0))
         budget = max(0, state.gold - reserve_gold)
         offers = [offer for offer in offers if int(offer.get("buy_price", 0)) <= budget]
     offers.sort(key=lambda offer: (int(offer.get("buy_price", 0)), str(offer.get("offer_id", ""))))
     return offers
+
+
+def shop_row_source_depth_bounds(row: dict[str, Any]) -> tuple[int, int]:
+    if row.get("source_depth") is not None:
+        depth = int(row.get("source_depth", 0))
+        return depth, depth
+    return int(row.get("source_depth_min", 0)), int(row.get("source_depth_max", 0))
+
+
+SHOP_IDENTITY_FIELDS = (
+    "item_def_id",
+    "item_template_id",
+    "display_name",
+    "rarity",
+    "rolled_stats",
+    "requirements",
+    "requirement_status",
+    "requirements_met",
+    "effect_ids",
+    "summary_lines",
+    "comparison",
+    "equip_preview",
+)
+
+
+def filtered_shop_events(state: RuntimeState, step: dict[str, Any]) -> list[dict[str, Any]]:
+    event_type = str(step["event_type"])
+    shop_id = str(step.get("shop_id", "town_vendor"))
+    matches = [
+        event for event in state.shop_events
+        if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id
+    ]
+    if step.get("offer_id") is not None:
+        matches = [event for event in matches if str(event.get("offer_id", "")) == str(step["offer_id"])]
+    if step.get("offer_kind") is not None:
+        matches = [event for event in matches if shop_event_offer_kind(event) == str(step["offer_kind"])]
+    if step.get("requires_revealed_item"):
+        matches = [event for event in matches if shop_event_revealed_item(event)]
+    if step.get("rarity_in") is not None:
+        allowed = {str(rarity) for rarity in step["rarity_in"]}
+        matches = [event for event in matches if str((event.get("item") or {}).get("rarity", "")) in allowed]
+    if step.get("item_slot") is not None:
+        matches = [event for event in matches if str((event.get("item") or {}).get("slot", "")) == str(step["item_slot"])]
+    if step.get("item_category") is not None:
+        matches = [event for event in matches if str((event.get("item") or {}).get("category", "")) == str(step["item_category"])]
+    return matches
+
+
+def shop_event_offer_kind(event: dict[str, Any]) -> str:
+    explicit = str(event.get("offer_kind", ""))
+    if explicit:
+        return explicit
+    offer_id = str(event.get("offer_id", ""))
+    if ":" in offer_id:
+        return offer_id.split(":", 1)[0]
+    return ""
+
+
+def shop_event_revealed_item(event: dict[str, Any]) -> bool:
+    item = event.get("item")
+    if not isinstance(item, dict):
+        return False
+    return bool(item.get("item_instance_id") and item.get("item_template_id") and item.get("display_name") and item.get("rarity"))
+
+
+def assert_shop_event_details(events: list[dict[str, Any]], step: dict[str, Any], label: str) -> None:
+    if step.get("requires_revealed_item"):
+        missing = [event for event in events if not shop_event_revealed_item(event)]
+        if missing:
+            raise AssertionError(f"{label}: events missing revealed item payload: {missing}")
+    if step.get("rarity_in") is not None:
+        allowed = {str(rarity) for rarity in step["rarity_in"]}
+        mismatched = [
+            event for event in events
+            if str((event.get("item") or {}).get("rarity", "")) not in allowed
+        ]
+        if mismatched:
+            raise AssertionError(f"{label}: revealed rarity not in {sorted(allowed)}: {mismatched}")
 
 
 def filtered_shop_sell_appraisals(state: RuntimeState, step: dict[str, Any]) -> list[dict[str, Any]]:
@@ -2606,7 +2682,12 @@ def select_shop_offer(state: RuntimeState, step: dict[str, Any]) -> dict[str, An
     offers = filtered_shop_offers(state, step)
     if not offers:
         shop_id = str(step.get("shop_id", "town_vendor"))
-        raise AssertionError(f"{step.get('action')}: no matching shop offers in {shop_id}: {step}; have={state.shop_offers.get(shop_id, {})}")
+        reserve_gold = int(step.get("reserve_gold", 0))
+        budget = max(0, state.gold - reserve_gold)
+        raise AssertionError(
+            f"{step.get('action')}: no matching shop offers in {shop_id}: {step}; "
+            f"gold={state.gold} budget={budget}; have={state.shop_offers.get(shop_id, {})}"
+        )
     index = int(step.get("offer_index", 0))
     if index < 0 or index >= len(offers):
         raise AssertionError(f"{step.get('action')}: offer_index {index} out of range for {offers}")
@@ -2634,14 +2715,29 @@ def assert_shop_detail_rows(rows: list[dict[str, Any]], step: dict[str, Any], la
         missing = [row for row in rows if not row.get("category")]
         if missing:
             raise AssertionError(f"{label}: rows missing category: {missing}")
+    if step.get("requires_concealed"):
+        missing = [row for row in rows if row.get("concealed") is not True]
+        if missing:
+            raise AssertionError(f"{label}: rows are not concealed: {missing}")
+    if step.get("requires_mystery_label"):
+        missing = [row for row in rows if not row.get("mystery_label")]
+        if missing:
+            raise AssertionError(f"{label}: rows missing mystery_label: {missing}")
+    if step.get("forbids_item_identity"):
+        leaking = [
+            row for row in rows
+            if any(field in row for field in SHOP_IDENTITY_FIELDS)
+        ]
+        if leaking:
+            raise AssertionError(f"{label}: rows expose hidden item fields: {leaking}")
     if step.get("source_depth_min") is not None:
         minimum = int(step["source_depth_min"])
-        missing = [row for row in rows if int(row.get("source_depth", 0)) < minimum]
+        missing = [row for row in rows if shop_row_source_depth_bounds(row)[0] < minimum]
         if missing:
             raise AssertionError(f"{label}: rows below source_depth_min {minimum}: {missing}")
     if step.get("source_depth_max") is not None:
         maximum = int(step["source_depth_max"])
-        missing = [row for row in rows if int(row.get("source_depth", 0)) > maximum]
+        missing = [row for row in rows if shop_row_source_depth_bounds(row)[1] > maximum]
         if missing:
             raise AssertionError(f"{label}: rows above source_depth_max {maximum}: {missing}")
     if step.get("requires_comparison"):
@@ -3486,13 +3582,9 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             assert_shop_detail_rows(rows, assertion, f"{where}: shop_sell_appraisal_details")
             continue
         if typ == "shop_event":
-            shop_id = str(assertion.get("shop_id", "town_vendor"))
-            event_type = str(assertion["event_type"])
-            matches = [
-                event for event in state.shop_events
-                if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id
-            ]
+            matches = filtered_shop_events(state, assertion)
             assert_count_matches(len(matches), assertion, f"{where}: shop_event", f": {matches}")
+            assert_shop_event_details(matches, assertion, f"{where}: shop_event")
             continue
         if typ == "stash_event":
             stash_id = str(assertion.get("stash_id", "account_stash"))

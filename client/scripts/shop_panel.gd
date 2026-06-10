@@ -18,6 +18,19 @@ const ICON_FONT_SIZE := 20
 const PRICE_FONT_SIZE := 13
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
 const DRAG_SOURCE_INVENTORY_BAG := "bag"
+const MYSTERY_SLOT_STYLE := "magic"
+const ITEM_IDENTITY_FIELDS := [
+	"item_def_id",
+	"item_template_id",
+	"display_name",
+	"rarity",
+	"rolled_stats",
+	"requirements",
+	"requirement_status",
+	"comparison",
+	"equip_preview",
+	"summary_lines",
+]
 const ITEM_RARITY_BACKGROUNDS := {
 	"common": Color("#343432"),
 	"magic": Color("#1b3458"),
@@ -160,6 +173,7 @@ func get_debug_state() -> Dictionary:
 		"offer_count": offers.size(),
 		"fixed_offer_count": _offers_by_kind("fixed").size(),
 		"generated_offer_count": _offers_by_kind("generated").size(),
+		"mystery_offer_count": _offers_by_kind("mystery").size(),
 		"buyback_offer_count": _offers_by_kind("buyback").size(),
 		"buy_buttons": _debug_buy_buttons(),
 		"offer_rows": _debug_offer_rows(),
@@ -297,7 +311,7 @@ func _fill_slot(slot: ShopSlotButton, offer: Dictionary) -> void:
 		return
 	slot.text = ""
 	slot.tooltip_text = _tooltip(offer)
-	var rarity := str(offer.get("rarity", "common"))
+	var rarity := MYSTERY_SLOT_STYLE if _is_mystery_offer(offer) else str(offer.get("rarity", "common"))
 	var affordable := _offer_affordable(offer)
 	slot.add_theme_stylebox_override("normal", _item_slot_style(rarity, false, affordable))
 	slot.add_theme_stylebox_override("hover", _item_slot_style(rarity, true, affordable))
@@ -307,6 +321,9 @@ func _fill_slot(slot: ShopSlotButton, offer: Dictionary) -> void:
 
 
 func _draw_item_icon(slot: Control, item: Dictionary) -> void:
+	if _is_mystery_offer(item):
+		_draw_mystery_icon(slot, item)
+		return
 	var def_id := str(item.get("item_def_id", ""))
 	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
 	var shape := str(icon.get("shape", "box"))
@@ -365,10 +382,45 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	)
 
 
+func _draw_mystery_icon(slot: Control, item: Dictionary) -> void:
+	var rect := Rect2(Vector2.ZERO, slot.size)
+	var center := rect.get_center()
+	var min_side = min(rect.size.x, rect.size.y)
+	var color := Color("#b6a6ff")
+	var accent := Color("#f4d481")
+	if not _offer_affordable(item):
+		color = color.darkened(0.35)
+		accent = accent.darkened(0.35)
+	slot.draw_arc(center + Vector2(0.0, -min_side * 0.02), min_side * 0.24, -0.9, 4.0, 24, color, 3.0, true)
+	slot.draw_circle(center + Vector2(0.0, min_side * 0.20), min_side * 0.035, accent)
+	var font := slot.get_theme_default_font()
+	var label := "?"
+	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE)
+	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.06), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
+	_draw_offer_price(slot, item)
+
+
+func _draw_offer_price(slot: Control, item: Dictionary) -> void:
+	var font := slot.get_theme_default_font()
+	var price := str(int(item.get("buy_price", 0)))
+	var price_color := Color("#f4c84f") if _offer_affordable(item) else Color("#ff6f6f")
+	var price_size := font.get_string_size(price, HORIZONTAL_ALIGNMENT_LEFT, -1, PRICE_FONT_SIZE)
+	slot.draw_string(
+		font,
+		Vector2(slot.size.x - price_size.x - 3.0, slot.size.y - 4.0),
+		price,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		PRICE_FONT_SIZE,
+		price_color
+	)
+
+
 func _drag_preview(offer: Dictionary) -> Control:
 	var label := Label.new()
 	label.text = _offer_name(offer)
-	label.add_theme_color_override("font_color", _rarity_color(str(offer.get("rarity", "common"))))
+	var rarity := MYSTERY_SLOT_STYLE if _is_mystery_offer(offer) else str(offer.get("rarity", "common"))
+	label.add_theme_color_override("font_color", _rarity_color(rarity))
 	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	return label
 
@@ -539,17 +591,23 @@ func _debug_offer_rows() -> Array:
 		if typeof(offer) != TYPE_DICTIONARY:
 			continue
 		var rec := offer as Dictionary
+		var mystery := _is_mystery_offer(rec)
 		out.append({
 			"offer_id": str(rec.get("offer_id", "")),
 			"kind": str(rec.get("kind", "")),
-			"item_def_id": str(rec.get("item_def_id", "")),
-			"item_template_id": str(rec.get("item_template_id", "")),
+			"item_def_id": "" if mystery else str(rec.get("item_def_id", "")),
+			"item_template_id": "" if mystery else str(rec.get("item_template_id", "")),
 			"display_name": _offer_name(rec),
-			"rarity": str(rec.get("rarity", "")),
+			"rarity": "" if mystery else str(rec.get("rarity", "")),
 			"slot": str(rec.get("slot", "")),
 			"category": str(rec.get("category", "")),
 			"buy_price": int(rec.get("buy_price", 0)),
 			"source_depth": int(rec.get("source_depth", 0)),
+			"source_depth_min": _source_depth_min(rec),
+			"source_depth_max": _source_depth_max(rec),
+			"concealed": mystery,
+			"mystery_label": _mystery_label(rec) if mystery else "",
+			"identity_field_count": _identity_field_count(rec) if mystery else 0,
 			"summary_lines": _detail_lines(rec),
 			"comparison_count": _comparison_count(rec),
 			"requirement_count": _requirement_lines(rec).size(),
@@ -589,6 +647,8 @@ func _equip_preview_row_count() -> int:
 
 
 func _offer_name(offer: Dictionary) -> String:
+	if _is_mystery_offer(offer):
+		return _mystery_label(offer)
 	var name := str(offer.get("display_name", ""))
 	if name != "":
 		return name
@@ -607,6 +667,8 @@ func _item_name(item: Dictionary) -> String:
 
 
 func _tooltip(row: Dictionary) -> String:
+	if _is_mystery_offer(row):
+		return "\n".join(_mystery_tooltip_lines(row))
 	var lines: Array = [_offer_name(row)]
 	var rarity := str(row.get("rarity", ""))
 	if rarity != "":
@@ -617,6 +679,18 @@ func _tooltip(row: Dictionary) -> String:
 
 func _make_offer_tooltip(offer: Dictionary) -> Control:
 	var tooltip := ItemTooltipPanelScript.new()
+	if _is_mystery_offer(offer):
+		tooltip.setup(
+			{},
+			item_presentations,
+			_mystery_tooltip_lines(offer),
+			[],
+			[],
+			int(offer.get("buy_price", 0)),
+			_offer_affordable(offer),
+			"?"
+		)
+		return tooltip
 	tooltip.setup(
 		offer,
 		item_presentations,
@@ -637,6 +711,8 @@ func _make_text_tooltip(text: String) -> Control:
 
 
 func _tooltip_lines(row: Dictionary) -> Array:
+	if _is_mystery_offer(row):
+		return _mystery_tooltip_lines(row)
 	var lines: Array = [_offer_name(row)]
 	var rarity := str(row.get("rarity", ""))
 	if rarity != "":
@@ -646,6 +722,8 @@ func _tooltip_lines(row: Dictionary) -> Array:
 
 
 func _detail_lines(row: Dictionary, include_requirements: bool = true, include_comparison: bool = true) -> Array:
+	if _is_mystery_offer(row):
+		return _mystery_detail_lines(row)
 	var lines: Array = []
 	var summary = row.get("summary_lines", [])
 	if typeof(summary) == TYPE_ARRAY:
@@ -675,6 +753,8 @@ func _detail_lines(row: Dictionary, include_requirements: bool = true, include_c
 
 
 func _requirement_lines(row: Dictionary) -> Array:
+	if _is_mystery_offer(row):
+		return []
 	var lines: Array = []
 	var statuses = row.get("requirement_status", [])
 	if typeof(statuses) == TYPE_ARRAY:
@@ -733,6 +813,8 @@ func _requirement_from_summary_line(text: String) -> String:
 
 
 func _comparison_entries(row: Dictionary) -> Array:
+	if _is_mystery_offer(row):
+		return []
 	var entries: Array = []
 	_append_equip_preview_entries(entries, row)
 	var comparison = row.get("comparison", {})
@@ -842,6 +924,8 @@ func _comparison_lines(comparison_value: Variant) -> Array:
 
 
 func _comparison_count(row: Dictionary) -> int:
+	if _is_mystery_offer(row):
+		return 0
 	var comparison = row.get("comparison", {})
 	if typeof(comparison) != TYPE_DICTIONARY:
 		return 0
@@ -856,6 +940,8 @@ func _requirement_color(met: bool) -> Color:
 
 
 func _equip_preview_count(row: Dictionary) -> int:
+	if _is_mystery_offer(row):
+		return 0
 	var preview = row.get("equip_preview", {})
 	if typeof(preview) != TYPE_DICTIONARY:
 		return 0
@@ -863,6 +949,95 @@ func _equip_preview_count(row: Dictionary) -> int:
 	if typeof(deltas) != TYPE_ARRAY:
 		return 0
 	return (deltas as Array).size()
+
+
+func _is_mystery_offer(row: Dictionary) -> bool:
+	return str(row.get("kind", "")) == "mystery" \
+		or bool(row.get("concealed", false)) \
+		or str(row.get("offer_id", "")).begins_with("mystery:")
+
+
+func _mystery_label(row: Dictionary) -> String:
+	var label := str(row.get("mystery_label", ""))
+	if label != "":
+		return label
+	var slot := _display_token(str(row.get("slot", "")))
+	if slot != "":
+		return "Unidentified %s" % slot
+	return "Unidentified item"
+
+
+func _mystery_tooltip_lines(row: Dictionary) -> Array:
+	var lines: Array = [_mystery_label(row)]
+	lines.append_array(_mystery_detail_lines(row))
+	return lines
+
+
+func _mystery_detail_lines(row: Dictionary) -> Array:
+	var lines: Array = []
+	var slot := _display_token(str(row.get("slot", "")))
+	if slot != "":
+		lines.append("Slot: %s" % slot)
+	var category := _display_token(str(row.get("category", "")))
+	if category != "":
+		lines.append("Kind: %s" % category)
+	var source := _source_window_line(row)
+	if source != "":
+		lines.append(source)
+	return lines
+
+
+func _source_window_line(row: Dictionary) -> String:
+	var min_depth := _source_depth_min(row)
+	var max_depth := _source_depth_max(row)
+	if min_depth <= 0 and max_depth <= 0:
+		return ""
+	if max_depth <= min_depth:
+		return "Source depth: %d" % min_depth
+	return "Source depths: %d-%d" % [min_depth, max_depth]
+
+
+func _source_depth_min(row: Dictionary) -> int:
+	if row.has("source_depth_min"):
+		return int(row.get("source_depth_min", 0))
+	return int(row.get("source_depth", 0))
+
+
+func _source_depth_max(row: Dictionary) -> int:
+	if row.has("source_depth_max"):
+		return int(row.get("source_depth_max", 0))
+	return int(row.get("source_depth", 0))
+
+
+func _identity_field_count(row: Dictionary) -> int:
+	var count := 0
+	for key in ITEM_IDENTITY_FIELDS:
+		if not row.has(key):
+			continue
+		var value = row.get(key)
+		if key == "display_name" and str(value) == _mystery_label(row):
+			continue
+		if _has_identity_value(value):
+			count += 1
+	return count
+
+
+func _has_identity_value(value) -> bool:
+	match typeof(value):
+		TYPE_NIL:
+			return false
+		TYPE_STRING:
+			return str(value) != ""
+		TYPE_ARRAY:
+			return not (value as Array).is_empty()
+		TYPE_DICTIONARY:
+			return not (value as Dictionary).is_empty()
+		_:
+			return true
+
+
+func _display_token(value: String) -> String:
+	return value.replace("_", " ").capitalize()
 
 
 func _display_stat(stat: String) -> String:

@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_test_missing_keycode_rejected()
 	_test_missing_click_entity_type_rejected()
 	_test_missing_click_floor_coords_rejected()
+	_test_missing_waypoint_level_rejected()
 	_test_missing_drag_bag_item_def_id_rejected()
 	_test_full_equipment_step_types_load()
 	_test_missing_menu_button_rejected()
@@ -141,6 +142,11 @@ func _test_missing_click_entity_type_rejected() -> void:
 func _test_missing_click_floor_coords_rejected() -> void:
 	var err := BotScenarioRunnerScript.validate_step({"type": "click_floor"}, 0)
 	_assert_ne("click_floor without x/z rejected", err, "")
+
+
+func _test_missing_waypoint_level_rejected() -> void:
+	var err := BotScenarioRunnerScript.validate_step({"type": "click_waypoint_level"}, 0)
+	_assert_ne("click_waypoint_level without target rejected", err, "")
 
 
 func _test_missing_drag_bag_item_def_id_rejected() -> void:
@@ -507,12 +513,15 @@ func _test_shop_step_types_load() -> void:
 		{"type": "assert_shop_panel_visible", "visible": true},
 		{"type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2},
 		{"type": "assert_shop_offer_count", "offer_kind": "generated", "equals": 5},
+		{"type": "assert_shop_offer_count", "offer_kind": "mystery", "equals": 1},
 		{"type": "assert_shop_offer_count", "offer_kind": "buyback", "equals": 1},
 		{"type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true},
 		{"type": "assert_shop_sell_rows", "rolled": true, "at_least": 1},
 		{"type": "click_shop_buy_offer", "offer_id": "fixed:red_potion"},
 		{"type": "click_shop_buy_offer", "offer_kind": "generated", "offer_index": 0},
+		{"type": "click_shop_buy_offer", "offer_kind": "mystery", "offer_index": 0},
 		{"type": "click_shop_sell_item", "rolled": true, "bag_index": 0},
+		{"type": "click_waypoint_level", "target_level": 0},
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("shop client step scenario valid", err, "")
@@ -528,9 +537,11 @@ func _test_shop_assertions() -> void:
 		"runner": "godot_client",
 		"world_id": "dungeon_levels",
 		"client_steps": [
-			{"type": "wait_shop_panel", "equals": 7, "timeout_s": 1.0},
+			{"type": "wait_shop_panel", "equals": 8, "timeout_s": 1.0},
 			{"type": "assert_shop_panel_visible", "visible": true},
 			{"type": "assert_shop_offer_count", "offer_kind": "generated", "equals": 5},
+			{"type": "assert_shop_offer_count", "offer_kind": "mystery", "equals": 1},
+			{"type": "assert_shop_offer_details", "offer_kind": "mystery", "concealed": true, "equals": 1, "source_depth_min": 1, "source_depth_max": 3, "requires_summary": true, "requires_price": true, "requires_slot": true, "requires_category": true, "requires_concealed": true, "requires_mystery_label": true, "forbids_item_identity": true, "summary_contains": "Source depths"},
 			{"type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true},
 			{"type": "assert_shop_sell_rows", "rolled": true, "at_least": 1},
 		],
@@ -539,19 +550,35 @@ func _test_shop_assertions() -> void:
 	var state := {
 		"shop_panel_visible": true,
 		"shop_panel": {
-			"offer_count": 7,
+			"offer_count": 8,
 			"fixed_offer_count": 2,
 			"generated_offer_count": 5,
+			"mystery_offer_count": 1,
 			"buyback_offer_count": 0,
 			"buy_buttons": {
 				"fixed:red_potion": {"enabled": true},
 			},
+			"offer_rows": [
+				{
+					"offer_id": "mystery:wp:-3:ring:000",
+					"kind": "mystery",
+					"concealed": true,
+					"mystery_label": "Unidentified ring",
+					"slot": "ring",
+					"category": "equipment",
+					"buy_price": 75,
+					"source_depth_min": 1,
+					"source_depth_max": 3,
+					"summary_lines": ["Slot: Ring", "Kind: Equipment", "Source depths: 1-3"],
+					"identity_field_count": 0,
+				},
+			],
 			"sell_rows": [
 				{"item_instance_id": "1", "item_def_id": "cave_bow", "item_template_id": "cave_bow"},
 			],
 		},
 	}
-	for _i in range(5):
+	for _i in range(data["client_steps"].size()):
 		runner.tick(0.016, state)
 	_assert_true("shop assertions pass", runner.is_done() and runner.passed())
 

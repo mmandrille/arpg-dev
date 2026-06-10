@@ -109,6 +109,7 @@ func TestDeleteStaleEmptySessions(t *testing.T) {
 		Experience:        0,
 		UnspentStatPoints: 0,
 		Stats:             CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+		SkillRanks:        map[string]int{"magic_bolt": 1},
 	}); err != nil {
 		t.Fatalf("create start snapshot: %v", err)
 	}

@@ -55,6 +55,69 @@
           "inventory_rows": 35
         }
       }
+    },
+    "town_mystery_seller": {
+      "name": "Mystery Seller",
+      "fixed_offers": [],
+      "generated_offers": {
+        "offer_count": 9,
+        "source": "common_dungeon_mob",
+        "min_depth": 1,
+        "source_depth_policy": "character_level_plus_one_to_deepest_else_any_achieved",
+        "max_rarity": "rare",
+        "refresh_on": "new_non_town_waypoint",
+        "max_roll_attempts": 256
+      },
+      "mystery_offers": {
+        "enabled": true,
+        "eligible_slots": ["main_hand", "off_hand", "head", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+        "source": "common_dungeon_mob",
+        "source_depth_window": 5,
+        "min_rarity": "magic",
+        "max_rarity": "rare",
+        "refresh_on": "new_non_town_waypoint",
+        "price_multiplier": 1.01,
+        "max_roll_attempts": 256
+      },
+      "buyback": {
+        "enabled": false,
+        "scope": "session_town_visit",
+        "buy_price_multiplier": 1.0,
+        "clear_on_leave_town": true
+      },
+      "pricing": {
+        "sell_multiplier": 0.25,
+        "round_buy_to": 1,
+        "rarity_multipliers": {
+          "common": 1.0,
+          "magic": 0.95,
+          "rare": 1.1,
+          "unique": 2.0
+        },
+        "slot_base": {
+          "main_hand": 30,
+          "off_hand": 25,
+          "head": 20,
+          "chest": 35,
+          "gloves": 18,
+          "belt": 22,
+          "boots": 18,
+          "ring": 24,
+          "amulet": 28
+        },
+        "stat_weights": {
+          "damage_min": 10,
+          "damage_max": 12,
+          "armor": 7,
+          "block_percent": 4,
+          "attack_speed_percent": 3,
+          "max_hp": 5,
+          "health_regen_per_10_seconds": 4,
+          "mana_regen_per_10_seconds": 4,
+          "hotbar_slots": 20,
+          "inventory_rows": 35
+        }
+      }
     }
   }
 }

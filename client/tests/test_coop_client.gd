@@ -6,6 +6,7 @@ const MainScript := preload("res://scripts/main.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
+const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
@@ -37,6 +38,7 @@ func _initialize() -> void:
 	_test_multiplayer_sessions_panel_row_join_affordances()
 	_test_settings_panel_create_game_type_sync()
 	_test_status_text_toggle_hides_left_debug_not_level_hud()
+	_test_player_hud_identity_uses_character_name_and_level()
 	_test_actionable_panels_autoclose_out_of_range()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -372,6 +374,25 @@ func _test_status_text_toggle_hides_left_debug_not_level_hud() -> void:
 	_assert_true("right level still shows dungeon depth", main._level_label.text.begins_with("Level 3"))
 	main._debug_label.free()
 	main._level_label.free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_player_hud_identity_uses_character_name_and_level() -> void:
+	var main = _make_main()
+	main._health_bar = PlayerHealthBarScript.new()
+	main._health_bar._build()
+	main.player_id = "1001"
+	main.party = [{"player_id": "1001", "display_name": "Astra"}]
+	main.character_progression = {"level": 4}
+	main._refresh_player_hud_identity()
+	var state: Dictionary = main._health_bar.get_debug_state()
+	_assert_eq("player hud identity name", str(state.get("character_name", "")), "Astra")
+	_assert_eq("player hud identity level", int(state.get("level", 0)), 4)
+	_assert_eq("player hud identity text", str(state.get("identity_text", "")), "Astra  Lv 4")
+	main._health_bar.free()
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

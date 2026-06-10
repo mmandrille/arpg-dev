@@ -704,6 +704,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	if _health_bar != null:
 		_health_bar.update_hp(player_hp, player_max_hp)
 		_health_bar.update_mana(player_mana, player_max_mana)
+		_refresh_player_hud_identity()
 	if character_stats_panel != null:
 		character_stats_panel.hide_display()
 	if skills_panel != null:
@@ -861,6 +862,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	character_progression = p.get("character_progression", {})
 	skill_progression = p.get("skill_progression", {})
 	skill_cooldowns = p.get("skill_cooldowns", [])
+	_refresh_player_hud_identity()
 	if resolver != null:
 		resolver.apply_snapshot(p)
 	_refresh_inventory_ui()
@@ -946,6 +948,7 @@ func _apply_delta(p: Dictionary) -> void:
 			"character_progression_update":
 				character_progression = c.get("character_progression", {})
 				_refresh_progression_ui()
+				_refresh_player_hud_identity()
 				_update_character_info_panel()
 			"skill_progression_update":
 				skill_progression = c.get("skill_progression", {})
@@ -2495,6 +2498,7 @@ func _build_scene() -> void:
 	ui.add_child(skill_bar)
 	_setup_character_info_panel(ui)
 	_health_bar = PlayerHealthBarScript.new()
+	_refresh_player_hud_identity()
 	ui.add_child(_health_bar)
 	_setup_menu_layer()
 
@@ -2935,6 +2939,11 @@ func _update_character_info_panel() -> void:
 		character_info_level_label.text = "Level  %d" % int(character_progression.get("level", 1))
 	if character_info_area_label != null:
 		character_info_area_label.text = "Area  %s" % _current_area_label()
+
+
+func _refresh_player_hud_identity() -> void:
+	if _health_bar != null:
+		_health_bar.set_identity(_local_character_display_name(), int(character_progression.get("level", 1)))
 
 
 func _local_character_display_name() -> String:

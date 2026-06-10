@@ -1,5 +1,4 @@
 {
-  "description": "Deterministic template item rolls for cave_blade.",
   "template_id": "cave_blade",
   "cases": [
     {
@@ -10,10 +9,12 @@
         "display_name": "Common Cave Blade",
         "rarity": "common",
         "stats": {
-          "damage_min": 3,
-          "damage_max": 4
+          "damage_max": 4,
+          "damage_min": 3
         },
-        "requirements": { "level": 1 },
+        "requirements": {
+          "level": 1
+        },
         "effect_ids": []
       }
     },
@@ -25,10 +26,12 @@
         "display_name": "Rare Cave Blade",
         "rarity": "rare",
         "stats": {
-          "damage_min": 4,
-          "damage_max": 5
+          "damage_max": 5,
+          "damage_min": 4
         },
-        "requirements": { "level": 1 },
+        "requirements": {
+          "level": 1
+        },
         "effect_ids": []
       }
     }

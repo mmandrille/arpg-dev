@@ -106,6 +106,9 @@ run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/t
 # 2l. Boss health bar render/state test (server-independent; v53).
 run_gate "GDScript boss health bar test" "[gdtest] PASS: test_boss_health_bar" res://tests/test_boss_health_bar.gd
 
+# 2m. Delta and snapshot state-mutation unit tests (server-independent; v53).
+run_gate "GDScript delta apply test" "[gdtest] PASS: test_delta_apply" res://tests/test_delta_apply.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0

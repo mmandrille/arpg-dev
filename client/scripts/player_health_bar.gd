@@ -8,11 +8,14 @@ var _hp_fill: ColorRect
 var _hp_label: Label
 var _mana_fill: ColorRect
 var _mana_label: Label
+var _identity_label: Label
 var _panel: PanelContainer
 var _hp: int = 10
 var _max_hp: int = 10
 var _mana: int = 10
 var _max_mana: int = 10
+var _character_name := "Hero"
+var _level := 1
 var _tween: Tween
 
 
@@ -41,6 +44,25 @@ func update_mana(mana: int, max_mana: int, is_restore: bool = false) -> void:
 	_update_bars()
 	if is_restore and mana > was_mana:
 		_flash(_mana_fill, Color(0.45, 0.90, 1.0), _mana_bar_color())
+
+
+func set_identity(character_name: String, level: int) -> void:
+	var next_name := character_name.strip_edges()
+	_character_name = next_name if next_name != "" else "Hero"
+	_level = maxi(1, level)
+	_update_identity_label()
+
+
+func get_debug_state() -> Dictionary:
+	return {
+		"character_name": _character_name,
+		"level": _level,
+		"identity_text": _identity_label.text if _identity_label != null else _identity_text(),
+		"hp": _hp,
+		"max_hp": _max_hp,
+		"mana": _mana,
+		"max_mana": _max_mana,
+	}
 
 
 func _flash(target: ColorRect, color: Color, return_color: Color) -> void:
@@ -80,6 +102,15 @@ func _update_bars() -> void:
 	_mana_label.text = "%d / %d" % [_mana, _max_mana]
 
 
+func _identity_text() -> String:
+	return "%s  Lv %d" % [_character_name, _level]
+
+
+func _update_identity_label() -> void:
+	if _identity_label != null:
+		_identity_label.text = _identity_text()
+
+
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 
@@ -99,11 +130,23 @@ func _build() -> void:
 	_panel.add_theme_stylebox_override("panel", style)
 	add_child(_panel)
 
-	var root := HBoxContainer.new()
-	root.add_theme_constant_override("separation", 10)
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 5)
 	_panel.add_child(root)
-	_build_meter(root, "♥", Color("#c0392b"), true)
-	_build_meter(root, "✦", Color("#48aeea"), false)
+
+	_identity_label = Label.new()
+	_identity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_identity_label.clip_text = true
+	_identity_label.add_theme_color_override("font_color", Color("#f0dfbb"))
+	_identity_label.add_theme_font_size_override("font_size", 17)
+	root.add_child(_identity_label)
+
+	var meters := HBoxContainer.new()
+	meters.add_theme_constant_override("separation", 10)
+	root.add_child(meters)
+	_build_meter(meters, "♥", Color("#c0392b"), true)
+	_build_meter(meters, "✦", Color("#48aeea"), false)
+	_update_identity_label()
 	_update_bars()
 
 
@@ -149,4 +192,4 @@ func _build_meter(parent: HBoxContainer, icon_text: String, icon_color: Color, i
 
 func _sync_position() -> void:
 	if _panel != null:
-		_panel.set_deferred("position", Vector2(12.0, get_viewport_rect().size.y - 62.0))
+		_panel.set_deferred("position", Vector2(12.0, get_viewport_rect().size.y - 84.0))

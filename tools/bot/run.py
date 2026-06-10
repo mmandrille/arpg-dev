@@ -638,7 +638,7 @@ async def execute_step(
         await wait_for_accept(ws, state, env["message_id"], loop)
         event_type = step.get("event_type")
         if event_type:
-            await wait_for_event(ws, state, str(event_type), loop)
+            await wait_for_event(ws, state, str(event_type), loop, timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)))
         return
 
     if action == "action_until_event":
@@ -682,7 +682,7 @@ async def execute_step(
         pending_message_id = ""
         start_index = len(state.combat_events)
         deadline = loop.time() + SLICE_TIMEOUT_S
-        while not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
+        while not any(combat_event_matches(ev, step, state) for ev in state.combat_events[start_index:]):
             if loop.time() > deadline:
                 raise TimeoutError(f"action_until_combat_event stalled waiting for {combat_event_summary(step)}")
             if is_monster and monster_def_id and target_id in skipped_ids:
@@ -721,14 +721,14 @@ async def execute_step(
             if reason == "player_dead":
                 raise AssertionError("action_until_combat_event: player died")
             raise AssertionError(f"action_intent for {monster_def_id or target_id} was rejected: {reason}")
-        if not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
+        if not any(combat_event_matches(ev, step, state) for ev in state.combat_events[start_index:]):
             raise AssertionError(f"action_until_combat_event target ended before {combat_event_summary(step)}")
         return
 
     if action == "wait_for_combat_event":
         start_index = len(state.combat_events)
         deadline = loop.time() + float(step.get("timeout_s", SLICE_TIMEOUT_S))
-        while not any(combat_event_matches(ev, step) for ev in state.combat_events[start_index:]):
+        while not any(combat_event_matches(ev, step, state) for ev in state.combat_events[start_index:]):
             if loop.time() > deadline:
                 raise TimeoutError(f"wait_for_combat_event stalled waiting for {combat_event_summary(step)}")
             await pump_one(ws, state, timeout=0.1)
@@ -770,7 +770,7 @@ async def execute_step(
             return
         event_type = step.get("event_type")
         if event_type:
-            await wait_for_event(ws, state, str(event_type), loop)
+            await wait_for_event(ws, state, str(event_type), loop, timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)))
         return
 
     if action == "kill_monsters":
@@ -846,7 +846,19 @@ async def execute_step(
 
     if action == "move_until_in_range":
         target = resolve_target(state, step)
-        await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)))
+        stop_distance = float(step.get("stop_distance", WALK_STOP_DISTANCE))
+        if target.get("type") == "monster":
+            await move_until_entity_in_range(
+                ws,
+                session_id,
+                state,
+                str(target["id"]),
+                loop,
+                stop_distance=stop_distance,
+                max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+            )
+            return
+        await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=stop_distance)
         return
 
     if action == "use_stair":
@@ -1668,6 +1680,100 @@ async def walk_toward(
     raise TimeoutError(f"walk_toward exhausted {max_ticks} ticks toward {target_pos}")
 
 
+async def move_until_entity_in_range(
+    ws,
+    session_id: str,
+    state: RuntimeState,
+    target_id: str,
+    loop,
+    *,
+    stop_distance: float,
+    max_ticks: int = WALK_MAX_TICKS,
+) -> None:
+    last_error: Exception | None = None
+    attempts = max(1, max_ticks // 20)
+    for _ in range(attempts):
+        target = state.entities.get(target_id)
+        player = find_player(state)
+        if target is None:
+            raise AssertionError(f"move_until_entity_in_range: target vanished: {target_id}")
+        if player is None:
+            raise AssertionError("move_until_entity_in_range: player not found")
+        if dict_distance(player["position"], target["position"]) <= stop_distance:
+            return
+
+        for candidate in range_candidate_positions(player["position"], target["position"], stop_distance):
+            try:
+                await walk_toward(
+                    ws,
+                    session_id,
+                    state,
+                    candidate,
+                    loop,
+                    max_ticks=min(max_ticks, 120),
+                    stop_distance=0.75,
+                )
+            except AssertionError as exc:
+                if "no_path" not in str(exc) and "path_too_long" not in str(exc):
+                    raise
+                last_error = exc
+                continue
+            except TimeoutError as exc:
+                last_error = exc
+                continue
+
+            target = state.entities.get(target_id)
+            player = find_player(state)
+            if target is None:
+                raise AssertionError(f"move_until_entity_in_range: target vanished: {target_id}")
+            if player is None:
+                raise AssertionError("move_until_entity_in_range: player not found")
+            if dict_distance(player["position"], target["position"]) <= stop_distance:
+                return
+
+    target = state.entities.get(target_id)
+    player = find_player(state)
+    detail = f"; last_error={last_error}" if last_error is not None else ""
+    raise TimeoutError(
+        f"move_until_entity_in_range exhausted {max_ticks} ticks toward {target_id}; "
+        f"player={(player or {}).get('position')} target={(target or {}).get('position')}{detail}"
+    )
+
+
+def range_candidate_positions(
+    player_pos: dict[str, Any],
+    target_pos: dict[str, Any],
+    stop_distance: float,
+) -> list[dict[str, float]]:
+    radius = max(1.25, stop_distance * 0.85)
+    player_x = float(player_pos["x"])
+    player_y = float(player_pos["y"])
+    target_x = float(target_pos["x"])
+    target_y = float(target_pos["y"])
+    base_x = player_x - target_x
+    base_y = player_y - target_y
+    base_len = math.hypot(base_x, base_y)
+    if base_len <= 0.000001:
+        base_x, base_y, base_len = 1.0, 0.0, 1.0
+    base_angle = math.atan2(base_y, base_x)
+    offsets = [0.0, math.pi / 4, -math.pi / 4, math.pi / 2, -math.pi / 2, math.pi, 3 * math.pi / 4, -3 * math.pi / 4]
+    candidates: list[dict[str, float]] = []
+    seen: set[tuple[int, int]] = set()
+    for offset in offsets:
+        angle = base_angle + offset
+        pos = {
+            "x": round(target_x + math.cos(angle) * radius, 3),
+            "y": round(target_y + math.sin(angle) * radius, 3),
+        }
+        key = (int(round(pos["x"] * 1000)), int(round(pos["y"] * 1000)))
+        if key in seen:
+            continue
+        seen.add(key)
+        candidates.append(pos)
+    candidates.sort(key=lambda pos: dict_distance(player_pos, pos))
+    return candidates
+
+
 def derived_walk_max_ticks(state: RuntimeState, target_pos: dict[str, Any], requested: int) -> int:
     player = find_player(state)
     if player is None:
@@ -1866,11 +1972,18 @@ async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str,
         raise AssertionError(f"reject {message_id} reason={got}, want {reason}")
 
 
-async def wait_for_event(ws, state: RuntimeState, event_type: str, loop) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
+async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S) -> None:
+    deadline = loop.time() + timeout_s
     while event_type not in state.seen_events:
         if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for event {event_type}")
+            player = find_player(state)
+            raise TimeoutError(
+                f"stalled waiting for event {event_type}; "
+                f"level={state.current_level} tick={state.last_tick} "
+                f"player_hp={(player or {}).get('hp')} "
+                f"seen_events={sorted(state.seen_events)} "
+                f"recent_combat={state.combat_events[-5:]}"
+            )
         await pump_one(ws, state, timeout=0.1)
 
 
@@ -1912,7 +2025,7 @@ async def wait_for_stash_event(
         await pump_one(ws, state, timeout=0.1)
 
 
-def combat_event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
+def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state: RuntimeState | None = None) -> bool:
     for key in (
         "event_type",
         "outcome",
@@ -1934,12 +2047,53 @@ def combat_event_matches(event: dict[str, Any], expected: dict[str, Any]) -> boo
     ):
         if key in expected and int(event.get(event_key, -999999)) < int(expected[key]):
             return False
+    if not combat_event_entity_matches(event, expected, state, "source"):
+        return False
+    if not combat_event_entity_matches(event, expected, state, "target"):
+        return False
     return True
+
+
+def combat_event_entity_matches(
+    event: dict[str, Any],
+    expected: dict[str, Any],
+    state: RuntimeState | None,
+    prefix: str,
+) -> bool:
+    selector: dict[str, Any] = {}
+    for expected_key, selector_key in (
+        (f"{prefix}_entity_type", "entity_type"),
+        (f"{prefix}_monster_def_id", "monster_def_id"),
+        (f"{prefix}_is_boss", "is_boss"),
+        (f"{prefix}_boss_template_id", "boss_template_id"),
+    ):
+        if expected_key in expected:
+            selector[selector_key] = expected[expected_key]
+    if not selector:
+        return True
+    if state is None:
+        return False
+    entity_id = str(event.get(f"{prefix}_entity_id", ""))
+    entity = state.entities.get(entity_id)
+    if entity is None:
+        return False
+    return entity_matches_selector(entity, selector)
 
 
 def combat_event_summary(expected: dict[str, Any]) -> str:
     parts = []
-    for key in ("event_type", "outcome", "damage", "min_damage", "blocked", "critical"):
+    for key in (
+        "event_type",
+        "outcome",
+        "damage",
+        "min_damage",
+        "blocked",
+        "critical",
+        "source_entity_type",
+        "source_monster_def_id",
+        "target_entity_type",
+        "target_monster_def_id",
+    ):
         if key in expected:
             parts.append(f"{key}={expected[key]}")
     return ", ".join(parts) or str(expected)
@@ -3409,7 +3563,7 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                 raise AssertionError(f"{where}: event {event_type} not seen; have {sorted(state.seen_events)}")
             continue
         if typ == "combat_event_seen":
-            if not any(combat_event_matches(event, assertion) for event in state.combat_events):
+            if not any(combat_event_matches(event, assertion, state) for event in state.combat_events):
                 raise AssertionError(
                     f"{where}: combat event {combat_event_summary(assertion)} not seen; have {state.combat_events}"
                 )
@@ -4285,9 +4439,10 @@ async def run_coop_rewards_and_scaling(
             lambda: all(player_entity_ids(peer.state) >= {host.state.local_player_id, nearby.state.local_player_id} for peer in dungeon_peers),
         )
 
-        monster = find_monster(host.state, "dungeon_mob")
+        monster_def_id = "dungeon_archer"
+        monster = find_monster(host.state, monster_def_id)
         if monster is None:
-            raise AssertionError(f"{scenario.id}: missing dungeon_mob in host state")
+            raise AssertionError(f"{scenario.id}: missing {monster_def_id} in host state")
         monster_pos = dict(monster["position"])
         approach_offsets = [(-1.5, 0.0), (1.5, 0.0), (0.0, -1.5), (0.0, 1.5), (-2.5, 0.0), (2.5, 0.0)]
         nearby_offsets = [(-4.0, 0.0), (4.0, 0.0), (0.0, -4.0), (0.0, 4.0), (-3.0, 0.0), (3.0, 0.0)]
@@ -4300,7 +4455,7 @@ async def run_coop_rewards_and_scaling(
         before_nearby_xp = state_experience(nearby.state)
         before_excluded_xp = state_experience(excluded.state)
 
-        await coop_attack_until_kill(dungeon_peers, nearby, "dungeon_mob", companions=[host])
+        await coop_attack_until_kill(dungeon_peers, nearby, monster_def_id, companions=[host])
         await wait_coop_until(
             peers,
             "shared xp applied to nearby only",

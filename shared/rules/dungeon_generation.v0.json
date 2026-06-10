@@ -16,6 +16,13 @@
   "monster_placement": {
     "count": 8,
     "monster_def_id": "dungeon_mob",
+    "monster_pool": [
+      { "monster_def_id": "dungeon_mob", "weight": 9 },
+      { "monster_def_id": "dungeon_archer", "weight": 1 }
+    ],
+    "minimum_monsters": [
+      { "monster_def_id": "dungeon_archer", "count": 1 }
+    ],
     "margin_from_wall": 2.0,
     "min_spawn_distance": 6.0,
     "max_attempts": 512

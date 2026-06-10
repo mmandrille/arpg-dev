@@ -96,7 +96,7 @@
           "rarity": "unique",
           "loot_table": "dungeon_mob_drop_depth_3_plus",
           "max_hp": 12,
-          "attack_damage": { "min": 2, "max": 4 },
+          "attack_damage": { "min": 2, "max": 2 },
           "xp_reward": 30
         },
         {

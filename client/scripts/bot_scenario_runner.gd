@@ -817,6 +817,8 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 			return false
 	if step.has("hp") and int(rec.get("hp", -999999)) != int(step.get("hp", 0)):
 		return false
+	if step.has("has_bow_marker") and bool(rec.get("has_bow_marker", false)) != bool(step.get("has_bow_marker", false)):
+		return false
 	var reaction: Dictionary = rec.get("reaction", {})
 	if step.has("reaction") and str(reaction.get("last_reaction", "")) != str(step.get("reaction", "")):
 		return false

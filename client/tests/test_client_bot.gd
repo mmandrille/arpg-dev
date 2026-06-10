@@ -55,6 +55,7 @@ func _initialize() -> void:
 	_test_client_settings_create_game_session_type_save_shape()
 	_test_combat_feedback_step_types_load()
 	_test_combat_event_and_damage_number_assertions()
+	_test_ranged_monster_presentation_assertions()
 	_test_inventory_paper_doll_step_types_load()
 	_test_inventory_paper_doll_assertions()
 	_test_wall_layout_step_types_load()
@@ -804,6 +805,31 @@ func _test_combat_event_and_damage_number_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("combat feedback assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_ranged_monster_presentation_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "ranged_monster_presentation_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "assert_entity_reaction", "entity_type": "monster", "monster_def_id": "dungeon_archer", "has_bow_marker": true},
+		],
+	}
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("ranged monster presentation assertion scenario valid", err, "")
+	runner.load_scenario(data)
+	var state := {
+		"entities_presentation_debug": [{
+			"type": "monster",
+			"monster_def_id": "dungeon_archer",
+			"has_bow_marker": true,
+			"reaction": {},
+		}],
+	}
+	runner.tick(0.016, state)
+	_assert_true("ranged monster presentation assertion passes", runner.is_done() and runner.passed())
 
 
 func _test_inventory_paper_doll_step_types_load() -> void:

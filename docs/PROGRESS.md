@@ -11,7 +11,7 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v51 — `mystery-seller-core` |
+| **Latest completed slice** | v52 — `ranged-monster-ai` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 |
 | **Next slice** | TBD |
@@ -67,6 +67,7 @@ v48_* = coop-rewards-and-scaling
 v49_* = gold-autopickup-and-shared-loot-rules
 v50_* = account-stash-storage
 v51_* = mystery-seller-core
+v52_* = ranged-monster-ai
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -138,6 +139,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v49** | `gold-autopickup-and-shared-loot-rules` | Complete (`make ci` green) | [`v49_spec-gold-autopickup-and-shared-loot-rules.md`](specs/v49_spec-gold-autopickup-and-shared-loot-rules.md) | [`v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md`](plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md) |
 | **v50** | `account-stash-storage` | Complete (`make ci` green) | [`v50_spec-account-stash-storage.md`](specs/v50_spec-account-stash-storage.md) | [`v50_2026-06-10-account-stash-storage.md`](plans/v50_2026-06-10-account-stash-storage.md) |
 | **v51** | `mystery-seller-core` | Complete (`make ci` green) | [`v51_spec-mystery-seller-core.md`](specs/v51_spec-mystery-seller-core.md) | [`v51_2026-06-10-mystery-seller-core.md`](plans/v51_2026-06-10-mystery-seller-core.md) |
+| **v52** | `ranged-monster-ai` | Complete (`make ci` green) | [`v52_spec-ranged-monster-ai.md`](specs/v52_spec-ranged-monster-ai.md) | [`v52_2026-06-10-ranged-monster-ai.md`](plans/v52_2026-06-10-ranged-monster-ai.md) |
 
 ---
 
@@ -1289,6 +1291,27 @@ before purchase.
   consumed-stock persistence; client bot scenario `24_mystery_seller_core.json` proves the live
   Godot shop panel renders and buys concealed offers.
 
+### v52 — Ranged monster AI
+
+**Proves:** Generated dungeon floors now include a server-authoritative ranged monster variant
+with a visible client-side bow marker.
+
+- Shared monster rules add `dungeon_archer` with ranged attack fields, while dungeon generation
+  rules define a deterministic melee-heavy spawn pool plus a minimum archer guarantee on normal
+  generated floors.
+- The Go sim keeps melee mobs unchanged, gives ranged chase monsters range/line-of-sight-aware
+  standoff goals, and spawns monster-owned projectile entities only when the shot is clear.
+- Monster-owned projectiles advance through the existing authoritative projectile lifecycle and
+  can damage only their living target player on the same level, resolving miss/block/damage/death
+  through the existing monster combat stat path.
+- Dungeon monster definition rolls use their own seeded RNG stream so adding archer composition
+  does not perturb established dungeon layout and placement fixtures.
+- Godot attaches a small procedural bow marker to `dungeon_archer` nodes from authoritative
+  `monster_def_id` metadata and exposes `has_bow_marker` through client bot debug state.
+- Protocol bot scenario `38_ranged_monster_ai.json` proves generated archer presence and
+  archer-sourced ranged player damage; client bot scenario `25_ranged_monster_ai.json` proves the
+  live bow-marker presentation and ranged damage path.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1367,6 +1390,8 @@ coop_rewards_and_scaling: three-account co-op → nearby host/guest share full X
 gold_autopickup_shared_loot: two peers see shared floor gold → both step into range → lowest player id wins private wallet update → item loot still requires click
 account_stash_storage: acquire dungeon loot/gold → open town stash → deposit/withdraw item and gold → replay/reconnect/state/fresh session persistence
 client_account_stash_panel: headless Godot client opens stash → verifies bag/stash item sync → deposits/withdraws item and gold
+ranged_monster_ai: descend to generated dungeon → assert dungeon_archer → observe archer-sourced ranged player damage
+client_ranged_monster_ai: headless Godot client descends to generated dungeon → asserts bow marker → observes ranged player damage
 ```
 
 **Verify:**
@@ -1570,15 +1595,19 @@ item and gold storage across fresh sessions.
 shop rows, deterministic per-character hidden stock, reveal-on-purchase events, and protocol/client
 bot proofs for hidden offers, purchase reveal, replay, and fresh-session consumed stock.
 
+**Ranged monster AI is now authoritative.** v52 adds generated dungeon archers, data-driven
+melee/ranged monster composition, server-owned monster projectiles that respect walls and target
+players, and a minimal Godot bow marker with protocol/client bot proofs.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50 non-goals, ADR-0008 deferred, ADR-0011 |
-| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48 non-goals |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51 non-goals, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52 non-goals, ADR-0013 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |

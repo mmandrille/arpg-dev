@@ -4995,6 +4995,10 @@ func TestBossFloorExitsUnlockAfterBossKill(t *testing.T) {
 func TestDungeonMonsterGeneration(t *testing.T) {
 	rules := loadRules(t)
 	placement := rules.DungeonGeneration.MonsterPlacement
+	allowedDefs := map[string]bool{placement.MonsterDefID: true}
+	for _, entry := range placement.MonsterPool {
+		allowedDefs[entry.MonsterDefID] = true
+	}
 	for _, levelNum := range []int{-1, -2} {
 		t.Run(fmt.Sprintf("level_%d", levelNum), func(t *testing.T) {
 			level, err := GenerateDungeonLevel("dungeon_monster_generation", levelNum, rules.DungeonGeneration)
@@ -5011,9 +5015,13 @@ func TestDungeonMonsterGeneration(t *testing.T) {
 			if len(again.monsters) != len(level.monsters) {
 				t.Fatalf("repeat level %d monsters = %d, want %d", levelNum, len(again.monsters), len(level.monsters))
 			}
+			archers := 0
 			for i, monster := range level.monsters {
-				if monster.defID != placement.MonsterDefID {
-					t.Fatalf("level %d monster %d defID = %s, want %s", levelNum, i, monster.defID, placement.MonsterDefID)
+				if !allowedDefs[monster.defID] {
+					t.Fatalf("level %d monster %d defID = %s, want one of %v", levelNum, i, monster.defID, allowedDefs)
+				}
+				if monster.defID == "dungeon_archer" {
+					archers++
 				}
 				if monster != again.monsters[i] {
 					t.Fatalf("level %d monster %d = %+v, repeat %+v", levelNum, i, monster, again.monsters[i])
@@ -5024,6 +5032,9 @@ func TestDungeonMonsterGeneration(t *testing.T) {
 				if dungeonMonsterPositionBlocked(monster.pos, rules.DungeonGeneration, levelWithoutMonsterIndex(level, i)) {
 					t.Fatalf("level %d monster %d blocked at %+v", levelNum, i, monster.pos)
 				}
+			}
+			if archers == 0 {
+				t.Fatalf("level %d generated no dungeon_archer: %+v", levelNum, level.monsters)
 			}
 		})
 	}
@@ -6039,8 +6050,8 @@ func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 	if player.hp != golden.PlayerHPAfter {
 		t.Fatalf("player hp = %d, want %d", player.hp, golden.PlayerHPAfter)
 	}
-	if countLiveMonstersByDef(sim.activeLevel(), golden.MonsterDefID) < rules.DungeonGeneration.MonsterPlacement.Count {
-		t.Fatalf("live %s count below base population", golden.MonsterDefID)
+	if len(liveDungeonMonsters(sim.activeLevel())) < rules.DungeonGeneration.MonsterPlacement.Count {
+		t.Fatalf("live generated monster count below base population")
 	}
 }
 
@@ -6056,10 +6067,11 @@ func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 		t.Fatalf("new sim: %v", err)
 	}
 	descendFromCurrentLevel(t, sim, "descend")
-	monster := firstEntityByKind(sim, monsterEntity)
+	monster := findMonsterByDef(sim, "dungeon_mob")
 	if monster == nil {
-		t.Fatal("missing generated monster")
+		t.Fatal("missing generated dungeon_mob")
 	}
+	killOtherMonstersForTest(sim.activeLevel(), monster.id)
 	sim.entities[sim.playerID].pos = sim.travelArrivalPosition(sim.activeLevel(), monster.pos, sim.playerID)
 	firstDamage, ok := waitForPlayerDamage(sim, golden.MaxTicksForFirstPlayerDamaged)
 	if !ok {
@@ -6081,10 +6093,11 @@ func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 		t.Fatalf("new replay sim: %v", err)
 	}
 	descendFromCurrentLevel(t, replay, "descend")
-	replayMonster := firstEntityByKind(replay, monsterEntity)
+	replayMonster := findMonsterByDef(replay, "dungeon_mob")
 	if replayMonster == nil {
-		t.Fatal("missing replay generated monster")
+		t.Fatal("missing replay generated dungeon_mob")
 	}
+	killOtherMonstersForTest(replay.activeLevel(), replayMonster.id)
 	replay.entities[replay.playerID].pos = replay.travelArrivalPosition(replay.activeLevel(), replayMonster.pos, replay.playerID)
 	replayDamage, ok := waitForPlayerDamage(replay, golden.MaxTicksForFirstPlayerDamaged)
 	if !ok {
@@ -6092,6 +6105,77 @@ func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 	}
 	if replayDamage.Tick != firstDamage.Tick || eventDamage(replayDamage, "player_damaged") != eventDamage(firstDamage, "player_damaged") {
 		t.Fatalf("replay first damage = tick %d damage %d, want tick %d damage %d", replayDamage.Tick, eventDamage(replayDamage, "player_damaged"), firstDamage.Tick, eventDamage(firstDamage, "player_damaged"))
+	}
+}
+
+func TestRangedMonsterProjectileDamagesPlayer(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_ranged_monster_hit", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, candidate := range sim.activeLevel().entities {
+		if candidate.kind == monsterEntity {
+			delete(sim.activeLevel().entities, id)
+		}
+	}
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 4, Y: 5}
+	player.hp = playerStartHP
+	archer := addTestMonster(sim, "dungeon_archer", Vec2{X: 10, Y: 5}, rules.Monsters["dungeon_archer"].MaxHP)
+
+	spawn := sim.Tick(nil)
+	projectile := firstChangeEntityByType(spawn, projectileEntity)
+	if projectile == nil {
+		t.Fatalf("ranged monster did not spawn projectile: %+v", spawn)
+	}
+	if projectile.OwnerID != idStr(archer.id) || projectile.TargetID != idStr(player.id) || projectile.ProjectileDefID != rules.Monsters["dungeon_archer"].ProjectileDefID {
+		t.Fatalf("projectile view = %+v, want archer owner/player target", projectile)
+	}
+	if distance(archer.pos, player.pos) <= rules.Combat.UnarmedReach+playerRadius {
+		t.Fatalf("archer moved into melee contact at %+v vs player %+v", archer.pos, player.pos)
+	}
+
+	damage, ok := waitForPlayerDamage(sim, 20)
+	if !ok {
+		t.Fatalf("expected ranged monster player damage; player=%+v archer=%+v", player.pos, archer.pos)
+	}
+	if eventSource(damage, "player_damaged") != idStr(archer.id) && eventSource(damage, "player_killed") != idStr(archer.id) {
+		t.Fatalf("ranged damage source = %+v, want archer %s", damage.Events, idStr(archer.id))
+	}
+	if player.hp >= playerStartHP {
+		t.Fatalf("player hp = %d, want reduced by archer projectile", player.hp)
+	}
+}
+
+func TestRangedMonsterBlockedShotDoesNotDamageThroughWall(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_ranged_monster_blocked", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, candidate := range sim.activeLevel().entities {
+		if candidate.kind == monsterEntity {
+			delete(sim.activeLevel().entities, id)
+		}
+	}
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 4, Y: 5}
+	player.hp = playerStartHP
+	archer := addTestMonster(sim, "dungeon_archer", Vec2{X: 10, Y: 5}, rules.Monsters["dungeon_archer"].MaxHP)
+	archer.aiMode = monsterAIModeChase
+	sim.activeLevel().walls = append(sim.activeLevel().walls, wallObstacle{pos: Vec2{X: 7, Y: 5}, size: Vec2{X: 1, Y: 4}, source: "generated"})
+
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+	sim.advanceMonsterAttack(&res)
+	if firstChangeEntityByType(res, projectileEntity) != nil {
+		t.Fatalf("ranged monster fired through blocked line: %+v", res.Changes)
+	}
+	if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
+		t.Fatalf("ranged monster damaged through blocked line: %+v", res.Events)
+	}
+	if player.hp != playerStartHP {
+		t.Fatalf("player hp = %d, want unchanged", player.hp)
 	}
 }
 
@@ -6534,11 +6618,20 @@ func liveDungeonMonsters(level *LevelState) []*entity {
 	out := []*entity{}
 	for _, id := range sortedEntityIDs(level.entities) {
 		candidate := level.entities[id]
-		if candidate != nil && candidate.kind == monsterEntity && candidate.monsterDefID == "dungeon_mob" && candidate.hp > 0 {
+		if candidate != nil && candidate.kind == monsterEntity && !candidate.isBoss && candidate.hp > 0 {
 			out = append(out, candidate)
 		}
 	}
 	return out
+}
+
+func killOtherMonstersForTest(level *LevelState, keepID uint64) {
+	for _, id := range sortedEntityIDs(level.entities) {
+		candidate := level.entities[id]
+		if candidate != nil && candidate.kind == monsterEntity && candidate.id != keepID {
+			candidate.hp = 0
+		}
+	}
 }
 
 func findBossEntity(t *testing.T, level *LevelState) *entity {
@@ -6655,6 +6748,15 @@ func eventDamage(r TickResult, eventType string) int {
 	return 0
 }
 
+func eventSource(r TickResult, eventType string) string {
+	for _, event := range r.Events {
+		if event.EventType == eventType {
+			return event.SourceEntityID
+		}
+	}
+	return ""
+}
+
 func countLiveMonstersByDef(level *LevelState, defID string) int {
 	count := 0
 	for _, entity := range level.entities {
@@ -6679,7 +6781,7 @@ func dungeonMonsterDebugPositions(level *LevelState) []Vec2 {
 	positions := []Vec2{}
 	for _, id := range sortedEntityIDs(level.entities) {
 		entity := level.entities[id]
-		if entity.kind == monsterEntity && entity.monsterDefID == "dungeon_mob" {
+		if entity.kind == monsterEntity && !entity.isBoss {
 			positions = append(positions, entity.pos)
 		}
 	}

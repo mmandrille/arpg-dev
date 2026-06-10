@@ -276,6 +276,28 @@ def cross_checks(report: Report) -> None:
         rd = mdef.get("retaliation_damage")
         if rd is not None and rd["max"] < rd["min"]:
             report.fail("monster retaliation range", f"{mid}: max must be >= min")
+        attack_mode = str(mdef.get("attack_mode", "melee"))
+        if attack_mode not in ("melee", "ranged"):
+            report.fail("monster attack_mode", f"{mid}: invalid attack_mode {attack_mode}")
+            continue
+        if attack_mode == "melee":
+            if any(mdef.get(key) is not None for key in ("attack_range", "projectile_speed", "projectile_def_id")):
+                report.fail("monster attack fields", f"{mid}: projectile fields only valid for ranged attacks")
+                continue
+        else:
+            attack_damage = mdef.get("attack_damage")
+            if attack_damage is None or int(mdef.get("attack_cooldown_ticks", 0)) <= 0:
+                report.fail("monster ranged attack", f"{mid}: ranged attacks require damage and cooldown")
+                continue
+            if float(mdef.get("attack_range", 0)) <= float(combat["unarmed_reach"]):
+                report.fail("monster ranged attack", f"{mid}: attack_range must exceed unarmed reach")
+                continue
+            if float(mdef.get("projectile_speed", 0)) <= 0:
+                report.fail("monster ranged attack", f"{mid}: projectile_speed must be positive")
+                continue
+            if not str(mdef.get("projectile_def_id", "")):
+                report.fail("monster ranged attack", f"{mid}: projectile_def_id is required")
+                continue
         behavior = mdef.get("behavior", "static")
         if behavior not in ("static", "chase"):
             report.fail("monster behavior", f"{mid}: invalid behavior {behavior}")
@@ -286,6 +308,8 @@ def cross_checks(report: Report) -> None:
             else:
                 report.ok(f"monster {mid} static behavior is valid")
             continue
+        if attack_mode == "ranged":
+            report.ok(f"monster {mid} ranged attack is valid")
         aggro = mdef.get("aggro_radius")
         if not isinstance(aggro, (int, float)) or aggro <= 0:
             report.fail("monster aggro_radius", f"{mid}: chase requires positive aggro_radius")
@@ -300,6 +324,50 @@ def cross_checks(report: Report) -> None:
             report.fail("monster move_speed", f"{mid}: move_speed must be > 0 and <= navigation.cell_size")
         else:
             report.ok(f"monster {mid} chase behavior is valid")
+
+    monster_placement = dungeon_generation["monster_placement"]
+    monster_count = int(monster_placement["count"])
+    pool = monster_placement.get("monster_pool", [])
+    minimums = monster_placement.get("minimum_monsters", [])
+    if monster_count > 0:
+        pool_ids = {str(entry["monster_def_id"]) for entry in pool}
+        total_weight = 0
+        failed_pool = False
+        for entry in pool:
+            mid = str(entry["monster_def_id"])
+            total_weight += int(entry["weight"])
+            mdef = monsters["monsters"].get(mid)
+            if mdef is None:
+                report.fail("dungeon monster_pool", f"unknown monster {mid}")
+                failed_pool = True
+            elif mdef.get("behavior", "static") != "chase":
+                report.fail("dungeon monster_pool", f"{mid} must use chase behavior")
+                failed_pool = True
+        min_total = 0
+        for entry in minimums:
+            mid = str(entry["monster_def_id"])
+            min_total += int(entry["count"])
+            if mid not in pool_ids:
+                report.fail("dungeon minimum_monsters", f"{mid} must also be in monster_pool")
+                failed_pool = True
+        if pool and total_weight <= 0:
+            report.fail("dungeon monster_pool", "total weight must be positive")
+            failed_pool = True
+        if min_total > monster_count:
+            report.fail("dungeon minimum_monsters", f"total {min_total} exceeds count {monster_count}")
+            failed_pool = True
+        archer = monsters["monsters"].get("dungeon_archer")
+        if archer is None or archer.get("attack_mode") != "ranged":
+            report.fail("dungeon_archer", "must exist and use ranged attack_mode")
+            failed_pool = True
+        if "dungeon_archer" not in pool_ids:
+            report.fail("dungeon monster_pool", "must include dungeon_archer")
+            failed_pool = True
+        if not any(str(entry["monster_def_id"]) == "dungeon_archer" and int(entry["count"]) > 0 for entry in minimums):
+            report.fail("dungeon minimum_monsters", "must guarantee at least one dungeon_archer")
+            failed_pool = True
+        if not failed_pool:
+            report.ok("dungeon monster pool includes guaranteed ranged archer")
 
     if retaliation is not None and retaliation_golden["retaliation_damage"] != retaliation:
         report.fail("retaliation_damage vs monster", "retaliation_damage mismatch")

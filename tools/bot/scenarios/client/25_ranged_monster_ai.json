@@ -1,0 +1,32 @@
+{
+  "id": "client_ranged_monster_ai",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v52_ranged_monster_ai",
+  "title": "Client ranged monster AI",
+  "description": "Client descends to a generated dungeon, verifies the dungeon archer bow marker, and observes archer-driven player damage.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -1, "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_archer",
+      "has_bow_marker": true,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_archer",
+      "event_type": "player_damaged",
+      "min_damage": 1,
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 25.0
+    }
+  ]
+}

@@ -12,6 +12,7 @@ const AnimationControllerScript := preload("res://scripts/animation_controller.g
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
+const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
@@ -184,6 +185,7 @@ var entities_root: Node3D
 var damage_numbers_layer: CanvasLayer
 var health_bars_layer: CanvasLayer
 var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
+var boss_health_bar: BossHealthBar
 var walls_root: Node3D
 var inventory_panel: InventoryPanel
 var shop_panel: ShopPanel
@@ -686,6 +688,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	_bot_pending_events.clear()
 	_bot_logged_snapshot = false
 	_clear_level_entities()
+	_hide_boss_health_bar()
 	if walls_root != null:
 		_clear_wall_nodes()
 	if resolver != null:
@@ -834,6 +837,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
 	for e in p.get("entities", []):
 		_upsert_entity(e)
+	_sync_boss_health_bar()
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
 	inventory_rows = int(p.get("inventory_rows", inventory_rows))
@@ -1068,6 +1072,7 @@ func _apply_delta(p: Dictionary) -> void:
 	if bot_mode:
 		for ev in p.get("events", []):
 			_bot_pending_events.append(ev)
+	_sync_boss_health_bar()
 	_reconcile_player()
 
 
@@ -1202,6 +1207,7 @@ func _remove_entity(id: String) -> void:
 	loot_ids.erase(id)
 	monster_ids.erase(id)
 	interactable_ids.erase(id)
+	_sync_boss_health_bar()
 
 
 func _clear_level_entities() -> void:
@@ -1213,6 +1219,7 @@ func _clear_level_entities() -> void:
 		if is_instance_valid(bar):
 			bar.queue_free()
 	monster_health_bars.clear()
+	_hide_boss_health_bar()
 	loot_ids.clear()
 	hovered_loot_id = ""
 	monster_ids.clear()
@@ -1458,6 +1465,53 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 	health_bars_layer.add_child(bar)
 	bar.setup(_camera, target, hp, max_hp)
 	monster_health_bars[entity_id] = bar
+
+
+func _hide_boss_health_bar() -> void:
+	if boss_health_bar != null:
+		boss_health_bar.hide_boss()
+
+
+func _sync_boss_health_bar() -> void:
+	if boss_health_bar == null:
+		return
+	var boss_id := _active_boss_entity_id()
+	if boss_id == "":
+		boss_health_bar.hide_boss()
+		return
+	var rec: Dictionary = entities[boss_id]
+	var hp := int(rec.get("hp", 0))
+	var max_hp := int(rec.get("max_hp", hp))
+	var template_id := str(rec.get("boss_template_id", ""))
+	boss_health_bar.show_boss(boss_id, template_id, _boss_health_bar_title(template_id), hp, max_hp)
+
+
+func _active_boss_entity_id() -> String:
+	var candidates: Array = []
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		if str(rec.get("type", "")) != "monster":
+			continue
+		if not bool(rec.get("is_boss", false)):
+			continue
+		if int(rec.get("hp", 0)) <= 0:
+			continue
+		candidates.append(str(id))
+	candidates.sort()
+	return str(candidates[0]) if not candidates.is_empty() else ""
+
+
+func _boss_health_bar_title(template_id: String) -> String:
+	if template_id == "":
+		return "Boss"
+	var pieces := template_id.replace("-", "_").split("_", false)
+	var words := PackedStringArray()
+	for piece in pieces:
+		var word := str(piece)
+		if word == "":
+			continue
+		words.append(word.substr(0, 1).to_upper() + word.substr(1).to_lower())
+	return " ".join(words) if words.size() > 0 else template_id
 
 
 # --- input + prediction -----------------------------------------------------
@@ -2361,6 +2415,8 @@ func _build_scene() -> void:
 	_level_label.offset_bottom = 64
 	ui.add_child(_level_label)
 	_update_level_hud()
+	boss_health_bar = BossHealthBarScript.new()
+	ui.add_child(boss_health_bar)
 	_setup_waypoint_panel(ui)
 	inventory_panel = InventoryPanelScript.new()
 	inventory_panel.intent_requested.connect(_on_inventory_intent_requested)
@@ -3839,6 +3895,7 @@ func get_bot_state() -> Dictionary:
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
+		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),

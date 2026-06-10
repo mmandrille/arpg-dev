@@ -11,7 +11,7 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v52 — `ranged-monster-ai` |
+| **Latest completed slice** | v53 — `boss-health-bar-ui` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 |
 | **Next slice** | TBD |
@@ -68,6 +68,7 @@ v49_* = gold-autopickup-and-shared-loot-rules
 v50_* = account-stash-storage
 v51_* = mystery-seller-core
 v52_* = ranged-monster-ai
+v53_* = boss-health-bar-ui
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -140,6 +141,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v50** | `account-stash-storage` | Complete (`make ci` green) | [`v50_spec-account-stash-storage.md`](specs/v50_spec-account-stash-storage.md) | [`v50_2026-06-10-account-stash-storage.md`](plans/v50_2026-06-10-account-stash-storage.md) |
 | **v51** | `mystery-seller-core` | Complete (`make ci` green) | [`v51_spec-mystery-seller-core.md`](specs/v51_spec-mystery-seller-core.md) | [`v51_2026-06-10-mystery-seller-core.md`](plans/v51_2026-06-10-mystery-seller-core.md) |
 | **v52** | `ranged-monster-ai` | Complete (`make ci` green) | [`v52_spec-ranged-monster-ai.md`](specs/v52_spec-ranged-monster-ai.md) | [`v52_2026-06-10-ranged-monster-ai.md`](plans/v52_2026-06-10-ranged-monster-ai.md) |
+| **v53** | `boss-health-bar-ui` | Complete (`make ci` green) | [`v53_spec-boss-health-bar-ui.md`](specs/v53_spec-boss-health-bar-ui.md) | [`v53_2026-06-10-boss-health-bar-ui.md`](plans/v53_2026-06-10-boss-health-bar-ui.md) |
 
 ---
 
@@ -1312,6 +1314,24 @@ with a visible client-side bow marker.
   archer-sourced ranged player damage; client bot scenario `25_ranged_monster_ai.json` proves the
   live bow-marker presentation and ranged damage path.
 
+### v53 — Boss health bar UI
+
+**Proves:** The Godot client now has a dedicated screen-anchored boss health bar driven by existing
+authoritative boss entity state.
+
+- Added an in-repo `BossHealthBar` control that displays boss title, hp/max hp, and a clamped fill
+  ratio without changing server combat, boss generation, or protocol schemas.
+- `main.gd` syncs the bar from live `is_boss` monster records, deterministically chooses the active
+  live boss, derives `Cave Warden` from `boss_template_id`, and hides on death, remove, level clear,
+  or gameplay teardown.
+- Existing world-space monster health bars remain unchanged; the boss bar is an additional
+  top-center HUD element for boss readability.
+- `get_bot_state()` exposes `boss_health_bar` debug state, and `BotScenarioRunner` supports
+  `wait_boss_health_bar` / `assert_boss_health_bar` steps with visibility, id/template/title,
+  hp/max hp, and ratio expectations.
+- Client bot scenario `26_boss_health_bar_ui.json` descends to the first boss floor and proves the
+  live `cave_warden` bar is visible.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1392,6 +1412,7 @@ account_stash_storage: acquire dungeon loot/gold → open town stash → deposit
 client_account_stash_panel: headless Godot client opens stash → verifies bag/stash item sync → deposits/withdraws item and gold
 ranged_monster_ai: descend to generated dungeon → assert dungeon_archer → observe archer-sourced ranged player damage
 client_ranged_monster_ai: headless Godot client descends to generated dungeon → asserts bow marker → observes ranged player damage
+client_boss_health_bar_ui: headless Godot client descends to first boss floor → asserts Cave Warden boss health bar
 ```
 
 **Verify:**
@@ -1599,6 +1620,10 @@ bot proofs for hidden offers, purchase reveal, replay, and fresh-session consume
 melee/ranged monster composition, server-owned monster projectiles that respect walls and target
 players, and a minimal Godot bow marker with protocol/client bot proofs.
 
+**Boss health bar UI is now client-visible.** v53 adds a top-center Godot boss health bar driven by
+existing authoritative boss entity hp/max hp and metadata, plus client unit and bot scenario proof
+for the first `cave_warden` boss floor.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -1608,6 +1633,7 @@ players, and a minimal Godot bow marker with protocol/client bot proofs.
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52 non-goals, ADR-0013 |
+| Client presentation | Boss portraits, phase/timer widgets, multi-boss layouts, and production boss health bar art/audio | v53 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |

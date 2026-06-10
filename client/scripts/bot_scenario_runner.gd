@@ -14,7 +14,7 @@ const STEP_TYPES_WAIT := [
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel",
-	"wait_remote_player_count",
+	"wait_boss_health_bar", "wait_remote_player_count",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -39,7 +39,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold",
+	"assert_stash_gold", "assert_boss_health_bar",
 	"assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
@@ -98,6 +98,7 @@ const ALL_STEP_TYPES: Array = [
 	"assert_stash_gold", "drag_bag_to_stash", "drag_stash_to_bag",
 	"click_stash_deposit_gold", "click_stash_withdraw_gold",
 	"click_waypoint_level",
+	"wait_boss_health_bar", "assert_boss_health_bar",
 	"wait_remote_player_count", "assert_remote_player_count",
 ]
 
@@ -242,6 +243,8 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			if not bool(state.get("stash_panel_visible", false)):
 				return false
 			return _stash_item_count_matches(step, state)
+		"wait_boss_health_bar":
+			return _boss_health_bar_matches(step, state)
 		"wait_remote_player_count":
 			return _remote_player_count_matches(step, state)
 		"wait_entity":
@@ -432,6 +435,8 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_stash_item_count(step, state)
 		"assert_stash_gold":
 			return _assert_stash_gold(step, state)
+		"assert_boss_health_bar":
+			return _assert_boss_health_bar(step, state)
 		"assert_remote_player_count":
 			if not _remote_player_count_matches(step, state):
 				_fail("assert_remote_player_count failed: want=%s remote_player_ids=%s step=%d scenario=%s" % [
@@ -716,6 +721,47 @@ func _skill_bar_matches(step: Dictionary, state: Dictionary) -> bool:
 func _skill_bar_expectation(step: Dictionary) -> Dictionary:
 	var out := {}
 	for key in ["skill_id", "rank", "max_rank", "enabled", "disabled", "remaining_ticks", "remaining_ticks_min", "remaining_ticks_max", "total_ticks", "cooldown_fraction_min", "cooldown_fraction_max"]:
+		if step.has(key):
+			out[key] = step[key]
+	return out
+
+
+func _assert_boss_health_bar(step: Dictionary, state: Dictionary) -> bool:
+	if _boss_health_bar_matches(step, state):
+		return true
+	_fail("assert_boss_health_bar failed: want=%s got=%s step=%d scenario=%s" % [
+		str(_boss_health_bar_expectation(step)),
+		str(state.get("boss_health_bar", {})),
+		_step_index,
+		str(scenario.get("id", "?"))
+	])
+	return false
+
+
+func _boss_health_bar_matches(step: Dictionary, state: Dictionary) -> bool:
+	var bar: Dictionary = state.get("boss_health_bar", {})
+	if step.has("visible") and bool(bar.get("visible", false)) != bool(step.get("visible", true)):
+		return false
+	for key in ["boss_id", "boss_template_id", "title"]:
+		if step.has(key) and str(bar.get(key, "")) != str(step.get(key, "")):
+			return false
+	for key in ["hp", "max_hp"]:
+		if step.has(key) and int(bar.get(key, -999999)) != int(step.get(key, 0)):
+			return false
+	if step.has("hp_min") and int(bar.get("hp", -999999)) < int(step.get("hp_min", 0)):
+		return false
+	if step.has("hp_max") and int(bar.get("hp", 999999)) > int(step.get("hp_max", 0)):
+		return false
+	if step.has("ratio_min") and float(bar.get("ratio", -1.0)) < float(step.get("ratio_min", 0.0)):
+		return false
+	if step.has("ratio_max") and float(bar.get("ratio", 2.0)) > float(step.get("ratio_max", 1.0)):
+		return false
+	return true
+
+
+func _boss_health_bar_expectation(step: Dictionary) -> Dictionary:
+	var out := {}
+	for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max"]:
 		if step.has(key):
 			out[key] = step[key]
 	return out
@@ -1557,6 +1603,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "skill_id=%s" % str(step.get("skill_id", "magic_bolt"))
 		"wait_skill_bar", "assert_skill_bar", "use_skill_slot":
 			return "skill_bar=%s" % str(_skill_bar_expectation(step))
+		"wait_boss_health_bar", "assert_boss_health_bar":
+			return "boss_health_bar=%s" % str(_boss_health_bar_expectation(step))
 		"assert_xp_bar":
 			return "xp_bar=%s" % str(step)
 		"click_menu_button":
@@ -1631,6 +1679,8 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		parts.append("skill_progression=%s" % str(state.get("skill_progression", {})))
 	if stype == "wait_skill_bar":
 		parts.append("skill_bar=%s" % str(state.get("skill_bar", {})))
+	if stype == "wait_boss_health_bar":
+		parts.append("boss_health_bar=%s" % str(state.get("boss_health_bar", {})))
 	if stype in ["wait_damage_number", "wait_no_damage_number"]:
 		parts.append("damage_numbers=%s" % str(state.get("damage_numbers", [])))
 	if stype == "wait_entity_reaction":
@@ -1791,6 +1841,13 @@ static func validate_step(step: Dictionary, index: int) -> String:
 				has_bar_expectation = true
 		if not has_bar_expectation:
 			return "client_steps[%d] (%s) requires at least one skill bar expectation" % [index, stype]
+	if stype in ["wait_boss_health_bar", "assert_boss_health_bar"]:
+		var has_boss_bar_expectation := false
+		for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max"]:
+			if step.has(key):
+				has_boss_bar_expectation = true
+		if not has_boss_bar_expectation:
+			return "client_steps[%d] (%s) requires at least one boss health bar expectation" % [index, stype]
 	if stype in ["set_floating_combat_text", "assert_floating_combat_text_enabled"]:
 		if not step.has("enabled"):
 			return "client_steps[%d] (%s) requires enabled" % [index, stype]

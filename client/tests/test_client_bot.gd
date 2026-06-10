@@ -64,6 +64,8 @@ func _initialize() -> void:
 	_test_shop_assertions()
 	_test_stash_step_types_load()
 	_test_stash_assertions()
+	_test_boss_health_bar_step_types_load()
+	_test_boss_health_bar_assertions()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -635,6 +637,46 @@ func _test_stash_assertions() -> void:
 	for _i in range(4):
 		runner.tick(0.016, state)
 	_assert_true("stash assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_boss_health_bar_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "wait_boss_health_bar", "visible": true, "boss_template_id": "cave_warden", "ratio_min": 0.01, "timeout_s": 1.0},
+		{"type": "assert_boss_health_bar", "visible": true, "title": "Cave Warden", "hp_min": 1},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("boss health bar client step scenario valid", err, "")
+	_assert_ne("boss health bar wait without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "wait_boss_health_bar", "timeout_s": 1.0}, 0), "")
+	_assert_ne("boss health bar assert without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_boss_health_bar"}, 0), "")
+
+
+func _test_boss_health_bar_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "boss_health_bar_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{"type": "wait_boss_health_bar", "visible": true, "boss_template_id": "cave_warden", "ratio_min": 0.5, "ratio_max": 1.0, "timeout_s": 1.0},
+			{"type": "assert_boss_health_bar", "visible": true, "boss_id": "3001", "boss_template_id": "cave_warden", "title": "Cave Warden", "hp": 18, "max_hp": 24},
+		],
+	}
+	runner.load_scenario(data)
+	var state := {
+		"boss_health_bar": {
+			"visible": true,
+			"boss_id": "3001",
+			"boss_template_id": "cave_warden",
+			"title": "Cave Warden",
+			"hp": 18,
+			"max_hp": 24,
+			"ratio": 0.75,
+		},
+	}
+	for _i in range(2):
+		runner.tick(0.016, state)
+	_assert_true("boss health bar assertions pass", runner.is_done() and runner.passed())
 
 
 func _test_timeout_failure_message_format() -> void:

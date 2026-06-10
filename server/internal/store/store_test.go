@@ -101,6 +101,32 @@ func TestAccountCharacterSessionFlow(t *testing.T) {
 		t.Fatalf("session round-trip mismatch: %+v", got)
 	}
 
+	chars, err := s.ListCharacters(ctx, acct.ID)
+	if err != nil {
+		t.Fatalf("list characters: %v", err)
+	}
+	if len(chars) != 1 || chars[0].ID != char.ID || chars[0].Level != 1 || chars[0].Gold != 0 || chars[0].DeepestDungeonDepth != 0 {
+		t.Fatalf("default character summary = %+v, want level 1 gold 0 depth 0", chars)
+	}
+	if err := s.UpsertCharacterProgression(ctx, acct.ID, store.CharacterProgression{
+		CharacterID:         char.ID,
+		Level:               6,
+		Experience:          88,
+		Stats:               store.CharacterBaseStats{Str: 6, Dex: 7, Vit: 8, Magic: 9},
+		Gold:                123,
+		DeepestDungeonDepth: 3,
+		SkillRanks:          map[string]int{"magic_bolt": 1},
+	}); err != nil {
+		t.Fatalf("upsert progression for summary: %v", err)
+	}
+	chars, err = s.ListCharacters(ctx, acct.ID)
+	if err != nil {
+		t.Fatalf("list characters after progression: %v", err)
+	}
+	if len(chars) != 1 || chars[0].Level != 6 || chars[0].Gold != 123 || chars[0].DeepestDungeonDepth != 3 {
+		t.Fatalf("progression character summary = %+v, want level 6 gold 123 depth 3", chars)
+	}
+
 	if _, err := s.GetSession(ctx, "sess_does_not_exist"); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}

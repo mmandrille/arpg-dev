@@ -256,6 +256,11 @@ func _test_dead_character_rows_are_disabled() -> void:
 	var dead_button := dead_row.get_child(0) as Button
 	_assert_true("dead character select disabled", dead_button.disabled)
 	_assert_true("dead character has skull marker", dead_button.text.begins_with("☠"))
+	_assert_true("dead character row keeps summary", dead_button.text.find("Lv 1") >= 0 and dead_button.text.find("0g") >= 0 and dead_button.text.find("D0") >= 0)
+	var debug := panel.get_debug_state()
+	var rows: Array = debug.get("character_rows", [])
+	_assert_eq("character summary row count", rows.size(), 2)
+	_assert_eq("dead character summary status", str((rows[0] as Dictionary).get("status", "")), "Dead")
 	var started := {"id": ""}
 	panel.start_requested.connect(func(character_id: String) -> void:
 		started["id"] = character_id
@@ -277,13 +282,18 @@ func _test_character_panel_modes_for_v45() -> void:
 	_assert_eq("forced create title", str(forced.get("title", "")), "Create Character")
 	_assert_true("forced create hides empty label", not bool(forced.get("empty_visible", true)))
 	panel.show_choose_or_create([
-		{"character_id": "char_live", "name": "Alive", "created_at": "", "dead": false},
+		{"character_id": "char_live", "name": "Alive", "created_at": "", "dead": false, "level": 4, "gold": 12, "deepest_dungeon_depth": 2},
 	], "Choose Character")
 	var choose := panel.get_debug_state()
 	_assert_eq("choose mode", str(choose.get("mode", "")), "choose_or_create")
 	_assert_eq("choose title", str(choose.get("title", "")), "Choose Character")
 	_assert_true("choose keeps create affordance", bool(choose.get("create_button_visible", false)))
 	_assert_eq("choose character count", (choose.get("characters", []) as Array).size(), 1)
+	var choose_rows: Array = choose.get("character_rows", [])
+	_assert_eq("choose row level", int((choose_rows[0] as Dictionary).get("level", 0)), 4)
+	_assert_eq("choose row gold", int((choose_rows[0] as Dictionary).get("gold", 0)), 12)
+	_assert_eq("choose row depth", int((choose_rows[0] as Dictionary).get("deepest_dungeon_depth", 0)), 2)
+	_assert_true("choose row label includes summary", str((choose_rows[0] as Dictionary).get("label", "")).find("Lv 4") >= 0)
 	panel.queue_free()
 
 

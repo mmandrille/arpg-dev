@@ -1,0 +1,25 @@
+{
+  "id": "character_select_summaries",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "title": "Character select summaries",
+  "description": "Client opens Create Game and verifies character selection rows expose server-authored progression summaries.",
+  "client_steps": [
+    { "type": "wait_main_menu", "timeout_s": 10.0 },
+    { "type": "click_menu_button", "button": "create_game" },
+    { "type": "wait_character_panel", "timeout_s": 5.0 },
+    {
+      "type": "assert_character_panel",
+      "mode": "choose_or_create",
+      "title": "Choose Character",
+      "min_character_count": 1,
+      "name_field_visible": true,
+      "create_button_visible": true,
+      "min_level": 1,
+      "min_gold": 0,
+      "min_deepest_dungeon_depth": 0,
+      "status": "Ready",
+      "label_contains": "Lv"
+    }
+  ]
+}

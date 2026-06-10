@@ -105,6 +105,7 @@ func get_debug_state() -> Dictionary:
 		"mode": _mode,
 		"title": title_text(),
 		"characters": known_characters(),
+		"character_rows": _debug_character_rows(),
 		"name_field_visible": _name_edit != null and _name_edit.visible,
 		"create_button_visible": _create_button != null and _create_button.visible,
 		"empty_visible": _empty_label != null and _empty_label.visible,
@@ -223,17 +224,17 @@ func _render_characters(characters: Array) -> void:
 		row.add_theme_constant_override("separation", 6)
 		row.custom_minimum_size = Vector2(360, 38)
 		var name := str(character.get("name", "Hero"))
-		var created := str(character.get("created_at", ""))
 		var dead := bool(character.get("dead", false))
 		var select_btn := Button.new()
-		var label := name if created == "" else "%s  %s" % [name, created.left(10)]
+		var label := _character_row_label(character)
 		if dead:
 			label = "☠  " + label
 		select_btn.text = label
 		select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select_btn.disabled = dead
+		select_btn.tooltip_text = _character_row_tooltip(character)
 		if dead:
-			select_btn.tooltip_text = "Dead"
+			select_btn.tooltip_text = "Dead\n" + select_btn.tooltip_text
 		select_btn.pressed.connect(func() -> void:
 			if not dead:
 				start_requested.emit(str(character.get("character_id", "")))
@@ -312,3 +313,63 @@ func _create_from_input() -> void:
 		set_error("Name is too long")
 		return
 	create_requested.emit(name)
+
+
+func _character_level(character: Dictionary) -> int:
+	return max(1, int(character.get("level", 1)))
+
+
+func _character_gold(character: Dictionary) -> int:
+	return max(0, int(character.get("gold", 0)))
+
+
+func _character_depth(character: Dictionary) -> int:
+	return max(0, int(character.get("deepest_dungeon_depth", 0)))
+
+
+func _character_status(character: Dictionary) -> String:
+	return "Dead" if bool(character.get("dead", false)) else "Ready"
+
+
+func _character_row_label(character: Dictionary) -> String:
+	var name := str(character.get("name", "Hero"))
+	return "%s  Lv %d | %dg | D%d | %s" % [
+		name,
+		_character_level(character),
+		_character_gold(character),
+		_character_depth(character),
+		_character_status(character),
+	]
+
+
+func _character_row_tooltip(character: Dictionary) -> String:
+	var created := str(character.get("created_at", ""))
+	var lines := [
+		"Level %d" % _character_level(character),
+		"Gold %d" % _character_gold(character),
+		"Deepest depth %d" % _character_depth(character),
+		"Status %s" % _character_status(character),
+	]
+	if created != "":
+		lines.append("Created %s" % created.left(10))
+	return "\n".join(lines)
+
+
+func _debug_character_rows() -> Array:
+	var rows := []
+	for character in _characters:
+		if typeof(character) != TYPE_DICTIONARY:
+			continue
+		var rec: Dictionary = character
+		rows.append({
+			"character_id": str(rec.get("character_id", "")),
+			"name": str(rec.get("name", "Hero")),
+			"dead": bool(rec.get("dead", false)),
+			"level": _character_level(rec),
+			"gold": _character_gold(rec),
+			"deepest_dungeon_depth": _character_depth(rec),
+			"status": _character_status(rec),
+			"label": _character_row_label(rec),
+			"tooltip": _character_row_tooltip(rec),
+		})
+	return rows

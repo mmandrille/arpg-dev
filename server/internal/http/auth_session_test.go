@@ -31,6 +31,15 @@ func fullServer(t *testing.T) http.Handler {
 }
 
 func fullServerWithConfig(t *testing.T, cfg config.Config) http.Handler {
+	h, _ := fullServerWithConfigAndStore(t, cfg)
+	return h
+}
+
+func fullServerWithStore(t *testing.T) (http.Handler, *store.Store) {
+	return fullServerWithConfigAndStore(t, config.Config{Addr: ":0", Env: "local", DevToken: testDevToken, MetricsEnabled: true})
+}
+
+func fullServerWithConfigAndStore(t *testing.T, cfg config.Config) (http.Handler, *store.Store) {
 	t.Helper()
 	url := "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable"
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -51,7 +60,7 @@ func fullServerWithConfig(t *testing.T, cfg config.Config) http.Handler {
 	if err != nil {
 		t.Fatalf("load rules: %v", err)
 	}
-	return New(Deps{
+	h := New(Deps{
 		Config:  cfg,
 		Logger:  logging.NewTo(io.Discard, "local"),
 		Metrics: metrics.New(),
@@ -60,6 +69,7 @@ func fullServerWithConfig(t *testing.T, cfg config.Config) http.Handler {
 		Rules:   rules,
 		Ready:   db.Ping,
 	}).Handler()
+	return h, db
 }
 
 func postJSON(h http.Handler, path, bearer string, body any) *httptest.ResponseRecorder {
@@ -202,6 +212,9 @@ func TestCreateCharacterValidationAndList(t *testing.T) {
 	if first.Name != "Mara" {
 		t.Fatalf("trimmed name = %q, want Mara", first.Name)
 	}
+	if first.Level != 1 || first.Gold != 0 || first.DeepestDungeonDepth != 0 {
+		t.Fatalf("new character summary = %+v, want level 1 gold 0 depth 0", first)
+	}
 	second := createCharacter(t, h, token, "Mara")
 	if second.Name != "Mara" || second.CharacterID == first.CharacterID {
 		t.Fatalf("duplicate character not created independently: first=%+v second=%+v", first, second)
@@ -223,6 +236,75 @@ func TestCreateCharacterValidationAndList(t *testing.T) {
 	}
 	if found != 2 {
 		t.Fatalf("listed characters missing created rows: %+v", listed.Characters)
+	}
+	for _, c := range listed.Characters {
+		if c.CharacterID == first.CharacterID && (c.Level != 1 || c.Gold != 0 || c.DeepestDungeonDepth != 0) {
+			t.Fatalf("default listed summary = %+v, want level 1 gold 0 depth 0", c)
+		}
+	}
+}
+
+func TestCharacterListIncludesProgressionSummariesAndDefaults(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	accountID, token := loginEmail(t, h, "characters-summary+"+ids.Token()[:12]+"@example.test")
+	hero := createCharacter(t, h, token, "Summary Hero")
+	fresh := createCharacter(t, h, token, "Fresh Hero")
+
+	if err := db.UpsertCharacterProgression(ctx, accountID, store.CharacterProgression{
+		CharacterID:         hero.CharacterID,
+		Level:               7,
+		Experience:          144,
+		UnspentStatPoints:   2,
+		UnspentSkillPoints:  1,
+		Stats:               store.CharacterBaseStats{Str: 8, Dex: 7, Vit: 6, Magic: 5},
+		Gold:                321,
+		DeepestDungeonDepth: 4,
+		SkillRanks:          map[string]int{"magic_bolt": 2},
+	}); err != nil {
+		t.Fatalf("upsert progression: %v", err)
+	}
+
+	otherAccountID, otherToken := loginEmail(t, h, "characters-summary-other+"+ids.Token()[:12]+"@example.test")
+	otherHero := createCharacter(t, h, otherToken, "Other Hero")
+	if err := db.UpsertCharacterProgression(ctx, otherAccountID, store.CharacterProgression{
+		CharacterID:         otherHero.CharacterID,
+		Level:               9,
+		Stats:               store.CharacterBaseStats{Str: 9, Dex: 9, Vit: 9, Magic: 9},
+		Gold:                999,
+		DeepestDungeonDepth: 8,
+		SkillRanks:          map[string]int{"magic_bolt": 1},
+	}); err != nil {
+		t.Fatalf("upsert other progression: %v", err)
+	}
+
+	rec := getJSON(h, "/v0/characters", token)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var listed listCharactersResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listed); err != nil {
+		t.Fatalf("decode list: %v", err)
+	}
+	var sawHero, sawFresh bool
+	for _, c := range listed.Characters {
+		switch c.CharacterID {
+		case hero.CharacterID:
+			sawHero = true
+			if c.Level != 7 || c.Gold != 321 || c.DeepestDungeonDepth != 4 {
+				t.Fatalf("progression summary = %+v, want level 7 gold 321 depth 4", c)
+			}
+		case fresh.CharacterID:
+			sawFresh = true
+			if c.Level != 1 || c.Gold != 0 || c.DeepestDungeonDepth != 0 {
+				t.Fatalf("fresh summary = %+v, want defaults", c)
+			}
+		case otherHero.CharacterID:
+			t.Fatalf("account-scoped list leaked other character summary: %+v", listed.Characters)
+		}
+	}
+	if !sawHero || !sawFresh {
+		t.Fatalf("listed summaries missing characters hero=%v fresh=%v rows=%+v", sawHero, sawFresh, listed.Characters)
 	}
 }
 

@@ -294,6 +294,7 @@ func _test_v45_menu_step_types_load() -> void:
 		{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Settings", "Exit"], "actions": ["create_game", "join_game", "settings", "exit"]},
 		{"type": "click_menu_button", "button": "create_game"},
 		{"type": "assert_character_panel", "mode": "forced_create", "title": "Create Character", "name_field_visible": true, "create_button_visible": true},
+		{"type": "assert_character_panel", "min_level": 1, "min_gold": 0, "min_deepest_dungeon_depth": 0, "status": "Ready"},
 		{"type": "select_create_game_type", "session_type": "solo"},
 		{"type": "assert_create_game_type", "session_type": "solo"},
 		{"type": "click_menu_button", "button": "join_game"},
@@ -329,6 +330,7 @@ func _test_v45_menu_assertions() -> void:
 			"mode": "choose_or_create",
 			"title": "Choose Character",
 			"characters": [{"character_id": "char_1", "dead": false}],
+			"character_rows": [{"character_id": "char_1", "dead": false, "level": 3, "gold": 25, "deepest_dungeon_depth": 2, "status": "Ready", "label": "Hero  Lv 3 | 25g | D2 | Ready"}],
 			"name_field_visible": true,
 			"create_button_visible": true,
 		},
@@ -342,6 +344,14 @@ func _test_v45_menu_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("v45 menu assertions pass", runner.is_done() and runner.passed())
+
+	var summary_runner := BotScenarioRunnerScript.new()
+	data["client_steps"] = [
+		{"type": "assert_character_panel", "min_level": 3, "min_gold": 25, "min_deepest_dungeon_depth": 2, "status": "Ready", "label_contains": "Lv 3"},
+	]
+	summary_runner.load_scenario(data)
+	summary_runner.tick(0.016, state)
+	_assert_true("character panel summary assertions pass", summary_runner.is_done() and summary_runner.passed())
 
 
 func _test_character_stats_step_types_load() -> void:

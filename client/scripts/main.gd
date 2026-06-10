@@ -294,7 +294,8 @@ func _bot_uses_menu() -> bool:
 	var file_name := scenario_path.get_file()
 	return file_name.begins_with("08_main_menu_flow") \
 		or file_name.begins_with("20_menu_create_join_flow") \
-		or file_name.begins_with("21_join_game_listed_session")
+		or file_name.begins_with("21_join_game_listed_session") \
+		or file_name.begins_with("27_character_select_summaries")
 
 
 func _mount_bot_controller() -> void:

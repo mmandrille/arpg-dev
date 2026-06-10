@@ -1437,6 +1437,57 @@ func _assert_character_panel(step: Dictionary, state: Dictionary) -> bool:
 				key, str(step.get(key, false)), str(panel.get(key, false)), str(panel), _step_index, str(scenario.get("id", "?"))
 			])
 			return false
+	if _has_character_summary_expectation(step):
+		var rows: Array = panel.get("character_rows", characters)
+		var matched := false
+		for row in rows:
+			if typeof(row) != TYPE_DICTIONARY:
+				continue
+			if _character_row_matches_summary(row as Dictionary, step):
+				matched = true
+				break
+		if not matched:
+			_fail("assert_character_panel summary failed: want=%s rows=%s step=%d scenario=%s" % [
+				str(_character_summary_expectation(step)), str(rows), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+	return true
+
+
+func _has_character_summary_expectation(step: Dictionary) -> bool:
+	for key in ["character_id", "status", "level", "min_level", "gold", "min_gold", "deepest_dungeon_depth", "min_deepest_dungeon_depth", "label_contains"]:
+		if step.has(key):
+			return true
+	return false
+
+
+func _character_summary_expectation(step: Dictionary) -> Dictionary:
+	var out := {}
+	for key in ["character_id", "status", "level", "min_level", "gold", "min_gold", "deepest_dungeon_depth", "min_deepest_dungeon_depth", "label_contains"]:
+		if step.has(key):
+			out[key] = step[key]
+	return out
+
+
+func _character_row_matches_summary(row: Dictionary, step: Dictionary) -> bool:
+	if step.has("character_id") and str(row.get("character_id", "")) != str(step.get("character_id", "")):
+		return false
+	if step.has("status") and str(row.get("status", "")) != str(step.get("status", "")):
+		return false
+	if step.has("level") and int(row.get("level", 0)) != int(step.get("level", 0)):
+		return false
+	if step.has("min_level") and int(row.get("level", 0)) < int(step.get("min_level", 0)):
+		return false
+	if step.has("gold") and int(row.get("gold", 0)) != int(step.get("gold", 0)):
+		return false
+	if step.has("min_gold") and int(row.get("gold", 0)) < int(step.get("min_gold", 0)):
+		return false
+	if step.has("deepest_dungeon_depth") and int(row.get("deepest_dungeon_depth", 0)) != int(step.get("deepest_dungeon_depth", 0)):
+		return false
+	if step.has("min_deepest_dungeon_depth") and int(row.get("deepest_dungeon_depth", 0)) < int(step.get("min_deepest_dungeon_depth", 0)):
+		return false
+	if step.has("label_contains") and str(row.get("label", "")).find(str(step.get("label_contains", ""))) < 0:
+		return false
 	return true
 
 
@@ -1860,7 +1911,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 			return "client_steps[%d] (%s) requires labels or actions" % [index, stype]
 	if stype == "assert_character_panel":
 		var has_panel_expectation := false
-		for key in ["visible", "mode", "title", "character_count", "min_character_count", "name_field_visible", "create_button_visible", "empty_visible"]:
+		for key in ["visible", "mode", "title", "character_count", "min_character_count", "name_field_visible", "create_button_visible", "empty_visible", "character_id", "status", "level", "min_level", "gold", "min_gold", "deepest_dungeon_depth", "min_deepest_dungeon_depth", "label_contains"]:
 			if step.has(key):
 				has_panel_expectation = true
 		if not has_panel_expectation:

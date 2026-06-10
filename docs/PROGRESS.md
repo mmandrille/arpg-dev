@@ -11,7 +11,7 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v53 — `boss-health-bar-ui` |
+| **Latest completed slice** | v54 — `character-select-summaries` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 |
 | **Next slice** | TBD |
@@ -69,6 +69,7 @@ v50_* = account-stash-storage
 v51_* = mystery-seller-core
 v52_* = ranged-monster-ai
 v53_* = boss-health-bar-ui
+v54_* = character-select-summaries
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -142,6 +143,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v51** | `mystery-seller-core` | Complete (`make ci` green) | [`v51_spec-mystery-seller-core.md`](specs/v51_spec-mystery-seller-core.md) | [`v51_2026-06-10-mystery-seller-core.md`](plans/v51_2026-06-10-mystery-seller-core.md) |
 | **v52** | `ranged-monster-ai` | Complete (`make ci` green) | [`v52_spec-ranged-monster-ai.md`](specs/v52_spec-ranged-monster-ai.md) | [`v52_2026-06-10-ranged-monster-ai.md`](plans/v52_2026-06-10-ranged-monster-ai.md) |
 | **v53** | `boss-health-bar-ui` | Complete (`make ci` green) | [`v53_spec-boss-health-bar-ui.md`](specs/v53_spec-boss-health-bar-ui.md) | [`v53_2026-06-10-boss-health-bar-ui.md`](plans/v53_2026-06-10-boss-health-bar-ui.md) |
+| **v54** | `character-select-summaries` | Complete (`make ci` green) | [`v54_spec-character-select-summaries.md`](specs/v54_spec-character-select-summaries.md) | [`v54_2026-06-10-character-select-summaries.md`](plans/v54_2026-06-10-character-select-summaries.md) |
 
 ---
 
@@ -1332,6 +1334,23 @@ authoritative boss entity state.
 - Client bot scenario `26_boss_health_bar_ui.json` descends to the first boss floor and proves the
   live `cave_warden` bar is visible.
 
+### v54 — Character select summaries
+
+**Proves:** The player-facing character picker can show durable server-authored progression before
+starting a session.
+
+- `GET /v0/characters` now returns account-scoped summary fields for each character: `level`,
+  `gold`, and `deepest_dungeon_depth`, alongside the existing name, id, dead state, and created date.
+- Character listing remains read-only: missing durable progression rows are left-joined and
+  coalesced to display defaults (`level: 1`, `gold: 0`, `deepest_dungeon_depth: 0`) instead of
+  creating persistence as a side effect.
+- Store and HTTP tests prove exact progression summaries, default rows, and account scoping.
+- `CharacterSelectPanel` renders compact row summaries and exposes structured `character_rows`
+  debug state without changing create, select, rename, delete, or dead-row behavior.
+- Client bot scenario `27_character_select_summaries.json` starts from the main menu and proves
+  the Choose Character panel exposes level/gold/depth/status summary data.
+- The full autoloop idea menu from 2026-06-10 is recorded in curated candidates for future reuse.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1413,6 +1432,7 @@ client_account_stash_panel: headless Godot client opens stash → verifies bag/s
 ranged_monster_ai: descend to generated dungeon → assert dungeon_archer → observe archer-sourced ranged player damage
 client_ranged_monster_ai: headless Godot client descends to generated dungeon → asserts bow marker → observes ranged player damage
 client_boss_health_bar_ui: headless Godot client descends to first boss floor → asserts Cave Warden boss health bar
+character_select_summaries: headless Godot client opens Create Game → asserts character row level/gold/depth/status summaries
 ```
 
 **Verify:**
@@ -1624,11 +1644,15 @@ players, and a minimal Godot bow marker with protocol/client bot proofs.
 existing authoritative boss entity hp/max hp and metadata, plus client unit and bot scenario proof
 for the first `cave_warden` boss floor.
 
+**Character select summaries are now server-authored.** v54 extends `GET /v0/characters` with
+level, gold, and deepest-depth summary fields, renders them in the Godot character picker, and
+proves the menu path with focused store, HTTP, client-unit, and client-bot coverage.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50 non-goals, ADR-0008 deferred, ADR-0011 |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54 non-goals, ADR-0008 deferred, ADR-0011 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
@@ -1642,6 +1666,22 @@ for the first `cave_warden` boss floor.
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
 | Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46/v48/v49 non-goals, ADR-0001 |
 | Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
+
+### Curated autoloop candidates
+
+These candidates were curated during `$autoloop 1` on 2026-06-10 and should be considered first by
+the next autoloop pass unless code changes make them stale.
+
+| Candidate | Status | Value | Size | Touch surfaces | Main risk / dependency |
+|-----------|--------|-------|------|----------------|------------------------|
+| `boss-phase-timer-ui` | Open | Add boss phase/windup timing cues to the existing boss health bar. | S | client, bot, docs | Must stay display-only from existing `boss_phase` state/events. |
+| `boss-pattern-variety` | Open | Add one more server-authored boss attack pattern so Cave Warden is less repetitive. | M | shared, server, client, bot, docs | Deterministic phase RNG and schema support for any new telegraph shape. |
+| `mystery-seller-paid-reroll` | Open | Let players spend gold to reroll concealed mystery seller stock. | M | shared/protocol, server, store, client, bot, docs | Price/refresh rules need conservative defaults. |
+| `stash-search-and-sorting` | Open | Add search/sort controls to stash and bag views without changing item authority. | S/M | client, bot, docs | Client UI only; must record plugin borrow/reject decision. |
+| `character-select-summaries` | Completed in v54 | Show level, gold, deepest depth, and status in character selection. | M | store, HTTP, client, bot, docs | Needs careful aggregate/query shape; rename/delete already exists. |
+| `session-browser-filters` | Open | Add Join Game search/filter/sort controls for listed sessions. | S/M | client, HTTP tests maybe, bot, docs | Headless proof needs stable multi-session setup. |
+| `loot-label-filter-core` | Open | Add display-only loot label filtering/highlighting for rarity/category. | M | client, bot, docs | Presentation-only; avoid changing shared loot ownership. |
+| `client-boss-telegraph-polish` | Open | Improve boss telegraph readability with a clearer in-world warning marker. | S/M | client, bot, docs | Visual client work; plugin/art shortcut checklist required. |
 
 ---
 

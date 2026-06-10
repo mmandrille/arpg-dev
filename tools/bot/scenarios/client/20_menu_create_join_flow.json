@@ -32,12 +32,18 @@
       "mode": "choose_or_create",
       "title": "Choose Character",
       "min_character_count": 1,
-      "name_field_visible": true,
+      "name_field_visible": false,
       "create_button_visible": true,
       "empty_visible": false
     },
+    { "type": "click_menu_button", "button": "create_character" },
+    {
+      "type": "assert_character_panel",
+      "name_field_visible": true,
+      "create_button_visible": true
+    },
     { "type": "enter_character_name", "name": "Bot Solo 45" },
-    { "type": "click_menu_button", "button": "start" },
+    { "type": "click_menu_button", "button": "confirm_character_create" },
     { "type": "wait_ws_open", "timeout_s": 10.0 },
     { "type": "assert_current_session", "exists": true, "mode": "solo", "listed": false },
     { "type": "remember_session" },
@@ -51,7 +57,7 @@
       "mode": "choose_or_create",
       "title": "Choose Character",
       "min_character_count": 1,
-      "name_field_visible": true,
+      "name_field_visible": false,
       "create_button_visible": true
     },
     { "type": "select_character", "index": 0 },

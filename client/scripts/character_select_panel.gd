@@ -13,6 +13,7 @@ const MODE_FORCED_CREATE := "forced_create"
 var _title: Label
 var _rows: VBoxContainer
 var _empty_label: Label
+var _create_row: HBoxContainer
 var _name_edit: LineEdit
 var _create_button: Button
 var _error_label: Label
@@ -49,11 +50,8 @@ func show_choose_or_create(characters: Array, title: String = "Choose Character"
 	_delete_mode = true
 	_mode = MODE_CHOOSE_OR_CREATE
 	_title.text = title
-	_name_edit.visible = true
-	_create_button.visible = true
-	_create_button.text = "Create Character"
-	_name_edit.placeholder_text = "New character name"
 	_name_edit.text = ""
+	_set_create_entry_expanded(false, "New character name")
 	_error_label.text = ""
 	_render_characters(characters)
 
@@ -65,14 +63,11 @@ func show_forced_create(title: String = "Create Character") -> void:
 	_delete_mode = false
 	_mode = MODE_FORCED_CREATE
 	_title.text = title
-	_name_edit.visible = true
-	_create_button.visible = true
-	_create_button.text = "Create Character"
-	_name_edit.placeholder_text = "Character name"
 	_name_edit.text = ""
+	_set_create_entry_expanded(true, "Character name")
 	_error_label.text = ""
 	_render_characters([])
-	_name_edit.grab_focus()
+	_focus_name_edit()
 
 
 func hide_panel() -> void:
@@ -108,17 +103,20 @@ func get_debug_state() -> Dictionary:
 		"character_rows": _debug_character_rows(),
 		"name_field_visible": _name_edit != null and _name_edit.visible,
 		"create_button_visible": _create_button != null and _create_button.visible,
+		"create_button_text": _create_button.text if _create_button != null else "",
 		"empty_visible": _empty_label != null and _empty_label.visible,
 		"error": _error_label.text if _error_label != null else "",
 	}
 
 
 func set_name_text(name: String) -> void:
+	if _name_edit != null and not _name_edit.visible:
+		_expand_create_entry()
 	_name_edit.text = name
 
 
 func submit_name() -> void:
-	_create_from_input()
+	_on_create_button_pressed()
 
 
 func start_character_at_index(index: int) -> void:
@@ -166,16 +164,22 @@ func _build() -> void:
 	_rows.add_theme_constant_override("separation", 6)
 	scroll.add_child(_rows)
 
+	_create_row = HBoxContainer.new()
+	_create_row.add_theme_constant_override("separation", 8)
+	box.add_child(_create_row)
+
 	_name_edit = LineEdit.new()
 	_name_edit.placeholder_text = "Character name"
 	_name_edit.max_length = 24
+	_name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_name_edit.text_submitted.connect(func(_text: String) -> void: _create_from_input())
-	box.add_child(_name_edit)
+	_create_row.add_child(_name_edit)
 
 	_create_button = Button.new()
 	_create_button.text = "Start"
-	_create_button.pressed.connect(_create_from_input)
-	box.add_child(_create_button)
+	_create_button.custom_minimum_size = Vector2(150, 40)
+	_create_button.pressed.connect(_on_create_button_pressed)
+	_create_row.add_child(_create_button)
 
 	_error_label = Label.new()
 	_error_label.add_theme_color_override("font_color", Color("#ff9b7a"))
@@ -263,6 +267,41 @@ func _render_characters(characters: Array) -> void:
 			)
 			row.add_child(delete_btn)
 		_rows.add_child(row)
+
+
+func _set_create_entry_expanded(expanded: bool, placeholder: String) -> void:
+	_name_edit.visible = expanded
+	_name_edit.placeholder_text = placeholder
+	_create_button.visible = true
+	if expanded:
+		_create_button.text = "✓"
+		_create_button.tooltip_text = "Create character"
+		_create_button.custom_minimum_size = Vector2(44, 40)
+		_create_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	else:
+		_create_button.text = "Create Character"
+		_create_button.tooltip_text = "Create a new character"
+		_create_button.custom_minimum_size = Vector2(150, 40)
+		_create_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+
+func _expand_create_entry() -> void:
+	_set_create_entry_expanded(true, "New character name")
+	_error_label.text = ""
+	_render_characters(_characters)
+	_focus_name_edit()
+
+
+func _on_create_button_pressed() -> void:
+	if _mode == MODE_CHOOSE_OR_CREATE and not _name_edit.visible:
+		_expand_create_entry()
+		return
+	_create_from_input()
+
+
+func _focus_name_edit() -> void:
+	if _name_edit != null and _name_edit.is_inside_tree():
+		_name_edit.grab_focus()
 
 
 func _prompt_delete(character_id: String, character_name: String) -> void:

@@ -13,7 +13,7 @@
       "mode": "choose_or_create",
       "title": "Choose Character",
       "min_character_count": 1,
-      "name_field_visible": true,
+      "name_field_visible": false,
       "create_button_visible": true,
       "min_level": 1,
       "min_gold": 0,

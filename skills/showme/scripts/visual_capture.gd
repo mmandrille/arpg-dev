@@ -4,6 +4,8 @@ const CharacterScene := preload("res://scenes/character.tscn")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
+const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
+const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 
 const DEFAULT_GEAR_ITEMS := ["cave_blade", "cave_shield", "cave_helm", "cave_mail", "cave_boots"]
 const ITEM_SLOT := {
@@ -40,6 +42,10 @@ func _initialize() -> void:
 	get_root().size = Vector2i(_width, _height)
 
 	match _focus:
+		"character-menu":
+			await _setup_character_menu()
+		"join-menu":
+			await _setup_join_menu()
 		"inventory":
 			await _setup_inventory()
 		"shop":
@@ -183,6 +189,28 @@ func _setup_shop() -> void:
 	var tooltip = panel._make_offer_tooltip(offers[3])
 	tooltip.position = Vector2(286, 142)
 	get_root().add_child(tooltip)
+
+
+func _setup_character_menu() -> void:
+	var panel: CharacterSelectPanel = CharacterSelectPanelScript.new()
+	get_root().add_child(panel)
+	await process_frame
+	panel.show_choose_or_create([
+		{"character_id": "char_1", "name": "Astra", "created_at": "2026-06-09T00:00:00Z", "dead": false, "level": 4, "gold": 128, "deepest_dungeon_depth": 3},
+		{"character_id": "char_2", "name": "Fallen", "created_at": "2026-06-08T00:00:00Z", "dead": true, "level": 2, "gold": 44, "deepest_dungeon_depth": 1},
+	], "Choose Character")
+	panel.submit_name()
+
+
+func _setup_join_menu() -> void:
+	var panel: MultiplayerSessionsPanel = MultiplayerSessionsPanelScript.new()
+	get_root().add_child(panel)
+	await process_frame
+	panel.show_panel()
+	panel.set_sessions([
+		{"session_id": "sess_1", "host_display_name": "Astra", "connected_count": 1, "member_count": 4, "world_id": "dungeon_levels", "mode": "coop", "listed": true},
+		{"session_id": "sess_2", "host_display_name": "Bram", "connected_count": 2, "member_count": 4, "world_id": "dungeon_levels", "mode": "coop", "listed": true},
+	])
 
 
 func _add_light(root: Node3D) -> void:

@@ -57,6 +57,20 @@ func select_session(session_id: String) -> void:
 			return
 
 
+func join_first_session() -> void:
+	if _sessions.is_empty():
+		return
+	var row: Dictionary = _sessions[0]
+	_join_session(str(row.get("session_id", "")))
+
+
+func join_session(session_id: String) -> void:
+	for session in _sessions:
+		if typeof(session) == TYPE_DICTIONARY and str((session as Dictionary).get("session_id", "")) == session_id:
+			_join_session(session_id)
+			return
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
@@ -64,7 +78,7 @@ func get_debug_state() -> Dictionary:
 		"sessions": _sessions.duplicate(true),
 		"selected_session_id": _selected_session_id,
 		"error": _error_label.text if _error_label != null else "",
-		"actions": ["refresh_sessions", "join_selected_session", "back"],
+		"actions": ["refresh_sessions", "join_first_listed_session", "join_expected_session", "back"],
 	}
 
 
@@ -117,10 +131,6 @@ func _build() -> void:
 	var bottom := HBoxContainer.new()
 	bottom.add_theme_constant_override("separation", 8)
 	box.add_child(bottom)
-	bottom.add_child(_button("Join Selected", func() -> void:
-		if _selected_session_id != "":
-			join_requested.emit(_selected_session_id)
-	))
 	bottom.add_child(_button("Back", back_requested.emit))
 
 	_error_label = Label.new()
@@ -146,6 +156,9 @@ func _render_sessions() -> void:
 			continue
 		var row: Dictionary = session
 		var session_id := str(row.get("session_id", ""))
+		var row_box := HBoxContainer.new()
+		row_box.add_theme_constant_override("separation", 6)
+		row_box.custom_minimum_size = Vector2(460, 38)
 		var button := Button.new()
 		button.toggle_mode = true
 		button.button_pressed = session_id == _selected_session_id
@@ -155,9 +168,34 @@ func _render_sessions() -> void:
 			int(row.get("member_count", 0)),
 			str(row.get("world_id", "")),
 		]
-		button.custom_minimum_size = Vector2(460, 38)
+		button.custom_minimum_size = Vector2(410, 38)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.pressed.connect(func() -> void:
 			_selected_session_id = session_id
 			_render_sessions()
 		)
-		_rows.add_child(button)
+		button.gui_input.connect(func(event: InputEvent) -> void:
+			if event is InputEventMouseButton:
+				var mouse_event := event as InputEventMouseButton
+				if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed and mouse_event.double_click:
+					_join_session(session_id)
+		)
+		row_box.add_child(button)
+
+		var join_btn := Button.new()
+		join_btn.text = "✓"
+		join_btn.tooltip_text = "Join game"
+		join_btn.custom_minimum_size = Vector2(38, 38)
+		join_btn.focus_mode = Control.FOCUS_NONE
+		join_btn.pressed.connect(func() -> void:
+			_join_session(session_id)
+		)
+		row_box.add_child(join_btn)
+		_rows.add_child(row_box)
+
+
+func _join_session(session_id: String) -> void:
+	if session_id == "":
+		return
+	_selected_session_id = session_id
+	join_requested.emit(session_id)

@@ -4346,16 +4346,13 @@ func bot_click_menu_button(button: String) -> void:
 			_on_host_listed_session_requested()
 		"join_first_listed_session":
 			if multiplayer_panel != null:
-				multiplayer_panel.select_first_session()
-				var state := multiplayer_panel.get_debug_state()
-				_on_join_listed_session_requested(str(state.get("selected_session_id", "")))
+				multiplayer_panel.join_first_session()
 		"select_expected_join_session":
 			if multiplayer_panel != null:
 				multiplayer_panel.select_session(OS.get_environment("ARPG_EXPECTED_JOIN_SESSION_ID"))
-		"join_selected_session":
+		"join_expected_session":
 			if multiplayer_panel != null:
-				var state := multiplayer_panel.get_debug_state()
-				_on_join_listed_session_requested(str(state.get("selected_session_id", "")))
+				multiplayer_panel.join_session(OS.get_environment("ARPG_EXPECTED_JOIN_SESSION_ID"))
 		"settings":
 			if pause_menu != null and pause_menu.visible:
 				_on_settings_from_pause()
@@ -4369,7 +4366,7 @@ func bot_click_menu_button(button: String) -> void:
 			elif multiplayer_panel != null and multiplayer_panel.visible:
 				multiplayer_panel.hide_panel()
 				main_menu.show_menu()
-		"start":
+		"create_character", "confirm_character_create", "start":
 			if character_panel != null:
 				character_panel.submit_name()
 		"resume":

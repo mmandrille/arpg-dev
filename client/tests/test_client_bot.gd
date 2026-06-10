@@ -50,7 +50,7 @@ func _initialize() -> void:
 	_test_client_settings_parse_size_label()
 	_test_client_settings_size_from_data()
 	_test_client_settings_floating_combat_text_from_data()
-	_test_client_settings_top_right_status_text_from_data()
+	_test_client_settings_status_text_from_data()
 	_test_client_settings_create_game_session_type_from_data()
 	_test_client_settings_create_game_session_type_save_shape()
 	_test_combat_feedback_step_types_load()
@@ -719,9 +719,10 @@ func _test_client_settings_floating_combat_text_from_data() -> void:
 	_assert_eq("settings floating text parses off", ClientSettingsScript.floating_combat_text_from_data({"floating_combat_text": false}), false)
 
 
-func _test_client_settings_top_right_status_text_from_data() -> void:
-	_assert_eq("settings top-right text defaults on", ClientSettingsScript.top_right_status_text_from_data({}), true)
-	_assert_eq("settings top-right text parses off", ClientSettingsScript.top_right_status_text_from_data({"top_right_status_text": false}), false)
+func _test_client_settings_status_text_from_data() -> void:
+	_assert_eq("settings status text defaults on", ClientSettingsScript.status_text_from_data({}), true)
+	_assert_eq("settings status text parses off", ClientSettingsScript.status_text_from_data({"status_text": false}), false)
+	_assert_eq("settings status text reads legacy key", ClientSettingsScript.status_text_from_data({"top_right_status_text": false}), false)
 
 
 func _test_client_settings_create_game_session_type_from_data() -> void:
@@ -739,12 +740,15 @@ func _test_client_settings_create_game_session_type_save_shape() -> void:
 		DirAccess.remove_absolute(absolute_path)
 	var settings = ClientSettingsScript.new(path)
 	settings.set_create_game_session_type("solo", false)
+	settings.set_status_text(false, false)
 	settings.save()
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
 	_assert_eq("settings save includes create game session type", str((parsed as Dictionary).get("create_game_session_type", "")), "solo")
+	_assert_eq("settings save includes status text", bool((parsed as Dictionary).get("status_text", true)), false)
 	var reloaded = ClientSettingsScript.new(path)
 	reloaded.load()
 	_assert_eq("settings reload restores create game session type", reloaded.create_game_session_type, "solo")
+	_assert_eq("settings reload restores status text", reloaded.status_text, false)
 	DirAccess.remove_absolute(absolute_path)
 
 

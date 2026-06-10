@@ -19,7 +19,7 @@ const SUPPORTED_CREATE_GAME_SESSION_TYPES := [
 var path: String = "user://settings.json"
 var window_size: Vector2i = DEFAULT_SIZE
 var floating_combat_text: bool = true
-var top_right_status_text: bool = true
+var status_text: bool = true
 var create_game_session_type: String = DEFAULT_CREATE_GAME_SESSION_TYPE
 
 
@@ -82,10 +82,13 @@ static func floating_combat_text_from_data(data) -> bool:
 	return bool((data as Dictionary).get("floating_combat_text", true))
 
 
-static func top_right_status_text_from_data(data) -> bool:
-	if typeof(data) != TYPE_DICTIONARY or not (data as Dictionary).has("top_right_status_text"):
+static func status_text_from_data(data) -> bool:
+	if typeof(data) != TYPE_DICTIONARY:
 		return true
-	return bool((data as Dictionary).get("top_right_status_text", true))
+	var settings := data as Dictionary
+	if settings.has("status_text"):
+		return bool(settings.get("status_text", true))
+	return bool(settings.get("top_right_status_text", true))
 
 
 static func create_game_session_type_from_data(data) -> String:
@@ -98,14 +101,14 @@ func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
 		floating_combat_text = true
-		top_right_status_text = true
+		status_text = true
 		create_game_session_type = DEFAULT_CREATE_GAME_SESSION_TYPE
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
 	window_size = size_from_data(parsed)
 	floating_combat_text = floating_combat_text_from_data(parsed)
-	top_right_status_text = top_right_status_text_from_data(parsed)
+	status_text = status_text_from_data(parsed)
 	create_game_session_type = create_game_session_type_from_data(parsed)
 
 
@@ -120,7 +123,7 @@ func save() -> void:
 			"height": window_size.y,
 		},
 		"floating_combat_text": floating_combat_text,
-		"top_right_status_text": top_right_status_text,
+		"status_text": status_text,
 		"create_game_session_type": create_game_session_type,
 	}))
 
@@ -159,8 +162,8 @@ func set_floating_combat_text(enabled: bool, persist: bool = true) -> void:
 		save()
 
 
-func set_top_right_status_text(enabled: bool, persist: bool = true) -> void:
-	top_right_status_text = enabled
+func set_status_text(enabled: bool, persist: bool = true) -> void:
+	status_text = enabled
 	if persist:
 		save()
 

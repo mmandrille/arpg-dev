@@ -4,7 +4,7 @@ class_name SettingsPanel
 signal back_requested
 signal size_selected(label: String)
 signal floating_combat_text_toggled(enabled: bool)
-signal top_right_status_text_toggled(enabled: bool)
+signal status_text_toggled(enabled: bool)
 signal create_game_session_type_selected(session_type: String)
 
 var _buttons: Dictionary = {}
@@ -12,7 +12,7 @@ var _session_type_buttons: Dictionary = {}
 var _selected_label: String = ""
 var _selected_session_type: String = "coop"
 var _floating_toggle: CheckButton
-var _top_right_toggle: CheckButton
+var _status_text_toggle: CheckButton
 
 
 func _ready() -> void:
@@ -23,12 +23,12 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, top_right_status_text_enabled: bool = true, create_game_session_type: String = "coop") -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop") -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
 	set_floating_combat_text_enabled(floating_combat_text_enabled)
-	set_top_right_status_text_enabled(top_right_status_text_enabled)
+	set_status_text_enabled(status_text_enabled)
 	set_create_game_session_type(create_game_session_type)
 
 
@@ -53,10 +53,10 @@ func set_floating_combat_text_enabled(enabled: bool) -> void:
 	_floating_toggle.button_pressed = enabled
 
 
-func set_top_right_status_text_enabled(enabled: bool) -> void:
-	if _top_right_toggle == null:
+func set_status_text_enabled(enabled: bool) -> void:
+	if _status_text_toggle == null:
 		return
-	_top_right_toggle.button_pressed = enabled
+	_status_text_toggle.button_pressed = enabled
 
 
 func set_create_game_session_type(session_type: String) -> void:
@@ -124,15 +124,15 @@ func _build() -> void:
 	)
 	box.add_child(_floating_toggle)
 
-	_top_right_toggle = CheckButton.new()
-	_top_right_toggle.text = "Top-right status text"
-	_top_right_toggle.button_pressed = true
-	_top_right_toggle.custom_minimum_size = Vector2(320, 42)
-	_top_right_toggle.add_theme_font_size_override("font_size", 39)
-	_top_right_toggle.toggled.connect(func(enabled: bool) -> void:
-		top_right_status_text_toggled.emit(enabled)
+	_status_text_toggle = CheckButton.new()
+	_status_text_toggle.text = "status-text"
+	_status_text_toggle.button_pressed = true
+	_status_text_toggle.custom_minimum_size = Vector2(320, 42)
+	_status_text_toggle.add_theme_font_size_override("font_size", 39)
+	_status_text_toggle.toggled.connect(func(enabled: bool) -> void:
+		status_text_toggled.emit(enabled)
 	)
-	box.add_child(_top_right_toggle)
+	box.add_child(_status_text_toggle)
 
 	var back := Button.new()
 	back.text = "Back"

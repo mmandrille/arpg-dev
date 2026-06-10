@@ -1,0 +1,83 @@
+shared/rules/combat.v0.schema.json
+  s_b50fdb51358789::t_bc9779bdc0a09e 7,28-59
+server/internal/store/store_test.go
+  s_b50fdb51358789::t_2ce142170a95d7 401-459
+server/internal/replay/replay_test.go
+  s_b50fdb51358789::t_a3dab77126a9b6 837-895
+  s_b50fdb51358789::t_aa1b65bbf2f123 1199-1208
+server/internal/realtime/session_loop_test.go
+  s_b50fdb51358789::t_4fb64877b4c5b4 4,168-236
+server/internal/game/types.go
+  s_b50fdb51358789::t_de91461ae1119d 440
+server/internal/store/repos.go
+  s_b50fdb51358789::t_f1f0e21c99e101 586
+server/internal/game/sim.go
+  s_b50fdb51358789::t_2307310766c8b9 2647-2650,2659
+  s_b50fdb51358789::t_659c81fc8c94f9 1933-1934,1936
+  s_b50fdb51358789::t_a9450e347f6c44 506,1567,1843,3659-3660,4086-4087,4089,4364,4373-4383,4387-4404,4447,4449,4451-4457,4460-4461,4463-4478,4495-4542
+  s_b50fdb51358789::t_9f0a7ee066dc8a 4450,4458-4459,4462,4479-4494
+shared/rules/combat.v0.json
+  s_b50fdb51358789::t_bc9779bdc0a09e 12-28
+server/internal/realtime/session_loop.go
+  s_b50fdb51358789::t_0438829467f129 804-810
+  s_b50fdb51358789::t_b657f01d55ac7d 560
+  s_b50fdb51358789::t_85793560c6c9a7 562-566,583-587,632-637,658-659,673,681,689,694,702,708,714,719,727
+docs/PROGRESS.md
+  s_b50fdb51358789::t_01bb298f710d41 14,66,134,1190-1205,1207-1211,1471-1475,1481,1491
+  s_b50fdb51358789::t_6f9dbe2c2b3118 1206,1286
+server/internal/game/rules.go
+  s_b50fdb51358789::t_6266be5d198099 1999-2033
+  s_b50fdb51358789::t_ff528384b778b3 54,654
+  s_b50fdb51358789::t_05715f97421ab0 78-89
+  s_b50fdb51358789::t_14a98953ef4fac 57-77,689-691,703
+docs/specs/v48_spec-coop-rewards-and-scaling.md
+  s_b50fdb51358789::t_e81bc6c0acc0b7 1-279
+docs/plans/v48_2026-06-09-coop-rewards-and-scaling.md
+  s_b50fdb51358789::t_cdfd55a88cf00f 1-2,4-49,56-68,75-85,91-101,107-117,121-132,140-152,158-164,173-179
+  s_b50fdb51358789::t_68b383bf97ae21 3,172
+  s_b50fdb51358789::t_1582d31e233b6e 50-55,69-74,86-90,102-106,118-120,133-139,153-157,165-171
+shared/golden/coop_rewards_and_scaling.json
+  s_b50fdb51358789::t_bc9779bdc0a09e 1-20
+server/internal/game/game_test.go
+  s_b50fdb51358789::t_8146ff69f80281 197-249
+  s_b50fdb51358789::t_cc9daa5357a13c 5433-5437,5439
+  s_b50fdb51358789::t_a45bbb50a17edf 6411-6500
+  s_b50fdb51358789::t_7c686151fe47c6 5369-5376,5411-5432,5438,5440-5592
+shared/golden/coop_rewards_and_scaling.v0.schema.json
+  s_b50fdb51358789::t_bc9779bdc0a09e 1-44
+tools/bot/run.py
+  s_b50fdb51358789::t_33aa2d53d397b3 3436-3441,3443-3446,3450-3455,3457-3480,3484-3490,3492-3496
+  s_b50fdb51358789::t_7cd05357b55cde 3803-3811
+  s_b50fdb51358789::t_3edaa697d5517d 3817
+  s_b50fdb51358789::t_1afda2900bbb00 3826-3850
+  s_b50fdb51358789::t_017e1f09be90b6 3858-3859
+  s_b50fdb51358789::t_2209439ea29cc3 3536,3542,3552-3556
+  s_b50fdb51358789::t_31df2581d1df20 3926-3944
+  s_b50fdb51358789::t_2c6263dcaa973f 3421-3428,3435,3442,3510-3535,3537-3541,3543-3551,3557-3574,3761-3802,3812-3816,3818-3825,3851-3857
+  s_b50fdb51358789::t_b2d671171375aa 3447-3449,3456,3481-3483,3491
+tools/bot/scenarios/client/16_vendor_item_comparison.json
+  s_b50fdb51358789::t_cfeb4a0f4c09fb 38
+server/internal/http/session.go
+  s_b50fdb51358789::t_de8ba52bcc8f95 318
+tools/bot/scenarios/34_coop_rewards_and_scaling.json
+  s_b50fdb51358789::t_abdd818a05baed 1-6,8-10
+  s_b50fdb51358789::t_6f9dbe2c2b3118 7
+tools/bot/test_protocol.py
+  s_b50fdb51358789::t_0c62bdebf358e6 368-377
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ba0d7998d862de24c563173f3a6c2054ce672a19",
+  "prompts": {},
+  "sessions": {
+    "s_b50fdb51358789": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaea8-db49-7b43-b480-008d84ff3108",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

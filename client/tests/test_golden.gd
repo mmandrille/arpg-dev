@@ -482,6 +482,9 @@ func _initialize() -> void:
 	if int(magic_bolt["requirements"]["stats"]["magic"]) != 15:
 		_fail("magic bolt magic requirement mismatch")
 		return
+	if int(magic_bolt["requirements"].get("level_per_rank", 0)) != 1 or int(magic_bolt["requirements"].get("stats_per_rank", {}).get("magic", 0)) != 5:
+		_fail("magic bolt per-rank requirement mismatch")
+		return
 	var cooldown_multiplier := float(magic_bolt["cooldown"]["multiplier"])
 	for c in skill_golden["attack_speed"]["cases"]:
 		var effective := float(c["dex_attack_speed"]) * float(c["weapon_attack_speed"]) * (1.0 + float(c["item_attack_speed_percent"]) / 100.0)
@@ -493,6 +496,12 @@ func _initialize() -> void:
 		var cooldown := maxi(1, int(ceil(float(interval) * cooldown_multiplier)))
 		if interval != int(c["expected_attack_interval_ticks"]) or cooldown != int(c["expected_magic_bolt_cooldown_ticks"]):
 			_fail("skill golden attack speed case %s interval/cooldown mismatch" % str(c["name"]))
+			return
+	for c in skill_golden["skill"]["rank_requirement_cases"]:
+		var req_rank := int(c["rank"])
+		var expected_requirements := _skill_requirements_for_rank(magic_bolt["requirements"], req_rank)
+		if int(c["level"]) != int(expected_requirements["level"]) or not _same_int_dictionary(c["stats"], expected_requirements["stats"]):
+			_fail("skill golden rank %d requirement mismatch" % req_rank)
 			return
 	for c in skill_golden["skill"]["rank_cases"]:
 		var rank := int(c["rank"])
@@ -703,6 +712,30 @@ func _attack_interval_ticks(combat: Dictionary, effective_attack_speed: float) -
 func _skill_mana_cost(skill: Dictionary, rank: int) -> int:
 	var mana: Dictionary = skill["cost"]["mana"]
 	return maxi(0, int(mana["base"]) + int(mana["per_rank"]) * maxi(0, rank - 1))
+
+
+func _skill_requirements_for_rank(requirements: Dictionary, rank: int) -> Dictionary:
+	var rank_offset := maxi(0, rank - 1)
+	var stats: Dictionary = {}
+	var base_stats: Dictionary = requirements.get("stats", {})
+	var stats_per_rank: Dictionary = requirements.get("stats_per_rank", {})
+	for stat in ["str", "dex", "vit", "magic"]:
+		var required := int(base_stats.get(stat, 0)) + int(stats_per_rank.get(stat, 0)) * rank_offset
+		if required > 0:
+			stats[stat] = required
+	return {
+		"level": int(requirements.get("level", 0)) + int(requirements.get("level_per_rank", 0)) * rank_offset,
+		"stats": stats,
+	}
+
+
+func _same_int_dictionary(a: Dictionary, b: Dictionary) -> bool:
+	if a.keys().size() != b.keys().size():
+		return false
+	for key in b.keys():
+		if not a.has(key) or int(a[key]) != int(b[key]):
+			return false
+	return true
 
 
 func _skill_damage_min(skill: Dictionary, rank: int) -> int:

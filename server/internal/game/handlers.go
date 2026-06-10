@@ -969,12 +969,13 @@ func (s *Sim) handleAllocateSkillPoint(in Input, res *TickResult) {
 		res.reject(in.MessageID, "player_dead")
 		return
 	}
-	if !s.skillRequirementsMet(def) {
+	nextRank := rank + 1
+	if !s.skillRequirementsMet(def, nextRank) {
 		res.reject(in.MessageID, "skill_requirements_not_met")
 		return
 	}
 
-	rank++
+	rank = nextRank
 	s.progression.SkillRanks[skillID] = rank
 	s.progression.UnspentSkillPoints--
 	s.appendProgressionAndSkillUpdates(res)
@@ -1011,7 +1012,7 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		res.reject(in.MessageID, "skill_not_learned")
 		return
 	}
-	if !s.skillRequirementsMet(def) {
+	if !s.skillRequirementsMet(def, rank) {
 		res.reject(in.MessageID, "skill_requirements_not_met")
 		return
 	}

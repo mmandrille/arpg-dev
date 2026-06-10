@@ -73,6 +73,19 @@ def equipment_visual_slot_matches(rule_slot: str | None, visual_slot: str) -> bo
     return rule_slot == visual_slot
 
 
+def skill_requirements_for_rank(requirements: dict, rank: int) -> dict:
+    rank_offset = max(0, int(rank) - 1)
+    level = int(requirements.get("level", 0)) + int(requirements.get("level_per_rank", 0)) * rank_offset
+    base_stats = requirements.get("stats", {})
+    stats_per_rank = requirements.get("stats_per_rank", {})
+    stats = {}
+    for stat in ("str", "dex", "vit", "magic"):
+        required = int(base_stats.get(stat, 0)) + int(stats_per_rank.get(stat, 0)) * rank_offset
+        if required > 0:
+            stats[stat] = required
+    return {"level": level, "stats": stats}
+
+
 def schema_for(instance_path: Path) -> Path:
     """Map an instance file to the schema that should validate it."""
     rel = instance_path.relative_to(SHARED)
@@ -1107,7 +1120,11 @@ def cross_checks(report: Report) -> None:
     elif int(magic_bolt.get("tree", {}).get("tier", 0)) <= 0 or int(magic_bolt.get("tree", {}).get("column", 0)) <= 0:
         report.fail("skills magic_bolt", "tree tier/column must be positive")
     elif int(magic_bolt.get("requirements", {}).get("stats", {}).get("magic", 0)) != 15:
-        report.fail("skills magic_bolt requirements", "magic requirement must be 15")
+        report.fail("skills magic_bolt requirements", "rank 1 magic requirement must be 15")
+    elif int(magic_bolt.get("requirements", {}).get("level_per_rank", 0)) != 1:
+        report.fail("skills magic_bolt requirements", "level requirement must increase by 1 per rank")
+    elif int(magic_bolt.get("requirements", {}).get("stats_per_rank", {}).get("magic", 0)) != 5:
+        report.fail("skills magic_bolt requirements", "magic requirement must increase by 5 per rank")
     elif float(magic_bolt.get("projectile", {}).get("range", 0)) <= 0 or float(magic_bolt.get("projectile", {}).get("speed", 0)) <= 0:
         report.fail("skills magic_bolt", "range/projectile_speed must be positive")
     elif magic_bolt.get("cooldown", {}).get("type") != "attack_interval_multiplier":
@@ -1206,6 +1223,18 @@ def cross_checks(report: Report) -> None:
                 break
             if int(case["expected_magic_bolt_cooldown_ticks"]) != cooldown_ticks:
                 report.fail("skill_points golden attack_speed", f"{case['name']}: cooldown mismatch")
+                failed_skill_magic = True
+                break
+    if not failed_skill_magic and magic_bolt is not None:
+        for case in skill_magic_golden["skill"]["rank_requirement_cases"]:
+            rank = int(case["rank"])
+            if rank < 1 or rank > int(magic_bolt["max_rank"]):
+                report.fail("skill_points golden skill", f"rank {rank}: requirement case outside max_rank")
+                failed_skill_magic = True
+                break
+            requirements = skill_requirements_for_rank(magic_bolt["requirements"], rank)
+            if int(case["level"]) != requirements["level"] or case["stats"] != requirements["stats"]:
+                report.fail("skill_points golden skill", f"rank {rank}: requirement mismatch")
                 failed_skill_magic = True
                 break
     if not failed_skill_magic and magic_bolt is not None:

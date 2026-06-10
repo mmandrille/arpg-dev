@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -167,6 +168,386 @@ func TestShopOpenBuyAndSell(t *testing.T) {
 	}
 	if ev := findEvent(sell.Events, "shop_sale"); ev == nil || ev.Price == nil || *ev.Price != price {
 		t.Fatalf("shop_sale event = %+v, want price %d", ev, price)
+	}
+}
+
+func TestShopStockSourceDepthPolicyAndRarityCap(t *testing.T) {
+	cases := []struct {
+		name       string
+		level      int
+		deepest    int
+		wantMin    int
+		wantMax    int
+		wantExact  int
+		exactDepth bool
+	}{
+		{name: "level_24_depth_50", level: 24, deepest: 50, wantMin: 25, wantMax: 50},
+		{name: "level_60_depth_50", level: 60, deepest: 50, wantMin: 1, wantMax: 50},
+		{name: "level_1_depth_0", level: 1, deepest: 0, wantMin: 1, wantMax: 1, wantExact: 1, exactDepth: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			sim := newTownVendorSimWithLevel(t, 5000, c.deepest, c.level)
+			vendor := townVendorEntity(t, sim)
+			open := sim.Tick([]Input{{
+				Type:      "action_intent",
+				MessageID: "msg_open_" + c.name,
+				Action:    &ActionIntent{TargetID: idStr(vendor.id)},
+			}})
+			opened := findEvent(open.Events, "shop_opened")
+			if opened == nil {
+				t.Fatalf("missing shop_opened: %+v", open)
+			}
+			generatedCount := 0
+			for _, offer := range opened.Offers {
+				if offer.Kind != shopOfferKindGenerated {
+					continue
+				}
+				generatedCount++
+				if offer.SourceDepth < c.wantMin || offer.SourceDepth > c.wantMax {
+					t.Fatalf("%s source depth = %d, want %d..%d offer=%+v", c.name, offer.SourceDepth, c.wantMin, c.wantMax, offer)
+				}
+				if c.exactDepth && offer.SourceDepth != c.wantExact {
+					t.Fatalf("%s source depth = %d, want %d", c.name, offer.SourceDepth, c.wantExact)
+				}
+				if !shopRarityAllowedByCap(offer.Rarity, "rare") {
+					t.Fatalf("%s rarity %s exceeds rare", c.name, offer.Rarity)
+				}
+			}
+			if generatedCount != sim.rules.Shops["town_vendor"].GeneratedOffers.OfferCount {
+				t.Fatalf("%s generated count = %d", c.name, generatedCount)
+			}
+			if !hasShopStockReplace(open, "town_vendor") {
+				t.Fatalf("%s missing stock replace change: %+v", c.name, open.Changes)
+			}
+		})
+	}
+}
+
+func TestShopStockLifecycleGolden(t *testing.T) {
+	rules := loadRules(t)
+	var golden struct {
+		ShopID         string `json:"shop_id"`
+		GeneratedStock struct {
+			OfferCount        int    `json:"offer_count"`
+			SourceDepthPolicy string `json:"source_depth_policy"`
+			RefreshOn         string `json:"refresh_on"`
+			MaxRarity         string `json:"max_rarity"`
+			Cases             []struct {
+				Name                   string `json:"name"`
+				CharacterLevel         int    `json:"character_level"`
+				DeepestDungeonDepth    int    `json:"deepest_dungeon_depth"`
+				ExpectedMinSourceDepth int    `json:"expected_min_source_depth"`
+				ExpectedMaxSourceDepth int    `json:"expected_max_source_depth"`
+			} `json:"cases"`
+		} `json:"generated_stock"`
+		FiniteStock struct {
+			AfterGeneratedPurchaseCount int `json:"after_generated_purchase_count"`
+			FixedOfferCount             int `json:"fixed_offer_count"`
+		} `json:"finite_stock"`
+		Buyback struct {
+			SellPrice int `json:"sell_price"`
+			BuyPrice  int `json:"buy_price"`
+		} `json:"buyback"`
+	}
+	loadGolden(t, "shop_stock_lifecycle.json", &golden)
+	shop := rules.Shops[golden.ShopID]
+	if shop.GeneratedOffers.SourceDepthPolicy != golden.GeneratedStock.SourceDepthPolicy ||
+		shop.GeneratedOffers.RefreshOn != golden.GeneratedStock.RefreshOn ||
+		shop.GeneratedOffers.MaxRarity != golden.GeneratedStock.MaxRarity {
+		t.Fatalf("shop lifecycle rules = %+v, want golden %+v", shop.GeneratedOffers, golden.GeneratedStock)
+	}
+	if shop.GeneratedOffers.OfferCount != golden.GeneratedStock.OfferCount {
+		t.Fatalf("offer count = %d, want %d", shop.GeneratedOffers.OfferCount, golden.GeneratedStock.OfferCount)
+	}
+
+	for _, c := range golden.GeneratedStock.Cases {
+		t.Run(c.Name, func(t *testing.T) {
+			sim := newTownVendorSimWithLevel(t, 5000, c.DeepestDungeonDepth, c.CharacterLevel)
+			vendor := townVendorEntity(t, sim)
+			open := sim.Tick([]Input{{
+				Type:      "action_intent",
+				MessageID: "msg_open_golden_" + c.Name,
+				Action:    &ActionIntent{TargetID: idStr(vendor.id)},
+			}})
+			opened := findEvent(open.Events, "shop_opened")
+			if opened == nil {
+				t.Fatalf("missing shop open event: %+v", open)
+			}
+			got := generatedOfferSignatures(opened.Offers)
+			if len(got) != golden.GeneratedStock.OfferCount {
+				t.Fatalf("generated count = %d, want %d: %+v", len(got), golden.GeneratedStock.OfferCount, opened.Offers)
+			}
+			for i, offer := range got {
+				wantOfferID := fmt.Sprintf("generated:wp:none:%03d", i)
+				if offer.OfferID != wantOfferID {
+					t.Fatalf("offer %d id = %s, want %s", i, offer.OfferID, wantOfferID)
+				}
+				if offer.SourceDepth < c.ExpectedMinSourceDepth || offer.SourceDepth > c.ExpectedMaxSourceDepth {
+					t.Fatalf("source depth = %d, want %d..%d offer=%+v", offer.SourceDepth, c.ExpectedMinSourceDepth, c.ExpectedMaxSourceDepth, offer)
+				}
+				if !shopRarityAllowedByCap(offer.Rarity, golden.GeneratedStock.MaxRarity) {
+					t.Fatalf("rarity %s exceeds %s", offer.Rarity, golden.GeneratedStock.MaxRarity)
+				}
+			}
+
+			repeat := newTownVendorSimWithLevel(t, 5000, c.DeepestDungeonDepth, c.CharacterLevel)
+			repeatOpen := repeat.Tick([]Input{{
+				Type:      "action_intent",
+				MessageID: "msg_open_golden_repeat_" + c.Name,
+				Action:    &ActionIntent{TargetID: idStr(townVendorEntity(t, repeat).id)},
+			}})
+			repeatOpened := findEvent(repeatOpen.Events, "shop_opened")
+			if repeatOpened == nil || !reflect.DeepEqual(got, generatedOfferSignatures(repeatOpened.Offers)) {
+				t.Fatalf("generated stock not deterministic\n got=%+v\nrepeat=%+v", got, repeatOpened)
+			}
+		})
+	}
+
+	sim := newTownVendorSim(t, 1000, 3)
+	vendor := townVendorEntity(t, sim)
+	generated := firstGeneratedOffer(t, sim)
+	buy := sim.Tick([]Input{{
+		Type:      "shop_buy_intent",
+		MessageID: "msg_buy_golden_generated",
+		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: generated.OfferID},
+	}})
+	buyEvent := findEvent(buy.Events, "shop_purchase")
+	if buyEvent == nil {
+		t.Fatalf("missing buy event: %+v", buy)
+	}
+	if countShopOffersByKind(buyEvent.Offers, shopOfferKindGenerated) != golden.FiniteStock.AfterGeneratedPurchaseCount ||
+		countShopOffersByKind(buyEvent.Offers, shopOfferKindFixed) != golden.FiniteStock.FixedOfferCount {
+		t.Fatalf("post-buy offer counts generated=%d fixed=%d event=%+v",
+			countShopOffersByKind(buyEvent.Offers, shopOfferKindGenerated),
+			countShopOffersByKind(buyEvent.Offers, shopOfferKindFixed),
+			buyEvent)
+	}
+	if got := shop.buybackPrice(golden.Buyback.SellPrice); got != golden.Buyback.BuyPrice {
+		t.Fatalf("buyback price = %d, want %d", got, golden.Buyback.BuyPrice)
+	}
+}
+
+func TestShopStockFiniteGeneratedAndBuybackLifecycle(t *testing.T) {
+	sim := newTownVendorSim(t, 1000, 3)
+	vendor := townVendorEntity(t, sim)
+	open := sim.Tick([]Input{{
+		Type:      "action_intent",
+		MessageID: "msg_open_stock_lifecycle",
+		Action:    &ActionIntent{TargetID: idStr(vendor.id)},
+	}})
+	opened := findEvent(open.Events, "shop_opened")
+	if opened == nil {
+		t.Fatalf("missing open event: %+v", open)
+	}
+	generated := firstGeneratedOfferFrom(opened.Offers)
+	if generated == nil {
+		t.Fatalf("missing generated offer: %+v", opened.Offers)
+	}
+
+	buyGenerated := sim.Tick([]Input{{
+		Type:      "shop_buy_intent",
+		MessageID: "msg_buy_stock_generated",
+		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: generated.OfferID},
+	}})
+	if !hasAck(buyGenerated, "msg_buy_stock_generated") || !hasShopStockAvailability(buyGenerated, generated.OfferID, false) {
+		t.Fatalf("generated buy did not ack/consume stock: %+v", buyGenerated)
+	}
+	buyEvent := findEvent(buyGenerated.Events, "shop_purchase")
+	if buyEvent == nil || findOffer(buyEvent.Offers, generated.OfferID) != nil || findOffer(buyEvent.Offers, "fixed:red_potion") == nil {
+		t.Fatalf("purchase refreshed offers = %+v", buyEvent)
+	}
+	if offers, _ := sim.shopCatalog("town_vendor"); findOffer(offers, generated.OfferID) != nil {
+		t.Fatalf("generated offer still available after buy: %+v", offers)
+	}
+	bought := sim.inventory[len(sim.inventory)-1]
+	sellPrice, ok := sim.inventorySellPrice("town_vendor", bought)
+	if !ok {
+		t.Fatalf("sell price missing for bought item %+v", bought)
+	}
+
+	sell := sim.Tick([]Input{{
+		Type:      "shop_sell_intent",
+		MessageID: "msg_sell_to_buyback",
+		ShopSell:  &ShopSellIntent{ShopEntityID: idStr(vendor.id), ItemInstanceID: idStr(bought.instanceID)},
+	}})
+	if !hasAck(sell, "msg_sell_to_buyback") {
+		t.Fatalf("sell did not ack: %+v", sell)
+	}
+	buybackID := "buyback:" + idStr(bought.instanceID)
+	saleEvent := findEvent(sell.Events, "shop_sale")
+	if saleEvent == nil {
+		t.Fatalf("missing sale event: %+v", sell)
+	}
+	buyback := findOffer(saleEvent.Offers, buybackID)
+	if buyback == nil || buyback.BuyPrice != sim.rules.Shops["town_vendor"].buybackPrice(sellPrice) {
+		t.Fatalf("buyback offer mismatch: event=%+v buyback=%+v sell_price=%d", saleEvent, buyback, sellPrice)
+	}
+
+	buybackPurchase := sim.Tick([]Input{{
+		Type:      "shop_buy_intent",
+		MessageID: "msg_buyback_purchase",
+		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: buybackID},
+	}})
+	if !hasAck(buybackPurchase, "msg_buyback_purchase") || sim.findItemByID(bought.instanceID) == nil {
+		t.Fatalf("buyback purchase failed: inv=%+v res=%+v", sim.inventory, buybackPurchase)
+	}
+	buybackEvent := findEvent(buybackPurchase.Events, "shop_purchase")
+	if buybackEvent == nil || buybackEvent.ItemInstanceID != idStr(bought.instanceID) || findOffer(buybackEvent.Offers, buybackID) != nil {
+		t.Fatalf("buyback purchase event mismatch: %+v", buybackEvent)
+	}
+}
+
+func TestShopStockAndBuybackArePerCharacterInCoop(t *testing.T) {
+	sim := newTownVendorSim(t, 1000, 3)
+	hostID := sim.DefaultPlayerID()
+	guestProgress := sim.rules.DefaultCharacterProgressionState()
+	guestProgress.Gold = 1000
+	guestProgress.DeepestDungeonDepth = 3
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", guestProgress)
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	vendor := townVendorEntity(t, sim)
+	nearVendor := Vec2{X: vendor.pos.X, Y: vendor.pos.Y - 1}
+	sim.levels[townLevel].entities[hostID].pos = nearVendor
+	sim.levels[townLevel].entities[guestID].pos = nearVendor
+
+	hostOpen := tickOne(t, sim, Input{
+		ActorPlayerID: hostID,
+		Type:          "action_intent",
+		MessageID:     "msg_host_open_shop",
+		Action:        &ActionIntent{TargetID: idStr(vendor.id)},
+	})
+	hostOpened := findEvent(hostOpen.Events, "shop_opened")
+	if hostOpened == nil || countShopOffersByKind(hostOpened.Offers, shopOfferKindGenerated) != 5 {
+		t.Fatalf("host open = %+v", hostOpen)
+	}
+	guestOpen := tickOne(t, sim, Input{
+		ActorPlayerID: guestID,
+		Type:          "action_intent",
+		MessageID:     "msg_guest_open_shop",
+		Action:        &ActionIntent{TargetID: idStr(vendor.id)},
+	})
+	guestOpened := findEvent(guestOpen.Events, "shop_opened")
+	if guestOpened == nil || countShopOffersByKind(guestOpened.Offers, shopOfferKindGenerated) != 5 {
+		t.Fatalf("guest open = %+v", guestOpen)
+	}
+	if sim.players[hostID].ShopStock["town_vendor"] == sim.players[guestID].ShopStock["town_vendor"] {
+		t.Fatalf("host and guest share shop stock pointer")
+	}
+
+	hostGenerated := firstGeneratedOfferFrom(hostOpened.Offers)
+	if hostGenerated == nil {
+		t.Fatalf("host missing generated offer: %+v", hostOpened.Offers)
+	}
+	hostBuy := tickOne(t, sim, Input{
+		ActorPlayerID: hostID,
+		Type:          "shop_buy_intent",
+		MessageID:     "msg_host_buy_generated",
+		ShopBuy:       &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: hostGenerated.OfferID},
+	})
+	hostPurchase := findEvent(hostBuy.Events, "shop_purchase")
+	if hostPurchase == nil || countShopOffersByKind(hostPurchase.Offers, shopOfferKindGenerated) != 4 {
+		t.Fatalf("host purchase = %+v", hostBuy)
+	}
+	hostSell := tickOne(t, sim, Input{
+		ActorPlayerID: hostID,
+		Type:          "shop_sell_intent",
+		MessageID:     "msg_host_sell_buyback",
+		ShopSell:      &ShopSellIntent{ShopEntityID: idStr(vendor.id), ItemInstanceID: hostPurchase.ItemInstanceID},
+	})
+	hostSale := findEvent(hostSell.Events, "shop_sale")
+	if hostSale == nil || countShopOffersByKind(hostSale.Offers, shopOfferKindBuyback) != 1 {
+		t.Fatalf("host sale = %+v", hostSell)
+	}
+
+	guestOpenAfterHostMutation := tickOne(t, sim, Input{
+		ActorPlayerID: guestID,
+		Type:          "action_intent",
+		MessageID:     "msg_guest_reopen_shop",
+		Action:        &ActionIntent{TargetID: idStr(vendor.id)},
+	})
+	guestReopened := findEvent(guestOpenAfterHostMutation.Events, "shop_opened")
+	if guestReopened == nil ||
+		countShopOffersByKind(guestReopened.Offers, shopOfferKindGenerated) != 5 ||
+		countShopOffersByKind(guestReopened.Offers, shopOfferKindBuyback) != 0 {
+		t.Fatalf("guest stock leaked host mutation: %+v", guestReopened)
+	}
+}
+
+func TestShopBuybackClearsOnLeavingTownAndGeneratedStockRefreshesOnNewWaypoint(t *testing.T) {
+	sim := newTownVendorSim(t, 1000, 3)
+	vendor := townVendorEntity(t, sim)
+	generated := firstGeneratedOffer(t, sim)
+	buy := sim.Tick([]Input{{
+		Type:      "shop_buy_intent",
+		MessageID: "msg_buy_before_clear",
+		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: generated.OfferID},
+	}})
+	if !hasAck(buy, "msg_buy_before_clear") {
+		t.Fatalf("buy before clear failed: %+v", buy)
+	}
+	item := sim.inventory[len(sim.inventory)-1]
+	sell := sim.Tick([]Input{{
+		Type:      "shop_sell_intent",
+		MessageID: "msg_sell_before_clear",
+		ShopSell:  &ShopSellIntent{ShopEntityID: idStr(vendor.id), ItemInstanceID: idStr(item.instanceID)},
+	}})
+	buybackID := "buyback:" + idStr(item.instanceID)
+	saleEvent := findEvent(sell.Events, "shop_sale")
+	if !hasAck(sell, "msg_sell_before_clear") || saleEvent == nil || findOffer(saleEvent.Offers, buybackID) == nil {
+		t.Fatalf("sell before clear failed: %+v", sell)
+	}
+
+	initialKey := sim.shopStock["town_vendor"].RefreshKey
+	stairs := sim.findStair(sim.activeLevel(), stairsDownDefID)
+	if stairs == nil {
+		t.Fatal("missing town stairs down")
+	}
+	moveDefaultPlayerTo(sim, stairs.pos)
+	descend1 := sim.TickResults([]Input{{Type: "descend_intent", MessageID: "msg_leave_town", Descend: &DescendIntent{}}})
+	if len(descend1) == 0 || !hasAck(descend1[0], "msg_leave_town") {
+		t.Fatalf("leave town failed: %+v", descend1)
+	}
+	if state := sim.shopStock["town_vendor"]; state != nil && len(state.Buyback) != 0 {
+		t.Fatalf("buyback survived leaving town: %+v", state.Buyback)
+	}
+
+	for depth := 2; depth <= 3; depth++ {
+		stairs = sim.findStair(sim.activeLevel(), stairsDownDefID)
+		if stairs == nil {
+			t.Fatalf("missing stairs down before depth %d", depth)
+		}
+		moveDefaultPlayerTo(sim, stairs.pos)
+		res := sim.TickResults([]Input{{Type: "descend_intent", MessageID: "msg_descend_for_wp", Descend: &DescendIntent{}}})
+		if len(res) == 0 {
+			t.Fatalf("descend to depth %d produced no results", depth)
+		}
+	}
+	teleporter := sim.findTeleporter(sim.activeLevel())
+	if teleporter == nil {
+		t.Fatal("missing level -3 teleporter")
+	}
+	moveDefaultPlayerTo(sim, teleporter.pos)
+	discover := sim.Tick([]Input{{
+		Type:      "action_intent",
+		MessageID: "msg_discover_shop_refresh",
+		Action:    &ActionIntent{TargetID: idStr(teleporter.id)},
+	}})
+	if !hasAck(discover, "msg_discover_shop_refresh") || !hasShopStockReplace(discover, "town_vendor") {
+		t.Fatalf("discover did not refresh stock: %+v", discover)
+	}
+	if got := sim.shopStock["town_vendor"].RefreshKey; got == initialKey {
+		t.Fatalf("refresh key did not change: %s", got)
+	}
+	again := sim.Tick([]Input{{
+		Type:      "action_intent",
+		MessageID: "msg_discover_shop_refresh_again",
+		Action:    &ActionIntent{TargetID: idStr(teleporter.id)},
+	}})
+	if hasShopStockReplace(again, "town_vendor") {
+		t.Fatalf("duplicate discovery refreshed stock: %+v", again)
 	}
 }
 
@@ -397,6 +778,105 @@ func TestShopBuyFailureDoesNotMutate(t *testing.T) {
 			t.Fatalf("buy reject = %+v", res.Rejects)
 		}
 	})
+
+	t.Run("unknown generated offer", func(t *testing.T) {
+		sim := newTownVendorSim(t, 1000, 1)
+		vendor := townVendorEntity(t, sim)
+		beforeGold := sim.gold
+		beforeInventory := len(sim.inventory)
+		res := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buy_unknown_generated",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: "generated:wp:none:999"},
+		}})
+		if !hasReject(res, "msg_buy_unknown_generated", "unknown_offer") {
+			t.Fatalf("buy reject = %+v", res.Rejects)
+		}
+		if sim.gold != beforeGold || len(sim.inventory) != beforeInventory {
+			t.Fatalf("unknown generated mutated gold=%d inv=%+v", sim.gold, sim.inventory)
+		}
+	})
+
+	t.Run("consumed generated offer", func(t *testing.T) {
+		sim := newTownVendorSim(t, 1000, 3)
+		vendor := townVendorEntity(t, sim)
+		offer := firstGeneratedOffer(t, sim)
+		buy := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buy_once",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: offer.OfferID},
+		}})
+		if !hasAck(buy, "msg_buy_once") {
+			t.Fatalf("initial generated buy failed: %+v", buy)
+		}
+		beforeGold := sim.gold
+		beforeInventory := len(sim.inventory)
+		again := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buy_consumed",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: offer.OfferID},
+		}})
+		if !hasReject(again, "msg_buy_consumed", "unknown_offer") {
+			t.Fatalf("consumed buy reject = %+v", again.Rejects)
+		}
+		if sim.gold != beforeGold || len(sim.inventory) != beforeInventory {
+			t.Fatalf("consumed buy mutated gold=%d inv=%+v", sim.gold, sim.inventory)
+		}
+	})
+
+	t.Run("invalid shop target", func(t *testing.T) {
+		sim := newTownVendorSim(t, 1000, 1)
+		res := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buy_invalid_shop",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: "999999", OfferID: "fixed:red_potion"},
+		}})
+		if !hasReject(res, "msg_buy_invalid_shop", "invalid_target") {
+			t.Fatalf("invalid shop reject = %+v", res.Rejects)
+		}
+	})
+
+	t.Run("missing buyback after purchase", func(t *testing.T) {
+		sim := newTownVendorSim(t, 1000, 3)
+		vendor := townVendorEntity(t, sim)
+		offer := firstGeneratedOffer(t, sim)
+		buy := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buy_for_buyback_failure",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: offer.OfferID},
+		}})
+		item := sim.inventory[len(sim.inventory)-1]
+		sell := sim.Tick([]Input{{
+			Type:      "shop_sell_intent",
+			MessageID: "msg_sell_for_buyback_failure",
+			ShopSell:  &ShopSellIntent{ShopEntityID: idStr(vendor.id), ItemInstanceID: idStr(item.instanceID)},
+		}})
+		if !hasAck(buy, "msg_buy_for_buyback_failure") || !hasAck(sell, "msg_sell_for_buyback_failure") {
+			t.Fatalf("setup buy/sell failed buy=%+v sell=%+v", buy, sell)
+		}
+		buybackID := "buyback:" + idStr(item.instanceID)
+		first := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buyback_once",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: buybackID},
+		}})
+		if !hasAck(first, "msg_buyback_once") {
+			t.Fatalf("buyback setup buy failed: %+v", first)
+		}
+		beforeGold := sim.gold
+		beforeInventory := len(sim.inventory)
+		again := sim.Tick([]Input{{
+			Type:      "shop_buy_intent",
+			MessageID: "msg_buyback_missing",
+			ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: buybackID},
+		}})
+		if !hasReject(again, "msg_buyback_missing", "unknown_offer") {
+			t.Fatalf("missing buyback reject = %+v", again.Rejects)
+		}
+		if sim.gold != beforeGold || len(sim.inventory) != beforeInventory {
+			t.Fatalf("missing buyback mutated gold=%d inv=%+v", sim.gold, sim.inventory)
+		}
+	})
 }
 
 func TestShopSellEquippedItemRejected(t *testing.T) {
@@ -495,9 +975,14 @@ func shopOfferGoldenFromView(offer ShopOfferView) shopOfferGolden {
 
 func newTownVendorSim(t *testing.T, gold int, deepestDepth int) *Sim {
 	t.Helper()
+	return newTownVendorSimWithLevel(t, gold, deepestDepth, 1)
+}
+
+func newTownVendorSimWithLevel(t *testing.T, gold int, deepestDepth int, level int) *Sim {
+	t.Helper()
 	rules := loadRules(t)
 	sim, err := NewSimWithWorldProgression("sess_shop", "v41_shop_offers", rules, "dungeon_levels", CharacterProgressionState{
-		Level:               1,
+		Level:               level,
 		Gold:                gold,
 		DeepestDungeonDepth: deepestDepth,
 		BaseStats:           rules.CharacterProgression.BaseStats,
@@ -508,6 +993,7 @@ func newTownVendorSim(t *testing.T, gold int, deepestDepth int) *Sim {
 	sim.SetPlayerMetadata(sim.DefaultPlayerID(), "acct_shop", "char_01H00000000000000000000000", "Hero", "host")
 	vendor := townVendorEntity(t, sim)
 	moveDefaultPlayerTo(sim, Vec2{X: vendor.pos.X, Y: vendor.pos.Y - 1})
+	sim.progression.Level = level
 	sim.savePlayer(sim.defaultPlayer())
 	return sim
 }
@@ -546,6 +1032,15 @@ func firstGeneratedOffer(t *testing.T, sim *Sim) ShopOfferView {
 	return ShopOfferView{}
 }
 
+func firstGeneratedOfferFrom(offers []ShopOfferView) *ShopOfferView {
+	for i := range offers {
+		if offers[i].Kind == shopOfferKindGenerated {
+			return &offers[i]
+		}
+	}
+	return nil
+}
+
 func findOffer(offers []ShopOfferView, offerID string) *ShopOfferView {
 	for i := range offers {
 		if offers[i].OfferID == offerID {
@@ -553,6 +1048,62 @@ func findOffer(offers []ShopOfferView, offerID string) *ShopOfferView {
 		}
 	}
 	return nil
+}
+
+func generatedOfferSignatures(offers []ShopOfferView) []ShopOfferView {
+	out := make([]ShopOfferView, 0, len(offers))
+	for _, offer := range offers {
+		if offer.Kind == shopOfferKindGenerated {
+			out = append(out, ShopOfferView{
+				OfferID:        offer.OfferID,
+				Kind:           offer.Kind,
+				ItemTemplateID: offer.ItemTemplateID,
+				DisplayName:    offer.DisplayName,
+				Rarity:         offer.Rarity,
+				RolledStats:    offer.RolledStats,
+				BuyPrice:       offer.BuyPrice,
+				SourceDepth:    offer.SourceDepth,
+			})
+		}
+	}
+	return out
+}
+
+func countShopOffersByKind(offers []ShopOfferView, kind string) int {
+	count := 0
+	for _, offer := range offers {
+		if offer.Kind == kind {
+			count++
+		}
+	}
+	return count
+}
+
+func tickOne(t *testing.T, sim *Sim, in Input) TickResult {
+	t.Helper()
+	results := sim.TickResults([]Input{in})
+	if len(results) != 1 {
+		t.Fatalf("tick results = %d, want 1: %+v", len(results), results)
+	}
+	return results[0]
+}
+
+func hasShopStockReplace(res TickResult, shopID string) bool {
+	for _, change := range res.Changes {
+		if change.Op == OpShopStockReplace && change.ShopID == shopID && len(change.ShopStock) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func hasShopStockAvailability(res TickResult, offerID string, available bool) bool {
+	for _, change := range res.Changes {
+		if change.Op == OpShopStockAvailability && change.OfferID == offerID && change.Available == available {
+			return true
+		}
+	}
+	return false
 }
 
 func findGeneratedOfferByTemplate(offers []ShopOfferView, templateID string) *ShopOfferView {

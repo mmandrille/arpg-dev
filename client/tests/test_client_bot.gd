@@ -152,6 +152,7 @@ func _test_full_equipment_step_types_load() -> void:
 		{"type": "drag_bag_to_equipment_slot", "item_def_id": "cave_helm", "slot": "head"},
 		{"type": "drag_equipment_to_bag", "slot": "head"},
 		{"type": "click_loot_item", "item_def_id": "cave_belt"},
+		{"type": "click_loot_item", "rolled": true},
 		{"type": "assign_hotbar_slot", "slot_index": 5, "item_def_id": "red_potion"},
 		{"type": "wait_hotbar_assigned", "slot_index": 5, "item_def_id": "red_potion", "timeout_s": 1.0},
 		{"type": "use_hotbar_slot", "slot_index": 5},
@@ -162,6 +163,7 @@ func _test_full_equipment_step_types_load() -> void:
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("full equipment client step scenario valid", err, "")
+	_assert_ne("click loot without selector rejected", BotScenarioRunnerScript.validate_step({"type": "click_loot_item"}, 0), "")
 
 
 func _test_missing_menu_button_rejected() -> void:
@@ -503,6 +505,7 @@ func _test_shop_step_types_load() -> void:
 		{"type": "assert_shop_panel_visible", "visible": true},
 		{"type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2},
 		{"type": "assert_shop_offer_count", "offer_kind": "generated", "equals": 5},
+		{"type": "assert_shop_offer_count", "offer_kind": "buyback", "equals": 1},
 		{"type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true},
 		{"type": "assert_shop_sell_rows", "rolled": true, "at_least": 1},
 		{"type": "click_shop_buy_offer", "offer_id": "fixed:red_potion"},
@@ -537,6 +540,7 @@ func _test_shop_assertions() -> void:
 			"offer_count": 7,
 			"fixed_offer_count": 2,
 			"generated_offer_count": 5,
+			"buyback_offer_count": 0,
 			"buy_buttons": {
 				"fixed:red_potion": {"enabled": true},
 			},

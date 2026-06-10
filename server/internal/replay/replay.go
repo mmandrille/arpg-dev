@@ -322,6 +322,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 		sim.LoadInventory(persistedItems(start.Items))
 		sim.LoadHotbar(persistedHotbar(start.Hotbar))
 		sim.LoadDiscoveredTeleporters(waypointLevels(start.Waypoints))
+		sim.LoadShopStock(persistedShopStock(start.ShopStock))
 		return sim, nil, nil, nil
 	}
 
@@ -347,6 +348,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 	sim.LoadInventoryForPlayer(hostID, persistedItems(hostStart.Items))
 	sim.LoadHotbarForPlayer(hostID, persistedHotbar(hostStart.Hotbar))
 	sim.LoadDiscoveredTeleportersForPlayer(hostID, waypointLevels(hostStart.Waypoints))
+	sim.LoadShopStockForPlayer(hostID, persistedShopStock(hostStart.ShopStock))
 
 	players := []memberPlayer{{member: host, playerID: hostID}}
 	if err := assertStoredPlayerID(host, hostID); err != nil {
@@ -463,6 +465,7 @@ func addMemberToSim(sim *game.Sim, rules *game.Rules, member store.SessionMember
 	sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
 	sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
 	sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
+	sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 	return memberPlayer{member: member, playerID: playerID}, nil
 }
 
@@ -551,6 +554,24 @@ func persistedHotbar(slots []store.CharacterHotbarSlot) []game.PersistedHotbarSl
 		out = append(out, game.PersistedHotbarSlot{
 			SlotIndex:      slot.SlotIndex,
 			ItemInstanceID: slot.ItemInstanceID,
+		})
+	}
+	return out
+}
+
+func persistedShopStock(items []store.CharacterShopStockItem) []game.PersistedShopStockItem {
+	out := make([]game.PersistedShopStockItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, game.PersistedShopStockItem{
+			ShopID:         item.ShopID,
+			RefreshKey:     item.RefreshKey,
+			OfferIndex:     item.OfferIndex,
+			OfferID:        item.OfferID,
+			SourceDepth:    item.SourceDepth,
+			ItemTemplateID: item.ItemTemplateID,
+			RolledPayload:  item.RolledPayload,
+			BuyPrice:       item.BuyPrice,
+			Available:      item.Available,
 		})
 	}
 	return out

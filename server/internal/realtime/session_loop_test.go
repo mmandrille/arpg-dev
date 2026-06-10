@@ -129,6 +129,14 @@ func TestShopDeltasAreActorScoped(t *testing.T) {
 	changes := []game.Change{
 		{Op: game.OpGoldUpdate, Gold: &gold},
 		{Op: game.OpInventoryAdd, Item: &game.ItemView{ItemInstanceID: "2001", ItemDefID: "red_potion"}},
+		{Op: game.OpShopStockReplace, ShopID: "town_vendor", RefreshKey: "wp:none", ShopStock: []game.PersistedShopStockItem{{
+			ShopID:         "town_vendor",
+			RefreshKey:     "wp:none",
+			OfferID:        "generated:wp:none:000",
+			ItemTemplateID: "cave_blade",
+			Available:      true,
+		}}},
+		{Op: game.OpShopStockAvailability, ShopID: "town_vendor", OfferID: "generated:wp:none:000", Available: false},
 		{Op: game.OpEntityUpdate, Entity: &game.EntityView{ID: "3001", Type: "monster"}},
 	}
 	events := []game.Event{
@@ -138,8 +146,8 @@ func TestShopDeltasAreActorScoped(t *testing.T) {
 	}
 
 	actorChanges := filterChangesForClient(changes, actorID, actorID)
-	if len(actorChanges) != 3 {
-		t.Fatalf("actor changes = %d, want 3: %+v", len(actorChanges), actorChanges)
+	if len(actorChanges) != 5 {
+		t.Fatalf("actor changes = %d, want 5: %+v", len(actorChanges), actorChanges)
 	}
 	otherChanges := filterChangesForClient(changes, actorID, otherID)
 	if len(otherChanges) != 1 || otherChanges[0].Op != game.OpEntityUpdate {

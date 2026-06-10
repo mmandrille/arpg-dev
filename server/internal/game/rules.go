@@ -531,10 +531,20 @@ type ShopFixedOffer struct {
 }
 
 type ShopGeneratedOffers struct {
-	OfferCount      int    `json:"offer_count"`
-	Source          string `json:"source"`
-	MinDepth        int    `json:"min_depth"`
-	MaxRollAttempts int    `json:"max_roll_attempts"`
+	OfferCount        int    `json:"offer_count"`
+	Source            string `json:"source"`
+	MinDepth          int    `json:"min_depth"`
+	SourceDepthPolicy string `json:"source_depth_policy"`
+	MaxRarity         string `json:"max_rarity"`
+	RefreshOn         string `json:"refresh_on"`
+	MaxRollAttempts   int    `json:"max_roll_attempts"`
+}
+
+type ShopBuyback struct {
+	Enabled            bool    `json:"enabled"`
+	Scope              string  `json:"scope"`
+	BuyPriceMultiplier float64 `json:"buy_price_multiplier"`
+	ClearOnLeaveTown   bool    `json:"clear_on_leave_town"`
 }
 
 type ShopPricing struct {
@@ -549,7 +559,21 @@ type ShopDef struct {
 	Name            string              `json:"name"`
 	FixedOffers     []ShopFixedOffer    `json:"fixed_offers"`
 	GeneratedOffers ShopGeneratedOffers `json:"generated_offers"`
+	Buyback         ShopBuyback         `json:"buyback"`
 	Pricing         ShopPricing         `json:"pricing"`
+}
+
+func shopRarityAllowedByCap(rarity, maxRarity string) bool {
+	rank := map[string]int{"common": 0, "magic": 1, "rare": 2}
+	r, ok := rank[rarity]
+	if !ok {
+		return false
+	}
+	maxRank, ok := rank[maxRarity]
+	if !ok {
+		return false
+	}
+	return r <= maxRank
 }
 
 // WorldDef is a deterministic initial session layout.
@@ -1724,8 +1748,35 @@ func validateShopRules(r *Rules) error {
 		if gen.MinDepth <= 0 {
 			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.min_depth: must be positive", shopID)
 		}
+		if gen.SourceDepthPolicy != "character_level_plus_one_to_deepest_else_any_achieved" {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.source_depth_policy: unsupported policy %s", shopID, gen.SourceDepthPolicy)
+		}
+		if gen.MaxRarity == "" {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.max_rarity: required", shopID)
+		}
+		if _, ok := r.Rarities[gen.MaxRarity]; !ok {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.max_rarity: unknown rarity %s", shopID, gen.MaxRarity)
+		}
+		if !shopRarityAllowedByCap(gen.MaxRarity, "rare") {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.max_rarity: must not exceed rare", shopID)
+		}
+		if gen.RefreshOn != "new_non_town_waypoint" {
+			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.refresh_on: unsupported trigger %s", shopID, gen.RefreshOn)
+		}
 		if gen.MaxRollAttempts < gen.OfferCount {
 			return fmt.Errorf("game: invalid rules shops.%s.generated_offers.max_roll_attempts: must be >= offer_count", shopID)
+		}
+		if !shop.Buyback.Enabled {
+			return fmt.Errorf("game: invalid rules shops.%s.buyback.enabled: must be true", shopID)
+		}
+		if shop.Buyback.Scope != "session_town_visit" {
+			return fmt.Errorf("game: invalid rules shops.%s.buyback.scope: unsupported scope %s", shopID, shop.Buyback.Scope)
+		}
+		if shop.Buyback.BuyPriceMultiplier <= 0 {
+			return fmt.Errorf("game: invalid rules shops.%s.buyback.buy_price_multiplier: must be positive", shopID)
+		}
+		if !shop.Buyback.ClearOnLeaveTown {
+			return fmt.Errorf("game: invalid rules shops.%s.buyback.clear_on_leave_town: must be true", shopID)
 		}
 		pricing := shop.Pricing
 		if pricing.SellMultiplier <= 0 || pricing.SellMultiplier > 1 {

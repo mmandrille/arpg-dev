@@ -221,6 +221,7 @@ type playerState struct {
 	DiscoveredTeleporters map[int]bool
 	Progression           CharacterProgressionState
 	SkillCooldowns        map[string]skillCooldownState
+	ShopStock             map[string]*shopStockState
 	Gold                  int
 }
 
@@ -252,6 +253,7 @@ type Sim struct {
 	discoveredTeleporters map[int]bool
 	progression           CharacterProgressionState
 	skillCooldowns        map[string]skillCooldownState
+	shopStock             map[string]*shopStockState
 	gold                  int
 }
 
@@ -305,6 +307,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		discoveredTeleporters: make(map[int]bool),
 		progression:           progression,
 		skillCooldowns:        make(map[string]skillCooldownState),
+		shopStock:             make(map[string]*shopStockState),
 		gold:                  progression.Gold,
 	}
 
@@ -482,6 +485,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		DiscoveredTeleporters: s.discoveredTeleporters,
 		Progression:           s.progression,
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
+		ShopStock:             s.shopStock,
 		Gold:                  s.gold,
 	}
 
@@ -609,6 +613,50 @@ func (s *Sim) LoadHotbar(slots []PersistedHotbarSlot) {
 	s.savePlayer(s.defaultPlayer())
 }
 
+// LoadShopStock restores durable generated shop stock into a fresh sim. Buyback
+// rows are session-local and are intentionally not loaded here.
+func (s *Sim) LoadShopStock(items []PersistedShopStockItem) {
+	if s.shopStock == nil {
+		s.shopStock = make(map[string]*shopStockState)
+	}
+	for _, p := range items {
+		if p.ShopID == "" || p.OfferID == "" || p.ItemTemplateID == "" {
+			continue
+		}
+		payload := parseRollPayload(p.RolledPayload)
+		if payload == nil {
+			continue
+		}
+		state := s.shopStock[p.ShopID]
+		if state == nil {
+			state = &shopStockState{RefreshKey: p.RefreshKey}
+			s.shopStock[p.ShopID] = state
+		}
+		if state.RefreshKey == "" {
+			state.RefreshKey = p.RefreshKey
+		}
+		state.Generated = append(state.Generated, &shopStockItem{
+			OfferIndex:     p.OfferIndex,
+			OfferID:        p.OfferID,
+			SourceDepth:    p.SourceDepth,
+			ItemTemplateID: p.ItemTemplateID,
+			Payload:        *payload,
+			BuyPrice:       p.BuyPrice,
+			Available:      p.Available,
+		})
+	}
+	for _, shopID := range sortedStringKeys(s.shopStock) {
+		state := s.shopStock[shopID]
+		sort.Slice(state.Generated, func(i, j int) bool {
+			if state.Generated[i].OfferIndex != state.Generated[j].OfferIndex {
+				return state.Generated[i].OfferIndex < state.Generated[j].OfferIndex
+			}
+			return state.Generated[i].OfferID < state.Generated[j].OfferID
+		})
+	}
+	s.savePlayer(s.defaultPlayer())
+}
+
 func parseRollPayload(raw json.RawMessage) *ItemRollPayload {
 	if len(raw) == 0 || string(raw) == "{}" {
 		return nil
@@ -694,6 +742,17 @@ func (s *Sim) LoadHotbarForPlayer(playerID uint64, slots []PersistedHotbarSlot) 
 	s.usePlayer(s.defaultPlayer())
 }
 
+func (s *Sim) LoadShopStockForPlayer(playerID uint64, items []PersistedShopStockItem) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadShopStock(items)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+}
+
 func (s *Sim) LoadDiscoveredTeleportersForPlayer(playerID uint64, levels []int) {
 	ps := s.players[playerID]
 	if ps == nil {
@@ -727,6 +786,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	hotbar := make([]uint64, maxHotbarCapacity)
 	discovered := map[int]bool{townLevel: true}
 	cooldowns := make(map[string]skillCooldownState)
+	shopStock := make(map[string]*shopStockState)
 	character := progression
 	gold := progression.Gold
 	s.equipped = equipped
@@ -734,6 +794,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	s.discoveredTeleporters = discovered
 	s.progression = character
 	s.skillCooldowns = cooldowns
+	s.shopStock = shopStock
 	s.gold = gold
 	maxHP := s.currentMaxHP()
 	maxMana := s.currentMaxMana()
@@ -762,6 +823,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		DiscoveredTeleporters: discovered,
 		Progression:           character,
 		SkillCooldowns:        cooldowns,
+		ShopStock:             shopStock,
 		Gold:                  gold,
 	}
 	s.usePlayer(s.defaultPlayer())
@@ -1016,6 +1078,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.skillCooldowns == nil {
 		s.skillCooldowns = make(map[string]skillCooldownState)
 	}
+	s.shopStock = ps.ShopStock
+	if s.shopStock == nil {
+		s.shopStock = make(map[string]*shopStockState)
+	}
 	s.gold = ps.Gold
 	level := s.activeLevel()
 	level.move = ps.Move
@@ -1034,6 +1100,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.DiscoveredTeleporters = s.discoveredTeleporters
 	ps.Progression = s.progression
 	ps.SkillCooldowns = s.skillCooldowns
+	ps.ShopStock = s.shopStock
 	ps.Gold = s.gold
 	if level := s.levels[ps.CurrentLevel]; level != nil {
 		ps.Move = level.move
@@ -1959,7 +2026,7 @@ func (s *Sim) openShop(e *entity, shopID string, in Input, res *TickResult, ack 
 		res.reject(in.MessageID, "not_actionable")
 		return
 	}
-	offers, ok := s.shopCatalog(shopID)
+	offers, ok := s.shopCatalogWithChanges(shopID, res)
 	if !ok {
 		res.reject(in.MessageID, "invalid_target")
 		return
@@ -1987,11 +2054,12 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 		res.reject(in.MessageID, reason)
 		return
 	}
-	offer, ok := s.findShopOffer(shopID, in.ShopBuy.OfferID)
+	entry, ok := s.findShopOffer(shopID, in.ShopBuy.OfferID, res)
 	if !ok {
 		res.reject(in.MessageID, "unknown_offer")
 		return
 	}
+	offer := entry.Offer
 	if s.gold < offer.BuyPrice {
 		res.reject(in.MessageID, "insufficient_gold")
 		return
@@ -2001,7 +2069,21 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 		return
 	}
 
-	item := s.itemFromShopOffer(offer, s.alloc())
+	var item *invItem
+	if entry.Buyback != nil {
+		row := s.removeShopBuyback(shopID, offer.OfferID)
+		if row == nil || row.Item == nil {
+			res.reject(in.MessageID, "unknown_offer")
+			return
+		}
+		item = cloneInvItem(row.Item)
+	} else {
+		item = s.itemFromShopOffer(offer, s.alloc())
+	}
+	if entry.Generated != nil {
+		entry.Generated.Available = false
+		res.Changes = append(res.Changes, Change{Op: OpShopStockAvailability, ShopID: shopID, OfferID: entry.Generated.OfferID, Available: false})
+	}
 	s.inventory = append(s.inventory, item)
 	s.gold -= offer.BuyPrice
 	s.progression.Gold = s.gold
@@ -2010,6 +2092,7 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
+	offers, _ := s.shopCatalogWithChanges(shopID, res)
 	res.Events = append(res.Events, Event{
 		EventType:      "shop_purchase",
 		EntityID:       idStr(shopEntity.id),
@@ -2019,6 +2102,8 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 		ItemInstanceID: idStr(item.instanceID),
 		Price:          intPtr(offer.BuyPrice),
 		TotalGold:      intPtr(s.gold),
+		Offers:         offers,
+		SellAppraisals: s.shopSellAppraisals(shopID),
 	})
 	res.ack(in.MessageID)
 }
@@ -2047,17 +2132,21 @@ func (s *Sim) handleShopSell(in Input, res *TickResult) {
 		res.reject(in.MessageID, "unsellable_item")
 		return
 	}
+	shop := s.rules.Shops[shopID]
+	soldItem := cloneInvItem(item)
 
 	removedID := idStr(item.instanceID)
 	s.removeItemByID(item.instanceID)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
 	s.clearHotbarReferences(item.instanceID, res)
+	s.addShopBuyback(shopID, soldItem, shop.buybackPrice(price))
 
 	s.gold += price
 	s.progression.Gold = s.gold
 	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	offers, _ := s.shopCatalogWithChanges(shopID, res)
 	res.Events = append(res.Events, Event{
 		EventType:      "shop_sale",
 		EntityID:       idStr(shopEntity.id),
@@ -2066,6 +2155,8 @@ func (s *Sim) handleShopSell(in Input, res *TickResult) {
 		ItemInstanceID: removedID,
 		Price:          intPtr(price),
 		TotalGold:      intPtr(s.gold),
+		Offers:         offers,
+		SellAppraisals: s.shopSellAppraisals(shopID),
 	})
 	res.ack(in.MessageID)
 }
@@ -2122,6 +2213,9 @@ func (s *Sim) activateTeleporter(e *entity, in Input, res *TickResult, ack bool)
 		CorrelationID: in.CorrelationID,
 		Level:         intPtr(s.currentLevel),
 	})
+	if s.currentLevel < townLevel {
+		s.refreshExistingGeneratedShopStock(res)
+	}
 }
 
 func (s *Sim) handleLevelTravel(in Input, res *TickResult) *TickResult {
@@ -2276,6 +2370,9 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 	}
 	fromLevel := s.currentLevel
 	destLevel := dest.levelNum
+	if fromLevel == townLevel && destLevel != townLevel {
+		s.clearShopBuyback()
+	}
 	delete(current.entities, player.id)
 	player.pos = arrivalPos
 	dest.entities[player.id] = player

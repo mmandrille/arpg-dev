@@ -503,10 +503,20 @@ func (r *runner) persistTick(res game.TickResult) {
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
-				if err := r.store.AddCharacterWaypoint(ctx, r.sess.CharacterID, c.Level); err != nil {
+				if _, err := r.store.AddCharacterWaypoint(ctx, r.sess.CharacterID, c.Level); err != nil {
 					r.metrics.PersistenceErrors.Inc()
 					r.log.Error("persist character waypoint", "error", err)
 				}
+			}
+		case game.OpShopStockReplace:
+			if err := r.store.ReplaceCharacterShopStock(ctx, r.sess.AccountID, r.sess.CharacterID, c.ShopID, c.RefreshKey, storeShopStock(r.sess.AccountID, r.sess.CharacterID, c.ShopStock)); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist shop stock replace", "shop_id", c.ShopID, "error", err)
+			}
+		case game.OpShopStockAvailability:
+			if err := r.store.SetCharacterShopStockAvailable(ctx, r.sess.AccountID, r.sess.CharacterID, c.ShopID, c.OfferID, c.Available); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist shop stock availability", "shop_id", c.ShopID, "offer_id", c.OfferID, "error", err)
 			}
 		case game.OpCharacterProgressionUpdate:
 			if c.Progression == nil {

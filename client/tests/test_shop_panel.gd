@@ -45,10 +45,12 @@ func _run() -> void:
 	_assert_eq("offer count", int(state.get("offer_count", 0)), 4)
 	_assert_eq("fixed count", int(state.get("fixed_offer_count", 0)), 2)
 	_assert_eq("generated count", int(state.get("generated_offer_count", 0)), 2)
+	_assert_eq("buyback count", int(state.get("buyback_offer_count", 0)), 0)
 	_assert_true("red potion buy enabled", bool(state.get("buy_buttons", {}).get("fixed:red_potion", {}).get("enabled", false)))
 	_assert_false("expensive generated disabled", bool(state.get("buy_buttons", {}).get("generated:depth3:001", {}).get("enabled", true)))
 	_assert_eq("sell rows", int(state.get("sell_row_count", 0)), 2)
 	_assert_true("offer rows include summaries", _rows_have_summary(state.get("offer_rows", [])))
+	_assert_eq("source depth debug defaults", int((state.get("offer_rows", [])[2] as Dictionary).get("source_depth", 0)), 0)
 	var sell_rows: Array = state.get("sell_rows", [])
 	_assert_true("sell rows include price", not sell_rows.is_empty() and int((sell_rows[0] as Dictionary).get("sell_price", 0)) > 0)
 	_assert_true("comparisons rendered", int(state.get("comparison_row_count", 0)) >= 2)
@@ -86,6 +88,23 @@ func _run() -> void:
 	_assert_eq("drop sell emitted count", emitted.size(), 3)
 	_assert_eq("drop sell emitted type", str(emitted[2]["type"]), "shop_sell_intent")
 	_assert_eq("drop sell emitted item", str(emitted[2]["payload"].get("item_instance_id", "")), "2001")
+
+	var refreshed_offers := [
+		offers[0],
+		offers[1],
+		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "cave_gloves", "item_def_id": "cave_gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "source_depth": 3, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"]},
+		{"offer_id": "buyback:2001", "kind": "buyback", "item_template_id": "cave_bow", "item_def_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "buy_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-5", "Requires level 1"]},
+	]
+	panel.apply_shop_refresh(refreshed_offers, [sell_appraisals[1]])
+	state = panel.get_debug_state()
+	_assert_eq("refreshed offer count", int(state.get("offer_count", 0)), 4)
+	_assert_eq("refreshed fixed count", int(state.get("fixed_offer_count", 0)), 2)
+	_assert_eq("refreshed generated count", int(state.get("generated_offer_count", 0)), 1)
+	_assert_eq("refreshed buyback count", int(state.get("buyback_offer_count", 0)), 1)
+	_assert_true("generated removal applied", not _rows_contain_offer_id(state.get("offer_rows", []), "generated:depth3:000"))
+	_assert_true("buyback row applied", _rows_contain_offer_id(state.get("offer_rows", []), "buyback:2001"))
+	_assert_eq("sell appraisals refreshed", int(state.get("sell_row_count", 0)), 1)
+	_assert_eq("source depth debug refreshed", int(_row_for_offer(state.get("offer_rows", []), "generated:depth3:001").get("source_depth", 0)), 3)
 
 	var inventory_panel := InventoryPanelScript.new()
 	root.add_child(inventory_panel)
@@ -163,6 +182,19 @@ func _rows_have_summary(rows: Variant) -> bool:
 		if (row as Dictionary).get("summary_lines", []).is_empty():
 			return false
 	return true
+
+
+func _rows_contain_offer_id(rows: Variant, offer_id: String) -> bool:
+	return not _row_for_offer(rows, offer_id).is_empty()
+
+
+func _row_for_offer(rows: Variant, offer_id: String) -> Dictionary:
+	if typeof(rows) != TYPE_ARRAY:
+		return {}
+	for row in rows:
+		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("offer_id", "")) == offer_id:
+			return row as Dictionary
+	return {}
 
 
 func _array_contains_text(rows: Array, needle: String) -> bool:

@@ -1075,6 +1075,8 @@ func _shop_offer_count_matches(step: Dictionary, state: Dictionary) -> bool:
 			key = "fixed_offer_count"
 		"generated":
 			key = "generated_offer_count"
+		"buyback":
+			key = "buyback_offer_count"
 	var got := int(panel.get(key, 0))
 	if step.has("equals") and got != int(step.get("equals", 0)):
 		return false
@@ -1098,6 +1100,10 @@ func _matching_shop_offer_rows(step: Dictionary, state: Dictionary) -> Array:
 		if step.has("item_def_id") and str(rec.get("item_def_id", "")) != str(step.get("item_def_id", "")):
 			continue
 		if step.has("item_template_id") and str(rec.get("item_template_id", "")) != str(step.get("item_template_id", "")):
+			continue
+		if step.has("source_depth_min") and int(rec.get("source_depth", 0)) < int(step.get("source_depth_min", 0)):
+			continue
+		if step.has("source_depth_max") and int(rec.get("source_depth", 0)) > int(step.get("source_depth_max", 0)):
 			continue
 		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
 			continue
@@ -1590,8 +1596,8 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if str(step.get("entity_type", "")) == "" or str(step.get("event_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type and event_type" % [index, stype]
 	if stype == "click_loot_item":
-		if str(step.get("item_def_id", "")) == "":
-			return "client_steps[%d] (%s) requires item_def_id" % [index, stype]
+		if str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
+			return "client_steps[%d] (%s) requires item_def_id or rolled" % [index, stype]
 	if stype == "wait_player_near":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]

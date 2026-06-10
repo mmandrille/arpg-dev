@@ -151,6 +151,24 @@ type CharacterHotbarSlot struct {
 	UpdatedAt      time.Time
 }
 
+// CharacterShopStockItem is one durable generated shop-stock row. Buyback rows
+// are intentionally excluded from persistence and session-start snapshots.
+type CharacterShopStockItem struct {
+	AccountID      string
+	CharacterID    string
+	ShopID         string
+	RefreshKey     string
+	OfferIndex     int
+	OfferID        string
+	SourceDepth    int
+	ItemTemplateID string
+	RolledPayload  json.RawMessage
+	BuyPrice       int
+	Available      bool
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
 // SessionStartSnapshot freezes the character progression visible when a
 // session was created. Replay uses this instead of mutable live character rows.
 type SessionStartSnapshot struct {
@@ -160,6 +178,7 @@ type SessionStartSnapshot struct {
 	Items       []CharacterItemInstance
 	Waypoints   []CharacterWaypoint
 	Hotbar      []CharacterHotbarSlot
+	ShopStock   []CharacterShopStockItem
 	Progression *CharacterProgression
 }
 

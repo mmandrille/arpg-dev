@@ -51,14 +51,17 @@ type CharacterProgressionRepo interface {
 	SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool) error
 	RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error
 	ListCharacterWaypoints(ctx context.Context, characterID string) ([]CharacterWaypoint, error)
-	AddCharacterWaypoint(ctx context.Context, characterID string, level int) error
+	AddCharacterWaypoint(ctx context.Context, characterID string, level int) (bool, error)
 	GetOrCreateCharacterProgression(ctx context.Context, accountID, characterID string, defaults CharacterProgressionDefaults) (CharacterProgression, error)
 	GetCharacterProgression(ctx context.Context, accountID, characterID string) (CharacterProgression, error)
 	UpsertCharacterProgression(ctx context.Context, accountID string, progression CharacterProgression) error
 	SetCharacterGold(ctx context.Context, accountID, characterID string, gold int) error
 	ListCharacterHotbar(ctx context.Context, accountID, characterID string) ([]CharacterHotbarSlot, error)
 	SetCharacterHotbarSlot(ctx context.Context, accountID, characterID string, slotIndex int, itemInstanceID *string) error
-	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, progression CharacterProgression) error
+	ListCharacterShopStock(ctx context.Context, accountID, characterID string) ([]CharacterShopStockItem, error)
+	ReplaceCharacterShopStock(ctx context.Context, accountID, characterID, shopID, refreshKey string, stock []CharacterShopStockItem) error
+	SetCharacterShopStockAvailable(ctx context.Context, accountID, characterID, shopID, offerID string, available bool) error
+	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, shopStock []CharacterShopStockItem, progression CharacterProgression) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshotForMember(ctx context.Context, sessionID, accountID, characterID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshots(ctx context.Context, sessionID string) ([]SessionStartSnapshot, error)

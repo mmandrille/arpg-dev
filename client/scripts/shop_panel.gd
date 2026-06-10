@@ -120,6 +120,13 @@ func show_shop(next_shop_entity_id: String, next_shop_id: String, next_offers: A
 	_render()
 
 
+func apply_shop_refresh(next_offers: Array, next_sell_appraisals: Array) -> void:
+	offers = _dup_array(next_offers)
+	sell_appraisals = _dup_array(next_sell_appraisals)
+	_apply_interaction_filters()
+	_render()
+
+
 func hide_display() -> void:
 	visible = false
 
@@ -153,6 +160,7 @@ func get_debug_state() -> Dictionary:
 		"offer_count": offers.size(),
 		"fixed_offer_count": _offers_by_kind("fixed").size(),
 		"generated_offer_count": _offers_by_kind("generated").size(),
+		"buyback_offer_count": _offers_by_kind("buyback").size(),
 		"buy_buttons": _debug_buy_buttons(),
 		"offer_rows": _debug_offer_rows(),
 		"sell_rows": _debug_sell_rows(),
@@ -541,6 +549,7 @@ func _debug_offer_rows() -> Array:
 			"slot": str(rec.get("slot", "")),
 			"category": str(rec.get("category", "")),
 			"buy_price": int(rec.get("buy_price", 0)),
+			"source_depth": int(rec.get("source_depth", 0)),
 			"summary_lines": _detail_lines(rec),
 			"comparison_count": _comparison_count(rec),
 			"requirement_count": _requirement_lines(rec).size(),

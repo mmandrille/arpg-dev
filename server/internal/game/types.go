@@ -231,6 +231,22 @@ type ShopOfferView struct {
 	Comparison        *ShopComparisonView     `json:"comparison,omitempty"`
 	Source            string                  `json:"source,omitempty"`
 	Depth             int                     `json:"depth,omitempty"`
+	SourceDepth       int                     `json:"source_depth,omitempty"`
+}
+
+// PersistedShopStockItem is a generated shop-stock row carried between the
+// store/replay boundary and the sim. Runtime buyback rows are intentionally not
+// represented by this type.
+type PersistedShopStockItem struct {
+	ShopID         string          `json:"shop_id"`
+	RefreshKey     string          `json:"refresh_key"`
+	OfferIndex     int             `json:"offer_index"`
+	OfferID        string          `json:"offer_id"`
+	SourceDepth    int             `json:"source_depth"`
+	ItemTemplateID string          `json:"item_template_id"`
+	RolledPayload  json.RawMessage `json:"rolled_payload"`
+	BuyPrice       int             `json:"buy_price"`
+	Available      bool            `json:"available"`
 }
 
 // ShopComparisonDeltaView describes one direct stat comparison between a
@@ -412,6 +428,8 @@ const (
 	OpCharacterProgressionUpdate = "character_progression_update"
 	OpSkillProgressionUpdate     = "skill_progression_update"
 	OpSkillCooldownUpdate        = "skill_cooldown_update"
+	OpShopStockReplace           = "shop_stock_replace"
+	OpShopStockAvailability      = "shop_stock_availability_update"
 )
 
 // Change is one ordered authoritative change within a tick. It marshals to
@@ -435,6 +453,11 @@ type Change struct {
 	Progression      *CharacterProgressionView
 	SkillProgression *SkillProgressionView
 	SkillCooldowns   []SkillCooldownView
+	ShopID           string
+	RefreshKey       string
+	ShopStock        []PersistedShopStockItem
+	OfferID          string
+	Available        bool
 }
 
 // MarshalJSON renders the change as the precise object for its op.
@@ -516,6 +539,20 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op             string              `json:"op"`
 			SkillCooldowns []SkillCooldownView `json:"skill_cooldowns"`
 		}{c.Op, c.SkillCooldowns})
+	case OpShopStockReplace:
+		return json.Marshal(struct {
+			Op         string                   `json:"op"`
+			ShopID     string                   `json:"shop_id"`
+			RefreshKey string                   `json:"refresh_key"`
+			Stock      []PersistedShopStockItem `json:"stock"`
+		}{c.Op, c.ShopID, c.RefreshKey, c.ShopStock})
+	case OpShopStockAvailability:
+		return json.Marshal(struct {
+			Op        string `json:"op"`
+			ShopID    string `json:"shop_id"`
+			OfferID   string `json:"offer_id"`
+			Available bool   `json:"available"`
+		}{c.Op, c.ShopID, c.OfferID, c.Available})
 	default:
 		return nil, &json.UnsupportedValueError{Str: "unknown change op: " + c.Op}
 	}

@@ -980,9 +980,11 @@ func _apply_delta(p: Dictionary) -> void:
 			_show_shop_panel(ev)
 			continue
 		if event_type == "shop_purchase" and shop_panel != null and shop_panel.visible:
+			_apply_shop_event_refresh(ev)
 			shop_panel.show_status("Bought for %d" % int(ev.get("price", 0)))
 			continue
 		if event_type == "shop_sale" and shop_panel != null and shop_panel.visible:
+			_apply_shop_event_refresh(ev)
 			shop_panel.show_status("Sold for %d" % int(ev.get("price", 0)))
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
@@ -2224,6 +2226,14 @@ func _sync_inventory_replay_display() -> void:
 		inventory_panel.set_interactive(false)
 	else:
 		inventory_panel.hide_display()
+
+
+func _apply_shop_event_refresh(ev: Dictionary) -> void:
+	if shop_panel == null or not shop_panel.visible:
+		return
+	if not ev.has("offers") and not ev.has("sell_appraisals"):
+		return
+	shop_panel.apply_shop_refresh(ev.get("offers", []), ev.get("sell_appraisals", []))
 
 
 func _entity_world_center(entity_id: String) -> Vector3:
@@ -3576,6 +3586,7 @@ func _bot_entities_debug(live_monster_ids: Array) -> Array:
 			"monster_def_id": str(rec.get("monster_def_id", "")),
 			"interactable_def_id": str(rec.get("interactable_def_id", "")),
 			"item_def_id": str(rec.get("item_def_id", "")),
+			"item_template_id": str(rec.get("item_template_id", "")),
 			"rarity": str(rec.get("rarity", "")),
 			"state": str(rec.get("state", "")),
 		})
@@ -3670,6 +3681,8 @@ func _bot_loot_debug() -> Array:
 		out.append({
 			"id": loot_id,
 			"item_def_id": str(rec.get("item_def_id", "")),
+			"item_template_id": str(rec.get("item_template_id", "")),
+			"rarity": str(rec.get("rarity", "")),
 		})
 	return out
 

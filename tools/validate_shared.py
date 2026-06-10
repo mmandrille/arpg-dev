@@ -73,10 +73,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v5.schema.json"
+            return PROTOCOL / "session_snapshot.v6.schema.json"
         if name.startswith("state_delta"):
-            return PROTOCOL / "state_delta.v5.schema.json"
-        return PROTOCOL / "messages.v5.schema.json"
+            return PROTOCOL / "state_delta.v6.schema.json"
+        return PROTOCOL / "messages.v6.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 
@@ -167,6 +167,7 @@ def cross_checks(report: Report) -> None:
     shop_pricing_golden = load(GOLDEN / "shop_pricing.json")
     shop_offers_golden = load(GOLDEN / "shop_offers.json")
     shop_appraisals_golden = load(GOLDEN / "shop_appraisals.json")
+    shop_stock_lifecycle_golden = load(GOLDEN / "shop_stock_lifecycle.json")
     equipment_requirements_golden = load(GOLDEN / "equipment_requirements.json")
 
     v4_protocol_files = [
@@ -181,6 +182,12 @@ def cross_checks(report: Report) -> None:
         PROTOCOL / "session_snapshot.v5.schema.json",
         PROTOCOL / "state_delta.v5.schema.json",
     ]
+    v6_protocol_files = [
+        PROTOCOL / "envelope.v6.schema.json",
+        PROTOCOL / "messages.v6.schema.json",
+        PROTOCOL / "session_snapshot.v6.schema.json",
+        PROTOCOL / "state_delta.v6.schema.json",
+    ]
     missing_v4 = [str(path.relative_to(ROOT)) for path in v4_protocol_files if not path.exists()]
     if missing_v4:
         report.fail("protocol v4 schema set", f"missing {', '.join(missing_v4)}")
@@ -191,11 +198,17 @@ def cross_checks(report: Report) -> None:
         report.fail("protocol v5 schema set", f"missing {', '.join(missing_v5)}")
     else:
         report.ok("protocol v5 schema set is present")
+    missing_v6 = [str(path.relative_to(ROOT)) for path in v6_protocol_files if not path.exists()]
+    if missing_v6:
+        report.fail("protocol v6 schema set", f"missing {', '.join(missing_v6)}")
+    else:
+        report.ok("protocol v6 schema set is present")
 
     messages_v4 = load(PROTOCOL / "messages.v4.schema.json")
     messages_v5 = load(PROTOCOL / "messages.v5.schema.json")
+    messages_v6 = load(PROTOCOL / "messages.v6.schema.json")
     actor_fields = {"player_id", "account_id", "character_id"}
-    for protocol_version, messages_schema in (("v4", messages_v4), ("v5", messages_v5)):
+    for protocol_version, messages_schema in (("v4", messages_v4), ("v5", messages_v5), ("v6", messages_v6)):
         intent_names = [name for name in messages_schema["$defs"] if name.endswith("_intent") or name == "client_ready"]
         actor_leaks: list[str] = []
         for name in sorted(intent_names):
@@ -1628,10 +1641,28 @@ def cross_checks(report: Report) -> None:
             report.fail("shop generated count", "v41 offer_count must be 5")
         elif generated.get("min_depth") != 1:
             report.fail("shop generated min_depth", "v41 min_depth must be 1")
+        elif generated.get("source_depth_policy") != "character_level_plus_one_to_deepest_else_any_achieved":
+            report.fail("shop generated source_depth_policy", "v47 source-depth policy mismatch")
+        elif generated.get("max_rarity") != "rare":
+            report.fail("shop generated max_rarity", "v47 max rarity must be rare")
+        elif generated.get("refresh_on") != "new_non_town_waypoint":
+            report.fail("shop generated refresh_on", "v47 refresh trigger mismatch")
         elif generated.get("max_roll_attempts", 0) < generated.get("offer_count", 0):
             report.fail("shop generated max_roll_attempts", "must be >= offer_count")
         else:
-            report.ok("shop generated offer config matches v41")
+            report.ok("shop generated offer config matches v47")
+
+        buyback = town_shop.get("buyback", {})
+        if buyback.get("enabled") is not True:
+            report.fail("shop buyback", "must be enabled")
+        elif buyback.get("scope") != "session_town_visit":
+            report.fail("shop buyback scope", "must be session_town_visit")
+        elif float(buyback.get("buy_price_multiplier", 0)) <= 0:
+            report.fail("shop buyback multiplier", "must be positive")
+        elif buyback.get("clear_on_leave_town") is not True:
+            report.fail("shop buyback clear_on_leave_town", "must be true")
+        else:
+            report.ok("shop buyback config matches v47")
 
         rarity_missing = sorted(set(rarities) - set(pricing["rarity_multipliers"]))
         if rarity_missing:
@@ -1950,6 +1981,74 @@ def cross_checks(report: Report) -> None:
                 report.fail("shop_appraisals golden", "equipped_item_exclusion must expect exclusion")
             else:
                 report.ok("shop_appraisals golden matches v42 appraisal contract")
+
+        failed_lifecycle = False
+        if shop_stock_lifecycle_golden["shop_id"] != "town_vendor":
+            report.fail("shop_stock_lifecycle golden", "shop_id must be town_vendor")
+            failed_lifecycle = True
+        if not failed_lifecycle:
+            golden_generated = shop_stock_lifecycle_golden["generated_stock"]
+            for key in ("offer_count", "source", "source_depth_policy", "refresh_on", "max_rarity"):
+                if golden_generated.get(key) != generated.get(key):
+                    report.fail("shop_stock_lifecycle golden", f"generated_stock.{key} drift")
+                    failed_lifecycle = True
+                    break
+        rarity_rank = {"common": 0, "magic": 1, "rare": 2}
+        if not failed_lifecycle:
+            max_rarity = str(generated["max_rarity"])
+            if max_rarity not in rarities:
+                report.fail("shop_stock_lifecycle max_rarity", f"unknown item rarity {max_rarity}")
+                failed_lifecycle = True
+            elif rarity_rank.get(max_rarity, 99) > rarity_rank["rare"]:
+                report.fail("shop_stock_lifecycle max_rarity", "must not exceed rare")
+                failed_lifecycle = True
+        if not failed_lifecycle:
+            def shop_source_depth_bounds(character_level: int, deepest_depth: int) -> tuple[int, int]:
+                max_depth = max(int(generated["min_depth"]), int(deepest_depth))
+                level_floor = int(character_level) + 1
+                min_depth = level_floor if level_floor <= max_depth else int(generated["min_depth"])
+                return min_depth, max_depth
+
+            for case in shop_stock_lifecycle_golden["generated_stock"]["cases"]:
+                got_min, got_max = shop_source_depth_bounds(int(case["character_level"]), int(case["deepest_dungeon_depth"]))
+                if got_min != int(case["expected_min_source_depth"]) or got_max != int(case["expected_max_source_depth"]):
+                    report.fail("shop_stock_lifecycle source-depth", f"{case['name']}: got {got_min}..{got_max}")
+                    failed_lifecycle = True
+                    break
+        if not failed_lifecycle:
+            finite = shop_stock_lifecycle_golden["finite_stock"]
+            if int(finite["initial_generated_count"]) != int(generated["offer_count"]):
+                report.fail("shop_stock_lifecycle finite_stock", "initial generated count mismatch")
+                failed_lifecycle = True
+            elif int(finite["after_generated_purchase_count"]) != int(generated["offer_count"]) - 1:
+                report.fail("shop_stock_lifecycle finite_stock", "post-purchase generated count mismatch")
+                failed_lifecycle = True
+            elif int(finite["fixed_offer_count"]) != len(town_shop["fixed_offers"]):
+                report.fail("shop_stock_lifecycle finite_stock", "fixed offer count mismatch")
+                failed_lifecycle = True
+        if not failed_lifecycle:
+            golden_buyback = shop_stock_lifecycle_golden["buyback"]
+            expected_buyback_price = max(1, int(math.ceil(int(golden_buyback["sell_price"]) * float(buyback["buy_price_multiplier"]))))
+            if golden_buyback.get("enabled") != buyback.get("enabled"):
+                report.fail("shop_stock_lifecycle buyback", "enabled mismatch")
+                failed_lifecycle = True
+            elif golden_buyback.get("scope") != buyback.get("scope"):
+                report.fail("shop_stock_lifecycle buyback", "scope mismatch")
+                failed_lifecycle = True
+            elif float(golden_buyback["buy_price_multiplier"]) != float(buyback["buy_price_multiplier"]):
+                report.fail("shop_stock_lifecycle buyback", "multiplier mismatch")
+                failed_lifecycle = True
+            elif int(golden_buyback["buy_price"]) != expected_buyback_price:
+                report.fail("shop_stock_lifecycle buyback", f"buy price {golden_buyback['buy_price']} != {expected_buyback_price}")
+                failed_lifecycle = True
+            elif golden_buyback.get("clear_on_leave_town") != buyback.get("clear_on_leave_town"):
+                report.fail("shop_stock_lifecycle buyback", "clear_on_leave_town mismatch")
+                failed_lifecycle = True
+            elif golden_buyback.get("persisted") is not False:
+                report.fail("shop_stock_lifecycle buyback", "must not be persisted")
+                failed_lifecycle = True
+        if not failed_lifecycle:
+            report.ok("shop_stock_lifecycle golden matches v47 lifecycle rules")
 
     town_vendor = interactables["interactables"].get("town_vendor")
     if town_vendor is None:

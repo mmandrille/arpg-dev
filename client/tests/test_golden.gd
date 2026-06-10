@@ -527,6 +527,7 @@ func _initialize() -> void:
 	var shops := _read(shared.path_join("rules/shops.v0.json"))
 	var shop_pricing := _read(shared.path_join("golden/shop_pricing.json"))
 	var shop_offers := _read(shared.path_join("golden/shop_offers.json"))
+	var shop_stock_lifecycle := _read(shared.path_join("golden/shop_stock_lifecycle.json"))
 	if not shops["shops"].has("town_vendor"):
 		_fail("shops missing town_vendor")
 		return
@@ -569,6 +570,45 @@ func _initialize() -> void:
 			if int(offer["buy_price"]) <= 0:
 				_fail("shop_offers buy_price must be positive")
 				return
+	if str(shop_stock_lifecycle["shop_id"]) != "town_vendor":
+		_fail("shop_stock_lifecycle must target town_vendor")
+		return
+	var lifecycle_generated: Dictionary = shop_stock_lifecycle["generated_stock"]
+	var generated_rules: Dictionary = town_vendor["generated_offers"]
+	for key in ["offer_count", "source", "source_depth_policy", "refresh_on", "max_rarity"]:
+		if lifecycle_generated[key] != generated_rules[key]:
+			_fail("shop_stock_lifecycle generated %s mismatch" % str(key))
+			return
+	if str(lifecycle_generated["max_rarity"]) != "rare":
+		_fail("shop_stock_lifecycle max rarity must be rare")
+		return
+	for source_case in lifecycle_generated["cases"]:
+		if int(source_case["expected_min_source_depth"]) > int(source_case["expected_max_source_depth"]):
+			_fail("shop_stock_lifecycle source-depth bounds inverted")
+			return
+	var finite_stock: Dictionary = shop_stock_lifecycle["finite_stock"]
+	if int(finite_stock["initial_generated_count"]) != int(generated_rules["offer_count"]):
+		_fail("shop_stock_lifecycle initial stock count mismatch")
+		return
+	if int(finite_stock["after_generated_purchase_count"]) != int(generated_rules["offer_count"]) - 1:
+		_fail("shop_stock_lifecycle purchase count mismatch")
+		return
+	if int(finite_stock["fixed_offer_count"]) != (town_vendor["fixed_offers"] as Array).size():
+		_fail("shop_stock_lifecycle fixed count mismatch")
+		return
+	var buyback: Dictionary = shop_stock_lifecycle["buyback"]
+	if not bool(buyback["enabled"]) or str(buyback["scope"]) != "session_town_visit":
+		_fail("shop_stock_lifecycle buyback scope mismatch")
+		return
+	if not str(buyback["offer_id"]).begins_with("buyback:"):
+		_fail("shop_stock_lifecycle buyback offer id mismatch")
+		return
+	if int(buyback["buy_price"]) <= 0 or int(buyback["sell_price"]) <= 0:
+		_fail("shop_stock_lifecycle buyback price must be positive")
+		return
+	if bool(buyback["persisted"]):
+		_fail("shop_stock_lifecycle buyback must be session-local")
+		return
 
 	# 23. Equipment requirements golden mirrors shared item requirements and client-readable status rows.
 	var equipment_requirements := _read(shared.path_join("golden/equipment_requirements.json"))

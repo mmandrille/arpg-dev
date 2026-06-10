@@ -933,9 +933,7 @@ func (s *Sim) handleAllocateStat(in Input, res *TickResult) {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	}
 
-	view := s.CharacterProgressionView()
-	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
-	s.appendInventoryPresentationUpdates(res)
+	s.appendProgressionAndSkillUpdates(res)
 	res.Events = append(res.Events, Event{
 		EventType:         "stat_allocated",
 		CorrelationID:     in.CorrelationID,
@@ -969,6 +967,10 @@ func (s *Sim) handleAllocateSkillPoint(in Input, res *TickResult) {
 	player := s.activeLevel().entities[s.playerID]
 	if player == nil || player.hp <= 0 {
 		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	if !s.skillRequirementsMet(def) {
+		res.reject(in.MessageID, "skill_requirements_not_met")
 		return
 	}
 
@@ -1007,6 +1009,10 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 	rank := s.progression.SkillRanks[skillID]
 	if rank <= 0 {
 		res.reject(in.MessageID, "skill_not_learned")
+		return
+	}
+	if !s.skillRequirementsMet(def) {
+		res.reject(in.MessageID, "skill_requirements_not_met")
 		return
 	}
 	if remaining, onCooldown := s.skillCooldownRemaining(skillID); onCooldown {
@@ -1064,4 +1070,3 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 	})
 	res.ack(in.MessageID)
 }
-

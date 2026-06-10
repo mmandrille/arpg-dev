@@ -125,6 +125,7 @@ func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
 	progress.Level = 3
 	progress.UnspentStatPoints = 6
 	progress.UnspentSkillPoints = 1
+	progress.BaseStats.Magic = 15
 	progress.SkillRanks = map[string]int{"magic_bolt": 0}
 
 	rows := []store.SessionInput{

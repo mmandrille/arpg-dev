@@ -476,6 +476,12 @@ func _initialize() -> void:
 	if int(skill_golden["skill"]["max_rank"]) != int(magic_bolt["max_rank"]):
 		_fail("skill golden max rank mismatch")
 		return
+	if skill_golden["skill"].get("requirements", {}) != magic_bolt.get("requirements", {}):
+		_fail("skill golden requirements mismatch")
+		return
+	if int(magic_bolt["requirements"]["stats"]["magic"]) != 15:
+		_fail("magic bolt magic requirement mismatch")
+		return
 	var cooldown_multiplier := float(magic_bolt["cooldown"]["multiplier"])
 	for c in skill_golden["attack_speed"]["cases"]:
 		var effective := float(c["dex_attack_speed"]) * float(c["weapon_attack_speed"]) * (1.0 + float(c["item_attack_speed_percent"]) / 100.0)
@@ -695,7 +701,7 @@ func _attack_interval_ticks(combat: Dictionary, effective_attack_speed: float) -
 
 
 func _skill_mana_cost(skill: Dictionary, rank: int) -> int:
-	var mana: Dictionary = skill["mana_cost"]
+	var mana: Dictionary = skill["cost"]["mana"]
 	return maxi(0, int(mana["base"]) + int(mana["per_rank"]) * maxi(0, rank - 1))
 
 

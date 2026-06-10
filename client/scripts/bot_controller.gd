@@ -67,9 +67,10 @@ func _process(delta: float) -> void:
 
 	var action: Dictionary = _runner.pending_action
 	if not action.is_empty():
-		print("[bot-client] action %s scenario=%s" % [
-			_format_action(action), _scenario_id
-		])
+		if str(action.get("type", "")) != "dispatch_intent":
+			print("[bot-client] action %s scenario=%s" % [
+				_format_action(action), _scenario_id
+			])
 		_execute_action(action, state)
 
 	if done:
@@ -148,6 +149,9 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_skill_button(str(action.get("skill_id", "magic_bolt")))
 		"use_skill_slot":
 			_do_use_skill_slot(action, state)
+		"dispatch_intent":
+			if _main != null and _main.has_method("bot_dispatch_action"):
+				_main.bot_dispatch_action(str(action.get("intent_type", "")), action.get("payload", {}))
 		"click_shop_buy_offer":
 			_do_click_shop_buy_offer(action)
 		"click_shop_sell_item":

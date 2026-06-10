@@ -13,41 +13,74 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["name", "kind", "max_rank", "targeting", "range", "projectile_speed", "mana_cost", "damage", "cooldown"],
+        "required": ["name", "class", "tree", "kind", "max_rank", "targeting", "requirements", "cost", "damage", "projectile", "cooldown"],
         "additionalProperties": false,
         "properties": {
           "name": { "type": "string", "minLength": 1 },
-          "kind": { "type": "string", "enum": ["projectile"] },
+          "class": { "type": "string", "minLength": 1 },
+          "tree": { "$ref": "#/$defs/tree_position" },
+          "kind": { "type": "string", "enum": ["projectile_attack"] },
           "max_rank": { "type": "integer", "minimum": 1 },
           "targeting": { "type": "string", "enum": ["direction_or_target"] },
-          "range": { "type": "number", "exclusiveMinimum": 0 },
-          "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
-          "mana_cost": { "$ref": "#/$defs/rank_linear_integer" },
-          "damage": {
-            "type": "object",
-            "required": ["min_base", "max_base", "min_per_rank", "max_per_rank"],
-            "additionalProperties": false,
-            "properties": {
-              "min_base": { "type": "integer", "minimum": 0 },
-              "max_base": { "type": "integer", "minimum": 0 },
-              "min_per_rank": { "type": "integer", "minimum": 0 },
-              "max_per_rank": { "type": "integer", "minimum": 0 }
-            }
-          },
-          "cooldown": {
-            "type": "object",
-            "required": ["type", "multiplier"],
-            "additionalProperties": false,
-            "properties": {
-              "type": { "const": "attack_interval_multiplier" },
-              "multiplier": { "type": "number", "exclusiveMinimum": 0 }
-            }
-          }
+          "requirements": { "$ref": "#/$defs/requirements" },
+          "cost": { "$ref": "#/$defs/cost" },
+          "damage": { "$ref": "#/$defs/rank_linear_damage" },
+          "projectile": { "$ref": "#/$defs/projectile" },
+          "cooldown": { "$ref": "#/$defs/cooldown" }
         }
       }
     }
   },
   "$defs": {
+    "tree_position": {
+      "type": "object",
+      "required": ["tier", "column"],
+      "additionalProperties": false,
+      "properties": {
+        "tier": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "required": ["level", "stats", "skills"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 },
+        "stats": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "str": { "type": "integer", "minimum": 1 },
+            "dex": { "type": "integer", "minimum": 1 },
+            "vit": { "type": "integer", "minimum": 1 },
+            "magic": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/skill_requirement" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "skill_requirement": {
+      "type": "object",
+      "required": ["skill_id", "rank"],
+      "additionalProperties": false,
+      "properties": {
+        "skill_id": { "type": "string", "minLength": 1 },
+        "rank": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "required": ["mana"],
+      "additionalProperties": false,
+      "properties": {
+        "mana": { "$ref": "#/$defs/rank_linear_integer" }
+      }
+    },
     "rank_linear_integer": {
       "type": "object",
       "required": ["base", "per_rank"],
@@ -55,6 +88,37 @@
       "properties": {
         "base": { "type": "integer", "minimum": 0 },
         "per_rank": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "rank_linear_damage": {
+      "type": "object",
+      "required": ["type", "min_base", "max_base", "min_per_rank", "max_per_rank"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "rank_linear_range" },
+        "min_base": { "type": "integer", "minimum": 0 },
+        "max_base": { "type": "integer", "minimum": 0 },
+        "min_per_rank": { "type": "integer", "minimum": 0 },
+        "max_per_rank": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "projectile": {
+      "type": "object",
+      "required": ["range", "speed", "visual"],
+      "additionalProperties": false,
+      "properties": {
+        "range": { "type": "number", "exclusiveMinimum": 0 },
+        "speed": { "type": "number", "exclusiveMinimum": 0 },
+        "visual": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cooldown": {
+      "type": "object",
+      "required": ["type", "multiplier"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "attack_interval_multiplier" },
+        "multiplier": { "type": "number", "exclusiveMinimum": 0 }
       }
     }
   }

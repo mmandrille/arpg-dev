@@ -42,7 +42,6 @@ const PLAYER_EVENT_CLIPS := {
 }
 const PLAYER_START_HP := 10
 const INTERACTABLE_ACTIVATION_RANGE := 1.5
-const MAGIC_BOLT_ID := "magic_bolt"
 const SKILL_FUNCTION_KEY_COUNT := 8
 const PLAYER_TINT := Color("#8fe8a7")
 const REMOTE_PLAYER_TINT := Color("#202934")
@@ -247,6 +246,7 @@ func _ready() -> void:
 	_sync_status_text_visibility()
 	_sync_settings_panel()
 	ItemRulesLoader.ensure_loaded()
+	SkillRulesLoader.ensure_loaded()
 	_load_dungeon_generation()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8888")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
@@ -2658,14 +2658,21 @@ func _skill_allocation_blocked() -> bool:
 		or int(skill_progression.get("unspent_skill_points", 0)) <= 0
 
 
-func _skill_cast_blocked(skill_id: String = "magic_bolt") -> bool:
+func _skill_cast_blocked(skill_id: String = "") -> bool:
+	var resolved_skill_id := skill_id
+	if resolved_skill_id == "":
+		resolved_skill_id = right_click_skill_id
+	if resolved_skill_id == "":
+		resolved_skill_id = _first_learned_skill_id()
+	if resolved_skill_id == "":
+		resolved_skill_id = SkillRulesLoader.first_skill_id()
 	return visual_replay_enabled \
 		or autoplay_enabled \
 		or _menu_blocks_gameplay_input() \
 		or client == null \
 		or client.ready_state() != WebSocketPeer.STATE_OPEN \
 		or player_hp <= 0 \
-		or _skill_rank(skill_id) <= 0
+		or _skill_rank(resolved_skill_id) <= 0
 
 
 func _assign_right_click_skill(skill_id: String) -> bool:
@@ -2728,8 +2735,15 @@ func _auto_select_right_click_skill() -> void:
 		if skill_id != "" and _skill_rank(skill_id) > 0:
 			right_click_skill_id = skill_id
 			return
-	if _skill_rank(MAGIC_BOLT_ID) > 0:
-		right_click_skill_id = MAGIC_BOLT_ID
+	right_click_skill_id = _first_learned_skill_id()
+
+
+func _first_learned_skill_id() -> String:
+	for id in SkillRulesLoader.skill_ids():
+		var skill_id := str(id)
+		if _skill_rank(skill_id) > 0:
+			return skill_id
+	return ""
 
 
 func _refresh_progression_ui() -> void:
@@ -2743,6 +2757,7 @@ func _refresh_progression_ui() -> void:
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
 	if skills_panel != null:
+		skills_panel.set_character_progression(character_progression)
 		skills_panel.set_skill_progression(skill_progression)
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
 		skills_panel.set_interactive(not _skill_allocation_blocked())
@@ -4281,13 +4296,15 @@ func bot_click_stat_button(stat: String) -> void:
 	character_stats_panel.bot_click_stat_button(stat)
 
 
-func bot_click_skill_button(skill_id: String = "magic_bolt") -> void:
+func bot_click_skill_button(skill_id: String = "") -> void:
 	if skills_panel == null:
 		return
 	skills_panel.bot_click_skill_button(skill_id)
 
 
-func bot_use_skill_bar(skill_id: String = "magic_bolt", target_id: String = "", force_direct: bool = false) -> void:
+func bot_use_skill_bar(skill_id: String = "", target_id: String = "", force_direct: bool = false) -> void:
+	if skill_id == "":
+		skill_id = SkillRulesLoader.first_skill_id()
 	if force_direct or target_id != "":
 		_send_skill_cast_intent(skill_id, target_id)
 		return
@@ -4295,7 +4312,9 @@ func bot_use_skill_bar(skill_id: String = "magic_bolt", target_id: String = "", 
 		skill_bar.use_slot()
 
 
-func bot_cast_skill_direction(skill_id: String = "magic_bolt", direction: Dictionary = {}) -> void:
+func bot_cast_skill_direction(skill_id: String = "", direction: Dictionary = {}) -> void:
+	if skill_id == "":
+		skill_id = SkillRulesLoader.first_skill_id()
 	if _skill_cast_blocked(skill_id):
 		return
 	var dir := Vector2(float(direction.get("x", _last_facing_direction.x)), float(direction.get("y", _last_facing_direction.y)))

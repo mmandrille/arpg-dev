@@ -135,8 +135,8 @@ func TestLoadRules(t *testing.T) {
 	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 3 {
 		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 3", r.CharacterProgression.SkillPoints)
 	}
-	if skill := r.Skills[magicBoltSkillID]; skill.MaxRank != 5 || skill.Kind != "projectile" || skill.Cooldown.Type != "attack_interval_multiplier" {
-		t.Fatalf("magic_bolt skill = %+v, want projectile max rank 5 attack interval cooldown", skill)
+	if skill := r.Skills[magicBoltSkillID]; skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 15 {
+		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 15 attack interval cooldown", skill)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
@@ -521,19 +521,48 @@ func TestStatAllocationVitHPAndRejects(t *testing.T) {
 func TestSkillPointCadenceAndSpend(t *testing.T) {
 	sim := NewSim("sess_skill_points", "01", loadRules(t))
 	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
-	sim.awardExperience(50, "corr_skill_xp", &res)
+	sim.awardExperience(140, "corr_skill_xp", &res)
 	sim.savePlayer(sim.defaultPlayer())
 
 	view := sim.CharacterProgressionView()
-	if view.Level != 3 || view.UnspentStatPoints != 6 || view.UnspentSkillPoints != 1 {
-		t.Fatalf("progression after level 3 = %+v, want level 3, 6 stat points, 1 skill point", view)
+	if view.Level != 5 || view.UnspentStatPoints != 12 || view.UnspentSkillPoints != 1 {
+		t.Fatalf("progression after level 5 = %+v, want level 5, 12 stat points, 1 skill point", view)
 	}
 	if !hasEvent(res, "skill_point_gained") {
 		t.Fatalf("missing skill_point_gained event: %+v", res.Events)
 	}
 	skillView := sim.SkillProgressionView()
-	if len(skillView.Skills) != 1 || skillView.Skills[0].SkillID != magicBoltSkillID || skillView.Skills[0].Rank != 0 || !skillView.Skills[0].CanSpend {
-		t.Fatalf("skill progression before spend = %+v", skillView)
+	if len(skillView.Skills) != 1 || skillView.Skills[0].SkillID != magicBoltSkillID || skillView.Skills[0].Rank != 0 || skillView.Skills[0].CanSpend {
+		t.Fatalf("skill progression before requirements = %+v, want rank 0 and not spendable", skillView)
+	}
+
+	rejected := sim.Tick([]Input{{
+		MessageID:          "spend_magic_rejected",
+		CorrelationID:      "corr_spend_rejected",
+		Type:               "allocate_skill_point_intent",
+		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
+	}})
+	assertReject(t, rejected, "spend_magic_rejected", "skill_requirements_not_met")
+	if sim.SkillProgressionView().Skills[0].Rank != 0 || sim.progression.UnspentSkillPoints != 1 {
+		t.Fatalf("requirement rejection mutated skill progression: %+v", sim.SkillProgressionView())
+	}
+
+	allocateMagic := sim.Tick([]Input{{
+		MessageID:     "allocate_magic",
+		CorrelationID: "corr_allocate_magic",
+		Type:          "allocate_stat_intent",
+		AllocateStat:  &AllocateStatIntent{Stat: "magic", Points: 10},
+	}})
+	assertAck(t, allocateMagic, "allocate_magic")
+	if skillProgressionUpdate(allocateMagic) == nil {
+		t.Fatalf("magic allocation missing skill progression refresh: changes=%+v", allocateMagic.Changes)
+	}
+	if sim.progression.BaseStats.Magic != 15 || sim.progression.UnspentStatPoints != 2 {
+		t.Fatalf("magic allocation progression = %+v, want magic 15 and 2 unspent stat points", sim.CharacterProgressionView())
+	}
+	skillView = sim.SkillProgressionView()
+	if !skillView.Skills[0].CanSpend {
+		t.Fatalf("skill progression after magic 15 = %+v, want spendable", skillView)
 	}
 
 	spend := sim.Tick([]Input{{
@@ -651,6 +680,7 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	rules.CharacterProgression.DerivedStats["crit_chance"] = crit
 
 	sim := NewSim("sess_magic_bolt", "01", rules)
+	sim.progression.BaseStats.Magic = 15
 	sim.progression.SkillRanks[magicBoltSkillID] = 1
 	sim.savePlayer(sim.defaultPlayer())
 	player := sim.entities[sim.playerID]
@@ -727,6 +757,39 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, second, "cast_magic_again")
+}
+
+func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
+	sim := NewSim("sess_magic_bolt_requirement", "01", loadRules(t))
+	sim.progression.SkillRanks[magicBoltSkillID] = 1
+	player := sim.entities[sim.playerID]
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: player.pos.X + 5, Y: player.pos.Y},
+		hp:           20,
+		maxHP:        20,
+		monsterDefID: monsterDefID,
+		lootTable:    "no_drop",
+	}
+	sim.entities[monster.id] = monster
+
+	beforeMana := player.mana
+	cast := sim.Tick([]Input{{
+		MessageID: "cast_requirement",
+		Type:      "cast_skill_intent",
+		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
+	}})
+	assertReject(t, cast, "cast_requirement", "skill_requirements_not_met")
+	if player.mana != beforeMana {
+		t.Fatalf("requirement rejection spent mana: got %d want %d", player.mana, beforeMana)
+	}
+	if len(sim.SkillCooldownViews()) != 0 {
+		t.Fatalf("requirement rejection started cooldown: %+v", sim.SkillCooldownViews())
+	}
+	if firstChangeEntityByType(cast, projectileEntity) != nil || hasEvent(cast, "monster_damaged") {
+		t.Fatalf("requirement rejection spawned/damaged: changes=%+v events=%+v", cast.Changes, cast.Events)
+	}
 }
 
 func TestStrengthDamageBonusAdjustsMeleeDamageRange(t *testing.T) {

@@ -3,17 +3,30 @@
   "skills": {
     "magic_bolt": {
       "name": "Magic Bolt",
-      "kind": "projectile",
+      "class": "mage",
+      "tree": { "tier": 1, "column": 1 },
+      "kind": "projectile_attack",
       "max_rank": 5,
       "targeting": "direction_or_target",
-      "range": 9.0,
-      "projectile_speed": 10.0,
-      "mana_cost": { "base": 3, "per_rank": 0 },
+      "requirements": {
+        "level": 1,
+        "stats": { "magic": 15 },
+        "skills": []
+      },
+      "cost": {
+        "mana": { "base": 3, "per_rank": 0 }
+      },
       "damage": {
+        "type": "rank_linear_range",
         "min_base": 4,
         "max_base": 6,
         "min_per_rank": 1,
         "max_per_rank": 1
+      },
+      "projectile": {
+        "range": 9.0,
+        "speed": 10.0,
+        "visual": "magic_bolt_projectile"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",

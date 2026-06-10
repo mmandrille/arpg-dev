@@ -23,9 +23,13 @@ func _run() -> void:
 		emitted.append(skill_id)
 	)
 
+	panel.set_character_progression({
+		"level": 3,
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
-		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true}],
+		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false}],
 	})
 	panel.set_interactive(true)
 	panel.ensure_display_visible()
@@ -41,16 +45,35 @@ func _run() -> void:
 	_assert_eq("skills aligns with stats top", int(panel._panel.position.y), int(stats_panel._panel.position.y))
 	stats_panel.queue_free()
 	_assert_eq("unspent skill points", int(state.get("unspent_skill_points", -1)), 1)
+	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
+	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
-	_assert_true("spend button enabled", bool(state.get("spend_button_enabled", false)))
+	_assert_false("spend button disabled before magic requirement", bool(state.get("spend_button_enabled", true)))
+	_assert_false("requirements not met before magic 15", bool(state.get("requirements_met", true)))
+	var requirement_status: Array = state.get("requirement_status", [])
+	_assert_eq("requirement row count", requirement_status.size(), 2)
+	_assert_eq("magic requirement current", int((requirement_status[1] as Dictionary).get("current", -1)), 5)
 	_assert_eq("no hovered skill by default", str(state.get("hovered_skill_id", "")), "")
 	_assert_false("tooltip hidden by default", bool(state.get("tooltip_visible", true)))
 	panel.bot_hover_skill("magic_bolt")
 	state = panel.get_debug_state()
 	_assert_eq("hovered skill updates", str(state.get("hovered_skill_id", "")), "magic_bolt")
 	_assert_true("tooltip visible on hover", bool(state.get("tooltip_visible", false)))
+	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: 3"))
+	_assert_true("tooltip includes missing magic", str(state.get("tooltip_body", "")).contains("Magic 15 (5)"))
 
+	panel.set_character_progression({
+		"level": 5,
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 15},
+	})
+	panel.set_skill_progression({
+		"unspent_skill_points": 1,
+		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true}],
+	})
+	state = panel.get_debug_state()
+	_assert_true("requirements met after magic 15", bool(state.get("requirements_met", false)))
+	_assert_true("spend button enabled after magic requirement", bool(state.get("spend_button_enabled", false)))
 	panel.bot_click_skill_button("magic_bolt")
 	_assert_eq("spend signal count", emitted.size(), 1)
 	_assert_eq("spend signal skill", str(emitted[0]), "magic_bolt")

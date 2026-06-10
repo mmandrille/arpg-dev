@@ -37,9 +37,11 @@ func _run() -> void:
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
 	_assert_true("spend button enabled", bool(state.get("spend_button_enabled", false)))
 	_assert_eq("no hovered skill by default", str(state.get("hovered_skill_id", "")), "")
+	_assert_false("tooltip hidden by default", bool(state.get("tooltip_visible", true)))
 	panel.bot_hover_skill("magic_bolt")
 	state = panel.get_debug_state()
 	_assert_eq("hovered skill updates", str(state.get("hovered_skill_id", "")), "magic_bolt")
+	_assert_true("tooltip visible on hover", bool(state.get("tooltip_visible", false)))
 
 	panel.bot_click_skill_button("magic_bolt")
 	_assert_eq("spend signal count", emitted.size(), 1)
@@ -52,6 +54,10 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("rank updates", int(state.get("rank", -1)), 1)
 	_assert_false("spend disabled with no points", bool(state.get("spend_button_enabled", true)))
+	panel.set_skill_bindings(["", "magic_bolt", "", "", "", "", "", ""], "magic_bolt")
+	state = panel.get_debug_state()
+	_assert_eq("assigned key shown", str(state.get("assigned_key", "")), "F2")
+	_assert_true("right click assigned state", bool(state.get("right_click_assigned", false)))
 
 	panel.queue_free()
 	print("[gdtest] PASS: test_skills_panel (%d passed, %d failed)" % [_pass_count, _fail_count])

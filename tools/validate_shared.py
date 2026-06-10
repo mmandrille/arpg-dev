@@ -122,6 +122,44 @@ def validate_instances(report: Report) -> None:
             report.fail(label, str(exc).splitlines()[0])
 
 
+class ShopRNG:
+    """Splitmix64 RNG matching the Go server implementation.
+
+    Used by generated-offer validation to replay shop stock deterministically
+    and compare against golden fixtures.
+    """
+
+    def __init__(self, state: int) -> None:
+        self.state = state & ((1 << 64) - 1)
+
+    def next(self) -> int:
+        self.state = (self.state + 0x9E3779B97F4A7C15) & ((1 << 64) - 1)
+        z = self.state
+        z = ((z ^ (z >> 30)) * 0xBF58476D1CE4E5B9) & ((1 << 64) - 1)
+        z = ((z ^ (z >> 27)) * 0x94D049BB133111EB) & ((1 << 64) - 1)
+        return (z ^ (z >> 31)) & ((1 << 64) - 1)
+
+    def intn(self, n: int) -> int:
+        if n <= 0:
+            return 0
+        return int(self.next() % n)
+
+
+def seed_to_uint64(seed: str) -> int:
+    """Convert a hex or ASCII seed string to uint64, matching the Go server."""
+    try:
+        raw = bytes.fromhex(seed)
+        if not raw:
+            raw = seed.encode()
+    except ValueError:
+        raw = seed.encode()
+    value = 1469598103934665603
+    for byte in raw:
+        value ^= byte
+        value = (value * 1099511628211) & ((1 << 64) - 1)
+    return value
+
+
 def cross_checks(report: Report) -> None:
     print("[3] cross-consistency drift guards")
     combat = load(RULES / "combat.v0.json")
@@ -1830,35 +1868,6 @@ def cross_checks(report: Report) -> None:
                 break
         if not failed_pricing:
             report.ok("shop_pricing golden matches v41 formula")
-
-        class ShopRNG:
-            def __init__(self, state: int) -> None:
-                self.state = state & ((1 << 64) - 1)
-
-            def next(self) -> int:
-                self.state = (self.state + 0x9E3779B97F4A7C15) & ((1 << 64) - 1)
-                z = self.state
-                z = ((z ^ (z >> 30)) * 0xBF58476D1CE4E5B9) & ((1 << 64) - 1)
-                z = ((z ^ (z >> 27)) * 0x94D049BB133111EB) & ((1 << 64) - 1)
-                return (z ^ (z >> 31)) & ((1 << 64) - 1)
-
-            def intn(self, n: int) -> int:
-                if n <= 0:
-                    return 0
-                return int(self.next() % n)
-
-        def seed_to_uint64(seed: str) -> int:
-            try:
-                raw = bytes.fromhex(seed)
-                if not raw:
-                    raw = seed.encode()
-            except ValueError:
-                raw = seed.encode()
-            value = 1469598103934665603
-            for byte in raw:
-                value ^= byte
-                value = (value * 1099511628211) & ((1 << 64) - 1)
-            return value
 
         def roll_treasure_class(class_id: str, rng: ShopRNG) -> list[dict]:
             out = []

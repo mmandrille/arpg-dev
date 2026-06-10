@@ -91,53 +91,54 @@ const (
 
 // entity is the internal mutable scene entity.
 type entity struct {
-	id                  uint64
-	kind                string
-	pos                 Vec2
-	hp                  int
-	maxHP               int
-	mana                int
-	maxMana             int
-	characterID         string
-	displayName         string
-	monsterDefID        string
-	monsterRarityID     string
-	monsterAttackDamage *DamageRange
-	monsterXPReward     int
-	isBoss              bool
-	bossTemplateID      string
-	visualModel         string
-	visualTint          string
-	visualScale         float64
-	bossPatternID       string
-	bossPhaseIndex      int
-	bossPhaseKind       string
-	bossPhaseStarted    uint64
-	bossPhaseEnds       uint64
-	bossCooldownEnds    uint64
-	bossActiveHit       map[uint64]bool
-	itemDefID           string
-	goldAmount          int
-	rollPayload         *ItemRollPayload
-	interactableDefID   string
-	state               string
-	lootTable           string
-	ownerID             uint64
-	targetID            uint64
-	projectileDefID     string
-	dir                 Vec2
-	speed               float64
-	traveled            float64
-	maxDistance         float64
-	damageRange         DamageRange
-	sourceMsgID         string
-	sourceCorrID        string
-	spawnTick           uint64
-	spawnPos            Vec2
-	aiMode              string
-	aiTargetPlayerID    uint64
-	lastAttackTick      uint64
-	hasAttacked         bool
+	id                   uint64
+	kind                 string
+	pos                  Vec2
+	hp                   int
+	maxHP                int
+	mana                 int
+	maxMana              int
+	characterID          string
+	displayName          string
+	monsterDefID         string
+	monsterRarityID      string
+	monsterAttackDamage  *DamageRange
+	monsterXPReward      int
+	isBoss               bool
+	bossTemplateID       string
+	visualModel          string
+	visualTint           string
+	visualScale          float64
+	bossPatternID        string
+	bossPatternDeckIndex int
+	bossPhaseIndex       int
+	bossPhaseKind        string
+	bossPhaseStarted     uint64
+	bossPhaseEnds        uint64
+	bossCooldownEnds     uint64
+	bossActiveHit        map[uint64]bool
+	itemDefID            string
+	goldAmount           int
+	rollPayload          *ItemRollPayload
+	interactableDefID    string
+	state                string
+	lootTable            string
+	ownerID              uint64
+	targetID             uint64
+	projectileDefID      string
+	dir                  Vec2
+	speed                float64
+	traveled             float64
+	maxDistance          float64
+	damageRange          DamageRange
+	sourceMsgID          string
+	sourceCorrID         string
+	spawnTick            uint64
+	spawnPos             Vec2
+	aiMode               string
+	aiTargetPlayerID     uint64
+	lastAttackTick       uint64
+	hasAttacked          bool
 }
 
 // invItem is an internal inventory item.
@@ -1647,25 +1648,27 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			return fmt.Errorf("game: generate dungeon level %d: unknown monster loot table %s", level.levelNum, lootTable)
 		}
 		monster := &entity{
-			kind:            monsterEntity,
-			pos:             generated.pos,
-			spawnPos:        generated.pos,
-			hp:              def.MaxHP,
-			maxHP:           def.MaxHP,
-			monsterDefID:    generated.defID,
-			monsterRarityID: generated.rarityID,
-			lootTable:       lootTable,
-			aiMode:          monsterAIModeIdle,
-			isBoss:          generated.isBoss,
-			bossTemplateID:  generated.bossTemplate,
-			visualModel:     generated.visualModel,
-			visualTint:      generated.visualTint,
-			visualScale:     generated.visualScale,
-			bossPhaseIndex:  -1,
+			kind:                 monsterEntity,
+			pos:                  generated.pos,
+			spawnPos:             generated.pos,
+			hp:                   def.MaxHP,
+			maxHP:                def.MaxHP,
+			monsterDefID:         generated.defID,
+			monsterRarityID:      generated.rarityID,
+			lootTable:            lootTable,
+			aiMode:               monsterAIModeIdle,
+			isBoss:               generated.isBoss,
+			bossTemplateID:       generated.bossTemplate,
+			visualModel:          generated.visualModel,
+			visualTint:           generated.visualTint,
+			visualScale:          generated.visualScale,
+			bossPhaseIndex:       -1,
+			bossPatternDeckIndex: -1,
 		}
 		if generated.isBoss {
 			template := s.rules.BossTemplates[generated.bossTemplate]
 			if len(template.PatternDeck) > 0 {
+				monster.bossPatternDeckIndex = 0
 				monster.bossPatternID = template.PatternDeck[0]
 			}
 			monster.maxHP = roundPositive(float64(def.MaxHP) * template.HPMultiplier)
@@ -3487,7 +3490,9 @@ func (s *Sim) nextBossPhase(boss *entity) (bossPhaseRuntime, bool) {
 	}
 	patternID := boss.bossPatternID
 	if patternID == "" {
+		boss.bossPatternDeckIndex = 0
 		patternID = template.PatternDeck[0]
+		boss.bossPatternID = patternID
 	}
 	pattern, ok := s.rules.BossPatterns[patternID]
 	if !ok || len(pattern.Phases) == 0 {
@@ -3513,6 +3518,7 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		boss.bossPhaseStarted = 0
 		boss.bossPhaseEnds = 0
 		boss.bossActiveHit = nil
+		s.advanceBossPatternDeck(boss)
 	} else {
 		next := bossPhaseRuntime{patternID: runtime.patternID, index: runtime.index + 1, phase: pattern.Phases[runtime.index+1]}
 		boss.bossPhaseIndex = next.index
@@ -3523,6 +3529,19 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(boss))})
+}
+
+func (s *Sim) advanceBossPatternDeck(boss *entity) {
+	template, ok := s.rules.BossTemplates[boss.bossTemplateID]
+	if !ok || len(template.PatternDeck) == 0 {
+		return
+	}
+	nextIndex := boss.bossPatternDeckIndex + 1
+	if nextIndex < 0 || nextIndex >= len(template.PatternDeck) {
+		nextIndex = 0
+	}
+	boss.bossPatternDeckIndex = nextIndex
+	boss.bossPatternID = template.PatternDeck[nextIndex]
 }
 
 func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *TickResult) {
@@ -3569,6 +3588,11 @@ func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {
 			radius = monsterRadius + playerRadius
 		}
 		return distance(boss.pos, player.pos) <= radius
+	case "circle":
+		if phase.Radius <= 0 {
+			return false
+		}
+		return distance(boss.pos, player.pos) <= phase.Radius
 	default:
 		return false
 	}

@@ -46,6 +46,7 @@ class RuntimeState:
     item_id: str | None = None
     equipped_item_id: str | None = None
     seen_events: set[str] = field(default_factory=set)
+    events: list[dict[str, Any]] = field(default_factory=list)
     combat_events: list[dict[str, Any]] = field(default_factory=list)
     pending_attack_monsters: dict[str, str] = field(default_factory=dict)
     accepted_attack_counts: dict[str, int] = field(default_factory=dict)

@@ -1978,6 +1978,46 @@ def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state:
     return True
 
 
+def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
+    for key in (
+        "event_type",
+        "entity_id",
+        "source_entity_id",
+        "target_entity_id",
+        "pattern_id",
+        "phase_kind",
+        "reason",
+        "state",
+    ):
+        if key in expected and str(event.get(key, "")) != str(expected[key]):
+            return False
+    for key in ("phase_index", "duration_ticks", "from_level", "to_level"):
+        if key in expected and int(event.get(key, -999999)) != int(expected[key]):
+            return False
+    return True
+
+
+def event_summary(expected: dict[str, Any]) -> str:
+    parts = []
+    for key in (
+        "event_type",
+        "entity_id",
+        "source_entity_id",
+        "target_entity_id",
+        "pattern_id",
+        "phase_kind",
+        "phase_index",
+        "duration_ticks",
+        "reason",
+        "state",
+        "from_level",
+        "to_level",
+    ):
+        if key in expected:
+            parts.append(f"{key}={expected[key]}")
+    return ", ".join(parts) or str(expected)
+
+
 def combat_event_entity_matches(
     event: dict[str, Any],
     expected: dict[str, Any],
@@ -2142,6 +2182,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
     for ev in (p.get("events") or []):
         event_type = ev["event_type"]
         state.seen_events.add(event_type)
+        state.events.append(dict(ev))
         if event_type in {"shop_opened", "shop_purchase", "shop_sale"}:
             shop_event = dict(ev)
             state.shop_events.append(shop_event)
@@ -3482,9 +3523,11 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                 )
             continue
         if typ == "event_seen":
-            event_type = str(assertion["event_type"])
-            if event_type not in state.seen_events:
-                raise AssertionError(f"{where}: event {event_type} not seen; have {sorted(state.seen_events)}")
+            if not any(event_matches(event, assertion) for event in state.events):
+                raise AssertionError(
+                    f"{where}: event {event_summary(assertion)} not seen; "
+                    f"have events={state.events[-10:]} seen_types={sorted(state.seen_events)}"
+                )
             continue
         if typ == "combat_event_seen":
             if not any(combat_event_matches(event, assertion, state) for event in state.combat_events):

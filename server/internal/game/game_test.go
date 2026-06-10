@@ -4878,6 +4878,66 @@ func TestBossPhaseTimingAndDodge(t *testing.T) {
 	}
 }
 
+func TestBossPatternDeckCycles(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_boss_deck", "boss_floor_gate", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	level, err := sim.ensureDungeonLevel(-5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.currentLevel = -5
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 15, Y: 15})
+	sim.syncCompatibilityFields()
+	boss := findBossEntity(t, level)
+	player := level.entities[sim.playerID]
+	player.pos = Vec2{X: boss.pos.X - 6, Y: boss.pos.Y}
+
+	first := sim.Tick(nil)
+	if !hasBossPatternStart(first, "charged_melee") {
+		t.Fatalf("first boss phase events = %+v, want charged_melee start", first.Events)
+	}
+	if boss.bossPatternDeckIndex != 0 || boss.bossPatternID != "charged_melee" {
+		t.Fatalf("initial boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
+	}
+
+	waitForBossPatternStart(t, sim, "ground_slam", 180)
+	if boss.bossPatternDeckIndex != 1 || boss.bossPatternID != "ground_slam" {
+		t.Fatalf("second boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
+	}
+
+	waitForBossPatternStart(t, sim, "charged_melee", 220)
+	if boss.bossPatternDeckIndex != 0 || boss.bossPatternID != "charged_melee" {
+		t.Fatalf("wrapped boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
+	}
+}
+
+func TestBossGroundSlamCircleHit(t *testing.T) {
+	rules := loadRules(t)
+	pattern, ok := rules.BossPatterns["ground_slam"]
+	if !ok {
+		t.Fatal("missing ground_slam pattern")
+	}
+	if len(pattern.Phases) < 2 {
+		t.Fatalf("ground_slam phases = %d, want at least 2", len(pattern.Phases))
+	}
+	phase := pattern.Phases[1]
+	if phase.Kind != "active" || phase.Shape != "circle" || phase.Radius <= 0 {
+		t.Fatalf("ground_slam active phase = %+v, want circle with positive radius", phase)
+	}
+	boss := &entity{pos: Vec2{X: 10, Y: 10}}
+	inside := &entity{pos: Vec2{X: boss.pos.X + phase.Radius - 0.01, Y: boss.pos.Y}}
+	outside := &entity{pos: Vec2{X: boss.pos.X + phase.Radius + 0.01, Y: boss.pos.Y}}
+	if !bossPhaseHitsPlayer(boss, inside, phase) {
+		t.Fatalf("ground_slam did not hit inside-radius player at distance %.2f radius %.2f", distance(boss.pos, inside.pos), phase.Radius)
+	}
+	if bossPhaseHitsPlayer(boss, outside, phase) {
+		t.Fatalf("ground_slam hit outside-radius player at distance %.2f radius %.2f", distance(boss.pos, outside.pos), phase.Radius)
+	}
+}
+
 func TestBossMovesDuringTelegraphAndPausesDuringActive(t *testing.T) {
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess_boss_move", "boss_floor_gate", rules, "dungeon_levels")
@@ -6909,6 +6969,29 @@ func hasEvent(r TickResult, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func hasBossPatternStart(r TickResult, patternID string) bool {
+	for _, ev := range r.Events {
+		if ev.EventType == "boss_phase_started" && ev.PatternID == patternID && ev.PhaseKind == "telegraph" {
+			return true
+		}
+	}
+	return false
+}
+
+func waitForBossPatternStart(t *testing.T, sim *Sim, patternID string, maxTicks int) Event {
+	t.Helper()
+	for i := 0; i < maxTicks; i++ {
+		res := sim.Tick(nil)
+		for _, ev := range res.Events {
+			if ev.EventType == "boss_phase_started" && ev.PatternID == patternID && ev.PhaseKind == "telegraph" {
+				return ev
+			}
+		}
+	}
+	t.Fatalf("missing boss_phase_started for pattern %s within %d ticks", patternID, maxTicks)
+	return Event{}
 }
 
 func hasProgressionChange(r TickResult) bool {

@@ -24,7 +24,7 @@ func _run() -> void:
 	)
 
 	var stash_items := [
-		{"stash_item_id": "9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "rolled_stats": {"damage_min": 2, "damage_max": 5}, "summary_lines": ["Slot: Main hand", "Damage 2-5"]},
+		{"stash_item_id": "9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "rolled_stats": {"damage_min": 2, "damage_max": 2}, "summary_lines": ["Slot: Main hand", "Damage 2-2"]},
 	]
 	var inventory := [
 		{"item_instance_id": "2001", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Magic Cave Blade", "rarity": "magic", "slot": "main_hand", "rolled_stats": {"damage_min": 3, "damage_max": 7}, "summary_lines": ["Slot: Main hand", "Damage 3-7"]},

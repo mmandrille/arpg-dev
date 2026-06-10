@@ -458,7 +458,7 @@ func TestReconstructLoadsSessionStartShopStock(t *testing.T) {
 	rules := loadRules(t)
 	stock := []store.CharacterShopStockItem{
 		shopStockFixture("generated:wp:none:000", 0, false, "cave_blade", `{"damage_min":2,"damage_max":4}`),
-		shopStockFixture("generated:wp:none:001", 1, true, "cave_bow", `{"damage_min":3,"damage_max":5}`),
+		shopStockFixture("generated:wp:none:001", 1, true, "cave_bow", `{"damage_min":2,"damage_max":2}`),
 	}
 	repo := &fakeRepo{
 		session: store.Session{ID: testSessionID, AccountID: "acct_1", CharacterID: "char_1", Seed: testSeed, WorldID: "dungeon_levels"},

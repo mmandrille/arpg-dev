@@ -655,8 +655,8 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 			OfferID:        "generated:depth2:001",
 			SourceDepth:    2,
 			ItemTemplateID: "cave_bow",
-			RolledPayload:  json.RawMessage(`{"item_template_id":"cave_bow","display_name":"Rare Cave Bow","rarity":"rare","stats":{"damage_min":3,"damage_max":8},"requirements":{"level":1},"effect_ids":[]}`),
-			BuyPrice:       375,
+			RolledPayload:  json.RawMessage(`{"item_template_id":"cave_bow","display_name":"Rare Cave Bow","rarity":"rare","stats":{"damage_min":2,"damage_max":3},"requirements":{"level":1},"effect_ids":[]}`),
+			BuyPrice:       210,
 			Available:      true,
 		},
 	}

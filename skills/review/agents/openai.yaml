@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review"
+  short_description: "Write repo-wide engineering review docs."
+  default_prompt: "Use $review to audit the repo and write the engineering review document set."

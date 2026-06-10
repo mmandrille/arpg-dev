@@ -1,0 +1,372 @@
+docs/as-built/v29_dungeon-equipment-drop-expansion.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-23
+docs/plans/v46_2026-06-09-client-join-game-proof.md
+  s_2efffcefba70c6::t_37811ffd721c26 60,226
+docs/as-built/v20_play-session-loop.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-22
+docs/specs/v21_spec-dungeon-monster-combat.md
+  s_2efffcefba70c6::t_37811ffd721c26 13,55
+docs/as-built/v44_skill-points-and-magic-bolt.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-28
+docs/as-built/v25_treasure-classes-and-guarded-chests.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-28
+docs/as-built/v47_shop-stock-lifecycle.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-27
+docs/plans/v51_2026-06-10-mystery-seller-core.md
+  s_2efffcefba70c6::t_37811ffd721c26 37,278
+docs/as-built/v45_menu-create-join-flow.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-26
+docs/as-built/v37_combat-control-and-boss-ai-fixes.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-33
+docs/reviews/20260610_v53-overview.md
+  s_2efffcefba70c6::t_37811ffd721c26 102
+docs/as-built/v34_model-reaction-polish.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-23
+docs/plans/v12_2026-06-05-ranged-projectile-combat.md
+  s_2efffcefba70c6::t_37811ffd721c26 43,231
+docs/as-built/v40_reachable-dungeon-obstacles.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-28
+docs/specs/v25_spec-treasure-classes-and-guarded-chests.md
+  s_2efffcefba70c6::t_37811ffd721c26 16,72
+docs/plans/v30_2026-06-07-monster-rarity-and-loot-scaling.md
+  s_2efffcefba70c6::t_37811ffd721c26 50,320,325,331
+docs/plans/v35_2026-06-08-boss-floor-gate.md
+  s_2efffcefba70c6::t_37811ffd721c26 63,405,409,411,416
+docs/as-built/v41_town-vendor-gold-sink.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-27
+docs/as-built/v6_visual-bot-scenario-runner.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-13
+docs/specs/v38_spec-session-browser-and-uncapped-coop-menu.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,59
+CLAUDE.md
+  s_2efffcefba70c6::t_4dcc980a3ee15f 9-11
+  s_2efffcefba70c6::t_a46885f468ff49 86-91
+  s_2efffcefba70c6::t_ac3ea508b284e5 130-131
+  s_2efffcefba70c6::t_63aa8d621ed4df 7,12-13
+  s_2efffcefba70c6::t_bde2ef86ec0998 92
+  s_2efffcefba70c6::t_e71944002a4199 134-135
+  s_2efffcefba70c6::t_61fef7bba92128 136
+docs/plans/v18_2026-06-06-dungeon-levels-and-stairs.md
+  s_2efffcefba70c6::t_37811ffd721c26 15,79,214
+docs/specs/v36_spec-inventory-paper-doll-capacity.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,70
+docs/specs/v41_spec-town-vendor-gold-sink.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,65
+docs/as-built/v4_take-a-hit.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-12
+docs/specs/v48_spec-coop-rewards-and-scaling.md
+  s_2efffcefba70c6::t_37811ffd721c26 11,106
+docs/specs/v6_spec-visual-bot-scenario-runner.md
+  s_2efffcefba70c6::t_37811ffd721c26 5,38
+docs/as-built/v13_inventory-ui.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-23
+docs/plans/v38_2026-06-08-session-browser-and-uncapped-coop-menu.md
+  s_2efffcefba70c6::t_37811ffd721c26 35,325,328,335
+docs/as-built/v22_character-scoped-persistence.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-22
+docs/as-built/v38_session-browser-and-uncapped-coop-menu.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-24
+docs/plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md
+  s_2efffcefba70c6::t_37811ffd721c26 35,200,210,213
+docs/as-built/v18_dungeon-levels-and-stairs.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-16
+docs/reviews/20260610_v53-shared-tooling-and-process.md
+  s_2efffcefba70c6::t_37811ffd721c26 68
+docs/specs/v34_spec-model-reaction-polish.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,62
+AGENTS.md
+  s_2efffcefba70c6::t_90c7a408f48c3c 5
+  s_2efffcefba70c6::t_730be1a1f785cb 6
+README.md
+  s_2efffcefba70c6::t_8f61ccd35eebb0 96-98
+  s_2efffcefba70c6::t_ff37b4ab0fa5fc 5-6
+  s_2efffcefba70c6::t_770a55bce871d7 19
+  s_2efffcefba70c6::t_7ba8c521612092 20
+docs/specs/v31_spec-combat-stat-effects-and-feedback.md
+  s_2efffcefba70c6::t_37811ffd721c26 17,100
+docs/specs/v42_spec-vendor-appraisal-and-item-comparison.md
+  s_2efffcefba70c6::t_37811ffd721c26 10,75
+docs/plans/v22_2026-06-07-character-scoped-persistence.md
+  s_2efffcefba70c6::t_37811ffd721c26 45,173
+docs/plans/v26_2026-06-07-character-stats-and-leveling.md
+  s_2efffcefba70c6::t_37811ffd721c26 63,238,243
+docs/plans/v48_2026-06-09-coop-rewards-and-scaling.md
+  s_2efffcefba70c6::t_37811ffd721c26 24,150
+docs/as-built/v43_equipment-requirements-and-preview.md
+  s_2efffcefba70c6::t_b1939c709bb714 1-10
+docs/plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md
+  s_2efffcefba70c6::t_37811ffd721c26 129,416,420
+docs/plans/v10_2026-06-05-click-action-and-melee-range.md
+  s_2efffcefba70c6::t_37811ffd721c26 56,112
+docs/plans/v11_2026-06-05-click-to-move-and-auto-path.md
+  s_2efffcefba70c6::t_37811ffd721c26 47,269
+docs/specs/v5_spec-resume-authoritative-state.md
+  s_2efffcefba70c6::t_37811ffd721c26 61
+docs/plans/v36_2026-06-08-inventory-paper-doll-capacity.md
+  s_2efffcefba70c6::t_37811ffd721c26 53,235,239,241
+skills/next/SKILL.md
+  s_2efffcefba70c6::t_37811ffd721c26 31
+  s_2efffcefba70c6::t_1af992159d3b34 52
+  s_2efffcefba70c6::t_06bf52ed6ad0d2 53
+docs/specs/v40_spec-reachable-dungeon-obstacles.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,62
+docs/specs/v54_spec-character-select-summaries.md
+  s_2efffcefba70c6::t_37811ffd721c26 58
+skills/spec/SKILL.md
+  s_2efffcefba70c6::t_37811ffd721c26 13-14
+docs/as-built/v28_full-equipment-and-belt-hotbar.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-28
+docs/as-built/v16_use-consumable.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-21
+docs/as-built/v53_boss-health-bar-ui.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-17
+docs/plans/v50_2026-06-10-account-stash-storage.md
+  s_2efffcefba70c6::t_37811ffd721c26 37,446
+docs/plans/v8_2026-06-05-equipped-weapon-damage.md
+  s_2efffcefba70c6::t_37811ffd721c26 68,227,233
+docs/plans/v21_2026-06-06-dungeon-monster-combat.md
+  s_2efffcefba70c6::t_37811ffd721c26 42,161
+docs/specs/v35_spec-boss-floor-gate.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,72
+docs/as-built/v27_hold-click-controls.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-17
+docs/specs/v33_spec-true-coop-session.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,62
+docs/specs/v11_spec-click-to-move-and-auto-path.md
+  s_2efffcefba70c6::t_37811ffd721c26 11
+docs/plans/v13_2026-06-05-inventory-ui.md
+  s_2efffcefba70c6::t_37811ffd721c26 47,272
+docs/plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md
+  s_2efffcefba70c6::t_37811ffd721c26 54,146,150
+docs/plans/v44_2026-06-09-skill-points-and-magic-bolt.md
+  s_2efffcefba70c6::t_37811ffd721c26 37,309,312
+docs/plans/v41_2026-06-09-town-vendor-gold-sink.md
+  s_2efffcefba70c6::t_37811ffd721c26 35,248
+skills/plan/SKILL.md
+  s_2efffcefba70c6::t_37811ffd721c26 25,108,127
+docs/plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md
+  s_2efffcefba70c6::t_37811ffd721c26 37,174
+docs/specs/v30_spec-monster-rarity-and-loot-scaling.md
+  s_2efffcefba70c6::t_37811ffd721c26 17,97
+docs/plans/v43_2026-06-09-equipment-requirements-and-preview.md
+  s_2efffcefba70c6::t_37811ffd721c26 65,166,170
+docs/as-built/v52_ranged-monster-ai.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-20
+docs/specs/v37_spec-combat-control-and-boss-ai-fixes.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,69
+docs/as-built/v35_boss-floor-gate.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-24
+docs/specs/v20_spec-play-session-loop.md
+  s_2efffcefba70c6::t_37811ffd721c26 13,66
+docs/specs/v46_spec-client-join-game-proof.md
+  s_2efffcefba70c6::t_37811ffd721c26 10,95
+docs/plans/v54_2026-06-10-character-select-summaries.md
+  s_2efffcefba70c6::t_37811ffd721c26 22,39,106,109,116,132
+docs/as-built/v10_click-action-and-melee-range.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-19
+docs/specs/v47_spec-shop-stock-lifecycle.md
+  s_2efffcefba70c6::t_37811ffd721c26 11,120
+docs/as-built/v21_dungeon-monster-combat.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-21
+docs/plans/v40_2026-06-09-reachable-dungeon-obstacles.md
+  s_2efffcefba70c6::t_37811ffd721c26 46,363,366,369,375
+docs/specs/v22_spec-character-scoped-persistence.md
+  s_2efffcefba70c6::t_37811ffd721c26 15,69
+docs/specs/v23_spec-item-templates-and-rolled-drops.md
+  s_2efffcefba70c6::t_37811ffd721c26 16,71
+docs/plans/v17_2026-06-06-monster-chase-movement.md
+  s_2efffcefba70c6::t_37811ffd721c26 17,22,61,186
+docs/specs/v24_spec-main-menu-and-character-start.md
+  s_2efffcefba70c6::t_37811ffd721c26 15,77
+docs/as-built/v23_item-templates-and-rolled-drops.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-25
+docs/as-built/v54_character-select-summaries.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-18
+docs/plans/v29_2026-06-07-dungeon-equipment-drop-expansion.md
+  s_2efffcefba70c6::t_37811ffd721c26 43,253,259,262,265
+docs/specs/v44_spec-skill-points-and-magic-bolt.md
+  s_2efffcefba70c6::t_37811ffd721c26 10,112
+docs/specs/v50_spec-account-stash-storage.md
+  s_2efffcefba70c6::t_37811ffd721c26 11,140
+docs/plans/v52_2026-06-10-ranged-monster-ai.md
+  s_2efffcefba70c6::t_37811ffd721c26 39,226,230,238,240
+docs/plans/v37_2026-06-08-combat-control-and-boss-ai-fixes.md
+  s_2efffcefba70c6::t_37811ffd721c26 56,290,294,296
+docs/as-built/v11_click-to-move-and-auto-path.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-18
+docs/plans/v20_2026-06-06-play-session-loop.md
+  s_2efffcefba70c6::t_37811ffd721c26 44,136
+docs/as-built/v31_combat-stat-effects-and-feedback.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-26
+docs/as-built/v3_animate-and-react.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-9
+docs/plans/v24_2026-06-07-main-menu-and-character-start.md
+  s_2efffcefba70c6::t_37811ffd721c26 20,47,187,192
+docs/specs/v18_spec-dungeon-levels-and-stairs.md
+  s_2efffcefba70c6::t_37811ffd721c26 6,14,554
+docs/as-built/v49_gold-autopickup-and-shared-loot-rules.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-24
+docs/as-built/v36_inventory-paper-doll-capacity.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-27
+skills/execute/SKILL.md
+  s_2efffcefba70c6::t_9619b72cbcd4a8 119
+  s_2efffcefba70c6::t_37811ffd721c26 27,65,115
+  s_2efffcefba70c6::t_5a3d17f54a5d8c 118
+docs/plans/v23_2026-06-07-item-templates-and-rolled-drops.md
+  s_2efffcefba70c6::t_37811ffd721c26 20,59,222
+docs/specs/v32_spec-test-floor-and-resilient-scenarios.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,56,183
+docs/as-built/v39_ui-currency-and-mana-polish.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-20
+docs/plans/v9_2026-06-05-solid-collision-and-obstacles.md
+  s_2efffcefba70c6::t_37811ffd721c26 25,68
+docs/plans/v31_2026-06-07-combat-stat-effects-and-feedback.md
+  s_2efffcefba70c6::t_37811ffd721c26 61,403,409,412,414
+docs/plans/v7_2026-06-05-gear-before-combat-scenario.md
+  s_2efffcefba70c6::t_37811ffd721c26 72,290,297
+docs/as-built/v46_client-join-game-proof.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-22
+docs/plans/v16_2026-06-06-use-consumable.md
+  s_2efffcefba70c6::t_37811ffd721c26 31
+PROGRESS.md
+  s_2efffcefba70c6::t_f2c4358f2634d6 547-548
+  s_2efffcefba70c6::t_37811ffd721c26 1-3,6-18,21-79,100-113,170-172,180-184,194-520,526-543,545-546
+  s_2efffcefba70c6::t_b1939c709bb714 116-157,159-169
+  s_2efffcefba70c6::t_881d615209b98e 179
+  s_2efffcefba70c6::t_aa4e80359a9c6c 523-525
+  s_2efffcefba70c6::t_d4252fcb18d7de 544
+  s_2efffcefba70c6::t_d7a1f9ea791c74 521-522
+  s_2efffcefba70c6::t_981d720a1a0e7a 80-99
+  s_2efffcefba70c6::t_b8f04039857e04 4-5
+  s_2efffcefba70c6::t_caf777ea3fcabf 158
+  s_2efffcefba70c6::t_adf9ebf50f0f2d 19-20
+  s_2efffcefba70c6::t_a88fb3e8a017f3 114-115,173-178,185-193
+docs/plans/v53_2026-06-10-boss-health-bar-ui.md
+  s_2efffcefba70c6::t_37811ffd721c26 44
+docs/as-built/v15_item-visuals-and-loot-presentation.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-22
+docs/specs/v51_spec-mystery-seller-core.md
+  s_2efffcefba70c6::t_37811ffd721c26 11,123
+docs/as-built/v51_mystery-seller-core.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-22
+docs/specs/v10_spec-click-action-and-melee-range.md
+  s_2efffcefba70c6::t_37811ffd721c26 11
+docs/specs/v13_spec-inventory-ui.md
+  s_2efffcefba70c6::t_37811ffd721c26 13,415
+docs/plans/v14_2026-06-02-godot-client-bot.md
+  s_2efffcefba70c6::t_37811ffd721c26 35,300
+docs/as-built/v2_equip-and-see-it.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-10
+docs/as-built/v9_solid-collision-and-obstacles.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-18
+skills/autoloop/SKILL.md
+  s_2efffcefba70c6::t_37811ffd721c26 82,179,207
+docs/specs/v17_spec-monster-chase-movement.md
+  s_2efffcefba70c6::t_37811ffd721c26 6,13,458
+docs/plans/v45_2026-06-09-menu-create-join-flow.md
+  s_2efffcefba70c6::t_37811ffd721c26 44,190,194
+docs/plans/v15_2026-06-06-item-visuals-and-loot-presentation.md
+  s_2efffcefba70c6::t_37811ffd721c26 31,39
+docs/as-built/v5_resume-authoritative-state.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-12
+docs/as-built/v19_teleporters-and-waypoint-ui.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-19
+docs/plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md
+  s_2efffcefba70c6::t_37811ffd721c26 40,136
+docs/specs/v45_spec-menu-create-join-flow.md
+  s_2efffcefba70c6::t_37811ffd721c26 10,115
+docs/as-built/v8_equipped-weapon-damage.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-13
+docs/as-built/v17_monster-chase-movement.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-19
+docs/specs/v7_spec-gear-before-combat-scenario.md
+  s_2efffcefba70c6::t_37811ffd721c26 9,468
+docs/specs/v49_spec-gold-autopickup-and-shared-loot-rules.md
+  s_2efffcefba70c6::t_37811ffd721c26 11,114
+docs/as-built/v14_godot-client-bot.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-35
+docs/specs/v28_spec-full-equipment-and-belt-hotbar.md
+  s_2efffcefba70c6::t_37811ffd721c26 18,112
+docs/plans/v19_2026-06-06-teleporters-and-waypoint-ui.md
+  s_2efffcefba70c6::t_37811ffd721c26 47,123
+docs/plans/v27_2026-06-07-hold-click-controls.md
+  s_2efffcefba70c6::t_37811ffd721c26 47,162,165
+docs/as-built/v24_main-menu-and-character-start.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-26
+docs/specs/v16_spec-use-consumable.md
+  s_2efffcefba70c6::t_37811ffd721c26 12
+docs/specs/v9_spec-solid-collision-and-obstacles.md
+  s_2efffcefba70c6::t_37811ffd721c26 37
+docs/as-built/v30_monster-rarity-and-loot-scaling.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-28
+docs/as-built/v7_gear-before-combat-scenario.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-12
+docs/plans/v33_2026-06-08-true-coop-session.md
+  s_2efffcefba70c6::t_37811ffd721c26 71,278,282
+docs/plans/v34_2026-06-08-model-reaction-polish.md
+  s_2efffcefba70c6::t_37811ffd721c26 37,127,131
+docs/specs/v12_spec-ranged-projectile-combat.md
+  s_2efffcefba70c6::t_37811ffd721c26 14
+docs/specs/v29_spec-dungeon-equipment-drop-expansion.md
+  s_2efffcefba70c6::t_37811ffd721c26 15,75
+docs/specs/v52_spec-ranged-monster-ai.md
+  s_2efffcefba70c6::t_37811ffd721c26 11,110
+docs/as-built/v0_first-playable-vertical-slice.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-12
+docs/as-built/v12_ranged-projectile-combat.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-21
+docs/as-built/v32_test-floor-and-resilient-scenarios.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-24
+docs/specs/v8_spec-equipped-weapon-damage.md
+  s_2efffcefba70c6::t_37811ffd721c26 11,183
+docs/plans/v5_2026-06-05-resume-authoritative-state.md
+  s_2efffcefba70c6::t_37811ffd721c26 48,187,191
+skills/finish/SKILL.md
+  s_2efffcefba70c6::t_c6de4cc12df585 126-127
+  s_2efffcefba70c6::t_8679e53586d1a7 63
+  s_2efffcefba70c6::t_37811ffd721c26 19,42,55
+  s_2efffcefba70c6::t_2e63304f5165ae 66
+docs/specs/v19_spec-teleporters-and-waypoint-ui.md
+  s_2efffcefba70c6::t_37811ffd721c26 13,71
+docs/as-built/v26_character-stats-and-leveling.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-27
+docs/as-built/v48_coop-rewards-and-scaling.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-21
+docs/as-built/v33_true-coop-session.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-30
+docs/as-built/v50_account-stash-storage.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-25
+docs/specs/v43_spec-equipment-requirements-and-preview.md
+  s_2efffcefba70c6::t_37811ffd721c26 10,75
+docs/specs/v27_spec-hold-click-controls.md
+  s_2efffcefba70c6::t_37811ffd721c26 19,224
+docs/plans/v47_2026-06-09-shop-stock-lifecycle.md
+  s_2efffcefba70c6::t_37811ffd721c26 30,392,406,408
+docs/as-built/v42_vendor-appraisal-and-item-comparison.md
+  s_2efffcefba70c6::t_a88fb3e8a017f3 1-24
+docs/plans/v6_2026-06-05-visual-bot-scenario-runner.md
+  s_2efffcefba70c6::t_37811ffd721c26 20,76
+docs/specs/v26_spec-character-stats-and-leveling.md
+  s_2efffcefba70c6::t_37811ffd721c26 16,92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1b748df31c0f8b088d4b37a67f03f2b3b24a6c20",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_2efffcefba70c6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b8cf0c25-3fa7-4594-ad47-1862f60b680c",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

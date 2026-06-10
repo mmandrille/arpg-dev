@@ -26,6 +26,31 @@
         }
       ],
       "cooldown_ticks": 40
+    },
+    "ground_slam": {
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 35,
+          "telegraph_type": "circle",
+          "from_color": "#b77cff",
+          "to_color": "#ff7a00",
+          "hit_shape": "circle",
+          "radius": 2.4
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 5,
+          "shape": "circle",
+          "radius": 2.4,
+          "damage": { "min": 5, "max": 7 }
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 24
+        }
+      ],
+      "cooldown_ticks": 50
     }
   }
 }

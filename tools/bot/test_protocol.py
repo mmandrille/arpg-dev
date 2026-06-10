@@ -703,6 +703,54 @@ def test_runtime_state_records_combat_event_metadata():
     ], state, "test")
 
 
+def test_runtime_assertion_matches_non_combat_event_payloads():
+    state = RuntimeState()
+
+    ingest_message({
+        "type": "state_delta",
+        "tick": 12,
+        "payload": {
+            "server_tick": 12,
+            "events": [{
+                "event_type": "boss_phase_started",
+                "entity_id": "3001",
+                "pattern_id": "ground_slam",
+                "phase_index": 0,
+                "phase_kind": "telegraph",
+                "duration_ticks": 35,
+            }],
+            "changes": [],
+        },
+    }, state)
+
+    assert state.events == [{
+        "event_type": "boss_phase_started",
+        "entity_id": "3001",
+        "pattern_id": "ground_slam",
+        "phase_index": 0,
+        "phase_kind": "telegraph",
+        "duration_ticks": 35,
+    }]
+    run_runtime_assertions([
+        {
+            "type": "event_seen",
+            "event_type": "boss_phase_started",
+            "pattern_id": "ground_slam",
+            "phase_kind": "telegraph",
+            "phase_index": 0,
+        }
+    ], state, "test")
+
+    try:
+        run_runtime_assertions([
+            {"type": "event_seen", "event_type": "boss_phase_started", "pattern_id": "charged_melee"}
+        ], state, "test")
+    except AssertionError as exc:
+        assert "pattern_id=charged_melee" in str(exc)
+    else:
+        raise AssertionError("expected event payload mismatch")
+
+
 def test_runtime_assertion_matches_combat_event_entity_selectors():
     state = RuntimeState(local_player_id="1001")
     state.entities = {

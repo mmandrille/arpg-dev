@@ -1,0 +1,58 @@
+client/scripts/skill_rules_loader.gd
+  s_0f1bceeefb38b1::t_1e3c6e734c1ea3 3-4,8-9,19-26,53-61,64-121,123-124,127-128,131-133
+shared/content/content_libraries.v0.schema.json
+  s_0f1bceeefb38b1::t_625e14172304ef 1-55
+client/tests/test_skill_rules_loader.gd.uid
+  s_0f1bceeefb38b1::t_c6114b32e3a548 1
+PROGRESS.md
+  s_0f1bceeefb38b1::t_d569303f55d1bf 15,81,181,523-528,537,557
+tools/validate_shared.py
+  s_0f1bceeefb38b1::t_01aa172cb2136e 22-36,43,86-88,110,187-188,234-266
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_0f1bceeefb38b1::t_f590affbf43686 77
+server/internal/game/rules_manifest.go
+  s_0f1bceeefb38b1::t_42d9ada0f362e5 12-13
+  s_0f1bceeefb38b1::t_8729f4588f796e 1-11,14-91
+client/tests/test_skill_rules_loader.gd
+  s_0f1bceeefb38b1::t_f5b0b6dd607651 1-40
+docs/specs/v60_spec-data-driven-content-library-manifest.md
+  s_0f1bceeefb38b1::t_6c185d9cf2f0b4 1-2,4-102
+  s_0f1bceeefb38b1::t_d569303f55d1bf 3
+server/internal/game/rules.go
+  s_0f1bceeefb38b1::t_8729f4588f796e 1069-1070,1073,1076
+shared/content/content_libraries.v0.json
+  s_0f1bceeefb38b1::t_625e14172304ef 1-21
+tools/test_validate_shared.py
+  s_0f1bceeefb38b1::t_2e75362b87040b 1-62
+server/internal/game/rules_manifest_test.go
+  s_0f1bceeefb38b1::t_d04f848bf9109d 1-81
+docs/plans/v60_2026-06-10-data-driven-content-library-manifest.md
+  s_0f1bceeefb38b1::t_d0d44ed26a9c30 23-24,26,31,45,47,49,51,64,66-69,82-83,85-86,88,130-132
+  s_0f1bceeefb38b1::t_e7a5f788edcd3e 1-22,25,27-30,33-44,46,48,50,52-63,65,70-81,84,87,89-99,101,103-117,123-129,136-142
+  s_0f1bceeefb38b1::t_f590affbf43686 32
+  s_0f1bceeefb38b1::t_ab8511f01e99a6 100,102,133-134
+  s_0f1bceeefb38b1::t_b9b85f04d23e4b 122,135
+  s_0f1bceeefb38b1::t_aa62c3bcea6468 118-121
+tools/content_manifest.py
+  s_0f1bceeefb38b1::t_625e14172304ef 1-76
+scripts/client_smoke.sh
+  s_0f1bceeefb38b1::t_f5b0b6dd607651 103
+docs/as-built/v60_data-driven-content-library-manifest.md
+  s_0f1bceeefb38b1::t_d569303f55d1bf 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8c809251ef12d9977b06e4d8dc8902cc52a95d41",
+  "prompts": {},
+  "sessions": {
+    "s_0f1bceeefb38b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb333-0d41-75b0-82de-79fc5e756865",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

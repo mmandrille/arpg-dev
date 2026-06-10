@@ -1,0 +1,46 @@
+{
+  "id": "client_boss_health_bar_ui",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v53_boss_health_bar_ui",
+  "title": "Client boss health bar UI",
+  "description": "Client descends to the first boss floor and verifies the screen-anchored Cave Warden boss health bar.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -1, "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -2, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -3, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -4, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -5, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
+    {
+      "type": "wait_boss_health_bar",
+      "visible": true,
+      "boss_template_id": "cave_warden",
+      "title": "Cave Warden",
+      "hp_min": 1,
+      "ratio_min": 0.01,
+      "ratio_max": 1.0,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_boss_health_bar",
+      "visible": true,
+      "boss_template_id": "cave_warden",
+      "title": "Cave Warden",
+      "hp_min": 1,
+      "ratio_min": 0.01,
+      "ratio_max": 1.0
+    }
+  ]
+}

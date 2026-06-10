@@ -103,6 +103,9 @@ run_gate "GDScript stash panel test" "[gdtest] PASS: test_stash_panel" res://tes
 run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://tests/test_skills_panel.gd
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd
 
+# 2l. Boss health bar render/state test (server-independent; v53).
+run_gate "GDScript boss health bar test" "[gdtest] PASS: test_boss_health_bar" res://tests/test_boss_health_bar.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0

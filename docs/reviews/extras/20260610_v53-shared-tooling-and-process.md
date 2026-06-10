@@ -4,7 +4,7 @@
 **Scope:** `shared/` (protocol, rules-as-data, golden), `tools/` (Python: bot, validator, assets, replay, play), `docs/` (PROGRESS, specs, plans, ADRs), root build (`Makefile`, `make/*.mk`, `scripts/`)
 **Baseline:** `main` @ `be32b20`
 **Stats:** `shared/` 20,472 LOC · 36 protocol schema files (v0–v8 × 4 families) · 35 golden fixtures · 53 specs + 53 plans · 9 ADRs · `tools/` 9,935 LOC · `pytest tools/` 59 passing
-**Overview:** [`20260610_v53-overview.md`](20260610_v53-overview.md)
+**Overview:** [`../20260610_v53-overview.md`](../20260610_v53-overview.md)
 
 ---
 

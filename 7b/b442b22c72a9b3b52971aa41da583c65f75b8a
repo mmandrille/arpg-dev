@@ -1,0 +1,24 @@
+make/server.mk
+  s_27577ac914d158::t_521ea3ad7e7420 14-16
+server/internal/game/game_test.go
+  s_27577ac914d158::t_d2fc652f13e0ba 2053,2059-2062,2072-2073
+  s_27577ac914d158::t_ee595949306599 5,14
+  s_27577ac914d158::t_c48d7e14224957 2089,2091-2094,2098-2100,2104-2105
+  s_27577ac914d158::t_c98db4ca2c8409 51-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7bb442b22c72a9b3b52971aa41da583c65f75b8a",
+  "prompts": {},
+  "sessions": {
+    "s_27577ac914d158": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df627ccd-97cc-45eb-813d-99c038bf4269",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

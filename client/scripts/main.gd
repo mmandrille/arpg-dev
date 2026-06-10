@@ -892,19 +892,21 @@ func _apply_delta(p: Dictionary) -> void:
 			"wall_layout_update":
 				_render_wall_layout(c.get("walls", []))
 			"entity_spawn", "entity_update":
-				_upsert_entity(c["entity"])
+				_upsert_entity(c.get("entity", {}))
 			"entity_remove":
-				_remove_entity(c["entity_id"])
+				_remove_entity(str(c.get("entity_id", "")))
 			"inventory_add":
-				inventory.append(c["item"])
+				var inv_item: Dictionary = c.get("item", {})
+				inventory.append(inv_item)
 				if resolver != null:
-					resolver.ingest_inventory_item(c["item"])
+					resolver.ingest_inventory_item(inv_item)
 			"inventory_update":
-				_update_inventory_item(c["item"])
+				var upd_item: Dictionary = c.get("item", {})
+				_update_inventory_item(upd_item)
 				if resolver != null:
-					resolver.ingest_inventory_item(c["item"])
+					resolver.ingest_inventory_item(upd_item)
 			"inventory_remove":
-				_remove_inventory_item(str(c["item_instance_id"]))
+				_remove_inventory_item(str(c.get("item_instance_id", "")))
 			"equipped_update":
 				equipped[c["slot"]] = c.get("item_instance_id")
 				if resolver != null:

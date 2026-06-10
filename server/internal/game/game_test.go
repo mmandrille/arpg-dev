@@ -2057,6 +2057,10 @@ func TestItemRollsGolden(t *testing.T) {
 			t.Fatalf("%s: rollItemTemplate returned false", c.Name)
 		}
 		if *update {
+			// Normalize nil slices to empty so GDScript "as Array" casts work.
+			if got.EffectIDs == nil {
+				got.EffectIDs = []string{}
+			}
 			golden.Cases[i].Expected = got
 			continue
 		}

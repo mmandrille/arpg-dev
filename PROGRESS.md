@@ -16,8 +16,8 @@ Last updated: 2026-06-10
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 (9 phases) |
 | **Next slice** | TBD |
-| **Last engineering review** | v53 — [`docs/reviews/20260610_v53-overview.md`](docs/reviews/20260610_v53-overview.md) (2026-06-10) |
-| **Next engineering review** | v60 (~every 10 slices) |
+| **Last engineering review** | v60 — [`docs/reviews/20260610_v60-overview.md`](docs/reviews/20260610_v60-overview.md) (2026-06-10) |
+| **Next engineering review** | v70 (~every 10 slices) |
 
 ### Slice numbering note
 
@@ -85,7 +85,7 @@ Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codena
 ### Periodic engineering reviews
 
 Every **~10 completed slices**, pause for a repo-wide engineering review under [`docs/reviews/`](docs/reviews/).
-Use the milestone slice number in filenames and headings (e.g. v50, v60, v70 — v53 is the latest pass).
+Use the milestone slice number in filenames and headings (e.g. v50, v60, v70 — v60 is the latest pass).
 
 **When to write:** after the milestone slice ships and `make ci` is green — typically as part of `/finish`
 close-out or as a dedicated review task before `/next` proposes the next batch.
@@ -546,7 +546,7 @@ the next autoloop pass unless code changes make them stale.
 |-----------|--------|-------|------|----------------|------------------------|
 | `boss-phase-timer-ui` | Completed in v57 | Add boss phase/windup timing cues to the existing boss health bar. | S | client, bot, docs | Kept display-only from existing `boss_phase` state/events. |
 | `boss-pattern-variety` | Completed in v58 | Add one more server-authored boss attack pattern so Cave Warden is less repetitive. | M | shared, server, bot, docs | Implemented deterministic deck-order cycling and server-owned circle hit shape. |
-| `data-driven-content-library-manifest` | Candidate for v60 review | Introduce a manifest/index loader for skills first, preserving stable gameplay IDs and deterministic merge validation. | M | shared, server, client loader, validation, docs | Start with no behavior change; use `docs/researchs/data-driven-content-libraries.md` as input. |
+| `data-driven-content-library-manifest` | Reviewed; recommended next | Introduce a manifest/index loader for skills first, preserving stable gameplay IDs and deterministic merge validation. | M | shared, server, client loader, validation, docs | Start with no behavior change; use `docs/researchs/data-driven-content-libraries.md` and the v60 review as input. |
 | `mystery-seller-paid-reroll` | Open | Let players spend gold to reroll concealed mystery seller stock. | M | shared/protocol, server, store, client, bot, docs | Price/refresh rules need conservative defaults. |
 | `stash-search-and-sorting` | Open | Add search/sort controls to stash and bag views without changing item authority. | S/M | client, bot, docs | Client UI only; must record plugin borrow/reject decision. |
 | `character-select-summaries` | Completed in v54 | Show level, gold, deepest depth, and status in character selection. | M | store, HTTP, client, bot, docs | Needs careful aggregate/query shape; rename/delete already exists. |

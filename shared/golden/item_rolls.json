@@ -1,4 +1,5 @@
 {
+  "description": "Deterministic rolled item outcomes for cave_blade rarity cases.",
   "template_id": "cave_blade",
   "cases": [
     {

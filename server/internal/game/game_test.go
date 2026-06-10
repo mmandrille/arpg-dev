@@ -6072,12 +6072,17 @@ func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 		SessionSeed                   string `json:"session_seed"`
 		Level                         int    `json:"level"`
 		MonsterDefID                  string `json:"monster_def_id"`
+		AttackCooldownTicks           int    `json:"attack_cooldown_ticks"`
 		MaxTicksForFirstPlayerDamaged int    `json:"max_ticks_for_first_player_damaged"`
 		Damage                        int    `json:"damage"`
 		PlayerHPAfter                 int    `json:"player_hp_after"`
 	}
 	loadGolden(t, "dungeon_monster_attack.json", &golden)
 	rules := loadRules(t)
+	def := rules.Monsters[golden.MonsterDefID]
+	if def.AttackCooldown != golden.AttackCooldownTicks {
+		t.Fatalf("%s attack cooldown = %d, want golden %d", golden.MonsterDefID, def.AttackCooldown, golden.AttackCooldownTicks)
+	}
 	sim, err := NewSimWithWorld("sess_dungeon_monster_attack", golden.SessionSeed, rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
@@ -6109,10 +6114,14 @@ func TestDungeonMonsterProactiveAttackGolden(t *testing.T) {
 func TestDungeonMonsterAttackCooldownAndDeterminism(t *testing.T) {
 	var golden struct {
 		SessionSeed                   string `json:"session_seed"`
+		AttackCooldownTicks           int    `json:"attack_cooldown_ticks"`
 		MaxTicksForFirstPlayerDamaged int    `json:"max_ticks_for_first_player_damaged"`
 	}
 	loadGolden(t, "dungeon_monster_attack.json", &golden)
 	rules := loadRules(t)
+	if rules.Monsters["dungeon_mob"].AttackCooldown != golden.AttackCooldownTicks {
+		t.Fatalf("dungeon_mob attack cooldown = %d, want golden %d", rules.Monsters["dungeon_mob"].AttackCooldown, golden.AttackCooldownTicks)
+	}
 	sim, err := NewSimWithWorld("sess_dungeon_monster_cooldown", golden.SessionSeed, rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)

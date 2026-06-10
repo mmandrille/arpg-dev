@@ -263,6 +263,9 @@ func _initialize() -> void:
 	if not dungeon_mob.has("attack_damage") or not dungeon_mob.has("attack_cooldown_ticks"):
 		_fail("dungeon monster missing proactive attack fields")
 		return
+	if int(dungeon_monster_attack["attack_cooldown_ticks"]) != int(dungeon_mob["attack_cooldown_ticks"]):
+		_fail("dungeon monster attack cooldown mismatch")
+		return
 	var attack_damage: Dictionary = dungeon_mob["attack_damage"]
 	var pinned_damage := int(dungeon_monster_attack["damage"])
 	var damage_matches_rarity := false

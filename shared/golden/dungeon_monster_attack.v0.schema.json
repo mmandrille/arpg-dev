@@ -8,6 +8,7 @@
     "session_seed",
     "level",
     "monster_def_id",
+    "attack_cooldown_ticks",
     "max_ticks_for_first_player_damaged",
     "damage",
     "player_hp_after"
@@ -18,6 +19,7 @@
     "session_seed": { "type": "string", "minLength": 1 },
     "level": { "type": "integer", "maximum": -1 },
     "monster_def_id": { "type": "string", "minLength": 1 },
+    "attack_cooldown_ticks": { "type": "integer", "minimum": 1 },
     "max_ticks_for_first_player_damaged": { "type": "integer", "minimum": 1 },
     "damage": { "type": "integer", "minimum": 0 },
     "player_hp_after": { "type": "integer", "minimum": 0 }

@@ -4141,27 +4141,55 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		attackDamage = &scaledAttackDamage
 		monster.lastAttackTick = s.tick
 		monster.hasAttacked = true
-		attackerStats := s.monsterEffectiveCombatStats(monster, *attackDamage)
-		defenderStats, _ := s.playerEffectiveCombatStats()
-		outcome := s.resolveCombat(attackerStats, defenderStats, *attackDamage)
-		if !outcome.Hit || outcome.Blocked {
-			res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, "", outcome))
+		if def.effectiveAttackMode() == attackModeRanged {
+			s.fireMonsterProjectile(monster, player, def, *attackDamage, res)
 			continue
 		}
-		player.hp -= outcome.Damage
-		if player.hp < 0 {
-			player.hp = 0
-		}
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
-		eventType := "player_damaged"
-		if player.hp == 0 {
-			eventType = "player_killed"
-		}
-		res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, "", outcome))
-		if player.hp == 0 {
-			continue
-		}
+		s.damagePlayerByMonster(monster, player, *attackDamage, "", res)
 	}
+}
+
+func (s *Sim) fireMonsterProjectile(monster *entity, player *entity, def MonsterDef, damageRange DamageRange, res *TickResult) {
+	dir := normalize(Vec2{X: player.pos.X - monster.pos.X, Y: player.pos.Y - monster.pos.Y})
+	if dir.X == 0 && dir.Y == 0 {
+		dir = Vec2{X: 1}
+	}
+	projectile := &entity{
+		kind:            projectileEntity,
+		pos:             monster.pos,
+		ownerID:         monster.id,
+		targetID:        player.id,
+		projectileDefID: def.ProjectileDefID,
+		dir:             dir,
+		speed:           def.ProjectileSpeed,
+		maxDistance:     def.AttackRange,
+		damageRange:     damageRange,
+		spawnTick:       s.tick,
+	}
+	projectile.id = s.alloc()
+	s.activeLevel().entities[projectile.id] = projectile
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
+}
+
+func (s *Sim) damagePlayerByMonster(monster *entity, player *entity, damageRange DamageRange, corr string, res *TickResult) combatResolution {
+	attackerStats := s.monsterEffectiveCombatStats(monster, damageRange)
+	defenderStats, _ := s.playerEffectiveCombatStats()
+	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
+	if !outcome.Hit || outcome.Blocked {
+		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
+		return outcome
+	}
+	player.hp -= outcome.Damage
+	if player.hp < 0 {
+		player.hp = 0
+	}
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	eventType := "player_damaged"
+	if player.hp == 0 {
+		eventType = "player_killed"
+	}
+	res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, corr, outcome))
+	return outcome
 }
 
 func (s *Sim) nearestLivingPlayerForMonster(level *LevelState, monster *entity) *playerState {
@@ -4280,6 +4308,9 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterD
 	)
 	for _, goal := range candidates {
 		if !s.positionInNavigationBounds(nav, goal) || s.monsterPositionBlocked(goal, monster.id) {
+			continue
+		}
+		if def.effectiveAttackMode() == attackModeRanged && !s.hasClearMonsterRangedShot(goal, player) {
 			continue
 		}
 		blocked := s.buildMonsterBlockedFn(monster.id)
@@ -4687,11 +4718,16 @@ const (
 	projectileHitWall = iota
 	projectileHitInteractable
 	projectileHitMonster
+	projectileHitPlayer
 )
 
 func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool) {
 	best := projectileHit{t: math.Inf(1)}
 	found := false
+	ownerKind := ""
+	if owner := s.activeLevel().entities[p.ownerID]; owner != nil {
+		ownerKind = owner.kind
+	}
 	consider := func(hit projectileHit) {
 		hit.pos = Vec2{
 			X: p.pos.X + (candidate.X-p.pos.X)*hit.t,
@@ -4725,11 +4761,21 @@ func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool
 				consider(projectileHit{t: t, category: projectileHitInteractable, entityID: e.id})
 			}
 		case monsterEntity:
-			if e.hp <= 0 {
+			if ownerKind != playerEntity || e.hp <= 0 {
 				continue
 			}
 			if t, ok := segmentIntersectsCircle(p.pos, candidate, e.pos, monsterRadius+projectileRadius); ok {
 				consider(projectileHit{t: t, category: projectileHitMonster, entityID: e.id})
+			}
+		case playerEntity:
+			if ownerKind != monsterEntity || e.hp <= 0 {
+				continue
+			}
+			if p.targetID != 0 && e.id != p.targetID {
+				continue
+			}
+			if t, ok := segmentIntersectsCircle(p.pos, candidate, e.pos, playerRadius+projectileRadius); ok {
+				consider(projectileHit{t: t, category: projectileHitPlayer, entityID: e.id})
 			}
 		}
 	}
@@ -4752,6 +4798,10 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		s.usePlayer(owner)
 		defer s.savePlayer(owner)
 	}
+	if hit.category == projectileHitPlayer {
+		s.resolveMonsterProjectileHit(p, hit, res)
+		return
+	}
 	if hit.category != projectileHitMonster {
 		res.Events = append(res.Events, Event{EventType: "projectile_blocked", CorrelationID: p.sourceCorrID})
 		return
@@ -4762,6 +4812,22 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		return
 	}
 	s.damageMonsterByPlayer(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+}
+
+func (s *Sim) resolveMonsterProjectileHit(p *entity, hit projectileHit, res *TickResult) {
+	owner := s.activeLevel().entities[p.ownerID]
+	target := s.activeLevel().entities[hit.entityID]
+	if owner == nil || owner.kind != monsterEntity || owner.hp <= 0 || target == nil || target.kind != playerEntity || target.hp <= 0 {
+		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
+		return
+	}
+	ps := s.players[target.id]
+	if ps == nil || !ps.Connected || ps.CurrentLevel != s.currentLevel {
+		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
+		return
+	}
+	s.usePlayer(ps)
+	s.damagePlayerByMonster(owner, target, p.damageRange, p.sourceCorrID, res)
 }
 
 func (s *Sim) aggroMonsterOnHit(monster *entity, playerID uint64, corr string, res *TickResult) {
@@ -5632,11 +5698,20 @@ func (s *Sim) targetInteractionRadius(e *entity) float64 {
 }
 
 func (s *Sim) monsterAttackReach(def MonsterDef) float64 {
+	if def.effectiveAttackMode() == attackModeRanged && def.AttackRange > 0 {
+		return def.AttackRange
+	}
 	return s.rules.Combat.UnarmedReach
 }
 
 func (s *Sim) monsterInAttackRange(monster *entity, player *entity, def MonsterDef) bool {
-	return meleeInRange(distance(player.pos, monster.pos), s.monsterAttackReach(def), playerRadius)
+	if !meleeInRange(distance(player.pos, monster.pos), s.monsterAttackReach(def), playerRadius) {
+		return false
+	}
+	if def.effectiveAttackMode() == attackModeRanged {
+		return s.hasClearMonsterRangedShot(monster.pos, player)
+	}
+	return true
 }
 
 func (s *Sim) inMeleeRange(target *entity) bool {
@@ -5700,6 +5775,34 @@ func (s *Sim) hasClearRangedShot(from Vec2, target *entity) bool {
 			if _, ok := segmentIntersectsCircle(from, target.pos, e.pos, monsterRadius+projectileRadius); ok {
 				return false
 			}
+		}
+	}
+	return true
+}
+
+func (s *Sim) hasClearMonsterRangedShot(from Vec2, target *entity) bool {
+	if target == nil || target.kind != playerEntity || target.hp <= 0 {
+		return false
+	}
+	for _, wall := range s.activeWalls() {
+		if _, ok := segmentIntersectsInflatedAABB(from, target.pos, wall.pos, wall.size, projectileRadius); ok {
+			return false
+		}
+	}
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
+		if e == nil || e.id == target.id {
+			continue
+		}
+		if e.kind != interactableEntity || e.state != interactableClosed {
+			continue
+		}
+		def, ok := s.rules.Interactables[e.interactableDefID]
+		if !ok || def.BarrierWhenClosed == nil {
+			continue
+		}
+		if _, ok := segmentIntersectsInflatedAABB(from, target.pos, e.pos, def.BarrierWhenClosed.Size, projectileRadius); ok {
+			return false
 		}
 	}
 	return true

@@ -18,6 +18,7 @@ from tools.bot.run import (
     join_listed_session,
     list_active_sessions,
     load_scenarios,
+    range_candidate_positions,
     run_assertions,
     run_runtime_assertions,
     select_shop_offer,
@@ -700,6 +701,63 @@ def test_runtime_state_records_combat_event_metadata():
     run_runtime_assertions([
         {"type": "combat_event_seen", "event_type": "monster_damaged", "outcome": "block", "blocked": True, "damage": 0}
     ], state, "test")
+
+
+def test_runtime_assertion_matches_combat_event_entity_selectors():
+    state = RuntimeState(local_player_id="1001")
+    state.entities = {
+        "1001": {"id": "1001", "type": "player", "hp": 9},
+        "1002": {
+            "id": "1002",
+            "type": "monster",
+            "monster_def_id": "dungeon_archer",
+            "hp": 4,
+        },
+        "1003": {
+            "id": "1003",
+            "type": "monster",
+            "monster_def_id": "dungeon_mob",
+            "hp": 4,
+        },
+    }
+    state.combat_events = [
+        {
+            "event_type": "player_damaged",
+            "source_entity_id": "1002",
+            "target_entity_id": "1001",
+            "damage": 1,
+        }
+    ]
+
+    run_runtime_assertions([
+        {
+            "type": "combat_event_seen",
+            "event_type": "player_damaged",
+            "source_monster_def_id": "dungeon_archer",
+            "target_entity_type": "player",
+            "min_damage": 1,
+        }
+    ], state, "test")
+
+    try:
+        run_runtime_assertions([
+            {
+                "type": "combat_event_seen",
+                "event_type": "player_damaged",
+                "source_monster_def_id": "dungeon_mob",
+            }
+        ], state, "test")
+    except AssertionError as exc:
+        assert "source_monster_def_id=dungeon_mob" in str(exc)
+    else:
+        raise AssertionError("expected selector mismatch")
+
+
+def test_range_candidate_positions_prefers_player_side_offset():
+    candidates = range_candidate_positions({"x": 4, "y": 5}, {"x": 10, "y": 5}, 6.5)
+
+    assert candidates[0] == {"x": 4.475, "y": 5.0}
+    assert len(candidates) == 8
 
 
 def test_directional_attack_direction_supports_explicit_and_target_direction():

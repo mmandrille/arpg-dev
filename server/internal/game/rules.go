@@ -179,11 +179,23 @@ type TeleporterPlacementRules struct {
 }
 
 type MonsterPlacementRules struct {
-	Count            int     `json:"count"`
-	MonsterDefID     string  `json:"monster_def_id"`
-	MarginFromWall   float64 `json:"margin_from_wall"`
-	MinSpawnDistance float64 `json:"min_spawn_distance"`
-	MaxAttempts      int     `json:"max_attempts"`
+	Count            int                   `json:"count"`
+	MonsterDefID     string                `json:"monster_def_id"`
+	MonsterPool      []MonsterPoolEntry    `json:"monster_pool,omitempty"`
+	MinimumMonsters  []MinimumMonsterEntry `json:"minimum_monsters,omitempty"`
+	MarginFromWall   float64               `json:"margin_from_wall"`
+	MinSpawnDistance float64               `json:"min_spawn_distance"`
+	MaxAttempts      int                   `json:"max_attempts"`
+}
+
+type MonsterPoolEntry struct {
+	MonsterDefID string `json:"monster_def_id"`
+	Weight       int    `json:"weight"`
+}
+
+type MinimumMonsterEntry struct {
+	MonsterDefID string `json:"monster_def_id"`
+	Count        int    `json:"count"`
 }
 
 type ChestPlacementRules struct {
@@ -486,6 +498,10 @@ type MonsterDef struct {
 	RetaliationDamage *DamageRange `json:"retaliation_damage,omitempty"`
 	AttackDamage      *DamageRange `json:"attack_damage,omitempty"`
 	AttackCooldown    int          `json:"attack_cooldown_ticks,omitempty"`
+	AttackMode        string       `json:"attack_mode,omitempty"`
+	AttackRange       float64      `json:"attack_range,omitempty"`
+	ProjectileSpeed   float64      `json:"projectile_speed,omitempty"`
+	ProjectileDefID   string       `json:"projectile_def_id,omitempty"`
 	Behavior          string       `json:"behavior,omitempty"`
 	AggroRadius       float64      `json:"aggro_radius,omitempty"`
 	LeashRadius       float64      `json:"leash_radius,omitempty"`
@@ -499,6 +515,14 @@ func (d MonsterDef) effectiveBehavior() string {
 	}
 
 	return d.Behavior
+}
+
+func (d MonsterDef) effectiveAttackMode() string {
+	if d.AttackMode == "" {
+		return attackModeMelee
+	}
+
+	return d.AttackMode
 }
 
 func (d MonsterDef) effectiveMoveSpeed(nav NavigationRules) float64 {
@@ -1106,6 +1130,34 @@ func LoadRules(dir string) (*Rules, error) {
 		} else if def.AttackCooldown > 0 {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_cooldown_ticks: requires attack_damage", id)
 		}
+		attackMode := def.effectiveAttackMode()
+		switch attackMode {
+		case attackModeMelee:
+			if def.AttackRange > 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_range: only valid for ranged attacks", id)
+			}
+			if def.ProjectileSpeed > 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.projectile_speed: only valid for ranged attacks", id)
+			}
+			if def.ProjectileDefID != "" {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.projectile_def_id: only valid for ranged attacks", id)
+			}
+		case attackModeRanged:
+			if def.AttackDamage == nil || def.AttackCooldown <= 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: ranged attacks require attack_damage and attack_cooldown_ticks", id)
+			}
+			if def.AttackRange <= r.Combat.UnarmedReach {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_range: must exceed melee reach", id)
+			}
+			if def.ProjectileSpeed <= 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.projectile_speed: must be positive for ranged attacks", id)
+			}
+			if def.ProjectileDefID == "" {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.projectile_def_id: required for ranged attacks", id)
+			}
+		default:
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_mode: %s", id, def.AttackMode)
+		}
 		behavior := def.effectiveBehavior()
 		switch behavior {
 		case monsterBehaviorStatic:
@@ -1114,6 +1166,9 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 			if def.AttackDamage != nil {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s: attack_damage only valid for chase behavior", id)
+			}
+			if attackMode == attackModeRanged {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: ranged attacks only valid for chase behavior", id)
 			}
 		case monsterBehaviorChase:
 			if def.AggroRadius <= 0 {
@@ -1305,6 +1360,9 @@ func LoadRules(dir string) (*Rules, error) {
 		if monsterDef.effectiveBehavior() != monsterBehaviorChase {
 			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: %s must use chase behavior", monsterID)
 		}
+	}
+	if err := validateMonsterPlacementPool(dungeonGeneration.MonsterPlacement, r); err != nil {
+		return nil, err
 	}
 	if dungeonGeneration.MonsterPlacement.MarginFromWall < 0 {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.margin_from_wall: must be non-negative")
@@ -1597,6 +1655,64 @@ func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFlo
 	if maxSpan >= math.Min(floor.Width, floor.Height) {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation: largest obstacle must fit inside floor")
 	}
+	return nil
+}
+
+func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) error {
+	if placement.Count == 0 {
+		if len(placement.MonsterPool) > 0 || len(placement.MinimumMonsters) > 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement: pool/minimums require positive count")
+		}
+		return nil
+	}
+
+	poolWeight := 0
+	poolIDs := map[string]bool{}
+	for idx, entry := range placement.MonsterPool {
+		if entry.MonsterDefID == "" {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].monster_def_id: required", idx)
+		}
+		if entry.Weight <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].weight: must be positive", idx)
+		}
+		def, ok := r.Monsters[entry.MonsterDefID]
+		if !ok {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].monster_def_id: unknown monster %s", idx, entry.MonsterDefID)
+		}
+		if def.effectiveBehavior() != monsterBehaviorChase {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].monster_def_id: %s must use chase behavior", idx, entry.MonsterDefID)
+		}
+		poolIDs[entry.MonsterDefID] = true
+		poolWeight += entry.Weight
+	}
+	if len(placement.MonsterPool) > 0 && poolWeight <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool: total weight must be positive")
+	}
+
+	minTotal := 0
+	for idx, entry := range placement.MinimumMonsters {
+		if entry.MonsterDefID == "" {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.minimum_monsters[%d].monster_def_id: required", idx)
+		}
+		if entry.Count < 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.minimum_monsters[%d].count: must be non-negative", idx)
+		}
+		def, ok := r.Monsters[entry.MonsterDefID]
+		if !ok {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.minimum_monsters[%d].monster_def_id: unknown monster %s", idx, entry.MonsterDefID)
+		}
+		if def.effectiveBehavior() != monsterBehaviorChase {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.minimum_monsters[%d].monster_def_id: %s must use chase behavior", idx, entry.MonsterDefID)
+		}
+		if len(placement.MonsterPool) > 0 && !poolIDs[entry.MonsterDefID] {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.minimum_monsters[%d].monster_def_id: %s missing from monster_pool", idx, entry.MonsterDefID)
+		}
+		minTotal += entry.Count
+	}
+	if minTotal > placement.Count {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.minimum_monsters: total %d exceeds count %d", minTotal, placement.Count)
+	}
+
 	return nil
 }
 

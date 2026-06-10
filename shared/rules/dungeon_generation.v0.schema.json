@@ -62,6 +62,15 @@
       "properties": {
         "count": { "type": "integer", "minimum": 0 },
         "monster_def_id": { "type": "string", "minLength": 1 },
+        "monster_pool": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/monster_pool_entry" }
+        },
+        "minimum_monsters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/minimum_monster_entry" }
+        },
         "margin_from_wall": { "type": "number", "minimum": 0 },
         "min_spawn_distance": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
@@ -275,6 +284,24 @@
       "properties": {
         "min": { "type": "integer", "minimum": 0 },
         "max": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "monster_pool_entry": {
+      "type": "object",
+      "required": ["monster_def_id", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "monster_def_id": { "type": "string", "minLength": 1 },
+        "weight": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "minimum_monster_entry": {
+      "type": "object",
+      "required": ["monster_def_id", "count"],
+      "additionalProperties": false,
+      "properties": {
+        "monster_def_id": { "type": "string", "minLength": 1 },
+        "count": { "type": "integer", "minimum": 0 }
       }
     },
     "positive_size": {

@@ -9,7 +9,7 @@
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "equals": 1 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated", "timeout_s": 60 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
     { "action": "pick_up_first_rolled_loot" },
     { "action": "equip_last_inventory_item" }

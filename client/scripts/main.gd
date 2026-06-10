@@ -71,6 +71,8 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 }
 const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
+const ARCHER_MONSTER_DEF_ID := "dungeon_archer"
+const ARCHER_BOW_MARKER_NAME := "ArcherBowMarker"
 const CHARACTER_FLOW_CREATE_GAME := "create_game"
 const CHARACTER_FLOW_JOIN_GAME := "join_game"
 const CHARACTER_FLOW_LEGACY_SOLO := "solo"
@@ -3197,6 +3199,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			var monster := packed.instantiate()
 			monster.scale = Vector3.ONE * _entity_visual_scale(e)
 			_apply_model_tint(monster, _entity_base_tint(e))
+			_sync_archer_bow_marker(monster, str(e.get("monster_def_id", "")))
 			return monster
 		# Fallback: red primitive so positioning/targeting still works.
 		var fallback := MeshInstance3D.new()
@@ -3205,6 +3208,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		fallback.mesh = BoxMesh.new()
 		fallback.material_override = fm
 		fallback.scale = Vector3.ONE * _entity_visual_scale(e)
+		_sync_archer_bow_marker(fallback, str(e.get("monster_def_id", "")))
 		return fallback
 	if kind == "player":
 		return _make_remote_player_node(e)
@@ -3250,6 +3254,8 @@ func _entity_visual_scale(e: Dictionary) -> float:
 
 
 func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
+	if e.has("monster_def_id"):
+		rec["monster_def_id"] = str(e["monster_def_id"])
 	for key in ["boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
 		if e.has(key):
 			rec[key] = e[key]
@@ -3265,6 +3271,59 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	rec["base_tint"] = base_tint.to_html(false)
 	if not bool(rec.get("boss_telegraph_active", false)):
 		_apply_model_tint(node, base_tint)
+	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
+	rec["has_bow_marker"] = _has_archer_bow_marker(node)
+
+
+func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
+	if root == null:
+		return
+	var existing := root.find_child(ARCHER_BOW_MARKER_NAME, true, false) as Node3D
+	if monster_def_id != ARCHER_MONSTER_DEF_ID:
+		if existing != null:
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = _make_archer_bow_marker()
+		root.add_child(existing)
+	_apply_archer_bow_material(existing)
+
+
+func _has_archer_bow_marker(root: Node3D) -> bool:
+	return root != null and root.find_child(ARCHER_BOW_MARKER_NAME, true, false) != null
+
+
+func _make_archer_bow_marker() -> Node3D:
+	var marker := Node3D.new()
+	marker.name = ARCHER_BOW_MARKER_NAME
+	marker.position = Vector3(0.42, 0.88, -0.28)
+	marker.rotation_degrees = Vector3(0.0, 0.0, -8.0)
+	marker.add_child(_make_archer_bow_part("BowGrip", Vector3(0.055, 0.46, 0.045), Vector3(0.0, 0.0, 0.0), 0.0, Color(0.39, 0.21, 0.08)))
+	marker.add_child(_make_archer_bow_part("BowUpperLimb", Vector3(0.045, 0.40, 0.04), Vector3(0.05, 0.34, 0.0), -18.0, Color(0.52, 0.31, 0.12)))
+	marker.add_child(_make_archer_bow_part("BowLowerLimb", Vector3(0.045, 0.40, 0.04), Vector3(0.05, -0.34, 0.0), 18.0, Color(0.52, 0.31, 0.12)))
+	marker.add_child(_make_archer_bow_part("BowString", Vector3(0.018, 0.90, 0.018), Vector3(0.18, 0.0, 0.0), 0.0, Color(0.86, 0.82, 0.68)))
+	return marker
+
+
+func _make_archer_bow_part(part_name: String, size: Vector3, position: Vector3, z_rotation_degrees: float, color: Color) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.name = part_name
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	part.mesh = mesh
+	part.position = position
+	part.rotation_degrees.z = z_rotation_degrees
+	part.set_meta("archer_bow_color", color.to_html(false))
+	return part
+
+
+func _apply_archer_bow_material(root: Node) -> void:
+	if root is MeshInstance3D and root.has_meta("archer_bow_color"):
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color("#" + str(root.get_meta("archer_bow_color")))
+		(root as MeshInstance3D).material_override = mat
+	for child in root.get_children():
+		_apply_archer_bow_material(child)
 
 
 func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
@@ -3866,6 +3925,7 @@ func _bot_entities_presentation_debug() -> Array:
 			"boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
 			"telegraph_tint": str(rec.get("telegraph_tint", "")),
 			"base_tint": str(rec.get("base_tint", "")),
+			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
 			"hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {},
 			"animation": controller.get_debug_state() if controller != null else {},

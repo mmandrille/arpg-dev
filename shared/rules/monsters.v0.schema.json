@@ -44,6 +44,10 @@
               }
             },
             "attack_cooldown_ticks": { "type": "integer", "minimum": 1 },
+            "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
+            "attack_range": { "type": "number", "exclusiveMinimum": 0 },
+            "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
+            "projectile_def_id": { "type": "string", "minLength": 1 },
             "behavior": { "type": "string", "enum": ["static", "chase"] },
             "aggro_radius": { "type": "number", "exclusiveMinimum": 0 },
             "leash_radius": { "type": "number", "exclusiveMinimum": 0 },

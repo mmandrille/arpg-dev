@@ -67,6 +67,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	rng := NewRNG(levelSeed)
 	chestRNG := NewRNG(SeedToUint64(seed + "|chest|" + strconv.Itoa(absInt(levelNum))))
 	rarityRNG := NewRNG(SeedToUint64(seed + "|monster_rarity|" + strconv.Itoa(absInt(levelNum))))
+	monsterDefRNG := NewRNG(SeedToUint64(seed + "|monster_def|" + strconv.Itoa(absInt(levelNum))))
 	out := generatedDungeonLevel{
 		levelNum: levelNum,
 		walls:    perimeterWalls(rules.FloorSize, rules.WallThickness),
@@ -97,7 +98,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := placeDungeonObstacles(seed, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
-		if err := placeDungeonMonsters(rng, rarityRNG, rules, &out); err != nil {
+		if err := placeDungeonMonsters(rng, monsterDefRNG, rarityRNG, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
 		if err := validateGeneratedDungeonReachability(rules, out); err != nil {
@@ -127,7 +128,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	if err := placeDungeonObstacles(seed, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
-	if err := placeDungeonMonsters(rng, rarityRNG, rules, &out); err != nil {
+	if err := placeDungeonMonsters(rng, monsterDefRNG, rarityRNG, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	if err := validateGeneratedDungeonReachability(rules, out); err != nil {
@@ -608,36 +609,75 @@ func randomChestPosition(rng *RNG, rules DungeonGenerationRules, out *generatedD
 	return Vec2{}, false
 }
 
-func placeDungeonMonsters(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+func placeDungeonMonsters(rng *RNG, defRNG *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
 	placement := rules.MonsterPlacement
 	count := placement.Count
 	if len(out.chests) > 0 {
 		count += rules.ChestPlacement.MonsterCountBonus
 	}
-	for i := 0; i < count; i++ {
-		pos, ok := randomMonsterPosition(rng, rules, out)
-		if !ok {
-			return fmt.Errorf("game: generate dungeon level %d: could not place monster %d", out.levelNum, i)
-		}
-		rarity := rules.RollMonsterRarity(rarityRNG)
-		effectiveDepth := absInt(out.levelNum) + rarity.LootDepthOffset
-		effectiveLootBand, ok := rules.LootBandForDepth(effectiveDepth)
-		if !ok {
-			return fmt.Errorf("game: generate dungeon level %d: missing loot band for effective depth %d", out.levelNum, effectiveDepth)
-		}
-		out.monsters = append(out.monsters, generatedMonster{
-			defID:     placement.MonsterDefID,
-			rarityID:  rarity.ID,
-			lootTable: effectiveLootBand.MonsterLootTable,
-			pos:       pos,
-		})
-		if rarity.ID == "champion" {
-			if err := placeChampionCommonMinions(rng, rules, out, pos); err != nil {
+	placed := 0
+	for _, minimum := range placement.MinimumMonsters {
+		for i := 0; i < minimum.Count && placed < count; i++ {
+			if err := placeGeneratedMonster(rng, rarityRNG, rules, out, minimum.MonsterDefID, placed); err != nil {
 				return err
 			}
+			placed++
+		}
+	}
+	for placed < count {
+		defID := rollDungeonMonsterDef(defRNG, placement)
+		if err := placeGeneratedMonster(rng, rarityRNG, rules, out, defID, placed); err != nil {
+			return err
+		}
+		placed++
+	}
+	return nil
+}
+
+func placeGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defID string, index int) error {
+	pos, ok := randomMonsterPosition(rng, rules, out)
+	if !ok {
+		return fmt.Errorf("game: generate dungeon level %d: could not place monster %d", out.levelNum, index)
+	}
+	rarity := rules.RollMonsterRarity(rarityRNG)
+	effectiveDepth := absInt(out.levelNum) + rarity.LootDepthOffset
+	effectiveLootBand, ok := rules.LootBandForDepth(effectiveDepth)
+	if !ok {
+		return fmt.Errorf("game: generate dungeon level %d: missing loot band for effective depth %d", out.levelNum, effectiveDepth)
+	}
+	out.monsters = append(out.monsters, generatedMonster{
+		defID:     defID,
+		rarityID:  rarity.ID,
+		lootTable: effectiveLootBand.MonsterLootTable,
+		pos:       pos,
+	})
+	if rarity.ID == "champion" {
+		if err := placeChampionCommonMinions(rng, rules, out, pos); err != nil {
+			return err
 		}
 	}
 	return nil
+}
+
+func rollDungeonMonsterDef(rng *RNG, placement MonsterPlacementRules) string {
+	if len(placement.MonsterPool) == 0 {
+		return placement.MonsterDefID
+	}
+	total := 0
+	for _, entry := range placement.MonsterPool {
+		total += entry.Weight
+	}
+	if total <= 0 {
+		return placement.MonsterDefID
+	}
+	roll := rng.IntN(total)
+	for _, entry := range placement.MonsterPool {
+		roll -= entry.Weight
+		if roll < 0 {
+			return entry.MonsterDefID
+		}
+	}
+	return placement.MonsterDefID
 }
 
 func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2) error {

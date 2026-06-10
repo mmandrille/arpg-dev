@@ -1,0 +1,64 @@
+server/internal/store/models.go
+  s_3029de92625633::t_8b6fa12f285a59 24-37
+server/internal/http/auth_session_test.go
+  s_3029de92625633::t_9d3b4f7383bf38 34-42,63,72,215-217,240-307
+client/scripts/main.gd
+  s_3029de92625633::t_95a5b317cf588c 297-298
+server/internal/replay/replay_test.go
+  s_3029de92625633::t_8b6fa12f285a59 1320
+client/tests/test_client_bot.gd
+  s_3029de92625633::t_41ac0c01233de6 297,333,348-354
+client/scripts/character_select_panel.gd
+  s_3029de92625633::t_1e537f0c9109f2 108,229,235,237,316-375
+client/tests/test_coop_client.gd
+  s_3029de92625633::t_2e90e22f2502f9 259-263,285,292-296
+docs/specs/v54_spec-character-select-summaries.md
+  s_3029de92625633::t_3885a49f6b2c8c 3
+  s_3029de92625633::t_01f53556ca0b34 1-2,4-81
+tools/bot/scenarios/client/27_character_select_summaries.json
+  s_3029de92625633::t_9236f7c69335b6 1-25
+server/internal/store/store_test.go
+  s_3029de92625633::t_9d3b4f7383bf38 104-129
+docs/plans/v54_2026-06-10-character-select-summaries.md
+  s_3029de92625633::t_3885a49f6b2c8c 3,109,112
+  s_3029de92625633::t_ad2cbc847ded00 50,52,54,57,59
+  s_3029de92625633::t_37c2ca37a9bf66 72,74,76,90,92
+  s_3029de92625633::t_28a8b497c5bc4a 93
+  s_3029de92625633::t_97509dbd03355f 1-2,4-49,51,53,55-56,58,60-71,73,75,77-89,91,94-107,110-111,113-121,127-132
+  s_3029de92625633::t_5dfba87a7efec6 108,122-126
+server/internal/store/interfaces.go
+  s_3029de92625633::t_8b6fa12f285a59 19
+server/internal/store/repos.go
+  s_3029de92625633::t_8b6fa12f285a59 88,90-97,105,107-117
+client/scripts/bot_scenario_runner.gd
+  s_3029de92625633::t_41ac0c01233de6 1440-1490,1914
+docs/PROGRESS.md
+  s_3029de92625633::t_e8aac3250a38f7 14,72,146
+  s_3029de92625633::t_30f8f380d2fe02 1435,1647-1650,1655,1675-1684
+  s_3029de92625633::t_01f53556ca0b34 1670-1674,1685
+  s_3029de92625633::t_14f46e090e921c 1337-1353
+server/internal/http/character.go
+  s_3029de92625633::t_3fe0e9d8b72fd7 24-30
+  s_3029de92625633::t_8b6fa12f285a59 61,166-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "50890432bb8b8f0e3a58f8258cee144e22cd022b",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_3029de92625633": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb1f7-a1ec-7e73-84a0-6545f34ddbb1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

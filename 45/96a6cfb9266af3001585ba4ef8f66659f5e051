@@ -1,0 +1,38 @@
+client/scripts/inventory_panel.gd
+  s_27577ac914d158::t_8a22491fa6f06a 1164
+  s_27577ac914d158::t_f216d9efddd943 58-63
+  s_27577ac914d158::t_17b4a1e2ef0aa9 140
+client/scripts/consumable_bar.gd
+  s_27577ac914d158::t_397aa6a69520c9 67
+  s_27577ac914d158::t_cc00efb3031c1d 10-13
+client/scripts/item_rules_loader.gd
+  s_27577ac914d158::t_3cb84aef38d56c 1,4-6,8-9,12-13,15-18,20-24,30,36,48,60
+  s_27577ac914d158::t_f033f9fccff7ae 2-3,7,10-11,14,19,25-29,31-35,37-47,49-59,61-69
+client/scripts/main.gd
+  s_27577ac914d158::t_0d593fa16f442e 114,117,120
+  s_27577ac914d158::t_bd77feb22ea54f 247
+  s_27577ac914d158::t_dcbe0d345da2ce 3594
+  s_27577ac914d158::t_bbf91d19a203a7 112-113,115-116,118-119
+client/scripts/stash_panel.gd
+  s_27577ac914d158::t_7a3ee3da497665 95
+  s_27577ac914d158::t_8326ebf6068571 35-40
+client/scripts/shop_panel.gd
+  s_27577ac914d158::t_0a352942727581 49-54
+  s_27577ac914d158::t_b801c9f0190616 117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4596a6cfb9266af3001585ba4ef8f66659f5e051",
+  "prompts": {},
+  "sessions": {
+    "s_27577ac914d158": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df627ccd-97cc-45eb-813d-99c038bf4269",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

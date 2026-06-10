@@ -2,8 +2,8 @@ import json
 
 from tools.bot.client_join_preflight import build_metadata, write_metadata
 from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
+from tools.bot.bot_types import RuntimeState
 from tools.bot.run import (
-    RuntimeState,
     clean_bot_run_artifacts,
     create_listed_coop_session,
     default_manifest_path,

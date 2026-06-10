@@ -5,6 +5,7 @@ extends SceneTree
 const MainScript := preload("res://scripts/main.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
+const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 
 var _pass_count: int = 0
@@ -30,6 +31,7 @@ func _initialize() -> void:
 	_test_dead_character_rows_are_disabled()
 	_test_character_panel_modes_for_v45()
 	_test_settings_panel_create_game_type_sync()
+	_test_status_text_toggle_hides_left_debug_not_level_hud()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -291,6 +293,26 @@ func _test_settings_panel_create_game_type_sync() -> void:
 	panel.set_create_game_session_type("coop")
 	_assert_true("coop create game type selected", (panel._session_type_buttons["coop"] as Button).disabled)
 	panel.queue_free()
+
+
+func _test_status_text_toggle_hides_left_debug_not_level_hud() -> void:
+	var main = _make_main()
+	main._debug_label = Label.new()
+	main._level_label = Label.new()
+	main.client_settings = ClientSettingsScript.new()
+	main.client_settings.status_text = false
+	main.current_level = -3
+	main._update_level_hud()
+	main._update_debug()
+	_assert_true("status text off hides left debug label", not main._debug_label.visible)
+	_assert_true("status text off keeps right level visible", main._level_label.visible)
+	_assert_true("right level still shows dungeon depth", main._level_label.text.begins_with("Level 3"))
+	main._debug_label.free()
+	main._level_label.free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
 
 
 func _test_local_player_model_front_faces_direction() -> void:

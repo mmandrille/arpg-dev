@@ -234,6 +234,7 @@ func _ready() -> void:
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
 	client_settings.apply()
+	_sync_status_text_visibility()
 	_sync_settings_panel()
 	_load_item_rules()
 	_load_item_templates()
@@ -558,7 +559,7 @@ func _on_settings_from_main() -> void:
 		settings_panel.show_settings(
 			ClientSettingsScript.size_label(client_settings.window_size),
 			client_settings.floating_combat_text,
-			client_settings.top_right_status_text,
+			client_settings.status_text,
 			client_settings.create_game_session_type
 		)
 
@@ -571,7 +572,7 @@ func _on_settings_from_pause() -> void:
 		settings_panel.show_settings(
 			ClientSettingsScript.size_label(client_settings.window_size),
 			client_settings.floating_combat_text,
-			client_settings.top_right_status_text,
+			client_settings.status_text,
 			client_settings.create_game_session_type
 		)
 
@@ -597,12 +598,12 @@ func _on_floating_combat_text_toggled(enabled: bool) -> void:
 	_sync_settings_panel()
 
 
-func _on_top_right_status_text_toggled(enabled: bool) -> void:
+func _on_status_text_toggled(enabled: bool) -> void:
 	if client_settings == null:
 		return
-	client_settings.set_top_right_status_text(enabled)
+	client_settings.set_status_text(enabled)
 	_sync_settings_panel()
-	_update_level_hud()
+	_sync_status_text_visibility()
 
 
 func _on_create_game_session_type_selected(session_type: String) -> void:
@@ -616,7 +617,7 @@ func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
 		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
 		settings_panel.set_floating_combat_text_enabled(client_settings.floating_combat_text)
-		settings_panel.set_top_right_status_text_enabled(client_settings.top_right_status_text)
+		settings_panel.set_status_text_enabled(client_settings.status_text)
 		settings_panel.set_create_game_session_type(client_settings.create_game_session_type)
 
 
@@ -2434,7 +2435,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.back_requested.connect(_on_settings_back)
 	settings_panel.size_selected.connect(_on_window_size_selected)
 	settings_panel.floating_combat_text_toggled.connect(_on_floating_combat_text_toggled)
-	settings_panel.top_right_status_text_toggled.connect(_on_top_right_status_text_toggled)
+	settings_panel.status_text_toggled.connect(_on_status_text_toggled)
 	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
 	menu_layer.add_child(settings_panel)
 
@@ -3158,9 +3159,6 @@ func _make_wall_node(wall: Dictionary) -> MeshInstance3D:
 func _update_level_hud() -> void:
 	if _level_label == null:
 		return
-	if client_settings != null and not client_settings.top_right_status_text:
-		_level_label.visible = false
-		return
 	var lines: Array[String] = []
 	if current_level == 0:
 		lines.append("Town")
@@ -3824,7 +3822,7 @@ func get_bot_state() -> Dictionary:
 		"loss_popup_visible": loss_popup != null and loss_popup.visible,
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
-		"top_right_status_text_enabled": client_settings != null and client_settings.top_right_status_text,
+		"status_text_enabled": client_settings != null and client_settings.status_text,
 		"create_game_session_type": client_settings.create_game_session_type if client_settings != null else ClientSettingsScript.DEFAULT_CREATE_GAME_SESSION_TYPE,
 		"damage_numbers": _bot_damage_numbers(),
 		"known_characters": character_panel.known_characters() if character_panel != null else [],
@@ -4271,6 +4269,11 @@ func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 # --- debug ------------------------------------------------------------------
 
 func _update_debug() -> void:
+	if _debug_label == null:
+		return
+	_sync_status_text_visibility()
+	if not _debug_label.visible:
+		return
 	var eq = equipped.get("main_hand", null)
 	var ws_state := "?"
 	if client != null:
@@ -4291,6 +4294,12 @@ func _update_debug() -> void:
 	] if visual_replay_enabled else ("bot-client" if bot_mode else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual"))
 	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB action  scroll zoom  I inventory" % [
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
+
+
+func _sync_status_text_visibility() -> void:
+	if _debug_label == null:
+		return
+	_debug_label.visible = client_settings == null or client_settings.status_text
 
 
 func _debug(msg: String) -> void:

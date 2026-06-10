@@ -1,0 +1,41 @@
+client/scripts/bot_scenario_runner.gd
+  s_b9cf0d42c0095c::t_0ee4bafc3d440d 748,751-753,758-761,766-769,775,879-892,1922
+docs/plans/v57_2026-06-10-boss-phase-readability.md
+  s_b9cf0d42c0095c::t_5dfb00d4c3d40e 1-2,4-43,48-57,60,62,64,66,68-78,80-81,83-84,86-95,97,99,101-112,116-123,128-132
+  s_b9cf0d42c0095c::t_4992437ad9cf68 3,44-47,58-59,61,63,65,67,79,82,85,96,98,100,113-114,124-126
+  s_b9cf0d42c0095c::t_ac2265475ed2d7 115,127
+docs/specs/v57_spec-boss-phase-readability.md
+  s_b9cf0d42c0095c::t_5dfb00d4c3d40e 1-84
+client/tests/test_boss_health_bar.gd
+  s_b9cf0d42c0095c::t_db23177d3bcedb 38-67,73
+client/scripts/boss_health_bar.gd
+  s_b9cf0d42c0095c::t_052d8ba12d19b0 7,12-13,21-26,56,61-76,86-91,104,155-172,177,188-207,216-230
+PROGRESS.md
+  s_b9cf0d42c0095c::t_17a738b8fb88b2 15,78,175,500-505,511,514-515,532,539
+  s_b9cf0d42c0095c::t_5a6a9fcd05021f 266
+client/tests/test_client_bot.gd
+  s_b9cf0d42c0095c::t_854d35a70e55dc 59,656-680,695-727,740-745,952-988
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_b9cf0d42c0095c::t_a0fb1627fa06b9 1-61
+docs/as-built/v57_boss-phase-readability.md
+  s_b9cf0d42c0095c::t_f32ba9a41bfcb9 1-31
+client/scripts/main.gd
+  s_b9cf0d42c0095c::t_fa9a9c71371fa3 4126-4128
+  s_b9cf0d42c0095c::t_0e4a7bc86fb595 75-76,740,1499-1540,3417-3418,3476,3481-3485,3497,3500,3502,3510-3511,3515-3582
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4f0102ba1fbe40d7eff1e08d47863f51184f6a29",
+  "prompts": {},
+  "sessions": {
+    "s_b9cf0d42c0095c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb285-2bbf-7b10-bc66-f90cee53e315",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

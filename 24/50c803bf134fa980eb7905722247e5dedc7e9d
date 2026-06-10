@@ -1,0 +1,30 @@
+docs/reviews/20260610_v53-shared-tooling-and-process.md
+  s_a7c4f269916132::t_00882225668e1f 1-68
+docs/reviews/20260610_v53-overview.md
+  s_a7c4f269916132::t_31b3757aa9a8db 1-102
+docs/reviews/20260610_v53-client.md
+  s_a7c4f269916132::t_48f0d7c645b49d 1-69
+docs/reviews/20260610_v53-backend.md
+  s_a7c4f269916132::t_313d5ad00d890c 1-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2450c803bf134fa980eb7905722247e5dedc7e9d",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_a7c4f269916132": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b2061c6-5e29-4de1-ba74-ec8b22007cd8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

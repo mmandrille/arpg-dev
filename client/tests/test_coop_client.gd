@@ -5,6 +5,7 @@ extends SceneTree
 const MainScript := preload("res://scripts/main.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
+const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
@@ -33,6 +34,7 @@ func _initialize() -> void:
 	_test_loss_popup_shows_for_dead_local_player()
 	_test_dead_character_rows_are_disabled()
 	_test_character_panel_modes_for_v45()
+	_test_multiplayer_sessions_panel_row_join_affordances()
 	_test_settings_panel_create_game_type_sync()
 	_test_status_text_toggle_hides_left_debug_not_level_hud()
 	_test_actionable_panels_autoclose_out_of_range()
@@ -280,6 +282,8 @@ func _test_character_panel_modes_for_v45() -> void:
 	var forced := panel.get_debug_state()
 	_assert_eq("forced create mode", str(forced.get("mode", "")), "forced_create")
 	_assert_eq("forced create title", str(forced.get("title", "")), "Create Character")
+	_assert_true("forced create shows name field", bool(forced.get("name_field_visible", false)))
+	_assert_eq("forced create uses check action", str(forced.get("create_button_text", "")), "✓")
 	_assert_true("forced create hides empty label", not bool(forced.get("empty_visible", true)))
 	panel.show_choose_or_create([
 		{"character_id": "char_live", "name": "Alive", "created_at": "", "dead": false, "level": 4, "gold": 12, "deepest_dungeon_depth": 2},
@@ -288,12 +292,57 @@ func _test_character_panel_modes_for_v45() -> void:
 	_assert_eq("choose mode", str(choose.get("mode", "")), "choose_or_create")
 	_assert_eq("choose title", str(choose.get("title", "")), "Choose Character")
 	_assert_true("choose keeps create affordance", bool(choose.get("create_button_visible", false)))
+	_assert_true("choose hides create name field until requested", not bool(choose.get("name_field_visible", true)))
+	_assert_eq("choose create action is explicit", str(choose.get("create_button_text", "")), "Create Character")
 	_assert_eq("choose character count", (choose.get("characters", []) as Array).size(), 1)
 	var choose_rows: Array = choose.get("character_rows", [])
 	_assert_eq("choose row level", int((choose_rows[0] as Dictionary).get("level", 0)), 4)
 	_assert_eq("choose row gold", int((choose_rows[0] as Dictionary).get("gold", 0)), 12)
 	_assert_eq("choose row depth", int((choose_rows[0] as Dictionary).get("deepest_dungeon_depth", 0)), 2)
 	_assert_true("choose row label includes summary", str((choose_rows[0] as Dictionary).get("label", "")).find("Lv 4") >= 0)
+	panel.submit_name()
+	var expanded := panel.get_debug_state()
+	_assert_true("create press reveals name field", bool(expanded.get("name_field_visible", false)))
+	_assert_eq("expanded create action uses check", str(expanded.get("create_button_text", "")), "✓")
+	var created := {"name": ""}
+	panel.create_requested.connect(func(name: String) -> void:
+		created["name"] = name
+	)
+	panel.set_name_text("Fresh Hero")
+	panel.submit_name()
+	_assert_eq("check creates character", str(created["name"]), "Fresh Hero")
+	panel.queue_free()
+
+
+func _test_multiplayer_sessions_panel_row_join_affordances() -> void:
+	var panel: MultiplayerSessionsPanel = MultiplayerSessionsPanelScript.new()
+	get_root().add_child(panel)
+	panel._build()
+	panel.show_panel()
+	panel.set_sessions([
+		{"session_id": "sess_1", "host_display_name": "Host", "connected_count": 1, "member_count": 4, "world_id": "dungeon_levels", "mode": "coop", "listed": true},
+	])
+	var debug := panel.get_debug_state()
+	var actions: Array = debug.get("actions", [])
+	_assert_true("join selected action removed", not actions.has("join_selected_session"))
+	var row := panel._rows.get_child(0) as HBoxContainer
+	_assert_eq("session row has label and check", row.get_child_count(), 2)
+	var row_button := row.get_child(0) as Button
+	var join_button := row.get_child(1) as Button
+	_assert_eq("session row join uses check", join_button.text, "✓")
+	var joined := {"id": ""}
+	panel.join_requested.connect(func(session_id: String) -> void:
+		joined["id"] = session_id
+	)
+	join_button.pressed.emit()
+	_assert_eq("row check joins session", str(joined["id"]), "sess_1")
+	joined["id"] = ""
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.pressed = true
+	event.double_click = true
+	row_button.emit_signal("gui_input", event)
+	_assert_eq("row double click joins session", str(joined["id"]), "sess_1")
 	panel.queue_free()
 
 

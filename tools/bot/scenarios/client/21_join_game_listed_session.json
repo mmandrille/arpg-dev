@@ -47,18 +47,24 @@
       "session_id_env": "ARPG_EXPECTED_JOIN_SESSION_ID",
       "selected": true
     },
-    { "type": "click_menu_button", "button": "join_selected_session" },
+    { "type": "click_menu_button", "button": "join_expected_session" },
     { "type": "wait_character_panel", "timeout_s": 5.0 },
     {
       "type": "assert_character_panel",
       "mode": "choose_or_create",
       "title": "Choose Character",
       "min_character_count": 1,
+      "name_field_visible": false,
+      "create_button_visible": true
+    },
+    { "type": "click_menu_button", "button": "create_character" },
+    {
+      "type": "assert_character_panel",
       "name_field_visible": true,
       "create_button_visible": true
     },
     { "type": "enter_character_name", "name": "Bot Guest 46" },
-    { "type": "click_menu_button", "button": "start" },
+    { "type": "click_menu_button", "button": "confirm_character_create" },
     { "type": "wait_ws_open", "timeout_s": 10.0 },
     {
       "type": "assert_current_session",

@@ -243,6 +243,7 @@ func _test_multiplayer_menu_step_types_load() -> void:
 		{"type": "click_menu_button", "button": "host_listed_session"},
 		{"type": "click_menu_button", "button": "join_first_listed_session"},
 		{"type": "click_menu_button", "button": "select_expected_join_session"},
+		{"type": "click_menu_button", "button": "join_expected_session"},
 		{"type": "wait_remote_player_count", "at_least": 1, "timeout_s": 1.0},
 		{"type": "assert_remote_player_count", "equals": 1},
 	]
@@ -299,7 +300,7 @@ func _test_v45_menu_step_types_load() -> void:
 		{"type": "select_create_game_type", "session_type": "solo"},
 		{"type": "assert_create_game_type", "session_type": "solo"},
 		{"type": "click_menu_button", "button": "join_game"},
-		{"type": "click_menu_button", "button": "join_selected_session"},
+		{"type": "click_menu_button", "button": "join_expected_session"},
 		{"type": "assert_current_session", "exists": true, "mode": "solo", "listed": false, "session_id": "sess_1"},
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
@@ -318,7 +319,7 @@ func _test_v45_menu_assertions() -> void:
 		"world_id": "dungeon_levels",
 		"client_steps": [
 			{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Settings", "Exit"], "actions": ["create_game", "join_game"]},
-			{"type": "assert_character_panel", "mode": "choose_or_create", "title": "Choose Character", "min_character_count": 1, "name_field_visible": true, "create_button_visible": true},
+			{"type": "assert_character_panel", "mode": "choose_or_create", "title": "Choose Character", "min_character_count": 1, "name_field_visible": false, "create_button_visible": true},
 			{"type": "assert_create_game_type", "session_type": "coop"},
 			{"type": "assert_current_session", "exists": true, "mode": "coop", "listed": true},
 		],
@@ -332,7 +333,7 @@ func _test_v45_menu_assertions() -> void:
 			"title": "Choose Character",
 			"characters": [{"character_id": "char_1", "dead": false}],
 			"character_rows": [{"character_id": "char_1", "dead": false, "level": 3, "gold": 25, "deepest_dungeon_depth": 2, "status": "Ready", "label": "Hero  Lv 3 | 25g | D2 | Ready"}],
-			"name_field_visible": true,
+			"name_field_visible": false,
 			"create_button_visible": true,
 		},
 		"create_game_session_type": "coop",

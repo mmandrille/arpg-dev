@@ -171,17 +171,19 @@ type wallObstacle struct {
 }
 
 type effectiveCombatStats struct {
-	DamageMin           float64
-	DamageMax           float64
-	HitChance           float64
-	CritChance          float64
-	CritDamage          float64
-	Armor               float64
-	BlockPercent        float64
-	AttackSpeed         float64
-	AttackIntervalTicks int
-	MaxHP               float64
-	MaxMana             float64
+	DamageMin            float64
+	DamageMax            float64
+	HitChance            float64
+	CritChance           float64
+	CritDamage           float64
+	Armor                float64
+	BlockPercent         float64
+	AttackSpeed          float64
+	AttackIntervalTicks  int
+	MaxHP                float64
+	MaxMana              float64
+	HealthRegenPerSecond float64
+	ManaRegenPerSecond   float64
 }
 
 type combatResolution struct {
@@ -223,6 +225,8 @@ type playerState struct {
 	SkillCooldowns        map[string]skillCooldownState
 	ShopStock             map[string]*shopStockState
 	Gold                  int
+	HPRegenCarry          float64
+	ManaRegenCarry        float64
 }
 
 // Sim is the deterministic authoritative simulation for one solo session.
@@ -255,6 +259,8 @@ type Sim struct {
 	skillCooldowns        map[string]skillCooldownState
 	shopStock             map[string]*shopStockState
 	gold                  int
+	hpRegenCarry          float64
+	manaRegenCarry        float64
 }
 
 // CharacterProgressionState is the authoritative mutable progression state for
@@ -1084,6 +1090,8 @@ func (s *Sim) usePlayer(ps *playerState) {
 		s.shopStock = make(map[string]*shopStockState)
 	}
 	s.gold = ps.Gold
+	s.hpRegenCarry = ps.HPRegenCarry
+	s.manaRegenCarry = ps.ManaRegenCarry
 	level := s.activeLevel()
 	level.move = ps.Move
 	level.autoNav = ps.AutoNav
@@ -1103,6 +1111,8 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.SkillCooldowns = s.skillCooldowns
 	ps.ShopStock = s.shopStock
 	ps.Gold = s.gold
+	ps.HPRegenCarry = s.hpRegenCarry
+	ps.ManaRegenCarry = s.manaRegenCarry
 	if level := s.levels[ps.CurrentLevel]; level != nil {
 		ps.Move = level.move
 		ps.AutoNav = level.autoNav
@@ -1302,6 +1312,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.usePlayer(ps)
 			res := resultFor(ps.CurrentLevel, ps.PlayerID)
 			s.applyMovement(res)
+			s.applyPlayerRegen(res)
 			s.savePlayer(ps)
 		}
 
@@ -1383,6 +1394,46 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 	default:
 		res.reject(in.MessageID, "unknown_type")
 	}
+}
+
+func (s *Sim) applyPlayerRegen(res *TickResult) {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		return
+	}
+	stats, _ := s.playerEffectiveCombatStats()
+	changed := false
+	if delta := regenAmount(stats.HealthRegenPerSecond, tickDuration, &s.hpRegenCarry, player.maxHP-player.hp); delta > 0 {
+		player.hp += delta
+		changed = true
+	}
+	if delta := regenAmount(stats.ManaRegenPerSecond, tickDuration, &s.manaRegenCarry, player.maxMana-player.mana); delta > 0 {
+		player.mana += delta
+		changed = true
+	}
+	if changed {
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	}
+}
+
+func regenAmount(ratePerSecond float64, secondsPerTick float64, carry *float64, missing int) int {
+	if missing <= 0 || ratePerSecond <= 0 || secondsPerTick <= 0 {
+		*carry = 0
+		return 0
+	}
+	*carry += ratePerSecond * secondsPerTick
+	amount := int(math.Floor(*carry + 0.000000001))
+	if amount <= 0 {
+		return 0
+	}
+	if amount > missing {
+		amount = missing
+	}
+	*carry -= float64(amount)
+	if amount == missing {
+		*carry = 0
+	}
+	return amount
 }
 
 func (s *Sim) activeLevel() *LevelState {
@@ -5438,17 +5489,19 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 	effective, _ := s.playerEffectiveCombatStats()
 	character := s.characterDerivedStatsView()
 	return DerivedStatsView{
-		DamageMin:           effective.DamageMin,
-		DamageMax:           effective.DamageMax,
-		Armor:               effective.Armor,
-		AttackSpeed:         effective.AttackSpeed,
-		AttackIntervalTicks: effective.AttackIntervalTicks,
-		HitChance:           effective.HitChance,
-		CritChance:          effective.CritChance,
-		CritDamage:          effective.CritDamage,
-		MovementSpeed:       character.MovementSpeed,
-		MaxHP:               effective.MaxHP,
-		MaxMana:             effective.MaxMana,
+		DamageMin:            effective.DamageMin,
+		DamageMax:            effective.DamageMax,
+		Armor:                effective.Armor,
+		AttackSpeed:          effective.AttackSpeed,
+		AttackIntervalTicks:  effective.AttackIntervalTicks,
+		HitChance:            effective.HitChance,
+		CritChance:           effective.CritChance,
+		CritDamage:           effective.CritDamage,
+		MovementSpeed:        character.MovementSpeed,
+		MaxHP:                effective.MaxHP,
+		MaxMana:              effective.MaxMana,
+		HealthRegenPerSecond: effective.HealthRegenPerSecond,
+		ManaRegenPerSecond:   effective.ManaRegenPerSecond,
 	}
 }
 
@@ -5470,17 +5523,19 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 		return v
 	}
 	return DerivedStatsView{
-		DamageMin:           eval("damage_min"),
-		DamageMax:           eval("damage_max"),
-		Armor:               eval("armor"),
-		AttackSpeed:         eval("attack_speed"),
-		AttackIntervalTicks: s.attackIntervalTicksFromSpeed(eval("attack_speed")),
-		HitChance:           eval("hit_chance"),
-		CritChance:          eval("crit_chance"),
-		CritDamage:          eval("crit_damage"),
-		MovementSpeed:       eval("movement_speed"),
-		MaxHP:               eval("max_hp"),
-		MaxMana:             eval("max_mana"),
+		DamageMin:            eval("damage_min"),
+		DamageMax:            eval("damage_max"),
+		Armor:                eval("armor"),
+		AttackSpeed:          eval("attack_speed"),
+		AttackIntervalTicks:  s.attackIntervalTicksFromSpeed(eval("attack_speed")),
+		HitChance:            eval("hit_chance"),
+		CritChance:           eval("crit_chance"),
+		CritDamage:           eval("crit_damage"),
+		MovementSpeed:        eval("movement_speed"),
+		MaxHP:                eval("max_hp"),
+		MaxMana:              eval("max_mana"),
+		HealthRegenPerSecond: eval("health_regen_per_second"),
+		ManaRegenPerSecond:   eval("mana_regen_per_second"),
 	}
 }
 
@@ -5671,6 +5726,8 @@ func equipPreviewDeltas(current, preview effectiveCombatStats) []EquipPreviewDel
 		{"attack_interval_ticks", float64(current.AttackIntervalTicks), float64(preview.AttackIntervalTicks)},
 		{"max_hp", current.MaxHP, preview.MaxHP},
 		{"max_mana", current.MaxMana, preview.MaxMana},
+		{"health_regen_per_second", current.HealthRegenPerSecond, preview.HealthRegenPerSecond},
+		{"mana_regen_per_second", current.ManaRegenPerSecond, preview.ManaRegenPerSecond},
 	}
 	deltas := []EquipPreviewDeltaView{}
 	for _, value := range values {
@@ -5708,6 +5765,8 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	damageMax := float64(s.rules.Combat.PlayerDamage.Max) + character.DamageMax
 	armor := character.Armor
 	maxHP := character.MaxHP
+	healthRegen := character.HealthRegenPerSecond
+	manaRegen := character.ManaRegenPerSecond
 	blockPercent := 0.0
 	weaponSpeed := 1.0
 	itemSpeedPercent := 0.0
@@ -5722,6 +5781,8 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	}
 	armorSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.Armor, Kind: "character_formula"}}
 	maxHPSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.MaxHP, Kind: "character_formula"}}
+	healthRegenSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.HealthRegenPerSecond, Kind: "character_formula"}}
+	manaRegenSources := []StatBreakdownSourceView{{Label: "Magic", Value: character.ManaRegenPerSecond, Kind: "character_formula"}}
 	blockSources := []StatBreakdownSourceView{}
 	attackSpeedSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.AttackSpeed, Kind: "character_formula"}}
 
@@ -5771,6 +5832,26 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			maxHP += float64(value)
 			maxHPSources = append(maxHPSources, StatBreakdownSourceView{Label: "Rolled max HP", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
+		if value := baseStats["health_regen_per_10_seconds"]; value != 0 {
+			perSecond := float64(value) / 10.0
+			healthRegen += perSecond
+			healthRegenSources = append(healthRegenSources, StatBreakdownSourceView{Label: label, Value: perSecond, Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["health_regen_per_10_seconds"]; value != 0 {
+			perSecond := float64(value) / 10.0
+			healthRegen += perSecond
+			healthRegenSources = append(healthRegenSources, StatBreakdownSourceView{Label: "Rolled HP regen", Value: perSecond, Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+		if value := baseStats["mana_regen_per_10_seconds"]; value != 0 {
+			perSecond := float64(value) / 10.0
+			manaRegen += perSecond
+			manaRegenSources = append(manaRegenSources, StatBreakdownSourceView{Label: label, Value: perSecond, Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["mana_regen_per_10_seconds"]; value != 0 {
+			perSecond := float64(value) / 10.0
+			manaRegen += perSecond
+			manaRegenSources = append(manaRegenSources, StatBreakdownSourceView{Label: "Rolled mana regen", Value: perSecond, Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
 		if value := baseStats["block_percent"]; value != 0 {
 			blockPercent += float64(value)
 			blockSources = append(blockSources, StatBreakdownSourceView{Label: label, Value: float64(value), Kind: "equipment_base", ItemInstanceID: itemID})
@@ -5807,17 +5888,19 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	}
 
 	effective := effectiveCombatStats{
-		DamageMin:           maxFloat(0, damageMin),
-		DamageMax:           maxFloat(0, damageMax),
-		HitChance:           clampFloat(minFloat(character.HitChance, s.rules.Combat.BaseHitChance), 0, 1),
-		CritChance:          clampFloat(character.CritChance, 0, 1),
-		CritDamage:          maxFloat(1, character.CritDamage),
-		Armor:               maxFloat(0, armor),
-		BlockPercent:        maxFloat(0, blockPercent),
-		AttackSpeed:         attackSpeed,
-		AttackIntervalTicks: attackInterval,
-		MaxHP:               maxFloat(1, maxHP),
-		MaxMana:             maxFloat(0, character.MaxMana),
+		DamageMin:            maxFloat(0, damageMin),
+		DamageMax:            maxFloat(0, damageMax),
+		HitChance:            clampFloat(minFloat(character.HitChance, s.rules.Combat.BaseHitChance), 0, 1),
+		CritChance:           clampFloat(character.CritChance, 0, 1),
+		CritDamage:           maxFloat(1, character.CritDamage),
+		Armor:                maxFloat(0, armor),
+		BlockPercent:         maxFloat(0, blockPercent),
+		AttackSpeed:          attackSpeed,
+		AttackIntervalTicks:  attackInterval,
+		MaxHP:                maxFloat(1, maxHP),
+		MaxMana:              maxFloat(0, character.MaxMana),
+		HealthRegenPerSecond: maxFloat(0, healthRegen),
+		ManaRegenPerSecond:   maxFloat(0, manaRegen),
 	}
 	if effective.DamageMax < effective.DamageMin {
 		effective.DamageMax = effective.DamageMin
@@ -5830,6 +5913,8 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		{Key: "attack_speed", Value: effective.AttackSpeed, UncappedValue: uncappedAttackSpeed, Cap: floatPtr(s.rules.Combat.MaxEffectiveAttackSpeed), Sources: attackSpeedSources},
 		{Key: "attack_interval_ticks", Value: float64(effective.AttackIntervalTicks), UncappedValue: float64(effective.AttackIntervalTicks), Cap: nil, Sources: attackIntervalSources},
 		{Key: "max_hp", Value: effective.MaxHP, UncappedValue: effective.MaxHP, Cap: nil, Sources: maxHPSources},
+		{Key: "health_regen_per_second", Value: effective.HealthRegenPerSecond, UncappedValue: effective.HealthRegenPerSecond, Cap: nil, Sources: healthRegenSources},
+		{Key: "mana_regen_per_second", Value: effective.ManaRegenPerSecond, UncappedValue: effective.ManaRegenPerSecond, Cap: nil, Sources: manaRegenSources},
 		{Key: "block_percent", Value: effective.BlockPercent, UncappedValue: uncappedBlock, Cap: floatPtr(blockCap), Sources: blockSources},
 	}
 	return effective, breakdowns

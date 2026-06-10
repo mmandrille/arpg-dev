@@ -20,6 +20,7 @@ Canonical definitions live in [`skills/`](skills/README.md). Tool paths are syml
 | `/execute {plan_file.md}` | [`skills/execute/SKILL.md`](skills/execute/SKILL.md) | Review plan for gaps → ask questions → implement task-by-task until `make ci` is green |
 | `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Consolidate `PROGRESS.md` + uncommitted changes → `make ci` green → commit `feat: v{N}: {title}` |
 | `/showme {gear\|inventory\|...}` | [`skills/showme/SKILL.md`](skills/showme/SKILL.md) | Open or capture a focused Godot client preview for fast visual feedback |
+| `/autoloop {count}` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for up to 3 autonomous committed slices |
 
 Workflow: `/next` → `/spec` → `/plan` → `/execute` → `/finish`. Use `/showme` during client visual work when fast focused feedback is useful. Do not skip the review gates.
 
@@ -27,9 +28,9 @@ Workflow: `/next` → `/spec` → `/plan` → `/execute` → `/finish`. Use `/sh
 
 | Agent | Discovery | Invoke |
 |-------|-----------|--------|
-| **Cursor** | `.cursor/skills/` → `skills/` (committed symlink) | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/showme` |
+| **Cursor** | `.cursor/skills/` → `skills/` (committed symlink) | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/showme`, `/autoloop` |
 | **Claude Code** | `.claude/skills/` → `skills/` (committed symlink) | same; `/reload-skills` after pull |
-| **Codex** | `skills/` in repo + run [`scripts/link-agent-skills.sh`](scripts/link-agent-skills.sh) once for `~/.codex/skills/` | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$showme` |
+| **Codex** | `skills/` in repo + run [`scripts/link-agent-skills.sh`](scripts/link-agent-skills.sh) once for `~/.codex/skills/` | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$showme`, `$autoloop` |
 
 Edit skills only under `skills/` — never duplicate into `.cursor/` or `.claude/`.
 

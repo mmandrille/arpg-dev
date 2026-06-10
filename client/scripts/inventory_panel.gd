@@ -809,6 +809,10 @@ func _tooltip_lines(item: Dictionary) -> Array:
 		lines.append("Damage: %s-%s" % [str(dmg.get("min", "?")), str(dmg.get("max", "?"))])
 	if rolled_stats.has("max_hp"):
 		lines.append("Max HP: +%s" % str(rolled_stats.get("max_hp", "?")))
+	if rolled_stats.has("health_regen_per_10_seconds"):
+		lines.append("HP regen / 10s: +%s" % str(rolled_stats.get("health_regen_per_10_seconds", "?")))
+	if rolled_stats.has("mana_regen_per_10_seconds"):
+		lines.append("Mana regen / 10s: +%s" % str(rolled_stats.get("mana_regen_per_10_seconds", "?")))
 	if rolled_stats.has("armor"):
 		lines.append("Armor: +%s" % str(rolled_stats.get("armor", "?")))
 	if rolled_stats.has("block_percent"):
@@ -988,10 +992,10 @@ func _comparison_entries(item: Dictionary) -> Array:
 				if typeof(delta) != TYPE_DICTIONARY:
 					continue
 				var rec := delta as Dictionary
-				var diff := int(rec.get("delta", 0))
+				var diff := float(rec.get("delta", 0.0))
 				var sign := "+" if diff >= 0 else ""
 				entries.append({
-					"text": "%s%s %s vs equipped" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))],
+					"text": "%s%s %s vs equipped" % [sign, _format_delta(diff), _display_stat(str(rec.get("stat", "")))],
 					"color": _comparison_color(diff),
 				})
 	var summary = item.get("summary_lines", [])
@@ -1010,7 +1014,7 @@ func _comparison_entries(item: Dictionary) -> Array:
 				continue
 			entries.append({
 				"text": text,
-				"color": _comparison_color(int(diff_value)),
+				"color": _comparison_color(float(diff_value)),
 			})
 	return entries
 
@@ -1026,10 +1030,10 @@ func _append_equip_preview_entries(entries: Array, item: Dictionary) -> void:
 		if typeof(delta) != TYPE_DICTIONARY:
 			continue
 		var rec := delta as Dictionary
-		var diff := int(rec.get("delta", 0))
+		var diff := float(rec.get("delta", 0.0))
 		var sign := "+" if diff >= 0 else ""
 		entries.append({
-			"text": "%s%s %s preview" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))],
+			"text": "%s%s %s preview" % [sign, _format_delta(diff), _display_stat(str(rec.get("stat", "")))],
 			"color": _comparison_color(diff),
 		})
 
@@ -1043,7 +1047,7 @@ func _comparison_delta_from_line(text: String):
 	var first_space := stripped.find(" ")
 	if first_space <= 1:
 		return null
-	return int(stripped.substr(0, first_space))
+	return float(stripped.substr(0, first_space))
 
 
 func _comparison_lines(comparison_value: Variant) -> Array:
@@ -1058,9 +1062,9 @@ func _comparison_lines(comparison_value: Variant) -> Array:
 		if typeof(delta) != TYPE_DICTIONARY:
 			continue
 		var rec := delta as Dictionary
-		var diff := int(rec.get("delta", 0))
+		var diff := float(rec.get("delta", 0.0))
 		var sign := "+" if diff >= 0 else ""
-		lines.append("%s%s %s vs equipped" % [sign, str(diff), _display_stat(str(rec.get("stat", "")))])
+		lines.append("%s%s %s vs equipped" % [sign, _format_delta(diff), _display_stat(str(rec.get("stat", "")))])
 	return lines
 
 
@@ -1116,7 +1120,7 @@ func _equip_preview_count(item: Dictionary) -> int:
 	return (deltas as Array).size()
 
 
-func _comparison_color(delta: int) -> Color:
+func _comparison_color(delta: float) -> Color:
 	if delta > 0:
 		return Color("#9ee6a8")
 	if delta < 0:
@@ -1126,6 +1130,12 @@ func _comparison_color(delta: int) -> Color:
 
 func _display_stat(stat: String) -> String:
 	return StatLabels.display_name(stat)
+
+
+func _format_delta(delta: float) -> String:
+	if absf(delta - roundf(delta)) < 0.0001:
+		return str(int(roundf(delta)))
+	return "%.2f" % delta
 
 
 func _short_label(def_id: String) -> String:

@@ -54,7 +54,9 @@
         "crit_damage",
         "movement_speed",
         "max_hp",
-        "max_mana"
+        "max_mana",
+        "health_regen_per_second",
+        "mana_regen_per_second"
       ],
       "additionalProperties": false,
       "properties": {
@@ -67,7 +69,9 @@
         "crit_damage": { "$ref": "#/$defs/linear_formula" },
         "movement_speed": { "$ref": "#/$defs/linear_formula" },
         "max_hp": { "$ref": "#/$defs/linear_formula" },
-        "max_mana": { "$ref": "#/$defs/linear_formula" }
+        "max_mana": { "$ref": "#/$defs/linear_formula" },
+        "health_regen_per_second": { "$ref": "#/$defs/linear_formula" },
+        "mana_regen_per_second": { "$ref": "#/$defs/linear_formula" }
       }
     }
   },

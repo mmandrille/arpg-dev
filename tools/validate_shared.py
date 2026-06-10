@@ -294,6 +294,8 @@ def cross_checks(report: Report) -> None:
         "movement_speed",
         "max_hp",
         "max_mana",
+        "health_regen_per_second",
+        "mana_regen_per_second",
     }
     progression_base_stats = character_progression["base_stats"]
     if set(progression_base_stats) != progression_stats:
@@ -599,7 +601,7 @@ def cross_checks(report: Report) -> None:
         elif projectile_speed is not None:
             report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -1889,7 +1891,7 @@ def cross_checks(report: Report) -> None:
         if not failed_offers:
             report.ok("shop_offers golden matches deterministic catalog")
 
-        stat_order = ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "hotbar_slots", "inventory_rows"]
+        stat_order = ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "hotbar_slots", "inventory_rows"]
 
         def comparison_deltas(offered: dict, equipped: dict) -> list[dict]:
             out = []

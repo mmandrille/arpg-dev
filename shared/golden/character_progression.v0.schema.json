@@ -66,7 +66,9 @@
         "crit_damage",
         "movement_speed",
         "max_hp",
-        "max_mana"
+        "max_mana",
+        "health_regen_per_second",
+        "mana_regen_per_second"
       ],
       "additionalProperties": false,
       "properties": {
@@ -80,7 +82,9 @@
         "crit_damage": { "type": "number" },
         "movement_speed": { "type": "number" },
         "max_hp": { "type": "number" },
-        "max_mana": { "type": "number" }
+        "max_mana": { "type": "number" },
+        "health_regen_per_second": { "type": "number" },
+        "mana_regen_per_second": { "type": "number" }
       }
     }
   }

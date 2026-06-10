@@ -102,7 +102,7 @@
         },
         "stat_weights": {
           "type": "object",
-          "required": ["damage_min", "damage_max", "armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"],
+          "required": ["damage_min", "damage_max", "armor", "block_percent", "max_hp", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "hotbar_slots", "inventory_rows"],
           "additionalProperties": { "type": "integer", "minimum": 0 },
           "properties": {
             "damage_min": { "type": "integer", "minimum": 0 },
@@ -110,6 +110,8 @@
             "armor": { "type": "integer", "minimum": 0 },
             "block_percent": { "type": "integer", "minimum": 0 },
             "max_hp": { "type": "integer", "minimum": 0 },
+            "health_regen_per_10_seconds": { "type": "integer", "minimum": 0 },
+            "mana_regen_per_10_seconds": { "type": "integer", "minimum": 0 },
             "hotbar_slots": { "type": "integer", "minimum": 0 },
             "inventory_rows": { "type": "integer", "minimum": 0 }
           }

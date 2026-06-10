@@ -555,6 +555,58 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	}
 }
 
+func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
+	rules := loadRules(t)
+	base := NewSim("sess_regen_base", "01", rules)
+	player := base.entities[base.playerID]
+	player.hp = player.maxHP - 2
+	player.mana = player.maxMana - 2
+
+	for i := 0; i < 199; i++ {
+		base.Tick(nil)
+	}
+	if player.hp != player.maxHP-2 || player.mana != player.maxMana-2 {
+		t.Fatalf("base regen before threshold hp/mana = %d/%d, want %d/%d", player.hp, player.mana, player.maxHP-2, player.maxMana-2)
+	}
+	heal := base.Tick(nil)
+	if player.hp != player.maxHP-1 || player.mana != player.maxMana-1 {
+		t.Fatalf("base regen after 10s hp/mana = %d/%d, want %d/%d", player.hp, player.mana, player.maxHP-1, player.maxMana-1)
+	}
+	if !hasPlayerResourceUpdate(heal, player.hp, player.mana) {
+		t.Fatalf("base regen missing player update: %+v", heal.Changes)
+	}
+
+	geared := NewSim("sess_regen_item", "01", rules)
+	ring := addRolledInventoryItem(t, geared, 6410, "cave_ring", map[string]int{"health_regen_per_10_seconds": 5, "mana_regen_per_10_seconds": 5})
+	assertAck(t, geared.Tick([]Input{{MessageID: "ring", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "ring")
+	gearedPlayer := geared.entities[geared.playerID]
+	gearedPlayer.hp = gearedPlayer.maxHP - 2
+	gearedPlayer.mana = gearedPlayer.maxMana - 2
+	view := geared.CharacterProgressionView()
+	if math.Abs(view.DerivedStats.HealthRegenPerSecond-0.6) > 0.000001 || math.Abs(view.DerivedStats.ManaRegenPerSecond-0.6) > 0.000001 {
+		t.Fatalf("geared regen stats = %+v, want 0.6/0.6", view.DerivedStats)
+	}
+	hpRegen := findStatBreakdown(view.StatBreakdowns, "health_regen_per_second")
+	manaRegen := findStatBreakdown(view.StatBreakdowns, "mana_regen_per_second")
+	if hpRegen == nil || manaRegen == nil || !hasBreakdownSource(hpRegen.Sources, "equipment_roll") || !hasBreakdownSource(manaRegen.Sources, "equipment_roll") {
+		t.Fatalf("missing regen equipment breakdowns hp=%+v mana=%+v all=%+v", hpRegen, manaRegen, view.StatBreakdowns)
+	}
+
+	for i := 0; i < 33; i++ {
+		geared.Tick(nil)
+	}
+	if gearedPlayer.hp != gearedPlayer.maxHP-2 || gearedPlayer.mana != gearedPlayer.maxMana-2 {
+		t.Fatalf("geared regen before threshold hp/mana = %d/%d, want %d/%d", gearedPlayer.hp, gearedPlayer.mana, gearedPlayer.maxHP-2, gearedPlayer.maxMana-2)
+	}
+	gearedHeal := geared.Tick(nil)
+	if gearedPlayer.hp != gearedPlayer.maxHP-1 || gearedPlayer.mana != gearedPlayer.maxMana-1 {
+		t.Fatalf("geared regen after boosted ticks hp/mana = %d/%d, want %d/%d", gearedPlayer.hp, gearedPlayer.mana, gearedPlayer.maxHP-1, gearedPlayer.maxMana-1)
+	}
+	if !hasPlayerResourceUpdate(gearedHeal, gearedPlayer.hp, gearedPlayer.mana) {
+		t.Fatalf("geared regen missing player update: %+v", gearedHeal.Changes)
+	}
+}
+
 func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	zero := 0.0
@@ -4163,6 +4215,19 @@ func hasChange(r TickResult, op string) bool {
 	return false
 }
 
+func hasPlayerResourceUpdate(r TickResult, hp, mana int) bool {
+	for _, c := range r.Changes {
+		if c.Op != OpEntityUpdate || c.Entity == nil || c.Entity.Type != playerEntity {
+			continue
+		}
+		if c.Entity.HP == nil || *c.Entity.HP != hp || c.Entity.Mana == nil || *c.Entity.Mana != mana {
+			continue
+		}
+		return true
+	}
+	return false
+}
+
 func hasHotbarUpdate(r TickResult, slotIndex int, itemInstanceID *string) bool {
 	for _, c := range r.Changes {
 		if c.Op != OpHotbarUpdate || c.SlotIndex != slotIndex {
@@ -6804,6 +6869,8 @@ func assertDerivedStats(t *testing.T, got, want DerivedStatsView) {
 	assertFloat("movement_speed", got.MovementSpeed, want.MovementSpeed)
 	assertFloat("max_hp", got.MaxHP, want.MaxHP)
 	assertFloat("max_mana", got.MaxMana, want.MaxMana)
+	assertFloat("health_regen_per_second", got.HealthRegenPerSecond, want.HealthRegenPerSecond)
+	assertFloat("mana_regen_per_second", got.ManaRegenPerSecond, want.ManaRegenPerSecond)
 }
 
 func findStatBreakdown(rows []StatBreakdownView, key string) *StatBreakdownView {

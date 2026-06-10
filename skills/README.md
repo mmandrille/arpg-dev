@@ -10,14 +10,15 @@ Canonical skill definitions for this repo. **Edit files here only** — tool-spe
 | [`execute/`](execute/SKILL.md) | `/execute {plan}` → implement until `make ci` green |
 | [`finish/`](finish/SKILL.md) | `/finish` → consolidate PROGRESS, CI, `feat: vN:` commit |
 | [`showme/`](showme/SKILL.md) | `/showme` or `$showme` → focused Godot screenshot/live preview for visual tuning |
+| [`autoloop/`](autoloop/SKILL.md) | `$autoloop {count}` → repeat next/spec/plan/execute/finish for up to 3 committed slices |
 
 ## Discovery paths
 
 | Agent | Project path | How to invoke |
 |-------|--------------|---------------|
-| **Cursor** | `.cursor/skills/*` → `skills/` | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/showme` |
+| **Cursor** | `.cursor/skills/*` → `skills/` | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/showme`, `/autoloop` |
 | **Claude Code** | `.claude/skills/*` → `skills/` | same slash commands |
-| **Codex** | `skills/` (repo) + optional `~/.codex/skills/` symlink | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$showme` |
+| **Codex** | `skills/` (repo) + optional `~/.codex/skills/` symlink | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$showme`, `$autoloop` |
 
 Run once per machine for Codex user-level discovery:
 

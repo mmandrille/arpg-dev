@@ -14,6 +14,11 @@ const DISPLAY_NAMES := {
 	"armor": "Armor",
 	"block_percent": "Block",
 	"max_hp": "Max HP",
+	"max_mana": "Max mana",
+	"health_regen_per_second": "HP regen /s",
+	"mana_regen_per_second": "Mana regen /s",
+	"health_regen_per_10_seconds": "HP regen / 10s",
+	"mana_regen_per_10_seconds": "Mana regen / 10s",
 	"hotbar_slots": "Hotbar slots",
 	"inventory_rows": "Inventory rows",
 }

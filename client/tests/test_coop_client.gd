@@ -24,6 +24,8 @@ func _initialize() -> void:
 	_test_path_reject_clears_held_click_state()
 	_test_capacity_reject_shows_bag_full_unequip_message()
 	_test_skill_function_key_selects_right_click_skill()
+	_test_learned_skill_auto_selects_right_click()
+	_test_skill_cast_payload_uses_direction_without_nearest_fallback()
 	_test_loss_popup_shows_for_dead_local_player()
 	_test_dead_character_rows_are_disabled()
 	_test_character_panel_modes_for_v45()
@@ -381,7 +383,8 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	_assert_eq("F1 maps to skill slot 0", main._skill_function_key_slot(event), 0)
 	_assert_true("assign F1 to magic bolt", main._assign_skill_function_key(0, "magic_bolt"))
 	_assert_eq("F1 binding stored", str(main.skill_function_keys[0]), "magic_bolt")
-	_assert_eq("binding does not select immediately", main.right_click_skill_id, "")
+	_assert_eq("ranked binding selects immediately", main.right_click_skill_id, "magic_bolt")
+	main.right_click_skill_id = ""
 	_assert_true("pressing F1 selects right click skill", main._select_right_click_skill_from_function_key(0))
 	_assert_eq("right click skill selected", main.right_click_skill_id, "magic_bolt")
 
@@ -393,6 +396,44 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	_assert_true("unranked skill can still be bound", main._assign_skill_function_key(1, "magic_bolt"))
 	_assert_true("unranked binding cannot select right click", not main._select_right_click_skill_from_function_key(1))
 	_assert_eq("right click stays empty for unranked skill", main.right_click_skill_id, "")
+	main.free()
+
+
+func _test_learned_skill_auto_selects_right_click() -> void:
+	var main = MainScript.new()
+	main.skill_progression = {
+		"unspent_skill_points": 0,
+		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false}],
+	}
+	main._refresh_skill_ui()
+	_assert_eq("learned only active skill auto-selects right click", main.right_click_skill_id, "magic_bolt")
+	main.skill_progression = {
+		"unspent_skill_points": 1,
+		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true}],
+	}
+	main._refresh_skill_ui()
+	_assert_eq("unlearned skill clears right click", main.right_click_skill_id, "")
+	main.free()
+
+
+func _test_skill_cast_payload_uses_direction_without_nearest_fallback() -> void:
+	var main = _make_main()
+	var monster := Node3D.new()
+	monster.position = Vector3(2.0, 0.0, 0.0)
+	main.entities_root.add_child(monster)
+	main.entities["2001"] = {"node": monster, "type": "monster", "hp": 10}
+	main.monster_ids = ["2001"]
+	main.predicted_pos = Vector3.ZERO
+	var payload := main._skill_cast_payload("magic_bolt", "", Vector2(0.0, -3.0), false)
+	_assert_eq("right click direction payload has no target", payload.has("target_id"), false)
+	var direction: Dictionary = payload.get("direction", {})
+	_assert_float("right click direction x", float(direction.get("x", 99.0)), 0.0)
+	_assert_float("right click direction y", float(direction.get("y", 99.0)), -1.0)
+	var targeted := main._skill_cast_payload("magic_bolt", "", Vector2.ZERO, true)
+	_assert_eq("skill slot fallback can still target nearest", str(targeted.get("target_id", "")), "2001")
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
 	main.free()
 
 
@@ -457,6 +498,14 @@ func _assert_eq(name: String, got, want) -> void:
 
 func _assert_vec3(name: String, got: Vector3, want: Vector3) -> void:
 	if got.distance_to(want) <= 0.0001:
+		_pass_count += 1
+		return
+	_fail_count += 1
+	printerr("[gdtest] FAIL: %s got=%s want=%s" % [name, str(got), str(want)])
+
+
+func _assert_float(name: String, got: float, want: float) -> void:
+	if absf(got - want) <= 0.0001:
 		_pass_count += 1
 		return
 	_fail_count += 1

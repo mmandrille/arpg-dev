@@ -55,7 +55,9 @@
           "crit_damage": 1.525,
           "movement_speed": 0.71,
           "max_hp": 10,
-          "max_mana": 10
+          "max_mana": 10,
+          "health_regen_per_second": 0.1,
+          "mana_regen_per_second": 0.1
         }
       }
     },

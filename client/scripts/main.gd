@@ -797,6 +797,8 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		_show_inventory_full_text(target_id)
 	elif reason == "capacity_would_overflow":
 		_show_bag_full_cant_unequip_text()
+	elif _is_skill_reject_reason(reason):
+		_show_skill_rejected_feedback()
 	elif shop_panel != null and shop_panel.visible:
 		shop_panel.show_status(reason.replace("_", " "), true)
 
@@ -2503,6 +2505,8 @@ func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
 		return false
 	_ensure_skill_function_key_slots()
 	skill_function_keys[slot_index] = skill_id
+	if _skill_rank(skill_id) > 0:
+		right_click_skill_id = skill_id
 	_sync_skill_bindings_ui()
 	return true
 
@@ -2539,6 +2543,19 @@ func _sync_skill_bindings_ui() -> void:
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
 
 
+func _auto_select_right_click_skill() -> void:
+	if right_click_skill_id != "" and _skill_rank(right_click_skill_id) > 0:
+		return
+	right_click_skill_id = ""
+	for bound_skill in skill_function_keys:
+		var skill_id := str(bound_skill)
+		if skill_id != "" and _skill_rank(skill_id) > 0:
+			right_click_skill_id = skill_id
+			return
+	if _skill_rank(MAGIC_BOLT_ID) > 0:
+		right_click_skill_id = MAGIC_BOLT_ID
+
+
 func _refresh_progression_ui() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_progression(character_progression)
@@ -2548,6 +2565,7 @@ func _refresh_progression_ui() -> void:
 
 
 func _refresh_skill_ui() -> void:
+	_auto_select_right_click_skill()
 	if skills_panel != null:
 		skills_panel.set_skill_progression(skill_progression)
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
@@ -2570,36 +2588,57 @@ func _sync_progression_interactivity() -> void:
 func _try_use_right_click_skill() -> bool:
 	if right_click_skill_id == "":
 		return false
-	_send_skill_cast_intent(right_click_skill_id)
+	var pick := _resolve_click_at_mouse()
+	var target_id := ""
+	var direction := Vector2.ZERO
+	if str(pick.get("kind", "")) == "monster":
+		target_id = str(pick.get("target_id", ""))
+	else:
+		direction = _aim_direction_from_mouse()
+	if not _send_skill_cast_intent(right_click_skill_id, target_id, direction, false):
+		_show_skill_rejected_feedback()
 	return true
 
 
-func _send_skill_cast_intent(skill_id: String, target_id: String = "") -> void:
+func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> bool:
 	if _skill_cast_blocked(skill_id):
-		return
-	var payload := _skill_cast_payload(skill_id, target_id)
+		return false
+	var payload := _skill_cast_payload(skill_id, target_id, direction, use_nearest_fallback)
 	if payload.is_empty():
-		return
+		return false
 	client.send("cast_skill_intent", last_server_tick, payload)
 	_attack_cooldown = SEND_INTERVAL
 	if player_anim != null:
 		player_anim.play_one_shot("attack")
+	return true
 
 
-func _skill_cast_payload(skill_id: String, target_id: String = "") -> Dictionary:
+func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> Dictionary:
 	var payload := {"skill_id": skill_id}
 	var chosen_target := target_id
-	if chosen_target == "":
+	if chosen_target == "" and use_nearest_fallback:
 		chosen_target = _nearest_live_monster_id()
 	if chosen_target != "":
 		payload["target_id"] = chosen_target
 		_face_toward_entity(chosen_target)
 		return payload
-	var dir := _last_facing_direction
-	if dir.length_squared() <= 0.0001:
-		dir = Vector2(1.0, 0.0)
+	var dir := DirectionalAttackInputScript.direction_or_fallback(direction, _last_facing_direction)
+	_face_direction(dir)
 	payload["direction"] = {"x": dir.x, "y": dir.y}
 	return payload
+
+
+func _is_skill_reject_reason(reason: String) -> bool:
+	return reason.begins_with("skill_") \
+		or reason == "unknown_skill" \
+		or reason == "not_enough_mana" \
+		or reason == "invalid_direction" \
+		or reason == "target_out_of_range"
+
+
+func _show_skill_rejected_feedback() -> void:
+	if skill_bar != null:
+		skill_bar.flash_rejected()
 
 
 func _skill_rank(skill_id: String) -> int:

@@ -1,0 +1,107 @@
+docs/specs/v59_spec-data-driven-skill-catalog.md
+  s_cf915216b57ac5::t_efd47e3b8d8def 1-2,4-264,266-309
+  s_cf915216b57ac5::t_dd787ab86fd0e1 265
+  s_cf915216b57ac5::t_309b2955856c09 3
+server/internal/replay/replay_test.go
+  s_cf915216b57ac5::t_141d8d433304ab 128
+server/internal/http/ws_test.go
+  s_cf915216b57ac5::t_141d8d433304ab 576
+client/tests/test_golden.gd
+  s_cf915216b57ac5::t_03170dfa0c00f2 479-484,704
+docs/as-built/v59_data-driven-skill-catalog.md
+  s_cf915216b57ac5::t_309b2955856c09 1-49
+shared/golden/skill_points_and_magic_bolt.v0.schema.json
+  s_cf915216b57ac5::t_1761435659d8f7 72,76-86,88-117
+docs/plans/v59_2026-06-10-data-driven-skill-catalog.md
+  s_cf915216b57ac5::t_c5204f10860926 61,64-65,67,69
+  s_cf915216b57ac5::t_dd787ab86fd0e1 168,180,182,184
+  s_cf915216b57ac5::t_93a6a0a249afe2 47,54
+  s_cf915216b57ac5::t_db381580c1546d 85,87,89,91,93
+  s_cf915216b57ac5::t_309b2955856c09 3,152,163-165,167,176-179,181,183
+  s_cf915216b57ac5::t_34121ec1c8c0b6 108,110,112,115,137,139,142,144,146
+  s_cf915216b57ac5::t_e114edcef339db 1-2,4-46,48-53,55-60,62-63,66,68,70-84,86,88,90,92,94-107,109,111,113-114,116-136,138,140-141,143,145,147-151,153-162,166,169-175,185-195
+client/scripts/skill_rules_loader.gd
+  s_cf915216b57ac5::t_4d56842238966a 1-40,42-66
+  s_cf915216b57ac5::t_5860ad9773c313 41
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_cf915216b57ac5::t_a375396ee73de3 73
+  s_cf915216b57ac5::t_e45a2c4ac76ae8 78
+  s_cf915216b57ac5::t_e68939cc4d278c 6,15-16,50-62,65-69,74,76-77,83-99,149,160,163,170,172
+  s_cf915216b57ac5::t_3053c7c1038694 21-33,37-39,47-49,63,79-80
+  s_cf915216b57ac5::t_9e424af18c5057 72,75
+client/scripts/bot_controller.gd
+  s_cf915216b57ac5::t_503e135852ab93 70-73
+  s_cf915216b57ac5::t_443829bcfa9025 152-154
+client/scripts/bot_scenario_runner.gd
+  s_cf915216b57ac5::t_62d378dccc5ebd 18,104
+  s_cf915216b57ac5::t_a3fe82b9b6a449 720-734,759-762,768
+  s_cf915216b57ac5::t_1123a39099635d 1727-1728,1962,1967-1969
+  s_cf915216b57ac5::t_ce2b871449cf92 252-253,329-347
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_cf915216b57ac5::t_49c9583b95bcce 17,20-22,26,30,35,37,40,43-49,53-54,56-57
+  s_cf915216b57ac5::t_ce9a8b56473612 13,36,39,41,55
+  s_cf915216b57ac5::t_0933b73291efee 7,11-12,27,31-34,38,42,50-52,58-67,71,75,78-79
+client/scripts/skill_bar.gd
+  s_cf915216b57ac5::t_5194570ad2edba 23-24,44,56,84,89-90,98-99,121-122,151-152,174,176-192
+  s_cf915216b57ac5::t_5860ad9773c313 10,175
+shared/golden/skill_points_and_magic_bolt.json
+  s_cf915216b57ac5::t_1761435659d8f7 62-64,66-70
+shared/assets/skill_presentations.v0.json
+  s_cf915216b57ac5::t_1761435659d8f7 1-15
+server/internal/game/game_test.go
+  s_cf915216b57ac5::t_eb40e4881c861b 557-559
+  s_cf915216b57ac5::t_c91c923508be39 524,528-529,549-556,560-562
+  s_cf915216b57ac5::t_30c83ec58eab2f 762-794
+  s_cf915216b57ac5::t_cd3a45005c4105 138-139,535-548,563-565,683
+client/scripts/skills_panel.gd
+  s_cf915216b57ac5::t_5860ad9773c313 13,101-103,111-113,309
+  s_cf915216b57ac5::t_90d182cc532846 7,22,28-29,57-61,78-80,84-86,92-93,95-97,104,114,168,170,195,202-203,215,228-229,236-238,240-241,244-246,254,291
+  s_cf915216b57ac5::t_1e66466efc9c61 308,310-462
+client/scripts/main.gd
+  s_cf915216b57ac5::t_08386c60d561d0 249,2760
+  s_cf915216b57ac5::t_5860ad9773c313 2661-2668,2675,2738-2746,4299,4305-4307,4315-4317
+shared/rules/skills.v0.schema.json
+  s_cf915216b57ac5::t_1761435659d8f7 16,20-22,25-29,35-83,92-121
+client/scripts/skill_rules_loader.gd.uid
+  s_cf915216b57ac5::t_4d56842238966a 1
+client/tests/test_skills_panel.gd
+  s_cf915216b57ac5::t_03170dfa0c00f2 26-29,32,48-49,52-56,63-64,66-76
+server/internal/game/rules.go
+  s_cf915216b57ac5::t_72c8c3c74082ca 434-439,441-444,456-458,480-483
+  s_cf915216b57ac5::t_6fec38336b83f0 440,447-455,459-468,479,484-490
+  s_cf915216b57ac5::t_d0f9f228b046be 2278-2291,2296-2354
+client/tests/test_skill_bar.gd
+  s_cf915216b57ac5::t_03170dfa0c00f2 33-34,42
+shared/rules/skills.v0.json
+  s_cf915216b57ac5::t_1761435659d8f7 6-8,11-18,20,26-29
+shared/assets/skill_presentations.v0.schema.json
+  s_cf915216b57ac5::t_1761435659d8f7 1-36
+docs/researchs/data-driven-content-libraries.md
+  s_cf915216b57ac5::t_ae5d6978f0eeb8 1-158
+server/internal/game/handlers.go
+  s_cf915216b57ac5::t_11eee2d021f41b 972-975,1014-1017
+  s_cf915216b57ac5::t_eb40e4881c861b 936
+server/internal/game/sim.go
+  s_cf915216b57ac5::t_11eee2d021f41b 2558,2589,2622-2623
+  s_cf915216b57ac5::t_0c83a1b49f81e0 4885,5027-5049
+tools/validate_shared.py
+  s_cf915216b57ac5::t_e65ed34d965505 168,1031-1032,1037-1041,1049-1050,1052-1102,1142
+PROGRESS.md
+  s_cf915216b57ac5::t_92c6b8726e24e8 15,80,179,259-260,515-520,525-526,529,549
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7210fbf0d1d4a9cfcc03b2da0dd3fd1286273e1d",
+  "prompts": {},
+  "sessions": {
+    "s_cf915216b57ac5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb2a5-f646-7512-8854-50bc9b47b3f7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

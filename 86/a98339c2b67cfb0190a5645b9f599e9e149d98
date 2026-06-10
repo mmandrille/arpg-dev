@@ -1,0 +1,21 @@
+server/internal/game/handlers.go
+  s_27577ac914d158::t_344aa79b798ae9 3-4
+server/internal/game/sim.go
+  s_27577ac914d158::t_4cd6aa554d5e6d 1456,1461-1463,1465
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "86a98339c2b67cfb0190a5645b9f599e9e149d98",
+  "prompts": {},
+  "sessions": {
+    "s_27577ac914d158": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df627ccd-97cc-45eb-813d-99c038bf4269",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

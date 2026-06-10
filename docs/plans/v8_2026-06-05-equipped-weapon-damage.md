@@ -65,7 +65,7 @@ Branch: `feature/equipped-weapon-damage`
 | Modify | `tools/bot/scenarios/02_gear_before_combat.json` | Add one-attack kill assertion |
 | Modify | `tools/bot/run.py` | Track accepted attack counts and runtime assertions |
 | Modify | `tools/bot/test_protocol.py` | Unit tests for attack-count observation/assertion |
-| Modify | `docs/PROGRESS.md` | Update only when v8 ships |
+| Modify | `PROGRESS.md` | Update only when v8 ships |
 
 No expected changes: protocol schemas, store migrations, replay package,
 realtime protocol, Godot `main.gd`, inventory UI, asset manifests, worlds.
@@ -224,13 +224,13 @@ Verification:
 ## Task 6: End-to-End Verification and Docs
 
 Files:
-- Modify after implementation is complete: `docs/PROGRESS.md`
+- Modify after implementation is complete: `PROGRESS.md`
 
 - [x] Step 6.1: Run focused shared + Go + Python checks.
 - [x] Step 6.2: Run `make bot` to prove both scenarios, `/state`, reconnect,
   and replay verification still pass.
 - [x] Step 6.3: Run `make ci`.
-- [x] Step 6.4: Update `docs/PROGRESS.md` only after the slice passes:
+- [x] Step 6.4: Update `PROGRESS.md` only after the slice passes:
   mark v8 complete, add summary, and keep deferred UI/plugin work in backlog.
 
 Final verification:

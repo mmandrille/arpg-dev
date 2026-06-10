@@ -60,7 +60,7 @@ Spec review notes resolved during planning:
 | Modify | `tools/bot/run.py` | Protocol bot progression helpers/assertions |
 | Create | `tools/bot/scenarios/18_character_stats_and_leveling.json` | End-to-end protocol proof |
 | Create | `tools/bot/scenarios/client/09_character_stats_panel.json` | Godot client UI proof |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when slice ships |
+| Modify | `PROGRESS.md` | Lifecycle update when slice ships |
 
 ## Task 1 - Shared progression contracts
 
@@ -235,12 +235,12 @@ make bot-client
 ## Task 9 - Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v26_spec-character-stats-and-leveling.md`
 - Modify: `docs/plans/v26_2026-06-07-character-stats-and-leveling.md`
 
 - [x] Step 9.1: When implementation ships, mark the v26 spec `Complete - make ci green on <date>`.
-- [x] Step 9.2: Add v26 to the `docs/PROGRESS.md` slice numbering note and lifecycle table.
+- [x] Step 9.2: Add v26 to the `PROGRESS.md` slice numbering note and lifecycle table.
 - [x] Step 9.3: Add a concise "What v26 proved" section covering durable XP, level-up points, stat allocation, max HP/damage effects, character sheet, XP bar, and bot proofs.
 - [x] Step 9.4: Update deferred gaps: passive skills, armor/crit/hit/attack speed gameplay, mana consumers, stat requirements, respec, class selection, main-menu character summaries, and deeper XP curve/balancing.
 - [x] Step 9.5: Mark this plan complete only after final CI is green.

@@ -21,7 +21,7 @@ Godot plugin shortcut decision: **not applicable**. v48 has no client UI, camera
 |--------|------|----------------|
 | Created | `docs/specs/v48_spec-coop-rewards-and-scaling.md` | Slice spec |
 | Create | `docs/plans/v48_2026-06-09-coop-rewards-and-scaling.md` | This implementation plan |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v48 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v48 ships |
 | Modify | `shared/rules/combat.v0.json` | Co-op XP and party challenge defaults |
 | Modify | `shared/rules/combat.v0.schema.json` | Validate co-op combat rule block |
 | Create | `shared/golden/coop_rewards_and_scaling.json` | Multiplier/eligibility expectations |
@@ -147,7 +147,7 @@ make bot scenario=27_session_browser_uncapped_coop.json
 ## Task 7 — Lifecycle Docs And CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v48_2026-06-09-coop-rewards-and-scaling.md`
 
 - [x] Step 7.1: Add v48 to the slice numbering note and lifecycle table when implementation finishes.

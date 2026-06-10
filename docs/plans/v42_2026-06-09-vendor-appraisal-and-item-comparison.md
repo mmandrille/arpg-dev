@@ -51,7 +51,7 @@ small in-repo panel backed by the correct authoritative protocol.
 | Modify | `client/tests/test_shop_panel.gd` | Panel detail/comparison tests |
 | Modify | `client/scripts/bot_controller.gd` / `client/scripts/bot_scenario_runner.gd` | Client bot debug/assertion if needed |
 | Create | `tools/bot/scenarios/client/16_vendor_item_comparison.json` | Client UI proof |
-| Modify | `docs/PROGRESS.md` | Lifecycle closeout |
+| Modify | `PROGRESS.md` | Lifecycle closeout |
 
 ## Task 1 - Shared Protocol And Golden Fixture
 
@@ -143,11 +143,11 @@ HEADLESS=1 make bot-client scenario=16_vendor_item_comparison.json
 ## Task 5 - Lifecycle Docs And Final Verification
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md`
 
 - [x] Step 5.1: Add v42 lifecycle row, numbering note, summary, bot scenario list, and deferred
-  gaps to `docs/PROGRESS.md`.
+  gaps to `PROGRESS.md`.
 - [x] Step 5.2: Mark plan checkboxes complete as tasks pass.
 - [x] Step 5.3: Run final verification.
 

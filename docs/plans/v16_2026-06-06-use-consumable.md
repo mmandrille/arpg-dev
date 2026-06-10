@@ -28,7 +28,7 @@ Status: In progress (2026-06-06)
 | Modify | `tools/bot/run.py` | `use_inventory_item`, assertions |
 | Modify | `tools/validate_shared.py` | consumable heal drift guard |
 | Modify | `client/tests/test_golden.gd` | use_consumable golden |
-| Modify | `docs/PROGRESS.md` | v16 lifecycle |
+| Modify | `PROGRESS.md` | v16 lifecycle |
 
 ## Verification
 

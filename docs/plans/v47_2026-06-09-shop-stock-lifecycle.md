@@ -27,7 +27,7 @@ Key implementation decisions:
 |--------|------|----------------|
 | Add | `docs/plans/v47_2026-06-09-shop-stock-lifecycle.md` | This implementation plan. |
 | Modify | `docs/specs/v47_spec-shop-stock-lifecycle.md` | Only if execution discovers approved spec corrections. |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v47 ships. |
+| Modify | `PROGRESS.md` | Lifecycle update when v47 ships. |
 | Modify | `shared/rules/shops.v0.json` | Add stock lifecycle, max rarity, source-depth, and buyback rules. |
 | Modify | `shared/rules/shops.v0.schema.json` | Validate new shop rule fields. |
 | Add | `shared/protocol/envelope.v6.schema.json` | Protocol version bump. |
@@ -389,7 +389,7 @@ HEADLESS=1 make bot-client scenario=17_equipment_requirements_and_preview
 ## Task 9 — Full Regression, Docs, And CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v47_spec-shop-stock-lifecycle.md` only if execution finds approved spec corrections
 - Modify: `docs/plans/v47_2026-06-09-shop-stock-lifecycle.md` if execution discovers approved deviations
 
@@ -403,9 +403,9 @@ make bot scenario=shop_stock_lifecycle
 HEADLESS=1 make bot-client scenario=22_shop_stock_lifecycle
 ```
 
-- [x] Step 9.2: Update `docs/PROGRESS.md` lifecycle table and "What each slice proved" for v47, including explicit non-goals and the current loot-band caveat.
+- [x] Step 9.2: Update `PROGRESS.md` lifecycle table and "What each slice proved" for v47, including explicit non-goals and the current loot-band caveat.
 ```bash
-rg -n "v47|shop-stock-lifecycle|Latest completed slice|town vendor|buyback" docs/PROGRESS.md
+rg -n "v47|shop-stock-lifecycle|Latest completed slice|town vendor|buyback" PROGRESS.md
 ```
 
 - [x] Step 9.3: Run full local CI.

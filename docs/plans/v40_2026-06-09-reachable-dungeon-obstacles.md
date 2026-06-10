@@ -43,7 +43,7 @@ Implementation notes:
 | Modify | `tools/bot/run.py` | Add wall-layout assertions/helpers if needed. |
 | Add | `tools/bot/scenarios/28_reachable_dungeon_obstacles.json` | Protocol bot proof. |
 | Add | `tools/bot/scenarios/client/14_dungeon_wall_rendering.json` | Client bot proof if reliable. |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v40 ships. |
+| Modify | `PROGRESS.md` | Lifecycle update when v40 ships. |
 
 ## Task 1 — Shared Contracts
 
@@ -360,19 +360,19 @@ make bot scenario=session_browser_uncapped_coop
 ## Task 9 — Lifecycle Docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v40_2026-06-09-reachable-dungeon-obstacles.md` if execution discovers an approved deviation
 
-- [x] Step 9.1: Update `docs/PROGRESS.md` lifecycle table with v40 after implementation is complete.
+- [x] Step 9.1: Update `PROGRESS.md` lifecycle table with v40 after implementation is complete.
 
 ```bash
-rg -n "v40|reachable-dungeon-obstacles|Latest completed slice|Open gaps" docs/PROGRESS.md
+rg -n "v40|reachable-dungeon-obstacles|Latest completed slice|Open gaps" PROGRESS.md
 ```
 
 - [x] Step 9.2: Add the v40 "What each slice proved" summary and any deferred gaps, preserving the explicit non-goals from the spec.
 
 ```bash
-rg -n "reachable dungeon|obstacle|wall layout|boss floor" docs/PROGRESS.md
+rg -n "reachable dungeon|obstacle|wall layout|boss floor" PROGRESS.md
 ```
 
 - [x] Step 9.3: Run full CI.

@@ -10,7 +10,7 @@ Related:
 - [`v19_spec-teleporters-and-waypoint-ui.md`](v19_spec-teleporters-and-waypoint-ui.md)
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — D2 level 0 = town; D4 town waypoint always active
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md)
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 Review status: Approved after gap review against v18/v19 as-built code. Closed gaps:
 
@@ -63,7 +63,7 @@ tools/bot/scenarios/12_dungeon_levels.json            - start in town, descend b
 tools/bot/scenarios/13_teleporter_lab.json            - start in town, descend before teleporter lab
 scripts/play.sh                                       - default ARPG_WORLD_ID=dungeon_levels, fresh session
 client/scripts/main.gd                                - default interactive world + town wall rendering
-docs/PROGRESS.md                                      - lifecycle update when v20 ships
+PROGRESS.md                                      - lifecycle update when v20 ships
 ```
 
 ## 4. Data shapes

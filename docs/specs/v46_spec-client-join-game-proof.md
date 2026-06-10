@@ -7,7 +7,7 @@ Slice: v46 - real Godot Join Game co-op proof
 Baseline: v45 `menu-create-join-flow`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client, backend-owned sessions, agent-playability
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one authoritative Sim
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI/lobby shortcut checklist
@@ -92,7 +92,7 @@ Steam, trade, or matchmaking work.
 ```text
 docs/specs/v46_spec-client-join-game-proof.md - this spec
 docs/plans/v46_2026-06-09-client-join-game-proof.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v46 ships
+PROGRESS.md - lifecycle update when v46 ships
 
 scripts/bot_client.sh - run scenario-specific preflight setup/cleanup when requested
 tools/bot/client_join_preflight.py - optional focused helper for a held listed co-op host

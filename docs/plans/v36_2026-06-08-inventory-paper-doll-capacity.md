@@ -50,7 +50,7 @@ Plan decisions:
 | Modify | `client/scripts/bot_controller.gd` | Client bot helpers if needed. |
 | Create | `tools/bot/scenarios/client/13_inventory_paper_doll.json` | Client UI proof. |
 | Modify | `client/scripts/smoke.gd` or `client/tests/*` | Headless UI model checks. |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when slice ships. |
+| Modify | `PROGRESS.md` | Lifecycle update when slice ships. |
 
 ## Task 1 - Shared contracts and golden fixture
 
@@ -232,13 +232,13 @@ HEADLESS=1 make bot-client scenario=13_inventory_paper_doll.json
 ## Task 7 - Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Keep: `docs/specs/v36_spec-inventory-paper-doll-capacity.md`
 - Keep: `docs/plans/v36_2026-06-08-inventory-paper-doll-capacity.md`
 
-- [x] Step 7.1: After implementation is complete, mark v36 complete in `docs/PROGRESS.md`, add the lifecycle row, and summarize the proof and any deferred polish.
+- [x] Step 7.1: After implementation is complete, mark v36 complete in `PROGRESS.md`, add the lifecycle row, and summarize the proof and any deferred polish.
 ```bash
-rg -n "v36|inventory-paper-doll-capacity|Next slice" docs/PROGRESS.md
+rg -n "v36|inventory-paper-doll-capacity|Next slice" PROGRESS.md
 ```
 
 - [x] Step 7.2: Run final CI.

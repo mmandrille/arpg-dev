@@ -44,7 +44,7 @@
 | Modify | `client/scripts/main.gd` | Floor click → `move_to_intent`; entity click unchanged |
 | Modify | `client/scripts/smoke.gd` | Migrate any far-action assumptions |
 | Modify | `client/tests/test_golden.gd` | `auto_path.json` cases |
-| Modify | `docs/PROGRESS.md` | v11 row when complete |
+| Modify | `PROGRESS.md` | v11 row when complete |
 | Modify | `docs/specs/v11_spec-click-to-move-and-auto-path.md` | Status → Complete when done |
 
 ## Plugin adoption
@@ -266,7 +266,7 @@ func IsClientIntent(t string) bool {
 
 ## Task 7: Documentation and CI
 
-- [ ] **Step 7.1:** Update `docs/PROGRESS.md` — v11 lifecycle row, summary, close “click-to-move / pathfinding” deferred gap.
+- [ ] **Step 7.1:** Update `PROGRESS.md` — v11 lifecycle row, summary, close “click-to-move / pathfinding” deferred gap.
 
 - [ ] **Step 7.2:** Set spec status to Complete with date.
 

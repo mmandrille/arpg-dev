@@ -14,7 +14,7 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - dungeon progression and character-scoped state
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist if client UI work expands
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -97,7 +97,7 @@ client/tests                                                  - focused floating
 tools/bot/run.py                                              - assertions for combat outcome metadata and settings if needed
 tools/bot/scenarios/22_combat_stat_effects.json               - protocol end-to-end proof
 tools/bot/scenarios/client/11_combat_feedback.json            - optional Godot client UI proof
-docs/PROGRESS.md                                              - lifecycle update when v31 ships
+PROGRESS.md                                              - lifecycle update when v31 ships
 ```
 
 Protocol note: v31 may extend existing v1 events with optional fields rather than bumping protocol

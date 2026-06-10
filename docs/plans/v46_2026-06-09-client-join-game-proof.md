@@ -57,7 +57,7 @@ Implementation decisions:
 |--------|------|----------------|
 | Create | `docs/specs/v46_spec-client-join-game-proof.md` | Slice spec |
 | Create | `docs/plans/v46_2026-06-09-client-join-game-proof.md` | This implementation plan |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v46 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v46 ships |
 | Modify | `scripts/bot_client.sh` | Scenario-specific preflight process setup, env injection, and cleanup |
 | Create | `tools/bot/client_join_preflight.py` | Hold a connected listed co-op host for the Godot guest scenario |
 | Modify | `tools/bot/test_protocol.py` | Unit coverage for preflight metadata/config helpers if practical |
@@ -223,7 +223,7 @@ make client-smoke
 ## Task 7 - Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v46_2026-06-09-client-join-game-proof.md`
 - Modify: `docs/specs/v46_spec-client-join-game-proof.md` only if accepted clarifications are discovered
 

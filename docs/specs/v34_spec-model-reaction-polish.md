@@ -6,7 +6,7 @@ Slice: v34 - universal model reactions and co-op player tint
 Baseline: v33 `true-coop-session`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client, authoritative server, client-only presentation
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for client presentation work
 - [`v3_spec-animate-and-react.md`](v3_spec-animate-and-react.md) - original client animation controller and monster reactions
@@ -59,7 +59,7 @@ visually distinct but model-consistent.
 ```text
 docs/specs/v34_spec-model-reaction-polish.md          - this slice contract
 docs/plans/v34_<YYYY-MM-DD>-model-reaction-polish.md  - implementation plan
-docs/PROGRESS.md                                      - lifecycle update when v34 ships
+PROGRESS.md                                      - lifecycle update when v34 ships
 
 client/scripts/main.gd                                - event routing, remote player model creation, tint application
 client/scripts/animation_controller.gd                - reaction/death presentation state if it belongs with animation priority

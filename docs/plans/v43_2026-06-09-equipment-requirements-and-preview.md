@@ -62,7 +62,7 @@ tooltips.
 | Modify | `client/tests/test_golden.gd` | GDScript golden consumption for equipment requirements |
 | Modify | `tools/bot/scenarios/client/16_vendor_item_comparison.json` | Client vendor requirement/preview assertions |
 | Create | `tools/bot/scenarios/client/17_equipment_requirements_and_preview.json` | Client UI proof |
-| Modify | `docs/PROGRESS.md` | Lifecycle closeout |
+| Modify | `PROGRESS.md` | Lifecycle closeout |
 
 ## Task 1 — Shared Rules, Schemas, And Golden Fixture
 
@@ -163,11 +163,11 @@ HEADLESS=1 make bot-client scenario=17_equipment_requirements_and_preview.json
 ## Task 5 — Lifecycle Docs And Final Verification
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v43_2026-06-09-equipment-requirements-and-preview.md`
 
 - [x] Step 5.1: Add v43 lifecycle row, numbering note, summary, bot scenario list, and deferred
-  gaps to `docs/PROGRESS.md`.
+  gaps to `PROGRESS.md`.
 - [x] Step 5.2: Mark plan checkboxes complete as tasks pass.
 - [x] Step 5.3: Run final verification.
 

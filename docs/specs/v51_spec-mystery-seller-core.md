@@ -8,7 +8,7 @@ Slice: v51 - mystery seller core
 Baseline: v50 `account-stash-storage`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared contracts, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub and character progression
 - [`../adr/0013-mystery-seller-and-unidentified-item-offers.md`](../adr/0013-mystery-seller-and-unidentified-item-offers.md) - mystery seller product direction
@@ -120,7 +120,7 @@ in-repo panel instead of adopting GLoot, Godot-Inventory, or Wyvernbox.
 ```text
 docs/specs/v51_spec-mystery-seller-core.md - this spec
 docs/plans/v51_2026-06-10-mystery-seller-core.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v51 ships
+PROGRESS.md - lifecycle update when v51 ships
 
 shared/rules/interactables.v0.json - new town mystery seller interactable
 shared/rules/worlds.v0.json - town placement for dungeon_levels level 0

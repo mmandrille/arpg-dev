@@ -8,7 +8,7 @@ Slice: v50 - account-wide town stash storage
 Baseline: v49 `gold-autopickup-and-shared-loot-rules`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared contracts, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub, account/character persistence, co-op level scoping
 - [`../adr/0011-player-market-and-multi-item-trade-offers.md`](../adr/0011-player-market-and-multi-item-trade-offers.md) - future market delivery needs town stash ownership rules
@@ -137,7 +137,7 @@ server.
 ```text
 docs/specs/v50_spec-account-stash-storage.md - this spec
 docs/plans/v50_2026-06-10-account-stash-storage.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v50 ships
+PROGRESS.md - lifecycle update when v50 ships
 
 shared/protocol/envelope.v7.schema.json - protocol version bump for stash intents/events if needed
 shared/protocol/messages.v7.schema.json - stash open/deposit/withdraw item/gold intents

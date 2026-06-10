@@ -12,7 +12,7 @@ Godot level HUD.
 
 Resolved baseline facts:
 
-- v17 `monster-chase-movement` is complete and `docs/PROGRESS.md` lists it as the latest shipped
+- v17 `monster-chase-movement` is complete and `PROGRESS.md` lists it as the latest shipped
   slice.
 - ADR-0008 is accepted and requires `levels map[int]*LevelState`, seeded on-demand generation, and
   protocol level scoping.
@@ -76,7 +76,7 @@ Godot shortcut adoption checklist:
 | Modify | `client/scripts/main.gd` | Active-level entity scope, stair clicks, dungeon walls, HUD |
 | Optional | `client/scripts/level_hud.gd` | Small HUD wrapper if cleaner than inline setup |
 | Modify | `client/tests/test_golden.gd` | Dungeon stair fixture/rules checks |
-| Modify | `docs/PROGRESS.md` | v18 lifecycle after implementation ships |
+| Modify | `PROGRESS.md` | v18 lifecycle after implementation ships |
 
 ## 5. Implementation Tasks
 
@@ -211,7 +211,7 @@ make client-smoke
 
 ### Task 7 — Docs and Final Verification
 
-- [ ] Update `docs/PROGRESS.md` only after v18 implementation ships.
+- [ ] Update `PROGRESS.md` only after v18 implementation ships.
 - [ ] Run full CI once after focused gates pass.
 - [ ] Optionally run visual replay for `12_dungeon_levels.json` to inspect stairs and HUD.
 

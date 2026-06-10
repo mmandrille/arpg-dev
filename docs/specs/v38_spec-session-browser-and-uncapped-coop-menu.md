@@ -6,7 +6,7 @@ Slice: v38 - multiplayer menu session browser, listed co-op sessions, uncapped p
 Baseline: v37 `combat-control-and-boss-ai-fixes`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, thin client, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one `Sim`
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - multiplayer menu/lobby shortcut review
@@ -56,7 +56,7 @@ membership, player entities, persistence, combat, loot, replay, and WebSocket fa
 ```text
 docs/specs/v38_spec-session-browser-and-uncapped-coop-menu.md     - this slice contract
 docs/plans/v38_<YYYY-MM-DD>-session-browser-and-uncapped-coop-menu.md - implementation plan
-docs/PROGRESS.md                                                   - lifecycle update when v38 ships
+PROGRESS.md                                                   - lifecycle update when v38 ships
 README.md                                                          - manual play and remote play command docs
 
 server/migrations/*.sql                                            - listed session field/indexes if schema changes

@@ -34,7 +34,7 @@ server/internal/game/game_test.go        - deterministic movement/collision test
 tools/bot/scenarios/03_collision_lab.json - protocol scenario for blocked and routed movement
 tools/bot/run.py                         - add scenario actions/assertions for movement positions
 client/scripts/main.gd                   - render simple wall props from collision_lab worlds
-docs/PROGRESS.md                         - record v9 when complete
+PROGRESS.md                         - record v9 when complete
 ```
 
 ## 4. Data shapes

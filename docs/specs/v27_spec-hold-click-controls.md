@@ -16,7 +16,7 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) — thin client; server owns outcomes
 - [`../adr/0007-animation-state-model.md`](../adr/0007-animation-state-model.md) — client-only attack/locomotion presentation
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) — adoption checklist (expected: reject plugins)
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -221,7 +221,7 @@ docs/specs/v27_spec-hold-click-controls.md              - this slice contract
 docs/plans/v27_2026-06-07-hold-click-controls.md        - implementation plan
 client/scripts/main.gd                                  - hold session state + repeat ticks
 client/tests/test_sustained_input.gd                    - unit tests for hold start/stop/cadence
-docs/PROGRESS.md                                        - lifecycle update when v27 ships
+PROGRESS.md                                        - lifecycle update when v27 ships
 ```
 
 **Unchanged:** `shared/`, `server/`, `tools/bot/scenarios/`, golden fixtures (unless plan finds an

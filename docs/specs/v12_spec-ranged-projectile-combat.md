@@ -11,7 +11,7 @@ Related:
 - [`v9_spec-solid-collision-and-obstacles.md`](v9_spec-solid-collision-and-obstacles.md) — wall AABB and monster circle collision reused by projectile sweep
 - [`v8_spec-equipped-weapon-damage.md`](v8_spec-equipped-weapon-damage.md) — weapon `damage` resolution at hit time
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) — `attack_missed`, retaliation only on successful hits
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md)
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures, replay determinism)
 - ADR-0007 (client-only presentation; projectile mesh/tween is client-side)

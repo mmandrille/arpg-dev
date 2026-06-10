@@ -17,7 +17,7 @@ Tech stack: Python bot tooling, Go replay/http, Godot GDScript, Make/bash.
 | Modify | `client/scripts/main.gd` | Visual replay playlist mode |
 | Modify | `scripts/bot_visual.sh` | Record scenarios before launching Godot |
 | Modify | `make/agents.mk` | Update target description |
-| Modify | `docs/PROGRESS.md` | Record v6 when complete |
+| Modify | `PROGRESS.md` | Record v6 when complete |
 
 ## Task 1: Scenario Catalog
 
@@ -73,7 +73,7 @@ make bot-visual
 ## Task 4: Documentation and Final Verification
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Update lifecycle table and progress summary.
 - [x] Run focused tests.

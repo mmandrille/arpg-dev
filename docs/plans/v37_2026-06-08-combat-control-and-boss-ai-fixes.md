@@ -53,7 +53,7 @@ Plan decisions:
 | Create | `tools/bot/scenarios/26_combat_control_and_boss_ai_fixes.json` | Directional ranged and aggro-on-hit protocol proof. |
 | Modify | `tools/bot/scenarios/24_boss_floor_gate.json` | Add boss movement/damage proof while preserving unlock proof. |
 | Create/Modify | `tools/bot/scenarios/client/14_shift_click_stationary_attack.json` | Client proof only if reliable; otherwise keep coverage in client tests. |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v37 ships. |
+| Modify | `PROGRESS.md` | Lifecycle update when v37 ships. |
 
 ## Task 1 - Shared protocol and lab world
 
@@ -287,13 +287,13 @@ HEADLESS=1 make bot-client scenario=14_shift_click_stationary_attack.json
 ## Task 7 - Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v37_spec-combat-control-and-boss-ai-fixes.md` only if implementation forces an as-built clarification
 - Modify: `docs/plans/v37_2026-06-08-combat-control-and-boss-ai-fixes.md` if task scope changes during implementation
 
-- [x] Step 7.1: Update `docs/PROGRESS.md` with v37 lifecycle row, latest completed slice, what v37 proved, and any newly deferred combat/boss/client-control items.
+- [x] Step 7.1: Update `PROGRESS.md` with v37 lifecycle row, latest completed slice, what v37 proved, and any newly deferred combat/boss/client-control items.
 ```bash
-rg -n "v37|combat-control-and-boss-ai-fixes|Latest completed slice|Open gaps" docs/PROGRESS.md
+rg -n "v37|combat-control-and-boss-ai-fixes|Latest completed slice|Open gaps" PROGRESS.md
 ```
 
 - [x] Step 7.2: Run final local CI.

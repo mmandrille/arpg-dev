@@ -32,7 +32,7 @@ Add a server-authoritative town vendor that gives gold a repeatable sink. The ve
 | HTTP/realtime/replay | `server/internal/http/**`, `server/internal/realtime/**`, `server/internal/replay/**` |
 | Bot | `tools/bot/run.py`, `tools/bot/scenarios/29_town_vendor_gold_sink.json` |
 | Client | `client/scripts/main.gd`, `client/scripts/net_client.gd`, `client/scripts/inventory_panel.gd`, `client/scripts/shop_panel.gd`, `client/tests/**`, `tools/bot/scenarios/client/15_town_vendor_shop_panel.json` |
-| Docs | `docs/PROGRESS.md` during finish |
+| Docs | `PROGRESS.md` during finish |
 
 ## Implementation Tasks
 
@@ -245,7 +245,7 @@ HEADLESS=1 SCENARIO=15_town_vendor_shop_panel ./scripts/bot_client_local.sh
 ### 8. Full Validation and Documentation Closeout
 
 - [x] Run focused tests after each area, then full CI.
-- [x] Update `docs/PROGRESS.md` during finish with:
+- [x] Update `PROGRESS.md` during finish with:
   - v41 completed summary.
   - New protocol version v4.
   - Shop/vendor behavior.

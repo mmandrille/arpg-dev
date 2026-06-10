@@ -6,7 +6,7 @@ Slice: v37 - stationary directional attacks, aggro-on-hit, and boss attack repai
 Baseline: v36 `inventory-paper-doll-capacity`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, deterministic replay, thin client
 - [`../adr/0007-animation-state-model.md`](../adr/0007-animation-state-model.md) - client-only attack/reaction presentation
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - dungeon levels and generated hostile floors
@@ -66,7 +66,7 @@ The proof is: client `SHIFT+click` input -> new/extended authoritative direction
 ```text
 docs/specs/v37_spec-combat-control-and-boss-ai-fixes.md       - this slice contract
 docs/plans/v37_<YYYY-MM-DD>-combat-control-and-boss-ai-fixes.md - implementation plan
-docs/PROGRESS.md                                               - lifecycle update when v37 ships
+PROGRESS.md                                               - lifecycle update when v37 ships
 
 shared/protocol/messages.v*.schema.json                        - directional attack intent contract
 shared/protocol/envelope.v*.schema.json                        - message type allowlist if needed

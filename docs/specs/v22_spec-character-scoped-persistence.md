@@ -12,7 +12,7 @@ Related:
 - [`v20_spec-play-session-loop.md`](v20_spec-play-session-loop.md) — fresh town-to-dungeon run loop
 - [`v21_spec-dungeon-monster-combat.md`](v21_spec-dungeon-monster-combat.md) — current dungeon threat baseline
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — D1 character persistence, D4 persistent waypoints
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -66,7 +66,7 @@ server/internal/http/ws_test.go                            - cross-session inven
 server/internal/http/auth_session_test.go                  - create/resume behavior around default character
 tools/bot/run.py                                           - multi-session same-account scenario helper
 tools/bot/scenarios/15_character_persistence.json          - end-to-end persistence proof
-docs/PROGRESS.md                                           - lifecycle update when v22 ships
+PROGRESS.md                                           - lifecycle update when v22 ships
 ```
 
 No new Godot UI is required. Existing inventory and waypoint panels should render the snapshot

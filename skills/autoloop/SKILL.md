@@ -79,7 +79,7 @@ commands unless the user explicitly asks in a later message.
 
 ## Phase 0 — Preflight
 
-1. Read [`CLAUDE.md`](../../CLAUDE.md), [`docs/PROGRESS.md`](../../docs/PROGRESS.md), and
+1. Read [`CLAUDE.md`](../../CLAUDE.md), [`PROGRESS.md`](../../PROGRESS.md), and
    [`AGENTS.md`](../../AGENTS.md).
 2. Run `git status --short`.
 3. If dirty changes exist before the loop starts, inspect enough to determine whether they are
@@ -176,7 +176,7 @@ Use the **execute** skill on the plan file.
 
 Use the **finish** skill.
 
-- Consolidate `docs/PROGRESS.md`.
+- Consolidate `PROGRESS.md`.
 - Run `make ci`.
 - Stage only files belonging to the current slice.
 - Commit with exactly:
@@ -204,7 +204,7 @@ After each commit:
 4. Do not clear context if the commit failed, `make ci` did not pass, git status is ambiguous,
    or the next selected idea cannot be reconstructed from the checkpoint.
 5. If no explicit context clearing mechanism is available, do manual context hygiene instead:
-   treat previous slice implementation details as stale, re-read `CLAUDE.md`, `docs/PROGRESS.md`,
+   treat previous slice implementation details as stale, re-read `CLAUDE.md`, `PROGRESS.md`,
    `AGENTS.md`, the remaining selected idea, and the relevant skill files before the next slice.
 6. Never create repository files solely as autoloop memory or checkpoints.
 

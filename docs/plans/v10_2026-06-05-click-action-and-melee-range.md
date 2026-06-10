@@ -53,7 +53,7 @@ Branch: `feature/solid-collision-and-obstacles`
 | Modify | `client/scripts/main.gd` | Raycast action, door render + tween, remove E/attack intents |
 | Modify | `client/scripts/smoke.gd` | `action_intent` migration |
 | Modify | `client/tests/test_golden.gd` | `melee_reach` golden cases |
-| Modify | `docs/PROGRESS.md` | v10 row when complete |
+| Modify | `PROGRESS.md` | v10 row when complete |
 
 ## Plugin Adoption Checklist
 
@@ -109,7 +109,7 @@ Branch: `feature/solid-collision-and-obstacles`
 
 ## Task 5: Documentation and CI
 
-- [x] Step 5.1: Update `docs/PROGRESS.md` lifecycle table + v10 summary when done.
+- [x] Step 5.1: Update `PROGRESS.md` lifecycle table + v10 summary when done.
 - [x] Step 5.2: Run `make ci`.
 - [ ] Step 5.3: Optional `make bot-visual` — confirm door swing in `door_lab` replay.
 

@@ -7,7 +7,7 @@ Slice: v44 - skill points, attack-speed foundation, and first active skill
 Baseline: v43 `equipment-requirements-and-preview`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - character-scoped progression
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
@@ -109,7 +109,7 @@ server-owned data.
 ```text
 docs/specs/v44_spec-skill-points-and-magic-bolt.md - this spec
 docs/plans/v44_2026-06-09-skill-points-and-magic-bolt.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v44 ships
+PROGRESS.md - lifecycle update when v44 ships
 
 shared/rules/character_progression.v0.schema.json - stat points per level and skill point cadence
 shared/rules/character_progression.v0.json - change stat points to 3 and add skill point cadence

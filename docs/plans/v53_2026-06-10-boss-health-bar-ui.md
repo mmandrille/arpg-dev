@@ -41,5 +41,5 @@ Date: 2026-06-10
    - Run `CLIENT_UNIT_ONLY=1 make client-smoke`.
    - Run the new bot client scenario headless.
    - Run `make ci`.
-   - Update `docs/PROGRESS.md`.
+   - Update `PROGRESS.md`.
    - Commit as `feat: v53: boss health bar UI`.

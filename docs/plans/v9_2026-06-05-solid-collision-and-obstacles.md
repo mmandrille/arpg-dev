@@ -22,7 +22,7 @@ Tech stack: Go sim/tests, shared JSON schemas, Python protocol bot, Godot GDScri
 | Create | `tools/bot/scenarios/03_collision_lab.json` | End-to-end collision scenario |
 | Modify | `tools/bot/run.py` | Movement assertion actions |
 | Modify | `client/scripts/main.gd` | Simple wall visuals from shared world rules |
-| Modify | `docs/PROGRESS.md` | v9 completion record |
+| Modify | `PROGRESS.md` | v9 completion record |
 
 ## Plugin Adoption Checklist
 
@@ -65,7 +65,7 @@ adoption because v9 collision must be deterministic and server-authoritative.
 
 ## Task 5: Documentation and Verification
 
-- [x] Step 5.1: Update `docs/PROGRESS.md` with v9 as-built notes.
+- [x] Step 5.1: Update `PROGRESS.md` with v9 as-built notes.
 - [x] Step 5.2: Run focused Go tests.
 - [x] Step 5.3: Run `make validate-shared`.
 - [x] Step 5.4: Run `make bot`.

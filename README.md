@@ -2,8 +2,8 @@
 
 Personal experiment: an isometric action-RPG / looter built almost entirely by
 AI agents. See [`docs/adr/0001-technology-stack.md`](docs/adr/0001-technology-stack.md)
-for the foundational architecture and [`docs/specs/v1_spec-first-playable-vertical-slice.md`](docs/specs/v1_spec-first-playable-vertical-slice.md)
-for the current slice.
+for the foundational architecture and [`PROGRESS.md`](PROGRESS.md) for the current
+development baseline — latest completed slice, active branch, open gaps, and backlog.
 
 Architecture in one line: a **Godot 4 client** and a **Go authoritative server**
 as separate apps in one repo, talking JSON over WebSocket, with **Postgres**
@@ -16,7 +16,8 @@ client/   Godot 4 (GDScript) thin client — renders + predicts, never authorita
 server/   Go realtime game server + platform services (auth, sessions, persistence)
 shared/   data contracts: protocol schemas, rules-as-data, cross-language golden fixtures
 tools/    Python protocol bot + replay verification wrapper + shared schema validator
-docs/     ADRs, specs, plans
+docs/     ADRs, specs, plans, as-built (per-slice summaries), reviews (~every 10 slices)
+PROGRESS.md  slice lifecycle and current status (repo root — read before new work)
 ```
 
 ## Toolchain (pinned)
@@ -92,4 +93,6 @@ make bot-visual
 
 ## Status
 
-First playable vertical slice — see the spec and plan under `docs/`.
+See [`PROGRESS.md`](PROGRESS.md) for the live snapshot: latest completed slice, CI gate,
+active branch, open gaps, and deferred backlog. Specs and plans live under `docs/specs/`
+and `docs/plans/`.

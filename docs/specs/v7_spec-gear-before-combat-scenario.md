@@ -6,7 +6,7 @@ Related:
 
 - [`v6_spec-visual-bot-scenario-runner.md`](v6_spec-visual-bot-scenario-runner.md)
 - [`v5_spec-resume-authoritative-state.md`](v5_spec-resume-authoritative-state.md)
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -465,7 +465,7 @@ Files:
 ```text
 client/scripts/main.gd
 scripts/bot_visual.sh
-docs/PROGRESS.md
+PROGRESS.md
 ```
 
 Expected work:

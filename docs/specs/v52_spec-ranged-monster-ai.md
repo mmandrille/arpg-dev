@@ -8,7 +8,7 @@ Slice: v52 - ranged dungeon monster AI
 Baseline: v51 `mystery-seller-core`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, deterministic replay, shared rules as data
 - [`../adr/0007-animation-state-model.md`](../adr/0007-animation-state-model.md) - client-only presentation and event-driven reactions
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - generated dungeon levels and town safety
@@ -107,7 +107,7 @@ adopt/borrow/reject decision.
 ```text
 docs/specs/v52_spec-ranged-monster-ai.md - this spec
 docs/plans/v52_2026-06-10-ranged-monster-ai.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v52 ships
+PROGRESS.md - lifecycle update when v52 ships
 
 shared/rules/monsters.v0.json - add dungeon_archer and ranged attack fields
 shared/rules/monsters.v0.schema.json - validate ranged monster fields

@@ -68,7 +68,7 @@ Work stays on the current branch. Do not create a branch. Preserve unrelated dir
 | Modify | `tools/bot/run.py` | Two-account/two-WebSocket scenario support |
 | Create | `tools/bot/scenarios/23_true_coop_session.json` | Protocol bot proof |
 | Create/Optional | `tools/bot/scenarios/client/12_true_coop_session.json` | Godot client proof if reliable in v33 |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v33 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v33 ships |
 
 ## Task 1 — Shared Protocol v2 Contracts
 
@@ -275,11 +275,11 @@ make client-smoke
 ## Task 10 — Lifecycle Docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v33_2026-06-08-true-coop-session.md`
 
 - [x] Step 10.1: Update this plan with any as-built deviations, especially if the optional two-process Godot proof is deferred.
-- [x] Step 10.2: Update `docs/PROGRESS.md` only after implementation and CI pass.
+- [x] Step 10.2: Update `PROGRESS.md` only after implementation and CI pass.
 - [x] Step 10.3: Record v33 as complete, summarize true co-op behavior, and list deferred multiplayer gaps: matchmaking/lobby, Steam invites, party UI, trade, XP sharing, loot allocation, more than two players.
 - [x] Step 10.4: Run the final gate.
 

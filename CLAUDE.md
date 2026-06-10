@@ -4,14 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project progress (read first)
 
-**Before any new feature or slice:** read [`docs/PROGRESS.md`](docs/PROGRESS.md).
+**Before any new feature or slice:** read [`PROGRESS.md`](PROGRESS.md) at the repo root.
 
-That file is the canonical lifecycle doc: completed slices (v0–v4), current branch/merge status,
-what each slice proved, known gaps, deferred backlog, and the agent checklist for starting work.
-Update it when a slice ships.
-
-**Current snapshot (2026-06-05):** slices through **v10 `click-action-and-melee-range`** are
-implemented on `feature/solid-collision-and-obstacles` (`make ci` green); not yet merged to `main`.
+That file is the canonical lifecycle doc: current branch/merge status, slice index, known gaps,
+deferred backlog, and the agent checklist for starting work. Per-slice as-built notes live in
+`docs/as-built/`.
+It is updated when a slice ships — use its **Current status** table for baseline facts instead
+of hard-coded slice numbers in this file or other entrypoint docs.
 
 ## Commands
 
@@ -84,12 +83,13 @@ Examples:
 ## Architecture
 
 ```
-client/   Godot 4 (GDScript) — thin client: renders + locally predicts movement/attack feedback
-server/   Go authoritative server — owns all game state, loot rolls, inventory, persistence
-shared/   Data contracts: JSON schemas, rules-as-data, cross-language golden fixtures
-tools/    Python: protocol bot, replay wrapper, shared schema validator, asset pipeline tools
-assets/   Source art manifests + asset generation scripts
-docs/     ADRs + specs + plans + PROGRESS.md (slice lifecycle — read before new work)
+PROGRESS.md  slice lifecycle + current status (read before new work)
+client/      Godot 4 (GDScript) — thin client: renders + locally predicts movement/attack feedback
+server/      Go authoritative server — owns all game state, loot rolls, inventory, persistence
+shared/      Data contracts: JSON schemas, rules-as-data, cross-language golden fixtures
+tools/       Python: protocol bot, replay wrapper, shared schema validator, asset pipeline tools
+assets/      Source art manifests + asset generation scripts
+docs/        ADRs + specs + plans + as-built + reviews (periodic ~every 10 slices — see PROGRESS.md)
 ```
 
 ### The authoritative boundary (ADR-0001 D2)
@@ -127,11 +127,13 @@ Animation is **client-only presentation state** — never on the wire. Player lo
 
 This project uses Spec-Driven Development. Before touching code for any new feature:
 
-1. Read [`docs/PROGRESS.md`](docs/PROGRESS.md) — baseline slice, open gaps, invariants.
-2. Read or write the spec under `docs/specs/vN_spec-<feature>.md` (`N` = slice execution order).
+1. Read [`PROGRESS.md`](PROGRESS.md) — confirm baseline slice, branch, open gaps, and invariants.
+2. Read or write the spec under `docs/specs/vN_spec-<feature>.md` (`N` = next execution order from `PROGRESS.md` and existing specs/plans).
 3. Write or check the plan under `docs/plans/vN_<date>-<feature>.md`.
 4. Consult the relevant ADRs in `docs/adr/` — especially ADR-0001 (foundational) and any feature-specific ones.
-5. When the slice completes, update `docs/PROGRESS.md` (lifecycle table + summary + new gaps).
+5. When the slice completes, update `PROGRESS.md` (lifecycle table, new gaps) and
+   `docs/as-built/vN_<codename>.md` (what it proved).
+6. At ~10-slice milestones, write a repo-wide engineering review under `docs/reviews/` (see `PROGRESS.md` → **Periodic engineering reviews**).
 
 ## Key Invariants
 

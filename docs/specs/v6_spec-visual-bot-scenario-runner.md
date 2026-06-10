@@ -2,7 +2,7 @@
 
 Status: Draft
 Branch: `feature/visual-bot-scenario-runner`
-Related: [`docs/PROGRESS.md`](../PROGRESS.md), [`v5_spec-resume-authoritative-state.md`](v5_spec-resume-authoritative-state.md)
+Related: [`PROGRESS.md`](../../PROGRESS.md), [`v5_spec-resume-authoritative-state.md`](v5_spec-resume-authoritative-state.md)
 
 ## 1. Purpose
 
@@ -35,7 +35,7 @@ server/internal/http/replay_test.go - timeline endpoint coverage
 client/scripts/main.gd - visual replay playlist mode
 scripts/bot_visual.sh - run scenarios, verify replay, launch playlist
 make/agents.mk - target description
-docs/PROGRESS.md - slice lifecycle update when complete
+PROGRESS.md - slice lifecycle update when complete
 ```
 
 ## 4. Data shapes

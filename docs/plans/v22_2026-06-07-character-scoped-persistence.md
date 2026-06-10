@@ -42,7 +42,7 @@ Spec defaults locked for implementation:
 | Modify | `server/internal/http/auth_session_test.go` | Account isolation and create/resume regression tests |
 | Modify | `tools/bot/run.py` | Add multi-session same-account scenario support and assertions |
 | Add | `tools/bot/scenarios/15_character_persistence.json` | End-to-end durable progression proof |
-| Modify | `docs/PROGRESS.md` | Add v22 lifecycle summary when complete |
+| Modify | `PROGRESS.md` | Add v22 lifecycle summary when complete |
 
 ## Task 1 — Database schema and store contracts
 
@@ -170,7 +170,7 @@ make client-smoke
 
 Files:
 
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 7.1: When implementation ships, add v22 to the lifecycle table and mark latest completed slice as `character-scoped-persistence`.
 - [x] Step 7.2: Document as-built behavior: character-owned inventory/equipment, character waypoints, session-start snapshots for replay, fresh map generation, and session-scoped HP/floor drops.

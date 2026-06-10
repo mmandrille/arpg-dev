@@ -17,7 +17,7 @@ Godot shortcut adoption checklist:
 
 Spec review notes resolved during planning:
 
-- Slice number, branch, codename, and baseline match `docs/PROGRESS.md`.
+- Slice number, branch, codename, and baseline match `PROGRESS.md`.
 - The spec's open questions have defaults and this plan locks them: duplicate character names are allowed; Return to Main Menu should use a small end-session route if implementation cost stays low; the character picker does not need inventory/equipment summaries; window size applies immediately.
 - No shared rules, golden fixtures, Go `game/`, or WebSocket schema changes are expected.
 - Bot proof is mandatory because this changes the client entry flow and session start flow; add client bot scenario `08_main_menu_flow.json`.
@@ -44,7 +44,7 @@ Spec review notes resolved during planning:
 | Modify | `client/scripts/bot_controller.gd` | Dispatch menu actions and expose menu state |
 | Modify | `client/tests/test_client_bot.gd` | Validate new client bot step types |
 | Add | `tools/bot/scenarios/client/08_main_menu_flow.json` | End-to-end client bot proof for menu/session flow |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v24 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v24 ships |
 
 ## Task 1 - Server character APIs
 
@@ -184,12 +184,12 @@ make test-go
 
 Files:
 
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v24_spec-main-menu-and-character-start.md`
 - Modify: `docs/plans/v24_2026-06-07-main-menu-and-character-start.md`
 
 - [x] Step 7.1: Update the v24 spec status when implementation completes.
-- [x] Step 7.2: Add v24 to the `docs/PROGRESS.md` slice numbering note and lifecycle table.
+- [x] Step 7.2: Add v24 to the `PROGRESS.md` slice numbering note and lifecycle table.
 - [x] Step 7.3: Add a concise "What v24 proved" section covering main menu, named characters, fresh-session continue, window settings, ESC pause, and client bot proof.
 - [x] Step 7.4: Move any newly deferred items to `Open gaps & deferred work`: delete/rename characters, richer settings, old-session resume UI if ever desired, character summaries, and production menu art/audio.
 - [x] Step 7.5: Mark this plan complete only after final CI is green.

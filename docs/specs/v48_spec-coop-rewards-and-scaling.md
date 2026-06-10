@@ -8,7 +8,7 @@ Slice: v48 - co-op proximity XP and logarithmic monster scaling
 Baseline: v47 `shop-stock-lifecycle`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one authoritative `Sim`
 - [`v30_spec-monster-rarity-and-loot-scaling.md`](v30_spec-monster-rarity-and-loot-scaling.md) - generated monster rarity HP/damage/XP scaling
@@ -103,7 +103,7 @@ XP/progression and combat events; it does not compute eligibility, XP, HP, or da
 ```text
 docs/specs/v48_spec-coop-rewards-and-scaling.md - this spec
 docs/plans/v48_2026-06-09-coop-rewards-and-scaling.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v48 ships
+PROGRESS.md - lifecycle update when v48 ships
 
 shared/rules/combat.v0.json - co-op XP and party challenge rule data
 shared/rules/combat.v0.schema.json - validate co-op rule fields

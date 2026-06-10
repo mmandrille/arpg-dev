@@ -22,7 +22,7 @@ disable-model-invocation: true
 
 ## Phase 0 — Baseline context (read first)
 
-1. [`docs/PROGRESS.md`](../../docs/PROGRESS.md) — current slice, open gaps, invariants.
+1. [`PROGRESS.md`](../../PROGRESS.md) — current slice, open gaps, invariants.
 2. [`CLAUDE.md`](../../CLAUDE.md) — commands, architecture, SDD process.
 3. [`AGENTS.md`](../../AGENTS.md) — Godot plugin adoption requirement for client work.
 4. The spec file the user provided.
@@ -105,7 +105,7 @@ Files:
 - [ ] `make bot` verification
 
 ## Task N — Lifecycle docs and CI
-- [ ] Update `docs/PROGRESS.md` when slice completes
+- [ ] Update `PROGRESS.md` when slice completes
 ```bash
 make ci
 ```
@@ -124,7 +124,7 @@ make ci
 2. Go sim + unit tests → `cd server && go test ./internal/game/...`
 3. Bot scenarios + `make bot`
 4. Godot client + `make client-unit` / `make client-smoke`
-5. `docs/PROGRESS.md` + `make ci`
+5. `PROGRESS.md` + `make ci`
 
 ### Bot scenario guidance
 

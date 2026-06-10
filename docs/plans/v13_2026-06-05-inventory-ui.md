@@ -44,7 +44,7 @@
 | Modify | `client/scripts/main.gd` | Mount panel, wire intents, remove `Q`, process `inventory_remove` |
 | Modify | `client/scripts/smoke.gd` or create `client/tests/test_inventory_ui.gd` | Headless panel/model checks |
 | Modify | `client/tests/test_golden.gd` | Validate inventory drop golden if practical |
-| Modify | `docs/PROGRESS.md` | Add v13 completion notes when shipped |
+| Modify | `PROGRESS.md` | Add v13 completion notes when shipped |
 
 ## Plugin adoption
 
@@ -269,7 +269,7 @@ Verify `I` opens the panel, world pickup works, double-click/drag equip works, d
 make bot-visual scenario=07_inventory_lab.json
 ```
 
-- [x] **Step 7.4:** Update `docs/PROGRESS.md` once the slice ships:
+- [x] **Step 7.4:** Update `PROGRESS.md` once the slice ships:
   - latest completed slice v13
   - lifecycle table row
   - “What v13 proved”

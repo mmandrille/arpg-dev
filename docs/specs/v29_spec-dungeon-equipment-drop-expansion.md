@@ -12,7 +12,7 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - dungeon progression and better loot by depth
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist; expect no client plugin adoption for this server/data slice
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -72,7 +72,7 @@ server/internal/game/game_test.go                             - depth/source loo
 client/tests/test_golden.gd                                   - data-only golden checks if fixture is shared with Godot
 tools/bot/run.py                                              - assertions for dropped template ids, slots, and equipment categories
 tools/bot/scenarios/20_dungeon_equipment_drops.json           - end-to-end real-play proof
-docs/PROGRESS.md                                              - lifecycle update when v29 ships
+PROGRESS.md                                              - lifecycle update when v29 ships
 ```
 
 No protocol schema change is expected. Existing rolled item fields from v23/v28 should carry every

@@ -7,7 +7,7 @@ Slice: v43 - equipment requirements and preview
 Baseline: v42 `vendor-appraisal-and-item-comparison`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - character-scoped progression
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
@@ -72,7 +72,7 @@ this data; it does not decide whether an item is usable.
 ```text
 docs/specs/v43_spec-equipment-requirements-and-preview.md - this spec
 docs/plans/v43_2026-06-09-equipment-requirements-and-preview.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v43 ships
+PROGRESS.md - lifecycle update when v43 ships
 
 shared/rules/item_templates.v0.schema.json - broaden requirements
 shared/rules/item_templates.v0.json - add minimal non-trivial requirement

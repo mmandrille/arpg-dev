@@ -40,7 +40,7 @@ so there is no plugin or asset pack to adopt/borrow.
 | Modify | `client/tests/test_golden.gd` | Add data-only checks if `dungeon_equipment_drops.json` is included in client golden coverage. |
 | Modify | `tools/bot/run.py` | Add assertions/helpers for slot/template category if existing helpers are insufficient. |
 | Create | `tools/bot/scenarios/20_dungeon_equipment_drops.json` | End-to-end real dungeon drop proof. |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v29 ships. |
+| Modify | `PROGRESS.md` | Lifecycle update when v29 ships. |
 
 ## Task 1 - Shared depth bands and treasure classes
 
@@ -250,19 +250,19 @@ make client-smoke
 
 Files:
 
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v29_spec-dungeon-equipment-drop-expansion.md` if implementation decisions differ from the draft
 
 - [x] Step 7.1: When implementation is complete, mark the v29 spec as implemented and update any resolved implementation notes.
 
 ```bash
-rg -n "Status: Draft|v29|dungeon-equipment-drop-expansion" docs/specs docs/PROGRESS.md
+rg -n "Status: Draft|v29|dungeon-equipment-drop-expansion" docs/specs PROGRESS.md
 ```
 
-- [x] Step 7.2: Update `docs/PROGRESS.md` lifecycle table, current status, slice summary, scripted scenario catalog, and deferred follow-ups.
+- [x] Step 7.2: Update `PROGRESS.md` lifecycle table, current status, slice summary, scripted scenario catalog, and deferred follow-ups.
 
 ```bash
-rg -n "v29|dungeon_equipment_drops|dungeon-equipment-drop-expansion" docs/PROGRESS.md tools/bot/scenarios
+rg -n "v29|dungeon_equipment_drops|dungeon-equipment-drop-expansion" PROGRESS.md tools/bot/scenarios
 ```
 
 - [x] Step 7.3: Run full CI.

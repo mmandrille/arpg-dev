@@ -24,7 +24,7 @@ disable-model-invocation: true
 
 ## Phase 0 — Baseline context (read first)
 
-1. [`docs/PROGRESS.md`](../../docs/PROGRESS.md)
+1. [`PROGRESS.md`](../../PROGRESS.md)
 2. [`CLAUDE.md`](../../CLAUDE.md)
 3. The plan file the user provided.
 4. The linked spec (`docs/specs/vN_spec-*.md`) if referenced in the plan.
@@ -62,7 +62,7 @@ shared/ (schemas, rules, golden)
   → server/ (game sim, realtime, store, replay)
   → tools/bot/ (scenarios, run.py, test_protocol.py)
   → client/ (GDScript, smoke, test_golden.gd)
-  → docs/PROGRESS.md
+  → PROGRESS.md
 ```
 
 ### Per-task workflow
@@ -112,11 +112,11 @@ If `make ci` fails, fix and re-run until green. Use focused commands while itera
 When `make ci` is green:
 
 1. Mark all plan checkboxes complete.
-2. Update [`docs/PROGRESS.md`](../../docs/PROGRESS.md):
+2. Update [`PROGRESS.md`](../../PROGRESS.md):
    - New row in lifecycle table (or mark slice complete).
-   - Summary of what the slice proved.
    - New open gaps / deferred backlog.
-3. Report to user:
+3. Add or update `docs/as-built/vN_<codename>.md` with what the slice proved.
+4. Report to user:
    - What was implemented (concise).
    - Verification evidence (`make ci` green).
    - Suggested manual check from plan (e.g. `make play`) if any.

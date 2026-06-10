@@ -44,7 +44,7 @@ Godot shortcut adoption checklist:
 | Add | `tools/bot/scenarios/13_teleporter_lab.json` | Bot acceptance scenario |
 | Modify | `client/scripts/main.gd` | Teleporter rendering and panel |
 | Modify | `client/tests/test_golden.gd` | Golden fixture checks |
-| Modify | `docs/PROGRESS.md` | v18/v19 lifecycle update |
+| Modify | `PROGRESS.md` | v18/v19 lifecycle update |
 
 ## 4. Tasks
 
@@ -120,7 +120,7 @@ make client-smoke
 
 ### Task 6 — Docs and final verification
 
-- [x] Update `docs/PROGRESS.md` to mark v18 complete and v19 implemented when gates pass.
+- [x] Update `PROGRESS.md` to mark v18 complete and v19 implemented when gates pass.
 - [x] Run final CI when DB-dependent infrastructure is available.
 
 Final gate:

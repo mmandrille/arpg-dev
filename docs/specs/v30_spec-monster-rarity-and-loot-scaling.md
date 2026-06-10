@@ -14,7 +14,7 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - seeded procedural dungeon generation and better loot by depth
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist; expect reject for simple tint/material work
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -94,7 +94,7 @@ client/tests/test_golden.gd                                  - optional shared g
 client/tests                                                 - presentation unit/smoke coverage if tint helpers are extracted
 tools/bot/run.py                                             - assertions for monster rarity and effective loot depth if needed
 tools/bot/scenarios/21_monster_rarity_loot_scaling.json      - end-to-end generated dungeon proof
-docs/PROGRESS.md                                             - lifecycle update when v30 ships
+PROGRESS.md                                             - lifecycle update when v30 ships
 ```
 
 Protocol schema change note: v1 schemas already include an optional `rarity` field on entity views.

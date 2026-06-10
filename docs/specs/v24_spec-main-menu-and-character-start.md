@@ -12,7 +12,7 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client and authoritative server boundary
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - character persistence and session-scoped worlds
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - required client UI plugin adoption checklist
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -74,7 +74,7 @@ client/scripts/bot_scenario_runner.gd                         - menu/assertion s
 client/scripts/bot_controller.gd                              - menu action dispatch/state exposure
 client/tests/test_client_bot.gd                               - scenario validation for menu steps
 tools/bot/scenarios/client/08_main_menu_flow.json             - client bot menu proof
-docs/PROGRESS.md                                              - lifecycle update when v24 ships
+PROGRESS.md                                              - lifecycle update when v24 ships
 ```
 
 ## 4. Data shapes

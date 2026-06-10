@@ -8,7 +8,7 @@ Related:
 
 - [`v9_spec-solid-collision-and-obstacles.md`](v9_spec-solid-collision-and-obstacles.md) — wall collision; door barrier reuses AABB checks
 - [`v8_spec-equipped-weapon-damage.md`](v8_spec-equipped-weapon-damage.md) — equipped weapon `reach` follows same item-rules pattern as `damage`
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md)
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures)
 - ADR-0007 (client-only presentation; door swing animation is client-side)

@@ -28,7 +28,7 @@ Status: In progress (2026-06-06)
 | Modify | `client/tests/test_item_visuals.gd` | Assert all current items have presentation metadata |
 | Modify | `client/scripts/bot_scenario_runner.gd` | Add client-bot assertions for item presentation |
 | Modify | client scenario JSON | Exercise presentation assertions |
-| Modify | `docs/PROGRESS.md` | Mark v15 complete when shipped |
+| Modify | `PROGRESS.md` | Mark v15 complete when shipped |
 
 ## 3. Implementation steps
 
@@ -36,7 +36,7 @@ Status: In progress (2026-06-06)
 - [x] Step 2: Add a Godot presentation loader/render helper in inventory and loot paths.
 - [x] Step 3: Extend Godot tests and client-bot assertions.
 - [x] Step 4: Run focused validation/tests, then `make ci`.
-- [x] Step 5: Update `docs/PROGRESS.md` with v15 lifecycle notes.
+- [x] Step 5: Update `PROGRESS.md` with v15 lifecycle notes.
 
 ## 4. Verification commands
 

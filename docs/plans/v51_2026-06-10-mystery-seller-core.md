@@ -34,7 +34,7 @@ Key implementation decisions:
 |--------|------|----------------|
 | Add | `docs/specs/v51_spec-mystery-seller-core.md` | Slice spec |
 | Add | `docs/plans/v51_2026-06-10-mystery-seller-core.md` | This implementation plan |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v51 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v51 ships |
 | Modify | `shared/rules/interactables.v0.json` | Add `town_mystery_seller` |
 | Modify | `shared/rules/worlds.v0.json` | Place mystery seller on town level `0` |
 | Modify | `shared/rules/shops.v0.json` | Add `town_mystery_seller` and mystery offer rules |
@@ -275,7 +275,7 @@ make bot-client HEADLESS=1
 ## Task 6 - Lifecycle Docs And CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v51_2026-06-10-mystery-seller-core.md`
 
 - [x] Step 6.1: Add v51 to the slice lifecycle table when implementation finishes.

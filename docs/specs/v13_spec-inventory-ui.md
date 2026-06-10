@@ -10,7 +10,7 @@ Related:
 - [`v10_spec-click-action-and-melee-range.md`](v10_spec-click-action-and-melee-range.md) — pickup remains `action_intent` on loot entities
 - [`v2_spec-equip-and-see-it.md`](v2_spec-equip-and-see-it.md) — `EquipmentVisualResolver`, item visuals pipeline
 - [`v8_spec-equipped-weapon-damage.md`](v8_spec-equipped-weapon-damage.md) — weapon stats for tooltips
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md) — **reject** inventory plugins for v13; custom UI only
 - ADR-0001 (authoritative server; client sends intents only)
 - ADR-0007 (client-only presentation; panel layout and drag feedback are not on the wire)
@@ -412,7 +412,7 @@ scenario remains the end-to-end proof.
 | Modify | `tools/bot/run.py` | Bot actions + `equipped_weapon_def` |
 | Modify | `tools/bot/test_protocol.py` | Unit tests |
 | Modify | `tools/validate_shared.py` | Golden/schema |
-| Modify | `docs/PROGRESS.md` | On completion |
+| Modify | `PROGRESS.md` | On completion |
 
 ## 6. Acceptance criteria
 

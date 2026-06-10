@@ -126,7 +126,7 @@ Protocol choice resolved during review:
 | Create | `tools/bot/scenarios/client/10_full_equipment.json` | Godot client UI proof |
 | Modify | existing `tools/bot/scenarios/*.json` | Migrate `"weapon"` scenarios to `main_hand` |
 | Modify | existing `tools/bot/scenarios/client/*.json` | Migrate weapon/hotbar assumptions |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when slice ships |
+| Modify | `PROGRESS.md` | Lifecycle update when slice ships |
 
 ---
 
@@ -413,11 +413,11 @@ HEADLESS=1 make bot-client scenario=10_full_equipment
 
 Files:
 - Modify: `docs/specs/v28_spec-full-equipment-and-belt-hotbar.md`
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md`
 
 - [x] Step 11.1: Update spec status and resolved review notes when implementation lands: branch `main`, `use_hotbar_intent { slot_index }`, and no plugin adoption.
-- [x] Step 11.2: Add v28 to the `docs/PROGRESS.md` slice numbering note and lifecycle table.
+- [x] Step 11.2: Add v28 to the `PROGRESS.md` slice numbering note and lifecycle table.
 - [x] Step 11.3: Add a concise "What v28 proved" section covering paper-doll equipment, two-hand rules, belt-gated hotbar persistence, droppable equipment templates, bot proofs, and client UI sync.
 - [x] Step 11.4: Record deferred gaps: armor mitigation, block execution, affix grammar, comparison UI, stash/vendors, production icons/art, offhand abilities/dual-wield, and deeper dungeon drop economy.
 - [x] Step 11.5: Mark this plan complete only after final CI is green.

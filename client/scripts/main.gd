@@ -2494,6 +2494,7 @@ func _assign_right_click_skill(skill_id: String) -> bool:
 	if _skill_rank(skill_id) <= 0:
 		return false
 	right_click_skill_id = skill_id
+	_sync_skill_bindings_ui()
 	return true
 
 
@@ -2502,6 +2503,7 @@ func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
 		return false
 	_ensure_skill_function_key_slots()
 	skill_function_keys[slot_index] = skill_id
+	_sync_skill_bindings_ui()
 	return true
 
 
@@ -2532,6 +2534,11 @@ func _ensure_skill_function_key_slots() -> void:
 		skill_function_keys.resize(SKILL_FUNCTION_KEY_COUNT)
 
 
+func _sync_skill_bindings_ui() -> void:
+	if skills_panel != null:
+		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
+
+
 func _refresh_progression_ui() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_progression(character_progression)
@@ -2543,6 +2550,7 @@ func _refresh_progression_ui() -> void:
 func _refresh_skill_ui() -> void:
 	if skills_panel != null:
 		skills_panel.set_skill_progression(skill_progression)
+		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
 		skills_panel.set_interactive(not _skill_allocation_blocked())
 	if skill_bar != null:
 		skill_bar.set_skill_progression(skill_progression)

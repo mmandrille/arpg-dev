@@ -1,0 +1,22 @@
+client/scripts/main.gd
+  s_27577ac914d158::t_6347526b3636ee 778-779
+server/internal/game/sim.go
+  s_27577ac914d158::t_3ed298c11fe989 3150-3151
+  s_27577ac914d158::t_40f22adb9e4c0d 5382-5383
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "93e722c40fe981a045c11e9c339dbba42d19e266",
+  "prompts": {},
+  "sessions": {
+    "s_27577ac914d158": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df627ccd-97cc-45eb-813d-99c038bf4269",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

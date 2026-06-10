@@ -1468,6 +1468,53 @@ func TestAggroOnHitPropagatesToNearbyMonsterGroup(t *testing.T) {
 	}
 }
 
+func TestAggroOnLethalHitPropagatesToNearbyMonsterGroup(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_lethal_group_aggro", "lethal_group_aggro", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("dungeon world: %v", err)
+	}
+	level, err := sim.ensureDungeonLevel(-1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, candidate := range level.entities {
+		if candidate.kind == monsterEntity {
+			delete(level.entities, id)
+		}
+	}
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 2, Y: 5})
+	sim.syncCompatibilityFields()
+
+	primary := addTestMonster(sim, "dungeon_mob", Vec2{X: 20, Y: 10}, 1)
+	near := addTestMonster(sim, "dungeon_mob", Vec2{X: 25, Y: 10}, 20)
+	far := addTestMonster(sim, "dungeon_mob", Vec2{X: 45, Y: 10}, 20)
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+
+	outcome := sim.damageMonsterByPlayer(primary, sim.playerID, "corr_lethal_group", &res, DamageRange{Min: 99, Max: 99})
+	if !outcome.Hit || outcome.Blocked || primary.hp != 0 {
+		t.Fatalf("setup expected lethal hit outcome=%+v primary_hp=%d events=%+v", outcome, primary.hp, res.Events)
+	}
+	if primary.aiMode != monsterAIModeIdle || primary.aiTargetPlayerID != 0 {
+		t.Fatalf("dead primary target/mode = %d/%s, want no aggro on dead source", primary.aiTargetPlayerID, primary.aiMode)
+	}
+	if near.aiTargetPlayerID != sim.playerID || near.aiMode != monsterAIModeChase {
+		t.Fatalf("near monster target/mode = %d/%s, want %d/%s", near.aiTargetPlayerID, near.aiMode, sim.playerID, monsterAIModeChase)
+	}
+	if far.aiTargetPlayerID != 0 || far.aiMode != monsterAIModeIdle {
+		t.Fatalf("far monster target/mode = %d/%s, want idle outside group radius", far.aiTargetPlayerID, far.aiMode)
+	}
+	if eventForEntity(res, "monster_aggro", primary.id) {
+		t.Fatalf("dead primary should not emit monster_aggro: %+v", res.Events)
+	}
+	if !eventForEntity(res, "monster_aggro", near.id) {
+		t.Fatalf("missing nearby monster_aggro after lethal hit: %+v", res.Events)
+	}
+	if eventForEntity(res, "monster_aggro", far.id) {
+		t.Fatalf("unexpected far monster_aggro after lethal hit: %+v", res.Events)
+	}
+}
+
 func TestAggroOnHitAlsoAggrosMonstersWithAttackerInRange(t *testing.T) {
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess_attack_range_aggro", "range_aggro", rules, "dungeon_levels")

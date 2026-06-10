@@ -1736,7 +1736,7 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
 
-	if outcome.Damage > 0 && target.hp > 0 {
+	if outcome.Damage > 0 {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
 	if target.hp == 0 {
@@ -3799,7 +3799,7 @@ func (s *Sim) resolveMonsterProjectileHit(p *entity, hit projectileHit, res *Tic
 }
 
 func (s *Sim) aggroMonsterOnHit(monster *entity, playerID uint64, corr string, res *TickResult) {
-	if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 || playerID == 0 {
+	if monster == nil || monster.kind != monsterEntity || playerID == 0 {
 		return
 	}
 	level := s.activeLevel()
@@ -3819,10 +3819,12 @@ func (s *Sim) aggroMonsterOnHit(monster *entity, playerID uint64, corr string, r
 	for len(queue) > 0 {
 		current := queue[0]
 		queue = queue[1:]
-		if current == nil || current.kind != monsterEntity || current.hp <= 0 {
+		if current == nil || current.kind != monsterEntity {
 			continue
 		}
-		s.aggroSingleMonster(current, playerID, corr, res)
+		if current.hp > 0 {
+			s.aggroSingleMonster(current, playerID, corr, res)
+		}
 		for _, candidateID := range sortedEntityIDs(level.entities) {
 			candidate := level.entities[candidateID]
 			if candidate == nil || queued[candidate.id] || !s.canJoinGroupAggro(current, candidate) {

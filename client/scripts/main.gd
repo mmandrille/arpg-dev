@@ -738,6 +738,7 @@ func _process(delta: float) -> void:
 	else:
 		_handle_input(delta)
 	_sync_waypoint_panel_reach()
+	_sync_actionable_panel_reach()
 	if player_anim != null:
 		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
 			and player_hp > 0 \
@@ -1605,9 +1606,9 @@ func _close_gameplay_panels(except: String = "") -> void:
 		_hide_shop_panel()
 	if not (except in ["stash", "stash_with_inventory"]):
 		_hide_stash_panel()
-	if not (except in ["stats", "inventory"]) and character_stats_panel != null:
+	if not (except in ["stats", "skills", "inventory"]) and character_stats_panel != null:
 		character_stats_panel.hide_display()
-	if except != "skills" and skills_panel != null:
+	if not (except in ["skills", "stats"]) and skills_panel != null:
 		skills_panel.hide_display()
 	if except != "character_info":
 		_hide_character_info_panel()
@@ -1950,9 +1951,11 @@ func _interactable_in_activation_range(rec: Dictionary) -> bool:
 	var target_node := rec.get("node") as Node3D
 	if target_node == null or player_anchor == null:
 		return false
+	var target_pos := target_node.global_position if target_node.is_inside_tree() else target_node.position
+	var player_pos := player_anchor.global_position if player_anchor.is_inside_tree() else player_anchor.position
 	var flat := Vector2(
-		target_node.global_position.x - player_anchor.global_position.x,
-		target_node.global_position.z - player_anchor.global_position.z
+		target_pos.x - player_pos.x,
+		target_pos.z - player_pos.z
 	)
 	return flat.length() <= INTERACTABLE_ACTIVATION_RANGE
 
@@ -2983,6 +2986,36 @@ func _sync_waypoint_panel_reach() -> void:
 	var teleporter := _current_teleporter_record()
 	if teleporter.is_empty() or not _interactable_in_activation_range(teleporter):
 		_hide_waypoint_panel()
+
+
+func _sync_actionable_panel_reach() -> void:
+	var closed_actionable := false
+	if shop_panel != null and shop_panel.visible:
+		if not _panel_source_in_activation_range(shop_panel.shop_entity_id):
+			_hide_shop_panel()
+			closed_actionable = true
+	if stash_panel != null and stash_panel.visible:
+		if not _panel_source_in_activation_range(stash_panel.stash_entity_id):
+			_hide_stash_panel()
+			closed_actionable = true
+	if closed_actionable:
+		_hide_inventory_if_no_actionable_panel()
+
+
+func _panel_source_in_activation_range(entity_id: String) -> bool:
+	if entity_id == "" or not entities.has(entity_id):
+		return false
+	var rec: Dictionary = entities.get(entity_id, {})
+	return _interactable_in_activation_range(rec)
+
+
+func _hide_inventory_if_no_actionable_panel() -> void:
+	if inventory_panel == null:
+		return
+	var shop_visible := shop_panel != null and shop_panel.visible
+	var stash_visible := stash_panel != null and stash_panel.visible
+	if not shop_visible and not stash_visible:
+		inventory_panel.hide_display()
 
 
 func _refresh_waypoint_panel() -> void:
@@ -4035,16 +4068,16 @@ func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, 
 	shop_panel.bot_click_sell_item(item_def_id, rolled, bag_index)
 
 
-func bot_click_stash_deposit_item(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
+func bot_drag_bag_to_stash(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	if stash_panel == null:
 		return
-	stash_panel.bot_click_deposit_item(item_def_id, rolled, bag_index)
+	stash_panel.bot_drag_bag_to_stash(item_def_id, rolled, bag_index)
 
 
-func bot_click_stash_withdraw_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
+func bot_drag_stash_to_bag(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
 	if stash_panel == null:
 		return
-	stash_panel.bot_click_withdraw_item(stash_item_id, item_def_id, rolled, stash_index)
+	stash_panel.bot_drag_stash_to_bag(stash_item_id, item_def_id, rolled, stash_index)
 
 
 func bot_click_stash_deposit_gold(amount: int = 1) -> void:

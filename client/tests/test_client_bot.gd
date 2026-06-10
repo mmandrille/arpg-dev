@@ -591,16 +591,16 @@ func _test_stash_step_types_load() -> void:
 		{"type": "assert_stash_panel_visible", "visible": true},
 		{"type": "assert_stash_item_count", "rolled": true, "equals": 1},
 		{"type": "assert_stash_gold", "equals": 3},
-		{"type": "click_stash_deposit_item", "rolled": true, "bag_index": 0},
-		{"type": "click_stash_withdraw_item", "rolled": true, "stash_index": 0},
+		{"type": "drag_bag_to_stash", "rolled": true, "bag_index": 0},
+		{"type": "drag_stash_to_bag", "rolled": true, "stash_index": 0},
 		{"type": "click_stash_deposit_gold", "amount": 1},
 		{"type": "click_stash_withdraw_gold", "amount": 1},
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("stash client step scenario valid", err, "")
 	_assert_ne("stash panel wait without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "wait_stash_panel", "timeout_s": 1.0}, 0), "")
-	_assert_ne("stash deposit without selector rejected", BotScenarioRunnerScript.validate_step({"type": "click_stash_deposit_item"}, 0), "")
-	_assert_ne("stash withdraw without selector rejected", BotScenarioRunnerScript.validate_step({"type": "click_stash_withdraw_item"}, 0), "")
+	_assert_ne("stash deposit without selector rejected", BotScenarioRunnerScript.validate_step({"type": "drag_bag_to_stash"}, 0), "")
+	_assert_ne("stash withdraw without selector rejected", BotScenarioRunnerScript.validate_step({"type": "drag_stash_to_bag"}, 0), "")
 	_assert_ne("stash gold without amount rejected", BotScenarioRunnerScript.validate_step({"type": "click_stash_deposit_gold"}, 0), "")
 
 

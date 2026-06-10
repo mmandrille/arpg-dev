@@ -154,10 +154,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_shop_sell_item(action)
 		"click_waypoint_level":
 			_do_click_waypoint_level(action)
-		"click_stash_deposit_item":
-			_do_click_stash_deposit_item(action)
-		"click_stash_withdraw_item":
-			_do_click_stash_withdraw_item(action)
+		"drag_bag_to_stash":
+			_do_drag_bag_to_stash(action)
+		"drag_stash_to_bag":
+			_do_drag_stash_to_bag(action)
 		"click_stash_deposit_gold":
 			_do_click_stash_deposit_gold(action)
 		"click_stash_withdraw_gold":
@@ -264,18 +264,18 @@ func _do_click_waypoint_level(action: Dictionary) -> void:
 		_main.bot_click_waypoint_level(int(action.get("target_level", 0)))
 
 
-func _do_click_stash_deposit_item(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_click_stash_deposit_item"):
-		_main.bot_click_stash_deposit_item(
+func _do_drag_bag_to_stash(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_drag_bag_to_stash"):
+		_main.bot_drag_bag_to_stash(
 			str(action.get("item_def_id", "")),
 			action.get("rolled", null),
 			int(action.get("bag_index", 0))
 		)
 
 
-func _do_click_stash_withdraw_item(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_click_stash_withdraw_item"):
-		_main.bot_click_stash_withdraw_item(
+func _do_drag_stash_to_bag(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_drag_stash_to_bag"):
+		_main.bot_drag_stash_to_bag(
 			str(action.get("stash_item_id", "")),
 			str(action.get("item_def_id", "")),
 			action.get("rolled", null),
@@ -547,14 +547,14 @@ func _format_action(action: Dictionary) -> String:
 			]
 		"click_waypoint_level":
 			return "click_waypoint_level target=%s" % str(action.get("target_level", ""))
-		"click_stash_deposit_item":
-			return "click_stash_deposit item=%s rolled=%s bag_index=%s" % [
+		"drag_bag_to_stash":
+			return "drag_bag_to_stash item=%s rolled=%s bag_index=%s" % [
 				str(action.get("item_def_id", "")),
 				str(action.get("rolled", "")),
 				str(action.get("bag_index", 0)),
 			]
-		"click_stash_withdraw_item":
-			return "click_stash_withdraw stash_item=%s item=%s rolled=%s stash_index=%s" % [
+		"drag_stash_to_bag":
+			return "drag_stash_to_bag stash_item=%s item=%s rolled=%s stash_index=%s" % [
 				str(action.get("stash_item_id", "")),
 				str(action.get("item_def_id", "")),
 				str(action.get("rolled", "")),

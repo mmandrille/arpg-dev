@@ -3418,10 +3418,82 @@ def player_entity_ids(state: RuntimeState) -> set[str]:
     return {str(entity_id) for entity_id, entity in state.entities.items() if entity.get("type") == "player"}
 
 
+def state_experience(state: RuntimeState) -> int:
+    return int(state.character_progression.get("experience", 0))
+
+
+def dict_distance(a: dict[str, Any], b: dict[str, Any]) -> float:
+    return math.hypot(float(a["x"]) - float(b["x"]), float(a["y"]) - float(b["y"]))
+
+
 def assert_party_contains_roles(state: RuntimeState, where: str) -> None:
     roles = {str(row.get("role", "")) for row in state.party}
     if not {"host", "guest"} <= roles:
         raise AssertionError(f"{where}: party roles {roles}, want host+guest; party={state.party}")
+
+
+async def move_coop_peer_to(
+    peers: list[CoopPeer],
+    peer: CoopPeer,
+    target_pos: dict[str, Any],
+    *,
+    stop_distance: float = WALK_STOP_DISTANCE,
+    max_ticks: int = 240,
+) -> None:
+    if await try_move_coop_peer_to(peers, peer, target_pos, stop_distance=stop_distance, max_ticks=max_ticks):
+        return
+    player = find_player(peer.state)
+    raise TimeoutError(f"{peer.label}: did not reach {target_pos}; player={(player or {}).get('position')}")
+
+
+async def try_move_coop_peer_to(
+    peers: list[CoopPeer],
+    peer: CoopPeer,
+    target_pos: dict[str, Any],
+    *,
+    stop_distance: float = WALK_STOP_DISTANCE,
+    max_ticks: int = 240,
+) -> bool:
+    player = find_player(peer.state)
+    if player is None:
+        raise AssertionError(f"{peer.label}: missing local player")
+    if dict_distance(player["position"], target_pos) <= stop_distance:
+        return True
+    message_id = await send_coop_intent(peer, "move_to_intent", {"position": target_pos})
+    await wait_coop_until(
+        peers,
+        f"{peer.label} move_to {message_id}",
+        lambda: message_id in peer.state.accepted_message_ids or message_id in peer.state.rejected_message_reasons,
+    )
+    reason = peer.state.rejected_message_reasons.pop(message_id, None)
+    if reason is not None:
+        if reason in {"no_path", "path_too_long"}:
+            return False
+        raise AssertionError(f"{peer.label} move_to rejected: {reason}")
+    for _ in range(max_ticks):
+        player = find_player(peer.state)
+        if player is None:
+            raise AssertionError(f"{peer.label}: missing local player while moving")
+        if dict_distance(player["position"], target_pos) <= stop_distance:
+            return True
+        await pump_coop(peers, timeout=0.05)
+    return False
+
+
+async def move_coop_peer_near(
+    peers: list[CoopPeer],
+    peer: CoopPeer,
+    center: dict[str, Any],
+    *,
+    offsets: list[tuple[float, float]],
+    stop_distance: float = 1.2,
+    max_ticks: int = 260,
+) -> dict[str, Any]:
+    for dx, dy in offsets:
+        target = {"x": float(center["x"]) + dx, "y": float(center["y"]) + dy}
+        if await try_move_coop_peer_to(peers, peer, target, stop_distance=stop_distance, max_ticks=max_ticks):
+            return target
+    raise TimeoutError(f"{peer.label}: could not reach an approach point near {center}")
 
 
 async def move_coop_peer(peers: list[CoopPeer], peer: CoopPeer, direction: dict[str, int]) -> None:
@@ -3433,6 +3505,71 @@ async def move_coop_peer(peers: list[CoopPeer], peer: CoopPeer, direction: dict[
         f"{peer.label} local movement",
         lambda: player_position(peer.state) != before,
     )
+
+
+async def wait_for_coop_damage_signal(
+    peers: list[CoopPeer],
+    driver: CoopPeer,
+    *,
+    min_raw_damage: int,
+    timeout_s: float = 16.0,
+) -> None:
+    loop = asyncio.get_event_loop()
+    start_indexes = {peer.label: len(peer.state.combat_events) for peer in peers}
+    deadline = loop.time() + timeout_s
+    while loop.time() <= deadline:
+        for peer in peers:
+            for ev in peer.state.combat_events[start_indexes[peer.label]:]:
+                if ev.get("event_type") == "player_damaged" and int(ev.get("raw_damage", 0)) >= min_raw_damage:
+                    return
+        message_id = await send_coop_intent(driver, "move_intent", {"direction": {"x": 0, "y": 0}, "duration_ticks": 1})
+        await wait_coop_accept(peers, driver, message_id)
+        await pump_coop(peers, timeout=0.1)
+    raise TimeoutError(f"co-op damage signal did not reach raw_damage >= {min_raw_damage}")
+
+
+async def coop_attack_until_kill(
+    peers: list[CoopPeer],
+    attacker: CoopPeer,
+    monster_def_id: str,
+    *,
+    companions: list[CoopPeer] | None = None,
+    timeout_s: float = 20.0,
+) -> None:
+    loop = asyncio.get_event_loop()
+    deadline = loop.time() + timeout_s
+    last_action = 0.0
+    companion_offsets = [(-3.0, 0.0), (3.0, 0.0), (0.0, -3.0), (0.0, 3.0), (-4.0, 0.0), (4.0, 0.0)]
+    while loop.time() <= deadline:
+        if "monster_killed" in attacker.state.seen_events:
+            return
+        monster = find_monster(attacker.state, monster_def_id)
+        if monster is None:
+            if "monster_killed" in attacker.state.seen_events:
+                return
+            await pump_coop(peers, timeout=0.1)
+            continue
+        for companion in companions or []:
+            if companion.state.current_level != attacker.state.current_level:
+                continue
+            if dict_distance(player_position(companion.state), monster["position"]) > 6.0:
+                await move_coop_peer_near(peers, companion, monster["position"], offsets=companion_offsets, stop_distance=1.4, max_ticks=180)
+        if loop.time() - last_action >= 0.12:
+            message_id = await send_coop_intent(attacker, "action_intent", {"target_id": str(monster["id"])})
+            await wait_coop_until(
+                peers,
+                f"{attacker.label} attack {message_id}",
+                lambda: message_id in attacker.state.accepted_message_ids or message_id in attacker.state.rejected_message_reasons,
+            )
+            reason = attacker.state.rejected_message_reasons.pop(message_id, None)
+            if reason is not None:
+                if reason == "invalid_target" and "monster_killed" in attacker.state.seen_events:
+                    return
+                if reason != "projectile_busy":
+                    raise AssertionError(f"{attacker.label} attack rejected: {reason}")
+            last_action = loop.time()
+        await pump_coop(peers, timeout=0.1)
+    raise TimeoutError(f"co-op attack did not kill {monster_def_id}")
 
 
 async def run_true_coop_session(
@@ -3621,6 +3758,108 @@ async def run_session_browser_uncapped_coop(
     return sess, host.state
 
 
+async def run_coop_rewards_and_scaling(
+    *,
+    client: httpx.Client,
+    base_url: str,
+    tokens: list[str],
+    debug_token: str,
+    scenario: Scenario,
+    character_ids: list[str],
+) -> tuple[dict[str, Any], RuntimeState]:
+    if len(tokens) < 3 or len(character_ids) < 3:
+        raise AssertionError(f"{scenario.id}: requires host, nearby guest, and excluded guest")
+    sess = create_coop_session(client, tokens[0], scenario.world_id, character_ids[0], scenario.seed)
+    session_id = str(sess["session_id"])
+
+    host = await connect_coop_peer(base_url, tokens[0], sess, "host", scenario.world_id)
+    peers = [host]
+    joined_sessions = [sess]
+    try:
+        for index, label in ((1, "nearby-guest"), (2, "excluded-guest")):
+            joined = join_coop_session(client, tokens[index], session_id, str(sess["join_code"]), character_ids[index])
+            joined_sessions.append(joined)
+            peers.append(await connect_coop_peer(base_url, tokens[index], joined, label, scenario.world_id))
+
+        nearby = peers[1]
+        excluded = peers[2]
+        await wait_coop_until(peers, "all peers have party rows", lambda: all(len(peer.state.party) >= 3 for peer in peers))
+
+        await execute_step(host.ws, session_id, host.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
+        await execute_step(nearby.ws, session_id, nearby.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
+        dungeon_peers = [host, nearby]
+        await wait_coop_until(
+            peers,
+            "host and nearby guest share dungeon while excluded guest stays town",
+            lambda: host.state.current_level == -1 and nearby.state.current_level == -1 and excluded.state.current_level == 0,
+        )
+        await wait_coop_until(
+            dungeon_peers,
+            "dungeon peers see each other",
+            lambda: all(player_entity_ids(peer.state) >= {host.state.local_player_id, nearby.state.local_player_id} for peer in dungeon_peers),
+        )
+
+        monster = find_monster(host.state, "dungeon_mob")
+        if monster is None:
+            raise AssertionError(f"{scenario.id}: missing dungeon_mob in host state")
+        monster_pos = dict(monster["position"])
+        approach_offsets = [(-1.5, 0.0), (1.5, 0.0), (0.0, -1.5), (0.0, 1.5), (-2.5, 0.0), (2.5, 0.0)]
+        nearby_offsets = [(-4.0, 0.0), (4.0, 0.0), (0.0, -4.0), (0.0, 4.0), (-3.0, 0.0), (3.0, 0.0)]
+        await move_coop_peer_near(dungeon_peers, nearby, monster_pos, offsets=nearby_offsets, stop_distance=1.2, max_ticks=260)
+        await move_coop_peer_near(dungeon_peers, host, monster_pos, offsets=approach_offsets, stop_distance=1.0, max_ticks=260)
+        if dict_distance(player_position(nearby.state), monster_pos) > 10.0:
+            raise AssertionError(f"nearby guest too far from monster: {player_position(nearby.state)} monster={monster_pos}")
+
+        before_host_xp = state_experience(host.state)
+        before_nearby_xp = state_experience(nearby.state)
+        before_excluded_xp = state_experience(excluded.state)
+
+        await coop_attack_until_kill(dungeon_peers, nearby, "dungeon_mob", companions=[host])
+        await wait_coop_until(
+            peers,
+            "shared xp applied to nearby only",
+            lambda: state_experience(host.state) >= before_host_xp + 10
+            and state_experience(nearby.state) >= before_nearby_xp + 10
+            and state_experience(excluded.state) == before_excluded_xp,
+        )
+
+        for peer in list(peers):
+            await close_coop_peer(peer)
+        peers.clear()
+
+        replay = fetch_replay(client, tokens[0], debug_token, session_id)
+        if not replay.get("match", False):
+            raise AssertionError(f"co-op rewards replay mismatch for {session_id}: {replay.get('mismatch')}")
+
+        fresh_host = create_session(client, tokens[0], scenario.world_id)
+        fresh_host_state = fetch_state(client, tokens[0], debug_token, str(fresh_host["session_id"]))
+        host_fresh_xp = int(fresh_host_state.get("character_progression", {}).get("experience", 0))
+        if host_fresh_xp < before_host_xp + 10:
+            raise AssertionError(f"host fresh xp={host_fresh_xp}, want >= {before_host_xp + 10}")
+
+        fresh_nearby = create_session(client, tokens[1], scenario.world_id)
+        fresh_nearby_state = fetch_state(client, tokens[1], debug_token, str(fresh_nearby["session_id"]))
+        nearby_fresh_xp = int(fresh_nearby_state.get("character_progression", {}).get("experience", 0))
+        if nearby_fresh_xp < before_nearby_xp + 10:
+            raise AssertionError(f"nearby fresh xp={nearby_fresh_xp}, want >= {before_nearby_xp + 10}")
+
+        fresh_excluded = create_session(client, tokens[2], scenario.world_id)
+        fresh_excluded_state = fetch_state(client, tokens[2], debug_token, str(fresh_excluded["session_id"]))
+        excluded_fresh_xp = int(fresh_excluded_state.get("character_progression", {}).get("experience", 0))
+        if excluded_fresh_xp != before_excluded_xp:
+            raise AssertionError(f"excluded fresh xp={excluded_fresh_xp}, want {before_excluded_xp}")
+    finally:
+        for peer in peers:
+            try:
+                await close_coop_peer(peer)
+            except Exception:
+                pass
+
+    _ = debug_token
+    log("co-op rewards/scaling protocol checks matched", session_id)
+    return sess, host.state
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -3676,6 +3915,25 @@ def main() -> int:
                     tokens.append(peer_token)
                     character_ids.append(ensure_character(client, peer_token, f"Coop Peer {index + 1}"))
                 sess, observed = asyncio.run(run_session_browser_uncapped_coop(
+                    client=client,
+                    base_url=args.base_url,
+                    tokens=tokens,
+                    debug_token=args.debug_token,
+                    scenario=scenario,
+                    character_ids=character_ids,
+                ))
+                token = tokens[0]
+            elif scenario.id == "coop_rewards_and_scaling":
+                tokens = []
+                character_ids = []
+                peer_count = max(3, scenario.peer_count)
+                replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
+                for index in range(peer_count):
+                    email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                    _, peer_token = dev_login(client, email, args.dev_token)
+                    tokens.append(peer_token)
+                    character_ids.append(ensure_character(client, peer_token, f"Reward Peer {index + 1}"))
+                sess, observed = asyncio.run(run_coop_rewards_and_scaling(
                     client=client,
                     base_url=args.base_url,
                     tokens=tokens,

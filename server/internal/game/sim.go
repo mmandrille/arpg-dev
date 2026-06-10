@@ -503,6 +503,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 				lootTable:    def.LootTable,
 				aiMode:       monsterAIModeIdle,
 			}
+			s.applyPartyHPScale(level, monster)
 			monster.id = s.alloc()
 			level.entities[monster.id] = monster
 		case lootEntity:
@@ -1563,6 +1564,7 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			}
 			monster.monsterXPReward = roundPositive(float64(def.XPReward) * rarity.XPMultiplier)
 		}
+		s.applyPartyHPScale(level, monster)
 		monster.id = s.alloc()
 		level.entities[monster.id] = monster
 	}
@@ -1838,7 +1840,7 @@ func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, r
 		CorrelationID:  corr,
 	})
 	s.dropLoot(monster, corr, res)
-	s.awardMonsterExperience(monster, corr, res)
+	s.awardMonsterExperience(monster, sourceID, corr, res)
 	if monster.isBoss {
 		s.unlockBossFloorExits(corr, res)
 	}
@@ -1928,9 +1930,10 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	if player == nil || player.hp <= 0 {
 		return
 	}
-	attackerStats := s.monsterEffectiveCombatStats(monster, *def.RetaliationDamage)
+	retaliationDamage := s.scaleMonsterDamageForParty(s.currentLevel, *def.RetaliationDamage)
+	attackerStats := s.monsterEffectiveCombatStats(monster, retaliationDamage)
 	defenderStats, _ := s.playerEffectiveCombatStats()
-	outcome := s.resolveCombat(attackerStats, defenderStats, *def.RetaliationDamage)
+	outcome := s.resolveCombat(attackerStats, defenderStats, retaliationDamage)
 	if !outcome.Hit || outcome.Blocked {
 		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
 		return
@@ -2641,6 +2644,10 @@ func (s *Sim) appendEquipmentProgressionChanges(res *TickResult) {
 }
 
 func (s *Sim) appendInventoryPresentationUpdates(res *TickResult) {
+	s.appendInventoryPresentationUpdatesForOwner(res, 0)
+}
+
+func (s *Sim) appendInventoryPresentationUpdatesForOwner(res *TickResult, ownerPlayerID uint64) {
 	for _, item := range s.inventory {
 		if item == nil {
 			continue
@@ -2649,7 +2656,7 @@ func (s *Sim) appendInventoryPresentationUpdates(res *TickResult) {
 		if len(view.RequirementStatus) == 0 && view.EquipPreview == nil {
 			continue
 		}
-		res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(view)})
+		res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, OwnerPlayerID: ownerPlayerID, Item: ptrItemView(view)})
 	}
 }
 
@@ -3649,6 +3656,8 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if monster.monsterAttackDamage != nil {
 			attackDamage = monster.monsterAttackDamage
 		}
+		scaledAttackDamage := s.scaleMonsterDamageForParty(s.currentLevel, *attackDamage)
+		attackDamage = &scaledAttackDamage
 		monster.lastAttackTick = s.tick
 		monster.hasAttacked = true
 		attackerStats := s.monsterEffectiveCombatStats(monster, *attackDamage)
@@ -4074,9 +4083,10 @@ func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *Ti
 			continue
 		}
 		s.usePlayer(ps)
-		attackerStats := s.monsterEffectiveCombatStats(boss, *phase.Damage)
+		scaledDamage := s.scaleMonsterDamageForParty(s.currentLevel, *phase.Damage)
+		attackerStats := s.monsterEffectiveCombatStats(boss, scaledDamage)
 		defenderStats, _ := s.playerEffectiveCombatStats()
-		outcome := s.resolveCombat(attackerStats, defenderStats, *phase.Damage)
+		outcome := s.resolveCombat(attackerStats, defenderStats, scaledDamage)
 		boss.bossActiveHit[playerID] = true
 		if !outcome.Hit || outcome.Blocked {
 			res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), boss.id, player.id, "", outcome))
@@ -4351,7 +4361,7 @@ func (s *Sim) canJoinGroupAggro(source, candidate *entity) bool {
 	return distance(source.pos, candidate.pos) <= radius
 }
 
-func (s *Sim) awardMonsterExperience(monster *entity, corr string, res *TickResult) {
+func (s *Sim) awardMonsterExperience(monster *entity, sourceID uint64, corr string, res *TickResult) {
 	def, ok := s.rules.Monsters[monster.monsterDefID]
 	if !ok || def.XPReward <= 0 {
 		return
@@ -4360,10 +4370,38 @@ func (s *Sim) awardMonsterExperience(monster *entity, corr string, res *TickResu
 	if monster.monsterXPReward > 0 {
 		xpReward = monster.monsterXPReward
 	}
-	s.awardExperience(xpReward, corr, res)
+	if !s.rules.Combat.Coop.XPShare.Enabled {
+		s.awardExperienceToPlayer(sourceID, xpReward, corr, res)
+		return
+	}
+	eligible := s.coopXPEligiblePlayers(monster)
+	if len(eligible) == 0 && sourceID != 0 {
+		eligible = []uint64{sourceID}
+	}
+	for _, playerID := range eligible {
+		s.awardExperienceToPlayer(playerID, xpReward, corr, res)
+	}
 }
 
 func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
+	s.awardExperienceForCurrentPlayer(amount, corr, res, 0)
+}
+
+func (s *Sim) awardExperienceToPlayer(playerID uint64, amount int, corr string, res *TickResult) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	restore := s.players[s.playerID]
+	s.usePlayer(ps)
+	s.awardExperienceForCurrentPlayer(amount, corr, res, playerID)
+	s.savePlayer(ps)
+	if restore != nil {
+		s.usePlayer(restore)
+	}
+}
+
+func (s *Sim) awardExperienceForCurrentPlayer(amount int, corr string, res *TickResult, ownerPlayerID uint64) {
 	if amount <= 0 {
 		return
 	}
@@ -4406,10 +4444,102 @@ func (s *Sim) awardExperience(amount int, corr string, res *TickResult) {
 	}
 
 	view := s.CharacterProgressionView()
-	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, OwnerPlayerID: ownerPlayerID, Progression: &view})
 	skillView := s.SkillProgressionView()
-	res.Changes = append(res.Changes, Change{Op: OpSkillProgressionUpdate, SkillProgression: &skillView})
-	s.appendInventoryPresentationUpdates(res)
+	res.Changes = append(res.Changes, Change{Op: OpSkillProgressionUpdate, OwnerPlayerID: ownerPlayerID, SkillProgression: &skillView})
+	s.appendInventoryPresentationUpdatesForOwner(res, ownerPlayerID)
+}
+
+func (s *Sim) coopXPEligiblePlayers(monster *entity) []uint64 {
+	if monster == nil {
+		return nil
+	}
+	radius := s.rules.Combat.Coop.XPShare.Radius
+	level, ok := s.levelContainingEntity(monster)
+	if !ok {
+		return nil
+	}
+	levelNum := level.levelNum
+	eligible := []uint64{}
+	for _, playerID := range sortedPlayerIDs(s.players) {
+		ps := s.players[playerID]
+		if ps == nil || !ps.Connected || ps.CurrentLevel != levelNum {
+			continue
+		}
+		player := level.entities[playerID]
+		if player == nil || player.hp <= 0 {
+			continue
+		}
+		if distance(player.pos, monster.pos) > radius {
+			continue
+		}
+		eligible = append(eligible, playerID)
+	}
+	return eligible
+}
+
+func (s *Sim) levelContainingEntity(target *entity) (*LevelState, bool) {
+	if target == nil {
+		return nil, false
+	}
+	if level := s.levels[s.currentLevel]; level != nil && level.entities[target.id] == target {
+		return level, true
+	}
+	for _, levelNum := range s.sortedLevelNums() {
+		level := s.levels[levelNum]
+		if level != nil && level.entities[target.id] == target {
+			return level, true
+		}
+	}
+	return nil, false
+}
+
+func (s *Sim) applyPartyHPScale(level *LevelState, monster *entity) {
+	if level == nil || monster == nil || !s.rules.Combat.Coop.PartyChallenge.HPScalesAtSpawn {
+		return
+	}
+	multiplier := s.partyChallengeMultiplierForLevel(level.levelNum)
+	if multiplier <= 1 {
+		return
+	}
+	monster.maxHP = roundPositive(float64(monster.maxHP) * multiplier)
+	monster.hp = monster.maxHP
+}
+
+func (s *Sim) scaleMonsterDamageForParty(levelNum int, base DamageRange) DamageRange {
+	if !s.rules.Combat.Coop.PartyChallenge.DamageScalesAtAttack {
+		return base
+	}
+	multiplier := s.partyChallengeMultiplierForLevel(levelNum)
+	if multiplier <= 1 {
+		return base
+	}
+	return scaleDamageRange(base, multiplier)
+}
+
+func (s *Sim) partyChallengeMultiplierForLevel(levelNum int) float64 {
+	count := s.aliveConnectedPlayerCountOnLevel(levelNum)
+	return s.rules.Combat.Coop.PartyChallenge.Multiplier(count)
+}
+
+func (s *Sim) aliveConnectedPlayerCountOnLevel(levelNum int) int {
+	level := s.levels[levelNum]
+	if level == nil {
+		return 0
+	}
+	count := 0
+	for _, playerID := range sortedPlayerIDs(s.players) {
+		ps := s.players[playerID]
+		if ps == nil || !ps.Connected || ps.CurrentLevel != levelNum {
+			continue
+		}
+		player := level.entities[playerID]
+		if player == nil || player.hp <= 0 {
+			continue
+		}
+		count++
+	}
+	return count
 }
 
 func segmentIntersectsInflatedAABB(start, end, rectCenter, rectSize Vec2, inflate float64) (float64, bool) {

@@ -398,6 +398,65 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	}
 }
 
+func TestSessionMemberConnectedPreservesTickZeroJoinOnReconnect(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+
+	hostAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "host-zero+"+ids.Token()[:12]+"@example.test")
+	hostChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), hostAcct.ID, "Host")
+	guestAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "guest-zero+"+ids.Token()[:12]+"@example.test")
+	guestChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), guestAcct.ID, "Guest")
+	sess := store.Session{
+		ID:           ids.New("sess"),
+		AccountID:    hostAcct.ID,
+		CharacterID:  hostChar.ID,
+		Seed:         "joined-zero",
+		WorldID:      "dungeon_levels",
+		Mode:         store.SessionModeCoop,
+		JoinCodeHash: "join_hash",
+		Status:       store.SessionActive,
+	}
+	if err := s.CreateSession(ctx, sess); err != nil {
+		t.Fatalf("create session: %v", err)
+	}
+	if err := s.CreateSessionHostMember(ctx, store.SessionMember{
+		SessionID: sess.ID, AccountID: hostAcct.ID, CharacterID: hostChar.ID, Role: store.SessionMemberHost,
+	}); err != nil {
+		t.Fatalf("create host member: %v", err)
+	}
+	if err := s.CreateSessionGuestMember(ctx, store.SessionMember{
+		SessionID: sess.ID, AccountID: guestAcct.ID, CharacterID: guestChar.ID, Role: store.SessionMemberGuest, JoinedTick: -1,
+	}); err != nil {
+		t.Fatalf("create guest member: %v", err)
+	}
+	if err := s.SetSessionMemberConnected(ctx, sess.ID, guestAcct.ID, guestChar.ID, "1005", 0, 0); err != nil {
+		t.Fatalf("first connect: %v", err)
+	}
+	member, err := s.GetSessionMember(ctx, sess.ID, guestAcct.ID, guestChar.ID)
+	if err != nil {
+		t.Fatalf("get first connected member: %v", err)
+	}
+	if member.JoinedTick != 0 {
+		t.Fatalf("joined_tick after tick-zero connect = %d, want 0", member.JoinedTick)
+	}
+	if err := s.SetSessionMemberDisconnected(ctx, sess.ID, guestAcct.ID, guestChar.ID, 0, 10); err != nil {
+		t.Fatalf("disconnect: %v", err)
+	}
+	if claimed, err := s.ClaimSessionMemberConnection(ctx, sess.ID, guestAcct.ID, guestChar.ID); err != nil || !claimed {
+		t.Fatalf("claim reconnect = %v, %v; want true, nil", claimed, err)
+	}
+	if err := s.SetSessionMemberConnected(ctx, sess.ID, guestAcct.ID, guestChar.ID, "1005", 0, 12); err != nil {
+		t.Fatalf("reconnect: %v", err)
+	}
+	member, err = s.GetSessionMember(ctx, sess.ID, guestAcct.ID, guestChar.ID)
+	if err != nil {
+		t.Fatalf("get reconnected member: %v", err)
+	}
+	if member.JoinedTick != 0 {
+		t.Fatalf("joined_tick after reconnect = %d, want original 0", member.JoinedTick)
+	}
+}
+
 func summaryByID(summaries []store.SessionSummary, sessionID string) store.SessionSummary {
 	for _, summary := range summaries {
 		if summary.SessionID == sessionID {

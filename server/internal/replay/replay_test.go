@@ -834,6 +834,65 @@ func TestVerifyCoopReplayMatchesActorCombatAndLootEvents(t *testing.T) {
 	assertRecordedEventHasEntity(t, events, "item_picked_up", "1001")
 }
 
+func TestReconstructCoopReplaySharesXPWithNearbyGuest(t *testing.T) {
+	rules := loadRules(t)
+	dummy := rules.Monsters["training_dummy"]
+	dummy.MaxHP = 1
+	dummy.XPReward = 10
+	dummy.RetaliationDamage = nil
+	rules.Monsters["training_dummy"] = dummy
+
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, Seed: "v48_coop_rewards_replay", WorldID: game.DefaultWorldID, Mode: store.SessionModeCoop},
+		members: []store.SessionMember{
+			{SessionID: testSessionID, AccountID: "acct_host", CharacterID: "char_host", PlayerEntityID: "1001", Role: store.SessionMemberHost, Status: store.SessionMemberActive, Connected: true},
+			{SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest", PlayerEntityID: "1003", Role: store.SessionMemberGuest, Status: store.SessionMemberActive, Connected: true},
+		},
+		starts: map[string]store.SessionStartSnapshot{
+			startKey("acct_host", "char_host"):   {SessionID: testSessionID, AccountID: "acct_host", CharacterID: "char_host"},
+			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
+		},
+	}
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	if err != nil {
+		t.Fatalf("scratch sim: %v", err)
+	}
+	monster := findSnapshotEntity(scratch.SnapshotForPlayer(1001), "monster", "training_dummy")
+	if monster == nil {
+		t.Fatal("missing training dummy")
+	}
+
+	var rows []store.SessionInput
+	var events []store.SessionEvent
+	tick := int64(0)
+	sequence := int64(0)
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1003, game.Vec2{X: monster.Position.X - 4, Y: monster.Position.Y})
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1001, game.Vec2{X: monster.Position.X - 1, Y: monster.Position.Y})
+	_ = appendInputAndAdvanceReplay(t, scratch, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: 1001,
+		Type:          "action_intent",
+		Action:        &game.ActionIntent{TargetID: monster.ID},
+	})
+	if countStoreEvents(events, "experience_gained") != 2 {
+		t.Fatalf("recorded xp events = %+v, want host and guest xp", events)
+	}
+
+	repo.inputs = rows
+	repo.events = events
+	recon, err := Reconstruct(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	hostXP := recon.Sim.SnapshotForPlayer(1001).CharacterProgression.Experience
+	guestXP := recon.Sim.SnapshotForPlayer(1003).CharacterProgression.Experience
+	if hostXP != 10 || guestXP != 10 {
+		t.Fatalf("replayed xp host=%d guest=%d, want both 10", hostXP, guestXP)
+	}
+	if !hasDerivedEvent(recon.DerivedEvents, "experience_gained") || !hasDerivedEvent(recon.DerivedEvents, "monster_killed") {
+		t.Fatalf("derived events missing xp/kill: %+v", recon.DerivedEvents)
+	}
+}
+
 func scriptedRecordedInputs() ([]RecordedInput, int64) {
 	return []RecordedInput{
 		{
@@ -1135,6 +1194,16 @@ func hasStoreEvent(events []store.SessionEvent, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func countStoreEvents(events []store.SessionEvent, eventType string) int {
+	count := 0
+	for _, ev := range events {
+		if ev.EventType == eventType {
+			count++
+		}
+	}
+	return count
 }
 
 func replayDistance(a, b game.Vec2) float64 {

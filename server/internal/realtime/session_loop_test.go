@@ -1,6 +1,7 @@
 package realtime
 
 import (
+	"context"
 	"testing"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
@@ -163,6 +164,76 @@ func TestShopDeltasAreActorScoped(t *testing.T) {
 		t.Fatalf("other events = %+v, want only public monster_aggro", otherEvents)
 	}
 }
+
+func TestProgressionDeltasUseExplicitOwner(t *testing.T) {
+	actorID := uint64(1001)
+	ownerID := uint64(1002)
+	gold := 80
+	progression := game.CharacterProgressionView{Level: 2, Experience: 20, BaseStats: game.BaseStatsView{Str: 5, Dex: 5, Vit: 5, Magic: 5}}
+	skills := game.SkillProgressionView{UnspentSkillPoints: 1, Skills: []game.SkillProgressionSkillView{}}
+	changes := []game.Change{
+		{Op: game.OpCharacterProgressionUpdate, OwnerPlayerID: ownerID, Progression: &progression},
+		{Op: game.OpSkillProgressionUpdate, OwnerPlayerID: ownerID, SkillProgression: &skills},
+		{Op: game.OpGoldUpdate, Gold: &gold},
+		{Op: game.OpEntityUpdate, Entity: &game.EntityView{ID: "3001", Type: "monster"}},
+	}
+	events := []game.Event{
+		{EventType: "experience_gained", EntityID: idStr(ownerID)},
+		{EventType: "character_leveled", EntityID: idStr(ownerID)},
+		{EventType: "skill_point_gained", EntityID: idStr(ownerID)},
+		{EventType: "monster_killed", EntityID: "3001"},
+	}
+
+	actorChanges := filterChangesForClient(changes, actorID, actorID)
+	if len(actorChanges) != 2 || actorChanges[0].Op != game.OpGoldUpdate || actorChanges[1].Op != game.OpEntityUpdate {
+		t.Fatalf("actor changes = %+v, want actor gold plus public entity update", actorChanges)
+	}
+	ownerChanges := filterChangesForClient(changes, actorID, ownerID)
+	if len(ownerChanges) != 3 || ownerChanges[0].Op != game.OpCharacterProgressionUpdate || ownerChanges[1].Op != game.OpSkillProgressionUpdate || ownerChanges[2].Op != game.OpEntityUpdate {
+		t.Fatalf("owner changes = %+v, want owner progression/skills plus public entity update", ownerChanges)
+	}
+	actorEvents := filterEventsForClient(events, actorID, actorID)
+	if len(actorEvents) != 1 || actorEvents[0].EventType != "monster_killed" {
+		t.Fatalf("actor events = %+v, want only public monster_killed", actorEvents)
+	}
+	ownerEvents := filterEventsForClient(events, actorID, ownerID)
+	if len(ownerEvents) != 4 {
+		t.Fatalf("owner events = %+v, want all owner progression events plus public monster_killed", ownerEvents)
+	}
+
+	repo := &progressionPersistRepo{}
+	loop := &sessionLoop{
+		hub:  &Hub{store: repo},
+		sess: store.Session{ID: "sess_owner_persist", AccountID: "acct_host", CharacterID: "char_host"},
+	}
+	loop.persistTick(game.TickResult{
+		Tick:          7,
+		ActorPlayerID: actorID,
+		Changes:       []game.Change{{Op: game.OpCharacterProgressionUpdate, OwnerPlayerID: ownerID, Progression: &progression}},
+	}, map[uint64]store.SessionMember{
+		actorID: {AccountID: "acct_host", CharacterID: "char_host"},
+		ownerID: {AccountID: "acct_guest", CharacterID: "char_guest"},
+	}, 0)
+	if len(repo.progressions) != 1 {
+		t.Fatalf("persisted progressions = %d, want 1", len(repo.progressions))
+	}
+	got := repo.progressions[0]
+	if got.AccountID != "acct_guest" || got.CharacterID != "char_guest" || got.Experience != 20 {
+		t.Fatalf("persisted progression = %+v, want guest owner at 20 xp", got)
+	}
+}
+
+type progressionPersistRepo struct {
+	store.Repository
+	progressions []store.CharacterProgression
+}
+
+func (r *progressionPersistRepo) UpsertCharacterProgression(_ context.Context, _ string, progression store.CharacterProgression) error {
+	r.progressions = append(r.progressions, progression)
+	return nil
+}
+
+func (r *progressionPersistRepo) TouchSession(context.Context, string) error { return nil }
 
 func mustReceiveDelta(t *testing.T, client *loopClient) stateDeltaPayload {
 	t.Helper()

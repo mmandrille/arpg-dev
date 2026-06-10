@@ -223,13 +223,107 @@ func TestProgressionDeltasUseExplicitOwner(t *testing.T) {
 	}
 }
 
+func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
+	rulesDir, err := game.FindSharedRulesDir()
+	if err != nil {
+		t.Fatalf("find rules: %v", err)
+	}
+	rules, err := game.LoadRules(rulesDir)
+	if err != nil {
+		t.Fatalf("load rules: %v", err)
+	}
+	sim := game.NewSim("sess_gold_fanout", "v49-gold-fanout", rules)
+	hostID := sim.DefaultPlayerID()
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	totalGold := 17
+	amount := 17
+	progression := game.CharacterProgressionView{Level: 1, Gold: totalGold, BaseStats: game.BaseStatsView{Str: 5, Dex: 5, Vit: 5, Magic: 5}}
+	result := game.TickResult{
+		Tick:          4,
+		Level:         0,
+		ActorPlayerID: 0,
+		Changes: []game.Change{
+			{Op: game.OpEntityRemove, EntityID: "3001"},
+			{Op: game.OpGoldUpdate, OwnerPlayerID: guestID, Gold: &totalGold},
+			{Op: game.OpCharacterProgressionUpdate, OwnerPlayerID: guestID, Progression: &progression},
+		},
+		Events: []game.Event{{
+			EventType: "gold_picked_up",
+			EntityID:  idStr(guestID),
+			Amount:    &amount,
+			TotalGold: &totalGold,
+		}},
+	}
+
+	host := &loopClient{playerID: hostID, sendCh: make(chan outEnvelope, 8), done: make(chan struct{})}
+	guest := &loopClient{playerID: guestID, sendCh: make(chan outEnvelope, 8), done: make(chan struct{})}
+	loop := &sessionLoop{
+		sess: store.Session{ID: "sess_gold_fanout"},
+		sim:  sim,
+	}
+	loop.fanoutResult(result, []*loopClient{host, guest}, nil)
+
+	hostDelta := mustReceiveDelta(t, host)
+	if len(hostDelta.Changes) != 1 || hostDelta.Changes[0].Op != game.OpEntityRemove || len(hostDelta.Events) != 0 {
+		t.Fatalf("host delta = %+v, want public remove only", hostDelta)
+	}
+	guestDelta := mustReceiveDelta(t, guest)
+	if len(guestDelta.Changes) != 3 || guestDelta.Changes[0].Op != game.OpEntityRemove || guestDelta.Changes[1].Op != game.OpGoldUpdate || guestDelta.Changes[2].Op != game.OpCharacterProgressionUpdate {
+		t.Fatalf("guest changes = %+v, want remove plus private gold/progression", guestDelta.Changes)
+	}
+	if len(guestDelta.Events) != 1 || guestDelta.Events[0].EventType != "gold_picked_up" || guestDelta.Events[0].TotalGold == nil || *guestDelta.Events[0].TotalGold != totalGold {
+		t.Fatalf("guest events = %+v, want private gold_picked_up with total", guestDelta.Events)
+	}
+
+	repo := &progressionPersistRepo{}
+	persistLoop := &sessionLoop{
+		hub:  &Hub{store: repo},
+		sess: store.Session{ID: "sess_gold_persist", AccountID: "acct_host", CharacterID: "char_host"},
+	}
+	persistLoop.persistTick(result, map[uint64]store.SessionMember{
+		hostID:  {AccountID: "acct_host", CharacterID: "char_host"},
+		guestID: {AccountID: "acct_guest", CharacterID: "char_guest"},
+	}, 0)
+	if len(repo.goldUpdates) != 1 {
+		t.Fatalf("persisted gold updates = %d, want 1", len(repo.goldUpdates))
+	}
+	gotGold := repo.goldUpdates[0]
+	if gotGold.accountID != "acct_guest" || gotGold.characterID != "char_guest" || gotGold.gold != totalGold {
+		t.Fatalf("persisted gold = %+v, want guest gold %d", gotGold, totalGold)
+	}
+	if len(repo.progressions) != 1 || repo.progressions[0].AccountID != "acct_guest" || repo.progressions[0].Gold != totalGold {
+		t.Fatalf("persisted progression = %+v, want guest progression gold %d", repo.progressions, totalGold)
+	}
+}
+
 type progressionPersistRepo struct {
 	store.Repository
 	progressions []store.CharacterProgression
+	goldUpdates  []persistedGoldUpdate
+	events       []store.SessionEvent
+}
+
+type persistedGoldUpdate struct {
+	accountID   string
+	characterID string
+	gold        int
 }
 
 func (r *progressionPersistRepo) UpsertCharacterProgression(_ context.Context, _ string, progression store.CharacterProgression) error {
 	r.progressions = append(r.progressions, progression)
+	return nil
+}
+
+func (r *progressionPersistRepo) SetCharacterGold(_ context.Context, accountID, characterID string, gold int) error {
+	r.goldUpdates = append(r.goldUpdates, persistedGoldUpdate{accountID: accountID, characterID: characterID, gold: gold})
+	return nil
+}
+
+func (r *progressionPersistRepo) AppendEvent(_ context.Context, event store.SessionEvent) error {
+	r.events = append(r.events, event)
 	return nil
 }
 

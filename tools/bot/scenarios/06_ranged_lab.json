@@ -16,9 +16,13 @@
       "monster_def_id": "training_dummy_ranged",
       "event_type": "monster_killed"
     },
-    { "action": "action_entity", "item_def_id": "gold", "event_type": "gold_picked_up" },
     { "action": "action_entity", "item_def_id": "quest_leaf", "event_type": "item_picked_up" },
-    { "action": "action_entity", "item_def_id": "red_potion", "event_type": "item_picked_up" }
+    { "action": "action_entity", "item_def_id": "red_potion", "event_type": "item_picked_up" },
+    {
+      "action": "wait_until_assertion",
+      "assertion": { "type": "event_seen", "event_type": "gold_picked_up" },
+      "timeout_s": 5
+    }
   ],
   "assertions": [
     { "type": "monster_dead", "monster_def_id": "training_dummy_ranged" },

@@ -9,7 +9,11 @@
     { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "main_hand" },
     { "action": "walk_to_monster", "monster_def_id": "training_dummy_reward" },
     { "action": "action_until_event", "monster_def_id": "training_dummy_reward", "event_type": "monster_killed" },
-    { "action": "action_entity", "item_def_id": "gold", "event_type": "gold_picked_up" }
+    {
+      "action": "wait_until_assertion",
+      "assertion": { "type": "event_seen", "event_type": "gold_picked_up" },
+      "timeout_s": 5
+    }
   ],
   "assertions": [
     { "type": "inventory_count", "equals": 1 },

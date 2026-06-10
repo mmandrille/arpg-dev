@@ -1,0 +1,67 @@
+tools/bot/run.py
+  s_1b76946234c99c::t_8a679fe842a5c0 3429-3432,3443-3452,3465-3494
+  s_1b76946234c99c::t_b5f75ffce500a4 3984-4055,4063-4082
+  s_1b76946234c99c::t_c1fff12dbd1a1f 4165-4183
+  s_1b76946234c99c::t_4793f66f095b68 993-994,998-999
+  s_1b76946234c99c::t_5ee08c749d430f 4056-4062
+  s_1b76946234c99c::t_a772d40ff6e7ac 3937-3983
+  s_1b76946234c99c::t_427280acbf3279 3453-3464,3495-3506
+docs/specs/v49_spec-gold-autopickup-and-shared-loot-rules.md
+  s_1b76946234c99c::t_7cc825ad33620e 1-238
+docs/PROGRESS.md
+  s_1b76946234c99c::t_efa834b47b73b0 1214-1238
+  s_1b76946234c99c::t_2cd08d80e72535 1504-1508,1515,1524
+  s_1b76946234c99c::t_26c614acb655c4 6,14,16,67,136
+  s_1b76946234c99c::t_38f00df0d52810 1314
+server/internal/game/game_test.go
+  s_1b76946234c99c::t_08a9bb5ab1d590 3930-3984
+  s_1b76946234c99c::t_55a7625df1bad7 1507-1723
+  s_1b76946234c99c::t_14a7c9a4ad0d35 4061-4073
+tools/bot/scenarios/client/16_vendor_item_comparison.json
+  s_1b76946234c99c::t_1116b630d3539a 16
+tools/bot/scenarios/client/15_town_vendor_shop_panel.json
+  s_1b76946234c99c::t_1116b630d3539a 16
+server/internal/game/sim.go
+  s_1b76946234c99c::t_104cb92a349f4e 1308-1309,1956-1957,1959,1961,1993-2028,2030-2033,2038-2076
+  s_1b76946234c99c::t_c2d0cf187c3d7a 2029,2034-2037
+server/internal/replay/replay_test.go
+  s_1b76946234c99c::t_73e7df0e71682d 81-114
+server/internal/realtime/session_loop_test.go
+  s_1b76946234c99c::t_888347ce5d8296 226-301,305,307-312,320-321
+  s_1b76946234c99c::t_6bf9e66b22a337 306,322-326
+docs/plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md
+  s_1b76946234c99c::t_263cb792cb6b0c 118-126
+  s_1b76946234c99c::t_665c5cee274b9a 85-89
+  s_1b76946234c99c::t_611ced334c99d8 48-54,65-72
+  s_1b76946234c99c::t_64500cfc70d19c 1-2,4-36,40-47,55-64,73-84,90-101,106-117,127-138,144-150,160-167
+  s_1b76946234c99c::t_957c5463e382cc 3,37-39,139-143,151-159
+  s_1b76946234c99c::t_a2201f74de1064 102-105
+server/internal/realtime/session_loop.go
+  s_1b76946234c99c::t_288876dda3ef7e 583
+tools/bot/scenarios/15_character_persistence.json
+  s_1b76946234c99c::t_68a20130700057 12-16
+tools/bot/scenarios/02_gear_before_combat.json
+  s_1b76946234c99c::t_68a20130700057 31-33
+tools/bot/scenarios/client/22_shop_stock_lifecycle.json
+  s_1b76946234c99c::t_1116b630d3539a 16
+tools/bot/scenarios/35_gold_autopickup_shared_loot.json
+  s_1b76946234c99c::t_6f2560f02daba1 1-10
+tools/bot/scenarios/06_ranged_lab.json
+  s_1b76946234c99c::t_68a20130700057 20-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9e1fdd5f0c12cfed73148e4bbeb83ee735e25ca8",
+  "prompts": {},
+  "sessions": {
+    "s_1b76946234c99c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaf44-bd02-7670-afc3-d49a3f4233c7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

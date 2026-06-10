@@ -39,6 +39,8 @@ const (
 	stairsUpDefID                  = "stairs_up"
 	teleporterDefID                = "teleporter"
 	treasureChestDefID             = "treasure_chest"
+	townStashDefID                 = "town_stash"
+	accountStashID                 = "account_stash"
 	worldModeMultiLevel            = "multi_level"
 	attackModeMelee                = "melee"
 	attackModeRanged               = "ranged"
@@ -60,6 +62,7 @@ const (
 	baseInventoryRows              = 3
 	inventoryColumns               = 5
 	maxInventoryRows               = 20
+	defaultStashCapacity           = 50
 	minimumChaseLeashTiles         = 25.0
 )
 
@@ -146,6 +149,12 @@ type invItem struct {
 	equipped    bool
 }
 
+type stashItem struct {
+	stashItemID uint64
+	itemDefID   string
+	rollPayload *ItemRollPayload
+}
+
 type goldRollContext struct {
 	levelNum        int
 	monsterRarityID string
@@ -225,6 +234,9 @@ type playerState struct {
 	SkillCooldowns        map[string]skillCooldownState
 	ShopStock             map[string]*shopStockState
 	Gold                  int
+	StashItems            []*stashItem
+	StashGold             int
+	StashCapacity         int
 	HPRegenCarry          float64
 	ManaRegenCarry        float64
 }
@@ -259,6 +271,9 @@ type Sim struct {
 	skillCooldowns        map[string]skillCooldownState
 	shopStock             map[string]*shopStockState
 	gold                  int
+	stashItems            []*stashItem
+	stashGold             int
+	stashCapacity         int
 	hpRegenCarry          float64
 	manaRegenCarry        float64
 }
@@ -315,6 +330,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		skillCooldowns:        make(map[string]skillCooldownState),
 		shopStock:             make(map[string]*shopStockState),
 		gold:                  progression.Gold,
+		stashCapacity:         defaultStashCapacity,
 	}
 
 	if s.multiLevel {
@@ -493,6 +509,9 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
 		ShopStock:             s.shopStock,
 		Gold:                  s.gold,
+		StashItems:            s.stashItems,
+		StashGold:             s.stashGold,
+		StashCapacity:         s.stashCapacity,
 	}
 
 	for _, preset := range world.Entities {
@@ -575,6 +594,13 @@ type PersistedItem struct {
 type PersistedHotbarSlot struct {
 	SlotIndex      int
 	ItemInstanceID *string
+}
+
+// PersistedStashItem is an account-stash item reloaded at session start.
+type PersistedStashItem struct {
+	StashItemID string
+	ItemDefID   string
+	RolledStats json.RawMessage
 }
 
 // LoadInventory restores persisted inventory into a fresh sim (used on resume).
@@ -661,6 +687,38 @@ func (s *Sim) LoadShopStock(items []PersistedShopStockItem) {
 			return state.Generated[i].OfferID < state.Generated[j].OfferID
 		})
 	}
+	s.savePlayer(s.defaultPlayer())
+}
+
+// LoadAccountStash restores account-owned stash contents into the active
+// player's private state.
+func (s *Sim) LoadAccountStash(items []PersistedStashItem, gold int, capacity int) {
+	if capacity <= 0 {
+		capacity = defaultStashCapacity
+	}
+	s.stashItems = []*stashItem{}
+	for _, p := range items {
+		id, err := strconv.ParseUint(p.StashItemID, 10, 64)
+		if err != nil || p.ItemDefID == "" {
+			continue
+		}
+		s.stashItems = append(s.stashItems, &stashItem{
+			stashItemID: id,
+			itemDefID:   p.ItemDefID,
+			rollPayload: parseRollPayload(p.RolledStats),
+		})
+		if id >= s.nextID {
+			s.nextID = id + 1
+		}
+	}
+	sort.Slice(s.stashItems, func(i, j int) bool {
+		return s.stashItems[i].stashItemID < s.stashItems[j].stashItemID
+	})
+	if gold < 0 {
+		gold = 0
+	}
+	s.stashGold = gold
+	s.stashCapacity = capacity
 	s.savePlayer(s.defaultPlayer())
 }
 
@@ -760,6 +818,17 @@ func (s *Sim) LoadShopStockForPlayer(playerID uint64, items []PersistedShopStock
 	s.usePlayer(s.defaultPlayer())
 }
 
+func (s *Sim) LoadAccountStashForPlayer(playerID uint64, items []PersistedStashItem, gold int, capacity int) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadAccountStash(items, gold, capacity)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+}
+
 func (s *Sim) LoadDiscoveredTeleportersForPlayer(playerID uint64, levels []int) {
 	ps := s.players[playerID]
 	if ps == nil {
@@ -794,6 +863,8 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	discovered := map[int]bool{townLevel: true}
 	cooldowns := make(map[string]skillCooldownState)
 	shopStock := make(map[string]*shopStockState)
+	stashItems := []*stashItem{}
+	stashCapacity := defaultStashCapacity
 	character := progression
 	gold := progression.Gold
 	s.equipped = equipped
@@ -803,6 +874,9 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	s.skillCooldowns = cooldowns
 	s.shopStock = shopStock
 	s.gold = gold
+	s.stashItems = stashItems
+	s.stashGold = 0
+	s.stashCapacity = stashCapacity
 	maxHP := s.currentMaxHP()
 	maxMana := s.currentMaxMana()
 	player := &entity{
@@ -832,6 +906,9 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		SkillCooldowns:        cooldowns,
 		ShopStock:             shopStock,
 		Gold:                  gold,
+		StashItems:            stashItems,
+		StashGold:             0,
+		StashCapacity:         stashCapacity,
 	}
 	s.usePlayer(s.defaultPlayer())
 	return player.id, nil
@@ -1090,6 +1167,12 @@ func (s *Sim) usePlayer(ps *playerState) {
 		s.shopStock = make(map[string]*shopStockState)
 	}
 	s.gold = ps.Gold
+	s.stashItems = ps.StashItems
+	s.stashGold = ps.StashGold
+	s.stashCapacity = ps.StashCapacity
+	if s.stashCapacity <= 0 {
+		s.stashCapacity = defaultStashCapacity
+	}
 	s.hpRegenCarry = ps.HPRegenCarry
 	s.manaRegenCarry = ps.ManaRegenCarry
 	level := s.activeLevel()
@@ -1111,6 +1194,9 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.SkillCooldowns = s.skillCooldowns
 	ps.ShopStock = s.shopStock
 	ps.Gold = s.gold
+	ps.StashItems = s.stashItems
+	ps.StashGold = s.stashGold
+	ps.StashCapacity = s.stashCapacity
 	ps.HPRegenCarry = s.hpRegenCarry
 	ps.ManaRegenCarry = s.manaRegenCarry
 	if level := s.levels[ps.CurrentLevel]; level != nil {
@@ -1156,6 +1242,10 @@ type Input struct {
 	CastSkill          *CastSkillIntent
 	ShopBuy            *ShopBuyIntent
 	ShopSell           *ShopSellIntent
+	StashDepositItem   *StashDepositItemIntent
+	StashWithdrawItem  *StashWithdrawItemIntent
+	StashDepositGold   *StashDepositGoldIntent
+	StashWithdrawGold  *StashWithdrawGoldIntent
 }
 
 // Intent payloads.
@@ -1215,6 +1305,22 @@ type (
 	ShopSellIntent struct {
 		ShopEntityID   string
 		ItemInstanceID string
+	}
+	StashDepositItemIntent struct {
+		StashEntityID  string
+		ItemInstanceID string
+	}
+	StashWithdrawItemIntent struct {
+		StashEntityID string
+		StashItemID   string
+	}
+	StashDepositGoldIntent struct {
+		StashEntityID string
+		Amount        int
+	}
+	StashWithdrawGoldIntent struct {
+		StashEntityID string
+		Amount        int
 	}
 )
 
@@ -1348,7 +1454,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) applyInput(in Input, res *TickResult) {
 	if in.Type != "client_ready" && s.playerDead() {
 		switch in.Type {
-		case "move_intent", "move_to_intent", "directional_attack_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent", "allocate_skill_point_intent", "cast_skill_intent", "shop_buy_intent", "shop_sell_intent":
+		case "move_intent", "move_to_intent", "directional_attack_intent", "action_intent", "descend_intent", "ascend_intent", "teleport_intent", "equip_intent", "unequip_intent", "drop_intent", "use_intent", "assign_hotbar_intent", "use_hotbar_intent", "allocate_stat_intent", "allocate_skill_point_intent", "cast_skill_intent", "shop_buy_intent", "shop_sell_intent", "stash_deposit_item_intent", "stash_withdraw_item_intent", "stash_deposit_gold_intent", "stash_withdraw_gold_intent":
 			res.reject(in.MessageID, "player_dead")
 			return
 		}
@@ -1391,6 +1497,14 @@ func (s *Sim) applyInput(in Input, res *TickResult) {
 		s.handleShopBuy(in, res)
 	case "shop_sell_intent":
 		s.handleShopSell(in, res)
+	case "stash_deposit_item_intent":
+		s.handleStashDepositItem(in, res)
+	case "stash_withdraw_item_intent":
+		s.handleStashWithdrawItem(in, res)
+	case "stash_deposit_gold_intent":
+		s.handleStashDepositGold(in, res)
+	case "stash_withdraw_gold_intent":
+		s.handleStashWithdrawGold(in, res)
 	default:
 		res.reject(in.MessageID, "unknown_type")
 	}
@@ -2136,6 +2250,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.openShop(e, shopID, in, res, ack)
 		return
 	}
+	if stashID := s.stashIDForInteractable(e); stashID != "" {
+		s.openStash(e, stashID, in, res, ack)
+		return
+	}
 	if e.state != interactableClosed {
 		res.reject(in.MessageID, "already_open")
 		return
@@ -2291,6 +2409,195 @@ func (s *Sim) handleShopSell(in Input, res *TickResult) {
 	res.ack(in.MessageID)
 }
 
+func (s *Sim) openStash(e *entity, stashID string, in Input, res *TickResult, ack bool) {
+	if e.state != interactableReady {
+		res.reject(in.MessageID, "not_actionable")
+		return
+	}
+	res.Events = append(res.Events, Event{
+		EventType:     "stash_opened",
+		EntityID:      idStr(e.id),
+		CorrelationID: in.CorrelationID,
+		StashID:       stashID,
+		StashItems:    s.stashItemViews(),
+		StashGold:     intPtr(s.stashGold),
+		StashCapacity: intPtr(s.stashCapacity),
+	})
+	if ack {
+		res.ack(in.MessageID)
+	}
+}
+
+func (s *Sim) handleStashDepositItem(in Input, res *TickResult) {
+	if in.StashDepositItem == nil || in.StashDepositItem.StashEntityID == "" || in.StashDepositItem.ItemInstanceID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	stashEntity, stashID, ok, reason := s.resolveStashIntentTarget(in.StashDepositItem.StashEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	item := s.findItem(in.StashDepositItem.ItemInstanceID)
+	if item == nil {
+		res.reject(in.MessageID, "not_in_inventory")
+		return
+	}
+	if item.equipped {
+		res.reject(in.MessageID, "item_equipped")
+		return
+	}
+	if s.hotbarHasItem(item.instanceID) {
+		res.reject(in.MessageID, "item_hotbar_assigned")
+		return
+	}
+	if len(s.stashItems) >= s.stashCapacity {
+		res.reject(in.MessageID, "stash_full")
+		return
+	}
+
+	stashItemID := s.alloc()
+	deposited := &stashItem{
+		stashItemID: stashItemID,
+		itemDefID:   item.itemDefID,
+		rollPayload: cloneRollPayload(item.rollPayload),
+	}
+	removedID := idStr(item.instanceID)
+	transferID := "stash_deposit_item:" + idStr(stashItemID)
+	s.removeItemByID(item.instanceID)
+	s.stashItems = append(s.stashItems, deposited)
+
+	res.Changes = append(res.Changes,
+		Change{Op: OpInventoryRemove, ItemInstanceID: &removedID, StashTransferID: transferID},
+		Change{Op: OpStashItemAdd, StashItem: ptrStashItemView(s.stashItemView(deposited)), StashTransferID: transferID},
+	)
+	res.Events = append(res.Events, Event{
+		EventType:      "stash_item_deposited",
+		EntityID:       idStr(stashEntity.id),
+		CorrelationID:  in.CorrelationID,
+		StashID:        stashID,
+		ItemInstanceID: removedID,
+		StashItemID:    idStr(stashItemID),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleStashWithdrawItem(in Input, res *TickResult) {
+	if in.StashWithdrawItem == nil || in.StashWithdrawItem.StashEntityID == "" || in.StashWithdrawItem.StashItemID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	stashEntity, stashID, ok, reason := s.resolveStashIntentTarget(in.StashWithdrawItem.StashEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	stored := s.findStashItem(in.StashWithdrawItem.StashItemID)
+	if stored == nil {
+		res.reject(in.MessageID, "stash_item_not_found")
+		return
+	}
+	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
+		res.reject(in.MessageID, "inventory_full")
+		return
+	}
+
+	item := &invItem{
+		instanceID:  s.alloc(),
+		itemDefID:   stored.itemDefID,
+		rollPayload: cloneRollPayload(stored.rollPayload),
+	}
+	stashItemID := idStr(stored.stashItemID)
+	transferID := "stash_withdraw_item:" + stashItemID
+	s.removeStashItemByID(stored.stashItemID)
+	s.inventory = append(s.inventory, item)
+
+	res.Changes = append(res.Changes,
+		Change{Op: OpStashItemRemove, StashItemID: stashItemID, StashTransferID: transferID},
+		Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item)), StashTransferID: transferID},
+	)
+	res.Events = append(res.Events, Event{
+		EventType:      "stash_item_withdrawn",
+		EntityID:       idStr(stashEntity.id),
+		CorrelationID:  in.CorrelationID,
+		StashID:        stashID,
+		ItemInstanceID: idStr(item.instanceID),
+		StashItemID:    stashItemID,
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleStashDepositGold(in Input, res *TickResult) {
+	if in.StashDepositGold == nil || in.StashDepositGold.StashEntityID == "" || in.StashDepositGold.Amount <= 0 {
+		res.reject(in.MessageID, "invalid_amount")
+		return
+	}
+	stashEntity, stashID, ok, reason := s.resolveStashIntentTarget(in.StashDepositGold.StashEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	amount := in.StashDepositGold.Amount
+	if s.gold < amount {
+		res.reject(in.MessageID, "insufficient_gold")
+		return
+	}
+	transferID := fmt.Sprintf("stash_deposit_gold:%d:%d", s.tick, amount)
+	s.gold -= amount
+	s.progression.Gold = s.gold
+	s.stashGold += amount
+	s.appendStashGoldChanges(res, transferID)
+	res.Events = append(res.Events, Event{
+		EventType:     "stash_gold_deposited",
+		EntityID:      idStr(stashEntity.id),
+		CorrelationID: in.CorrelationID,
+		StashID:       stashID,
+		Amount:        intPtr(amount),
+		TotalGold:     intPtr(s.gold),
+		StashGold:     intPtr(s.stashGold),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleStashWithdrawGold(in Input, res *TickResult) {
+	if in.StashWithdrawGold == nil || in.StashWithdrawGold.StashEntityID == "" || in.StashWithdrawGold.Amount <= 0 {
+		res.reject(in.MessageID, "invalid_amount")
+		return
+	}
+	stashEntity, stashID, ok, reason := s.resolveStashIntentTarget(in.StashWithdrawGold.StashEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	amount := in.StashWithdrawGold.Amount
+	if s.stashGold < amount {
+		res.reject(in.MessageID, "insufficient_stash_gold")
+		return
+	}
+	transferID := fmt.Sprintf("stash_withdraw_gold:%d:%d", s.tick, amount)
+	s.stashGold -= amount
+	s.gold += amount
+	s.progression.Gold = s.gold
+	s.appendStashGoldChanges(res, transferID)
+	res.Events = append(res.Events, Event{
+		EventType:     "stash_gold_withdrawn",
+		EntityID:      idStr(stashEntity.id),
+		CorrelationID: in.CorrelationID,
+		StashID:       stashID,
+		Amount:        intPtr(amount),
+		TotalGold:     intPtr(s.gold),
+		StashGold:     intPtr(s.stashGold),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) appendStashGoldChanges(res *TickResult, transferID string) {
+	res.Changes = append(res.Changes, Change{Op: OpStashGoldUpdate, StashGold: intPtr(s.stashGold), StashTransferID: transferID})
+	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold), StashTransferID: transferID})
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view, StashTransferID: transferID})
+}
+
 func (s *Sim) resolveShopIntentTarget(shopEntityID string) (*entity, string, bool, string) {
 	shopEntity, levelNum, ok := s.findEntityAnyLevel(shopEntityID)
 	if !ok || shopEntity.kind != interactableEntity {
@@ -2312,11 +2619,39 @@ func (s *Sim) resolveShopIntentTarget(shopEntityID string) (*entity, string, boo
 	return shopEntity, shopID, true, ""
 }
 
+func (s *Sim) resolveStashIntentTarget(stashEntityID string) (*entity, string, bool, string) {
+	stashEntity, levelNum, ok := s.findEntityAnyLevel(stashEntityID)
+	if !ok || stashEntity.kind != interactableEntity {
+		return nil, "", false, "invalid_target"
+	}
+	stashID := s.stashIDForInteractable(stashEntity)
+	if stashID == "" {
+		return nil, "", false, "invalid_target"
+	}
+	if levelNum != s.currentLevel || s.currentLevel != townLevel {
+		return nil, "", false, "out_of_range"
+	}
+	if !s.inDispatchRange(stashEntity) {
+		return nil, "", false, "out_of_range"
+	}
+	if stashEntity.state != interactableReady {
+		return nil, "", false, "not_actionable"
+	}
+	return stashEntity, stashID, true, ""
+}
+
 func (s *Sim) shopIDForInteractable(e *entity) string {
 	if e == nil || e.kind != interactableEntity {
 		return ""
 	}
 	return s.rules.Interactables[e.interactableDefID].ShopID
+}
+
+func (s *Sim) stashIDForInteractable(e *entity) string {
+	if e == nil || e.kind != interactableEntity {
+		return ""
+	}
+	return s.rules.Interactables[e.interactableDefID].StashID
 }
 
 func (s *Sim) activateTeleporter(e *entity, in Input, res *TickResult, ack bool) {
@@ -3569,6 +3904,18 @@ func (s *Sim) removeItemByID(id uint64) {
 	for i, it := range s.inventory {
 		if it.instanceID == id {
 			s.inventory = append(s.inventory[:i], s.inventory[i+1:]...)
+			return
+		}
+	}
+}
+
+func (s *Sim) removeStashItemByID(id uint64) {
+	for i, it := range s.stashItems {
+		if it == nil {
+			continue
+		}
+		if it.stashItemID == id {
+			s.stashItems = append(s.stashItems[:i], s.stashItems[i+1:]...)
 			return
 		}
 	}
@@ -5372,6 +5719,9 @@ func (s *Sim) actionable(e *entity) bool {
 		if s.shopIDForInteractable(e) != "" && e.state == interactableReady {
 			return true
 		}
+		if s.stashIDForInteractable(e) != "" && e.state == interactableReady {
+			return true
+		}
 		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)
 	default:
 		return false
@@ -5609,6 +5959,34 @@ func (s *Sim) itemView(item *invItem) ItemView {
 	view := item.view()
 	s.annotateItemView(&view, item)
 	return view
+}
+
+func (s *Sim) stashItemView(item *stashItem) StashItemView {
+	if item == nil {
+		return StashItemView{}
+	}
+	view := item.view()
+	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+		view.RequirementStatus = status
+		view.RequirementsMet = met
+	})
+	if previewItem := item.previewItem(); previewItem != nil {
+		if preview := s.equipPreviewForItem(previewItem, ""); preview != nil {
+			view.EquipPreview = preview
+		}
+	}
+	return view
+}
+
+func (s *Sim) stashItemViews() []StashItemView {
+	out := make([]StashItemView, 0, len(s.stashItems))
+	for _, item := range s.stashItems {
+		if item == nil {
+			continue
+		}
+		out = append(out, s.stashItemView(item))
+	}
+	return out
 }
 
 func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
@@ -6182,6 +6560,22 @@ func (s *Sim) findItemByID(id uint64) *invItem {
 	return nil
 }
 
+func (s *Sim) findStashItem(stashItemID string) *stashItem {
+	n, err := strconv.ParseUint(stashItemID, 10, 64)
+	if err != nil {
+		return nil
+	}
+	for _, it := range s.stashItems {
+		if it == nil {
+			continue
+		}
+		if it.stashItemID == n {
+			return it
+		}
+	}
+	return nil
+}
+
 func sortedEntityIDs(entities map[uint64]*entity) []uint64 {
 	ids := make([]uint64, 0, len(entities))
 	for id := range entities {
@@ -6219,6 +6613,9 @@ func (s *Sim) Snapshot() Snapshot {
 		InventoryRows:     baseInventoryRows,
 		InventoryCapacity: inventoryCapacityForRows(baseInventoryRows),
 		Gold:              0,
+		StashItems:        []StashItemView{},
+		StashGold:         0,
+		StashCapacity:     defaultStashCapacity,
 		SkillProgression:  SkillProgressionView{Skills: []SkillProgressionSkillView{}},
 		SkillCooldowns:    []SkillCooldownView{},
 		RecentEvents:      []Event{},
@@ -6245,6 +6642,10 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 	for _, it := range s.inventory {
 		inventory = append(inventory, s.itemView(it))
 	}
+	stashItems := make([]StashItemView, 0, len(s.stashItems))
+	for _, it := range s.stashItems {
+		stashItems = append(stashItems, s.stashItemView(it))
+	}
 
 	equipped := newSnapshotEquippedMap(s.equipped)
 	party := s.partyView()
@@ -6265,6 +6666,9 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		InventoryRows:         s.inventoryRows(),
 		InventoryCapacity:     s.inventoryCapacity(),
 		Gold:                  s.gold,
+		StashItems:            stashItems,
+		StashGold:             s.stashGold,
+		StashCapacity:         s.stashCapacity,
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
 		CharacterProgression:  s.CharacterProgressionView(),
 		SkillProgression:      s.SkillProgressionView(),
@@ -6444,11 +6848,36 @@ func (it *invItem) view() ItemView {
 	return v
 }
 
+func (it *stashItem) view() StashItemView {
+	v := StashItemView{
+		StashItemID: idStr(it.stashItemID),
+		ItemDefID:   it.itemDefID,
+	}
+	if it.rollPayload != nil {
+		it.rollPayload.stashItemViewFields(&v)
+	}
+	return v
+}
+
+func (it *stashItem) previewItem() *invItem {
+	if it == nil {
+		return nil
+	}
+	return &invItem{
+		instanceID:  it.stashItemID,
+		itemDefID:   it.itemDefID,
+		rollPayload: it.rollPayload,
+	}
+}
+
 func ptrEntityView(v EntityView) *EntityView { return &v }
 func ptrItemView(v ItemView) *ItemView       { return &v }
-func intPtr(v int) *int                      { return &v }
-func floatPtr(v float64) *float64            { return &v }
-func boolPtr(v bool) *bool                   { return &v }
+func ptrStashItemView(v StashItemView) *StashItemView {
+	return &v
+}
+func intPtr(v int) *int           { return &v }
+func floatPtr(v float64) *float64 { return &v }
+func boolPtr(v bool) *bool        { return &v }
 
 func maxFloat(a, b float64) float64 {
 	if a > b {

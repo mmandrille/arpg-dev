@@ -73,10 +73,10 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "protocol" and parts[1] == "examples":
         name = instance_path.name
         if name == "session_snapshot.json":
-            return PROTOCOL / "session_snapshot.v6.schema.json"
+            return PROTOCOL / "session_snapshot.v7.schema.json"
         if name.startswith("state_delta"):
-            return PROTOCOL / "state_delta.v6.schema.json"
-        return PROTOCOL / "messages.v6.schema.json"
+            return PROTOCOL / "state_delta.v7.schema.json"
+        return PROTOCOL / "messages.v7.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
 
 
@@ -188,6 +188,12 @@ def cross_checks(report: Report) -> None:
         PROTOCOL / "session_snapshot.v6.schema.json",
         PROTOCOL / "state_delta.v6.schema.json",
     ]
+    v7_protocol_files = [
+        PROTOCOL / "envelope.v7.schema.json",
+        PROTOCOL / "messages.v7.schema.json",
+        PROTOCOL / "session_snapshot.v7.schema.json",
+        PROTOCOL / "state_delta.v7.schema.json",
+    ]
     missing_v4 = [str(path.relative_to(ROOT)) for path in v4_protocol_files if not path.exists()]
     if missing_v4:
         report.fail("protocol v4 schema set", f"missing {', '.join(missing_v4)}")
@@ -203,12 +209,18 @@ def cross_checks(report: Report) -> None:
         report.fail("protocol v6 schema set", f"missing {', '.join(missing_v6)}")
     else:
         report.ok("protocol v6 schema set is present")
+    missing_v7 = [str(path.relative_to(ROOT)) for path in v7_protocol_files if not path.exists()]
+    if missing_v7:
+        report.fail("protocol v7 schema set", f"missing {', '.join(missing_v7)}")
+    else:
+        report.ok("protocol v7 schema set is present")
 
     messages_v4 = load(PROTOCOL / "messages.v4.schema.json")
     messages_v5 = load(PROTOCOL / "messages.v5.schema.json")
     messages_v6 = load(PROTOCOL / "messages.v6.schema.json")
+    messages_v7 = load(PROTOCOL / "messages.v7.schema.json")
     actor_fields = {"player_id", "account_id", "character_id"}
-    for protocol_version, messages_schema in (("v4", messages_v4), ("v5", messages_v5), ("v6", messages_v6)):
+    for protocol_version, messages_schema in (("v4", messages_v4), ("v5", messages_v5), ("v6", messages_v6), ("v7", messages_v7)):
         intent_names = [name for name in messages_schema["$defs"] if name.endswith("_intent") or name == "client_ready"]
         actor_leaks: list[str] = []
         for name in sorted(intent_names):
@@ -2331,20 +2343,27 @@ def cross_checks(report: Report) -> None:
                 report.fail("interactable transition", f"{interactable_id}: closed blocker must not declare transition")
             if "shop_id" in interactable:
                 report.fail("interactable shop", f"{interactable_id}: closed blocker must not declare shop_id")
+            if "stash_id" in interactable:
+                report.fail("interactable stash", f"{interactable_id}: closed blocker must not declare stash_id")
             continue
         if initial_state == "ready":
             transition = interactable.get("transition")
             shop_id = interactable.get("shop_id")
-            if bool(transition) == bool(shop_id):
-                report.fail("interactable action", f"{interactable_id}: ready interactable needs exactly one transition or shop_id")
+            stash_id = interactable.get("stash_id")
+            if sum([bool(transition), bool(shop_id), bool(stash_id)]) != 1:
+                report.fail("interactable action", f"{interactable_id}: ready interactable needs exactly one transition, shop_id, or stash_id")
             elif transition and transition not in ("ascend", "descend", "waypoint"):
                 report.fail("interactable transition", f"{interactable_id}: unsupported transition {transition}")
             elif shop_id and shop_id not in shop_defs:
                 report.fail("interactable shop", f"{interactable_id}: unknown shop_id {shop_id}")
+            elif stash_id and stash_id != "account_stash":
+                report.fail("interactable stash", f"{interactable_id}: unknown stash_id {stash_id}")
             elif "barrier_when_closed" in interactable:
                 report.fail("interactable barrier", f"{interactable_id}: ready interactable must not block")
             elif shop_id:
                 report.ok(f"interactable {interactable_id} ready shop is {shop_id}")
+            elif stash_id:
+                report.ok(f"interactable {interactable_id} ready stash is {stash_id}")
             else:
                 report.ok(f"interactable {interactable_id} ready transition is {transition}")
             continue

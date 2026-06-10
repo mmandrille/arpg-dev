@@ -14,6 +14,7 @@ const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
+const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
@@ -95,6 +96,9 @@ var equipped: Dictionary = {}
 var inventory_rows: int = 3
 var inventory_capacity: int = 15
 var gold: int = 0
+var stash_items: Array = []
+var stash_gold: int = 0
+var stash_capacity: int = 50
 var hotbar_capacity: int = 2
 var hotbar: Array = []
 var character_progression: Dictionary = {}
@@ -181,6 +185,7 @@ var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
 var walls_root: Node3D
 var inventory_panel: InventoryPanel
 var shop_panel: ShopPanel
+var stash_panel: StashPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
@@ -801,6 +806,8 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		_show_skill_rejected_feedback()
 	elif shop_panel != null and shop_panel.visible:
 		shop_panel.show_status(reason.replace("_", " "), true)
+	elif stash_panel != null and stash_panel.visible:
+		stash_panel.show_status(reason.replace("_", " "), true)
 
 
 func _apply_snapshot(p: Dictionary) -> void:
@@ -828,6 +835,9 @@ func _apply_snapshot(p: Dictionary) -> void:
 	inventory_rows = int(p.get("inventory_rows", inventory_rows))
 	inventory_capacity = int(p.get("inventory_capacity", inventory_capacity))
 	gold = int(p.get("gold", gold))
+	stash_items = p.get("stash_items", [])
+	stash_gold = int(p.get("stash_gold", stash_gold))
+	stash_capacity = int(p.get("stash_capacity", stash_capacity))
 	hotbar_capacity = int(p.get("hotbar_capacity", 2))
 	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
@@ -860,6 +870,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_update_character_info_panel()
 			_hide_waypoint_panel()
 			_hide_shop_panel()
+			_hide_stash_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -899,6 +910,12 @@ func _apply_delta(p: Dictionary) -> void:
 				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"))
 			"gold_update":
 				gold = int(c.get("gold", gold))
+			"stash_item_add":
+				_upsert_stash_item(c.get("item", {}))
+			"stash_item_remove":
+				_remove_stash_item(str(c.get("stash_item_id", "")))
+			"stash_gold_update":
+				stash_gold = int(c.get("stash_gold", stash_gold))
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
 				var discovered := bool(c.get("discovered", false))
@@ -994,6 +1011,21 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "shop_sale" and shop_panel != null and shop_panel.visible:
 			_apply_shop_event_refresh(ev)
 			shop_panel.show_status("Sold for %d" % int(ev.get("price", 0)))
+			continue
+		if event_type == "stash_opened":
+			_show_stash_panel(ev)
+			continue
+		if event_type == "stash_item_deposited" and stash_panel != null and stash_panel.visible:
+			stash_panel.show_status("Item stored")
+			continue
+		if event_type == "stash_item_withdrawn" and stash_panel != null and stash_panel.visible:
+			stash_panel.show_status("Item withdrawn")
+			continue
+		if event_type == "stash_gold_deposited" and stash_panel != null and stash_panel.visible:
+			stash_panel.show_status("Stored %d gold" % int(ev.get("amount", 0)))
+			continue
+		if event_type == "stash_gold_withdrawn" and stash_panel != null and stash_panel.visible:
+			stash_panel.show_status("Withdrew %d gold" % int(ev.get("amount", 0)))
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
 			_apply_boss_phase_started(eid, ev)
@@ -1197,6 +1229,25 @@ func _remove_inventory_item(item_instance_id: String) -> void:
 			inventory.remove_at(i)
 
 
+func _upsert_stash_item(item: Dictionary) -> void:
+	var stash_item_id := str(item.get("stash_item_id", ""))
+	if stash_item_id == "":
+		return
+	for i in range(stash_items.size()):
+		if str(stash_items[i].get("stash_item_id", "")) == stash_item_id:
+			var merged: Dictionary = stash_items[i].duplicate(true)
+			merged.merge(item, true)
+			stash_items[i] = merged
+			return
+	stash_items.append(item.duplicate(true))
+
+
+func _remove_stash_item(stash_item_id: String) -> void:
+	for i in range(stash_items.size() - 1, -1, -1):
+		if str(stash_items[i].get("stash_item_id", "")) == stash_item_id:
+			stash_items.remove_at(i)
+
+
 func _apply_hotbar_update(slot_index: int, item_instance_id) -> void:
 	if slot_index < 0 or slot_index >= 10:
 		return
@@ -1212,6 +1263,9 @@ func _refresh_inventory_ui() -> void:
 		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold, hotbar)
 	if shop_panel != null and shop_panel.visible:
 		shop_panel.set_inventory_state(inventory, equipped, gold)
+	if stash_panel != null and stash_panel.visible:
+		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
+		stash_panel.set_inventory_state(inventory, equipped, gold, hotbar)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
@@ -1542,10 +1596,12 @@ func _is_skill_slot_key(event: InputEventKey) -> bool:
 
 
 func _close_gameplay_panels(except: String = "") -> void:
-	if not (except in ["inventory", "stats", "shop_with_inventory"]) and inventory_panel != null:
+	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory"]) and inventory_panel != null:
 		inventory_panel.hide_display()
 	if not (except in ["shop", "shop_with_inventory"]):
 		_hide_shop_panel()
+	if not (except in ["stash", "stash_with_inventory"]):
+		_hide_stash_panel()
 	if not (except in ["stats", "inventory"]) and character_stats_panel != null:
 		character_stats_panel.hide_display()
 	if except != "skills" and skills_panel != null:
@@ -2306,6 +2362,9 @@ func _build_scene() -> void:
 	shop_panel = ShopPanelScript.new()
 	shop_panel.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(shop_panel)
+	stash_panel = StashPanelScript.new()
+	stash_panel.intent_requested.connect(_on_inventory_intent_requested)
+	ui.add_child(stash_panel)
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(consumable_bar)
@@ -2435,6 +2494,7 @@ func _show_loss_popup() -> void:
 		pause_menu.hide_pause()
 	_hide_waypoint_panel()
 	_hide_shop_panel()
+	_hide_stash_panel()
 	if skills_panel != null:
 		skills_panel.hide_display()
 	loss_popup.visible = true
@@ -2866,12 +2926,50 @@ func _hide_shop_panel() -> void:
 		inventory_panel.clear_shop_sell_context()
 
 
+func _show_stash_panel(ev: Dictionary) -> void:
+	if stash_panel == null:
+		return
+	_close_gameplay_panels("stash_with_inventory")
+	var next_stash_id := str(ev.get("stash_id", "account_stash"))
+	var next_entity_id := str(ev.get("entity_id", ""))
+	stash_items = ev.get("stash_items", stash_items)
+	stash_gold = int(ev.get("stash_gold", stash_gold))
+	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
+	if inventory_panel != null:
+		inventory_panel.ensure_display_visible()
+	stash_panel.show_stash(
+		next_entity_id,
+		next_stash_id,
+		stash_items,
+		stash_gold,
+		stash_capacity,
+		inventory,
+		equipped,
+		gold,
+		hotbar,
+		_stash_title(next_stash_id)
+	)
+
+
+func _hide_stash_panel() -> void:
+	if stash_panel != null:
+		stash_panel.hide_display()
+
+
 func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:
 		"town_vendor":
 			return "Town Vendor"
 		_:
 			return next_shop_id.replace("_", " ").capitalize()
+
+
+func _stash_title(next_stash_id: String) -> String:
+	match next_stash_id:
+		"account_stash":
+			return "Account Stash"
+		_:
+			return next_stash_id.replace("_", " ").capitalize()
 
 
 func _sync_waypoint_panel_reach() -> void:
@@ -3616,6 +3714,9 @@ func get_bot_state() -> Dictionary:
 		"equipped": equipped.duplicate(true),
 		"inventory_rows": inventory_rows,
 		"inventory_capacity": inventory_capacity,
+		"stash_items": stash_items.duplicate(true),
+		"stash_gold": stash_gold,
+		"stash_capacity": stash_capacity,
 		"monster_ids": live_monster_ids,
 		"entities_debug": _bot_entities_debug(live_monster_ids),
 		"local_player_presentation": _bot_local_player_presentation(),
@@ -3627,12 +3728,14 @@ func get_bot_state() -> Dictionary:
 		"loot_presentations": _bot_loot_presentations(),
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
 		"shop_panel_visible": shop_panel != null and shop_panel.visible,
+		"stash_panel_visible": stash_panel != null and stash_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
 		"shop_panel": shop_panel.get_debug_state() if shop_panel != null else {},
+		"stash_panel": stash_panel.get_debug_state() if stash_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
@@ -3862,6 +3965,30 @@ func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, 
 	if shop_panel == null:
 		return
 	shop_panel.bot_click_sell_item(item_def_id, rolled, bag_index)
+
+
+func bot_click_stash_deposit_item(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
+	if stash_panel == null:
+		return
+	stash_panel.bot_click_deposit_item(item_def_id, rolled, bag_index)
+
+
+func bot_click_stash_withdraw_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
+	if stash_panel == null:
+		return
+	stash_panel.bot_click_withdraw_item(stash_item_id, item_def_id, rolled, stash_index)
+
+
+func bot_click_stash_deposit_gold(amount: int = 1) -> void:
+	if stash_panel == null:
+		return
+	stash_panel.bot_click_deposit_gold(amount)
+
+
+func bot_click_stash_withdraw_gold(amount: int = 1) -> void:
+	if stash_panel == null:
+		return
+	stash_panel.bot_click_withdraw_gold(amount)
 
 
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:

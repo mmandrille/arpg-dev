@@ -61,7 +61,13 @@ type CharacterProgressionRepo interface {
 	ListCharacterShopStock(ctx context.Context, accountID, characterID string) ([]CharacterShopStockItem, error)
 	ReplaceCharacterShopStock(ctx context.Context, accountID, characterID, shopID, refreshKey string, stock []CharacterShopStockItem) error
 	SetCharacterShopStockAvailable(ctx context.Context, accountID, characterID, shopID, offerID string, available bool) error
-	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, shopStock []CharacterShopStockItem, progression CharacterProgression) error
+	ListAccountStashItems(ctx context.Context, accountID string) ([]AccountStashItem, error)
+	GetOrCreateAccountStashGold(ctx context.Context, accountID string) (AccountStashGold, error)
+	TransferCharacterItemToAccountStash(ctx context.Context, accountID, characterID, itemInstanceID, stashItemID string) (AccountStashItem, error)
+	TransferAccountStashItemToCharacter(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID string) (CharacterItemInstance, error)
+	TransferCharacterGoldToAccountStash(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
+	TransferAccountStashGoldToCharacter(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
+	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshotForMember(ctx context.Context, sessionID, accountID, characterID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshots(ctx context.Context, sessionID string) ([]SessionStartSnapshot, error)

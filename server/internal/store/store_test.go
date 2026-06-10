@@ -377,13 +377,13 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
 	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
 	thirdHotbar := []store.CharacterHotbarSlot{{AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, SlotIndex: 0, ItemInstanceID: &thirdItem.ID}}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, nil, hostProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, nil, nil, store.AccountStashGold{AccountID: hostAcct.ID}, hostProgression); err != nil {
 		t.Fatalf("host start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, nil, guestProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, nil, nil, store.AccountStashGold{AccountID: guestAcct.ID}, guestProgression); err != nil {
 		t.Fatalf("guest start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, nil, thirdProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, nil, nil, store.AccountStashGold{AccountID: thirdAcct.ID}, thirdProgression); err != nil {
 		t.Fatalf("third start snapshot: %v", err)
 	}
 	snaps, err := s.LoadSessionStartSnapshots(ctx, sess.ID)
@@ -658,7 +658,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("restore missing stock: expected ErrNotFound, got %v", err)
 	}
 
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, shopStock, loadedProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
@@ -756,6 +756,165 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	if err := s.RemoveCharacterItem(ctx, acct.ID, char.ID, item.ID); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("remove missing item: expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestAccountStashTransfersAreAccountScopedAndAtomic(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+
+	acct, err := s.UpsertAccountByEmail(ctx, ids.New("acct"), "stash+"+ids.Token()[:12]+"@example.test")
+	if err != nil {
+		t.Fatalf("upsert account: %v", err)
+	}
+	charA, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Stasher")
+	if err != nil {
+		t.Fatalf("create character A: %v", err)
+	}
+	charB, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Alt")
+	if err != nil {
+		t.Fatalf("create character B: %v", err)
+	}
+	otherAcct, err := s.UpsertAccountByEmail(ctx, ids.New("acct"), "stash-other+"+ids.Token()[:12]+"@example.test")
+	if err != nil {
+		t.Fatalf("upsert other account: %v", err)
+	}
+	otherChar, err := s.CreateCharacter(ctx, ids.New("char"), otherAcct.ID, "Other")
+	if err != nil {
+		t.Fatalf("create other character: %v", err)
+	}
+
+	defaults := store.CharacterProgressionDefaults{
+		Level:              1,
+		Experience:         0,
+		UnspentStatPoints:  0,
+		UnspentSkillPoints: 0,
+		Stats:              store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+		Gold:               10,
+		SkillRanks:         map[string]int{"magic_bolt": 0},
+	}
+	if _, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, charA.ID, defaults); err != nil {
+		t.Fatalf("create progression A: %v", err)
+	}
+	otherDefaults := defaults
+	otherDefaults.Gold = 5
+	if _, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, charB.ID, store.CharacterProgressionDefaults{Level: 1, Stats: defaults.Stats, Gold: 0, SkillRanks: defaults.SkillRanks}); err != nil {
+		t.Fatalf("create progression B: %v", err)
+	}
+	if _, err := s.GetOrCreateCharacterProgression(ctx, otherAcct.ID, otherChar.ID, otherDefaults); err != nil {
+		t.Fatalf("create progression other: %v", err)
+	}
+
+	itemA := store.CharacterItemInstance{
+		ID:          "item_a",
+		AccountID:   acct.ID,
+		CharacterID: charA.ID,
+		ItemDefID:   "cave_blade",
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":6},"requirements":{"level":1},"effect_ids":[]}`),
+	}
+	if err := s.AddCharacterItem(ctx, itemA); err != nil {
+		t.Fatalf("add character item A: %v", err)
+	}
+	stashed, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, charA.ID, itemA.ID, "stash_1")
+	if err != nil {
+		t.Fatalf("deposit item: %v", err)
+	}
+	if stashed.AccountID != acct.ID || stashed.StashItemID != "stash_1" || stashed.SourceCharacterID != charA.ID || stashed.ItemDefID != itemA.ItemDefID {
+		t.Fatalf("stashed item mismatch: %+v", stashed)
+	}
+	charAItems, err := s.ListCharacterItems(ctx, acct.ID, charA.ID)
+	if err != nil {
+		t.Fatalf("list char A items: %v", err)
+	}
+	if len(charAItems) != 0 {
+		t.Fatalf("deposited item remained on character A: %+v", charAItems)
+	}
+	stashItems, err := s.ListAccountStashItems(ctx, acct.ID)
+	if err != nil {
+		t.Fatalf("list account stash: %v", err)
+	}
+	if len(stashItems) != 1 || stashItems[0].StashItemID != "stash_1" {
+		t.Fatalf("account stash items = %+v", stashItems)
+	}
+	otherStashItems, err := s.ListAccountStashItems(ctx, otherAcct.ID)
+	if err != nil {
+		t.Fatalf("list other stash: %v", err)
+	}
+	if len(otherStashItems) != 0 {
+		t.Fatalf("foreign account saw stash rows: %+v", otherStashItems)
+	}
+	if _, err := s.TransferAccountStashItemToCharacter(ctx, otherAcct.ID, otherChar.ID, "stash_1", "foreign_item"); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("foreign withdraw: expected ErrNotFound, got %v", err)
+	}
+
+	withdrawn, err := s.TransferAccountStashItemToCharacter(ctx, acct.ID, charB.ID, "stash_1", "item_b")
+	if err != nil {
+		t.Fatalf("withdraw item to char B: %v", err)
+	}
+	if withdrawn.AccountID != acct.ID || withdrawn.CharacterID != charB.ID || withdrawn.ID != "item_b" || withdrawn.ItemDefID != itemA.ItemDefID {
+		t.Fatalf("withdrawn item mismatch: %+v", withdrawn)
+	}
+	stashItems, err = s.ListAccountStashItems(ctx, acct.ID)
+	if err != nil {
+		t.Fatalf("list after withdraw: %v", err)
+	}
+	if len(stashItems) != 0 {
+		t.Fatalf("stash item remained after withdraw: %+v", stashItems)
+	}
+
+	conflictA := store.CharacterItemInstance{
+		ID:          "item_conflict_a",
+		AccountID:   acct.ID,
+		CharacterID: charA.ID,
+		ItemDefID:   "red_potion",
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{}`),
+	}
+	conflictB := conflictA
+	conflictB.ID = "item_conflict_b"
+	if err := s.AddCharacterItem(ctx, conflictA); err != nil {
+		t.Fatalf("add conflict A: %v", err)
+	}
+	if err := s.AddCharacterItem(ctx, conflictB); err != nil {
+		t.Fatalf("add conflict B: %v", err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, charA.ID, conflictA.ID, "stash_conflict"); err != nil {
+		t.Fatalf("deposit conflict A: %v", err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, charA.ID, conflictB.ID, "stash_conflict"); !errors.Is(err, store.ErrConflict) {
+		t.Fatalf("deposit conflict B: expected ErrConflict, got %v", err)
+	}
+	charAItems, err = s.ListCharacterItems(ctx, acct.ID, charA.ID)
+	if err != nil {
+		t.Fatalf("list char A after conflict: %v", err)
+	}
+	if len(charAItems) != 1 || charAItems[0].ID != conflictB.ID {
+		t.Fatalf("conflict deposit did not roll back character item: %+v", charAItems)
+	}
+
+	if gold, err := s.GetOrCreateAccountStashGold(ctx, acct.ID); err != nil || gold.Gold != 0 {
+		t.Fatalf("initial stash gold = %+v err=%v", gold, err)
+	}
+	charGold, stashGold, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, charA.ID, 4)
+	if err != nil {
+		t.Fatalf("deposit gold: %v", err)
+	}
+	if charGold != 6 || stashGold != 4 {
+		t.Fatalf("deposit gold balances character=%d stash=%d", charGold, stashGold)
+	}
+	charGold, stashGold, err = s.TransferAccountStashGoldToCharacter(ctx, acct.ID, charB.ID, 2)
+	if err != nil {
+		t.Fatalf("withdraw gold: %v", err)
+	}
+	if charGold != 2 || stashGold != 2 {
+		t.Fatalf("withdraw gold balances character=%d stash=%d", charGold, stashGold)
+	}
+	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, charA.ID, 0); !errors.Is(err, store.ErrConflict) {
+		t.Fatalf("zero gold transfer: expected ErrConflict, got %v", err)
+	}
+	if _, _, err := s.TransferAccountStashGoldToCharacter(ctx, otherAcct.ID, otherChar.ID, 1); !errors.Is(err, store.ErrConflict) {
+		t.Fatalf("foreign empty stash withdraw: expected ErrConflict, got %v", err)
 	}
 }
 

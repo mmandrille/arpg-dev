@@ -1,0 +1,57 @@
+{
+  "id": "account_stash_storage",
+  "world_id": "dungeon_levels",
+  "seed": "town_vendor_gold_sink_1075",
+  "title": "Account stash storage",
+  "description": "Collect dungeon loot, return to town, deposit and withdraw a rolled item, then leave an item and gold in the account stash for reconnect and fresh-session persistence checks.",
+  "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
+    { "action": "pick_up_first_rolled_loot" },
+    { "action": "pick_up_loot", "item_def_id": "gold", "wait_for_loot_s": 0.1 },
+    { "action": "use_stair", "direction": "up", "max_ticks": 240 },
+    { "action": "open_stash" },
+    { "action": "assert_stash_item_count", "equals": 0 },
+    { "action": "deposit_stash_item", "rolled": true, "equipped": false },
+    { "action": "assert_stash_item_count", "rolled": true, "equals": 1 },
+    { "action": "withdraw_stash_item", "rolled": true },
+    { "action": "assert_stash_item_count", "equals": 0 },
+    { "action": "deposit_stash_item", "rolled": true, "equipped": false },
+    { "action": "deposit_stash_gold", "amount": 1 },
+    { "action": "assert_gold_changed", "direction": "decrease", "by_at_least": 1 },
+    { "action": "assert_stash_item_count", "rolled": true, "equals": 1 },
+    { "action": "assert_stash_gold", "equals": 1 },
+    { "action": "assert_stash_event", "event_type": "stash_opened", "at_least": 1 },
+    { "action": "assert_stash_event", "event_type": "stash_item_deposited", "at_least": 2 },
+    { "action": "assert_stash_event", "event_type": "stash_item_withdrawn", "at_least": 1 },
+    { "action": "assert_stash_event", "event_type": "stash_gold_deposited", "at_least": 1 }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": 0 },
+    { "type": "visited_levels_contain", "level": -1 },
+    { "type": "event_seen", "event_type": "stash_opened" },
+    { "type": "event_seen", "event_type": "stash_item_deposited" },
+    { "type": "event_seen", "event_type": "stash_item_withdrawn" },
+    { "type": "event_seen", "event_type": "stash_gold_deposited" },
+    { "type": "stash_event", "event_type": "stash_item_deposited", "at_least": 2 },
+    { "type": "stash_event", "event_type": "stash_item_withdrawn", "at_least": 1 },
+    { "type": "stash_event", "event_type": "stash_gold_deposited", "at_least": 1 },
+    { "type": "stash_item_count", "rolled": true, "equals": 1 },
+    { "type": "stash_gold", "equals": 1 },
+    { "type": "stash_capacity", "equals": 50 }
+  ],
+  "fresh_session_checks": [
+    {
+      "world_id": "dungeon_levels",
+      "steps": [],
+      "assertions": [
+        { "type": "stash_item_count", "rolled": true, "equals": 1 },
+        { "type": "stash_gold", "equals": 1 },
+        { "type": "stash_capacity", "equals": 50 }
+      ]
+    }
+  ],
+  "visual": {
+    "camera": { "x": 6, "y": 12, "zoom": 1.1 }
+  }
+}

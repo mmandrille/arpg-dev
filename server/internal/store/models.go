@@ -97,6 +97,26 @@ const (
 	ItemLocationStash     = "stash"
 )
 
+// AccountStashItem is an account-owned item row that can be shared across
+// characters on the same account.
+type AccountStashItem struct {
+	AccountID         string
+	StashItemID       string
+	SourceCharacterID string
+	ItemDefID         string
+	RolledStats       json.RawMessage
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+// AccountStashGold is the account-owned stash wallet.
+type AccountStashGold struct {
+	AccountID string
+	Gold      int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 // CharacterWaypoint is a durable unlocked waypoint level for a character.
 type CharacterWaypoint struct {
 	CharacterID  string
@@ -179,6 +199,8 @@ type SessionStartSnapshot struct {
 	Waypoints   []CharacterWaypoint
 	Hotbar      []CharacterHotbarSlot
 	ShopStock   []CharacterShopStockItem
+	StashItems  []AccountStashItem
+	StashGold   AccountStashGold
 	Progression *CharacterProgression
 }
 

@@ -31,6 +31,11 @@
       "name": "Town Vendor",
       "initial_state": "ready",
       "shop_id": "town_vendor"
+    },
+    "town_stash": {
+      "name": "Town Stash",
+      "initial_state": "ready",
+      "stash_id": "account_stash"
     }
   }
 }

@@ -13,7 +13,7 @@ const STEP_TYPES_WAIT := [
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
-	"wait_wall_layout", "wait_shop_panel",
+	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel",
 	"wait_remote_player_count",
 ]
 const STEP_TYPES_ASSERT := [
@@ -38,7 +38,8 @@ const STEP_TYPES_ASSERT := [
 	"assert_entity_reaction",
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
-	"assert_shop_sell_details",
+	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
+	"assert_stash_gold",
 	"assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
@@ -50,6 +51,8 @@ const STEP_TYPES_ACTION := [
 	"set_floating_combat_text", "select_create_game_type",
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_sell_item",
+	"click_stash_deposit_item", "click_stash_withdraw_item", "click_stash_deposit_gold",
+	"click_stash_withdraw_gold",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -91,6 +94,9 @@ const ALL_STEP_TYPES: Array = [
 	"wait_shop_panel", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "click_shop_buy_offer", "click_shop_sell_item",
+	"wait_stash_panel", "assert_stash_panel_visible", "assert_stash_item_count",
+	"assert_stash_gold", "click_stash_deposit_item", "click_stash_withdraw_item",
+	"click_stash_deposit_gold", "click_stash_withdraw_gold",
 	"wait_remote_player_count", "assert_remote_player_count",
 ]
 
@@ -231,6 +237,10 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			if not bool(state.get("shop_panel_visible", false)):
 				return false
 			return _shop_offer_count_matches(step, state)
+		"wait_stash_panel":
+			if not bool(state.get("stash_panel_visible", false)):
+				return false
+			return _stash_item_count_matches(step, state)
 		"wait_remote_player_count":
 			return _remote_player_count_matches(step, state)
 		"wait_entity":
@@ -415,6 +425,12 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_shop_offer_details(step, state)
 		"assert_shop_sell_details":
 			return _assert_shop_sell_details(step, state)
+		"assert_stash_panel_visible":
+			return _assert_bool_state("assert_stash_panel_visible", "stash_panel_visible", step, state)
+		"assert_stash_item_count":
+			return _assert_stash_item_count(step, state)
+		"assert_stash_gold":
+			return _assert_stash_gold(step, state)
 		"assert_remote_player_count":
 			if not _remote_player_count_matches(step, state):
 				_fail("assert_remote_player_count failed: want=%s remote_player_ids=%s step=%d scenario=%s" % [
@@ -1004,6 +1020,32 @@ func _assert_shop_sell_details(step: Dictionary, state: Dictionary) -> bool:
 	return _assert_shop_detail_rows("assert_shop_sell_details", step, _matching_shop_sell_rows(step, state), "sell_price")
 
 
+func _assert_stash_item_count(step: Dictionary, state: Dictionary) -> bool:
+	if _stash_item_count_matches(step, state):
+		return true
+	var panel: Dictionary = state.get("stash_panel", {})
+	_fail("assert_stash_item_count failed: want=%s panel=%s step=%d scenario=%s" % [
+		str(step), str(panel), _step_index, str(scenario.get("id", "?"))
+	])
+	return false
+
+
+func _assert_stash_gold(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("stash_panel", {})
+	var got := int(panel.get("stash_gold", state.get("stash_gold", 0)))
+	if step.has("equals") and got != int(step.get("equals", 0)):
+		_fail("assert_stash_gold failed: equals want=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("equals", 0)), got, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("at_least") and got < int(step.get("at_least", 0)):
+		_fail("assert_stash_gold failed: at_least want=%d got=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("at_least", 0)), got, str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
 func _assert_shop_detail_rows(label: String, step: Dictionary, rows: Array, price_key: String) -> bool:
 	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
 		_fail("%s failed: equals want=%d got=%d rows=%s step=%d scenario=%s" % [
@@ -1083,6 +1125,37 @@ func _shop_offer_count_matches(step: Dictionary, state: Dictionary) -> bool:
 	if step.has("at_least") and got < int(step.get("at_least", 0)):
 		return false
 	return true
+
+
+func _stash_item_count_matches(step: Dictionary, state: Dictionary) -> bool:
+	if not step.has("equals") and not step.has("at_least"):
+		return true
+	var rows := _matching_stash_rows(step, state)
+	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
+		return false
+	if step.has("at_least") and rows.size() < int(step.get("at_least", 0)):
+		return false
+	return true
+
+
+func _matching_stash_rows(step: Dictionary, state: Dictionary) -> Array:
+	var panel: Dictionary = state.get("stash_panel", {})
+	var rows: Array = panel.get("stash_rows", state.get("stash_items", []))
+	var out: Array = []
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if step.has("stash_item_id") and str(rec.get("stash_item_id", "")) != str(step.get("stash_item_id", "")):
+			continue
+		if step.has("item_def_id") and str(rec.get("item_def_id", "")) != str(step.get("item_def_id", "")):
+			continue
+		if step.has("item_template_id") and str(rec.get("item_template_id", "")) != str(step.get("item_template_id", "")):
+			continue
+		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
+			continue
+		out.append(rec)
+	return out
 
 
 func _matching_shop_offer_rows(step: Dictionary, state: Dictionary) -> Array:
@@ -1479,6 +1552,10 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"assert_shop_offer_details", "assert_shop_sell_details", \
 		"click_shop_buy_offer", "click_shop_sell_item":
 			return "shop=%s" % str(step)
+		"wait_stash_panel", "assert_stash_item_count", "assert_stash_gold", "assert_stash_panel_visible", \
+		"click_stash_deposit_item", "click_stash_withdraw_item", \
+		"click_stash_deposit_gold", "click_stash_withdraw_gold":
+			return "stash=%s" % str(step)
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))
 		"click_entity":
@@ -1533,6 +1610,8 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		])
 	if stype == "wait_shop_panel":
 		parts.append("shop_panel=%s" % str(state.get("shop_panel", {})))
+	if stype == "wait_stash_panel":
+		parts.append("stash_panel=%s" % str(state.get("stash_panel", {})))
 	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):
 		parts.append("next_attack_soon=true")
 	print("[bot-client] %s scenario=%s step=%d" % [" ".join(parts), str(scenario.get("id", "?")), _step_index])
@@ -1704,6 +1783,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_shop_panel", "assert_shop_offer_count"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
+	if stype in ["wait_stash_panel", "assert_stash_item_count", "assert_stash_gold"]:
+		if not step.has("equals") and not step.has("at_least"):
+			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
 	if stype == "assert_shop_buy_button":
 		if str(step.get("offer_id", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id" % [index, stype]
@@ -1713,6 +1795,15 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "click_shop_buy_offer":
 		if str(step.get("offer_id", "")) == "" and str(step.get("offer_kind", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id or offer_kind" % [index, stype]
+	if stype == "click_stash_deposit_item":
+		if str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
+			return "client_steps[%d] (%s) requires item_def_id or rolled" % [index, stype]
+	if stype == "click_stash_withdraw_item":
+		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
+			return "client_steps[%d] (%s) requires stash_item_id, item_def_id, or rolled" % [index, stype]
+	if stype in ["click_stash_deposit_gold", "click_stash_withdraw_gold"]:
+		if int(step.get("amount", 0)) <= 0:
+			return "client_steps[%d] (%s) requires positive amount" % [index, stype]
 	if stype == "assert_multiplayer_session_rows":
 		if not step.has("equals") and not step.has("min_count") and not step.has("selected") and not step.has("listed") and not step.has("session_id") and not step.has("session_id_env") and not step.has("mode") and not step.has("member_count_min") and not step.has("connected_count_min"):
 			return "client_steps[%d] (%s) requires a row expectation" % [index, stype]

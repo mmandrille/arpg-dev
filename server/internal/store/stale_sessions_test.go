@@ -102,7 +102,7 @@ func TestDeleteStaleEmptySessions(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("append event: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, oldEmpty.ID, oldEmpty.AccountID, oldEmpty.CharacterID, nil, nil, nil, nil, CharacterProgression{
+	if err := s.CreateSessionStartSnapshot(ctx, oldEmpty.ID, oldEmpty.AccountID, oldEmpty.CharacterID, nil, nil, nil, nil, nil, AccountStashGold{AccountID: oldEmpty.AccountID}, CharacterProgression{
 		AccountID:         oldEmpty.AccountID,
 		CharacterID:       oldEmpty.CharacterID,
 		Level:             1,

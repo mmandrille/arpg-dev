@@ -1,0 +1,8 @@
+{
+  "type": "stash_deposit_item_intent",
+  "message_id": "msg_01H00000000000000000000016",
+  "session_id": "sess_01H00000000000000000000000",
+  "tick": 53,
+  "correlation_id": "corr_01H00000000000000000000016",
+  "payload": { "stash_entity_id": "1015", "item_instance_id": "1004" }
+}

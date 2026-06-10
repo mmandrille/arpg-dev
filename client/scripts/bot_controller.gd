@@ -152,6 +152,14 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_shop_buy_offer(action)
 		"click_shop_sell_item":
 			_do_click_shop_sell_item(action)
+		"click_stash_deposit_item":
+			_do_click_stash_deposit_item(action)
+		"click_stash_withdraw_item":
+			_do_click_stash_withdraw_item(action)
+		"click_stash_deposit_gold":
+			_do_click_stash_deposit_gold(action)
+		"click_stash_withdraw_gold":
+			_do_click_stash_withdraw_gold(action)
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -247,6 +255,35 @@ func _do_click_shop_sell_item(action: Dictionary) -> void:
 			action.get("rolled", null),
 			int(action.get("bag_index", 0))
 		)
+
+
+func _do_click_stash_deposit_item(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_stash_deposit_item"):
+		_main.bot_click_stash_deposit_item(
+			str(action.get("item_def_id", "")),
+			action.get("rolled", null),
+			int(action.get("bag_index", 0))
+		)
+
+
+func _do_click_stash_withdraw_item(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_stash_withdraw_item"):
+		_main.bot_click_stash_withdraw_item(
+			str(action.get("stash_item_id", "")),
+			str(action.get("item_def_id", "")),
+			action.get("rolled", null),
+			int(action.get("stash_index", 0))
+		)
+
+
+func _do_click_stash_deposit_gold(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_stash_deposit_gold"):
+		_main.bot_click_stash_deposit_gold(int(action.get("amount", 1)))
+
+
+func _do_click_stash_withdraw_gold(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_stash_withdraw_gold"):
+		_main.bot_click_stash_withdraw_gold(int(action.get("amount", 1)))
 
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
@@ -501,6 +538,23 @@ func _format_action(action: Dictionary) -> String:
 				str(action.get("rolled", "")),
 				str(action.get("bag_index", 0)),
 			]
+		"click_stash_deposit_item":
+			return "click_stash_deposit item=%s rolled=%s bag_index=%s" % [
+				str(action.get("item_def_id", "")),
+				str(action.get("rolled", "")),
+				str(action.get("bag_index", 0)),
+			]
+		"click_stash_withdraw_item":
+			return "click_stash_withdraw stash_item=%s item=%s rolled=%s stash_index=%s" % [
+				str(action.get("stash_item_id", "")),
+				str(action.get("item_def_id", "")),
+				str(action.get("rolled", "")),
+				str(action.get("stash_index", 0)),
+			]
+		"click_stash_deposit_gold":
+			return "click_stash_deposit_gold amount=%s" % str(action.get("amount", 1))
+		"click_stash_withdraw_gold":
+			return "click_stash_withdraw_gold amount=%s" % str(action.get("amount", 1))
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
 				str(action.get("slot_index", "")),

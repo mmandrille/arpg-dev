@@ -1,41 +1,50 @@
 ---
 name: autoloop
 description: >-
-  Run an autonomous SDD loop for a bounded number of continuous slices. Use when
-  the user runs $autoloop N, /autoloop N, or asks Codex to repeatedly run next,
-  spec, plan, execute, and finish with default decisions and committed slices.
+  Present a curated menu of 5-10 possible SDD slices, wait for the user to pick
+  the ideas they like, then order and execute a bounded autonomous loop through
+  next, spec, plan, execute, and finish with committed slices. Use when the user
+  runs $autoloop N, /autoloop N, or asks Codex to curate and run multiple SDD slices.
 disable-model-invocation: true
 ---
 
-# $autoloop — Autonomous SDD Slice Loop
+# $autoloop — Curated Autonomous SDD Slice Loop
 
 **Trigger:** `$autoloop {count}` or `/autoloop {count}`
 
 Examples:
 
-- `$autoloop 1` — complete one autonomous slice.
-- `$autoloop 3` — complete up to three autonomous slices, stopping early on any gate.
+- `$autoloop 1` — present 5-10 ideas, then complete one selected slice.
+- `$autoloop 3` — present 5-10 ideas, then complete up to three selected slices, stopping early on any gate.
 
-**Announce at start:** "Using the **autoloop** skill to run a bounded autonomous SDD loop."
+**Announce at start:** "Using the **autoloop** skill to curate slice ideas, then run a bounded autonomous SDD loop after you choose."
 
 ## Purpose
 
-Run the normal SDD workflow repeatedly:
+Run the normal SDD workflow repeatedly after one explicit user selection gate:
 
 ```text
-$next -> $spec -> $plan -> $execute -> $finish
+$autoloop -> idea menu -> user picks -> agent orders picks -> $spec -> $plan -> $execute -> $finish
 ```
 
-This skill is an explicit user authorization to continue from brief to spec, plan,
-implementation, CI, and commit when all gates pass. It does **not** authorize pushing,
-branch creation, bypassing CI, or guessing through blockers.
+The initial `$autoloop` invocation authorizes preflight and idea discovery only.
+After the user picks one or more ideas from the menu, that reply authorizes the
+agent to order the selected ideas and continue from brief to spec, plan,
+implementation, CI, and commit when all gates pass. It does **not** authorize
+pushing, branch creation, bypassing CI, or guessing through blockers.
 
 ## Count handling
 
 1. Parse `{count}` as an integer.
 2. If missing, zero, negative, or not an integer, ask the user for a valid count.
-3. If `{count} > 3`, run at most **3** slices and say the request was capped.
-4. Stop after `{count}` completed and committed slices, or earlier on any stop condition.
+3. If `{count} > 3`, run at most **3** slices and say the execution request was capped.
+4. Always show **5-10** slice ideas before execution, regardless of the execution count.
+5. After the user picks ideas, set the execution target to the smaller of:
+   - the capped count, and
+   - the number of viable selected ideas.
+6. If the user selects more ideas than the execution target, order all selected ideas,
+   execute the first target-sized prefix, and report the rest as deferred.
+7. Stop after the execution target is completed and committed, or earlier on any stop condition.
 
 ## Defaults for non-blocking choices
 
@@ -62,6 +71,8 @@ Stop immediately and report the reason if any of these occur:
 5. A decision requires product/design judgment not covered by the defaults.
 6. Secrets, credentials, `.env`, or local-only artifacts appear in the diff or staged changes.
 7. Completing another slice would exceed the capped count of 3.
+8. The user has not yet selected ideas from the generated menu.
+9. A selected idea is too vague, too large, or not verifiable enough to turn into a small slice.
 
 Do not create branches. Do not push. Do not use `--no-verify`, `--amend`, or destructive git
 commands unless the user explicitly asks in a later message.
@@ -81,18 +92,55 @@ commands unless the user explicitly asks in a later message.
    - [`skills/execute/SKILL.md`](../execute/SKILL.md)
    - [`skills/finish/SKILL.md`](../finish/SKILL.md)
 
+## Phase 1 — Idea menu and selection
+
+Before writing any spec, plan, or code:
+
+1. Use the **next** skill discovery inputs to gather candidate slices from `PROGRESS.md`,
+   ADRs, existing specs/plans, open gaps, bot gaps, and natural project trajectory.
+2. Present **5-10** slice ideas. Prefer 8 when the backlog has enough credible options.
+3. Keep each idea compact and selection-friendly:
+   - stable number or short code the user can choose,
+   - codename,
+   - one-line player/system value,
+   - size `S | M | L | XL`,
+   - touch surfaces,
+   - main risk or dependency.
+4. Do **not** choose for the user during the first autoloop response. Ask them to pick the
+   idea numbers/codenames they like.
+5. If the user asks for fewer than 5 ideas, honor that explicit request; otherwise the
+   default menu remains 5-10 ideas.
+6. If fewer than 5 credible candidates exist, show the credible candidates and say why the
+   menu is shorter.
+7. Do not write or modify files during the idea menu phase unless needed to inspect repo state.
+
+When the user replies with selected ideas:
+
+1. Validate that each selected idea maps to a menu candidate or a clearly equivalent user idea.
+2. Drop or split ideas that are too large for one slice; if the split is not obvious, stop.
+3. Order the selected ideas using:
+   - dependency order first,
+   - smallest vertical proof next,
+   - player-visible progress next,
+   - bot/test proof clarity as a tie-breaker.
+4. Show the ordered execution queue and the capped execution target.
+5. Begin the per-slice loop without asking for another confirmation, unless a hard stop
+   condition applies.
+
 ## Per-slice loop
 
-Repeat until the requested count is complete or a stop condition fires.
+Repeat over the ordered selected queue until the execution target is complete or a stop
+condition fires.
 
 ### 1. Discover
 
-Use the **next** skill to identify the highest-value next slice from `PROGRESS.md`,
-ADRs, existing specs/plans, open gaps, and natural project trajectory.
+Use the selected menu idea as the next-slice brief. Re-check `PROGRESS.md`, ADRs,
+existing specs/plans, open gaps, and natural project trajectory before committing to it.
 
-- Produce the normal next-slice brief.
-- If multiple viable candidates remain, choose using the autoloop defaults.
-- If the choice still requires user judgment, stop.
+- Produce the normal next-slice brief for the selected idea.
+- If implementation order needs adjustment after a completed slice, reorder remaining selected
+  ideas using the ordering rules above and report the adjustment.
+- If the selected idea still requires user judgment, stop.
 
 ### 2. Spec
 
@@ -162,3 +210,6 @@ If the loop stops early, report:
 - Exact stop condition.
 - Current git status summary.
 - The next manual command the user should run after resolving the blocker.
+
+If execution stops before all selected ideas are completed, also report the remaining ordered
+ideas that were not started.

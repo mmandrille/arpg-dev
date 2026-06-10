@@ -1049,6 +1049,13 @@ func TestRangedProjectileGolden(t *testing.T) {
 				rulesCopy := *rules
 				rulesCopy.Combat = rules.Combat
 				rulesCopy.Combat.BaseHitChance = *tc.BaseHitChance
+				hit := rulesCopy.CharacterProgression.DerivedStats["hit_chance"]
+				hit.Type = "linear"
+				hit.Base = *tc.BaseHitChance
+				hit.PerDex = 0
+				hit.Min = tc.BaseHitChance
+				hit.Max = tc.BaseHitChance
+				rulesCopy.CharacterProgression.DerivedStats["hit_chance"] = hit
 				rules = &rulesCopy
 			}
 			sim := rangedLabWithEquippedBow(t, rules, tc.Seed)
@@ -2830,7 +2837,7 @@ func TestMonsterCombatStatsEffective(t *testing.T) {
 	if stats.DamageMin != 3 || stats.DamageMax != 5 {
 		t.Fatalf("monster damage = %v..%v, want 3..5", stats.DamageMin, stats.DamageMax)
 	}
-	if stats.HitChance != 1 || stats.CritChance != 0 || stats.CritDamage != 1.5 || stats.Armor != 0 {
+	if stats.HitChance != 0.5 || stats.CritChance != 0 || stats.CritDamage != 1.5 || stats.Armor != 0 {
 		t.Fatalf("monster chance/crit/armor stats = %+v", stats)
 	}
 	if stats.BlockPercent != 75 {

@@ -539,10 +539,20 @@ def cross_checks(report: Report) -> None:
             report.fail("character_progression derived stat", f"unsupported derived stat {stat_id}")
             formula_failed = True
             break
-        if formula.get("type") != "linear":
-            report.fail("character_progression formula", f"{stat_id}: only linear is supported")
+        formula_type = formula.get("type")
+        if formula_type not in {"linear", "logarithmic"}:
+            report.fail("character_progression formula", f"{stat_id}: unsupported formula type {formula_type}")
             formula_failed = True
             break
+        if formula_type == "logarithmic":
+            if formula.get("stat") not in progression_stats:
+                report.fail("character_progression formula", f"{stat_id}: unsupported logarithmic stat {formula.get('stat')}")
+                formula_failed = True
+                break
+            if float(formula.get("denominator", 0)) <= 0:
+                report.fail("character_progression formula", f"{stat_id}: logarithmic denominator must be positive")
+                formula_failed = True
+                break
         for key in formula:
             if not key.startswith("per_"):
                 continue
@@ -578,8 +588,12 @@ def cross_checks(report: Report) -> None:
 
     def evaluate_formula(formula: dict, stats: dict) -> float:
         value = float(formula["base"])
-        for stat in progression_stats:
-            value += float(formula.get(f"per_{stat}", 0.0)) * float(stats[stat])
+        if formula.get("type") == "logarithmic":
+            raw = max(0.0, float(stats[str(formula["stat"])]) - float(formula.get("offset", 0.0)))
+            value += float(formula["scale"]) * (math.log1p(raw) / math.log1p(float(formula["denominator"])))
+        else:
+            for stat in progression_stats:
+                value += float(formula.get(f"per_{stat}", 0.0)) * float(stats[stat])
         if "min" in formula:
             value = max(value, float(formula["min"]))
         if "max" in formula:

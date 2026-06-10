@@ -135,14 +135,18 @@ type SkillPointRules struct {
 }
 
 type LinearStatFormula struct {
-	Type     string   `json:"type"`
-	Base     float64  `json:"base"`
-	PerStr   float64  `json:"per_str"`
-	PerDex   float64  `json:"per_dex"`
-	PerVit   float64  `json:"per_vit"`
-	PerMagic float64  `json:"per_magic"`
-	Min      *float64 `json:"min"`
-	Max      *float64 `json:"max"`
+	Type        string   `json:"type"`
+	Base        float64  `json:"base"`
+	PerStr      float64  `json:"per_str"`
+	PerDex      float64  `json:"per_dex"`
+	PerVit      float64  `json:"per_vit"`
+	PerMagic    float64  `json:"per_magic"`
+	Stat        string   `json:"stat"`
+	Scale       float64  `json:"scale"`
+	Offset      float64  `json:"offset"`
+	Denominator float64  `json:"denominator"`
+	Min         *float64 `json:"min"`
+	Max         *float64 `json:"max"`
 }
 
 type DungeonFloorSize struct {
@@ -874,8 +878,18 @@ func LoadRules(dir string) (*Rules, error) {
 		if !ok {
 			return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats: missing %s", key)
 		}
-		if formula.Type != "linear" {
+		if formula.Type != "linear" && formula.Type != "logarithmic" {
 			return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats.%s.type: %s", key, formula.Type)
+		}
+		if formula.Type == "logarithmic" {
+			switch formula.Stat {
+			case "str", "dex", "vit", "magic":
+			default:
+				return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats.%s.stat: %s", key, formula.Stat)
+			}
+			if formula.Denominator <= 0 {
+				return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats.%s.denominator: must be positive", key)
+			}
 		}
 		if formula.Min != nil && formula.Max != nil && *formula.Max < *formula.Min {
 			return nil, fmt.Errorf("game: invalid rules character_progression.derived_stats.%s: max must be >= min", key)

@@ -41,6 +41,7 @@ func _initialize() -> void:
 	_test_settings_panel_create_game_type_sync()
 	_test_status_text_toggle_hides_left_debug_not_level_hud()
 	_test_player_hud_identity_uses_character_name_and_level()
+	_test_character_stats_probability_values_use_percentages()
 	_test_actionable_panels_autoclose_out_of_range()
 	_test_movement_closes_gameplay_panels()
 
@@ -400,6 +401,24 @@ func _test_player_hud_identity_uses_character_name_and_level() -> void:
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
+
+
+func _test_character_stats_probability_values_use_percentages() -> void:
+	var panel = CharacterStatsPanelScript.new()
+	panel._build()
+	panel.set_progression({
+		"derived_stats": {
+			"hit_chance": 0.5,
+			"crit_chance": 0.06,
+			"block_percent": 75,
+		},
+	})
+	var state: Dictionary = panel.get_debug_state()
+	var labels: Dictionary = state.get("derived_labels", {})
+	_assert_eq("hit chance displays percent", str(labels.get("hit_chance", "")), "Hit chance  50%")
+	_assert_eq("crit chance displays percent", str(labels.get("crit_chance", "")), "Crit chance  6%")
+	_assert_eq("block chance displays percent", str(labels.get("block_percent", "")), "Block  75%")
+	panel.free()
 
 
 func _test_actionable_panels_autoclose_out_of_range() -> void:

@@ -55,9 +55,12 @@ var hotbar: Array = []
 var inventory_rows: int = BASE_INVENTORY_ROWS
 var inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS
 var gold: int = 0
-var item_rules: Dictionary = {}
-var item_templates: Dictionary = {}
-var item_presentations: Dictionary = {}
+var item_rules: Dictionary:
+	get: return ItemRulesLoader.item_rules
+var item_templates: Dictionary:
+	get: return ItemRulesLoader.item_templates
+var item_presentations: Dictionary:
+	get: return ItemRulesLoader.item_presentations
 var _panel: PanelContainer
 var _equipment_slots: Dictionary = {}
 var _bag_grid: GridContainer
@@ -134,12 +137,10 @@ class InventorySlotButton:
 
 
 func _ready() -> void:
+	ItemRulesLoader.ensure_loaded()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_load_item_rules()
-	_load_item_templates()
-	_load_item_presentations()
 	_ensure_built()
 	_render()
 	visible = false
@@ -1159,46 +1160,8 @@ func _short_label(def_id: String) -> String:
 	return out.substr(0, 3)
 
 
-func _load_item_rules() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/items.v0.json")
-	if not FileAccess.file_exists(path):
-		return
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return
-	var parsed = JSON.parse_string(f.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_rules = parsed.get("items", {})
-
-
-func _load_item_templates() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/item_templates.v0.json")
-	if not FileAccess.file_exists(path):
-		return
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return
-	var parsed = JSON.parse_string(f.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_templates = parsed.get("templates", {})
-
-
 func _item_definition(def_id: String) -> Dictionary:
-	if item_rules.has(def_id):
-		return item_rules.get(def_id, {})
-	return item_templates.get(def_id, {})
-
-
-func _load_item_presentations() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
-	if not FileAccess.file_exists(path):
-		return
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return
-	var parsed = JSON.parse_string(f.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_presentations = parsed.get("items", {})
+	return ItemRulesLoader.item_definition(def_id)
 
 
 func _debug_presentations() -> Dictionary:

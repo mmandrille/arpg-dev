@@ -32,9 +32,12 @@ var inventory: Array = []
 var equipped: Dictionary = {}
 var hotbar: Array = []
 var gold: int = 0
-var item_rules: Dictionary = {}
-var item_templates: Dictionary = {}
-var item_presentations: Dictionary = {}
+var item_rules: Dictionary:
+	get: return ItemRulesLoader.item_rules
+var item_templates: Dictionary:
+	get: return ItemRulesLoader.item_templates
+var item_presentations: Dictionary:
+	get: return ItemRulesLoader.item_presentations
 
 var _panel: PanelContainer
 var _title_label: Label
@@ -89,12 +92,10 @@ class StashSlotButton:
 
 
 func _ready() -> void:
+	ItemRulesLoader.ensure_loaded()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_load_item_rules()
-	_load_item_templates()
-	_load_item_presentations()
 	_build()
 	visible = false
 
@@ -591,40 +592,6 @@ func _item_definition(def_id: String) -> Dictionary:
 	return item_templates.get(def_id, {})
 
 
-func _load_item_rules() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/items.v0.json")
-	if not FileAccess.file_exists(path):
-		return
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return
-	var parsed = JSON.parse_string(f.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_rules = parsed.get("items", {})
-
-
-func _load_item_templates() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/item_templates.v0.json")
-	if not FileAccess.file_exists(path):
-		return
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return
-	var parsed = JSON.parse_string(f.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_templates = parsed.get("templates", {})
-
-
-func _load_item_presentations() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
-	if not FileAccess.file_exists(path):
-		return
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return
-	var parsed = JSON.parse_string(f.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_presentations = parsed.get("items", {})
 
 
 func _panel_style() -> StyleBoxFlat:

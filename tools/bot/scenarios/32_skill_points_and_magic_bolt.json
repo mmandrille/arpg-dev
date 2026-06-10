@@ -74,6 +74,7 @@
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 99, "timeout_s": 160 },
+    { "action": "wait_ticks", "ticks": 1000, "timeout_s": 90 },
     { "action": "kill_monsters", "monster_def_id": "dungeon_archer", "count": 99, "timeout_s": 80 },
     { "action": "wait_ticks", "ticks": 1000, "timeout_s": 90 },
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },

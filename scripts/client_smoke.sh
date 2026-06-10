@@ -100,6 +100,7 @@ run_gate "GDScript shop panel test" "[gdtest] PASS: test_shop_panel" res://tests
 run_gate "GDScript stash panel test" "[gdtest] PASS: test_stash_panel" res://tests/test_stash_panel.gd
 
 # 2k. Skill point panel and skill bar tests (server-independent; v44).
+run_gate "GDScript skill rules loader test" "[gdtest] PASS: test_skill_rules_loader" res://tests/test_skill_rules_loader.gd
 run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://tests/test_skills_panel.gd
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd
 

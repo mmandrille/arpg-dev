@@ -1066,16 +1066,14 @@ func LoadRules(dir string) (*Rules, error) {
 	r.Rarities = itemTemplates.Rarities
 	r.RarityOrder = rarityOrder
 
-	var skills struct {
-		Skills map[string]SkillDef `json:"skills"`
-	}
-	if err := readJSON(filepath.Join(dir, "skills.v0.json"), &skills); err != nil {
+	skills, err := loadSkillRulesFromManifest(dir)
+	if err != nil {
 		return nil, err
 	}
-	if err := validateSkillRules(skills.Skills); err != nil {
+	if err := validateSkillRules(skills); err != nil {
 		return nil, err
 	}
-	r.Skills = skills.Skills
+	r.Skills = skills
 
 	var treasureClasses struct {
 		Classes map[string]TreasureClassDef `json:"classes"`

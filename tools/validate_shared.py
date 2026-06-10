@@ -19,12 +19,28 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+try:
+    from .content_manifest import (
+        ManifestError,
+        merge_catalog_files,
+        skill_presentation_entries,
+        skill_rule_entries,
+    )
+except ImportError:  # pragma: no cover - direct script execution
+    from content_manifest import (  # type: ignore[no-redef]
+        ManifestError,
+        merge_catalog_files,
+        skill_presentation_entries,
+        skill_rule_entries,
+    )
+
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "shared"
 PROTOCOL = SHARED / "protocol"
 RULES = SHARED / "rules"
 GOLDEN = SHARED / "golden"
 ASSETS = SHARED / "assets"
+CONTENT = SHARED / "content"
 
 
 def load(path: Path):
@@ -67,6 +83,9 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "assets":
         # foo.v0.json -> foo.v0.schema.json
         return ASSETS / instance_path.name.replace(".v0.json", ".v0.schema.json")
+    if parts[0] == "content":
+        # foo.v0.json -> foo.v0.schema.json
+        return CONTENT / instance_path.name.replace(".v0.json", ".v0.schema.json")
     if parts[0] == "golden":
         # foo.json -> foo.v0.schema.json
         return GOLDEN / (instance_path.stem + ".v0.schema.json")
@@ -88,6 +107,7 @@ def iter_instances() -> list[Path]:
     instances: list[Path] = []
     instances += sorted(p for p in RULES.glob("*.v0.json") if not p.name.endswith(".schema.json"))
     instances += sorted(p for p in ASSETS.glob("*.v0.json") if not p.name.endswith(".schema.json"))
+    instances += sorted(p for p in CONTENT.glob("*.v0.json") if not p.name.endswith(".schema.json"))
     instances += sorted(p for p in GOLDEN.glob("*.json") if not p.name.endswith(".schema.json"))
     instances += sorted(PROTOCOL.glob("examples/*.json"))
     return instances
@@ -164,6 +184,8 @@ def cross_checks(report: Report) -> None:
     print("[3] cross-consistency drift guards")
     combat = load(RULES / "combat.v0.json")
     character_progression = load(RULES / "character_progression.v0.json")
+    content_manifest_path = CONTENT / "content_libraries.v0.json"
+    content_manifest = load(content_manifest_path)
     skills = load(RULES / "skills.v0.json")
     skill_presentations = load(ASSETS / "skill_presentations.v0.json")
     items = load(RULES / "items.v0.json")
@@ -208,6 +230,40 @@ def cross_checks(report: Report) -> None:
     shop_appraisals_golden = load(GOLDEN / "shop_appraisals.json")
     shop_stock_lifecycle_golden = load(GOLDEN / "shop_stock_lifecycle.json")
     equipment_requirements_golden = load(GOLDEN / "equipment_requirements.json")
+
+    try:
+        manifest_skills = merge_catalog_files(content_manifest_path, skill_rule_entries(content_manifest), "skills")
+    except ManifestError as exc:
+        manifest_skills = {}
+        report.fail("content manifest skill rules", str(exc))
+    else:
+        if set(manifest_skills) != set(skills.get("skills", {})):
+            report.fail(
+                "content manifest skill rules",
+                f"merged ids {sorted(manifest_skills)} != skills.v0.json ids {sorted(skills.get('skills', {}))}",
+            )
+        else:
+            report.ok("content manifest skill rules merge to canonical skills")
+
+    try:
+        manifest_skill_presentations = merge_catalog_files(
+            content_manifest_path,
+            skill_presentation_entries(content_manifest),
+            "skills",
+        )
+    except ManifestError as exc:
+        manifest_skill_presentations = {}
+        report.fail("content manifest skill presentations", str(exc))
+    else:
+        if set(manifest_skill_presentations) != set(skill_presentations.get("skills", {})):
+            report.fail(
+                "content manifest skill presentations",
+                "merged ids "
+                f"{sorted(manifest_skill_presentations)} != skill_presentations.v0.json ids "
+                f"{sorted(skill_presentations.get('skills', {}))}",
+            )
+        else:
+            report.ok("content manifest skill presentations merge to canonical presentations")
 
     v4_protocol_files = [
         PROTOCOL / "envelope.v4.schema.json",

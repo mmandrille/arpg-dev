@@ -1,0 +1,21 @@
+{
+  "version": 0,
+  "rules": {
+    "skills": [
+      {
+        "group": "mage",
+        "path": "../rules/skills.v0.json"
+      }
+    ]
+  },
+  "assets": {
+    "skills": {
+      "presentations": [
+        {
+          "group": "default",
+          "path": "../assets/skill_presentations.v0.json"
+        }
+      ]
+    }
+  }
+}

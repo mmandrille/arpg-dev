@@ -1,0 +1,19 @@
+docs/PROGRESS.md
+  s_5263b1fa022096::t_35c8a90cab44f6 1172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "152e131b8fccd5e03a950452bbe79dfc6a9784fc",
+  "prompts": {},
+  "sessions": {
+    "s_5263b1fa022096": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eaeda-f6d2-75c3-b8f6-8253378898be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+shared/golden/dungeon_monster_attack.json
+  s_b9cf0d42c0095c::t_dcef4970cf8d51 6
+shared/rules/monsters.v0.json
+  s_b9cf0d42c0095c::t_dcef4970cf8d51 95,112
+client/tests/test_golden.gd
+  s_b9cf0d42c0095c::t_dcef4970cf8d51 266-268
+PROGRESS.md
+  s_b9cf0d42c0095c::t_f92a61a446a679 15,77,173,490-496,502
+  s_02679809199807::t_407f561aca0fd6 95-97
+docs/specs/v56_spec-monster-attack-cadence.md
+  s_b9cf0d42c0095c::t_e9ce6b5627c13d 1-65
+shared/golden/item_rolls.json
+  s_b9cf0d42c0095c::t_c8bc70442ad2d8 2
+docs/plans/v56_2026-06-10-monster-attack-cadence.md
+  s_b9cf0d42c0095c::t_dcef4970cf8d51 39-40,57-59
+  s_b9cf0d42c0095c::t_2bbcdc7096f657 104,118
+  s_b9cf0d42c0095c::t_c8bc70442ad2d8 26,42-43
+  s_b9cf0d42c0095c::t_e9ce6b5627c13d 1-25,27-38,44-56,61-72,75-86,89-101,105-111,119-123
+  s_b9cf0d42c0095c::t_e10652f32e83a6 41,60,73
+  s_b9cf0d42c0095c::t_f32de9a6b89d4c 74,87-88,112-117
+  s_b9cf0d42c0095c::t_1a465d3bf478cf 102-103
+docs/as-built/v56_monster-attack-cadence.md
+  s_b9cf0d42c0095c::t_f92a61a446a679 1-32
+shared/golden/dungeon_monster_attack.v0.schema.json
+  s_b9cf0d42c0095c::t_dcef4970cf8d51 11,22
+server/internal/game/game_test.go
+  s_b9cf0d42c0095c::t_dcef4970cf8d51 6075,6082-6085,6117,6122-6124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "04b957ea93bf6b8bccd6442c0c0b7cea96f71d5a",
+  "prompts": {},
+  "sessions": {
+    "s_02679809199807": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "569617fb-c33e-48e5-b6ae-cf133337abf0",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_b9cf0d42c0095c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb285-2bbf-7b10-bc66-f90cee53e315",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

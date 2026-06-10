@@ -1169,6 +1169,7 @@ change.
 | [0010](adr/0010-mercenaries-from-player-characters.md) | Hired mercenaries derived from other players' characters | Proposed |
 | [0011](adr/0011-player-market-and-multi-item-trade-offers.md) | Player market listings and multi-item trade offers | Proposed |
 | [0012](adr/0012-item-upgrades-and-item-levels.md) | Item upgrades, item levels, and advanced dungeon resources | Proposed |
+| [0013](adr/0013-mystery-seller-and-unidentified-item-offers.md) | Mystery seller with expensive unidentified equipment offers | Proposed |
 
 Anticipated but **not written:** netcode timing, Protobuf migration, production auth, multiplayer split,
 quest system design, NPC interaction protocol, character progression formulas

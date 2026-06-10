@@ -21,10 +21,13 @@ func (s *Server) registerCharacterRoutes(mux *http.ServeMux) {
 }
 
 type characterResponse struct {
-	CharacterID string `json:"character_id"`
-	Name        string `json:"name"`
-	Dead        bool   `json:"dead"`
-	CreatedAt   string `json:"created_at"`
+	CharacterID         string `json:"character_id"`
+	Name                string `json:"name"`
+	Dead                bool   `json:"dead"`
+	Level               int    `json:"level"`
+	Gold                int    `json:"gold"`
+	DeepestDungeonDepth int    `json:"deepest_dungeon_depth"`
+	CreatedAt           string `json:"created_at"`
 }
 
 type listCharactersResponse struct {
@@ -55,7 +58,7 @@ func (s *Server) handleListCharacters(w http.ResponseWriter, r *http.Request) {
 
 	res := listCharactersResponse{Characters: make([]characterResponse, 0, len(chars))}
 	for _, c := range chars {
-		res.Characters = append(res.Characters, characterToResponse(c))
+		res.Characters = append(res.Characters, characterSummaryToResponse(c))
 	}
 	writeJSON(w, http.StatusOK, res)
 }
@@ -160,9 +163,24 @@ func (s *Server) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
 
 func characterToResponse(c store.Character) characterResponse {
 	return characterResponse{
-		CharacterID: c.ID,
-		Name:        c.Name,
-		Dead:        c.Dead,
-		CreatedAt:   c.CreatedAt.UTC().Format(time.RFC3339),
+		CharacterID:         c.ID,
+		Name:                c.Name,
+		Dead:                c.Dead,
+		Level:               1,
+		Gold:                0,
+		DeepestDungeonDepth: 0,
+		CreatedAt:           c.CreatedAt.UTC().Format(time.RFC3339),
+	}
+}
+
+func characterSummaryToResponse(c store.CharacterSummary) characterResponse {
+	return characterResponse{
+		CharacterID:         c.ID,
+		Name:                c.Name,
+		Dead:                c.Dead,
+		Level:               c.Level,
+		Gold:                c.Gold,
+		DeepestDungeonDepth: c.DeepestDungeonDepth,
+		CreatedAt:           c.CreatedAt.UTC().Format(time.RFC3339),
 	}
 }

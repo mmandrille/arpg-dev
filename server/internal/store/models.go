@@ -21,6 +21,20 @@ type Character struct {
 	CreatedAt time.Time
 }
 
+// CharacterSummary is the account-scoped character-list row exposed before a
+// session starts. Progression fields are display-only summaries from durable
+// character_progression, with safe defaults when no row exists yet.
+type CharacterSummary struct {
+	ID                  string
+	AccountID           string
+	Name                string
+	Dead                bool
+	Level               int
+	Gold                int
+	DeepestDungeonDepth int
+	CreatedAt           time.Time
+}
+
 // Session is one authoritative game session. Solo sessions have one host
 // member; co-op sessions have one host plus zero or more guests.
 type Session struct {

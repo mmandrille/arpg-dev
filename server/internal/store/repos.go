@@ -85,12 +85,16 @@ func (s *Store) GetCharacter(ctx context.Context, id string) (Character, error) 
 	return c, nil
 }
 
-func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]Character, error) {
+func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]CharacterSummary, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, account_id, name, dead, created_at
-		 FROM characters
-		 WHERE account_id = $1
-		 ORDER BY created_at ASC, id ASC`,
+		`SELECT c.id, c.account_id, c.name, c.dead,
+		        COALESCE(p.level, 1), COALESCE(p.gold, 0), COALESCE(p.deepest_dungeon_depth, 0),
+		        c.created_at
+		   FROM characters c
+		   LEFT JOIN character_progression p
+		     ON p.account_id = c.account_id AND p.character_id = c.id
+		  WHERE c.account_id = $1
+		  ORDER BY c.created_at ASC, c.id ASC`,
 		accountID,
 	)
 	if err != nil {
@@ -98,10 +102,19 @@ func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]Charact
 	}
 	defer rows.Close()
 
-	var chars []Character
+	var chars []CharacterSummary
 	for rows.Next() {
-		var c Character
-		if err := rows.Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt); err != nil {
+		var c CharacterSummary
+		if err := rows.Scan(
+			&c.ID,
+			&c.AccountID,
+			&c.Name,
+			&c.Dead,
+			&c.Level,
+			&c.Gold,
+			&c.DeepestDungeonDepth,
+			&c.CreatedAt,
+		); err != nil {
 			return nil, fmt.Errorf("store: scan character: %w", err)
 		}
 		chars = append(chars, c)

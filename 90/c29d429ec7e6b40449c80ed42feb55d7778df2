@@ -1,0 +1,131 @@
+docs/plans/v51_2026-06-10-mystery-seller-core.md
+  s_932d6b636b97d4::t_cbcf3eefd2c4d7 133,138,143,148,153,158,174,179,184,189,194,199,309-312
+  s_932d6b636b97d4::t_57c99b2d60ec9d 1-2,4-27,29-84,86-89,91-94,96-99,101-104,106-109,111-114,116-119,121-132,134-137,139-142,144-147,149-152,154-157,159-173,175-178,180-183,185-188,190-193,195-198,200-210,212-215,217-220,222-225,227-230,232-249,251-254,256-259,261-264,266-269,271-280,282-285,287-290,292-295,297-300,302-307,324-332
+  s_932d6b636b97d4::t_4ac45335ecb2bc 85,90,95,105,110,115,120,308
+  s_932d6b636b97d4::t_0b6d3e3dfd811b 28,100
+  s_932d6b636b97d4::t_744046ca7392f5 216
+  s_932d6b636b97d4::t_f5be1bd49dd83d 211,221,226,231,250,255,260,265,270,281,286,291,296,313-320
+  s_932d6b636b97d4::t_3d76ba7e0e72c1 3,301,321-323
+client/scripts/bot_controller.gd
+  s_932d6b636b97d4::t_5935bf6216c466 155-156,262-266,548-549
+client/tests/test_client_bot.gd
+  s_932d6b636b97d4::t_50b65cff1c68b5 540,543-544,553,556,561-575,581
+  s_932d6b636b97d4::t_588f947e1d0d5d 516,522,524
+  s_932d6b636b97d4::t_55ce372b914df5 26,147-149
+tools/bot/scenarios/client/24_mystery_seller_core.json
+  s_932d6b636b97d4::t_883f31a3ef67af 5,24-29,38-39
+  s_932d6b636b97d4::t_8fa3335058bede 31
+  s_932d6b636b97d4::t_7b376f225fe199 43
+  s_932d6b636b97d4::t_9d8496b22e0cef 37
+  s_932d6b636b97d4::t_583072e7ecd73b 1-4,6-16,19-23,30,32-36,40-42,44-53
+  s_932d6b636b97d4::t_20cbd6cf8f53e9 17-18
+server/internal/store/stale_sessions_test.go
+  s_932d6b636b97d4::t_bd5020ef8977fc 112
+shared/protocol/envelope.v8.schema.json
+  s_932d6b636b97d4::t_a63eafc0cad80a 3-4
+  s_932d6b636b97d4::t_e2115e183a9c8e 1-2,5-56
+client/scripts/bot_scenario_runner.gd
+  s_932d6b636b97d4::t_65e0992e85778f 1588-1589
+  s_932d6b636b97d4::t_64ac45224ea722 1103-1117
+  s_932d6b636b97d4::t_9787304c616932 1860-1862
+  s_932d6b636b97d4::t_ed18e97a797cec 1136-1137,1195-1197,1199-1203,1229-1235
+  s_932d6b636b97d4::t_3d39d7f5b8928c 55,100
+shared/protocol/state_delta.v8.schema.json
+  s_932d6b636b97d4::t_e2115e183a9c8e 1-2,5-117,124-147,165-178,180-351,354-900
+  s_932d6b636b97d4::t_a63eafc0cad80a 3-4
+  s_932d6b636b97d4::t_77b05d8bd0828c 118-123,148-164,179,352-353
+server/internal/store/repos.go
+  s_932d6b636b97d4::t_334c337f35f471 430
+shared/protocol/examples/mystery_shop_buy_intent.json
+  s_932d6b636b97d4::t_1889e78500a265 1-2,5,7-11
+  s_932d6b636b97d4::t_596059409bccfb 3-4,6
+server/internal/replay/replay_test.go
+  s_932d6b636b97d4::t_118dd36a504c2c 713,733,774
+shared/rules/shops.v0.json
+  s_932d6b636b97d4::t_e3d6ef3a2b193f 93-95
+  s_932d6b636b97d4::t_d4039fa8229c5d 79,90
+  s_932d6b636b97d4::t_e955fc27915713 58-78,80-89,91-92,96-120
+shared/protocol/messages.v8.schema.json
+  s_932d6b636b97d4::t_a63eafc0cad80a 3-4
+  s_932d6b636b97d4::t_e2115e183a9c8e 1-2,5-270,272-347
+  s_932d6b636b97d4::t_69b635feb79be1 271
+shared/rules/shops.v0.schema.json
+  s_932d6b636b97d4::t_c1906843189393 24,59-76
+tools/bot/test_protocol.py
+  s_932d6b636b97d4::t_b732c512a7e4c7 188-213,215-251
+  s_932d6b636b97d4::t_cf8a46326957b9 214
+docs/specs/v51_spec-mystery-seller-core.md
+  s_932d6b636b97d4::t_f5be1bd49dd83d 3,24
+  s_932d6b636b97d4::t_46ac72694b0443 1-2,4-23,27-70,72-87,90-192
+  s_932d6b636b97d4::t_c820bd0c5402dc 25-26,71,88-89,193-195
+tools/bot/run.py
+  s_932d6b636b97d4::t_2574b1346e8bbb 1328,1396,1398
+  s_932d6b636b97d4::t_6f9f198471b1bd 2573,2575-2578,2587-2609,2718-2732,2735,2740
+  s_932d6b636b97d4::t_2411daef69674c 2620,2631-2640
+  s_932d6b636b97d4::t_2950fb0fb72403 2685-2690
+  s_932d6b636b97d4::t_a32a9552c4cb26 3585,3587
+  s_932d6b636b97d4::t_f3d570d182d6fe 2610-2619,2621-2630,2641-2664
+client/tests/test_shop_panel.gd
+  s_932d6b636b97d4::t_2a0abfc2a8326a 109-149
+shared/rules/worlds.v0.json
+  s_932d6b636b97d4::t_6c520eb6f192c3 475-477
+shared/protocol/examples/state_delta.json
+  s_932d6b636b97d4::t_e2a98cb6fef61f 236-280
+server/internal/game/types.go
+  s_932d6b636b97d4::t_18f9fbc1f60c6b 262-263,282-283,414
+  s_932d6b636b97d4::t_454c3f5942e5d3 264,266
+tools/validate_shared.py
+  s_932d6b636b97d4::t_9913d040b920e8 76,78-79,197-202,223-227,233,235
+docs/PROGRESS.md
+  s_932d6b636b97d4::t_11469f0b2e0ce2 1279-1280,1580
+  s_932d6b636b97d4::t_9dbbb03991b3db 14,69,1269-1278,1281-1291,1569-1572,1579,1581
+  s_932d6b636b97d4::t_ccac10d1fdf312 140
+server/internal/game/rules.go
+  s_932d6b636b97d4::t_ce339ba68a5836 580-591,611,1845-1848
+  s_932d6b636b97d4::t_bf9b565b47a3cf 617,621,628-631
+  s_932d6b636b97d4::t_a7617bf864d7f1 1894-1944
+client/scripts/main.gd
+  s_932d6b636b97d4::t_22899e5cb6f839 2963-2964
+  s_932d6b636b97d4::t_44ccc93105480e 3033-3040
+server/internal/game/shop.go
+  s_932d6b636b97d4::t_b5999a6be763f3 480-495
+  s_932d6b636b97d4::t_c80f42fd7e36ee 14,233-235,285-399
+  s_932d6b636b97d4::t_0f3e0633ad5868 1060
+  s_932d6b636b97d4::t_23a193303d6c5c 1054-1059,1061-1067
+tools/bot/scenarios/37_mystery_seller_core.json
+  s_932d6b636b97d4::t_6f1e4f98ce59d4 16-17
+  s_932d6b636b97d4::t_883f31a3ef67af 4,13-14,19-20
+  s_932d6b636b97d4::t_3e54ace7568ddb 1-3,5-8,15,18,21-103
+  s_932d6b636b97d4::t_63a9230723b5ae 9-10
+  s_932d6b636b97d4::t_71a2c100d6a4fa 11-12
+shared/rules/interactables.v0.json
+  s_932d6b636b97d4::t_6c520eb6f192c3 35-39
+client/scripts/shop_panel.gd
+  s_932d6b636b97d4::t_47a5645b2135e7 21-33,176,314,324-326,385-418,422-423,594,598-599,601,606-610,650-651,670-671,682-693,714-715,725-726,756-757,816-817,927-928,943-944,954-1040
+server/internal/game/sim.go
+  s_932d6b636b97d4::t_24d247c59a231d 2328-2333,2359
+server/internal/game/shop_test.go
+  s_932d6b636b97d4::t_c66869b16c7a6e 1186-1204,1217-1228,1251-1261,1271-1277
+  s_932d6b636b97d4::t_17e8b6e7651a6d 598-663
+  s_932d6b636b97d4::t_f5e86d3a847c44 174-292
+  s_932d6b636b97d4::t_6dc9a498d08b22 1262-1270
+shared/protocol/session_snapshot.v8.schema.json
+  s_932d6b636b97d4::t_a63eafc0cad80a 3-4
+  s_932d6b636b97d4::t_e2115e183a9c8e 1-2,5-646
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "90c29d429ec7e6b40449c80ed42feb55d7778df2",
+  "prompts": {},
+  "sessions": {
+    "s_932d6b636b97d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eafce-e615-7c50-8cca-027c26f21915",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

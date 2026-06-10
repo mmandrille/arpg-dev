@@ -405,6 +405,18 @@ func _verify_inventory_panel_model() -> bool:
 		return false
 	panel.set_inventory_state([
 		{"item_instance_id": "1005", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
+		{"item_instance_id": "1006", "item_def_id": "red_potion", "slot": "", "equipped": false},
+	], {"main_hand": null}, 3, 15, 0, [{"slot_index": 0, "item_instance_id": "1006"}])
+	state = panel.get_debug_state()
+	var hotbar_assigned_ids: Array = state["hotbar_assigned_item_ids"]
+	if int(state["bag_count"]) != 2 \
+			or int(state["hotbar_assigned_inventory_count"]) != 1 \
+			or not hotbar_assigned_ids.has("1006") \
+			or not panel._tooltip_lines({"item_instance_id": "1006", "item_def_id": "red_potion", "slot": "", "equipped": false}).has("Assigned to hotbar: 1"):
+		_fail("inventory panel hotbar assignment state mismatch: %s" % state)
+		return false
+	panel.set_inventory_state([
+		{"item_instance_id": "1005", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
 		{"item_instance_id": "1006", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
 		{"item_instance_id": "1007", "item_def_id": "quest_leaf", "slot": "", "equipped": false},
 		{"item_instance_id": "1008", "item_def_id": "quest_leaf", "slot": "", "equipped": false},

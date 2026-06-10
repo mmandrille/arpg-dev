@@ -1201,7 +1201,7 @@ func _apply_hotbar_update(slot_index: int, item_instance_id) -> void:
 
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
-		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold)
+		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold, hotbar)
 	if shop_panel != null and shop_panel.visible:
 		shop_panel.set_inventory_state(inventory, equipped, gold)
 	if consumable_bar != null:

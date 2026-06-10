@@ -12,6 +12,8 @@ const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
+const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
+const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -40,6 +42,7 @@ func _initialize() -> void:
 	_test_status_text_toggle_hides_left_debug_not_level_hud()
 	_test_player_hud_identity_uses_character_name_and_level()
 	_test_actionable_panels_autoclose_out_of_range()
+	_test_movement_closes_gameplay_panels()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -437,6 +440,46 @@ func _test_actionable_panels_autoclose_out_of_range() -> void:
 	main.inventory_panel.free()
 	main.shop_panel.free()
 	main.stash_panel.free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_movement_closes_gameplay_panels() -> void:
+	var main = _make_main()
+	main.inventory_panel = InventoryPanelScript.new()
+	main.shop_panel = ShopPanelScript.new()
+	main.stash_panel = StashPanelScript.new()
+	main.character_stats_panel = CharacterStatsPanelScript.new()
+	main.skills_panel = SkillsPanelScript.new()
+	main.character_info_panel = PanelContainer.new()
+	main.waypoint_panel = PanelContainer.new()
+
+	main.inventory_panel.visible = true
+	main.shop_panel.visible = true
+	main.stash_panel.visible = true
+	main.character_stats_panel.visible = true
+	main.skills_panel.visible = true
+	main.character_info_panel.visible = true
+	main.waypoint_panel.visible = true
+	main._close_gameplay_panels_for_movement()
+
+	_assert_true("movement closes inventory panel", not main.inventory_panel.visible)
+	_assert_true("movement closes shop panel", not main.shop_panel.visible)
+	_assert_true("movement closes stash panel", not main.stash_panel.visible)
+	_assert_true("movement closes character stats panel", not main.character_stats_panel.visible)
+	_assert_true("movement closes skills panel", not main.skills_panel.visible)
+	_assert_true("movement closes character info panel", not main.character_info_panel.visible)
+	_assert_true("movement closes waypoint panel", not main.waypoint_panel.visible)
+
+	main.inventory_panel.free()
+	main.shop_panel.free()
+	main.stash_panel.free()
+	main.character_stats_panel.free()
+	main.skills_panel.free()
+	main.character_info_panel.free()
+	main.waypoint_panel.free()
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

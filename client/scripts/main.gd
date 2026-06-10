@@ -1678,6 +1678,7 @@ func _handle_input(delta: float) -> void:
 
 	if input != Vector2.ZERO and not _movement_requires_fresh_input and _send_cooldown <= 0.0:
 		var dir := _camera_relative_flat_direction(input)
+		_close_gameplay_panels_for_movement()
 		# Local prediction: move immediately for responsive feel.
 		predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
 		_reconcile_player()
@@ -1725,6 +1726,21 @@ func _close_gameplay_panels(except: String = "") -> void:
 		_hide_character_info_panel()
 	if except != "waypoint":
 		_hide_waypoint_panel()
+
+
+func _close_gameplay_panels_for_movement() -> void:
+	_close_gameplay_panels()
+
+
+func _movement_intent_starts_motion(intent_type: String, payload: Dictionary) -> bool:
+	if intent_type == "move_to_intent":
+		return true
+	if intent_type != "move_intent":
+		return false
+	var direction = payload.get("direction", {})
+	if typeof(direction) != TYPE_DICTIONARY:
+		return false
+	return absf(float(direction.get("x", 0.0))) > 0.0001 or absf(float(direction.get("y", 0.0))) > 0.0001
 
 
 func _is_escape_key(event: InputEventKey) -> bool:
@@ -1921,6 +1937,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	var kind := str(pick.get("kind", ""))
 	if kind == "floor":
 		var ground: Vector3 = pick.get("ground", Vector3.ZERO)
+		_close_gameplay_panels_for_movement()
 		client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
 		_attack_cooldown = SEND_INTERVAL
 		if _sustained_click.mode == "move":
@@ -2006,6 +2023,7 @@ func _repeat_hold_move() -> void:
 	if not _sustained_click.can_repeat_move(ground):
 		return
 
+	_close_gameplay_panels_for_movement()
 	client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
 	_sustained_click.mark_move_sent(ground)
 	_attack_cooldown = SEND_INTERVAL
@@ -2038,6 +2056,7 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 	if target_node == null:
 		pending_interactable_action.clear()
 		return
+	_close_gameplay_panels_for_movement()
 	client.send("move_to_intent", last_server_tick, {
 		"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
 	})
@@ -3203,6 +3222,7 @@ func _on_waypoint_level_pressed(level: int) -> void:
 			return
 		pending_waypoint_target_level = level
 		pending_waypoint_travel = true
+		_close_gameplay_panels_for_movement()
 		client.send("move_to_intent", last_server_tick, {
 			"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
 		})
@@ -4235,6 +4255,8 @@ func _bot_loot_label_debug() -> Array:
 func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
+	if _movement_intent_starts_motion(intent_type, payload):
+		_close_gameplay_panels_for_movement()
 	client.send(intent_type, last_server_tick, payload)
 	_attack_cooldown = SEND_INTERVAL
 

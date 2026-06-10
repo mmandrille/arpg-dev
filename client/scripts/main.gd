@@ -109,9 +109,15 @@ var skill_progression: Dictionary = {}
 var skill_cooldowns: Array = []
 var right_click_skill_id: String = ""
 var skill_function_keys: Array = ["", "", "", "", "", "", "", ""]
-var item_rules: Dictionary = {}
-var item_templates: Dictionary = {}
-var item_presentations: Dictionary = {}
+var item_rules: Dictionary:
+	get: return ItemRulesLoader.item_rules
+	set(v): ItemRulesLoader.item_rules = v
+var item_templates: Dictionary:
+	get: return ItemRulesLoader.item_templates
+	set(v): ItemRulesLoader.item_templates = v
+var item_presentations: Dictionary:
+	get: return ItemRulesLoader.item_presentations
+	set(v): ItemRulesLoader.item_presentations = v
 var dungeon_generation: Dictionary = {}
 var loot_ids: Array = []
 var hovered_loot_id: String = ""
@@ -238,9 +244,7 @@ func _ready() -> void:
 	client_settings.apply()
 	_sync_status_text_visibility()
 	_sync_settings_panel()
-	_load_item_rules()
-	_load_item_templates()
-	_load_item_presentations()
+	ItemRulesLoader.ensure_loaded()
 	_load_dungeon_generation()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8888")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
@@ -3586,31 +3590,8 @@ func _item_rarity_background(rarity: String) -> Color:
 	return ITEM_RARITY_BACKGROUNDS.get(key, ITEM_RARITY_BACKGROUNDS["common"])
 
 
-func _load_item_rules() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/items.v0.json")
-	var parsed = _read_json(path)
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_rules = parsed.get("items", {})
-
-
-func _load_item_templates() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/item_templates.v0.json")
-	var parsed = _read_json(path)
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_templates = parsed.get("templates", {})
-
-
-func _load_item_presentations() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
-	var parsed = _read_json(path)
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_presentations = parsed.get("items", {})
-
-
 func _item_definition(item_def_id: String) -> Dictionary:
-	if item_rules.has(item_def_id):
-		return item_rules.get(item_def_id, {})
-	return item_templates.get(item_def_id, {})
+	return ItemRulesLoader.item_definition(item_def_id)
 
 
 func _generic_loot_name(item_def_id: String) -> String:

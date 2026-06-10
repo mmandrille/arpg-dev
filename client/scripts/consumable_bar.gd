@@ -7,8 +7,10 @@ const SLOT_COUNT := 10
 const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
 var inventory: Array = []
-var item_rules: Dictionary = {}
-var item_presentations: Dictionary = {}
+var item_rules: Dictionary:
+	get: return ItemRulesLoader.item_rules
+var item_presentations: Dictionary:
+	get: return ItemRulesLoader.item_presentations
 var progression: Dictionary = {}
 var progression_rules: Dictionary = {}
 var hotbar_capacity: int = 2
@@ -62,11 +64,10 @@ class ConsumableSlotButton:
 
 
 func _ready() -> void:
+	ItemRulesLoader.ensure_loaded()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_load_item_rules()
-	_load_item_presentations()
 	_load_progression_rules()
 	_slot_items.resize(SLOT_COUNT)
 	for i in SLOT_COUNT:
@@ -430,18 +431,6 @@ func _xp_bar_fill_style() -> StyleBoxFlat:
 	return s
 
 
-func _load_item_rules() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/items.v0.json")
-	var parsed = _read_json(path)
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_rules = parsed.get("items", {})
-
-
-func _load_item_presentations() -> void:
-	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_presentations.v0.json")
-	var parsed = _read_json(path)
-	if typeof(parsed) == TYPE_DICTIONARY:
-		item_presentations = parsed.get("items", {})
 
 
 func _load_progression_rules() -> void:

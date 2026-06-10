@@ -187,13 +187,34 @@ feat: v{N}: {title of this slice}
 
 - Do not push.
 
-### 6. Continue or stop
+### 6. Post-commit checkpoint and context hygiene
 
 After each commit:
 
-1. Run `git status --short`.
-2. If only unrelated pre-existing dirty changes remain, stop and report them.
-3. If the worktree is clean and the requested count is not reached, begin the next slice.
+1. Run `git status --short` and `git log -1 --oneline`.
+2. Write a concise continuation checkpoint in chat before any context clearing attempt:
+   - completed count and execution target,
+   - current branch,
+   - last commit hash and message,
+   - current `git status --short`,
+   - ordered selected queue with completed, next, and deferred ideas,
+   - any new hard-stop risks or deferred scope.
+3. Only after the checkpoint exists, clear or compact context if the runtime exposes a safe
+   explicit mechanism for doing so.
+4. Do not clear context if the commit failed, `make ci` did not pass, git status is ambiguous,
+   or the next selected idea cannot be reconstructed from the checkpoint.
+5. If no explicit context clearing mechanism is available, do manual context hygiene instead:
+   treat previous slice implementation details as stale, re-read `CLAUDE.md`, `docs/PROGRESS.md`,
+   `AGENTS.md`, the remaining selected idea, and the relevant skill files before the next slice.
+6. Never create repository files solely as autoloop memory or checkpoints.
+
+### 7. Continue or stop
+
+After the checkpoint and optional context hygiene:
+
+1. If only unrelated pre-existing dirty changes remain, stop and report them.
+2. If the worktree is clean and the execution target is not reached, begin the next slice.
+3. If the worktree is clean and the execution target is reached, stop and report completion.
 
 ## Reporting
 

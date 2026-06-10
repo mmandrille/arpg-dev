@@ -2,6 +2,7 @@ class_name SkillBar
 extends Control
 
 signal cast_skill_requested(skill_id: String)
+signal open_skills_requested
 
 const TICK_DURATION_S := 0.05
 
@@ -122,7 +123,7 @@ func _build() -> void:
 	_slot.tooltip_text = _tooltip_text(_current_skill_id())
 	_slot.focus_mode = Control.FOCUS_NONE
 	_slot.custom_minimum_size = Vector2(52, 52)
-	_slot.pressed.connect(use_slot)
+	_slot.pressed.connect(func() -> void: open_skills_requested.emit())
 	_slot.add_theme_font_size_override("font_size", 22)
 	box.add_child(_slot)
 
@@ -147,7 +148,7 @@ func _position_panel() -> void:
 func _render() -> void:
 	if _slot == null or _cooldown == null:
 		return
-	_slot.disabled = not _slot_enabled()
+	_slot.disabled = not _interactive
 	_slot.text = _skill_icon_label_text(_current_skill_id()) if _rank > 0 else "-"
 	_slot.tooltip_text = _tooltip_text(_current_skill_id())
 	_cooldown.value = _cooldown_fraction()

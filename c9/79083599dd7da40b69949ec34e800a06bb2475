@@ -1,0 +1,32 @@
+AGENTS.md
+  s_02679809199807::t_b065eb749fc1a9 22
+skills/finish/SKILL.md
+  s_02679809199807::t_11d58a2c2fa616 66
+skills/review/SKILL.md
+  s_02679809199807::t_870e454c61ad77 51-53,56
+  s_02679809199807::t_1ae75f2227c521 5-7
+  s_02679809199807::t_e30f1527ead0e8 169-171
+  s_02679809199807::t_3490cf52bdb9ef 37
+  s_02679809199807::t_f13ad2be434992 133-134
+  s_02679809199807::t_d854261021ed69 113
+  s_02679809199807::t_5c3547110022c7 145-146
+  s_02679809199807::t_1c9ccdbdb56048 102-103
+  s_02679809199807::t_7fcf73ae51f1f0 17
+  s_02679809199807::t_5fc0b09f1033a5 157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c979083599dd7da40b69949ec34e800a06bb2475",
+  "prompts": {},
+  "sessions": {
+    "s_02679809199807": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "569617fb-c33e-48e5-b6ae-cf133337abf0",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

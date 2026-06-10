@@ -1,0 +1,61 @@
+{
+  "id": "client_boss_phase_readability",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v57_boss_phase_readability",
+  "title": "Client boss phase readability",
+  "description": "Client descends to the first boss floor and verifies the Cave Warden phase countdown and telegraph marker.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -1, "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -2, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -3, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -4, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "level_changed", "to_level": -5, "timeout_s": 20.0 },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
+    {
+      "type": "wait_boss_health_bar",
+      "visible": true,
+      "boss_template_id": "cave_warden",
+      "title": "Cave Warden",
+      "hp_min": 1,
+      "ratio_min": 0.01,
+      "ratio_max": 1.0,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_boss_health_bar",
+      "visible": true,
+      "boss_template_id": "cave_warden",
+      "phase_kind": "telegraph",
+      "pattern_id": "charged_melee",
+      "phase_index": 0,
+      "duration_ticks": 30,
+      "remaining_ticks_min": 1,
+      "remaining_ticks_max": 30,
+      "phase_ratio_min": 0.01,
+      "phase_ratio_max": 1.0,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_entity_reaction",
+      "entity_type": "monster",
+      "is_boss": true,
+      "boss_template_id": "cave_warden",
+      "boss_telegraph_active": true,
+      "has_boss_telegraph_marker": true,
+      "telegraph_radius_min": 1.5,
+      "telegraph_radius_max": 1.7
+    }
+  ]
+}

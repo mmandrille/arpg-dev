@@ -35,11 +35,42 @@ func _run() -> void:
 	_assert_eq("hp clamps to max", int(state.get("hp", 0)), 24)
 	_assert_true("ratio clamps to one", absf(float(state.get("ratio", 0.0)) - 1.0) < 0.001)
 
+	bar.set_phase_state({
+		"phase_kind": "telegraph",
+		"pattern_id": "charged_melee",
+		"phase_index": 0,
+		"duration_ticks": 30,
+		"remaining_ticks": 15,
+	})
+	state = bar.get_debug_state()
+	_assert_eq("phase kind", str(state.get("phase_kind", "")), "telegraph")
+	_assert_eq("pattern id", str(state.get("pattern_id", "")), "charged_melee")
+	_assert_eq("phase index", int(state.get("phase_index", -2)), 0)
+	_assert_eq("duration ticks", int(state.get("duration_ticks", 0)), 30)
+	_assert_eq("remaining ticks", int(state.get("remaining_ticks", 0)), 15)
+	_assert_true("phase ratio half", absf(float(state.get("phase_ratio", 0.0)) - 0.5) < 0.001)
+
+	bar.set_phase_state({
+		"phase_kind": "active",
+		"duration_ticks": 4,
+		"remaining_ticks": 9,
+	})
+	state = bar.get_debug_state()
+	_assert_eq("remaining clamps to duration", int(state.get("remaining_ticks", 0)), 4)
+	_assert_true("phase ratio clamps one", absf(float(state.get("phase_ratio", 0.0)) - 1.0) < 0.001)
+
+	bar.clear_phase_state()
+	state = bar.get_debug_state()
+	_assert_eq("phase kind clears", str(state.get("phase_kind", "x")), "")
+	_assert_eq("phase index clears", int(state.get("phase_index", 0)), -1)
+	_assert_eq("phase ratio clears", float(state.get("phase_ratio", 1.0)), 0.0)
+
 	bar.show_boss("3001", "cave_warden", "Cave Warden", -5, 0)
 	state = bar.get_debug_state()
 	_assert_false("dead boss hides", bool(state.get("visible", true)))
 	_assert_eq("dead hp clamps zero", int(state.get("hp", -1)), 0)
 	_assert_eq("invalid max hp clamps one", int(state.get("max_hp", 0)), 1)
+	_assert_eq("dead clears phase", str(state.get("phase_kind", "x")), "")
 
 	bar.hide_boss()
 	state = bar.get_debug_state()

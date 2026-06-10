@@ -775,6 +775,8 @@ func _handle_message(env: Dictionary) -> void:
 			_debug("rejected: %s" % env["payload"].get("reason", "?"))
 		"error":
 			_debug("error: %s" % env["payload"].get("message", "?"))
+		_:
+			push_warning("_handle_message: unknown server message type '%s'" % env.get("type", ""))
 
 
 func _snapshot_local_player_id(p: Dictionary) -> String:

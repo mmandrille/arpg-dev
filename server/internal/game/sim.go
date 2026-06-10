@@ -3147,8 +3147,8 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 
 	wasEquipped := item.equipped
 	if item.equipped {
-		for slot, instanceID := range s.equipped {
-			if instanceID == item.instanceID {
+		for _, slot := range sortedStringKeys(s.equipped) {
+			if s.equipped[slot] == item.instanceID {
 				s.equipped[slot] = 0
 				res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
 			}
@@ -5379,8 +5379,8 @@ func (s *Sim) inventoryRowsAfterEquip(slot string, item *invItem, clearedSlots [
 	if item != nil {
 		if item.equipped {
 			currentSlot := ""
-			for eqSlot, instanceID := range s.equipped {
-				if instanceID == item.instanceID {
+			for _, eqSlot := range sortedStringKeys(s.equipped) {
+				if s.equipped[eqSlot] == item.instanceID {
 					currentSlot = eqSlot
 					break
 				}

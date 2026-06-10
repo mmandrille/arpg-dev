@@ -2,9 +2,10 @@
 name: autoloop
 description: >-
   Present a curated menu of 5-10 possible SDD slices, wait for the user to pick
-  the ideas they like, then order and execute a bounded autonomous loop through
-  next, spec, plan, execute, and finish with committed slices. Use when the user
-  runs $autoloop N, /autoloop N, or asks Codex to curate and run multiple SDD slices.
+  the ideas they like, order them, batch any blocking clarification questions
+  across the selected queue, then execute a bounded autonomous loop through next,
+  spec, plan, execute, and finish with committed slices. Use when the user runs
+  $autoloop N, /autoloop N, or asks Codex to curate and run multiple SDD slices.
 disable-model-invocation: true
 ---
 
@@ -24,14 +25,17 @@ Examples:
 Run the normal SDD workflow repeatedly after one explicit user selection gate:
 
 ```text
-$autoloop -> idea menu -> user picks -> agent orders picks -> $spec -> $plan -> $execute -> $finish
+$autoloop -> idea menu -> user picks -> agent orders picks -> batch questions -> $spec -> $plan -> $execute -> $finish
 ```
 
 The initial `$autoloop` invocation authorizes preflight and idea discovery only.
 After the user picks one or more ideas from the menu, that reply authorizes the
-agent to order the selected ideas and continue from brief to spec, plan,
-implementation, CI, and commit when all gates pass. It does **not** authorize
-pushing, branch creation, bypassing CI, or guessing through blockers.
+agent to order the selected ideas and run the batch clarification gate. If that
+gate emits no questions, the agent may continue from brief to spec, plan,
+implementation, CI, and commit when all gates pass. If that gate emits questions,
+the user's answer authorizes continuing with those answers applied. It does
+**not** authorize pushing, branch creation, bypassing CI, or guessing through
+blockers.
 
 ## Count handling
 
@@ -73,6 +77,7 @@ Stop immediately and report the reason if any of these occur:
 7. Completing another slice would exceed the capped count of 3.
 8. The user has not yet selected ideas from the generated menu.
 9. A selected idea is too vague, too large, or not verifiable enough to turn into a small slice.
+10. Batch clarification questions were emitted and the user has not answered them yet.
 
 Do not create branches. Do not push. Do not use `--no-verify`, `--amend`, or destructive git
 commands unless the user explicitly asks in a later message.
@@ -124,13 +129,37 @@ When the user replies with selected ideas:
    - player-visible progress next,
    - bot/test proof clarity as a tie-breaker.
 4. Show the ordered execution queue and the capped execution target.
-5. Begin the per-slice loop without asking for another confirmation, unless a hard stop
-   condition applies.
+5. Run the batch clarification gate below before beginning the per-slice loop.
+
+## Phase 2 — Batch clarification gate
+
+Before writing specs, plans, or code for selected ideas:
+
+1. Do a lightweight discovery pass for every viable selected idea:
+   - cover all ideas in the execution target,
+   - also cover deferred selected ideas when a question affects splitting, ordering, or future viability,
+   - re-check `PROGRESS.md`, ADRs, existing specs/plans, open gaps, and bot/test proof needs.
+2. Anticipate the questions that would otherwise be raised later by `$next`, `$spec`, `$plan`,
+   or `$execute` gates.
+3. Use the defaults for non-blocking choices instead of asking. Only ask when the answer requires
+   product/design judgment, changes slice boundaries, affects protocol/schema contracts, or could
+   make implementation unsafe to start while the user is away.
+4. If any blocking questions remain, present them all at once, grouped by selected idea. Keep them
+   answerable in a single reply:
+   - label each question as `Required for this run` or `Deferred/future`,
+   - include a short reason the answer blocks autonomous execution,
+   - include a conservative suggested default only when the repo context supports one,
+   - state that unanswered required questions will stop the loop.
+5. Stop and wait for the user's answers if any required questions were emitted.
+6. If there are no required questions, say that the selected queue has no blocking questions and
+   begin the per-slice loop without asking for another confirmation.
+7. After the user answers, apply the answers consistently across all selected slices. If an answer
+   changes ordering, scope, or viability, update the queue and report the adjustment before execution.
 
 ## Per-slice loop
 
-Repeat over the ordered selected queue until the execution target is complete or a stop
-condition fires.
+Repeat over the clarified ordered selected queue until the execution target is complete or a
+stop condition fires.
 
 ### 1. Discover
 
@@ -140,7 +169,8 @@ existing specs/plans, open gaps, and natural project trajectory before committin
 - Produce the normal next-slice brief for the selected idea.
 - If implementation order needs adjustment after a completed slice, reorder remaining selected
   ideas using the ordering rules above and report the adjustment.
-- If the selected idea still requires user judgment, stop.
+- If the selected idea still requires user judgment not covered by the batch clarification gate,
+  stop and ask only that newly discovered blocking question.
 
 ### 2. Spec
 
@@ -160,7 +190,7 @@ Use the **plan** skill on the spec file.
 - Run the spec review gate.
 - Fix only minor spec gaps that are clearly implied by the brief and defaults.
 - Write or update `docs/plans/vN_YYYY-MM-DD-<codename>.md`.
-- Stop on unresolved questions.
+- Stop on unresolved questions not already covered by the batch clarification answers.
 
 ### 4. Execute
 

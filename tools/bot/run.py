@@ -1885,11 +1885,12 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.shop_events.append(shop_event)
             state.last_shop_event = shop_event
             shop_id = str(ev.get("shop_id", ""))
-            if event_type == "shop_opened" and shop_id:
+            if shop_id and "offers" in ev:
                 state.shop_offers[shop_id] = {
                     str(offer["offer_id"]): dict(offer)
                     for offer in ev.get("offers", [])
                 }
+            if shop_id and "sell_appraisals" in ev:
                 state.shop_sell_appraisals[shop_id] = {
                     str(appraisal["item_instance_id"]): dict(appraisal)
                     for appraisal in ev.get("sell_appraisals", [])
@@ -2287,6 +2288,10 @@ def filtered_shop_offers(state: RuntimeState, step: dict[str, Any]) -> list[dict
         offers = [offer for offer in offers if str(offer.get("item_def_id")) == str(step["item_def_id"])]
     if step.get("item_template_id") is not None:
         offers = [offer for offer in offers if str(offer.get("item_template_id")) == str(step["item_template_id"])]
+    if step.get("source_depth_min") is not None:
+        offers = [offer for offer in offers if int(offer.get("source_depth", 0)) >= int(step["source_depth_min"])]
+    if step.get("source_depth_max") is not None:
+        offers = [offer for offer in offers if int(offer.get("source_depth", 0)) <= int(step["source_depth_max"])]
     if bool(step.get("affordable")):
         reserve_gold = int(step.get("reserve_gold", 0))
         budget = max(0, state.gold - reserve_gold)
@@ -2304,6 +2309,9 @@ def filtered_shop_sell_appraisals(state: RuntimeState, step: dict[str, Any]) -> 
         rows = [row for row in rows if str(row.get("item_def_id")) == str(step["item_def_id"])]
     if step.get("item_template_id") is not None:
         rows = [row for row in rows if str(row.get("item_template_id")) == str(step["item_template_id"])]
+    if step.get("rolled") is not None:
+        want_rolled = bool(step["rolled"])
+        rows = [row for row in rows if bool(row.get("item_template_id")) == want_rolled]
     rows.sort(key=lambda row: (int(row.get("sell_price", 0)), str(row.get("item_instance_id", ""))))
     return rows
 
@@ -2340,6 +2348,16 @@ def assert_shop_detail_rows(rows: list[dict[str, Any]], step: dict[str, Any], la
         missing = [row for row in rows if not row.get("category")]
         if missing:
             raise AssertionError(f"{label}: rows missing category: {missing}")
+    if step.get("source_depth_min") is not None:
+        minimum = int(step["source_depth_min"])
+        missing = [row for row in rows if int(row.get("source_depth", 0)) < minimum]
+        if missing:
+            raise AssertionError(f"{label}: rows below source_depth_min {minimum}: {missing}")
+    if step.get("source_depth_max") is not None:
+        maximum = int(step["source_depth_max"])
+        missing = [row for row in rows if int(row.get("source_depth", 0)) > maximum]
+        if missing:
+            raise AssertionError(f"{label}: rows above source_depth_max {maximum}: {missing}")
     if step.get("requires_comparison"):
         missing = [row for row in rows if not row.get("comparison", {}).get("deltas")]
         if missing:

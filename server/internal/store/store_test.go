@@ -377,13 +377,13 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
 	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
 	thirdHotbar := []store.CharacterHotbarSlot{{AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, SlotIndex: 0, ItemInstanceID: &thirdItem.ID}}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, hostProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, nil, hostProgression); err != nil {
 		t.Fatalf("host start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, guestProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, nil, guestProgression); err != nil {
 		t.Fatalf("guest start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, thirdProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, nil, thirdProgression); err != nil {
 		t.Fatalf("third start snapshot: %v", err)
 	}
 	snaps, err := s.LoadSessionStartSnapshots(ctx, sess.ID)
@@ -479,11 +479,19 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "main_hand", true); err != nil {
 		t.Fatalf("set equipped: %v", err)
 	}
-	if err := s.AddCharacterWaypoint(ctx, char.ID, -1); err != nil {
+	insertedWaypoint, err := s.AddCharacterWaypoint(ctx, char.ID, -1)
+	if err != nil {
 		t.Fatalf("add waypoint: %v", err)
 	}
-	if err := s.AddCharacterWaypoint(ctx, char.ID, -1); err != nil {
+	if !insertedWaypoint {
+		t.Fatalf("first waypoint insert returned false")
+	}
+	insertedWaypoint, err = s.AddCharacterWaypoint(ctx, char.ID, -1)
+	if err != nil {
 		t.Fatalf("re-add waypoint: %v", err)
+	}
+	if insertedWaypoint {
+		t.Fatalf("duplicate waypoint insert returned true")
 	}
 
 	items, err := s.ListCharacterItems(ctx, acct.ID, char.ID)
@@ -539,13 +547,65 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("hotbar slot 2 = %+v, want item %s", hotbar[2], item.ID)
 	}
 
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, loadedProgression); err != nil {
+	initialStock := []store.CharacterShopStockItem{
+		{
+			AccountID:      acct.ID,
+			CharacterID:    char.ID,
+			ShopID:         "town_vendor",
+			RefreshKey:     "wp:-1",
+			OfferIndex:     0,
+			OfferID:        "generated:depth1:000",
+			SourceDepth:    1,
+			ItemTemplateID: "cave_blade",
+			RolledPayload:  json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Common Cave Blade","rarity":"common","stats":{"damage_min":2,"damage_max":4},"requirements":{"level":1},"effect_ids":[]}`),
+			BuyPrice:       100,
+			Available:      true,
+		},
+		{
+			AccountID:      acct.ID,
+			CharacterID:    char.ID,
+			ShopID:         "town_vendor",
+			RefreshKey:     "wp:-1",
+			OfferIndex:     1,
+			OfferID:        "generated:depth2:001",
+			SourceDepth:    2,
+			ItemTemplateID: "cave_bow",
+			RolledPayload:  json.RawMessage(`{"item_template_id":"cave_bow","display_name":"Rare Cave Bow","rarity":"rare","stats":{"damage_min":3,"damage_max":8},"requirements":{"level":1},"effect_ids":[]}`),
+			BuyPrice:       375,
+			Available:      true,
+		},
+	}
+	if err := s.ReplaceCharacterShopStock(ctx, acct.ID, char.ID, "town_vendor", "wp:-1", initialStock); err != nil {
+		t.Fatalf("replace shop stock: %v", err)
+	}
+	shopStock, err := s.ListCharacterShopStock(ctx, acct.ID, char.ID)
+	if err != nil {
+		t.Fatalf("list shop stock: %v", err)
+	}
+	if len(shopStock) != 2 || shopStock[0].OfferID != "generated:depth1:000" || shopStock[1].SourceDepth != 2 {
+		t.Fatalf("shop stock mismatch: %+v", shopStock)
+	}
+	if err := s.SetCharacterShopStockAvailable(ctx, acct.ID, char.ID, "town_vendor", "generated:depth1:000", false); err != nil {
+		t.Fatalf("consume shop stock: %v", err)
+	}
+	shopStock, err = s.ListCharacterShopStock(ctx, acct.ID, char.ID)
+	if err != nil {
+		t.Fatalf("reload shop stock: %v", err)
+	}
+	if len(shopStock) != 2 || shopStock[0].Available {
+		t.Fatalf("consumed shop stock did not persist: %+v", shopStock)
+	}
+	if err := s.SetCharacterShopStockAvailable(ctx, acct.ID, char.ID, "town_vendor", "missing", true); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("restore missing stock: expected ErrNotFound, got %v", err)
+	}
+
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, shopStock, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
 		t.Fatalf("mutate live item: %v", err)
 	}
-	if err := s.AddCharacterWaypoint(ctx, char.ID, -2); err != nil {
+	if _, err := s.AddCharacterWaypoint(ctx, char.ID, -2); err != nil {
 		t.Fatalf("mutate live waypoints: %v", err)
 	}
 	mutatedProgression := loadedProgression
@@ -562,6 +622,22 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := s.SetCharacterHotbarSlot(ctx, acct.ID, char.ID, 2, nil); err != nil {
 		t.Fatalf("mutate live hotbar: %v", err)
 	}
+	replacementStock := []store.CharacterShopStockItem{{
+		AccountID:      acct.ID,
+		CharacterID:    char.ID,
+		ShopID:         "town_vendor",
+		RefreshKey:     "wp:-2",
+		OfferIndex:     0,
+		OfferID:        "generated:depth3:000",
+		SourceDepth:    3,
+		ItemTemplateID: "cave_helm",
+		RolledPayload:  json.RawMessage(`{"item_template_id":"cave_helm","display_name":"Magic Cave Helm","rarity":"magic","stats":{"armor":5},"requirements":{"level":1},"effect_ids":[]}`),
+		BuyPrice:       85,
+		Available:      true,
+	}}
+	if err := s.ReplaceCharacterShopStock(ctx, acct.ID, char.ID, "town_vendor", "wp:-2", replacementStock); err != nil {
+		t.Fatalf("mutate live shop stock: %v", err)
+	}
 	snap, err := s.LoadSessionStartSnapshot(ctx, sess.ID)
 	if err != nil {
 		t.Fatalf("load session snapshot: %v", err)
@@ -574,6 +650,9 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	if len(snap.Waypoints) != 1 || snap.Waypoints[0].Level != -1 {
 		t.Fatalf("snapshot waypoints mutated with live state: %+v", snap.Waypoints)
+	}
+	if len(snap.ShopStock) != 2 || snap.ShopStock[0].OfferID != "generated:depth1:000" || snap.ShopStock[0].Available || snap.ShopStock[1].OfferID != "generated:depth2:001" {
+		t.Fatalf("snapshot shop stock mutated with live state: %+v", snap.ShopStock)
 	}
 	if snap.Progression == nil {
 		t.Fatalf("snapshot progression missing")

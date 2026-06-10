@@ -161,7 +161,71 @@
         }
       ]
     },
-    { "event_type": "shop_purchase", "entity_id": "1013", "shop_id": "town_vendor", "offer_id": "fixed:red_potion", "item_instance_id": "1014", "price": 20, "total_gold": 80 },
-    { "event_type": "shop_sale", "entity_id": "1013", "shop_id": "town_vendor", "item_instance_id": "1004", "price": 27, "total_gold": 107 }
+    {
+      "event_type": "shop_purchase",
+      "entity_id": "1013",
+      "shop_id": "town_vendor",
+      "offer_id": "generated:depth3:000",
+      "item_instance_id": "1014",
+      "price": 215,
+      "total_gold": 80,
+      "offers": [
+        { "offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 HP"] },
+        { "offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 mana"] }
+      ],
+      "sell_appraisals": []
+    },
+    {
+      "event_type": "shop_sale",
+      "entity_id": "1013",
+      "shop_id": "town_vendor",
+      "item_instance_id": "1004",
+      "price": 27,
+      "total_gold": 107,
+      "offers": [
+        { "offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 HP"] },
+        { "offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 mana"] },
+        {
+          "offer_id": "buyback:1004",
+          "kind": "buyback",
+          "item_def_id": "cave_blade",
+          "item_template_id": "cave_blade",
+          "display_name": "Common Cave Blade",
+          "rarity": "common",
+          "slot": "main_hand",
+          "category": "equipment",
+          "rolled_stats": { "damage_min": 2, "damage_max": 6 },
+          "requirements": { "level": 1 },
+          "requirement_status": [{ "stat": "level", "required": 1, "current": 1, "met": true }],
+          "requirements_met": true,
+          "equip_preview": { "slot": "main_hand", "requirements_met": true, "deltas": [{ "stat": "damage_max", "current": 4, "preview": 6, "delta": 2 }] },
+          "effect_ids": [],
+          "buy_price": 27,
+          "summary_lines": ["Slot: Main hand", "Damage 2-6", "Requires level 1"],
+          "comparison": {
+            "slot": "main_hand",
+            "deltas": [
+              { "stat": "damage_min", "offered": 2, "equipped": 0, "delta": 2 },
+              { "stat": "damage_max", "offered": 6, "equipped": 0, "delta": 6 }
+            ]
+          }
+        }
+      ],
+      "sell_appraisals": []
+    },
+    {
+      "event_type": "shop_purchase",
+      "entity_id": "1013",
+      "shop_id": "town_vendor",
+      "offer_id": "buyback:1004",
+      "item_instance_id": "1004",
+      "price": 27,
+      "total_gold": 80,
+      "offers": [
+        { "offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 HP"] },
+        { "offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 mana"] }
+      ],
+      "sell_appraisals": []
+    }
   ]
 }

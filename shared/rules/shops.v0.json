@@ -11,7 +11,16 @@
         "offer_count": 5,
         "source": "common_dungeon_mob",
         "min_depth": 1,
-        "max_roll_attempts": 64
+        "source_depth_policy": "character_level_plus_one_to_deepest_else_any_achieved",
+        "max_rarity": "rare",
+        "refresh_on": "new_non_town_waypoint",
+        "max_roll_attempts": 128
+      },
+      "buyback": {
+        "enabled": true,
+        "scope": "session_town_visit",
+        "buy_price_multiplier": 1.0,
+        "clear_on_leave_town": true
       },
       "pricing": {
         "sell_multiplier": 0.25,

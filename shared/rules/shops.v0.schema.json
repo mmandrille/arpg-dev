@@ -12,7 +12,7 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["name", "fixed_offers", "generated_offers", "pricing"],
+        "required": ["name", "fixed_offers", "generated_offers", "buyback", "pricing"],
         "additionalProperties": false,
         "properties": {
           "name": { "type": "string", "minLength": 1 },
@@ -21,7 +21,8 @@
             "items": { "$ref": "#/$defs/fixed_offer" }
           },
           "generated_offers": { "$ref": "#/$defs/generated_offers" },
-          "pricing": { "$ref": "#/$defs/pricing" }
+          "pricing": { "$ref": "#/$defs/pricing" },
+          "buyback": { "$ref": "#/$defs/buyback" }
         }
       }
     }
@@ -39,13 +40,30 @@
     },
     "generated_offers": {
       "type": "object",
-      "required": ["offer_count", "source", "min_depth", "max_roll_attempts"],
+      "required": ["offer_count", "source", "min_depth", "source_depth_policy", "max_rarity", "refresh_on", "max_roll_attempts"],
       "additionalProperties": false,
       "properties": {
         "offer_count": { "type": "integer", "minimum": 1 },
         "source": { "type": "string", "enum": ["common_dungeon_mob"] },
         "min_depth": { "type": "integer", "minimum": 1 },
+        "source_depth_policy": {
+          "type": "string",
+          "enum": ["character_level_plus_one_to_deepest_else_any_achieved"]
+        },
+        "max_rarity": { "type": "string", "enum": ["common", "magic", "rare"] },
+        "refresh_on": { "type": "string", "enum": ["new_non_town_waypoint"] },
         "max_roll_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "buyback": {
+      "type": "object",
+      "required": ["enabled", "scope", "buy_price_multiplier", "clear_on_leave_town"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "scope": { "type": "string", "enum": ["session_town_visit"] },
+        "buy_price_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "clear_on_leave_town": { "type": "boolean" }
       }
     },
     "pricing": {

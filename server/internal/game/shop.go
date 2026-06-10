@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"sort"
@@ -9,20 +10,75 @@ import (
 const (
 	shopOfferKindFixed     = "fixed"
 	shopOfferKindGenerated = "generated"
+	shopOfferKindBuyback   = "buyback"
 	shopSourceCommonMob    = "common_dungeon_mob"
 )
 
+type shopStockState struct {
+	RefreshKey string
+	Generated  []*shopStockItem
+	Buyback    []*shopBuybackItem
+}
+
+type shopStockItem struct {
+	OfferIndex     int
+	OfferID        string
+	SourceDepth    int
+	ItemTemplateID string
+	Payload        ItemRollPayload
+	BuyPrice       int
+	Available      bool
+}
+
+type shopBuybackItem struct {
+	OfferID  string
+	Item     *invItem
+	BuyPrice int
+}
+
+type shopOfferEntry struct {
+	Offer     ShopOfferView
+	Generated *shopStockItem
+	Buyback   *shopBuybackItem
+}
+
 func (s *Sim) shopCatalog(shopID string) ([]ShopOfferView, bool) {
-	characterID := s.currentShopCharacterID()
-	return s.shopCatalogFor(shopID, characterID, s.progression.DeepestDungeonDepth)
+	return s.shopCatalogWithChanges(shopID, nil)
 }
 
 func (s *Sim) shopCatalogFor(shopID, characterID string, deepestDepth int) ([]ShopOfferView, bool) {
+	return s.statelessShopCatalogFor(shopID, characterID, deepestDepth)
+}
+
+func (s *Sim) shopCatalogWithChanges(shopID string, res *TickResult) ([]ShopOfferView, bool) {
 	shop, ok := s.rules.Shops[shopID]
 	if !ok {
 		return nil, false
 	}
 	offers := make([]ShopOfferView, 0, len(shop.FixedOffers)+shop.GeneratedOffers.OfferCount)
+	offers = append(offers, s.fixedShopOffers(shop)...)
+	state := s.ensureGeneratedShopStock(shopID, shop, res)
+	for _, row := range state.Generated {
+		if row == nil || !row.Available {
+			continue
+		}
+		if view, ok := s.shopOfferViewFromGeneratedStock(shop, row); ok {
+			offers = append(offers, view)
+		}
+	}
+	for _, row := range state.Buyback {
+		if row == nil || row.Item == nil {
+			continue
+		}
+		if view, ok := s.shopOfferViewFromBuyback(row); ok {
+			offers = append(offers, view)
+		}
+	}
+	return offers, true
+}
+
+func (s *Sim) fixedShopOffers(shop ShopDef) []ShopOfferView {
+	offers := make([]ShopOfferView, 0, len(shop.FixedOffers))
 	for _, offer := range shop.FixedOffers {
 		item := s.rules.Items[offer.ItemDefID]
 		stats := fixedItemStats(item)
@@ -40,6 +96,16 @@ func (s *Sim) shopCatalogFor(shopID, characterID string, deepestDepth int) ([]Sh
 		s.annotateShopOfferView(&view, &invItem{instanceID: previewItemInstanceID(), itemDefID: offer.ItemDefID})
 		offers = append(offers, view)
 	}
+	return offers
+}
+
+func (s *Sim) statelessShopCatalogFor(shopID, characterID string, deepestDepth int) ([]ShopOfferView, bool) {
+	shop, ok := s.rules.Shops[shopID]
+	if !ok {
+		return nil, false
+	}
+	offers := make([]ShopOfferView, 0, len(shop.FixedOffers)+shop.GeneratedOffers.OfferCount)
+	offers = append(offers, s.fixedShopOffers(shop)...)
 	offers = append(offers, s.generatedShopOffers(shopID, shop, characterID, deepestDepth)...)
 	return offers, true
 }
@@ -110,6 +176,215 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 	return offers
 }
 
+func (s *Sim) ensureGeneratedShopStock(shopID string, shop ShopDef, res *TickResult) *shopStockState {
+	if s.shopStock == nil {
+		s.shopStock = make(map[string]*shopStockState)
+	}
+	state := s.shopStock[shopID]
+	refreshKey := s.shopRefreshKey()
+	if state == nil {
+		state = &shopStockState{}
+		s.shopStock[shopID] = state
+	}
+	if state.RefreshKey != refreshKey || state.Generated == nil {
+		state.RefreshKey = refreshKey
+		state.Generated = s.rollGeneratedShopStock(shopID, shop, refreshKey)
+		if res != nil {
+			res.Changes = append(res.Changes, Change{
+				Op:         OpShopStockReplace,
+				ShopID:     shopID,
+				RefreshKey: refreshKey,
+				ShopStock:  s.persistedShopStockRows(shopID, state),
+			})
+		}
+	}
+	return state
+}
+
+func (s *Sim) refreshExistingGeneratedShopStock(res *TickResult) {
+	if len(s.shopStock) == 0 {
+		return
+	}
+	for _, shopID := range sortedStringKeys(s.shopStock) {
+		shop, ok := s.rules.Shops[shopID]
+		if !ok {
+			continue
+		}
+		state := s.shopStock[shopID]
+		if state == nil || state.Generated == nil {
+			continue
+		}
+		refreshKey := s.shopRefreshKey()
+		state.RefreshKey = refreshKey
+		state.Generated = s.rollGeneratedShopStock(shopID, shop, refreshKey)
+		if res != nil {
+			res.Changes = append(res.Changes, Change{
+				Op:         OpShopStockReplace,
+				ShopID:     shopID,
+				RefreshKey: refreshKey,
+				ShopStock:  s.persistedShopStockRows(shopID, state),
+			})
+		}
+	}
+}
+
+func (s *Sim) rollGeneratedShopStock(shopID string, shop ShopDef, refreshKey string) []*shopStockItem {
+	gen := shop.GeneratedOffers
+	characterID := s.currentShopCharacterID()
+	rng := NewRNG(SeedToUint64(fmt.Sprintf("%s|shop_stock|%s|%s|%s|offers", s.seed, shopID, characterID, refreshKey)))
+	rows := make([]*shopStockItem, 0, gen.OfferCount)
+	for attempts := 0; len(rows) < gen.OfferCount && attempts < gen.MaxRollAttempts; attempts++ {
+		sourceDepth := s.rollShopSourceDepth(gen, rng)
+		band, ok := s.rules.DungeonGeneration.LootBandForDepth(sourceDepth)
+		if !ok {
+			continue
+		}
+		table, ok := s.rules.LootTables[band.MonsterLootTable]
+		if !ok || table.TreasureClassID == "" {
+			continue
+		}
+		for _, drop := range s.rules.RollTreasureClass(table.TreasureClassID, rng) {
+			templateID := drop.ItemTemplateID
+			if templateID == "" {
+				continue
+			}
+			template, ok := s.rules.ItemTemplates[templateID]
+			if !ok || template.Category != "equipment" || !template.Equippable {
+				continue
+			}
+			payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng)
+			if !ok || !shopRarityAllowedByCap(payload.Rarity, gen.MaxRarity) {
+				continue
+			}
+			buyPrice, ok := shop.generatedBuyPrice(templateID, payload.Rarity, payload.Stats, s.rules)
+			if !ok {
+				continue
+			}
+			offerIndex := len(rows)
+			rows = append(rows, &shopStockItem{
+				OfferIndex:     offerIndex,
+				OfferID:        fmt.Sprintf("generated:%s:%03d", refreshKey, offerIndex),
+				SourceDepth:    sourceDepth,
+				ItemTemplateID: templateID,
+				Payload:        payload,
+				BuyPrice:       buyPrice,
+				Available:      true,
+			})
+			if len(rows) >= gen.OfferCount {
+				break
+			}
+		}
+	}
+	return rows
+}
+
+func (s *Sim) rollShopSourceDepth(gen ShopGeneratedOffers, rng *RNG) int {
+	minDepth, maxDepth := s.shopSourceDepthBounds(gen)
+	if maxDepth < minDepth {
+		return minDepth
+	}
+	return minDepth + rng.IntN(maxDepth-minDepth+1)
+}
+
+func (s *Sim) shopSourceDepthBounds(gen ShopGeneratedOffers) (int, int) {
+	maxDepth := maxInt(gen.MinDepth, s.progression.DeepestDungeonDepth)
+	levelFloor := s.progression.Level + 1
+	minDepth := gen.MinDepth
+	if levelFloor <= maxDepth {
+		minDepth = levelFloor
+	}
+	if minDepth < gen.MinDepth {
+		minDepth = gen.MinDepth
+	}
+	return minDepth, maxDepth
+}
+
+func (s *Sim) shopRefreshKey() string {
+	if len(s.discoveredTeleporters) == 0 {
+		return "wp:none"
+	}
+	levels := make([]int, 0, len(s.discoveredTeleporters))
+	for level, discovered := range s.discoveredTeleporters {
+		if discovered && level < townLevel {
+			levels = append(levels, level)
+		}
+	}
+	if len(levels) == 0 {
+		return "wp:none"
+	}
+	sort.Ints(levels)
+	out := "wp"
+	for _, level := range levels {
+		out += fmt.Sprintf(":%d", level)
+	}
+	return out
+}
+
+func (s *Sim) persistedShopStockRows(shopID string, state *shopStockState) []PersistedShopStockItem {
+	if state == nil {
+		return nil
+	}
+	rows := make([]PersistedShopStockItem, 0, len(state.Generated))
+	for _, row := range state.Generated {
+		if row == nil {
+			continue
+		}
+		raw, err := json.Marshal(row.Payload)
+		if err != nil {
+			raw = []byte(`{}`)
+		}
+		rows = append(rows, PersistedShopStockItem{
+			ShopID:         shopID,
+			RefreshKey:     state.RefreshKey,
+			OfferIndex:     row.OfferIndex,
+			OfferID:        row.OfferID,
+			SourceDepth:    row.SourceDepth,
+			ItemTemplateID: row.ItemTemplateID,
+			RolledPayload:  raw,
+			BuyPrice:       row.BuyPrice,
+			Available:      row.Available,
+		})
+	}
+	return rows
+}
+
+func (s *Sim) shopOfferViewFromGeneratedStock(shop ShopDef, row *shopStockItem) (ShopOfferView, bool) {
+	if row == nil {
+		return ShopOfferView{}, false
+	}
+	template, ok := s.rules.ItemTemplates[row.ItemTemplateID]
+	if !ok {
+		return ShopOfferView{}, false
+	}
+	stats := cloneIntMap(row.Payload.Stats)
+	item := &invItem{
+		instanceID:  previewItemInstanceID(),
+		itemDefID:   row.ItemTemplateID,
+		rollPayload: cloneRollPayload(&row.Payload),
+	}
+	view := ShopOfferView{
+		OfferID:        row.OfferID,
+		Kind:           shopOfferKindGenerated,
+		ItemDefID:      row.ItemTemplateID,
+		ItemTemplateID: row.ItemTemplateID,
+		DisplayName:    row.Payload.DisplayName,
+		Rarity:         row.Payload.Rarity,
+		Slot:           template.Slot,
+		Category:       template.Category,
+		RolledStats:    stats,
+		Requirements:   cloneIntMap(row.Payload.Requirements),
+		EffectIDs:      cloneStringSlice(row.Payload.EffectIDs),
+		BuyPrice:       row.BuyPrice,
+		SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, stats, row.Payload.Requirements, row.Payload.EffectIDs, nil),
+		Comparison:     s.shopComparisonForItem(template.Slot, stats),
+		Source:         shop.GeneratedOffers.Source,
+		Depth:          row.SourceDepth,
+		SourceDepth:    row.SourceDepth,
+	}
+	s.annotateShopOfferView(&view, item)
+	return view, true
+}
+
 func (s *Sim) currentShopCharacterID() string {
 	if ps := s.players[s.playerID]; ps != nil && ps.CharacterID != "" {
 		return ps.CharacterID
@@ -120,17 +395,38 @@ func (s *Sim) currentShopCharacterID() string {
 	return "default"
 }
 
-func (s *Sim) findShopOffer(shopID, offerID string) (ShopOfferView, bool) {
-	offers, ok := s.shopCatalog(shopID)
+func (s *Sim) findShopOffer(shopID, offerID string, res *TickResult) (shopOfferEntry, bool) {
+	shop, ok := s.rules.Shops[shopID]
 	if !ok {
-		return ShopOfferView{}, false
+		return shopOfferEntry{}, false
 	}
-	for _, offer := range offers {
+	for _, offer := range s.fixedShopOffers(shop) {
 		if offer.OfferID == offerID {
-			return offer, true
+			return shopOfferEntry{Offer: offer}, true
 		}
 	}
-	return ShopOfferView{}, false
+	state := s.ensureGeneratedShopStock(shopID, shop, res)
+	for _, row := range state.Generated {
+		if row == nil || !row.Available || row.OfferID != offerID {
+			continue
+		}
+		view, ok := s.shopOfferViewFromGeneratedStock(shop, row)
+		if !ok {
+			return shopOfferEntry{}, false
+		}
+		return shopOfferEntry{Offer: view, Generated: row}, true
+	}
+	for _, row := range state.Buyback {
+		if row == nil || row.OfferID != offerID {
+			continue
+		}
+		view, ok := s.shopOfferViewFromBuyback(row)
+		if !ok {
+			return shopOfferEntry{}, false
+		}
+		return shopOfferEntry{Offer: view, Buyback: row}, true
+	}
+	return shopOfferEntry{}, false
 }
 
 func (shop ShopDef) fixedBuyPrice(itemDefID string) (int, bool) {
@@ -168,6 +464,10 @@ func (shop ShopDef) generatedBuyPrice(templateID, rarity string, finalStats map[
 
 func (shop ShopDef) sellPrice(buyPrice int) int {
 	return maxInt(1, int(math.Floor(float64(buyPrice)*shop.Pricing.SellMultiplier)))
+}
+
+func (shop ShopDef) buybackPrice(sellPrice int) int {
+	return maxInt(1, int(math.Ceil(float64(sellPrice)*shop.Buyback.BuyPriceMultiplier)))
 }
 
 func (s *Sim) inventorySellPrice(shopID string, item *invItem) (int, bool) {
@@ -235,6 +535,110 @@ func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellApprai
 		SellPrice:         sellPrice,
 		SummaryLines:      s.itemSummaryLines(category, view.Slot, stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
 		Comparison:        s.shopComparisonForItem(view.Slot, stats),
+	}
+}
+
+func (s *Sim) shopOfferViewFromBuyback(row *shopBuybackItem) (ShopOfferView, bool) {
+	if row == nil || row.Item == nil {
+		return ShopOfferView{}, false
+	}
+	item := row.Item
+	view := s.itemView(item)
+	category := ""
+	stats := fixedItemStats(s.rules.Items[item.itemDefID])
+	if item.rollPayload != nil {
+		template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+		if !ok {
+			return ShopOfferView{}, false
+		}
+		category = template.Category
+		stats = cloneIntMap(item.rollPayload.Stats)
+	} else if def, ok := s.rules.Items[item.itemDefID]; ok {
+		category = def.Category
+	}
+	offer := ShopOfferView{
+		OfferID:           row.OfferID,
+		Kind:              shopOfferKindBuyback,
+		ItemDefID:         view.ItemDefID,
+		ItemTemplateID:    view.ItemTemplateID,
+		DisplayName:       s.displayNameForItem(item),
+		Rarity:            view.Rarity,
+		Slot:              view.Slot,
+		Category:          category,
+		RolledStats:       view.RolledStats,
+		Requirements:      view.Requirements,
+		RequirementStatus: view.RequirementStatus,
+		RequirementsMet:   view.RequirementsMet,
+		EquipPreview:      view.EquipPreview,
+		EffectIDs:         view.EffectIDs,
+		BuyPrice:          row.BuyPrice,
+		SummaryLines:      s.itemSummaryLines(category, view.Slot, stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
+		Comparison:        s.shopComparisonForItem(view.Slot, stats),
+	}
+	return offer, true
+}
+
+func (s *Sim) addShopBuyback(shopID string, item *invItem, buyPrice int) {
+	if item == nil {
+		return
+	}
+	if s.shopStock == nil {
+		s.shopStock = make(map[string]*shopStockState)
+	}
+	state := s.shopStock[shopID]
+	if state == nil {
+		state = &shopStockState{RefreshKey: s.shopRefreshKey()}
+		s.shopStock[shopID] = state
+	}
+	offerID := "buyback:" + idStr(item.instanceID)
+	for i := range state.Buyback {
+		if state.Buyback[i] != nil && state.Buyback[i].OfferID == offerID {
+			state.Buyback[i] = &shopBuybackItem{OfferID: offerID, Item: cloneInvItem(item), BuyPrice: buyPrice}
+			return
+		}
+	}
+	state.Buyback = append(state.Buyback, &shopBuybackItem{OfferID: offerID, Item: cloneInvItem(item), BuyPrice: buyPrice})
+	sort.Slice(state.Buyback, func(i, j int) bool {
+		return state.Buyback[i].OfferID < state.Buyback[j].OfferID
+	})
+}
+
+func (s *Sim) removeShopBuyback(shopID, offerID string) *shopBuybackItem {
+	if s.shopStock == nil {
+		return nil
+	}
+	state := s.shopStock[shopID]
+	if state == nil {
+		return nil
+	}
+	for i, row := range state.Buyback {
+		if row == nil || row.OfferID != offerID {
+			continue
+		}
+		state.Buyback = append(state.Buyback[:i], state.Buyback[i+1:]...)
+		return row
+	}
+	return nil
+}
+
+func (s *Sim) clearShopBuyback() {
+	for _, shopID := range sortedStringKeys(s.shopStock) {
+		if state := s.shopStock[shopID]; state != nil {
+			state.Buyback = nil
+		}
+	}
+}
+
+func cloneInvItem(in *invItem) *invItem {
+	if in == nil {
+		return nil
+	}
+	return &invItem{
+		instanceID:  in.instanceID,
+		itemDefID:   in.itemDefID,
+		slot:        in.slot,
+		equipped:    false,
+		rollPayload: cloneRollPayload(in.rollPayload),
 	}
 }
 
@@ -483,7 +887,7 @@ func (offer ShopOfferView) inventoryItem(instanceID uint64) *invItem {
 		itemDefID:  offer.ItemDefID,
 		equipped:   false,
 	}
-	if offer.Kind == shopOfferKindGenerated {
+	if offer.ItemTemplateID != "" {
 		item.rollPayload = &ItemRollPayload{
 			ItemTemplateID: offer.ItemTemplateID,
 			DisplayName:    offer.DisplayName,
@@ -498,7 +902,7 @@ func (offer ShopOfferView) inventoryItem(instanceID uint64) *invItem {
 
 func (s *Sim) itemFromShopOffer(offer ShopOfferView, instanceID uint64) *invItem {
 	item := offer.inventoryItem(instanceID)
-	if offer.Kind == shopOfferKindGenerated {
+	if offer.ItemTemplateID != "" {
 		item.slot = s.itemSlot(offer.ItemDefID, item.rollPayload)
 		return item
 	}

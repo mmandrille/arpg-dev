@@ -101,6 +101,7 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 				str(action.get("item_def_id", "")),
 				state,
 				int(action.get("occurrence", 0)),
+				action.get("rolled", null),
 			)
 		"click_floor":
 			_do_click_floor(float(action.get("x", 0.0)), float(action.get("z", 0.0)))
@@ -298,7 +299,7 @@ func _select_entity_ids(state: Dictionary, selector: Dictionary) -> Array:
 	return out
 
 
-func _do_click_loot_item(item_def_id: String, state: Dictionary, occurrence: int = 0) -> void:
+func _do_click_loot_item(item_def_id: String, state: Dictionary, occurrence: int = 0, rolled: Variant = null) -> void:
 	if _main == null:
 		return
 	var loot: Array = state.get("loot", [])
@@ -307,7 +308,9 @@ func _do_click_loot_item(item_def_id: String, state: Dictionary, occurrence: int
 		if typeof(row) != TYPE_DICTIONARY:
 			continue
 		var rec := row as Dictionary
-		if str(rec.get("item_def_id", "")) != item_def_id:
+		if item_def_id != "" and str(rec.get("item_def_id", "")) != item_def_id:
+			continue
+		if rolled != null and (str(rec.get("item_template_id", "")) != "") != bool(rolled):
 			continue
 		if seen == occurrence:
 			var target_id := str(rec.get("id", ""))
@@ -317,7 +320,7 @@ func _do_click_loot_item(item_def_id: String, state: Dictionary, occurrence: int
 				_main.bot_dispatch_action("action_intent", {"target_id": target_id})
 			return
 		seen += 1
-	printerr("[bot-client] click_loot_item: item_def_id=%s occurrence=%d not found" % [item_def_id, occurrence])
+	printerr("[bot-client] click_loot_item: item_def_id=%s rolled=%s occurrence=%d not found" % [item_def_id, str(rolled), occurrence])
 
 
 func _do_click_floor(world_x: float, world_z: float) -> void:
@@ -447,8 +450,10 @@ func _format_action(action: Dictionary) -> String:
 				str(action.get("entity_type", "")), str(action.get("entity_index", 0))
 			]
 		"click_loot_item":
-			return "click_loot_item item=%s occurrence=%s" % [
-				str(action.get("item_def_id", "")), str(action.get("occurrence", 0))
+			return "click_loot_item item=%s rolled=%s occurrence=%s" % [
+				str(action.get("item_def_id", "")),
+				str(action.get("rolled", "")),
+				str(action.get("occurrence", 0))
 			]
 		"click_floor":
 			return "click_floor x=%s z=%s" % [str(action.get("x", "")), str(action.get("z", ""))]

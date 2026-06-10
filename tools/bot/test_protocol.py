@@ -163,7 +163,8 @@ def test_runtime_assertions_support_shop_offer_count_and_events():
         "town_vendor": {
             "fixed:red_potion": {"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "buy_price": 20},
             "fixed:blue_potion": {"offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "buy_price": 20},
-            "generated:depth3:000": {"offer_id": "generated:depth3:000", "kind": "generated", "item_def_id": "cave_boots", "buy_price": 40},
+            "generated:depth3:000": {"offer_id": "generated:depth3:000", "kind": "generated", "item_def_id": "cave_boots", "buy_price": 40, "source_depth": 3},
+            "buyback:2001": {"offer_id": "buyback:2001", "kind": "buyback", "item_def_id": "cave_boots", "buy_price": 12},
         }
     }
     state.shop_events = [
@@ -173,13 +174,72 @@ def test_runtime_assertions_support_shop_offer_count_and_events():
 
     run_runtime_assertions(
         [
-            {"type": "shop_offer_count", "shop_id": "town_vendor", "equals": 3},
+            {"type": "shop_offer_count", "shop_id": "town_vendor", "equals": 4},
             {"type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2},
+            {"type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1},
+            {"type": "shop_offer_details", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 1, "source_depth_min": 2, "source_depth_max": 3, "requires_summary": False},
             {"type": "shop_event", "shop_id": "town_vendor", "event_type": "shop_purchase", "equals": 1},
         ],
         state,
         "unit",
     )
+
+
+def test_shop_purchase_event_refreshes_cached_offers():
+    state = RuntimeState(gold=100)
+    ingest_message(
+        {
+            "type": "state_delta",
+            "tick": 1,
+            "payload": {
+                "server_tick": 1,
+                "level": 0,
+                "changes": [],
+                "events": [
+                    {
+                        "event_type": "shop_opened",
+                        "shop_id": "town_vendor",
+                        "offers": [
+                            {"offer_id": "fixed:red_potion", "kind": "fixed", "buy_price": 20},
+                            {"offer_id": "generated:wp:none:000", "kind": "generated", "buy_price": 50, "source_depth": 1},
+                        ],
+                        "sell_appraisals": [],
+                    }
+                ],
+            },
+        },
+        state,
+    )
+    assert [o["offer_id"] for o in filtered_shop_offers(state, {"shop_id": "town_vendor"})] == [
+        "fixed:red_potion",
+        "generated:wp:none:000",
+    ]
+
+    ingest_message(
+        {
+            "type": "state_delta",
+            "tick": 2,
+            "payload": {
+                "server_tick": 2,
+                "level": 0,
+                "changes": [],
+                "events": [
+                    {
+                        "event_type": "shop_purchase",
+                        "shop_id": "town_vendor",
+                        "offers": [
+                            {"offer_id": "fixed:red_potion", "kind": "fixed", "buy_price": 20},
+                        ],
+                        "sell_appraisals": [],
+                    }
+                ],
+            },
+        },
+        state,
+    )
+
+    assert [o["offer_id"] for o in filtered_shop_offers(state, {"shop_id": "town_vendor"})] == ["fixed:red_potion"]
+    assert filtered_shop_offers(state, {"shop_id": "town_vendor", "offer_id": "generated:wp:none:000"}) == []
 
 
 def test_load_scenarios_gear_asserts_outcome_not_timing():

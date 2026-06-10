@@ -137,6 +137,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	sim.LoadInventoryForPlayer(hostPlayerID, persistedItems(hostStart.Items))
 	sim.LoadHotbarForPlayer(hostPlayerID, persistedHotbar(hostStart.Hotbar))
 	sim.LoadDiscoveredTeleportersForPlayer(hostPlayerID, waypointLevels(hostStart.Waypoints))
+	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
 	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
 	}
@@ -156,6 +157,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
 		sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
 		sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
+		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
 		}
@@ -251,6 +253,7 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 	l.sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
 	l.sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
 	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
+	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 	l.mu.Unlock()
 	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 		l.log.Error("set late-joined member player", "account_id", member.AccountID, "character_id", member.CharacterID, "player_id", playerID, "error", err)
@@ -554,7 +557,8 @@ func filterChangesForClient(changes []game.Change, actorPlayerID, clientPlayerID
 		switch change.Op {
 		case game.OpInventoryAdd, game.OpInventoryUpdate, game.OpInventoryRemove,
 			game.OpEquippedUpdate, game.OpHotbarUpdate, game.OpTeleporterDiscoveryUpdate,
-			game.OpGoldUpdate, game.OpCharacterProgressionUpdate:
+			game.OpGoldUpdate, game.OpCharacterProgressionUpdate,
+			game.OpShopStockReplace, game.OpShopStockAvailability:
 			if actorPlayerID == 0 || actorPlayerID != clientPlayerID {
 				continue
 			}
@@ -686,10 +690,20 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
-				if err := l.hub.store.AddCharacterWaypoint(ctx, member.CharacterID, c.Level); err != nil {
+				if _, err := l.hub.store.AddCharacterWaypoint(ctx, member.CharacterID, c.Level); err != nil {
 					l.hub.metrics.PersistenceErrors.Inc()
 					l.log.Error("persist character waypoint", "error", err)
 				}
+			}
+		case game.OpShopStockReplace:
+			if err := l.hub.store.ReplaceCharacterShopStock(ctx, member.AccountID, member.CharacterID, c.ShopID, c.RefreshKey, storeShopStock(member.AccountID, member.CharacterID, c.ShopStock)); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist shop stock replace", "shop_id", c.ShopID, "error", err)
+			}
+		case game.OpShopStockAvailability:
+			if err := l.hub.store.SetCharacterShopStockAvailable(ctx, member.AccountID, member.CharacterID, c.ShopID, c.OfferID, c.Available); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist shop stock availability", "shop_id", c.ShopID, "offer_id", c.OfferID, "error", err)
 			}
 		case game.OpCharacterProgressionUpdate:
 			if c.Progression == nil {

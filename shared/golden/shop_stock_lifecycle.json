@@ -1,0 +1,48 @@
+{
+  "shop_id": "town_vendor",
+  "generated_stock": {
+    "offer_count": 5,
+    "source": "common_dungeon_mob",
+    "source_depth_policy": "character_level_plus_one_to_deepest_else_any_achieved",
+    "refresh_on": "new_non_town_waypoint",
+    "max_rarity": "rare",
+    "cases": [
+      {
+        "name": "level_24_depth_50",
+        "character_level": 24,
+        "deepest_dungeon_depth": 50,
+        "expected_min_source_depth": 25,
+        "expected_max_source_depth": 50
+      },
+      {
+        "name": "level_60_depth_50",
+        "character_level": 60,
+        "deepest_dungeon_depth": 50,
+        "expected_min_source_depth": 1,
+        "expected_max_source_depth": 50
+      },
+      {
+        "name": "level_1_depth_0",
+        "character_level": 1,
+        "deepest_dungeon_depth": 0,
+        "expected_min_source_depth": 1,
+        "expected_max_source_depth": 1
+      }
+    ]
+  },
+  "finite_stock": {
+    "initial_generated_count": 5,
+    "after_generated_purchase_count": 4,
+    "fixed_offer_count": 2
+  },
+  "buyback": {
+    "enabled": true,
+    "offer_id": "buyback:1004",
+    "scope": "session_town_visit",
+    "sell_price": 27,
+    "buy_price": 27,
+    "buy_price_multiplier": 1.0,
+    "clear_on_leave_town": true,
+    "persisted": false
+  }
+}

@@ -419,6 +419,57 @@ func TestReconstructLoadsSessionStartHotbarAndInputs(t *testing.T) {
 	}
 }
 
+func TestReconstructLoadsSessionStartShopStock(t *testing.T) {
+	rules := loadRules(t)
+	stock := []store.CharacterShopStockItem{
+		shopStockFixture("generated:wp:none:000", 0, false, "cave_blade", `{"damage_min":2,"damage_max":4}`),
+		shopStockFixture("generated:wp:none:001", 1, true, "cave_bow", `{"damage_min":3,"damage_max":5}`),
+	}
+	repo := &fakeRepo{
+		session: store.Session{ID: testSessionID, AccountID: "acct_1", CharacterID: "char_1", Seed: testSeed, WorldID: "dungeon_levels"},
+		start: store.SessionStartSnapshot{
+			SessionID:   testSessionID,
+			AccountID:   "acct_1",
+			CharacterID: "char_1",
+			ShopStock:   stock,
+		},
+	}
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	if err != nil {
+		t.Fatalf("scratch sim: %v", err)
+	}
+	actorID := scratch.DefaultPlayerID()
+	vendor := findSnapshotEntity(scratch.SnapshotForPlayer(actorID), "interactable", "town_vendor")
+	if vendor == nil {
+		t.Fatal("missing town vendor")
+	}
+	var rows []store.SessionInput
+	var events []store.SessionEvent
+	sequence := int64(0)
+	tick := int64(0)
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, actorID, vendor.Position)
+	_ = appendInputAndAdvanceReplay(t, scratch, &rows, &events, tick, &sequence, game.Input{
+		ActorPlayerID: actorID,
+		Type:          "action_intent",
+		Action:        &game.ActionIntent{TargetID: vendor.ID},
+	})
+	repo.inputs = rows
+	repo.events = events
+
+	recon, err := Reconstruct(context.Background(), repo, rules, testSessionID)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+	opened := derivedShopEvent(t, recon.DerivedEvents, "shop_opened")
+	if findReplayOffer(opened.Offers, "generated:wp:none:000") != nil {
+		t.Fatalf("consumed stock offer surfaced in replay shop_opened: %+v", opened.Offers)
+	}
+	available := findReplayOffer(opened.Offers, "generated:wp:none:001")
+	if available == nil || available.ItemTemplateID != "cave_bow" || available.SourceDepth != 1 {
+		t.Fatalf("available stock offer = %+v, offers=%+v", available, opened.Offers)
+	}
+}
+
 func TestReconstructCoopSessionRestoresMembersAndActorInputs(t *testing.T) {
 	rules := loadRules(t)
 	repo := &fakeRepo{
@@ -878,6 +929,52 @@ func storeEvents(events []derivedEvent) []store.SessionEvent {
 	return out
 }
 
+func shopStockFixture(offerID string, index int, available bool, templateID, statsJSON string) store.CharacterShopStockItem {
+	return store.CharacterShopStockItem{
+		AccountID:      "acct_1",
+		CharacterID:    "char_1",
+		ShopID:         "town_vendor",
+		RefreshKey:     "wp:none",
+		OfferIndex:     index,
+		OfferID:        offerID,
+		SourceDepth:    1,
+		ItemTemplateID: templateID,
+		RolledPayload: json.RawMessage(fmt.Sprintf(
+			`{"item_template_id":%q,"display_name":%q,"rarity":"common","stats":%s,"requirements":{"level":1},"effect_ids":[]}`,
+			templateID,
+			"Common Replay "+templateID,
+			statsJSON,
+		)),
+		BuyPrice:  50 + index,
+		Available: available,
+	}
+}
+
+func derivedShopEvent(t *testing.T, events []derivedEvent, eventType string) game.Event {
+	t.Helper()
+	for _, ev := range events {
+		if ev.EventType != eventType {
+			continue
+		}
+		var payload game.Event
+		if err := json.Unmarshal(ev.Payload, &payload); err != nil {
+			t.Fatalf("unmarshal derived %s: %v", eventType, err)
+		}
+		return payload
+	}
+	t.Fatalf("missing derived event %s in %+v", eventType, events)
+	return game.Event{}
+}
+
+func findReplayOffer(offers []game.ShopOfferView, offerID string) *game.ShopOfferView {
+	for i := range offers {
+		if offers[i].OfferID == offerID {
+			return &offers[i]
+		}
+	}
+	return nil
+}
+
 func stringPtr(v string) *string {
 	return &v
 }
@@ -1183,7 +1280,7 @@ func (f *fakeRepo) RemoveCharacterItem(context.Context, string, string, string) 
 func (f *fakeRepo) ListCharacterWaypoints(context.Context, string) ([]store.CharacterWaypoint, error) {
 	return nil, nil
 }
-func (f *fakeRepo) AddCharacterWaypoint(context.Context, string, int) error { return nil }
+func (f *fakeRepo) AddCharacterWaypoint(context.Context, string, int) (bool, error) { return true, nil }
 func (f *fakeRepo) GetOrCreateCharacterProgression(context.Context, string, string, store.CharacterProgressionDefaults) (store.CharacterProgression, error) {
 	return store.CharacterProgression{}, nil
 }
@@ -1202,7 +1299,16 @@ func (f *fakeRepo) ListCharacterHotbar(context.Context, string, string) ([]store
 func (f *fakeRepo) SetCharacterHotbarSlot(context.Context, string, string, int, *string) error {
 	return nil
 }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterProgression) error {
+func (f *fakeRepo) ListCharacterShopStock(context.Context, string, string) ([]store.CharacterShopStockItem, error) {
+	return nil, nil
+}
+func (f *fakeRepo) ReplaceCharacterShopStock(context.Context, string, string, string, string, []store.CharacterShopStockItem) error {
+	return nil
+}
+func (f *fakeRepo) SetCharacterShopStockAvailable(context.Context, string, string, string, string, bool) error {
+	return nil
+}
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, []store.CharacterShopStockItem, store.CharacterProgression) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {

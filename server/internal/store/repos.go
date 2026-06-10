@@ -188,12 +188,14 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_inputs WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_events WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM inventory_items WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_shop_stock WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_hotbar_slots WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_item_instances WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_waypoints WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_character_skill_ranks WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_character_progression WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_members WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_shop_stock WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM session_start_hotbar_slots WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM session_start_item_instances WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM session_start_waypoints WHERE character_id = $1`, []any{characterID}},
@@ -201,6 +203,7 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_start_character_progression WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM session_members WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM sessions WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM character_shop_stock WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_hotbar_slots WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_item_instances WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_waypoints WHERE character_id = $1`, []any{characterID}},
@@ -802,17 +805,17 @@ func (s *Store) ListCharacterWaypoints(ctx context.Context, characterID string) 
 	return out, rows.Err()
 }
 
-func (s *Store) AddCharacterWaypoint(ctx context.Context, characterID string, level int) error {
-	_, err := s.pool.Exec(ctx,
+func (s *Store) AddCharacterWaypoint(ctx context.Context, characterID string, level int) (bool, error) {
+	tag, err := s.pool.Exec(ctx,
 		`INSERT INTO character_waypoints (character_id, level)
 		 VALUES ($1, $2)
 		 ON CONFLICT (character_id, level) DO NOTHING`,
 		characterID, level,
 	)
 	if err != nil {
-		return fmt.Errorf("store: add character waypoint: %w", err)
+		return false, fmt.Errorf("store: add character waypoint: %w", err)
 	}
-	return nil
+	return tag.RowsAffected() > 0, nil
 }
 
 func (s *Store) GetOrCreateCharacterProgression(ctx context.Context, accountID, characterID string, defaults CharacterProgressionDefaults) (CharacterProgression, error) {
@@ -1079,7 +1082,110 @@ func (s *Store) SetCharacterHotbarSlot(ctx context.Context, accountID, character
 	return nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, progression CharacterProgression) error {
+func (s *Store) ListCharacterShopStock(ctx context.Context, accountID, characterID string) ([]CharacterShopStockItem, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT account_id, character_id, shop_id, refresh_key, offer_index, offer_id, source_depth, item_template_id, rolled_payload, buy_price, available, created_at, updated_at
+		 FROM character_shop_stock
+		 WHERE account_id = $1 AND character_id = $2
+		 ORDER BY shop_id ASC, offer_index ASC, offer_id ASC`,
+		accountID, characterID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list character shop stock: %w", err)
+	}
+	defer rows.Close()
+	var out []CharacterShopStockItem
+	for rows.Next() {
+		item, err := scanCharacterShopStockItem(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: list character shop stock rows: %w", err)
+	}
+	return out, nil
+}
+
+func (s *Store) ReplaceCharacterShopStock(ctx context.Context, accountID, characterID, shopID, refreshKey string, stock []CharacterShopStockItem) error {
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx,
+			`DELETE FROM character_shop_stock
+			 WHERE account_id = $1 AND character_id = $2 AND shop_id = $3`,
+			accountID, characterID, shopID,
+		); err != nil {
+			return fmt.Errorf("store: replace character shop stock: %w", err)
+		}
+		for _, item := range stock {
+			rowShopID := item.ShopID
+			if rowShopID == "" {
+				rowShopID = shopID
+			}
+			rowRefreshKey := item.RefreshKey
+			if rowRefreshKey == "" {
+				rowRefreshKey = refreshKey
+			}
+			rolledPayload := item.RolledPayload
+			if len(rolledPayload) == 0 {
+				rolledPayload = []byte(`{}`)
+			}
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO character_shop_stock (
+				   account_id, character_id, shop_id, refresh_key, offer_index, offer_id, source_depth, item_template_id, rolled_payload, buy_price, available
+				 )
+				 SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11
+				 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)`,
+				accountID, characterID, rowShopID, rowRefreshKey, item.OfferIndex, item.OfferID, item.SourceDepth,
+				item.ItemTemplateID, []byte(rolledPayload), item.BuyPrice, item.Available,
+			); err != nil {
+				return fmt.Errorf("store: insert character shop stock: %w", err)
+			}
+		}
+		return nil
+	})
+}
+
+func (s *Store) SetCharacterShopStockAvailable(ctx context.Context, accountID, characterID, shopID, offerID string, available bool) error {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE character_shop_stock
+		 SET available = $5, updated_at = now()
+		 WHERE account_id = $1 AND character_id = $2 AND shop_id = $3 AND offer_id = $4`,
+		accountID, characterID, shopID, offerID, available,
+	)
+	if err != nil {
+		return fmt.Errorf("store: set character shop stock available: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func scanCharacterShopStockItem(row rowScanner) (CharacterShopStockItem, error) {
+	var item CharacterShopStockItem
+	err := row.Scan(
+		&item.AccountID,
+		&item.CharacterID,
+		&item.ShopID,
+		&item.RefreshKey,
+		&item.OfferIndex,
+		&item.OfferID,
+		&item.SourceDepth,
+		&item.ItemTemplateID,
+		&item.RolledPayload,
+		&item.BuyPrice,
+		&item.Available,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+	)
+	if err != nil {
+		return CharacterShopStockItem{}, fmt.Errorf("store: scan character shop stock: %w", err)
+	}
+	return item, nil
+}
+
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, shopStock []CharacterShopStockItem, progression CharacterProgression) error {
 	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO session_start_character_progression (
@@ -1145,6 +1251,23 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 				sessionID, accountID, characterID, slot.SlotIndex, slot.ItemInstanceID,
 			); err != nil {
 				return fmt.Errorf("store: insert session start hotbar: %w", err)
+			}
+		}
+		for _, stock := range shopStock {
+			rolledPayload := stock.RolledPayload
+			if len(rolledPayload) == 0 {
+				rolledPayload = []byte(`{}`)
+			}
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_shop_stock (
+				   session_id, account_id, character_id, shop_id, refresh_key, offer_index, offer_id, source_depth, item_template_id, rolled_payload, buy_price, available
+				 )
+				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12)
+				 ON CONFLICT (session_id, account_id, character_id, shop_id, offer_id) DO NOTHING`,
+				sessionID, accountID, characterID, stock.ShopID, stock.RefreshKey, stock.OfferIndex, stock.OfferID,
+				stock.SourceDepth, stock.ItemTemplateID, []byte(rolledPayload), stock.BuyPrice, stock.Available,
+			); err != nil {
+				return fmt.Errorf("store: insert session start shop stock: %w", err)
 			}
 		}
 		return nil
@@ -1244,6 +1367,28 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 		snap.Hotbar = append(snap.Hotbar, slot)
 	}
 	if err := hotbarRows.Err(); err != nil {
+		return snap, err
+	}
+
+	stockRows, err := s.pool.Query(ctx,
+		`SELECT account_id, character_id, shop_id, refresh_key, offer_index, offer_id, source_depth, item_template_id, rolled_payload, buy_price, available, created_at, created_at
+		 FROM session_start_shop_stock
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3
+		 ORDER BY shop_id ASC, offer_index ASC, offer_id ASC`,
+		sessionID, accountID, characterID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start shop stock: %w", err)
+	}
+	defer stockRows.Close()
+	for stockRows.Next() {
+		item, err := scanCharacterShopStockItem(stockRows)
+		if err != nil {
+			return snap, err
+		}
+		snap.ShopStock = append(snap.ShopStock, item)
+	}
+	if err := stockRows.Err(); err != nil {
 		return snap, err
 	}
 

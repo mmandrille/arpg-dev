@@ -162,6 +162,44 @@ func persistedHotbar(slots []store.CharacterHotbarSlot) []game.PersistedHotbarSl
 	return out
 }
 
+func persistedShopStock(items []store.CharacterShopStockItem) []game.PersistedShopStockItem {
+	out := make([]game.PersistedShopStockItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, game.PersistedShopStockItem{
+			ShopID:         item.ShopID,
+			RefreshKey:     item.RefreshKey,
+			OfferIndex:     item.OfferIndex,
+			OfferID:        item.OfferID,
+			SourceDepth:    item.SourceDepth,
+			ItemTemplateID: item.ItemTemplateID,
+			RolledPayload:  item.RolledPayload,
+			BuyPrice:       item.BuyPrice,
+			Available:      item.Available,
+		})
+	}
+	return out
+}
+
+func storeShopStock(accountID, characterID string, items []game.PersistedShopStockItem) []store.CharacterShopStockItem {
+	out := make([]store.CharacterShopStockItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, store.CharacterShopStockItem{
+			AccountID:      accountID,
+			CharacterID:    characterID,
+			ShopID:         item.ShopID,
+			RefreshKey:     item.RefreshKey,
+			OfferIndex:     item.OfferIndex,
+			OfferID:        item.OfferID,
+			SourceDepth:    item.SourceDepth,
+			ItemTemplateID: item.ItemTemplateID,
+			RolledPayload:  item.RolledPayload,
+			BuyPrice:       item.BuyPrice,
+			Available:      item.Available,
+		})
+	}
+	return out
+}
+
 func waypointLevels(waypoints []store.CharacterWaypoint) []int {
 	out := make([]int, 0, len(waypoints))
 	for _, wp := range waypoints {

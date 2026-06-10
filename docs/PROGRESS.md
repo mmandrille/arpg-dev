@@ -11,7 +11,7 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v46 — `client-join-game-proof` |
+| **Latest completed slice** | v47 — `shop-stock-lifecycle` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
@@ -62,6 +62,7 @@ v43_* = equipment-requirements-and-preview
 v44_* = skill-points-and-magic-bolt
 v45_* = menu-create-join-flow
 v46_* = client-join-game-proof
+v47_* = shop-stock-lifecycle
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -128,6 +129,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v44** | `skill-points-and-magic-bolt` | Complete (`make ci` green) | [`v44_spec-skill-points-and-magic-bolt.md`](specs/v44_spec-skill-points-and-magic-bolt.md) | [`v44_2026-06-09-skill-points-and-magic-bolt.md`](plans/v44_2026-06-09-skill-points-and-magic-bolt.md) |
 | **v45** | `menu-create-join-flow` | Complete (`make ci` green) | [`v45_spec-menu-create-join-flow.md`](specs/v45_spec-menu-create-join-flow.md) | [`v45_2026-06-09-menu-create-join-flow.md`](plans/v45_2026-06-09-menu-create-join-flow.md) |
 | **v46** | `client-join-game-proof` | Complete (`make ci` green) | [`v46_spec-client-join-game-proof.md`](specs/v46_spec-client-join-game-proof.md) | [`v46_2026-06-09-client-join-game-proof.md`](plans/v46_2026-06-09-client-join-game-proof.md) |
+| **v47** | `shop-stock-lifecycle` | Complete (`make ci` green) | [`v47_spec-shop-stock-lifecycle.md`](specs/v47_spec-shop-stock-lifecycle.md) | [`v47_2026-06-09-shop-stock-lifecycle.md`](plans/v47_2026-06-09-shop-stock-lifecycle.md) |
 
 ---
 
@@ -1155,6 +1157,34 @@ session as a distinct guest account while a protocol-level host remains connecte
 filters/search/sorting, two-window Godot choreography, production lobby art/audio, or server model
 change.
 
+### v47 — Shop stock lifecycle
+
+**Proves:** Town-vendor generated stock is finite, per-character, refresh-gated by newly unlocked
+non-town waypoints, and paired with session-local buyback without moving shop authority to the client.
+
+- Protocol v6 adds `buyback` offer kind support, source-depth metadata, shop stock change ops, and
+  refreshed `offers` / `sell_appraisals` on purchase and sale events.
+- Shared shop rules cap generated shop rarity at `rare`, define buyback behavior, and make generated
+  source depth roll from the character's achieved dungeon range, with `character level + 1` as the
+  lower bound when that is inside the achieved range.
+- Generated shop stock is stored per character, frozen into session-start snapshots for replay, and
+  consumed only after successful validation; fixed potion offers remain infinite.
+- Successful sales create actor-local buyback rows that preserve the sold item payload and can be
+  repurchased, then disappear after buyback purchase, leaving town, or ending the session.
+- Newly discovered non-town waypoints refresh generated stock exactly once; repeated shop opens or
+  duplicate waypoint discoveries do not reroll stock.
+- Godot keeps the shop panel open across buy/sell events, applies server-authored refreshed rows,
+  exposes buyback/source-depth debug state, and reuses existing item summary/comparison rendering.
+- Go lifecycle tests prove finite generated stock consumption; protocol bot scenario
+  `33_shop_stock_lifecycle.json` proves source-depth metadata, buyback, waypoint refresh, replay,
+  reconnect, and fresh-session behavior; client bot scenario `22_shop_stock_lifecycle.json` proves
+  the live Godot panel applies purchase and buyback refreshes while staying open.
+
+**Explicit non-goals:** no fixed potion stock limits, durable buyback across town exits or session
+ends, multiple vendors, stash, repair, crafting, gambling, sorting/filtering/search, player trade,
+clock-based refresh, production vendor assets, expanded item-level/depth economy bands beyond the
+current `1`, `2`, and `3+` loot bands, or unique/set shop offers.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1221,6 +1251,8 @@ reachable_dungeon_obstacles: descend through generated dungeon floors → assert
 dungeon_wall_rendering: headless Godot client descends to generated floors → assert authoritative non-perimeter wall rendering state
 vendor_appraisal_quotes: open town vendor after dungeon loot → assert server-authored offer summaries, comparisons, sell appraisals, buy, sell, replay
 vendor_item_comparison: headless Godot client opens vendor → assert visible offer/sell details, comparison rows, buy, and sell
+shop_stock_lifecycle: town vendor generated stock source-depth → sell-to-buyback → rebuy → waypoint refresh → fresh-session buyback cleared
+client_shop_stock_lifecycle: headless Godot client opens vendor → sell to buyback → fixed purchase refresh → sell/rebuy buyback → assert fixed/generated rows remain visible
 equipment_requirements_and_preview: pick up requirement-gated gear → reject unmet equip → level and allocate STR → equip → prove persistence
 client_equipment_requirements_and_preview: headless Godot client opens inventory → assert requirement-status and equip-preview rows
 skill_points_and_magic_bolt: level to 3 → spend Magic Bolt → cast → reject cooldown recast → recover → prove replay/fresh persistence
@@ -1406,15 +1438,20 @@ client-bot preflight host that holds an active listed co-op backend session, the
 Godot guest through Join Game, character selection, listed join, WebSocket connect, and remote-player
 presence assertions.
 
+**Town vendor stock is now finite and refresh-gated.** v47 persists per-character generated stock,
+consumes purchased generated offers, refreshes stock only on newly unlocked non-town waypoints,
+limits shop rarity to `rare`, and keeps buyback rows session-local and cleared when the actor leaves
+town.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots | v22/v24/v26/v39/v40/v41/v44/v45 non-goals, ADR-0008 deferred, ADR-0011 |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47 non-goals, ADR-0008 deferred, ADR-0011 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44 non-goals |
-| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique monster special drops, mystery-seller non-common rarity floor, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
-| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, expensive mystery-seller blind-buy gold sink with progression-window stock | v33/v38/v41/v42 non-goals, ADR-0011, ADR-0012, ADR-0013 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45 non-goals, ADR-0013 |
+| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, mystery-seller non-common rarity floor, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
+| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, expensive mystery-seller blind-buy gold sink with progression-window stock, clock-based shop refresh | v33/v38/v41/v42/v47 non-goals, ADR-0011, ADR-0012, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47 non-goals, ADR-0013 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |

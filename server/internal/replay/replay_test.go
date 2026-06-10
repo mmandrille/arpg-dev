@@ -78,6 +78,40 @@ func TestReconstructFromInputsWithDirectionalAttackAggro(t *testing.T) {
 	}
 }
 
+func TestReconstructFromInputsWithPassiveGoldAutoPickup(t *testing.T) {
+	rules := loadRules(t)
+	dummy := rules.Monsters["training_dummy"]
+	dummy.MaxHP = 1
+	dummy.LootTable = "reward_drop"
+	dummy.RetaliationDamage = nil
+	rules.Monsters["training_dummy"] = dummy
+	rules.Combat.PlayerDamage = game.DamageRange{Min: 1, Max: 1}
+	rows := []store.SessionInput{
+		storedInput(t, "inp-step", "msg-step", 0, 0, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
+		storedInput(t, "inp-kill", "msg-kill", 1, 1, "action_intent", map[string]any{"target_id": "1002"}),
+		storedInput(t, "inp-step-after", "msg-step-after", 2, 2, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
+	}
+	inputs, maxTick, err := StoredInputs(rows)
+	if err != nil {
+		t.Fatalf("stored inputs: %v", err)
+	}
+
+	recon, err := ReconstructFromInputs(testSessionID, "v49-passive-gold-replay", rules, game.DefaultWorldID, inputs, maxTick+2)
+	if err != nil {
+		t.Fatalf("reconstruct: %v", err)
+	}
+
+	if !hasDerivedEvent(recon.DerivedEvents, "monster_killed") || !hasDerivedEvent(recon.DerivedEvents, "loot_dropped") || !hasDerivedEvent(recon.DerivedEvents, "gold_picked_up") {
+		t.Fatalf("derived events missing kill/drop/passive pickup: %+v", recon.DerivedEvents)
+	}
+	if recon.Snapshot.Gold <= 0 || recon.Snapshot.CharacterProgression.Gold != recon.Snapshot.Gold {
+		t.Fatalf("snapshot gold = %d progression gold = %d, want passive pickup wallet", recon.Snapshot.Gold, recon.Snapshot.CharacterProgression.Gold)
+	}
+	if loot := findSnapshotEntity(recon.Snapshot, "loot", "gold"); loot != nil {
+		t.Fatalf("gold loot remains after passive replay pickup: %+v", loot)
+	}
+}
+
 func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
 	rules := loadRules(t)
 	zero := 0.0

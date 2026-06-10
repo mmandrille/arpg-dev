@@ -990,9 +990,13 @@ async def execute_step(
         loot = find_loot(state, item_def_id)
         deadline = loop.time() + float(step.get("wait_for_loot_s", 3.0))
         while loot is None and loop.time() < deadline:
+            if item_def_id == "gold" and "gold_picked_up" in state.seen_events:
+                return
             await pump_one(ws, state, timeout=0.1)
             loot = find_loot(state, item_def_id)
         if loot is None:
+            if item_def_id == "gold" and "gold_picked_up" in state.seen_events:
+                return
             raise AssertionError(f"pick_up_loot: loot not found for item_def_id={item_def_id}")
         deadline = loop.time() + SLICE_TIMEOUT_S
         await walk_toward(
@@ -3422,6 +3426,10 @@ def state_experience(state: RuntimeState) -> int:
     return int(state.character_progression.get("experience", 0))
 
 
+def state_gold(state: RuntimeState) -> int:
+    return int(state.gold)
+
+
 def dict_distance(a: dict[str, Any], b: dict[str, Any]) -> float:
     return math.hypot(float(a["x"]) - float(b["x"]), float(a["y"]) - float(b["y"]))
 
@@ -3430,6 +3438,72 @@ def assert_party_contains_roles(state: RuntimeState, where: str) -> None:
     roles = {str(row.get("role", "")) for row in state.party}
     if not {"host", "guest"} <= roles:
         raise AssertionError(f"{where}: party roles {roles}, want host+guest; party={state.party}")
+
+
+def find_non_gold_loot(state: RuntimeState) -> dict[str, Any] | None:
+    for loot_id in list(state.loot_ids):
+        loot = state.entities.get(str(loot_id))
+        if loot is None or loot.get("type") != "loot":
+            continue
+        if str(loot.get("item_def_id", "")) != "gold":
+            return loot
+    return None
+
+
+def find_new_non_gold_loot(state: RuntimeState, before_ids: set[str]) -> dict[str, Any] | None:
+    for loot_id in sorted(str(loot_id) for loot_id in state.loot_ids):
+        if loot_id in before_ids:
+            continue
+        loot = state.entities.get(loot_id)
+        if loot is None or loot.get("type") != "loot":
+            continue
+        if str(loot.get("item_def_id", "")) != "gold":
+            return loot
+    return None
+
+
+def entity_visible_as_loot(state: RuntimeState, entity_id: str, item_def_id: str | None = None) -> bool:
+    entity = state.entities.get(str(entity_id))
+    if entity is None or entity.get("type") != "loot":
+        return False
+    if item_def_id is not None and str(entity.get("item_def_id", "")) != item_def_id:
+        return False
+    return True
+
+
+def dominant_step_direction(from_pos: dict[str, Any], to_pos: dict[str, Any]) -> dict[str, int]:
+    dx = float(to_pos["x"]) - float(from_pos["x"])
+    dy = float(to_pos["y"]) - float(from_pos["y"])
+    if abs(dx) >= abs(dy):
+        return {"x": 1 if dx >= 0 else -1, "y": 0}
+    return {"x": 0, "y": 1 if dy >= 0 else -1}
+
+
+async def stage_peers_for_same_tick_gold_pickup(peers: list[CoopPeer], host: CoopPeer, guest: CoopPeer, gold: dict[str, Any]) -> dict[str, int]:
+    gold_pos = dict(gold["position"])
+    direction = dominant_step_direction(player_position(host.state), gold_pos)
+    stage_pos = {
+        "x": float(gold_pos["x"]) - float(direction["x"]) * 2.0,
+        "y": float(gold_pos["y"]) - float(direction["y"]) * 2.0,
+    }
+    await move_coop_peer_to(peers, host, stage_pos, stop_distance=0.25, max_ticks=320)
+    await move_coop_peer_to(peers, guest, stage_pos, stop_distance=0.25, max_ticks=320)
+    gold_id = str(gold["id"])
+    if not entity_visible_as_loot(host.state, gold_id, "gold") or not entity_visible_as_loot(guest.state, gold_id, "gold"):
+        raise AssertionError(f"gold {gold_id} was consumed before same-tick staging")
+    return direction
+
+
+async def open_chest_for_non_gold_loot(peers: list[CoopPeer], host: CoopPeer) -> dict[str, Any] | None:
+    chest = find_interactable(host.state, "treasure_chest")
+    if chest is None or str(chest.get("state", "closed")) == "open":
+        return None
+    before_ids = {str(loot_id) for loot_id in host.state.loot_ids}
+    await move_coop_peer_to(peers, host, dict(chest["position"]), stop_distance=1.0, max_ticks=320)
+    message_id = await send_coop_intent(host, "action_intent", {"target_id": str(chest["id"])})
+    await wait_coop_accept(peers, host, message_id)
+    await pump_coop(peers, timeout=0.3)
+    return find_new_non_gold_loot(host.state, before_ids) or find_non_gold_loot(host.state)
 
 
 async def move_coop_peer_to(
@@ -3860,6 +3934,152 @@ async def run_coop_rewards_and_scaling(
     return sess, host.state
 
 
+async def run_non_gold_click_required_item_proof(
+    *,
+    client: httpx.Client,
+    base_url: str,
+    token: str,
+    debug_token: str,
+) -> None:
+    sess = create_session(client, token, "dungeon_levels", "chest_seed_22")
+    session_id = str(sess["session_id"])
+    peer = await connect_coop_peer(base_url, token, sess, "item-proof", "dungeon_levels")
+    peers = [peer]
+    try:
+        await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 120}, asyncio.get_event_loop())
+        non_gold = await open_chest_for_non_gold_loot(peers, peer)
+        if non_gold is None:
+            raise AssertionError("item proof: chest did not produce non-gold loot")
+
+        item_loot_id = str(non_gold["id"])
+        before_inventory_count = len(peer.state.inventory)
+        await move_coop_peer_to(peers, peer, dict(non_gold["position"]), stop_distance=1.25, max_ticks=260)
+        await pump_coop(peers, timeout=0.2)
+        if len(peer.state.inventory) != before_inventory_count:
+            raise AssertionError(
+                f"non-gold loot auto-picked without click: before={before_inventory_count} after={len(peer.state.inventory)}"
+            )
+        if not entity_visible_as_loot(peer.state, item_loot_id):
+            raise AssertionError(f"non-gold loot {item_loot_id} disappeared before explicit pickup")
+
+        pick_msg = await send_coop_intent(peer, "action_intent", {"target_id": item_loot_id})
+        await wait_coop_accept(peers, peer, pick_msg)
+        await wait_coop_until(
+            peers,
+            "explicit item pickup adds inventory and removes loot",
+            lambda: len(peer.state.inventory) > before_inventory_count and item_loot_id not in peer.state.entities,
+        )
+    finally:
+        for item_peer in peers:
+            try:
+                await close_coop_peer(item_peer)
+            except Exception:
+                pass
+
+    replay = fetch_replay(client, token, debug_token, session_id)
+    if not replay.get("match", False):
+        raise AssertionError(f"non-gold item proof replay mismatch for {session_id}: {replay.get('mismatch')}")
+
+
+async def run_gold_autopickup_shared_loot(
+    *,
+    client: httpx.Client,
+    base_url: str,
+    tokens: list[str],
+    debug_token: str,
+    scenario: Scenario,
+    character_ids: list[str],
+) -> tuple[dict[str, Any], RuntimeState]:
+    if len(tokens) < 2 or len(character_ids) < 2:
+        raise AssertionError(f"{scenario.id}: requires host and guest")
+    sess = create_coop_session(client, tokens[0], scenario.world_id, character_ids[0], scenario.seed)
+    session_id = str(sess["session_id"])
+
+    host = await connect_coop_peer(base_url, tokens[0], sess, "host", scenario.world_id)
+    guest: CoopPeer | None = None
+    peers = [host]
+    try:
+        joined = join_coop_session(client, tokens[1], session_id, str(sess["join_code"]), character_ids[1])
+        guest = await connect_coop_peer(base_url, tokens[1], joined, "guest", scenario.world_id)
+        peers.append(guest)
+        await wait_coop_until(peers, "both peers have party rows", lambda: all(len(peer.state.party) >= 2 for peer in peers))
+
+        for peer in (host, guest):
+            await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 260}, asyncio.get_event_loop())
+            await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 260}, asyncio.get_event_loop())
+        await wait_coop_until(
+            peers,
+            "both peers share level -2",
+            lambda: host.state.current_level == -2 and guest.state.current_level == -2
+            and player_entity_ids(host.state) >= {host.state.local_player_id, guest.state.local_player_id}
+            and player_entity_ids(guest.state) >= {host.state.local_player_id, guest.state.local_player_id},
+        )
+
+        gold = find_loot(host.state, "gold")
+        if gold is None:
+            raise AssertionError(f"{scenario.id}: missing generated dungeon gold in host state")
+        gold_id = str(gold["id"])
+        if not entity_visible_as_loot(guest.state, gold_id, "gold"):
+            raise AssertionError(f"guest does not see shared gold {gold_id}: {guest.state.entities}")
+
+        before_host_gold = state_gold(host.state)
+        before_guest_gold = state_gold(guest.state)
+        direction = await stage_peers_for_same_tick_gold_pickup(peers, host, guest, gold)
+        host_msg = await send_coop_intent(host, "move_intent", {"direction": direction, "duration_ticks": 1})
+        guest_msg = await send_coop_intent(guest, "move_intent", {"direction": direction, "duration_ticks": 1})
+        await wait_coop_accept(peers, host, host_msg)
+        await wait_coop_accept(peers, guest, guest_msg)
+        await wait_coop_until(
+            peers,
+            "shared gold removed and awarded to lowest player id",
+            lambda: gold_id not in host.state.entities
+            and gold_id not in guest.state.entities
+            and state_gold(host.state) > before_host_gold
+            and state_gold(guest.state) == before_guest_gold,
+        )
+        if "gold_picked_up" not in host.state.seen_events:
+            raise AssertionError("host did not receive gold_picked_up")
+        if "gold_picked_up" in guest.state.seen_events:
+            raise AssertionError("guest received another player's private gold_picked_up")
+
+        for peer in list(peers):
+            await close_coop_peer(peer)
+        peers.clear()
+
+        state_body = fetch_state(client, tokens[0], debug_token, session_id)
+        if int(state_body.get("gold", 0)) < state_gold(host.state):
+            raise AssertionError(f"/state gold={state_body.get('gold')} below observed {state_gold(host.state)}")
+
+        replay = fetch_replay(client, tokens[0], debug_token, session_id)
+        if not replay.get("match", False):
+            raise AssertionError(f"gold auto-pickup replay mismatch for {session_id}: {replay.get('mismatch')}")
+
+        await run_non_gold_click_required_item_proof(
+            client=client,
+            base_url=base_url,
+            token=tokens[0],
+            debug_token=debug_token,
+        )
+
+        fresh_host = create_session(client, tokens[0], scenario.world_id)
+        fresh_host_state = fetch_state(client, tokens[0], debug_token, str(fresh_host["session_id"]))
+        if int(fresh_host_state.get("gold", 0)) < state_gold(host.state):
+            raise AssertionError(f"fresh host gold={fresh_host_state.get('gold')}, want >= {state_gold(host.state)}")
+        fresh_guest = create_session(client, tokens[1], scenario.world_id)
+        fresh_guest_state = fetch_state(client, tokens[1], debug_token, str(fresh_guest["session_id"]))
+        if int(fresh_guest_state.get("gold", 0)) != before_guest_gold:
+            raise AssertionError(f"fresh guest gold={fresh_guest_state.get('gold')}, want unchanged {before_guest_gold}")
+    finally:
+        for peer in peers:
+            try:
+                await close_coop_peer(peer)
+            except Exception:
+                pass
+
+    log("gold auto-pickup/shared loot protocol checks matched", session_id)
+    return sess, host.state
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -3934,6 +4154,25 @@ def main() -> int:
                     tokens.append(peer_token)
                     character_ids.append(ensure_character(client, peer_token, f"Reward Peer {index + 1}"))
                 sess, observed = asyncio.run(run_coop_rewards_and_scaling(
+                    client=client,
+                    base_url=args.base_url,
+                    tokens=tokens,
+                    debug_token=args.debug_token,
+                    scenario=scenario,
+                    character_ids=character_ids,
+                ))
+                token = tokens[0]
+            elif scenario.id == "gold_autopickup_shared_loot":
+                tokens = []
+                character_ids = []
+                peer_count = max(2, scenario.peer_count)
+                replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
+                for index in range(peer_count):
+                    email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                    _, peer_token = dev_login(client, email, args.dev_token)
+                    tokens.append(peer_token)
+                    character_ids.append(ensure_character(client, peer_token, f"Gold Peer {index + 1}"))
+                sess, observed = asyncio.run(run_gold_autopickup_shared_loot(
                     client=client,
                     base_url=args.base_url,
                     tokens=tokens,

@@ -580,7 +580,7 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 			if actorPlayerID != clientPlayerID {
 				continue
 			}
-		case "experience_gained", "character_leveled", "skill_point_gained":
+		case "experience_gained", "character_leveled", "skill_point_gained", "gold_picked_up":
 			ownerPlayerID, ok := eventEntityPlayerID(event)
 			if !ok || ownerPlayerID != clientPlayerID {
 				continue

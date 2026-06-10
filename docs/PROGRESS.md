@@ -3,7 +3,7 @@
 **Read this file at the start of every new task** before writing specs, plans, or code.
 It is the canonical snapshot of what exists, what each slice proved, and what is still open.
 
-Last updated: 2026-06-09
+Last updated: 2026-06-10
 
 ---
 
@@ -11,9 +11,9 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v48 — `coop-rewards-and-scaling` |
+| **Latest completed slice** | v49 — `gold-autopickup-and-shared-loot-rules` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-09 |
+| **CI gate** | `make ci` green on 2026-06-10 |
 | **Next slice** | TBD |
 
 ### Slice numbering note
@@ -64,6 +64,7 @@ v45_* = menu-create-join-flow
 v46_* = client-join-game-proof
 v47_* = shop-stock-lifecycle
 v48_* = coop-rewards-and-scaling
+v49_* = gold-autopickup-and-shared-loot-rules
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -132,6 +133,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v46** | `client-join-game-proof` | Complete (`make ci` green) | [`v46_spec-client-join-game-proof.md`](specs/v46_spec-client-join-game-proof.md) | [`v46_2026-06-09-client-join-game-proof.md`](plans/v46_2026-06-09-client-join-game-proof.md) |
 | **v47** | `shop-stock-lifecycle` | Complete (`make ci` green) | [`v47_spec-shop-stock-lifecycle.md`](specs/v47_spec-shop-stock-lifecycle.md) | [`v47_2026-06-09-shop-stock-lifecycle.md`](plans/v47_2026-06-09-shop-stock-lifecycle.md) |
 | **v48** | `coop-rewards-and-scaling` | Complete (`make ci` green) | [`v48_spec-coop-rewards-and-scaling.md`](specs/v48_spec-coop-rewards-and-scaling.md) | [`v48_2026-06-09-coop-rewards-and-scaling.md`](plans/v48_2026-06-09-coop-rewards-and-scaling.md) |
+| **v49** | `gold-autopickup-and-shared-loot-rules` | Complete (`make ci` green) | [`v49_spec-gold-autopickup-and-shared-loot-rules.md`](specs/v49_spec-gold-autopickup-and-shared-loot-rules.md) | [`v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md`](plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md) |
 
 ---
 
@@ -1209,6 +1211,31 @@ rules while keeping the server authoritative and protocol v6 unchanged.
 HP/damage scaling, monster population-count scaling, party UI, chat, friendly fire, PvP, respawn, or
 client UI changes.
 
+### v49 — Gold auto-pickup and shared loot rules
+
+**Proves:** Floor loot remains shared for everyone while gold gains a server-owned quality-of-life
+auto-pickup path.
+
+- Gold floor entities are still shared world entities with no owner/reservation/personal-loot field.
+- After connected player movement resolves, the sim scans levels, gold entity ids, and eligible
+  player ids in stable order; the lowest eligible same-level alive connected player in loot range
+  wins the gold.
+- Gold pickup emits public `entity_remove` plus winner-private `gold_update`,
+  `character_progression_update`, and `gold_picked_up`; realtime filtering and persistence route by
+  explicit owner even when passive pickup has no actor input.
+- Manual in-range gold pickup and out-of-range auto-navigation compatibility are preserved; passive
+  pickup cannot duplicate a pending clicked gold entity.
+- Non-gold item loot does not auto-pick up and still requires explicit `action_intent`.
+- Protocol v6 needed no schema bump: existing deltas/events cover passive gold pickup, and
+  `gold_picked_up.correlation_id` remains optional.
+- Protocol bot scenario `35_gold_autopickup_shared_loot.json` proves shared co-op floor gold,
+  auto-pickup without click, winner-private wallet updates, replay/fresh-session persistence, and a
+  deterministic click-required non-gold item proof.
+
+**Explicit non-goals:** no personal loot, hidden loot, duplicated per-player drops, loot
+reservations, shared/split gold, item auto-pickup, loot allocation UI, drop-rate rebalance, or client
+UI/art/audio changes.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1284,6 +1311,7 @@ client_skill_points_and_magic_bolt: headless Godot client opens skill panel → 
 menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
 join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible
 coop_rewards_and_scaling: three-account co-op → nearby host/guest share full XP → different-level guest excluded → replay/fresh persistence
+gold_autopickup_shared_loot: two peers see shared floor gold → both step into range → lowest player id wins private wallet update → item loot still requires click
 ```
 
 **Verify:**
@@ -1473,13 +1501,18 @@ eligible party members, excludes dead/disconnected/far/different-level members, 
 HP/damage logarithmically with active same-level party count, and routes private progression by
 recipient owner.
 
+**Gold is now auto-pickable, but loot stays shared.** v49 keeps one shared floor entity per drop,
+adds passive gold pickup for the first eligible player in deterministic order, and leaves non-gold
+items click-required. Personal loot, reservations, hidden/duplicated drops, shared/split gold, and
+item auto-pickup remain deferred/non-goals.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47 non-goals, ADR-0008 deferred, ADR-0011 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48 non-goals |
-| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, mystery-seller non-common rarity floor, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
+| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, mystery-seller non-common rarity floor, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, expensive mystery-seller blind-buy gold sink with progression-window stock, clock-based shop refresh | v33/v38/v41/v42/v47 non-goals, ADR-0011, ADR-0012, ADR-0013 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47 non-goals, ADR-0013 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
@@ -1488,7 +1521,7 @@ recipient owner.
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46/v48 non-goals, ADR-0001 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46/v48/v49 non-goals, ADR-0001 |
 | Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
 
 ---

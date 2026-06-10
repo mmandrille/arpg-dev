@@ -1046,17 +1046,7 @@ func TestRangedProjectileGolden(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			rules := loadRules(t)
 			if tc.BaseHitChance != nil {
-				rulesCopy := *rules
-				rulesCopy.Combat = rules.Combat
-				rulesCopy.Combat.BaseHitChance = *tc.BaseHitChance
-				hit := rulesCopy.CharacterProgression.DerivedStats["hit_chance"]
-				hit.Type = "linear"
-				hit.Base = *tc.BaseHitChance
-				hit.PerDex = 0
-				hit.Min = tc.BaseHitChance
-				hit.Max = tc.BaseHitChance
-				rulesCopy.CharacterProgression.DerivedStats["hit_chance"] = hit
-				rules = &rulesCopy
+				rules = rulesCopyWithHitChance(rules, *tc.BaseHitChance)
 			}
 			sim := rangedLabWithEquippedBow(t, rules, tc.Seed)
 			sim.entities[sim.playerID].pos = tc.PlayerPosition
@@ -1144,6 +1134,39 @@ func rulesWithTrainingBowReach(t *testing.T, reach float64) *Rules {
 	bow.Reach = &reach
 	items["training_bow"] = bow
 	copyRules.Items = items
+	return &copyRules
+}
+
+func rulesWithHitChance(t *testing.T, chance float64) *Rules {
+	t.Helper()
+	return rulesCopyWithHitChance(loadRules(t), chance)
+}
+
+func rulesCopyWithHitChance(base *Rules, chance float64) *Rules {
+	copyRules := *base
+	copyRules.Combat = base.Combat
+	copyRules.Combat.BaseHitChance = chance
+	progress := base.CharacterProgression
+	derived := make(map[string]LinearStatFormula, len(base.CharacterProgression.DerivedStats))
+	for key, formula := range base.CharacterProgression.DerivedStats {
+		derived[key] = formula
+	}
+	hit := derived["hit_chance"]
+	hit.Type = "linear"
+	hit.Base = chance
+	hit.PerStr = 0
+	hit.PerDex = 0
+	hit.PerVit = 0
+	hit.PerMagic = 0
+	hit.Stat = ""
+	hit.Scale = 0
+	hit.Offset = 0
+	hit.Denominator = 0
+	hit.Min = &chance
+	hit.Max = &chance
+	derived["hit_chance"] = hit
+	progress.DerivedStats = derived
+	copyRules.CharacterProgression = progress
 	return &copyRules
 }
 
@@ -1251,7 +1274,7 @@ func TestDirectionalMeleeStopsMovementAndAcksEmptySwing(t *testing.T) {
 }
 
 func TestDirectionalRangedFreeShotHitsAndOmitsTargetID(t *testing.T) {
-	sim := combatControlLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	sim := combatControlLabWithEquippedBow(t, rulesWithHitChance(t, 1.0), "cafebabecafebabe")
 	player := sim.entities[sim.playerID]
 	player.pos = Vec2{X: 3, Y: 5}
 	monster := firstEntityByKind(sim, monsterEntity)
@@ -1601,7 +1624,7 @@ func TestRangedAutoApproachThenFire(t *testing.T) {
 }
 
 func TestRangedDummyDropsSeparatedLootItems(t *testing.T) {
-	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	sim := rangedLabWithEquippedBow(t, rulesWithHitChance(t, 1.0), "cafebabecafebabe")
 	monster := firstEntityByKind(sim, monsterEntity)
 	monster.hp = 1
 	r := sim.Tick([]Input{{MessageID: "kill", CorrelationID: "corr_kill", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
@@ -1645,9 +1668,9 @@ func TestRangedDummyDropsSeparatedLootItems(t *testing.T) {
 }
 
 func TestRangedBowLootRequiresMeleeReach(t *testing.T) {
-	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
-	if sim.playerActionReach() != 16.0 {
-		t.Fatalf("playerActionReach = %v, want bow reach 16.0", sim.playerActionReach())
+	sim := rangedLabWithEquippedBow(t, rulesWithHitChance(t, 1.0), "cafebabecafebabe")
+	if sim.playerActionReach() != 12.0 {
+		t.Fatalf("playerActionReach = %v, want bow reach 12.0", sim.playerActionReach())
 	}
 	if sim.playerMeleeReach() != sim.rules.Combat.UnarmedReach {
 		t.Fatalf("playerMeleeReach = %v, want unarmed %v", sim.playerMeleeReach(), sim.rules.Combat.UnarmedReach)

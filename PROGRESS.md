@@ -12,7 +12,7 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v55 — `consolidation-and-quality-gates` |
+| **Latest completed slice** | v56 — `monster-attack-cadence` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 (9 phases) |
 | **Next slice** | TBD |
@@ -74,6 +74,7 @@ v52_* = ranged-monster-ai
 v53_* = boss-health-bar-ui
 v54_* = character-select-summaries
 v55_* = consolidation-and-quality-gates
+v56_* = monster-attack-cadence
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -91,9 +92,9 @@ close-out or as a dedicated review task before `/next` proposes the next batch.
 | File | Focus |
 |------|-------|
 | `docs/reviews/YYYYMMDD_vN-overview.md` | Executive summary, scorecard, cross-cutting themes |
-| `docs/reviews/YYYYMMDD_vN-backend.md` | Go server / `internal/game` |
-| `docs/reviews/YYYYMMDD_vN-client.md` | Godot client |
-| `docs/reviews/YYYYMMDD_vN-shared-tooling-and-process.md` | `shared/`, `tools/`, SDD process |
+| `docs/reviews/backend/YYYYMMDD_vN-backend.md` | Go server / `internal/game` |
+| `docs/reviews/client/YYYYMMDD_vN-client.md` | Godot client |
+| `docs/reviews/extras/YYYYMMDD_vN-shared-tooling-and-process.md` | `shared/`, `tools/`, SDD process |
 
 Update **Last engineering review** / **Next engineering review** in the table above when a review lands.
 Feed actionable findings into open gaps or the next slice briefs — reviews are input to `/next`, not shelfware.
@@ -169,6 +170,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v53** | `boss-health-bar-ui` | Complete (`make ci` green) | [`v53_spec-boss-health-bar-ui.md`](docs/specs/v53_spec-boss-health-bar-ui.md) | [`v53_2026-06-10-boss-health-bar-ui.md`](docs/plans/v53_2026-06-10-boss-health-bar-ui.md) | [`as-built`](docs/as-built/v53_boss-health-bar-ui.md) |
 | **v54** | `character-select-summaries` | Complete (`make ci` green) | [`v54_spec-character-select-summaries.md`](docs/specs/v54_spec-character-select-summaries.md) | [`v54_2026-06-10-character-select-summaries.md`](docs/plans/v54_2026-06-10-character-select-summaries.md) | [`as-built`](docs/as-built/v54_character-select-summaries.md) |
 | **v55** | `consolidation-and-quality-gates` | Complete (`make ci` green) | [`v55_spec-consolidation-and-quality-gates.md`](docs/specs/v55_spec-consolidation-and-quality-gates.md) | [`v55_2026-06-10-consolidation-and-quality-gates.md`](docs/plans/v55_2026-06-10-consolidation-and-quality-gates.md) | — |
+| **v56** | `monster-attack-cadence` | Complete (`make ci` green) | [`v56_spec-monster-attack-cadence.md`](docs/specs/v56_spec-monster-attack-cadence.md) | [`v56_2026-06-10-monster-attack-cadence.md`](docs/plans/v56_2026-06-10-monster-attack-cadence.md) | [`as-built`](docs/as-built/v56_monster-attack-cadence.md) |
 
 ---
 
@@ -485,12 +487,19 @@ hazard on golden fixtures; and `test_delta_apply.gd` adds the first unit coverag
 highest-risk zero-tested client code. All 265 Go tests, 59 Python tests, and 15 GDScript unit
 tests pass; CI is now 9 phases.
 
+**Generated monster attacks are a little faster.** v56 tunes regular generated dungeon monsters
+without changing damage, movement, bosses, or lab fixtures: `dungeon_mob` cooldown is now 32 ticks
+and `dungeon_archer` cooldown is now 75 ticks. The dungeon monster attack golden owns the melee
+cooldown, Go/GDScript golden checks cross-check it against shared rules, protocol bot scenarios
+prove archer damage, boss-floor traversal, and skill-progression combat, and a missing
+`item_rolls.json` description field found by `make validate-shared` is restored.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54 non-goals, ADR-0008 deferred, ADR-0011 |
-| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52 non-goals |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52 non-goals, ADR-0013 |

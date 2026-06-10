@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/content/content_libraries.v0.schema.json",
+  "title": "Content library manifest (v0)",
+  "description": "Deterministic indexes for shared content files. File paths are loader inputs only; stable content IDs remain the gameplay/runtime model.",
+  "type": "object",
+  "required": ["version", "rules", "assets"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "rules": {
+      "type": "object",
+      "required": ["skills"],
+      "additionalProperties": false,
+      "properties": {
+        "skills": { "$ref": "#/$defs/file_entries" }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "required": ["skills"],
+      "additionalProperties": false,
+      "properties": {
+        "skills": {
+          "type": "object",
+          "required": ["presentations"],
+          "additionalProperties": false,
+          "properties": {
+            "presentations": { "$ref": "#/$defs/file_entries" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "file_entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/file_entry" }
+    },
+    "file_entry": {
+      "type": "object",
+      "required": ["group", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "group": { "type": "string", "minLength": 1 },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/).+\\.v0\\.json$"
+        }
+      }
+    }
+  }
+}

@@ -2,9 +2,9 @@
 name: review
 description: >-
   Generate a repo-wide engineering review set under docs/reviews, following the
-  existing overview/backend/client/shared-tooling-process pattern. Use when the
-  user runs /review or $review, asks for the next periodic engineering review,
-  or asks for a full-repo architecture/maintainability review document set.
+  overview-at-root + backend/client/extras subfolder layout. Use when the user
+  runs /review or $review, asks for the next periodic engineering review, or
+  asks for a full-repo architecture/maintainability review document set.
 ---
 
 # /review — Repo-wide Engineering Review
@@ -14,7 +14,7 @@ description: >-
 Examples:
 
 - `/review` — review the current repo baseline and write the next review set.
-- `$review v60` — write `docs/reviews/YYYYMMDD_v60-*.md`.
+- `$review v60` — write `docs/reviews/YYYYMMDD_v60-overview.md` plus companion reports under `docs/reviews/{backend,client,extras}/`.
 - `/review backend only` — write or update the relevant review file, then summarize what was skipped.
 
 **Announce at start:** "Using the **review** skill to audit the repo and write the engineering review set."
@@ -34,7 +34,7 @@ Read first:
 
 1. [`PROGRESS.md`](../../PROGRESS.md) — latest completed slice, review cadence, open gaps.
 2. [`CLAUDE.md`](../../CLAUDE.md) — commands, architecture, invariants.
-3. Latest files in [`docs/reviews/`](../../docs/reviews/) — template, prior findings, unresolved themes.
+3. Latest files in [`docs/reviews/`](../../docs/reviews/) — overview at root; prior companion reports under `backend/`, `client/`, and `extras/`.
 4. Relevant ADRs in [`docs/adr/`](../../docs/adr/) — especially ADR-0001 and any area-specific ADRs.
 
 Determine:
@@ -48,10 +48,12 @@ File names:
 
 ```text
 docs/reviews/{YYYYMMDD}_v{N}-overview.md
-docs/reviews/{YYYYMMDD}_v{N}-backend.md
-docs/reviews/{YYYYMMDD}_v{N}-client.md
-docs/reviews/{YYYYMMDD}_v{N}-shared-tooling-and-process.md
+docs/reviews/backend/{YYYYMMDD}_v{N}-backend.md
+docs/reviews/client/{YYYYMMDD}_v{N}-client.md
+docs/reviews/extras/{YYYYMMDD}_v{N}-shared-tooling-and-process.md
 ```
+
+Only overview files live at `docs/reviews/` root. Companion reports always go in their subfolder.
 
 If the target files already exist, update them in place rather than creating duplicates.
 
@@ -97,6 +99,8 @@ Write the three detailed reports first. Use concise, evidence-heavy prose.
 
 ### Backend report
 
+Write to `docs/reviews/backend/{YYYYMMDD}_v{N}-backend.md`.
+
 Required shape:
 
 ```markdown
@@ -106,7 +110,7 @@ Required shape:
 **Scope:** ...
 **Baseline:** ...
 **Stats:** ...
-**Overview:** [`YYYYMMDD_vN-overview.md`](YYYYMMDD_vN-overview.md)
+**Overview:** [`../{YYYYMMDD}_vN-overview.md`](../{YYYYMMDD}_vN-overview.md)
 
 ---
 
@@ -126,6 +130,8 @@ Inspect at least: authoritative boundary, deterministic sim rules, input dispatc
 
 ### Client report
 
+Write to `docs/reviews/client/{YYYYMMDD}_v{N}-client.md`.
+
 Required shape mirrors backend with:
 
 ```markdown
@@ -135,6 +141,8 @@ Required shape mirrors backend with:
 Inspect at least: thin-client authority, protocol snapshot/delta application, input/prediction/reconciliation, UI panel ownership, bot/replay scaffolding, client tests, scene/script organization.
 
 ### Shared/tooling/process report
+
+Write to `docs/reviews/extras/{YYYYMMDD}_v{N}-shared-tooling-and-process.md`.
 
 Required shape mirrors backend with:
 
@@ -146,7 +154,7 @@ Inspect at least: protocol versioning, schemas/examples, rules-as-data, golden c
 
 ## Phase 3 — Write Overview
 
-Create the overview last so it accurately consolidates the subreports.
+Create the overview last at `docs/reviews/{YYYYMMDD}_v{N}-overview.md` so it accurately consolidates the subreports.
 
 Required shape:
 
@@ -158,9 +166,9 @@ Required shape:
 **Scope:** Whole repo — ...
 **Git baseline:** ...
 **Companion reports:**
-- [`YYYYMMDD_vN-backend.md`](YYYYMMDD_vN-backend.md) — Go authoritative server
-- [`YYYYMMDD_vN-client.md`](YYYYMMDD_vN-client.md) — Godot thin client
-- [`YYYYMMDD_vN-shared-tooling-and-process.md`](YYYYMMDD_vN-shared-tooling-and-process.md) — contracts, Python tooling, docs/SDD
+- [`backend/{YYYYMMDD}_vN-backend.md`](backend/{YYYYMMDD}_vN-backend.md) — Go authoritative server
+- [`client/{YYYYMMDD}_vN-client.md`](client/{YYYYMMDD}_vN-client.md) — Godot thin client
+- [`extras/{YYYYMMDD}_vN-shared-tooling-and-process.md`](extras/{YYYYMMDD}_vN-shared-tooling-and-process.md) — contracts, Python tooling, docs/SDD
 
 ---
 

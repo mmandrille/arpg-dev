@@ -3,6 +3,7 @@
 extends SceneTree
 
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
+const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -32,6 +33,13 @@ func _run() -> void:
 	_assert_true("panel visible", bool(state.get("visible", false)))
 	_assert_eq("panel width matches stats", int(panel._panel.custom_minimum_size.x), 330)
 	_assert_eq("panel height matches stats", int(panel._panel.custom_minimum_size.y), 500)
+	var stats_panel := CharacterStatsPanelScript.new()
+	root.add_child(stats_panel)
+	await process_frame
+	stats_panel.ensure_display_visible()
+	_assert_true("skills opens right of stats", panel._panel.position.x >= stats_panel._panel.position.x + stats_panel._panel.custom_minimum_size.x)
+	_assert_eq("skills aligns with stats top", int(panel._panel.position.y), int(stats_panel._panel.position.y))
+	stats_panel.queue_free()
 	_assert_eq("unspent skill points", int(state.get("unspent_skill_points", -1)), 1)
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)

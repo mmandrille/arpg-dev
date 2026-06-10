@@ -8,6 +8,7 @@ const StatLabels := preload("res://scripts/stat_labels.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
+const DRAG_SOURCE_STASH := "stash"
 const BAG_COLUMNS := 5
 const BASE_INVENTORY_ROWS := 3
 const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
@@ -113,6 +114,10 @@ class InventorySlotButton:
 			return source == SLOT_KIND_BAG and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 		if slot_kind == SLOT_KIND_BAG:
 			if source == DRAG_SOURCE_SHOP_OFFER and str(data.get("offer_id", "")) != "" and str(data.get("shop_entity_id", "")) != "":
+				return true
+			if source == DRAG_SOURCE_STASH \
+					and str(data.get("stash_entity_id", "")) != "" \
+					and str(data.get("stash_item_id", "")) != "":
 				return true
 			return panel._slot_kind_is_equipment(source)
 		return false
@@ -708,6 +713,11 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 			intent_requested.emit("shop_buy_intent", {
 				"shop_entity_id": str(data.get("shop_entity_id", "")),
 				"offer_id": str(data.get("offer_id", "")),
+			})
+		elif source == DRAG_SOURCE_STASH:
+			intent_requested.emit("stash_withdraw_item_intent", {
+				"stash_entity_id": str(data.get("stash_entity_id", "")),
+				"stash_item_id": str(data.get("stash_item_id", "")),
 			})
 		elif _slot_kind_is_equipment(source):
 			intent_requested.emit("unequip_intent", {"slot": _slot_from_kind(source)})

@@ -106,7 +106,7 @@ func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
 	_panel.custom_minimum_size = Vector2(330, 500)
-	_panel.position = Vector2(16, 118)
+	_panel.position = Vector2(362, 118)
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	add_child(_panel)

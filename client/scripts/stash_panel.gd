@@ -4,16 +4,17 @@ extends Control
 signal intent_requested(intent_type: String, payload: Dictionary)
 
 const StatLabels := preload("res://scripts/stat_labels.gd")
-const PANEL_SIZE := Vector2(390, 700)
+const PANEL_SIZE := Vector2(390, 520)
 const COLUMNS := 5
 const STASH_VISIBLE_ROWS := 6
-const BAG_VISIBLE_ROWS := 3
 const SLOT_SIZE := Vector2(50, 50)
 const SLOT_GAP := 6
 const TITLE_FONT_SIZE := 31
 const BODY_FONT_SIZE := 21
 const DETAIL_FONT_SIZE := 18
 const ICON_FONT_SIZE := 18
+const DRAG_SOURCE_INVENTORY_BAG := "bag"
+const DRAG_SOURCE_STASH := "stash"
 const ITEM_RARITY_BACKGROUNDS := {
 	"common": Color("#343432"),
 	"magic": Color("#1b3458"),
@@ -40,8 +41,6 @@ var _title_label: Label
 var _gold_label: Label
 var _status_label: Label
 var _stash_grid: GridContainer
-var _bag_grid: GridContainer
-var _deposit_buttons: Dictionary = {}
 var _withdraw_buttons: Dictionary = {}
 var _deposit_gold_button: Button
 var _withdraw_gold_button: Button
@@ -60,17 +59,33 @@ class StashSlotButton:
 			return
 		panel._draw_item_icon(self, item)
 
-	func _gui_input(event: InputEvent) -> void:
-		if not panel._interactive:
-			return
-		if event is InputEventMouseButton \
-				and event.button_index == MOUSE_BUTTON_LEFT \
-				and event.double_click \
-				and not item.is_empty():
-			if slot_kind == "stash":
-				panel._emit_withdraw(item)
-			else:
-				panel._emit_deposit(item)
+	func _get_drag_data(_at_position: Vector2) -> Variant:
+		if not panel._interactive or item.is_empty() or slot_kind != "stash":
+			return null
+		var data := {
+			"source": DRAG_SOURCE_STASH,
+			"stash_entity_id": panel.stash_entity_id,
+			"stash_item_id": str(item.get("stash_item_id", "")),
+			"item": item,
+		}
+		var preview := Label.new()
+		preview.text = str(item.get("display_name", item.get("item_def_id", "item")))
+		preview.add_theme_color_override("font_color", Color("#e8dcc8"))
+		set_drag_preview(preview)
+		return data
+
+	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+		if not panel._interactive or typeof(data) != TYPE_DICTIONARY or slot_kind != "stash":
+			return false
+		var source := str((data as Dictionary).get("source", ""))
+		var dragged: Dictionary = (data as Dictionary).get("item", {})
+		return source == DRAG_SOURCE_INVENTORY_BAG \
+			and panel.stash_entity_id != "" \
+			and not dragged.is_empty() \
+			and str(dragged.get("item_instance_id", "")) != ""
+
+	func _drop_data(_at_position: Vector2, data: Variant) -> void:
+		panel._handle_drop_on_stash(data)
 
 
 func _ready() -> void:
@@ -140,24 +155,21 @@ func get_debug_state() -> Dictionary:
 		"stash_capacity": stash_capacity,
 		"stash_item_count": stash_items.size(),
 		"stash_rows": _debug_stash_rows(),
-		"bag_rows": _debug_bag_rows(),
-		"deposit_row_count": _stashable_items().size(),
 		"withdraw_buttons": _debug_withdraw_buttons(),
-		"deposit_buttons": _debug_deposit_buttons(),
 		"deposit_gold_enabled": _deposit_gold_button != null and not _deposit_gold_button.disabled,
 		"withdraw_gold_enabled": _withdraw_gold_button != null and not _withdraw_gold_button.disabled,
 		"status": _status_label.text if _status_label != null else "",
 	}
 
 
-func bot_click_deposit_item(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
+func bot_drag_bag_to_stash(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	var matches := _matching_inventory_items(item_def_id, rolled)
 	if bag_index < 0 or bag_index >= matches.size():
 		return
 	_emit_deposit(matches[bag_index])
 
 
-func bot_click_withdraw_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
+func bot_drag_stash_to_bag(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
 	var matches := _matching_stash_items(stash_item_id, item_def_id, rolled)
 	if stash_index < 0 or stash_index >= matches.size():
 		return
@@ -228,19 +240,6 @@ func _build() -> void:
 	_stash_grid.add_theme_constant_override("v_separation", SLOT_GAP)
 	stash_scroll.add_child(_stash_grid)
 
-	root.add_child(_section_label("Bag"))
-	var bag_scroll := ScrollContainer.new()
-	bag_scroll.custom_minimum_size = Vector2(
-		COLUMNS * SLOT_SIZE.x + (COLUMNS - 1) * SLOT_GAP + 18,
-		BAG_VISIBLE_ROWS * SLOT_SIZE.y + (BAG_VISIBLE_ROWS - 1) * SLOT_GAP
-	)
-	root.add_child(bag_scroll)
-	_bag_grid = GridContainer.new()
-	_bag_grid.columns = COLUMNS
-	_bag_grid.add_theme_constant_override("h_separation", SLOT_GAP)
-	_bag_grid.add_theme_constant_override("v_separation", SLOT_GAP)
-	bag_scroll.add_child(_bag_grid)
-
 	var gold_bar := HBoxContainer.new()
 	gold_bar.add_theme_constant_override("separation", 8)
 	root.add_child(gold_bar)
@@ -255,14 +254,12 @@ func _build() -> void:
 
 
 func _render() -> void:
-	if _panel == null or _stash_grid == null or _bag_grid == null:
+	if _panel == null or _stash_grid == null:
 		return
-	_deposit_buttons = {}
 	_withdraw_buttons = {}
 	_title_label.text = stash_title
 	_gold_label.text = "%d / %d gold" % [gold, stash_gold]
 	_clear_children(_stash_grid)
-	_clear_children(_bag_grid)
 
 	var stash_slots = max(stash_capacity, stash_items.size())
 	for i in range(stash_slots):
@@ -270,13 +267,6 @@ func _render() -> void:
 		var item: Dictionary = stash_items[i] if i < stash_items.size() else {}
 		_fill_slot(slot, item, "stash")
 		_stash_grid.add_child(slot)
-
-	var bag_slots = max(inventory.size(), 15)
-	for i in range(bag_slots):
-		var bag_slot := _slot_button("bag")
-		var item: Dictionary = inventory[i] if i < inventory.size() else {}
-		_fill_slot(bag_slot, item, "bag")
-		_bag_grid.add_child(bag_slot)
 
 	if _deposit_gold_button != null:
 		_deposit_gold_button.disabled = not _interactive or stash_entity_id == "" or gold <= 0
@@ -329,10 +319,7 @@ func _fill_slot(slot: StashSlotButton, item: Dictionary, kind: String) -> void:
 		slot.queue_redraw()
 		return
 	var enabled := _interactive and stash_entity_id != ""
-	if kind == "bag":
-		enabled = enabled and _inventory_item_stashable(item)
-		_deposit_buttons[str(item.get("item_instance_id", ""))] = {"enabled": enabled}
-	else:
+	if kind == "stash":
 		_withdraw_buttons[str(item.get("stash_item_id", ""))] = {"enabled": enabled}
 	slot.text = ""
 	slot.tooltip_text = "\n".join(_tooltip_lines(item))
@@ -391,7 +378,10 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 
 
 func _emit_deposit(item: Dictionary) -> void:
-	if stash_entity_id == "" or item.is_empty() or not _inventory_item_stashable(item):
+	if stash_entity_id == "" or item.is_empty():
+		return
+	if not _inventory_item_stashable(item):
+		show_status("can't stash item", true)
 		return
 	intent_requested.emit("stash_deposit_item_intent", {
 		"stash_entity_id": stash_entity_id,
@@ -406,6 +396,16 @@ func _emit_withdraw(item: Dictionary) -> void:
 		"stash_entity_id": stash_entity_id,
 		"stash_item_id": str(item.get("stash_item_id", "")),
 	})
+
+
+func _handle_drop_on_stash(data: Variant) -> void:
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	var rec := data as Dictionary
+	if str(rec.get("source", "")) != DRAG_SOURCE_INVENTORY_BAG:
+		return
+	var item: Dictionary = rec.get("item", {})
+	_emit_deposit(item)
 
 
 func _emit_deposit_gold(amount: int) -> void:
@@ -505,17 +505,6 @@ func _debug_stash_rows() -> Array:
 	return out
 
 
-func _debug_bag_rows() -> Array:
-	var out: Array = []
-	for item in inventory:
-		if typeof(item) != TYPE_DICTIONARY:
-			continue
-		var rec := item as Dictionary
-		if _inventory_item_stashable(rec):
-			out.append(_debug_item_row(rec, "bag"))
-	return out
-
-
 func _debug_item_row(item: Dictionary, kind: String) -> Dictionary:
 	return {
 		"item_instance_id": str(item.get("item_instance_id", "")),
@@ -537,17 +526,6 @@ func _debug_withdraw_buttons() -> Dictionary:
 			continue
 		var rec := item as Dictionary
 		out[str(rec.get("stash_item_id", ""))] = {"enabled": _interactive and stash_entity_id != ""}
-	return out
-
-
-func _debug_deposit_buttons() -> Dictionary:
-	var out := {}
-	for item in inventory:
-		if typeof(item) != TYPE_DICTIONARY:
-			continue
-		var rec := item as Dictionary
-		var item_id := str(rec.get("item_instance_id", ""))
-		out[item_id] = {"enabled": _interactive and stash_entity_id != "" and _inventory_item_stashable(rec)}
 	return out
 
 
@@ -695,7 +673,7 @@ func _reposition_panel() -> void:
 	var margin := 20.0
 	var panel_size := _panel.custom_minimum_size
 	var viewport_size := get_viewport_rect().size
-	_panel.offset_left = viewport_size.x - panel_size.x - margin
+	_panel.offset_left = margin
 	_panel.offset_top = margin + 54.0
 	_panel.offset_right = _panel.offset_left + panel_size.x
 	_panel.offset_bottom = _panel.offset_top + panel_size.y

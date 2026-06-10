@@ -51,7 +51,7 @@ const STEP_TYPES_ACTION := [
 	"set_floating_combat_text", "select_create_game_type",
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_sell_item",
-	"click_stash_deposit_item", "click_stash_withdraw_item", "click_stash_deposit_gold",
+	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
 	"click_stash_withdraw_gold", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
@@ -95,7 +95,7 @@ const ALL_STEP_TYPES: Array = [
 	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "click_shop_buy_offer", "click_shop_sell_item",
 	"wait_stash_panel", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold", "click_stash_deposit_item", "click_stash_withdraw_item",
+	"assert_stash_gold", "drag_bag_to_stash", "drag_stash_to_bag",
 	"click_stash_deposit_gold", "click_stash_withdraw_gold",
 	"click_waypoint_level",
 	"wait_remote_player_count", "assert_remote_player_count",
@@ -1590,7 +1590,7 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"click_waypoint_level":
 			return "target_level=%s" % str(step.get("target_level", ""))
 		"wait_stash_panel", "assert_stash_item_count", "assert_stash_gold", "assert_stash_panel_visible", \
-		"click_stash_deposit_item", "click_stash_withdraw_item", \
+		"drag_bag_to_stash", "drag_stash_to_bag", \
 		"click_stash_deposit_gold", "click_stash_withdraw_gold":
 			return "stash=%s" % str(step)
 		"press_key":
@@ -1832,10 +1832,10 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "click_shop_buy_offer":
 		if str(step.get("offer_id", "")) == "" and str(step.get("offer_kind", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id or offer_kind" % [index, stype]
-	if stype == "click_stash_deposit_item":
+	if stype == "drag_bag_to_stash":
 		if str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
 			return "client_steps[%d] (%s) requires item_def_id or rolled" % [index, stype]
-	if stype == "click_stash_withdraw_item":
+	if stype == "drag_stash_to_bag":
 		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
 			return "client_steps[%d] (%s) requires stash_item_id, item_def_id, or rolled" % [index, stype]
 	if stype in ["click_stash_deposit_gold", "click_stash_withdraw_gold"]:

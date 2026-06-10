@@ -7,6 +7,9 @@ const NetClientScript := preload("res://scripts/net_client.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
+const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const ShopPanelScript := preload("res://scripts/shop_panel.gd")
+const StashPanelScript := preload("res://scripts/stash_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -32,6 +35,7 @@ func _initialize() -> void:
 	_test_character_panel_modes_for_v45()
 	_test_settings_panel_create_game_type_sync()
 	_test_status_text_toggle_hides_left_debug_not_level_hud()
+	_test_actionable_panels_autoclose_out_of_range()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -309,6 +313,50 @@ func _test_status_text_toggle_hides_left_debug_not_level_hud() -> void:
 	_assert_true("right level still shows dungeon depth", main._level_label.text.begins_with("Level 3"))
 	main._debug_label.free()
 	main._level_label.free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_actionable_panels_autoclose_out_of_range() -> void:
+	var main = _make_main()
+	main.inventory_panel = InventoryPanelScript.new()
+	main.shop_panel = ShopPanelScript.new()
+	main.stash_panel = StashPanelScript.new()
+	var vendor_node := Node3D.new()
+	var stash_node := Node3D.new()
+	main.entities_root.add_child(vendor_node)
+	main.entities_root.add_child(stash_node)
+	vendor_node.position = Vector3(1.0, 0.0, 0.0)
+	stash_node.position = Vector3(1.0, 0.0, 0.0)
+	main.entities["2001"] = {"node": vendor_node, "type": "interactable", "interactable_def_id": "town_vendor"}
+	main.entities["2002"] = {"node": stash_node, "type": "interactable", "interactable_def_id": "town_stash"}
+
+	main.inventory_panel.visible = true
+	main.shop_panel.visible = true
+	main.shop_panel.shop_entity_id = "2001"
+	main._sync_actionable_panel_reach()
+	_assert_true("shop remains visible while in range", main.shop_panel.visible)
+	_assert_true("inventory remains visible while shop in range", main.inventory_panel.visible)
+	vendor_node.position = Vector3(5.0, 0.0, 0.0)
+	main._sync_actionable_panel_reach()
+	_assert_true("shop closes out of range", not main.shop_panel.visible)
+	_assert_true("inventory closes with out-of-range shop", not main.inventory_panel.visible)
+
+	main.inventory_panel.visible = true
+	main.stash_panel.visible = true
+	main.stash_panel.stash_entity_id = "2002"
+	main._sync_actionable_panel_reach()
+	_assert_true("stash remains visible while in range", main.stash_panel.visible)
+	stash_node.position = Vector3(5.0, 0.0, 0.0)
+	main._sync_actionable_panel_reach()
+	_assert_true("stash closes out of range", not main.stash_panel.visible)
+	_assert_true("inventory closes with out-of-range stash", not main.inventory_panel.visible)
+
+	main.inventory_panel.free()
+	main.shop_panel.free()
+	main.stash_panel.free()
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

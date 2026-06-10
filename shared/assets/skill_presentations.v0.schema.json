@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/skill_presentations.v0.schema.json",
+  "title": "Skill presentations (v0)",
+  "description": "Client-facing skill labels and icons. Gameplay authority stays in shared/rules/skills.v0.json.",
+  "type": "object",
+  "required": ["version", "skills"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "skills": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["icon", "summary", "projectile_visual"],
+        "additionalProperties": false,
+        "properties": {
+          "icon": {
+            "type": "object",
+            "required": ["label", "shape", "color", "accent"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string", "minLength": 1, "maxLength": 3 },
+              "shape": { "type": "string", "enum": ["bolt"] },
+              "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+              "accent": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+            }
+          },
+          "summary": { "type": "string", "minLength": 1 },
+          "projectile_visual": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

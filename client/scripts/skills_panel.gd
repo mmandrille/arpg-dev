@@ -3,14 +3,14 @@ extends Control
 
 signal allocate_skill_point_requested(skill_id: String)
 
-const MAGIC_BOLT_ID := "magic_bolt"
-
 var skill_progression: Dictionary = {}
+var character_progression: Dictionary = {}
 var interactive: bool = true
 var _hovered_skill_id: String = ""
 var _hover_controls: Array[Control] = []
 var _skill_function_keys: Array = []
 var _right_click_skill_id: String = ""
+var _skill_id: String = ""
 var _panel: PanelContainer
 var _points_label: Label
 var _rank_label: Label
@@ -19,11 +19,14 @@ var _skill_block: Panel
 var _skill_icon_label: Label
 var _assigned_key_label: Label
 var _tooltip: PanelContainer
+var _tooltip_title: Label
 var _tooltip_rank: Label
 var _tooltip_body: Label
 
 
 func _ready() -> void:
+	SkillRulesLoader.ensure_loaded()
+	_skill_id = _current_skill_id()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -51,6 +54,11 @@ func set_skill_progression(next_progression: Dictionary) -> void:
 	_render()
 
 
+func set_character_progression(next_progression: Dictionary) -> void:
+	character_progression = next_progression.duplicate(true)
+	_render()
+
+
 func set_interactive(enabled: bool) -> void:
 	interactive = enabled
 	_render()
@@ -67,32 +75,43 @@ func hovered_skill_id() -> String:
 
 
 func get_debug_state() -> Dictionary:
-	var skill := _skill_row(MAGIC_BOLT_ID)
+	var skill_id := _current_skill_id()
+	var skill := _skill_row(skill_id)
+	var requirement_status := _requirement_status(skill_id)
 	return {
 		"visible": visible,
 		"unspent_skill_points": int(skill_progression.get("unspent_skill_points", 0)),
-		"skill_id": MAGIC_BOLT_ID,
+		"skill_id": skill_id,
+		"skill_name": _skill_name(skill_id),
+		"icon_label": _skill_icon_label_text(skill_id),
 		"rank": int(skill.get("rank", 0)),
 		"max_rank": int(skill.get("max_rank", 0)),
 		"can_spend": bool(skill.get("can_spend", false)),
 		"spend_button_enabled": _spend_button != null and not _spend_button.disabled,
 		"hovered_skill_id": _hovered_skill_id,
-		"assigned_key": _assigned_key_for_skill(MAGIC_BOLT_ID),
-		"right_click_assigned": _right_click_skill_id == MAGIC_BOLT_ID,
+		"assigned_key": _assigned_key_for_skill(skill_id),
+		"right_click_assigned": _right_click_skill_id == skill_id,
 		"tooltip_visible": _tooltip != null and _tooltip.visible,
+		"tooltip_body": _tooltip_body.text if _tooltip_body != null else "",
+		"requirements_met": _requirements_met(requirement_status),
+		"requirement_status": requirement_status,
 	}
 
 
-func bot_click_skill_button(skill_id: String = MAGIC_BOLT_ID) -> void:
-	if skill_id != MAGIC_BOLT_ID:
+func bot_click_skill_button(skill_id: String = "") -> void:
+	if skill_id == "":
+		skill_id = _current_skill_id()
+	if skill_id != _current_skill_id():
 		return
 	if _spend_button == null or _spend_button.disabled:
 		return
 	_spend_button.pressed.emit()
 
 
-func bot_hover_skill(skill_id: String = MAGIC_BOLT_ID) -> void:
-	if skill_id != MAGIC_BOLT_ID:
+func bot_hover_skill(skill_id: String = "") -> void:
+	if skill_id == "":
+		skill_id = _current_skill_id()
+	if skill_id != _current_skill_id():
 		return
 	_hovered_skill_id = skill_id
 	_show_tooltip(skill_id)
@@ -146,9 +165,9 @@ func _build() -> void:
 	_skill_block.mouse_filter = Control.MOUSE_FILTER_STOP
 	_skill_block.add_theme_stylebox_override("panel", _skill_block_style(false, false))
 	tree.add_child(_skill_block)
-	_bind_skill_hover(_skill_block, MAGIC_BOLT_ID)
+	_bind_skill_hover(_skill_block, _current_skill_id())
 
-	_skill_icon_label = _label("M", 42, Color("#d8d1c1"))
+	_skill_icon_label = _label(_skill_icon_label_text(_current_skill_id()), 42, _skill_icon_color(_current_skill_id()))
 	_skill_icon_label.position = Vector2(8, 8)
 	_skill_icon_label.size = Vector2(64, 64)
 	_skill_icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -173,15 +192,15 @@ func _build() -> void:
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_STOP
 	_tooltip.add_theme_stylebox_override("panel", _tooltip_style())
 	tree.add_child(_tooltip)
-	_bind_skill_hover(_tooltip, MAGIC_BOLT_ID)
+	_bind_skill_hover(_tooltip, _current_skill_id())
 
 	var tip_root := VBoxContainer.new()
 	tip_root.add_theme_constant_override("separation", 6)
 	tip_root.custom_minimum_size = Vector2(184, 154)
 	_tooltip.add_child(tip_root)
 
-	var tooltip_title := _label("Magic Bolt", 21, Color("#f0dfbb"))
-	tip_root.add_child(tooltip_title)
+	_tooltip_title = _label(_skill_name(_current_skill_id()), 21, Color("#f0dfbb"))
+	tip_root.add_child(_tooltip_title)
 	_tooltip_rank = _label("", 16, Color("#cfc3aa"))
 	tip_root.add_child(_tooltip_rank)
 	_tooltip_body = _label("", 15, Color("#b9ad97"))
@@ -193,7 +212,7 @@ func _build() -> void:
 	_spend_button.custom_minimum_size = Vector2(38, 30)
 	_spend_button.pressed.connect(_on_spend_pressed)
 	tip_root.add_child(_spend_button)
-	_bind_skill_hover(_spend_button, MAGIC_BOLT_ID)
+	_bind_skill_hover(_spend_button, _current_skill_id())
 
 	_points_label = _label("", 18, Color("#bfc6c2"))
 	_points_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -206,19 +225,25 @@ func _render() -> void:
 	if _points_label == null or _rank_label == null or _spend_button == null:
 		return
 	var unspent := int(skill_progression.get("unspent_skill_points", 0))
-	var skill := _skill_row(MAGIC_BOLT_ID)
+	var skill_id := _current_skill_id()
+	var skill := _skill_row(skill_id)
 	var rank := int(skill.get("rank", 0))
 	var max_rank := int(skill.get("max_rank", 0))
 	var unlocked := rank > 0
 	_points_label.text = "Skill choices remaining  %d" % unspent
 	_rank_label.text = "%d / %d" % [rank, max_rank]
 	_spend_button.disabled = not interactive or unspent <= 0 or rank >= max_rank or not bool(skill.get("can_spend", false))
+	_spend_button.tooltip_text = "Spend point in %s" % _skill_name(skill_id)
+	if _tooltip_title != null:
+		_tooltip_title.text = _skill_name(skill_id)
 	_tooltip_rank.text = "Rank %d / %d" % [rank, max_rank]
-	_tooltip_body.text = "Projectile spell\nMana: %d\nCooldown: attack x2" % (2 + maxi(rank, 1))
-	var assigned_key := _assigned_key_for_skill(MAGIC_BOLT_ID)
+	_tooltip_body.text = _tooltip_text(skill_id, maxi(rank, 1))
+	var assigned_key := _assigned_key_for_skill(skill_id)
 	_assigned_key_label.text = assigned_key
 	_assigned_key_label.visible = assigned_key != ""
-	_skill_block.add_theme_stylebox_override("panel", _skill_block_style(unlocked, _right_click_skill_id == MAGIC_BOLT_ID))
+	_skill_block.add_theme_stylebox_override("panel", _skill_block_style(unlocked, _right_click_skill_id == skill_id))
+	_skill_icon_label.text = _skill_icon_label_text(skill_id) if unlocked else "-"
+	_skill_icon_label.add_theme_color_override("font_color", _skill_icon_color(skill_id))
 	_skill_icon_label.modulate = Color(1, 1, 1, 1) if unlocked else Color(0.42, 0.42, 0.42, 1)
 	_rank_label.modulate = Color(1, 1, 1, 1) if unlocked else Color(0.45, 0.45, 0.45, 1)
 
@@ -226,7 +251,7 @@ func _render() -> void:
 func _on_spend_pressed() -> void:
 	if _spend_button == null or _spend_button.disabled:
 		return
-	allocate_skill_point_requested.emit(MAGIC_BOLT_ID)
+	allocate_skill_point_requested.emit(_current_skill_id())
 
 
 func _skill_row(skill_id: String) -> Dictionary:
@@ -263,7 +288,7 @@ func _mouse_over_skill_controls() -> bool:
 
 
 func _show_tooltip(skill_id: String) -> void:
-	if skill_id != MAGIC_BOLT_ID or _tooltip == null:
+	if skill_id != _current_skill_id() or _tooltip == null:
 		return
 	_tooltip.visible = true
 
@@ -278,6 +303,161 @@ func _assigned_key_for_skill(skill_id: String) -> String:
 		if str(_skill_function_keys[i]) == skill_id:
 			return "F%d" % (i + 1)
 	return ""
+
+
+func _current_skill_id() -> String:
+	return SkillRulesLoader.first_skill_id()
+
+
+func _skill_def(skill_id: String) -> Dictionary:
+	return SkillRulesLoader.skill_definition(skill_id)
+
+
+func _skill_presentation(skill_id: String) -> Dictionary:
+	return SkillRulesLoader.skill_presentation(skill_id)
+
+
+func _skill_name(skill_id: String) -> String:
+	var def := _skill_def(skill_id)
+	return str(def.get("name", skill_id))
+
+
+func _skill_icon_label_text(skill_id: String) -> String:
+	var presentation := _skill_presentation(skill_id)
+	var icon: Dictionary = presentation.get("icon", {})
+	return str(icon.get("label", skill_id.substr(0, 1).to_upper()))
+
+
+func _skill_icon_color(skill_id: String) -> Color:
+	var presentation := _skill_presentation(skill_id)
+	var icon: Dictionary = presentation.get("icon", {})
+	return Color(str(icon.get("accent", "#d8d1c1")))
+
+
+func _tooltip_text(skill_id: String, rank: int) -> String:
+	var def := _skill_def(skill_id)
+	var presentation := _skill_presentation(skill_id)
+	var summary := str(presentation.get("summary", _kind_label(def)))
+	var text := summary
+	text += "\nMana: %d" % _skill_mana_cost(def, rank)
+	text += "\n%s" % _skill_cooldown_text(def)
+	var requirement_line := _requirement_line(skill_id)
+	if requirement_line != "":
+		text += "\n%s" % requirement_line
+	return text
+
+
+func _kind_label(def: Dictionary) -> String:
+	var kind := str(def.get("kind", "skill")).replace("_", " ")
+	return kind.capitalize()
+
+
+func _skill_mana_cost(def: Dictionary, rank: int) -> int:
+	var cost: Dictionary = def.get("cost", {})
+	var mana: Dictionary = cost.get("mana", {})
+	return maxi(0, int(mana.get("base", 0)) + int(mana.get("per_rank", 0)) * maxi(0, rank - 1))
+
+
+func _skill_cooldown_text(def: Dictionary) -> String:
+	var cooldown: Dictionary = def.get("cooldown", {})
+	if str(cooldown.get("type", "")) == "attack_interval_multiplier":
+		var multiplier := float(cooldown.get("multiplier", 1.0))
+		if is_equal_approx(multiplier, roundf(multiplier)):
+			return "Cooldown: attack x%d" % int(roundf(multiplier))
+		return "Cooldown: attack x%.1f" % multiplier
+	return "Cooldown: %s" % str(cooldown.get("type", "none"))
+
+
+func _requirement_line(skill_id: String) -> String:
+	var rows := _requirement_status(skill_id)
+	if rows.is_empty():
+		return ""
+	var labels: Array[String] = []
+	for row in rows:
+		var rec := row as Dictionary
+		var label := str(rec.get("label", rec.get("stat", "")))
+		var required := int(rec.get("required", 0))
+		var current := int(rec.get("current", 0))
+		if bool(rec.get("met", false)):
+			labels.append("%s %d" % [label, required])
+		else:
+			labels.append("%s %d (%d)" % [label, required, current])
+	return "Requires %s" % ", ".join(labels)
+
+
+func _requirement_status(skill_id: String) -> Array:
+	var def := _skill_def(skill_id)
+	var requirements: Dictionary = def.get("requirements", {})
+	var out: Array = []
+	var level_required := int(requirements.get("level", 0))
+	if level_required > 0:
+		var current_level := int(character_progression.get("level", 1))
+		out.append({
+			"stat": "level",
+			"label": "Level",
+			"required": level_required,
+			"current": current_level,
+			"met": current_level >= level_required,
+		})
+	var stats: Dictionary = requirements.get("stats", {})
+	for stat in ["str", "dex", "vit", "magic"]:
+		if not stats.has(stat):
+			continue
+		var required := int(stats.get(stat, 0))
+		if required <= 0:
+			continue
+		var current := _current_stat_value(stat)
+		out.append({
+			"stat": stat,
+			"label": _stat_label(stat),
+			"required": required,
+			"current": current,
+			"met": current >= required,
+		})
+	var skills: Array = requirements.get("skills", [])
+	for prereq in skills:
+		if typeof(prereq) != TYPE_DICTIONARY:
+			continue
+		var rec := prereq as Dictionary
+		var prereq_id := str(rec.get("skill_id", ""))
+		var required_rank := int(rec.get("rank", 0))
+		if prereq_id == "" or required_rank <= 0:
+			continue
+		var current_rank := int(_skill_row(prereq_id).get("rank", 0))
+		out.append({
+			"stat": prereq_id,
+			"label": _skill_name(prereq_id),
+			"required": required_rank,
+			"current": current_rank,
+			"met": current_rank >= required_rank,
+		})
+	return out
+
+
+func _requirements_met(rows: Array) -> bool:
+	for row in rows:
+		if typeof(row) == TYPE_DICTIONARY and not bool((row as Dictionary).get("met", false)):
+			return false
+	return true
+
+
+func _current_stat_value(stat: String) -> int:
+	var stats: Dictionary = character_progression.get("base_stats", {})
+	return int(stats.get(stat, 0))
+
+
+func _stat_label(stat: String) -> String:
+	match stat:
+		"str":
+			return "Strength"
+		"dex":
+			return "Dexterity"
+		"vit":
+			return "Vitality"
+		"magic":
+			return "Magic"
+		_:
+			return stat.capitalize()
 
 
 func _add_disabled_slot(parent: Control, position: Vector2) -> void:

@@ -165,6 +165,7 @@ def cross_checks(report: Report) -> None:
     combat = load(RULES / "combat.v0.json")
     character_progression = load(RULES / "character_progression.v0.json")
     skills = load(RULES / "skills.v0.json")
+    skill_presentations = load(ASSETS / "skill_presentations.v0.json")
     items = load(RULES / "items.v0.json")
     item_templates = load(RULES / "item_templates.v0.json")
     treasure_classes = load(RULES / "treasure_classes.v0.json")
@@ -1027,13 +1028,17 @@ def cross_checks(report: Report) -> None:
     magic_bolt = skills.get("skills", {}).get("magic_bolt")
     if magic_bolt is None:
         report.fail("skills magic_bolt", "missing magic_bolt")
-    elif magic_bolt.get("kind") != "projectile":
-        report.fail("skills magic_bolt", "kind must be projectile")
+    elif magic_bolt.get("kind") != "projectile_attack":
+        report.fail("skills magic_bolt", "kind must be projectile_attack")
     elif int(magic_bolt.get("max_rank", 0)) <= 0:
         report.fail("skills magic_bolt", "max_rank must be positive")
     elif magic_bolt.get("targeting") != "direction_or_target":
         report.fail("skills magic_bolt", "targeting must be direction_or_target")
-    elif float(magic_bolt.get("range", 0)) <= 0 or float(magic_bolt.get("projectile_speed", 0)) <= 0:
+    elif int(magic_bolt.get("tree", {}).get("tier", 0)) <= 0 or int(magic_bolt.get("tree", {}).get("column", 0)) <= 0:
+        report.fail("skills magic_bolt", "tree tier/column must be positive")
+    elif int(magic_bolt.get("requirements", {}).get("stats", {}).get("magic", 0)) != 15:
+        report.fail("skills magic_bolt requirements", "magic requirement must be 15")
+    elif float(magic_bolt.get("projectile", {}).get("range", 0)) <= 0 or float(magic_bolt.get("projectile", {}).get("speed", 0)) <= 0:
         report.fail("skills magic_bolt", "range/projectile_speed must be positive")
     elif magic_bolt.get("cooldown", {}).get("type") != "attack_interval_multiplier":
         report.fail("skills magic_bolt", "cooldown type must be attack_interval_multiplier")
@@ -1041,14 +1046,60 @@ def cross_checks(report: Report) -> None:
         report.fail("skills magic_bolt", "cooldown multiplier must be positive")
     else:
         dmg = magic_bolt["damage"]
-        rank_one_min = int(dmg["min_base"])
-        rank_one_max = int(dmg["max_base"])
-        rank_max_min = rank_one_min + int(dmg["min_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
-        rank_max_max = rank_one_max + int(dmg["max_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
-        if rank_one_max < rank_one_min or rank_max_max < rank_max_min:
-            report.fail("skills magic_bolt damage", "damage max must be >= min at every rank")
+        if dmg.get("type") != "rank_linear_range":
+            report.fail("skills magic_bolt damage", "damage type must be rank_linear_range")
         else:
-            report.ok("skills magic_bolt declarative tuning is valid")
+            rank_one_min = int(dmg["min_base"])
+            rank_one_max = int(dmg["max_base"])
+            rank_max_min = rank_one_min + int(dmg["min_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
+            rank_max_max = rank_one_max + int(dmg["max_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
+            if rank_one_max < rank_one_min or rank_max_max < rank_max_min:
+                report.fail("skills magic_bolt damage", "damage max must be >= min at every rank")
+            else:
+                report.ok("skills magic_bolt declarative tuning is valid")
+
+    missing_skill_presentations = sorted(set(skills.get("skills", {})) - set(skill_presentations.get("skills", {})))
+    extra_skill_presentations = sorted(set(skill_presentations.get("skills", {})) - set(skills.get("skills", {})))
+    if missing_skill_presentations:
+        report.fail("skill_presentations coverage", f"missing presentations for {missing_skill_presentations}")
+    elif extra_skill_presentations:
+        report.fail("skill_presentations keys", f"unknown skills {extra_skill_presentations}")
+    elif magic_bolt is not None:
+        presentation = skill_presentations["skills"].get("magic_bolt", {})
+        if presentation.get("projectile_visual") != magic_bolt.get("projectile", {}).get("visual"):
+            report.fail("skill_presentations magic_bolt", "projectile_visual must match rules projectile.visual")
+        else:
+            report.ok("skill presentations cover skill rules")
+
+    if magic_bolt is not None:
+        for skill_id, skill in skills.get("skills", {}).items():
+            for req in skill.get("requirements", {}).get("skills", []):
+                required_id = req.get("skill_id", "")
+                required_rank = int(req.get("rank", 0))
+                if required_id not in skills.get("skills", {}):
+                    report.fail("skills prerequisites", f"{skill_id} references unknown skill {required_id}")
+                    break
+                if required_rank > int(skills["skills"][required_id]["max_rank"]):
+                    report.fail("skills prerequisites", f"{skill_id} requires {required_id} rank beyond max")
+                    break
+            else:
+                continue
+            break
+        else:
+            report.ok("skill prerequisites reference known skills")
+
+    if magic_bolt is not None:
+        skill_golden = skill_magic_golden.get("skill", {})
+        if skill_golden.get("class") != magic_bolt.get("class"):
+            report.fail("skill_points golden skill", "class must match skills.v0.json")
+        elif skill_golden.get("tree") != magic_bolt.get("tree"):
+            report.fail("skill_points golden skill", "tree must match skills.v0.json")
+        elif skill_golden.get("kind") != magic_bolt.get("kind"):
+            report.fail("skill_points golden skill", "kind must match skills.v0.json")
+        elif skill_golden.get("requirements") != magic_bolt.get("requirements"):
+            report.fail("skill_points golden skill", "requirements must match skills.v0.json")
+        else:
+            report.ok("skill_points golden skill catalog metadata matches rules")
 
     failed_skill_magic = False
     if magic_bolt is None:
@@ -1088,7 +1139,7 @@ def cross_checks(report: Report) -> None:
                 failed_skill_magic = True
                 break
     if not failed_skill_magic and magic_bolt is not None:
-        cost = magic_bolt["mana_cost"]
+        cost = magic_bolt["cost"]["mana"]
         dmg = magic_bolt["damage"]
         for case in skill_magic_golden["skill"]["rank_cases"]:
             rank = int(case["rank"])

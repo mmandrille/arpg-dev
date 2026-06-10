@@ -431,15 +431,41 @@ type ItemTemplateDef struct {
 
 // SkillDef is a server-authoritative active skill definition.
 type SkillDef struct {
-	Name            string            `json:"name"`
-	Kind            string            `json:"kind"`
-	MaxRank         int               `json:"max_rank"`
-	Targeting       string            `json:"targeting"`
-	Range           float64           `json:"range"`
-	ProjectileSpeed float64           `json:"projectile_speed"`
-	ManaCost        SkillRankValueDef `json:"mana_cost"`
-	Damage          SkillDamageDef    `json:"damage"`
-	Cooldown        SkillCooldownDef  `json:"cooldown"`
+	Name         string              `json:"name"`
+	Class        string              `json:"class"`
+	Tree         SkillTreeDef        `json:"tree"`
+	Kind         string              `json:"kind"`
+	MaxRank      int                 `json:"max_rank"`
+	Targeting    string              `json:"targeting"`
+	Requirements SkillRequirementDef `json:"requirements"`
+	Cost         SkillCostDef        `json:"cost"`
+	Damage       SkillDamageDef      `json:"damage"`
+	Projectile   SkillProjectileDef  `json:"projectile"`
+	Cooldown     SkillCooldownDef    `json:"cooldown"`
+}
+
+// SkillTreeDef positions a skill in a class skill tree.
+type SkillTreeDef struct {
+	Tier   int `json:"tier"`
+	Column int `json:"column"`
+}
+
+// SkillRequirementDef declares deterministic requirements for learning and
+// using a skill.
+type SkillRequirementDef struct {
+	Level  int                    `json:"level"`
+	Stats  map[string]int         `json:"stats"`
+	Skills []SkillPrerequisiteDef `json:"skills"`
+}
+
+type SkillPrerequisiteDef struct {
+	SkillID string `json:"skill_id"`
+	Rank    int    `json:"rank"`
+}
+
+// SkillCostDef declares rank-scaled resource costs.
+type SkillCostDef struct {
+	Mana SkillRankValueDef `json:"mana"`
 }
 
 // SkillRankValueDef is a rank-scaled integer value. Rank 1 uses Base.
@@ -450,10 +476,18 @@ type SkillRankValueDef struct {
 
 // SkillDamageDef controls the deterministic rank-scaled damage range.
 type SkillDamageDef struct {
-	MinBase    int `json:"min_base"`
-	MaxBase    int `json:"max_base"`
-	MinPerRank int `json:"min_per_rank"`
-	MaxPerRank int `json:"max_per_rank"`
+	Type       string `json:"type"`
+	MinBase    int    `json:"min_base"`
+	MaxBase    int    `json:"max_base"`
+	MinPerRank int    `json:"min_per_rank"`
+	MaxPerRank int    `json:"max_per_rank"`
+}
+
+// SkillProjectileDef defines server-owned projectile behavior for a skill.
+type SkillProjectileDef struct {
+	Range  float64 `json:"range"`
+	Speed  float64 `json:"speed"`
+	Visual string  `json:"visual"`
 }
 
 // SkillCooldownDef defines how a skill cooldown is derived.
@@ -2240,49 +2274,84 @@ func validateSkillRules(skills map[string]SkillDef) error {
 	if len(skills) == 0 {
 		return fmt.Errorf("game: invalid rules skills: at least one skill is required")
 	}
-	def, ok := skills[magicBoltSkillID]
-	if !ok {
-		return fmt.Errorf("game: invalid rules skills: missing %s", magicBoltSkillID)
-	}
-	if def.Name == "" {
-		return fmt.Errorf("game: invalid rules skills.%s.name: required", magicBoltSkillID)
-	}
-	if def.Kind != "projectile" {
-		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", magicBoltSkillID, def.Kind)
-	}
-	if def.MaxRank <= 0 {
-		return fmt.Errorf("game: invalid rules skills.%s.max_rank: must be positive", magicBoltSkillID)
-	}
-	if def.Targeting != "direction_or_target" {
-		return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s", magicBoltSkillID, def.Targeting)
-	}
-	if def.Range <= 0 {
-		return fmt.Errorf("game: invalid rules skills.%s.range: must be positive", magicBoltSkillID)
-	}
-	if def.ProjectileSpeed <= 0 {
-		return fmt.Errorf("game: invalid rules skills.%s.projectile_speed: must be positive", magicBoltSkillID)
-	}
-	if def.ManaCost.Base < 0 || def.ManaCost.PerRank < 0 {
-		return fmt.Errorf("game: invalid rules skills.%s.mana_cost: values must be non-negative", magicBoltSkillID)
-	}
-	if def.Damage.MinBase < 0 || def.Damage.MaxBase < def.Damage.MinBase {
-		return fmt.Errorf("game: invalid rules skills.%s.damage: base damage must be valid", magicBoltSkillID)
-	}
-	if def.Damage.MinPerRank < 0 || def.Damage.MaxPerRank < 0 {
-		return fmt.Errorf("game: invalid rules skills.%s.damage: per-rank damage must be non-negative", magicBoltSkillID)
-	}
-	if def.Cooldown.Type != "attack_interval_multiplier" {
-		return fmt.Errorf("game: invalid rules skills.%s.cooldown.type: unsupported %s", magicBoltSkillID, def.Cooldown.Type)
-	}
-	if def.Cooldown.Multiplier <= 0 {
-		return fmt.Errorf("game: invalid rules skills.%s.cooldown.multiplier: must be positive", magicBoltSkillID)
-	}
 	for id, skill := range skills {
-		if id == magicBoltSkillID {
-			continue
+		if id == "" {
+			return fmt.Errorf("game: invalid rules skills: empty skill id")
+		}
+		if skill.Name == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.name: required", id)
+		}
+		if skill.Class == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.class: required", id)
+		}
+		if skill.Tree.Tier <= 0 || skill.Tree.Column <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.tree: tier and column must be positive", id)
+		}
+		if skill.Kind != "projectile_attack" {
+			return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", id, skill.Kind)
 		}
 		if skill.MaxRank <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.max_rank: must be positive", id)
+		}
+		if skill.Targeting != "direction_or_target" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s", id, skill.Targeting)
+		}
+		if err := validateSkillRequirements(id, skill.Requirements, skills); err != nil {
+			return err
+		}
+		if skill.Cost.Mana.Base < 0 || skill.Cost.Mana.PerRank < 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.cost.mana: values must be non-negative", id)
+		}
+		if skill.Damage.Type != "rank_linear_range" {
+			return fmt.Errorf("game: invalid rules skills.%s.damage.type: unsupported %s", id, skill.Damage.Type)
+		}
+		if skill.Damage.MinBase < 0 || skill.Damage.MaxBase < skill.Damage.MinBase {
+			return fmt.Errorf("game: invalid rules skills.%s.damage: base damage must be valid", id)
+		}
+		if skill.Damage.MinPerRank < 0 || skill.Damage.MaxPerRank < 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.damage: per-rank damage must be non-negative", id)
+		}
+		if skill.Projectile.Range <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.projectile.range: must be positive", id)
+		}
+		if skill.Projectile.Speed <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.projectile.speed: must be positive", id)
+		}
+		if skill.Projectile.Visual == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.projectile.visual: required", id)
+		}
+		if skill.Cooldown.Type != "attack_interval_multiplier" {
+			return fmt.Errorf("game: invalid rules skills.%s.cooldown.type: unsupported %s", id, skill.Cooldown.Type)
+		}
+		if skill.Cooldown.Multiplier <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.cooldown.multiplier: must be positive", id)
+		}
+	}
+	return nil
+}
+
+func validateSkillRequirements(skillID string, req SkillRequirementDef, skills map[string]SkillDef) error {
+	if req.Level <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.requirements.level: must be positive", skillID)
+	}
+	for stat, value := range req.Stats {
+		if !isSupportedRequirementStat(stat) {
+			return fmt.Errorf("game: invalid rules skills.%s.requirements.stats.%s: unsupported requirement", skillID, stat)
+		}
+		if value <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.requirements.stats.%s: must be positive", skillID, stat)
+		}
+	}
+	for _, prereq := range req.Skills {
+		if prereq.SkillID == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.requirements.skills: skill_id is required", skillID)
+		}
+		required, ok := skills[prereq.SkillID]
+		if !ok {
+			return fmt.Errorf("game: invalid rules skills.%s.requirements.skills.%s: unknown skill", skillID, prereq.SkillID)
+		}
+		if prereq.Rank <= 0 || prereq.Rank > required.MaxRank {
+			return fmt.Errorf("game: invalid rules skills.%s.requirements.skills.%s.rank: must be within max rank", skillID, prereq.SkillID)
 		}
 	}
 	return nil

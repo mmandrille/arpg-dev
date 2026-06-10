@@ -2555,7 +2555,7 @@ func skillManaCost(def SkillDef, rank int) int {
 	if rank < 1 {
 		rank = 1
 	}
-	cost := def.ManaCost.Base + def.ManaCost.PerRank*(rank-1)
+	cost := def.Cost.Mana.Base + def.Cost.Mana.PerRank*(rank-1)
 	if cost < 0 {
 		return 0
 	}
@@ -2586,7 +2586,7 @@ func (s *Sim) skillCastDirection(def SkillDef, cast *CastSkillIntent, player *en
 		if target == nil || target.kind != monsterEntity || target.hp <= 0 {
 			return Vec2{}, 0, "invalid_target"
 		}
-		if distance(player.pos, target.pos) > def.Range+meleeRangeEpsilon {
+		if distance(player.pos, target.pos) > def.Projectile.Range+meleeRangeEpsilon {
 			return Vec2{}, 0, "target_out_of_range"
 		}
 		dir := normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
@@ -2619,8 +2619,8 @@ func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef,
 		targetID:        targetID,
 		projectileDefID: skillID,
 		dir:             normalize(dir),
-		speed:           def.ProjectileSpeed,
-		maxDistance:     def.Range,
+		speed:           def.Projectile.Speed,
+		maxDistance:     def.Projectile.Range,
 		damageRange:     skillDamageRange(def, rank),
 		sourceMsgID:     in.MessageID,
 		sourceCorrID:    in.CorrelationID,
@@ -4882,7 +4882,7 @@ func (s *Sim) SkillProgressionView() SkillProgressionView {
 			SkillID:  skillID,
 			Rank:     rank,
 			MaxRank:  def.MaxRank,
-			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank,
+			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank && s.skillRequirementsMet(def),
 		})
 	}
 	return SkillProgressionView{
@@ -5022,6 +5022,31 @@ func (s *Sim) requirementCurrentValue(stat string) int {
 func (s *Sim) requirementsMet(requirements map[string]int) bool {
 	_, met := s.requirementStatus(requirements)
 	return met
+}
+
+func (s *Sim) skillRequirementsMet(def SkillDef) bool {
+	if !s.requirementsMet(skillBaseRequirements(def.Requirements)) {
+		return false
+	}
+	for _, prereq := range def.Requirements.Skills {
+		if s.progression.SkillRanks[prereq.SkillID] < prereq.Rank {
+			return false
+		}
+	}
+	return true
+}
+
+func skillBaseRequirements(req SkillRequirementDef) map[string]int {
+	out := map[string]int{}
+	if req.Level > 0 {
+		out["level"] = req.Level
+	}
+	for _, stat := range []string{"str", "dex", "vit", "magic"} {
+		if required := req.Stats[stat]; required > 0 {
+			out[stat] = required
+		}
+	}
+	return out
 }
 
 func (s *Sim) annotateRequirementStatus(requirements map[string]int, set func([]RequirementStatusView, *bool)) {

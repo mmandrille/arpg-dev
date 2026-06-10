@@ -30,6 +30,8 @@ func _run() -> void:
 	var state := bar.get_debug_state()
 	_assert_eq("rank starts zero", int(state.get("rank", -1)), 0)
 	_assert_false("unranked skill disabled", bool(state.get("enabled", true)))
+	_assert_eq("unranked slot text", str(state.get("slot_text", "")), "-")
+	_assert_true("tooltip uses catalog name", str(state.get("tooltip_text", "")).contains("Magic Bolt"))
 
 	bar.set_skill_progression({
 		"unspent_skill_points": 0,
@@ -37,6 +39,7 @@ func _run() -> void:
 	})
 	state = bar.get_debug_state()
 	_assert_true("ranked skill enabled", bool(state.get("enabled", false)))
+	_assert_eq("ranked slot text from presentation", str(state.get("slot_text", "")), "M")
 	bar.use_slot()
 	_assert_eq("cast signal count", emitted.size(), 1)
 	_assert_eq("cast signal skill", str(emitted[0]), "magic_bolt")

@@ -3,7 +3,7 @@
   "world_id": "dungeon_levels",
   "seed": "v44_skill_points_magic_bolt",
   "title": "Skill points and Magic Bolt",
-  "description": "Level to 3, prove the new stat and skill point cadence, spend Magic Bolt, cast it, reject recast during cooldown, recover, cast again, and verify state/reconnect/replay/fresh persistence.",
+  "description": "Level to 5, prove Magic Bolt rejects at magic 5, allocate ten stat points into magic, learn/cast Magic Bolt, reject recast during cooldown, recover, and verify state/reconnect/replay/fresh persistence.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
     { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2, "timeout_s": 60 },
@@ -12,17 +12,31 @@
       "level": 2,
       "unspent_stat_points": 3,
       "vit": 5,
-      "derived_stats": { "max_hp": 10, "attack_interval_ticks": 20 }
+      "magic": 5,
+      "derived_stats": { "max_hp": 10, "max_mana": 10, "attack_interval_ticks": 20 }
     },
     {
       "action": "allocate_stat",
       "stat": "vit",
-      "points": 3,
+      "points": 2,
+      "expect_progression": {
+        "level": 2,
+        "unspent_stat_points": 1,
+        "vit": 7,
+        "magic": 5,
+        "derived_stats": { "max_hp": 12, "max_mana": 10, "attack_interval_ticks": 20 }
+      }
+    },
+    {
+      "action": "allocate_stat",
+      "stat": "magic",
+      "points": 1,
       "expect_progression": {
         "level": 2,
         "unspent_stat_points": 0,
-        "vit": 8,
-        "derived_stats": { "max_hp": 13, "attack_interval_ticks": 20 }
+        "vit": 7,
+        "magic": 6,
+        "derived_stats": { "max_hp": 12, "max_mana": 11, "attack_interval_ticks": 20 }
       }
     },
     { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 3, "timeout_s": 90 },
@@ -30,8 +44,59 @@
       "action": "assert_character_progression",
       "level": 3,
       "unspent_stat_points": 3,
-      "vit": 8,
-      "derived_stats": { "max_hp": 13, "attack_interval_ticks": 20 }
+      "vit": 7,
+      "magic": 6,
+      "derived_stats": { "max_hp": 12, "max_mana": 11, "attack_interval_ticks": 20 }
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "magic_bolt",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": false
+    },
+    { "action": "allocate_skill_point", "skill_id": "magic_bolt", "expect_reject": "skill_requirements_not_met" },
+    {
+      "action": "allocate_stat",
+      "stat": "magic",
+      "points": 3,
+      "expect_progression": {
+        "level": 3,
+        "unspent_stat_points": 0,
+        "vit": 7,
+        "magic": 9,
+        "derived_stats": { "max_hp": 12, "max_mana": 14, "attack_interval_ticks": 20 }
+      }
+    },
+    { "action": "use_stair", "direction": "up", "max_ticks": 120 },
+    { "action": "wait_ticks", "ticks": 1000, "timeout_s": 90 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 99, "timeout_s": 160 },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_archer", "count": 99, "timeout_s": 80 },
+    { "action": "wait_ticks", "ticks": 1000, "timeout_s": 90 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1, "timeout_s": 60 },
+    {
+      "action": "assert_character_progression",
+      "level": 5,
+      "unspent_stat_points": 6,
+      "vit": 7,
+      "magic": 9,
+      "derived_stats": { "max_hp": 12, "max_mana": 14, "attack_interval_ticks": 20 }
+    },
+    {
+      "action": "allocate_stat",
+      "stat": "magic",
+      "points": 6,
+      "expect_progression": {
+        "level": 5,
+        "unspent_stat_points": 0,
+        "vit": 7,
+        "magic": 15,
+        "derived_stats": { "max_hp": 12, "max_mana": 20, "attack_interval_ticks": 20 }
+      }
     },
     {
       "action": "assert_skill_progression",
@@ -81,7 +146,7 @@
     }
   ],
   "assertions": [
-    { "type": "current_level", "equals": -1 },
+    { "type": "current_level", "equals": -3 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "event_seen", "event_type": "experience_gained" },
     { "type": "event_seen", "event_type": "character_leveled" },
@@ -92,19 +157,19 @@
     { "type": "event_seen", "event_type": "skill_cooldown_rejected" },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 4 },
     { "type": "monster_damage_at_least", "monster_def_id": "dungeon_mob", "damage": 4 },
-    { "type": "character_progression", "level": 3, "unspent_stat_points": 3, "vit": 8, "derived_stats": { "max_hp": 13, "attack_interval_ticks": 20 } },
+    { "type": "character_progression", "level": 5, "unspent_stat_points": 0, "vit": 7, "magic": 15, "derived_stats": { "max_hp": 12, "max_mana": 20, "attack_interval_ticks": 20 } },
     { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false },
     { "type": "skill_cooldown", "skill_id": "magic_bolt", "remaining_ticks": { "between": [1, 40] }, "total_ticks": 40 },
-    { "type": "player_max_hp_equals", "equals": 13 }
+    { "type": "player_max_hp_equals", "equals": 12 }
   ],
   "fresh_session_checks": [
     {
       "world_id": "dungeon_levels",
       "steps": [],
       "assertions": [
-        { "type": "character_progression", "level": 3, "unspent_stat_points": 3, "vit": 8, "derived_stats": { "max_hp": 13, "attack_interval_ticks": 20 } },
+        { "type": "character_progression", "level": 5, "unspent_stat_points": 0, "vit": 7, "magic": 15, "derived_stats": { "max_hp": 12, "max_mana": 20, "attack_interval_ticks": 20 } },
         { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false },
-        { "type": "player_max_hp_equals", "equals": 13 }
+        { "type": "player_max_hp_equals", "equals": 12 }
       ]
     }
   ],

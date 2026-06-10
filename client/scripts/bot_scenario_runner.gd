@@ -15,6 +15,7 @@ const STEP_TYPES_WAIT := [
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel",
 	"wait_boss_health_bar", "wait_remote_player_count",
+	"wait_ticks",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -100,6 +101,7 @@ const ALL_STEP_TYPES: Array = [
 	"click_waypoint_level",
 	"wait_boss_health_bar", "assert_boss_health_bar",
 	"wait_remote_player_count", "assert_remote_player_count",
+	"wait_ticks",
 ]
 
 var scenario: Dictionary = {}
@@ -247,6 +249,8 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _boss_health_bar_matches(step, state)
 		"wait_remote_player_count":
 			return _remote_player_count_matches(step, state)
+		"wait_ticks":
+			return _wait_ticks(step, state)
 		"wait_entity":
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
@@ -319,6 +323,28 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, [])
 			return eids.is_empty()
+	return false
+
+
+func _wait_ticks(step: Dictionary, state: Dictionary) -> bool:
+	var current_tick := int(state.get("last_tick", 0))
+	if not _memory.has("wait_ticks_target"):
+		_memory["wait_ticks_target"] = current_tick + int(step.get("ticks", 0))
+		_memory["wait_ticks_last_pulse"] = -999.0
+	var target_tick := int(_memory.get("wait_ticks_target", current_tick))
+	if current_tick >= target_tick:
+		_memory.erase("wait_ticks_target")
+		_memory.erase("wait_ticks_last_pulse")
+		return true
+	var pulse_s := float(step.get("pulse_s", 0.05))
+	if _step_elapsed - float(_memory.get("wait_ticks_last_pulse", -999.0)) >= pulse_s:
+		_memory["wait_ticks_last_pulse"] = _step_elapsed
+		pending_action = {
+			"type": "dispatch_intent",
+			"_type": "dispatch_intent",
+			"intent_type": "move_intent",
+			"payload": {"direction": {"x": 0, "y": 0}, "duration_ticks": 1},
+		}
 	return false
 
 
@@ -691,6 +717,21 @@ func _assert_skill_button_enabled(step: Dictionary, state: Dictionary) -> bool:
 			str(step.get("skill_id", "magic_bolt")), want, got, str(panel), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
+	if step.has("requirements_met") and bool(panel.get("requirements_met", false)) != bool(step.get("requirements_met", false)):
+		_fail("assert_skill_button_enabled requirements failed: want=%s got=%s panel=%s step=%d scenario=%s" % [
+			bool(step.get("requirements_met", false)), bool(panel.get("requirements_met", false)), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("skill_name") and str(panel.get("skill_name", "")) != str(step.get("skill_name", "")):
+		_fail("assert_skill_button_enabled skill_name failed: want=%s got=%s step=%d scenario=%s" % [
+			str(step.get("skill_name", "")), str(panel.get("skill_name", "")), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("tooltip_contains") and not str(panel.get("tooltip_body", "")).contains(str(step.get("tooltip_contains", ""))):
+		_fail("assert_skill_button_enabled tooltip failed: want contains=%s got=%s step=%d scenario=%s" % [
+			str(step.get("tooltip_contains", "")), str(panel.get("tooltip_body", "")), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
 	return true
 
 
@@ -715,12 +756,16 @@ func _skill_bar_matches(step: Dictionary, state: Dictionary) -> bool:
 		return false
 	if step.has("cooldown_fraction_max") and float(bar.get("cooldown_fraction", 2.0)) > float(step.get("cooldown_fraction_max", 1.0)):
 		return false
+	if step.has("slot_text") and str(bar.get("slot_text", "")) != str(step.get("slot_text", "")):
+		return false
+	if step.has("tooltip_contains") and not str(bar.get("tooltip_text", "")).contains(str(step.get("tooltip_contains", ""))):
+		return false
 	return true
 
 
 func _skill_bar_expectation(step: Dictionary) -> Dictionary:
 	var out := {}
-	for key in ["skill_id", "rank", "max_rank", "enabled", "disabled", "remaining_ticks", "remaining_ticks_min", "remaining_ticks_max", "total_ticks", "cooldown_fraction_min", "cooldown_fraction_max"]:
+	for key in ["skill_id", "rank", "max_rank", "enabled", "disabled", "remaining_ticks", "remaining_ticks_min", "remaining_ticks_max", "total_ticks", "cooldown_fraction_min", "cooldown_fraction_max", "slot_text", "tooltip_contains"]:
 		if step.has(key):
 			out[key] = step[key]
 	return out
@@ -1679,6 +1724,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "skill_id=%s" % str(step.get("skill_id", "magic_bolt"))
 		"wait_skill_bar", "assert_skill_bar", "use_skill_slot":
 			return "skill_bar=%s" % str(_skill_bar_expectation(step))
+		"wait_ticks":
+			return "ticks=%d" % int(step.get("ticks", 0))
 		"wait_boss_health_bar", "assert_boss_health_bar":
 			return "boss_health_bar=%s" % str(_boss_health_bar_expectation(step))
 		"assert_xp_bar":
@@ -1912,11 +1959,14 @@ static func validate_step(step: Dictionary, index: int) -> String:
 			return "client_steps[%d] (%s) requires enabled" % [index, stype]
 	if stype in ["wait_skill_bar", "assert_skill_bar"]:
 		var has_bar_expectation := false
-		for key in ["rank", "max_rank", "enabled", "disabled", "remaining_ticks", "remaining_ticks_min", "remaining_ticks_max", "total_ticks", "cooldown_fraction_min", "cooldown_fraction_max"]:
+		for key in ["rank", "max_rank", "enabled", "disabled", "remaining_ticks", "remaining_ticks_min", "remaining_ticks_max", "total_ticks", "cooldown_fraction_min", "cooldown_fraction_max", "slot_text", "tooltip_contains"]:
 			if step.has(key):
 				has_bar_expectation = true
 		if not has_bar_expectation:
 			return "client_steps[%d] (%s) requires at least one skill bar expectation" % [index, stype]
+	if stype == "wait_ticks":
+		if int(step.get("ticks", 0)) <= 0:
+			return "client_steps[%d] (%s) requires positive ticks" % [index, stype]
 	if stype in ["wait_boss_health_bar", "assert_boss_health_bar"]:
 		var has_boss_bar_expectation := false
 		for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max", "phase_kind", "pattern_id", "phase_index", "duration_ticks", "remaining_ticks_min", "remaining_ticks_max", "phase_ratio_min", "phase_ratio_max"]:

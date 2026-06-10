@@ -3,11 +3,11 @@ extends Control
 
 signal cast_skill_requested(skill_id: String)
 
-const MAGIC_BOLT_ID := "magic_bolt"
 const TICK_DURATION_S := 0.05
 
 var skill_progression: Dictionary = {}
 var _interactive: bool = true
+var _skill_id: String = ""
 var _rank: int = 0
 var _max_rank: int = 0
 var _remaining_ticks: float = 0.0
@@ -20,6 +20,8 @@ var _flash_color := Color("#f0dfbb")
 
 
 func _ready() -> void:
+	SkillRulesLoader.ensure_loaded()
+	_skill_id = _current_skill_id()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -39,7 +41,7 @@ func _process(delta: float) -> void:
 
 func set_skill_progression(next_progression: Dictionary) -> void:
 	skill_progression = next_progression.duplicate(true)
-	var skill := _skill_row(MAGIC_BOLT_ID)
+	var skill := _skill_row(_current_skill_id())
 	_rank = int(skill.get("rank", 0))
 	_max_rank = int(skill.get("max_rank", 0))
 	_render()
@@ -51,7 +53,7 @@ func set_skill_cooldowns(cooldowns: Array) -> void:
 		if typeof(row) != TYPE_DICTIONARY:
 			continue
 		var rec := row as Dictionary
-		if str(rec.get("skill_id", "")) != MAGIC_BOLT_ID:
+		if str(rec.get("skill_id", "")) != _current_skill_id():
 			continue
 		_remaining_ticks = float(rec.get("remaining_ticks", 0))
 		_total_ticks = int(rec.get("total_ticks", 0))
@@ -79,12 +81,13 @@ func flash_rejected() -> void:
 func use_slot() -> void:
 	if not _slot_enabled():
 		return
-	cast_skill_requested.emit(MAGIC_BOLT_ID)
+	cast_skill_requested.emit(_current_skill_id())
 
 
 func get_debug_state() -> Dictionary:
 	return {
-		"skill_id": MAGIC_BOLT_ID,
+		"skill_id": _current_skill_id(),
+		"skill_name": _skill_name(_current_skill_id()),
 		"rank": _rank,
 		"max_rank": _max_rank,
 		"enabled": _slot_enabled(),
@@ -92,6 +95,8 @@ func get_debug_state() -> Dictionary:
 		"remaining_ticks": int(ceil(_remaining_ticks)),
 		"total_ticks": _total_ticks,
 		"cooldown_fraction": _cooldown_fraction(),
+		"slot_text": _slot.text if _slot != null else "",
+		"tooltip_text": _slot.tooltip_text if _slot != null else "",
 	}
 
 
@@ -113,8 +118,8 @@ func _build() -> void:
 	_panel.add_child(box)
 
 	_slot = Button.new()
-	_slot.text = "M"
-	_slot.tooltip_text = "Magic Bolt"
+	_slot.text = _skill_icon_label_text(_current_skill_id())
+	_slot.tooltip_text = _tooltip_text(_current_skill_id())
 	_slot.focus_mode = Control.FOCUS_NONE
 	_slot.custom_minimum_size = Vector2(52, 52)
 	_slot.pressed.connect(use_slot)
@@ -143,7 +148,8 @@ func _render() -> void:
 	if _slot == null or _cooldown == null:
 		return
 	_slot.disabled = not _slot_enabled()
-	_slot.text = "M" if _rank > 0 else "-"
+	_slot.text = _skill_icon_label_text(_current_skill_id()) if _rank > 0 else "-"
+	_slot.tooltip_text = _tooltip_text(_current_skill_id())
 	_cooldown.value = _cooldown_fraction()
 
 
@@ -163,6 +169,27 @@ func _skill_row(skill_id: String) -> Dictionary:
 		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("skill_id", "")) == skill_id:
 			return (row as Dictionary)
 	return {}
+
+
+func _current_skill_id() -> String:
+	return SkillRulesLoader.first_skill_id()
+
+
+func _skill_name(skill_id: String) -> String:
+	var def := SkillRulesLoader.skill_definition(skill_id)
+	return str(def.get("name", skill_id))
+
+
+func _skill_icon_label_text(skill_id: String) -> String:
+	var presentation := SkillRulesLoader.skill_presentation(skill_id)
+	var icon: Dictionary = presentation.get("icon", {})
+	return str(icon.get("label", skill_id.substr(0, 1).to_upper()))
+
+
+func _tooltip_text(skill_id: String) -> String:
+	var presentation := SkillRulesLoader.skill_presentation(skill_id)
+	var summary := str(presentation.get("summary", "Skill"))
+	return "%s\n%s" % [_skill_name(skill_id), summary]
 
 
 func _flash(color: Color) -> void:

@@ -573,6 +573,7 @@ func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing
 
 func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		rules.CharacterProgression.BaseStats.Magic = 15
 		dummy := rules.Monsters["training_dummy"]
 		dummy.MaxHP = 1
 		dummy.XPReward = 50

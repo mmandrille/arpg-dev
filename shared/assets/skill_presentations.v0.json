@@ -1,0 +1,15 @@
+{
+  "version": 0,
+  "skills": {
+    "magic_bolt": {
+      "icon": {
+        "label": "M",
+        "shape": "bolt",
+        "color": "#62b7ff",
+        "accent": "#e8f7ff"
+      },
+      "summary": "Projectile spell",
+      "projectile_visual": "magic_bolt_projectile"
+    }
+  }
+}

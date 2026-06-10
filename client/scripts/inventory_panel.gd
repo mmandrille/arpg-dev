@@ -10,6 +10,7 @@ const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
 const BAG_COLUMNS := 5
 const BASE_INVENTORY_ROWS := 3
+const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 const TITLE_FONT_SIZE := 33
 const BODY_FONT_SIZE := 23
 const SLOT_FONT_SIZE := 23
@@ -49,6 +50,7 @@ const PAPER_DOLL_SLOT_POSITIONS := {
 
 var inventory: Array = []
 var equipped: Dictionary = {}
+var hotbar: Array = []
 var inventory_rows: int = BASE_INVENTORY_ROWS
 var inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS
 var gold: int = 0
@@ -188,11 +190,14 @@ func _sync_viewport_size() -> void:
 	_reposition_panel()
 
 
-func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0) -> void:
+func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0, next_hotbar: Array = []) -> void:
 	inventory = []
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
 	equipped = next_equipped.duplicate(true)
+	hotbar = []
+	for slot in next_hotbar:
+		hotbar.append((slot as Dictionary).duplicate(true))
 	inventory_rows = max(0, next_inventory_rows)
 	inventory_capacity = max(0, next_inventory_capacity)
 	gold = max(0, next_gold)
@@ -215,6 +220,8 @@ func get_debug_state() -> Dictionary:
 		"inventory_rows": inventory_rows,
 		"inventory_capacity": inventory_capacity,
 		"gold": gold,
+		"hotbar_assigned_item_ids": _debug_hotbar_assigned_item_ids(),
+		"hotbar_assigned_inventory_count": _hotbar_assigned_inventory_count(),
 		"bag_columns": _bag_grid.columns if _bag_grid != null else BAG_COLUMNS,
 		"available_slot_count": inventory_capacity,
 		"rendered_slot_count": _rendered_bag_slot_count,
@@ -518,6 +525,23 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var font_size := ICON_FONT_SIZE
 	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.38), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#f4ead8"))
+	_draw_hotbar_badge(slot, item)
+
+
+func _draw_hotbar_badge(slot: Control, item: Dictionary) -> void:
+	var assigned_slots := _hotbar_slots_for_item(str(item.get("item_instance_id", "")))
+	if assigned_slots.is_empty():
+		return
+	var label := "H%s" % _hotbar_label_for_slot(int(assigned_slots[0]))
+	if assigned_slots.size() > 1:
+		label = "H+"
+	var badge_rect := Rect2(Vector2(slot.size.x - 28.0, 3.0), Vector2(24.0, 16.0))
+	slot.draw_rect(badge_rect, Color("#15110a"), true)
+	slot.draw_rect(badge_rect, Color("#d6a94d"), false, 1.0)
+	var font := slot.get_theme_default_font()
+	var font_size := 10
+	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	slot.draw_string(font, badge_rect.position + Vector2((badge_rect.size.x - text_size.x) * 0.5, 12.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#f4ead8"))
 
 
 func _title(text: String) -> Label:
@@ -767,6 +791,7 @@ func _tooltip_lines(item: Dictionary) -> Array:
 	var summary_lines := _detail_lines(item, false, false)
 	if not summary_lines.is_empty():
 		lines.append_array(summary_lines)
+		_append_hotbar_tooltip_line(lines, item)
 		return lines
 	var slot := str(def.get("slot", ""))
 	if slot != "":
@@ -800,7 +825,53 @@ func _tooltip_lines(item: Dictionary) -> Array:
 		lines.append("Reach: %s" % str(def["reach"]))
 	if def.has("attack_mode"):
 		lines.append("Mode: %s" % str(def["attack_mode"]))
+	_append_hotbar_tooltip_line(lines, item)
 	return lines
+
+
+func _append_hotbar_tooltip_line(lines: Array, item: Dictionary) -> void:
+	var hotbar_labels := _hotbar_labels_for_item(str(item.get("item_instance_id", "")))
+	if not hotbar_labels.is_empty():
+		lines.append("Assigned to hotbar: %s" % ", ".join(hotbar_labels))
+
+
+func _hotbar_slots_for_item(item_instance_id: String) -> Array:
+	var slots: Array = []
+	if item_instance_id == "":
+		return slots
+	for slot in hotbar:
+		if typeof(slot) != TYPE_DICTIONARY:
+			continue
+		var rec := slot as Dictionary
+		var assigned_id = rec.get("item_instance_id", null)
+		if assigned_id != null and str(assigned_id) == item_instance_id:
+			var slot_index := int(rec.get("slot_index", -1))
+			if slot_index >= 0 and slot_index < HOTKEY_LABELS.size():
+				slots.append(slot_index)
+	return slots
+
+
+func _hotbar_labels_for_item(item_instance_id: String) -> Array:
+	var labels: Array = []
+	for slot_index in _hotbar_slots_for_item(item_instance_id):
+		var index := int(slot_index)
+		if index >= 0 and index < HOTKEY_LABELS.size():
+			labels.append(_hotbar_label_for_slot(index))
+	return labels
+
+
+func _hotbar_label_for_slot(slot_index: int) -> String:
+	if slot_index >= 0 and slot_index < HOTKEY_LABELS.size():
+		return HOTKEY_LABELS[slot_index]
+	return str(slot_index + 1)
+
+
+func _hotbar_assigned_inventory_count() -> int:
+	var total := 0
+	for item in _bag_items():
+		if not _hotbar_slots_for_item(str((item as Dictionary).get("item_instance_id", ""))).is_empty():
+			total += 1
+	return total
 
 
 func _consumable_effect_lines(def: Dictionary) -> Array:
@@ -1117,6 +1188,15 @@ func _debug_presentations() -> Dictionary:
 		if def_id != "":
 			out[def_id] = item_presentations.has(def_id)
 	return out
+
+
+func _debug_hotbar_assigned_item_ids() -> Array:
+	var ids: Array = []
+	for item in _bag_items():
+		var item_id := str((item as Dictionary).get("item_instance_id", ""))
+		if item_id != "" and not _hotbar_slots_for_item(item_id).is_empty():
+			ids.append(item_id)
+	return ids
 
 
 func _debug_paper_doll_slots() -> Dictionary:

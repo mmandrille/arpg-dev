@@ -11,3 +11,6 @@ test-go: ## Run all Go tests
 
 lint-determinism: ## Check game/ for determinism violations (time.Now, math/rand, bare map ranges)
 	cd $(SERVER_DIR) && go run ./cmd/determinism-lint ./internal/game/...
+
+regen-golden: ## Regenerate golden fixtures from current sim output (run after intentional formula changes)
+	cd $(SERVER_DIR) && go test ./internal/game/... -update -run Golden -v 2>&1 | grep -E 'updated golden|PASS|FAIL'

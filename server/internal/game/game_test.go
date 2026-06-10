@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"math"
 	"os"
@@ -9,6 +10,8 @@ import (
 	"strings"
 	"testing"
 )
+
+var update = flag.Bool("update", false, "rewrite golden fixtures with current sim output")
 
 // --- shared fixture helpers -------------------------------------------------
 
@@ -43,6 +46,19 @@ func loadGolden(t *testing.T, name string, v any) {
 	if err := json.Unmarshal(b, v); err != nil {
 		t.Fatalf("parse golden %s: %v", name, err)
 	}
+}
+
+func writeGolden(t *testing.T, name string, v any) {
+	t.Helper()
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		t.Fatalf("marshal golden %s: %v", name, err)
+	}
+	path := filepath.Join(sharedDir(t), "golden", name)
+	if err := os.WriteFile(path, append(b, '\n'), 0o644); err != nil {
+		t.Fatalf("write golden %s: %v", name, err)
+	}
+	t.Logf("updated golden: %s", name)
 }
 
 // --- rules ------------------------------------------------------------------
@@ -2034,11 +2050,15 @@ func TestItemRollsGolden(t *testing.T) {
 	}
 	loadGolden(t, "item_rolls.json", &golden)
 
-	for _, c := range golden.Cases {
+	for i, c := range golden.Cases {
 		sim := NewSim("sess_item_roll_"+c.Name, c.Seed, r)
 		got, ok := sim.rollItemTemplate(golden.TemplateID)
 		if !ok {
 			t.Fatalf("%s: rollItemTemplate returned false", c.Name)
+		}
+		if *update {
+			golden.Cases[i].Expected = got
+			continue
 		}
 		if got.ItemTemplateID != c.Expected.ItemTemplateID ||
 			got.DisplayName != c.Expected.DisplayName ||
@@ -2048,6 +2068,9 @@ func TestItemRollsGolden(t *testing.T) {
 			!sameStringSlice(got.EffectIDs, c.Expected.EffectIDs) {
 			t.Fatalf("%s: rolled payload = %+v, want %+v", c.Name, got, c.Expected)
 		}
+	}
+	if *update {
+		writeGolden(t, "item_rolls.json", golden)
 	}
 }
 
@@ -2063,16 +2086,23 @@ func TestTreasureClassRollsGolden(t *testing.T) {
 	}
 	loadGolden(t, "treasure_class_rolls.json", &golden)
 
-	for _, c := range golden.Cases {
+	for i, c := range golden.Cases {
 		got := rules.RollTreasureClass(golden.TreasureClassID, NewRNG(SeedToUint64(c.Seed)))
+		if *update {
+			golden.Cases[i].ExpectedDrops = got
+			continue
+		}
 		if len(got) != len(c.ExpectedDrops) {
 			t.Fatalf("%s: drops = %+v, want %+v", c.Name, got, c.ExpectedDrops)
 		}
-		for i := range got {
-			if got[i] != c.ExpectedDrops[i] {
-				t.Fatalf("%s: drop %d = %+v, want %+v", c.Name, i, got[i], c.ExpectedDrops[i])
+		for j := range got {
+			if got[j] != c.ExpectedDrops[j] {
+				t.Fatalf("%s: drop %d = %+v, want %+v", c.Name, j, got[j], c.ExpectedDrops[j])
 			}
 		}
+	}
+	if *update {
+		writeGolden(t, "treasure_class_rolls.json", golden)
 	}
 }
 

@@ -7,6 +7,8 @@ const MAGIC_BOLT_ID := "magic_bolt"
 
 var skill_progression: Dictionary = {}
 var interactive: bool = true
+var _hovered_skill_id: String = ""
+var _hover_controls: Array[Control] = []
 var _panel: PanelContainer
 var _points_label: Label
 var _rank_label: Label
@@ -46,6 +48,10 @@ func set_interactive(enabled: bool) -> void:
 	_render()
 
 
+func hovered_skill_id() -> String:
+	return _hovered_skill_id
+
+
 func get_debug_state() -> Dictionary:
 	var skill := _skill_row(MAGIC_BOLT_ID)
 	return {
@@ -56,6 +62,7 @@ func get_debug_state() -> Dictionary:
 		"max_rank": int(skill.get("max_rank", 0)),
 		"can_spend": bool(skill.get("can_spend", false)),
 		"spend_button_enabled": _spend_button != null and not _spend_button.disabled,
+		"hovered_skill_id": _hovered_skill_id,
 	}
 
 
@@ -67,6 +74,12 @@ func bot_click_skill_button(skill_id: String = MAGIC_BOLT_ID) -> void:
 	_spend_button.pressed.emit()
 
 
+func bot_hover_skill(skill_id: String = MAGIC_BOLT_ID) -> void:
+	if skill_id != MAGIC_BOLT_ID:
+		return
+	_hovered_skill_id = skill_id
+
+
 func _sync_viewport_size() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -74,37 +87,42 @@ func _sync_viewport_size() -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
-	_panel.custom_minimum_size = Vector2(310, 190)
-	_panel.position = Vector2(360, 118)
+	_panel.custom_minimum_size = Vector2(330, 500)
+	_panel.position = Vector2(16, 118)
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	add_child(_panel)
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
-	root.custom_minimum_size = Vector2(284, 164)
+	root.custom_minimum_size = Vector2(304, 470)
 	_panel.add_child(root)
 
-	var title := _label("Skills", 28, Color("#f0dfbb"))
+	var title := _label("Skills", 33, Color("#f0dfbb"))
 	root.add_child(title)
-	_points_label = _label("", 20, Color("#d8c7a6"))
+	_points_label = _value_label()
 	root.add_child(_points_label)
 
+	root.add_child(_section_label("Active"))
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	row.add_theme_constant_override("separation", 8)
+	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	root.add_child(row)
-	var name_label := _label("Magic Bolt", 21, Color("#f0dfbb"))
-	name_label.custom_minimum_size = Vector2(130, 30)
+	var name_label := _value_label("Magic Bolt")
+	name_label.custom_minimum_size = Vector2(178, 30)
 	row.add_child(name_label)
-	_rank_label = _label("", 20, Color("#d8c7a6"))
-	_rank_label.custom_minimum_size = Vector2(70, 30)
+	_rank_label = _value_label()
+	_rank_label.custom_minimum_size = Vector2(62, 30)
 	row.add_child(_rank_label)
 	_spend_button = Button.new()
-	_spend_button.text = "Spend"
+	_spend_button.text = "+"
+	_spend_button.tooltip_text = "Spend skill point"
 	_spend_button.focus_mode = Control.FOCUS_NONE
-	_spend_button.custom_minimum_size = Vector2(70, 30)
+	_spend_button.custom_minimum_size = Vector2(38, 30)
 	_spend_button.pressed.connect(_on_spend_pressed)
 	row.add_child(_spend_button)
+	for control in [row, name_label, _rank_label, _spend_button]:
+		_bind_skill_hover(control, MAGIC_BOLT_ID)
 
 	_render()
 
@@ -135,11 +153,44 @@ func _skill_row(skill_id: String) -> Dictionary:
 	return {}
 
 
+func _bind_skill_hover(control: Control, skill_id: String) -> void:
+	if control == null:
+		return
+	if control.mouse_filter == Control.MOUSE_FILTER_IGNORE:
+		control.mouse_filter = Control.MOUSE_FILTER_PASS
+	_hover_controls.append(control)
+	control.mouse_entered.connect(func() -> void:
+		_hovered_skill_id = skill_id
+	)
+	control.mouse_exited.connect(func() -> void:
+		if not _mouse_over_skill_controls():
+			_hovered_skill_id = ""
+	)
+
+
+func _mouse_over_skill_controls() -> bool:
+	var mouse_pos := get_viewport().get_mouse_position()
+	for control in _hover_controls:
+		if control != null and control.is_inside_tree() and control.get_global_rect().has_point(mouse_pos):
+			return true
+	return false
+
+
 func _label(text: String, size: int, color: Color) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", color)
+	return label
+
+
+func _value_label(text: String = "") -> Label:
+	return _label(text, 23, Color("#d8c7a6"))
+
+
+func _section_label(text: String) -> Label:
+	var label := _value_label(text)
+	label.add_theme_color_override("font_color", Color("#c9a227"))
 	return label
 
 

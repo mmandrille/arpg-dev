@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_test_multiple_remote_players_update_and_remove_independently()
 	_test_path_reject_clears_held_click_state()
 	_test_capacity_reject_shows_bag_full_unequip_message()
+	_test_skill_function_key_selects_right_click_skill()
 	_test_loss_popup_shows_for_dead_local_player()
 	_test_dead_character_rows_are_disabled()
 	_test_character_panel_modes_for_v45()
@@ -366,6 +367,32 @@ func _test_capacity_reject_shows_bag_full_unequip_message() -> void:
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_skill_function_key_selects_right_click_skill() -> void:
+	var main = MainScript.new()
+	main.skill_progression = {
+		"unspent_skill_points": 0,
+		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false}],
+	}
+	var event := InputEventKey.new()
+	event.keycode = KEY_F1
+	_assert_eq("F1 maps to skill slot 0", main._skill_function_key_slot(event), 0)
+	_assert_true("assign F1 to magic bolt", main._assign_skill_function_key(0, "magic_bolt"))
+	_assert_eq("F1 binding stored", str(main.skill_function_keys[0]), "magic_bolt")
+	_assert_eq("binding does not select immediately", main.right_click_skill_id, "")
+	_assert_true("pressing F1 selects right click skill", main._select_right_click_skill_from_function_key(0))
+	_assert_eq("right click skill selected", main.right_click_skill_id, "magic_bolt")
+
+	main.right_click_skill_id = ""
+	main.skill_progression = {
+		"unspent_skill_points": 1,
+		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true}],
+	}
+	_assert_true("unranked skill can still be bound", main._assign_skill_function_key(1, "magic_bolt"))
+	_assert_true("unranked binding cannot select right click", not main._select_right_click_skill_from_function_key(1))
+	_assert_eq("right click stays empty for unranked skill", main.right_click_skill_id, "")
 	main.free()
 
 

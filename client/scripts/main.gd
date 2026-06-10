@@ -40,6 +40,8 @@ const PLAYER_EVENT_CLIPS := {
 }
 const PLAYER_START_HP := 10
 const INTERACTABLE_ACTIVATION_RANGE := 1.5
+const MAGIC_BOLT_ID := "magic_bolt"
+const SKILL_FUNCTION_KEY_COUNT := 8
 const PLAYER_TINT := Color("#8fe8a7")
 const REMOTE_PLAYER_TINT := Color("#202934")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
@@ -98,6 +100,8 @@ var hotbar: Array = []
 var character_progression: Dictionary = {}
 var skill_progression: Dictionary = {}
 var skill_cooldowns: Array = []
+var right_click_skill_id: String = ""
+var skill_function_keys: Array = ["", "", "", "", "", "", "", ""]
 var item_rules: Dictionary = {}
 var item_templates: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -654,6 +658,8 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	character_progression = {}
 	skill_progression = {}
 	skill_cooldowns = []
+	right_click_skill_id = ""
+	skill_function_keys = ["", "", "", "", "", "", "", ""]
 	loot_ids.clear()
 	monster_ids.clear()
 	interactable_ids.clear()
@@ -1413,6 +1419,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
+		var skill_key_slot := _skill_function_key_slot(event)
+		if skill_key_slot >= 0:
+			if _handle_skill_function_key(skill_key_slot):
+				get_viewport().set_input_as_handled()
+				return
 		var hotbar_slot := _hotbar_slot_for_key(event)
 		if hotbar_slot >= 0:
 			if consumable_bar != null:
@@ -1459,6 +1470,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					var pick := _resolve_click_at_mouse()
 					_sustained_click.begin_from_pick(pick)
 					_execute_click_pick(pick)
+			MOUSE_BUTTON_RIGHT:
+				if _try_use_right_click_skill():
+					get_viewport().set_input_as_handled()
+					return
 			MOUSE_BUTTON_WHEEL_UP:
 				_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			MOUSE_BUTTON_WHEEL_DOWN:
@@ -1593,6 +1608,13 @@ func _hotbar_slot_for_key(event: InputEventKey) -> int:
 		return int(code - KEY_1)
 	if code == KEY_0:
 		return 9
+	return -1
+
+
+func _skill_function_key_slot(event: InputEventKey) -> int:
+	var code := event.keycode if event.keycode != KEY_NONE else event.physical_keycode
+	if code >= KEY_F1 and code <= KEY_F8:
+		return int(code - KEY_F1)
 	return -1
 
 
@@ -2468,6 +2490,48 @@ func _skill_cast_blocked(skill_id: String = "magic_bolt") -> bool:
 		or _skill_rank(skill_id) <= 0
 
 
+func _assign_right_click_skill(skill_id: String) -> bool:
+	if _skill_rank(skill_id) <= 0:
+		return false
+	right_click_skill_id = skill_id
+	return true
+
+
+func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
+	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT or skill_id == "":
+		return false
+	_ensure_skill_function_key_slots()
+	skill_function_keys[slot_index] = skill_id
+	return true
+
+
+func _select_right_click_skill_from_function_key(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT:
+		return false
+	_ensure_skill_function_key_slots()
+	var skill_id := str(skill_function_keys[slot_index])
+	if skill_id == "":
+		return false
+	return _assign_right_click_skill(skill_id)
+
+
+func _handle_skill_function_key(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT:
+		return false
+	if skills_panel != null and skills_panel.visible:
+		var hovered_skill_id := skills_panel.hovered_skill_id()
+		if hovered_skill_id != "":
+			return _assign_skill_function_key(slot_index, hovered_skill_id)
+	return _select_right_click_skill_from_function_key(slot_index)
+
+
+func _ensure_skill_function_key_slots() -> void:
+	while skill_function_keys.size() < SKILL_FUNCTION_KEY_COUNT:
+		skill_function_keys.append("")
+	if skill_function_keys.size() > SKILL_FUNCTION_KEY_COUNT:
+		skill_function_keys.resize(SKILL_FUNCTION_KEY_COUNT)
+
+
 func _refresh_progression_ui() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_progression(character_progression)
@@ -2493,6 +2557,13 @@ func _sync_progression_interactivity() -> void:
 		skills_panel.set_interactive(not _skill_allocation_blocked())
 	if skill_bar != null:
 		skill_bar.set_interactive(not _skill_cast_blocked())
+
+
+func _try_use_right_click_skill() -> bool:
+	if right_click_skill_id == "":
+		return false
+	_send_skill_cast_intent(right_click_skill_id)
+	return true
 
 
 func _send_skill_cast_intent(skill_id: String, target_id: String = "") -> void:
@@ -3492,6 +3563,8 @@ func get_bot_state() -> Dictionary:
 		"character_progression": character_progression.duplicate(true),
 		"skill_progression": skill_progression.duplicate(true),
 		"skill_cooldowns": skill_cooldowns.duplicate(true),
+		"right_click_skill_id": right_click_skill_id,
+		"skill_function_keys": skill_function_keys.duplicate(true),
 		"inventory": inventory.duplicate(true),
 		"equipped": equipped.duplicate(true),
 		"inventory_rows": inventory_rows,

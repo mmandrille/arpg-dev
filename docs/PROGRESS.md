@@ -11,7 +11,7 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v49 — `gold-autopickup-and-shared-loot-rules` |
+| **Latest completed slice** | v50 — `account-stash-storage` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 |
 | **Next slice** | TBD |
@@ -65,6 +65,7 @@ v46_* = client-join-game-proof
 v47_* = shop-stock-lifecycle
 v48_* = coop-rewards-and-scaling
 v49_* = gold-autopickup-and-shared-loot-rules
+v50_* = account-stash-storage
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -134,6 +135,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v47** | `shop-stock-lifecycle` | Complete (`make ci` green) | [`v47_spec-shop-stock-lifecycle.md`](specs/v47_spec-shop-stock-lifecycle.md) | [`v47_2026-06-09-shop-stock-lifecycle.md`](plans/v47_2026-06-09-shop-stock-lifecycle.md) |
 | **v48** | `coop-rewards-and-scaling` | Complete (`make ci` green) | [`v48_spec-coop-rewards-and-scaling.md`](specs/v48_spec-coop-rewards-and-scaling.md) | [`v48_2026-06-09-coop-rewards-and-scaling.md`](plans/v48_2026-06-09-coop-rewards-and-scaling.md) |
 | **v49** | `gold-autopickup-and-shared-loot-rules` | Complete (`make ci` green) | [`v49_spec-gold-autopickup-and-shared-loot-rules.md`](specs/v49_spec-gold-autopickup-and-shared-loot-rules.md) | [`v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md`](plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md) |
+| **v50** | `account-stash-storage` | Complete (`make ci` green) | [`v50_spec-account-stash-storage.md`](specs/v50_spec-account-stash-storage.md) | [`v50_2026-06-10-account-stash-storage.md`](plans/v50_2026-06-10-account-stash-storage.md) |
 
 ---
 
@@ -1236,6 +1238,32 @@ auto-pickup path.
 reservations, shared/split gold, item auto-pickup, loot allocation UI, drop-rate rebalance, or client
 UI/art/audio changes.
 
+### v50 — Account stash storage
+
+**Proves:** Characters on the same account now have a durable town stash for item and gold storage,
+with replay-safe session-start snapshots and actor-private realtime payloads.
+
+- Shared rules add a `town_stash` interactable on `dungeon_levels` town level `0`; protocol v7 adds
+  stash item/gold transfer intents, stash snapshot fields, stash change ops, and stash events.
+- Account-owned stash tables store items and gold separately from character-scoped inventory rows,
+  while session-start stash snapshot tables freeze the replay source of truth.
+- The Go sim opens stash through existing `action_intent`, validates item/gold deposit and withdraw,
+  rejects equipped/hotbar-assigned/full-capacity/insufficient-funds cases, and emits paired
+  inventory/gold plus stash changes without optimistic client ownership.
+- Realtime persistence groups each stash transfer through atomic store methods and filters stash
+  snapshots, changes, and events to the owning account/player.
+- Godot adds a server-driven `StashPanel` beside the existing inventory flow, including stash/bag
+  item grids, stash and character gold display, fixed one-gold transfer controls, and client-bot
+  hooks.
+- Protocol bot scenario `36_account_stash_storage.json` proves dungeon loot/gold acquisition,
+  town stash open, item and gold deposit/withdraw, replay, reconnect, `/state`, and fresh-session
+  persistence; client bot scenario `23_account_stash_panel.json` proves the live Godot panel flow.
+
+**Explicit non-goals:** no remote stash access outside town, stash sorting/filtering/search/tabs,
+capacity upgrades, item stacks, direct equip/use/sell/upgrade from stash, player-market delivery,
+crafting/material tabs, arbitrary numeric gold entry, production stash art/audio, or real-time
+cross-session push for another already-open session on the same account.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1312,6 +1340,8 @@ menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo 
 join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible
 coop_rewards_and_scaling: three-account co-op → nearby host/guest share full XP → different-level guest excluded → replay/fresh persistence
 gold_autopickup_shared_loot: two peers see shared floor gold → both step into range → lowest player id wins private wallet update → item loot still requires click
+account_stash_storage: acquire dungeon loot/gold → open town stash → deposit/withdraw item and gold → replay/reconnect/state/fresh session persistence
+client_account_stash_panel: headless Godot client opens stash → verifies bag/stash item sync → deposits/withdraws item and gold
 ```
 
 **Verify:**
@@ -1506,15 +1536,20 @@ adds passive gold pickup for the first eligible player in deterministic order, a
 items click-required. Personal loot, reservations, hidden/duplicated drops, shared/split gold, and
 item auto-pickup remain deferred/non-goals.
 
+**Account stash storage is now authoritative.** v50 adds a town stash interactable, protocol v7
+stash contracts, account-owned item/gold persistence, replay-safe session-start stash snapshots,
+server-owned item/gold transfers, owner-private realtime fanout, and protocol/client bot proofs for
+item and gold storage across fresh sessions.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47 non-goals, ADR-0008 deferred, ADR-0011 |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50 non-goals, ADR-0008 deferred, ADR-0011 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, mystery-seller non-common rarity floor, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, expensive mystery-seller blind-buy gold sink with progression-window stock, clock-based shop refresh | v33/v38/v41/v42/v47 non-goals, ADR-0011, ADR-0012, ADR-0013 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47 non-goals, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50 non-goals, ADR-0013 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |

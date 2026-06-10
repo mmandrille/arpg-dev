@@ -800,6 +800,94 @@ def test_structured_requirement_and_shop_preview_assertions():
     ], state, "test")
 
 
+def test_stash_snapshot_delta_and_assertions():
+    state = RuntimeState()
+    ingest_message(
+        {
+            "type": "session_snapshot",
+            "payload": {
+                "server_tick": 1,
+                "current_level": 0,
+                "local_player_id": "1001",
+                "party": [],
+                "walls": [],
+                "entities": [],
+                "inventory": [],
+                "equipped": {},
+                "hotbar": [],
+                "stash_items": [
+                    {
+                        "stash_item_id": "9001",
+                        "item_def_id": "cave_bow",
+                        "item_template_id": "cave_bow",
+                        "display_name": "Common Cave Bow",
+                    }
+                ],
+                "stash_gold": 3,
+                "stash_capacity": 50,
+                "discovered_teleporters": [],
+                "character_progression": {"gold": 11},
+                "skill_progression": {},
+                "skill_cooldowns": [],
+            },
+        },
+        state,
+    )
+
+    run_runtime_assertions([
+        {"type": "stash_item_count", "item_template_id": "cave_bow", "equals": 1},
+        {"type": "stash_gold", "equals": 3},
+        {"type": "stash_capacity", "equals": 50},
+    ], state, "unit runtime")
+    run_assertions([
+        {"type": "stash_item_count", "item_template_id": "cave_bow", "equals": 1},
+        {"type": "stash_gold", "equals": 3},
+        {"type": "stash_capacity", "equals": 50},
+    ], [], [], {}, None, "unit state", stash_items=list(state.stash_items), stash_gold=state.stash_gold, stash_capacity=state.stash_capacity)
+
+    ingest_message(
+        {
+            "type": "state_delta",
+            "tick": 2,
+            "payload": {
+                "server_tick": 2,
+                "level": 0,
+                "events": [
+                    {
+                        "event_type": "stash_gold_deposited",
+                        "entity_id": "1002",
+                        "stash_id": "account_stash",
+                        "amount": 4,
+                        "total_gold": 7,
+                        "stash_gold": 7,
+                    }
+                ],
+                "changes": [
+                    {
+                        "op": "stash_item_add",
+                        "item": {
+                            "stash_item_id": "9002",
+                            "item_def_id": "cave_blade",
+                            "item_template_id": "cave_blade",
+                        },
+                    },
+                    {"op": "stash_item_remove", "stash_item_id": "9001"},
+                    {"op": "stash_gold_update", "stash_gold": 7},
+                ],
+            },
+        },
+        state,
+    )
+
+    run_runtime_assertions([
+        {"type": "stash_item_count", "item_template_id": "cave_bow", "equals": 0},
+        {"type": "stash_item_count", "item_template_id": "cave_blade", "equals": 1},
+        {"type": "stash_gold", "equals": 7},
+        {"type": "gold", "equals": 7},
+        {"type": "stash_event", "event_type": "stash_gold_deposited", "equals": 1},
+    ], state, "unit runtime")
+
+
 def test_structured_assertions_support_range_comparators_and_filters():
     entities = [
         {"id": "1001", "type": "player", "hp": 9},

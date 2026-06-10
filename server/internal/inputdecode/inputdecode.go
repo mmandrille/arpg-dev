@@ -28,6 +28,10 @@ const (
 	TypeCastSkill          = "cast_skill_intent"
 	TypeShopBuy            = "shop_buy_intent"
 	TypeShopSell           = "shop_sell_intent"
+	TypeStashDepositItem   = "stash_deposit_item_intent"
+	TypeStashWithdrawItem  = "stash_withdraw_item_intent"
+	TypeStashDepositGold   = "stash_deposit_gold_intent"
+	TypeStashWithdrawGold  = "stash_withdraw_gold_intent"
 )
 
 type envelope struct {
@@ -96,12 +100,21 @@ type (
 		ShopEntityID   string `json:"shop_entity_id"`
 		ItemInstanceID string `json:"item_instance_id"`
 	}
+	stashItemPayloadWire struct {
+		StashEntityID  string `json:"stash_entity_id"`
+		ItemInstanceID string `json:"item_instance_id"`
+		StashItemID    string `json:"stash_item_id"`
+	}
+	stashGoldPayloadWire struct {
+		StashEntityID string `json:"stash_entity_id"`
+		Amount        int    `json:"amount"`
+	}
 )
 
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeShopBuy, TypeShopSell:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeShopBuy, TypeShopSell, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold:
 		return true
 	}
 	return false
@@ -224,6 +237,30 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.ShopSell = &game.ShopSellIntent{ShopEntityID: p.ShopEntityID, ItemInstanceID: p.ItemInstanceID}
+	case TypeStashDepositItem:
+		var p stashItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.ItemInstanceID == "" {
+			return in, false
+		}
+		in.StashDepositItem = &game.StashDepositItemIntent{StashEntityID: p.StashEntityID, ItemInstanceID: p.ItemInstanceID}
+	case TypeStashWithdrawItem:
+		var p stashItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.StashItemID == "" {
+			return in, false
+		}
+		in.StashWithdrawItem = &game.StashWithdrawItemIntent{StashEntityID: p.StashEntityID, StashItemID: p.StashItemID}
+	case TypeStashDepositGold:
+		var p stashGoldPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.Amount <= 0 {
+			return in, false
+		}
+		in.StashDepositGold = &game.StashDepositGoldIntent{StashEntityID: p.StashEntityID, Amount: p.Amount}
+	case TypeStashWithdrawGold:
+		var p stashGoldPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.Amount <= 0 {
+			return in, false
+		}
+		in.StashWithdrawGold = &game.StashWithdrawGoldIntent{StashEntityID: p.StashEntityID, Amount: p.Amount}
 	default:
 		return in, false
 	}

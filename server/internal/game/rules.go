@@ -464,6 +464,7 @@ type InteractableDef struct {
 	InitialState      string               `json:"initial_state"`
 	Transition        string               `json:"transition,omitempty"`
 	ShopID            string               `json:"shop_id,omitempty"`
+	StashID           string               `json:"stash_id,omitempty"`
 	BarrierWhenClosed *InteractableBarrier `json:"barrier_when_closed,omitempty"`
 }
 
@@ -1185,6 +1186,9 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.ShopID != "" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.shop_id: closed interactable must not declare shop_id", id)
 			}
+			if def.StashID != "" {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.stash_id: closed interactable must not declare stash_id", id)
+			}
 			if def.BarrierWhenClosed != nil && (def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0) {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
 			}
@@ -1192,8 +1196,18 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.BarrierWhenClosed != nil {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed: transition interactable must not declare barrier", id)
 			}
-			if (def.Transition == "") == (def.ShopID == "") {
-				return nil, fmt.Errorf("game: invalid rules interactables.%s: must declare exactly one of transition or shop_id", id)
+			actionCount := 0
+			if def.Transition != "" {
+				actionCount++
+			}
+			if def.ShopID != "" {
+				actionCount++
+			}
+			if def.StashID != "" {
+				actionCount++
+			}
+			if actionCount != 1 {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s: must declare exactly one of transition, shop_id, or stash_id", id)
 			}
 			if def.Transition != "" {
 				switch def.Transition {
@@ -1206,6 +1220,9 @@ func LoadRules(dir string) (*Rules, error) {
 				if _, ok := r.Shops[def.ShopID]; !ok {
 					return nil, fmt.Errorf("game: invalid rules interactables.%s.shop_id: unknown shop %s", id, def.ShopID)
 				}
+			}
+			if def.StashID != "" && def.StashID != "account_stash" {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.stash_id: unknown stash %s", id, def.StashID)
 			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules interactables.%s.initial_state: unsupported state %s", id, def.InitialState)

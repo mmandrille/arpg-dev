@@ -124,6 +124,11 @@ class RuntimeState:
     shop_sell_appraisals: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     shop_events: list[dict[str, Any]] = field(default_factory=list)
     last_shop_event: dict[str, Any] | None = None
+    stash_items: list[dict[str, Any]] = field(default_factory=list)
+    stash_gold: int = 0
+    stash_capacity: int = 50
+    stash_events: list[dict[str, Any]] = field(default_factory=list)
+    last_stash_event: dict[str, Any] | None = None
     last_gold_before_action: int | None = None
     last_gold_after_action: int | None = None
 
@@ -1398,6 +1403,167 @@ async def execute_step(
         assert_count_matches(len(matches), step, "assert_shop_event", f": {matches}")
         return
 
+    if action == "open_stash":
+        stash_id = str(step.get("stash_id", "account_stash"))
+        interactable_def_id = str(step.get("interactable_def_id", "town_stash"))
+        target = find_interactable(state, interactable_def_id)
+        if target is None:
+            raise AssertionError(f"open_stash: missing {interactable_def_id} on level {state.current_level}")
+        await walk_toward(
+            ws,
+            session_id,
+            state,
+            target["position"],
+            loop,
+            stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
+            max_ticks=derived_walk_max_ticks(state, target["position"], int(step.get("max_ticks", WALK_MAX_TICKS))),
+        )
+        start_index = len(state.stash_events)
+        env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": str(target["id"])})
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_stash_event(ws, state, "stash_opened", loop, stash_id=stash_id, start_index=start_index)
+        return
+
+    if action == "deposit_stash_item":
+        stash_id = str(step.get("stash_id", "account_stash"))
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_stash")))
+        if target is None:
+            raise AssertionError(f"deposit_stash_item: missing stash entity on level {state.current_level}")
+        item = select_inventory_item(state.inventory, step)
+        item_id = str(item["item_instance_id"])
+        before_stash_count = len(state.stash_items)
+        start_index = len(state.stash_events)
+        env = make_envelope(
+            "stash_deposit_item_intent",
+            session_id,
+            state.last_tick,
+            {"stash_entity_id": str(target["id"]), "item_instance_id": item_id},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_stash_event(ws, state, "stash_item_deposited", loop, stash_id=stash_id, start_index=start_index)
+        state.last_gold_before_action = None
+        state.last_gold_after_action = None
+        if str(event.get("item_instance_id")) != item_id:
+            raise AssertionError(f"deposit_stash_item: event item {event.get('item_instance_id')} != {item_id}")
+        if find_inventory_item_by_instance(state.inventory, item_id) is not None:
+            raise AssertionError(f"deposit_stash_item: item {item_id} still in inventory")
+        if len(state.stash_items) <= before_stash_count:
+            raise AssertionError(f"deposit_stash_item: stash did not grow after depositing {item_id}: {state.stash_items}")
+        return
+
+    if action == "withdraw_stash_item":
+        stash_id = str(step.get("stash_id", "account_stash"))
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_stash")))
+        if target is None:
+            raise AssertionError(f"withdraw_stash_item: missing stash entity on level {state.current_level}")
+        item = select_stash_item(state, step)
+        stash_item_id = str(item["stash_item_id"])
+        before_inventory_count = len(state.inventory)
+        start_index = len(state.stash_events)
+        env = make_envelope(
+            "stash_withdraw_item_intent",
+            session_id,
+            state.last_tick,
+            {"stash_entity_id": str(target["id"]), "stash_item_id": stash_item_id},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_stash_event(ws, state, "stash_item_withdrawn", loop, stash_id=stash_id, start_index=start_index)
+        state.last_gold_before_action = None
+        state.last_gold_after_action = None
+        if str(event.get("stash_item_id")) != stash_item_id:
+            raise AssertionError(f"withdraw_stash_item: event stash item {event.get('stash_item_id')} != {stash_item_id}")
+        if find_stash_item_by_id(state.stash_items, stash_item_id) is not None:
+            raise AssertionError(f"withdraw_stash_item: stash item {stash_item_id} still in stash")
+        if len(state.inventory) <= before_inventory_count:
+            raise AssertionError(f"withdraw_stash_item: inventory did not grow after withdrawing {stash_item_id}")
+        return
+
+    if action == "deposit_stash_gold":
+        amount = int(step["amount"])
+        stash_id = str(step.get("stash_id", "account_stash"))
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_stash")))
+        if target is None:
+            raise AssertionError(f"deposit_stash_gold: missing stash entity on level {state.current_level}")
+        before_gold = state.gold
+        start_index = len(state.stash_events)
+        env = make_envelope(
+            "stash_deposit_gold_intent",
+            session_id,
+            state.last_tick,
+            {"stash_entity_id": str(target["id"]), "amount": amount},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_stash_event(ws, state, "stash_gold_deposited", loop, stash_id=stash_id, start_index=start_index)
+        state.last_gold_before_action = before_gold
+        state.last_gold_after_action = state.gold
+        if int(event.get("amount", 0)) != amount:
+            raise AssertionError(f"deposit_stash_gold: event amount {event.get('amount')} != {amount}")
+        return
+
+    if action == "withdraw_stash_gold":
+        amount = int(step["amount"])
+        stash_id = str(step.get("stash_id", "account_stash"))
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_stash")))
+        if target is None:
+            raise AssertionError(f"withdraw_stash_gold: missing stash entity on level {state.current_level}")
+        before_gold = state.gold
+        start_index = len(state.stash_events)
+        env = make_envelope(
+            "stash_withdraw_gold_intent",
+            session_id,
+            state.last_tick,
+            {"stash_entity_id": str(target["id"]), "amount": amount},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_stash_event(ws, state, "stash_gold_withdrawn", loop, stash_id=stash_id, start_index=start_index)
+        state.last_gold_before_action = before_gold
+        state.last_gold_after_action = state.gold
+        if int(event.get("amount", 0)) != amount:
+            raise AssertionError(f"withdraw_stash_gold: event amount {event.get('amount')} != {amount}")
+        return
+
+    if action == "assert_stash_item_count":
+        items = filtered_stash_items(state.stash_items, step)
+        assert_count_matches(len(items), step, "assert_stash_item_count", f": {items}")
+        return
+
+    if action == "assert_stash_gold":
+        assert_count_matches(state.stash_gold, step, "assert_stash_gold")
+        return
+
+    if action == "assert_stash_event":
+        event_type = str(step["event_type"])
+        stash_id = str(step.get("stash_id", "account_stash"))
+        matches = [
+            event for event in state.stash_events
+            if event.get("event_type") == event_type and str(event.get("stash_id", "")) == stash_id
+        ]
+        if step.get("stash_item_id") is not None:
+            matches = [event for event in matches if str(event.get("stash_item_id", "")) == str(step["stash_item_id"])]
+        assert_count_matches(len(matches), step, "assert_stash_event", f": {matches}")
+        return
+
     if action == "use_inventory_item":
         item_def_id = str(step["item_def_id"])
         bag_index = int(step.get("bag_index", 0))
@@ -1732,6 +1898,25 @@ async def wait_for_shop_event(
         await pump_one(ws, state, timeout=0.1)
 
 
+async def wait_for_stash_event(
+    ws,
+    state: RuntimeState,
+    event_type: str,
+    loop,
+    *,
+    stash_id: str = "account_stash",
+    start_index: int = 0,
+) -> dict[str, Any]:
+    deadline = loop.time() + SLICE_TIMEOUT_S
+    while True:
+        for event in state.stash_events[start_index:]:
+            if event.get("event_type") == event_type and str(event.get("stash_id", "")) == stash_id:
+                return event
+        if loop.time() > deadline:
+            raise TimeoutError(f"stalled waiting for stash event {event_type} stash_id={stash_id}")
+        await pump_one(ws, state, timeout=0.1)
+
+
 def combat_event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
     for key in (
         "event_type",
@@ -1899,6 +2084,18 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                     str(appraisal["item_instance_id"]): dict(appraisal)
                     for appraisal in ev.get("sell_appraisals", [])
                 }
+        if event_type in {"stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn"}:
+            stash_event = dict(ev)
+            state.stash_events.append(stash_event)
+            state.last_stash_event = stash_event
+            if "stash_items" in ev:
+                state.stash_items = [dict(item) for item in ev.get("stash_items", [])]
+            if "stash_gold" in ev:
+                state.stash_gold = int(ev.get("stash_gold", state.stash_gold))
+            if "stash_capacity" in ev:
+                state.stash_capacity = int(ev.get("stash_capacity", state.stash_capacity))
+            if "total_gold" in ev:
+                state.gold = int(ev.get("total_gold", state.gold))
         if event_type in {"monster_damaged", "player_damaged", "player_killed", "attack_missed", "attack_blocked"}:
             state.combat_events.append(dict(ev))
         if event_type == "level_changed":
@@ -1970,6 +2167,12 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                 state.inventory_capacity = int(c["inventory_capacity"])
         elif c["op"] == "gold_update":
             state.gold = int(c.get("gold", state.gold))
+        elif c["op"] == "stash_item_add":
+            upsert_stash_item(state, c["item"])
+        elif c["op"] == "stash_item_remove":
+            remove_stash_item(state, str(c["stash_item_id"]))
+        elif c["op"] == "stash_gold_update":
+            state.stash_gold = int(c.get("stash_gold", state.stash_gold))
         elif c["op"] == "teleporter_discovery_update":
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
@@ -2005,6 +2208,9 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     state.skill_progression = dict(payload.get("skill_progression", {}))
     state.skill_cooldowns = [dict(row) for row in payload.get("skill_cooldowns", [])]
     state.gold = int(payload.get("gold", state.character_progression.get("gold", 0)))
+    state.stash_items = [dict(item) for item in payload.get("stash_items", [])]
+    state.stash_gold = int(payload.get("stash_gold", 0))
+    state.stash_capacity = int(payload.get("stash_capacity", 50))
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
         entity_id
@@ -2134,6 +2340,24 @@ def remove_inventory_item(state: RuntimeState, item_instance_id: str) -> None:
         state.item_id = None
     if state.equipped_item_id == item_instance_id:
         state.equipped_item_id = None
+
+
+def upsert_stash_item(state: RuntimeState, item: dict[str, Any]) -> None:
+    stash_item_id = str(item["stash_item_id"])
+    for i, current in enumerate(state.stash_items):
+        if str(current.get("stash_item_id")) == stash_item_id:
+            merged = dict(current)
+            merged.update(item)
+            state.stash_items[i] = merged
+            return
+    state.stash_items.append(dict(item))
+
+
+def remove_stash_item(state: RuntimeState, stash_item_id: str) -> None:
+    state.stash_items = [
+        item for item in state.stash_items
+        if str(item.get("stash_item_id")) != stash_item_id
+    ]
 
 
 def find_loot(state: RuntimeState, item_def_id: str) -> dict[str, Any] | None:
@@ -2281,6 +2505,64 @@ def find_inventory_item_by_instance(inventory: list[dict[str, Any]], item_instan
     return next((item for item in inventory if str(item.get("item_instance_id")) == str(item_instance_id)), None)
 
 
+def filtered_inventory_items(inventory: list[dict[str, Any]], step: dict[str, Any]) -> list[dict[str, Any]]:
+    items = list(inventory)
+    if step.get("item_instance_id") is not None:
+        items = [item for item in items if str(item.get("item_instance_id", "")) == str(step["item_instance_id"])]
+    if step.get("item_def_id") is not None:
+        items = [item for item in items if str(item.get("item_def_id", "")) == str(step["item_def_id"])]
+    if step.get("item_template_id") is not None:
+        items = [item for item in items if str(item.get("item_template_id", "")) == str(step["item_template_id"])]
+    if step.get("rolled") is not None:
+        want_rolled = bool(step["rolled"])
+        items = [item for item in items if bool(item.get("item_template_id")) == want_rolled]
+    if step.get("equipped") is not None:
+        items = [item for item in items if bool(item.get("equipped")) == bool(step["equipped"])]
+    items.sort(key=lambda item: str(item.get("item_instance_id", "")))
+    return items
+
+
+def select_inventory_item(inventory: list[dict[str, Any]], step: dict[str, Any]) -> dict[str, Any]:
+    items = filtered_inventory_items(inventory, step)
+    if not items:
+        raise AssertionError(f"{step.get('action')}: no matching inventory item for {step}; inventory={inventory}")
+    index = int(step.get("bag_index", 0))
+    if index < 0 or index >= len(items):
+        raise AssertionError(f"{step.get('action')}: bag_index {index} out of range for {items}")
+    return items[index]
+
+
+def filtered_stash_items(stash_items: list[dict[str, Any]], step: dict[str, Any]) -> list[dict[str, Any]]:
+    items = list(stash_items)
+    if step.get("stash_item_id") is not None:
+        items = [item for item in items if str(item.get("stash_item_id", "")) == str(step["stash_item_id"])]
+    if step.get("item_def_id") is not None:
+        items = [item for item in items if str(item.get("item_def_id", "")) == str(step["item_def_id"])]
+    if step.get("item_template_id") is not None:
+        items = [item for item in items if str(item.get("item_template_id", "")) == str(step["item_template_id"])]
+    if step.get("rolled") is not None:
+        want_rolled = bool(step["rolled"])
+        items = [item for item in items if bool(item.get("item_template_id")) == want_rolled]
+    items.sort(key=lambda item: str(item.get("stash_item_id", "")))
+    return items
+
+
+def select_stash_item(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
+    items = filtered_stash_items(state.stash_items, step)
+    if not items:
+        raise AssertionError(f"{step.get('action')}: no matching stash item for {step}; stash={state.stash_items}")
+    index = int(step.get("stash_index", 0))
+    if index < 0 or index >= len(items):
+        raise AssertionError(f"{step.get('action')}: stash_index {index} out of range for {items}")
+    return items[index]
+
+
+def find_stash_item_by_id(stash_items: list[dict[str, Any]], stash_item_id: str | None) -> dict[str, Any] | None:
+    if stash_item_id is None:
+        return None
+    return next((item for item in stash_items if str(item.get("stash_item_id")) == str(stash_item_id)), None)
+
+
 def filtered_shop_offers(state: RuntimeState, step: dict[str, Any]) -> list[dict[str, Any]]:
     shop_id = str(step.get("shop_id", "town_vendor"))
     offers = list(state.shop_offers.get(shop_id, {}).values())
@@ -2419,6 +2701,9 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             inventory_rows=int(payload.get("inventory_rows", 3)),
             inventory_capacity=int(payload.get("inventory_capacity", int(payload.get("inventory_rows", 3)) * 5)),
             gold=int(payload.get("gold", 0)),
+            stash_items=payload.get("stash_items", []),
+            stash_gold=int(payload.get("stash_gold", 0)),
+            stash_capacity=int(payload.get("stash_capacity", 50)),
             skill_progression=payload.get("skill_progression", {}),
             skill_cooldowns=payload.get("skill_cooldowns", []),
         )
@@ -2830,6 +3115,9 @@ def run_assertions(
     inventory_rows: int | None = None,
     inventory_capacity: int | None = None,
     gold: int | None = None,
+    stash_items: list[dict[str, Any]] | None = None,
+    stash_gold: int | None = None,
+    stash_capacity: int | None = None,
     skill_progression: dict[str, Any] | None = None,
     skill_cooldowns: list[dict[str, Any]] | None = None,
 ) -> None:
@@ -2867,6 +3155,13 @@ def run_assertions(
             assert_loot_requirement_status(entities, assertion, where)
         elif typ == "gold":
             assert_count_matches(int(gold or 0), assertion, f"{where}: gold")
+        elif typ == "stash_item_count":
+            rows = filtered_stash_items(list(stash_items or []), assertion)
+            assert_count_matches(len(rows), assertion, f"{where}: stash item count", f": {rows}")
+        elif typ == "stash_gold":
+            assert_count_matches(int(stash_gold or 0), assertion, f"{where}: stash gold")
+        elif typ == "stash_capacity":
+            assert_count_matches(int(stash_capacity or 0), assertion, f"{where}: stash capacity")
         elif typ == "wall_count":
             wall_rows = list(walls or [])
             if assertion.get("source") is not None:
@@ -2942,6 +3237,7 @@ def run_assertions(
             "shop_sell_appraisal_count",
             "shop_sell_appraisal_details",
             "shop_event",
+            "stash_event",
         }:
             continue
         elif typ == "player_hp_equals":
@@ -3161,6 +3457,16 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "gold":
             assert_count_matches(state.gold, assertion, f"{where}: gold")
             continue
+        if typ == "stash_item_count":
+            rows = filtered_stash_items(state.stash_items, assertion)
+            assert_count_matches(len(rows), assertion, f"{where}: stash_item_count", f": {rows}")
+            continue
+        if typ == "stash_gold":
+            assert_count_matches(state.stash_gold, assertion, f"{where}: stash_gold")
+            continue
+        if typ == "stash_capacity":
+            assert_count_matches(state.stash_capacity, assertion, f"{where}: stash_capacity")
+            continue
         if typ == "shop_offer_count":
             offers = filtered_shop_offers(state, assertion)
             assert_count_matches(len(offers), assertion, f"{where}: shop_offer_count", f": {offers}")
@@ -3187,6 +3493,17 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                 if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id
             ]
             assert_count_matches(len(matches), assertion, f"{where}: shop_event", f": {matches}")
+            continue
+        if typ == "stash_event":
+            stash_id = str(assertion.get("stash_id", "account_stash"))
+            event_type = str(assertion["event_type"])
+            matches = [
+                event for event in state.stash_events
+                if event.get("event_type") == event_type and str(event.get("stash_id", "")) == stash_id
+            ]
+            if assertion.get("stash_item_id") is not None:
+                matches = [event for event in matches if str(event.get("stash_item_id", "")) == str(assertion["stash_item_id"])]
+            assert_count_matches(len(matches), assertion, f"{where}: stash_event", f": {matches}")
             continue
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)
@@ -3338,6 +3655,9 @@ def run_verified_session(
         inventory_rows=int(state.get("inventory_rows", 3)),
         inventory_capacity=int(state.get("inventory_capacity", int(state.get("inventory_rows", 3)) * 5)),
         gold=int(state.get("gold", 0)),
+        stash_items=state.get("stash_items", []),
+        stash_gold=int(state.get("stash_gold", 0)),
+        stash_capacity=int(state.get("stash_capacity", 50)),
         skill_progression=state.get("skill_progression", {}),
         skill_cooldowns=state.get("skill_cooldowns", []),
     )

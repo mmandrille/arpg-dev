@@ -188,6 +188,8 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_inputs WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_events WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM inventory_items WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_account_stash_items WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_account_stash_gold WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_shop_stock WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_hotbar_slots WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_item_instances WHERE ` + sessionFilter, []any{accountID, characterID}},
@@ -419,6 +421,9 @@ func (s *Store) DeleteStaleEmptySessions(ctx context.Context, updatedBefore time
 			`DELETE FROM session_inputs WHERE session_id = ANY($1)`,
 			`DELETE FROM session_events WHERE session_id = ANY($1)`,
 			`DELETE FROM inventory_items WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_account_stash_items WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_account_stash_gold WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_shop_stock WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_hotbar_slots WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_item_instances WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_waypoints WHERE session_id = ANY($1)`,
@@ -1185,7 +1190,294 @@ func scanCharacterShopStockItem(row rowScanner) (CharacterShopStockItem, error) 
 	return item, nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, shopStock []CharacterShopStockItem, progression CharacterProgression) error {
+func (s *Store) ListAccountStashItems(ctx context.Context, accountID string) ([]AccountStashItem, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at
+		 FROM account_stash_items
+		 WHERE account_id = $1
+		 ORDER BY created_at ASC, stash_item_id ASC`,
+		accountID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list account stash items: %w", err)
+	}
+	defer rows.Close()
+	var out []AccountStashItem
+	for rows.Next() {
+		item, err := scanAccountStashItem(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: list account stash item rows: %w", err)
+	}
+	return out, nil
+}
+
+func (s *Store) GetOrCreateAccountStashGold(ctx context.Context, accountID string) (AccountStashGold, error) {
+	var out AccountStashGold
+	if err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO account_stash_gold (account_id, gold)
+			 SELECT $1, 0
+			 WHERE EXISTS (SELECT 1 FROM accounts WHERE id = $1)
+			 ON CONFLICT (account_id) DO NOTHING`,
+			accountID,
+		); err != nil {
+			return fmt.Errorf("store: initialize account stash gold: %w", err)
+		}
+		err := tx.QueryRow(ctx,
+			`SELECT account_id, gold, created_at, updated_at
+			 FROM account_stash_gold
+			 WHERE account_id = $1`,
+			accountID,
+		).Scan(&out.AccountID, &out.Gold, &out.CreatedAt, &out.UpdatedAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: get account stash gold: %w", err)
+		}
+		return nil
+	}); err != nil {
+		return AccountStashGold{}, err
+	}
+	return out, nil
+}
+
+func (s *Store) TransferCharacterItemToAccountStash(ctx context.Context, accountID, characterID, itemInstanceID, stashItemID string) (AccountStashItem, error) {
+	var out AccountStashItem
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var item CharacterItemInstance
+		err := tx.QueryRow(ctx,
+			`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at
+			 FROM character_item_instances
+			 WHERE account_id = $1 AND character_id = $2 AND id = $3 AND location = $4 AND equipped = FALSE
+			 FOR UPDATE`,
+			accountID, characterID, itemInstanceID, ItemLocationInventory,
+		).Scan(&item.ID, &item.AccountID, &item.CharacterID, &item.ItemDefID, &item.Location, &item.Slot, &item.Equipped, &item.RolledStats, &item.CreatedAt, &item.UpdatedAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock character item for stash deposit: %w", err)
+		}
+		rolledStats := item.RolledStats
+		if len(rolledStats) == 0 {
+			rolledStats = []byte(`{}`)
+		}
+		err = tx.QueryRow(ctx,
+			`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
+			 VALUES ($1, $2, $3, $4, $5::jsonb)
+			 ON CONFLICT (account_id, stash_item_id) DO NOTHING
+			 RETURNING account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at`,
+			accountID, stashItemID, characterID, item.ItemDefID, []byte(rolledStats),
+		).Scan(&out.AccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrConflict
+		}
+		if err != nil {
+			return fmt.Errorf("store: insert account stash item: %w", err)
+		}
+		tag, err := tx.Exec(ctx,
+			`DELETE FROM character_item_instances
+			 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
+			accountID, characterID, itemInstanceID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: delete deposited character item: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+		if _, err := tx.Exec(ctx,
+			`UPDATE character_hotbar_slots
+			 SET item_instance_id = NULL, updated_at = now()
+			 WHERE account_id = $1 AND character_id = $2 AND item_instance_id = $3`,
+			accountID, characterID, itemInstanceID,
+		); err != nil {
+			return fmt.Errorf("store: clear deposited item hotbar slots: %w", err)
+		}
+		return nil
+	})
+	return out, err
+}
+
+func (s *Store) TransferAccountStashItemToCharacter(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID string) (CharacterItemInstance, error) {
+	var out CharacterItemInstance
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var stash AccountStashItem
+		err := tx.QueryRow(ctx,
+			`SELECT account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at
+			 FROM account_stash_items
+			 WHERE account_id = $1 AND stash_item_id = $2
+			 FOR UPDATE`,
+			accountID, stashItemID,
+		).Scan(&stash.AccountID, &stash.StashItemID, &stash.SourceCharacterID, &stash.ItemDefID, &stash.RolledStats, &stash.CreatedAt, &stash.UpdatedAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock account stash item for withdraw: %w", err)
+		}
+		rolledStats := stash.RolledStats
+		if len(rolledStats) == 0 {
+			rolledStats = []byte(`{}`)
+		}
+		tag, err := tx.Exec(ctx,
+			`DELETE FROM account_stash_items
+			 WHERE account_id = $1 AND stash_item_id = $2`,
+			accountID, stashItemID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: delete withdrawn stash item: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+		err = tx.QueryRow(ctx,
+			`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
+			 SELECT $1, $2, $3, $4, $5, NULL, FALSE, $6::jsonb
+			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $3 AND account_id = $2)
+			 RETURNING id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at`,
+			itemInstanceID, accountID, characterID, stash.ItemDefID, ItemLocationInventory, []byte(rolledStats),
+		).Scan(&out.ID, &out.AccountID, &out.CharacterID, &out.ItemDefID, &out.Location, &out.Slot, &out.Equipped, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: insert withdrawn character item: %w", err)
+		}
+		return nil
+	})
+	return out, err
+}
+
+func (s *Store) TransferCharacterGoldToAccountStash(ctx context.Context, accountID, characterID string, amount int) (int, int, error) {
+	if amount <= 0 {
+		return 0, 0, ErrConflict
+	}
+	result := s.transferAccountStashGold(ctx, accountID, characterID, amount)
+	if result.err != nil {
+		return 0, 0, result.err
+	}
+	return result.characterGold, result.stashGold, nil
+}
+
+func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, accountID, characterID string, amount int) (int, int, error) {
+	if amount <= 0 {
+		return 0, 0, ErrConflict
+	}
+	result := s.transferAccountStashGold(ctx, accountID, characterID, -amount)
+	if result.err != nil {
+		return 0, 0, result.err
+	}
+	return result.characterGold, result.stashGold, nil
+}
+
+type stashGoldTransferResult struct {
+	characterGold int
+	stashGold     int
+	err           error
+}
+
+func (s *Store) transferAccountStashGold(ctx context.Context, accountID, characterID string, deltaToStash int) stashGoldTransferResult {
+	var result stashGoldTransferResult
+	result.err = pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO account_stash_gold (account_id, gold)
+			 SELECT $1, 0
+			 WHERE EXISTS (SELECT 1 FROM accounts WHERE id = $1)
+			 ON CONFLICT (account_id) DO NOTHING`,
+			accountID,
+		); err != nil {
+			return fmt.Errorf("store: initialize account stash gold: %w", err)
+		}
+		var characterGold int
+		err := tx.QueryRow(ctx,
+			`SELECT gold
+			 FROM character_progression
+			 WHERE account_id = $1 AND character_id = $2
+			 FOR UPDATE`,
+			accountID, characterID,
+		).Scan(&characterGold)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock character gold: %w", err)
+		}
+		var stashGold int
+		err = tx.QueryRow(ctx,
+			`SELECT gold
+			 FROM account_stash_gold
+			 WHERE account_id = $1
+			 FOR UPDATE`,
+			accountID,
+		).Scan(&stashGold)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock account stash gold: %w", err)
+		}
+		if deltaToStash > 0 {
+			if characterGold < deltaToStash {
+				return ErrConflict
+			}
+			characterGold -= deltaToStash
+			stashGold += deltaToStash
+		} else {
+			withdraw := -deltaToStash
+			if stashGold < withdraw {
+				return ErrConflict
+			}
+			stashGold -= withdraw
+			characterGold += withdraw
+		}
+		if _, err := tx.Exec(ctx,
+			`UPDATE character_progression
+			 SET gold = $3, updated_at = now()
+			 WHERE account_id = $1 AND character_id = $2`,
+			accountID, characterID, characterGold,
+		); err != nil {
+			return fmt.Errorf("store: update character gold: %w", err)
+		}
+		if _, err := tx.Exec(ctx,
+			`UPDATE account_stash_gold
+			 SET gold = $2, updated_at = now()
+			 WHERE account_id = $1`,
+			accountID, stashGold,
+		); err != nil {
+			return fmt.Errorf("store: update account stash gold: %w", err)
+		}
+		result.characterGold = characterGold
+		result.stashGold = stashGold
+		return nil
+	})
+	return result
+}
+
+func scanAccountStashItem(row rowScanner) (AccountStashItem, error) {
+	var item AccountStashItem
+	err := row.Scan(
+		&item.AccountID,
+		&item.StashItemID,
+		&item.SourceCharacterID,
+		&item.ItemDefID,
+		&item.RolledStats,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+	)
+	if err != nil {
+		return AccountStashItem{}, fmt.Errorf("store: scan account stash item: %w", err)
+	}
+	return item, nil
+}
+
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error {
 	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO session_start_character_progression (
@@ -1269,6 +1561,38 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 			); err != nil {
 				return fmt.Errorf("store: insert session start shop stock: %w", err)
 			}
+		}
+		for _, stashItem := range stashItems {
+			rolledStats := stashItem.RolledStats
+			if len(rolledStats) == 0 {
+				rolledStats = []byte(`{}`)
+			}
+			var sourceCharacterID any
+			if stashItem.SourceCharacterID != "" {
+				sourceCharacterID = stashItem.SourceCharacterID
+			}
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_account_stash_items (
+				   session_id, account_id, stash_item_id, source_character_id, item_def_id, rolled_stats
+				 )
+				 VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+				 ON CONFLICT (session_id, account_id, stash_item_id) DO NOTHING`,
+				sessionID, accountID, stashItem.StashItemID, sourceCharacterID, stashItem.ItemDefID, []byte(rolledStats),
+			); err != nil {
+				return fmt.Errorf("store: insert session start account stash item: %w", err)
+			}
+		}
+		stashGoldAccountID := stashGold.AccountID
+		if stashGoldAccountID == "" {
+			stashGoldAccountID = accountID
+		}
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO session_start_account_stash_gold (session_id, account_id, gold)
+			 VALUES ($1, $2, $3)
+			 ON CONFLICT (session_id, account_id) DO NOTHING`,
+			sessionID, stashGoldAccountID, stashGold.Gold,
+		); err != nil {
+			return fmt.Errorf("store: insert session start account stash gold: %w", err)
 		}
 		return nil
 	})
@@ -1390,6 +1714,44 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	}
 	if err := stockRows.Err(); err != nil {
 		return snap, err
+	}
+
+	stashRows, err := s.pool.Query(ctx,
+		`SELECT account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, created_at
+		 FROM session_start_account_stash_items
+		 WHERE session_id = $1 AND account_id = $2
+		 ORDER BY created_at ASC, stash_item_id ASC`,
+		sessionID, accountID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start account stash items: %w", err)
+	}
+	defer stashRows.Close()
+	for stashRows.Next() {
+		item, err := scanAccountStashItem(stashRows)
+		if err != nil {
+			return snap, err
+		}
+		snap.StashItems = append(snap.StashItems, item)
+	}
+	if err := stashRows.Err(); err != nil {
+		return snap, err
+	}
+
+	var stashGold AccountStashGold
+	err = s.pool.QueryRow(ctx,
+		`SELECT account_id, gold, created_at, created_at
+		 FROM session_start_account_stash_gold
+		 WHERE session_id = $1 AND account_id = $2`,
+		sessionID, accountID,
+	).Scan(&stashGold.AccountID, &stashGold.Gold, &stashGold.CreatedAt, &stashGold.UpdatedAt)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return snap, fmt.Errorf("store: load session start account stash gold: %w", err)
+	}
+	if err == nil {
+		snap.StashGold = stashGold
+	} else {
+		snap.StashGold = AccountStashGold{AccountID: accountID}
 	}
 
 	wpRows, err := s.pool.Query(ctx,

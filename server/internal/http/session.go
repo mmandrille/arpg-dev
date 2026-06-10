@@ -365,7 +365,19 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character shop stock")
 		return false
 	}
-	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, shopStock, progression); err != nil {
+	stashItems, err := s.store.ListAccountStashItems(ctx, accountID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load account stash")
+		return false
+	}
+	stashGold, err := s.store.GetOrCreateAccountStashGold(ctx, accountID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load account stash gold")
+		return false
+	}
+	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, shopStock, stashItems, stashGold, progression); err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
 		return false

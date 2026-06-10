@@ -96,7 +96,10 @@ run_gate "GDScript directional attack input test" "[gdtest] PASS: test_direction
 # 2i. Shop panel render and intent payload test (server-independent; v41).
 run_gate "GDScript shop panel test" "[gdtest] PASS: test_shop_panel" res://tests/test_shop_panel.gd
 
-# 2j. Skill point panel and skill bar tests (server-independent; v44).
+# 2j. Stash panel render and intent payload test (server-independent; v50).
+run_gate "GDScript stash panel test" "[gdtest] PASS: test_stash_panel" res://tests/test_stash_panel.gd
+
+# 2k. Skill point panel and skill bar tests (server-independent; v44).
 run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://tests/test_skills_panel.gd
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd
 

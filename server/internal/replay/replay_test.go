@@ -710,7 +710,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 				SessionID:      testSessionID,
 				AccountID:      "acct_guest",
 				CharacterID:    "char_guest",
-				PlayerEntityID: "1005",
+				PlayerEntityID: "1006",
 				Role:           store.SessionMemberGuest,
 				Status:         store.SessionMemberActive,
 				Connected:      true,
@@ -730,7 +730,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	var events []store.SessionEvent
 	tick := int64(0)
 	sequence := int64(0)
-	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1005, game.Vec2{X: 5, Y: 10})
+	tick = appendMoveToAndAdvanceReplay(t, scratch, rules, &rows, &events, tick, &sequence, 1006, game.Vec2{X: 5, Y: 10})
 
 	stairs := findSnapshotEntity(scratch.SnapshotForPlayer(1001), "interactable", "stairs_down")
 	if stairs == nil {
@@ -771,7 +771,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	if !rep.Match {
 		t.Fatalf("verify mismatch: %s", rep.Mismatch)
 	}
-	if entityByID(rep.Snapshot, "1005") != nil {
+	if entityByID(rep.Snapshot, "1006") != nil {
 		t.Fatalf("disconnected guest should be absent from replay snapshot: %+v", rep.Snapshot.Entities)
 	}
 	if hasStoreEvent(events, "item_picked_up") {
@@ -1411,7 +1411,25 @@ func (f *fakeRepo) ReplaceCharacterShopStock(context.Context, string, string, st
 func (f *fakeRepo) SetCharacterShopStockAvailable(context.Context, string, string, string, string, bool) error {
 	return nil
 }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, []store.CharacterShopStockItem, store.CharacterProgression) error {
+func (f *fakeRepo) ListAccountStashItems(context.Context, string) ([]store.AccountStashItem, error) {
+	return nil, nil
+}
+func (f *fakeRepo) GetOrCreateAccountStashGold(_ context.Context, accountID string) (store.AccountStashGold, error) {
+	return store.AccountStashGold{AccountID: accountID}, nil
+}
+func (f *fakeRepo) TransferCharacterItemToAccountStash(context.Context, string, string, string, string) (store.AccountStashItem, error) {
+	return store.AccountStashItem{}, nil
+}
+func (f *fakeRepo) TransferAccountStashItemToCharacter(context.Context, string, string, string, string) (store.CharacterItemInstance, error) {
+	return store.CharacterItemInstance{}, nil
+}
+func (f *fakeRepo) TransferCharacterGoldToAccountStash(context.Context, string, string, int) (int, int, error) {
+	return 0, 0, nil
+}
+func (f *fakeRepo) TransferAccountStashGoldToCharacter(context.Context, string, string, int) (int, int, error) {
+	return 0, 0, nil
+}
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, store.CharacterProgression) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {

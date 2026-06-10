@@ -66,6 +66,21 @@ type ItemView struct {
 	Equipped          bool                    `json:"equipped"`
 }
 
+// StashItemView is the protocol view of an account-stash item.
+type StashItemView struct {
+	StashItemID       string                  `json:"stash_item_id"`
+	ItemDefID         string                  `json:"item_def_id"`
+	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
+	DisplayName       string                  `json:"display_name,omitempty"`
+	Rarity            string                  `json:"rarity,omitempty"`
+	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
+	Requirements      map[string]int          `json:"requirements,omitempty"`
+	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
+	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
+	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
+	EffectIDs         []string                `json:"effect_ids,omitempty"`
+}
+
 // ItemRollPayload is the durable JSON payload stored in rolled_stats columns.
 type ItemRollPayload struct {
 	ItemTemplateID string         `json:"item_template_id"`
@@ -88,9 +103,37 @@ func (p ItemRollPayload) itemViewFields(v *ItemView) {
 	v.EffectIDs = cloneStringSlice(p.EffectIDs)
 }
 
+func (p ItemRollPayload) stashItemViewFields(v *StashItemView) {
+	if p.ItemTemplateID == "" {
+		return
+	}
+	v.ItemTemplateID = p.ItemTemplateID
+	v.DisplayName = p.DisplayName
+	v.Rarity = p.Rarity
+	v.RolledStats = cloneIntMap(p.Stats)
+	v.Requirements = cloneIntMap(p.Requirements)
+	v.EffectIDs = cloneStringSlice(p.EffectIDs)
+}
+
 // RollPayload returns the durable payload represented by optional rolled item
 // fields in this protocol view.
 func (v ItemView) RollPayload() *ItemRollPayload {
+	if v.ItemTemplateID == "" {
+		return nil
+	}
+	return &ItemRollPayload{
+		ItemTemplateID: v.ItemTemplateID,
+		DisplayName:    v.DisplayName,
+		Rarity:         v.Rarity,
+		Stats:          cloneIntMap(v.RolledStats),
+		Requirements:   cloneIntMap(v.Requirements),
+		EffectIDs:      cloneStringSlice(v.EffectIDs),
+	}
+}
+
+// RollPayload returns the durable payload represented by optional rolled stash
+// item fields.
+func (v StashItemView) RollPayload() *ItemRollPayload {
 	if v.ItemTemplateID == "" {
 		return nil
 	}
@@ -364,6 +407,11 @@ type Event struct {
 	SellAppraisals     []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
 	OfferID            string                  `json:"offer_id,omitempty"`
 	Price              *int                    `json:"price,omitempty"`
+	StashID            string                  `json:"stash_id,omitempty"`
+	StashItemID        string                  `json:"stash_item_id,omitempty"`
+	StashItems         []StashItemView         `json:"stash_items,omitempty"`
+	StashGold          *int                    `json:"stash_gold,omitempty"`
+	StashCapacity      *int                    `json:"stash_capacity,omitempty"`
 	PatternID          string                  `json:"pattern_id,omitempty"`
 	PhaseIndex         *int                    `json:"phase_index,omitempty"`
 	PhaseKind          string                  `json:"phase_kind,omitempty"`
@@ -407,6 +455,9 @@ type Snapshot struct {
 	InventoryRows         int                       `json:"inventory_rows"`
 	InventoryCapacity     int                       `json:"inventory_capacity"`
 	Gold                  int                       `json:"gold"`
+	StashItems            []StashItemView           `json:"stash_items"`
+	StashGold             int                       `json:"stash_gold"`
+	StashCapacity         int                       `json:"stash_capacity"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	SkillProgression      SkillProgressionView      `json:"skill_progression"`
@@ -425,6 +476,9 @@ const (
 	OpEquippedUpdate             = "equipped_update"
 	OpHotbarUpdate               = "hotbar_update"
 	OpGoldUpdate                 = "gold_update"
+	OpStashItemAdd               = "stash_item_add"
+	OpStashItemRemove            = "stash_item_remove"
+	OpStashGoldUpdate            = "stash_gold_update"
 	OpWallLayoutUpdate           = "wall_layout_update"
 	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
 	OpCharacterProgressionUpdate = "character_progression_update"
@@ -443,6 +497,8 @@ type Change struct {
 	Entity           *EntityView
 	EntityID         string
 	Item             *ItemView
+	StashItem        *StashItemView
+	StashItemID      string
 	Slot             string
 	ItemInstanceID   *string // for equipped_update; nil marshals as null
 	SlotIndex        int
@@ -450,6 +506,7 @@ type Change struct {
 	InventoryRows    *int
 	InventoryCap     *int
 	Gold             *int
+	StashGold        *int
 	Walls            []WallView
 	Level            int
 	Discovered       bool
@@ -461,6 +518,7 @@ type Change struct {
 	ShopStock        []PersistedShopStockItem
 	OfferID          string
 	Available        bool
+	StashTransferID  string
 }
 
 // MarshalJSON renders the change as the precise object for its op.
@@ -516,6 +574,25 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op   string `json:"op"`
 			Gold int    `json:"gold"`
 		}{c.Op, gold})
+	case OpStashItemAdd:
+		return json.Marshal(struct {
+			Op   string         `json:"op"`
+			Item *StashItemView `json:"item"`
+		}{c.Op, c.StashItem})
+	case OpStashItemRemove:
+		return json.Marshal(struct {
+			Op          string `json:"op"`
+			StashItemID string `json:"stash_item_id"`
+		}{c.Op, c.StashItemID})
+	case OpStashGoldUpdate:
+		stashGold := 0
+		if c.StashGold != nil {
+			stashGold = *c.StashGold
+		}
+		return json.Marshal(struct {
+			Op        string `json:"op"`
+			StashGold int    `json:"stash_gold"`
+		}{c.Op, stashGold})
 	case OpWallLayoutUpdate:
 		return json.Marshal(struct {
 			Op    string     `json:"op"`

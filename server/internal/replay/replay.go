@@ -323,6 +323,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 		sim.LoadHotbar(persistedHotbar(start.Hotbar))
 		sim.LoadDiscoveredTeleporters(waypointLevels(start.Waypoints))
 		sim.LoadShopStock(persistedShopStock(start.ShopStock))
+		sim.LoadAccountStash(persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
 		return sim, nil, nil, nil
 	}
 
@@ -349,6 +350,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 	sim.LoadHotbarForPlayer(hostID, persistedHotbar(hostStart.Hotbar))
 	sim.LoadDiscoveredTeleportersForPlayer(hostID, waypointLevels(hostStart.Waypoints))
 	sim.LoadShopStockForPlayer(hostID, persistedShopStock(hostStart.ShopStock))
+	sim.LoadAccountStashForPlayer(hostID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
 
 	players := []memberPlayer{{member: host, playerID: hostID}}
 	if err := assertStoredPlayerID(host, hostID); err != nil {
@@ -466,6 +468,7 @@ func addMemberToSim(sim *game.Sim, rules *game.Rules, member store.SessionMember
 	sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
 	sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 	sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
+	sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
 	return memberPlayer{member: member, playerID: playerID}, nil
 }
 
@@ -572,6 +575,18 @@ func persistedShopStock(items []store.CharacterShopStockItem) []game.PersistedSh
 			RolledPayload:  item.RolledPayload,
 			BuyPrice:       item.BuyPrice,
 			Available:      item.Available,
+		})
+	}
+	return out
+}
+
+func persistedStashItems(items []store.AccountStashItem) []game.PersistedStashItem {
+	out := make([]game.PersistedStashItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, game.PersistedStashItem{
+			StashItemID: item.StashItemID,
+			ItemDefID:   item.ItemDefID,
+			RolledStats: item.RolledStats,
 		})
 	}
 	return out

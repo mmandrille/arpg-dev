@@ -138,6 +138,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	sim.LoadHotbarForPlayer(hostPlayerID, persistedHotbar(hostStart.Hotbar))
 	sim.LoadDiscoveredTeleportersForPlayer(hostPlayerID, waypointLevels(hostStart.Waypoints))
 	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
+	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
 	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
 	}
@@ -158,6 +159,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
 		sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
+		sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
 		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
 		}
@@ -254,6 +256,7 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 	l.sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
 	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
+	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
 	l.mu.Unlock()
 	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 		l.log.Error("set late-joined member player", "account_id", member.AccountID, "character_id", member.CharacterID, "player_id", playerID, "error", err)
@@ -558,7 +561,8 @@ func filterChangesForClient(changes []game.Change, actorPlayerID, clientPlayerID
 		case game.OpInventoryAdd, game.OpInventoryUpdate, game.OpInventoryRemove,
 			game.OpEquippedUpdate, game.OpHotbarUpdate, game.OpTeleporterDiscoveryUpdate,
 			game.OpGoldUpdate, game.OpCharacterProgressionUpdate, game.OpSkillProgressionUpdate,
-			game.OpShopStockReplace, game.OpShopStockAvailability:
+			game.OpShopStockReplace, game.OpShopStockAvailability,
+			game.OpStashItemAdd, game.OpStashItemRemove, game.OpStashGoldUpdate:
 			ownerPlayerID := actorPlayerID
 			if change.OwnerPlayerID != 0 {
 				ownerPlayerID = change.OwnerPlayerID
@@ -576,7 +580,7 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 	out := make([]game.Event, 0, len(events))
 	for _, event := range events {
 		switch event.EventType {
-		case "level_changed", "shop_opened", "shop_purchase", "shop_sale":
+		case "level_changed", "shop_opened", "shop_purchase", "shop_sale", "stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn":
 			if actorPlayerID != clientPlayerID {
 				continue
 			}
@@ -593,6 +597,16 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 
 func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uint64]store.SessionMember, eventSequence int64) int64 {
 	ctx := context.Background()
+	member := store.SessionMember{
+		AccountID:   l.sess.AccountID,
+		CharacterID: l.sess.CharacterID,
+	}
+	if res.ActorPlayerID != 0 {
+		if actorMember, ok := membersByPlayerID[res.ActorPlayerID]; ok {
+			member = actorMember
+		}
+	}
+
 	for _, ev := range res.Events {
 		payload, _ := json.Marshal(ev)
 		if err := l.hub.store.AppendEvent(ctx, store.SessionEvent{
@@ -615,20 +629,47 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				}
 			}
 		}
+		switch ev.EventType {
+		case "stash_item_deposited":
+			if ev.ItemInstanceID == "" || ev.StashItemID == "" {
+				break
+			}
+			if _, err := l.hub.store.TransferCharacterItemToAccountStash(ctx, member.AccountID, member.CharacterID, ev.ItemInstanceID, ev.StashItemID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist stash item deposit", "account_id", member.AccountID, "character_id", member.CharacterID, "item_instance_id", ev.ItemInstanceID, "stash_item_id", ev.StashItemID, "error", err)
+			}
+		case "stash_item_withdrawn":
+			if ev.ItemInstanceID == "" || ev.StashItemID == "" {
+				break
+			}
+			if _, err := l.hub.store.TransferAccountStashItemToCharacter(ctx, member.AccountID, member.CharacterID, ev.StashItemID, ev.ItemInstanceID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist stash item withdraw", "account_id", member.AccountID, "character_id", member.CharacterID, "item_instance_id", ev.ItemInstanceID, "stash_item_id", ev.StashItemID, "error", err)
+			}
+		case "stash_gold_deposited":
+			if ev.Amount == nil {
+				break
+			}
+			if _, _, err := l.hub.store.TransferCharacterGoldToAccountStash(ctx, member.AccountID, member.CharacterID, *ev.Amount); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist stash gold deposit", "account_id", member.AccountID, "character_id", member.CharacterID, "amount", *ev.Amount, "error", err)
+			}
+		case "stash_gold_withdrawn":
+			if ev.Amount == nil {
+				break
+			}
+			if _, _, err := l.hub.store.TransferAccountStashGoldToCharacter(ctx, member.AccountID, member.CharacterID, *ev.Amount); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist stash gold withdraw", "account_id", member.AccountID, "character_id", member.CharacterID, "amount", *ev.Amount, "error", err)
+			}
+		}
 		eventSequence++
 	}
 
-	member := store.SessionMember{
-		AccountID:   l.sess.AccountID,
-		CharacterID: l.sess.CharacterID,
-	}
-	if res.ActorPlayerID != 0 {
-		if actorMember, ok := membersByPlayerID[res.ActorPlayerID]; ok {
-			member = actorMember
-		}
-	}
-
 	for _, c := range res.Changes {
+		if c.StashTransferID != "" {
+			continue
+		}
 		changeMember := member
 		if c.OwnerPlayerID != 0 {
 			if ownerMember, ok := membersByPlayerID[c.OwnerPlayerID]; ok {

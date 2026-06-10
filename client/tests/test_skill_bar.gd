@@ -21,6 +21,10 @@ func _run() -> void:
 	bar.cast_skill_requested.connect(func(skill_id: String) -> void:
 		emitted.append(skill_id)
 	)
+	var open_count := {"count": 0}
+	bar.open_skills_requested.connect(func() -> void:
+		open_count["count"] = int(open_count["count"]) + 1
+	)
 
 	bar.set_skill_progression({
 		"unspent_skill_points": 0,
@@ -32,6 +36,9 @@ func _run() -> void:
 	_assert_false("unranked skill disabled", bool(state.get("enabled", true)))
 	_assert_eq("unranked slot text", str(state.get("slot_text", "")), "-")
 	_assert_true("tooltip uses catalog name", str(state.get("tooltip_text", "")).contains("Magic Bolt"))
+	bar._slot.pressed.emit()
+	_assert_eq("slot click opens skills panel", int(open_count["count"]), 1)
+	_assert_eq("slot click does not cast", emitted.size(), 0)
 
 	bar.set_skill_progression({
 		"unspent_skill_points": 0,

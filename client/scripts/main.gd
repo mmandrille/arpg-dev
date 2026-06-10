@@ -2495,6 +2495,7 @@ func _build_scene() -> void:
 	ui.add_child(skills_panel)
 	skill_bar = SkillBarScript.new()
 	skill_bar.cast_skill_requested.connect(_on_skill_cast_requested)
+	skill_bar.open_skills_requested.connect(_open_skills_panel_from_bar)
 	ui.add_child(skill_bar)
 	_setup_character_info_panel(ui)
 	_health_bar = PlayerHealthBarScript.new()
@@ -2640,6 +2641,14 @@ func _on_skill_point_requested(skill_id: String) -> void:
 
 func _on_skill_cast_requested(skill_id: String) -> void:
 	_send_skill_cast_intent(skill_id)
+
+
+func _open_skills_panel_from_bar() -> void:
+	if skills_panel == null:
+		return
+	_close_gameplay_panels("skills")
+	skills_panel.ensure_display_visible()
+	_refresh_skill_ui()
 
 
 func _stat_allocation_blocked() -> bool:

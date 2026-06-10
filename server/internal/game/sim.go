@@ -462,7 +462,7 @@ func (r *Rules) defaultSkillRanks() map[string]int {
 
 func (r *Rules) normalizeSkillRanks(in map[string]int) map[string]int {
 	out := r.defaultSkillRanks()
-	for skillID, rank := range in {
+	for skillID, rank := range in { //nolint:determinism — output is a map, iteration order does not affect the result
 		def, ok := r.Skills[skillID]
 		if !ok {
 			continue
@@ -483,7 +483,7 @@ func cloneSkillCooldowns(in map[string]skillCooldownState) map[string]skillCoold
 		return make(map[string]skillCooldownState)
 	}
 	out := make(map[string]skillCooldownState, len(in))
-	for skillID, cooldown := range in {
+	for skillID, cooldown := range in { //nolint:determinism — pure map clone, output is a map
 		out[skillID] = cooldown
 	}
 	return out
@@ -755,7 +755,7 @@ func cloneIntMap(in map[string]int) map[string]int {
 		return nil
 	}
 	out := make(map[string]int, len(in))
-	for key, value := range in {
+	for key, value := range in { //nolint:determinism — pure map clone, output is a map
 		out[key] = value
 	}
 	return out
@@ -5430,10 +5430,10 @@ func (s *Sim) itemBaseAndRollStats(item *invItem) (map[string]int, map[string]in
 	if !ok {
 		return baseStats, rolledStats
 	}
-	for key, value := range template.BaseStats {
+	for key, value := range template.BaseStats { //nolint:determinism — output is a map, order irrelevant
 		baseStats[key] = value
 	}
-	for key, total := range item.rollPayload.Stats {
+	for key, total := range item.rollPayload.Stats { //nolint:determinism — output is a map, order irrelevant
 		if base := template.BaseStats[key]; total != base {
 			rolledStats[key] = total - base
 		}

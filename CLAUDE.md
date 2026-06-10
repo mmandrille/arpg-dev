@@ -96,7 +96,7 @@ docs/        ADRs + specs + plans + as-built + reviews (periodic ~every 10 slice
 The client is a renderer + input layer; **the server owns every outcome that matters** (HP, damage, loot rolls, inventory). Even in solo play the client speaks the full production-shaped protocol over WebSocket. There is no local-only path or client-side shortcut.
 
 ### Server internals (`server/internal/`)
-- **`game/`** — deterministic authoritative simulation (`Sim`). Given the same seed + ordered inputs it always produces identical output. Enforced: seeded PRNG only (`rng.go`), no `time.Now()` in game logic, stable entity-ID ordering, fixed 20 Hz tick. Rules loaded from `shared/rules/` at startup (`rules.go`).
+- **`game/`** — deterministic authoritative simulation (`Sim`). Given the same seed + ordered inputs it always produces identical output. Enforced: seeded PRNG only (`rng.go`), no `time.Now()` in game logic, stable entity-ID ordering, **15 Hz tick** (`protocol.go:17`). Rules loaded from `shared/rules/` at startup (`rules.go`). **CI gate:** `make lint-determinism` fails on `time.Now()`, `math/rand`, or bare map ranges in hot-path files — see `server/cmd/determinism-lint/`.
 - **`realtime/`** — WebSocket hub + per-session runner. `Hub.Run()` upgrades the connection, constructs a `Sim`, and enters the session loop.
 - **`store/`** — repository interface + Postgres implementation. Sessions, inventory, events all persist here.
 - **`auth/`, `http/`, `replay/`** — platform services (auth, REST endpoints, replay command).
@@ -137,8 +137,80 @@ This project uses Spec-Driven Development. Before touching code for any new feat
 
 ## Key Invariants
 
-- **Determinism in the Go sim is non-negotiable.** No `time.Now()`, `rand.Intn()` without the seeded `RNG`, or map iteration in game logic (`game/` package only). Any violation breaks replay.
-- **Shared rules are data, not code.** Formula types live in `shared/rules/`; Go and GDScript each implement the same small evaluator set. Never add executable logic to shared data files.
-- **Golden fixtures are cross-language contracts.** Any change to combat formulas or loot logic must update the golden files in `shared/golden/` and both the Go and GDScript golden tests.
-- **Protocol JSON schemas are versioned.** Changes to `shared/protocol/` require a schema version bump and must remain backward-compatible or require coordinated client+server update.
-- **Asset manifest is the source of truth for asset identity.** `assets/manifests/assets.v0.json` maps `asset_id → runtime_path`. `shared/assets/item_visuals.v0.json` maps `item_def_id → asset_id + mount_socket`. These two files are the only canonical link between gameplay and visuals.
+- **Determinism in the Go sim is non-negotiable.** No `time.Now()`, `rand.Intn()` without the
+  seeded `RNG`, or bare map ranges with key+value in game logic (`game/` package hot-path files).
+  Enforced by `make lint-determinism` (CI step 3/9). Known-safe map clones that output maps are
+  annotated `//nolint:determinism` with a WHY comment. Any violation breaks replay.
+- **New intents register in `handlers.go`, not in `applyInput`.** Add one entry to `inputHandlers`
+  map in `handlers.go`. Never edit `applyInput` in `sim.go` for a new intent type.
+- **Shared rules are data, not code.** Formula types live in `shared/rules/`; Go and GDScript each
+  implement the same small evaluator set. Never add executable logic to shared data files.
+- **Golden fixtures are cross-language contracts.** Any change to combat formulas or loot logic
+  must update `shared/golden/` and both Go and GDScript golden tests. Use `make regen-golden`
+  after intentional formula changes (runs `go test -update -run Golden`).
+  When writing golden update paths: normalize nil Go slices to `[]T{}` before `writeGolden` —
+  Go `null` JSON breaks GDScript `as Array` casts.
+- **Protocol JSON schemas are versioned.** Changes to `shared/protocol/` require a schema version
+  bump and must remain backward-compatible or require coordinated client+server update.
+- **Asset manifest is the source of truth for asset identity.** `assets/manifests/assets.v0.json`
+  maps `asset_id → runtime_path`. `shared/assets/item_visuals.v0.json` maps
+  `item_def_id → asset_id + mount_socket`. These two files are the only canonical link between
+  gameplay and visuals.
+- **GDScript shared singletons: use `class_name` with static vars, not Godot autoload.**
+  Autoload names are resolved at runtime, not at GDScript compile time. Any test that `preload()`s
+  a script depending on an autoload will fail with "Identifier not found" in headless mode.
+  Pattern: `class_name Foo extends RefCounted` + `static var _loaded: bool` + `ensure_loaded()`.
+
+## Agent rules (from v55 consolidation)
+
+These rules emerged from paying down the god-file debt. Agents should follow them on every slice:
+
+### Go server
+
+1. **Handler registry discipline.** `applyInput` dispatches via `inputHandlers` map. A new intent
+   type adds one line to `handlers.go`. Never add a new `case` to `applyInput`.
+
+2. **Map range in game/.** When you write `for k, v := range someMap` in `sim.go` or
+   `handlers.go`, you must either: (a) use a `sorted*` helper before iterating, or (b) add
+   `//nolint:determinism` with a one-line comment explaining WHY the result is order-independent
+   (e.g., "output is a map", "commutative sum", "bool existence check").
+   The lint will fail CI otherwise.
+
+3. **Golden updates.** After any formula or loot rule change, run `make regen-golden` and commit
+   the updated fixtures alongside the rule change. When adding a new `-update` path to a test,
+   normalize nil slices: `if got.SomeSlice == nil { got.SomeSlice = []T{} }` before writing.
+
+### Python tools
+
+4. **bot_types.py is the type home.** `Scenario`, `RuntimeState`, `CoopPeer`, and
+   `DEFAULT_WORLD_ID` live in `tools/bot/bot_types.py`. Do not re-add them to `run.py` or any
+   other module. New shared types go to `bot_types.py`, not inline in `run.py`.
+
+5. **validate_shared cross-checks.** When adding a new stat key that appears under two different
+   names or units across rules/protocol/goldens, add a `cross_checks()` assertion that verifies
+   both names are present. The `health_regen_per_10_seconds` ↔ `health_regen_per_second` example
+   is the template.
+
+### GDScript client
+
+6. **ItemRulesLoader pattern for shared data.** Any data loaded from `shared/` that is needed by
+   multiple scripts goes through a `class_name Foo extends RefCounted` static singleton with
+   `ensure_loaded()`. Do NOT duplicate file-load code across scripts.
+
+7. **Delta payload access.** Never use `c["key"]` on a delta change dictionary — always use
+   `c.get("key", default)`. Direct access crashes on partial/malformed server messages; `.get()`
+   degrades gracefully and makes the malformed-delta test pass cleanly.
+
+8. **Headless unit tests avoid scene-tree ops.** Tests in `tests/` using `extends SceneTree`
+   can test pure state mutations on a `MainScript.new()` instance, but must not call paths that
+   access `$Node` children, `get_parent()`, or require `entities_root`/`_walls_root`/etc.
+   Those paths are covered indirectly by bot scenarios; unit tests cover state correctness.
+
+### CI / process
+
+9. **Test and commit between independent refactoring steps.** Each structural change should be
+   committed with a passing test suite before the next one begins. This keeps `git bisect` clean
+   and avoids entangling unrelated failures.
+
+10. **Trivials first, then structural splits, then infrastructure.** Safety bugs (bare ranges,
+    missing guards) should land before monolith splits so the split is on proven-correct code.

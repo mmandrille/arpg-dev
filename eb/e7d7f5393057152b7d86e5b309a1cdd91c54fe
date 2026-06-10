@@ -1,0 +1,25 @@
+shared/rules/character_progression.v0.json
+  s_6ad77ebd06dff8::t_3dad20a3c2431a 15,37-117
+server/internal/game/game_test.go
+  s_6ad77ebd06dff8::t_3dad20a3c2431a 116-117,465-478
+shared/protocol/examples/session_snapshot.json
+  s_6ad77ebd06dff8::t_3dad20a3c2431a 69
+shared/protocol/examples/state_delta.json
+  s_6ad77ebd06dff8::t_3dad20a3c2431a 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ebe7d7f5393057152b7d86e5b309a1cdd91c54fe",
+  "prompts": {},
+  "sessions": {
+    "s_6ad77ebd06dff8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb212-d756-7900-a45c-2c09166ffa4a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

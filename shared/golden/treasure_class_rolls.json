@@ -5,46 +5,66 @@
       "name": "bow",
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
-        { "item_template_id": "cave_greatsword" }
+        {
+          "item_template_id": "cave_greatsword"
+        }
       ]
     },
     {
       "name": "shield",
       "seed": "v29_guarded_chest_tc_depth_3_plus_13",
       "expected_drops": [
-        { "item_template_id": "cave_ring" }
+        {
+          "item_template_id": "cave_ring"
+        }
       ]
     },
     {
       "name": "belt_and_jewelry",
       "seed": "v29_guarded_chest_tc_depth_3_plus_3",
       "expected_drops": [
-        { "item_template_id": "cave_bow" },
-        { "item_template_id": "cave_ring" }
+        {
+          "item_template_id": "cave_bow"
+        },
+        {
+          "item_template_id": "cave_ring"
+        }
       ]
     },
     {
       "name": "armor_and_belt",
       "seed": "v29_guarded_chest_tc_depth_3_plus_4",
       "expected_drops": [
-        { "item_template_id": "cave_belt" },
-        { "item_template_id": "cave_belt" }
+        {
+          "item_template_id": "cave_belt"
+        },
+        {
+          "item_template_id": "cave_belt"
+        }
       ]
     },
     {
       "name": "potion_bonus",
       "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
-        { "item_template_id": "cave_greatsword" },
-        { "item_def_id": "red_potion" }
+        {
+          "item_template_id": "cave_greatsword"
+        },
+        {
+          "item_def_id": "red_potion"
+        }
       ]
     },
     {
       "name": "money_like_bonus",
       "seed": "v29_guarded_chest_tc_depth_3_plus_14",
       "expected_drops": [
-        { "item_template_id": "cave_belt" },
-        { "item_def_id": "gold" }
+        {
+          "item_template_id": "cave_belt"
+        },
+        {
+          "item_def_id": "gold"
+        }
       ]
     }
   ]

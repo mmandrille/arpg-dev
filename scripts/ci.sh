@@ -23,20 +23,23 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "== 1/8 shared schema validation =="
+echo "== 1/9 shared schema validation =="
 "$RUN_QUIET" --label validate-shared -- make validate-shared
 
-echo "== 2/8 asset manifest + GLB validation =="
+echo "== 2/9 asset manifest + GLB validation =="
 "$RUN_QUIET" --label validate-assets -- make validate-assets
 
-echo "== 3/8 Go tests =="
+echo "== 3/9 determinism lint =="
+"$RUN_QUIET" --label "determinism-lint" -- make lint-determinism
+
+echo "== 4/9 Go tests =="
 "$RUN_QUIET" --label "go test ./..." -- bash -c 'cd server && go test ./...'
 
-echo "== 4/8 Python unit checks =="
+echo "== 5/9 Python unit checks =="
 make tools >/dev/null
 "$RUN_QUIET" --label "pytest tools" -- "$ROOT/.venv/bin/python" -m pytest -q tools
 
-echo "== 5/8 start Postgres + server =="
+echo "== 6/9 start Postgres + server =="
 make db-up
 # Build a binary and run it directly (not via `go run`, whose child binary
 # would survive the cleanup kill and, if stdout were piped, hold the pipe open).
@@ -58,7 +61,7 @@ if ! curl -fsS "$BASE_URL/readyz" >/dev/null; then
   exit 1
 fi
 
-echo "== 6/8 protocol bot + replay =="
+echo "== 7/9 protocol bot + replay =="
 BOT_LOG="$(mktemp -t arpg-ci-bot.XXXXXX.log)"
 set +e
 SESSION_ID="$("$ROOT/.venv/bin/python" -m tools.bot.run \
@@ -82,12 +85,12 @@ echo "bot completed session: $SESSION_ID"
 "$RUN_QUIET" --label "arpg-replay" -- bash -c \
   "cd server && ARPG_DATABASE_URL=\"$DATABASE_URL\" go run ./cmd/arpg-replay --session-id \"$SESSION_ID\""
 
-echo "== 7/8 Godot client bot scenarios =="
+echo "== 8/9 Godot client bot scenarios =="
 "$RUN_QUIET" --label "bot-client scenarios" -- env \
   GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
   SCENARIO=all HEADLESS=1 ./scripts/bot_client.sh
 
-echo "== 8/8 Godot headless smoke (optional) =="
+echo "== 9/9 Godot headless smoke (optional) =="
 "$RUN_QUIET" --label "client smoke" -- env \
   GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" DEBUG_TOKEN="$DEBUG_TOKEN" \
   ./scripts/client_smoke.sh

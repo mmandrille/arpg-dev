@@ -882,10 +882,17 @@ func statSummaryLines(stats map[string]int) []string {
 			continue
 		}
 		if value := stats[stat]; value != 0 {
-			lines = append(lines, fmt.Sprintf("%s %+d", displayStatName(stat), value))
+			lines = append(lines, fmt.Sprintf("%s %s", displayStatName(stat), displayStatValue(stat, value)))
 		}
 	}
 	return lines
+}
+
+func displayStatValue(stat string, value int) string {
+	if stat == "block_percent" || stat == "attack_speed_percent" {
+		return fmt.Sprintf("%+d%%", value)
+	}
+	return fmt.Sprintf("%+d", value)
 }
 
 func displayRange(r DamageRange) string {

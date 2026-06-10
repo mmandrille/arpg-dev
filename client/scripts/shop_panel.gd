@@ -902,8 +902,14 @@ func _stat_lines(stats_value: Variant) -> Array:
 	for key in ["armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"]:
 		var value := int(stats.get(key, 0))
 		if value > 0:
-			lines.append("%s +%d" % [_display_stat(key), value])
+			lines.append("%s %s" % [_display_stat(key), _format_stat_value(key, value)])
 	return lines
+
+
+func _format_stat_value(stat: String, value: int) -> String:
+	if stat == "block_percent" or stat == "attack_speed_percent":
+		return "+%d%%" % value
+	return "+%d" % value
 
 
 func _comparison_lines(comparison_value: Variant) -> Array:

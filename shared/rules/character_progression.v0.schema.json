@@ -60,18 +60,18 @@
       ],
       "additionalProperties": false,
       "properties": {
-        "damage_min": { "$ref": "#/$defs/linear_formula" },
-        "damage_max": { "$ref": "#/$defs/linear_formula" },
-        "armor": { "$ref": "#/$defs/linear_formula" },
-        "attack_speed": { "$ref": "#/$defs/linear_formula" },
-        "hit_chance": { "$ref": "#/$defs/linear_formula" },
-        "crit_chance": { "$ref": "#/$defs/linear_formula" },
-        "crit_damage": { "$ref": "#/$defs/linear_formula" },
-        "movement_speed": { "$ref": "#/$defs/linear_formula" },
-        "max_hp": { "$ref": "#/$defs/linear_formula" },
-        "max_mana": { "$ref": "#/$defs/linear_formula" },
-        "health_regen_per_second": { "$ref": "#/$defs/linear_formula" },
-        "mana_regen_per_second": { "$ref": "#/$defs/linear_formula" }
+        "damage_min": { "$ref": "#/$defs/derived_formula" },
+        "damage_max": { "$ref": "#/$defs/derived_formula" },
+        "armor": { "$ref": "#/$defs/derived_formula" },
+        "attack_speed": { "$ref": "#/$defs/derived_formula" },
+        "hit_chance": { "$ref": "#/$defs/derived_formula" },
+        "crit_chance": { "$ref": "#/$defs/derived_formula" },
+        "crit_damage": { "$ref": "#/$defs/derived_formula" },
+        "movement_speed": { "$ref": "#/$defs/derived_formula" },
+        "max_hp": { "$ref": "#/$defs/derived_formula" },
+        "max_mana": { "$ref": "#/$defs/derived_formula" },
+        "health_regen_per_second": { "$ref": "#/$defs/derived_formula" },
+        "mana_regen_per_second": { "$ref": "#/$defs/derived_formula" }
       }
     }
   },
@@ -87,6 +87,12 @@
         "magic": { "type": "integer", "minimum": 1 }
       }
     },
+    "derived_formula": {
+      "oneOf": [
+        { "$ref": "#/$defs/linear_formula" },
+        { "$ref": "#/$defs/logarithmic_formula" }
+      ]
+    },
     "linear_formula": {
       "type": "object",
       "required": ["type", "base"],
@@ -98,6 +104,21 @@
         "per_dex": { "type": "number" },
         "per_vit": { "type": "number" },
         "per_magic": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" }
+      }
+    },
+    "logarithmic_formula": {
+      "type": "object",
+      "required": ["type", "base", "stat", "scale", "denominator"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "logarithmic" },
+        "base": { "type": "number" },
+        "stat": { "type": "string", "enum": ["str", "dex", "vit", "magic"] },
+        "scale": { "type": "number" },
+        "offset": { "type": "number" },
+        "denominator": { "type": "number", "exclusiveMinimum": 0 },
         "min": { "type": "number" },
         "max": { "type": "number" }
       }

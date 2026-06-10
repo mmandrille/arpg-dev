@@ -4939,18 +4939,7 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 	stats := s.progression.BaseStats
 	eval := func(key string) float64 {
 		formula := s.rules.CharacterProgression.DerivedStats[key]
-		v := formula.Base +
-			formula.PerStr*float64(stats.Str) +
-			formula.PerDex*float64(stats.Dex) +
-			formula.PerVit*float64(stats.Vit) +
-			formula.PerMagic*float64(stats.Magic)
-		if formula.Min != nil && v < *formula.Min {
-			v = *formula.Min
-		}
-		if formula.Max != nil && v > *formula.Max {
-			v = *formula.Max
-		}
-		return v
+		return evalProgressionFormula(formula, stats)
 	}
 	return DerivedStatsView{
 		DamageMin:            eval("damage_min"),
@@ -4966,6 +4955,50 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 		MaxMana:              eval("max_mana"),
 		HealthRegenPerSecond: eval("health_regen_per_second"),
 		ManaRegenPerSecond:   eval("mana_regen_per_second"),
+	}
+}
+
+func evalProgressionFormula(formula LinearStatFormula, stats BaseStatsView) float64 {
+	value := formula.Base
+	switch formula.Type {
+	case "logarithmic":
+		statValue := progressionStatValue(stats, formula.Stat)
+		gainInput := statValue - formula.Offset
+		if gainInput < 0 {
+			gainInput = 0
+		}
+		denominator := formula.Denominator
+		if denominator <= 0 {
+			denominator = 1
+		}
+		value += formula.Scale * (math.Log1p(gainInput) / math.Log1p(denominator))
+	default:
+		value += formula.PerStr*float64(stats.Str) +
+			formula.PerDex*float64(stats.Dex) +
+			formula.PerVit*float64(stats.Vit) +
+			formula.PerMagic*float64(stats.Magic)
+	}
+	if formula.Min != nil && value < *formula.Min {
+		value = *formula.Min
+	}
+	if formula.Max != nil && value > *formula.Max {
+		value = *formula.Max
+	}
+	return value
+}
+
+func progressionStatValue(stats BaseStatsView, stat string) float64 {
+	switch stat {
+	case "str":
+		return float64(stats.Str)
+	case "dex":
+		return float64(stats.Dex)
+	case "vit":
+		return float64(stats.Vit)
+	case "magic":
+		return float64(stats.Magic)
+	default:
+		return 0
 	}
 }
 
@@ -5373,7 +5406,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	effective := effectiveCombatStats{
 		DamageMin:            maxFloat(0, damageMin),
 		DamageMax:            maxFloat(0, damageMax),
-		HitChance:            clampFloat(minFloat(character.HitChance, s.rules.Combat.BaseHitChance), 0, 1),
+		HitChance:            clampFloat(character.HitChance, 0, 1),
 		CritChance:           clampFloat(character.CritChance, 0, 1),
 		CritDamage:           maxFloat(1, character.CritDamage),
 		Armor:                maxFloat(0, armor),

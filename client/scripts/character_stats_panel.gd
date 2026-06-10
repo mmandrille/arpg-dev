@@ -21,6 +21,8 @@ const DERIVED_LABELS := {
 	"health_regen_per_second": "HP regen /s",
 	"mana_regen_per_second": "Mana regen /s",
 }
+const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance"]
+const WHOLE_PERCENT_STATS := ["block_percent"]
 
 var progression: Dictionary = {}
 var allocation_enabled: bool = false
@@ -74,11 +76,17 @@ func get_debug_state() -> Dictionary:
 			"enabled": btn != null and not btn.disabled,
 			"disabled": btn == null or btn.disabled,
 		}
+	var derived_labels := {}
+	for key in _derived_labels.keys():
+		var label: Label = _derived_labels.get(key, null)
+		if label != null:
+			derived_labels[key] = label.text
 	return {
 		"visible": visible,
 		"progression": progression.duplicate(true),
 		"allocation_enabled": allocation_enabled,
 		"stat_buttons": stat_buttons,
+		"derived_labels": derived_labels,
 		"stat_breakdowns": _breakdowns_by_key(),
 	}
 
@@ -165,7 +173,7 @@ func _render() -> void:
 	for key in DERIVED_LABELS.keys():
 		var label: Label = _derived_labels.get(key, null)
 		if label != null:
-			label.text = "%s  %s" % [DERIVED_LABELS[key], _format_number(float(derived.get(key, 0.0)))]
+			label.text = "%s  %s" % [DERIVED_LABELS[key], _format_stat_value(key, float(derived.get(key, 0.0)))]
 			label.tooltip_text = _breakdown_summary(key)
 	_render_buttons()
 
@@ -188,6 +196,14 @@ func _format_number(value: float) -> String:
 	return "%.2f" % value
 
 
+func _format_stat_value(key: String, value: float) -> String:
+	if key in FRACTION_PERCENT_STATS:
+		return "%s%%" % _format_number(value * 100.0)
+	if key in WHOLE_PERCENT_STATS:
+		return "%s%%" % _format_number(value)
+	return _format_number(value)
+
+
 func _breakdowns_by_key() -> Dictionary:
 	var out := {}
 	var rows: Array = progression.get("stat_breakdowns", [])
@@ -204,9 +220,9 @@ func _breakdown_summary(key: String) -> String:
 	if rec.is_empty():
 		return ""
 	var parts: PackedStringArray = PackedStringArray()
-	var value := _format_number(float(rec.get("value", 0.0)))
+	var value := _format_stat_value(key, float(rec.get("value", 0.0)))
 	if rec.get("cap", null) != null:
-		parts.append("%s: %s (cap %s)" % [DERIVED_LABELS.get(key, key), value, _format_number(float(rec.get("cap", 0.0)))])
+		parts.append("%s: %s (cap %s)" % [DERIVED_LABELS.get(key, key), value, _format_stat_value(key, float(rec.get("cap", 0.0)))])
 	else:
 		parts.append("%s: %s" % [DERIVED_LABELS.get(key, key), value])
 	var sources: Array = rec.get("sources", [])
@@ -215,7 +231,7 @@ func _breakdown_summary(key: String) -> String:
 			continue
 		var source_rec := source as Dictionary
 		var label := str(source_rec.get("label", source_rec.get("kind", "")))
-		parts.append("%s %s" % [label, _format_number(float(source_rec.get("value", 0.0)))])
+		parts.append("%s %s" % [label, _format_stat_value(key, float(source_rec.get("value", 0.0)))])
 	return "\n".join(parts)
 
 

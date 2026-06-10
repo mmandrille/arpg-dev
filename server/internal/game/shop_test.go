@@ -786,7 +786,7 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 	if appraisal.ItemInstanceID != idStr(sellable.instanceID) || appraisal.DisplayName != "Magic Cave Shield" || appraisal.SellPrice != 38 {
 		t.Fatalf("sell appraisal = %+v", appraisal)
 	}
-	if !containsShopString(appraisal.SummaryLines, "Armor +5") || !containsShopString(appraisal.SummaryLines, "Block +9") {
+	if !containsShopString(appraisal.SummaryLines, "Armor +5") || !containsShopString(appraisal.SummaryLines, "Block +9%") {
 		t.Fatalf("sell appraisal summary lines = %+v", appraisal.SummaryLines)
 	}
 	redPotion := findOffer(opened.Offers, "fixed:red_potion")

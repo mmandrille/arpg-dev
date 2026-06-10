@@ -37,7 +37,7 @@
       "slot": "off_hand",
       "category": "equipment",
       "sell_price": 38,
-      "summary_lines": ["Slot: Off hand", "Armor +5", "Block +9", "Requires level 1"],
+      "summary_lines": ["Slot: Off hand", "Armor +5", "Block +9%", "Requires level 1"],
       "comparison": [
         { "stat": "armor", "offered": 5, "equipped": 0, "delta": 5 },
         { "stat": "block_percent", "offered": 9, "equipped": 0, "delta": 9 }

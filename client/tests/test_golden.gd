@@ -718,10 +718,15 @@ func _skill_damage_max(skill: Dictionary, rank: int) -> int:
 
 func _eval_progression_formula(formula: Dictionary, stats: Dictionary) -> float:
 	var value := float(formula.get("base", 0.0))
-	value += float(formula.get("per_str", 0.0)) * float(stats.get("str", 0))
-	value += float(formula.get("per_dex", 0.0)) * float(stats.get("dex", 0))
-	value += float(formula.get("per_vit", 0.0)) * float(stats.get("vit", 0))
-	value += float(formula.get("per_magic", 0.0)) * float(stats.get("magic", 0))
+	if str(formula.get("type", "")) == "logarithmic":
+		var stat := str(formula.get("stat", ""))
+		var raw := maxf(0.0, float(stats.get(stat, 0)) - float(formula.get("offset", 0.0)))
+		value += float(formula.get("scale", 0.0)) * (log(1.0 + raw) / log(1.0 + float(formula.get("denominator", 1.0))))
+	else:
+		value += float(formula.get("per_str", 0.0)) * float(stats.get("str", 0))
+		value += float(formula.get("per_dex", 0.0)) * float(stats.get("dex", 0))
+		value += float(formula.get("per_vit", 0.0)) * float(stats.get("vit", 0))
+		value += float(formula.get("per_magic", 0.0)) * float(stats.get("magic", 0))
 	if formula.has("min"):
 		value = maxf(value, float(formula["min"]))
 	if formula.has("max"):

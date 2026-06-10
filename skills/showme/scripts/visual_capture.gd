@@ -7,6 +7,7 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
+const MainScript := preload("res://scripts/main.gd")
 
 const DEFAULT_GEAR_ITEMS := ["cave_blade", "cave_shield", "cave_helm", "cave_mail", "cave_boots"]
 const ITEM_SLOT := {
@@ -49,6 +50,8 @@ func _initialize() -> void:
 			await _setup_join_menu()
 		"hud":
 			await _setup_hud()
+		"stairs":
+			await _setup_stairs()
 		"inventory":
 			await _setup_inventory()
 		"shop":
@@ -222,6 +225,36 @@ func _setup_hud() -> void:
 	panel.update_hp(9, 12)
 	panel.update_mana(7, 14)
 	get_root().add_child(panel)
+
+
+func _setup_stairs() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackStairs"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(3.3, 3.0, 4.5), Vector3(0.0, 0.40, 0.0), 3.2)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(4.2, 0.04, 2.6)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.025, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#353735")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var main: Node3D = MainScript.new()
+	var up := main._make_stair_node("stairs_up") as Node3D
+	up.name = "PreviewStairsUp"
+	up.position = Vector3(-1.0, 0.0, 0.0)
+	root.add_child(up)
+	var down := main._make_stair_node("stairs_down") as Node3D
+	down.name = "PreviewStairsDown"
+	down.position = Vector3(1.0, 0.0, 0.0)
+	root.add_child(down)
 
 
 func _add_light(root: Node3D) -> void:

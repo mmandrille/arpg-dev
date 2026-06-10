@@ -3877,26 +3877,103 @@ func _make_door_node() -> Node3D:
 func _make_stair_node(def_id: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Stairs_%s" % def_id
+	var is_down := def_id == "stairs_down"
 	var base := MeshInstance3D.new()
+	base.name = "StairBase"
 	var mesh := BoxMesh.new()
-	mesh.size = Vector3(1.1, 0.18, 1.1)
+	mesh.size = Vector3(1.18, 0.14, 1.18)
 	base.mesh = mesh
-	base.position = Vector3(0.0, 0.09, 0.0)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.22, 0.24, 0.27) if def_id == "stairs_down" else Color(0.46, 0.48, 0.50)
-	base.material_override = mat
+	base.position = Vector3(0.0, 0.07, 0.0)
+	base.material_override = _stair_material(_stair_base_color(def_id, "ready"))
 	root.add_child(base)
-	for i in range(3):
+
+	if is_down:
+		var pit := MeshInstance3D.new()
+		pit.name = "DownPit"
+		var pit_mesh := CylinderMesh.new()
+		pit_mesh.top_radius = 0.38
+		pit_mesh.bottom_radius = 0.38
+		pit_mesh.height = 0.045
+		pit_mesh.radial_segments = 32
+		pit.mesh = pit_mesh
+		pit.position = Vector3(0.0, 0.155, -0.20)
+		pit.material_override = _stair_material(Color("#05070a"))
+		root.add_child(pit)
+	else:
+		var landing := MeshInstance3D.new()
+		landing.name = "UpLanding"
+		var landing_mesh := BoxMesh.new()
+		landing_mesh.size = Vector3(0.58, 0.12, 0.42)
+		landing.mesh = landing_mesh
+		landing.position = Vector3(0.0, 0.54, -0.34)
+		landing.material_override = _stair_material(Color("#d0c8a6"))
+		root.add_child(landing)
+
+	for i in range(4):
 		var step := MeshInstance3D.new()
+		step.name = "StairStep%d" % i
 		var smesh := BoxMesh.new()
-		smesh.size = Vector3(0.95 - float(i) * 0.18, 0.12, 0.22)
+		smesh.size = Vector3(1.00 - float(i) * 0.12, 0.12, 0.20)
 		step.mesh = smesh
-		step.position = Vector3(0.0, 0.22 + float(i) * 0.12, -0.34 + float(i) * 0.27)
-		var step_mat := StandardMaterial3D.new()
-		step_mat.albedo_color = Color(0.58, 0.56, 0.50)
-		step.material_override = step_mat
+		var t := float(i) / 3.0
+		if is_down:
+			step.position = Vector3(0.0, 0.38 - t * 0.24, 0.34 - t * 0.50)
+			step.material_override = _stair_material(Color("#565b61").lerp(Color("#161a20"), t))
+		else:
+			step.position = Vector3(0.0, 0.20 + t * 0.30, 0.34 - t * 0.50)
+			step.material_override = _stair_material(Color("#7f817b").lerp(Color("#c1bb9f"), t))
 		root.add_child(step)
+	_add_stair_direction_marker(root, is_down)
 	return root
+
+
+func _stair_base_color(def_id: String, state: String) -> Color:
+	if state == "locked" or state == "disabled":
+		return Color("#6b2e2e")
+	if def_id == "stairs_down":
+		return Color("#111821")
+	return Color("#666d68")
+
+
+func _stair_material(color: Color, glow: bool = false) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	if glow:
+		mat.emission_enabled = true
+		mat.emission = color
+	return mat
+
+
+func _add_stair_direction_marker(root: Node3D, is_down: bool) -> void:
+	var color := Color("#57a8ff") if is_down else Color("#ffe076")
+	var shaft := MeshInstance3D.new()
+	shaft.name = "DownMarkerShaft" if is_down else "UpMarkerShaft"
+	var shaft_mesh := CylinderMesh.new()
+	shaft_mesh.top_radius = 0.035
+	shaft_mesh.bottom_radius = 0.035
+	shaft_mesh.height = 0.40
+	shaft_mesh.radial_segments = 16
+	shaft.mesh = shaft_mesh
+	shaft.position = Vector3(0.0, 0.74 if is_down else 0.55, -0.18 if is_down else 0.08)
+	shaft.material_override = _stair_material(color, true)
+	root.add_child(shaft)
+
+	var head := MeshInstance3D.new()
+	head.name = "DownMarkerHead" if is_down else "UpMarkerHead"
+	var head_mesh := CylinderMesh.new()
+	if is_down:
+		head_mesh.top_radius = 0.24
+		head_mesh.bottom_radius = 0.0
+		head.position = Vector3(0.0, 0.46, -0.18)
+	else:
+		head_mesh.top_radius = 0.0
+		head_mesh.bottom_radius = 0.16
+		head.position = Vector3(0.0, 0.80, 0.08)
+	head_mesh.height = 0.30 if is_down else 0.24
+	head_mesh.radial_segments = 24
+	head.mesh = head_mesh
+	head.material_override = _stair_material(color, true)
+	root.add_child(head)
 
 
 func _make_teleporter_node() -> Node3D:
@@ -3992,9 +4069,9 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 			return
 		var mat := StandardMaterial3D.new()
 		if state == "locked" or state == "disabled":
-			mat.albedo_color = Color(0.42, 0.18, 0.18)
+			mat.albedo_color = _stair_base_color(def_id, state)
 		else:
-			mat.albedo_color = Color(0.22, 0.24, 0.27) if def_id == "stairs_down" else Color(0.46, 0.48, 0.50)
+			mat.albedo_color = _stair_base_color(def_id, state)
 		base.material_override = mat
 
 

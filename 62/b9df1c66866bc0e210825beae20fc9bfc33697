@@ -1,0 +1,51 @@
+docs/as-built/v58_boss-pattern-variety.md
+  s_b9cf0d42c0095c::t_9ee9ba4808f410 1-34
+tools/bot/run.py
+  s_b9cf0d42c0095c::t_efb6dfc30a7de9 2185
+  s_b9cf0d42c0095c::t_fa37a25d2a556d 3526-3530
+  s_b9cf0d42c0095c::t_804cf90a775b2f 1981-2020
+docs/specs/v58_spec-boss-pattern-variety.md
+  s_b9cf0d42c0095c::t_b6c4ed3e8219da 1-74
+tools/bot/bot_types.py
+  s_b9cf0d42c0095c::t_adf030c49958bf 49
+shared/rules/boss_patterns.v0.json
+  s_b9cf0d42c0095c::t_d0022bd66d9572 29-53
+PROGRESS.md
+  s_b9cf0d42c0095c::t_fadf3fb71fb5a1 15,79,177,244,508-512,518,521-522,540
+shared/rules/boss_templates.v0.json
+  s_b9cf0d42c0095c::t_3697271e1b9fe8 7
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_b9cf0d42c0095c::t_f77c26ba7b35d6 28,33,44-45
+docs/plans/v58_2026-06-10-boss-pattern-variety.md
+  s_b9cf0d42c0095c::t_625717c929e796 78,80,82,124
+  s_b9cf0d42c0095c::t_250ad73899ba4c 43,45-46,122
+  s_b9cf0d42c0095c::t_bb4890bd6801dd 111-112
+  s_b9cf0d42c0095c::t_c365f9e43f8c88 114,127
+  s_b9cf0d42c0095c::t_ae230f3cbc5e13 93,95-96,125-126
+  s_b9cf0d42c0095c::t_e98097a2b1fad9 1-42,44,47-57,60,62,64,66-77,79,81,83-92,94,97-110,113,115-121,128-133
+  s_b9cf0d42c0095c::t_b3c0f75b1de142 58-59,61,63,65,123
+server/internal/game/game_test.go
+  s_b9cf0d42c0095c::t_e702540f4e8399 4881-4940
+  s_b9cf0d42c0095c::t_0a1ae84e3537e0 6974-6996
+tools/bot/test_protocol.py
+  s_b9cf0d42c0095c::t_9b9330c7fc764c 706-753
+server/internal/game/sim.go
+  s_b9cf0d42c0095c::t_0127e8bd6e626a 113,1666,1671,3493,3495,3521,3534-3546,3591-3595
+  s_b9cf0d42c0095c::t_a060661b884136 94-112,114-141,1651-1665
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "62b9df1c66866bc0e210825beae20fc9bfc33697",
+  "prompts": {},
+  "sessions": {
+    "s_b9cf0d42c0095c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb285-2bbf-7b10-bc66-f90cee53e315",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

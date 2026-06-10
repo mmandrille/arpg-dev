@@ -1,0 +1,178 @@
+docs/PROGRESS.md
+  s_932d6b636b97d4::t_19514d0b05ff5b 1539-1543,1548,1552
+  s_932d6b636b97d4::t_747de20e945eb2 14,68,138
+  s_932d6b636b97d4::t_aef5b1b7b57cbd 1343
+  s_932d6b636b97d4::t_96698081141e34 1241-1266
+  s_932d6b636b97d4::t_82c2c8dac147ad 1344
+server/internal/game/stash_test.go
+  s_932d6b636b97d4::t_30b16a532fe571 1-103,205-224
+  s_932d6b636b97d4::t_d90c15c3c96146 104-121,124-131,133-182,186,190-204
+  s_932d6b636b97d4::t_5c12ad57580c31 122-123,132,183-185,187-189
+shared/protocol/session_snapshot.v7.schema.json
+  s_932d6b636b97d4::t_ffacbfef364d1b 1-6,8-29,33-134,153-408,417-586,608-646
+  s_932d6b636b97d4::t_5e39311b4e958b 409-416,587-607
+  s_932d6b636b97d4::t_334c336d9eebdd 7,30-32,135-152
+shared/protocol/examples/stash_withdraw_item_intent.json
+  s_932d6b636b97d4::t_c8232ffc8d074c 1-8
+server/internal/inputdecode/inputdecode.go
+  s_932d6b636b97d4::t_e075f486f24651 31-34,103-111,117,240-263
+shared/protocol/examples/session_snapshot.json
+  s_932d6b636b97d4::t_c8232ffc8d074c 59-63
+server/internal/replay/replay_test.go
+  s_932d6b636b97d4::t_f7622ff7766512 713,733,774
+  s_932d6b636b97d4::t_ff712937deb024 1414-1432
+shared/protocol/examples/state_delta.json
+  s_932d6b636b97d4::t_c8232ffc8d074c 36-38,234-258
+server/internal/game/rules.go
+  s_932d6b636b97d4::t_8e502090884759 467,1189-1191,1199-1210,1224-1225
+server/internal/realtime/session_loop.go
+  s_932d6b636b97d4::t_a864bb5047d103 564-565,583
+  s_932d6b636b97d4::t_537001125c5434 141,162,259
+  s_932d6b636b97d4::t_71226a1b745c2e 600-609,632-664,666,670-672
+server/migrations/0014_account_stash.sql
+  s_932d6b636b97d4::t_cc7adb0938f7a0 1-47
+client/scripts/stash_panel.gd
+  s_932d6b636b97d4::t_646395da83a9b3 441-445,501-502,511-515
+  s_932d6b636b97d4::t_bece4d8c40e652 503-504
+  s_932d6b636b97d4::t_9277a1fd5786c9 1-440,446-500,505-510,516-729
+server/internal/store/models.go
+  s_932d6b636b97d4::t_3e80aa32d01dfa 104
+  s_932d6b636b97d4::t_55ed8fa203cf6b 100-103,105-119,202-203
+client/tests/test_stash_panel.gd.uid
+  s_932d6b636b97d4::t_8540470f0e1576 1
+shared/rules/worlds.v0.json
+  s_932d6b636b97d4::t_a1b395982a7f65 472-476
+server/internal/replay/replay.go
+  s_932d6b636b97d4::t_058c3e6f3d775e 326,353,471,583-587
+  s_932d6b636b97d4::t_3e80aa32d01dfa 588-589
+shared/rules/interactables.v0.json
+  s_932d6b636b97d4::t_a1b395982a7f65 34-38
+server/internal/http/session.go
+  s_932d6b636b97d4::t_950b44493cd7ba 368-380
+tools/bot/run.py
+  s_932d6b636b97d4::t_8390719c557509 2508-2565
+  s_932d6b636b97d4::t_6a2c3d61b19548 2345-2362
+  s_932d6b636b97d4::t_e968791b864af6 2087-2098,2170-2175,2211-2213
+  s_932d6b636b97d4::t_ae85b4b1cd9fde 3460-3469,3497-3506
+  s_932d6b636b97d4::t_fc9ded394c928d 127-131
+  s_932d6b636b97d4::t_6e80660a4f1db1 1901-1919
+  s_932d6b636b97d4::t_91e933d709171a 2704-2706,3118-3120,3158-3164,3240,3658-3660
+  s_932d6b636b97d4::t_1cc0893319e85a 1406-1566
+server/internal/store/stale_sessions_test.go
+  s_932d6b636b97d4::t_ff712937deb024 105
+shared/protocol/messages.v7.schema.json
+  s_932d6b636b97d4::t_710fc09bf9dfc6 32-35,88-95,281-316
+  s_932d6b636b97d4::t_ffacbfef364d1b 1-31,36-87,96-280,317-347
+shared/protocol/examples/stash_deposit_gold_intent.json
+  s_932d6b636b97d4::t_c8232ffc8d074c 1-8
+server/internal/realtime/hub.go
+  s_932d6b636b97d4::t_ae5bf9e726398f 183-187,190-194
+  s_932d6b636b97d4::t_3e80aa32d01dfa 188-189
+server/internal/game/sim.go
+  s_932d6b636b97d4::t_f818cb999955d8 1245-1248,1309-1323
+  s_932d6b636b97d4::t_9b4569455b0312 5964,5968-5980,6851-6853,6855-6872,6875-6877
+  s_932d6b636b97d4::t_9e9814e194d20f 866-867,877-879,909-911
+  s_932d6b636b97d4::t_21997e3e1b0a34 1170-1175,1197-1199
+  s_932d6b636b97d4::t_5fe7df1125322f 599-601,604-605,693-724,821-827
+  s_932d6b636b97d4::t_c89cce6356f633 1457,1500-1507
+  s_932d6b636b97d4::t_2281179a97ea59 6569-6571
+  s_932d6b636b97d4::t_3e80aa32d01dfa 602-603,6854,6878-6880
+  s_932d6b636b97d4::t_554bb3e3e94fe7 5965-5967,5984-5986
+  s_932d6b636b97d4::t_a8331f91ddf660 6616-6618,6645-6648,6669-6671
+  s_932d6b636b97d4::t_a6dcfec89403aa 3914-3916
+  s_932d6b636b97d4::t_3dbe4d800eb28f 5722-5724
+  s_932d6b636b97d4::t_3af281719bf92e 6563-6568,6572-6578
+  s_932d6b636b97d4::t_8ce5cd9cb37a55 3912-3913,3917-3923
+  s_932d6b636b97d4::t_ef812ad5cd467d 42-43,65,152-157,237-239,274-276,333,512-514
+  s_932d6b636b97d4::t_6b211c16ad6d61 2253-2256,2412-2600,2622-2642,2650-2654
+  s_932d6b636b97d4::t_7e9f419a8c9a8e 5981-5983,5987-5991
+server/internal/store/store_test.go
+  s_932d6b636b97d4::t_45a443680e3be4 380,383,386,661
+  s_932d6b636b97d4::t_bc7716237a6823 762-920
+tools/bot/test_protocol.py
+  s_932d6b636b97d4::t_7b0f38fc80e7d2 803-890
+server/internal/store/repos.go
+  s_932d6b636b97d4::t_8bd34f95946cbb 1719-1756
+  s_932d6b636b97d4::t_f1140f627f543c 1362-1364,1366,1373-1375,1377
+  s_932d6b636b97d4::t_00c2dad7e1a5db 1565-1596
+  s_932d6b636b97d4::t_cd63844ce323ed 1193-1361,1365,1367-1372,1376,1378-1480
+  s_932d6b636b97d4::t_8905ebead0d37d 191-192,424-426
+tools/bot/scenarios/client/23_account_stash_panel.json
+  s_932d6b636b97d4::t_2a41b0ec698ea5 1-39
+shared/protocol/state_delta.v7.schema.json
+  s_932d6b636b97d4::t_ffacbfef364d1b 1-98,117-330,339-534,556-784,812-876
+  s_932d6b636b97d4::t_b5f9031645a6f9 99-116,331-338,535-555,785-811
+shared/protocol/examples/stash_withdraw_gold_intent.json
+  s_932d6b636b97d4::t_c8232ffc8d074c 1-8
+client/scripts/main.gd
+  s_932d6b636b97d4::t_b2baccbffd986a 17
+  s_932d6b636b97d4::t_2777d572ac9a65 809-810
+  s_932d6b636b97d4::t_7bc4e7abe90e8b 2365-2367
+  s_932d6b636b97d4::t_61b2b6d550814e 3717-3719,3731,3738
+  s_932d6b636b97d4::t_a2489b347a1267 3970-3993
+  s_932d6b636b97d4::t_0aa15904ee5253 913-918,1015-1028
+  s_932d6b636b97d4::t_35669a56402529 99-101
+  s_932d6b636b97d4::t_9edfb39c7f7c08 2929-2958,2967-2972
+  s_932d6b636b97d4::t_af585fe746c299 873,2497
+  s_932d6b636b97d4::t_67b149c9368c0f 1266-1268
+  s_932d6b636b97d4::t_a2bda0eb431ad1 838-840
+  s_932d6b636b97d4::t_a27827d49c0a25 1232-1250
+  s_932d6b636b97d4::t_3012d607665b6a 188
+  s_932d6b636b97d4::t_e26d2c36b21ee4 1599,1603-1604
+client/scripts/bot_scenario_runner.gd
+  s_932d6b636b97d4::t_5c86cba1e82db8 16,41-42,54-55,97-99
+  s_932d6b636b97d4::t_3f194d011d88c7 240-243,428-433
+  s_932d6b636b97d4::t_74d84e1ddbe0b6 1555-1558,1613-1614
+  s_932d6b636b97d4::t_50d550f6a3f9ab 1786-1788,1798-1806
+  s_932d6b636b97d4::t_5ef85ce1f6afee 1023-1048,1130-1158
+server/internal/game/types.go
+  s_932d6b636b97d4::t_5d22cdb6927d6e 69-83,106-117,134-149,410-414,458-460,479-481,500-501,509,521,577-595
+tools/bot/scenarios/36_account_stash_storage.json
+  s_932d6b636b97d4::t_6ddf593c43b5e8 1-57
+shared/rules/interactables.v0.schema.json
+  s_932d6b636b97d4::t_a1b395982a7f65 22,42-43,56-57
+client/scripts/bot_controller.gd
+  s_932d6b636b97d4::t_3444d6de8f1201 155-162,260-286
+  s_932d6b636b97d4::t_dd58a2530f7ca3 541-557
+shared/protocol/envelope.v7.schema.json
+  s_932d6b636b97d4::t_ffacbfef364d1b 1-31,36-56
+  s_932d6b636b97d4::t_710fc09bf9dfc6 32-35
+client/tests/test_stash_panel.gd
+  s_932d6b636b97d4::t_b85a7142a4fb0f 1-111
+scripts/client_smoke.sh
+  s_932d6b636b97d4::t_65eb33e8b6f445 99-102
+client/scripts/stash_panel.gd.uid
+  s_932d6b636b97d4::t_8540470f0e1576 1
+shared/protocol/examples/stash_deposit_item_intent.json
+  s_932d6b636b97d4::t_c8232ffc8d074c 1-8
+server/internal/store/interfaces.go
+  s_932d6b636b97d4::t_bdb0c6632663b7 64-70
+tools/validate_shared.py
+  s_932d6b636b97d4::t_7a364daed3aada 76,78-79,191-196,212-216,221,223
+  s_932d6b636b97d4::t_be16d9ba69321f 2346-2347,2352-2354,2359-2360,2365-2366
+client/tests/test_client_bot.gd
+  s_932d6b636b97d4::t_5a55bd33352cc3 63-64
+  s_932d6b636b97d4::t_129894c78e8984 559-611
+docs/plans/v50_2026-06-10-account-stash-storage.md
+  s_932d6b636b97d4::t_d239df653e1653 339,349,354,359,379,403,408,413,423,428,433,476-478,482-483,486,500
+  s_932d6b636b97d4::t_c7f2eb4466b464 3,384,438,469,479-481,484-485,487-489
+  s_932d6b636b97d4::t_962e2302b2374a 92,97,102,107,112,117,122,132,137,152,157,162,167,172,177
+  s_932d6b636b97d4::t_10a2bd80f3ab02 182,187,197,212,217,222,227,232,237,242,247,252,257,282,287,292,297,302,307,322
+  s_932d6b636b97d4::t_cb42853067acf3 449,454,459,464
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0c4aa6a35343e742678861a122a86e156ea427c5",
+  "prompts": {},
+  "sessions": {
+    "s_932d6b636b97d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eafce-e615-7c50-8cca-027c26f21915",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

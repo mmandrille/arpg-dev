@@ -113,8 +113,8 @@ func TestLoadRules(t *testing.T) {
 	if r.Interactables["wooden_door"].InitialState != interactableClosed {
 		t.Fatalf("wooden_door = %+v, want initially closed", r.Interactables["wooden_door"])
 	}
-	if r.CharacterProgression.PointsPerLevel != 3 || r.CharacterProgression.LevelCap != 20 {
-		t.Fatalf("character progression = %+v, want points_per_level 3 level_cap 20", r.CharacterProgression)
+	if r.CharacterProgression.PointsPerLevel != 3 || r.CharacterProgression.LevelCap != 100 {
+		t.Fatalf("character progression = %+v, want points_per_level 3 level_cap 100", r.CharacterProgression)
 	}
 	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 3 {
 		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 3", r.CharacterProgression.SkillPoints)
@@ -459,6 +459,23 @@ func TestExperienceGainAndLevelUpFromMonsterKill(t *testing.T) {
 	assertReject(t, reject, "kill_again", "invalid_target")
 	if sim.CharacterProgressionView().Experience != 20 {
 		t.Fatalf("dead monster granted XP twice: %+v", sim.CharacterProgressionView())
+	}
+}
+
+func TestCharacterProgressionCapsAtLevel100(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_level_cap", "01", rules)
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
+	requiredXP := rules.CharacterProgression.XPThresholds[rules.CharacterProgression.LevelCap-1]
+
+	sim.awardExperience(requiredXP+1000, "corr_level_cap", &res)
+
+	view := sim.CharacterProgressionView()
+	if view.Level != 100 || view.LevelCap != 100 {
+		t.Fatalf("progression level cap = %+v, want level 100 cap 100", view)
+	}
+	if view.ExperienceToNextLevel != nil {
+		t.Fatalf("experience_to_next_level = %v, want nil at cap", view.ExperienceToNextLevel)
 	}
 }
 

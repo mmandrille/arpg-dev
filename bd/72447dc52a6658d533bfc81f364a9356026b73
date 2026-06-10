@@ -1,0 +1,28 @@
+skills/review/agents/openai.yaml
+  s_d0abafeb11dbb1::t_0f4d6caac2522b 1-4
+scripts/link-agent-skills.sh
+  s_d0abafeb11dbb1::t_0f4d6caac2522b 11,24
+AGENTS.md
+  s_d0abafeb11dbb1::t_0f4d6caac2522b 22,26,34
+  s_d0abafeb11dbb1::t_8803234e42997e 32
+skills/README.md
+  s_d0abafeb11dbb1::t_0f4d6caac2522b 12,20,22
+skills/review/SKILL.md
+  s_d0abafeb11dbb1::t_0f4d6caac2522b 1-217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bd72447dc52a6658d533bfc81f364a9356026b73",
+  "prompts": {},
+  "sessions": {
+    "s_d0abafeb11dbb1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb21d-2bf9-7b90-bbd9-83e725702904",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

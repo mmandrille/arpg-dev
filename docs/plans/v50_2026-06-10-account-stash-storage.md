@@ -34,7 +34,7 @@ Key implementation decisions:
 |--------|------|----------------|
 | Add | `docs/plans/v50_2026-06-10-account-stash-storage.md` | This implementation plan |
 | Modify | `docs/specs/v50_spec-account-stash-storage.md` | Only if execution discovers approved spec corrections |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v50 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v50 ships |
 | Modify | `shared/rules/interactables.v0.json` | Add `town_stash` definition |
 | Modify | `shared/rules/interactables.v0.schema.json` | Allow ready stash interactables |
 | Modify | `shared/rules/worlds.v0.json` | Place `town_stash` on town level `0` for `dungeon_levels` |
@@ -443,7 +443,7 @@ make bot-client HEADLESS=1
 ## Task 7 - Lifecycle Docs And CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v50_2026-06-10-account-stash-storage.md`
 
 - [x] Step 7.1: Add v50 to the slice lifecycle table when implementation finishes.

@@ -44,7 +44,7 @@ Godot plugin adoption checklist (**reject**): input timing belongs in existing c
 | Create | `client/tests/test_sustained_input.gd` | Headless unit tests for helper start/stop/cadence/epsilon |
 | Modify | `scripts/client_smoke.sh` | Register new unit gate in client-unit path |
 | Modify | `docs/specs/v27_spec-hold-click-controls.md` | Status → Complete when done |
-| Modify | `docs/PROGRESS.md` | Lifecycle row when slice ships |
+| Modify | `PROGRESS.md` | Lifecycle row when slice ships |
 
 **Unchanged:** `shared/`, `server/`, `tools/bot/scenarios/`, golden fixtures, protocol schemas.
 
@@ -159,10 +159,10 @@ make bot
 
 Files:
 - Modify: `docs/specs/v27_spec-hold-click-controls.md`
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 6.1: Mark spec Status → Complete with date when implementation lands.
-- [x] Step 6.2: Add v27 row to `docs/PROGRESS.md` lifecycle table + summary when slice ships (`/finish`).
+- [x] Step 6.2: Add v27 row to `PROGRESS.md` lifecycle table + summary when slice ships (`/finish`).
 
 ```bash
 make ci

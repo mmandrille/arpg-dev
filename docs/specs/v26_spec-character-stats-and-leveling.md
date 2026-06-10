@@ -13,7 +13,7 @@ Related:
 - [`v25_spec-treasure-classes-and-guarded-chests.md`](v25_spec-treasure-classes-and-guarded-chests.md) - current reward-loop baseline
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - character-scoped progression
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -89,7 +89,7 @@ client/tests/test_golden.gd                                - progression golden 
 tools/bot/run.py                                           - protocol bot progression assertions and stat allocation helper
 tools/bot/scenarios/18_character_stats_and_leveling.json   - end-to-end protocol proof
 tools/bot/scenarios/client/09_character_stats_panel.json   - Godot client UI proof
-docs/PROGRESS.md                                           - lifecycle update when v26 ships
+PROGRESS.md                                           - lifecycle update when v26 ships
 ```
 
 The implementation plan must run the Godot plugin adoption checklist from

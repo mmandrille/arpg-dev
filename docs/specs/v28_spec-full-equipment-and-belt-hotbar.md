@@ -15,7 +15,7 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) — authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — character-scoped progression
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) — plugin adoption checklist (expect **reject** logic plugins; custom UI)
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## Resolved implementation notes
 
@@ -109,7 +109,7 @@ client/tests/test_inventory_equipment.gd                    - optional UI model 
 tools/bot/run.py                                            - multi-slot equip + hotbar helpers
 tools/bot/scenarios/19_full_equipment.json                  - protocol end-to-end proof
 tools/bot/scenarios/client/10_full_equipment.json           - Godot client UI proof
-docs/PROGRESS.md                                            - lifecycle update when v28 ships
+PROGRESS.md                                            - lifecycle update when v28 ships
 ```
 
 Update **all** existing producers/consumers that reference `equipped.weapon` or equip slot `"weapon"`

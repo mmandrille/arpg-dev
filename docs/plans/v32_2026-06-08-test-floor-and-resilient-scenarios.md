@@ -32,7 +32,7 @@ and must not create a branch.
 | Action | Path | Responsibility |
 |--------|------|----------------|
 | Modify | `CLAUDE.md` | Add durable test locking policy for future agents |
-| Modify | `docs/PROGRESS.md` | Add v32 lifecycle entry and as-built audit summary when complete |
+| Modify | `PROGRESS.md` | Add v32 lifecycle entry and as-built audit summary when complete |
 | Create/Modify | `docs/plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md` | Implementation checklist and audit record |
 | Modify | `tools/bot/run.py` | Add or standardize semantic/range/eventual assertion helpers |
 | Modify | `tools/bot/scenarios/*.json` | Convert brittle protocol scenarios to selectors/ranges/derived assertions |
@@ -197,7 +197,7 @@ Files:
 - [x] Step 8.5: Temporarily change movement speed or a movement timing rule locally, then run
   focused movement/chase scenarios.
 - [x] Step 8.6: Revert the local tuning change immediately after the probe.
-- [x] Step 8.7: Record probe results in this plan's Audit Record or `docs/PROGRESS.md` as-built
+- [x] Step 8.7: Record probe results in this plan's Audit Record or `PROGRESS.md` as-built
   summary. Do not commit probe tuning changes.
 
 ```bash
@@ -207,10 +207,10 @@ git diff -- shared/rules/dungeon_generation.v0.json shared/rules/monsters.v0.jso
 ## Task 9 — Lifecycle Docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md`
 
-- [x] Step 9.1: Update `docs/PROGRESS.md` with v32 as complete only after implementation and CI
+- [x] Step 9.1: Update `PROGRESS.md` with v32 as complete only after implementation and CI
   pass.
 - [x] Step 9.2: Add an as-built summary of which exact locks remain intentional and which brittle
   areas were converted.

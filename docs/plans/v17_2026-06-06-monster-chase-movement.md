@@ -14,12 +14,12 @@ Resolved baseline facts:
 - `docs/specs/v17_spec-monster-chase-movement.md` exists and is draft.
 - This plan file was created during planning review.
 - v16 `use-consumable` is accepted as complete.
-- `docs/PROGRESS.md` has been updated to list v16 as the latest completed slice and v17 as planned.
+- `PROGRESS.md` has been updated to list v16 as the latest completed slice and v17 as planned.
 - Active branch is `feature/monster-chase-movement`.
 
 Remaining implementation note:
 
-- Update `docs/PROGRESS.md` again only when v17 ships, replacing planned status with complete
+- Update `PROGRESS.md` again only when v17 ships, replacing planned status with complete
   lifecycle notes.
 
 ## 3. Design Decisions Closed During Review
@@ -58,7 +58,7 @@ Remaining implementation note:
 | Modify | `client/scripts/main.gd` | Monster walk/idle from authoritative position deltas |
 | Modify | `client/tests/test_golden.gd` | Monster chase fixture drift check |
 | Optional | `tools/bot/scenarios/client/07_monster_chase_idle.json` | Client-bot presentation smoke |
-| Modify | `docs/PROGRESS.md` | v17 lifecycle after implementation ships |
+| Modify | `PROGRESS.md` | v17 lifecycle after implementation ships |
 
 ## 5. Implementation Tasks
 
@@ -183,7 +183,7 @@ HEADLESS=1 make bot-client
 
 ### Task 8 — Docs and Final Verification
 
-- [ ] Update `docs/PROGRESS.md` after v17 implementation ships:
+- [ ] Update `PROGRESS.md` after v17 implementation ships:
   - current status
   - lifecycle row
   - v17 summary

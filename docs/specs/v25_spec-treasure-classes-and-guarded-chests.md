@@ -13,7 +13,7 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - dungeon progression and better loot by depth
 - [`../adr/0009-boss-floors-and-timing-mechanics.md`](../adr/0009-boss-floors-and-timing-mechanics.md) - future boss-floor chest and reward pacing
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -69,7 +69,7 @@ client/scripts/main.gd                                           - placeholder c
 client/tests/test_golden.gd                                      - data-only treasure/chest golden checks
 tools/bot/run.py                                                 - assertions/helpers for chest floors and multi-drop metadata
 tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json  - end-to-end proof
-docs/PROGRESS.md                                                 - lifecycle update when v25 ships
+PROGRESS.md                                                 - lifecycle update when v25 ships
 ```
 
 ## 4. Data shapes

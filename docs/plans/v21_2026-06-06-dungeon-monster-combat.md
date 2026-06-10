@@ -39,7 +39,7 @@ Spec review notes resolved during planning:
 | Modify | `client/tests/test_golden.gd` | Cross-check dungeon monster attack fixture |
 | Modify | `tools/bot/run.py` | Add/extend scenario helpers for passive damage and generated mob targeting |
 | Add | `tools/bot/scenarios/14_dungeon_monsters.json` | End-to-end dungeon threat proof |
-| Modify | `docs/PROGRESS.md` | v21 lifecycle update when complete |
+| Modify | `PROGRESS.md` | v21 lifecycle update when complete |
 
 ## Task 1 — Shared rules and validation
 
@@ -158,7 +158,7 @@ make client-smoke
 
 Files:
 
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [ ] Step 7.1: When implementation ships, add v21 to the lifecycle table and mark latest completed slice as `dungeon-monster-combat`.
 - [ ] Step 7.2: Document the as-built proof: generated dungeon mobs, proactive attack cooldown, deterministic golden, bot scenario `14`, and no town monsters.

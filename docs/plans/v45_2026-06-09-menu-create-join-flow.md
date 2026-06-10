@@ -41,7 +41,7 @@ Implementation decisions:
 |--------|------|----------------|
 | Create | `docs/plans/v45_2026-06-09-menu-create-join-flow.md` | This implementation plan |
 | Modify | `docs/specs/v45_spec-menu-create-join-flow.md` | Only if implementation discovers accepted clarifications |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v45 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v45 ships |
 | Modify | `client/scripts/client_settings.gd` | Persist `create_game_session_type` with default `coop` |
 | Modify | `client/scripts/settings_panel.gd` | Render and emit the Create Game Type toggle |
 | Modify | `client/scripts/main_menu.gd` | Replace root play buttons/signals with Create Game / Join Game |
@@ -187,11 +187,11 @@ HEADLESS=1 make bot-client scenario=20_menu_create_join_flow.json
 ## Task 7 - Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v45_spec-menu-create-join-flow.md` only if accepted clarifications were discovered
 - Modify: `docs/plans/v45_2026-06-09-menu-create-join-flow.md`
 
-- [x] Step 7.1: Update `docs/PROGRESS.md` current status to latest completed slice v45 when implementation is finished.
+- [x] Step 7.1: Update `PROGRESS.md` current status to latest completed slice v45 when implementation is finished.
 - [x] Step 7.2: Add v45 to the slice numbering note and lifecycle table with spec and plan links.
 - [x] Step 7.3: Add a concise `v45 - Menu create/join flow` summary under "What each slice proved".
 - [x] Step 7.4: Update the bot scenario summary list with the v45 client proof.

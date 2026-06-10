@@ -32,7 +32,7 @@ Godot plugin adoption checklist result:
 |--------|------|----------------|
 | Create | `docs/plans/v38_2026-06-08-session-browser-and-uncapped-coop-menu.md` | Implementation plan |
 | Modify | `docs/specs/v38_spec-session-browser-and-uncapped-coop-menu.md` | Only if implementation discovers small contract clarifications |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v38 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v38 ships |
 | Modify | `README.md` | `make play`, `make play N`, and `make play-remote N` usage |
 | Create | `server/migrations/0008_listed_sessions.sql` | Add listed-session storage/indexes |
 | Modify | `server/internal/store/models.go` | `Session.Listed`, `SessionSummary`, comments without two-player wording |
@@ -322,17 +322,17 @@ rg -n "play-remote|make play 3|BASE_URL" README.md
 ## Task 7 — Lifecycle Docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v38_spec-session-browser-and-uncapped-coop-menu.md` only if implementation clarifies contract details
 
-- [x] Step 7.1: Update `docs/PROGRESS.md` lifecycle table with v38 once implementation is complete.
+- [x] Step 7.1: Update `PROGRESS.md` lifecycle table with v38 once implementation is complete.
 
 - [x] Step 7.2: Add a concise v38 "What this slice proved" entry covering listed sessions, uncapped co-op membership, menu host/join, and `play-remote`.
 
 - [x] Step 7.3: Move any newly deferred scope into the Open gaps table, especially filters/search, Steam invites, load-aware caps, and richer party UI.
 
 ```bash
-rg -n "v38|session-browser-and-uncapped-coop-menu|play-remote" docs/PROGRESS.md
+rg -n "v38|session-browser-and-uncapped-coop-menu|play-remote" PROGRESS.md
 ```
 
 ## Final verification

@@ -10,7 +10,7 @@ Related:
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — D4 waypoints deferred from v18
 - [`v10_spec-click-action-and-melee-range.md`](v10_spec-click-action-and-melee-range.md) — interactable activation pattern
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) — client UI shortcut checklist
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -68,7 +68,7 @@ tools/bot/run.py                               - teleporter action and assertion
 tools/bot/scenarios/13_teleporter_lab.json     - discover/teleport round trip
 client/scripts/main.gd                         - teleporter rendering, click behavior, left panel
 client/tests/test_golden.gd                    - teleporter golden fixture checks
-docs/PROGRESS.md                               - lifecycle update when v19 ships
+PROGRESS.md                               - lifecycle update when v19 ships
 ```
 
 ## 4. Data Shapes

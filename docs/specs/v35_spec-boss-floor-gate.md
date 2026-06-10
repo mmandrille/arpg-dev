@@ -6,7 +6,7 @@ Slice: v35 - first boss floor, telegraphed attack, and locked depth gate
 Baseline: v34 `model-reaction-polish`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0007-animation-state-model.md`](../adr/0007-animation-state-model.md) - client-only event-driven presentation
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - generated dungeon levels and level transitions
@@ -69,7 +69,7 @@ server authority -> client telegraph presentation -> bot/replay/golden coverage.
 ```text
 docs/specs/v35_spec-boss-floor-gate.md          - this slice contract
 docs/plans/v35_<YYYY-MM-DD>-boss-floor-gate.md  - implementation plan
-docs/PROGRESS.md                                - lifecycle update when v35 ships
+PROGRESS.md                                - lifecycle update when v35 ships
 
 shared/rules/dungeon_generation.v0.json         - boss-floor generation block plus monster rarity visual scale
 shared/rules/dungeon_generation.v0.schema.json  - validation for boss generation fields and rarity visual scale

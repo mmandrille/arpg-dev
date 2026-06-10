@@ -65,4 +65,4 @@ Plus: write `docs/ARCHITECTURE.md` (as-built), reconcile ADR-0013 to as-built, a
 
 ---
 
-*Evidence: reads of `validate_shared.py`, `bot/run.py`, `shared/protocol/*` (v7↔v8 diffs), `shared/rules/character_progression.v0.json`, `item_templates.v0.json`, `shops.v0.json`, `docs/adr/0001/0007/0013`, `docs/PROGRESS.md`, `CLAUDE.md`, `scripts/ci.sh`; verified `health_regen` split across 6+ files and `CLAUDE.md:13` v10 snapshot; `pytest tools/` 59 passing.*
+*Evidence: reads of `validate_shared.py`, `bot/run.py`, `shared/protocol/*` (v7↔v8 diffs), `shared/rules/character_progression.v0.json`, `item_templates.v0.json`, `shops.v0.json`, `docs/adr/0001/0007/0013`, `PROGRESS.md`, `CLAUDE.md`, `scripts/ci.sh`; verified `health_regen` split across 6+ files and `CLAUDE.md:13` v10 snapshot; `pytest tools/` 59 passing.*

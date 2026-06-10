@@ -60,7 +60,7 @@ No branch should be created; work stays on the current checkout.
 | Modify | `tools/bot/test_protocol.py` | Unit coverage for new bot assertions/helpers. |
 | Create | `tools/bot/scenarios/24_boss_floor_gate.json` | End-to-end protocol proof. |
 | Create/Modify | `tools/bot/scenarios/client/13_boss_telegraph.json` | Optional Godot client proof if reliable. |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when slice ships. |
+| Modify | `PROGRESS.md` | Lifecycle update when slice ships. |
 
 ## Task 1 — Shared rules and schemas
 
@@ -402,18 +402,18 @@ make client-smoke
 ## Task 12 — Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v35_spec-boss-floor-gate.md` only if implementation forces a clarified as-built note
 - Modify: `docs/plans/v35_2026-06-08-boss-floor-gate.md` if task scope changes during implementation
 
-- [x] Step 12.1: Update `docs/PROGRESS.md` lifecycle table with v35, slice numbering note, current status, what v35 proved, and any newly deferred boss-floor gaps.
+- [x] Step 12.1: Update `PROGRESS.md` lifecycle table with v35, slice numbering note, current status, what v35 proved, and any newly deferred boss-floor gaps.
 ```bash
-rg -n "v35|boss-floor-gate|Latest completed slice|Open gaps" docs/PROGRESS.md
+rg -n "v35|boss-floor-gate|Latest completed slice|Open gaps" PROGRESS.md
 ```
 
 - [x] Step 12.2: Record any as-built deviations from this plan in the plan or spec before finish.
 ```bash
-git diff -- docs/specs/v35_spec-boss-floor-gate.md docs/plans/v35_2026-06-08-boss-floor-gate.md docs/PROGRESS.md
+git diff -- docs/specs/v35_spec-boss-floor-gate.md docs/plans/v35_2026-06-08-boss-floor-gate.md PROGRESS.md
 ```
 
 - [x] Step 12.3: Run final CI.

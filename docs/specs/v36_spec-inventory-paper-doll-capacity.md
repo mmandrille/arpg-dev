@@ -6,7 +6,7 @@ Slice: v36 - inventory paper-doll tuneup and item-gated bag capacity
 Baseline: v35 `boss-floor-gate`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for inventory UI presentation work
 - [`v13_spec-inventory-ui.md`](v13_spec-inventory-ui.md) - inventory panel, equip/unequip/drop intents
@@ -67,7 +67,7 @@ and delta sync -> 5-column Godot bag grid -> paper-doll equipment layout -> bot/
 ```text
 docs/specs/v36_spec-inventory-paper-doll-capacity.md       - this slice contract
 docs/plans/v36_<YYYY-MM-DD>-inventory-paper-doll-capacity.md - implementation plan
-docs/PROGRESS.md                                           - lifecycle update when v36 ships
+PROGRESS.md                                           - lifecycle update when v36 ships
 
 shared/rules/character_progression.v0.json                 - base inventory_rows if stored with derived stats
 shared/rules/character_progression.v0.schema.json          - derived stat schema update if needed

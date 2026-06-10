@@ -41,7 +41,7 @@ Godot shortcut adoption checklist:
 | Modify | `scripts/play.sh` | `ARPG_WORLD_ID=dungeon_levels`, unset `ARPG_SESSION_ID` |
 | Modify | `client/scripts/main.gd` | Interactive default world + town wall rendering |
 | Modify | `client/tests/test_golden.gd` | Cross-language town/dungeon stair fixture checks |
-| Modify | `docs/PROGRESS.md` | v20 lifecycle when complete |
+| Modify | `PROGRESS.md` | v20 lifecycle when complete |
 
 ## Task 1 — Shared contracts and world preset
 
@@ -133,7 +133,7 @@ make client-smoke   # if server available
 
 Files:
 
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 5.1: Mark v20 complete in lifecycle table; document town entry and play-loop proof.
 - [x] Step 5.2: Note deferred gaps (character persistence, safe zone, production town art).

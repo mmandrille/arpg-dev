@@ -3,7 +3,7 @@
 Status: Draft
 Branch: `feature/dungeon-levels-and-stairs`
 Slice: v18 — multi-level Sim, seeded stair PCG, descend/ascend intents, level HUD
-Baseline: v17 `monster-chase-movement` (complete; `docs/PROGRESS.md` updated before v18 implementation)
+Baseline: v17 `monster-chase-movement` (complete; `PROGRESS.md` updated before v18 implementation)
 Related:
 
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — D2 multi-level Sim, D3 seeded generation, protocol table
@@ -11,7 +11,7 @@ Related:
 - [`v11_spec-click-to-move-and-auto-path.md`](v11_spec-click-to-move-and-auto-path.md) — navigation bounds scale for 2× dungeon floors
 - [`v10_spec-click-action-and-melee-range.md`](v10_spec-click-action-and-melee-range.md) — interactable pattern reused for stairs
 - [`v7_spec-gear-before-combat-scenario.md`](v7_spec-gear-before-combat-scenario.md) — world preset + session `world_id` persistence
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures, replay determinism)
 - ADR-0007 (client-only presentation; level HUD is not on the wire)
 
@@ -551,7 +551,7 @@ tools/validate_shared.py                          - generation + golden validati
 client/scripts/main.gd                            - level-scoped entities, stair clicks, dungeon walls, LevelHud
 client/scripts/level_hud.gd                       - top-right label (new, optional wrapper)
 client/tests/test_golden.gd                       - dungeon_stairs fixture checks
-docs/PROGRESS.md                                  - v18 lifecycle when complete
+PROGRESS.md                                  - v18 lifecycle when complete
 docs/plans/v18_2026-06-06-dungeon-levels-and-stairs.md  - implementation plan (separate artifact)
 ```
 

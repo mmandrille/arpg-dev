@@ -1,0 +1,548 @@
+# Project progress & slice lifecycle
+
+**Read this file at the start of every new task** before writing specs, plans, or code.
+It is the canonical snapshot of where the project stands and what is still open. Per-slice as-built
+summaries live in [`docs/as-built/`](docs/as-built/).
+
+Last updated: 2026-06-10
+
+---
+
+## Current status
+
+| Field | Value |
+|-------|-------|
+| **Latest completed slice** | v54 — `character-select-summaries` |
+| **Active branch** | `main` |
+| **CI gate** | `make ci` green on 2026-06-10 |
+| **Next slice** | TBD |
+| **Last engineering review** | v53 — [`docs/reviews/20260610_v53-overview.md`](docs/reviews/20260610_v53-overview.md) (2026-06-10) |
+| **Next engineering review** | v60 (~every 10 slices) |
+
+### Slice numbering note
+
+ADR-0001 sometimes calls the first slice **v1**; repo lifecycle labels use **v0–v9**
+(`v0` = first playable). **Spec and plan filenames** use a `vN_` prefix for execution order:
+
+```text
+v1_* = first-playable    v5_* = resume-state    v8_* = equipped-weapon-damage
+v2_* = equip-and-see-it  v6_* = visual-bot
+v3_* = animate-and-react v7_* = gear-before-combat v9_* = solid-collision
+v4_* = take-a-hit        v10_* = click-action-and-melee-range
+v11_* = click-to-move-and-auto-path
+v12_* = ranged-projectile-combat
+v13_* = inventory-ui
+v14_* = godot-client-bot
+v15_* = item-visuals-and-loot-presentation
+v16_* = use-consumable
+v17_* = monster-chase-movement
+v18_* = dungeon-levels-and-stairs
+v19_* = teleporters-and-waypoint-ui
+v20_* = play-session-loop
+v21_* = dungeon-monster-combat
+v22_* = character-scoped-persistence
+v23_* = item-templates-and-rolled-drops
+v24_* = main-menu-and-character-start
+v25_* = treasure-classes-and-guarded-chests
+v26_* = character-stats-and-leveling
+v27_* = hold-click-controls
+v28_* = full-equipment-and-belt-hotbar
+v29_* = dungeon-equipment-drop-expansion
+v30_* = monster-rarity-and-loot-scaling
+v31_* = combat-stat-effects-and-feedback
+v32_* = test-floor-and-resilient-scenarios
+v33_* = true-coop-session
+v34_* = model-reaction-polish
+v35_* = boss-floor-gate
+v36_* = inventory-paper-doll-capacity
+v37_* = combat-control-and-boss-ai-fixes
+v38_* = session-browser-and-uncapped-coop-menu
+v39_* = ui-currency-and-mana-polish
+v40_* = reachable-dungeon-obstacles
+v41_* = town-vendor-gold-sink
+v42_* = vendor-appraisal-and-item-comparison
+v43_* = equipment-requirements-and-preview
+v44_* = skill-points-and-magic-bolt
+v45_* = menu-create-join-flow
+v46_* = client-join-game-proof
+v47_* = shop-stock-lifecycle
+v48_* = coop-rewards-and-scaling
+v49_* = gold-autopickup-and-shared-loot-rules
+v50_* = account-stash-storage
+v51_* = mystery-seller-core
+v52_* = ranged-monster-ai
+v53_* = boss-health-bar-ui
+v54_* = character-select-summaries
+```
+
+Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
+
+### Periodic engineering reviews
+
+Every **~10 completed slices**, pause for a repo-wide engineering review under [`docs/reviews/`](docs/reviews/).
+Use the milestone slice number in filenames and headings (e.g. v50, v60, v70 — v53 is the latest pass).
+
+**When to write:** after the milestone slice ships and `make ci` is green — typically as part of `/finish`
+close-out or as a dedicated review task before `/next` proposes the next batch.
+
+**Minimum set** (follow the v53 pattern):
+
+| File | Focus |
+|------|-------|
+| `docs/reviews/YYYYMMDD_vN-overview.md` | Executive summary, scorecard, cross-cutting themes |
+| `docs/reviews/YYYYMMDD_vN-backend.md` | Go server / `internal/game` |
+| `docs/reviews/YYYYMMDD_vN-client.md` | Godot client |
+| `docs/reviews/YYYYMMDD_vN-shared-tooling-and-process.md` | `shared/`, `tools/`, SDD process |
+
+Update **Last engineering review** / **Next engineering review** in the table above when a review lands.
+Feed actionable findings into open gaps or the next slice briefs — reviews are input to `/next`, not shelfware.
+
+---
+
+## Slice lifecycle
+
+Slices are small, end-to-end proofs. Each ships: shared contracts → Go sim → Godot client →
+Python bot/smoke → golden fixtures → `make ci` green.
+
+```text
+v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react ──► v4 take-a-hit ──► v5 resume-state ──► v6 visual-bot-scenarios ──► v7 gear-before-combat ──► v8 equipped-weapon-damage ──► v9 solid-collision ──► v10 click-action ──► v11 auto-path ──► v12 ranged-projectiles ──► v13 inventory-ui
+   (architecture)        (visual pipeline)         (skeletal anims)         (player damage)      (resume replay)      (visual replay playlist)        (world presets)              (weapon damage)             (walls + bodies)
+        │                      │                        │                        │                         │                         │                              │                              │                         │
+     main ✓                  main ✓                    main ✓                    main ✓              branch ✓                  branch ✓                       branch ✓                       branch ✓                  branch ✓                  branch ✓
+```
+
+| Slice | Codename | Status | Spec | Plan | As-built |
+|-------|----------|--------|------|------|----------|
+| **v0** | `first-playable-vertical-slice` | Complete (on `main`) | [`v1_spec-first-playable-vertical-slice.md`](docs/specs/v1_spec-first-playable-vertical-slice.md) | [`v1_2026-06-05-first-playable-vertical-slice.md`](docs/plans/v1_2026-06-05-first-playable-vertical-slice.md) | [`as-built`](docs/as-built/v0_first-playable-vertical-slice.md) |
+| **v2** | `equip-and-see-it` | Complete (on `main`) | [`v2_spec-equip-and-see-it.md`](docs/specs/v2_spec-equip-and-see-it.md) | [`v2_2026-06-05-equip-and-see-it.md`](docs/plans/v2_2026-06-05-equip-and-see-it.md) | [`as-built`](docs/as-built/v2_equip-and-see-it.md) |
+| **v3** | `animate-and-react` | Complete (on `main`) | [`v3_spec-animate-and-react.md`](docs/specs/v3_spec-animate-and-react.md) | [`v3_2026-06-05-animate-and-react.md`](docs/plans/v3_2026-06-05-animate-and-react.md) | [`as-built`](docs/as-built/v3_animate-and-react.md) |
+| **v4** | `take-a-hit` | Complete (on `main`) | [`v4_spec-take-a-hit.md`](docs/specs/v4_spec-take-a-hit.md) | [`v4_2026-06-05-take-a-hit.md`](docs/plans/v4_2026-06-05-take-a-hit.md) | [`as-built`](docs/as-built/v4_take-a-hit.md) |
+| **v5** | `resume-authoritative-state` | Complete (`make ci` green) | [`v5_spec-resume-authoritative-state.md`](docs/specs/v5_spec-resume-authoritative-state.md) | [`v5_2026-06-05-resume-authoritative-state.md`](docs/plans/v5_2026-06-05-resume-authoritative-state.md) | [`as-built`](docs/as-built/v5_resume-authoritative-state.md) |
+| **v6** | `visual-bot-scenario-runner` | Complete (`make ci` green) | [`v6_spec-visual-bot-scenario-runner.md`](docs/specs/v6_spec-visual-bot-scenario-runner.md) | [`v6_2026-06-05-visual-bot-scenario-runner.md`](docs/plans/v6_2026-06-05-visual-bot-scenario-runner.md) | [`as-built`](docs/as-built/v6_visual-bot-scenario-runner.md) |
+| **v7** | `gear-before-combat-scenario` | Complete (`make ci` green) | [`v7_spec-gear-before-combat-scenario.md`](docs/specs/v7_spec-gear-before-combat-scenario.md) | [`v7_2026-06-05-gear-before-combat-scenario.md`](docs/plans/v7_2026-06-05-gear-before-combat-scenario.md) | [`as-built`](docs/as-built/v7_gear-before-combat-scenario.md) |
+| **v8** | `equipped-weapon-damage` | Complete (`make ci` green) | [`v8_spec-equipped-weapon-damage.md`](docs/specs/v8_spec-equipped-weapon-damage.md) | [`v8_2026-06-05-equipped-weapon-damage.md`](docs/plans/v8_2026-06-05-equipped-weapon-damage.md) | [`as-built`](docs/as-built/v8_equipped-weapon-damage.md) |
+| **v9** | `solid-collision-and-obstacles` | Complete (`make ci` green) | [`v9_spec-solid-collision-and-obstacles.md`](docs/specs/v9_spec-solid-collision-and-obstacles.md) | [`v9_2026-06-05-solid-collision-and-obstacles.md`](docs/plans/v9_2026-06-05-solid-collision-and-obstacles.md) | [`as-built`](docs/as-built/v9_solid-collision-and-obstacles.md) |
+| **v10** | `click-action-and-melee-range` | Complete (`make ci` green) | [`v10_spec-click-action-and-melee-range.md`](docs/specs/v10_spec-click-action-and-melee-range.md) | [`v10_2026-06-05-click-action-and-melee-range.md`](docs/plans/v10_2026-06-05-click-action-and-melee-range.md) | [`as-built`](docs/as-built/v10_click-action-and-melee-range.md) |
+| **v11** | `click-to-move-and-auto-path` | Complete (`make ci` green) | [`v11_spec-click-to-move-and-auto-path.md`](docs/specs/v11_spec-click-to-move-and-auto-path.md) | [`v11_2026-06-05-click-to-move-and-auto-path.md`](docs/plans/v11_2026-06-05-click-to-move-and-auto-path.md) | [`as-built`](docs/as-built/v11_click-to-move-and-auto-path.md) |
+| **v12** | `ranged-projectile-combat` | Complete (`make ci` green) | [`v12_spec-ranged-projectile-combat.md`](docs/specs/v12_spec-ranged-projectile-combat.md) | [`v12_2026-06-05-ranged-projectile-combat.md`](docs/plans/v12_2026-06-05-ranged-projectile-combat.md) | [`as-built`](docs/as-built/v12_ranged-projectile-combat.md) |
+| **v13** | `inventory-ui` | Complete (`make ci` green) | [`v13_spec-inventory-ui.md`](docs/specs/v13_spec-inventory-ui.md) | [`v13_2026-06-05-inventory-ui.md`](docs/plans/v13_2026-06-05-inventory-ui.md) | [`as-built`](docs/as-built/v13_inventory-ui.md) |
+| **v14** | `godot-client-bot` | Complete (`make ci` green) | [`v14_spec-godot-client-bot.md`](docs/specs/v14_spec-godot-client-bot.md) | [`v14_2026-06-02-godot-client-bot.md`](docs/plans/v14_2026-06-02-godot-client-bot.md) | [`as-built`](docs/as-built/v14_godot-client-bot.md) |
+| **v15** | `item-visuals-and-loot-presentation` | Complete (`make ci` green) | [`v15_spec-item-visuals-and-loot-presentation.md`](docs/specs/v15_spec-item-visuals-and-loot-presentation.md) | [`v15_2026-06-06-item-visuals-and-loot-presentation.md`](docs/plans/v15_2026-06-06-item-visuals-and-loot-presentation.md) | [`as-built`](docs/as-built/v15_item-visuals-and-loot-presentation.md) |
+| **v16** | `use-consumable` | Complete (`make ci` green) | [`v16_spec-use-consumable.md`](docs/specs/v16_spec-use-consumable.md) | [`v16_2026-06-06-use-consumable.md`](docs/plans/v16_2026-06-06-use-consumable.md) | [`as-built`](docs/as-built/v16_use-consumable.md) |
+| **v17** | `monster-chase-movement` | Complete (`make ci` green) | [`v17_spec-monster-chase-movement.md`](docs/specs/v17_spec-monster-chase-movement.md) | [`v17_2026-06-06-monster-chase-movement.md`](docs/plans/v17_2026-06-06-monster-chase-movement.md) | [`as-built`](docs/as-built/v17_monster-chase-movement.md) |
+| **v18** | `dungeon-levels-and-stairs` | Complete (`make ci` green) | [`v18_spec-dungeon-levels-and-stairs.md`](docs/specs/v18_spec-dungeon-levels-and-stairs.md) | [`v18_2026-06-06-dungeon-levels-and-stairs.md`](docs/plans/v18_2026-06-06-dungeon-levels-and-stairs.md) | [`as-built`](docs/as-built/v18_dungeon-levels-and-stairs.md) |
+| **v19** | `teleporters-and-waypoint-ui` | Complete (`make ci` green) | [`v19_spec-teleporters-and-waypoint-ui.md`](docs/specs/v19_spec-teleporters-and-waypoint-ui.md) | [`v19_2026-06-06-teleporters-and-waypoint-ui.md`](docs/plans/v19_2026-06-06-teleporters-and-waypoint-ui.md) | [`as-built`](docs/as-built/v19_teleporters-and-waypoint-ui.md) |
+| **v20** | `play-session-loop` | Complete (`make ci` green) | [`v20_spec-play-session-loop.md`](docs/specs/v20_spec-play-session-loop.md) | [`v20_2026-06-06-play-session-loop.md`](docs/plans/v20_2026-06-06-play-session-loop.md) | [`as-built`](docs/as-built/v20_play-session-loop.md) |
+| **v21** | `dungeon-monster-combat` | Complete (`make ci` green) | [`v21_spec-dungeon-monster-combat.md`](docs/specs/v21_spec-dungeon-monster-combat.md) | [`v21_2026-06-06-dungeon-monster-combat.md`](docs/plans/v21_2026-06-06-dungeon-monster-combat.md) | [`as-built`](docs/as-built/v21_dungeon-monster-combat.md) |
+| **v22** | `character-scoped-persistence` | Complete (`make ci` green) | [`v22_spec-character-scoped-persistence.md`](docs/specs/v22_spec-character-scoped-persistence.md) | [`v22_2026-06-07-character-scoped-persistence.md`](docs/plans/v22_2026-06-07-character-scoped-persistence.md) | [`as-built`](docs/as-built/v22_character-scoped-persistence.md) |
+| **v23** | `item-templates-and-rolled-drops` | Complete (`make ci` green) | [`v23_spec-item-templates-and-rolled-drops.md`](docs/specs/v23_spec-item-templates-and-rolled-drops.md) | [`v23_2026-06-07-item-templates-and-rolled-drops.md`](docs/plans/v23_2026-06-07-item-templates-and-rolled-drops.md) | [`as-built`](docs/as-built/v23_item-templates-and-rolled-drops.md) |
+| **v24** | `main-menu-and-character-start` | Complete (`make ci` green) | [`v24_spec-main-menu-and-character-start.md`](docs/specs/v24_spec-main-menu-and-character-start.md) | [`v24_2026-06-07-main-menu-and-character-start.md`](docs/plans/v24_2026-06-07-main-menu-and-character-start.md) | [`as-built`](docs/as-built/v24_main-menu-and-character-start.md) |
+| **v25** | `treasure-classes-and-guarded-chests` | Complete (`make ci` green) | [`v25_spec-treasure-classes-and-guarded-chests.md`](docs/specs/v25_spec-treasure-classes-and-guarded-chests.md) | [`v25_2026-06-07-treasure-classes-and-guarded-chests.md`](docs/plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md) | [`as-built`](docs/as-built/v25_treasure-classes-and-guarded-chests.md) |
+| **v26** | `character-stats-and-leveling` | Complete (`make ci` green) | [`v26_spec-character-stats-and-leveling.md`](docs/specs/v26_spec-character-stats-and-leveling.md) | [`v26_2026-06-07-character-stats-and-leveling.md`](docs/plans/v26_2026-06-07-character-stats-and-leveling.md) | [`as-built`](docs/as-built/v26_character-stats-and-leveling.md) |
+| **v27** | `hold-click-controls` | Complete (`make ci` green) | [`v27_spec-hold-click-controls.md`](docs/specs/v27_spec-hold-click-controls.md) | [`v27_2026-06-07-hold-click-controls.md`](docs/plans/v27_2026-06-07-hold-click-controls.md) | [`as-built`](docs/as-built/v27_hold-click-controls.md) |
+| **v28** | `full-equipment-and-belt-hotbar` | Complete (`make ci` green) | [`v28_spec-full-equipment-and-belt-hotbar.md`](docs/specs/v28_spec-full-equipment-and-belt-hotbar.md) | [`v28_2026-06-07-full-equipment-and-belt-hotbar.md`](docs/plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md) | [`as-built`](docs/as-built/v28_full-equipment-and-belt-hotbar.md) |
+| **v29** | `dungeon-equipment-drop-expansion` | Complete (`make ci` green) | [`v29_spec-dungeon-equipment-drop-expansion.md`](docs/specs/v29_spec-dungeon-equipment-drop-expansion.md) | [`v29_2026-06-07-dungeon-equipment-drop-expansion.md`](docs/plans/v29_2026-06-07-dungeon-equipment-drop-expansion.md) | [`as-built`](docs/as-built/v29_dungeon-equipment-drop-expansion.md) |
+| **v30** | `monster-rarity-and-loot-scaling` | Complete (`make ci` green) | [`v30_spec-monster-rarity-and-loot-scaling.md`](docs/specs/v30_spec-monster-rarity-and-loot-scaling.md) | [`v30_2026-06-07-monster-rarity-and-loot-scaling.md`](docs/plans/v30_2026-06-07-monster-rarity-and-loot-scaling.md) | [`as-built`](docs/as-built/v30_monster-rarity-and-loot-scaling.md) |
+| **v31** | `combat-stat-effects-and-feedback` | Complete (`make ci` green) | [`v31_spec-combat-stat-effects-and-feedback.md`](docs/specs/v31_spec-combat-stat-effects-and-feedback.md) | [`v31_2026-06-07-combat-stat-effects-and-feedback.md`](docs/plans/v31_2026-06-07-combat-stat-effects-and-feedback.md) | [`as-built`](docs/as-built/v31_combat-stat-effects-and-feedback.md) |
+| **v32** | `test-floor-and-resilient-scenarios` | Complete (`make ci` green) | [`v32_spec-test-floor-and-resilient-scenarios.md`](docs/specs/v32_spec-test-floor-and-resilient-scenarios.md) | [`v32_2026-06-08-test-floor-and-resilient-scenarios.md`](docs/plans/v32_2026-06-08-test-floor-and-resilient-scenarios.md) | [`as-built`](docs/as-built/v32_test-floor-and-resilient-scenarios.md) |
+| **v33** | `true-coop-session` | Complete (`make ci` green) | [`v33_spec-true-coop-session.md`](docs/specs/v33_spec-true-coop-session.md) | [`v33_2026-06-08-true-coop-session.md`](docs/plans/v33_2026-06-08-true-coop-session.md) | [`as-built`](docs/as-built/v33_true-coop-session.md) |
+| **v34** | `model-reaction-polish` | Complete (`make ci` green) | [`v34_spec-model-reaction-polish.md`](docs/specs/v34_spec-model-reaction-polish.md) | [`v34_2026-06-08-model-reaction-polish.md`](docs/plans/v34_2026-06-08-model-reaction-polish.md) | [`as-built`](docs/as-built/v34_model-reaction-polish.md) |
+| **v35** | `boss-floor-gate` | Complete (`make ci` green) | [`v35_spec-boss-floor-gate.md`](docs/specs/v35_spec-boss-floor-gate.md) | [`v35_2026-06-08-boss-floor-gate.md`](docs/plans/v35_2026-06-08-boss-floor-gate.md) | [`as-built`](docs/as-built/v35_boss-floor-gate.md) |
+| **v36** | `inventory-paper-doll-capacity` | Complete (`make ci` green) | [`v36_spec-inventory-paper-doll-capacity.md`](docs/specs/v36_spec-inventory-paper-doll-capacity.md) | [`v36_2026-06-08-inventory-paper-doll-capacity.md`](docs/plans/v36_2026-06-08-inventory-paper-doll-capacity.md) | [`as-built`](docs/as-built/v36_inventory-paper-doll-capacity.md) |
+| **v37** | `combat-control-and-boss-ai-fixes` | Complete (`make ci` green) | [`v37_spec-combat-control-and-boss-ai-fixes.md`](docs/specs/v37_spec-combat-control-and-boss-ai-fixes.md) | [`v37_2026-06-08-combat-control-and-boss-ai-fixes.md`](docs/plans/v37_2026-06-08-combat-control-and-boss-ai-fixes.md) | [`as-built`](docs/as-built/v37_combat-control-and-boss-ai-fixes.md) |
+| **v38** | `session-browser-and-uncapped-coop-menu` | Complete (`make ci` green) | [`v38_spec-session-browser-and-uncapped-coop-menu.md`](docs/specs/v38_spec-session-browser-and-uncapped-coop-menu.md) | [`v38_2026-06-08-session-browser-and-uncapped-coop-menu.md`](docs/plans/v38_2026-06-08-session-browser-and-uncapped-coop-menu.md) | [`as-built`](docs/as-built/v38_session-browser-and-uncapped-coop-menu.md) |
+| **v39** | `ui-currency-and-mana-polish` | Complete (`make ci` green) | [`v39_spec-ui-currency-and-mana-polish.md`](docs/specs/v39_spec-ui-currency-and-mana-polish.md) | [`v39_2026-06-09-ui-currency-and-mana-polish.md`](docs/plans/v39_2026-06-09-ui-currency-and-mana-polish.md) | [`as-built`](docs/as-built/v39_ui-currency-and-mana-polish.md) |
+| **v40** | `reachable-dungeon-obstacles` | Complete (`make ci` green) | [`v40_spec-reachable-dungeon-obstacles.md`](docs/specs/v40_spec-reachable-dungeon-obstacles.md) | [`v40_2026-06-09-reachable-dungeon-obstacles.md`](docs/plans/v40_2026-06-09-reachable-dungeon-obstacles.md) | [`as-built`](docs/as-built/v40_reachable-dungeon-obstacles.md) |
+| **v41** | `town-vendor-gold-sink` | Complete (`make ci` green) | [`v41_spec-town-vendor-gold-sink.md`](docs/specs/v41_spec-town-vendor-gold-sink.md) | [`v41_2026-06-09-town-vendor-gold-sink.md`](docs/plans/v41_2026-06-09-town-vendor-gold-sink.md) | [`as-built`](docs/as-built/v41_town-vendor-gold-sink.md) |
+| **v42** | `vendor-appraisal-and-item-comparison` | Complete (`make ci` green) | [`v42_spec-vendor-appraisal-and-item-comparison.md`](docs/specs/v42_spec-vendor-appraisal-and-item-comparison.md) | [`v42_2026-06-09-vendor-appraisal-and-item-comparison.md`](docs/plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md) | [`as-built`](docs/as-built/v42_vendor-appraisal-and-item-comparison.md) |
+| **v43** | `equipment-requirements-and-preview` | Complete (`make ci` green) | [`v43_spec-equipment-requirements-and-preview.md`](docs/specs/v43_spec-equipment-requirements-and-preview.md) | [`v43_2026-06-09-equipment-requirements-and-preview.md`](docs/plans/v43_2026-06-09-equipment-requirements-and-preview.md) | [`as-built`](docs/as-built/v43_equipment-requirements-and-preview.md) |
+| **v44** | `skill-points-and-magic-bolt` | Complete (`make ci` green) | [`v44_spec-skill-points-and-magic-bolt.md`](docs/specs/v44_spec-skill-points-and-magic-bolt.md) | [`v44_2026-06-09-skill-points-and-magic-bolt.md`](docs/plans/v44_2026-06-09-skill-points-and-magic-bolt.md) | [`as-built`](docs/as-built/v44_skill-points-and-magic-bolt.md) |
+| **v45** | `menu-create-join-flow` | Complete (`make ci` green) | [`v45_spec-menu-create-join-flow.md`](docs/specs/v45_spec-menu-create-join-flow.md) | [`v45_2026-06-09-menu-create-join-flow.md`](docs/plans/v45_2026-06-09-menu-create-join-flow.md) | [`as-built`](docs/as-built/v45_menu-create-join-flow.md) |
+| **v46** | `client-join-game-proof` | Complete (`make ci` green) | [`v46_spec-client-join-game-proof.md`](docs/specs/v46_spec-client-join-game-proof.md) | [`v46_2026-06-09-client-join-game-proof.md`](docs/plans/v46_2026-06-09-client-join-game-proof.md) | [`as-built`](docs/as-built/v46_client-join-game-proof.md) |
+| **v47** | `shop-stock-lifecycle` | Complete (`make ci` green) | [`v47_spec-shop-stock-lifecycle.md`](docs/specs/v47_spec-shop-stock-lifecycle.md) | [`v47_2026-06-09-shop-stock-lifecycle.md`](docs/plans/v47_2026-06-09-shop-stock-lifecycle.md) | [`as-built`](docs/as-built/v47_shop-stock-lifecycle.md) |
+| **v48** | `coop-rewards-and-scaling` | Complete (`make ci` green) | [`v48_spec-coop-rewards-and-scaling.md`](docs/specs/v48_spec-coop-rewards-and-scaling.md) | [`v48_2026-06-09-coop-rewards-and-scaling.md`](docs/plans/v48_2026-06-09-coop-rewards-and-scaling.md) | [`as-built`](docs/as-built/v48_coop-rewards-and-scaling.md) |
+| **v49** | `gold-autopickup-and-shared-loot-rules` | Complete (`make ci` green) | [`v49_spec-gold-autopickup-and-shared-loot-rules.md`](docs/specs/v49_spec-gold-autopickup-and-shared-loot-rules.md) | [`v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md`](docs/plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md) | [`as-built`](docs/as-built/v49_gold-autopickup-and-shared-loot-rules.md) |
+| **v50** | `account-stash-storage` | Complete (`make ci` green) | [`v50_spec-account-stash-storage.md`](docs/specs/v50_spec-account-stash-storage.md) | [`v50_2026-06-10-account-stash-storage.md`](docs/plans/v50_2026-06-10-account-stash-storage.md) | [`as-built`](docs/as-built/v50_account-stash-storage.md) |
+| **v51** | `mystery-seller-core` | Complete (`make ci` green) | [`v51_spec-mystery-seller-core.md`](docs/specs/v51_spec-mystery-seller-core.md) | [`v51_2026-06-10-mystery-seller-core.md`](docs/plans/v51_2026-06-10-mystery-seller-core.md) | [`as-built`](docs/as-built/v51_mystery-seller-core.md) |
+| **v52** | `ranged-monster-ai` | Complete (`make ci` green) | [`v52_spec-ranged-monster-ai.md`](docs/specs/v52_spec-ranged-monster-ai.md) | [`v52_2026-06-10-ranged-monster-ai.md`](docs/plans/v52_2026-06-10-ranged-monster-ai.md) | [`as-built`](docs/as-built/v52_ranged-monster-ai.md) |
+| **v53** | `boss-health-bar-ui` | Complete (`make ci` green) | [`v53_spec-boss-health-bar-ui.md`](docs/specs/v53_spec-boss-health-bar-ui.md) | [`v53_2026-06-10-boss-health-bar-ui.md`](docs/plans/v53_2026-06-10-boss-health-bar-ui.md) | [`as-built`](docs/as-built/v53_boss-health-bar-ui.md) |
+| **v54** | `character-select-summaries` | Complete (`make ci` green) | [`v54_spec-character-select-summaries.md`](docs/specs/v54_spec-character-select-summaries.md) | [`v54_2026-06-10-character-select-summaries.md`](docs/plans/v54_2026-06-10-character-select-summaries.md) | [`as-built`](docs/as-built/v54_character-select-summaries.md) |
+
+---
+
+## Slice as-built summaries
+
+Per-slice **what it proved** notes live in [`docs/as-built/`](docs/as-built/) — one file per
+completed slice. Specs record intent; plans record execution; as-built records what shipped.
+
+On `/finish`, add or update `docs/as-built/vN_<codename>.md` instead of growing this file.
+Use the **As-built** column in the slice lifecycle table above for links.
+
+## Architecture decisions (ADRs)
+
+| ADR | Topic | Status |
+|-----|-------|--------|
+| [0001](docs/adr/0001-technology-stack.md) | Foundational stack (Go server, Godot client, shared rules, replay, bot) | Accepted |
+| [0006](docs/adr/0006-asset-pipeline.md) | glTF-first assets, manifests, sockets, validation | Accepted; v3 as-built for rigged GLBs |
+| [0007](docs/adr/0007-animation-state-model.md) | Client-only animation; event-driven reactions | Accepted; v4 as-built for player reactions |
+| [0008](docs/adr/0008-world-structure-and-dungeon-progression.md) | World structure: infinite inverted-tower dungeon, multi-level Sim, character-scoped persistence, waypoints, co-op | Accepted |
+| [0009](docs/adr/0009-boss-floors-and-timing-mechanics.md) | Boss floors, telegraphed timing mechanics, and progression gates | Proposed; v35 as-built covers first boss-floor gate |
+| [0010](docs/adr/0010-mercenaries-from-player-characters.md) | Hired mercenaries derived from other players' characters | Proposed |
+| [0011](docs/adr/0011-player-market-and-multi-item-trade-offers.md) | Player market listings and multi-item trade offers | Proposed |
+| [0012](docs/adr/0012-item-upgrades-and-item-levels.md) | Item upgrades, item levels, and advanced dungeon resources | Proposed |
+| [0013](docs/adr/0013-mystery-seller-and-unidentified-item-offers.md) | Mystery seller with expensive unidentified equipment offers | Proposed |
+
+Anticipated but **not written:** netcode timing, Protobuf migration, production auth, multiplayer split,
+quest system design, NPC interaction protocol, character progression formulas
+(see ADR-0001 follow-up list and ADR-0008 deferred items). Future mercenaries, player market,
+item upgrades, and mystery seller economy are captured separately in ADR-0010, ADR-0011, ADR-0012,
+and ADR-0013.
+
+---
+
+## Scripted vertical slice flow (bot + smoke)
+
+Every slice keeps this loop working unless the spec explicitly changes it:
+
+```text
+dev-login → create session → move → attack training dummy → pick up loot → equip rusty_sword
+```
+
+After v4 the player **survives with reduced HP** (`hp < 10`). Monster dies; player may take retaliation
+each successful hit. After v7 this flow lives in `tools/bot/scenarios/01_vertical_slice.json`; additional
+scenario JSON files are automatically included in filename order in `make bot` and `make bot-visual`.
+
+The scenario catalog also includes:
+
+```text
+gear_before_combat: walk to rusty_sword → pick up → equip → one-shot reward dummy → pick up training_badge
+collision_lab: pass through middle wall gap → kill monster on far side
+inventory_lab: pick up rusty_sword → equip → unequip → drop → re-pickup → re-equip
+heal_lab: pick up red_potion x2 → take damage → use potion twice → full HP
+chase_lab / chase_maze / leash_lab: wait while chase monster closes; kite beyond leash and return
+dungeon_levels / teleporter_lab: start in town, descend/ascend generated floors; discover teleporters and fast-travel back
+character_persistence: same-account fresh sessions retain gear/equipment and discovered waypoint access
+rolled_drops: kill dungeon mob → pick up/equip rolled cave_blade → prove rolled metadata persists
+main_menu_flow: Create Game root flow → settings → listed co-op session → pause input lock → return → existing-character fresh session
+treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob → open chest once → pick up chest loot
+character_stats_and_leveling: descend to dungeon → kill mobs for XP → level up → spend VIT → prove persistence
+full_equipment: pick up/equip paper-doll gear → prove hand occupancy → assign belt-gated hotbar → prove persistence
+dungeon_equipment_drops: descend to depth-banded dungeon → open chest → pick up/equip rolled equipment → prove persistence
+monster_rarity_loot_scaling: descend to generated dungeon → assert champion rarity → kill → pick up rolled loot → prove persistence
+combat_stat_effects: combat lab proofs for miss, crit, armor floor, block, monster crit/block, projectile impact, and stat breakdowns
+client_combat_feedback: equip gear → assert stat breakdowns → prove normal/crit/miss/block floating text and settings toggle
+true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
+model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
+boss_floor_gate: descend to level -5 → assert compact boss floor and locked exits → observe boss phase → kill boss → unlock exits → descend to -6
+inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
+combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
+session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
+ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions
+reachable_dungeon_obstacles: descend through generated dungeon floors → assert generated interior wall layout → route to loot beyond obstacles → prove replay
+dungeon_wall_rendering: headless Godot client descends to generated floors → assert authoritative non-perimeter wall rendering state
+vendor_appraisal_quotes: open town vendor after dungeon loot → assert server-authored offer summaries, comparisons, sell appraisals, buy, sell, replay
+vendor_item_comparison: headless Godot client opens vendor → assert visible offer/sell details, comparison rows, buy, and sell
+shop_stock_lifecycle: town vendor generated stock source-depth → sell-to-buyback → rebuy → waypoint refresh → fresh-session buyback cleared
+client_shop_stock_lifecycle: headless Godot client opens vendor → sell to buyback → fixed purchase refresh → sell/rebuy buyback → assert fixed/generated rows remain visible
+equipment_requirements_and_preview: pick up requirement-gated gear → reject unmet equip → level and allocate STR → equip → prove persistence
+client_equipment_requirements_and_preview: headless Godot client opens inventory → assert requirement-status and equip-preview rows
+skill_points_and_magic_bolt: level to 3 → spend Magic Bolt → cast → reject cooldown recast → recover → prove replay/fresh persistence
+client_skill_points_and_magic_bolt: headless Godot client opens skill panel → spends Magic Bolt → observes skill bar cooldown and recovery
+menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
+join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible
+coop_rewards_and_scaling: three-account co-op → nearby host/guest share full XP → different-level guest excluded → replay/fresh persistence
+gold_autopickup_shared_loot: two peers see shared floor gold → both step into range → lowest player id wins private wallet update → item loot still requires click
+account_stash_storage: acquire dungeon loot/gold → open town stash → deposit/withdraw item and gold → replay/reconnect/state/fresh session persistence
+client_account_stash_panel: headless Godot client opens stash → verifies bag/stash item sync → deposits/withdraws item and gold
+ranged_monster_ai: descend to generated dungeon → assert dungeon_archer → observe archer-sourced ranged player damage
+client_ranged_monster_ai: headless Godot client descends to generated dungeon → asserts bow marker → observes ranged player damage
+client_boss_health_bar_ui: headless Godot client descends to first boss floor → asserts Cave Warden boss health bar
+character_select_summaries: headless Godot client opens Create Game → asserts character row level/gold/depth/status summaries
+```
+
+**Verify:**
+
+```bash
+make db-up && make server    # terminal 1
+make bot                     # terminal 2 — all protocol bot scenarios
+make client-unit             # headless Godot unit gates (no server required)
+make client-smoke            # headless Godot gates + slice smoke
+make bot-client              # Godot client bot scenarios; requires live server
+make ci                      # full suite
+make bot-visual              # optional — record all bot scenarios and watch replay playlist in Godot
+make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenario by file name or id
+```
+
+---
+
+## Open gaps & deferred work
+
+Do **not** assume these are the next slice — they are documented backlog items agents should know about.
+
+### Recently closed
+
+**Combat/world state now persists on same-session resume.** v5 replays recorded
+inputs before the WebSocket `session_snapshot`, so monster death, player HP,
+inventory, equipped state, and ID continuity are restored authoritatively.
+
+**World preset identity now persists on sessions.** v7 stores `world_id`, so fresh WebSocket attach,
+resume, `/state`, replay verification, and replay timeline all reconstruct the same initial layout.
+
+**Equipped weapon damage now changes authoritative combat.** v8 resolves `rusty_sword.damage`
+from equipped server state at attack time and proves the equipped gear scenario kills the reward
+dummy in one acknowledged attack.
+
+**Solid collision now blocks movement through bodies and walls.** v9 resolves player movement
+against live monsters and static world walls, while collision lab proves routed movement and
+deterministic replay.
+
+**Click action and melee reach are now authoritative.** v10 unifies combat/pickup/door activation
+behind `action_intent`, enforces reach from shared rules, and proves a replayable opening door.
+
+**Click-to-move and action auto-approach are now authoritative.** v11 adds shared navigation
+rules, deterministic server A*, `move_to_intent`, and a path-maze bot proof.
+
+**Ranged projectile combat is now authoritative.** v12 adds ranged weapon rules, projectile
+entities, swept collision, impact-time hit/damage, and a ranged-lab bot/replay proof.
+
+**Inventory UI, unequip, and player drop are now authoritative.** v13 adds protocol-backed
+unequip/drop intents, deterministic adjacent loot placement, persisted inventory removal, and a
+display-only Godot panel that mirrors server snapshots/deltas.
+
+**Current item presentation is now shared-data-driven.** v15 adds presentation metadata for all
+current item definitions and uses it for inventory icons and ground loot silhouettes without
+server/protocol changes.
+
+**Consumable healing is now authoritative.** v16 adds `use_intent`, red potion heal rules, HP cap
+goldens, server-owned inventory removal, and a client-only hotbar that sends use intents.
+
+**Monster chase movement is now authoritative.** v17 adds opt-in chase behavior, deterministic
+monster pathing around solids, leash return, chase/lab bot scenarios, and client walk presentation
+from position deltas.
+
+**Dungeon levels, stairs, teleporters, town entry, and dungeon monster threat are now authoritative.**
+v18 adds multi-level dungeon state and generated stairs; v19 adds generated teleporters, session
+discovery, and server-owned fast travel with a client-only waypoint panel; v20 makes town level `0`
+the fresh play-session entry and keeps dungeon floors lazy; v21 spawns deterministic hostile dungeon
+mobs that chase and proactively damage the player.
+
+**Character inventory/equipment and waypoint unlocks now persist across fresh sessions.** v22 moves
+durable item instances and discovered waypoint levels to the default character, while preserving
+session-start snapshots for deterministic replay and keeping HP, dungeon maps, monsters, corpses,
+opened doors, and floor drops session-scoped.
+
+**Dungeon mobs now drop rolled weapon gear.** v23 adds server-authoritative item templates,
+deterministic rarity/stat rolls, rolled weapon damage, rolled payload persistence, and tooltip
+presentation for the first rolled weapon template.
+
+**The client now has a player-facing menu shell.** v24 adds named character list/create APIs,
+fresh-session Continue/New Game flows, local window-size settings, ESC pause, Return to Main Menu,
+and a Godot client bot proof for the complete menu path.
+
+**Treasure classes and guarded chests are now authoritative.** v25 adds data-driven multi-attempt
+monster/chest loot, deterministic rare chest generation with guarded monster bonus, open-once chest
+loot, and bot/golden coverage for the complete path.
+
+**Character stats and leveling are now authoritative.** v26 adds durable XP, levels, stat points,
+base stats, derived substats, stat allocation, VIT max-HP effects, STR damage contribution, a
+Godot character sheet, an XP bar, and protocol/client bot proofs.
+
+**Sustained left-click controls are now client-side.** v27 adds hold-to-attack on monsters and
+hold-to-move on floor by repeating existing `action_intent` / `move_to_intent` at `SEND_INTERVAL`,
+with sticky targets, move epsilon, and headless unit coverage — no protocol or server changes.
+
+**Full paper-doll equipment and belt-gated hotbar are now authoritative.** v28 replaces the single
+weapon slot with full equipment slots, two-hand occupancy, droppable gear templates, persisted
+character hotbar layout, replay-safe session hotbar snapshots, and protocol/client bot proofs for
+server-synced paper-doll and belt capacity behavior.
+
+**Generated dungeon drops now reach the expanded equipment catalog.** v29 adds temporary depth
+bands, depth-specific monster/chest treasure classes, validation for full v28 template reachability
+by depth `3+`, golden fixtures for varied equipment outcomes, and a real generated dungeon bot proof.
+
+**Generated dungeon monster rarity now scales challenge and loot depth.** v30 adds deterministic
+generated monster rarity tiers, scaled HP/damage/XP, effective monster loot depth offsets,
+monster rarity in protocol/replay state, player/enemy tinting, and a real generated dungeon bot
+proof for non-common rarity.
+
+**Combat stats now affect authoritative outcomes.** v31 applies hit, crit, armor, block, minimum
+damage, and effective stat breakdowns across player and monster combat, then renders normal, crit,
+miss, and block feedback from protocol events in Godot.
+
+**The test floor now separates contracts from tuning details.** v32 keeps exact locks for replay,
+schema, formula parity, persistence boundaries, and named UI/protocol contracts, while converting
+brittle dungeon size, generated population, movement timing, rarity tuning, and selector-index
+assumptions to semantic, range, derived, or eventual checks.
+
+**True two-player co-op sessions are now authoritative.** v33 adds server-owned co-op session
+membership, hashed join codes, actor-tagged inputs, per-player sim state, recipient-scoped realtime
+snapshots/deltas, remote-player Godot rendering, and a protocol bot proof for join, movement,
+disconnect/reconnect, and replay.
+
+**Character-like model reactions are now unified in the Godot client.** v34 adds client-only
+hit/death transform and tint reactions for local players, remote co-op players, and monsters;
+remote co-op players now reuse the humanoid character model with a distinct dark tint.
+
+**The first boss floor gate is now authoritative.** v35 adds a compact level `-5` boss arena,
+telegraphed boss phases, locked down-stair/teleporter exits until boss death, boss visual scale
+metadata, and protocol/replay/bot proof for unlock and descent.
+
+**Inventory capacity and the paper-doll bag grid are now authoritative.** v36 adds server-derived
+`inventory_rows` / `inventory_capacity`, an item-granted row source, full-bag and overflow rejection
+guards, a 5-column capacity grid, and protocol/client bot proofs.
+
+**Combat control and boss AI fixes are now authoritative.** v37 adds server-owned directional attacks,
+authoritative stop movement, aggro-on-hit with nearby contagious group aggro, boss chase/damage repair,
+and protocol/client unit proofs.
+
+**Session browser and uncapped co-op are now authoritative.** v38 adds persisted listed co-op sessions,
+active session summaries, listed join without join code, three-plus-member realtime/replay proofs, a
+Godot Multiplayer menu path, and local/remote multi-client menu launchers. Empty listed sessions are
+hidden from discovery, and a listed session is ended when its last connected player disconnects.
+
+**Character gold, mana, and related UI polish are now authoritative.** v39 adds durable character
+gold, currency loot pickup, generated gold scaling, snapshot/delta/replay wallet coverage, player
+mana, blue mana potions, DEX-sourced armor, and Godot HUD/inventory/menu polish.
+
+**Reachable generated dungeon obstacles are now authoritative.** v40 adds deterministic generated
+interior dungeon walls, obstacle reachability retries, authoritative protocol wall layouts,
+Godot server-layout rendering, and protocol/client bot proofs that generated walls exist without
+blocking generated targets.
+
+**The town vendor and first gold sink are now authoritative.** v41 adds the `town_vendor`, protocol
+v4 shop buy/sell contracts, fixed potion stock, deterministic generated offers based on deepest
+dungeon depth, durable gold mutations, deepest-depth persistence, and protocol/client bot proofs for
+shop open, buy, sell, reconnect, replay, and fresh-session persistence.
+
+**Vendor appraisals and direct item comparison are now authoritative.** v42 extends `shop_opened`
+with server-authored summary, appraisal, and comparison views, and proves the richer protocol plus
+Godot panel through protocol/client bot scenarios.
+
+**Equipment requirements and equip previews are now authoritative.** v43 expands item-template
+requirements to level/base stats, rejects unmet equips before mutation, annotates loot/inventory/shop
+views with server-authored requirement status and equip-preview deltas, and proves the path through
+protocol and Godot client bot scenarios.
+
+**Skill points and Magic Bolt are now authoritative.** v44 adds durable skill points/ranks,
+protocol v5 skill state, attack-speed-derived cooldowns, a server-owned Magic Bolt cast/reject/recover
+loop, and protocol/client bot proofs through replay, reconnect, and fresh-session persistence.
+
+**Menu Create Game and Join Game flows now match the backend session model.** v45 replaces the
+player-facing Continue/New Game/Multiplayer root menu with Create Game, Join Game, Settings, and
+Exit; persists the Create Game Type setting; and proves co-op/solo create plus Join Game empty-state
+behavior through client bot scenarios.
+
+**The real Godot Join Game path now has a multi-account listed-session proof.** v46 adds a
+client-bot preflight host that holds an active listed co-op backend session, then drives a separate
+Godot guest through Join Game, character selection, listed join, WebSocket connect, and remote-player
+presence assertions.
+
+**Town vendor stock is now finite and refresh-gated.** v47 persists per-character generated stock,
+consumes purchased generated offers, refreshes stock only on newly unlocked non-town waypoints,
+limits shop rarity to `rare`, and keeps buyback rows session-local and cleared when the actor leaves
+town.
+
+**Co-op rewards and monster scaling are now authoritative.** v48 grants full monster XP to nearby
+eligible party members, excludes dead/disconnected/far/different-level members, scales monster
+HP/damage logarithmically with active same-level party count, and routes private progression by
+recipient owner.
+
+**Gold is now auto-pickable, but loot stays shared.** v49 keeps one shared floor entity per drop,
+adds passive gold pickup for the first eligible player in deterministic order, and leaves non-gold
+items click-required. Personal loot, reservations, hidden/duplicated drops, shared/split gold, and
+item auto-pickup remain deferred/non-goals.
+
+**Account stash storage is now authoritative.** v50 adds a town stash interactable, protocol v7
+stash contracts, account-owned item/gold persistence, replay-safe session-start stash snapshots,
+server-owned item/gold transfers, owner-private realtime fanout, and protocol/client bot proofs for
+item and gold storage across fresh sessions.
+
+**Mystery seller core is now authoritative.** v51 adds a town mystery seller, protocol v8 concealed
+shop rows, deterministic per-character hidden stock, reveal-on-purchase events, and protocol/client
+bot proofs for hidden offers, purchase reveal, replay, and fresh-session consumed stock.
+
+**Ranged monster AI is now authoritative.** v52 adds generated dungeon archers, data-driven
+melee/ranged monster composition, server-owned monster projectiles that respect walls and target
+players, and a minimal Godot bow marker with protocol/client bot proofs.
+
+**Boss health bar UI is now client-visible.** v53 adds a top-center Godot boss health bar driven by
+existing authoritative boss entity hp/max hp and metadata, plus client unit and bot scenario proof
+for the first `cave_warden` boss floor.
+
+**Character select summaries are now server-authored.** v54 extends `GET /v0/characters` with
+level, gold, and deepest-depth summary fields, renders them in the Godot character picker, and
+proves the menu path with focused store, HTTP, client-unit, and client-bot coverage.
+
+### Other deferred items (from specs / ADRs)
+
+| Area | Deferred item | Source |
+|------|---------------|--------|
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54 non-goals, ADR-0008 deferred, ADR-0011 |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52 non-goals |
+| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
+| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52 non-goals, ADR-0013 |
+| Client presentation | Boss portraits, phase/timer widgets, multi-boss layouts, and production boss health bar art/audio | v53 non-goals, ADR-0009 |
+| Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
+| Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
+| Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
+| Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
+| Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
+| Protocol | Protobuf / `godobuf` migration | ADR-0001 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46/v48/v49 non-goals, ADR-0001 |
+| Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
+
+### Curated autoloop candidates
+
+These candidates were curated during `$autoloop 1` on 2026-06-10 and should be considered first by
+the next autoloop pass unless code changes make them stale.
+
+| Candidate | Status | Value | Size | Touch surfaces | Main risk / dependency |
+|-----------|--------|-------|------|----------------|------------------------|
+| `boss-phase-timer-ui` | Open | Add boss phase/windup timing cues to the existing boss health bar. | S | client, bot, docs | Must stay display-only from existing `boss_phase` state/events. |
+| `boss-pattern-variety` | Open | Add one more server-authored boss attack pattern so Cave Warden is less repetitive. | M | shared, server, client, bot, docs | Deterministic phase RNG and schema support for any new telegraph shape. |
+| `mystery-seller-paid-reroll` | Open | Let players spend gold to reroll concealed mystery seller stock. | M | shared/protocol, server, store, client, bot, docs | Price/refresh rules need conservative defaults. |
+| `stash-search-and-sorting` | Open | Add search/sort controls to stash and bag views without changing item authority. | S/M | client, bot, docs | Client UI only; must record plugin borrow/reject decision. |
+| `character-select-summaries` | Completed in v54 | Show level, gold, deepest depth, and status in character selection. | M | store, HTTP, client, bot, docs | Needs careful aggregate/query shape; rename/delete already exists. |
+| `session-browser-filters` | Open | Add Join Game search/filter/sort controls for listed sessions. | S/M | client, HTTP tests maybe, bot, docs | Headless proof needs stable multi-session setup. |
+| `loot-label-filter-core` | Open | Add display-only loot label filtering/highlighting for rarity/category. | M | client, bot, docs | Presentation-only; avoid changing shared loot ownership. |
+| `client-boss-telegraph-polish` | Open | Improve boss telegraph readability with a clearer in-world warning marker. | S/M | client, bot, docs | Visual client work; plugin/art shortcut checklist required. |
+
+---
+
+## Starting a new task (agent checklist)
+
+1. **Read this file** (`PROGRESS.md`) — confirm baseline slice and open gaps.
+2. **Read ADR-0001** and any feature-specific ADRs listed above.
+3. **Spec first** — create or read `docs/specs/vN_spec-<feature>.md` (SDD; `N` = next execution order).
+4. **Plan second** — create `docs/plans/vN_<YYYY-MM-DD>-<feature>.md` with file map + verification commands.
+5. **Branch** — stay on the current checkout; do not create branches (user creates them before development if needed).
+6. **Implement** shared → server → client → bot/smoke → docs; keep `make ci` green.
+7. **Update this file** when the slice completes: lifecycle table row, open gaps, and status fields.
+   Write the as-built summary in `docs/as-built/vN_<codename>.md` (not inline here).
+8. **Engineering review cadence** — when the latest completed slice hits the next ~10-slice milestone
+   (see **Next engineering review** above), write or refresh the review set under [`docs/reviews/`](docs/reviews/)
+   before piling on more feature slices.
+
+### Invariants (do not break)
+
+- Go sim determinism: seeded RNG only, no wall-clock in `game/`, stable ordering.
+- Shared rules are **data**; formulas evaluated in Go + GDScript from the same golden fixtures.
+- Animation is client-only; new reactions need a **server event** first, then client mapping.
+- Golden changes require Go tests **and** GDScript `test_golden.gd` / `validate_shared.py` updates.
+
+---
+
+## Repo map (quick reference)
+
+```text
+client/          Godot 4.6.3 — main.gd, animation_controller.gd, net_client.gd, smoke.gd
+server/          Go — internal/game (sim), internal/realtime (WS), internal/store (Postgres)
+shared/          protocol schemas, rules JSON, golden fixtures
+tools/           bot, replay, validate_shared.py, assets/
+assets/          manifests + gen scripts
+docs/            ADRs, specs, plans, as-built, reviews (periodic ~every 10 slices)
+```
+
+**Agent entrypoints:** [`CLAUDE.md`](CLAUDE.md) (commands + architecture), this file (progress),
+[`README.md`](README.md) (human onboarding), [`docs/reviews/`](docs/reviews/) (periodic engineering audits).

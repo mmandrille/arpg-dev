@@ -32,7 +32,7 @@
 | Modify | `make/agents.mk` | Add `bot-client` target |
 | Modify | `scripts/ci.sh` | Run `bot-client` in the CI sequence |
 | Modify | `scripts/client_smoke.sh` | Include `test_client_bot.gd` in client unit/smoke gates if needed |
-| Modify | `docs/PROGRESS.md` | Update only when v14 ships |
+| Modify | `PROGRESS.md` | Update only when v14 ships |
 
 ---
 
@@ -297,7 +297,7 @@ ARPG_WORLD_ID=vertical_slice \
 
 ## Task 8: Completion Docs
 
-- [ ] **Step 8.1:** Update `docs/PROGRESS.md` only after v14 is implemented and `make ci` is green.
+- [ ] **Step 8.1:** Update `PROGRESS.md` only after v14 is implemented and `make ci` is green.
 
 - [ ] **Step 8.2:** Mark the v14 spec status complete only after acceptance criteria are met.
 

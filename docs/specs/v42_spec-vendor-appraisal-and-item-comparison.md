@@ -7,7 +7,7 @@ Slice: v42 - vendor appraisals and item comparison
 Baseline: v41 `town-vendor-gold-sink`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub and NPC economy direction
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
@@ -72,7 +72,7 @@ The thin proof:
 ```text
 docs/specs/v42_spec-vendor-appraisal-and-item-comparison.md - this spec
 docs/plans/v42_2026-06-09-vendor-appraisal-and-item-comparison.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v42 ships
+PROGRESS.md - lifecycle update when v42 ships
 
 shared/protocol/state_delta.v4.schema.json - add appraisal/comparison payloads to shop_opened
 shared/protocol/examples/state_delta.json - include detailed shop_opened appraisals

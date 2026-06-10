@@ -6,7 +6,7 @@ Slice: v40 - deterministic interior dungeon obstacles with reachability guarante
 Baseline: v39 `ui-currency-and-mana-polish`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - on-demand seeded dungeon generation
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for client presentation work
@@ -59,7 +59,7 @@ The first slice should prove a conservative foundation:
 ```text
 docs/specs/v40_spec-reachable-dungeon-obstacles.md - this slice contract
 docs/plans/v40_<YYYY-MM-DD>-reachable-dungeon-obstacles.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v40 ships
+PROGRESS.md - lifecycle update when v40 ships
 
 shared/rules/dungeon_generation.v0.json - obstacle generation tuning
 shared/rules/dungeon_generation.v0.schema.json - schema for obstacle tuning

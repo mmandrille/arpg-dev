@@ -55,7 +55,7 @@ interface contract is captured in this SDD spec plus Go HTTP/store tests and God
 - `client/scripts/bot_scenario_runner.gd` - optional assertion support for character summary fields.
 - `client/tests/test_coop_client.gd` and/or `client/tests/test_client_bot.gd` - local UI coverage.
 - `tools/bot/scenarios/client/27_character_select_summaries.json` - client bot proof.
-- `docs/PROGRESS.md` - lifecycle and deferred candidate updates when the slice ships.
+- `PROGRESS.md` - lifecycle and deferred candidate updates when the slice ships.
 
 ## Test and bot proof
 

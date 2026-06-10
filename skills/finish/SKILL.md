@@ -16,7 +16,7 @@ disable-model-invocation: true
 ## Hard rules
 
 1. **`make ci` must pass** before committing. No commit on red CI.
-2. **Update `docs/PROGRESS.md`** if not already current — lifecycle table, summary, open gaps.
+2. **Update `PROGRESS.md`** if not already current — lifecycle table, summary, open gaps.
 3. **Commit message format is fixed:**
 
    ```
@@ -39,7 +39,7 @@ Determine `vN`, codename, and human title from (in order):
 
 1. Uncommitted / staged changes — look for `docs/specs/vN_spec-*.md`, `docs/plans/vN_*.md`.
 2. Current git branch (identify codename from branch name, spec, or plan — do not create branches).
-3. [`docs/PROGRESS.md`](../../docs/PROGRESS.md) — active branch, in-progress rows.
+3. [`PROGRESS.md`](../../PROGRESS.md) — active branch, in-progress rows.
 4. Plan checkboxes — all or most marked `[x]`.
 
 If ambiguous (multiple slices in diff, or number unclear), **ask the user** before proceeding.
@@ -52,7 +52,7 @@ Record:
 
 ## Phase 1 — Consolidate PROGRESS.md
 
-Read [`docs/PROGRESS.md`](../../docs/PROGRESS.md) and verify it reflects the shipped slice.
+Read [`PROGRESS.md`](../../PROGRESS.md) and verify it reflects the shipped slice.
 
 ### Required updates when missing or stale
 
@@ -60,9 +60,10 @@ Read [`docs/PROGRESS.md`](../../docs/PROGRESS.md) and verify it reflects the shi
 |---------|--------|
 | **Current status** | `Latest completed slice` → vN; `Active branch` → feature branch or TBD; `CI gate` → date + green; `Next slice` → TBD |
 | **Slice lifecycle table** | Add/update row: Status = Complete (`make ci` green), Spec + Plan links |
-| **What each slice proved** | New `### vN — {title}` subsection: what it proves, key decisions, scope limits |
+| **As-built summary** | Add or update `docs/as-built/vN_<codename>.md`: what it proves, key decisions, scope limits |
 | **Open gaps & deferred work** | Move closed items to **Recently closed**; add any new deferred items from spec non-goals |
 | **Last updated** | Today's date |
+| **Engineering review** | If the shipped slice hits the next ~10-slice milestone in `PROGRESS.md` → **Next engineering review**, update **Last/Next engineering review** and add the review set under `docs/reviews/` (overview + backend + client + shared-tooling-and-process) |
 
 Cross-check against:
 
@@ -122,7 +123,8 @@ Stage all files that belong to the slice:
 git add <paths>
 ```
 
-Include: code, shared contracts, golden fixtures, bot scenarios, specs, plans, PROGRESS.md, ADR updates if part of slice.
+Include: code, shared contracts, golden fixtures, bot scenarios, specs, plans, PROGRESS.md,
+`docs/as-built/vN_<codename>.md`, ADR updates if part of slice.
 
 Do **not** stage unrelated local edits — ask user if mixed changes exist.
 

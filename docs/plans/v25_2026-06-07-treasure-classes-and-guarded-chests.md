@@ -34,7 +34,7 @@ Godot plugin adoption checklist: **reject/adopt none for this slice**. The clien
 | Modify | `client/tests/test_golden.gd` | Data-only golden checks |
 | Modify | `tools/bot/run.py` | Bot assertions/helpers for chest floor and multi-drop checks |
 | Create | `tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json` | End-to-end proof |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when slice ships |
+| Modify | `PROGRESS.md` | Lifecycle update when slice ships |
 
 ## Task 1 - Shared treasure class contracts
 
@@ -171,7 +171,7 @@ make bot
 ## Task 8 - Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v25_spec-treasure-classes-and-guarded-chests.md`
 - Modify: `docs/plans/v25_2026-06-07-treasure-classes-and-guarded-chests.md`
 

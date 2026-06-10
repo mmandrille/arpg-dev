@@ -8,7 +8,7 @@ Slice: v49 - gold auto-pickup and shared floor loot rules
 Baseline: v48 `coop-rewards-and-scaling`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one authoritative `Sim`
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client shortcut checklist
@@ -111,7 +111,7 @@ the plugin research doc before editing client code.
 ```text
 docs/specs/v49_spec-gold-autopickup-and-shared-loot-rules.md - this spec
 docs/plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v49 ships
+PROGRESS.md - lifecycle update when v49 ships
 
 server/internal/game/sim.go - post-movement gold auto-pickup, deterministic winner/order, shared loot invariants
 server/internal/game/types.go - only if an internal owner marker is needed for private gold changes

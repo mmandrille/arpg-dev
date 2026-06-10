@@ -34,7 +34,7 @@ The exact clamps and fixture values are pinned in `shared/golden/skill_points_an
 |--------|------|----------------|
 | Create | `docs/plans/v44_2026-06-09-skill-points-and-magic-bolt.md` | This implementation plan |
 | Modify | `docs/specs/v44_spec-skill-points-and-magic-bolt.md` | Only if planning uncovers accepted spec clarifications |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v44 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v44 ships |
 | Modify | `shared/rules/character_progression.v0.schema.json` | Skill-point cadence schema and 3 stat points per level |
 | Modify | `shared/rules/character_progression.v0.json` | Change `points_per_level` to 3; add skill-point cadence |
 | Modify | `shared/rules/combat.v0.schema.json` | Add `base_attack_interval_ticks` and attack-speed clamp defaults if not owned by progression rules |
@@ -306,10 +306,10 @@ HEADLESS=1 make bot-client scenario=19_skill_points_and_magic_bolt.json
 ## Task 11 - Lifecycle docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v44_spec-skill-points-and-magic-bolt.md` only if implementation reveals accepted as-built clarifications
 
-- [x] Step 11.1: Update `docs/PROGRESS.md` latest completed slice, slice numbering list, lifecycle row, "what each slice proved", scenario catalog, recently closed notes, and deferred backlog if scope changes.
+- [x] Step 11.1: Update `PROGRESS.md` latest completed slice, slice numbering list, lifecycle row, "what each slice proved", scenario catalog, recently closed notes, and deferred backlog if scope changes.
 - [x] Step 11.2: Record as-built deviations in the spec only if the implementation intentionally differs from this plan.
 - [x] Step 11.3: Run final gates.
 

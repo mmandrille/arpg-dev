@@ -36,7 +36,7 @@ Key implementation decisions:
 |--------|------|----------------|
 | Add | `docs/specs/v52_spec-ranged-monster-ai.md` | Slice spec |
 | Add | `docs/plans/v52_2026-06-10-ranged-monster-ai.md` | This implementation plan |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v52 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v52 ships |
 | Modify | `shared/rules/monsters.v0.json` | Add `dungeon_archer` and ranged attack fields |
 | Modify | `shared/rules/monsters.v0.schema.json` | Validate monster ranged fields |
 | Modify | `shared/rules/dungeon_generation.v0.json` | Configure melee/ranged monster mix |
@@ -223,11 +223,11 @@ make bot-client HEADLESS=1
 Files:
 - Modify: `docs/specs/v52_spec-ranged-monster-ai.md`
 - Modify: `docs/plans/v52_2026-06-10-ranged-monster-ai.md`
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 6.1: Update the spec status to `Implemented` after all acceptance criteria pass.
 ```bash
-rg -n 'Status:|ranged monster|ranged-monster-ai' docs/specs/v52_spec-ranged-monster-ai.md docs/PROGRESS.md
+rg -n 'Status:|ranged monster|ranged-monster-ai' docs/specs/v52_spec-ranged-monster-ai.md PROGRESS.md
 ```
 
 - [x] Step 6.2: Mark this plan's completed checkboxes and summarize key as-built decisions.
@@ -235,9 +235,9 @@ rg -n 'Status:|ranged monster|ranged-monster-ai' docs/specs/v52_spec-ranged-mons
 rg -n '\\[ \\]' docs/plans/v52_2026-06-10-ranged-monster-ai.md
 ```
 
-- [x] Step 6.3: Update `docs/PROGRESS.md`: latest slice v52, lifecycle row, "What each slice proved", recently closed ranged monster AI gap, and deferred follow-ups for richer ranged AI/art/balance.
+- [x] Step 6.3: Update `PROGRESS.md`: latest slice v52, lifecycle row, "What each slice proved", recently closed ranged monster AI gap, and deferred follow-ups for richer ranged AI/art/balance.
 ```bash
-rg -n 'Latest completed slice|v52|ranged monster|Open gaps' docs/PROGRESS.md
+rg -n 'Latest completed slice|v52|ranged monster|Open gaps' PROGRESS.md
 ```
 
 ## Final verification

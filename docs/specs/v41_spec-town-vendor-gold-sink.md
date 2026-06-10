@@ -6,7 +6,7 @@ Slice: v41 - town vendor, deterministic shop offers, and spendable gold
 Baseline: v40 `reachable-dungeon-obstacles`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub, character progression, deepest level reached
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for client presentation work
@@ -62,7 +62,7 @@ The thin vertical proof:
 ```text
 docs/specs/v41_spec-town-vendor-gold-sink.md - this slice contract
 docs/plans/v41_<YYYY-MM-DD>-town-vendor-gold-sink.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v41 ships
+PROGRESS.md - lifecycle update when v41 ships
 
 server/migrations/0010_character_deepest_dungeon_depth.sql - durable depth field and session-start snapshot field
 server/internal/store/models.go - deepest depth on character progression and session-start progression

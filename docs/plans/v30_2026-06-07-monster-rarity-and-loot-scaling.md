@@ -47,7 +47,7 @@ or inventory plugin would reduce the core work, and gameplay authority must stay
 | Modify | `tools/bot/run.py` | Add monster rarity assertions and effective loot-depth assertions if existing helpers are insufficient. |
 | Create | `tools/bot/scenarios/21_monster_rarity_loot_scaling.json` | End-to-end generated dungeon rarity proof. |
 | Modify | `docs/specs/v30_spec-monster-rarity-and-loot-scaling.md` | Update status/notes only if implementation decisions differ. |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v30 ships. |
+| Modify | `PROGRESS.md` | Lifecycle update when v30 ships. |
 
 ## Task 1 - Shared rarity rules and validation
 
@@ -317,18 +317,18 @@ make client-smoke
 Files:
 
 - Modify: `docs/specs/v30_spec-monster-rarity-and-loot-scaling.md`
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 8.1: When implementation is complete, mark the v30 spec as implemented and record any final rounding or data-placement decisions.
 
 ```bash
-rg -n "Status: Draft|round|monster-rarity-and-loot-scaling|v30" docs/specs/v30_spec-monster-rarity-and-loot-scaling.md docs/PROGRESS.md
+rg -n "Status: Draft|round|monster-rarity-and-loot-scaling|v30" docs/specs/v30_spec-monster-rarity-and-loot-scaling.md PROGRESS.md
 ```
 
 - [x] Step 8.2: Add v30 to the `PROGRESS.md` lifecycle table, slice numbering note, summary, scripted scenario catalog, and recently closed gaps.
 
 ```bash
-rg -n "v30|monster-rarity|Latest completed slice|Next slice" docs/PROGRESS.md
+rg -n "v30|monster-rarity|Latest completed slice|Next slice" PROGRESS.md
 ```
 
 - [x] Step 8.3: Run full CI and keep the current branch; do not create a feature branch.

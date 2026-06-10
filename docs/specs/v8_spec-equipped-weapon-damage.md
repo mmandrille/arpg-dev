@@ -8,7 +8,7 @@ Related:
 
 - [`v7_spec-gear-before-combat-scenario.md`](v7_spec-gear-before-combat-scenario.md) — deferred combat math; gear loop proves equip-before-attack ordering
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) — damage roll + retaliation golden pattern
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md) — inventory UI plugins deferred to a future client slice
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures)
 
@@ -180,7 +180,7 @@ No new persisted fields. Verification:
 | Modify | `tools/bot/scenarios/02_gear_before_combat.json` | `monster_killed_in_attacks` assertion |
 | Modify | `tools/bot/run.py` (or scenario runner module) | Implement `monster_killed_in_attacks` assertion |
 | Modify | `tools/bot/test_protocol.py` | Unit test for new assertion type |
-| Modify | `docs/PROGRESS.md` | v8 row + summary when complete |
+| Modify | `PROGRESS.md` | v8 row + summary when complete |
 
 **Out of scope for file changes:** protocol schemas, Godot `main.gd`, inventory UI / `client/addons/`, animation, asset manifests, new worlds.
 

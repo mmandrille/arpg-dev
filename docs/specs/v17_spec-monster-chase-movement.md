@@ -3,14 +3,14 @@
 Status: Draft
 Branch: `feature/monster-chase-movement`
 Slice: v17 — server-authoritative monster chase movement (aggro, pathfinding, leash)
-Baseline: v16 `use-consumable` (complete; `docs/PROGRESS.md` updated before v17 implementation)
+Baseline: v16 `use-consumable` (complete; `PROGRESS.md` updated before v17 implementation)
 Related:
 
 - [`v16_spec-use-consumable.md`](v16_spec-use-consumable.md)
 - [`v11_spec-click-to-move-and-auto-path.md`](v11_spec-click-to-move-and-auto-path.md) — grid A\* planner reused for monsters
 - [`v9_spec-solid-collision-and-obstacles.md`](v9_spec-solid-collision-and-obstacles.md) — wall/monster/player collision reused
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) — retaliation remains hit-triggered only
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md) — LimboAI deferred
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures, replay determinism)
 - ADR-0007 (client-only locomotion presentation from authoritative position deltas)
@@ -455,7 +455,7 @@ client/scripts/main.gd                        - monster locomotion from position
 client/animations/monster_anims.tres          - add walk clip
 client/tools/build_animations.gd              - generate monster walk if needed
 client/tests/test_golden.gd                  - monster_chase golden checks
-docs/PROGRESS.md                              - v17 lifecycle when complete
+PROGRESS.md                              - v17 lifecycle when complete
 docs/plans/v17_2026-06-06-monster-chase-movement.md  - implementation plan (separate artifact)
 ```
 

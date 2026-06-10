@@ -7,7 +7,7 @@ Slice: v45 - main menu create/join flow cleanup
 Baseline: v44 `skill-points-and-magic-bolt`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client, authoritative backend, no offline gameplay path
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
 - [`v24_spec-main-menu-and-character-start.md`](v24_spec-main-menu-and-character-start.md) - current main menu, character picker, settings, and pause shell
@@ -112,7 +112,7 @@ sessions.
 ```text
 docs/specs/v45_spec-menu-create-join-flow.md - this spec
 docs/plans/v45_2026-06-09-menu-create-join-flow.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v45 ships
+PROGRESS.md - lifecycle update when v45 ships
 
 client/scripts/main_menu.gd - replace root play buttons and signals
 client/scripts/settings_panel.gd - add session-type toggle

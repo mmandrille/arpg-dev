@@ -6,7 +6,7 @@ Slice: v32 - resilient test floor before more gameplay
 Baseline: v31 `combat-stat-effects-and-feedback`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - deterministic authoritative sim, replay, shared rules
 - [`v18_spec-dungeon-levels-and-stairs.md`](v18_spec-dungeon-levels-and-stairs.md) - generated dungeon floors and stair placement
 - [`v21_spec-dungeon-monster-combat.md`](v21_spec-dungeon-monster-combat.md) - dungeon monster population and combat
@@ -53,7 +53,7 @@ numbers should only break tests that intentionally lock those values.
 docs/specs/v32_spec-test-floor-and-resilient-scenarios.md       - this slice contract
 docs/plans/v32_<YYYY-MM-DD>-test-floor-and-resilient-scenarios.md - implementation plan
 CLAUDE.md                                                       - durable testing policy for future agents
-docs/PROGRESS.md                                                - lifecycle update when v32 ships
+PROGRESS.md                                                - lifecycle update when v32 ships
 server/internal/game/*_test.go                                  - convert brittle gameplay assertions where needed
 server/internal/replay/*_test.go                                - preserve replay strictness, remove incidental tuning locks
 tools/bot/run.py                                                - semantic/range/eventual assertion helpers
@@ -180,7 +180,7 @@ where practical.
 
 1. `CLAUDE.md` documents the test locking policy for future agents.
 2. Existing brittle tests and scenarios are audited and classified in the v32 plan or an as-built
-   section of `docs/PROGRESS.md`.
+   section of `PROGRESS.md`.
 3. Dungeon size tuning does not break unrelated bot scenarios or Go tests.
 4. Dungeon population tuning does not break unrelated bot scenarios or Go tests.
 5. Movement speed tuning does not break unrelated bot scenarios or Go tests.

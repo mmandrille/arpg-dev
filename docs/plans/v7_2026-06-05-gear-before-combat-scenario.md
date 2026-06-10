@@ -69,7 +69,7 @@ Branch: `feature/gear-before-combat-scenario`
 | Create | `tools/bot/scenarios/02_gear_before_combat.json` | New scenario |
 | Modify | `tools/bot/run.py` | World ID, selectors, walk actions, structured assertions |
 | Modify | `tools/bot/test_protocol.py` | Loader, assertions, unknown action/world tests |
-| Modify | `docs/PROGRESS.md` | Record v7 when complete |
+| Modify | `PROGRESS.md` | Record v7 when complete |
 
 No changes expected: `client/scripts/main.gd`, `scripts/bot_visual.sh`, `client/scripts/smoke.gd`.
 
@@ -287,14 +287,14 @@ make bot   # server + db required
 ## Task 5: End-to-End and Visual Replay
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 5.1: Run full bot suite — both scenarios pass including reconnect/resume.
 - [x] Step 5.2: Run replay verification for both recorded sessions.
 - [x] Step 5.3: Confirm `make bot-visual` records and plays scenarios in order
   (`01_vertical_slice`, then `02_gear_before_combat`) without Godot changes.
 - [x] Step 5.4: Confirm `make client-smoke` still green (default world unchanged).
-- [x] Step 5.5: Update `docs/PROGRESS.md`:
+- [x] Step 5.5: Update `PROGRESS.md`:
   - lifecycle row for v7
   - summary of world presets + gear-before-combat flow
   - note scenario catalog now has two entries

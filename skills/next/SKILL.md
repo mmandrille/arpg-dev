@@ -28,7 +28,7 @@ Examples:
 
 ## Phase 0 — Baseline context (read first)
 
-1. [`docs/PROGRESS.md`](../../docs/PROGRESS.md) — latest completed slice, active branch, open gaps, deferred backlog.
+1. [`PROGRESS.md`](../../PROGRESS.md) — latest completed slice, active branch, open gaps, deferred backlog.
 2. [`CLAUDE.md`](../../CLAUDE.md) — architecture, invariants, slice pattern.
 3. [`docs/adr/0001-technology-stack.md`](../../docs/adr/0001-technology-stack.md) — if not already familiar.
 4. Relevant ADRs for the candidate area (e.g. [`0008-world-structure-and-dungeon-progression.md`](../../docs/adr/0008-world-structure-and-dungeon-progression.md) for world/progression).
@@ -49,7 +49,8 @@ Survey these sources and rank 2–4 candidates:
 | Source | What to extract |
 |--------|-----------------|
 | `PROGRESS.md` → **Open gaps & deferred work** | Documented backlog; do not treat as automatic next slice |
-| `PROGRESS.md` → **Current status** | `Next slice: TBD`, active branch, latest completed |
+| `PROGRESS.md` → **Current status** | `Next slice: TBD`, active branch, latest completed, **Next engineering review** milestone |
+| [`docs/reviews/`](../../docs/reviews/) | Latest periodic audit (~every 10 slices); if due or stale, propose a review slice before new features |
 | ADR deferred decisions | e.g. ADR-0008 D1 character persistence, D3 PCG density |
 | In-flight specs | Specs/plans written but not marked complete |
 | Natural trajectory | What logically follows the latest completed slice (e.g. v19 teleporters → v20 play loop) |

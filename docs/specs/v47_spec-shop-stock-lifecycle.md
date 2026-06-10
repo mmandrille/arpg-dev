@@ -8,7 +8,7 @@ Slice: v47 - per-character shop stock lifecycle
 Baseline: v46 `client-join-game-proof`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub, character persistence, waypoints
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
@@ -117,7 +117,7 @@ the required UI surface. The plan should still record the adoption checklist res
 ```text
 docs/specs/v47_spec-shop-stock-lifecycle.md - this spec
 docs/plans/v47_2026-06-09-shop-stock-lifecycle.md - implementation plan
-docs/PROGRESS.md - lifecycle update when v47 ships
+PROGRESS.md - lifecycle update when v47 ships
 
 shared/rules/shops.v0.json - stock lifecycle rules, max rarity, buyback pricing
 shared/rules/shops.v0.schema.json - validate new shop-stock fields

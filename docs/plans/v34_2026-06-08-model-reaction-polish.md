@@ -34,7 +34,7 @@ No shared JSON, Go sim, persistence, replay, or protocol schema work is expected
 | Modify | `client/scripts/bot_scenario_runner.gd` | Add client-bot assertions for entity presentation/reaction debug if needed |
 | Modify | `client/scripts/bot_controller.gd` | Dispatch any new read-only bot assertions if needed |
 | Create | `tools/bot/scenarios/client/12_model_reaction_polish.json` | Godot client proof |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v34 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v34 ships |
 
 ## Task 1 — Reaction Controller
 
@@ -124,11 +124,11 @@ make bot
 ## Task 5 — Lifecycle Docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v34_2026-06-08-model-reaction-polish.md`
 
 - [x] Step 5.1: Update this plan checkbox state as tasks complete.
-- [x] Step 5.2: Update `docs/PROGRESS.md` lifecycle table and v34 summary when implementation is complete.
+- [x] Step 5.2: Update `PROGRESS.md` lifecycle table and v34 summary when implementation is complete.
 - [x] Step 5.3: Record any actual deviation from the expected plugin shortcut decision.
 - [x] Step 5.4: Run full CI.
 

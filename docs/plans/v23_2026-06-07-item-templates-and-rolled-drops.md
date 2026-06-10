@@ -17,7 +17,7 @@ Godot shortcut adoption checklist:
 
 Spec review notes resolved during planning:
 
-- Slice number, branch, and baseline match `docs/PROGRESS.md`: v23 builds on completed v22.
+- Slice number, branch, and baseline match `PROGRESS.md`: v23 builds on completed v22.
 - The spec's open questions have explicit defaults; this plan locks them for implementation: use `common`, `magic`, and `rare`; enforce only `required_level <= 1`; display/persist `max_hp` without applying it; expose enough rolled fields on loot entities for `/state` and future presentation; keep `items.v0.json`.
 - Protocol changes are additive to existing v1 item/entity views and should not introduce a new envelope schema version unless validation proves one is required.
 - Bot proof is mandatory because this touches gameplay, inventory, loot, protocol views, persistence, and replay; add scenario `16_rolled_drops.json`.
@@ -56,7 +56,7 @@ Spec review notes resolved during planning:
 | Modify | `tools/bot/run.py` | Add rolled item assertions and fresh-session checks |
 | Modify | `tools/bot/test_protocol.py` | Unit-test new scenario assertions/helpers if added |
 | Add | `tools/bot/scenarios/16_rolled_drops.json` | End-to-end rolled dungeon drop proof |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v23 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v23 ships |
 
 ## Task 1 — Shared contracts and validation
 
@@ -219,7 +219,7 @@ make client-smoke
 
 Files:
 
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 8.1: When implementation ships, add v23 to the lifecycle table and mark latest completed slice as `item-templates-and-rolled-drops`.
 - [x] Step 8.2: Document as-built behavior: template rules, rarity/stat rolls, dungeon mob drops, rolled weapon damage, rolled persistence, tooltip display, bot scenario `16`, and unchanged legacy fixed items.

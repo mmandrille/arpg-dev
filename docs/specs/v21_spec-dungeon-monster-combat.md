@@ -10,7 +10,7 @@ Related:
 - [`v18_spec-dungeon-levels-and-stairs.md`](v18_spec-dungeon-levels-and-stairs.md) — dungeon gen extended here
 - [`v20_spec-play-session-loop.md`](v20_spec-play-session-loop.md) — playable loop this slice threatens
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — D3 PCG density, D5 town safe zone
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -52,7 +52,7 @@ server/internal/game/sim.go                                — advanceMonsterAtt
 server/internal/game/game_test.go                          — golden test for dungeon_monster_attack.json
 client/tests/test_golden.gd                                — GDScript cross-check of dungeon_monster_attack.json
 tools/bot/scenarios/14_dungeon_monsters.json               — prove proactive hit end-to-end
-docs/PROGRESS.md                                           — lifecycle update when v21 ships
+PROGRESS.md                                           — lifecycle update when v21 ships
 ```
 
 No protocol schema changes. `player_damaged` / `player_killed` event types already exist in

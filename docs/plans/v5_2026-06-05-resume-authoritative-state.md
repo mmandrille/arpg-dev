@@ -45,7 +45,7 @@ Branch: `feature/resume-authoritative-state`
 | Modify | `client/scripts/smoke.gd` | Assert real resumed monster death/player HP; remove forced death workaround |
 | Modify | `tools/bot/run.py` | Resume probe asserts HP and monster death, not just inventory |
 | Modify | `docs/specs/v4_spec-take-a-hit.md` | Replace resume limitation with v5 as-built pointer after implementation |
-| Modify | `docs/PROGRESS.md` | Mark v5 complete after implementation and remove the open resume gap |
+| Modify | `PROGRESS.md` | Mark v5 complete after implementation and remove the open resume gap |
 
 ## Task 1: Break Import Cycle And Extend Reconstruct
 
@@ -184,11 +184,11 @@ Files:
 - Modify: `docs/specs/v4_spec-take-a-hit.md`
 - Modify: `docs/specs/v5_spec-resume-authoritative-state.md`
 - Modify: `docs/plans/v5_2026-06-05-resume-authoritative-state.md`
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 6.1: Update the v4 spec limitation note to point to v5 once the
   server resume gap is fixed.
-- [x] Step 6.2: Add v5 to `docs/PROGRESS.md` lifecycle table as complete only
+- [x] Step 6.2: Add v5 to `PROGRESS.md` lifecycle table as complete only
   after implementation and CI pass.
 - [x] Step 6.3: Move the "combat/world state does not persist on resume" gap out
   of open gaps after acceptance is met.

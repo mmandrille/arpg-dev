@@ -37,7 +37,7 @@ Godot plugin shortcut decision: **reject / not applicable**. v49 has no new clie
 | Modify | `tools/bot/scenarios/client/15_town_vendor_shop_panel.json` | Client bot fixture updated for passive gold pickup |
 | Modify | `tools/bot/scenarios/client/16_vendor_item_comparison.json` | Client bot fixture updated for passive gold pickup |
 | Modify | `tools/bot/scenarios/client/22_shop_stock_lifecycle.json` | Client bot fixture updated for passive gold pickup |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when v49 ships |
+| Modify | `PROGRESS.md` | Lifecycle update when v49 ships |
 
 ## Task 1 — Server Gold Pickup Semantics
 
@@ -133,7 +133,7 @@ make bot scenario=34_coop_rewards_and_scaling.json
 ## Task 6 — Lifecycle Docs And CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/plans/v49_2026-06-10-gold-autopickup-and-shared-loot-rules.md`
 
 - [x] Step 6.1: Add v49 to the slice numbering note and lifecycle table when implementation finishes.

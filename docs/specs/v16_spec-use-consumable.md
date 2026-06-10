@@ -9,7 +9,7 @@ Related:
 - [`v15_spec-item-visuals-and-loot-presentation.md`](v15_spec-item-visuals-and-loot-presentation.md)
 - [`v13_spec-inventory-ui.md`](v13_spec-inventory-ui.md) — inventory intents pattern
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) — player HP / retaliation
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 

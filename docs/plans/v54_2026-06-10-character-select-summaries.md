@@ -19,7 +19,7 @@ adoption checklist in `docs/researchs/godot-plugins-and-shortcuts.md` was review
 extension of an existing in-repo `Control` and does not justify adding GLoot, Godot-Inventory, or a
 menu/UI dependency.
 
-The full autoloop idea menu is persisted in `docs/PROGRESS.md` under curated autoloop candidates so
+The full autoloop idea menu is persisted in `PROGRESS.md` under curated autoloop candidates so
 future autoloops can reuse it.
 
 ## File map
@@ -36,7 +36,7 @@ future autoloops can reuse it.
 | Modify | `client/tests/test_coop_client.gd` | Unit coverage for summary rendering and dead row behavior. |
 | Modify | `client/tests/test_client_bot.gd` | Unit coverage for new bot assertion shape. |
 | Add | `tools/bot/scenarios/client/27_character_select_summaries.json` | Headless menu proof for summary fields. |
-| Modify | `docs/PROGRESS.md` | Lifecycle row, summary, and curated candidate carry-forward when the slice ships. |
+| Modify | `PROGRESS.md` | Lifecycle row, summary, and curated candidate carry-forward when the slice ships. |
 
 ## Task 1 - Store and HTTP contract
 
@@ -103,17 +103,17 @@ HEADLESS=1 make bot-client scenario=27_character_select_summaries.json
 Files:
 - Modify: `docs/specs/v54_spec-character-select-summaries.md`
 - Modify: `docs/plans/v54_2026-06-10-character-select-summaries.md`
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 
 - [x] Step 4.1: Mark this plan complete as tasks finish.
-- [x] Step 4.2: Update `docs/PROGRESS.md`: latest completed slice v54, numbering note, lifecycle
+- [x] Step 4.2: Update `PROGRESS.md`: latest completed slice v54, numbering note, lifecycle
   row, "What each slice proved", scripted scenario catalog, recently closed item, and keep the
   remaining curated autoloop candidates for reuse.
 - [x] Step 4.3: Record any deferred scope: portraits, class summaries, equipment previews,
   old-session resume UI, and richer character detail panels remain out of v54.
 
 ```bash
-rg -n 'v54|character-select-summaries|Curated autoloop candidates|Latest completed slice' docs/PROGRESS.md
+rg -n 'v54|character-select-summaries|Curated autoloop candidates|Latest completed slice' PROGRESS.md
 make ci
 ```
 
@@ -129,4 +129,4 @@ make ci
 
 - Character portraits, classes, visual customization, equipment previews, old-session resume UI,
   and richer character detail panels.
-- The other curated autoloop candidates remain in `docs/PROGRESS.md` for future selection.
+- The other curated autoloop candidates remain in `PROGRESS.md` for future selection.

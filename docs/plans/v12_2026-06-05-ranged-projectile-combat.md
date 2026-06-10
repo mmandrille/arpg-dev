@@ -40,7 +40,7 @@
 | Modify | `client/scripts/main.gd` | Spawn/update/remove placeholder projectile nodes |
 | Modify | `client/tests/test_golden.gd` | Validate ranged projectile golden/rules consistency |
 | Modify | `client/scripts/smoke.gd` | Cover projectile entity rendering if practical |
-| Modify | `docs/PROGRESS.md` | Add v12 completion notes when shipped |
+| Modify | `PROGRESS.md` | Add v12 completion notes when shipped |
 
 ## Plugin adoption
 
@@ -228,7 +228,7 @@ make ci
 make bot-visual
 ```
 
-- [x] **Step 7.3:** Update `docs/PROGRESS.md` with v12 lifecycle row, what the slice proved, explicit non-goals, and any deferred gaps.
+- [x] **Step 7.3:** Update `PROGRESS.md` with v12 lifecycle row, what the slice proved, explicit non-goals, and any deferred gaps.
 
 - [x] **Step 7.4:** Mark the spec status complete only after `make ci` is green.
 

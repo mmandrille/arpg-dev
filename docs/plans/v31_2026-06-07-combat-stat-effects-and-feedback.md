@@ -58,7 +58,7 @@ Implementation defaults from the spec:
 | Modify | `client/tests/test_golden.gd` | Shared formula/effective stat golden checks |
 | Modify | `client/tests/test_client_bot.gd` | Scenario validation/settings helper tests |
 | Create | `tools/bot/scenarios/client/11_combat_feedback.json` | Client presentation proof |
-| Modify | `docs/PROGRESS.md` | Lifecycle update when slice ships |
+| Modify | `PROGRESS.md` | Lifecycle update when slice ships |
 
 ## Task 1 — Shared Combat Contracts and Lab Data
 
@@ -400,18 +400,18 @@ make client-unit
 ## Task 12 — Lifecycle Docs and CI
 
 Files:
-- Modify: `docs/PROGRESS.md`
+- Modify: `PROGRESS.md`
 - Modify: `docs/specs/v31_spec-combat-stat-effects-and-feedback.md` only if implementation resolves details differently
 - Modify: `docs/plans/v31_2026-06-07-combat-stat-effects-and-feedback.md` if tasks are materially revised during execution
 
 - [x] Step 12.1: Update the v31 spec status from Draft to Implemented only after implementation and CI are complete.
 ```bash
-rg -n "Status:|v31|combat-stat-effects" docs/specs/v31_spec-combat-stat-effects-and-feedback.md docs/PROGRESS.md
+rg -n "Status:|v31|combat-stat-effects" docs/specs/v31_spec-combat-stat-effects-and-feedback.md PROGRESS.md
 ```
 
-- [x] Step 12.2: Add v31 to the `docs/PROGRESS.md` lifecycle table, numbering note, current status, summary, scenario catalog, and recently closed/open deferred sections.
+- [x] Step 12.2: Add v31 to the `PROGRESS.md` lifecycle table, numbering note, current status, summary, scenario catalog, and recently closed/open deferred sections.
 ```bash
-rg -n "v31|combat_stat|Combat" docs/PROGRESS.md
+rg -n "v31|combat_stat|Combat" PROGRESS.md
 ```
 
 - [x] Step 12.3: Run final local CI.

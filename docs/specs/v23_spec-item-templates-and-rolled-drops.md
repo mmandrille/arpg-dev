@@ -13,7 +13,7 @@ Related:
 - [`v22_spec-character-scoped-persistence.md`](v22_spec-character-scoped-persistence.md) — durable item instances with `rolled_stats`
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) — shared rules as data and deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — dungeon progression and better loot loop
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
 
@@ -68,7 +68,7 @@ client/scripts/inventory_panel.gd                          - tooltip rarity and 
 client/tests/test_golden.gd                                - data-only item roll/template checks
 tools/bot/run.py                                           - rolled item assertions if needed
 tools/bot/scenarios/16_rolled_drops.json                   - end-to-end rolled loot proof
-docs/PROGRESS.md                                           - lifecycle update when v23 ships
+PROGRESS.md                                           - lifecycle update when v23 ships
 ```
 
 ## 4. Data shapes

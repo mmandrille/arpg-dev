@@ -6,7 +6,7 @@ Slice: v33 - true two-player co-op foundation
 Baseline: v32 `test-floor-and-resilient-scenarios`
 Related:
 
-- [`../PROGRESS.md`](../PROGRESS.md)
+- [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative Go server, thin Godot client, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one `Sim`
 - [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - multiplayer shortcut review
@@ -59,7 +59,7 @@ can descend or use unlocked travel later.
 ```text
 docs/specs/v33_spec-true-coop-session.md             - this slice contract
 docs/plans/v33_<YYYY-MM-DD>-true-coop-session.md     - implementation plan
-docs/PROGRESS.md                                     - lifecycle update when v33 ships
+PROGRESS.md                                     - lifecycle update when v33 ships
 
 shared/protocol/messages.v2.schema.json              - realtime envelope + intent contracts with actor derived server-side
 shared/protocol/session_snapshot.v2.schema.json      - local_player_id, party, and player entity metadata

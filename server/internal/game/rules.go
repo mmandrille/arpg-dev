@@ -791,7 +791,7 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules character_progression.experience_curve: missing level %d", level)
 		}
 	}
-	requiredDerived := []string{"damage_min", "damage_max", "armor", "attack_speed", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana"}
+	requiredDerived := []string{"damage_min", "damage_max", "armor", "attack_speed", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second"}
 	for _, key := range requiredDerived {
 		formula, ok := progression.DerivedStats[key]
 		if !ok {
@@ -2107,7 +2107,7 @@ func isSupportedRequirementStat(stat string) bool {
 
 func isSupportedItemStat(stat string) bool {
 	switch stat {
-	case "damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent", "hotbar_slots", "inventory_rows":
+	case "damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "hotbar_slots", "inventory_rows":
 		return true
 	default:
 		return false

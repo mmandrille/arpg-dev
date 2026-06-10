@@ -18,6 +18,8 @@ const DERIVED_LABELS := {
 	"movement_speed": "Move speed",
 	"max_hp": "HP",
 	"max_mana": "Mana",
+	"health_regen_per_second": "HP regen /s",
+	"mana_regen_per_second": "Mana regen /s",
 }
 
 var progression: Dictionary = {}

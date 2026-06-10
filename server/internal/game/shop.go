@@ -843,7 +843,7 @@ func (s *Sim) statsForInventoryItem(item *invItem) map[string]int {
 }
 
 func shopStatOrder() []string {
-	return []string{"damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "hotbar_slots", "inventory_rows"}
+	return []string{"damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "hotbar_slots", "inventory_rows"}
 }
 
 func displayStatName(stat string) string {
@@ -856,6 +856,10 @@ func displayStatName(stat string) string {
 		return "Armor"
 	case "max_hp":
 		return "Max HP"
+	case "health_regen_per_10_seconds":
+		return "HP regen / 10s"
+	case "mana_regen_per_10_seconds":
+		return "Mana regen / 10s"
 	case "block_percent":
 		return "Block"
 	case "attack_speed_percent":

@@ -187,6 +187,8 @@
         "max_hp": { "type": "integer", "minimum": 0 },
         "armor": { "type": "integer", "minimum": 0 },
         "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "health_regen_per_10_seconds": { "type": "integer", "minimum": 0 },
+        "mana_regen_per_10_seconds": { "type": "integer", "minimum": 0 },
         "hotbar_slots": { "type": "integer", "minimum": 0, "maximum": 10 },
         "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
@@ -494,7 +496,7 @@
     },
     "derived_stats": {
       "type": "object",
-      "required": ["damage_min", "damage_max", "armor", "attack_speed", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana"],
+      "required": ["damage_min", "damage_max", "armor", "attack_speed", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second"],
       "additionalProperties": false,
       "properties": {
         "damage_min": { "type": "number", "minimum": 0 },
@@ -506,7 +508,9 @@
         "crit_damage": { "type": "number", "minimum": 0 },
         "movement_speed": { "type": "number", "minimum": 0 },
         "max_hp": { "type": "number", "minimum": 1 },
-        "max_mana": { "type": "number", "minimum": 0 }
+        "max_mana": { "type": "number", "minimum": 0 },
+        "health_regen_per_second": { "type": "number", "minimum": 0 },
+        "mana_regen_per_second": { "type": "number", "minimum": 0 }
       }
     },
     "stat_breakdown_source": {
@@ -525,7 +529,7 @@
       "required": ["key", "value", "sources"],
       "additionalProperties": false,
       "properties": {
-        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "hit_chance", "crit_chance", "crit_damage", "max_hp", "block_percent"] },
+        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "hit_chance", "crit_chance", "crit_damage", "max_hp", "health_regen_per_second", "mana_regen_per_second", "block_percent"] },
         "value": { "type": "number" },
         "uncapped_value": { "type": "number" },
         "cap": { "type": ["number", "null"] },

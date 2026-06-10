@@ -1,0 +1,42 @@
+tools/bot/scenarios/client/27_character_select_summaries.json
+  s_0f1bceeefb38b1::t_167ed05f219b9d 16
+tools/bot/scenarios/client/20_menu_create_join_flow.json
+  s_0f1bceeefb38b1::t_ce0e5a0a8a3183 35,39-44,46,60
+client/scripts/character_select_panel.gd
+  s_0f1bceeefb38b1::t_1abb4b71c6c73b 70,292,300-304
+  s_0f1bceeefb38b1::t_93c69a97c21a38 16,54,67,106,113-114,119,167-170,174,176,180-182,272-291,293-299
+client/tests/test_coop_client.gd
+  s_0f1bceeefb38b1::t_da38c8dae0285b 8,37,285-286,295-296,303-345
+skills/showme/scripts/visual_capture.gd
+  s_0f1bceeefb38b1::t_71930144407909 7-8,45-48,194-213
+client/scripts/main.gd
+  s_0f1bceeefb38b1::t_22a7532ac50c89 4349,4353,4355
+  s_0f1bceeefb38b1::t_0bb83a0c7e5f27 4369
+tools/bot/scenarios/client/08_main_menu_flow.json
+  s_0f1bceeefb38b1::t_70c71fe756bf15 29,33-38,40,62
+skills/showme/scripts/render_focus.py
+  s_0f1bceeefb38b1::t_3efdbd07abca8f 24,46-47
+client/scripts/multiplayer_sessions_panel.gd
+  s_0f1bceeefb38b1::t_982d1eac6d8a58 159-161,171-172,177-201
+  s_0f1bceeefb38b1::t_48dcb2f9cedf02 60-73,81
+tools/bot/scenarios/client/21_join_game_listed_session.json
+  s_0f1bceeefb38b1::t_a1a3236f28a006 50,57-62,67
+client/tests/test_client_bot.gd
+  s_0f1bceeefb38b1::t_8a0bed0a2c824f 246,303,322,336
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0ad149418102990ec99c236b7594bb8d88464a44",
+  "prompts": {},
+  "sessions": {
+    "s_0f1bceeefb38b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb333-0d41-75b0-82de-79fc5e756865",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

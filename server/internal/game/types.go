@@ -437,6 +437,7 @@ const (
 // oneOf), which is why it has a custom MarshalJSON.
 type Change struct {
 	Op               string
+	OwnerPlayerID    uint64
 	Entity           *EntityView
 	EntityID         string
 	Item             *ItemView

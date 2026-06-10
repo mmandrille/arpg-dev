@@ -194,6 +194,59 @@ func TestMonsterRarityGolden(t *testing.T) {
 	}
 }
 
+func TestCoopRewardsAndScalingGolden(t *testing.T) {
+	var golden struct {
+		XPShare struct {
+			Radius                  float64 `json:"radius"`
+			FullXPPerEligiblePlayer bool    `json:"full_xp_per_eligible_player"`
+			IncludeDeadPlayers      bool    `json:"include_dead_players"`
+			IncludeDisconnected     bool    `json:"include_disconnected_players"`
+		} `json:"xp_share"`
+		PartyChallenge struct {
+			PerDoubleBonus float64 `json:"per_double_bonus"`
+			MaxBonus       float64 `json:"max_bonus"`
+			Cases          []struct {
+				PartyCount         int     `json:"party_count"`
+				ExpectedMultiplier float64 `json:"expected_multiplier"`
+			} `json:"cases"`
+		} `json:"party_challenge"`
+	}
+	loadGolden(t, "coop_rewards_and_scaling.json", &golden)
+	rules := loadRules(t)
+	if rules.Combat.Coop.XPShare.Radius != golden.XPShare.Radius ||
+		rules.Combat.Coop.XPShare.FullXPPerEligiblePlayer != golden.XPShare.FullXPPerEligiblePlayer ||
+		rules.Combat.Coop.XPShare.IncludeDeadPlayers != golden.XPShare.IncludeDeadPlayers ||
+		rules.Combat.Coop.XPShare.IncludeDisconnected != golden.XPShare.IncludeDisconnected {
+		t.Fatalf("xp share rules = %+v, want golden %+v", rules.Combat.Coop.XPShare, golden.XPShare)
+	}
+	if rules.Combat.Coop.PartyChallenge.PerDoubleBonus != golden.PartyChallenge.PerDoubleBonus ||
+		rules.Combat.Coop.PartyChallenge.MaxBonus != golden.PartyChallenge.MaxBonus {
+		t.Fatalf("party challenge rules = %+v, want golden %+v", rules.Combat.Coop.PartyChallenge, golden.PartyChallenge)
+	}
+	for _, c := range golden.PartyChallenge.Cases {
+		got := rules.Combat.Coop.PartyChallenge.Multiplier(c.PartyCount)
+		if math.Abs(got-c.ExpectedMultiplier) > 1e-12 {
+			t.Fatalf("party count %d multiplier = %.15f, want %.15f", c.PartyCount, got, c.ExpectedMultiplier)
+		}
+	}
+}
+
+func TestValidateCoopCombatRules(t *testing.T) {
+	rules := loadRules(t).Combat.Coop
+	if err := validateCoopCombatRules(rules); err != nil {
+		t.Fatalf("default coop rules invalid: %v", err)
+	}
+	rules.XPShare.Radius = 0
+	if err := validateCoopCombatRules(rules); err == nil {
+		t.Fatal("zero xp share radius unexpectedly valid")
+	}
+	rules = loadRules(t).Combat.Coop
+	rules.PartyChallenge.MaxBonus = rules.PartyChallenge.PerDoubleBonus / 2
+	if err := validateCoopCombatRules(rules); err == nil {
+		t.Fatal("max bonus below per-double bonus unexpectedly valid")
+	}
+}
+
 func TestBossRulesAndGoldens(t *testing.T) {
 	rules := loadRules(t)
 
@@ -5313,8 +5366,14 @@ func TestCoopActorScopedLootExperienceAndMonsterTargeting(t *testing.T) {
 	if !hasEvent(kill, "monster_killed") || !hasEvent(kill, "experience_gained") {
 		t.Fatalf("kill events = %+v", kill.Events)
 	}
-	if sim.players[hostID].Progression.Experience != 10 || sim.players[guestID].Progression.Experience != 0 {
-		t.Fatalf("xp host=%d guest=%d, want host only", sim.players[hostID].Progression.Experience, sim.players[guestID].Progression.Experience)
+	if sim.players[hostID].Progression.Experience != 10 || sim.players[guestID].Progression.Experience != 10 {
+		t.Fatalf("xp host=%d guest=%d, want both nearby players", sim.players[hostID].Progression.Experience, sim.players[guestID].Progression.Experience)
+	}
+	if owners := changeOwnersForOp(kill, OpCharacterProgressionUpdate); !sameUint64Set(owners, []uint64{hostID, guestID}) {
+		t.Fatalf("progression update owners = %v, want host+guest", owners)
+	}
+	if owners := changeOwnersForOp(kill, OpSkillProgressionUpdate); !sameUint64Set(owners, []uint64{hostID, guestID}) {
+		t.Fatalf("skill progression update owners = %v, want host+guest", owners)
 	}
 	var loot *entity
 	for _, e := range sim.entities {
@@ -5346,6 +5405,191 @@ func TestCoopActorScopedLootExperienceAndMonsterTargeting(t *testing.T) {
 	}
 	if sim.entities[guestID].hp >= guestHP {
 		t.Fatalf("guest hp = %d, want below %d", sim.entities[guestID].hp, guestHP)
+	}
+}
+
+func TestCoopExperienceEligibilityRules(t *testing.T) {
+	cases := []struct {
+		name        string
+		setup       func(sim *Sim, hostID, guestID uint64, monster *entity)
+		wantGuestXP int
+	}{
+		{
+			name: "nearby alive connected same level",
+			setup: func(sim *Sim, hostID, guestID uint64, monster *entity) {
+				sim.entities[guestID].pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
+			},
+			wantGuestXP: 10,
+		},
+		{
+			name: "out of radius",
+			setup: func(sim *Sim, hostID, guestID uint64, monster *entity) {
+				sim.entities[guestID].pos = Vec2{X: monster.pos.X + 11, Y: monster.pos.Y}
+			},
+		},
+		{
+			name: "different level",
+			setup: func(sim *Sim, hostID, guestID uint64, monster *entity) {
+				guest := sim.entities[guestID]
+				delete(sim.entities, guestID)
+				otherLevel := newLevelState(-1, &sim.rules.Navigation)
+				otherLevel.entities[guestID] = guest
+				sim.levels[-1] = otherLevel
+				sim.players[guestID].CurrentLevel = -1
+				guest.pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
+			},
+		},
+		{
+			name: "disconnected",
+			setup: func(sim *Sim, hostID, guestID uint64, monster *entity) {
+				sim.entities[guestID].pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
+				sim.RemovePlayerEntity(guestID)
+			},
+		},
+		{
+			name: "dead",
+			setup: func(sim *Sim, hostID, guestID uint64, monster *entity) {
+				sim.entities[guestID].pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
+				sim.entities[guestID].hp = 0
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			sim, hostID, guestID, monster := newCoopRewardTestSim(t, "sess_coop_xp_"+strings.ReplaceAll(tc.name, " ", "_"))
+			tc.setup(sim, hostID, guestID, monster)
+			kill := killCoopRewardMonster(t, sim, hostID, monster)
+			if sim.players[hostID].Progression.Experience != 10 {
+				t.Fatalf("host xp = %d, want 10", sim.players[hostID].Progression.Experience)
+			}
+			if sim.players[guestID].Progression.Experience != tc.wantGuestXP {
+				t.Fatalf("guest xp = %d, want %d; events=%+v changes=%+v", sim.players[guestID].Progression.Experience, tc.wantGuestXP, kill.Events, kill.Changes)
+			}
+		})
+	}
+}
+
+func TestCoopExperienceRecipientLevelUpAndSoloUnchanged(t *testing.T) {
+	sim, hostID, guestID, monster := newCoopRewardTestSim(t, "sess_coop_xp_level")
+	sim.players[guestID].Progression.Experience = 10
+	sim.entities[guestID].pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
+
+	kill := killCoopRewardMonster(t, sim, hostID, monster)
+	if sim.players[guestID].Progression.Experience != 20 || sim.players[guestID].Progression.Level != 2 || sim.players[guestID].Progression.UnspentStatPoints != 3 {
+		t.Fatalf("guest progression = %+v, want level 2 at 20 xp with 3 stat points", sim.players[guestID].Progression)
+	}
+	if !eventForEntity(kill, "character_leveled", guestID) {
+		t.Fatalf("missing guest level-up event: %+v", kill.Events)
+	}
+	if owners := changeOwnersForOp(kill, OpCharacterProgressionUpdate); !sameUint64Set(owners, []uint64{hostID, guestID}) {
+		t.Fatalf("progression update owners = %v, want host+guest", owners)
+	}
+
+	rules := coopRewardTestRules(t)
+	solo := NewSim("sess_solo_xp", "solo_xp_seed", rules)
+	soloMonster := findMonsterByDef(solo, monsterDefID)
+	if soloMonster == nil {
+		t.Fatal("solo missing monster")
+	}
+	soloMonster.hp = 1
+	soloMonster.maxHP = 1
+	soloMonster.lootTable = "no_drop"
+	kill = killCoopRewardMonster(t, solo, solo.playerID, soloMonster)
+	if solo.players[solo.playerID].Progression.Experience != 10 {
+		t.Fatalf("solo xp = %d, want 10; events=%+v", solo.players[solo.playerID].Progression.Experience, kill.Events)
+	}
+}
+
+func TestCoopPartyChallengeScaling(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_party_scaling", "party_scaling_seed", rules)
+	levelNum := sim.currentLevel
+	for count := 1; count <= 5; count++ {
+		for len(sim.players) < count {
+			if _, err := sim.AddGuestPlayer(fmt.Sprintf("acct_%d", len(sim.players)), fmt.Sprintf("char_%d", len(sim.players)), "Guest", rules.DefaultCharacterProgressionState()); err != nil {
+				t.Fatalf("add guest: %v", err)
+			}
+		}
+		got := sim.partyChallengeMultiplierForLevel(levelNum)
+		want := rules.Combat.Coop.PartyChallenge.Multiplier(count)
+		if math.Abs(got-want) > 1e-12 {
+			t.Fatalf("count %d multiplier = %.15f, want %.15f", count, got, want)
+		}
+	}
+}
+
+func TestCoopPartyChallengeHPDamageAndLateJoin(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_party_hp_damage", "party_hp_damage_seed", rules)
+	if _, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState()); err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	base := rules.Monsters["dungeon_mob"]
+	var rarity MonsterRarityDef
+	for _, candidate := range rules.DungeonGeneration.MonsterRarities {
+		if candidate.HPMultiplier > 1 {
+			rarity = candidate
+			break
+		}
+	}
+	if rarity.ID == "" {
+		t.Fatal("missing monster rarity with hp multiplier > 1")
+	}
+	rarityScaledHP := roundPositive(float64(base.MaxHP) * rarity.HPMultiplier)
+	monster := &entity{kind: monsterEntity, hp: rarityScaledHP, maxHP: rarityScaledHP, monsterDefID: "dungeon_mob"}
+	sim.applyPartyHPScale(sim.activeLevel(), monster)
+	wantHP := roundPositive(float64(rarityScaledHP) * rules.Combat.Coop.PartyChallenge.Multiplier(2))
+	if monster.maxHP != wantHP || monster.hp != wantHP {
+		t.Fatalf("party-scaled rarity hp = %d/%d, want %d", monster.hp, monster.maxHP, wantHP)
+	}
+
+	solo := NewSim("sess_party_late_join", "party_late_join_seed", rules)
+	lateMonster := &entity{kind: monsterEntity, hp: 20, maxHP: 20, monsterDefID: "dungeon_mob"}
+	solo.applyPartyHPScale(solo.activeLevel(), lateMonster)
+	if lateMonster.maxHP != 20 {
+		t.Fatalf("solo spawn hp = %d, want unscaled 20", lateMonster.maxHP)
+	}
+	if _, err := solo.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState()); err != nil {
+		t.Fatalf("late add guest: %v", err)
+	}
+	if lateMonster.maxHP != 20 {
+		t.Fatalf("late join retro-scaled hp to %d, want 20", lateMonster.maxHP)
+	}
+	gotDamage := solo.scaleMonsterDamageForParty(solo.currentLevel, DamageRange{Min: 4, Max: 4})
+	if gotDamage != (DamageRange{Min: 5, Max: 5}) {
+		t.Fatalf("two-player damage scale = %+v, want {5,5}", gotDamage)
+	}
+}
+
+func TestCoopMonsterAttackDamageScalesAtResolution(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	damage := DamageRange{Min: 4, Max: 4}
+	dummy := rules.Monsters[monsterDefID]
+	dummy.AttackDamage = &damage
+	dummy.AttackCooldown = 1
+	dummy.HitChance = floatPtr(1)
+	dummy.CritChance = floatPtr(0)
+	dummy.RetaliationDamage = nil
+	rules.Monsters[monsterDefID] = dummy
+
+	sim := NewSim("sess_party_attack_damage", "party_attack_damage_seed", rules)
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	monster := findMonsterByDef(sim, monsterDefID)
+	if monster == nil {
+		t.Fatal("missing monster")
+	}
+	monster.pos = Vec2{X: 10, Y: 10}
+	sim.entities[hostID].pos = Vec2{X: 10.4, Y: 10}
+	sim.entities[guestID].pos = Vec2{X: 9, Y: 10}
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
+	sim.advanceMonsterAttack(&res)
+	ev := eventForTarget(res, "player_damaged", hostID)
+	if ev == nil || ev.RawDamage == nil || *ev.RawDamage != 5 {
+		t.Fatalf("player_damaged = %+v, events=%+v, want raw damage 5 from two-player scaling", ev, res.Events)
 	}
 }
 
@@ -6162,6 +6406,96 @@ func hasProgressionChange(r TickResult) bool {
 		}
 	}
 	return false
+}
+
+func changeOwnersForOp(r TickResult, op string) []uint64 {
+	var out []uint64
+	for _, change := range r.Changes {
+		if change.Op == op {
+			out = append(out, change.OwnerPlayerID)
+		}
+	}
+	return out
+}
+
+func sameUint64Set(got, want []uint64) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	counts := make(map[uint64]int, len(got))
+	for _, v := range got {
+		counts[v]++
+	}
+	for _, v := range want {
+		counts[v]--
+		if counts[v] < 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func eventForEntity(r TickResult, eventType string, entityID uint64) bool {
+	for _, ev := range r.Events {
+		if ev.EventType == eventType && ev.EntityID == idStr(entityID) {
+			return true
+		}
+	}
+	return false
+}
+
+func eventForTarget(r TickResult, eventType string, targetID uint64) *Event {
+	for i := range r.Events {
+		ev := &r.Events[i]
+		if ev.EventType == eventType && ev.TargetEntityID == idStr(targetID) {
+			return ev
+		}
+	}
+	return nil
+}
+
+func coopRewardTestRules(t *testing.T) *Rules {
+	t.Helper()
+	rules := cloneRules(loadRules(t))
+	dummy := rules.Monsters[monsterDefID]
+	dummy.MaxHP = 1
+	dummy.XPReward = 10
+	dummy.RetaliationDamage = nil
+	rules.Monsters[monsterDefID] = dummy
+	return rules
+}
+
+func newCoopRewardTestSim(t *testing.T, sessionID string) (*Sim, uint64, uint64, *entity) {
+	t.Helper()
+	rules := coopRewardTestRules(t)
+	sim, err := NewSimWithWorld(sessionID, "coop_reward_seed", rules, "vertical_slice")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	monster := findMonsterByDef(sim, monsterDefID)
+	if monster == nil {
+		t.Fatal("missing monster")
+	}
+	monster.hp = 1
+	monster.maxHP = 1
+	monster.lootTable = "no_drop"
+	return sim, hostID, guestID, monster
+}
+
+func killCoopRewardMonster(t *testing.T, sim *Sim, hostID uint64, monster *entity) TickResult {
+	t.Helper()
+	sim.entities[hostID].pos = monster.pos
+	kill := sim.Tick([]Input{{MessageID: "host_kill", ActorPlayerID: hostID, Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, kill, "host_kill")
+	if !hasEvent(kill, "monster_killed") || !hasEvent(kill, "experience_gained") {
+		t.Fatalf("kill events = %+v", kill.Events)
+	}
+	return kill
 }
 
 func assertDerivedStats(t *testing.T, got, want DerivedStatsView) {

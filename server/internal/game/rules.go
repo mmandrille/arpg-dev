@@ -51,6 +51,42 @@ type Combat struct {
 	MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
 	PlayerDamage            DamageRange `json:"player_damage"`
 	UnarmedReach            float64     `json:"unarmed_reach"`
+	Coop                    CoopCombat  `json:"coop"`
+}
+
+type CoopCombat struct {
+	XPShare        CoopXPShareRules        `json:"xp_share"`
+	PartyChallenge CoopPartyChallengeRules `json:"party_challenge"`
+}
+
+type CoopXPShareRules struct {
+	Enabled                 bool    `json:"enabled"`
+	Radius                  float64 `json:"radius"`
+	FullXPPerEligiblePlayer bool    `json:"full_xp_per_eligible_player"`
+	IncludeDeadPlayers      bool    `json:"include_dead_players"`
+	IncludeDisconnected     bool    `json:"include_disconnected_players"`
+}
+
+type CoopPartyChallengeRules struct {
+	Enabled              bool    `json:"enabled"`
+	PerDoubleBonus       float64 `json:"per_double_bonus"`
+	MaxBonus             float64 `json:"max_bonus"`
+	HPScalesAtSpawn      bool    `json:"hp_scales_at_spawn"`
+	DamageScalesAtAttack bool    `json:"damage_scales_at_attack"`
+}
+
+func (r CoopPartyChallengeRules) Multiplier(partyCount int) float64 {
+	if !r.Enabled || partyCount <= 1 {
+		return 1
+	}
+	bonus := r.PerDoubleBonus * math.Log2(float64(partyCount))
+	if bonus > r.MaxBonus {
+		bonus = r.MaxBonus
+	}
+	if bonus < 0 {
+		bonus = 0
+	}
+	return 1 + bonus
 }
 
 // NavigationRules bounds server-owned auto-navigation.
@@ -615,6 +651,7 @@ func LoadRules(dir string) (*Rules, error) {
 		MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
 		PlayerDamage            DamageRange `json:"player_damage"`
 		UnarmedReach            float64     `json:"unarmed_reach"`
+		Coop                    CoopCombat  `json:"coop"`
 	}
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
@@ -649,6 +686,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if combat.UnarmedReach <= 0 {
 		return nil, fmt.Errorf("game: invalid rules combat.unarmed_reach: must be positive")
 	}
+	if err := validateCoopCombatRules(combat.Coop); err != nil {
+		return nil, err
+	}
 	r.Combat = Combat{
 		BaseHitChance:           combat.BaseHitChance,
 		BaseCritChance:          combat.BaseCritChance,
@@ -660,6 +700,7 @@ func LoadRules(dir string) (*Rules, error) {
 		MaxEffectiveAttackSpeed: combat.MaxEffectiveAttackSpeed,
 		PlayerDamage:            combat.PlayerDamage,
 		UnarmedReach:            combat.UnarmedReach,
+		Coop:                    combat.Coop,
 	}
 
 	var navigation struct {
@@ -1951,6 +1992,41 @@ func validateDamageRange(label string, d DamageRange) error {
 	}
 	if d.Max < d.Min {
 		return fmt.Errorf("game: invalid rules %s: max must be >= min", label)
+	}
+	return nil
+}
+
+func validateCoopCombatRules(coop CoopCombat) error {
+	if coop.XPShare.Enabled {
+		if coop.XPShare.Radius <= 0 {
+			return fmt.Errorf("game: invalid rules combat.coop.xp_share.radius: must be positive")
+		}
+		if !coop.XPShare.FullXPPerEligiblePlayer {
+			return fmt.Errorf("game: invalid rules combat.coop.xp_share.full_xp_per_eligible_player: must be true for v48")
+		}
+		if coop.XPShare.IncludeDeadPlayers {
+			return fmt.Errorf("game: invalid rules combat.coop.xp_share.include_dead_players: must be false for v48")
+		}
+		if coop.XPShare.IncludeDisconnected {
+			return fmt.Errorf("game: invalid rules combat.coop.xp_share.include_disconnected_players: must be false for v48")
+		}
+	}
+	if coop.PartyChallenge.Enabled {
+		if coop.PartyChallenge.PerDoubleBonus < 0 {
+			return fmt.Errorf("game: invalid rules combat.coop.party_challenge.per_double_bonus: must be non-negative")
+		}
+		if coop.PartyChallenge.MaxBonus < 0 {
+			return fmt.Errorf("game: invalid rules combat.coop.party_challenge.max_bonus: must be non-negative")
+		}
+		if coop.PartyChallenge.MaxBonus < coop.PartyChallenge.PerDoubleBonus {
+			return fmt.Errorf("game: invalid rules combat.coop.party_challenge.max_bonus: must be >= per_double_bonus")
+		}
+		if !coop.PartyChallenge.HPScalesAtSpawn {
+			return fmt.Errorf("game: invalid rules combat.coop.party_challenge.hp_scales_at_spawn: must be true for v48")
+		}
+		if !coop.PartyChallenge.DamageScalesAtAttack {
+			return fmt.Errorf("game: invalid rules combat.coop.party_challenge.damage_scales_at_attack: must be true for v48")
+		}
 	}
 	return nil
 }

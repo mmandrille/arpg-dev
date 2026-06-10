@@ -365,6 +365,16 @@ def test_load_scenarios_discovers_session_browser_uncapped_coop():
     assert coop.assertions == []
 
 
+def test_load_scenarios_discovers_coop_rewards_and_scaling():
+    scenarios = load_scenarios()
+    coop = next(s for s in scenarios if s.id == "coop_rewards_and_scaling")
+
+    assert coop.world_id == "dungeon_levels"
+    assert coop.peer_count == 3
+    assert coop.steps == []
+    assert coop.assertions == []
+
+
 def test_listed_session_http_helpers():
     requests: list[tuple[str, str, dict | None]] = []
 

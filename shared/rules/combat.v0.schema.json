@@ -4,7 +4,7 @@
   "title": "Combat rules (v0)",
   "description": "Declarative combat parameters. Authoritative damage is rolled by the server PRNG within [min, max]; the cross-language damage formula is pinned by shared/golden/damage_formula.json.",
   "type": "object",
-  "required": ["version", "base_hit_chance", "base_crit_chance", "base_crit_damage", "minimum_damage", "block_cap_percent", "base_attack_interval_ticks", "min_effective_attack_speed", "max_effective_attack_speed", "player_damage", "unarmed_reach"],
+  "required": ["version", "base_hit_chance", "base_crit_chance", "base_crit_damage", "minimum_damage", "block_cap_percent", "base_attack_interval_ticks", "min_effective_attack_speed", "max_effective_attack_speed", "player_damage", "unarmed_reach", "coop"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
@@ -25,6 +25,37 @@
         "max": { "type": "integer", "minimum": 0 }
       }
     },
-    "unarmed_reach": { "type": "number", "exclusiveMinimum": 0 }
+    "unarmed_reach": { "type": "number", "exclusiveMinimum": 0 },
+    "coop": {
+      "type": "object",
+      "required": ["xp_share", "party_challenge"],
+      "additionalProperties": false,
+      "properties": {
+        "xp_share": {
+          "type": "object",
+          "required": ["enabled", "radius", "full_xp_per_eligible_player", "include_dead_players", "include_disconnected_players"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "radius": { "type": "number", "exclusiveMinimum": 0 },
+            "full_xp_per_eligible_player": { "type": "boolean" },
+            "include_dead_players": { "type": "boolean" },
+            "include_disconnected_players": { "type": "boolean" }
+          }
+        },
+        "party_challenge": {
+          "type": "object",
+          "required": ["enabled", "per_double_bonus", "max_bonus", "hp_scales_at_spawn", "damage_scales_at_attack"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "per_double_bonus": { "type": "number", "minimum": 0 },
+            "max_bonus": { "type": "number", "minimum": 0 },
+            "hp_scales_at_spawn": { "type": "boolean" },
+            "damage_scales_at_attack": { "type": "boolean" }
+          }
+        }
+      }
+    }
   }
 }

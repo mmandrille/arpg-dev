@@ -1,0 +1,20 @@
+{
+  "description": "Co-op XP eligibility defaults and party challenge scaling for v48.",
+  "xp_share": {
+    "radius": 10.0,
+    "full_xp_per_eligible_player": true,
+    "include_dead_players": false,
+    "include_disconnected_players": false
+  },
+  "party_challenge": {
+    "per_double_bonus": 0.25,
+    "max_bonus": 0.5,
+    "cases": [
+      { "party_count": 1, "expected_multiplier": 1.0 },
+      { "party_count": 2, "expected_multiplier": 1.25 },
+      { "party_count": 3, "expected_multiplier": 1.396240625180289 },
+      { "party_count": 4, "expected_multiplier": 1.5 },
+      { "party_count": 5, "expected_multiplier": 1.5 }
+    ]
+  }
+}

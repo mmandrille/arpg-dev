@@ -557,9 +557,13 @@ func filterChangesForClient(changes []game.Change, actorPlayerID, clientPlayerID
 		switch change.Op {
 		case game.OpInventoryAdd, game.OpInventoryUpdate, game.OpInventoryRemove,
 			game.OpEquippedUpdate, game.OpHotbarUpdate, game.OpTeleporterDiscoveryUpdate,
-			game.OpGoldUpdate, game.OpCharacterProgressionUpdate,
+			game.OpGoldUpdate, game.OpCharacterProgressionUpdate, game.OpSkillProgressionUpdate,
 			game.OpShopStockReplace, game.OpShopStockAvailability:
-			if actorPlayerID == 0 || actorPlayerID != clientPlayerID {
+			ownerPlayerID := actorPlayerID
+			if change.OwnerPlayerID != 0 {
+				ownerPlayerID = change.OwnerPlayerID
+			}
+			if ownerPlayerID == 0 || ownerPlayerID != clientPlayerID {
 				continue
 			}
 		}
@@ -574,6 +578,11 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 		switch event.EventType {
 		case "level_changed", "shop_opened", "shop_purchase", "shop_sale":
 			if actorPlayerID != clientPlayerID {
+				continue
+			}
+		case "experience_gained", "character_leveled", "skill_point_gained":
+			ownerPlayerID, ok := eventEntityPlayerID(event)
+			if !ok || ownerPlayerID != clientPlayerID {
 				continue
 			}
 		}
@@ -620,6 +629,12 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 	}
 
 	for _, c := range res.Changes {
+		changeMember := member
+		if c.OwnerPlayerID != 0 {
+			if ownerMember, ok := membersByPlayerID[c.OwnerPlayerID]; ok {
+				changeMember = ownerMember
+			}
+		}
 		switch c.Op {
 		case game.OpInventoryAdd:
 			if c.Item == nil {
@@ -640,8 +655,8 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			}
 			if err := l.hub.store.AddCharacterItem(ctx, store.CharacterItemInstance{
 				ID:          c.Item.ItemInstanceID,
-				AccountID:   member.AccountID,
-				CharacterID: member.CharacterID,
+				AccountID:   changeMember.AccountID,
+				CharacterID: changeMember.CharacterID,
 				ItemDefID:   c.Item.ItemDefID,
 				Location:    location,
 				Slot:        c.Item.Slot,
@@ -655,7 +670,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.Item == nil {
 				continue
 			}
-			if err := l.hub.store.SetCharacterItemEquipped(ctx, member.AccountID, member.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped); err != nil {
+			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist inventory update", "error", err)
 			}
@@ -663,7 +678,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.ItemInstanceID == nil {
 				continue
 			}
-			if err := l.hub.store.RemoveCharacterItem(ctx, member.AccountID, member.CharacterID, *c.ItemInstanceID); err != nil {
+			if err := l.hub.store.RemoveCharacterItem(ctx, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist inventory remove", "error", err)
 			}
@@ -671,12 +686,12 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.ItemInstanceID == nil || c.Slot == "" {
 				continue
 			}
-			if err := l.hub.store.SetCharacterItemEquipped(ctx, member.AccountID, member.CharacterID, *c.ItemInstanceID, c.Slot, true); err != nil {
+			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID, c.Slot, true); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist equipped update", "error", err)
 			}
 		case game.OpHotbarUpdate:
-			if err := l.hub.store.SetCharacterHotbarSlot(ctx, member.AccountID, member.CharacterID, c.SlotIndex, c.ItemInstanceID); err != nil {
+			if err := l.hub.store.SetCharacterHotbarSlot(ctx, changeMember.AccountID, changeMember.CharacterID, c.SlotIndex, c.ItemInstanceID); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist hotbar update", "error", err)
 			}
@@ -684,24 +699,24 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.Gold == nil {
 				continue
 			}
-			if err := l.hub.store.SetCharacterGold(ctx, member.AccountID, member.CharacterID, *c.Gold); err != nil {
+			if err := l.hub.store.SetCharacterGold(ctx, changeMember.AccountID, changeMember.CharacterID, *c.Gold); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist character gold", "error", err)
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
-				if _, err := l.hub.store.AddCharacterWaypoint(ctx, member.CharacterID, c.Level); err != nil {
+				if _, err := l.hub.store.AddCharacterWaypoint(ctx, changeMember.CharacterID, c.Level); err != nil {
 					l.hub.metrics.PersistenceErrors.Inc()
 					l.log.Error("persist character waypoint", "error", err)
 				}
 			}
 		case game.OpShopStockReplace:
-			if err := l.hub.store.ReplaceCharacterShopStock(ctx, member.AccountID, member.CharacterID, c.ShopID, c.RefreshKey, storeShopStock(member.AccountID, member.CharacterID, c.ShopStock)); err != nil {
+			if err := l.hub.store.ReplaceCharacterShopStock(ctx, changeMember.AccountID, changeMember.CharacterID, c.ShopID, c.RefreshKey, storeShopStock(changeMember.AccountID, changeMember.CharacterID, c.ShopStock)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist shop stock replace", "shop_id", c.ShopID, "error", err)
 			}
 		case game.OpShopStockAvailability:
-			if err := l.hub.store.SetCharacterShopStockAvailable(ctx, member.AccountID, member.CharacterID, c.ShopID, c.OfferID, c.Available); err != nil {
+			if err := l.hub.store.SetCharacterShopStockAvailable(ctx, changeMember.AccountID, changeMember.CharacterID, c.ShopID, c.OfferID, c.Available); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist shop stock availability", "shop_id", c.ShopID, "offer_id", c.OfferID, "error", err)
 			}
@@ -709,7 +724,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.Progression == nil {
 				continue
 			}
-			if err := l.hub.store.UpsertCharacterProgression(ctx, member.AccountID, storeProgressionFromView(member.AccountID, member.CharacterID, *c.Progression)); err != nil {
+			if err := l.hub.store.UpsertCharacterProgression(ctx, changeMember.AccountID, storeProgressionFromView(changeMember.AccountID, changeMember.CharacterID, *c.Progression)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist character progression", "error", err)
 			}
@@ -784,6 +799,13 @@ func killedEventMember(ev game.Event, membersByPlayerID map[uint64]store.Session
 	}
 	member, ok := membersByPlayerID[playerID]
 	return member, ok
+}
+
+func eventEntityPlayerID(ev game.Event) (uint64, bool) {
+	if ev.EntityID == "" {
+		return 0, false
+	}
+	return game.ParseEntityID(ev.EntityID)
 }
 
 func isCoopSession(sess store.Session) bool {

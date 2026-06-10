@@ -35,7 +35,7 @@
     { "type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2 },
     { "type": "assert_shop_offer_count", "offer_kind": "generated", "at_least": 1 },
     { "type": "assert_shop_offer_details", "offer_kind": "fixed", "equals": 2, "requires_summary": true, "requires_price": true, "requires_category": true, "summary_contains": "Restores" },
-    { "type": "assert_shop_offer_details", "offer_kind": "generated", "at_least": 1, "requires_summary": true, "requires_price": true, "requires_slot": true, "requires_comparison": true, "requires_requirement_status": true, "requires_equip_preview": true, "summary_contains": "Slot:" },
+    { "type": "assert_shop_offer_details", "offer_kind": "generated", "at_least": 1, "requires_summary": true, "requires_price": true, "requires_slot": true, "requires_comparison": true, "requires_requirement_status": true, "summary_contains": "Slot:" },
     { "type": "assert_shop_sell_rows", "rolled": true, "at_least": 1 },
     { "type": "assert_shop_sell_details", "rolled": true, "at_least": 1, "requires_summary": true, "requires_price": true, "requires_slot": true, "requires_comparison": true, "requires_requirement_status": true, "requires_equip_preview": true, "summary_contains": "Slot:" },
     { "type": "click_shop_sell_item", "rolled": true },

@@ -11,7 +11,7 @@ Last updated: 2026-06-09
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v47 — `shop-stock-lifecycle` |
+| **Latest completed slice** | v48 — `coop-rewards-and-scaling` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-09 |
 | **Next slice** | TBD |
@@ -63,6 +63,7 @@ v44_* = skill-points-and-magic-bolt
 v45_* = menu-create-join-flow
 v46_* = client-join-game-proof
 v47_* = shop-stock-lifecycle
+v48_* = coop-rewards-and-scaling
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -130,6 +131,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v45** | `menu-create-join-flow` | Complete (`make ci` green) | [`v45_spec-menu-create-join-flow.md`](specs/v45_spec-menu-create-join-flow.md) | [`v45_2026-06-09-menu-create-join-flow.md`](plans/v45_2026-06-09-menu-create-join-flow.md) |
 | **v46** | `client-join-game-proof` | Complete (`make ci` green) | [`v46_spec-client-join-game-proof.md`](specs/v46_spec-client-join-game-proof.md) | [`v46_2026-06-09-client-join-game-proof.md`](plans/v46_2026-06-09-client-join-game-proof.md) |
 | **v47** | `shop-stock-lifecycle` | Complete (`make ci` green) | [`v47_spec-shop-stock-lifecycle.md`](specs/v47_spec-shop-stock-lifecycle.md) | [`v47_2026-06-09-shop-stock-lifecycle.md`](plans/v47_2026-06-09-shop-stock-lifecycle.md) |
+| **v48** | `coop-rewards-and-scaling` | Complete (`make ci` green) | [`v48_spec-coop-rewards-and-scaling.md`](specs/v48_spec-coop-rewards-and-scaling.md) | [`v48_2026-06-09-coop-rewards-and-scaling.md`](plans/v48_2026-06-09-coop-rewards-and-scaling.md) |
 
 ---
 
@@ -1185,6 +1187,28 @@ ends, multiple vendors, stash, repair, crafting, gambling, sorting/filtering/sea
 clock-based refresh, production vendor assets, expanded item-level/depth economy bands beyond the
 current `1`, `2`, and `3+` loot bands, or unique/set shop offers.
 
+### v48 — Co-op rewards and scaling
+
+**Proves:** Co-op combat can reward nearby party members and scale monster challenge from shared
+rules while keeping the server authoritative and protocol v6 unchanged.
+
+- Shared combat rules and golden fixtures define full-XP proximity sharing plus logarithmic party
+  scaling with defaults `10.0` radius, `0.25` per doubling, and `0.50` max bonus.
+- Monster kill XP now goes once to every eligible alive, connected, same-level player within the
+  configured radius; dead, disconnected, far, and different-level players are excluded.
+- Private progression, skill progression, and XP events route by explicit owner, so each client sees
+  only its own reward and persistence writes the rewarded character.
+- Monster HP scales at spawn after rarity/template scaling; monster damage scales at attack
+  resolution from the current alive connected same-level party count.
+- Reconnect persistence now preserves legitimate tick-zero co-op joins by using an unset
+  `joined_tick` sentinel instead of overwriting tick `0`.
+- Protocol bot scenario `34_coop_rewards_and_scaling.json` proves nearby shared XP, different-level
+  exclusion, replay, and fresh-session persistence; Go replay tests prove shared-XP reconstruction.
+
+**Explicit non-goals:** no loot allocation changes, shared gold, explicit party bonus beyond
+HP/damage scaling, monster population-count scaling, party UI, chat, friendly fire, PvP, respawn, or
+client UI changes.
+
 ---
 
 ## Architecture decisions (ADRs)
@@ -1259,6 +1283,7 @@ skill_points_and_magic_bolt: level to 3 → spend Magic Bolt → cast → reject
 client_skill_points_and_magic_bolt: headless Godot client opens skill panel → spends Magic Bolt → observes skill bar cooldown and recovery
 menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
 join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible
+coop_rewards_and_scaling: three-account co-op → nearby host/guest share full XP → different-level guest excluded → replay/fresh persistence
 ```
 
 **Verify:**
@@ -1443,12 +1468,17 @@ consumes purchased generated offers, refreshes stock only on newly unlocked non-
 limits shop rarity to `rare`, and keeps buyback rows session-local and cleared when the actor leaves
 town.
 
+**Co-op rewards and monster scaling are now authoritative.** v48 grants full monster XP to nearby
+eligible party members, excludes dead/disconnected/far/different-level members, scales monster
+HP/damage logarithmically with active same-level party count, and routes private progression by
+recipient owner.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, main-menu character summaries, stash, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47 non-goals, ADR-0008 deferred, ADR-0011 |
-| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, co-op boss scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44 non-goals |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, ranged monster AI, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, mystery-seller non-common rarity floor, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, expensive mystery-seller blind-buy gold sink with progression-window stock, clock-based shop refresh | v33/v38/v41/v42/v47 non-goals, ADR-0011, ADR-0012, ADR-0013 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor art, production dungeon art/lighting/sound, production chest art/animation/audio, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation, stash, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47 non-goals, ADR-0013 |
@@ -1458,7 +1488,7 @@ town.
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, XP sharing, party bonus, proximity reward rules, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46 non-goals, ADR-0001 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46/v48 non-goals, ADR-0001 |
 | Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
 
 ---

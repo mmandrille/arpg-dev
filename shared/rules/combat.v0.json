@@ -9,5 +9,21 @@
   "min_effective_attack_speed": 0.25,
   "max_effective_attack_speed": 3.0,
   "player_damage": { "min": 2, "max": 4 },
-  "unarmed_reach": 1.0
+  "unarmed_reach": 1.0,
+  "coop": {
+    "xp_share": {
+      "enabled": true,
+      "radius": 10.0,
+      "full_xp_per_eligible_player": true,
+      "include_dead_players": false,
+      "include_disconnected_players": false
+    },
+    "party_challenge": {
+      "enabled": true,
+      "per_double_bonus": 0.25,
+      "max_bonus": 0.50,
+      "hp_scales_at_spawn": true,
+      "damage_scales_at_attack": true
+    }
+  }
 }

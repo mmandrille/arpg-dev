@@ -583,7 +583,7 @@ func (s *Store) ClaimSessionMemberConnection(ctx context.Context, sessionID, acc
 func (s *Store) SetSessionMemberConnected(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, tick int64) error {
 	tag, err := s.pool.Exec(ctx,
 		`UPDATE session_members
-		 SET connected = TRUE, status = 'active', player_entity_id = $4, current_level = $5, joined_tick = CASE WHEN joined_tick = 0 THEN $6 ELSE joined_tick END, left_tick = NULL, updated_at = now()
+		 SET connected = TRUE, status = 'active', player_entity_id = $4, current_level = $5, joined_tick = CASE WHEN joined_tick < 0 THEN $6 ELSE joined_tick END, left_tick = NULL, updated_at = now()
 		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3`,
 		sessionID, accountID, characterID, playerEntityID, currentLevel, tick,
 	)

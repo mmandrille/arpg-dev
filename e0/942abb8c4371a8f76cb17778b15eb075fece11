@@ -1,0 +1,101 @@
+tools/validate_shared.py
+  s_932d6b636b97d4::t_bdf4a5d5071864 279-300,311-312,328-370
+server/internal/game/rules.go
+  s_932d6b636b97d4::t_758a9e79d08ba8 1661-1718
+  s_932d6b636b97d4::t_5180afc096b1e7 189-198,501-504,520-525
+  s_932d6b636b97d4::t_f34557fe186e03 182-188
+  s_932d6b636b97d4::t_6f0fcace0e1eea 1133-1160,1170-1171
+  s_932d6b636b97d4::t_c264da0c539494 1364-1366
+server/internal/game/dungeon_gen.go
+  s_932d6b636b97d4::t_c77d47225a1748 70,101,131
+  s_932d6b636b97d4::t_af49899766417b 612,628
+  s_932d6b636b97d4::t_9ab84ae533d92e 618-621,624-627,629-630,632,637-680
+tools/bot/scenarios/38_ranged_monster_ai.json
+  s_932d6b636b97d4::t_2790c15eda4edc 1-41
+client/scripts/bot_scenario_runner.gd
+  s_932d6b636b97d4::t_fc7a20f71a2199 820-821
+shared/rules/monsters.v0.schema.json
+  s_932d6b636b97d4::t_bbf39cdb9cbf7e 47-50
+shared/rules/dungeon_generation.v0.schema.json
+  s_932d6b636b97d4::t_bbf39cdb9cbf7e 65-73,289-304
+tools/bot/test_protocol.py
+  s_932d6b636b97d4::t_df08af5c3ad2b1 21,754-760
+  s_932d6b636b97d4::t_2790c15eda4edc 706-753,761-762
+client/tests/test_client_bot.gd
+  s_932d6b636b97d4::t_6364e584166e81 58,810-832
+shared/rules/monsters.v0.json
+  s_932d6b636b97d4::t_bbf39cdb9cbf7e 97-107,113-117
+  s_932d6b636b97d4::t_5fd3a5037bae7b 108-112
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_932d6b636b97d4::t_a1e0262972aa02 6,10,16
+shared/golden/dungeon_obstacles.json
+  s_932d6b636b97d4::t_f1c7ff64989ea3 74
+  s_932d6b636b97d4::t_eef7558fc00b5a 75-76,78,81
+server/internal/game/game_test.go
+  s_932d6b636b97d4::t_8b8e7973464974 6111-6181
+  s_932d6b636b97d4::t_f3f9d6654cc03e 6070,6072,6096,6098
+  s_932d6b636b97d4::t_fe7201d5e52f63 6621,6784
+  s_932d6b636b97d4::t_60782258c5fbfd 4998-5001,5018,5020-5024,5036-5037
+  s_932d6b636b97d4::t_e52165ff062840 6053-6054
+  s_932d6b636b97d4::t_69cf05345eb6d2 6074,6100
+  s_932d6b636b97d4::t_34c0ef95025794 6751-6759
+  s_932d6b636b97d4::t_d443e0d9b2389f 6628-6636
+client/scripts/main.gd
+  s_932d6b636b97d4::t_703c828b0b0605 3257-3258,3274-3326
+  s_932d6b636b97d4::t_fc7a20f71a2199 3928
+  s_932d6b636b97d4::t_96bbcebb5b97e9 74-75
+  s_932d6b636b97d4::t_4e89cdc680e2da 3202,3211
+shared/golden/monster_rarity.json
+  s_932d6b636b97d4::t_f1c7ff64989ea3 99
+tools/bot/scenarios/client/25_ranged_monster_ai.json
+  s_932d6b636b97d4::t_509e2004fe735c 1-32
+docs/PROGRESS.md
+  s_932d6b636b97d4::t_3291c06ea2f2f7 14,70,142,1294-1314,1598-1601,1607,1610
+  s_932d6b636b97d4::t_9409b810624844 1393-1394
+tools/bot/scenarios/20_dungeon_equipment_drops.json
+  s_932d6b636b97d4::t_11b476f3398cd2 12
+docs/specs/v52_spec-ranged-monster-ai.md
+  s_932d6b636b97d4::t_60c510bd35cdae 1-2,4-172
+  s_932d6b636b97d4::t_3291c06ea2f2f7 3
+docs/plans/v52_2026-06-10-ranged-monster-ai.md
+  s_932d6b636b97d4::t_e21b3b50ebff6a 135,140,145,150,155,160,165
+  s_932d6b636b97d4::t_3291c06ea2f2f7 3,228,233,238
+  s_932d6b636b97d4::t_fe9607622ddbf6 187
+  s_932d6b636b97d4::t_b3a28231b889c1 201,206,211
+  s_932d6b636b97d4::t_0869b0e122f66e 177,182
+  s_932d6b636b97d4::t_f8461db64d5ffc 216
+  s_932d6b636b97d4::t_066282c2775ef5 109,114,119,124
+  s_932d6b636b97d4::t_1fe4f083e5dc69 73,78,83,88,93,98
+  s_932d6b636b97d4::t_2d131725d026ff 245-253
+  s_932d6b636b97d4::t_e2bdfba3e7a7a4 1-2,4-72,74-77,79-82,84-87,89-92,94-97,99-108,110-113,115-118,120-123,125-134,136-139,141-144,146-149,151-154,156-159,161-164,166-176,178-181,183-186,188-200,202-205,207-210,212-215,217-227,229-232,234-237,239-244,254-259
+tools/bot/run.py
+  s_932d6b636b97d4::t_eacdf973149a04 1979-1986
+  s_932d6b636b97d4::t_64f2ca3ff51b76 4442-4443,4445,4458
+  s_932d6b636b97d4::t_df08af5c3ad2b1 849-861,1683-1774
+  s_932d6b636b97d4::t_2790c15eda4edc 685,724,731,2028,2050-2053,2057-2082,2085-2096,3566
+  s_932d6b636b97d4::t_793c87bf36bade 773
+  s_932d6b636b97d4::t_11b476f3398cd2 641,1975-1976
+server/internal/game/sim.go
+  s_932d6b636b97d4::t_1fa5433a6dec0d 4144-4145,4148-4180,4182-4192
+  s_932d6b636b97d4::t_03def632d8289d 4313-4315,5701-5703,5708-5714,5783-5805
+  s_932d6b636b97d4::t_2f211f5a7a5b18 4721,4727-4730,4764,4770-4779,4801-4804,4817-4830
+shared/rules/dungeon_generation.v0.json
+  s_932d6b636b97d4::t_5fd3a5037bae7b 20-21
+  s_932d6b636b97d4::t_bbf39cdb9cbf7e 19,22-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e0942abb8c4371a8f76cb17778b15eb075fece11",
+  "prompts": {},
+  "sessions": {
+    "s_932d6b636b97d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eafce-e615-7c50-8cca-027c26f21915",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -56,6 +56,7 @@ func _initialize() -> void:
 	_test_combat_feedback_step_types_load()
 	_test_combat_event_and_damage_number_assertions()
 	_test_ranged_monster_presentation_assertions()
+	_test_boss_telegraph_presentation_assertions()
 	_test_inventory_paper_doll_step_types_load()
 	_test_inventory_paper_doll_assertions()
 	_test_wall_layout_step_types_load()
@@ -652,8 +653,31 @@ func _test_stash_assertions() -> void:
 func _test_boss_health_bar_step_types_load() -> void:
 	var data := _make_valid_scenario()
 	data["client_steps"] = [
-		{"type": "wait_boss_health_bar", "visible": true, "boss_template_id": "cave_warden", "ratio_min": 0.01, "timeout_s": 1.0},
-		{"type": "assert_boss_health_bar", "visible": true, "title": "Cave Warden", "hp_min": 1},
+		{
+			"type": "wait_boss_health_bar",
+			"visible": true,
+			"boss_template_id": "cave_warden",
+			"ratio_min": 0.01,
+			"phase_kind": "telegraph",
+			"pattern_id": "charged_melee",
+			"phase_index": 0,
+			"duration_ticks": 30,
+			"remaining_ticks_min": 1,
+			"remaining_ticks_max": 30,
+			"phase_ratio_min": 0.01,
+			"phase_ratio_max": 1.0,
+			"timeout_s": 1.0,
+		},
+		{
+			"type": "assert_boss_health_bar",
+			"visible": true,
+			"title": "Cave Warden",
+			"hp_min": 1,
+			"phase_kind": "active",
+			"pattern_id": "charged_melee",
+			"phase_index": 1,
+			"duration_ticks": 18,
+		},
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("boss health bar client step scenario valid", err, "")
@@ -668,8 +692,39 @@ func _test_boss_health_bar_assertions() -> void:
 		"runner": "godot_client",
 		"world_id": "dungeon_levels",
 		"client_steps": [
-			{"type": "wait_boss_health_bar", "visible": true, "boss_template_id": "cave_warden", "ratio_min": 0.5, "ratio_max": 1.0, "timeout_s": 1.0},
-			{"type": "assert_boss_health_bar", "visible": true, "boss_id": "3001", "boss_template_id": "cave_warden", "title": "Cave Warden", "hp": 18, "max_hp": 24},
+			{
+				"type": "wait_boss_health_bar",
+				"visible": true,
+				"boss_template_id": "cave_warden",
+				"ratio_min": 0.5,
+				"ratio_max": 1.0,
+				"phase_kind": "telegraph",
+				"pattern_id": "charged_melee",
+				"phase_index": 0,
+				"duration_ticks": 30,
+				"remaining_ticks_min": 1,
+				"remaining_ticks_max": 30,
+				"phase_ratio_min": 0.7,
+				"phase_ratio_max": 0.9,
+				"timeout_s": 1.0,
+			},
+			{
+				"type": "assert_boss_health_bar",
+				"visible": true,
+				"boss_id": "3001",
+				"boss_template_id": "cave_warden",
+				"title": "Cave Warden",
+				"hp": 18,
+				"max_hp": 24,
+				"phase_kind": "telegraph",
+				"pattern_id": "charged_melee",
+				"phase_index": 0,
+				"duration_ticks": 30,
+				"remaining_ticks_min": 20,
+				"remaining_ticks_max": 30,
+				"phase_ratio_min": 0.7,
+				"phase_ratio_max": 0.9,
+			},
 		],
 	}
 	runner.load_scenario(data)
@@ -682,6 +737,12 @@ func _test_boss_health_bar_assertions() -> void:
 			"hp": 18,
 			"max_hp": 24,
 			"ratio": 0.75,
+			"phase_kind": "telegraph",
+			"pattern_id": "charged_melee",
+			"phase_index": 0,
+			"duration_ticks": 30,
+			"remaining_ticks": 24,
+			"phase_ratio": 0.8,
 		},
 	}
 	for _i in range(2):
@@ -886,6 +947,45 @@ func _test_ranged_monster_presentation_assertions() -> void:
 	}
 	runner.tick(0.016, state)
 	_assert_true("ranged monster presentation assertion passes", runner.is_done() and runner.passed())
+
+
+func _test_boss_telegraph_presentation_assertions() -> void:
+	var runner := BotScenarioRunnerScript.new()
+	var data := {
+		"id": "boss_telegraph_presentation_assert_test",
+		"runner": "godot_client",
+		"world_id": "dungeon_levels",
+		"client_steps": [
+			{
+				"type": "assert_entity_reaction",
+				"entity_type": "monster",
+				"is_boss": true,
+				"boss_template_id": "cave_warden",
+				"boss_telegraph_active": true,
+				"has_boss_telegraph_marker": true,
+				"telegraph_tint": "ff0000",
+				"telegraph_radius_min": 1.5,
+				"telegraph_radius_max": 1.7,
+			},
+		],
+	}
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("boss telegraph presentation assertion scenario valid", err, "")
+	runner.load_scenario(data)
+	var state := {
+		"entities_presentation_debug": [{
+			"type": "monster",
+			"is_boss": true,
+			"boss_template_id": "cave_warden",
+			"boss_telegraph_active": true,
+			"has_boss_telegraph_marker": true,
+			"telegraph_tint": "ff0000",
+			"telegraph_radius": 1.6,
+			"reaction": {},
+		}],
+	}
+	runner.tick(0.016, state)
+	_assert_true("boss telegraph presentation assertion passes", runner.is_done() and runner.passed())
 
 
 func _test_inventory_paper_doll_step_types_load() -> void:

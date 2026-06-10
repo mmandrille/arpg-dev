@@ -72,6 +72,8 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 }
 const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
+const BOSS_PHASE_TICK_RATE := 15.0
+const BOSS_TELEGRAPH_MARKER_NAME := "BossTelegraphMarker"
 const ARCHER_MONSTER_DEF_ID := "dungeon_archer"
 const ARCHER_BOW_MARKER_NAME := "ArcherBowMarker"
 const CHARACTER_FLOW_CREATE_GAME := "create_game"
@@ -735,6 +737,7 @@ func _process(delta: float) -> void:
 	if gameplay_active or visual_replay_enabled:
 		for env in client.poll():
 			_handle_message(env)
+		_advance_boss_phase_display(delta)
 	_sync_progression_interactivity()
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
@@ -1493,6 +1496,48 @@ func _sync_boss_health_bar() -> void:
 	var max_hp := int(rec.get("max_hp", hp))
 	var template_id := str(rec.get("boss_template_id", ""))
 	boss_health_bar.show_boss(boss_id, template_id, _boss_health_bar_title(template_id), hp, max_hp)
+	var phase := _boss_phase_for_display(rec)
+	if phase.is_empty():
+		boss_health_bar.clear_phase_state()
+	else:
+		boss_health_bar.set_phase_state(phase)
+
+
+func _advance_boss_phase_display(delta: float) -> void:
+	var changed := false
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		var phase := _boss_phase_for_display(rec)
+		if phase.is_empty():
+			continue
+		var remaining := float(phase.get("remaining_ticks_float", float(phase.get("remaining_ticks", 0))))
+		remaining = maxf(0.0, remaining - maxf(0.0, delta) * BOSS_PHASE_TICK_RATE)
+		phase["remaining_ticks_float"] = remaining
+		phase["remaining_ticks"] = int(ceil(remaining))
+		rec["boss_phase"] = phase
+		changed = true
+	if changed:
+		_sync_boss_health_bar()
+
+
+func _boss_phase_for_display(rec: Dictionary) -> Dictionary:
+	var raw = rec.get("boss_phase", {})
+	if typeof(raw) != TYPE_DICTIONARY:
+		return {}
+	var phase: Dictionary = (raw as Dictionary).duplicate(true)
+	var kind := str(phase.get("phase_kind", ""))
+	if kind == "":
+		return {}
+	var duration := maxi(0, int(phase.get("duration_ticks", 0)))
+	phase["duration_ticks"] = duration
+	var remaining := int(phase.get("remaining_ticks", -1))
+	if remaining < 0:
+		var started_tick := int(phase.get("started_tick", last_server_tick))
+		remaining = max(0, duration - max(0, last_server_tick - started_tick))
+	phase["remaining_ticks"] = clampi(remaining, 0, duration)
+	phase["remaining_ticks_float"] = clampf(float(phase.get("remaining_ticks_float", phase["remaining_ticks"])), 0.0, float(duration))
+	rec["boss_phase"] = phase
+	return phase
 
 
 func _active_boss_entity_id() -> String:
@@ -3369,6 +3414,8 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 		_apply_model_tint(node, base_tint)
 	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
+	_normalize_boss_phase_metadata(rec)
+	_sync_boss_telegraph_marker_from_record(rec)
 
 
 func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
@@ -3426,11 +3473,16 @@ func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
 	if rec.is_empty():
 		return
+	var duration := maxi(0, int(ev.get("duration_ticks", 0)))
 	rec["boss_phase"] = {
 		"pattern_id": str(ev.get("pattern_id", "")),
 		"phase_index": int(ev.get("phase_index", -1)),
 		"phase_kind": str(ev.get("phase_kind", "")),
-		"duration_ticks": int(ev.get("duration_ticks", 0)),
+		"duration_ticks": duration,
+		"remaining_ticks": duration,
+		"remaining_ticks_float": float(duration),
+		"telegraph": ev.get("telegraph", {}),
+		"hit_shape": ev.get("hit_shape", {}),
 	}
 	var node := rec.get("node", null) as Node3D
 	if node == null:
@@ -3442,9 +3494,12 @@ func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 		rec["boss_telegraph_active"] = true
 		rec["telegraph_tint"] = tint.to_html(false)
 		_apply_model_tint(node, tint)
+		_sync_boss_telegraph_marker(rec, telegraph)
 	else:
 		rec["boss_telegraph_active"] = false
+		_remove_boss_telegraph_marker(rec)
 		_apply_model_tint(node, Color("#" + str(rec.get("base_tint", "ffffff"))))
+	_sync_boss_health_bar()
 
 
 func _apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
@@ -3452,9 +3507,79 @@ func _apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
 	if rec.is_empty():
 		return
 	rec["boss_telegraph_active"] = false
+	rec.erase("boss_phase")
+	_remove_boss_telegraph_marker(rec)
 	var node := rec.get("node", null) as Node3D
 	if node != null:
 		_apply_model_tint(node, Color("#" + str(rec.get("base_tint", "ffffff"))))
+	_sync_boss_health_bar()
+
+
+func _normalize_boss_phase_metadata(rec: Dictionary) -> void:
+	var phase := _boss_phase_for_display(rec)
+	if phase.is_empty():
+		return
+	if str(phase.get("phase_kind", "")) == "telegraph":
+		var telegraph: Dictionary = phase.get("telegraph", {})
+		if not telegraph.is_empty():
+			rec["boss_telegraph_active"] = true
+			rec["telegraph_tint"] = Color(str(telegraph.get("to_color", "#ff0000"))).to_html(false)
+
+
+func _sync_boss_telegraph_marker_from_record(rec: Dictionary) -> void:
+	var phase := _boss_phase_for_display(rec)
+	if phase.is_empty() or str(phase.get("phase_kind", "")) != "telegraph":
+		_remove_boss_telegraph_marker(rec)
+		return
+	var telegraph: Dictionary = phase.get("telegraph", {})
+	if telegraph.is_empty():
+		_remove_boss_telegraph_marker(rec)
+		return
+	_sync_boss_telegraph_marker(rec, telegraph)
+
+
+func _sync_boss_telegraph_marker(rec: Dictionary, telegraph: Dictionary) -> void:
+	var node := rec.get("node", null) as Node3D
+	if node == null:
+		return
+	var marker := node.find_child(BOSS_TELEGRAPH_MARKER_NAME, false, false) as MeshInstance3D
+	if marker == null:
+		marker = MeshInstance3D.new()
+		marker.name = BOSS_TELEGRAPH_MARKER_NAME
+		marker.position = Vector3(0.0, 0.035, 0.0)
+		node.add_child(marker)
+	var radius := maxf(0.1, float(telegraph.get("radius", 1.0)))
+	var visual_scale := maxf(0.1, float(rec.get("visual_scale", 1.0)))
+	var local_radius := radius / visual_scale
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = local_radius
+	mesh.bottom_radius = local_radius
+	mesh.height = 0.035
+	mesh.radial_segments = 48
+	marker.mesh = mesh
+	var color := Color(str(telegraph.get("to_color", "#ff4a32")))
+	color.a = 0.34
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	marker.material_override = mat
+	rec["boss_telegraph_active"] = true
+	rec["telegraph_tint"] = color.to_html(false)
+	rec["has_boss_telegraph_marker"] = true
+	rec["telegraph_radius"] = radius
+	rec["telegraph_marker_color"] = color.to_html(false)
+
+
+func _remove_boss_telegraph_marker(rec: Dictionary) -> void:
+	var node := rec.get("node", null) as Node3D
+	if node != null:
+		var marker := node.find_child(BOSS_TELEGRAPH_MARKER_NAME, false, false)
+		if marker != null:
+			marker.queue_free()
+	rec["has_boss_telegraph_marker"] = false
+	rec["telegraph_radius"] = 0.0
+	rec["telegraph_marker_color"] = ""
 
 
 func _apply_model_tint(root: Node, color: Color) -> void:
@@ -3998,6 +4123,9 @@ func _bot_entities_presentation_debug() -> Array:
 			"boss_phase": rec.get("boss_phase", {}),
 			"boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
 			"telegraph_tint": str(rec.get("telegraph_tint", "")),
+			"has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
+			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)),
+			"telegraph_marker_color": str(rec.get("telegraph_marker_color", "")),
 			"base_tint": str(rec.get("base_tint", "")),
 			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
 			"hp": int(rec.get("hp", 1)),

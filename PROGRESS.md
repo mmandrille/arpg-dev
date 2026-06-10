@@ -12,7 +12,7 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v56 — `monster-attack-cadence` |
+| **Latest completed slice** | v57 — `boss-phase-readability` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-10 (9 phases) |
 | **Next slice** | TBD |
@@ -75,6 +75,7 @@ v53_* = boss-health-bar-ui
 v54_* = character-select-summaries
 v55_* = consolidation-and-quality-gates
 v56_* = monster-attack-cadence
+v57_* = boss-phase-readability
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -171,6 +172,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v54** | `character-select-summaries` | Complete (`make ci` green) | [`v54_spec-character-select-summaries.md`](docs/specs/v54_spec-character-select-summaries.md) | [`v54_2026-06-10-character-select-summaries.md`](docs/plans/v54_2026-06-10-character-select-summaries.md) | [`as-built`](docs/as-built/v54_character-select-summaries.md) |
 | **v55** | `consolidation-and-quality-gates` | Complete (`make ci` green) | [`v55_spec-consolidation-and-quality-gates.md`](docs/specs/v55_spec-consolidation-and-quality-gates.md) | [`v55_2026-06-10-consolidation-and-quality-gates.md`](docs/plans/v55_2026-06-10-consolidation-and-quality-gates.md) | — |
 | **v56** | `monster-attack-cadence` | Complete (`make ci` green) | [`v56_spec-monster-attack-cadence.md`](docs/specs/v56_spec-monster-attack-cadence.md) | [`v56_2026-06-10-monster-attack-cadence.md`](docs/plans/v56_2026-06-10-monster-attack-cadence.md) | [`as-built`](docs/as-built/v56_monster-attack-cadence.md) |
+| **v57** | `boss-phase-readability` | Complete (`make ci` green) | [`v57_spec-boss-phase-readability.md`](docs/specs/v57_spec-boss-phase-readability.md) | [`v57_2026-06-10-boss-phase-readability.md`](docs/plans/v57_2026-06-10-boss-phase-readability.md) | [`as-built`](docs/as-built/v57_boss-phase-readability.md) |
 
 ---
 
@@ -261,6 +263,7 @@ client_account_stash_panel: headless Godot client opens stash → verifies bag/s
 ranged_monster_ai: descend to generated dungeon → assert dungeon_archer → observe archer-sourced ranged player damage
 client_ranged_monster_ai: headless Godot client descends to generated dungeon → asserts bow marker → observes ranged player damage
 client_boss_health_bar_ui: headless Godot client descends to first boss floor → asserts Cave Warden boss health bar
+client_boss_phase_readability: headless Godot client descends to first boss floor → asserts boss phase countdown and telegraph marker
 character_select_summaries: headless Godot client opens Create Game → asserts character row level/gold/depth/status summaries
 ```
 
@@ -494,16 +497,22 @@ cooldown, Go/GDScript golden checks cross-check it against shared rules, protoco
 prove archer damage, boss-floor traversal, and skill-progression combat, and a missing
 `item_rolls.json` description field found by `make validate-shared` is restored.
 
+**Boss phase readability is now client-visible.** v57 keeps server combat unchanged and adds
+display-only phase state to the Godot boss health bar: phase kind, pattern id, phase index,
+duration, remaining ticks, and phase ratio. Telegraph phases now attach a primitive
+`BossTelegraphMarker` under the boss using server-authored radius/color, and the client bot runner
+can assert both the bar countdown and the in-world marker.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54 non-goals, ADR-0008 deferred, ADR-0011 |
-| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56 non-goals |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, buffs/debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks, enrage phases, summoned adds, monster population-count scaling, final skill tree and active ability catalog, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
 | Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52 non-goals, ADR-0013 |
-| Client presentation | Boss portraits, phase/timer widgets, multi-boss layouts, and production boss health bar art/audio | v53 non-goals, ADR-0009 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57 non-goals, ADR-0013 |
+| Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production boss telegraph VFX/audio, and production boss health bar art/audio | v53/v57 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
@@ -520,14 +529,14 @@ the next autoloop pass unless code changes make them stale.
 
 | Candidate | Status | Value | Size | Touch surfaces | Main risk / dependency |
 |-----------|--------|-------|------|----------------|------------------------|
-| `boss-phase-timer-ui` | Open | Add boss phase/windup timing cues to the existing boss health bar. | S | client, bot, docs | Must stay display-only from existing `boss_phase` state/events. |
+| `boss-phase-timer-ui` | Completed in v57 | Add boss phase/windup timing cues to the existing boss health bar. | S | client, bot, docs | Kept display-only from existing `boss_phase` state/events. |
 | `boss-pattern-variety` | Open | Add one more server-authored boss attack pattern so Cave Warden is less repetitive. | M | shared, server, client, bot, docs | Deterministic phase RNG and schema support for any new telegraph shape. |
 | `mystery-seller-paid-reroll` | Open | Let players spend gold to reroll concealed mystery seller stock. | M | shared/protocol, server, store, client, bot, docs | Price/refresh rules need conservative defaults. |
 | `stash-search-and-sorting` | Open | Add search/sort controls to stash and bag views without changing item authority. | S/M | client, bot, docs | Client UI only; must record plugin borrow/reject decision. |
 | `character-select-summaries` | Completed in v54 | Show level, gold, deepest depth, and status in character selection. | M | store, HTTP, client, bot, docs | Needs careful aggregate/query shape; rename/delete already exists. |
 | `session-browser-filters` | Open | Add Join Game search/filter/sort controls for listed sessions. | S/M | client, HTTP tests maybe, bot, docs | Headless proof needs stable multi-session setup. |
 | `loot-label-filter-core` | Open | Add display-only loot label filtering/highlighting for rarity/category. | M | client, bot, docs | Presentation-only; avoid changing shared loot ownership. |
-| `client-boss-telegraph-polish` | Open | Improve boss telegraph readability with a clearer in-world warning marker. | S/M | client, bot, docs | Visual client work; plugin/art shortcut checklist required. |
+| `client-boss-telegraph-polish` | Completed in v57 | Improve boss telegraph readability with a clearer in-world warning marker. | S/M | client, bot, docs | Reused in-repo primitive marker patterns; external plugins/assets rejected. |
 
 ---
 

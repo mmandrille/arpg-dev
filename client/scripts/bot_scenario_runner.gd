@@ -745,23 +745,34 @@ func _boss_health_bar_matches(step: Dictionary, state: Dictionary) -> bool:
 	for key in ["boss_id", "boss_template_id", "title"]:
 		if step.has(key) and str(bar.get(key, "")) != str(step.get(key, "")):
 			return false
-	for key in ["hp", "max_hp"]:
+	for key in ["hp", "max_hp", "phase_index", "duration_ticks"]:
 		if step.has(key) and int(bar.get(key, -999999)) != int(step.get(key, 0)):
+			return false
+	for key in ["phase_kind", "pattern_id"]:
+		if step.has(key) and str(bar.get(key, "")) != str(step.get(key, "")):
 			return false
 	if step.has("hp_min") and int(bar.get("hp", -999999)) < int(step.get("hp_min", 0)):
 		return false
 	if step.has("hp_max") and int(bar.get("hp", 999999)) > int(step.get("hp_max", 0)):
 		return false
+	if step.has("remaining_ticks_min") and int(bar.get("remaining_ticks", -999999)) < int(step.get("remaining_ticks_min", 0)):
+		return false
+	if step.has("remaining_ticks_max") and int(bar.get("remaining_ticks", 999999)) > int(step.get("remaining_ticks_max", 0)):
+		return false
 	if step.has("ratio_min") and float(bar.get("ratio", -1.0)) < float(step.get("ratio_min", 0.0)):
 		return false
 	if step.has("ratio_max") and float(bar.get("ratio", 2.0)) > float(step.get("ratio_max", 1.0)):
+		return false
+	if step.has("phase_ratio_min") and float(bar.get("phase_ratio", -1.0)) < float(step.get("phase_ratio_min", 0.0)):
+		return false
+	if step.has("phase_ratio_max") and float(bar.get("phase_ratio", 2.0)) > float(step.get("phase_ratio_max", 1.0)):
 		return false
 	return true
 
 
 func _boss_health_bar_expectation(step: Dictionary) -> Dictionary:
 	var out := {}
-	for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max"]:
+	for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max", "phase_kind", "pattern_id", "phase_index", "duration_ticks", "remaining_ticks_min", "remaining_ticks_max", "phase_ratio_min", "phase_ratio_max"]:
 		if step.has(key):
 			out[key] = step[key]
 	return out
@@ -864,6 +875,20 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 	if step.has("hp") and int(rec.get("hp", -999999)) != int(step.get("hp", 0)):
 		return false
 	if step.has("has_bow_marker") and bool(rec.get("has_bow_marker", false)) != bool(step.get("has_bow_marker", false)):
+		return false
+	if step.has("is_boss") and bool(rec.get("is_boss", false)) != bool(step.get("is_boss", false)):
+		return false
+	if step.has("boss_template_id") and str(rec.get("boss_template_id", "")) != str(step.get("boss_template_id", "")):
+		return false
+	if step.has("boss_telegraph_active") and bool(rec.get("boss_telegraph_active", false)) != bool(step.get("boss_telegraph_active", false)):
+		return false
+	if step.has("has_boss_telegraph_marker") and bool(rec.get("has_boss_telegraph_marker", false)) != bool(step.get("has_boss_telegraph_marker", false)):
+		return false
+	if step.has("telegraph_tint") and str(rec.get("telegraph_tint", "")) != str(step.get("telegraph_tint", "")):
+		return false
+	if step.has("telegraph_radius_min") and float(rec.get("telegraph_radius", -1.0)) < float(step.get("telegraph_radius_min", 0.0)):
+		return false
+	if step.has("telegraph_radius_max") and float(rec.get("telegraph_radius", 999999.0)) > float(step.get("telegraph_radius_max", 0.0)):
 		return false
 	var reaction: Dictionary = rec.get("reaction", {})
 	if step.has("reaction") and str(reaction.get("last_reaction", "")) != str(step.get("reaction", "")):
@@ -1894,7 +1919,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 			return "client_steps[%d] (%s) requires at least one skill bar expectation" % [index, stype]
 	if stype in ["wait_boss_health_bar", "assert_boss_health_bar"]:
 		var has_boss_bar_expectation := false
-		for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max"]:
+		for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max", "phase_kind", "pattern_id", "phase_index", "duration_ticks", "remaining_ticks_min", "remaining_ticks_max", "phase_ratio_min", "phase_ratio_max"]:
 			if step.has(key):
 				has_boss_bar_expectation = true
 		if not has_boss_bar_expectation:

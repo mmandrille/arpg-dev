@@ -2722,7 +2722,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 
 	t.Run("bow occupies both hands", func(t *testing.T) {
 		sim := NewSim("sess_bow_occupies", "01", loadRules(t))
-		bow := addRolledInventoryItem(t, sim, 6230, "cave_bow", map[string]int{"damage_min": 8, "damage_max": 8})
+		bow := addRolledInventoryItem(t, sim, 6230, "cave_bow", map[string]int{"damage_min": 2, "damage_max": 2})
 		assertAck(t, sim.Tick([]Input{{MessageID: "bow", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(bow.instanceID), Slot: mainHandSlot}}}), "bow")
 		want := expected["bow occupies both hands"]
 		assertEquippedTemplate(t, sim, mainHandSlot, *want.equipped[mainHandSlot])

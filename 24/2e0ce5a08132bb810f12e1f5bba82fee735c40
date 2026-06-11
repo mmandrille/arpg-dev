@@ -1,0 +1,68 @@
+server/internal/game/sim.go
+  s_ba8ba4c088ef1a::t_16c2bac7a38d43 4327,4330,4341
+server/internal/game/game_test.go
+  s_ba8ba4c088ef1a::t_d86e72ca8f73e1 6308,6314,6338-6349
+  s_ba8ba4c088ef1a::t_0a52a0b2a0e88b 2152
+  s_ba8ba4c088ef1a::t_e822db6e9977a8 2142-2143
+  s_ba8ba4c088ef1a::t_3a206cf48c4eba 2127-2141,2144-2151,2153-2175
+  s_ba8ba4c088ef1a::t_42485b72e57691 4696-4697,4705,4709,4712-4723,6149-6151
+  s_ba8ba4c088ef1a::t_6f1cd9d1f1b2e3 5998-6041
+  s_ba8ba4c088ef1a::t_72ec38ae42beb6 6305-6306,6309-6313,6315-6317
+docs/plans/v76_2026-06-11-pack-aggro-and-dungeon-packs.md
+  s_ba8ba4c088ef1a::t_acfa7d359dacf1 3,49-52,64-66,78-79,93-95,103-105
+  s_ba8ba4c088ef1a::t_eaca266193202f 106
+  s_ba8ba4c088ef1a::t_0ef5307934e26f 1-2,4-34,38-48,53-63,67-77,80-92,96-102
+  s_ba8ba4c088ef1a::t_0973eef0178d22 35-37
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_ba8ba4c088ef1a::t_b5c2b80a1f35d2 14,23
+tools/bot/scenarios/13_teleporter_lab.json
+  s_ba8ba4c088ef1a::t_62424c4d8601f2 4
+server/internal/game/dungeon_gen.go
+  s_ba8ba4c088ef1a::t_a92156cb1b3101 857,862,867,872
+  s_ba8ba4c088ef1a::t_3585ddca06c5c8 46,614-615,617-618,621-628,631,636-701,703-710,712-714,724,737-759
+  s_ba8ba4c088ef1a::t_f49c63928fc6d7 796
+  s_ba8ba4c088ef1a::t_1eb2fc1dec318a 702,715
+  s_ba8ba4c088ef1a::t_f63e804c6579c2 809
+docs/specs/v76_spec-pack-aggro-and-dungeon-packs.md
+  s_ba8ba4c088ef1a::t_8e304de8a4c65a 1-2,4-28,30-59
+  s_ba8ba4c088ef1a::t_acfa7d359dacf1 3,29
+server/internal/game/rules.go
+  s_ba8ba4c088ef1a::t_a76dfe206ead7e 208-210,607,613-617
+  s_ba8ba4c088ef1a::t_2fd47437d2e004 1881-1895,1899-1910,1918-1919,1924-1928,1932-1933
+  s_ba8ba4c088ef1a::t_0973eef0178d22 1358-1359,1371-1373
+tools/bot/run.py
+  s_ba8ba4c088ef1a::t_a2e80bf8bd8431 3537,3624-3626
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_ba8ba4c088ef1a::t_d93b826bf2aab0 1-10,12-29
+  s_ba8ba4c088ef1a::t_eb196af6776787 11
+shared/rules/monsters.v0.schema.json
+  s_ba8ba4c088ef1a::t_dc1618a72a91fe 53
+docs/as-built/v76_pack-aggro-and-dungeon-packs.md
+  s_ba8ba4c088ef1a::t_acfa7d359dacf1 1-24
+PROGRESS.md
+  s_ba8ba4c088ef1a::t_acfa7d359dacf1 660-664
+server/internal/replay/replay_test.go
+  s_ba8ba4c088ef1a::t_45a1f74d7faf0d 287,354
+shared/rules/dungeon_generation.v0.schema.json
+  s_ba8ba4c088ef1a::t_11aa7899170ad9 61,66-68
+shared/rules/monsters.v0.json
+  s_ba8ba4c088ef1a::t_fed89f0854f504 110,126,144,166,184
+shared/rules/dungeon_generation.v0.json
+  s_ba8ba4c088ef1a::t_9e5795a37d95de 17,19-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "242e0ce5a08132bb810f12e1f5bba82fee735c40",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

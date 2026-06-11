@@ -104,6 +104,7 @@ func httpSkillRowByID(rows []game.SkillProgressionSkillView, skillID string) *ga
 type wEntity struct {
 	ID              string `json:"id"`
 	Type            string `json:"type"`
+	MonsterDefID    string `json:"monster_def_id"`
 	ItemDefID       string `json:"item_def_id"`
 	ProjectileDefID string `json:"projectile_def_id"`
 	HP              *int   `json:"hp"`
@@ -699,7 +700,8 @@ func TestPostResumePickupAllocatesAfterHistoricalEntities(t *testing.T) {
 	if first.Type != "session_snapshot" {
 		t.Fatalf("first = %q, want session_snapshot", first.Type)
 	}
-	lootID := killUntilLoot(t, conn, sessionID, first.Tick)
+	targetID := trainingDummyIDFromWireSnapshot(t, first)
+	lootID := killUntilLoot(t, conn, sessionID, first.Tick, targetID)
 	_ = conn.Close()
 
 	resume := dialWS(t, srv, token, sessionID)
@@ -812,6 +814,7 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 	if first.Type != "session_snapshot" {
 		t.Fatalf("first = %q", first.Type)
 	}
+	targetID := trainingDummyIDFromWireSnapshot(t, first)
 
 	var lastTick uint64
 	var lootID, itemID string
@@ -840,7 +843,7 @@ func driveSlice(t *testing.T, srv *httptest.Server, token, sessionID string) str
 			t.Fatalf("slice stalled: killed=%v pickedUp=%v equipped=%v", killed, pickedUp, equipped)
 		case <-attackTicker.C:
 			if movedIntoRange && !killed {
-				send("action_intent", map[string]any{"target_id": "1002"})
+				send("action_intent", map[string]any{"target_id": targetID})
 			}
 		case m, ok := <-recv:
 			if !ok {
@@ -1276,7 +1279,7 @@ func waitStateDeltaTick(t *testing.T, conn *websocket.Conn, fallback uint64) uin
 	}
 }
 
-func killUntilLoot(t *testing.T, conn *websocket.Conn, sessionID string, startTick uint64) string {
+func killUntilLoot(t *testing.T, conn *websocket.Conn, sessionID string, startTick uint64, targetID string) string {
 	t.Helper()
 	lastTick := startTick
 	seq := 0
@@ -1285,7 +1288,7 @@ func killUntilLoot(t *testing.T, conn *websocket.Conn, sessionID string, startTi
 	lastTick = waitStateDeltaTick(t, conn, lastTick)
 	for {
 		seq++
-		sendIntent(t, conn, sessionID, lastTick, "msg-pre-pick-attack-"+strconv.Itoa(seq), "action_intent", map[string]any{"target_id": "1002"})
+		sendIntent(t, conn, sessionID, lastTick, "msg-pre-pick-attack-"+strconv.Itoa(seq), "action_intent", map[string]any{"target_id": targetID})
 		select {
 		case <-deadline:
 			t.Fatal("no loot before timeout")
@@ -1310,6 +1313,23 @@ func killUntilLoot(t *testing.T, conn *websocket.Conn, sessionID string, startTi
 			}
 		}
 	}
+}
+
+func trainingDummyIDFromWireSnapshot(t *testing.T, msg wMsg) string {
+	t.Helper()
+	var snap struct {
+		Entities []wEntity `json:"entities"`
+	}
+	if err := json.Unmarshal(msg.Payload, &snap); err != nil {
+		t.Fatalf("decode snapshot: %v", err)
+	}
+	for _, entity := range snap.Entities {
+		if entity.Type == "monster" && entity.MonsterDefID == "training_dummy" {
+			return entity.ID
+		}
+	}
+	t.Fatalf("snapshot missing training_dummy: %+v", snap.Entities)
+	return ""
 }
 
 func readInventoryAdd(t *testing.T, conn *websocket.Conn) wItem {

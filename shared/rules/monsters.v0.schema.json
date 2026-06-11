@@ -49,6 +49,7 @@
             "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
             "projectile_def_id": { "type": "string", "minLength": 1 },
             "behavior": { "type": "string", "enum": ["static", "chase"] },
+            "pack_role": { "type": "string", "enum": ["frontline", "ranged", "flanker", "swarm"] },
             "aggro_radius": { "type": "number", "exclusiveMinimum": 0 },
             "assist_radius": { "type": "number", "exclusiveMinimum": 0 },
             "leash_radius": { "type": "number", "exclusiveMinimum": 0 },

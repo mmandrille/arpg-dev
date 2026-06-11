@@ -219,6 +219,7 @@ func TestBuildTimelineThroughTickExtendsPassiveSimulation(t *testing.T) {
 
 func TestBuildTimelineIncludesGeneratedMonsterRarity(t *testing.T) {
 	rules := loadRules(t)
+	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 0
 	sim, err := game.NewSimWithWorld(testSessionID, "v30_monster_rarity", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)

@@ -662,6 +662,10 @@ monster assist radius, deterministic close pack placement, and a protocol bot pr
 one generated monster can emit multiple `monster_aggro` events. The existing v78 latest-completed
 status remains canonical because v76-v78 main-config slices already landed on this branch.
 
+**Generated packs now have role and leader foundations.** v79 adds internal pack roles, pack
+composition constraints, and deterministic elite leader markers so future elite behavior can build
+on structured encounters without exposing new protocol fields yet.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |

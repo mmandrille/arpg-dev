@@ -612,6 +612,9 @@ func _test_stash_step_types_load() -> void:
 		{"type": "assert_stash_panel_visible", "visible": true},
 		{"type": "assert_stash_item_count", "rolled": true, "equals": 1},
 		{"type": "assert_stash_gold", "equals": 3},
+		{"type": "set_stash_search", "text": "bow"},
+		{"type": "select_stash_sort", "mode": "name"},
+		{"type": "assert_stash_filter", "search_text": "bow", "sort_mode": "name", "filtered_equals": 1, "first_item_def_id": "cave_bow"},
 		{"type": "drag_bag_to_stash", "rolled": true, "bag_index": 0},
 		{"type": "drag_stash_to_bag", "rolled": true, "stash_index": 0},
 		{"type": "click_stash_deposit_gold", "amount": 1},
@@ -623,6 +626,9 @@ func _test_stash_step_types_load() -> void:
 	_assert_ne("stash deposit without selector rejected", BotScenarioRunnerScript.validate_step({"type": "drag_bag_to_stash"}, 0), "")
 	_assert_ne("stash withdraw without selector rejected", BotScenarioRunnerScript.validate_step({"type": "drag_stash_to_bag"}, 0), "")
 	_assert_ne("stash gold without amount rejected", BotScenarioRunnerScript.validate_step({"type": "click_stash_deposit_gold"}, 0), "")
+	_assert_ne("stash search without text rejected", BotScenarioRunnerScript.validate_step({"type": "set_stash_search"}, 0), "")
+	_assert_ne("stash sort without valid mode rejected", BotScenarioRunnerScript.validate_step({"type": "select_stash_sort", "mode": "missing"}, 0), "")
+	_assert_ne("stash filter without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_stash_filter"}, 0), "")
 
 
 func _test_stash_assertions() -> void:
@@ -636,6 +642,7 @@ func _test_stash_assertions() -> void:
 			{"type": "assert_stash_panel_visible", "visible": true},
 			{"type": "assert_stash_item_count", "rolled": true, "equals": 1},
 			{"type": "assert_stash_gold", "equals": 3},
+			{"type": "assert_stash_filter", "search_text": "bow", "sort_mode": "name", "filtered_equals": 1, "first_item_def_id": "cave_bow"},
 		],
 	}
 	runner.load_scenario(data)
@@ -648,12 +655,15 @@ func _test_stash_assertions() -> void:
 		"stash_panel": {
 			"visible": true,
 			"stash_gold": 3,
+			"stash_search_text": "bow",
+			"stash_sort_mode": "name",
+			"filtered_stash_item_count": 1,
 			"stash_rows": [
 				{"stash_item_id": "9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow"},
 			],
 		},
 	}
-	for _i in range(4):
+	for _i in range(5):
 		runner.tick(0.016, state)
 	_assert_true("stash assertions pass", runner.is_done() and runner.passed())
 

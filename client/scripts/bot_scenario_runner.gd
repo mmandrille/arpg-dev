@@ -40,7 +40,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold", "assert_boss_health_bar",
+	"assert_stash_gold", "assert_stash_filter", "assert_boss_health_bar",
 	"assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
@@ -53,7 +53,7 @@ const STEP_TYPES_ACTION := [
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
-	"click_stash_withdraw_gold", "click_waypoint_level",
+	"click_stash_withdraw_gold", "set_stash_search", "select_stash_sort", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -96,8 +96,8 @@ const ALL_STEP_TYPES: Array = [
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"wait_stash_panel", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold", "drag_bag_to_stash", "drag_stash_to_bag",
-	"click_stash_deposit_gold", "click_stash_withdraw_gold",
+	"assert_stash_gold", "assert_stash_filter", "drag_bag_to_stash", "drag_stash_to_bag",
+	"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort",
 	"click_waypoint_level",
 	"wait_boss_health_bar", "assert_boss_health_bar",
 	"wait_remote_player_count", "assert_remote_player_count",
@@ -463,6 +463,8 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_stash_item_count(step, state)
 		"assert_stash_gold":
 			return _assert_stash_gold(step, state)
+		"assert_stash_filter":
+			return _assert_stash_filter(step, state)
 		"assert_boss_health_bar":
 			return _assert_boss_health_bar(step, state)
 		"assert_remote_player_count":
@@ -1198,6 +1200,33 @@ func _assert_stash_gold(step: Dictionary, state: Dictionary) -> bool:
 	return true
 
 
+func _assert_stash_filter(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("stash_panel", {})
+	if step.has("search_text") and str(panel.get("stash_search_text", "")) != str(step.get("search_text", "")):
+		_fail("assert_stash_filter failed: search_text want=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("search_text", "")), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("sort_mode") and str(panel.get("stash_sort_mode", "")) != str(step.get("sort_mode", "")):
+		_fail("assert_stash_filter failed: sort_mode want=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("sort_mode", "")), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("filtered_equals") and int(panel.get("filtered_stash_item_count", 0)) != int(step.get("filtered_equals", 0)):
+		_fail("assert_stash_filter failed: filtered_equals want=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("filtered_equals", 0)), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("first_item_def_id"):
+		var rows: Array = panel.get("stash_rows", [])
+		if rows.is_empty() or str((rows[0] as Dictionary).get("item_def_id", "")) != str(step.get("first_item_def_id", "")):
+			_fail("assert_stash_filter failed: first_item_def_id want=%s rows=%s step=%d scenario=%s" % [
+				str(step.get("first_item_def_id", "")), str(rows), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+	return true
+
+
 func _assert_shop_detail_rows(label: String, step: Dictionary, rows: Array, price_key: String) -> bool:
 	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
 		_fail("%s failed: equals want=%d got=%d rows=%s step=%d scenario=%s" % [
@@ -1793,9 +1822,9 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "shop=%s" % str(step)
 		"click_waypoint_level":
 			return "target_level=%s" % str(step.get("target_level", ""))
-		"wait_stash_panel", "assert_stash_item_count", "assert_stash_gold", "assert_stash_panel_visible", \
+		"wait_stash_panel", "assert_stash_item_count", "assert_stash_gold", "assert_stash_filter", "assert_stash_panel_visible", \
 		"drag_bag_to_stash", "drag_stash_to_bag", \
-		"click_stash_deposit_gold", "click_stash_withdraw_gold":
+		"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort":
 			return "stash=%s" % str(step)
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))
@@ -2060,6 +2089,16 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["click_stash_deposit_gold", "click_stash_withdraw_gold"]:
 		if int(step.get("amount", 0)) <= 0:
 			return "client_steps[%d] (%s) requires positive amount" % [index, stype]
+	if stype == "set_stash_search":
+		if not step.has("text"):
+			return "client_steps[%d] (%s) requires text" % [index, stype]
+	if stype == "select_stash_sort":
+		var mode := str(step.get("mode", ""))
+		if not ["acquired", "name", "rarity", "slot"].has(mode):
+			return "client_steps[%d] (%s) requires mode acquired, name, rarity, or slot" % [index, stype]
+	if stype == "assert_stash_filter":
+		if not step.has("search_text") and not step.has("sort_mode") and not step.has("filtered_equals") and not step.has("first_item_def_id"):
+			return "client_steps[%d] (%s) requires search_text, sort_mode, filtered_equals, or first_item_def_id" % [index, stype]
 	if stype == "assert_multiplayer_session_rows":
 		if not step.has("equals") and not step.has("min_count") and not step.has("selected") and not step.has("listed") and not step.has("session_id") and not step.has("session_id_env") and not step.has("mode") and not step.has("member_count_min") and not step.has("connected_count_min"):
 			return "client_steps[%d] (%s) requires a row expectation" % [index, stype]

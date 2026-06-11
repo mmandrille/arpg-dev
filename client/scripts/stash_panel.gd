@@ -13,6 +13,11 @@ const TITLE_FONT_SIZE := 31
 const BODY_FONT_SIZE := 21
 const DETAIL_FONT_SIZE := 18
 const ICON_FONT_SIZE := 18
+const SORT_ACQUIRED := "acquired"
+const SORT_NAME := "name"
+const SORT_RARITY := "rarity"
+const SORT_SLOT := "slot"
+const SORT_MODES := [SORT_ACQUIRED, SORT_NAME, SORT_RARITY, SORT_SLOT]
 const DRAG_SOURCE_INVENTORY_BAG := "bag"
 const DRAG_SOURCE_STASH := "stash"
 const ITEM_RARITY_BACKGROUNDS := {
@@ -43,11 +48,15 @@ var _panel: PanelContainer
 var _title_label: Label
 var _gold_label: Label
 var _status_label: Label
+var _search_field: LineEdit
+var _sort_option: OptionButton
 var _stash_grid: GridContainer
 var _withdraw_buttons: Dictionary = {}
 var _deposit_gold_button: Button
 var _withdraw_gold_button: Button
 var _interactive: bool = true
+var _search_text: String = ""
+var _sort_mode: String = SORT_ACQUIRED
 
 
 class StashSlotButton:
@@ -155,6 +164,9 @@ func get_debug_state() -> Dictionary:
 		"stash_gold": stash_gold,
 		"stash_capacity": stash_capacity,
 		"stash_item_count": stash_items.size(),
+		"filtered_stash_item_count": _visible_stash_items().size(),
+		"stash_search_text": _search_text,
+		"stash_sort_mode": _sort_mode,
 		"stash_rows": _debug_stash_rows(),
 		"withdraw_buttons": _debug_withdraw_buttons(),
 		"deposit_gold_enabled": _deposit_gold_button != null and not _deposit_gold_button.disabled,
@@ -183,6 +195,18 @@ func bot_click_deposit_gold(amount: int = 1) -> void:
 
 func bot_click_withdraw_gold(amount: int = 1) -> void:
 	_emit_withdraw_gold(amount)
+
+
+func bot_set_search_text(text: String) -> void:
+	_search_text = text.strip_edges()
+	if _search_field != null and _search_field.text != _search_text:
+		_search_field.text = _search_text
+	if _panel != null:
+		_render()
+
+
+func bot_select_sort_mode(mode: String) -> void:
+	_set_sort_mode(mode)
 
 
 func _sync_viewport_size() -> void:
@@ -228,6 +252,31 @@ func _build() -> void:
 	_status_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	root.add_child(_status_label)
 
+	var filters := HBoxContainer.new()
+	filters.add_theme_constant_override("separation", 8)
+	root.add_child(filters)
+	_search_field = LineEdit.new()
+	_search_field.placeholder_text = "Search stash"
+	_search_field.clear_button_enabled = true
+	_search_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_search_field.text_changed.connect(func(text: String) -> void:
+		_search_text = text.strip_edges()
+		_render()
+	)
+	filters.add_child(_search_field)
+
+	_sort_option = OptionButton.new()
+	_sort_option.custom_minimum_size = Vector2(112, 32)
+	_sort_option.add_item("Acquired")
+	_sort_option.add_item("Name")
+	_sort_option.add_item("Rarity")
+	_sort_option.add_item("Slot")
+	_sort_option.item_selected.connect(func(index: int) -> void:
+		if index >= 0 and index < SORT_MODES.size():
+			_set_sort_mode(SORT_MODES[index])
+	)
+	filters.add_child(_sort_option)
+
 	root.add_child(_section_label("Stash"))
 	var stash_scroll := ScrollContainer.new()
 	stash_scroll.custom_minimum_size = Vector2(
@@ -260,12 +309,19 @@ func _render() -> void:
 	_withdraw_buttons = {}
 	_title_label.text = stash_title
 	_gold_label.text = "%d / %d gold" % [gold, stash_gold]
+	if _search_field != null and _search_field.text != _search_text:
+		_search_field.text = _search_text
+	if _sort_option != null:
+		var selected: int = max(0, SORT_MODES.find(_sort_mode))
+		if _sort_option.selected != selected:
+			_sort_option.select(selected)
 	_clear_children(_stash_grid)
 
-	var stash_slots = max(stash_capacity, stash_items.size())
+	var visible_items := _visible_stash_items()
+	var stash_slots: int = max(stash_capacity, stash_items.size())
 	for i in range(stash_slots):
 		var slot := _slot_button("stash")
-		var item: Dictionary = stash_items[i] if i < stash_items.size() else {}
+		var item: Dictionary = visible_items[i] if i < visible_items.size() else {}
 		_fill_slot(slot, item, "stash")
 		_stash_grid.add_child(slot)
 
@@ -464,7 +520,8 @@ func _matching_inventory_items(item_def_id: String, rolled: Variant) -> Array:
 
 func _matching_stash_items(stash_item_id: String, item_def_id: String, rolled: Variant) -> Array:
 	var out: Array = []
-	for item in stash_items:
+	var source := stash_items if stash_item_id != "" else _visible_stash_items()
+	for item in source:
 		if typeof(item) != TYPE_DICTIONARY:
 			continue
 		var rec := item as Dictionary
@@ -479,6 +536,93 @@ func _matching_stash_items(stash_item_id: String, item_def_id: String, rolled: V
 		return str((a as Dictionary).get("stash_item_id", "")) < str((b as Dictionary).get("stash_item_id", ""))
 	)
 	return out
+
+
+func _visible_stash_items() -> Array:
+	var rows: Array = []
+	for item in stash_items:
+		if typeof(item) != TYPE_DICTIONARY:
+			continue
+		var rec := (item as Dictionary).duplicate(true)
+		if _stash_item_matches_search(rec):
+			rows.append(rec)
+	_sort_stash_rows(rows)
+	return rows
+
+
+func _stash_item_matches_search(item: Dictionary) -> bool:
+	var needle := _search_text.strip_edges().to_lower()
+	if needle == "":
+		return true
+	var haystack := [
+		_item_name(item),
+		str(item.get("item_def_id", "")),
+		str(item.get("item_template_id", "")),
+		str(item.get("rarity", "")),
+		str(item.get("slot", "")),
+	]
+	var summary = item.get("summary_lines", [])
+	if typeof(summary) == TYPE_ARRAY:
+		for line in summary:
+			haystack.append(str(line))
+	for value in haystack:
+		if str(value).to_lower().find(needle) >= 0:
+			return true
+	return false
+
+
+func _sort_stash_rows(rows: Array) -> void:
+	rows.sort_custom(func(a, b) -> bool:
+		var left := a as Dictionary
+		var right := b as Dictionary
+		match _sort_mode:
+			SORT_NAME:
+				return _sort_key(_item_name(left), left) < _sort_key(_item_name(right), right)
+			SORT_RARITY:
+				var lr := _rarity_rank(str(left.get("rarity", "")))
+				var rr := _rarity_rank(str(right.get("rarity", "")))
+				if lr == rr:
+					return _sort_key(_item_name(left), left) < _sort_key(_item_name(right), right)
+				return lr > rr
+			SORT_SLOT:
+				var ls := str(left.get("slot", ""))
+				var rs := str(right.get("slot", ""))
+				if ls == rs:
+					return _sort_key(_item_name(left), left) < _sort_key(_item_name(right), right)
+				return ls < rs
+			_:
+				return int(left.get("stash_item_id", 0)) < int(right.get("stash_item_id", 0))
+	)
+
+
+func _sort_key(primary: String, item: Dictionary) -> String:
+	return "%s:%010d" % [primary.to_lower(), int(item.get("stash_item_id", 0))]
+
+
+func _rarity_rank(rarity: String) -> int:
+	match rarity.to_lower():
+		"unique":
+			return 4
+		"rare":
+			return 3
+		"magic":
+			return 2
+		"common":
+			return 1
+		_:
+			return 0
+
+
+func _set_sort_mode(mode: String) -> void:
+	if not SORT_MODES.has(mode):
+		return
+	_sort_mode = mode
+	if _sort_option != null:
+		var selected := SORT_MODES.find(mode)
+		if selected >= 0 and _sort_option.selected != selected:
+			_sort_option.select(selected)
+	if _panel != null:
+		_render()
 
 
 func _is_equipped_instance(item_instance_id: String) -> bool:
@@ -498,7 +642,7 @@ func _is_hotbar_assigned(item_instance_id: String) -> bool:
 
 func _debug_stash_rows() -> Array:
 	var out: Array = []
-	for item in stash_items:
+	for item in _visible_stash_items():
 		if typeof(item) != TYPE_DICTIONARY:
 			continue
 		var rec := item as Dictionary
@@ -522,7 +666,7 @@ func _debug_item_row(item: Dictionary, kind: String) -> Dictionary:
 
 func _debug_withdraw_buttons() -> Dictionary:
 	var out := {}
-	for item in stash_items:
+	for item in _visible_stash_items():
 		if typeof(item) != TYPE_DICTIONARY:
 			continue
 		var rec := item as Dictionary

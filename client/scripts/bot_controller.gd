@@ -168,6 +168,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_stash_deposit_gold(action)
 		"click_stash_withdraw_gold":
 			_do_click_stash_withdraw_gold(action)
+		"set_stash_search":
+			_do_set_stash_search(action)
+		"select_stash_sort":
+			_do_select_stash_sort(action)
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -302,6 +306,16 @@ func _do_click_stash_deposit_gold(action: Dictionary) -> void:
 func _do_click_stash_withdraw_gold(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_click_stash_withdraw_gold"):
 		_main.bot_click_stash_withdraw_gold(int(action.get("amount", 1)))
+
+
+func _do_set_stash_search(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_set_stash_search"):
+		_main.bot_set_stash_search(str(action.get("text", "")))
+
+
+func _do_select_stash_sort(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_select_stash_sort"):
+		_main.bot_select_stash_sort(str(action.get("mode", "acquired")))
 
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
@@ -588,6 +602,10 @@ func _format_action(action: Dictionary) -> String:
 			return "click_stash_deposit_gold amount=%s" % str(action.get("amount", 1))
 		"click_stash_withdraw_gold":
 			return "click_stash_withdraw_gold amount=%s" % str(action.get("amount", 1))
+		"set_stash_search":
+			return "set_stash_search text=%s" % str(action.get("text", ""))
+		"select_stash_sort":
+			return "select_stash_sort mode=%s" % str(action.get("mode", "acquired"))
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
 				str(action.get("slot_index", "")),

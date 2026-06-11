@@ -4879,6 +4879,18 @@ func bot_click_stash_withdraw_gold(amount: int = 1) -> void:
 	stash_panel.bot_click_withdraw_gold(amount)
 
 
+func bot_set_stash_search(text: String) -> void:
+	if stash_panel == null:
+		return
+	stash_panel.bot_set_search_text(text)
+
+
+func bot_select_stash_sort(mode: String) -> void:
+	if stash_panel == null:
+		return
+	stash_panel.bot_select_sort_mode(mode)
+
+
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:
 	if consumable_bar == null:
 		return

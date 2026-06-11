@@ -39,6 +39,7 @@ func _initialize() -> void:
 	_test_skill_cooldown_reject_shows_floating_text()
 	_test_player_healed_spawns_heal_rain()
 	_test_local_attack_range_uses_equipped_reach()
+	_test_basic_attack_cooldown_uses_derived_interval()
 	_test_character_bar_opens_stats_panel()
 	_test_skill_function_key_selects_right_click_skill()
 	_test_learned_skill_auto_selects_right_click()
@@ -791,6 +792,15 @@ func _test_character_bar_opens_stats_panel() -> void:
 	main.character_stats_panel.free()
 	main.skills_panel.free()
 	main.inventory_panel.free()
+	main.free()
+
+
+func _test_basic_attack_cooldown_uses_derived_interval() -> void:
+	var main = MainScript.new()
+	main.character_progression = {"derived_stats": {"attack_interval_ticks": 7}}
+	_assert_float("basic attack cooldown uses derived attack interval", main._basic_attack_cooldown_seconds(), 0.7)
+	main.character_progression = {"derived_stats": {"attack_interval_ticks": 0}}
+	_assert_float("basic attack cooldown falls back to default interval", main._basic_attack_cooldown_seconds(), 2.0)
 	main.free()
 
 

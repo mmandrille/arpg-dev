@@ -132,6 +132,7 @@ type entity struct {
 	ownerID               uint64
 	targetID              uint64
 	projectileDefID       string
+	effectIDs             []string
 	dir                   Vec2
 	speed                 float64
 	traveled              float64
@@ -225,9 +226,11 @@ type skillCooldownState struct {
 
 type skillEffectState struct {
 	SkillID     string
+	TargetID    uint64
 	Stats       []string
 	Percent     int
 	VisualScale float64
+	EffectID    string
 	EndsTick    uint64
 	TotalTicks  int
 }
@@ -235,6 +238,13 @@ type skillEffectState struct {
 type skillHealApplication struct {
 	Target *entity
 	Heal   int
+}
+
+type skillBuffApplication struct {
+	Target      *entity
+	Effect      SkillEffectDef
+	Percent     int
+	VisualScale float64
 }
 
 type playerState struct {
@@ -854,6 +864,37 @@ func cloneStringSlice(in []string) []string {
 	}
 	out := make([]string, len(in))
 	copy(out, in)
+	return out
+}
+
+func sortedUniqueStrings(in []string) []string {
+	if len(in) == 0 {
+		return []string{}
+	}
+	seen := map[string]bool{}
+	for _, value := range in {
+		if value != "" {
+			seen[value] = true
+		}
+	}
+	out := make([]string, 0, len(seen))
+	for value := range seen {
+		out = append(out, value)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func removeStringValue(in []string, value string) []string {
+	if value == "" || len(in) == 0 {
+		return cloneStringSlice(in)
+	}
+	out := []string{}
+	for _, current := range in {
+		if current != value {
+			out = append(out, current)
+		}
+	}
 	return out
 }
 
@@ -1619,18 +1660,28 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 	}
 	player := s.activeLevel().entities[s.playerID]
 	changed := false
-	for _, skillID := range sortedStringKeys(s.skillEffects) {
-		effect := s.skillEffects[skillID]
+	updatedTargets := map[uint64]bool{}
+	for _, stateKey := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[stateKey]
 		if effect.EndsTick > s.tick {
 			continue
 		}
-		delete(s.skillEffects, skillID)
+		delete(s.skillEffects, stateKey)
 		changed = true
-		if player != nil {
+		targetID := effect.TargetID
+		if targetID == 0 {
+			targetID = s.playerID
+		}
+		target := s.activeLevel().entities[targetID]
+		if target != nil {
+			if effect.EffectID != "" {
+				target.effectIDs = removeStringValue(target.effectIDs, effect.EffectID)
+			}
+			updatedTargets[target.id] = true
 			res.Events = append(res.Events, Event{
 				EventType: "skill_effect_ended",
-				EntityID:  idStr(player.id),
-				SkillID:   skillID,
+				EntityID:  idStr(target.id),
+				SkillID:   effect.SkillID,
 			})
 		}
 	}
@@ -1639,8 +1690,14 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 	}
 	resourcesChanged := s.syncActivePlayerMaxResources()
 	visualChanged := s.syncActivePlayerVisualScale()
-	if resourcesChanged || visualChanged || player.hp > 0 {
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	if resourcesChanged || visualChanged {
+		updatedTargets[player.id] = true
+	}
+	for _, id := range sortedUint64Keys(updatedTargets) {
+		target := s.activeLevel().entities[id]
+		if target != nil && target.hp > 0 {
+			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+		}
 	}
 }
 
@@ -2935,9 +2992,11 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 		totalTicks := effect.DurationTicks
 		s.skillEffects[skillID] = skillEffectState{
 			SkillID:     skillID,
+			TargetID:    player.id,
 			Stats:       cloneStringSlice(effect.Stats),
 			Percent:     percent,
 			VisualScale: scale,
+			EffectID:    skillID,
 			EndsTick:    s.tick + uint64(totalTicks),
 			TotalTicks:  totalTicks,
 		}
@@ -2953,6 +3012,34 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 			TotalTicks:     intPtr(totalTicks),
 		})
 	}
+}
+
+func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, cast *CastSkillIntent) ([]skillBuffApplication, string) {
+	if player == nil {
+		return nil, "player_dead"
+	}
+	applications := []skillBuffApplication{}
+	for _, effect := range def.Effects {
+		if effect.Type != "area_stat_percent_buff" {
+			continue
+		}
+		center, rejectReason := s.skillAreaCenter(effect, cast, player)
+		if rejectReason != "" {
+			return nil, rejectReason
+		}
+		percent := skillEffectPercent(effect, rank)
+		scale := 1.0
+		targets := s.healSkillTargets(center, effect, player.id)
+		for _, target := range targets {
+			applications = append(applications, skillBuffApplication{
+				Target:      target,
+				Effect:      effect,
+				Percent:     percent,
+				VisualScale: scale,
+			})
+		}
+	}
+	return applications, ""
 }
 
 func (s *Sim) skillAreaCenter(effect SkillEffectDef, cast *CastSkillIntent, player *entity) (Vec2, string) {
@@ -3083,6 +3170,48 @@ func (s *Sim) applyAreaHeal(player *entity, skillID string, rank int, applicatio
 			SkillID:        skillID,
 			Rank:           intPtr(rank),
 			Heal:           intPtr(app.Heal),
+		})
+	}
+}
+
+func (s *Sim) applyAreaStatBuff(player *entity, skillID string, rank int, applications []skillBuffApplication, correlationID string, res *TickResult) {
+	for _, app := range applications {
+		target := app.Target
+		if target == nil || target.kind != playerEntity || target.hp <= 0 {
+			continue
+		}
+		effectID := app.Effect.EffectID
+		if effectID == "" {
+			effectID = skillID
+		}
+		stateKey := skillID
+		if target.id != s.playerID {
+			stateKey = fmt.Sprintf("%s:%d", skillID, target.id)
+		}
+		totalTicks := app.Effect.DurationTicks
+		s.skillEffects[stateKey] = skillEffectState{
+			SkillID:     skillID,
+			TargetID:    target.id,
+			Stats:       cloneStringSlice(app.Effect.Stats),
+			Percent:     app.Percent,
+			VisualScale: app.VisualScale,
+			EffectID:    effectID,
+			EndsTick:    s.tick + uint64(totalTicks),
+			TotalTicks:  totalTicks,
+		}
+		target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+		res.Events = append(res.Events, Event{
+			EventType:      "skill_effect_started",
+			EntityID:       idStr(target.id),
+			SourceEntityID: idStr(player.id),
+			TargetEntityID: idStr(target.id),
+			CorrelationID:  correlationID,
+			SkillID:        skillID,
+			Rank:           intPtr(rank),
+			Amount:         intPtr(app.Percent),
+			RemainingTicks: intPtr(totalTicks),
+			TotalTicks:     intPtr(totalTicks),
 		})
 	}
 }
@@ -5602,6 +5731,16 @@ func (s *Sim) skillClassAllowed(def SkillDef) bool {
 	return def.Class == "" || def.Class == s.progression.CharacterClass
 }
 
+func (s *Sim) skillEffectLabel(effect skillEffectState) string {
+	if def, ok := s.rules.Skills[effect.SkillID]; ok && def.Name != "" {
+		return def.Name
+	}
+	if effect.SkillID != "" {
+		return effect.SkillID
+	}
+	return "Skill effect"
+}
+
 func (s *Sim) itemClassAllowed(item *invItem) bool {
 	if item == nil || item.rollPayload != nil {
 		return true
@@ -5930,6 +6069,30 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		if value := rolledStats["attack_speed_percent"]; value != 0 {
 			itemSpeedPercent += float64(value)
 			attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: "Rolled attack speed", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+	}
+
+	for _, stateKey := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[stateKey]
+		if effect.TargetID != 0 && effect.TargetID != s.playerID {
+			continue
+		}
+		if effect.EndsTick <= s.tick || effect.Percent <= 0 {
+			continue
+		}
+		for _, stat := range effect.Stats {
+			switch stat {
+			case "armor":
+				bonus := math.Round(armor * float64(effect.Percent) / 100.0)
+				if bonus < 1 {
+					bonus = 1
+				}
+				armor += bonus
+				armorSources = append(armorSources, StatBreakdownSourceView{Label: s.skillEffectLabel(effect), Value: bonus, Kind: "skill_effect"})
+			case "block_percent":
+				blockPercent += float64(effect.Percent)
+				blockSources = append(blockSources, StatBreakdownSourceView{Label: s.skillEffectLabel(effect), Value: float64(effect.Percent), Kind: "skill_effect"})
+			}
 		}
 	}
 
@@ -6286,6 +6449,15 @@ func sortedEntityIDs(entities map[uint64]*entity) []uint64 {
 	return ids
 }
 
+func sortedUint64Keys[V any](m map[uint64]V) []uint64 {
+	ids := make([]uint64, 0, len(m))
+	for id := range m {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
+}
+
 func (s *Sim) sortedLevelNums() []int {
 	levels := make([]int, 0, len(s.levels))
 	for levelNum := range s.levels {
@@ -6488,6 +6660,7 @@ func (e *entity) view() EntityView {
 			ev.MaxMana = &maxMana
 			ev.CharacterID = e.characterID
 			ev.DisplayName = e.displayName
+			ev.EffectIDs = cloneStringSlice(e.effectIDs)
 			if e.visualScale > 0 {
 				ev.VisualScale = e.visualScale
 			}

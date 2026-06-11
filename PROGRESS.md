@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v80 — `combat-threat-readability` |
+| **Latest completed slice** | v81 — `paladin-holy-shield` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -99,6 +99,7 @@ v77_* = main-config-derived-gameplay
 v78_* = main-config-drop-profiles
 v79_* = elite-pack-roles
 v80_* = combat-threat-readability
+v81_* = paladin-holy-shield
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -219,6 +220,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v78** | `main-config-drop-profiles` | Complete (`make ci` green) | [`v78_spec-main-config-drop-profiles.md`](docs/specs/v78_spec-main-config-drop-profiles.md) | [`v78_2026-06-11-main-config-drop-profiles.md`](docs/plans/v78_2026-06-11-main-config-drop-profiles.md) | [`as-built`](docs/as-built/v78_main-config-drop-profiles.md) |
 | **v79** | `elite-pack-roles` | Complete (`make ci` green) | [`v79_spec-elite-pack-roles.md`](docs/specs/v79_spec-elite-pack-roles.md) | [`v79_2026-06-11-elite-pack-roles.md`](docs/plans/v79_2026-06-11-elite-pack-roles.md) | [`as-built`](docs/as-built/v79_elite-pack-roles.md) |
 | **v80** | `combat-threat-readability` | Complete (`make ci` green) | [`v80_spec-combat-threat-readability.md`](docs/specs/v80_spec-combat-threat-readability.md) | [`v80_2026-06-11-combat-threat-readability.md`](docs/plans/v80_2026-06-11-combat-threat-readability.md) | [`as-built`](docs/as-built/v80_combat-threat-readability.md) |
+| **v81** | `paladin-holy-shield` | Complete (`make ci` green) | [`v81_spec-paladin-holy-shield.md`](docs/specs/v81_spec-paladin-holy-shield.md) | [`v81_2026-06-11-paladin-holy-shield.md`](docs/plans/v81_2026-06-11-paladin-holy-shield.md) | [`as-built`](docs/as-built/v81_paladin-holy-shield.md) |
 
 ---
 
@@ -681,15 +683,19 @@ variant, and proves it with client unit, focused client-bot, and protocol pack-a
 small follow-ups for realtime fanout level snapshotting, combat event presenter extraction,
 defensive client payload parsing, and splitting the largest Python validation/bot files by domain.
 
+**Paladin Holy Shield is now authoritative and visible.** v81 adds a data-driven Paladin area
+defensive buff, per-player active effect ids, armor/block stat application, server-owned expiry,
+Rage-style status UI presentation, and a gold shield/shine around every affected hero.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
-| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72 non-goals |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
 | Economy / trade | Market offers/purchases, gold/resource pricing, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations beyond listing-row removal, atomic buyer/seller ownership transfer, stash delivery for purchases, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72 non-goals, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |

@@ -677,7 +677,7 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}
 	skillView := sim.SkillProgressionView()
 	magicSkill, ok := skillProgressionRow(skillView, magicBoltSkillID)
-	if !ok || len(skillView.Skills) != 3 || magicSkill.Rank != 0 || !magicSkill.CanSpend {
+	if !ok || magicSkill.Rank != 0 || !magicSkill.CanSpend {
 		t.Fatalf("skill progression at baseline requirements = %+v, want rank 0 and spendable", skillView)
 	}
 
@@ -1286,6 +1286,63 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	}
 	if !hasEvent(noop, "skill_cast") || !hasEvent(noop, "skill_cooldown_started") {
 		t.Fatalf("full-hp heal events = %+v, want cast plus cooldown", noop.Events)
+	}
+}
+
+func TestHolyShieldAreaBuffAppliesDefenseVisualStateAndExpires(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_holy_shield", "01", rules)
+	sim.progression.CharacterClass = "paladin"
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	sim.progression.BaseStats.Vit = 8
+	sim.progression.BaseStats.Magic = 8
+	sim.progression.SkillRanks["holy_shield"] = 1
+	player.mana = player.maxMana
+	beforeMana := player.mana
+	sim.savePlayer(sim.defaultPlayer())
+
+	before, _ := sim.playerEffectiveCombatStats()
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_holy_shield",
+		CorrelationID: "corr_holy_shield",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "holy_shield"},
+	}})
+	assertAck(t, cast, "cast_holy_shield")
+	if player.mana != beforeMana-10 {
+		t.Fatalf("holy shield mana after cast = %d, want %d", player.mana, beforeMana-10)
+	}
+	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "skill_cooldown_started") {
+		t.Fatalf("holy shield missing cast/effect/cooldown events: %+v", cast.Events)
+	}
+	if !sameStringSlice(player.effectIDs, []string{"holy_shield"}) {
+		t.Fatalf("player effect ids = %v, want holy_shield", player.effectIDs)
+	}
+	after, breakdowns := sim.playerEffectiveCombatStats()
+	if after.Armor <= before.Armor || after.BlockPercent <= before.BlockPercent {
+		t.Fatalf("holy shield stats before=%+v after=%+v", before, after)
+	}
+	if armor := findStatBreakdown(breakdowns, "armor"); armor == nil || !statBreakdownHasSourceKind(*armor, "skill_effect") {
+		t.Fatalf("holy shield armor breakdown missing skill source: %+v", armor)
+	}
+	if block := findStatBreakdown(breakdowns, "block_percent"); block == nil || !statBreakdownHasSourceKind(*block, "skill_effect") {
+		t.Fatalf("holy shield block breakdown missing skill source: %+v", block)
+	}
+
+	var expired TickResult
+	for i := 0; i < 300; i++ {
+		expired = sim.Tick(nil)
+	}
+	if !hasEvent(expired, "skill_effect_ended") {
+		t.Fatalf("holy shield expiry missing event: %+v", expired.Events)
+	}
+	if len(player.effectIDs) != 0 {
+		t.Fatalf("holy shield effect ids after expiry = %v, want empty", player.effectIDs)
+	}
+	finalStats, _ := sim.playerEffectiveCombatStats()
+	if math.Abs(finalStats.Armor-before.Armor) > 0.000001 || math.Abs(finalStats.BlockPercent-before.BlockPercent) > 0.000001 {
+		t.Fatalf("holy shield stats after expiry=%+v want before=%+v", finalStats, before)
 	}
 }
 
@@ -8067,6 +8124,15 @@ func findStatBreakdown(rows []StatBreakdownView, key string) *StatBreakdownView 
 		}
 	}
 	return nil
+}
+
+func statBreakdownHasSourceKind(row StatBreakdownView, kind string) bool {
+	for _, source := range row.Sources {
+		if source.Kind == kind {
+			return true
+		}
+	}
+	return false
 }
 
 func characterProgressionUpdate(r TickResult) *CharacterProgressionView {

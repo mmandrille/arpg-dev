@@ -39,6 +39,7 @@ func _initialize() -> void:
 	_test_skill_cooldown_reject_shows_floating_text()
 	_test_monster_aggro_shows_threat_floating_text()
 	_test_player_healed_spawns_heal_rain()
+	_test_holy_shield_effect_ids_drive_world_shine()
 	_test_local_attack_range_uses_equipped_reach()
 	_test_basic_attack_cooldown_uses_derived_interval()
 	_test_character_bar_opens_stats_panel()
@@ -799,6 +800,66 @@ func _test_player_healed_spawns_heal_rain() -> void:
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.queue_free()
+
+
+func _test_holy_shield_effect_ids_drive_world_shine() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1001",
+		"type": "player",
+		"position": {"x": 2.0, "y": 3.0},
+		"hp": 10,
+		"max_hp": 10,
+		"effect_ids": ["holy_shield"],
+	})
+	var local_state := main._bot_local_player_presentation()
+	_assert_true("local holy shield marker active", bool(local_state.get("has_holy_shield_effect", false)))
+	_assert_true("local holy shield effect id visible", (local_state.get("effect_ids", []) as Array).has("holy_shield"))
+	main._upsert_entity({
+		"id": "1001",
+		"type": "player",
+		"position": {"x": 2.0, "y": 3.0},
+		"hp": 10,
+		"max_hp": 10,
+		"effect_ids": [],
+	})
+	local_state = main._bot_local_player_presentation()
+	_assert_true("local holy shield marker removed", not bool(local_state.get("has_holy_shield_effect", true)))
+
+	main._upsert_entity({
+		"id": "1002",
+		"type": "player",
+		"position": {"x": 4.0, "y": 4.0},
+		"hp": 10,
+		"max_hp": 10,
+		"character_id": "char_guest",
+		"effect_ids": ["holy_shield"],
+	})
+	var remote_state: Array = main._bot_entities_presentation_debug()
+	_assert_eq("remote state count", remote_state.size(), 1)
+	if remote_state.size() > 0:
+		var remote: Dictionary = remote_state[0]
+		_assert_true("remote holy shield marker active", bool(remote.get("has_holy_shield_effect", false)))
+		_assert_true("remote holy shield effect id visible", (remote.get("effect_ids", []) as Array).has("holy_shield"))
+	main._upsert_entity({
+		"id": "1002",
+		"type": "player",
+		"position": {"x": 4.0, "y": 4.0},
+		"hp": 10,
+		"max_hp": 10,
+		"character_id": "char_guest",
+		"effect_ids": [],
+	})
+	remote_state = main._bot_entities_presentation_debug()
+	if remote_state.size() > 0:
+		var cleared: Dictionary = remote_state[0]
+		_assert_true("remote holy shield marker removed", not bool(cleared.get("has_holy_shield_effect", true)))
+
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
 
 
 func _test_local_attack_range_uses_equipped_reach() -> void:

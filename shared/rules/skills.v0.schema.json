@@ -23,9 +23,9 @@
         "name": { "type": "string", "minLength": 1 },
         "class": { "type": "string", "minLength": 1 },
         "tree": { "$ref": "#/$defs/tree_position" },
-        "kind": { "type": "string", "enum": ["projectile_attack", "self_buff", "area_heal"] },
+        "kind": { "type": "string", "enum": ["projectile_attack", "self_buff", "area_heal", "area_stat_buff"] },
         "max_rank": { "type": "integer", "minimum": 1 },
-        "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area"] },
+        "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
         "cost": { "$ref": "#/$defs/cost" },
         "damage": { "$ref": "#/$defs/rank_linear_damage" },
@@ -57,6 +57,13 @@
           "then": {
             "required": ["effects"],
             "properties": { "targeting": { "const": "direction_or_target_area" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "area_stat_buff" } }, "required": ["kind"] },
+          "then": {
+            "required": ["effects"],
+            "properties": { "targeting": { "const": "self_or_ally_area" } }
           }
         }
       ]
@@ -155,7 +162,8 @@
     "skill_effect": {
       "oneOf": [
         { "$ref": "#/$defs/stat_percent_buff_effect" },
-        { "$ref": "#/$defs/area_percent_heal_effect" }
+        { "$ref": "#/$defs/area_percent_heal_effect" },
+        { "$ref": "#/$defs/area_stat_percent_buff_effect" }
       ]
     },
     "stat_percent_buff_effect": {
@@ -188,6 +196,28 @@
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "percent_base": { "type": "integer", "minimum": 0 },
         "percent_per_rank": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "area_stat_percent_buff_effect": {
+      "type": "object",
+      "required": ["type", "target", "include_caster", "range", "radius", "stats", "percent_base", "percent_per_rank", "duration_ticks", "effect_id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "area_stat_percent_buff" },
+        "target": { "const": "allies" },
+        "include_caster": { "type": "boolean" },
+        "range": { "type": "number", "exclusiveMinimum": 0 },
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "stats": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["str", "dex", "vit", "magic", "armor", "block_percent"] }
+        },
+        "percent_base": { "type": "integer", "minimum": 0 },
+        "percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "effect_id": { "type": "string", "minLength": 1 }
       }
     },
     "cooldown": {

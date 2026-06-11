@@ -86,6 +86,8 @@ const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
 const BOSS_PHASE_TICK_RATE := 10.0
 const BOSS_TELEGRAPH_MARKER_NAME := "BossTelegraphMarker"
+const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
+const HOLY_SHIELD_EFFECT_ID := "holy_shield"
 const ARCHER_MONSTER_DEF_ID := "dungeon_archer"
 const ARCHER_BOW_MARKER_NAME := "ArcherBowMarker"
 const CHARACTER_FLOW_CREATE_GAME := "create_game"
@@ -1176,6 +1178,8 @@ func _upsert_entity(e: Dictionary) -> void:
 				_health_bar.update_mana(player_mana, player_max_mana)
 		if e.has("visual_scale"):
 			_apply_local_player_visual_scale(float(e["visual_scale"]))
+		if e.has("effect_ids"):
+			_sync_holy_shield_effect(player_anchor, e.get("effect_ids", []))
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		var prev_predicted_pos := predicted_pos
 		# Reconcile: snap prediction back toward authoritative truth.
@@ -3926,7 +3930,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 		var visual := MonsterVisualsLoaderScript.resolve(str(e["monster_def_id"]), str(e.get("visual_model", "")))
 		if not e.has("visual_model"):
 			rec["visual_model"] = str(visual.get("visual_model", visual.get("scene", "")))
-	for key in ["boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
+	for key in ["boss_template_id", "visual_model", "visual_tint", "boss_phase", "effect_ids"]:
 		if e.has(key):
 			rec[key] = e[key]
 	if e.has("is_boss"):
@@ -3943,6 +3947,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 		_apply_model_tint(node, base_tint)
 	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
+	_sync_holy_shield_effect(node, rec.get("effect_ids", []))
 	_normalize_boss_phase_metadata(rec)
 	_sync_boss_telegraph_marker_from_record(rec)
 
@@ -3963,6 +3968,62 @@ func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 
 func _has_archer_bow_marker(root: Node3D) -> bool:
 	return root != null and root.find_child(ARCHER_BOW_MARKER_NAME, true, false) != null
+
+
+func _sync_holy_shield_effect(root: Node3D, effect_ids_value) -> void:
+	if root == null:
+		return
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	var active := effect_ids.has(HOLY_SHIELD_EFFECT_ID)
+	var existing := root.find_child(HOLY_SHIELD_MARKER_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = _make_holy_shield_effect()
+		root.add_child(existing)
+
+
+func _has_holy_shield_effect(root: Node3D) -> bool:
+	return root != null and root.find_child(HOLY_SHIELD_MARKER_NAME, false, false) != null
+
+
+func _make_holy_shield_effect() -> Node3D:
+	var marker := Node3D.new()
+	marker.name = HOLY_SHIELD_MARKER_NAME
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.82, 0.26, 0.54)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.74, 0.22)
+	mat.emission_energy_multiplier = 1.25
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	var ring := MeshInstance3D.new()
+	ring.name = "HolyShieldRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.64
+	ring_mesh.outer_radius = 0.76
+	ring_mesh.ring_segments = 72
+	ring.mesh = ring_mesh
+	ring.position.y = 0.06
+	ring.material_override = mat
+	marker.add_child(ring)
+
+	var column := MeshInstance3D.new()
+	column.name = "HolyShieldShine"
+	var column_mesh := CylinderMesh.new()
+	column_mesh.top_radius = 0.52
+	column_mesh.bottom_radius = 0.52
+	column_mesh.height = 1.45
+	column_mesh.radial_segments = 36
+	column.mesh = column_mesh
+	column.position.y = 0.72
+	column.material_override = mat
+	marker.add_child(column)
+	return marker
 
 
 func _make_archer_bow_marker() -> Node3D:
@@ -4827,10 +4888,18 @@ func _bot_local_player_presentation() -> Dictionary:
 		"type": "player",
 		"visual_model": "character",
 		"visual_scale": player_visual_scale,
+		"effect_ids": _local_player_effect_ids(),
+		"has_holy_shield_effect": _has_holy_shield_effect(player_anchor),
 		"base_tint": PLAYER_TINT.to_html(false),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
 	}
+
+
+func _local_player_effect_ids() -> Array:
+	if player_anchor == null or not _has_holy_shield_effect(player_anchor):
+		return []
+	return [HOLY_SHIELD_EFFECT_ID]
 
 
 func _character_info_debug_state() -> Dictionary:
@@ -4866,6 +4935,8 @@ func _bot_entities_presentation_debug() -> Array:
 			"telegraph_marker_color": str(rec.get("telegraph_marker_color", "")),
 			"base_tint": str(rec.get("base_tint", "")),
 			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
+			"effect_ids": rec.get("effect_ids", []),
+			"has_holy_shield_effect": _has_holy_shield_effect(node),
 			"hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {},
 			"animation": controller.get_debug_state() if controller != null else {},

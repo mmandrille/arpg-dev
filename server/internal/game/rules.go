@@ -569,6 +569,7 @@ type SkillEffectDef struct {
 	IncludeCaster  bool     `json:"include_caster"`
 	Range          float64  `json:"range"`
 	Radius         float64  `json:"radius"`
+	EffectID       string   `json:"effect_id"`
 }
 
 // SkillCooldownDef defines how a skill cooldown is derived.
@@ -2626,7 +2627,7 @@ func validateSkillRules(skills map[string]SkillDef) error {
 
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "self_buff", "area_heal":
+	case "projectile_attack", "self_buff", "area_heal", "area_stat_buff":
 		return true
 	default:
 		return false
@@ -2650,6 +2651,11 @@ func validateSkillKindPayload(skillID string, skill SkillDef) error {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for area_heal", skillID, skill.Targeting)
 		}
 		return validateSkillEffects(skillID, skill.Effects, "area_percent_heal")
+	case "area_stat_buff":
+		if skill.Targeting != "self_or_ally_area" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for area_stat_buff", skillID, skill.Targeting)
+		}
+		return validateSkillEffects(skillID, skill.Effects, "area_stat_percent_buff")
 	default:
 		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
 	}
@@ -2697,9 +2703,51 @@ func validateSkillEffects(skillID string, effects []SkillEffectDef, expectedType
 			if err := validateAreaPercentHealEffect(skillID, idx, effect); err != nil {
 				return err
 			}
+		case "area_stat_percent_buff":
+			if err := validateAreaStatPercentBuffEffect(skillID, idx, effect); err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].type: unsupported %s", skillID, idx, effect.Type)
 		}
+	}
+	return nil
+}
+
+func validateAreaStatPercentBuffEffect(skillID string, idx int, effect SkillEffectDef) error {
+	if len(effect.Stats) == 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats: at least one stat is required", skillID, idx)
+	}
+	seen := map[string]bool{}
+	for _, stat := range effect.Stats {
+		if stat != "armor" && stat != "block_percent" && !isSupportedRequirementStat(stat) {
+			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats.%s: unsupported stat", skillID, idx, stat)
+		}
+		if seen[stat] {
+			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats.%s: duplicate stat", skillID, idx, stat)
+		}
+		seen[stat] = true
+	}
+	if effect.PercentBase < 0 || effect.PercentPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: percent values must be non-negative", skillID, idx)
+	}
+	if effect.PercentBase == 0 && effect.PercentPerRank == 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: percent values cannot both be zero", skillID, idx)
+	}
+	if effect.DurationTicks <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].duration_ticks: must be positive", skillID, idx)
+	}
+	if effect.Target != "allies" {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].target: unsupported %s", skillID, idx, effect.Target)
+	}
+	if effect.Range <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].range: must be positive", skillID, idx)
+	}
+	if effect.Radius <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].radius: must be positive", skillID, idx)
+	}
+	if effect.EffectID == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].effect_id: required", skillID, idx)
 	}
 	return nil
 }

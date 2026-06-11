@@ -15,9 +15,9 @@ Last updated: 2026-06-11
 | **Latest completed slice** | v70 — `class-skill-and-item-gates` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
-| **Next slice** | v70 engineering review, then v71 class picker and sprites |
-| **Last engineering review** | v60 — [`docs/reviews/20260610_v60-overview.md`](docs/reviews/20260610_v60-overview.md) (2026-06-10) |
-| **Next engineering review** | Due now after v70 (`class-skill-and-item-gates`) |
+| **Next slice** | v71 — class picker and sprites |
+| **Last engineering review** | v70 — [`docs/reviews/20260611_v70-overview.md`](docs/reviews/20260611_v70-overview.md) (2026-06-11) |
+| **Next engineering review** | v80 (~every 10 slices) |
 
 ### Slice numbering note
 
@@ -602,6 +602,11 @@ rules to seed fresh progression. The default `barbarian` preserves the prior bas
 spend/cast attempts, adds one fixed class-required weapon per class, and rejects wrong-class weapon
 equips. Session-start snapshots and realtime reconstruction carry class identity so restrictions
 survive the authoritative boundary.
+
+**v70 engineering review steering.** The v70 review recommends a small maintenance follow-up for
+realtime fanout level snapshots and defensive `equipped_update.slot` handling in Godot/Python bot,
+plus keeping the v71 class picker contained in character-select UI with shared class presentation
+metadata where practical.
 
 ### Other deferred items (from specs / ADRs)
 

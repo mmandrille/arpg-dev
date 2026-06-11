@@ -78,6 +78,7 @@ func (s *Server) Handler() http.Handler {
 	s.registerAuthRoutes(mux)
 	s.registerCharacterRoutes(mux)
 	s.registerSessionRoutes(mux)
+	s.registerMarketRoutes(mux)
 	s.registerInspectRoutes(mux)
 	s.registerRealtimeRoutes(mux)
 	return s.withMiddleware(mux)

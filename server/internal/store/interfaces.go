@@ -69,6 +69,9 @@ type CharacterProgressionRepo interface {
 	TransferAccountStashItemToCharacter(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID string) (CharacterItemInstance, error)
 	TransferCharacterGoldToAccountStash(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
 	TransferAccountStashGoldToCharacter(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
+	ListActiveMarketListings(ctx context.Context) ([]MarketListing, error)
+	CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string) (MarketListing, error)
+	CancelMarketListing(ctx context.Context, accountID, listingID string) (MarketListing, error)
 	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshotForMember(ctx context.Context, sessionID, accountID, characterID string) (SessionStartSnapshot, error)

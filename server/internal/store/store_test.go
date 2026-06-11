@@ -969,6 +969,81 @@ func TestAccountStashTransfersAreAccountScopedAndAtomic(t *testing.T) {
 	}
 }
 
+func TestMarketListingMovesStashItemAndCancelReturnsIt(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+
+	acct, err := s.UpsertAccountByEmail(ctx, "acct_market_"+suffix, "market+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	char, err := s.CreateCharacter(ctx, "char_market_"+suffix, acct.ID, "Market Hero")
+	if err != nil {
+		t.Fatal(err)
+	}
+	item := store.CharacterItemInstance{
+		ID:          "market_item_" + suffix,
+		AccountID:   acct.ID,
+		CharacterID: char.ID,
+		ItemDefID:   "rusty_sword",
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{"damage_min":1}`),
+	}
+	if err := s.AddCharacterItem(ctx, item); err != nil {
+		t.Fatal(err)
+	}
+	stashID := "stash_market_" + suffix
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, item.ID, stashID); err != nil {
+		t.Fatal(err)
+	}
+
+	listingID := "listing_market_" + suffix
+	listing, err := s.CreateMarketListingFromStash(ctx, acct.ID, stashID, listingID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if listing.Status != store.MarketListingActive || listing.ItemDefID != "rusty_sword" {
+		t.Fatalf("listing = %+v", listing)
+	}
+	stashItems, err := s.ListAccountStashItems(ctx, acct.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stashItems) != 0 {
+		t.Fatalf("stash after listing = %+v, want empty", stashItems)
+	}
+	active, err := s.ListActiveMarketListings(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(active) == 0 || active[0].ID != listing.ID {
+		t.Fatalf("active listings = %+v, want %s", active, listing.ID)
+	}
+
+	other, err := s.UpsertAccountByEmail(ctx, "acct_market_other_"+suffix, "market-other+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.CancelMarketListing(ctx, other.ID, listing.ID); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("foreign cancel err = %v, want ErrNotFound", err)
+	}
+	canceled, err := s.CancelMarketListing(ctx, acct.ID, listing.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if canceled.Status != store.MarketListingCanceled || canceled.CanceledAt == nil {
+		t.Fatalf("canceled listing = %+v", canceled)
+	}
+	stashItems, err = s.ListAccountStashItems(ctx, acct.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stashItems) != 1 || stashItems[0].StashItemID != stashID {
+		t.Fatalf("stash after cancel = %+v", stashItems)
+	}
+}
+
 func TestInputsAndEventsOrdering(t *testing.T) {
 	s := newStore(t)
 	ctx := context.Background()

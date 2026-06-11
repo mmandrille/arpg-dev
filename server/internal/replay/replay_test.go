@@ -1473,6 +1473,15 @@ func (f *fakeRepo) TransferCharacterGoldToAccountStash(context.Context, string, 
 func (f *fakeRepo) TransferAccountStashGoldToCharacter(context.Context, string, string, int) (int, int, error) {
 	return 0, 0, nil
 }
+func (f *fakeRepo) ListActiveMarketListings(context.Context) ([]store.MarketListing, error) {
+	return nil, nil
+}
+func (f *fakeRepo) CreateMarketListingFromStash(context.Context, string, string, string) (store.MarketListing, error) {
+	return store.MarketListing{}, nil
+}
+func (f *fakeRepo) CancelMarketListing(context.Context, string, string) (store.MarketListing, error) {
+	return store.MarketListing{}, nil
+}
 func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, store.CharacterProgression) error {
 	return nil
 }

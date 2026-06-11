@@ -92,6 +92,7 @@ var player_hp: int = PLAYER_START_HP
 var player_max_hp: int = PLAYER_START_HP
 var player_mana: int = 10
 var player_max_mana: int = 10
+var player_visual_scale: float = 1.0
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
@@ -972,16 +973,24 @@ func _apply_delta(p: Dictionary) -> void:
 			if skill_bar != null:
 				skill_bar.flash_rejected()
 			continue
+		if event_type == "player_healed":
+			_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
+			if eid == player_id and _health_bar != null:
+				_health_bar.update_hp(player_hp, player_max_hp, true)
+			continue
+		if event_type == "skill_effect_started" and eid == player_id:
+			if str(ev.get("skill_id", "")) == "rage":
+				_apply_local_player_visual_scale(1.0 + float(ev.get("amount", 0)) / 100.0)
+			continue
+		if event_type == "skill_effect_ended" and eid == player_id:
+			if str(ev.get("skill_id", "")) == "rage":
+				_apply_local_player_visual_scale(1.0)
+			continue
 		if visual_replay_enabled and inventory_panel != null:
 			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)
 			if hint != null:
 				inventory_panel.show_gesture_hint(str(hint))
 		if eid == player_id:
-			if event_type == "player_healed":
-				_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
-				if _health_bar != null:
-					_health_bar.update_hp(player_hp, player_max_hp, true)
-				continue
 			if event_type == "player_mana_restored":
 				_show_damage_number(eid, Color("#54c7f3"), ev.get("mana", null), "+", 1.0)
 				if _health_bar != null:
@@ -1116,6 +1125,8 @@ func _upsert_entity(e: Dictionary) -> void:
 				player_max_mana = int(e["max_mana"])
 			if _health_bar != null:
 				_health_bar.update_mana(player_mana, player_max_mana)
+		if e.has("visual_scale"):
+			_apply_local_player_visual_scale(float(e["visual_scale"]))
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
@@ -1188,7 +1199,7 @@ func _upsert_entity(e: Dictionary) -> void:
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
-	if rec["type"] == "monster":
+	if rec["type"] == "monster" or rec["type"] == "player":
 		_apply_entity_visual_metadata(rec, e)
 	# Resume/snapshot consistency: a monster already dead in the snapshot enters
 	# the terminal death pose without waiting for an event (spec §5.4).
@@ -2771,7 +2782,7 @@ func _auto_select_right_click_skill() -> void:
 
 
 func _first_learned_skill_id() -> String:
-	for id in SkillRulesLoader.skill_ids():
+	for id in SkillRulesLoader.skill_ids_by_tree():
 		var skill_id := str(id)
 		if _skill_rank(skill_id) > 0:
 			return skill_id
@@ -2788,15 +2799,21 @@ func _refresh_progression_ui() -> void:
 
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
+	var selected_skill_id := right_click_skill_id
+	if selected_skill_id == "":
+		selected_skill_id = _first_learned_skill_id()
+	if selected_skill_id == "":
+		selected_skill_id = SkillRulesLoader.first_skill_id()
 	if skills_panel != null:
 		skills_panel.set_character_progression(character_progression)
 		skills_panel.set_skill_progression(skill_progression)
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
 		skills_panel.set_interactive(not _skill_allocation_blocked())
 	if skill_bar != null:
+		skill_bar.set_skill_id(selected_skill_id)
 		skill_bar.set_skill_progression(skill_progression)
 		skill_bar.set_skill_cooldowns(skill_cooldowns)
-		skill_bar.set_interactive(not _skill_cast_blocked())
+		skill_bar.set_interactive(not _skill_cast_blocked(selected_skill_id))
 
 
 func _sync_progression_interactivity() -> void:
@@ -2805,7 +2822,7 @@ func _sync_progression_interactivity() -> void:
 	if skills_panel != null:
 		skills_panel.set_interactive(not _skill_allocation_blocked())
 	if skill_bar != null:
-		skill_bar.set_interactive(not _skill_cast_blocked())
+		skill_bar.set_interactive(not _skill_cast_blocked(str(skill_bar.get_debug_state().get("skill_id", ""))))
 
 
 func _try_use_right_click_skill() -> bool:
@@ -2838,6 +2855,17 @@ func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction
 
 func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> Dictionary:
 	var payload := {"skill_id": skill_id}
+	var targeting := _skill_targeting(skill_id)
+	if targeting == "self":
+		if player_id != "":
+			payload["target_id"] = player_id
+		else:
+			payload["direction"] = {"x": _last_facing_direction.x, "y": _last_facing_direction.y}
+		return payload
+	if targeting == "direction_or_target_area" and target_id == "" and direction.length_squared() <= 0.0001 and use_nearest_fallback:
+		if player_id != "":
+			payload["target_id"] = player_id
+			return payload
 	var chosen_target := target_id
 	if chosen_target == "" and use_nearest_fallback:
 		chosen_target = _nearest_live_monster_id()
@@ -2849,6 +2877,11 @@ func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Ve
 	_face_direction(dir)
 	payload["direction"] = {"x": dir.x, "y": dir.y}
 	return payload
+
+
+func _skill_targeting(skill_id: String) -> String:
+	var def := SkillRulesLoader.skill_definition(skill_id)
+	return str(def.get("targeting", "direction_or_target"))
 
 
 func _is_skill_reject_reason(reason: String) -> bool:
@@ -3421,6 +3454,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 func _make_remote_player_node(e: Dictionary) -> Node3D:
 	var root = CharacterScene.instantiate() as Node3D
 	root.name = "RemotePlayer_%s" % str(e.get("id", ""))
+	root.scale = Vector3.ONE * _entity_visual_scale(e)
 	_apply_model_tint(root, REMOTE_PLAYER_TINT)
 	return root
 
@@ -3445,6 +3479,12 @@ func _entity_visual_scale(e: Dictionary) -> float:
 	if scale <= 0.0:
 		return 1.0
 	return scale
+
+
+func _apply_local_player_visual_scale(scale: float) -> void:
+	player_visual_scale = scale if scale > 0.0 else 1.0
+	if character_visual != null:
+		character_visual.scale = Vector3.ONE * player_visual_scale
 
 
 func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
@@ -4219,6 +4259,7 @@ func _bot_local_player_presentation() -> Dictionary:
 		"id": player_id,
 		"type": "player",
 		"visual_model": "character",
+		"visual_scale": player_visual_scale,
 		"base_tint": PLAYER_TINT.to_html(false),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
@@ -4425,6 +4466,13 @@ func bot_use_skill_bar(skill_id: String = "", target_id: String = "", force_dire
 	if force_direct or target_id != "":
 		_send_skill_cast_intent(skill_id, target_id)
 		return
+	if skill_id != "" and _skill_rank(skill_id) > 0:
+		right_click_skill_id = skill_id
+		if skill_bar != null:
+			skill_bar.set_skill_id(skill_id)
+			skill_bar.set_skill_progression(skill_progression)
+			skill_bar.set_skill_cooldowns(skill_cooldowns)
+		_sync_skill_bindings_ui()
 	if skill_bar != null:
 		skill_bar.use_slot()
 

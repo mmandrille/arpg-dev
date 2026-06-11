@@ -28,7 +28,7 @@ func _run() -> void:
 
 	bar.set_skill_progression({
 		"unspent_skill_points": 0,
-		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false}],
+		"skills": _skill_rows(0),
 	})
 	bar.set_interactive(true)
 	var state := bar.get_debug_state()
@@ -42,7 +42,7 @@ func _run() -> void:
 
 	bar.set_skill_progression({
 		"unspent_skill_points": 0,
-		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false}],
+		"skills": _skill_rows(1),
 	})
 	state = bar.get_debug_state()
 	_assert_true("ranked skill enabled", bool(state.get("enabled", false)))
@@ -50,6 +50,19 @@ func _run() -> void:
 	bar.use_slot()
 	_assert_eq("cast signal count", emitted.size(), 1)
 	_assert_eq("cast signal skill", str(emitted[0]), "magic_bolt")
+	bar.set_skill_id("heal")
+	bar.set_skill_progression({
+		"unspent_skill_points": 0,
+		"skills": _skill_rows(1, 0, 1),
+	})
+	state = bar.get_debug_state()
+	_assert_eq("selected heal skill id", str(state.get("skill_id", "")), "heal")
+	_assert_eq("selected heal slot text", str(state.get("slot_text", "")), "H")
+	_assert_true("selected heal tooltip", str(state.get("tooltip_text", "")).contains("Heal"))
+	bar.use_slot()
+	_assert_eq("heal cast signal count", emitted.size(), 2)
+	_assert_eq("heal cast signal skill", str(emitted[1]), "heal")
+	bar.set_skill_id("magic_bolt")
 
 	bar.set_skill_cooldowns([{"skill_id": "magic_bolt", "remaining_ticks": 40, "total_ticks": 40}])
 	state = bar.get_debug_state()
@@ -89,3 +102,11 @@ func _assert_true(label: String, value: bool) -> void:
 
 func _assert_false(label: String, value: bool) -> void:
 	_assert_true(label, not value)
+
+
+func _skill_rows(magic_rank: int, rage_rank: int = 0, heal_rank: int = 0) -> Array:
+	return [
+		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": 5, "can_spend": false},
+		{"skill_id": "rage", "rank": rage_rank, "max_rank": 5, "can_spend": false},
+		{"skill_id": "heal", "rank": heal_rank, "max_rank": 5, "can_spend": false},
+	]

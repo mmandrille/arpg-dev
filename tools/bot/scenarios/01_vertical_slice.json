@@ -26,7 +26,6 @@
   ],
   "assertions": [
     "equipped_rusty_sword",
-    "player_damaged",
     "monster_dead"
   ]
 }

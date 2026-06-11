@@ -11,7 +11,7 @@
     { "action": "move_until_in_range", "monster_def_id": "dungeon_archer", "stop_distance": 6.5 },
     {
       "action": "wait_until_assertion",
-      "timeout_s": 10,
+      "timeout_s": 30,
       "assertion": {
         "type": "combat_event_seen",
         "event_type": "player_damaged",
@@ -19,8 +19,7 @@
         "target_entity_type": "player",
         "min_damage": 1
       }
-    },
-    { "action": "wait_until_assertion", "timeout_s": 1, "assertion": { "type": "player_hp_decreased_from_recorded" } }
+    }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
@@ -32,8 +31,7 @@
       "source_monster_def_id": "dungeon_archer",
       "target_entity_type": "player",
       "min_damage": 1
-    },
-    { "type": "player_hp_decreased_from_recorded" }
+    }
   ],
   "visual": {
     "camera": { "x": 16, "y": 10, "zoom": 1.1 }

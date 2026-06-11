@@ -34,6 +34,71 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.0
       }
+    },
+    "rage": {
+      "name": "Rage",
+      "class": "warrior",
+      "tree": { "tier": 1, "column": 2 },
+      "kind": "self_buff",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": { "str": 10, "vit": 10 },
+        "stats_per_rank": { "str": 5, "vit": 5 },
+        "skills": []
+      },
+      "cost": {
+        "mana": { "base": 10, "per_rank": 0 }
+      },
+      "effects": [
+        {
+          "type": "stat_percent_buff",
+          "stats": ["str", "vit"],
+          "percent_base": 10,
+          "percent_per_rank": 10,
+          "duration_ticks": 450,
+          "visual_scale": true
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.0
+      }
+    },
+    "heal": {
+      "name": "Heal",
+      "class": "mage",
+      "tree": { "tier": 1, "column": 3 },
+      "kind": "area_heal",
+      "max_rank": 5,
+      "targeting": "direction_or_target_area",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": { "magic": 10 },
+        "stats_per_rank": { "magic": 5 },
+        "skills": []
+      },
+      "cost": {
+        "mana": { "base": 10, "per_rank": 0 }
+      },
+      "effects": [
+        {
+          "type": "area_percent_heal",
+          "target": "allies",
+          "include_caster": true,
+          "range": 9.0,
+          "radius": 3.0,
+          "percent_base": 25,
+          "percent_per_rank": 10
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.0
+      }
     }
   }
 }

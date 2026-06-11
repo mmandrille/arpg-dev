@@ -711,28 +711,39 @@ func _skill_progression_expectation(step: Dictionary) -> Dictionary:
 func _assert_skill_button_enabled(step: Dictionary, state: Dictionary) -> bool:
 	var want := bool(step.get("enabled", true))
 	var panel: Dictionary = state.get("skills_panel", {})
-	var got := bool(panel.get("spend_button_enabled", false))
+	var skill_id := str(step.get("skill_id", "magic_bolt"))
+	var skill_panel := _panel_skill_state(panel, skill_id)
+	var got := bool(skill_panel.get("spend_button_enabled", false))
 	if want != got:
 		_fail("assert_skill_button_enabled failed: skill=%s want=%s got=%s panel=%s step=%d scenario=%s" % [
-			str(step.get("skill_id", "magic_bolt")), want, got, str(panel), _step_index, str(scenario.get("id", "?"))
+			skill_id, want, got, str(panel), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
-	if step.has("requirements_met") and bool(panel.get("requirements_met", false)) != bool(step.get("requirements_met", false)):
+	if step.has("requirements_met") and bool(skill_panel.get("requirements_met", false)) != bool(step.get("requirements_met", false)):
 		_fail("assert_skill_button_enabled requirements failed: want=%s got=%s panel=%s step=%d scenario=%s" % [
-			bool(step.get("requirements_met", false)), bool(panel.get("requirements_met", false)), str(panel), _step_index, str(scenario.get("id", "?"))
+			bool(step.get("requirements_met", false)), bool(skill_panel.get("requirements_met", false)), str(panel), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
-	if step.has("skill_name") and str(panel.get("skill_name", "")) != str(step.get("skill_name", "")):
+	if step.has("skill_name") and str(skill_panel.get("skill_name", "")) != str(step.get("skill_name", "")):
 		_fail("assert_skill_button_enabled skill_name failed: want=%s got=%s step=%d scenario=%s" % [
-			str(step.get("skill_name", "")), str(panel.get("skill_name", "")), _step_index, str(scenario.get("id", "?"))
+			str(step.get("skill_name", "")), str(skill_panel.get("skill_name", "")), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
-	if step.has("tooltip_contains") and not str(panel.get("tooltip_body", "")).contains(str(step.get("tooltip_contains", ""))):
+	if step.has("tooltip_contains") and not str(skill_panel.get("tooltip_body", "")).contains(str(step.get("tooltip_contains", ""))):
 		_fail("assert_skill_button_enabled tooltip failed: want contains=%s got=%s step=%d scenario=%s" % [
-			str(step.get("tooltip_contains", "")), str(panel.get("tooltip_body", "")), _step_index, str(scenario.get("id", "?"))
+			str(step.get("tooltip_contains", "")), str(skill_panel.get("tooltip_body", "")), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
 	return true
+
+
+func _panel_skill_state(panel: Dictionary, skill_id: String) -> Dictionary:
+	var skill_rows = panel.get("skills", {})
+	if typeof(skill_rows) == TYPE_DICTIONARY:
+		var rows: Dictionary = skill_rows
+		if rows.has(skill_id) and typeof(rows[skill_id]) == TYPE_DICTIONARY:
+			return rows[skill_id] as Dictionary
+	return panel
 
 
 func _skill_bar_matches(step: Dictionary, state: Dictionary) -> bool:

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://arpg.dev/schemas/rules/skills.v0.schema.json",
   "title": "Skill rules (v0)",
-  "description": "Declarative active-skill catalog. The Go sim owns authoritative validation, cooldowns, mana spend, projectiles, and damage.",
+  "description": "Declarative active-skill catalog. The Go sim owns authoritative validation, cooldowns, mana spend, projectiles, buffs, healing, and damage.",
   "type": "object",
   "required": ["version", "skills"],
   "additionalProperties": false,
@@ -11,27 +11,56 @@
     "skills": {
       "type": "object",
       "minProperties": 1,
-      "additionalProperties": {
-        "type": "object",
-        "required": ["name", "class", "tree", "kind", "max_rank", "targeting", "requirements", "cost", "damage", "projectile", "cooldown"],
-        "additionalProperties": false,
-        "properties": {
-          "name": { "type": "string", "minLength": 1 },
-          "class": { "type": "string", "minLength": 1 },
-          "tree": { "$ref": "#/$defs/tree_position" },
-          "kind": { "type": "string", "enum": ["projectile_attack"] },
-          "max_rank": { "type": "integer", "minimum": 1 },
-          "targeting": { "type": "string", "enum": ["direction_or_target"] },
-          "requirements": { "$ref": "#/$defs/requirements" },
-          "cost": { "$ref": "#/$defs/cost" },
-          "damage": { "$ref": "#/$defs/rank_linear_damage" },
-          "projectile": { "$ref": "#/$defs/projectile" },
-          "cooldown": { "$ref": "#/$defs/cooldown" }
-        }
-      }
+      "additionalProperties": { "$ref": "#/$defs/skill" }
     }
   },
   "$defs": {
+    "skill": {
+      "type": "object",
+      "required": ["name", "class", "tree", "kind", "max_rank", "targeting", "requirements", "cost", "cooldown"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "class": { "type": "string", "minLength": 1 },
+        "tree": { "$ref": "#/$defs/tree_position" },
+        "kind": { "type": "string", "enum": ["projectile_attack", "self_buff", "area_heal"] },
+        "max_rank": { "type": "integer", "minimum": 1 },
+        "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area"] },
+        "requirements": { "$ref": "#/$defs/requirements" },
+        "cost": { "$ref": "#/$defs/cost" },
+        "damage": { "$ref": "#/$defs/rank_linear_damage" },
+        "projectile": { "$ref": "#/$defs/projectile" },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/skill_effect" }
+        },
+        "cooldown": { "$ref": "#/$defs/cooldown" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "projectile_attack" } }, "required": ["kind"] },
+          "then": {
+            "required": ["damage", "projectile"],
+            "properties": { "targeting": { "const": "direction_or_target" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "self_buff" } }, "required": ["kind"] },
+          "then": {
+            "required": ["effects"],
+            "properties": { "targeting": { "const": "self" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "area_heal" } }, "required": ["kind"] },
+          "then": {
+            "required": ["effects"],
+            "properties": { "targeting": { "const": "direction_or_target_area" } }
+          }
+        }
+      ]
+    },
     "tree_position": {
       "type": "object",
       "required": ["tier", "column"],
@@ -121,6 +150,44 @@
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "speed": { "type": "number", "exclusiveMinimum": 0 },
         "visual": { "type": "string", "minLength": 1 }
+      }
+    },
+    "skill_effect": {
+      "oneOf": [
+        { "$ref": "#/$defs/stat_percent_buff_effect" },
+        { "$ref": "#/$defs/area_percent_heal_effect" }
+      ]
+    },
+    "stat_percent_buff_effect": {
+      "type": "object",
+      "required": ["type", "stats", "percent_base", "percent_per_rank", "duration_ticks", "visual_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "stat_percent_buff" },
+        "stats": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["str", "dex", "vit", "magic"] }
+        },
+        "percent_base": { "type": "integer", "minimum": 0 },
+        "percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "visual_scale": { "type": "boolean" }
+      }
+    },
+    "area_percent_heal_effect": {
+      "type": "object",
+      "required": ["type", "target", "include_caster", "range", "radius", "percent_base", "percent_per_rank"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "area_percent_heal" },
+        "target": { "const": "allies" },
+        "include_caster": { "type": "boolean" },
+        "range": { "type": "number", "exclusiveMinimum": 0 },
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "percent_base": { "type": "integer", "minimum": 0 },
+        "percent_per_rank": { "type": "integer", "minimum": 0 }
       }
     },
     "cooldown": {

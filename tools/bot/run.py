@@ -1149,7 +1149,12 @@ async def execute_step(
     if action == "cast_skill":
         skill_id = str(step.get("skill_id", "magic_bolt"))
         payload: dict[str, Any] = {"skill_id": skill_id}
-        if step.get("target_id") is not None:
+        if bool(step.get("target_self", False)):
+            player = find_player(state)
+            if player is None:
+                raise AssertionError("cast_skill target_self: player not found")
+            payload["target_id"] = str(player["id"])
+        elif step.get("target_id") is not None:
             payload["target_id"] = str(step["target_id"])
         elif step.get("monster_def_id") is not None:
             target = resolve_target(state, step)
@@ -1832,6 +1837,8 @@ async def attack_until_monster_event(
             skipped_ids.add(active_target_id)
             active_target_id = None
             continue
+        if reason == "projectile_busy":
+            continue
         if reason == "invalid_target" and monster_def_id and monster_def_id in state.killed_monster_def_ids:
             continue
         if reason == "player_dead":
@@ -1984,6 +1991,7 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "entity_id",
         "source_entity_id",
         "target_entity_id",
+        "skill_id",
         "pattern_id",
         "phase_kind",
         "reason",
@@ -1991,7 +1999,18 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
     ):
         if key in expected and str(event.get(key, "")) != str(expected[key]):
             return False
-    for key in ("phase_index", "duration_ticks", "from_level", "to_level"):
+    for key in (
+        "phase_index",
+        "duration_ticks",
+        "from_level",
+        "to_level",
+        "rank",
+        "mana",
+        "heal",
+        "amount",
+        "remaining_ticks",
+        "total_ticks",
+    ):
         if key in expected and int(event.get(key, -999999)) != int(expected[key]):
             return False
     return True
@@ -2004,6 +2023,13 @@ def event_summary(expected: dict[str, Any]) -> str:
         "entity_id",
         "source_entity_id",
         "target_entity_id",
+        "skill_id",
+        "rank",
+        "mana",
+        "heal",
+        "amount",
+        "remaining_ticks",
+        "total_ticks",
         "pattern_id",
         "phase_kind",
         "phase_index",

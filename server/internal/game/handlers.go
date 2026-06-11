@@ -1033,6 +1033,56 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		res.reject(in.MessageID, "not_enough_mana")
 		return
 	}
+	switch def.Kind {
+	case "projectile_attack":
+		s.handleProjectileSkillCast(in, res, player, skillID, def, rank, manaCost)
+	case "self_buff":
+		s.handleSelfBuffSkillCast(in, res, player, skillID, def, rank, manaCost)
+	case "area_heal":
+		s.handleAreaHealSkillCast(in, res, player, skillID, def, rank, manaCost)
+	default:
+		res.reject(in.MessageID, "unsupported_skill_kind")
+	}
+}
+
+func (s *Sim) commitSkillSpend(player *entity, skillID string, def SkillDef, manaCost int) int {
+	player.mana -= manaCost
+	cooldownTicks := s.skillCooldownTicks(def)
+	s.skillCooldowns[skillID] = skillCooldownState{EndsTick: s.tick + uint64(cooldownTicks), TotalTicks: cooldownTicks}
+	return cooldownTicks
+}
+
+func (s *Sim) appendSkillCastEvent(res *TickResult, player *entity, skillID string, rank int, manaCost int, correlationID string, targetID uint64, projectileDefID string) {
+	event := Event{
+		EventType:      "skill_cast",
+		EntityID:       idStr(player.id),
+		SourceEntityID: idStr(player.id),
+		CorrelationID:  correlationID,
+		SkillID:        skillID,
+		Rank:           intPtr(rank),
+		Mana:           intPtr(manaCost),
+	}
+	if targetID != 0 {
+		event.TargetEntityID = idStr(targetID)
+	}
+	if projectileDefID != "" {
+		event.ProjectileDefID = projectileDefID
+	}
+	res.Events = append(res.Events, event)
+}
+
+func (s *Sim) appendSkillCooldownStartedEvent(res *TickResult, player *entity, skillID string, correlationID string, cooldownTicks int) {
+	res.Events = append(res.Events, Event{
+		EventType:      "skill_cooldown_started",
+		EntityID:       idStr(player.id),
+		CorrelationID:  correlationID,
+		SkillID:        skillID,
+		RemainingTicks: intPtr(cooldownTicks),
+		TotalTicks:     intPtr(cooldownTicks),
+	})
+}
+
+func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
 	dir, targetID, rejectReason := s.skillCastDirection(def, in.CastSkill, player)
 	if rejectReason != "" {
 		res.reject(in.MessageID, rejectReason)
@@ -1041,33 +1091,43 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 
 	s.activeLevel().move = nil
 	s.clearAutoNav()
-	player.mana -= manaCost
+	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
-	cooldownTicks := s.skillCooldownTicks(def)
-	s.skillCooldowns[skillID] = skillCooldownState{EndsTick: s.tick + uint64(cooldownTicks), TotalTicks: cooldownTicks}
 	projectile := s.spawnSkillProjectile(player, skillID, def, rank, dir, targetID, in)
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
 	s.appendSkillCooldownUpdate(res)
-	res.Events = append(res.Events, Event{
-		EventType:       "skill_cast",
-		EntityID:        idStr(player.id),
-		SourceEntityID:  idStr(player.id),
-		CorrelationID:   in.CorrelationID,
-		SkillID:         skillID,
-		Rank:            intPtr(rank),
-		Mana:            intPtr(manaCost),
-		ProjectileDefID: skillID,
-	})
-	if targetID != 0 {
-		res.Events[len(res.Events)-1].TargetEntityID = idStr(targetID)
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, skillID)
+	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleSelfBuffSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, 0, "")
+	s.applySkillBuff(player, skillID, def, rank, in.CorrelationID, res)
+	s.syncActivePlayerMaxResources()
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	s.appendSkillCooldownUpdate(res)
+	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleAreaHealSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
+	applications, rejectReason := s.areaHealApplications(player, def, rank, in.CastSkill)
+	if rejectReason != "" {
+		res.reject(in.MessageID, rejectReason)
+		return
 	}
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_cooldown_started",
-		EntityID:       idStr(player.id),
-		CorrelationID:  in.CorrelationID,
-		SkillID:        skillID,
-		RemainingTicks: intPtr(cooldownTicks),
-		TotalTicks:     intPtr(cooldownTicks),
-	})
+
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, 0, "")
+	s.applyAreaHeal(player, skillID, rank, applications, in.CorrelationID, res)
+	s.appendSkillCooldownUpdate(res)
+	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)
 }

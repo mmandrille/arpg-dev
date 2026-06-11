@@ -28,9 +28,8 @@
       "event_type": "monster_killed"
     },
     {
-      "action": "wait_until_assertion",
-      "assertion": { "type": "event_seen", "event_type": "gold_picked_up" },
-      "timeout_s": 5
+      "action": "pick_up_loot",
+      "item_def_id": "gold"
     }
   ],
   "assertions": [

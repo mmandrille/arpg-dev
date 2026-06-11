@@ -138,6 +138,12 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills[magicBoltSkillID]; skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 15 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 5 {
 		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 15 +5/rank level +1/rank attack interval cooldown", skill)
 	}
+	if skill := r.Skills["rage"]; skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 10 || skill.Requirements.Stats["vit"] != 10 || skill.Requirements.StatsPerRank["str"] != 5 || skill.Requirements.StatsPerRank["vit"] != 5 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
+		t.Fatalf("rage skill = %+v, want self_buff STR/VIT requirements and 450 tick effect", skill)
+	}
+	if skill := r.Skills["heal"]; skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 10 || skill.Requirements.StatsPerRank["magic"] != 5 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 3.0 {
+		t.Fatalf("heal skill = %+v, want area_heal magic requirements and range/radius effect", skill)
+	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
 	}
@@ -532,7 +538,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		t.Fatalf("missing skill_point_gained event: %+v", res.Events)
 	}
 	skillView := sim.SkillProgressionView()
-	if len(skillView.Skills) != 1 || skillView.Skills[0].SkillID != magicBoltSkillID || skillView.Skills[0].Rank != 0 || skillView.Skills[0].CanSpend {
+	magicSkill, ok := skillProgressionRow(skillView, magicBoltSkillID)
+	if !ok || len(skillView.Skills) != 3 || magicSkill.Rank != 0 || magicSkill.CanSpend {
 		t.Fatalf("skill progression before requirements = %+v, want rank 0 and not spendable", skillView)
 	}
 
@@ -543,7 +550,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
 	}})
 	assertReject(t, rejected, "spend_magic_rejected", "skill_requirements_not_met")
-	if sim.SkillProgressionView().Skills[0].Rank != 0 || sim.progression.UnspentSkillPoints != 1 {
+	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
+	if magicSkill.Rank != 0 || sim.progression.UnspentSkillPoints != 1 {
 		t.Fatalf("requirement rejection mutated skill progression: %+v", sim.SkillProgressionView())
 	}
 
@@ -561,7 +569,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		t.Fatalf("magic allocation progression = %+v, want magic 15 and 2 unspent stat points", sim.CharacterProgressionView())
 	}
 	skillView = sim.SkillProgressionView()
-	if !skillView.Skills[0].CanSpend {
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if !magicSkill.CanSpend {
 		t.Fatalf("skill progression after magic 15 = %+v, want spendable", skillView)
 	}
 
@@ -576,7 +585,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		t.Fatalf("missing skill spend outputs: changes=%+v events=%+v", spend.Changes, spend.Events)
 	}
 	skillView = sim.SkillProgressionView()
-	if skillView.UnspentSkillPoints != 0 || skillView.Skills[0].Rank != 1 || skillView.Skills[0].CanSpend {
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 1 || magicSkill.CanSpend {
 		t.Fatalf("skill progression after spend = %+v, want rank 1 and no spendable points", skillView)
 	}
 
@@ -586,7 +596,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
 	}})
 	assertReject(t, overspend, "overspend_skill", "not_enough_skill_points")
-	if sim.SkillProgressionView().Skills[0].Rank != 1 {
+	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
+	if magicSkill.Rank != 1 {
 		t.Fatalf("overspend mutated rank: %+v", sim.SkillProgressionView())
 	}
 
@@ -598,7 +609,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		t.Fatalf("progression after level 6 = %+v, want level 6, 5 stat points, 1 skill point", view)
 	}
 	skillView = sim.SkillProgressionView()
-	if skillView.Skills[0].CanSpend {
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if magicSkill.CanSpend {
 		t.Fatalf("rank 2 skill progression at magic 15 = %+v, want blocked until magic 20", skillView)
 	}
 	rankTwoRejected := sim.Tick([]Input{{
@@ -608,7 +620,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
 	}})
 	assertReject(t, rankTwoRejected, "spend_rank_two_rejected", "skill_requirements_not_met")
-	if sim.SkillProgressionView().Skills[0].Rank != 1 || sim.progression.UnspentSkillPoints != 1 {
+	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
+	if magicSkill.Rank != 1 || sim.progression.UnspentSkillPoints != 1 {
 		t.Fatalf("rank 2 requirement rejection mutated skill progression: %+v", sim.SkillProgressionView())
 	}
 
@@ -623,7 +636,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		t.Fatalf("rank 2 magic allocation progression = %+v, want magic 20 and no unspent stat points", sim.CharacterProgressionView())
 	}
 	skillView = sim.SkillProgressionView()
-	if !skillView.Skills[0].CanSpend {
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if !magicSkill.CanSpend {
 		t.Fatalf("rank 2 skill progression after magic 20 = %+v, want spendable", skillView)
 	}
 	rankTwoSpend := sim.Tick([]Input{{
@@ -634,7 +648,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}})
 	assertAck(t, rankTwoSpend, "spend_rank_two")
 	skillView = sim.SkillProgressionView()
-	if skillView.UnspentSkillPoints != 0 || skillView.Skills[0].Rank != 2 || skillView.Skills[0].CanSpend {
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 2 || magicSkill.CanSpend {
 		t.Fatalf("skill progression after rank 2 spend = %+v, want rank 2 and no spendable points", skillView)
 	}
 }
@@ -837,6 +852,116 @@ func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
 	}
 	if firstChangeEntityByType(cast, projectileEntity) != nil || hasEvent(cast, "monster_damaged") {
 		t.Fatalf("requirement rejection spawned/damaged: changes=%+v events=%+v", cast.Changes, cast.Events)
+	}
+}
+
+func TestRageBuffAppliesStatsVisualScaleAndExpires(t *testing.T) {
+	sim := NewSim("sess_rage", "01", loadRules(t))
+	player := sim.entities[sim.playerID]
+	sim.progression.BaseStats.Str = 10
+	sim.progression.BaseStats.Vit = 10
+	sim.progression.SkillRanks["rage"] = 1
+	player.maxHP = sim.currentMaxHP()
+	player.hp = player.maxHP
+	player.mana = player.maxMana
+	sim.savePlayer(sim.defaultPlayer())
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_rage",
+		CorrelationID: "corr_rage",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "rage", Direction: &Vec2{X: 1}},
+	}})
+	assertAck(t, cast, "cast_rage")
+	if player.mana != 0 {
+		t.Fatalf("rage mana after cast = %d, want 0", player.mana)
+	}
+	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "skill_cooldown_started") {
+		t.Fatalf("rage missing cast/effect/cooldown events: %+v", cast.Events)
+	}
+	if player.maxHP != 16 || player.hp != 15 {
+		t.Fatalf("rage hp/max = %d/%d, want 15/16 without free heal", player.hp, player.maxHP)
+	}
+	if math.Abs(player.visualScale-1.1) > 0.000001 {
+		t.Fatalf("rage visual scale = %v, want 1.1", player.visualScale)
+	}
+	if got := int(math.Round(sim.DerivedStatsView().MaxHP)); got != 16 {
+		t.Fatalf("rage derived max hp = %d, want 16", got)
+	}
+
+	var expired TickResult
+	for i := 0; i < 450; i++ {
+		expired = sim.Tick(nil)
+	}
+	if !hasEvent(expired, "skill_effect_ended") {
+		t.Fatalf("rage expiry missing event: %+v", expired.Events)
+	}
+	if player.maxHP != 15 || player.visualScale != 0 {
+		t.Fatalf("rage after expiry hp max/scale = %d/%v, want max 15 and no scale", player.maxHP, player.visualScale)
+	}
+}
+
+func TestHealAreaSkillHealsAlliesAndRejectsNoop(t *testing.T) {
+	rules := loadRules(t)
+	sim := NewSim("sess_heal_skill", "01", rules)
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	sim.usePlayer(sim.players[hostID])
+	player := sim.entities[hostID]
+	guest := sim.entities[guestID]
+	guest.pos = Vec2{X: player.pos.X + 1, Y: player.pos.Y}
+	sim.progression.BaseStats.Magic = 10
+	sim.progression.SkillRanks["heal"] = 1
+	player.hp = 5
+	guest.hp = 3
+	player.mana = player.maxMana
+	sim.savePlayer(sim.players[hostID])
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_heal",
+		CorrelationID: "corr_heal",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
+	}})
+	assertAck(t, cast, "cast_heal")
+	if player.mana != 0 {
+		t.Fatalf("heal mana after cast = %d, want 0", player.mana)
+	}
+	if player.hp != 7 || guest.hp != 5 {
+		t.Fatalf("heal hp host/guest = %d/%d, want 7/5", player.hp, guest.hp)
+	}
+	healed := 0
+	for _, ev := range cast.Events {
+		if ev.EventType == "player_healed" {
+			healed++
+			if ev.SkillID != "heal" || ev.Heal == nil || *ev.Heal != 2 {
+				t.Fatalf("heal event = %+v, want skill heal for 2", ev)
+			}
+		}
+	}
+	if healed != 2 || !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_cooldown_started") {
+		t.Fatalf("heal events = %+v, want two heals plus cast/cooldown", cast.Events)
+	}
+
+	for i := 0; i < 50; i++ {
+		sim.Tick(nil)
+	}
+	sim.usePlayer(sim.players[hostID])
+	player.mana = player.maxMana
+	player.hp = player.maxHP
+	guest.hp = guest.maxHP
+	sim.savePlayer(sim.players[hostID])
+	noop := sim.Tick([]Input{{
+		MessageID: "cast_heal_full",
+		Type:      "cast_skill_intent",
+		CastSkill: &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
+	}})
+	assertReject(t, noop, "cast_heal_full", "already_full_hp")
+	if player.mana != player.maxMana {
+		t.Fatalf("noop heal spent mana: %d want %d", player.mana, player.maxMana)
 	}
 }
 
@@ -1419,7 +1544,9 @@ func TestDirectionalRangedProjectileBlockedAndExpires(t *testing.T) {
 }
 
 func TestAggroOnHitDirectionalRangedMovesFromOutsidePassiveRadius(t *testing.T) {
-	sim := combatControlLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
+	rules := cloneRules(loadRules(t))
+	forceCharacterHitChance(rules, 1.0)
+	sim := combatControlLabWithEquippedBow(t, rules, "cafebabecafebabe")
 	player := sim.entities[sim.playerID]
 	player.pos = Vec2{X: 3, Y: 5}
 	monster := firstEntityByKind(sim, monsterEntity)
@@ -1449,7 +1576,8 @@ func TestAggroOnHitDirectionalRangedMovesFromOutsidePassiveRadius(t *testing.T) 
 }
 
 func TestAggroOnHitPrefersAttackingPlayerInCoop(t *testing.T) {
-	rules := loadRules(t)
+	rules := cloneRules(loadRules(t))
+	forceCharacterHitChance(rules, 1.0)
 	sim := combatControlLabWithEquippedBow(t, rules, "cafebabecafebabe")
 	hostID := sim.playerID
 	sim.SetPlayerMetadata(hostID, "acct_host", "char_host", "Host", "host")
@@ -2943,7 +3071,10 @@ func combatGoldenStats(name string) (effectiveCombatStats, effectiveCombatStats,
 // runSlice drives a sim through the full vertical-slice flow and returns it.
 func runSlice(t *testing.T, seed string) *Sim {
 	t.Helper()
-	sim := NewSim("sess_test", seed, loadRules(t))
+	rules := cloneRules(loadRules(t))
+	forceCharacterHitChance(rules, 1.0)
+	forceMonsterHitChance(rules, monsterDefID, 1.0)
+	sim := NewSim("sess_test", seed, rules)
 
 	// Move into unarmed reach of the monster.
 	sim.Tick([]Input{{MessageID: "m1", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 2}}})
@@ -3039,7 +3170,9 @@ func TestScriptedSliceMatchesGolden(t *testing.T) {
 }
 
 func TestSuccessfulHitRetaliatesAndPreservesKillOrder(t *testing.T) {
-	sim := NewSim("sess_retaliate", "deadbeefdeadbeef", loadRules(t))
+	rules := cloneRules(loadRules(t))
+	forceMonsterHitChance(rules, monsterDefID, 1.0)
+	sim := NewSim("sess_retaliate", "deadbeefdeadbeef", rules)
 	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
@@ -3187,7 +3320,9 @@ func TestMissedAttackDoesNotRetaliate(t *testing.T) {
 }
 
 func TestPlayerKilledByRetaliation(t *testing.T) {
-	rules := loadRules(t)
+	rules := cloneRules(loadRules(t))
+	forceCharacterHitChance(rules, 1.0)
+	forceMonsterHitChance(rules, monsterDefID, 1.0)
 	dummy := rules.Monsters[monsterDefID]
 	dummy.MaxHP = 100
 	rules.Monsters[monsterDefID] = dummy
@@ -3363,7 +3498,8 @@ func TestDropNoSpace(t *testing.T) {
 }
 
 func TestUseConsumableHealLab(t *testing.T) {
-	rules := loadRules(t)
+	rules := cloneRules(loadRules(t))
+	forceMonsterHitChance(rules, "training_dummy_heal", 1.0)
 	sim, err := NewSimWithWorld("sess_heal_lab", "01", rules, "heal_lab")
 	if err != nil {
 		t.Fatalf("new heal lab: %v", err)
@@ -5994,7 +6130,9 @@ func TestCoopThreePlayersSameLevelVisibilityAndActorMovement(t *testing.T) {
 }
 
 func TestCoopActorScopedLootExperienceAndMonsterTargeting(t *testing.T) {
-	rules := loadRules(t)
+	rules := cloneRules(loadRules(t))
+	forceCharacterHitChance(rules, 1.0)
+	forceMonsterHitChance(rules, monsterDefID, 1.0)
 	dmg := DamageRange{Min: 1, Max: 1}
 	dummy := rules.Monsters[monsterDefID]
 	dummy.AttackDamage = &dmg
@@ -7240,12 +7378,31 @@ func eventForTarget(r TickResult, eventType string, targetID uint64) *Event {
 func coopRewardTestRules(t *testing.T) *Rules {
 	t.Helper()
 	rules := cloneRules(loadRules(t))
+	forceCharacterHitChance(rules, 1.0)
 	dummy := rules.Monsters[monsterDefID]
 	dummy.MaxHP = 1
 	dummy.XPReward = 10
 	dummy.RetaliationDamage = nil
 	rules.Monsters[monsterDefID] = dummy
 	return rules
+}
+
+func forceCharacterHitChance(rules *Rules, chance float64) {
+	hit := rules.CharacterProgression.DerivedStats["hit_chance"]
+	hit.Base = chance
+	hit.PerDex = 0
+	hit.PerStr = 0
+	hit.PerVit = 0
+	hit.PerMagic = 0
+	hit.Min = &chance
+	hit.Max = &chance
+	rules.CharacterProgression.DerivedStats["hit_chance"] = hit
+}
+
+func forceMonsterHitChance(rules *Rules, monsterDefID string, chance float64) {
+	def := rules.Monsters[monsterDefID]
+	def.HitChance = &chance
+	rules.Monsters[monsterDefID] = def
 }
 
 func newCoopRewardTestSim(t *testing.T, sessionID string) (*Sim, uint64, uint64, *entity) {
@@ -7331,6 +7488,15 @@ func skillProgressionUpdate(r TickResult) *SkillProgressionView {
 		}
 	}
 	return nil
+}
+
+func skillProgressionRow(view SkillProgressionView, skillID string) (SkillProgressionSkillView, bool) {
+	for _, row := range view.Skills {
+		if row.SkillID == skillID {
+			return row, true
+		}
+	}
+	return SkillProgressionSkillView{}, false
 }
 
 func skillCooldownUpdate(r TickResult) []SkillCooldownView {

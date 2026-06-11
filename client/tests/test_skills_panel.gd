@@ -29,7 +29,7 @@ func _run() -> void:
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
-		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false}],
+		"skills": _skill_rows(0, false),
 	})
 	panel.set_interactive(true)
 	panel.ensure_display_visible()
@@ -45,6 +45,7 @@ func _run() -> void:
 	_assert_eq("skills aligns with stats top", int(panel._panel.position.y), int(stats_panel._panel.position.y))
 	stats_panel.queue_free()
 	_assert_eq("unspent skill points", int(state.get("unspent_skill_points", -1)), 1)
+	_assert_eq("first-row skill count", (state.get("skill_ids", []) as Array).size(), 3)
 	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
@@ -62,6 +63,12 @@ func _run() -> void:
 	_assert_true("tooltip visible on hover", bool(state.get("tooltip_visible", false)))
 	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: 3"))
 	_assert_true("tooltip includes missing magic", str(state.get("tooltip_body", "")).contains("Magic 15 (5)"))
+	panel.bot_hover_skill("heal")
+	state = panel.get_debug_state()
+	_assert_eq("heal selection updates", str(state.get("selected_skill_id", "")), "heal")
+	_assert_eq("heal icon from presentation", str(state.get("icon_label", "")), "H")
+	_assert_true("heal tooltip includes mana", str(state.get("tooltip_body", "")).contains("Mana: 10"))
+	panel.bot_hover_skill("magic_bolt")
 
 	panel.set_character_progression({
 		"level": 5,
@@ -69,7 +76,7 @@ func _run() -> void:
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
-		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true}],
+		"skills": _skill_rows(0, true),
 	})
 	state = panel.get_debug_state()
 	_assert_true("requirements met after magic 15", bool(state.get("requirements_met", false)))
@@ -80,7 +87,7 @@ func _run() -> void:
 
 	panel.set_skill_progression({
 		"unspent_skill_points": 0,
-		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false}],
+		"skills": _skill_rows(1, false),
 	})
 	state = panel.get_debug_state()
 	_assert_eq("rank updates", int(state.get("rank", -1)), 1)
@@ -92,7 +99,7 @@ func _run() -> void:
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
-		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false}],
+		"skills": _skill_rows(1, false),
 	})
 	state = panel.get_debug_state()
 	_assert_false("rank 2 requirement blocks magic 15", bool(state.get("requirements_met", true)))
@@ -105,7 +112,7 @@ func _run() -> void:
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
-		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": true}],
+		"skills": _skill_rows(1, true),
 	})
 	state = panel.get_debug_state()
 	_assert_true("rank 2 requirements met at magic 20", bool(state.get("requirements_met", false)))
@@ -138,3 +145,11 @@ func _assert_true(label: String, value: bool) -> void:
 
 func _assert_false(label: String, value: bool) -> void:
 	_assert_true(label, not value)
+
+
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false) -> Array:
+	return [
+		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": 5, "can_spend": magic_can_spend},
+		{"skill_id": "rage", "rank": rage_rank, "max_rank": 5, "can_spend": rage_can_spend},
+		{"skill_id": "heal", "rank": heal_rank, "max_rank": 5, "can_spend": heal_can_spend},
+	]

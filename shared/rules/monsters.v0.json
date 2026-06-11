@@ -54,12 +54,34 @@
       "max_hp": 2,
       "loot_table": "heal_double_drop",
       "xp_reward": 0,
-      "hit_chance": 0.5,
+      "hit_chance": 1.0,
       "crit_chance": 0.0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
       "retaliation_damage": { "min": 6, "max": 6 }
+    },
+    "skill_xp_level6_dummy": {
+      "name": "Skill XP Dummy",
+      "max_hp": 1,
+      "loot_table": "no_drop",
+      "xp_reward": 200,
+      "hit_chance": 0.5,
+      "crit_chance": 0.0,
+      "crit_damage": 1.5,
+      "armor": 0,
+      "block_percent": 0
+    },
+    "skill_xp_level7_dummy": {
+      "name": "Skill XP Dummy",
+      "max_hp": 1,
+      "loot_table": "no_drop",
+      "xp_reward": 270,
+      "hit_chance": 0.5,
+      "crit_chance": 0.0,
+      "crit_damage": 1.5,
+      "armor": 0,
+      "block_percent": 0
     },
     "training_dummy_chase": {
       "name": "Training Dummy",

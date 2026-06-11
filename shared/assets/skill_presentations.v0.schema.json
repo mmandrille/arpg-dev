@@ -13,7 +13,7 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["icon", "summary", "projectile_visual"],
+        "required": ["icon", "summary"],
         "additionalProperties": false,
         "properties": {
           "icon": {
@@ -22,13 +22,14 @@
             "additionalProperties": false,
             "properties": {
               "label": { "type": "string", "minLength": 1, "maxLength": 3 },
-              "shape": { "type": "string", "enum": ["bolt"] },
+              "shape": { "type": "string", "enum": ["bolt", "burst", "heart"] },
               "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
               "accent": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
             }
           },
           "summary": { "type": "string", "minLength": 1 },
-          "projectile_visual": { "type": "string", "minLength": 1 }
+          "projectile_visual": { "type": "string", "minLength": 1 },
+          "effect_visual": { "type": "string", "minLength": 1 }
         }
       }
     }

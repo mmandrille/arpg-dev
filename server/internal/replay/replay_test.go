@@ -18,7 +18,7 @@ const (
 )
 
 func TestReconstructFromInputsRestoresCombatStateAndMetadata(t *testing.T) {
-	rules := loadRules(t)
+	rules := reliableReplayHitRules(t)
 	inputs, maxTick := scriptedRecordedInputs()
 
 	recon, err := ReconstructFromInputs(testSessionID, testSeed, rules, game.DefaultWorldID, inputs, maxTick)
@@ -45,7 +45,7 @@ func TestReconstructFromInputsRestoresCombatStateAndMetadata(t *testing.T) {
 }
 
 func TestReconstructFromInputsWithDirectionalAttackAggro(t *testing.T) {
-	rules := loadRules(t)
+	rules := reliableReplayHitRules(t)
 	mob := rules.Monsters["dungeon_mob"]
 	mob.MaxHP = 20
 	rules.Monsters["dungeon_mob"] = mob
@@ -113,7 +113,7 @@ func TestReconstructFromInputsWithPassiveGoldAutoPickup(t *testing.T) {
 }
 
 func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
-	rules := loadRules(t)
+	rules := reliableReplayHitRules(t)
 	zero := 0.0
 	crit := rules.CharacterProgression.DerivedStats["crit_chance"]
 	crit.Base = 0
@@ -140,7 +140,8 @@ func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reconstruct: %v", err)
 	}
-	if recon.Snapshot.SkillProgression.UnspentSkillPoints != 0 || len(recon.Snapshot.SkillProgression.Skills) == 0 || recon.Snapshot.SkillProgression.Skills[0].Rank != 1 {
+	magicBolt := replaySkillRowByID(recon.Snapshot.SkillProgression.Skills, "magic_bolt")
+	if recon.Snapshot.SkillProgression.UnspentSkillPoints != 0 || magicBolt == nil || magicBolt.Rank != 1 {
 		t.Fatalf("skill progression snapshot = %+v, want rank 1 and no unspent points", recon.Snapshot.SkillProgression)
 	}
 	if len(recon.Snapshot.SkillCooldowns) == 0 || recon.Snapshot.SkillCooldowns[0].SkillID != "magic_bolt" {
@@ -156,7 +157,7 @@ func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
 }
 
 func TestVerifyUsesReconstructedSnapshot(t *testing.T) {
-	rules := loadRules(t)
+	rules := reliableReplayHitRules(t)
 	rows := scriptedStoredInputs(t)
 	recorded, maxTick, err := StoredInputs(rows)
 	if err != nil {
@@ -870,7 +871,7 @@ func TestVerifyCoopReplayMatchesActorCombatAndLootEvents(t *testing.T) {
 }
 
 func TestReconstructCoopReplaySharesXPWithNearbyGuest(t *testing.T) {
-	rules := loadRules(t)
+	rules := reliableReplayHitRules(t)
 	dummy := rules.Monsters["training_dummy"]
 	dummy.MaxHP = 1
 	dummy.XPReward = 10
@@ -1295,6 +1296,42 @@ func loadRules(t *testing.T) *game.Rules {
 		t.Fatalf("load rules: %v", err)
 	}
 	return rules
+}
+
+func reliableReplayHitRules(t *testing.T) *game.Rules {
+	t.Helper()
+	rules := loadRules(t)
+	forceReplayCharacterHitChance(rules, 1.0)
+	forceReplayMonsterHitChance(rules, "training_dummy", 1.0)
+	forceReplayMonsterHitChance(rules, "dungeon_mob", 1.0)
+	return rules
+}
+
+func forceReplayCharacterHitChance(rules *game.Rules, chance float64) {
+	hit := rules.CharacterProgression.DerivedStats["hit_chance"]
+	hit.Base = chance
+	hit.PerDex = 0
+	hit.PerStr = 0
+	hit.PerVit = 0
+	hit.PerMagic = 0
+	hit.Min = &chance
+	hit.Max = &chance
+	rules.CharacterProgression.DerivedStats["hit_chance"] = hit
+}
+
+func forceReplayMonsterHitChance(rules *game.Rules, monsterDefID string, chance float64) {
+	def := rules.Monsters[monsterDefID]
+	def.HitChance = &chance
+	rules.Monsters[monsterDefID] = def
+}
+
+func replaySkillRowByID(rows []game.SkillProgressionSkillView, skillID string) *game.SkillProgressionSkillView {
+	for i := range rows {
+		if rows[i].SkillID == skillID {
+			return &rows[i]
+		}
+	}
+	return nil
 }
 
 type fakeRepo struct {

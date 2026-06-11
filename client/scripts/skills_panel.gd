@@ -10,14 +10,14 @@ var _hovered_skill_id: String = ""
 var _hover_controls: Array[Control] = []
 var _skill_function_keys: Array = []
 var _right_click_skill_id: String = ""
-var _skill_id: String = ""
+var _selected_skill_id: String = ""
 var _panel: PanelContainer
 var _points_label: Label
-var _rank_label: Label
 var _spend_button: Button
-var _skill_block: Panel
-var _skill_icon_label: Label
-var _assigned_key_label: Label
+var _skill_blocks: Dictionary = {}
+var _skill_icon_labels: Dictionary = {}
+var _skill_rank_labels: Dictionary = {}
+var _assigned_key_labels: Dictionary = {}
 var _tooltip: PanelContainer
 var _tooltip_title: Label
 var _tooltip_rank: Label
@@ -26,7 +26,7 @@ var _tooltip_body: Label
 
 func _ready() -> void:
 	SkillRulesLoader.ensure_loaded()
-	_skill_id = _current_skill_id()
+	_selected_skill_id = _current_skill_id()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -78,30 +78,52 @@ func get_debug_state() -> Dictionary:
 	var skill_id := _current_skill_id()
 	var skill := _skill_row(skill_id)
 	var requirement_status := _requirement_status(skill_id)
+	var skill_states := {}
+	for id in _tree_skill_ids():
+		var row_skill_id := str(id)
+		var row := _skill_row(row_skill_id)
+		var row_requirements := _requirement_status(row_skill_id)
+		skill_states[row_skill_id] = {
+			"skill_id": row_skill_id,
+			"skill_name": _skill_name(row_skill_id),
+			"icon_label": _skill_icon_label_text(row_skill_id),
+			"rank": int(row.get("rank", 0)),
+			"max_rank": int(row.get("max_rank", int(_skill_def(row_skill_id).get("max_rank", 0)))),
+			"can_spend": bool(row.get("can_spend", false)),
+			"spend_button_enabled": _skill_spend_enabled(row_skill_id),
+			"assigned_key": _assigned_key_for_skill(row_skill_id),
+			"right_click_assigned": _right_click_skill_id == row_skill_id,
+			"requirements_met": _requirements_met(row_requirements),
+			"requirement_status": row_requirements,
+			"tooltip_body": _tooltip_text(row_skill_id, maxi(int(row.get("rank", 0)), 1)),
+		}
 	return {
 		"visible": visible,
 		"unspent_skill_points": int(skill_progression.get("unspent_skill_points", 0)),
 		"skill_id": skill_id,
+		"skill_ids": _tree_skill_ids(),
 		"skill_name": _skill_name(skill_id),
 		"icon_label": _skill_icon_label_text(skill_id),
 		"rank": int(skill.get("rank", 0)),
-		"max_rank": int(skill.get("max_rank", 0)),
+		"max_rank": int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 0)))),
 		"can_spend": bool(skill.get("can_spend", false)),
 		"spend_button_enabled": _spend_button != null and not _spend_button.disabled,
 		"hovered_skill_id": _hovered_skill_id,
+		"selected_skill_id": skill_id,
 		"assigned_key": _assigned_key_for_skill(skill_id),
 		"right_click_assigned": _right_click_skill_id == skill_id,
 		"tooltip_visible": _tooltip != null and _tooltip.visible,
 		"tooltip_body": _tooltip_body.text if _tooltip_body != null else "",
 		"requirements_met": _requirements_met(requirement_status),
 		"requirement_status": requirement_status,
+		"skills": skill_states,
 	}
 
 
 func bot_click_skill_button(skill_id: String = "") -> void:
 	if skill_id == "":
 		skill_id = _current_skill_id()
-	if skill_id != _current_skill_id():
+	if not _select_skill(skill_id):
 		return
 	if _spend_button == null or _spend_button.disabled:
 		return
@@ -111,7 +133,7 @@ func bot_click_skill_button(skill_id: String = "") -> void:
 func bot_hover_skill(skill_id: String = "") -> void:
 	if skill_id == "":
 		skill_id = _current_skill_id()
-	if skill_id != _current_skill_id():
+	if not _select_skill(skill_id):
 		return
 	_hovered_skill_id = skill_id
 	_show_tooltip(skill_id)
@@ -159,31 +181,42 @@ func _build() -> void:
 	_add_disabled_slot(tree, Vector2(111, 252))
 	_add_disabled_slot(tree, Vector2(176, 252))
 
-	_skill_block = Panel.new()
-	_skill_block.position = Vector2(112, 54)
-	_skill_block.size = Vector2(80, 80)
-	_skill_block.mouse_filter = Control.MOUSE_FILTER_STOP
-	_skill_block.add_theme_stylebox_override("panel", _skill_block_style(false, false))
-	tree.add_child(_skill_block)
-	_bind_skill_hover(_skill_block, _current_skill_id())
+	for raw_skill_id in _tree_skill_ids():
+		var skill_id := str(raw_skill_id)
+		var skill_block := Panel.new()
+		skill_block.position = _skill_block_position(skill_id)
+		skill_block.size = Vector2(80, 80)
+		skill_block.mouse_filter = Control.MOUSE_FILTER_STOP
+		skill_block.add_theme_stylebox_override("panel", _skill_block_style(false, false))
+		skill_block.gui_input.connect(func(event: InputEvent) -> void:
+			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+				_select_skill(skill_id)
+				_show_tooltip(skill_id)
+		)
+		tree.add_child(skill_block)
+		_bind_skill_hover(skill_block, skill_id)
+		_skill_blocks[skill_id] = skill_block
 
-	_skill_icon_label = _label(_skill_icon_label_text(_current_skill_id()), 42, _skill_icon_color(_current_skill_id()))
-	_skill_icon_label.position = Vector2(8, 8)
-	_skill_icon_label.size = Vector2(64, 64)
-	_skill_icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_skill_icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_skill_icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_skill_block.add_child(_skill_icon_label)
+		var icon_label := _label(_skill_icon_label_text(skill_id), 42, _skill_icon_color(skill_id))
+		icon_label.position = Vector2(8, 8)
+		icon_label.size = Vector2(64, 64)
+		icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		skill_block.add_child(icon_label)
+		_skill_icon_labels[skill_id] = icon_label
 
-	_assigned_key_label = _badge_label("")
-	_assigned_key_label.position = Vector2(50, 55)
-	_assigned_key_label.custom_minimum_size = Vector2(30, 22)
-	_skill_block.add_child(_assigned_key_label)
+		var assigned_key_label := _badge_label("")
+		assigned_key_label.position = Vector2(50, 55)
+		assigned_key_label.custom_minimum_size = Vector2(30, 22)
+		skill_block.add_child(assigned_key_label)
+		_assigned_key_labels[skill_id] = assigned_key_label
 
-	_rank_label = _badge_label("")
-	_rank_label.position = Vector2(196, 78)
-	_rank_label.custom_minimum_size = Vector2(40, 28)
-	tree.add_child(_rank_label)
+		var rank_label := _badge_label("")
+		rank_label.position = Vector2(0, 55)
+		rank_label.custom_minimum_size = Vector2(40, 22)
+		skill_block.add_child(rank_label)
+		_skill_rank_labels[skill_id] = rank_label
 
 	_tooltip = PanelContainer.new()
 	_tooltip.visible = false
@@ -192,7 +225,7 @@ func _build() -> void:
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_STOP
 	_tooltip.add_theme_stylebox_override("panel", _tooltip_style())
 	tree.add_child(_tooltip)
-	_bind_skill_hover(_tooltip, _current_skill_id())
+	_hover_controls.append(_tooltip)
 
 	var tip_root := VBoxContainer.new()
 	tip_root.add_theme_constant_override("separation", 6)
@@ -212,7 +245,7 @@ func _build() -> void:
 	_spend_button.custom_minimum_size = Vector2(38, 30)
 	_spend_button.pressed.connect(_on_spend_pressed)
 	tip_root.add_child(_spend_button)
-	_bind_skill_hover(_spend_button, _current_skill_id())
+	_hover_controls.append(_spend_button)
 
 	_points_label = _label("", 18, Color("#bfc6c2"))
 	_points_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -222,30 +255,46 @@ func _build() -> void:
 
 
 func _render() -> void:
-	if _points_label == null or _rank_label == null or _spend_button == null:
+	if _points_label == null or _spend_button == null:
 		return
+	if _selected_skill_id == "" or SkillRulesLoader.skill_definition(_selected_skill_id).is_empty():
+		_selected_skill_id = SkillRulesLoader.first_skill_id()
 	var unspent := int(skill_progression.get("unspent_skill_points", 0))
 	var skill_id := _current_skill_id()
 	var skill := _skill_row(skill_id)
 	var rank := int(skill.get("rank", 0))
-	var max_rank := int(skill.get("max_rank", 0))
-	var unlocked := rank > 0
+	var max_rank := int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 0))))
 	_points_label.text = "Skill choices remaining  %d" % unspent
-	_rank_label.text = "%d / %d" % [rank, max_rank]
-	_spend_button.disabled = not interactive or unspent <= 0 or rank >= max_rank or not bool(skill.get("can_spend", false))
+	_spend_button.disabled = not _skill_spend_enabled(skill_id)
 	_spend_button.tooltip_text = "Spend point in %s" % _skill_name(skill_id)
 	if _tooltip_title != null:
 		_tooltip_title.text = _skill_name(skill_id)
 	_tooltip_rank.text = "Rank %d / %d" % [rank, max_rank]
 	_tooltip_body.text = _tooltip_text(skill_id, maxi(rank, 1))
-	var assigned_key := _assigned_key_for_skill(skill_id)
-	_assigned_key_label.text = assigned_key
-	_assigned_key_label.visible = assigned_key != ""
-	_skill_block.add_theme_stylebox_override("panel", _skill_block_style(unlocked, _right_click_skill_id == skill_id))
-	_skill_icon_label.text = _skill_icon_label_text(skill_id) if unlocked else "-"
-	_skill_icon_label.add_theme_color_override("font_color", _skill_icon_color(skill_id))
-	_skill_icon_label.modulate = Color(1, 1, 1, 1) if unlocked else Color(0.42, 0.42, 0.42, 1)
-	_rank_label.modulate = Color(1, 1, 1, 1) if unlocked else Color(0.45, 0.45, 0.45, 1)
+	for raw_skill_id in _tree_skill_ids():
+		var row_skill_id := str(raw_skill_id)
+		var row := _skill_row(row_skill_id)
+		var row_rank := int(row.get("rank", 0))
+		var row_max_rank := int(row.get("max_rank", int(_skill_def(row_skill_id).get("max_rank", 0))))
+		var unlocked := row_rank > 0
+		var selected := row_skill_id == skill_id
+		var block := _skill_blocks.get(row_skill_id, null) as Panel
+		if block != null:
+			block.add_theme_stylebox_override("panel", _skill_block_style(unlocked, selected or _right_click_skill_id == row_skill_id))
+		var icon_label := _skill_icon_labels.get(row_skill_id, null) as Label
+		if icon_label != null:
+			icon_label.text = _skill_icon_label_text(row_skill_id)
+			icon_label.add_theme_color_override("font_color", _skill_icon_color(row_skill_id))
+			icon_label.modulate = Color(1, 1, 1, 1) if unlocked or selected else Color(0.5, 0.5, 0.5, 1)
+		var assigned_key_label := _assigned_key_labels.get(row_skill_id, null) as Label
+		if assigned_key_label != null:
+			var assigned_key := _assigned_key_for_skill(row_skill_id)
+			assigned_key_label.text = assigned_key
+			assigned_key_label.visible = assigned_key != ""
+		var rank_label := _skill_rank_labels.get(row_skill_id, null) as Label
+		if rank_label != null:
+			rank_label.text = "%d/%d" % [row_rank, row_max_rank]
+			rank_label.modulate = Color(1, 1, 1, 1) if unlocked or selected else Color(0.45, 0.45, 0.45, 1)
 
 
 func _on_spend_pressed() -> void:
@@ -288,7 +337,7 @@ func _mouse_over_skill_controls() -> bool:
 
 
 func _show_tooltip(skill_id: String) -> void:
-	if skill_id != _current_skill_id() or _tooltip == null:
+	if not _select_skill(skill_id) or _tooltip == null:
 		return
 	_tooltip.visible = true
 
@@ -306,7 +355,38 @@ func _assigned_key_for_skill(skill_id: String) -> String:
 
 
 func _current_skill_id() -> String:
+	if _selected_skill_id != "" and not SkillRulesLoader.skill_definition(_selected_skill_id).is_empty():
+		return _selected_skill_id
 	return SkillRulesLoader.first_skill_id()
+
+
+func _select_skill(skill_id: String) -> bool:
+	if skill_id == "" or SkillRulesLoader.skill_definition(skill_id).is_empty():
+		return false
+	_selected_skill_id = skill_id
+	_render()
+	return true
+
+
+func _tree_skill_ids() -> Array:
+	return SkillRulesLoader.skill_ids_by_tree()
+
+
+func _skill_block_position(skill_id: String) -> Vector2:
+	var tree: Dictionary = _skill_def(skill_id).get("tree", {})
+	var tier := maxi(1, int(tree.get("tier", 1)))
+	var column := maxi(1, int(tree.get("column", 1)))
+	return Vector2(18 + (column - 1) * 94, 54 + (tier - 1) * 98)
+
+
+func _skill_spend_enabled(skill_id: String) -> bool:
+	var skill := _skill_row(skill_id)
+	var rank := int(skill.get("rank", 0))
+	var max_rank := int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 0))))
+	return interactive \
+		and int(skill_progression.get("unspent_skill_points", 0)) > 0 \
+		and rank < max_rank \
+		and bool(skill.get("can_spend", false))
 
 
 func _skill_def(skill_id: String) -> Dictionary:

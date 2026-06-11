@@ -70,7 +70,6 @@
     "reachable_targets": [
       { "kind": "stairs_up", "position": { "x": 67, "y": 35 } },
       { "kind": "stairs_down", "position": { "x": 88, "y": 15 } },
-      { "kind": "loot", "def_id": "gold", "position": { "x": 74, "y": 35 } },
       { "kind": "monster", "def_id": "dungeon_archer", "position": { "x": 92, "y": 7 } },
       { "kind": "monster", "def_id": "dungeon_archer", "position": { "x": 54, "y": 7 } },
       { "kind": "monster", "def_id": "dungeon_archer", "position": { "x": 85, "y": 40 } },

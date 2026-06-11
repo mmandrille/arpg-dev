@@ -75,6 +75,12 @@ func _initialize() -> void:
 		return
 	if not _verify_interactable_vendor_models():
 		return
+	if not _verify_interactable_stair_models():
+		return
+	if not _verify_ground_texture_selection():
+		return
+	if not _verify_wall_texture_material():
+		return
 
 	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
 	quit(0)
@@ -359,6 +365,121 @@ func _verify_interactable_vendor_models() -> bool:
 		return false
 	vendor.free()
 	mystery.free()
+	main.free()
+	return true
+
+
+func _verify_interactable_stair_models() -> bool:
+	var main = MainScript.new()
+	var up := main._make_entity_node({"type": "interactable", "interactable_def_id": "stairs_up"})
+	var down := main._make_entity_node({"type": "interactable", "interactable_def_id": "stairs_down"})
+	if up == null or up.find_child("UpHighLanding", true, false) == null or up.find_child("UpBackWall", true, false) == null:
+		_fail("stairs_up did not use raised stair model")
+		main.free()
+		return false
+	if down == null or down.find_child("DownPitOpening", true, false) == null or down.find_child("DownBackWall", true, false) == null:
+		_fail("stairs_down did not use descending pit model")
+		up.free()
+		main.free()
+		return false
+	var first_down_step := down.find_child("DownStep0", true, false) as Node3D
+	var last_down_step := down.find_child("DownStep4", true, false) as Node3D
+	if first_down_step == null or last_down_step == null or first_down_step.position.y <= last_down_step.position.y:
+		_fail("stairs_down steps do not descend into the opening")
+		up.free()
+		down.free()
+		main.free()
+		return false
+	var first_up_step := up.find_child("UpStep0", true, false) as Node3D
+	var last_up_step := up.find_child("UpStep4", true, false) as Node3D
+	if first_up_step == null or last_up_step == null or first_up_step.position.y >= last_up_step.position.y:
+		_fail("stairs_up steps do not rise to the landing")
+		up.free()
+		down.free()
+		main.free()
+		return false
+	up.free()
+	down.free()
+	main.free()
+	return true
+
+
+func _verify_ground_texture_selection() -> bool:
+	var main = MainScript.new()
+	if main._ground_texture_id_for_level(0) != MainScript.GROUND_TEXTURE_TOWN:
+		_fail("town level did not select grass ground texture")
+		main.free()
+		return false
+	for level in [-1, -2, -10, 1]:
+		if main._ground_texture_id_for_level(level) != MainScript.GROUND_TEXTURE_DUNGEON:
+			_fail("dungeon level %d did not select rock ground texture" % level)
+			main.free()
+			return false
+	var town_a: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 0, 0)
+	var town_b: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 17, 29)
+	var rock_a: Color = main._ground_texel(MainScript.GROUND_TEXTURE_DUNGEON, 0, 0)
+	var rock_b: Color = main._ground_texel(MainScript.GROUND_TEXTURE_DUNGEON, 17, 29)
+	if town_a == rock_a:
+		_fail("town and dungeon ground textures share the same base texel")
+		main.free()
+		return false
+	if town_a == town_b or rock_a == rock_b:
+		_fail("ground textures are flat colors")
+		main.free()
+		return false
+	var mat := main._ground_material_for_level(-1)
+	if mat.albedo_texture == null:
+		_fail("dungeon ground material is missing its generated texture")
+		main.free()
+		return false
+	main.free()
+	return true
+
+
+func _verify_wall_texture_material() -> bool:
+	var main = MainScript.new()
+	var generated := main._make_wall_node({
+		"id": "test_generated",
+		"position": {"x": 4.0, "y": 5.0},
+		"size": {"x": 8.0, "y": 2.0},
+		"source": "generated",
+	})
+	var perimeter := main._make_wall_node({
+		"id": "test_perimeter",
+		"position": {"x": 4.0, "y": 5.0},
+		"size": {"x": 8.0, "y": 2.0},
+		"source": "perimeter",
+	})
+	var generated_mat := generated.material_override as StandardMaterial3D
+	var perimeter_mat := perimeter.material_override as StandardMaterial3D
+	if generated_mat == null or generated_mat.albedo_texture == null:
+		_fail("generated cave wall material is missing its stone texture")
+		generated.free()
+		perimeter.free()
+		main.free()
+		return false
+	if perimeter_mat == null or perimeter_mat.albedo_texture == null:
+		_fail("perimeter cave wall material is missing its stone texture")
+		generated.free()
+		perimeter.free()
+		main.free()
+		return false
+	var wall_a: Color = main._wall_texel(MainScript.WALL_TEXTURE_CAVE, 0, 0)
+	var wall_b: Color = main._wall_texel(MainScript.WALL_TEXTURE_CAVE, 17, 19)
+	if wall_a == wall_b:
+		_fail("cave wall texture is flat")
+		generated.free()
+		perimeter.free()
+		main.free()
+		return false
+	if generated_mat.albedo_color == perimeter_mat.albedo_color:
+		_fail("generated and perimeter wall materials use the same tint")
+		generated.free()
+		perimeter.free()
+		main.free()
+		return false
+	generated.free()
+	perimeter.free()
 	main.free()
 	return true
 

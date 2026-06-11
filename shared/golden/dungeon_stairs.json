@@ -12,9 +12,7 @@
     "-2": {
       "stairs_up": { "x": 24, "y": 43 },
       "stairs_down": { "x": 30, "y": 2 },
-      "loot": [
-        { "item_def_id": "gold", "position": { "x": 31, "y": 43 } }
-      ]
+      "loot": []
     },
     "-3": {
       "stairs_up": { "x": 14, "y": 30 },

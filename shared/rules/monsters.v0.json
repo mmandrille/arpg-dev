@@ -83,6 +83,17 @@
       "armor": 0,
       "block_percent": 0
     },
+    "stats_panel_dummy": {
+      "name": "Stats Panel Dummy",
+      "max_hp": 1,
+      "loot_table": "no_drop",
+      "xp_reward": 30,
+      "hit_chance": 0.5,
+      "crit_chance": 0.0,
+      "crit_damage": 1.5,
+      "armor": 0,
+      "block_percent": 0
+    },
     "training_dummy_chase": {
       "name": "Training Dummy",
       "max_hp": 3,

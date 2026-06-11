@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v75 — `persistent-window-layout` |
+| **Latest completed slice** | v76 — `main-config-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -94,6 +94,7 @@ v72_* = monster-visual-catalog
 v73_* = draggable-window-foundation
 v74_* = gameplay-window-chrome
 v75_* = persistent-window-layout
+v76_* = main-config-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -209,6 +210,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v73** | `draggable-window-foundation` | Complete (`make client-unit` green) | [`v73_spec-draggable-window-foundation.md`](docs/specs/v73_spec-draggable-window-foundation.md) | [`v73_2026-06-11-draggable-window-foundation.md`](docs/plans/v73_2026-06-11-draggable-window-foundation.md) | [`as-built`](docs/as-built/v73_draggable-window-foundation.md) |
 | **v74** | `gameplay-window-chrome` | Complete (`make client-unit` green) | [`v74_spec-gameplay-window-chrome.md`](docs/specs/v74_spec-gameplay-window-chrome.md) | [`v74_2026-06-11-gameplay-window-chrome.md`](docs/plans/v74_2026-06-11-gameplay-window-chrome.md) | [`as-built`](docs/as-built/v74_gameplay-window-chrome.md) |
 | **v75** | `persistent-window-layout` | Complete (`make client-unit` green) | [`v75_spec-persistent-window-layout.md`](docs/specs/v75_spec-persistent-window-layout.md) | [`v75_2026-06-11-persistent-window-layout.md`](docs/plans/v75_2026-06-11-persistent-window-layout.md) | [`as-built`](docs/as-built/v75_persistent-window-layout.md) |
+| **v76** | `main-config-foundation` | Complete (`make ci` green) | [`v76_spec-main-config-foundation.md`](docs/specs/v76_spec-main-config-foundation.md) | [`v76_2026-06-11-main-config-foundation.md`](docs/plans/v76_2026-06-11-main-config-foundation.md) | [`as-built`](docs/as-built/v76_main-config-foundation.md) |
 
 ---
 
@@ -640,6 +642,10 @@ and existing gameplay-panel APIs.
 for character stats, skills, inventory, shop, and stash through `user://window_layout.cfg`, while
 disabling normal persistence during client unit tests.
 
+**Main gameplay config foundation is now validated.** v76 adds `main_config.v0.json`, exposes it
+through the Go rules loader, and adds drift guards against current combat, movement, and dungeon
+monster drop defaults until follow-up slices consume those values directly.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -652,7 +658,7 @@ disabling normal persistence during client unit tests.
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
-| Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up |
+| Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. Main-config follow-ups: v77 should make combat/movement consumers and assertions derive from `main_config.v0.json`; v78 should replace repeated dungeon monster drop weights with reusable config-driven drop profiles. | v32 test-locking policy follow-up, v76 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

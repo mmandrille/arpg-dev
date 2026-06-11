@@ -14,6 +14,7 @@ import (
 // Go server and the Godot client read the same files (ADR-0001 D6); this is the
 // server's loader and typed view.
 type Rules struct {
+	MainConfig          MainConfig
 	Combat               Combat
 	Navigation           NavigationRules
 	Items                map[string]ItemDef
@@ -31,6 +32,18 @@ type Rules struct {
 	DungeonGeneration    DungeonGenerationRules
 	BossTemplates        map[string]BossTemplateDef
 	BossPatterns         map[string]BossPatternDef
+}
+
+// MainConfig holds high-level gameplay tuning values that are being promoted
+// into one designer-facing file before older rules consume them directly.
+type MainConfig struct {
+	Gameplay MainGameplayConfig `json:"gameplay"`
+}
+
+type MainGameplayConfig struct {
+	BaseAttackIntervalTicks int     `json:"base_attack_interval_ticks"`
+	BaseMovementSpeed       float64 `json:"base_movement_speed"`
+	BaseDropRatePercent     int     `json:"base_drop_rate_percent"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -767,6 +780,24 @@ type WorldEntity struct {
 // LoadRules reads and parses the v0 rules files from a directory.
 func LoadRules(dir string) (*Rules, error) {
 	r := &Rules{}
+
+	var mainConfig struct {
+		Version  int                `json:"version"`
+		Gameplay MainGameplayConfig `json:"gameplay"`
+	}
+	if err := readJSON(filepath.Join(dir, "main_config.v0.json"), &mainConfig); err != nil {
+		return nil, err
+	}
+	if mainConfig.Gameplay.BaseAttackIntervalTicks <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_attack_interval_ticks: must be positive")
+	}
+	if mainConfig.Gameplay.BaseMovementSpeed <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_movement_speed: must be positive")
+	}
+	if mainConfig.Gameplay.BaseDropRatePercent < 0 || mainConfig.Gameplay.BaseDropRatePercent > 100 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_drop_rate_percent: must be within [0,100]")
+	}
+	r.MainConfig = MainConfig{Gameplay: mainConfig.Gameplay}
 
 	var combat struct {
 		Version                 int         `json:"version"`

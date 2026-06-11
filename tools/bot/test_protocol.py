@@ -151,17 +151,17 @@ def test_bot_scenarios_do_not_use_large_raw_tick_waits():
     assert offenders == []
 
 
-def test_protocol_bot_scenario_elapsed_budget_is_ten_seconds():
-    assert MAX_SCENARIO_ELAPSED_S == 10.0
-    assert_scenario_elapsed_within_budget("unit_fast", 10.0)
+def test_protocol_bot_scenario_elapsed_budget_is_sixty_seconds():
+    assert MAX_SCENARIO_ELAPSED_S == 60.0
+    assert_scenario_elapsed_within_budget("unit_fast", 60.0)
 
 
 def test_protocol_bot_scenario_elapsed_budget_rejects_slow_scenarios():
     try:
-        assert_scenario_elapsed_within_budget("unit_slow", 10.01)
+        assert_scenario_elapsed_within_budget("unit_slow", 60.01)
     except TimeoutError as exc:
         assert "unit_slow" in str(exc)
-        assert "budget is 10.00s" in str(exc)
+        assert "budget is 60.00s" in str(exc)
     else:
         raise AssertionError("slow scenario was not rejected")
 

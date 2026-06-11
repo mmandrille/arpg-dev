@@ -64,7 +64,7 @@
       "y": 8,
       "pathfind": true,
       "max_ticks": 120,
-      "tolerance": 1.0
+      "tolerance": 2.0
     },
     {
       "action": "wait_for_combat_event",

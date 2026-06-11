@@ -273,7 +273,7 @@ func _test_dead_character_rows_are_disabled() -> void:
 		{"character_id": "char_live", "name": "Alive", "created_at": "2026-06-09T00:00:00Z", "dead": false},
 	])
 	var dead_row := panel._rows.get_child(0) as HBoxContainer
-	var dead_button := dead_row.get_child(0) as Button
+	var dead_button := _first_button_child(dead_row)
 	_assert_true("dead character select disabled", dead_button.disabled)
 	_assert_true("dead character has skull marker", dead_button.text.begins_with("☠"))
 	_assert_true("dead character row keeps summary", dead_button.text.find("Lv 1") >= 0 and dead_button.text.find("0g") >= 0 and dead_button.text.find("D0") >= 0)
@@ -452,14 +452,15 @@ func _test_character_stats_window_chrome() -> void:
 	panel.ensure_display_visible()
 	var state: Dictionary = panel.get_debug_state()
 	var window: Dictionary = state.get("window", {})
+	var start_position: Dictionary = window.get("position", {})
 	_assert_eq("stats window title", str(window.get("title", "")), "Character")
 	_assert_true("stats window has close button", bool(window.get("close_visible", false)))
 	_assert_true("stats window is draggable", bool(window.get("draggable", false)))
 	panel.bot_drag_window_by(Vector2(32, 18))
 	state = panel.get_debug_state()
 	var moved_position: Dictionary = (state.get("window", {}) as Dictionary).get("position", {})
-	_assert_eq("stats drag moved x", int(moved_position.get("x", 0)), 48)
-	_assert_eq("stats drag moved y", int(moved_position.get("y", 0)), 136)
+	_assert_eq("stats drag moved x", int(moved_position.get("x", 0)), int(start_position.get("x", 0)) + 32)
+	_assert_eq("stats drag moved y", int(moved_position.get("y", 0)), int(start_position.get("y", 0)) + 18)
 	panel.bot_drag_window_by(Vector2(-10000, -10000))
 	state = panel.get_debug_state()
 	var clamped_position: Dictionary = (state.get("window", {}) as Dictionary).get("position", {})
@@ -475,6 +476,7 @@ func _test_draggable_window_persists_layout() -> void:
 	var old_force: bool = DraggableWindowScript.force_enable_persistence_for_tests
 	DraggableWindowScript.layout_storage_path = "user://test_window_layout.cfg"
 	DraggableWindowScript.force_enable_persistence_for_tests = true
+	_remove_user_file(DraggableWindowScript.layout_storage_path)
 	var first = DraggableWindowScript.new()
 	root.add_child(first)
 	first.custom_minimum_size = Vector2(200, 120)
@@ -498,6 +500,19 @@ func _test_draggable_window_persists_layout() -> void:
 	second.queue_free()
 	DraggableWindowScript.layout_storage_path = old_path
 	DraggableWindowScript.force_enable_persistence_for_tests = old_force
+
+
+func _first_button_child(node: Node) -> Button:
+	for child in node.get_children():
+		if child is Button:
+			return child as Button
+	return null
+
+
+func _remove_user_file(path: String) -> void:
+	var absolute_path := ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(absolute_path):
+		DirAccess.remove_absolute(absolute_path)
 
 
 func _test_actionable_panels_autoclose_out_of_range() -> void:

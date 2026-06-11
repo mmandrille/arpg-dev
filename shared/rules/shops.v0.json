@@ -14,7 +14,7 @@
         "source_depth_policy": "character_level_plus_one_to_deepest_else_any_achieved",
         "max_rarity": "rare",
         "refresh_on": "new_non_town_waypoint",
-        "max_roll_attempts": 128
+        "max_roll_attempts": 512
       },
       "buyback": {
         "enabled": true,

@@ -65,6 +65,11 @@ func writeGolden(t *testing.T, name string, v any) {
 
 func TestLoadRules(t *testing.T) {
 	r := loadRules(t)
+	if r.MainConfig.Gameplay.BaseAttackIntervalTicks != 20 ||
+		r.MainConfig.Gameplay.BaseMovementSpeed != 1.0 ||
+		r.MainConfig.Gameplay.BaseDropRatePercent != 20 {
+		t.Fatalf("main config gameplay = %+v", r.MainConfig.Gameplay)
+	}
 	if r.Combat.PlayerDamage.Min != 2 || r.Combat.PlayerDamage.Max != 4 {
 		t.Fatalf("combat player_damage = %+v, want {2,4}", r.Combat.PlayerDamage)
 	}

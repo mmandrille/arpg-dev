@@ -30,14 +30,13 @@
           "action": "cast_skill",
           "skill_id": "heal",
           "target_self": true,
-          "event_type": "skill_cast",
-          "expect_skill_cooldown": { "skill_id": "heal", "remaining_ticks": 40, "total_ticks": 40 }
+          "event_type": "skill_cast"
         }
       ],
       "assertions": [
         { "type": "event_seen", "event_type": "skill_cast", "skill_id": "heal", "rank": 1, "mana": 10 },
         { "type": "event_seen", "event_type": "player_healed", "skill_id": "heal", "heal": 3 },
-        { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "heal", "total_ticks": 40 },
+        { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "heal", "total_ticks": 32 },
         { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false }
       ]
     }

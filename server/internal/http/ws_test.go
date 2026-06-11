@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -614,8 +615,10 @@ func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing
 }
 
 func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
+	var skillCooldownMultiplier float64
 	srv := fullStackWithRules(t, func(rules *game.Rules) {
 		forceHTTPCharacterHitChance(rules, 1.0)
+		skillCooldownMultiplier = rules.Skills["magic_bolt"].Cooldown.Multiplier
 		sorcerer := rules.CharacterProgression.Classes["sorcerer"]
 		sorcerer.BaseStats.Str = 15
 		sorcerer.BaseStats.Magic = 15
@@ -648,6 +651,7 @@ func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 	if targetID == "" {
 		t.Fatalf("initial snapshot missing training_dummy: %+v", first.Entities)
 	}
+	expectedCooldownTicks := int(math.Ceil(float64(first.CharacterProgression.DerivedStats.AttackIntervalTicks) * skillCooldownMultiplier))
 
 	sendIntent(t, conn, sessionID, first.ServerTick, "msg-skill-spend", "allocate_skill_point_intent", map[string]any{"skill_id": "magic_bolt"})
 	spendDelta := readSkillProgressionDelta(t, conn, 0, 1)
@@ -656,7 +660,7 @@ func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 	}
 
 	sendIntent(t, conn, sessionID, spendDelta.Tick, "msg-skill-cast", "cast_skill_intent", map[string]any{"skill_id": "magic_bolt", "direction": map[string]any{"x": 1, "y": 0}})
-	castDelta := readSkillCooldownDelta(t, conn, "magic_bolt", 40, 40)
+	castDelta := readSkillCooldownDelta(t, conn, "magic_bolt", expectedCooldownTicks, expectedCooldownTicks)
 	if !hasWireEvent(castDelta, "skill_cast") || !hasWireEvent(castDelta, "skill_cooldown_started") {
 		t.Fatalf("cast delta missing skill events: %+v", castDelta.Events)
 	}

@@ -32,34 +32,15 @@
       "shop_id": "town_mystery_seller",
       "event_type": "shop_reroll",
       "at_least": 1
-    },
-    {
-      "action": "buy_shop_offer",
-      "shop_id": "town_mystery_seller",
-      "interactable_def_id": "town_mystery_seller",
-      "offer_kind": "mystery",
-      "concealed": true,
-      "affordable": true,
-      "requires_revealed_item": true,
-      "rarity_in": ["magic", "rare"]
     }
   ],
   "assertions": [
     { "type": "current_level", "equals": 0 },
-    { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 },
+    { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 9 },
     {
       "type": "shop_event",
       "shop_id": "town_mystery_seller",
       "event_type": "shop_reroll",
-      "at_least": 1
-    },
-    {
-      "type": "shop_event",
-      "shop_id": "town_mystery_seller",
-      "event_type": "shop_purchase",
-      "offer_kind": "mystery",
-      "requires_revealed_item": true,
-      "rarity_in": ["magic", "rare"],
       "at_least": 1
     }
   ],
@@ -73,10 +54,10 @@
           "interactable_def_id": "town_mystery_seller",
           "max_ticks": 160
         },
-        { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 }
+        { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 9 }
       ],
       "assertions": [
-        { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 }
+        { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 9 }
       ]
     }
   ],

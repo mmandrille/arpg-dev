@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/main_config.v0.schema.json",
+  "title": "Main gameplay config (v0)",
+  "description": "Top-level gameplay tuning values that can be adjusted before lower-level rule files are regenerated or refactored to consume them directly.",
+  "type": "object",
+  "required": ["version", "gameplay"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "const": 0 },
+    "gameplay": {
+      "type": "object",
+      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent"],
+      "additionalProperties": false,
+      "properties": {
+        "base_attack_interval_ticks": { "type": "integer", "minimum": 1 },
+        "base_movement_speed": { "type": "number", "exclusiveMinimum": 0 },
+        "base_drop_rate_percent": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    }
+  }
+}

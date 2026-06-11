@@ -783,7 +783,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 }
 
 func TestVerifyCoopReplayMatchesActorCombatAndLootEvents(t *testing.T) {
-	rules := loadRules(t)
+	rules := reliableReplayHitRules(t)
 	repo := &fakeRepo{
 		session: store.Session{ID: testSessionID, Seed: "v33_coop_combat_replay", WorldID: "gear_before_combat", Mode: store.SessionModeCoop},
 		members: []store.SessionMember{

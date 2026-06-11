@@ -1,0 +1,80 @@
+server/internal/store/store_test.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 406,409,412,634-650,704,727-731,758-759
+server/internal/game/handlers.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 44,905-929
+client/scripts/main.gd
+  s_4c0cc59c104e28::t_1960f4fd5bcde9 869,964-966,2806,2819,2850-2865
+server/internal/http/session.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 362-367,386
+server/internal/store/repos.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 207-208,216-217,226-227,446-447,1112-1221,1612,1680-1698,1848-1879
+shared/protocol/envelope.v8.schema.json
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 30
+server/internal/replay/replay.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 324,352,471,568-572
+client/tests/test_coop_client.gd
+  s_4c0cc59c104e28::t_6a185299d261e6 684-689
+server/internal/store/interfaces.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 61-62,72
+server/internal/store/models.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 188-195,223
+server/internal/realtime/session_loop.go
+  s_4c0cc59c104e28::t_80855f5ea6b892 139,161,259
+  s_4c0cc59c104e28::t_d91d079183153e 742-754
+shared/protocol/session_snapshot.v8.schema.json
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 37,377-388
+shared/protocol/state_delta.v8.schema.json
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 727-740,890-896
+server/internal/inputdecode/inputdecode.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 29,96-99,122,233-238
+server/internal/replay/replay_test.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 1443-1448,1476
+server/internal/game/types.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 447-452,477,500,530,638-642
+server/internal/realtime/hub.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 165-171
+server/internal/store/stale_sessions_test.go
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 105
+server/internal/realtime/runner.go
+  s_4c0cc59c104e28::t_d91d079183153e 496-508
+shared/protocol/examples/set_skill_bindings_intent.json
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 1-10
+server/internal/game/game_test.go
+  s_4c0cc59c104e28::t_fb6e9aa67fe3f2 657-675
+shared/protocol/messages.v8.schema.json
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 30,85-86,233-244
+server/migrations/0015_character_skill_bindings.sql
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 1-45
+shared/protocol/examples/session_snapshot.json
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 123-126
+shared/protocol/examples/state_delta.json
+  s_1e8b8d9cb32141::t_f17c3a34106ddc 82-88
+server/internal/game/sim.go
+  s_4c0cc59c104e28::t_eb56d2dc608c80 62
+  s_4c0cc59c104e28::t_7386245efde7db 660,711-716,841-842
+  s_4c0cc59c104e28::t_a4f575a125cd2a 6160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c6bfffc9c9975ba9779778164ab986fb6ca35f70",
+  "prompts": {},
+  "sessions": {
+    "s_1e8b8d9cb32141": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4ed-e3d7-7660-878d-330420be72c6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_4c0cc59c104e28": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4fc-520c-7230-b3f4-43f216d2c5cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

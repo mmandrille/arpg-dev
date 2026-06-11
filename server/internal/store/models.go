@@ -185,6 +185,7 @@ type CharacterProgressionDefaults struct {
 type CharacterProgression struct {
 	AccountID           string
 	CharacterID         string
+	CharacterClass      string
 	Level               int
 	Experience          int
 	UnspentStatPoints   int

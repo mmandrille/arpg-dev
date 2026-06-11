@@ -128,7 +128,11 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	if err != nil {
 		return nil, nil, fmt.Errorf("load host start snapshot: %w", err)
 	}
-	sim, err := game.NewSimWithWorldProgression(sess.ID, sess.Seed, h.rules, worldID, progressionStateFromStore(h.rules, hostStart.Progression))
+	hostProgression, err := h.progressionStateForMember(ctx, host, hostStart.Progression)
+	if err != nil {
+		return nil, nil, err
+	}
+	sim, err := game.NewSimWithWorldProgression(sess.ID, sess.Seed, h.rules, worldID, hostProgression)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -152,7 +156,11 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		if err != nil {
 			return nil, nil, fmt.Errorf("load guest start snapshot: %w", err)
 		}
-		playerID, err := sim.AddGuestPlayer(member.AccountID, member.CharacterID, "Guest", progressionStateFromStore(h.rules, start.Progression))
+		memberProgression, err := h.progressionStateForMember(ctx, member, start.Progression)
+		if err != nil {
+			return nil, nil, err
+		}
+		playerID, err := sim.AddGuestPlayer(member.AccountID, member.CharacterID, "Guest", memberProgression)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -167,6 +175,22 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		}
 	}
 	return sim, nil, nil
+}
+
+func (h *Hub) progressionStateForMember(ctx context.Context, member store.SessionMember, progression *store.CharacterProgression) (game.CharacterProgressionState, error) {
+	if progression == nil {
+		return progressionStateFromStore(h.rules, progression), nil
+	}
+	character, err := h.store.GetCharacter(ctx, member.CharacterID)
+	if err != nil {
+		return game.CharacterProgressionState{}, fmt.Errorf("load character class: %w", err)
+	}
+	if character.CharacterClass == "" || character.CharacterClass == progression.CharacterClass {
+		return progressionStateFromStore(h.rules, progression), nil
+	}
+	updated := *progression
+	updated.CharacterClass = character.CharacterClass
+	return progressionStateFromStore(h.rules, &updated), nil
 }
 
 func (l *sessionLoop) start() {

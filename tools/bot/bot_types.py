@@ -20,6 +20,7 @@ class Scenario:
     peer_count: int
     title: str
     description: str
+    character_class: str
     steps: list[dict[str, Any]]
     assertions: list[Any]
     fresh_session_checks: list[dict[str, Any]]

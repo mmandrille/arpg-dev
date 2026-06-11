@@ -308,6 +308,7 @@ type Sim struct {
 // CharacterProgressionState is the authoritative mutable progression state for
 // one character inside a sim session.
 type CharacterProgressionState struct {
+	CharacterClass      string
 	Level               int
 	Experience          int
 	UnspentStatPoints   int
@@ -456,6 +457,7 @@ func townNavigationForWorld(global NavigationRules, world WorldDef) NavigationRu
 func (r *Rules) DefaultCharacterProgressionState() CharacterProgressionState {
 	return CharacterProgressionState{
 		Level:               1,
+		CharacterClass:      "barbarian",
 		Experience:          0,
 		UnspentStatPoints:   0,
 		UnspentSkillPoints:  0,
@@ -469,6 +471,9 @@ func (r *Rules) DefaultCharacterProgressionState() CharacterProgressionState {
 func (r *Rules) normalizeProgressionState(in CharacterProgressionState) CharacterProgressionState {
 	if in.Level < 1 {
 		in.Level = 1
+	}
+	if in.CharacterClass == "" {
+		in.CharacterClass = "barbarian"
 	}
 	if in.Experience < 0 {
 		in.Experience = 0
@@ -5307,6 +5312,7 @@ func (s *Sim) currentMaxMana() int {
 func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 	remaining := s.experienceToNextLevel()
 	return CharacterProgressionView{
+		CharacterClass:        s.progression.CharacterClass,
 		Level:                 s.progression.Level,
 		Experience:            s.progression.Experience,
 		ExperienceToNextLevel: remaining,
@@ -5333,7 +5339,7 @@ func (s *Sim) SkillProgressionView() SkillProgressionView {
 			SkillID:  skillID,
 			Rank:     rank,
 			MaxRank:  def.MaxRank,
-			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank && s.skillRequirementsMet(def, rank+1),
+			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank && s.skillClassAllowed(def) && s.skillRequirementsMet(def, rank+1),
 		})
 	}
 	return SkillProgressionView{
@@ -5558,6 +5564,21 @@ func (s *Sim) skillRequirementsMet(def SkillDef, rank int) bool {
 		}
 	}
 	return true
+}
+
+func (s *Sim) skillClassAllowed(def SkillDef) bool {
+	return def.Class == "" || def.Class == s.progression.CharacterClass
+}
+
+func (s *Sim) itemClassAllowed(item *invItem) bool {
+	if item == nil || item.rollPayload != nil {
+		return true
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok {
+		return true
+	}
+	return def.ClassRequired == "" || def.ClassRequired == s.progression.CharacterClass
 }
 
 func skillRequirementsForRank(req SkillRequirementDef, rank int) map[string]int {

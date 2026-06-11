@@ -126,25 +126,28 @@ func TestLoadRules(t *testing.T) {
 	if !bow.Equippable || bow.Slot != "main_hand" || bow.AttackMode != attackModeRanged || bow.Damage == nil || bow.Reach == nil || bow.ProjectileSpeed == nil {
 		t.Fatalf("training_bow def = %+v, want ranged weapon", bow)
 	}
+	if r.Items["barbarian_axe"].ClassRequired != "barbarian" || r.Items["sorcerer_staff"].ClassRequired != "sorcerer" || r.Items["paladin_mace"].ClassRequired != "paladin" {
+		t.Fatalf("class weapon requirements = axe:%q staff:%q mace:%q", r.Items["barbarian_axe"].ClassRequired, r.Items["sorcerer_staff"].ClassRequired, r.Items["paladin_mace"].ClassRequired)
+	}
 	if r.Interactables["wooden_door"].InitialState != interactableClosed {
 		t.Fatalf("wooden_door = %+v, want initially closed", r.Interactables["wooden_door"])
 	}
 	if r.CharacterProgression.PointsPerLevel != 3 || r.CharacterProgression.LevelCap != 100 {
 		t.Fatalf("character progression = %+v, want points_per_level 3 level_cap 100", r.CharacterProgression)
 	}
-	if len(r.CharacterProgression.Classes) != 3 || r.CharacterProgression.Classes["barbarian"].BaseStats.Str != 5 || r.CharacterProgression.Classes["sorcerer"].BaseStats.Magic != 10 || r.CharacterProgression.Classes["paladin"].BaseStats.Vit != 8 {
+	if len(r.CharacterProgression.Classes) != 3 || r.CharacterProgression.Classes["barbarian"].BaseStats.Str != 5 || r.CharacterProgression.Classes["sorcerer"].BaseStats.Str != 3 || r.CharacterProgression.Classes["paladin"].BaseStats.Vit != 8 {
 		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin starting stats", r.CharacterProgression.Classes)
 	}
 	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 3 {
 		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 3", r.CharacterProgression.SkillPoints)
 	}
-	if skill := r.Skills[magicBoltSkillID]; skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
+	if skill := r.Skills[magicBoltSkillID]; skill.Class != "sorcerer" || skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
 		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 5 +3/rank level +1/rank attack interval cooldown", skill)
 	}
-	if skill := r.Skills["rage"]; skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
+	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
 	}
-	if skill := r.Skills["heal"]; skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 3.0 {
+	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 3.0 {
 		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and range/radius effect", skill)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
@@ -548,6 +551,8 @@ func TestStatAllocationVitHPAndRejects(t *testing.T) {
 
 func TestSkillPointCadenceAndSpend(t *testing.T) {
 	sim := MustNewSim("sess_skill_points", "01", loadRules(t))
+	sim.progression.CharacterClass = "sorcerer"
+	sim.savePlayer(sim.defaultPlayer())
 	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
 	sim.awardExperience(140, "corr_skill_xp", &res)
 	sim.savePlayer(sim.defaultPlayer())
@@ -804,6 +809,105 @@ func TestLoadInventoryAppliesEquippedResourceStats(t *testing.T) {
 	}
 }
 
+func TestClassSkillAccessGatesSpendabilityAndLearning(t *testing.T) {
+	rules := loadRules(t)
+	cases := []struct {
+		classID string
+		allowed string
+		blocked string
+	}{
+		{classID: "barbarian", allowed: "rage", blocked: magicBoltSkillID},
+		{classID: "sorcerer", allowed: magicBoltSkillID, blocked: "rage"},
+		{classID: "paladin", allowed: "heal", blocked: magicBoltSkillID},
+	}
+	for _, c := range cases {
+		t.Run(c.classID, func(t *testing.T) {
+			state := rules.DefaultCharacterProgressionState()
+			state.CharacterClass = c.classID
+			state.UnspentSkillPoints = 2
+			classDef := rules.CharacterProgression.Classes[c.classID]
+			state.BaseStats = classDef.BaseStats
+			sim, err := NewSimWithWorldProgression("sess_class_skill_"+c.classID, "class_skill_seed", rules, DefaultWorldID, state)
+			if err != nil {
+				t.Fatalf("new sim: %v", err)
+			}
+			allowed, ok := skillProgressionRow(sim.SkillProgressionView(), c.allowed)
+			if !ok || !allowed.CanSpend {
+				t.Fatalf("%s allowed skill row = %+v ok=%v, want spendable", c.classID, allowed, ok)
+			}
+			blocked, ok := skillProgressionRow(sim.SkillProgressionView(), c.blocked)
+			if !ok || blocked.CanSpend {
+				t.Fatalf("%s blocked skill row = %+v ok=%v, want not spendable", c.classID, blocked, ok)
+			}
+			rejected := sim.Tick([]Input{{
+				MessageID:          "spend_blocked",
+				CorrelationID:      "corr_spend_blocked",
+				Type:               "allocate_skill_point_intent",
+				AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: c.blocked},
+			}})
+			assertReject(t, rejected, "spend_blocked", "skill_class_not_allowed")
+			if sim.progression.SkillRanks[c.blocked] != 0 {
+				t.Fatalf("blocked skill rank mutated: %+v", sim.progression.SkillRanks)
+			}
+			sim.progression.SkillRanks[c.blocked] = 1
+			castRejected := sim.Tick([]Input{{
+				MessageID:     "cast_blocked",
+				CorrelationID: "corr_cast_blocked",
+				Type:          "cast_skill_intent",
+				CastSkill:     &CastSkillIntent{SkillID: c.blocked, Direction: &Vec2{X: 1}},
+			}})
+			assertReject(t, castRejected, "cast_blocked", "skill_class_not_allowed")
+			sim.progression.SkillRanks[c.blocked] = 0
+			spend := sim.Tick([]Input{{
+				MessageID:          "spend_allowed",
+				CorrelationID:      "corr_spend_allowed",
+				Type:               "allocate_skill_point_intent",
+				AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: c.allowed},
+			}})
+			assertAck(t, spend, "spend_allowed")
+			if sim.progression.SkillRanks[c.allowed] != 1 {
+				t.Fatalf("allowed skill rank = %d, want 1", sim.progression.SkillRanks[c.allowed])
+			}
+		})
+	}
+}
+
+func TestClassRequiredWeaponsGateEquip(t *testing.T) {
+	rules := loadRules(t)
+	state := rules.DefaultCharacterProgressionState()
+	state.CharacterClass = "barbarian"
+	state.BaseStats = rules.CharacterProgression.Classes["barbarian"].BaseStats
+	sim, err := NewSimWithWorldProgression("sess_class_weapon_barbarian", "class_weapon_seed", rules, DefaultWorldID, state)
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	sim.inventory = append(sim.inventory,
+		&invItem{instanceID: 2001, itemDefID: "sorcerer_staff"},
+		&invItem{instanceID: 2002, itemDefID: "barbarian_axe"},
+	)
+	sim.savePlayer(sim.defaultPlayer())
+	rejected := sim.Tick([]Input{{
+		MessageID:     "equip_staff",
+		CorrelationID: "corr_equip_staff",
+		Type:          "equip_intent",
+		Equip:         &EquipIntent{ItemInstanceID: "2001", Slot: mainHandSlot},
+	}})
+	assertReject(t, rejected, "equip_staff", "class_requirement_not_met")
+	if sim.equipped[mainHandSlot] != 0 {
+		t.Fatalf("blocked class weapon equipped: %+v", sim.equipped)
+	}
+	equipped := sim.Tick([]Input{{
+		MessageID:     "equip_axe",
+		CorrelationID: "corr_equip_axe",
+		Type:          "equip_intent",
+		Equip:         &EquipIntent{ItemInstanceID: "2002", Slot: mainHandSlot},
+	}})
+	assertAck(t, equipped, "equip_axe")
+	if sim.equipped[mainHandSlot] != 2002 {
+		t.Fatalf("class weapon equipped slot = %d, want 2002", sim.equipped[mainHandSlot])
+	}
+}
+
 func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	zero := 0.0
@@ -815,6 +919,7 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	rules.CharacterProgression.DerivedStats["crit_chance"] = crit
 
 	sim := MustNewSim("sess_magic_bolt", "01", rules)
+	sim.progression.CharacterClass = "sorcerer"
 	sim.progression.BaseStats.Magic = 15
 	sim.progression.SkillRanks[magicBoltSkillID] = 1
 	sim.savePlayer(sim.defaultPlayer())
@@ -896,7 +1001,9 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 
 func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
 	sim := MustNewSim("sess_magic_bolt_requirement", "01", loadRules(t))
+	sim.progression.CharacterClass = "sorcerer"
 	sim.progression.SkillRanks[magicBoltSkillID] = 2
+	sim.savePlayer(sim.defaultPlayer())
 	player := sim.entities[sim.playerID]
 	monster := &entity{
 		id:           sim.alloc(),
@@ -976,6 +1083,8 @@ func TestRageBuffAppliesStatsVisualScaleAndExpires(t *testing.T) {
 func TestHealAreaSkillHealsAlliesAndRejectsNoop(t *testing.T) {
 	rules := loadRules(t)
 	sim := MustNewSim("sess_heal_skill", "01", rules)
+	sim.progression.CharacterClass = "paladin"
+	sim.savePlayer(sim.defaultPlayer())
 	hostID := sim.playerID
 	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
 	if err != nil {

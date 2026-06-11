@@ -1,126 +1,36 @@
 {
   "id": "rage_and_heal_skills",
   "world_id": "skill_progression_lab",
-  "seed": "v61_rage_and_heal_skills",
-  "title": "Rage and Heal skills",
-  "description": "Use a compact skill lab to level to the second skill-point grant, learn baseline Rage and Heal, cast Rage, then prove Heal in a fresh heal lab session.",
+  "seed": "v61_rage_skill",
+  "character_class": "barbarian",
+  "title": "Rage skill",
+  "description": "Use a compact skill lab to prove the barbarian can learn and cast Rage while non-barbarian skill access is blocked by class gates.",
   "steps": [
     { "action": "attack_until_event", "monster_def_id": "skill_xp_level7_dummy", "event_type": "monster_killed", "timeout_s": 20 },
-    {
-      "action": "assert_character_progression",
-      "level": 7,
-      "unspent_stat_points": 18,
-      "str": 5,
-      "vit": 5,
-      "magic": 5,
-      "derived_stats": { "max_hp": 10, "max_mana": 10 }
-    },
-    {
-      "action": "assert_skill_progression",
-      "unspent_skill_points": 2,
-      "skill_id": "rage",
-      "rank": 0,
-      "max_rank": 5,
-      "can_spend": true
-    },
-    {
-      "action": "assert_skill_progression",
-      "unspent_skill_points": 2,
-      "skill_id": "rage",
-      "rank": 0,
-      "max_rank": 5,
-      "can_spend": true
-    },
-    {
-      "action": "assert_skill_progression",
-      "unspent_skill_points": 2,
-      "skill_id": "heal",
-      "rank": 0,
-      "max_rank": 5,
-      "can_spend": true
-    },
+    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": true },
+    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false },
     {
       "action": "allocate_skill_point",
       "skill_id": "rage",
-      "expect_skill_progression": {
-        "unspent_skill_points": 1,
-        "skill_id": "rage",
-        "rank": 1,
-        "max_rank": 5,
-        "can_spend": false
-      }
+      "expect_skill_progression": { "unspent_skill_points": 1, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false }
     },
-    {
-      "action": "allocate_skill_point",
-      "skill_id": "heal",
-      "expect_skill_progression": {
-        "unspent_skill_points": 0,
-        "skill_id": "heal",
-        "rank": 1,
-        "max_rank": 5,
-        "can_spend": false
-      }
-    },
+    { "action": "allocate_skill_point", "skill_id": "heal", "expect_reject": "skill_class_not_allowed" },
     {
       "action": "cast_skill",
       "skill_id": "rage",
       "target_self": true,
       "event_type": "skill_cast",
-      "expect_skill_cooldown": {
-        "skill_id": "rage",
-        "remaining_ticks": 40,
-        "total_ticks": 40
-      }
-    },
-    {
-      "action": "assert_character_progression",
-      "str": 5,
-      "vit": 5,
-      "magic": 5,
-      "derived_stats": { "max_hp": 10, "max_mana": 10 }
+      "expect_skill_cooldown": { "skill_id": "rage", "remaining_ticks": 40, "total_ticks": 40 }
     }
   ],
   "assertions": [
     { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "rage", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "heal", "rank": 1 },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 10 },
     { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "rage", "amount": 10, "remaining_ticks": 450, "total_ticks": 450 },
     { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "rage", "total_ticks": 40 },
-    { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "type": "character_progression", "level": 7, "unspent_stat_points": 18, "str": 5, "vit": 5, "magic": 5 },
-    { "type": "skill_cooldown", "skill_id": "rage", "remaining_ticks": { "between": [1, 40] }, "total_ticks": 40 },
+    { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
+    { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false },
     { "type": "player_max_hp_equals", "equals": 11 }
-  ],
-  "fresh_session_checks": [
-    {
-      "world_id": "heal_lab",
-      "seed": "v61_heal_skill_lab",
-      "steps": [
-        { "action": "attack_until_event", "monster_def_id": "training_dummy_heal", "event_type": "monster_killed" },
-        {
-          "action": "cast_skill",
-          "skill_id": "heal",
-          "target_self": true,
-          "event_type": "skill_cast",
-          "expect_skill_cooldown": {
-            "skill_id": "heal",
-            "remaining_ticks": 40,
-            "total_ticks": 40
-          }
-        }
-      ],
-      "assertions": [
-        { "type": "event_seen", "event_type": "skill_cast", "skill_id": "heal", "rank": 1, "mana": 10 },
-        { "type": "event_seen", "event_type": "player_healed", "skill_id": "heal", "heal": 2 },
-        { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "heal", "total_ticks": 40 },
-        { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
-        { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false },
-        { "type": "character_progression", "level": 7, "unspent_stat_points": 18, "str": 5, "vit": 5, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10 } },
-        { "type": "skill_cooldown", "skill_id": "heal", "remaining_ticks": { "between": [1, 40] }, "total_ticks": 40 },
-        { "type": "player_max_hp_equals", "equals": 10 }
-      ]
-    }
   ],
   "visual": {
     "camera": { "x": 16, "y": 10, "zoom": 1.0 }

@@ -422,6 +422,7 @@ type ItemDef struct {
 	Category        string       `json:"category"`
 	Slot            string       `json:"slot"`
 	Equippable      bool         `json:"equippable"`
+	ClassRequired   string       `json:"class_required,omitempty"`
 	Handedness      string       `json:"handedness,omitempty"`
 	OccupiesHands   []string     `json:"occupies_hands,omitempty"`
 	AttackMode      string       `json:"attack_mode,omitempty"`
@@ -973,6 +974,14 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	for id, def := range items.Items {
+		if def.ClassRequired != "" {
+			if !def.Equippable {
+				return nil, fmt.Errorf("game: invalid rules items.%s.class_required: only valid on equippable items", id)
+			}
+			if _, ok := r.CharacterProgression.Classes[def.ClassRequired]; !ok {
+				return nil, fmt.Errorf("game: invalid rules items.%s.class_required: unknown class %s", id, def.ClassRequired)
+			}
+		}
 		if def.Equippable && def.Slot == "" {
 			return nil, fmt.Errorf("game: invalid rules items.%s: equippable item must declare slot", id)
 		}

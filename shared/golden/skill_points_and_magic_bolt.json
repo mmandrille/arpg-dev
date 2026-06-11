@@ -59,7 +59,7 @@
   },
   "skill": {
     "skill_id": "magic_bolt",
-    "class": "mage",
+    "class": "sorcerer",
     "tree": { "tier": 1, "column": 1 },
     "kind": "projectile_attack",
     "max_rank": 5,

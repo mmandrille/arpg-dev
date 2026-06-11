@@ -607,6 +607,7 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 		return rules.DefaultCharacterProgressionState()
 	}
 	return game.CharacterProgressionState{
+		CharacterClass:      progression.CharacterClass,
 		Level:               progression.Level,
 		Experience:          progression.Experience,
 		UnspentStatPoints:   progression.UnspentStatPoints,

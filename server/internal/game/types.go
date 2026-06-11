@@ -218,6 +218,7 @@ type StatBreakdownView struct {
 // CharacterProgressionView is the protocol view of durable character XP/stat
 // progression plus derived display stats.
 type CharacterProgressionView struct {
+	CharacterClass        string              `json:"character_class"`
 	Level                 int                 `json:"level"`
 	Experience            int                 `json:"experience"`
 	ExperienceToNextLevel *int                `json:"experience_to_next_level"`

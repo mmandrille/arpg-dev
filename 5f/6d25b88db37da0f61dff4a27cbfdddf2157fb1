@@ -1,0 +1,40 @@
+server/internal/game/rules.go
+  s_c8b827646bf8c0::t_95540511aee72b 17,858
+docs/as-built/v77_main-config-derived-gameplay.md
+  s_c8b827646bf8c0::t_77b91e11a24656 1-2,4-6,11-13
+  s_c8b827646bf8c0::t_1604b683be681a 3,7-10,14-16
+PROGRESS.md
+  s_c8b827646bf8c0::t_1604b683be681a 15,214,650-653,666
+tools/validate_shared.py
+  s_c8b827646bf8c0::t_ac22c03b494993 1119-1122,1124,1345-1346
+docs/specs/v77_spec-main-config-derived-gameplay.md
+  s_c8b827646bf8c0::t_77b91e11a24656 1-2,4-27
+  s_c8b827646bf8c0::t_1604b683be681a 3
+docs/plans/v77_2026-06-11-main-config-derived-gameplay.md
+  s_c8b827646bf8c0::t_1604b683be681a 3,9-14
+  s_c8b827646bf8c0::t_77b91e11a24656 1-2,4-8,15-22
+server/internal/game/sim.go
+  s_c8b827646bf8c0::t_dd1a7023d38bb8 3118-3124
+  s_c8b827646bf8c0::t_f2b464ab644d85 15,3105-3106,3138
+server/internal/game/game_test.go
+  s_c8b827646bf8c0::t_ad66396ad28a2e 47-50,52-54,57,81,86-106
+  s_c8b827646bf8c0::t_ac22c03b494993 4425,4427
+  s_c8b827646bf8c0::t_b90a148e7e4f83 7,235-262
+  s_c8b827646bf8c0::t_a06fabaf386637 41-46,51,55-56,58-80,82-85,107-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5f6d25b88db37da0f61dff4a27cbfdddf2157fb1",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

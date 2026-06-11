@@ -240,6 +240,8 @@ var ground_textures: Dictionary = {}
 var wall_textures: Dictionary = {}
 
 const SEND_INTERVAL := 0.1
+const SERVER_TICK_RATE := 10.0
+const DEFAULT_ATTACK_INTERVAL_TICKS := 20
 const PLAYER_SPEED := 2.8
 const WALK_ANIMATION_LINGER_SECONDS := 0.28
 const CAMERA_ZOOM_DEFAULT := 20.0
@@ -1543,6 +1545,16 @@ func _send_action_intent(target_id: String) -> void:
 	pending_action_targets[message_id] = {"target_id": target_id}
 
 
+func _basic_attack_cooldown_seconds() -> float:
+	var ticks := DEFAULT_ATTACK_INTERVAL_TICKS
+	var derived = character_progression.get("derived_stats", {})
+	if typeof(derived) == TYPE_DICTIONARY:
+		ticks = int(derived.get("attack_interval_ticks", DEFAULT_ATTACK_INTERVAL_TICKS))
+	if ticks <= 0:
+		ticks = DEFAULT_ATTACK_INTERVAL_TICKS
+	return maxf(SEND_INTERVAL, float(ticks) / SERVER_TICK_RATE)
+
+
 func _remove_monster_health_bar(entity_id: String) -> void:
 	if not monster_health_bars.has(entity_id):
 		return
@@ -2084,7 +2096,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 		player_anim.play_one_shot("attack")
 
 	_send_action_intent(target_id)
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else SEND_INTERVAL
 
 
 func _target_in_local_attack_range(target_id: String) -> bool:
@@ -2194,7 +2206,7 @@ func _repeat_hold_attack() -> void:
 		player_anim.play_one_shot("attack")
 
 	_send_action_intent(target_id)
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = _basic_attack_cooldown_seconds()
 
 
 func _repeat_hold_move() -> void:
@@ -2369,7 +2381,7 @@ func _try_send_directional_attack() -> void:
 	if player_anim != null:
 		player_anim.play_one_shot("attack")
 	client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(direction))
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = _basic_attack_cooldown_seconds()
 
 
 func _mouse_ground_point() -> Vector3:
@@ -4944,7 +4956,7 @@ func bot_click_entity_id(target_id: String) -> void:
 		_activate_or_approach_interactable(target_id, rec)
 		return
 	_send_action_intent(target_id)
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else SEND_INTERVAL
 
 
 func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> void:

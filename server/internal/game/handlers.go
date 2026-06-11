@@ -93,6 +93,9 @@ func (s *Sim) handleDirectionalAttack(in Input, res *TickResult) {
 		s.fireProjectileInDirection(dir, 0, in, res, true)
 		return
 	}
+	if !s.consumeBasicAttack(in, res) {
+		return
+	}
 	res.ack(in.MessageID)
 	target := s.directionalMeleeTarget(dir)
 	if target == nil {

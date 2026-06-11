@@ -263,6 +263,7 @@ type playerState struct {
 	StashCapacity         int
 	HPRegenCarry          float64
 	ManaRegenCarry        float64
+	NextBasicAttackTick   uint64
 }
 
 // Sim is the deterministic authoritative simulation for one solo session.
@@ -303,6 +304,7 @@ type Sim struct {
 	stashCapacity         int
 	hpRegenCarry          float64
 	manaRegenCarry        float64
+	nextBasicAttackTick   uint64
 }
 
 // CharacterProgressionState is the authoritative mutable progression state for
@@ -1286,6 +1288,7 @@ func (s *Sim) usePlayer(ps *playerState) {
 	}
 	s.hpRegenCarry = ps.HPRegenCarry
 	s.manaRegenCarry = ps.ManaRegenCarry
+	s.nextBasicAttackTick = ps.NextBasicAttackTick
 	level := s.activeLevel()
 	level.move = ps.Move
 	level.autoNav = ps.AutoNav
@@ -1313,6 +1316,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.StashCapacity = s.stashCapacity
 	ps.HPRegenCarry = s.hpRegenCarry
 	ps.ManaRegenCarry = s.manaRegenCarry
+	ps.NextBasicAttackTick = s.nextBasicAttackTick
 	if level := s.levels[ps.CurrentLevel]; level != nil {
 		ps.Move = level.move
 		ps.AutoNav = level.autoNav
@@ -1943,10 +1947,22 @@ func (s *Sim) dispatchAction(target *entity, in Input, res *TickResult, ack bool
 }
 
 func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) {
+	if !s.consumeBasicAttack(in, res) {
+		return
+	}
 	if ack {
 		res.ack(in.MessageID)
 	}
 	s.damageMonsterByPlayer(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamage())
+}
+
+func (s *Sim) consumeBasicAttack(in Input, res *TickResult) bool {
+	if s.tick < s.nextBasicAttackTick {
+		res.reject(in.MessageID, "basic_attack_on_cooldown")
+		return false
+	}
+	s.nextBasicAttackTick = s.tick + uint64(s.DerivedStatsView().AttackIntervalTicks)
+	return true
 }
 
 func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
@@ -2006,6 +2022,9 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 	dir = normalize(dir)
 	if dir.X == 0 && dir.Y == 0 {
 		res.reject(in.MessageID, "invalid_direction")
+		return
+	}
+	if !s.consumeBasicAttack(in, res) {
 		return
 	}
 	maxDistance := s.playerActionReach()

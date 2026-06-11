@@ -1575,6 +1575,25 @@ func TestProjectileBusyRejectsSecondFire(t *testing.T) {
 	assertReject(t, second, "fire2", "projectile_busy")
 }
 
+func TestBasicAttackCooldownRejectsRapidMelee(t *testing.T) {
+	sim := MustNewSim("sess_basic_attack_cooldown", "01", loadRules(t))
+	monster := firstEntityByKind(sim, monsterEntity)
+	monster.pos = sim.entities[sim.playerID].pos
+	monster.hp = 50
+	monster.maxHP = 50
+	interval := sim.DerivedStatsView().AttackIntervalTicks
+
+	first := sim.Tick([]Input{{MessageID: "hit1", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, first, "hit1")
+	second := sim.Tick([]Input{{MessageID: "hit2", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertReject(t, second, "hit2", "basic_attack_on_cooldown")
+	for i := 0; i < interval-1; i++ {
+		sim.Tick(nil)
+	}
+	third := sim.Tick([]Input{{MessageID: "hit3", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
+	assertAck(t, third, "hit3")
+}
+
 func TestDirectionalAttackRejectsInvalidDirection(t *testing.T) {
 	sim := MustNewSim("sess_directional_invalid", "01", loadRules(t))
 	r := sim.Tick([]Input{{MessageID: "dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{}}}})
@@ -3309,6 +3328,7 @@ func runSlice(t *testing.T, seed string) *Sim {
 			break
 		}
 		sim.Tick([]Input{{MessageID: "a" + itoa(i), CorrelationID: "corr_a", Type: "action_intent", Action: &ActionIntent{TargetID: monsterID}}})
+		advanceBasicAttackCooldown(sim)
 	}
 	if e := sim.findEntity(monsterID); e == nil || e.hp != 0 {
 		t.Fatalf("monster not dead after attacks: %+v", e)
@@ -3338,6 +3358,13 @@ func runSlice(t *testing.T, seed string) *Sim {
 	sim.Tick([]Input{{MessageID: "e1", CorrelationID: "corr_e", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: itemID, Slot: mainHandSlot}}})
 
 	return sim
+}
+
+func advanceBasicAttackCooldown(sim *Sim) {
+	interval := sim.DerivedStatsView().AttackIntervalTicks
+	for i := 1; i < interval; i++ {
+		sim.Tick(nil)
+	}
 }
 
 func TestScriptedSliceMatchesGolden(t *testing.T) {
@@ -3574,6 +3601,7 @@ func TestPlayerKilledByRetaliation(t *testing.T) {
 		if sim.entities[sim.playerID].hp == 0 {
 			break
 		}
+		advanceBasicAttackCooldown(sim)
 	}
 
 	if sim.entities[sim.playerID].hp != 0 {

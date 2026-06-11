@@ -138,8 +138,8 @@ func TestLoadRules(t *testing.T) {
 	if len(r.CharacterProgression.Classes) != 3 || r.CharacterProgression.Classes["barbarian"].BaseStats.Str != 5 || r.CharacterProgression.Classes["sorcerer"].BaseStats.Str != 3 || r.CharacterProgression.Classes["paladin"].BaseStats.Vit != 8 {
 		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin starting stats", r.CharacterProgression.Classes)
 	}
-	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 3 {
-		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 3", r.CharacterProgression.SkillPoints)
+	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 1 {
+		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 1", r.CharacterProgression.SkillPoints)
 	}
 	if skill := r.Skills[magicBoltSkillID]; skill.Class != "sorcerer" || skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
 		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 5 +3/rank level +1/rank attack interval cooldown", skill)
@@ -558,8 +558,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	sim.savePlayer(sim.defaultPlayer())
 
 	view := sim.CharacterProgressionView()
-	if view.Level != 5 || view.UnspentStatPoints != 12 || view.UnspentSkillPoints != 1 {
-		t.Fatalf("progression after level 5 = %+v, want level 5, 12 stat points, 1 skill point", view)
+	if view.Level != 5 || view.UnspentStatPoints != 12 || view.UnspentSkillPoints != 2 {
+		t.Fatalf("progression after level 5 = %+v, want level 5, 12 stat points, 2 skill points", view)
 	}
 	if !hasEvent(res, "skill_point_gained") {
 		t.Fatalf("missing skill_point_gained event: %+v", res.Events)
@@ -582,8 +582,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 1 || magicSkill.CanSpend {
-		t.Fatalf("skill progression after spend = %+v, want rank 1 and no spendable points", skillView)
+	if skillView.UnspentSkillPoints != 1 || magicSkill.Rank != 1 || magicSkill.CanSpend {
+		t.Fatalf("skill progression after spend = %+v, want rank 1, 1 point, and blocked rank 2 requirements", skillView)
 	}
 
 	overspend := sim.Tick([]Input{{
@@ -591,7 +591,7 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		Type:               "allocate_skill_point_intent",
 		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
 	}})
-	assertReject(t, overspend, "overspend_skill", "not_enough_skill_points")
+	assertReject(t, overspend, "overspend_skill", "skill_requirements_not_met")
 	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
 	if magicSkill.Rank != 1 {
 		t.Fatalf("overspend mutated rank: %+v", sim.SkillProgressionView())

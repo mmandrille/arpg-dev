@@ -580,7 +580,7 @@ func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing
 	conn := dialWS(t, srv, token, sessionID)
 	first := readSnapshot(t, conn)
 	if first.CharacterProgression.Level != 1 || first.CharacterProgression.UnspentStatPoints != 0 {
-		t.Fatalf("initial progression = %+v, want level 1 no points", first.CharacterProgression)
+		t.Fatalf("initial progression = %+v, want level 1 with no stat points", first.CharacterProgression)
 	}
 
 	sendIntent(t, conn, sessionID, first.ServerTick, "msg-prog-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
@@ -635,8 +635,8 @@ func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 		t.Fatalf("initial character class = %q, want sorcerer", first.CharacterProgression.CharacterClass)
 	}
 	magicBolt := httpSkillRowByID(first.SkillProgression.Skills, "magic_bolt")
-	if first.SkillProgression.UnspentSkillPoints != 0 || magicBolt == nil || magicBolt.Rank != 0 {
-		t.Fatalf("initial skill progression = %+v, want rank 0 and no points", first.SkillProgression)
+	if first.SkillProgression.UnspentSkillPoints != 1 || magicBolt == nil || magicBolt.Rank != 0 || !magicBolt.CanSpend {
+		t.Fatalf("initial skill progression = %+v, want rank 0 and 1 spendable point", first.SkillProgression)
 	}
 	targetID := ""
 	for _, entity := range first.Entities {
@@ -649,15 +649,7 @@ func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 		t.Fatalf("initial snapshot missing training_dummy: %+v", first.Entities)
 	}
 
-	sendIntent(t, conn, sessionID, first.ServerTick, "msg-skill-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
-	tick := waitStateDeltaTick(t, conn, first.ServerTick)
-	sendIntent(t, conn, sessionID, tick, "msg-skill-kill", "action_intent", map[string]any{"target_id": targetID})
-	levelDelta := readSkillProgressionDelta(t, conn, 1, 0)
-	if !hasWireEvent(levelDelta, "skill_point_gained") {
-		t.Fatalf("skill point delta missing event: %+v", levelDelta.Events)
-	}
-
-	sendIntent(t, conn, sessionID, levelDelta.Tick, "msg-skill-spend", "allocate_skill_point_intent", map[string]any{"skill_id": "magic_bolt"})
+	sendIntent(t, conn, sessionID, first.ServerTick, "msg-skill-spend", "allocate_skill_point_intent", map[string]any{"skill_id": "magic_bolt"})
 	spendDelta := readSkillProgressionDelta(t, conn, 0, 1)
 	if !hasWireEvent(spendDelta, "skill_rank_updated") {
 		t.Fatalf("skill spend delta missing event: %+v", spendDelta.Events)

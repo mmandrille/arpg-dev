@@ -24,7 +24,7 @@
   "skill_points": {
     "points_per_grant": 1,
     "grant_every_levels": 3,
-    "first_grant_level": 3
+    "first_grant_level": 1
   },
   "level_cap": 100,
   "experience_curve": {

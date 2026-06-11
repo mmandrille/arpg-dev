@@ -460,7 +460,7 @@ func (r *Rules) DefaultCharacterProgressionState() CharacterProgressionState {
 		CharacterClass:      "barbarian",
 		Experience:          0,
 		UnspentStatPoints:   0,
-		UnspentSkillPoints:  0,
+		UnspentSkillPoints:  r.skillPointsGrantedAtLevel(1),
 		SkillRanks:          r.defaultSkillRanks(),
 		BaseStats:           r.CharacterProgression.BaseStats,
 		Gold:                0,

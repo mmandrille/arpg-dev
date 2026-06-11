@@ -1,0 +1,26 @@
+shared/rules/monsters.v0.json
+  s_ba8ba4c088ef1a::t_03b3e03a3f6a1b 117,134,155,172,225,242
+shared/golden/dungeon_monster_attack.json
+  s_ba8ba4c088ef1a::t_03b3e03a3f6a1b 6
+shared/rules/dungeon_generation.v0.json
+  s_ba8ba4c088ef1a::t_03b3e03a3f6a1b 99
+shared/golden/monster_rarity.json
+  s_ba8ba4c088ef1a::t_03b3e03a3f6a1b 26,148,161
+  s_ba8ba4c088ef1a::t_fa4be6e96351ea 51,76,101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "65a3c30366060325d99949b6c92475a5b81419d3",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -193,14 +193,14 @@ func _setup_skills() -> void:
 	await process_frame
 	panel.set_character_progression({
 		"level": 1,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 15},
 	})
 	panel.set_skill_progression({
-		"unspent_skill_points": 0,
+		"unspent_skill_points": 1,
 		"skills": [
-			{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false},
+			{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true},
 			{"skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": false},
-			{"skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false},
+			{"skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": true},
 		],
 	})
 	panel.ensure_display_visible()

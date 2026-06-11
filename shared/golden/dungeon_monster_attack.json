@@ -3,7 +3,7 @@
   "session_seed": "dungeon_mob_100x50_42",
   "level": -1,
   "monster_def_id": "dungeon_mob",
-  "attack_cooldown_ticks": 32,
+  "attack_cooldown_ticks": 21,
   "max_ticks_for_first_player_damaged": 1200,
   "damage": 1,
   "player_hp_after": 9

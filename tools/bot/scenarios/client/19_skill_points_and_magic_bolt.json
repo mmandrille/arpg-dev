@@ -10,7 +10,7 @@
     { "type": "assert_skill_progression", "unspent_skill_points": 1, "skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": true },
     { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "skill_xp_level6_dummy", "timeout_s": 10.0 },
     { "type": "click_entity_until_event", "entity_type": "monster", "monster_def_id": "skill_xp_level6_dummy", "event_type": "monster_killed", "consume_event": true, "retry_s": 0.25, "timeout_s": 20.0 },
-    { "type": "wait_character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10, "attack_interval_ticks": 20 }, "player_max_hp": 10, "timeout_s": 8.0 },
+    { "type": "wait_character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10, "attack_interval_ticks": 16 }, "player_max_hp": 10, "timeout_s": 8.0 },
     { "type": "wait_skill_progression", "unspent_skill_points": 2, "skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": true, "timeout_s": 5.0 },
     { "type": "wait_skill_progression", "unspent_skill_points": 2, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false, "timeout_s": 5.0 },
     { "type": "press_key", "keycode": "KEY_K" },
@@ -21,7 +21,7 @@
     { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "enabled": true, "remaining_ticks": 0, "slot_text": "", "tooltip_contains": "Rage", "timeout_s": 5.0 },
     { "type": "use_skill_slot", "skill_id": "rage", "force_direct": true },
     { "type": "wait_event", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 10, "timeout_s": 5.0 },
-    { "type": "wait_event", "event_type": "skill_cooldown_started", "skill_id": "rage", "total_ticks": 40, "timeout_s": 5.0 },
-    { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "disabled": true, "remaining_ticks_min": 1, "total_ticks": 40, "slot_text": "", "timeout_s": 5.0 }
+    { "type": "wait_event", "event_type": "skill_cooldown_started", "skill_id": "rage", "total_ticks": 32, "timeout_s": 5.0 },
+    { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "disabled": true, "remaining_ticks_min": 1, "total_ticks": 32, "slot_text": "", "timeout_s": 5.0 }
   ]
 }

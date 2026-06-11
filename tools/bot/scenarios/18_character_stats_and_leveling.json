@@ -5,7 +5,7 @@
   "title": "Character stats and leveling",
   "description": "Kill compact lab mobs for XP, level up, allocate VIT, reject overspend, and prove progression persists through replay/reconnect/fresh sessions.",
   "steps": [
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2 },
+    { "action": "kill_monsters", "monster_def_id": "stats_panel_dummy", "count": 1 },
     {
       "action": "assert_character_progression",
       "level": 2,

@@ -195,6 +195,7 @@ def seed_to_uint64(seed: str) -> int:
 
 def cross_checks(report: Report) -> None:
     print("[3] cross-consistency drift guards")
+    main_config = load(RULES / "main_config.v0.json")
     combat = load(RULES / "combat.v0.json")
     character_progression = load(RULES / "character_progression.v0.json")
     content_manifest_path = CONTENT / "content_libraries.v0.json"
@@ -243,6 +244,7 @@ def cross_checks(report: Report) -> None:
     shop_appraisals_golden = load(GOLDEN / "shop_appraisals.json")
     shop_stock_lifecycle_golden = load(GOLDEN / "shop_stock_lifecycle.json")
     equipment_requirements_golden = load(GOLDEN / "equipment_requirements.json")
+    main_gameplay = main_config.get("gameplay", {})
 
     try:
         manifest_skills = merge_catalog_files(content_manifest_path, skill_rule_entries(content_manifest), "skills")
@@ -1113,6 +1115,37 @@ def cross_checks(report: Report) -> None:
             report.fail("equipment_lab treasure class", f"missing templates: {missing_tc_templates}")
         else:
             report.ok("equipment_lab treasure class covers every v28 template")
+
+    if int(main_gameplay.get("base_attack_interval_ticks", 0)) != int(combat.get("base_attack_interval_ticks", 0)):
+        report.fail("main_config gameplay", "base_attack_interval_ticks must match combat.v0.json")
+    elif not math.isclose(float(main_gameplay.get("base_movement_speed", -1)), float(navigation.get("cell_size", -2)), rel_tol=0, abs_tol=0.000001):
+        report.fail("main_config gameplay", "base_movement_speed must match navigation.cell_size until v77 consumes it directly")
+    else:
+        report.ok("main_config gameplay mirrors current combat and movement defaults")
+
+    def treasure_class_at_least_one_drop_rate(class_id: str) -> int | None:
+        treasure_class = treasure_class_defs.get(class_id)
+        if treasure_class is None:
+            return None
+        no_drop_chance = 1.0
+        for attempt in treasure_class.get("attempts", []):
+            total = int(attempt.get("success_weight", 0)) + int(attempt.get("no_drop_weight", 0))
+            if total <= 0:
+                continue
+            no_drop_chance *= int(attempt.get("no_drop_weight", 0)) / total
+        return int(round((1.0 - no_drop_chance) * 100))
+
+    monster_drop_rates = {}
+    for table_id in ["dungeon_mob_drop", *[band["monster_loot_table"] for band in dungeon_generation.get("loot_bands", [])]]:
+        treasure_class_id = treasure_class_id_for_table(table_id)
+        if not treasure_class_id:
+            continue
+        monster_drop_rates[treasure_class_id] = treasure_class_at_least_one_drop_rate(treasure_class_id)
+    expected_base_drop_rate = int(main_gameplay.get("base_drop_rate_percent", -1))
+    if any(rate != expected_base_drop_rate for rate in monster_drop_rates.values()):
+        report.fail("main_config gameplay", f"base_drop_rate_percent {expected_base_drop_rate} must match dungeon monster rates {monster_drop_rates}")
+    else:
+        report.ok("main_config gameplay mirrors dungeon monster drop rate")
 
     if combat.get("unarmed_reach", 0) <= 0:
         report.fail("combat unarmed_reach", "must be positive")

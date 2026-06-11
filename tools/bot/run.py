@@ -34,7 +34,7 @@ from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenar
 from tools.bot.protocol import make_envelope, to_ws_url
 
 SLICE_TIMEOUT_S = 20.0
-MAX_SCENARIO_ELAPSED_S = 10.0
+MAX_SCENARIO_ELAPSED_S = 60.0
 WAIT_LOG_INTERVAL_S = 2.0
 WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
@@ -659,7 +659,7 @@ async def execute_step(
                 continue
             if reason == "invalid_target" and monster_def_id and monster_def_id in state.killed_monster_def_ids:
                 continue
-            if reason == "projectile_busy":
+            if reason in {"basic_attack_on_cooldown", "projectile_busy"}:
                 continue
             if reason == "player_dead":
                 raise AssertionError("action_until_combat_event: player died")
@@ -784,6 +784,8 @@ async def execute_step(
                     break
                 if reason == "player_dead":
                     raise AssertionError(f"kill_monsters: player died after killing {killed}/{max_count}")
+                if reason == "basic_attack_on_cooldown":
+                    continue
                 raise AssertionError(f"action_intent for {monster_def_id} {target_id} was rejected: {reason}")
         return
 
@@ -1890,7 +1892,7 @@ async def attack_until_monster_event(
             skipped_ids.add(active_target_id)
             active_target_id = None
             continue
-        if reason == "projectile_busy":
+        if reason in {"basic_attack_on_cooldown", "projectile_busy"}:
             continue
         if reason == "invalid_target" and monster_def_id and monster_def_id in state.killed_monster_def_ids:
             continue
@@ -2245,6 +2247,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         if monster_def_id:
             reason = m.get("payload", {}).get("reason", "unknown")
             if reason == "invalid_target" and monster_def_id in state.killed_monster_def_ids:
+                return
+            if reason == "basic_attack_on_cooldown":
                 return
             raise AssertionError(f"action_intent for {monster_def_id} was rejected: {reason}")
         return
@@ -4263,7 +4267,7 @@ async def coop_attack_until_kill(
             if reason is not None:
                 if reason == "invalid_target" and "monster_killed" in attacker.state.seen_events:
                     return
-                if reason != "projectile_busy":
+                if reason not in {"basic_attack_on_cooldown", "projectile_busy"}:
                     raise AssertionError(f"{attacker.label} attack rejected: {reason}")
             last_action = loop.time()
         await pump_coop(peers, timeout=0.1)

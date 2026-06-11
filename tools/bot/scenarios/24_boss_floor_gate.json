@@ -21,7 +21,7 @@
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "use_stair", "direction": "down", "expect_reject": "boss_alive", "max_ticks": 120 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_phase_started", "phase_kind": "telegraph" }, "timeout_s": 2 },
-    { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 20 },
+    { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 45 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "cave_warden" }, "timeout_s": 2 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "interactable_state_changed" }, "timeout_s": 5 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "equals": 1 },

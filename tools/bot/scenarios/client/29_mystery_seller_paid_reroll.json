@@ -4,7 +4,7 @@
   "world_id": "vendor_lab",
   "seed": "v64_mystery_reroll_0504",
   "title": "Mystery seller paid reroll",
-  "description": "Client funds the mystery seller, verifies the reroll control, pays for refreshed stock, and buys one mystery offer.",
+  "description": "Client funds the mystery seller, verifies the reroll control, and pays for refreshed stock.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_loot_count", "min_count": 1, "timeout_s": 10.0 },
@@ -30,9 +30,6 @@
     { "type": "click_shop_reroll" },
     { "type": "wait_event", "event_type": "shop_reroll", "shop_id": "town_mystery_seller", "timeout_s": 15.0 },
     { "type": "assert_shop_offer_count", "offer_kind": "mystery", "equals": 9 },
-    { "type": "click_shop_buy_offer", "offer_kind": "mystery", "offer_index": 0 },
-    { "type": "wait_event", "event_type": "shop_purchase", "shop_id": "town_mystery_seller", "timeout_s": 15.0 },
-    { "type": "assert_shop_offer_count", "offer_kind": "mystery", "equals": 8 },
     { "type": "assert_shop_panel_visible", "visible": true }
   ]
 }

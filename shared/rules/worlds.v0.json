@@ -619,8 +619,7 @@
     "character_stats_lab": {
       "player": { "position": { "x": 2, "y": 5 } },
       "entities": [
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 7, "y": 4 } },
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 7, "y": 6 } },
+        { "type": "monster", "monster_def_id": "stats_panel_dummy", "position": { "x": 7, "y": 5 } },
         { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
         { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
         { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },

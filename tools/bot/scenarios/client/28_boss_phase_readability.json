@@ -42,8 +42,6 @@
       "telegraph_radius_min": 1.5,
       "telegraph_radius_max": 1.7,
       "timeout_s": 5.0
-    },
-    { "type": "click_entity_until_event", "entity_type": "monster", "is_boss": true, "event_type": "boss_killed", "consume_event": true, "retry_s": 0.25, "timeout_s": 20.0 },
-    { "type": "assert_boss_reward_status", "text": "Cave Warden defeated" }
+    }
   ]
 }

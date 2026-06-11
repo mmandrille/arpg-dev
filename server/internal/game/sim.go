@@ -217,6 +217,20 @@ type skillCooldownState struct {
 	TotalTicks int
 }
 
+type skillEffectState struct {
+	SkillID     string
+	Stats       []string
+	Percent     int
+	VisualScale float64
+	EndsTick    uint64
+	TotalTicks  int
+}
+
+type skillHealApplication struct {
+	Target *entity
+	Heal   int
+}
+
 type playerState struct {
 	PlayerID              uint64
 	AccountID             string
@@ -233,6 +247,7 @@ type playerState struct {
 	DiscoveredTeleporters map[int]bool
 	Progression           CharacterProgressionState
 	SkillCooldowns        map[string]skillCooldownState
+	SkillEffects          map[string]skillEffectState
 	ShopStock             map[string]*shopStockState
 	Gold                  int
 	StashItems            []*stashItem
@@ -270,6 +285,7 @@ type Sim struct {
 	discoveredTeleporters map[int]bool
 	progression           CharacterProgressionState
 	skillCooldowns        map[string]skillCooldownState
+	skillEffects          map[string]skillEffectState
 	shopStock             map[string]*shopStockState
 	gold                  int
 	stashItems            []*stashItem
@@ -329,6 +345,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		discoveredTeleporters: make(map[int]bool),
 		progression:           progression,
 		skillCooldowns:        make(map[string]skillCooldownState),
+		skillEffects:          make(map[string]skillEffectState),
 		shopStock:             make(map[string]*shopStockState),
 		gold:                  progression.Gold,
 		stashCapacity:         defaultStashCapacity,
@@ -490,6 +507,18 @@ func cloneSkillCooldowns(in map[string]skillCooldownState) map[string]skillCoold
 	return out
 }
 
+func cloneSkillEffects(in map[string]skillEffectState) map[string]skillEffectState {
+	if len(in) == 0 {
+		return make(map[string]skillEffectState)
+	}
+	out := make(map[string]skillEffectState, len(in))
+	for skillID, effect := range in { //nolint:determinism — pure map clone, output is a map
+		effect.Stats = cloneStringSlice(effect.Stats)
+		out[skillID] = effect
+	}
+	return out
+}
+
 func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world WorldDef) error {
 	maxHP := s.currentMaxHP()
 	maxMana := s.currentMaxMana()
@@ -508,6 +537,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		DiscoveredTeleporters: s.discoveredTeleporters,
 		Progression:           s.progression,
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
+		SkillEffects:          cloneSkillEffects(s.skillEffects),
 		ShopStock:             s.shopStock,
 		Gold:                  s.gold,
 		StashItems:            s.stashItems,
@@ -863,6 +893,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	hotbar := make([]uint64, maxHotbarCapacity)
 	discovered := map[int]bool{townLevel: true}
 	cooldowns := make(map[string]skillCooldownState)
+	effects := make(map[string]skillEffectState)
 	shopStock := make(map[string]*shopStockState)
 	stashItems := []*stashItem{}
 	stashCapacity := defaultStashCapacity
@@ -873,6 +904,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	s.discoveredTeleporters = discovered
 	s.progression = character
 	s.skillCooldowns = cooldowns
+	s.skillEffects = effects
 	s.shopStock = shopStock
 	s.gold = gold
 	s.stashItems = stashItems
@@ -905,6 +937,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		DiscoveredTeleporters: discovered,
 		Progression:           character,
 		SkillCooldowns:        cooldowns,
+		SkillEffects:          effects,
 		ShopStock:             shopStock,
 		Gold:                  gold,
 		StashItems:            stashItems,
@@ -1163,6 +1196,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.skillCooldowns == nil {
 		s.skillCooldowns = make(map[string]skillCooldownState)
 	}
+	s.skillEffects = ps.SkillEffects
+	if s.skillEffects == nil {
+		s.skillEffects = make(map[string]skillEffectState)
+	}
 	s.shopStock = ps.ShopStock
 	if s.shopStock == nil {
 		s.shopStock = make(map[string]*shopStockState)
@@ -1193,6 +1230,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.DiscoveredTeleporters = s.discoveredTeleporters
 	ps.Progression = s.progression
 	ps.SkillCooldowns = s.skillCooldowns
+	ps.SkillEffects = s.skillEffects
 	ps.ShopStock = s.shopStock
 	ps.Gold = s.gold
 	ps.StashItems = s.stashItems
@@ -1418,6 +1456,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			}
 			s.usePlayer(ps)
 			res := resultFor(ps.CurrentLevel, ps.PlayerID)
+			s.expireSkillEffects(res)
 			s.applyMovement(res)
 			s.applyPlayerRegen(res)
 			s.savePlayer(ps)
@@ -1484,6 +1523,62 @@ func (s *Sim) applyPlayerRegen(res *TickResult) {
 	if changed {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	}
+}
+
+func (s *Sim) expireSkillEffects(res *TickResult) {
+	if len(s.skillEffects) == 0 {
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	changed := false
+	for _, skillID := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[skillID]
+		if effect.EndsTick > s.tick {
+			continue
+		}
+		delete(s.skillEffects, skillID)
+		changed = true
+		if player != nil {
+			res.Events = append(res.Events, Event{
+				EventType: "skill_effect_ended",
+				EntityID:  idStr(player.id),
+				SkillID:   skillID,
+			})
+		}
+	}
+	if !changed || player == nil {
+		return
+	}
+	resourcesChanged := s.syncActivePlayerMaxResources()
+	visualChanged := s.syncActivePlayerVisualScale()
+	if resourcesChanged || visualChanged || player.hp > 0 {
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	}
+}
+
+func (s *Sim) syncActivePlayerMaxResources() bool {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil {
+		return false
+	}
+	changed := false
+	maxHP := s.currentMaxHP()
+	if maxHP != player.maxHP {
+		player.maxHP = maxHP
+		if player.hp > player.maxHP {
+			player.hp = player.maxHP
+		}
+		changed = true
+	}
+	maxMana := s.currentMaxMana()
+	if maxMana != player.maxMana {
+		player.maxMana = maxMana
+		if player.mana > player.maxMana {
+			player.mana = player.maxMana
+		}
+		changed = true
+	}
+	return changed
 }
 
 func regenAmount(ratePerSecond float64, secondsPerTick float64, carry *float64, missing int) int {
@@ -2629,6 +2724,185 @@ func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef,
 	projectile.id = s.alloc()
 	s.activeLevel().entities[projectile.id] = projectile
 	return projectile
+}
+
+func skillEffectPercent(effect SkillEffectDef, rank int) int {
+	if rank < 1 {
+		rank = 1
+	}
+	percent := effect.PercentBase + effect.PercentPerRank*(rank-1)
+	if percent < 0 {
+		return 0
+	}
+	return percent
+}
+
+func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
+	if player == nil {
+		return
+	}
+	for _, effect := range def.Effects {
+		if effect.Type != "stat_percent_buff" {
+			continue
+		}
+		percent := skillEffectPercent(effect, rank)
+		scale := 1.0
+		if effect.VisualScale {
+			scale += float64(percent) / 100.0
+		}
+		totalTicks := effect.DurationTicks
+		s.skillEffects[skillID] = skillEffectState{
+			SkillID:     skillID,
+			Stats:       cloneStringSlice(effect.Stats),
+			Percent:     percent,
+			VisualScale: scale,
+			EndsTick:    s.tick + uint64(totalTicks),
+			TotalTicks:  totalTicks,
+		}
+		s.syncActivePlayerVisualScale()
+		res.Events = append(res.Events, Event{
+			EventType:      "skill_effect_started",
+			EntityID:       idStr(player.id),
+			CorrelationID:  correlationID,
+			SkillID:        skillID,
+			Rank:           intPtr(rank),
+			Amount:         intPtr(percent),
+			RemainingTicks: intPtr(totalTicks),
+			TotalTicks:     intPtr(totalTicks),
+		})
+	}
+}
+
+func (s *Sim) skillAreaCenter(effect SkillEffectDef, cast *CastSkillIntent, player *entity) (Vec2, string) {
+	if cast == nil || player == nil {
+		return Vec2{}, "invalid_payload"
+	}
+	if cast.TargetID != "" {
+		target := s.findEntity(cast.TargetID)
+		if target == nil || (target.kind != monsterEntity && target.kind != playerEntity) || target.hp <= 0 {
+			return Vec2{}, "invalid_target"
+		}
+		if distance(player.pos, target.pos) > effect.Range+meleeRangeEpsilon {
+			return Vec2{}, "target_out_of_range"
+		}
+		return target.pos, ""
+	}
+	if cast.Direction == nil {
+		return player.pos, ""
+	}
+	if !finiteVec2(*cast.Direction) {
+		return Vec2{}, "invalid_payload"
+	}
+	dir := normalize(*cast.Direction)
+	if dir.X == 0 && dir.Y == 0 {
+		return Vec2{}, "invalid_direction"
+	}
+	return Vec2{X: player.pos.X + dir.X*effect.Range, Y: player.pos.Y + dir.Y*effect.Range}, ""
+}
+
+func (s *Sim) healSkillTargets(center Vec2, effect SkillEffectDef, casterID uint64) []*entity {
+	targets := []*entity{}
+	level := s.activeLevel()
+	for _, id := range sortedEntityIDs(level.entities) {
+		entity := level.entities[id]
+		if entity == nil || entity.kind != playerEntity || entity.hp <= 0 {
+			continue
+		}
+		if entity.id == casterID && !effect.IncludeCaster {
+			continue
+		}
+		if distance(center, entity.pos) > effect.Radius+meleeRangeEpsilon {
+			continue
+		}
+		targets = append(targets, entity)
+	}
+	return targets
+}
+
+func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast *CastSkillIntent) ([]skillHealApplication, string) {
+	if player == nil {
+		return nil, "player_dead"
+	}
+	applications := []skillHealApplication{}
+	for _, effect := range def.Effects {
+		if effect.Type != "area_percent_heal" {
+			continue
+		}
+		center, rejectReason := s.skillAreaCenter(effect, cast, player)
+		if rejectReason != "" {
+			return nil, rejectReason
+		}
+		percent := skillEffectPercent(effect, rank)
+		targets := s.healSkillTargets(center, effect, player.id)
+		for _, target := range targets {
+			if target.hp >= target.maxHP {
+				continue
+			}
+			heal := int(math.Floor(float64(target.maxHP)*float64(percent)/100.0 + 0.000000001))
+			if heal < 1 {
+				heal = 1
+			}
+			if target.hp+heal > target.maxHP {
+				heal = target.maxHP - target.hp
+			}
+			if heal <= 0 {
+				continue
+			}
+			applications = append(applications, skillHealApplication{Target: target, Heal: heal})
+		}
+	}
+	if len(applications) == 0 {
+		return nil, "already_full_hp"
+	}
+	return applications, ""
+}
+
+func (s *Sim) syncActivePlayerVisualScale() bool {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil {
+		return false
+	}
+	scale := 1.0
+	for _, skillID := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[skillID]
+		if effect.EndsTick <= s.tick || effect.VisualScale <= scale {
+			continue
+		}
+		scale = effect.VisualScale
+	}
+	stored := 0.0
+	if scale > 1.0 {
+		stored = scale
+	}
+	if math.Abs(player.visualScale-stored) <= 0.000001 {
+		return false
+	}
+	player.visualScale = stored
+	return true
+}
+
+func (s *Sim) applyAreaHeal(player *entity, skillID string, rank int, applications []skillHealApplication, correlationID string, res *TickResult) {
+	for _, app := range applications {
+		target := app.Target
+		if target == nil || app.Heal <= 0 {
+			continue
+		}
+		target.hp += app.Heal
+		if target.hp > target.maxHP {
+			target.hp = target.maxHP
+		}
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+		res.Events = append(res.Events, Event{
+			EventType:      "player_healed",
+			EntityID:       idStr(target.id),
+			SourceEntityID: idStr(player.id),
+			TargetEntityID: idStr(target.id),
+			CorrelationID:  correlationID,
+			SkillID:        skillID,
+			Rank:           intPtr(rank),
+			Heal:           intPtr(app.Heal),
+		})
+	}
 }
 
 func (s *Sim) applyMovement(res *TickResult) {
@@ -4936,7 +5210,7 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 }
 
 func (s *Sim) characterDerivedStatsView() DerivedStatsView {
-	stats := s.progression.BaseStats
+	stats := s.effectiveBaseStatsView()
 	eval := func(key string) float64 {
 		formula := s.rules.CharacterProgression.DerivedStats[key]
 		return evalProgressionFormula(formula, stats)
@@ -4956,6 +5230,39 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 		HealthRegenPerSecond: eval("health_regen_per_second"),
 		ManaRegenPerSecond:   eval("mana_regen_per_second"),
 	}
+}
+
+func (s *Sim) effectiveBaseStatsView() BaseStatsView {
+	stats := s.progression.BaseStats
+	if len(s.skillEffects) == 0 {
+		return stats
+	}
+	for _, skillID := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[skillID]
+		if effect.EndsTick <= s.tick || effect.Percent <= 0 {
+			continue
+		}
+		for _, stat := range effect.Stats {
+			switch stat {
+			case "str":
+				stats.Str = scaleStatPercent(stats.Str, effect.Percent)
+			case "dex":
+				stats.Dex = scaleStatPercent(stats.Dex, effect.Percent)
+			case "vit":
+				stats.Vit = scaleStatPercent(stats.Vit, effect.Percent)
+			case "magic":
+				stats.Magic = scaleStatPercent(stats.Magic, effect.Percent)
+			}
+		}
+	}
+	return stats
+}
+
+func scaleStatPercent(value int, percent int) int {
+	if value <= 0 || percent <= 0 {
+		return value
+	}
+	return int(math.Round(float64(value) * (1.0 + float64(percent)/100.0)))
 }
 
 func evalProgressionFormula(formula LinearStatFormula, stats BaseStatsView) float64 {
@@ -5925,6 +6232,9 @@ func (e *entity) view() EntityView {
 			ev.MaxMana = &maxMana
 			ev.CharacterID = e.characterID
 			ev.DisplayName = e.displayName
+			if e.visualScale > 0 {
+				ev.VisualScale = e.visualScale
+			}
 		}
 		if e.kind == monsterEntity {
 			ev.MonsterDefID = e.monsterDefID

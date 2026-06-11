@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from tools.bot.client_join_preflight import build_metadata, write_metadata
 from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
@@ -25,6 +26,12 @@ from tools.bot.run import (
     select_scenarios,
     should_clean_bot_run_artifacts,
 )
+
+
+ROOT = Path(__file__).resolve().parents[2]
+PROTOCOL_SCENARIOS_DIR = ROOT / "tools" / "bot" / "scenarios"
+CLIENT_SCENARIOS_DIR = PROTOCOL_SCENARIOS_DIR / "client"
+MAX_RAW_WAIT_TICKS = 120
 
 
 def test_to_ws_url_http():
@@ -120,6 +127,26 @@ def test_load_scenarios_catalog_order():
 
     assert [s.path.name for s in scenarios[:2]] == ["01_vertical_slice.json", "02_gear_before_combat.json"]
     assert [s.id for s in scenarios[:2]] == ["vertical_slice", "gear_before_combat"]
+
+
+def test_bot_scenarios_do_not_use_large_raw_tick_waits():
+    offenders = []
+    for path in sorted(PROTOCOL_SCENARIOS_DIR.glob("*.json")):
+        raw = json.loads(path.read_text())
+        step_groups = [("steps", raw.get("steps", []))]
+        for check_index, check in enumerate(raw.get("fresh_session_checks", []), start=1):
+            step_groups.append((f"fresh_session_checks[{check_index}].steps", check.get("steps", [])))
+        for group_name, steps in step_groups:
+            for step_index, step in enumerate(steps):
+                if step.get("action") == "wait_ticks" and int(step.get("ticks", 0)) > MAX_RAW_WAIT_TICKS:
+                    offenders.append(f"{path.name}:{group_name}[{step_index}] ticks={step.get('ticks')}")
+    for path in sorted(CLIENT_SCENARIOS_DIR.glob("*.json")):
+        raw = json.loads(path.read_text())
+        for step_index, step in enumerate(raw.get("client_steps", [])):
+            if step.get("type") == "wait_ticks" and int(step.get("ticks", 0)) > MAX_RAW_WAIT_TICKS:
+                offenders.append(f"{path.name}:client_steps[{step_index}] ticks={step.get('ticks')}")
+
+    assert offenders == []
 
 
 def test_select_shop_offer_prefers_cheapest_affordable_generated():
@@ -336,7 +363,7 @@ def test_load_scenarios_discovers_path_maze():
 
     assert maze.world_id == "path_maze"
     assert maze.steps == [{
-        "action": "action_once_until_event",
+        "action": "action_until_event",
         "monster_def_id": "training_dummy_path",
         "event_type": "monster_killed",
     }]

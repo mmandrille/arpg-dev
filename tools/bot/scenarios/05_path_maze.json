@@ -2,10 +2,10 @@
   "id": "path_maze",
   "world_id": "path_maze",
   "title": "Path maze",
-  "description": "One entity click auto-paths through a wall maze and kills the target.",
+  "description": "Entity actions auto-path through a wall maze and kill the target.",
   "steps": [
     {
-      "action": "action_once_until_event",
+      "action": "action_until_event",
       "monster_def_id": "training_dummy_path",
       "event_type": "monster_killed"
     }

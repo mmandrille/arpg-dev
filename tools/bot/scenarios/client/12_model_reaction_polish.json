@@ -1,8 +1,8 @@
 {
   "id": "model_reaction_polish",
   "runner": "godot_client",
-  "world_id": "vertical_slice",
-  "seed": "facefeed00000034",
+  "world_id": "combat_stat_lab",
+  "seed": "facefeed00000031",
   "title": "Model reaction polish",
   "description": "Proves client-only hit/death reactions for monsters and the local player from authoritative combat events. Remote player visual/tint is covered by client unit tests because the current Godot client bot runs a single client.",
   "client_steps": [
@@ -11,14 +11,14 @@
     {
       "type": "assert_entity_reaction",
       "entity_type": "monster",
-      "monster_def_id": "training_dummy",
+      "monster_def_id": "combat_lab_soft_target",
       "visual_model": "character",
       "terminal": false
     },
     {
       "type": "click_entity_until_event",
       "entity_type": "monster",
-      "monster_def_id": "training_dummy",
+      "monster_def_id": "combat_lab_soft_target",
       "event_type": "monster_damaged",
       "outcome": "hit",
       "consume_event": true,
@@ -28,10 +28,21 @@
     {
       "type": "wait_entity_reaction",
       "entity_type": "monster",
-      "monster_def_id": "training_dummy",
+      "monster_def_id": "combat_lab_soft_target",
       "reaction": "hit",
       "terminal": false,
       "timeout_s": 2.0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_crit_attacker",
+      "event_type": "player_damaged",
+      "outcome": "crit",
+      "critical": true,
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 20.0
     },
     {
       "type": "wait_entity_reaction",
@@ -43,7 +54,7 @@
     {
       "type": "click_entity_until_event",
       "entity_type": "monster",
-      "monster_def_id": "training_dummy",
+      "monster_def_id": "combat_lab_soft_target",
       "event_type": "monster_killed",
       "consume_event": true,
       "retry_s": 0.25,
@@ -52,7 +63,7 @@
     {
       "type": "wait_entity_reaction",
       "entity_type": "monster",
-      "monster_def_id": "training_dummy",
+      "monster_def_id": "combat_lab_soft_target",
       "reaction": "death",
       "terminal": true,
       "hp": 0,

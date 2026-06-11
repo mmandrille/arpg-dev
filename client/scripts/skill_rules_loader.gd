@@ -43,8 +43,29 @@ static func skill_ids() -> Array:
 	return ids
 
 
+static func skill_ids_by_tree() -> Array:
+	ensure_loaded()
+	var ids := skill_rules.keys()
+	ids.sort_custom(func(a, b) -> bool:
+		var a_id := str(a)
+		var b_id := str(b)
+		var a_tree: Dictionary = skill_definition(a_id).get("tree", {})
+		var b_tree: Dictionary = skill_definition(b_id).get("tree", {})
+		var a_tier := int(a_tree.get("tier", 999))
+		var b_tier := int(b_tree.get("tier", 999))
+		if a_tier != b_tier:
+			return a_tier < b_tier
+		var a_column := int(a_tree.get("column", 999))
+		var b_column := int(b_tree.get("column", 999))
+		if a_column != b_column:
+			return a_column < b_column
+		return a_id < b_id
+	)
+	return ids
+
+
 static func first_skill_id() -> String:
-	var ids := skill_ids()
+	var ids := skill_ids_by_tree()
 	if ids.is_empty():
 		return ""
 	return str(ids[0])

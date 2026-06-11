@@ -10,6 +10,26 @@
       },
       "summary": "Projectile spell",
       "projectile_visual": "magic_bolt_projectile"
+    },
+    "rage": {
+      "icon": {
+        "label": "R",
+        "shape": "burst",
+        "color": "#cf4f3e",
+        "accent": "#ffd0a8"
+      },
+      "summary": "STR/VIT size buff",
+      "effect_visual": "rage_scale"
+    },
+    "heal": {
+      "icon": {
+        "label": "H",
+        "shape": "heart",
+        "color": "#47b870",
+        "accent": "#d8ffe3"
+      },
+      "summary": "Area ally heal",
+      "effect_visual": "healing_pulse"
     }
   }
 }

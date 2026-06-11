@@ -402,7 +402,7 @@
             "properties": { "event_type": { "const": "player_healed" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["heal", "item_instance_id"] }
+          "then": { "required": ["entity_id", "heal"] }
         },
         {
           "if": {
@@ -499,7 +499,7 @@
             "properties": { "event_type": { "const": "skill_cast" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "skill_id", "rank", "mana", "projectile_def_id"] }
+          "then": { "required": ["entity_id", "skill_id", "rank", "mana"] }
         },
         {
           "if": {

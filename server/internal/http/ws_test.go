@@ -72,6 +72,33 @@ func fullStackWithRules(t *testing.T, tweak func(*game.Rules)) *httptest.Server 
 	return srv
 }
 
+func forceHTTPCharacterHitChance(rules *game.Rules, chance float64) {
+	hit := rules.CharacterProgression.DerivedStats["hit_chance"]
+	hit.Base = chance
+	hit.PerDex = 0
+	hit.PerStr = 0
+	hit.PerVit = 0
+	hit.PerMagic = 0
+	hit.Min = &chance
+	hit.Max = &chance
+	rules.CharacterProgression.DerivedStats["hit_chance"] = hit
+}
+
+func forceHTTPMonsterHitChance(rules *game.Rules, monsterDefID string, chance float64) {
+	def := rules.Monsters[monsterDefID]
+	def.HitChance = &chance
+	rules.Monsters[monsterDefID] = def
+}
+
+func httpSkillRowByID(rows []game.SkillProgressionSkillView, skillID string) *game.SkillProgressionSkillView {
+	for i := range rows {
+		if rows[i].SkillID == skillID {
+			return &rows[i]
+		}
+	}
+	return nil
+}
+
 // wire-decoding structs for the client side of the test.
 type wEntity struct {
 	ID              string `json:"id"`
@@ -483,7 +510,10 @@ func TestWebSocketCompletesSlice(t *testing.T) {
 }
 
 func TestResumeSnapshotMatchesStateEndpoint(t *testing.T) {
-	srv := fullStack(t)
+	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		forceHTTPCharacterHitChance(rules, 1.0)
+		forceHTTPMonsterHitChance(rules, "training_dummy", 1.0)
+	})
 	token, sessionID := loginAndSession(t, srv)
 	itemID := driveSlice(t, srv, token, sessionID)
 
@@ -526,6 +556,7 @@ func TestCharacterPersistenceLoadsInventoryAndEquipmentAcrossFreshSessions(t *te
 
 func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing.T) {
 	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		forceHTTPCharacterHitChance(rules, 1.0)
 		dummy := rules.Monsters["training_dummy"]
 		dummy.MaxHP = 1
 		dummy.XPReward = 20
@@ -573,6 +604,7 @@ func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing
 
 func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		forceHTTPCharacterHitChance(rules, 1.0)
 		rules.CharacterProgression.BaseStats.Magic = 15
 		dummy := rules.Monsters["training_dummy"]
 		dummy.MaxHP = 1
@@ -585,7 +617,8 @@ func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 
 	conn := dialWS(t, srv, token, sessionID)
 	first := readSnapshot(t, conn)
-	if first.SkillProgression.UnspentSkillPoints != 0 || len(first.SkillProgression.Skills) == 0 || first.SkillProgression.Skills[0].Rank != 0 {
+	magicBolt := httpSkillRowByID(first.SkillProgression.Skills, "magic_bolt")
+	if first.SkillProgression.UnspentSkillPoints != 0 || magicBolt == nil || magicBolt.Rank != 0 {
 		t.Fatalf("initial skill progression = %+v, want rank 0 and no points", first.SkillProgression)
 	}
 
@@ -647,6 +680,8 @@ func TestPostResumePickupAllocatesAfterHistoricalEntities(t *testing.T) {
 
 func TestDeadPlayerResumeRejectsGameplayIntents(t *testing.T) {
 	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		forceHTTPCharacterHitChance(rules, 1.0)
+		forceHTTPMonsterHitChance(rules, "training_dummy", 1.0)
 		dmg := game.DamageRange{Min: 11, Max: 11}
 		dummy := rules.Monsters["training_dummy"]
 		dummy.MaxHP = 100

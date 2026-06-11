@@ -42,9 +42,19 @@ func _process(delta: float) -> void:
 
 func set_skill_progression(next_progression: Dictionary) -> void:
 	skill_progression = next_progression.duplicate(true)
-	var skill := _skill_row(_current_skill_id())
-	_rank = int(skill.get("rank", 0))
-	_max_rank = int(skill.get("max_rank", 0))
+	_sync_rank_from_progression()
+	_render()
+
+
+func set_skill_id(skill_id: String) -> void:
+	if skill_id == "":
+		skill_id = SkillRulesLoader.first_skill_id()
+	if skill_id == _current_skill_id():
+		return
+	_skill_id = skill_id
+	_remaining_ticks = 0.0
+	_total_ticks = 0
+	_sync_rank_from_progression()
 	_render()
 
 
@@ -173,7 +183,15 @@ func _skill_row(skill_id: String) -> Dictionary:
 
 
 func _current_skill_id() -> String:
+	if _skill_id != "" and not SkillRulesLoader.skill_definition(_skill_id).is_empty():
+		return _skill_id
 	return SkillRulesLoader.first_skill_id()
+
+
+func _sync_rank_from_progression() -> void:
+	var skill := _skill_row(_current_skill_id())
+	_rank = int(skill.get("rank", 0))
+	_max_rank = int(skill.get("max_rank", int(SkillRulesLoader.skill_definition(_current_skill_id()).get("max_rank", 0))))
 
 
 func _skill_name(skill_id: String) -> String:

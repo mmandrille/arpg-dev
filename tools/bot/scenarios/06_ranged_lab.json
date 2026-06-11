@@ -12,7 +12,7 @@
       "y": 8
     },
     {
-      "action": "action_once_until_event",
+      "action": "action_until_event",
       "monster_def_id": "training_dummy_ranged",
       "event_type": "monster_killed"
     },

@@ -445,6 +445,7 @@ type SkillDef struct {
 	Cost         SkillCostDef        `json:"cost"`
 	Damage       SkillDamageDef      `json:"damage"`
 	Projectile   SkillProjectileDef  `json:"projectile"`
+	Effects      []SkillEffectDef    `json:"effects"`
 	Cooldown     SkillCooldownDef    `json:"cooldown"`
 }
 
@@ -494,6 +495,20 @@ type SkillProjectileDef struct {
 	Range  float64 `json:"range"`
 	Speed  float64 `json:"speed"`
 	Visual string  `json:"visual"`
+}
+
+// SkillEffectDef is a closed data contract for supported active-skill effects.
+type SkillEffectDef struct {
+	Type           string   `json:"type"`
+	Stats          []string `json:"stats"`
+	PercentBase    int      `json:"percent_base"`
+	PercentPerRank int      `json:"percent_per_rank"`
+	DurationTicks  int      `json:"duration_ticks"`
+	VisualScale    bool     `json:"visual_scale"`
+	Target         string   `json:"target"`
+	IncludeCaster  bool     `json:"include_caster"`
+	Range          float64  `json:"range"`
+	Radius         float64  `json:"radius"`
 }
 
 // SkillCooldownDef defines how a skill cooldown is derived.
@@ -2301,14 +2316,11 @@ func validateSkillRules(skills map[string]SkillDef) error {
 		if skill.Tree.Tier <= 0 || skill.Tree.Column <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.tree: tier and column must be positive", id)
 		}
-		if skill.Kind != "projectile_attack" {
+		if !isSupportedSkillKind(skill.Kind) {
 			return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", id, skill.Kind)
 		}
 		if skill.MaxRank <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.max_rank: must be positive", id)
-		}
-		if skill.Targeting != "direction_or_target" {
-			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s", id, skill.Targeting)
 		}
 		if err := validateSkillRequirements(id, skill.Requirements, skills); err != nil {
 			return err
@@ -2316,23 +2328,8 @@ func validateSkillRules(skills map[string]SkillDef) error {
 		if skill.Cost.Mana.Base < 0 || skill.Cost.Mana.PerRank < 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.cost.mana: values must be non-negative", id)
 		}
-		if skill.Damage.Type != "rank_linear_range" {
-			return fmt.Errorf("game: invalid rules skills.%s.damage.type: unsupported %s", id, skill.Damage.Type)
-		}
-		if skill.Damage.MinBase < 0 || skill.Damage.MaxBase < skill.Damage.MinBase {
-			return fmt.Errorf("game: invalid rules skills.%s.damage: base damage must be valid", id)
-		}
-		if skill.Damage.MinPerRank < 0 || skill.Damage.MaxPerRank < 0 {
-			return fmt.Errorf("game: invalid rules skills.%s.damage: per-rank damage must be non-negative", id)
-		}
-		if skill.Projectile.Range <= 0 {
-			return fmt.Errorf("game: invalid rules skills.%s.projectile.range: must be positive", id)
-		}
-		if skill.Projectile.Speed <= 0 {
-			return fmt.Errorf("game: invalid rules skills.%s.projectile.speed: must be positive", id)
-		}
-		if skill.Projectile.Visual == "" {
-			return fmt.Errorf("game: invalid rules skills.%s.projectile.visual: required", id)
+		if err := validateSkillKindPayload(id, skill); err != nil {
+			return err
 		}
 		if skill.Cooldown.Type != "attack_interval_multiplier" {
 			return fmt.Errorf("game: invalid rules skills.%s.cooldown.type: unsupported %s", id, skill.Cooldown.Type)
@@ -2340,6 +2337,131 @@ func validateSkillRules(skills map[string]SkillDef) error {
 		if skill.Cooldown.Multiplier <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.cooldown.multiplier: must be positive", id)
 		}
+	}
+	return nil
+}
+
+func isSupportedSkillKind(kind string) bool {
+	switch kind {
+	case "projectile_attack", "self_buff", "area_heal":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateSkillKindPayload(skillID string, skill SkillDef) error {
+	switch skill.Kind {
+	case "projectile_attack":
+		if skill.Targeting != "direction_or_target" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for projectile_attack", skillID, skill.Targeting)
+		}
+		return validateProjectileSkillPayload(skillID, skill)
+	case "self_buff":
+		if skill.Targeting != "self" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for self_buff", skillID, skill.Targeting)
+		}
+		return validateSkillEffects(skillID, skill.Effects, "stat_percent_buff")
+	case "area_heal":
+		if skill.Targeting != "direction_or_target_area" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for area_heal", skillID, skill.Targeting)
+		}
+		return validateSkillEffects(skillID, skill.Effects, "area_percent_heal")
+	default:
+		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
+	}
+}
+
+func validateProjectileSkillPayload(skillID string, skill SkillDef) error {
+	if skill.Damage.Type != "rank_linear_range" {
+		return fmt.Errorf("game: invalid rules skills.%s.damage.type: unsupported %s", skillID, skill.Damage.Type)
+	}
+	if skill.Damage.MinBase < 0 || skill.Damage.MaxBase < skill.Damage.MinBase {
+		return fmt.Errorf("game: invalid rules skills.%s.damage: base damage must be valid", skillID)
+	}
+	if skill.Damage.MinPerRank < 0 || skill.Damage.MaxPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.damage: per-rank damage must be non-negative", skillID)
+	}
+	if skill.Projectile.Range <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.projectile.range: must be positive", skillID)
+	}
+	if skill.Projectile.Speed <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.projectile.speed: must be positive", skillID)
+	}
+	if skill.Projectile.Visual == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.projectile.visual: required", skillID)
+	}
+	if len(skill.Effects) > 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects: projectile_attack does not support effects", skillID)
+	}
+	return nil
+}
+
+func validateSkillEffects(skillID string, effects []SkillEffectDef, expectedType string) error {
+	if len(effects) == 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects: at least one %s effect is required", skillID, expectedType)
+	}
+	for idx, effect := range effects {
+		if effect.Type != expectedType {
+			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].type: unsupported %s for skill kind", skillID, idx, effect.Type)
+		}
+		switch effect.Type {
+		case "stat_percent_buff":
+			if err := validateStatPercentBuffEffect(skillID, idx, effect); err != nil {
+				return err
+			}
+		case "area_percent_heal":
+			if err := validateAreaPercentHealEffect(skillID, idx, effect); err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].type: unsupported %s", skillID, idx, effect.Type)
+		}
+	}
+	return nil
+}
+
+func validateStatPercentBuffEffect(skillID string, idx int, effect SkillEffectDef) error {
+	if len(effect.Stats) == 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats: at least one stat is required", skillID, idx)
+	}
+	seen := map[string]bool{}
+	for _, stat := range effect.Stats {
+		if !isSupportedRequirementStat(stat) {
+			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats.%s: unsupported stat", skillID, idx, stat)
+		}
+		if seen[stat] {
+			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats.%s: duplicate stat", skillID, idx, stat)
+		}
+		seen[stat] = true
+	}
+	if effect.PercentBase < 0 || effect.PercentPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: percent values must be non-negative", skillID, idx)
+	}
+	if effect.PercentBase == 0 && effect.PercentPerRank == 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: percent values cannot both be zero", skillID, idx)
+	}
+	if effect.DurationTicks <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].duration_ticks: must be positive", skillID, idx)
+	}
+	return nil
+}
+
+func validateAreaPercentHealEffect(skillID string, idx int, effect SkillEffectDef) error {
+	if effect.Target != "allies" {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].target: unsupported %s", skillID, idx, effect.Target)
+	}
+	if effect.Range <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].range: must be positive", skillID, idx)
+	}
+	if effect.Radius <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].radius: must be positive", skillID, idx)
+	}
+	if effect.PercentBase < 0 || effect.PercentPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: percent values must be non-negative", skillID, idx)
+	}
+	if effect.PercentBase == 0 && effect.PercentPerRank == 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: percent values cannot both be zero", skillID, idx)
 	}
 	return nil
 }

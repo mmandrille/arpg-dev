@@ -5,6 +5,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
+const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -62,7 +63,7 @@ var item_templates: Dictionary:
 	get: return ItemRulesLoader.item_templates
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
-var _panel: PanelContainer
+var _panel: DraggableWindow
 var _equipment_slots: Dictionary = {}
 var _bag_grid: GridContainer
 var _gold_label: Label
@@ -176,6 +177,16 @@ func hide_display() -> void:
 	visible = false
 
 
+func bot_click_close() -> void:
+	if _panel != null and _panel.close_button() != null:
+		_panel.close_button().pressed.emit()
+
+
+func bot_drag_window_by(delta: Vector2) -> void:
+	if _panel != null:
+		_panel.bot_drag_by(delta)
+
+
 func show_gesture_hint(text: String) -> void:
 	if _gesture_hint == null:
 		return
@@ -242,6 +253,7 @@ func get_debug_state() -> Dictionary:
 		"requirement_row_count": _requirement_row_count(),
 		"equip_preview_row_count": _equip_preview_row_count(),
 		"empty_slot_style": "gray_block",
+		"window": _panel.get_debug_state() if _panel != null else {},
 	}
 
 
@@ -328,25 +340,31 @@ func _build() -> void:
 	if _panel != null:
 		return
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel = PanelContainer.new()
+	_panel = DraggableWindowScript.new()
 	_panel.custom_minimum_size = Vector2(750, 460)
-	_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_panel.configure("Inventory", Vector2(720, 396))
 	_reposition_panel()
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.close_requested.connect(hide_display)
 	add_child(_panel)
+
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 2)
+	body.custom_minimum_size = Vector2(720, 396)
+	_panel.set_content(body)
 
 	_gesture_hint = Label.new()
 	_gesture_hint.visible = false
 	_gesture_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_gesture_hint.add_theme_color_override("font_color", Color("#c9a227"))
 	_gesture_hint.add_theme_font_size_override("font_size", 23)
-	_panel.add_child(_gesture_hint)
+	body.add_child(_gesture_hint)
 
 	var root := HBoxContainer.new()
 	root.add_theme_constant_override("separation", 18)
-	root.custom_minimum_size = Vector2(720, 430)
-	_panel.add_child(root)
+	root.custom_minimum_size = Vector2(720, 370)
+	body.add_child(root)
 
 	var left := VBoxContainer.new()
 	left.custom_minimum_size = Vector2(350, 0)
@@ -668,14 +686,11 @@ func _reposition_panel() -> void:
 	var margin := 20.0
 	var panel_size := _panel.custom_minimum_size
 	var viewport_size := get_viewport_rect().size if is_inside_tree() else Vector2(1280, 720)
-	_panel.offset_right = -margin
-	_panel.offset_bottom = -maxf(margin, minf(140.0, viewport_size.y * 0.16))
-	_panel.offset_left = _panel.offset_right - panel_size.x
-	_panel.offset_top = _panel.offset_bottom - panel_size.y
-	if viewport_size.y > 0.0 and viewport_size.y + _panel.offset_top < margin:
-		_panel.offset_top = -viewport_size.y + margin
-	if viewport_size.x > 0.0 and viewport_size.x + _panel.offset_left < margin:
-		_panel.offset_left = -viewport_size.x + margin
+	var bottom_margin := maxf(margin, minf(140.0, viewport_size.y * 0.16))
+	_panel.position = Vector2(
+		maxf(margin, viewport_size.x - panel_size.x - margin),
+		maxf(margin, viewport_size.y - panel_size.y - bottom_margin)
+	)
 
 
 func _panel_style() -> StyleBoxFlat:

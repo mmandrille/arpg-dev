@@ -5,6 +5,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
+const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(360, 680)
 const VENDOR_COLUMNS := 5
 const VENDOR_ROWS := 10
@@ -53,7 +54,7 @@ var item_templates: Dictionary:
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 
-var _panel: PanelContainer
+var _panel: DraggableWindow
 var _title_label: Label
 var _reroll_button: Button
 var _status_label: Label
@@ -193,6 +194,7 @@ func get_debug_state() -> Dictionary:
 		"occupied_vendor_slot_count": _vendor_items().size(),
 		"header_gold_visible": false,
 		"status": _status_label.text if _status_label != null else "",
+		"window": _panel.get_debug_state() if _panel != null else {},
 	}
 
 
@@ -224,6 +226,16 @@ func bot_click_reroll() -> void:
 		_emit_reroll()
 
 
+func bot_click_close() -> void:
+	if _panel != null and _panel.close_button() != null:
+		_panel.close_button().pressed.emit()
+
+
+func bot_drag_window_by(delta: Vector2) -> void:
+	if _panel != null:
+		_panel.bot_drag_by(delta)
+
+
 func _sync_viewport_size() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_reposition_panel()
@@ -231,28 +243,29 @@ func _sync_viewport_size() -> void:
 
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel = PanelContainer.new()
+	_panel = DraggableWindowScript.new()
 	_panel.custom_minimum_size = PANEL_SIZE
-	_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_panel.configure(shop_title, Vector2(PANEL_SIZE.x - 28, PANEL_SIZE.y - 58))
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.close_requested.connect(hide_display)
 	add_child(_panel)
 	_reposition_panel()
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
-	root.custom_minimum_size = Vector2(PANEL_SIZE.x - 28, PANEL_SIZE.y - 24)
-	_panel.add_child(root)
+	root.custom_minimum_size = Vector2(PANEL_SIZE.x - 28, PANEL_SIZE.y - 58)
+	_panel.set_content(root)
 
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 10)
 	root.add_child(header)
 	_title_label = Label.new()
 	_title_label.text = shop_title
+	_title_label.visible = false
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_title_label.add_theme_color_override("font_color", Color("#f4d481"))
 	_title_label.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
-	header.add_child(_title_label)
 
 	_reroll_button = Button.new()
 	_reroll_button.text = "Reroll"
@@ -285,6 +298,7 @@ func _render() -> void:
 		return
 	_buy_buttons = {}
 	_title_label.text = shop_title
+	_panel.configure(shop_title, Vector2(PANEL_SIZE.x - 28, PANEL_SIZE.y - 58))
 	_sync_reroll_button()
 	_clear_children(_vendor_grid)
 	var rows := _vendor_items()
@@ -1189,19 +1203,12 @@ func _reposition_panel() -> void:
 		return
 	var margin := 20.0
 	var panel_size := _panel.custom_minimum_size
-	var viewport_size := get_viewport_rect().size
-	_panel.offset_left = margin
-	_panel.offset_top = margin + 54.0
-	_panel.offset_right = _panel.offset_left + panel_size.x
-	_panel.offset_bottom = _panel.offset_top + panel_size.y
-	if viewport_size.y > 0.0 and _panel.offset_bottom > viewport_size.y - margin:
-		var overflow := _panel.offset_bottom - (viewport_size.y - margin)
-		_panel.offset_top -= overflow
-		_panel.offset_bottom -= overflow
-	if viewport_size.x > 0.0 and _panel.offset_right > viewport_size.x - margin:
-		var overflow_x := _panel.offset_right - (viewport_size.x - margin)
-		_panel.offset_left -= overflow_x
-		_panel.offset_right -= overflow_x
+	var viewport_size := get_viewport_rect().size if is_inside_tree() else Vector2(1280, 720)
+	var desired := Vector2(margin, margin + 54.0)
+	_panel.position = Vector2(
+		clampf(desired.x, margin, maxf(margin, viewport_size.x - panel_size.x - margin)),
+		clampf(desired.y, margin, maxf(margin, viewport_size.y - panel_size.y - margin))
+	)
 
 
 func _apply_interaction_filters() -> void:

@@ -14,8 +14,11 @@
     "max_attempts": 64
   },
   "monster_placement": {
-    "count": 8,
+    "count": 18,
     "monster_def_id": "dungeon_mob",
+    "pack_count": { "min": 5, "max": 7 },
+    "pack_size": { "min": 2, "max": 5 },
+    "pack_member_radius": 3.0,
     "monster_pool": [
       { "monster_def_id": "dungeon_mob", "weight": 7 },
       { "monster_def_id": "dungeon_archer", "weight": 1 },

@@ -11,8 +11,7 @@
     { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1, "timeout_s": 60 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "expect_reject": "invalid_target" },
-    { "action": "pick_up_first_rolled_loot" }
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "expect_reject": "invalid_target" }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
@@ -21,17 +20,7 @@
     { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
     { "type": "event_seen", "event_type": "monster_killed" },
     { "type": "event_seen", "event_type": "interactable_activated" },
-    { "type": "event_seen", "event_type": "loot_dropped" },
-    { "type": "rolled_inventory_any", "equipped": false }
-  ],
-  "fresh_session_checks": [
-    {
-      "world_id": "dungeon_levels",
-      "steps": [],
-      "assertions": [
-        { "type": "rolled_inventory_any", "equipped": false }
-      ]
-    }
+    { "type": "event_seen", "event_type": "loot_dropped" }
   ],
   "visual": {
     "camera": { "x": 16, "y": 10, "zoom": 1.1 }

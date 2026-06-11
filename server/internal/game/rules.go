@@ -205,6 +205,9 @@ type TeleporterPlacementRules struct {
 type MonsterPlacementRules struct {
 	Count            int                   `json:"count"`
 	MonsterDefID     string                `json:"monster_def_id"`
+	PackCount        IntRange              `json:"pack_count"`
+	PackSize         IntRange              `json:"pack_size"`
+	PackMemberRadius float64               `json:"pack_member_radius"`
 	MonsterPool      []MonsterPoolEntry    `json:"monster_pool,omitempty"`
 	MinimumMonsters  []MinimumMonsterEntry `json:"minimum_monsters,omitempty"`
 	MarginFromWall   float64               `json:"margin_from_wall"`
@@ -601,9 +604,17 @@ type MonsterDef struct {
 	ProjectileDefID   string       `json:"projectile_def_id,omitempty"`
 	Behavior          string       `json:"behavior,omitempty"`
 	AggroRadius       float64      `json:"aggro_radius,omitempty"`
+	AssistRadius      float64      `json:"assist_radius,omitempty"`
 	LeashRadius       float64      `json:"leash_radius,omitempty"`
 	MoveSpeed         float64      `json:"move_speed,omitempty"`
 	XPReward          int          `json:"xp_reward,omitempty"`
+}
+
+func (d MonsterDef) effectiveAssistRadius() float64 {
+	if d.AssistRadius > 0 {
+		return d.AssistRadius
+	}
+	return d.AggroRadius
 }
 
 func (d MonsterDef) effectiveBehavior() string {
@@ -1344,8 +1355,8 @@ func LoadRules(dir string) (*Rules, error) {
 		behavior := def.effectiveBehavior()
 		switch behavior {
 		case monsterBehaviorStatic:
-			if def.AggroRadius > 0 || def.LeashRadius > 0 || def.MoveSpeed > 0 {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s: aggro/leash/move_speed only valid for chase behavior", id)
+			if def.AggroRadius > 0 || def.AssistRadius > 0 || def.LeashRadius > 0 || def.MoveSpeed > 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: aggro/assist/leash/move_speed only valid for chase behavior", id)
 			}
 			if def.AttackDamage != nil {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s: attack_damage only valid for chase behavior", id)
@@ -1356,6 +1367,9 @@ func LoadRules(dir string) (*Rules, error) {
 		case monsterBehaviorChase:
 			if def.AggroRadius <= 0 {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s: chase requires positive aggro_radius", id)
+			}
+			if def.AssistRadius > 0 && def.AssistRadius < def.AggroRadius {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s: assist_radius must be >= aggro_radius", id)
 			}
 			if def.LeashRadius > 0 && def.LeashRadius < def.AggroRadius {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s: leash_radius must be >= aggro_radius", id)
@@ -1864,9 +1878,36 @@ func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) err
 		}
 		return nil
 	}
+	if placement.PackCount.Min <= 0 || placement.PackCount.Max < placement.PackCount.Min {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_count: invalid min/max")
+	}
+	if placement.PackSize.Min <= 0 || placement.PackSize.Max < placement.PackSize.Min {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_size: invalid min/max")
+	}
+	if placement.PackMemberRadius <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_member_radius: must be positive")
+	}
+	if placement.PackCount.Min*placement.PackSize.Min > placement.Count {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement: minimum pack population exceeds count")
+	}
+	if placement.PackCount.Max*placement.PackSize.Max < placement.Count {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement: maximum pack population below count")
+	}
 
 	poolWeight := 0
 	poolIDs := map[string]bool{}
+	minAssistRadius := math.MaxFloat64
+	considerAssist := func(monsterID string) error {
+		def, ok := r.Monsters[monsterID]
+		if !ok {
+			return fmt.Errorf("unknown monster %s", monsterID)
+		}
+		if def.effectiveBehavior() != monsterBehaviorChase {
+			return fmt.Errorf("%s must use chase behavior", monsterID)
+		}
+		minAssistRadius = math.Min(minAssistRadius, def.effectiveAssistRadius())
+		return nil
+	}
 	for idx, entry := range placement.MonsterPool {
 		if entry.MonsterDefID == "" {
 			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].monster_def_id: required", idx)
@@ -1874,18 +1915,22 @@ func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) err
 		if entry.Weight <= 0 {
 			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].weight: must be positive", idx)
 		}
-		def, ok := r.Monsters[entry.MonsterDefID]
-		if !ok {
-			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].monster_def_id: unknown monster %s", idx, entry.MonsterDefID)
-		}
-		if def.effectiveBehavior() != monsterBehaviorChase {
-			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].monster_def_id: %s must use chase behavior", idx, entry.MonsterDefID)
+		if err := considerAssist(entry.MonsterDefID); err != nil {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool[%d].monster_def_id: %v", idx, err)
 		}
 		poolIDs[entry.MonsterDefID] = true
 		poolWeight += entry.Weight
 	}
+	if len(placement.MonsterPool) == 0 {
+		if err := considerAssist(placement.MonsterDefID); err != nil {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: %v", err)
+		}
+	}
 	if len(placement.MonsterPool) > 0 && poolWeight <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool: total weight must be positive")
+	}
+	if minAssistRadius != math.MaxFloat64 && placement.PackMemberRadius*2 > minAssistRadius {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_member_radius: diameter must fit within monster assist_radius")
 	}
 
 	minTotal := 0

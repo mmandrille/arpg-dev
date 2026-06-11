@@ -3534,6 +3534,7 @@ def run_assertions(
             "monster_within_player_distance",
             "monster_near_spawn",
             "event_seen",
+            "event_count",
             "combat_event_seen",
             "player_never_in_melee_range_of",
             "monster_damage_at_least",
@@ -3619,6 +3620,10 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
                     f"{where}: event {event_summary(assertion)} not seen; "
                     f"have events={state.events[-10:]} seen_types={sorted(state.seen_events)}"
                 )
+            continue
+        if typ == "event_count":
+            matches = sum(1 for event in state.events if event_matches(event, assertion))
+            assert_count_matches(matches, assertion, f"{where}: event count {event_summary(assertion)}")
             continue
         if typ == "combat_event_seen":
             if not any(combat_event_matches(event, assertion, state) for event in state.combat_events):

@@ -785,6 +785,11 @@ func (s *Sim) handleAssignHotbar(in Input, res *TickResult) {
 			return
 		}
 		s.hotbar[in.AssignHotbar.SlotIndex] = 0
+		if assignedID != 0 && !s.hotbarHasItem(assignedID) {
+			if item := s.findItemByID(assignedID); item != nil {
+				res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
+			}
+		}
 		res.Changes = append(res.Changes, Change{
 			Op:             OpHotbarUpdate,
 			SlotIndex:      in.AssignHotbar.SlotIndex,
@@ -804,12 +809,36 @@ func (s *Sim) handleAssignHotbar(in Input, res *TickResult) {
 		res.reject(in.MessageID, "not_consumable")
 		return
 	}
+	assignedID := s.hotbar[in.AssignHotbar.SlotIndex]
+	if assignedID != 0 && assignedID != item.instanceID {
+		bagCountAfter := s.bagOccupancyCount()
+		if !s.hotbarHasItem(item.instanceID) {
+			bagCountAfter--
+		}
+		if !s.hotbarHasItemExcept(assignedID, in.AssignHotbar.SlotIndex) {
+			bagCountAfter++
+		}
+		if bagCountAfter > s.inventoryCapacity() {
+			res.reject(in.MessageID, "inventory_full")
+			return
+		}
+	}
 	s.hotbar[in.AssignHotbar.SlotIndex] = item.instanceID
+	if assignedID != 0 && assignedID != item.instanceID && !s.hotbarHasItem(assignedID) {
+		if oldItem := s.findItemByID(assignedID); oldItem != nil {
+			res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(oldItem))})
+		}
+	}
 	idCopy := idStr(item.instanceID)
+	if assignedID != item.instanceID && !s.hotbarHasItemExcept(item.instanceID, in.AssignHotbar.SlotIndex) {
+		res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &idCopy})
+	}
+	itemView := s.itemView(item)
 	res.Changes = append(res.Changes, Change{
 		Op:             OpHotbarUpdate,
 		SlotIndex:      in.AssignHotbar.SlotIndex,
 		ItemInstanceID: &idCopy,
+		Item:           &itemView,
 		InventoryRows:  intPtr(s.inventoryRows()),
 		InventoryCap:   intPtr(s.inventoryCapacity()),
 	})

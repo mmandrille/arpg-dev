@@ -4699,6 +4699,21 @@ func (s *Sim) hotbarHasItem(instanceID uint64) bool {
 	return false
 }
 
+func (s *Sim) hotbarHasItemExcept(instanceID uint64, exceptSlot int) bool {
+	if instanceID == 0 {
+		return false
+	}
+	for slot, assigned := range s.hotbar {
+		if slot == exceptSlot {
+			continue
+		}
+		if assigned == instanceID {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Sim) hotbarView() []HotbarSlotView {
 	if len(s.hotbar) != maxHotbarCapacity {
 		s.hotbar = make([]uint64, maxHotbarCapacity)
@@ -4709,6 +4724,10 @@ func (s *Sim) hotbarView() []HotbarSlotView {
 		if itemID != 0 {
 			id := idStr(itemID)
 			slot.ItemInstanceID = &id
+			if item := s.findItemByID(itemID); item != nil {
+				view := s.itemView(item)
+				slot.Item = &view
+			}
 		}
 		out = append(out, slot)
 	}
@@ -6107,6 +6126,9 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 
 	inventory := make([]ItemView, 0, len(s.inventory))
 	for _, it := range s.inventory {
+		if it == nil || s.hotbarHasItem(it.instanceID) {
+			continue
+		}
 		inventory = append(inventory, s.itemView(it))
 	}
 	stashItems := make([]StashItemView, 0, len(s.stashItems))

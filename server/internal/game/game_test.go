@@ -3717,6 +3717,13 @@ func TestInventoryCapacityOccupancyExemptsEquippedAndHotbar(t *testing.T) {
 	if got := sim.bagOccupancyCount(); got != 1 {
 		t.Fatalf("bag occupancy after hotbar assign = %d, want 1", got)
 	}
+	snap := sim.Snapshot()
+	if findSnapshotItemByID(snap.Inventory, potion.instanceID) != nil {
+		t.Fatalf("hotbar potion still appears in snapshot inventory: %+v", snap.Inventory)
+	}
+	if len(snap.Hotbar) == 0 || snap.Hotbar[0].Item == nil || snap.Hotbar[0].Item.ItemDefID != "red_potion" {
+		t.Fatalf("hotbar snapshot missing assigned item view: %+v", snap.Hotbar)
+	}
 	if badge.equipped {
 		t.Fatal("badge unexpectedly equipped")
 	}
@@ -3808,6 +3815,41 @@ func TestHotbarAssignUseDirectUseAndReenable(t *testing.T) {
 	assertAck(t, use, "use_hotbar")
 	if sim.findItemByID(second.instanceID) != nil || sim.hotbar[5] != 0 {
 		t.Fatalf("hotbar use did not consume/clear item=%+v hotbar=%v", sim.findItemByID(second.instanceID), sim.hotbar)
+	}
+}
+
+func TestHotbarAssignClearAndReplaceMovesItemsBetweenBagViewAndHotbar(t *testing.T) {
+	sim := NewSim("sess_hotbar_bag_view", "01", loadRules(t))
+	red := addStaticInventoryItem(sim, 7110, "red_potion")
+	blue := addStaticInventoryItem(sim, 7111, "blue_potion")
+
+	assignRed := sim.Tick([]Input{{MessageID: "assign_red", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr(idStr(red.instanceID))}}})
+	assertAck(t, assignRed, "assign_red")
+	if !hasInventoryRemove(assignRed, red.instanceID) || !hasHotbarUpdateItem(assignRed, 0, red.instanceID, "red_potion") {
+		t.Fatalf("assign red did not move potion to hotbar view: %+v", assignRed.Changes)
+	}
+	if findSnapshotItemByID(sim.Snapshot().Inventory, red.instanceID) != nil {
+		t.Fatalf("assigned red still visible in bag snapshot: %+v", sim.Snapshot().Inventory)
+	}
+
+	clearRed := sim.Tick([]Input{{MessageID: "clear_red", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: nil}}})
+	assertAck(t, clearRed, "clear_red")
+	if !hasInventoryAdd(clearRed, red.instanceID) || !hasHotbarUpdate(clearRed, 0, nil) {
+		t.Fatalf("clear red did not return potion to bag view: %+v", clearRed.Changes)
+	}
+	if findSnapshotItemByID(sim.Snapshot().Inventory, red.instanceID) == nil {
+		t.Fatalf("cleared red missing from bag snapshot: %+v", sim.Snapshot().Inventory)
+	}
+
+	assertAck(t, sim.Tick([]Input{{MessageID: "assign_red_again", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr(idStr(red.instanceID))}}}), "assign_red_again")
+	replaceBlue := sim.Tick([]Input{{MessageID: "replace_blue", Type: "assign_hotbar_intent", AssignHotbar: &AssignHotbarIntent{SlotIndex: 0, ItemInstanceID: stringPtr(idStr(blue.instanceID))}}})
+	assertAck(t, replaceBlue, "replace_blue")
+	if !hasInventoryAdd(replaceBlue, red.instanceID) || !hasInventoryRemove(replaceBlue, blue.instanceID) || !hasHotbarUpdateItem(replaceBlue, 0, blue.instanceID, "blue_potion") {
+		t.Fatalf("replace did not swap bag/hotbar views: %+v", replaceBlue.Changes)
+	}
+	snap := sim.Snapshot()
+	if findSnapshotItemByID(snap.Inventory, red.instanceID) == nil || findSnapshotItemByID(snap.Inventory, blue.instanceID) != nil {
+		t.Fatalf("replace snapshot inventory = %+v", snap.Inventory)
 	}
 }
 
@@ -4614,6 +4656,46 @@ func hasHotbarUpdate(r TickResult, slotIndex int, itemInstanceID *string) bool {
 		return c.ItemInstanceID != nil && *c.ItemInstanceID == *itemInstanceID
 	}
 	return false
+}
+
+func hasHotbarUpdateItem(r TickResult, slotIndex int, instanceID uint64, itemDefID string) bool {
+	for _, c := range r.Changes {
+		if c.Op != OpHotbarUpdate || c.SlotIndex != slotIndex || c.ItemInstanceID == nil {
+			continue
+		}
+		if *c.ItemInstanceID != idStr(instanceID) || c.Item == nil || c.Item.ItemDefID != itemDefID {
+			continue
+		}
+		return true
+	}
+	return false
+}
+
+func hasInventoryAdd(r TickResult, instanceID uint64) bool {
+	for _, c := range r.Changes {
+		if c.Op == OpInventoryAdd && c.Item != nil && c.Item.ItemInstanceID == idStr(instanceID) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasInventoryRemove(r TickResult, instanceID uint64) bool {
+	for _, c := range r.Changes {
+		if c.Op == OpInventoryRemove && c.ItemInstanceID != nil && *c.ItemInstanceID == idStr(instanceID) {
+			return true
+		}
+	}
+	return false
+}
+
+func findSnapshotItemByID(items []ItemView, instanceID uint64) *ItemView {
+	for i := range items {
+		if items[i].ItemInstanceID == idStr(instanceID) {
+			return &items[i]
+		}
+	}
+	return nil
 }
 
 func hasEquippedUpdate(r TickResult, slot string, itemInstanceID *string) bool {

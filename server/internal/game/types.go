@@ -337,8 +337,9 @@ type ShopSellAppraisalView struct {
 
 // HotbarSlotView is one fixed hotbar assignment in the protocol snapshot.
 type HotbarSlotView struct {
-	SlotIndex      int     `json:"slot_index"`
-	ItemInstanceID *string `json:"item_instance_id"`
+	SlotIndex      int       `json:"slot_index"`
+	ItemInstanceID *string   `json:"item_instance_id"`
+	Item           *ItemView `json:"item,omitempty"`
 }
 
 type WallView struct {
@@ -564,12 +565,13 @@ func (c Change) MarshalJSON() ([]byte, error) {
 		}{c.Op, c.Slot, c.ItemInstanceID, c.HotbarCapacity, c.InventoryRows, c.InventoryCap})
 	case OpHotbarUpdate:
 		return json.Marshal(struct {
-			Op             string  `json:"op"`
-			SlotIndex      int     `json:"slot_index"`
-			ItemInstanceID *string `json:"item_instance_id"`
-			InventoryRows  *int    `json:"inventory_rows,omitempty"`
-			InventoryCap   *int    `json:"inventory_capacity,omitempty"`
-		}{c.Op, c.SlotIndex, c.ItemInstanceID, c.InventoryRows, c.InventoryCap})
+			Op             string    `json:"op"`
+			SlotIndex      int       `json:"slot_index"`
+			ItemInstanceID *string   `json:"item_instance_id"`
+			Item           *ItemView `json:"item,omitempty"`
+			InventoryRows  *int      `json:"inventory_rows,omitempty"`
+			InventoryCap   *int      `json:"inventory_capacity,omitempty"`
+		}{c.Op, c.SlotIndex, c.ItemInstanceID, c.Item, c.InventoryRows, c.InventoryCap})
 	case OpGoldUpdate:
 		gold := 0
 		if c.Gold != nil {

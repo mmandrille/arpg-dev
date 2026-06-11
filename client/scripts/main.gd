@@ -930,7 +930,7 @@ func _apply_delta(p: Dictionary) -> void:
 					inventory_rows = int(c.get("inventory_rows", inventory_rows))
 				if c.has("inventory_capacity"):
 					inventory_capacity = int(c.get("inventory_capacity", inventory_capacity))
-				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"))
+				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"), c.get("item", {}))
 			"gold_update":
 				gold = int(c.get("gold", gold))
 			"stash_item_add":
@@ -1285,14 +1285,17 @@ func _remove_stash_item(stash_item_id: String) -> void:
 			stash_items.remove_at(i)
 
 
-func _apply_hotbar_update(slot_index: int, item_instance_id) -> void:
+func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = {}) -> void:
 	if slot_index < 0 or slot_index >= 10:
 		return
 	while hotbar.size() < 10:
 		hotbar.append({"slot_index": hotbar.size(), "item_instance_id": null})
-	hotbar[slot_index] = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+	var slot := {"slot_index": slot_index, "item_instance_id": item_instance_id}
+	if not item.is_empty():
+		slot["item"] = item.duplicate(true)
+	hotbar[slot_index] = slot
 	if consumable_bar != null:
-		consumable_bar.apply_hotbar_update(slot_index, item_instance_id)
+		consumable_bar.apply_hotbar_update(slot_index, item_instance_id, item)
 
 
 func _refresh_inventory_ui() -> void:

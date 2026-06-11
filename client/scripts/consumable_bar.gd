@@ -107,12 +107,15 @@ func set_hotbar_state(next_capacity: int, next_hotbar: Array) -> void:
 	_render()
 
 
-func apply_hotbar_update(slot_index: int, item_instance_id) -> void:
+func apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = {}) -> void:
 	if slot_index < 0 or slot_index >= SLOT_COUNT:
 		return
 	while hotbar.size() < SLOT_COUNT:
 		hotbar.append({"slot_index": hotbar.size(), "item_instance_id": null})
-	hotbar[slot_index] = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+	var slot := {"slot_index": slot_index, "item_instance_id": item_instance_id}
+	if not item.is_empty():
+		slot["item"] = item.duplicate(true)
+	hotbar[slot_index] = slot
 	_rebuild_slot_items()
 	_render()
 
@@ -308,6 +311,8 @@ func _rebuild_slot_items() -> void:
 		if item_id == null:
 			continue
 		var item := _find_inventory_item(str(item_id))
+		if item.is_empty() and (slot as Dictionary).has("item"):
+			item = ((slot as Dictionary).get("item", {}) as Dictionary).duplicate(true)
 		if not item.is_empty() and _is_consumable(item):
 			_slot_items[slot_index] = item.duplicate(true)
 

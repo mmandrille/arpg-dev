@@ -1,0 +1,63 @@
+server/internal/store/repos.go
+  s_c8b827646bf8c0::t_38e61bb7eee30d 54,56,65,67,77-78,90,112,129,132-135,148,150
+server/internal/http/session.go
+  s_c8b827646bf8c0::t_fbe3c9547985cb 344-350,482,484-486
+tools/validate_shared.py
+  s_c8b827646bf8c0::t_cea0ab1d7cc284 508-526
+server/internal/game/game_test.go
+  s_c8b827646bf8c0::t_21b48a094fb312 135
+  s_c8b827646bf8c0::t_3d696726bf1cc8 136-137
+server/internal/store/models.go
+  s_c8b827646bf8c0::t_38e61bb7eee30d 17-22,32
+docs/specs/v69_spec-character-class-foundation.md
+  s_c8b827646bf8c0::t_c1f4775369d44e 1-2,4-47
+  s_c8b827646bf8c0::t_719f20c404b3fe 3
+server/migrations/0017_character_class.sql
+  s_c8b827646bf8c0::t_38e61bb7eee30d 1-9
+shared/rules/character_progression.v0.schema.json
+  s_c8b827646bf8c0::t_a369d7231d8f8d 7,12-16,95-101
+server/internal/store/interfaces.go
+  s_c8b827646bf8c0::t_38e61bb7eee30d 20
+docs/plans/v69_2026-06-11-character-class-foundation.md
+  s_c8b827646bf8c0::t_0ccb298aff0c3c 92-93
+  s_c8b827646bf8c0::t_c1f4775369d44e 1-2,4-33,36-49,53-64,68-80,83-89
+  s_c8b827646bf8c0::t_719f20c404b3fe 3,34-35,50-52,65-67,81-82,90-91
+shared/rules/character_progression.v0.json
+  s_c8b827646bf8c0::t_a369d7231d8f8d 9-11,13-22
+  s_c8b827646bf8c0::t_21b48a094fb312 12
+server/internal/store/stale_sessions_test.go
+  s_c8b827646bf8c0::t_534c0cbec85f99 45
+server/internal/store/store_test.go
+  s_c8b827646bf8c0::t_52dc958762e792 76-78,111
+  s_c8b827646bf8c0::t_534c0cbec85f99 146,150,824,828,836,984
+server/internal/replay/replay_test.go
+  s_c8b827646bf8c0::t_85cf17a4936036 1361
+server/internal/http/auth_session_test.go
+  s_c8b827646bf8c0::t_21b48a094fb312 293
+  s_c8b827646bf8c0::t_3f342a8afa71a6 131-140,148,219-222,228-230,234,238-240,263-292,294-297
+server/internal/game/rules.go
+  s_c8b827646bf8c0::t_fd11a24df3546a 124,132-136,868,887-900,961
+  s_c8b827646bf8c0::t_d78d51e6198bbf 866-867,869-871
+server/internal/http/character.go
+  s_c8b827646bf8c0::t_03f86723c12fb8 15,27,40-41,91-100,180,193
+docs/as-built/v69_character-class-foundation.md
+  s_c8b827646bf8c0::t_719f20c404b3fe 1-25
+PROGRESS.md
+  s_c8b827646bf8c0::t_719f20c404b3fe 15,90,199,594-597
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "07c6b6d7eadfb122d3534813ec304f101fd2a6f0",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+docs/plans/v62_2026-06-11-monster-depth-stat-scaling.md
+  s_1e8b8d9cb32141::t_c5b7330f55d647 3,84-85,99-101,109-112
+  s_1e8b8d9cb32141::t_6450e9e80046b0 1-2,4-37,39,43-53,57-67,69,71,74-83,86-98,102-108
+  s_1e8b8d9cb32141::t_5112e91fd5e4d5 38,40-42,54-56,68,70,72-73
+shared/golden/monster_rarity.v0.schema.json
+  s_1e8b8d9cb32141::t_f1d18e77e1f5ba 24-29,41-46,50,63-67,104,120-124
+server/internal/game/sim.go
+  s_1e8b8d9cb32141::t_63888a1ecbbc1f 95-106,108-147,1866-1873
+  s_1e8b8d9cb32141::t_020c3422d4b97b 1845-1846,1850-1856
+  s_1e8b8d9cb32141::t_a460a5dbe4eecb 6009-6024,6028-6029,6031-6032
+  s_1e8b8d9cb32141::t_dddc078bfe2e45 1865,1874-1905
+  s_1e8b8d9cb32141::t_e188346977f0b4 3466-3470
+  s_1e8b8d9cb32141::t_bc24f9ac8bb652 107
+docs/specs/v62_spec-monster-depth-stat-scaling.md
+  s_1e8b8d9cb32141::t_133b99abd2135d 3
+  s_1e8b8d9cb32141::t_b5cc3480663969 1-2,4-87
+tools/bot/scenarios/38_ranged_monster_ai.json
+  s_1e8b8d9cb32141::t_867993f485ad6c 6,15-16,18,28-29,31
+tools/bot/scenarios/13_teleporter_lab.json
+  s_1e8b8d9cb32141::t_92a4ec354c2321 6
+  s_1e8b8d9cb32141::t_00cbe9230a84ec 4
+tools/bot/scenarios/client/10_full_equipment.json
+  s_1e8b8d9cb32141::t_21207793351d74 33
+tools/bot/scenarios/12_dungeon_levels.json
+  s_1e8b8d9cb32141::t_af435499160a8a 4
+docs/as-built/v62_monster-depth-stat-scaling.md
+  s_1e8b8d9cb32141::t_39fb10a4c14553 1-33
+server/internal/game/game_test.go
+  s_1e8b8d9cb32141::t_c2e6945f23ec56 170,173-180,201-202,204-207,209-211,213-216
+  s_1e8b8d9cb32141::t_a650eecb3fc7bc 6016-6023,6068
+  s_1e8b8d9cb32141::t_e701f8c3fa8821 212,6067
+  s_1e8b8d9cb32141::t_63888a1ecbbc1f 159-169,171-172,6013-6015
+  s_1e8b8d9cb32141::t_cec400ab9402fe 6090
+PROGRESS.md
+  s_1e8b8d9cb32141::t_d7aee4817fca39 7,15,17,83,185
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_1e8b8d9cb32141::t_8ee8b88d742557 6,10,18
+  s_1e8b8d9cb32141::t_355160617f4be2 13
+tools/validate_shared.py
+  s_1e8b8d9cb32141::t_b1f065d575f407 1775-1776
+  s_1e8b8d9cb32141::t_dd8bab66477043 1689-1691,1730
+  s_1e8b8d9cb32141::t_6e422846b71208 1699-1709,1716-1718,1720-1724,1727-1728,1731-1763,1773-1774,1777-1780
+shared/rules/dungeon_generation.v0.schema.json
+  s_1e8b8d9cb32141::t_0e505d072038bd 18
+  s_1e8b8d9cb32141::t_718dbfe7c59520 206-235,249-254,266-271
+tools/bot/scenarios/client/06_use_potion_hotbar.json
+  s_1e8b8d9cb32141::t_c22156eba77a69 27
+server/internal/game/rules.go
+  s_1e8b8d9cb32141::t_c78e9aa97ffb82 112,271-298
+  s_1e8b8d9cb32141::t_025a7119868b77 1528
+  s_1e8b8d9cb32141::t_dbe3b9b52675d6 1403
+  s_1e8b8d9cb32141::t_98a6d3cd9a0fa3 1499-1501,1817-1844,1893-1909
+server/internal/realtime/session_loop.go
+  s_1e8b8d9cb32141::t_dda847a4009a94 672-677,731
+server/internal/realtime/runner.go
+  s_1e8b8d9cb32141::t_9ea55b45d2fcc1 413-418,480
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_1e8b8d9cb32141::t_ddfb7b767d59ec 11
+  s_1e8b8d9cb32141::t_07e617ee5e3439 4
+tools/bot/scenarios/10_chase_maze.json
+  s_1e8b8d9cb32141::t_cb56407b170b4a 7
+shared/rules/dungeon_generation.v0.json
+  s_1e8b8d9cb32141::t_a3d2d8e6e865b4 83-96,105-110,121-126,137-142,153-158
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_1e8b8d9cb32141::t_55ac92123000f8 17,33
+  s_1e8b8d9cb32141::t_c428a82da6eae5 34
+  s_1e8b8d9cb32141::t_3c085053680cf0 38
+shared/golden/monster_rarity.json
+  s_1e8b8d9cb32141::t_d99d28732581b0 45,47-51,70,73-75,95-101
+  s_1e8b8d9cb32141::t_240f1320a176f2 12-17,22-26,37-42,62-67,72,76,87-92,142,144-148,157-161
+tools/bot/scenarios/19_full_equipment.json
+  s_1e8b8d9cb32141::t_dafe8ef1ff1db5 72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "13208c256aeed61e63d5e6e38320025d7070a6c6",
+  "prompts": {},
+  "sessions": {
+    "s_1e8b8d9cb32141": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4ed-e3d7-7660-878d-330420be72c6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -683,6 +683,11 @@ variant, and proves it with client unit, focused client-bot, and protocol pack-a
 small follow-ups for realtime fanout level snapshotting, combat event presenter extraction,
 defensive client payload parsing, and splitting the largest Python validation/bot files by domain.
 
+**Maintainability ratchet is now explicit.** New source/test/tool files target a 600-line maximum,
+existing over-limit files are grandfathered in `.maintainability/file-size-baseline.tsv`, and
+`make maintainability` enforces that new files do not exceed the target while grandfathered files
+do not grow by more than 25 lines without a documented maintenance exception.
+
 **Paladin Holy Shield is now authoritative and visible.** v81 adds a data-driven Paladin area
 defensive buff, per-player active effect ids, armor/block stat application, server-owned expiry,
 Rage-style status UI presentation, and a gold shield/shine around every affected hero.

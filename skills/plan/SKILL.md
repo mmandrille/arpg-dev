@@ -47,6 +47,7 @@ Review the spec systematically. Produce a short **Spec Review** section in chat 
 | **Bot proof** | Acceptance criteria map to bot scenario steps or new scenario JSON. |
 | **Replay** | Input shape changes mention replay test updates. |
 | **Client** | Godot plugin adoption checklist required if UI/camera/art is in scope. |
+| **Maintainability** | Plan identifies touched over-600-line files and either extracts helpers or justifies deferral. |
 | **Docs** | `PROGRESS.md` update is in scope when slice ships. |
 | **As-built drift** | Spec assumptions match current code (grep/read cited files). |
 
@@ -87,6 +88,25 @@ Tech stack: <Go sim, shared JSON, Godot client, Python bot, etc.>
 | Action | Path | Responsibility |
 |--------|------|----------------|
 
+## Maintenance ratchet
+Target: source/test/tool files stay at or below 600 lines.
+
+Hotspot / over-limit files touched:
+- [ ] `client/scripts/main.gd`
+- [ ] `server/internal/game/game_test.go`
+- [ ] `tools/bot/run.py`
+- [ ] `tools/validate_shared.py`
+- [ ] Other over-limit file from `.maintainability/file-size-baseline.tsv`: `<path or none>`
+
+Decision:
+- [ ] Extract focused helper/module/test file as part of this slice, or
+- [ ] Defer extraction with rationale: `<why splitting now is riskier>`
+
+Verification:
+```bash
+make maintainability
+```
+
 ## Task 1 — <name>
 Files:
 - Create/Modify: `path`
@@ -111,6 +131,7 @@ make ci
 ```
 
 ## Final verification
+- [ ] `make maintainability`
 - [ ] `make validate-shared` (if shared/ touched)
 - [ ] `make test-go` (if server/ touched)
 - [ ] `make client-unit` (if client/ touched)

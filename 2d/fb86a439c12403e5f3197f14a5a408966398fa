@@ -1,0 +1,32 @@
+docs/adr/0014-core-progression-and-endgame-design-rules.md
+  s_0fdde12a1774c7::t_216ecb022954b9 1-21,26-162,176-219,222-228
+  s_0fdde12a1774c7::t_8e0e9afc566cbc 22-25,163-175,220-221
+PROGRESS.md
+  s_0fdde12a1774c7::t_216ecb022954b9 208,545,547-548,557
+  s_0fdde12a1774c7::t_8e0e9afc566cbc 602-606
+  s_811f691015f0d0::t_93192aae00c21b 229-231,261,263
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2dfb86a439c12403e5f3197f14a5a408966398fa",
+  "prompts": {},
+  "sessions": {
+    "s_0fdde12a1774c7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb414-449c-74e2-b662-88e0cdd7337e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_811f691015f0d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb46e-e1fb-77a1-9408-52e55364dd27",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

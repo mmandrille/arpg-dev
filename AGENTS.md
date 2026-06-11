@@ -39,6 +39,17 @@ Edit skills only under `skills/` — never duplicate into `.cursor/` or `.claude
 
 Do **not** create new branches. Work only on the branch already checked out — even if it is `main`. If a feature branch is needed, the user creates and checks it out before development begins.
 
+### Worktree isolation
+
+Prefer isolating agent implementation work in a separate Git worktree until the slice has passed its targeted verification. This is valid when the user has already provided a worktree/branch for the task, or when the user explicitly approves creating a temporary worktree and branch. Agents must not create that branch unprompted, because Git cannot check out the same branch in two worktrees and this repo's default rule is still "no new branches."
+
+When worktree isolation is used:
+
+1. Keep exploratory edits, generated files, and focused test iterations inside the isolated worktree.
+2. Do not commit from the isolated worktree unless the user explicitly asks.
+3. After verification, transfer the complete tested change set back to `main` and run `/finish` there.
+4. Let `/finish` perform the final `PROGRESS.md` consolidation, `make ci` gate, staging, and single `feat: vN: ...` commit on `main`.
+
 ## Testing discipline
 
 Prefer targeted verification while iterating. Run the smallest command or scenario that covers the files and behavior you changed, such as a focused Go package test, `make validate-shared`, `make client-unit`, a single `make bot scenario=...`, or one client bot scenario.

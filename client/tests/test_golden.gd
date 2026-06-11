@@ -476,10 +476,10 @@ func _initialize() -> void:
 	if skill_golden["skill"].get("requirements", {}) != magic_bolt.get("requirements", {}):
 		_fail("skill golden requirements mismatch")
 		return
-	if int(magic_bolt["requirements"]["stats"]["magic"]) != 15:
+	if int(magic_bolt["requirements"]["stats"]["magic"]) != 5:
 		_fail("magic bolt magic requirement mismatch")
 		return
-	if int(magic_bolt["requirements"].get("level_per_rank", 0)) != 1 or int(magic_bolt["requirements"].get("stats_per_rank", {}).get("magic", 0)) != 5:
+	if int(magic_bolt["requirements"].get("level_per_rank", 0)) != 1 or int(magic_bolt["requirements"].get("stats_per_rank", {}).get("magic", 0)) != 3:
 		_fail("magic bolt per-rank requirement mismatch")
 		return
 	var cooldown_multiplier := float(magic_bolt["cooldown"]["multiplier"])

@@ -29,7 +29,7 @@ func _run() -> void:
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
-		"skills": _skill_rows(0, false),
+		"skills": _skill_rows(0, true),
 	})
 	panel.set_interactive(true)
 	panel.ensure_display_visible()
@@ -51,9 +51,9 @@ func _run() -> void:
 	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "bolt")
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
-	_assert_false("spend button disabled before magic requirement", bool(state.get("spend_button_enabled", true)))
-	_assert_eq("unbought missing requirement is disabled", str(state.get("visual_state", "")), "disabled")
-	_assert_false("requirements not met before magic 15", bool(state.get("requirements_met", true)))
+	_assert_true("spend button enabled at initial magic requirement", bool(state.get("spend_button_enabled", false)))
+	_assert_eq("unbought met requirement is highlighted", str(state.get("visual_state", "")), "highlight")
+	_assert_true("requirements met at magic 5", bool(state.get("requirements_met", false)))
 	var requirement_status: Array = state.get("requirement_status", [])
 	_assert_eq("requirement row count", requirement_status.size(), 2)
 	_assert_eq("magic requirement current", int((requirement_status[1] as Dictionary).get("current", -1)), 5)
@@ -64,7 +64,7 @@ func _run() -> void:
 	_assert_eq("hovered skill updates", str(state.get("hovered_skill_id", "")), "magic_bolt")
 	_assert_true("tooltip visible on hover", bool(state.get("tooltip_visible", false)))
 	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: 3"))
-	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel 1\nMagic 15(-10)"))
+	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel 1\nMagic 5"))
 	panel.bot_hover_skill("heal")
 	state = panel.get_debug_state()
 	_assert_eq("heal selection updates", str(state.get("selected_skill_id", "")), "heal")
@@ -75,14 +75,14 @@ func _run() -> void:
 
 	panel.set_character_progression({
 		"level": 5,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 15},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
 		"skills": _skill_rows(0, true),
 	})
 	state = panel.get_debug_state()
-	_assert_true("requirements met after magic 15", bool(state.get("requirements_met", false)))
+	_assert_true("requirements met at magic 5", bool(state.get("requirements_met", false)))
 	_assert_true("spend button enabled after magic requirement", bool(state.get("spend_button_enabled", false)))
 	_assert_eq("rankable skill is highlighted", str(state.get("visual_state", "")), "highlight")
 	panel.bot_click_skill_button("magic_bolt")
@@ -102,29 +102,29 @@ func _run() -> void:
 
 	panel.set_character_progression({
 		"level": 6,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 15},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
 		"skills": _skill_rows(1, false),
 	})
 	state = panel.get_debug_state()
-	_assert_false("rank 2 requirement blocks magic 15", bool(state.get("requirements_met", true)))
-	_assert_false("rank 2 spend disabled before magic 20", bool(state.get("spend_button_enabled", true)))
+	_assert_false("rank 2 requirement blocks magic 5", bool(state.get("requirements_met", true)))
+	_assert_false("rank 2 spend disabled before magic 8", bool(state.get("spend_button_enabled", true)))
 	_assert_eq("bought skill missing next-rank req stays normal", str(state.get("visual_state", "")), "normal")
-	_assert_true("tooltip includes rank 2 missing magic diff", str(state.get("tooltip_body", "")).contains("Magic 20(-5)"))
+	_assert_true("tooltip includes rank 2 missing magic diff", str(state.get("tooltip_body", "")).contains("Magic 8(-3)"))
 
 	panel.set_character_progression({
 		"level": 6,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 20},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 8},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
 		"skills": _skill_rows(1, true),
 	})
 	state = panel.get_debug_state()
-	_assert_true("rank 2 requirements met at magic 20", bool(state.get("requirements_met", false)))
-	_assert_true("rank 2 spend enabled at magic 20", bool(state.get("spend_button_enabled", false)))
+	_assert_true("rank 2 requirements met at magic 8", bool(state.get("requirements_met", false)))
+	_assert_true("rank 2 spend enabled at magic 8", bool(state.get("spend_button_enabled", false)))
 	panel.set_skill_bindings(["", "magic_bolt", "", "", "", "", "", ""], "magic_bolt")
 	state = panel.get_debug_state()
 	_assert_eq("assigned key shown", str(state.get("assigned_key", "")), "F2")

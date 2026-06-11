@@ -3,7 +3,7 @@
   "world_id": "skill_progression_lab",
   "seed": "v61_rage_and_heal_skills",
   "title": "Rage and Heal skills",
-  "description": "Use a compact skill lab to level to the second skill-point grant, satisfy Rage and Heal requirements, learn both first-row skills, cast Rage, then prove Heal in a fresh heal lab session.",
+  "description": "Use a compact skill lab to level to the second skill-point grant, learn baseline Rage and Heal, cast Rage, then prove Heal in a fresh heal lab session.",
   "steps": [
     { "action": "attack_until_event", "monster_def_id": "skill_xp_level7_dummy", "event_type": "monster_killed", "timeout_s": 20 },
     {
@@ -21,46 +21,7 @@
       "skill_id": "rage",
       "rank": 0,
       "max_rank": 5,
-      "can_spend": false
-    },
-    {
-      "action": "allocate_stat",
-      "stat": "vit",
-      "points": 5,
-      "expect_progression": {
-        "level": 7,
-        "unspent_stat_points": 13,
-        "str": 5,
-        "vit": 10,
-        "magic": 5,
-        "derived_stats": { "max_hp": 15, "max_mana": 10 }
-      }
-    },
-    {
-      "action": "allocate_stat",
-      "stat": "str",
-      "points": 5,
-      "expect_progression": {
-        "level": 7,
-        "unspent_stat_points": 8,
-        "str": 10,
-        "vit": 10,
-        "magic": 5,
-        "derived_stats": { "max_hp": 15, "max_mana": 10 }
-      }
-    },
-    {
-      "action": "allocate_stat",
-      "stat": "magic",
-      "points": 5,
-      "expect_progression": {
-        "level": 7,
-        "unspent_stat_points": 3,
-        "str": 10,
-        "vit": 10,
-        "magic": 10,
-        "derived_stats": { "max_hp": 15, "max_mana": 15 }
-      }
+      "can_spend": true
     },
     {
       "action": "assert_skill_progression",
@@ -113,10 +74,10 @@
     },
     {
       "action": "assert_character_progression",
-      "str": 10,
-      "vit": 10,
-      "magic": 10,
-      "derived_stats": { "max_hp": 15, "max_mana": 15 }
+      "str": 5,
+      "vit": 5,
+      "magic": 5,
+      "derived_stats": { "max_hp": 10, "max_mana": 10 }
     }
   ],
   "assertions": [
@@ -127,9 +88,9 @@
     { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "rage", "total_ticks": 40 },
     { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
     { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "type": "character_progression", "level": 7, "unspent_stat_points": 3, "str": 10, "vit": 10, "magic": 10 },
+    { "type": "character_progression", "level": 7, "unspent_stat_points": 18, "str": 5, "vit": 5, "magic": 5 },
     { "type": "skill_cooldown", "skill_id": "rage", "remaining_ticks": { "between": [1, 40] }, "total_ticks": 40 },
-    { "type": "player_max_hp_equals", "equals": 16 }
+    { "type": "player_max_hp_equals", "equals": 11 }
   ],
   "fresh_session_checks": [
     {
@@ -151,13 +112,13 @@
       ],
       "assertions": [
         { "type": "event_seen", "event_type": "skill_cast", "skill_id": "heal", "rank": 1, "mana": 10 },
-        { "type": "event_seen", "event_type": "player_healed", "skill_id": "heal", "heal": 3 },
+        { "type": "event_seen", "event_type": "player_healed", "skill_id": "heal", "heal": 2 },
         { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "heal", "total_ticks": 40 },
         { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
         { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false },
-        { "type": "character_progression", "level": 7, "unspent_stat_points": 3, "str": 10, "vit": 10, "magic": 10, "derived_stats": { "max_hp": 15, "max_mana": 15 } },
+        { "type": "character_progression", "level": 7, "unspent_stat_points": 18, "str": 5, "vit": 5, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10 } },
         { "type": "skill_cooldown", "skill_id": "heal", "remaining_ticks": { "between": [1, 40] }, "total_ticks": 40 },
-        { "type": "player_max_hp_equals", "equals": 15 }
+        { "type": "player_max_hp_equals", "equals": 10 }
       ]
     }
   ],

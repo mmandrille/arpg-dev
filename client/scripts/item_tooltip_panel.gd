@@ -8,7 +8,8 @@ const PREVIEW_SIZE := Vector2(96, 96)
 const PREVIEW_GAP := 8
 const CONTENT_WIDTH := 360.0
 const MAIN_STAT_WIDTH := CONTENT_WIDTH - PREVIEW_SIZE.x - PREVIEW_GAP
-const PRICE_WIDTH := 72.0
+const PRICE_WIDTH := 132.0
+const FOOTER_TOP_GAP := 10
 
 
 class ItemPreview:
@@ -136,19 +137,30 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 			root.add_child(_tooltip_label(str(rec.get("text", "")), color))
 
 	if price >= 0:
+		root.add_child(_tooltip_spacer(FOOTER_TOP_GAP))
 		var footer := HBoxContainer.new()
+		footer.name = "GoldValueFooter"
 		footer.add_theme_constant_override("separation", 0)
+		footer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var spacer := Control.new()
 		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		footer.add_child(spacer)
 		var price_label := Label.new()
-		price_label.text = str(price)
+		price_label.name = "GoldValueLabel"
+		price_label.text = "%d gold" % price
 		price_label.custom_minimum_size = Vector2(PRICE_WIDTH, 0)
 		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		price_label.add_theme_color_override("font_color", Color("#f4c84f") if affordable else Color("#ff6f6f"))
 		price_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 		footer.add_child(price_label)
 		root.add_child(footer)
+
+
+func debug_gold_value_text() -> String:
+	var label := find_child("GoldValueLabel", true, false) as Label
+	if label == null:
+		return ""
+	return label.text
 
 
 func _tooltip_label(text: String, color: Color, width: float = CONTENT_WIDTH, font_size: int = BODY_FONT_SIZE) -> Label:

@@ -1119,12 +1119,12 @@ def cross_checks(report: Report) -> None:
         report.fail("skills magic_bolt", "targeting must be direction_or_target")
     elif int(magic_bolt.get("tree", {}).get("tier", 0)) <= 0 or int(magic_bolt.get("tree", {}).get("column", 0)) <= 0:
         report.fail("skills magic_bolt", "tree tier/column must be positive")
-    elif int(magic_bolt.get("requirements", {}).get("stats", {}).get("magic", 0)) != 15:
-        report.fail("skills magic_bolt requirements", "rank 1 magic requirement must be 15")
+    elif int(magic_bolt.get("requirements", {}).get("stats", {}).get("magic", 0)) != 5:
+        report.fail("skills magic_bolt requirements", "rank 1 magic requirement must be 5")
     elif int(magic_bolt.get("requirements", {}).get("level_per_rank", 0)) != 1:
         report.fail("skills magic_bolt requirements", "level requirement must increase by 1 per rank")
-    elif int(magic_bolt.get("requirements", {}).get("stats_per_rank", {}).get("magic", 0)) != 5:
-        report.fail("skills magic_bolt requirements", "magic requirement must increase by 5 per rank")
+    elif int(magic_bolt.get("requirements", {}).get("stats_per_rank", {}).get("magic", 0)) != 3:
+        report.fail("skills magic_bolt requirements", "single-stat requirement must increase by 3 per rank")
     elif float(magic_bolt.get("projectile", {}).get("range", 0)) <= 0 or float(magic_bolt.get("projectile", {}).get("speed", 0)) <= 0:
         report.fail("skills magic_bolt", "range/projectile_speed must be positive")
     elif magic_bolt.get("cooldown", {}).get("type") != "attack_interval_multiplier":

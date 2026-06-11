@@ -1,14 +1,12 @@
 {
   "id": "dungeon_wall_rendering",
   "runner": "godot_client",
-  "world_id": "dungeon_levels",
+  "world_id": "generated_wall_lab",
   "seed": "v40_obstacles",
   "title": "Dungeon wall rendering",
   "description": "Client applies authoritative generated dungeon wall layouts from snapshots and level-transition deltas.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 10.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
     { "type": "wait_wall_layout", "current_level": -1, "at_least": 5, "generated_at_least": 1, "non_perimeter_at_least": 1, "timeout_s": 10.0 },
     { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 10.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },

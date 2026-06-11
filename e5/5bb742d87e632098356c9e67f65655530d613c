@@ -1,0 +1,37 @@
+shared/rules/skills.v0.json
+  s_ba8ba4c088ef1a::t_8c9cd0e9b717c8 93
+client/scripts/heal_rain_effect.gd
+  s_ba8ba4c088ef1a::t_dc8ed6e14ea570 11,46-49,57-70
+  s_ba8ba4c088ef1a::t_b12937dd51a7f4 50
+  s_ba8ba4c088ef1a::t_8c9cd0e9b717c8 1-10,12-45,51-56,71-87
+client/tests/test_coop_client.gd
+  s_ba8ba4c088ef1a::t_7797e494da8846 19,666,668
+  s_ba8ba4c088ef1a::t_5c2f8a772c5265 38-39,630-665,667,669-678
+server/internal/game/game_test.go
+  s_ba8ba4c088ef1a::t_0708a97e321225 150-151
+client/scripts/main.gd
+  s_ba8ba4c088ef1a::t_8c9cd0e9b717c8 14,61,1002,1005,1498-1515,2998-3001,3009-3021,3177-3179,3183,3229,3240-3242,3244-3266,3281-3288
+  s_ba8ba4c088ef1a::t_7d70a2a3e781d6 3230-3234,3267-3280
+  s_ba8ba4c088ef1a::t_84025a213542ea 3173,3185-3186
+  s_ba8ba4c088ef1a::t_2d7558e7e14e5e 127,835,838,847
+skills/showme/scripts/render_focus.py
+  s_ba8ba4c088ef1a::t_80552a4c29889d 24,58-59
+skills/showme/scripts/visual_capture.gd
+  s_ba8ba4c088ef1a::t_80552a4c29889d 12,64-65,393-444
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e55bb742d87e632098356c9e67f65655530d613c",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

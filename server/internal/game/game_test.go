@@ -201,7 +201,7 @@ func TestMonsterRarityGolden(t *testing.T) {
 		if rarity.ArmorMultiplier != c.ArmorMultiplier || rarity.ArmorBonus != c.ArmorBonus || rarity.HitChanceBonus != c.HitChanceBonus || rarity.CritChanceBonus != c.CritChanceBonus || rarity.BlockPercentBonus != c.BlockPercentBonus || rarity.AttackCooldownMultiplier != c.AttackCooldownMultiplier {
 			t.Fatalf("rarity %s stat modifiers = %+v, want golden", c.ID, rarity)
 		}
-		sim := NewSim("sess_monster_rarity_"+c.ID, "monster_rarity_"+c.ID, rules)
+		sim := MustNewSim("sess_monster_rarity_"+c.ID, "monster_rarity_"+c.ID, rules)
 		stats := sim.generatedMonsterStats(base, -1-int(rarity.LootDepthOffset), rarity)
 		if stats.maxHP != c.Expected.MaxHP {
 			t.Fatalf("rarity %s max hp = %d, want %d", c.ID, stats.maxHP, c.Expected.MaxHP)
@@ -433,7 +433,7 @@ func TestCharacterProgressionGolden(t *testing.T) {
 
 	for _, tc := range golden.Cases {
 		t.Run(tc.Name, func(t *testing.T) {
-			sim := NewSim("sess_progression_"+tc.Name, "01", rules)
+			sim := MustNewSim("sess_progression_"+tc.Name, "01", rules)
 			sim.progression.BaseStats = tc.BaseStats
 			sim.progression.UnspentStatPoints = tc.StartingUnspentStatPoints
 			res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
@@ -470,7 +470,7 @@ func TestExperienceGainAndLevelUpFromMonsterKill(t *testing.T) {
 	def := rules.Monsters["dungeon_mob"]
 	def.XPReward = 20
 	rules.Monsters["dungeon_mob"] = def
-	sim := NewSim("sess_xp_kill", "01", rules)
+	sim := MustNewSim("sess_xp_kill", "01", rules)
 	player := sim.entities[sim.playerID]
 	monster := &entity{
 		id:           sim.alloc(),
@@ -505,7 +505,7 @@ func TestExperienceGainAndLevelUpFromMonsterKill(t *testing.T) {
 
 func TestCharacterProgressionCapsAtLevel100(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_level_cap", "01", rules)
+	sim := MustNewSim("sess_level_cap", "01", rules)
 	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
 	requiredXP := rules.CharacterProgression.XPThresholds[rules.CharacterProgression.LevelCap-1]
 
@@ -521,7 +521,7 @@ func TestCharacterProgressionCapsAtLevel100(t *testing.T) {
 }
 
 func TestStatAllocationVitHPAndRejects(t *testing.T) {
-	sim := NewSim("sess_stat_alloc", "01", loadRules(t))
+	sim := MustNewSim("sess_stat_alloc", "01", loadRules(t))
 	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
 	sim.awardExperience(20, "corr_xp", &res)
 	player := sim.entities[sim.playerID]
@@ -544,7 +544,7 @@ func TestStatAllocationVitHPAndRejects(t *testing.T) {
 }
 
 func TestSkillPointCadenceAndSpend(t *testing.T) {
-	sim := NewSim("sess_skill_points", "01", loadRules(t))
+	sim := MustNewSim("sess_skill_points", "01", loadRules(t))
 	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
 	sim.awardExperience(140, "corr_skill_xp", &res)
 	sim.savePlayer(sim.defaultPlayer())
@@ -674,7 +674,7 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 }
 
 func TestSetSkillBindingsIntentUpdatesSnapshotAndDelta(t *testing.T) {
-	sim := NewSim("sess_skill_bindings", "01", loadRules(t))
+	sim := MustNewSim("sess_skill_bindings", "01", loadRules(t))
 	update := sim.Tick([]Input{{
 		MessageID: "bind_skills",
 		Type:      "set_skill_bindings_intent",
@@ -710,7 +710,7 @@ func TestSetSkillBindingsIntentUpdatesSnapshotAndDelta(t *testing.T) {
 }
 
 func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
-	sim := NewSim("sess_attack_speed", "01", loadRules(t))
+	sim := MustNewSim("sess_attack_speed", "01", loadRules(t))
 	blade := addRolledInventoryItem(t, sim, 6400, "cave_blade", nil)
 	gloves := addRolledInventoryItem(t, sim, 6401, "cave_gloves", map[string]int{"attack_speed_percent": 10})
 	assertAck(t, sim.Tick([]Input{{MessageID: "blade", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "blade")
@@ -726,7 +726,7 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 		t.Fatalf("attack speed breakdowns = speed:%+v interval:%+v all:%+v", speed, interval, view.StatBreakdowns)
 	}
 
-	slow := NewSim("sess_attack_speed_slow", "01", loadRules(t))
+	slow := MustNewSim("sess_attack_speed_slow", "01", loadRules(t))
 	greatsword := addRolledInventoryItem(t, slow, 6402, "cave_greatsword", nil)
 	assertAck(t, slow.Tick([]Input{{MessageID: "greatsword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}}), "greatsword")
 	slowView := slow.CharacterProgressionView()
@@ -737,7 +737,7 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 
 func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	rules := loadRules(t)
-	base := NewSim("sess_regen_base", "01", rules)
+	base := MustNewSim("sess_regen_base", "01", rules)
 	player := base.entities[base.playerID]
 	player.hp = player.maxHP - 2
 	player.mana = player.maxMana - 2
@@ -756,7 +756,7 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 		t.Fatalf("base regen missing player update: %+v", heal.Changes)
 	}
 
-	geared := NewSim("sess_regen_item", "01", rules)
+	geared := MustNewSim("sess_regen_item", "01", rules)
 	ring := addRolledInventoryItem(t, geared, 6410, "cave_ring", map[string]int{"health_regen_per_10_seconds": 5, "mana_regen_per_10_seconds": 5})
 	assertAck(t, geared.Tick([]Input{{MessageID: "ring", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "ring")
 	gearedPlayer := geared.entities[geared.playerID]
@@ -788,7 +788,7 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 }
 
 func TestLoadInventoryAppliesEquippedResourceStats(t *testing.T) {
-	sim := NewSim("sess_resume_equipped_stats", "01", loadRules(t))
+	sim := MustNewSim("sess_resume_equipped_stats", "01", loadRules(t))
 	player := sim.entities[sim.playerID]
 	if player.maxHP != 10 || player.hp != 10 {
 		t.Fatalf("base player hp = %d/%d, want 10/10", player.hp, player.maxHP)
@@ -842,7 +842,7 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	crit.Max = &zero
 	rules.CharacterProgression.DerivedStats["crit_chance"] = crit
 
-	sim := NewSim("sess_magic_bolt", "01", rules)
+	sim := MustNewSim("sess_magic_bolt", "01", rules)
 	sim.progression.BaseStats.Magic = 15
 	sim.progression.SkillRanks[magicBoltSkillID] = 1
 	sim.savePlayer(sim.defaultPlayer())
@@ -923,7 +923,7 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 }
 
 func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
-	sim := NewSim("sess_magic_bolt_requirement", "01", loadRules(t))
+	sim := MustNewSim("sess_magic_bolt_requirement", "01", loadRules(t))
 	sim.progression.SkillRanks[magicBoltSkillID] = 1
 	player := sim.entities[sim.playerID]
 	monster := &entity{
@@ -956,7 +956,7 @@ func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
 }
 
 func TestRageBuffAppliesStatsVisualScaleAndExpires(t *testing.T) {
-	sim := NewSim("sess_rage", "01", loadRules(t))
+	sim := MustNewSim("sess_rage", "01", loadRules(t))
 	player := sim.entities[sim.playerID]
 	sim.progression.BaseStats.Str = 10
 	sim.progression.BaseStats.Vit = 10
@@ -1003,7 +1003,7 @@ func TestRageBuffAppliesStatsVisualScaleAndExpires(t *testing.T) {
 
 func TestHealAreaSkillHealsAlliesAndRejectsNoop(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_heal_skill", "01", rules)
+	sim := MustNewSim("sess_heal_skill", "01", rules)
 	hostID := sim.playerID
 	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
 	if err != nil {
@@ -1067,7 +1067,7 @@ func TestHealAreaSkillHealsAlliesAndRejectsNoop(t *testing.T) {
 
 func TestStrengthDamageBonusAdjustsMeleeDamageRange(t *testing.T) {
 	rules := loadRules(t)
-	base := NewSim("sess_damage_base", "01", rules)
+	base := MustNewSim("sess_damage_base", "01", rules)
 	strong, err := NewSimWithWorldProgression("sess_damage_str", "01", rules, DefaultWorldID, CharacterProgressionState{
 		Level:             1,
 		Experience:        0,
@@ -1154,6 +1154,16 @@ func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
 	assertEntity(t, rsnap, "1001", playerEntity, "", "", Vec2{X: 2, Y: 2})
 	assertEntity(t, rsnap, "1002", lootEntity, "", "training_bow", Vec2{X: 3, Y: 2})
 	assertEntity(t, rsnap, "1003", monsterEntity, "training_dummy_ranged", "", Vec2{X: 12, Y: 5})
+}
+
+func TestNewSimReturnsDefaultWorldError(t *testing.T) {
+	rules := loadRules(t)
+	broken := *rules
+	broken.Worlds = map[string]WorldDef{}
+
+	if sim, err := NewSim("sess_missing_default", "01", &broken); err == nil {
+		t.Fatalf("NewSim returned nil error and sim=%v for missing default world", sim)
+	}
 }
 
 func assertEntity(t *testing.T, snap Snapshot, id, typ, monsterDefID, itemDefID string, pos Vec2) {
@@ -1453,13 +1463,13 @@ func TestProjectileBusyRejectsSecondFire(t *testing.T) {
 }
 
 func TestDirectionalAttackRejectsInvalidDirection(t *testing.T) {
-	sim := NewSim("sess_directional_invalid", "01", loadRules(t))
+	sim := MustNewSim("sess_directional_invalid", "01", loadRules(t))
 	r := sim.Tick([]Input{{MessageID: "dir", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{}}}})
 	assertReject(t, r, "dir", "invalid_direction")
 }
 
 func TestDirectionalMeleeHitsMonsterInFront(t *testing.T) {
-	sim := NewSim("sess_directional_melee", "01", loadRules(t))
+	sim := MustNewSim("sess_directional_melee", "01", loadRules(t))
 	monster := firstEntityByKind(sim, monsterEntity)
 	monster.pos = Vec2{X: 11.2, Y: 5}
 	monster.hp = 10
@@ -1477,7 +1487,7 @@ func TestDirectionalMeleeHitsMonsterInFront(t *testing.T) {
 
 func TestDirectionalMeleeMissesBehindAndOutsideCapsule(t *testing.T) {
 	t.Run("behind", func(t *testing.T) {
-		sim := NewSim("sess_directional_behind", "01", loadRules(t))
+		sim := MustNewSim("sess_directional_behind", "01", loadRules(t))
 		monster := firstEntityByKind(sim, monsterEntity)
 		monster.pos = Vec2{X: 9.2, Y: 5}
 		initialHP := monster.hp
@@ -1492,7 +1502,7 @@ func TestDirectionalMeleeMissesBehindAndOutsideCapsule(t *testing.T) {
 	})
 
 	t.Run("outside capsule", func(t *testing.T) {
-		sim := NewSim("sess_directional_lateral", "01", loadRules(t))
+		sim := MustNewSim("sess_directional_lateral", "01", loadRules(t))
 		monster := firstEntityByKind(sim, monsterEntity)
 		monster.pos = Vec2{X: 11.0, Y: 6.2}
 		initialHP := monster.hp
@@ -1508,7 +1518,7 @@ func TestDirectionalMeleeMissesBehindAndOutsideCapsule(t *testing.T) {
 }
 
 func TestDirectionalMeleeTieBreaksByEntityID(t *testing.T) {
-	sim := NewSim("sess_directional_tie", "01", loadRules(t))
+	sim := MustNewSim("sess_directional_tie", "01", loadRules(t))
 	first := firstEntityByKind(sim, monsterEntity)
 	first.pos = Vec2{X: 11, Y: 4.8}
 	first.hp = 10
@@ -1526,7 +1536,7 @@ func TestDirectionalMeleeTieBreaksByEntityID(t *testing.T) {
 }
 
 func TestDirectionalMeleeStopsMovementAndAcksEmptySwing(t *testing.T) {
-	sim := NewSim("sess_directional_stop", "01", loadRules(t))
+	sim := MustNewSim("sess_directional_stop", "01", loadRules(t))
 	monster := firstEntityByKind(sim, monsterEntity)
 	monster.pos = Vec2{X: 9, Y: 5}
 	move := sim.Tick([]Input{{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 3}}})
@@ -2006,7 +2016,7 @@ func TestRangedBowLootRequiresMeleeReach(t *testing.T) {
 }
 
 func TestGoldAutoPickupWalkingIntoTownGold(t *testing.T) {
-	sim := NewSim("sess_gold_auto_town", "v49_gold_auto_town", loadRules(t))
+	sim := MustNewSim("sess_gold_auto_town", "v49_gold_auto_town", loadRules(t))
 	player := sim.entities[sim.playerID]
 	gold := addTestGoldLoot(sim, Vec2{X: player.pos.X + 2, Y: player.pos.Y}, 7)
 
@@ -2057,7 +2067,7 @@ func TestGoldAutoPickupWorksOnDungeonLevelWallet(t *testing.T) {
 }
 
 func TestNonGoldLootDoesNotAutoPickup(t *testing.T) {
-	sim := NewSim("sess_item_no_auto", "v49_item_no_auto", loadRules(t))
+	sim := MustNewSim("sess_item_no_auto", "v49_item_no_auto", loadRules(t))
 	player := sim.entities[sim.playerID]
 	loot := addTestFloorLoot(sim, "quest_leaf", player.pos)
 
@@ -2077,7 +2087,7 @@ func TestNonGoldLootDoesNotAutoPickup(t *testing.T) {
 }
 
 func TestManualGoldPickupStillWorksInRange(t *testing.T) {
-	sim := NewSim("sess_gold_manual", "v49_gold_manual", loadRules(t))
+	sim := MustNewSim("sess_gold_manual", "v49_gold_manual", loadRules(t))
 	player := sim.entities[sim.playerID]
 	gold := addTestGoldLoot(sim, player.pos, 9)
 
@@ -2103,7 +2113,7 @@ func TestManualGoldPickupStillWorksInRange(t *testing.T) {
 
 func TestGoldAutoPickupCoopLowestPlayerIDWins(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_gold_coop_winner", "v49_gold_coop_winner", rules)
+	sim := MustNewSim("sess_gold_coop_winner", "v49_gold_coop_winner", rules)
 	hostID := sim.playerID
 	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
 	if err != nil {
@@ -2129,7 +2139,7 @@ func TestGoldAutoPickupCoopLowestPlayerIDWins(t *testing.T) {
 func TestGoldAutoPickupSkipsDeadAndDisconnectedPlayers(t *testing.T) {
 	t.Run("dead lower player", func(t *testing.T) {
 		rules := loadRules(t)
-		sim := NewSim("sess_gold_dead_skip", "v49_gold_dead_skip", rules)
+		sim := MustNewSim("sess_gold_dead_skip", "v49_gold_dead_skip", rules)
 		hostID := sim.playerID
 		guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
 		if err != nil {
@@ -2148,7 +2158,7 @@ func TestGoldAutoPickupSkipsDeadAndDisconnectedPlayers(t *testing.T) {
 	})
 	t.Run("disconnected lower player", func(t *testing.T) {
 		rules := loadRules(t)
-		sim := NewSim("sess_gold_disconnected_skip", "v49_gold_disconnected_skip", rules)
+		sim := MustNewSim("sess_gold_disconnected_skip", "v49_gold_disconnected_skip", rules)
 		hostID := sim.playerID
 		guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
 		if err != nil {
@@ -2168,7 +2178,7 @@ func TestGoldAutoPickupSkipsDeadAndDisconnectedPlayers(t *testing.T) {
 }
 
 func TestGoldAutoPickupMultipleGoldStableEntityOrder(t *testing.T) {
-	sim := NewSim("sess_gold_order", "v49_gold_order", loadRules(t))
+	sim := MustNewSim("sess_gold_order", "v49_gold_order", loadRules(t))
 	player := sim.entities[sim.playerID]
 	first := addTestGoldLoot(sim, player.pos, 3)
 	second := addTestGoldLoot(sim, player.pos, 5)
@@ -2188,7 +2198,7 @@ func TestGoldAutoPickupMultipleGoldStableEntityOrder(t *testing.T) {
 }
 
 func TestGoldAutoPickupPendingAutoNavDoesNotDuplicate(t *testing.T) {
-	sim := NewSim("sess_gold_pending_nav", "v49_gold_pending_nav", loadRules(t))
+	sim := MustNewSim("sess_gold_pending_nav", "v49_gold_pending_nav", loadRules(t))
 	hostID := sim.playerID
 	sim.entities[hostID].pos = Vec2{X: 2, Y: 2}
 	gold := addTestGoldLoot(sim, Vec2{X: 6, Y: 2}, 10)
@@ -2467,7 +2477,7 @@ func TestItemRollsGolden(t *testing.T) {
 	loadGolden(t, "item_rolls.json", &golden)
 
 	for i, c := range golden.Cases {
-		sim := NewSim("sess_item_roll_"+c.Name, c.Seed, r)
+		sim := MustNewSim("sess_item_roll_"+c.Name, c.Seed, r)
 		got, ok := sim.rollItemTemplate(golden.TemplateID)
 		if !ok {
 			t.Fatalf("%s: rollItemTemplate returned false", c.Name)
@@ -2647,7 +2657,7 @@ func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
 		}},
 	}}}
 	rules.LootTables["test_rolled_drop"] = LootTable{TreasureClassID: "test_rolled_tc"}
-	sim := NewSim("sess_rolled_loot", "0000000000000004", rules)
+	sim := MustNewSim("sess_rolled_loot", "0000000000000004", rules)
 	player := sim.entities[sim.playerID]
 	monster := &entity{
 		id:           sim.alloc(),
@@ -2709,7 +2719,7 @@ func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
 
 func TestLegacyLootHasNoRolledPayload(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_legacy_loot", "01", rules)
+	sim := MustNewSim("sess_legacy_loot", "01", rules)
 	player := sim.entities[sim.playerID]
 	monster := &entity{
 		id:           sim.alloc(),
@@ -2736,7 +2746,7 @@ func TestLegacyLootHasNoRolledPayload(t *testing.T) {
 
 func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_rolled_damage", "01", rules)
+	sim := MustNewSim("sess_rolled_damage", "01", rules)
 	player := sim.entities[sim.playerID]
 	item := &invItem{
 		instanceID: 5000,
@@ -2786,7 +2796,7 @@ func TestFullEquipmentSlotsGolden(t *testing.T) {
 			t.Fatalf("equipment slot[%d] = %q, want %q", i, equipmentSlots[i], want)
 		}
 	}
-	snap := NewSim("sess_equipment_slots", "01", loadRules(t)).Snapshot()
+	snap := MustNewSim("sess_equipment_slots", "01", loadRules(t)).Snapshot()
 	for _, slot := range golden.EquipmentSlots {
 		if _, ok := snap.Equipped[slot]; !ok {
 			t.Fatalf("snapshot missing equipped slot %q: %+v", slot, snap.Equipped)
@@ -2796,7 +2806,7 @@ func TestFullEquipmentSlotsGolden(t *testing.T) {
 
 func TestEquipmentSlotCompatibilityAndRings(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_equipment_slots", "01", rules)
+	sim := MustNewSim("sess_equipment_slots", "01", rules)
 	cases := []struct {
 		templateID string
 		slot       string
@@ -2827,7 +2837,7 @@ func TestEquipmentSlotCompatibilityAndRings(t *testing.T) {
 }
 
 func TestEquipmentWrongSlotRejects(t *testing.T) {
-	sim := NewSim("sess_wrong_slot", "01", loadRules(t))
+	sim := MustNewSim("sess_wrong_slot", "01", loadRules(t))
 	shield := addRolledInventoryItem(t, sim, 6100, "cave_shield", nil)
 	res := sim.Tick([]Input{{
 		MessageID: "wrong",
@@ -2847,7 +2857,7 @@ func TestEquipmentRequirementsRejectAndPreview(t *testing.T) {
 	}
 	loadGolden(t, "equipment_requirements.json", &golden)
 
-	sim := NewSim("sess_equipment_requirements", "01", loadRules(t))
+	sim := MustNewSim("sess_equipment_requirements", "01", loadRules(t))
 	item := addRolledInventoryItem(t, sim, 6110, golden.TemplateID, map[string]int{"damage_min": 5, "damage_max": 8})
 	view := sim.itemView(item)
 	assertRequirementStatus(t, view.RequirementStatus, golden.FreshCharacter.Status)
@@ -2940,7 +2950,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	}
 
 	t.Run("one hand sword and shield can coexist", func(t *testing.T) {
-		sim := NewSim("sess_one_hand_shield", "01", loadRules(t))
+		sim := MustNewSim("sess_one_hand_shield", "01", loadRules(t))
 		sword := addRolledInventoryItem(t, sim, 6200, "cave_blade", map[string]int{"damage_min": 4, "damage_max": 5})
 		shield := addRolledInventoryItem(t, sim, 6201, "cave_shield", map[string]int{"armor": 3, "block_percent": 8})
 		assertAck(t, sim.Tick([]Input{{MessageID: "sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "sword")
@@ -2954,7 +2964,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	})
 
 	t.Run("two handed sword clears offhand", func(t *testing.T) {
-		sim := NewSim("sess_two_hand_clear", "01", loadRules(t))
+		sim := MustNewSim("sess_two_hand_clear", "01", loadRules(t))
 		shield := addRolledInventoryItem(t, sim, 6210, "cave_shield", nil)
 		greatsword := addRolledInventoryItem(t, sim, 6211, "cave_greatsword", nil)
 		assertAck(t, sim.Tick([]Input{{MessageID: "shield", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}}), "shield")
@@ -2971,7 +2981,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	})
 
 	t.Run("two handed sword clears occupied hands", func(t *testing.T) {
-		sim := NewSim("sess_two_hand_clear_both", "01", loadRules(t))
+		sim := MustNewSim("sess_two_hand_clear_both", "01", loadRules(t))
 		sword := addRolledInventoryItem(t, sim, 6212, "cave_blade", nil)
 		shield := addRolledInventoryItem(t, sim, 6213, "cave_shield", nil)
 		greatsword := addRolledInventoryItem(t, sim, 6214, "cave_greatsword", nil)
@@ -2990,7 +3000,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	})
 
 	t.Run("two handed sword full bag reject preserves occupied hands", func(t *testing.T) {
-		sim := NewSim("sess_two_hand_full_bag_preserve", "01", loadRules(t))
+		sim := MustNewSim("sess_two_hand_full_bag_preserve", "01", loadRules(t))
 		sword := addRolledInventoryItem(t, sim, 6215, "cave_blade", nil)
 		shield := addRolledInventoryItem(t, sim, 6216, "cave_shield", nil)
 		greatsword := addRolledInventoryItem(t, sim, 6217, "cave_greatsword", nil)
@@ -3011,7 +3021,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	})
 
 	t.Run("offhand blocked by two handed main hand", func(t *testing.T) {
-		sim := NewSim("sess_two_hand_block", "01", loadRules(t))
+		sim := MustNewSim("sess_two_hand_block", "01", loadRules(t))
 		bow := addRolledInventoryItem(t, sim, 6220, "cave_bow", nil)
 		shield := addRolledInventoryItem(t, sim, 6221, "cave_shield", nil)
 		assertAck(t, sim.Tick([]Input{{MessageID: "bow", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(bow.instanceID), Slot: mainHandSlot}}}), "bow")
@@ -3020,7 +3030,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	})
 
 	t.Run("bow occupies both hands", func(t *testing.T) {
-		sim := NewSim("sess_bow_occupies", "01", loadRules(t))
+		sim := MustNewSim("sess_bow_occupies", "01", loadRules(t))
 		bow := addRolledInventoryItem(t, sim, 6230, "cave_bow", map[string]int{"damage_min": 2, "damage_max": 2})
 		assertAck(t, sim.Tick([]Input{{MessageID: "bow", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(bow.instanceID), Slot: mainHandSlot}}}), "bow")
 		want := expected["bow occupies both hands"]
@@ -3037,7 +3047,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 	})
 
 	t.Run("shield display rolls do not affect combat yet", func(t *testing.T) {
-		sim := NewSim("sess_shield_display", "01", loadRules(t))
+		sim := MustNewSim("sess_shield_display", "01", loadRules(t))
 		sword := addRolledInventoryItem(t, sim, 6240, "cave_blade", map[string]int{"damage_min": 4, "damage_max": 4})
 		shieldStats := expected["shield display rolls do not affect combat yet"].rolledStats
 		shield := addRolledInventoryItem(t, sim, 6241, "cave_shield", shieldStats)
@@ -3053,7 +3063,7 @@ func TestHandOccupancyAndPrimaryWeaponGolden(t *testing.T) {
 }
 
 func TestCombatStatBreakdownsIncludeEquipmentAndCap(t *testing.T) {
-	sim := NewSim("sess_combat_breakdown", "01", loadRules(t))
+	sim := MustNewSim("sess_combat_breakdown", "01", loadRules(t))
 	sword := addRolledInventoryItem(t, sim, 6250, "cave_blade", map[string]int{"damage_min": 4, "damage_max": 6})
 	shield := addRolledInventoryItem(t, sim, 6251, "cave_shield", map[string]int{"armor": 5, "block_percent": 82})
 	ring := addRolledInventoryItem(t, sim, 6252, "cave_ring", map[string]int{"max_hp": 4})
@@ -3106,7 +3116,7 @@ func TestCombatStatEffectsGolden(t *testing.T) {
 	}
 	loadGolden(t, "combat_stat_effects.json", &golden)
 
-	sim := NewSim("sess_combat_stat_golden", "01", loadRules(t))
+	sim := MustNewSim("sess_combat_stat_golden", "01", loadRules(t))
 	for _, c := range golden.Cases {
 		attacker, defender, damageRange := combatGoldenStats(c.Name)
 		got := sim.resolveCombat(attacker, defender, damageRange)
@@ -3124,7 +3134,7 @@ func TestCombatStatEffectsGolden(t *testing.T) {
 }
 
 func TestMonsterCombatStatsEffective(t *testing.T) {
-	sim := NewSim("sess_monster_combat_stats", "01", loadRules(t))
+	sim := MustNewSim("sess_monster_combat_stats", "01", loadRules(t))
 	monster := &entity{
 		id:           7001,
 		kind:         monsterEntity,
@@ -3174,7 +3184,7 @@ func runSlice(t *testing.T, seed string) *Sim {
 	rules := cloneRules(loadRules(t))
 	forceCharacterHitChance(rules, 1.0)
 	forceMonsterHitChance(rules, monsterDefID, 1.0)
-	sim := NewSim("sess_test", seed, rules)
+	sim := MustNewSim("sess_test", seed, rules)
 
 	// Move into unarmed reach of the monster.
 	sim.Tick([]Input{{MessageID: "m1", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 2}}})
@@ -3272,7 +3282,7 @@ func TestScriptedSliceMatchesGolden(t *testing.T) {
 func TestSuccessfulHitRetaliatesAndPreservesKillOrder(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	forceMonsterHitChance(rules, monsterDefID, 1.0)
-	sim := NewSim("sess_retaliate", "deadbeefdeadbeef", rules)
+	sim := MustNewSim("sess_retaliate", "deadbeefdeadbeef", rules)
 	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
@@ -3376,7 +3386,7 @@ func TestEquippedWeaponWithoutDamageFallsBackToBaseDamage(t *testing.T) {
 func TestDamageEventReportsRolledDamageNotClampedHPDelta(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	rules.Combat.PlayerDamage = DamageRange{Min: 5, Max: 5}
-	sim := NewSim("sess_overkill_damage_event", "deadbeefdeadbeef", rules)
+	sim := MustNewSim("sess_overkill_damage_event", "deadbeefdeadbeef", rules)
 	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	sim.findEntity("1002").hp = 1
 
@@ -3398,7 +3408,7 @@ func TestDamageEventReportsRolledDamageNotClampedHPDelta(t *testing.T) {
 func TestMissedAttackDoesNotRetaliate(t *testing.T) {
 	rules := loadRules(t)
 	rules.Combat.BaseHitChance = 0
-	sim := NewSim("sess_miss", "deadbeefdeadbeef", rules)
+	sim := MustNewSim("sess_miss", "deadbeefdeadbeef", rules)
 	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	r := sim.Tick([]Input{{
 		MessageID:     "a1",
@@ -3427,7 +3437,7 @@ func TestPlayerKilledByRetaliation(t *testing.T) {
 	dummy.MaxHP = 100
 	rules.Monsters[monsterDefID] = dummy
 
-	sim := NewSim("sess_player_death", "deadbeefdeadbeef", rules)
+	sim := MustNewSim("sess_player_death", "deadbeefdeadbeef", rules)
 	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	damaged, killed := 0, 0
 	for i := 0; i < playerStartHP+2; i++ {
@@ -3718,7 +3728,7 @@ func TestUseConsumableRejectsNonConsumable(t *testing.T) {
 }
 
 func TestHotbarCapacityAndBelt(t *testing.T) {
-	sim := NewSim("sess_hotbar_capacity", "01", loadRules(t))
+	sim := MustNewSim("sess_hotbar_capacity", "01", loadRules(t))
 	snap := sim.Snapshot()
 	if snap.HotbarCapacity != 2 || len(snap.Hotbar) != 10 {
 		t.Fatalf("base hotbar capacity=%d len=%d, want 2/10", snap.HotbarCapacity, len(snap.Hotbar))
@@ -3767,7 +3777,7 @@ func TestInventoryCapacityBaseItemBonusAndGolden(t *testing.T) {
 		t.Fatalf("inventory capacity constants = rows %d columns %d cap %d, want golden %+v", baseInventoryRows, inventoryColumns, inventoryCapacityForRows(baseInventoryRows), golden)
 	}
 
-	sim := NewSim("sess_inventory_capacity", "01", loadRules(t))
+	sim := MustNewSim("sess_inventory_capacity", "01", loadRules(t))
 	snap := sim.Snapshot()
 	if snap.InventoryRows != golden.BaseInventoryRows || snap.InventoryCapacity != golden.BaseCapacity {
 		t.Fatalf("base snapshot rows/capacity = %d/%d, want %d/%d", snap.InventoryRows, snap.InventoryCapacity, golden.BaseInventoryRows, golden.BaseCapacity)
@@ -3797,7 +3807,7 @@ func TestInventoryCapacityBaseItemBonusAndGolden(t *testing.T) {
 }
 
 func TestInventoryCapacityOccupancyExemptsEquippedAndHotbar(t *testing.T) {
-	sim := NewSim("sess_inventory_occupancy", "01", loadRules(t))
+	sim := MustNewSim("sess_inventory_occupancy", "01", loadRules(t))
 	sword := addStaticInventoryItem(sim, 7310, "rusty_sword")
 	potion := addStaticInventoryItem(sim, 7311, "red_potion")
 	badge := addStaticInventoryItem(sim, 7312, "quest_leaf")
@@ -3830,7 +3840,7 @@ func TestInventoryCapacityOccupancyExemptsEquippedAndHotbar(t *testing.T) {
 }
 
 func TestInventoryCapacityPickupRejectsFullBagBeforeMutation(t *testing.T) {
-	sim := NewSim("sess_inventory_full_pickup", "01", loadRules(t))
+	sim := MustNewSim("sess_inventory_full_pickup", "01", loadRules(t))
 	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
 		addStaticInventoryItem(sim, uint64(7400+i), "quest_leaf")
 	}
@@ -3849,7 +3859,7 @@ func TestInventoryCapacityPickupRejectsFullBagBeforeMutation(t *testing.T) {
 }
 
 func TestInventoryCapacityUnequipAndShrinkRejectBeforeMutation(t *testing.T) {
-	sim := NewSim("sess_inventory_unequip_full", "01", loadRules(t))
+	sim := MustNewSim("sess_inventory_unequip_full", "01", loadRules(t))
 	sword := addStaticInventoryItem(sim, 7500, "rusty_sword")
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_sword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "equip_sword")
 	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
@@ -3861,7 +3871,7 @@ func TestInventoryCapacityUnequipAndShrinkRejectBeforeMutation(t *testing.T) {
 		t.Fatalf("rejected unequip mutated sword/equipped: item=%+v equipped=%v", sword, sim.equipped)
 	}
 
-	sim = NewSim("sess_inventory_shrink_full", "01", loadRules(t))
+	sim = MustNewSim("sess_inventory_shrink_full", "01", loadRules(t))
 	pack := addRolledInventoryItem(t, sim, 7600, "cave_pack_belt", map[string]int{"inventory_rows": 1})
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_pack", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(pack.instanceID), Slot: "belt"}}}), "equip_pack")
 	for i := 0; i < inventoryCapacityForRows(baseInventoryRows)+1; i++ {
@@ -3882,7 +3892,7 @@ func TestInventoryCapacityUnequipAndShrinkRejectBeforeMutation(t *testing.T) {
 }
 
 func TestHotbarAssignUseDirectUseAndReenable(t *testing.T) {
-	sim := NewSim("sess_hotbar_use", "01", loadRules(t))
+	sim := MustNewSim("sess_hotbar_use", "01", loadRules(t))
 	player := sim.entities[sim.playerID]
 	player.hp = 4
 	first := addStaticInventoryItem(sim, 7100, "red_potion")
@@ -3919,7 +3929,7 @@ func TestHotbarAssignUseDirectUseAndReenable(t *testing.T) {
 }
 
 func TestHotbarAssignClearAndReplaceMovesItemsBetweenBagViewAndHotbar(t *testing.T) {
-	sim := NewSim("sess_hotbar_bag_view", "01", loadRules(t))
+	sim := MustNewSim("sess_hotbar_bag_view", "01", loadRules(t))
 	red := addStaticInventoryItem(sim, 7110, "red_potion")
 	blue := addStaticInventoryItem(sim, 7111, "blue_potion")
 
@@ -3954,7 +3964,7 @@ func TestHotbarAssignClearAndReplaceMovesItemsBetweenBagViewAndHotbar(t *testing
 }
 
 func TestHotbarRejectsAndDropClears(t *testing.T) {
-	sim := NewSim("sess_hotbar_rejects", "01", loadRules(t))
+	sim := MustNewSim("sess_hotbar_rejects", "01", loadRules(t))
 	potion := addStaticInventoryItem(sim, 7200, "red_potion")
 	badge := addStaticInventoryItem(sim, 7201, "quest_leaf")
 
@@ -4176,7 +4186,7 @@ func TestMovement(t *testing.T) {
 func TestTickResultSlicesNeverNil(t *testing.T) {
 	// A movement-only tick must still carry non-nil Changes/Events so the
 	// state_delta marshals arrays, not null (regression guard).
-	sim := NewSim("s", "01", loadRules(t))
+	sim := MustNewSim("s", "01", loadRules(t))
 	r := sim.Tick(nil)
 	if r.Changes == nil || r.Events == nil {
 		t.Fatalf("nil slices in tick result: %+v", r)
@@ -4265,7 +4275,7 @@ func TestActionAutoApproachQueuesWhenOutOfRange(t *testing.T) {
 	rules := loadRules(t)
 
 	t.Run("monster", func(t *testing.T) {
-		sim := NewSim("sess_range_monster", "01", rules)
+		sim := MustNewSim("sess_range_monster", "01", rules)
 		r := sim.Tick([]Input{{MessageID: "a", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
 		assertAck(t, r, "a")
 	})
@@ -4395,33 +4405,33 @@ func TestRejections(t *testing.T) {
 	rules := loadRules(t)
 
 	t.Run("invalid attack target", func(t *testing.T) {
-		sim := NewSim("s", "01", rules)
+		sim := MustNewSim("s", "01", rules)
 		r := sim.Tick([]Input{{MessageID: "x", Type: "action_intent", Action: &ActionIntent{TargetID: "9999"}}})
 		assertReject(t, r, "x", "invalid_target")
 	})
 
 	t.Run("pickup non-loot", func(t *testing.T) {
-		sim := NewSim("s", "01", rules)
+		sim := MustNewSim("s", "01", rules)
 		sim.findEntity("1002").hp = 0
 		r := sim.Tick([]Input{{MessageID: "x", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
 		assertReject(t, r, "x", "invalid_target")
 	})
 
 	t.Run("equip not in inventory", func(t *testing.T) {
-		sim := NewSim("s", "01", rules)
+		sim := MustNewSim("s", "01", rules)
 		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: mainHandSlot}}})
 		assertReject(t, r, "x", "not_in_inventory")
 	})
 
 	t.Run("equip non-equippable", func(t *testing.T) {
-		sim := NewSim("s", "01", rules)
+		sim := MustNewSim("s", "01", rules)
 		addTestInventoryItem(sim, &invItem{instanceID: 5000, itemDefID: "quest_leaf"})
 		r := sim.Tick([]Input{{MessageID: "x", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "5000", Slot: mainHandSlot}}})
 		assertReject(t, r, "x", "not_equippable")
 	})
 
 	t.Run("unknown type", func(t *testing.T) {
-		sim := NewSim("s", "01", rules)
+		sim := MustNewSim("s", "01", rules)
 		r := sim.Tick([]Input{{MessageID: "x", Type: "bogus_intent"}})
 		assertReject(t, r, "x", "unknown_type")
 	})
@@ -4447,13 +4457,13 @@ func TestDeadPlayerRejectsIntentsAndStopsActiveMovement(t *testing.T) {
 		{MessageID: "drop", Type: "drop_intent", Drop: &DropIntent{ItemInstanceID: "1004"}},
 	}
 	for _, in := range cases {
-		sim := NewSim("sess_dead_"+in.MessageID, "01", rules)
+		sim := MustNewSim("sess_dead_"+in.MessageID, "01", rules)
 		sim.entities[sim.playerID].hp = 0
 		r := sim.Tick([]Input{in})
 		assertReject(t, r, in.MessageID, "player_dead")
 	}
 
-	sim := NewSim("sess_dead_move", "01", rules)
+	sim := MustNewSim("sess_dead_move", "01", rules)
 	start := sim.entities[sim.playerID].pos
 	sim.Tick([]Input{{MessageID: "move", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 3}}})
 	afterFirst := sim.entities[sim.playerID].pos
@@ -5834,7 +5844,7 @@ func TestBossFloorExcludesGeneratedObstacles(t *testing.T) {
 
 func TestGeneratedObstacleCollisionPaths(t *testing.T) {
 	t.Run("player movement blocks", func(t *testing.T) {
-		sim := NewSim("sess_generated_wall_move", "01", loadRules(t))
+		sim := MustNewSim("sess_generated_wall_move", "01", loadRules(t))
 		player := sim.entities[sim.playerID]
 		player.pos = Vec2{X: 10, Y: 5}
 		addGeneratedWallToActiveLevel(sim, Vec2{X: 10.5, Y: 5}, Vec2{X: 1, Y: 4})
@@ -5901,7 +5911,7 @@ func TestGeneratedObstacleCollisionPaths(t *testing.T) {
 	})
 
 	t.Run("travel arrival avoids wall", func(t *testing.T) {
-		sim := NewSim("sess_generated_wall_arrival", "01", loadRules(t))
+		sim := MustNewSim("sess_generated_wall_arrival", "01", loadRules(t))
 		level := sim.activeLevel()
 		marker := Vec2{X: 10, Y: 5}
 		firstCandidate := Vec2{X: 11, Y: 5}
@@ -6467,7 +6477,7 @@ func TestCoopExperienceRecipientLevelUpAndSoloUnchanged(t *testing.T) {
 	}
 
 	rules := coopRewardTestRules(t)
-	solo := NewSim("sess_solo_xp", "solo_xp_seed", rules)
+	solo := MustNewSim("sess_solo_xp", "solo_xp_seed", rules)
 	soloMonster := findMonsterByDef(solo, monsterDefID)
 	if soloMonster == nil {
 		t.Fatal("solo missing monster")
@@ -6483,7 +6493,7 @@ func TestCoopExperienceRecipientLevelUpAndSoloUnchanged(t *testing.T) {
 
 func TestCoopPartyChallengeScaling(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_party_scaling", "party_scaling_seed", rules)
+	sim := MustNewSim("sess_party_scaling", "party_scaling_seed", rules)
 	levelNum := sim.currentLevel
 	for count := 1; count <= 5; count++ {
 		for len(sim.players) < count {
@@ -6501,7 +6511,7 @@ func TestCoopPartyChallengeScaling(t *testing.T) {
 
 func TestCoopPartyChallengeHPDamageAndLateJoin(t *testing.T) {
 	rules := loadRules(t)
-	sim := NewSim("sess_party_hp_damage", "party_hp_damage_seed", rules)
+	sim := MustNewSim("sess_party_hp_damage", "party_hp_damage_seed", rules)
 	if _, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState()); err != nil {
 		t.Fatalf("add guest: %v", err)
 	}
@@ -6524,7 +6534,7 @@ func TestCoopPartyChallengeHPDamageAndLateJoin(t *testing.T) {
 		t.Fatalf("party-scaled rarity hp = %d/%d, want %d", monster.hp, monster.maxHP, wantHP)
 	}
 
-	solo := NewSim("sess_party_late_join", "party_late_join_seed", rules)
+	solo := MustNewSim("sess_party_late_join", "party_late_join_seed", rules)
 	lateMonster := &entity{kind: monsterEntity, hp: 20, maxHP: 20, monsterDefID: "dungeon_mob"}
 	solo.applyPartyHPScale(solo.activeLevel(), lateMonster)
 	if lateMonster.maxHP != 20 {
@@ -6553,7 +6563,7 @@ func TestCoopMonsterAttackDamageScalesAtResolution(t *testing.T) {
 	dummy.RetaliationDamage = nil
 	rules.Monsters[monsterDefID] = dummy
 
-	sim := NewSim("sess_party_attack_damage", "party_attack_damage_seed", rules)
+	sim := MustNewSim("sess_party_attack_damage", "party_attack_damage_seed", rules)
 	hostID := sim.playerID
 	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
 	if err != nil {

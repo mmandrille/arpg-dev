@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v62 — `monster-depth-stat-scaling` |
+| **Latest completed slice** | v63 — `runtime-sim-error-construction` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -81,6 +81,7 @@ v59_* = data-driven-skill-catalog
 v60_* = data-driven-content-library-manifest
 v61_* = rage-and-heal-skills
 v62_* = monster-depth-stat-scaling
+v63_* = runtime-sim-error-construction
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -183,6 +184,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v60** | `data-driven-content-library-manifest` | Complete (`make ci` green) | [`v60_spec-data-driven-content-library-manifest.md`](docs/specs/v60_spec-data-driven-content-library-manifest.md) | [`v60_2026-06-10-data-driven-content-library-manifest.md`](docs/plans/v60_2026-06-10-data-driven-content-library-manifest.md) | [`as-built`](docs/as-built/v60_data-driven-content-library-manifest.md) |
 | **v61** | `rage-and-heal-skills` | Complete (`make ci` green) | [`v61_spec-rage-and-heal-skills.md`](docs/specs/v61_spec-rage-and-heal-skills.md) | [`v61_2026-06-10-rage-and-heal-skills.md`](docs/plans/v61_2026-06-10-rage-and-heal-skills.md) | [`as-built`](docs/as-built/v61_rage-and-heal-skills.md) |
 | **v62** | `monster-depth-stat-scaling` | Complete (`make ci` green) | [`v62_spec-monster-depth-stat-scaling.md`](docs/specs/v62_spec-monster-depth-stat-scaling.md) | [`v62_2026-06-11-monster-depth-stat-scaling.md`](docs/plans/v62_2026-06-11-monster-depth-stat-scaling.md) | [`as-built`](docs/as-built/v62_monster-depth-stat-scaling.md) |
+| **v63** | `runtime-sim-error-construction` | Complete (`make ci` green) | [`v63_spec-runtime-sim-error-construction.md`](docs/specs/v63_spec-runtime-sim-error-construction.md) | [`v63_2026-06-11-runtime-sim-error-construction.md`](docs/plans/v63_2026-06-11-runtime-sim-error-construction.md) | [`as-built`](docs/as-built/v63_runtime-sim-error-construction.md) |
 
 ---
 
@@ -539,6 +541,16 @@ tests prove relative path resolution, duplicate-ID rejection, and unknown manife
 with closed declarative effect rows for a self stat-percent buff and an allied area percent heal.
 The server owns mana, cooldowns, buff expiry, max-HP sync, visual scale metadata, and skill-sourced
 healing events; the Godot skill tree and hotbar now select among multiple first-row skills.
+
+**Generated monster stats now scale by dungeon depth.** v62 moves regular generated dungeon monster
+HP, damage, XP, and related combat pressure onto depth-aware shared rules while keeping boss
+templates bespoke. Go and GDScript golden checks prove the scaling rules, and protocol bot coverage
+keeps generated dungeon combat replayable.
+
+**Default sim construction now returns errors instead of panicking.** v63 changes the exported
+`game.NewSim` default-world constructor to return `(*Sim, error)`, adds explicit `MustNewSim`
+panic behavior for tests with known-valid fixtures, and covers invalid default-world construction
+without crashing. This closes the v60 backend review's runtime sim construction finding.
 
 ### Other deferred items (from specs / ADRs)
 

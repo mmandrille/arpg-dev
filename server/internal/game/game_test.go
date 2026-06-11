@@ -5168,15 +5168,8 @@ func TestDungeonStairsGolden(t *testing.T) {
 	if len(level2.teleporters) != 0 || golden.Levels["-2"].Teleporter != nil {
 		t.Fatalf("level -2 teleporter count = %d, golden=%+v; want absent", len(level2.teleporters), golden.Levels["-2"].Teleporter)
 	}
-	if len(golden.Levels["-2"].Loot) != 1 {
-		t.Fatalf("level -2 golden loot = %+v, want one entry", golden.Levels["-2"].Loot)
-	}
-	wantLoot := golden.Levels["-2"].Loot[0]
-	if got, ok := generatedLootPos(level2, wantLoot.ItemDefID); !ok || got != wantLoot.Position {
-		t.Fatalf("level -2 loot %s = %+v/%v, want %+v", wantLoot.ItemDefID, got, ok, wantLoot.Position)
-	}
-	if distance(wantLoot.Position, *golden.Levels["-2"].StairsUp) < dungeonCoinStairDistance {
-		t.Fatalf("level -2 coin distance from stairs_up = %v, want at least %v", distance(wantLoot.Position, *golden.Levels["-2"].StairsUp), dungeonCoinStairDistance)
+	if len(golden.Levels["-2"].Loot) != 0 || len(level2.loot) != 0 {
+		t.Fatalf("level -2 generated loot = %+v, golden=%+v; want none", level2.loot, golden.Levels["-2"].Loot)
 	}
 
 	level3, err := GenerateDungeonLevel(golden.Seed, -3, rules.DungeonGeneration)
@@ -6827,28 +6820,8 @@ func TestDungeonDescendAscendTransitions(t *testing.T) {
 		t.Fatal("missing up stairs on level -2")
 	}
 	assertTravelArrivalNextToMarker(t, sim, sim.activeLevel(), sim.entities[sim.playerID].pos, up.pos)
-	coin := findLootByDef(sim, "gold")
-	if coin == nil {
-		t.Fatal("missing dungeon gold coin")
-	}
-	wantGold := coin.goldAmount
-	if wantGold < 8 || wantGold > 15 {
-		t.Fatalf("dungeon coin amount = %d, want scaled level -2 range 8..15", wantGold)
-	}
-	pickup := sim.Tick([]Input{{MessageID: "pick_coin", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(coin.id)}}})
-	assertAck(t, pickup, "pick_coin")
-	if len(sim.inventory) != 0 || sim.gold != 0 {
-		t.Fatalf("coin picked up without leaving stair: inventory=%+v gold=%d", sim.inventory, sim.gold)
-	}
-	pickupTicks := 1
-	for ; pickupTicks < 20 && sim.gold == 0; pickupTicks++ {
-		sim.Tick(nil)
-	}
-	if len(sim.inventory) != 0 || sim.gold != wantGold {
-		t.Fatalf("after coin pickup inventory=%+v gold=%d, want inventory empty gold %d", sim.inventory, sim.gold, wantGold)
-	}
-	if pickupTicks < 5 {
-		t.Fatalf("coin pickup took %d ticks from stair, want at least 5", pickupTicks)
+	if coin := findLootByDef(sim, "gold"); coin != nil {
+		t.Fatalf("found generated dungeon gold coin %+v; gold should drop from monsters, chests, or other loot sources", coin)
 	}
 
 	sim.entities[sim.playerID].pos = up.pos
@@ -7194,15 +7167,6 @@ func generatedTeleporterPos(level generatedDungeonLevel) Vec2 {
 		}
 	}
 	return Vec2{}
-}
-
-func generatedLootPos(level generatedDungeonLevel, itemDefID string) (Vec2, bool) {
-	for _, loot := range level.loot {
-		if loot.itemDefID == itemDefID {
-			return loot.pos, true
-		}
-	}
-	return Vec2{}, false
 }
 
 func liveDungeonMonsters(level *LevelState) []*entity {

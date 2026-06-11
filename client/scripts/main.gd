@@ -228,6 +228,9 @@ var _last_facing_direction := Vector2(1.0, 0.0)
 var _debug_label: Label
 var _level_label: Label
 var _camera: Camera3D
+var ground_node: MeshInstance3D
+var ground_textures: Dictionary = {}
+var wall_textures: Dictionary = {}
 
 const SEND_INTERVAL := 0.1
 const PLAYER_SPEED := 2.8
@@ -238,6 +241,9 @@ const CAMERA_ZOOM_MIN := 8.0
 const CAMERA_ZOOM_MAX := 40.0
 const CAMERA_FOLLOW_OFFSET := Vector3(9.0, 20.0, 15.0)
 const PROJECTILE_LERP_SECONDS := 0.10
+const GROUND_TEXTURE_TOWN := "town_grass"
+const GROUND_TEXTURE_DUNGEON := "dungeon_rock"
+const WALL_TEXTURE_CAVE := "cave_wall"
 
 
 func _ready() -> void:
@@ -839,6 +845,7 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
+	_update_ground_material()
 	var local_id := _snapshot_local_player_id(p)
 	if local_id != "":
 		player_id = local_id
@@ -891,6 +898,7 @@ func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		if str(ev.get("event_type", "")) == "level_changed":
 			current_level = int(ev.get("to_level", current_level))
+			_update_ground_material()
 			pending_interactable_action.clear()
 			pending_waypoint_travel = false
 			_clear_level_entities()
@@ -2615,6 +2623,9 @@ func _entity_world_center(entity_id: String) -> Vector3:
 # --- scene construction (placeholder primitives) ----------------------------
 
 func _build_scene() -> void:
+	ground_node = _make_ground_node()
+	add_child(ground_node)
+
 	_camera = Camera3D.new()
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	_camera.size = CAMERA_ZOOM_DEFAULT
@@ -2693,6 +2704,101 @@ func _build_scene() -> void:
 	walls_root = Node3D.new()
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
+
+
+func _make_ground_node() -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = "Ground"
+	var mesh := PlaneMesh.new()
+	mesh.size = Vector2(140.0, 90.0)
+	mesh.subdivide_width = 32
+	mesh.subdivide_depth = 20
+	node.mesh = mesh
+	node.position = Vector3(50.0, -0.02, 25.0)
+	node.material_override = _ground_material_for_level(current_level)
+	return node
+
+
+func _update_ground_material() -> void:
+	if ground_node == null:
+		return
+	ground_node.material_override = _ground_material_for_level(current_level)
+
+
+func _ground_texture_id_for_level(level: int) -> String:
+	return GROUND_TEXTURE_TOWN if level == 0 else GROUND_TEXTURE_DUNGEON
+
+
+func _ground_material_for_level(level: int) -> StandardMaterial3D:
+	var texture_id := _ground_texture_id_for_level(level)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = _make_ground_texture(texture_id)
+	mat.albedo_color = Color.WHITE
+	mat.roughness = 0.92
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.uv1_scale = Vector3(28.0, 18.0, 1.0)
+	return mat
+
+
+func _make_ground_texture(texture_id: String) -> ImageTexture:
+	if ground_textures.has(texture_id):
+		return ground_textures[texture_id] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, _ground_texel(texture_id, x, y))
+	var texture := ImageTexture.create_from_image(image)
+	ground_textures[texture_id] = texture
+	return texture
+
+
+func _ground_texel(texture_id: String, x: int, y: int) -> Color:
+	var n := int((x * 37 + y * 19 + ((x / 8) * 11) + ((y / 8) * 23)) % 17)
+	if texture_id == GROUND_TEXTURE_TOWN:
+		var base := Color("#3f7f3b").lerp(Color("#6fa34d"), float(n) / 16.0)
+		if ((x + y) % 13) == 0:
+			base = base.lerp(Color("#9cbf68"), 0.35)
+		if (x % 16) == 0 or (y % 16) == 0:
+			base = base.lerp(Color("#2d5f32"), 0.28)
+		return base
+	var rock := Color("#3c3f43").lerp(Color("#73706b"), float(n) / 16.0)
+	if abs((x % 16) - (y % 16)) <= 1:
+		rock = rock.lerp(Color("#25282c"), 0.35)
+	if ((x * 3 + y * 5) % 29) == 0:
+		rock = rock.lerp(Color("#a09a8e"), 0.28)
+	return rock
+
+
+func _make_wall_texture(texture_id: String) -> ImageTexture:
+	if wall_textures.has(texture_id):
+		return wall_textures[texture_id] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, _wall_texel(texture_id, x, y))
+	var texture := ImageTexture.create_from_image(image)
+	wall_textures[texture_id] = texture
+	return texture
+
+
+func _wall_texel(_texture_id: String, x: int, y: int) -> Color:
+	var brick_w := 16
+	var brick_h := 12
+	var row := int(y / brick_h)
+	var offset := 8 if row % 2 == 1 else 0
+	var local_x := int((x + offset) % brick_w)
+	var local_y := int(y % brick_h)
+	var noise := int((x * 29 + y * 43 + row * 17 + int((x + offset) / brick_w) * 13) % 23)
+	var stone := Color("#34363a").lerp(Color("#6b6255"), float(noise) / 22.0)
+	if local_x <= 1 or local_y <= 1:
+		return stone.lerp(Color("#17191c"), 0.62)
+	if local_x >= brick_w - 2 or local_y >= brick_h - 2:
+		stone = stone.lerp(Color("#202226"), 0.34)
+	if ((x * 5 + y * 7) % 31) == 0:
+		stone = stone.lerp(Color("#9b9386"), 0.32)
+	if ((x - y) % 19) == 0:
+		stone = stone.lerp(Color("#22252a"), 0.30)
+	return stone
 
 
 func _setup_menu_layer() -> void:
@@ -3562,13 +3668,17 @@ func _make_wall_node(wall: Dictionary) -> MeshInstance3D:
 	node.mesh = mesh
 	node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
 	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = _make_wall_texture(WALL_TEXTURE_CAVE)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = 0.96
+	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.0), max(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
 	match str(wall.get("source", "")):
 		"generated":
-			mat.albedo_color = Color(0.37, 0.34, 0.30)
+			mat.albedo_color = Color(0.92, 0.86, 0.76)
 		"perimeter":
-			mat.albedo_color = Color(0.24, 0.25, 0.27)
+			mat.albedo_color = Color(0.62, 0.64, 0.68)
 		_:
-			mat.albedo_color = Color(0.32, 0.34, 0.36)
+			mat.albedo_color = Color(0.78, 0.80, 0.82)
 	node.material_override = mat
 	return node
 
@@ -4253,53 +4363,47 @@ func _make_stair_node(def_id: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Stairs_%s" % def_id
 	var is_down := def_id == "stairs_down"
-	var base := MeshInstance3D.new()
-	base.name = "StairBase"
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(1.18, 0.14, 1.18)
-	base.mesh = mesh
-	base.position = Vector3(0.0, 0.07, 0.0)
-	base.material_override = _stair_material(_stair_base_color(def_id, "ready"))
-	root.add_child(base)
-
 	if is_down:
-		var pit := MeshInstance3D.new()
-		pit.name = "DownPit"
-		var pit_mesh := CylinderMesh.new()
-		pit_mesh.top_radius = 0.38
-		pit_mesh.bottom_radius = 0.38
-		pit_mesh.height = 0.045
-		pit_mesh.radial_segments = 32
-		pit.mesh = pit_mesh
-		pit.position = Vector3(0.0, 0.155, -0.20)
-		pit.material_override = _stair_material(Color("#05070a"))
-		root.add_child(pit)
+		_add_stair_box(root, "DownStoneFrame", Vector3(1.46, 0.16, 1.20), Vector3(0.0, 0.08, 0.0), _stair_base_color(def_id, "ready"))
+		_add_stair_box(root, "DownPitOpening", Vector3(1.02, 0.06, 0.76), Vector3(0.0, 0.185, -0.04), Color("#030507"))
+		_add_stair_box(root, "DownBackWall", Vector3(1.02, 0.38, 0.12), Vector3(0.0, 0.34, -0.46), Color("#10151c"))
+		_add_stair_box(root, "DownLeftWall", Vector3(0.12, 0.30, 0.76), Vector3(-0.57, 0.30, -0.04), Color("#18202a"))
+		for i in range(5):
+			var t := float(i) / 4.0
+			_add_stair_box(
+				root,
+				"DownStep%d" % i,
+				Vector3(0.84 - t * 0.12, 0.09, 0.16),
+				Vector3(0.0, 0.34 - t * 0.22, 0.28 - t * 0.54),
+				Color("#66707a").lerp(Color("#10151d"), t)
+			)
+		_add_stair_box(root, "DownThreshold", Vector3(1.20, 0.10, 0.14), Vector3(0.0, 0.24, 0.42), Color("#89909a"))
 	else:
-		var landing := MeshInstance3D.new()
-		landing.name = "UpLanding"
-		var landing_mesh := BoxMesh.new()
-		landing_mesh.size = Vector3(0.58, 0.12, 0.42)
-		landing.mesh = landing_mesh
-		landing.position = Vector3(0.0, 0.54, -0.34)
-		landing.material_override = _stair_material(Color("#d0c8a6"))
-		root.add_child(landing)
-
-	for i in range(4):
-		var step := MeshInstance3D.new()
-		step.name = "StairStep%d" % i
-		var smesh := BoxMesh.new()
-		smesh.size = Vector3(1.00 - float(i) * 0.12, 0.12, 0.20)
-		step.mesh = smesh
-		var t := float(i) / 3.0
-		if is_down:
-			step.position = Vector3(0.0, 0.38 - t * 0.24, 0.34 - t * 0.50)
-			step.material_override = _stair_material(Color("#565b61").lerp(Color("#161a20"), t))
-		else:
-			step.position = Vector3(0.0, 0.20 + t * 0.30, 0.34 - t * 0.50)
-			step.material_override = _stair_material(Color("#7f817b").lerp(Color("#c1bb9f"), t))
-		root.add_child(step)
-	_add_stair_direction_marker(root, is_down)
+		_add_stair_box(root, "UpGroundPad", Vector3(1.42, 0.14, 1.14), Vector3(0.0, 0.07, 0.0), _stair_base_color(def_id, "ready"))
+		_add_stair_box(root, "UpHighLanding", Vector3(0.64, 0.16, 0.46), Vector3(0.0, 0.72, -0.45), Color("#d6cfaa"))
+		_add_stair_box(root, "UpBackWall", Vector3(0.78, 0.42, 0.12), Vector3(0.0, 0.54, -0.72), Color("#aaa78c"))
+		for i in range(5):
+			var t := float(i) / 4.0
+			_add_stair_box(
+				root,
+				"UpStep%d" % i,
+				Vector3(1.12 - t * 0.42, 0.12, 0.20),
+				Vector3(0.0, 0.19 + t * 0.45, 0.36 - t * 0.66),
+				Color("#7c817a").lerp(Color("#d3cda9"), t)
+			)
 	return root
+
+
+func _add_stair_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.name = part_name
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	part.mesh = mesh
+	part.position = position
+	part.material_override = _stair_material(color)
+	parent.add_child(part)
+	return part
 
 
 func _stair_base_color(def_id: String, state: String) -> Color:
@@ -4317,38 +4421,6 @@ func _stair_material(color: Color, glow: bool = false) -> StandardMaterial3D:
 		mat.emission_enabled = true
 		mat.emission = color
 	return mat
-
-
-func _add_stair_direction_marker(root: Node3D, is_down: bool) -> void:
-	var color := Color("#57a8ff") if is_down else Color("#ffe076")
-	var shaft := MeshInstance3D.new()
-	shaft.name = "DownMarkerShaft" if is_down else "UpMarkerShaft"
-	var shaft_mesh := CylinderMesh.new()
-	shaft_mesh.top_radius = 0.035
-	shaft_mesh.bottom_radius = 0.035
-	shaft_mesh.height = 0.40
-	shaft_mesh.radial_segments = 16
-	shaft.mesh = shaft_mesh
-	shaft.position = Vector3(0.0, 0.74 if is_down else 0.55, -0.18 if is_down else 0.08)
-	shaft.material_override = _stair_material(color, true)
-	root.add_child(shaft)
-
-	var head := MeshInstance3D.new()
-	head.name = "DownMarkerHead" if is_down else "UpMarkerHead"
-	var head_mesh := CylinderMesh.new()
-	if is_down:
-		head_mesh.top_radius = 0.24
-		head_mesh.bottom_radius = 0.0
-		head.position = Vector3(0.0, 0.46, -0.18)
-	else:
-		head_mesh.top_radius = 0.0
-		head_mesh.bottom_radius = 0.16
-		head.position = Vector3(0.0, 0.80, 0.08)
-	head_mesh.height = 0.30 if is_down else 0.24
-	head_mesh.radial_segments = 24
-	head.mesh = head_mesh
-	head.material_override = _stair_material(color, true)
-	root.add_child(head)
 
 
 func _make_teleporter_node() -> Node3D:

@@ -6,7 +6,6 @@ import (
 	"strconv"
 )
 
-const dungeonCoinStairDistance = 7.0
 const championCommonMinionCount = 2
 
 type generatedDungeonLevel struct {
@@ -121,10 +120,6 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
-	out.loot = append(out.loot, generatedLoot{
-		itemDefID: "gold",
-		pos:       stairDistantLootPosition(up, rules),
-	})
 	if err := placeDungeonObstacles(seed, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
@@ -878,14 +873,6 @@ func insideDungeonFloor(pos Vec2, rules DungeonGenerationRules) bool {
 		pos.Y >= margin &&
 		pos.X <= rules.FloorSize.Width-margin &&
 		pos.Y <= rules.FloorSize.Height-margin
-}
-
-func stairDistantLootPosition(anchor Vec2, rules DungeonGenerationRules) Vec2 {
-	margin := rules.StairPlacement.MarginFromWall
-	if anchor.X+dungeonCoinStairDistance <= rules.FloorSize.Width-margin {
-		return Vec2{X: anchor.X + dungeonCoinStairDistance, Y: anchor.Y}
-	}
-	return Vec2{X: anchor.X - dungeonCoinStairDistance, Y: anchor.Y}
 }
 
 func dungeonNavigation(global NavigationRules, gen DungeonGenerationRules) NavigationRules {

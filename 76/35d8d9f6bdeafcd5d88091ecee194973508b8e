@@ -1,0 +1,91 @@
+server/migrations/0015_character_skill_bindings.sql
+  s_4c0cc59c104e28::t_03f33362bb267e 1-45
+server/internal/http/session.go
+  s_4c0cc59c104e28::t_523158d0fbe5ca 362-367,386
+server/internal/store/models.go
+  s_4c0cc59c104e28::t_03f33362bb267e 188-195,223
+shared/protocol/session_snapshot.v8.schema.json
+  s_4c0cc59c104e28::t_a321215b97d46e 37,377-388
+shared/protocol/messages.v8.schema.json
+  s_4c0cc59c104e28::t_a321215b97d46e 30,85-86,233-244
+shared/protocol/examples/state_delta.json
+  s_4c0cc59c104e28::t_f730b3862cde69 82-88
+server/internal/game/types.go
+  s_4c0cc59c104e28::t_463ad07ed046f8 447-452,477,500,530,638-642
+shared/protocol/state_delta.v8.schema.json
+  s_4c0cc59c104e28::t_082e7c11a5a500 727-740,890-896
+shared/protocol/examples/set_skill_bindings_intent.json
+  s_4c0cc59c104e28::t_f730b3862cde69 1-10
+shared/protocol/examples/session_snapshot.json
+  s_4c0cc59c104e28::t_f730b3862cde69 123-126
+server/internal/store/repos.go
+  s_4c0cc59c104e28::t_4f3397541aa57f 446-447
+  s_4c0cc59c104e28::t_f15c9de7067eac 207-208,216-217,226-227,1112-1178,1180-1219
+  s_4c0cc59c104e28::t_0e77f9efa5be32 1179,1612,1680-1697
+  s_4c0cc59c104e28::t_0775e6c1e3a666 1848-1881
+server/internal/replay/replay_test.go
+  s_1e8b8d9cb32141::t_f03e4eb5d09d7c 1443-1448
+  s_1e8b8d9cb32141::t_09c3f5c8b53ac3 1476
+server/internal/realtime/hub.go
+  s_4c0cc59c104e28::t_80855f5ea6b892 165-171
+client/tests/test_coop_client.gd
+  s_38a51e2b61cc29::t_aef1b404362f88 630
+  s_38a51e2b61cc29::t_620349e264dde1 37,615-629
+client/scripts/main.gd
+  s_4c0cc59c104e28::t_71bb0b8944402b 2085
+  s_38a51e2b61cc29::t_4336943ec61930 1083-1084
+  s_38a51e2b61cc29::t_09d1f2d8d32e97 2037,2144-2145
+  s_38a51e2b61cc29::t_7a3bd4d5d78cb8 2044-2067,2072-2081,2083-2084,2086-2105
+  s_38a51e2b61cc29::t_60ef9da47da023 2082
+  s_38a51e2b61cc29::t_e6aa53c33d3e22 48-52,1088-1089
+  s_38a51e2b61cc29::t_b6a2abf062c702 2068-2071
+server/internal/store/stale_sessions_test.go
+  s_1e8b8d9cb32141::t_dfe8fb0777d1d2 105
+server/internal/replay/replay.go
+  s_4c0cc59c104e28::t_80855f5ea6b892 568-574
+  s_4c0cc59c104e28::t_d57265fb9d788f 324,352,471
+server/internal/inputdecode/inputdecode.go
+  s_4c0cc59c104e28::t_52a541bdddbdc7 29,96-99,122,233-238
+server/internal/store/store_test.go
+  s_1e8b8d9cb32141::t_6a18e22e30db24 406,409,412
+  s_4c0cc59c104e28::t_185d1355e445ff 634-650,704,727-731,758-759
+server/internal/game/handlers.go
+  s_4c0cc59c104e28::t_d777a99f2d52fb 44
+  s_4c0cc59c104e28::t_a7b49900b1cec9 905-932
+server/internal/store/interfaces.go
+  s_4c0cc59c104e28::t_03f33362bb267e 61-62,72
+shared/protocol/envelope.v8.schema.json
+  s_4c0cc59c104e28::t_a321215b97d46e 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7635d8d9f6bdeafcd5d88091ecee194973508b8e",
+  "prompts": {},
+  "sessions": {
+    "s_1e8b8d9cb32141": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4ed-e3d7-7660-878d-330420be72c6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_38a51e2b61cc29": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4f3-ed6d-77e1-ab8e-e95b6d39c946",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_4c0cc59c104e28": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4fc-520c-7230-b3f4-43f216d2c5cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

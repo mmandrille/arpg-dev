@@ -1686,6 +1686,9 @@ def cross_checks(report: Report) -> None:
         def rounded_positive(value: float) -> int:
             return max(1, int(math.floor(value + 0.5)))
 
+        def rounded_non_negative(value: float) -> int:
+            return max(0, int(math.floor(value + 0.5)))
+
         for golden_rarity in monster_rarity_golden["rarities"]:
             rarity_id = golden_rarity["id"]
             rule_rarity = rarity_by_id.get(rarity_id)
@@ -1693,20 +1696,71 @@ def cross_checks(report: Report) -> None:
                 report.fail("monster_rarity golden", f"{rarity_id}: missing from dungeon_generation monster_rarities")
                 failed_monster_rarity_golden = True
                 break
-            for field in ("hp_multiplier", "damage_multiplier", "xp_multiplier"):
+            for field in (
+                "hp_multiplier",
+                "damage_multiplier",
+                "xp_multiplier",
+                "armor_multiplier",
+                "armor_bonus",
+                "hit_chance_bonus",
+                "crit_chance_bonus",
+                "block_percent_bonus",
+                "attack_cooldown_multiplier",
+            ):
                 if golden_rarity[field] != rule_rarity[field]:
                     report.fail("monster_rarity golden", f"{rarity_id}.{field}: mismatch with dungeon_generation")
                     failed_monster_rarity_golden = True
                     break
             if failed_monster_rarity_golden:
                 break
+            def clamp(value: float, minimum: float, maximum: float) -> float:
+                return max(minimum, min(maximum, value))
+
             expected = golden_rarity["expected"]
-            expected_hp = rounded_positive(base_monster["max_hp"] * rule_rarity["hp_multiplier"])
+            scaling = dungeon_generation["monster_depth_scaling"]
+            depth_index = rule_rarity["loot_depth_offset"]
+            hp_depth = 1 + scaling["hp_per_depth"] * depth_index
+            damage_depth = 1 + scaling["damage_per_depth"] * depth_index
+            expected_hp = rounded_positive(base_monster["max_hp"] * hp_depth * rule_rarity["hp_multiplier"])
             base_attack = base_monster["attack_damage"]
             expected_attack = {
-                "min": rounded_positive(base_attack["min"] * rule_rarity["damage_multiplier"]),
-                "max": rounded_positive(base_attack["max"] * rule_rarity["damage_multiplier"]),
+                "min": rounded_positive(base_attack["min"] * damage_depth * rule_rarity["damage_multiplier"]),
+                "max": rounded_positive(base_attack["max"] * damage_depth * rule_rarity["damage_multiplier"]),
             }
+            expected_armor = rounded_non_negative(
+                (base_monster.get("armor", 0) + scaling["armor_per_depth"] * depth_index)
+                * rule_rarity["armor_multiplier"]
+                + rule_rarity["armor_bonus"]
+            )
+            expected_hit = clamp(
+                base_monster.get("hit_chance", combat["base_hit_chance"])
+                + scaling["hit_chance_per_depth"] * depth_index
+                + rule_rarity["hit_chance_bonus"],
+                0,
+                scaling["max_hit_chance"],
+            )
+            expected_crit = clamp(
+                base_monster.get("crit_chance", combat["base_crit_chance"])
+                + scaling["crit_chance_per_depth"] * depth_index
+                + rule_rarity["crit_chance_bonus"],
+                0,
+                scaling["max_crit_chance"],
+            )
+            expected_block = clamp(
+                base_monster.get("block_percent", 0)
+                + scaling["block_percent_per_depth"] * depth_index
+                + rule_rarity["block_percent_bonus"],
+                0,
+                scaling["max_block_percent"],
+            )
+            expected_cooldown = max(
+                scaling["min_attack_cooldown_ticks"],
+                rounded_positive(
+                    base_monster["attack_cooldown_ticks"]
+                    * (scaling["attack_cooldown_multiplier_per_depth"] ** depth_index)
+                    * rule_rarity["attack_cooldown_multiplier"]
+                ),
+            )
             expected_xp = rounded_positive(base_monster["xp_reward"] * rule_rarity["xp_multiplier"])
             if expected["max_hp"] != expected_hp:
                 report.fail("monster_rarity golden", f"{rarity_id}: max_hp mismatch")
@@ -1714,6 +1768,16 @@ def cross_checks(report: Report) -> None:
                 break
             if expected["attack_damage"] != expected_attack:
                 report.fail("monster_rarity golden", f"{rarity_id}: attack_damage mismatch")
+                failed_monster_rarity_golden = True
+                break
+            if (
+                expected["armor"] != expected_armor
+                or abs(expected["hit_chance"] - expected_hit) > 1e-12
+                or abs(expected["crit_chance"] - expected_crit) > 1e-12
+                or expected["block_percent"] != expected_block
+                or expected["attack_cooldown_ticks"] != expected_cooldown
+            ):
+                report.fail("monster_rarity golden", f"{rarity_id}: derived stat mismatch")
                 failed_monster_rarity_golden = True
                 break
             if expected["xp_reward"] != expected_xp:

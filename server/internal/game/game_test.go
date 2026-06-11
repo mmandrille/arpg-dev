@@ -156,17 +156,28 @@ func TestMonsterRarityGolden(t *testing.T) {
 	var golden struct {
 		MonsterDefID string `json:"monster_def_id"`
 		Rarities     []struct {
-			ID               string  `json:"id"`
-			Weight           int     `json:"weight"`
-			Color            string  `json:"color"`
-			HPMultiplier     float64 `json:"hp_multiplier"`
-			DamageMultiplier float64 `json:"damage_multiplier"`
-			XPMultiplier     float64 `json:"xp_multiplier"`
-			LootDepthOffset  int     `json:"loot_depth_offset"`
-			Expected         struct {
-				MaxHP        int         `json:"max_hp"`
-				AttackDamage DamageRange `json:"attack_damage"`
-				XPReward     int         `json:"xp_reward"`
+			ID                       string  `json:"id"`
+			Weight                   int     `json:"weight"`
+			Color                    string  `json:"color"`
+			HPMultiplier             float64 `json:"hp_multiplier"`
+			DamageMultiplier         float64 `json:"damage_multiplier"`
+			XPMultiplier             float64 `json:"xp_multiplier"`
+			ArmorMultiplier          float64 `json:"armor_multiplier"`
+			ArmorBonus               float64 `json:"armor_bonus"`
+			HitChanceBonus           float64 `json:"hit_chance_bonus"`
+			CritChanceBonus          float64 `json:"crit_chance_bonus"`
+			BlockPercentBonus        float64 `json:"block_percent_bonus"`
+			AttackCooldownMultiplier float64 `json:"attack_cooldown_multiplier"`
+			LootDepthOffset          int     `json:"loot_depth_offset"`
+			Expected                 struct {
+				MaxHP               int         `json:"max_hp"`
+				AttackDamage        DamageRange `json:"attack_damage"`
+				Armor               float64     `json:"armor"`
+				HitChance           float64     `json:"hit_chance"`
+				CritChance          float64     `json:"crit_chance"`
+				BlockPercent        float64     `json:"block_percent"`
+				AttackCooldownTicks int         `json:"attack_cooldown_ticks"`
+				XPReward            int         `json:"xp_reward"`
 			} `json:"expected"`
 		} `json:"rarities"`
 		EffectiveDepthCases []struct {
@@ -187,14 +198,22 @@ func TestMonsterRarityGolden(t *testing.T) {
 		if rarity.Weight != c.Weight || rarity.Color != c.Color || rarity.LootDepthOffset != c.LootDepthOffset {
 			t.Fatalf("rarity %s = %+v, want golden weight/color/offset", c.ID, rarity)
 		}
-		if roundPositive(float64(base.MaxHP)*rarity.HPMultiplier) != c.Expected.MaxHP {
-			t.Fatalf("rarity %s max hp mismatch", c.ID)
+		if rarity.ArmorMultiplier != c.ArmorMultiplier || rarity.ArmorBonus != c.ArmorBonus || rarity.HitChanceBonus != c.HitChanceBonus || rarity.CritChanceBonus != c.CritChanceBonus || rarity.BlockPercentBonus != c.BlockPercentBonus || rarity.AttackCooldownMultiplier != c.AttackCooldownMultiplier {
+			t.Fatalf("rarity %s stat modifiers = %+v, want golden", c.ID, rarity)
 		}
-		if got := scaleDamageRange(*base.AttackDamage, rarity.DamageMultiplier); got != c.Expected.AttackDamage {
-			t.Fatalf("rarity %s damage = %+v, want %+v", c.ID, got, c.Expected.AttackDamage)
+		sim := NewSim("sess_monster_rarity_"+c.ID, "monster_rarity_"+c.ID, rules)
+		stats := sim.generatedMonsterStats(base, -1-int(rarity.LootDepthOffset), rarity)
+		if stats.maxHP != c.Expected.MaxHP {
+			t.Fatalf("rarity %s max hp = %d, want %d", c.ID, stats.maxHP, c.Expected.MaxHP)
 		}
-		if roundPositive(float64(base.XPReward)*rarity.XPMultiplier) != c.Expected.XPReward {
-			t.Fatalf("rarity %s xp mismatch", c.ID)
+		if stats.attackDamage == nil || *stats.attackDamage != c.Expected.AttackDamage {
+			t.Fatalf("rarity %s damage = %+v, want %+v", c.ID, stats.attackDamage, c.Expected.AttackDamage)
+		}
+		if stats.armor != c.Expected.Armor || math.Abs(stats.hitChance-c.Expected.HitChance) > 1e-12 || math.Abs(stats.critChance-c.Expected.CritChance) > 1e-12 || stats.blockPercent != c.Expected.BlockPercent || stats.attackCooldown != c.Expected.AttackCooldownTicks {
+			t.Fatalf("rarity %s generated stats = %+v, want armor %.3f hit %.3f crit %.3f block %.3f cooldown %d", c.ID, stats, c.Expected.Armor, c.Expected.HitChance, c.Expected.CritChance, c.Expected.BlockPercent, c.Expected.AttackCooldownTicks)
+		}
+		if stats.xpReward != c.Expected.XPReward {
+			t.Fatalf("rarity %s xp = %d, want %d", c.ID, stats.xpReward, c.Expected.XPReward)
 		}
 	}
 	for _, c := range golden.EffectiveDepthCases {
@@ -5991,12 +6010,17 @@ func TestGeneratedDungeonMonsterRarityGolden(t *testing.T) {
 			Seed             string `json:"seed"`
 			Level            int    `json:"level"`
 			ExpectedMonsters []struct {
-				Index        int         `json:"index"`
-				Rarity       string      `json:"rarity"`
-				LootTable    string      `json:"loot_table"`
-				MaxHP        int         `json:"max_hp"`
-				AttackDamage DamageRange `json:"attack_damage"`
-				XPReward     int         `json:"xp_reward"`
+				Index               int         `json:"index"`
+				Rarity              string      `json:"rarity"`
+				LootTable           string      `json:"loot_table"`
+				MaxHP               int         `json:"max_hp"`
+				AttackDamage        DamageRange `json:"attack_damage"`
+				Armor               float64     `json:"armor"`
+				HitChance           float64     `json:"hit_chance"`
+				CritChance          float64     `json:"crit_chance"`
+				BlockPercent        float64     `json:"block_percent"`
+				AttackCooldownTicks int         `json:"attack_cooldown_ticks"`
+				XPReward            int         `json:"xp_reward"`
 			} `json:"expected_monsters"`
 		} `json:"generated_cases"`
 	}
@@ -6040,6 +6064,9 @@ func TestGeneratedDungeonMonsterRarityGolden(t *testing.T) {
 			if got.monsterAttackDamage == nil || *got.monsterAttackDamage != expected.AttackDamage {
 				t.Fatalf("%s entity %d attack = %+v, want %+v", c.Name, expected.Index, got.monsterAttackDamage, expected.AttackDamage)
 			}
+			if got.monsterArmor != expected.Armor || math.Abs(got.monsterHitChance-expected.HitChance) > 1e-12 || math.Abs(got.monsterCritChance-expected.CritChance) > 1e-12 || got.monsterBlockPercent != expected.BlockPercent || got.monsterAttackCooldown != expected.AttackCooldownTicks {
+				t.Fatalf("%s entity %d stats = armor %.3f hit %.3f crit %.3f block %.3f cooldown %d, want %.3f %.3f %.3f %.3f %d", c.Name, expected.Index, got.monsterArmor, got.monsterHitChance, got.monsterCritChance, got.monsterBlockPercent, got.monsterAttackCooldown, expected.Armor, expected.HitChance, expected.CritChance, expected.BlockPercent, expected.AttackCooldownTicks)
+			}
 			if got.monsterXPReward != expected.XPReward {
 				t.Fatalf("%s entity %d xp = %d, want %d", c.Name, expected.Index, got.monsterXPReward, expected.XPReward)
 			}
@@ -6060,7 +6087,7 @@ func TestStaticWorldMonstersDoNotGetGeneratedRarity(t *testing.T) {
 	if monster == nil {
 		t.Fatal("missing vertical slice monster")
 	}
-	if monster.monsterRarityID != "" || monster.monsterAttackDamage != nil || monster.monsterXPReward != 0 {
+	if monster.monsterRarityID != "" || monster.monsterAttackDamage != nil || monster.monsterAttackCooldown != 0 || monster.monsterArmor != 0 || monster.monsterHitChance != 0 || monster.monsterCritChance != 0 || monster.monsterBlockPercent != 0 || monster.monsterXPReward != 0 {
 		t.Fatalf("static monster has generated rarity fields: %+v", monster)
 	}
 	if monster.view().Rarity != "" {

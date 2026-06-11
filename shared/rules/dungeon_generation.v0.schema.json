@@ -15,6 +15,7 @@
     "obstacle_generation",
     "boss_floor",
     "monster_rarity_note",
+    "monster_depth_scaling",
     "monster_rarities",
     "loot_band_note",
     "loot_bands",
@@ -202,6 +203,36 @@
     },
     "loot_band_note": { "type": "string", "minLength": 1 },
     "monster_rarity_note": { "type": "string", "minLength": 1 },
+    "monster_depth_scaling": {
+      "type": "object",
+      "required": [
+        "hp_per_depth",
+        "damage_per_depth",
+        "armor_per_depth",
+        "hit_chance_per_depth",
+        "max_hit_chance",
+        "crit_chance_per_depth",
+        "max_crit_chance",
+        "block_percent_per_depth",
+        "max_block_percent",
+        "attack_cooldown_multiplier_per_depth",
+        "min_attack_cooldown_ticks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "hp_per_depth": { "type": "number", "minimum": 0 },
+        "damage_per_depth": { "type": "number", "minimum": 0 },
+        "armor_per_depth": { "type": "number", "minimum": 0 },
+        "hit_chance_per_depth": { "type": "number", "minimum": 0 },
+        "max_hit_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "crit_chance_per_depth": { "type": "number", "minimum": 0 },
+        "max_crit_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "block_percent_per_depth": { "type": "number", "minimum": 0 },
+        "max_block_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "attack_cooldown_multiplier_per_depth": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "min_attack_cooldown_ticks": { "type": "integer", "minimum": 1 }
+      }
+    },
     "monster_rarities": {
       "type": "array",
       "minItems": 4,
@@ -215,6 +246,12 @@
           "hp_multiplier",
           "damage_multiplier",
           "xp_multiplier",
+          "armor_multiplier",
+          "armor_bonus",
+          "hit_chance_bonus",
+          "crit_chance_bonus",
+          "block_percent_bonus",
+          "attack_cooldown_multiplier",
           "loot_depth_offset",
           "visual_scale"
         ],
@@ -226,6 +263,12 @@
           "hp_multiplier": { "type": "number", "exclusiveMinimum": 0 },
           "damage_multiplier": { "type": "number", "exclusiveMinimum": 0 },
           "xp_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "armor_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "armor_bonus": { "type": "number", "minimum": 0 },
+          "hit_chance_bonus": { "type": "number", "minimum": 0 },
+          "crit_chance_bonus": { "type": "number", "minimum": 0 },
+          "block_percent_bonus": { "type": "number", "minimum": 0, "maximum": 100 },
+          "attack_cooldown_multiplier": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
           "loot_depth_offset": { "type": "integer", "minimum": 0 },
           "visual_scale": { "type": "number", "exclusiveMinimum": 0 }
         }

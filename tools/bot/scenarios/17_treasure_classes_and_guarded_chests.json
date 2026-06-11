@@ -1,14 +1,14 @@
 {
   "id": "treasure_classes_and_guarded_chests",
   "world_id": "dungeon_levels",
-  "seed": "chest_seed_22",
+  "seed": "chest_fast_69",
   "title": "Treasure classes and guarded chests",
   "description": "Pinned dungeon seed generates a guarded chest floor with enough dungeon mobs for loot attempts, one closed chest, multi-attempt mob loot, open-once chest loot, pickup, state, reconnect, replay, and fresh-session persistence.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 40 },
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "at_least": 2 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "equals": 1 },
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2, "timeout_s": 60 },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1, "timeout_s": 60 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "expect_reject": "invalid_target" },

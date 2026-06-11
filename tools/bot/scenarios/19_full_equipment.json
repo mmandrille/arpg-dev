@@ -69,7 +69,7 @@
         { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_bow" },
         { "type": "equipped_slot_def", "slot": "belt", "item_def_id": "cave_belt" },
         { "type": "hotbar_capacity", "equals": 10 },
-        { "type": "hotbar_slot", "slot_index": 5, "item_def_id": "red_potion" }
+        { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" }
       ]
     }
   ]

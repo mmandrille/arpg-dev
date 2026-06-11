@@ -669,6 +669,12 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 		eventSequence++
 	}
 
+	hotbarAssignedItems := map[string]struct{}{}
+	for _, c := range res.Changes {
+		if c.Op == game.OpHotbarUpdate && c.ItemInstanceID != nil {
+			hotbarAssignedItems[*c.ItemInstanceID] = struct{}{}
+		}
+	}
 	for _, c := range res.Changes {
 		if c.StashTransferID != "" {
 			continue
@@ -720,6 +726,9 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			}
 		case game.OpInventoryRemove:
 			if c.ItemInstanceID == nil {
+				continue
+			}
+			if _, assignedToHotbar := hotbarAssignedItems[*c.ItemInstanceID]; assignedToHotbar {
 				continue
 			}
 			if err := l.hub.store.RemoveCharacterItem(ctx, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID); err != nil {

@@ -410,6 +410,12 @@ func (r *runner) persistTick(res game.TickResult) {
 		}
 	}
 
+	hotbarAssignedItems := map[string]struct{}{}
+	for _, c := range res.Changes {
+		if c.Op == game.OpHotbarUpdate && c.ItemInstanceID != nil {
+			hotbarAssignedItems[*c.ItemInstanceID] = struct{}{}
+		}
+	}
 	for _, c := range res.Changes {
 		switch c.Op {
 		case game.OpInventoryAdd:
@@ -469,6 +475,9 @@ func (r *runner) persistTick(res game.TickResult) {
 			}
 		case game.OpInventoryRemove:
 			if c.ItemInstanceID == nil {
+				continue
+			}
+			if _, assignedToHotbar := hotbarAssignedItems[*c.ItemInstanceID]; assignedToHotbar {
 				continue
 			}
 			r.log.Debug("inventory_debug_change",

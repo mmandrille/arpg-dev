@@ -1,0 +1,26 @@
+server/internal/game/game_test.go
+  s_ba8ba4c088ef1a::t_922dc42e14ef31 958-959
+  s_ba8ba4c088ef1a::t_7f45180e3670c3 703-704,716-717
+shared/golden/skill_points_and_magic_bolt.json
+  s_ba8ba4c088ef1a::t_7f45180e3670c3 24,27-29,33,36-38,42,45-47,51,54-56
+shared/rules/character_progression.v0.json
+  s_ba8ba4c088ef1a::t_28e6b63d387aa6 138
+shared/golden/character_progression.json
+  s_ba8ba4c088ef1a::t_7f45180e3670c3 27-28,56-57,85-86,114-115,145-146,174-175,203-204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9714ad083c2f291653955fd157ecc316f32354d7",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

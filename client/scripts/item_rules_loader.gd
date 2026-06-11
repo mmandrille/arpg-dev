@@ -1,6 +1,6 @@
 ## ItemRulesLoader — static singleton for shared item rule data.
 ##
-## Loads items.v0.json, item_templates.v0.json, and item_presentations.v0.json
+## Loads items.v0.json, item_templates.v0.json, shops.v0.json, and item_presentations.v0.json
 ## once (lazy, guarded by _loaded) and caches the results as static vars.
 ## All panels and main.gd access these dictionaries directly instead of each
 ## loading their own copy.
@@ -14,6 +14,7 @@ extends RefCounted
 
 static var item_rules: Dictionary = {}
 static var item_templates: Dictionary = {}
+static var shop_rules: Dictionary = {}
 static var item_presentations: Dictionary = {}
 static var _loaded: bool = false
 
@@ -24,6 +25,7 @@ static func ensure_loaded() -> void:
 	_loaded = true
 	_load_item_rules()
 	_load_item_templates()
+	_load_shop_rules()
 	_load_item_presentations()
 
 
@@ -55,6 +57,18 @@ static func _load_item_templates() -> void:
 	var parsed = JSON.parse_string(f.get_as_text())
 	if typeof(parsed) == TYPE_DICTIONARY:
 		item_templates = parsed.get("templates", {})
+
+
+static func _load_shop_rules() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/shops.v0.json")
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		shop_rules = parsed
 
 
 static func _load_item_presentations() -> void:

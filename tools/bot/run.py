@@ -1280,6 +1280,40 @@ async def execute_step(
             raise AssertionError(f"buy_shop_offer: inventory did not grow after {offer}")
         return
 
+    if action == "reroll_shop":
+        shop_id = str(step.get("shop_id", "town_mystery_seller"))
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_mystery_seller")))
+        if target is None:
+            raise AssertionError(f"reroll_shop: missing shop entity on level {state.current_level}")
+        before_gold = state.gold
+        start_index = len(state.shop_events)
+        env = make_envelope(
+            "shop_reroll_intent",
+            session_id,
+            state.last_tick,
+            {"shop_entity_id": str(target["id"])},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_shop_event(ws, state, "shop_reroll", loop, shop_id=shop_id, start_index=start_index)
+        state.last_gold_before_action = before_gold
+        state.last_gold_after_action = state.gold
+        if int(event.get("price", 0)) <= 0:
+            raise AssertionError(f"reroll_shop: event missing positive price: {event}")
+        if int(event.get("total_gold", state.gold)) != state.gold:
+            raise AssertionError(f"reroll_shop: event total_gold {event.get('total_gold')} != state gold {state.gold}")
+        offers = list(state.shop_offers.get(shop_id, {}).keys())
+        if not offers:
+            raise AssertionError(f"reroll_shop: cached offers missing after event {event}")
+        if "|reroll:" not in str(event.get("refresh_key", "")):
+            raise AssertionError(f"reroll_shop: event missing reroll refresh key: {event}")
+        assert_shop_event_details([event], step, "reroll_shop")
+        return
+
     if action == "sell_inventory_item":
         shop_id = str(step.get("shop_id", "town_vendor"))
         target = find_interactable(state, str(step.get("interactable_def_id", "town_vendor")))
@@ -2218,7 +2252,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         event_type = ev["event_type"]
         state.seen_events.add(event_type)
         state.events.append(dict(ev))
-        if event_type in {"shop_opened", "shop_purchase", "shop_sale"}:
+        if event_type in {"shop_opened", "shop_purchase", "shop_sale", "shop_reroll"}:
             shop_event = dict(ev)
             state.shop_events.append(shop_event)
             state.last_shop_event = shop_event

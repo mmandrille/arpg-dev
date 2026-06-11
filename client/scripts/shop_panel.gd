@@ -55,6 +55,7 @@ var item_presentations: Dictionary:
 
 var _panel: PanelContainer
 var _title_label: Label
+var _reroll_button: Button
 var _status_label: Label
 var _vendor_grid: GridContainer
 var _buy_buttons: Dictionary = {}
@@ -176,6 +177,9 @@ func get_debug_state() -> Dictionary:
 		"generated_offer_count": _offers_by_kind("generated").size(),
 		"mystery_offer_count": _offers_by_kind("mystery").size(),
 		"buyback_offer_count": _offers_by_kind("buyback").size(),
+		"reroll_visible": _reroll_button != null and _reroll_button.visible,
+		"reroll_enabled": _reroll_enabled(),
+		"reroll_cost": _reroll_cost(),
 		"buy_buttons": _debug_buy_buttons(),
 		"offer_rows": _debug_offer_rows(),
 		"sell_rows": _debug_sell_rows(),
@@ -215,6 +219,11 @@ func bot_click_sell_item(item_def_id: String = "", rolled: Variant = null, bag_i
 	_emit_sell(matches[bag_index])
 
 
+func bot_click_reroll() -> void:
+	if _reroll_enabled():
+		_emit_reroll()
+
+
 func _sync_viewport_size() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_reposition_panel()
@@ -245,6 +254,13 @@ func _build() -> void:
 	_title_label.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 	header.add_child(_title_label)
 
+	_reroll_button = Button.new()
+	_reroll_button.text = "Reroll"
+	_reroll_button.focus_mode = Control.FOCUS_NONE
+	_reroll_button.custom_minimum_size = Vector2(88, 36)
+	_reroll_button.pressed.connect(_emit_reroll)
+	header.add_child(_reroll_button)
+
 	_status_label = Label.new()
 	_status_label.text = ""
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -269,6 +285,7 @@ func _render() -> void:
 		return
 	_buy_buttons = {}
 	_title_label.text = shop_title
+	_sync_reroll_button()
 	_clear_children(_vendor_grid)
 	var rows := _vendor_items()
 	for i in range(VENDOR_SLOT_COUNT):
@@ -458,6 +475,36 @@ func _emit_sell(item: Dictionary) -> void:
 		"shop_entity_id": shop_entity_id,
 		"item_instance_id": str(item.get("item_instance_id", "")),
 	})
+
+
+func _emit_reroll() -> void:
+	if shop_entity_id == "" or not _reroll_enabled():
+		return
+	intent_requested.emit("shop_reroll_intent", {
+		"shop_entity_id": shop_entity_id,
+	})
+
+
+func _sync_reroll_button() -> void:
+	if _reroll_button == null:
+		return
+	var cost := _reroll_cost()
+	_reroll_button.visible = _is_mystery_shop()
+	_reroll_button.disabled = not _reroll_enabled()
+	_reroll_button.text = "Reroll %d" % cost
+	_reroll_button.tooltip_text = "Refresh mystery offers for %d gold" % cost
+
+
+func _reroll_enabled() -> bool:
+	return _interactive and _is_mystery_shop() and gold >= _reroll_cost()
+
+
+func _reroll_cost() -> int:
+	return int(ItemRulesLoader.shop_rules.get("shops", {}).get(shop_id, {}).get("mystery_offers", {}).get("reroll_cost", 0))
+
+
+func _is_mystery_shop() -> bool:
+	return shop_id == "town_mystery_seller" and _reroll_cost() > 0
 
 
 func _offer_affordable(offer: Dictionary) -> bool:

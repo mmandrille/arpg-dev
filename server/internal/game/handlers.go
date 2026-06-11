@@ -44,6 +44,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"set_skill_bindings_intent":   (*Sim).handleSetSkillBindings,
 	"shop_buy_intent":             (*Sim).handleShopBuy,
 	"shop_sell_intent":            (*Sim).handleShopSell,
+	"shop_reroll_intent":          (*Sim).handleShopReroll,
 	"stash_deposit_item_intent":   (*Sim).handleStashDepositItem,
 	"stash_withdraw_item_intent":  (*Sim).handleStashWithdrawItem,
 	"stash_deposit_gold_intent":   (*Sim).handleStashDepositGold,
@@ -289,6 +290,46 @@ func (s *Sim) handleShopSell(in Input, res *TickResult) {
 		TotalGold:      intPtr(s.gold),
 		Offers:         offers,
 		SellAppraisals: s.shopSellAppraisals(shopID),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleShopReroll(in Input, res *TickResult) {
+	if in.ShopReroll == nil || in.ShopReroll.ShopEntityID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	shopEntity, shopID, ok, reason := s.resolveShopIntentTarget(in.ShopReroll.ShopEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	shop, ok := s.rules.Shops[shopID]
+	if !ok || !shop.MysteryOffers.Enabled {
+		res.reject(in.MessageID, "reroll_unavailable")
+		return
+	}
+	cost := shop.MysteryOffers.RerollCost
+	if s.gold < cost {
+		res.reject(in.MessageID, "insufficient_gold")
+		return
+	}
+	state := s.rerollMysteryShopStock(shopID, shop, res)
+	s.gold -= cost
+	s.progression.Gold = s.gold
+	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	offers, _ := s.shopCatalogWithChanges(shopID, res)
+	res.Events = append(res.Events, Event{
+		EventType:     "shop_reroll",
+		EntityID:      idStr(shopEntity.id),
+		CorrelationID: in.CorrelationID,
+		ShopID:        shopID,
+		Price:         intPtr(cost),
+		TotalGold:     intPtr(s.gold),
+		RefreshKey:    state.RefreshKey,
+		Offers:        offers,
 	})
 	res.ack(in.MessageID)
 }

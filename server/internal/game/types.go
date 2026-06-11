@@ -412,6 +412,7 @@ type Event struct {
 	SellAppraisals     []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
 	OfferID            string                  `json:"offer_id,omitempty"`
 	Price              *int                    `json:"price,omitempty"`
+	RefreshKey         string                  `json:"refresh_key,omitempty"`
 	Item               *ItemView               `json:"item,omitempty"`
 	StashID            string                  `json:"stash_id,omitempty"`
 	StashItemID        string                  `json:"stash_item_id,omitempty"`

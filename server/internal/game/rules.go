@@ -686,6 +686,7 @@ type ShopMysteryOffers struct {
 	MaxRarity         string   `json:"max_rarity"`
 	RefreshOn         string   `json:"refresh_on"`
 	PriceMultiplier   float64  `json:"price_multiplier"`
+	RerollCost        int      `json:"reroll_cost"`
 	MaxRollAttempts   int      `json:"max_roll_attempts"`
 }
 
@@ -2178,6 +2179,9 @@ func validateMysteryShopRules(r *Rules, shopID string, shop ShopDef) error {
 	}
 	if mystery.PriceMultiplier <= 1 {
 		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.price_multiplier: must be > 1", shopID)
+	}
+	if mystery.RerollCost <= 0 {
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.reroll_cost: must be positive", shopID)
 	}
 	if mystery.MaxRollAttempts < len(mystery.EligibleSlots) {
 		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.max_roll_attempts: must be >= eligible slot count", shopID)

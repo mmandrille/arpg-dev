@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v72 — `monster-visual-catalog` |
+| **Latest completed slice** | v73 — `draggable-window-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -91,6 +91,7 @@ v69_* = character-class-foundation
 v70_* = class-skill-and-item-gates
 v71_* = class-picker-and-sprites
 v72_* = monster-visual-catalog
+v73_* = draggable-window-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -203,6 +204,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v70** | `class-skill-and-item-gates` | Complete (`make ci` green) | [`v70_spec-class-skill-and-item-gates.md`](docs/specs/v70_spec-class-skill-and-item-gates.md) | [`v70_2026-06-11-class-skill-and-item-gates.md`](docs/plans/v70_2026-06-11-class-skill-and-item-gates.md) | [`as-built`](docs/as-built/v70_class-skill-and-item-gates.md) |
 | **v71** | `class-picker-and-sprites` | Complete (`make ci` green) | [`v71_spec-class-picker-and-sprites.md`](docs/specs/v71_spec-class-picker-and-sprites.md) | [`v71_2026-06-11-class-picker-and-sprites.md`](docs/plans/v71_2026-06-11-class-picker-and-sprites.md) | [`as-built`](docs/as-built/v71_class-picker-and-sprites.md) |
 | **v72** | `monster-visual-catalog` | Complete (`make ci` green) | [`v72_spec-monster-visual-catalog.md`](docs/specs/v72_spec-monster-visual-catalog.md) | [`v72_2026-06-11-monster-visual-catalog.md`](docs/plans/v72_2026-06-11-monster-visual-catalog.md) | [`as-built`](docs/as-built/v72_monster-visual-catalog.md) |
+| **v73** | `draggable-window-foundation` | Complete (`make client-unit` green) | [`v73_spec-draggable-window-foundation.md`](docs/specs/v73_spec-draggable-window-foundation.md) | [`v73_2026-06-11-draggable-window-foundation.md`](docs/plans/v73_2026-06-11-draggable-window-foundation.md) | [`as-built`](docs/as-built/v73_draggable-window-foundation.md) |
 
 ---
 
@@ -622,6 +624,10 @@ quadruped/flyer placeholder assets, wolf/bat monster definitions with unchanged 
 and deterministic boss model pools across dummy, quadruped, and tiny flyer visuals. Godot resolves
 monster scenes through the catalog, and the showme monster lineup was approved before final CI.
 
+**Stats and skills now use draggable window chrome.** v73 adds a reusable Godot titlebar shell with
+close button, titlebar-only dragging, viewport clamping, and debug proof, then migrates the
+character stats and skills panels without changing server authority or gameplay protocol.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -631,7 +637,7 @@ monster scenes through the catalog, and the showme monster lineup was approved b
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
 | Economy / trade | Market offers/purchases, gold/resource pricing, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations beyond listing-row removal, atomic buyer/seller ownership transfer, stash delivery for purchases, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72 non-goals, ADR-0013 |
-| Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, and production boss health bar art/audio | v53/v57/v58 non-goals, ADR-0009 |
+| Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for inventory/shop/stash/waypoint/menu windows, persistent custom window layout | v53/v57/v58/v73 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up |

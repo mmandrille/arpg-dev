@@ -4,6 +4,7 @@ extends Control
 signal allocate_skill_point_requested(skill_id: String)
 
 const SkillIconScript := preload("res://scripts/skill_icon.gd")
+const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 
 var skill_progression: Dictionary = {}
 var character_progression: Dictionary = {}
@@ -13,7 +14,7 @@ var _hover_controls: Array[Control] = []
 var _skill_function_keys: Array = []
 var _right_click_skill_id: String = ""
 var _selected_skill_id: String = ""
-var _panel: PanelContainer
+var _panel: DraggableWindow
 var _points_label: Label
 var _spend_button: Button
 var _skill_blocks: Dictionary = {}
@@ -123,6 +124,7 @@ func get_debug_state() -> Dictionary:
 		"tooltip_body": _tooltip_plain_text,
 		"requirements_met": _requirements_met(requirement_status),
 		"requirement_status": requirement_status,
+		"window": _panel.get_debug_state() if _panel != null else {},
 		"skills": skill_states,
 	}
 
@@ -135,6 +137,16 @@ func bot_click_skill_button(skill_id: String = "") -> void:
 	if _spend_button == null or _spend_button.disabled:
 		return
 	_spend_button.pressed.emit()
+
+
+func bot_click_close() -> void:
+	if _panel != null and _panel.close_button() != null:
+		_panel.close_button().pressed.emit()
+
+
+func bot_drag_window_by(delta: Vector2) -> void:
+	if _panel != null:
+		_panel.bot_drag_by(delta)
 
 
 func bot_hover_skill(skill_id: String = "") -> void:
@@ -152,30 +164,28 @@ func _sync_viewport_size() -> void:
 
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel = PanelContainer.new()
+	_panel = DraggableWindowScript.new()
 	_panel.custom_minimum_size = Vector2(330, 500)
 	_panel.position = Vector2(362, 118)
+	_panel.configure("Skills", Vector2(304, 436))
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
+	_panel.close_requested.connect(hide_display)
 	add_child(_panel)
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 10)
-	root.custom_minimum_size = Vector2(304, 470)
-	_panel.add_child(root)
-
-	var title := _label("Skill Tree", 31, Color("#f0dfbb"))
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(title)
+	root.custom_minimum_size = Vector2(304, 436)
+	_panel.set_content(root)
 
 	var tree := Control.new()
-	tree.custom_minimum_size = Vector2(304, 376)
+	tree.custom_minimum_size = Vector2(304, 356)
 	tree.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(tree)
 
 	var backdrop := ColorRect.new()
 	backdrop.color = Color("#151617")
-	backdrop.custom_minimum_size = Vector2(304, 376)
+	backdrop.custom_minimum_size = Vector2(304, 356)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(backdrop)
 

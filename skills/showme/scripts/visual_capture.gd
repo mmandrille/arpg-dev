@@ -3,6 +3,7 @@ extends SceneTree
 const CharacterScene := preload("res://scenes/character.tscn")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
@@ -36,6 +37,7 @@ var _height := 480
 var _duration := 0.0
 var _items: Array = []
 var _subject: Node3D
+var _skills_panel: Control
 
 
 func _initialize() -> void:
@@ -54,12 +56,17 @@ func _initialize() -> void:
 			await _setup_stairs()
 		"inventory":
 			await _setup_inventory()
+		"skills":
+			await _setup_skills()
 		"shop":
 			await _setup_shop()
 		_:
 			await _setup_gear()
 
 	for _i in range(8):
+		await process_frame
+	if _focus == "skills" and _skills_panel != null:
+		_skills_panel.bot_hover_skill("rage")
 		await process_frame
 
 	if _mode == "live":
@@ -177,6 +184,27 @@ func _setup_inventory() -> void:
 	var tooltip = panel._make_item_tooltip(items[6])
 	tooltip.position = Vector2(524, 28)
 	get_root().add_child(tooltip)
+
+
+func _setup_skills() -> void:
+	var panel = SkillsPanelScript.new()
+	_skills_panel = panel
+	get_root().add_child(panel)
+	await process_frame
+	panel.set_character_progression({
+		"level": 1,
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+	})
+	panel.set_skill_progression({
+		"unspent_skill_points": 0,
+		"skills": [
+			{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false},
+			{"skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": false},
+			{"skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false},
+		],
+	})
+	panel.ensure_display_visible()
+	panel.bot_hover_skill("rage")
 
 
 func _setup_shop() -> void:

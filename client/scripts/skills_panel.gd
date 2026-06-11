@@ -21,7 +21,8 @@ var _assigned_key_labels: Dictionary = {}
 var _tooltip: PanelContainer
 var _tooltip_title: Label
 var _tooltip_rank: Label
-var _tooltip_body: Label
+var _tooltip_body: RichTextLabel
+var _tooltip_plain_text: String = ""
 
 
 func _ready() -> void:
@@ -95,7 +96,7 @@ func get_debug_state() -> Dictionary:
 			"right_click_assigned": _right_click_skill_id == row_skill_id,
 			"requirements_met": _requirements_met(row_requirements),
 			"requirement_status": row_requirements,
-			"tooltip_body": _tooltip_text(row_skill_id, maxi(int(row.get("rank", 0)), 1)),
+			"tooltip_body": _tooltip_plain_text_for(row_skill_id, maxi(int(row.get("rank", 0)), 1)),
 		}
 	return {
 		"visible": visible,
@@ -113,7 +114,7 @@ func get_debug_state() -> Dictionary:
 		"assigned_key": _assigned_key_for_skill(skill_id),
 		"right_click_assigned": _right_click_skill_id == skill_id,
 		"tooltip_visible": _tooltip != null and _tooltip.visible,
-		"tooltip_body": _tooltip_body.text if _tooltip_body != null else "",
+		"tooltip_body": _tooltip_plain_text,
 		"requirements_met": _requirements_met(requirement_status),
 		"requirement_status": requirement_status,
 		"skills": skill_states,
@@ -220,7 +221,7 @@ func _build() -> void:
 
 	_tooltip = PanelContainer.new()
 	_tooltip.visible = false
-	_tooltip.position = Vector2(48, 150)
+	_tooltip.position = Vector2(48, 108)
 	_tooltip.custom_minimum_size = Vector2(208, 178)
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_STOP
 	_tooltip.add_theme_stylebox_override("panel", _tooltip_style())
@@ -236,7 +237,13 @@ func _build() -> void:
 	tip_root.add_child(_tooltip_title)
 	_tooltip_rank = _label("", 16, Color("#cfc3aa"))
 	tip_root.add_child(_tooltip_rank)
-	_tooltip_body = _label("", 15, Color("#b9ad97"))
+	_tooltip_body = RichTextLabel.new()
+	_tooltip_body.bbcode_enabled = true
+	_tooltip_body.fit_content = true
+	_tooltip_body.scroll_active = false
+	_tooltip_body.custom_minimum_size = Vector2(184, 96)
+	_tooltip_body.add_theme_font_size_override("normal_font_size", 15)
+	_tooltip_body.add_theme_color_override("default_color", Color("#b9ad97"))
 	tip_root.add_child(_tooltip_body)
 	_spend_button = Button.new()
 	_spend_button.text = "+"
@@ -270,7 +277,7 @@ func _render() -> void:
 	if _tooltip_title != null:
 		_tooltip_title.text = _skill_name(skill_id)
 	_tooltip_rank.text = "Rank %d / %d" % [rank, max_rank]
-	_tooltip_body.text = _tooltip_text(skill_id, maxi(rank, 1))
+	_set_tooltip_body(skill_id, maxi(rank, 1))
 	for raw_skill_id in _tree_skill_ids():
 		var row_skill_id := str(raw_skill_id)
 		var row := _skill_row(row_skill_id)
@@ -414,17 +421,45 @@ func _skill_icon_color(skill_id: String) -> Color:
 	return Color(str(icon.get("accent", "#d8d1c1")))
 
 
-func _tooltip_text(skill_id: String, rank: int) -> String:
+func _set_tooltip_body(skill_id: String, rank: int) -> void:
+	_tooltip_plain_text = _tooltip_plain_text_for(skill_id, rank)
+	if _tooltip_body != null:
+		_tooltip_body.text = _tooltip_rich_text_for(skill_id, rank)
+
+
+func _tooltip_plain_text_for(skill_id: String, rank: int) -> String:
 	var def := _skill_def(skill_id)
 	var presentation := _skill_presentation(skill_id)
 	var summary := str(presentation.get("summary", _kind_label(def)))
 	var text := summary
 	text += "\nMana: %d" % _skill_mana_cost(def, rank)
 	text += "\n%s" % _skill_cooldown_text(def)
-	var requirement_line := _requirement_line(skill_id)
-	if requirement_line != "":
-		text += "\n%s" % requirement_line
+	var requirement_lines := _requirement_lines(skill_id)
+	if not requirement_lines.is_empty():
+		text += "\nRequires:"
+		for line in requirement_lines:
+			text += "\n%s" % str((line as Dictionary).get("text", ""))
 	return text
+
+
+func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
+	var def := _skill_def(skill_id)
+	var presentation := _skill_presentation(skill_id)
+	var summary := str(presentation.get("summary", _kind_label(def)))
+	var lines: Array[String] = [
+		_escape_bbcode(summary),
+		_escape_bbcode("Mana: %d" % _skill_mana_cost(def, rank)),
+		_escape_bbcode(_skill_cooldown_text(def)),
+	]
+	var requirement_lines := _requirement_lines(skill_id)
+	if not requirement_lines.is_empty():
+		lines.append(_escape_bbcode("Requires:"))
+		for line in requirement_lines:
+			var rec := line as Dictionary
+			var text := _escape_bbcode(str(rec.get("text", "")))
+			var color := str(rec.get("color", "#b9ad97"))
+			lines.append("[color=%s]%s[/color]" % [color, text])
+	return "\n".join(lines)
 
 
 func _kind_label(def: Dictionary) -> String:
@@ -448,21 +483,32 @@ func _skill_cooldown_text(def: Dictionary) -> String:
 	return "Cooldown: %s" % str(cooldown.get("type", "none"))
 
 
-func _requirement_line(skill_id: String) -> String:
+func _requirement_lines(skill_id: String) -> Array:
 	var rows := _requirement_status(skill_id)
 	if rows.is_empty():
-		return ""
-	var labels: Array[String] = []
+		return []
+	var lines: Array = []
 	for row in rows:
 		var rec := row as Dictionary
 		var label := str(rec.get("label", rec.get("stat", "")))
 		var required := int(rec.get("required", 0))
 		var current := int(rec.get("current", 0))
-		if bool(rec.get("met", false)):
-			labels.append("%s %d" % [label, required])
-		else:
-			labels.append("%s %d (%d)" % [label, required, current])
-	return "Requires %s" % ", ".join(labels)
+		var met := bool(rec.get("met", current >= required))
+		var suffix := "" if met else "(%d)" % (current - required)
+		lines.append({
+			"text": "%s %d%s" % [label, required, suffix],
+			"color": _requirement_color(met),
+		})
+	return lines
+
+
+func _requirement_color(met: bool) -> String:
+	return "#b9d6a3" if met else "#e07a67"
+
+
+func _escape_bbcode(text: String) -> String:
+	return text.replace("[", "\\[").replace("]", "\\]")
+
 
 
 func _requirement_status(skill_id: String) -> Array:

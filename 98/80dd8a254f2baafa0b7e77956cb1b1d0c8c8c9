@@ -1,0 +1,61 @@
+shared/rules/worlds.v0.json
+  s_32d8e7aa3a61b6::t_9b4363d39e1528 308-311
+PROGRESS.md
+  s_32d8e7aa3a61b6::t_0abfc858a11065 15,103,225,685-687,698-699
+  s_32d8e7aa3a61b6::t_184963a1f99f9a 703-704
+  s_32d8e7aa3a61b6::t_571c02d44e39f8 700
+  s_32d8e7aa3a61b6::t_8101ef33ae2f95 701-702
+server/internal/realtime/session_loop_test.go
+  s_32d8e7aa3a61b6::t_8d0fabe0479ec1 81-84,117-120,273-276
+docs/specs/v82_spec-realtime-fanout-level-snapshot.md
+  s_32d8e7aa3a61b6::t_c79e3c30b21f5b 1-2,4-50
+  s_32d8e7aa3a61b6::t_0abfc858a11065 3
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_32d8e7aa3a61b6::t_eee474ef87f68a 29
+tools/bot/scenarios/43_paladin_holy_shield.json
+  s_32d8e7aa3a61b6::t_cb6a33ee5a5505 21,28
+tools/bot/scenarios/client/12_model_reaction_polish.json
+  s_32d8e7aa3a61b6::t_d97e726f3199ce 61
+  s_32d8e7aa3a61b6::t_9b4363d39e1528 52
+  s_32d8e7aa3a61b6::t_3f276102afefeb 37
+tools/bot/scenarios/40_paladin_heal_skill.json
+  s_32d8e7aa3a61b6::t_eee474ef87f68a 39
+server/internal/realtime/session_loop.go
+  s_32d8e7aa3a61b6::t_8d0fabe0479ec1 354-364,531,535,537
+  s_32d8e7aa3a61b6::t_349f5311297f37 511-522
+docs/plans/v82_2026-06-11-realtime-fanout-level-snapshot.md
+  s_32d8e7aa3a61b6::t_8101ef33ae2f95 25,98
+  s_32d8e7aa3a61b6::t_d6c88b3ede1592 23-24,97
+  s_32d8e7aa3a61b6::t_c79e3c30b21f5b 1-21,29-36,39-40,42-54,58-67,70-82,87-94,103-104
+  s_32d8e7aa3a61b6::t_184963a1f99f9a 27-28,99-100
+  s_32d8e7aa3a61b6::t_0abfc858a11065 37-38,41,55-57,68-69,83-84,95,101-102
+  s_32d8e7aa3a61b6::t_571c02d44e39f8 22,26,85-86,96
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_32d8e7aa3a61b6::t_677b7318b3676a 15,71,80
+  s_32d8e7aa3a61b6::t_8d3b528af839ed 42,56
+docs/as-built/v82_realtime-fanout-level-snapshot.md
+  s_32d8e7aa3a61b6::t_d6c88b3ede1592 16,26
+  s_32d8e7aa3a61b6::t_8101ef33ae2f95 15,27
+  s_32d8e7aa3a61b6::t_0abfc858a11065 1-14,20-24,30-38
+  s_32d8e7aa3a61b6::t_571c02d44e39f8 25
+  s_32d8e7aa3a61b6::t_184963a1f99f9a 17-19,28-29
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_32d8e7aa3a61b6::t_eee474ef87f68a 24-25
+  s_32d8e7aa3a61b6::t_677b7318b3676a 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9880dd8a254f2baafa0b7e77956cb1b1d0c8c8c9",
+  "prompts": {},
+  "sessions": {
+    "s_32d8e7aa3a61b6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb8e4-6441-7b63-8394-51e6b1f36c05",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

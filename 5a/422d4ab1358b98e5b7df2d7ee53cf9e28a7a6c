@@ -1,0 +1,24 @@
+shared/golden/character_progression.json
+  s_5048b9a91bd1e6::t_f5d3717c181829 27-29,56-58,85-87,114-116,145-147,174-176,203-204
+shared/rules/character_progression.v0.json
+  s_5048b9a91bd1e6::t_984c8063bd93cf 139
+  s_5048b9a91bd1e6::t_59612f323fb97c 138
+shared/rules/combat.v0.json
+  s_5048b9a91bd1e6::t_59612f323fb97c 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5a422d4ab1358b98e5b7df2d7ee53cf9e28a7a6c",
+  "prompts": {},
+  "sessions": {
+    "s_5048b9a91bd1e6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb8e0-5f32-7421-aebc-e41da901e852",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

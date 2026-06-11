@@ -1,0 +1,23 @@
+docs/plans/v71_2026-06-11-class-picker-and-sprites.md
+  s_c8b827646bf8c0::t_584a6f38e4cc47 85,94-95
+client/scripts/bot_scenario_runner.gd
+  s_c8b827646bf8c0::t_a6bee028acdd59 2088
+client/scripts/character_select_panel.gd
+  s_c8b827646bf8c0::t_3a2b2fb8c34e79 457
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8dbeb04b4913ca6673fedb23ae8f7649ecdf5e1a",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

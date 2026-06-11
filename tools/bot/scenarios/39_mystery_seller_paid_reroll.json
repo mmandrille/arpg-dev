@@ -1,0 +1,86 @@
+{
+  "id": "mystery_seller_paid_reroll",
+  "world_id": "vendor_lab",
+  "seed": "v64_mystery_reroll_0504",
+  "title": "Mystery seller paid reroll",
+  "description": "Fund a mystery seller visit, pay to reroll concealed stock, then buy from the refreshed mystery offer set.",
+  "steps": [
+    { "action": "pick_up_first_rolled_loot" },
+    { "action": "pick_up_first_rolled_loot" },
+    { "action": "pick_up_first_rolled_loot" },
+    { "action": "open_shop" },
+    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
+    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
+    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
+    {
+      "action": "open_shop",
+      "shop_id": "town_mystery_seller",
+      "interactable_def_id": "town_mystery_seller",
+      "max_ticks": 160
+    },
+    { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "concealed": true, "equals": 9 },
+    {
+      "action": "reroll_shop",
+      "shop_id": "town_mystery_seller",
+      "interactable_def_id": "town_mystery_seller",
+      "offer_kind": "mystery"
+    },
+    { "action": "assert_gold_changed", "direction": "decrease", "by_at_least": 50 },
+    { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "concealed": true, "equals": 9 },
+    {
+      "action": "assert_shop_event",
+      "shop_id": "town_mystery_seller",
+      "event_type": "shop_reroll",
+      "at_least": 1
+    },
+    {
+      "action": "buy_shop_offer",
+      "shop_id": "town_mystery_seller",
+      "interactable_def_id": "town_mystery_seller",
+      "offer_kind": "mystery",
+      "concealed": true,
+      "affordable": true,
+      "requires_revealed_item": true,
+      "rarity_in": ["magic", "rare"]
+    }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": 0 },
+    { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 },
+    {
+      "type": "shop_event",
+      "shop_id": "town_mystery_seller",
+      "event_type": "shop_reroll",
+      "at_least": 1
+    },
+    {
+      "type": "shop_event",
+      "shop_id": "town_mystery_seller",
+      "event_type": "shop_purchase",
+      "offer_kind": "mystery",
+      "requires_revealed_item": true,
+      "rarity_in": ["magic", "rare"],
+      "at_least": 1
+    }
+  ],
+  "fresh_session_checks": [
+    {
+      "world_id": "vendor_lab",
+      "steps": [
+        {
+          "action": "open_shop",
+          "shop_id": "town_mystery_seller",
+          "interactable_def_id": "town_mystery_seller",
+          "max_ticks": 160
+        },
+        { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 }
+      ],
+      "assertions": [
+        { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 }
+      ]
+    }
+  ],
+  "visual": {
+    "camera": { "x": 17, "y": 12, "zoom": 1.1 }
+  }
+}

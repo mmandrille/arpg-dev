@@ -249,6 +249,77 @@ func TestMysterySellerPurchaseRevealsAndConsumesOffer(t *testing.T) {
 	}
 }
 
+func TestMysterySellerPaidRerollReplacesStockAndSpendsGold(t *testing.T) {
+	sim := newMysterySellerSim(t, 2000, 3)
+	seller := townMysterySellerEntity(t, sim)
+	before := mysteryOffers(t, sim)
+	beforeGold := sim.gold
+	cost := sim.rules.Shops["town_mystery_seller"].MysteryOffers.RerollCost
+
+	reroll := sim.Tick([]Input{{
+		Type:       "shop_reroll_intent",
+		MessageID:  "msg_reroll_mystery",
+		ShopReroll: &ShopRerollIntent{ShopEntityID: idStr(seller.id)},
+	}})
+	if !hasAck(reroll, "msg_reroll_mystery") {
+		t.Fatalf("reroll mystery was not acked: %+v", reroll)
+	}
+	if sim.gold != beforeGold-cost {
+		t.Fatalf("gold after mystery reroll = %d, want %d", sim.gold, beforeGold-cost)
+	}
+	if !hasShopStockReplace(reroll, "town_mystery_seller") {
+		t.Fatalf("mystery reroll did not replace stock: %+v", reroll.Changes)
+	}
+	ev := findEvent(reroll.Events, "shop_reroll")
+	if ev == nil || ev.ShopID != "town_mystery_seller" || ev.Price == nil || *ev.Price != cost || ev.TotalGold == nil || *ev.TotalGold != sim.gold || ev.RefreshKey == "" {
+		t.Fatalf("shop_reroll event = %+v", ev)
+	}
+	after := ev.Offers
+	if countShopOffersByKind(after, shopOfferKindMystery) != len(sim.rules.Shops["town_mystery_seller"].MysteryOffers.EligibleSlots) {
+		t.Fatalf("rerolled mystery offer count mismatch: %+v", after)
+	}
+	if len(before) == 0 || len(after) == 0 || before[0].OfferID == after[0].OfferID {
+		t.Fatalf("reroll did not produce a new refresh-keyed stock: before=%+v after=%+v", before, after)
+	}
+}
+
+func TestMysterySellerPaidRerollRejectsWithoutMutation(t *testing.T) {
+	t.Run("insufficient gold", func(t *testing.T) {
+		sim := newMysterySellerSim(t, 0, 3)
+		seller := townMysterySellerEntity(t, sim)
+		before := mysteryOffers(t, sim)
+		res := sim.Tick([]Input{{
+			Type:       "shop_reroll_intent",
+			MessageID:  "msg_reroll_no_gold",
+			ShopReroll: &ShopRerollIntent{ShopEntityID: idStr(seller.id)},
+		}})
+		if !hasReject(res, "msg_reroll_no_gold", "insufficient_gold") {
+			t.Fatalf("reroll no gold result = %+v", res)
+		}
+		after := mysteryOffers(t, sim)
+		if sim.gold != 0 || len(after) != len(before) || after[0].OfferID != before[0].OfferID {
+			t.Fatalf("insufficient gold reroll mutated state: gold=%d before=%+v after=%+v", sim.gold, before, after)
+		}
+	})
+
+	t.Run("normal vendor", func(t *testing.T) {
+		sim := newTownVendorSim(t, 1000, 3)
+		vendor := townVendorEntity(t, sim)
+		beforeGold := sim.gold
+		res := sim.Tick([]Input{{
+			Type:       "shop_reroll_intent",
+			MessageID:  "msg_reroll_vendor",
+			ShopReroll: &ShopRerollIntent{ShopEntityID: idStr(vendor.id)},
+		}})
+		if !hasReject(res, "msg_reroll_vendor", "reroll_unavailable") {
+			t.Fatalf("vendor reroll result = %+v", res)
+		}
+		if sim.gold != beforeGold {
+			t.Fatalf("vendor reroll mutated gold=%d want %d", sim.gold, beforeGold)
+		}
+	})
+}
+
 func TestMysterySellerPurchaseRejectsWithoutMutation(t *testing.T) {
 	t.Run("insufficient gold", func(t *testing.T) {
 		sim := newMysterySellerSim(t, 0, 3)

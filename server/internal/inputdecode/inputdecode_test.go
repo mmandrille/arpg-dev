@@ -193,6 +193,31 @@ func TestDecodeShopSellIntentRejectsInvalidPayload(t *testing.T) {
 	}
 }
 
+func TestDecodeShopRerollIntent(t *testing.T) {
+	in, ok := Decode(TypeShopReroll, "msg_reroll", "corr_reroll", json.RawMessage(`{"shop_entity_id":"1013"}`))
+	if !ok {
+		t.Fatal("Decode shop_reroll_intent rejected valid payload")
+	}
+	if in.ShopReroll == nil || in.ShopReroll.ShopEntityID != "1013" {
+		t.Fatalf("decoded shop reroll = %+v", in.ShopReroll)
+	}
+	if !IsClientIntent(TypeShopReroll) {
+		t.Fatal("shop_reroll_intent not marked as client intent")
+	}
+}
+
+func TestDecodeShopRerollIntentRejectsInvalidPayload(t *testing.T) {
+	tests := []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"shop_entity_id":1013}`),
+	}
+	for _, payload := range tests {
+		if _, ok := Decode(TypeShopReroll, "msg_reroll", "", payload); ok {
+			t.Fatalf("Decode accepted invalid shop reroll payload %s", payload)
+		}
+	}
+}
+
 func TestDecodeStoredShopIntent(t *testing.T) {
 	raw := []byte(`{
 		"type":"shop_buy_intent",

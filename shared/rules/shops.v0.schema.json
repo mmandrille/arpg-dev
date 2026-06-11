@@ -58,7 +58,7 @@
     },
     "mystery_offers": {
       "type": "object",
-      "required": ["enabled", "eligible_slots", "source", "source_depth_window", "min_rarity", "max_rarity", "refresh_on", "price_multiplier", "max_roll_attempts"],
+      "required": ["enabled", "eligible_slots", "source", "source_depth_window", "min_rarity", "max_rarity", "refresh_on", "price_multiplier", "reroll_cost", "max_roll_attempts"],
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
@@ -74,6 +74,7 @@
         "max_rarity": { "type": "string", "enum": ["magic", "rare"] },
         "refresh_on": { "type": "string", "enum": ["new_non_town_waypoint"] },
         "price_multiplier": { "type": "number", "exclusiveMinimum": 1 },
+        "reroll_cost": { "type": "integer", "minimum": 1 },
         "max_roll_attempts": { "type": "integer", "minimum": 1 }
       }
     },

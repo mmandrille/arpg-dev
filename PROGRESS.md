@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v63 — `runtime-sim-error-construction` |
+| **Latest completed slice** | v64 — `mystery-seller-paid-reroll` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -82,6 +82,7 @@ v60_* = data-driven-content-library-manifest
 v61_* = rage-and-heal-skills
 v62_* = monster-depth-stat-scaling
 v63_* = runtime-sim-error-construction
+v64_* = mystery-seller-paid-reroll
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -185,6 +186,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v61** | `rage-and-heal-skills` | Complete (`make ci` green) | [`v61_spec-rage-and-heal-skills.md`](docs/specs/v61_spec-rage-and-heal-skills.md) | [`v61_2026-06-10-rage-and-heal-skills.md`](docs/plans/v61_2026-06-10-rage-and-heal-skills.md) | [`as-built`](docs/as-built/v61_rage-and-heal-skills.md) |
 | **v62** | `monster-depth-stat-scaling` | Complete (`make ci` green) | [`v62_spec-monster-depth-stat-scaling.md`](docs/specs/v62_spec-monster-depth-stat-scaling.md) | [`v62_2026-06-11-monster-depth-stat-scaling.md`](docs/plans/v62_2026-06-11-monster-depth-stat-scaling.md) | [`as-built`](docs/as-built/v62_monster-depth-stat-scaling.md) |
 | **v63** | `runtime-sim-error-construction` | Complete (`make ci` green) | [`v63_spec-runtime-sim-error-construction.md`](docs/specs/v63_spec-runtime-sim-error-construction.md) | [`v63_2026-06-11-runtime-sim-error-construction.md`](docs/plans/v63_2026-06-11-runtime-sim-error-construction.md) | [`as-built`](docs/as-built/v63_runtime-sim-error-construction.md) |
+| **v64** | `mystery-seller-paid-reroll` | Complete (`make ci` green) | [`v64_spec-mystery-seller-paid-reroll.md`](docs/specs/v64_spec-mystery-seller-paid-reroll.md) | [`v64_2026-06-11-mystery-seller-paid-reroll.md`](docs/plans/v64_2026-06-11-mystery-seller-paid-reroll.md) | [`as-built`](docs/as-built/v64_mystery-seller-paid-reroll.md) |
 
 ---
 

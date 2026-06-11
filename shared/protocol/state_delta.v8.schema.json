@@ -352,6 +352,7 @@
         "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery):[a-z0-9_:-]+$" },
         "item": { "$ref": "#/$defs/item" },
         "price": { "type": "integer", "minimum": 1 },
+        "refresh_key": { "type": "string", "minLength": 1 },
         "stash_id": { "type": "string" },
         "stash_item_id": { "$ref": "#/$defs/decimal_id" },
         "stash_items": {
@@ -556,6 +557,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "shop_id", "item_instance_id", "price", "total_gold", "offers", "sell_appraisals"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "shop_reroll" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "shop_id", "price", "total_gold", "refresh_key", "offers"] }
         },
         {
           "if": {

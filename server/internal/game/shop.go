@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strings"
 )
 
 const (
@@ -187,7 +188,7 @@ func (s *Sim) ensureGeneratedShopStock(shopID string, shop ShopDef, res *TickRes
 		state = &shopStockState{}
 		s.shopStock[shopID] = state
 	}
-	if state.RefreshKey != refreshKey || state.Generated == nil {
+	if !s.shopStockMatchesRefresh(state, refreshKey) {
 		state.RefreshKey = refreshKey
 		state.Generated = s.rollGeneratedShopStock(shopID, shop, refreshKey)
 		if res != nil {
@@ -200,6 +201,16 @@ func (s *Sim) ensureGeneratedShopStock(shopID string, shop ShopDef, res *TickRes
 		}
 	}
 	return state
+}
+
+func (s *Sim) shopStockMatchesRefresh(state *shopStockState, refreshKey string) bool {
+	if state == nil || state.Generated == nil {
+		return false
+	}
+	if state.RefreshKey == refreshKey {
+		return true
+	}
+	return strings.HasPrefix(state.RefreshKey, refreshKey+"|reroll:")
 }
 
 func (s *Sim) refreshExistingGeneratedShopStock(res *TickResult) {
@@ -227,6 +238,41 @@ func (s *Sim) refreshExistingGeneratedShopStock(res *TickResult) {
 			})
 		}
 	}
+}
+
+func (s *Sim) rerollMysteryShopStock(shopID string, shop ShopDef, res *TickResult) *shopStockState {
+	if s.shopStock == nil {
+		s.shopStock = make(map[string]*shopStockState)
+	}
+	state := s.shopStock[shopID]
+	if state == nil {
+		state = &shopStockState{}
+		s.shopStock[shopID] = state
+	}
+	state.RefreshKey = s.nextMysteryRerollRefreshKey(state)
+	state.Generated = s.rollGeneratedShopStock(shopID, shop, state.RefreshKey)
+	if res != nil {
+		res.Changes = append(res.Changes, Change{
+			Op:         OpShopStockReplace,
+			ShopID:     shopID,
+			RefreshKey: state.RefreshKey,
+			ShopStock:  s.persistedShopStockRows(shopID, state),
+		})
+	}
+	return state
+}
+
+func (s *Sim) nextMysteryRerollRefreshKey(state *shopStockState) string {
+	base := s.shopRefreshKey()
+	prefix := base + "|reroll:"
+	next := 1
+	if state != nil && strings.HasPrefix(state.RefreshKey, prefix) {
+		var current int
+		if _, err := fmt.Sscanf(strings.TrimPrefix(state.RefreshKey, prefix), "%d", &current); err == nil && current >= next {
+			next = current + 1
+		}
+	}
+	return fmt.Sprintf("%s%d", prefix, next)
 }
 
 func (s *Sim) rollGeneratedShopStock(shopID string, shop ShopDef, refreshKey string) []*shopStockItem {

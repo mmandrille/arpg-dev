@@ -1352,6 +1352,7 @@ type Input struct {
 	SetSkillBindings   *SetSkillBindingsIntent
 	ShopBuy            *ShopBuyIntent
 	ShopSell           *ShopSellIntent
+	ShopReroll         *ShopRerollIntent
 	StashDepositItem   *StashDepositItemIntent
 	StashWithdrawItem  *StashWithdrawItemIntent
 	StashDepositGold   *StashDepositGoldIntent
@@ -1419,6 +1420,9 @@ type (
 	ShopSellIntent struct {
 		ShopEntityID   string
 		ItemInstanceID string
+	}
+	ShopRerollIntent struct {
+		ShopEntityID string
 	}
 	StashDepositItemIntent struct {
 		StashEntityID  string

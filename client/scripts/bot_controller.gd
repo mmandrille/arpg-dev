@@ -154,6 +154,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 				_main.bot_dispatch_action(str(action.get("intent_type", "")), action.get("payload", {}))
 		"click_shop_buy_offer":
 			_do_click_shop_buy_offer(action)
+		"click_shop_reroll":
+			_do_click_shop_reroll()
 		"click_shop_sell_item":
 			_do_click_shop_sell_item(action)
 		"click_waypoint_level":
@@ -252,6 +254,11 @@ func _do_click_shop_buy_offer(action: Dictionary) -> void:
 			str(action.get("offer_kind", "")),
 			int(action.get("offer_index", 0))
 		)
+
+
+func _do_click_shop_reroll() -> void:
+	if _main != null and _main.has_method("bot_click_shop_reroll"):
+		_main.bot_click_shop_reroll()
 
 
 func _do_click_shop_sell_item(action: Dictionary) -> void:
@@ -554,6 +561,8 @@ func _format_action(action: Dictionary) -> String:
 				str(action.get("offer_kind", "")),
 				str(action.get("offer_index", 0)),
 			]
+		"click_shop_reroll":
+			return "click_shop_reroll"
 		"click_shop_sell_item":
 			return "click_shop_sell item=%s rolled=%s bag_index=%s" % [
 				str(action.get("item_def_id", "")),

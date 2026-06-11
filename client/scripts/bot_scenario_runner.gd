@@ -38,7 +38,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
 	"assert_entity_reaction",
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
-	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
+	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "assert_boss_health_bar",
 	"assert_remote_player_count",
@@ -51,7 +51,7 @@ const STEP_TYPES_ACTION := [
 	"enter_character_name", "select_character", "select_window_size",
 	"set_floating_combat_text", "select_create_game_type",
 	"remember_session", "remember_player_position", "click_stat_button",
-	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_sell_item",
+	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
 	"click_stash_withdraw_gold", "click_waypoint_level",
 ]
@@ -93,8 +93,8 @@ const ALL_STEP_TYPES: Array = [
 	"wait_entity_reaction", "assert_entity_reaction",
 	"wait_wall_layout", "assert_wall_layout",
 	"wait_shop_panel", "assert_shop_panel_visible", "assert_shop_offer_count",
-	"assert_shop_buy_button", "assert_shop_sell_rows", "assert_shop_offer_details",
-	"assert_shop_sell_details", "click_shop_buy_offer", "click_shop_sell_item",
+	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
+	"assert_shop_sell_details", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"wait_stash_panel", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "drag_bag_to_stash", "drag_stash_to_bag",
 	"click_stash_deposit_gold", "click_stash_withdraw_gold",
@@ -449,6 +449,8 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_shop_offer_count(step, state)
 		"assert_shop_buy_button":
 			return _assert_shop_buy_button(step, state)
+		"assert_shop_reroll_button":
+			return _assert_shop_reroll_button(step, state)
 		"assert_shop_sell_rows":
 			return _assert_shop_sell_rows(step, state)
 		"assert_shop_offer_details":
@@ -1127,6 +1129,26 @@ func _assert_shop_buy_button(step: Dictionary, state: Dictionary) -> bool:
 	return true
 
 
+func _assert_shop_reroll_button(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("shop_panel", {})
+	if step.has("visible") and bool(panel.get("reroll_visible", false)) != bool(step.get("visible", true)):
+		_fail("assert_shop_reroll_button failed: visible want=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("visible", true)), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("enabled") and bool(panel.get("reroll_enabled", false)) != bool(step.get("enabled", true)):
+		_fail("assert_shop_reroll_button failed: enabled want=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("enabled", true)), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("cost") and int(panel.get("reroll_cost", 0)) != int(step.get("cost", 0)):
+		_fail("assert_shop_reroll_button failed: cost want=%d panel=%s step=%d scenario=%s" % [
+			int(step.get("cost", 0)), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
 func _assert_shop_sell_rows(step: Dictionary, state: Dictionary) -> bool:
 	var rows := _matching_shop_sell_rows(step, state)
 	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
@@ -1765,9 +1787,9 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "presentation=%s" % str(step)
 		"wait_wall_layout", "assert_wall_layout":
 			return "wall_layout=%s" % str(step)
-		"wait_shop_panel", "assert_shop_offer_count", "assert_shop_buy_button", "assert_shop_sell_rows", \
+		"wait_shop_panel", "assert_shop_offer_count", "assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", \
 		"assert_shop_offer_details", "assert_shop_sell_details", \
-		"click_shop_buy_offer", "click_shop_sell_item":
+		"click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item":
 			return "shop=%s" % str(step)
 		"click_waypoint_level":
 			return "target_level=%s" % str(step.get("target_level", ""))
@@ -2020,6 +2042,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "assert_shop_buy_button":
 		if str(step.get("offer_id", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id" % [index, stype]
+	if stype == "assert_shop_reroll_button":
+		if not step.has("visible") and not step.has("enabled") and not step.has("cost"):
+			return "client_steps[%d] (%s) requires visible, enabled, or cost" % [index, stype]
 	if stype in ["assert_shop_sell_rows", "assert_shop_offer_details", "assert_shop_sell_details"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]

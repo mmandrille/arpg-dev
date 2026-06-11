@@ -1068,6 +1068,10 @@ func _apply_delta(p: Dictionary) -> void:
 			_apply_shop_event_refresh(ev)
 			shop_panel.show_status("Sold for %d" % int(ev.get("price", 0)))
 			continue
+		if event_type == "shop_reroll" and shop_panel != null and shop_panel.visible:
+			_apply_shop_event_refresh(ev)
+			shop_panel.show_status("Rerolled for %d" % int(ev.get("price", 0)))
+			continue
 		if event_type == "stash_opened":
 			_show_stash_panel(ev)
 			continue
@@ -4843,6 +4847,12 @@ func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, 
 	if shop_panel == null:
 		return
 	shop_panel.bot_click_sell_item(item_def_id, rolled, bag_index)
+
+
+func bot_click_shop_reroll() -> void:
+	if shop_panel == null:
+		return
+	shop_panel.bot_click_reroll()
 
 
 func bot_drag_bag_to_stash(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:

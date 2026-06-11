@@ -531,8 +531,10 @@ func _test_shop_step_types_load() -> void:
 		{"type": "assert_shop_offer_count", "offer_kind": "mystery", "equals": 1},
 		{"type": "assert_shop_offer_count", "offer_kind": "buyback", "equals": 1},
 		{"type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true},
+		{"type": "assert_shop_reroll_button", "visible": true, "enabled": true, "cost": 50},
 		{"type": "assert_shop_sell_rows", "rolled": true, "at_least": 1},
 		{"type": "click_shop_buy_offer", "offer_id": "fixed:red_potion"},
+		{"type": "click_shop_reroll"},
 		{"type": "click_shop_buy_offer", "offer_kind": "generated", "offer_index": 0},
 		{"type": "click_shop_buy_offer", "offer_kind": "mystery", "offer_index": 0},
 		{"type": "click_shop_sell_item", "rolled": true, "bag_index": 0},
@@ -542,6 +544,7 @@ func _test_shop_step_types_load() -> void:
 	_assert_eq("shop client step scenario valid", err, "")
 	_assert_ne("shop panel wait without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "wait_shop_panel", "timeout_s": 1.0}, 0), "")
 	_assert_ne("shop buy button without offer rejected", BotScenarioRunnerScript.validate_step({"type": "assert_shop_buy_button"}, 0), "")
+	_assert_ne("shop reroll button without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_shop_reroll_button"}, 0), "")
 	_assert_ne("shop click buy without selector rejected", BotScenarioRunnerScript.validate_step({"type": "click_shop_buy_offer"}, 0), "")
 
 
@@ -558,6 +561,7 @@ func _test_shop_assertions() -> void:
 			{"type": "assert_shop_offer_count", "offer_kind": "mystery", "equals": 1},
 			{"type": "assert_shop_offer_details", "offer_kind": "mystery", "concealed": true, "equals": 1, "source_depth_min": 1, "source_depth_max": 3, "requires_summary": true, "requires_price": true, "requires_slot": true, "requires_category": true, "requires_concealed": true, "requires_mystery_label": true, "forbids_item_identity": true, "summary_contains": "Source depths"},
 			{"type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true},
+			{"type": "assert_shop_reroll_button", "visible": true, "enabled": true, "cost": 50},
 			{"type": "assert_shop_sell_rows", "rolled": true, "at_least": 1},
 		],
 	}
@@ -573,6 +577,9 @@ func _test_shop_assertions() -> void:
 			"buy_buttons": {
 				"fixed:red_potion": {"enabled": true},
 			},
+			"reroll_visible": true,
+			"reroll_enabled": true,
+			"reroll_cost": 50,
 			"offer_rows": [
 				{
 					"offer_id": "mystery:wp:-3:ring:000",

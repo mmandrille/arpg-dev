@@ -30,6 +30,7 @@
         "set_skill_bindings_intent",
         "shop_buy_intent",
         "shop_sell_intent",
+        "shop_reroll_intent",
         "stash_deposit_item_intent",
         "stash_withdraw_item_intent",
         "stash_deposit_gold_intent",
@@ -88,6 +89,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/shop_buy_intent" } } } },
     { "if": { "properties": { "type": { "const": "shop_sell_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/shop_sell_intent" } } } },
+    { "if": { "properties": { "type": { "const": "shop_reroll_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/shop_reroll_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_deposit_item_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_deposit_item_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_withdraw_item_intent" } } },
@@ -295,6 +298,14 @@
       "properties": {
         "shop_entity_id": { "$ref": "#/$defs/decimal_id" },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "shop_reroll_intent": {
+      "type": "object",
+      "required": ["shop_entity_id"],
+      "additionalProperties": false,
+      "properties": {
+        "shop_entity_id": { "$ref": "#/$defs/decimal_id" }
       }
     },
     "stash_deposit_item_intent": {

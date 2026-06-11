@@ -1,0 +1,72 @@
+shared/rules/skills.v0.json
+  s_66e4bb8bcb6db1::t_efacedfa6fc61c 102-137
+client/tests/test_status_effects_bar.gd
+  s_66e4bb8bcb6db1::t_13c4c5ffedd771 54-71
+shared/assets/skill_presentations.v0.schema.json
+  s_66e4bb8bcb6db1::t_7765abc49dd9e8 25
+server/internal/game/rules.go
+  s_66e4bb8bcb6db1::t_e6946f40216706 572,2630,2654-2658,2706-2709,2717,2739-2750
+  s_66e4bb8bcb6db1::t_18ee87e703b416 2718-2738
+shared/rules/skills.v0.schema.json
+  s_66e4bb8bcb6db1::t_5ed24efa422ae3 26,28,61-67,165-166,201-220
+server/internal/game/handlers.go
+  s_66e4bb8bcb6db1::t_be764b04a67a9b 1157-1158,1250-1268
+client/scripts/main.gd
+  s_66e4bb8bcb6db1::t_a74ccaa4fd45af 3981
+  s_66e4bb8bcb6db1::t_b4e1296e29db7d 3973-3980,3982-4028
+  s_66e4bb8bcb6db1::t_7ea010f5865400 3933,3950
+  s_66e4bb8bcb6db1::t_d4b967e139a437 89-90
+  s_66e4bb8bcb6db1::t_2e12c11c299e8f 1181-1182
+  s_66e4bb8bcb6db1::t_389f32a9d1d8cd 4891-4892,4899-4904,4938-4939
+client/tests/test_coop_client.gd
+  s_66e4bb8bcb6db1::t_00f455c42fd8c0 828,857
+  s_66e4bb8bcb6db1::t_de3b566d3a5239 42,805-827,829-856,858-862
+docs/specs/v81_spec-paladin-holy-shield.md
+  s_66e4bb8bcb6db1::t_18b758fa70a22b 3,65
+  s_66e4bb8bcb6db1::t_c1a1a83512456a 1-2,4-64,66-80
+client/tests/test_skill_rules_loader.gd
+  s_66e4bb8bcb6db1::t_c8595338da07ca 20,29,36,48-55
+server/internal/game/game_test.go
+  s_66e4bb8bcb6db1::t_fa6761a5e7a33a 1292-1301,1303-1312,1315-1348
+  s_66e4bb8bcb6db1::t_ebd720f8877933 1302,1313-1314
+  s_66e4bb8bcb6db1::t_11c64bdc6d4cb7 8129-8137
+  s_66e4bb8bcb6db1::t_4b5b29fe72853a 680
+PROGRESS.md
+  s_66e4bb8bcb6db1::t_18b758fa70a22b 15,102,223,686-689,695,698
+server/internal/game/sim.go
+  s_66e4bb8bcb6db1::t_00a6c29886d70e 135,229,233
+  s_66e4bb8bcb6db1::t_32c8791902cbe6 1663-1665,1669,1671-1680,1683-1684,1693-1700
+  s_66e4bb8bcb6db1::t_55184231d17a7b 870-900
+  s_66e4bb8bcb6db1::t_99f33084e119d2 243-249
+  s_66e4bb8bcb6db1::t_4fceb1594bc2e5 2995,2999,3017-3042
+  s_66e4bb8bcb6db1::t_70aa816641fee5 3177-3218
+  s_66e4bb8bcb6db1::t_f296be16e852aa 6075-6098
+  s_66e4bb8bcb6db1::t_648f967e74247a 6663
+  s_66e4bb8bcb6db1::t_5fc18c846d8ea8 5734-5743
+  s_66e4bb8bcb6db1::t_28e47e321ed461 6452-6460
+docs/plans/v81_2026-06-11-paladin-holy-shield.md
+  s_66e4bb8bcb6db1::t_18b758fa70a22b 3,42,44-45,59-61,63,65,78-79,81,96-99,113-114,122-125
+  s_66e4bb8bcb6db1::t_d85f2c8d10b2b7 1-2,4-41,43,46-58,62,64,66-77,80,82-95,100-112,115-121,126-131
+shared/assets/skill_presentations.v0.json
+  s_66e4bb8bcb6db1::t_947b913569a8df 33-42
+tools/bot/scenarios/43_paladin_holy_shield.json
+  s_66e4bb8bcb6db1::t_e7ee9db66987b2 1-33
+docs/as-built/v81_paladin-holy-shield.md
+  s_66e4bb8bcb6db1::t_18b758fa70a22b 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b23c85c77d58dce382a529c9cc613cf14af22282",
+  "prompts": {},
+  "sessions": {
+    "s_66e4bb8bcb6db1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb829-7254-7681-b5a1-1b347fe4657f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

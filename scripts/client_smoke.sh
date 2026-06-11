@@ -31,40 +31,46 @@ echo "[client-smoke] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
 # failing nonzero (with a clear message) if it does not.
 run_gate() {
   local label="$1" sentinel="$2" script="$3"
-  local gate_log
+  local gate_log gate_started elapsed
   gate_log="$(mktemp -t arpg-client-gate.XXXXXX.log)"
 
   echo "[client-smoke] running $label"
+  gate_started=$SECONDS
   set +e
   "$GODOT" --headless --path "$CLIENT_DIR" --script "$script" >"$gate_log" 2>&1
   local status=$?
   set -e
+  elapsed=$((SECONDS - gate_started))
 
   if [[ $status -ne 0 ]]; then
-    echo "FAILED: $label (exit $status)"
+    echo "FAILED: $label (exit $status, elapsed=${elapsed}s)"
     show_log "$gate_log" "$label"
     rm -f "$gate_log"
     exit 1
   fi
 
   if ! grep -qF -- "$sentinel" "$gate_log"; then
-    echo "FAILED: $label (missing sentinel: $sentinel)"
+    echo "FAILED: $label (missing sentinel: $sentinel, elapsed=${elapsed}s)"
     show_log "$gate_log" "$label"
     rm -f "$gate_log"
     exit 1
   fi
 
   if is_quiet_mode; then
-    echo "OK: $label"
+    echo "OK: $label (${elapsed}s)"
   else
     cat "$gate_log"
+    echo "[client-smoke] OK: $label elapsed=${elapsed}s"
   fi
 
   rm -f "$gate_log"
 }
 
 # Import resources once so headless --script runs cleanly.
+echo "[client-smoke] running Godot asset import"
+import_started=$SECONDS
 "$GODOT" --headless --path "$CLIENT_DIR" --import >/dev/null 2>&1 || true
+echo "OK: Godot asset import ($((SECONDS - import_started))s)"
 
 # 1. GDScript golden-fixture test (server-independent; ADR D6 / acceptance #7).
 run_gate "GDScript golden test" "[gdtest] PASS" res://tests/test_golden.gd

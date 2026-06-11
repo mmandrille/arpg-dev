@@ -1,0 +1,19 @@
+AGENTS.md
+  s_37f6ed2badfd89::t_70e1b3ef35020a 42-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f45052cb905fa4940a1f3ba73b3ba2b0aad59dd2",
+  "prompts": {},
+  "sessions": {
+    "s_37f6ed2badfd89": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb766-135a-7f03-958b-273d5dd4e100",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

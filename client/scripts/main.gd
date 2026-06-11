@@ -3633,6 +3633,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_stair_node(def_id)
 		if def_id == "teleporter":
 			return _make_teleporter_node()
+		if def_id == "treasure_chest" or def_id == "town_stash":
+			return _make_chest_node(def_id)
 		return _make_door_node()
 	if kind == "projectile":
 		return _make_projectile_node()
@@ -4102,6 +4104,71 @@ func _make_door_node() -> Node3D:
 	return root
 
 
+func _make_chest_node(def_id: String) -> Node3D:
+	var is_stash := def_id == "town_stash"
+	var root := Node3D.new()
+	root.name = "TownStashChest" if is_stash else "TreasureChest"
+	var scale := 1.12 if is_stash else 1.0
+	var wood := Color("#6f3b18") if is_stash else Color("#744018")
+	var dark_wood := Color("#3c2111") if is_stash else Color("#4a2711")
+	var metal := Color("#d1b15d") if is_stash else Color("#8d8f8f")
+	var metal_dark := Color("#6f5b2e") if is_stash else Color("#3d4143")
+	var cloth := Color("#244e66") if is_stash else Color("#5a2017")
+	var glow := Color("#f3d36b") if is_stash else Color("#f5b449")
+
+	_add_chest_part(root, "ChestShadow", Vector3(1.28, 0.035, 0.82) * scale, Vector3(0.0, 0.018, 0.0), Color("#181715"))
+	_add_chest_part(root, "ChestBody", Vector3(1.08, 0.48, 0.70) * scale, Vector3(0.0, 0.29 * scale, 0.0), wood)
+	_add_chest_part(root, "ChestFrontPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, 0.374 * scale), dark_wood)
+	_add_chest_part(root, "ChestBackPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, -0.374 * scale), dark_wood)
+	_add_chest_part(root, "ChestLeftPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(-0.564 * scale, 0.30 * scale, 0.0), dark_wood)
+	_add_chest_part(root, "ChestRightPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(0.564 * scale, 0.30 * scale, 0.0), dark_wood)
+	_add_chest_part(root, "ChestFrontBand", Vector3(1.18, 0.08, 0.055) * scale, Vector3(0.0, 0.48 * scale, 0.405 * scale), metal)
+	_add_chest_part(root, "ChestBottomBand", Vector3(1.18, 0.075, 0.055) * scale, Vector3(0.0, 0.13 * scale, 0.405 * scale), metal_dark)
+	for x in [-0.42, 0.42]:
+		_add_chest_part(root, "ChestVerticalBand", Vector3(0.085, 0.54, 0.085) * scale, Vector3(x * scale, 0.33 * scale, 0.405 * scale), metal)
+	for x in [-0.43, 0.43]:
+		for z in [-0.28, 0.28]:
+			_add_chest_part(root, "ChestFoot", Vector3(0.22, 0.10, 0.16) * scale, Vector3(x * scale, 0.055 * scale, z * scale), metal_dark)
+
+	var lid_pivot := Node3D.new()
+	lid_pivot.name = "ChestLidPivot"
+	lid_pivot.position = Vector3(0.0, 0.56 * scale, -0.36 * scale)
+	root.add_child(lid_pivot)
+	_add_chest_part(lid_pivot, "ChestLid", Vector3(1.16, 0.30, 0.72) * scale, Vector3(0.0, 0.15 * scale, 0.36 * scale), wood)
+	_add_chest_part(lid_pivot, "ChestLidCrown", Vector3(0.92, 0.12, 0.58) * scale, Vector3(0.0, 0.33 * scale, 0.36 * scale), Color("#8a4f20") if is_stash else Color("#8b511f"))
+	_add_chest_part(lid_pivot, "ChestLidFrontBand", Vector3(1.22, 0.08, 0.075) * scale, Vector3(0.0, 0.13 * scale, 0.74 * scale), metal)
+	for x in [-0.42, 0.42]:
+		_add_chest_part(lid_pivot, "ChestLidStrap", Vector3(0.075, 0.36, 0.80) * scale, Vector3(x * scale, 0.20 * scale, 0.36 * scale), metal)
+
+	_add_chest_part(root, "ChestLockPlate", Vector3(0.22, 0.24, 0.075) * scale, Vector3(0.0, 0.42 * scale, 0.452 * scale), metal)
+	_add_chest_part(root, "ChestLockSlot", Vector3(0.075, 0.11, 0.085) * scale, Vector3(0.0, 0.40 * scale, 0.502 * scale), metal_dark)
+	_add_chest_part(root, "ChestLeftHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(-0.64 * scale, 0.36 * scale, 0.0), metal)
+	_add_chest_part(root, "ChestRightHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(0.64 * scale, 0.36 * scale, 0.0), metal)
+	if is_stash:
+		_add_chest_part(root, "ChestStashCrest", Vector3(0.36, 0.12, 0.082) * scale, Vector3(0.0, 0.61 * scale, 0.456 * scale), cloth)
+
+	var inner := _add_chest_part(root, "ChestInnerGlow", Vector3(0.84, 0.045, 0.46) * scale, Vector3(0.0, 0.57 * scale, 0.02 * scale), glow)
+	var glow_mat := inner.material_override as StandardMaterial3D
+	glow_mat.emission_enabled = true
+	glow_mat.emission = glow
+	inner.visible = false
+	return root
+
+
+func _add_chest_part(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.name = part_name
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	part.mesh = mesh
+	part.position = position
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	part.material_override = mat
+	parent.add_child(part)
+	return part
+
+
 func _make_stair_node(def_id: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Stairs_%s" % def_id
@@ -4264,6 +4331,12 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 	if node == null:
 		return
 	_apply_interactable_state_tint(rec, state)
+	var chest_pivot := node.find_child("ChestLidPivot", true, false) as Node3D
+	if chest_pivot != null:
+		var chest_rot := deg_to_rad(-68.0) if state == "open" else 0.0
+		var chest_tween := create_tween()
+		chest_tween.tween_property(chest_pivot, "rotation:x", chest_rot, 0.22)
+		return
 	var pivot := node.find_child("DoorPivot", true, false) as Node3D
 	if pivot == null:
 		return
@@ -4277,6 +4350,23 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 	if node == null:
 		return
 	var def_id := str(rec.get("interactable_def_id", ""))
+	if def_id == "treasure_chest" or def_id == "town_stash":
+		var glow := node.find_child("ChestInnerGlow", true, false) as MeshInstance3D
+		if glow != null:
+			glow.visible = state == "open"
+		var lock := node.find_child("ChestLockPlate", true, false) as MeshInstance3D
+		if lock != null:
+			var lock_mat := StandardMaterial3D.new()
+			if state == "locked" or state == "disabled":
+				lock_mat.albedo_color = Color("#7a2f2d")
+			elif state == "open":
+				lock_mat.albedo_color = Color("#f0cf72")
+				lock_mat.emission_enabled = true
+				lock_mat.emission = Color("#8a6122")
+			else:
+				lock_mat.albedo_color = Color("#d1b15d") if def_id == "town_stash" else Color("#8d8f8f")
+			lock.material_override = lock_mat
+		return
 	if def_id == "teleporter":
 		var core := node.get_child(1) as MeshInstance3D if node.get_child_count() > 1 else null
 		if core == null:

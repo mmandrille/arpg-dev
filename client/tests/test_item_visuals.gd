@@ -71,6 +71,8 @@ func _initialize() -> void:
 		return
 	if not _verify_loot_label_presentation(item_rules, item_templates, presentations):
 		return
+	if not _verify_interactable_chest_models():
+		return
 
 	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
 	quit(0)
@@ -288,6 +290,40 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 
 	loot_a.free()
 	loot_b.free()
+	main.free()
+	return true
+
+
+func _verify_interactable_chest_models() -> bool:
+	var main = MainScript.new()
+	get_root().add_child(main)
+	var stash := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_stash"})
+	var chest := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest"})
+	if stash == null or stash.name != "TownStashChest" or stash.find_child("ChestStashCrest", true, false) == null:
+		_fail("town stash did not use fortified chest model")
+		main.free()
+		return false
+	if chest == null or chest.name != "TreasureChest" or chest.find_child("ChestLockPlate", true, false) == null:
+		_fail("treasure chest did not use chest model")
+		stash.free()
+		main.free()
+		return false
+	var glow := chest.find_child("ChestInnerGlow", true, false) as MeshInstance3D
+	var lid := chest.find_child("ChestLidPivot", true, false) as Node3D
+	if glow == null or lid == null or glow.visible:
+		_fail("treasure chest missing closed lid/glow state")
+		stash.free()
+		chest.free()
+		main.free()
+		return false
+	main.add_child(chest)
+	main._set_interactable_state("chest_1", {"node": chest, "interactable_def_id": "treasure_chest", "state": "closed"}, "open")
+	if not glow.visible:
+		_fail("opened treasure chest did not reveal inner glow")
+		stash.free()
+		main.free()
+		return false
+	stash.free()
 	main.free()
 	return true
 

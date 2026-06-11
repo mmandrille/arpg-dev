@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/fs"
 	"math"
 	"os"
 	"path/filepath"
@@ -35,6 +36,74 @@ func loadRules(t *testing.T) *Rules {
 		t.Fatalf("load rules: %v", err)
 	}
 	return rules
+}
+
+func loadRulesWithMainGameplay(t *testing.T, overrides map[string]any) *Rules {
+	t.Helper()
+	sourceDir, err := FindSharedRulesDir()
+	if err != nil {
+		t.Fatalf("locate rules: %v", err)
+	}
+	sourceSharedDir := filepath.Dir(sourceDir)
+	targetSharedDir := t.TempDir()
+	targetRulesDir := filepath.Join(targetSharedDir, "rules")
+	if err := copyTree(sourceDir, targetRulesDir); err != nil {
+		t.Fatalf("copy rules: %v", err)
+	}
+	if err := copyTree(filepath.Join(sourceSharedDir, "content"), filepath.Join(targetSharedDir, "content")); err != nil {
+		t.Fatalf("copy content: %v", err)
+	}
+
+	configPath := filepath.Join(targetRulesDir, "main_config.v0.json")
+	var config map[string]any
+	b, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("read temp main_config: %v", err)
+	}
+	if err := json.Unmarshal(b, &config); err != nil {
+		t.Fatalf("parse temp main_config: %v", err)
+	}
+	gameplay, ok := config["gameplay"].(map[string]any)
+	if !ok {
+		t.Fatal("temp main_config gameplay missing")
+	}
+	for key, value := range overrides {
+		gameplay[key] = value
+	}
+	b, err = json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		t.Fatalf("marshal temp main_config: %v", err)
+	}
+	if err := os.WriteFile(configPath, append(b, '\n'), 0o644); err != nil {
+		t.Fatalf("write temp main_config: %v", err)
+	}
+
+	rules, err := LoadRules(targetRulesDir)
+	if err != nil {
+		t.Fatalf("load temp rules: %v", err)
+	}
+	return rules
+}
+
+func copyTree(sourceDir, targetDir string) error {
+	return filepath.WalkDir(sourceDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(sourceDir, path)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(targetDir, rel)
+		if d.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(target, b, 0o644)
+	})
 }
 
 func loadGolden(t *testing.T, name string, v any) {
@@ -160,6 +229,37 @@ func TestLoadRules(t *testing.T) {
 	}
 	if _, ok := r.Worlds["combat_control_lab"]; !ok {
 		t.Fatal("missing combat_control_lab world")
+	}
+}
+
+func TestMainConfigAttackIntervalOverridesCombatMirror(t *testing.T) {
+	rules := loadRulesWithMainGameplay(t, map[string]any{
+		"base_attack_interval_ticks": 10,
+	})
+	if rules.Combat.BaseAttackIntervalTicks != 10 {
+		t.Fatalf("combat base attack interval = %d, want main_config value 10", rules.Combat.BaseAttackIntervalTicks)
+	}
+	sim := MustNewSim("sess_main_config_attack", "01", rules)
+	if got := sim.DerivedStatsView().AttackIntervalTicks; got != 8 {
+		t.Fatalf("derived attack interval = %d, want ceil(10 / 1.28125) = 8", got)
+	}
+}
+
+func TestMainConfigMovementSpeedDrivesPlayerMovement(t *testing.T) {
+	rules := loadRulesWithMainGameplay(t, map[string]any{
+		"base_movement_speed": 0.5,
+	})
+	sim, err := NewSimWithWorld("sess_main_config_move", "abcd", rules, "gear_before_combat")
+	if err != nil {
+		t.Fatalf("gear world: %v", err)
+	}
+	start := sim.entities[sim.playerID].pos
+	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1, Y: 0}, DurationTicks: 2}}})
+	sim.Tick(nil)
+	got := sim.entities[sim.playerID].pos
+	wantX := start.X + 1.0
+	if got.X != wantX || got.Y != start.Y {
+		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}
 }
 
@@ -4322,9 +4422,9 @@ func TestMovement(t *testing.T) {
 	}
 	sim.Tick(nil)
 	sim.Tick(nil)
-	// 3 ticks of legacy one-cell input movement in +x.
+	// 3 ticks of configured input movement in +x.
 	got := sim.entities[sim.playerID].pos
-	wantX := start.X + 3*moveSpeed
+	wantX := start.X + 3*sim.rules.MainConfig.Gameplay.BaseMovementSpeed
 	if got.X != wantX || got.Y != start.Y {
 		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}

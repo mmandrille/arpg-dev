@@ -14,7 +14,7 @@ import (
 // Go server and the Godot client read the same files (ADR-0001 D6); this is the
 // server's loader and typed view.
 type Rules struct {
-	MainConfig          MainConfig
+	MainConfig           MainConfig
 	Combat               Combat
 	Navigation           NavigationRules
 	Items                map[string]ItemDef
@@ -855,7 +855,7 @@ func LoadRules(dir string) (*Rules, error) {
 		BaseCritDamage:          combat.BaseCritDamage,
 		MinimumDamage:           combat.MinimumDamage,
 		BlockCap:                combat.BlockCap,
-		BaseAttackIntervalTicks: combat.BaseAttackIntervalTicks,
+		BaseAttackIntervalTicks: mainConfig.Gameplay.BaseAttackIntervalTicks,
 		MinEffectiveAttackSpeed: combat.MinEffectiveAttackSpeed,
 		MaxEffectiveAttackSpeed: combat.MaxEffectiveAttackSpeed,
 		PlayerDamage:            combat.PlayerDamage,
@@ -875,9 +875,6 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if navigation.CellSize <= 0 {
 		return nil, fmt.Errorf("game: invalid rules navigation.cell_size: must be positive")
-	}
-	if navigation.CellSize != moveSpeed {
-		return nil, fmt.Errorf("game: invalid rules navigation.cell_size: must equal moveSpeed %.1f for v11", moveSpeed)
 	}
 	if navigation.MaxAutoSteps <= 0 {
 		return nil, fmt.Errorf("game: invalid rules navigation.max_auto_steps: must be positive")

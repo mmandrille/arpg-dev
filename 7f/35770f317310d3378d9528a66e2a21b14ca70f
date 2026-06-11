@@ -1,0 +1,44 @@
+docs/plans/v74_2026-06-11-gameplay-window-chrome.md
+  s_c8b827646bf8c0::t_1d8206cf7d1ca2 1-2,4-30,33-44,48-59,62-67,69-70
+  s_c8b827646bf8c0::t_f0ae9a6a0276d9 3,31-32,45-47,60-61,68
+client/tests/test_shop_panel.gd
+  s_c8b827646bf8c0::t_647e83aae78df4 45-48,128,164-167,169-175
+  s_c8b827646bf8c0::t_1589e37999be73 168
+docs/specs/v74_spec-gameplay-window-chrome.md
+  s_c8b827646bf8c0::t_1d8206cf7d1ca2 1-43
+docs/as-built/v74_gameplay-window-chrome.md
+  s_c8b827646bf8c0::t_f0ae9a6a0276d9 1-20
+client/scripts/inventory_panel.gd
+  s_c8b827646bf8c0::t_7cd95fa88eb66a 256
+  s_c8b827646bf8c0::t_f97f0e5d43530c 180-189,343,345,349,352-356,362,366-367,689-693
+  s_c8b827646bf8c0::t_9248f207e9d95d 8,66
+client/scripts/stash_panel.gd
+  s_c8b827646bf8c0::t_8c5c6ada4fec05 7,48,176,214-223,231,233,236,242-243,250,324
+  s_c8b827646bf8c0::t_a3f628e5c6468d 806-811
+PROGRESS.md
+  s_c8b827646bf8c0::t_f0ae9a6a0276d9 15,95,209,633-636,646
+client/scripts/shop_panel.gd
+  s_c8b827646bf8c0::t_59a5d0ccc7196b 8,57,197,229-238,246,248,251,257-258,265,301
+  s_c8b827646bf8c0::t_3ca3690062c3eb 1206-1211
+client/tests/test_stash_panel.gd
+  s_c8b827646bf8c0::t_647e83aae78df4 39-42,54,130-133,135-141
+  s_c8b827646bf8c0::t_b8805a67888d5e 134
+client/scripts/smoke.gd
+  s_c8b827646bf8c0::t_647e83aae78df4 375-388
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7f35770f317310d3378d9528a66e2a21b14ca70f",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -56,7 +56,7 @@
       "hit_chance": 0.5,
           "crit_chance": 0.06,
           "crit_damage": 1.525,
-          "movement_speed": 0.71,
+          "movement_speed": 0.497,
           "max_hp": 10,
           "max_mana": 10,
           "health_regen_per_second": 0.1,

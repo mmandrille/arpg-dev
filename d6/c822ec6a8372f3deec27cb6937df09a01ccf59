@@ -1,0 +1,32 @@
+server/internal/game/sim.go
+  s_ba8ba4c088ef1a::t_287ea43f6110bf 1950-1952,1959-1967,2027
+  s_ba8ba4c088ef1a::t_0c5994ed98f785 266,307,1291,1319
+server/internal/game/handlers.go
+  s_ba8ba4c088ef1a::t_05ec99bb8c9ad3 96-98
+client/tests/test_coop_client.gd
+  s_ba8ba4c088ef1a::t_9dc30418979d47 42,798-803
+server/internal/game/game_test.go
+  s_ba8ba4c088ef1a::t_fd0546118becfc 3331,3363-3367
+  s_ba8ba4c088ef1a::t_65c8be85fee6a8 3604
+  s_ba8ba4c088ef1a::t_e8238cec634de9 1578-1596
+client/scripts/main.gd
+  s_ba8ba4c088ef1a::t_ce65258cb5afd0 2209,2384
+  s_ba8ba4c088ef1a::t_ea11fef5083795 243-244,1548-1555
+  s_ba8ba4c088ef1a::t_0020e03adc08f6 2099,4959
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d6c822ec6a8372f3deec27cb6937df09a01ccf59",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

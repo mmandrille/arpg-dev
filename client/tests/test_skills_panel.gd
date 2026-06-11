@@ -24,6 +24,7 @@ func _run() -> void:
 	)
 
 	panel.set_character_progression({
+		"character_class": "sorcerer",
 		"level": 3,
 		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
 	})
@@ -45,7 +46,8 @@ func _run() -> void:
 	_assert_eq("skills aligns with stats top", int(panel._panel.position.y), int(stats_panel._panel.position.y))
 	stats_panel.queue_free()
 	_assert_eq("unspent skill points", int(state.get("unspent_skill_points", -1)), 1)
-	_assert_eq("first-row skill count", (state.get("skill_ids", []) as Array).size(), 3)
+	_assert_eq("class-filtered skill count", (state.get("skill_ids", []) as Array).size(), 1)
+	_assert_eq("sorcerer skill visible", str((state.get("skill_ids", []) as Array)[0]), "magic_bolt")
 	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
 	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "bolt")
@@ -67,13 +69,12 @@ func _run() -> void:
 	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel 1\nMagic 5"))
 	panel.bot_hover_skill("heal")
 	state = panel.get_debug_state()
-	_assert_eq("heal selection updates", str(state.get("selected_skill_id", "")), "heal")
-	_assert_eq("heal icon from presentation", str(state.get("icon_label", "")), "H")
-	_assert_eq("heal icon shape from presentation", str(state.get("icon_shape", "")), "heart")
-	_assert_true("heal tooltip includes mana", str(state.get("tooltip_body", "")).contains("Mana: 10"))
+	_assert_eq("non-class skill selection ignored", str(state.get("selected_skill_id", "")), "magic_bolt")
+	_assert_false("non-class skill absent from debug state", (state.get("skills", {}) as Dictionary).has("heal"))
 	panel.bot_hover_skill("magic_bolt")
 
 	panel.set_character_progression({
+		"character_class": "sorcerer",
 		"level": 5,
 		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
 	})
@@ -98,9 +99,10 @@ func _run() -> void:
 	_assert_false("spend disabled with no points", bool(state.get("spend_button_enabled", true)))
 	_assert_eq("bought skill without points stays normal", str(state.get("visual_state", "")), "normal")
 	var skills_without_points: Dictionary = state.get("skills", {})
-	_assert_eq("unbought no-points skill is disabled", str((skills_without_points.get("heal", {}) as Dictionary).get("visual_state", "")), "disabled")
+	_assert_false("off-class no-points skill remains hidden", skills_without_points.has("heal"))
 
 	panel.set_character_progression({
+		"character_class": "sorcerer",
 		"level": 6,
 		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
 	})
@@ -115,6 +117,7 @@ func _run() -> void:
 	_assert_true("tooltip includes rank 2 missing magic diff", str(state.get("tooltip_body", "")).contains("Magic 8(-3)"))
 
 	panel.set_character_progression({
+		"character_class": "sorcerer",
 		"level": 6,
 		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 8},
 	})

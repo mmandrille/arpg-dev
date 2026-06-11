@@ -20,6 +20,7 @@ const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
+const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
@@ -202,6 +203,7 @@ var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
 var skill_bar: SkillBar
+var status_effects_bar: StatusEffectsBar
 var character_info_panel: PanelContainer
 var character_info_name_label: Label
 var character_info_level_label: Label
@@ -213,6 +215,7 @@ var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
 var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
 var _movement_requires_fresh_input: bool = false
+var _player_walk_linger: float = 0.0
 var _last_facing_direction := Vector2(1.0, 0.0)
 var _debug_label: Label
 var _level_label: Label
@@ -220,6 +223,7 @@ var _camera: Camera3D
 
 const SEND_INTERVAL := 0.1
 const PLAYER_SPEED := 2.8
+const WALK_ANIMATION_LINGER_SECONDS := 0.28
 const CAMERA_ZOOM_DEFAULT := 20.0
 const CAMERA_ZOOM_STEP := 1.5
 const CAMERA_ZOOM_MIN := 8.0
@@ -678,6 +682,8 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	skill_cooldowns = []
 	right_click_skill_id = ""
 	skill_function_keys = ["", "", "", "", "", "", "", ""]
+	if status_effects_bar != null:
+		status_effects_bar.clear_effects()
 	loot_ids.clear()
 	monster_ids.clear()
 	interactable_ids.clear()
@@ -743,6 +749,7 @@ func _process(delta: float) -> void:
 	_sync_progression_interactivity()
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
+	_tick_movement_animation_linger(delta)
 
 	if visual_replay_enabled:
 		_handle_visual_replay(delta)
@@ -753,14 +760,7 @@ func _process(delta: float) -> void:
 	_sync_waypoint_panel_reach()
 	_sync_actionable_panel_reach()
 	if player_anim != null:
-		var moving := client.ready_state() == WebSocketPeer.STATE_OPEN \
-			and player_hp > 0 \
-			and not _user_input_blocked() \
-			and not _is_force_stand_held() \
-			and not _movement_requires_fresh_input \
-			and (Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
-			or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D))
-		player_anim.set_locomotion(moving)
+		player_anim.set_locomotion(_local_player_is_walking())
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
 	_update_debug()
@@ -979,10 +979,14 @@ func _apply_delta(p: Dictionary) -> void:
 				_health_bar.update_hp(player_hp, player_max_hp, true)
 			continue
 		if event_type == "skill_effect_started" and eid == player_id:
+			if status_effects_bar != null:
+				status_effects_bar.start_effect(ev)
 			if str(ev.get("skill_id", "")) == "rage":
 				_apply_local_player_visual_scale(1.0 + float(ev.get("amount", 0)) / 100.0)
 			continue
 		if event_type == "skill_effect_ended" and eid == player_id:
+			if status_effects_bar != null:
+				status_effects_bar.end_effect(str(ev.get("skill_id", "")))
 			if str(ev.get("skill_id", "")) == "rage":
 				_apply_local_player_visual_scale(1.0)
 			continue
@@ -1128,9 +1132,13 @@ func _upsert_entity(e: Dictionary) -> void:
 		if e.has("visual_scale"):
 			_apply_local_player_visual_scale(float(e["visual_scale"]))
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
+		var prev_predicted_pos := predicted_pos
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
 		player_anchor.position = server_pos
+		if prev_predicted_pos.distance_to(server_pos) > 0.001 and player_hp > 0:
+			_mark_local_player_walking()
+			_face_direction(Vector2(server_pos.x - prev_predicted_pos.x, server_pos.z - prev_predicted_pos.z))
 		return
 	var rec: Dictionary
 	var is_new := false
@@ -1187,10 +1195,13 @@ func _upsert_entity(e: Dictionary) -> void:
 		var node := rec["node"] as Node3D
 		var prev_pos := node.position
 		node.position = server_pos
-		if rec["type"] == "monster" and rec["controller"] != null and not is_new:
+		if (rec["type"] == "monster" or rec["type"] == "player") and rec["controller"] != null and not is_new:
 			var hp_val := int(e.get("hp", rec.get("hp", 1)))
 			var moved := prev_pos.distance_to(server_pos) > 0.001
-			rec["controller"].set_locomotion(moved and hp_val > 0)
+			if moved and hp_val > 0:
+				rec["walk_linger"] = WALK_ANIMATION_LINGER_SECONDS
+				_face_entity_direction(node, Vector2(server_pos.x - prev_pos.x, server_pos.z - prev_pos.z))
+			rec["controller"].set_locomotion(float(rec.get("walk_linger", 0.0)) > 0.0 and hp_val > 0)
 		if rec["type"] == "player":
 			rec["hp"] = int(e.get("hp", rec.get("hp", PLAYER_START_HP)))
 			rec["max_hp"] = int(e.get("max_hp", rec.get("max_hp", PLAYER_START_HP)))
@@ -1696,6 +1707,7 @@ func _handle_input(delta: float) -> void:
 		# Local prediction: move immediately for responsive feel.
 		predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
 		_reconcile_player()
+		_mark_local_player_walking()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 		_send_cooldown = SEND_INTERVAL
 
@@ -1755,6 +1767,35 @@ func _movement_intent_starts_motion(intent_type: String, payload: Dictionary) ->
 	if typeof(direction) != TYPE_DICTIONARY:
 		return false
 	return absf(float(direction.get("x", 0.0))) > 0.0001 or absf(float(direction.get("y", 0.0))) > 0.0001
+
+
+func _mark_local_player_walking() -> void:
+	_player_walk_linger = WALK_ANIMATION_LINGER_SECONDS
+
+
+func _local_player_is_walking() -> bool:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
+		return false
+	if player_hp <= 0 or _user_input_blocked() or _is_force_stand_held() or _movement_requires_fresh_input:
+		return false
+	if _player_walk_linger > 0.0:
+		return true
+	return Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
+		or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D)
+
+
+func _tick_movement_animation_linger(delta: float) -> void:
+	_player_walk_linger = maxf(0.0, _player_walk_linger - delta)
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		if not rec.has("walk_linger"):
+			continue
+		rec["walk_linger"] = maxf(0.0, float(rec.get("walk_linger", 0.0)) - delta)
+		var ctrl = rec.get("controller", null)
+		if ctrl == null:
+			continue
+		var hp := int(rec.get("hp", 1))
+		ctrl.set_locomotion(float(rec.get("walk_linger", 0.0)) > 0.0 and hp > 0)
 
 
 func _is_escape_key(event: InputEventKey) -> bool:
@@ -1854,6 +1895,7 @@ func _handle_autoplay(delta: float) -> void:
 				var dir := Vector2(1, 0)
 				predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
 				_reconcile_player()
+				_mark_local_player_walking()
 				client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 				autoplay_move_sent = true
 				autoplay_timer = autoplay_step_delay
@@ -1952,6 +1994,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	if kind == "floor":
 		var ground: Vector3 = pick.get("ground", Vector3.ZERO)
 		_close_gameplay_panels_for_movement()
+		_mark_local_player_walking()
 		client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
 		_attack_cooldown = SEND_INTERVAL
 		if _sustained_click.mode == "move":
@@ -2038,6 +2081,7 @@ func _repeat_hold_move() -> void:
 		return
 
 	_close_gameplay_panels_for_movement()
+	_mark_local_player_walking()
 	client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
 	_sustained_click.mark_move_sent(ground)
 	_attack_cooldown = SEND_INTERVAL
@@ -2071,6 +2115,7 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 		pending_interactable_action.clear()
 		return
 	_close_gameplay_panels_for_movement()
+	_mark_local_player_walking()
 	client.send("move_to_intent", last_server_tick, {
 		"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
 	})
@@ -2137,6 +2182,13 @@ func _face_direction(flat_dir: Vector2) -> void:
 	_last_facing_direction = facing
 
 	character_visual.rotation.y = atan2(facing.x, facing.y)
+
+
+func _face_entity_direction(node: Node3D, flat_dir: Vector2) -> void:
+	if node == null or flat_dir.length_squared() <= 0.0001:
+		return
+	var facing := flat_dir.normalized()
+	node.rotation.y = atan2(facing.x, facing.y)
 
 
 func _camera_relative_flat_direction(input: Vector2) -> Vector2:
@@ -2530,6 +2582,8 @@ func _build_scene() -> void:
 	skill_bar.cast_skill_requested.connect(_on_skill_cast_requested)
 	skill_bar.open_skills_requested.connect(_open_skills_panel_from_bar)
 	ui.add_child(skill_bar)
+	status_effects_bar = StatusEffectsBarScript.new()
+	ui.add_child(status_effects_bar)
 	_setup_character_info_panel(ui)
 	_health_bar = PlayerHealthBarScript.new()
 	_refresh_player_hud_identity()
@@ -3266,6 +3320,7 @@ func _on_waypoint_level_pressed(level: int) -> void:
 		pending_waypoint_target_level = level
 		pending_waypoint_travel = true
 		_close_gameplay_panels_for_movement()
+		_mark_local_player_walking()
 		client.send("move_to_intent", last_server_tick, {
 			"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
 		})
@@ -4186,6 +4241,7 @@ func get_bot_state() -> Dictionary:
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
+		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
 		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
@@ -4385,6 +4441,7 @@ func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 		return
 	if _movement_intent_starts_motion(intent_type, payload):
 		_close_gameplay_panels_for_movement()
+		_mark_local_player_walking()
 	client.send(intent_type, last_server_tick, payload)
 	_attack_cooldown = SEND_INTERVAL
 

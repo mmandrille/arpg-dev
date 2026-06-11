@@ -199,7 +199,7 @@ func _test_monster_scene() -> void:
 	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_assert(ap != null, "monster AnimationPlayer missing")
 	if ap != null:
-		for clip in ["idle", "hit", "death"]:
+		for clip in ["idle", "walk", "hit", "death"]:
 			_assert(ap.has_animation(clip), "monster missing clip %s" % clip)
 	s.free()
 	await process_frame

@@ -1,0 +1,31 @@
+docs/specs/v83_spec-defensive-client-envelope-payloads.md
+  s_32d8e7aa3a61b6::t_962a181d2379a6 1-2,4-52
+  s_32d8e7aa3a61b6::t_cf0692ed7cc917 3
+docs/as-built/v83_defensive-client-envelope-payloads.md
+  s_32d8e7aa3a61b6::t_cf0692ed7cc917 1-27
+client/scripts/main.gd
+  s_32d8e7aa3a61b6::t_da28774538a140 798,801,803,805,809-810,812,817-821
+PROGRESS.md
+  s_32d8e7aa3a61b6::t_cf0692ed7cc917 15,104,227,687-689,708-710
+docs/plans/v83_2026-06-11-defensive-client-envelope-payloads.md
+  s_32d8e7aa3a61b6::t_cf0692ed7cc917 29-30,33,46-48,59-61,75-77,86-88
+  s_32d8e7aa3a61b6::t_962a181d2379a6 1-28,31-32,34-45,49-58,62-74,78-85,89-90
+client/tests/test_delta_apply.gd
+  s_32d8e7aa3a61b6::t_da28774538a140 35,181-201
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "34d120207deb381af66963a62727655f57daf395",
+  "prompts": {},
+  "sessions": {
+    "s_32d8e7aa3a61b6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb8e4-6441-7b63-8394-51e6b1f36c05",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

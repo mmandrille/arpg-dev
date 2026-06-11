@@ -1246,6 +1246,7 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	if monster == nil {
 		t.Fatal("missing monster for heal targeting regression")
 	}
+	monster.pos = Vec2{X: player.pos.X + 8, Y: player.pos.Y}
 	player.mana = player.maxMana
 	player.hp = 5
 	guest.hp = guest.maxHP
@@ -1257,8 +1258,8 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(monster.id)},
 	}})
 	assertAck(t, selfHeal, "cast_heal_monster_target")
-	if player.hp != 7 {
-		t.Fatalf("monster-targeted heal hp = %d, want caster-centered heal to 7", player.hp)
+	if player.hp != 5 {
+		t.Fatalf("monster-targeted heal hp = %d, want unchanged because area is centered on target", player.hp)
 	}
 	if guest.hp != guest.maxHP {
 		t.Fatalf("monster-targeted heal guest hp = %d, want unchanged full hp %d", guest.hp, guest.maxHP)
@@ -1343,6 +1344,37 @@ func TestHolyShieldAreaBuffAppliesDefenseVisualStateAndExpires(t *testing.T) {
 	finalStats, _ := sim.playerEffectiveCombatStats()
 	if math.Abs(finalStats.Armor-before.Armor) > 0.000001 || math.Abs(finalStats.BlockPercent-before.BlockPercent) > 0.000001 {
 		t.Fatalf("holy shield stats after expiry=%+v want before=%+v", finalStats, before)
+	}
+}
+
+func TestHolyShieldIgnoresAimAndAlwaysBuffsCaster(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_holy_shield_caster_centered", "01", rules)
+	sim.progression.CharacterClass = "paladin"
+	sim.progression.BaseStats.Vit = 8
+	sim.progression.BaseStats.Magic = 8
+	sim.progression.SkillRanks["holy_shield"] = 1
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	player.mana = player.maxMana
+	beforeMana := player.mana
+	sim.savePlayer(sim.defaultPlayer())
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_holy_shield_bad_target",
+		CorrelationID: "corr_holy_shield_bad_target",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "holy_shield", TargetID: "999999", Direction: &Vec2{X: 1, Y: 0}},
+	}})
+	assertAck(t, cast, "cast_holy_shield_bad_target")
+	if !hasEvent(cast, "skill_effect_started") {
+		t.Fatalf("holy shield with bad target missing caster buff event: %+v", cast.Events)
+	}
+	if !sameStringSlice(player.effectIDs, []string{"holy_shield"}) {
+		t.Fatalf("player effect ids = %v, want holy_shield", player.effectIDs)
+	}
+	if player.mana != beforeMana-10 {
+		t.Fatalf("holy shield mana after bad-target cast = %d, want %d", player.mana, beforeMana-10)
 	}
 }
 

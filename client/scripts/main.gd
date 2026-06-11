@@ -1006,7 +1006,6 @@ func _apply_delta(p: Dictionary) -> void:
 			_show_skill_rejected_feedback(str(ev.get("reason", "")))
 			continue
 		if event_type == "player_healed":
-			_spawn_heal_rain(eid)
 			_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
 			if eid == player_id and _health_bar != null:
 				_health_bar.update_hp(player_hp, player_max_hp, true)
@@ -1508,9 +1507,13 @@ func _spawn_heal_rain(entity_id: String) -> void:
 	var target := _node_for_entity_id(entity_id)
 	if target == null:
 		return
+	_spawn_heal_rain_at_position(_node_world_or_local_position(target))
+
+
+func _spawn_heal_rain_at_position(world_position: Vector3) -> void:
 	var effect := HealRainEffectScript.new() as HealRainEffect
 	effect.setup(HEAL_RAIN_RADIUS)
-	effect.position = _node_world_or_local_position(target)
+	effect.position = world_position
 	add_child(effect)
 
 
@@ -3189,7 +3192,10 @@ func _try_use_right_click_skill() -> bool:
 		target_id = str(pick.get("target_id", ""))
 	else:
 		direction = _aim_direction_from_mouse()
-	return _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
+	var sent := _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
+	if sent and right_click_skill_id == "heal":
+		_spawn_heal_rain_at_position(_mouse_ground_point())
+	return sent
 
 
 func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> bool:
@@ -3213,6 +3219,12 @@ func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Ve
 	var payload := {"skill_id": skill_id}
 	var targeting := _skill_targeting(skill_id)
 	if targeting == "self":
+		if player_id != "":
+			payload["target_id"] = player_id
+		else:
+			payload["direction"] = {"x": _last_facing_direction.x, "y": _last_facing_direction.y}
+		return payload
+	if targeting == "self_or_ally_area":
 		if player_id != "":
 			payload["target_id"] = player_id
 		else:

@@ -3023,10 +3023,7 @@ func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, c
 		if effect.Type != "area_stat_percent_buff" {
 			continue
 		}
-		center, rejectReason := s.skillAreaCenter(effect, cast, player)
-		if rejectReason != "" {
-			return nil, rejectReason
-		}
+		center := player.pos
 		percent := skillEffectPercent(effect, rank)
 		scale := 1.0
 		targets := s.healSkillTargets(center, effect, player.id)
@@ -3052,7 +3049,7 @@ func (s *Sim) skillAreaCenter(effect SkillEffectDef, cast *CastSkillIntent, play
 			return Vec2{}, "invalid_target"
 		}
 		if target.kind == monsterEntity {
-			return player.pos, ""
+			return target.pos, ""
 		}
 		if distance(player.pos, target.pos) > effect.Range+meleeRangeEpsilon {
 			return Vec2{}, "target_out_of_range"

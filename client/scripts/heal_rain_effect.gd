@@ -1,7 +1,7 @@
 extends Node3D
 class_name HealRainEffect
 
-const LIFETIME := 1.15
+const LIFETIME := 3.0
 const DROP_COUNT := 34
 const DEFAULT_RADIUS := 4.0
 const FALL_HEIGHT := 3.2

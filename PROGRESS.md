@@ -550,6 +550,7 @@ healing events; the Godot skill tree and hotbar now select among multiple first-
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, and production boss health bar art/audio | v53/v57/v58 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
+| Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
@@ -572,6 +573,7 @@ the next autoloop pass unless code changes make them stale.
 | `character-select-summaries` | Completed in v54 | Show level, gold, deepest depth, and status in character selection. | M | store, HTTP, client, bot, docs | Needs careful aggregate/query shape; rename/delete already exists. |
 | `session-browser-filters` | Open | Add Join Game search/filter/sort controls for listed sessions. | S/M | client, HTTP tests maybe, bot, docs | Headless proof needs stable multi-session setup. |
 | `loot-label-filter-core` | Open | Add display-only loot label filtering/highlighting for rarity/category. | M | client, bot, docs | Presentation-only; avoid changing shared loot ownership. |
+| `tuning-friendly-rule-tests` | Open | Make shared-rule balance tuning less brittle by replacing accidental hardcoded rule values in tests/scenarios with rule-derived or semantic assertions. | M | shared, server tests, client tests, bot scenarios, validation docs | Must preserve exact locks for schemas, replay determinism, persistence boundaries, and named goldens. |
 | `client-boss-telegraph-polish` | Completed in v57 | Improve boss telegraph readability with a clearer in-world warning marker. | S/M | client, bot, docs | Reused in-repo primitive marker patterns; external plugins/assets rejected. |
 
 ---

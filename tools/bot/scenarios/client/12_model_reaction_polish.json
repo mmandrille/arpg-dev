@@ -12,7 +12,7 @@
       "type": "assert_entity_reaction",
       "entity_type": "monster",
       "monster_def_id": "combat_lab_soft_target",
-      "visual_model": "character",
+      "visual_model": "monster_dummy",
       "terminal": false
     },
     {

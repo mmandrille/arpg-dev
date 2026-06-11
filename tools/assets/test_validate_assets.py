@@ -120,6 +120,12 @@ def default_manifest() -> dict:
                 "format": "glb",
                 "required_nodes": [],
             },
+            "monster_dummy_v0": {
+                "type": "monster",
+                "runtime_path": MONSTER_GLB,
+                "format": "glb",
+                "required_nodes": ["root", "pivot"],
+            },
         },
     }
 
@@ -142,11 +148,27 @@ def default_visuals() -> dict:
     }
 
 
+def default_monster_visuals() -> dict:
+    return {
+        "version": 0,
+        "monster_visuals": {
+            "training_dummy": {
+                "asset_id": "monster_dummy_v0",
+                "scene": "monster_dummy",
+                "scale": 1.0,
+                "height_offset": 0.0,
+                "animation_profile": "ground_biped",
+            }
+        },
+    }
+
+
 def build_root(
     tmp_path: Path,
     *,
     manifest: dict | None = None,
     visuals: dict | None = None,
+    monster_visuals: dict | None = None,
     char_nodes: list[str] | None = None,
     write_sword: bool = True,
 ) -> Path:
@@ -155,12 +177,14 @@ def build_root(
     shutil.copy(REAL_SCHEMA, root / "assets/manifests/assets.v0.schema.json")
     write(root / "assets/manifests/assets.v0.json", manifest or default_manifest())
     write(root / "shared/assets/item_visuals.v0.json", visuals or default_visuals())
+    write(root / "shared/assets/monster_visuals.v0.json", monster_visuals or default_monster_visuals())
     char_joints = char_nodes if char_nodes is not None else [
         "root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"
     ]
     write(root / CHAR_GLB, make_skinned_glb(char_joints))
     if write_sword:
         write(root / SWORD_GLB, make_glb([]))
+    write(root / MONSTER_GLB, make_skinned_glb(["root", "pivot"]))
     return root
 
 
@@ -260,6 +284,20 @@ def test_monster_entry_passes(tmp_path):
     write(root / MONSTER_GLB, make_skinned_glb(["root", "pivot"]))
     report = run(root)
     assert report.failures == []
+
+
+def test_monster_visual_unknown_asset_id(tmp_path):
+    monster_visuals = default_monster_visuals()
+    monster_visuals["monster_visuals"]["training_dummy"]["asset_id"] = "missing_monster_v0"
+    report = run(build_root(tmp_path, monster_visuals=monster_visuals))
+    assert any("monster asset_id resolution" in f for f in report.failures)
+
+
+def test_monster_visual_wrong_asset_type(tmp_path):
+    monster_visuals = default_monster_visuals()
+    monster_visuals["monster_visuals"]["training_dummy"]["asset_id"] = "weapon_rusty_sword_v0"
+    report = run(build_root(tmp_path, monster_visuals=monster_visuals))
+    assert any("monster asset_id type" in f for f in report.failures)
 
 
 def test_required_node_not_a_skin_joint_fails(tmp_path):

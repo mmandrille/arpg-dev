@@ -17,11 +17,15 @@
     "count": 8,
     "monster_def_id": "dungeon_mob",
     "monster_pool": [
-      { "monster_def_id": "dungeon_mob", "weight": 9 },
-      { "monster_def_id": "dungeon_archer", "weight": 1 }
+      { "monster_def_id": "dungeon_mob", "weight": 7 },
+      { "monster_def_id": "dungeon_archer", "weight": 1 },
+      { "monster_def_id": "dungeon_wolf", "weight": 2 },
+      { "monster_def_id": "dungeon_bat", "weight": 2 }
     ],
     "minimum_monsters": [
-      { "monster_def_id": "dungeon_archer", "count": 1 }
+      { "monster_def_id": "dungeon_archer", "count": 1 },
+      { "monster_def_id": "dungeon_wolf", "count": 1 },
+      { "monster_def_id": "dungeon_bat", "count": 1 }
     ],
     "margin_from_wall": 2.0,
     "min_spawn_distance": 6.0,

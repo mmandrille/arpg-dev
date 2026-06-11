@@ -11,7 +11,8 @@
       "visual": {
         "model": "current_humanoid_player",
         "color": "#b77cff",
-        "scale": 2.0
+        "scale": 2.0,
+        "model_pool": ["monster_dummy", "monster_quadruped", "monster_tiny_flyer"]
       }
     }
   }

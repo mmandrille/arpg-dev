@@ -316,6 +316,54 @@ def monster_dummy_glb() -> bytes:
     return _build_skinned_glb(color, joints, parts)
 
 
+def monster_quadruped_glb() -> bytes:
+    """Low-poly canine/feline predator silhouette with rigid skinned parts."""
+    color = (0.30, 0.36, 0.34, 1.0)
+    joints = [
+        ("root", -1, (0.0, 0.0, 0.0)),
+        ("spine", 0, (0.0, 0.55, 0.0)),
+        ("head", 1, (0.0, 0.18, -0.78)),
+        ("tail", 1, (0.0, 0.12, 0.86)),
+        ("leg_fl", 0, (-0.28, 0.42, -0.42)),
+        ("leg_fr", 0, (0.28, 0.42, -0.42)),
+        ("leg_bl", 0, (-0.28, 0.42, 0.48)),
+        ("leg_br", 0, (0.28, 0.42, 0.48)),
+    ]
+    parts = [
+        (1, (0.0, 0.58, 0.08), (0.58, 0.42, 1.34)),
+        (2, (0.0, 0.72, -0.78), (0.42, 0.34, 0.46)),
+        (2, (-0.17, 0.96, -0.88), (0.12, 0.20, 0.10)),
+        (2, (0.17, 0.96, -0.88), (0.12, 0.20, 0.10)),
+        (3, (0.0, 0.78, 0.95), (0.16, 0.16, 0.62)),
+        (4, (-0.28, 0.22, -0.42), (0.18, 0.48, 0.18)),
+        (5, (0.28, 0.22, -0.42), (0.18, 0.48, 0.18)),
+        (6, (-0.28, 0.22, 0.48), (0.20, 0.48, 0.20)),
+        (7, (0.28, 0.22, 0.48), (0.20, 0.48, 0.20)),
+    ]
+    return _build_skinned_glb(color, joints, parts)
+
+
+def monster_tiny_flyer_glb() -> bytes:
+    """Tiny bat-like flyer with wing joints for client-side flap clips."""
+    color = (0.20, 0.18, 0.28, 1.0)
+    joints = [
+        ("root", -1, (0.0, 0.0, 0.0)),
+        ("body", 0, (0.0, 0.36, 0.0)),
+        ("head", 1, (0.0, 0.10, -0.24)),
+        ("wing_l", 1, (-0.28, 0.03, 0.0)),
+        ("wing_r", 1, (0.28, 0.03, 0.0)),
+    ]
+    parts = [
+        (1, (0.0, 0.38, 0.0), (0.30, 0.26, 0.24)),
+        (2, (0.0, 0.46, -0.24), (0.22, 0.18, 0.18)),
+        (2, (-0.08, 0.58, -0.30), (0.06, 0.10, 0.05)),
+        (2, (0.08, 0.58, -0.30), (0.06, 0.10, 0.05)),
+        (3, (-0.48, 0.40, 0.02), (0.55, 0.05, 0.34)),
+        (4, (0.48, 0.40, 0.02), (0.55, 0.05, 0.34)),
+    ]
+    return _build_skinned_glb(color, joints, parts)
+
+
 def rusty_sword_glb() -> bytes:
     """Low-poly rusty one-handed sword, grip at origin, blade pointing +Y."""
     color = (0.45, 0.3, 0.18, 1.0)  # rusty brown
@@ -346,6 +394,8 @@ TARGETS = {
     "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
     "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
     "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
+    "client/assets/monsters/quadruped/monster_quadruped.glb": monster_quadruped_glb,
+    "client/assets/monsters/tiny_flyer/monster_tiny_flyer.glb": monster_tiny_flyer_glb,
 }
 
 

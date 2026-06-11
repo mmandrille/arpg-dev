@@ -32,8 +32,11 @@ const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
+const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
+const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
+const MonsterTinyFlyerScene := preload("res://scenes/monster_tiny_flyer.tscn")
 const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
 	"monster_killed": "death",
@@ -3724,16 +3727,24 @@ func _read_json(path: String):
 
 func _make_entity_node(e: Dictionary) -> Node3D:
 	var kind := str(e.get("type", ""))
-	# Monster adopts the rigged dummy scene (spec §5.3); loot uses shared
-	# presentation metadata while gameplay stays server-owned.
+	# Monsters resolve presentation through shared visual metadata while
+	# gameplay stays server-owned.
 	if kind == "monster":
-		var packed := CharacterScene if str(e.get("visual_model", "")) == BOSS_VISUAL_MODEL else MonsterDummyScene
+		var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
+		var packed := _monster_scene_for_visual(str(visual.get("scene", "monster_dummy")))
+		if str(e.get("visual_model", "")) == BOSS_VISUAL_MODEL:
+			packed = CharacterScene
 		if packed != null:
-			var monster := packed.instantiate()
-			monster.scale = Vector3.ONE * _entity_visual_scale(e)
-			_apply_model_tint(monster, _entity_base_tint(e))
-			_sync_archer_bow_marker(monster, str(e.get("monster_def_id", "")))
-			return monster
+			var root := Node3D.new()
+			root.name = "MonsterVisualRoot"
+			var monster := packed.instantiate() as Node3D
+			monster.position.y = float(visual.get("height_offset", 0.0))
+			monster.scale = Vector3.ONE * float(visual.get("scale", 1.0))
+			root.add_child(monster)
+			root.scale = Vector3.ONE * _entity_visual_scale(e)
+			_apply_model_tint(root, _entity_base_tint(e))
+			_sync_archer_bow_marker(root, str(e.get("monster_def_id", "")))
+			return root
 		# Fallback: red primitive so positioning/targeting still works.
 		var fallback := MeshInstance3D.new()
 		var fm := StandardMaterial3D.new()
@@ -3759,6 +3770,16 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	if kind == "projectile":
 		return _make_projectile_node()
 	return _make_loot_node(e)
+
+
+func _monster_scene_for_visual(scene_key: String) -> PackedScene:
+	match scene_key:
+		"monster_quadruped":
+			return MonsterQuadrupedScene
+		"monster_tiny_flyer":
+			return MonsterTinyFlyerScene
+		_:
+			return MonsterDummyScene
 
 
 func _make_remote_player_node(e: Dictionary) -> Node3D:
@@ -3800,6 +3821,9 @@ func _apply_local_player_visual_scale(scale: float) -> void:
 func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	if e.has("monster_def_id"):
 		rec["monster_def_id"] = str(e["monster_def_id"])
+		var visual := MonsterVisualsLoaderScript.resolve(str(e["monster_def_id"]), str(e.get("visual_model", "")))
+		if not e.has("visual_model"):
+			rec["visual_model"] = str(visual.get("visual_model", visual.get("scene", "")))
 	for key in ["boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
 		if e.has(key):
 			rec[key] = e[key]

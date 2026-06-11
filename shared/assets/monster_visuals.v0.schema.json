@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/monster_visuals.v0.schema.json",
+  "title": "Monster visuals (v0)",
+  "description": "Rendering contract only: maps monster_def_id to asset/scene presentation metadata. Carries NO gameplay stats.",
+  "type": "object",
+  "required": ["version", "monster_visuals"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "monster_visuals": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["asset_id", "scene", "scale", "height_offset", "animation_profile"],
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": { "type": "string", "minLength": 1 },
+          "scene": {
+            "type": "string",
+            "enum": ["monster_dummy", "monster_quadruped", "monster_tiny_flyer"]
+          },
+          "scale": { "type": "number", "exclusiveMinimum": 0 },
+          "height_offset": { "type": "number", "minimum": 0 },
+          "animation_profile": {
+            "type": "string",
+            "enum": ["ground_biped", "ground_quadruped", "hover_flyer"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -315,9 +315,10 @@ type BossTemplateDef struct {
 }
 
 type BossVisualDef struct {
-	Model string  `json:"model"`
-	Color string  `json:"color"`
-	Scale float64 `json:"scale"`
+	Model     string   `json:"model"`
+	Color     string   `json:"color"`
+	Scale     float64  `json:"scale"`
+	ModelPool []string `json:"model_pool"`
 }
 
 type BossPatternDef struct {
@@ -2066,11 +2067,18 @@ func validateBossTemplates(templates map[string]BossTemplateDef, r *Rules) error
 		if _, ok := r.LootTables[template.LootTable]; !ok {
 			return fmt.Errorf("game: invalid rules boss_templates.%s.loot_table: unknown table %s", templateID, template.LootTable)
 		}
-		if template.Visual.Model != "current_humanoid_player" {
-			return fmt.Errorf("game: invalid rules boss_templates.%s.visual.model: expected current_humanoid_player", templateID)
+		if template.Visual.Model == "" {
+			return fmt.Errorf("game: invalid rules boss_templates.%s.visual.model: required", templateID)
 		}
-		if template.Visual.Scale != 2.0 {
-			return fmt.Errorf("game: invalid rules boss_templates.%s.visual.scale: expected 2.0", templateID)
+		if template.Visual.Scale <= 0 {
+			return fmt.Errorf("game: invalid rules boss_templates.%s.visual.scale: must be positive", templateID)
+		}
+		for idx, model := range template.Visual.ModelPool {
+			switch model {
+			case "monster_dummy", "monster_quadruped", "monster_tiny_flyer":
+			default:
+				return fmt.Errorf("game: invalid rules boss_templates.%s.visual.model_pool[%d]: unknown model %s", templateID, idx, model)
+			}
 		}
 	}
 	for _, templateID := range r.DungeonGeneration.BossFloor.BossTemplatePool {

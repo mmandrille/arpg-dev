@@ -5,6 +5,7 @@ signal cast_skill_requested(skill_id: String)
 signal open_skills_requested
 
 const TICK_DURATION_S := 1.0 / 10.0
+const SkillIconScript := preload("res://scripts/skill_icon.gd")
 
 var skill_progression: Dictionary = {}
 var _interactive: bool = true
@@ -15,6 +16,7 @@ var _remaining_ticks: float = 0.0
 var _total_ticks: int = 0
 var _panel: PanelContainer
 var _slot: Button
+var _slot_icon
 var _badge: Label
 var _cooldown: ProgressBar
 var _flash_timer: float = 0.0
@@ -111,6 +113,7 @@ func get_debug_state() -> Dictionary:
 		"total_ticks": _total_ticks,
 		"cooldown_fraction": _cooldown_fraction(),
 		"slot_text": _slot.text if _slot != null else "",
+		"icon_shape": _slot_icon.shape if _slot_icon != null else "",
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
 	}
 
@@ -133,13 +136,18 @@ func _build() -> void:
 	_panel.add_child(box)
 
 	_slot = Button.new()
-	_slot.text = _skill_icon_label_text(_current_skill_id())
+	_slot.text = ""
 	_slot.tooltip_text = _tooltip_text(_current_skill_id())
 	_slot.focus_mode = Control.FOCUS_NONE
 	_slot.custom_minimum_size = Vector2(52, 52)
 	_slot.pressed.connect(func() -> void: open_skills_requested.emit())
 	_slot.add_theme_font_size_override("font_size", 22)
 	box.add_child(_slot)
+
+	_slot_icon = SkillIconScript.new()
+	_slot_icon.position = Vector2(4, 4)
+	_slot_icon.size = Vector2(44, 44)
+	_slot.add_child(_slot_icon)
 
 	_badge = _make_upgrade_badge()
 	_slot.add_child(_badge)
@@ -166,8 +174,11 @@ func _render() -> void:
 	if _slot == null or _cooldown == null:
 		return
 	_slot.disabled = not _interactive
-	_slot.text = _skill_icon_label_text(_current_skill_id()) if _rank > 0 else "-"
+	_slot.text = "-" if _rank <= 0 else ""
 	_slot.tooltip_text = _tooltip_text(_current_skill_id())
+	if _slot_icon != null:
+		_slot_icon.visible = _rank > 0
+		_slot_icon.configure(_current_skill_id(), SkillRulesLoader.skill_presentation(_current_skill_id()))
 	if _badge != null:
 		_badge.visible = _unspent_skill_points() > 0
 	_cooldown.value = _cooldown_fraction()

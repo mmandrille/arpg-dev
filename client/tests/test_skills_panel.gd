@@ -48,6 +48,7 @@ func _run() -> void:
 	_assert_eq("first-row skill count", (state.get("skill_ids", []) as Array).size(), 3)
 	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
+	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "bolt")
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
 	_assert_false("spend button disabled before magic requirement", bool(state.get("spend_button_enabled", true)))
@@ -68,6 +69,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("heal selection updates", str(state.get("selected_skill_id", "")), "heal")
 	_assert_eq("heal icon from presentation", str(state.get("icon_label", "")), "H")
+	_assert_eq("heal icon shape from presentation", str(state.get("icon_shape", "")), "heart")
 	_assert_true("heal tooltip includes mana", str(state.get("tooltip_body", "")).contains("Mana: 10"))
 	panel.bot_hover_skill("magic_bolt")
 

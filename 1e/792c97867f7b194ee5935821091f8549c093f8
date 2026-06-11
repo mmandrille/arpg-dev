@@ -1,0 +1,79 @@
+shared/protocol/session_snapshot.v8.schema.json
+  s_74e4f341218515::t_87d32b064a0671 458-462
+server/internal/game/sim.go
+  s_74e4f341218515::t_d431f17875ac7d 2071-2080
+shared/protocol/examples/state_delta.json
+  s_74e4f341218515::t_5182eaa006e92b 97
+shared/protocol/session_snapshot.v3.schema.json
+  s_74e4f341218515::t_87d32b064a0671 315-319
+shared/protocol/session_snapshot.v6.schema.json
+  s_74e4f341218515::t_87d32b064a0671 413-417
+shared/protocol/state_delta.v2.schema.json
+  s_74e4f341218515::t_87d32b064a0671 152-156
+shared/protocol/state_delta.v3.schema.json
+  s_74e4f341218515::t_87d32b064a0671 169-173
+docs/plans/v67_2026-06-11-boss-kill-reward-polish.md
+  s_74e4f341218515::t_5bfad105ff8658 1-17,20-23,29-33,35,37-38
+  s_74e4f341218515::t_7ba293cf3d1c8a 18-19,24-27,34,36
+  s_74e4f341218515::t_74314ea1a2545f 28
+server/internal/game/types.go
+  s_74e4f341218515::t_d431f17875ac7d 384
+server/internal/game/game_test.go
+  s_74e4f341218515::t_d431f17875ac7d 5600,5610-5611
+  s_74e4f341218515::t_ee5ccb3a79b240 5603-5609
+client/scripts/bot_controller.gd
+  s_74e4f341218515::t_d9012dc268d3e3 366-367
+tools/bot/run.py
+  s_74e4f341218515::t_5182eaa006e92b 2037,2070
+shared/protocol/session_snapshot.v2.schema.json
+  s_74e4f341218515::t_87d32b064a0671 297-301
+shared/protocol/state_delta.v7.schema.json
+  s_74e4f341218515::t_87d32b064a0671 364-368
+shared/protocol/state_delta.v8.schema.json
+  s_74e4f341218515::t_87d32b064a0671 389-393
+PROGRESS.md
+  s_74e4f341218515::t_7ba293cf3d1c8a 15,88,195,267,579-582
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_74e4f341218515::t_d9012dc268d3e3 25,38
+client/scripts/main.gd
+  s_74e4f341218515::t_ee5ccb3a79b240 5142
+  s_74e4f341218515::t_d431f17875ac7d 146,1091-1093,4637,5140-5141
+shared/protocol/state_delta.v4.schema.json
+  s_74e4f341218515::t_87d32b064a0671 313-317
+shared/protocol/session_snapshot.v5.schema.json
+  s_74e4f341218515::t_87d32b064a0671 413-417
+shared/protocol/state_delta.v5.schema.json
+  s_74e4f341218515::t_87d32b064a0671 321-325
+client/scripts/bot_scenario_runner.gd
+  s_74e4f341218515::t_ef47e38d74c04b 44,103,471-479,2049-2051
+  s_74e4f341218515::t_d9012dc268d3e3 293
+shared/protocol/session_snapshot.v7.schema.json
+  s_74e4f341218515::t_87d32b064a0671 442-446
+docs/as-built/v67_boss-kill-reward-polish.md
+  s_74e4f341218515::t_7ba293cf3d1c8a 1-21
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_74e4f341218515::t_d9012dc268d3e3 45-47
+  s_74e4f341218515::t_c9939ff9506b8f 36,43-44
+shared/protocol/session_snapshot.v4.schema.json
+  s_74e4f341218515::t_87d32b064a0671 369-373
+shared/protocol/state_delta.v6.schema.json
+  s_74e4f341218515::t_87d32b064a0671 338-342
+docs/specs/v67_spec-boss-kill-reward-polish.md
+  s_74e4f341218515::t_5bfad105ff8658 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1e792c97867f7b194ee5935821091f8549c093f8",
+  "prompts": {},
+  "sessions": {
+    "s_74e4f341218515": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb53a-77e2-76e0-85bd-104f9a738cad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

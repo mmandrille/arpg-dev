@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v83 — `defensive-client-envelope-payloads` |
+| **Latest completed slice** | v84 — `client-bot-step-registry` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -102,6 +102,7 @@ v80_* = combat-threat-readability
 v81_* = paladin-holy-shield
 v82_* = realtime-fanout-level-snapshot
 v83_* = defensive-client-envelope-payloads
+v84_* = client-bot-step-registry
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -225,6 +226,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v81** | `paladin-holy-shield` | Complete (`make ci` green) | [`v81_spec-paladin-holy-shield.md`](docs/specs/v81_spec-paladin-holy-shield.md) | [`v81_2026-06-11-paladin-holy-shield.md`](docs/plans/v81_2026-06-11-paladin-holy-shield.md) | [`as-built`](docs/as-built/v81_paladin-holy-shield.md) |
 | **v82** | `realtime-fanout-level-snapshot` | Complete (`make ci` green) | [`v82_spec-realtime-fanout-level-snapshot.md`](docs/specs/v82_spec-realtime-fanout-level-snapshot.md) | [`v82_2026-06-11-realtime-fanout-level-snapshot.md`](docs/plans/v82_2026-06-11-realtime-fanout-level-snapshot.md) | [`as-built`](docs/as-built/v82_realtime-fanout-level-snapshot.md) |
 | **v83** | `defensive-client-envelope-payloads` | Complete (`make ci` green) | [`v83_spec-defensive-client-envelope-payloads.md`](docs/specs/v83_spec-defensive-client-envelope-payloads.md) | [`v83_2026-06-11-defensive-client-envelope-payloads.md`](docs/plans/v83_2026-06-11-defensive-client-envelope-payloads.md) | [`as-built`](docs/as-built/v83_defensive-client-envelope-payloads.md) |
+| **v84** | `client-bot-step-registry` | Complete (`make ci` green) | [`v84_spec-client-bot-step-registry.md`](docs/specs/v84_spec-client-bot-step-registry.md) | [`v84_2026-06-11-client-bot-step-registry.md`](docs/plans/v84_2026-06-11-client-bot-step-registry.md) | [`as-built`](docs/as-built/v84_client-bot-step-registry.md) |
 
 ---
 
@@ -685,8 +687,8 @@ variant, and proves it with client unit, focused client-bot, and protocol pack-a
 
 **v80 engineering review steering.** The v80 review keeps the repo at 8.4/10 overall and recommends
 small follow-ups for combat event presenter extraction and splitting the largest Python validation/bot
-files by domain. The realtime fanout level snapshot finding was closed in v82, and defensive client
-payload parsing was closed in v83.
+files by domain. The realtime fanout level snapshot finding was closed in v82, defensive client
+payload parsing was closed in v83, and client bot step registry duplication was closed in v84.
 
 **Maintainability ratchet is now explicit.** New source/test/tool files target a 600-line maximum,
 existing over-limit files are grandfathered in `.maintainability/file-size-baseline.tsv`, and
@@ -708,6 +710,10 @@ instead of depending on a long basic-attack sequence against combat-stat targets
 **Client envelope payload parsing is now defensive.** v83 routes central Godot `_handle_message`
 payload access through a dictionary guard, so missing/null/non-dictionary payloads on accepted,
 rejected, error, and delta envelopes no longer crash the client message boundary.
+
+**Client bot step registration now has one source of truth.** v84 derives `ALL_STEP_TYPES` from
+the wait/assert/action category arrays in `bot_scenario_runner.gd`, preserving unknown-step
+validation while removing a duplicated maintenance list.
 
 ### Other deferred items (from specs / ADRs)
 

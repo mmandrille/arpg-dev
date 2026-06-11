@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_test_missing_id_rejected()
 	_test_missing_world_id_rejected()
 	_test_empty_steps_rejected()
+	_test_all_step_types_derived_from_categories()
 	_test_unknown_step_type_rejected()
 	_test_missing_step_field_entity_type()
 	_test_missing_step_field_event_type()
@@ -116,6 +117,16 @@ func _test_unknown_step_type_rejected() -> void:
 	data["client_steps"] = [{"type": "do_the_thing", "timeout_s": 5.0}]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_ne("unknown step type rejected", err, "")
+
+
+func _test_all_step_types_derived_from_categories() -> void:
+	var expected: Array = []
+	expected.append_array(BotScenarioRunnerScript.STEP_TYPES_WAIT)
+	expected.append_array(BotScenarioRunnerScript.STEP_TYPES_ASSERT)
+	expected.append_array(BotScenarioRunnerScript.STEP_TYPES_ACTION)
+	_assert_eq("all step type count is derived", BotScenarioRunnerScript.ALL_STEP_TYPES.size(), expected.size())
+	for stype in expected:
+		_assert_true("all step types include %s" % str(stype), stype in BotScenarioRunnerScript.ALL_STEP_TYPES)
 
 
 func _test_missing_step_field_entity_type() -> void:

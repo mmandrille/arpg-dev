@@ -27,6 +27,7 @@
         "allocate_stat_intent",
         "allocate_skill_point_intent",
         "cast_skill_intent",
+        "set_skill_bindings_intent",
         "shop_buy_intent",
         "shop_sell_intent",
         "stash_deposit_item_intent",
@@ -81,6 +82,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/allocate_skill_point_intent" } } } },
     { "if": { "properties": { "type": { "const": "cast_skill_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/cast_skill_intent" } } } },
+    { "if": { "properties": { "type": { "const": "set_skill_bindings_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/set_skill_bindings_intent" } } } },
     { "if": { "properties": { "type": { "const": "shop_buy_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/shop_buy_intent" } } } },
     { "if": { "properties": { "type": { "const": "shop_sell_intent" } } },
@@ -225,6 +228,20 @@
       "additionalProperties": false,
       "properties": {
         "slot_index": { "type": "integer", "minimum": 0, "maximum": 9 }
+      }
+    },
+    "set_skill_bindings_intent": {
+      "type": "object",
+      "required": ["function_keys", "right_click_skill_id"],
+      "additionalProperties": false,
+      "properties": {
+        "function_keys": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": { "type": "string" }
+        },
+        "right_click_skill_id": { "type": "string" }
       }
     },
     "equipment_slot": {

@@ -359,6 +359,12 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character hotbar")
 		return false
 	}
+	skillBinds, err := s.store.GetOrCreateCharacterSkillBindings(ctx, accountID, characterID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character skill bindings")
+		return false
+	}
 	shopStock, err := s.store.ListCharacterShopStock(ctx, accountID, characterID)
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
@@ -377,7 +383,7 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load account stash gold")
 		return false
 	}
-	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, shopStock, stashItems, stashGold, progression); err != nil {
+	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, skillBinds, shopStock, stashItems, stashGold, progression); err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
 		return false

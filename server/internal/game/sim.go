@@ -59,6 +59,7 @@ const (
 	tickDuration                   = 0.05
 	minHotbarCapacity              = 2
 	maxHotbarCapacity              = 10
+	skillFunctionKeyCount          = 8
 	baseInventoryRows              = 3
 	inventoryColumns               = 5
 	maxInventoryRows               = 20
@@ -248,6 +249,8 @@ type playerState struct {
 	Progression           CharacterProgressionState
 	SkillCooldowns        map[string]skillCooldownState
 	SkillEffects          map[string]skillEffectState
+	SkillFunctionKeys     []string
+	RightClickSkillID     string
 	ShopStock             map[string]*shopStockState
 	Gold                  int
 	StashItems            []*stashItem
@@ -286,6 +289,8 @@ type Sim struct {
 	progression           CharacterProgressionState
 	skillCooldowns        map[string]skillCooldownState
 	skillEffects          map[string]skillEffectState
+	skillFunctionKeys     []string
+	rightClickSkillID     string
 	shopStock             map[string]*shopStockState
 	gold                  int
 	stashItems            []*stashItem
@@ -346,6 +351,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		progression:           progression,
 		skillCooldowns:        make(map[string]skillCooldownState),
 		skillEffects:          make(map[string]skillEffectState),
+		skillFunctionKeys:     make([]string, skillFunctionKeyCount),
 		shopStock:             make(map[string]*shopStockState),
 		gold:                  progression.Gold,
 		stashCapacity:         defaultStashCapacity,
@@ -555,6 +561,8 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		Progression:           s.progression,
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
 		SkillEffects:          cloneSkillEffects(s.skillEffects),
+		SkillFunctionKeys:     cloneStringSlice(s.skillFunctionKeys),
+		RightClickSkillID:     s.rightClickSkillID,
 		ShopStock:             s.shopStock,
 		Gold:                  s.gold,
 		StashItems:            s.stashItems,
@@ -644,6 +652,12 @@ type PersistedHotbarSlot struct {
 	ItemInstanceID *string
 }
 
+// PersistedSkillBindings is the durable skill control layout reloaded on resume.
+type PersistedSkillBindings struct {
+	FunctionKeys      []string
+	RightClickSkillID string
+}
+
 // PersistedStashItem is an account-stash item reloaded at session start.
 type PersistedStashItem struct {
 	StashItemID string
@@ -691,6 +705,12 @@ func (s *Sim) LoadHotbar(slots []PersistedHotbarSlot) {
 		}
 		s.hotbar[slot.SlotIndex] = id
 	}
+	s.savePlayer(s.defaultPlayer())
+}
+
+func (s *Sim) LoadSkillBindings(bindings PersistedSkillBindings) {
+	s.skillFunctionKeys = normalizeSkillFunctionKeys(bindings.FunctionKeys)
+	s.rightClickSkillID = bindings.RightClickSkillID
 	s.savePlayer(s.defaultPlayer())
 }
 
@@ -818,6 +838,12 @@ func cloneStringSlice(in []string) []string {
 	return out
 }
 
+func normalizeSkillFunctionKeys(in []string) []string {
+	out := make([]string, skillFunctionKeyCount)
+	copy(out, in)
+	return out
+}
+
 // LoadDiscoveredTeleporters restores durable character waypoint unlocks into a
 // fresh session. Town remains discovered even if callers omit it.
 func (s *Sim) LoadDiscoveredTeleporters(levels []int) {
@@ -851,6 +877,17 @@ func (s *Sim) LoadHotbarForPlayer(playerID uint64, slots []PersistedHotbarSlot) 
 	}
 	s.usePlayer(ps)
 	s.LoadHotbar(slots)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+}
+
+func (s *Sim) LoadSkillBindingsForPlayer(playerID uint64, bindings PersistedSkillBindings) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadSkillBindings(bindings)
 	s.savePlayer(ps)
 	s.usePlayer(s.defaultPlayer())
 }
@@ -1217,6 +1254,8 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.skillEffects == nil {
 		s.skillEffects = make(map[string]skillEffectState)
 	}
+	s.skillFunctionKeys = normalizeSkillFunctionKeys(ps.SkillFunctionKeys)
+	s.rightClickSkillID = ps.RightClickSkillID
 	s.shopStock = ps.ShopStock
 	if s.shopStock == nil {
 		s.shopStock = make(map[string]*shopStockState)
@@ -1248,6 +1287,8 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.Progression = s.progression
 	ps.SkillCooldowns = s.skillCooldowns
 	ps.SkillEffects = s.skillEffects
+	ps.SkillFunctionKeys = normalizeSkillFunctionKeys(s.skillFunctionKeys)
+	ps.RightClickSkillID = s.rightClickSkillID
 	ps.ShopStock = s.shopStock
 	ps.Gold = s.gold
 	ps.StashItems = s.stashItems
@@ -1296,6 +1337,7 @@ type Input struct {
 	AllocateStat       *AllocateStatIntent
 	AllocateSkillPoint *AllocateSkillPointIntent
 	CastSkill          *CastSkillIntent
+	SetSkillBindings   *SetSkillBindingsIntent
 	ShopBuy            *ShopBuyIntent
 	ShopSell           *ShopSellIntent
 	StashDepositItem   *StashDepositItemIntent
@@ -1353,6 +1395,10 @@ type (
 		SkillID   string
 		TargetID  string
 		Direction *Vec2
+	}
+	SetSkillBindingsIntent struct {
+		FunctionKeys      []string
+		RightClickSkillID string
 	}
 	ShopBuyIntent struct {
 		ShopEntityID string
@@ -5217,6 +5263,13 @@ func (s *Sim) SkillCooldownViews() []SkillCooldownView {
 	return out
 }
 
+func (s *Sim) SkillBindingsView() SkillBindingsView {
+	return SkillBindingsView{
+		FunctionKeys:      normalizeSkillFunctionKeys(s.skillFunctionKeys),
+		RightClickSkillID: s.rightClickSkillID,
+	}
+}
+
 // ProgressionState returns a copy of the mutable progression state.
 func (s *Sim) ProgressionState() CharacterProgressionState {
 	s.progression.Gold = s.gold
@@ -6104,6 +6157,7 @@ func (s *Sim) Snapshot() Snapshot {
 		StashCapacity:     defaultStashCapacity,
 		SkillProgression:  SkillProgressionView{Skills: []SkillProgressionSkillView{}},
 		SkillCooldowns:    []SkillCooldownView{},
+		SkillBindings:     SkillBindingsView{FunctionKeys: make([]string, skillFunctionKeyCount)},
 		RecentEvents:      []Event{},
 	}
 }
@@ -6162,6 +6216,7 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		CharacterProgression:  s.CharacterProgressionView(),
 		SkillProgression:      s.SkillProgressionView(),
 		SkillCooldowns:        s.SkillCooldownViews(),
+		SkillBindings:         s.SkillBindingsView(),
 		RecentEvents:          []Event{},
 	}
 	s.savePlayer(ps)

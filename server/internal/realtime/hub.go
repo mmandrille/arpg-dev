@@ -162,6 +162,13 @@ func persistedHotbar(slots []store.CharacterHotbarSlot) []game.PersistedHotbarSl
 	return out
 }
 
+func persistedSkillBindings(bindings store.CharacterSkillBindings) game.PersistedSkillBindings {
+	return game.PersistedSkillBindings{
+		FunctionKeys:      bindings.FunctionKeys,
+		RightClickSkillID: bindings.RightClickSkillID,
+	}
+}
+
 func persistedShopStock(items []store.CharacterShopStockItem) []game.PersistedShopStockItem {
 	out := make([]game.PersistedShopStockItem, 0, len(items))
 	for _, item := range items {

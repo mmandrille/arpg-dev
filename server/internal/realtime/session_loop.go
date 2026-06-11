@@ -136,6 +136,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	sim.SetPlayerMetadata(hostPlayerID, host.AccountID, host.CharacterID, "Hero", store.SessionMemberHost)
 	sim.LoadInventoryForPlayer(hostPlayerID, persistedItems(hostStart.Items))
 	sim.LoadHotbarForPlayer(hostPlayerID, persistedHotbar(hostStart.Hotbar))
+	sim.LoadSkillBindingsForPlayer(hostPlayerID, persistedSkillBindings(hostStart.SkillBinds))
 	sim.LoadDiscoveredTeleportersForPlayer(hostPlayerID, waypointLevels(hostStart.Waypoints))
 	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
 	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
@@ -157,6 +158,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		}
 		sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
 		sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
+		sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
 		sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 		sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
@@ -254,6 +256,7 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 	}
 	l.sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
 	l.sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
+	l.sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
 	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
@@ -735,6 +738,19 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if err := l.hub.store.SetCharacterHotbarSlot(ctx, changeMember.AccountID, changeMember.CharacterID, c.SlotIndex, c.ItemInstanceID); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist hotbar update", "error", err)
+			}
+		case game.OpSkillBindingsUpdate:
+			if c.SkillBindings == nil {
+				continue
+			}
+			if err := l.hub.store.SetCharacterSkillBindings(ctx, store.CharacterSkillBindings{
+				AccountID:         changeMember.AccountID,
+				CharacterID:       changeMember.CharacterID,
+				FunctionKeys:      c.SkillBindings.FunctionKeys,
+				RightClickSkillID: c.SkillBindings.RightClickSkillID,
+			}); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist skill bindings update", "error", err)
 			}
 		case game.OpGoldUpdate:
 			if c.Gold == nil {

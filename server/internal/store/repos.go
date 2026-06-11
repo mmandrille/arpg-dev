@@ -204,6 +204,8 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_start_account_stash_items WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_account_stash_gold WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_shop_stock WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_skill_preferences WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_skill_bindings WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_hotbar_slots WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_item_instances WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_waypoints WHERE ` + sessionFilter, []any{accountID, characterID}},
@@ -211,6 +213,8 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_start_character_progression WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_members WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_shop_stock WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM session_start_skill_preferences WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM session_start_skill_bindings WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM session_start_hotbar_slots WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM session_start_item_instances WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM session_start_waypoints WHERE character_id = $1`, []any{characterID}},
@@ -219,6 +223,8 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_members WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM sessions WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_shop_stock WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM character_skill_preferences WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
+			{`DELETE FROM character_skill_bindings WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_hotbar_slots WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_item_instances WHERE account_id = $1 AND character_id = $2`, []any{accountID, characterID}},
 			{`DELETE FROM character_waypoints WHERE character_id = $1`, []any{characterID}},
@@ -437,6 +443,8 @@ func (s *Store) DeleteStaleEmptySessions(ctx context.Context, updatedBefore time
 			`DELETE FROM session_start_account_stash_items WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_account_stash_gold WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_shop_stock WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_skill_preferences WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_skill_bindings WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_hotbar_slots WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_item_instances WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_waypoints WHERE session_id = ANY($1)`,
@@ -1101,6 +1109,116 @@ func (s *Store) SetCharacterHotbarSlot(ctx context.Context, accountID, character
 	return nil
 }
 
+func (s *Store) GetOrCreateCharacterSkillBindings(ctx context.Context, accountID, characterID string) (CharacterSkillBindings, error) {
+	out := CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 8)}
+	if err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO character_skill_bindings (account_id, character_id, slot_index, skill_id)
+			 SELECT $1, $2, slots.slot_index, ''
+			 FROM generate_series(0, 7) AS slots(slot_index)
+			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+			 ON CONFLICT (character_id, slot_index) DO NOTHING`,
+			accountID, characterID,
+		); err != nil {
+			return fmt.Errorf("store: initialize character skill bindings: %w", err)
+		}
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO character_skill_preferences (account_id, character_id, right_click_skill_id)
+			 SELECT $1, $2, ''
+			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+			 ON CONFLICT (character_id) DO NOTHING`,
+			accountID, characterID,
+		); err != nil {
+			return fmt.Errorf("store: initialize character skill preferences: %w", err)
+		}
+		rows, err := tx.Query(ctx,
+			`SELECT slot_index, skill_id
+			 FROM character_skill_bindings
+			 WHERE account_id = $1 AND character_id = $2
+			 ORDER BY slot_index ASC`,
+			accountID, characterID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: list character skill bindings: %w", err)
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var slot int
+			var skillID string
+			if err := rows.Scan(&slot, &skillID); err != nil {
+				return fmt.Errorf("store: scan character skill binding: %w", err)
+			}
+			if slot >= 0 && slot < len(out.FunctionKeys) {
+				out.FunctionKeys[slot] = skillID
+			}
+		}
+		if err := rows.Err(); err != nil {
+			return fmt.Errorf("store: list character skill binding rows: %w", err)
+		}
+		if err := tx.QueryRow(ctx,
+			`SELECT right_click_skill_id
+			 FROM character_skill_preferences
+			 WHERE account_id = $1 AND character_id = $2`,
+			accountID, characterID,
+		).Scan(&out.RightClickSkillID); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return ErrNotFound
+			}
+			return fmt.Errorf("store: get character skill preference: %w", err)
+		}
+		return nil
+	}); err != nil {
+		return CharacterSkillBindings{}, err
+	}
+	return out, nil
+}
+
+func (s *Store) SetCharacterSkillBindings(ctx context.Context, bindings CharacterSkillBindings) error {
+	keys := normalizeSkillFunctionKeys(bindings.FunctionKeys)
+	if err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		tag, err := tx.Exec(ctx,
+			`INSERT INTO character_skill_preferences (account_id, character_id, right_click_skill_id)
+			 SELECT $1, $2, $3
+			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+			 ON CONFLICT (character_id) DO UPDATE SET
+			   right_click_skill_id = EXCLUDED.right_click_skill_id,
+			   updated_at = now()
+			 WHERE character_skill_preferences.account_id = EXCLUDED.account_id`,
+			bindings.AccountID, bindings.CharacterID, bindings.RightClickSkillID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: set character skill preference: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+		for slot, skillID := range keys {
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO character_skill_bindings (account_id, character_id, slot_index, skill_id)
+				 SELECT $1, $2, $3, $4
+				 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
+				 ON CONFLICT (character_id, slot_index) DO UPDATE SET
+				   skill_id = EXCLUDED.skill_id,
+				   updated_at = now()
+				 WHERE character_skill_bindings.account_id = EXCLUDED.account_id`,
+				bindings.AccountID, bindings.CharacterID, slot, skillID,
+			); err != nil {
+				return fmt.Errorf("store: set character skill binding: %w", err)
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func normalizeSkillFunctionKeys(keys []string) []string {
+	out := make([]string, 8)
+	copy(out, keys)
+	return out
+}
+
 func (s *Store) ListCharacterShopStock(ctx context.Context, accountID, characterID string) ([]CharacterShopStockItem, error) {
 	rows, err := s.pool.Query(ctx,
 		`SELECT account_id, character_id, shop_id, refresh_key, offer_index, offer_id, source_depth, item_template_id, rolled_payload, buy_price, available, created_at, updated_at
@@ -1491,7 +1609,7 @@ func scanAccountStashItem(row rowScanner) (AccountStashItem, error) {
 	return item, nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error {
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error {
 	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO session_start_character_progression (
@@ -1558,6 +1676,25 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 			); err != nil {
 				return fmt.Errorf("store: insert session start hotbar: %w", err)
 			}
+		}
+		keys := normalizeSkillFunctionKeys(skillBinds.FunctionKeys)
+		for slot, skillID := range keys {
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_skill_bindings (session_id, account_id, character_id, slot_index, skill_id)
+				 VALUES ($1, $2, $3, $4, $5)
+				 ON CONFLICT (session_id, account_id, character_id, slot_index) DO NOTHING`,
+				sessionID, accountID, characterID, slot, skillID,
+			); err != nil {
+				return fmt.Errorf("store: insert session start skill binding: %w", err)
+			}
+		}
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO session_start_skill_preferences (session_id, account_id, character_id, right_click_skill_id)
+			 VALUES ($1, $2, $3, $4)
+			 ON CONFLICT (session_id, account_id, character_id) DO NOTHING`,
+			sessionID, accountID, characterID, skillBinds.RightClickSkillID,
+		); err != nil {
+			return fmt.Errorf("store: insert session start skill preference: %w", err)
 		}
 		for _, stock := range shopStock {
 			rolledPayload := stock.RolledPayload
@@ -1706,6 +1843,40 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	}
 	if err := hotbarRows.Err(); err != nil {
 		return snap, err
+	}
+
+	snap.SkillBinds = CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 8)}
+	skillRows, err := s.pool.Query(ctx,
+		`SELECT slot_index, skill_id
+		 FROM session_start_skill_bindings
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3
+		 ORDER BY slot_index ASC`,
+		sessionID, accountID, characterID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start skill bindings: %w", err)
+	}
+	defer skillRows.Close()
+	for skillRows.Next() {
+		var slot int
+		var skillID string
+		if err := skillRows.Scan(&slot, &skillID); err != nil {
+			return snap, fmt.Errorf("store: scan session start skill binding: %w", err)
+		}
+		if slot >= 0 && slot < len(snap.SkillBinds.FunctionKeys) {
+			snap.SkillBinds.FunctionKeys[slot] = skillID
+		}
+	}
+	if err := skillRows.Err(); err != nil {
+		return snap, err
+	}
+	if err := s.pool.QueryRow(ctx,
+		`SELECT right_click_skill_id
+		 FROM session_start_skill_preferences
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3`,
+		sessionID, accountID, characterID,
+	).Scan(&snap.SkillBinds.RightClickSkillID); err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return snap, fmt.Errorf("store: load session start skill preference: %w", err)
 	}
 
 	stockRows, err := s.pool.Query(ctx,

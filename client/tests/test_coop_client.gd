@@ -681,6 +681,12 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	_assert_true("unranked skill can still be bound", main._assign_skill_function_key(1, "magic_bolt"))
 	_assert_true("unranked binding cannot select right click", not main._select_right_click_skill_from_function_key(1))
 	_assert_eq("right click stays empty for unranked skill", main.right_click_skill_id, "")
+	main._apply_skill_bindings({
+		"function_keys": ["heal", "magic_bolt", "", "", "", "", "", ""],
+		"right_click_skill_id": "heal",
+	})
+	_assert_eq("snapshot restores F1 skill binding", str(main.skill_function_keys[0]), "heal")
+	_assert_eq("snapshot restores right click skill", main.right_click_skill_id, "heal")
 	main.skill_bar.queue_free()
 	main.free()
 

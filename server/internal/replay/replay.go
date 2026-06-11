@@ -321,6 +321,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 		}
 		sim.LoadInventory(persistedItems(start.Items))
 		sim.LoadHotbar(persistedHotbar(start.Hotbar))
+		sim.LoadSkillBindings(persistedSkillBindings(start.SkillBinds))
 		sim.LoadDiscoveredTeleporters(waypointLevels(start.Waypoints))
 		sim.LoadShopStock(persistedShopStock(start.ShopStock))
 		sim.LoadAccountStash(persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
@@ -348,6 +349,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 	sim.SetPlayerMetadata(hostID, host.AccountID, host.CharacterID, displayNameForMember(host), host.Role)
 	sim.LoadInventoryForPlayer(hostID, persistedItems(hostStart.Items))
 	sim.LoadHotbarForPlayer(hostID, persistedHotbar(hostStart.Hotbar))
+	sim.LoadSkillBindingsForPlayer(hostID, persistedSkillBindings(hostStart.SkillBinds))
 	sim.LoadDiscoveredTeleportersForPlayer(hostID, waypointLevels(hostStart.Waypoints))
 	sim.LoadShopStockForPlayer(hostID, persistedShopStock(hostStart.ShopStock))
 	sim.LoadAccountStashForPlayer(hostID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
@@ -466,6 +468,7 @@ func addMemberToSim(sim *game.Sim, rules *game.Rules, member store.SessionMember
 	}
 	sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
 	sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
+	sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
 	sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 	sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 	sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
@@ -560,6 +563,13 @@ func persistedHotbar(slots []store.CharacterHotbarSlot) []game.PersistedHotbarSl
 		})
 	}
 	return out
+}
+
+func persistedSkillBindings(bindings store.CharacterSkillBindings) game.PersistedSkillBindings {
+	return game.PersistedSkillBindings{
+		FunctionKeys:      bindings.FunctionKeys,
+		RightClickSkillID: bindings.RightClickSkillID,
+	}
 }
 
 func persistedShopStock(items []store.CharacterShopStockItem) []game.PersistedShopStockItem {

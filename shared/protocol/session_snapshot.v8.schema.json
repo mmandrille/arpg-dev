@@ -34,6 +34,7 @@
     "character_progression": { "$ref": "#/$defs/character_progression" },
     "skill_progression": { "$ref": "#/$defs/skill_progression" },
     "skill_cooldowns": { "type": "array", "items": { "$ref": "#/$defs/skill_cooldown" } },
+    "skill_bindings": { "$ref": "#/$defs/skill_bindings" },
     "recent_events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
   },
   "$defs": {
@@ -371,6 +372,20 @@
         "skill_id": { "type": "string", "minLength": 1 },
         "remaining_ticks": { "type": "integer", "minimum": 0 },
         "total_ticks": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "skill_bindings": {
+      "type": "object",
+      "required": ["function_keys", "right_click_skill_id"],
+      "additionalProperties": false,
+      "properties": {
+        "function_keys": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": { "type": "string" }
+        },
+        "right_click_skill_id": { "type": "string" }
       }
     },
     "event": {

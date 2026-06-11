@@ -27,6 +27,7 @@
         "allocate_stat_intent",
         "allocate_skill_point_intent",
         "cast_skill_intent",
+        "set_skill_bindings_intent",
         "shop_buy_intent",
         "shop_sell_intent",
         "stash_deposit_item_intent",

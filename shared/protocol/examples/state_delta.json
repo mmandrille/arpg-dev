@@ -79,6 +79,13 @@
         { "skill_id": "magic_bolt", "remaining_ticks": 40, "total_ticks": 40 }
       ]
     },
+    {
+      "op": "skill_bindings_update",
+      "skill_bindings": {
+        "function_keys": ["magic_bolt", "heal", "", "", "", "", "", ""],
+        "right_click_skill_id": "heal"
+      }
+    },
     { "op": "entity_spawn", "entity": { "id": "1006", "type": "loot", "item_def_id": "rusty_sword", "position": { "x": 11, "y": 5 } } }
   ],
   "events": [

@@ -724,6 +724,20 @@
         "total_ticks": { "type": "integer", "minimum": 0 }
       }
     },
+    "skill_bindings": {
+      "type": "object",
+      "required": ["function_keys", "right_click_skill_id"],
+      "additionalProperties": false,
+      "properties": {
+        "function_keys": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": { "type": "string" }
+        },
+        "right_click_skill_id": { "type": "string" }
+      }
+    },
     "change": {
       "oneOf": [
         {
@@ -871,6 +885,15 @@
           "properties": {
             "op": { "const": "skill_cooldown_update" },
             "skill_cooldowns": { "type": "array", "items": { "$ref": "#/$defs/skill_cooldown" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "skill_bindings"],
+          "properties": {
+            "op": { "const": "skill_bindings_update" },
+            "skill_bindings": { "$ref": "#/$defs/skill_bindings" }
           }
         },
         {

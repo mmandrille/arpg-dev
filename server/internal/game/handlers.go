@@ -41,6 +41,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"allocate_stat_intent":        (*Sim).handleAllocateStat,
 	"allocate_skill_point_intent": (*Sim).handleAllocateSkillPoint,
 	"cast_skill_intent":           (*Sim).handleCastSkill,
+	"set_skill_bindings_intent":   (*Sim).handleSetSkillBindings,
 	"shop_buy_intent":             (*Sim).handleShopBuy,
 	"shop_sell_intent":            (*Sim).handleShopSell,
 	"stash_deposit_item_intent":   (*Sim).handleStashDepositItem,
@@ -898,6 +899,34 @@ func (s *Sim) handleUse(in Input, res *TickResult) {
 		res.reject(in.MessageID, reason)
 		return
 	}
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleSetSkillBindings(in Input, res *TickResult) {
+	if in.SetSkillBindings == nil {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	keys := normalizeSkillFunctionKeys(in.SetSkillBindings.FunctionKeys)
+	for _, skillID := range keys {
+		if skillID == "" {
+			continue
+		}
+		if _, ok := s.rules.Skills[skillID]; !ok {
+			res.reject(in.MessageID, "unknown_skill")
+			return
+		}
+	}
+	if rightClick := in.SetSkillBindings.RightClickSkillID; rightClick != "" {
+		if _, ok := s.rules.Skills[rightClick]; !ok {
+			res.reject(in.MessageID, "unknown_skill")
+			return
+		}
+	}
+	s.skillFunctionKeys = keys
+	s.rightClickSkillID = in.SetSkillBindings.RightClickSkillID
+	view := s.SkillBindingsView()
+	res.Changes = append(res.Changes, Change{Op: OpSkillBindingsUpdate, SkillBindings: &view})
 	res.ack(in.MessageID)
 }
 

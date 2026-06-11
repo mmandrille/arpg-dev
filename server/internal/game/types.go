@@ -444,6 +444,12 @@ type PartyMemberView struct {
 	CurrentLevel int    `json:"current_level"`
 }
 
+// SkillBindingsView is the client control layout for active skill shortcuts.
+type SkillBindingsView struct {
+	FunctionKeys      []string `json:"function_keys"`
+	RightClickSkillID string   `json:"right_click_skill_id"`
+}
+
 // Snapshot is the full authoritative state for rendering (session_snapshot).
 type Snapshot struct {
 	ServerTick            uint64                    `json:"server_tick"`
@@ -468,6 +474,7 @@ type Snapshot struct {
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	SkillProgression      SkillProgressionView      `json:"skill_progression"`
 	SkillCooldowns        []SkillCooldownView       `json:"skill_cooldowns"`
+	SkillBindings         SkillBindingsView         `json:"skill_bindings"`
 	RecentEvents          []Event                   `json:"recent_events"`
 }
 
@@ -490,6 +497,7 @@ const (
 	OpCharacterProgressionUpdate = "character_progression_update"
 	OpSkillProgressionUpdate     = "skill_progression_update"
 	OpSkillCooldownUpdate        = "skill_cooldown_update"
+	OpSkillBindingsUpdate        = "skill_bindings_update"
 	OpShopStockReplace           = "shop_stock_replace"
 	OpShopStockAvailability      = "shop_stock_availability_update"
 )
@@ -519,6 +527,7 @@ type Change struct {
 	Progression      *CharacterProgressionView
 	SkillProgression *SkillProgressionView
 	SkillCooldowns   []SkillCooldownView
+	SkillBindings    *SkillBindingsView
 	ShopID           string
 	RefreshKey       string
 	ShopStock        []PersistedShopStockItem
@@ -626,6 +635,11 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op             string              `json:"op"`
 			SkillCooldowns []SkillCooldownView `json:"skill_cooldowns"`
 		}{c.Op, c.SkillCooldowns})
+	case OpSkillBindingsUpdate:
+		return json.Marshal(struct {
+			Op            string             `json:"op"`
+			SkillBindings *SkillBindingsView `json:"skill_bindings"`
+		}{c.Op, c.SkillBindings})
 	case OpShopStockReplace:
 		return json.Marshal(struct {
 			Op         string                   `json:"op"`

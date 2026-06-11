@@ -1,0 +1,10 @@
+{
+  "type": "set_skill_bindings_intent",
+  "message_id": "msg_01H00000000000000000000000",
+  "session_id": "sess_01H00000000000000000000000",
+  "tick": 42,
+  "payload": {
+    "function_keys": ["magic_bolt", "heal", "", "", "", "", "", ""],
+    "right_click_skill_id": "heal"
+  }
+}

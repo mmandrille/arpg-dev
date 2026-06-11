@@ -341,7 +341,13 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character items")
 		return false
 	}
-	progression, err := s.store.GetOrCreateCharacterProgression(ctx, accountID, characterID, progressionDefaultsFromRules(s.rules))
+	character, err := s.store.GetCharacter(ctx, characterID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character")
+		return false
+	}
+	progression, err := s.store.GetOrCreateCharacterProgression(ctx, accountID, characterID, progressionDefaultsFromRules(s.rules, character.CharacterClass))
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character progression")
@@ -473,8 +479,11 @@ func sessionResponse(sess store.Session, characterID, joinCode string) createSes
 	}
 }
 
-func progressionDefaultsFromRules(rules *game.Rules) store.CharacterProgressionDefaults {
+func progressionDefaultsFromRules(rules *game.Rules, characterClass string) store.CharacterProgressionDefaults {
 	state := rules.DefaultCharacterProgressionState()
+	if classDef, ok := rules.CharacterProgression.Classes[characterClass]; ok {
+		state.BaseStats = classDef.BaseStats
+	}
 	return store.CharacterProgressionDefaults{
 		Level:               state.Level,
 		Experience:          state.Experience,

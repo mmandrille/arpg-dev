@@ -4,11 +4,16 @@
   "title": "Character progression rules (v0)",
   "description": "Declarative character stats, XP thresholds, level-up stat/skill points, and bounded derived-stat formulas.",
   "type": "object",
-  "required": ["version", "base_stats", "points_per_level", "skill_points", "level_cap", "experience_curve", "derived_stats"],
+  "required": ["version", "base_stats", "classes", "points_per_level", "skill_points", "level_cap", "experience_curve", "derived_stats"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
     "base_stats": { "$ref": "#/$defs/base_stats" },
+    "classes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/character_class" }
+    },
     "points_per_level": { "type": "integer", "minimum": 1 },
     "skill_points": {
       "type": "object",
@@ -85,6 +90,15 @@
         "dex": { "type": "integer", "minimum": 1 },
         "vit": { "type": "integer", "minimum": 1 },
         "magic": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "character_class": {
+      "type": "object",
+      "required": ["name", "base_stats"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "base_stats": { "$ref": "#/$defs/base_stats" }
       }
     },
     "derived_formula": {

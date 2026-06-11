@@ -132,6 +132,9 @@ func TestLoadRules(t *testing.T) {
 	if r.CharacterProgression.PointsPerLevel != 3 || r.CharacterProgression.LevelCap != 100 {
 		t.Fatalf("character progression = %+v, want points_per_level 3 level_cap 100", r.CharacterProgression)
 	}
+	if len(r.CharacterProgression.Classes) != 3 || r.CharacterProgression.Classes["barbarian"].BaseStats.Str != 5 || r.CharacterProgression.Classes["sorcerer"].BaseStats.Magic != 10 || r.CharacterProgression.Classes["paladin"].BaseStats.Vit != 8 {
+		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin starting stats", r.CharacterProgression.Classes)
+	}
 	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 3 {
 		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 3", r.CharacterProgression.SkillPoints)
 	}

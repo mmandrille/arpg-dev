@@ -128,7 +128,16 @@ func loginEmail(t *testing.T, h http.Handler, email string) (accountID, token st
 
 func createCharacter(t *testing.T, h http.Handler, token, name string) characterResponse {
 	t.Helper()
-	rec := postJSON(h, "/v0/characters", token, map[string]string{"name": name})
+	return createCharacterWithClass(t, h, token, name, "")
+}
+
+func createCharacterWithClass(t *testing.T, h http.Handler, token, name, characterClass string) characterResponse {
+	t.Helper()
+	body := map[string]string{"name": name}
+	if characterClass != "" {
+		body["character_class"] = characterClass
+	}
+	rec := postJSON(h, "/v0/characters", token, body)
 	if rec.Code != http.StatusCreated {
 		t.Fatalf("create character status = %d, body = %s", rec.Code, rec.Body.String())
 	}
@@ -136,7 +145,7 @@ func createCharacter(t *testing.T, h http.Handler, token, name string) character
 	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
 		t.Fatalf("decode character: %v", err)
 	}
-	if res.CharacterID == "" || res.Name == "" || res.CreatedAt == "" {
+	if res.CharacterID == "" || res.Name == "" || res.CharacterClass == "" || res.CreatedAt == "" {
 		t.Fatalf("incomplete character response: %+v", res)
 	}
 	return res
@@ -207,17 +216,27 @@ func TestCreateCharacterValidationAndList(t *testing.T) {
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("long name status = %d, want 400", rec.Code)
 	}
+	rec = postJSON(h, "/v0/characters", token, map[string]string{"name": "Bad Class", "character_class": "necromancer"})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("invalid class status = %d, want 400", rec.Code)
+	}
 
 	first := createCharacter(t, h, token, "  Mara  ")
 	if first.Name != "Mara" {
 		t.Fatalf("trimmed name = %q, want Mara", first.Name)
 	}
+	if first.CharacterClass != "barbarian" {
+		t.Fatalf("default character_class = %q, want barbarian", first.CharacterClass)
+	}
 	if first.Level != 1 || first.Gold != 0 || first.DeepestDungeonDepth != 0 {
 		t.Fatalf("new character summary = %+v, want level 1 gold 0 depth 0", first)
 	}
-	second := createCharacter(t, h, token, "Mara")
+	second := createCharacterWithClass(t, h, token, "Mara", "sorcerer")
 	if second.Name != "Mara" || second.CharacterID == first.CharacterID {
 		t.Fatalf("duplicate character not created independently: first=%+v second=%+v", first, second)
+	}
+	if second.CharacterClass != "sorcerer" {
+		t.Fatalf("explicit character_class = %q, want sorcerer", second.CharacterClass)
 	}
 
 	rec = getJSON(h, "/v0/characters", token)
@@ -241,6 +260,41 @@ func TestCreateCharacterValidationAndList(t *testing.T) {
 		if c.CharacterID == first.CharacterID && (c.Level != 1 || c.Gold != 0 || c.DeepestDungeonDepth != 0) {
 			t.Fatalf("default listed summary = %+v, want level 1 gold 0 depth 0", c)
 		}
+		if c.CharacterID == second.CharacterID && c.CharacterClass != "sorcerer" {
+			t.Fatalf("listed explicit class = %+v, want sorcerer", c)
+		}
+	}
+}
+
+func TestCharacterClassSeedsSessionStartProgression(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	accountID, token := loginEmail(t, h, "characters-class-stats+"+ids.Token()[:12]+"@example.test")
+	barbarian := createCharacterWithClass(t, h, token, "Class Barbarian", "barbarian")
+	sorcerer := createCharacterWithClass(t, h, token, "Class Sorcerer", "sorcerer")
+
+	rec := postJSON(h, "/v0/sessions", token, map[string]string{"mode": "solo", "world_id": "vertical_slice", "character_id": barbarian.CharacterID})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("barbarian session status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/sessions", token, map[string]string{"mode": "solo", "world_id": "vertical_slice", "character_id": sorcerer.CharacterID})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("sorcerer session status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	barbProgression, err := db.GetCharacterProgression(ctx, accountID, barbarian.CharacterID)
+	if err != nil {
+		t.Fatalf("barbarian progression: %v", err)
+	}
+	sorcProgression, err := db.GetCharacterProgression(ctx, accountID, sorcerer.CharacterID)
+	if err != nil {
+		t.Fatalf("sorcerer progression: %v", err)
+	}
+	if barbProgression.Stats.Str != 5 || barbProgression.Stats.Vit != 5 || barbProgression.Stats.Magic != 5 {
+		t.Fatalf("barbarian stats = %+v, want class start", barbProgression.Stats)
+	}
+	if sorcProgression.Stats.Str != 3 || sorcProgression.Stats.Magic != 10 {
+		t.Fatalf("sorcerer stats = %+v, want class start", sorcProgression.Stats)
 	}
 }
 

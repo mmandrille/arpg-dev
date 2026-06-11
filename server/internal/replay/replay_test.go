@@ -1358,7 +1358,7 @@ func (f *fakeRepo) GetCharacter(context.Context, string) (store.Character, error
 func (f *fakeRepo) ListCharacters(context.Context, string) ([]store.CharacterSummary, error) {
 	return nil, nil
 }
-func (f *fakeRepo) CreateCharacter(context.Context, string, string, string) (store.Character, error) {
+func (f *fakeRepo) CreateCharacter(context.Context, string, string, string, string) (store.Character, error) {
 	return store.Character{}, nil
 }
 func (f *fakeRepo) DeleteCharacter(context.Context, string, string) error { return nil }

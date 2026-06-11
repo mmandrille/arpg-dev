@@ -42,7 +42,7 @@ func createCleanupSession(t *testing.T, ctx context.Context, s *Store, label str
 	if err != nil {
 		t.Fatalf("upsert account: %v", err)
 	}
-	char, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Cleanup "+label)
+	char, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Cleanup "+label, "barbarian")
 	if err != nil {
 		t.Fatalf("create character: %v", err)
 	}

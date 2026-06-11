@@ -6,6 +6,20 @@
     "vit": 5,
     "magic": 5
   },
+  "classes": {
+    "barbarian": {
+      "name": "Barbarian",
+      "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 }
+    },
+    "sorcerer": {
+      "name": "Sorcerer",
+      "base_stats": { "str": 3, "dex": 5, "vit": 5, "magic": 10 }
+    },
+    "paladin": {
+      "name": "Paladin",
+      "base_stats": { "str": 6, "dex": 4, "vit": 8, "magic": 5 }
+    }
+  },
   "points_per_level": 3,
   "skill_points": {
     "points_per_grant": 1,

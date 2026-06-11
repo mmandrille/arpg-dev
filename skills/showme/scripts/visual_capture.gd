@@ -54,6 +54,8 @@ func _initialize() -> void:
 			await _setup_hud()
 		"stairs":
 			await _setup_stairs()
+		"chests":
+			await _setup_chests()
 		"inventory":
 			await _setup_inventory()
 		"skills":
@@ -283,6 +285,37 @@ func _setup_stairs() -> void:
 	down.name = "PreviewStairsDown"
 	down.position = Vector3(1.0, 0.0, 0.0)
 	root.add_child(down)
+
+
+func _setup_chests() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackChests"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(3.4, 2.6, 4.4), Vector3(0.0, 0.42, 0.0), 3.6)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(4.4, 0.04, 2.4)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.025, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#353735")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var main: Node3D = MainScript.new()
+	var stash := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_stash"}) as Node3D
+	stash.name = "PreviewTownStash"
+	stash.position = Vector3(-1.0, 0.0, 0.0)
+	root.add_child(stash)
+	var chest := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest"}) as Node3D
+	chest.name = "PreviewTreasureChest"
+	chest.position = Vector3(1.0, 0.0, 0.0)
+	root.add_child(chest)
+	_subject = root
 
 
 func _add_light(root: Node3D) -> void:

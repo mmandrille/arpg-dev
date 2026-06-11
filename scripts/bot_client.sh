@@ -214,12 +214,14 @@ run_scenario() {
   scenario_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('id','unknown'))")"
   world_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('world_id',''))")"
   seed="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('seed',''))")"
-  started_ts="$SECONDS"
+  started_ts="$(python3 -c 'import time; print(time.monotonic())')"
   tmpfile="$(mktemp)"
   preflight_metadata="$(mktemp)"
   preflight_log="$(mktemp)"
 
-  echo "[bot-client $(_ts)] --- running scenario: $scenario_id (world=$world_id file=$(basename "$scenario_path"))"
+  if ! is_quiet_mode || [[ "$HEADLESS" != "1" ]]; then
+    echo "[bot-client $(_ts)] running scenario: $scenario_id (world=$world_id file=$(basename "$scenario_path"))"
+  fi
   exit_code=0
   local godot_flags="--resolution 1280x720"
   local email
@@ -285,11 +287,12 @@ run_scenario() {
 
   rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
   cleanup_preflights
-  local elapsed=$((SECONDS - started_ts))
+  local elapsed
+  elapsed="$(python3 -c 'import sys,time; print(f"{time.monotonic() - float(sys.argv[1]):.2f}s")' "$started_ts")"
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
-    echo "OK: bot-client $scenario_id (${elapsed}s)"
+    echo "OK: client bot scenario $scenario_id (elapsed=$elapsed)"
   else
-    echo "[bot-client $(_ts)] OK $scenario_id elapsed=${elapsed}s"
+    echo "[bot-client $(_ts)] OK $scenario_id elapsed=${elapsed}"
   fi
 }
 

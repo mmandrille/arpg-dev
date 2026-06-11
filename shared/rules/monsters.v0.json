@@ -114,7 +114,7 @@
       "leash_radius": 10.0,
       "move_speed": 0.49,
       "attack_damage": { "min": 1, "max": 2 },
-      "attack_cooldown_ticks": 32
+      "attack_cooldown_ticks": 21
     },
     "dungeon_archer": {
       "name": "Cave Archer",
@@ -131,7 +131,7 @@
       "leash_radius": 10.0,
       "move_speed": 0.42,
       "attack_damage": { "min": 1, "max": 1 },
-      "attack_cooldown_ticks": 75,
+      "attack_cooldown_ticks": 50,
       "attack_mode": "ranged",
       "attack_range": 7.0,
       "projectile_speed": 16.0,
@@ -152,7 +152,7 @@
       "leash_radius": 10.0,
       "move_speed": 0.49,
       "attack_damage": { "min": 1, "max": 2 },
-      "attack_cooldown_ticks": 32
+      "attack_cooldown_ticks": 21
     },
     "dungeon_bat": {
       "name": "Cave Bat",
@@ -169,7 +169,7 @@
       "leash_radius": 10.0,
       "move_speed": 0.49,
       "attack_damage": { "min": 1, "max": 2 },
-      "attack_cooldown_ticks": 32
+      "attack_cooldown_ticks": 21
     },
     "combat_lab_soft_target": {
       "name": "Combat Lab Soft Target",
@@ -222,7 +222,7 @@
       "leash_radius": 6.0,
       "move_speed": 0.49,
       "attack_damage": { "min": 2, "max": 2 },
-      "attack_cooldown_ticks": 20
+      "attack_cooldown_ticks": 13
     },
     "combat_lab_miss_attacker": {
       "name": "Combat Lab Miss Attacker",
@@ -239,7 +239,7 @@
       "leash_radius": 6.0,
       "move_speed": 0.49,
       "attack_damage": { "min": 2, "max": 2 },
-      "attack_cooldown_ticks": 20
+      "attack_cooldown_ticks": 13
     }
   }
 }

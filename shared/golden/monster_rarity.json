@@ -23,7 +23,7 @@
         "hit_chance": 0.5,
         "crit_chance": 0.0,
         "block_percent": 0,
-        "attack_cooldown_ticks": 32,
+        "attack_cooldown_ticks": 21,
         "xp_reward": 10
       }
     },
@@ -48,7 +48,7 @@
         "hit_chance": 0.56,
         "crit_chance": 0.025,
         "block_percent": 5,
-        "attack_cooldown_ticks": 28,
+        "attack_cooldown_ticks": 18,
         "xp_reward": 15
       }
     },
@@ -73,7 +73,7 @@
         "hit_chance": 0.62,
         "crit_chance": 0.06,
         "block_percent": 10,
-        "attack_cooldown_ticks": 25,
+        "attack_cooldown_ticks": 16,
         "xp_reward": 20
       }
     },
@@ -98,7 +98,7 @@
         "hit_chance": 0.68,
         "crit_chance": 0.095,
         "block_percent": 15,
-        "attack_cooldown_ticks": 22,
+        "attack_cooldown_ticks": 14,
         "xp_reward": 30
       }
     }
@@ -145,7 +145,7 @@
           "hit_chance": 0.64,
           "crit_chance": 0.085,
           "block_percent": 13,
-          "attack_cooldown_ticks": 55,
+          "attack_cooldown_ticks": 36,
           "xp_reward": 30
         },
         {
@@ -158,7 +158,7 @@
           "hit_chance": 0.52,
           "crit_chance": 0.005,
           "block_percent": 1,
-          "attack_cooldown_ticks": 31,
+          "attack_cooldown_ticks": 20,
           "xp_reward": 10
         }
       ]

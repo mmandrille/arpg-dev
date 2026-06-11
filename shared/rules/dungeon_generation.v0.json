@@ -96,7 +96,7 @@
     "block_percent_per_depth": 1,
     "max_block_percent": 35,
     "attack_cooldown_multiplier_per_depth": 0.97,
-    "min_attack_cooldown_ticks": 18
+    "min_attack_cooldown_ticks": 12
   },
   "monster_rarities": [
     {

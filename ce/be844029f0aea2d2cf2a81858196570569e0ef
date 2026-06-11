@@ -1,0 +1,82 @@
+docs/specs/v64_spec-mystery-seller-paid-reroll.md
+  s_74e4f341218515::t_04788e0291378a 1-2,4-99
+  s_74e4f341218515::t_b2fce8b2d3adcf 3
+shared/rules/shops.v0.json
+  s_74e4f341218515::t_35fdbc979f6687 80
+shared/protocol/messages.v8.schema.json
+  s_74e4f341218515::t_35fdbc979f6687 33,92-93,302-308
+server/internal/game/handlers.go
+  s_74e4f341218515::t_dd5e75b57de009 47,297-332
+client/scripts/main.gd
+  s_74e4f341218515::t_33406800541197 1071-1074,4852-4855
+client/tests/test_shop_panel.gd
+  s_74e4f341218515::t_87744bd2b78385 49,125-127,149-152,154-156
+client/scripts/item_rules_loader.gd
+  s_74e4f341218515::t_fcaf705a786281 3,17,28,62-71
+tools/bot/scenarios/39_mystery_seller_paid_reroll.json
+  s_74e4f341218515::t_155f590ba51acc 10,12
+  s_74e4f341218515::t_9482ef40e4fc69 1-9,11,13-86
+docs/as-built/v64_mystery-seller-paid-reroll.md
+  s_74e4f341218515::t_b2fce8b2d3adcf 1-30,33,35-41
+  s_74e4f341218515::t_f6ed6a330a3e27 31-32,34
+PROGRESS.md
+  s_74e4f341218515::t_b2fce8b2d3adcf 15,85,189
+server/internal/inputdecode/inputdecode_test.go
+  s_74e4f341218515::t_00da493830b7f5 196-220
+server/internal/inputdecode/inputdecode.go
+  s_74e4f341218515::t_00da0065377698 32,109-111,126,255-260
+server/internal/game/shop_test.go
+  s_74e4f341218515::t_a6944273723509 252-322
+docs/plans/v64_2026-06-11-mystery-seller-paid-reroll.md
+  s_74e4f341218515::t_04788e0291378a 1-2,4-50,52-55,57-62,64-67,69-73,75-80,82-85,87-92,94-97,99-104,106-109,111-118,122-126
+  s_74e4f341218515::t_b2fce8b2d3adcf 3,51,56,63,68,74,81,86,93,98,105,119-120
+  s_74e4f341218515::t_f6ed6a330a3e27 110,121
+tools/bot/run.py
+  s_74e4f341218515::t_a06a3c5258bbc4 1312-1313
+  s_74e4f341218515::t_d5b9b9397c59ed 1283-1311,1314-1316,2255
+client/scripts/shop_panel.gd
+  s_74e4f341218515::t_d51ebe15caa34f 58,180-182,222-226,257-263,288,480-507
+client/scripts/bot_controller.gd
+  s_74e4f341218515::t_6b9799d335008d 157-158,259-263,564-565
+server/internal/game/rules.go
+  s_74e4f341218515::t_0d24924d99bf1c 689,2183-2184
+shared/protocol/examples/mystery_shop_reroll_intent.json
+  s_74e4f341218515::t_35fdbc979f6687 1-2,5,7-10
+  s_74e4f341218515::t_e90bcc8a7f29a1 3-4,6
+tools/bot/scenarios/client/29_mystery_seller_paid_reroll.json
+  s_74e4f341218515::t_155f590ba51acc 15-16,19-20
+  s_74e4f341218515::t_48f1eef9909279 1-14,17-18,21-38
+client/tests/test_client_bot.gd
+  s_74e4f341218515::t_11b0032153f8d9 564
+  s_74e4f341218515::t_5cd525e89e8bf5 534,537,547,580-582
+client/scripts/bot_scenario_runner.gd
+  s_74e4f341218515::t_1e557c84f134bf 2045-2047
+  s_74e4f341218515::t_4e546d1f5df89a 41,54,96-97,452-453,1132-1151,1790,1792
+shared/protocol/state_delta.v8.schema.json
+  s_74e4f341218515::t_a6689816bd7623 355,562-566
+shared/rules/shops.v0.schema.json
+  s_74e4f341218515::t_35fdbc979f6687 61,77
+server/internal/game/sim.go
+  s_74e4f341218515::t_0d24924d99bf1c 1355,1424-1425
+server/internal/game/types.go
+  s_74e4f341218515::t_0d24924d99bf1c 415
+server/internal/game/shop.go
+  s_74e4f341218515::t_1afec7ef723f34 8,243-275
+  s_74e4f341218515::t_e90bcc8a7f29a1 191,206-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cebe844029f0aea2d2cf2a81858196570569e0ef",
+  "prompts": {},
+  "sessions": {
+    "s_74e4f341218515": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb53a-77e2-76e0-85bd-104f9a738cad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

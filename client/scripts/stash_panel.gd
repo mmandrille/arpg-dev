@@ -236,6 +236,7 @@ func _build() -> void:
 	_panel.close_requested.connect(hide_display)
 	add_child(_panel)
 	_reposition_panel()
+	_panel.set_layout_key("stash")
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 7)

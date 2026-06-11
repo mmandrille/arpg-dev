@@ -16,6 +16,7 @@ const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
+const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -48,6 +49,7 @@ func _initialize() -> void:
 	_test_player_hud_identity_uses_character_name_and_level()
 	_test_character_stats_probability_values_use_percentages()
 	_test_character_stats_window_chrome()
+	_test_draggable_window_persists_layout()
 	_test_actionable_panels_autoclose_out_of_range()
 	_test_movement_closes_gameplay_panels()
 
@@ -462,6 +464,36 @@ func _test_character_stats_window_chrome() -> void:
 	panel.bot_click_close()
 	_assert_true("stats close button hides panel", not panel.visible)
 	panel.queue_free()
+
+
+func _test_draggable_window_persists_layout() -> void:
+	var old_path: String = DraggableWindowScript.layout_storage_path
+	var old_force: bool = DraggableWindowScript.force_enable_persistence_for_tests
+	DraggableWindowScript.layout_storage_path = "user://test_window_layout.cfg"
+	DraggableWindowScript.force_enable_persistence_for_tests = true
+	var first = DraggableWindowScript.new()
+	root.add_child(first)
+	first.custom_minimum_size = Vector2(200, 120)
+	first.position = Vector2(24, 36)
+	first.configure("Test", Vector2(180, 80))
+	first.set_layout_key("test_panel")
+	first.bot_drag_by(Vector2(40, 30))
+	var saved_state: Dictionary = first.get_debug_state()
+	_assert_true("window persistence enabled in forced test", bool(saved_state.get("persistence_enabled", false)))
+	first.queue_free()
+
+	var second = DraggableWindowScript.new()
+	root.add_child(second)
+	second.custom_minimum_size = Vector2(200, 120)
+	second.position = Vector2(5, 5)
+	second.configure("Test", Vector2(180, 80))
+	second.set_layout_key("test_panel")
+	var loaded_position: Dictionary = (second.get_debug_state().get("position", {}) as Dictionary)
+	_assert_eq("window persisted x", int(loaded_position.get("x", 0)), 64)
+	_assert_eq("window persisted y", int(loaded_position.get("y", 0)), 66)
+	second.queue_free()
+	DraggableWindowScript.layout_storage_path = old_path
+	DraggableWindowScript.force_enable_persistence_for_tests = old_force
 
 
 func _test_actionable_panels_autoclose_out_of_range() -> void:

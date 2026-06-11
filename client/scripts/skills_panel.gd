@@ -168,6 +168,7 @@ func _build() -> void:
 	_panel.custom_minimum_size = Vector2(330, 500)
 	_panel.position = Vector2(362, 118)
 	_panel.configure("Skills", Vector2(304, 436))
+	_panel.set_layout_key("skills")
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.close_requested.connect(hide_display)

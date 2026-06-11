@@ -344,6 +344,7 @@ func _build() -> void:
 	_panel.custom_minimum_size = Vector2(750, 460)
 	_panel.configure("Inventory", Vector2(720, 396))
 	_reposition_panel()
+	_panel.set_layout_key("inventory")
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.close_requested.connect(hide_display)

@@ -505,6 +505,25 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("character_progression base_stats are valid")
 
+    class_defs = character_progression.get("classes", {})
+    expected_classes = {"barbarian", "sorcerer", "paladin"}
+    if set(class_defs) != expected_classes:
+        report.fail("character_progression classes", f"must define exactly {sorted(expected_classes)}")
+    else:
+        invalid_classes = []
+        duplicate_stat_shapes = set()
+        for class_id, class_def in class_defs.items():
+            stats = class_def.get("base_stats", {})
+            if not class_def.get("name") or set(stats) != progression_stats or any(value < 1 for value in stats.values()):
+                invalid_classes.append(class_id)
+            duplicate_stat_shapes.add(tuple(stats.get(stat, 0) for stat in sorted(progression_stats)))
+        if invalid_classes:
+            report.fail("character_progression classes", f"invalid class stat maps: {invalid_classes}")
+        elif len(duplicate_stat_shapes) != len(expected_classes):
+            report.fail("character_progression classes", "each class must have distinct starting stats")
+        else:
+            report.ok("character_progression classes are valid")
+
     if character_progression["points_per_level"] <= 0:
         report.fail("character_progression points_per_level", "must be positive")
     else:

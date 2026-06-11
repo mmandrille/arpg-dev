@@ -51,9 +51,9 @@ func (s *Store) GetAccount(ctx context.Context, id string) (Account, error) {
 func (s *Store) GetOrCreateDefaultCharacter(ctx context.Context, charID, accountID, name string) (Character, error) {
 	var c Character
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, account_id, name, dead, created_at FROM characters WHERE account_id = $1 ORDER BY created_at ASC LIMIT 1`,
+		`SELECT id, account_id, name, character_class, dead, created_at FROM characters WHERE account_id = $1 ORDER BY created_at ASC LIMIT 1`,
 		accountID,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CharacterClass, &c.Dead, &c.CreatedAt)
 	if err == nil {
 		return c, nil
 	}
@@ -62,9 +62,9 @@ func (s *Store) GetOrCreateDefaultCharacter(ctx context.Context, charID, account
 	}
 	err = s.pool.QueryRow(ctx,
 		`INSERT INTO characters (id, account_id, name) VALUES ($1, $2, $3)
-		 RETURNING id, account_id, name, dead, created_at`,
+		 RETURNING id, account_id, name, character_class, dead, created_at`,
 		charID, accountID, name,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CharacterClass, &c.Dead, &c.CreatedAt)
 	if err != nil {
 		return Character{}, fmt.Errorf("store: create character: %w", err)
 	}
@@ -74,8 +74,8 @@ func (s *Store) GetOrCreateDefaultCharacter(ctx context.Context, charID, account
 func (s *Store) GetCharacter(ctx context.Context, id string) (Character, error) {
 	var c Character
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, account_id, name, dead, created_at FROM characters WHERE id = $1`, id,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
+		`SELECT id, account_id, name, character_class, dead, created_at FROM characters WHERE id = $1`, id,
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CharacterClass, &c.Dead, &c.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Character{}, ErrNotFound
 	}
@@ -87,7 +87,7 @@ func (s *Store) GetCharacter(ctx context.Context, id string) (Character, error) 
 
 func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]CharacterSummary, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT c.id, c.account_id, c.name, c.dead,
+		`SELECT c.id, c.account_id, c.name, c.character_class, c.dead,
 		        COALESCE(p.level, 1), COALESCE(p.gold, 0), COALESCE(p.deepest_dungeon_depth, 0),
 		        c.created_at
 		   FROM characters c
@@ -109,6 +109,7 @@ func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]Charact
 			&c.ID,
 			&c.AccountID,
 			&c.Name,
+			&c.CharacterClass,
 			&c.Dead,
 			&c.Level,
 			&c.Gold,
@@ -125,13 +126,13 @@ func (s *Store) ListCharacters(ctx context.Context, accountID string) ([]Charact
 	return chars, nil
 }
 
-func (s *Store) CreateCharacter(ctx context.Context, charID, accountID, name string) (Character, error) {
+func (s *Store) CreateCharacter(ctx context.Context, charID, accountID, name, characterClass string) (Character, error) {
 	var c Character
 	err := s.pool.QueryRow(ctx,
-		`INSERT INTO characters (id, account_id, name) VALUES ($1, $2, $3)
-		 RETURNING id, account_id, name, dead, created_at`,
-		charID, accountID, name,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
+		`INSERT INTO characters (id, account_id, name, character_class) VALUES ($1, $2, $3, $4)
+		 RETURNING id, account_id, name, character_class, dead, created_at`,
+		charID, accountID, name, characterClass,
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CharacterClass, &c.Dead, &c.CreatedAt)
 	if err != nil {
 		return Character{}, fmt.Errorf("store: create character: %w", err)
 	}
@@ -144,9 +145,9 @@ func (s *Store) RenameCharacter(ctx context.Context, accountID, characterID, nam
 		`UPDATE characters
 		 SET name = $3
 		 WHERE account_id = $1 AND id = $2
-		 RETURNING id, account_id, name, dead, created_at`,
+		 RETURNING id, account_id, name, character_class, dead, created_at`,
 		accountID, characterID, name,
-	).Scan(&c.ID, &c.AccountID, &c.Name, &c.Dead, &c.CreatedAt)
+	).Scan(&c.ID, &c.AccountID, &c.Name, &c.CharacterClass, &c.Dead, &c.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Character{}, ErrNotFound
 	}

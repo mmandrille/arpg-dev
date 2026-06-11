@@ -121,11 +121,17 @@ type DungeonGenerationRules struct {
 // stats, and derived-stat formulas.
 type CharacterProgressionRules struct {
 	BaseStats      BaseStatsView
+	Classes        map[string]CharacterClassDef
 	PointsPerLevel int
 	SkillPoints    SkillPointRules
 	LevelCap       int
 	XPThresholds   map[int]int
 	DerivedStats   map[string]LinearStatFormula
+}
+
+type CharacterClassDef struct {
+	Name      string        `json:"name"`
+	BaseStats BaseStatsView `json:"base_stats"`
 }
 
 // SkillPointRules controls deterministic skill-point grants on level-up.
@@ -857,11 +863,12 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 
 	var progression struct {
-		Version         int             `json:"version"`
-		BaseStats       BaseStatsView   `json:"base_stats"`
-		PointsPerLevel  int             `json:"points_per_level"`
-		SkillPoints     SkillPointRules `json:"skill_points"`
-		LevelCap        int             `json:"level_cap"`
+		Version         int                          `json:"version"`
+		BaseStats       BaseStatsView                `json:"base_stats"`
+		Classes         map[string]CharacterClassDef `json:"classes"`
+		PointsPerLevel  int                          `json:"points_per_level"`
+		SkillPoints     SkillPointRules              `json:"skill_points"`
+		LevelCap        int                          `json:"level_cap"`
 		ExperienceCurve struct {
 			Type   string `json:"type"`
 			Levels []struct {
@@ -876,6 +883,20 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if progression.BaseStats.Str <= 0 || progression.BaseStats.Dex <= 0 || progression.BaseStats.Vit <= 0 || progression.BaseStats.Magic <= 0 {
 		return nil, fmt.Errorf("game: invalid rules character_progression.base_stats: all stats must be positive")
+	}
+	if len(progression.Classes) == 0 {
+		return nil, fmt.Errorf("game: invalid rules character_progression.classes: at least one class is required")
+	}
+	for id, classDef := range progression.Classes {
+		if id == "" {
+			return nil, fmt.Errorf("game: invalid rules character_progression.classes: empty class id")
+		}
+		if classDef.Name == "" {
+			return nil, fmt.Errorf("game: invalid rules character_progression.classes.%s.name: required", id)
+		}
+		if classDef.BaseStats.Str <= 0 || classDef.BaseStats.Dex <= 0 || classDef.BaseStats.Vit <= 0 || classDef.BaseStats.Magic <= 0 {
+			return nil, fmt.Errorf("game: invalid rules character_progression.classes.%s.base_stats: all stats must be positive", id)
+		}
 	}
 	if progression.PointsPerLevel <= 0 {
 		return nil, fmt.Errorf("game: invalid rules character_progression.points_per_level: must be positive")
@@ -937,6 +958,7 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	r.CharacterProgression = CharacterProgressionRules{
 		BaseStats:      progression.BaseStats,
+		Classes:        progression.Classes,
 		PointsPerLevel: progression.PointsPerLevel,
 		SkillPoints:    progression.SkillPoints,
 		LevelCap:       progression.LevelCap,

@@ -14,11 +14,12 @@ type Account struct {
 
 // Character belongs to an account.
 type Character struct {
-	ID        string
-	AccountID string
-	Name      string
-	Dead      bool
-	CreatedAt time.Time
+	ID             string
+	AccountID      string
+	Name           string
+	CharacterClass string
+	Dead           bool
+	CreatedAt      time.Time
 }
 
 // CharacterSummary is the account-scoped character-list row exposed before a
@@ -28,6 +29,7 @@ type CharacterSummary struct {
 	ID                  string
 	AccountID           string
 	Name                string
+	CharacterClass      string
 	Dead                bool
 	Level               int
 	Gold                int

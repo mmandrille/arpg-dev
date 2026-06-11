@@ -12,6 +12,7 @@ import (
 )
 
 const maxCharacterNameRunes = 24
+const defaultCharacterClass = "barbarian"
 
 func (s *Server) registerCharacterRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /v0/characters", s.requireAuth(http.HandlerFunc(s.handleListCharacters)))
@@ -23,6 +24,7 @@ func (s *Server) registerCharacterRoutes(mux *http.ServeMux) {
 type characterResponse struct {
 	CharacterID         string `json:"character_id"`
 	Name                string `json:"name"`
+	CharacterClass      string `json:"character_class"`
 	Dead                bool   `json:"dead"`
 	Level               int    `json:"level"`
 	Gold                int    `json:"gold"`
@@ -35,7 +37,8 @@ type listCharactersResponse struct {
 }
 
 type createCharacterRequest struct {
-	Name string `json:"name"`
+	Name           string `json:"name"`
+	CharacterClass string `json:"character_class"`
 }
 
 type renameCharacterRequest struct {
@@ -85,7 +88,16 @@ func (s *Server) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	char, err := s.store.CreateCharacter(r.Context(), ids.New("char"), accountID, name)
+	characterClass := strings.TrimSpace(req.CharacterClass)
+	if characterClass == "" {
+		characterClass = defaultCharacterClass
+	}
+	if _, ok := s.rules.CharacterProgression.Classes[characterClass]; !ok {
+		writeError(w, http.StatusBadRequest, "invalid_character_class", "character class is not available")
+		return
+	}
+
+	char, err := s.store.CreateCharacter(r.Context(), ids.New("char"), accountID, name, characterClass)
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create character")
@@ -165,6 +177,7 @@ func characterToResponse(c store.Character) characterResponse {
 	return characterResponse{
 		CharacterID:         c.ID,
 		Name:                c.Name,
+		CharacterClass:      c.CharacterClass,
 		Dead:                c.Dead,
 		Level:               1,
 		Gold:                0,
@@ -177,6 +190,7 @@ func characterSummaryToResponse(c store.CharacterSummary) characterResponse {
 	return characterResponse{
 		CharacterID:         c.ID,
 		Name:                c.Name,
+		CharacterClass:      c.CharacterClass,
 		Dead:                c.Dead,
 		Level:               c.Level,
 		Gold:                c.Gold,

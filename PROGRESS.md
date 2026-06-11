@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v68 — `market-stash-listing-foundation` |
+| **Latest completed slice** | v69 — `character-class-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -87,6 +87,7 @@ v65_* = stash-search-and-sorting
 v66_* = progress-backlog-hygiene
 v67_* = boss-kill-reward-polish
 v68_* = market-stash-listing-foundation
+v69_* = character-class-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -195,6 +196,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v66** | `progress-backlog-hygiene` | Complete (`make ci` green) | [`v66_spec-progress-backlog-hygiene.md`](docs/specs/v66_spec-progress-backlog-hygiene.md) | [`v66_2026-06-11-progress-backlog-hygiene.md`](docs/plans/v66_2026-06-11-progress-backlog-hygiene.md) | [`as-built`](docs/as-built/v66_progress-backlog-hygiene.md) |
 | **v67** | `boss-kill-reward-polish` | Complete (`make ci` green) | [`v67_spec-boss-kill-reward-polish.md`](docs/specs/v67_spec-boss-kill-reward-polish.md) | [`v67_2026-06-11-boss-kill-reward-polish.md`](docs/plans/v67_2026-06-11-boss-kill-reward-polish.md) | [`as-built`](docs/as-built/v67_boss-kill-reward-polish.md) |
 | **v68** | `market-stash-listing-foundation` | Complete (`make ci` green) | [`v68_spec-market-stash-listing-foundation.md`](docs/specs/v68_spec-market-stash-listing-foundation.md) | [`v68_2026-06-11-market-stash-listing-foundation.md`](docs/plans/v68_2026-06-11-market-stash-listing-foundation.md) | [`as-built`](docs/as-built/v68_market-stash-listing-foundation.md) |
+| **v69** | `character-class-foundation` | Complete (`make ci` green) | [`v69_spec-character-class-foundation.md`](docs/specs/v69_spec-character-class-foundation.md) | [`v69_2026-06-11-character-class-foundation.md`](docs/plans/v69_2026-06-11-character-class-foundation.md) | [`as-built`](docs/as-built/v69_character-class-foundation.md) |
 
 ---
 
@@ -588,6 +590,11 @@ plus client bot coverage prove the boss-specific signal.
 persistence and authenticated HTTP routes to create a listing from an account stash item, browse
 active listings, and cancel an owned listing back to stash. Offers, purchases, pricing, expiration,
 and Godot market UI remain deferred.
+
+**Character class identity is now authoritative.** v69 persists `character_class`, exposes it in
+character APIs, validates create requests against shared progression class rules, and uses class
+rules to seed fresh progression. The default `barbarian` preserves the prior baseline stats while
+`sorcerer` and `paladin` prove divergent starts.
 
 ### Other deferred items (from specs / ADRs)
 

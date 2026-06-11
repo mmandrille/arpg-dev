@@ -73,6 +73,9 @@ func TestAccountCharacterSessionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create character: %v", err)
 	}
+	if char.CharacterClass != "barbarian" {
+		t.Fatalf("default character class = %q, want barbarian", char.CharacterClass)
+	}
 	// Second call returns the same character.
 	char2, err := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), acct.ID, "Hero")
 	if err != nil {
@@ -105,7 +108,7 @@ func TestAccountCharacterSessionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("list characters: %v", err)
 	}
-	if len(chars) != 1 || chars[0].ID != char.ID || chars[0].Level != 1 || chars[0].Gold != 0 || chars[0].DeepestDungeonDepth != 0 {
+	if len(chars) != 1 || chars[0].ID != char.ID || chars[0].CharacterClass != "barbarian" || chars[0].Level != 1 || chars[0].Gold != 0 || chars[0].DeepestDungeonDepth != 0 {
 		t.Fatalf("default character summary = %+v, want level 1 gold 0 depth 0", chars)
 	}
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, store.CharacterProgression{
@@ -140,11 +143,11 @@ func TestDeleteCharacterRemovesProgressionAndSessions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("upsert account: %v", err)
 	}
-	keep, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Keep")
+	keep, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Keep", "barbarian")
 	if err != nil {
 		t.Fatalf("create keep character: %v", err)
 	}
-	remove, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Remove")
+	remove, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Remove", "barbarian")
 	if err != nil {
 		t.Fatalf("create remove character: %v", err)
 	}
@@ -818,11 +821,11 @@ func TestAccountStashTransfersAreAccountScopedAndAtomic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("upsert account: %v", err)
 	}
-	charA, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Stasher")
+	charA, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Stasher", "barbarian")
 	if err != nil {
 		t.Fatalf("create character A: %v", err)
 	}
-	charB, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Alt")
+	charB, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Alt", "barbarian")
 	if err != nil {
 		t.Fatalf("create character B: %v", err)
 	}
@@ -830,7 +833,7 @@ func TestAccountStashTransfersAreAccountScopedAndAtomic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("upsert other account: %v", err)
 	}
-	otherChar, err := s.CreateCharacter(ctx, ids.New("char"), otherAcct.ID, "Other")
+	otherChar, err := s.CreateCharacter(ctx, ids.New("char"), otherAcct.ID, "Other", "barbarian")
 	if err != nil {
 		t.Fatalf("create other character: %v", err)
 	}
@@ -978,7 +981,7 @@ func TestMarketListingMovesStashItemAndCancelReturnsIt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	char, err := s.CreateCharacter(ctx, "char_market_"+suffix, acct.ID, "Market Hero")
+	char, err := s.CreateCharacter(ctx, "char_market_"+suffix, acct.ID, "Market Hero", "barbarian")
 	if err != nil {
 		t.Fatal(err)
 	}

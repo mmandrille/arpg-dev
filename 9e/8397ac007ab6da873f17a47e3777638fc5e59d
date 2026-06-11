@@ -1,0 +1,36 @@
+docs/as-built/v78_main-config-drop-profiles.md
+  s_c8b827646bf8c0::t_d2c1458cef1b15 1-16
+tools/validate_shared.py
+  s_c8b827646bf8c0::t_d09fd59a359227 1138,1143,1145-1148,1150
+server/internal/game/game_test.go
+  s_c8b827646bf8c0::t_20148dd1ae723d 2861-2872,2885-2886
+PROGRESS.md
+  s_c8b827646bf8c0::t_8930df73f8529d 15,215,655-659,672
+docs/plans/v78_2026-06-11-main-config-drop-profiles.md
+  s_c8b827646bf8c0::t_d2c1458cef1b15 1-22
+server/internal/http/ws_test.go
+  s_c8b827646bf8c0::t_e02ca35c94adaa 677-688,692-694
+  s_c8b827646bf8c0::t_c5b2f69f54f425 689
+  s_c8b827646bf8c0::t_79b71f386bfa33 690-691
+docs/specs/v78_spec-main-config-drop-profiles.md
+  s_c8b827646bf8c0::t_d2c1458cef1b15 1-26
+server/internal/game/rules.go
+  s_c8b827646bf8c0::t_f56481033653a8 633-669
+  s_c8b827646bf8c0::t_64a951747d6a67 1633-1635
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9e8397ac007ab6da873f17a47e3777638fc5e59d",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

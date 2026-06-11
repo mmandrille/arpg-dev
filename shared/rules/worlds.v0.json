@@ -508,6 +508,12 @@
       "player": { "position": { "x": 26, "y": 15 } },
       "entities": []
     },
+    "generated_wall_lab": {
+      "mode": "multi_level",
+      "start_level": -1,
+      "player": { "position": { "x": 26, "y": 15 } },
+      "entities": []
+    },
     "coop_reward_lab": {
       "player": { "position": { "x": 13, "y": 8 } },
       "entities": [
@@ -551,6 +557,11 @@
           "type": "interactable",
           "interactable_def_id": "town_mystery_seller",
           "position": { "x": 17, "y": 12 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_stash",
+          "position": { "x": 11, "y": 12 }
         },
         { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 13, "y": 11 } },
         { "type": "loot", "item_template_id": "cave_greatsword", "position": { "x": 13, "y": 12 } },

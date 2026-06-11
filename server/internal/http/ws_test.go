@@ -674,7 +674,24 @@ func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 }
 
 func TestPostResumePickupAllocatesAfterHistoricalEntities(t *testing.T) {
-	srv := fullStack(t)
+	srv := fullStackWithRules(t, func(rules *game.Rules) {
+		rules.TreasureClasses["test_resume_guaranteed_tc"] = game.TreasureClassDef{Attempts: []game.TreasureAttemptDef{{
+			AttemptID:     "primary",
+			SuccessWeight: 100,
+			NoDropWeight:  0,
+			Entries: []game.TreasureClassEntry{{
+				ItemDefID: "rusty_sword",
+				Weight:    1,
+			}},
+		}}}
+		rules.LootTables["test_resume_guaranteed_drop"] = game.LootTable{TreasureClassID: "test_resume_guaranteed_tc"}
+		dummy := rules.Monsters["training_dummy"]
+		dummy.MaxHP = 1
+		hitChance := 1.0
+		dummy.HitChance = &hitChance
+		dummy.LootTable = "test_resume_guaranteed_drop"
+		rules.Monsters["training_dummy"] = dummy
+	})
 	token, sessionID := loginAndSession(t, srv)
 
 	conn := dialWS(t, srv, token, sessionID)

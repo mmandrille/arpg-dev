@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v77 — `main-config-derived-gameplay` |
+| **Latest completed slice** | v78 — `main-config-drop-profiles` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -212,6 +212,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v75** | `persistent-window-layout` | Complete (`make client-unit` green) | [`v75_spec-persistent-window-layout.md`](docs/specs/v75_spec-persistent-window-layout.md) | [`v75_2026-06-11-persistent-window-layout.md`](docs/plans/v75_2026-06-11-persistent-window-layout.md) | [`as-built`](docs/as-built/v75_persistent-window-layout.md) |
 | **v76** | `main-config-foundation` | Complete (`make ci` green) | [`v76_spec-main-config-foundation.md`](docs/specs/v76_spec-main-config-foundation.md) | [`v76_2026-06-11-main-config-foundation.md`](docs/plans/v76_2026-06-11-main-config-foundation.md) | [`as-built`](docs/as-built/v76_main-config-foundation.md) |
 | **v77** | `main-config-derived-gameplay` | Complete (`make ci` green) | [`v77_spec-main-config-derived-gameplay.md`](docs/specs/v77_spec-main-config-derived-gameplay.md) | [`v77_2026-06-11-main-config-derived-gameplay.md`](docs/plans/v77_2026-06-11-main-config-derived-gameplay.md) | [`as-built`](docs/as-built/v77_main-config-derived-gameplay.md) |
+| **v78** | `main-config-drop-profiles` | Complete (`make ci` green) | [`v78_spec-main-config-drop-profiles.md`](docs/specs/v78_spec-main-config-drop-profiles.md) | [`v78_2026-06-11-main-config-drop-profiles.md`](docs/plans/v78_2026-06-11-main-config-drop-profiles.md) | [`as-built`](docs/as-built/v78_main-config-drop-profiles.md) |
 
 ---
 
@@ -651,6 +652,11 @@ monster drop defaults until follow-up slices consume those values directly.
 `base_attack_interval_ticks` and `base_movement_speed` operational server gameplay inputs, with
 focused tests proving edits to `main_config.v0.json` take effect without touching older rule files.
 
+**Main gameplay config now drives dungeon monster drop chance.** v78 applies
+`base_drop_rate_percent` to dungeon monster treasure-class primary attempts during rules loading,
+so the global drop chance can be tuned from `main_config.v0.json` without hand-editing each depth
+class.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -663,7 +669,7 @@ focused tests proving edits to `main_config.v0.json` take effect without touchin
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
-| Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. Main-config follow-up: v78 should replace repeated dungeon monster drop weights with reusable config-driven drop profiles. | v32 test-locking policy follow-up, v76/v77 deferred |
+| Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
 | Settings | Fullscreen, audio, controls remapping, accessibility options, graphics quality, language selection | v24 non-goals |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |

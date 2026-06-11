@@ -2858,6 +2858,18 @@ func TestDungeonEquipmentDropsGolden(t *testing.T) {
 
 func TestDungeonMonsterLootRate(t *testing.T) {
 	rules := loadRules(t)
+	assertDungeonMonsterLootRate(t, rules, float64(rules.MainConfig.Gameplay.BaseDropRatePercent)/100.0)
+}
+
+func TestMainConfigDropRateDrivesDungeonMonsterLoot(t *testing.T) {
+	rules := loadRulesWithMainGameplay(t, map[string]any{
+		"base_drop_rate_percent": 35,
+	})
+	assertDungeonMonsterLootRate(t, rules, 0.35)
+}
+
+func assertDungeonMonsterLootRate(t *testing.T, rules *Rules, want float64) {
+	t.Helper()
 	tableIDs := []string{"dungeon_mob_drop"}
 	for _, band := range rules.DungeonGeneration.LootBands {
 		tableIDs = append(tableIDs, band.MonsterLootTable)
@@ -2870,8 +2882,8 @@ func TestDungeonMonsterLootRate(t *testing.T) {
 		seen[tableID] = true
 		table := rules.LootTables[tableID]
 		got := treasureClassAtLeastOneDropChance(rules.TreasureClasses[table.TreasureClassID])
-		if math.Abs(got-0.20) > 0.000001 {
-			t.Fatalf("%s at-least-one drop chance = %.4f, want 0.2000", tableID, got)
+		if math.Abs(got-want) > 0.000001 {
+			t.Fatalf("%s at-least-one drop chance = %.4f, want %.4f", tableID, got, want)
 		}
 	}
 }

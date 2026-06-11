@@ -21,39 +21,39 @@
     "cases": [
       {
         "name": "baseline_rusty_sword",
-        "dex_attack_speed": 1.025,
+        "dex_attack_speed": 1.28125,
         "weapon_attack_speed": 1.0,
         "item_attack_speed_percent": 0,
-        "expected_effective_attack_speed": 1.025,
-        "expected_attack_interval_ticks": 20,
-        "expected_magic_bolt_cooldown_ticks": 40
+        "expected_effective_attack_speed": 1.28125,
+        "expected_attack_interval_ticks": 16,
+        "expected_magic_bolt_cooldown_ticks": 32
       },
       {
         "name": "greatsword_slow",
-        "dex_attack_speed": 1.025,
+        "dex_attack_speed": 1.28125,
         "weapon_attack_speed": 0.70,
         "item_attack_speed_percent": 0,
-        "expected_effective_attack_speed": 0.7175,
-        "expected_attack_interval_ticks": 28,
-        "expected_magic_bolt_cooldown_ticks": 56
+        "expected_effective_attack_speed": 0.896875,
+        "expected_attack_interval_ticks": 23,
+        "expected_magic_bolt_cooldown_ticks": 46
       },
       {
         "name": "positive_speed_item",
-        "dex_attack_speed": 1.025,
+        "dex_attack_speed": 1.28125,
         "weapon_attack_speed": 1.0,
         "item_attack_speed_percent": 10,
-        "expected_effective_attack_speed": 1.1275,
-        "expected_attack_interval_ticks": 18,
-        "expected_magic_bolt_cooldown_ticks": 36
+        "expected_effective_attack_speed": 1.409375,
+        "expected_attack_interval_ticks": 15,
+        "expected_magic_bolt_cooldown_ticks": 30
       },
       {
         "name": "negative_speed_item",
-        "dex_attack_speed": 1.025,
+        "dex_attack_speed": 1.28125,
         "weapon_attack_speed": 1.0,
         "item_attack_speed_percent": -20,
-        "expected_effective_attack_speed": 0.82,
-        "expected_attack_interval_ticks": 25,
-        "expected_magic_bolt_cooldown_ticks": 50
+        "expected_effective_attack_speed": 1.025,
+        "expected_attack_interval_ticks": 20,
+        "expected_magic_bolt_cooldown_ticks": 40
       }
     ]
   },

@@ -700,8 +700,8 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	assertAck(t, sim.Tick([]Input{{MessageID: "gloves", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(gloves.instanceID), Slot: "gloves"}}}), "gloves")
 
 	view := sim.CharacterProgressionView()
-	if math.Abs(view.DerivedStats.AttackSpeed-1.1275) > 0.000001 || view.DerivedStats.AttackIntervalTicks != 18 {
-		t.Fatalf("attack speed/interval with blade+gloves = %+v, want 1.1275 / 18", view.DerivedStats)
+	if math.Abs(view.DerivedStats.AttackSpeed-1.409375) > 0.000001 || view.DerivedStats.AttackIntervalTicks != 15 {
+		t.Fatalf("attack speed/interval with blade+gloves = %+v, want 1.409375 / 15", view.DerivedStats)
 	}
 	speed := findStatBreakdown(view.StatBreakdowns, "attack_speed")
 	interval := findStatBreakdown(view.StatBreakdowns, "attack_interval_ticks")
@@ -713,8 +713,8 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	greatsword := addRolledInventoryItem(t, slow, 6402, "cave_greatsword", nil)
 	assertAck(t, slow.Tick([]Input{{MessageID: "greatsword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}}), "greatsword")
 	slowView := slow.CharacterProgressionView()
-	if math.Abs(slowView.DerivedStats.AttackSpeed-0.7175) > 0.000001 || slowView.DerivedStats.AttackIntervalTicks != 28 {
-		t.Fatalf("attack speed/interval with greatsword = %+v, want 0.7175 / 28", slowView.DerivedStats)
+	if math.Abs(slowView.DerivedStats.AttackSpeed-0.896875) > 0.000001 || slowView.DerivedStats.AttackIntervalTicks != 23 {
+		t.Fatalf("attack speed/interval with greatsword = %+v, want 0.896875 / 23", slowView.DerivedStats)
 	}
 }
 
@@ -955,8 +955,8 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		t.Fatalf("missing cast/cooldown events: %+v", cast.Events)
 	}
 	cooldowns := skillCooldownUpdate(cast)
-	if len(cooldowns) != 1 || cooldowns[0].SkillID != magicBoltSkillID || cooldowns[0].RemainingTicks != 40 || cooldowns[0].TotalTicks != 40 {
-		t.Fatalf("cooldown update = %+v, want magic_bolt 40/40", cooldowns)
+	if len(cooldowns) != 1 || cooldowns[0].SkillID != magicBoltSkillID || cooldowns[0].RemainingTicks != 32 || cooldowns[0].TotalTicks != 32 {
+		t.Fatalf("cooldown update = %+v, want magic_bolt 32/32", cooldowns)
 	}
 	spawn := firstChangeEntityByType(cast, projectileEntity)
 	if spawn == nil || spawn.ProjectileDefID != magicBoltSkillID || spawn.TargetID != idStr(monster.id) {

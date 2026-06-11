@@ -14,6 +14,7 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
+const SkillBarScript := preload("res://scripts/skill_bar.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -586,9 +587,14 @@ func _test_capacity_reject_shows_bag_full_unequip_message() -> void:
 
 func _test_skill_function_key_selects_right_click_skill() -> void:
 	var main = MainScript.new()
+	main.skill_bar = SkillBarScript.new()
+	root.add_child(main.skill_bar)
 	main.skill_progression = {
 		"unspent_skill_points": 0,
-		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false}],
+		"skills": [
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false},
+			{"skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false},
+		],
 	}
 	var event := InputEventKey.new()
 	event.keycode = KEY_F1
@@ -596,9 +602,14 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	_assert_true("assign F1 to magic bolt", main._assign_skill_function_key(0, "magic_bolt"))
 	_assert_eq("F1 binding stored", str(main.skill_function_keys[0]), "magic_bolt")
 	_assert_eq("ranked binding selects immediately", main.right_click_skill_id, "magic_bolt")
+	_assert_eq("ranked binding updates skill bar", str(main.skill_bar.get_debug_state().get("skill_id", "")), "magic_bolt")
+	_assert_true("assign F2 to heal", main._assign_skill_function_key(1, "heal"))
+	_assert_eq("F2 binding selects heal", main.right_click_skill_id, "heal")
+	_assert_eq("F2 binding updates skill bar", str(main.skill_bar.get_debug_state().get("skill_id", "")), "heal")
 	main.right_click_skill_id = ""
 	_assert_true("pressing F1 selects right click skill", main._select_right_click_skill_from_function_key(0))
 	_assert_eq("right click skill selected", main.right_click_skill_id, "magic_bolt")
+	_assert_eq("pressing F1 updates skill bar", str(main.skill_bar.get_debug_state().get("skill_id", "")), "magic_bolt")
 
 	main.right_click_skill_id = ""
 	main.skill_progression = {
@@ -608,6 +619,7 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	_assert_true("unranked skill can still be bound", main._assign_skill_function_key(1, "magic_bolt"))
 	_assert_true("unranked binding cannot select right click", not main._select_right_click_skill_from_function_key(1))
 	_assert_eq("right click stays empty for unranked skill", main.right_click_skill_id, "")
+	main.skill_bar.queue_free()
 	main.free()
 
 

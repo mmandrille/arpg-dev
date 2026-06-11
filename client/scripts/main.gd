@@ -2726,6 +2726,7 @@ func _assign_right_click_skill(skill_id: String) -> bool:
 		return false
 	right_click_skill_id = skill_id
 	_sync_skill_bindings_ui()
+	_sync_skill_bar_selection()
 	return true
 
 
@@ -2737,6 +2738,7 @@ func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
 	if _skill_rank(skill_id) > 0:
 		right_click_skill_id = skill_id
 	_sync_skill_bindings_ui()
+	_sync_skill_bar_selection()
 	return true
 
 
@@ -2772,6 +2774,20 @@ func _sync_skill_bindings_ui() -> void:
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
 
 
+func _sync_skill_bar_selection() -> void:
+	if skill_bar == null:
+		return
+	var selected_skill_id := right_click_skill_id
+	if selected_skill_id == "":
+		selected_skill_id = _first_learned_skill_id()
+	if selected_skill_id == "":
+		selected_skill_id = SkillRulesLoader.first_skill_id()
+	skill_bar.set_skill_id(selected_skill_id)
+	skill_bar.set_skill_progression(skill_progression)
+	skill_bar.set_skill_cooldowns(skill_cooldowns)
+	skill_bar.set_interactive(not _skill_cast_blocked(selected_skill_id))
+
+
 func _auto_select_right_click_skill() -> void:
 	if right_click_skill_id != "" and _skill_rank(right_click_skill_id) > 0:
 		return
@@ -2802,21 +2818,12 @@ func _refresh_progression_ui() -> void:
 
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
-	var selected_skill_id := right_click_skill_id
-	if selected_skill_id == "":
-		selected_skill_id = _first_learned_skill_id()
-	if selected_skill_id == "":
-		selected_skill_id = SkillRulesLoader.first_skill_id()
 	if skills_panel != null:
 		skills_panel.set_character_progression(character_progression)
 		skills_panel.set_skill_progression(skill_progression)
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
 		skills_panel.set_interactive(not _skill_allocation_blocked())
-	if skill_bar != null:
-		skill_bar.set_skill_id(selected_skill_id)
-		skill_bar.set_skill_progression(skill_progression)
-		skill_bar.set_skill_cooldowns(skill_cooldowns)
-		skill_bar.set_interactive(not _skill_cast_blocked(selected_skill_id))
+	_sync_skill_bar_selection()
 
 
 func _sync_progression_interactivity() -> void:

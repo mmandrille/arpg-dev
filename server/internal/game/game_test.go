@@ -654,6 +654,42 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}
 }
 
+func TestSetSkillBindingsIntentUpdatesSnapshotAndDelta(t *testing.T) {
+	sim := NewSim("sess_skill_bindings", "01", loadRules(t))
+	update := sim.Tick([]Input{{
+		MessageID: "bind_skills",
+		Type:      "set_skill_bindings_intent",
+		SetSkillBindings: &SetSkillBindingsIntent{
+			FunctionKeys:      []string{magicBoltSkillID, "heal"},
+			RightClickSkillID: "heal",
+		},
+	}})
+	assertAck(t, update, "bind_skills")
+	var got *SkillBindingsView
+	for i := range update.Changes {
+		if update.Changes[i].Op == OpSkillBindingsUpdate {
+			got = update.Changes[i].SkillBindings
+			break
+		}
+	}
+	if got == nil || len(got.FunctionKeys) != skillFunctionKeyCount || got.FunctionKeys[0] != magicBoltSkillID || got.FunctionKeys[1] != "heal" || got.RightClickSkillID != "heal" {
+		t.Fatalf("skill binding update = %+v changes=%+v", got, update.Changes)
+	}
+	snap := sim.Snapshot()
+	if len(snap.SkillBindings.FunctionKeys) != skillFunctionKeyCount || snap.SkillBindings.FunctionKeys[0] != magicBoltSkillID || snap.SkillBindings.RightClickSkillID != "heal" {
+		t.Fatalf("snapshot skill bindings = %+v", snap.SkillBindings)
+	}
+
+	rejected := sim.Tick([]Input{{
+		MessageID: "bad_bind",
+		Type:      "set_skill_bindings_intent",
+		SetSkillBindings: &SetSkillBindingsIntent{
+			FunctionKeys: []string{"not_a_skill"},
+		},
+	}})
+	assertReject(t, rejected, "bad_bind", "unknown_skill")
+}
+
 func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	sim := NewSim("sess_attack_speed", "01", loadRules(t))
 	blade := addRolledInventoryItem(t, sim, 6400, "cave_blade", nil)

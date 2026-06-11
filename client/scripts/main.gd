@@ -866,6 +866,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	character_progression = p.get("character_progression", {})
 	skill_progression = p.get("skill_progression", {})
 	skill_cooldowns = p.get("skill_cooldowns", [])
+	_apply_skill_bindings(p.get("skill_bindings", {}))
 	_refresh_player_hud_identity()
 	if resolver != null:
 		resolver.apply_snapshot(p)
@@ -959,6 +960,9 @@ func _apply_delta(p: Dictionary) -> void:
 				_refresh_skill_ui()
 			"skill_cooldown_update":
 				skill_cooldowns = c.get("skill_cooldowns", [])
+				_refresh_skill_ui()
+			"skill_bindings_update":
+				_apply_skill_bindings(c.get("skill_bindings", {}))
 				_refresh_skill_ui()
 			_:
 				pass
@@ -2799,6 +2803,7 @@ func _assign_right_click_skill(skill_id: String) -> bool:
 	right_click_skill_id = skill_id
 	_sync_skill_bindings_ui()
 	_sync_skill_bar_selection()
+	_send_skill_bindings_intent()
 	return true
 
 
@@ -2811,6 +2816,7 @@ func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
 		right_click_skill_id = skill_id
 	_sync_skill_bindings_ui()
 	_sync_skill_bar_selection()
+	_send_skill_bindings_intent()
 	return true
 
 
@@ -2839,6 +2845,25 @@ func _ensure_skill_function_key_slots() -> void:
 		skill_function_keys.append("")
 	if skill_function_keys.size() > SKILL_FUNCTION_KEY_COUNT:
 		skill_function_keys.resize(SKILL_FUNCTION_KEY_COUNT)
+
+
+func _apply_skill_bindings(bindings: Dictionary) -> void:
+	var keys: Array = bindings.get("function_keys", [])
+	skill_function_keys = keys.duplicate(true)
+	_ensure_skill_function_key_slots()
+	right_click_skill_id = str(bindings.get("right_click_skill_id", right_click_skill_id))
+	_sync_skill_bindings_ui()
+	_sync_skill_bar_selection()
+
+
+func _send_skill_bindings_intent() -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
+		return
+	_ensure_skill_function_key_slots()
+	client.send("set_skill_bindings_intent", last_server_tick, {
+		"function_keys": skill_function_keys.duplicate(true),
+		"right_click_skill_id": right_click_skill_id,
+	})
 
 
 func _sync_skill_bindings_ui() -> void:

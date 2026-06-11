@@ -185,6 +185,14 @@ type CharacterHotbarSlot struct {
 	UpdatedAt      time.Time
 }
 
+// CharacterSkillBindings is the durable character-owned skill control layout.
+type CharacterSkillBindings struct {
+	AccountID         string
+	CharacterID       string
+	FunctionKeys      []string
+	RightClickSkillID string
+}
+
 // CharacterShopStockItem is one durable generated shop-stock row. Buyback rows
 // are intentionally excluded from persistence and session-start snapshots.
 type CharacterShopStockItem struct {
@@ -212,6 +220,7 @@ type SessionStartSnapshot struct {
 	Items       []CharacterItemInstance
 	Waypoints   []CharacterWaypoint
 	Hotbar      []CharacterHotbarSlot
+	SkillBinds  CharacterSkillBindings
 	ShopStock   []CharacterShopStockItem
 	StashItems  []AccountStashItem
 	StashGold   AccountStashGold

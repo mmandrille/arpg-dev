@@ -493,6 +493,19 @@ func (r *runner) persistTick(res game.TickResult) {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist hotbar update", "error", err)
 			}
+		case game.OpSkillBindingsUpdate:
+			if c.SkillBindings == nil {
+				continue
+			}
+			if err := r.store.SetCharacterSkillBindings(ctx, store.CharacterSkillBindings{
+				AccountID:         r.sess.AccountID,
+				CharacterID:       r.sess.CharacterID,
+				FunctionKeys:      c.SkillBindings.FunctionKeys,
+				RightClickSkillID: c.SkillBindings.RightClickSkillID,
+			}); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist skill bindings update", "error", err)
+			}
 		case game.OpGoldUpdate:
 			if c.Gold == nil {
 				continue

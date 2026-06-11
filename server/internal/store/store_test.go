@@ -403,13 +403,13 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
 	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
 	thirdHotbar := []store.CharacterHotbarSlot{{AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, SlotIndex: 0, ItemInstanceID: &thirdItem.ID}}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, nil, nil, store.AccountStashGold{AccountID: hostAcct.ID}, hostProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: hostAcct.ID}, hostProgression); err != nil {
 		t.Fatalf("host start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, nil, nil, store.AccountStashGold{AccountID: guestAcct.ID}, guestProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: guestAcct.ID}, guestProgression); err != nil {
 		t.Fatalf("guest start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, nil, nil, store.AccountStashGold{AccountID: thirdAcct.ID}, thirdProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: thirdAcct.ID}, thirdProgression); err != nil {
 		t.Fatalf("third start snapshot: %v", err)
 	}
 	snaps, err := s.LoadSessionStartSnapshots(ctx, sess.ID)
@@ -631,6 +631,23 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if hotbar[2].ItemInstanceID == nil || *hotbar[2].ItemInstanceID != item.ID {
 		t.Fatalf("hotbar slot 2 = %+v, want item %s", hotbar[2], item.ID)
 	}
+	skillBinds, err := s.GetOrCreateCharacterSkillBindings(ctx, acct.ID, char.ID)
+	if err != nil {
+		t.Fatalf("get skill bindings: %v", err)
+	}
+	skillBinds.FunctionKeys[0] = "magic_bolt"
+	skillBinds.FunctionKeys[1] = "heal"
+	skillBinds.RightClickSkillID = "heal"
+	if err := s.SetCharacterSkillBindings(ctx, skillBinds); err != nil {
+		t.Fatalf("set skill bindings: %v", err)
+	}
+	skillBinds, err = s.GetOrCreateCharacterSkillBindings(ctx, acct.ID, char.ID)
+	if err != nil {
+		t.Fatalf("reload skill bindings: %v", err)
+	}
+	if len(skillBinds.FunctionKeys) != 8 || skillBinds.FunctionKeys[0] != "magic_bolt" || skillBinds.FunctionKeys[1] != "heal" || skillBinds.RightClickSkillID != "heal" {
+		t.Fatalf("skill bindings mismatch: %+v", skillBinds)
+	}
 
 	initialStock := []store.CharacterShopStockItem{
 		{
@@ -684,7 +701,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("restore missing stock: expected ErrNotFound, got %v", err)
 	}
 
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, loadedProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, skillBinds, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
@@ -706,6 +723,11 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	if err := s.SetCharacterHotbarSlot(ctx, acct.ID, char.ID, 2, nil); err != nil {
 		t.Fatalf("mutate live hotbar: %v", err)
+	}
+	skillBinds.FunctionKeys[0] = "rage"
+	skillBinds.RightClickSkillID = "rage"
+	if err := s.SetCharacterSkillBindings(ctx, skillBinds); err != nil {
+		t.Fatalf("mutate live skill bindings: %v", err)
 	}
 	replacementStock := []store.CharacterShopStockItem{{
 		AccountID:      acct.ID,
@@ -732,6 +754,9 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	if len(snap.Hotbar) != 10 || snap.Hotbar[2].ItemInstanceID == nil || *snap.Hotbar[2].ItemInstanceID != item.ID {
 		t.Fatalf("snapshot hotbar mutated with live state: %+v", snap.Hotbar)
+	}
+	if len(snap.SkillBinds.FunctionKeys) != 8 || snap.SkillBinds.FunctionKeys[0] != "magic_bolt" || snap.SkillBinds.FunctionKeys[1] != "heal" || snap.SkillBinds.RightClickSkillID != "heal" {
+		t.Fatalf("snapshot skill bindings mutated with live state: %+v", snap.SkillBinds)
 	}
 	if len(snap.Waypoints) != 1 || snap.Waypoints[0].Level != -1 {
 		t.Fatalf("snapshot waypoints mutated with live state: %+v", snap.Waypoints)

@@ -26,6 +26,7 @@ const (
 	TypeAllocateStat       = "allocate_stat_intent"
 	TypeAllocateSkillPoint = "allocate_skill_point_intent"
 	TypeCastSkill          = "cast_skill_intent"
+	TypeSetSkillBindings   = "set_skill_bindings_intent"
 	TypeShopBuy            = "shop_buy_intent"
 	TypeShopSell           = "shop_sell_intent"
 	TypeStashDepositItem   = "stash_deposit_item_intent"
@@ -92,6 +93,10 @@ type (
 		TargetID  string     `json:"target_id"`
 		Direction *game.Vec2 `json:"direction"`
 	}
+	setSkillBindingsPayloadWire struct {
+		FunctionKeys      []string `json:"function_keys"`
+		RightClickSkillID string   `json:"right_click_skill_id"`
+	}
 	shopBuyPayloadWire struct {
 		ShopEntityID string `json:"shop_entity_id"`
 		OfferID      string `json:"offer_id"`
@@ -114,7 +119,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeShopBuy, TypeShopSell, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold:
 		return true
 	}
 	return false
@@ -225,6 +230,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.CastSkill = &game.CastSkillIntent{SkillID: p.SkillID, TargetID: p.TargetID, Direction: p.Direction}
+	case TypeSetSkillBindings:
+		var p setSkillBindingsPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || len(p.FunctionKeys) > 8 {
+			return in, false
+		}
+		in.SetSkillBindings = &game.SetSkillBindingsIntent{FunctionKeys: p.FunctionKeys, RightClickSkillID: p.RightClickSkillID}
 	case TypeShopBuy:
 		var p shopBuyPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.ShopEntityID == "" || p.OfferID == "" {

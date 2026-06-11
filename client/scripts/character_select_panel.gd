@@ -454,7 +454,7 @@ func _refresh_class_buttons() -> void:
 		var button: Button = _class_buttons.get(class_id, null)
 		if button == null:
 			continue
-		var selected := class_id == _selected_class_id
+		var selected: bool = class_id == _selected_class_id
 		button.button_pressed = selected
 		button.modulate = Color("#ffffff") if selected else Color("#b7b0a4")
 

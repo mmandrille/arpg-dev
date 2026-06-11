@@ -232,7 +232,7 @@ func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load rules: %v", err)
 	}
-	sim := game.NewSim("sess_gold_fanout", "v49-gold-fanout", rules)
+	sim := game.MustNewSim("sess_gold_fanout", "v49-gold-fanout", rules)
 	hostID := sim.DefaultPlayerID()
 	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
 	if err != nil {

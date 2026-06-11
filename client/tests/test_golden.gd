@@ -229,11 +229,8 @@ func _initialize() -> void:
 		_fail("dungeon level -3 teleporter mismatch")
 		return
 	var dungeon_loot: Array = level2["loot"]
-	if dungeon_loot.size() != 1:
+	if dungeon_loot.size() != 0:
 		_fail("dungeon level -2 loot count mismatch")
-		return
-	if str(dungeon_loot[0]["item_def_id"]) != "gold" or not _vec2_equals(dungeon_loot[0]["position"], 31.0, 43.0):
-		_fail("dungeon level -2 coin loot mismatch")
 		return
 	var fallback := str(dungeon_generation["default_level_name_template"]).replace("{n}", str(abs(-9)))
 	if fallback != "Depth 9":

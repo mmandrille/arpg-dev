@@ -69,7 +69,7 @@ func TestShopGeneratedOfferGolden(t *testing.T) {
 
 	for _, c := range golden.Cases {
 		t.Run(c.Name, func(t *testing.T) {
-			sim := NewSim(golden.ShopID+"_"+c.Name, golden.Seed, rules)
+			sim := MustNewSim(golden.ShopID+"_"+c.Name, golden.Seed, rules)
 			offers := sim.generatedShopOffers(golden.ShopID, rules.Shops[golden.ShopID], golden.CharacterID, c.DeepestDungeonDepth)
 			if len(offers) != c.ExpectedOfferCount {
 				t.Fatalf("generated offers = %d, want %d: %+v", len(offers), c.ExpectedOfferCount, offers)

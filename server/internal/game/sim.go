@@ -319,8 +319,14 @@ type CharacterProgressionState struct {
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
-func NewSim(sessionID, seed string, rules *Rules) *Sim {
-	s, err := NewSimWithWorld(sessionID, seed, rules, DefaultWorldID)
+func NewSim(sessionID, seed string, rules *Rules) (*Sim, error) {
+	return NewSimWithWorld(sessionID, seed, rules, DefaultWorldID)
+}
+
+// MustNewSim builds a fresh default-world session or panics.
+// It is intended for tests with known-valid fixtures; runtime callers should use NewSim.
+func MustNewSim(sessionID, seed string, rules *Rules) *Sim {
+	s, err := NewSim(sessionID, seed, rules)
 	if err != nil {
 		panic(err)
 	}

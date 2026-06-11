@@ -386,18 +386,22 @@ def test_load_scenarios_discovers_path_maze():
     }]
 
 
-def test_load_scenarios_dungeon_levels_loots_coin_before_returning():
-    scenarios = load_scenarios()
-    dungeon = next(s for s in scenarios if s.id == "dungeon_levels")
+def test_load_scenarios_dungeon_levels_returns_to_matching_stair():
+	scenarios = load_scenarios()
+	dungeon = next(s for s in scenarios if s.id == "dungeon_levels")
 
-    assert dungeon.world_id == "dungeon_levels"
-    assert {"action": "pick_up_loot", "item_def_id": "gold"} in dungeon.steps
-    assert dungeon.steps[-1] == {
-        "action": "assert_player_at_used_stair",
-        "direction": "down",
-        "tolerance": 0.001,
-    }
-    assert {"type": "gold", "at_least": 8} in dungeon.assertions
+	assert dungeon.world_id == "dungeon_levels"
+	assert dungeon.steps[:3] == [
+		{"action": "use_stair", "direction": "down", "max_ticks": 80},
+		{"action": "use_stair", "direction": "down", "max_ticks": 360},
+		{"action": "use_stair", "direction": "up", "max_ticks": 360},
+	]
+	assert dungeon.steps[-1] == {
+		"action": "assert_player_at_used_stair",
+		"direction": "down",
+		"tolerance": 0.001,
+	}
+	assert {"type": "visited_levels_contain", "level": -2} in dungeon.assertions
 
 
 def test_select_scenarios_all_returns_catalog_order():

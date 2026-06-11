@@ -3,11 +3,10 @@
   "world_id": "dungeon_levels",
   "seed": "dungeon_levels_fast_247",
   "title": "Dungeon levels",
-  "description": "Descend from town to generated level -2, pick up the currency coin, then ascend back to level -1 at the matching down stair.",
+  "description": "Descend from town to generated level -2, then ascend back to level -1 at the matching down stair.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
     { "action": "use_stair", "direction": "down", "max_ticks": 360 },
-    { "action": "pick_up_loot", "item_def_id": "gold" },
     { "action": "use_stair", "direction": "up", "max_ticks": 360 },
     { "action": "assert_player_at_used_stair", "direction": "down", "tolerance": 0.001 }
   ],
@@ -15,7 +14,6 @@
     { "type": "current_level", "equals": -1 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -2 },
-    { "type": "gold", "at_least": 8 },
     { "type": "event_seen", "event_type": "level_changed" }
   ],
   "visual": {

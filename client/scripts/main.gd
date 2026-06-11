@@ -45,6 +45,11 @@ const PLAYER_EVENT_CLIPS := {
 const PLAYER_START_HP := 10
 const INTERACTABLE_ACTIVATION_RANGE := 1.5
 const SKILL_FUNCTION_KEY_COUNT := 8
+const LOCAL_UNARMED_REACH := 1.0
+const LOCAL_MONSTER_RADIUS := 0.45
+const LOCAL_LOOT_RADIUS := 0.35
+const LOCAL_INTERACTABLE_RADIUS := 0.50
+const LOCAL_REACH_EPSILON := 0.000001
 const PLAYER_TINT := Color("#8fe8a7")
 const REMOTE_PLAYER_TINT := Color("#202934")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
@@ -1079,9 +1084,13 @@ func _apply_delta(p: Dictionary) -> void:
 		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
 			if event_type == "attack_missed":
+				if str(ev.get("source_entity_id", "")) == player_id and player_anim != null:
+					player_anim.play_one_shot("attack")
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
+			if str(ev.get("source_entity_id", "")) == player_id and player_anim != null:
+				player_anim.play_one_shot("attack")
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			_play_entity_reaction(eid, ev, "hit")
@@ -2029,11 +2038,73 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	if typ == "interactable" and interactable_def_id == "teleporter":
 		_activate_or_approach_interactable(target_id, rec)
 		return
-	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")):
+	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")) and _target_in_local_attack_range(target_id):
 		player_anim.play_one_shot("attack")
 
 	_send_action_intent(target_id)
 	_attack_cooldown = SEND_INTERVAL
+
+
+func _target_in_local_attack_range(target_id: String) -> bool:
+	if player_anchor == null or target_id == "" or not entities.has(target_id):
+		return false
+	var rec: Dictionary = entities[target_id]
+	var target_node := rec.get("node", null) as Node3D
+	if target_node == null:
+		return false
+	var target_position := _node_world_or_local_position(target_node)
+	var player_position := _node_world_or_local_position(player_anchor)
+	var flat := Vector2(target_position.x - player_position.x, target_position.z - player_position.z)
+	var reach := _local_player_attack_reach()
+	return flat.length() <= reach + _local_target_interaction_radius(rec) + LOCAL_REACH_EPSILON
+
+
+func _local_player_attack_reach() -> float:
+	var item := _local_equipped_weapon_item()
+	if item.is_empty():
+		return LOCAL_UNARMED_REACH
+	var def := _local_equipped_weapon_definition(item)
+	var reach := float(def.get("reach", LOCAL_UNARMED_REACH))
+	return reach if reach > 0.0 else LOCAL_UNARMED_REACH
+
+
+func _local_equipped_weapon_item() -> Dictionary:
+	var raw_weapon_id = equipped.get("main_hand", null)
+	if raw_weapon_id == null:
+		return {}
+	var weapon_id := str(raw_weapon_id)
+	if weapon_id == "":
+		return {}
+	for item in inventory:
+		var row: Dictionary = item
+		if str(row.get("item_instance_id", "")) == weapon_id:
+			return row
+	return {}
+
+
+func _local_equipped_weapon_definition(item: Dictionary) -> Dictionary:
+	ItemRulesLoader.ensure_loaded()
+	var template_id := str(item.get("item_template_id", ""))
+	if template_id != "":
+		var template: Variant = ItemRulesLoader.item_templates.get(template_id, {})
+		if typeof(template) == TYPE_DICTIONARY:
+			return template
+	var item_def_id := str(item.get("item_def_id", ""))
+	if item_def_id != "":
+		return ItemRulesLoader.item_definition(item_def_id)
+	return {}
+
+
+func _local_target_interaction_radius(rec: Dictionary) -> float:
+	match str(rec.get("type", "")):
+		"monster":
+			return LOCAL_MONSTER_RADIUS
+		"loot":
+			return LOCAL_LOOT_RADIUS
+		"interactable":
+			return LOCAL_INTERACTABLE_RADIUS
+		_:
+			return 0.0
 
 
 func _tick_sustained_click() -> void:
@@ -2073,6 +2144,9 @@ func _repeat_hold_attack() -> void:
 	)
 	if flat.length_squared() > 0.0001:
 		_face_direction(flat.normalized())
+
+	if not _target_in_local_attack_range(target_id):
+		return
 
 	if player_anim != null:
 		player_anim.play_one_shot("attack")

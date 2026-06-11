@@ -34,6 +34,7 @@ func _initialize() -> void:
 	_test_path_reject_clears_held_click_state()
 	_test_capacity_reject_shows_bag_full_unequip_message()
 	_test_no_mana_reject_shows_floating_text()
+	_test_local_attack_range_uses_equipped_reach()
 	_test_character_bar_opens_stats_panel()
 	_test_skill_function_key_selects_right_click_skill()
 	_test_learned_skill_auto_selects_right_click()
@@ -605,6 +606,28 @@ func _test_no_mana_reject_shows_floating_text() -> void:
 	_assert_eq("no mana floating text variant", str((numbers[0] as Dictionary).get("variant", "")), "mana")
 	main.damage_numbers_layer.queue_free()
 	main._camera.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_local_attack_range_uses_equipped_reach() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.player_anchor.position = Vector3.ZERO
+	var near := Node3D.new()
+	near.position = Vector3(1.95, 0.0, 0.0)
+	var far := Node3D.new()
+	far.position = Vector3(2.10, 0.0, 0.0)
+	main.entities_root.add_child(near)
+	main.entities_root.add_child(far)
+	main.inventory = [{"item_instance_id": "sword_1", "item_def_id": "rusty_sword"}]
+	main.equipped = {"main_hand": "sword_1"}
+	main.entities["near"] = {"node": near, "type": "monster", "hp": 3}
+	main.entities["far"] = {"node": far, "type": "monster", "hp": 3}
+	_assert_true("near monster is inside equipped sword reach", main._target_in_local_attack_range("near"))
+	_assert_true("far monster is outside equipped sword reach", not main._target_in_local_attack_range("far"))
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

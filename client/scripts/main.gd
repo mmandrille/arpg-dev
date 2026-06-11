@@ -483,8 +483,8 @@ func _show_character_picker_for_flow(title: String = "Choose Character") -> void
 		character_panel.show_choose_or_create(characters, title)
 
 
-func _on_character_create_requested(name: String) -> void:
-	var character := client.create_character(name)
+func _on_character_create_requested(name: String, character_class: String = "barbarian") -> void:
+	var character := client.create_character(name, character_class)
 	if character.is_empty():
 		character_panel.set_error("Could not create character")
 		return
@@ -5010,6 +5010,11 @@ func bot_enter_character_name(name: String) -> void:
 func bot_select_character(index: int) -> void:
 	if character_panel != null:
 		character_panel.start_character_at_index(index)
+
+
+func bot_select_character_class(class_id: String) -> void:
+	if character_panel != null:
+		character_panel.select_class(class_id)
 
 
 func bot_select_window_size(size: String) -> void:

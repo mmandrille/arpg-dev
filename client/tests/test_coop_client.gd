@@ -311,17 +311,29 @@ func _test_character_panel_modes_for_v45() -> void:
 	_assert_eq("choose row gold", int((choose_rows[0] as Dictionary).get("gold", 0)), 12)
 	_assert_eq("choose row depth", int((choose_rows[0] as Dictionary).get("deepest_dungeon_depth", 0)), 2)
 	_assert_true("choose row label includes summary", str((choose_rows[0] as Dictionary).get("label", "")).find("Lv 4") >= 0)
+	_assert_eq("choose row default class", str((choose_rows[0] as Dictionary).get("character_class", "")), "barbarian")
 	panel.submit_name()
 	var expanded := panel.get_debug_state()
 	_assert_true("create press reveals name field", bool(expanded.get("name_field_visible", false)))
 	_assert_eq("expanded create action uses check", str(expanded.get("create_button_text", "")), "✓")
-	var created := {"name": ""}
-	panel.create_requested.connect(func(name: String) -> void:
+	_assert_true("expanded class picker visible", bool(expanded.get("class_picker_visible", false)))
+	_assert_eq("default selected class", str(expanded.get("selected_class", "")), "barbarian")
+	var options: Array = expanded.get("class_options", [])
+	_assert_eq("three class options", options.size(), 3)
+	_assert_true("barbarian tooltip includes skill", str((options[0] as Dictionary).get("tooltip", "")).contains("Skill: Rage"))
+	panel.select_class("sorcerer")
+	var sorc_state := panel.get_debug_state()
+	_assert_eq("selected sorcerer", str(sorc_state.get("selected_class", "")), "sorcerer")
+	_assert_true("sorcerer tooltip includes magic bolt", str(((sorc_state.get("class_options", []) as Array)[1] as Dictionary).get("tooltip", "")).contains("Magic Bolt"))
+	var created := {"name": "", "class": ""}
+	panel.create_requested.connect(func(name: String, character_class: String) -> void:
 		created["name"] = name
+		created["class"] = character_class
 	)
 	panel.set_name_text("Fresh Hero")
 	panel.submit_name()
 	_assert_eq("check creates character", str(created["name"]), "Fresh Hero")
+	_assert_eq("check creates selected class", str(created["class"]), "sorcerer")
 	panel.queue_free()
 
 

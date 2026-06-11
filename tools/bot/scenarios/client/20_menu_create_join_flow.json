@@ -40,7 +40,14 @@
     {
       "type": "assert_character_panel",
       "name_field_visible": true,
-      "create_button_visible": true
+      "create_button_visible": true,
+      "class_picker_visible": true,
+      "selected_class": "barbarian"
+    },
+    { "type": "select_character_class", "class_id": "sorcerer" },
+    {
+      "type": "assert_character_panel",
+      "selected_class": "sorcerer"
     },
     { "type": "enter_character_name", "name": "Bot Solo 45" },
     { "type": "click_menu_button", "button": "confirm_character_create" },
@@ -58,7 +65,8 @@
       "title": "Choose Character",
       "min_character_count": 1,
       "name_field_visible": false,
-      "create_button_visible": true
+      "create_button_visible": true,
+      "row_character_class": "sorcerer"
     },
     { "type": "select_character", "index": 0 },
     { "type": "wait_ws_open", "timeout_s": 10.0 },

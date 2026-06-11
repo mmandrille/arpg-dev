@@ -48,7 +48,7 @@ const STEP_TYPES_ACTION := [
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_equipment_slot",
 	"drag_equipment_to_bag", "drag_bag_to_outside", "assign_hotbar_slot",
 	"use_hotbar_slot", "double_click_bag_item", "click_menu_button",
-	"enter_character_name", "select_character", "select_window_size",
+	"enter_character_name", "select_character", "select_character_class", "select_window_size",
 	"set_floating_combat_text", "select_create_game_type",
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
@@ -77,7 +77,7 @@ const ALL_STEP_TYPES: Array = [
 	"assert_create_game_type", "assert_current_session",
 	"wait_multiplayer_panel", "assert_multiplayer_panel_visible",
 	"assert_multiplayer_session_rows", "assert_settings_panel_visible", "assert_pause_menu_visible",
-	"click_menu_button", "enter_character_name", "select_character",
+	"click_menu_button", "enter_character_name", "select_character", "select_character_class",
 	"select_window_size", "remember_session", "assert_session_changed",
 	"select_create_game_type",
 	"remember_player_position", "assert_player_position_unchanged",
@@ -1593,6 +1593,28 @@ func _assert_character_panel(step: Dictionary, state: Dictionary) -> bool:
 				str(_character_summary_expectation(step)), str(rows), _step_index, str(scenario.get("id", "?"))
 			])
 			return false
+	if step.has("selected_class") and str(panel.get("selected_class", "")) != str(step.get("selected_class", "")):
+		_fail("assert_character_panel selected_class failed: want=%s got=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("selected_class", "")), str(panel.get("selected_class", "")), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("class_picker_visible") and bool(panel.get("class_picker_visible", false)) != bool(step.get("class_picker_visible", false)):
+		_fail("assert_character_panel class_picker_visible failed: want=%s got=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("class_picker_visible", false)), str(panel.get("class_picker_visible", false)), str(panel), _step_index, str(scenario.get("id", "?"))
+		])
+		return false
+	if step.has("row_character_class"):
+		var rows: Array = panel.get("character_rows", characters)
+		var found_class := false
+		for row in rows:
+			if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("character_class", "")) == str(step.get("row_character_class", "")):
+				found_class = true
+				break
+		if not found_class:
+			_fail("assert_character_panel row_character_class failed: want=%s rows=%s step=%d scenario=%s" % [
+				str(step.get("row_character_class", "")), str(rows), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
 	return true
 
 
@@ -1814,6 +1836,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "session=%s" % str(step)
 		"enter_character_name":
 			return "name=%s" % str(step.get("name", ""))
+		"select_character_class":
+			return "class_id=%s" % str(step.get("class_id", ""))
 		"select_character":
 			return "index=%s" % str(step.get("index", 0))
 		"select_window_size":
@@ -2124,6 +2148,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "enter_character_name":
 		if str(step.get("name", "")) == "":
 			return "client_steps[%d] (%s) requires name" % [index, stype]
+	if stype == "select_character_class":
+		if str(step.get("class_id", "")) == "":
+			return "client_steps[%d] (%s) requires class_id" % [index, stype]
 	if stype == "select_window_size":
 		if str(step.get("size", "")) == "":
 			return "client_steps[%d] (%s) requires size" % [index, stype]

@@ -104,9 +104,12 @@ func list_characters() -> Array:
 	return []
 
 
-func create_character(name: String) -> Dictionary:
+func create_character(name: String, character_class: String = "") -> Dictionary:
+	var body := {"name": name}
+	if character_class != "":
+		body["character_class"] = character_class
 	var r := _http(HTTPClient.METHOD_POST, "/v0/characters",
-		["Authorization: Bearer " + token], JSON.stringify({"name": name}))
+		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) == 201 and r.has("body"):
 		return r["body"]
 	push_error("create_character failed: %s" % r)

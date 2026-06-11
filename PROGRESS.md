@@ -12,10 +12,10 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v70 — `class-skill-and-item-gates` |
+| **Latest completed slice** | v71 — `class-picker-and-sprites` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
-| **Next slice** | v71 — class picker and sprites |
+| **Next slice** | TBD |
 | **Last engineering review** | v70 — [`docs/reviews/20260611_v70-overview.md`](docs/reviews/20260611_v70-overview.md) (2026-06-11) |
 | **Next engineering review** | v80 (~every 10 slices) |
 
@@ -89,6 +89,7 @@ v67_* = boss-kill-reward-polish
 v68_* = market-stash-listing-foundation
 v69_* = character-class-foundation
 v70_* = class-skill-and-item-gates
+v71_* = class-picker-and-sprites
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -199,6 +200,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v68** | `market-stash-listing-foundation` | Complete (`make ci` green) | [`v68_spec-market-stash-listing-foundation.md`](docs/specs/v68_spec-market-stash-listing-foundation.md) | [`v68_2026-06-11-market-stash-listing-foundation.md`](docs/plans/v68_2026-06-11-market-stash-listing-foundation.md) | [`as-built`](docs/as-built/v68_market-stash-listing-foundation.md) |
 | **v69** | `character-class-foundation` | Complete (`make ci` green) | [`v69_spec-character-class-foundation.md`](docs/specs/v69_spec-character-class-foundation.md) | [`v69_2026-06-11-character-class-foundation.md`](docs/plans/v69_2026-06-11-character-class-foundation.md) | [`as-built`](docs/as-built/v69_character-class-foundation.md) |
 | **v70** | `class-skill-and-item-gates` | Complete (`make ci` green) | [`v70_spec-class-skill-and-item-gates.md`](docs/specs/v70_spec-class-skill-and-item-gates.md) | [`v70_2026-06-11-class-skill-and-item-gates.md`](docs/plans/v70_2026-06-11-class-skill-and-item-gates.md) | [`as-built`](docs/as-built/v70_class-skill-and-item-gates.md) |
+| **v71** | `class-picker-and-sprites` | Complete (`make ci` green) | [`v71_spec-class-picker-and-sprites.md`](docs/specs/v71_spec-class-picker-and-sprites.md) | [`v71_2026-06-11-class-picker-and-sprites.md`](docs/plans/v71_2026-06-11-class-picker-and-sprites.md) | [`as-built`](docs/as-built/v71_class-picker-and-sprites.md) |
 
 ---
 
@@ -607,6 +609,11 @@ survive the authoritative boundary.
 realtime fanout level snapshots and defensive `equipped_update.slot` handling in Godot/Python bot,
 plus keeping the v71 class picker contained in character-select UI with shared class presentation
 metadata where practical.
+
+**Class creation is now player-facing.** v71 adds class picker blocks with code-native class
+sprites, hover tooltips for class stats/skills, selected-class create request plumbing, and class
+icons at the start of character rows. Client unit and bot coverage prove Sorcerer selection without
+changing server authority.
 
 ### Other deferred items (from specs / ADRs)
 

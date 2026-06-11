@@ -1,0 +1,60 @@
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_ba8ba4c088ef1a::t_8df18975b76382 6,10,16
+shared/rules/monsters.v0.json
+  s_ba8ba4c088ef1a::t_7231b6a4ec5a6a 124,143,166,185
+shared/rules/monsters.v0.schema.json
+  s_ba8ba4c088ef1a::t_7231b6a4ec5a6a 52
+docs/as-built/v79_elite-pack-roles.md
+  s_ba8ba4c088ef1a::t_3818ea361fd755 1-23
+server/internal/game/game_test.go
+  s_ba8ba4c088ef1a::t_9760be3abd870b 6032-6057
+  s_ba8ba4c088ef1a::t_f522661ef48a53 6068-6094
+  s_ba8ba4c088ef1a::t_1aa20fa68a8304 6430-6431,6439-6440,6518-6519
+server/internal/http/ws_test.go
+  s_ba8ba4c088ef1a::t_b20ccc87c1de6b 107
+  s_ba8ba4c088ef1a::t_11e4a385fa4080 703-704,1282,1291
+  s_ba8ba4c088ef1a::t_feaf168f36d68b 1318-1334
+  s_ba8ba4c088ef1a::t_2a082313568f7b 817,846
+shared/rules/dungeon_generation.v0.schema.json
+  s_ba8ba4c088ef1a::t_7231b6a4ec5a6a 61,69-78
+server/internal/game/dungeon_gen.go
+  s_ba8ba4c088ef1a::t_e77f1825a2d58e 785-786,788-790
+  s_ba8ba4c088ef1a::t_c55265e935d981 47,629-634,642-665,674-676,678-692,740,759,772,774-778,787
+  s_ba8ba4c088ef1a::t_6bb07bbcb5675b 666-673,677,792
+server/internal/replay/replay_test.go
+  s_ba8ba4c088ef1a::t_83e1ab83aa0625 222
+docs/plans/v79_2026-06-11-elite-pack-roles.md
+  s_ba8ba4c088ef1a::t_d305c9f9303dcd 1-2,4-8,12-14,19-21,25-27
+  s_ba8ba4c088ef1a::t_3818ea361fd755 3,9-11,15-18,22-24,28-30
+  s_ba8ba4c088ef1a::t_38596f3f99cdcd 31
+server/internal/game/rules.go
+  s_ba8ba4c088ef1a::t_35d6e1e433dc4c 212-213,221-223
+  s_ba8ba4c088ef1a::t_337a4b0df60ce3 407-413,1645-1650,1668
+  s_ba8ba4c088ef1a::t_48e6880e58241a 621
+  s_ba8ba4c088ef1a::t_e77f1825a2d58e 131
+  s_ba8ba4c088ef1a::t_131e9d60ae91a9 1913-1927,1937,1947-1949,1951,1975-1976
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_ba8ba4c088ef1a::t_4842eac91c2799 10
+docs/specs/v79_spec-elite-pack-roles.md
+  s_ba8ba4c088ef1a::t_d305c9f9303dcd 1-48
+shared/rules/dungeon_generation.v0.json
+  s_ba8ba4c088ef1a::t_7231b6a4ec5a6a 22-23
+PROGRESS.md
+  s_ba8ba4c088ef1a::t_3818ea361fd755 665-668
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2acb4c1ad02f0387c1b2fa47a078c36dbfb60c3e",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

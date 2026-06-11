@@ -1,0 +1,47 @@
+client/scripts/stash_panel.gd
+  s_74e4f341218515::t_30f61c7125cd1c 523-524,541-627,645,669
+  s_74e4f341218515::t_d381007042b511 16-20,51-52,58-59,167-169,200-209
+  s_74e4f341218515::t_3f6dbc90f4b675 255-279,312-314,316-317,320,324
+  s_74e4f341218515::t_0206e539f4ce10 315,321
+docs/specs/v65_spec-stash-search-and-sorting.md
+  s_74e4f341218515::t_41928ab7a68f65 1-62
+tools/bot/scenarios/client/30_stash_search_and_sorting.json
+  s_74e4f341218515::t_263ec05c7ed31e 1-39
+docs/plans/v65_2026-06-11-stash-search-and-sorting.md
+  s_74e4f341218515::t_b4a8057091a460 3,38,43,50,55,62,70,84-85
+  s_74e4f341218515::t_d317e157182b7d 75,86
+  s_74e4f341218515::t_41928ab7a68f65 1-2,4-37,39-42,44-49,51-54,56-61,63-69,71-74,76-83,87-91
+client/scripts/bot_scenario_runner.gd
+  s_74e4f341218515::t_39258c8ca2b3fd 43,56,99-100,466-467
+  s_74e4f341218515::t_80cc4edb540261 1203-1229,1825,1827
+  s_74e4f341218515::t_6a3ece081fff42 2092-2101
+client/scripts/main.gd
+  s_74e4f341218515::t_c85849b78b25ba 4882-4893
+docs/as-built/v65_stash-search-and-sorting.md
+  s_74e4f341218515::t_b4a8057091a460 1-25,27,29-34
+  s_74e4f341218515::t_d317e157182b7d 26,28
+PROGRESS.md
+  s_74e4f341218515::t_b4a8057091a460 15,86,191
+client/scripts/bot_controller.gd
+  s_74e4f341218515::t_c85849b78b25ba 171-174,311-320,605-608
+client/tests/test_client_bot.gd
+  s_74e4f341218515::t_b8ef7b22269f27 615-617,629-631,645,658-660,666
+client/tests/test_stash_panel.gd
+  s_74e4f341218515::t_4b3800dd1bd3f6 28-29,39-40,52-68,80-85,87-89,109-111,114-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3df26d1d7709c0962232d52c97ed0143899e666f",
+  "prompts": {},
+  "sessions": {
+    "s_74e4f341218515": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb53a-77e2-76e0-85bd-104f9a738cad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

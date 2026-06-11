@@ -3036,9 +3036,6 @@ func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast 
 			applications = append(applications, skillHealApplication{Target: target, Heal: heal})
 		}
 	}
-	if len(applications) == 0 {
-		return nil, "already_full_hp"
-	}
 	return applications, ""
 }
 

@@ -1086,7 +1086,7 @@ func TestRageBuffAppliesStatsVisualScaleAndExpires(t *testing.T) {
 	}
 }
 
-func TestHealAreaSkillHealsAlliesAndRejectsNoop(t *testing.T) {
+func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	rules := loadRules(t)
 	sim := MustNewSim("sess_heal_skill", "01", rules)
 	sim.progression.CharacterClass = "paladin"
@@ -1170,11 +1170,17 @@ func TestHealAreaSkillHealsAlliesAndRejectsNoop(t *testing.T) {
 	noop := sim.Tick([]Input{{
 		MessageID: "cast_heal_full",
 		Type:      "cast_skill_intent",
-		CastSkill: &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
+		CastSkill: &CastSkillIntent{SkillID: "heal"},
 	}})
-	assertReject(t, noop, "cast_heal_full", "already_full_hp")
-	if player.mana != player.maxMana {
-		t.Fatalf("noop heal spent mana: %d want %d", player.mana, player.maxMana)
+	assertAck(t, noop, "cast_heal_full")
+	if player.mana != 0 {
+		t.Fatalf("full-hp heal mana = %d, want spent to 0", player.mana)
+	}
+	if hasEvent(noop, "player_healed") {
+		t.Fatalf("full-hp heal events = %+v, want no player_healed", noop.Events)
+	}
+	if !hasEvent(noop, "skill_cast") || !hasEvent(noop, "skill_cooldown_started") {
+		t.Fatalf("full-hp heal events = %+v, want cast plus cooldown", noop.Events)
 	}
 }
 

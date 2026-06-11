@@ -32,6 +32,7 @@ func _initialize() -> void:
 	_test_snapshot_equipped()
 	_test_snapshot_stash()
 	_test_malformed_delta_does_not_crash()
+	_test_malformed_envelope_payloads_do_not_crash()
 
 	if _fail == 0:
 		print("[gdtest] PASS: test_delta_apply (%d assertions)" % _pass)
@@ -175,6 +176,29 @@ func _test_malformed_delta_does_not_crash() -> void:
 	m._apply_delta({"changes": [{"op": "inventory_add"}]})
 	m._apply_delta({"changes": [{"op": "unknown_op", "data": "x"}]})
 	_assert_eq("malformed delta does not crash", true, true)
+
+
+func _test_malformed_envelope_payloads_do_not_crash() -> void:
+	var m := _new_main()
+	m.pending_action_targets["msg_accepted"] = "1001"
+	m.pending_action_targets["msg_missing"] = "1002"
+	m.pending_interactable_action = {"entity_id": "1003"}
+	m.pending_waypoint_travel = true
+
+	m._handle_message({"type": "intent_accepted", "payload": {"accepted_message_id": "msg_accepted"}})
+	m._handle_message({"type": "intent_accepted"})
+	m._handle_message({"type": "intent_accepted", "payload": "not-a-dictionary"})
+	m._handle_message({"type": "intent_rejected"})
+	m._handle_message({"type": "intent_rejected", "payload": null})
+	m._handle_message({"type": "error"})
+	m._handle_message({"type": "error", "payload": []})
+	m._handle_message({"type": "state_delta"})
+	m._handle_message({"type": "state_delta", "payload": "not-a-dictionary"})
+
+	_assert_eq("accepted payload erases matching pending action", m.pending_action_targets.has("msg_accepted"), false)
+	_assert_eq("malformed accepted leaves unrelated pending action", m.pending_action_targets.has("msg_missing"), true)
+	_assert_eq("malformed reject clears interactable action", m.pending_interactable_action.is_empty(), true)
+	_assert_eq("malformed reject clears waypoint travel", m.pending_waypoint_travel, false)
 
 
 # --- helpers ------------------------------------------------------------------

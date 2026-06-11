@@ -90,7 +90,7 @@
           "target": "allies",
           "include_caster": true,
           "range": 9.0,
-          "radius": 3.0,
+          "radius": 4.0,
           "percent_base": 25,
           "percent_per_rank": 10
         }

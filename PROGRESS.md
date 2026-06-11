@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v65 — `stash-search-and-sorting` |
+| **Latest completed slice** | v66 — `progress-backlog-hygiene` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -84,6 +84,7 @@ v62_* = monster-depth-stat-scaling
 v63_* = runtime-sim-error-construction
 v64_* = mystery-seller-paid-reroll
 v65_* = stash-search-and-sorting
+v66_* = progress-backlog-hygiene
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -189,6 +190,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v63** | `runtime-sim-error-construction` | Complete (`make ci` green) | [`v63_spec-runtime-sim-error-construction.md`](docs/specs/v63_spec-runtime-sim-error-construction.md) | [`v63_2026-06-11-runtime-sim-error-construction.md`](docs/plans/v63_2026-06-11-runtime-sim-error-construction.md) | [`as-built`](docs/as-built/v63_runtime-sim-error-construction.md) |
 | **v64** | `mystery-seller-paid-reroll` | Complete (`make ci` green) | [`v64_spec-mystery-seller-paid-reroll.md`](docs/specs/v64_spec-mystery-seller-paid-reroll.md) | [`v64_2026-06-11-mystery-seller-paid-reroll.md`](docs/plans/v64_2026-06-11-mystery-seller-paid-reroll.md) | [`as-built`](docs/as-built/v64_mystery-seller-paid-reroll.md) |
 | **v65** | `stash-search-and-sorting` | Complete (`make ci` green) | [`v65_spec-stash-search-and-sorting.md`](docs/specs/v65_spec-stash-search-and-sorting.md) | [`v65_2026-06-11-stash-search-and-sorting.md`](docs/plans/v65_2026-06-11-stash-search-and-sorting.md) | [`as-built`](docs/as-built/v65_stash-search-and-sorting.md) |
+| **v66** | `progress-backlog-hygiene` | Complete (`make ci` green) | [`v66_spec-progress-backlog-hygiene.md`](docs/specs/v66_spec-progress-backlog-hygiene.md) | [`v66_2026-06-11-progress-backlog-hygiene.md`](docs/plans/v66_2026-06-11-progress-backlog-hygiene.md) | [`as-built`](docs/as-built/v66_progress-backlog-hygiene.md) |
 
 ---
 
@@ -286,6 +288,8 @@ client_ranged_monster_ai: headless Godot client descends to generated dungeon �
 client_boss_health_bar_ui: headless Godot client descends to first boss floor → asserts Cave Warden boss health bar
 client_boss_phase_readability: headless Godot client descends to first boss floor → asserts boss phase countdown and telegraph marker
 character_select_summaries: headless Godot client opens Create Game → asserts character row level/gold/depth/status summaries
+mystery_seller_paid_reroll: open mystery seller → spend 50 gold to reroll concealed stock → prove old offers are replaced, gold persists, and replay/fresh stock remain deterministic
+stash_search_and_sorting: headless Godot client opens stash → searches and sorts bag/stash rows → deposits/withdraws by stable server IDs
 ```
 
 **Verify:**
@@ -556,14 +560,27 @@ keeps generated dungeon combat replayable.
 panic behavior for tests with known-valid fixtures, and covers invalid default-world construction
 without crashing. This closes the v60 backend review's runtime sim construction finding.
 
+**Mystery seller paid reroll is now authoritative.** v64 adds the `shop_reroll_intent`,
+a server-owned 50 gold spend, deterministic `|reroll:N` stock refresh keys, complete replacement
+of concealed mystery stock, and protocol/client bot proofs for reroll, replay, and fresh-session
+persistence.
+
+**Stash search and sorting are now client-visible.** v65 adds display-only Godot controls for
+searching and sorting bag/stash rows by acquired order, name, rarity, or slot, while keeping all
+deposit/withdraw mutation keyed by server-authored `stash_item_id` / inventory item IDs.
+
+**Progress backlog hygiene is current through v66.** v66 corrects the canonical discovery metadata
+after v64/v65 by marking shipped candidates complete, adding their scenario catalog entries, and
+narrowing deferred backlog text to still-open adjacent work.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
-| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
+| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, and production boss health bar art/audio | v53/v57/v58 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
@@ -586,8 +603,8 @@ the next autoloop pass unless code changes make them stale.
 | `boss-phase-timer-ui` | Completed in v57 | Add boss phase/windup timing cues to the existing boss health bar. | S | client, bot, docs | Kept display-only from existing `boss_phase` state/events. |
 | `boss-pattern-variety` | Completed in v58 | Add one more server-authored boss attack pattern so Cave Warden is less repetitive. | M | shared, server, bot, docs | Implemented deterministic deck-order cycling and server-owned circle hit shape. |
 | `data-driven-content-library-manifest` | Completed in v60 | Introduce a manifest/index loader for skills first, preserving stable gameplay IDs and deterministic merge validation. | M | shared, server, client loader, validation, docs | Shipped as skills-only; item/class rollout remains deferred. |
-| `mystery-seller-paid-reroll` | Open | Let players spend gold to reroll concealed mystery seller stock. | M | shared/protocol, server, store, client, bot, docs | Price/refresh rules need conservative defaults. |
-| `stash-search-and-sorting` | Open | Add search/sort controls to stash and bag views without changing item authority. | S/M | client, bot, docs | Client UI only; must record plugin borrow/reject decision. |
+| `mystery-seller-paid-reroll` | Completed in v64 | Let players spend gold to reroll concealed mystery seller stock. | M | shared/protocol, server, store, client, bot, docs | Shipped with a 50 gold server-owned reroll and deterministic stock replacement. |
+| `stash-search-and-sorting` | Completed in v65 | Add search/sort controls to stash and bag views without changing item authority. | S/M | client, bot, docs | Shipped as display-only Godot controls with server-ID mutation safety. |
 | `character-select-summaries` | Completed in v54 | Show level, gold, deepest depth, and status in character selection. | M | store, HTTP, client, bot, docs | Needs careful aggregate/query shape; rename/delete already exists. |
 | `session-browser-filters` | Open | Add Join Game search/filter/sort controls for listed sessions. | S/M | client, HTTP tests maybe, bot, docs | Headless proof needs stable multi-session setup. |
 | `loot-label-filter-core` | Open | Add display-only loot label filtering/highlighting for rarity/category. | M | client, bot, docs | Presentation-only; avoid changing shared loot ownership. |

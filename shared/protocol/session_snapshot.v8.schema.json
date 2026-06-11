@@ -250,7 +250,8 @@
             { "$ref": "#/$defs/decimal_id" },
             { "type": "null" }
           ]
-        }
+        },
+        "item": { "$ref": "#/$defs/item" }
       }
     },
     "teleporter_discovery": {

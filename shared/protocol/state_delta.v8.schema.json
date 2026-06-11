@@ -795,6 +795,7 @@
             "op": { "const": "hotbar_update" },
             "slot_index": { "type": "integer", "minimum": 0, "maximum": 9 },
             "item_instance_id": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+            "item": { "$ref": "#/$defs/item" },
             "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 },
             "inventory_capacity": { "type": "integer", "minimum": 0, "maximum": 100 }
           }

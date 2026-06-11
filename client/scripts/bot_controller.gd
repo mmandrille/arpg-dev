@@ -459,6 +459,17 @@ func _find_bag_item_id(item_def_id: String, state: Dictionary, bag_index: int = 
 			var iid := str(item.get("item_instance_id", ""))
 			if str(equipped_weapon) != iid:
 				matches.append(iid)
+	if matches.is_empty():
+		var bar: Dictionary = state.get("consumable_bar", {})
+		var assigned: Array = bar.get("assigned_slots", [])
+		for slot in assigned:
+			if typeof(slot) != TYPE_DICTIONARY:
+				continue
+			var slot_item := slot as Dictionary
+			if str(slot_item.get("item_def_id", "")) == item_def_id:
+				var iid := str(slot_item.get("item_instance_id", ""))
+				if iid != "":
+					matches.append(iid)
 	if bag_index < 0 or bag_index >= matches.size():
 		return ""
 	return str(matches[bag_index])

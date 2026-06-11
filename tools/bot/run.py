@@ -2309,7 +2309,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             if "inventory_capacity" in c:
                 state.inventory_capacity = int(c["inventory_capacity"])
         elif c["op"] == "hotbar_update":
-            upsert_hotbar(state, int(c["slot_index"]), c.get("item_instance_id"))
+            upsert_hotbar(state, int(c["slot_index"]), c.get("item_instance_id"), c.get("item"))
             if "inventory_rows" in c:
                 state.inventory_rows = int(c["inventory_rows"])
             if "inventory_capacity" in c:
@@ -2382,10 +2382,13 @@ def parse_discovered_teleporters(payload: dict[str, Any]) -> dict[int, bool]:
     }
 
 
-def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any) -> None:
+def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any, item: dict[str, Any] | None = None) -> None:
     while len(state.hotbar) <= slot_index:
         state.hotbar.append({"slot_index": len(state.hotbar), "item_instance_id": None})
-    state.hotbar[slot_index] = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+    slot = {"slot_index": slot_index, "item_instance_id": item_instance_id}
+    if item:
+        slot["item"] = dict(item)
+    state.hotbar[slot_index] = slot
 
 
 def decay_skill_cooldowns(state: RuntimeState, ticks: int) -> None:
@@ -3126,7 +3129,10 @@ def assert_hotbar_slot(hotbar: list[dict], slot_index: int, item_def_id: Any, wh
         raise AssertionError(f"{where}: hotbar[{slot_index}] is empty, want {item_def_id}")
     if inventory is None:
         return
-    item = next((i for i in inventory if str(i.get("item_instance_id")) == assigned_id), None)
+    slot = next((s for s in hotbar if int(s.get("slot_index", -1)) == slot_index), {})
+    item = slot.get("item")
+    if item is None:
+        item = next((i for i in inventory if str(i.get("item_instance_id")) == assigned_id), None)
     if item is None or item.get("item_def_id") != str(item_def_id):
         raise AssertionError(f"{where}: hotbar[{slot_index}] item={item}, want {item_def_id}")
 

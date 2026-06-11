@@ -19,6 +19,7 @@ const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
+const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
@@ -72,7 +73,7 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 }
 const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
-const BOSS_PHASE_TICK_RATE := 15.0
+const BOSS_PHASE_TICK_RATE := 10.0
 const BOSS_TELEGRAPH_MARKER_NAME := "BossTelegraphMarker"
 const ARCHER_MONSTER_DEF_ID := "dungeon_archer"
 const ARCHER_BOW_MARKER_NAME := "ArcherBowMarker"
@@ -202,6 +203,7 @@ var stash_panel: StashPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
+var character_bar: Control
 var skill_bar: SkillBar
 var status_effects_bar: StatusEffectsBar
 var character_info_panel: PanelContainer
@@ -2432,6 +2434,8 @@ func _start_next_visual_replay() -> void:
 		consumable_bar.set_interactive(false)
 	if character_stats_panel != null:
 		character_stats_panel.set_allocation_enabled(false)
+	if character_bar != null:
+		character_bar.set_interactive(false)
 	if skills_panel != null:
 		skills_panel.set_interactive(false)
 	if skill_bar != null:
@@ -2578,6 +2582,9 @@ func _build_scene() -> void:
 	skills_panel = SkillsPanelScript.new()
 	skills_panel.allocate_skill_point_requested.connect(_on_skill_point_requested)
 	ui.add_child(skills_panel)
+	character_bar = CharacterBarScript.new()
+	character_bar.open_character_requested.connect(_open_character_panel_from_bar)
+	ui.add_child(character_bar)
 	skill_bar = SkillBarScript.new()
 	skill_bar.cast_skill_requested.connect(_on_skill_cast_requested)
 	skill_bar.open_skills_requested.connect(_open_skills_panel_from_bar)
@@ -2738,6 +2745,14 @@ func _open_skills_panel_from_bar() -> void:
 	_refresh_skill_ui()
 
 
+func _open_character_panel_from_bar() -> void:
+	if character_stats_panel == null or _input_locked():
+		return
+	_close_gameplay_panels("stats")
+	character_stats_panel.ensure_display_visible()
+	_refresh_progression_ui()
+
+
 func _stat_allocation_blocked() -> bool:
 	return visual_replay_enabled \
 		or autoplay_enabled \
@@ -2866,6 +2881,8 @@ func _refresh_progression_ui() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_progression(character_progression)
 		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
+	if character_bar != null:
+		character_bar.set_progression(character_progression)
 	if consumable_bar != null:
 		consumable_bar.set_character_progression(character_progression)
 
@@ -2883,6 +2900,8 @@ func _refresh_skill_ui() -> void:
 func _sync_progression_interactivity() -> void:
 	if character_stats_panel != null:
 		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
+	if character_bar != null:
+		character_bar.set_interactive(not _input_locked())
 	if skills_panel != null:
 		skills_panel.set_interactive(not _skill_allocation_blocked())
 	if skill_bar != null:
@@ -4240,6 +4259,7 @@ func get_bot_state() -> Dictionary:
 		"stash_panel": stash_panel.get_debug_state() if stash_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
+		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
 		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},

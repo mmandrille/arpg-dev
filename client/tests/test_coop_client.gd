@@ -14,6 +14,7 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
+const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 
 var _pass_count: int = 0
@@ -32,6 +33,7 @@ func _initialize() -> void:
 	_test_multiple_remote_players_update_and_remove_independently()
 	_test_path_reject_clears_held_click_state()
 	_test_capacity_reject_shows_bag_full_unequip_message()
+	_test_character_bar_opens_stats_panel()
 	_test_skill_function_key_selects_right_click_skill()
 	_test_learned_skill_auto_selects_right_click()
 	_test_skill_cast_payload_uses_direction_without_nearest_fallback()
@@ -582,6 +584,42 @@ func _test_capacity_reject_shows_bag_full_unequip_message() -> void:
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_character_bar_opens_stats_panel() -> void:
+	var main = MainScript.new()
+	main.character_stats_panel = CharacterStatsPanelScript.new()
+	main.skills_panel = SkillsPanelScript.new()
+	main.inventory_panel = InventoryPanelScript.new()
+	main.character_bar = CharacterBarScript.new()
+	root.add_child(main.character_stats_panel)
+	root.add_child(main.skills_panel)
+	root.add_child(main.inventory_panel)
+	root.add_child(main.character_bar)
+	main.character_stats_panel._build()
+	main.character_bar._build()
+	main.character_bar.open_character_requested.connect(main._open_character_panel_from_bar)
+	main.character_progression = {
+		"level": 2,
+		"experience": 30,
+		"unspent_stat_points": 2,
+		"base_stats": {"str": 5, "agi": 5, "vit": 5, "magic": 5},
+		"derived_stats": {"max_hp": 10},
+	}
+	main._refresh_progression_ui()
+	var character_bar_state: Dictionary = main.character_bar.get_debug_state()
+	_assert_eq("character bar is the stats button", str(character_bar_state.get("tooltip_text", "")), "Character")
+	_assert_true("character bar stat badge visible with points", bool(character_bar_state.get("upgrade_badge_visible", false)))
+	_assert_eq("character bar stat badge text", str(character_bar_state.get("upgrade_badge_text", "")), "+")
+	main.skills_panel.visible = true
+	main.inventory_panel.visible = true
+	main.character_bar.open_slot()
+	_assert_true("character bar opens stats panel", main.character_stats_panel.visible)
+	main.character_bar.queue_free()
+	main.character_stats_panel.free()
+	main.skills_panel.free()
+	main.inventory_panel.free()
 	main.free()
 
 

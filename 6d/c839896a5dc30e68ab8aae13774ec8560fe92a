@@ -1,0 +1,48 @@
+docs/specs/v63_spec-runtime-sim-error-construction.md
+  s_74e4f341218515::t_4a238ba1703f27 1-2,4-71
+  s_74e4f341218515::t_bc062ec615dbe1 3
+PROGRESS.md
+  s_74e4f341218515::t_325b67d9d03d20 15,84,187,545-553
+docs/as-built/v63_runtime-sim-error-construction.md
+  s_74e4f341218515::t_bc9e0d1fe0ad6a 1-10,14-23
+  s_74e4f341218515::t_bc062ec615dbe1 11-13
+server/internal/game/sim.go
+  s_74e4f341218515::t_11d4ec8aa792fe 322-329
+server/internal/game/shop_test.go
+  s_74e4f341218515::t_3f5ade7d1cab49 72
+server/internal/game/game_test.go
+  s_74e4f341218515::t_3f5ade7d1cab49 204,436,473,508,524,547,677,713,729,740,759,791,845,926,959,1006,1070,1466,1472,1490,1505,1521,1539,2019,2070,2090,2116,2142,2161,2181,2201,2480,2660,2722,2749,2799,2809,2840,2860,2953,2967,2984,3003,3024,3033,3050,3066,3119,3137,3187,3285,3389,3411,3440,3731,3780,3810,3843,3862,3874,3895,3932,3967,4189,4278,4408,4414,4421,4427,4434,4460,4466,5847,5914,6480,6496,6514,6537,6566
+  s_74e4f341218515::t_2bdd0cdd893834 1159-1168
+server/internal/realtime/session_loop_test.go
+  s_74e4f341218515::t_3f5ade7d1cab49 235
+tools/bot/scenarios/12_dungeon_levels.json
+  s_74e4f341218515::t_07387f0307d306 6
+client/tests/test_golden.gd
+  s_74e4f341218515::t_1514008eb92bf1 232
+docs/plans/v63_2026-06-11-runtime-sim-error-construction.md
+  s_74e4f341218515::t_f8d79109d10906 29
+  s_74e4f341218515::t_bc062ec615dbe1 3,102,111
+  s_74e4f341218515::t_2040ef90c036d3 30-31,83-84,88-91
+  s_74e4f341218515::t_347a860cdf4408 82,92-96
+  s_74e4f341218515::t_2cb24f05b2f092 110
+  s_74e4f341218515::t_4a238ba1703f27 1-2,4-28,32-39,41-45,47-51,53-64,66-70,72-81,85-87,97-101,103-109,112-116
+  s_74e4f341218515::t_8f5d12ec0189e1 40,46,52,65,71
+tools/bot/test_protocol.py
+  s_74e4f341218515::t_c5172fe619f0c3 389-404
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6dc839896a5dc30e68ab8aae13774ec8560fe92a",
+  "prompts": {},
+  "sessions": {
+    "s_74e4f341218515": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb53a-77e2-76e0-85bd-104f9a738cad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

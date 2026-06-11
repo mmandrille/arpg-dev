@@ -1,0 +1,27 @@
+shared/golden/dungeon_equipment_drops.json
+  s_c8b827646bf8c0::t_d04abf52beec14 52,63,74-75
+server/internal/game/game_test.go
+  s_c8b827646bf8c0::t_a495cd7eb14cb1 2768-2769,6792
+shared/golden/shop_offers.json
+  s_c8b827646bf8c0::t_646e487f5ef700 11-14,23-27,35,37-39
+shared/golden/treasure_class_rolls.json
+  s_c8b827646bf8c0::t_4667eb932b6f9c 9,18,27,30,39,42,51,54,63,66
+shared/rules/treasure_classes.v0.json
+  s_c8b827646bf8c0::t_a5f159f938b351 8-9,11-17,26-27,29-31,34-35,44-45,47-49,51-56,65-66,68-81,93-97,117-119,122-123,131-135,147-151,153-156,164-173,185-198,206-219
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fcdab5822a118b4b49c2b258efe0bbe1f3e48f5c",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

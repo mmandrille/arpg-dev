@@ -1,0 +1,47 @@
+docs/reviews/extras/20260611_v80-shared-tooling-and-process.md
+  s_ba8ba4c088ef1a::t_fb5565f2b9e862 1-57
+client/tests/test_coop_client.gd
+  s_ba8ba4c088ef1a::t_7f5f3af7b4bb8a 40,728-773
+docs/specs/v80_spec-combat-threat-readability.md
+  s_ba8ba4c088ef1a::t_dd248ab8487a63 1-63
+client/scripts/damage_number.gd
+  s_ba8ba4c088ef1a::t_11b78ee7ed10d5 35,51
+PROGRESS.md
+  s_ba8ba4c088ef1a::t_6a5282a98f37cb 15,19-20,98-101,220-221,668-670,676-682
+docs/plans/v80_2026-06-11-combat-threat-readability.md
+  s_ba8ba4c088ef1a::t_2c5bbef0b32b46 78,83,93
+  s_ba8ba4c088ef1a::t_7678792910c666 64-66,92
+  s_ba8ba4c088ef1a::t_94cbbd7976b1fb 42,47,53,91
+  s_ba8ba4c088ef1a::t_b62514bf442a19 84,94
+  s_ba8ba4c088ef1a::t_175bac6810fa4b 1-41,43-46,48-52,54-63,67-77,79-82,85-90,95-99
+docs/reviews/backend/20260611_v80-backend.md
+  s_ba8ba4c088ef1a::t_fb5565f2b9e862 1-56
+docs/reviews/20260611_v80-overview.md
+  s_ba8ba4c088ef1a::t_b62514bf442a19 86,88-89
+  s_ba8ba4c088ef1a::t_fb5565f2b9e862 1-85,87
+docs/reviews/client/20260611_v80-client.md
+  s_ba8ba4c088ef1a::t_fb5565f2b9e862 1-58
+tools/bot/scenarios/client/31_combat_threat_readability.json
+  s_ba8ba4c088ef1a::t_47fbaec61d8a06 1-24
+client/scripts/main.gd
+  s_ba8ba4c088ef1a::t_ee42335a91041d 1110-1112
+docs/as-built/v80_combat-threat-readability.md
+  s_ba8ba4c088ef1a::t_37cb7009b274d0 1-20,22-26
+  s_ba8ba4c088ef1a::t_b62514bf442a19 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4dcab9e0e028c4643bb7157ddb76f196d997b713",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

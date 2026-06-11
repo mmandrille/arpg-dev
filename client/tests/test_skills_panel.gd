@@ -62,7 +62,7 @@ func _run() -> void:
 	_assert_eq("hovered skill updates", str(state.get("hovered_skill_id", "")), "magic_bolt")
 	_assert_true("tooltip visible on hover", bool(state.get("tooltip_visible", false)))
 	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: 3"))
-	_assert_true("tooltip includes missing magic", str(state.get("tooltip_body", "")).contains("Magic 15 (5)"))
+	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel 1\nMagic 15(-10)"))
 	panel.bot_hover_skill("heal")
 	state = panel.get_debug_state()
 	_assert_eq("heal selection updates", str(state.get("selected_skill_id", "")), "heal")
@@ -104,7 +104,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_false("rank 2 requirement blocks magic 15", bool(state.get("requirements_met", true)))
 	_assert_false("rank 2 spend disabled before magic 20", bool(state.get("spend_button_enabled", true)))
-	_assert_true("tooltip includes rank 2 missing magic", str(state.get("tooltip_body", "")).contains("Magic 20 (15)"))
+	_assert_true("tooltip includes rank 2 missing magic diff", str(state.get("tooltip_body", "")).contains("Magic 20(-5)"))
 
 	panel.set_character_progression({
 		"level": 6,

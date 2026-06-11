@@ -1,0 +1,106 @@
+server/internal/game/rules.go
+  s_c8b827646bf8c0::t_a1cf7c7832364d 425,977-984
+shared/rules/items.v0.json
+  s_c8b827646bf8c0::t_1059309d5b44f1 6-8
+shared/rules/skills.v0.json
+  s_c8b827646bf8c0::t_1059309d5b44f1 6,40,72
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_c8b827646bf8c0::t_cb722a9e85aeba 5-7,10,14-15,18-26
+tools/bot/run.py
+  s_c8b827646bf8c0::t_516278a8270ed2 95,149,153-154,168-172,177,179-183,185,3919-3922,3934
+shared/assets/item_presentations.v0.json
+  s_c8b827646bf8c0::t_118c86ce273091 16-27
+server/internal/game/handlers.go
+  s_c8b827646bf8c0::t_fd7f5461101163 671-674,1076-1079,1122-1123
+server/internal/realtime/session_loop.go
+  s_c8b827646bf8c0::t_fa76f0999aa370 131-135,159-163,178-193
+docs/as-built/v70_class-skill-and-item-gates.md
+  s_c8b827646bf8c0::t_e8a39ca575b542 1-25
+server/internal/realtime/hub.go
+  s_c8b827646bf8c0::t_48e90725f3f01f 121
+tools/bot/bot_types.py
+  s_c8b827646bf8c0::t_516278a8270ed2 23
+server/internal/store/repos.go
+  s_c8b827646bf8c0::t_de27a5cd939be0 1751,1753,1920,1925
+  s_c8b827646bf8c0::t_b52cf9f103650f 1744-1747,1755
+server/internal/replay/replay.go
+  s_c8b827646bf8c0::t_48e90725f3f01f 610
+tools/validate_shared.py
+  s_c8b827646bf8c0::t_837e7aaefb1b26 836-859,1155-1162
+docs/plans/v70_2026-06-11-class-skill-and-item-gates.md
+  s_c8b827646bf8c0::t_bf1cddf4404bb2 3,27-29,37-39,47-48,57-60
+  s_c8b827646bf8c0::t_8ecf6a4f51d76f 1-2,4-26,30-36,40-46,49-56
+shared/assets/item_visuals.v0.json
+  s_c8b827646bf8c0::t_118c86ce273091 54-83
+server/internal/game/sim.go
+  s_c8b827646bf8c0::t_b02061240db5ea 5315
+  s_c8b827646bf8c0::t_1b323b69c5a542 5569-5583
+  s_c8b827646bf8c0::t_1424b79b00d32c 311,460,475-476
+  s_c8b827646bf8c0::t_5751f6155aac0e 5342
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_c8b827646bf8c0::t_28feff0a5d9bc8 5
+server/internal/http/auth_session_test.go
+  s_c8b827646bf8c0::t_0e31526d5b08a7 296
+server/internal/realtime/runner.go
+  s_c8b827646bf8c0::t_48e90725f3f01f 563
+docs/specs/v70_spec-class-skill-and-item-gates.md
+  s_c8b827646bf8c0::t_d9270695c36cd7 42-43
+  s_c8b827646bf8c0::t_8ecf6a4f51d76f 1-41,44-47
+server/internal/replay/replay_test.go
+  s_c8b827646bf8c0::t_a184eb3be36757 126
+PROGRESS.md
+  s_c8b827646bf8c0::t_53152c038e6577 15,18,20,91,201,601-604
+server/internal/store/models.go
+  s_c8b827646bf8c0::t_de27a5cd939be0 188
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_c8b827646bf8c0::t_28feff0a5d9bc8 4-7,10-11,15,17,23,31-32
+shared/rules/character_progression.v0.json
+  s_c8b827646bf8c0::t_d1fecd8078f63f 16
+server/internal/game/game_test.go
+  s_c8b827646bf8c0::t_50e5acb0a68b1c 1006
+  s_c8b827646bf8c0::t_8a1b30dd7fe38b 852-860
+  s_c8b827646bf8c0::t_de33ba927b9c5e 922,1004,1086
+  s_c8b827646bf8c0::t_0e31526d5b08a7 138
+  s_c8b827646bf8c0::t_95a78fee597cb7 129-131,144,147,150
+  s_c8b827646bf8c0::t_c1d86da478e012 812-851,861-884,887,889-910
+  s_c8b827646bf8c0::t_40c0c3afc446c4 888
+  s_c8b827646bf8c0::t_fabc7794252a18 554-555,885-886,1087
+tools/bot/scenarios/40_paladin_heal_skill.json
+  s_c8b827646bf8c0::t_28feff0a5d9bc8 1-48
+shared/rules/items.v0.schema.json
+  s_c8b827646bf8c0::t_1059309d5b44f1 25
+server/internal/game/types.go
+  s_c8b827646bf8c0::t_1424b79b00d32c 221
+server/internal/http/ws_test.go
+  s_c8b827646bf8c0::t_0943a79e6c7444 152-155,168-170,919-922,924-928
+  s_c8b827646bf8c0::t_0510fabb0e4fff 175-177
+  s_c8b827646bf8c0::t_d34085e53dd960 1153-1159
+  s_c8b827646bf8c0::t_8e360cc240743c 619-622,625
+  s_c8b827646bf8c0::t_4de45f53ae8336 630
+  s_c8b827646bf8c0::t_f4299110a7a5a5 641-650,654
+  s_c8b827646bf8c0::t_e667b8451e17ab 931-936
+  s_c8b827646bf8c0::t_5ab129b19ead51 634-636
+server/migrations/0018_session_start_character_class.sql
+  s_c8b827646bf8c0::t_1424b79b00d32c 1-9
+server/internal/http/session.go
+  s_c8b827646bf8c0::t_4d338f6840d5b3 356
+  s_c8b827646bf8c0::t_de27a5cd939be0 486
+shared/golden/skill_points_and_magic_bolt.json
+  s_c8b827646bf8c0::t_051131d6ee6b6d 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ec1f6ef3e90310af659636c084055e66b2ddd0ef",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

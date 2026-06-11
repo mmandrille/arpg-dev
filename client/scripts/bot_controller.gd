@@ -137,6 +137,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_enter_character_name(str(action.get("name", "")))
 		"select_character":
 			_do_select_character(int(action.get("index", 0)))
+		"select_character_class":
+			_do_select_character_class(str(action.get("class_id", "")))
 		"select_window_size":
 			_do_select_window_size(str(action.get("size", "")))
 		"set_floating_combat_text":
@@ -199,6 +201,11 @@ func _do_enter_character_name(name: String) -> void:
 func _do_select_character(index: int) -> void:
 	if _main != null and _main.has_method("bot_select_character"):
 		_main.bot_select_character(index)
+
+
+func _do_select_character_class(class_id: String) -> void:
+	if _main != null and _main.has_method("bot_select_character_class"):
+		_main.bot_select_character_class(class_id)
 
 
 func _do_select_window_size(size: String) -> void:

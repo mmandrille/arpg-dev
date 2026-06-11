@@ -3,17 +3,40 @@ class_name CharacterSelectPanel
 
 signal back_requested
 signal start_requested(character_id: String)
-signal create_requested(name: String)
+signal create_requested(name: String, character_class: String)
 signal delete_requested(character_id: String)
 signal rename_requested(character_id: String, name: String)
 
+const ClassIconScript := preload("res://scripts/class_icon.gd")
+
 const MODE_CHOOSE_OR_CREATE := "choose_or_create"
 const MODE_FORCED_CREATE := "forced_create"
+const DEFAULT_CLASS_ID := "barbarian"
+
+const CLASS_DEFS := {
+	"barbarian": {
+		"name": "Barbarian",
+		"skill": "Rage",
+		"stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+	},
+	"sorcerer": {
+		"name": "Sorcerer",
+		"skill": "Magic Bolt",
+		"stats": {"str": 3, "dex": 5, "vit": 5, "magic": 5},
+	},
+	"paladin": {
+		"name": "Paladin",
+		"skill": "Heal",
+		"stats": {"str": 4, "dex": 5, "vit": 7, "magic": 5},
+	},
+}
+const CLASS_ORDER := ["barbarian", "sorcerer", "paladin"]
 
 var _title: Label
 var _rows: VBoxContainer
 var _empty_label: Label
 var _create_row: HBoxContainer
+var _class_picker: HBoxContainer
 var _name_edit: LineEdit
 var _create_button: Button
 var _error_label: Label
@@ -25,6 +48,8 @@ var _delete_mode: bool = false
 var _pending_delete_id: String = ""
 var _pending_rename_id: String = ""
 var _mode: String = MODE_FORCED_CREATE
+var _selected_class_id: String = DEFAULT_CLASS_ID
+var _class_buttons: Dictionary = {}
 
 
 func _ready() -> void:
@@ -104,6 +129,9 @@ func get_debug_state() -> Dictionary:
 		"name_field_visible": _name_edit != null and _name_edit.visible,
 		"create_button_visible": _create_button != null and _create_button.visible,
 		"create_button_text": _create_button.text if _create_button != null else "",
+		"class_picker_visible": _class_picker != null and _class_picker.visible,
+		"selected_class": _selected_class_id,
+		"class_options": _debug_class_options(),
 		"empty_visible": _empty_label != null and _empty_label.visible,
 		"error": _error_label.text if _error_label != null else "",
 	}
@@ -117,6 +145,17 @@ func set_name_text(name: String) -> void:
 
 func submit_name() -> void:
 	_on_create_button_pressed()
+
+
+func select_class(class_id: String) -> void:
+	if not CLASS_DEFS.has(class_id):
+		return
+	_selected_class_id = class_id
+	_refresh_class_buttons()
+
+
+func selected_class_id() -> String:
+	return _selected_class_id
 
 
 func start_character_at_index(index: int) -> void:
@@ -135,12 +174,12 @@ func _build() -> void:
 	add_child(bg)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(430, 420)
+	panel.custom_minimum_size = Vector2(520, 470)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.offset_left = -215
-	panel.offset_right = 215
-	panel.offset_top = -210
-	panel.offset_bottom = 210
+	panel.offset_left = -260
+	panel.offset_right = 260
+	panel.offset_top = -235
+	panel.offset_bottom = 235
 	add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -180,6 +219,11 @@ func _build() -> void:
 	_create_button.custom_minimum_size = Vector2(150, 40)
 	_create_button.pressed.connect(_on_create_button_pressed)
 	_create_row.add_child(_create_button)
+
+	_class_picker = HBoxContainer.new()
+	_class_picker.add_theme_constant_override("separation", 8)
+	box.add_child(_class_picker)
+	_build_class_picker()
 
 	_error_label = Label.new()
 	_error_label.add_theme_color_override("font_color", Color("#ff9b7a"))
@@ -226,9 +270,15 @@ func _render_characters(characters: Array) -> void:
 			continue
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 6)
-		row.custom_minimum_size = Vector2(360, 38)
+		row.custom_minimum_size = Vector2(460, 40)
 		var name := str(character.get("name", "Hero"))
 		var dead := bool(character.get("dead", false))
+		var class_id := _character_class_id(character)
+		var class_icon = ClassIconScript.new()
+		class_icon.custom_minimum_size = Vector2(34, 34)
+		class_icon.configure(class_id)
+		class_icon.tooltip_text = _class_tooltip(class_id)
+		row.add_child(class_icon)
 		var select_btn := Button.new()
 		var label := _character_row_label(character)
 		if dead:
@@ -278,11 +328,14 @@ func _set_create_entry_expanded(expanded: bool, placeholder: String) -> void:
 		_create_button.tooltip_text = "Create character"
 		_create_button.custom_minimum_size = Vector2(44, 40)
 		_create_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+		_class_picker.visible = true
+		_refresh_class_buttons()
 	else:
 		_create_button.text = "Create Character"
 		_create_button.tooltip_text = "Create a new character"
 		_create_button.custom_minimum_size = Vector2(150, 40)
 		_create_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_class_picker.visible = false
 
 
 func _expand_create_entry() -> void:
@@ -351,7 +404,59 @@ func _create_from_input() -> void:
 	if name.length() > 24:
 		set_error("Name is too long")
 		return
-	create_requested.emit(name)
+	create_requested.emit(name, _selected_class_id)
+
+
+func _build_class_picker() -> void:
+	for child in _class_picker.get_children():
+		child.queue_free()
+	_class_buttons.clear()
+	for class_id in CLASS_ORDER:
+		var button := Button.new()
+		button.toggle_mode = true
+		button.custom_minimum_size = Vector2(154, 72)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.tooltip_text = _class_tooltip(class_id)
+		button.pressed.connect(func() -> void:
+			select_class(class_id)
+		)
+		var content := HBoxContainer.new()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_theme_constant_override("separation", 8)
+		content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 8)
+		var icon = ClassIconScript.new()
+		icon.custom_minimum_size = Vector2(42, 42)
+		icon.configure(class_id)
+		content.add_child(icon)
+		var labels := VBoxContainer.new()
+		labels.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		labels.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var title := Label.new()
+		title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		title.text = _class_name(class_id)
+		title.add_theme_font_size_override("font_size", 16)
+		labels.add_child(title)
+		var skill := Label.new()
+		skill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		skill.text = _class_skill(class_id)
+		skill.add_theme_font_size_override("font_size", 12)
+		skill.add_theme_color_override("font_color", Color("#cfc3aa"))
+		labels.add_child(skill)
+		content.add_child(labels)
+		button.add_child(content)
+		_class_picker.add_child(button)
+		_class_buttons[class_id] = button
+	_refresh_class_buttons()
+
+
+func _refresh_class_buttons() -> void:
+	for class_id in CLASS_ORDER:
+		var button: Button = _class_buttons.get(class_id, null)
+		if button == null:
+			continue
+		var selected := class_id == _selected_class_id
+		button.button_pressed = selected
+		button.modulate = Color("#ffffff") if selected else Color("#b7b0a4")
 
 
 func _character_level(character: Dictionary) -> int:
@@ -370,9 +475,41 @@ func _character_status(character: Dictionary) -> String:
 	return "Dead" if bool(character.get("dead", false)) else "Ready"
 
 
+func _character_class_id(character: Dictionary) -> String:
+	var class_id := str(character.get("character_class", DEFAULT_CLASS_ID))
+	if not CLASS_DEFS.has(class_id):
+		return DEFAULT_CLASS_ID
+	return class_id
+
+
+func _class_name(class_id: String) -> String:
+	return str((CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary).get("name", "Barbarian"))
+
+
+func _class_skill(class_id: String) -> String:
+	return str((CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary).get("skill", "Rage"))
+
+
+func _class_stats(class_id: String) -> Dictionary:
+	return (CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary).get("stats", {}) as Dictionary
+
+
+func _class_tooltip(class_id: String) -> String:
+	var stats := _class_stats(class_id)
+	return "%s\nSkill: %s\nSTR %d  DEX %d  VIT %d  MAGIC %d" % [
+		_class_name(class_id),
+		_class_skill(class_id),
+		int(stats.get("str", 0)),
+		int(stats.get("dex", 0)),
+		int(stats.get("vit", 0)),
+		int(stats.get("magic", 0)),
+	]
+
+
 func _character_row_label(character: Dictionary) -> String:
 	var name := str(character.get("name", "Hero"))
-	return "%s  Lv %d | %dg | D%d | %s" % [
+	return "%s  %s  Lv %d | %dg | D%d | %s" % [
+		_class_name(_character_class_id(character)),
 		name,
 		_character_level(character),
 		_character_gold(character),
@@ -384,6 +521,7 @@ func _character_row_label(character: Dictionary) -> String:
 func _character_row_tooltip(character: Dictionary) -> String:
 	var created := str(character.get("created_at", ""))
 	var lines := [
+		"Class %s" % _class_name(_character_class_id(character)),
 		"Level %d" % _character_level(character),
 		"Gold %d" % _character_gold(character),
 		"Deepest depth %d" % _character_depth(character),
@@ -403,6 +541,9 @@ func _debug_character_rows() -> Array:
 		rows.append({
 			"character_id": str(rec.get("character_id", "")),
 			"name": str(rec.get("name", "Hero")),
+			"character_class": _character_class_id(rec),
+			"class_name": _class_name(_character_class_id(rec)),
+			"class_tooltip": _class_tooltip(_character_class_id(rec)),
 			"dead": bool(rec.get("dead", false)),
 			"level": _character_level(rec),
 			"gold": _character_gold(rec),
@@ -412,3 +553,16 @@ func _debug_character_rows() -> Array:
 			"tooltip": _character_row_tooltip(rec),
 		})
 	return rows
+
+
+func _debug_class_options() -> Array:
+	var out := []
+	for class_id in CLASS_ORDER:
+		out.append({
+			"class_id": class_id,
+			"name": _class_name(class_id),
+			"skill": _class_skill(class_id),
+			"selected": class_id == _selected_class_id,
+			"tooltip": _class_tooltip(class_id),
+		})
+	return out

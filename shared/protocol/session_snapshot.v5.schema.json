@@ -410,6 +410,13 @@
         },
         {
           "if": {
+            "properties": { "event_type": { "const": "boss_killed" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["source_entity_id", "target_entity_id", "boss_template_id"] }
+        },
+        {
+          "if": {
             "properties": { "event_type": { "enum": ["item_picked_up", "loot_picked_up"] } },
             "required": ["event_type"]
           },

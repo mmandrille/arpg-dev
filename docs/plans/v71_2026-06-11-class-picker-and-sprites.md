@@ -82,7 +82,7 @@ Files:
 
 - [x] Step 4.1: Mark spec/plan complete and add as-built summary.
 - [x] Step 4.2: Update `PROGRESS.md` lifecycle table, summary, and next slice.
-- [ ] Step 4.3: Run final CI.
+- [x] Step 4.3: Run final CI.
 
 ```bash
 make ci
@@ -91,5 +91,5 @@ make ci
 ## Final Verification
 
 - [x] `make client-unit`
-- [ ] `make client-smoke`
-- [ ] `make ci`
+- [x] `make client-smoke`
+- [x] `make ci`

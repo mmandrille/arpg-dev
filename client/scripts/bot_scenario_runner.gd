@@ -2085,7 +2085,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 			return "client_steps[%d] (%s) requires labels or actions" % [index, stype]
 	if stype == "assert_character_panel":
 		var has_panel_expectation := false
-		for key in ["visible", "mode", "title", "character_count", "min_character_count", "name_field_visible", "create_button_visible", "empty_visible", "character_id", "status", "level", "min_level", "gold", "min_gold", "deepest_dungeon_depth", "min_deepest_dungeon_depth", "label_contains"]:
+		for key in ["visible", "mode", "title", "character_count", "min_character_count", "name_field_visible", "create_button_visible", "class_picker_visible", "selected_class", "row_character_class", "empty_visible", "character_id", "status", "level", "min_level", "gold", "min_gold", "deepest_dungeon_depth", "min_deepest_dungeon_depth", "label_contains"]:
 			if step.has(key):
 				has_panel_expectation = true
 		if not has_panel_expectation:

@@ -48,6 +48,7 @@ const SKILL_FUNCTION_KEY_COUNT := 8
 const PLAYER_TINT := Color("#8fe8a7")
 const REMOTE_PLAYER_TINT := Color("#202934")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
+const NO_MANA_TEXT := "NO MANA"
 const MONSTER_RARITY_TINTS := {
 	"common": Color("#f2f2ec"),
 	"champion": Color("#9fc7ff"),
@@ -824,7 +825,7 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 	elif reason == "capacity_would_overflow":
 		_show_bag_full_cant_unequip_text()
 	elif _is_skill_reject_reason(reason):
-		_show_skill_rejected_feedback()
+		_show_skill_rejected_feedback(reason)
 	elif shop_panel != null and shop_panel.visible:
 		shop_panel.show_status(reason.replace("_", " "), true)
 	elif stash_panel != null and stash_panel.visible:
@@ -1442,11 +1443,13 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null, p
 	var target: Node3D = null
 	var world_position := Vector3.ZERO
 	if entity_id == player_id:
+		if player_anchor == null:
+			return
 		target = player_anchor
-		world_position = player_anchor.global_position
+		world_position = _node_world_or_local_position(player_anchor)
 	elif entities.has(entity_id):
 		target = entities[entity_id]["node"] as Node3D
-		world_position = target.global_position
+		world_position = _node_world_or_local_position(target)
 	else:
 		return
 	var pop := DamageNumberScript.new() as DamageNumber
@@ -2975,9 +2978,11 @@ func _is_skill_reject_reason(reason: String) -> bool:
 		or reason == "target_out_of_range"
 
 
-func _show_skill_rejected_feedback() -> void:
+func _show_skill_rejected_feedback(reason: String = "") -> void:
 	if skill_bar != null:
 		skill_bar.flash_rejected()
+	if reason == "not_enough_mana":
+		_show_damage_number(player_id, Color("#54c7f3"), null, "", 0.0, "mana", NO_MANA_TEXT)
 
 
 func _skill_rank(skill_id: String) -> int:

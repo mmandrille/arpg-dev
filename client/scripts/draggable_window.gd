@@ -5,9 +5,12 @@ signal close_requested
 
 const TITLEBAR_HEIGHT := 34.0
 const CLOSE_SIZE := Vector2(30, 28)
+static var layout_storage_path: String = "user://window_layout.cfg"
+static var force_enable_persistence_for_tests: bool = false
 
 var window_title: String = ""
 var draggable: bool = true
+var layout_key: String = ""
 var _titlebar: PanelContainer
 var _title_label: Label
 var _close_button: Button
@@ -43,6 +46,11 @@ func close_button() -> Button:
 	return _close_button
 
 
+func set_layout_key(key: String) -> void:
+	layout_key = key.strip_edges()
+	_load_position()
+
+
 func titlebar() -> Control:
 	return _titlebar
 
@@ -50,6 +58,7 @@ func titlebar() -> Control:
 func bot_drag_by(delta: Vector2) -> void:
 	position += delta
 	clamp_to_viewport()
+	_save_position()
 
 
 func get_debug_state() -> Dictionary:
@@ -58,6 +67,8 @@ func get_debug_state() -> Dictionary:
 		"position": {"x": position.x, "y": position.y},
 		"close_visible": _close_button != null and _close_button.visible,
 		"draggable": draggable,
+		"layout_key": layout_key,
+		"persistence_enabled": _persistence_enabled(),
 	}
 
 
@@ -124,6 +135,8 @@ func _on_titlebar_gui_input(event: InputEvent) -> void:
 		global_position = get_global_mouse_position() - _drag_offset
 		clamp_to_viewport()
 		accept_event()
+	if event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_save_position()
 
 
 func _titlebar_style() -> StyleBoxFlat:
@@ -136,3 +149,35 @@ func _titlebar_style() -> StyleBoxFlat:
 	s.content_margin_top = 3
 	s.content_margin_bottom = 3
 	return s
+
+
+func _persistence_enabled() -> bool:
+	if layout_key == "":
+		return false
+	if OS.get_environment("CLIENT_UNIT_ONLY") == "1" and not force_enable_persistence_for_tests:
+		return false
+	return true
+
+
+func _load_position() -> void:
+	if not _persistence_enabled():
+		return
+	var cfg := ConfigFile.new()
+	if cfg.load(layout_storage_path) != OK:
+		return
+	if not cfg.has_section_key(layout_key, "x") or not cfg.has_section_key(layout_key, "y"):
+		return
+	position = Vector2(float(cfg.get_value(layout_key, "x", position.x)), float(cfg.get_value(layout_key, "y", position.y)))
+	clamp_to_viewport()
+
+
+func _save_position() -> void:
+	if not _persistence_enabled():
+		return
+	var cfg := ConfigFile.new()
+	cfg.load(layout_storage_path)
+	cfg.set_value(layout_key, "x", position.x)
+	cfg.set_value(layout_key, "y", position.y)
+	var err := cfg.save(layout_storage_path)
+	if err != OK:
+		push_warning("could not save window layout: %s" % layout_storage_path)

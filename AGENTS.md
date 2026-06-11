@@ -54,6 +54,8 @@ When worktree isolation is used:
 
 Prefer targeted verification while iterating. Run the smallest command or scenario that covers the files and behavior you changed, such as a focused Go package test, `make validate-shared`, `make client-unit`, a single `make bot scenario=...`, or one client bot scenario.
 
+When working on features or changes that involve visual effects and a client bot scenario exists, always tell the user the exact scenario name and command they can run for visual verification, for example: `make bot-visual scenario=blablabla`.
+
 Do **not** repeatedly run the full suite by default. Reserve `make ci` for the final pre-commit proof when the change is broad enough to justify it, when targeted tests leave meaningful integration risk, or when the user explicitly asks for full CI.
 
 ## Data-driven gameplay and tests

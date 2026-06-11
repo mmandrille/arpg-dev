@@ -32,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_REL = "assets/manifests/assets.v0.json"
 MANIFEST_SCHEMA_REL = "assets/manifests/assets.v0.schema.json"
 ITEM_VISUALS_REL = "shared/assets/item_visuals.v0.json"
+MONSTER_VISUALS_REL = "shared/assets/monster_visuals.v0.json"
 
 
 def load(path: Path):
@@ -89,6 +90,7 @@ def validate(root: Path, report: Report) -> None:
     manifest_path = root / MANIFEST_REL
     schema_path = root / MANIFEST_SCHEMA_REL
     visuals_path = root / ITEM_VISUALS_REL
+    monster_visuals_path = root / MONSTER_VISUALS_REL
 
     # [1] schema-validate the manifest.
     print("[1] manifest schema validation")
@@ -105,6 +107,7 @@ def validate(root: Path, report: Report) -> None:
 
     assets = manifest["assets"]
     visuals = load(visuals_path)["item_visuals"]
+    monster_visuals = load(monster_visuals_path)["monster_visuals"] if monster_visuals_path.is_file() else {}
 
     # [2] runtime_path existence + provenance sha256.
     print("[2] runtime files + provenance")
@@ -143,6 +146,20 @@ def validate(root: Path, report: Report) -> None:
             report.fail("slot agreement", f"{def_id}: visual slot {vis['slot']} != asset slot {entry.get('slot')}")
         else:
             report.ok(f"{def_id} -> {vis['asset_id']} resolves with matching slot")
+
+    # [4b] monster_visuals -> manifest resolution. Monster presentation is
+    # data-driven by monster_def_id, but the manifest remains the source of
+    # truth for runtime bytes.
+    print("[4b] monster_visuals -> manifest resolution")
+    for def_id, vis in sorted(monster_visuals.items()):
+        entry = assets.get(vis["asset_id"])
+        if entry is None:
+            report.fail("monster asset_id resolution", f"{def_id}: asset_id {vis['asset_id']} not in manifest")
+            continue
+        if entry["type"] != "monster":
+            report.fail("monster asset_id type", f"{def_id}: asset {vis['asset_id']} is {entry['type']}, expected monster")
+        else:
+            report.ok(f"{def_id} -> {vis['asset_id']} resolves to monster asset")
 
     # [5] character mount-bone coverage (spec §4.3): item_visuals still names the
     #     runtime socket right_hand_socket, but the manifest required_nodes list

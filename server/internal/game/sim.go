@@ -1819,7 +1819,13 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			}
 			generated.defID = template.BaseMonsterDefID
 			lootTable = template.LootTable
-			generated.visualModel = template.Visual.Model
+			if generated.visualModel == "" {
+				generated.visualModel = template.Visual.Model
+				if len(template.Visual.ModelPool) > 0 {
+					visualRNG := NewRNG(SeedToUint64(fmt.Sprintf("%s|boss_visual|%d|%s", s.seed, level.levelNum, generated.bossTemplate)))
+					generated.visualModel = template.Visual.ModelPool[visualRNG.IntN(len(template.Visual.ModelPool))]
+				}
+			}
 			generated.visualTint = template.Visual.Color
 			generated.visualScale = template.Visual.Scale
 		}

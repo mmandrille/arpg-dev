@@ -343,8 +343,14 @@ func TestBossRulesAndGoldens(t *testing.T) {
 	if template.BaseMonsterDefID != floorGolden.Expected.Boss.BaseMonsterDefID {
 		t.Fatalf("boss base monster = %s, want %s", template.BaseMonsterDefID, floorGolden.Expected.Boss.BaseMonsterDefID)
 	}
-	if template.Visual.Model != floorGolden.Expected.Boss.VisualModel || template.Visual.Color != floorGolden.Expected.Boss.VisualColor || template.Visual.Scale != floorGolden.Expected.Boss.VisualScale {
+	if template.Visual.Color != floorGolden.Expected.Boss.VisualColor || template.Visual.Scale != floorGolden.Expected.Boss.VisualScale {
 		t.Fatalf("boss visual = %+v, want golden %+v", template.Visual, floorGolden.Expected.Boss)
+	}
+	if len(template.Visual.ModelPool) == 0 {
+		t.Fatalf("boss visual model pool is empty")
+	}
+	if !stringSliceContains(template.Visual.ModelPool, floorGolden.Expected.Boss.VisualModel) {
+		t.Fatalf("boss visual model %s not in pool %+v", floorGolden.Expected.Boss.VisualModel, template.Visual.ModelPool)
 	}
 
 	var timelineGolden struct {
@@ -7881,6 +7887,15 @@ func adjacentUnitOffsets() []Vec2 {
 		{X: -1, Y: -1},
 		{X: 1, Y: -1},
 	}
+}
+
+func stringSliceContains(values []string, needle string) bool {
+	for _, value := range values {
+		if value == needle {
+			return true
+		}
+	}
+	return false
 }
 
 func itoa(i int) string {

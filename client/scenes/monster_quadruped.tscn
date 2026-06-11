@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/monsters/quadruped/monster_quadruped.glb" id="1_glb"]
+[ext_resource type="AnimationLibrary" path="res://animations/monster_anims.tres" id="2_anims"]
+
+[node name="MonsterQuadruped" type="Node3D"]
+
+[node name="ModelRoot" parent="." instance=ExtResource("1_glb")]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../ModelRoot")
+libraries = {
+"": ExtResource("2_anims")
+}

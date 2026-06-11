@@ -3,6 +3,7 @@ extends SceneTree
 # Run: godot --headless --path client --script res://tests/test_animation.gd
 const ControllerScript := preload("res://scripts/animation_controller.gd")
 const ReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
+const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 
 
 var _failed: bool = false
@@ -32,6 +33,8 @@ func _initialize() -> void:
 	await _test_player_snapshot_death_pose()
 	if _failed: quit(1); return
 	await _test_monster_scene()
+	if _failed: quit(1); return
+	_test_monster_visuals_catalog()
 	if _failed: quit(1); return
 	print("[gdtest] PASS: animation controller + scenes")
 	quit(0)
@@ -193,16 +196,31 @@ func _test_player_snapshot_death_pose() -> void:
 
 
 func _test_monster_scene() -> void:
-	var s = (load("res://scenes/monster_dummy.tscn") as PackedScene).instantiate()
-	get_root().add_child(s)
-	await process_frame
-	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	_assert(ap != null, "monster AnimationPlayer missing")
-	if ap != null:
-		for clip in ["idle", "walk", "hit", "death"]:
-			_assert(ap.has_animation(clip), "monster missing clip %s" % clip)
-	s.free()
-	await process_frame
+	for scene_path in [
+		"res://scenes/monster_dummy.tscn",
+		"res://scenes/monster_quadruped.tscn",
+		"res://scenes/monster_tiny_flyer.tscn",
+	]:
+		var s = (load(scene_path) as PackedScene).instantiate()
+		get_root().add_child(s)
+		await process_frame
+		var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		_assert(ap != null, "%s AnimationPlayer missing" % scene_path)
+		if ap != null:
+			for clip in ["idle", "walk", "hit", "death"]:
+				_assert(ap.has_animation(clip), "%s missing clip %s" % [scene_path, clip])
+		s.free()
+		await process_frame
+
+
+func _test_monster_visuals_catalog() -> void:
+	var wolf := MonsterVisualsLoaderScript.resolve("dungeon_wolf")
+	_assert(str(wolf.get("scene", "")) == "monster_quadruped", "dungeon_wolf scene = %s" % wolf.get("scene", ""))
+	var bat := MonsterVisualsLoaderScript.resolve("dungeon_bat")
+	_assert(str(bat.get("scene", "")) == "monster_tiny_flyer", "dungeon_bat scene = %s" % bat.get("scene", ""))
+	_assert(float(bat.get("height_offset", 0.0)) > 0.0, "dungeon_bat must hover above ground")
+	var boss := MonsterVisualsLoaderScript.resolve("dungeon_mob", "monster_tiny_flyer")
+	_assert(str(boss.get("scene", "")) == "monster_tiny_flyer", "boss visual_model should select flyer scene")
 
 
 func _assert(cond: bool, msg: String) -> void:

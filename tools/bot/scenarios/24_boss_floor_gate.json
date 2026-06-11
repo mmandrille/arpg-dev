@@ -5,7 +5,7 @@
   "title": "Boss floor gate",
   "description": "Start in the compact level -5 boss-floor lab, prove boss movement, locked exits, one telegraph, boss kill, exit unlock, and descent to -6.",
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "monster", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "current_humanoid_player", "visual_scale": 2.0, "equals": 1 },
+    { "action": "assert_entity_count", "entity_type": "monster", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "monster_tiny_flyer", "visual_scale": 2.0, "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "locked", "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "teleporter", "equals": 0 },
     {

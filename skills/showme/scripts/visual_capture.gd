@@ -58,6 +58,8 @@ func _initialize() -> void:
 			await _setup_chests()
 		"vendors":
 			await _setup_vendors()
+		"monsters":
+			await _setup_monsters()
 		"inventory":
 			await _setup_inventory()
 		"skills":
@@ -348,6 +350,40 @@ func _setup_vendors() -> void:
 	mystery.name = "PreviewMysterySeller"
 	mystery.position = Vector3(1.0, 0.0, 0.0)
 	root.add_child(mystery)
+	_subject = root
+
+
+func _setup_monsters() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackMonsters"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(4.2, 3.0, 5.3), Vector3(0.0, 0.70, 0.0), 4.8)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(6.2, 0.04, 2.6)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.025, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#353735")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var main: Node3D = MainScript.new()
+	var entries := [
+		{"name": "Dummy", "x": -2.25, "entity": {"type": "monster", "monster_def_id": "dungeon_mob", "rarity": "common"}},
+		{"name": "Wolf", "x": -0.75, "entity": {"type": "monster", "monster_def_id": "dungeon_wolf", "rarity": "common"}},
+		{"name": "Bat", "x": 0.75, "entity": {"type": "monster", "monster_def_id": "dungeon_bat", "rarity": "common"}},
+		{"name": "Boss", "x": 2.25, "entity": {"type": "monster", "monster_def_id": "dungeon_mob", "rarity": "unique", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "monster_tiny_flyer", "visual_scale": 2.0, "visual_tint": "#b77cff"}},
+	]
+	for entry in entries:
+		var monster := main._make_entity_node(entry["entity"] as Dictionary) as Node3D
+		monster.name = "Preview%s" % str(entry["name"])
+		monster.position = Vector3(float(entry["x"]), 0.0, 0.0)
+		root.add_child(monster)
 	_subject = root
 
 

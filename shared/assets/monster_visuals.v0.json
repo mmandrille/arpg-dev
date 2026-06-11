@@ -1,0 +1,124 @@
+{
+  "version": 0,
+  "monster_visuals": {
+    "training_dummy": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "training_dummy_reward": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "training_dummy_path": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "training_dummy_ranged": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "training_dummy_heal": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "training_dummy_chase": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "skill_xp_level6_dummy": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "skill_xp_level7_dummy": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "combat_lab_soft_target": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "combat_lab_armored_target": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "combat_lab_blocking_target": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "combat_lab_crit_attacker": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "combat_lab_miss_attacker": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "dungeon_mob": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "dungeon_archer": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
+    "dungeon_wolf": {
+      "asset_id": "monster_quadruped_predator_v0",
+      "scene": "monster_quadruped",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_quadruped"
+    },
+    "dungeon_bat": {
+      "asset_id": "monster_tiny_flyer_v0",
+      "scene": "monster_tiny_flyer",
+      "scale": 0.7,
+      "height_offset": 0.9,
+      "animation_profile": "hover_flyer"
+    }
+  }
+}

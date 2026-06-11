@@ -1616,7 +1616,7 @@ def cross_checks(report: Report) -> None:
             report.fail("boss_floor golden", "initial exit states must be locked/absent")
         elif expected["boss"]["base_monster_def_id"] != template["base_monster_def_id"]:
             report.fail("boss_floor golden", "boss base_monster_def_id mismatch")
-        elif expected["boss"]["visual_model"] != template["visual"]["model"] or expected["boss"]["visual_scale"] != template["visual"]["scale"]:
+        elif expected["boss"]["visual_model"] not in template["visual"].get("model_pool", [template["visual"]["model"]]) or expected["boss"]["visual_scale"] != template["visual"]["scale"]:
             report.fail("boss_floor golden", "boss visual metadata mismatch")
         else:
             report.ok("boss_floor golden matches boss-floor rules")

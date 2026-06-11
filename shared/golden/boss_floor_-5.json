@@ -15,7 +15,7 @@
     "boss": {
       "template_id": "cave_warden",
       "base_monster_def_id": "dungeon_mob",
-      "visual_model": "current_humanoid_player",
+      "visual_model": "monster_tiny_flyer",
       "visual_color": "#b77cff",
       "visual_scale": 2.0
     }

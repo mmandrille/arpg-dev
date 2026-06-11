@@ -1,5 +1,5 @@
 // Package realtime implements the authenticated WebSocket game protocol: the
-// per-connection session runner that drives the 20 Hz authoritative tick loop,
+// per-connection session runner that drives the 10 Hz authoritative tick loop,
 // validates envelopes, applies buffered inputs in deterministic order, and
 // persists inputs/events/inventory (ADR-0001 D2/D3/D8.1/D8.2).
 package realtime
@@ -14,7 +14,7 @@ import (
 // tickHz is the live authoritative session rate. The deterministic sim still
 // advances one fixed tick per loop; lowering the loop rate slows live gameplay
 // without changing replay tick semantics.
-const tickHz = 15
+const tickHz = 10
 
 // Client-to-server message types.
 const (

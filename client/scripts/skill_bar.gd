@@ -4,7 +4,7 @@ extends Control
 signal cast_skill_requested(skill_id: String)
 signal open_skills_requested
 
-const TICK_DURATION_S := 0.05
+const TICK_DURATION_S := 1.0 / 10.0
 
 var skill_progression: Dictionary = {}
 var _interactive: bool = true
@@ -15,6 +15,7 @@ var _remaining_ticks: float = 0.0
 var _total_ticks: int = 0
 var _panel: PanelContainer
 var _slot: Button
+var _badge: Label
 var _cooldown: ProgressBar
 var _flash_timer: float = 0.0
 var _flash_color := Color("#f0dfbb")
@@ -101,6 +102,9 @@ func get_debug_state() -> Dictionary:
 		"skill_name": _skill_name(_current_skill_id()),
 		"rank": _rank,
 		"max_rank": _max_rank,
+		"unspent_skill_points": _unspent_skill_points(),
+		"upgrade_badge_visible": _badge.visible if _badge != null else false,
+		"upgrade_badge_text": _badge.text if _badge != null else "",
 		"enabled": _slot_enabled(),
 		"disabled": not _slot_enabled(),
 		"remaining_ticks": int(ceil(_remaining_ticks)),
@@ -137,6 +141,9 @@ func _build() -> void:
 	_slot.add_theme_font_size_override("font_size", 22)
 	box.add_child(_slot)
 
+	_badge = _make_upgrade_badge()
+	_slot.add_child(_badge)
+
 	_cooldown = ProgressBar.new()
 	_cooldown.min_value = 0.0
 	_cooldown.max_value = 1.0
@@ -161,6 +168,8 @@ func _render() -> void:
 	_slot.disabled = not _interactive
 	_slot.text = _skill_icon_label_text(_current_skill_id()) if _rank > 0 else "-"
 	_slot.tooltip_text = _tooltip_text(_current_skill_id())
+	if _badge != null:
+		_badge.visible = _unspent_skill_points() > 0
 	_cooldown.value = _cooldown_fraction()
 
 
@@ -172,6 +181,10 @@ func _cooldown_fraction() -> float:
 	if _total_ticks <= 0:
 		return 0.0
 	return clampf(_remaining_ticks / float(_total_ticks), 0.0, 1.0)
+
+
+func _unspent_skill_points() -> int:
+	return int(skill_progression.get("unspent_skill_points", 0))
 
 
 func _skill_row(skill_id: String) -> Dictionary:
@@ -217,6 +230,22 @@ func _flash(color: Color) -> void:
 	_flash_color = color
 	_flash_timer = 0.2
 	_slot.modulate = _flash_color
+
+
+func _make_upgrade_badge() -> Label:
+	var badge := Label.new()
+	badge.text = "+"
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge.position = Vector2(34.0, -2.0)
+	badge.size = Vector2(20.0, 20.0)
+	badge.add_theme_font_size_override("font_size", 18)
+	badge.add_theme_color_override("font_color", Color("#5eff62"))
+	badge.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.85))
+	badge.add_theme_constant_override("shadow_offset_x", 1)
+	badge.add_theme_constant_override("shadow_offset_y", 1)
+	return badge
 
 
 func _panel_style() -> StyleBoxFlat:

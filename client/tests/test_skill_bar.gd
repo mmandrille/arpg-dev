@@ -33,6 +33,7 @@ func _run() -> void:
 	bar.set_interactive(true)
 	var state := bar.get_debug_state()
 	_assert_eq("rank starts zero", int(state.get("rank", -1)), 0)
+	_assert_false("skill upgrade badge hidden without points", bool(state.get("upgrade_badge_visible", true)))
 	_assert_false("unranked skill disabled", bool(state.get("enabled", true)))
 	_assert_eq("unranked slot text", str(state.get("slot_text", "")), "-")
 	_assert_true("tooltip uses catalog name", str(state.get("tooltip_text", "")).contains("Magic Bolt"))
@@ -41,10 +42,12 @@ func _run() -> void:
 	_assert_eq("slot click does not cast", emitted.size(), 0)
 
 	bar.set_skill_progression({
-		"unspent_skill_points": 0,
+		"unspent_skill_points": 1,
 		"skills": _skill_rows(1),
 	})
 	state = bar.get_debug_state()
+	_assert_true("skill upgrade badge visible with points", bool(state.get("upgrade_badge_visible", false)))
+	_assert_eq("skill upgrade badge text", str(state.get("upgrade_badge_text", "")), "+")
 	_assert_true("ranked skill enabled", bool(state.get("enabled", false)))
 	_assert_eq("ranked slot text from presentation", str(state.get("slot_text", "")), "M")
 	bar.use_slot()

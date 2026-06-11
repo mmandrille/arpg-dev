@@ -96,7 +96,7 @@ docs/        ADRs + specs + plans + as-built + reviews (periodic ~every 10 slice
 The client is a renderer + input layer; **the server owns every outcome that matters** (HP, damage, loot rolls, inventory). Even in solo play the client speaks the full production-shaped protocol over WebSocket. There is no local-only path or client-side shortcut.
 
 ### Server internals (`server/internal/`)
-- **`game/`** — deterministic authoritative simulation (`Sim`). Given the same seed + ordered inputs it always produces identical output. Enforced: seeded PRNG only (`rng.go`), no `time.Now()` in game logic, stable entity-ID ordering, **15 Hz tick** (`protocol.go:17`). Rules loaded from `shared/rules/` at startup (`rules.go`). **CI gate:** `make lint-determinism` fails on `time.Now()`, `math/rand`, or bare map ranges in hot-path files — see `server/cmd/determinism-lint/`.
+- **`game/`** — deterministic authoritative simulation (`Sim`). Given the same seed + ordered inputs it always produces identical output. Enforced: seeded PRNG only (`rng.go`), no `time.Now()`, stable entity-ID ordering, **10 Hz live tick** (`server/internal/realtime/protocol.go:17`). Rules loaded from `shared/rules/` at startup (`rules.go`). **CI gate:** `make lint-determinism` fails on `time.Now()`, `math/rand`, or bare map ranges in hot-path files — see `server/cmd/determinism-lint/`.
 - **`realtime/`** — WebSocket hub + per-session runner. `Hub.Run()` upgrades the connection, constructs a `Sim`, and enters the session loop.
 - **`store/`** — repository interface + Postgres implementation. Sessions, inventory, events all persist here.
 - **`auth/`, `http/`, `replay/`** — platform services (auth, REST endpoints, replay command).

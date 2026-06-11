@@ -80,6 +80,23 @@ Examples:
 - Movement speed: prefer "monster moves closer / leashes within a timeout derived from current
   rules" over "position equals X after exactly N ticks" unless fixed-tick stepping is the feature.
 
+## Data-Driven Configuration Policy
+
+Gameplay tuning must be data-driven by default. Before adding or changing any balance-sensitive
+value, decide whether it belongs in `shared/rules/main_config.v0.json`, another
+`shared/rules/*.json` catalog, or a schema-backed content file. This applies to attack speed,
+movement speed, drop chance, loot weights, monster stats, class stats, skill costs/cooldowns, shop
+pricing, XP curves, generated-content budgets, and similar values. Hardcoding a new tuning value in
+Go, GDScript, or Python requires an explicit note in the spec/plan explaining why code ownership is
+the right boundary.
+
+Tests must protect configurability. Prefer deriving expectations from loaded rules, using
+semantic/range/eventual assertions, or creating focused temp-rule fixtures that modify only the
+shared JSON under test and prove gameplay follows it. Do not duplicate current rule values in
+unrelated tests; those assertions become accidental tuning locks. Exact numbers remain appropriate
+for named goldens, protocol/schema contracts, deterministic replay equality, evaluator parity, and
+tests whose stated purpose is to own a formula.
+
 ## Architecture
 
 ```

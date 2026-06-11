@@ -56,6 +56,12 @@ Prefer targeted verification while iterating. Run the smallest command or scenar
 
 Do **not** repeatedly run the full suite by default. Reserve `make ci` for the final pre-commit proof when the change is broad enough to justify it, when targeted tests leave meaningful integration risk, or when the user explicitly asks for full CI.
 
+## Data-driven gameplay and tests
+
+Gameplay tuning belongs in shared data, not hardcoded implementation constants. Before adding or changing balance-sensitive behavior, check whether the value should live in `shared/rules/main_config.v0.json`, another `shared/rules/*.json` catalog, or a schema-backed content file. Values such as attack speed, movement speed, drop chance, loot weights, monster stats, class stats, skill costs/cooldowns, shop pricing, XP curves, and generated-content budgets must be configurable unless the slice explicitly documents why code ownership is required.
+
+Tests must preserve that configurability. Do not copy current tuning values into unrelated assertions. Prefer rule-derived expectations, semantic/range/eventual assertions, or focused temp-rule fixtures that change only the relevant shared JSON and prove gameplay follows it. Exact numeric assertions are acceptable only for protocol/schema contracts, deterministic goldens, evaluator parity, or a test whose stated purpose is to own that formula.
+
 ## Development priority
 
 While the game is still in active development, do **not** preserve backward compatibility just for its own sake. Prefer the cleanest, healthiest implementation and update contracts, fixtures, tests, tools, and docs together.

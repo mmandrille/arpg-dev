@@ -1,0 +1,41 @@
+shared/golden/dungeon_stairs.json
+  s_4c0cc59c104e28::t_8702640e07fb55 15
+server/internal/game/game_test.go
+  s_4c0cc59c104e28::t_a740a2aca5b04f 5171-5172,6823-6824
+client/tests/test_item_visuals.gd
+  s_4c0cc59c104e28::t_8757640ec5ef0f 78-79,372-375,377-402
+  s_5db3176cff45e9::t_fcb3621badbcf6 80-81,403-434
+  s_4c0cc59c104e28::t_5e3a78edffad69 376
+  s_4c0cc59c104e28::t_9df0a83fdf1a88 82-83,435-482
+client/scripts/main.gd
+  s_5db3176cff45e9::t_c6ace8dff5e973 232,2739,2744-2745,2750-2752
+  s_4c0cc59c104e28::t_a4edadaf4c030b 4367-4380,4382-4393,4397-4406
+  s_5db3176cff45e9::t_4840ec9a1b623b 231,244-245,848,901,2626-2628,2709-2738,2740-2743,2746-2749,2753-2769
+  s_4c0cc59c104e28::t_7b132a3346e522 3671-3674,3677,3679,3681
+  s_4c0cc59c104e28::t_b58b67a616387a 2772-2803
+  s_4c0cc59c104e28::t_3a65cf4831d826 233,246
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "674183489a24aff3f63ce17bec74b3ad8ff04704",
+  "prompts": {},
+  "sessions": {
+    "s_4c0cc59c104e28": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4fc-520c-7230-b3f4-43f216d2c5cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_5db3176cff45e9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb522-0622-7923-a22c-dd7295f289dc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

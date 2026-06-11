@@ -12,7 +12,7 @@ import (
 const (
 	baseEntityID                   = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
 	playerStartHP                  = 10
-	moveSpeed                      = 1.0
+	defaultMoveSpeed               = 1.0
 	playerRadius                   = 0.45
 	monsterRadius                  = 0.45
 	monsterDefID                   = "training_dummy"
@@ -3102,8 +3102,8 @@ func (s *Sim) applyMovement(res *TickResult) {
 	player := s.activeLevel().entities[s.playerID]
 	before := player.pos
 	player.pos = s.resolveMovement(player.pos, Vec2{
-		X: s.activeLevel().move.dir.X * moveSpeed,
-		Y: s.activeLevel().move.dir.Y * moveSpeed,
+		X: s.activeLevel().move.dir.X * s.playerMoveSpeed(),
+		Y: s.activeLevel().move.dir.Y * s.playerMoveSpeed(),
 	})
 	s.activeLevel().move.remaining--
 	if s.activeLevel().move.remaining == 0 {
@@ -3113,6 +3113,13 @@ func (s *Sim) applyMovement(res *TickResult) {
 		return
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+}
+
+func (s *Sim) playerMoveSpeed() float64 {
+	if s.rules != nil && s.rules.MainConfig.Gameplay.BaseMovementSpeed > 0 {
+		return s.rules.MainConfig.Gameplay.BaseMovementSpeed
+	}
+	return defaultMoveSpeed
 }
 
 func (s *Sim) applyAutoNav(res *TickResult) {
@@ -3128,7 +3135,7 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 	before := player.pos
 	step := s.activeLevel().autoNav.steps[0]
 	s.activeLevel().autoNav.steps = s.activeLevel().autoNav.steps[1:]
-	player.pos = s.resolveMovement(player.pos, Vec2{X: step.X * moveSpeed, Y: step.Y * moveSpeed})
+	player.pos = s.resolveMovement(player.pos, Vec2{X: step.X * s.playerMoveSpeed(), Y: step.Y * s.playerMoveSpeed()})
 	if player.pos != before {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	}

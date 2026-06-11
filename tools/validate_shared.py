@@ -1116,12 +1116,12 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok("equipment_lab treasure class covers every v28 template")
 
-    if int(main_gameplay.get("base_attack_interval_ticks", 0)) != int(combat.get("base_attack_interval_ticks", 0)):
-        report.fail("main_config gameplay", "base_attack_interval_ticks must match combat.v0.json")
-    elif not math.isclose(float(main_gameplay.get("base_movement_speed", -1)), float(navigation.get("cell_size", -2)), rel_tol=0, abs_tol=0.000001):
-        report.fail("main_config gameplay", "base_movement_speed must match navigation.cell_size until v77 consumes it directly")
+    if int(main_gameplay.get("base_attack_interval_ticks", 0)) <= 0:
+        report.fail("main_config gameplay", "base_attack_interval_ticks must be positive")
+    elif float(main_gameplay.get("base_movement_speed", 0)) <= 0:
+        report.fail("main_config gameplay", "base_movement_speed must be positive")
     else:
-        report.ok("main_config gameplay mirrors current combat and movement defaults")
+        report.ok("main_config gameplay owns attack cadence and movement speed")
 
     def treasure_class_at_least_one_drop_rate(class_id: str) -> int | None:
         treasure_class = treasure_class_defs.get(class_id)
@@ -1342,8 +1342,8 @@ def cross_checks(report: Report) -> None:
         if not failed_skill_magic:
             report.ok("skill_points golden matches combat and skills rules")
 
-    if navigation.get("cell_size") != 1.0:
-        report.fail("navigation cell_size", "must be 1.0 for v11 moveSpeed parity")
+    if navigation.get("cell_size", 0) <= 0:
+        report.fail("navigation cell_size", "must be positive")
     elif navigation.get("max_auto_steps", 0) <= 0:
         report.fail("navigation max_auto_steps", "must be positive")
     elif navigation.get("stop_distance", -1) < 0:

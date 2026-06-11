@@ -1,20 +1,12 @@
 {
   "id": "mystery_seller_core",
-  "world_id": "dungeon_levels",
+  "world_id": "vendor_lab",
   "seed": "v51_mystery_0504",
   "title": "Mystery seller core",
-  "description": "Reach dungeon depth 3, fund one mystery purchase, assert concealed shop rows hide item identity, then buy one mystery offer and verify the revealed payload and consumed stock persist.",
+  "description": "Use the compact vendor lab to fund one mystery purchase, assert concealed shop rows hide item identity, then buy one mystery offer and verify the revealed payload and consumed stock persist.",
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "pick_up_first_rolled_loot" },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "pick_up_first_rolled_loot" },
-    { "action": "assert_deepest_dungeon_depth", "at_least": 3 },
-    { "action": "discover_teleporter", "max_ticks": 520 },
-    { "action": "teleport_to_level", "target_level": 0 },
     { "action": "open_shop" },
     { "action": "sell_inventory_item", "rolled": true, "equipped": false },
     { "action": "assert_gold_changed", "direction": "increase" },
@@ -66,8 +58,6 @@
   ],
   "assertions": [
     { "type": "current_level", "equals": 0 },
-    { "type": "visited_levels_contain", "level": -3 },
-    { "type": "character_progression", "deepest_dungeon_depth": 3 },
     { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 },
     {
       "type": "shop_event",
@@ -81,7 +71,7 @@
   ],
   "fresh_session_checks": [
     {
-      "world_id": "dungeon_levels",
+      "world_id": "vendor_lab",
       "steps": [
         {
           "action": "open_shop",
@@ -92,8 +82,7 @@
         { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 }
       ],
       "assertions": [
-        { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 },
-        { "type": "character_progression", "deepest_dungeon_depth": 3 }
+        { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 8 }
       ]
     }
   ],

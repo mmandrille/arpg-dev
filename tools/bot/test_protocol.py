@@ -5,6 +5,7 @@ from tools.bot.client_join_preflight import build_metadata, write_metadata
 from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
 from tools.bot.bot_types import RuntimeState
 from tools.bot.run import (
+    MAX_SCENARIO_ELAPSED_S,
     clean_bot_run_artifacts,
     create_listed_coop_session,
     default_manifest_path,
@@ -20,6 +21,7 @@ from tools.bot.run import (
     list_active_sessions,
     load_scenarios,
     range_candidate_positions,
+    assert_scenario_elapsed_within_budget,
     run_assertions,
     run_runtime_assertions,
     select_shop_offer,
@@ -147,6 +149,21 @@ def test_bot_scenarios_do_not_use_large_raw_tick_waits():
                 offenders.append(f"{path.name}:client_steps[{step_index}] ticks={step.get('ticks')}")
 
     assert offenders == []
+
+
+def test_protocol_bot_scenario_elapsed_budget_is_ten_seconds():
+    assert MAX_SCENARIO_ELAPSED_S == 10.0
+    assert_scenario_elapsed_within_budget("unit_fast", 10.0)
+
+
+def test_protocol_bot_scenario_elapsed_budget_rejects_slow_scenarios():
+    try:
+        assert_scenario_elapsed_within_budget("unit_slow", 10.01)
+    except TimeoutError as exc:
+        assert "unit_slow" in str(exc)
+        assert "budget is 10.00s" in str(exc)
+    else:
+        raise AssertionError("slow scenario was not rejected")
 
 
 def test_select_shop_offer_prefers_cheapest_affordable_generated():
@@ -461,7 +478,7 @@ def test_load_scenarios_discovers_coop_rewards_and_scaling():
     scenarios = load_scenarios()
     coop = next(s for s in scenarios if s.id == "coop_rewards_and_scaling")
 
-    assert coop.world_id == "dungeon_levels"
+    assert coop.world_id == "coop_reward_lab"
     assert coop.peer_count == 3
     assert coop.steps == []
     assert coop.assertions == []

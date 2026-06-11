@@ -34,6 +34,7 @@ from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenar
 from tools.bot.protocol import make_envelope, to_ws_url
 
 SLICE_TIMEOUT_S = 20.0
+MAX_SCENARIO_ELAPSED_S = 10.0
 WAIT_LOG_INTERVAL_S = 2.0
 WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
@@ -62,6 +63,14 @@ def log_wait_progress(label: str, loop, started_at: float, **details: Any) -> No
     for key, value in details.items():
         parts.append(f"{key}={value}")
     log(*parts)
+
+
+def assert_scenario_elapsed_within_budget(scenario_id: str, elapsed_s: float) -> None:
+    if elapsed_s > MAX_SCENARIO_ELAPSED_S:
+        raise TimeoutError(
+            f"protocol bot scenario {scenario_id} took {elapsed_s:.2f}s; "
+            f"budget is {MAX_SCENARIO_ELAPSED_S:.2f}s. Shorten the scenario to its core proof."
+        )
 
 
 
@@ -4418,29 +4427,38 @@ async def run_coop_rewards_and_scaling(
         excluded = peers[2]
         await wait_coop_until(peers, "all peers have party rows", lambda: all(len(peer.state.party) >= 3 for peer in peers))
 
-        await execute_step(host.ws, session_id, host.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
-        await execute_step(nearby.ws, session_id, nearby.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
-        dungeon_peers = [host, nearby]
+        reward_peers = [host, nearby]
+        monster_def_id = "dungeon_mob"
+        if scenario.world_id == "dungeon_levels":
+            await execute_step(host.ws, session_id, host.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
+            await execute_step(nearby.ws, session_id, nearby.state, {"action": "use_stair", "direction": "down", "max_ticks": 240}, asyncio.get_event_loop())
+            await wait_coop_until(
+                peers,
+                "host and nearby guest share dungeon while excluded guest stays town",
+                lambda: host.state.current_level == -1 and nearby.state.current_level == -1 and excluded.state.current_level == 0,
+            )
+            monster_def_id = "dungeon_archer"
+        else:
+            await wait_coop_until(
+                peers,
+                "all compact reward peers share level",
+                lambda: host.state.current_level == nearby.state.current_level == excluded.state.current_level,
+            )
+            await move_coop_peer_to(peers, excluded, {"x": 2, "y": 2}, stop_distance=0.5, max_ticks=180)
         await wait_coop_until(
-            peers,
-            "host and nearby guest share dungeon while excluded guest stays town",
-            lambda: host.state.current_level == -1 and nearby.state.current_level == -1 and excluded.state.current_level == 0,
-        )
-        await wait_coop_until(
-            dungeon_peers,
-            "dungeon peers see each other",
-            lambda: all(player_entity_ids(peer.state) >= {host.state.local_player_id, nearby.state.local_player_id} for peer in dungeon_peers),
+            reward_peers,
+            "reward peers see each other",
+            lambda: all(player_entity_ids(peer.state) >= {host.state.local_player_id, nearby.state.local_player_id} for peer in reward_peers),
         )
 
-        monster_def_id = "dungeon_archer"
         monster = find_monster(host.state, monster_def_id)
         if monster is None:
             raise AssertionError(f"{scenario.id}: missing {monster_def_id} in host state")
         monster_pos = dict(monster["position"])
         approach_offsets = [(-1.5, 0.0), (1.5, 0.0), (0.0, -1.5), (0.0, 1.5), (-2.5, 0.0), (2.5, 0.0)]
         nearby_offsets = [(-4.0, 0.0), (4.0, 0.0), (0.0, -4.0), (0.0, 4.0), (-3.0, 0.0), (3.0, 0.0)]
-        await move_coop_peer_near(dungeon_peers, nearby, monster_pos, offsets=nearby_offsets, stop_distance=1.2, max_ticks=260)
-        await move_coop_peer_near(dungeon_peers, host, monster_pos, offsets=approach_offsets, stop_distance=1.0, max_ticks=260)
+        await move_coop_peer_near(reward_peers, nearby, monster_pos, offsets=nearby_offsets, stop_distance=1.2, max_ticks=260)
+        await move_coop_peer_near(reward_peers, host, monster_pos, offsets=approach_offsets, stop_distance=1.0, max_ticks=260)
         if dict_distance(player_position(nearby.state), monster_pos) > 10.0:
             raise AssertionError(f"nearby guest too far from monster: {player_position(nearby.state)} monster={monster_pos}")
 
@@ -4448,7 +4466,7 @@ async def run_coop_rewards_and_scaling(
         before_nearby_xp = state_experience(nearby.state)
         before_excluded_xp = state_experience(excluded.state)
 
-        await coop_attack_until_kill(dungeon_peers, nearby, monster_def_id, companions=[host])
+        await coop_attack_until_kill(reward_peers, nearby, monster_def_id, companions=[host])
         await wait_coop_until(
             peers,
             "shared xp applied to nearby only",
@@ -4501,13 +4519,12 @@ async def run_non_gold_click_required_item_proof(
     token: str,
     debug_token: str,
 ) -> None:
-    sess = create_session(client, token, "dungeon_levels", "chest_seed_22")
+    sess = create_session(client, token, "coop_loot_lab", "chest_seed_22")
     session_id = str(sess["session_id"])
-    peer = await connect_coop_peer(base_url, token, sess, "item-proof", "dungeon_levels")
+    peer = await connect_coop_peer(base_url, token, sess, "item-proof", "coop_loot_lab")
     peers = [peer]
     try:
-        await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 120}, asyncio.get_event_loop())
-        non_gold = await open_chest_for_non_gold_loot(peers, peer)
+        non_gold = find_non_gold_loot(peer.state) or await open_chest_for_non_gold_loot(peers, peer)
         if non_gold is None:
             raise AssertionError("item proof: chest did not produce non-gold loot")
 
@@ -4564,16 +4581,25 @@ async def run_gold_autopickup_shared_loot(
         peers.append(guest)
         await wait_coop_until(peers, "both peers have party rows", lambda: all(len(peer.state.party) >= 2 for peer in peers))
 
-        for peer in (host, guest):
-            await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 260}, asyncio.get_event_loop())
-            await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 260}, asyncio.get_event_loop())
-        await wait_coop_until(
-            peers,
-            "both peers share level -2",
-            lambda: host.state.current_level == -2 and guest.state.current_level == -2
-            and player_entity_ids(host.state) >= {host.state.local_player_id, guest.state.local_player_id}
-            and player_entity_ids(guest.state) >= {host.state.local_player_id, guest.state.local_player_id},
-        )
+        if scenario.world_id == "dungeon_levels":
+            for peer in (host, guest):
+                await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 260}, asyncio.get_event_loop())
+                await execute_step(peer.ws, session_id, peer.state, {"action": "use_stair", "direction": "down", "max_ticks": 260}, asyncio.get_event_loop())
+            await wait_coop_until(
+                peers,
+                "both peers share level -2",
+                lambda: host.state.current_level == -2 and guest.state.current_level == -2
+                and player_entity_ids(host.state) >= {host.state.local_player_id, guest.state.local_player_id}
+                and player_entity_ids(guest.state) >= {host.state.local_player_id, guest.state.local_player_id},
+            )
+        else:
+            await wait_coop_until(
+                peers,
+                "both peers share compact loot level",
+                lambda: host.state.current_level == guest.state.current_level
+                and player_entity_ids(host.state) >= {host.state.local_player_id, guest.state.local_player_id}
+                and player_entity_ids(guest.state) >= {host.state.local_player_id, guest.state.local_player_id},
+            )
 
         gold = find_loot(host.state, "gold")
         if gold is None:
@@ -4780,7 +4806,9 @@ def main() -> int:
                 observed = check_observed
                 log("fresh session check done", scenario.id, f"#{idx}")
 
-            log("scenario done", scenario.id, f"elapsed={time.monotonic() - scenario_started:.2f}s")
+            scenario_elapsed = time.monotonic() - scenario_started
+            assert_scenario_elapsed_within_budget(scenario.id, scenario_elapsed)
+            log("scenario done", scenario.id, f"elapsed={scenario_elapsed:.2f}s")
 
             scenario_visual = json.loads(scenario.path.read_text()).get("visual")
             entry = {

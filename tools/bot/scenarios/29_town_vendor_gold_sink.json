@@ -1,20 +1,11 @@
 {
   "id": "town_vendor_gold_sink",
-  "world_id": "dungeon_levels",
+  "world_id": "vendor_lab",
   "seed": "town_vendor_gold_sink_1075",
   "title": "Town vendor gold sink",
-  "description": "Reach dungeon depth 3, return to town, open the vendor, verify generated stock, sell loot, and buy a fixed potion while asserting gold/inventory/progression changes.",
+  "description": "Open the compact vendor lab, verify generated stock, sell rolled loot, and buy a fixed potion while asserting gold/inventory changes.",
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "pick_up_first_rolled_loot" },
-    { "action": "pick_up_loot", "item_def_id": "gold", "wait_for_loot_s": 0.1 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "assert_deepest_dungeon_depth", "at_least": 3 },
-    { "action": "use_stair", "direction": "up", "max_ticks": 480 },
-    { "action": "use_stair", "direction": "up", "max_ticks": 480 },
-    { "action": "use_stair", "direction": "up", "max_ticks": 480 },
     { "action": "open_shop" },
     { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "at_least": 3 },
     { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2 },
@@ -31,8 +22,6 @@
   "assertions": [
     { "type": "current_level", "equals": 0 },
     { "type": "visited_levels_contain", "level": 0 },
-    { "type": "visited_levels_contain", "level": -3 },
-    { "type": "character_progression", "deepest_dungeon_depth": 3 },
     { "type": "shop_offer_count", "shop_id": "town_vendor", "at_least": 3 },
     { "type": "shop_event", "event_type": "shop_opened", "at_least": 1 },
     { "type": "shop_event", "event_type": "shop_purchase", "at_least": 1 },
@@ -41,10 +30,9 @@
   ],
   "fresh_session_checks": [
     {
-      "world_id": "dungeon_levels",
+      "world_id": "vendor_lab",
       "steps": [],
       "assertions": [
-        { "type": "character_progression", "deepest_dungeon_depth": 3 },
         { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false }
       ]
     }

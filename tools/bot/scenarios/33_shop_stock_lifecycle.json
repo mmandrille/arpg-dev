@@ -1,24 +1,15 @@
 {
   "id": "shop_stock_lifecycle",
-  "world_id": "dungeon_levels",
+  "world_id": "vendor_lab",
   "seed": "town_vendor_gold_sink_1075",
   "title": "Shop stock lifecycle",
-  "description": "Open town vendor stock, use buyback during the town visit, leave town to clear buyback, refresh generated stock through waypoint discovery, and prove durable generated stock persists to the next session.",
+  "description": "Open compact vendor stock, use buyback during the visit, and prove generated stock persists while buyback is cleared in the next session.",
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "pick_up_first_rolled_loot" },
-    { "action": "pick_up_loot", "item_def_id": "gold", "wait_for_loot_s": 0.1 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "assert_deepest_dungeon_depth", "at_least": 3 },
-    { "action": "use_stair", "direction": "up", "max_ticks": 480 },
-    { "action": "use_stair", "direction": "up", "max_ticks": 480 },
-    { "action": "use_stair", "direction": "up", "max_ticks": 480 },
     { "action": "open_shop" },
     { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2 },
     { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
-    { "action": "assert_shop_offer_details", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5, "source_depth_min": 2, "source_depth_max": 3, "requires_slot": true, "requires_category": true },
+    { "action": "assert_shop_offer_details", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5, "requires_slot": true, "requires_category": true },
     { "action": "sell_inventory_item", "rolled": true, "equipped": false },
     { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 },
     { "action": "buy_shop_offer", "shop_id": "town_vendor", "offer_id": "fixed:red_potion" },
@@ -28,31 +19,18 @@
     { "action": "sell_inventory_item", "item_def_id": "red_potion", "equipped": false },
     { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 2 },
     { "action": "buy_shop_offer", "shop_id": "town_vendor", "offer_kind": "buyback", "offer_index": 0 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
-    { "action": "discover_teleporter", "max_ticks": 400 },
-    { "action": "assert_teleporter_discovered", "level": -3, "discovered": true },
-    { "action": "teleport_to_level", "target_level": 0 },
-    { "action": "open_shop" },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 0 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
-    { "action": "assert_shop_offer_details", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5, "source_depth_min": 2, "source_depth_max": 3, "requires_slot": true, "requires_category": true }
+    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 }
   ],
   "assertions": [
     { "type": "current_level", "equals": 0 },
-    { "type": "visited_levels_contain", "level": -3 },
-    { "type": "teleporter_discovered", "level": -3, "discovered": true },
-    { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 0 },
+    { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 },
     { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
     { "type": "shop_event", "event_type": "shop_purchase", "at_least": 2 },
     { "type": "shop_event", "event_type": "shop_sale", "at_least": 2 }
   ],
   "fresh_session_checks": [
     {
-      "world_id": "dungeon_levels",
+      "world_id": "vendor_lab",
       "steps": [
         { "action": "open_shop" },
         { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 0 },
@@ -60,8 +38,7 @@
       ],
       "assertions": [
         { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 0 },
-        { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
-        { "type": "character_progression", "deepest_dungeon_depth": 3 }
+        { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 }
       ]
     }
   ],

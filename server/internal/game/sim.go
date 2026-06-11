@@ -360,6 +360,23 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 			return nil, err
 		}
 		s.discoveredTeleporters[townLevel] = true
+		if world.StartLevel != nil && *world.StartLevel < townLevel {
+			start, err := s.ensureTravelLevel(*world.StartLevel)
+			if err != nil {
+				return nil, err
+			}
+			player := level.entities[s.playerID]
+			if player == nil {
+				return nil, fmt.Errorf("game: missing player for world %s", worldID)
+			}
+			delete(level.entities, s.playerID)
+			player.pos = world.Player.Position
+			start.entities[s.playerID] = player
+			s.currentLevel = start.levelNum
+			if ps := s.players[s.playerID]; ps != nil {
+				ps.CurrentLevel = start.levelNum
+			}
+		}
 		s.syncCompatibilityFields()
 		return s, nil
 	}

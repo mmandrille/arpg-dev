@@ -1,0 +1,39 @@
+client/scripts/main.gd
+  s_f4659d40a8f4f2::t_2ee583de219e7d 1510-1513,1516,3195-3198,3228-3231
+  s_f4659d40a8f4f2::t_1fafa673e00ee4 3227,3232
+server/internal/game/game_test.go
+  s_f4659d40a8f4f2::t_1fafa673e00ee4 1350-1359,1361-1375,1378-1380
+  s_f4659d40a8f4f2::t_2ee583de219e7d 1261-1262
+  s_f4659d40a8f4f2::t_1a7ea87511818f 1360,1376-1377
+  s_f4659d40a8f4f2::t_8de4e93d0ee31e 1249
+client/scripts/heal_rain_effect.gd
+  s_f4659d40a8f4f2::t_2ee583de219e7d 4
+client/scripts/skills_panel.gd
+  s_f4659d40a8f4f2::t_61a224943d375d 9-14,122-123,141,208-209,214,222,228-229,234-235,273,298,315-316,318-321,418,420-438,726-727,742-746,757
+client/tests/test_coop_client.gd
+  s_f4659d40a8f4f2::t_2ee583de219e7d 793,813,819-820
+  s_f4659d40a8f4f2::t_8de4e93d0ee31e 795-796
+  s_f4659d40a8f4f2::t_3f936b4fef2904 804-812,814-818,821-829
+client/tests/test_skills_panel.gd
+  s_f4659d40a8f4f2::t_fbda6841ea98f2 63,111-129,131-133,212,217
+  s_f4659d40a8f4f2::t_be4c61f044b11d 130
+server/internal/game/sim.go
+  s_f4659d40a8f4f2::t_1fafa673e00ee4 3026
+  s_f4659d40a8f4f2::t_e670ed6fc0d34b 3052
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cb21117e692276d43959e5e7bf9f030fa96fbb57",
+  "prompts": {},
+  "sessions": {
+    "s_f4659d40a8f4f2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb866-a8fd-7a91-bb41-78c0d1c43b4d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

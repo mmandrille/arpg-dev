@@ -17,6 +17,7 @@ const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -35,6 +36,8 @@ func _initialize() -> void:
 	_test_path_reject_clears_held_click_state()
 	_test_capacity_reject_shows_bag_full_unequip_message()
 	_test_no_mana_reject_shows_floating_text()
+	_test_skill_cooldown_reject_shows_floating_text()
+	_test_player_healed_spawns_heal_rain()
 	_test_local_attack_range_uses_equipped_reach()
 	_test_character_bar_opens_stats_panel()
 	_test_skill_function_key_selects_right_click_skill()
@@ -680,6 +683,57 @@ func _test_no_mana_reject_shows_floating_text() -> void:
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
+
+
+func _test_skill_cooldown_reject_shows_floating_text() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.player_anchor.position = Vector3(2.0, 0.0, 3.0)
+	main.client_settings = ClientSettingsScript.new()
+	main.damage_numbers_layer = CanvasLayer.new()
+	main._camera = Camera3D.new()
+	root.add_child(main.damage_numbers_layer)
+	root.add_child(main._camera)
+	main._camera.look_at_from_position(Vector3(2.0, 12.0, 13.0), main.player_anchor.position, Vector3.UP)
+	main._apply_delta({"events": [{"event_type": "skill_cooldown_rejected", "entity_id": "1001", "skill_id": "heal", "reason": "skill_on_cooldown"}], "changes": []})
+	var numbers := main._bot_damage_numbers()
+	_assert_eq("cooldown floating text count", numbers.size(), 1)
+	_assert_eq("cooldown floating text", str((numbers[0] as Dictionary).get("text", "")), "ON COOLDOWN")
+	_assert_eq("cooldown floating text variant", str((numbers[0] as Dictionary).get("variant", "")), "skill_reject")
+	main.damage_numbers_layer.queue_free()
+	main._camera.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_player_healed_spawns_heal_rain() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.player_anchor.position = Vector3(2.0, 0.0, 3.0)
+	main.client_settings = ClientSettingsScript.new()
+	main.damage_numbers_layer = CanvasLayer.new()
+	main._camera = Camera3D.new()
+	root.add_child(main.damage_numbers_layer)
+	root.add_child(main._camera)
+	main._camera.look_at_from_position(Vector3(2.0, 12.0, 13.0), main.player_anchor.position, Vector3.UP)
+	main._apply_delta({"events": [{"event_type": "player_healed", "entity_id": "1001", "heal": 4}], "changes": []})
+	var rain_count := 0
+	for child in main.get_children():
+		if child.get_script() == HealRainEffectScript:
+			rain_count += 1
+			_assert_float("heal rain radius", float(child.radius), MainScript.HEAL_RAIN_RADIUS)
+	_assert_eq("heal rain count", rain_count, 1)
+	var numbers := main._bot_damage_numbers()
+	_assert_eq("heal floating text count", numbers.size(), 1)
+	_assert_eq("heal floating text", str((numbers[0] as Dictionary).get("text", "")), "+4")
+	main.damage_numbers_layer.queue_free()
+	main._camera.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
 
 
 func _test_local_attack_range_uses_equipped_reach() -> void:

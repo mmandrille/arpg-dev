@@ -9,6 +9,7 @@ const CharacterSelectPanelScript := preload("res://scripts/character_select_pane
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const MainScript := preload("res://scripts/main.gd")
+const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 
 const DEFAULT_GEAR_ITEMS := ["cave_blade", "cave_shield", "cave_helm", "cave_mail", "cave_boots"]
 const ITEM_SLOT := {
@@ -60,6 +61,8 @@ func _initialize() -> void:
 			await _setup_vendors()
 		"monsters":
 			await _setup_monsters()
+		"heal-rain":
+			await _setup_heal_rain()
 		"inventory":
 			await _setup_inventory()
 		"skills":
@@ -385,6 +388,60 @@ func _setup_monsters() -> void:
 		monster.position = Vector3(float(entry["x"]), 0.0, 0.0)
 		root.add_child(monster)
 	_subject = root
+
+
+func _setup_heal_rain() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackHealRain"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(5.4, 5.0, 7.1), Vector3(0.0, 0.9, 0.0), 8.3)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(9.2, 0.04, 5.2)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.025, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#303631")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var character_mat := StandardMaterial3D.new()
+	character_mat.albedo_color = Color(0.55, 0.72, 0.62, 0.58)
+	character_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	for i in range(5):
+		var marker := _make_heal_target_marker(character_mat)
+		marker.position = Vector3(-2.8 + float(i) * 1.4, 0.0, 0.0)
+		root.add_child(marker)
+
+	var effect = HealRainEffectScript.new()
+	effect.setup(MainScript.HEAL_RAIN_RADIUS)
+	effect.position = Vector3.ZERO
+	root.add_child(effect)
+	_subject = root
+
+
+func _make_heal_target_marker(mat: StandardMaterial3D) -> Node3D:
+	var root := Node3D.new()
+	var body := MeshInstance3D.new()
+	var body_mesh := CapsuleMesh.new()
+	body_mesh.radius = 0.22
+	body_mesh.height = 1.25
+	body.mesh = body_mesh
+	body.material_override = mat
+	body.position.y = 0.68
+	root.add_child(body)
+	var head := MeshInstance3D.new()
+	var head_mesh := SphereMesh.new()
+	head_mesh.radius = 0.22
+	head.mesh = head_mesh
+	head.material_override = mat
+	head.position.y = 1.45
+	root.add_child(head)
+	return root
 
 
 func _add_light(root: Node3D) -> void:

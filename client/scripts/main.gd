@@ -11,6 +11,7 @@ const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
+const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
@@ -57,6 +58,7 @@ const PLAYER_TINT := Color("#8fe8a7")
 const REMOTE_PLAYER_TINT := Color("#202934")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
 const NO_MANA_TEXT := "NO MANA"
+const HEAL_RAIN_RADIUS := 4.0
 const MONSTER_RARITY_TINTS := {
 	"common": Color("#f2f2ec"),
 	"champion": Color("#9fc7ff"),
@@ -122,6 +124,7 @@ var skill_progression: Dictionary = {}
 var skill_cooldowns: Array = []
 var right_click_skill_id: String = ""
 var skill_function_keys: Array = ["", "", "", "", "", "", "", ""]
+var pending_skill_casts: Dictionary = {}
 var item_rules: Dictionary:
 	get: return ItemRulesLoader.item_rules
 	set(v): ItemRulesLoader.item_rules = v
@@ -829,8 +832,10 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 	var message_id := str(payload.get("rejected_message_id", ""))
 	var reason := str(payload.get("reason", ""))
 	var pending: Dictionary = pending_action_targets.get(message_id, {})
+	var was_skill_cast := pending_skill_casts.has(message_id)
 	if message_id != "":
 		pending_action_targets.erase(message_id)
+		pending_skill_casts.erase(message_id)
 	if reason == "no_path" or reason == "path_too_long":
 		_sustained_click.clear()
 		pending_interactable_action.clear()
@@ -839,7 +844,7 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		_show_inventory_full_text(target_id)
 	elif reason == "capacity_would_overflow":
 		_show_bag_full_cant_unequip_text()
-	elif _is_skill_reject_reason(reason):
+	elif was_skill_cast or _is_skill_reject_reason(reason):
 		_show_skill_rejected_feedback(reason)
 	elif shop_panel != null and shop_panel.visible:
 		shop_panel.show_status(reason.replace("_", " "), true)
@@ -994,10 +999,10 @@ func _apply_delta(p: Dictionary) -> void:
 				player_anim.play_one_shot("attack")
 			continue
 		if event_type == "skill_cooldown_rejected" and eid == player_id:
-			if skill_bar != null:
-				skill_bar.flash_rejected()
+			_show_skill_rejected_feedback(str(ev.get("reason", "")))
 			continue
 		if event_type == "player_healed":
+			_spawn_heal_rain(eid)
 			_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
 			if eid == player_id and _health_bar != null:
 				_health_bar.update_hp(player_hp, player_max_hp, true)
@@ -1488,6 +1493,24 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null, p
 	damage_numbers_layer.add_child(pop)
 	var side := side_override if side_override != 0.0 else (-1.0 if entity_id == player_id else 1.0)
 	pop.setup(_camera, target, world_position, amount, color, side, prefix, variant, text_override)
+
+
+func _spawn_heal_rain(entity_id: String) -> void:
+	var target := _node_for_entity_id(entity_id)
+	if target == null:
+		return
+	var effect := HealRainEffectScript.new() as HealRainEffect
+	effect.setup(HEAL_RAIN_RADIUS)
+	effect.position = _node_world_or_local_position(target)
+	add_child(effect)
+
+
+func _node_for_entity_id(entity_id: String) -> Node3D:
+	if entity_id == player_id:
+		return player_anchor
+	if entities.has(entity_id):
+		return entities[entity_id].get("node", null) as Node3D
+	return null
 
 
 func _show_inventory_full_text(target_id: String) -> void:
@@ -2972,6 +2995,10 @@ func _skill_allocation_blocked() -> bool:
 
 
 func _skill_cast_blocked(skill_id: String = "") -> bool:
+	return _skill_cast_block_reason(skill_id) != ""
+
+
+func _skill_cast_block_reason(skill_id: String = "") -> String:
 	var resolved_skill_id := skill_id
 	if resolved_skill_id == "":
 		resolved_skill_id = right_click_skill_id
@@ -2979,13 +3006,19 @@ func _skill_cast_blocked(skill_id: String = "") -> bool:
 		resolved_skill_id = _first_learned_skill_id()
 	if resolved_skill_id == "":
 		resolved_skill_id = SkillRulesLoader.first_skill_id()
-	return visual_replay_enabled \
-		or autoplay_enabled \
-		or _menu_blocks_gameplay_input() \
-		or client == null \
-		or client.ready_state() != WebSocketPeer.STATE_OPEN \
-		or player_hp <= 0 \
-		or _skill_rank(resolved_skill_id) <= 0
+	if visual_replay_enabled:
+		return "visual_replay"
+	if autoplay_enabled:
+		return "autoplay"
+	if _menu_blocks_gameplay_input():
+		return "menu_open"
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
+		return "not_connected"
+	if player_hp <= 0:
+		return "dead"
+	if _skill_rank(resolved_skill_id) <= 0:
+		return "skill_not_learned"
+	return ""
 
 
 func _assign_right_click_skill(skill_id: String) -> bool:
@@ -3137,18 +3170,20 @@ func _try_use_right_click_skill() -> bool:
 		target_id = str(pick.get("target_id", ""))
 	else:
 		direction = _aim_direction_from_mouse()
-	if not _send_skill_cast_intent(right_click_skill_id, target_id, direction, false):
-		_show_skill_rejected_feedback()
-	return true
+	return _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
 
 
 func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> bool:
-	if _skill_cast_blocked(skill_id):
+	var blocked_reason := _skill_cast_block_reason(skill_id)
+	if blocked_reason != "":
+		_show_skill_rejected_feedback(blocked_reason)
 		return false
 	var payload := _skill_cast_payload(skill_id, target_id, direction, use_nearest_fallback)
 	if payload.is_empty():
+		_show_skill_rejected_feedback("invalid_target")
 		return false
-	client.send("cast_skill_intent", last_server_tick, payload)
+	var message_id := client.send("cast_skill_intent", last_server_tick, payload)
+	pending_skill_casts[message_id] = {"skill_id": skill_id}
 	_attack_cooldown = SEND_INTERVAL
 	if player_anim != null:
 		player_anim.play_one_shot("attack")
@@ -3191,14 +3226,66 @@ func _is_skill_reject_reason(reason: String) -> bool:
 		or reason == "unknown_skill" \
 		or reason == "not_enough_mana" \
 		or reason == "invalid_direction" \
-		or reason == "target_out_of_range"
+		or reason == "target_out_of_range" \
+		or reason == "invalid_target" \
+		or reason == "invalid_payload" \
+		or reason == "player_dead" \
+		or reason == "projectile_busy" \
+		or reason == "unsupported_skill_kind"
 
 
 func _show_skill_rejected_feedback(reason: String = "") -> void:
 	if skill_bar != null:
 		skill_bar.flash_rejected()
+	var message := _skill_reject_message(reason)
+	var color := Color("#ffcf5a")
+	var variant := "skill_reject"
 	if reason == "not_enough_mana":
-		_show_damage_number(player_id, Color("#54c7f3"), null, "", 0.0, "mana", NO_MANA_TEXT)
+		color = Color("#54c7f3")
+		variant = "mana"
+	_show_damage_number(player_id, color, null, "", 0.0, variant, message)
+
+
+func _skill_reject_message(reason: String) -> String:
+	match reason:
+		"not_enough_mana":
+			return NO_MANA_TEXT
+		"skill_not_learned":
+			return "SKILL NOT LEARNED"
+		"target_out_of_range":
+			return "OUT OF RANGE"
+		"invalid_direction", "invalid_target":
+			return "INVALID TARGET"
+		"unknown_skill":
+			return "UNKNOWN SKILL"
+		"menu_open":
+			return "MENU OPEN"
+		"not_connected":
+			return "NOT CONNECTED"
+		"dead":
+			return "DEAD"
+		"player_dead":
+			return "DEAD"
+		"skill_on_cooldown":
+			return "ON COOLDOWN"
+		"skill_class_not_allowed":
+			return "WRONG CLASS"
+		"skill_requirements_not_met":
+			return "REQUIREMENTS NOT MET"
+		"invalid_payload":
+			return "INVALID CAST"
+		"projectile_busy":
+			return "PROJECTILE BUSY"
+		"unsupported_skill_kind":
+			return "UNSUPPORTED SKILL"
+		"visual_replay":
+			return "REPLAY MODE"
+		"autoplay":
+			return "AUTOPLAY"
+		"":
+			return "CANT CAST"
+		_:
+			return reason.replace("_", " ").to_upper()
 
 
 func _skill_rank(skill_id: String) -> int:

@@ -1,0 +1,32 @@
+client/scripts/skill_bar.gd
+  s_4c0cc59c104e28::t_860a5a4db37da9 19
+  s_4c0cc59c104e28::t_1e9ed37a149d98 8,147
+  s_4c0cc59c104e28::t_d759a2b0e3ab2e 116,139,148-151,177,179-181
+client/scripts/skill_icon.gd
+  s_4c0cc59c104e28::t_d759a2b0e3ab2e 1-75
+client/tests/test_skill_bar.gd
+  s_4c0cc59c104e28::t_d759a2b0e3ab2e 53,64-65
+  s_4c0cc59c104e28::t_aeccc91a5e1bb9 52
+client/scripts/skills_panel.gd
+  s_4c0cc59c104e28::t_860a5a4db37da9 207,295
+  s_4c0cc59c104e28::t_1e9ed37a149d98 6-7
+  s_4c0cc59c104e28::t_d759a2b0e3ab2e 20,93,112,208-212,296-298,436-439
+client/tests/test_skills_panel.gd
+  s_4c0cc59c104e28::t_d759a2b0e3ab2e 51,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "856e932d1fa398f42ea4a15f940c0f053638d2dc",
+  "prompts": {},
+  "sessions": {
+    "s_4c0cc59c104e28": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4fc-520c-7230-b3f4-43f216d2c5cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

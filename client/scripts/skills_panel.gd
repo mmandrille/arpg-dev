@@ -3,6 +3,8 @@ extends Control
 
 signal allocate_skill_point_requested(skill_id: String)
 
+const SkillIconScript := preload("res://scripts/skill_icon.gd")
+
 var skill_progression: Dictionary = {}
 var character_progression: Dictionary = {}
 var interactive: bool = true
@@ -15,7 +17,7 @@ var _panel: PanelContainer
 var _points_label: Label
 var _spend_button: Button
 var _skill_blocks: Dictionary = {}
-var _skill_icon_labels: Dictionary = {}
+var _skill_icons: Dictionary = {}
 var _skill_rank_labels: Dictionary = {}
 var _assigned_key_labels: Dictionary = {}
 var _tooltip: PanelContainer
@@ -88,6 +90,7 @@ func get_debug_state() -> Dictionary:
 			"skill_id": row_skill_id,
 			"skill_name": _skill_name(row_skill_id),
 			"icon_label": _skill_icon_label_text(row_skill_id),
+			"icon_shape": _skill_icon_shape(row_skill_id),
 			"rank": int(row.get("rank", 0)),
 			"max_rank": int(row.get("max_rank", int(_skill_def(row_skill_id).get("max_rank", 0)))),
 			"can_spend": bool(row.get("can_spend", false)),
@@ -106,6 +109,7 @@ func get_debug_state() -> Dictionary:
 		"skill_ids": _tree_skill_ids(),
 		"skill_name": _skill_name(skill_id),
 		"icon_label": _skill_icon_label_text(skill_id),
+		"icon_shape": _skill_icon_shape(skill_id),
 		"rank": int(skill.get("rank", 0)),
 		"max_rank": int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 0)))),
 		"can_spend": bool(skill.get("can_spend", false)),
@@ -200,14 +204,12 @@ func _build() -> void:
 		_bind_skill_hover(skill_block, skill_id)
 		_skill_blocks[skill_id] = skill_block
 
-		var icon_label := _label(_skill_icon_label_text(skill_id), 42, _skill_icon_color(skill_id))
-		icon_label.position = Vector2(8, 8)
-		icon_label.size = Vector2(64, 64)
-		icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		skill_block.add_child(icon_label)
-		_skill_icon_labels[skill_id] = icon_label
+		var icon = SkillIconScript.new()
+		icon.position = Vector2(8, 8)
+		icon.size = Vector2(64, 64)
+		icon.configure(skill_id, _skill_presentation(skill_id))
+		skill_block.add_child(icon)
+		_skill_icons[skill_id] = icon
 
 		var assigned_key_label := _badge_label("")
 		assigned_key_label.position = Vector2(50, 55)
@@ -290,11 +292,10 @@ func _render() -> void:
 		var block := _skill_blocks.get(row_skill_id, null) as Panel
 		if block != null:
 			block.add_theme_stylebox_override("panel", _skill_block_style(visual_state, selected or _right_click_skill_id == row_skill_id))
-		var icon_label := _skill_icon_labels.get(row_skill_id, null) as Label
-		if icon_label != null:
-			icon_label.text = _skill_icon_label_text(row_skill_id)
-			icon_label.add_theme_color_override("font_color", _skill_icon_color(row_skill_id))
-			icon_label.modulate = _skill_icon_modulate(visual_state, selected)
+		var icon = _skill_icons.get(row_skill_id, null)
+		if icon != null:
+			icon.configure(row_skill_id, _skill_presentation(row_skill_id))
+			icon.modulate = _skill_icon_modulate(visual_state, selected)
 		var assigned_key_label := _assigned_key_labels.get(row_skill_id, null) as Label
 		if assigned_key_label != null:
 			var assigned_key := _assigned_key_for_skill(row_skill_id)
@@ -430,6 +431,12 @@ func _skill_icon_color(skill_id: String) -> Color:
 	var presentation := _skill_presentation(skill_id)
 	var icon: Dictionary = presentation.get("icon", {})
 	return Color(str(icon.get("accent", "#d8d1c1")))
+
+
+func _skill_icon_shape(skill_id: String) -> String:
+	var presentation := _skill_presentation(skill_id)
+	var icon: Dictionary = presentation.get("icon", {})
+	return str(icon.get("shape", "bolt"))
 
 
 func _set_tooltip_body(skill_id: String, rank: int) -> void:

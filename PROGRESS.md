@@ -657,6 +657,11 @@ focused tests proving edits to `main_config.v0.json` take effect without touchin
 so the global drop chance can be tuned from `main_config.v0.json` without hand-editing each depth
 class.
 
+**Generated dungeon fights now form packs.** The pack-aggro slice adds data-driven pack sizing,
+monster assist radius, deterministic close pack placement, and a protocol bot proof that damaging
+one generated monster can emit multiple `monster_aggro` events. The existing v78 latest-completed
+status remains canonical because v76-v78 main-config slices already landed on this branch.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |

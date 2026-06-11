@@ -4324,10 +4324,10 @@ func (s *Sim) canAggroAttackingPlayer(candidate, player *entity) bool {
 		return false
 	}
 	def, ok := s.rules.Monsters[candidate.monsterDefID]
-	if !ok || def.effectiveBehavior() != monsterBehaviorChase || def.AggroRadius <= 0 {
+	if !ok || def.effectiveBehavior() != monsterBehaviorChase || def.effectiveAssistRadius() <= 0 {
 		return false
 	}
-	return distance(candidate.pos, player.pos) <= def.AggroRadius
+	return distance(candidate.pos, player.pos) <= def.effectiveAssistRadius()
 }
 
 func (s *Sim) canJoinGroupAggro(source, candidate *entity) bool {
@@ -4338,7 +4338,7 @@ func (s *Sim) canJoinGroupAggro(source, candidate *entity) bool {
 	if !ok || def.effectiveBehavior() != monsterBehaviorChase {
 		return false
 	}
-	radius := def.AggroRadius
+	radius := def.effectiveAssistRadius()
 	if radius <= 0 {
 		return false
 	}

@@ -284,7 +284,7 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 			Magic: 5,
 		},
 	}
-	sim, err := game.NewSimWithWorldProgression(testSessionID, "boss_floor_gate", rules, "dungeon_levels", progression)
+	sim, err := game.NewSimWithWorldProgression(testSessionID, "boss_floor_gate", rules, "boss_floor_gate_lab", progression)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -293,19 +293,6 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 	events := []store.SessionEvent{}
 	sequence := int64(0)
 	tick := int64(0)
-
-	for level := 0; level > -5; level-- {
-		down := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "stairs_down")
-		if down == nil {
-			t.Fatalf("missing stairs_down on level %d", level)
-		}
-		tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
-		tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
-			ActorPlayerID: actorID,
-			Type:          "descend_intent",
-			Descend:       &game.DescendIntent{},
-		})
-	}
 
 	down := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "stairs_down")
 	if down == nil || down.State != "locked" {
@@ -364,7 +351,7 @@ func TestVerifyBossFloorGateReplay(t *testing.T) {
 			AccountID:   "acct_host",
 			CharacterID: "char_host",
 			Seed:        "boss_floor_gate",
-			WorldID:     "dungeon_levels",
+			WorldID:     "boss_floor_gate_lab",
 		},
 		inputs: rows,
 		events: events,

@@ -43,6 +43,7 @@ type generatedLoot struct {
 
 type generatedMonster struct {
 	defID        string
+	packID       string
 	rarityID     string
 	bossTemplate string
 	isBoss       bool
@@ -610,30 +611,108 @@ func placeDungeonMonsters(rng *RNG, defRNG *RNG, rarityRNG *RNG, rules DungeonGe
 	if len(out.chests) > 0 {
 		count += rules.ChestPlacement.MonsterCountBonus
 	}
-	placed := 0
+	packSizes := randomMonsterPackSizes(rng, placement, count)
+	defIDs := make([]string, 0, count)
 	for _, minimum := range placement.MinimumMonsters {
-		for i := 0; i < minimum.Count && placed < count; i++ {
-			if err := placeGeneratedMonster(rng, rarityRNG, rules, out, minimum.MonsterDefID, placed); err != nil {
-				return err
-			}
-			placed++
+		for i := 0; i < minimum.Count && len(defIDs) < count; i++ {
+			defIDs = append(defIDs, minimum.MonsterDefID)
 		}
 	}
-	for placed < count {
-		defID := rollDungeonMonsterDef(defRNG, placement)
-		if err := placeGeneratedMonster(rng, rarityRNG, rules, out, defID, placed); err != nil {
+	for len(defIDs) < count {
+		defIDs = append(defIDs, rollDungeonMonsterDef(defRNG, placement))
+	}
+	nextDef := 0
+	for packIndex, packSize := range packSizes {
+		packID := fmt.Sprintf("pack_%02d", packIndex+1)
+		defs := append([]string(nil), defIDs[nextDef:nextDef+packSize]...)
+		if err := placeGeneratedMonsterPack(rng, rarityRNG, rules, out, defs, packID); err != nil {
 			return err
 		}
-		placed++
+		nextDef += packSize
 	}
 	return nil
 }
 
-func placeGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defID string, index int) error {
-	pos, ok := randomMonsterPosition(rng, rules, out)
-	if !ok {
-		return fmt.Errorf("game: generate dungeon level %d: could not place monster %d", out.levelNum, index)
+func randomMonsterPackSizes(rng *RNG, placement MonsterPlacementRules, count int) []int {
+	minPackSize := placement.PackSize.Min
+	maxPackSize := placement.PackSize.Max
+	minPackCount := placement.PackCount.Min
+	maxPackCount := placement.PackCount.Max
+	if minPackSize <= 0 || maxPackSize < minPackSize || minPackCount <= 0 || maxPackCount < minPackCount {
+		return []int{count}
 	}
+	minFeasible := maxInt(minPackCount, ceilDiv(count, maxPackSize))
+	maxFeasible := minInt(maxPackCount, count/minPackSize)
+	if maxFeasible < minFeasible {
+		return []int{count}
+	}
+	packCount := randomIntRange(rng, minFeasible, maxFeasible)
+	sizes := make([]int, packCount)
+	for i := range sizes {
+		sizes[i] = minPackSize
+	}
+	remaining := count - packCount*minPackSize
+	for remaining > 0 {
+		progressed := false
+		start := rng.IntN(packCount)
+		for i := 0; i < packCount && remaining > 0; i++ {
+			index := (start + i) % packCount
+			room := maxPackSize - sizes[index]
+			if room <= 0 {
+				continue
+			}
+			add := 1 + rng.IntN(minInt(room, remaining))
+			sizes[index] += add
+			remaining -= add
+			progressed = true
+		}
+		if !progressed {
+			break
+		}
+	}
+	return sizes
+}
+
+func ceilDiv(a, b int) int {
+	if b <= 0 {
+		return 0
+	}
+	return (a + b - 1) / b
+}
+
+func placeGeneratedMonsterPack(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defIDs []string, packID string) error {
+	for attempt := 0; attempt < rules.MonsterPlacement.MaxAttempts; attempt++ {
+		center, ok := randomMonsterPosition(rng, rules, out)
+		if !ok {
+			return fmt.Errorf("game: generate dungeon level %d: could not place %s center", out.levelNum, packID)
+		}
+		candidate := *out
+		placed := make([]Vec2, 0, len(defIDs))
+		ok = true
+		for i, defID := range defIDs {
+			pos := center
+			if i > 0 {
+				var memberOK bool
+				pos, memberOK = packMemberPosition(rng, rules, candidate, center, len(placed))
+				if !memberOK {
+					ok = false
+					break
+				}
+			}
+			if err := appendGeneratedMonster(rng, rarityRNG, rules, &candidate, defID, packID, pos); err != nil {
+				return err
+			}
+			placed = append(placed, pos)
+		}
+		if ok {
+			out.monsters = candidate.monsters
+			return nil
+		}
+	}
+	return fmt.Errorf("game: generate dungeon level %d: could not place %s", out.levelNum, packID)
+}
+
+func appendGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defID string, packID string, pos Vec2) error {
 	rarity := rules.RollMonsterRarity(rarityRNG)
 	effectiveDepth := absInt(out.levelNum) + rarity.LootDepthOffset
 	effectiveLootBand, ok := rules.LootBandForDepth(effectiveDepth)
@@ -642,6 +721,7 @@ func placeGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRule
 	}
 	out.monsters = append(out.monsters, generatedMonster{
 		defID:     defID,
+		packID:    packID,
 		rarityID:  rarity.ID,
 		lootTable: effectiveLootBand.MonsterLootTable,
 		pos:       pos,
@@ -652,6 +732,31 @@ func placeGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRule
 		}
 	}
 	return nil
+}
+
+func packMemberPosition(rng *RNG, rules DungeonGenerationRules, out generatedDungeonLevel, center Vec2, placedCount int) (Vec2, bool) {
+	ringDistance := math.Max(rules.MonsterPlacement.MarginFromWall+0.5, rules.MonsterPlacement.PackMemberRadius*0.8)
+	baseOffsets := []Vec2{
+		{X: ringDistance, Y: 0},
+		{X: -ringDistance, Y: 0},
+		{X: 0, Y: ringDistance},
+		{X: 0, Y: -ringDistance},
+	}
+	start := 0
+	if len(baseOffsets) > 0 {
+		start = rng.IntN(len(baseOffsets))
+	}
+	for i := 0; i < len(baseOffsets); i++ {
+		offset := baseOffsets[(start+i+placedCount-1)%len(baseOffsets)]
+		pos := Vec2{X: center.X + offset.X, Y: center.Y + offset.Y}
+		if distance(center, pos) > rules.MonsterPlacement.PackMemberRadius+0.000001 {
+			continue
+		}
+		if !dungeonMonsterPositionBlocked(pos, rules, out) && insideDungeonFloor(pos, rules) && generatedTargetReachable(rules, out, pos) {
+			return pos, true
+		}
+	}
+	return Vec2{}, false
 }
 
 func rollDungeonMonsterDef(rng *RNG, placement MonsterPlacementRules) string {
@@ -688,7 +793,7 @@ func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *gen
 	for i := 0; i < championCommonMinionCount; i++ {
 		pos, ok := randomChampionMinionPosition(rng, rules, out, championPos)
 		if !ok {
-			return fmt.Errorf("game: generate dungeon level %d: could not place champion minion %d", out.levelNum, i)
+			return nil
 		}
 		out.monsters = append(out.monsters, generatedMonster{
 			defID:     rules.MonsterPlacement.MonsterDefID,
@@ -701,16 +806,12 @@ func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *gen
 }
 
 func randomChampionMinionPosition(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2) (Vec2, bool) {
-	const ringDistance = 1.75
+	ringDistance := math.Max(rules.MonsterPlacement.MarginFromWall+0.5, 2.5)
 	baseOffsets := []Vec2{
 		{X: ringDistance, Y: 0},
 		{X: -ringDistance, Y: 0},
 		{X: 0, Y: ringDistance},
 		{X: 0, Y: -ringDistance},
-		{X: ringDistance, Y: ringDistance},
-		{X: -ringDistance, Y: ringDistance},
-		{X: ringDistance, Y: -ringDistance},
-		{X: -ringDistance, Y: -ringDistance},
 	}
 	start := 0
 	if len(baseOffsets) > 0 {
@@ -753,21 +854,22 @@ func randomMonsterPosition(rng *RNG, rules DungeonGenerationRules, out *generate
 
 func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out generatedDungeonLevel) bool {
 	placement := rules.MonsterPlacement
+	interactableClearance := math.Max(placement.MarginFromWall, placement.PackMemberRadius*2)
 	if distance(pos, rules.PlayerSpawn) < placement.MinSpawnDistance {
 		return true
 	}
 	for _, stair := range out.stairPositions() {
-		if distance(pos, stair) < placement.MarginFromWall {
+		if distance(pos, stair) < interactableClearance {
 			return true
 		}
 	}
 	for _, teleporter := range out.teleporterPositions() {
-		if distance(pos, teleporter) < placement.MarginFromWall {
+		if distance(pos, teleporter) < interactableClearance {
 			return true
 		}
 	}
 	for _, chest := range out.chestPositions() {
-		if distance(pos, chest) < placement.MarginFromWall {
+		if distance(pos, chest) < interactableClearance {
 			return true
 		}
 	}

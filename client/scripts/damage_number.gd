@@ -54,12 +54,12 @@ func _process(delta: float) -> void:
 
 
 func _update_position() -> void:
-	if _camera == null:
+	if _camera == null or not _camera.is_inside_tree():
 		return
 
 	var anchor := _world_position
 	if is_instance_valid(_target):
-		anchor = _target.global_position
+		anchor = _target.global_position if _target.is_inside_tree() else _target.position
 
 	var screen := _camera.unproject_position(anchor + WORLD_OFFSET)
 	var t := _age / LIFETIME

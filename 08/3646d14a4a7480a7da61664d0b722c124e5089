@@ -1,0 +1,43 @@
+client/tests/test_shop_panel.gd
+  s_5db3176cff45e9::t_a315861aed453c 160-165,167-168,171-172
+  s_5db3176cff45e9::t_0c41455a3b5c8e 166,178-191
+  s_5db3176cff45e9::t_d96a627e3bb9fd 169-170,173-177
+skills/showme/scripts/visual_capture.gd
+  s_5db3176cff45e9::t_b85b6572d244b2 177,417-419
+  s_5db3176cff45e9::t_8fdaf75bffaa0e 188,405-415
+client/scripts/inventory_panel.gd
+  s_5db3176cff45e9::t_94b77c1fd82b18 820-821,823,825,827-830,835-841,843-844,854-879
+  s_5db3176cff45e9::t_d23ba6eaee7296 824,842,845-853
+  s_5db3176cff45e9::t_d5a49c9c37f305 33,822,826
+server/internal/game/sim.go
+  s_4c0cc59c104e28::t_ed4af0f5bfc4c3 691,2591,2597-2627
+server/internal/game/game_test.go
+  s_4c0cc59c104e28::t_c8ba60fe60f57d 830-831
+  s_4c0cc59c104e28::t_9335b028f50abf 790-829,832-834
+client/scripts/item_tooltip_panel.gd
+  s_5db3176cff45e9::t_639096643c3764 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "083646d14a4a7480a7da61664d0b722c124e5089",
+  "prompts": {},
+  "sessions": {
+    "s_4c0cc59c104e28": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4fc-520c-7230-b3f4-43f216d2c5cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_5db3176cff45e9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb522-0622-7923-a22c-dd7295f289dc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

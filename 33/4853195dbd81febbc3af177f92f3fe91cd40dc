@@ -1,0 +1,41 @@
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_c8b827646bf8c0::t_a1e69e4a10c769 10-11,15,31-32
+shared/golden/skill_points_and_magic_bolt.json
+  s_c8b827646bf8c0::t_d6ecb8cdcc747a 8,11-12
+shared/rules/character_progression.v0.json
+  s_c8b827646bf8c0::t_6972d2d77d4f14 27
+tools/validate_shared.py
+  s_c8b827646bf8c0::t_6972d2d77d4f14 539-540
+shared/rules/character_progression.v0.schema.json
+  s_c8b827646bf8c0::t_6972d2d77d4f14 25
+server/internal/game/sim.go
+  s_c8b827646bf8c0::t_6972d2d77d4f14 463
+server/internal/http/ws_test.go
+  s_c8b827646bf8c0::t_5aee2ed46c28de 583,638-639
+  s_c8b827646bf8c0::t_5226e849acc444 652
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_c8b827646bf8c0::t_03842be3ba1581 7
+  s_c8b827646bf8c0::t_6de0927a31a10b 10
+shared/golden/character_progression.json
+  s_c8b827646bf8c0::t_d6ecb8cdcc747a 21,50,79,139,168,197
+server/internal/game/game_test.go
+  s_c8b827646bf8c0::t_d6ecb8cdcc747a 141-142,561-562,585-586,594
+shared/golden/skill_points_and_magic_bolt.v0.schema.json
+  s_c8b827646bf8c0::t_6972d2d77d4f14 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "334853195dbd81febbc3af177f92f3fe91cd40dc",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

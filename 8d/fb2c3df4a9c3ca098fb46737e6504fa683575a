@@ -1,0 +1,19 @@
+docs/ideas/roster-town-benefits-and-bench-xp.md
+  s_f70b7779e3e0de::t_c37bcf4ebc9965 1-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8dfb2c3df4a9c3ca098fb46737e6504fa683575a",
+  "prompts": {},
+  "sessions": {
+    "s_f70b7779e3e0de": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6fd-8a8e-7070-91a8-682e97c92f74",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

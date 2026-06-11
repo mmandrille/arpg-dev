@@ -245,13 +245,13 @@ main_menu_flow: Create Game root flow → settings → listed co-op session → 
 treasure_classes_and_guarded_chests: pinned chest floor → kill guarded mob → open chest once → pick up chest loot
 character_stats_and_leveling: descend to dungeon → kill mobs for XP → level up → spend VIT → prove persistence
 full_equipment: pick up/equip paper-doll gear → prove hand occupancy → assign belt-gated hotbar → prove persistence
-dungeon_equipment_drops: descend to depth-banded dungeon → open chest → pick up/equip rolled equipment → prove persistence
+dungeon_equipment_drops: compact equipment lab → pick up/equip rolled equipment → prove persistence; depth-banded generation stays in lower-level tests/goldens
 monster_rarity_loot_scaling: descend to generated dungeon → assert champion rarity → kill → pick up rolled loot → prove persistence
 combat_stat_effects: combat lab proofs for miss, crit, armor floor, block, monster crit/block, projectile impact, and stat breakdowns
 client_combat_feedback: equip gear → assert stat breakdowns → prove normal/crit/miss/block floating text and settings toggle
 true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
 model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
-boss_floor_gate: descend to level -5 → assert compact boss floor and locked exits → observe charged melee and ground slam phases → kill boss → unlock exits → descend to -6
+boss_floor_gate: start on compact boss floor → assert locked exits → observe boss phase telegraph → kill boss → unlock exits → descend to -6
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
@@ -269,11 +269,11 @@ client_skill_points_and_magic_bolt: headless Godot client opens skill panel → 
 rage_and_heal_skills: level to the second skill-point grant → learn Rage and Heal → cast Rage → fresh heal_lab session casts Heal and proves skill-sourced healing
 menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
 join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible
-coop_rewards_and_scaling: three-account co-op → nearby host/guest share full XP → different-level guest excluded → replay/fresh persistence
-gold_autopickup_shared_loot: two peers see shared floor gold → both step into range → lowest player id wins private wallet update → item loot still requires click
+coop_rewards_and_scaling: compact three-account co-op → nearby host/guest share full XP → out-of-range guest excluded → replay/fresh persistence; different-level exclusion stays in lower-level tests
+gold_autopickup_shared_loot: compact co-op loot lab → shared floor gold race → lowest player id wins private wallet update → item loot still requires click
 account_stash_storage: acquire dungeon loot/gold → open town stash → deposit/withdraw item and gold → replay/reconnect/state/fresh session persistence
 client_account_stash_panel: headless Godot client opens stash → verifies bag/stash item sync → deposits/withdraws item and gold
-ranged_monster_ai: descend to generated dungeon → assert dungeon_archer → observe archer-sourced ranged player damage
+ranged_monster_ai: compact archer lab → assert dungeon_archer → observe archer-sourced ranged player damage; generated archer placement stays in lower-level/client coverage
 client_ranged_monster_ai: headless Godot client descends to generated dungeon → asserts bow marker → observes ranged player damage
 client_boss_health_bar_ui: headless Godot client descends to first boss floor → asserts Cave Warden boss health bar
 client_boss_phase_readability: headless Godot client descends to first boss floor → asserts boss phase countdown and telegraph marker

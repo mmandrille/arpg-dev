@@ -214,3 +214,9 @@ These rules emerged from paying down the god-file debt. Agents should follow the
 
 10. **Trivials first, then structural splits, then infrastructure.** Safety bugs (bare ranges,
     missing guards) should land before monolith splits so the split is on proven-correct code.
+
+11. **Protocol bot scenarios stay under 10 seconds.** `tools/bot/run.py` fails any protocol bot
+    scenario whose full run exceeds 10.0 seconds. If a scenario drifts over budget, shorten it to
+    the contract it is really proving: use compact lab worlds, focused setup, or lower-level
+    Go/Python tests for exhaustive traversal/timing coverage instead of waiting through unrelated
+    dungeon walks or natural combat cycles.

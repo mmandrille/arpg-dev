@@ -712,9 +712,10 @@ func shopRarityRank(rarity string) (int, bool) {
 
 // WorldDef is a deterministic initial session layout.
 type WorldDef struct {
-	Mode     string        `json:"mode,omitempty"`
-	Player   WorldPlayer   `json:"player"`
-	Entities []WorldEntity `json:"entities"`
+	Mode       string        `json:"mode,omitempty"`
+	StartLevel *int          `json:"start_level,omitempty"`
+	Player     WorldPlayer   `json:"player"`
+	Entities   []WorldEntity `json:"entities"`
 }
 
 // WorldPlayer is the initial player placement for a world.
@@ -1543,6 +1544,14 @@ func LoadRules(dir string) (*Rules, error) {
 		case "", worldModeMultiLevel:
 		default:
 			return nil, fmt.Errorf("game: invalid rules worlds.%s.mode: unsupported mode %s", worldID, world.Mode)
+		}
+		if world.StartLevel != nil {
+			if world.Mode != worldModeMultiLevel {
+				return nil, fmt.Errorf("game: invalid rules worlds.%s.start_level: only multi_level worlds can set start_level", worldID)
+			}
+			if *world.StartLevel > townLevel {
+				return nil, fmt.Errorf("game: invalid rules worlds.%s.start_level: must be <= 0", worldID)
+			}
 		}
 		for i, entity := range world.Entities {
 			label := fmt.Sprintf("worlds.%s.entities[%d]", worldID, i)

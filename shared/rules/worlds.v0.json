@@ -502,6 +502,61 @@
         }
       ]
     },
+    "boss_floor_gate_lab": {
+      "mode": "multi_level",
+      "start_level": -5,
+      "player": { "position": { "x": 26, "y": 15 } },
+      "entities": []
+    },
+    "coop_reward_lab": {
+      "player": { "position": { "x": 13, "y": 8 } },
+      "entities": [
+        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 15, "y": 8 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+      ]
+    },
+    "coop_loot_lab": {
+      "player": { "position": { "x": 4, "y": 5 } },
+      "entities": [
+        { "type": "loot", "item_def_id": "gold", "position": { "x": 6, "y": 5 } },
+        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 8, "y": 5 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+      ]
+    },
+    "ranged_monster_ai_lab": {
+      "player": { "position": { "x": 6, "y": 5 } },
+      "entities": [
+        { "type": "monster", "monster_def_id": "dungeon_archer", "position": { "x": 10, "y": 5 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+      ]
+    },
+    "vendor_lab": {
+      "player": { "position": { "x": 12, "y": 12 } },
+      "entities": [
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_vendor",
+          "position": { "x": 15, "y": 12 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_mystery_seller",
+          "position": { "x": 17, "y": 12 }
+        },
+        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 13, "y": 11 } },
+        { "type": "loot", "item_template_id": "cave_greatsword", "position": { "x": 13, "y": 12 } },
+        { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 13, "y": 13 } }
+      ]
+    },
     "equipment_lab": {
       "player": { "position": { "x": 2, "y": 5 } },
       "entities": [

@@ -17,6 +17,7 @@
         "additionalProperties": false,
         "properties": {
           "mode": { "type": "string", "enum": ["multi_level"] },
+          "start_level": { "type": "integer", "maximum": 0 },
           "player": {
             "type": "object",
             "required": ["position"],

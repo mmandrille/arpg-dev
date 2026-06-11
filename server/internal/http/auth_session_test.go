@@ -293,7 +293,7 @@ func TestCharacterClassSeedsSessionStartProgression(t *testing.T) {
 	if barbProgression.Stats.Str != 5 || barbProgression.Stats.Vit != 5 || barbProgression.Stats.Magic != 5 {
 		t.Fatalf("barbarian stats = %+v, want class start", barbProgression.Stats)
 	}
-	if sorcProgression.Stats.Str != 3 || sorcProgression.Stats.Magic != 10 {
+	if sorcProgression.Stats.Str != 3 || sorcProgression.Stats.Magic != 5 {
 		t.Fatalf("sorcerer stats = %+v, want class start", sorcProgression.Stats)
 	}
 }

@@ -353,6 +353,7 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character progression")
 		return false
 	}
+	progression.CharacterClass = character.CharacterClass
 	waypoints, err := s.store.ListCharacterWaypoints(ctx, characterID)
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
@@ -482,6 +483,7 @@ func sessionResponse(sess store.Session, characterID, joinCode string) createSes
 func progressionDefaultsFromRules(rules *game.Rules, characterClass string) store.CharacterProgressionDefaults {
 	state := rules.DefaultCharacterProgressionState()
 	if classDef, ok := rules.CharacterProgression.Classes[characterClass]; ok {
+		state.CharacterClass = characterClass
 		state.BaseStats = classDef.BaseStats
 	}
 	return store.CharacterProgressionDefaults{

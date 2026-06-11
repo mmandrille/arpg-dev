@@ -149,6 +149,10 @@ func loginAndSession(t *testing.T, srv *httptest.Server) (token, sessionID strin
 }
 
 func loginAndSessionWithWorld(t *testing.T, srv *httptest.Server, worldID string) (token, sessionID string) {
+	return loginAndSessionWithWorldAndClass(t, srv, worldID, "")
+}
+
+func loginAndSessionWithWorldAndClass(t *testing.T, srv *httptest.Server, worldID, characterClass string) (token, sessionID string) {
 	t.Helper()
 	// dev-login
 	rec := doHTTP(t, srv, "POST", "/v0/auth/dev-login", "", map[string]string{
@@ -161,9 +165,16 @@ func loginAndSessionWithWorld(t *testing.T, srv *httptest.Server, worldID string
 	if worldID != "" {
 		body["world_id"] = worldID
 	}
+	if characterClass != "" {
+		character := createCharacterWSWithClass(t, srv, lr.AccessToken, characterClass+" hero", characterClass)
+		body["character_id"] = character.CharacterID
+	}
 	rec = doHTTP(t, srv, "POST", "/v0/sessions", lr.AccessToken, body)
 	var sr createSessionResponse
 	mustJSON(t, rec, &sr)
+	if characterID, ok := body["character_id"].(string); ok && sr.CharacterID != characterID {
+		t.Fatalf("created session character_id = %q, want %q", sr.CharacterID, characterID)
+	}
 	return lr.AccessToken, sr.SessionID
 }
 
@@ -605,26 +616,42 @@ func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing
 func TestWebSocketSkillPointSpendAndMagicBoltCast(t *testing.T) {
 	srv := fullStackWithRules(t, func(rules *game.Rules) {
 		forceHTTPCharacterHitChance(rules, 1.0)
-		rules.CharacterProgression.BaseStats.Magic = 15
+		sorcerer := rules.CharacterProgression.Classes["sorcerer"]
+		sorcerer.BaseStats.Str = 15
+		sorcerer.BaseStats.Magic = 15
+		rules.CharacterProgression.Classes["sorcerer"] = sorcerer
 		dummy := rules.Monsters["training_dummy"]
 		dummy.MaxHP = 1
-		dummy.XPReward = 50
+		dummy.XPReward = 140
 		dummy.LootTable = "no_drop"
 		dummy.RetaliationDamage = nil
 		rules.Monsters["training_dummy"] = dummy
 	})
-	token, sessionID := loginAndSession(t, srv)
+	token, sessionID := loginAndSessionWithWorldAndClass(t, srv, "", "sorcerer")
 
 	conn := dialWS(t, srv, token, sessionID)
 	first := readSnapshot(t, conn)
+	if first.CharacterProgression.CharacterClass != "sorcerer" {
+		t.Fatalf("initial character class = %q, want sorcerer", first.CharacterProgression.CharacterClass)
+	}
 	magicBolt := httpSkillRowByID(first.SkillProgression.Skills, "magic_bolt")
 	if first.SkillProgression.UnspentSkillPoints != 0 || magicBolt == nil || magicBolt.Rank != 0 {
 		t.Fatalf("initial skill progression = %+v, want rank 0 and no points", first.SkillProgression)
 	}
+	targetID := ""
+	for _, entity := range first.Entities {
+		if entity.Type == "monster" && entity.MonsterDefID == "training_dummy" {
+			targetID = entity.ID
+			break
+		}
+	}
+	if targetID == "" {
+		t.Fatalf("initial snapshot missing training_dummy: %+v", first.Entities)
+	}
 
 	sendIntent(t, conn, sessionID, first.ServerTick, "msg-skill-move", "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1})
 	tick := waitStateDeltaTick(t, conn, first.ServerTick)
-	sendIntent(t, conn, sessionID, tick, "msg-skill-kill", "action_intent", map[string]any{"target_id": "1002"})
+	sendIntent(t, conn, sessionID, tick, "msg-skill-kill", "action_intent", map[string]any{"target_id": targetID})
 	levelDelta := readSkillProgressionDelta(t, conn, 1, 0)
 	if !hasWireEvent(levelDelta, "skill_point_gained") {
 		t.Fatalf("skill point delta missing event: %+v", levelDelta.Events)
@@ -889,10 +916,24 @@ func loginWS(t *testing.T, srv *httptest.Server, label string) devLoginResponse 
 }
 
 func createCharacterWS(t *testing.T, srv *httptest.Server, token, name string) characterResponse {
+	return createCharacterWSWithClass(t, srv, token, name, "")
+}
+
+func createCharacterWSWithClass(t *testing.T, srv *httptest.Server, token, name, characterClass string) characterResponse {
 	t.Helper()
-	resp := doHTTP(t, srv, http.MethodPost, "/v0/characters", token, map[string]string{"name": name})
+	body := map[string]string{"name": name}
+	if characterClass != "" {
+		body["character_class"] = characterClass
+	}
+	resp := doHTTP(t, srv, http.MethodPost, "/v0/characters", token, body)
 	var res characterResponse
 	mustJSON(t, resp, &res)
+	if res.CharacterID == "" {
+		t.Fatalf("created character missing id: %+v", res)
+	}
+	if characterClass != "" && res.CharacterClass != characterClass {
+		t.Fatalf("created character class = %q, want %q", res.CharacterClass, characterClass)
+	}
 	return res
 }
 
@@ -1109,6 +1150,13 @@ func readSkillProgressionDelta(t *testing.T, conn *websocket.Conn, unspent, rank
 		default:
 		}
 		m := readMsg(t, conn)
+		if m.Type == "intent_rejected" {
+			var p rejectPayload
+			if err := json.Unmarshal(m.Payload, &p); err != nil {
+				t.Fatalf("decode rejected while waiting for skill progression: %v", err)
+			}
+			t.Fatalf("intent %s rejected while waiting for skill progression: %s", p.RejectedMessageID, p.Reason)
+		}
 		if m.Type != "state_delta" {
 			continue
 		}

@@ -3,7 +3,7 @@
   "skills": {
     "magic_bolt": {
       "name": "Magic Bolt",
-      "class": "mage",
+      "class": "sorcerer",
       "tree": { "tier": 1, "column": 1 },
       "kind": "projectile_attack",
       "max_rank": 5,
@@ -37,7 +37,7 @@
     },
     "rage": {
       "name": "Rage",
-      "class": "warrior",
+      "class": "barbarian",
       "tree": { "tier": 1, "column": 2 },
       "kind": "self_buff",
       "max_rank": 5,
@@ -69,7 +69,7 @@
     },
     "heal": {
       "name": "Heal",
-      "class": "mage",
+      "class": "paladin",
       "tree": { "tier": 1, "column": 3 },
       "kind": "area_heal",
       "max_rank": 5,

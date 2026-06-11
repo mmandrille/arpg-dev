@@ -668,6 +668,10 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "hands_blocked")
 		return
 	}
+	if !s.itemClassAllowed(item) {
+		res.reject(in.MessageID, "class_requirement_not_met")
+		return
+	}
 	if item.rollPayload != nil && !s.requirementsMet(item.rollPayload.Requirements) {
 		res.reject(in.MessageID, "requirements_not_met")
 		return
@@ -1069,6 +1073,10 @@ func (s *Sim) handleAllocateSkillPoint(in Input, res *TickResult) {
 		return
 	}
 	nextRank := rank + 1
+	if !s.skillClassAllowed(def) {
+		res.reject(in.MessageID, "skill_class_not_allowed")
+		return
+	}
 	if !s.skillRequirementsMet(def, nextRank) {
 		res.reject(in.MessageID, "skill_requirements_not_met")
 		return
@@ -1109,6 +1117,10 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 	rank := s.progression.SkillRanks[skillID]
 	if rank <= 0 {
 		res.reject(in.MessageID, "skill_not_learned")
+		return
+	}
+	if !s.skillClassAllowed(def) {
+		res.reject(in.MessageID, "skill_class_not_allowed")
 		return
 	}
 	if !s.skillRequirementsMet(def, rank) {

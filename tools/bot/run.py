@@ -92,6 +92,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
             peer_count=int(raw.get("peer_count", 2)),
             title=raw.get("title", sid),
             description=raw.get("description", ""),
+            character_class=str(raw.get("character_class", "")),
             steps=list(raw.get("steps", [])),
             assertions=list(raw.get("assertions", [])),
             fresh_session_checks=list(raw.get("fresh_session_checks", [])),
@@ -145,10 +146,12 @@ def dev_login(client: httpx.Client, email: str, dev_token: str) -> tuple[str, st
     return body["account_id"], body["access_token"]
 
 
-def create_session(client: httpx.Client, token: str, world_id: str, seed: str = "") -> dict[str, Any]:
+def create_session(client: httpx.Client, token: str, world_id: str, seed: str = "", character_id: str = "") -> dict[str, Any]:
     body: dict[str, Any] = {"mode": "solo", "world_id": world_id}
     if seed:
         body["seed"] = seed
+    if character_id:
+        body["character_id"] = character_id
     resp = client.post("/v0/sessions", headers=auth(token), json=body)
     resp.raise_for_status()
     body = resp.json()
@@ -162,17 +165,24 @@ def list_characters(client: httpx.Client, token: str) -> list[dict[str, Any]]:
     return list(resp.json().get("characters", []))
 
 
-def create_character(client: httpx.Client, token: str, name: str) -> dict[str, Any]:
-    resp = client.post("/v0/characters", headers=auth(token), json={"name": name})
+def create_character(client: httpx.Client, token: str, name: str, character_class: str = "") -> dict[str, Any]:
+    body = {"name": name}
+    if character_class:
+        body["character_class"] = character_class
+    resp = client.post("/v0/characters", headers=auth(token), json=body)
     resp.raise_for_status()
     return resp.json()
 
 
-def ensure_character(client: httpx.Client, token: str, name: str) -> str:
+def ensure_character(client: httpx.Client, token: str, name: str, character_class: str = "") -> str:
     chars = list_characters(client, token)
-    if chars:
+    if character_class:
+        for char in chars:
+            if str(char.get("character_class", "")) == character_class:
+                return str(char["character_id"])
+    elif chars:
         return str(chars[0]["character_id"])
-    return str(create_character(client, token, name)["character_id"])
+    return str(create_character(client, token, name, character_class)["character_id"])
 
 
 def create_coop_session(
@@ -3906,7 +3916,10 @@ def run_verified_session(
     assertions: list[Any],
     seed: str = "",
 ) -> tuple[dict[str, Any], RuntimeState]:
-    sess = create_session(client, token, world_id, seed)
+    character_id = ""
+    if scenario.character_class:
+        character_id = ensure_character(client, token, f"{scenario.character_class.title()} Bot", scenario.character_class)
+    sess = create_session(client, token, world_id, seed, character_id)
     session_id = sess["session_id"]
     log("session created", session_id, f"seed={sess.get('seed')}")
 
@@ -3918,6 +3931,7 @@ def run_verified_session(
         peer_count=scenario.peer_count,
         title=scenario.title,
         description=scenario.description,
+        character_class=scenario.character_class,
         steps=steps,
         assertions=assertions,
         fresh_session_checks=[],

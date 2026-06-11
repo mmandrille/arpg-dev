@@ -833,6 +833,30 @@ def cross_checks(report: Report) -> None:
                 report.ok(f"item {item_id} ranged weapon fields are valid")
         elif projectile_speed is not None:
             report.fail("item projectile_speed", f"{item_id}: projectile_speed is only valid on ranged weapons")
+        class_required = item.get("class_required")
+        if class_required is not None:
+            if class_required not in class_defs:
+                report.fail("item class_required", f"{item_id}: unknown class {class_required}")
+            elif not item.get("equippable"):
+                report.fail("item class_required", f"{item_id}: only equippable items can require a class")
+            else:
+                report.ok(f"item {item_id} class requirement resolves")
+    class_weapons = {
+        "barbarian_axe": "barbarian",
+        "sorcerer_staff": "sorcerer",
+        "paladin_mace": "paladin",
+    }
+    rusty_damage = items["items"].get("rusty_sword", {}).get("damage", {})
+    for item_id, class_id in class_weapons.items():
+        item = items["items"].get(item_id)
+        if item is None:
+            report.fail("class weapon", f"missing {item_id}")
+        elif item.get("class_required") != class_id:
+            report.fail("class weapon", f"{item_id}: must require {class_id}")
+        elif item.get("damage", {}).get("max", 0) <= rusty_damage.get("max", 0):
+            report.fail("class weapon", f"{item_id}: must be stronger than rusty_sword")
+        else:
+            report.ok(f"class weapon {item_id} is valid")
 
     valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
@@ -1128,6 +1152,14 @@ def cross_checks(report: Report) -> None:
         report.ok("combat attack interval and speed clamps are valid")
 
     magic_bolt = skills.get("skills", {}).get("magic_bolt")
+    skill_class_map = {skill_id: skill.get("class", "") for skill_id, skill in skills.get("skills", {}).items()}
+    unknown_skill_classes = {skill_id: class_id for skill_id, class_id in skill_class_map.items() if class_id not in class_defs}
+    if unknown_skill_classes:
+        report.fail("skill classes", f"unknown classes: {unknown_skill_classes}")
+    elif skill_class_map.get("magic_bolt") != "sorcerer" or skill_class_map.get("rage") != "barbarian" or skill_class_map.get("heal") != "paladin":
+        report.fail("skill classes", "magic_bolt/rage/heal must map to sorcerer/barbarian/paladin")
+    else:
+        report.ok("skill classes reference character classes")
     if magic_bolt is None:
         report.fail("skills magic_bolt", "missing magic_bolt")
     elif magic_bolt.get("kind") != "projectile_attack":

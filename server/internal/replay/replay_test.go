@@ -123,6 +123,7 @@ func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
 	rules.CharacterProgression.DerivedStats["crit_chance"] = crit
 	progress := rules.DefaultCharacterProgressionState()
 	progress.Level = 3
+	progress.CharacterClass = "sorcerer"
 	progress.UnspentStatPoints = 6
 	progress.UnspentSkillPoints = 1
 	progress.BaseStats.Magic = 15

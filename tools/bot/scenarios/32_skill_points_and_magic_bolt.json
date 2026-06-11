@@ -2,6 +2,7 @@
   "id": "skill_points_and_magic_bolt",
   "world_id": "skill_progression_lab",
   "seed": "v44_skill_points_magic_bolt",
+  "character_class": "sorcerer",
   "title": "Skill points and Magic Bolt",
   "description": "Use a compact skill lab to level, learn/cast Magic Bolt at magic 5, reject rank 2 and recast during cooldown, recover, and verify state/reconnect/replay/fresh persistence.",
   "steps": [

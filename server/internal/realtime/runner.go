@@ -560,6 +560,7 @@ func storeProgressionFromView(accountID, characterID string, view game.Character
 	return store.CharacterProgression{
 		AccountID:           accountID,
 		CharacterID:         characterID,
+		CharacterClass:      view.CharacterClass,
 		Level:               view.Level,
 		Experience:          view.Experience,
 		UnspentStatPoints:   view.UnspentStatPoints,

@@ -1741,14 +1741,18 @@ func scanMarketListing(row rowScanner) (MarketListing, error) {
 }
 
 func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error {
+	characterClass := progression.CharacterClass
+	if characterClass == "" {
+		characterClass = "barbarian"
+	}
 	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO session_start_character_progression (
-			   session_id, account_id, character_id, level, experience, unspent_stat_points, unspent_skill_points, stat_str, stat_dex, stat_vit, stat_magic, gold, deepest_dungeon_depth
+			   session_id, account_id, character_id, character_class, level, experience, unspent_stat_points, unspent_skill_points, stat_str, stat_dex, stat_vit, stat_magic, gold, deepest_dungeon_depth
 			 )
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 			 ON CONFLICT (session_id, account_id, character_id) DO NOTHING`,
-			sessionID, accountID, characterID, progression.Level, progression.Experience, progression.UnspentStatPoints, progression.UnspentSkillPoints,
+			sessionID, accountID, characterID, characterClass, progression.Level, progression.Experience, progression.UnspentStatPoints, progression.UnspentSkillPoints,
 			progression.Stats.Str, progression.Stats.Dex, progression.Stats.Vit, progression.Stats.Magic, progression.Gold, progression.DeepestDungeonDepth,
 		); err != nil {
 			return fmt.Errorf("store: insert session start progression: %w", err)
@@ -1913,12 +1917,12 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	snap.CharacterID = characterID
 	var prog CharacterProgression
 	err := s.pool.QueryRow(ctx,
-		`SELECT account_id, character_id, level, experience, unspent_stat_points, unspent_skill_points, stat_str, stat_dex, stat_vit, stat_magic, gold, deepest_dungeon_depth, created_at, created_at
+		`SELECT account_id, character_id, character_class, level, experience, unspent_stat_points, unspent_skill_points, stat_str, stat_dex, stat_vit, stat_magic, gold, deepest_dungeon_depth, created_at, created_at
 		 FROM session_start_character_progression
 		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3`,
 		sessionID, accountID, characterID,
 	).Scan(
-		&prog.AccountID, &prog.CharacterID, &prog.Level, &prog.Experience, &prog.UnspentStatPoints, &prog.UnspentSkillPoints,
+		&prog.AccountID, &prog.CharacterID, &prog.CharacterClass, &prog.Level, &prog.Experience, &prog.UnspentStatPoints, &prog.UnspentSkillPoints,
 		&prog.Stats.Str, &prog.Stats.Dex, &prog.Stats.Vit, &prog.Stats.Magic, &prog.Gold, &prog.DeepestDungeonDepth, &prog.CreatedAt, &prog.UpdatedAt,
 	)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {

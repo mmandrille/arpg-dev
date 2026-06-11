@@ -13,6 +13,18 @@
       "icon": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "label": "Bw" },
       "ground": { "shape": "bow", "color": "#9b6a3c", "accent": "#d8c17b", "scale": 1.0 }
     },
+    "barbarian_axe": {
+      "icon": { "shape": "blade", "color": "#b85f48", "accent": "#ffd0a3", "label": "Ax" },
+      "ground": { "shape": "blade", "color": "#b85f48", "accent": "#ffd0a3", "scale": 1.05 }
+    },
+    "sorcerer_staff": {
+      "icon": { "shape": "blade", "color": "#5e8fd6", "accent": "#d8f0ff", "label": "St" },
+      "ground": { "shape": "blade", "color": "#5e8fd6", "accent": "#d8f0ff", "scale": 1.1 }
+    },
+    "paladin_mace": {
+      "icon": { "shape": "blade", "color": "#d1b457", "accent": "#fff1a8", "label": "Mc" },
+      "ground": { "shape": "blade", "color": "#d1b457", "accent": "#fff1a8", "scale": 1.05 }
+    },
     "cave_greatsword": {
       "icon": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "label": "2H" },
       "ground": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "scale": 1.1 }

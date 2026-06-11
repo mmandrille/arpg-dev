@@ -12,12 +12,12 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v69 — `character-class-foundation` |
+| **Latest completed slice** | v70 — `class-skill-and-item-gates` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
-| **Next slice** | TBD |
+| **Next slice** | v70 engineering review, then v71 class picker and sprites |
 | **Last engineering review** | v60 — [`docs/reviews/20260610_v60-overview.md`](docs/reviews/20260610_v60-overview.md) (2026-06-10) |
-| **Next engineering review** | v70 (~every 10 slices) |
+| **Next engineering review** | Due now after v70 (`class-skill-and-item-gates`) |
 
 ### Slice numbering note
 
@@ -88,6 +88,7 @@ v66_* = progress-backlog-hygiene
 v67_* = boss-kill-reward-polish
 v68_* = market-stash-listing-foundation
 v69_* = character-class-foundation
+v70_* = class-skill-and-item-gates
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -197,6 +198,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v67** | `boss-kill-reward-polish` | Complete (`make ci` green) | [`v67_spec-boss-kill-reward-polish.md`](docs/specs/v67_spec-boss-kill-reward-polish.md) | [`v67_2026-06-11-boss-kill-reward-polish.md`](docs/plans/v67_2026-06-11-boss-kill-reward-polish.md) | [`as-built`](docs/as-built/v67_boss-kill-reward-polish.md) |
 | **v68** | `market-stash-listing-foundation` | Complete (`make ci` green) | [`v68_spec-market-stash-listing-foundation.md`](docs/specs/v68_spec-market-stash-listing-foundation.md) | [`v68_2026-06-11-market-stash-listing-foundation.md`](docs/plans/v68_2026-06-11-market-stash-listing-foundation.md) | [`as-built`](docs/as-built/v68_market-stash-listing-foundation.md) |
 | **v69** | `character-class-foundation` | Complete (`make ci` green) | [`v69_spec-character-class-foundation.md`](docs/specs/v69_spec-character-class-foundation.md) | [`v69_2026-06-11-character-class-foundation.md`](docs/plans/v69_2026-06-11-character-class-foundation.md) | [`as-built`](docs/as-built/v69_character-class-foundation.md) |
+| **v70** | `class-skill-and-item-gates` | Complete (`make ci` green) | [`v70_spec-class-skill-and-item-gates.md`](docs/specs/v70_spec-class-skill-and-item-gates.md) | [`v70_2026-06-11-class-skill-and-item-gates.md`](docs/plans/v70_2026-06-11-class-skill-and-item-gates.md) | [`as-built`](docs/as-built/v70_class-skill-and-item-gates.md) |
 
 ---
 
@@ -595,6 +597,11 @@ and Godot market UI remain deferred.
 character APIs, validates create requests against shared progression class rules, and uses class
 rules to seed fresh progression. The default `barbarian` preserves the prior baseline stats while
 `sorcerer` and `paladin` prove divergent starts.
+
+**Class gates now affect gameplay.** v70 maps each skill to its class, rejects cross-class skill
+spend/cast attempts, adds one fixed class-required weapon per class, and rejects wrong-class weapon
+equips. Session-start snapshots and realtime reconstruction carry class identity so restrictions
+survive the authoritative boundary.
 
 ### Other deferred items (from specs / ADRs)
 

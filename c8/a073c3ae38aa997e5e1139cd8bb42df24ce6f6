@@ -1,0 +1,40 @@
+tools/bot/scenarios/client/16_vendor_item_comparison.json
+  s_7edc7d9c3db5c9::t_e1aacbe745c091 4,11-12
+tools/bot/scenarios/client/15_town_vendor_shop_panel.json
+  s_7edc7d9c3db5c9::t_0751c54b5f25d5 4,7,11-12
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_7edc7d9c3db5c9::t_0751c54b5f25d5 4,7
+tools/bot/scenarios/client/14_dungeon_wall_rendering.json
+  s_7edc7d9c3db5c9::t_ff5900a811b90f 4
+tools/bot/scenarios/client/22_shop_stock_lifecycle.json
+  s_7edc7d9c3db5c9::t_0751c54b5f25d5 4
+shared/rules/worlds.v0.json
+  s_7edc7d9c3db5c9::t_ff5900a811b90f 511-516
+  s_7edc7d9c3db5c9::t_f2573ba073a801 561-565
+tools/bot/scenarios/client/25_ranged_monster_ai.json
+  s_7edc7d9c3db5c9::t_ff5900a811b90f 4
+  s_7edc7d9c3db5c9::t_0691706515da7e 7,18
+tools/bot/scenarios/client/23_account_stash_panel.json
+  s_7edc7d9c3db5c9::t_0751c54b5f25d5 4,7,11-12
+  s_7edc7d9c3db5c9::t_936ec8b0bf3b97 22
+tools/bot/scenarios/client/24_mystery_seller_core.json
+  s_7edc7d9c3db5c9::t_811e0439e023dc 4,7
+tools/bot/scenarios/client/26_boss_health_bar_ui.json
+  s_7edc7d9c3db5c9::t_0751c54b5f25d5 4,7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c8a073c3ae38aa997e5e1139cd8bb42df24ce6f6",
+  "prompts": {},
+  "sessions": {
+    "s_7edc7d9c3db5c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4b1-8e94-74b0-b574-69e4b955a0f6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

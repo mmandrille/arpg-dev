@@ -1110,6 +1110,79 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	assertAck(t, second, "cast_magic_again")
 }
 
+func TestMagicBoltAutoNavigatesToCastRange(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	skill := rules.Skills[magicBoltSkillID]
+	skill.Projectile.Range = 4
+	rules.Skills[magicBoltSkillID] = skill
+
+	sim := MustNewSim("sess_magic_bolt_auto_nav", "01", rules)
+	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.BaseStats.Magic = 15
+	sim.progression.SkillRanks[magicBoltSkillID] = 1
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 2, Y: 5}
+	for id, e := range sim.entities {
+		if e.kind == monsterEntity {
+			delete(sim.entities, id)
+		}
+	}
+	monster := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: 12, Y: 5},
+		hp:           20,
+		maxHP:        20,
+		monsterDefID: monsterDefID,
+		lootTable:    "no_drop",
+	}
+	sim.entities[monster.id] = monster
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_far_magic",
+		CorrelationID: "corr_far_magic",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
+	}})
+	assertAck(t, cast, "cast_far_magic")
+	if firstChangeEntityByType(cast, projectileEntity) != nil {
+		t.Fatal("far magic bolt spawned before auto-navigation completed")
+	}
+	if player.mana != player.maxMana {
+		t.Fatalf("far magic bolt spent mana before reaching cast range: mana=%d max=%d", player.mana, player.maxMana)
+	}
+	nav := sim.activeLevel().autoNav
+	if nav == nil || nav.pendingSkill == nil || nav.pendingSkill.SkillID != magicBoltSkillID {
+		t.Fatalf("far magic bolt did not queue pending skill auto-nav: %+v", nav)
+	}
+
+	sawProjectile := false
+	var castDistance float64
+	for i := 0; i < 100 && !sawProjectile; i++ {
+		r := sim.Tick(nil)
+		for _, c := range r.Changes {
+			if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == projectileEntity {
+				sawProjectile = true
+				castDistance = distance(c.Entity.Position, monster.pos)
+				if c.Entity.ProjectileDefID != magicBoltSkillID || c.Entity.TargetID != idStr(monster.id) {
+					t.Fatalf("auto-nav magic bolt projectile = %+v", c.Entity)
+				}
+			}
+		}
+	}
+	if !sawProjectile {
+		t.Fatal("auto-navigated magic bolt never spawned projectile")
+	}
+	if castDistance > skill.Projectile.Range+meleeRangeEpsilon {
+		t.Fatalf("magic bolt cast distance = %.3f, want within range %.3f", castDistance, skill.Projectile.Range)
+	}
+	minExpected := skill.Projectile.Range - rules.Navigation.CellSize - meleeRangeEpsilon
+	if castDistance < minExpected {
+		t.Fatalf("magic bolt cast distance = %.3f, want farthest reachable point near range >= %.3f", castDistance, minExpected)
+	}
+}
+
 func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
 	sim := MustNewSim("sess_magic_bolt_requirement", "01", loadRules(t))
 	sim.progression.CharacterClass = "sorcerer"

@@ -1201,6 +1201,35 @@ func (s *Sim) appendSkillCooldownStartedEvent(res *TickResult, player *entity, s
 func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
 	dir, targetID, rejectReason := s.skillCastDirection(def, in.CastSkill, player)
 	if rejectReason != "" {
+		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
+			target := s.findEntity(in.CastSkill.TargetID)
+			if target == nil || target.kind != monsterEntity || target.hp <= 0 {
+				res.reject(in.MessageID, "invalid_target")
+				return
+			}
+			_, steps, ok := s.findSkillCastApproachGoal(target, def)
+			if !ok {
+				res.reject(in.MessageID, "no_path")
+				return
+			}
+			if len(steps) > s.activeNav().MaxAutoSteps {
+				res.reject(in.MessageID, "path_too_long")
+				return
+			}
+			s.activeLevel().move = nil
+			s.activeLevel().autoNav = &autoNavState{
+				steps: steps,
+				pendingSkill: &CastSkillIntent{
+					SkillID:   in.CastSkill.SkillID,
+					TargetID:  in.CastSkill.TargetID,
+					Direction: cloneVec2Ptr(in.CastSkill.Direction),
+				},
+				sourceMsgID:  in.MessageID,
+				sourceCorrID: in.CorrelationID,
+			}
+			res.ack(in.MessageID)
+			return
+		}
 		res.reject(in.MessageID, rejectReason)
 		return
 	}

@@ -176,6 +176,7 @@ type activeMove struct {
 type autoNavState struct {
 	steps         []Vec2
 	pendingAction *ActionIntent
+	pendingSkill  *CastSkillIntent
 	sourceMsgID   string
 	sourceCorrID  string
 }
@@ -865,6 +866,14 @@ func cloneStringSlice(in []string) []string {
 	out := make([]string, len(in))
 	copy(out, in)
 	return out
+}
+
+func cloneVec2Ptr(in *Vec2) *Vec2 {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
 }
 
 func sortedUniqueStrings(in []string) []string {
@@ -3273,7 +3282,20 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 func (s *Sim) finishAutoNav(res *TickResult) {
 	nav := s.activeLevel().autoNav
 	s.clearAutoNav()
-	if nav == nil || nav.pendingAction == nil {
+	if nav == nil {
+		return
+	}
+	if nav.pendingSkill != nil {
+		in := Input{
+			MessageID:     nav.sourceMsgID,
+			CorrelationID: nav.sourceCorrID,
+			Type:          "cast_skill_intent",
+			CastSkill:     nav.pendingSkill,
+		}
+		s.handleCastSkill(in, res)
+		return
+	}
+	if nav.pendingAction == nil {
 		return
 	}
 	in := Input{
@@ -3501,6 +3523,46 @@ func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 			if ok {
 				return goal, steps, true
 			}
+		}
+	}
+	return Vec2{}, nil, false
+}
+
+func (s *Sim) findSkillCastApproachGoal(target *entity, def SkillDef) (Vec2, []Vec2, bool) {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || target == nil {
+		return Vec2{}, nil, false
+	}
+	nav := s.activeNav()
+	blocked := s.buildBlockedFn()
+	bestGoal := Vec2{}
+	bestSteps := []Vec2(nil)
+	bestDistance := -1.0
+	bestStepCount := 0
+	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
+	for radius := maxRadius; radius >= 0; radius-- {
+		for _, cell := range ringCells(worldToGrid(nav, target.pos), radius) {
+			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
+				continue
+			}
+			goal := gridToWorld(nav, cell)
+			dist := distance(goal, target.pos)
+			if dist > def.Projectile.Range+meleeRangeEpsilon || !s.hasClearRangedShot(goal, target) {
+				continue
+			}
+			steps, ok := PlanPath(nav, player.pos, goal, blocked)
+			if !ok {
+				continue
+			}
+			if dist > bestDistance+0.000001 || (math.Abs(dist-bestDistance) <= 0.000001 && (bestSteps == nil || len(steps) < bestStepCount)) {
+				bestGoal = goal
+				bestSteps = steps
+				bestDistance = dist
+				bestStepCount = len(steps)
+			}
+		}
+		if bestSteps != nil {
+			return bestGoal, bestSteps, true
 		}
 	}
 	return Vec2{}, nil, false

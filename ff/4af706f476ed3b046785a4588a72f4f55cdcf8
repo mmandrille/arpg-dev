@@ -1,0 +1,26 @@
+skills/showme/scripts/visual_capture.gd
+  s_4c0cc59c104e28::t_33f499ad5e6a34 59-60,323-350
+client/scripts/main.gd
+  s_4c0cc59c104e28::t_a78b81ddb9e534 3638-3639,4174-4249
+skills/showme/scripts/render_focus.py
+  s_4c0cc59c104e28::t_e6da459b65f463 24,54
+client/tests/test_item_visuals.gd
+  s_4c0cc59c104e28::t_c2461f093d0923 76-77
+  s_4c0cc59c104e28::t_7be53d24920468 333-365
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ff4af706f476ed3b046785a4588a72f4f55cdcf8",
+  "prompts": {},
+  "sessions": {
+    "s_4c0cc59c104e28": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb4fc-520c-7230-b3f4-43f216d2c5cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -2945,6 +2945,9 @@ func (s *Sim) skillAreaCenter(effect SkillEffectDef, cast *CastSkillIntent, play
 		if target == nil || (target.kind != monsterEntity && target.kind != playerEntity) || target.hp <= 0 {
 			return Vec2{}, "invalid_target"
 		}
+		if target.kind == monsterEntity {
+			return player.pos, ""
+		}
 		if distance(player.pos, target.pos) > effect.Range+meleeRangeEpsilon {
 			return Vec2{}, "target_out_of_range"
 		}

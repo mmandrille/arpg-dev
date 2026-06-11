@@ -1137,6 +1137,32 @@ func TestHealAreaSkillHealsAlliesAndRejectsNoop(t *testing.T) {
 		sim.Tick(nil)
 	}
 	sim.usePlayer(sim.players[hostID])
+	monster := firstEntityByKind(sim, monsterEntity)
+	if monster == nil {
+		t.Fatal("missing monster for heal targeting regression")
+	}
+	player.mana = player.maxMana
+	player.hp = 5
+	guest.hp = guest.maxHP
+	sim.savePlayer(sim.players[hostID])
+	selfHeal := sim.Tick([]Input{{
+		MessageID:     "cast_heal_monster_target",
+		CorrelationID: "corr_heal_monster_target",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(monster.id)},
+	}})
+	assertAck(t, selfHeal, "cast_heal_monster_target")
+	if player.hp != 7 {
+		t.Fatalf("monster-targeted heal hp = %d, want caster-centered heal to 7", player.hp)
+	}
+	if guest.hp != guest.maxHP {
+		t.Fatalf("monster-targeted heal guest hp = %d, want unchanged full hp %d", guest.hp, guest.maxHP)
+	}
+
+	for i := 0; i < 50; i++ {
+		sim.Tick(nil)
+	}
+	sim.usePlayer(sim.players[hostID])
 	player.mana = player.maxMana
 	player.hp = player.maxHP
 	guest.hp = guest.maxHP

@@ -1,11 +1,13 @@
 ---
 name: autoloop
 description: >-
-  Present a curated menu of 5-10 possible SDD slices, wait for the user to pick
-  the ideas they like, order them, batch any blocking clarification questions
-  across the selected queue, then execute a bounded autonomous loop through next,
-  spec, plan, execute, and finish with committed slices. Use when the user runs
-  $autoloop N, /autoloop N, or asks Codex to curate and run multiple SDD slices.
+  Detect repository-maintenance documentation cleanup needs as permission-gated
+  pre-tasks, then present a curated menu of 5-10 possible non-documentation SDD
+  slices, wait for the user to pick the ideas they like, order them, batch any
+  blocking clarification questions across the selected queue, then execute a
+  bounded autonomous loop through next, spec, plan, execute, and finish with
+  committed slices. Use when the user runs $autoloop N, /autoloop N, or asks
+  Codex to curate and run multiple SDD slices.
 disable-model-invocation: true
 ---
 
@@ -25,10 +27,14 @@ Examples:
 Run the normal SDD workflow repeatedly after one explicit user selection gate:
 
 ```text
-$autoloop -> idea menu -> user picks -> agent orders picks -> batch questions -> $spec -> $plan -> $execute -> $finish
+$autoloop -> pre-task check -> idea menu -> user picks -> agent orders picks -> batch questions -> $spec -> $plan -> $execute -> $finish
 ```
 
 The initial `$autoloop` invocation authorizes preflight and idea discovery only.
+It does **not** authorize documentation cleanup, documentation reordering, or
+repository-maintenance edits. If such work is detected as needed to keep the
+repo coherent, treat it as a permission-gated pre-task before the idea menu, not
+as a slice candidate.
 After the user picks one or more ideas from the menu, that reply authorizes the
 agent to order the selected ideas and run the batch clarification gate. If that
 gate emits no questions, the agent may continue from brief to spec, plan,
@@ -58,6 +64,9 @@ choice is not a true blocker:
 - Choose the smallest vertical slice.
 - Prefer player-visible progress.
 - Prefer existing backlog, open gaps, ADR deferred work, or in-flight specs over new inventions.
+- Exclude documentation-only cleaning, updating, ordering, reshaping, index repair, or lifecycle
+  hygiene from the slice menu when the value is repository maintenance rather than a new
+  gameplay/system proof.
 - Defer risky or large scope into explicit non-goals.
 - Prefer server authority, deterministic sim changes, shared contracts, and bot proof over
   client-only presentation shortcuts.
@@ -103,21 +112,38 @@ Before writing any spec, plan, or code:
 
 1. Use the **next** skill discovery inputs to gather candidate slices from `PROGRESS.md`,
    ADRs, existing specs/plans, open gaps, bot gaps, and natural project trajectory.
-2. Present **5-10** slice ideas. Prefer 8 when the backlog has enough credible options.
-3. Keep each idea compact and selection-friendly:
+2. Detect whether repository-maintenance documentation work is needed before credible slice
+   selection. This includes documentation cleaning, updating, ordering, index repair,
+   lifecycle-table correction, stale-link cleanup, or backlog/review hygiene whose purpose is
+   to maintain repo coherence.
+3. If such documentation maintenance is needed:
+   - Do **not** include it in the slice menu.
+   - Present it as a **pre-task** before the menu with the concrete files/symptoms found and the
+     smallest proposed maintenance action.
+   - Ask the user for permission to do the pre-task before continuing to slice presentation.
+   - Stop and wait for the user's answer. If the user declines, continue to the slice menu only if
+     the maintenance issue does not make candidate selection unsafe or misleading; otherwise stop.
+   - If the user approves, complete the pre-task first, verify the relevant docs enough to know the
+     menu can be curated safely, then resume Phase 1.
+4. Present **5-10** slice ideas. Prefer 8 when the backlog has enough credible options.
+   Slice ideas must be gameplay, systems, tooling, test, infrastructure, or quality work with a
+   verifiable repo/runtime proof. They must not be documentation-only cleaning, updating, or
+   ordering work discovered as repository maintenance.
+5. Keep each idea compact and selection-friendly:
    - stable number or short code the user can choose,
    - codename,
    - one-line player/system value,
    - size `S | M | L | XL`,
    - touch surfaces,
    - main risk or dependency.
-4. Do **not** choose for the user during the first autoloop response. Ask them to pick the
+6. Do **not** choose for the user during the first autoloop response. Ask them to pick the
    idea numbers/codenames they like.
-5. If the user asks for fewer than 5 ideas, honor that explicit request; otherwise the
+7. If the user asks for fewer than 5 ideas, honor that explicit request; otherwise the
    default menu remains 5-10 ideas.
-6. If fewer than 5 credible candidates exist, show the credible candidates and say why the
+8. If fewer than 5 credible candidates exist, show the credible candidates and say why the
    menu is shorter.
-7. Do not write or modify files during the idea menu phase unless needed to inspect repo state.
+9. Do not write or modify files during the idea menu phase unless the user approved a
+   documentation-maintenance pre-task or inspection of repo state requires no file changes.
 
 When the user replies with selected ideas:
 

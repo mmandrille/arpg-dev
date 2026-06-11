@@ -536,8 +536,8 @@ def cross_checks(report: Report) -> None:
         report.fail("character_progression skill_points.points_per_grant", "must be positive")
     elif int(skill_point_rules.get("grant_every_levels", 0)) <= 0:
         report.fail("character_progression skill_points.grant_every_levels", "must be positive")
-    elif int(skill_point_rules.get("first_grant_level", 0)) < 2:
-        report.fail("character_progression skill_points.first_grant_level", "must be at least 2")
+    elif int(skill_point_rules.get("first_grant_level", 0)) < 1:
+        report.fail("character_progression skill_points.first_grant_level", "must be at least 1")
     elif int(skill_point_rules["first_grant_level"]) > int(character_progression["level_cap"]):
         report.fail("character_progression skill_points.first_grant_level", "must be within level cap")
     else:

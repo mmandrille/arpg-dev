@@ -5,11 +5,11 @@
     "skill_points": {
       "points_per_grant": 1,
       "grant_every_levels": 3,
-      "first_grant_level": 3
+      "first_grant_level": 1
     },
     "level_cases": [
-      { "level": 1, "expected_unspent_stat_points": 0, "expected_unspent_skill_points": 0 },
-      { "level": 2, "expected_unspent_stat_points": 3, "expected_unspent_skill_points": 0 },
+      { "level": 1, "expected_unspent_stat_points": 0, "expected_unspent_skill_points": 1 },
+      { "level": 2, "expected_unspent_stat_points": 3, "expected_unspent_skill_points": 1 },
       { "level": 3, "expected_unspent_stat_points": 6, "expected_unspent_skill_points": 1 },
       { "level": 6, "expected_unspent_stat_points": 15, "expected_unspent_skill_points": 2 }
     ]

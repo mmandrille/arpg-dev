@@ -22,7 +22,7 @@
       "properties": {
         "points_per_grant": { "type": "integer", "minimum": 1 },
         "grant_every_levels": { "type": "integer", "minimum": 1 },
-        "first_grant_level": { "type": "integer", "minimum": 2 }
+        "first_grant_level": { "type": "integer", "minimum": 1 }
       }
     },
     "level_cap": { "type": "integer", "minimum": 2 },

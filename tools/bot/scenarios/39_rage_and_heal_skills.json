@@ -7,12 +7,12 @@
   "description": "Use a compact skill lab to prove the barbarian can learn and cast Rage while non-barbarian skill access is blocked by class gates.",
   "steps": [
     { "action": "attack_until_event", "monster_def_id": "skill_xp_level7_dummy", "event_type": "monster_killed", "timeout_s": 20 },
-    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": true },
-    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false },
+    { "action": "assert_skill_progression", "unspent_skill_points": 3, "skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": true },
+    { "action": "assert_skill_progression", "unspent_skill_points": 3, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false },
     {
       "action": "allocate_skill_point",
       "skill_id": "rage",
-      "expect_skill_progression": { "unspent_skill_points": 1, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false }
+      "expect_skill_progression": { "unspent_skill_points": 2, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false }
     },
     { "action": "allocate_skill_point", "skill_id": "heal", "expect_reject": "skill_class_not_allowed" },
     {
@@ -28,8 +28,8 @@
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 10 },
     { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "rage", "amount": 10, "remaining_ticks": 450, "total_ticks": 450 },
     { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "rage", "total_ticks": 40 },
-    { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false },
+    { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
+    { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false },
     { "type": "player_max_hp_equals", "equals": 11 }
   ],
   "visual": {

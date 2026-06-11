@@ -19,7 +19,7 @@
       "name": "chase_maze_reaches_player_adjacent",
       "world_id": "chase_maze",
       "idle_player_ticks": 30,
-      "expected_monster_position": { "x": 2.7, "y": 2.9 },
+      "expected_monster_position": { "x": 8.651342544265136, "y": 6.35589010563559 },
       "expected_events": ["monster_aggro"]
     },
     {

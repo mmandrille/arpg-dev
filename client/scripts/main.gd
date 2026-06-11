@@ -795,22 +795,30 @@ func _process(delta: float) -> void:
 
 func _handle_message(env: Dictionary) -> void:
 	last_server_tick = max(last_server_tick, int(env.get("tick", 0)))
+	var payload := _envelope_payload(env)
 	match env.get("type", ""):
 		"session_snapshot":
-			_apply_snapshot(env["payload"])
+			_apply_snapshot(payload)
 		"state_delta":
-			_apply_delta(env["payload"])
+			_apply_delta(payload)
 		"intent_accepted":
-			pending_action_targets.erase(str(env["payload"].get("accepted_message_id", "")))
+			pending_action_targets.erase(str(payload.get("accepted_message_id", "")))
 		"intent_rejected":
 			pending_interactable_action.clear()
 			pending_waypoint_travel = false
-			_handle_intent_rejected(env["payload"])
-			_debug("rejected: %s" % env["payload"].get("reason", "?"))
+			_handle_intent_rejected(payload)
+			_debug("rejected: %s" % payload.get("reason", "?"))
 		"error":
-			_debug("error: %s" % env["payload"].get("message", "?"))
+			_debug("error: %s" % payload.get("message", "?"))
 		_:
 			push_warning("_handle_message: unknown server message type '%s'" % env.get("type", ""))
+
+
+func _envelope_payload(env: Dictionary) -> Dictionary:
+	var payload = env.get("payload", {})
+	if payload is Dictionary:
+		return payload
+	return {}
 
 
 func _snapshot_local_player_id(p: Dictionary) -> String:

@@ -51,6 +51,24 @@ func _run() -> void:
 	_assert_eq("rage removed on end", (state.get("effects", []) as Array).size(), 0)
 	_assert_false("bar hidden after end", bool(state.get("visible", true)))
 
+	bar.start_effect({
+		"event_type": "skill_effect_started",
+		"skill_id": "holy_shield",
+		"remaining_ticks": 300,
+		"total_ticks": 300,
+	})
+	state = bar.get_debug_state()
+	effects = state.get("effects", [])
+	_assert_eq("holy shield effect appears", effects.size(), 1)
+	if effects.size() > 0:
+		var shield: Dictionary = effects[0]
+		_assert_eq("holy shield id", str(shield.get("skill_id", "")), "holy_shield")
+		_assert_eq("holy shield icon label", str(shield.get("label", "")), "S")
+		_assert_eq("holy shield total ticks", int(shield.get("total_ticks", -1)), 300)
+	bar.end_effect("holy_shield")
+	state = bar.get_debug_state()
+	_assert_eq("holy shield removed on end", (state.get("effects", []) as Array).size(), 0)
+
 	bar.start_effect({"skill_id": "rage", "remaining_ticks": 1, "total_ticks": 1})
 	bar._process(1.0)
 	state = bar.get_debug_state()

@@ -1154,6 +1154,8 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		s.handleSelfBuffSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "area_heal":
 		s.handleAreaHealSkillCast(in, res, player, skillID, def, rank, manaCost)
+	case "area_stat_buff":
+		s.handleAreaStatBuffSkillCast(in, res, player, skillID, def, rank, manaCost)
 	default:
 		res.reject(in.MessageID, "unsupported_skill_kind")
 	}
@@ -1241,6 +1243,29 @@ func (s *Sim) handleAreaHealSkillCast(in Input, res *TickResult, player *entity,
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, 0, "")
 	s.applyAreaHeal(player, skillID, rank, applications, in.CorrelationID, res)
+	s.appendSkillCooldownUpdate(res)
+	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleAreaStatBuffSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
+	applications, rejectReason := s.areaStatBuffApplications(player, def, rank, in.CastSkill)
+	if rejectReason != "" {
+		res.reject(in.MessageID, rejectReason)
+		return
+	}
+	if len(applications) == 0 {
+		res.reject(in.MessageID, "no_valid_targets")
+		return
+	}
+
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, 0, "")
+	s.applyAreaStatBuff(player, skillID, rank, applications, in.CorrelationID, res)
+	s.syncActivePlayerMaxResources()
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)

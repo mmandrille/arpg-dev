@@ -30,6 +30,16 @@
       },
       "summary": "Area ally heal",
       "effect_visual": "healing_pulse"
+    },
+    "holy_shield": {
+      "icon": {
+        "label": "S",
+        "shape": "shield",
+        "color": "#f0c85a",
+        "accent": "#fff7bf"
+      },
+      "summary": "Area ally defense",
+      "effect_visual": "holy_shield"
     }
   }
 }

@@ -99,6 +99,42 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.0
       }
+    },
+    "holy_shield": {
+      "name": "Holy Shield",
+      "class": "paladin",
+      "tree": { "tier": 1, "column": 4 },
+      "kind": "area_stat_buff",
+      "max_rank": 5,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": { "vit": 5, "magic": 5 },
+        "stats_per_rank": { "vit": 2, "magic": 2 },
+        "skills": []
+      },
+      "cost": {
+        "mana": { "base": 10, "per_rank": 1 }
+      },
+      "effects": [
+        {
+          "type": "area_stat_percent_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 8.0,
+          "radius": 5.0,
+          "stats": ["armor", "block_percent"],
+          "percent_base": 20,
+          "percent_per_rank": 10,
+          "duration_ticks": 300,
+          "effect_id": "holy_shield"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      }
     }
   }
 }

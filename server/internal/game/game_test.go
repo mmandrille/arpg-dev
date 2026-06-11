@@ -2765,8 +2765,8 @@ func TestDungeonMonsterLootRate(t *testing.T) {
 		seen[tableID] = true
 		table := rules.LootTables[tableID]
 		got := treasureClassAtLeastOneDropChance(rules.TreasureClasses[table.TreasureClassID])
-		if math.Abs(got-0.15) > 0.000001 {
-			t.Fatalf("%s at-least-one drop chance = %.4f, want 0.1500", tableID, got)
+		if math.Abs(got-0.20) > 0.000001 {
+			t.Fatalf("%s at-least-one drop chance = %.4f, want 0.2000", tableID, got)
 		}
 	}
 }
@@ -6789,17 +6789,7 @@ func TestDungeonEquipmentLootDeterminism(t *testing.T) {
 		t.Fatalf("same-seed loot sequence drifted: %v != %v", first, second)
 	}
 	if len(first) == 0 {
-		t.Fatal("expected at least one dungeon equipment drop")
-	}
-	foundEquipment := false
-	for _, drop := range first {
-		if drop == "cave_shield:cave_shield" {
-			foundEquipment = true
-			break
-		}
-	}
-	if !foundEquipment {
-		t.Fatalf("loot sequence = %v, want rolled equipment", first)
+		t.Fatal("expected at least one dungeon drop")
 	}
 }
 

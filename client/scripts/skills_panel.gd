@@ -82,7 +82,7 @@ func get_debug_state() -> Dictionary:
 	var skill := _skill_row(skill_id)
 	var requirement_status := _requirement_status(skill_id)
 	var skill_states := {}
-	for id in _tree_skill_ids():
+	for id in _visible_skill_ids():
 		var row_skill_id := str(id)
 		var row := _skill_row(row_skill_id)
 		var row_requirements := _requirement_status(row_skill_id)
@@ -106,7 +106,7 @@ func get_debug_state() -> Dictionary:
 		"visible": visible,
 		"unspent_skill_points": int(skill_progression.get("unspent_skill_points", 0)),
 		"skill_id": skill_id,
-		"skill_ids": _tree_skill_ids(),
+		"skill_ids": _visible_skill_ids(),
 		"skill_name": _skill_name(skill_id),
 		"icon_label": _skill_icon_label_text(skill_id),
 		"icon_shape": _skill_icon_shape(skill_id),
@@ -268,8 +268,8 @@ func _build() -> void:
 func _render() -> void:
 	if _points_label == null or _spend_button == null:
 		return
-	if _selected_skill_id == "" or SkillRulesLoader.skill_definition(_selected_skill_id).is_empty():
-		_selected_skill_id = SkillRulesLoader.first_skill_id()
+	if _selected_skill_id == "" or not _skill_is_visible(_selected_skill_id):
+		_selected_skill_id = str(_visible_skill_ids().front()) if not _visible_skill_ids().is_empty() else SkillRulesLoader.first_skill_id()
 	var unspent := int(skill_progression.get("unspent_skill_points", 0))
 	var skill_id := _current_skill_id()
 	var skill := _skill_row(skill_id)
@@ -284,6 +284,7 @@ func _render() -> void:
 	_set_tooltip_body(skill_id, maxi(rank, 1))
 	for raw_skill_id in _tree_skill_ids():
 		var row_skill_id := str(raw_skill_id)
+		var row_visible := _skill_is_visible(row_skill_id)
 		var row := _skill_row(row_skill_id)
 		var row_rank := int(row.get("rank", 0))
 		var row_max_rank := int(row.get("max_rank", int(_skill_def(row_skill_id).get("max_rank", 0))))
@@ -291,6 +292,7 @@ func _render() -> void:
 		var selected := row_skill_id == skill_id
 		var block := _skill_blocks.get(row_skill_id, null) as Panel
 		if block != null:
+			block.visible = row_visible
 			block.add_theme_stylebox_override("panel", _skill_block_style(visual_state, selected or _right_click_skill_id == row_skill_id))
 		var icon = _skill_icons.get(row_skill_id, null)
 		if icon != null:
@@ -365,13 +367,16 @@ func _assigned_key_for_skill(skill_id: String) -> String:
 
 
 func _current_skill_id() -> String:
-	if _selected_skill_id != "" and not SkillRulesLoader.skill_definition(_selected_skill_id).is_empty():
+	if _selected_skill_id != "" and _skill_is_visible(_selected_skill_id):
 		return _selected_skill_id
+	var visible_skill_ids := _visible_skill_ids()
+	if not visible_skill_ids.is_empty():
+		return str(visible_skill_ids.front())
 	return SkillRulesLoader.first_skill_id()
 
 
 func _select_skill(skill_id: String) -> bool:
-	if skill_id == "" or SkillRulesLoader.skill_definition(skill_id).is_empty():
+	if skill_id == "" or not _skill_is_visible(skill_id):
 		return false
 	_selected_skill_id = skill_id
 	_render()
@@ -380,6 +385,25 @@ func _select_skill(skill_id: String) -> bool:
 
 func _tree_skill_ids() -> Array:
 	return SkillRulesLoader.skill_ids_by_tree()
+
+
+func _visible_skill_ids() -> Array:
+	var character_class := str(character_progression.get("character_class", ""))
+	if character_class == "":
+		return _tree_skill_ids()
+	var out: Array = []
+	for raw_skill_id in _tree_skill_ids():
+		var skill_id := str(raw_skill_id)
+		if str(_skill_def(skill_id).get("class", "")) == character_class:
+			out.append(skill_id)
+	return out
+
+
+func _skill_is_visible(skill_id: String) -> bool:
+	if skill_id == "" or SkillRulesLoader.skill_definition(skill_id).is_empty():
+		return false
+	var character_class := str(character_progression.get("character_class", ""))
+	return character_class == "" or str(_skill_def(skill_id).get("class", "")) == character_class
 
 
 func _skill_block_position(skill_id: String) -> Vector2:

@@ -1,0 +1,27 @@
+shared/rules/monsters.v0.json
+  s_ba8ba4c088ef1a::t_a3f83ff7cd65f8 100,115,132,153,170,223,240
+shared/protocol/examples/session_snapshot.json
+  s_ba8ba4c088ef1a::t_a3f83ff7cd65f8 83
+shared/rules/character_progression.v0.json
+  s_ba8ba4c088ef1a::t_a3f83ff7cd65f8 142
+shared/protocol/examples/state_delta.json
+  s_ba8ba4c088ef1a::t_a3f83ff7cd65f8 59
+shared/golden/character_progression.json
+  s_ba8ba4c088ef1a::t_a3f83ff7cd65f8 32,61,90,119,150,179,208
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9ab51acd37382f66da73fb0b091413343fb56ea0",
+  "prompts": {},
+  "sessions": {
+    "s_ba8ba4c088ef1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb763-0e96-7fe3-a8ba-ed562ff3189f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

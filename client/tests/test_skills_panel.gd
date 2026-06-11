@@ -60,6 +60,7 @@ func _run() -> void:
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
 	_assert_true("spend button enabled at initial magic requirement", bool(state.get("spend_button_enabled", false)))
+	_assert_false("spend button is not visible", bool(state.get("spend_button_visible", true)))
 	_assert_eq("unbought met requirement is highlighted", str(state.get("visual_state", "")), "highlight")
 	_assert_true("requirements met at magic 5", bool(state.get("requirements_met", false)))
 	var requirement_status: Array = state.get("requirement_status", [])
@@ -106,6 +107,29 @@ func _run() -> void:
 	_assert_eq("bought skill without points stays normal", str(state.get("visual_state", "")), "normal")
 	var skills_without_points: Dictionary = state.get("skills", {})
 	_assert_false("off-class no-points skill remains hidden", skills_without_points.has("heal"))
+
+	panel.set_character_progression({
+		"character_class": "paladin",
+		"level": 5,
+		"base_stats": {"str": 5, "dex": 5, "vit": 8, "magic": 5},
+	})
+	panel.set_skill_progression({
+		"unspent_skill_points": 1,
+		"skills": _skill_rows(0, false, 0, false, 0, true, 0, true),
+	})
+	state = panel.get_debug_state()
+	var paladin_skill_ids: Array = state.get("skill_ids", [])
+	_assert_eq("paladin has two compact visible skills", paladin_skill_ids.size(), 2)
+	_assert_eq("paladin first local skill", str(paladin_skill_ids[0]), "heal")
+	_assert_eq("paladin second local skill", str(paladin_skill_ids[1]), "holy_shield")
+	var heal_block := panel._skill_blocks.get("heal", null) as Control
+	var holy_shield_block := panel._skill_blocks.get("holy_shield", null) as Control
+	_assert_true("paladin heal block exists", heal_block != null)
+	_assert_true("paladin holy shield block exists", holy_shield_block != null)
+	if heal_block != null and holy_shield_block != null:
+		_assert_true("paladin third-column skill reflows into compact row", heal_block.position.x <= 120.0)
+		_assert_true("paladin fourth-column skill remains inside tree", holy_shield_block.position.x + holy_shield_block.size.x <= 304.0)
+	_assert_eq("rankable paladin skill is highlighted", str(((state.get("skills", {}) as Dictionary).get("heal", {}) as Dictionary).get("visual_state", "")), "highlight")
 
 	panel.set_character_progression({
 		"character_class": "sorcerer",
@@ -185,9 +209,10 @@ func _remove_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute_path)
 
 
-func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false) -> Array:
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false) -> Array:
 	return [
 		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": 5, "can_spend": magic_can_spend},
 		{"skill_id": "rage", "rank": rage_rank, "max_rank": 5, "can_spend": rage_can_spend},
 		{"skill_id": "heal", "rank": heal_rank, "max_rank": 5, "can_spend": heal_can_spend},
+		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": 5, "can_spend": holy_shield_can_spend},
 	]

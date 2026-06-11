@@ -787,6 +787,51 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	}
 }
 
+func TestLoadInventoryAppliesEquippedResourceStats(t *testing.T) {
+	sim := NewSim("sess_resume_equipped_stats", "01", loadRules(t))
+	player := sim.entities[sim.playerID]
+	if player.maxHP != 10 || player.hp != 10 {
+		t.Fatalf("base player hp = %d/%d, want 10/10", player.hp, player.maxHP)
+	}
+	payload := ItemRollPayload{
+		ItemTemplateID: "cave_ring",
+		DisplayName:    "Resume Ring",
+		Rarity:         "test",
+		Stats:          map[string]int{"max_hp": 4},
+		Requirements:   map[string]int{"level": 1},
+	}
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.LoadInventory([]PersistedItem{{
+		InstanceID:  "6415",
+		ItemDefID:   "cave_ring",
+		Slot:        ringLeftSlot,
+		Equipped:    true,
+		RolledStats: raw,
+	}})
+
+	player = sim.entities[sim.playerID]
+	if player.maxHP != 14 || player.hp != 14 {
+		t.Fatalf("loaded equipped ring hp = %d/%d, want 14/14", player.hp, player.maxHP)
+	}
+	snap := sim.Snapshot()
+	var playerView *EntityView
+	for i := range snap.Entities {
+		if snap.Entities[i].ID == idStr(sim.playerID) {
+			playerView = &snap.Entities[i]
+			break
+		}
+	}
+	if playerView == nil || playerView.MaxHP == nil || *playerView.MaxHP != 14 || playerView.HP == nil || *playerView.HP != 14 {
+		t.Fatalf("snapshot player after load = %+v, want hp/maxHP 14/14", playerView)
+	}
+	if snap.CharacterProgression.DerivedStats.MaxHP != 14 {
+		t.Fatalf("snapshot derived max hp = %v, want 14", snap.CharacterProgression.DerivedStats.MaxHP)
+	}
+}
+
 func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	zero := 0.0

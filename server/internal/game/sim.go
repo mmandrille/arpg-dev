@@ -688,6 +688,7 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 			s.nextID = id + 1
 		}
 	}
+	s.syncActivePlayerResourceCaps(nil)
 	s.savePlayer(s.defaultPlayer())
 }
 
@@ -2587,24 +2588,43 @@ func (s *Sim) travelArrivalBlocked(level *LevelState, pos Vec2, movingPlayerID u
 }
 
 func (s *Sim) appendEquipmentProgressionChanges(res *TickResult) {
-	player := s.activeLevel().entities[s.playerID]
-	if player != nil {
-		maxHP := s.currentMaxHP()
-		if maxHP != player.maxHP {
-			delta := maxHP - player.maxHP
-			player.maxHP = maxHP
-			if delta > 0 {
-				player.hp += delta
-			}
-			if player.hp > player.maxHP {
-				player.hp = player.maxHP
-			}
-			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
-		}
-	}
+	s.syncActivePlayerResourceCaps(res)
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
 	s.appendInventoryPresentationUpdates(res)
+}
+
+func (s *Sim) syncActivePlayerResourceCaps(res *TickResult) {
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil {
+		return
+	}
+	changed := false
+	if maxHP := s.currentMaxHP(); maxHP != player.maxHP {
+		delta := maxHP - player.maxHP
+		player.maxHP = maxHP
+		if delta > 0 {
+			player.hp += delta
+		}
+		if player.hp > player.maxHP {
+			player.hp = player.maxHP
+		}
+		changed = true
+	}
+	if maxMana := s.currentMaxMana(); maxMana != player.maxMana {
+		delta := maxMana - player.maxMana
+		player.maxMana = maxMana
+		if delta > 0 {
+			player.mana += delta
+		}
+		if player.mana > player.maxMana {
+			player.mana = player.maxMana
+		}
+		changed = true
+	}
+	if changed && res != nil {
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	}
 }
 
 func (s *Sim) appendInventoryPresentationUpdates(res *TickResult) {

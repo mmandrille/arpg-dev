@@ -157,6 +157,38 @@ func _run() -> void:
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
 	_assert_true("inventory red potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines(inventory[1]), "Restores 5 HP"))
 	_assert_true("inventory blue potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines({"item_def_id": "blue_potion"}), "Restores 5 mana"))
+	var amulet := {
+		"item_instance_id": "2003",
+		"item_def_id": "cave_amulet",
+		"item_template_id": "cave_amulet",
+		"display_name": "Common Cave Amulet",
+		"rarity": "common",
+		"rolled_stats": {"max_hp": 4, "mana_regen_per_10_seconds": 2},
+	}
+	var amulet_lines: Array = inventory_panel._tooltip_lines(amulet)
+	_assert_false("inventory amulet no base title", _array_contains_text(amulet_lines, "Base stats"))
+	_assert_false("inventory amulet no random title", _array_contains_text(amulet_lines, "Random stats"))
+	_assert_true("inventory amulet base max hp", _array_contains_text(amulet_lines, "Max HP: +2"))
+	_assert_true("inventory amulet random mana regen", _array_contains_text(amulet_lines, "Mana regen / 10s: +2"))
+	var first_separator := amulet_lines.find(InventoryPanelScript.TOOLTIP_STAT_SEPARATOR)
+	var last_separator := amulet_lines.rfind(InventoryPanelScript.TOOLTIP_STAT_SEPARATOR)
+	_assert_true("inventory amulet two separators", first_separator >= 0 and last_separator > first_separator)
+	_assert_true("inventory amulet separator before base", first_separator < amulet_lines.find("Max HP: +2"))
+	_assert_true("inventory amulet separator before random", last_separator < amulet_lines.find("Mana regen / 10s: +2"))
+	var blade := {
+		"item_instance_id": "2004",
+		"item_def_id": "cave_blade",
+		"item_template_id": "cave_blade",
+		"display_name": "Magic Cave Blade",
+		"rarity": "magic",
+		"rolled_stats": {"damage_min": 3, "damage_max": 4, "max_hp": 3},
+	}
+	var blade_lines: Array = inventory_panel._tooltip_lines(blade)
+	_assert_true("inventory blade type reach before stats", blade_lines.find("Reach: 1.5") < blade_lines.find(InventoryPanelScript.TOOLTIP_STAT_SEPARATOR))
+	_assert_true("inventory blade type mode before stats", blade_lines.find("Mode: melee") < blade_lines.find(InventoryPanelScript.TOOLTIP_STAT_SEPARATOR))
+	_assert_true("inventory blade random min delta", _array_contains_text(blade_lines, "Min damage: +1"))
+	_assert_false("inventory blade hides zero max delta", _array_contains_text(blade_lines, "Max damage:"))
+	_assert_true("inventory blade random hp delta", _array_contains_text(blade_lines, "Max HP: +3"))
 	inventory_panel.set_inventory_state([sell_appraisals[0]], {}, 3, 15, 60)
 	var inventory_state := inventory_panel.get_debug_state()
 	_assert_true("inventory requirements rendered", int(inventory_state.get("requirement_row_count", 0)) >= 2)

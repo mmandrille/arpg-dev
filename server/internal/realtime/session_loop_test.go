@@ -78,7 +78,10 @@ func TestFanoutLevelTravelScopesDepartureAndArrival(t *testing.T) {
 			FromLevel: &fromLevel,
 			ToLevel:   &toLevel,
 		}},
-	}, clients, nil)
+		}, clients, nil, map[uint64]int{
+			hostID:  fromLevel,
+			guestID: toLevel,
+		})
 
 	hostDeparture := mustReceiveDelta(t, host)
 	if got := len(hostDeparture.Changes); got != 1 {
@@ -111,7 +114,10 @@ func TestFanoutLevelTravelScopesDepartureAndArrival(t *testing.T) {
 				Position: game.Vec2{X: 4, Y: 4},
 			},
 		}},
-	}, clients, nil)
+		}, clients, nil, map[uint64]int{
+			hostID:  fromLevel,
+			guestID: toLevel,
+		})
 
 	assertNoEnvelope(t, host)
 	guestArrival := mustReceiveDelta(t, guest)
@@ -264,7 +270,10 @@ func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
 		sess: store.Session{ID: "sess_gold_fanout"},
 		sim:  sim,
 	}
-	loop.fanoutResult(result, []*loopClient{host, guest}, nil)
+	loop.fanoutResult(result, []*loopClient{host, guest}, nil, map[uint64]int{
+		hostID:  0,
+		guestID: 0,
+	})
 
 	hostDelta := mustReceiveDelta(t, host)
 	if len(hostDelta.Changes) != 1 || hostDelta.Changes[0].Op != game.OpEntityRemove || len(hostDelta.Events) != 0 {

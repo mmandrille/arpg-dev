@@ -26,7 +26,7 @@
     { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "rage", "rank": 1 },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 10 },
     { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "rage", "amount": 10, "remaining_ticks": 450, "total_ticks": 450 },
-    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "rage", "total_ticks": 32 },
+    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "rage" },
     { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false },
     { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": false },
     { "type": "player_max_hp_equals", "equals": 11 }

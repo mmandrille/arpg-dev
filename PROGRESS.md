@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v81 — `paladin-holy-shield` |
+| **Latest completed slice** | v82 — `realtime-fanout-level-snapshot` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -100,6 +100,7 @@ v78_* = main-config-drop-profiles
 v79_* = elite-pack-roles
 v80_* = combat-threat-readability
 v81_* = paladin-holy-shield
+v82_* = realtime-fanout-level-snapshot
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -221,6 +222,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v79** | `elite-pack-roles` | Complete (`make ci` green) | [`v79_spec-elite-pack-roles.md`](docs/specs/v79_spec-elite-pack-roles.md) | [`v79_2026-06-11-elite-pack-roles.md`](docs/plans/v79_2026-06-11-elite-pack-roles.md) | [`as-built`](docs/as-built/v79_elite-pack-roles.md) |
 | **v80** | `combat-threat-readability` | Complete (`make ci` green) | [`v80_spec-combat-threat-readability.md`](docs/specs/v80_spec-combat-threat-readability.md) | [`v80_2026-06-11-combat-threat-readability.md`](docs/plans/v80_2026-06-11-combat-threat-readability.md) | [`as-built`](docs/as-built/v80_combat-threat-readability.md) |
 | **v81** | `paladin-holy-shield` | Complete (`make ci` green) | [`v81_spec-paladin-holy-shield.md`](docs/specs/v81_spec-paladin-holy-shield.md) | [`v81_2026-06-11-paladin-holy-shield.md`](docs/plans/v81_2026-06-11-paladin-holy-shield.md) | [`as-built`](docs/as-built/v81_paladin-holy-shield.md) |
+| **v82** | `realtime-fanout-level-snapshot` | Complete (`make ci` green) | [`v82_spec-realtime-fanout-level-snapshot.md`](docs/specs/v82_spec-realtime-fanout-level-snapshot.md) | [`v82_2026-06-11-realtime-fanout-level-snapshot.md`](docs/plans/v82_2026-06-11-realtime-fanout-level-snapshot.md) | [`as-built`](docs/as-built/v82_realtime-fanout-level-snapshot.md) |
 
 ---
 
@@ -680,8 +682,9 @@ events to display-only `AGGRO` floating text in the Godot client, adds a `threat
 variant, and proves it with client unit, focused client-bot, and protocol pack-aggro coverage.
 
 **v80 engineering review steering.** The v80 review keeps the repo at 8.4/10 overall and recommends
-small follow-ups for realtime fanout level snapshotting, combat event presenter extraction,
-defensive client payload parsing, and splitting the largest Python validation/bot files by domain.
+small follow-ups for combat event presenter extraction, defensive client payload parsing, and
+splitting the largest Python validation/bot files by domain. The realtime fanout level snapshot
+finding was closed in v82.
 
 **Maintainability ratchet is now explicit.** New source/test/tool files target a 600-line maximum,
 existing over-limit files are grandfathered in `.maintainability/file-size-baseline.tsv`, and
@@ -691,6 +694,14 @@ do not grow by more than 25 lines without a documented maintenance exception.
 **Paladin Holy Shield is now authoritative and visible.** v81 adds a data-driven Paladin area
 defensive buff, per-player active effect ids, armor/block stat application, server-owned expiry,
 Rage-style status UI presentation, and a gold shield/shine around every affected hero.
+
+**Realtime fanout now uses tick-time client level snapshots.** v82 captures connected client levels
+under the session loop mutex and passes that snapshot into fanout, closing the v70/v80 review
+finding without changing protocol, gameplay, or client presentation. The slice also removes stale
+attack-interval-derived exact expectations from Magic Bolt, Rage, Heal, Holy Shield, and matching
+client bot scenarios that CI surfaced; exact cooldown math remains owned by shared golden tests.
+The model-reaction client scenario now uses a safe low-HP lab dummy for terminal reaction proof
+instead of depending on a long basic-attack sequence against combat-stat targets.
 
 ### Other deferred items (from specs / ADRs)
 

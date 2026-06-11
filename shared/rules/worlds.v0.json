@@ -305,6 +305,11 @@
           "position": { "x": 12, "y": 7 }
         },
         {
+          "type": "monster",
+          "monster_def_id": "training_dummy_reward",
+          "position": { "x": 5, "y": 8 }
+        },
+        {
           "type": "wall",
           "position": { "x": 8, "y": 0.5 },
           "size": { "x": 16, "y": 1 }

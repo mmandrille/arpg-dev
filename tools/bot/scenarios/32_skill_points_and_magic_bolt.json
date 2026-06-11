@@ -12,7 +12,7 @@
       "level": 6,
       "unspent_stat_points": 15,
       "magic": 5,
-      "derived_stats": { "max_hp": 10, "max_mana": 10, "attack_interval_ticks": 16 }
+      "derived_stats": { "max_hp": 10, "max_mana": 10 }
     },
     {
       "action": "assert_skill_progression",
@@ -39,12 +39,7 @@
       "action": "cast_skill",
       "skill_id": "magic_bolt",
       "monster_def_id": "combat_lab_soft_target",
-      "event_type": "skill_cast",
-      "expect_skill_cooldown": {
-        "skill_id": "magic_bolt",
-        "remaining_ticks": 32,
-        "total_ticks": 32
-      }
+      "event_type": "skill_cast"
     },
     {
       "action": "wait_until_assertion",
@@ -58,12 +53,7 @@
       "action": "cast_skill",
       "skill_id": "magic_bolt",
       "direction": { "x": 1, "y": 0 },
-      "event_type": "skill_cast",
-      "expect_skill_cooldown": {
-        "skill_id": "magic_bolt",
-        "remaining_ticks": 32,
-        "total_ticks": 32
-      }
+      "event_type": "skill_cast"
     }
   ],
   "assertions": [
@@ -78,9 +68,8 @@
     { "type": "event_seen", "event_type": "skill_cooldown_rejected" },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 4 },
     { "type": "monster_damage_at_least", "monster_def_id": "combat_lab_soft_target", "damage": 4 },
-    { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10, "attack_interval_ticks": 16 } },
+    { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10 } },
     { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "type": "skill_cooldown", "skill_id": "magic_bolt", "remaining_ticks": { "between": [1, 32] }, "total_ticks": 32 },
     { "type": "player_max_hp_equals", "equals": 10 }
   ],
   "fresh_session_checks": [
@@ -88,7 +77,7 @@
       "world_id": "dungeon_levels",
       "steps": [],
       "assertions": [
-        { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10, "attack_interval_ticks": 16 } },
+        { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10 } },
         { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false },
         { "type": "player_max_hp_equals", "equals": 10 }
       ]

@@ -351,13 +351,17 @@ func (l *sessionLoop) snapshotEnvelope(playerID uint64) outEnvelope {
 
 func (l *sessionLoop) broadcastSnapshots() {
 	l.mu.Lock()
-	clients := make([]*loopClient, 0, len(l.clients))
-	membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
-	for _, client := range l.clients {
-		clients = append(clients, client)
-		membersByPlayerID[client.playerID] = client.member
-	}
-	l.mu.Unlock()
+		clients := make([]*loopClient, 0, len(l.clients))
+		membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
+		levelsByPlayerID := make(map[uint64]int, len(l.clients))
+		for _, client := range l.clients {
+			clients = append(clients, client)
+			membersByPlayerID[client.playerID] = client.member
+			if level, ok := l.sim.PlayerCurrentLevel(client.playerID); ok {
+				levelsByPlayerID[client.playerID] = level
+			}
+		}
+		l.mu.Unlock()
 	for _, client := range clients {
 		client.enqueue(l.snapshotEnvelope(client.playerID))
 	}
@@ -504,14 +508,18 @@ func (l *sessionLoop) doTick() {
 				delete(l.received, ack.MessageID)
 			}
 		}
-	}
-	clients := make([]*loopClient, 0, len(l.clients))
-	membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
-	for _, client := range l.clients {
-		clients = append(clients, client)
-		membersByPlayerID[client.playerID] = client.member
-	}
-	l.mu.Unlock()
+		}
+		clients := make([]*loopClient, 0, len(l.clients))
+		membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
+		levelsByPlayerID := make(map[uint64]int, len(l.clients))
+		for _, client := range l.clients {
+			clients = append(clients, client)
+			membersByPlayerID[client.playerID] = client.member
+			if level, ok := l.sim.PlayerCurrentLevel(client.playerID); ok {
+				levelsByPlayerID[client.playerID] = level
+			}
+		}
+		l.mu.Unlock()
 
 	l.hub.metrics.TickDuration.Observe(time.Since(start).Seconds())
 	for _, latency := range latencies {
@@ -520,13 +528,13 @@ func (l *sessionLoop) doTick() {
 	eventSequence := int64(0)
 	for _, res := range results {
 		eventSequence = l.persistTick(res, membersByPlayerID, eventSequence)
-		l.fanoutResult(res, clients, inputTypes)
+		l.fanoutResult(res, clients, inputTypes, levelsByPlayerID)
 	}
 }
 
-func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, inputTypes map[string]string) {
+func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, inputTypes map[string]string, levelsByPlayerID map[uint64]int) {
 	for _, client := range clients {
-		level, ok := l.sim.PlayerCurrentLevel(client.playerID)
+		level, ok := levelsByPlayerID[client.playerID]
 		if !ok {
 			continue
 		}

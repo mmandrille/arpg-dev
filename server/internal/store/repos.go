@@ -1509,6 +1509,116 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 	return result.characterGold, result.stashGold, nil
 }
 
+func (s *Store) ListActiveMarketListings(ctx context.Context) ([]MarketListing, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at
+		 FROM market_listings
+		 WHERE status = $1
+		 ORDER BY created_at DESC, id ASC`,
+		MarketListingActive,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list active market listings: %w", err)
+	}
+	defer rows.Close()
+	var out []MarketListing
+	for rows.Next() {
+		listing, err := scanMarketListing(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, listing)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: list active market listing rows: %w", err)
+	}
+	return out, nil
+}
+
+func (s *Store) CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string) (MarketListing, error) {
+	var out MarketListing
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var stash AccountStashItem
+		err := tx.QueryRow(ctx,
+			`SELECT account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at
+			 FROM account_stash_items
+			 WHERE account_id = $1 AND stash_item_id = $2
+			 FOR UPDATE`,
+			accountID, stashItemID,
+		).Scan(&stash.AccountID, &stash.StashItemID, &stash.SourceCharacterID, &stash.ItemDefID, &stash.RolledStats, &stash.CreatedAt, &stash.UpdatedAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock stash item for market listing: %w", err)
+		}
+		rolledStats := stash.RolledStats
+		if len(rolledStats) == 0 {
+			rolledStats = []byte(`{}`)
+		}
+		err = tx.QueryRow(ctx,
+			`INSERT INTO market_listings (id, seller_account_id, stash_item_id, source_character_id, item_def_id, rolled_stats, status)
+			 VALUES ($1, $2, $3, NULLIF($4, ''), $5, $6::jsonb, $7)
+			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at`,
+			listingID, accountID, stashItemID, stash.SourceCharacterID, stash.ItemDefID, []byte(rolledStats), MarketListingActive,
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt)
+		if err != nil {
+			return fmt.Errorf("store: insert market listing: %w", err)
+		}
+		tag, err := tx.Exec(ctx, `DELETE FROM account_stash_items WHERE account_id = $1 AND stash_item_id = $2`, accountID, stashItemID)
+		if err != nil {
+			return fmt.Errorf("store: delete listed stash item: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+		return nil
+	})
+	return out, err
+}
+
+func (s *Store) CancelMarketListing(ctx context.Context, accountID, listingID string) (MarketListing, error) {
+	var out MarketListing
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		err := tx.QueryRow(ctx,
+			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at
+			 FROM market_listings
+			 WHERE id = $1 AND seller_account_id = $2 AND status = $3
+			 FOR UPDATE`,
+			listingID, accountID, MarketListingActive,
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock market listing for cancel: %w", err)
+		}
+		rolledStats := out.RolledStats
+		if len(rolledStats) == 0 {
+			rolledStats = []byte(`{}`)
+		}
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
+			 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
+			accountID, out.StashItemID, out.SourceCharacterID, out.ItemDefID, []byte(rolledStats),
+		); err != nil {
+			return fmt.Errorf("store: restore canceled listing to stash: %w", err)
+		}
+		err = tx.QueryRow(ctx,
+			`UPDATE market_listings
+			 SET status = $3, canceled_at = now(), updated_at = now()
+			 WHERE id = $1 AND seller_account_id = $2
+			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at`,
+			listingID, accountID, MarketListingCanceled,
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt)
+		if err != nil {
+			return fmt.Errorf("store: cancel market listing: %w", err)
+		}
+		return nil
+	})
+	return out, err
+}
+
 type stashGoldTransferResult struct {
 	characterGold int
 	stashGold     int
@@ -1607,6 +1717,26 @@ func scanAccountStashItem(row rowScanner) (AccountStashItem, error) {
 		return AccountStashItem{}, fmt.Errorf("store: scan account stash item: %w", err)
 	}
 	return item, nil
+}
+
+func scanMarketListing(row rowScanner) (MarketListing, error) {
+	var listing MarketListing
+	err := row.Scan(
+		&listing.ID,
+		&listing.SellerAccountID,
+		&listing.StashItemID,
+		&listing.SourceCharacterID,
+		&listing.ItemDefID,
+		&listing.RolledStats,
+		&listing.Status,
+		&listing.CreatedAt,
+		&listing.UpdatedAt,
+		&listing.CanceledAt,
+	)
+	if err != nil {
+		return MarketListing{}, fmt.Errorf("store: scan market listing: %w", err)
+	}
+	return listing, nil
 }
 
 func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error {

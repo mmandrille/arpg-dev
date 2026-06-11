@@ -308,6 +308,85 @@ func TestCharacterListIncludesProgressionSummariesAndDefaults(t *testing.T) {
 	}
 }
 
+func TestMarketListingRoutesMoveStashItemAndRejectForeignCancel(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	accountID, token := loginEmail(t, h, "market-routes+"+ids.Token()[:12]+"@example.test")
+	char := createCharacter(t, h, token, "Market Seller")
+	otherAccountID, otherToken := loginEmail(t, h, "market-routes-other+"+ids.Token()[:12]+"@example.test")
+	if otherAccountID == accountID {
+		t.Fatal("expected distinct accounts")
+	}
+	item := store.CharacterItemInstance{
+		ID:          "market_route_item",
+		AccountID:   accountID,
+		CharacterID: char.CharacterID,
+		ItemDefID:   "rusty_sword",
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{"damage_min":1}`),
+	}
+	if err := db.AddCharacterItem(ctx, item); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountID, char.CharacterID, item.ID, "stash_route_item"); err != nil {
+		t.Fatal(err)
+	}
+
+	rec := postJSON(h, "/v0/market/listings", token, map[string]string{"stash_item_id": "stash_route_item"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create listing status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var created marketListingResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &created); err != nil {
+		t.Fatal(err)
+	}
+	if created.ListingID == "" || created.Status != store.MarketListingActive || created.ItemDefID != "rusty_sword" {
+		t.Fatalf("created listing = %+v", created)
+	}
+	stashItems, err := db.ListAccountStashItems(ctx, accountID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stashItems) != 0 {
+		t.Fatalf("stash after listing = %+v", stashItems)
+	}
+
+	rec = getJSON(h, "/v0/market/listings", token)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list listings status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var listed listMarketListingsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listed); err != nil {
+		t.Fatal(err)
+	}
+	if len(listed.Listings) == 0 || listed.Listings[0].ListingID != created.ListingID {
+		t.Fatalf("listed market rows = %+v", listed.Listings)
+	}
+
+	rec = postJSON(h, "/v0/market/listings/"+created.ListingID+"/cancel", otherToken, map[string]string{})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign cancel status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/market/listings/"+created.ListingID+"/cancel", token, map[string]string{})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("cancel listing status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var canceled marketListingResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &canceled); err != nil {
+		t.Fatal(err)
+	}
+	if canceled.Status != store.MarketListingCanceled {
+		t.Fatalf("canceled = %+v", canceled)
+	}
+	stashItems, err = db.ListAccountStashItems(ctx, accountID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stashItems) != 1 || stashItems[0].StashItemID != "stash_route_item" {
+		t.Fatalf("stash after cancel = %+v", stashItems)
+	}
+}
+
 func TestCharactersAreAccountScoped(t *testing.T) {
 	h := fullServer(t)
 	_, tokenA := loginEmail(t, h, "characters-account-a@example.test")

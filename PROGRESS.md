@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v67 — `boss-kill-reward-polish` |
+| **Latest completed slice** | v68 — `market-stash-listing-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -86,6 +86,7 @@ v64_* = mystery-seller-paid-reroll
 v65_* = stash-search-and-sorting
 v66_* = progress-backlog-hygiene
 v67_* = boss-kill-reward-polish
+v68_* = market-stash-listing-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -193,6 +194,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v65** | `stash-search-and-sorting` | Complete (`make ci` green) | [`v65_spec-stash-search-and-sorting.md`](docs/specs/v65_spec-stash-search-and-sorting.md) | [`v65_2026-06-11-stash-search-and-sorting.md`](docs/plans/v65_2026-06-11-stash-search-and-sorting.md) | [`as-built`](docs/as-built/v65_stash-search-and-sorting.md) |
 | **v66** | `progress-backlog-hygiene` | Complete (`make ci` green) | [`v66_spec-progress-backlog-hygiene.md`](docs/specs/v66_spec-progress-backlog-hygiene.md) | [`v66_2026-06-11-progress-backlog-hygiene.md`](docs/plans/v66_2026-06-11-progress-backlog-hygiene.md) | [`as-built`](docs/as-built/v66_progress-backlog-hygiene.md) |
 | **v67** | `boss-kill-reward-polish` | Complete (`make ci` green) | [`v67_spec-boss-kill-reward-polish.md`](docs/specs/v67_spec-boss-kill-reward-polish.md) | [`v67_2026-06-11-boss-kill-reward-polish.md`](docs/plans/v67_2026-06-11-boss-kill-reward-polish.md) | [`as-built`](docs/as-built/v67_boss-kill-reward-polish.md) |
+| **v68** | `market-stash-listing-foundation` | Complete (`make ci` green) | [`v68_spec-market-stash-listing-foundation.md`](docs/specs/v68_spec-market-stash-listing-foundation.md) | [`v68_2026-06-11-market-stash-listing-foundation.md`](docs/plans/v68_2026-06-11-market-stash-listing-foundation.md) | [`as-built`](docs/as-built/v68_market-stash-listing-foundation.md) |
 
 ---
 
@@ -285,6 +287,7 @@ join_game_listed_session: protocol host holds active listed co-op session → Go
 coop_rewards_and_scaling: compact three-account co-op → nearby host/guest share full XP → out-of-range guest excluded → replay/fresh persistence; different-level exclusion stays in lower-level tests
 gold_autopickup_shared_loot: compact co-op loot lab → shared floor gold race → lowest player id wins private wallet update → item loot still requires click
 account_stash_storage: acquire dungeon loot/gold → open town stash → deposit/withdraw item and gold → replay/reconnect/state/fresh session persistence
+market_stash_listing_foundation: HTTP/store proof creates active market listing from stash item → browse active listings → reject foreign cancel → cancel back to stash
 client_account_stash_panel: headless Godot client opens stash → verifies bag/stash item sync → deposits/withdraws item and gold
 ranged_monster_ai: compact archer lab → assert dungeon_archer → observe archer-sourced ranged player damage; generated archer placement stays in lower-level/client coverage
 client_ranged_monster_ai: headless Godot client descends to generated dungeon → asserts bow marker → observes ranged player damage
@@ -581,6 +584,11 @@ narrowing deferred backlog text to still-open adjacent work.
 exit-unlock flow. The Godot client now exposes a `Cave Warden defeated` reward status, and protocol
 plus client bot coverage prove the boss-specific signal.
 
+**Market listings now have a stash-backed foundation.** v68 adds active/canceled market listing
+persistence and authenticated HTTP routes to create a listing from an account stash item, browse
+active listings, and cancel an owned listing back to stash. Offers, purchases, pricing, expiration,
+and Godot market UI remain deferred.
+
 ### Other deferred items (from specs / ADRs)
 
 | Area | Deferred item | Source |
@@ -588,7 +596,7 @@ plus client bot coverage prove the boss-specific signal.
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
-| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
+| Economy / trade | Market offers/purchases, gold/resource pricing, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations beyond listing-row removal, atomic buyer/seller ownership transfer, stash delivery for purchases, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, and production boss health bar art/audio | v53/v57/v58 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |

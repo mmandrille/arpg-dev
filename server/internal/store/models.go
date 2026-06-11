@@ -131,6 +131,25 @@ type AccountStashGold struct {
 	UpdatedAt time.Time
 }
 
+const (
+	MarketListingActive   = "active"
+	MarketListingCanceled = "canceled"
+)
+
+// MarketListing is a durable seller listing backed by one former stash item.
+type MarketListing struct {
+	ID                string
+	SellerAccountID   string
+	StashItemID       string
+	SourceCharacterID string
+	ItemDefID         string
+	RolledStats       json.RawMessage
+	Status            string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	CanceledAt        *time.Time
+}
+
 // CharacterWaypoint is a durable unlocked waypoint level for a character.
 type CharacterWaypoint struct {
 	CharacterID  string

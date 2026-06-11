@@ -3201,8 +3201,6 @@ func _try_use_right_click_skill() -> bool:
 	else:
 		direction = _aim_direction_from_mouse()
 	var sent := _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
-	if sent and right_click_skill_id == "heal":
-		_spawn_heal_rain_at_position(_mouse_ground_point())
 	return sent
 
 

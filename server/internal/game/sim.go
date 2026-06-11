@@ -2985,6 +2985,19 @@ func skillEffectPercent(effect SkillEffectDef, rank int) int {
 	return percent
 }
 
+func skillCastRange(def SkillDef) float64 {
+	if def.Projectile.Range > 0 {
+		return def.Projectile.Range
+	}
+	castRange := 0.0
+	for _, effect := range def.Effects {
+		if effect.Range > castRange {
+			castRange = effect.Range
+		}
+	}
+	return castRange
+}
+
 func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
 	if player == nil {
 		return
@@ -3057,11 +3070,11 @@ func (s *Sim) skillAreaCenter(effect SkillEffectDef, cast *CastSkillIntent, play
 		if target == nil || (target.kind != monsterEntity && target.kind != playerEntity) || target.hp <= 0 {
 			return Vec2{}, "invalid_target"
 		}
-		if target.kind == monsterEntity {
-			return target.pos, ""
-		}
 		if distance(player.pos, target.pos) > effect.Range+meleeRangeEpsilon {
 			return Vec2{}, "target_out_of_range"
+		}
+		if target.kind == monsterEntity {
+			return target.pos, ""
 		}
 		return target.pos, ""
 	}
@@ -3528,7 +3541,7 @@ func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 	return Vec2{}, nil, false
 }
 
-func (s *Sim) findSkillCastApproachGoal(target *entity, def SkillDef) (Vec2, []Vec2, bool) {
+func (s *Sim) findSkillCastApproachGoal(target *entity, castRange float64, requireClearShot bool) (Vec2, []Vec2, bool) {
 	player := s.activeLevel().entities[s.playerID]
 	if player == nil || target == nil {
 		return Vec2{}, nil, false
@@ -3547,7 +3560,10 @@ func (s *Sim) findSkillCastApproachGoal(target *entity, def SkillDef) (Vec2, []V
 			}
 			goal := gridToWorld(nav, cell)
 			dist := distance(goal, target.pos)
-			if dist > def.Projectile.Range+meleeRangeEpsilon || !s.hasClearRangedShot(goal, target) {
+			if dist > castRange+meleeRangeEpsilon {
+				continue
+			}
+			if requireClearShot && !s.hasClearRangedShot(goal, target) {
 				continue
 			}
 			steps, ok := PlanPath(nav, player.pos, goal, blocked)

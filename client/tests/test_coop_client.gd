@@ -801,31 +801,6 @@ func _test_player_healed_spawns_heal_rain() -> void:
 	main.walls_root.queue_free()
 	main.queue_free()
 
-	var cast_only = _make_main()
-	cast_only.player_id = "1001"
-	cast_only.player_anchor.position = Vector3(2.0, 0.0, 3.0)
-	cast_only.client_settings = ClientSettingsScript.new()
-	cast_only.damage_numbers_layer = CanvasLayer.new()
-	cast_only._camera = Camera3D.new()
-	root.add_child(cast_only.damage_numbers_layer)
-	root.add_child(cast_only._camera)
-	cast_only._camera.look_at_from_position(Vector3(2.0, 12.0, 13.0), cast_only.player_anchor.position, Vector3.UP)
-	cast_only._spawn_heal_rain_at_position(Vector3(6.0, 0.0, 7.0))
-	var cast_rain_count := 0
-	for child in cast_only.get_children():
-		if child.get_script() == HealRainEffectScript:
-			cast_rain_count += 1
-			_assert_float("heal cast rain radius", float(child.radius), MainScript.HEAL_RAIN_RADIUS)
-			_assert_float("heal cast rain x", float(child.position.x), 6.0)
-			_assert_float("heal cast rain z", float(child.position.z), 7.0)
-	_assert_eq("heal cast rain count", cast_rain_count, 1)
-	_assert_eq("heal cast does not show heal number", cast_only._bot_damage_numbers().size(), 0)
-	cast_only.damage_numbers_layer.queue_free()
-	cast_only._camera.queue_free()
-	cast_only.player_anchor.queue_free()
-	cast_only.entities_root.queue_free()
-	cast_only.walls_root.queue_free()
-	cast_only.queue_free()
 
 
 func _test_holy_shield_effect_ids_drive_world_shine() -> void:

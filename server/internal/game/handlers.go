@@ -1202,32 +1202,7 @@ func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entit
 	dir, targetID, rejectReason := s.skillCastDirection(def, in.CastSkill, player)
 	if rejectReason != "" {
 		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
-			target := s.findEntity(in.CastSkill.TargetID)
-			if target == nil || target.kind != monsterEntity || target.hp <= 0 {
-				res.reject(in.MessageID, "invalid_target")
-				return
-			}
-			_, steps, ok := s.findSkillCastApproachGoal(target, def)
-			if !ok {
-				res.reject(in.MessageID, "no_path")
-				return
-			}
-			if len(steps) > s.activeNav().MaxAutoSteps {
-				res.reject(in.MessageID, "path_too_long")
-				return
-			}
-			s.activeLevel().move = nil
-			s.activeLevel().autoNav = &autoNavState{
-				steps: steps,
-				pendingSkill: &CastSkillIntent{
-					SkillID:   in.CastSkill.SkillID,
-					TargetID:  in.CastSkill.TargetID,
-					Direction: cloneVec2Ptr(in.CastSkill.Direction),
-				},
-				sourceMsgID:  in.MessageID,
-				sourceCorrID: in.CorrelationID,
-			}
-			res.ack(in.MessageID)
+			s.beginSkillAutoNav(in, res, def.Projectile.Range, true)
 			return
 		}
 		res.reject(in.MessageID, rejectReason)
@@ -1262,6 +1237,10 @@ func (s *Sim) handleSelfBuffSkillCast(in Input, res *TickResult, player *entity,
 func (s *Sim) handleAreaHealSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
 	applications, rejectReason := s.areaHealApplications(player, def, rank, in.CastSkill)
 	if rejectReason != "" {
+		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
+			s.beginSkillAutoNav(in, res, skillCastRange(def), false)
+			return
+		}
 		res.reject(in.MessageID, rejectReason)
 		return
 	}
@@ -1280,6 +1259,10 @@ func (s *Sim) handleAreaHealSkillCast(in Input, res *TickResult, player *entity,
 func (s *Sim) handleAreaStatBuffSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
 	applications, rejectReason := s.areaStatBuffApplications(player, def, rank, in.CastSkill)
 	if rejectReason != "" {
+		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
+			s.beginSkillAutoNav(in, res, skillCastRange(def), false)
+			return
+		}
 		res.reject(in.MessageID, rejectReason)
 		return
 	}
@@ -1297,5 +1280,38 @@ func (s *Sim) handleAreaStatBuffSkillCast(in Input, res *TickResult, player *ent
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) beginSkillAutoNav(in Input, res *TickResult, castRange float64, requireClearShot bool) {
+	if in.CastSkill == nil || in.CastSkill.TargetID == "" {
+		res.reject(in.MessageID, "invalid_target")
+		return
+	}
+	target := s.findEntity(in.CastSkill.TargetID)
+	if target == nil || (target.kind != monsterEntity && target.kind != playerEntity) || target.hp <= 0 {
+		res.reject(in.MessageID, "invalid_target")
+		return
+	}
+	_, steps, ok := s.findSkillCastApproachGoal(target, castRange, requireClearShot)
+	if !ok {
+		res.reject(in.MessageID, "no_path")
+		return
+	}
+	if len(steps) > s.activeNav().MaxAutoSteps {
+		res.reject(in.MessageID, "path_too_long")
+		return
+	}
+	s.activeLevel().move = nil
+	s.activeLevel().autoNav = &autoNavState{
+		steps: steps,
+		pendingSkill: &CastSkillIntent{
+			SkillID:   in.CastSkill.SkillID,
+			TargetID:  in.CastSkill.TargetID,
+			Direction: cloneVec2Ptr(in.CastSkill.Direction),
+		},
+		sourceMsgID:  in.MessageID,
+		sourceCorrID: in.CorrelationID,
+	}
 	res.ack(in.MessageID)
 }

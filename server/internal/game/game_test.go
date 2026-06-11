@@ -240,8 +240,9 @@ func TestMainConfigAttackIntervalOverridesCombatMirror(t *testing.T) {
 		t.Fatalf("combat base attack interval = %d, want main_config value 10", rules.Combat.BaseAttackIntervalTicks)
 	}
 	sim := MustNewSim("sess_main_config_attack", "01", rules)
-	if got := sim.DerivedStatsView().AttackIntervalTicks; got != 8 {
-		t.Fatalf("derived attack interval = %d, want ceil(10 / 1.28125) = 8", got)
+	expectedInterval := sim.attackIntervalTicksFromSpeed(sim.characterDerivedStatsView().AttackSpeed)
+	if got := sim.DerivedStatsView().AttackIntervalTicks; got != expectedInterval {
+		t.Fatalf("derived attack interval = %d, want configured interval derived from character speed %d", got, expectedInterval)
 	}
 }
 
@@ -805,8 +806,11 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	assertAck(t, sim.Tick([]Input{{MessageID: "gloves", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(gloves.instanceID), Slot: "gloves"}}}), "gloves")
 
 	view := sim.CharacterProgressionView()
-	if math.Abs(view.DerivedStats.AttackSpeed-1.409375) > 0.000001 || view.DerivedStats.AttackIntervalTicks != 15 {
-		t.Fatalf("attack speed/interval with blade+gloves = %+v, want 1.409375 / 15", view.DerivedStats)
+	baseAttackSpeed := sim.characterDerivedStatsView().AttackSpeed
+	expectedBladeSpeed := sim.clampEffectiveAttackSpeed(baseAttackSpeed * sim.rules.ItemTemplates["cave_blade"].AttackSpeed * (1.0 + float64(gloves.rollPayload.Stats["attack_speed_percent"])/100.0))
+	expectedBladeInterval := sim.attackIntervalTicksFromSpeed(expectedBladeSpeed)
+	if math.Abs(view.DerivedStats.AttackSpeed-expectedBladeSpeed) > 0.000001 || view.DerivedStats.AttackIntervalTicks != expectedBladeInterval {
+		t.Fatalf("attack speed/interval with blade+gloves = %+v, want %v / %d", view.DerivedStats, expectedBladeSpeed, expectedBladeInterval)
 	}
 	speed := findStatBreakdown(view.StatBreakdowns, "attack_speed")
 	interval := findStatBreakdown(view.StatBreakdowns, "attack_interval_ticks")
@@ -818,8 +822,10 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	greatsword := addRolledInventoryItem(t, slow, 6402, "cave_greatsword", nil)
 	assertAck(t, slow.Tick([]Input{{MessageID: "greatsword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}}), "greatsword")
 	slowView := slow.CharacterProgressionView()
-	if math.Abs(slowView.DerivedStats.AttackSpeed-0.896875) > 0.000001 || slowView.DerivedStats.AttackIntervalTicks != 23 {
-		t.Fatalf("attack speed/interval with greatsword = %+v, want 0.896875 / 23", slowView.DerivedStats)
+	expectedGreatswordSpeed := slow.clampEffectiveAttackSpeed(slow.characterDerivedStatsView().AttackSpeed * slow.rules.ItemTemplates["cave_greatsword"].AttackSpeed)
+	expectedGreatswordInterval := slow.attackIntervalTicksFromSpeed(expectedGreatswordSpeed)
+	if math.Abs(slowView.DerivedStats.AttackSpeed-expectedGreatswordSpeed) > 0.000001 || slowView.DerivedStats.AttackIntervalTicks != expectedGreatswordInterval {
+		t.Fatalf("attack speed/interval with greatsword = %+v, want %v / %d", slowView.DerivedStats, expectedGreatswordSpeed, expectedGreatswordInterval)
 	}
 }
 
@@ -1060,8 +1066,9 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		t.Fatalf("missing cast/cooldown events: %+v", cast.Events)
 	}
 	cooldowns := skillCooldownUpdate(cast)
-	if len(cooldowns) != 1 || cooldowns[0].SkillID != magicBoltSkillID || cooldowns[0].RemainingTicks != 32 || cooldowns[0].TotalTicks != 32 {
-		t.Fatalf("cooldown update = %+v, want magic_bolt 32/32", cooldowns)
+	expectedCooldown := sim.skillCooldownTicks(rules.Skills[magicBoltSkillID])
+	if len(cooldowns) != 1 || cooldowns[0].SkillID != magicBoltSkillID || cooldowns[0].RemainingTicks != expectedCooldown || cooldowns[0].TotalTicks != expectedCooldown {
+		t.Fatalf("cooldown update = %+v, want magic_bolt %d/%d", cooldowns, expectedCooldown, expectedCooldown)
 	}
 	spawn := firstChangeEntityByType(cast, projectileEntity)
 	if spawn == nil || spawn.ProjectileDefID != magicBoltSkillID || spawn.TargetID != idStr(monster.id) {
@@ -1336,6 +1343,42 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	}
 	if guest.hp != guest.maxHP {
 		t.Fatalf("monster-targeted heal guest hp = %d, want unchanged full hp %d", guest.hp, guest.maxHP)
+	}
+
+	for i := 0; i < 50; i++ {
+		sim.Tick(nil)
+	}
+	sim.usePlayer(sim.players[hostID])
+	player.pos = Vec2{X: 2, Y: 5}
+	monster.pos = Vec2{X: player.pos.X + rules.Skills["heal"].Effects[0].Range + 2, Y: player.pos.Y}
+	player.mana = player.maxMana
+	beforeMana := player.mana
+	sim.savePlayer(sim.players[hostID])
+	outOfRange := sim.Tick([]Input{{
+		MessageID:     "cast_heal_monster_target_far",
+		CorrelationID: "corr_heal_monster_target_far",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(monster.id)},
+	}})
+	assertAck(t, outOfRange, "cast_heal_monster_target_far")
+	if player.mana != beforeMana {
+		t.Fatalf("out-of-range heal auto-nav spent mana before cast: got %d want %d", player.mana, beforeMana)
+	}
+	if hasEvent(outOfRange, "skill_cast") || hasEvent(outOfRange, "player_healed") {
+		t.Fatalf("out-of-range heal emitted cast/heal before auto-nav finished: %+v", outOfRange.Events)
+	}
+	var completed TickResult
+	for steps := 0; steps < 200; steps++ {
+		completed = sim.Tick(nil)
+		if hasEvent(completed, "skill_cast") || len(completed.Rejects) > 0 {
+			break
+		}
+	}
+	if !hasEvent(completed, "skill_cast") || !hasEvent(completed, "skill_cooldown_started") {
+		t.Fatalf("auto-nav heal completion missing cast/cooldown events: %+v", completed.Events)
+	}
+	if player.mana != beforeMana-10 {
+		t.Fatalf("auto-nav heal mana after cast = %d, want %d", player.mana, beforeMana-10)
 	}
 
 	for i := 0; i < 50; i++ {

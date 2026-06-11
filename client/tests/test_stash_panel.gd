@@ -25,6 +25,8 @@ func _run() -> void:
 
 	var stash_items := [
 		{"stash_item_id": "9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "rolled_stats": {"damage_min": 2, "damage_max": 2}, "summary_lines": ["Slot: Main hand", "Damage 2-2"]},
+		{"stash_item_id": "9002", "item_def_id": "cave_ring", "item_template_id": "cave_ring", "display_name": "Rare Cave Ring", "rarity": "rare", "slot": "ring", "rolled_stats": {"max_hp": 4}, "summary_lines": ["Slot: Ring", "Maximum Health +4"]},
+		{"stash_item_id": "9003", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
 	]
 	var inventory := [
 		{"item_instance_id": "2001", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Magic Cave Blade", "rarity": "magic", "slot": "main_hand", "rolled_stats": {"damage_min": 3, "damage_max": 7}, "summary_lines": ["Slot: Main hand", "Damage 3-7"]},
@@ -34,7 +36,8 @@ func _run() -> void:
 	panel.show_stash("1005", "account_stash", stash_items, 3, 50, inventory, {}, 7, [], "Account Stash")
 	var state := panel.get_debug_state()
 	_assert_true("panel visible", bool(state.get("visible", false)))
-	_assert_eq("stash item count", int(state.get("stash_item_count", 0)), 1)
+	_assert_eq("stash item count", int(state.get("stash_item_count", 0)), 3)
+	_assert_eq("filtered stash item count", int(state.get("filtered_stash_item_count", 0)), 3)
 	_assert_eq("stash gold", int(state.get("stash_gold", 0)), 3)
 	_assert_eq("gold", int(state.get("gold", 0)), 7)
 	_assert_eq("capacity", int(state.get("stash_capacity", 0)), 50)
@@ -45,6 +48,23 @@ func _run() -> void:
 	_assert_true("gold withdraw enabled", bool(state.get("withdraw_gold_enabled", false)))
 	_assert_true("stash rows include summary", _rows_have_summary(state.get("stash_rows", [])))
 	_assert_true("stash panel opens on left side", panel._panel.offset_left <= 24.0)
+
+	panel.bot_set_search_text(" ring ")
+	state = panel.get_debug_state()
+	_assert_eq("search text trimmed", str(state.get("stash_search_text", "")), "ring")
+	_assert_eq("search filters ring", int(state.get("filtered_stash_item_count", 0)), 1)
+	_assert_eq("filtered row is ring", str((state.get("stash_rows", [])[0] as Dictionary).get("item_def_id", "")), "cave_ring")
+
+	panel.bot_select_sort_mode("rarity")
+	state = panel.get_debug_state()
+	_assert_eq("sort mode rarity", str(state.get("stash_sort_mode", "")), "rarity")
+	_assert_eq("filtered sort preserves ring", str((state.get("stash_rows", [])[0] as Dictionary).get("stash_item_id", "")), "9002")
+
+	panel.bot_set_search_text("")
+	panel.bot_select_sort_mode("name")
+	state = panel.get_debug_state()
+	_assert_eq("search cleared count", int(state.get("filtered_stash_item_count", 0)), 3)
+	_assert_eq("name sort first bow", str((state.get("stash_rows", [])[0] as Dictionary).get("item_def_id", "")), "cave_bow")
 
 	panel.bot_drag_bag_to_stash("", true, 0)
 	_assert_eq("deposit emitted count", emitted.size(), 1)
@@ -57,10 +77,16 @@ func _run() -> void:
 	_assert_eq("withdraw emitted type", str(emitted[1]["type"]), "stash_withdraw_item_intent")
 	_assert_eq("withdraw emitted item", str(emitted[1]["payload"].get("stash_item_id", "")), "9001")
 
+	panel.bot_set_search_text("ring")
+	panel.bot_drag_stash_to_bag("", "", true, 0)
+	_assert_eq("filtered withdraw emitted count", emitted.size(), 3)
+	_assert_eq("filtered withdraw emitted item", str(emitted[2]["payload"].get("stash_item_id", "")), "9002")
+	panel.bot_set_search_text("")
+
 	panel._handle_drop_on_stash({"source": "bag", "item": inventory[0]})
-	_assert_eq("bag drag to stash emitted count", emitted.size(), 3)
-	_assert_eq("bag drag to stash type", str(emitted[2]["type"]), "stash_deposit_item_intent")
-	_assert_eq("bag drag to stash item", str(emitted[2]["payload"].get("item_instance_id", "")), "2001")
+	_assert_eq("bag drag to stash emitted count", emitted.size(), 4)
+	_assert_eq("bag drag to stash type", str(emitted[3]["type"]), "stash_deposit_item_intent")
+	_assert_eq("bag drag to stash item", str(emitted[3]["payload"].get("item_instance_id", "")), "2001")
 
 	var inventory_panel := InventoryPanelScript.new()
 	root.add_child(inventory_panel)
@@ -80,14 +106,14 @@ func _run() -> void:
 	inventory_panel.queue_free()
 
 	panel.bot_click_deposit_gold(1)
-	_assert_eq("deposit gold emitted count", emitted.size(), 4)
-	_assert_eq("deposit gold type", str(emitted[3]["type"]), "stash_deposit_gold_intent")
-	_assert_eq("deposit gold amount", int(emitted[3]["payload"].get("amount", 0)), 1)
+	_assert_eq("deposit gold emitted count", emitted.size(), 5)
+	_assert_eq("deposit gold type", str(emitted[4]["type"]), "stash_deposit_gold_intent")
+	_assert_eq("deposit gold amount", int(emitted[4]["payload"].get("amount", 0)), 1)
 
 	panel.bot_click_withdraw_gold(1)
-	_assert_eq("withdraw gold emitted count", emitted.size(), 5)
-	_assert_eq("withdraw gold type", str(emitted[4]["type"]), "stash_withdraw_gold_intent")
-	_assert_eq("withdraw gold amount", int(emitted[4]["payload"].get("amount", 0)), 1)
+	_assert_eq("withdraw gold emitted count", emitted.size(), 6)
+	_assert_eq("withdraw gold type", str(emitted[5]["type"]), "stash_withdraw_gold_intent")
+	_assert_eq("withdraw gold amount", int(emitted[5]["payload"].get("amount", 0)), 1)
 
 	panel.set_stash_state([], 0, 50)
 	panel.set_inventory_state([inventory[0]], {"main_hand": "2001"}, 0, [])

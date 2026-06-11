@@ -4,6 +4,7 @@ extends Control
 signal allocate_stat_requested(stat: String)
 
 const StatLabels := preload("res://scripts/stat_labels.gd")
+const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const BASE_STATS := StatLabels.BASE_STATS
 const DERIVED_LABELS := {
 	"damage_min": "Damage min",
@@ -26,7 +27,7 @@ const WHOLE_PERCENT_STATS := ["block_percent"]
 
 var progression: Dictionary = {}
 var allocation_enabled: bool = false
-var _panel: PanelContainer
+var _panel: DraggableWindow
 var _level_label: Label
 var _xp_label: Label
 var _points_label: Label
@@ -88,6 +89,7 @@ func get_debug_state() -> Dictionary:
 		"stat_buttons": stat_buttons,
 		"derived_labels": derived_labels,
 		"stat_breakdowns": _breakdowns_by_key(),
+		"window": _panel.get_debug_state() if _panel != null else {},
 	}
 
 
@@ -98,29 +100,35 @@ func bot_click_stat_button(stat: String) -> void:
 	btn.pressed.emit()
 
 
+func bot_click_close() -> void:
+	if _panel != null and _panel.close_button() != null:
+		_panel.close_button().pressed.emit()
+
+
+func bot_drag_window_by(delta: Vector2) -> void:
+	if _panel != null:
+		_panel.bot_drag_by(delta)
+
+
 func _sync_viewport_size() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel = PanelContainer.new()
+	_panel = DraggableWindowScript.new()
 	_panel.custom_minimum_size = Vector2(330, 500)
 	_panel.position = Vector2(16, 118)
+	_panel.configure("Character", Vector2(304, 436))
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.close_requested.connect(hide_display)
 	add_child(_panel)
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
-	root.custom_minimum_size = Vector2(304, 470)
-	_panel.add_child(root)
-
-	var title := Label.new()
-	title.text = "Character"
-	title.add_theme_font_size_override("font_size", 33)
-	title.add_theme_color_override("font_color", Color("#f0dfbb"))
-	root.add_child(title)
+	root.custom_minimum_size = Vector2(304, 436)
+	_panel.set_content(root)
 
 	_level_label = _value_label()
 	_xp_label = _value_label()

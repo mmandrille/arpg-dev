@@ -47,6 +47,7 @@ func _initialize() -> void:
 	_test_status_text_toggle_hides_left_debug_not_level_hud()
 	_test_player_hud_identity_uses_character_name_and_level()
 	_test_character_stats_probability_values_use_percentages()
+	_test_character_stats_window_chrome()
 	_test_actionable_panels_autoclose_out_of_range()
 	_test_movement_closes_gameplay_panels()
 
@@ -436,6 +437,31 @@ func _test_character_stats_probability_values_use_percentages() -> void:
 	_assert_eq("crit chance displays percent", str(labels.get("crit_chance", "")), "Crit chance  6%")
 	_assert_eq("block chance displays percent", str(labels.get("block_percent", "")), "Block  75%")
 	panel.free()
+
+
+func _test_character_stats_window_chrome() -> void:
+	var panel = CharacterStatsPanelScript.new()
+	root.add_child(panel)
+	panel._build()
+	panel.ensure_display_visible()
+	var state: Dictionary = panel.get_debug_state()
+	var window: Dictionary = state.get("window", {})
+	_assert_eq("stats window title", str(window.get("title", "")), "Character")
+	_assert_true("stats window has close button", bool(window.get("close_visible", false)))
+	_assert_true("stats window is draggable", bool(window.get("draggable", false)))
+	panel.bot_drag_window_by(Vector2(32, 18))
+	state = panel.get_debug_state()
+	var moved_position: Dictionary = (state.get("window", {}) as Dictionary).get("position", {})
+	_assert_eq("stats drag moved x", int(moved_position.get("x", 0)), 48)
+	_assert_eq("stats drag moved y", int(moved_position.get("y", 0)), 136)
+	panel.bot_drag_window_by(Vector2(-10000, -10000))
+	state = panel.get_debug_state()
+	var clamped_position: Dictionary = (state.get("window", {}) as Dictionary).get("position", {})
+	_assert_eq("stats drag clamps x", int(clamped_position.get("x", -1)), 0)
+	_assert_eq("stats drag clamps y", int(clamped_position.get("y", -1)), 0)
+	panel.bot_click_close()
+	_assert_true("stats close button hides panel", not panel.visible)
+	panel.queue_free()
 
 
 func _test_actionable_panels_autoclose_out_of_range() -> void:

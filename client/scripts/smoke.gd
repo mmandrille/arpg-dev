@@ -372,6 +372,20 @@ func _verify_inventory_panel_model() -> bool:
 	if int(state["bag_count"]) != 2 or state["equipped_main_hand"] != null:
 		_fail("inventory panel initial state mismatch: %s" % state)
 		return false
+	var window: Dictionary = state.get("window", {})
+	if str(window.get("title", "")) != "Inventory" or not bool(window.get("close_visible", false)) or not bool(window.get("draggable", false)):
+		_fail("inventory panel window chrome mismatch: %s" % state)
+		return false
+	panel.bot_drag_window_by(Vector2(30, 20))
+	state = panel.get_debug_state()
+	var moved_position: Dictionary = (state.get("window", {}) as Dictionary).get("position", {})
+	if int(moved_position.get("x", 0)) <= 0 or int(moved_position.get("y", 0)) <= 0:
+		_fail("inventory panel drag mismatch: %s" % state)
+		return false
+	panel.bot_click_close()
+	if panel.visible:
+		_fail("inventory panel close mismatch: %s" % state)
+		return false
 	var paper_slots: Dictionary = state["paper_doll_slots"]
 	if float(paper_slots["ring_left"]["position"]["x"]) != float(paper_slots["main_hand"]["position"]["x"]) \
 			or float(paper_slots["ring_left"]["position"]["y"]) <= float(paper_slots["main_hand"]["position"]["y"]) \

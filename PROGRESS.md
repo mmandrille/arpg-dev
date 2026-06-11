@@ -12,12 +12,12 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v78 — `main-config-drop-profiles` |
+| **Latest completed slice** | v80 — `combat-threat-readability` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
-| **Last engineering review** | v70 — [`docs/reviews/20260611_v70-overview.md`](docs/reviews/20260611_v70-overview.md) (2026-06-11) |
-| **Next engineering review** | v80 (~every 10 slices) |
+| **Last engineering review** | v80 — [`docs/reviews/20260611_v80-overview.md`](docs/reviews/20260611_v80-overview.md) (2026-06-11) |
+| **Next engineering review** | v90 (~every 10 slices) |
 
 ### Slice numbering note
 
@@ -95,6 +95,10 @@ v73_* = draggable-window-foundation
 v74_* = gameplay-window-chrome
 v75_* = persistent-window-layout
 v76_* = main-config-foundation
+v77_* = main-config-derived-gameplay
+v78_* = main-config-drop-profiles
+v79_* = elite-pack-roles
+v80_* = combat-threat-readability
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -213,6 +217,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v76** | `main-config-foundation` | Complete (`make ci` green) | [`v76_spec-main-config-foundation.md`](docs/specs/v76_spec-main-config-foundation.md) | [`v76_2026-06-11-main-config-foundation.md`](docs/plans/v76_2026-06-11-main-config-foundation.md) | [`as-built`](docs/as-built/v76_main-config-foundation.md) |
 | **v77** | `main-config-derived-gameplay` | Complete (`make ci` green) | [`v77_spec-main-config-derived-gameplay.md`](docs/specs/v77_spec-main-config-derived-gameplay.md) | [`v77_2026-06-11-main-config-derived-gameplay.md`](docs/plans/v77_2026-06-11-main-config-derived-gameplay.md) | [`as-built`](docs/as-built/v77_main-config-derived-gameplay.md) |
 | **v78** | `main-config-drop-profiles` | Complete (`make ci` green) | [`v78_spec-main-config-drop-profiles.md`](docs/specs/v78_spec-main-config-drop-profiles.md) | [`v78_2026-06-11-main-config-drop-profiles.md`](docs/plans/v78_2026-06-11-main-config-drop-profiles.md) | [`as-built`](docs/as-built/v78_main-config-drop-profiles.md) |
+| **v79** | `elite-pack-roles` | Complete (`make ci` green) | [`v79_spec-elite-pack-roles.md`](docs/specs/v79_spec-elite-pack-roles.md) | [`v79_2026-06-11-elite-pack-roles.md`](docs/plans/v79_2026-06-11-elite-pack-roles.md) | [`as-built`](docs/as-built/v79_elite-pack-roles.md) |
+| **v80** | `combat-threat-readability` | Complete (`make ci` green) | [`v80_spec-combat-threat-readability.md`](docs/specs/v80_spec-combat-threat-readability.md) | [`v80_2026-06-11-combat-threat-readability.md`](docs/plans/v80_2026-06-11-combat-threat-readability.md) | [`as-built`](docs/as-built/v80_combat-threat-readability.md) |
 
 ---
 
@@ -659,12 +665,21 @@ class.
 
 **Generated dungeon fights now form packs.** The pack-aggro slice adds data-driven pack sizing,
 monster assist radius, deterministic close pack placement, and a protocol bot proof that damaging
-one generated monster can emit multiple `monster_aggro` events. The existing v78 latest-completed
-status remains canonical because v76-v78 main-config slices already landed on this branch.
+one generated monster can emit multiple `monster_aggro` events. This landed after the already-used
+v76-v78 main-config slice numbers, so the as-built/spec files retain the requested v76 label while
+the canonical lifecycle continues through v79/v80.
 
 **Generated packs now have role and leader foundations.** v79 adds internal pack roles, pack
 composition constraints, and deterministic elite leader markers so future elite behavior can build
 on structured encounters without exposing new protocol fields yet.
+
+**Combat threat readability is now visible.** v80 maps existing authoritative `monster_aggro`
+events to display-only `AGGRO` floating text in the Godot client, adds a `threat` damage-number
+variant, and proves it with client unit, focused client-bot, and protocol pack-aggro coverage.
+
+**v80 engineering review steering.** The v80 review keeps the repo at 8.4/10 overall and recommends
+small follow-ups for realtime fanout level snapshotting, combat event presenter extraction,
+defensive client payload parsing, and splitting the largest Python validation/bot files by domain.
 
 ### Other deferred items (from specs / ADRs)
 

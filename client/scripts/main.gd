@@ -1107,6 +1107,9 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "boss_phase_ended" and entities.has(eid):
 			_apply_boss_phase_ended(eid, ev)
 			continue
+		if event_type == "monster_aggro":
+			_show_damage_number(eid, Color("#80ff8f"), null, "", 0.0, "threat", "AGGRO")
+			continue
 		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
 			if event_type == "attack_missed":

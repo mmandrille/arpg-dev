@@ -37,6 +37,7 @@ func _initialize() -> void:
 	_test_capacity_reject_shows_bag_full_unequip_message()
 	_test_no_mana_reject_shows_floating_text()
 	_test_skill_cooldown_reject_shows_floating_text()
+	_test_monster_aggro_shows_threat_floating_text()
 	_test_player_healed_spawns_heal_rain()
 	_test_local_attack_range_uses_equipped_reach()
 	_test_basic_attack_cooldown_uses_derived_interval()
@@ -722,6 +723,54 @@ func _test_skill_cooldown_reject_shows_floating_text() -> void:
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
+
+
+func _test_monster_aggro_shows_threat_floating_text() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.client_settings = ClientSettingsScript.new()
+	main.damage_numbers_layer = CanvasLayer.new()
+	main._camera = Camera3D.new()
+	var monster := Node3D.new()
+	monster.position = Vector3(4.0, 0.0, 4.0)
+	main.entities_root.add_child(monster)
+	main.entities["2001"] = {"node": monster, "type": "monster", "hp": 5}
+	root.add_child(main.damage_numbers_layer)
+	root.add_child(main._camera)
+	main._camera.look_at_from_position(Vector3(4.0, 12.0, 14.0), monster.position, Vector3.UP)
+	main._apply_delta({"events": [{"event_type": "monster_aggro", "entity_id": "2001"}], "changes": []})
+	var numbers := main._bot_damage_numbers()
+	_assert_eq("aggro floating text count", numbers.size(), 1)
+	_assert_eq("aggro floating text", str((numbers[0] as Dictionary).get("text", "")), "AGGRO")
+	_assert_eq("aggro floating text variant", str((numbers[0] as Dictionary).get("variant", "")), "threat")
+	main.damage_numbers_layer.queue_free()
+	main._camera.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+	var disabled = _make_main()
+	disabled.player_id = "1001"
+	disabled.client_settings = ClientSettingsScript.new()
+	disabled.client_settings.floating_combat_text = false
+	disabled.damage_numbers_layer = CanvasLayer.new()
+	disabled._camera = Camera3D.new()
+	var disabled_monster := Node3D.new()
+	disabled_monster.position = Vector3(4.0, 0.0, 4.0)
+	disabled.entities_root.add_child(disabled_monster)
+	disabled.entities["2001"] = {"node": disabled_monster, "type": "monster", "hp": 5}
+	root.add_child(disabled.damage_numbers_layer)
+	root.add_child(disabled._camera)
+	disabled._camera.look_at_from_position(Vector3(4.0, 12.0, 14.0), disabled_monster.position, Vector3.UP)
+	disabled._apply_delta({"events": [{"event_type": "monster_aggro", "entity_id": "2001"}], "changes": []})
+	_assert_eq("disabled aggro floating text count", disabled._bot_damage_numbers().size(), 0)
+	disabled.damage_numbers_layer.queue_free()
+	disabled._camera.queue_free()
+	disabled.player_anchor.queue_free()
+	disabled.entities_root.queue_free()
+	disabled.walls_root.queue_free()
+	disabled.free()
 
 
 func _test_player_healed_spawns_heal_rain() -> void:

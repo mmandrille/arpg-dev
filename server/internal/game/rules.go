@@ -109,6 +109,7 @@ type DungeonGenerationRules struct {
 	ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 	BossFloor                BossFloorRules           `json:"boss_floor"`
 	MonsterRarityNote        string                   `json:"monster_rarity_note"`
+	MonsterDepthScaling      MonsterDepthScalingRules `json:"monster_depth_scaling"`
 	MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 	LootBandNote             string                   `json:"loot_band_note"`
 	LootBands                []DungeonLootBand        `json:"loot_bands"`
@@ -267,14 +268,34 @@ type DungeonLootBand struct {
 }
 
 type MonsterRarityDef struct {
-	ID               string  `json:"id"`
-	Weight           int     `json:"weight"`
-	Color            string  `json:"color"`
-	HPMultiplier     float64 `json:"hp_multiplier"`
-	DamageMultiplier float64 `json:"damage_multiplier"`
-	XPMultiplier     float64 `json:"xp_multiplier"`
-	LootDepthOffset  int     `json:"loot_depth_offset"`
-	VisualScale      float64 `json:"visual_scale"`
+	ID                       string  `json:"id"`
+	Weight                   int     `json:"weight"`
+	Color                    string  `json:"color"`
+	HPMultiplier             float64 `json:"hp_multiplier"`
+	DamageMultiplier         float64 `json:"damage_multiplier"`
+	XPMultiplier             float64 `json:"xp_multiplier"`
+	ArmorMultiplier          float64 `json:"armor_multiplier"`
+	ArmorBonus               float64 `json:"armor_bonus"`
+	HitChanceBonus           float64 `json:"hit_chance_bonus"`
+	CritChanceBonus          float64 `json:"crit_chance_bonus"`
+	BlockPercentBonus        float64 `json:"block_percent_bonus"`
+	AttackCooldownMultiplier float64 `json:"attack_cooldown_multiplier"`
+	LootDepthOffset          int     `json:"loot_depth_offset"`
+	VisualScale              float64 `json:"visual_scale"`
+}
+
+type MonsterDepthScalingRules struct {
+	HPPerDepth                       float64 `json:"hp_per_depth"`
+	DamagePerDepth                   float64 `json:"damage_per_depth"`
+	ArmorPerDepth                    float64 `json:"armor_per_depth"`
+	HitChancePerDepth                float64 `json:"hit_chance_per_depth"`
+	MaxHitChance                     float64 `json:"max_hit_chance"`
+	CritChancePerDepth               float64 `json:"crit_chance_per_depth"`
+	MaxCritChance                    float64 `json:"max_crit_chance"`
+	BlockPercentPerDepth             float64 `json:"block_percent_per_depth"`
+	MaxBlockPercent                  float64 `json:"max_block_percent"`
+	AttackCooldownMultiplierPerDepth float64 `json:"attack_cooldown_multiplier_per_depth"`
+	MinAttackCooldownTicks           int     `json:"min_attack_cooldown_ticks"`
 }
 
 type BossTemplateDef struct {
@@ -1379,6 +1400,7 @@ func LoadRules(dir string) (*Rules, error) {
 		ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 		BossFloor                BossFloorRules           `json:"boss_floor"`
 		MonsterRarityNote        string                   `json:"monster_rarity_note"`
+		MonsterDepthScaling      MonsterDepthScalingRules `json:"monster_depth_scaling"`
 		MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 		LootBandNote             string                   `json:"loot_band_note"`
 		LootBands                []DungeonLootBand        `json:"loot_bands"`
@@ -1474,6 +1496,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if dungeonGeneration.MonsterRarityNote == "" {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_rarity_note: required")
 	}
+	if err := validateMonsterDepthScaling(dungeonGeneration.MonsterDepthScaling, r.Combat); err != nil {
+		return nil, err
+	}
 	if err := validateMonsterRarities(dungeonGeneration.MonsterRarities); err != nil {
 		return nil, err
 	}
@@ -1500,6 +1525,7 @@ func LoadRules(dir string) (*Rules, error) {
 		ObstacleGeneration:       dungeonGeneration.ObstacleGeneration,
 		BossFloor:                dungeonGeneration.BossFloor,
 		MonsterRarityNote:        dungeonGeneration.MonsterRarityNote,
+		MonsterDepthScaling:      dungeonGeneration.MonsterDepthScaling,
 		MonsterRarities:          dungeonGeneration.MonsterRarities,
 		LootBandNote:             dungeonGeneration.LootBandNote,
 		LootBands:                dungeonGeneration.LootBands,
@@ -1788,6 +1814,34 @@ func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) err
 	return nil
 }
 
+func validateMonsterDepthScaling(s MonsterDepthScalingRules, combat Combat) error {
+	if s.HPPerDepth < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.hp_per_depth: must be non-negative")
+	}
+	if s.DamagePerDepth < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.damage_per_depth: must be non-negative")
+	}
+	if s.ArmorPerDepth < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.armor_per_depth: must be non-negative")
+	}
+	if s.HitChancePerDepth < 0 || s.MaxHitChance <= 0 || s.MaxHitChance > 1 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.hit_chance: invalid per-depth or max")
+	}
+	if s.CritChancePerDepth < 0 || s.MaxCritChance < 0 || s.MaxCritChance > 1 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.crit_chance: invalid per-depth or max")
+	}
+	if s.BlockPercentPerDepth < 0 || s.MaxBlockPercent < 0 || s.MaxBlockPercent > float64(combat.BlockCap) {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.block_percent: invalid per-depth or max")
+	}
+	if s.AttackCooldownMultiplierPerDepth <= 0 || s.AttackCooldownMultiplierPerDepth > 1 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.attack_cooldown_multiplier_per_depth: must be > 0 and <= 1")
+	}
+	if s.MinAttackCooldownTicks <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_depth_scaling.min_attack_cooldown_ticks: must be positive")
+	}
+	return nil
+}
+
 func validateMonsterRarities(rarities []MonsterRarityDef) error {
 	expectedIDs := []string{"common", "champion", "rare", "unique"}
 	expectedWeights := map[string]int{
@@ -1835,6 +1889,24 @@ func validateMonsterRarities(rarities []MonsterRarityDef) error {
 		}
 		if rarity.XPMultiplier <= 0 {
 			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].xp_multiplier: must be positive", idx)
+		}
+		if rarity.ArmorMultiplier <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].armor_multiplier: must be positive", idx)
+		}
+		if rarity.ArmorBonus < 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].armor_bonus: must be non-negative", idx)
+		}
+		if rarity.HitChanceBonus < 0 || rarity.HitChanceBonus > 1 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].hit_chance_bonus: must be between 0 and 1", idx)
+		}
+		if rarity.CritChanceBonus < 0 || rarity.CritChanceBonus > 1 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].crit_chance_bonus: must be between 0 and 1", idx)
+		}
+		if rarity.BlockPercentBonus < 0 || rarity.BlockPercentBonus > 100 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].block_percent_bonus: must be between 0 and 100", idx)
+		}
+		if rarity.AttackCooldownMultiplier <= 0 || rarity.AttackCooldownMultiplier > 1 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].attack_cooldown_multiplier: must be > 0 and <= 1", idx)
 		}
 		if rarity.LootDepthOffset != expectedOffsets[rarity.ID] {
 			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].loot_depth_offset: expected %d", idx, expectedOffsets[rarity.ID])

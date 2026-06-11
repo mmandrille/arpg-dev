@@ -4,7 +4,7 @@
 It is the canonical snapshot of where the project stands and what is still open. Per-slice as-built
 summaries live in [`docs/as-built/`](docs/as-built/).
 
-Last updated: 2026-06-10
+Last updated: 2026-06-11
 
 ---
 
@@ -12,9 +12,9 @@ Last updated: 2026-06-10
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v61 — `rage-and-heal-skills` |
+| **Latest completed slice** | v62 — `monster-depth-stat-scaling` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-10 (9 phases) |
+| **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
 | **Last engineering review** | v60 — [`docs/reviews/20260610_v60-overview.md`](docs/reviews/20260610_v60-overview.md) (2026-06-10) |
 | **Next engineering review** | v70 (~every 10 slices) |
@@ -80,6 +80,7 @@ v58_* = boss-pattern-variety
 v59_* = data-driven-skill-catalog
 v60_* = data-driven-content-library-manifest
 v61_* = rage-and-heal-skills
+v62_* = monster-depth-stat-scaling
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -181,6 +182,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v59** | `data-driven-skill-catalog` | Complete (`make ci` green) | [`v59_spec-data-driven-skill-catalog.md`](docs/specs/v59_spec-data-driven-skill-catalog.md) | [`v59_2026-06-10-data-driven-skill-catalog.md`](docs/plans/v59_2026-06-10-data-driven-skill-catalog.md) | [`as-built`](docs/as-built/v59_data-driven-skill-catalog.md) |
 | **v60** | `data-driven-content-library-manifest` | Complete (`make ci` green) | [`v60_spec-data-driven-content-library-manifest.md`](docs/specs/v60_spec-data-driven-content-library-manifest.md) | [`v60_2026-06-10-data-driven-content-library-manifest.md`](docs/plans/v60_2026-06-10-data-driven-content-library-manifest.md) | [`as-built`](docs/as-built/v60_data-driven-content-library-manifest.md) |
 | **v61** | `rage-and-heal-skills` | Complete (`make ci` green) | [`v61_spec-rage-and-heal-skills.md`](docs/specs/v61_spec-rage-and-heal-skills.md) | [`v61_2026-06-10-rage-and-heal-skills.md`](docs/plans/v61_2026-06-10-rage-and-heal-skills.md) | [`as-built`](docs/as-built/v61_rage-and-heal-skills.md) |
+| **v62** | `monster-depth-stat-scaling` | Complete (`make ci` green) | [`v62_spec-monster-depth-stat-scaling.md`](docs/specs/v62_spec-monster-depth-stat-scaling.md) | [`v62_2026-06-11-monster-depth-stat-scaling.md`](docs/plans/v62_2026-06-11-monster-depth-stat-scaling.md) | [`as-built`](docs/as-built/v62_monster-depth-stat-scaling.md) |
 
 ---
 

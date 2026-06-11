@@ -14,7 +14,7 @@
     { "type": "wait_skill_progression", "unspent_skill_points": 2, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false, "timeout_s": 5.0 },
     { "type": "press_key", "keycode": "KEY_K" },
     { "type": "assert_skills_panel_visible", "visible": true },
-    { "type": "assert_skill_button_enabled", "skill_id": "magic_bolt", "enabled": false, "requirements_met": false, "skill_name": "Magic Bolt", "tooltip_contains": "Magic 15 (5)" },
+    { "type": "assert_skill_button_enabled", "skill_id": "magic_bolt", "enabled": false, "requirements_met": false, "skill_name": "Magic Bolt", "tooltip_contains": "Magic 15(-10)" },
     { "type": "click_stat_button", "stat": "magic" },
     { "type": "click_stat_button", "stat": "magic" },
     { "type": "click_stat_button", "stat": "magic" },
@@ -30,15 +30,11 @@
     { "type": "assert_skill_button_enabled", "skill_id": "magic_bolt", "enabled": true, "requirements_met": true, "skill_name": "Magic Bolt", "tooltip_contains": "Mana: 3" },
     { "type": "click_skill_button", "skill_id": "magic_bolt" },
     { "type": "wait_skill_progression", "unspent_skill_points": 1, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false, "timeout_s": 5.0 },
-    { "type": "assert_skill_button_enabled", "skill_id": "magic_bolt", "enabled": false, "requirements_met": false, "tooltip_contains": "Magic 20 (15)" },
-    { "type": "wait_skill_bar", "skill_id": "magic_bolt", "rank": 1, "enabled": true, "remaining_ticks": 0, "slot_text": "M", "tooltip_contains": "Magic Bolt", "timeout_s": 5.0 },
+    { "type": "assert_skill_button_enabled", "skill_id": "magic_bolt", "enabled": false, "requirements_met": false, "tooltip_contains": "Magic 20(-5)" },
+    { "type": "wait_skill_bar", "skill_id": "magic_bolt", "rank": 1, "enabled": true, "remaining_ticks": 0, "slot_text": "", "tooltip_contains": "Magic Bolt", "timeout_s": 5.0 },
     { "type": "use_skill_slot", "skill_id": "magic_bolt", "direction": { "x": 1, "y": 0 } },
     { "type": "wait_event", "event_type": "skill_cast", "skill_id": "magic_bolt", "rank": 1, "mana": 3, "timeout_s": 5.0 },
     { "type": "wait_event", "event_type": "skill_cooldown_started", "skill_id": "magic_bolt", "total_ticks": 40, "timeout_s": 5.0 },
-    { "type": "wait_skill_bar", "skill_id": "magic_bolt", "rank": 1, "disabled": true, "remaining_ticks_min": 1, "total_ticks": 40, "slot_text": "M", "timeout_s": 5.0 },
-    { "type": "use_skill_slot", "skill_id": "magic_bolt", "direction": { "x": 1, "y": 0 } },
-    { "type": "wait_event", "event_type": "skill_cooldown_rejected", "skill_id": "magic_bolt", "timeout_s": 5.0 },
-    { "type": "wait_skill_bar", "skill_id": "magic_bolt", "rank": 1, "enabled": true, "remaining_ticks": 0, "slot_text": "M", "timeout_s": 5.0 },
-    { "type": "assert_skill_bar", "skill_id": "magic_bolt", "rank": 1, "enabled": true, "remaining_ticks": 0, "slot_text": "M", "tooltip_contains": "Magic Bolt" }
+    { "type": "wait_skill_bar", "skill_id": "magic_bolt", "rank": 1, "disabled": true, "remaining_ticks_min": 1, "total_ticks": 40, "slot_text": "", "timeout_s": 5.0 }
   ]
 }

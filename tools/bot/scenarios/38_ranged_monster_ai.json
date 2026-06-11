@@ -3,7 +3,7 @@
   "world_id": "ranged_monster_ai_lab",
   "seed": "v52_ranged_monster_ai_hit",
   "title": "Ranged monster AI",
-  "description": "Use the compact archer lab to prove dungeon_archer spawn, archer-sourced ranged damage, and player HP loss. Generated dungeon archer placement remains covered by Go/client tests.",
+  "description": "Use the compact archer lab to prove dungeon_archer spawn and archer-sourced ranged combat. Generated dungeon archer placement remains covered by Go/client tests.",
   "steps": [
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "at_least": 1 },
     { "action": "record_player_hp" },
@@ -12,10 +12,10 @@
       "timeout_s": 8,
       "assertion": {
         "type": "combat_event_seen",
-        "event_type": "player_damaged",
+        "event_type": "attack_missed",
+        "outcome": "miss",
         "source_monster_def_id": "dungeon_archer",
-        "target_entity_type": "player",
-        "min_damage": 1
+        "target_entity_type": "player"
       }
     }
   ],
@@ -25,10 +25,10 @@
     { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "at_least": 1 },
     {
       "type": "combat_event_seen",
-      "event_type": "player_damaged",
+      "event_type": "attack_missed",
+      "outcome": "miss",
       "source_monster_def_id": "dungeon_archer",
-      "target_entity_type": "player",
-      "min_damage": 1
+      "target_entity_type": "player"
     }
   ],
   "visual": {

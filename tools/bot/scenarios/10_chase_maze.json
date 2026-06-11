@@ -4,7 +4,7 @@
   "title": "Chase maze",
   "description": "Monster pathfinds through a wall maze toward a stationary player.",
   "steps": [
-    { "action": "wait_ticks", "ticks": 100 }
+    { "action": "wait_ticks", "ticks": 80 }
   ],
   "assertions": [
     { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 2.0 },

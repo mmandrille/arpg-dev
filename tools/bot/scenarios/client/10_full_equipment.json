@@ -30,6 +30,6 @@
     { "type": "wait_hotbar_capacity", "at_least": 3, "timeout_s": 15.0 },
     { "type": "assert_hotbar_assigned", "slot_index": 2, "item_def_id": "red_potion" },
     { "type": "use_hotbar_slot", "slot_index": 2 },
-    { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 1 }
+    { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 0 }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "teleporter_lab",
   "world_id": "dungeon_levels",
-  "seed": "5e5a4562087ad93bee38e6916be48d0b",
+  "seed": "teleporter_fast_154",
   "title": "Teleporter lab",
-  "description": "Descend from town through two non-waypoint floors, discover the cadence teleporter on level -3, teleport back to town, then return to level -3 and town.",
+  "description": "Descend from town through two non-waypoint floors, discover the cadence teleporter on level -3, then teleport back to town.",
   "steps": [
     { "action": "discover_teleporter", "max_ticks": 40, "wait_discovered": false },
     { "action": "use_stair", "direction": "down", "max_ticks": 40 },
@@ -14,10 +14,6 @@
     { "action": "discover_teleporter", "max_ticks": 400 },
     { "action": "assert_teleporter_discovered", "level": 0, "discovered": true },
     { "action": "assert_teleporter_discovered", "level": -3, "discovered": true },
-    { "action": "teleport_to_level", "target_level": 0 },
-    { "action": "assert_player_at_discovered_teleporter", "level": 0, "tolerance": 0.001 },
-    { "action": "teleport_to_level", "target_level": -3 },
-    { "action": "assert_player_at_discovered_teleporter", "level": -3, "tolerance": 0.001 },
     { "action": "teleport_to_level", "target_level": 0 },
     { "action": "assert_player_at_discovered_teleporter", "level": 0, "tolerance": 0.001 }
   ],

@@ -92,54 +92,59 @@ const (
 
 // entity is the internal mutable scene entity.
 type entity struct {
-	id                   uint64
-	kind                 string
-	pos                  Vec2
-	hp                   int
-	maxHP                int
-	mana                 int
-	maxMana              int
-	characterID          string
-	displayName          string
-	monsterDefID         string
-	monsterRarityID      string
-	monsterAttackDamage  *DamageRange
-	monsterXPReward      int
-	isBoss               bool
-	bossTemplateID       string
-	visualModel          string
-	visualTint           string
-	visualScale          float64
-	bossPatternID        string
-	bossPatternDeckIndex int
-	bossPhaseIndex       int
-	bossPhaseKind        string
-	bossPhaseStarted     uint64
-	bossPhaseEnds        uint64
-	bossCooldownEnds     uint64
-	bossActiveHit        map[uint64]bool
-	itemDefID            string
-	goldAmount           int
-	rollPayload          *ItemRollPayload
-	interactableDefID    string
-	state                string
-	lootTable            string
-	ownerID              uint64
-	targetID             uint64
-	projectileDefID      string
-	dir                  Vec2
-	speed                float64
-	traveled             float64
-	maxDistance          float64
-	damageRange          DamageRange
-	sourceMsgID          string
-	sourceCorrID         string
-	spawnTick            uint64
-	spawnPos             Vec2
-	aiMode               string
-	aiTargetPlayerID     uint64
-	lastAttackTick       uint64
-	hasAttacked          bool
+	id                    uint64
+	kind                  string
+	pos                   Vec2
+	hp                    int
+	maxHP                 int
+	mana                  int
+	maxMana               int
+	characterID           string
+	displayName           string
+	monsterDefID          string
+	monsterRarityID       string
+	monsterAttackDamage   *DamageRange
+	monsterAttackCooldown int
+	monsterArmor          float64
+	monsterHitChance      float64
+	monsterCritChance     float64
+	monsterBlockPercent   float64
+	monsterXPReward       int
+	isBoss                bool
+	bossTemplateID        string
+	visualModel           string
+	visualTint            string
+	visualScale           float64
+	bossPatternID         string
+	bossPatternDeckIndex  int
+	bossPhaseIndex        int
+	bossPhaseKind         string
+	bossPhaseStarted      uint64
+	bossPhaseEnds         uint64
+	bossCooldownEnds      uint64
+	bossActiveHit         map[uint64]bool
+	itemDefID             string
+	goldAmount            int
+	rollPayload           *ItemRollPayload
+	interactableDefID     string
+	state                 string
+	lootTable             string
+	ownerID               uint64
+	targetID              uint64
+	projectileDefID       string
+	dir                   Vec2
+	speed                 float64
+	traveled              float64
+	maxDistance           float64
+	damageRange           DamageRange
+	sourceMsgID           string
+	sourceCorrID          string
+	spawnTick             uint64
+	spawnPos              Vec2
+	aiMode                string
+	aiTargetPlayerID      uint64
+	lastAttackTick        uint64
+	hasAttacked           bool
 }
 
 // invItem is an internal inventory item.
@@ -1837,21 +1842,65 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			}
 			monster.monsterXPReward = roundPositive(float64(def.XPReward) * template.HPMultiplier)
 		} else if rarity, ok := s.rules.DungeonGeneration.MonsterRarity(generated.rarityID); ok {
-			monster.maxHP = roundPositive(float64(def.MaxHP) * rarity.HPMultiplier)
+			stats := s.generatedMonsterStats(def, level.levelNum, rarity)
+			monster.maxHP = stats.maxHP
 			monster.hp = monster.maxHP
 			monster.visualScale = rarity.VisualScale
 			monster.visualTint = rarity.Color
-			if def.AttackDamage != nil {
-				scaledAttack := scaleDamageRange(*def.AttackDamage, rarity.DamageMultiplier)
-				monster.monsterAttackDamage = &scaledAttack
-			}
-			monster.monsterXPReward = roundPositive(float64(def.XPReward) * rarity.XPMultiplier)
+			monster.monsterAttackDamage = stats.attackDamage
+			monster.monsterAttackCooldown = stats.attackCooldown
+			monster.monsterArmor = stats.armor
+			monster.monsterHitChance = stats.hitChance
+			monster.monsterCritChance = stats.critChance
+			monster.monsterBlockPercent = stats.blockPercent
+			monster.monsterXPReward = stats.xpReward
 		}
 		s.applyPartyHPScale(level, monster)
 		monster.id = s.alloc()
 		level.entities[monster.id] = monster
 	}
 	return nil
+}
+
+type generatedMonsterEffectiveStats struct {
+	maxHP          int
+	attackDamage   *DamageRange
+	attackCooldown int
+	armor          float64
+	hitChance      float64
+	critChance     float64
+	blockPercent   float64
+	xpReward       int
+}
+
+func (s *Sim) generatedMonsterStats(def MonsterDef, levelNum int, rarity MonsterRarityDef) generatedMonsterEffectiveStats {
+	depth := absInt(levelNum)
+	depthIndex := maxInt(0, depth-1)
+	scaling := s.rules.DungeonGeneration.MonsterDepthScaling
+	depthFactor := func(perDepth float64) float64 {
+		return 1 + perDepth*float64(depthIndex)
+	}
+	stats := generatedMonsterEffectiveStats{
+		maxHP:        roundPositive(float64(def.MaxHP) * depthFactor(scaling.HPPerDepth) * rarity.HPMultiplier),
+		armor:        math.Round((float64(def.Armor)+scaling.ArmorPerDepth*float64(depthIndex))*rarity.ArmorMultiplier + rarity.ArmorBonus),
+		hitChance:    clampFloat(def.effectiveHitChance(s.rules.Combat)+scaling.HitChancePerDepth*float64(depthIndex)+rarity.HitChanceBonus, 0, scaling.MaxHitChance),
+		critChance:   clampFloat(def.effectiveCritChance(s.rules.Combat)+scaling.CritChancePerDepth*float64(depthIndex)+rarity.CritChanceBonus, 0, scaling.MaxCritChance),
+		blockPercent: clampFloat(float64(def.BlockPercent)+scaling.BlockPercentPerDepth*float64(depthIndex)+rarity.BlockPercentBonus, 0, scaling.MaxBlockPercent),
+		xpReward:     roundPositive(float64(def.XPReward) * rarity.XPMultiplier),
+	}
+	if def.AttackDamage != nil {
+		scaledAttack := scaleDamageRange(*def.AttackDamage, depthFactor(scaling.DamagePerDepth)*rarity.DamageMultiplier)
+		stats.attackDamage = &scaledAttack
+	}
+	if def.AttackCooldown > 0 {
+		cooldownMultiplier := math.Pow(scaling.AttackCooldownMultiplierPerDepth, float64(depthIndex)) * rarity.AttackCooldownMultiplier
+		cooldown := int(math.Round(float64(def.AttackCooldown) * cooldownMultiplier))
+		if cooldown < scaling.MinAttackCooldownTicks {
+			cooldown = scaling.MinAttackCooldownTicks
+		}
+		stats.attackCooldown = cooldown
+	}
+	return stats
 }
 
 func (s *Sim) dispatchAction(target *entity, in Input, res *TickResult, ack bool) {
@@ -3414,7 +3463,11 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if !s.monsterInAttackRange(monster, player, def) {
 			continue
 		}
-		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(def.AttackCooldown) {
+		attackCooldown := def.AttackCooldown
+		if monster.monsterAttackCooldown > 0 {
+			attackCooldown = monster.monsterAttackCooldown
+		}
+		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(attackCooldown) {
 			continue
 		}
 		attackDamage := def.AttackDamage
@@ -5953,14 +6006,30 @@ func (s *Sim) monsterEffectiveCombatStats(monster *entity, damage DamageRange) e
 		}
 	}
 	def := s.rules.Monsters[monster.monsterDefID]
+	hitChance := def.effectiveHitChance(s.rules.Combat)
+	if monster.monsterHitChance > 0 {
+		hitChance = monster.monsterHitChance
+	}
+	critChance := def.effectiveCritChance(s.rules.Combat)
+	if monster.monsterCritChance > 0 {
+		critChance = monster.monsterCritChance
+	}
+	armor := float64(def.Armor)
+	if monster.monsterArmor > 0 {
+		armor = monster.monsterArmor
+	}
+	blockPercent := clampFloat(float64(def.BlockPercent), 0, float64(s.rules.Combat.BlockCap))
+	if monster.monsterBlockPercent > 0 {
+		blockPercent = clampFloat(monster.monsterBlockPercent, 0, float64(s.rules.Combat.BlockCap))
+	}
 	return effectiveCombatStats{
 		DamageMin:    float64(damage.Min),
 		DamageMax:    float64(damage.Max),
-		HitChance:    def.effectiveHitChance(s.rules.Combat),
-		CritChance:   def.effectiveCritChance(s.rules.Combat),
+		HitChance:    hitChance,
+		CritChance:   critChance,
 		CritDamage:   def.effectiveCritDamage(s.rules.Combat),
-		Armor:        float64(def.Armor),
-		BlockPercent: clampFloat(float64(def.BlockPercent), 0, float64(s.rules.Combat.BlockCap)),
+		Armor:        armor,
+		BlockPercent: blockPercent,
 		MaxHP:        float64(monster.maxHP),
 	}
 }

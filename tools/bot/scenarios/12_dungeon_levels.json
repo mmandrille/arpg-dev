@@ -1,6 +1,7 @@
 {
   "id": "dungeon_levels",
   "world_id": "dungeon_levels",
+  "seed": "dungeon_levels_fast_247",
   "title": "Dungeon levels",
   "description": "Descend from town to generated level -2, pick up the currency coin, then ascend back to level -1 at the matching down stair.",
   "steps": [

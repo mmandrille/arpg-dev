@@ -1,0 +1,27 @@
+docs/plans/v66_2026-06-11-progress-backlog-hygiene.md
+  s_74e4f341218515::t_dbec4c4c2e2ac0 15-18
+  s_74e4f341218515::t_9f7eadabead660 1-14,20-27
+  s_74e4f341218515::t_d540c64661b80d 19
+PROGRESS.md
+  s_74e4f341218515::t_404772e457671a 15,87,193,291-292,563-575,580,583,606-607
+docs/as-built/v66_progress-backlog-hygiene.md
+  s_74e4f341218515::t_9f7eadabead660 1-15
+docs/specs/v66_spec-progress-backlog-hygiene.md
+  s_74e4f341218515::t_9f7eadabead660 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e1e4c02c519592dcd03a5971d2163b4062d8c57d",
+  "prompts": {},
+  "sessions": {
+    "s_74e4f341218515": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb53a-77e2-76e0-85bd-104f9a738cad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

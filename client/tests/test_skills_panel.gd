@@ -51,6 +51,7 @@ func _run() -> void:
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
 	_assert_false("spend button disabled before magic requirement", bool(state.get("spend_button_enabled", true)))
+	_assert_eq("unbought missing requirement is disabled", str(state.get("visual_state", "")), "disabled")
 	_assert_false("requirements not met before magic 15", bool(state.get("requirements_met", true)))
 	var requirement_status: Array = state.get("requirement_status", [])
 	_assert_eq("requirement row count", requirement_status.size(), 2)
@@ -81,6 +82,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_true("requirements met after magic 15", bool(state.get("requirements_met", false)))
 	_assert_true("spend button enabled after magic requirement", bool(state.get("spend_button_enabled", false)))
+	_assert_eq("rankable skill is highlighted", str(state.get("visual_state", "")), "highlight")
 	panel.bot_click_skill_button("magic_bolt")
 	_assert_eq("spend signal count", emitted.size(), 1)
 	_assert_eq("spend signal skill", str(emitted[0]), "magic_bolt")
@@ -92,6 +94,9 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("rank updates", int(state.get("rank", -1)), 1)
 	_assert_false("spend disabled with no points", bool(state.get("spend_button_enabled", true)))
+	_assert_eq("bought skill without points stays normal", str(state.get("visual_state", "")), "normal")
+	var skills_without_points: Dictionary = state.get("skills", {})
+	_assert_eq("unbought no-points skill is disabled", str((skills_without_points.get("heal", {}) as Dictionary).get("visual_state", "")), "disabled")
 
 	panel.set_character_progression({
 		"level": 6,
@@ -104,6 +109,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_false("rank 2 requirement blocks magic 15", bool(state.get("requirements_met", true)))
 	_assert_false("rank 2 spend disabled before magic 20", bool(state.get("spend_button_enabled", true)))
+	_assert_eq("bought skill missing next-rank req stays normal", str(state.get("visual_state", "")), "normal")
 	_assert_true("tooltip includes rank 2 missing magic diff", str(state.get("tooltip_body", "")).contains("Magic 20(-5)"))
 
 	panel.set_character_progression({

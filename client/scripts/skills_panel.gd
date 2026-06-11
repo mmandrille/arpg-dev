@@ -92,6 +92,7 @@ func get_debug_state() -> Dictionary:
 			"max_rank": int(row.get("max_rank", int(_skill_def(row_skill_id).get("max_rank", 0)))),
 			"can_spend": bool(row.get("can_spend", false)),
 			"spend_button_enabled": _skill_spend_enabled(row_skill_id),
+			"visual_state": _skill_visual_state(row_skill_id),
 			"assigned_key": _assigned_key_for_skill(row_skill_id),
 			"right_click_assigned": _right_click_skill_id == row_skill_id,
 			"requirements_met": _requirements_met(row_requirements),
@@ -109,6 +110,7 @@ func get_debug_state() -> Dictionary:
 		"max_rank": int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 0)))),
 		"can_spend": bool(skill.get("can_spend", false)),
 		"spend_button_enabled": _spend_button != null and not _spend_button.disabled,
+		"visual_state": _skill_visual_state(skill_id),
 		"hovered_skill_id": _hovered_skill_id,
 		"selected_skill_id": skill_id,
 		"assigned_key": _assigned_key_for_skill(skill_id),
@@ -188,7 +190,7 @@ func _build() -> void:
 		skill_block.position = _skill_block_position(skill_id)
 		skill_block.size = Vector2(80, 80)
 		skill_block.mouse_filter = Control.MOUSE_FILTER_STOP
-		skill_block.add_theme_stylebox_override("panel", _skill_block_style(false, false))
+		skill_block.add_theme_stylebox_override("panel", _skill_block_style("disabled", false))
 		skill_block.gui_input.connect(func(event: InputEvent) -> void:
 			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 				_select_skill(skill_id)
@@ -283,16 +285,16 @@ func _render() -> void:
 		var row := _skill_row(row_skill_id)
 		var row_rank := int(row.get("rank", 0))
 		var row_max_rank := int(row.get("max_rank", int(_skill_def(row_skill_id).get("max_rank", 0))))
-		var unlocked := row_rank > 0
+		var visual_state := _skill_visual_state(row_skill_id)
 		var selected := row_skill_id == skill_id
 		var block := _skill_blocks.get(row_skill_id, null) as Panel
 		if block != null:
-			block.add_theme_stylebox_override("panel", _skill_block_style(unlocked, selected or _right_click_skill_id == row_skill_id))
+			block.add_theme_stylebox_override("panel", _skill_block_style(visual_state, selected or _right_click_skill_id == row_skill_id))
 		var icon_label := _skill_icon_labels.get(row_skill_id, null) as Label
 		if icon_label != null:
 			icon_label.text = _skill_icon_label_text(row_skill_id)
 			icon_label.add_theme_color_override("font_color", _skill_icon_color(row_skill_id))
-			icon_label.modulate = Color(1, 1, 1, 1) if unlocked or selected else Color(0.5, 0.5, 0.5, 1)
+			icon_label.modulate = _skill_icon_modulate(visual_state, selected)
 		var assigned_key_label := _assigned_key_labels.get(row_skill_id, null) as Label
 		if assigned_key_label != null:
 			var assigned_key := _assigned_key_for_skill(row_skill_id)
@@ -301,7 +303,7 @@ func _render() -> void:
 		var rank_label := _skill_rank_labels.get(row_skill_id, null) as Label
 		if rank_label != null:
 			rank_label.text = "%d/%d" % [row_rank, row_max_rank]
-			rank_label.modulate = Color(1, 1, 1, 1) if unlocked or selected else Color(0.45, 0.45, 0.45, 1)
+			rank_label.modulate = _skill_rank_modulate(visual_state, selected)
 
 
 func _on_spend_pressed() -> void:
@@ -394,6 +396,15 @@ func _skill_spend_enabled(skill_id: String) -> bool:
 		and int(skill_progression.get("unspent_skill_points", 0)) > 0 \
 		and rank < max_rank \
 		and bool(skill.get("can_spend", false))
+
+
+func _skill_visual_state(skill_id: String) -> String:
+	var rank := int(_skill_row(skill_id).get("rank", 0))
+	if _skill_spend_enabled(skill_id):
+		return "highlight"
+	if rank <= 0:
+		return "disabled"
+	return "normal"
 
 
 func _skill_def(skill_id: String) -> Dictionary:
@@ -652,10 +663,26 @@ func _panel_style() -> StyleBoxFlat:
 	return s
 
 
-func _skill_block_style(unlocked: bool, selected: bool) -> StyleBoxFlat:
+func _skill_block_style(visual_state: String, selected: bool) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
-	s.bg_color = Color("#5a4028") if unlocked else Color("#201a16")
-	s.border_color = Color("#c9a76a") if selected else (Color("#8a7245") if unlocked else Color("#3b342c"))
+	match visual_state:
+		"highlight":
+			s.bg_color = Color("#6d5222")
+			s.border_color = Color("#f2c86d")
+		"normal":
+			s.bg_color = Color("#5a4028")
+			s.border_color = Color("#c9a76a") if selected else Color("#8a7245")
+		_:
+			s.bg_color = Color("#151515")
+			s.border_color = Color("#4a4a4a") if selected else Color("#2f2f2f")
+	if selected:
+		match visual_state:
+			"highlight":
+				s.border_color = Color("#f0dfbb")
+			"normal":
+				s.border_color = Color("#c9a76a")
+			_:
+				s.border_color = Color("#5a5a5a")
 	s.border_width_left = 2
 	s.border_width_top = 2
 	s.border_width_right = 2
@@ -665,6 +692,26 @@ func _skill_block_style(unlocked: bool, selected: bool) -> StyleBoxFlat:
 	s.corner_radius_bottom_left = 2
 	s.corner_radius_bottom_right = 2
 	return s
+
+
+func _skill_icon_modulate(visual_state: String, selected: bool) -> Color:
+	match visual_state:
+		"highlight":
+			return Color(1.15, 1.08, 0.88, 1)
+		"normal":
+			return Color(1, 1, 1, 1)
+		_:
+			return Color(0.34, 0.34, 0.34, 1) if not selected else Color(0.55, 0.55, 0.55, 1)
+
+
+func _skill_rank_modulate(visual_state: String, selected: bool) -> Color:
+	match visual_state:
+		"highlight":
+			return Color(1, 0.93, 0.72, 1)
+		"normal":
+			return Color(1, 1, 1, 1)
+		_:
+			return Color(0.38, 0.38, 0.38, 1) if not selected else Color(0.55, 0.55, 0.55, 1)
 
 
 func _tooltip_style() -> StyleBoxFlat:

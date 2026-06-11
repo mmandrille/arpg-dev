@@ -205,6 +205,7 @@ Use the **As-built** column in the slice lifecycle table above for links.
 | [0011](docs/adr/0011-player-market-and-multi-item-trade-offers.md) | Player market listings and multi-item trade offers | Proposed |
 | [0012](docs/adr/0012-item-upgrades-and-item-levels.md) | Item upgrades, item levels, and advanced dungeon resources | Proposed |
 | [0013](docs/adr/0013-mystery-seller-and-unidentified-item-offers.md) | Mystery seller with expensive unidentified equipment offers | Proposed |
+| [0014](docs/adr/0014-core-progression-and-endgame-design-rules.md) | Core progression, itemization, economy, endgame, co-op, and PvP design rules | Proposed |
 
 Anticipated but **not written:** netcode timing, Protobuf migration, production auth, multiplayer split,
 quest system design, NPC interaction protocol, character progression formulas
@@ -225,6 +226,9 @@ dev-login → create session → move → attack training dummy → pick up loot
 After v4 the player **survives with reduced HP** (`hp < 10`). Monster dies; player may take retaliation
 each successful hit. After v7 this flow lives in `tools/bot/scenarios/01_vertical_slice.json`; additional
 scenario JSON files are automatically included in filename order in `make bot` and `make bot-visual`.
+Every protocol bot scenario has a hard **10.0 second** full-run budget. When a proof grows past
+that, shorten setup to the behavior under test with compact lab worlds or focused lower-level tests
+instead of waiting through unrelated traversal, farming, or natural timing loops.
 
 The scenario catalog also includes:
 
@@ -254,9 +258,9 @@ session_browser_uncapped_coop: host creates listed co-op → two peers join from
 ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions
 reachable_dungeon_obstacles: descend through generated dungeon floors → assert generated interior wall layout → route to loot beyond obstacles → prove replay
 dungeon_wall_rendering: headless Godot client descends to generated floors → assert authoritative non-perimeter wall rendering state
-vendor_appraisal_quotes: open town vendor after dungeon loot → assert server-authored offer summaries, comparisons, sell appraisals, buy, sell, replay
+vendor_appraisal_quotes: open compact vendor lab with rolled loot → assert server-authored offer summaries, comparisons, sell appraisals, buy, sell, replay
 vendor_item_comparison: headless Godot client opens vendor → assert visible offer/sell details, comparison rows, buy, and sell
-shop_stock_lifecycle: town vendor generated stock source-depth → sell-to-buyback → rebuy → waypoint refresh → fresh-session buyback cleared
+shop_stock_lifecycle: compact vendor generated stock → sell-to-buyback → rebuy → fresh-session buyback cleared and generated stock retained
 client_shop_stock_lifecycle: headless Godot client opens vendor → sell to buyback → fixed purchase refresh → sell/rebuy buyback → assert fixed/generated rows remain visible
 equipment_requirements_and_preview: pick up requirement-gated gear → reject unmet equip → level and allocate STR → equip → prove persistence
 client_equipment_requirements_and_preview: headless Godot client opens inventory → assert requirement-status and equip-preview rows
@@ -538,10 +542,10 @@ healing events; the Godot skill tree and hotbar now select among multiple first-
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59 non-goals, ADR-0008 deferred, ADR-0011 |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades/sorting/search, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61 non-goals |
-| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique/set shop offers, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013 |
-| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013 |
+| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
+| Economy / trade | Player market listings, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations, atomic ownership transfer, stash delivery, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, paid mystery rerolls, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, production combat/skill VFX/audio, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, and production boss health bar art/audio | v53/v57/v58 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
@@ -550,7 +554,7 @@ healing events; the Godot skill tree and hotbar now select among multiple first-
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership | v0/v33/v38/v45/v46/v48/v49 non-goals, ADR-0001 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49 non-goals, ADR-0001, ADR-0014 |
 | Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
 
 ### Curated autoloop candidates
@@ -595,6 +599,11 @@ the next autoloop pass unless code changes make them stale.
   `applyInput` in `sim.go`. The dispatcher is a registry lookup now.
 - Shared rules are **data**; formulas evaluated in Go + GDScript from the same golden fixtures.
   After intentional formula changes: `make regen-golden` → `make ci` to keep goldens current.
+- ADR-0014 progression/endgame rules are challenge rules. If a requested direction conflicts with
+  stats/skills/passives mattering, loot hope, economy value, low complexity, meaningful uniques,
+  endless progression, fair deaths, survival passives, all-level endgame, co-op differentiation,
+  skill-based PvP, or market-as-endgame, pause and ask the owner to justify the exception before
+  speccing or implementing it. Record accepted exceptions in the spec or plan.
 - Animation is client-only; new reactions need a **server event** first, then client mapping.
 - Golden changes require Go tests **and** GDScript `test_golden.gd` / `validate_shared.py` updates.
 - GDScript shared data singletons: use `class_name Foo extends RefCounted` with `static var`

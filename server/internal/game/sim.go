@@ -2068,6 +2068,16 @@ func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, r
 		TargetEntityID: idStr(monster.id),
 		CorrelationID:  corr,
 	})
+	if monster.isBoss {
+		res.Events = append(res.Events, Event{
+			EventType:      "boss_killed",
+			EntityID:       idStr(monster.id),
+			SourceEntityID: idStr(sourceID),
+			TargetEntityID: idStr(monster.id),
+			BossTemplateID: monster.bossTemplateID,
+			CorrelationID:  corr,
+		})
+	}
 	s.dropLoot(monster, corr, res)
 	s.awardMonsterExperience(monster, sourceID, corr, res)
 	if monster.isBoss {

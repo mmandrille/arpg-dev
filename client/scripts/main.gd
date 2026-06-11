@@ -143,6 +143,7 @@ var pending_action_targets: Dictionary = {}
 var pending_waypoint_target_level: int = 0
 var pending_waypoint_travel: bool = false
 var _last_inventory_feedback_text: String = ""
+var _last_boss_reward_status: String = ""
 var ready_sent: bool = false
 var item_to_equip: String = ""
 var bot_mode: bool = false
@@ -1086,6 +1087,9 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "stash_gold_withdrawn" and stash_panel != null and stash_panel.visible:
 			stash_panel.show_status("Withdrew %d gold" % int(ev.get("amount", 0)))
+			continue
+		if event_type == "boss_killed":
+			_last_boss_reward_status = "%s defeated" % _boss_health_bar_title(str(ev.get("boss_template_id", "")))
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
 			_apply_boss_phase_started(eid, ev)
@@ -4630,6 +4634,7 @@ func get_bot_state() -> Dictionary:
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
 		"status_text_enabled": client_settings != null and client_settings.status_text,
+		"boss_reward_status": _last_boss_reward_status,
 		"create_game_session_type": client_settings.create_game_session_type if client_settings != null else ClientSettingsScript.DEFAULT_CREATE_GAME_SESSION_TYPE,
 		"damage_numbers": _bot_damage_numbers(),
 		"known_characters": character_panel.known_characters() if character_panel != null else [],
@@ -5132,8 +5137,9 @@ func _update_debug() -> void:
 		visual_replay_scenarios.size(),
 		visual_replay_title,
 	] if visual_replay_enabled else ("bot-client" if bot_mode else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual"))
-	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s\nW/A/S/D move  LMB action  scroll zoom  I inventory" % [
-		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis]
+	var boss_status := "\nboss=%s" % _last_boss_reward_status if _last_boss_reward_status != "" else ""
+	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s%s\nW/A/S/D move  LMB action  scroll zoom  I inventory" % [
+		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis, boss_status]
 
 
 func _sync_status_text_visibility() -> void:

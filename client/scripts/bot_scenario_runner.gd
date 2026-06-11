@@ -41,7 +41,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "assert_stash_filter", "assert_boss_health_bar",
-	"assert_remote_player_count",
+	"assert_boss_reward_status", "assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",
@@ -100,6 +100,7 @@ const ALL_STEP_TYPES: Array = [
 	"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort",
 	"click_waypoint_level",
 	"wait_boss_health_bar", "assert_boss_health_bar",
+	"assert_boss_reward_status",
 	"wait_remote_player_count", "assert_remote_player_count",
 	"wait_ticks",
 ]
@@ -289,7 +290,7 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 					"entity_type": str(step.get("entity_type", "")),
 					"entity_index": int(step.get("entity_index", 0)),
 				}
-				for key in ["monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state"]:
+				for key in ["monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state", "is_boss"]:
 					if step.has(key):
 						pending_action[key] = step[key]
 			return false
@@ -467,6 +468,15 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_stash_filter(step, state)
 		"assert_boss_health_bar":
 			return _assert_boss_health_bar(step, state)
+		"assert_boss_reward_status":
+			var want_status := str(step.get("text", ""))
+			var got_status := str(state.get("boss_reward_status", ""))
+			if want_status != got_status:
+				_fail("assert_boss_reward_status failed: want=%s got=%s step=%d scenario=%s" % [
+					want_status, got_status, _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_remote_player_count":
 			if not _remote_player_count_matches(step, state):
 				_fail("assert_remote_player_count failed: want=%s remote_player_ids=%s step=%d scenario=%s" % [
@@ -2036,6 +2046,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 				has_boss_bar_expectation = true
 		if not has_boss_bar_expectation:
 			return "client_steps[%d] (%s) requires at least one boss health bar expectation" % [index, stype]
+	if stype == "assert_boss_reward_status":
+		if str(step.get("text", "")) == "":
+			return "client_steps[%d] (%s) requires text" % [index, stype]
 	if stype in ["set_floating_combat_text", "assert_floating_combat_text_enabled"]:
 		if not step.has("enabled"):
 			return "client_steps[%d] (%s) requires enabled" % [index, stype]

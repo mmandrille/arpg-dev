@@ -33,14 +33,17 @@
       "timeout_s": 15.0
     },
     {
-      "type": "assert_entity_reaction",
+      "type": "wait_entity_reaction",
       "entity_type": "monster",
       "is_boss": true,
       "boss_template_id": "cave_warden",
       "boss_telegraph_active": true,
       "has_boss_telegraph_marker": true,
       "telegraph_radius_min": 1.5,
-      "telegraph_radius_max": 1.7
-    }
+      "telegraph_radius_max": 1.7,
+      "timeout_s": 5.0
+    },
+    { "type": "click_entity_until_event", "entity_type": "monster", "is_boss": true, "event_type": "boss_killed", "consume_event": true, "retry_s": 0.25, "timeout_s": 20.0 },
+    { "type": "assert_boss_reward_status", "text": "Cave Warden defeated" }
   ]
 }

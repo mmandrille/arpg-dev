@@ -22,6 +22,7 @@
     { "action": "use_stair", "direction": "down", "expect_reject": "boss_alive", "max_ticks": 120 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_phase_started", "phase_kind": "telegraph" }, "timeout_s": 2 },
     { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 20 },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "cave_warden" }, "timeout_s": 2 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "interactable_state_changed" }, "timeout_s": 5 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "teleporter", "equals": 0 },
@@ -34,6 +35,7 @@
     { "type": "event_seen", "event_type": "boss_phase_started", "phase_kind": "telegraph" },
     { "type": "event_seen", "event_type": "descend_blocked" },
     { "type": "event_seen", "event_type": "monster_killed" },
+    { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "cave_warden" },
     { "type": "event_seen", "event_type": "interactable_state_changed" }
   ],
   "visual": {

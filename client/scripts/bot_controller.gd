@@ -363,6 +363,8 @@ func _select_entity_ids(state: Dictionary, selector: Dictionary) -> Array:
 			if selector.has(key) and str(selector.get(key, "")) != "" and str(rec.get(key, "")) != str(selector[key]):
 				ok = false
 				break
+		if selector.has("is_boss") and bool(rec.get("is_boss", false)) != bool(selector.get("is_boss", false)):
+			ok = false
 		if ok:
 			out.append(str(rec.get("id", "")))
 	return out

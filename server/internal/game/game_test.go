@@ -5597,8 +5597,18 @@ func TestBossFloorExitsUnlockAfterBossKill(t *testing.T) {
 	boss.hp = 1
 	kill := sim.Tick([]Input{{MessageID: "kill_boss", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(boss.id)}}})
 	assertAck(t, kill, "kill_boss")
-	if !hasEvent(kill, "monster_killed") || !hasEvent(kill, "interactable_state_changed") {
+	if !hasEvent(kill, "monster_killed") || !hasEvent(kill, "boss_killed") || !hasEvent(kill, "interactable_state_changed") {
 		t.Fatalf("missing boss kill/unlock events: %+v", kill.Events)
+	}
+	var bossKilled Event
+	for _, ev := range kill.Events {
+		if ev.EventType == "boss_killed" {
+			bossKilled = ev
+			break
+		}
+	}
+	if bossKilled.BossTemplateID != "cave_warden" || bossKilled.TargetEntityID != idStr(boss.id) {
+		t.Fatalf("boss_killed event = %+v", bossKilled)
 	}
 	if down.state != interactableReady {
 		t.Fatalf("down state = %s, want %s", down.state, interactableReady)

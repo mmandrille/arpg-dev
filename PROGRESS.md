@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v66 — `progress-backlog-hygiene` |
+| **Latest completed slice** | v67 — `boss-kill-reward-polish` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -85,6 +85,7 @@ v63_* = runtime-sim-error-construction
 v64_* = mystery-seller-paid-reroll
 v65_* = stash-search-and-sorting
 v66_* = progress-backlog-hygiene
+v67_* = boss-kill-reward-polish
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -191,6 +192,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v64** | `mystery-seller-paid-reroll` | Complete (`make ci` green) | [`v64_spec-mystery-seller-paid-reroll.md`](docs/specs/v64_spec-mystery-seller-paid-reroll.md) | [`v64_2026-06-11-mystery-seller-paid-reroll.md`](docs/plans/v64_2026-06-11-mystery-seller-paid-reroll.md) | [`as-built`](docs/as-built/v64_mystery-seller-paid-reroll.md) |
 | **v65** | `stash-search-and-sorting` | Complete (`make ci` green) | [`v65_spec-stash-search-and-sorting.md`](docs/specs/v65_spec-stash-search-and-sorting.md) | [`v65_2026-06-11-stash-search-and-sorting.md`](docs/plans/v65_2026-06-11-stash-search-and-sorting.md) | [`as-built`](docs/as-built/v65_stash-search-and-sorting.md) |
 | **v66** | `progress-backlog-hygiene` | Complete (`make ci` green) | [`v66_spec-progress-backlog-hygiene.md`](docs/specs/v66_spec-progress-backlog-hygiene.md) | [`v66_2026-06-11-progress-backlog-hygiene.md`](docs/plans/v66_2026-06-11-progress-backlog-hygiene.md) | [`as-built`](docs/as-built/v66_progress-backlog-hygiene.md) |
+| **v67** | `boss-kill-reward-polish` | Complete (`make ci` green) | [`v67_spec-boss-kill-reward-polish.md`](docs/specs/v67_spec-boss-kill-reward-polish.md) | [`v67_2026-06-11-boss-kill-reward-polish.md`](docs/plans/v67_2026-06-11-boss-kill-reward-polish.md) | [`as-built`](docs/as-built/v67_boss-kill-reward-polish.md) |
 
 ---
 
@@ -262,6 +264,7 @@ client_combat_feedback: equip gear → assert stat breakdowns → prove normal/c
 true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
 model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
 boss_floor_gate: start on compact boss floor → assert locked exits → observe boss phase telegraph → kill boss → unlock exits → descend to -6
+boss_kill_reward_polish: compact boss floor → kill Cave Warden → observe `boss_killed` with `boss_template_id` and client reward status
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
@@ -572,6 +575,11 @@ deposit/withdraw mutation keyed by server-authored `stash_item_id` / inventory i
 **Progress backlog hygiene is current through v66.** v66 corrects the canonical discovery metadata
 after v64/v65 by marking shipped candidates complete, adding their scenario catalog entries, and
 narrowing deferred backlog text to still-open adjacent work.
+
+**Boss kill reward status is now explicit.** v67 emits a dedicated `boss_killed` event with
+`boss_template_id` for boss deaths while preserving the existing `monster_killed`, loot, XP, and
+exit-unlock flow. The Godot client now exposes a `Cave Warden defeated` reward status, and protocol
+plus client bot coverage prove the boss-specific signal.
 
 ### Other deferred items (from specs / ADRs)
 

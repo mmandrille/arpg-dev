@@ -1,0 +1,49 @@
+server/internal/store/models.go
+  s_74e4f341218515::t_2fbd9bddd48774 134-152
+server/internal/http/market.go
+  s_74e4f341218515::t_45dbaee8d8246b 7,121-122
+  s_74e4f341218515::t_4bd1eedd3f0c7a 1-6,8-120,123-124
+server/internal/replay/replay_test.go
+  s_74e4f341218515::t_4240a6b6d601f5 1476-1484
+server/internal/store/repos.go
+  s_74e4f341218515::t_1e8ca1b28663a7 1512-1621,1722-1739
+server/internal/http/server.go
+  s_74e4f341218515::t_4bd1eedd3f0c7a 81
+server/internal/http/auth_session_test.go
+  s_74e4f341218515::t_1dcc65a97529c8 311-389
+docs/specs/v68_spec-market-stash-listing-foundation.md
+  s_74e4f341218515::t_d58080f4cc6c7e 1-36
+server/internal/store/store_test.go
+  s_74e4f341218515::t_4240a6b6d601f5 975,977,981,986,996-997,1001-1002,1024,1042
+  s_74e4f341218515::t_1dcc65a97529c8 972,974,976,978-980,982-985,987-995,998-1000,1003-1023,1025-1041,1043-1046
+  s_74e4f341218515::t_59260f4322a7fc 973
+server/internal/store/interfaces.go
+  s_74e4f341218515::t_2fbd9bddd48774 72-74
+server/migrations/0016_market_listings.sql
+  s_74e4f341218515::t_2fbd9bddd48774 1-19
+PROGRESS.md
+  s_74e4f341218515::t_a805b2d4d5a4b8 599
+  s_74e4f341218515::t_8395bd3ac47dbf 15,89,197,290,587-590
+docs/plans/v68_2026-06-11-market-stash-listing-foundation.md
+  s_74e4f341218515::t_d58080f4cc6c7e 1-17,22-28
+  s_74e4f341218515::t_8395bd3ac47dbf 18-20
+  s_74e4f341218515::t_3d30e4d57fbd47 21
+docs/as-built/v68_market-stash-listing-foundation.md
+  s_74e4f341218515::t_8395bd3ac47dbf 1-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a4886ec3e63cbf0cbc5cac10d697e205983f9b34",
+  "prompts": {},
+  "sessions": {
+    "s_74e4f341218515": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb53a-77e2-76e0-85bd-104f9a738cad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

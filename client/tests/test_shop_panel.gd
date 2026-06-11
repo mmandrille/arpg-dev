@@ -72,6 +72,7 @@ func _run() -> void:
 	_assert_true("tooltip comparison extracted", _array_contains_text(comparison_entries, "vs equipped"))
 	var offer_tooltip := panel._make_offer_tooltip(offers[2])
 	_assert_eq("vendor tooltip uses shared panel", offer_tooltip.get_script(), ItemTooltipPanelScript)
+	_assert_eq("vendor tooltip gold value", offer_tooltip.debug_gold_value_text(), "50 gold")
 	offer_tooltip.queue_free()
 
 	panel.bot_click_buy_offer("fixed:red_potion")
@@ -145,6 +146,7 @@ func _run() -> void:
 	_assert_false("mystery tooltip hides comparison", _array_contains_text(mystery_tooltip_lines, "vs equipped"))
 	var mystery_tooltip := panel._make_offer_tooltip(mystery_offer)
 	_assert_eq("mystery tooltip uses shared panel", mystery_tooltip.get_script(), ItemTooltipPanelScript)
+	_assert_eq("mystery tooltip gold value", mystery_tooltip.debug_gold_value_text(), "75 gold")
 	mystery_tooltip.queue_free()
 	panel.bot_click_reroll()
 	_assert_eq("mystery reroll emitted count", emitted.size(), 4)
@@ -203,12 +205,28 @@ func _run() -> void:
 	_assert_true("inventory equip previews rendered", int(inventory_state.get("equip_preview_row_count", 0)) >= 1)
 	var inventory_tooltip := inventory_panel._make_item_tooltip(sell_appraisals[0])
 	_assert_eq("inventory tooltip uses shared panel", inventory_tooltip.get_script(), ItemTooltipPanelScript)
+	_assert_eq("inventory tooltip gold value", inventory_tooltip.debug_gold_value_text(), "27 gold")
 	_assert_false("inventory tooltip stats exclude requirements", _array_contains_text(inventory_panel._tooltip_lines(sell_appraisals[0]), "Requires"))
 	_assert_true("inventory tooltip requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "Level 2"))
 	_assert_true("inventory tooltip stat requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "%s 15(-3)" % StatLabels.display_name("str")))
 	_assert_true("inventory tooltip preview extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "preview"))
 	_assert_true("inventory tooltip comparison extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "vs equipped"))
 	inventory_tooltip.queue_free()
+	var ring := {
+		"item_instance_id": "2005",
+		"item_def_id": "cave_ring",
+		"item_template_id": "cave_ring",
+		"display_name": "Common Cave Ring",
+		"rarity": "common",
+		"slot": "ring",
+		"rolled_stats": {"max_hp": 2, "mana_regen_per_10_seconds": 2},
+	}
+	var ring_tooltip := inventory_panel._make_item_tooltip(ring)
+	_assert_eq("inventory generated tooltip computed gold value", ring_tooltip.debug_gold_value_text(), "11 gold")
+	ring_tooltip.queue_free()
+	var potion_tooltip := inventory_panel._make_item_tooltip(inventory[1])
+	_assert_eq("inventory fixed tooltip computed gold value", potion_tooltip.debug_gold_value_text(), "5 gold")
+	potion_tooltip.queue_free()
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
 	inventory_panel._handle_drop_on_slot("bag", {
 		"source": "shop_offer",

@@ -11,8 +11,8 @@
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
-        "stats": { "magic": 15 },
-        "stats_per_rank": { "magic": 5 },
+        "stats": { "magic": 5 },
+        "stats_per_rank": { "magic": 3 },
         "skills": []
       },
       "cost": {
@@ -45,8 +45,8 @@
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
-        "stats": { "str": 10, "vit": 10 },
-        "stats_per_rank": { "str": 5, "vit": 5 },
+        "stats": { "str": 5, "vit": 5 },
+        "stats_per_rank": { "str": 1, "vit": 1 },
         "skills": []
       },
       "cost": {
@@ -77,8 +77,8 @@
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
-        "stats": { "magic": 10 },
-        "stats_per_rank": { "magic": 5 },
+        "stats": { "magic": 5 },
+        "stats_per_rank": { "magic": 3 },
         "skills": []
       },
       "cost": {

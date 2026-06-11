@@ -135,14 +135,14 @@ func TestLoadRules(t *testing.T) {
 	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 3 {
 		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 3", r.CharacterProgression.SkillPoints)
 	}
-	if skill := r.Skills[magicBoltSkillID]; skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 15 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 5 {
-		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 15 +5/rank level +1/rank attack interval cooldown", skill)
+	if skill := r.Skills[magicBoltSkillID]; skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
+		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 5 +3/rank level +1/rank attack interval cooldown", skill)
 	}
-	if skill := r.Skills["rage"]; skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 10 || skill.Requirements.Stats["vit"] != 10 || skill.Requirements.StatsPerRank["str"] != 5 || skill.Requirements.StatsPerRank["vit"] != 5 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
-		t.Fatalf("rage skill = %+v, want self_buff STR/VIT requirements and 450 tick effect", skill)
+	if skill := r.Skills["rage"]; skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
+		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
 	}
-	if skill := r.Skills["heal"]; skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 10 || skill.Requirements.StatsPerRank["magic"] != 5 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 3.0 {
-		t.Fatalf("heal skill = %+v, want area_heal magic requirements and range/radius effect", skill)
+	if skill := r.Skills["heal"]; skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 3.0 {
+		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and range/radius effect", skill)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
@@ -558,39 +558,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}
 	skillView := sim.SkillProgressionView()
 	magicSkill, ok := skillProgressionRow(skillView, magicBoltSkillID)
-	if !ok || len(skillView.Skills) != 3 || magicSkill.Rank != 0 || magicSkill.CanSpend {
-		t.Fatalf("skill progression before requirements = %+v, want rank 0 and not spendable", skillView)
-	}
-
-	rejected := sim.Tick([]Input{{
-		MessageID:          "spend_magic_rejected",
-		CorrelationID:      "corr_spend_rejected",
-		Type:               "allocate_skill_point_intent",
-		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
-	}})
-	assertReject(t, rejected, "spend_magic_rejected", "skill_requirements_not_met")
-	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
-	if magicSkill.Rank != 0 || sim.progression.UnspentSkillPoints != 1 {
-		t.Fatalf("requirement rejection mutated skill progression: %+v", sim.SkillProgressionView())
-	}
-
-	allocateMagic := sim.Tick([]Input{{
-		MessageID:     "allocate_magic",
-		CorrelationID: "corr_allocate_magic",
-		Type:          "allocate_stat_intent",
-		AllocateStat:  &AllocateStatIntent{Stat: "magic", Points: 10},
-	}})
-	assertAck(t, allocateMagic, "allocate_magic")
-	if skillProgressionUpdate(allocateMagic) == nil {
-		t.Fatalf("magic allocation missing skill progression refresh: changes=%+v", allocateMagic.Changes)
-	}
-	if sim.progression.BaseStats.Magic != 15 || sim.progression.UnspentStatPoints != 2 {
-		t.Fatalf("magic allocation progression = %+v, want magic 15 and 2 unspent stat points", sim.CharacterProgressionView())
-	}
-	skillView = sim.SkillProgressionView()
-	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if !magicSkill.CanSpend {
-		t.Fatalf("skill progression after magic 15 = %+v, want spendable", skillView)
+	if !ok || len(skillView.Skills) != 3 || magicSkill.Rank != 0 || !magicSkill.CanSpend {
+		t.Fatalf("skill progression at baseline requirements = %+v, want rank 0 and spendable", skillView)
 	}
 
 	spend := sim.Tick([]Input{{
@@ -624,13 +593,13 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	sim.awardExperience(60, "corr_rank_two_xp", &rankTwoXP)
 	sim.savePlayer(sim.defaultPlayer())
 	view = sim.CharacterProgressionView()
-	if view.Level != 6 || view.UnspentStatPoints != 5 || view.UnspentSkillPoints != 1 {
-		t.Fatalf("progression after level 6 = %+v, want level 6, 5 stat points, 1 skill point", view)
+	if view.Level != 6 || view.UnspentStatPoints != 15 || view.UnspentSkillPoints != 1 {
+		t.Fatalf("progression after level 6 = %+v, want level 6, 15 stat points, 1 skill point", view)
 	}
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
 	if magicSkill.CanSpend {
-		t.Fatalf("rank 2 skill progression at magic 15 = %+v, want blocked until magic 20", skillView)
+		t.Fatalf("rank 2 skill progression at magic 5 = %+v, want blocked until magic 8", skillView)
 	}
 	rankTwoRejected := sim.Tick([]Input{{
 		MessageID:          "spend_rank_two_rejected",
@@ -648,16 +617,16 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 		MessageID:     "allocate_rank_two_magic",
 		CorrelationID: "corr_allocate_rank_two_magic",
 		Type:          "allocate_stat_intent",
-		AllocateStat:  &AllocateStatIntent{Stat: "magic", Points: 5},
+		AllocateStat:  &AllocateStatIntent{Stat: "magic", Points: 3},
 	}})
 	assertAck(t, allocateRankTwoMagic, "allocate_rank_two_magic")
-	if sim.progression.BaseStats.Magic != 20 || sim.progression.UnspentStatPoints != 0 {
-		t.Fatalf("rank 2 magic allocation progression = %+v, want magic 20 and no unspent stat points", sim.CharacterProgressionView())
+	if sim.progression.BaseStats.Magic != 8 || sim.progression.UnspentStatPoints != 12 {
+		t.Fatalf("rank 2 magic allocation progression = %+v, want magic 8 and 12 unspent stat points", sim.CharacterProgressionView())
 	}
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
 	if !magicSkill.CanSpend {
-		t.Fatalf("rank 2 skill progression after magic 20 = %+v, want spendable", skillView)
+		t.Fatalf("rank 2 skill progression after magic 8 = %+v, want spendable", skillView)
 	}
 	rankTwoSpend := sim.Tick([]Input{{
 		MessageID:          "spend_rank_two",
@@ -924,7 +893,7 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 
 func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
 	sim := MustNewSim("sess_magic_bolt_requirement", "01", loadRules(t))
-	sim.progression.SkillRanks[magicBoltSkillID] = 1
+	sim.progression.SkillRanks[magicBoltSkillID] = 2
 	player := sim.entities[sim.playerID]
 	monster := &entity{
 		id:           sim.alloc(),

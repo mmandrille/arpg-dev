@@ -279,8 +279,8 @@ shop_stock_lifecycle: compact vendor generated stock → sell-to-buyback → reb
 client_shop_stock_lifecycle: headless Godot client opens vendor → sell to buyback → fixed purchase refresh → sell/rebuy buyback → assert fixed/generated rows remain visible
 equipment_requirements_and_preview: pick up requirement-gated gear → reject unmet equip → level and allocate STR → equip → prove persistence
 client_equipment_requirements_and_preview: headless Godot client opens inventory → assert requirement-status and equip-preview rows
-skill_points_and_magic_bolt: level to 5 → fail Magic Bolt requirement → allocate Magic 15 → cast → reject cooldown recast → recover → prove replay/fresh persistence
-client_skill_points_and_magic_bolt: headless Godot client opens skill panel → proves disabled/enabled Magic 15 requirement path → observes skill bar cooldown and recovery
+skill_points_and_magic_bolt: level to 5 → learn Magic Bolt at baseline Magic 5 → cast → reject rank 2/cooldown recast → recover → prove replay/fresh persistence
+client_skill_points_and_magic_bolt: headless Godot client opens skill panel → proves baseline Magic 5 availability and rank 2 Magic 8 gating → observes skill bar cooldown and recovery
 rage_and_heal_skills: level to the second skill-point grant → learn Rage and Heal → cast Rage → fresh heal_lab session casts Heal and proves skill-sourced healing
 menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
 join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible

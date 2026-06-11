@@ -73,6 +73,8 @@ func _initialize() -> void:
 		return
 	if not _verify_interactable_chest_models():
 		return
+	if not _verify_interactable_vendor_models():
+		return
 
 	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
 	quit(0)
@@ -324,6 +326,39 @@ func _verify_interactable_chest_models() -> bool:
 		main.free()
 		return false
 	stash.free()
+	main.free()
+	return true
+
+
+func _verify_interactable_vendor_models() -> bool:
+	var main = MainScript.new()
+	var vendor := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_vendor"})
+	var mystery := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_mystery_seller"})
+	if vendor == null or vendor.name != "ShopVendor" or vendor.find_child("VendorSign", true, false) == null:
+		_fail("town vendor did not use merchant model")
+		main.free()
+		return false
+	if mystery == null or mystery.name != "MysterySeller" or mystery.find_child("CrystalOrb", true, false) == null:
+		_fail("mystery seller did not use dark-violet merchant model")
+		vendor.free()
+		main.free()
+		return false
+	var vendor_body := vendor.find_child("Body", true, false) as MeshInstance3D
+	var mystery_body := mystery.find_child("Body", true, false) as MeshInstance3D
+	if vendor_body == null or (vendor_body.material_override as StandardMaterial3D).albedo_color.to_html(false) != "e2b92e":
+		_fail("town vendor body is not yellow")
+		vendor.free()
+		mystery.free()
+		main.free()
+		return false
+	if mystery_body == null or (mystery_body.material_override as StandardMaterial3D).albedo_color.to_html(false) != "2b124a":
+		_fail("mystery seller body is not dark violet")
+		vendor.free()
+		mystery.free()
+		main.free()
+		return false
+	vendor.free()
+	mystery.free()
 	main.free()
 	return true
 

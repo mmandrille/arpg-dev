@@ -56,6 +56,8 @@ func _initialize() -> void:
 			await _setup_stairs()
 		"chests":
 			await _setup_chests()
+		"vendors":
+			await _setup_vendors()
 		"inventory":
 			await _setup_inventory()
 		"skills":
@@ -315,6 +317,37 @@ func _setup_chests() -> void:
 	chest.name = "PreviewTreasureChest"
 	chest.position = Vector3(1.0, 0.0, 0.0)
 	root.add_child(chest)
+	_subject = root
+
+
+func _setup_vendors() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackVendors"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(3.4, 2.8, 4.6), Vector3(0.0, 0.70, 0.0), 3.7)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(4.4, 0.04, 2.4)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.025, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#353735")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var main: Node3D = MainScript.new()
+	var vendor := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_vendor"}) as Node3D
+	vendor.name = "PreviewTownVendor"
+	vendor.position = Vector3(-1.0, 0.0, 0.0)
+	root.add_child(vendor)
+	var mystery := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_mystery_seller"}) as Node3D
+	mystery.name = "PreviewMysterySeller"
+	mystery.position = Vector3(1.0, 0.0, 0.0)
+	root.add_child(mystery)
 	_subject = root
 
 

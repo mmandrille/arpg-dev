@@ -3635,6 +3635,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_teleporter_node()
 		if def_id == "treasure_chest" or def_id == "town_stash":
 			return _make_chest_node(def_id)
+		if def_id == "town_vendor" or def_id == "town_mystery_seller":
+			return _make_merchant_node(def_id)
 		return _make_door_node()
 	if kind == "projectile":
 		return _make_projectile_node()
@@ -4167,6 +4169,84 @@ func _add_chest_part(parent: Node3D, part_name: String, size: Vector3, position:
 	part.material_override = mat
 	parent.add_child(part)
 	return part
+
+
+func _make_merchant_node(def_id: String) -> Node3D:
+	var is_mystery := def_id == "town_mystery_seller"
+	var root := Node3D.new()
+	root.name = "MysterySeller" if is_mystery else "ShopVendor"
+	var cloth := Color("#2b124a") if is_mystery else Color("#e2b92e")
+	var cloth_dark := Color("#150824") if is_mystery else Color("#8c6418")
+	var accent := Color("#7c4dff") if is_mystery else Color("#ffe37a")
+	var trim := Color("#c7a6ff") if is_mystery else Color("#f6d85c")
+	var wood := Color("#4b2a16")
+	var skin := Color("#c1845a") if is_mystery else Color("#c99666")
+	var glow := Color("#6f40ff") if is_mystery else Color("#ffd85a")
+
+	_add_merchant_box(root, "MerchantShadow", Vector3(1.35, 0.035, 0.92), Vector3(0.0, 0.018, 0.0), Color("#181715"))
+	_add_merchant_box(root, "CounterTop", Vector3(1.12, 0.18, 0.48), Vector3(0.0, 0.39, 0.31), wood)
+	_add_merchant_box(root, "CounterFront", Vector3(1.18, 0.36, 0.09), Vector3(0.0, 0.22, 0.57), cloth_dark)
+	_add_merchant_box(root, "CounterTrim", Vector3(1.24, 0.08, 0.10), Vector3(0.0, 0.44, 0.60), trim)
+	_add_merchant_box(root, "CounterLeftLeg", Vector3(0.12, 0.34, 0.12), Vector3(-0.50, 0.17, 0.36), wood)
+	_add_merchant_box(root, "CounterRightLeg", Vector3(0.12, 0.34, 0.12), Vector3(0.50, 0.17, 0.36), wood)
+
+	_add_merchant_box(root, "Body", Vector3(0.42, 0.66, 0.30), Vector3(0.0, 0.78, -0.05), cloth)
+	_add_merchant_box(root, "Belt", Vector3(0.48, 0.09, 0.34), Vector3(0.0, 0.62, -0.04), Color("#2f2117"))
+	_add_merchant_box(root, "Head", Vector3(0.32, 0.30, 0.30), Vector3(0.0, 1.28, -0.03), skin)
+	_add_merchant_box(root, "Nose", Vector3(0.08, 0.08, 0.08), Vector3(0.0, 1.27, 0.16), skin.lerp(Color.WHITE, 0.12))
+	_add_merchant_box(root, "LeftArm", Vector3(0.12, 0.44, 0.16), Vector3(-0.32, 0.78, 0.02), cloth_dark)
+	_add_merchant_box(root, "RightArm", Vector3(0.12, 0.44, 0.16), Vector3(0.32, 0.78, 0.02), cloth_dark)
+	_add_merchant_box(root, "LeftHand", Vector3(0.13, 0.10, 0.13), Vector3(-0.32, 0.53, 0.08), skin)
+	_add_merchant_box(root, "RightHand", Vector3(0.13, 0.10, 0.13), Vector3(0.32, 0.53, 0.08), skin)
+
+	if is_mystery:
+		_add_merchant_box(root, "Hood", Vector3(0.44, 0.22, 0.36), Vector3(0.0, 1.39, -0.02), cloth_dark)
+		_add_merchant_box(root, "HoodRim", Vector3(0.40, 0.08, 0.08), Vector3(0.0, 1.30, 0.18), accent)
+		_add_merchant_cylinder(root, "CrystalOrb", 0.16, 0.22, Vector3(0.34, 0.62, 0.43), glow, true)
+		_add_merchant_box(root, "MysterySign", Vector3(0.34, 0.24, 0.07), Vector3(-0.36, 0.67, 0.62), accent)
+	else:
+		_add_merchant_box(root, "HatBrim", Vector3(0.54, 0.08, 0.42), Vector3(0.0, 1.43, -0.02), accent)
+		_add_merchant_box(root, "HatCrown", Vector3(0.34, 0.22, 0.30), Vector3(0.0, 1.56, -0.02), cloth)
+		_add_merchant_box(root, "CoinStackA", Vector3(0.16, 0.08, 0.16), Vector3(-0.30, 0.54, 0.43), glow)
+		_add_merchant_box(root, "CoinStackB", Vector3(0.14, 0.14, 0.14), Vector3(-0.12, 0.57, 0.42), glow)
+		_add_merchant_box(root, "VendorSign", Vector3(0.34, 0.24, 0.07), Vector3(0.36, 0.67, 0.62), accent)
+	return root
+
+
+func _add_merchant_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.name = part_name
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	part.mesh = mesh
+	part.position = position
+	part.material_override = _merchant_material(color)
+	parent.add_child(part)
+	return part
+
+
+func _add_merchant_cylinder(parent: Node3D, part_name: String, radius: float, height: float, position: Vector3, color: Color, emit: bool = false) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.name = part_name
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = 24
+	part.mesh = mesh
+	part.position = position
+	part.material_override = _merchant_material(color, emit)
+	parent.add_child(part)
+	return part
+
+
+func _merchant_material(color: Color, emit: bool = false) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	if emit:
+		mat.emission_enabled = true
+		mat.emission = color
+	return mat
 
 
 func _make_stair_node(def_id: String) -> Node3D:

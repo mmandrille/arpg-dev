@@ -21,7 +21,7 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "inventory", "skills", "shop", "character-menu", "join-menu", "hud", "stairs", "chests"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "inventory", "skills", "shop", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--output", default="", help="PNG output path for screenshot mode.")
@@ -50,6 +50,8 @@ def main() -> int:
     if args.focus == "stairs" and (args.width, args.height) == (640, 480):
         width, height = 960, 640
     if args.focus == "chests" and (args.width, args.height) == (640, 480):
+        width, height = 960, 640
+    if args.focus == "vendors" and (args.width, args.height) == (640, 480):
         width, height = 960, 640
 
     duration = args.duration

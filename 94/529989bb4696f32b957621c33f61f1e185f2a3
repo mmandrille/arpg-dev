@@ -1,0 +1,163 @@
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_2ca39747f75c71::t_10400837d3250f 30
+shared/rules/worlds.v0.json
+  s_0f1bceeefb38b1::t_60a778514e03ee 349-368
+tools/bot/scenarios/05_path_maze.json
+  s_2ca39747f75c71::t_62d89d6005cbba 5,8
+shared/protocol/state_delta.v8.schema.json
+  s_2ca39747f75c71::t_9c2b6a49d241e2 405,502
+client/tests/test_skill_bar.gd
+  s_2ca39747f75c71::t_3a46b6231b31a3 31,45,53-65,105-112
+shared/protocol/session_snapshot.v8.schema.json
+  s_2ca39747f75c71::t_9c2b6a49d241e2 459,551
+docs/specs/v61_spec-rage-and-heal-skills.md
+  s_2ca39747f75c71::t_4b332fdd8972d5 1-58
+tools/bot/scenarios/02_gear_before_combat.json
+  s_2ca39747f75c71::t_1185c578c6b12a 31-32
+tools/bot/scenarios/38_ranged_monster_ai.json
+  s_2ca39747f75c71::t_947b008492394e 14,22,34
+shared/rules/skills.v0.json
+  s_2ca39747f75c71::t_28e3174f617d7c 37-101
+server/internal/game/game_test.go
+  s_2ca39747f75c71::t_5eae5ea7921a5d 1547-1549,1579-1580,3173-3175,3323,3325,3501-3502
+  s_2ca39747f75c71::t_3e6bd8e41c677c 7493-7501
+  s_2ca39747f75c71::t_e9ec5b92a41636 6133-6135
+  s_2ca39747f75c71::t_744fd6f8f68fc9 141-146,541-542,553-554,572-573,588-589,599-600,612-613,623-624,639-640,651-652
+  s_2ca39747f75c71::t_b1f607121bda9c 3324
+  s_2ca39747f75c71::t_3d7566f2fd81f5 952
+  s_2ca39747f75c71::t_c5b69e27ca9ec4 7381,7390-7405
+  s_2ca39747f75c71::t_3ab5c9e282d8fa 3074-3077
+  s_2ca39747f75c71::t_628499497b26b8 858-951,953-967
+client/scripts/smoke.gd
+  s_2ca39747f75c71::t_70a747f37ec468 235,296,309
+shared/rules/monsters.v0.json
+  s_2ca39747f75c71::t_9b2ac0890d443f 57
+  s_0f1bceeefb38b1::t_60a778514e03ee 64-85
+client/scripts/skills_panel.gd
+  s_2ca39747f75c71::t_6d6840d34a6926 81-99,104,108,112,119
+  s_2ca39747f75c71::t_aa3630eb71f532 126,136
+  s_2ca39747f75c71::t_369c18bce8a552 228,248,258,260-261,266,268,274-297
+  s_2ca39747f75c71::t_f81d3c0506246f 13,17-20,29
+  s_2ca39747f75c71::t_2b9c8ef06a8626 184-219
+  s_2ca39747f75c71::t_3518c7031bd0bc 340,358-359,363-389
+tools/bot/scenarios/06_ranged_lab.json
+  s_2ca39747f75c71::t_a8535f86602241 15
+server/internal/game/handlers.go
+  s_2ca39747f75c71::t_01e9555be85ca9 1036-1044,1046,1048,1052-1064,1066-1069,1071-1074,1078,1083-1107,1109-1127,1129-1131
+  s_2ca39747f75c71::t_963be98aa3bcb1 1108,1128
+shared/rules/skills.v0.schema.json
+  s_2ca39747f75c71::t_87a99b80c88079 5,14,18-63,155-190
+tools/bot/run.py
+  s_2ca39747f75c71::t_5a441ce8bcc675 1840-1841
+  s_2ca39747f75c71::t_e590f0cdcd8252 1152-1157
+  s_2ca39747f75c71::t_9695c61d956757 1994,2002-2013,2026-2032
+client/tests/test_skills_panel.gd
+  s_2ca39747f75c71::t_1b53366efec798 32,48,66-71,79,90,102,115,148-155
+PROGRESS.md
+  s_2ca39747f75c71::t_ef8ae49a3605ae 532-536,542
+  s_2ca39747f75c71::t_2cdc71e9949210 265
+  s_2ca39747f75c71::t_504b737861d9d5 15,82,183
+tools/bot/scenarios/client/12_model_reaction_polish.json
+  s_2ca39747f75c71::t_6712880acab2e5 4-5,14,21,31,36-46,57,66
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_2ca39747f75c71::t_40f1f6a92a6037 1-2,4-5,7,9-10,13-19,21-30,33-41,43,46-56,59-118,120-129,131-157,159-167
+  s_2ca39747f75c71::t_95f47db4c3362b 44-45,57-58,158
+  s_2ca39747f75c71::t_218c69f64d3ad5 119
+  s_2ca39747f75c71::t_d743076ef1943a 130
+  s_0f1bceeefb38b1::t_27ba24d51a32a7 3,6,8,11-12,20,31-32,42
+docs/as-built/v61_rage-and-heal-skills.md
+  s_2ca39747f75c71::t_c83b82433e1a2d 1-27,33-37,39-40,44-51
+  s_2ca39747f75c71::t_dca8dd2830fb48 28-32,38,41-43
+client/scripts/skill_bar.gd
+  s_2ca39747f75c71::t_ff95a0f8f54165 45-57,186-187,191-194
+client/tests/test_skill_rules_loader.gd
+  s_2ca39747f75c71::t_0d314d33385c5f 20-22,27-28,33-34
+tools/bot/test_protocol.py
+  s_0f1bceeefb38b1::t_95b6707a3b4df8 2,31-36,132-149
+  s_2ca39747f75c71::t_af7c12e386eb6f 366
+server/internal/game/rules.go
+  s_2ca39747f75c71::t_8d6bf3193aa15b 448,500-511
+  s_2ca39747f75c71::t_9d8b11a5cb8570 2319,2331-2332,2334-2335,2337-2338,2340-2357,2359-2362,2364-2367,2369-2406,2408-2431,2433-2464
+client/scripts/main.gd
+  s_2ca39747f75c71::t_4b7b0f2deb1fff 3457,3484-3487
+  s_2ca39747f75c71::t_461d3a2bc19ee7 2785
+  s_2ca39747f75c71::t_68bcd0e79bc951 2802-2806,2813,2816,2858-2868,2882-2884
+  s_2ca39747f75c71::t_8403e13f3cd00d 4262
+  s_2ca39747f75c71::t_92cb3fa8cf06e8 2825
+  s_2ca39747f75c71::t_bc6495e28031f8 4469-4475
+  s_2ca39747f75c71::t_36025077998c0f 1128-1129,1202
+  s_2ca39747f75c71::t_6bce396b06d14a 976-988
+  s_2ca39747f75c71::t_0dce4579d3a702 95
+server/internal/replay/replay_test.go
+  s_2ca39747f75c71::t_5f03f2c050e133 1301-1336
+  s_2ca39747f75c71::t_60e7bb80e5ce18 21,48,116,143-144,160,874
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_2ca39747f75c71::t_eea89e6fcde994 68-72
+  s_0f1bceeefb38b1::t_77e0b558aaf23b 3,6,8,11-12,18,28,30-31,33,38,48,55-56,60,89,99-101,103,110-112
+server/internal/http/ws_test.go
+  s_2ca39747f75c71::t_362f9565c3202d 75-101
+  s_2ca39747f75c71::t_4c97e1f7325175 513-516,559,607,620-621,683-684
+server/internal/game/sim.go
+  s_2ca39747f75c71::t_35daf27917bfc3 907
+  s_2ca39747f75c71::t_6a326a8386cfbd 220-228,250,288
+  s_2ca39747f75c71::t_3a47b8aabd9f84 540
+  s_2ca39747f75c71::t_ee77fa9f46874a 5213
+  s_2ca39747f75c71::t_de32733d0d7939 5235-5265
+  s_2ca39747f75c71::t_130575ae03d542 1199-1202,1233
+  s_2ca39747f75c71::t_0b82f9fd324c2e 510-521
+  s_2ca39747f75c71::t_e6063fa56484f5 2776,2831
+  s_2ca39747f75c71::t_cd55e9cba05b97 2740,2766
+  s_2ca39747f75c71::t_087d423be4a56a 348
+  s_2ca39747f75c71::t_90ab73066b4def 896,940
+  s_2ca39747f75c71::t_193f1ea2aa0bc6 2729-2739,2741-2761,2763-2765,2767-2775,2777-2821,2823,2825,2827-2830,2832,2834-2850,2852-2853,2856,2906-2907
+  s_2ca39747f75c71::t_4cdbc0745982e5 1553-1554
+  s_2ca39747f75c71::t_c0bf3238462ee1 2762,2858-2881
+  s_2ca39747f75c71::t_c05a94e771fc2c 229-233
+  s_2ca39747f75c71::t_d450bdb5e0e824 1459
+  s_2ca39747f75c71::t_094d7a1251b249 2822,2824,2826,2833,2851,2854-2855,2857,2882-2905
+  s_2ca39747f75c71::t_ee18f1a109bda9 6235-6237
+  s_2ca39747f75c71::t_c6c164cd4b2790 1528-1552,1555-1583
+client/scripts/bot_scenario_runner.gd
+  s_2ca39747f75c71::t_d1e09db7da6f09 714-716,719,722,724,727,729,732,734,740-746
+client/scripts/skill_rules_loader.gd
+  s_2ca39747f75c71::t_56107638787821 46-66,68
+shared/assets/skill_presentations.v0.schema.json
+  s_2ca39747f75c71::t_fadee6d0708679 16,25,31-32
+docs/plans/v61_2026-06-10-rage-and-heal-skills.md
+  s_2ca39747f75c71::t_dca8dd2830fb48 3,116,126,128
+  s_2ca39747f75c71::t_9de3760137c718 47-48,50
+  s_2ca39747f75c71::t_16062d3139ba9c 32,49,77,80-81,98-101,114-115,124-125,127
+  s_2ca39747f75c71::t_7fb23ef25c1fc1 64-68
+  s_2ca39747f75c71::t_1774b7f01aab27 22-23,42-43
+  s_2ca39747f75c71::t_fd5223f9a568c2 1-2,4-21,24-31,33-41,44-46,51-63,69-76,78-79,82-97,102-113,117-123,129-132
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_0f1bceeefb38b1::t_6625e0dc5f66a1 4,7,11-14,17-18,28-29,32-33
+tools/bot/scenarios/15_character_persistence.json
+  s_2ca39747f75c71::t_d2d773cc951e60 12
+shared/assets/skill_presentations.v0.json
+  s_2ca39747f75c71::t_e1603ba8a5f5ee 13-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "94529989bb4696f32b957621c33f61f1e185f2a3",
+  "prompts": {},
+  "sessions": {
+    "s_0f1bceeefb38b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb333-0d41-75b0-82de-79fc5e756865",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_2ca39747f75c71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb2d8-b590-78a1-8a30-011f04af3e59",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

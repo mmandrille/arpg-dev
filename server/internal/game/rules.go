@@ -128,6 +128,7 @@ type DungeonGenerationRules struct {
 	LootBands                []DungeonLootBand        `json:"loot_bands"`
 	LevelNames               map[string]string        `json:"level_names"`
 	DefaultLevelNameTemplate string                   `json:"default_level_name_template"`
+	monsterPackRoles         map[string]string
 }
 
 // CharacterProgressionRules controls XP thresholds, level-up points, base
@@ -208,11 +209,18 @@ type MonsterPlacementRules struct {
 	PackCount        IntRange              `json:"pack_count"`
 	PackSize         IntRange              `json:"pack_size"`
 	PackMemberRadius float64               `json:"pack_member_radius"`
+	PackComposition  PackCompositionRules  `json:"pack_composition"`
+	ElitePackChance  int                   `json:"elite_pack_chance_percent"`
 	MonsterPool      []MonsterPoolEntry    `json:"monster_pool,omitempty"`
 	MinimumMonsters  []MinimumMonsterEntry `json:"minimum_monsters,omitempty"`
 	MarginFromWall   float64               `json:"margin_from_wall"`
 	MinSpawnDistance float64               `json:"min_spawn_distance"`
 	MaxAttempts      int                   `json:"max_attempts"`
+}
+
+type PackCompositionRules struct {
+	FrontlineMin int `json:"frontline_min"`
+	RangedMax    int `json:"ranged_max"`
 }
 
 type MonsterPoolEntry struct {
@@ -394,6 +402,13 @@ func (d DungeonGenerationRules) MonsterRarity(id string) (MonsterRarityDef, bool
 		}
 	}
 	return MonsterRarityDef{}, false
+}
+
+func (d DungeonGenerationRules) MonsterRole(monsterID string) string {
+	if d.monsterPackRoles == nil {
+		return ""
+	}
+	return d.monsterPackRoles[monsterID]
 }
 
 func (d DungeonGenerationRules) RollMonsterRarity(rng *RNG) MonsterRarityDef {
@@ -603,6 +618,7 @@ type MonsterDef struct {
 	ProjectileSpeed   float64      `json:"projectile_speed,omitempty"`
 	ProjectileDefID   string       `json:"projectile_def_id,omitempty"`
 	Behavior          string       `json:"behavior,omitempty"`
+	PackRole          string       `json:"pack_role,omitempty"`
 	AggroRadius       float64      `json:"aggro_radius,omitempty"`
 	AssistRadius      float64      `json:"assist_radius,omitempty"`
 	LeashRadius       float64      `json:"leash_radius,omitempty"`
@@ -1626,6 +1642,12 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules dungeon_generation.level_names.%s: key must be a negative integer string", key)
 		}
 	}
+	monsterPackRoles := map[string]string{}
+	for monsterID, def := range r.Monsters {
+		if def.PackRole != "" {
+			monsterPackRoles[monsterID] = def.PackRole
+		}
+	}
 	r.DungeonGeneration = DungeonGenerationRules{
 		FloorSize:                dungeonGeneration.FloorSize,
 		WallThickness:            dungeonGeneration.WallThickness,
@@ -1643,6 +1665,7 @@ func LoadRules(dir string) (*Rules, error) {
 		LootBands:                dungeonGeneration.LootBands,
 		LevelNames:               dungeonGeneration.LevelNames,
 		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
+		monsterPackRoles:         monsterPackRoles,
 	}
 	if err := r.applyMainConfigDungeonMonsterDropRate(); err != nil {
 		return nil, err
@@ -1887,6 +1910,21 @@ func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) err
 	if placement.PackMemberRadius <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_member_radius: must be positive")
 	}
+	if placement.PackComposition.FrontlineMin <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_composition.frontline_min: must be positive")
+	}
+	if placement.PackComposition.RangedMax < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_composition.ranged_max: must be non-negative")
+	}
+	if placement.PackComposition.FrontlineMin > placement.PackSize.Min {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_composition.frontline_min: must fit minimum pack size")
+	}
+	if placement.PackComposition.RangedMax > placement.PackSize.Max {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_composition.ranged_max: must fit maximum pack size")
+	}
+	if placement.ElitePackChance < 0 || placement.ElitePackChance > 100 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.elite_pack_chance_percent: must be 0..100")
+	}
 	if placement.PackCount.Min*placement.PackSize.Min > placement.Count {
 		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement: minimum pack population exceeds count")
 	}
@@ -1896,6 +1934,7 @@ func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) err
 
 	poolWeight := 0
 	poolIDs := map[string]bool{}
+	poolRoles := map[string]bool{}
 	minAssistRadius := math.MaxFloat64
 	considerAssist := func(monsterID string) error {
 		def, ok := r.Monsters[monsterID]
@@ -1905,7 +1944,11 @@ func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) err
 		if def.effectiveBehavior() != monsterBehaviorChase {
 			return fmt.Errorf("%s must use chase behavior", monsterID)
 		}
+		if def.PackRole == "" {
+			return fmt.Errorf("%s must declare pack_role", monsterID)
+		}
 		minAssistRadius = math.Min(minAssistRadius, def.effectiveAssistRadius())
+		poolRoles[def.PackRole] = true
 		return nil
 	}
 	for idx, entry := range placement.MonsterPool {
@@ -1928,6 +1971,9 @@ func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) err
 	}
 	if len(placement.MonsterPool) > 0 && poolWeight <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool: total weight must be positive")
+	}
+	if !poolRoles["frontline"] {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_pool: at least one frontline pack_role required")
 	}
 	if minAssistRadius != math.MaxFloat64 && placement.PackMemberRadius*2 > minAssistRadius {
 		return fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.pack_member_radius: diameter must fit within monster assist_radius")

@@ -44,6 +44,7 @@ type generatedLoot struct {
 type generatedMonster struct {
 	defID        string
 	packID       string
+	packLeader   bool
 	rarityID     string
 	bossTemplate string
 	isBoss       bool
@@ -625,12 +626,68 @@ func placeDungeonMonsters(rng *RNG, defRNG *RNG, rarityRNG *RNG, rules DungeonGe
 	for packIndex, packSize := range packSizes {
 		packID := fmt.Sprintf("pack_%02d", packIndex+1)
 		defs := append([]string(nil), defIDs[nextDef:nextDef+packSize]...)
-		if err := placeGeneratedMonsterPack(rng, rarityRNG, rules, out, defs, packID); err != nil {
+		defs = composeMonsterPackDefs(rules, defs)
+		leaderIndex := -1
+		if placement.ElitePackChance > 0 && rng.IntN(100) < placement.ElitePackChance {
+			leaderIndex = 0
+		}
+		if err := placeGeneratedMonsterPack(rng, rarityRNG, rules, out, defs, packID, leaderIndex); err != nil {
 			return err
 		}
 		nextDef += packSize
 	}
 	return nil
+}
+
+func composeMonsterPackDefs(rules DungeonGenerationRules, defs []string) []string {
+	if len(defs) == 0 {
+		return defs
+	}
+	frontlineID := rules.MonsterPlacement.MonsterDefID
+	if rules.MonsterRole(frontlineID) != "frontline" {
+		for _, entry := range rules.MonsterPlacement.MonsterPool {
+			if rules.MonsterRole(entry.MonsterDefID) == "frontline" {
+				frontlineID = entry.MonsterDefID
+				break
+			}
+		}
+	}
+	frontlineCount := 0
+	rangedCount := 0
+	for _, defID := range defs {
+		switch rules.MonsterRole(defID) {
+		case "frontline":
+			frontlineCount++
+		case "ranged":
+			rangedCount++
+		}
+	}
+	for frontlineCount < rules.MonsterPlacement.PackComposition.FrontlineMin && frontlineCount < len(defs) {
+		replaceIndex := 0
+		for i, defID := range defs {
+			if rules.MonsterRole(defID) != "ranged" {
+				replaceIndex = i
+				break
+			}
+		}
+		replacedRole := rules.MonsterRole(defs[replaceIndex])
+		if replacedRole == "ranged" {
+			rangedCount--
+		}
+		defs[replaceIndex] = frontlineID
+		frontlineCount++
+	}
+	for i, defID := range defs {
+		if rangedCount <= rules.MonsterPlacement.PackComposition.RangedMax {
+			break
+		}
+		if rules.MonsterRole(defID) != "ranged" {
+			continue
+		}
+		defs[i] = frontlineID
+		rangedCount--
+	}
+	return defs
 }
 
 func randomMonsterPackSizes(rng *RNG, placement MonsterPlacementRules, count int) []int {
@@ -680,7 +737,7 @@ func ceilDiv(a, b int) int {
 	return (a + b - 1) / b
 }
 
-func placeGeneratedMonsterPack(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defIDs []string, packID string) error {
+func placeGeneratedMonsterPack(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defIDs []string, packID string, leaderIndex int) error {
 	for attempt := 0; attempt < rules.MonsterPlacement.MaxAttempts; attempt++ {
 		center, ok := randomMonsterPosition(rng, rules, out)
 		if !ok {
@@ -699,7 +756,7 @@ func placeGeneratedMonsterPack(rng *RNG, rarityRNG *RNG, rules DungeonGeneration
 					break
 				}
 			}
-			if err := appendGeneratedMonster(rng, rarityRNG, rules, &candidate, defID, packID, pos); err != nil {
+			if err := appendGeneratedMonster(rng, rarityRNG, rules, &candidate, defID, packID, i == leaderIndex, pos); err != nil {
 				return err
 			}
 			placed = append(placed, pos)
@@ -712,21 +769,27 @@ func placeGeneratedMonsterPack(rng *RNG, rarityRNG *RNG, rules DungeonGeneration
 	return fmt.Errorf("game: generate dungeon level %d: could not place %s", out.levelNum, packID)
 }
 
-func appendGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defID string, packID string, pos Vec2) error {
+func appendGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defID string, packID string, leader bool, pos Vec2) error {
 	rarity := rules.RollMonsterRarity(rarityRNG)
+	if leader {
+		if champion, ok := rules.MonsterRarity("champion"); ok {
+			rarity = champion
+		}
+	}
 	effectiveDepth := absInt(out.levelNum) + rarity.LootDepthOffset
 	effectiveLootBand, ok := rules.LootBandForDepth(effectiveDepth)
 	if !ok {
 		return fmt.Errorf("game: generate dungeon level %d: missing loot band for effective depth %d", out.levelNum, effectiveDepth)
 	}
 	out.monsters = append(out.monsters, generatedMonster{
-		defID:     defID,
-		packID:    packID,
-		rarityID:  rarity.ID,
-		lootTable: effectiveLootBand.MonsterLootTable,
-		pos:       pos,
+		defID:      defID,
+		packID:     packID,
+		packLeader: leader,
+		rarityID:   rarity.ID,
+		lootTable:  effectiveLootBand.MonsterLootTable,
+		pos:        pos,
 	})
-	if rarity.ID == "champion" {
+	if rarity.ID == "champion" && !leader {
 		if err := placeChampionCommonMinions(rng, rules, out, pos); err != nil {
 			return err
 		}

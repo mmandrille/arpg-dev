@@ -58,7 +58,7 @@
     },
     "monster_placement": {
       "type": "object",
-      "required": ["count", "monster_def_id", "pack_count", "pack_size", "pack_member_radius", "margin_from_wall", "min_spawn_distance", "max_attempts"],
+      "required": ["count", "monster_def_id", "pack_count", "pack_size", "pack_member_radius", "pack_composition", "elite_pack_chance_percent", "margin_from_wall", "min_spawn_distance", "max_attempts"],
       "additionalProperties": false,
       "properties": {
         "count": { "type": "integer", "minimum": 0 },
@@ -66,6 +66,16 @@
         "pack_count": { "$ref": "#/$defs/int_range" },
         "pack_size": { "$ref": "#/$defs/int_range" },
         "pack_member_radius": { "type": "number", "exclusiveMinimum": 0 },
+        "pack_composition": {
+          "type": "object",
+          "required": ["frontline_min", "ranged_max"],
+          "additionalProperties": false,
+          "properties": {
+            "frontline_min": { "type": "integer", "minimum": 1 },
+            "ranged_max": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "elite_pack_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
         "monster_pool": {
           "type": "array",
           "minItems": 1,

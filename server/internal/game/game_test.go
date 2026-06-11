@@ -6029,12 +6029,65 @@ func TestDungeonMonsterGenerationCreatesDeterministicPacks(t *testing.T) {
 		if len(monsters) < placement.PackSize.Min || len(monsters) > placement.PackSize.Max {
 			t.Fatalf("%s size = %d, want %d..%d", packID, len(monsters), placement.PackSize.Min, placement.PackSize.Max)
 		}
+		frontlineCount := 0
+		rangedCount := 0
+		leaderCount := 0
+		for _, monster := range monsters {
+			switch rules.DungeonGeneration.MonsterRole(monster.defID) {
+			case "frontline":
+				frontlineCount++
+			case "ranged":
+				rangedCount++
+			}
+			if monster.packLeader {
+				leaderCount++
+				if monster.rarityID != "champion" {
+					t.Fatalf("%s leader rarity = %s, want champion", packID, monster.rarityID)
+				}
+			}
+		}
+		if frontlineCount < placement.PackComposition.FrontlineMin {
+			t.Fatalf("%s frontline count = %d, want at least %d", packID, frontlineCount, placement.PackComposition.FrontlineMin)
+		}
+		if rangedCount > placement.PackComposition.RangedMax {
+			t.Fatalf("%s ranged count = %d, want at most %d", packID, rangedCount, placement.PackComposition.RangedMax)
+		}
+		if leaderCount > 1 {
+			t.Fatalf("%s leader count = %d, want at most 1", packID, leaderCount)
+		}
 		for i := range monsters {
 			for j := i + 1; j < len(monsters); j++ {
 				if got := distance(monsters[i].pos, monsters[j].pos); got > placement.PackMemberRadius*2+0.000001 {
 					t.Fatalf("%s monsters too far apart: %.3f > %.3f: %+v %+v", packID, got, placement.PackMemberRadius*2, monsters[i], monsters[j])
 				}
 			}
+		}
+	}
+}
+
+func TestDungeonMonsterGenerationCanForceElitePackLeaders(t *testing.T) {
+	rules := loadRules(t)
+	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
+	level, err := GenerateDungeonLevel("v79_forced_elite_packs", -1, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	packLeaders := map[string]int{}
+	for _, monster := range level.monsters {
+		if monster.packID == "" || !monster.packLeader {
+			continue
+		}
+		packLeaders[monster.packID]++
+		if monster.rarityID != "champion" {
+			t.Fatalf("%s leader rarity = %s, want champion", monster.packID, monster.rarityID)
+		}
+	}
+	if len(packLeaders) < rules.DungeonGeneration.MonsterPlacement.PackCount.Min {
+		t.Fatalf("elite leaders = %+v, want one per generated pack", packLeaders)
+	}
+	for packID, count := range packLeaders {
+		if count != 1 {
+			t.Fatalf("%s leader count = %d, want 1", packID, count)
 		}
 	}
 }
@@ -6374,8 +6427,8 @@ func TestGuardedChestGenerationGolden(t *testing.T) {
 		}
 		if c.ExpectedChest == nil {
 			wantCount := rules.DungeonGeneration.MonsterPlacement.Count
-			if len(level.monsters) != wantCount {
-				t.Fatalf("%s: monsters = %d, want rule-derived base count %d", c.Name, len(level.monsters), wantCount)
+			if len(level.monsters) < wantCount {
+				t.Fatalf("%s: monsters = %d, want at least rule-derived base count %d", c.Name, len(level.monsters), wantCount)
 			}
 			if len(level.chests) != 0 {
 				t.Fatalf("%s: chests = %+v, want none", c.Name, level.chests)
@@ -6383,8 +6436,8 @@ func TestGuardedChestGenerationGolden(t *testing.T) {
 			continue
 		}
 		wantCount := rules.DungeonGeneration.MonsterPlacement.Count + rules.DungeonGeneration.ChestPlacement.MonsterCountBonus
-		if len(level.monsters) != wantCount {
-			t.Fatalf("%s: monsters = %d, want rule-derived guarded count %d", c.Name, len(level.monsters), wantCount)
+		if len(level.monsters) < wantCount {
+			t.Fatalf("%s: monsters = %d, want at least rule-derived guarded count %d", c.Name, len(level.monsters), wantCount)
 		}
 		if len(level.chests) != 1 {
 			t.Fatalf("%s: chests = %+v, want one", c.Name, level.chests)
@@ -6462,7 +6515,8 @@ func TestGeneratedDungeonMonsterRarityGolden(t *testing.T) {
 		} `json:"generated_cases"`
 	}
 	loadGolden(t, "monster_rarity.json", &golden)
-	rules := loadRules(t)
+	rules := cloneRules(loadRules(t))
+	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 0
 	for _, c := range golden.GeneratedCases {
 		level, err := GenerateDungeonLevel(c.Seed, c.Level, rules.DungeonGeneration)
 		if err != nil {

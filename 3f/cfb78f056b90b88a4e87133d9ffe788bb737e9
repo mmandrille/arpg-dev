@@ -1,0 +1,66 @@
+server/internal/game/sim.go
+  s_811f691015f0d0::t_8bd2f45f6b61d6 363-379
+tools/bot/scenarios/20_dungeon_equipment_drops.json
+  s_811f691015f0d0::t_2e41ea5f194200 3,6,12,17
+tools/bot/run.py
+  s_811f691015f0d0::t_0ef84d05ca7a29 4430,4432-4446,4449-4451,4460-4461,4469
+  s_811f691015f0d0::t_f14b2145e9d61d 37,68-75,4809-4811
+  s_811f691015f0d0::t_a7a40e3857d7de 4522,4524,4527,4584-4602
+  s_811f691015f0d0::t_bd936663a5184d 4447
+  s_811f691015f0d0::t_97d5cddfdb50ca 4431
+tools/bot/scenarios/34_coop_rewards_and_scaling.json
+  s_811f691015f0d0::t_97d5cddfdb50ca 3
+  s_811f691015f0d0::t_9ce18a078a5982 7
+tools/bot/scenarios/37_mystery_seller_core.json
+  s_811f691015f0d0::t_aac3095089f850 3,6,74,85
+tools/bot/scenarios/35_gold_autopickup_shared_loot.json
+  s_811f691015f0d0::t_a7a40e3857d7de 3,7
+shared/rules/worlds.v0.schema.json
+  s_811f691015f0d0::t_8bd2f45f6b61d6 20
+shared/rules/worlds.v0.json
+  s_811f691015f0d0::t_97d5cddfdb50ca 511,513,519-520
+  s_811f691015f0d0::t_1bd2d106ede827 542-559
+  s_811f691015f0d0::t_bd936663a5184d 512,514-518
+  s_811f691015f0d0::t_b263bed7ad86cc 505-510
+  s_811f691015f0d0::t_a7a40e3857d7de 521-531
+  s_811f691015f0d0::t_630a324154ca0d 532-541
+tools/bot/scenarios/33_shop_stock_lifecycle.json
+  s_811f691015f0d0::t_aac3095089f850 3,6,22,26,33,41
+  s_811f691015f0d0::t_7fcb7fd6f94b73 12
+CLAUDE.md
+  s_811f691015f0d0::t_4e4bbe16646378 217-222
+tools/bot/scenarios/38_ranged_monster_ai.json
+  s_811f691015f0d0::t_630a324154ca0d 3,6,12,23
+  s_811f691015f0d0::t_49badcd9efa123 4
+tools/bot/test_protocol.py
+  s_811f691015f0d0::t_5751e521c42fe5 481
+  s_811f691015f0d0::t_116151e01496f5 8,24,154-166
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_811f691015f0d0::t_1f8c2e1df3b031 23-24,34
+  s_811f691015f0d0::t_b263bed7ad86cc 3,6
+server/internal/game/rules.go
+  s_811f691015f0d0::t_8bd2f45f6b61d6 1548-1554
+  s_811f691015f0d0::t_a9c366954a96c1 715-718
+PROGRESS.md
+  s_811f691015f0d0::t_5751e521c42fe5 248,254,272-273,276
+tools/bot/scenarios/30_vendor_appraisal_quotes.json
+  s_811f691015f0d0::t_aac3095089f850 3,6
+tools/bot/scenarios/29_town_vendor_gold_sink.json
+  s_811f691015f0d0::t_aac3095089f850 3,6,33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3fcfb78f056b90b88a4e87133d9ffe788bb737e9",
+  "prompts": {},
+  "sessions": {
+    "s_811f691015f0d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb46e-e1fb-77a1-9408-52e55364dd27",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

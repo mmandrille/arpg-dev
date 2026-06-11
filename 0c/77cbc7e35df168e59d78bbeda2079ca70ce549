@@ -1,0 +1,92 @@
+shared/rules/main_config.v0.schema.json
+  s_c8b827646bf8c0::t_e38c810a762d06 1-22
+tools/bot/scenarios/36_account_stash_storage.json
+  s_c8b827646bf8c0::t_d0aa964dfe341d 22
+server/internal/game/rules.go
+  s_c8b827646bf8c0::t_e92e155e375613 17,37-48,784-800
+client/tests/test_shop_panel.gd
+  s_c8b827646bf8c0::t_6b9a5c1c5829dc 164,168-169
+tools/bot/scenarios/40_paladin_heal_skill.json
+  s_c8b827646bf8c0::t_e8423fd391f828 33,39
+tools/bot/scenarios/39_mystery_seller_paid_reroll.json
+  s_c8b827646bf8c0::t_0ac0aa8f1cffdc 39,57,60
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_c8b827646bf8c0::t_790258a3b98a5b 45
+tools/bot/scenarios/client/09_character_stats_panel.json
+  s_c8b827646bf8c0::t_cbdc3fe04e8143 4,12
+  s_c8b827646bf8c0::t_7e624cbce46e6f 17
+tools/bot/scenarios/client/29_mystery_seller_paid_reroll.json
+  s_c8b827646bf8c0::t_55522711b20ef7 7
+server/internal/replay/replay_test.go
+  s_c8b827646bf8c0::t_d891d33441243c 786
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_c8b827646bf8c0::t_73641be18af79a 29
+  s_c8b827646bf8c0::t_26c7a732a2eb72 22
+shared/rules/main_config.v0.json
+  s_c8b827646bf8c0::t_e38c810a762d06 1-8
+docs/plans/v76_2026-06-11-main-config-foundation.md
+  s_c8b827646bf8c0::t_86781e341fec47 1-2,4-30,33-43,47-56,61-73,77-83,87-92
+  s_c8b827646bf8c0::t_343659dde0eb94 3,31-32,44-46,57-60,74-76,84-86
+shared/rules/shops.v0.json
+  s_c8b827646bf8c0::t_69a75dd719d045 17
+shared/rules/monsters.v0.json
+  s_c8b827646bf8c0::t_13c5c5d19e27e4 86-96
+shared/rules/worlds.v0.json
+  s_c8b827646bf8c0::t_b75ba1885bcc4e 622
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_c8b827646bf8c0::t_4e1476f4bb74b8 13,24-25
+tools/bot/scenarios/18_character_stats_and_leveling.json
+  s_c8b827646bf8c0::t_54429c3c5afc67 8
+client/tests/test_skills_panel.gd
+  s_c8b827646bf8c0::t_359e281c84a363 7,18,141,146-147,182-185
+  s_c8b827646bf8c0::t_91b0316bec5103 52
+docs/specs/v76_spec-main-config-foundation.md
+  s_c8b827646bf8c0::t_69d13b844ed58a 1-2,4-53
+  s_c8b827646bf8c0::t_343659dde0eb94 3
+tools/validate_shared.py
+  s_c8b827646bf8c0::t_81b9c83a20c690 198,247,1119-1148
+docs/as-built/v76_main-config-foundation.md
+  s_c8b827646bf8c0::t_343659dde0eb94 1-22
+PROGRESS.md
+  s_c8b827646bf8c0::t_2ffdb1569e00dd 15,97,213,645-648,661
+server/internal/http/ws_test.go
+  s_c8b827646bf8c0::t_b420ef123c2fb1 7,618,621,654,663
+client/tests/test_coop_client.gd
+  s_c8b827646bf8c0::t_285cb691bc6b9f 276,455,462-463,479,505-515
+client/tests/test_stash_panel.gd
+  s_c8b827646bf8c0::t_decfc305198fcc 130,134-135
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_c8b827646bf8c0::t_07b10e72fe9b79 15,45-46,55,64-65,81,83,91
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_c8b827646bf8c0::t_1bdfb279af8c19 24
+tools/bot/run.py
+  s_c8b827646bf8c0::t_ca93b489e750f4 787-788
+  s_c8b827646bf8c0::t_565b1ffdb1bcde 2251-2252
+  s_c8b827646bf8c0::t_253c44ee75cb67 4270
+  s_c8b827646bf8c0::t_c3294c2b765bed 662,1895
+  s_c8b827646bf8c0::t_40f249613e4805 37
+tools/bot/scenarios/22_combat_stat_effects.json
+  s_c8b827646bf8c0::t_374a8b162b0053 67
+tools/bot/scenarios/15_character_persistence.json
+  s_c8b827646bf8c0::t_79a0dcdc1da068 9,14
+tools/bot/test_protocol.py
+  s_c8b827646bf8c0::t_e6792e0f34bfe8 154-156,161,164
+server/internal/game/game_test.go
+  s_c8b827646bf8c0::t_8b7ee636ff30e5 68-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0c77cbc7e35df168e59d78bbeda2079ca70ce549",
+  "prompts": {},
+  "sessions": {
+    "s_c8b827646bf8c0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb6e2-2424-7c43-b6cd-e3fd1d735f3b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

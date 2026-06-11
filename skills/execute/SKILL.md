@@ -46,6 +46,7 @@ Review the plan before touching code. Produce a short **Plan Review** in chat.
 | **Branch** | Work only on the current checkout; never create or switch branches. |
 | **Drift** | Plan still matches as-built code (prior slices may have landed since plan was written). |
 | **Plugin checklist** | Client tasks include adopt/borrow/reject if UI/art is in scope. |
+| **Maintenance ratchet** | Plan includes over-600-line file decisions and `make maintainability`. |
 
 ### Outcomes
 
@@ -81,6 +82,8 @@ For each plan task:
 - Server owns outcomes; client is renderer + input.
 - Animation is client-only; wire new reactions via `state_delta.events`.
 - Golden changes → update Go tests **and** `client/tests/test_golden.gd`.
+- File-size ratchet: new source/test/tool files stay <=600 lines; grandfathered files do not grow
+  beyond the `.maintainability/file-size-baseline.tsv` allowance without a documented exception.
 
 ### Bot scenarios
 
@@ -100,6 +103,7 @@ When the plan includes bot work:
 Run the plan's **Final verification** section. Minimum gate:
 
 ```bash
+make maintainability
 make ci
 ```
 

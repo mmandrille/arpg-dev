@@ -55,6 +55,7 @@ Survey these sources and rank 2–4 candidates:
 | In-flight specs | Specs/plans written but not marked complete |
 | Natural trajectory | What logically follows the latest completed slice (e.g. v19 teleporters → v20 play loop) |
 | Bot/scenario gaps | Missing end-to-end proof for a feature area |
+| Maintenance ratchet | Open v80 maintainability findings and over-600-line files likely to be touched |
 
 Score each candidate on:
 

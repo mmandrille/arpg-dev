@@ -64,6 +64,7 @@ Read [`PROGRESS.md`](../../PROGRESS.md) and verify it reflects the shipped slice
 | **Open gaps & deferred work** | Move closed items to **Recently closed**; add any new deferred items from spec non-goals |
 | **Last updated** | Today's date |
 | **Engineering review** | If the shipped slice hits the next ~10-slice milestone in `PROGRESS.md` → **Next engineering review**, update **Last/Next engineering review** and add the review set: overview at `docs/reviews/`, companion reports under `docs/reviews/{backend,client,extras}/` |
+| **Maintenance ratchet** | Confirm any touched over-600-line files were split, stayed within allowance, or have a documented exception |
 
 Cross-check against:
 
@@ -98,6 +99,10 @@ Review:
 - Changes match the identified slice scope.
 
 ### CI gate
+
+```bash
+make maintainability
+```
 
 ```bash
 make ci

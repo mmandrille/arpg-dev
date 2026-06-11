@@ -97,6 +97,23 @@ unrelated tests; those assertions become accidental tuning locks. Exact numbers 
 for named goldens, protocol/schema contracts, deterministic replay equality, evaluator parity, and
 tests whose stated purpose is to own a formula.
 
+## Maintainability Ratchet
+
+Source, test, and tool files have a target maximum of **600 lines**.
+
+Rules:
+
+1. New source/test/tool files should stay at or below 600 lines.
+2. Existing over-limit files are grandfathered in `.maintainability/file-size-baseline.tsv`.
+3. Grandfathered files may not grow by more than 25 lines unless the slice plan documents why
+   splitting now is riskier and the baseline is intentionally updated.
+4. When touching an over-limit file, prefer extracting a focused helper, module, or test file as
+   part of the same slice.
+5. Run `make maintainability` before finishing a slice that adds or expands source/test/tool files.
+
+This is a ratchet, not a repo-wide rewrite mandate: shrink large files opportunistically and block
+new large files from appearing.
+
 ## Architecture
 
 ```

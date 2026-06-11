@@ -174,7 +174,7 @@ func _setup_inventory() -> void:
 	var items := _inventory_items()
 	panel.set_inventory_state(items, {
 		"head": "2001",
-		"amulet": null,
+		"amulet": "2011",
 		"chest": "2002",
 		"gloves": null,
 		"belt": "2003",
@@ -185,7 +185,7 @@ func _setup_inventory() -> void:
 		"off_hand": "2006",
 	}, 4, 20, 145)
 	panel.ensure_display_visible()
-	var tooltip = panel._make_item_tooltip(items[6])
+	var tooltip = panel._make_item_tooltip(_inventory_item_by_id(items, "2005"))
 	tooltip.position = Vector2(524, 28)
 	get_root().add_child(tooltip)
 
@@ -400,8 +400,37 @@ func _inventory_items() -> Array:
 		{"item_instance_id": "2002", "item_def_id": "cave_mail", "slot": "chest", "equipped": true, "rarity": "rare"},
 		{"item_instance_id": "2003", "item_def_id": "cave_pack_belt", "slot": "belt", "equipped": true, "rarity": "magic"},
 		{"item_instance_id": "2004", "item_def_id": "cave_boots", "slot": "boots", "equipped": true, "rarity": "common"},
-		{"item_instance_id": "2005", "item_def_id": "cave_blade", "slot": "main_hand", "equipped": true, "rarity": "magic"},
+		{
+			"item_instance_id": "2005",
+			"item_def_id": "cave_blade",
+			"item_template_id": "cave_blade",
+			"display_name": "Magic Cave Blade",
+			"slot": "main_hand",
+			"equipped": true,
+			"rarity": "magic",
+			"rolled_stats": {"damage_min": 3, "damage_max": 4, "max_hp": 3},
+			"requirements": {"level": 1},
+			"requirement_status": [
+				{"stat": "level", "required": 1, "current": 1, "met": true}
+			],
+			"requirements_met": true,
+		},
 		{"item_instance_id": "2006", "item_def_id": "cave_shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
+		{
+			"item_instance_id": "2011",
+			"item_def_id": "cave_amulet",
+			"item_template_id": "cave_amulet",
+			"display_name": "Common Cave Amulet",
+			"slot": "amulet",
+			"equipped": true,
+			"rarity": "common",
+			"rolled_stats": {"max_hp": 4, "mana_regen_per_10_seconds": 2},
+			"requirements": {"level": 1},
+			"requirement_status": [
+				{"stat": "level", "required": 1, "current": 1, "met": true}
+			],
+			"requirements_met": true,
+		},
 		{"item_instance_id": "2007", "item_def_id": "red_potion", "slot": "", "equipped": false, "rarity": "common"},
 		{"item_instance_id": "2008", "item_def_id": "blue_potion", "slot": "", "equipped": false, "rarity": "common"},
 		{"item_instance_id": "2009", "item_def_id": "cave_ring", "slot": "ring_left", "equipped": false, "rarity": "rare"},
@@ -430,6 +459,13 @@ func _inventory_items() -> Array:
 			"summary_lines": ["Slot: main hand", "Damage 6-11"],
 		},
 	]
+
+
+func _inventory_item_by_id(items: Array, item_instance_id: String) -> Dictionary:
+	for item in items:
+		if typeof(item) == TYPE_DICTIONARY and str((item as Dictionary).get("item_instance_id", "")) == item_instance_id:
+			return item as Dictionary
+	return {}
 
 
 func _shop_offers() -> Array:

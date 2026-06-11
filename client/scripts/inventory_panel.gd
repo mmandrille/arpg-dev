@@ -30,6 +30,7 @@ const EQUIPMENT_LABELS := {
 	"main_hand": "Main",
 	"off_hand": "Off"
 }
+const TOOLTIP_STAT_SEPARATOR := "----------------"
 const ITEM_RARITY_BACKGROUNDS := {
 	"common": Color("#343432"),
 	"magic": Color("#1b3458"),
@@ -811,37 +812,71 @@ func _tooltip_lines(item: Dictionary) -> Array:
 		var category := str(def.get("category", ""))
 		if category != "":
 			lines.append("Kind: %s" % category)
-	lines.append_array(_consumable_effect_lines(def))
-	var rolled_stats: Dictionary = item.get("rolled_stats", {})
-	if rolled_stats.has("damage_min") and rolled_stats.has("damage_max"):
-		lines.append("Damage: %s-%s" % [str(rolled_stats.get("damage_min", "?")), str(rolled_stats.get("damage_max", "?"))])
-	elif def.has("damage"):
-		var dmg: Dictionary = def["damage"]
-		lines.append("Damage: %s-%s" % [str(dmg.get("min", "?")), str(dmg.get("max", "?"))])
-	if rolled_stats.has("max_hp"):
-		lines.append("Max HP: +%s" % str(rolled_stats.get("max_hp", "?")))
-	if rolled_stats.has("health_regen_per_10_seconds"):
-		lines.append("HP regen / 10s: +%s" % str(rolled_stats.get("health_regen_per_10_seconds", "?")))
-	if rolled_stats.has("mana_regen_per_10_seconds"):
-		lines.append("Mana regen / 10s: +%s" % str(rolled_stats.get("mana_regen_per_10_seconds", "?")))
-	if rolled_stats.has("armor"):
-		lines.append("Armor: +%s" % str(rolled_stats.get("armor", "?")))
-	if rolled_stats.has("block_percent"):
-		lines.append("Block: %s%%" % str(rolled_stats.get("block_percent", "?")))
-	if rolled_stats.has("hotbar_slots"):
-		lines.append("Hotbar slots: %s" % str(rolled_stats.get("hotbar_slots", "?")))
-	if rolled_stats.has("inventory_rows"):
-		lines.append("Inventory rows: +%s" % str(rolled_stats.get("inventory_rows", "?")))
-	else:
-		var base_stats: Dictionary = def.get("base_stats", {})
-		if base_stats.has("inventory_rows"):
-			lines.append("Inventory rows: +%s" % str(base_stats.get("inventory_rows", "?")))
 	if def.has("reach"):
 		lines.append("Reach: %s" % str(def["reach"]))
 	if def.has("attack_mode"):
 		lines.append("Mode: %s" % str(def["attack_mode"]))
+	lines.append_array(_consumable_effect_lines(def))
+	var base_stat_lines := _base_stat_lines(def)
+	if not base_stat_lines.is_empty():
+		lines.append(TOOLTIP_STAT_SEPARATOR)
+		lines.append_array(base_stat_lines)
+	var random_stat_lines := _random_stat_lines(item.get("rolled_stats", {}), def)
+	if not random_stat_lines.is_empty():
+		lines.append(TOOLTIP_STAT_SEPARATOR)
+		lines.append_array(random_stat_lines)
+	elif def.has("damage"):
+		var dmg: Dictionary = def["damage"]
+		lines.append("Damage: %s-%s" % [str(dmg.get("min", "?")), str(dmg.get("max", "?"))])
 	_append_hotbar_tooltip_line(lines, item)
 	return lines
+
+
+func _base_stat_lines(def: Dictionary) -> Array:
+	var stats_value = def.get("base_stats", {})
+	if typeof(stats_value) != TYPE_DICTIONARY:
+		return []
+	return _stat_lines_for_tooltip(stats_value as Dictionary, false)
+
+
+func _random_stat_lines(stats_value: Variant, def: Dictionary) -> Array:
+	if typeof(stats_value) != TYPE_DICTIONARY:
+		return []
+	var base_stats: Dictionary = def.get("base_stats", {})
+	var deltas: Dictionary = {}
+	for key in (stats_value as Dictionary).keys():
+		var total := int((stats_value as Dictionary).get(key, 0))
+		var base := int(base_stats.get(key, 0))
+		var delta := total - base
+		if delta != 0:
+			deltas[key] = delta
+	return _stat_lines_for_tooltip(deltas, true)
+
+
+func _stat_lines_for_tooltip(stats: Dictionary, signed: bool) -> Array:
+	var lines: Array = []
+	if int(stats.get("damage_min", 0)) > 0 or int(stats.get("damage_max", 0)) > 0:
+		if signed:
+			if int(stats.get("damage_min", 0)) != 0:
+				lines.append("%s: %s" % [_display_stat("damage_min"), _format_stat_value(stats.get("damage_min", 0), false)])
+			if int(stats.get("damage_max", 0)) != 0:
+				lines.append("%s: %s" % [_display_stat("damage_max"), _format_stat_value(stats.get("damage_max", 0), false)])
+		else:
+			lines.append("Damage: %s-%s" % [str(stats.get("damage_min", "?")), str(stats.get("damage_max", "?"))])
+	for key in ["armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "hotbar_slots", "inventory_rows"]:
+		if not stats.has(key):
+			continue
+		var value := int(stats.get(key, 0))
+		if value == 0:
+			continue
+		lines.append("%s: %s" % [_display_stat(key), _format_stat_value(value, key == "block_percent" or key == "attack_speed_percent")])
+	return lines
+
+
+func _format_stat_value(value: int, percent: bool) -> String:
+	var sign := "+" if value > 0 else ""
+	var suffix := "%" if percent else ""
+	return "%s%d%s" % [sign, value, suffix]
 
 
 func _append_hotbar_tooltip_line(lines: Array, item: Dictionary) -> void:

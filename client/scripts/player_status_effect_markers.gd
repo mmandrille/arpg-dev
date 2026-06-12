@@ -126,16 +126,16 @@ static func make_holy_shield_aura_pulse(radius: float) -> Node3D:
 static func make_holy_shield_target_pulse() -> Node3D:
 	var marker := Node3D.new()
 	marker.name = HOLY_SHIELD_TARGET_PULSE_NAME
-	var mat := _holy_shield_pulse_material(0.72)
+	var mat := _holy_shield_pulse_material(0.92)
 	var shine := MeshInstance3D.new()
 	shine.name = "HolyShieldTargetShine"
 	var shine_mesh := CylinderMesh.new()
-	shine_mesh.top_radius = 0.46
-	shine_mesh.bottom_radius = 0.68
-	shine_mesh.height = 1.65
+	shine_mesh.top_radius = 0.82
+	shine_mesh.bottom_radius = 1.02
+	shine_mesh.height = 1.85
 	shine_mesh.radial_segments = 36
 	shine.mesh = shine_mesh
-	shine.position.y = 0.78
+	shine.position.y = 0.86
 	shine.material_override = mat
 	marker.add_child(shine)
 	return marker
@@ -192,8 +192,11 @@ static func _holy_shield_pulse_material(alpha: float) -> StandardMaterial3D:
 	mat.albedo_color = Color(1.0, 0.90, 0.32, alpha)
 	mat.emission_enabled = true
 	mat.emission = Color(1.0, 0.86, 0.28)
-	mat.emission_energy_multiplier = 2.3
+	mat.emission_energy_multiplier = 3.4
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.no_depth_test = true
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	return mat
 

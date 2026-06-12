@@ -55,6 +55,7 @@ const PAPER_DOLL_SLOT_POSITIONS := {
 var inventory: Array = []
 var equipped: Dictionary = {}
 var hotbar: Array = []
+var hotbar_capacity: int = 2
 var inventory_rows: int = BASE_INVENTORY_ROWS
 var inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS
 var gold: int = 0
@@ -94,10 +95,14 @@ class InventorySlotButton:
 			return
 		if event is InputEventMouseButton \
 				and event.button_index == MOUSE_BUTTON_LEFT \
-				and event.double_click \
+				and event.pressed \
 				and slot_kind == SLOT_KIND_BAG \
 				and not item.is_empty():
-			panel._handle_double_click(item)
+			if event.shift_pressed:
+				panel._handle_shift_click(item)
+				accept_event()
+			elif event.double_click:
+				panel._handle_double_click(item)
 
 	func _get_drag_data(_at_position: Vector2) -> Variant:
 		if not panel._interactive or item.is_empty():
@@ -209,7 +214,7 @@ func _sync_viewport_size() -> void:
 	_reposition_panel()
 
 
-func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0, next_hotbar: Array = []) -> void:
+func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0, next_hotbar: Array = [], next_hotbar_capacity: int = 2) -> void:
 	inventory = []
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
@@ -217,6 +222,7 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	hotbar = []
 	for slot in next_hotbar:
 		hotbar.append((slot as Dictionary).duplicate(true))
+	hotbar_capacity = clamp(next_hotbar_capacity, 2, HOTKEY_LABELS.size())
 	inventory_rows = max(0, next_inventory_rows)
 	inventory_capacity = max(0, next_inventory_capacity)
 	gold = max(0, next_gold)
@@ -756,6 +762,19 @@ func _handle_double_click(item: Dictionary) -> void:
 		intent_requested.emit("use_intent", {"item_instance_id": str(item.get("item_instance_id", ""))})
 
 
+func _handle_shift_click(item: Dictionary) -> void:
+	if not _is_consumable(item):
+		return
+	var slot_index := _first_empty_hotbar_slot()
+	if slot_index < 0:
+		show_gesture_hint("belt full")
+		return
+	intent_requested.emit("assign_hotbar_intent", {
+		"slot_index": slot_index,
+		"item_instance_id": str(item.get("item_instance_id", "")),
+	})
+
+
 func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 	if typeof(data) != TYPE_DICTIONARY:
 		return
@@ -962,6 +981,25 @@ func _hotbar_slots_for_item(item_instance_id: String) -> Array:
 			if slot_index >= 0 and slot_index < HOTKEY_LABELS.size():
 				slots.append(slot_index)
 	return slots
+
+
+func _first_empty_hotbar_slot() -> int:
+	for slot_index in range(hotbar_capacity):
+		if not _hotbar_slot_has_item(slot_index):
+			return slot_index
+	return -1
+
+
+func _hotbar_slot_has_item(slot_index: int) -> bool:
+	for slot in hotbar:
+		if typeof(slot) != TYPE_DICTIONARY:
+			continue
+		var rec := slot as Dictionary
+		if int(rec.get("slot_index", -1)) != slot_index:
+			continue
+		var assigned_id = rec.get("item_instance_id", null)
+		return assigned_id != null and str(assigned_id) != ""
+	return false
 
 
 func _hotbar_labels_for_item(item_instance_id: String) -> Array:

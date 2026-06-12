@@ -4688,9 +4688,13 @@ func (s *Sim) spawnIceShardProjectiles(origin *entity, ownerID uint64, skillID s
 	for i := 0; i < count; i++ {
 		angle := s.rollUnitFloat() * 2 * math.Pi
 		dir := Vec2{X: math.Cos(angle), Y: math.Sin(angle)}
+		start := Vec2{
+			X: origin.pos.X + dir.X*(monsterRadius+projectileRadius+0.05),
+			Y: origin.pos.Y + dir.Y*(monsterRadius+projectileRadius+0.05),
+		}
 		projectile := &entity{
 			kind:            projectileEntity,
-			pos:             origin.pos,
+			pos:             start,
 			ownerID:         ownerID,
 			projectileDefID: def.Shatter.Visual,
 			sourceSkillID:   skillID,

@@ -1133,13 +1133,20 @@ func TestIceShardAlwaysHitsAppliesSlowAndSpawnsShards(t *testing.T) {
 		t.Fatalf("monster effect ids = %v, want ice_slow", monster.effectIDs)
 	}
 	shards := 0
+	originOverlap := 0
 	for _, change := range impactChanges {
 		if change.Op == OpEntitySpawn && change.Entity != nil && change.Entity.Type == projectileEntity && change.Entity.ProjectileDefID == "ice_shard_shard" {
 			shards++
+			if distance(change.Entity.Position, monster.pos) <= monsterRadius+projectileRadius {
+				originOverlap++
+			}
 		}
 	}
 	if shards != 3 {
 		t.Fatalf("ice shard spawned %d shards, want 3; changes=%+v", shards, impactChanges)
+	}
+	if originOverlap != 0 {
+		t.Fatalf("ice shard spawned %d shards inside impact target radius; changes=%+v", originOverlap, impactChanges)
 	}
 }
 

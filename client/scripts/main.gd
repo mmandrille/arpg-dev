@@ -4003,7 +4003,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_merchant_node(def_id)
 		return _make_door_node()
 	if kind == "projectile":
-		return _make_projectile_node()
+		return _make_projectile_node(str(e.get("projectile_def_id", "")))
 	return _make_loot_node(e)
 
 
@@ -4429,18 +4429,29 @@ func _load_dungeon_generation() -> void:
 		dungeon_generation = parsed
 
 
-func _make_projectile_node() -> Node3D:
+func _make_projectile_node(projectile_def_id: String = "") -> Node3D:
 	var root := Node3D.new()
 	root.name = "Projectile"
 	var shaft := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
-	mesh.size = Vector3(0.16, 0.16, 0.7)
+	var color := Color(0.65, 0.90, 1.0)
+	var emission := Color(0.25, 0.55, 0.9)
+	if projectile_def_id == "ice_shard_projectile":
+		mesh.size = Vector3(0.12, 0.12, 0.9)
+		color = Color(0.72, 0.95, 1.0)
+		emission = Color(0.35, 0.75, 1.0)
+	elif projectile_def_id == "ice_shard_shard":
+		mesh.size = Vector3(0.08, 0.08, 0.42)
+		color = Color(0.86, 0.98, 1.0)
+		emission = Color(0.45, 0.85, 1.0)
+	else:
+		mesh.size = Vector3(0.16, 0.16, 0.7)
 	shaft.mesh = mesh
 	shaft.position = Vector3(0.0, 0.35, 0.0)
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.65, 0.90, 1.0)
+	mat.albedo_color = color
 	mat.emission_enabled = true
-	mat.emission = Color(0.25, 0.55, 0.9)
+	mat.emission = emission
 	shaft.material_override = mat
 	root.add_child(shaft)
 	return root

@@ -1,0 +1,21 @@
+PROGRESS.md
+  s_c88be8e83fa4bc::t_ef623809ae7b56 119,421-424
+docs/as-built/v97_class-starter-loadouts.md
+  s_c88be8e83fa4bc::t_ef623809ae7b56 29-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0882420c996ae313a2928f83d6d1d45c2f5db283",
+  "prompts": {},
+  "sessions": {
+    "s_c88be8e83fa4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfa-d65a-7650-81f2-89f916faeef8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -2,18 +2,21 @@ from __future__ import annotations
 
 import pytest
 
-from tools.bot.skill_demo import all_skill_demo_entries
+from tools.bot.skill_demo import ROOT, all_skill_demo_entries, load_json
 from tools.bot.skill_visual import SKILL_VISUAL_SCENARIO, build_plan, print_skill_visual_matrix, run_skill_visual, skill_visual_matrix
 from tools.bot.skill_visual_runtime import (
+    FAST_POST_CAST_HOLD_TICKS,
     POST_CAST_HOLD_TICKS,
     build_assertions,
     build_steps,
     magic_required_for_mana,
+    post_cast_hold_ticks,
     seed_skill_visual_character,
     selected_skill_visual_level,
     skill_mana_cost,
     skill_required_skill_ranks,
     skill_required_stats,
+    targets_ally,
 )
 
 
@@ -24,6 +27,8 @@ def test_current_skills_use_single_visual_scenario() -> None:
         assert plan.skill.skill_id == skill_id
         assert plan.scenario_id == SKILL_VISUAL_SCENARIO
         assert plan.command[-1].endswith("scripts/bot_visual.sh")
+        scenario = load_json(ROOT / "tools" / "bot" / "scenarios" / "44_skill_visual.json")
+        assert float(scenario.get("visual", {}).get("post_complete_hold_s", 0.0)) >= 3.0
 
 
 def test_run_skill_visual_dry_run_does_not_launch_process(capsys: pytest.CaptureFixture[str]) -> None:
@@ -79,8 +84,13 @@ def test_skill_visual_steps_hold_after_cast_for_two_seconds() -> None:
         steps = build_steps(entry)
         assert not any(step.get("action") == "attack_until_event" for step in steps)
         assert not any(step.get("action") == "allocate_skill_point" for step in steps)
-        assert steps[-1] == {"action": "wait_ticks", "ticks": POST_CAST_HOLD_TICKS}
-        assert POST_CAST_HOLD_TICKS >= 40
+        assert steps[-1] == {"action": "wait_ticks", "ticks": post_cast_hold_ticks(entry)}
+        if entry.kind == "area_heal":
+            assert post_cast_hold_ticks(entry) == FAST_POST_CAST_HOLD_TICKS
+        else:
+            assert post_cast_hold_ticks(entry) == POST_CAST_HOLD_TICKS
+    assert FAST_POST_CAST_HOLD_TICKS >= 20
+    assert POST_CAST_HOLD_TICKS >= 40
 
 
 def test_skill_visual_assertions_use_seeded_rank_without_rank_update_event() -> None:
@@ -90,6 +100,16 @@ def test_skill_visual_assertions_use_seeded_rank_without_rank_update_event() -> 
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "holy_shield", "rank": 5} in assertions
     assert not any(assertion.get("event_type") == "skill_rank_updated" for assertion in assertions)
     assert any(assertion.get("type") == "skill_progression" and assertion.get("rank") == 5 for assertion in assertions)
+
+
+def test_heal_visual_uses_compact_self_cast_path() -> None:
+    entry = next(entry for entry in all_skill_demo_entries() if entry.skill_id == "heal")
+    steps = build_steps(entry)
+    assertions = build_assertions(entry)
+
+    assert targets_ally(entry) is False
+    assert steps[0] == {"action": "cast_skill", "skill_id": "heal", "target_self": True, "event_type": "skill_cast"}
+    assert not any(assertion.get("event_type") == "player_healed" for assertion in assertions)
 
 
 def test_skill_visual_rank_requirements_are_derived_from_rules(monkeypatch: pytest.MonkeyPatch) -> None:

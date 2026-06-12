@@ -57,6 +57,7 @@ const (
 	directionalMeleeHalfWidth      = 0.35
 	projectileRadius               = 0.10
 	tickDuration                   = 0.05
+	healRainPulseIntervalTicks     = 10
 	minHotbarCapacity              = 2
 	maxHotbarCapacity              = 10
 	skillFunctionKeyCount          = 8
@@ -238,6 +239,21 @@ type skillEffectState struct {
 	TotalTicks  int
 }
 
+type areaHealZoneState struct {
+	ID            uint64
+	Level         int
+	Center        Vec2
+	CasterID      uint64
+	SkillID       string
+	Rank          int
+	Percent       int
+	Radius        float64
+	IncludeCaster bool
+	CorrelationID string
+	NextPulseTick uint64
+	EndsTick      uint64
+}
+
 type skillHealApplication struct {
 	Target *entity
 	Heal   int
@@ -288,11 +304,12 @@ type Sim struct {
 	rng       *RNG
 	rules     *Rules
 
-	tick     uint64
-	nextID   uint64
-	playerID uint64
-	players  map[uint64]*playerState
-	goldRoll uint64
+	tick               uint64
+	nextID             uint64
+	playerID           uint64
+	players            map[uint64]*playerState
+	goldRoll           uint64
+	nextAreaHealZoneID uint64
 
 	levels                map[int]*LevelState
 	currentLevel          int
@@ -308,6 +325,7 @@ type Sim struct {
 	progression           CharacterProgressionState
 	skillCooldowns        map[string]skillCooldownState
 	skillEffects          map[string]skillEffectState
+	areaHealZones         map[uint64]areaHealZoneState
 	skillFunctionKeys     []string
 	rightClickSkillID     string
 	shopStock             map[string]*shopStockState
@@ -368,6 +386,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		rng:                   NewRNG(SeedToUint64(seed)),
 		rules:                 rules,
 		nextID:                baseEntityID,
+		nextAreaHealZoneID:    1,
 		players:               make(map[uint64]*playerState),
 		levels:                make(map[int]*LevelState),
 		currentLevel:          levelZero,
@@ -378,6 +397,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		progression:           progression,
 		skillCooldowns:        make(map[string]skillCooldownState),
 		skillEffects:          make(map[string]skillEffectState),
+		areaHealZones:         make(map[uint64]areaHealZoneState),
 		skillFunctionKeys:     make([]string, skillFunctionKeyCount),
 		shopStock:             make(map[string]*shopStockState),
 		gold:                  progression.Gold,
@@ -1615,6 +1635,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.savePlayer(ps)
 		}
 
+		s.advanceAreaHealZones(resultFor)
 		s.autoPickUpGold(resultFor)
 
 		for _, levelNum := range s.sortedLevelNums() {
@@ -3250,13 +3271,7 @@ func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast 
 			if target.hp >= target.maxHP {
 				continue
 			}
-			heal := int(math.Floor(float64(target.maxHP)*float64(percent)/100.0 + 0.000000001))
-			if heal < 1 {
-				heal = 1
-			}
-			if target.hp+heal > target.maxHP {
-				heal = target.maxHP - target.hp
-			}
+			heal := healAmountForTarget(target, percent)
 			if heal <= 0 {
 				continue
 			}
@@ -3264,6 +3279,111 @@ func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast 
 		}
 	}
 	return applications, ""
+}
+
+func (s *Sim) startAreaHealZones(player *entity, skillID string, def SkillDef, rank int, cast *CastSkillIntent, correlationID string) {
+	if player == nil {
+		return
+	}
+	for _, effect := range def.Effects {
+		if effect.Type != "area_percent_heal" || effect.DurationTicks <= 0 {
+			continue
+		}
+		center, rejectReason := s.skillAreaCenter(effect, cast, player)
+		if rejectReason != "" {
+			continue
+		}
+		id := s.nextAreaHealZoneID
+		s.nextAreaHealZoneID++
+		s.areaHealZones[id] = areaHealZoneState{
+			ID:            id,
+			Level:         s.currentLevel,
+			Center:        center,
+			CasterID:      player.id,
+			SkillID:       skillID,
+			Rank:          rank,
+			Percent:       skillEffectPercent(effect, rank),
+			Radius:        effect.Radius,
+			IncludeCaster: effect.IncludeCaster,
+			CorrelationID: correlationID,
+			NextPulseTick: s.tick + uint64(healRainPulseIntervalTicks),
+			EndsTick:      s.tick + uint64(effect.DurationTicks),
+		}
+	}
+}
+
+func (s *Sim) advanceAreaHealZones(resultFor func(level int, actor uint64) *TickResult) {
+	if len(s.areaHealZones) == 0 {
+		return
+	}
+	for _, zoneID := range sortedUint64Keys(s.areaHealZones) {
+		zone := s.areaHealZones[zoneID]
+		if s.tick >= zone.EndsTick {
+			delete(s.areaHealZones, zoneID)
+			continue
+		}
+		if s.tick < zone.NextPulseTick {
+			continue
+		}
+		res := resultFor(zone.Level, 0)
+		s.applyAreaHealZonePulse(zone, res)
+		for zone.NextPulseTick <= s.tick {
+			zone.NextPulseTick += uint64(healRainPulseIntervalTicks)
+		}
+		s.areaHealZones[zoneID] = zone
+	}
+}
+
+func (s *Sim) applyAreaHealZonePulse(zone areaHealZoneState, res *TickResult) {
+	level := s.levels[zone.Level]
+	if level == nil {
+		return
+	}
+	for _, id := range sortedEntityIDs(level.entities) {
+		target := level.entities[id]
+		if target == nil || target.kind != playerEntity || target.hp <= 0 {
+			continue
+		}
+		if target.id == zone.CasterID && !zone.IncludeCaster {
+			continue
+		}
+		if distance(zone.Center, target.pos) > zone.Radius+meleeRangeEpsilon {
+			continue
+		}
+		heal := healAmountForTarget(target, zone.Percent)
+		if heal <= 0 {
+			continue
+		}
+		target.hp += heal
+		if target.hp > target.maxHP {
+			target.hp = target.maxHP
+		}
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+		res.Events = append(res.Events, Event{
+			EventType:      "player_healed",
+			EntityID:       idStr(target.id),
+			SourceEntityID: idStr(zone.CasterID),
+			TargetEntityID: idStr(target.id),
+			CorrelationID:  zone.CorrelationID,
+			SkillID:        zone.SkillID,
+			Rank:           intPtr(zone.Rank),
+			Heal:           intPtr(heal),
+		})
+	}
+}
+
+func healAmountForTarget(target *entity, percent int) int {
+	if target == nil || target.hp >= target.maxHP {
+		return 0
+	}
+	heal := int(math.Floor(float64(target.maxHP)*float64(percent)/100.0 + 0.000000001))
+	if heal < 1 {
+		heal = 1
+	}
+	if target.hp+heal > target.maxHP {
+		heal = target.maxHP - target.hp
+	}
+	return heal
 }
 
 func (s *Sim) syncActivePlayerVisualScale() bool {

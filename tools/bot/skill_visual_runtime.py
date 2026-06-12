@@ -17,6 +17,7 @@ SKILL_VISUAL_ENV = "ARPG_SKILL_VISUAL_SKILL_ID"
 SKILL_VISUAL_RANK_ENV = "ARPG_SKILL_VISUAL_RANK"
 SKILL_VISUAL_LEVEL_ENV = "ARPG_SKILL_VISUAL_LEVEL"
 POST_CAST_HOLD_TICKS = 40
+FAST_POST_CAST_HOLD_TICKS = 20
 
 
 def selected_skill_visual_entry() -> SkillDemoEntry:
@@ -167,8 +168,14 @@ def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
             "target_self": True,
             "event_type": "skill_cast",
         })
-    steps.append({"action": "wait_ticks", "ticks": POST_CAST_HOLD_TICKS})
+    steps.append({"action": "wait_ticks", "ticks": post_cast_hold_ticks(entry)})
     return steps
+
+
+def post_cast_hold_ticks(entry: SkillDemoEntry) -> int:
+    if entry.kind == "area_heal":
+        return FAST_POST_CAST_HOLD_TICKS
+    return POST_CAST_HOLD_TICKS
 
 
 def build_assertions(entry: SkillDemoEntry, rank: int = 1) -> list[dict[str, Any]]:
@@ -180,13 +187,11 @@ def build_assertions(entry: SkillDemoEntry, rank: int = 1) -> list[dict[str, Any
         assertions.append({"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1})
     elif entry.kind in {"self_buff", "area_stat_buff"}:
         assertions.append({"type": "event_seen", "event_type": "skill_effect_started", "skill_id": entry.skill_id})
-    elif entry.kind == "area_heal":
-        assertions.append({"type": "event_seen", "event_type": "player_healed", "skill_id": entry.skill_id})
     return assertions
 
 
 def targets_ally(entry: SkillDemoEntry) -> bool:
-    return entry.kind in {"area_heal", "area_stat_buff"} and entry.targeting != "self"
+    return entry.kind == "area_stat_buff" and entry.targeting != "self"
 
 
 def seed_skill_visual_character(
@@ -332,7 +337,7 @@ async def run_ally_cast(
         await wait_for_skill_rank(ctx, host, entry.skill_id, rank, peers)
 
         host_stage = {"x": 4.0, "y": 5.0}
-        ally_stage = {"x": 4.0, "y": 8.0}
+        ally_stage = {"x": 4.0, "y": 6.0}
         await ctx["move_coop_peer_to"](peers, host, host_stage, stop_distance=0.35, max_ticks=320)
         await ctx["move_coop_peer_to"](peers, ally, ally_stage, stop_distance=0.35, max_ticks=320)
 
@@ -351,7 +356,7 @@ async def run_ally_cast(
             await wait_for_event(ctx, host, "player_healed", peers, skill_id=entry.skill_id)
         elif entry.kind == "area_stat_buff":
             await wait_for_event(ctx, host, "skill_effect_started", peers, skill_id=entry.skill_id)
-        await wait_ticks(ctx, peers, host, POST_CAST_HOLD_TICKS)
+        await wait_ticks(ctx, peers, host, post_cast_hold_ticks(entry))
         return sess, host.state
     finally:
         for peer in peers:

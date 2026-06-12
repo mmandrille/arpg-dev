@@ -228,7 +228,7 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
 	}
-	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 {
+	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 || skill.Effects[0].DurationTicks != 30 {
 		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and enlarged range/radius effect", skill)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
@@ -1423,6 +1423,37 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	}
 	if healed != 2 || !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_cooldown_started") {
 		t.Fatalf("heal events = %+v, want two heals plus cast/cooldown", cast.Events)
+	}
+	guest.pos = Vec2{X: player.pos.X + 10, Y: player.pos.Y}
+	guest.hp = 3
+	for i := 0; i < healRainPulseIntervalTicks-1; i++ {
+		noPulse := sim.Tick(nil)
+		if hasEvent(noPulse, "player_healed") {
+			t.Fatalf("heal rain pulsed before one second: tick=%d events=%+v", noPulse.Tick, noPulse.Events)
+		}
+	}
+	guest.pos = Vec2{X: player.pos.X + 1, Y: player.pos.Y}
+	pulse := sim.Tick(nil)
+	if player.hp != 9 || guest.hp != 5 {
+		t.Fatalf("heal rain first pulse hp host/guest = %d/%d, want 9/5", player.hp, guest.hp)
+	}
+	if countEvents(pulse, "player_healed") != 2 {
+		t.Fatalf("heal rain first pulse events = %+v, want two player_healed", pulse.Events)
+	}
+	guest.pos = Vec2{X: player.pos.X + 10, Y: player.pos.Y}
+	guest.hp = 3
+	for i := 0; i < healRainPulseIntervalTicks; i++ {
+		sim.Tick(nil)
+	}
+	if guest.hp != 3 {
+		t.Fatalf("heal rain healed outside ally to %d, want unchanged 3", guest.hp)
+	}
+	guest.pos = Vec2{X: player.pos.X + 1, Y: player.pos.Y}
+	for i := 0; i < 50; i++ {
+		sim.Tick(nil)
+	}
+	if guest.hp != 3 {
+		t.Fatalf("expired heal rain healed late entrant to %d, want unchanged 3", guest.hp)
 	}
 
 	for i := 0; i < 50; i++ {
@@ -8247,6 +8278,16 @@ func hasEvent(r TickResult, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func countEvents(r TickResult, eventType string) int {
+	count := 0
+	for _, ev := range r.Events {
+		if ev.EventType == eventType {
+			count++
+		}
+	}
+	return count
 }
 
 func eventListHas(events []Event, eventType string) bool {

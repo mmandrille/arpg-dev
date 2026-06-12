@@ -257,7 +257,7 @@
     },
     "area_percent_heal_effect": {
       "type": "object",
-      "required": ["type", "target", "include_caster", "range", "radius", "percent_base", "percent_per_rank"],
+      "required": ["type", "target", "include_caster", "range", "radius", "percent_base", "percent_per_rank", "duration_ticks"],
       "additionalProperties": false,
       "properties": {
         "type": { "const": "area_percent_heal" },
@@ -266,7 +266,8 @@
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "percent_base": { "type": "integer", "minimum": 0 },
-        "percent_per_rank": { "type": "integer", "minimum": 0 }
+        "percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 }
       }
     },
     "area_stat_percent_buff_effect": {

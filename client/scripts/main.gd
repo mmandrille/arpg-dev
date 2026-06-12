@@ -184,6 +184,7 @@ var waypoint_panel: PanelContainer
 var waypoint_rows: VBoxContainer
 var visual_replay_exit_timer: float = 0.0
 var visual_replay_show_inventory: bool = false
+var visual_replay_completion_hold_s: float = 0.5
 var client_settings: ClientSettings
 var menu_layer: CanvasLayer
 var main_menu: MainMenu
@@ -1031,6 +1032,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_:
 				pass
 	_refresh_inventory_ui()
+	var heal_cast_rain_correlations := _heal_cast_rain_correlations(p.get("events", []))
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
@@ -1041,6 +1043,13 @@ func _apply_delta(p: Dictionary) -> void:
 				player_anim.play_one_shot("attack")
 			if ev.has("angle_degrees") and ev.has("range") and ev.has("direction"):
 				_spawn_skill_cone(ev)
+			var correlation_id := str(ev.get("correlation_id", ""))
+			var is_heal_cast := str(ev.get("skill_id", "")) == "heal"
+			if is_heal_cast and (heal_cast_rain_correlations.has(correlation_id) or heal_cast_rain_correlations.has("__uncorrelated__")):
+				var heal_target_id := str(ev.get("target_entity_id", ""))
+				if heal_target_id == "":
+					heal_target_id = eid
+				_spawn_heal_rain(heal_target_id)
 			continue
 		if event_type == "skill_chain_hit":
 			_spawn_ligthing_chain(ev)
@@ -1626,6 +1635,33 @@ func _spawn_heal_rain(entity_id: String) -> void:
 	if target == null:
 		return
 	_spawn_heal_rain_at_position(_node_world_or_local_position(target))
+
+
+func _heal_cast_rain_correlations(events: Array) -> Dictionary:
+	var heal_casts := {}
+	var healed_casts := {}
+	var has_uncorrelated_heal_cast := false
+	var has_heal_result := false
+	for raw in events:
+		if not (raw is Dictionary):
+			continue
+		var ev := raw as Dictionary
+		var correlation_id := str(ev.get("correlation_id", ""))
+		var event_type := str(ev.get("event_type", ""))
+		if event_type == "skill_cast" and str(ev.get("skill_id", "")) == "heal":
+			if correlation_id == "":
+				has_uncorrelated_heal_cast = true
+			else:
+				heal_casts[correlation_id] = true
+		elif event_type == "player_healed" and str(ev.get("skill_id", "")) == "heal":
+			has_heal_result = true
+			if correlation_id != "":
+				healed_casts[correlation_id] = true
+	for correlation_id in healed_casts.keys():
+		heal_casts.erase(correlation_id)
+	if has_uncorrelated_heal_cast and not has_heal_result:
+		heal_casts["__uncorrelated__"] = true
+	return heal_casts
 
 
 func _spawn_heal_rain_at_position(world_position: Vector3) -> void:
@@ -2774,6 +2810,7 @@ func _start_next_visual_replay() -> void:
 	current_world_id = world_id
 	visual_replay_title = str(scenario.get("title", scenario.get("id", session_id)))
 	var visual_cfg: Dictionary = scenario.get("visual", {})
+	visual_replay_completion_hold_s = maxf(float(visual_cfg.get("post_complete_hold_s", 0.5)), 0.0)
 	visual_replay_show_inventory = bool(visual_cfg.get("inventory_panel", false)) \
 		or world_id == "inventory_lab" \
 		or str(scenario.get("id", "")) == "inventory_lab"
@@ -2826,7 +2863,10 @@ func _handle_visual_replay(delta: float) -> void:
 	if visual_replay_timer > 0.0:
 		return
 	if visual_replay_envelope_index >= visual_replay_envelopes.size():
-		visual_replay_timer = maxf(autoplay_step_delay * 4.0, 0.5)
+		if visual_replay_completion_hold_s > 0.0:
+			visual_replay_timer = visual_replay_completion_hold_s
+			visual_replay_completion_hold_s = 0.0
+			return
 		_start_next_visual_replay()
 		return
 

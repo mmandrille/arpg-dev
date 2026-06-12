@@ -111,7 +111,7 @@ def default_manifest() -> dict:
                 "type": "character",
                 "runtime_path": CHAR_GLB,
                 "format": "glb",
-                "required_nodes": ["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"],
+                "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
             },
             "weapon_rusty_sword_v0": {
                 "type": "equipment",
@@ -179,7 +179,7 @@ def build_root(
     write(root / "shared/assets/item_visuals.v0.json", visuals or default_visuals())
     write(root / "shared/assets/monster_visuals.v0.json", monster_visuals or default_monster_visuals())
     char_joints = char_nodes if char_nodes is not None else [
-        "root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"
+        "root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"
     ]
     write(root / CHAR_GLB, make_skinned_glb(char_joints))
     if write_sword:
@@ -215,11 +215,11 @@ def test_socket_coverage_failure(tmp_path):
     manifest = default_manifest()
     # Drop the weapon mount bone: the mount-bone coverage check must fail.
     manifest["assets"]["character_base_humanoid_v0"]["required_nodes"] = [
-        "root", "spine", "arm_r", "leg_l", "leg_r"
+        "root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"
     ]
     report = run(build_root(
         tmp_path, manifest=manifest,
-        char_nodes=["root", "spine", "arm_r", "leg_l", "leg_r"],
+        char_nodes=["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"],
     ))
     assert any("mount bone" in f for f in report.failures)
 
@@ -252,7 +252,7 @@ def test_glb_required_node_not_a_skin_joint(tmp_path):
     # (here `spine`) -> [6] must hard-fail because it is not an actual joint.
     report = run(build_root(
         tmp_path,
-        char_nodes=["root", "arm_r", "hand_r", "leg_l", "leg_r"],
+        char_nodes=["root", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
     ))
     assert any("glb joint" in f or "not skin joints" in f for f in report.failures)
 

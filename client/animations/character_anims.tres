@@ -11,6 +11,23 @@ tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, -0.81915206, 0, 0, 0.57357645, 0.35, 1, 0, 0, 0, 1)
 
 [sub_resource type="Animation" id="Animation_2dhpa"]
+length = 0.35
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Skeleton3D:spine")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, 0, 0, -0.0784591, 0.9969173, 0.35, 1, 0, 0, 0, 1)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Skeleton3D:arm_l")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, -0.8164978, -0.34658277, -0.18041955, 0.42504182, 0.35, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_gyr64"]
 length = 0.6
 tracks/0/type = "rotation_3d"
 tracks/0/imported = false
@@ -20,7 +37,7 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.6, 1, -0.58778524, 0, 0, 0.809017)
 
-[sub_resource type="Animation" id="Animation_gyr64"]
+[sub_resource type="Animation" id="Animation_vuuvk"]
 length = 0.25
 tracks/0/type = "rotation_3d"
 tracks/0/imported = false
@@ -30,7 +47,7 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.08, 1, -0.12186935, 0, 0, 0.99254614, 0.25, 1, 0, 0, 0, 1)
 
-[sub_resource type="Animation" id="Animation_vuuvk"]
+[sub_resource type="Animation" id="Animation_cr3ch"]
 loop_mode = 1
 tracks/0/type = "rotation_3d"
 tracks/0/imported = false
@@ -40,7 +57,7 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
 
-[sub_resource type="Animation" id="Animation_cr3ch"]
+[sub_resource type="Animation" id="Animation_jpfb3"]
 length = 0.8
 loop_mode = 1
 tracks/0/type = "rotation_3d"
@@ -61,8 +78,9 @@ tracks/1/keys = PackedFloat32Array(0, 1, -0.21643962, 0, 0, 0.976296, 0.4, 1, 0.
 [resource]
 _data = {
 &"attack": SubResource("Animation_3sbup"),
-&"death": SubResource("Animation_2dhpa"),
-&"hit": SubResource("Animation_gyr64"),
-&"idle": SubResource("Animation_vuuvk"),
-&"walk": SubResource("Animation_cr3ch")
+&"attack_off_hand": SubResource("Animation_2dhpa"),
+&"death": SubResource("Animation_gyr64"),
+&"hit": SubResource("Animation_vuuvk"),
+&"idle": SubResource("Animation_cr3ch"),
+&"walk": SubResource("Animation_jpfb3")
 }

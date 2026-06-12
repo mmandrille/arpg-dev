@@ -90,6 +90,7 @@ run_gate "GDScript client bot unit test" "[gdtest] PASS: test_client_bot" res://
 
 # 2e. Co-op local/remote player handling test (server-independent; v33).
 run_gate "GDScript co-op client unit test" "[gdtest] PASS: test_coop_client" res://tests/test_coop_client.gd
+run_gate "GDScript rogue presentation test" "[gdtest] PASS: test_rogue_presentation" res://tests/test_rogue_presentation.gd
 
 # 2f. Waypoint panel scroll/layout test (server-independent; v19).
 run_gate "GDScript waypoint panel test" "[gdtest] PASS: test_waypoint_panel" res://tests/test_waypoint_panel.gd

@@ -208,10 +208,14 @@ func _test_character_scene() -> void:
 	_assert(sock is BoneAttachment3D, "right_hand_socket must be a BoneAttachment3D")
 	if sock is BoneAttachment3D:
 		_assert(sock.bone_name == "hand_r", "socket bound to hand_r, got %s" % sock.bone_name)
+	var off_sock = s.find_child("off_hand_socket", true, false)
+	_assert(off_sock is BoneAttachment3D, "off_hand_socket must be a BoneAttachment3D")
+	if off_sock is BoneAttachment3D:
+		_assert(off_sock.bone_name == "hand_l", "off_hand_socket bound to hand_l, got %s" % off_sock.bone_name)
 	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_assert(ap != null, "character AnimationPlayer missing")
 	if ap != null:
-		for clip in ["idle", "walk", "attack", "hit", "death"]:
+		for clip in ["idle", "walk", "attack", "attack_off_hand", "hit", "death"]:
 			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
 	s.free()
 	await process_frame
@@ -231,7 +235,7 @@ func _test_class_character_models() -> void:
 		var skel := model.find_child("Skeleton3D", true, false) as Skeleton3D
 		_assert(skel != null, "%s model missing Skeleton3D" % class_id)
 		if skel != null:
-			for bone in ["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"]:
+			for bone in ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"]:
 				_assert(skel.find_bone(bone) >= 0, "%s model missing bone %s" % [class_id, bone])
 		model.free()
 		await process_frame

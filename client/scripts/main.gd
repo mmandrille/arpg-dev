@@ -61,6 +61,7 @@ const LOCAL_INTERACTABLE_RADIUS := 0.50
 const LOCAL_REACH_EPSILON := 0.000001
 const PLAYER_TINT := Color("#8fe8a7")
 const REMOTE_PLAYER_TINT := Color("#202934")
+const POISON_TINT := Color("#38f06f")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
 const NO_MANA_TEXT := "NO MANA"
 const HEAL_RAIN_RADIUS := 4.0
@@ -1099,6 +1100,13 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "skill_effect_started" and str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
 			_pulse_holy_shield_aura(ev)
+		if str(ev.get("skill_id", "")) == "poison_stab":
+			if event_type == "skill_effect_started":
+				_set_entity_poison_tint(eid, true)
+				continue
+			if event_type == "skill_effect_ended":
+				_set_entity_poison_tint(eid, false)
+				continue
 		if event_type == "skill_effect_started" and eid == player_id:
 			if status_effects_bar != null:
 				status_effects_bar.start_effect(ev)
@@ -1139,7 +1147,7 @@ func _apply_delta(p: Dictionary) -> void:
 			if player_clip == "death":
 				player_anim.enter_terminal("death")
 			else:
-				player_anim.play_one_shot(player_clip)
+				_play_local_player_reaction_animation(player_clip)
 			continue
 		if PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
 			if event_type == "player_damaged":
@@ -1216,14 +1224,14 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
-			if event_type == "attack_missed":
-				if str(ev.get("source_entity_id", "")) == player_id and player_anim != null:
-					player_anim.play_one_shot("attack")
+			if event_type in ["attack_missed", "attack_blocked"]:
+				if str(ev.get("source_entity_id", "")) == player_id:
+					_play_local_attack_animation_for_event(ev)
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
-			if str(ev.get("source_entity_id", "")) == player_id and player_anim != null:
-				player_anim.play_one_shot("attack")
+			if str(ev.get("source_entity_id", "")) == player_id:
+				_play_local_attack_animation_for_event(ev)
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			_play_entity_reaction(eid, ev, "hit")
@@ -1503,17 +1511,36 @@ func _sync_camera_to_player() -> void:
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
 	var outcome := str(ev.get("outcome", ""))
 	var damage = ev.get("damage", null)
+	var skill_id := str(ev.get("skill_id", ""))
 	if outcome == "miss":
 		_show_damage_number(entity_id, Color(0.82, 0.86, 0.92), null, "", 0.0, "miss", "MISS")
 		return
 	if outcome == "block":
 		_show_damage_number(entity_id, Color(0.35, 0.78, 1.0), null, "", 0.0, "block", "BLOCK")
 		return
+	if skill_id == "poison_stab":
+		_show_damage_number(entity_id, Color("#55e66f"), damage, "", 0.0, "poison")
+		return
 	if outcome == "crit" or bool(ev.get("critical", false)):
 		var crit_damage := 0 if damage == null else int(damage)
 		_show_damage_number(entity_id, Color(1.0, 0.58, 0.22), crit_damage, "", 0.0, "crit", "%d!" % crit_damage)
 		return
 	_show_damage_number(entity_id, default_color, damage)
+
+
+func _play_local_attack_animation_for_event(ev: Dictionary) -> void:
+	if player_anim == null:
+		return
+	var weapon_slot := str(ev.get("weapon_slot", "main_hand"))
+	player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack")
+
+
+func _play_local_player_reaction_animation(clip: String) -> void:
+	if player_anim == null:
+		return
+	if clip == "hit" and player_anim.current_clip() in ["attack", "attack_off_hand"]:
+		return
+	player_anim.play_one_shot(clip)
 
 
 func _play_entity_reaction(entity_id: String, ev: Dictionary, reaction_name: String) -> void:
@@ -2936,6 +2963,13 @@ func _visual_replay_delay_for(env: Dictionary) -> float:
 		return autoplay_step_delay
 	var payload: Dictionary = env.get("payload", {})
 	var delay := autoplay_step_delay
+	for ev in payload.get("events", []):
+		var event_type := str(ev.get("event_type", ""))
+		var skill_id := str(ev.get("skill_id", ""))
+		if skill_id == "poison_stab" and event_type in ["skill_effect_started", "skill_effect_ended", "monster_damaged"]:
+			delay = maxf(delay, autoplay_step_delay * 2.4)
+		if str(ev.get("weapon_slot", "")) == "off_hand":
+			delay = maxf(delay, autoplay_step_delay * 2.0)
 	for change in payload.get("changes", []):
 		var op := str(change.get("op", ""))
 		if op in ["entity_spawn", "entity_update"]:
@@ -4501,10 +4535,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	node.scale = Vector3.ONE * float(rec.get("visual_scale", 1.0))
 	var base_tint := _entity_base_tint(e)
 	rec["base_tint"] = base_tint.to_html(false)
-	if not bool(rec.get("boss_telegraph_active", false)):
-		_apply_model_tint(node, base_tint)
-		if PlayerStatusEffectMarkers.has_ice_slow_effect(rec.get("effect_ids", [])):
-			_apply_model_tint(node, Color(0.62, 0.86, 1.0))
+	_apply_entity_status_tint(rec)
 	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
 	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []))
@@ -4592,7 +4623,7 @@ func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 	else:
 		rec["boss_telegraph_active"] = false
 		_remove_boss_telegraph_marker(rec)
-		_apply_model_tint(node, Color("#" + str(rec.get("base_tint", "ffffff"))))
+		_apply_entity_status_tint(rec)
 	_sync_boss_health_bar()
 
 
@@ -4603,9 +4634,7 @@ func _apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
 	rec["boss_telegraph_active"] = false
 	rec.erase("boss_phase")
 	_remove_boss_telegraph_marker(rec)
-	var node := rec.get("node", null) as Node3D
-	if node != null:
-		_apply_model_tint(node, Color("#" + str(rec.get("base_tint", "ffffff"))))
+	_apply_entity_status_tint(rec)
 	_sync_boss_health_bar()
 
 
@@ -4674,6 +4703,30 @@ func _remove_boss_telegraph_marker(rec: Dictionary) -> void:
 	rec["has_boss_telegraph_marker"] = false
 	rec["telegraph_radius"] = 0.0
 	rec["telegraph_marker_color"] = ""
+
+
+func _set_entity_poison_tint(entity_id: String, active: bool) -> void:
+	var rec: Dictionary = entities.get(entity_id, {})
+	if rec.is_empty():
+		return
+	rec["poisoned"] = active
+	_apply_entity_status_tint(rec)
+
+
+func _apply_entity_status_tint(rec: Dictionary) -> void:
+	var node := rec.get("node", null) as Node3D
+	if node == null or bool(rec.get("boss_telegraph_active", false)):
+		return
+	var tint := Color("#" + str(rec.get("base_tint", "ffffff")))
+	if PlayerStatusEffectMarkers.has_ice_slow_effect(rec.get("effect_ids", [])):
+		tint = Color(0.62, 0.86, 1.0)
+	if bool(rec.get("poisoned", false)):
+		tint = POISON_TINT
+	var reaction = rec.get("reaction", null)
+	if reaction != null and reaction.has_method("set_base_tint"):
+		reaction.set_base_tint(tint)
+	else:
+		_apply_model_tint(node, tint)
 
 
 func _apply_model_tint(root: Node, color: Color) -> void:
@@ -5673,6 +5726,7 @@ func _bot_damage_numbers() -> Array:
 			out.append({
 				"text": pop.combat_text,
 				"variant": pop.combat_variant,
+				"color": pop.label_settings.font_color.to_html(false) if pop.label_settings != null else "",
 			})
 	return out
 

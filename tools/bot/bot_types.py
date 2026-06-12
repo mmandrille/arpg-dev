@@ -81,6 +81,7 @@ class RuntimeState:
     last_stash_event: dict[str, Any] | None = None
     last_gold_before_action: int | None = None
     last_gold_after_action: int | None = None
+    remembered_entity_ids: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass

@@ -173,7 +173,7 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 			return
 		inst = (packed as PackedScene).instantiate()
 	inst.name = asset_id
-	_apply_transform(inst, vis.get("local_transform", {}))
+	_apply_transform(inst, _local_transform_for_slot(slot, vis))
 	var rarity := str(item.get("rarity", "common")).to_lower()
 	var tint: Color = RARITY_TINTS.get(rarity, RARITY_TINTS["common"])
 	_apply_tint(inst, tint)
@@ -217,6 +217,19 @@ func _mount_socket_for_slot(slot: String, vis: Dictionary) -> String:
 	if str(vis.get("slot", slot)) != slot and SOCKET_BY_SLOT.has(slot):
 		return str(SOCKET_BY_SLOT[slot])
 	return str(vis.get("mount_socket", SOCKET_BY_SLOT.get(slot, "right_hand_socket")))
+
+
+func _local_transform_for_slot(slot: String, vis: Dictionary) -> Dictionary:
+	var transform: Dictionary = (vis.get("local_transform", {}) as Dictionary).duplicate(true)
+	if slot != "off_hand" or str(vis.get("slot", slot)) == slot:
+		return transform
+	var position: Dictionary = (transform.get("position", {}) as Dictionary).duplicate(true)
+	position["z"] = float(position.get("z", 0.0)) + 0.08
+	transform["position"] = position
+	var rotation: Dictionary = (transform.get("rotation_degrees", {}) as Dictionary).duplicate(true)
+	rotation["z"] = float(rotation.get("z", 0.0)) + 180.0
+	transform["rotation_degrees"] = rotation
+	return transform
 
 
 func _clear_mounted(slot: String) -> void:

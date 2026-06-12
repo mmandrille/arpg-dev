@@ -1,9 +1,9 @@
 [gd_scene load_steps=4 format=3]
 
 ; Slice v3 player character (spec animate-and-react §5.1/§5.5). The rigged GLB is
-; instanced as "ModelRoot" (carries Skeleton3D with bone hand_r). character_visual.gd
-; attaches a BoneAttachment3D named "right_hand_socket" to hand_r so the equipped
-; weapon rides the arm. AnimationPlayer plays idle/walk/attack from the committed
+; instanced as "ModelRoot" (carries Skeleton3D with hand_r/hand_l bones).
+; character_visual.gd attaches hand sockets so equipped weapons ride the matching
+; arm. AnimationPlayer plays idle/walk/attack/off-hand attack from the committed
 ; library; root_node targets ModelRoot so bone-pose tracks resolve.
 [ext_resource type="PackedScene" path="res://assets/characters/base_humanoid/base_humanoid.glb" id="1_glb"]
 [ext_resource type="Script" path="res://scripts/character_visual.gd" id="2_script"]

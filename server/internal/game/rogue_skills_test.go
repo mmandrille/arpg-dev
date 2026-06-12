@@ -36,6 +36,44 @@ func TestRoguePoisonStabAppliesDamageOverTime(t *testing.T) {
 	}
 }
 
+func TestRoguePoisonStabPoisonsImmuneUndeadForZeroDamage(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.Combat.BaseHitChance = 1
+	rules.Combat.BaseCritChance = 0
+	sim := newRogueSkillTestSim(t, rules)
+	player := sim.entities[sim.playerID]
+	target := addRogueSkillTarget(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 20)
+	target.monsterDefID = "dungeon_undead"
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "poison_undead",
+		CorrelationID: "corr_poison_undead",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", TargetID: idStr(target.id)},
+	}})
+	assertAck(t, cast, "poison_undead")
+	if !hasEvent(cast, "skill_effect_started") {
+		t.Fatalf("poison immune cast events = %+v, want skill_effect_started", cast.Events)
+	}
+	if !hasZeroDamageTypeEvent(cast, damageTypePoison) {
+		t.Fatalf("poison immune cast events = %+v, want zero poison hit", cast.Events)
+	}
+	hpAfterHit := target.hp
+	var tick TickResult
+	for i := 0; i < 12; i++ {
+		tick = sim.Tick(nil)
+		if hasPoisonZeroDamageEvent(tick, "poison_stab") {
+			break
+		}
+	}
+	if !hasPoisonZeroDamageEvent(tick, "poison_stab") {
+		t.Fatalf("missing zero poison tick; last events=%+v", tick.Events)
+	}
+	if target.hp != hpAfterHit {
+		t.Fatalf("poison immune target hp = %d, want unchanged %d", target.hp, hpAfterHit)
+	}
+}
+
 func TestRogueDashMovesThroughAndDamagesTarget(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	rules.Combat.BaseHitChance = 1
@@ -129,6 +167,24 @@ func addRogueSkillTarget(sim *Sim, pos Vec2, hp int) *entity {
 func hasPoisonDamageEvent(r TickResult, skillID string) bool {
 	for _, ev := range r.Events {
 		if ev.EventType == "monster_damaged" && ev.SkillID == skillID && ev.Damage != nil && *ev.Damage > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func hasPoisonZeroDamageEvent(r TickResult, skillID string) bool {
+	for _, ev := range r.Events {
+		if ev.EventType == "monster_damaged" && ev.SkillID == skillID && ev.DamageType == damageTypePoison && ev.Damage != nil && *ev.Damage == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func hasZeroDamageTypeEvent(r TickResult, damageType string) bool {
+	for _, ev := range r.Events {
+		if ev.EventType == "monster_damaged" && ev.DamageType == damageType && ev.Damage != nil && *ev.Damage == 0 {
 			return true
 		}
 	}

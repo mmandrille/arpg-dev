@@ -240,6 +240,32 @@
       "attack_cooldown_ticks": 21,
       "name_key": "monster.dungeon_bat.name"
     },
+    "dungeon_undead": {
+      "name": "Skeleton",
+      "max_hp": 8,
+      "loot_table": "dungeon_mob_drop",
+      "xp_reward": 12,
+      "hit_chance": 0.5,
+      "crit_chance": 0,
+      "crit_damage": 1.5,
+      "armor": 1,
+      "block_percent": 0,
+      "resistances": {
+        "poison": 1.0
+      },
+      "pack_role": "frontline",
+      "behavior": "chase",
+      "aggro_radius": 6,
+      "assist_radius": 8,
+      "leash_radius": 10,
+      "move_speed": 0.42,
+      "attack_damage": {
+        "min": 1,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 24,
+      "name_key": "monster.dungeon_undead.name"
+    },
     "combat_lab_soft_target": {
       "name": "Combat Lab Soft Target",
       "max_hp": 60,

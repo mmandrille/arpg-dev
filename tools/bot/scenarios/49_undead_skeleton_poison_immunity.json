@@ -1,0 +1,40 @@
+{
+  "id": "undead_skeleton_poison_immunity",
+  "world_id": "undead_skeleton_poison_immunity",
+  "seed": "undead_skeleton_poison_immunity_seed",
+  "character_class": "rogue",
+  "title": "Undead skeleton poison immunity",
+  "description": "Poison Stab a skeleton undead and prove the poison status starts while poison damage resolves to zero.",
+  "visual": {
+    "camera": { "x": 5, "y": 5, "zoom": 1.2 },
+    "post_complete_hold_s": 3.0
+  },
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 8, "vit": 5, "magic": 4 },
+    "skill_ranks": { "poison_stab": 1 }
+  },
+  "steps": [
+    {
+      "action": "cast_skill",
+      "skill_id": "poison_stab",
+      "monster_def_id": "dungeon_undead",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "poison_stab", "amount": 0 },
+      "timeout_s": 3
+    },
+    { "action": "wait_ticks", "ticks": 22 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "poison_stab", "rank": 1 },
+    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "poison_stab", "amount": 0 },
+    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "poison_stab", "damage_type": "poison", "damage": 0, "min": 2 },
+    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "poison_stab", "damage_type": "poison", "damage": 0, "target_monster_def_id": "dungeon_undead" }
+  ]
+}

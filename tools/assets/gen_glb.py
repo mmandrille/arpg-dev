@@ -440,6 +440,34 @@ def monster_tiny_flyer_glb() -> bytes:
     return _build_skinned_glb(color, joints, parts)
 
 
+def monster_skeleton_glb() -> bytes:
+    """Low-poly skeleton silhouette with biped joints for existing hit/death clips."""
+    color = (0.82, 0.78, 0.66, 1.0)
+    joints = [
+        ("root", -1, (0.0, 0.0, 0.0)),
+        ("spine", 0, (0.0, 0.92, 0.0)),
+        ("head", 1, (0.0, 0.62, 0.0)),
+        ("arm_l", 1, (-0.34, 0.38, 0.0)),
+        ("arm_r", 1, (0.34, 0.38, 0.0)),
+        ("leg_l", 0, (-0.13, 0.42, 0.0)),
+        ("leg_r", 0, (0.13, 0.42, 0.0)),
+    ]
+    parts = [
+        (1, (0.0, 0.92, 0.0), (0.22, 0.74, 0.16)),
+        (1, (-0.18, 1.05, 0.0), (0.05, 0.34, 0.06)),
+        (1, (0.18, 1.05, 0.0), (0.05, 0.34, 0.06)),
+        (2, (0.0, 1.55, -0.02), (0.30, 0.30, 0.24)),
+        (2, (0.0, 1.55, -0.18), (0.12, 0.10, 0.08)),
+        (3, (-0.44, 0.95, 0.0), (0.10, 0.58, 0.10)),
+        (3, (-0.46, 0.47, 0.0), (0.09, 0.50, 0.09)),
+        (4, (0.44, 0.95, 0.0), (0.10, 0.58, 0.10)),
+        (4, (0.46, 0.47, 0.0), (0.09, 0.50, 0.09)),
+        (5, (-0.13, 0.45, 0.0), (0.11, 0.78, 0.11)),
+        (6, (0.13, 0.45, 0.0), (0.11, 0.78, 0.11)),
+    ]
+    return _build_skinned_glb(color, joints, parts)
+
+
 def rusty_sword_glb() -> bytes:
     """Low-poly rusty one-handed sword, grip at origin, blade pointing +Y."""
     color = (0.45, 0.3, 0.18, 1.0)  # rusty brown
@@ -509,6 +537,7 @@ TARGETS = {
     "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
     "client/assets/monsters/quadruped/monster_quadruped.glb": monster_quadruped_glb,
     "client/assets/monsters/tiny_flyer/monster_tiny_flyer.glb": monster_tiny_flyer_glb,
+    "client/assets/monsters/skeleton/monster_skeleton.glb": monster_skeleton_glb,
 }
 
 

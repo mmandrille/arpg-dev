@@ -3574,7 +3574,7 @@ func (s *Sim) applyConeSkill(player *entity, skillID string, def SkillDef, targe
 			continue
 		}
 		outcome := s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, s.resolvePlayerAttackDamage(), s.skillDamageType(def))
-		if def.Poison.DurationTicks > 0 && outcome.Damage > 0 && target.hp > 0 {
+		if def.Poison.DurationTicks > 0 && outcome.Hit && !outcome.Blocked && target.hp > 0 {
 			s.startPoisonDot(player, target, skillID, def, outcome.Damage, correlationID, res)
 		}
 		if target.hp <= 0 || outcome.Damage <= 0 {

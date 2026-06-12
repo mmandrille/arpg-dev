@@ -396,6 +396,16 @@
         }
       ]
     },
+    "undead_skeleton_poison_immunity": {
+      "player": { "position": { "x": 4, "y": 5 } },
+      "entities": [
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_undead",
+          "position": { "x": 5.2, "y": 5 }
+        }
+      ]
+    },
     "skill_visual_lab": {
       "player": { "position": { "x": 4, "y": 5 } },
       "entities": [

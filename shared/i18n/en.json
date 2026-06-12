@@ -80,6 +80,7 @@
     "monster.dungeon_archer.name": "Cave Archer",
     "monster.dungeon_wolf.name": "Cave Wolf",
     "monster.dungeon_bat.name": "Cave Bat",
+    "monster.dungeon_undead.name": "Skeleton",
     "monster.combat_lab_soft_target.name": "Combat Lab Soft Target",
     "monster.combat_lab_lightning_resistant.name": "Lightning Resistant Target",
     "monster.combat_lab_lightning_weak.name": "Lightning Weak Target",

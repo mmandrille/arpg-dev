@@ -26,7 +26,7 @@ static func ensure_loaded() -> void:
 
 static func resolve(monster_def_id: String, visual_model: String = "") -> Dictionary:
 	ensure_loaded()
-	if visual_model in ["monster_dummy", "monster_quadruped", "monster_tiny_flyer"]:
+	if visual_model in ["monster_dummy", "monster_quadruped", "monster_tiny_flyer", "monster_skeleton"]:
 		return _entry_for_scene(visual_model)
 	if _visuals.has(monster_def_id):
 		var entry := (_visuals[monster_def_id] as Dictionary).duplicate()

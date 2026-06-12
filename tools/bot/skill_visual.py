@@ -20,6 +20,8 @@ class SkillVisualPlan:
     skill: SkillDemoEntry
     scenario_id: str
     command: list[str]
+    rank: int = 1
+    level: int | None = None
 
 
 def selected_skill_entries(skill_id: str) -> list[SkillDemoEntry]:
@@ -30,24 +32,42 @@ def selected_skill_entries(skill_id: str) -> list[SkillDemoEntry]:
     return [skill_demo_entry(skill_id)]
 
 
-def build_plan(skill_id: str, root: Path = ROOT) -> SkillVisualPlan:
+def validate_rank(entry: SkillDemoEntry, rank: int) -> int:
+    if rank < 1 or rank > entry.max_rank:
+        raise ValueError(f"rank for {entry.skill_id} must be between 1 and {entry.max_rank}")
+    return rank
+
+
+def validate_level(level: int | None) -> int | None:
+    if level is not None and level < 1:
+        raise ValueError("level must be >= 1")
+    return level
+
+
+def build_plan(skill_id: str, root: Path = ROOT, *, rank: int = 1, level: int | None = None) -> SkillVisualPlan:
     entry = skill_demo_entry(skill_id)
+    rank = validate_rank(entry, rank)
     return SkillVisualPlan(
         skill=entry,
         scenario_id=SKILL_VISUAL_SCENARIO,
         command=[str(root / "scripts" / "bot_visual.sh")],
+        rank=rank,
+        level=validate_level(level),
     )
 
 
-def run_skill_visual(skill_id: str, *, dry_run: bool = False, root: Path = ROOT) -> int:
+def run_skill_visual(skill_id: str, *, dry_run: bool = False, root: Path = ROOT, rank: int = 1, level: int | None = None) -> int:
     entries = selected_skill_entries(skill_id)
     if skill_id == "all":
         print("skill_visual all count=%d scenario=%s" % (len(entries), SKILL_VISUAL_SCENARIO))
     for entry in entries:
+        selected_rank = validate_rank(entry, rank)
         plan = SkillVisualPlan(
             skill=entry,
             scenario_id=SKILL_VISUAL_SCENARIO,
             command=[str(root / "scripts" / "bot_visual.sh")],
+            rank=selected_rank,
+            level=validate_level(level),
         )
         plan_exit = run_skill_visual_plan(plan, dry_run=dry_run, root=root)
         if plan_exit != 0:
@@ -57,8 +77,15 @@ def run_skill_visual(skill_id: str, *, dry_run: bool = False, root: Path = ROOT)
 
 def run_skill_visual_plan(plan: SkillVisualPlan, *, dry_run: bool = False, root: Path = ROOT) -> int:
     print(
-        "skill_visual skill=%s category=%s ranks=%s scenario=%s"
-        % (plan.skill.skill_id, plan.skill.category, plan.skill.rank_targets, plan.scenario_id)
+        "skill_visual skill=%s category=%s rank=%s level=%s ranks=%s scenario=%s"
+        % (
+            plan.skill.skill_id,
+            plan.skill.category,
+            plan.rank,
+            plan.level if plan.level is not None else "auto",
+            plan.skill.rank_targets,
+            plan.scenario_id,
+        )
     )
     print("delegates: ARPG_BOT_SCENARIO=%s %s" % (plan.scenario_id, " ".join(plan.command)))
     if dry_run:
@@ -66,6 +93,9 @@ def run_skill_visual_plan(plan: SkillVisualPlan, *, dry_run: bool = False, root:
     env = os.environ.copy()
     env["ARPG_BOT_SCENARIO"] = plan.scenario_id
     env["ARPG_SKILL_VISUAL_SKILL_ID"] = plan.skill.skill_id
+    env["ARPG_SKILL_VISUAL_RANK"] = str(plan.rank)
+    if plan.level is not None:
+        env["ARPG_SKILL_VISUAL_LEVEL"] = str(plan.level)
     return subprocess.call(plan.command, cwd=root, env=env)
 
 
@@ -120,6 +150,8 @@ def _yes_no(value: bool) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run a visual replay for a shared skill id.")
     parser.add_argument("skill_id", nargs="?", help="Skill id to visualize.")
+    parser.add_argument("--rank", type=int, default=1, help="Skill rank to seed before casting. Defaults to 1.")
+    parser.add_argument("--level", type=int, help="Character level to seed. Defaults to the minimum required for rank.")
     parser.add_argument("--dry-run", action="store_true", help="Print the delegated command without running it.")
     parser.add_argument("--list", action="store_true", help="Print skill visual coverage matrix.")
     args = parser.parse_args(argv)
@@ -127,7 +159,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print_skill_visual_matrix()
         return 0
     try:
-        return run_skill_visual(str(args.skill_id or ""), dry_run=args.dry_run)
+        return run_skill_visual(str(args.skill_id or ""), dry_run=args.dry_run, rank=args.rank, level=args.level)
     except (KeyError, ValueError) as exc:
         parser.exit(2, f"skill_visual: {exc}\n")
 

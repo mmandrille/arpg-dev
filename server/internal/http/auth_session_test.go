@@ -104,6 +104,21 @@ func deleteJSON(h http.Handler, path, bearer string) *httptest.ResponseRecorder 
 	return rec
 }
 
+func putDebugJSON(h http.Handler, path, bearer string, body any, debugToken string) *httptest.ResponseRecorder {
+	buf, _ := json.Marshal(body)
+	req := httptest.NewRequest(http.MethodPut, path, bytes.NewReader(buf))
+	req.Header.Set("Content-Type", "application/json")
+	if bearer != "" {
+		req.Header.Set("Authorization", "Bearer "+bearer)
+	}
+	if debugToken != "" {
+		req.Header.Set("X-Debug-Token", debugToken)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
 func login(t *testing.T, h http.Handler) (accountID, token string) {
 	return loginEmail(t, h, "dev@example.test")
 }
@@ -295,6 +310,36 @@ func TestCharacterClassSeedsSessionStartProgression(t *testing.T) {
 	}
 	if sorcProgression.Stats.Str != 3 || sorcProgression.Stats.Magic != 5 {
 		t.Fatalf("sorcerer stats = %+v, want class start", sorcProgression.Stats)
+	}
+}
+
+func TestDebugCharacterProgressionSeedsOwnedCharacter(t *testing.T) {
+	h, db := fullServerWithConfigAndStore(t, config.Config{Addr: ":0", Env: "local", DevToken: testDevToken, DebugToken: testDebugToken})
+	ctx := context.Background()
+	accountID, token := loginEmail(t, h, "debug-progression+"+ids.Token()[:12]+"@example.test")
+	hero := createCharacterWithClass(t, h, token, "Debug Paladin", "paladin")
+
+	rec := putDebugJSON(h, "/v0/debug/characters/"+hero.CharacterID+"/progression", token, map[string]any{
+		"level":                5,
+		"experience":           0,
+		"unspent_stat_points":  0,
+		"unspent_skill_points": 0,
+		"stats":                map[string]int{"str": 6, "dex": 4, "vit": 13, "magic": 13},
+		"skill_ranks":          map[string]int{"holy_shield": 5},
+	}, testDebugToken)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("debug seed status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	progression, err := db.GetCharacterProgression(ctx, accountID, hero.CharacterID)
+	if err != nil {
+		t.Fatalf("load seeded progression: %v", err)
+	}
+	if progression.Level != 5 || progression.Experience != 0 || progression.UnspentSkillPoints != 0 {
+		t.Fatalf("seeded progression = %+v, want level 5 with no XP/unspent skill points", progression)
+	}
+	if progression.Stats.Vit != 13 || progression.Stats.Magic != 13 || progression.SkillRanks["holy_shield"] != 5 {
+		t.Fatalf("seeded stats/ranks = %+v ranks=%+v, want holy_shield rank 5 requirements", progression.Stats, progression.SkillRanks)
 	}
 }
 

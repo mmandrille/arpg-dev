@@ -4,14 +4,18 @@ from __future__ import annotations
 import asyncio
 from dataclasses import replace
 import os
+from pathlib import Path
 from typing import Any
 
 import httpx
 
 from tools.bot.bot_types import CoopPeer, RuntimeState, Scenario
-from tools.bot.skill_demo import SkillDemoEntry, skill_demo_entry
+from tools.bot.skill_demo import ROOT, SkillDemoEntry, load_json, load_skill_rules, skill_demo_entry
 
 SKILL_VISUAL_ENV = "ARPG_SKILL_VISUAL_SKILL_ID"
+SKILL_VISUAL_RANK_ENV = "ARPG_SKILL_VISUAL_RANK"
+SKILL_VISUAL_LEVEL_ENV = "ARPG_SKILL_VISUAL_LEVEL"
+POST_CAST_HOLD_TICKS = 40
 
 
 def selected_skill_visual_entry() -> SkillDemoEntry:
@@ -21,6 +25,25 @@ def selected_skill_visual_entry() -> SkillDemoEntry:
     return skill_demo_entry(skill_id)
 
 
+def selected_skill_visual_rank(entry: SkillDemoEntry) -> int:
+    raw = os.environ.get(SKILL_VISUAL_RANK_ENV, "1").strip() or "1"
+    rank = int(raw)
+    if rank < 1 or rank > entry.max_rank:
+        raise ValueError(f"skill_visual rank for {entry.skill_id} must be between 1 and {entry.max_rank}")
+    return rank
+
+
+def selected_skill_visual_level(entry: SkillDemoEntry, rank: int) -> int:
+    raw = os.environ.get(SKILL_VISUAL_LEVEL_ENV, "").strip()
+    minimum = skill_required_level(entry.skill_id, rank)
+    if not raw:
+        return minimum
+    level = int(raw)
+    if level < minimum:
+        raise ValueError(f"skill_visual level for {entry.skill_id} rank {rank} must be >= {minimum}")
+    return level
+
+
 def runtime_scenario(scenario: Scenario, entry: SkillDemoEntry) -> Scenario:
     return replace(
         scenario,
@@ -28,38 +51,50 @@ def runtime_scenario(scenario: Scenario, entry: SkillDemoEntry) -> Scenario:
         character_class=entry.class_id,
         title=f"Skill Visual - {entry.name}",
         description=(
-            f"Reusable skill visual replay for {entry.name}: learn the skill, cast it through "
+            f"Reusable skill visual replay for {entry.name}: seed the requested rank, cast it through "
             f"{entry.targeting}, and hold after the cast."
         ),
     )
 
 
-def setup_monster_id(entry: SkillDemoEntry) -> str:
-    if entry.kind == "self_buff":
-        return "skill_xp_level7_dummy"
-    return "skill_xp_level6_dummy"
+def skill_rule(skill_id: str) -> dict[str, Any]:
+    return dict(load_skill_rules().get(skill_id, {}))
 
 
-def rank_assertion(entry: SkillDemoEntry) -> dict[str, Any]:
+def skill_required_level(skill_id: str, rank: int) -> int:
+    req = dict(skill_rule(skill_id).get("requirements", {}))
+    return int(req.get("level", 1)) + max(0, rank - 1) * int(req.get("level_per_rank", 0))
+
+
+def skill_required_stats(skill_id: str, rank: int) -> dict[str, int]:
+    req = dict(skill_rule(skill_id).get("requirements", {}))
+    stats = {str(k): int(v) for k, v in dict(req.get("stats", {})).items()}
+    per_rank = {str(k): int(v) for k, v in dict(req.get("stats_per_rank", {})).items()}
+    for stat, value in per_rank.items():
+        stats[stat] = stats.get(stat, 0) + max(0, rank - 1) * value
+    return stats
+
+
+def base_stats_for_class(class_id: str, root: Path = ROOT) -> dict[str, int]:
+    progression = load_json(root / "shared" / "rules" / "character_progression.v0.json")
+    class_stats = dict(progression.get("classes", {}).get(class_id, {}).get("base_stats", {}))
+    if not class_stats:
+        class_stats = dict(progression.get("base_stats", {}))
+    return {str(k): int(v) for k, v in class_stats.items()}
+
+
+def rank_assertion(entry: SkillDemoEntry, rank: int) -> dict[str, Any]:
     return {
         "type": "skill_progression",
         "skill_id": entry.skill_id,
-        "rank": 1,
+        "rank": rank,
         "max_rank": entry.max_rank,
         "can_spend": False,
     }
 
 
 def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
-    steps: list[dict[str, Any]] = [
-        {
-            "action": "attack_until_event",
-            "monster_def_id": setup_monster_id(entry),
-            "event_type": "monster_killed",
-            "timeout_s": 20,
-        },
-        {"action": "allocate_skill_point", "skill_id": entry.skill_id},
-    ]
+    steps: list[dict[str, Any]] = []
     if entry.kind == "projectile_attack":
         steps.extend([
             {"action": "move_until_player_position", "x": 4, "y": 5, "pathfind": True, "max_ticks": 220},
@@ -82,15 +117,14 @@ def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
             "target_self": True,
             "event_type": "skill_cast",
         })
-    steps.append({"action": "wait_ticks", "ticks": 30})
+    steps.append({"action": "wait_ticks", "ticks": POST_CAST_HOLD_TICKS})
     return steps
 
 
-def build_assertions(entry: SkillDemoEntry) -> list[dict[str, Any]]:
+def build_assertions(entry: SkillDemoEntry, rank: int = 1) -> list[dict[str, Any]]:
     assertions: list[dict[str, Any]] = [
-        {"type": "event_seen", "event_type": "skill_rank_updated", "skill_id": entry.skill_id, "rank": 1},
-        {"type": "event_seen", "event_type": "skill_cast", "skill_id": entry.skill_id, "rank": 1},
-        rank_assertion(entry),
+        {"type": "event_seen", "event_type": "skill_cast", "skill_id": entry.skill_id, "rank": rank},
+        rank_assertion(entry, rank),
     ]
     if entry.kind == "projectile_attack":
         assertions.append({"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1})
@@ -103,6 +137,43 @@ def build_assertions(entry: SkillDemoEntry) -> list[dict[str, Any]]:
 
 def targets_ally(entry: SkillDemoEntry) -> bool:
     return entry.kind in {"area_heal", "area_stat_buff"} and entry.targeting != "self"
+
+
+def seed_skill_visual_character(
+    client: httpx.Client,
+    token: str,
+    debug_token: str,
+    character_id: str,
+    entry: SkillDemoEntry,
+    rank: int,
+    level: int,
+) -> None:
+    stats = base_stats_for_class(entry.class_id)
+    for stat, required in skill_required_stats(entry.skill_id, rank).items():
+        stats[stat] = max(stats.get(stat, 0), required)
+    payload = {
+        "level": level,
+        "experience": 0,
+        "unspent_stat_points": 0,
+        "unspent_skill_points": 0,
+        "stats": {
+            "str": stats.get("str", 0),
+            "dex": stats.get("dex", 0),
+            "vit": stats.get("vit", 0),
+            "magic": stats.get("magic", 0),
+        },
+        "skill_ranks": {entry.skill_id: rank},
+    }
+    resp = client.put(
+        f"/v0/debug/characters/{character_id}/progression",
+        headers={**ctx_auth(token), "X-Debug-Token": debug_token},
+        json=payload,
+    )
+    resp.raise_for_status()
+
+
+def ctx_auth(token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {token}"}
 
 
 async def wait_for_skill_rank(ctx: dict[str, Any], peer: CoopPeer, skill_id: str, rank: int, peers: list[CoopPeer]) -> None:
@@ -190,6 +261,7 @@ async def run_ally_cast(
     host_character_id: str,
     ally_character_id: str,
     entry: SkillDemoEntry,
+    rank: int,
 ) -> tuple[dict[str, Any], RuntimeState]:
     sess = ctx["create_coop_session"](client, host_token, scenario.world_id, host_character_id, scenario.seed)
     session_id = str(sess["session_id"])
@@ -204,11 +276,7 @@ async def run_ally_cast(
             lambda: ctx["player_entity_ids"](host.state) >= {host.state.local_player_id, ally.state.local_player_id}
             and ctx["player_entity_ids"](ally.state) >= {host.state.local_player_id, ally.state.local_player_id},
         )
-        await ctx["coop_attack_until_kill"](peers, host, setup_monster_id(entry), companions=[ally])
-
-        rank_message = await ctx["send_coop_intent"](host, "allocate_skill_point_intent", {"skill_id": entry.skill_id})
-        await ctx["wait_coop_accept"](peers, host, rank_message)
-        await wait_for_skill_rank(ctx, host, entry.skill_id, 1, peers)
+        await wait_for_skill_rank(ctx, host, entry.skill_id, rank, peers)
 
         host_stage = {"x": 4.0, "y": 5.0}
         ally_stage = {"x": 4.0, "y": 8.0}
@@ -230,7 +298,7 @@ async def run_ally_cast(
             await wait_for_event(ctx, host, "player_healed", peers, skill_id=entry.skill_id)
         elif entry.kind == "area_stat_buff":
             await wait_for_event(ctx, host, "skill_effect_started", peers, skill_id=entry.skill_id)
-        await wait_ticks(ctx, peers, host, 30)
+        await wait_ticks(ctx, peers, host, POST_CAST_HOLD_TICKS)
         return sess, host.state
     finally:
         for peer in peers:
@@ -242,10 +310,13 @@ async def run_ally_cast(
 
 def run_selected(ctx: dict[str, Any], args: Any, client: httpx.Client, scenario: Scenario) -> tuple[Scenario, str, str, dict[str, Any], RuntimeState]:
     entry = selected_skill_visual_entry()
+    rank = selected_skill_visual_rank(entry)
+    level = selected_skill_visual_level(entry, rank)
     scenario = runtime_scenario(scenario, entry)
     replay_email = ctx["scenario_email"](args.email, f"{scenario.id}-{entry.skill_id}-host")
     _, token = ctx["dev_login"](client, replay_email, args.dev_token)
     host_character_id = ctx["ensure_character"](client, token, f"{entry.name} Visual Host", entry.class_id)
+    seed_skill_visual_character(client, token, args.debug_token, host_character_id, entry, rank, level)
     if targets_ally(entry):
         ally_email = ctx["scenario_email"](args.email, f"{scenario.id}-{entry.skill_id}-ally")
         _, ally_token = ctx["dev_login"](client, ally_email, args.dev_token)
@@ -260,6 +331,7 @@ def run_selected(ctx: dict[str, Any], args: Any, client: httpx.Client, scenario:
             host_character_id=host_character_id,
             ally_character_id=ally_character_id,
             entry=entry,
+            rank=rank,
         ))
     else:
         sess, observed = ctx["run_verified_session"](
@@ -270,7 +342,7 @@ def run_selected(ctx: dict[str, Any], args: Any, client: httpx.Client, scenario:
             scenario=scenario,
             world_id=scenario.world_id,
             steps=build_steps(entry),
-            assertions=build_assertions(entry),
+            assertions=build_assertions(entry, rank),
             seed=scenario.seed,
         )
     return scenario, replay_email, token, sess, observed

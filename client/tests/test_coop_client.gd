@@ -790,7 +790,7 @@ func _test_player_healed_spawns_heal_rain() -> void:
 		if child.get_script() == HealRainEffectScript:
 			rain_count += 1
 			_assert_float("heal rain radius", float(child.radius), MainScript.HEAL_RAIN_RADIUS)
-	_assert_eq("player_healed rain count", rain_count, 0)
+	_assert_eq("player_healed rain count", rain_count, 1)
 	var numbers := main._bot_damage_numbers()
 	if numbers.size() > 0:
 		_assert_eq("heal floating text", str((numbers[0] as Dictionary).get("text", "")), "+4")

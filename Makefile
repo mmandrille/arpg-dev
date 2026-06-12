@@ -40,9 +40,9 @@ help: ## List available commands
 	@echo "  Output: make test/ci/bot/test-all/client-* are quiet by default. Use VERBOSE=1 (or V=1) for full logs."
 
 .PHONY: skill-visual
-skill-visual: ## Run a bot-visual replay for a skill: make skill-visual skill=holy_shield
+skill-visual: ## Run a bot-visual replay for a skill: make skill-visual skill=holy_shield rank=1
 	@if [[ -z "$(skill)" ]]; then echo "usage: make skill-visual skill=<skill_id>"; exit 2; fi
-	@$(PY) -m tools.bot.skill_visual "$(skill)" $(if $(DRY_RUN),--dry-run,)
+	@$(PY) -m tools.bot.skill_visual "$(skill)" $(if $(rank),--rank "$(rank)",) $(if $(level),--level "$(level)",) $(if $(DRY_RUN),--dry-run,)
 
 .PHONY: skill-visual-list
 skill-visual-list: ## List skill visual replay coverage

@@ -11,12 +11,77 @@ import (
 
 // registerInspectRoutes wires the debug-gated inspection + replay endpoints.
 func (s *Server) registerInspectRoutes(mux *http.ServeMux) {
+	mux.Handle("PUT /v0/debug/characters/{character_id}/progression",
+		s.requireAuth(s.requireDebug(http.HandlerFunc(s.handleDebugCharacterProgression))))
 	mux.Handle("GET /v0/sessions/{session_id}/state",
 		s.requireAuth(s.requireDebug(http.HandlerFunc(s.handleSessionState))))
 	mux.Handle("GET /v0/sessions/{session_id}/replay",
 		s.requireAuth(s.requireDebug(http.HandlerFunc(s.handleSessionReplay))))
 	mux.Handle("GET /v0/sessions/{session_id}/replay/timeline",
 		s.requireAuth(s.requireDebug(http.HandlerFunc(s.handleSessionReplayTimeline))))
+}
+
+type debugCharacterProgressionRequest struct {
+	Level              int                      `json:"level"`
+	Experience         int                      `json:"experience"`
+	UnspentStatPoints  int                      `json:"unspent_stat_points"`
+	UnspentSkillPoints int                      `json:"unspent_skill_points"`
+	Stats              store.CharacterBaseStats `json:"stats"`
+	SkillRanks         map[string]int           `json:"skill_ranks"`
+}
+
+func (s *Server) handleDebugCharacterProgression(w http.ResponseWriter, r *http.Request) {
+	accountID, _ := accountFromContext(r.Context())
+	characterID := r.PathValue("character_id")
+	if !safePathID(characterID) {
+		writeError(w, http.StatusNotFound, "character_not_found", "character not found")
+		return
+	}
+	character, err := s.store.GetCharacter(r.Context(), characterID)
+	if errors.Is(err, store.ErrNotFound) || (err == nil && character.AccountID != accountID) {
+		writeError(w, http.StatusNotFound, "character_not_found", "character not found")
+		return
+	}
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character")
+		return
+	}
+
+	var req debugCharacterProgressionRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	if req.Level < 1 || req.Experience < 0 || req.UnspentStatPoints < 0 || req.UnspentSkillPoints < 0 {
+		writeError(w, http.StatusBadRequest, "invalid_progression", "progression values are out of range")
+		return
+	}
+	for skillID, rank := range req.SkillRanks {
+		if skillID == "" || rank < 0 {
+			writeError(w, http.StatusBadRequest, "invalid_progression", "skill ranks are out of range")
+			return
+		}
+	}
+
+	progression := store.CharacterProgression{
+		AccountID:           accountID,
+		CharacterID:         characterID,
+		Level:               req.Level,
+		Experience:          req.Experience,
+		UnspentStatPoints:   req.UnspentStatPoints,
+		UnspentSkillPoints:  req.UnspentSkillPoints,
+		Stats:               req.Stats,
+		Gold:                0,
+		DeepestDungeonDepth: 0,
+		SkillRanks:          req.SkillRanks,
+	}
+	if err := s.store.UpsertCharacterProgression(r.Context(), accountID, progression); err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not seed character progression")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 // requireDebug enforces the X-Debug-Token header (ADR-0001 D8.4 / spec 4.1).

@@ -2,13 +2,16 @@
   "version": 0,
   "classes": {
     "barbarian": {
-      "icon": { "label": "B", "shape": "axe", "color": "#c85f3d", "accent": "#ffd9a8" }
+      "icon": { "label": "B", "shape": "axe", "color": "#c85f3d", "accent": "#ffd9a8" },
+      "model": { "asset_id": "character_barbarian_v0" }
     },
     "sorcerer": {
-      "icon": { "label": "S", "shape": "spark", "color": "#5e8cff", "accent": "#dce7ff" }
+      "icon": { "label": "S", "shape": "spark", "color": "#5e8cff", "accent": "#dce7ff" },
+      "model": { "asset_id": "character_sorcerer_v0" }
     },
     "paladin": {
-      "icon": { "label": "P", "shape": "shield", "color": "#d9b44a", "accent": "#fff3ba" }
+      "icon": { "label": "P", "shape": "shield", "color": "#d9b44a", "accent": "#fff3ba" },
+      "model": { "asset_id": "character_paladin_v0" }
     }
   }
 }

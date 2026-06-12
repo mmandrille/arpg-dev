@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://arpg.dev/schemas/assets/class_presentations.v0.schema.json",
   "title": "Class presentations (v0)",
-  "description": "Client-facing class labels and icons. Gameplay authority stays in shared/rules/character_progression.v0.json.",
+  "description": "Client-facing class labels, icons, and character models. Gameplay authority stays in shared/rules/character_progression.v0.json.",
   "type": "object",
   "required": ["version", "classes"],
   "additionalProperties": false,
@@ -13,7 +13,7 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["icon"],
+        "required": ["icon", "model"],
         "additionalProperties": false,
         "properties": {
           "icon": {
@@ -25,6 +25,14 @@
               "shape": { "type": "string", "enum": ["axe", "spark", "shield"] },
               "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
               "accent": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+            }
+          },
+          "model": {
+            "type": "object",
+            "required": ["asset_id"],
+            "additionalProperties": false,
+            "properties": {
+              "asset_id": { "type": "string", "minLength": 1 }
             }
           }
         }

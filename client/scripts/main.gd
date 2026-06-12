@@ -38,6 +38,7 @@ const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
+const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
@@ -111,6 +112,7 @@ var player_max_hp: int = PLAYER_START_HP
 var player_mana: int = 10
 var player_max_mana: int = 10
 var player_visual_scale: float = 1.0
+var _local_player_class_asset_id: String = ""
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
@@ -288,6 +290,7 @@ func _ready() -> void:
 	_sync_settings_panel()
 	ItemRulesLoader.ensure_loaded()
 	SkillRulesLoader.ensure_loaded()
+	ClassPresentationsLoaderScript.ensure_loaded()
 	_load_dungeon_generation()
 	_load_ground_item_visual_data()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8888")
@@ -957,6 +960,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	skill_progression = p.get("skill_progression", {})
 	skill_cooldowns = p.get("skill_cooldowns", [])
 	_apply_skill_bindings(p.get("skill_bindings", {}))
+	_apply_local_player_class_model()
 	_refresh_player_hud_identity()
 	if resolver != null:
 		resolver.apply_snapshot(p)
@@ -1046,6 +1050,7 @@ func _apply_delta(p: Dictionary) -> void:
 					_show_waypoint_panel()
 			"character_progression_update":
 				character_progression = c.get("character_progression", {})
+				_apply_local_player_class_model()
 				_refresh_progression_ui()
 				_refresh_player_hud_identity()
 				_update_character_info_panel()
@@ -4402,6 +4407,7 @@ func _monster_scene_for_visual(scene_key: String) -> PackedScene:
 func _make_remote_player_node(e: Dictionary) -> Node3D:
 	var root = CharacterScene.instantiate() as Node3D
 	root.name = "RemotePlayer_%s" % str(e.get("id", ""))
+	_apply_character_class_model(root, str(e.get("character_class", "")))
 	root.scale = Vector3.ONE * _entity_visual_scale(e)
 	_apply_model_tint(root, REMOTE_PLAYER_TINT)
 	return root
@@ -4433,6 +4439,47 @@ func _apply_local_player_visual_scale(scale: float) -> void:
 	player_visual_scale = scale if scale > 0.0 else 1.0
 	if character_visual != null:
 		character_visual.scale = Vector3.ONE * player_visual_scale
+
+
+func _apply_local_player_class_model() -> void:
+	if character_visual == null:
+		return
+	var class_id := str(character_progression.get("character_class", ""))
+	var resolved := ClassPresentationsLoaderScript.resolve(class_id)
+	var asset_id := str(resolved.get("asset_id", ""))
+	if asset_id == "" or asset_id == _local_player_class_asset_id:
+		return
+	_local_player_class_asset_id = asset_id
+	_apply_character_class_model(character_visual, class_id)
+	_apply_local_player_visual_scale(player_visual_scale)
+	_apply_model_tint(character_visual, PLAYER_TINT)
+	player_reaction = ModelReactionControllerScript.new(character_visual, PLAYER_TINT)
+	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap != null:
+		player_anim = AnimationControllerScript.new(ap)
+
+
+func _apply_character_class_model(root: Node3D, class_id: String) -> void:
+	var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
+	if packed == null:
+		return
+	var old_model := root.find_child("ModelRoot", false, false) as Node
+	if old_model != null:
+		root.remove_child(old_model)
+		old_model.free()
+	var model := packed.instantiate() as Node3D
+	if model == null:
+		return
+	model.name = "ModelRoot"
+	root.add_child(model)
+	root.move_child(model, 0)
+	var ap := root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap != null:
+		ap.root_node = NodePath("../ModelRoot")
+	if root.has_method("_ensure_weapon_socket"):
+		root.call("_ensure_weapon_socket")
+	if root.has_method("_ensure_fallback_sockets"):
+		root.call("_ensure_fallback_sockets")
 
 
 func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:

@@ -26,6 +26,14 @@ Status: Complete
 - Starter equipment reuses placeholder item visuals; dedicated axe, staff, and shield production art remains deferred.
 - `skill_damage_percent` affects skill damage resolution but is not exposed as a dedicated top-level derived-stat display yet.
 
+## Follow-up Consolidation
+
+Post-v97 unversioned commits added minor visual/presentation polish around this slice: dedicated
+starter staff and axe GLBs, item-family presentation assets, floor-loot presentation fixes,
+class-specific character model placeholders, and magic scaling for existing skill effects. These
+commits are treated as minor improvements on top of v97 rather than separate numbered slices; Rogue
+class work starts at v98.
+
 ## Maintainability Note
 
 This slice touched grandfathered creation, simulation, and bot-test files in narrow paths. Starter-specific HTTP coverage and skill-stat helpers were extracted to focused files, while the remaining `sim.go` max-mana/stat-breakdown growth is covered by a documented baseline update. The baseline also records the already-shipped v96 `client/scripts/main.gd` growth and current `auth_session_test.go` size so the ratchet is accurate again.

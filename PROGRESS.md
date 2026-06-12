@@ -116,6 +116,7 @@ v94_* = item-upgrade-starter
 v95_* = unique-item-catalog-seed
 v96_* = town-presentation-polish
 v97_* = class-starter-loadouts
+v98_* = rogue-class-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -417,6 +418,10 @@ campfire, adds two procedural wood cabins, improves the town ground texture, and
 **New heroes now get class starter kits.** v97 seeds explicitly created paladins with sword/shield,
 sorcerers with a two-handed staff, and barbarians with a slower harder-hitting axe, plus one health
 and one mana potion. The starter staff also introduces item-backed max mana and skill damage scaling.
+Follow-up minor improvements after v97 added dedicated starter staff/axe models, item-family
+presentation assets, class-specific character models, magic scaling for existing skill effects, and
+floor-loot presentation fixes. These are considered unversioned polish/consolidation commits, not
+separate numbered slices; the next gameplay slice remains v98.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

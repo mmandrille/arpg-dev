@@ -395,7 +395,7 @@ func _show_main_menu() -> void:
 
 
 func _raise_gameplay_windows() -> void:
-	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, character_stats_panel, skills_panel]:
+	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, character_stats_panel, skills_panel, character_info_panel]:
 		if panel != null and panel is CanvasItem:
 			(panel as CanvasItem).move_to_front()
 
@@ -1981,6 +1981,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if inventory_panel != null:
 				_close_gameplay_panels("inventory")
 				inventory_panel.toggle()
+				_raise_gameplay_windows()
 			get_viewport().set_input_as_handled()
 			return
 		if _is_character_stats_key(event):
@@ -1988,6 +1989,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_close_gameplay_panels("stats")
 				character_stats_panel.toggle()
 				_refresh_progression_ui()
+				_raise_gameplay_windows()
 			get_viewport().set_input_as_handled()
 			return
 		if _is_skills_key(event):
@@ -1995,6 +1997,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_close_gameplay_panels("skills")
 				skills_panel.toggle()
 				_refresh_skill_ui()
+				_raise_gameplay_windows()
 			get_viewport().set_input_as_handled()
 			return
 		if _is_character_info_key(event):
@@ -2945,6 +2948,7 @@ func _sync_inventory_replay_display() -> void:
 	if visual_replay_show_inventory or has_inventory:
 		inventory_panel.ensure_display_visible()
 		inventory_panel.set_interactive(false)
+		_raise_gameplay_windows()
 	else:
 		inventory_panel.hide_display()
 
@@ -3328,6 +3332,7 @@ func _open_skills_panel_from_bar() -> void:
 	_close_gameplay_panels("skills")
 	skills_panel.ensure_display_visible()
 	_refresh_skill_ui()
+	_raise_gameplay_windows()
 
 
 func _open_character_panel_from_bar() -> void:
@@ -3336,6 +3341,7 @@ func _open_character_panel_from_bar() -> void:
 	_close_gameplay_panels("stats")
 	character_stats_panel.ensure_display_visible()
 	_refresh_progression_ui()
+	_raise_gameplay_windows()
 
 
 func _stat_allocation_blocked() -> bool:
@@ -3746,6 +3752,7 @@ func _toggle_character_info_panel() -> void:
 	character_info_panel.visible = not character_info_panel.visible
 	if character_info_panel.visible:
 		_update_character_info_panel()
+		_raise_gameplay_windows()
 
 
 func _hide_character_info_panel() -> void:
@@ -3880,6 +3887,7 @@ func _show_shop_panel(ev: Dictionary) -> void:
 		_shop_title(next_shop_id),
 		ev.get("sell_appraisals", [])
 	)
+	_raise_gameplay_windows()
 
 
 func _hide_shop_panel() -> void:
@@ -3912,6 +3920,7 @@ func _show_stash_panel(ev: Dictionary) -> void:
 		hotbar,
 		_stash_title(next_stash_id)
 	)
+	_raise_gameplay_windows()
 
 
 func _hide_stash_panel() -> void:
@@ -3931,6 +3940,7 @@ func _show_bishop_panel(ev: Dictionary) -> void:
 		bool(ev.get("affordable", gold >= int(ev.get("price", 250)))),
 		gold
 	)
+	_raise_gameplay_windows()
 
 
 func _hide_bishop_panel() -> void:
@@ -3954,6 +3964,7 @@ func _show_market_panel(ev: Dictionary) -> void:
 		elif listings.is_empty():
 			status = "No active listings"
 	market_panel.show_market(next_entity_id, listings, stash_items, client.account_id if client != null else "", status)
+	_raise_gameplay_windows()
 
 
 func _on_market_action_requested(action: String, payload: Dictionary) -> void:
@@ -5883,6 +5894,7 @@ func _bot_shadow_inventory_equip(item_instance_id: String) -> void:
 	if inventory_panel == null:
 		return
 	inventory_panel.ensure_display_visible()
+	_raise_gameplay_windows()
 	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
 	var to_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
 	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
@@ -5894,6 +5906,7 @@ func _bot_shadow_inventory_unequip() -> void:
 	if inventory_panel == null:
 		return
 	inventory_panel.ensure_display_visible()
+	_raise_gameplay_windows()
 	var from_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
 	var to_pos: Vector2 = inventory_panel.get_bag_area_screen_center()
 	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
@@ -5905,6 +5918,7 @@ func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 	if inventory_panel == null:
 		return
 	inventory_panel.ensure_display_visible()
+	_raise_gameplay_windows()
 	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
 	if from_pos == Vector2.ZERO:
 		from_pos = inventory_panel.get_weapon_slot_screen_center()

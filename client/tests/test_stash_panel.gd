@@ -94,6 +94,7 @@ func _run() -> void:
 
 	var inventory_panel := InventoryPanelScript.new()
 	root.add_child(inventory_panel)
+	await process_frame
 	var inventory_emitted: Array = []
 	inventory_panel.intent_requested.connect(func(intent_type: String, payload: Dictionary) -> void:
 		inventory_emitted.append({"type": intent_type, "payload": payload.duplicate(true)})
@@ -107,6 +108,19 @@ func _run() -> void:
 	_assert_eq("stash drag to bag emitted count", inventory_emitted.size(), 1)
 	_assert_eq("stash drag to bag type", str(inventory_emitted[0]["type"]), "stash_withdraw_item_intent")
 	_assert_eq("stash drag to bag item", str(inventory_emitted[0]["payload"].get("stash_item_id", "")), "9001")
+	_assert_true("test equip slot kind recognized", inventory_panel._slot_kind_is_equipment("equip:main_hand"))
+	_assert_true("test stash item can equip to main hand", inventory_panel._item_can_equip_to(stash_items[0], "main_hand"))
+	inventory_panel._handle_drop_on_slot("equip:main_hand", {
+		"source": "stash",
+		"stash_entity_id": "1005",
+		"stash_item_id": "9001",
+		"item": stash_items[0],
+	})
+	_assert_eq("stash drag to equip emitted count", inventory_emitted.size(), 2)
+	if inventory_emitted.size() >= 2:
+		_assert_eq("stash drag to equip type", str(inventory_emitted[1]["type"]), "stash_equip_item_intent")
+		_assert_eq("stash drag to equip stash item", str(inventory_emitted[1]["payload"].get("stash_item_id", "")), "9001")
+		_assert_eq("stash drag to equip slot", str(inventory_emitted[1]["payload"].get("slot", "")), "main_hand")
 	inventory_panel.queue_free()
 
 	panel.bot_click_deposit_gold(1)

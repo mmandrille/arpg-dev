@@ -116,7 +116,7 @@ class InventorySlotButton:
 		if dragged.is_empty():
 			return false
 		if panel._slot_kind_is_equipment(slot_kind):
-			return source == SLOT_KIND_BAG and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
+			return (source == SLOT_KIND_BAG or source == DRAG_SOURCE_STASH) and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 		if slot_kind == SLOT_KIND_BAG:
 			if source == DRAG_SOURCE_SHOP_OFFER and str(data.get("offer_id", "")) != "" and str(data.get("shop_entity_id", "")) != "":
 				return true
@@ -800,7 +800,15 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 	if _slot_kind_is_equipment(slot_kind):
 		var slot := _slot_from_kind(slot_kind)
 		if _item_can_equip_to(item, slot):
-			intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
+			var source := str(data.get("source", ""))
+			if source == DRAG_SOURCE_STASH:
+				intent_requested.emit("stash_equip_item_intent", {
+					"stash_entity_id": str(data.get("stash_entity_id", "")),
+					"stash_item_id": str(data.get("stash_item_id", "")),
+					"slot": slot,
+				})
+			else:
+				intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
 	elif slot_kind == SLOT_KIND_BAG:
 		var source := str(data.get("source", ""))
 		if source == DRAG_SOURCE_SHOP_OFFER:
@@ -818,8 +826,7 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 
 
 func _item_can_equip_to(item: Dictionary, slot: String) -> bool:
-	var def_id := str(item.get("item_def_id", ""))
-	var def: Dictionary = _item_definition(def_id)
+	var def: Dictionary = _item_definition_for_item(item)
 	if not bool(def.get("equippable", false)):
 		return false
 	var item_slot := str(def.get("slot", ""))
@@ -829,8 +836,7 @@ func _item_can_equip_to(item: Dictionary, slot: String) -> bool:
 
 
 func _preferred_equip_slot(item: Dictionary) -> String:
-	var def_id := str(item.get("item_def_id", ""))
-	var def: Dictionary = _item_definition(def_id)
+	var def: Dictionary = _item_definition_for_item(item)
 	if not bool(def.get("equippable", false)):
 		return ""
 	var item_slot := str(def.get("slot", ""))
@@ -1289,6 +1295,25 @@ func _short_label(def_id: String) -> String:
 
 func _item_definition(def_id: String) -> Dictionary:
 	return ItemRulesLoader.item_definition(def_id)
+
+
+func _item_definition_for_item(item: Dictionary) -> Dictionary:
+	var def_id := str(item.get("item_def_id", ""))
+	var def := _item_definition(def_id)
+	if not def.is_empty():
+		return def
+	var template_id := str(item.get("item_template_id", ""))
+	if template_id != "":
+		def = _item_definition(template_id)
+		if not def.is_empty():
+			return def
+	var item_slot := str(item.get("slot", ""))
+	if item_slot != "":
+		return {
+			"equippable": true,
+			"slot": item_slot,
+		}
+	return {}
 
 
 func _debug_presentations() -> Dictionary:

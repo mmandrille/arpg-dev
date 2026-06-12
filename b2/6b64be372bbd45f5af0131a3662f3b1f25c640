@@ -1,0 +1,24 @@
+tools/bot/test_skill_visual.py
+  s_5e45ef83ebf19d::t_bd3e92bf8216ab 152-154
+  s_5e45ef83ebf19d::t_831c299ec666ab 11,14,132-151
+tools/bot/skill_visual_runtime.py
+  s_5e45ef83ebf19d::t_08b60e290bf7b5 120-121,123-135
+  s_5e45ef83ebf19d::t_6f58412cd9e3e8 6,79-99,191
+  s_5e45ef83ebf19d::t_533d3440e30721 122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b26b64be372bbd45f5af0131a3662f3b1f25c640",
+  "prompts": {},
+  "sessions": {
+    "s_5e45ef83ebf19d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb919-cf01-7b80-aa7b-94e92d0861c8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

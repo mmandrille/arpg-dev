@@ -1339,6 +1339,7 @@ func (s *Sim) handleAreaHealSkillCast(in Input, res *TickResult, player *entity,
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, 0, "")
 	s.applyAreaHeal(player, skillID, rank, applications, in.CorrelationID, res)
+	s.startAreaHealZones(player, skillID, def, rank, in.CastSkill, in.CorrelationID)
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)

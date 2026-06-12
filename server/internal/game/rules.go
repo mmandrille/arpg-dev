@@ -2919,6 +2919,9 @@ func validateAreaPercentHealEffect(skillID string, idx int, effect SkillEffectDe
 	if effect.PercentBase == 0 && effect.PercentPerRank == 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: percent values cannot both be zero", skillID, idx)
 	}
+	if effect.DurationTicks <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].duration_ticks: must be positive", skillID, idx)
+	}
 	return nil
 }
 

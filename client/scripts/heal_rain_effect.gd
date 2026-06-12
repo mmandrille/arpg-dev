@@ -2,9 +2,9 @@ extends Node3D
 class_name HealRainEffect
 
 const LIFETIME := 3.0
-const DROP_COUNT := 34
+const DROP_COUNT := 64
 const DEFAULT_RADIUS := 4.0
-const FALL_HEIGHT := 3.2
+const FALL_HEIGHT := 5.0
 
 var radius := DEFAULT_RADIUS
 var _age := 0.0
@@ -20,10 +20,10 @@ func setup(effect_radius: float = DEFAULT_RADIUS) -> void:
 
 func _ready() -> void:
 	_material = StandardMaterial3D.new()
-	_material.albedo_color = Color(0.24, 1.0, 0.42, 0.78)
+	_material.albedo_color = Color(0.18, 1.0, 0.36, 0.95)
 	_material.emission_enabled = true
-	_material.emission = Color(0.16, 1.0, 0.35)
-	_material.emission_energy_multiplier = 1.45
+	_material.emission = Color(0.35, 1.0, 0.48)
+	_material.emission_energy_multiplier = 2.4
 	_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_make_ground_ring()
@@ -47,7 +47,7 @@ func _process(delta: float) -> void:
 		for child in drop.get_children():
 			if child is GeometryInstance3D:
 				(child as GeometryInstance3D).transparency = 1.0 - fade
-	_material.albedo_color.a = 0.78 * fade
+	_material.albedo_color.a = 0.95 * fade
 
 
 func _make_drop(index: int) -> void:
@@ -58,13 +58,13 @@ func _make_drop(index: int) -> void:
 	drop.rotation.y = angle + PI * 0.25
 	var vertical := MeshInstance3D.new()
 	var vertical_mesh := BoxMesh.new()
-	vertical_mesh.size = Vector3(0.06, 0.50, 0.06)
+	vertical_mesh.size = Vector3(0.10, 0.90, 0.10)
 	vertical.mesh = vertical_mesh
 	vertical.material_override = _material
 	drop.add_child(vertical)
 	var horizontal := MeshInstance3D.new()
 	var horizontal_mesh := BoxMesh.new()
-	horizontal_mesh.size = Vector3(0.36, 0.06, 0.06)
+	horizontal_mesh.size = Vector3(0.52, 0.10, 0.10)
 	horizontal.mesh = horizontal_mesh
 	horizontal.material_override = _material
 	drop.add_child(horizontal)

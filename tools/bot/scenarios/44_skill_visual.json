@@ -7,6 +7,7 @@
   "steps": [],
   "assertions": [],
   "visual": {
-    "camera": { "x": 16, "y": 8, "zoom": 1.0 }
+    "camera": { "x": 16, "y": 8, "zoom": 1.0 },
+    "post_complete_hold_s": 3.0
   }
 }

@@ -39,6 +39,9 @@ func _initialize() -> void:
 	_test_skill_cooldown_reject_shows_floating_text()
 	_test_monster_aggro_shows_threat_floating_text()
 	_test_player_healed_spawns_heal_rain()
+	_test_full_hp_heal_cast_spawns_heal_rain_once()
+	_test_uncorrelated_heal_cast_spawns_heal_rain_once()
+	_test_heal_cast_with_healed_event_does_not_double_spawn_rain()
 	_test_holy_shield_effect_ids_drive_world_shine()
 	_test_local_attack_range_uses_equipped_reach()
 	_test_basic_attack_cooldown_uses_derived_interval()
@@ -813,6 +816,106 @@ func _test_player_healed_spawns_heal_rain() -> void:
 	var numbers := main._bot_damage_numbers()
 	if numbers.size() > 0:
 		_assert_eq("heal floating text", str((numbers[0] as Dictionary).get("text", "")), "+4")
+	main.damage_numbers_layer.queue_free()
+	main._camera.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
+
+
+func _test_full_hp_heal_cast_spawns_heal_rain_once() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.player_anchor.position = Vector3(2.0, 0.0, 3.0)
+	main._apply_delta({
+		"events": [
+			{
+				"event_type": "skill_cast",
+				"entity_id": "1001",
+				"source_entity_id": "1001",
+				"correlation_id": "heal_full_hp",
+				"skill_id": "heal",
+				"rank": 1
+			}
+		],
+		"changes": []
+	})
+	var rain_count := 0
+	for child in main.get_children():
+		if child.get_script() == HealRainEffectScript:
+			rain_count += 1
+	_assert_eq("full hp heal cast rain count", rain_count, 1)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
+
+
+func _test_uncorrelated_heal_cast_spawns_heal_rain_once() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.player_anchor.position = Vector3(2.0, 0.0, 3.0)
+	main._apply_delta({
+		"events": [
+			{
+				"event_type": "skill_cast",
+				"entity_id": "1001",
+				"source_entity_id": "1001",
+				"skill_id": "heal",
+				"rank": 1
+			}
+		],
+		"changes": []
+	})
+	var rain_count := 0
+	for child in main.get_children():
+		if child.get_script() == HealRainEffectScript:
+			rain_count += 1
+	_assert_eq("uncorrelated heal cast rain count", rain_count, 1)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
+
+
+func _test_heal_cast_with_healed_event_does_not_double_spawn_rain() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.player_anchor.position = Vector3(2.0, 0.0, 3.0)
+	main.client_settings = ClientSettingsScript.new()
+	main.damage_numbers_layer = CanvasLayer.new()
+	main._camera = Camera3D.new()
+	root.add_child(main.damage_numbers_layer)
+	root.add_child(main._camera)
+	main._camera.look_at_from_position(Vector3(2.0, 12.0, 13.0), main.player_anchor.position, Vector3.UP)
+	main._apply_delta({
+		"events": [
+			{
+				"event_type": "skill_cast",
+				"entity_id": "1001",
+				"source_entity_id": "1001",
+				"correlation_id": "heal_real",
+				"skill_id": "heal",
+				"rank": 1
+			},
+			{
+				"event_type": "player_healed",
+				"entity_id": "1001",
+				"target_entity_id": "1001",
+				"source_entity_id": "1001",
+				"correlation_id": "heal_real",
+				"skill_id": "heal",
+				"heal": 4
+			}
+		],
+		"changes": []
+	})
+	var rain_count := 0
+	for child in main.get_children():
+		if child.get_script() == HealRainEffectScript:
+			rain_count += 1
+	_assert_eq("healing heal cast rain count", rain_count, 1)
 	main.damage_numbers_layer.queue_free()
 	main._camera.queue_free()
 	main.player_anchor.queue_free()

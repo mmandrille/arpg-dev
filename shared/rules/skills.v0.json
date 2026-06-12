@@ -289,7 +289,8 @@
           "range": 9,
           "radius": 4,
           "percent_base": 25,
-          "percent_per_rank": 10
+          "percent_per_rank": 10,
+          "duration_ticks": 30
         }
       ],
       "cooldown": {

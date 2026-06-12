@@ -50,6 +50,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"stash_withdraw_item_intent":  (*Sim).handleStashWithdrawItem,
 	"stash_deposit_gold_intent":   (*Sim).handleStashDepositGold,
 	"stash_withdraw_gold_intent":  (*Sim).handleStashWithdrawGold,
+	"corpse_withdraw_item_intent": (*Sim).handleCorpseWithdrawItem,
 }
 
 // handleClientReady acknowledges the client_ready handshake.

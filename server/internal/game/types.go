@@ -43,6 +43,10 @@ type EntityView struct {
 	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
 	EffectIDs         []string                `json:"effect_ids,omitempty"`
 	InteractableDefID string                  `json:"interactable_def_id,omitempty"`
+	CorpseCharacterID string                  `json:"corpse_character_id,omitempty"`
+	CorpseName        string                  `json:"corpse_name,omitempty"`
+	CorpseLevel       int                     `json:"corpse_level,omitempty"`
+	CorpseItemCount   *int                    `json:"corpse_item_count,omitempty"`
 	OwnerID           string                  `json:"owner_id,omitempty"`
 	TargetID          string                  `json:"target_id,omitempty"`
 	ProjectileDefID   string                  `json:"projectile_def_id,omitempty"`
@@ -429,6 +433,19 @@ type Event struct {
 	StashItems         []StashItemView         `json:"stash_items,omitempty"`
 	StashGold          *int                    `json:"stash_gold,omitempty"`
 	StashCapacity      *int                    `json:"stash_capacity,omitempty"`
+	CorpseCharacterID  string                  `json:"corpse_character_id,omitempty"`
+	CorpseName         string                  `json:"corpse_name,omitempty"`
+	CorpseItems        []ItemView              `json:"corpse_items,omitempty"`
+	Inventory          []ItemView              `json:"inventory,omitempty"`
+	Equipped           map[string]*string      `json:"equipped,omitempty"`
+	Hotbar             []HotbarSlotView        `json:"hotbar,omitempty"`
+	Gold               *int                    `json:"gold,omitempty"`
+	InventoryRows      *int                    `json:"inventory_rows,omitempty"`
+	InventoryCapacity  *int                    `json:"inventory_capacity,omitempty"`
+	HotbarCapacity     *int                    `json:"hotbar_capacity,omitempty"`
+	CharacterClass     string                  `json:"character_class,omitempty"`
+	CharacterLevel     *int                    `json:"character_level,omitempty"`
+	CharacterXP        *int                    `json:"character_xp,omitempty"`
 	PatternID          string                  `json:"pattern_id,omitempty"`
 	PhaseIndex         *int                    `json:"phase_index,omitempty"`
 	PhaseKind          string                  `json:"phase_kind,omitempty"`

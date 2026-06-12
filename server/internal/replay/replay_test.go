@@ -1355,8 +1355,8 @@ func (f *fakeRepo) DeleteCharacter(context.Context, string, string) error { retu
 func (f *fakeRepo) RenameCharacter(context.Context, string, string, string) (store.Character, error) {
 	return store.Character{}, nil
 }
-func (f *fakeRepo) MarkCharacterDead(context.Context, string, string) error { return nil }
-func (f *fakeRepo) CreateSession(context.Context, store.Session) error      { return nil }
+func (f *fakeRepo) MarkCharacterDead(context.Context, string, string, int) error { return nil }
+func (f *fakeRepo) CreateSession(context.Context, store.Session) error           { return nil }
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil
 }
@@ -1399,6 +1399,12 @@ func (f *fakeRepo) SetSessionMemberPlayer(context.Context, string, string, strin
 }
 func (f *fakeRepo) ListCharacterItems(context.Context, string, string) ([]store.CharacterItemInstance, error) {
 	return nil, nil
+}
+func (f *fakeRepo) ListRecoverableCharacterCorpses(context.Context, string, string) ([]store.CharacterCorpse, error) {
+	return nil, nil
+}
+func (f *fakeRepo) TransferCorpseItemToCharacter(context.Context, string, string, string, string, string) (store.CharacterItemInstance, error) {
+	return store.CharacterItemInstance{}, nil
 }
 func (f *fakeRepo) AddCharacterItem(context.Context, store.CharacterItemInstance) error { return nil }
 func (f *fakeRepo) SetCharacterItemLocation(context.Context, string, string, string, string) error {

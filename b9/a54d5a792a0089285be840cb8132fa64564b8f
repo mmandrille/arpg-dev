@@ -1,0 +1,34 @@
+client/scripts/main_menu.gd
+  s_fe4ee1c1e49e89::t_a1cd8a952eb0a1 14-15,57-62,90-96,100-102
+docs/specs/v1_spec-first-playable-vertical-slice.md
+  s_fe4ee1c1e49e89::t_a1cd8a952eb0a1 102
+server/internal/http/auth_session_test.go
+  s_fe4ee1c1e49e89::t_a1cd8a952eb0a1 144-163
+  s_fe4ee1c1e49e89::t_1eb1bdd1dca566 687-763
+client/scripts/net_client.gd
+  s_fe4ee1c1e49e89::t_a1cd8a952eb0a1 17,94
+client/scripts/main.gd
+  s_fe4ee1c1e49e89::t_6eca7d5ef0b035 397-402
+  s_fe4ee1c1e49e89::t_cb2dac1ec2f81c 403-415
+  s_fe4ee1c1e49e89::t_96f9b48ad6f4a6 303-304,393,444,446,522,524,558,560
+  s_fe4ee1c1e49e89::t_24c445f57c6f9f 5395
+  s_fe4ee1c1e49e89::t_0e1630fa586835 2988,3043
+server/internal/http/auth.go
+  s_fe4ee1c1e49e89::t_a1cd8a952eb0a1 23,51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b9a54d5a792a0089285be840cb8132fa64564b8f",
+  "prompts": {},
+  "sessions": {
+    "s_fe4ee1c1e49e89": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebc09-eb17-7121-b6d8-9a1af60943f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -20,9 +20,9 @@
         },
         {
           "key": "block_percent",
-          "min_value": 6,
+          "min_value": 5,
           "cap": 75,
-          "source_kinds": ["equipment_base", "equipment_roll"]
+          "source_kinds": ["equipment_base"]
         }
       ]
     },
@@ -86,9 +86,9 @@
         },
         {
           "key": "block_percent",
-          "min_value": 6,
+          "min_value": 5,
           "cap": 75,
-          "source_kinds": ["equipment_base", "equipment_roll"]
+          "source_kinds": ["equipment_base"]
         }
       ]
     },

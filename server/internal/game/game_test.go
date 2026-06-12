@@ -3212,6 +3212,27 @@ func TestItemRollsGolden(t *testing.T) {
 	}
 }
 
+func TestUniqueEffectRollsRespectItemTypeCompatibility(t *testing.T) {
+	r := loadRules(t)
+	shield := r.ItemTemplates["cave_shield"]
+	if shield.ItemType != "shield" {
+		t.Fatalf("cave_shield item_type = %q, want shield", shield.ItemType)
+	}
+	for seed := uint64(0); seed < 25; seed++ {
+		got, ok := r.rollUniqueEffectForTemplate(shield, NewRNG(seed))
+		if !ok {
+			t.Fatalf("seed %d: expected compatible unique effect for shield", seed)
+		}
+		effect := r.UniqueEffects[got]
+		if !containsString(effect.CompatibleItemTypes, shield.ItemType) {
+			t.Fatalf("seed %d: effect %s is not compatible with %s", seed, got, shield.ItemType)
+		}
+		if got == "echoing_finish" {
+			t.Fatalf("seed %d: shield selected weapon-only effect %s", seed, got)
+		}
+	}
+}
+
 func TestTreasureClassRollsGolden(t *testing.T) {
 	rules := loadRules(t)
 	var golden struct {

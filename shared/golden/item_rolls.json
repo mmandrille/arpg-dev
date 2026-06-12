@@ -1,17 +1,17 @@
 {
-  "description": "Deterministic rolled item outcomes for cave_blade rarity cases.",
+  "description": "Deterministic rolled item outcomes for cave_blade rarity cases, including unique effect attachment.",
   "template_id": "cave_blade",
   "cases": [
     {
       "name": "common cave blade",
-      "seed": "0000000000000001",
+      "seed": "0000000000000000",
       "expected": {
         "item_template_id": "cave_blade",
         "display_name": "Common Cave Blade",
         "rarity": "common",
         "stats": {
-          "damage_max": 4,
-          "damage_min": 3
+          "damage_max": 5,
+          "damage_min": 2
         },
         "requirements": {
           "level": 1
@@ -21,19 +21,39 @@
     },
     {
       "name": "rare cave blade",
-      "seed": "0000000000000004",
+      "seed": "0000000000000006",
       "expected": {
         "item_template_id": "cave_blade",
         "display_name": "Rare Cave Blade",
         "rarity": "rare",
         "stats": {
-          "damage_max": 5,
-          "damage_min": 4
+          "damage_max": 7,
+          "damage_min": 2,
+          "max_hp": 3
         },
         "requirements": {
           "level": 1
         },
         "effect_ids": []
+      }
+    },
+    {
+      "name": "unique cave blade",
+      "seed": "00000000000000b1",
+      "expected": {
+        "item_template_id": "cave_blade",
+        "display_name": "Unique Cave Blade",
+        "rarity": "unique",
+        "stats": {
+          "damage_max": 6,
+          "damage_min": 2
+        },
+        "requirements": {
+          "level": 1
+        },
+        "effect_ids": [
+          "everburning_wound"
+        ]
       }
     }
   ]

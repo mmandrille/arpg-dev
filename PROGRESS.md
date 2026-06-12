@@ -12,7 +12,7 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v94 — `item-upgrade-starter` |
+| **Latest completed slice** | v95 — `unique-item-catalog-seed` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
 | **Next slice** | TBD |
@@ -113,6 +113,7 @@ v91_* = spanish-language-selector
 v92_* = town-bishop-respec
 v93_* = market-multi-item-offers
 v94_* = item-upgrade-starter
+v95_* = unique-item-catalog-seed
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -247,6 +248,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v92** | `town-bishop-respec` | Complete (`make ci` green) | [`v92_spec-town-bishop-respec.md`](docs/specs/v92_spec-town-bishop-respec.md) | [`v92_2026-06-12-town-bishop-respec.md`](docs/plans/v92_2026-06-12-town-bishop-respec.md) | [`as-built`](docs/as-built/v92_town-bishop-respec.md) |
 | **v93** | `market-multi-item-offers` | Complete (`make ci` green) | [`v93_spec-market-multi-item-offers.md`](docs/specs/v93_spec-market-multi-item-offers.md) | [`v93_2026-06-12-market-multi-item-offers.md`](docs/plans/v93_2026-06-12-market-multi-item-offers.md) | [`as-built`](docs/as-built/v93_market-multi-item-offers.md) |
 | **v94** | `item-upgrade-starter` | Complete (`make ci` green) | [`v94_spec-item-upgrade-starter.md`](docs/specs/v94_spec-item-upgrade-starter.md) | [`v94_2026-06-12-item-upgrade-starter.md`](docs/plans/v94_2026-06-12-item-upgrade-starter.md) | [`as-built`](docs/as-built/v94_item-upgrade-starter.md) |
+| **v95** | `unique-item-catalog-seed` | Complete (`make ci` green) | [`v95_spec-unique-item-catalog-seed.md`](docs/specs/v95_spec-unique-item-catalog-seed.md) | [`v95_2026-06-12-unique-item-catalog-seed.md`](docs/plans/v95_2026-06-12-unique-item-catalog-seed.md) | [`as-built`](docs/as-built/v95_unique-item-catalog-seed.md) |
 
 ---
 
@@ -399,6 +401,10 @@ active offers.
 cost/max level plus an authenticated account-stash upgrade route. The store spends stash gold,
 increments `item_level`, and increases one existing rolled stat deterministically while preserving
 market eligibility for upgraded items.
+
+**The unique item catalog has a disabled seed.** v95 adds schema-backed `unique_items.v0.json` with
+`embercall_blade` as a non-player-facing unique concept. Validation cross-checks the base template
+and keeps the seed disabled until a future behavior-changing unique effect path exists.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

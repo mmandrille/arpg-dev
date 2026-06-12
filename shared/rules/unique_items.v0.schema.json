@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/unique_items.v0.schema.json",
+  "title": "Unique item catalog (v0)",
+  "type": "object",
+  "required": ["version", "uniques"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "const": 0 },
+    "uniques": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "enabled", "base_template_id", "display_name", "minimum_level", "behavior_hook", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "enabled": { "type": "boolean" },
+          "base_template_id": { "type": "string", "minLength": 1 },
+          "display_name": { "type": "string", "minLength": 1 },
+          "minimum_level": { "type": "integer", "minimum": 1 },
+          "behavior_hook": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "enum": ["disabled_seed", "ready"] }
+        }
+      }
+    }
+  }
+}

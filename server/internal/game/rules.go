@@ -45,6 +45,8 @@ type MainGameplayConfig struct {
 	BaseMovementSpeed       float64 `json:"base_movement_speed"`
 	BaseDropRatePercent     int     `json:"base_drop_rate_percent"`
 	RespecCostGold          int     `json:"respec_cost_gold"`
+	ItemUpgradeCostGold     int     `json:"item_upgrade_cost_gold"`
+	ItemUpgradeMaxLevel     int     `json:"item_upgrade_max_level"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -902,6 +904,12 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.RespecCostGold < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.respec_cost_gold: must be non-negative")
+	}
+	if mainConfig.Gameplay.ItemUpgradeCostGold < 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_cost_gold: must be non-negative")
+	}
+	if mainConfig.Gameplay.ItemUpgradeMaxLevel <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_max_level: must be positive")
 	}
 	r.MainConfig = MainConfig{Gameplay: mainConfig.Gameplay}
 

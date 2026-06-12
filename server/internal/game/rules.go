@@ -508,6 +508,7 @@ type SkillDef struct {
 	Cone         SkillConeDef        `json:"cone"`
 	Slow         SkillSlowDef        `json:"slow"`
 	Shatter      SkillShatterDef     `json:"shatter"`
+	Chain        SkillChainDef       `json:"chain"`
 	Effects      []SkillEffectDef    `json:"effects"`
 	Cooldown     SkillCooldownDef    `json:"cooldown"`
 }
@@ -584,6 +585,12 @@ type SkillShatterDef struct {
 	Range     float64 `json:"range"`
 	Speed     float64 `json:"speed"`
 	Visual    string  `json:"visual"`
+}
+
+type SkillChainDef struct {
+	RangeMultiplier float64 `json:"range_multiplier"`
+	MaxJumps        int     `json:"max_jumps"`
+	Visual          string  `json:"visual"`
 }
 
 // SkillEffectDef is a closed data contract for supported active-skill effects.
@@ -2656,7 +2663,7 @@ func validateSkillRules(skills map[string]SkillDef) error {
 
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "cold_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff":
 		return true
 	default:
 		return false
@@ -2678,6 +2685,14 @@ func validateSkillKindPayload(skillID string, skill SkillDef) error {
 			return err
 		}
 		return validateColdSkillPayload(skillID, skill)
+	case "chain_projectile_attack":
+		if skill.Targeting != "direction_or_target" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for chain_projectile_attack", skillID, skill.Targeting)
+		}
+		if err := validateProjectileSkillPayload(skillID, skill); err != nil {
+			return err
+		}
+		return validateChainSkillPayload(skillID, skill)
 	case "cone_attack":
 		if skill.Targeting != "direction_or_target" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for cone_attack", skillID, skill.Targeting)
@@ -2765,6 +2780,19 @@ func validateColdSkillPayload(skillID string, skill SkillDef) error {
 	}
 	if skill.Shatter.Range <= 0 || skill.Shatter.Speed <= 0 || skill.Shatter.Visual == "" {
 		return fmt.Errorf("game: invalid rules skills.%s.shatter: range, speed, and visual are required", skillID)
+	}
+	return nil
+}
+
+func validateChainSkillPayload(skillID string, skill SkillDef) error {
+	if skill.Chain.RangeMultiplier <= 0 || skill.Chain.RangeMultiplier >= 1 {
+		return fmt.Errorf("game: invalid rules skills.%s.chain.range_multiplier: must be > 0 and < 1", skillID)
+	}
+	if skill.Chain.MaxJumps <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.chain.max_jumps: must be positive", skillID)
+	}
+	if skill.Chain.Visual == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.chain.visual: required", skillID)
 	}
 	return nil
 }

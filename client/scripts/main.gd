@@ -1013,6 +1013,9 @@ func _apply_delta(p: Dictionary) -> void:
 			if ev.has("angle_degrees") and ev.has("range") and ev.has("direction"):
 				_spawn_skill_cone(ev)
 			continue
+		if event_type == "skill_chain_hit":
+			_spawn_ligthing_chain(ev)
+			continue
 		if event_type == "skill_cooldown_rejected" and eid == player_id:
 			_show_skill_rejected_feedback(str(ev.get("reason", "")))
 			continue
@@ -1629,6 +1632,42 @@ func _spawn_skill_cone(ev: Dictionary) -> void:
 	var tween := wedge.create_tween()
 	tween.tween_property(wedge, "scale", Vector3.ONE * 1.03, 0.16)
 	tween.tween_callback(wedge.queue_free)
+
+
+func _spawn_ligthing_chain(ev: Dictionary) -> void:
+	var source := _node_for_entity_id(str(ev.get("source_entity_id", "")))
+	var target := _node_for_entity_id(str(ev.get("target_entity_id", "")))
+	if source == null or target == null:
+		return
+	var start := _node_world_or_local_position(source)
+	var finish := _node_world_or_local_position(target)
+	var delta := finish - start
+	var length := delta.length()
+	if length <= 0.05:
+		return
+	var root := Node3D.new()
+	root.name = "LigthingChain"
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.07, 0.07, length)
+	var bolt := MeshInstance3D.new()
+	bolt.mesh = mesh
+	bolt.position = Vector3(0.0, 0.55, 0.0)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.94, 0.28, 0.78)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.88, 0.2)
+	mat.emission_energy_multiplier = 2.4
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bolt.material_override = mat
+	root.add_child(bolt)
+	root.position = (start + finish) * 0.5
+	root.position.y = 0.15
+	add_child(root)
+	root.look_at(Vector3(finish.x, root.position.y, finish.z), Vector3.UP)
+	var tween := root.create_tween()
+	tween.tween_property(root, "scale", Vector3(1.25, 1.25, 1.0), 0.28)
+	tween.tween_callback(root.queue_free)
 
 
 func _vec2_from_dict(value) -> Vector2:

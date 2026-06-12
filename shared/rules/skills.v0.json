@@ -38,7 +38,7 @@
     "ice_shard": {
       "name": "Ice Shard",
       "class": "sorcerer",
-      "tree": { "tier": 1, "column": 2 },
+      "tree": { "tier": 2, "column": 1 },
       "kind": "cold_projectile_attack",
       "max_rank": 5,
       "targeting": "direction_or_target",
@@ -47,7 +47,7 @@
         "level_per_rank": 1,
         "stats": { "magic": 5 },
         "stats_per_rank": { "magic": 3 },
-        "skills": []
+        "skills": [{ "skill_id": "magic_bolt", "rank": 1 }]
       },
       "cost": {
         "mana": { "base": 6, "per_rank": 1 }
@@ -76,6 +76,45 @@
         "range": 7.0,
         "speed": 12.0,
         "visual": "ice_shard_shard"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.0
+      }
+    },
+    "ligthing": {
+      "name": "Ligthing",
+      "class": "sorcerer",
+      "tree": { "tier": 2, "column": 2 },
+      "kind": "chain_projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": { "magic": 5 },
+        "stats_per_rank": { "magic": 3 },
+        "skills": [{ "skill_id": "magic_bolt", "rank": 1 }]
+      },
+      "cost": {
+        "mana": { "base": 7, "per_rank": 1 }
+      },
+      "damage": {
+        "type": "rank_linear_range",
+        "min_base": 3,
+        "max_base": 6,
+        "min_per_rank": 1,
+        "max_per_rank": 1
+      },
+      "projectile": {
+        "range": 18.0,
+        "speed": 10.0,
+        "visual": "ligthing_projectile"
+      },
+      "chain": {
+        "range_multiplier": 0.8,
+        "max_jumps": 8,
+        "visual": "ligthing_chain"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",

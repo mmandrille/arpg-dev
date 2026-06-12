@@ -4620,6 +4620,10 @@ func (s *Sim) resolveSkillProjectileMonsterHit(p *entity, target *entity, res *T
 		return
 	}
 	outcome := s.damageMonsterByPlayerSkill(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+	if def.Kind == "chain_projectile_attack" && outcome.Damage > 0 {
+		s.applySkillChain(target, p.ownerID, skillID, def, p.damageRange, p.sourceCorrID, res)
+		return
+	}
 	if def.Kind != "cold_projectile_attack" || outcome.Damage <= 0 {
 		return
 	}
@@ -4628,6 +4632,62 @@ func (s *Sim) resolveSkillProjectileMonsterHit(p *entity, target *entity, res *T
 		return
 	}
 	s.spawnIceShardProjectiles(target, p.ownerID, skillID, def, outcome.Damage, p.sourceCorrID, res)
+}
+
+func (s *Sim) applySkillChain(origin *entity, ownerID uint64, skillID string, def SkillDef, damageRange DamageRange, correlationID string, res *TickResult) {
+	if origin == nil || origin.kind != monsterEntity || def.Chain.RangeMultiplier <= 0 || def.Chain.RangeMultiplier >= 1 || def.Chain.MaxJumps <= 0 {
+		return
+	}
+	visited := map[uint64]bool{origin.id: true}
+	current := origin
+	currentRange := def.Projectile.Range * def.Chain.RangeMultiplier
+	for jump := 1; jump <= def.Chain.MaxJumps; jump++ {
+		next := s.nearestChainMonster(current.pos, currentRange, visited)
+		if next == nil {
+			return
+		}
+		visited[next.id] = true
+		dir := normalize(Vec2{X: next.pos.X - current.pos.X, Y: next.pos.Y - current.pos.Y})
+		res.Events = append(res.Events, Event{
+			EventType:       "skill_chain_hit",
+			EntityID:        idStr(ownerID),
+			SourceEntityID:  idStr(current.id),
+			TargetEntityID:  idStr(next.id),
+			CorrelationID:   correlationID,
+			SkillID:         skillID,
+			Rank:            intPtr(jump),
+			ProjectileDefID: def.Chain.Visual,
+			Position:        cloneVec2Ptr(&current.pos),
+			Direction:       cloneVec2Ptr(&dir),
+			Range:           floatPtr(distance(current.pos, next.pos)),
+		})
+		s.damageMonsterByPlayerSkill(next, ownerID, correlationID, res, damageRange)
+		current = next
+		currentRange *= def.Chain.RangeMultiplier
+	}
+}
+
+func (s *Sim) nearestChainMonster(origin Vec2, maxRange float64, visited map[uint64]bool) *entity {
+	if maxRange <= 0 {
+		return nil
+	}
+	var best *entity
+	bestDist := math.Inf(1)
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		target := s.activeLevel().entities[id]
+		if target == nil || target.kind != monsterEntity || target.hp <= 0 || visited[target.id] {
+			continue
+		}
+		dist := distance(origin, target.pos)
+		if dist > maxRange+meleeRangeEpsilon {
+			continue
+		}
+		if dist < bestDist {
+			best = target
+			bestDist = dist
+		}
+	}
+	return best
 }
 
 func (s *Sim) applyMonsterSlow(target *entity, sourceID uint64, skillID string, slow SkillSlowDef, correlationID string, res *TickResult) {

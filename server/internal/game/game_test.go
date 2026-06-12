@@ -218,6 +218,12 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills[magicBoltSkillID]; skill.Class != "sorcerer" || skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
 		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 5 +3/rank level +1/rank attack interval cooldown", skill)
 	}
+	if skill := r.Skills["ice_shard"]; len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Requirements.Skills[0].Rank != 1 {
+		t.Fatalf("ice_shard prerequisites = %+v, want magic_bolt rank 1", skill.Requirements.Skills)
+	}
+	if skill := r.Skills["ligthing"]; skill.Class != "sorcerer" || skill.Kind != "chain_projectile_attack" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Chain.RangeMultiplier != 0.8 {
+		t.Fatalf("ligthing skill = %+v, want sorcerer chain_projectile_attack with magic_bolt prerequisite and 0.8 chain", skill)
+	}
 	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
 	}
@@ -1097,6 +1103,7 @@ func TestIceShardAlwaysHitsAppliesSlowAndSpawnsShards(t *testing.T) {
 	sim := MustNewSim("sess_ice_shard", "01", rules)
 	sim.progression.CharacterClass = "sorcerer"
 	sim.progression.BaseStats.Magic = 15
+	sim.progression.SkillRanks[magicBoltSkillID] = 1
 	sim.progression.SkillRanks["ice_shard"] = 1
 	sim.savePlayer(sim.defaultPlayer())
 	player := sim.entities[sim.playerID]
@@ -1147,6 +1154,72 @@ func TestIceShardAlwaysHitsAppliesSlowAndSpawnsShards(t *testing.T) {
 	}
 	if originOverlap != 0 {
 		t.Fatalf("ice shard spawned %d shards inside impact target radius; changes=%+v", originOverlap, impactChanges)
+	}
+}
+
+func TestLigthingChainsToNearestTargetsWithShrinkingRange(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	skill := rules.Skills["ligthing"]
+	skill.Damage.MinBase = 5
+	skill.Damage.MaxBase = 5
+	skill.Chain.RangeMultiplier = 0.8
+	skill.Chain.MaxJumps = 8
+	rules.Skills["ligthing"] = skill
+	sim := MustNewSim("sess_ligthing", "01", rules)
+	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.BaseStats.Magic = 15
+	sim.progression.SkillRanks[magicBoltSkillID] = 1
+	sim.progression.SkillRanks["ligthing"] = 1
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	for id, e := range sim.entities {
+		if e != nil && e.kind == monsterEntity {
+			delete(sim.entities, id)
+		}
+	}
+	first := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 5, Y: player.pos.Y}, hp: 30, maxHP: 30, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	second := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 12, Y: player.pos.Y}, hp: 30, maxHP: 30, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	third := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 20, Y: player.pos.Y}, hp: 30, maxHP: 30, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	tooFar := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 30, Y: player.pos.Y}, hp: 30, maxHP: 30, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	for _, monster := range []*entity{first, second, third, tooFar} {
+		sim.entities[monster.id] = monster
+	}
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_ligthing",
+		CorrelationID: "corr_ligthing",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "ligthing", TargetID: idStr(first.id)},
+	}})
+	assertAck(t, cast, "cast_ligthing")
+	var impactEvents []Event
+	for i := 0; i < 30; i++ {
+		res := sim.Tick(nil)
+		impactEvents = append(impactEvents, res.Events...)
+		if eventListHas(res.Events, "skill_chain_hit") {
+			break
+		}
+	}
+	damageByTarget := map[string]int{}
+	chainHits := 0
+	for _, ev := range impactEvents {
+		if ev.EventType == "monster_damaged" && ev.TargetEntityID != "" && ev.Damage != nil {
+			damageByTarget[ev.TargetEntityID] += *ev.Damage
+		}
+		if ev.EventType == "skill_chain_hit" {
+			chainHits++
+		}
+	}
+	if chainHits != 2 {
+		t.Fatalf("ligthing chain hits = %d, want 2; events=%+v", chainHits, impactEvents)
+	}
+	for _, monster := range []*entity{first, second, third} {
+		if damageByTarget[idStr(monster.id)] == 0 || monster.hp >= monster.maxHP {
+			t.Fatalf("monster %d damage=%d hp=%d/%d events=%+v", monster.id, damageByTarget[idStr(monster.id)], monster.hp, monster.maxHP, impactEvents)
+		}
+	}
+	if damageByTarget[idStr(tooFar.id)] != 0 || tooFar.hp != tooFar.maxHP {
+		t.Fatalf("too-far monster was chained: damage=%d hp=%d/%d events=%+v", damageByTarget[idStr(tooFar.id)], tooFar.hp, tooFar.maxHP, impactEvents)
 	}
 }
 

@@ -22,6 +22,17 @@
       "projectile_visual": "ice_shard_projectile",
       "effect_visual": "ice_slow"
     },
+    "ligthing": {
+      "icon": {
+        "label": "L",
+        "shape": "bolt",
+        "color": "#f7e35f",
+        "accent": "#fff9bd"
+      },
+      "summary": "Chaining lightning projectile",
+      "projectile_visual": "ligthing_projectile",
+      "effect_visual": "ligthing_chain"
+    },
     "cleave": {
       "icon": {
         "label": "C",

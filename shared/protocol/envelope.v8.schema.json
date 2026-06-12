@@ -34,6 +34,7 @@
         "stash_withdraw_item_intent",
         "stash_deposit_gold_intent",
         "stash_withdraw_gold_intent",
+        "corpse_withdraw_item_intent",
         "session_snapshot",
         "state_delta",
         "intent_accepted",

@@ -1,0 +1,10 @@
+{
+  "type": "corpse_withdraw_item_intent",
+  "message_id": "msg_01HZYX8N7P2Q3R4S5T6V7W8X9Y",
+  "session_id": "sess_01HZYX8N7P2Q3R4S5T6V7W8X9Y",
+  "tick": 42,
+  "payload": {
+    "corpse_entity_id": "1017",
+    "item_instance_id": "4001"
+  }
+}

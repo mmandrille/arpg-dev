@@ -96,6 +96,10 @@
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "interactable_def_id": { "type": "string" },
+        "corpse_character_id": { "$ref": "#/$defs/prefixed_id" },
+        "corpse_name": { "type": "string" },
+        "corpse_level": { "type": "integer", "minimum": 1 },
+        "corpse_item_count": { "type": "integer", "minimum": 0 },
         "owner_id": { "$ref": "#/$defs/decimal_id" },
         "target_id": { "$ref": "#/$defs/decimal_id" },
         "projectile_def_id": { "type": "string" },
@@ -438,6 +442,19 @@
         },
         "stash_gold": { "type": "integer", "minimum": 0 },
         "stash_capacity": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "corpse_character_id": { "$ref": "#/$defs/prefixed_id" },
+        "corpse_name": { "type": "string" },
+        "corpse_items": { "type": "array", "items": { "$ref": "#/$defs/item" } },
+        "inventory": { "type": "array", "items": { "$ref": "#/$defs/item" } },
+        "equipped": { "$ref": "#/$defs/equipped" },
+        "hotbar": { "type": "array", "items": { "$ref": "#/$defs/hotbar_slot" } },
+        "gold": { "type": "integer", "minimum": 0 },
+        "inventory_rows": { "type": "integer", "minimum": 0 },
+        "inventory_capacity": { "type": "integer", "minimum": 0 },
+        "hotbar_capacity": { "type": "integer", "minimum": 0 },
+        "character_class": { "type": "string" },
+        "character_level": { "type": "integer", "minimum": 1 },
+        "character_xp": { "type": "integer", "minimum": 0 },
         "pattern_id": { "type": "string" },
         "phase_index": { "type": "integer", "minimum": 0 },
         "phase_kind": { "type": "string", "enum": ["telegraph", "active", "recovery", "cooldown"] },
@@ -657,6 +674,20 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "stash_id", "amount", "total_gold", "stash_gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "corpse_opened" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "corpse_character_id", "corpse_name", "corpse_items", "inventory", "equipped", "hotbar", "gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "corpse_item_recovered" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "corpse_character_id", "corpse_name", "item_instance_id", "stash_item_id", "corpse_items", "inventory", "equipped", "hotbar", "gold"] }
         }
       ]
     },

@@ -403,7 +403,7 @@ func (r *runner) persistTick(res game.TickResult) {
 			r.log.Error("persist event", "error", err)
 		}
 		if ev.EventType == "player_killed" {
-			if err := r.store.MarkCharacterDead(ctx, r.sess.AccountID, r.sess.CharacterID); err != nil && !errors.Is(err, store.ErrNotFound) {
+			if err := r.store.MarkCharacterDead(ctx, r.sess.AccountID, r.sess.CharacterID, res.Level); err != nil && !errors.Is(err, store.ErrNotFound) {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist character death", "error", err)
 			}

@@ -1,0 +1,25 @@
+shared/rules/monsters.v0.json
+  s_5e45ef83ebf19d::t_2414e978fa42af 196
+client/scripts/main.gd
+  s_5e45ef83ebf19d::t_2414e978fa42af 4006,4432,4437-4448,4452,4454
+server/internal/game/sim.go
+  s_5e45ef83ebf19d::t_bdd239765da3f9 4691-4694,4697
+server/internal/game/game_test.go
+  s_5e45ef83ebf19d::t_bdd239765da3f9 1136,1140-1142,1147-1149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "81952141cb418f842cd665d0c86585f3def46122",
+  "prompts": {},
+  "sessions": {
+    "s_5e45ef83ebf19d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb919-cf01-7b80-aa7b-94e92d0861c8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

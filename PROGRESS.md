@@ -4,7 +4,7 @@
 It is the canonical snapshot of where the project stands and what is still open. Per-slice as-built
 summaries live in [`docs/as-built/`](docs/as-built/).
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 
 ---
 
@@ -12,9 +12,9 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v87 — `skill-visual-matrix` |
+| **Latest completed slice** | v88 — `skill-visual-rank-seeding` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
+| **CI gate** | `make ci` green on 2026-06-12 (9 phases) |
 | **Next slice** | TBD |
 | **Last engineering review** | v80 — [`docs/reviews/20260611_v80-overview.md`](docs/reviews/20260611_v80-overview.md) (2026-06-11) |
 | **Next engineering review** | v90 (~every 10 slices) |
@@ -106,6 +106,7 @@ v84_* = client-bot-step-registry
 v85_* = skill-demo-catalog
 v86_* = skill-visual-command
 v87_* = skill-visual-matrix
+v88_* = skill-visual-rank-seeding
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -233,6 +234,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v85** | `skill-demo-catalog` | Complete (`make ci` green) | [`v85_spec-skill-demo-catalog.md`](docs/specs/v85_spec-skill-demo-catalog.md) | [`v85_2026-06-11-skill-demo-catalog.md`](docs/plans/v85_2026-06-11-skill-demo-catalog.md) | [`as-built`](docs/as-built/v85_skill-demo-catalog.md) |
 | **v86** | `skill-visual-command` | Complete (`make ci` green) | [`v86_spec-skill-visual-command.md`](docs/specs/v86_spec-skill-visual-command.md) | [`v86_2026-06-11-skill-visual-command.md`](docs/plans/v86_2026-06-11-skill-visual-command.md) | [`as-built`](docs/as-built/v86_skill-visual-command.md) |
 | **v87** | `skill-visual-matrix` | Complete (`make ci` green) | [`v87_spec-skill-visual-matrix.md`](docs/specs/v87_spec-skill-visual-matrix.md) | [`v87_2026-06-11-skill-visual-matrix.md`](docs/plans/v87_2026-06-11-skill-visual-matrix.md) | [`as-built`](docs/as-built/v87_skill-visual-matrix.md) |
+| **v88** | `skill-visual-rank-seeding` | Complete (`make ci` green) | — | — | [`as-built`](docs/as-built/v88_skill-visual-rank-seeding.md) |
 
 ---
 
@@ -356,6 +358,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
+skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without
+first killing an XP dummy or allocating a skill point during the replay.
 
 **Combat/world state now persists on same-session resume.** v5 replays recorded
 inputs before the WebSocket `session_snapshot`, so monster death, player HP,

@@ -108,7 +108,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
 
 def select_scenarios(scenarios: list[Scenario], selected: str) -> list[Scenario]:
     if selected == "all":
-        return scenarios
+        return [scenario for scenario in scenarios if scenario.id != "skill_visual"]
     wanted = {normalize_scenario_selector(part.strip()) for part in selected.split(",") if part.strip()}
     found = [s for s in scenarios if scenario_matches_selector(s, wanted)]
     matched: set[str] = set()

@@ -131,6 +131,15 @@ def test_load_scenarios_catalog_order():
     assert [s.id for s in scenarios[:2]] == ["vertical_slice", "gear_before_combat"]
 
 
+def test_default_all_skips_parameterized_skill_visual_scenario():
+    scenarios = load_scenarios()
+    selected = select_scenarios(scenarios, "all")
+
+    assert "skill_visual" in {scenario.id for scenario in scenarios}
+    assert "skill_visual" not in {scenario.id for scenario in selected}
+    assert select_scenarios(scenarios, "skill_visual")[0].id == "skill_visual"
+
+
 def test_bot_scenarios_do_not_use_large_raw_tick_waits():
     offenders = []
     for path in sorted(PROTOCOL_SCENARIOS_DIR.glob("*.json")):
@@ -407,7 +416,7 @@ def test_load_scenarios_dungeon_levels_returns_to_matching_stair():
 def test_select_scenarios_all_returns_catalog_order():
     scenarios = load_scenarios()
 
-    assert select_scenarios(scenarios, "all") == scenarios
+    assert select_scenarios(scenarios, "all") == [scenario for scenario in scenarios if scenario.id != "skill_visual"]
 
 
 def test_select_scenarios_accepts_file_name_and_stem():

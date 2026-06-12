@@ -79,6 +79,9 @@
     "monster.combat_lab_armored_target.name": "Combat Lab Armored Target",
     "monster.combat_lab_blocking_target.name": "Combat Lab Blocking Target",
     "monster.combat_lab_crit_attacker.name": "Combat Lab Crit Attacker",
-    "monster.combat_lab_miss_attacker.name": "Combat Lab Miss Attacker"
+    "monster.combat_lab_miss_attacker.name": "Combat Lab Miss Attacker",
+    "settings.language": "Language",
+    "settings.language.en": "English",
+    "settings.language.es": "Spanish"
   }
 }

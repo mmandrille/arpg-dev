@@ -8,6 +8,8 @@ const DEFAULT_SIZE := Vector2i(1920, 1080)
 const CREATE_GAME_SESSION_TYPE_COOP := "coop"
 const CREATE_GAME_SESSION_TYPE_SOLO := "solo"
 const DEFAULT_CREATE_GAME_SESSION_TYPE := CREATE_GAME_SESSION_TYPE_COOP
+const DEFAULT_LANGUAGE := "en"
+const SUPPORTED_LANGUAGES := ["en", "es"]
 const SUPPORTED_SIZES := [
 	Vector2i(1280, 720),
 	Vector2i(1600, 900),
@@ -23,6 +25,7 @@ var window_size: Vector2i = DEFAULT_SIZE
 var floating_combat_text: bool = true
 var status_text: bool = true
 var create_game_session_type: String = DEFAULT_CREATE_GAME_SESSION_TYPE
+var language: String = DEFAULT_LANGUAGE
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -69,6 +72,18 @@ static func create_game_session_type_label(session_type: String) -> String:
 			return TextCatalogScript.get_text("settings.session_type.coop", "Co-op")
 
 
+static func normalize_language(language_id: String) -> String:
+	var normalized := language_id.strip_edges().to_lower()
+	if normalized in SUPPORTED_LANGUAGES:
+		return normalized
+	return DEFAULT_LANGUAGE
+
+
+static func language_label(language_id: String) -> String:
+	var normalized := normalize_language(language_id)
+	return TextCatalogScript.get_text("settings.language.%s" % normalized, normalized)
+
+
 static func size_from_data(data) -> Vector2i:
 	if typeof(data) != TYPE_DICTIONARY:
 		return DEFAULT_SIZE
@@ -99,12 +114,19 @@ static func create_game_session_type_from_data(data) -> String:
 	return normalize_create_game_session_type(str((data as Dictionary).get("create_game_session_type", DEFAULT_CREATE_GAME_SESSION_TYPE)))
 
 
+static func language_from_data(data) -> String:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_LANGUAGE
+	return normalize_language(str((data as Dictionary).get("language", DEFAULT_LANGUAGE)))
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
 		floating_combat_text = true
 		status_text = true
 		create_game_session_type = DEFAULT_CREATE_GAME_SESSION_TYPE
+		language = DEFAULT_LANGUAGE
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
@@ -112,6 +134,7 @@ func load() -> void:
 	floating_combat_text = floating_combat_text_from_data(parsed)
 	status_text = status_text_from_data(parsed)
 	create_game_session_type = create_game_session_type_from_data(parsed)
+	language = language_from_data(parsed)
 
 
 func save() -> void:
@@ -127,6 +150,7 @@ func save() -> void:
 		"floating_combat_text": floating_combat_text,
 		"status_text": status_text,
 		"create_game_session_type": create_game_session_type,
+		"language": language,
 	}))
 
 
@@ -172,5 +196,12 @@ func set_status_text(enabled: bool, persist: bool = true) -> void:
 
 func set_create_game_session_type(session_type: String, persist: bool = true) -> void:
 	create_game_session_type = normalize_create_game_session_type(session_type)
+	if persist:
+		save()
+
+
+func set_language(language_id: String, persist: bool = true) -> void:
+	language = normalize_language(language_id)
+	TextCatalogScript.set_locale(language)
 	if persist:
 		save()

@@ -3205,7 +3205,19 @@ def cross_checks(report: Report) -> None:
         report.fail("unique_effects catalog", "must define at least one unique effect")
     else:
         failed_unique_effects = False
-        supported_hooks = {"on_hero_damage_dealt", "on_basic_attack_hit", "on_equip_passive"}
+        supported_hooks = {
+            "on_hero_damage_dealt",
+            "on_basic_attack_hit",
+            "on_equip_passive",
+            "on_lethal_damage_taken",
+            "on_block_or_evade",
+            "on_enemy_killed",
+            "on_skill_resource_shortfall",
+            "on_large_hit_taken",
+            "on_continuous_movement_attack",
+            "on_projectile_hit_taken",
+            "on_repeated_same_target_hit",
+        }
         for effect_id, effect in unique_effect_defs.items():
             if effect.get("id") != effect_id:
                 report.fail("unique_effects id", f"{effect_id}: id field must match key")
@@ -3223,7 +3235,7 @@ def cross_checks(report: Report) -> None:
                 report.fail("unique_effects compatibility", f"{effect_id}: unknown item types {unknown_types}")
                 failed_unique_effects = True
             params = effect.get("params", {})
-            if hook == "on_hero_damage_dealt":
+            if effect_id == "everburning_wound":
                 required_params = {
                     "status_id",
                     "damage_type",

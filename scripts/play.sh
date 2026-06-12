@@ -63,11 +63,14 @@ curl -fsS "$BASE_URL/readyz" >/dev/null
 "$GODOT" --headless --path "$ROOT/client" --import >/dev/null 2>&1 || true
 
 if (( PLAY_CLIENTS == 1 )); then
+  EMAIL="${ARPG_PLAY_EMAIL:-client1@mail.com}"
   echo "[play] launching Godot client — close the window to stop the server."
+  echo "[play] dev account: $EMAIL"
   echo "[play] main menu opens first; gameplay controls: W/A/S/D move, LMB action, scroll zoom, I inventory."
   GODOT_ENV=(
     "ARPG_BASE_URL=$BASE_URL"
     "ARPG_DEV_TOKEN=$DEV_TOKEN"
+    "ARPG_EMAIL=$EMAIL"
   )
   [[ -n "${ARPG_AUTOSTART:-}" ]] && GODOT_ENV+=("ARPG_AUTOSTART=$ARPG_AUTOSTART")
   [[ -n "${ARPG_WORLD_ID:-}" ]] && GODOT_ENV+=("ARPG_WORLD_ID=$ARPG_WORLD_ID")
@@ -78,7 +81,8 @@ else
   echo "[play] launching Godot clients — close all windows to stop the server."
   echo "[play] each client opens the main menu with a distinct dev account; use Multiplayer to host/join listed sessions."
   for idx in $(seq 1 "$PLAY_CLIENTS"); do
-    EMAIL="${ARPG_PLAY_EMAIL_PREFIX:-player}${idx}+play-$(date +%s)@example.test"
+    EMAIL="${ARPG_PLAY_EMAIL_PREFIX:-client}${idx}@${ARPG_PLAY_EMAIL_DOMAIN:-mail.com}"
+    echo "[play] client $idx dev account: $EMAIL"
     env -u ARPG_AUTOSTART -u ARPG_WORLD_ID -u ARPG_SESSION_ID \
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \

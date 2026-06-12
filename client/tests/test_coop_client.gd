@@ -277,26 +277,37 @@ func _test_dead_character_rows_are_disabled() -> void:
 	get_root().add_child(panel)
 	panel._build()
 	panel.show_continue([
-		{"character_id": "char_dead", "name": "Fallen", "created_at": "2026-06-09T00:00:00Z", "dead": true},
-		{"character_id": "char_live", "name": "Alive", "created_at": "2026-06-09T00:00:00Z", "dead": false},
+		{"character_id": "char_dead_low", "name": "Fallen", "created_at": "2026-06-09T00:00:00Z", "dead": true, "death_level": -3, "level": 2},
+		{"character_id": "char_live_low", "name": "Alive", "created_at": "2026-06-09T00:00:00Z", "dead": false, "level": 1},
+		{"character_id": "char_dead_high", "name": "Wraith", "created_at": "2026-06-09T00:00:00Z", "dead": true, "death_level": -4, "level": 7},
+		{"character_id": "char_live_high", "name": "Champion", "created_at": "2026-06-09T00:00:00Z", "dead": false, "level": 5},
 	])
-	var dead_row := panel._rows.get_child(0) as HBoxContainer
+	var live_high_row := panel._rows.get_child(0) as HBoxContainer
+	var live_low_row := panel._rows.get_child(1) as HBoxContainer
+	var dead_high_row := panel._rows.get_child(2) as HBoxContainer
+	var dead_low_row := panel._rows.get_child(3) as HBoxContainer
+	_assert_true("alive group sorted before dead group", (_first_button_child(live_high_row).text.find("Champion") >= 0) and (_first_button_child(live_low_row).text.find("Alive") >= 0))
+	_assert_true("dead group sorted by level descending", (_first_button_child(dead_high_row).text.find("Wraith") >= 0) and (_first_button_child(dead_low_row).text.find("Fallen") >= 0))
+	var dead_row := dead_high_row
 	var dead_button := _first_button_child(dead_row)
 	_assert_true("dead character select disabled", dead_button.disabled)
-	_assert_true("dead character has skull marker", dead_button.text.begins_with("☠"))
-	_assert_true("dead character row keeps summary", dead_button.text.find("Lv 1") >= 0 and dead_button.text.find("0g") >= 0 and dead_button.text.find("D0") >= 0)
+	_assert_true("dead character row shows body level", dead_button.text.find("Body L-4") >= 0)
+	_assert_true("dead character row omits inline skull", not dead_button.text.begins_with("☠"))
+	_assert_true("dead character row hides live summary", dead_button.text.find("g |") == -1 and dead_button.text.find("| Dead") == -1)
 	var debug := panel.get_debug_state()
 	var rows: Array = debug.get("character_rows", [])
-	_assert_eq("character summary row count", rows.size(), 2)
-	_assert_eq("dead character summary status", str((rows[0] as Dictionary).get("status", "")), "Dead")
+	_assert_eq("character summary row count", rows.size(), 4)
+	_assert_eq("first character sorted id", str((rows[0] as Dictionary).get("character_id", "")), "char_live_high")
+	_assert_eq("third character sorted id", str((rows[2] as Dictionary).get("character_id", "")), "char_dead_high")
+	_assert_eq("dead character summary status", str((rows[2] as Dictionary).get("status", "")), "Dead")
 	var started := {"id": ""}
 	panel.start_requested.connect(func(character_id: String) -> void:
 		started["id"] = character_id
 	)
-	panel.start_character_at_index(0)
+	panel.start_character_at_index(2)
 	_assert_eq("dead character did not start", str(started["id"]), "")
-	panel.start_character_at_index(1)
-	_assert_eq("live character starts", str(started["id"]), "char_live")
+	panel.start_character_at_index(0)
+	_assert_eq("live character starts", str(started["id"]), "char_live_high")
 	panel.queue_free()
 
 

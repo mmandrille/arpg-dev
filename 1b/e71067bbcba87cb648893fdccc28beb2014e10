@@ -1,0 +1,66 @@
+client/tests/test_coop_client.gd
+  s_9e5840f177c4bc::t_e9541f2a9384a2 793
+client/tests/test_status_effect_presentation.gd
+  s_9e5840f177c4bc::t_bbd8379dcfe183 1-122
+tools/bot/skill_visual.py
+  s_5e45ef83ebf19d::t_b22726cd8c371e 23-24,35-47,49,54-55,59,64,69-70,80-88,96-98,153-154,162
+server/internal/http/inspect.go
+  s_5e45ef83ebf19d::t_835eb3fca25cda 25-28,30
+  s_5e45ef83ebf19d::t_fdceb81d290902 14-15,24,29,31-84
+client/scripts/player_status_effect_markers.gd.uid
+  s_9e5840f177c4bc::t_84e3a556d02728 1
+client/scripts/player_status_effect_markers.gd
+  s_9e5840f177c4bc::t_f6af1fbbba9976 8-10,51-65,99-134,174-210
+  s_9e5840f177c4bc::t_fa13e3f4a86075 1-7,11-50,66-98,135-173
+tools/bot/skill_visual_runtime.py
+  s_5e45ef83ebf19d::t_1af3a64c9126fe 7,13,16-17,28-46,54,60-66,69-86,90,97,124,126-127,151-153
+  s_9e5840f177c4bc::t_93b4caeb4487c0 18,120,301
+  s_5e45ef83ebf19d::t_2f0a37aeea95ea 142-150,154-170,172-176,319
+  s_5e45ef83ebf19d::t_c5ff7b8e155ff8 171
+  s_5e45ef83ebf19d::t_23303bd6f5a5af 264,279,313-314,334,345
+server/internal/http/auth_session_test.go
+  s_5e45ef83ebf19d::t_b2cb09979653b8 107-121
+  s_5e45ef83ebf19d::t_40466b421e9a3b 316-345
+client/scripts/main.gd
+  s_9e5840f177c4bc::t_b38dc0485cc5a8 4914-4915,4964
+  s_9e5840f177c4bc::t_e9541f2a9384a2 1018
+  s_9e5840f177c4bc::t_d31ac71ef23b47 1484-1537
+  s_9e5840f177c4bc::t_bd6dfa695e4bb0 4913,4916,4924,4926,4963
+  s_9e5840f177c4bc::t_314a0069c732c2 129
+  s_9e5840f177c4bc::t_7cfd445c93fdfa 15
+  s_9e5840f177c4bc::t_55513431009e45 1027,1029,1034,1036
+  s_9e5840f177c4bc::t_e4807bcae35b55 1022-1023
+  s_9e5840f177c4bc::t_c96520fbba4656 1194,4027
+scripts/client_smoke.sh
+  s_9e5840f177c4bc::t_c7a82f239bfc77 113
+Makefile
+  s_5e45ef83ebf19d::t_e5240eb830641d 43,45
+tools/bot/test_skill_visual.py
+  s_5e45ef83ebf19d::t_4289dd0365c052 7-14,98-127
+  s_9e5840f177c4bc::t_71ec265aef8fee 74-76,79-80
+  s_5e45ef83ebf19d::t_4b43c9caff1635 27,32-33,58-62,77-78,81-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1be71067bbcba87cb648893fdccc28beb2014e10",
+  "prompts": {},
+  "sessions": {
+    "s_5e45ef83ebf19d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb919-cf01-7b80-aa7b-94e92d0861c8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_9e5840f177c4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb912-51bb-7052-bc31-6696387df364",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

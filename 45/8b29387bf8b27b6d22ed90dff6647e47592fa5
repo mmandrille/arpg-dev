@@ -1,0 +1,49 @@
+tools/bot/class_foundation_coverage.py
+  s_c88be8e83fa4bc::t_7df7dd54691c07 1-105
+PROGRESS.md
+  s_c88be8e83fa4bc::t_fc401f725807fc 15,18,123,265,338,459-463
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_c88be8e83fa4bc::t_f6dcf22a5da31b 23,29-31,40
+  s_c88be8e83fa4bc::t_5d4e69d158660c 17
+  s_c88be8e83fa4bc::t_105dead36615f5 1-16,18-22,24-27,32-39,41-42
+  s_c88be8e83fa4bc::t_79fc58fcee170e 28
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_c88be8e83fa4bc::t_105dead36615f5 1-2,4-16,18-22,24-27,36-41,43,45,47-48
+  s_c88be8e83fa4bc::t_f6dcf22a5da31b 23
+  s_c88be8e83fa4bc::t_80ff7479e83a4b 3,29-30,32-33,42,44,46
+  s_c88be8e83fa4bc::t_79fc58fcee170e 28,31
+  s_c88be8e83fa4bc::t_9f9cad8cd7b207 34-35
+  s_c88be8e83fa4bc::t_5d4e69d158660c 17
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_c88be8e83fa4bc::t_c19df7173922d7 38
+  s_c88be8e83fa4bc::t_79fc58fcee170e 25,29
+  s_c88be8e83fa4bc::t_105dead36615f5 1-16,18-22,24,26-28,31-37,39-40
+  s_c88be8e83fa4bc::t_5d4e69d158660c 17
+  s_c88be8e83fa4bc::t_f6dcf22a5da31b 23
+  s_c88be8e83fa4bc::t_694eefc2ab84e6 30
+tools/bot/test_protocol.py
+  s_c88be8e83fa4bc::t_2ded8cf0d934b4 5,479-483
+tools/bot/run.py
+  s_c88be8e83fa4bc::t_8b0f32388ad840 186
+docs/as-built/v102_class-bot-visual-scenarios.md
+  s_c88be8e83fa4bc::t_fc401f725807fc 1-48
+docs/plans/v102_2026-06-12-class-bot-visual-scenarios.md
+  s_c88be8e83fa4bc::t_df8f65521e8f8c 40-41,64,70,76,82,95,101,107,118,124,130,136,147,153,159,165,176,182,188,194,206,212,218,230,238,244,250,265,271,277,286-292
+  s_c88be8e83fa4bc::t_dfad4259d7325a 42,285
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "458b29387bf8b27b6d22ed90dff6647e47592fa5",
+  "prompts": {},
+  "sessions": {
+    "s_c88be8e83fa4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfa-d65a-7650-81f2-89f916faeef8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

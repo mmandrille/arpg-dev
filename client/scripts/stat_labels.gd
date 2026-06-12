@@ -1,6 +1,8 @@
 class_name StatLabels
 extends RefCounted
 
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
+
 const BASE_STATS := ["str", "dex", "vit", "magic"]
 
 const DISPLAY_NAMES := {
@@ -25,4 +27,5 @@ const DISPLAY_NAMES := {
 
 
 static func display_name(stat: String) -> String:
-	return str(DISPLAY_NAMES.get(stat, stat))
+	var fallback := str(DISPLAY_NAMES.get(stat, stat))
+	return TextCatalogScript.get_text("stat.%s" % stat, fallback)

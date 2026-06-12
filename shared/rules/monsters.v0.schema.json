@@ -17,6 +17,7 @@
           "additionalProperties": false,
           "properties": {
             "name": { "type": "string" },
+            "name_key": { "type": "string", "minLength": 1 },
             "max_hp": { "type": "integer", "minimum": 1 },
             "loot_table": { "type": "string" },
             "xp_reward": { "type": "integer", "minimum": 0 },

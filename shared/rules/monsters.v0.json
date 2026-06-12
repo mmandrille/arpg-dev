@@ -7,11 +7,15 @@
       "loot_table": "basic_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
-      "retaliation_damage": { "min": 1, "max": 1 }
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
+      "name_key": "monster.training_dummy.name"
     },
     "training_dummy_reward": {
       "name": "Training Dummy",
@@ -19,11 +23,15 @@
       "loot_table": "reward_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
-      "retaliation_damage": { "min": 1, "max": 1 }
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
+      "name_key": "monster.training_dummy_reward.name"
     },
     "training_dummy_path": {
       "name": "Training Dummy",
@@ -31,11 +39,15 @@
       "loot_table": "reward_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
-      "retaliation_damage": { "min": 1, "max": 1 }
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
+      "name_key": "monster.training_dummy_path.name"
     },
     "training_dummy_ranged": {
       "name": "Training Dummy",
@@ -43,23 +55,31 @@
       "loot_table": "ranged_multi_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
-      "retaliation_damage": { "min": 1, "max": 1 }
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
+      "name_key": "monster.training_dummy_ranged.name"
     },
     "training_dummy_heal": {
       "name": "Training Dummy",
       "max_hp": 2,
       "loot_table": "heal_double_drop",
       "xp_reward": 0,
-      "hit_chance": 1.0,
-      "crit_chance": 0.0,
+      "hit_chance": 1,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
-      "retaliation_damage": { "min": 6, "max": 6 }
+      "retaliation_damage": {
+        "min": 6,
+        "max": 6
+      },
+      "name_key": "monster.training_dummy_heal.name"
     },
     "skill_xp_level6_dummy": {
       "name": "Skill XP Dummy",
@@ -67,10 +87,11 @@
       "loot_table": "no_drop",
       "xp_reward": 200,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
-      "block_percent": 0
+      "block_percent": 0,
+      "name_key": "monster.skill_xp_level6_dummy.name"
     },
     "skill_xp_level7_dummy": {
       "name": "Skill XP Dummy",
@@ -78,10 +99,11 @@
       "loot_table": "no_drop",
       "xp_reward": 270,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
-      "block_percent": 0
+      "block_percent": 0,
+      "name_key": "monster.skill_xp_level7_dummy.name"
     },
     "stats_panel_dummy": {
       "name": "Stats Panel Dummy",
@@ -89,10 +111,11 @@
       "loot_table": "no_drop",
       "xp_reward": 30,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
-      "block_percent": 0
+      "block_percent": 0,
+      "name_key": "monster.stats_panel_dummy.name"
     },
     "training_dummy_chase": {
       "name": "Training Dummy",
@@ -100,16 +123,20 @@
       "loot_table": "basic_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
-      "retaliation_damage": { "min": 1, "max": 1 },
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
       "behavior": "chase",
-      "aggro_radius": 8.0,
-      "assist_radius": 8.0,
-      "leash_radius": 8.0,
-      "move_speed": 0.49
+      "aggro_radius": 8,
+      "assist_radius": 8,
+      "leash_radius": 8,
+      "move_speed": 0.49,
+      "name_key": "monster.training_dummy_chase.name"
     },
     "dungeon_mob": {
       "name": "Cave Wraith",
@@ -117,18 +144,22 @@
       "loot_table": "dungeon_mob_drop",
       "xp_reward": 10,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
       "pack_role": "frontline",
       "behavior": "chase",
-      "aggro_radius": 6.0,
-      "assist_radius": 8.0,
-      "leash_radius": 10.0,
+      "aggro_radius": 6,
+      "assist_radius": 8,
+      "leash_radius": 10,
       "move_speed": 0.49,
-      "attack_damage": { "min": 1, "max": 2 },
-      "attack_cooldown_ticks": 21
+      "attack_damage": {
+        "min": 1,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 21,
+      "name_key": "monster.dungeon_mob.name"
     },
     "dungeon_archer": {
       "name": "Cave Archer",
@@ -136,22 +167,26 @@
       "loot_table": "dungeon_mob_drop",
       "xp_reward": 10,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
       "pack_role": "ranged",
       "behavior": "chase",
-      "aggro_radius": 6.0,
-      "assist_radius": 8.0,
-      "leash_radius": 10.0,
+      "aggro_radius": 6,
+      "assist_radius": 8,
+      "leash_radius": 10,
       "move_speed": 0.42,
-      "attack_damage": { "min": 1, "max": 1 },
+      "attack_damage": {
+        "min": 1,
+        "max": 1
+      },
       "attack_cooldown_ticks": 50,
       "attack_mode": "ranged",
-      "attack_range": 7.0,
-      "projectile_speed": 16.0,
-      "projectile_def_id": "training_arrow"
+      "attack_range": 7,
+      "projectile_speed": 16,
+      "projectile_def_id": "training_arrow",
+      "name_key": "monster.dungeon_archer.name"
     },
     "dungeon_wolf": {
       "name": "Cave Wolf",
@@ -159,18 +194,22 @@
       "loot_table": "dungeon_mob_drop",
       "xp_reward": 10,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
       "pack_role": "flanker",
       "behavior": "chase",
-      "aggro_radius": 6.0,
-      "assist_radius": 8.0,
-      "leash_radius": 10.0,
+      "aggro_radius": 6,
+      "assist_radius": 8,
+      "leash_radius": 10,
       "move_speed": 0.49,
-      "attack_damage": { "min": 1, "max": 2 },
-      "attack_cooldown_ticks": 21
+      "attack_damage": {
+        "min": 1,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 21,
+      "name_key": "monster.dungeon_wolf.name"
     },
     "dungeon_bat": {
       "name": "Cave Bat",
@@ -178,18 +217,22 @@
       "loot_table": "dungeon_mob_drop",
       "xp_reward": 10,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
       "pack_role": "swarm",
       "behavior": "chase",
-      "aggro_radius": 6.0,
-      "assist_radius": 8.0,
-      "leash_radius": 10.0,
+      "aggro_radius": 6,
+      "assist_radius": 8,
+      "leash_radius": 10,
       "move_speed": 0.49,
-      "attack_damage": { "min": 1, "max": 2 },
-      "attack_cooldown_ticks": 21
+      "attack_damage": {
+        "min": 1,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 21,
+      "name_key": "monster.dungeon_bat.name"
     },
     "combat_lab_soft_target": {
       "name": "Combat Lab Soft Target",
@@ -197,11 +240,15 @@
       "loot_table": "no_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 0,
-      "retaliation_damage": { "min": 1, "max": 1 }
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
+      "name_key": "monster.combat_lab_soft_target.name"
     },
     "combat_lab_armored_target": {
       "name": "Combat Lab Armored Target",
@@ -209,11 +256,15 @@
       "loot_table": "no_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 99,
       "block_percent": 0,
-      "retaliation_damage": { "min": 1, "max": 1 }
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
+      "name_key": "monster.combat_lab_armored_target.name"
     },
     "combat_lab_blocking_target": {
       "name": "Combat Lab Blocking Target",
@@ -221,45 +272,57 @@
       "loot_table": "no_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,
-      "crit_chance": 0.0,
+      "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 0,
       "block_percent": 100,
-      "retaliation_damage": { "min": 1, "max": 1 }
+      "retaliation_damage": {
+        "min": 1,
+        "max": 1
+      },
+      "name_key": "monster.combat_lab_blocking_target.name"
     },
     "combat_lab_crit_attacker": {
       "name": "Combat Lab Crit Attacker",
       "max_hp": 8,
       "loot_table": "no_drop",
       "xp_reward": 0,
-      "hit_chance": 1.0,
-      "crit_chance": 1.0,
-      "crit_damage": 2.0,
+      "hit_chance": 1,
+      "crit_chance": 1,
+      "crit_damage": 2,
       "armor": 0,
       "block_percent": 0,
       "behavior": "chase",
-      "aggro_radius": 4.0,
-      "leash_radius": 6.0,
+      "aggro_radius": 4,
+      "leash_radius": 6,
       "move_speed": 0.49,
-      "attack_damage": { "min": 2, "max": 2 },
-      "attack_cooldown_ticks": 13
+      "attack_damage": {
+        "min": 2,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 13,
+      "name_key": "monster.combat_lab_crit_attacker.name"
     },
     "combat_lab_miss_attacker": {
       "name": "Combat Lab Miss Attacker",
       "max_hp": 8,
       "loot_table": "no_drop",
       "xp_reward": 0,
-      "hit_chance": 0.0,
-      "crit_chance": 1.0,
-      "crit_damage": 2.0,
+      "hit_chance": 0,
+      "crit_chance": 1,
+      "crit_damage": 2,
       "armor": 0,
       "block_percent": 0,
       "behavior": "chase",
-      "aggro_radius": 4.0,
-      "leash_radius": 6.0,
+      "aggro_radius": 4,
+      "leash_radius": 6,
       "move_speed": 0.49,
-      "attack_damage": { "min": 2, "max": 2 },
-      "attack_cooldown_ticks": 13
+      "attack_damage": {
+        "min": 2,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 13,
+      "name_key": "monster.combat_lab_miss_attacker.name"
     }
   }
 }

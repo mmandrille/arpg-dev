@@ -1,6 +1,8 @@
 extends Control
 class_name PauseMenu
 
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
+
 signal resume_pressed
 signal settings_pressed
 signal return_to_menu_pressed
@@ -45,15 +47,15 @@ func _build() -> void:
 	add_child(box)
 
 	var title := Label.new()
-	title.text = "Paused"
+	title.text = TextCatalogScript.get_text("pause.title", "Paused")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 39)
 	box.add_child(title)
 
-	box.add_child(_button("Resume", resume_pressed.emit))
-	box.add_child(_button("Settings", settings_pressed.emit))
-	box.add_child(_button("Return to Main Menu", return_to_menu_pressed.emit))
-	box.add_child(_button("Exit", exit_pressed.emit))
+	box.add_child(_button(TextCatalogScript.get_text("pause.resume", "Resume"), resume_pressed.emit))
+	box.add_child(_button(TextCatalogScript.get_text("menu.settings", "Settings"), settings_pressed.emit))
+	box.add_child(_button(TextCatalogScript.get_text("pause.return_to_main_menu", "Return to Main Menu"), return_to_menu_pressed.emit))
+	box.add_child(_button(TextCatalogScript.get_text("menu.exit", "Exit"), exit_pressed.emit))
 
 
 func _button(text: String, callback: Callable) -> Button:

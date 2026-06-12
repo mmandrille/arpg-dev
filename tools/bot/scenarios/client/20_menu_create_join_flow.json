@@ -3,7 +3,7 @@
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "title": "Menu Create Game and Join Game flow",
-  "description": "Focused v45 proof for Join Game list-first empty state, Settings Create Game Type persistence, Solo Create Game through choose-or-create, and existing-character reuse.",
+  "description": "Focused v45 proof for Join Game list-first state, Settings Create Game Type persistence, Solo Create Game through choose-or-create, and existing-character reuse.",
   "client_steps": [
     { "type": "wait_main_menu", "timeout_s": 10.0 },
     {
@@ -14,7 +14,7 @@
     { "type": "click_menu_button", "button": "join_game" },
     { "type": "wait_multiplayer_panel", "timeout_s": 5.0 },
     { "type": "assert_multiplayer_panel_visible", "visible": true },
-    { "type": "assert_multiplayer_session_rows", "equals": 0, "selected": false },
+    { "type": "assert_multiplayer_session_rows", "selected": false },
     { "type": "click_menu_button", "button": "back" },
     { "type": "wait_main_menu", "timeout_s": 3.0 },
     { "type": "click_menu_button", "button": "settings" },

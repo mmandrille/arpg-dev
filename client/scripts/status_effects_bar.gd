@@ -76,7 +76,7 @@ func start_effect(event: Dictionary) -> void:
 		"accent": str(icon.get("accent", "#ffffff")),
 		"remaining_ticks": remaining_ticks,
 		"total_ticks": total_ticks,
-		"name": str(SkillRulesLoader.skill_definition(skill_id).get("name", skill_id)),
+		"name": SkillRulesLoader.skill_display_name(skill_id),
 	}
 	_render()
 

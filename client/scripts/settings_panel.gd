@@ -1,6 +1,8 @@
 extends Control
 class_name SettingsPanel
 
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
+
 signal back_requested
 signal size_selected(label: String)
 signal floating_combat_text_toggled(enabled: bool)
@@ -86,7 +88,7 @@ func _build() -> void:
 	panel.add_child(box)
 
 	var title := Label.new()
-	title.text = "Settings"
+	title.text = TextCatalogScript.get_text("settings.title", "Settings")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 45)
 	box.add_child(title)
@@ -103,7 +105,7 @@ func _build() -> void:
 		box.add_child(button)
 
 	var session_type_label := Label.new()
-	session_type_label.text = "Create Game Type"
+	session_type_label.text = TextCatalogScript.get_text("settings.create_game_type", "Create Game Type")
 	session_type_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	session_type_label.add_theme_font_size_override("font_size", 30)
 	box.add_child(session_type_label)
@@ -111,11 +113,11 @@ func _build() -> void:
 	var session_type_row := HBoxContainer.new()
 	session_type_row.add_theme_constant_override("separation", 8)
 	box.add_child(session_type_row)
-	_add_session_type_button(session_type_row, "Co-op", "coop")
-	_add_session_type_button(session_type_row, "Solo", "solo")
+	_add_session_type_button(session_type_row, TextCatalogScript.get_text("settings.session_type.coop", "Co-op"), "coop")
+	_add_session_type_button(session_type_row, TextCatalogScript.get_text("settings.session_type.solo", "Solo"), "solo")
 
 	_floating_toggle = CheckButton.new()
-	_floating_toggle.text = "Floating combat text"
+	_floating_toggle.text = TextCatalogScript.get_text("settings.floating_combat_text", "Floating combat text")
 	_floating_toggle.button_pressed = true
 	_floating_toggle.custom_minimum_size = Vector2(320, 42)
 	_floating_toggle.add_theme_font_size_override("font_size", 39)
@@ -125,7 +127,7 @@ func _build() -> void:
 	box.add_child(_floating_toggle)
 
 	_status_text_toggle = CheckButton.new()
-	_status_text_toggle.text = "status-text"
+	_status_text_toggle.text = TextCatalogScript.get_text("settings.status_text", "Status text")
 	_status_text_toggle.button_pressed = true
 	_status_text_toggle.custom_minimum_size = Vector2(320, 42)
 	_status_text_toggle.add_theme_font_size_override("font_size", 39)
@@ -135,7 +137,7 @@ func _build() -> void:
 	box.add_child(_status_text_toggle)
 
 	var back := Button.new()
-	back.text = "Back"
+	back.text = TextCatalogScript.get_text("settings.back", "Back")
 	back.custom_minimum_size = Vector2(320, 44)
 	back.add_theme_font_size_override("font_size", 39)
 	back.pressed.connect(back_requested.emit)

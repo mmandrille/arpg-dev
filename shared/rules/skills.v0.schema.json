@@ -21,6 +21,7 @@
       "additionalProperties": false,
       "properties": {
         "name": { "type": "string", "minLength": 1 },
+        "name_key": { "type": "string", "minLength": 1 },
         "class": { "type": "string", "minLength": 1 },
         "tree": { "$ref": "#/$defs/tree_position" },
         "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff"] },

@@ -8,6 +8,7 @@ signal delete_requested(character_id: String)
 signal rename_requested(character_id: String, name: String)
 
 const ClassIconScript := preload("res://scripts/class_icon.gd")
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 
 const MODE_CHOOSE_OR_CREATE := "choose_or_create"
 const MODE_FORCED_CREATE := "forced_create"
@@ -16,17 +17,23 @@ const DEFAULT_CLASS_ID := "barbarian"
 const CLASS_DEFS := {
 	"barbarian": {
 		"name": "Barbarian",
+		"name_key": "character.class.barbarian",
 		"skill": "Rage",
+		"skill_key": "skill.rage.name",
 		"stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
 	},
 	"sorcerer": {
 		"name": "Sorcerer",
+		"name_key": "character.class.sorcerer",
 		"skill": "Magic Bolt",
+		"skill_key": "skill.magic_bolt.name",
 		"stats": {"str": 3, "dex": 5, "vit": 5, "magic": 5},
 	},
 	"paladin": {
 		"name": "Paladin",
+		"name_key": "character.class.paladin",
 		"skill": "Heal",
+		"skill_key": "skill.heal.name",
 		"stats": {"str": 4, "dex": 5, "vit": 7, "magic": 5},
 	},
 }
@@ -472,7 +479,9 @@ func _character_depth(character: Dictionary) -> int:
 
 
 func _character_status(character: Dictionary) -> String:
-	return "Dead" if bool(character.get("dead", false)) else "Ready"
+	if bool(character.get("dead", false)):
+		return TextCatalogScript.get_text("common.dead", "Dead")
+	return TextCatalogScript.get_text("common.ready", "Ready")
 
 
 func _character_class_id(character: Dictionary) -> String:
@@ -483,11 +492,13 @@ func _character_class_id(character: Dictionary) -> String:
 
 
 func _class_name(class_id: String) -> String:
-	return str((CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary).get("name", "Barbarian"))
+	var class_def := CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary
+	return TextCatalogScript.get_text(str(class_def.get("name_key", "")), str(class_def.get("name", "Barbarian")))
 
 
 func _class_skill(class_id: String) -> String:
-	return str((CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary).get("skill", "Rage"))
+	var class_def := CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary
+	return TextCatalogScript.get_text(str(class_def.get("skill_key", "")), str(class_def.get("skill", "Rage")))
 
 
 func _class_stats(class_id: String) -> Dictionary:
@@ -496,12 +507,17 @@ func _class_stats(class_id: String) -> Dictionary:
 
 func _class_tooltip(class_id: String) -> String:
 	var stats := _class_stats(class_id)
-	return "%s\nSkill: %s\nSTR %d  DEX %d  VIT %d  MAGIC %d" % [
+	return "%s\n%s: %s\n%s %d  %s %d  %s %d  %s %d" % [
 		_class_name(class_id),
+		TextCatalogScript.get_text("character.skill", "Skill"),
 		_class_skill(class_id),
+		TextCatalogScript.get_text("stat.str", "STR"),
 		int(stats.get("str", 0)),
+		TextCatalogScript.get_text("stat.dex", "DEX"),
 		int(stats.get("dex", 0)),
+		TextCatalogScript.get_text("stat.vit", "VIT"),
 		int(stats.get("vit", 0)),
+		TextCatalogScript.get_text("stat.magic", "MAGIC").to_upper(),
 		int(stats.get("magic", 0)),
 	]
 
@@ -521,11 +537,11 @@ func _character_row_label(character: Dictionary) -> String:
 func _character_row_tooltip(character: Dictionary) -> String:
 	var created := str(character.get("created_at", ""))
 	var lines := [
-		"Class %s" % _class_name(_character_class_id(character)),
-		"Level %d" % _character_level(character),
-		"Gold %d" % _character_gold(character),
-		"Deepest depth %d" % _character_depth(character),
-		"Status %s" % _character_status(character),
+		"%s %s" % [TextCatalogScript.get_text("character.class", "Class"), _class_name(_character_class_id(character))],
+		"%s %d" % [TextCatalogScript.get_text("character.level", "Level"), _character_level(character)],
+		"%s %d" % [TextCatalogScript.get_text("character.gold", "Gold"), _character_gold(character)],
+		"%s %d" % [TextCatalogScript.get_text("character.deepest_depth", "Deepest depth"), _character_depth(character)],
+		"%s %s" % [TextCatalogScript.get_text("character.status", "Status"), _character_status(character)],
 	]
 	if created != "":
 		lines.append("Created %s" % created.left(10))

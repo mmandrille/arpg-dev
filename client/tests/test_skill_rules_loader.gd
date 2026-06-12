@@ -26,6 +26,8 @@ func _run() -> void:
 
 	var skill := SkillRulesLoaderScript.skill_definition("magic_bolt")
 	_assert_eq("skill name from manifest-listed rules", str(skill.get("name", "")), "Magic Bolt")
+	_assert_eq("skill name key from manifest-listed rules", str(skill.get("name_key", "")), "skill.magic_bolt.name")
+	_assert_eq("localized skill display name", SkillRulesLoaderScript.skill_display_name("magic_bolt"), "Magic Bolt")
 	_assert_eq("skill projectile visual", str(skill.get("projectile", {}).get("visual", "")), "magic_bolt_projectile")
 	_assert_eq("rage kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("rage").get("kind", "")), "self_buff")
 	_assert_eq("cleave kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("cleave").get("kind", "")), "cone_attack")
@@ -35,6 +37,8 @@ func _run() -> void:
 	_assert_eq("holy shield kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("holy_shield").get("kind", "")), "area_stat_buff")
 
 	var presentation := SkillRulesLoaderScript.skill_presentation("magic_bolt")
+	_assert_eq("presentation summary key from manifest-listed assets", str(presentation.get("summary_key", "")), "skill.magic_bolt.summary")
+	_assert_eq("localized skill summary", SkillRulesLoaderScript.skill_summary("magic_bolt"), "Projectile spell")
 	_assert_eq("presentation label from manifest-listed assets", str(presentation.get("icon", {}).get("label", "")), "M")
 	_assert_eq("presentation projectile visual", str(presentation.get("projectile_visual", "")), "magic_bolt_projectile")
 	_assert_eq("rage presentation label", str(SkillRulesLoaderScript.skill_presentation("rage").get("icon", {}).get("label", "")), "R")

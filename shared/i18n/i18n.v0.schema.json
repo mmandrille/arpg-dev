@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/i18n/i18n.v0.schema.json",
+  "title": "Localized text catalog (v0)",
+  "description": "Flat key/value catalog for player-visible text. English is the source fallback catalog.",
+  "type": "object",
+  "required": ["version", "locale", "strings"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "locale": { "type": "string", "minLength": 2 },
+    "strings": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+([._-][a-z0-9]+)*$"
+      },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    }
+  }
+}

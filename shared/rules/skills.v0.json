@@ -4,19 +4,29 @@
     "magic_bolt": {
       "name": "Magic Bolt",
       "class": "sorcerer",
-      "tree": { "tier": 1, "column": 1 },
+      "tree": {
+        "tier": 1,
+        "column": 1
+      },
       "kind": "projectile_attack",
       "max_rank": 5,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
-        "stats": { "magic": 5 },
-        "stats_per_rank": { "magic": 3 },
+        "stats": {
+          "magic": 5
+        },
+        "stats_per_rank": {
+          "magic": 3
+        },
         "skills": []
       },
       "cost": {
-        "mana": { "base": 3, "per_rank": 0 }
+        "mana": {
+          "base": 3,
+          "per_rank": 0
+        }
       },
       "damage": {
         "type": "rank_linear_range",
@@ -26,31 +36,47 @@
         "max_per_rank": 1
       },
       "projectile": {
-        "range": 18.0,
-        "speed": 10.0,
+        "range": 18,
+        "speed": 10,
         "visual": "magic_bolt_projectile"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.0
-      }
+        "multiplier": 2
+      },
+      "name_key": "skill.magic_bolt.name"
     },
     "ice_shard": {
       "name": "Ice Shard",
       "class": "sorcerer",
-      "tree": { "tier": 2, "column": 1 },
+      "tree": {
+        "tier": 2,
+        "column": 1
+      },
       "kind": "cold_projectile_attack",
       "max_rank": 5,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
-        "stats": { "magic": 5 },
-        "stats_per_rank": { "magic": 3 },
-        "skills": [{ "skill_id": "magic_bolt", "rank": 1 }]
+        "stats": {
+          "magic": 5
+        },
+        "stats_per_rank": {
+          "magic": 3
+        },
+        "skills": [
+          {
+            "skill_id": "magic_bolt",
+            "rank": 1
+          }
+        ]
       },
       "cost": {
-        "mana": { "base": 6, "per_rank": 1 }
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
       },
       "damage": {
         "type": "rank_linear_range",
@@ -60,8 +86,8 @@
         "max_per_rank": 1
       },
       "projectile": {
-        "range": 18.0,
-        "speed": 10.0,
+        "range": 18,
+        "speed": 10,
         "visual": "ice_shard_projectile"
       },
       "slow": {
@@ -73,31 +99,47 @@
       "shatter": {
         "min_shards": 2,
         "max_shards": 5,
-        "range": 7.0,
-        "speed": 12.0,
+        "range": 7,
+        "speed": 12,
         "visual": "ice_shard_shard"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.0
-      }
+        "multiplier": 2
+      },
+      "name_key": "skill.ice_shard.name"
     },
     "ligthing": {
       "name": "Ligthing",
       "class": "sorcerer",
-      "tree": { "tier": 2, "column": 2 },
+      "tree": {
+        "tier": 2,
+        "column": 2
+      },
       "kind": "chain_projectile_attack",
       "max_rank": 5,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
-        "stats": { "magic": 5 },
-        "stats_per_rank": { "magic": 3 },
-        "skills": [{ "skill_id": "magic_bolt", "rank": 1 }]
+        "stats": {
+          "magic": 5
+        },
+        "stats_per_rank": {
+          "magic": 3
+        },
+        "skills": [
+          {
+            "skill_id": "magic_bolt",
+            "rank": 1
+          }
+        ]
       },
       "cost": {
-        "mana": { "base": 7, "per_rank": 1 }
+        "mana": {
+          "base": 7,
+          "per_rank": 1
+        }
       },
       "damage": {
         "type": "rank_linear_range",
@@ -107,8 +149,8 @@
         "max_per_rank": 1
       },
       "projectile": {
-        "range": 18.0,
-        "speed": 7.0,
+        "range": 18,
+        "speed": 7,
         "visual": "ligthing_projectile"
       },
       "chain": {
@@ -118,59 +160,88 @@
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.0
-      }
+        "multiplier": 2
+      },
+      "name_key": "skill.ligthing.name"
     },
     "cleave": {
       "name": "Cleave",
       "class": "barbarian",
-      "tree": { "tier": 1, "column": 1 },
+      "tree": {
+        "tier": 1,
+        "column": 1
+      },
       "kind": "cone_attack",
       "max_rank": 5,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
-        "stats": { "str": 5, "vit": 5 },
-        "stats_per_rank": { "str": 1, "vit": 1 },
+        "stats": {
+          "str": 5,
+          "vit": 5
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
         "skills": []
       },
       "cost": {
-        "mana": { "base": 8, "per_rank": 1 }
+        "mana": {
+          "base": 8,
+          "per_rank": 1
+        }
       },
       "cone": {
-        "range": 3.0,
-        "angle_degrees": 50.0,
-        "push_min": 1.0,
-        "push_max": 3.0,
+        "range": 3,
+        "angle_degrees": 50,
+        "push_min": 1,
+        "push_max": 3,
         "damage_source": "weapon"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.0
-      }
+        "multiplier": 2
+      },
+      "name_key": "skill.cleave.name"
     },
     "rage": {
       "name": "Rage",
       "class": "barbarian",
-      "tree": { "tier": 1, "column": 2 },
+      "tree": {
+        "tier": 1,
+        "column": 2
+      },
       "kind": "self_buff",
       "max_rank": 5,
       "targeting": "self",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
-        "stats": { "str": 5, "vit": 5 },
-        "stats_per_rank": { "str": 1, "vit": 1 },
+        "stats": {
+          "str": 5,
+          "vit": 5
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
         "skills": []
       },
       "cost": {
-        "mana": { "base": 10, "per_rank": 0 }
+        "mana": {
+          "base": 10,
+          "per_rank": 0
+        }
       },
       "effects": [
         {
           "type": "stat_percent_buff",
-          "stats": ["str", "vit"],
+          "stats": [
+            "str",
+            "vit"
+          ],
           "percent_base": 10,
           "percent_per_rank": 10,
           "duration_ticks": 450,
@@ -179,67 +250,94 @@
       ],
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.0
-      }
+        "multiplier": 2
+      },
+      "name_key": "skill.rage.name"
     },
     "heal": {
       "name": "Heal",
       "class": "paladin",
-      "tree": { "tier": 1, "column": 3 },
+      "tree": {
+        "tier": 1,
+        "column": 3
+      },
       "kind": "area_heal",
       "max_rank": 5,
       "targeting": "direction_or_target_area",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
-        "stats": { "magic": 5 },
-        "stats_per_rank": { "magic": 3 },
+        "stats": {
+          "magic": 5
+        },
+        "stats_per_rank": {
+          "magic": 3
+        },
         "skills": []
       },
       "cost": {
-        "mana": { "base": 10, "per_rank": 0 }
+        "mana": {
+          "base": 10,
+          "per_rank": 0
+        }
       },
       "effects": [
         {
           "type": "area_percent_heal",
           "target": "allies",
           "include_caster": true,
-          "range": 9.0,
-          "radius": 4.0,
+          "range": 9,
+          "radius": 4,
           "percent_base": 25,
           "percent_per_rank": 10
         }
       ],
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.0
-      }
+        "multiplier": 2
+      },
+      "name_key": "skill.heal.name"
     },
     "holy_shield": {
       "name": "Holy Shield",
       "class": "paladin",
-      "tree": { "tier": 1, "column": 4 },
+      "tree": {
+        "tier": 1,
+        "column": 4
+      },
       "kind": "area_stat_buff",
       "max_rank": 5,
       "targeting": "self_or_ally_area",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
-        "stats": { "vit": 5, "magic": 5 },
-        "stats_per_rank": { "vit": 2, "magic": 2 },
+        "stats": {
+          "vit": 5,
+          "magic": 5
+        },
+        "stats_per_rank": {
+          "vit": 2,
+          "magic": 2
+        },
         "skills": []
       },
       "cost": {
-        "mana": { "base": 10, "per_rank": 1 }
+        "mana": {
+          "base": 10,
+          "per_rank": 1
+        }
       },
       "effects": [
         {
           "type": "area_stat_percent_buff",
           "target": "allies",
           "include_caster": true,
-          "range": 8.0,
-          "radius": 5.0,
-          "stats": ["armor", "block_percent"],
+          "range": 8,
+          "radius": 5,
+          "stats": [
+            "armor",
+            "block_percent"
+          ],
           "percent_base": 20,
           "percent_per_rank": 10,
           "duration_ticks": 300,
@@ -249,7 +347,8 @@
       "cooldown": {
         "type": "attack_interval_multiplier",
         "multiplier": 2.5
-      }
+      },
+      "name_key": "skill.holy_shield.name"
     }
   }
 }

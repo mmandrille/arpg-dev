@@ -12,6 +12,7 @@ const AnimationControllerScript := preload("res://scripts/animation_controller.g
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
+const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_markers.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
@@ -1095,7 +1096,10 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "player_healed":
 			_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
-			_spawn_heal_rain(eid)
+			if str(ev.get("skill_id", "")) == "heal":
+				_spawn_heal_rain(eid)
+			else:
+				_spawn_consumable_heal_effect(eid)
 			if eid == player_id and _health_bar != null:
 				_health_bar.update_hp(player_hp, player_max_hp, true)
 			continue
@@ -1725,6 +1729,15 @@ func _spawn_heal_rain(entity_id: String) -> void:
 	if target == null:
 		return
 	_spawn_heal_rain_at_position(_node_world_or_local_position(target))
+
+
+func _spawn_consumable_heal_effect(entity_id: String) -> void:
+	var target := _node_for_entity_id(entity_id)
+	if target == null:
+		return
+	var effect := ConsumableHealEffectScript.new() as Node3D
+	effect.position = _node_world_or_local_position(target) + Vector3(0.0, 0.45, 0.0)
+	add_child(effect)
 
 
 func _heal_cast_rain_correlations(events: Array) -> Dictionary:

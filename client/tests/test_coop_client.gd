@@ -18,6 +18,7 @@ const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
+const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -38,7 +39,7 @@ func _initialize() -> void:
 	_test_no_mana_reject_shows_floating_text()
 	_test_skill_cooldown_reject_shows_floating_text()
 	_test_monster_aggro_shows_threat_floating_text()
-	_test_player_healed_spawns_heal_rain()
+	_test_consumable_heal_spawns_personal_effect()
 	_test_full_hp_heal_cast_spawns_heal_rain_once()
 	_test_uncorrelated_heal_cast_spawns_heal_rain_once()
 	_test_heal_cast_with_healed_event_does_not_double_spawn_rain()
@@ -838,7 +839,7 @@ func _test_monster_aggro_shows_threat_floating_text() -> void:
 	disabled.free()
 
 
-func _test_player_healed_spawns_heal_rain() -> void:
+func _test_consumable_heal_spawns_personal_effect() -> void:
 	var main = _make_main()
 	main.player_id = "1001"
 	main.player_anchor.position = Vector3(2.0, 0.0, 3.0)
@@ -848,13 +849,16 @@ func _test_player_healed_spawns_heal_rain() -> void:
 	root.add_child(main.damage_numbers_layer)
 	root.add_child(main._camera)
 	main._camera.look_at_from_position(Vector3(2.0, 12.0, 13.0), main.player_anchor.position, Vector3.UP)
-	main._apply_delta({"events": [{"event_type": "player_healed", "entity_id": "1001", "heal": 4}], "changes": []})
+	main._apply_delta({"events": [{"event_type": "player_healed", "entity_id": "1001", "item_instance_id": "potion_1", "heal": 4}], "changes": []})
 	var rain_count := 0
+	var personal_count := 0
 	for child in main.get_children():
 		if child.get_script() == HealRainEffectScript:
 			rain_count += 1
-			_assert_float("heal rain radius", float(child.radius), MainScript.HEAL_RAIN_RADIUS)
-	_assert_eq("player_healed rain count", rain_count, 1)
+		if child.get_script() == ConsumableHealEffectScript:
+			personal_count += 1
+	_assert_eq("consumable healed rain count", rain_count, 0)
+	_assert_eq("consumable healed personal effect count", personal_count, 1)
 	var numbers := main._bot_damage_numbers()
 	if numbers.size() > 0:
 		_assert_eq("heal floating text", str((numbers[0] as Dictionary).get("text", "")), "+4")

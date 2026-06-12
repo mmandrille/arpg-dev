@@ -13,6 +13,10 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["magic_bolt"].icon_label == "M"
     assert entries["magic_bolt"].rank_targets == [1, 5]
 
+    assert entries["ligthing"].category == "attack"
+    assert entries["ligthing"].class_id == "sorcerer"
+    assert entries["ligthing"].icon_label == "L"
+
     assert entries["rage"].category == "self_buff"
     assert entries["rage"].class_id == "barbarian"
     assert entries["rage"].icon_shape == "burst"

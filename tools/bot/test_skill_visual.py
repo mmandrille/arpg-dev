@@ -12,6 +12,7 @@ from tools.bot.skill_visual_runtime import (
     seed_skill_visual_character,
     selected_skill_visual_level,
     skill_mana_cost,
+    skill_required_skill_ranks,
     skill_required_stats,
 )
 
@@ -127,6 +128,28 @@ def test_skill_visual_seed_payload_sets_rank_level_and_required_stats() -> None:
     assert client.payload["experience"] == 0
     assert client.payload["skill_ranks"] == {"holy_shield": 5}
     assert client.payload["stats"] == {"str": 6, "dex": 4, "vit": 13, "magic": 13}
+
+
+def test_skill_visual_seed_payload_sets_skill_prerequisites() -> None:
+    class Response:
+        def raise_for_status(self) -> None:
+            pass
+
+    class Client:
+        def __init__(self) -> None:
+            self.payload: dict[str, object] = {}
+
+        def put(self, url: str, *, headers: dict[str, str], json: dict[str, object]) -> Response:
+            self.payload = json
+            return Response()
+
+    entry = next(entry for entry in all_skill_demo_entries() if entry.skill_id == "ligthing")
+    client = Client()
+
+    seed_skill_visual_character(client, "access", "debug", "char_123", entry, rank=5, level=5)  # type: ignore[arg-type]
+
+    assert skill_required_skill_ranks("ligthing") == {"magic_bolt": 1}
+    assert client.payload["skill_ranks"] == {"magic_bolt": 1, "ligthing": 5}
 
 
 def test_skill_visual_seed_payload_covers_ranked_mana_cost() -> None:

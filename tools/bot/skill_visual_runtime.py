@@ -76,6 +76,19 @@ def skill_required_stats(skill_id: str, rank: int) -> dict[str, int]:
     return stats
 
 
+def skill_required_skill_ranks(skill_id: str) -> dict[str, int]:
+    req = dict(skill_rule(skill_id).get("requirements", {}))
+    out: dict[str, int] = {}
+    for raw in list(req.get("skills", [])):
+        if not isinstance(raw, dict):
+            continue
+        prereq_id = str(raw.get("skill_id", ""))
+        prereq_rank = int(raw.get("rank", 0))
+        if prereq_id and prereq_rank > 0:
+            out[prereq_id] = max(out.get(prereq_id, 0), prereq_rank)
+    return out
+
+
 def skill_mana_cost(skill_id: str, rank: int) -> int:
     mana = dict(dict(skill_rule(skill_id).get("cost", {})).get("mana", {}))
     base = int(mana.get("base", 0))
@@ -132,7 +145,7 @@ def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
                 "timeout_s": 8,
             },
         ])
-    elif entry.kind in {"projectile_attack", "cold_projectile_attack"}:
+    elif entry.kind in {"projectile_attack", "cold_projectile_attack", "chain_projectile_attack"}:
         steps.extend([
             {"action": "move_until_player_position", "x": 4, "y": 5, "pathfind": True, "max_ticks": 220},
             {
@@ -163,7 +176,7 @@ def build_assertions(entry: SkillDemoEntry, rank: int = 1) -> list[dict[str, Any
         {"type": "event_seen", "event_type": "skill_cast", "skill_id": entry.skill_id, "rank": rank},
         rank_assertion(entry, rank),
     ]
-    if entry.kind in {"projectile_attack", "cold_projectile_attack", "cone_attack"}:
+    if entry.kind in {"projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack"}:
         assertions.append({"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1})
     elif entry.kind in {"self_buff", "area_stat_buff"}:
         assertions.append({"type": "event_seen", "event_type": "skill_effect_started", "skill_id": entry.skill_id})
@@ -189,6 +202,8 @@ def seed_skill_visual_character(
     for stat, required in skill_required_stats(entry.skill_id, rank).items():
         stats[stat] = max(stats.get(stat, 0), required)
     stats["magic"] = max(stats.get("magic", 0), magic_required_for_mana(skill_mana_cost(entry.skill_id, rank)))
+    skill_ranks = skill_required_skill_ranks(entry.skill_id)
+    skill_ranks[entry.skill_id] = rank
     payload = {
         "level": level,
         "experience": 0,
@@ -200,7 +215,7 @@ def seed_skill_visual_character(
             "vit": stats.get("vit", 0),
             "magic": stats.get("magic", 0),
         },
-        "skill_ranks": {entry.skill_id: rank},
+        "skill_ranks": skill_ranks,
     }
     resp = client.put(
         f"/v0/debug/characters/{character_id}/progression",

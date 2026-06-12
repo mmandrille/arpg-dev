@@ -20,6 +20,7 @@ func _run() -> void:
 	_assert_true("manifest-loaded skills include holy shield", ids.has("holy_shield"))
 	_assert_true("manifest-loaded skills include cleave", ids.has("cleave"))
 	_assert_true("manifest-loaded skills include ice shard", ids.has("ice_shard"))
+	_assert_true("manifest-loaded skills include ligthing", ids.has("ligthing"))
 	_assert_eq("alphabetical first id stable", str(ids[0]), "cleave")
 	_assert_eq("tree-order first skill stable", SkillRulesLoaderScript.first_skill_id(), "cleave")
 
@@ -29,6 +30,7 @@ func _run() -> void:
 	_assert_eq("rage kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("rage").get("kind", "")), "self_buff")
 	_assert_eq("cleave kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("cleave").get("kind", "")), "cone_attack")
 	_assert_eq("ice shard kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("ice_shard").get("kind", "")), "cold_projectile_attack")
+	_assert_eq("ligthing kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("ligthing").get("kind", "")), "chain_projectile_attack")
 	_assert_eq("heal kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("heal").get("kind", "")), "area_heal")
 	_assert_eq("holy shield kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("holy_shield").get("kind", "")), "area_stat_buff")
 
@@ -38,6 +40,7 @@ func _run() -> void:
 	_assert_eq("rage presentation label", str(SkillRulesLoaderScript.skill_presentation("rage").get("icon", {}).get("label", "")), "R")
 	_assert_eq("cleave presentation label", str(SkillRulesLoaderScript.skill_presentation("cleave").get("icon", {}).get("label", "")), "C")
 	_assert_eq("ice shard presentation label", str(SkillRulesLoaderScript.skill_presentation("ice_shard").get("icon", {}).get("label", "")), "I")
+	_assert_eq("ligthing presentation label", str(SkillRulesLoaderScript.skill_presentation("ligthing").get("icon", {}).get("label", "")), "L")
 	_assert_eq("heal presentation label", str(SkillRulesLoaderScript.skill_presentation("heal").get("icon", {}).get("label", "")), "H")
 	_assert_eq("holy shield presentation label", str(SkillRulesLoaderScript.skill_presentation("holy_shield").get("icon", {}).get("label", "")), "S")
 

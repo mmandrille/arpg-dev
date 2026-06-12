@@ -1148,7 +1148,7 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		return
 	}
 	switch def.Kind {
-	case "projectile_attack", "cold_projectile_attack":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack":
 		s.handleProjectileSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "cone_attack":
 		s.handleConeSkillCast(in, res, player, skillID, def, rank, manaCost)

@@ -2096,7 +2096,7 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 
 func (s *Sim) damageMonsterByPlayerSkill(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
-	outcome := s.resolveSkillDamage(defenderStats, damageRange)
+	outcome := s.resolveSkillDamage(defenderStats, s.applySkillDamageBonus(damageRange))
 	target.hp -= outcome.Damage
 	if target.hp < 0 {
 		target.hp = 0
@@ -6625,6 +6625,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	damageMax := float64(s.rules.Combat.PlayerDamage.Max) + character.DamageMax
 	armor := character.Armor
 	maxHP := character.MaxHP
+	maxMana := character.MaxMana
 	healthRegen := character.HealthRegenPerSecond
 	manaRegen := character.ManaRegenPerSecond
 	blockPercent := 0.0
@@ -6641,6 +6642,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	}
 	armorSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.Armor, Kind: "character_formula"}}
 	maxHPSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.MaxHP, Kind: "character_formula"}}
+	maxManaSources := []StatBreakdownSourceView{{Label: "Magic", Value: character.MaxMana, Kind: "character_formula"}}
 	healthRegenSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.HealthRegenPerSecond, Kind: "character_formula"}}
 	manaRegenSources := []StatBreakdownSourceView{{Label: "Magic", Value: character.ManaRegenPerSecond, Kind: "character_formula"}}
 	blockSources := []StatBreakdownSourceView{}
@@ -6691,6 +6693,14 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		if value := rolledStats["max_hp"]; value != 0 {
 			maxHP += float64(value)
 			maxHPSources = append(maxHPSources, StatBreakdownSourceView{Label: "Rolled max HP", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+		if value := baseStats["max_mana"]; value != 0 {
+			maxMana += float64(value)
+			maxManaSources = append(maxManaSources, StatBreakdownSourceView{Label: label, Value: float64(value), Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["max_mana"]; value != 0 {
+			maxMana += float64(value)
+			maxManaSources = append(maxManaSources, StatBreakdownSourceView{Label: "Rolled max mana", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
 		if value := baseStats["health_regen_per_10_seconds"]; value != 0 {
 			perSecond := float64(value) / 10.0
@@ -6782,7 +6792,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		AttackSpeed:          attackSpeed,
 		AttackIntervalTicks:  attackInterval,
 		MaxHP:                maxFloat(1, maxHP),
-		MaxMana:              maxFloat(0, character.MaxMana),
+		MaxMana:              maxFloat(0, maxMana),
 		HealthRegenPerSecond: maxFloat(0, healthRegen),
 		ManaRegenPerSecond:   maxFloat(0, manaRegen),
 	}
@@ -6797,6 +6807,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		{Key: "attack_speed", Value: effective.AttackSpeed, UncappedValue: uncappedAttackSpeed, Cap: floatPtr(s.rules.Combat.MaxEffectiveAttackSpeed), Sources: attackSpeedSources},
 		{Key: "attack_interval_ticks", Value: float64(effective.AttackIntervalTicks), UncappedValue: float64(effective.AttackIntervalTicks), Cap: nil, Sources: attackIntervalSources},
 		{Key: "max_hp", Value: effective.MaxHP, UncappedValue: effective.MaxHP, Cap: nil, Sources: maxHPSources},
+		{Key: "max_mana", Value: effective.MaxMana, UncappedValue: effective.MaxMana, Cap: nil, Sources: maxManaSources},
 		{Key: "health_regen_per_second", Value: effective.HealthRegenPerSecond, UncappedValue: effective.HealthRegenPerSecond, Cap: nil, Sources: healthRegenSources},
 		{Key: "mana_regen_per_second", Value: effective.ManaRegenPerSecond, UncappedValue: effective.ManaRegenPerSecond, Cap: nil, Sources: manaRegenSources},
 		{Key: "block_percent", Value: effective.BlockPercent, UncappedValue: uncappedBlock, Cap: floatPtr(blockCap), Sources: blockSources},

@@ -216,6 +216,7 @@ def cross_checks(report: Report) -> None:
     skill_presentations = load(ASSETS / "skill_presentations.v0.json")
     items = load(RULES / "items.v0.json")
     item_templates = load(RULES / "item_templates.v0.json")
+    unique_items = load(RULES / "unique_items.v0.json")
     treasure_classes = load(RULES / "treasure_classes.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
@@ -3119,6 +3120,29 @@ def cross_checks(report: Report) -> None:
         report.fail("item_presentations coverage", f"missing entries: {missing_presentations}")
     else:
         report.ok("item_presentations covers all item rules")
+
+    unique_defs = unique_items.get("uniques", {})
+    if not unique_defs:
+        report.fail("unique_items catalog", "must define at least one unique seed")
+    else:
+        failed_uniques = False
+        for unique_id, unique in unique_defs.items():
+            if unique.get("id") != unique_id:
+                report.fail("unique_items id", f"{unique_id}: id field must match key")
+                failed_uniques = True
+            template_id = unique.get("base_template_id")
+            if template_id not in item_templates["templates"]:
+                report.fail("unique_items base template", f"{unique_id}: unknown template {template_id}")
+                failed_uniques = True
+            if unique.get("enabled") is not False or unique.get("status") != "disabled_seed":
+                report.fail("unique_items seed status", f"{unique_id}: v95 seeds must remain disabled")
+                failed_uniques = True
+            hook = str(unique.get("behavior_hook", "")).lower()
+            if "future" not in hook and "behavior" not in hook:
+                report.fail("unique_items behavior hook", f"{unique_id}: must describe future behavior, not only stats")
+                failed_uniques = True
+        if not failed_uniques:
+            report.ok("unique_items disabled seeds reference valid templates and behavior hooks")
 
 
 def main() -> int:

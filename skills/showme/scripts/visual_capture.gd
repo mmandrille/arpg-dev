@@ -64,6 +64,8 @@ func _initialize() -> void:
 			await _setup_monsters()
 		"heal-rain":
 			await _setup_heal_rain()
+		"town":
+			await _setup_town()
 		"inventory":
 			await _setup_inventory()
 		"skills":
@@ -479,6 +481,20 @@ func _setup_heal_rain() -> void:
 	effect.position = Vector3.ZERO
 	root.add_child(effect)
 	_subject = root
+
+
+func _setup_town() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackTown"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(20.0, 18.0, 25.0), Vector3(12.0, 0.8, 12.0), 17.5)
+
+	var main: Node3D = MainScript.new()
+	var town: Node3D = main.make_town_preview_scene()
+	root.add_child(town)
+	_subject = town
 
 
 func _make_heal_target_marker(mat: StandardMaterial3D) -> Node3D:

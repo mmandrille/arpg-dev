@@ -518,27 +518,27 @@
         {
           "type": "interactable",
           "interactable_def_id": "town_vendor",
-          "position": { "x": 15, "y": 12 }
+          "position": { "x": 17, "y": 10 }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_mystery_seller",
-          "position": { "x": 17, "y": 12 }
+          "position": { "x": 18, "y": 15 }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_stash",
-          "position": { "x": 13, "y": 12 }
+          "position": { "x": 7, "y": 14 }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_bishop",
-          "position": { "x": 19, "y": 12 }
+          "position": { "x": 15, "y": 6 }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_market_board",
-          "position": { "x": 21, "y": 12 }
+          "position": { "x": 10, "y": 18 }
         }
       ]
     },

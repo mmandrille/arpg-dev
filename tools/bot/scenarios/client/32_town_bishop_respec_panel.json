@@ -7,6 +7,8 @@
   "description": "Client opens the red town bishop service panel and verifies the respec option and unaffordable state.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "click_floor", "x": 10.0, "z": 12.0 },
+    { "type": "wait_player_near", "x": 10.0, "z": 12.0, "distance": 1.2, "timeout_s": 10.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_bishop" },
     { "type": "wait_bishop_panel", "price": 250, "affordable": false, "respec_enabled": false, "timeout_s": 15.0 },
     { "type": "assert_bishop_panel_visible", "visible": true },

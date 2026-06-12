@@ -81,6 +81,8 @@ func _initialize() -> void:
 		return
 	if not _verify_ground_texture_selection():
 		return
+	if not _verify_town_preview_props():
+		return
 	if not _verify_wall_texture_material():
 		return
 
@@ -441,6 +443,7 @@ func _verify_ground_texture_selection() -> bool:
 			return false
 	var town_a: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 0, 0)
 	var town_b: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 17, 29)
+	var town_c: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 32, 32)
 	var rock_a: Color = main._ground_texel(MainScript.GROUND_TEXTURE_DUNGEON, 0, 0)
 	var rock_b: Color = main._ground_texel(MainScript.GROUND_TEXTURE_DUNGEON, 17, 29)
 	if town_a == rock_a:
@@ -451,11 +454,61 @@ func _verify_ground_texture_selection() -> bool:
 		_fail("ground textures are flat colors")
 		main.free()
 		return false
+	if town_a == town_c or town_b == town_c:
+		_fail("town ground texture does not expose enough color variation")
+		main.free()
+		return false
 	var mat := main._ground_material_for_level(-1)
 	if mat.albedo_texture == null:
 		_fail("dungeon ground material is missing its generated texture")
 		main.free()
 		return false
+	main.free()
+	return true
+
+
+func _verify_town_preview_props() -> bool:
+	var main = MainScript.new()
+	var town := main.make_town_preview_scene()
+	if town == null:
+		_fail("town preview scene was not created")
+		main.free()
+		return false
+	var required := [
+		"TownPreviewGround", "TownService_town_vendor", "TownService_town_mystery_seller",
+		"TownService_town_stash", "TownService_town_bishop", "TownService_town_market_board",
+		"TownCabinWest", "TownCabinEast", "TownCampfire",
+	]
+	for node_name in required:
+		if town.find_child(str(node_name), true, false) == null:
+			_fail("town preview missing %s" % node_name)
+			town.free()
+			main.free()
+			return false
+	var fire := town.find_child("TownCampfire", true, false) as Node3D
+	if fire.find_child("CampfireLight", true, false) == null or fire.find_child("FireFlameInner", true, false) == null:
+		_fail("town campfire is missing light or flame parts")
+		town.free()
+		main.free()
+		return false
+	var cabin := town.find_child("TownCabinWest", true, false)
+	if cabin.find_child("CabinDoor", true, false) == null or cabin.find_child("CabinRoofRidge", true, false) == null:
+		_fail("town cabin is missing door or roof parts")
+		town.free()
+		main.free()
+		return false
+	var fire_pos := Vector2(fire.position.x, fire.position.z)
+	for node_name in required:
+		if str(node_name) in ["TownPreviewGround", "TownCampfire"]:
+			continue
+		var node := town.find_child(str(node_name), true, false) as Node3D
+		var distance := fire_pos.distance_to(Vector2(node.position.x, node.position.z))
+		if distance < 5.0:
+			_fail("town preview %s is too close to campfire: %.2f" % [node_name, distance])
+			town.free()
+			main.free()
+			return false
+	town.free()
 	main.free()
 	return true
 

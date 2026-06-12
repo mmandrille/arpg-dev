@@ -6,6 +6,7 @@ const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
+var _expired_effects: Array = []
 
 
 func _initialize() -> void:
@@ -14,6 +15,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var bar := StatusEffectsBarScript.new()
+	bar.effect_expired.connect(_on_effect_expired)
 	root.add_child(bar)
 	await process_frame
 
@@ -43,7 +45,7 @@ func _run() -> void:
 	effects = state.get("effects", [])
 	if effects.size() > 0:
 		var decayed: Dictionary = effects[0]
-		_assert_true("rage locally decays", int(decayed.get("remaining_ticks", 450)) < 450)
+		_assert_eq("rage decays at authoritative tick rate", int(decayed.get("remaining_ticks", 450)), 440)
 		_assert_true("rage fraction lowers", float(decayed.get("fraction", 1.0)) < 1.0)
 
 	bar.end_effect("rage")
@@ -73,10 +75,15 @@ func _run() -> void:
 	bar._process(1.0)
 	state = bar.get_debug_state()
 	_assert_eq("expired effect removed locally", (state.get("effects", []) as Array).size(), 0)
+	_assert_true("expired effect emitted", _expired_effects.has("rage"))
 
 	bar.queue_free()
 	print("[gdtest] PASS: test_status_effects_bar (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
+
+
+func _on_effect_expired(skill_id: String) -> void:
+	_expired_effects.append(skill_id)
 
 
 func _assert_eq(label: String, got, expected) -> void:

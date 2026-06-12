@@ -39,7 +39,7 @@
     "cleave": {
       "icon": {
         "label": "C",
-        "shape": "burst",
+        "shape": "slash",
         "color": "#c93830",
         "accent": "#ffd4c9"
       },

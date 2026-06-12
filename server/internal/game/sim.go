@@ -2048,6 +2048,7 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
 	if !outcome.Hit || outcome.Blocked {
 		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
+		s.aggroMonsterOnHit(target, playerID, corr, res)
 		return outcome
 	}
 

@@ -3957,7 +3957,7 @@ func TestDamageEventReportsRolledDamageNotClampedHPDelta(t *testing.T) {
 
 func TestMissedAttackDoesNotRetaliate(t *testing.T) {
 	rules := loadRules(t)
-	rules.Combat.BaseHitChance = 0
+	forceCharacterHitChance(rules, 0)
 	sim := MustNewSim("sess_miss", "deadbeefdeadbeef", rules)
 	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
 	r := sim.Tick([]Input{{
@@ -3971,11 +3971,54 @@ func TestMissedAttackDoesNotRetaliate(t *testing.T) {
 	if !hasEvent(r, "attack_missed") {
 		t.Fatalf("expected attack_missed: %+v", r.Events)
 	}
+	if !hasEvent(r, "monster_aggro") {
+		t.Fatalf("missed attack did not aggro target: %+v", r.Events)
+	}
 	if hasEvent(r, "player_damaged") || hasEvent(r, "player_killed") || hasPlayerUpdate(r) {
 		t.Fatalf("miss retaliated unexpectedly: changes=%+v events=%+v", r.Changes, r.Events)
 	}
 	if sim.entities[sim.playerID].hp != playerStartHP {
 		t.Fatalf("player hp = %d, want %d", sim.entities[sim.playerID].hp, playerStartHP)
+	}
+}
+
+func TestBlockedAttackAggrosWithoutDamage(t *testing.T) {
+	rules := loadRules(t)
+	forceCharacterHitChance(rules, 1.0)
+	rules.Combat.BlockCap = 100
+	def := rules.Monsters[monsterDefID]
+	def.BlockPercent = 100
+	rules.Monsters[monsterDefID] = def
+	sim := MustNewSim("sess_block_aggro", "deadbeefdeadbeef", rules)
+	sim.entities[sim.playerID].pos = Vec2{X: 11, Y: 5}
+	monster := sim.findEntity("1002")
+	if monster == nil {
+		t.Fatal("missing target monster")
+	}
+	beforeHP := monster.hp
+	r := sim.Tick([]Input{{
+		MessageID:     "blocked",
+		CorrelationID: "corr_block",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: "1002"},
+	}})
+
+	assertAck(t, r, "blocked")
+	blocked := false
+	for _, ev := range r.Events {
+		if ev.EventType == "monster_damaged" && ev.Blocked != nil && *ev.Blocked {
+			blocked = true
+			break
+		}
+	}
+	if !blocked {
+		t.Fatalf("expected blocked monster_damaged event: %+v", r.Events)
+	}
+	if !hasEvent(r, "monster_aggro") {
+		t.Fatalf("blocked attack did not aggro target: %+v", r.Events)
+	}
+	if monster.hp != beforeHP {
+		t.Fatalf("blocked attack changed hp from %d to %d", beforeHP, monster.hp)
 	}
 }
 

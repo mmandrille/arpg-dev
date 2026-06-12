@@ -11,6 +11,8 @@ const SKILL_ICON_SIZE := Vector2(48, 48)
 const SKILL_TREE_ORIGIN := Vector2(18, 54)
 const SKILL_TREE_SPACING := Vector2(74, 98)
 const SKILL_TREE_WIDTH := 304.0
+const SKILL_TOOLTIP_SIZE := Vector2(208, 178)
+const SKILL_TOOLTIP_GAP := 8.0
 
 var skill_progression: Dictionary = {}
 var character_progression: Dictionary = {}
@@ -127,6 +129,8 @@ func get_debug_state() -> Dictionary:
 		"assigned_key": _assigned_key_for_skill(skill_id),
 		"right_click_assigned": _right_click_skill_id == skill_id,
 		"tooltip_visible": _tooltip != null and _tooltip.visible,
+		"tooltip_position": _vec2_debug(_tooltip.position if _tooltip != null else Vector2.ZERO),
+		"tooltip_mouse_filter": _tooltip.mouse_filter if _tooltip != null else -1,
 		"tooltip_body": _tooltip_plain_text,
 		"requirements_met": _requirements_met(requirement_status),
 		"requirement_status": requirement_status,
@@ -243,17 +247,10 @@ func _build() -> void:
 
 	_tooltip = PanelContainer.new()
 	_tooltip.visible = false
-	_tooltip.position = Vector2(48, 108)
-	_tooltip.custom_minimum_size = Vector2(208, 178)
-	_tooltip.mouse_filter = Control.MOUSE_FILTER_STOP
+	_tooltip.custom_minimum_size = SKILL_TOOLTIP_SIZE
+	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tooltip.add_theme_stylebox_override("panel", _tooltip_style())
 	tree.add_child(_tooltip)
-	_hover_controls.append(_tooltip)
-	_tooltip.mouse_exited.connect(func() -> void:
-		if not _mouse_over_skill_controls():
-			_hovered_skill_id = ""
-			_hide_tooltip()
-	)
 
 	var tip_root := VBoxContainer.new()
 	tip_root.add_theme_constant_override("separation", 6)
@@ -367,12 +364,24 @@ func _mouse_over_skill_controls() -> bool:
 func _show_tooltip(skill_id: String) -> void:
 	if not _select_skill(skill_id) or _tooltip == null:
 		return
+	_position_tooltip_below_skill(skill_id)
 	_tooltip.visible = true
 
 
 func _hide_tooltip() -> void:
 	if _tooltip != null:
 		_tooltip.visible = false
+
+
+func _position_tooltip_below_skill(skill_id: String) -> void:
+	if _tooltip == null:
+		return
+	var block := _skill_blocks.get(skill_id, null) as Control
+	if block == null:
+		return
+	var x := clampf(block.position.x, 0.0, maxf(0.0, SKILL_TREE_WIDTH - SKILL_TOOLTIP_SIZE.x))
+	var y := block.position.y + SKILL_BLOCK_SIZE.y + SKILL_TOOLTIP_GAP
+	_tooltip.position = Vector2(x, y)
 
 
 func _assigned_key_for_skill(skill_id: String) -> String:
@@ -801,6 +810,10 @@ func _tooltip_style() -> StyleBoxFlat:
 	s.content_margin_top = 10
 	s.content_margin_bottom = 10
 	return s
+
+
+func _vec2_debug(value: Vector2) -> Dictionary:
+	return {"x": value.x, "y": value.y}
 
 
 func _badge_style() -> StyleBoxFlat:

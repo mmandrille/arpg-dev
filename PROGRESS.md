@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v100 — `damage-types-and-resistances` |
+| **Latest completed slice** | v101 — `undead-skeleton-poison-immunity` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | v101 — `undead-skeleton-poison-immunity` |
+| **Next slice** | v102 — TBD |
 | **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
 | **Next engineering review** | v110 (~every 10 slices) |
 
@@ -119,6 +119,7 @@ v97_* = class-starter-loadouts
 v98_* = rogue-class-foundation
 v99_* = rogue-skill-mechanics
 v100_* = damage-types-and-resistances
+v101_* = undead-skeleton-poison-immunity
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -259,6 +260,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v98** | `rogue-class-foundation` | Complete (`make ci` green) | [`v98_spec-rogue-class-foundation.md`](docs/specs/v98_spec-rogue-class-foundation.md) | [`v98_2026-06-12-rogue-class-foundation.md`](docs/plans/v98_2026-06-12-rogue-class-foundation.md) | [`as-built`](docs/as-built/v98_rogue-class-foundation.md) |
 | **v99** | `rogue-skill-mechanics` | Complete (`make ci` green) | [`v99_spec-rogue-skill-mechanics.md`](docs/specs/v99_spec-rogue-skill-mechanics.md) | [`v99_2026-06-12-rogue-skill-mechanics.md`](docs/plans/v99_2026-06-12-rogue-skill-mechanics.md) | [`as-built`](docs/as-built/v99_rogue-skill-mechanics.md) |
 | **v100** | `damage-types-and-resistances` | Complete (`make ci` green) | [`v100_spec-damage-types-and-resistances.md`](docs/specs/v100_spec-damage-types-and-resistances.md) | [`v100_2026-06-12-damage-types-and-resistances.md`](docs/plans/v100_2026-06-12-damage-types-and-resistances.md) | [`as-built`](docs/as-built/v100_damage-types-and-resistances.md) |
+| **v101** | `undead-skeleton-poison-immunity` | Complete (`make ci` green) | [`v101_spec-undead-skeleton-poison-immunity.md`](docs/specs/v101_spec-undead-skeleton-poison-immunity.md) | [`v101_2026-06-12-undead-skeleton-poison-immunity.md`](docs/plans/v101_2026-06-12-undead-skeleton-poison-immunity.md) | [`as-built`](docs/as-built/v101_undead-skeleton-poison-immunity.md) |
 
 ---
 
@@ -444,6 +446,12 @@ observes two main-hand attacks plus one off-hand attack.
 and `damage_type` on combat events. Lightning now deals half damage to flying lab/bat targets and
 50% bonus damage to quadruped/wolf targets, proven through focused Go tests and the
 `damage_types_and_resistances` protocol bot scenario.
+
+**Undead poison immunity is playable and visible.** v101 adds a localized `dungeon_undead` monster
+with full poison resistance, a generated skeleton GLB/scene wired through the monster visual
+catalog, and a compact lab scenario. Poison Stab now applies poisoned status on a connected hit
+even when resistance mitigates the hit to zero, and poison ticks against undead emit authoritative
+zero-damage poison events instead of lowering HP.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

@@ -201,7 +201,7 @@ func percentDamageRange(base DamageRange, percent int) DamageRange {
 }
 
 func (s *Sim) startPoisonDot(player *entity, target *entity, skillID string, def SkillDef, sourceDamage int, correlationID string, res *TickResult) {
-	if player == nil || target == nil || sourceDamage <= 0 {
+	if player == nil || target == nil || sourceDamage < 0 {
 		return
 	}
 	rank := s.progression.SkillRanks[skillID]
@@ -210,7 +210,7 @@ func (s *Sim) startPoisonDot(player *entity, target *entity, skillID string, def
 	}
 	percent := def.Poison.DamagePercentBase + def.Poison.DamagePercentPerRank*(rank-1)
 	damage := int(math.Round(float64(sourceDamage) * float64(percent) / 100.0))
-	if damage < 1 {
+	if sourceDamage > 0 && damage < 1 {
 		damage = 1
 	}
 	duration := def.Poison.DurationTicks + s.progression.BaseStats.Magic*def.Poison.MagicDurationTicksPerPoint

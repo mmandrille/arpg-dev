@@ -43,6 +43,7 @@ const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
 const MonsterTinyFlyerScene := preload("res://scenes/monster_tiny_flyer.tscn")
+const MonsterSkeletonScene := preload("res://scenes/monster_skeleton.tscn")
 const MONSTER_EVENT_CLIPS := {
 	"monster_damaged": "hit",
 	"monster_killed": "death",
@@ -4434,6 +4435,8 @@ func _monster_scene_for_visual(scene_key: String) -> PackedScene:
 			return MonsterQuadrupedScene
 		"monster_tiny_flyer":
 			return MonsterTinyFlyerScene
+		"monster_skeleton":
+			return MonsterSkeletonScene
 		_:
 			return MonsterDummyScene
 

@@ -265,6 +265,7 @@ func _test_monster_scene() -> void:
 		"res://scenes/monster_dummy.tscn",
 		"res://scenes/monster_quadruped.tscn",
 		"res://scenes/monster_tiny_flyer.tscn",
+		"res://scenes/monster_skeleton.tscn",
 	]:
 		var s = (load(scene_path) as PackedScene).instantiate()
 		get_root().add_child(s)
@@ -284,6 +285,8 @@ func _test_monster_visuals_catalog() -> void:
 	var bat := MonsterVisualsLoaderScript.resolve("dungeon_bat")
 	_assert(str(bat.get("scene", "")) == "monster_tiny_flyer", "dungeon_bat scene = %s" % bat.get("scene", ""))
 	_assert(float(bat.get("height_offset", 0.0)) > 0.0, "dungeon_bat must hover above ground")
+	var undead := MonsterVisualsLoaderScript.resolve("dungeon_undead")
+	_assert(str(undead.get("scene", "")) == "monster_skeleton", "dungeon_undead scene = %s" % undead.get("scene", ""))
 	var boss := MonsterVisualsLoaderScript.resolve("dungeon_mob", "monster_tiny_flyer")
 	_assert(str(boss.get("scene", "")) == "monster_tiny_flyer", "boss visual_model should select flyer scene")
 

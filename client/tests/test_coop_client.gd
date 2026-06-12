@@ -61,6 +61,7 @@ func _initialize() -> void:
 	_test_character_stats_window_chrome()
 	_test_draggable_window_persists_layout()
 	_test_actionable_panels_autoclose_out_of_range()
+	_test_market_board_activation_sends_action_intent()
 	_test_movement_closes_gameplay_panels()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -577,6 +578,30 @@ func _test_actionable_panels_autoclose_out_of_range() -> void:
 	main.inventory_panel.free()
 	main.shop_panel.free()
 	main.stash_panel.free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_market_board_activation_sends_action_intent() -> void:
+	var main = _make_main()
+	main.client = NetClientScript.new("http://localhost:18080")
+	main.player_anchor.position = Vector3.ZERO
+	var board_node := Node3D.new()
+	board_node.position = Vector3(1.0, 0.0, 0.0)
+	main.entities_root.add_child(board_node)
+	main.entities["3001"] = {
+		"node": board_node,
+		"type": "interactable",
+		"interactable_def_id": "town_market_board",
+		"state": "ready",
+	}
+	main._activate_or_approach_interactable("3001", main.entities["3001"])
+	_assert_eq("market board pending action count", main.pending_action_targets.size(), 1)
+	_assert_true("market board pending action id recorded", main.pending_action_targets.has("cmsg-1"))
+	if main.pending_action_targets.has("cmsg-1"):
+		_assert_eq("market board action target", str((main.pending_action_targets["cmsg-1"] as Dictionary).get("target_id", "")), "3001")
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

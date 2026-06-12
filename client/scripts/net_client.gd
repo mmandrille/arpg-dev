@@ -81,8 +81,19 @@ func _http(method: int, path: String, headers: Array, body: String) -> Dictionar
 			buf.append_array(chunk)
 		else:
 			OS.delay_msec(5)
-	var parsed = JSON.parse_string(buf.get_string_from_utf8())
+	var parsed = _parse_http_body(buf)
 	return {"_code": code, "body": parsed}
+
+
+func _parse_http_body(buf: PackedByteArray):
+	var text := buf.get_string_from_utf8().strip_edges()
+	if text == "":
+		return null
+	return JSON.parse_string(text)
+
+
+func _parse_http_body_for_test(buf: PackedByteArray):
+	return _parse_http_body(buf)
 
 
 func login(email: String, dev_token: String) -> bool:

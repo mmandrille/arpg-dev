@@ -1486,8 +1486,8 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(monster.id)},
 	}})
 	assertAck(t, selfHeal, "cast_heal_monster_target")
-	if player.hp != 5 {
-		t.Fatalf("monster-targeted heal hp = %d, want unchanged because area is centered on target", player.hp)
+	if player.hp != 7 {
+		t.Fatalf("monster-targeted heal hp = %d, want immediate caster heal while area is centered on target", player.hp)
 	}
 	if guest.hp != guest.maxHP {
 		t.Fatalf("monster-targeted heal guest hp = %d, want unchanged full hp %d", guest.hp, guest.maxHP)

@@ -87,6 +87,7 @@ func _test_net_client_base_url_and_ws_url() -> void:
 	http_client.ws_url = "/v0/ws?session_id=sess_1"
 	http_client.token = "tok"
 	_assert_eq("http websocket URL", http_client.websocket_url(), "ws://localhost:18080/v0/ws?session_id=sess_1&access_token=tok")
+	_assert_eq("empty HTTP body parse", http_client._parse_http_body_for_test(PackedByteArray()), null)
 	var https_client = NetClientScript.new("https://example.test/some/path")
 	https_client.ws_url = "/v0/ws?session_id=sess_2"
 	https_client.token = "tok2"

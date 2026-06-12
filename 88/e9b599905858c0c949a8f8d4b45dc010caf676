@@ -1,0 +1,53 @@
+server/internal/http/account_stash.go
+  s_d64f6fea84390c::t_3b10ed36294bba 1-74
+docs/specs/v94_spec-item-upgrade-starter.md
+  s_d64f6fea84390c::t_62ab1be9212031 1-54
+server/internal/store/repos.go
+  s_d64f6fea84390c::t_d46e00750ecb83 5,8
+  s_d64f6fea84390c::t_ba9a97d15f49ef 1515-1634
+shared/rules/main_config.v0.json
+  s_d64f6fea84390c::t_5c206da52ad7a0 7-9
+docs/as-built/v94_item-upgrade-starter.md
+  s_d64f6fea84390c::t_d8eefd66bc1970 1-24
+server/internal/game/rules.go
+  s_d64f6fea84390c::t_17e2851153660e 48-49
+  s_d64f6fea84390c::t_fbd61525c273da 908-913
+server/internal/http/server.go
+  s_d64f6fea84390c::t_d60fe9ce320c6e 81
+server/internal/http/auth_session_test.go
+  s_d64f6fea84390c::t_98b2e39810638b 489-531
+server/internal/store/interfaces.go
+  s_d64f6fea84390c::t_efc6e10741a296 72
+server/internal/store/store_test.go
+  s_d64f6fea84390c::t_58162d7036cf26 1050-1119
+shared/rules/main_config.v0.schema.json
+  s_d64f6fea84390c::t_16ff52d660f5cf 13,19-21
+PROGRESS.md
+  s_d64f6fea84390c::t_ede0ba4ff57940 15,115,249,398-401
+docs/plans/v94_2026-06-12-item-upgrade-starter.md
+  s_d64f6fea84390c::t_5fd9e59856a34b 54-55,63-66,74-76,84,93-98
+  s_d64f6fea84390c::t_2f59211cb3f87c 43-45
+  s_d64f6fea84390c::t_97d9f2340adbf7 1-42,46-53,56-62,67-73,77-83,85-92,99-103
+tools/validate_shared.py
+  s_d64f6fea84390c::t_a107eaf4c65cbb 1168-1174
+server/internal/replay/replay_test.go
+  s_d64f6fea84390c::t_cecc31ddd9d347 1466-1468
+.maintainability/file-size-baseline.tsv
+  s_d64f6fea84390c::t_406e2f94f92b06 21,27-28,32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "88e9b599905858c0c949a8f8d4b45dc010caf676",
+  "prompts": {},
+  "sessions": {
+    "s_d64f6fea84390c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eba4d-7607-7531-bca4-07347b2d0f71",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

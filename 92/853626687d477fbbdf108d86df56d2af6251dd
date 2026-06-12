@@ -1,0 +1,62 @@
+server/internal/game/game_test.go
+  s_5e45ef83ebf19d::t_cdbdab79bee51d 221-226
+  s_5e45ef83ebf19d::t_399ed76987378f 1160-1225
+  s_5e45ef83ebf19d::t_e5b2abbcdb0995 1106
+tools/bot/skill_visual_runtime.py
+  s_5e45ef83ebf19d::t_d8ea1628357053 148,179
+  s_5e45ef83ebf19d::t_ba1e468417382e 79-91,205-206,218
+tools/bot/test_skill_visual.py
+  s_5e45ef83ebf19d::t_71ffb38d2ba2e3 15,133-152
+tools/bot/skill_demo.py
+  s_5e45ef83ebf19d::t_81de3d707c6c59 91
+client/scripts/main.gd
+  s_5e45ef83ebf19d::t_cf30b419c6f809 1669
+  s_5e45ef83ebf19d::t_89618ed064745b 1016-1018,1637-1666,1668,1670
+  s_5e45ef83ebf19d::t_443cb3a9a3d91f 1667
+client/tests/test_skill_rules_loader.gd
+  s_5e45ef83ebf19d::t_5f8d404efc164f 23,33,43
+client/tests/test_skills_panel.gd
+  s_5e45ef83ebf19d::t_90c0a128a8f216 55,58,214,219
+client/tests/test_skill_bar.gd
+  s_5e45ef83ebf19d::t_4461a0a589cc2d 113,118
+server/internal/game/sim.go
+  s_9e5840f177c4bc::t_64fa4bc31659bf 4652-4658,4660-4662
+  s_5e45ef83ebf19d::t_67ce648bec08ec 4623-4626,4637-4651,4659,4663-4690
+shared/rules/skills.v0.schema.json
+  s_5e45ef83ebf19d::t_a12c44f1c3a8bb 26,36,59-65,222-228
+server/internal/game/handlers.go
+  s_5e45ef83ebf19d::t_6f41db789fd993 1151
+shared/rules/skills.v0.json
+  s_5e45ef83ebf19d::t_cf30b419c6f809 111
+  s_5e45ef83ebf19d::t_2945c193c705ec 41,50,85-110,112-117
+shared/assets/skill_presentations.v0.json
+  s_5e45ef83ebf19d::t_a9c9e54971698f 25-35
+tools/bot/test_skill_demo.py
+  s_5e45ef83ebf19d::t_107a754ac17309 16-19
+server/internal/game/rules.go
+  s_5e45ef83ebf19d::t_6fecad11761225 511,590-595,2666,2688-2695,2787-2795
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "92853626687d477fbbdf108d86df56d2af6251dd",
+  "prompts": {},
+  "sessions": {
+    "s_5e45ef83ebf19d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb919-cf01-7b80-aa7b-94e92d0861c8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_9e5840f177c4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb912-51bb-7052-bc31-6696387df364",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

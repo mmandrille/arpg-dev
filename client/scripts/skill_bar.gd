@@ -219,8 +219,7 @@ func _sync_rank_from_progression() -> void:
 
 
 func _skill_name(skill_id: String) -> String:
-	var def := SkillRulesLoader.skill_definition(skill_id)
-	return str(def.get("name", skill_id))
+	return SkillRulesLoader.skill_display_name(skill_id)
 
 
 func _skill_icon_label_text(skill_id: String) -> String:
@@ -230,9 +229,7 @@ func _skill_icon_label_text(skill_id: String) -> String:
 
 
 func _tooltip_text(skill_id: String) -> String:
-	var presentation := SkillRulesLoader.skill_presentation(skill_id)
-	var summary := str(presentation.get("summary", "Skill"))
-	return "%s\n%s" % [_skill_name(skill_id), summary]
+	return "%s\n%s" % [_skill_name(skill_id), SkillRulesLoader.skill_summary(skill_id)]
 
 
 func _flash(color: Color) -> void:

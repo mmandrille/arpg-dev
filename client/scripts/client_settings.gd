@@ -2,6 +2,8 @@
 extends RefCounted
 class_name ClientSettings
 
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
+
 const DEFAULT_SIZE := Vector2i(1920, 1080)
 const CREATE_GAME_SESSION_TYPE_COOP := "coop"
 const CREATE_GAME_SESSION_TYPE_SOLO := "solo"
@@ -62,9 +64,9 @@ static func normalize_create_game_session_type(session_type: String) -> String:
 static func create_game_session_type_label(session_type: String) -> String:
 	match normalize_create_game_session_type(session_type):
 		CREATE_GAME_SESSION_TYPE_SOLO:
-			return "Solo"
+			return TextCatalogScript.get_text("settings.session_type.solo", "Solo")
 		_:
-			return "Co-op"
+			return TextCatalogScript.get_text("settings.session_type.coop", "Co-op")
 
 
 static func size_from_data(data) -> Vector2i:

@@ -1,6 +1,8 @@
 extends Control
 class_name MainMenu
 
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
+
 signal create_game_pressed
 signal join_game_pressed
 signal settings_pressed
@@ -43,16 +45,16 @@ func _build() -> void:
 	add_child(box)
 
 	var title := Label.new()
-	title.text = "ARPG Dev"
+	title.text = TextCatalogScript.get_text("app.title", "ARPG Dev")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 51)
 	title.add_theme_color_override("font_color", Color("#f1efe4"))
 	box.add_child(title)
 
-	box.add_child(_button("Create Game", create_game_pressed.emit, "create_game"))
-	box.add_child(_button("Join Game", join_game_pressed.emit, "join_game"))
-	box.add_child(_button("Settings", settings_pressed.emit))
-	box.add_child(_button("Exit", exit_pressed.emit))
+	box.add_child(_button(TextCatalogScript.get_text("menu.create_game", "Create Game"), create_game_pressed.emit, "create_game"))
+	box.add_child(_button(TextCatalogScript.get_text("menu.join_game", "Join Game"), join_game_pressed.emit, "join_game"))
+	box.add_child(_button(TextCatalogScript.get_text("menu.settings", "Settings"), settings_pressed.emit))
+	box.add_child(_button(TextCatalogScript.get_text("menu.exit", "Exit"), exit_pressed.emit))
 
 
 func _button(text: String, callback: Callable, action: String = "") -> Button:

@@ -6,6 +6,7 @@ class_name SkillRulesLoader
 extends RefCounted
 
 const CONTENT_MANIFEST_REL := "../shared/content/content_libraries.v0.json"
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 
 static var skill_rules: Dictionary = {}
 static var skill_presentations: Dictionary = {}
@@ -34,6 +35,16 @@ static func skill_definition(skill_id: String) -> Dictionary:
 static func skill_presentation(skill_id: String) -> Dictionary:
 	ensure_loaded()
 	return skill_presentations.get(skill_id, {})
+
+
+static func skill_display_name(skill_id: String) -> String:
+	var def := skill_definition(skill_id)
+	return TextCatalogScript.get_text(str(def.get("name_key", "")), str(def.get("name", skill_id)))
+
+
+static func skill_summary(skill_id: String) -> String:
+	var presentation := skill_presentation(skill_id)
+	return TextCatalogScript.get_text(str(presentation.get("summary_key", "")), str(presentation.get("summary", "Skill")))
 
 
 static func skill_ids() -> Array:

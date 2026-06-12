@@ -33,6 +33,7 @@ import websockets
 from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenario
 from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot import skill_visual_runtime
+from tools.bot.debug_progression import debug_progression_body
 
 SLICE_TIMEOUT_S = 20.0
 MAX_SCENARIO_ELAPSED_S = 15.0
@@ -190,27 +191,16 @@ def ensure_character(client: httpx.Client, token: str, name: str, character_clas
 
 
 def seed_debug_progression(
-    client: httpx.Client,
-    token: str,
-    debug_token: str,
-    character_id: str,
+    client: httpx.Client, token: str, debug_token: str, character_id: str,
     progression: dict[str, Any],
 ) -> None:
-    body = {
-        "level": int(progression.get("level", 1)),
-        "experience": int(progression.get("experience", 0)),
-        "unspent_stat_points": int(progression.get("unspent_stat_points", 0)),
-        "unspent_skill_points": int(progression.get("unspent_skill_points", 0)),
-        "stats": dict(progression.get("stats", {})),
-        "skill_ranks": dict(progression.get("skill_ranks", {})),
-    }
+    body = debug_progression_body(progression)
     resp = client.put(
         f"/v0/debug/characters/{character_id}/progression",
         headers={**auth(token), "X-Debug-Token": debug_token},
         json=body,
     )
     resp.raise_for_status()
-    log("debug progression seeded", character_id, f"level={body['level']}", f"stats={body['stats']}")
 
 
 def create_coop_session(

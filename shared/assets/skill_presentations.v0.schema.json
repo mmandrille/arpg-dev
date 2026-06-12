@@ -28,6 +28,7 @@
             }
           },
           "summary": { "type": "string", "minLength": 1 },
+          "summary_key": { "type": "string", "minLength": 1 },
           "projectile_visual": { "type": "string", "minLength": 1 },
           "effect_visual": { "type": "string", "minLength": 1 }
         }

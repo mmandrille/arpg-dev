@@ -26,6 +26,7 @@ try:
         skill_presentation_entries,
         skill_rule_entries,
     )
+    from .validate_i18n import validate_i18n_catalog
 except ImportError:  # pragma: no cover - direct script execution
     from content_manifest import (  # type: ignore[no-redef]
         ManifestError,
@@ -33,6 +34,7 @@ except ImportError:  # pragma: no cover - direct script execution
         skill_presentation_entries,
         skill_rule_entries,
     )
+    from validate_i18n import validate_i18n_catalog  # type: ignore[no-redef]
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "shared"
@@ -41,6 +43,7 @@ RULES = SHARED / "rules"
 GOLDEN = SHARED / "golden"
 ASSETS = SHARED / "assets"
 CONTENT = SHARED / "content"
+I18N = SHARED / "i18n"
 
 
 def load(path: Path):
@@ -99,6 +102,8 @@ def schema_for(instance_path: Path) -> Path:
     if parts[0] == "content":
         # foo.v0.json -> foo.v0.schema.json
         return CONTENT / instance_path.name.replace(".v0.json", ".v0.schema.json")
+    if parts[0] == "i18n":
+        return I18N / "i18n.v0.schema.json"
     if parts[0] == "golden":
         # foo.json -> foo.v0.schema.json
         return GOLDEN / (instance_path.stem + ".v0.schema.json")
@@ -121,6 +126,7 @@ def iter_instances() -> list[Path]:
     instances += sorted(p for p in RULES.glob("*.v0.json") if not p.name.endswith(".schema.json"))
     instances += sorted(p for p in ASSETS.glob("*.v0.json") if not p.name.endswith(".schema.json"))
     instances += sorted(p for p in CONTENT.glob("*.v0.json") if not p.name.endswith(".schema.json"))
+    instances += sorted(p for p in I18N.glob("*.json") if not p.name.endswith(".schema.json"))
     instances += sorted(p for p in GOLDEN.glob("*.json") if not p.name.endswith(".schema.json"))
     instances += sorted(PROTOCOL.glob("examples/*.json"))
     return instances
@@ -200,6 +206,7 @@ def cross_checks(report: Report) -> None:
     character_progression = load(RULES / "character_progression.v0.json")
     content_manifest_path = CONTENT / "content_libraries.v0.json"
     content_manifest = load(content_manifest_path)
+    english_text = load(I18N / "en.json")
     skills = load(RULES / "skills.v0.json")
     skill_presentations = load(ASSETS / "skill_presentations.v0.json")
     items = load(RULES / "items.v0.json")
@@ -245,6 +252,8 @@ def cross_checks(report: Report) -> None:
     shop_stock_lifecycle_golden = load(GOLDEN / "shop_stock_lifecycle.json")
     equipment_requirements_golden = load(GOLDEN / "equipment_requirements.json")
     main_gameplay = main_config.get("gameplay", {})
+
+    validate_i18n_catalog(report, english_text, skills, skill_presentations, monsters)
 
     try:
         manifest_skills = merge_catalog_files(content_manifest_path, skill_rule_entries(content_manifest), "skills")

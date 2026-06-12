@@ -11,12 +11,12 @@ client/tests/test_client_bot.gd	1093
 client/tests/test_coop_client.gd	1116
 client/tests/test_golden.gd	769
 server/internal/game/dungeon_gen.go	1061
-server/internal/game/game_test.go	8496
+server/internal/game/game_test.go	8619
 server/internal/game/handlers.go	1358
-server/internal/game/rules.go	2984
+server/internal/game/rules.go	3012
 server/internal/game/shop.go	1163
 server/internal/game/shop_test.go	1479
-server/internal/game/sim.go	7142
+server/internal/game/sim.go	7207
 server/internal/game/types.go	670
 server/internal/http/auth_session_test.go	948
 server/internal/http/ws_test.go	1482

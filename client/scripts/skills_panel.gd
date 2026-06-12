@@ -160,6 +160,11 @@ func bot_hover_skill(skill_id: String = "") -> void:
 	_show_tooltip(skill_id)
 
 
+func bot_leave_skill_tooltip() -> void:
+	_hovered_skill_id = ""
+	_hide_tooltip()
+
+
 func _sync_viewport_size() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -244,6 +249,11 @@ func _build() -> void:
 	_tooltip.add_theme_stylebox_override("panel", _tooltip_style())
 	tree.add_child(_tooltip)
 	_hover_controls.append(_tooltip)
+	_tooltip.mouse_exited.connect(func() -> void:
+		if not _mouse_over_skill_controls():
+			_hovered_skill_id = ""
+			_hide_tooltip()
+	)
 
 	var tip_root := VBoxContainer.new()
 	tip_root.add_theme_constant_override("separation", 6)
@@ -466,8 +476,7 @@ func _skill_presentation(skill_id: String) -> Dictionary:
 
 
 func _skill_name(skill_id: String) -> String:
-	var def := _skill_def(skill_id)
-	return str(def.get("name", skill_id))
+	return SkillRulesLoader.skill_display_name(skill_id)
 
 
 func _skill_icon_label_text(skill_id: String) -> String:
@@ -497,7 +506,9 @@ func _set_tooltip_body(skill_id: String, rank: int) -> void:
 func _tooltip_plain_text_for(skill_id: String, rank: int) -> String:
 	var def := _skill_def(skill_id)
 	var presentation := _skill_presentation(skill_id)
-	var summary := str(presentation.get("summary", _kind_label(def)))
+	var summary := SkillRulesLoader.skill_summary(skill_id)
+	if summary == "":
+		summary = _kind_label(def)
 	var text := summary
 	text += "\nMana: %d" % _skill_mana_cost(def, rank)
 	text += "\n%s" % _skill_cooldown_text(def)
@@ -512,7 +523,9 @@ func _tooltip_plain_text_for(skill_id: String, rank: int) -> String:
 func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
 	var def := _skill_def(skill_id)
 	var presentation := _skill_presentation(skill_id)
-	var summary := str(presentation.get("summary", _kind_label(def)))
+	var summary := SkillRulesLoader.skill_summary(skill_id)
+	if summary == "":
+		summary = _kind_label(def)
 	var lines: Array[String] = [
 		_escape_bbcode(summary),
 		_escape_bbcode("Mana: %d" % _skill_mana_cost(def, rank)),
@@ -659,11 +672,11 @@ func _current_stat_value(stat: String) -> int:
 func _stat_label(stat: String) -> String:
 	match stat:
 		"str":
-			return "Strength"
+			return TextCatalog.get_text("stat.strength", "Strength")
 		"dex":
-			return "Dexterity"
+			return TextCatalog.get_text("stat.dexterity", "Dexterity")
 		"vit":
-			return "Vitality"
+			return TextCatalog.get_text("stat.vitality", "Vitality")
 		"magic":
 			return "Magic"
 		_:

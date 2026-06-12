@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v89 — `class-second-combat-skills` |
+| **Latest completed slice** | v90 — `text-catalog-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | TBD |
+| **Next slice** | v91 — `spanish-language-selector` |
 | **Last engineering review** | v90 — [`docs/reviews/20260612_v90-overview.md`](docs/reviews/20260612_v90-overview.md) (2026-06-12) |
 | **Next engineering review** | v100 (~every 10 slices) |
 
@@ -108,6 +108,7 @@ v86_* = skill-visual-command
 v87_* = skill-visual-matrix
 v88_* = skill-visual-rank-seeding
 v89_* = class-second-combat-skills
+v90_* = text-catalog-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -237,6 +238,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v87** | `skill-visual-matrix` | Complete (`make ci` green) | [`v87_spec-skill-visual-matrix.md`](docs/specs/v87_spec-skill-visual-matrix.md) | [`v87_2026-06-11-skill-visual-matrix.md`](docs/plans/v87_2026-06-11-skill-visual-matrix.md) | [`as-built`](docs/as-built/v87_skill-visual-matrix.md) |
 | **v88** | `skill-visual-rank-seeding` | Complete (`make ci` green) | — | — | [`as-built`](docs/as-built/v88_skill-visual-rank-seeding.md) |
 | **v89** | `class-second-combat-skills` | Complete (`make ci` green) | [`v89_spec-class-second-combat-skills.md`](docs/specs/v89_spec-class-second-combat-skills.md) | [`v89_2026-06-12-class-second-combat-skills.md`](docs/plans/v89_2026-06-12-class-second-combat-skills.md) | [`as-built`](docs/as-built/v89_class-second-combat-skills.md) |
+| **v90** | `text-catalog-foundation` | Complete (`make ci` green) | [`v90_spec-text-catalog-foundation.md`](docs/specs/v90_spec-text-catalog-foundation.md) | [`v90_2026-06-12-text-catalog-foundation.md`](docs/plans/v90_2026-06-12-text-catalog-foundation.md) | [`as-built`](docs/as-built/v90_text-catalog-foundation.md) |
 
 ---
 
@@ -365,6 +367,11 @@ Do **not** assume these are the next slice — they are documented backlog items
 server-owned cone weapon attack with pushback and Ice Shard as a cold projectile with stackable
 slow plus deterministic shard fan-out; skill visuals now list and replay both skills from the
 shared catalog.
+
+**English text now has a shared catalog foundation.** v90 adds `shared/i18n/en.json`, schema and
+validator coverage, skill/monster text keys, and a Godot text lookup service with fallback behavior.
+Menu, pause, Settings, stat, class summary, skill, skill-bar, and status-effect helpers now resolve
+through the catalog so v91 can add Spanish plus the Settings language selector.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

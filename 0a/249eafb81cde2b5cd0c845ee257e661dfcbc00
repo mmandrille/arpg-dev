@@ -1,0 +1,86 @@
+assets/characters/base_humanoid/README.md
+  s_c88be8e83fa4bc::t_8b0898c800b410 5-6
+tools/assets/test_validate_assets.py
+  s_c88be8e83fa4bc::t_61d5ac9e1eb5bd 114,182,218,222,255
+client/tests/test_rogue_presentation.gd.uid
+  s_c88be8e83fa4bc::t_8d9ab1ab5d9802 1
+client/tools/build_animations.gd
+  s_c88be8e83fa4bc::t_7b26de5d4b4db2 67-68
+  s_c88be8e83fa4bc::t_ccbef8b3e6960d 69-70
+tools/bot/bot_types.py
+  s_c88be8e83fa4bc::t_049673e7c0b41a 84
+client/tests/test_animation.gd
+  s_c88be8e83fa4bc::t_1098b8fe0de8d5 211-214,218,238
+scripts/client_smoke.sh
+  s_c88be8e83fa4bc::t_4013fed60ac0c9 93
+client/scripts/character_visual.gd
+  s_c88be8e83fa4bc::t_01404c9b6c1df4 3-4,6-9,30,32-40
+assets/characters/paladin/README.md
+  s_c88be8e83fa4bc::t_8b0898c800b410 8
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_c88be8e83fa4bc::t_6ed0ce71314368 7,35,46,68-69
+  s_c88be8e83fa4bc::t_e71655635b5c1a 8-11
+  s_c88be8e83fa4bc::t_b00ff74fd5ced3 48,51-53
+  s_c88be8e83fa4bc::t_1209be4336e0a2 54-58,70
+  s_c88be8e83fa4bc::t_21826b71578f83 40-43
+client/scripts/main.gd
+  s_c88be8e83fa4bc::t_43263062a1170a 1514,1521-1523,5729
+  s_c88be8e83fa4bc::t_ddae91622fac1c 1228-1229,1233-1234,1531-1535
+  s_c88be8e83fa4bc::t_72dcdc59f7e1b1 1227,2966-2972
+  s_c88be8e83fa4bc::t_d3407d53279905 1150,1536-1543
+  s_c88be8e83fa4bc::t_eed7490ab5ce8c 4725-4729
+  s_c88be8e83fa4bc::t_e2f8a6862929ab 1103-1109,4538,4626,4637,4708-4724
+  s_c88be8e83fa4bc::t_32eeb950772df7 64
+tools/assets/gen_glb.py
+  s_c88be8e83fa4bc::t_cd2a7be4396563 288-290,295-300,310-313,322-325,337-340,357-360,370-373
+client/scripts/equipment_visuals.gd
+  s_c88be8e83fa4bc::t_c82cdbbe615c4c 176,222-232
+tools/assets/validate_assets.py
+  s_c88be8e83fa4bc::t_c07db06a87d4a0 11-12,164-166,171,174-175,178,181
+assets/manifests/assets.v0.json
+  s_c88be8e83fa4bc::t_1c70518ea46f85 10,14,23,27,36,40,49,53,62,66
+client/tests/test_item_visuals.gd
+  s_c88be8e83fa4bc::t_ea4bf9ee822e03 73-74,222-253
+tools/bot/run.py
+  s_c88be8e83fa4bc::t_f4c1c98695d68d 641
+  s_c88be8e83fa4bc::t_6b0c9bb4fb812d 2693,2696-2698,2700,2752-2756,2758-2759
+  s_c88be8e83fa4bc::t_af8d84d63e63e0 2751,2781-2790
+  s_c88be8e83fa4bc::t_16d32eaa56f963 2391-2394,2757
+shared/rules/worlds.v0.json
+  s_c88be8e83fa4bc::t_307129c86ce35a 371-375
+assets/characters/barbarian/README.md
+  s_c88be8e83fa4bc::t_8b0898c800b410 8
+client/scripts/model_reaction_controller.gd
+  s_c88be8e83fa4bc::t_490cf7103d0138 35-38
+client/animations/character_anims.tres
+  s_c88be8e83fa4bc::t_040704bc7cb960 14-17,19-20,29-30,40,50,60,81-85
+  s_c88be8e83fa4bc::t_ad17e0ead06cd1 18,21-28
+client/tests/test_rogue_presentation.gd
+  s_c88be8e83fa4bc::t_f91f4d3671f801 15,68-79,81-87,99-110,133-134,154-158
+  s_c88be8e83fa4bc::t_6717d3dec4731e 124-125
+  s_c88be8e83fa4bc::t_e90c7d5d342bc4 7,80,88-98
+  s_c88be8e83fa4bc::t_662bb1762cddf9 1-6,8-14,16,18-67,111-123,126-132,159-166
+  s_c88be8e83fa4bc::t_1b6f0cb7f1b981 17,135-153,167-174
+assets/characters/sorcerer/README.md
+  s_c88be8e83fa4bc::t_8b0898c800b410 8
+client/tools/inspect_rig.gd
+  s_c88be8e83fa4bc::t_5be1d49151d5c4 4
+client/scenes/character.tscn
+  s_c88be8e83fa4bc::t_de754c32f46175 4-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0a249eafb81cde2b5cd0c845ee257e661dfcbc00",
+  "prompts": {},
+  "sessions": {
+    "s_c88be8e83fa4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfa-d65a-7650-81f2-89f916faeef8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

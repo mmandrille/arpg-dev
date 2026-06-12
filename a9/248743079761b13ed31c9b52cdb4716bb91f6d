@@ -1,0 +1,71 @@
+tools/bot/scenarios/53_unique_burn_effect_live.json
+  s_fe4ee1c1e49e89::t_ffe81d9e53f925 1-34
+client/scripts/main.gd
+  s_fe4ee1c1e49e89::t_41e1ee9a705b3f 4563,4755
+  s_fe4ee1c1e49e89::t_be7edfdf874130 1111-1117,4738-4744,4756,5735
+client/tests/test_status_effect_presentation.gd
+  s_fe4ee1c1e49e89::t_32cff701bd2bec 17,131-171
+PROGRESS.md
+  s_fe4ee1c1e49e89::t_41e0c97759401d 15,18,126,271
+shared/rules/items.v0.schema.json
+  s_fe4ee1c1e49e89::t_8de931d03ff0bc 193
+tools/validate_shared.py
+  s_fe4ee1c1e49e89::t_002be668a00375 3241-3243
+server/internal/game/unique_effects.go
+  s_fe4ee1c1e49e89::t_364dc18ade1527 1-16,18-110,112-151,157-225
+  s_fe4ee1c1e49e89::t_d607617e58fe15 17,111,152-156
+.maintainability/file-size-baseline.tsv
+  s_fe4ee1c1e49e89::t_f1442eb1b7152f 6,19
+docs/specs/v105_spec-unique-burn-effect-live.md
+  s_fe4ee1c1e49e89::t_865cb4fd8c43e0 1-49
+tools/bot/scenarios/client/33_unique_burn_effect_live.json
+  s_fe4ee1c1e49e89::t_ffe81d9e53f925 1-40
+client/scripts/bot_scenario_runner.gd
+  s_fe4ee1c1e49e89::t_7e0956feccf26f 862,916
+docs/plans/v105_2026-06-12-unique-burn-effect-live.md
+  s_fe4ee1c1e49e89::t_41e0c97759401d 16-19,21-25
+  s_fe4ee1c1e49e89::t_f1442eb1b7152f 27-34,41
+  s_fe4ee1c1e49e89::t_865cb4fd8c43e0 1-15,20,26,35-40,42-43
+client/scripts/player_status_effect_markers.gd
+  s_fe4ee1c1e49e89::t_be7edfdf874130 6,10,64-81,207-245
+  s_fe4ee1c1e49e89::t_41e1ee9a705b3f 59-63
+docs/as-built/v105_unique-burn-effect-live.md
+  s_fe4ee1c1e49e89::t_41e0c97759401d 3-40
+  s_fe4ee1c1e49e89::t_865cb4fd8c43e0 1-2
+server/internal/game/damage_types.go
+  s_fe4ee1c1e49e89::t_8de931d03ff0bc 11,25,35
+shared/rules/skills.v0.schema.json
+  s_fe4ee1c1e49e89::t_8de931d03ff0bc 111
+server/internal/game/sim.go
+  s_fe4ee1c1e49e89::t_59eb43bf537edb 2121,2146
+  s_fe4ee1c1e49e89::t_8de931d03ff0bc 289,334,409,626,1108,1375-1378,1415
+  s_fe4ee1c1e49e89::t_d607617e58fe15 1660
+shared/rules/worlds.v0.json
+  s_fe4ee1c1e49e89::t_ffe81d9e53f925 264-298
+shared/rules/monsters.v0.schema.json
+  s_fe4ee1c1e49e89::t_002be668a00375 70
+server/internal/game/unique_effects_test.go
+  s_fe4ee1c1e49e89::t_95ddaaa53d7740 17-23,69
+  s_fe4ee1c1e49e89::t_b87c23f2280a82 44
+  s_fe4ee1c1e49e89::t_933a86c6b08176 70,72-74,76-77
+  s_fe4ee1c1e49e89::t_59be663be0b90c 71
+  s_fe4ee1c1e49e89::t_e014ad98709c4f 43,45-47,49,51,56-57,85-89,111-115
+  s_fe4ee1c1e49e89::t_e5a91f6f0013fc 24,84
+  s_fe4ee1c1e49e89::t_fd1f7f65643af7 1-16,25-42,48,50,52-55,58-68,75,78-83,90-110,116-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a9248743079761b13ed31c9b52cdb4716bb91f6d",
+  "prompts": {},
+  "sessions": {
+    "s_fe4ee1c1e49e89": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebc09-eb17-7121-b6d8-9a1af60943f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

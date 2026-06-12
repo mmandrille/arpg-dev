@@ -35,6 +35,7 @@ const (
 	TypeStashWithdrawItem  = "stash_withdraw_item_intent"
 	TypeStashDepositGold   = "stash_deposit_gold_intent"
 	TypeStashWithdrawGold  = "stash_withdraw_gold_intent"
+	TypeCorpseWithdrawItem = "corpse_withdraw_item_intent"
 )
 
 type envelope struct {
@@ -122,12 +123,16 @@ type (
 		StashEntityID string `json:"stash_entity_id"`
 		Amount        int    `json:"amount"`
 	}
+	corpseWithdrawItemPayloadWire struct {
+		CorpseEntityID string `json:"corpse_entity_id"`
+		ItemInstanceID string `json:"item_instance_id"`
+	}
 )
 
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem:
 		return true
 	}
 	return false
@@ -292,6 +297,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.StashWithdrawGold = &game.StashWithdrawGoldIntent{StashEntityID: p.StashEntityID, Amount: p.Amount}
+	case TypeCorpseWithdrawItem:
+		var p corpseWithdrawItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.CorpseEntityID == "" || p.ItemInstanceID == "" {
+			return in, false
+		}
+		in.CorpseWithdrawItem = &game.CorpseWithdrawItemIntent{CorpseEntityID: p.CorpseEntityID, ItemInstanceID: p.ItemInstanceID}
 	default:
 		return in, false
 	}

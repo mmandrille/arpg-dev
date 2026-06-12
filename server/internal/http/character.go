@@ -26,6 +26,7 @@ type characterResponse struct {
 	Name                string `json:"name"`
 	CharacterClass      string `json:"character_class"`
 	Dead                bool   `json:"dead"`
+	DeathLevel          *int   `json:"death_level,omitempty"`
 	Level               int    `json:"level"`
 	Gold                int    `json:"gold"`
 	DeepestDungeonDepth int    `json:"deepest_dungeon_depth"`
@@ -184,6 +185,7 @@ func characterToResponse(c store.Character) characterResponse {
 		Name:                c.Name,
 		CharacterClass:      c.CharacterClass,
 		Dead:                c.Dead,
+		DeathLevel:          c.DeathLevel,
 		Level:               1,
 		Gold:                0,
 		DeepestDungeonDepth: 0,
@@ -197,6 +199,7 @@ func characterSummaryToResponse(c store.CharacterSummary) characterResponse {
 		Name:                c.Name,
 		CharacterClass:      c.CharacterClass,
 		Dead:                c.Dead,
+		DeathLevel:          c.DeathLevel,
 		Level:               c.Level,
 		Gold:                c.Gold,
 		DeepestDungeonDepth: c.DeepestDungeonDepth,

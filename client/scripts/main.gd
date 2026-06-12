@@ -2573,6 +2573,9 @@ func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
 		else:
 			_send_action_intent(target_id)
 			_attack_cooldown = SEND_INTERVAL
+		return
+	_send_action_intent(target_id)
+	_attack_cooldown = SEND_INTERVAL
 
 
 func _update_facing_toward_mouse() -> void:

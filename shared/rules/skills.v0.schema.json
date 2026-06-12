@@ -172,7 +172,19 @@
         "min_base": { "type": "integer", "minimum": 0 },
         "max_base": { "type": "integer", "minimum": 0 },
         "min_per_rank": { "type": "integer", "minimum": 0 },
-        "max_per_rank": { "type": "integer", "minimum": 0 }
+        "max_per_rank": { "type": "integer", "minimum": 0 },
+        "magic_scaling": { "$ref": "#/$defs/magic_scaling" }
+      }
+    },
+    "magic_scaling": {
+      "type": "object",
+      "required": ["stat", "percent_per_point", "max_bonus_percent", "use_requirement_baseline"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "const": "magic" },
+        "percent_per_point": { "type": "number", "exclusiveMinimum": 0 },
+        "max_bonus_percent": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+        "use_requirement_baseline": { "type": "boolean" }
       }
     },
     "projectile": {
@@ -267,7 +279,8 @@
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "percent_base": { "type": "integer", "minimum": 0 },
         "percent_per_rank": { "type": "integer", "minimum": 0 },
-        "duration_ticks": { "type": "integer", "minimum": 1 }
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "magic_scaling": { "$ref": "#/$defs/magic_scaling" }
       }
     },
     "area_stat_percent_buff_effect": {
@@ -289,7 +302,8 @@
         "percent_base": { "type": "integer", "minimum": 0 },
         "percent_per_rank": { "type": "integer", "minimum": 0 },
         "duration_ticks": { "type": "integer", "minimum": 1 },
-        "effect_id": { "type": "string", "minLength": 1 }
+        "effect_id": { "type": "string", "minLength": 1 },
+        "magic_scaling": { "$ref": "#/$defs/magic_scaling" }
       }
     },
     "cooldown": {

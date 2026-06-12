@@ -273,8 +273,13 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		sword_node.free()
 		main.free()
 		return false
-	if absf(sword_model.scale.x - 0.25) > 0.001 or absf(sword_model.scale.y - 0.25) > 0.001 or absf(sword_model.scale.z - 0.25) > 0.001:
-		_fail("equipment floor loot model was not scaled to 25%%: %s" % str(sword_model.scale))
+	if absf(sword_model.scale.x - 1.0) > 0.001 or absf(sword_model.scale.y - 1.0) > 0.001 or absf(sword_model.scale.z - 1.0) > 0.001:
+		_fail("equipment floor loot model was not scaled to 100%%: %s" % str(sword_model.scale))
+		sword_node.free()
+		main.free()
+		return false
+	if sword_model.position.y < 0.50 or absf(sword_model.rotation_degrees.z) > 0.001:
+		_fail("equipment floor loot model is not upright above the floor: pos=%s rot=%s" % [str(sword_model.position), str(sword_model.rotation_degrees)])
 		sword_node.free()
 		main.free()
 		return false

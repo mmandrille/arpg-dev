@@ -74,6 +74,12 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("hovered skill updates", str(state.get("hovered_skill_id", "")), "magic_bolt")
 	_assert_true("tooltip visible on hover", bool(state.get("tooltip_visible", false)))
+	var tooltip_position: Dictionary = state.get("tooltip_position", {})
+	var magic_block := panel._skill_blocks.get("magic_bolt", null) as Control
+	_assert_true("magic block exists for tooltip placement", magic_block != null)
+	if magic_block != null:
+		_assert_true("tooltip opens under hovered skill", float(tooltip_position.get("y", 0.0)) >= magic_block.position.y + magic_block.size.y)
+	_assert_eq("tooltip ignores mouse so skill remains clickable", int(state.get("tooltip_mouse_filter", -1)), Control.MOUSE_FILTER_IGNORE)
 	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: 3"))
 	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel 1\nMagic 5"))
 	panel.bot_leave_skill_tooltip()

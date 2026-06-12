@@ -1666,7 +1666,7 @@ func _spawn_ligthing_chain(ev: Dictionary) -> void:
 	add_child(root)
 	root.look_at(Vector3(finish.x, root.position.y, finish.z), Vector3.UP)
 	var tween := root.create_tween()
-	tween.tween_property(root, "scale", Vector3(1.25, 1.25, 1.0), 0.28)
+	tween.tween_property(root, "scale", Vector3(1.25, 1.25, 1.0), 0.35)
 	tween.tween_callback(root.queue_free)
 
 

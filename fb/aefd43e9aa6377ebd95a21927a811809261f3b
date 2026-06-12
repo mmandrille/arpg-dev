@@ -1,0 +1,28 @@
+docs/as-built/v88_skill-visual-rank-seeding.md
+  s_5e45ef83ebf19d::t_a132e64cbe820c 23-24,32-33
+  s_5e45ef83ebf19d::t_5eaa737e5ed1d1 1-22,25-31,34-38
+tools/bot/test_protocol.py
+  s_5e45ef83ebf19d::t_818287468dd3c2 134-140
+  s_5e45ef83ebf19d::t_918273ce642563 419
+tools/bot/run.py
+  s_5e45ef83ebf19d::t_230aa3b4af4985 111
+PROGRESS.md
+  s_5e45ef83ebf19d::t_04a8303db0d5b2 7,15,109,362-364
+  s_5e45ef83ebf19d::t_823810dc0280d8 17,237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fbaefd43e9aa6377ebd95a21927a811809261f3b",
+  "prompts": {},
+  "sessions": {
+    "s_5e45ef83ebf19d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb919-cf01-7b80-aa7b-94e92d0861c8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

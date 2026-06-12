@@ -486,6 +486,49 @@ func TestMarketListingRoutesMoveStashItemAndRejectForeignCancel(t *testing.T) {
 	}
 }
 
+func TestAccountStashItemUpgradeRoute(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	accountID, token := loginEmail(t, h, "stash-upgrade+"+suffix+"@example.test")
+	char := createCharacter(t, h, token, "Upgrade Route Hero")
+	prog := store.CharacterProgression{AccountID: accountID, CharacterID: char.CharacterID, CharacterClass: "barbarian", Level: 1, Gold: 125, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
+	if err := db.UpsertCharacterProgression(ctx, accountID, prog); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "route_upgrade_item_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountID, char.CharacterID, "route_upgrade_item_"+suffix, "route_upgrade_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 100); err != nil {
+		t.Fatal(err)
+	}
+	rec := postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("upgrade status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var upgraded upgradeAccountStashItemResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
+		t.Fatal(err)
+	}
+	if upgraded.StashGold != 0 || upgraded.CostGold != 100 {
+		t.Fatalf("upgrade balances = %+v", upgraded)
+	}
+	var stats map[string]int
+	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
+		t.Fatal(err)
+	}
+	if stats["item_level"] != 1 || stats["damage_max"] != 5 {
+		t.Fatalf("upgraded route stats = %+v", stats)
+	}
+	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("max-level upgrade status = %d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestMarketOfferRoutesSubmitListAndAccept(t *testing.T) {
 	h, db := fullServerWithStore(t)
 	ctx := context.Background()

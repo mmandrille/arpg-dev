@@ -1165,6 +1165,13 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("main_config gameplay owns dungeon monster drop rate")
 
+    if int(main_gameplay.get("item_upgrade_cost_gold", -1)) < 0:
+        report.fail("main_config gameplay", "item_upgrade_cost_gold must be non-negative")
+    elif int(main_gameplay.get("item_upgrade_max_level", 0)) <= 0:
+        report.fail("main_config gameplay", "item_upgrade_max_level must be positive")
+    else:
+        report.ok("main_config gameplay owns starter item upgrade tuning")
+
     if combat.get("unarmed_reach", 0) <= 0:
         report.fail("combat unarmed_reach", "must be positive")
     else:

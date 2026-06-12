@@ -2,8 +2,10 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -1508,6 +1510,126 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 		return 0, 0, result.err
 	}
 	return result.characterGold, result.stashGold, nil
+}
+
+func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, costGold, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, error) {
+	if costGold < 0 || maxLevel <= 0 {
+		return AccountStashItem{}, 0, ErrConflict
+	}
+	var out AccountStashItem
+	var stashGold int
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO account_stash_gold (account_id, gold)
+			 SELECT $1, 0
+			 WHERE EXISTS (SELECT 1 FROM accounts WHERE id = $1)
+			 ON CONFLICT (account_id) DO NOTHING`,
+			accountID,
+		); err != nil {
+			return fmt.Errorf("store: initialize account stash gold for upgrade: %w", err)
+		}
+		err := tx.QueryRow(ctx,
+			`SELECT gold
+			 FROM account_stash_gold
+			 WHERE account_id = $1
+			 FOR UPDATE`,
+			accountID,
+		).Scan(&stashGold)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock account stash gold for upgrade: %w", err)
+		}
+		if stashGold < costGold {
+			return ErrConflict
+		}
+		item, err := lockAccountStashItem(ctx, tx, accountID, stashItemID)
+		if err != nil {
+			return err
+		}
+		if _, ok := eligibleItemDefs[item.ItemDefID]; !ok {
+			return ErrConflict
+		}
+		upgradedStats, err := upgradedRolledStats(item.RolledStats, maxLevel)
+		if err != nil {
+			return err
+		}
+		stashGold -= costGold
+		if _, err := tx.Exec(ctx,
+			`UPDATE account_stash_gold
+			 SET gold = $2, updated_at = now()
+			 WHERE account_id = $1`,
+			accountID, stashGold,
+		); err != nil {
+			return fmt.Errorf("store: spend account stash gold for upgrade: %w", err)
+		}
+		err = tx.QueryRow(ctx,
+			`UPDATE account_stash_items
+			 SET rolled_stats = $3::jsonb, updated_at = now()
+			 WHERE account_id = $1 AND stash_item_id = $2
+			 RETURNING account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at`,
+			accountID, stashItemID, upgradedStats,
+		).Scan(&out.AccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
+		if err != nil {
+			return fmt.Errorf("store: update upgraded account stash item: %w", err)
+		}
+		return nil
+	})
+	return out, stashGold, err
+}
+
+func upgradedRolledStats(raw json.RawMessage, maxLevel int) ([]byte, error) {
+	stats := map[string]any{}
+	if len(raw) > 0 {
+		if err := json.Unmarshal(raw, &stats); err != nil {
+			return nil, fmt.Errorf("store: decode rolled stats for upgrade: %w", err)
+		}
+	}
+	level := numericStatValue(stats["item_level"])
+	if level >= maxLevel {
+		return nil, ErrConflict
+	}
+	keys := make([]string, 0, len(stats))
+	for key, value := range stats {
+		if key == "item_level" {
+			continue
+		}
+		if _, ok := numericStatValueOK(value); ok {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	if len(keys) == 0 {
+		return nil, ErrConflict
+	}
+	current, _ := numericStatValueOK(stats[keys[0]])
+	stats[keys[0]] = current + 1
+	stats["item_level"] = level + 1
+	out, err := json.Marshal(stats)
+	if err != nil {
+		return nil, fmt.Errorf("store: encode upgraded rolled stats: %w", err)
+	}
+	return out, nil
+}
+
+func numericStatValue(value any) int {
+	n, _ := numericStatValueOK(value)
+	return n
+}
+
+func numericStatValueOK(value any) (int, bool) {
+	switch v := value.(type) {
+	case float64:
+		return int(v), true
+	case int:
+		return v, true
+	case json.Number:
+		n, err := v.Int64()
+		return int(n), err == nil
+	default:
+		return 0, false
+	}
 }
 
 func (s *Store) ListActiveMarketListings(ctx context.Context) ([]MarketListing, error) {

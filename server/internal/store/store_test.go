@@ -1047,6 +1047,76 @@ func TestMarketListingMovesStashItemAndCancelReturnsIt(t *testing.T) {
 	}
 }
 
+func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	acct, err := s.UpsertAccountByEmail(ctx, "acct_upgrade_"+suffix, "upgrade+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	char, err := s.CreateCharacter(ctx, "char_upgrade_"+suffix, acct.ID, "Upgrade Hero", "barbarian")
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog := store.CharacterProgression{AccountID: acct.ID, CharacterID: char.ID, CharacterClass: "barbarian", Level: 1, Gold: 125, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
+	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "upgrade_item_"+suffix, "upgrade_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 100); err != nil {
+		t.Fatal(err)
+	}
+	item, gold, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 1, map[string]struct{}{"cave_blade": {}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gold != 0 {
+		t.Fatalf("stash gold after upgrade = %d, want 0", gold)
+	}
+	var stats map[string]int
+	if err := json.Unmarshal(item.RolledStats, &stats); err != nil {
+		t.Fatal(err)
+	}
+	if stats["item_level"] != 1 || stats["damage_max"] != 5 || stats["damage_min"] != 2 {
+		t.Fatalf("upgraded stats = %+v", stats)
+	}
+	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 25); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 1, 1, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
+		t.Fatalf("max level upgrade err = %v, want ErrConflict", err)
+	}
+}
+
+func TestAccountStashItemUpgradeRejectsInsufficientGold(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	acct, err := s.UpsertAccountByEmail(ctx, "acct_upgrade_poor_"+suffix, "upgrade-poor+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	char, err := s.CreateCharacter(ctx, "char_upgrade_poor_"+suffix, acct.ID, "Poor Upgrade Hero", "barbarian")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "poor_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2}`)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "poor_upgrade_item_"+suffix, "poor_upgrade_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, 100, 1, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
+		t.Fatalf("insufficient gold upgrade err = %v, want ErrConflict", err)
+	}
+}
+
 func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 	s := newStore(t)
 	ctx := context.Background()

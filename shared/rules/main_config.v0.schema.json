@@ -10,13 +10,15 @@
     "version": { "type": "integer", "const": 0 },
     "gameplay": {
       "type": "object",
-      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold"],
+      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold", "item_upgrade_cost_gold", "item_upgrade_max_level"],
       "additionalProperties": false,
       "properties": {
         "base_attack_interval_ticks": { "type": "integer", "minimum": 1 },
         "base_movement_speed": { "type": "number", "exclusiveMinimum": 0 },
         "base_drop_rate_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "respec_cost_gold": { "type": "integer", "minimum": 0 }
+        "respec_cost_gold": { "type": "integer", "minimum": 0 },
+        "item_upgrade_cost_gold": { "type": "integer", "minimum": 0 },
+        "item_upgrade_max_level": { "type": "integer", "minimum": 1 }
       }
     }
   }

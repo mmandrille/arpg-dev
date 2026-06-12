@@ -183,7 +183,7 @@ def ensure_character(client: httpx.Client, token: str, name: str, character_clas
     chars = list_characters(client, token)
     if character_class:
         for char in chars:
-            if str(char.get("character_class", "")) == character_class:
+            if str(char.get("character_class", "")) == character_class and str(char.get("name", "")) == name:
                 return str(char["character_id"])
     elif chars:
         return str(chars[0]["character_id"])

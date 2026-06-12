@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v101 — `undead-skeleton-poison-immunity` |
+| **Latest completed slice** | v102 — `class-bot-visual-scenarios` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | v102 — TBD |
+| **Next slice** | v103 — TBD |
 | **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
 | **Next engineering review** | v110 (~every 10 slices) |
 
@@ -120,6 +120,7 @@ v98_* = rogue-class-foundation
 v99_* = rogue-skill-mechanics
 v100_* = damage-types-and-resistances
 v101_* = undead-skeleton-poison-immunity
+v102_* = class-bot-visual-scenarios
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -261,6 +262,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v99** | `rogue-skill-mechanics` | Complete (`make ci` green) | [`v99_spec-rogue-skill-mechanics.md`](docs/specs/v99_spec-rogue-skill-mechanics.md) | [`v99_2026-06-12-rogue-skill-mechanics.md`](docs/plans/v99_2026-06-12-rogue-skill-mechanics.md) | [`as-built`](docs/as-built/v99_rogue-skill-mechanics.md) |
 | **v100** | `damage-types-and-resistances` | Complete (`make ci` green) | [`v100_spec-damage-types-and-resistances.md`](docs/specs/v100_spec-damage-types-and-resistances.md) | [`v100_2026-06-12-damage-types-and-resistances.md`](docs/plans/v100_2026-06-12-damage-types-and-resistances.md) | [`as-built`](docs/as-built/v100_damage-types-and-resistances.md) |
 | **v101** | `undead-skeleton-poison-immunity` | Complete (`make ci` green) | [`v101_spec-undead-skeleton-poison-immunity.md`](docs/specs/v101_spec-undead-skeleton-poison-immunity.md) | [`v101_2026-06-12-undead-skeleton-poison-immunity.md`](docs/plans/v101_2026-06-12-undead-skeleton-poison-immunity.md) | [`as-built`](docs/as-built/v101_undead-skeleton-poison-immunity.md) |
+| **v102** | `class-bot-visual-scenarios` | Complete (`make ci` green) | [`v102_spec-class-bot-visual-scenarios.md`](docs/specs/v102_spec-class-bot-visual-scenarios.md) | [`v102_2026-06-12-class-bot-visual-scenarios.md`](docs/plans/v102_2026-06-12-class-bot-visual-scenarios.md) | [`as-built`](docs/as-built/v102_class-bot-visual-scenarios.md) |
 
 ---
 
@@ -333,6 +335,7 @@ true_coop_session: host creates co-op → guest joins → shared-level visibilit
 model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
 boss_floor_gate: start on compact boss floor → assert locked exits → observe boss phase telegraph → kill boss → unlock exits → descend to -6
 boss_kill_reward_polish: compact boss floor → kill Cave Warden → observe `boss_killed` with `boss_template_id` and client reward status
+paladin_class_foundation / barbarian_class_foundation / sorcerer_class_foundation / rogue_class_foundation: class starter gear → movement → at least three basic attacks → all current class skills
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
@@ -452,6 +455,12 @@ with full poison resistance, a generated skeleton GLB/scene wired through the mo
 catalog, and a compact lab scenario. Poison Stab now applies poisoned status on a connected hit
 even when resistance mitigates the hit to zero, and poison ticks against undead emit authoritative
 zero-damage poison events instead of lowering HP.
+
+**Every playable class has a foundation visual scenario.** v102 adds Paladin, Barbarian, and
+Sorcerer class-foundation protocol/visual scenarios alongside the existing Rogue scenario. Each
+scenario proves starter gear, movement, at least three basic attacks, and every current class skill;
+Python coverage now fails if a playable class lacks a foundation scenario or a class skill is not
+referenced by that class scenario.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

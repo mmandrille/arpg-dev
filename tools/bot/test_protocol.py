@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from tools.bot.client_join_preflight import build_metadata, write_metadata
+from tools.bot.class_foundation_coverage import validate_class_foundation_coverage
 from tools.bot.protocol import make_envelope, next_message_id, to_ws_url
 from tools.bot.bot_types import RuntimeState
 from tools.bot.run import (
@@ -473,6 +474,13 @@ def test_load_scenarios_discovers_rogue_class_foundation():
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "dash", "rank": 1} in rogue.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "poison_stab", "rank": 1} in rogue.assertions
     assert {"type": "combat_event_seen", "weapon_slot": "off_hand"} in rogue.assertions
+
+
+def test_class_foundation_scenarios_cover_every_class_skill():
+    scenarios = load_scenarios()
+    result = validate_class_foundation_coverage(ROOT / "shared" / "rules", scenarios)
+
+    result.assert_complete()
 
 
 def test_load_scenarios_discovers_equipment_requirements_and_preview():

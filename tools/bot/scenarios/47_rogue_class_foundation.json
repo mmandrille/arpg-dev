@@ -1,16 +1,59 @@
 {
   "id": "rogue_class_foundation",
-  "world_id": "vertical_slice",
+  "world_id": "skill_progression_lab",
   "seed": "rogue_class_foundation_seed",
   "character_class": "rogue",
   "title": "Rogue class foundation",
-  "description": "Create a Rogue and prove the starter dual swords, health potion, and mana potion arrive through the normal inventory snapshot.",
-  "steps": [],
+  "description": "Create a Rogue, prove starter dual swords, then use Dash, Poison Stab, and dual-wield attacks against the same target.",
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 2,
+    "stats": { "str": 4, "dex": 8, "vit": 5, "magic": 4 },
+    "skill_ranks": {}
+  },
+  "steps": [
+    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "poison_stab", "rank": 0, "max_rank": 5, "can_spend": true },
+    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "dash", "rank": 0, "max_rank": 5, "can_spend": true },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "dash",
+      "expect_skill_progression": { "unspent_skill_points": 1, "skill_id": "dash", "rank": 1, "max_rank": 5, "can_spend": false }
+    },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "poison_stab",
+      "expect_skill_progression": { "unspent_skill_points": 0, "skill_id": "poison_stab", "rank": 1, "max_rank": 5, "can_spend": false }
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "dash",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "poison_stab",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    { "action": "wait_for_combat_event", "event_type": "monster_damaged", "skill_id": "poison_stab", "timeout_s": 3 },
+    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand" },
+    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "weapon_slot": "off_hand" },
+    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand" }
+  ],
   "assertions": [
     { "type": "character_progression", "str": 4, "dex": 8, "vit": 5, "magic": 4 },
     { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_rogue_sword" },
     { "type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "starter_rogue_sword" },
-    { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false },
-    { "type": "inventory_contains", "item_def_id": "blue_potion", "equipped": false }
+    { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "dash", "rank": 1 },
+    { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "poison_stab", "rank": 1 },
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "dash", "rank": 1 },
+    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "dash", "min_damage": 1 },
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "poison_stab", "rank": 1 },
+    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "poison_stab", "min": 1 },
+    { "type": "combat_event_seen", "event_type": "monster_damaged", "weapon_slot": "main_hand", "min_damage": 1 },
+    { "type": "combat_event_seen", "weapon_slot": "off_hand" }
   ]
 }

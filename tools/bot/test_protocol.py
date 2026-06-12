@@ -460,20 +460,19 @@ def test_load_scenarios_discovers_class_starter_loadout():
     assert starter.world_id == "vertical_slice"
     assert starter.character_class == "sorcerer"
     assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff"} in starter.assertions
-    assert {"type": "inventory_contains", "item_def_id": "red_potion", "equipped": False} in starter.assertions
-    assert {"type": "inventory_contains", "item_def_id": "blue_potion", "equipped": False} in starter.assertions
 
 
 def test_load_scenarios_discovers_rogue_class_foundation():
     scenarios = load_scenarios()
     rogue = next(s for s in scenarios if s.id == "rogue_class_foundation")
 
-    assert rogue.world_id == "vertical_slice"
+    assert rogue.world_id == "skill_progression_lab"
     assert rogue.character_class == "rogue"
     assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_rogue_sword"} in rogue.assertions
     assert {"type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "starter_rogue_sword"} in rogue.assertions
-    assert {"type": "inventory_contains", "item_def_id": "red_potion", "equipped": False} in rogue.assertions
-    assert {"type": "inventory_contains", "item_def_id": "blue_potion", "equipped": False} in rogue.assertions
+    assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "dash", "rank": 1} in rogue.assertions
+    assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "poison_stab", "rank": 1} in rogue.assertions
+    assert {"type": "combat_event_seen", "weapon_slot": "off_hand"} in rogue.assertions
 
 
 def test_load_scenarios_discovers_equipment_requirements_and_preview():

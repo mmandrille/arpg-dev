@@ -94,7 +94,8 @@ func (s *Sim) handleDirectionalAttack(in Input, res *TickResult) {
 		s.fireProjectileInDirection(dir, 0, in, res, true)
 		return
 	}
-	if !s.consumeBasicAttack(in, res) {
+	weaponSlot, ok := s.consumeBasicAttack(in, res)
+	if !ok {
 		return
 	}
 	res.ack(in.MessageID)
@@ -102,7 +103,7 @@ func (s *Sim) handleDirectionalAttack(in Input, res *TickResult) {
 	if target == nil {
 		return
 	}
-	s.damageMonsterByPlayer(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamage())
+	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), weaponSlot)
 }
 
 func (s *Sim) handleMoveTo(in Input, res *TickResult) {
@@ -1198,6 +1199,10 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack":
 		s.handleProjectileSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "cone_attack":
+		if def.Dash.RangeBase > 0 {
+			s.handleDashSkillCast(in, res, player, skillID, def, rank, manaCost)
+			return
+		}
 		s.handleConeSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "self_buff":
 		s.handleSelfBuffSkillCast(in, res, player, skillID, def, rank, manaCost)

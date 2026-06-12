@@ -2097,6 +2097,8 @@ def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state:
         "source_entity_id",
         "target_entity_id",
         "entity_id",
+        "skill_id",
+        "weapon_slot",
     ):
         if key in expected and event.get(key) != expected[key]:
             return False

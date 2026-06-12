@@ -509,6 +509,8 @@ type SkillDef struct {
 	Damage       SkillDamageDef      `json:"damage"`
 	Projectile   SkillProjectileDef  `json:"projectile"`
 	Cone         SkillConeDef        `json:"cone"`
+	Poison       SkillPoisonDef      `json:"poison"`
+	Dash         SkillDashDef        `json:"dash"`
 	Slow         SkillSlowDef        `json:"slow"`
 	Shatter      SkillShatterDef     `json:"shatter"`
 	Chain        SkillChainDef       `json:"chain"`
@@ -2794,7 +2796,7 @@ func validateConeSkillPayload(skillID string, skill SkillDef) error {
 	if len(skill.Effects) > 0 || skill.Projectile.Range > 0 {
 		return fmt.Errorf("game: invalid rules skills.%s: cone_attack does not support effects or projectile", skillID)
 	}
-	return nil
+	return validateRogueConeSkillPayload(skillID, skill)
 }
 
 func validateColdSkillPayload(skillID string, skill SkillDef) error {

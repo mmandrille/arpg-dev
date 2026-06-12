@@ -371,6 +371,31 @@
         }
       ]
     },
+    "skill_visual_lab": {
+      "player": { "position": { "x": 4, "y": 5 } },
+      "entities": [
+        {
+          "type": "monster",
+          "monster_def_id": "skill_xp_level6_dummy",
+          "position": { "x": 10, "y": 5 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "skill_xp_level7_dummy",
+          "position": { "x": 10, "y": 6 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": { "x": 24, "y": 5 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "training_dummy_heal",
+          "position": { "x": 4, "y": 10 }
+        }
+      ]
+    },
     "chase_lab": {
       "player": { "position": { "x": 4, "y": 5 } },
       "entities": [

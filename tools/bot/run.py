@@ -32,6 +32,7 @@ import websockets
 
 from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenario
 from tools.bot.protocol import make_envelope, to_ws_url
+from tools.bot import skill_visual_runtime
 
 SLICE_TIMEOUT_S = 20.0
 MAX_SCENARIO_ELAPSED_S = 60.0
@@ -101,6 +102,8 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
     if not scenarios:
         raise ValueError(f"no scenarios found in {scenario_dir}")
     return scenarios
+
+
 
 
 def select_scenarios(scenarios: list[Scenario], selected: str) -> list[Scenario]:
@@ -4758,7 +4761,9 @@ def main() -> int:
         for scenario in selected:
             scenario_started = time.monotonic()
             log("scenario begin", scenario.id, "-", scenario.title, f"world={scenario.world_id}")
-            if scenario.id == "true_coop_session":
+            if scenario.id == "skill_visual":
+                scenario, replay_email, token, sess, observed = skill_visual_runtime.run_selected(globals(), args, client, scenario)
+            elif scenario.id == "true_coop_session":
                 replay_email = scenario_email(args.email, scenario.id + "-host")
                 guest_email = scenario_email(args.email, scenario.id + "-guest")
                 _, host_token = dev_login(client, replay_email, args.dev_token)

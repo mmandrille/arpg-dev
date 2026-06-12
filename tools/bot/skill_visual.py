@@ -12,13 +12,7 @@ from tools.bot.skill_demo import SkillDemoEntry, all_skill_demo_entries, skill_d
 
 
 ROOT = Path(__file__).resolve().parents[2]
-
-SKILL_SCENARIOS = {
-    "magic_bolt": "skill_points_and_magic_bolt",
-    "rage": "rage_and_heal_skills",
-    "heal": "paladin_heal_skill",
-    "holy_shield": "paladin_holy_shield",
-}
+SKILL_VISUAL_SCENARIO = "skill_visual"
 
 
 @dataclass(frozen=True)
@@ -28,22 +22,40 @@ class SkillVisualPlan:
     command: list[str]
 
 
+def selected_skill_entries(skill_id: str) -> list[SkillDemoEntry]:
+    if not skill_id:
+        raise ValueError("missing required skill id; use skill=<skill_id>")
+    if skill_id == "all":
+        return all_skill_demo_entries()
+    return [skill_demo_entry(skill_id)]
+
+
 def build_plan(skill_id: str, root: Path = ROOT) -> SkillVisualPlan:
     entry = skill_demo_entry(skill_id)
-    scenario_id = SKILL_SCENARIOS.get(skill_id)
-    if scenario_id is None:
-        raise ValueError(f"skill {skill_id!r} has no visual scenario mapping")
     return SkillVisualPlan(
         skill=entry,
-        scenario_id=scenario_id,
+        scenario_id=SKILL_VISUAL_SCENARIO,
         command=[str(root / "scripts" / "bot_visual.sh")],
     )
 
 
 def run_skill_visual(skill_id: str, *, dry_run: bool = False, root: Path = ROOT) -> int:
-    if not skill_id:
-        raise ValueError("missing required skill id; use skill=<skill_id>")
-    plan = build_plan(skill_id, root)
+    entries = selected_skill_entries(skill_id)
+    if skill_id == "all":
+        print("skill_visual all count=%d scenario=%s" % (len(entries), SKILL_VISUAL_SCENARIO))
+    for entry in entries:
+        plan = SkillVisualPlan(
+            skill=entry,
+            scenario_id=SKILL_VISUAL_SCENARIO,
+            command=[str(root / "scripts" / "bot_visual.sh")],
+        )
+        plan_exit = run_skill_visual_plan(plan, dry_run=dry_run, root=root)
+        if plan_exit != 0:
+            return plan_exit
+    return 0
+
+
+def run_skill_visual_plan(plan: SkillVisualPlan, *, dry_run: bool = False, root: Path = ROOT) -> int:
     print(
         "skill_visual skill=%s category=%s ranks=%s scenario=%s"
         % (plan.skill.skill_id, plan.skill.category, plan.skill.rank_targets, plan.scenario_id)
@@ -53,21 +65,21 @@ def run_skill_visual(skill_id: str, *, dry_run: bool = False, root: Path = ROOT)
         return 0
     env = os.environ.copy()
     env["ARPG_BOT_SCENARIO"] = plan.scenario_id
+    env["ARPG_SKILL_VISUAL_SKILL_ID"] = plan.skill.skill_id
     return subprocess.call(plan.command, cwd=root, env=env)
 
 
 def skill_visual_matrix() -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for entry in all_skill_demo_entries():
-        scenario_id = SKILL_SCENARIOS.get(entry.skill_id, "")
         rows.append({
             "skill_id": entry.skill_id,
             "class_id": entry.class_id,
             "category": entry.category,
             "icon": entry.icon_label,
             "rank_targets": entry.rank_targets,
-            "scenario_id": scenario_id,
-            "rank1_visual": bool(scenario_id),
+            "scenario_id": SKILL_VISUAL_SCENARIO,
+            "rank1_visual": True,
             "rank5_visual": False,
             "buff_stat_delta_visual": False,
         })

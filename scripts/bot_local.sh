@@ -95,6 +95,6 @@ echo "[bot-local] running protocol bot scenario selection '$SCENARIO'..."
 "$RUN_QUIET" --label "protocol bot ($SCENARIO)" -- \
   "$ROOT/.venv/bin/python" -m tools.bot.run \
   --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
-  --email "$EMAIL" --scenario "$SCENARIO"
+  --email "$EMAIL" --scenario "$SCENARIO" --cleanup-characters
 
 echo "[bot-local] scenarios complete; shutting down server."

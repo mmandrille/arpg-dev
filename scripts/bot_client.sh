@@ -159,6 +159,17 @@ metadata_field() {
   python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get(sys.argv[2], ''))" "$path" "$key"
 }
 
+cleanup_account_email() {
+  local email="$1"
+  if [[ -z "$email" ]]; then
+    return 0
+  fi
+  "$PYTHON" "$ROOT/tools/bot/cleanup_account.py" \
+    --base-url "$BASE_URL" \
+    --dev-token "$DEV_TOKEN" \
+    --email "$email" >/dev/null
+}
+
 start_preflight() {
   local scenario_path="$1"
   local scenario_id="$2"
@@ -285,8 +296,12 @@ run_scenario() {
     return 1
   fi
 
-  rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
   cleanup_preflights
+  cleanup_account_email "$email"
+  if [[ -s "$preflight_metadata" ]]; then
+    cleanup_account_email "$(metadata_field "$preflight_metadata" host_email)"
+  fi
+  rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
   local elapsed
   elapsed="$(python3 -c 'import sys,time; print(f"{time.monotonic() - float(sys.argv[1]):.2f}s")' "$started_ts")"
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then

@@ -120,7 +120,7 @@ func putDebugJSON(h http.Handler, path, bearer string, body any, debugToken stri
 }
 
 func login(t *testing.T, h http.Handler) (accountID, token string) {
-	return loginEmail(t, h, "dev@example.test")
+	return loginEmail(t, h, testEmail(t, "dev"))
 }
 
 func loginEmail(t *testing.T, h http.Handler, email string) (accountID, token string) {
@@ -138,13 +138,37 @@ func loginEmail(t *testing.T, h http.Handler, email string) (accountID, token st
 	if res.AccessToken == "" || res.AccountID == "" {
 		t.Fatalf("login missing token/account: %+v", res)
 	}
+	t.Cleanup(func() {
+		rec := getJSON(h, "/v0/characters", res.AccessToken)
+		if rec.Code != http.StatusOK {
+			t.Logf("cleanup list characters for %s status = %d, body = %s", email, rec.Code, rec.Body.String())
+			return
+		}
+		var listed listCharactersResponse
+		if err := json.Unmarshal(rec.Body.Bytes(), &listed); err != nil {
+			t.Logf("cleanup decode characters for %s: %v", email, err)
+			return
+		}
+		for _, char := range listed.Characters {
+			rec := deleteJSON(h, "/v0/characters/"+char.CharacterID, res.AccessToken)
+			if rec.Code != http.StatusNoContent && rec.Code != http.StatusNotFound {
+				t.Logf("cleanup delete character %s for %s status = %d, body = %s", char.CharacterID, email, rec.Code, rec.Body.String())
+			}
+		}
+	})
 	return res.AccountID, res.AccessToken
+}
+
+func testEmail(t *testing.T, label string) string {
+	t.Helper()
+	return label + "+" + ids.Token()[:12] + "@example.test"
 }
 
 func TestDevLoginReturnsNormalizedAccountEmail(t *testing.T) {
 	h := fullServer(t)
+	email := "client-normalized+" + ids.Token()[:12] + "@mail.test"
 	rec := postJSON(h, "/v0/auth/dev-login", "", map[string]string{
-		"email": "  Client1@MAIL.COM  ", "dev_token": testDevToken,
+		"email": "  " + strings.ToUpper(email) + "  ", "dev_token": testDevToken,
 	})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("login status = %d, body = %s", rec.Code, rec.Body.String())
@@ -153,7 +177,7 @@ func TestDevLoginReturnsNormalizedAccountEmail(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
 		t.Fatalf("decode login: %v", err)
 	}
-	if res.Email != "client1@mail.com" {
+	if res.Email != email {
 		t.Fatalf("login email = %q, want normalized account email", res.Email)
 	}
 	if res.AccountID == "" || res.AccessToken == "" || res.ExpiresAt == "" {
@@ -241,7 +265,7 @@ func TestCharacterAPIRequiresAuth(t *testing.T) {
 
 func TestCreateCharacterValidationAndList(t *testing.T) {
 	h := fullServer(t)
-	_, token := loginEmail(t, h, "characters-validation@example.test")
+	_, token := loginEmail(t, h, testEmail(t, "characters-validation"))
 
 	rec := postJSON(h, "/v0/characters", token, map[string]string{"name": "   "})
 	if rec.Code != http.StatusBadRequest {
@@ -665,8 +689,8 @@ func TestMarketOfferRoutesSubmitListAndAccept(t *testing.T) {
 
 func TestCharactersAreAccountScoped(t *testing.T) {
 	h := fullServer(t)
-	_, tokenA := loginEmail(t, h, "characters-account-a@example.test")
-	_, tokenB := loginEmail(t, h, "characters-account-b@example.test")
+	_, tokenA := loginEmail(t, h, testEmail(t, "characters-account-a"))
+	_, tokenB := loginEmail(t, h, testEmail(t, "characters-account-b"))
 
 	charA := createCharacter(t, h, tokenA, "Account A Hero")
 	rec := getJSON(h, "/v0/characters", tokenB)
@@ -687,8 +711,8 @@ func TestCharactersAreAccountScoped(t *testing.T) {
 func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
 	h, db := fullServerWithStore(t)
 	ctx := context.Background()
-	accountA, tokenA := loginEmail(t, h, "client1@mail.com")
-	accountB, tokenB := loginEmail(t, h, "client2@mail.com")
+	accountA, tokenA := loginEmail(t, h, testEmail(t, "client-one"))
+	accountB, tokenB := loginEmail(t, h, testEmail(t, "client-two"))
 	if accountA == accountB {
 		t.Fatal("expected stable client emails to resolve to distinct accounts")
 	}
@@ -699,15 +723,15 @@ func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
 	charB := createCharacter(t, h, tokenB, "Client Two Only")
 	rec := getJSON(h, "/v0/characters", tokenB)
 	if rec.Code != http.StatusOK {
-		t.Fatalf("client2 character list status = %d, body = %s", rec.Code, rec.Body.String())
+		t.Fatalf("second account character list status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 	var listedB listCharactersResponse
 	if err := json.Unmarshal(rec.Body.Bytes(), &listedB); err != nil {
-		t.Fatalf("decode client2 characters: %v", err)
+		t.Fatalf("decode second account characters: %v", err)
 	}
 	for _, c := range listedB.Characters {
 		if c.CharacterID == charA.CharacterID || c.Name == charA.Name {
-			t.Fatalf("client2 saw client1 character: %+v", listedB.Characters)
+			t.Fatalf("second account saw first account character: %+v", listedB.Characters)
 		}
 	}
 
@@ -731,23 +755,23 @@ func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(stashB) != 0 {
-		t.Fatalf("client2 stash leaked client1 item: %+v", stashB)
+		t.Fatalf("second account stash leaked first account item: %+v", stashB)
 	}
 
 	rec = postJSON(h, "/v0/market/listings", tokenA, map[string]string{"stash_item_id": stashItemID})
 	if rec.Code != http.StatusCreated {
-		t.Fatalf("client1 create listing status = %d, body = %s", rec.Code, rec.Body.String())
+		t.Fatalf("first account create listing status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 	summaryA := getMarketSummary(t, h, tokenA)
 	if summaryA.PublishedListings != beforeA.PublishedListings+1 {
-		t.Fatalf("client1 market summary = %+v, want one new published listing over %+v", summaryA, beforeA)
+		t.Fatalf("first account market summary = %+v, want one new published listing over %+v", summaryA, beforeA)
 	}
 	summaryB := getMarketSummary(t, h, tokenB)
 	if summaryB.PublishedListings != beforeB.PublishedListings || summaryB.IncomingBids != beforeB.IncomingBids {
-		t.Fatalf("client2 market summary leaked client1 account state: before=%+v after=%+v", beforeB, summaryB)
+		t.Fatalf("second account market summary leaked first account state: before=%+v after=%+v", beforeB, summaryB)
 	}
 	if charB.CharacterID == "" {
-		t.Fatal("client2 character was not created")
+		t.Fatal("second account character was not created")
 	}
 }
 
@@ -1068,7 +1092,7 @@ func TestCreateSessionCustomSeedLocalOnly(t *testing.T) {
 	}
 
 	remote := fullServerWithConfig(t, config.Config{Addr: ":0", Env: "remote", DevToken: testDevToken, MetricsEnabled: true})
-	_, remoteToken := loginEmail(t, remote, "remote-seed@example.test")
+	_, remoteToken := loginEmail(t, remote, testEmail(t, "remote-seed"))
 	rec = postJSON(remote, "/v0/sessions", remoteToken, map[string]any{"mode": "solo", "seed": "pinned-test-seed"})
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("remote custom seed status = %d, body = %s", rec.Code, rec.Body.String())
@@ -1105,8 +1129,8 @@ func TestCreateSessionWorldID(t *testing.T) {
 
 func TestCreateSessionWithSelectedCharacter(t *testing.T) {
 	h := fullServer(t)
-	_, tokenA := loginEmail(t, h, "selected-character-a@example.test")
-	_, tokenB := loginEmail(t, h, "selected-character-b@example.test")
+	_, tokenA := loginEmail(t, h, testEmail(t, "selected-character-a"))
+	_, tokenB := loginEmail(t, h, testEmail(t, "selected-character-b"))
 	charA := createCharacter(t, h, tokenA, "Selected Hero")
 
 	rec := postJSON(h, "/v0/sessions", tokenA, map[string]any{
@@ -1138,7 +1162,7 @@ func TestCreateSessionWithSelectedCharacter(t *testing.T) {
 
 func TestCreateSessionOmittedCharacterUsesDefault(t *testing.T) {
 	h := fullServer(t)
-	_, token := loginEmail(t, h, "default-character-session@example.test")
+	_, token := loginEmail(t, h, testEmail(t, "default-character-session"))
 
 	rec := postJSON(h, "/v0/sessions", token, map[string]any{"mode": "solo", "world_id": "dungeon_levels"})
 	if rec.Code != http.StatusCreated {
@@ -1155,8 +1179,8 @@ func TestCreateSessionOmittedCharacterUsesDefault(t *testing.T) {
 
 func TestEndSessionOwnerOnlyAndIdempotent(t *testing.T) {
 	h := fullServer(t)
-	_, tokenA := loginEmail(t, h, "end-session-a@example.test")
-	_, tokenB := loginEmail(t, h, "end-session-b@example.test")
+	_, tokenA := loginEmail(t, h, testEmail(t, "end-session-a"))
+	_, tokenB := loginEmail(t, h, testEmail(t, "end-session-b"))
 
 	rec := postJSON(h, "/v0/sessions", tokenA, map[string]any{"mode": "solo"})
 	if rec.Code != http.StatusCreated {

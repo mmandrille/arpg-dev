@@ -193,7 +193,7 @@
     },
     "combat_lab_soft_target": {
       "name": "Combat Lab Soft Target",
-      "max_hp": 12,
+      "max_hp": 60,
       "loot_table": "no_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,

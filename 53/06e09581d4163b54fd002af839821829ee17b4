@@ -1,0 +1,36 @@
+shared/rules/skills.v0.schema.json
+  s_cda692c9bdd556::t_5777a00a4782c1 186
+  s_cda692c9bdd556::t_40a197048f4a9f 175-185,187,282-283,305-306
+shared/rules/skills.v0.json
+  s_cda692c9bdd556::t_4a21f30652d1a9 36-42,92-98,161-167,311-317,369-375
+server/internal/game/item_skill_stats.go
+  s_cda692c9bdd556::t_43da346258e4c0 22-92
+server/internal/game/sim.go
+  s_cda692c9bdd556::t_388764ffb3d3cf 3119,3129,3212,3214,3257,3268,3289-3290,3326-3327
+server/internal/game/rules.go
+  s_cda692c9bdd556::t_11099df5e1fdf5 561-562,566,610-621
+  s_cda692c9bdd556::t_3aa17a2b93663b 2763-2765,2898-2900,2949-2964
+  s_cda692c9bdd556::t_fe80faf596e1f6 553-558,563-565
+  s_cda692c9bdd556::t_150e1bba07dc65 2965-2966
+server/internal/game/game_test.go
+  s_cda692c9bdd556::t_2fd92c9f0bb11b 1586-1587,1607-1609,1611
+  s_cda692c9bdd556::t_f47ebc58d9546b 222-224,237-238
+  s_cda692c9bdd556::t_bd5eabe91f7f6e 1591-1595
+  s_cda692c9bdd556::t_29773f5a8591cf 1553-1585,1588-1590,1596-1606,1610,1612-1615
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5306e09581d4163b54fd002af839821829ee17b4",
+  "prompts": {},
+  "sessions": {
+    "s_cda692c9bdd556": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebc53-0c60-7710-9c6d-de52b50b4bab",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

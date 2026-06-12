@@ -1,0 +1,66 @@
+shared/rules/monsters.v0.json
+  s_5ef4c125d45464::t_db2a8713bd545b 243-268
+server/internal/game/sim.go
+  s_5ef4c125d45464::t_db2a8713bd545b 3577
+server/internal/game/rogue_skills.go
+  s_5ef4c125d45464::t_db2a8713bd545b 204,213
+tools/bot/scenarios/49_undead_skeleton_poison_immunity.json
+  s_5ef4c125d45464::t_db2a8713bd545b 1-40
+client/tests/test_animation.gd
+  s_5ef4c125d45464::t_314d9a7fa74ea1 268,288-289
+client/assets/monsters/skeleton/monster_skeleton.glb.import
+  s_5ef4c125d45464::t_ce5c8d1e0a924e 1-42
+docs/as-built/v101_undead-skeleton-poison-immunity.md
+  s_5ef4c125d45464::t_5ef832b261edc7 1-39
+PROGRESS.md
+  s_5ef4c125d45464::t_5ef832b261edc7 15,18,122,263,450-454
+tools/assets/gen_glb.py
+  s_5ef4c125d45464::t_db2a8713bd545b 443-470,540
+client/scenes/monster_skeleton.tscn
+  s_5ef4c125d45464::t_db2a8713bd545b 1-14
+shared/assets/monster_visuals.v0.json
+  s_5ef4c125d45464::t_db2a8713bd545b 122-128
+tools/bot/run.py
+  s_5ef4c125d45464::t_db2a8713bd545b 2135,2152-2154,2179,2183-2185
+shared/rules/worlds.v0.json
+  s_5ef4c125d45464::t_db2a8713bd545b 399-408
+shared/i18n/en.json
+  s_5ef4c125d45464::t_db2a8713bd545b 83
+docs/specs/v101_spec-undead-skeleton-poison-immunity.md
+  s_5ef4c125d45464::t_5b4513236e847a 3
+  s_5ef4c125d45464::t_46bbbc868eb7a2 1-2,4-68
+client/scripts/monster_visuals_loader.gd
+  s_5ef4c125d45464::t_db2a8713bd545b 29
+assets/manifests/assets.v0.json
+  s_5ef4c125d45464::t_ce5c8d1e0a924e 246
+  s_5ef4c125d45464::t_db2a8713bd545b 235-245,247
+client/scripts/main.gd
+  s_5ef4c125d45464::t_db2a8713bd545b 46,4438-4439
+shared/i18n/es.json
+  s_5ef4c125d45464::t_db2a8713bd545b 32
+shared/assets/monster_visuals.v0.schema.json
+  s_5ef4c125d45464::t_db2a8713bd545b 22
+server/internal/game/rogue_skills_test.go
+  s_5ef4c125d45464::t_314d9a7fa74ea1 39-57,59-76,176-178
+  s_5ef4c125d45464::t_b38ae21abb2e45 58,179-187
+docs/plans/v101_2026-06-12-undead-skeleton-poison-immunity.md
+  s_5ef4c125d45464::t_5ef832b261edc7 68-70,89-91,105-107,119-120,132-133,142-146
+  s_5ef4c125d45464::t_5b4513236e847a 3,147-148
+  s_5ef4c125d45464::t_46bbbc868eb7a2 1-2,4-67,71-88,92-104,108-118,121-131,134-141,149-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ed5eed45ba4df491106e84e23c0fde7f5c623778",
+  "prompts": {},
+  "sessions": {
+    "s_5ef4c125d45464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebcce-14fc-7791-855e-883bea5a95a1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

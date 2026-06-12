@@ -1,0 +1,55 @@
+shared/rules/skills.v0.json
+  s_c076b72dc061e1::t_cbc029077ae553 292-293
+client/scripts/main.gd
+  s_c076b72dc061e1::t_4a4d4865622d97 1035,1046,1049-1052,1640-1642,1645-1651,1656,1660-1661,1664
+  s_c076b72dc061e1::t_08402ecd9f098d 1643-1644,1652-1655,1657-1659,1662-1663
+  s_c076b72dc061e1::t_404fbe0d5bf2df 1047-1048
+  s_c076b72dc061e1::t_5bfa88dfd87a99 187,2813,2866-2869
+server/internal/game/rules.go
+  s_c076b72dc061e1::t_a65ba63f242374 2922-2924
+tools/bot/test_skill_visual.py
+  s_c076b72dc061e1::t_caff8c815dec56 8,13,87-93
+  s_c076b72dc061e1::t_f8c66bd88ae59c 19,105-112
+  s_c076b72dc061e1::t_e1eceb9f6248bb 5,30-31
+server/internal/game/handlers.go
+  s_c076b72dc061e1::t_eb0b93bb6d2945 1342
+tools/bot/scenarios/44_skill_visual.json
+  s_c076b72dc061e1::t_6d16f99afabfea 10-11
+server/internal/game/sim.go
+  s_c076b72dc061e1::t_111abb10a70641 328,400
+  s_c076b72dc061e1::t_769cd67a8f6d2c 3274,3284-3295,3298-3386
+  s_c076b72dc061e1::t_0fad5790a40de8 60,242-254
+  s_c076b72dc061e1::t_6c8d221cb9a930 307-311
+  s_c076b72dc061e1::t_d5da06d75a379e 312,389,3296-3297
+  s_c076b72dc061e1::t_854a171614649b 1638
+server/internal/game/game_test.go
+  s_c076b72dc061e1::t_8b7f92143c5ae8 1427-1428,1435,1437-1438,8283-8290
+  s_c076b72dc061e1::t_87efc138d5fb8d 231,1429-1434,1436,1439-1456
+client/scripts/heal_rain_effect.gd
+  s_c076b72dc061e1::t_17b2c7d58ffcdf 5,7,23,25-26,50,61,67
+tools/bot/skill_visual_runtime.py
+  s_c076b72dc061e1::t_7474fa2bc6f320 20,171,175-180,340,359
+  s_c076b72dc061e1::t_a6981c94490a35 194
+shared/rules/skills.v0.schema.json
+  s_c076b72dc061e1::t_a752a3c086cb00 260,269-270
+client/tests/test_coop_client.gd
+  s_c076b72dc061e1::t_74ec33c9020aad 43,849-875
+  s_c076b72dc061e1::t_128ed08eeba75b 44
+  s_c076b72dc061e1::t_3a22cb6349bc26 42,827-848,876-918
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9793cb47d6f1bdd035467cd9b2027a3593bde354",
+  "prompts": {},
+  "sessions": {
+    "s_c076b72dc061e1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eba3e-3639-73d0-9424-d9c92e5d3fc6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

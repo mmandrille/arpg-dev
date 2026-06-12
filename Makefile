@@ -44,4 +44,8 @@ skill-visual: ## Run a bot-visual replay for a skill: make skill-visual skill=ho
 	@if [[ -z "$(skill)" ]]; then echo "usage: make skill-visual skill=<skill_id>"; exit 2; fi
 	@$(PY) -m tools.bot.skill_visual "$(skill)" $(if $(DRY_RUN),--dry-run,)
 
+.PHONY: skill-visual-list
+skill-visual-list: ## List skill visual replay coverage
+	@$(PY) -m tools.bot.skill_visual --list
+
 include make/subfiles.mk

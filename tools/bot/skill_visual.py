@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 from typing import Sequence
 
-from tools.bot.skill_demo import SkillDemoEntry, skill_demo_entry
+from tools.bot.skill_demo import SkillDemoEntry, all_skill_demo_entries, skill_demo_entry
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -56,11 +56,64 @@ def run_skill_visual(skill_id: str, *, dry_run: bool = False, root: Path = ROOT)
     return subprocess.call(plan.command, cwd=root, env=env)
 
 
+def skill_visual_matrix() -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for entry in all_skill_demo_entries():
+        scenario_id = SKILL_SCENARIOS.get(entry.skill_id, "")
+        rows.append({
+            "skill_id": entry.skill_id,
+            "class_id": entry.class_id,
+            "category": entry.category,
+            "icon": entry.icon_label,
+            "rank_targets": entry.rank_targets,
+            "scenario_id": scenario_id,
+            "rank1_visual": bool(scenario_id),
+            "rank5_visual": False,
+            "buff_stat_delta_visual": False,
+        })
+    return rows
+
+
+def print_skill_visual_matrix() -> None:
+    headers = [
+        "skill_id",
+        "class",
+        "category",
+        "icon",
+        "ranks",
+        "scenario",
+        "rank1",
+        "rank5",
+        "buff_stats",
+    ]
+    print("\t".join(headers))
+    for row in skill_visual_matrix():
+        print("\t".join([
+            str(row["skill_id"]),
+            str(row["class_id"]),
+            str(row["category"]),
+            str(row["icon"]),
+            ",".join(str(rank) for rank in row["rank_targets"]),
+            str(row["scenario_id"]),
+            _yes_no(bool(row["rank1_visual"])),
+            _yes_no(bool(row["rank5_visual"])),
+            _yes_no(bool(row["buff_stat_delta_visual"])),
+        ]))
+
+
+def _yes_no(value: bool) -> str:
+    return "yes" if value else "no"
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run a visual replay for a shared skill id.")
     parser.add_argument("skill_id", nargs="?", help="Skill id to visualize.")
     parser.add_argument("--dry-run", action="store_true", help="Print the delegated command without running it.")
+    parser.add_argument("--list", action="store_true", help="Print skill visual coverage matrix.")
     args = parser.parse_args(argv)
+    if args.list:
+        print_skill_visual_matrix()
+        return 0
     try:
         return run_skill_visual(str(args.skill_id or ""), dry_run=args.dry_run)
     except (KeyError, ValueError) as exc:

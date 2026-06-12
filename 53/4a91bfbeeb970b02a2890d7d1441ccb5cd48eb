@@ -1,0 +1,28 @@
+client/scripts/consumable_heal_effect.gd
+  s_eb8fc978f46112::t_afe161a1592468 1-53
+client/tests/test_status_effect_presentation.gd
+  s_eb8fc978f46112::t_afe161a1592468 7-8,20-21,179-206,214-219
+client/scripts/consumable_heal_effect.gd.uid
+  s_eb8fc978f46112::t_551c7de8f2f3f1 1
+client/tests/test_coop_client.gd
+  s_eb8fc978f46112::t_26ce8449819e56 21,42,842,852,854,858-861
+client/scripts/main.gd
+  s_eb8fc978f46112::t_afe161a1592468 15,1099-1102,1734-1737,1739-1740
+  s_eb8fc978f46112::t_77048818437a41 1738
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "534a91bfbeeb970b02a2890d7d1441ccb5cd48eb",
+  "prompts": {},
+  "sessions": {
+    "s_eb8fc978f46112": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe09-ce4f-78c2-b989-7cea8a0e00af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

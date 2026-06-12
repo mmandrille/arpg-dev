@@ -1121,6 +1121,8 @@ func _apply_delta(p: Dictionary) -> void:
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
 				_apply_local_player_visual_scale(1.0)
 				PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, false)
+			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
+				PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, [])
 			continue
 		if visual_replay_enabled and inventory_panel != null:
 			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)

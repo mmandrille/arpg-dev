@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://arpg.dev/schemas/assets/item_presentations.v0.schema.json",
   "title": "Item presentation metadata (v0)",
-  "description": "Client rendering hints only: icon and ground-loot presentation keyed by item_def_id. Carries NO gameplay stats.",
+  "description": "Client rendering hints only: family icons and ground-loot presentation. Carries NO gameplay stats.",
   "type": "object",
-  "required": ["version", "items"],
+  "required": ["version", "families", "items"],
   "additionalProperties": false,
   "$defs": {
     "hexColor": {
@@ -13,16 +13,16 @@
     },
     "iconShape": {
       "type": "string",
-      "enum": ["blade", "bow", "badge", "coin", "leaf", "potion", "box"]
+      "enum": ["blade", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "leaf", "potion", "box"]
     },
     "groundShape": {
       "type": "string",
-      "enum": ["blade", "bow", "badge", "coin", "leaf", "potion", "box"]
+      "enum": ["blade", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "leaf", "potion", "box"]
     }
   },
   "properties": {
     "version": { "const": 0 },
-    "items": {
+    "families": {
       "type": "object",
       "minProperties": 1,
       "additionalProperties": {
@@ -51,6 +51,47 @@
               "accent": { "$ref": "#/$defs/hexColor" },
               "scale": { "type": "number", "exclusiveMinimum": 0 }
             }
+          },
+          "3d_model": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "items": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["family"],
+        "additionalProperties": false,
+        "properties": {
+          "family": { "type": "string", "minLength": 1 },
+          "icon": {
+            "type": "object",
+            "required": ["shape", "color", "accent", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "shape": { "$ref": "#/$defs/iconShape" },
+              "color": { "$ref": "#/$defs/hexColor" },
+              "accent": { "$ref": "#/$defs/hexColor" },
+              "label": { "type": "string", "minLength": 1, "maxLength": 3 }
+            }
+          },
+          "ground": {
+            "type": "object",
+            "required": ["shape", "color", "accent", "scale"],
+            "additionalProperties": false,
+            "properties": {
+              "shape": { "$ref": "#/$defs/groundShape" },
+              "color": { "$ref": "#/$defs/hexColor" },
+              "accent": { "$ref": "#/$defs/hexColor" },
+              "scale": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          },
+          "3d_model": {
+            "type": "string",
+            "minLength": 1
           }
         }
       }

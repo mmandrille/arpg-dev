@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/class_presentations.v0.schema.json",
+  "title": "Class presentations (v0)",
+  "description": "Client-facing class labels and icons. Gameplay authority stays in shared/rules/character_progression.v0.json.",
+  "type": "object",
+  "required": ["version", "classes"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "classes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["icon"],
+        "additionalProperties": false,
+        "properties": {
+          "icon": {
+            "type": "object",
+            "required": ["label", "shape", "color", "accent"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string", "minLength": 1, "maxLength": 3 },
+              "shape": { "type": "string", "enum": ["axe", "spark", "shield"] },
+              "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+              "accent": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

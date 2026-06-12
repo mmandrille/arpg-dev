@@ -87,6 +87,7 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 	"consumable": Color("#ff8f70"),
 }
 const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
+const GROUND_EQUIPMENT_MODEL_SCALE := 0.25
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
 const BOSS_PHASE_TICK_RATE := 10.0
 const BOSS_TELEGRAPH_MARKER_NAME := "BossTelegraphMarker"
@@ -140,6 +141,7 @@ var item_templates: Dictionary:
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 	set(v): ItemRulesLoader.item_presentations = v
+var asset_manifest: Dictionary = {}
 var dungeon_generation: Dictionary = {}
 var loot_ids: Array = []
 var hovered_loot_id: String = ""
@@ -287,6 +289,7 @@ func _ready() -> void:
 	ItemRulesLoader.ensure_loaded()
 	SkillRulesLoader.ensure_loaded()
 	_load_dungeon_generation()
+	_load_ground_item_visual_data()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8888")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
 
@@ -4645,6 +4648,16 @@ func _make_loot_node(e: Dictionary) -> Node3D:
 	var accent := Color(str(ground.get("accent", "#f6e8b1")))
 	var scale := float(ground.get("scale", 1.0))
 	_add_loot_rarity_background(root, _item_rarity_background(str(e.get("rarity", "common"))), scale)
+	var model := _make_ground_equipment_model(item_def_id, str(e.get("rarity", "common")))
+	if model != null:
+		root.add_child(model)
+	else:
+		_add_loot_primitive(root, shape, color, accent, scale)
+	_add_loot_label(root, _loot_label_text(e), scale, _loot_label_color(e))
+	return root
+
+
+func _add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color, scale: float) -> void:
 	match shape:
 		"blade":
 			_add_loot_box(root, "Blade", Vector3(0.12, 0.08, 0.78) * scale, Vector3(0.0, 0.20, 0.0), color)
@@ -4664,8 +4677,41 @@ func _make_loot_node(e: Dictionary) -> Node3D:
 			_add_loot_box(root, "Cork", Vector3(0.14, 0.10, 0.14) * scale, Vector3(0.0, 0.48 * scale, 0.0), accent)
 		_:
 			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
-	_add_loot_label(root, _loot_label_text(e), scale, _loot_label_color(e))
-	return root
+
+
+func _make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
+	var presentation: Dictionary = item_presentations.get(item_def_id, {})
+	var asset_id := str(presentation.get("3d_model", ""))
+	if asset_id == "":
+		return null
+	var entry = asset_manifest.get(asset_id, null)
+	if typeof(entry) != TYPE_DICTIONARY:
+		return null
+	var runtime_path := str((entry as Dictionary).get("runtime_path", ""))
+	var packed = load(_res_path(runtime_path))
+	if packed == null or not (packed is PackedScene):
+		return null
+	var inst := (packed as PackedScene).instantiate() as Node3D
+	if inst == null:
+		return null
+	inst.name = "GroundModel_%s" % asset_id
+	inst.scale = Vector3.ONE * GROUND_EQUIPMENT_MODEL_SCALE
+	inst.position = Vector3(0.0, 0.16, 0.0)
+	inst.rotation_degrees = Vector3(0.0, 35.0, -18.0)
+	_apply_model_tint(inst, _ground_item_tint(rarity))
+	return inst
+
+
+func _ground_item_tint(rarity: String) -> Color:
+	match rarity.to_lower():
+		"magic":
+			return Color("#5aa7ff")
+		"rare":
+			return Color("#ffd75e")
+		"unique":
+			return Color("#ff9f52")
+		_:
+			return Color("#d8d0bd")
 
 
 func _add_loot_rarity_background(parent: Node3D, color: Color, scale: float) -> void:
@@ -4806,6 +4852,20 @@ func _load_dungeon_generation() -> void:
 	var parsed = _read_json(path)
 	if typeof(parsed) == TYPE_DICTIONARY:
 		dungeon_generation = parsed
+
+
+func _load_ground_item_visual_data() -> void:
+	var base := ProjectSettings.globalize_path("res://")
+	var manifest = _read_json(base.path_join("../assets/manifests/assets.v0.json"))
+	if typeof(manifest) == TYPE_DICTIONARY:
+		asset_manifest = manifest.get("assets", {})
+
+
+func _res_path(runtime_path: String) -> String:
+	var p := runtime_path
+	if p.begins_with("client/"):
+		p = p.substr("client/".length())
+	return "res://" + p
 
 
 func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:

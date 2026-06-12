@@ -4,6 +4,7 @@ extends PanelContainer
 const BODY_FONT_SIZE := 23
 const REQUIREMENT_FONT_SIZE := BODY_FONT_SIZE - 1
 const ICON_FONT_SIZE := 32
+const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const PREVIEW_SIZE := Vector2(96, 96)
 const PREVIEW_GAP := 8
 const CONTENT_WIDTH := 360.0
@@ -40,46 +41,8 @@ class ItemPreview:
 		var def_id := str(item.get("item_def_id", ""))
 		var presentation: Dictionary = item_presentations.get(def_id, {})
 		var icon: Dictionary = presentation.get("icon", {})
-		var shape := str(icon.get("shape", "box"))
-		var color := Color(str(icon.get("color", "#d8d0bd")))
-		var accent := Color(str(icon.get("accent", "#6b5420")))
-		if dimmed:
-			color = color.darkened(0.35)
-			accent = accent.darkened(0.35)
-		var center := rect.get_center()
-		var min_side = min(rect.size.x, rect.size.y)
 		var label := str(icon.get("label", fallback_label if fallback_label != "" else _short_label(def_id)))
-
-		match shape:
-			"blade":
-				var a := center + Vector2(-min_side * 0.26, min_side * 0.24)
-				var b := center + Vector2(min_side * 0.26, -min_side * 0.24)
-				draw_line(a, b, color, 10.0, true)
-				draw_line(a + Vector2(-8, 8), a + Vector2(10, -10), accent, 7.0, true)
-			"bow":
-				draw_arc(center, min_side * 0.30, -1.28, 1.28, 26, color, 8.0, true)
-				draw_line(center + Vector2(min_side * 0.18, -min_side * 0.30), center + Vector2(min_side * 0.18, min_side * 0.30), accent, 4.0, true)
-			"badge", "coin":
-				draw_circle(center, min_side * 0.27, color)
-				draw_arc(center, min_side * 0.20, 0.0, TAU, 24, accent, 4.0, true)
-			"leaf":
-				var pts := PackedVector2Array([
-					center + Vector2(0, -min_side * 0.34),
-					center + Vector2(min_side * 0.28, -min_side * 0.02),
-					center + Vector2(0, min_side * 0.31),
-					center + Vector2(-min_side * 0.28, -min_side * 0.02),
-				])
-				draw_colored_polygon(pts, color)
-				draw_line(center + Vector2(0, -min_side * 0.25), center + Vector2(0, min_side * 0.25), accent, 4.0, true)
-			"potion":
-				draw_rect(Rect2(center + Vector2(-min_side * 0.14, -min_side * 0.04), Vector2(min_side * 0.28, min_side * 0.32)), color, true)
-				draw_rect(Rect2(center + Vector2(-min_side * 0.09, -min_side * 0.24), Vector2(min_side * 0.18, min_side * 0.18)), accent, true)
-			_:
-				draw_rect(Rect2(center - Vector2(min_side * 0.23, min_side * 0.23), Vector2(min_side * 0.46, min_side * 0.46)), color, true)
-
-		var font := get_theme_default_font()
-		var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE)
-		draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.36), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
+		ItemIconDrawerScript.draw(self, rect, icon, label, dimmed, 0.36, ICON_FONT_SIZE)
 
 	func _short_label(def_id: String) -> String:
 		if def_id == "":

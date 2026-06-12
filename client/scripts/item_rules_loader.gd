@@ -8,7 +8,7 @@
 ## Usage (any script — no autoload registration needed):
 ##   ItemRulesLoader.ensure_loaded()          # call once in _ready()
 ##   var def := ItemRulesLoader.item_definition(def_id)
-##   var icon := ItemRulesLoader.item_presentations.get(def_id, {}).get("icon", {})
+##   var icon := ItemRulesLoader.item_presentation(def_id).get("icon", {})
 class_name ItemRulesLoader
 extends RefCounted
 
@@ -16,6 +16,7 @@ static var item_rules: Dictionary = {}
 static var item_templates: Dictionary = {}
 static var shop_rules: Dictionary = {}
 static var item_presentations: Dictionary = {}
+static var item_presentation_families: Dictionary = {}
 static var _loaded: bool = false
 
 
@@ -33,6 +34,10 @@ static func item_definition(def_id: String) -> Dictionary:
 	if item_rules.has(def_id):
 		return item_rules.get(def_id, {})
 	return item_templates.get(def_id, {})
+
+
+static func item_presentation(def_id: String) -> Dictionary:
+	return item_presentations.get(def_id, {})
 
 
 static func _load_item_rules() -> void:
@@ -80,4 +85,21 @@ static func _load_item_presentations() -> void:
 		return
 	var parsed = JSON.parse_string(f.get_as_text())
 	if typeof(parsed) == TYPE_DICTIONARY:
-		item_presentations = parsed.get("items", {})
+		item_presentation_families = parsed.get("families", {})
+		item_presentations = _resolved_item_presentations(parsed.get("items", {}), item_presentation_families)
+
+
+static func _resolved_item_presentations(items: Dictionary, families: Dictionary) -> Dictionary:
+	var resolved := {}
+	for def_id in items.keys():
+		var entry: Dictionary = items.get(def_id, {})
+		var family_id := str(entry.get("family", ""))
+		var family: Dictionary = families.get(family_id, {})
+		var presentation := family.duplicate(true)
+		for key in ["icon", "ground", "3d_model"]:
+			if entry.has(key):
+				var value = entry.get(key)
+				presentation[key] = (value as Dictionary).duplicate(true) if typeof(value) == TYPE_DICTIONARY else value
+		presentation["family"] = family_id
+		resolved[str(def_id)] = presentation
+	return resolved

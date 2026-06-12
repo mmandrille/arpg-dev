@@ -4,6 +4,7 @@ extends Control
 signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(360, 680)
@@ -359,48 +360,11 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 		return
 	var def_id := str(item.get("item_def_id", ""))
 	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
-	var shape := str(icon.get("shape", "box"))
-	var color := Color(str(icon.get("color", "#d8d0bd")))
-	var accent := Color(str(icon.get("accent", "#6b5420")))
-	if not _offer_affordable(item):
-		color = color.darkened(0.35)
-		accent = accent.darkened(0.35)
 	var rect := Rect2(Vector2.ZERO, slot.size)
-	var center := rect.get_center()
-	var min_side = min(rect.size.x, rect.size.y)
 	var label := str(icon.get("label", _short_label(def_id)))
-
-	match shape:
-		"blade":
-			var a := center + Vector2(-min_side * 0.22, min_side * 0.22)
-			var b := center + Vector2(min_side * 0.22, -min_side * 0.22)
-			slot.draw_line(a, b, color, 5.0, true)
-			slot.draw_line(a + Vector2(-4, 4), a + Vector2(5, -5), accent, 4.0, true)
-		"bow":
-			slot.draw_arc(center, min_side * 0.28, -1.25, 1.25, 18, color, 4.0, true)
-			slot.draw_line(center + Vector2(min_side * 0.18, -min_side * 0.26), center + Vector2(min_side * 0.18, min_side * 0.26), accent, 2.0, true)
-		"badge", "coin":
-			slot.draw_circle(center, min_side * 0.24, color)
-			slot.draw_arc(center, min_side * 0.17, 0.0, TAU, 18, accent, 2.0, true)
-		"leaf":
-			var pts := PackedVector2Array([
-				center + Vector2(0, -min_side * 0.30),
-				center + Vector2(min_side * 0.24, -min_side * 0.02),
-				center + Vector2(0, min_side * 0.28),
-				center + Vector2(-min_side * 0.24, -min_side * 0.02),
-			])
-			slot.draw_colored_polygon(pts, color)
-			slot.draw_line(center + Vector2(0, -min_side * 0.22), center + Vector2(0, min_side * 0.22), accent, 2.0, true)
-		"potion":
-			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.13, -min_side * 0.05), Vector2(min_side * 0.26, min_side * 0.28)), color, true)
-			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.08, -min_side * 0.22), Vector2(min_side * 0.16, min_side * 0.16)), accent, true)
-		_:
-			slot.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
+	ItemIconDrawerScript.draw(slot, rect, icon, label, not _offer_affordable(item), 0.10, ICON_FONT_SIZE)
 
 	var font := slot.get_theme_default_font()
-	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE)
-	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.10), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
-
 	var price := str(int(item.get("buy_price", 0)))
 	var price_color := Color("#f4c84f") if _offer_affordable(item) else Color("#ff6f6f")
 	var price_size := font.get_string_size(price, HORIZONTAL_ALIGNMENT_LEFT, -1, PRICE_FONT_SIZE)

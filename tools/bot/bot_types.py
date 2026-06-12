@@ -21,6 +21,7 @@ class Scenario:
     title: str
     description: str
     character_class: str
+    debug_progression: dict[str, Any]
     steps: list[dict[str, Any]]
     assertions: list[Any]
     fresh_session_checks: list[dict[str, Any]]

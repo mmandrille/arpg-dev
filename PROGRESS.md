@@ -16,8 +16,8 @@ Last updated: 2026-06-12
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
 | **Next slice** | TBD |
-| **Last engineering review** | v80 — [`docs/reviews/20260611_v80-overview.md`](docs/reviews/20260611_v80-overview.md) (2026-06-11) |
-| **Next engineering review** | v90 (~every 10 slices) |
+| **Last engineering review** | v90 — [`docs/reviews/20260612_v90-overview.md`](docs/reviews/20260612_v90-overview.md) (2026-06-12) |
+| **Next engineering review** | v100 (~every 10 slices) |
 
 ### Slice numbering note
 
@@ -708,6 +708,11 @@ variant, and proves it with client unit, focused client-bot, and protocol pack-a
 small follow-ups for combat event presenter extraction and splitting the largest Python validation/bot
 files by domain. The realtime fanout level snapshot finding was closed in v82, defensive client
 payload parsing was closed in v83, and client bot step registry duplication was closed in v84.
+
+**v90 engineering review steering.** The v90 review keeps the repo at 8.5/10 overall, confirms
+`make ci` green after blocker cleanup, and steers the next batch toward localization: central English
+text keys, Spanish translations, Settings language selection, and English fallback. It also keeps
+the standing rule that touched large files should be split or shrunk rather than extended.
 
 **Maintainability ratchet is now explicit.** New source/test/tool files target a 600-line maximum,
 existing over-limit files are grandfathered in `.maintainability/file-size-baseline.tsv`, and

@@ -63,7 +63,7 @@
     },
     "skill_xp_level6_dummy": {
       "name": "Skill XP Dummy",
-      "max_hp": 60,
+      "max_hp": 1,
       "loot_table": "no_drop",
       "xp_reward": 200,
       "hit_chance": 0.5,

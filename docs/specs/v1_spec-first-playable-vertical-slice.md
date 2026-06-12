@@ -99,6 +99,7 @@ Response:
 ```json
 {
   "account_id": "acct_01H00000000000000000000000",
+  "email": "dev@example.test",
   "access_token": "opaque-dev-token",
   "expires_at": "2026-06-05T12:00:00Z"
 }

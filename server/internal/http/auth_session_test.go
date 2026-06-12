@@ -141,6 +141,26 @@ func loginEmail(t *testing.T, h http.Handler, email string) (accountID, token st
 	return res.AccountID, res.AccessToken
 }
 
+func TestDevLoginReturnsNormalizedAccountEmail(t *testing.T) {
+	h := fullServer(t)
+	rec := postJSON(h, "/v0/auth/dev-login", "", map[string]string{
+		"email": "  Client1@MAIL.COM  ", "dev_token": testDevToken,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("login status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var res devLoginResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
+		t.Fatalf("decode login: %v", err)
+	}
+	if res.Email != "client1@mail.com" {
+		t.Fatalf("login email = %q, want normalized account email", res.Email)
+	}
+	if res.AccountID == "" || res.AccessToken == "" || res.ExpiresAt == "" {
+		t.Fatalf("login response missing identity fields: %+v", res)
+	}
+}
+
 func createCharacter(t *testing.T, h http.Handler, token, name string) characterResponse {
 	t.Helper()
 	return createCharacterWithClass(t, h, token, name, "")
@@ -661,6 +681,83 @@ func TestCharactersAreAccountScoped(t *testing.T) {
 		if c.CharacterID == charA.CharacterID {
 			t.Fatalf("account B saw account A character: %+v", listed.Characters)
 		}
+	}
+}
+
+func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	accountA, tokenA := loginEmail(t, h, "client1@mail.com")
+	accountB, tokenB := loginEmail(t, h, "client2@mail.com")
+	if accountA == accountB {
+		t.Fatal("expected stable client emails to resolve to distinct accounts")
+	}
+
+	charA := createCharacter(t, h, tokenA, "Client One Only")
+	charB := createCharacter(t, h, tokenB, "Client Two Only")
+	rec := getJSON(h, "/v0/characters", tokenB)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("client2 character list status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	var listedB listCharactersResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listedB); err != nil {
+		t.Fatalf("decode client2 characters: %v", err)
+	}
+	for _, c := range listedB.Characters {
+		if c.CharacterID == charA.CharacterID || c.Name == charA.Name {
+			t.Fatalf("client2 saw client1 character: %+v", listedB.Characters)
+		}
+	}
+
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{
+		ID:          "client1_bound_item",
+		AccountID:   accountA,
+		CharacterID: charA.CharacterID,
+		ItemDefID:   "rusty_sword",
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{"damage_min":1}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountA, charA.CharacterID, "client1_bound_item", "client1_bound_stash_item"); err != nil {
+		t.Fatal(err)
+	}
+	stashB, err := db.ListAccountStashItems(ctx, accountB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stashB) != 0 {
+		t.Fatalf("client2 stash leaked client1 item: %+v", stashB)
+	}
+
+	rec = postJSON(h, "/v0/market/listings", tokenA, map[string]string{"stash_item_id": "client1_bound_stash_item"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("client1 create listing status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	rec = getJSON(h, "/v0/market/summary", tokenA)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("client1 market summary status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var summaryA marketSummaryResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &summaryA); err != nil {
+		t.Fatal(err)
+	}
+	if summaryA.PublishedListings != 1 {
+		t.Fatalf("client1 market summary = %+v, want own published listing", summaryA)
+	}
+	rec = getJSON(h, "/v0/market/summary", tokenB)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("client2 market summary status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var summaryB marketSummaryResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &summaryB); err != nil {
+		t.Fatal(err)
+	}
+	if summaryB.PublishedListings != 0 || summaryB.IncomingBids != 0 {
+		t.Fatalf("client2 market summary leaked client1 account state: %+v", summaryB)
+	}
+	if charB.CharacterID == "" {
+		t.Fatal("client2 character was not created")
 	}
 }
 

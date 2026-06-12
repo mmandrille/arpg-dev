@@ -64,6 +64,11 @@ func _character_clips() -> Dictionary:
 		"attack": {"length": 0.35, "loop": false, "bones": {
 			"arm_r": [[0.0, 0, 0, 0], [0.12, -110, 0, 0], [0.35, 0, 0, 0]],
 		}},
+		# attack_off_hand: mirror the swing onto the left arm (weapon rides hand_l).
+		"attack_off_hand": {"length": 0.35, "loop": false, "bones": {
+			"spine": [[0.0, 0, 0, 0], [0.12, 0, 0, -9], [0.35, 0, 0, 0]],
+			"arm_l": [[0.0, 0, 0, 0], [0.12, -125, 0, -46], [0.35, 0, 0, 0]],
+		}},
 		# hit: brief backward wobble on authoritative player damage.
 		"hit": {"length": 0.25, "loop": false, "bones": {
 			"spine": [[0.0, 0, 0, 0], [0.08, -14, 0, 0], [0.25, 0, 0, 0]],

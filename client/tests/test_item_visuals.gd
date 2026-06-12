@@ -70,6 +70,8 @@ func _initialize() -> void:
 
 	if not _verify_equipped_fallback_resolver():
 		return
+	if not _verify_off_hand_weapon_resolver():
+		return
 	if not _verify_loot_label_presentation(item_rules, item_templates, presentations):
 		return
 	if not _verify_interactable_chest_models():
@@ -214,6 +216,41 @@ func _verify_equipped_fallback_resolver() -> bool:
 		return false
 	if str(equipped_visuals["head"].get("tint", "")) != "5aa7ff":
 		_fail("unmapped future item magic tint mismatch: %s" % equipped_visuals["head"])
+		return false
+	mount.queue_free()
+	return true
+
+
+func _verify_off_hand_weapon_resolver() -> bool:
+	var mount := _make_mount_root()
+	var resolver = ResolverScript.new(mount)
+	resolver.apply_snapshot({
+		"inventory": [
+			{"item_instance_id": "4001", "item_def_id": "starter_rogue_sword", "slot": "off_hand", "equipped": true, "rarity": "common"},
+		],
+		"equipped": {"off_hand": "4001"},
+	})
+	var state: Dictionary = resolver.get_debug_state()
+	if not state["warnings"].is_empty():
+		_fail("resolver emitted warnings for rogue off-hand sword: %s" % state["warnings"])
+		return false
+	var equipped_visuals: Dictionary = state["equipped_visuals"]
+	if not equipped_visuals.has("off_hand"):
+		_fail("rogue starter sword did not mount off hand: %s" % equipped_visuals)
+		return false
+	var off_hand: Dictionary = equipped_visuals["off_hand"]
+	if str(off_hand.get("mount_socket", "")) != "off_hand_socket":
+		_fail("rogue starter sword off hand used wrong socket: %s" % off_hand)
+		return false
+	if bool(off_hand.get("procedural_fallback", false)):
+		_fail("rogue starter sword off hand used shield fallback: %s" % off_hand)
+		return false
+	var node := mount.find_child("weapon_rusty_sword_v0", true, false) as Node3D
+	if node == null:
+		_fail("rogue starter sword off hand node missing")
+		return false
+	if absf(node.rotation_degrees.z - 180.0) > 0.01 or node.position.z < 0.07:
+		_fail("rogue starter sword off hand transform not mirrored: pos=%s rot=%s" % [str(node.position), str(node.rotation_degrees)])
 		return false
 	mount.queue_free()
 	return true

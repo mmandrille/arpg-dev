@@ -32,6 +32,10 @@ func _init(root: Node3D, base_tint: Color = Color.WHITE) -> void:
 
 func set_base_tint(color: Color) -> void:
 	_base_tint = color
+	for key in _base_mesh_colors.keys():
+		var rec: Dictionary = _base_mesh_colors[key]
+		rec["color"] = color
+		_base_mesh_colors[key] = rec
 	if not _terminal:
 		_current_tint = color
 		_apply_color_scale(1.0)

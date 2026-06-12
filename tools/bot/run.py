@@ -638,7 +638,7 @@ async def execute_step(
         monster_def_id = str(step.get("monster_def_id") or target.get("monster_def_id") or "")
         rarity = str(step["rarity"]) if step.get("rarity") is not None else None
         is_monster = target.get("type") == "monster"
-        skipped_ids: set[str] = set()
+        skipped_ids: set[str] = _remembered_excluded_ids(state, step)
         last_action = 0.0
         pending_message_id = ""
         start_index = len(state.combat_events)
@@ -2388,6 +2388,10 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
             state.gold = int(ev.get("total_gold", state.gold))
         if event_type in {"monster_damaged", "player_damaged", "player_killed", "attack_missed", "attack_blocked"}:
             state.combat_events.append(dict(ev))
+        if event_type == "skill_effect_started" and str(ev.get("skill_id", "")) == "poison_stab":
+            target_id = str(ev.get("target_entity_id") or ev.get("entity_id") or "")
+            if target_id:
+                state.remembered_entity_ids["poison_stab_target"] = target_id
         if event_type == "level_changed":
             state.current_level = int(ev["to_level"])
             state.pending_level_load = state.current_level
@@ -2686,11 +2690,14 @@ def find_nearest_monster(
     rarity: str | None = None,
     is_boss: bool | None = None,
     exclude_ids: set[str] | None = None,
+    skip: int = 0,
 ) -> dict[str, Any] | None:
     monsters = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, is_boss=is_boss, exclude_ids=exclude_ids)
-    if not monsters:
+    if skip < 0:
+        skip = 0
+    if len(monsters) <= skip:
         return None
-    return monsters[0]
+    return monsters[skip]
 
 
 def find_live_monsters_sorted(
@@ -2741,7 +2748,15 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
         return target
     if step.get("monster_def_id"):
         rarity = str(step["rarity"]) if step.get("rarity") is not None else None
-        target = find_nearest_monster(state, str(step["monster_def_id"]), rarity, bool(step["is_boss"]) if step.get("is_boss") is not None else None)
+        exclude_ids = _remembered_excluded_ids(state, step)
+        target = find_nearest_monster(
+            state,
+            str(step["monster_def_id"]),
+            rarity,
+            bool(step["is_boss"]) if step.get("is_boss") is not None else None,
+            exclude_ids=exclude_ids,
+            skip=int(step.get("target_skip", 0)),
+        )
         if target is None:
             raise AssertionError(f"{step.get('action')}: monster not found: {step}")
         return target
@@ -2761,6 +2776,18 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
             raise AssertionError(f"{step.get('action')}: interactable not found: {step}")
         return target
     raise AssertionError(f"{step.get('action')}: no target selector in {step}")
+
+
+def _remembered_excluded_ids(state: RuntimeState, step: dict[str, Any]) -> set[str]:
+    excluded: set[str] = set()
+    raw_keys = step.get("exclude_remembered", [])
+    if not isinstance(raw_keys, list):
+        raw_keys = [raw_keys]
+    for key in raw_keys:
+        remembered_id = state.remembered_entity_ids.get(str(key), "")
+        if remembered_id:
+            excluded.add(remembered_id)
+    return excluded
 
 
 def directional_attack_direction(state: RuntimeState, step: dict[str, Any]) -> dict[str, float]:

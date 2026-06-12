@@ -8,8 +8,8 @@ Engine-free checks over the asset manifest and the shared visual metadata:
   3. Every ``asset_id`` referenced by ``item_visuals`` resolves in the manifest.
   4. Equipment entries declare a ``slot`` matching the visuals that point at
      them, and each visual's ``asset_id`` resolves to an equipment entry.
-  5. Every character entry's ``required_nodes`` declares the weapon mount bone
-     (``hand_r``); the runtime ``BoneAttachment3D`` socket rides that bone.
+  5. Every character entry's ``required_nodes`` declares the hand mount bones
+     (``hand_r`` and ``hand_l``); runtime ``BoneAttachment3D`` sockets ride them.
   6. Parse the GLB skin and hard-fail unless every declared ``required_nodes``
      name is an actual skin joint (proves the GLB is rigged, not a stub).
 
@@ -161,23 +161,24 @@ def validate(root: Path, report: Report) -> None:
         else:
             report.ok(f"{def_id} -> {vis['asset_id']} resolves to monster asset")
 
-    # [5] character mount-bone coverage (spec §4.3): item_visuals still names the
-    #     runtime socket right_hand_socket, but the manifest required_nodes list
-    #     rig joints. The weapon mount contract is satisfied when hand_r is declared.
+    # [5] character mount-bone coverage (spec §4.3): item_visuals names runtime
+    #     hand sockets, but the manifest required_nodes list rig joints. The hand
+    #     mount contract is satisfied when both hand bones are declared.
     print("[5] character mount-bone coverage")
     characters = {aid: e for aid, e in assets.items() if e["type"] == "character"}
     if not characters:
         report.fail("character coverage", "no character asset declared")
-    WEAPON_MOUNT_BONE = "hand_r"
+    HAND_MOUNT_BONES = {"hand_r", "hand_l"}
     for asset_id, entry in sorted(characters.items()):
         declared = set(entry.get("required_nodes", []))
-        if WEAPON_MOUNT_BONE not in declared:
+        missing = sorted(HAND_MOUNT_BONES - declared)
+        if missing:
             report.fail(
                 "mount bone",
-                f"{asset_id}: required_nodes missing weapon mount bone {WEAPON_MOUNT_BONE}",
+                f"{asset_id}: required_nodes missing hand mount bones {missing}",
             )
         else:
-            report.ok(f"{asset_id} declares weapon mount bone {WEAPON_MOUNT_BONE}")
+            report.ok(f"{asset_id} declares hand mount bones {sorted(HAND_MOUNT_BONES)}")
 
     # [6] GLB skin-joint inspection: required_nodes must be SKIN JOINTS, proving
     #     the GLB is actually rigged (spec §6, §10). Characters/monsters are

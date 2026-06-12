@@ -16,8 +16,8 @@ Last updated: 2026-06-12
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
 | **Next slice** | TBD |
-| **Last engineering review** | v90 — [`docs/reviews/20260612_v90-overview.md`](docs/reviews/20260612_v90-overview.md) (2026-06-12) |
-| **Next engineering review** | v100 (~every 10 slices) |
+| **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
+| **Next engineering review** | v110 (~every 10 slices) |
 
 ### Slice numbering note
 
@@ -784,6 +784,13 @@ payload parsing was closed in v83, and client bot step registry duplication was 
 `make ci` green after blocker cleanup, and steers the next batch toward localization: central English
 text keys, Spanish translations, Settings language selection, and English fallback. It also keeps
 the standing rule that touched large files should be split or shrunk rather than extended.
+
+**v100 engineering review steering.** The v100 review keeps the repo at 8.5/10 overall and steers
+the next gameplay batch toward shared damage types, data-driven monster resistances, and focused
+combat helpers/tests. Undead poison immunity should consume the same resistance contract rather
+than introducing a one-off immunity flag. The review gate also records a maintenance exception for
+the already-landed v99 growth in `main.gd`, `test_item_visuals.gd`, `sim.go`, and `tools/bot/run.py`;
+future slices touching those files should split or shrink them before adding more behavior.
 
 **Maintainability ratchet is now explicit.** New source/test/tool files target a 600-line maximum,
 existing over-limit files are grandfathered in `.maintainability/file-size-baseline.tsv`, and

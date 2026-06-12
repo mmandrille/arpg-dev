@@ -1,0 +1,22 @@
+client/tests/test_status_effect_presentation.gd
+  s_6cd8e180f3214c::t_98a665023d5dc7 15,95-97,99-101,104,106-111
+  s_6cd8e180f3214c::t_df819879761de5 98,102-103,105
+client/scripts/main.gd
+  s_6cd8e180f3214c::t_98a665023d5dc7 1124-1125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b5b1433c1bf7341bbe6151170f861d88a242b559",
+  "prompts": {},
+  "sessions": {
+    "s_6cd8e180f3214c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd22-fd05-7d40-aeb7-c0624a10de1e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

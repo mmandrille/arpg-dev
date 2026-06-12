@@ -3116,6 +3116,7 @@ func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, p
 }
 
 func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef, rank int, dir Vec2, targetID uint64, in Input) *entity {
+	damageRange := s.scaleSkillDamageForMagic(def, rank, skillDamageRange(def, rank))
 	projectile := &entity{
 		kind:            projectileEntity,
 		pos:             player.pos,
@@ -3125,7 +3126,7 @@ func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef,
 		dir:             normalize(dir),
 		speed:           def.Projectile.Speed,
 		maxDistance:     def.Projectile.Range,
-		damageRange:     skillDamageRange(def, rank),
+		damageRange:     damageRange,
 		sourceSkillID:   skillID,
 		sourceMsgID:     in.MessageID,
 		sourceCorrID:    in.CorrelationID,
@@ -3208,9 +3209,9 @@ func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, c
 			continue
 		}
 		center := player.pos
-		percent := skillEffectPercent(effect, rank)
+		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank))
 		scale := 1.0
-		targets := s.healSkillTargets(center, effect, player.id)
+		targets := s.healSkillTargets(center, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
 		for _, target := range targets {
 			applications = append(applications, skillBuffApplication{
 				Target:      target,
@@ -3253,7 +3254,7 @@ func (s *Sim) skillAreaCenter(effect SkillEffectDef, cast *CastSkillIntent, play
 	return Vec2{X: player.pos.X + dir.X*effect.Range, Y: player.pos.Y + dir.Y*effect.Range}, ""
 }
 
-func (s *Sim) healSkillTargets(center Vec2, effect SkillEffectDef, casterID uint64) []*entity {
+func (s *Sim) healSkillTargets(center Vec2, effect SkillEffectDef, casterID uint64, radius float64) []*entity {
 	targets := []*entity{}
 	level := s.activeLevel()
 	for _, id := range sortedEntityIDs(level.entities) {
@@ -3264,7 +3265,7 @@ func (s *Sim) healSkillTargets(center Vec2, effect SkillEffectDef, casterID uint
 		if entity.id == casterID && !effect.IncludeCaster {
 			continue
 		}
-		if distance(center, entity.pos) > effect.Radius+meleeRangeEpsilon {
+		if distance(center, entity.pos) > radius+meleeRangeEpsilon {
 			continue
 		}
 		targets = append(targets, entity)
@@ -3285,8 +3286,8 @@ func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast 
 		if rejectReason != "" {
 			return nil, rejectReason
 		}
-		percent := skillEffectPercent(effect, rank)
-		targets := s.healSkillTargets(center, effect, player.id)
+		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank))
+		targets := s.healSkillTargets(center, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
 		for _, target := range targets {
 			if target.hp >= target.maxHP {
 				continue
@@ -3322,8 +3323,8 @@ func (s *Sim) startAreaHealZones(player *entity, skillID string, def SkillDef, r
 			CasterID:      player.id,
 			SkillID:       skillID,
 			Rank:          rank,
-			Percent:       skillEffectPercent(effect, rank),
-			Radius:        effect.Radius,
+			Percent:       s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank)),
+			Radius:        s.scaleSkillRadiusForMagic(def, rank, effect),
 			IncludeCaster: effect.IncludeCaster,
 			CorrelationID: correlationID,
 			NextPulseTick: s.tick + uint64(healRainPulseIntervalTicks),

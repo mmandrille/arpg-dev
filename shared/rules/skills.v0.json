@@ -33,7 +33,13 @@
         "min_base": 4,
         "max_base": 6,
         "min_per_rank": 1,
-        "max_per_rank": 1
+        "max_per_rank": 1,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
       },
       "projectile": {
         "range": 18,
@@ -83,7 +89,13 @@
         "min_base": 3,
         "max_base": 5,
         "min_per_rank": 1,
-        "max_per_rank": 1
+        "max_per_rank": 1,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
       },
       "projectile": {
         "range": 18,
@@ -146,7 +158,13 @@
         "min_base": 3,
         "max_base": 6,
         "min_per_rank": 1,
-        "max_per_rank": 1
+        "max_per_rank": 1,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
       },
       "projectile": {
         "range": 18,
@@ -290,7 +308,13 @@
           "radius": 4,
           "percent_base": 25,
           "percent_per_rank": 10,
-          "duration_ticks": 30
+          "duration_ticks": 30,
+          "magic_scaling": {
+            "stat": "magic",
+            "percent_per_point": 1,
+            "max_bonus_percent": 25,
+            "use_requirement_baseline": true
+          }
         }
       ],
       "cooldown": {
@@ -342,7 +366,13 @@
           "percent_base": 20,
           "percent_per_rank": 10,
           "duration_ticks": 300,
-          "effect_id": "holy_shield"
+          "effect_id": "holy_shield",
+          "magic_scaling": {
+            "stat": "magic",
+            "percent_per_point": 1,
+            "max_bonus_percent": 20,
+            "use_requirement_baseline": true
+          }
         }
       ],
       "cooldown": {

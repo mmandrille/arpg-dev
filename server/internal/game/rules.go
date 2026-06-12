@@ -550,11 +550,20 @@ type SkillRankValueDef struct {
 
 // SkillDamageDef controls the deterministic rank-scaled damage range.
 type SkillDamageDef struct {
-	Type       string `json:"type"`
-	MinBase    int    `json:"min_base"`
-	MaxBase    int    `json:"max_base"`
-	MinPerRank int    `json:"min_per_rank"`
-	MaxPerRank int    `json:"max_per_rank"`
+	Type         string          `json:"type"`
+	MinBase      int             `json:"min_base"`
+	MaxBase      int             `json:"max_base"`
+	MinPerRank   int             `json:"min_per_rank"`
+	MaxPerRank   int             `json:"max_per_rank"`
+	MagicScaling SkillScalingDef `json:"magic_scaling,omitempty"`
+}
+
+// SkillScalingDef lets a skill opt into gentle caster-stat scaling.
+type SkillScalingDef struct {
+	Stat                   string  `json:"stat"`
+	PercentPerPoint        float64 `json:"percent_per_point"`
+	MaxBonusPercent        float64 `json:"max_bonus_percent"`
+	UseRequirementBaseline bool    `json:"use_requirement_baseline"`
 }
 
 // SkillProjectileDef defines server-owned projectile behavior for a skill.
@@ -598,17 +607,18 @@ type SkillChainDef struct {
 
 // SkillEffectDef is a closed data contract for supported active-skill effects.
 type SkillEffectDef struct {
-	Type           string   `json:"type"`
-	Stats          []string `json:"stats"`
-	PercentBase    int      `json:"percent_base"`
-	PercentPerRank int      `json:"percent_per_rank"`
-	DurationTicks  int      `json:"duration_ticks"`
-	VisualScale    bool     `json:"visual_scale"`
-	Target         string   `json:"target"`
-	IncludeCaster  bool     `json:"include_caster"`
-	Range          float64  `json:"range"`
-	Radius         float64  `json:"radius"`
-	EffectID       string   `json:"effect_id"`
+	Type           string          `json:"type"`
+	Stats          []string        `json:"stats"`
+	PercentBase    int             `json:"percent_base"`
+	PercentPerRank int             `json:"percent_per_rank"`
+	DurationTicks  int             `json:"duration_ticks"`
+	VisualScale    bool            `json:"visual_scale"`
+	Target         string          `json:"target"`
+	IncludeCaster  bool            `json:"include_caster"`
+	Range          float64         `json:"range"`
+	Radius         float64         `json:"radius"`
+	EffectID       string          `json:"effect_id"`
+	MagicScaling   SkillScalingDef `json:"magic_scaling,omitempty"`
 }
 
 // SkillCooldownDef defines how a skill cooldown is derived.
@@ -2750,6 +2760,9 @@ func validateProjectileSkillPayload(skillID string, skill SkillDef) error {
 	if skill.Damage.MinPerRank < 0 || skill.Damage.MaxPerRank < 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.damage: per-rank damage must be non-negative", skillID)
 	}
+	if err := validateSkillMagicScaling(fmt.Sprintf("skills.%s.damage.magic_scaling", skillID), skill.Damage.MagicScaling); err != nil {
+		return err
+	}
 	if skill.Projectile.Range <= 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.projectile.range: must be positive", skillID)
 	}
@@ -2882,6 +2895,9 @@ func validateAreaStatPercentBuffEffect(skillID string, idx int, effect SkillEffe
 	if effect.EffectID == "" {
 		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].effect_id: required", skillID, idx)
 	}
+	if err := validateSkillMagicScaling(fmt.Sprintf("skills.%s.effects[%d].magic_scaling", skillID, idx), effect.MagicScaling); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -2929,6 +2945,25 @@ func validateAreaPercentHealEffect(skillID string, idx int, effect SkillEffectDe
 	}
 	if effect.DurationTicks <= 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].duration_ticks: must be positive", skillID, idx)
+	}
+	if err := validateSkillMagicScaling(fmt.Sprintf("skills.%s.effects[%d].magic_scaling", skillID, idx), effect.MagicScaling); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateSkillMagicScaling(path string, scaling SkillScalingDef) error {
+	if scaling.Stat == "" {
+		return nil
+	}
+	if scaling.Stat != "magic" {
+		return fmt.Errorf("game: invalid rules %s.stat: unsupported %s", path, scaling.Stat)
+	}
+	if scaling.PercentPerPoint <= 0 {
+		return fmt.Errorf("game: invalid rules %s.percent_per_point: must be positive", path)
+	}
+	if scaling.MaxBonusPercent <= 0 || scaling.MaxBonusPercent > 100 {
+		return fmt.Errorf("game: invalid rules %s.max_bonus_percent: must be within (0,100]", path)
 	}
 	return nil
 }

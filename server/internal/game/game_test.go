@@ -219,6 +219,9 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills[magicBoltSkillID]; skill.Class != "sorcerer" || skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
 		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 5 +3/rank level +1/rank attack interval cooldown", skill)
 	}
+	if scaling := r.Skills[magicBoltSkillID].Damage.MagicScaling; scaling.Stat != "magic" || scaling.PercentPerPoint <= 0 || scaling.MaxBonusPercent <= 0 || !scaling.UseRequirementBaseline {
+		t.Fatalf("magic_bolt magic scaling = %+v, want capped requirement-based magic scaling", scaling)
+	}
 	if skill := r.Skills["ice_shard"]; len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Requirements.Skills[0].Rank != 1 {
 		t.Fatalf("ice_shard prerequisites = %+v, want magic_bolt rank 1", skill.Requirements.Skills)
 	}
@@ -230,6 +233,9 @@ func TestLoadRules(t *testing.T) {
 	}
 	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 || skill.Effects[0].DurationTicks != 30 {
 		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and enlarged range/radius effect", skill)
+	}
+	if scaling := r.Skills["heal"].Effects[0].MagicScaling; scaling.Stat != "magic" || scaling.PercentPerPoint <= 0 || scaling.MaxBonusPercent <= 0 || !scaling.UseRequirementBaseline {
+		t.Fatalf("heal magic scaling = %+v, want capped requirement-based magic scaling", scaling)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
@@ -1541,6 +1547,69 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	}
 	if !hasEvent(noop, "skill_cast") || !hasEvent(noop, "skill_cooldown_started") {
 		t.Fatalf("full-hp heal events = %+v, want cast plus cooldown", noop.Events)
+	}
+}
+
+func TestMagicStatScalesSkillDamageHealAndArea(t *testing.T) {
+	rules := loadRules(t)
+	magicBolt := rules.Skills[magicBoltSkillID]
+	heal := rules.Skills["heal"]
+
+	base := MustNewSim("sess_magic_skill_base", "01", rules)
+	base.progression.CharacterClass = "sorcerer"
+	base.progression.BaseStats.Magic = skillStatRequirementForRank(magicBolt, "magic", 1)
+	baseRange := base.scaleSkillDamageForMagic(magicBolt, 1, skillDamageRange(magicBolt, 1))
+
+	scaled := MustNewSim("sess_magic_skill_scaled", "01", rules)
+	scaled.progression.CharacterClass = "sorcerer"
+	scaled.progression.BaseStats.Magic = skillStatRequirementForRank(magicBolt, "magic", 1) + 50
+	scaledRange := scaled.scaleSkillDamageForMagic(magicBolt, 1, skillDamageRange(magicBolt, 1))
+
+	if scaledRange.Min <= baseRange.Min || scaledRange.Max <= baseRange.Max {
+		t.Fatalf("magic-scaled skill damage = %+v, want above base %+v", scaledRange, baseRange)
+	}
+
+	sim := MustNewSim("sess_magic_heal_scaled", "01", rules)
+	sim.progression.CharacterClass = "paladin"
+	sim.savePlayer(sim.defaultPlayer())
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest_magic", "char_guest_magic", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	sim.usePlayer(sim.players[hostID])
+	player := sim.entities[hostID]
+	guest := sim.entities[guestID]
+	effect := heal.Effects[0]
+	player.hp = player.maxHP / 2
+	guest.hp = guest.maxHP / 2
+	playerHPBefore := player.hp
+	guestHPBefore := guest.hp
+	player.mana = player.maxMana
+	sim.progression.BaseStats.Magic = skillStatRequirementForRank(heal, "magic", 1) + 50
+	sim.progression.SkillRanks["heal"] = 1
+	basePercent := skillEffectPercent(effect, 1)
+	scaledPercent := sim.scaleSkillPercentForMagic(heal, 1, effect, basePercent)
+	if scaledPercent <= basePercent {
+		t.Fatalf("magic-scaled heal percent = %d, want above base %d", scaledPercent, basePercent)
+	}
+	guest.pos = Vec2{X: player.pos.X + effect.Radius + 0.5, Y: player.pos.Y}
+	sim.savePlayer(sim.players[hostID])
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_magic_scaled_heal",
+		CorrelationID: "corr_magic_scaled_heal",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
+	}})
+	assertAck(t, cast, "cast_magic_scaled_heal")
+
+	expectedHeal := healAmountForTarget(&entity{hp: playerHPBefore, maxHP: player.maxHP}, scaledPercent)
+	if player.hp < playerHPBefore+expectedHeal {
+		t.Fatalf("magic-scaled heal hp = %d, want at least %d from scaled percent %d", player.hp, playerHPBefore+expectedHeal, scaledPercent)
+	}
+	if guest.hp <= guestHPBefore {
+		t.Fatalf("magic-scaled heal radius did not reach guest at %.2f from %.2f: hp=%d", effect.Radius+0.5, effect.Radius, guest.hp)
 	}
 }
 

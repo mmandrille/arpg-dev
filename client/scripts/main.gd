@@ -87,7 +87,7 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 	"consumable": Color("#ff8f70"),
 }
 const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
-const GROUND_EQUIPMENT_MODEL_SCALE := 0.25
+const GROUND_EQUIPMENT_MODEL_SCALE := 1.0
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
 const BOSS_PHASE_TICK_RATE := 10.0
 const BOSS_TELEGRAPH_MARKER_NAME := "BossTelegraphMarker"
@@ -4696,8 +4696,8 @@ func _make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D
 		return null
 	inst.name = "GroundModel_%s" % asset_id
 	inst.scale = Vector3.ONE * GROUND_EQUIPMENT_MODEL_SCALE
-	inst.position = Vector3(0.0, 0.16, 0.0)
-	inst.rotation_degrees = Vector3(0.0, 35.0, -18.0)
+	inst.position = Vector3(0.0, 0.52, 0.0)
+	inst.rotation_degrees = Vector3(0.0, 35.0, 0.0)
 	_apply_model_tint(inst, _ground_item_tint(rarity))
 	return inst
 

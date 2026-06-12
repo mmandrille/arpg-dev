@@ -1,0 +1,51 @@
+docs/as-built/v107_survival-reactive-unique-effects.md
+  s_ab63a63fb76fe1::t_09cc1f5cf9af42 1-20
+server/internal/game/sim.go
+  s_ab63a63fb76fe1::t_4a26d80d32af46 292,340,418
+  s_ab63a63fb76fe1::t_8554d0d73839f4 7223
+  s_ab63a63fb76fe1::t_51548680112f63 638,1402-1405,1445
+  s_ab63a63fb76fe1::t_25638550064863 4672,4676,4687
+  s_ab63a63fb76fe1::t_caa5c011d97250 2423,2427,2438
+  s_ab63a63fb76fe1::t_133f96c740008a 5073
+  s_ab63a63fb76fe1::t_76b9c268178802 1123
+tools/bot/scenarios/55_survival_reactive_unique_effects.json
+  s_ab63a63fb76fe1::t_f679796de6144c 4
+  s_ab63a63fb76fe1::t_5b81076e58305f 1-3,5,7-9,11-12,14-18,21-22
+  s_ab63a63fb76fe1::t_0ea7752fadfa8e 6,10,13,19-20
+docs/specs/v107_spec-survival-reactive-unique-effects.md
+  s_ab63a63fb76fe1::t_23dbef600ef84f 1-33
+server/internal/game/unique_survival_effects.go
+  s_ab63a63fb76fe1::t_fff3646a9e89e0 1-22,51-195,197-280,282-333
+  s_ab63a63fb76fe1::t_a9749a9fb59bd1 23-50
+  s_ab63a63fb76fe1::t_c20d9b978d48e0 196,281
+server/internal/game/unique_effects.go
+  s_ab63a63fb76fe1::t_596a2af19f9ffc 141-142
+  s_ab63a63fb76fe1::t_b5e59eb543186f 549-575
+server/internal/game/unique_effects_test.go
+  s_ab63a63fb76fe1::t_0cfd28d20dc9e6 235-242,245-273,276-300,303-305,308,311-319,323-328,330-340,342,344-352,374-392
+  s_ab63a63fb76fe1::t_d437dc488fb5af 320-322
+  s_ab63a63fb76fe1::t_023adb0986a260 309-310,341,343
+  s_ab63a63fb76fe1::t_69db9688ea1aa3 243-244,274-275,301-302,306-307,329
+PROGRESS.md
+  s_ab63a63fb76fe1::t_167f1c2aa966f8 275
+  s_ab63a63fb76fe1::t_09cc1f5cf9af42 15,18,128
+docs/plans/v107_2026-06-12-survival-reactive-unique-effects.md
+  s_ab63a63fb76fe1::t_23dbef600ef84f 1-8,18-30
+  s_ab63a63fb76fe1::t_09cc1f5cf9af42 9-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a902d25dac61d010e202541bdfbe5a585e1fed0c",
+  "prompts": {},
+  "sessions": {
+    "s_ab63a63fb76fe1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebddb-b253-72b0-9015-616d3b773776",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

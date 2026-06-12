@@ -1,0 +1,80 @@
+server/internal/game/sim.go
+  s_29a1252ff39199::t_df60e39317aed0 2506-2509,2525-2535
+  s_29a1252ff39199::t_b75a1e51af8614 6023
+shared/protocol/state_delta.v8.schema.json
+  s_29a1252ff39199::t_df60e39317aed0 177,588-593
+client/scripts/market_panel.gd
+  s_29a1252ff39199::t_1fc0967ad7934d 182
+  s_29a1252ff39199::t_08460d39cc9a6f 1-3,6,8-11,13,16-17,22-28,30-32,36,38-53,66-72,75,77-89,91-103,108,115,117,123-124,129,133,135-136,164-165,167-169,171-181,183-186,200,229,257,269,271-275,284,293,295-313
+  s_29a1252ff39199::t_142a7aa9f8f91f 4-5,7,12,14-15,18-21,29,33-35,37,54-65,73-74,76,90,104-107,109-114,116,118-122,125-128,130-132,134,137-163,166,170,187-199,201-228,230-256,258-268,270,276-283,285-292,294,314-320
+client/tests/test_item_visuals.gd
+  s_29a1252ff39199::t_6952e3d1edf81f 78-79,374-391
+server/internal/store/store_test.go
+  s_29a1252ff39199::t_4934c812daa85c 1199-1205
+client/scripts/main.gd
+  s_29a1252ff39199::t_ae589b335fdfce 3907-3914,3916-3921,4006-4012,4059-4061,4081
+  s_29a1252ff39199::t_f53836c01d3eed 23
+  s_29a1252ff39199::t_b96b86cc0a1092 4941-4977
+  s_29a1252ff39199::t_2c1b843d3348e2 942,3915,3967-3984
+  s_29a1252ff39199::t_4339cf12e1ec22 2993,3922-3934,3936-3944,3946-3961,3963-3966
+  s_29a1252ff39199::t_ee091563c1d7fa 2350,2495-2505
+  s_29a1252ff39199::t_845d59fd347b94 3935,3945,3962
+  s_29a1252ff39199::t_0d7a9bd5e791c8 4336-4337
+  s_29a1252ff39199::t_865ab130e1d09d 5252,5261
+  s_29a1252ff39199::t_0bcee913c184d5 5495
+  s_29a1252ff39199::t_516a612f06a2e0 224,4080
+  s_29a1252ff39199::t_dd718489fbf6d3 967,1168-1170,2070,2078-2079,2992,2994,3228
+  s_29a1252ff39199::t_e9dad0fbeb2cce 3985-4005
+server/internal/http/market.go
+  s_29a1252ff39199::t_38a277da887aa0 14,66-85
+server/internal/store/interfaces.go
+  s_29a1252ff39199::t_8a11009d751898 79
+shared/rules/interactables.v0.schema.json
+  s_29a1252ff39199::t_df60e39317aed0 23
+shared/rules/interactables.v0.json
+  s_29a1252ff39199::t_df60e39317aed0 45-49
+skills/showme/scripts/render_focus.py
+  s_29a1252ff39199::t_8876b005abdbbd 24,48-51
+server/internal/game/rules.go
+  s_29a1252ff39199::t_df60e39317aed0 1569
+tools/validate_shared.py
+  s_29a1252ff39199::t_516a612f06a2e0 2775
+skills/showme/scripts/visual_capture.gd
+  s_29a1252ff39199::t_0a1f2d195dd448 8,73-78,244-293,711-722
+server/internal/store/models.go
+  s_29a1252ff39199::t_50226dfe15232e 189-190
+  s_29a1252ff39199::t_8a11009d751898 187-188,191-192
+server/internal/store/repos.go
+  s_29a1252ff39199::t_d5c0c8da5e441d 1892-1893,1902
+  s_29a1252ff39199::t_954825cf68bdf8 1887-1891,1894-1901,1903-1907
+shared/protocol/session_snapshot.v8.schema.json
+  s_29a1252ff39199::t_df60e39317aed0 429,625-630
+client/scripts/market_panel.gd.uid
+  s_29a1252ff39199::t_17063bd3d90d19 1
+shared/rules/worlds.v0.json
+  s_29a1252ff39199::t_df60e39317aed0 537-541,611-614
+server/internal/game/bishop_test.go
+  s_29a1252ff39199::t_494feca9419964 5-26
+client/scripts/net_client.gd
+  s_29a1252ff39199::t_d3f582c9d5ab3a 242-250
+  s_29a1252ff39199::t_ec0f7e4e316d4e 251-259
+  s_29a1252ff39199::t_7d55206ea71e22 260-277
+server/internal/http/auth_session_test.go
+  s_29a1252ff39199::t_65e30cd94cc4da 604-614
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c9fe344df3ddf77a37ebffc6d0ff23fb06f6bff7",
+  "prompts": {},
+  "sessions": {
+    "s_29a1252ff39199": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbe8-cbaf-7ce0-9adc-89d49b7e4284",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

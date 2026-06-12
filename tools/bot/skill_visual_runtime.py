@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import replace
+import math
 import os
 from pathlib import Path
 from typing import Any
@@ -75,6 +76,27 @@ def skill_required_stats(skill_id: str, rank: int) -> dict[str, int]:
     return stats
 
 
+def skill_mana_cost(skill_id: str, rank: int) -> int:
+    mana = dict(dict(skill_rule(skill_id).get("cost", {})).get("mana", {}))
+    base = int(mana.get("base", 0))
+    per_rank = int(mana.get("per_rank", 0))
+    return base + max(0, rank - 1) * per_rank
+
+
+def magic_required_for_mana(mana_cost: int, root: Path = ROOT) -> int:
+    if mana_cost <= 0:
+        return 0
+    progression = load_json(root / "shared" / "rules" / "character_progression.v0.json")
+    max_mana = dict(dict(progression.get("derived_stats", {})).get("max_mana", {}))
+    base = float(max_mana.get("base", 0.0))
+    per_magic = float(max_mana.get("per_magic", 0.0))
+    minimum = float(max_mana.get("min", 0.0))
+    if per_magic <= 0:
+        return 0
+    required = max(float(mana_cost), minimum)
+    return max(0, int(math.ceil((required - base) / per_magic)))
+
+
 def base_stats_for_class(class_id: str, root: Path = ROOT) -> dict[str, int]:
     progression = load_json(root / "shared" / "rules" / "character_progression.v0.json")
     class_stats = dict(progression.get("classes", {}).get(class_id, {}).get("base_stats", {}))
@@ -95,7 +117,22 @@ def rank_assertion(entry: SkillDemoEntry, rank: int) -> dict[str, Any]:
 
 def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
-    if entry.kind in {"projectile_attack", "cold_projectile_attack", "cone_attack"}:
+    if entry.kind == "cone_attack":
+        steps.extend([
+            {"action": "move_until_player_position", "x": 7, "y": 5, "pathfind": True, "max_ticks": 220},
+            {
+                "action": "cast_skill",
+                "skill_id": entry.skill_id,
+                "direction": {"x": 1, "y": 0},
+                "event_type": "skill_cast",
+            },
+            {
+                "action": "wait_until_assertion",
+                "assertion": {"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1},
+                "timeout_s": 8,
+            },
+        ])
+    elif entry.kind in {"projectile_attack", "cold_projectile_attack"}:
         steps.extend([
             {"action": "move_until_player_position", "x": 4, "y": 5, "pathfind": True, "max_ticks": 220},
             {
@@ -151,6 +188,7 @@ def seed_skill_visual_character(
     stats = base_stats_for_class(entry.class_id)
     for stat, required in skill_required_stats(entry.skill_id, rank).items():
         stats[stat] = max(stats.get(stat, 0), required)
+    stats["magic"] = max(stats.get("magic", 0), magic_required_for_mana(skill_mana_cost(entry.skill_id, rank)))
     payload = {
         "level": level,
         "experience": 0,

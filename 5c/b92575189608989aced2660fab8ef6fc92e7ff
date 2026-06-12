@@ -1,0 +1,79 @@
+shared/i18n/en.json
+  s_c88be8e83fa4bc::t_8e0de84deb4350 26,66-67
+shared/i18n/es.json
+  s_c88be8e83fa4bc::t_8e0de84deb4350 9,64-65
+server/internal/game/sim.go
+  s_c88be8e83fa4bc::t_c55caa0e2f9d9c 5452-5465,5482-5488,5770,5827-5856
+docs/as-built/v98_rogue-class-foundation.md
+  s_c88be8e83fa4bc::t_2653223904e51e 1-41
+  s_c88be8e83fa4bc::t_2597d7aa45814d 42-45
+tools/assets/gen_glb.py
+  s_c88be8e83fa4bc::t_4a89cfc910a7d3 362-374,502
+client/tests/test_animation.gd
+  s_c88be8e83fa4bc::t_4b14f78d895775 221
+docs/specs/v98_spec-rogue-class-foundation.md
+  s_c88be8e83fa4bc::t_2238cb1a3b687a 1-2,4-71
+  s_c88be8e83fa4bc::t_2653223904e51e 3
+server/internal/http/starter_loadout_test.go
+  s_c88be8e83fa4bc::t_c55caa0e2f9d9c 25
+client/scripts/character_select_panel.gd
+  s_c88be8e83fa4bc::t_4b14f78d895775 37-44,47
+PROGRESS.md
+  s_c88be8e83fa4bc::t_2653223904e51e 15,18,257,427-431
+.maintainability/file-size-baseline.tsv
+  s_c88be8e83fa4bc::t_2597d7aa45814d 6,11,14,16,19,29,31-33
+shared/assets/class_presentations.v0.json
+  s_c88be8e83fa4bc::t_8e0de84deb4350 15-18
+shared/rules/character_progression.v0.json
+  s_c88be8e83fa4bc::t_8e0de84deb4350 21-24
+tools/validate_shared.py
+  s_c88be8e83fa4bc::t_9fff4c0409773a 530
+shared/assets/item_visuals.v0.json
+  s_c88be8e83fa4bc::t_41d9ed7727a84f 34-43
+tools/bot/test_protocol.py
+  s_c88be8e83fa4bc::t_ee1b57955ec5e1 467-478
+server/internal/game/game_test.go
+  s_c88be8e83fa4bc::t_a976c78f683ddc 213-218,3568-3599
+shared/assets/class_presentations.v0.schema.json
+  s_c88be8e83fa4bc::t_8e0de84deb4350 25
+client/assets/characters/rogue/rogue.glb.import
+  s_c88be8e83fa4bc::t_30c98c6668d9be 1-42
+client/scripts/class_icon.gd
+  s_c88be8e83fa4bc::t_4b14f78d895775 41-42,69-70,81-82,93-94,134-146
+server/internal/game/handlers.go
+  s_c88be8e83fa4bc::t_c55caa0e2f9d9c 713
+server/internal/http/starter_loadout.go
+  s_c88be8e83fa4bc::t_c55caa0e2f9d9c 40-45
+shared/rules/item_templates.v0.json
+  s_c88be8e83fa4bc::t_8e0de84deb4350 51-70
+docs/plans/v98_2026-06-12-rogue-class-foundation.md
+  s_c88be8e83fa4bc::t_2597d7aa45814d 59-64
+  s_c88be8e83fa4bc::t_2238cb1a3b687a 1-2,4-48,54-58,65-80,85-96,101-115,119-129,132-144,147-153,162-167
+  s_c88be8e83fa4bc::t_2653223904e51e 3,49-53,81-84,97-100,116-118,130-131,145-146,154-161
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_c88be8e83fa4bc::t_aea48e4b27b69a 10
+  s_c88be8e83fa4bc::t_ee1b57955ec5e1 1-9,11-16
+shared/assets/item_presentations.v0.json
+  s_c88be8e83fa4bc::t_8e0de84deb4350 98-102
+assets/manifests/assets.v0.json
+  s_c88be8e83fa4bc::t_4a89cfc910a7d3 56-65,67-68
+  s_c88be8e83fa4bc::t_18bc11ea6e8ffd 66
+client/tests/test_coop_client.gd
+  s_c88be8e83fa4bc::t_4b14f78d895775 336,342-346
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5cb92575189608989aced2660fab8ef6fc92e7ff",
+  "prompts": {},
+  "sessions": {
+    "s_c88be8e83fa4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfa-d65a-7650-81f2-89f916faeef8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

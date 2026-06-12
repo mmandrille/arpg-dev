@@ -1,0 +1,16 @@
+{
+  "id": "rogue_class_foundation",
+  "world_id": "vertical_slice",
+  "seed": "rogue_class_foundation_seed",
+  "character_class": "rogue",
+  "title": "Rogue class foundation",
+  "description": "Create a Rogue and prove the starter dual swords, health potion, and mana potion arrive through the normal inventory snapshot.",
+  "steps": [],
+  "assertions": [
+    { "type": "character_progression", "str": 4, "dex": 8, "vit": 5, "magic": 4 },
+    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_rogue_sword" },
+    { "type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "starter_rogue_sword" },
+    { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false },
+    { "type": "inventory_contains", "item_def_id": "blue_potion", "equipped": false }
+  ]
+}

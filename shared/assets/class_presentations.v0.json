@@ -12,6 +12,10 @@
     "paladin": {
       "icon": { "label": "P", "shape": "shield", "color": "#d9b44a", "accent": "#fff3ba" },
       "model": { "asset_id": "character_paladin_v0" }
+    },
+    "rogue": {
+      "icon": { "label": "R", "shape": "dagger", "color": "#3f8f6d", "accent": "#d7f2df" },
+      "model": { "asset_id": "character_rogue_v0" }
     }
   }
 }

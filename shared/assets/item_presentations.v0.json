@@ -95,6 +95,11 @@
       "icon": { "shape": "blade", "color": "#d1b457", "accent": "#fff1a8", "label": "Sw" },
       "ground": { "shape": "blade", "color": "#d1b457", "accent": "#fff1a8", "scale": 1.0 }
     },
+    "starter_rogue_sword": {
+      "family": "sword",
+      "icon": { "shape": "blade", "color": "#5aa883", "accent": "#d7f2df", "label": "Rg" },
+      "ground": { "shape": "blade", "color": "#5aa883", "accent": "#d7f2df", "scale": 0.95 }
+    },
     "starter_paladin_shield": {
       "family": "shield",
       "icon": { "shape": "shield", "color": "#9b8b4d", "accent": "#fff1a8", "label": "Sh" },

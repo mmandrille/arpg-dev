@@ -38,6 +38,8 @@ func _draw() -> void:
 			_draw_spark(center, radius)
 		"shield":
 			_draw_shield(center, radius)
+		"dagger":
+			_draw_dagger(center, radius)
 		_:
 			_draw_axe(center, radius)
 	draw_arc(center, radius, 0.0, TAU, 40, accent_color, 2.0, true)
@@ -64,6 +66,8 @@ static func _fallback_shape(next_class_id: String) -> String:
 			return "spark"
 		"paladin":
 			return "shield"
+		"rogue":
+			return "dagger"
 		_:
 			return "axe"
 
@@ -74,6 +78,8 @@ static func _fallback_color(next_class_id: String) -> String:
 			return "#5e8cff"
 		"paladin":
 			return "#d9b44a"
+		"rogue":
+			return "#3f8f6d"
 		_:
 			return "#c85f3d"
 
@@ -84,6 +90,8 @@ static func _fallback_accent(next_class_id: String) -> String:
 			return "#dce7ff"
 		"paladin":
 			return "#fff3ba"
+		"rogue":
+			return "#d7f2df"
 		_:
 			return "#ffd9a8"
 
@@ -123,3 +131,16 @@ func _draw_shield(center: Vector2, radius: float) -> void:
 	draw_polyline(shield, accent_color, 2.0, true)
 	draw_line(center + Vector2(0, -radius * 0.34), center + Vector2(0, radius * 0.48), accent_color, 2.0)
 	draw_line(center + Vector2(-radius * 0.30, -radius * 0.04), center + Vector2(radius * 0.30, -radius * 0.04), accent_color, 2.0)
+
+
+func _draw_dagger(center: Vector2, radius: float) -> void:
+	var blade := PackedVector2Array([
+		center + Vector2(0, -radius * 0.76),
+		center + Vector2(radius * 0.18, radius * 0.12),
+		center + Vector2(0, radius * 0.30),
+		center + Vector2(-radius * 0.18, radius * 0.12),
+	])
+	draw_colored_polygon(blade, fill_color)
+	draw_polyline(blade, accent_color, 2.0, true)
+	draw_line(center + Vector2(-radius * 0.38, radius * 0.22), center + Vector2(radius * 0.38, radius * 0.22), accent_color, 3.0)
+	draw_line(center + Vector2(0, radius * 0.28), center + Vector2(0, radius * 0.64), accent_color, 4.0)

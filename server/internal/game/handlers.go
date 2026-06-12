@@ -710,7 +710,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "not_equippable")
 		return
 	}
-	if !slotAcceptsItemSlot(in.Equip.Slot, itemSlot) {
+	if !s.slotAcceptsItem(in.Equip.Slot, item, itemSlot) {
 		res.reject(in.MessageID, "wrong_slot")
 		return
 	}

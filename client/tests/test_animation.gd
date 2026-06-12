@@ -218,7 +218,7 @@ func _test_character_scene() -> void:
 
 
 func _test_class_character_models() -> void:
-	for class_id in ["barbarian", "sorcerer", "paladin"]:
+	for class_id in ["barbarian", "sorcerer", "paladin", "rogue"]:
 		var resolved := ClassPresentationsLoaderScript.resolve(class_id)
 		_assert(str(resolved.get("asset_id", "")) == "character_%s_v0" % class_id, "%s model asset mismatch: %s" % [class_id, resolved])
 		var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)

@@ -527,7 +527,7 @@ def cross_checks(report: Report) -> None:
         report.ok("character_progression base_stats are valid")
 
     class_defs = character_progression.get("classes", {})
-    expected_classes = {"barbarian", "sorcerer", "paladin"}
+    expected_classes = {"barbarian", "sorcerer", "paladin", "rogue"}
     if set(class_defs) != expected_classes:
         report.fail("character_progression classes", f"must define exactly {sorted(expected_classes)}")
     else:

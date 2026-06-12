@@ -18,6 +18,10 @@
     "paladin": {
       "name": "Paladin",
       "base_stats": { "str": 6, "dex": 4, "vit": 8, "magic": 5 }
+    },
+    "rogue": {
+      "name": "Rogue",
+      "base_stats": { "str": 4, "dex": 8, "vit": 5, "magic": 4 }
     }
   },
   "points_per_level": 3,

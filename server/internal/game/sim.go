@@ -5449,6 +5449,20 @@ func slotAcceptsItemSlot(slot, itemSlot string) bool {
 	return slot == itemSlot
 }
 
+func (s *Sim) slotAcceptsItem(slot string, item *invItem, itemSlot string) bool {
+	if slotAcceptsItemSlot(slot, itemSlot) {
+		return true
+	}
+	return slot == offHandSlot && itemSlot == mainHandSlot && s.canOffhandWeapon(item)
+}
+
+func (s *Sim) canOffhandWeapon(item *invItem) bool {
+	if s.progression.CharacterClass != "rogue" || item == nil {
+		return false
+	}
+	return s.itemHandedness(item) == "one_handed" && s.itemAttackMode(item) == attackModeMelee
+}
+
 func (s *Sim) itemOccupiesHands(item *invItem) []string {
 	if item == nil {
 		return nil
@@ -5463,6 +5477,13 @@ func (s *Sim) itemOccupiesHands(item *invItem) []string {
 		return cloneStringSlice(def.OccupiesHands)
 	}
 	return nil
+}
+
+func (s *Sim) itemOccupiesHandsForSlot(slot string, item *invItem) []string {
+	if slot == offHandSlot && s.canOffhandWeapon(item) {
+		return []string{offHandSlot}
+	}
+	return s.itemOccupiesHands(item)
 }
 
 func validHotbarSlot(slotIndex int) bool {
@@ -5746,7 +5767,7 @@ func (s *Sim) slotsClearedByEquip(slot string, item *invItem) []string {
 		out = append(out, candidate)
 	}
 	add(slot)
-	for _, occupied := range s.itemOccupiesHands(item) {
+	for _, occupied := range s.itemOccupiesHandsForSlot(slot, item) {
 		add(occupied)
 	}
 	sort.Strings(out)
@@ -5801,6 +5822,38 @@ func (s *Sim) playerAttackMode() string {
 		return attackModeMelee
 	}
 	return def.AttackMode
+}
+
+func (s *Sim) itemHandedness(item *invItem) string {
+	if item == nil {
+		return ""
+	}
+	if item.rollPayload != nil {
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok {
+			return template.Handedness
+		}
+		return ""
+	}
+	if def, ok := s.rules.Items[item.itemDefID]; ok {
+		return def.Handedness
+	}
+	return ""
+}
+
+func (s *Sim) itemAttackMode(item *invItem) string {
+	if item == nil {
+		return ""
+	}
+	if item.rollPayload != nil {
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok && template.AttackMode != "" {
+			return template.AttackMode
+		}
+		return attackModeMelee
+	}
+	if def, ok := s.rules.Items[item.itemDefID]; ok && def.AttackMode != "" {
+		return def.AttackMode
+	}
+	return attackModeMelee
 }
 
 func (s *Sim) equippedWeaponDef() (ItemDef, bool) {

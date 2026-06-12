@@ -86,13 +86,14 @@ func show_choose_or_create(characters: Array, title: String = "Choose Character"
 	_sync_viewport_size()
 	visible = true
 	_characters = characters.duplicate(true)
+	_sort_characters_for_picker(_characters)
 	_delete_mode = true
 	_mode = MODE_CHOOSE_OR_CREATE
 	_title.text = title
 	_name_edit.text = ""
 	_set_create_entry_expanded(false, "New character name")
 	_error_label.text = ""
-	_render_characters(characters)
+	_render_characters(_characters)
 
 
 func show_forced_create(title: String = "Create Character") -> void:
@@ -293,10 +294,9 @@ func _render_characters(characters: Array) -> void:
 		class_icon.configure(class_id)
 		class_icon.tooltip_text = _class_tooltip(class_id)
 		row.add_child(class_icon)
+
 		var select_btn := Button.new()
 		var label := _character_row_label(character)
-		if dead:
-			label = "☠  " + label
 		select_btn.text = label
 		select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select_btn.disabled = dead
@@ -309,16 +309,27 @@ func _render_characters(characters: Array) -> void:
 		)
 		row.add_child(select_btn)
 		if _delete_mode:
-			var rename_btn := Button.new()
-			rename_btn.text = "✎"
-			rename_btn.tooltip_text = "Rename character"
-			rename_btn.custom_minimum_size = Vector2(38, 38)
-			rename_btn.focus_mode = Control.FOCUS_NONE
-			var rename_character_id := str(character.get("character_id", ""))
-			rename_btn.pressed.connect(func() -> void:
-				_prompt_rename(rename_character_id, name)
-			)
-			row.add_child(rename_btn)
+			if dead:
+				var skull_btn := Button.new()
+				skull_btn.text = "☠"
+				skull_btn.tooltip_text = "Dead hero"
+				skull_btn.custom_minimum_size = Vector2(50, 38)
+				skull_btn.focus_mode = Control.FOCUS_NONE
+				skull_btn.disabled = true
+				skull_btn.add_theme_font_size_override("font_size", 48)
+				skull_btn.add_theme_color_override("font_disabled_color", Color("#e8dcc8"))
+				row.add_child(skull_btn)
+			else:
+				var rename_btn := Button.new()
+				rename_btn.text = "✎"
+				rename_btn.tooltip_text = "Rename character"
+				rename_btn.custom_minimum_size = Vector2(38, 38)
+				rename_btn.focus_mode = Control.FOCUS_NONE
+				var rename_character_id := str(character.get("character_id", ""))
+				rename_btn.pressed.connect(func() -> void:
+					_prompt_rename(rename_character_id, name)
+				)
+				row.add_child(rename_btn)
 
 			var delete_btn := Button.new()
 			delete_btn.text = "🗑"
@@ -331,6 +342,26 @@ func _render_characters(characters: Array) -> void:
 			)
 			row.add_child(delete_btn)
 		_rows.add_child(row)
+
+
+func _sort_characters_for_picker(characters: Array) -> void:
+	characters.sort_custom(func(a, b) -> bool:
+		if typeof(a) != TYPE_DICTIONARY:
+			return false
+		if typeof(b) != TYPE_DICTIONARY:
+			return true
+		var a_rec := a as Dictionary
+		var b_rec := b as Dictionary
+		var a_dead := bool(a_rec.get("dead", false))
+		var b_dead := bool(b_rec.get("dead", false))
+		if a_dead != b_dead:
+			return not a_dead
+		var a_level := _character_level(a_rec)
+		var b_level := _character_level(b_rec)
+		if a_level != b_level:
+			return a_level > b_level
+		return str(a_rec.get("created_at", "")) < str(b_rec.get("created_at", ""))
+	)
 
 
 func _set_create_entry_expanded(expanded: bool, placeholder: String) -> void:
@@ -485,6 +516,10 @@ func _character_depth(character: Dictionary) -> int:
 	return max(0, int(character.get("deepest_dungeon_depth", 0)))
 
 
+func _character_death_level(character: Dictionary) -> int:
+	return int(character.get("death_level", 0))
+
+
 func _character_status(character: Dictionary) -> String:
 	if bool(character.get("dead", false)):
 		return TextCatalogScript.get_text("common.dead", "Dead")
@@ -531,6 +566,12 @@ func _class_tooltip(class_id: String) -> String:
 
 func _character_row_label(character: Dictionary) -> String:
 	var name := str(character.get("name", "Hero"))
+	if bool(character.get("dead", false)):
+		return "%s  %s  Body L%d" % [
+			_class_name(_character_class_id(character)),
+			name,
+			_character_death_level(character),
+		]
 	return "%s  %s  Lv %d | %dg | D%d | %s" % [
 		_class_name(_character_class_id(character)),
 		name,
@@ -550,6 +591,8 @@ func _character_row_tooltip(character: Dictionary) -> String:
 		"%s %d" % [TextCatalogScript.get_text("character.deepest_depth", "Deepest depth"), _character_depth(character)],
 		"%s %s" % [TextCatalogScript.get_text("character.status", "Status"), _character_status(character)],
 	]
+	if bool(character.get("dead", false)):
+		lines.append("Body level %d" % _character_death_level(character))
 	if created != "":
 		lines.append("Created %s" % created.left(10))
 	return "\n".join(lines)
@@ -568,10 +611,11 @@ func _debug_character_rows() -> Array:
 			"class_name": _class_name(_character_class_id(rec)),
 			"class_tooltip": _class_tooltip(_character_class_id(rec)),
 			"dead": bool(rec.get("dead", false)),
-			"level": _character_level(rec),
-			"gold": _character_gold(rec),
-			"deepest_dungeon_depth": _character_depth(rec),
-			"status": _character_status(rec),
+				"level": _character_level(rec),
+				"gold": _character_gold(rec),
+				"deepest_dungeon_depth": _character_depth(rec),
+				"death_level": _character_death_level(rec),
+				"status": _character_status(rec),
 			"label": _character_row_label(rec),
 			"tooltip": _character_row_tooltip(rec),
 		})

@@ -1204,6 +1204,14 @@ func _apply_delta(p: Dictionary) -> void:
 			if stash_panel != null and stash_panel.visible:
 				stash_panel.show_status("Item withdrawn")
 			continue
+		if event_type == "corpse_opened":
+			_show_corpse_panel(ev)
+			continue
+		if event_type == "corpse_item_recovered":
+			_show_corpse_panel(ev)
+			if stash_panel != null and stash_panel.visible:
+				stash_panel.show_status("Item recovered")
+			continue
 		if event_type == "stash_gold_deposited" and stash_panel != null and stash_panel.visible:
 			stash_panel.show_status("Stored %d gold" % int(ev.get("amount", 0)))
 			continue
@@ -3984,6 +3992,27 @@ func _show_stash_panel(ev: Dictionary) -> void:
 	_raise_gameplay_windows()
 
 
+func _show_corpse_panel(ev: Dictionary) -> void:
+	if stash_panel == null:
+		return
+	_close_gameplay_panels("stash_with_inventory")
+	var next_entity_id := str(ev.get("entity_id", ""))
+	var corpse_name := str(ev.get("corpse_name", "Hero"))
+	var corpse_items: Array = ev.get("corpse_items", [])
+	if inventory_panel != null:
+		inventory_panel.ensure_display_visible()
+	stash_panel.show_corpse(
+		next_entity_id,
+		corpse_name,
+		corpse_items,
+		inventory,
+		equipped,
+		gold,
+		hotbar
+	)
+	_raise_gameplay_windows()
+
+
 func _hide_stash_panel() -> void:
 	if stash_panel != null:
 		stash_panel.hide_display()
@@ -4138,6 +4167,45 @@ func _stash_title(next_stash_id: String) -> String:
 			return "Account Stash"
 		_:
 			return next_stash_id.replace("_", " ").capitalize()
+
+
+func _make_hero_corpse_node(e: Dictionary) -> Node3D:
+	var root := Node3D.new()
+	root.name = "HeroCorpse_%s" % str(e.get("corpse_character_id", e.get("id", "")))
+	var body := CharacterScene.instantiate() as Node3D
+	body.name = "FallenHeroBody"
+	body.rotation_degrees = Vector3(0.0, 0.0, -88.0)
+	body.position = Vector3(0.05, 0.18, 0.0)
+	body.scale = Vector3.ONE * 0.82
+	_apply_model_tint(body, Color("#d4af37"))
+	root.add_child(body)
+
+	var shadow := MeshInstance3D.new()
+	shadow.name = "CorpseShadow"
+	var shadow_mesh := CylinderMesh.new()
+	shadow_mesh.top_radius = 0.75
+	shadow_mesh.bottom_radius = 0.75
+	shadow_mesh.height = 0.025
+	shadow.mesh = shadow_mesh
+	shadow.scale.z = 0.48
+	shadow.position = Vector3(0.0, 0.015, 0.0)
+	var shadow_mat := StandardMaterial3D.new()
+	shadow_mat.albedo_color = Color("#171412")
+	shadow.material_override = shadow_mat
+	root.add_child(shadow)
+
+	var marker := Label3D.new()
+	marker.name = "CorpseMarker"
+	var corpse_name := str(e.get("corpse_name", "Hero"))
+	var corpse_level := int(e.get("corpse_level", 0))
+	marker.text = "%s Lv %d" % [corpse_name, corpse_level] if corpse_level > 0 else corpse_name
+	marker.font_size = 28
+	marker.modulate = Color("#e8dcc8")
+	marker.outline_size = 10
+	marker.position = Vector3(0.0, 1.15, 0.0)
+	marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	root.add_child(marker)
+	return root
 
 
 func _sync_waypoint_panel_reach() -> void:
@@ -4435,6 +4503,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_teleporter_node()
 		if def_id == "treasure_chest" or def_id == "town_stash":
 			return _make_chest_node(def_id)
+		if def_id == "hero_corpse":
+			return _make_hero_corpse_node(e)
 		if def_id == "town_vendor" or def_id == "town_mystery_seller":
 			return _make_merchant_node(def_id)
 		if def_id == "town_bishop":

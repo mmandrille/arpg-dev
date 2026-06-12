@@ -35,6 +35,8 @@ var stash_title: String = "Account Stash"
 var stash_items: Array = []
 var stash_gold: int = 0
 var stash_capacity: int = 50
+var container_mode: String = "stash"
+var container_label: String = "Stash"
 var inventory: Array = []
 var equipped: Dictionary = {}
 var hotbar: Array = []
@@ -52,6 +54,7 @@ var _gold_label: Label
 var _status_label: Label
 var _search_field: LineEdit
 var _sort_option: OptionButton
+var _section_title_label: Label
 var _stash_grid: GridContainer
 var _withdraw_buttons: Dictionary = {}
 var _deposit_gold_button: Button
@@ -115,7 +118,29 @@ func show_stash(next_entity_id: String, next_stash_id: String, next_items: Array
 	stash_entity_id = next_entity_id
 	stash_id = next_stash_id
 	stash_title = next_title
+	container_mode = "stash"
+	container_label = "Stash"
 	set_stash_state(next_items, next_stash_gold, next_capacity)
+	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
+	visible = true
+	_apply_interaction_filters()
+	_render()
+
+
+func show_corpse(next_entity_id: String, corpse_name: String, corpse_items: Array, next_inventory: Array, next_equipped: Dictionary, next_gold: int, next_hotbar: Array = []) -> void:
+	stash_entity_id = next_entity_id
+	stash_id = "hero_corpse"
+	stash_title = "%s's Body" % corpse_name if corpse_name != "" else "Hero Body"
+	container_mode = "corpse"
+	container_label = "Corpse"
+	var mapped_items := []
+	for item in corpse_items:
+		if typeof(item) != TYPE_DICTIONARY:
+			continue
+		var rec := (item as Dictionary).duplicate(true)
+		rec["stash_item_id"] = str(rec.get("item_instance_id", rec.get("stash_item_id", "")))
+		mapped_items.append(rec)
+	set_stash_state(mapped_items, 0, mapped_items.size())
 	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
 	visible = true
 	_apply_interaction_filters()
@@ -161,6 +186,7 @@ func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"stash_id": stash_id,
+		"container_mode": container_mode,
 		"stash_entity_id": stash_entity_id,
 		"gold": gold,
 		"stash_gold": stash_gold,
@@ -292,7 +318,8 @@ func _build() -> void:
 	)
 	filters.add_child(_sort_option)
 
-	root.add_child(_section_label("Stash"))
+	_section_title_label = _section_label("Stash")
+	root.add_child(_section_title_label)
 	var stash_scroll := ScrollContainer.new()
 	stash_scroll.custom_minimum_size = Vector2(
 		COLUMNS * SLOT_SIZE.x + (COLUMNS - 1) * SLOT_GAP + 18,
@@ -324,7 +351,11 @@ func _render() -> void:
 	_withdraw_buttons = {}
 	_title_label.text = stash_title
 	_panel.configure(stash_title, Vector2(PANEL_SIZE.x - 28, PANEL_SIZE.y - 58))
-	_gold_label.text = "%d / %d gold" % [gold, stash_gold]
+	_gold_label.text = "%d / %d gold" % [gold, stash_gold] if container_mode == "stash" else "%d gold" % gold
+	if _section_title_label != null:
+		_section_title_label.text = container_label
+	if _search_field != null:
+		_search_field.placeholder_text = "Search corpse" if container_mode == "corpse" else "Search stash"
 	if _search_field != null and _search_field.text != _search_text:
 		_search_field.text = _search_text
 	if _sort_option != null:
@@ -341,10 +372,12 @@ func _render() -> void:
 		_fill_slot(slot, item, "stash")
 		_stash_grid.add_child(slot)
 
-	if _deposit_gold_button != null:
-		_deposit_gold_button.disabled = not _interactive or stash_entity_id == "" or gold <= 0
-	if _withdraw_gold_button != null:
-		_withdraw_gold_button.disabled = not _interactive or stash_entity_id == "" or stash_gold <= 0
+		if _deposit_gold_button != null:
+			_deposit_gold_button.visible = container_mode == "stash"
+			_deposit_gold_button.disabled = not _interactive or container_mode != "stash" or stash_entity_id == "" or gold <= 0
+		if _withdraw_gold_button != null:
+			_withdraw_gold_button.visible = container_mode == "stash"
+			_withdraw_gold_button.disabled = not _interactive or container_mode != "stash" or stash_entity_id == "" or stash_gold <= 0
 
 
 func _section_label(text: String) -> Label:
@@ -426,6 +459,12 @@ func _emit_deposit(item: Dictionary) -> void:
 
 func _emit_withdraw(item: Dictionary) -> void:
 	if stash_entity_id == "" or item.is_empty():
+		return
+	if container_mode == "corpse":
+		intent_requested.emit("corpse_withdraw_item_intent", {
+			"corpse_entity_id": stash_entity_id,
+			"item_instance_id": str(item.get("item_instance_id", item.get("stash_item_id", ""))),
+		})
 		return
 	intent_requested.emit("stash_withdraw_item_intent", {
 		"stash_entity_id": stash_entity_id,

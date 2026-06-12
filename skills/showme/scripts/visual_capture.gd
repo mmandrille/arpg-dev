@@ -75,6 +75,10 @@ func _initialize() -> void:
 			await _setup_town()
 		"inventory":
 			await _setup_inventory()
+		"corpse":
+			await _setup_corpse()
+		"corpse-inventory":
+			await _setup_corpse_inventory()
 		"skills":
 			await _setup_skills()
 		"shop":
@@ -211,6 +215,63 @@ func _setup_inventory() -> void:
 	get_root().add_child(tooltip)
 
 
+func _setup_corpse() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackCorpse"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(2.6, 2.6, 3.2), Vector3(0.0, 0.55, 0.0), 2.6)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "dungeon_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(3.2, 0.04, 2.6)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.03, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#3d3a35")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var main: Node3D = MainScript.new()
+	var corpse: Node3D = main._make_entity_node({
+		"id": "1017",
+		"type": "interactable",
+		"interactable_def_id": "hero_corpse",
+		"corpse_character_id": "char_dead",
+		"corpse_name": "Fallen",
+		"corpse_level": 2,
+		"corpse_item_count": 3,
+	})
+	corpse.name = "PreviewHeroCorpse"
+	root.add_child(corpse)
+	_subject = corpse
+
+
+func _setup_corpse_inventory() -> void:
+	var inventory_panel = InventoryPanelScript.new()
+	get_root().add_child(inventory_panel)
+	var corpse_panel = preload("res://scripts/stash_panel.gd").new()
+	get_root().add_child(corpse_panel)
+	await process_frame
+
+	var inventory := [
+		{"item_instance_id": "3001", "item_def_id": "starter_paladin_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "3002", "item_def_id": "red_potion", "slot": "", "equipped": false, "rarity": "common"},
+	]
+	var equipped := {"main_hand": "3001"}
+	var corpse_items := [
+		{"item_instance_id": "4001", "item_def_id": "cave_blade", "display_name": "Fallen Cave Blade", "slot": "main_hand", "equipped": true, "rarity": "magic", "rolled_stats": {"damage_min": 3, "damage_max": 6}},
+		{"item_instance_id": "4002", "item_def_id": "cave_boots", "display_name": "Fallen Boots", "slot": "boots", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "4003", "item_def_id": "cave_ring", "display_name": "Fallen Ring", "slot": "ring_left", "equipped": false, "rarity": "rare", "rolled_stats": {"max_hp": 4}},
+	]
+
+	inventory_panel.set_inventory_state(inventory, equipped, 3, 15, 82)
+	inventory_panel.ensure_display_visible()
+	corpse_panel.show_corpse("1017", "Fallen", corpse_items, inventory, equipped, 82, [])
+
+
 func _setup_floor_item() -> void:
 	var root := Node3D.new()
 	root.name = "VisualFeedbackFloorItem"
@@ -343,7 +404,7 @@ func _setup_character_menu() -> void:
 	await process_frame
 	panel.show_choose_or_create([
 		{"character_id": "char_1", "name": "Astra", "created_at": "2026-06-09T00:00:00Z", "dead": false, "level": 4, "gold": 128, "deepest_dungeon_depth": 3},
-		{"character_id": "char_2", "name": "Fallen", "created_at": "2026-06-08T00:00:00Z", "dead": true, "level": 2, "gold": 44, "deepest_dungeon_depth": 1},
+		{"character_id": "char_2", "name": "Fallen", "created_at": "2026-06-08T00:00:00Z", "dead": true, "death_level": -3, "level": 2, "gold": 44, "deepest_dungeon_depth": 1},
 	], "Choose Character")
 	panel.submit_name()
 

@@ -36,6 +36,7 @@
         "stash_withdraw_item_intent",
         "stash_deposit_gold_intent",
         "stash_withdraw_gold_intent",
+        "corpse_withdraw_item_intent",
         "session_snapshot",
         "state_delta",
         "intent_accepted",
@@ -102,6 +103,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_deposit_gold_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_withdraw_gold_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_withdraw_gold_intent" } } } },
+    { "if": { "properties": { "type": { "const": "corpse_withdraw_item_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/corpse_withdraw_item_intent" } } } },
     { "if": { "properties": { "type": { "const": "intent_accepted" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/intent_accepted" } } } },
     { "if": { "properties": { "type": { "const": "intent_rejected" } } },
@@ -335,6 +338,15 @@
       "properties": {
         "stash_entity_id": { "$ref": "#/$defs/decimal_id" },
         "stash_item_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "corpse_withdraw_item_intent": {
+      "type": "object",
+      "required": ["corpse_entity_id", "item_instance_id"],
+      "additionalProperties": false,
+      "properties": {
+        "corpse_entity_id": { "$ref": "#/$defs/decimal_id" },
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" }
       }
     },
     "stash_deposit_gold_intent": {

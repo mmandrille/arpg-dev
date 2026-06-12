@@ -19,7 +19,7 @@ type CharacterRepo interface {
 	ListCharacters(ctx context.Context, accountID string) ([]CharacterSummary, error)
 	CreateCharacter(ctx context.Context, charID, accountID, name, characterClass string) (Character, error)
 	RenameCharacter(ctx context.Context, accountID, characterID, name string) (Character, error)
-	MarkCharacterDead(ctx context.Context, accountID, characterID string) error
+	MarkCharacterDead(ctx context.Context, accountID, characterID string, deathLevel int) error
 	DeleteCharacter(ctx context.Context, accountID, characterID string) error
 }
 
@@ -69,6 +69,8 @@ type CharacterProgressionRepo interface {
 	TransferAccountStashItemToCharacter(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID string) (CharacterItemInstance, error)
 	TransferCharacterGoldToAccountStash(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
 	TransferAccountStashGoldToCharacter(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
+	ListRecoverableCharacterCorpses(ctx context.Context, accountID, excludeCharacterID string) ([]CharacterCorpse, error)
+	TransferCorpseItemToCharacter(ctx context.Context, accountID, corpseCharacterID, targetCharacterID, corpseItemID, newItemID string) (CharacterItemInstance, error)
 	UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, costGold, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, error)
 	ListActiveMarketListings(ctx context.Context) ([]MarketListing, error)
 	CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string) (MarketListing, error)

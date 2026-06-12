@@ -41,6 +41,7 @@ const (
 	treasureChestDefID             = "treasure_chest"
 	townStashDefID                 = "town_stash"
 	accountStashID                 = "account_stash"
+	heroCorpseDefID                = "hero_corpse"
 	worldModeMultiLevel            = "multi_level"
 	attackModeMelee                = "melee"
 	attackModeRanged               = "ranged"
@@ -130,6 +131,10 @@ type entity struct {
 	interactableDefID     string
 	state                 string
 	lootTable             string
+	corpseCharacterID     string
+	corpseName            string
+	corpseLevel           int
+	corpseItemCount       int
 	ownerID               uint64
 	targetID              uint64
 	projectileDefID       string
@@ -344,6 +349,7 @@ type Sim struct {
 	stashItems            []*stashItem
 	stashGold             int
 	stashCapacity         int
+	corpses               map[string]*corpseState
 	hpRegenCarry          float64
 	manaRegenCarry        float64
 	nextBasicAttackTick   uint64
@@ -1494,6 +1500,7 @@ type Input struct {
 	StashWithdrawItem  *StashWithdrawItemIntent
 	StashDepositGold   *StashDepositGoldIntent
 	StashWithdrawGold  *StashWithdrawGoldIntent
+	CorpseWithdrawItem *CorpseWithdrawItemIntent
 }
 
 // Intent payloads.
@@ -1579,6 +1586,10 @@ type (
 	StashWithdrawGoldIntent struct {
 		StashEntityID string
 		Amount        int
+	}
+	CorpseWithdrawItemIntent struct {
+		CorpseEntityID string
+		ItemInstanceID string
 	}
 )
 
@@ -2036,6 +2047,7 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		monster.id = s.alloc()
 		level.entities[monster.id] = monster
 	}
+	s.spawnCorpsesOnLevel(level)
 	return nil
 }
 
@@ -2091,6 +2103,10 @@ func (s *Sim) dispatchAction(target *entity, in Input, res *TickResult, ack bool
 	case lootEntity:
 		s.pickUpTarget(target, in, res, ack)
 	case interactableEntity:
+		if target.interactableDefID == heroCorpseDefID {
+			s.openCorpse(target, in, res, ack)
+			return
+		}
 		s.activateInteractable(target, in, res, ack)
 	default:
 		res.reject(in.MessageID, "invalid_target")
@@ -6150,6 +6166,9 @@ func (s *Sim) actionable(e *entity) bool {
 	case lootEntity:
 		return true
 	case interactableEntity:
+		if e.interactableDefID == heroCorpseDefID {
+			return e.state == interactableReady
+		}
 		if e.interactableDefID == teleporterDefID && (e.state == interactableReady || e.state == interactableLocked || e.state == interactableDisabled) {
 			return true
 		}
@@ -7505,6 +7524,15 @@ func (e *entity) view() EntityView {
 	case interactableEntity:
 		ev.InteractableDefID = e.interactableDefID
 		ev.State = e.state
+		if e.interactableDefID == heroCorpseDefID {
+			ev.CorpseCharacterID = e.corpseCharacterID
+			ev.CorpseName = e.corpseName
+			if e.corpseLevel > 0 {
+				ev.CorpseLevel = e.corpseLevel
+			}
+			count := e.corpseItemCount
+			ev.CorpseItemCount = &count
+		}
 	case projectileEntity:
 		ev.OwnerID = idStr(e.ownerID)
 		if e.targetID != 0 {

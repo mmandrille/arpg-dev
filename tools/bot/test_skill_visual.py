@@ -8,8 +8,10 @@ from tools.bot.skill_visual_runtime import (
     POST_CAST_HOLD_TICKS,
     build_assertions,
     build_steps,
+    magic_required_for_mana,
     seed_skill_visual_character,
     selected_skill_visual_level,
+    skill_mana_cost,
     skill_required_stats,
 )
 
@@ -125,6 +127,31 @@ def test_skill_visual_seed_payload_sets_rank_level_and_required_stats() -> None:
     assert client.payload["experience"] == 0
     assert client.payload["skill_ranks"] == {"holy_shield": 5}
     assert client.payload["stats"] == {"str": 6, "dex": 4, "vit": 13, "magic": 13}
+
+
+def test_skill_visual_seed_payload_covers_ranked_mana_cost() -> None:
+    class Response:
+        def raise_for_status(self) -> None:
+            pass
+
+    class Client:
+        def __init__(self) -> None:
+            self.payload: dict[str, object] = {}
+
+        def put(self, url: str, *, headers: dict[str, str], json: dict[str, object]) -> Response:
+            self.payload = json
+            return Response()
+
+    entry = next(entry for entry in all_skill_demo_entries() if entry.skill_id == "cleave")
+    client = Client()
+
+    seed_skill_visual_character(client, "access", "debug", "char_123", entry, rank=5, level=5)  # type: ignore[arg-type]
+
+    stats = client.payload["stats"]
+    assert isinstance(stats, dict)
+    mana_cost = skill_mana_cost("cleave", 5)
+    assert mana_cost == 12
+    assert stats["magic"] >= magic_required_for_mana(mana_cost)
 
 
 def test_print_skill_visual_matrix(capsys: pytest.CaptureFixture[str]) -> None:

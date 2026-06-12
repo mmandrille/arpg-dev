@@ -1,0 +1,86 @@
+docs/as-built/v89_class-second-combat-skills.md
+  s_5e45ef83ebf19d::t_f7f063aa1f3663 33
+  s_5e45ef83ebf19d::t_585635da48ccf7 1-25,27-30,34-40
+  s_5e45ef83ebf19d::t_89749c3df19817 26,31-32
+tools/bot/skill_visual_runtime.py
+  s_5e45ef83ebf19d::t_e5bdd678d7787f 98,129
+client/scripts/main.gd
+  s_5e45ef83ebf19d::t_a57cdcfa11eaa5 1589-1638
+  s_5e45ef83ebf19d::t_371bf456c98582 1012-1013,4077-4078
+shared/protocol/state_delta.v8.schema.json
+  s_5e45ef83ebf19d::t_e5bdd678d7787f 342-345
+shared/protocol/session_snapshot.v8.schema.json
+  s_5e45ef83ebf19d::t_e5bdd678d7787f 424-427
+server/internal/game/rules.go
+  s_5e45ef83ebf19d::t_d36301b6858f30 508-510,563-588,2659,2673-2685,2731-2767
+client/scripts/player_status_effect_markers.gd
+  s_5e45ef83ebf19d::t_371bf456c98582 5,52-54
+docs/plans/v89_2026-06-12-class-second-combat-skills.md
+  s_5e45ef83ebf19d::t_1441278e9bcda6 1-2,4-44,50-51,54,60-75,77,79,81,84-95,98,100,102,104,106-120,122,124,127-142,144,146,149-163,166,168-175,185-192
+  s_5e45ef83ebf19d::t_89749c3df19817 183-184
+  s_5e45ef83ebf19d::t_379253afcbb88a 3,76,78,80,82-83,96-97,99,101,103,105,121,123,125-126,143,145,147-148,164-165,167,177-182
+  s_5e45ef83ebf19d::t_f7f063aa1f3663 45-49,52-53,55-59,176
+tools/bot/skill_demo.py
+  s_5e45ef83ebf19d::t_e5bdd678d7787f 91-93
+server/internal/game/game_test.go
+  s_5e45ef83ebf19d::t_63e2be6deec2db 1119-1120,1123-1124,1129-1130,1136,1142
+  s_5e45ef83ebf19d::t_7e879a50b36602 1037-1046,1052-1102,1108-1118,1121-1122,1125-1128,1131-1135,1137-1141,1143-1145
+  s_5e45ef83ebf19d::t_f7bca4946cc4d3 8128-8136
+  s_5e45ef83ebf19d::t_49e08dda264341 1047-1051,1103-1107
+shared/assets/skill_presentations.v0.json
+  s_5e45ef83ebf19d::t_4e9a60e275bc6c 28
+  s_5e45ef83ebf19d::t_9f06cac8cbbeca 14-27,29-34
+server/internal/game/handlers.go
+  s_5e45ef83ebf19d::t_31c189c5944748 1151,1153-1154,1192-1199,1202-1203,1238-1260
+  s_5e45ef83ebf19d::t_aa6bb6b7fc3b3b 1200-1201
+client/tests/test_skill_rules_loader.gd
+  s_5e45ef83ebf19d::t_d931e0744e168b 21-24,30-31,39-40
+shared/rules/skills.v0.json
+  s_5e45ef83ebf19d::t_9f06cac8cbbeca 38-113
+shared/rules/skills.v0.schema.json
+  s_5e45ef83ebf19d::t_9f06cac8cbbeca 26,33-35,51-64,175-208
+docs/specs/v89_spec-class-second-combat-skills.md
+  s_5e45ef83ebf19d::t_585635da48ccf7 3
+  s_5e45ef83ebf19d::t_7831c386e4efba 1-2,4-131
+server/internal/game/sim.go
+  s_5e45ef83ebf19d::t_8f64d96f764b65 2071-2110,3364
+  s_5e45ef83ebf19d::t_107a508c36448d 2975-2978,2987,3023,3294-3362
+  s_5e45ef83ebf19d::t_f4b6e14981ca18 4650-4656,4692-4703
+  s_5e45ef83ebf19d::t_3d09f8b4d29c1d 5103-5106
+  s_5e45ef83ebf19d::t_3a6f2e2f12bb5f 4607-4610,4614-4649,4657-4691,4704-4708
+  s_5e45ef83ebf19d::t_7747ef3e91d200 135-136
+  s_5e45ef83ebf19d::t_46de20379603a7 3839,3848-3858,3860-3870
+  s_5e45ef83ebf19d::t_4e9a60e275bc6c 912,3859
+  s_5e45ef83ebf19d::t_753431cf40ea43 913-920
+server/internal/game/types.go
+  s_5e45ef83ebf19d::t_7747ef3e91d200 411-414
+tools/bot/scenarios/45_class_second_combat_skills.json
+  s_5e45ef83ebf19d::t_416525d797d9c6 30-31
+  s_5e45ef83ebf19d::t_2bdbda45986eab 1-29,32-36
+client/tests/test_skills_panel.gd
+  s_5e45ef83ebf19d::t_96a9aa9db8f6ad 55,57,213,215,217
+client/tests/test_skill_bar.gd
+  s_5e45ef83ebf19d::t_172340aba84721 29,113,115,117,120
+PROGRESS.md
+  s_5e45ef83ebf19d::t_54b70ef3b7bb91 364-368
+  s_5e45ef83ebf19d::t_72d24871e8eed6 15,110
+  s_5e45ef83ebf19d::t_89749c3df19817 17,239
+.maintainability/file-size-baseline.tsv
+  s_5e45ef83ebf19d::t_8b259fc2b41dc3 6,14-16,19,21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "badf2277fa0672f4b0f0e67c78edaf2c48eba9b3",
+  "prompts": {},
+  "sessions": {
+    "s_5e45ef83ebf19d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb919-cf01-7b80-aa7b-94e92d0861c8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

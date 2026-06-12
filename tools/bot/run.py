@@ -170,6 +170,23 @@ def list_characters(client: httpx.Client, token: str) -> list[dict[str, Any]]:
     return list(resp.json().get("characters", []))
 
 
+def delete_character(client: httpx.Client, token: str, character_id: str) -> None:
+    resp = client.delete(f"/v0/characters/{character_id}", headers=auth(token))
+    resp.raise_for_status()
+
+
+def cleanup_account_characters(client: httpx.Client, email: str, dev_token: str) -> int:
+    _, token = dev_login(client, email, dev_token)
+    removed = 0
+    for char in list_characters(client, token):
+        character_id = str(char.get("character_id", ""))
+        if not character_id:
+            continue
+        delete_character(client, token, character_id)
+        removed += 1
+    return removed
+
+
 def create_character(client: httpx.Client, token: str, name: str, character_class: str = "") -> dict[str, Any]:
     body = {"name": name}
     if character_class:
@@ -4891,6 +4908,7 @@ def main() -> int:
     parser.add_argument("--list-scenarios", action="store_true")
     parser.add_argument("--write-manifest", type=Path)
     parser.add_argument("--print-session-id", action="store_true")
+    parser.add_argument("--cleanup-characters", action="store_true")
     args = parser.parse_args()
 
     scenarios = load_scenarios()
@@ -4900,6 +4918,7 @@ def main() -> int:
         return 0
     selected = select_scenarios(scenarios, args.scenario)
     results: list[dict[str, Any]] = []
+    cleanup_emails: set[str] = set()
     last_session_id = ""
 
     with httpx.Client(base_url=args.base_url, timeout=10.0) as client:
@@ -4911,6 +4930,7 @@ def main() -> int:
             elif scenario.id == "true_coop_session":
                 replay_email = scenario_email(args.email, scenario.id + "-host")
                 guest_email = scenario_email(args.email, scenario.id + "-guest")
+                cleanup_emails.update({replay_email, guest_email})
                 _, host_token = dev_login(client, replay_email, args.dev_token)
                 _, guest_token = dev_login(client, guest_email, args.dev_token)
                 host_character_id = ensure_character(client, host_token, "Coop Host")
@@ -4932,6 +4952,7 @@ def main() -> int:
                 replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
                 for index in range(scenario.peer_count):
                     email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                    cleanup_emails.add(email)
                     _, peer_token = dev_login(client, email, args.dev_token)
                     tokens.append(peer_token)
                     character_ids.append(ensure_character(client, peer_token, f"Coop Peer {index + 1}"))
@@ -4951,6 +4972,7 @@ def main() -> int:
                 replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
                 for index in range(peer_count):
                     email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                    cleanup_emails.add(email)
                     _, peer_token = dev_login(client, email, args.dev_token)
                     tokens.append(peer_token)
                     character_ids.append(ensure_character(client, peer_token, f"Reward Peer {index + 1}"))
@@ -4970,6 +4992,7 @@ def main() -> int:
                 replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
                 for index in range(peer_count):
                     email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                    cleanup_emails.add(email)
                     _, peer_token = dev_login(client, email, args.dev_token)
                     tokens.append(peer_token)
                     character_ids.append(ensure_character(client, peer_token, f"Gold Peer {index + 1}"))
@@ -4984,6 +5007,7 @@ def main() -> int:
                 token = tokens[0]
             else:
                 replay_email = scenario_email(args.email, scenario.id)
+                cleanup_emails.add(replay_email)
                 _, token = dev_login(client, replay_email, args.dev_token)
                 sess, observed = run_verified_session(
                     client=client,
@@ -5042,6 +5066,13 @@ def main() -> int:
             if isinstance(scenario_visual, dict):
                 entry["visual"] = scenario_visual
             results.append(entry)
+
+        if args.cleanup_characters:
+            removed = 0
+            for email in sorted(cleanup_emails):
+                removed += cleanup_account_characters(client, email, args.dev_token)
+            if removed:
+                log("deleted bot account characters", removed)
 
     if args.write_manifest:
         if should_clean_bot_run_artifacts(args.write_manifest):

@@ -66,7 +66,7 @@ echo "[bot-visual] recording bot scenario selection '$SCENARIO' (manifest: $MANI
 "$RUN_QUIET" --label "protocol bot recording ($SCENARIO)" -- \
   "$ROOT/.venv/bin/python" -m tools.bot.run \
   --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
-  --email "$EMAIL" --scenario "$SCENARIO" --write-manifest "$MANIFEST"
+  --email "$EMAIL" --scenario "$SCENARIO" --write-manifest "$MANIFEST" --cleanup-characters
 
 "$RUN_QUIET" --label "Godot asset import" -- bash -c '"$1" --headless --path "$2/client" --import || true' _ "$GODOT" "$ROOT"
 

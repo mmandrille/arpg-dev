@@ -350,6 +350,103 @@ func TestSurvivalUniqueAshenReprisalPrimesAndConsumesOnNextHit(t *testing.T) {
 	}
 }
 
+func TestResourceUniqueGravePactHealsLowHealthKiller(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := MustNewSim("sess_grave_pact", "grave_pact", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	player.hp = 10
+	player.maxHP = 100
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 1)
+	equipUniqueTestEffect(t, sim, gravePactEffectID, 9910, "cave_ring", ringLeftSlot)
+	player.hp = 10
+	player.maxHP = 100
+
+	res := &TickResult{}
+	sim.finishMonsterKill(target, player.id, "grave", res)
+	if player.hp != 18 {
+		t.Fatalf("player hp = %d, want 8%% max hp heal to 18; events=%+v", player.hp, res.Events)
+	}
+	if !eventListHas(res.Events, "player_healed") {
+		t.Fatalf("grave pact events = %+v, want player_healed", res.Events)
+	}
+}
+
+func TestResourceUniqueBloodPricePaysMissingManaWithHP(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := MustNewSim("sess_blood_price", "blood_price", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 50)
+	equipUniqueTestEffect(t, sim, bloodPriceEffectID, 9911, "cave_belt", "belt")
+	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.BaseStats.Magic = 10
+	sim.progression.SkillRanks[magicBoltSkillID] = 1
+	player.mana = 0
+	player.hp = 20
+	player.maxHP = 50
+	sim.savePlayer(sim.defaultPlayer())
+
+	cast := sim.Tick([]Input{{MessageID: "blood_cast", Type: "cast_skill_intent", CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(target.id)}}})
+	assertAck(t, cast, "blood_cast")
+	if player.hp >= 20 || player.mana != 0 {
+		t.Fatalf("player hp/mana = %d/%d, want hp paid and mana clamped; events=%+v", player.hp, player.mana, cast.Events)
+	}
+	if !eventListHas(cast.Events, "skill_cast") || !eventListHas(cast.Events, "skill_effect_started") {
+		t.Fatalf("blood price cast events = %+v, want skill cast and blood price marker", cast.Events)
+	}
+}
+
+func TestResourceUniquePilgrimsMomentumChargesAndKnocksBack(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.Combat.BaseHitChance = 1
+	rules.Combat.BaseCritChance = 0
+	sim := MustNewSim("sess_pilgrim", "pilgrim", rules)
+	forceUniqueTestHeroHitChance(sim)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 200)
+	equipUniqueTestEffect(t, sim, pilgrimsMomentumEffectID, 9912, "cave_boots", "boots")
+	for i := 0; i < 20; i++ {
+		sim.updatePilgrimMomentumMovement(player, true, &TickResult{})
+	}
+	before := target.pos
+
+	res := &TickResult{}
+	outcome := sim.damageMonsterByPlayerWithSlot(target, player.id, "pilgrim_hit", res, DamageRange{Min: 10, Max: 10}, damageTypeForce, mainHandSlot)
+	if outcome.Damage <= 10 {
+		t.Fatalf("pilgrim damage = %d, want bonus over 10; events=%+v", outcome.Damage, res.Events)
+	}
+	if _, ok := sim.uniquePilgrimMomentum[player.id]; ok {
+		t.Fatalf("pilgrim charge not consumed")
+	}
+	if target.pos == before {
+		t.Fatalf("target position = %+v, want knockback from %+v", target.pos, before)
+	}
+}
+
+func TestResourceUniqueLanternOfTheFallenHealsLowestNearbyHero(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := MustNewSim("sess_lantern", "lantern", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	player.hp = 20
+	player.maxHP = 100
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 1)
+	equipUniqueTestEffect(t, sim, lanternOfTheFallenEffectID, 9913, "cave_amulet", "amulet")
+	player.hp = 20
+	player.maxHP = 100
+
+	res := &TickResult{}
+	sim.finishMonsterKill(target, player.id, "lantern", res)
+	if player.hp != 26 {
+		t.Fatalf("player hp = %d, want lantern 6%% max hp heal to 26; events=%+v", player.hp, res.Events)
+	}
+	if !eventListHas(res.Events, "player_healed") || !eventListHas(res.Events, "skill_effect_started") {
+		t.Fatalf("lantern events = %+v, want heal and wisp marker", res.Events)
+	}
+}
+
 func uniqueEventDamage(r TickResult, eventType string, skillID string) (int, bool) {
 	return uniqueEventListDamage(r.Events, eventType, skillID)
 }

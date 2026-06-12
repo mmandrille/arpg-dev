@@ -1,0 +1,12 @@
+{
+  "id": "skill_visual",
+  "world_id": "skill_visual_lab",
+  "seed": "skill_visual",
+  "title": "Skill Visual",
+  "description": "Reusable visual replay expanded from ARPG_SKILL_VISUAL_SKILL_ID.",
+  "steps": [],
+  "assertions": [],
+  "visual": {
+    "camera": { "x": 16, "y": 8, "zoom": 1.0 }
+  }
+}

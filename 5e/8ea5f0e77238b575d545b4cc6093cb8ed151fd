@@ -1,0 +1,32 @@
+shared/rules/unique_items.v0.json
+  s_d64f6fea84390c::t_f0adc26f717cec 1-14
+PROGRESS.md
+  s_d64f6fea84390c::t_919152ca42bae9 15,116,251,405-407
+docs/as-built/v95_unique-item-catalog-seed.md
+  s_d64f6fea84390c::t_ec074a0968cb81 1-21
+docs/plans/v95_2026-06-12-unique-item-catalog-seed.md
+  s_d64f6fea84390c::t_9794dc3899bd1d 40-41,49-50,58,67-70
+  s_d64f6fea84390c::t_1a571783f8d3fc 1-39,42-48,51-57,59-66,71-75
+docs/specs/v95_spec-unique-item-catalog-seed.md
+  s_d64f6fea84390c::t_e06d46ccea5463 1-38
+shared/rules/unique_items.v0.schema.json
+  s_d64f6fea84390c::t_e99af0c7080277 1-28
+tools/validate_shared.py
+  s_d64f6fea84390c::t_6abf9dd8701b26 219,3124-3145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5e8ea5f0e77238b575d545b4cc6093cb8ed151fd",
+  "prompts": {},
+  "sessions": {
+    "s_d64f6fea84390c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eba4d-7607-7531-bca4-07347b2d0f71",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

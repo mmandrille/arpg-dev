@@ -324,6 +324,7 @@ func _initialize() -> void:
 	# 16. Item roll golden references shared item template fields for tooltip display.
 	var item_templates := _read(shared.path_join("rules/item_templates.v0.json"))
 	var item_rolls := _read(shared.path_join("golden/item_rolls.json"))
+	var unique_effects := _read(shared.path_join("rules/unique_effects.v0.json"))
 	var template_id := str(item_rolls["template_id"])
 	if not item_templates["templates"].has(template_id):
 		_fail("item_rolls references unknown template")
@@ -347,8 +348,16 @@ func _initialize() -> void:
 		if expected["requirements"] != template["requirements"]:
 			_fail("item_rolls requirements mismatch")
 			return
-		if (expected["effect_ids"] as Array).size() != 0:
-			_fail("item_rolls effect_ids should be empty in v23")
+		var effect_ids := expected["effect_ids"] as Array
+		if str(expected["rarity"]) == "unique":
+			if effect_ids.size() != 1:
+				_fail("unique item_rolls must attach one effect_id")
+				return
+			if not (unique_effects["effects"] as Dictionary).has(str(effect_ids[0])):
+				_fail("unique item_rolls references unknown effect_id")
+				return
+		elif effect_ids.size() != 0:
+			_fail("non-unique item_rolls effect_ids must be empty")
 			return
 
 	# 17. Treasure class golden references shared item/template reward sources.

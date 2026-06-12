@@ -34,9 +34,12 @@
       "timeout_s": 2.0
     },
     {
-      "type": "wait_event",
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_crit_attacker",
       "event_type": "player_damaged",
       "consume_event": true,
+      "retry_s": 0.25,
       "timeout_s": 20.0
     },
     {

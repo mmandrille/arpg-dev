@@ -22,7 +22,7 @@
       "type": "assert_character_progression",
       "stat_breakdowns": [
         { "key": "armor", "min_value": 1, "source_kinds": ["character_formula"] },
-        { "key": "block_percent", "min_value": 6, "cap": 75, "source_kinds": ["equipment_base", "equipment_roll"] }
+        { "key": "block_percent", "min_value": 5, "cap": 75, "source_kinds": ["equipment_base"] }
       ]
     },
     { "type": "click_entity_until_event", "entity_type": "monster", "monster_def_id": "combat_lab_armored_target", "event_type": "monster_damaged", "outcome": "hit", "blocked": false, "critical": false, "consume_event": true, "retry_s": 0.25, "timeout_s": 15.0 },

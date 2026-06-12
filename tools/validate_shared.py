@@ -220,6 +220,7 @@ def cross_checks(report: Report) -> None:
     item_templates = load(RULES / "item_templates.v0.json")
     unique_items = load(RULES / "unique_items.v0.json")
     unique_effects = load(RULES / "unique_effects.v0.json")
+    unique_effect_defs = unique_effects.get("effects", {})
     treasure_classes = load(RULES / "treasure_classes.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
@@ -2891,8 +2892,18 @@ def cross_checks(report: Report) -> None:
                 report.fail("item_rolls golden", f"{case['name']}: requirements mismatch template")
                 golden_failed = True
                 break
-            if expected.get("effect_ids", []) != []:
-                report.fail("item_rolls golden", f"{case['name']}: v23 effect_ids must be empty")
+            effect_ids = expected.get("effect_ids", [])
+            if expected.get("rarity") == "unique":
+                if len(effect_ids) != 1:
+                    report.fail("item_rolls golden", f"{case['name']}: unique rolls must attach exactly one effect id")
+                    golden_failed = True
+                    break
+                elif effect_ids[0] not in unique_effect_defs:
+                    report.fail("item_rolls golden", f"{case['name']}: unknown unique effect id {effect_ids[0]}")
+                    golden_failed = True
+                    break
+            elif effect_ids != []:
+                report.fail("item_rolls golden", f"{case['name']}: non-unique effect_ids must be empty")
                 golden_failed = True
                 break
         if not golden_failed:
@@ -3190,7 +3201,6 @@ def cross_checks(report: Report) -> None:
             report.ok("unique_items disabled seeds reference valid templates and behavior hooks")
 
     template_item_types = {template.get("item_type") for template in item_templates["templates"].values()}
-    unique_effect_defs = unique_effects.get("effects", {})
     if not unique_effect_defs:
         report.fail("unique_effects catalog", "must define at least one unique effect")
     else:

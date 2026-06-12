@@ -1148,14 +1148,38 @@ func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG) (ItemRollPa
 		}
 		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
 	}
+	effectIDs := cloneStringSlice(template.EffectPool)
+	if rarityID == "unique" {
+		effectID, ok := r.rollUniqueEffectForTemplate(template, rng)
+		if ok {
+			effectIDs = append(effectIDs, effectID)
+		}
+	}
 	return ItemRollPayload{
 		ItemTemplateID: templateID,
 		DisplayName:    rarity.NamePrefix + " " + template.Name,
 		Rarity:         rarityID,
 		Stats:          stats,
 		Requirements:   cloneIntMap(template.Requirements),
-		EffectIDs:      cloneStringSlice(template.EffectPool),
+		EffectIDs:      effectIDs,
 	}, true
+}
+
+func (r *Rules) rollUniqueEffectForTemplate(template ItemTemplateDef, rng *RNG) (string, bool) {
+	var compatible []string
+	for effectID, effect := range r.UniqueEffects {
+		if !effect.Enabled || effect.Status != "ready" {
+			continue
+		}
+		if containsStringValue(effect.CompatibleItemTypes, template.ItemType) {
+			compatible = append(compatible, effectID)
+		}
+	}
+	if len(compatible) == 0 {
+		return "", false
+	}
+	sort.Strings(compatible)
+	return compatible[rng.IntN(len(compatible))], true
 }
 
 func ceilToMultiple(value float64, multiple int) int {

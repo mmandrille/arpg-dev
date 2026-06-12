@@ -19,6 +19,7 @@ type Rules struct {
 	Navigation           NavigationRules
 	Items                map[string]ItemDef
 	ItemTemplates        map[string]ItemTemplateDef
+	UniqueEffects        map[string]UniqueEffectDef
 	Skills               map[string]SkillDef
 	Rarities             map[string]RarityDef
 	RarityOrder          []string
@@ -778,6 +779,17 @@ type LootEntry struct {
 	Weight         int    `json:"weight"`
 }
 
+type UniqueEffectDef struct {
+	ID                  string                 `json:"id"`
+	Enabled             bool                   `json:"enabled"`
+	DisplayName         string                 `json:"display_name"`
+	Summary             string                 `json:"summary"`
+	Hook                string                 `json:"hook"`
+	CompatibleItemTypes []string               `json:"compatible_item_types"`
+	Params              map[string]interface{} `json:"params"`
+	Status              string                 `json:"status"`
+}
+
 type TreasureClassEntry struct {
 	ItemDefID      string `json:"item_def_id"`
 	ItemTemplateID string `json:"item_template_id"`
@@ -1311,6 +1323,25 @@ func LoadRules(dir string) (*Rules, error) {
 	r.ItemTemplates = itemTemplates.Templates
 	r.Rarities = itemTemplates.Rarities
 	r.RarityOrder = rarityOrder
+
+	var uniqueEffects struct {
+		Effects map[string]UniqueEffectDef `json:"effects"`
+	}
+	if err := readJSON(filepath.Join(dir, "unique_effects.v0.json"), &uniqueEffects); err != nil {
+		return nil, err
+	}
+	for effectID, effect := range uniqueEffects.Effects {
+		if effect.ID != effectID {
+			return nil, fmt.Errorf("game: invalid rules unique_effects.%s.id: must match key", effectID)
+		}
+		if !effect.Enabled || effect.Status != "ready" {
+			return nil, fmt.Errorf("game: invalid rules unique_effects.%s: must be enabled and ready", effectID)
+		}
+		if len(effect.CompatibleItemTypes) == 0 {
+			return nil, fmt.Errorf("game: invalid rules unique_effects.%s.compatible_item_types: required", effectID)
+		}
+	}
+	r.UniqueEffects = uniqueEffects.Effects
 
 	skills, err := loadSkillRulesFromManifest(dir)
 	if err != nil {

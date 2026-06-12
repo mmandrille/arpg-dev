@@ -3,7 +3,8 @@
   "rarities": {
     "common": { "weight": 70, "stat_rolls": 1, "name_prefix": "Common" },
     "magic": { "weight": 25, "stat_rolls": 2, "name_prefix": "Magic" },
-    "rare": { "weight": 5, "stat_rolls": 3, "name_prefix": "Rare" }
+    "rare": { "weight": 5, "stat_rolls": 3, "name_prefix": "Rare" },
+    "unique": { "weight": 1, "stat_rolls": 4, "name_prefix": "Unique" }
   },
   "templates": {
     "cave_blade": {

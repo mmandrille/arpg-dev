@@ -1472,6 +1472,15 @@ func (f *fakeRepo) CreateMarketListingFromStash(context.Context, string, string,
 func (f *fakeRepo) CancelMarketListing(context.Context, string, string) (store.MarketListing, error) {
 	return store.MarketListing{}, nil
 }
+func (f *fakeRepo) CreateMarketOffer(context.Context, string, string, string, []string) (store.MarketOffer, error) {
+	return store.MarketOffer{}, nil
+}
+func (f *fakeRepo) ListMarketOffersForSeller(context.Context, string, string) ([]store.MarketOffer, error) {
+	return nil, nil
+}
+func (f *fakeRepo) AcceptMarketOffer(context.Context, string, string, string) (store.MarketOffer, error) {
+	return store.MarketOffer{}, nil
+}
 func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, store.CharacterProgression) error {
 	return nil
 }

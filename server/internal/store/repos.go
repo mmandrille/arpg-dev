@@ -1512,7 +1512,7 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 
 func (s *Store) ListActiveMarketListings(ctx context.Context) ([]MarketListing, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at
+		`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at
 		 FROM market_listings
 		 WHERE status = $1
 		 ORDER BY created_at DESC, id ASC`,
@@ -1560,9 +1560,9 @@ func (s *Store) CreateMarketListingFromStash(ctx context.Context, accountID, sta
 		err = tx.QueryRow(ctx,
 			`INSERT INTO market_listings (id, seller_account_id, stash_item_id, source_character_id, item_def_id, rolled_stats, status)
 			 VALUES ($1, $2, $3, NULLIF($4, ''), $5, $6::jsonb, $7)
-			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at`,
+			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at`,
 			listingID, accountID, stashItemID, stash.SourceCharacterID, stash.ItemDefID, []byte(rolledStats), MarketListingActive,
-		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt)
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
 		if err != nil {
 			return fmt.Errorf("store: insert market listing: %w", err)
 		}
@@ -1582,17 +1582,20 @@ func (s *Store) CancelMarketListing(ctx context.Context, accountID, listingID st
 	var out MarketListing
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		err := tx.QueryRow(ctx,
-			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at
+			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at
 			 FROM market_listings
 			 WHERE id = $1 AND seller_account_id = $2 AND status = $3
 			 FOR UPDATE`,
 			listingID, accountID, MarketListingActive,
-		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt)
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
 		if err != nil {
 			return fmt.Errorf("store: lock market listing for cancel: %w", err)
+		}
+		if err := refundActiveMarketOffers(ctx, tx, listingID, "store: refund canceled listing offers"); err != nil {
+			return err
 		}
 		rolledStats := out.RolledStats
 		if len(rolledStats) == 0 {
@@ -1609,9 +1612,9 @@ func (s *Store) CancelMarketListing(ctx context.Context, accountID, listingID st
 			`UPDATE market_listings
 			 SET status = $3, canceled_at = now(), updated_at = now()
 			 WHERE id = $1 AND seller_account_id = $2
-			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at`,
+			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at`,
 			listingID, accountID, MarketListingCanceled,
-		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt)
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
 		if err != nil {
 			return fmt.Errorf("store: cancel market listing: %w", err)
 		}
@@ -1620,10 +1623,316 @@ func (s *Store) CancelMarketListing(ctx context.Context, accountID, listingID st
 	return out, err
 }
 
+func (s *Store) CreateMarketOffer(ctx context.Context, bidderAccountID, listingID, offerID string, stashItemIDs []string) (MarketOffer, error) {
+	if len(stashItemIDs) == 0 || len(stashItemIDs) > 10 || hasDuplicateStrings(stashItemIDs) {
+		return MarketOffer{}, ErrConflict
+	}
+	var out MarketOffer
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var sellerAccountID string
+		err := tx.QueryRow(ctx,
+			`SELECT seller_account_id
+			 FROM market_listings
+			 WHERE id = $1 AND status = $2
+			 FOR UPDATE`,
+			listingID, MarketListingActive,
+		).Scan(&sellerAccountID)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock listing for offer: %w", err)
+		}
+		if sellerAccountID == bidderAccountID {
+			return ErrConflict
+		}
+		err = tx.QueryRow(ctx,
+			`INSERT INTO market_offers (id, listing_id, bidder_account_id, status)
+			 VALUES ($1, $2, $3, $4)
+			 RETURNING id, listing_id, bidder_account_id, status, created_at, updated_at, accepted_at, rejected_at`,
+			offerID, listingID, bidderAccountID, MarketOfferActive,
+		).Scan(&out.ID, &out.ListingID, &out.BidderAccountID, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.AcceptedAt, &out.RejectedAt)
+		if err != nil {
+			return fmt.Errorf("store: insert market offer: %w", err)
+		}
+		out.Items = make([]MarketOfferItem, 0, len(stashItemIDs))
+		for _, stashItemID := range stashItemIDs {
+			item, err := lockAccountStashItem(ctx, tx, bidderAccountID, stashItemID)
+			if err != nil {
+				return err
+			}
+			offerItem, err := insertMarketOfferItem(ctx, tx, offerID, bidderAccountID, item)
+			if err != nil {
+				return err
+			}
+			if err := deleteAccountStashItem(ctx, tx, bidderAccountID, stashItemID); err != nil {
+				return err
+			}
+			out.Items = append(out.Items, offerItem)
+		}
+		return nil
+	})
+	return out, err
+}
+
+func (s *Store) ListMarketOffersForSeller(ctx context.Context, sellerAccountID, listingID string) ([]MarketOffer, error) {
+	var owner string
+	err := s.pool.QueryRow(ctx,
+		`SELECT seller_account_id FROM market_listings WHERE id = $1`,
+		listingID,
+	).Scan(&owner)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("store: lookup listing seller for offers: %w", err)
+	}
+	if owner != sellerAccountID {
+		return nil, ErrNotFound
+	}
+	return s.listMarketOffers(ctx, listingID)
+}
+
+func (s *Store) AcceptMarketOffer(ctx context.Context, sellerAccountID, listingID, offerID string) (MarketOffer, error) {
+	var accepted MarketOffer
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var listing MarketListing
+		err := tx.QueryRow(ctx,
+			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at
+			 FROM market_listings
+			 WHERE id = $1 AND seller_account_id = $2 AND status = $3
+			 FOR UPDATE`,
+			listingID, sellerAccountID, MarketListingActive,
+		).Scan(&listing.ID, &listing.SellerAccountID, &listing.StashItemID, &listing.SourceCharacterID, &listing.ItemDefID, &listing.RolledStats, &listing.Status, &listing.CreatedAt, &listing.UpdatedAt, &listing.CanceledAt, &listing.AcceptedAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("store: lock listing for offer acceptance: %w", err)
+		}
+		offer, err := lockMarketOffer(ctx, tx, listingID, offerID, MarketOfferActive)
+		if err != nil {
+			return err
+		}
+		items, err := listMarketOfferItemsForUpdate(ctx, tx, offer.ID)
+		if err != nil {
+			return err
+		}
+		offer.Items = items
+		listedStats := listing.RolledStats
+		if len(listedStats) == 0 {
+			listedStats = []byte(`{}`)
+		}
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
+			 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
+			offer.BidderAccountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, []byte(listedStats),
+		); err != nil {
+			return fmt.Errorf("store: deliver accepted listing to bidder stash: %w", err)
+		}
+		for _, item := range items {
+			if err := restoreOfferItemToAccountStash(ctx, tx, sellerAccountID, item); err != nil {
+				return err
+			}
+		}
+		if err := refundCompetingMarketOffers(ctx, tx, listingID, offerID); err != nil {
+			return err
+		}
+		err = tx.QueryRow(ctx,
+			`UPDATE market_offers
+			 SET status = $3, accepted_at = now(), updated_at = now()
+			 WHERE id = $1 AND listing_id = $2
+			 RETURNING id, listing_id, bidder_account_id, status, created_at, updated_at, accepted_at, rejected_at`,
+			offerID, listingID, MarketOfferAccepted,
+		).Scan(&accepted.ID, &accepted.ListingID, &accepted.BidderAccountID, &accepted.Status, &accepted.CreatedAt, &accepted.UpdatedAt, &accepted.AcceptedAt, &accepted.RejectedAt)
+		if err != nil {
+			return fmt.Errorf("store: accept market offer: %w", err)
+		}
+		accepted.Items = items
+		if _, err := tx.Exec(ctx,
+			`UPDATE market_listings
+			 SET status = $3, accepted_at = now(), updated_at = now()
+			 WHERE id = $1 AND seller_account_id = $2`,
+			listingID, sellerAccountID, MarketListingAccepted,
+		); err != nil {
+			return fmt.Errorf("store: mark market listing accepted: %w", err)
+		}
+		return nil
+	})
+	return accepted, err
+}
+
 type stashGoldTransferResult struct {
 	characterGold int
 	stashGold     int
 	err           error
+}
+
+func hasDuplicateStrings(values []string) bool {
+	seen := make(map[string]struct{}, len(values))
+	for _, v := range values {
+		if v == "" {
+			return true
+		}
+		if _, ok := seen[v]; ok {
+			return true
+		}
+		seen[v] = struct{}{}
+	}
+	return false
+}
+
+func lockAccountStashItem(ctx context.Context, tx pgx.Tx, accountID, stashItemID string) (AccountStashItem, error) {
+	var item AccountStashItem
+	err := tx.QueryRow(ctx,
+		`SELECT account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at
+		 FROM account_stash_items
+		 WHERE account_id = $1 AND stash_item_id = $2
+		 FOR UPDATE`,
+		accountID, stashItemID,
+	).Scan(&item.AccountID, &item.StashItemID, &item.SourceCharacterID, &item.ItemDefID, &item.RolledStats, &item.CreatedAt, &item.UpdatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return AccountStashItem{}, ErrNotFound
+	}
+	if err != nil {
+		return AccountStashItem{}, fmt.Errorf("store: lock account stash item: %w", err)
+	}
+	return item, nil
+}
+
+func deleteAccountStashItem(ctx context.Context, tx pgx.Tx, accountID, stashItemID string) error {
+	tag, err := tx.Exec(ctx,
+		`DELETE FROM account_stash_items WHERE account_id = $1 AND stash_item_id = $2`,
+		accountID, stashItemID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: delete account stash item: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func insertMarketOfferItem(ctx context.Context, tx pgx.Tx, offerID, bidderAccountID string, item AccountStashItem) (MarketOfferItem, error) {
+	rolledStats := item.RolledStats
+	if len(rolledStats) == 0 {
+		rolledStats = []byte(`{}`)
+	}
+	var out MarketOfferItem
+	err := tx.QueryRow(ctx,
+		`INSERT INTO market_offer_items (offer_id, bidder_account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
+		 VALUES ($1, $2, $3, NULLIF($4, ''), $5, $6::jsonb)
+		 RETURNING offer_id, bidder_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at`,
+		offerID, bidderAccountID, item.StashItemID, item.SourceCharacterID, item.ItemDefID, []byte(rolledStats),
+	).Scan(&out.OfferID, &out.BidderAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.CreatedAt)
+	if err != nil {
+		return MarketOfferItem{}, fmt.Errorf("store: insert market offer item: %w", err)
+	}
+	return out, nil
+}
+
+func lockMarketOffer(ctx context.Context, tx pgx.Tx, listingID, offerID, status string) (MarketOffer, error) {
+	var offer MarketOffer
+	err := tx.QueryRow(ctx,
+		`SELECT id, listing_id, bidder_account_id, status, created_at, updated_at, accepted_at, rejected_at
+		 FROM market_offers
+		 WHERE id = $1 AND listing_id = $2 AND status = $3
+		 FOR UPDATE`,
+		offerID, listingID, status,
+	).Scan(&offer.ID, &offer.ListingID, &offer.BidderAccountID, &offer.Status, &offer.CreatedAt, &offer.UpdatedAt, &offer.AcceptedAt, &offer.RejectedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return MarketOffer{}, ErrNotFound
+	}
+	if err != nil {
+		return MarketOffer{}, fmt.Errorf("store: lock market offer: %w", err)
+	}
+	return offer, nil
+}
+
+func listMarketOfferItemsForUpdate(ctx context.Context, tx pgx.Tx, offerID string) ([]MarketOfferItem, error) {
+	rows, err := tx.Query(ctx,
+		`SELECT offer_id, bidder_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at
+		 FROM market_offer_items
+		 WHERE offer_id = $1
+		 ORDER BY created_at ASC, stash_item_id ASC
+		 FOR UPDATE`,
+		offerID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list market offer items for update: %w", err)
+	}
+	defer rows.Close()
+	return scanMarketOfferItemRows(rows)
+}
+
+func restoreOfferItemToAccountStash(ctx context.Context, tx pgx.Tx, accountID string, item MarketOfferItem) error {
+	rolledStats := item.RolledStats
+	if len(rolledStats) == 0 {
+		rolledStats = []byte(`{}`)
+	}
+	if _, err := tx.Exec(ctx,
+		`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
+		 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
+		accountID, item.StashItemID, item.SourceCharacterID, item.ItemDefID, []byte(rolledStats),
+	); err != nil {
+		return fmt.Errorf("store: restore offer item to account stash: %w", err)
+	}
+	return nil
+}
+
+func refundActiveMarketOffers(ctx context.Context, tx pgx.Tx, listingID, errPrefix string) error {
+	return refundMarketOffers(ctx, tx, listingID, "")
+}
+
+func refundCompetingMarketOffers(ctx context.Context, tx pgx.Tx, listingID, acceptedOfferID string) error {
+	return refundMarketOffers(ctx, tx, listingID, acceptedOfferID)
+}
+
+func refundMarketOffers(ctx context.Context, tx pgx.Tx, listingID, exceptOfferID string) error {
+	rows, err := tx.Query(ctx,
+		`SELECT id, listing_id, bidder_account_id, status, created_at, updated_at, accepted_at, rejected_at
+		 FROM market_offers
+		 WHERE listing_id = $1 AND status = $2 AND ($3 = '' OR id <> $3)
+		 ORDER BY created_at ASC, id ASC
+		 FOR UPDATE`,
+		listingID, MarketOfferActive, exceptOfferID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: list refundable market offers: %w", err)
+	}
+	defer rows.Close()
+	var offers []MarketOffer
+	for rows.Next() {
+		var offer MarketOffer
+		if err := rows.Scan(&offer.ID, &offer.ListingID, &offer.BidderAccountID, &offer.Status, &offer.CreatedAt, &offer.UpdatedAt, &offer.AcceptedAt, &offer.RejectedAt); err != nil {
+			return fmt.Errorf("store: scan refundable market offer: %w", err)
+		}
+		offers = append(offers, offer)
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("store: refundable market offer rows: %w", err)
+	}
+	for _, offer := range offers {
+		items, err := listMarketOfferItemsForUpdate(ctx, tx, offer.ID)
+		if err != nil {
+			return err
+		}
+		for _, item := range items {
+			if err := restoreOfferItemToAccountStash(ctx, tx, offer.BidderAccountID, item); err != nil {
+				return err
+			}
+		}
+		if _, err := tx.Exec(ctx,
+			`UPDATE market_offers
+			 SET status = $3, rejected_at = now(), updated_at = now()
+			 WHERE id = $1 AND listing_id = $2`,
+			offer.ID, listingID, MarketOfferRejected,
+		); err != nil {
+			return fmt.Errorf("store: reject refunded market offer: %w", err)
+		}
+	}
+	return nil
 }
 
 func (s *Store) transferAccountStashGold(ctx context.Context, accountID, characterID string, deltaToStash int) stashGoldTransferResult {
@@ -1733,11 +2042,75 @@ func scanMarketListing(row rowScanner) (MarketListing, error) {
 		&listing.CreatedAt,
 		&listing.UpdatedAt,
 		&listing.CanceledAt,
+		&listing.AcceptedAt,
 	)
 	if err != nil {
 		return MarketListing{}, fmt.Errorf("store: scan market listing: %w", err)
 	}
 	return listing, nil
+}
+
+func (s *Store) listMarketOffers(ctx context.Context, listingID string) ([]MarketOffer, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT id, listing_id, bidder_account_id, status, created_at, updated_at, accepted_at, rejected_at
+		 FROM market_offers
+		 WHERE listing_id = $1 AND status = $2
+		 ORDER BY created_at ASC, id ASC`,
+		listingID, MarketOfferActive,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list market offers: %w", err)
+	}
+	defer rows.Close()
+	var offers []MarketOffer
+	for rows.Next() {
+		var offer MarketOffer
+		if err := rows.Scan(&offer.ID, &offer.ListingID, &offer.BidderAccountID, &offer.Status, &offer.CreatedAt, &offer.UpdatedAt, &offer.AcceptedAt, &offer.RejectedAt); err != nil {
+			return nil, fmt.Errorf("store: scan market offer: %w", err)
+		}
+		offers = append(offers, offer)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: market offer rows: %w", err)
+	}
+	for i := range offers {
+		items, err := s.listMarketOfferItems(ctx, offers[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		offers[i].Items = items
+	}
+	return offers, nil
+}
+
+func (s *Store) listMarketOfferItems(ctx context.Context, offerID string) ([]MarketOfferItem, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT offer_id, bidder_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at
+		 FROM market_offer_items
+		 WHERE offer_id = $1
+		 ORDER BY created_at ASC, stash_item_id ASC`,
+		offerID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list market offer items: %w", err)
+	}
+	defer rows.Close()
+	return scanMarketOfferItemRows(rows)
+}
+
+func scanMarketOfferItemRows(rows pgx.Rows) ([]MarketOfferItem, error) {
+	var items []MarketOfferItem
+	for rows.Next() {
+		var item MarketOfferItem
+		if err := rows.Scan(&item.OfferID, &item.BidderAccountID, &item.StashItemID, &item.SourceCharacterID, &item.ItemDefID, &item.RolledStats, &item.CreatedAt); err != nil {
+			return nil, fmt.Errorf("store: scan market offer item: %w", err)
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: market offer item rows: %w", err)
+	}
+	return items, nil
 }
 
 func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error {

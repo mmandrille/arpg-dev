@@ -136,6 +136,7 @@ type AccountStashGold struct {
 const (
 	MarketListingActive   = "active"
 	MarketListingCanceled = "canceled"
+	MarketListingAccepted = "accepted"
 )
 
 // MarketListing is a durable seller listing backed by one former stash item.
@@ -150,6 +151,37 @@ type MarketListing struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	CanceledAt        *time.Time
+	AcceptedAt        *time.Time
+}
+
+const (
+	MarketOfferActive   = "active"
+	MarketOfferAccepted = "accepted"
+	MarketOfferRejected = "rejected"
+)
+
+// MarketOffer is a durable item-for-item bid on one market listing.
+type MarketOffer struct {
+	ID              string
+	ListingID       string
+	BidderAccountID string
+	Status          string
+	Items           []MarketOfferItem
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	AcceptedAt      *time.Time
+	RejectedAt      *time.Time
+}
+
+// MarketOfferItem is one item snapshot reserved inside a market offer.
+type MarketOfferItem struct {
+	OfferID           string
+	BidderAccountID   string
+	StashItemID       string
+	SourceCharacterID string
+	ItemDefID         string
+	RolledStats       json.RawMessage
+	CreatedAt         time.Time
 }
 
 // CharacterWaypoint is a durable unlocked waypoint level for a character.

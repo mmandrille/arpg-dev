@@ -50,6 +50,8 @@ func _initialize() -> void:
 	get_root().size = Vector2i(_width, _height)
 
 	match _focus:
+		"floor-item":
+			await _setup_floor_item()
 		"character-menu":
 			await _setup_character_menu()
 		"join-menu":
@@ -204,6 +206,43 @@ func _setup_inventory() -> void:
 	var tooltip = panel._make_item_tooltip(_inventory_item_by_id(items, "2005"))
 	tooltip.position = Vector2(524, 28)
 	get_root().add_child(tooltip)
+
+
+func _setup_floor_item() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackFloorItem"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(2.5, 2.3, 3.2), Vector3(0.0, 0.12, 0.0), 2.1)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_grass_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(3.2, 0.035, 2.5)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.03, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#496f3e")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var main: Node3D = MainScript.new()
+	var base := ProjectSettings.globalize_path("res://")
+	var manifest = _read_json(base.path_join("../assets/manifests/assets.v0.json"))
+	if typeof(manifest) == TYPE_DICTIONARY:
+		main.asset_manifest = manifest.get("assets", {})
+	ItemRulesLoader.ensure_loaded()
+	var item_def_id := str(_items[0]) if not _items.is_empty() else "cave_blade"
+	var loot: Node3D = main._make_loot_node({
+		"type": "loot",
+		"item_def_id": item_def_id,
+		"rarity": "magic",
+		"amount": 1,
+	})
+	loot.name = "PreviewFloorItem_%s" % item_def_id
+	root.add_child(loot)
+	_subject = loot
 
 
 func _setup_skills() -> void:
@@ -535,6 +574,13 @@ func _add_camera(root: Node3D, position: Vector3, target: Vector3, size: float) 
 	root.add_child(camera)
 	camera.look_at_from_position(position, target, Vector3.UP)
 	camera.current = true
+
+
+func _read_json(path: String):
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return null
+	return JSON.parse_string(f.get_as_text())
 
 
 func _gear_snapshot(items: Array) -> Dictionary:

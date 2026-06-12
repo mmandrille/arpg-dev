@@ -4647,11 +4647,11 @@ func _make_loot_node(e: Dictionary) -> Node3D:
 	var color := Color(str(ground.get("color", "#" + _loot_color(item_def_id).to_html(false))))
 	var accent := Color(str(ground.get("accent", "#f6e8b1")))
 	var scale := float(ground.get("scale", 1.0))
-	_add_loot_rarity_background(root, _item_rarity_background(str(e.get("rarity", "common"))), scale)
 	var model := _make_ground_equipment_model(item_def_id, str(e.get("rarity", "common")))
 	if model != null:
 		root.add_child(model)
 	else:
+		_add_loot_rarity_background(root, _item_rarity_background(str(e.get("rarity", "common"))), scale)
 		_add_loot_primitive(root, shape, color, accent, scale)
 	_add_loot_label(root, _loot_label_text(e), scale, _loot_label_color(e))
 	return root
@@ -4696,8 +4696,8 @@ func _make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D
 		return null
 	inst.name = "GroundModel_%s" % asset_id
 	inst.scale = Vector3.ONE * GROUND_EQUIPMENT_MODEL_SCALE
-	inst.position = Vector3(0.0, 0.52, 0.0)
-	inst.rotation_degrees = Vector3(0.0, 35.0, 0.0)
+	inst.position = Vector3(0.0, 0.12, 0.0)
+	inst.rotation_degrees = Vector3(90.0, 35.0, 0.0)
 	_apply_model_tint(inst, _ground_item_tint(rarity))
 	return inst
 

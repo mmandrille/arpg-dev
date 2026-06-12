@@ -88,6 +88,7 @@ func (s *Sim) applyUniqueDamageBeforeHeroHit(target *entity, playerID uint64, da
 	if target == nil || target.kind != monsterEntity || target.hp <= 0 {
 		return damageRange
 	}
+	damageRange = s.applyPilgrimMomentumBeforeHeroHit(target, playerID, damageRange)
 	for _, effectID := range s.equippedUniqueEffectIDs(playerID) {
 		if effectID != hungerOfTheDeepEffectID {
 			continue
@@ -140,6 +141,8 @@ func (s *Sim) triggerUniqueEffectsAfterHeroDamage(target *entity, playerID uint6
 			}
 		case ashenReprisalEffectID:
 			s.applyAshenReprisalOnHeroHit(target, playerID, corr, res, outcome.Damage)
+		case pilgrimsMomentumEffectID:
+			s.triggerPilgrimMomentumAfterHeroHit(target, playerID, corr, res, outcome)
 		}
 	}
 }
@@ -148,6 +151,7 @@ func (s *Sim) triggerUniqueEffectsOnMonsterKilled(monster *entity, sourceID uint
 	if monster == nil || monster.kind != monsterEntity {
 		return
 	}
+	s.triggerResourceUniqueEffectsOnMonsterKilled(monster, sourceID, corr, res)
 	mark, ok := s.uniqueExecutionMarks[monster.id]
 	if !ok || mark.EffectID != executionersMarkEffectID || s.tick >= mark.EndsTick {
 		delete(s.uniqueExecutionMarks, monster.id)

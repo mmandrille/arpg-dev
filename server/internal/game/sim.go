@@ -290,6 +290,7 @@ type playerState struct {
 	UniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
 	UniqueHungerStacks    map[uint64]uniqueHungerStackState
 	UniqueAshenReprisals  map[uint64]uniqueAshenReprisalState
+	UniquePilgrimMomentum map[uint64]uniquePilgrimMomentumState
 	SkillFunctionKeys     []string
 	RightClickSkillID     string
 	ShopStock             map[string]*shopStockState
@@ -338,6 +339,7 @@ type Sim struct {
 	uniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
 	uniqueHungerStacks    map[uint64]uniqueHungerStackState
 	uniqueAshenReprisals  map[uint64]uniqueAshenReprisalState
+	uniquePilgrimMomentum map[uint64]uniquePilgrimMomentumState
 	areaHealZones         map[uint64]areaHealZoneState
 	skillFunctionKeys     []string
 	rightClickSkillID     string
@@ -636,6 +638,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		UniqueExecutionMarks:  cloneUniqueExecutionMarks(s.uniqueExecutionMarks),
 		UniqueHungerStacks:    cloneUniqueHungerStacks(s.uniqueHungerStacks),
 		UniqueAshenReprisals:  cloneUniqueAshenReprisals(s.uniqueAshenReprisals),
+		UniquePilgrimMomentum: cloneUniquePilgrimMomentum(s.uniquePilgrimMomentum),
 		SkillFunctionKeys:     cloneStringSlice(s.skillFunctionKeys),
 		RightClickSkillID:     s.rightClickSkillID,
 		ShopStock:             s.shopStock,
@@ -1403,6 +1406,7 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.uniqueAshenReprisals == nil {
 		s.uniqueAshenReprisals = make(map[uint64]uniqueAshenReprisalState)
 	}
+	s.usePlayerUniquePilgrimMomentum(ps)
 	s.skillFunctionKeys = normalizeSkillFunctionKeys(ps.SkillFunctionKeys)
 	s.rightClickSkillID = ps.RightClickSkillID
 	s.shopStock = ps.ShopStock
@@ -1443,6 +1447,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.UniqueExecutionMarks = s.uniqueExecutionMarks
 	ps.UniqueHungerStacks = s.uniqueHungerStacks
 	ps.UniqueAshenReprisals = s.uniqueAshenReprisals
+	ps.UniquePilgrimMomentum = s.uniquePilgrimMomentum
 	ps.SkillFunctionKeys = normalizeSkillFunctionKeys(s.skillFunctionKeys)
 	ps.RightClickSkillID = s.rightClickSkillID
 	ps.ShopStock = s.shopStock
@@ -3687,6 +3692,7 @@ func (s *Sim) applyMovement(res *TickResult) {
 	if s.activeLevel().move.remaining == 0 {
 		s.activeLevel().move = nil
 	}
+	s.updatePilgrimMomentumMovement(player, player.pos != before, res)
 	if player.pos == before {
 		return
 	}

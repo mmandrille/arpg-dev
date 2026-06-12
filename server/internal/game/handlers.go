@@ -1191,7 +1191,7 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		return
 	}
 	manaCost := skillManaCost(def, rank)
-	if player.mana < manaCost {
+	if player.mana < manaCost && !s.tryBloodPriceForSkill(player, manaCost, in.CorrelationID, res) {
 		res.reject(in.MessageID, "not_enough_mana")
 		return
 	}
@@ -1217,6 +1217,9 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 
 func (s *Sim) commitSkillSpend(player *entity, skillID string, def SkillDef, manaCost int) int {
 	player.mana -= manaCost
+	if player.mana < 0 {
+		player.mana = 0
+	}
 	cooldownTicks := s.skillCooldownTicks(def)
 	s.skillCooldowns[skillID] = skillCooldownState{EndsTick: s.tick + uint64(cooldownTicks), TotalTicks: cooldownTicks}
 	return cooldownTicks

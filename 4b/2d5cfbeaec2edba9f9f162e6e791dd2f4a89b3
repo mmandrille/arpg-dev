@@ -1,0 +1,45 @@
+PROGRESS.md
+  s_ab63a63fb76fe1::t_56b2c60da164ea 15,18,129,277
+tools/bot/scenarios/56_resource_support_mobility_unique_effects.json
+  s_ab63a63fb76fe1::t_4e8dac47ea21ed 1-2,4-9,11-29
+  s_ab63a63fb76fe1::t_045004fa83d71c 3,10
+docs/as-built/v108_resource-support-mobility-unique-effects.md
+  s_ab63a63fb76fe1::t_56b2c60da164ea 1-20
+docs/specs/v108_spec-resource-support-mobility-unique-effects.md
+  s_ab63a63fb76fe1::t_fca201315cf342 1-33
+shared/rules/worlds.v0.json
+  s_ab63a63fb76fe1::t_6ab2bf6b4754dd 749-757
+server/internal/game/unique_effects.go
+  s_ab63a63fb76fe1::t_603d493e3b7ed1 91,144-145,154
+server/internal/game/sim.go
+  s_ab63a63fb76fe1::t_147948977f0aae 293,342,641,1450
+  s_ab63a63fb76fe1::t_7968b2540d96f6 1409,3695
+docs/plans/v108_2026-06-12-resource-support-mobility-unique-effects.md
+  s_ab63a63fb76fe1::t_fca201315cf342 1-8,17-29
+  s_ab63a63fb76fe1::t_56b2c60da164ea 9-16
+server/internal/game/handlers.go
+  s_ab63a63fb76fe1::t_16a573c53a2057 1194,1220-1222
+server/internal/game/unique_resource_effects.go
+  s_ab63a63fb76fe1::t_8636cef3a0d5c6 32-38
+  s_ab63a63fb76fe1::t_36b62b242c1b08 1-31,39-266
+server/internal/game/unique_effects_test.go
+  s_ab63a63fb76fe1::t_6fb605a9c84e0a 381,409,436
+  s_ab63a63fb76fe1::t_4b879c79bfc9bb 388
+  s_ab63a63fb76fe1::t_824079ef305e2d 353-380,382-387,389-408,410-435,437-449
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4b2d5cfbeaec2edba9f9f162e6e791dd2f4a89b3",
+  "prompts": {},
+  "sessions": {
+    "s_ab63a63fb76fe1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebddb-b253-72b0-9015-616d3b773776",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

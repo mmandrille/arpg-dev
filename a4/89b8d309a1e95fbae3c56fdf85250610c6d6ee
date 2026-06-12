@@ -1,0 +1,48 @@
+tools/bot/test_protocol.py
+  s_9e5840f177c4bc::t_595d3859641313 163,165,170,173
+  s_9e5840f177c4bc::t_aad459ab209cb5 164
+shared/rules/monsters.v0.json
+  s_9e5840f177c4bc::t_2aee0632588220 66
+docs/reviews/backend/20260612_v90-backend.md
+  s_9e5840f177c4bc::t_ddc3aec4a30f58 1-45
+docs/reviews/20260612_v90-overview.md
+  s_9e5840f177c4bc::t_ddc3aec4a30f58 1-82
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_591cdb939986ce::t_ebabf6d8092a45 7-11,13-14,31
+  s_591cdb939986ce::t_a41811b086fccf 12
+docs/reviews/client/20260612_v90-client.md
+  s_9e5840f177c4bc::t_ddc3aec4a30f58 1-47
+tools/bot/run.py
+  s_591cdb939986ce::t_ebabf6d8092a45 97,192-215,3957-3961,3975
+  s_9e5840f177c4bc::t_4f69396e691d64 38
+PROGRESS.md
+  s_9e5840f177c4bc::t_f7d41b3d56682f 19-20,712-715
+tools/bot/bot_types.py
+  s_591cdb939986ce::t_ebabf6d8092a45 24
+docs/reviews/extras/20260612_v90-shared-tooling-and-process.md
+  s_9e5840f177c4bc::t_ddc3aec4a30f58 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a489b8d309a1e95fbae3c56fdf85250610c6d6ee",
+  "prompts": {},
+  "sessions": {
+    "s_591cdb939986ce": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb9e2-8e8f-7c83-ba57-7ca34e506863",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_9e5840f177c4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb912-51bb-7052-bc31-6696387df364",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

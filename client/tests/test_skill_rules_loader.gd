@@ -21,6 +21,8 @@ func _run() -> void:
 	_assert_true("manifest-loaded skills include cleave", ids.has("cleave"))
 	_assert_true("manifest-loaded skills include ice shard", ids.has("ice_shard"))
 	_assert_true("manifest-loaded skills include ligthing", ids.has("ligthing"))
+	_assert_true("manifest-loaded skills include poison stab", ids.has("poison_stab"))
+	_assert_true("manifest-loaded skills include dash", ids.has("dash"))
 	_assert_eq("alphabetical first id stable", str(ids[0]), "cleave")
 	_assert_eq("tree-order first skill stable", SkillRulesLoaderScript.first_skill_id(), "cleave")
 
@@ -35,6 +37,8 @@ func _run() -> void:
 	_assert_eq("ligthing kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("ligthing").get("kind", "")), "chain_projectile_attack")
 	_assert_eq("heal kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("heal").get("kind", "")), "area_heal")
 	_assert_eq("holy shield kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("holy_shield").get("kind", "")), "area_stat_buff")
+	_assert_eq("poison stab kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("poison_stab").get("kind", "")), "cone_attack")
+	_assert_eq("dash kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("dash").get("kind", "")), "cone_attack")
 
 	var presentation := SkillRulesLoaderScript.skill_presentation("magic_bolt")
 	_assert_eq("presentation summary key from manifest-listed assets", str(presentation.get("summary_key", "")), "skill.magic_bolt.summary")
@@ -47,6 +51,8 @@ func _run() -> void:
 	_assert_eq("ligthing presentation label", str(SkillRulesLoaderScript.skill_presentation("ligthing").get("icon", {}).get("label", "")), "L")
 	_assert_eq("heal presentation label", str(SkillRulesLoaderScript.skill_presentation("heal").get("icon", {}).get("label", "")), "H")
 	_assert_eq("holy shield presentation label", str(SkillRulesLoaderScript.skill_presentation("holy_shield").get("icon", {}).get("label", "")), "S")
+	_assert_eq("poison stab presentation label", str(SkillRulesLoaderScript.skill_presentation("poison_stab").get("icon", {}).get("label", "")), "P")
+	_assert_eq("dash presentation label", str(SkillRulesLoaderScript.skill_presentation("dash").get("icon", {}).get("label", "")), "D")
 
 	print("[gdtest] PASS: test_skill_rules_loader (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)

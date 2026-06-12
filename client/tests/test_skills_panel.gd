@@ -138,6 +138,25 @@ func _run() -> void:
 	_assert_eq("rankable paladin skill is highlighted", str(((state.get("skills", {}) as Dictionary).get("heal", {}) as Dictionary).get("visual_state", "")), "highlight")
 
 	panel.set_character_progression({
+		"character_class": "rogue",
+		"level": 1,
+		"base_stats": {"str": 5, "dex": 8, "vit": 5, "magic": 5},
+	})
+	panel.set_skill_progression({
+		"unspent_skill_points": 1,
+		"skills": _skill_rows(0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, true, 0, true),
+	})
+	state = panel.get_debug_state()
+	var rogue_skill_ids: Array = state.get("skill_ids", [])
+	_assert_eq("rogue has two starter visible skills", rogue_skill_ids.size(), 2)
+	_assert_eq("rogue first starter skill", str(rogue_skill_ids[0]), "poison_stab")
+	_assert_eq("rogue second starter skill", str(rogue_skill_ids[1]), "dash")
+	_assert_eq("rogue skill name from catalog", str(state.get("skill_name", "")), "Poison Stab")
+	_assert_eq("rogue skill icon from presentation", str(state.get("icon_label", "")), "P")
+	_assert_true("rogue poison stab can spend", bool(((state.get("skills", {}) as Dictionary).get("poison_stab", {}) as Dictionary).get("can_spend", false)))
+	_assert_true("rogue dash can spend", bool(((state.get("skills", {}) as Dictionary).get("dash", {}) as Dictionary).get("can_spend", false)))
+
+	panel.set_character_progression({
 		"character_class": "sorcerer",
 		"level": 6,
 		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
@@ -215,7 +234,7 @@ func _remove_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute_path)
 
 
-func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false) -> Array:
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false) -> Array:
 	return [
 		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": 5, "can_spend": cleave_can_spend},
 		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": 5, "can_spend": magic_can_spend},
@@ -224,4 +243,6 @@ func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rag
 		{"skill_id": "rage", "rank": rage_rank, "max_rank": 5, "can_spend": rage_can_spend},
 		{"skill_id": "heal", "rank": heal_rank, "max_rank": 5, "can_spend": heal_can_spend},
 		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": 5, "can_spend": holy_shield_can_spend},
+		{"skill_id": "poison_stab", "rank": poison_stab_rank, "max_rank": 5, "can_spend": poison_stab_can_spend},
+		{"skill_id": "dash", "rank": dash_rank, "max_rank": 5, "can_spend": dash_can_spend},
 	]

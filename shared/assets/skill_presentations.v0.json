@@ -79,6 +79,28 @@
       "summary": "Area ally defense",
       "effect_visual": "holy_shield",
       "summary_key": "skill.holy_shield.summary"
+    },
+    "poison_stab": {
+      "icon": {
+        "label": "P",
+        "shape": "burst",
+        "color": "#44b66f",
+        "accent": "#d7f7df"
+      },
+      "summary": "Close poison weapon strike",
+      "effect_visual": "poison_stab",
+      "summary_key": "skill.poison_stab.summary"
+    },
+    "dash": {
+      "icon": {
+        "label": "D",
+        "shape": "burst",
+        "color": "#58c7d8",
+        "accent": "#dcfbff"
+      },
+      "summary": "Forward dash strike",
+      "effect_visual": "dash",
+      "summary_key": "skill.dash.summary"
     }
   }
 }

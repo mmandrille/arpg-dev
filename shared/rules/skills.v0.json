@@ -380,6 +380,86 @@
         "multiplier": 2.5
       },
       "name_key": "skill.holy_shield.name"
+    },
+    "poison_stab": {
+      "name": "Poison Stab",
+      "class": "rogue",
+      "tree": {
+        "tier": 1,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 8
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 1.8,
+        "angle_degrees": 25,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1.25
+      },
+      "name_key": "skill.poison_stab.name"
+    },
+    "dash": {
+      "name": "Dash",
+      "class": "rogue",
+      "tree": {
+        "tier": 1,
+        "column": 2
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 8
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 5,
+        "angle_degrees": 35,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.dash.name"
     }
   }
 }

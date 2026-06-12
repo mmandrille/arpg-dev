@@ -11,6 +11,7 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	_test_rage_effect_started_drives_world_aura()
+	_test_rage_icon_expiry_clears_world_aura()
 	_test_holy_shield_started_blinks_models_in_range()
 	_test_holy_shield_ended_clears_local_world_effect()
 
@@ -44,6 +45,20 @@ func _test_rage_effect_started_drives_world_aura() -> void:
 	local_state = main._bot_local_player_presentation()
 	_assert_true("local rage marker removed", not bool(local_state.get("has_rage_effect", true)))
 	_assert_float("local rage visual scale reset", float(local_state.get("visual_scale", 0.0)), 1.0)
+	_free_main(main)
+
+
+func _test_rage_icon_expiry_clears_world_aura() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._apply_delta({"events": [{"event_type": "skill_effect_started", "entity_id": "1001", "skill_id": "rage", "amount": 25, "remaining_ticks": 1, "total_ticks": 1}], "changes": []})
+	var local_state := main._bot_local_player_presentation()
+	_assert_true("local rage marker active before icon expiry", bool(local_state.get("has_rage_effect", false)))
+
+	main._on_status_effect_expired("rage")
+	local_state = main._bot_local_player_presentation()
+	_assert_true("local rage marker removed by icon expiry", not bool(local_state.get("has_rage_effect", true)))
+	_assert_float("local rage visual scale reset by icon expiry", float(local_state.get("visual_scale", 0.0)), 1.0)
 	_free_main(main)
 
 

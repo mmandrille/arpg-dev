@@ -465,12 +465,12 @@ func _setup_monsters() -> void:
 	get_root().add_child(root)
 
 	_add_light(root)
-	_add_camera(root, Vector3(4.2, 3.0, 5.3), Vector3(0.0, 0.70, 0.0), 4.8)
+	_add_camera(root, Vector3(5.0, 3.2, 6.0), Vector3(0.0, 0.72, 0.0), 5.4)
 
 	var floor := MeshInstance3D.new()
 	floor.name = "reference_floor"
 	var floor_mesh := BoxMesh.new()
-	floor_mesh.size = Vector3(6.2, 0.04, 2.6)
+	floor_mesh.size = Vector3(7.6, 0.04, 2.6)
 	floor.mesh = floor_mesh
 	floor.position = Vector3(0, -0.025, 0)
 	var floor_mat := StandardMaterial3D.new()
@@ -480,10 +480,11 @@ func _setup_monsters() -> void:
 
 	var main: Node3D = MainScript.new()
 	var entries := [
-		{"name": "Dummy", "x": -2.25, "entity": {"type": "monster", "monster_def_id": "dungeon_mob", "rarity": "common"}},
-		{"name": "Wolf", "x": -0.75, "entity": {"type": "monster", "monster_def_id": "dungeon_wolf", "rarity": "common"}},
-		{"name": "Bat", "x": 0.75, "entity": {"type": "monster", "monster_def_id": "dungeon_bat", "rarity": "common"}},
-		{"name": "Boss", "x": 2.25, "entity": {"type": "monster", "monster_def_id": "dungeon_mob", "rarity": "unique", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "monster_tiny_flyer", "visual_scale": 2.0, "visual_tint": "#b77cff"}},
+		{"name": "Dummy", "x": -3.0, "entity": {"type": "monster", "monster_def_id": "dungeon_mob", "rarity": "common"}},
+		{"name": "Wolf", "x": -1.5, "entity": {"type": "monster", "monster_def_id": "dungeon_wolf", "rarity": "common"}},
+		{"name": "Bat", "x": 0.0, "entity": {"type": "monster", "monster_def_id": "dungeon_bat", "rarity": "common"}},
+		{"name": "Skeleton", "x": 1.5, "entity": {"type": "monster", "monster_def_id": "dungeon_undead", "rarity": "common"}},
+		{"name": "Boss", "x": 3.0, "entity": {"type": "monster", "monster_def_id": "dungeon_mob", "rarity": "unique", "is_boss": true, "boss_template_id": "cave_warden", "visual_model": "monster_tiny_flyer", "visual_scale": 2.0, "visual_tint": "#b77cff"}},
 	]
 	for entry in entries:
 		var monster := main._make_entity_node(entry["entity"] as Dictionary) as Node3D

@@ -22,7 +22,7 @@
             "additionalProperties": false,
             "properties": {
               "label": { "type": "string", "minLength": 1, "maxLength": 3 },
-              "shape": { "type": "string", "enum": ["bolt", "burst", "heart", "shield"] },
+              "shape": { "type": "string", "enum": ["bolt", "burst", "heart", "shield", "slash"] },
               "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
               "accent": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
             }

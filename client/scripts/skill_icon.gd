@@ -35,6 +35,8 @@ func _draw() -> void:
 			_draw_burst(center, radius)
 		"heart":
 			_draw_heart(center, radius)
+		"slash":
+			_draw_slash(center, radius)
 		_:
 			_draw_bolt(center, radius)
 	draw_arc(center, radius, 0.0, TAU, 40, accent_color, 2.0, true)
@@ -73,3 +75,18 @@ func _draw_heart(center: Vector2, radius: float) -> void:
 		points.append(center + Vector2(x, y) * (radius / 18.0))
 	draw_colored_polygon(points, fill_color)
 	draw_polyline(points, accent_color, 2.0, true)
+
+
+func _draw_slash(center: Vector2, radius: float) -> void:
+	var upper := center + Vector2(radius * 0.58, -radius * 0.68)
+	var lower := center + Vector2(-radius * 0.58, radius * 0.68)
+	var blade := PackedVector2Array([
+		upper + Vector2(radius * 0.12, radius * 0.02),
+		center + Vector2(radius * 0.12, radius * 0.12),
+		lower + Vector2(-radius * 0.06, radius * 0.14),
+		center + Vector2(-radius * 0.16, -radius * 0.06),
+		upper + Vector2(radius * 0.02, -radius * 0.18),
+	])
+	draw_colored_polygon(blade, fill_color)
+	draw_polyline(blade, accent_color, 2.0, true)
+	draw_line(center + Vector2(-radius * 0.42, -radius * 0.44), center + Vector2(radius * 0.44, radius * 0.42), accent_color, 2.0, true)

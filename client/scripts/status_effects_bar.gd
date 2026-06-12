@@ -1,7 +1,9 @@
 class_name StatusEffectsBar
 extends Control
 
-const TICK_DURATION_S := 1.0 / 15.0
+signal effect_expired(skill_id: String)
+
+const TICK_DURATION_S := 1.0 / 10.0
 const ICON_SIZE := Vector2(36, 36)
 
 var _effects: Dictionary = {}
@@ -54,6 +56,7 @@ func _process(delta: float) -> void:
 		rec["remaining_ticks"] = maxf(0.0, float(rec.get("remaining_ticks", 0.0)) - (delta / TICK_DURATION_S))
 		if float(rec.get("remaining_ticks", 0.0)) <= 0.0:
 			_effects.erase(skill_id)
+			effect_expired.emit(str(skill_id))
 		changed = true
 	if changed:
 		_render()

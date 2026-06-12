@@ -47,6 +47,8 @@ func _run() -> void:
 	_assert_eq("presentation projectile visual", str(presentation.get("projectile_visual", "")), "magic_bolt_projectile")
 	_assert_eq("rage presentation label", str(SkillRulesLoaderScript.skill_presentation("rage").get("icon", {}).get("label", "")), "R")
 	_assert_eq("cleave presentation label", str(SkillRulesLoaderScript.skill_presentation("cleave").get("icon", {}).get("label", "")), "C")
+	_assert_eq("rage presentation shape", str(SkillRulesLoaderScript.skill_presentation("rage").get("icon", {}).get("shape", "")), "burst")
+	_assert_eq("cleave presentation shape", str(SkillRulesLoaderScript.skill_presentation("cleave").get("icon", {}).get("shape", "")), "slash")
 	_assert_eq("ice shard presentation label", str(SkillRulesLoaderScript.skill_presentation("ice_shard").get("icon", {}).get("label", "")), "I")
 	_assert_eq("ligthing presentation label", str(SkillRulesLoaderScript.skill_presentation("ligthing").get("icon", {}).get("label", "")), "L")
 	_assert_eq("heal presentation label", str(SkillRulesLoaderScript.skill_presentation("heal").get("icon", {}).get("label", "")), "H")

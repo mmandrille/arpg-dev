@@ -1658,6 +1658,14 @@ func _holy_shield_aura_radius() -> float:
 	return 5.0
 
 
+func _on_status_effect_expired(skill_id: String) -> void:
+	if skill_id == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
+		_apply_local_player_visual_scale(1.0)
+		PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, false)
+	if skill_id == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
+		PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, [])
+
+
 func _flat_distance(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
@@ -3084,6 +3092,7 @@ func _build_scene() -> void:
 	skill_bar.open_skills_requested.connect(_open_skills_panel_from_bar)
 	ui.add_child(skill_bar)
 	status_effects_bar = StatusEffectsBarScript.new()
+	status_effects_bar.effect_expired.connect(_on_status_effect_expired)
 	ui.add_child(status_effects_bar)
 	_setup_character_info_panel(ui)
 	_health_bar = PlayerHealthBarScript.new()

@@ -486,6 +486,109 @@ func TestMarketListingRoutesMoveStashItemAndRejectForeignCancel(t *testing.T) {
 	}
 }
 
+func TestMarketOfferRoutesSubmitListAndAccept(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	sellerID, sellerToken := loginEmail(t, h, "market-offer-seller+"+suffix+"@example.test")
+	sellerChar := createCharacter(t, h, sellerToken, "Offer Seller")
+	bidderID, bidderToken := loginEmail(t, h, "market-offer-bidder+"+suffix+"@example.test")
+	bidderChar := createCharacter(t, h, bidderToken, "Offer Bidder")
+	foreignID, foreignToken := loginEmail(t, h, "market-offer-foreign+"+suffix+"@example.test")
+	if sellerID == bidderID || bidderID == foreignID || sellerID == foreignID {
+		t.Fatal("expected distinct market route accounts")
+	}
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{
+		ID:          "market_offer_listing_item_" + suffix,
+		AccountID:   sellerID,
+		CharacterID: sellerChar.CharacterID,
+		ItemDefID:   "rusty_sword",
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{"damage_min":2}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, sellerID, sellerChar.CharacterID, "market_offer_listing_item_"+suffix, "market_offer_listing_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	for _, itemID := range []string{"market_offer_bid_item_a_" + suffix, "market_offer_bid_item_b_" + suffix} {
+		if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: bidderID, CharacterID: bidderChar.CharacterID, ItemDefID: "red_potion", Location: store.ItemLocationInventory}); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.TransferCharacterItemToAccountStash(ctx, bidderID, bidderChar.CharacterID, itemID, "stash_"+itemID); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	rec := postJSON(h, "/v0/market/listings", sellerToken, map[string]string{"stash_item_id": "market_offer_listing_stash_" + suffix})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create listing status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var listing marketListingResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listing); err != nil {
+		t.Fatal(err)
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers", sellerToken, createMarketOfferRequest{StashItemIDs: []string{"market_offer_listing_stash_" + suffix}})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("self offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers", bidderToken, createMarketOfferRequest{StashItemIDs: []string{"stash_market_offer_bid_item_a_" + suffix, "stash_market_offer_bid_item_b_" + suffix}})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var offer marketOfferResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &offer); err != nil {
+		t.Fatal(err)
+	}
+	if offer.OfferID == "" || offer.Status != store.MarketOfferActive || len(offer.Items) != 2 {
+		t.Fatalf("created offer = %+v", offer)
+	}
+	rec = getJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers", foreignToken)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign list offers status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = getJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers", sellerToken)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("seller list offers status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var offers listMarketOffersResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &offers); err != nil {
+		t.Fatal(err)
+	}
+	if len(offers.Offers) != 1 || offers.Offers[0].OfferID != offer.OfferID {
+		t.Fatalf("listed offers = %+v", offers.Offers)
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers/"+offer.OfferID+"/accept", foreignToken, map[string]string{})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign accept status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers/"+offer.OfferID+"/accept", sellerToken, map[string]string{})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("accept offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var accepted marketOfferResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &accepted); err != nil {
+		t.Fatal(err)
+	}
+	if accepted.Status != store.MarketOfferAccepted {
+		t.Fatalf("accepted offer = %+v", accepted)
+	}
+	sellerStash, err := db.ListAccountStashItems(ctx, sellerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sellerStash) != 2 {
+		t.Fatalf("seller stash after accept = %+v", sellerStash)
+	}
+	bidderStash, err := db.ListAccountStashItems(ctx, bidderID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(bidderStash) != 1 || bidderStash[0].StashItemID != "market_offer_listing_stash_"+suffix {
+		t.Fatalf("bidder stash after accept = %+v", bidderStash)
+	}
+}
+
 func TestCharactersAreAccountScoped(t *testing.T) {
 	h := fullServer(t)
 	_, tokenA := loginEmail(t, h, "characters-account-a@example.test")

@@ -35,7 +35,7 @@ from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot import skill_visual_runtime
 
 SLICE_TIMEOUT_S = 20.0
-MAX_SCENARIO_ELAPSED_S = 60.0
+MAX_SCENARIO_ELAPSED_S = 15.0
 WAIT_LOG_INTERVAL_S = 2.0
 WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
@@ -94,6 +94,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
             title=raw.get("title", sid),
             description=raw.get("description", ""),
             character_class=str(raw.get("character_class", "")),
+            debug_progression=dict(raw.get("debug_progression", {})),
             steps=list(raw.get("steps", [])),
             assertions=list(raw.get("assertions", [])),
             fresh_session_checks=list(raw.get("fresh_session_checks", [])),
@@ -186,6 +187,30 @@ def ensure_character(client: httpx.Client, token: str, name: str, character_clas
     elif chars:
         return str(chars[0]["character_id"])
     return str(create_character(client, token, name, character_class)["character_id"])
+
+
+def seed_debug_progression(
+    client: httpx.Client,
+    token: str,
+    debug_token: str,
+    character_id: str,
+    progression: dict[str, Any],
+) -> None:
+    body = {
+        "level": int(progression.get("level", 1)),
+        "experience": int(progression.get("experience", 0)),
+        "unspent_stat_points": int(progression.get("unspent_stat_points", 0)),
+        "unspent_skill_points": int(progression.get("unspent_skill_points", 0)),
+        "stats": dict(progression.get("stats", {})),
+        "skill_ranks": dict(progression.get("skill_ranks", {})),
+    }
+    resp = client.put(
+        f"/v0/debug/characters/{character_id}/progression",
+        headers={**auth(token), "X-Debug-Token": debug_token},
+        json=body,
+    )
+    resp.raise_for_status()
+    log("debug progression seeded", character_id, f"level={body['level']}", f"stats={body['stats']}")
 
 
 def create_coop_session(
@@ -3929,8 +3954,11 @@ def run_verified_session(
     seed: str = "",
 ) -> tuple[dict[str, Any], RuntimeState]:
     character_id = ""
-    if scenario.character_class:
-        character_id = ensure_character(client, token, f"{scenario.character_class.title()} Bot", scenario.character_class)
+    if scenario.character_class or scenario.debug_progression:
+        character_name = f"{scenario.character_class.title()} Bot" if scenario.character_class else f"{scenario.title} Bot"
+        character_id = ensure_character(client, token, character_name, scenario.character_class)
+    if scenario.debug_progression:
+        seed_debug_progression(client, token, debug_token, character_id, scenario.debug_progression)
     sess = create_session(client, token, world_id, seed, character_id)
     session_id = sess["session_id"]
     log("session created", session_id, f"seed={sess.get('seed')}")
@@ -3944,6 +3972,7 @@ def run_verified_session(
         title=scenario.title,
         description=scenario.description,
         character_class=scenario.character_class,
+        debug_progression=scenario.debug_progression,
         steps=steps,
         assertions=assertions,
         fresh_session_checks=[],

@@ -1,0 +1,57 @@
+client/scripts/animation_controller.gd
+  s_a539ce2bf87640::t_91b94dcbf973f5 49-55
+  s_a539ce2bf87640::t_8c5ed3fca22112 56-59
+shared/golden/skill_points_and_magic_bolt.json
+  s_a539ce2bf87640::t_e43bd112f3b324 18,28-29,37-38,46-47,55-56
+client/scripts/model_reaction_controller.gd
+  s_a539ce2bf87640::t_5220ce92959280 69-78
+  s_a539ce2bf87640::t_ac429d00256829 79-82
+client/tests/test_animation.gd
+  s_a539ce2bf87640::t_05d89a07a9a1ba 19-20,29-30,93-104,180-195
+shared/golden/character_progression.json
+  s_a539ce2bf87640::t_30a9eb7ca90ccb 28,57,86,115,146,175,204
+client/tests/test_stash_panel.gd
+  s_a539ce2bf87640::t_2556ddc9fd2b87 97,120-123
+  s_a539ce2bf87640::t_eee37b4b0da87c 111-112
+  s_a539ce2bf87640::t_662d6c7da6ebdf 113-119
+client/scripts/inventory_panel.gd
+  s_a539ce2bf87640::t_2043005c564e24 829,839,1300-1306,1316
+  s_a539ce2bf87640::t_cdf9b88eaa58ef 119
+  s_a539ce2bf87640::t_fc34c5dc8afbf7 803-811
+  s_a539ce2bf87640::t_b2accfd177e4ba 1307-1315
+shared/rules/main_config.v0.json
+  s_a539ce2bf87640::t_e43bd112f3b324 4
+client/tests/test_skills_panel.gd
+  s_a539ce2bf87640::t_9d6a24d1c20339 79-82
+shared/rules/combat.v0.json
+  s_a539ce2bf87640::t_e43bd112f3b324 8
+client/scripts/main.gd
+  s_a539ce2bf87640::t_b37d84c2a0895a 122,3155-3156
+  s_a539ce2bf87640::t_ff940b44be380e 1212-1215,1217-1221
+  s_a539ce2bf87640::t_30d3407b8efee4 729,3161-3190
+  s_9e5840f177c4bc::t_9259beb670a634 1136-1139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "73dc918f3b4cfd589737d5f239b8f525293137b9",
+  "prompts": {},
+  "sessions": {
+    "s_9e5840f177c4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb912-51bb-7052-bc31-6696387df364",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a539ce2bf87640": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb9ea-dd40-7542-a30a-c8c12e0b4bd0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

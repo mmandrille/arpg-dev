@@ -333,12 +333,17 @@ func _test_character_panel_modes_for_v45() -> void:
 	_assert_true("expanded class picker visible", bool(expanded.get("class_picker_visible", false)))
 	_assert_eq("default selected class", str(expanded.get("selected_class", "")), "barbarian")
 	var options: Array = expanded.get("class_options", [])
-	_assert_eq("three class options", options.size(), 3)
+	_assert_eq("four class options", options.size(), 4)
 	_assert_true("barbarian tooltip includes skill", str((options[0] as Dictionary).get("tooltip", "")).contains("Skill: Rage"))
 	panel.select_class("sorcerer")
 	var sorc_state := panel.get_debug_state()
 	_assert_eq("selected sorcerer", str(sorc_state.get("selected_class", "")), "sorcerer")
 	_assert_true("sorcerer tooltip includes magic bolt", str(((sorc_state.get("class_options", []) as Array)[1] as Dictionary).get("tooltip", "")).contains("Magic Bolt"))
+	panel.select_class("rogue")
+	var rogue_state := panel.get_debug_state()
+	_assert_eq("selected rogue", str(rogue_state.get("selected_class", "")), "rogue")
+	_assert_true("rogue tooltip includes poison stab", str(((rogue_state.get("class_options", []) as Array)[3] as Dictionary).get("tooltip", "")).contains("Poison Stab"))
+	panel.select_class("sorcerer")
 	var created := {"name": "", "class": ""}
 	panel.create_requested.connect(func(name: String, character_class: String) -> void:
 		created["name"] = name

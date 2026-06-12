@@ -359,6 +359,19 @@ def paladin_glb() -> bytes:
     ])
 
 
+def rogue_glb() -> bytes:
+    """Smaller, thinner dual-wield class silhouette."""
+    return _humanoid_glb((0.24, 0.48, 0.36, 1.0), [
+        (1, (0.0, 1.05, 0.0), (0.42, 0.76, 0.26)),
+        (1, (0.0, 1.63, 0.0), (0.28, 0.28, 0.28)),
+        (1, (0.0, 1.05, 0.18), (0.34, 0.12, 0.05), (0.08, 0.12, 0.10, 1.0)),
+        (1, (-0.34, 1.06, 0.0), (0.12, 0.64, 0.12)),
+        (2, (0.34, 1.06, 0.0), (0.12, 0.64, 0.12)),
+        (4, (-0.13, 0.40, 0.0), (0.15, 0.80, 0.15)),
+        (5, (0.13, 0.40, 0.0), (0.15, 0.80, 0.15)),
+    ])
+
+
 def monster_dummy_glb() -> bytes:
     """Training dummy: a post on a base, skinned so hit/death clips rotate it.
 
@@ -486,6 +499,7 @@ TARGETS = {
     "client/assets/characters/barbarian/barbarian.glb": barbarian_glb,
     "client/assets/characters/sorcerer/sorcerer.glb": sorcerer_glb,
     "client/assets/characters/paladin/paladin.glb": paladin_glb,
+    "client/assets/characters/rogue/rogue.glb": rogue_glb,
     "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
     "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
     "client/assets/equipment/weapons/starter_staff/starter_staff.glb": starter_staff_glb,

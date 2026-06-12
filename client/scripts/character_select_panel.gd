@@ -34,10 +34,17 @@ const CLASS_DEFS := {
 		"name_key": "character.class.paladin",
 		"skill": "Heal",
 		"skill_key": "skill.heal.name",
-		"stats": {"str": 4, "dex": 5, "vit": 7, "magic": 5},
+		"stats": {"str": 6, "dex": 4, "vit": 8, "magic": 5},
+	},
+	"rogue": {
+		"name": "Rogue",
+		"name_key": "character.class.rogue",
+		"skill": "Poison Stab",
+		"skill_key": "skill.poison_stab.name",
+		"stats": {"str": 4, "dex": 8, "vit": 5, "magic": 4},
 	},
 }
-const CLASS_ORDER := ["barbarian", "sorcerer", "paladin"]
+const CLASS_ORDER := ["barbarian", "sorcerer", "paladin", "rogue"]
 
 var _title: Label
 var _rows: VBoxContainer

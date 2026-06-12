@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v97 — `class-starter-loadouts` |
+| **Latest completed slice** | v98 — `rogue-class-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | TBD |
+| **Next slice** | TBD — likely Rogue skill implementation (`poison-stab` or `dash`) |
 | **Last engineering review** | v90 — [`docs/reviews/20260612_v90-overview.md`](docs/reviews/20260612_v90-overview.md) (2026-06-12) |
 | **Next engineering review** | v100 (~every 10 slices) |
 
@@ -254,6 +254,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v95** | `unique-item-catalog-seed` | Complete (`make ci` green) | [`v95_spec-unique-item-catalog-seed.md`](docs/specs/v95_spec-unique-item-catalog-seed.md) | [`v95_2026-06-12-unique-item-catalog-seed.md`](docs/plans/v95_2026-06-12-unique-item-catalog-seed.md) | [`as-built`](docs/as-built/v95_unique-item-catalog-seed.md) |
 | **v96** | `town-presentation-polish` | Complete (`make ci` green) | [`v96_spec-town-presentation-polish.md`](docs/specs/v96_spec-town-presentation-polish.md) | [`v96_2026-06-12-town-presentation-polish.md`](docs/plans/v96_2026-06-12-town-presentation-polish.md) | [`as-built`](docs/as-built/v96_town-presentation-polish.md) |
 | **v97** | `class-starter-loadouts` | Complete (`make ci` green) | [`v97_spec-class-starter-loadouts.md`](docs/specs/v97_spec-class-starter-loadouts.md) | [`v97_2026-06-12-class-starter-loadouts.md`](docs/plans/v97_2026-06-12-class-starter-loadouts.md) | [`as-built`](docs/as-built/v97_class-starter-loadouts.md) |
+| **v98** | `rogue-class-foundation` | Complete (`make ci` green) | [`v98_spec-rogue-class-foundation.md`](docs/specs/v98_spec-rogue-class-foundation.md) | [`v98_2026-06-12-rogue-class-foundation.md`](docs/plans/v98_2026-06-12-rogue-class-foundation.md) | [`as-built`](docs/as-built/v98_rogue-class-foundation.md) |
 
 ---
 
@@ -422,6 +423,12 @@ Follow-up minor improvements after v97 added dedicated starter staff/axe models,
 presentation assets, class-specific character models, magic scaling for existing skill effects, and
 floor-loot presentation fixes. These are considered unversioned polish/consolidation commits, not
 separate numbered slices; the next gameplay slice remains v98.
+
+**Rogue class foundation is playable.** v98 adds Rogue as the fourth selectable class with a slimmer
+deterministic character model, dagger class icon, dexterity-leaning starting stats, and a durable
+starter kit of two common swords plus one health and one mana potion. Rogues can equip one-handed
+melee weapons in `off_hand`; non-Rogue classes still cannot. Poison Stab, Dash, and independent
+off-hand attack cadence remain deferred Rogue skill/combat follow-ups.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

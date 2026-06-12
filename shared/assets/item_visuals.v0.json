@@ -31,6 +31,16 @@
         "scale": { "x": 1.05, "y": 1.05, "z": 1.05 }
       }
     },
+    "starter_rogue_sword": {
+      "asset_id": "weapon_rusty_sword_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": -0.08, "z": 0.0 },
+        "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.92, "y": 0.92, "z": 0.92 }
+      }
+    },
     "starter_paladin_shield": {
       "asset_id": "fallback_equipment_off_hand_v0",
       "slot": "off_hand",

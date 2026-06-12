@@ -464,6 +464,18 @@ def test_load_scenarios_discovers_class_starter_loadout():
     assert {"type": "inventory_contains", "item_def_id": "blue_potion", "equipped": False} in starter.assertions
 
 
+def test_load_scenarios_discovers_rogue_class_foundation():
+    scenarios = load_scenarios()
+    rogue = next(s for s in scenarios if s.id == "rogue_class_foundation")
+
+    assert rogue.world_id == "vertical_slice"
+    assert rogue.character_class == "rogue"
+    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_rogue_sword"} in rogue.assertions
+    assert {"type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "starter_rogue_sword"} in rogue.assertions
+    assert {"type": "inventory_contains", "item_def_id": "red_potion", "equipped": False} in rogue.assertions
+    assert {"type": "inventory_contains", "item_def_id": "blue_potion", "equipped": False} in rogue.assertions
+
+
 def test_load_scenarios_discovers_equipment_requirements_and_preview():
     scenarios = load_scenarios()
     requirements = next(s for s in scenarios if s.id == "equipment_requirements_and_preview")

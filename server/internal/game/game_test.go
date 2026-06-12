@@ -210,8 +210,12 @@ func TestLoadRules(t *testing.T) {
 	if r.CharacterProgression.PointsPerLevel != 3 || r.CharacterProgression.LevelCap != 100 {
 		t.Fatalf("character progression = %+v, want points_per_level 3 level_cap 100", r.CharacterProgression)
 	}
-	if len(r.CharacterProgression.Classes) != 3 || r.CharacterProgression.Classes["barbarian"].BaseStats.Str != 5 || r.CharacterProgression.Classes["sorcerer"].BaseStats.Str != 3 || r.CharacterProgression.Classes["paladin"].BaseStats.Vit != 8 {
-		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin starting stats", r.CharacterProgression.Classes)
+	if len(r.CharacterProgression.Classes) != 4 ||
+		r.CharacterProgression.Classes["barbarian"].BaseStats.Str != 5 ||
+		r.CharacterProgression.Classes["sorcerer"].BaseStats.Str != 3 ||
+		r.CharacterProgression.Classes["paladin"].BaseStats.Vit != 8 ||
+		r.CharacterProgression.Classes["rogue"].BaseStats.Dex != 8 {
+		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin/rogue starting stats", r.CharacterProgression.Classes)
 	}
 	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 1 {
 		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 1", r.CharacterProgression.SkillPoints)
@@ -3561,6 +3565,38 @@ func TestEquipmentWrongSlotRejects(t *testing.T) {
 		Equip:     &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: mainHandSlot},
 	}})
 	assertReject(t, res, "wrong", "wrong_slot")
+}
+
+func TestRogueOffhandWeaponEquipRules(t *testing.T) {
+	rules := loadRules(t)
+	rogueState := rules.DefaultCharacterProgressionState()
+	rogueState.CharacterClass = "rogue"
+	rogueState.BaseStats = rules.CharacterProgression.Classes["rogue"].BaseStats
+	rogue, err := NewSimWithWorldProgression("sess_rogue_offhand", "rogue_offhand_seed", rules, DefaultWorldID, rogueState)
+	if err != nil {
+		t.Fatalf("new rogue sim: %v", err)
+	}
+	main := addRolledInventoryItem(t, rogue, 6110, "starter_rogue_sword", nil)
+	off := addRolledInventoryItem(t, rogue, 6111, "cave_blade", nil)
+	mainResult := rogue.Tick([]Input{{MessageID: "main", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(main.instanceID), Slot: mainHandSlot}}})
+	assertAck(t, mainResult, "main")
+	offResult := rogue.Tick([]Input{{MessageID: "off", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(off.instanceID), Slot: offHandSlot}}})
+	assertAck(t, offResult, "off")
+	if rogue.equipped[mainHandSlot] != main.instanceID || rogue.equipped[offHandSlot] != off.instanceID {
+		t.Fatalf("rogue equipped = %+v, want main %d off %d", rogue.equipped, main.instanceID, off.instanceID)
+	}
+	if off.slot != offHandSlot {
+		t.Fatalf("offhand weapon slot = %q, want %q", off.slot, offHandSlot)
+	}
+
+	barbarian := MustNewSim("sess_barbarian_offhand", "barbarian_offhand_seed", rules)
+	barbarianWeapon := addRolledInventoryItem(t, barbarian, 6120, "cave_blade", nil)
+	barbarianResult := barbarian.Tick([]Input{{MessageID: "barb_off", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(barbarianWeapon.instanceID), Slot: offHandSlot}}})
+	assertReject(t, barbarianResult, "barb_off", "wrong_slot")
+
+	twoHand := addRolledInventoryItem(t, rogue, 6130, "starter_sorcerer_staff", nil)
+	twoHandResult := rogue.Tick([]Input{{MessageID: "two_hand_off", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(twoHand.instanceID), Slot: offHandSlot}}})
+	assertReject(t, twoHandResult, "two_hand_off", "wrong_slot")
 }
 
 func TestEquipmentRequirementsRejectAndPreview(t *testing.T) {

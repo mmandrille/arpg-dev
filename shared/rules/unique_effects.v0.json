@@ -1,0 +1,50 @@
+{
+  "version": 0,
+  "effects": {
+    "everburning_wound": {
+      "id": "everburning_wound",
+      "enabled": true,
+      "display_name": "Everburning Wound",
+      "summary": "All hero damage applies burn for 10 seconds, ticking once per second for 10% of the original hit damage.",
+      "hook": "on_hero_damage_dealt",
+      "compatible_item_types": ["sword", "greatsword", "axe", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+      "params": {
+        "status_id": "burning",
+        "damage_type": "fire",
+        "tick_damage_percent_of_original_hit": 10,
+        "duration_seconds": 10,
+        "tick_interval_seconds": 1
+      },
+      "status": "ready"
+    },
+    "echoing_finish": {
+      "id": "echoing_finish",
+      "enabled": true,
+      "display_name": "Echoing Finish",
+      "summary": "Basic attacks against low-health enemies echo a portion of the hit into a nearby enemy.",
+      "hook": "on_basic_attack_hit",
+      "compatible_item_types": ["sword", "greatsword", "axe", "staff", "bow", "gloves", "ring", "amulet"],
+      "params": {
+        "target_hp_percent_threshold": 35,
+        "echo_damage_percent": 40,
+        "search_radius_tiles": 4
+      },
+      "status": "ready"
+    },
+    "last_stand_glimmer": {
+      "id": "last_stand_glimmer",
+      "enabled": true,
+      "display_name": "Last Stand Glimmer",
+      "summary": "While equipped, surviving near death can briefly amplify all outgoing hero damage.",
+      "hook": "on_equip_passive",
+      "compatible_item_types": ["shield", "helm", "chest", "belt", "boots", "ring", "amulet"],
+      "params": {
+        "hp_percent_threshold": 25,
+        "damage_bonus_percent": 30,
+        "duration_seconds": 4,
+        "cooldown_seconds": 30
+      },
+      "status": "ready"
+    }
+  }
+}

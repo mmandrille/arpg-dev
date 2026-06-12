@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v102 — `class-bot-visual-scenarios` |
+| **Latest completed slice** | v103 — `unique-effect-catalog-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | v103 — TBD |
+| **Next slice** | v104 — TBD |
 | **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
 | **Next engineering review** | v110 (~every 10 slices) |
 
@@ -121,6 +121,7 @@ v99_* = rogue-skill-mechanics
 v100_* = damage-types-and-resistances
 v101_* = undead-skeleton-poison-immunity
 v102_* = class-bot-visual-scenarios
+v103_* = unique-effect-catalog-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -263,6 +264,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v100** | `damage-types-and-resistances` | Complete (`make ci` green) | [`v100_spec-damage-types-and-resistances.md`](docs/specs/v100_spec-damage-types-and-resistances.md) | [`v100_2026-06-12-damage-types-and-resistances.md`](docs/plans/v100_2026-06-12-damage-types-and-resistances.md) | [`as-built`](docs/as-built/v100_damage-types-and-resistances.md) |
 | **v101** | `undead-skeleton-poison-immunity` | Complete (`make ci` green) | [`v101_spec-undead-skeleton-poison-immunity.md`](docs/specs/v101_spec-undead-skeleton-poison-immunity.md) | [`v101_2026-06-12-undead-skeleton-poison-immunity.md`](docs/plans/v101_2026-06-12-undead-skeleton-poison-immunity.md) | [`as-built`](docs/as-built/v101_undead-skeleton-poison-immunity.md) |
 | **v102** | `class-bot-visual-scenarios` | Complete (`make ci` green) | [`v102_spec-class-bot-visual-scenarios.md`](docs/specs/v102_spec-class-bot-visual-scenarios.md) | [`v102_2026-06-12-class-bot-visual-scenarios.md`](docs/plans/v102_2026-06-12-class-bot-visual-scenarios.md) | [`as-built`](docs/as-built/v102_class-bot-visual-scenarios.md) |
+| **v103** | `unique-effect-catalog-foundation` | Complete (`make ci` green) | [`v103_spec-unique-effect-catalog-foundation.md`](docs/specs/v103_spec-unique-effect-catalog-foundation.md) | [`v103_2026-06-12-unique-effect-catalog-foundation.md`](docs/plans/v103_2026-06-12-unique-effect-catalog-foundation.md) | [`as-built`](docs/as-built/v103_unique-effect-catalog-foundation.md) |
 
 ---
 

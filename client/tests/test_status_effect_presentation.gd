@@ -12,6 +12,7 @@ var _fail_count: int = 0
 func _initialize() -> void:
 	_test_rage_effect_started_drives_world_aura()
 	_test_holy_shield_started_blinks_models_in_range()
+	_test_holy_shield_ended_clears_local_world_effect()
 
 	print("[gdtest] PASS: test_status_effect_presentation (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -88,6 +89,26 @@ func _test_holy_shield_started_blinks_models_in_range() -> void:
 			far_pulses = int(rec.get("holy_shield_target_pulses", 0))
 	_assert_eq("near model holy shield target pulse", near_pulses, 1)
 	_assert_eq("far model holy shield target pulse", far_pulses, 0)
+	_free_main(main)
+
+
+func _test_holy_shield_ended_clears_local_world_effect() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1001",
+		"type": "player",
+		"position": {"x": 0.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"effect_ids": ["holy_shield"],
+	})
+	var local_state := main._bot_local_player_presentation()
+	_assert_true("local holy shield marker active before end event", bool(local_state.get("has_holy_shield_effect", false)))
+
+	main._apply_delta({"events": [{"event_type": "skill_effect_ended", "entity_id": "1001", "skill_id": "holy_shield"}], "changes": []})
+	local_state = main._bot_local_player_presentation()
+	_assert_true("local holy shield marker removed by end event", not bool(local_state.get("has_holy_shield_effect", true)))
 	_free_main(main)
 
 

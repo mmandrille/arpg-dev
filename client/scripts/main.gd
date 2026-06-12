@@ -119,6 +119,7 @@ var gold: int = 0
 var stash_items: Array = []
 var stash_gold: int = 0
 var stash_capacity: int = 50
+var pending_stash_equips: Dictionary = {}
 var hotbar_capacity: int = 2
 var hotbar: Array = []
 var character_progression: Dictionary = {}
@@ -725,6 +726,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	inventory = []
 	equipped = {}
 	gold = 0
+	pending_stash_equips.clear()
 	character_progression = {}
 	skill_progression = {}
 	skill_cooldowns = []
@@ -1131,8 +1133,10 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "stash_item_deposited" and stash_panel != null and stash_panel.visible:
 			stash_panel.show_status("Item stored")
 			continue
-		if event_type == "stash_item_withdrawn" and stash_panel != null and stash_panel.visible:
-			stash_panel.show_status("Item withdrawn")
+		if event_type == "stash_item_withdrawn":
+			_handle_stash_item_withdrawn(ev)
+			if stash_panel != null and stash_panel.visible:
+				stash_panel.show_status("Item withdrawn")
 			continue
 		if event_type == "stash_gold_deposited" and stash_panel != null and stash_panel.visible:
 			stash_panel.show_status("Stored %d gold" % int(ev.get("amount", 0)))
@@ -1204,12 +1208,17 @@ func _upsert_entity(e: Dictionary) -> void:
 				player_max_hp = int(e["max_hp"])
 			if _health_bar != null:
 				_health_bar.update_hp(player_hp, player_max_hp)
-			if player_hp <= 0 and player_anim != null:
-				player_anim.enter_terminal("death")
-			if player_hp <= 0 and player_reaction != null:
-				player_reaction.enter_death()
 			if player_hp <= 0:
+				if player_anim != null:
+					player_anim.enter_terminal("death")
+				if player_reaction != null:
+					player_reaction.enter_death()
 				_show_loss_popup()
+			else:
+				if player_anim != null and player_anim.is_terminal():
+					player_anim.reset_terminal()
+				if player_reaction != null and player_reaction.is_terminal():
+					player_reaction.reset_terminal()
 		if e.has("mana"):
 			player_mana = int(e["mana"])
 			if e.has("max_mana"):
@@ -3143,7 +3152,42 @@ func _show_loss_popup() -> void:
 func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) -> void:
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
+	if intent_type == "stash_equip_item_intent":
+		_send_stash_equip_item_intent(payload)
+		return
 	client.send(intent_type, last_server_tick, payload)
+
+
+func _send_stash_equip_item_intent(payload: Dictionary) -> void:
+	var stash_item_id := str(payload.get("stash_item_id", ""))
+	var stash_entity_id := str(payload.get("stash_entity_id", ""))
+	var slot := str(payload.get("slot", ""))
+	if stash_item_id == "" or stash_entity_id == "" or not _is_equipment_slot(slot):
+		return
+	pending_stash_equips[stash_item_id] = slot
+	client.send("stash_withdraw_item_intent", last_server_tick, {
+		"stash_entity_id": stash_entity_id,
+		"stash_item_id": stash_item_id,
+	})
+
+
+func _handle_stash_item_withdrawn(ev: Dictionary) -> void:
+	var stash_item_id := str(ev.get("stash_item_id", ""))
+	if stash_item_id == "" or not pending_stash_equips.has(stash_item_id):
+		return
+	var slot := str(pending_stash_equips.get(stash_item_id, ""))
+	pending_stash_equips.erase(stash_item_id)
+	var item_instance_id := str(ev.get("item_instance_id", ""))
+	if item_instance_id == "" or not _is_equipment_slot(slot) or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
+		return
+	client.send("equip_intent", last_server_tick, {
+		"item_instance_id": item_instance_id,
+		"slot": slot,
+	})
+
+
+func _is_equipment_slot(slot: String) -> bool:
+	return slot in ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 
 
 func _on_character_stat_requested(stat: String) -> void:

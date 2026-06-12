@@ -46,6 +46,17 @@ func enter_terminal(name: String) -> void:
 	_play(name)
 
 
+func reset_terminal() -> void:
+	_terminal = false
+	_terminal_clip = ""
+	_one_shot = ""
+	_play(WALK if _moving else IDLE)
+
+
+func is_terminal() -> bool:
+	return _terminal
+
+
 func current_clip() -> String:
 	if _player == null:
 		return ""

@@ -16,6 +16,8 @@ func _initialize() -> void:
 	if _failed: quit(1); return
 	_test_controller_terminal_latches()
 	if _failed: quit(1); return
+	_test_controller_terminal_reset_restores_locomotion()
+	if _failed: quit(1); return
 	_test_controller_hit_ignored_after_death()
 	if _failed: quit(1); return
 	_test_controller_locomotion_change_during_one_shot()
@@ -23,6 +25,8 @@ func _initialize() -> void:
 	await _test_model_reaction_hit_restores()
 	if _failed: quit(1); return
 	await _test_model_reaction_death_terminal()
+	if _failed: quit(1); return
+	await _test_model_reaction_terminal_reset_restores_model()
 	if _failed: quit(1); return
 	# Scene tests exercise runtime _ready (socket attach). add_child() inside
 	# _initialize() does NOT enter the tree synchronously in Godot 4.6, so we
@@ -83,6 +87,18 @@ func _test_controller_terminal_latches() -> void:
 	c.set_locomotion(true)        # ignored
 	_assert(c.current_clip() == "death", "terminal latched, got %s" % c.current_clip())
 	_assert(c.get_debug_state()["terminal"] == true, "terminal flag set")
+	ap.free()
+
+
+func _test_controller_terminal_reset_restores_locomotion() -> void:
+	var ap := _make_player(["idle", "walk", "death"])
+	var c = ControllerScript.new(ap)
+	c.enter_terminal("death")
+	c.reset_terminal()
+	_assert(c.get_debug_state()["terminal"] == false, "terminal reset clears flag")
+	_assert(c.current_clip() == "idle", "terminal reset restores idle, got %s" % c.current_clip())
+	c.set_locomotion(true)
+	_assert(c.current_clip() == "walk", "locomotion works after terminal reset, got %s" % c.current_clip())
 	ap.free()
 
 
@@ -157,6 +173,26 @@ func _test_model_reaction_death_terminal() -> void:
 	_assert(absf(root.rotation.x) > 0.1 or absf(root.rotation.z) > 0.1, "death reaction rotates model down, got %s" % root.rotation)
 	var color := _reaction_mesh_color(root)
 	_assert(color.r < Color("#8fe8a7").r and color.g < Color("#8fe8a7").g, "death reaction darkens color, got %s" % color)
+	root.free()
+	await process_frame
+
+
+func _test_model_reaction_terminal_reset_restores_model() -> void:
+	var base_color := Color("#8fe8a7")
+	var root := _make_reaction_root(base_color)
+	await process_frame
+	var c = ReactionControllerScript.new(root, base_color)
+	c.enter_death(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
+	await create_timer(0.25).timeout
+	c.reset_terminal()
+	var state: Dictionary = c.get_debug_state()
+	_assert(state["terminal"] == false, "reaction terminal reset clears flag")
+	_assert(str(state["last_reaction"]) == "", "reaction terminal reset clears last reaction")
+	_assert(root.rotation.distance_to(Vector3.ZERO) <= 0.001, "reaction terminal reset restores rotation, got %s" % root.rotation)
+	var color := _reaction_mesh_color(root)
+	_assert(color.is_equal_approx(base_color), "reaction terminal reset restores color, got %s" % color)
+	c.play_hit(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
+	_assert(str(c.get_debug_state()["last_reaction"]) == "hit", "hit works after reaction terminal reset")
 	root.free()
 	await process_frame
 

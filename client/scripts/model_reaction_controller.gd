@@ -66,6 +66,20 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 	_death_tween.tween_property(_root, "rotation", target_rotation, DEATH_SECONDS)
 
 
+func reset_terminal() -> void:
+	_terminal = false
+	_last_reaction = ""
+	_kill_tween(_hit_tween)
+	_kill_tween(_death_tween)
+	if _root != null:
+		_root.rotation = _base_rotation
+	_apply_color_scale(1.0)
+
+
+func is_terminal() -> bool:
+	return _terminal
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"terminal": _terminal,

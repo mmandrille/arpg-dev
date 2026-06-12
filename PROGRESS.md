@@ -12,7 +12,7 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v91 — `spanish-language-selector` |
+| **Latest completed slice** | v92 — `town-bishop-respec` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
 | **Next slice** | TBD |
@@ -110,6 +110,7 @@ v88_* = skill-visual-rank-seeding
 v89_* = class-second-combat-skills
 v90_* = text-catalog-foundation
 v91_* = spanish-language-selector
+v92_* = town-bishop-respec
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -241,6 +242,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v89** | `class-second-combat-skills` | Complete (`make ci` green) | [`v89_spec-class-second-combat-skills.md`](docs/specs/v89_spec-class-second-combat-skills.md) | [`v89_2026-06-12-class-second-combat-skills.md`](docs/plans/v89_2026-06-12-class-second-combat-skills.md) | [`as-built`](docs/as-built/v89_class-second-combat-skills.md) |
 | **v90** | `text-catalog-foundation` | Complete (`make ci` green) | [`v90_spec-text-catalog-foundation.md`](docs/specs/v90_spec-text-catalog-foundation.md) | [`v90_2026-06-12-text-catalog-foundation.md`](docs/plans/v90_2026-06-12-text-catalog-foundation.md) | [`as-built`](docs/as-built/v90_text-catalog-foundation.md) |
 | **v91** | `spanish-language-selector` | Complete (`make ci` green) | [`v91_spec-spanish-language-selector.md`](docs/specs/v91_spec-spanish-language-selector.md) | [`v91_2026-06-12-spanish-language-selector.md`](docs/plans/v91_2026-06-12-spanish-language-selector.md) | [`as-built`](docs/as-built/v91_spanish-language-selector.md) |
+| **v92** | `town-bishop-respec` | Complete (`make ci` green) | [`v92_spec-town-bishop-respec.md`](docs/specs/v92_spec-town-bishop-respec.md) | [`v92_2026-06-12-town-bishop-respec.md`](docs/plans/v92_2026-06-12-town-bishop-respec.md) | [`as-built`](docs/as-built/v92_town-bishop-respec.md) |
 
 ---
 
@@ -378,6 +380,11 @@ through the catalog so v91 can add Spanish plus the Settings language selector.
 **Spanish localization is selectable from Settings.** v91 adds `shared/i18n/es.json`, validates locale
 catalogs against English, persists the selected language, and refreshes menu, pause, and Settings
 labels immediately while falling back to English for missing keys.
+
+**Town bishop respec service is live.** v92 adds a red `town_bishop` interactable that heals HP/mana
+on activation and opens a compact service panel with a 250 gold Respec action. The server owns gold
+deduction, stat reset/refund, skill rank refund, cooldown clearing, resource refill, and rejection
+when the player cannot afford the service.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

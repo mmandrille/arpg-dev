@@ -27,6 +27,7 @@ type debugCharacterProgressionRequest struct {
 	UnspentStatPoints  int                      `json:"unspent_stat_points"`
 	UnspentSkillPoints int                      `json:"unspent_skill_points"`
 	Stats              store.CharacterBaseStats `json:"stats"`
+	Gold               int                      `json:"gold"`
 	SkillRanks         map[string]int           `json:"skill_ranks"`
 }
 
@@ -53,7 +54,7 @@ func (s *Server) handleDebugCharacterProgression(w http.ResponseWriter, r *http.
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	if req.Level < 1 || req.Experience < 0 || req.UnspentStatPoints < 0 || req.UnspentSkillPoints < 0 {
+	if req.Level < 1 || req.Experience < 0 || req.UnspentStatPoints < 0 || req.UnspentSkillPoints < 0 || req.Gold < 0 {
 		writeError(w, http.StatusBadRequest, "invalid_progression", "progression values are out of range")
 		return
 	}
@@ -72,7 +73,7 @@ func (s *Server) handleDebugCharacterProgression(w http.ResponseWriter, r *http.
 		UnspentStatPoints:   req.UnspentStatPoints,
 		UnspentSkillPoints:  req.UnspentSkillPoints,
 		Stats:               req.Stats,
-		Gold:                0,
+		Gold:                req.Gold,
 		DeepestDungeonDepth: 0,
 		SkillRanks:          req.SkillRanks,
 	}

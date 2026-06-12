@@ -1146,6 +1146,13 @@ async def execute_step(
         assert_count_matches(int(player.get("hp", -1)), step, "assert_player_hp")
         return
 
+    if action == "assert_player_mana":
+        player = find_player(state)
+        if player is None:
+            raise AssertionError("assert_player_mana: player not found in runtime state")
+        assert_count_matches(int(player.get("mana", -1)), step, "assert_player_mana")
+        return
+
     if action == "allocate_stat":
         stat = str(step["stat"])
         points = int(step.get("points", 1))
@@ -1255,6 +1262,55 @@ async def execute_step(
         await ws.send(json.dumps(env))
         await wait_for_accept(ws, state, env["message_id"], loop)
         await wait_for_shop_event(ws, state, "shop_opened", loop, shop_id=shop_id, start_index=start_index)
+        return
+
+    if action == "open_bishop_service":
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_bishop")))
+        if target is None:
+            raise AssertionError(f"open_bishop_service: missing town_bishop on level {state.current_level}")
+        await walk_toward(
+            ws,
+            session_id,
+            state,
+            target["position"],
+            loop,
+            stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
+            max_ticks=derived_walk_max_ticks(state, target["position"], int(step.get("max_ticks", WALK_MAX_TICKS))),
+        )
+        start_index = len(state.events)
+        env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": str(target["id"])})
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_event(ws, state, "bishop_service_opened", loop, start_index=start_index)
+        return
+
+    if action == "respec_bishop":
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_bishop")))
+        if target is None:
+            raise AssertionError(f"respec_bishop: missing town_bishop on level {state.current_level}")
+        before_gold = state.gold
+        start_index = len(state.events)
+        env = make_envelope(
+            "bishop_respec_intent",
+            session_id,
+            state.last_tick,
+            {"bishop_entity_id": str(target["id"])},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_event(ws, state, "bishop_respec", loop, start_index=start_index)
+        state.last_gold_before_action = before_gold
+        state.last_gold_after_action = state.gold
+        expected_progression = step.get("expect_progression")
+        if isinstance(expected_progression, dict):
+            await wait_for_character_progression(ws, state, expected_progression, loop)
+        expected_skill = step.get("expect_skill_progression")
+        if isinstance(expected_skill, dict):
+            await wait_for_skill_progression(ws, state, expected_skill, loop)
         return
 
     if action == "assert_shop_offer_count":
@@ -1976,9 +2032,9 @@ async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str,
         raise AssertionError(f"reject {message_id} reason={got}, want {reason}")
 
 
-async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S) -> None:
+async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S, start_index: int = 0) -> None:
     deadline = loop.time() + timeout_s
-    while event_type not in state.seen_events:
+    while not any(ev.get("event_type") == event_type for ev in state.events[start_index:]):
         if loop.time() > deadline:
             player = find_player(state)
             raise TimeoutError(
@@ -2070,6 +2126,7 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "phase_kind",
         "reason",
         "state",
+        "service",
     ):
         if key in expected and str(event.get(key, "")) != str(expected[key]):
             return False
@@ -2084,9 +2141,15 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "amount",
         "remaining_ticks",
         "total_ticks",
+        "price",
+        "total_gold",
+        "unspent_stat_points",
+        "unspent_skill_points",
     ):
         if key in expected and int(event.get(key, -999999)) != int(expected[key]):
             return False
+    if "affordable" in expected and bool(event.get("affordable", False)) != bool(expected["affordable"]):
+        return False
     return True
 
 
@@ -2111,6 +2174,12 @@ def event_summary(expected: dict[str, Any]) -> str:
         "duration_ticks",
         "reason",
         "state",
+        "service",
+        "price",
+        "total_gold",
+        "unspent_stat_points",
+        "unspent_skill_points",
+        "affordable",
         "from_level",
         "to_level",
     ):
@@ -2313,6 +2382,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                 state.stash_capacity = int(ev.get("stash_capacity", state.stash_capacity))
             if "total_gold" in ev:
                 state.gold = int(ev.get("total_gold", state.gold))
+        if event_type in {"bishop_service_opened", "bishop_respec"} and "total_gold" in ev:
+            state.gold = int(ev.get("total_gold", state.gold))
         if event_type in {"monster_damaged", "player_damaged", "player_killed", "attack_missed", "attack_blocked"}:
             state.combat_events.append(dict(ev))
         if event_type == "level_changed":
@@ -3942,13 +4013,15 @@ def run_verified_session(
     steps: list[dict[str, Any]],
     assertions: list[Any],
     seed: str = "",
+    debug_progression: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], RuntimeState]:
+    active_debug_progression = scenario.debug_progression if debug_progression is None else debug_progression
     character_id = ""
-    if scenario.character_class or scenario.debug_progression:
+    if scenario.character_class or active_debug_progression:
         character_name = f"{scenario.character_class.title()} Bot" if scenario.character_class else f"{scenario.title} Bot"
         character_id = ensure_character(client, token, character_name, scenario.character_class)
-    if scenario.debug_progression:
-        seed_debug_progression(client, token, debug_token, character_id, scenario.debug_progression)
+    if active_debug_progression:
+        seed_debug_progression(client, token, debug_token, character_id, active_debug_progression)
     sess = create_session(client, token, world_id, seed, character_id)
     session_id = sess["session_id"]
     log("session created", session_id, f"seed={sess.get('seed')}")
@@ -3962,7 +4035,7 @@ def run_verified_session(
         title=scenario.title,
         description=scenario.description,
         character_class=scenario.character_class,
-        debug_progression=scenario.debug_progression,
+        debug_progression=active_debug_progression,
         steps=steps,
         assertions=assertions,
         fresh_session_checks=[],
@@ -4890,6 +4963,7 @@ def main() -> int:
                     steps=check_steps,
                     assertions=check_assertions,
                     seed=str(check.get("seed", "")),
+                    debug_progression=dict(check.get("debug_progression", scenario.debug_progression)),
                 )
                 last_session_id = check_sess["session_id"]
                 observed = check_observed

@@ -13,7 +13,7 @@ const STEP_TYPES_WAIT := [
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
-	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel",
+	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel", "wait_bishop_panel",
 	"wait_boss_health_bar", "wait_remote_player_count",
 	"wait_ticks",
 ]
@@ -41,7 +41,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "assert_stash_filter", "assert_boss_health_bar",
-	"assert_boss_reward_status", "assert_remote_player_count",
+	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_boss_reward_status", "assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",
@@ -53,7 +53,7 @@ const STEP_TYPES_ACTION := [
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
-	"click_stash_withdraw_gold", "set_stash_search", "select_stash_sort", "click_waypoint_level",
+	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -200,6 +200,10 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			if not bool(state.get("stash_panel_visible", false)):
 				return false
 			return _stash_item_count_matches(step, state)
+		"wait_bishop_panel":
+			if not bool(state.get("bishop_panel_visible", false)):
+				return false
+			return _bishop_panel_matches(step, state)
 		"wait_boss_health_bar":
 			return _boss_health_bar_matches(step, state)
 		"wait_remote_player_count":
@@ -420,6 +424,15 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_stash_gold(step, state)
 		"assert_stash_filter":
 			return _assert_stash_filter(step, state)
+		"assert_bishop_panel_visible":
+			return _assert_bool_state("assert_bishop_panel_visible", "bishop_panel_visible", step, state)
+		"assert_bishop_panel":
+			if not _bishop_panel_matches(step, state):
+				_fail("assert_bishop_panel failed: want=%s panel=%s step=%d scenario=%s" % [
+					str(step), str(state.get("bishop_panel", {})), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_boss_health_bar":
 			return _assert_boss_health_bar(step, state)
 		"assert_boss_reward_status":
@@ -1300,6 +1313,21 @@ func _stash_item_count_matches(step: Dictionary, state: Dictionary) -> bool:
 	return true
 
 
+func _bishop_panel_matches(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("bishop_panel", {})
+	for key in ["price", "gold"]:
+		if step.has(key) and int(panel.get(key, -1)) != int(step.get(key, 0)):
+			return false
+	for key in ["affordable", "respec_enabled", "visible"]:
+		if step.has(key) and bool(panel.get(key, false)) != bool(step.get(key, false)):
+			return false
+	if step.has("service_id") and str(panel.get("service_id", "")) != str(step.get("service_id", "")):
+		return false
+	if step.has("status_contains") and not str(panel.get("status", "")).contains(str(step.get("status_contains", ""))):
+		return false
+	return true
+
+
 func _matching_stash_rows(step: Dictionary, state: Dictionary) -> Array:
 	var panel: Dictionary = state.get("stash_panel", {})
 	var rows: Array = panel.get("stash_rows", state.get("stash_items", []))
@@ -1814,6 +1842,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"drag_bag_to_stash", "drag_stash_to_bag", \
 		"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort":
 			return "stash=%s" % str(step)
+		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec":
+			return "bishop=%s" % str(step)
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))
 		"click_entity":
@@ -2059,6 +2089,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_stash_panel", "assert_stash_item_count", "assert_stash_gold"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
+	if stype in ["wait_bishop_panel", "assert_bishop_panel"]:
+		if not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("respec_enabled") and not step.has("service_id") and not step.has("visible") and not step.has("status_contains"):
+			return "client_steps[%d] (%s) requires a bishop panel expectation" % [index, stype]
 	if stype == "assert_shop_buy_button":
 		if str(step.get("offer_id", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id" % [index, stype]

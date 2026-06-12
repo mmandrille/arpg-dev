@@ -1,0 +1,128 @@
+package game
+
+import "testing"
+
+func TestBishopServiceRestoresResourcesOnOpen(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_open", "v92_bishop_open", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	player.hp = player.maxHP - 2
+	player.mana = player.maxMana - 2
+
+	open := sim.Tick([]Input{{
+		MessageID:     "open_bishop",
+		CorrelationID: "corr_bishop_open",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, open, "open_bishop")
+	if player.hp != player.maxHP || player.mana != player.maxMana {
+		t.Fatalf("resources after bishop open hp/mana=%d/%d max=%d/%d", player.hp, player.mana, player.maxHP, player.maxMana)
+	}
+	ev := findEvent(open.Events, "bishop_service_opened")
+	if ev == nil || ev.Price == nil || *ev.Price != sim.rules.MainConfig.Gameplay.RespecCostGold || ev.Affordable == nil || *ev.Affordable {
+		t.Fatalf("bishop service event = %+v", ev)
+	}
+}
+
+func TestBishopRespecRefundsBuildForGold(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_respec", "v92_bishop_respec", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.Level = 6
+	sim.progression.BaseStats = BaseStatsView{Str: 4, Dex: 6, Vit: 7, Magic: 12}
+	sim.progression.UnspentStatPoints = 4
+	sim.progression.UnspentSkillPoints = 0
+	sim.progression.SkillRanks = map[string]int{"magic_bolt": 2, "ice_shard": 1}
+	sim.progression.Gold = 300
+	sim.gold = 300
+	player.maxHP = sCurrentMaxHP(t, sim)
+	player.maxMana = sim.currentMaxMana()
+	player.hp = 1
+	player.mana = 1
+	sim.skillCooldowns["magic_bolt"] = skillCooldownState{EndsTick: sim.tick + 5, TotalTicks: 10}
+	sim.savePlayer(sim.defaultPlayer())
+
+	respec := sim.Tick([]Input{{
+		MessageID:     "respec",
+		CorrelationID: "corr_bishop_respec",
+		Type:          "bishop_respec_intent",
+		BishopRespec:  &BishopRespecIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, respec, "respec")
+	if sim.gold != 50 || sim.progression.Gold != 50 {
+		t.Fatalf("gold after respec sim/progression=%d/%d, want 50", sim.gold, sim.progression.Gold)
+	}
+	wantStats := sim.rules.CharacterProgression.Classes["sorcerer"].BaseStats
+	if sim.progression.BaseStats != wantStats {
+		t.Fatalf("base stats after respec = %+v, want %+v", sim.progression.BaseStats, wantStats)
+	}
+	if sim.progression.UnspentStatPoints != 15 {
+		t.Fatalf("unspent stat points = %d, want 15", sim.progression.UnspentStatPoints)
+	}
+	if sim.progression.UnspentSkillPoints != 2 {
+		t.Fatalf("unspent skill points = %d, want 2", sim.progression.UnspentSkillPoints)
+	}
+	if len(sim.progression.SkillRanks) != 0 || len(sim.skillCooldowns) != 0 {
+		t.Fatalf("skills/cooldowns after respec ranks=%+v cooldowns=%+v", sim.progression.SkillRanks, sim.skillCooldowns)
+	}
+	if player.hp != player.maxHP || player.mana != player.maxMana {
+		t.Fatalf("resources after respec hp/mana=%d/%d max=%d/%d", player.hp, player.mana, player.maxHP, player.maxMana)
+	}
+	if ev := findEvent(respec.Events, "bishop_respec"); ev == nil || ev.Price == nil || *ev.Price != 250 || ev.TotalGold == nil || *ev.TotalGold != 50 {
+		t.Fatalf("bishop_respec event = %+v", ev)
+	}
+}
+
+func TestBishopRespecRejectsWithoutGold(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_poor", "v92_bishop_poor", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	sim.progression.Level = 6
+	sim.progression.BaseStats.Vit += 2
+	sim.progression.SkillRanks = map[string]int{"magic_bolt": 1}
+	sim.progression.Gold = 249
+	sim.gold = 249
+	sim.savePlayer(sim.defaultPlayer())
+
+	respec := sim.Tick([]Input{{
+		MessageID:    "poor_respec",
+		Type:         "bishop_respec_intent",
+		BishopRespec: &BishopRespecIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertReject(t, respec, "poor_respec", "not_enough_gold")
+	if sim.gold != 249 || sim.progression.BaseStats.Vit != 7 || sim.progression.SkillRanks["magic_bolt"] != 1 {
+		t.Fatalf("unaffordable respec mutated state: gold=%d progression=%+v", sim.gold, sim.progression)
+	}
+}
+
+func findInteractableByDefID(t *testing.T, sim *Sim, defID string) *entity {
+	t.Helper()
+	for _, e := range sim.activeLevel().entities {
+		if e.kind == interactableEntity && e.interactableDefID == defID {
+			return e
+		}
+	}
+	t.Fatalf("missing interactable %s", defID)
+	return nil
+}
+
+func sCurrentMaxHP(t *testing.T, sim *Sim) int {
+	t.Helper()
+	return sim.currentMaxHP()
+}

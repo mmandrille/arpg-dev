@@ -1423,6 +1423,7 @@ type Input struct {
 	ShopBuy            *ShopBuyIntent
 	ShopSell           *ShopSellIntent
 	ShopReroll         *ShopRerollIntent
+	BishopRespec       *BishopRespecIntent
 	StashDepositItem   *StashDepositItemIntent
 	StashWithdrawItem  *StashWithdrawItemIntent
 	StashDepositGold   *StashDepositGoldIntent
@@ -1493,6 +1494,9 @@ type (
 	}
 	ShopRerollIntent struct {
 		ShopEntityID string
+	}
+	BishopRespecIntent struct {
+		BishopEntityID string
 	}
 	StashDepositItemIntent struct {
 		StashEntityID  string
@@ -2474,6 +2478,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.openStash(e, stashID, in, res, ack)
 		return
 	}
+	if service := s.serviceForInteractable(e); service == "bishop" {
+		s.openBishopService(e, in, res, ack)
+		return
+	}
 	if e.state != interactableClosed {
 		res.reject(in.MessageID, "already_open")
 		return
@@ -2531,6 +2539,35 @@ func (s *Sim) openStash(e *entity, stashID string, in Input, res *TickResult, ac
 	}
 }
 
+func (s *Sim) openBishopService(e *entity, in Input, res *TickResult, ack bool) {
+	if e.state != interactableReady {
+		res.reject(in.MessageID, "not_actionable")
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	healed, restored := s.restorePlayerResources(player, res)
+	cost := s.respecCostGold()
+	affordable := s.gold >= cost
+	res.Events = append(res.Events, Event{
+		EventType:     "bishop_service_opened",
+		EntityID:      idStr(e.id),
+		CorrelationID: in.CorrelationID,
+		Service:       "bishop",
+		Heal:          intPtr(healed),
+		Mana:          intPtr(restored),
+		Price:         intPtr(cost),
+		Affordable:    boolPtr(affordable),
+		TotalGold:     intPtr(s.gold),
+	})
+	if ack {
+		res.ack(in.MessageID)
+	}
+}
+
 func (s *Sim) appendStashGoldChanges(res *TickResult, transferID string) {
 	res.Changes = append(res.Changes, Change{Op: OpStashGoldUpdate, StashGold: intPtr(s.stashGold), StashTransferID: transferID})
 	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold), StashTransferID: transferID})
@@ -2580,6 +2617,26 @@ func (s *Sim) resolveStashIntentTarget(stashEntityID string) (*entity, string, b
 	return stashEntity, stashID, true, ""
 }
 
+func (s *Sim) resolveBishopIntentTarget(bishopEntityID string) (*entity, bool, string) {
+	bishopEntity, levelNum, ok := s.findEntityAnyLevel(bishopEntityID)
+	if !ok || bishopEntity.kind != interactableEntity {
+		return nil, false, "invalid_target"
+	}
+	if s.serviceForInteractable(bishopEntity) != "bishop" {
+		return nil, false, "invalid_target"
+	}
+	if levelNum != s.currentLevel || s.currentLevel != townLevel {
+		return nil, false, "out_of_range"
+	}
+	if !s.inDispatchRange(bishopEntity) {
+		return nil, false, "out_of_range"
+	}
+	if bishopEntity.state != interactableReady {
+		return nil, false, "not_actionable"
+	}
+	return bishopEntity, true, ""
+}
+
 func (s *Sim) shopIDForInteractable(e *entity) string {
 	if e == nil || e.kind != interactableEntity {
 		return ""
@@ -2592,6 +2649,13 @@ func (s *Sim) stashIDForInteractable(e *entity) string {
 		return ""
 	}
 	return s.rules.Interactables[e.interactableDefID].StashID
+}
+
+func (s *Sim) serviceForInteractable(e *entity) string {
+	if e == nil || e.kind != interactableEntity {
+		return ""
+	}
+	return s.rules.Interactables[e.interactableDefID].Service
 }
 
 func (s *Sim) activateTeleporter(e *entity, in Input, res *TickResult, ack bool) {
@@ -5816,6 +5880,9 @@ func (s *Sim) actionable(e *entity) bool {
 		if s.stashIDForInteractable(e) != "" && e.state == interactableReady {
 			return true
 		}
+		if s.serviceForInteractable(e) == "bishop" && e.state == interactableReady {
+			return true
+		}
 		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)
 	default:
 		return false
@@ -5865,6 +5932,58 @@ func (s *Sim) currentMaxMana() int {
 		return 0
 	}
 	return mana
+}
+
+func (s *Sim) respecCostGold() int {
+	if s.rules == nil {
+		return 0
+	}
+	return s.rules.MainConfig.Gameplay.RespecCostGold
+}
+
+func (s *Sim) resetCharacterBuildForRespec() {
+	classDef, ok := s.rules.CharacterProgression.Classes[s.progression.CharacterClass]
+	if ok {
+		s.progression.BaseStats = classDef.BaseStats
+	} else {
+		s.progression.BaseStats = s.rules.CharacterProgression.BaseStats
+	}
+	s.progression.UnspentStatPoints = s.totalEarnedStatPoints()
+	s.progression.UnspentSkillPoints = s.totalEarnedSkillPoints()
+	s.progression.SkillRanks = make(map[string]int)
+}
+
+func (s *Sim) totalEarnedStatPoints() int {
+	level := maxInt(1, s.progression.Level)
+	return (level - 1) * s.rules.CharacterProgression.PointsPerLevel
+}
+
+func (s *Sim) totalEarnedSkillPoints() int {
+	rules := s.rules.CharacterProgression.SkillPoints
+	level := maxInt(1, s.progression.Level)
+	if level < rules.FirstGrantLevel {
+		return 0
+	}
+	grants := 0
+	for grantLevel := rules.FirstGrantLevel; grantLevel <= level; grantLevel += rules.GrantEveryLevels {
+		grants++
+	}
+	return grants * rules.PointsPerGrant
+}
+
+func (s *Sim) restorePlayerResources(player *entity, res *TickResult) (int, int) {
+	if player == nil {
+		return 0, 0
+	}
+	healed := maxInt(0, player.maxHP-player.hp)
+	restored := maxInt(0, player.maxMana-player.mana)
+	if healed == 0 && restored == 0 {
+		return 0, 0
+	}
+	player.hp = player.maxHP
+	player.mana = player.maxMana
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	return healed, restored
 }
 
 // CharacterProgressionView returns the authoritative protocol view of the

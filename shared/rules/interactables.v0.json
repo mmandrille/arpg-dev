@@ -41,6 +41,11 @@
       "name": "Town Stash",
       "initial_state": "ready",
       "stash_id": "account_stash"
+    },
+    "town_bishop": {
+      "name": "Town Bishop",
+      "initial_state": "ready",
+      "service": "bishop"
     }
   }
 }

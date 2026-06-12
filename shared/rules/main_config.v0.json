@@ -3,6 +3,7 @@
   "gameplay": {
     "base_attack_interval_ticks": 16,
     "base_movement_speed": 1.0,
-    "base_drop_rate_percent": 20
+    "base_drop_rate_percent": 20,
+    "respec_cost_gold": 250
   }
 }

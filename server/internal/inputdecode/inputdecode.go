@@ -30,6 +30,7 @@ const (
 	TypeShopBuy            = "shop_buy_intent"
 	TypeShopSell           = "shop_sell_intent"
 	TypeShopReroll         = "shop_reroll_intent"
+	TypeBishopRespec       = "bishop_respec_intent"
 	TypeStashDepositItem   = "stash_deposit_item_intent"
 	TypeStashWithdrawItem  = "stash_withdraw_item_intent"
 	TypeStashDepositGold   = "stash_deposit_gold_intent"
@@ -109,6 +110,9 @@ type (
 	shopRerollPayloadWire struct {
 		ShopEntityID string `json:"shop_entity_id"`
 	}
+	bishopRespecPayloadWire struct {
+		BishopEntityID string `json:"bishop_entity_id"`
+	}
 	stashItemPayloadWire struct {
 		StashEntityID  string `json:"stash_entity_id"`
 		ItemInstanceID string `json:"item_instance_id"`
@@ -123,7 +127,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold:
 		return true
 	}
 	return false
@@ -258,6 +262,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.ShopReroll = &game.ShopRerollIntent{ShopEntityID: p.ShopEntityID}
+	case TypeBishopRespec:
+		var p bishopRespecPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
+			return in, false
+		}
+		in.BishopRespec = &game.BishopRespecIntent{BishopEntityID: p.BishopEntityID}
 	case TypeStashDepositItem:
 		var p stashItemPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.ItemInstanceID == "" {

@@ -529,6 +529,11 @@
           "type": "interactable",
           "interactable_def_id": "town_stash",
           "position": { "x": 13, "y": 12 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_bishop",
+          "position": { "x": 19, "y": 12 }
         }
       ]
     },
@@ -592,6 +597,11 @@
           "type": "interactable",
           "interactable_def_id": "town_stash",
           "position": { "x": 11, "y": 12 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_bishop",
+          "position": { "x": 9, "y": 12 }
         },
         { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 13, "y": 11 } },
         { "type": "loot", "item_template_id": "cave_greatsword", "position": { "x": 13, "y": 12 } },

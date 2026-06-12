@@ -426,6 +426,9 @@
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "angle_degrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
         "reason": { "type": "string" },
+        "service": { "type": "string", "enum": ["bishop"] },
+        "price": { "type": "integer", "minimum": 0 },
+        "affordable": { "type": "boolean" },
         "stash_id": { "type": "string" },
         "stash_item_id": { "$ref": "#/$defs/decimal_id" },
         "stash_items": {
@@ -611,6 +614,20 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "state"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "bishop_service_opened" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "heal", "mana", "price", "affordable", "total_gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "bishop_respec" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "heal", "mana", "price", "total_gold", "unspent_stat_points", "unspent_skill_points"] }
         },
         {
           "if": {

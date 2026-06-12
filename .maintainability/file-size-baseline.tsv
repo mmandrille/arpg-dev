@@ -3,7 +3,7 @@
 client/scripts/bot_controller.gd	634
 client/scripts/bot_scenario_runner.gd	2166
 client/scripts/inventory_panel.gd	1325
-client/scripts/main.gd	5447
+client/scripts/main.gd	5629
 client/scripts/shop_panel.gd	1233
 client/scripts/skills_panel.gd	812
 client/scripts/stash_panel.gd	833
@@ -12,11 +12,11 @@ client/tests/test_coop_client.gd	1116
 client/tests/test_golden.gd	769
 server/internal/game/dungeon_gen.go	1061
 server/internal/game/game_test.go	8619
-server/internal/game/handlers.go	1358
+server/internal/game/handlers.go	1405
 server/internal/game/rules.go	3012
 server/internal/game/shop.go	1163
 server/internal/game/shop_test.go	1479
-server/internal/game/sim.go	7207
+server/internal/game/sim.go	7326
 server/internal/game/types.go	670
 server/internal/http/auth_session_test.go	948
 server/internal/http/ws_test.go	1482
@@ -27,6 +27,6 @@ server/internal/replay/replay_test.go	1513
 server/internal/store/repos.go	2190
 server/internal/store/store_test.go	1118
 skills/showme/scripts/visual_capture.gd	666
-tools/bot/run.py	4910
+tools/bot/run.py	5008
 tools/bot/test_protocol.py	1246
 tools/validate_shared.py	3110

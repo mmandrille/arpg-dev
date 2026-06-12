@@ -152,6 +152,25 @@ func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {
 	return out
 }
 
+func persistedCorpses(corpses []store.CharacterCorpse) []game.PersistedCorpse {
+	return persistedCorpsesWithAccount("", corpses)
+}
+
+func persistedCorpsesWithAccount(accountID string, corpses []store.CharacterCorpse) []game.PersistedCorpse {
+	out := make([]game.PersistedCorpse, 0, len(corpses))
+	for _, corpse := range corpses {
+		out = append(out, game.PersistedCorpse{
+			AccountID:   accountID,
+			CharacterID: corpse.CharacterID,
+			Name:        corpse.Name,
+			Level:       corpse.Level,
+			DeathLevel:  corpse.DeathLevel,
+			Items:       persistedItems(corpse.Items),
+		})
+	}
+	return out
+}
+
 func persistedHotbar(slots []store.CharacterHotbarSlot) []game.PersistedHotbarSlot {
 	out := make([]game.PersistedHotbarSlot, 0, len(slots))
 	for _, slot := range slots {

@@ -1,0 +1,15 @@
+{
+  "id": "class_starter_loadout",
+  "world_id": "vertical_slice",
+  "seed": "class_starter_loadout_seed",
+  "character_class": "sorcerer",
+  "title": "Class starter loadout",
+  "description": "Create a sorcerer and prove the starter staff, empty offhand, health potion, and mana potion arrive through the normal inventory snapshot.",
+  "steps": [],
+  "assertions": [
+    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff" },
+    { "type": "equipped_slot_empty", "slot": "off_hand" },
+    { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false },
+    { "type": "inventory_contains", "item_def_id": "blue_potion", "equipped": false }
+  ]
+}

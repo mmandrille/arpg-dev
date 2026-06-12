@@ -87,3 +87,30 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 		t.Fatalf("geared regen missing player update: %+v", gearedHeal.Changes)
 	}
 }
+
+func TestStarterStaffAddsMaxManaAndSkillDamage(t *testing.T) {
+	sim := MustNewSim("sess_starter_staff_stats", "01", loadRules(t))
+	staff := addRolledInventoryItem(t, sim, 6420, "starter_sorcerer_staff", map[string]int{
+		"damage_min":           2,
+		"damage_max":           4,
+		"max_mana":             5,
+		"skill_damage_percent": 50,
+	})
+	assertAck(t, sim.Tick([]Input{{MessageID: "staff", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(staff.instanceID), Slot: mainHandSlot}}}), "staff")
+
+	view := sim.CharacterProgressionView()
+	baseMaxMana := sim.characterDerivedStatsView().MaxMana
+	if math.Abs(view.DerivedStats.MaxMana-(baseMaxMana+5)) > 0.000001 {
+		t.Fatalf("max mana with staff = %+v, want %v", view.DerivedStats, baseMaxMana+5)
+	}
+	maxMana := findStatBreakdown(view.StatBreakdowns, "max_mana")
+	if maxMana == nil || !hasBreakdownSource(maxMana.Sources, "equipment_base") || !hasBreakdownSource(maxMana.Sources, "equipment_roll") {
+		t.Fatalf("max mana breakdown = %+v all=%+v", maxMana, view.StatBreakdowns)
+	}
+
+	scaled := sim.applySkillDamageBonus(DamageRange{Min: 4, Max: 4})
+	outcome := sim.resolveSkillDamage(effectiveCombatStats{}, scaled)
+	if outcome.RawDamage != 6 || outcome.Damage != 6 {
+		t.Fatalf("skill damage with staff = %+v, want raw/final 6", outcome)
+	}
+}

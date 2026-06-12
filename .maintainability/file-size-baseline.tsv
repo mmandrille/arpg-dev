@@ -3,7 +3,7 @@
 client/scripts/bot_controller.gd	634
 client/scripts/bot_scenario_runner.gd	2166
 client/scripts/inventory_panel.gd	1325
-client/scripts/main.gd	5944
+client/scripts/main.gd	5983
 client/scripts/shop_panel.gd	1233
 client/scripts/skills_panel.gd	812
 client/scripts/stash_panel.gd	833
@@ -16,9 +16,9 @@ server/internal/game/handlers.go	1405
 server/internal/game/rules.go	3012
 server/internal/game/shop.go	1163
 server/internal/game/shop_test.go	1479
-server/internal/game/sim.go	7446
+server/internal/game/sim.go	7477
 server/internal/game/types.go	670
-server/internal/http/auth_session_test.go	1094
+server/internal/http/auth_session_test.go	1202
 server/internal/http/ws_test.go	1482
 server/internal/realtime/runner.go	627
 server/internal/realtime/session_loop.go	903

@@ -103,6 +103,11 @@ func (s *Server) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create character")
 		return
 	}
+	if err := s.ensureStarterLoadout(r.Context(), char); err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not create starter loadout")
+		return
+	}
 	writeJSON(w, http.StatusCreated, characterToResponse(char))
 }
 

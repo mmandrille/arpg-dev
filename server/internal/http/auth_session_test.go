@@ -692,6 +692,8 @@ func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
 	if accountA == accountB {
 		t.Fatal("expected stable client emails to resolve to distinct accounts")
 	}
+	beforeA := getMarketSummary(t, h, tokenA)
+	beforeB := getMarketSummary(t, h, tokenB)
 
 	charA := createCharacter(t, h, tokenA, "Client One Only")
 	charB := createCharacter(t, h, tokenB, "Client Two Only")
@@ -709,8 +711,10 @@ func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
 		}
 	}
 
+	itemID := "client1_bound_item_" + ids.Token()[:12]
+	stashItemID := "client1_bound_stash_item_" + ids.Token()[:12]
 	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{
-		ID:          "client1_bound_item",
+		ID:          itemID,
 		AccountID:   accountA,
 		CharacterID: charA.CharacterID,
 		ItemDefID:   "rusty_sword",
@@ -719,7 +723,7 @@ func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountA, charA.CharacterID, "client1_bound_item", "client1_bound_stash_item"); err != nil {
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountA, charA.CharacterID, itemID, stashItemID); err != nil {
 		t.Fatal(err)
 	}
 	stashB, err := db.ListAccountStashItems(ctx, accountB)
@@ -730,35 +734,34 @@ func TestStableDevAccountsKeepAccountBoundStateSeparate(t *testing.T) {
 		t.Fatalf("client2 stash leaked client1 item: %+v", stashB)
 	}
 
-	rec = postJSON(h, "/v0/market/listings", tokenA, map[string]string{"stash_item_id": "client1_bound_stash_item"})
+	rec = postJSON(h, "/v0/market/listings", tokenA, map[string]string{"stash_item_id": stashItemID})
 	if rec.Code != http.StatusCreated {
 		t.Fatalf("client1 create listing status = %d, body = %s", rec.Code, rec.Body.String())
 	}
-	rec = getJSON(h, "/v0/market/summary", tokenA)
-	if rec.Code != http.StatusOK {
-		t.Fatalf("client1 market summary status = %d body=%s", rec.Code, rec.Body.String())
+	summaryA := getMarketSummary(t, h, tokenA)
+	if summaryA.PublishedListings != beforeA.PublishedListings+1 {
+		t.Fatalf("client1 market summary = %+v, want one new published listing over %+v", summaryA, beforeA)
 	}
-	var summaryA marketSummaryResponse
-	if err := json.Unmarshal(rec.Body.Bytes(), &summaryA); err != nil {
-		t.Fatal(err)
-	}
-	if summaryA.PublishedListings != 1 {
-		t.Fatalf("client1 market summary = %+v, want own published listing", summaryA)
-	}
-	rec = getJSON(h, "/v0/market/summary", tokenB)
-	if rec.Code != http.StatusOK {
-		t.Fatalf("client2 market summary status = %d body=%s", rec.Code, rec.Body.String())
-	}
-	var summaryB marketSummaryResponse
-	if err := json.Unmarshal(rec.Body.Bytes(), &summaryB); err != nil {
-		t.Fatal(err)
-	}
-	if summaryB.PublishedListings != 0 || summaryB.IncomingBids != 0 {
-		t.Fatalf("client2 market summary leaked client1 account state: %+v", summaryB)
+	summaryB := getMarketSummary(t, h, tokenB)
+	if summaryB.PublishedListings != beforeB.PublishedListings || summaryB.IncomingBids != beforeB.IncomingBids {
+		t.Fatalf("client2 market summary leaked client1 account state: before=%+v after=%+v", beforeB, summaryB)
 	}
 	if charB.CharacterID == "" {
 		t.Fatal("client2 character was not created")
 	}
+}
+
+func getMarketSummary(t *testing.T, h http.Handler, token string) marketSummaryResponse {
+	t.Helper()
+	rec := getJSON(h, "/v0/market/summary", token)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("market summary status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var summary marketSummaryResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &summary); err != nil {
+		t.Fatal(err)
+	}
+	return summary
 }
 
 func TestDeleteCharacterRemovesOwnedCharacter(t *testing.T) {

@@ -453,6 +453,17 @@ def test_load_scenarios_discovers_inventory_capacity_lab():
     assert any(step.get("expect_reject") == "inventory_full" for step in capacity.steps)
 
 
+def test_load_scenarios_discovers_class_starter_loadout():
+    scenarios = load_scenarios()
+    starter = next(s for s in scenarios if s.id == "class_starter_loadout")
+
+    assert starter.world_id == "vertical_slice"
+    assert starter.character_class == "sorcerer"
+    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff"} in starter.assertions
+    assert {"type": "inventory_contains", "item_def_id": "red_potion", "equipped": False} in starter.assertions
+    assert {"type": "inventory_contains", "item_def_id": "blue_potion", "equipped": False} in starter.assertions
+
+
 def test_load_scenarios_discovers_equipment_requirements_and_preview():
     scenarios = load_scenarios()
     requirements = next(s for s in scenarios if s.id == "equipment_requirements_and_preview")

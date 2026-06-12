@@ -29,6 +29,82 @@
       ],
       "effect_pool": []
     },
+    "starter_paladin_sword": {
+      "name": "Paladin Sword",
+      "category": "equipment",
+      "item_type": "sword",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["main_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 1.0,
+      "reach": 1.5,
+      "requirements": { "level": 1 },
+      "base_stats": { "damage_min": 3, "damage_max": 5 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+      ],
+      "effect_pool": []
+    },
+    "starter_paladin_shield": {
+      "name": "Paladin Shield",
+      "category": "equipment",
+      "item_type": "shield",
+      "slot": "off_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["off_hand"],
+      "requirements": { "level": 1 },
+      "base_stats": { "armor": 2, "block_percent": 5 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 1, "max": 2, "weight": 3 },
+        { "stat": "block_percent", "min": 1, "max": 4, "weight": 2 }
+      ],
+      "effect_pool": []
+    },
+    "starter_sorcerer_staff": {
+      "name": "Sorcerer Staff",
+      "category": "equipment",
+      "item_type": "staff",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 0.9,
+      "reach": 1.8,
+      "requirements": { "level": 1 },
+      "base_stats": { "damage_min": 2, "damage_max": 4, "max_mana": 2 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 1 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
+        { "stat": "max_mana", "min": 1, "max": 3, "weight": 3 },
+        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 2 },
+        { "stat": "skill_damage_percent", "min": 5, "max": 15, "weight": 2 }
+      ],
+      "effect_pool": []
+    },
+    "starter_barbarian_axe": {
+      "name": "Barbarian Axe",
+      "category": "equipment",
+      "item_type": "axe",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 0.75,
+      "reach": 1.7,
+      "requirements": { "level": 1 },
+      "base_stats": { "damage_min": 5, "damage_max": 8 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 }
+      ],
+      "effect_pool": []
+    },
     "cave_greatsword": {
       "name": "Cave Greatsword",
       "category": "equipment",

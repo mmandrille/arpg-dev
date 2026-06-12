@@ -12,7 +12,7 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v96 — `town-presentation-polish` |
+| **Latest completed slice** | v97 — `class-starter-loadouts` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
 | **Next slice** | TBD |
@@ -115,6 +115,7 @@ v93_* = market-multi-item-offers
 v94_* = item-upgrade-starter
 v95_* = unique-item-catalog-seed
 v96_* = town-presentation-polish
+v97_* = class-starter-loadouts
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -251,6 +252,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v94** | `item-upgrade-starter` | Complete (`make ci` green) | [`v94_spec-item-upgrade-starter.md`](docs/specs/v94_spec-item-upgrade-starter.md) | [`v94_2026-06-12-item-upgrade-starter.md`](docs/plans/v94_2026-06-12-item-upgrade-starter.md) | [`as-built`](docs/as-built/v94_item-upgrade-starter.md) |
 | **v95** | `unique-item-catalog-seed` | Complete (`make ci` green) | [`v95_spec-unique-item-catalog-seed.md`](docs/specs/v95_spec-unique-item-catalog-seed.md) | [`v95_2026-06-12-unique-item-catalog-seed.md`](docs/plans/v95_2026-06-12-unique-item-catalog-seed.md) | [`as-built`](docs/as-built/v95_unique-item-catalog-seed.md) |
 | **v96** | `town-presentation-polish` | Complete (`make ci` green) | [`v96_spec-town-presentation-polish.md`](docs/specs/v96_spec-town-presentation-polish.md) | [`v96_2026-06-12-town-presentation-polish.md`](docs/plans/v96_2026-06-12-town-presentation-polish.md) | [`as-built`](docs/as-built/v96_town-presentation-polish.md) |
+| **v97** | `class-starter-loadouts` | Complete (`make ci` green) | [`v97_spec-class-starter-loadouts.md`](docs/specs/v97_spec-class-starter-loadouts.md) | [`v97_2026-06-12-class-starter-loadouts.md`](docs/plans/v97_2026-06-12-class-starter-loadouts.md) | [`as-built`](docs/as-built/v97_class-starter-loadouts.md) |
 
 ---
 
@@ -411,6 +413,10 @@ and keeps the seed disabled until a future behavior-changing unique effect path 
 **Town now reads as a wider hub.** v96 distributes town services at least 5 tiles from the central
 campfire, adds two procedural wood cabins, improves the town ground texture, and adds
 `$showme --focus town` for focused visual feedback without changing server authority.
+
+**New heroes now get class starter kits.** v97 seeds explicitly created paladins with sword/shield,
+sorcerers with a two-handed staff, and barbarians with a slower harder-hitting axe, plus one health
+and one mana potion. The starter staff also introduces item-backed max mana and skill damage scaling.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without
@@ -789,11 +795,11 @@ validation while removing a duplicated maintenance list.
 
 | Area | Deferred item | Source |
 |------|---------------|--------|
-| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
+| Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history, starter loadout backfill for existing or compatibility-default characters | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59/v97 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
 | Economy / trade | Market offers/purchases, gold/resource pricing, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations beyond listing-row removal, atomic buyer/seller ownership transfer, stash delivery for purchases, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96 non-goals, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |

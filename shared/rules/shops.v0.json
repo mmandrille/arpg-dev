@@ -49,8 +49,10 @@
           "block_percent": 4,
           "attack_speed_percent": 3,
           "max_hp": 5,
+          "max_mana": 5,
           "health_regen_per_10_seconds": 4,
           "mana_regen_per_10_seconds": 4,
+          "skill_damage_percent": 6,
           "hotbar_slots": 20,
           "inventory_rows": 35
         }
@@ -113,8 +115,10 @@
           "block_percent": 4,
           "attack_speed_percent": 3,
           "max_hp": 5,
+          "max_mana": 5,
           "health_regen_per_10_seconds": 4,
           "mana_regen_per_10_seconds": 4,
+          "skill_damage_percent": 6,
           "hotbar_slots": 20,
           "inventory_rows": 35
         }

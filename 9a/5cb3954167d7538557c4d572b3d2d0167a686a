@@ -1,0 +1,106 @@
+tools/bot/run.py
+  s_2a441be859a0af::t_38327edc7d2864 2129,2144-2147,2151-2152,2177-2182
+  s_2a441be859a0af::t_8453830ad7598b 2035,2037
+  s_2a441be859a0af::t_6ca5930a4deb49 1267-1315
+  s_2a441be859a0af::t_2c257700082816 1149-1155
+  s_2a441be859a0af::t_ec6683e0466367 2385-2386
+  s_2a441be859a0af::t_98e983d3012340 4016,4018,4020,4023-4024,4038,4966
+shared/rules/interactables.v0.schema.json
+  s_2a441be859a0af::t_26249ddf5e5b84 23,44-45,59-60
+server/internal/game/sim.go
+  s_2a441be859a0af::t_18710efdd3ee78 1426,1498-1499
+  s_2a441be859a0af::t_1ec2cca77a3133 2481-2484,2542-2570,2620-2639,2654-2658
+  s_2a441be859a0af::t_5fd64628309844 5883-5885
+  s_2a441be859a0af::t_8ce5dfb98be35b 5937-5988
+shared/rules/worlds.v0.json
+  s_2a441be859a0af::t_26249ddf5e5b84 532-536,601-604
+server/internal/inputdecode/inputdecode.go
+  s_2a441be859a0af::t_18710efdd3ee78 33,113-115,130,265-270
+client/scripts/main.gd
+  s_2a441be859a0af::t_ddd84d402f4d6d 5038,5046,5335-5338
+  s_2a441be859a0af::t_c76842186fbdf8 22,221,892-893,962,1152-1158,1430-1431,2027,2033-2034,2930-2932,3825-3849,3886-3889,3906-3907,4160-4161
+  s_2a441be859a0af::t_56421d2f7035d3 4737-4764
+server/internal/game/bishop_test.go
+  s_2a441be859a0af::t_7988e56bc1826c 54,100
+  s_2a441be859a0af::t_7d5f4d6327662b 1-11,13-39,41-53,55-93,95-99,101-128
+  s_2a441be859a0af::t_e328b2f56a4be3 12,40,94
+server/internal/game/rules.go
+  s_2a441be859a0af::t_0b1e865fcd2ee2 1520-1522,1540-1542,1544,1561-1562
+  s_2a441be859a0af::t_b32a5843249562 633
+  s_2a441be859a0af::t_56f6ff632d8912 47,903-904
+.maintainability/file-size-baseline.tsv
+  s_2a441be859a0af::t_4061a0aaf8a421 6,15,19,30
+server/internal/replay/replay_test.go
+  s_2a441be859a0af::t_38865da6b0a4a1 688,705,725,766
+docs/plans/v92_2026-06-12-town-bishop-respec.md
+  s_2a441be859a0af::t_31cf9844a0c8b5 159
+  s_2a441be859a0af::t_d43cd839ca1511 53-57,154
+  s_2a441be859a0af::t_99ec7e8b7e5c88 3,45-48,51,74-77,91-94,96-97,110,112-113,126-129,143-145,155-158
+  s_2a441be859a0af::t_42e492a4578fa7 1-2,4-44,49-50,52,58-73,78-90,95,98-109,111,114-125,130-142,146-153,160-164
+shared/rules/main_config.v0.json
+  s_2a441be859a0af::t_26249ddf5e5b84 6-7
+server/internal/http/inspect.go
+  s_2a441be859a0af::t_6e38a209612cec 30,57,76
+docs/specs/v92_spec-town-bishop-respec.md
+  s_2a441be859a0af::t_35038d12e873e4 3,62-65
+  s_2a441be859a0af::t_d5eccf1ceff252 1-2,4-61,66-80
+PROGRESS.md
+  s_2a441be859a0af::t_6f4055e35fe825 15,113,245,384-387
+shared/protocol/state_delta.v8.schema.json
+  s_2a441be859a0af::t_7a5f60caa355f9 177,359-360,582-593
+tools/validate_shared.py
+  s_2a441be859a0af::t_2cb2c1b6a22489 2758-2760,2767-2768,2775-2776
+client/scripts/bishop_panel.gd
+  s_2a441be859a0af::t_21947cc916840f 1-38,41-141,143-187
+  s_2a441be859a0af::t_321e4e8c2eca1b 39-40,142
+client/scripts/bot_scenario_runner.gd
+  s_2a441be859a0af::t_7b70683e870f73 16,44,56,203-206,427-435
+  s_2a441be859a0af::t_b309ca6e4f6201 1845-1846,2092-2094
+  s_2a441be859a0af::t_425098f7489042 1316-1330
+server/internal/game/handlers.go
+  s_2a441be859a0af::t_4df498c4406f80 48
+  s_2a441be859a0af::t_235307633d1854 341-386
+server/internal/game/game_test.go
+  s_2a441be859a0af::t_e328b2f56a4be3 137
+  s_2a441be859a0af::t_2cb2c1b6a22489 139-140
+tools/bot/debug_progression.py
+  s_2a441be859a0af::t_6e38a209612cec 14
+shared/protocol/messages.v8.schema.json
+  s_2a441be859a0af::t_a21b8580aa1dca 34,95-96,313-319
+shared/protocol/session_snapshot.v8.schema.json
+  s_2a441be859a0af::t_5531c560961cd4 429-431,618-630
+docs/as-built/v92_town-bishop-respec.md
+  s_2a441be859a0af::t_58971bbe674533 13
+  s_2a441be859a0af::t_e73494fd120331 1-12,14-28
+shared/rules/main_config.v0.schema.json
+  s_2a441be859a0af::t_26249ddf5e5b84 13,18-19
+client/scripts/bishop_panel.gd.uid
+  s_2a441be859a0af::t_21a1146a1f3715 1
+tools/bot/scenarios/client/32_town_bishop_respec_panel.json
+  s_2a441be859a0af::t_bcab8cd442402e 1-6,8-10,12,14-15
+  s_2a441be859a0af::t_e34af0328988f2 7,11,13
+client/scripts/bot_controller.gd
+  s_2a441be859a0af::t_4cdd4803bc9650 173-174,320-324,621-622
+server/internal/game/types.go
+  s_2a441be859a0af::t_4df498c4406f80 417,422
+shared/rules/interactables.v0.json
+  s_2a441be859a0af::t_26249ddf5e5b84 44-48
+tools/bot/scenarios/45_town_bishop_respec.json
+  s_2a441be859a0af::t_8b2a222fd8247f 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9a5cb3954167d7538557c4d572b3d2d0167a686a",
+  "prompts": {},
+  "sessions": {
+    "s_2a441be859a0af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eba24-0958-7363-b937-4658e5e4f732",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

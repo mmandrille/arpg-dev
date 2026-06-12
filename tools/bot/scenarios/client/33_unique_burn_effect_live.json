@@ -2,7 +2,7 @@
   "id": "unique_burn_effect_live",
   "runner": "godot_client",
   "world_id": "unique_burn_lab",
-  "seed": "00000000000000b1",
+  "seed": "00000000000001cb",
   "title": "Unique burn effect live",
   "description": "Client equips a deterministic unique cave blade and verifies the target shows the burning cue after Everburning Wound starts.",
   "client_steps": [

@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v105 — `unique-burn-effect-live` |
+| **Latest completed slice** | v106 — `offensive-unique-effects` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | v106 — TBD |
+| **Next slice** | v107 — TBD |
 | **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
 | **Next engineering review** | v110 (~every 10 slices) |
 
@@ -124,6 +124,7 @@ v102_* = class-bot-visual-scenarios
 v103_* = unique-effect-catalog-foundation
 v104_* = unique-drop-roll-contract
 v105_* = unique-burn-effect-live
+v106_* = offensive-unique-effects
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -269,6 +270,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v103** | `unique-effect-catalog-foundation` | Complete (`make ci` green) | [`v103_spec-unique-effect-catalog-foundation.md`](docs/specs/v103_spec-unique-effect-catalog-foundation.md) | [`v103_2026-06-12-unique-effect-catalog-foundation.md`](docs/plans/v103_2026-06-12-unique-effect-catalog-foundation.md) | [`as-built`](docs/as-built/v103_unique-effect-catalog-foundation.md) |
 | **v104** | `unique-drop-roll-contract` | Complete (`make ci` green) | [`v104_spec-unique-drop-roll-contract.md`](docs/specs/v104_spec-unique-drop-roll-contract.md) | [`v104_2026-06-12-unique-drop-roll-contract.md`](docs/plans/v104_2026-06-12-unique-drop-roll-contract.md) | [`as-built`](docs/as-built/v104_unique-drop-roll-contract.md) |
 | **v105** | `unique-burn-effect-live` | Complete (`make ci` green) | [`v105_spec-unique-burn-effect-live.md`](docs/specs/v105_spec-unique-burn-effect-live.md) | [`v105_2026-06-12-unique-burn-effect-live.md`](docs/plans/v105_2026-06-12-unique-burn-effect-live.md) | [`as-built`](docs/as-built/v105_unique-burn-effect-live.md) |
+| **v106** | `offensive-unique-effects` | Complete (`make ci` green) | [`v106_spec-offensive-unique-effects.md`](docs/specs/v106_spec-offensive-unique-effects.md) | [`v106_2026-06-12-offensive-unique-effects.md`](docs/plans/v106_2026-06-12-offensive-unique-effects.md) | [`as-built`](docs/as-built/v106_offensive-unique-effects.md) |
 
 ---
 

@@ -389,10 +389,43 @@ def training_bow_glb() -> bytes:
     return _build_glb(color, parts, [])
 
 
+def starter_staff_glb() -> bytes:
+    """Low-poly two-handed staff, hand grip at origin, shaft pointing +Y."""
+    color = (0.28, 0.19, 0.36, 1.0)
+    parts = [
+        {"name": "lower_cap", "translation": [0.0, -0.72, 0.0], "scale": [0.09, 0.12, 0.09]},
+        {"name": "shaft_lower", "translation": [0.0, -0.34, 0.0], "scale": [0.055, 0.78, 0.055]},
+        {"name": "grip_wrap", "translation": [0.0, 0.0, 0.0], "scale": [0.075, 0.24, 0.075]},
+        {"name": "shaft_upper", "translation": [0.0, 0.45, 0.0], "scale": [0.055, 0.9, 0.055]},
+        {"name": "head_cross", "translation": [0.0, 0.96, 0.0], "scale": [0.34, 0.055, 0.08]},
+        {"name": "crystal_core", "translation": [0.0, 1.13, 0.0], "scale": [0.18, 0.22, 0.18]},
+        {"name": "crystal_tip", "translation": [0.0, 1.32, 0.0], "scale": [0.10, 0.16, 0.10]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def starter_axe_glb() -> bytes:
+    """Low-poly two-handed axe, grip at origin, haft pointing +Y."""
+    color = (0.34, 0.25, 0.18, 1.0)
+    parts = [
+        {"name": "butt_cap", "translation": [0.0, -0.54, 0.0], "scale": [0.10, 0.10, 0.10]},
+        {"name": "haft_lower", "translation": [0.0, -0.20, 0.0], "scale": [0.07, 0.68, 0.07]},
+        {"name": "grip_wrap", "translation": [0.0, 0.08, 0.0], "scale": [0.09, 0.28, 0.09]},
+        {"name": "haft_upper", "translation": [0.0, 0.50, 0.0], "scale": [0.07, 0.72, 0.07]},
+        {"name": "head_socket", "translation": [0.0, 0.88, 0.0], "scale": [0.15, 0.16, 0.12]},
+        {"name": "upper_blade", "translation": [0.0, 0.88, 0.24], "scale": [0.055, 0.30, 0.32]},
+        {"name": "lower_blade", "translation": [0.0, 0.88, -0.24], "scale": [0.055, 0.30, 0.32]},
+        {"name": "top_spike", "translation": [0.0, 1.12, 0.0], "scale": [0.10, 0.22, 0.08]},
+    ]
+    return _build_glb(color, parts, [])
+
+
 TARGETS = {
     "client/assets/characters/base_humanoid/base_humanoid.glb": base_humanoid_glb,
     "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
     "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
+    "client/assets/equipment/weapons/starter_staff/starter_staff.glb": starter_staff_glb,
+    "client/assets/equipment/weapons/starter_axe/starter_axe.glb": starter_axe_glb,
     "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
     "client/assets/monsters/quadruped/monster_quadruped.glb": monster_quadruped_glb,
     "client/assets/monsters/tiny_flyer/monster_tiny_flyer.glb": monster_tiny_flyer_glb,

@@ -16,6 +16,8 @@ const DEFAULT_GEAR_ITEMS := ["cave_blade", "cave_shield", "cave_helm", "cave_mai
 const ITEM_SLOT := {
 	"rusty_sword": "main_hand",
 	"cave_blade": "main_hand",
+	"starter_sorcerer_staff": "main_hand",
+	"starter_barbarian_axe": "main_hand",
 	"cave_greatsword": "main_hand",
 	"cave_war_sword": "main_hand",
 	"training_bow": "main_hand",

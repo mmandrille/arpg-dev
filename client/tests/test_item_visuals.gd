@@ -278,8 +278,13 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		sword_node.free()
 		main.free()
 		return false
-	if sword_model.position.y < 0.50 or absf(sword_model.rotation_degrees.z) > 0.001:
-		_fail("equipment floor loot model is not upright above the floor: pos=%s rot=%s" % [str(sword_model.position), str(sword_model.rotation_degrees)])
+	if sword_model.position.y > 0.15 or absf(sword_model.rotation_degrees.x - 90.0) > 0.001:
+		_fail("equipment floor loot model is not lying on the floor: pos=%s rot=%s" % [str(sword_model.position), str(sword_model.rotation_degrees)])
+		sword_node.free()
+		main.free()
+		return false
+	if sword_node.find_child("RarityBackground", true, false) != null:
+		_fail("equipment floor loot model still renders a rarity floor tile")
 		sword_node.free()
 		main.free()
 		return false

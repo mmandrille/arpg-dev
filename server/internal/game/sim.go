@@ -289,6 +289,7 @@ type playerState struct {
 	UniqueBurnDots        map[string]uniqueBurnDotState
 	UniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
 	UniqueHungerStacks    map[uint64]uniqueHungerStackState
+	UniqueAshenReprisals  map[uint64]uniqueAshenReprisalState
 	SkillFunctionKeys     []string
 	RightClickSkillID     string
 	ShopStock             map[string]*shopStockState
@@ -336,6 +337,7 @@ type Sim struct {
 	uniqueBurnDots        map[string]uniqueBurnDotState
 	uniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
 	uniqueHungerStacks    map[uint64]uniqueHungerStackState
+	uniqueAshenReprisals  map[uint64]uniqueAshenReprisalState
 	areaHealZones         map[uint64]areaHealZoneState
 	skillFunctionKeys     []string
 	rightClickSkillID     string
@@ -413,6 +415,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		uniqueBurnDots:        make(map[string]uniqueBurnDotState),
 		uniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
 		uniqueHungerStacks:    make(map[uint64]uniqueHungerStackState),
+		uniqueAshenReprisals:  make(map[uint64]uniqueAshenReprisalState),
 		areaHealZones:         make(map[uint64]areaHealZoneState),
 		skillFunctionKeys:     make([]string, skillFunctionKeyCount),
 		shopStock:             make(map[string]*shopStockState),
@@ -632,6 +635,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		UniqueBurnDots:        cloneUniqueBurnDots(s.uniqueBurnDots),
 		UniqueExecutionMarks:  cloneUniqueExecutionMarks(s.uniqueExecutionMarks),
 		UniqueHungerStacks:    cloneUniqueHungerStacks(s.uniqueHungerStacks),
+		UniqueAshenReprisals:  cloneUniqueAshenReprisals(s.uniqueAshenReprisals),
 		SkillFunctionKeys:     cloneStringSlice(s.skillFunctionKeys),
 		RightClickSkillID:     s.rightClickSkillID,
 		ShopStock:             s.shopStock,
@@ -1116,6 +1120,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		UniqueBurnDots:        make(map[string]uniqueBurnDotState),
 		UniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
 		UniqueHungerStacks:    make(map[uint64]uniqueHungerStackState),
+		UniqueAshenReprisals:  make(map[uint64]uniqueAshenReprisalState),
 		ShopStock:             shopStock,
 		Gold:                  gold,
 		StashItems:            stashItems,
@@ -1394,6 +1399,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.uniqueHungerStacks == nil {
 		s.uniqueHungerStacks = make(map[uint64]uniqueHungerStackState)
 	}
+	s.uniqueAshenReprisals = ps.UniqueAshenReprisals
+	if s.uniqueAshenReprisals == nil {
+		s.uniqueAshenReprisals = make(map[uint64]uniqueAshenReprisalState)
+	}
 	s.skillFunctionKeys = normalizeSkillFunctionKeys(ps.SkillFunctionKeys)
 	s.rightClickSkillID = ps.RightClickSkillID
 	s.shopStock = ps.ShopStock
@@ -1433,6 +1442,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.UniqueBurnDots = s.uniqueBurnDots
 	ps.UniqueExecutionMarks = s.uniqueExecutionMarks
 	ps.UniqueHungerStacks = s.uniqueHungerStacks
+	ps.UniqueAshenReprisals = s.uniqueAshenReprisals
 	ps.SkillFunctionKeys = normalizeSkillFunctionKeys(s.skillFunctionKeys)
 	ps.RightClickSkillID = s.rightClickSkillID
 	ps.ShopStock = s.shopStock
@@ -2410,9 +2420,11 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	defenderStats, _ := s.playerEffectiveCombatStats()
 	outcome := s.resolveCombat(attackerStats, defenderStats, retaliationDamage)
 	if !outcome.Hit || outcome.Blocked {
+		s.triggerUniqueEffectsAfterPlayerAvoidedHit(player, monster, corr, res)
 		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
 		return
 	}
+	outcome = s.applyUniqueEffectsBeforePlayerDamage(player, monster, corr, res, outcome, uniqueIncomingDamageSource{})
 	player.hp -= outcome.Damage
 	if player.hp < 0 {
 		player.hp = 0
@@ -2423,6 +2435,7 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 		eventType = "player_killed"
 	}
 	res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, corr, outcome))
+	s.triggerUniqueEffectsAfterPlayerDamage(player, monster, corr, res, outcome)
 }
 
 func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
@@ -4231,27 +4244,6 @@ func (s *Sim) fireMonsterProjectile(monster *entity, player *entity, def Monster
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
 }
 
-func (s *Sim) damagePlayerByMonster(monster *entity, player *entity, damageRange DamageRange, corr string, res *TickResult) combatResolution {
-	attackerStats := s.monsterEffectiveCombatStats(monster, damageRange)
-	defenderStats, _ := s.playerEffectiveCombatStats()
-	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
-	if !outcome.Hit || outcome.Blocked {
-		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
-		return outcome
-	}
-	player.hp -= outcome.Damage
-	if player.hp < 0 {
-		player.hp = 0
-	}
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
-	eventType := "player_damaged"
-	if player.hp == 0 {
-		eventType = "player_killed"
-	}
-	res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, corr, outcome))
-	return outcome
-}
-
 func (s *Sim) nearestLivingPlayerForMonster(level *LevelState, monster *entity) *playerState {
 	if monster != nil && monster.aiTargetPlayerID != 0 {
 		ps := s.players[monster.aiTargetPlayerID]
@@ -4677,9 +4669,11 @@ func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *Ti
 		outcome := s.resolveCombat(attackerStats, defenderStats, scaledDamage)
 		boss.bossActiveHit[playerID] = true
 		if !outcome.Hit || outcome.Blocked {
+			s.triggerUniqueEffectsAfterPlayerAvoidedHit(player, boss, "", res)
 			res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), boss.id, player.id, "", outcome))
 			continue
 		}
+		outcome = s.applyUniqueEffectsBeforePlayerDamage(player, boss, "", res, outcome, uniqueIncomingDamageSource{})
 		player.hp -= outcome.Damage
 		if player.hp < 0 {
 			player.hp = 0
@@ -4690,6 +4684,7 @@ func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *Ti
 			eventType = "player_killed"
 		}
 		res.Events = append(res.Events, combatEvent(eventType, boss.id, player.id, "", outcome))
+		s.triggerUniqueEffectsAfterPlayerDamage(player, boss, "", res, outcome)
 	}
 }
 
@@ -5075,7 +5070,7 @@ func (s *Sim) resolveMonsterProjectileHit(p *entity, hit projectileHit, res *Tic
 		return
 	}
 	s.usePlayer(ps)
-	s.damagePlayerByMonster(owner, target, p.damageRange, p.sourceCorrID, res)
+	s.damagePlayerByMonsterWithSource(owner, target, p.damageRange, p.sourceCorrID, res, uniqueIncomingDamageSource{Projectile: true})
 }
 
 func (s *Sim) aggroMonsterOnHit(monster *entity, playerID uint64, corr string, res *TickResult) {
@@ -7225,7 +7220,7 @@ func (s *Sim) findItem(instanceID string) *invItem {
 
 func (s *Sim) findItemByID(id uint64) *invItem {
 	for _, it := range s.inventory {
-		if it.instanceID == id {
+		if it != nil && it.instanceID == id {
 			return it
 		}
 	}

@@ -138,6 +138,8 @@ func (s *Sim) triggerUniqueEffectsAfterHeroDamage(target *entity, playerID uint6
 			if ok {
 				s.updateHungerOfTheDeep(playerID, target, def)
 			}
+		case ashenReprisalEffectID:
+			s.applyAshenReprisalOnHeroHit(target, playerID, corr, res, outcome.Damage)
 		}
 	}
 }
@@ -540,6 +542,33 @@ func uniqueEffectStringParam(def UniqueEffectDef, key string, fallback string) s
 	}
 	typed, ok := value.(string)
 	if !ok || typed == "" {
+		return fallback
+	}
+	return typed
+}
+
+func uniqueEffectFloatParam(def UniqueEffectDef, key string, fallback float64) float64 {
+	value, ok := def.Params[key]
+	if !ok {
+		return fallback
+	}
+	switch typed := value.(type) {
+	case float64:
+		return typed
+	case int:
+		return float64(typed)
+	default:
+		return fallback
+	}
+}
+
+func uniqueEffectBoolParam(def UniqueEffectDef, key string, fallback bool) bool {
+	value, ok := def.Params[key]
+	if !ok {
+		return fallback
+	}
+	typed, ok := value.(bool)
+	if !ok {
 		return fallback
 	}
 	return typed

@@ -232,6 +232,124 @@ func TestOffensiveUniqueHungerOfTheDeepRampsAndResets(t *testing.T) {
 	}
 }
 
+func TestSurvivalUniqueVeilOfTheLastOathPreventsLethalHitOnce(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	forceUniqueTestMonsterHitChance(rules, 1)
+	sim := MustNewSim("sess_veil_oath", "veil_oath", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	monster := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
+	equipUniqueTestEffect(t, sim, veilOfTheLastOathEffectID, 9901, "cave_shield", offHandSlot)
+	player.hp = 5
+	player.maxHP = 20
+
+	first := &TickResult{}
+	outcome := sim.damagePlayerByMonster(monster, player, DamageRange{Min: 10, Max: 10}, "veil", first)
+	if outcome.Damage != 0 || player.hp != 5 {
+		t.Fatalf("first lethal outcome=%+v hp=%d, want prevented at 5", outcome, player.hp)
+	}
+	if !sameStringSlice(player.effectIDs, []string{"last_oath_veil"}) {
+		t.Fatalf("player effects = %v, want last_oath_veil", player.effectIDs)
+	}
+	if _, active := sim.skillCooldownRemaining(veilOfTheLastOathEffectID); !active {
+		t.Fatalf("veil cooldown missing after trigger; changes=%+v events=%+v", first.Changes, first.Events)
+	}
+
+	second := &TickResult{}
+	outcome = sim.damagePlayerByMonster(monster, player, DamageRange{Min: 10, Max: 10}, "veil_cooldown", second)
+	if outcome.Damage <= 0 || player.hp != 0 {
+		t.Fatalf("second lethal outcome=%+v hp=%d, want death during cooldown", outcome, player.hp)
+	}
+}
+
+func TestSurvivalUniqueFrostglassWardSlowsAndBuffsAfterLargeHit(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	forceUniqueTestMonsterHitChance(rules, 1)
+	sim := MustNewSim("sess_frostglass", "frostglass", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	attacker := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
+	nearby := uniqueTestMonster(sim, Vec2{X: player.pos.X + 2, Y: player.pos.Y}, 50)
+	equipUniqueTestEffect(t, sim, frostglassWardEffectID, 9902, "cave_shield", offHandSlot)
+	player.hp = 100
+	player.maxHP = 100
+
+	res := &TickResult{}
+	sim.damagePlayerByMonster(attacker, player, DamageRange{Min: 30, Max: 30}, "frost", res)
+	if !sameStringSlice(player.effectIDs, []string{frostglassWardEffectID}) {
+		t.Fatalf("player effects = %v, want frostglass ward armor marker", player.effectIDs)
+	}
+	if !sameStringSlice(nearby.effectIDs, []string{"ice_slow"}) {
+		t.Fatalf("nearby effects = %v, want ice slow", nearby.effectIDs)
+	}
+	if _, active := sim.skillCooldownRemaining(frostglassWardEffectID); !active {
+		t.Fatalf("frostglass cooldown missing; events=%+v", res.Events)
+	}
+	if _, ok := eventAmount(TickResult{Events: res.Events}, "skill_effect_started", frostglassWardEffectID); !ok {
+		t.Fatalf("frostglass events = %+v, want skill_effect_started", res.Events)
+	}
+}
+
+func TestSurvivalUniqueMirrorsteelSkinReducesProjectileAndReflects(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	forceUniqueTestMonsterHitChance(rules, 1)
+	sim := MustNewSim("sess_mirrorsteel", "mirrorsteel", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	attacker := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
+	equipUniqueTestEffect(t, sim, mirrorsteelSkinEffectID, 9903, "cave_shield", offHandSlot)
+	player.hp = 100
+	player.maxHP = 100
+
+	res := &TickResult{}
+	outcome := sim.damagePlayerByMonsterWithSource(attacker, player, DamageRange{Min: 10, Max: 10}, "mirror", res, uniqueIncomingDamageSource{Projectile: true})
+	if outcome.Damage != 2 || player.hp != 98 {
+		t.Fatalf("mirror outcome=%+v hp=%d, want 70%% reduction after armor mitigation", outcome, player.hp)
+	}
+	if attacker.hp != 48 {
+		t.Fatalf("attacker hp=%d, want reflected damage after mitigation; events=%+v", attacker.hp, res.Events)
+	}
+	if _, active := sim.skillCooldownRemaining(mirrorsteelSkinEffectID); !active {
+		t.Fatalf("mirrorsteel cooldown missing; events=%+v", res.Events)
+	}
+}
+
+func TestSurvivalUniqueAshenReprisalPrimesAndConsumesOnNextHit(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	forceUniqueTestMonsterHitChance(rules, 0)
+	def := rules.Monsters[monsterDefID]
+	def.RetaliationDamage = nil
+	rules.Monsters[monsterDefID] = def
+	rules.Combat.BaseCritChance = 0
+	sim := MustNewSim("sess_ashen", "ashen", rules)
+	forceUniqueTestHeroHitChance(sim)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	attacker := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 200)
+	blade := equipUniqueTestEffect(t, sim, ashenReprisalEffectID, 9904, "cave_blade", mainHandSlot)
+	blade.rollPayload.Stats["damage_min"] = 10
+	blade.rollPayload.Stats["damage_max"] = 10
+
+	avoid := &TickResult{}
+	sim.damagePlayerByMonster(attacker, player, DamageRange{Min: 10, Max: 10}, "ashen_prime", avoid)
+	if _, ok := sim.uniqueAshenReprisals[player.id]; !ok {
+		t.Fatalf("ashen was not primed; events=%+v", avoid.Events)
+	}
+
+	hit := &TickResult{}
+	outcome := sim.damageMonsterByPlayerWithSlot(target, player.id, "ashen_hit", hit, DamageRange{Min: 10, Max: 10}, damageTypeForce, mainHandSlot)
+	if _, ok := sim.uniqueAshenReprisals[player.id]; ok {
+		t.Fatalf("ashen remained primed after hit outcome=%+v effects=%v events=%+v equipped=%v", outcome, sim.equippedUniqueEffectIDs(player.id), hit.Events, sim.equipped)
+	}
+	if !eventListHasDamageType(hit.Events, "monster_damaged", ashenReprisalEffectID, damageTypeFire) {
+		t.Fatalf("ashen hit events = %+v, want fire bonus damage", hit.Events)
+	}
+	if !sameStringSlice(target.effectIDs, []string{"burning"}) {
+		t.Fatalf("target effects = %v, want burning", target.effectIDs)
+	}
+}
+
 func uniqueEventDamage(r TickResult, eventType string, skillID string) (int, bool) {
 	return uniqueEventListDamage(r.Events, eventType, skillID)
 }
@@ -251,6 +369,27 @@ func clearUniqueTestMonsters(sim *Sim) {
 			delete(sim.entities, id)
 		}
 	}
+}
+
+func forceUniqueTestMonsterHitChance(rules *Rules, chance float64) {
+	def := rules.Monsters[monsterDefID]
+	def.HitChance = &chance
+	def.CritChance = floatPtr(0)
+	rules.Monsters[monsterDefID] = def
+}
+
+func uniqueTestMonster(sim *Sim, pos Vec2, hp int) *entity {
+	monster := &entity{id: sim.alloc(), kind: monsterEntity, pos: pos, hp: hp, maxHP: hp, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	sim.entities[monster.id] = monster
+	return monster
+}
+
+func equipUniqueTestEffect(t *testing.T, sim *Sim, effectID string, instanceID uint64, templateID string, slot string) *invItem {
+	t.Helper()
+	item := addRolledInventoryItem(t, sim, instanceID, templateID, map[string]int{})
+	item.rollPayload.EffectIDs = []string{effectID}
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_" + effectID, Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(item.instanceID), Slot: slot}}}), "equip_"+effectID)
+	return item
 }
 
 func uniqueEventListDamage(events []Event, eventType string, skillID string) (int, bool) {

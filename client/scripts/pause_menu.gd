@@ -8,6 +8,8 @@ signal settings_pressed
 signal return_to_menu_pressed
 signal exit_pressed
 
+var _title: Label
+var _buttons_by_key: Dictionary = {}
 
 func _ready() -> void:
 	_sync_viewport_size()
@@ -46,21 +48,36 @@ func _build() -> void:
 	box.offset_bottom = 140
 	add_child(box)
 
-	var title := Label.new()
-	title.text = TextCatalogScript.get_text("pause.title", "Paused")
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 39)
-	box.add_child(title)
+	_title = Label.new()
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title.add_theme_font_size_override("font_size", 39)
+	box.add_child(_title)
 
-	box.add_child(_button(TextCatalogScript.get_text("pause.resume", "Resume"), resume_pressed.emit))
-	box.add_child(_button(TextCatalogScript.get_text("menu.settings", "Settings"), settings_pressed.emit))
-	box.add_child(_button(TextCatalogScript.get_text("pause.return_to_main_menu", "Return to Main Menu"), return_to_menu_pressed.emit))
-	box.add_child(_button(TextCatalogScript.get_text("menu.exit", "Exit"), exit_pressed.emit))
+	box.add_child(_button("resume", resume_pressed.emit))
+	box.add_child(_button("settings", settings_pressed.emit))
+	box.add_child(_button("return_to_main_menu", return_to_menu_pressed.emit))
+	box.add_child(_button("exit", exit_pressed.emit))
+	refresh_texts()
 
 
-func _button(text: String, callback: Callable) -> Button:
+func _button(key: String, callback: Callable) -> Button:
 	var button := Button.new()
-	button.text = text
+	_buttons_by_key[key] = button
 	button.custom_minimum_size = Vector2(260, 42)
 	button.pressed.connect(callback)
 	return button
+
+
+func refresh_texts() -> void:
+	if _title != null:
+		_title.text = TextCatalogScript.get_text("pause.title", "Paused")
+	_set_button_text("resume", TextCatalogScript.get_text("pause.resume", "Resume"))
+	_set_button_text("settings", TextCatalogScript.get_text("menu.settings", "Settings"))
+	_set_button_text("return_to_main_menu", TextCatalogScript.get_text("pause.return_to_main_menu", "Return to Main Menu"))
+	_set_button_text("exit", TextCatalogScript.get_text("menu.exit", "Exit"))
+
+
+func _set_button_text(key: String, text: String) -> void:
+	var button: Button = _buttons_by_key.get(key, null)
+	if button != null:
+		button.text = text

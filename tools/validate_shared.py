@@ -26,7 +26,7 @@ try:
         skill_presentation_entries,
         skill_rule_entries,
     )
-    from .validate_i18n import validate_i18n_catalog
+    from .validate_i18n import validate_i18n_catalog, validate_locale_catalog
 except ImportError:  # pragma: no cover - direct script execution
     from content_manifest import (  # type: ignore[no-redef]
         ManifestError,
@@ -34,7 +34,7 @@ except ImportError:  # pragma: no cover - direct script execution
         skill_presentation_entries,
         skill_rule_entries,
     )
-    from validate_i18n import validate_i18n_catalog  # type: ignore[no-redef]
+    from validate_i18n import validate_i18n_catalog, validate_locale_catalog  # type: ignore[no-redef]
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "shared"
@@ -207,6 +207,11 @@ def cross_checks(report: Report) -> None:
     content_manifest_path = CONTENT / "content_libraries.v0.json"
     content_manifest = load(content_manifest_path)
     english_text = load(I18N / "en.json")
+    locale_texts = [
+        load(path)
+        for path in sorted(I18N.glob("*.json"))
+        if path.name != "en.json" and not path.name.endswith(".schema.json")
+    ]
     skills = load(RULES / "skills.v0.json")
     skill_presentations = load(ASSETS / "skill_presentations.v0.json")
     items = load(RULES / "items.v0.json")
@@ -254,6 +259,8 @@ def cross_checks(report: Report) -> None:
     main_gameplay = main_config.get("gameplay", {})
 
     validate_i18n_catalog(report, english_text, skills, skill_presentations, monsters)
+    for locale_text in locale_texts:
+        validate_locale_catalog(report, locale_text, english_text)
 
     try:
         manifest_skills = merge_catalog_files(content_manifest_path, skill_rule_entries(content_manifest), "skills")

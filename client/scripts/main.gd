@@ -273,7 +273,9 @@ func _ready() -> void:
 	_build_scene()
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
+	client_settings.set_language(client_settings.language, false)
 	client_settings.apply()
+	_refresh_localized_texts()
 	_sync_status_text_visibility()
 	_sync_settings_panel()
 	ItemRulesLoader.ensure_loaded()
@@ -600,7 +602,8 @@ func _on_settings_from_main() -> void:
 			ClientSettingsScript.size_label(client_settings.window_size),
 			client_settings.floating_combat_text,
 			client_settings.status_text,
-			client_settings.create_game_session_type
+			client_settings.create_game_session_type,
+			client_settings.language
 		)
 
 
@@ -613,7 +616,8 @@ func _on_settings_from_pause() -> void:
 			ClientSettingsScript.size_label(client_settings.window_size),
 			client_settings.floating_combat_text,
 			client_settings.status_text,
-			client_settings.create_game_session_type
+			client_settings.create_game_session_type,
+			client_settings.language
 		)
 
 
@@ -653,12 +657,30 @@ func _on_create_game_session_type_selected(session_type: String) -> void:
 	_sync_settings_panel()
 
 
+func _on_language_selected(language: String) -> void:
+	if client_settings == null:
+		return
+	client_settings.set_language(language)
+	_refresh_localized_texts()
+	_sync_settings_panel()
+
+
 func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
 		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
 		settings_panel.set_floating_combat_text_enabled(client_settings.floating_combat_text)
 		settings_panel.set_status_text_enabled(client_settings.status_text)
 		settings_panel.set_create_game_session_type(client_settings.create_game_session_type)
+		settings_panel.set_language(client_settings.language)
+
+
+func _refresh_localized_texts() -> void:
+	if main_menu != null:
+		main_menu.refresh_texts()
+	if pause_menu != null:
+		pause_menu.refresh_texts()
+	if settings_panel != null:
+		settings_panel.refresh_texts()
 
 
 func _show_pause_menu() -> void:
@@ -3051,6 +3073,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.floating_combat_text_toggled.connect(_on_floating_combat_text_toggled)
 	settings_panel.status_text_toggled.connect(_on_status_text_toggled)
 	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
+	settings_panel.language_selected.connect(_on_language_selected)
 	menu_layer.add_child(settings_panel)
 
 	pause_menu = PauseMenuScript.new()
@@ -4919,6 +4942,7 @@ func get_bot_state() -> Dictionary:
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
 		"status_text_enabled": client_settings != null and client_settings.status_text,
+		"language": client_settings.language if client_settings != null else ClientSettingsScript.DEFAULT_LANGUAGE,
 		"boss_reward_status": _last_boss_reward_status,
 		"create_game_session_type": client_settings.create_game_session_type if client_settings != null else ClientSettingsScript.DEFAULT_CREATE_GAME_SESSION_TYPE,
 		"damage_numbers": _bot_damage_numbers(),
@@ -5326,6 +5350,10 @@ func bot_set_floating_combat_text(enabled: bool) -> void:
 
 func bot_select_create_game_type(session_type: String) -> void:
 	_on_create_game_session_type_selected(session_type)
+
+
+func bot_select_language(language: String) -> void:
+	_on_language_selected(language)
 
 
 func bot_consume_pending_event_at(index: int) -> void:

@@ -24,6 +24,11 @@ func _run() -> void:
 	_assert_eq("stat label from English catalog", StatLabelsScript.display_name("armor"), "Armor")
 	_assert_eq("skill name from text key", SkillRulesLoaderScript.skill_display_name("magic_bolt"), "Magic Bolt")
 	_assert_eq("skill summary from text key", SkillRulesLoaderScript.skill_summary("rage"), "STR/VIT size buff")
+	TextCatalogScript.set_locale("es")
+	_assert_eq("Spanish menu label", TextCatalogScript.get_text("menu.create_game", "fallback"), "Crear partida")
+	_assert_eq("Spanish skill name", SkillRulesLoaderScript.skill_display_name("magic_bolt"), "Proyectil magico")
+	_assert_eq("Spanish missing key uses English before fallback", TextCatalogScript.get_text("settings.language.en", "fallback"), "English")
+	_assert_eq("unsupported locale normalizes to English", TextCatalogScript.normalize_locale("fr"), "en")
 
 	print("[gdtest] PASS: test_text_catalog (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)

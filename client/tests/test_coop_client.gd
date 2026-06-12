@@ -51,6 +51,7 @@ func _initialize() -> void:
 	_test_character_panel_modes_for_v45()
 	_test_multiplayer_sessions_panel_row_join_affordances()
 	_test_settings_panel_create_game_type_sync()
+	_test_client_settings_language_persistence()
 	_test_status_text_toggle_hides_left_debug_not_level_hud()
 	_test_player_hud_identity_uses_character_name_and_level()
 	_test_character_stats_probability_values_use_percentages()
@@ -379,15 +380,33 @@ func _test_multiplayer_sessions_panel_row_join_affordances() -> void:
 
 
 func _test_settings_panel_create_game_type_sync() -> void:
+	TextCatalog.reset_for_tests()
+	TextCatalog.set_locale("es")
 	var panel: SettingsPanel = SettingsPanelScript.new()
 	get_root().add_child(panel)
 	panel._build()
-	panel.show_settings("1920x1080", true, true, "solo")
+	panel.show_settings("1920x1080", true, true, "solo", "es")
 	_assert_true("solo create game type selected", (panel._session_type_buttons["solo"] as Button).disabled)
 	_assert_true("coop create game type available", not (panel._session_type_buttons["coop"] as Button).disabled)
+	_assert_true("Spanish language selected", (panel._language_buttons["es"] as Button).disabled)
+	_assert_eq("language label text", panel._language_label.text, "Idioma")
 	panel.set_create_game_session_type("coop")
 	_assert_true("coop create game type selected", (panel._session_type_buttons["coop"] as Button).disabled)
+	panel.set_language("en")
+	_assert_true("English language selected", (panel._language_buttons["en"] as Button).disabled)
+	TextCatalog.set_locale("en")
 	panel.queue_free()
+
+
+func _test_client_settings_language_persistence() -> void:
+	var path := "user://test-language-settings.json"
+	var settings := ClientSettingsScript.new(path)
+	settings.set_language("es")
+	var loaded := ClientSettingsScript.new(path)
+	loaded.load()
+	_assert_eq("language persisted", loaded.language, "es")
+	loaded.set_language("fr")
+	_assert_eq("unsupported language normalizes", loaded.language, "en")
 
 
 func _test_status_text_toggle_hides_left_debug_not_level_hud() -> void:

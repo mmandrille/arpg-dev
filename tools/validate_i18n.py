@@ -35,6 +35,23 @@ def validate_i18n_catalog(
         _require_key(report, english_strings, "monster name_key", f"monster {monster_id} name_key resolves", monster_id, monster)
 
 
+def validate_locale_catalog(report: Any, locale_text: dict[str, Any], english_text: dict[str, Any]) -> None:
+    locale = str(locale_text.get("locale", ""))
+    strings = locale_text.get("strings", {})
+    english_strings = english_text.get("strings", {})
+    if locale:
+        report.ok(f"text catalog {locale} declares locale")
+    else:
+        report.fail("text catalog locale", "missing locale")
+    for key, value in sorted(strings.items()):
+        if key in english_strings and isinstance(value, str) and value.strip():
+            report.ok(f"text catalog {locale} {key}")
+        elif key not in english_strings:
+            report.fail("text catalog key", f"{locale} has unknown key {key!r}")
+        else:
+            report.fail("text catalog entry", f"{locale} has empty value for {key!r}")
+
+
 def _require_key(
     report: Any,
     english_strings: dict[str, Any],

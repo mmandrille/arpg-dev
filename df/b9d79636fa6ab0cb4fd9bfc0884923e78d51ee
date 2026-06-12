@@ -1,0 +1,56 @@
+shared/assets/skill_presentations.v0.json
+  s_6cd8e180f3214c::t_ec469f2870555d 42
+client/tests/test_skill_rules_loader.gd
+  s_6cd8e180f3214c::t_6470b745cc22ed 50-51
+shared/assets/skill_presentations.v0.schema.json
+  s_6cd8e180f3214c::t_ec469f2870555d 25
+skills/showme/scripts/visual_capture.gd
+  s_5ef4c125d45464::t_6ee2eafda7b6af 468,473,483-487
+client/scripts/status_effects_bar.gd
+  s_6cd8e180f3214c::t_548daf550b170c 4-6,59
+client/scripts/skill_icon.gd
+  s_6cd8e180f3214c::t_ec469f2870555d 38-39,78-92
+docs/plans/v102_2026-06-12-class-bot-visual-scenarios.md
+  s_c88be8e83fa4bc::t_c3f701fe88e027 1-299
+client/tests/test_status_effects_bar.gd
+  s_6cd8e180f3214c::t_57fa20ef25e825 9,18,48,78,85-86
+docs/specs/v102_spec-class-bot-visual-scenarios.md
+  s_c88be8e83fa4bc::t_053ecc811d28dc 1-145
+client/scripts/main.gd
+  s_6cd8e180f3214c::t_cbe475bd5673bf 1661-1668
+  s_6cd8e180f3214c::t_d7e1cf635934a9 3095
+client/tests/test_status_effect_presentation.gd
+  s_6cd8e180f3214c::t_ca6819725c43e0 14,48-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "dfb9d79636fa6ab0cb4fd9bfc0884923e78d51ee",
+  "prompts": {},
+  "sessions": {
+    "s_5ef4c125d45464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebcce-14fc-7791-855e-883bea5a95a1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_6cd8e180f3214c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd22-fd05-7d40-aeb7-c0624a10de1e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_c88be8e83fa4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfa-d65a-7650-81f2-89f916faeef8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

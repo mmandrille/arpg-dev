@@ -287,6 +287,8 @@ type playerState struct {
 	SkillEffects          map[string]skillEffectState
 	PoisonDots            map[uint64]poisonDotState
 	UniqueBurnDots        map[string]uniqueBurnDotState
+	UniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
+	UniqueHungerStacks    map[uint64]uniqueHungerStackState
 	SkillFunctionKeys     []string
 	RightClickSkillID     string
 	ShopStock             map[string]*shopStockState
@@ -332,6 +334,8 @@ type Sim struct {
 	skillEffects          map[string]skillEffectState
 	poisonDots            map[uint64]poisonDotState
 	uniqueBurnDots        map[string]uniqueBurnDotState
+	uniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
+	uniqueHungerStacks    map[uint64]uniqueHungerStackState
 	areaHealZones         map[uint64]areaHealZoneState
 	skillFunctionKeys     []string
 	rightClickSkillID     string
@@ -407,6 +411,8 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		skillEffects:          make(map[string]skillEffectState),
 		poisonDots:            make(map[uint64]poisonDotState),
 		uniqueBurnDots:        make(map[string]uniqueBurnDotState),
+		uniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
+		uniqueHungerStacks:    make(map[uint64]uniqueHungerStackState),
 		areaHealZones:         make(map[uint64]areaHealZoneState),
 		skillFunctionKeys:     make([]string, skillFunctionKeyCount),
 		shopStock:             make(map[string]*shopStockState),
@@ -624,6 +630,8 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		SkillEffects:          cloneSkillEffects(s.skillEffects),
 		PoisonDots:            clonePoisonDots(s.poisonDots),
 		UniqueBurnDots:        cloneUniqueBurnDots(s.uniqueBurnDots),
+		UniqueExecutionMarks:  cloneUniqueExecutionMarks(s.uniqueExecutionMarks),
+		UniqueHungerStacks:    cloneUniqueHungerStacks(s.uniqueHungerStacks),
 		SkillFunctionKeys:     cloneStringSlice(s.skillFunctionKeys),
 		RightClickSkillID:     s.rightClickSkillID,
 		ShopStock:             s.shopStock,
@@ -1106,6 +1114,8 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		SkillEffects:          effects,
 		PoisonDots:            make(map[uint64]poisonDotState),
 		UniqueBurnDots:        make(map[string]uniqueBurnDotState),
+		UniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
+		UniqueHungerStacks:    make(map[uint64]uniqueHungerStackState),
 		ShopStock:             shopStock,
 		Gold:                  gold,
 		StashItems:            stashItems,
@@ -1376,6 +1386,14 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.uniqueBurnDots == nil {
 		s.uniqueBurnDots = make(map[string]uniqueBurnDotState)
 	}
+	s.uniqueExecutionMarks = ps.UniqueExecutionMarks
+	if s.uniqueExecutionMarks == nil {
+		s.uniqueExecutionMarks = make(map[uint64]uniqueExecutionMarkState)
+	}
+	s.uniqueHungerStacks = ps.UniqueHungerStacks
+	if s.uniqueHungerStacks == nil {
+		s.uniqueHungerStacks = make(map[uint64]uniqueHungerStackState)
+	}
 	s.skillFunctionKeys = normalizeSkillFunctionKeys(ps.SkillFunctionKeys)
 	s.rightClickSkillID = ps.RightClickSkillID
 	s.shopStock = ps.ShopStock
@@ -1413,6 +1431,8 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.SkillEffects = s.skillEffects
 	ps.PoisonDots = s.poisonDots
 	ps.UniqueBurnDots = s.uniqueBurnDots
+	ps.UniqueExecutionMarks = s.uniqueExecutionMarks
+	ps.UniqueHungerStacks = s.uniqueHungerStacks
 	ps.SkillFunctionKeys = normalizeSkillFunctionKeys(s.skillFunctionKeys)
 	ps.RightClickSkillID = s.rightClickSkillID
 	ps.ShopStock = s.shopStock
@@ -1658,6 +1678,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.expireSkillEffects(res)
 			s.advancePoisonDots(res)
 			s.advanceUniqueBurnDots(res)
+			s.advanceOffensiveUniqueEffectStates(res)
 			s.applyMovement(res)
 			s.applyPlayerRegen(res)
 			s.savePlayer(ps)
@@ -2092,6 +2113,7 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 }
 
 func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, damageType string, weaponSlot string) combatResolution {
+	damageRange = s.applyUniqueDamageBeforeHeroHit(target, playerID, damageRange)
 	attackerStats, _ := s.playerEffectiveCombatStats()
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
@@ -2118,7 +2140,7 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 	if outcome.Damage > 0 {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
-	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome)
+	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: true})
 	if target.hp == 0 {
 		s.finishMonsterKill(target, playerID, corr, res)
 	}
@@ -2131,6 +2153,7 @@ func (s *Sim) damageMonsterByPlayerSkill(target *entity, playerID uint64, corr s
 }
 
 func (s *Sim) damageMonsterByPlayerSkillTyped(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, damageType string) combatResolution {
+	damageRange = s.applyUniqueDamageBeforeHeroHit(target, playerID, damageRange)
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveSkillDamage(defenderStats, s.applySkillDamageBonus(damageRange))
 	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
@@ -2143,7 +2166,7 @@ func (s *Sim) damageMonsterByPlayerSkillTyped(target *entity, playerID uint64, c
 	if outcome.Damage > 0 {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
-	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome)
+	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: false})
 	if target.hp == 0 {
 		s.finishMonsterKill(target, playerID, corr, res)
 	}
@@ -2273,6 +2296,7 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 }
 
 func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, res *TickResult) {
+	s.triggerUniqueEffectsOnMonsterKilled(monster, sourceID, corr, res)
 	res.Events = append(res.Events, Event{
 		EventType:      "monster_killed",
 		EntityID:       idStr(monster.id),

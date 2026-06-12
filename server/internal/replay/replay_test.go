@@ -685,7 +685,7 @@ func TestReconstructCoopDisconnectedMemberIsRemovedForReconnect(t *testing.T) {
 
 func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	rules := loadRules(t)
-	const guestPlayerID = 1008
+	const guestPlayerID = 1009
 	repo := &fakeRepo{
 		session: store.Session{ID: testSessionID, Seed: "v33_coop_replay", WorldID: "dungeon_levels", Mode: store.SessionModeCoop},
 		members: []store.SessionMember{
@@ -702,7 +702,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 				SessionID:      testSessionID,
 				AccountID:      "acct_guest",
 				CharacterID:    "char_guest",
-				PlayerEntityID: "1008",
+				PlayerEntityID: "1009",
 				Role:           store.SessionMemberGuest,
 				Status:         store.SessionMemberActive,
 				Connected:      true,
@@ -763,7 +763,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	if !rep.Match {
 		t.Fatalf("verify mismatch: %s", rep.Mismatch)
 	}
-	if entityByID(rep.Snapshot, "1008") != nil {
+	if entityByID(rep.Snapshot, "1009") != nil {
 		t.Fatalf("disconnected guest should be absent from replay snapshot: %+v", rep.Snapshot.Entities)
 	}
 	if hasStoreEvent(events, "item_picked_up") {
@@ -1483,6 +1483,9 @@ func (f *fakeRepo) ListMarketOffersForSeller(context.Context, string, string) ([
 }
 func (f *fakeRepo) AcceptMarketOffer(context.Context, string, string, string) (store.MarketOffer, error) {
 	return store.MarketOffer{}, nil
+}
+func (f *fakeRepo) GetMarketSummary(context.Context, string) (store.MarketSummary, error) {
+	return store.MarketSummary{}, nil
 }
 func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, store.CharacterProgression) error {
 	return nil

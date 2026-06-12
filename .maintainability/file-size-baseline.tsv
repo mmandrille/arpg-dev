@@ -3,7 +3,7 @@
 client/scripts/bot_controller.gd	634
 client/scripts/bot_scenario_runner.gd	2166
 client/scripts/inventory_panel.gd	1325
-client/scripts/main.gd	5669
+client/scripts/main.gd	5944
 client/scripts/shop_panel.gd	1233
 client/scripts/skills_panel.gd	812
 client/scripts/stash_panel.gd	833
@@ -26,7 +26,7 @@ server/internal/replay/replay.go	722
 server/internal/replay/replay_test.go	1513
 server/internal/store/repos.go	2685
 server/internal/store/store_test.go	1356
-skills/showme/scripts/visual_capture.gd	666
+skills/showme/scripts/visual_capture.gd	754
 tools/bot/run.py	5008
 tools/bot/test_protocol.py	1246
 tools/validate_shared.py	3138

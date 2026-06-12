@@ -1,0 +1,56 @@
+server/internal/http/market.go
+  s_d64f6fea84390c::t_90d4d9b8b70a4f 17-19,41-64,136-226,243-264
+server/internal/store/store_test.go
+  s_d64f6fea84390c::t_918525bdcf4c68 1050-1217
+server/internal/store/interfaces.go
+  s_d64f6fea84390c::t_1d252888299f48 75-77
+docs/specs/v93_spec-market-multi-item-offers.md
+  s_d64f6fea84390c::t_12773009c5fa4a 1-71
+server/migrations/0017_market_offers.sql
+  s_d64f6fea84390c::t_051ea73847bbea 1-10
+  s_d64f6fea84390c::t_ad2696ff368bb9 11-37
+server/migrations/0020_market_offers_repair.sql
+  s_d64f6fea84390c::t_5251291e080c68 1-27
+PROGRESS.md
+  s_d64f6fea84390c::t_050ab7be196573 15,114,247,391-394
+docs/plans/v93_2026-06-12-market-multi-item-offers.md
+  s_d64f6fea84390c::t_8c211dde5e11bd 1-39,44-56,60-70,76-86,91-102,106-113,119-123
+  s_d64f6fea84390c::t_266a2f4543abcb 40-43
+  s_d64f6fea84390c::t_690c32d3e0fe2f 57-59,71-75,87-90,103-105,114-118
+server/migrations/0019_market_listing_accepted_status_repair.sql
+  s_d64f6fea84390c::t_cefbb6577211f7 1-9
+server/internal/store/repos.go
+  s_d64f6fea84390c::t_bb337cdd6d9491 1565,1590,1617
+  s_d64f6fea84390c::t_14392cf104cfc6 2045,2053-2113
+  s_d64f6fea84390c::t_905f776639c40c 1515,1563,1585,1615
+  s_d64f6fea84390c::t_d555ca539ea529 1597-1599,1626-1762
+  s_d64f6fea84390c::t_78e8481a9c640f 1771-1937
+server/migrations/0018_market_listing_accepted_status.sql
+  s_d64f6fea84390c::t_717994eff9e729 1-9
+server/internal/store/models.go
+  s_d64f6fea84390c::t_9c5fa7ad5f90f1 139,154-184
+docs/as-built/v93_market-multi-item-offers.md
+  s_d64f6fea84390c::t_d7bbf791d49e02 1-26
+server/internal/replay/replay_test.go
+  s_d64f6fea84390c::t_ed108039e9b1b9 1475-1483
+.maintainability/file-size-baseline.tsv
+  s_d64f6fea84390c::t_bc801b9542eb70 6,11,14,19,21,27-28
+server/internal/http/auth_session_test.go
+  s_d64f6fea84390c::t_02626c51c84a8c 489-591
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "59aadb734b43decd65381db7bd1891dff1f7f69a",
+  "prompts": {},
+  "sessions": {
+    "s_d64f6fea84390c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eba4d-7607-7531-bca4-07347b2d0f71",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

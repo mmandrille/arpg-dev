@@ -2,7 +2,7 @@
 # Format: path<TAB>baseline_line_count
 client/scripts/bot_controller.gd	634
 client/scripts/bot_scenario_runner.gd	2166
-client/scripts/inventory_panel.gd	1325
+client/scripts/inventory_panel.gd	1353
 client/scripts/main.gd	6090
 client/scripts/shop_panel.gd	1233
 client/scripts/skills_panel.gd	812

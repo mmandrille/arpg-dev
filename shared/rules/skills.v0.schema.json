@@ -32,6 +32,8 @@
         "damage": { "$ref": "#/$defs/rank_linear_damage" },
         "projectile": { "$ref": "#/$defs/projectile" },
         "cone": { "$ref": "#/$defs/cone" },
+        "poison": { "$ref": "#/$defs/poison" },
+        "dash": { "$ref": "#/$defs/dash" },
         "slow": { "$ref": "#/$defs/slow" },
         "shatter": { "$ref": "#/$defs/shatter" },
         "chain": { "$ref": "#/$defs/chain" },
@@ -207,6 +209,29 @@
         "push_min": { "type": "number", "minimum": 0 },
         "push_max": { "type": "number", "minimum": 0 },
         "damage_source": { "type": "string", "enum": ["weapon"] }
+      }
+    },
+    "poison": {
+      "type": "object",
+      "required": ["damage_percent_base", "damage_percent_per_rank", "duration_ticks", "magic_duration_ticks_per_point"],
+      "additionalProperties": false,
+      "properties": {
+        "damage_percent_base": { "type": "integer", "minimum": 1 },
+        "damage_percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "magic_duration_ticks_per_point": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "dash": {
+      "type": "object",
+      "required": ["range_base", "range_per_rank", "damage_percent_base", "damage_percent_per_magic", "max_damage_bonus_percent"],
+      "additionalProperties": false,
+      "properties": {
+        "range_base": { "type": "number", "exclusiveMinimum": 0 },
+        "range_per_rank": { "type": "number", "minimum": 0 },
+        "damage_percent_base": { "type": "integer", "minimum": 1 },
+        "damage_percent_per_magic": { "type": "integer", "minimum": 0 },
+        "max_damage_bonus_percent": { "type": "integer", "minimum": 0 }
       }
     },
     "slow": {

@@ -404,7 +404,7 @@
       },
       "cost": {
         "mana": {
-          "base": 4,
+          "base": 3,
           "per_rank": 1
         }
       },
@@ -414,6 +414,12 @@
         "push_min": 0,
         "push_max": 0,
         "damage_source": "weapon"
+      },
+      "poison": {
+        "damage_percent_base": 25,
+        "damage_percent_per_rank": 10,
+        "duration_ticks": 50,
+        "magic_duration_ticks_per_point": 2
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
@@ -444,7 +450,7 @@
       },
       "cost": {
         "mana": {
-          "base": 6,
+          "base": 4,
           "per_rank": 1
         }
       },
@@ -454,6 +460,13 @@
         "push_min": 0,
         "push_max": 0,
         "damage_source": "weapon"
+      },
+      "dash": {
+        "range_base": 5,
+        "range_per_rank": 1,
+        "damage_percent_base": 50,
+        "damage_percent_per_magic": 3,
+        "max_damage_bonus_percent": 50
       },
       "cooldown": {
         "type": "attack_interval_multiplier",

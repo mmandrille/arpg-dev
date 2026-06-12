@@ -283,6 +283,7 @@ type playerState struct {
 	Progression           CharacterProgressionState
 	SkillCooldowns        map[string]skillCooldownState
 	SkillEffects          map[string]skillEffectState
+	PoisonDots            map[uint64]poisonDotState
 	SkillFunctionKeys     []string
 	RightClickSkillID     string
 	ShopStock             map[string]*shopStockState
@@ -293,6 +294,7 @@ type playerState struct {
 	HPRegenCarry          float64
 	ManaRegenCarry        float64
 	NextBasicAttackTick   uint64
+	NextOffHandAttackTick uint64
 }
 
 // Sim is the deterministic authoritative simulation for one solo session.
@@ -325,6 +327,7 @@ type Sim struct {
 	progression           CharacterProgressionState
 	skillCooldowns        map[string]skillCooldownState
 	skillEffects          map[string]skillEffectState
+	poisonDots            map[uint64]poisonDotState
 	areaHealZones         map[uint64]areaHealZoneState
 	skillFunctionKeys     []string
 	rightClickSkillID     string
@@ -336,6 +339,7 @@ type Sim struct {
 	hpRegenCarry          float64
 	manaRegenCarry        float64
 	nextBasicAttackTick   uint64
+	nextOffHandAttackTick uint64
 }
 
 // CharacterProgressionState is the authoritative mutable progression state for
@@ -397,6 +401,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		progression:           progression,
 		skillCooldowns:        make(map[string]skillCooldownState),
 		skillEffects:          make(map[string]skillEffectState),
+		poisonDots:            make(map[uint64]poisonDotState),
 		areaHealZones:         make(map[uint64]areaHealZoneState),
 		skillFunctionKeys:     make([]string, skillFunctionKeyCount),
 		shopStock:             make(map[string]*shopStockState),
@@ -612,6 +617,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		Progression:           s.progression,
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
 		SkillEffects:          cloneSkillEffects(s.skillEffects),
+		PoisonDots:            clonePoisonDots(s.poisonDots),
 		SkillFunctionKeys:     cloneStringSlice(s.skillFunctionKeys),
 		RightClickSkillID:     s.rightClickSkillID,
 		ShopStock:             s.shopStock,
@@ -1092,6 +1098,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		Progression:           character,
 		SkillCooldowns:        cooldowns,
 		SkillEffects:          effects,
+		PoisonDots:            make(map[uint64]poisonDotState),
 		ShopStock:             shopStock,
 		Gold:                  gold,
 		StashItems:            stashItems,
@@ -1354,6 +1361,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.skillEffects == nil {
 		s.skillEffects = make(map[string]skillEffectState)
 	}
+	s.poisonDots = ps.PoisonDots
+	if s.poisonDots == nil {
+		s.poisonDots = make(map[uint64]poisonDotState)
+	}
 	s.skillFunctionKeys = normalizeSkillFunctionKeys(ps.SkillFunctionKeys)
 	s.rightClickSkillID = ps.RightClickSkillID
 	s.shopStock = ps.ShopStock
@@ -1370,6 +1381,7 @@ func (s *Sim) usePlayer(ps *playerState) {
 	s.hpRegenCarry = ps.HPRegenCarry
 	s.manaRegenCarry = ps.ManaRegenCarry
 	s.nextBasicAttackTick = ps.NextBasicAttackTick
+	s.nextOffHandAttackTick = ps.NextOffHandAttackTick
 	level := s.activeLevel()
 	level.move = ps.Move
 	level.autoNav = ps.AutoNav
@@ -1388,6 +1400,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.Progression = s.progression
 	ps.SkillCooldowns = s.skillCooldowns
 	ps.SkillEffects = s.skillEffects
+	ps.PoisonDots = s.poisonDots
 	ps.SkillFunctionKeys = normalizeSkillFunctionKeys(s.skillFunctionKeys)
 	ps.RightClickSkillID = s.rightClickSkillID
 	ps.ShopStock = s.shopStock
@@ -1398,6 +1411,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.HPRegenCarry = s.hpRegenCarry
 	ps.ManaRegenCarry = s.manaRegenCarry
 	ps.NextBasicAttackTick = s.nextBasicAttackTick
+	ps.NextOffHandAttackTick = s.nextOffHandAttackTick
 	if level := s.levels[ps.CurrentLevel]; level != nil {
 		ps.Move = level.move
 		ps.AutoNav = level.autoNav
@@ -1630,6 +1644,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.usePlayer(ps)
 			res := resultFor(ps.CurrentLevel, ps.PlayerID)
 			s.expireSkillEffects(res)
+			s.advancePoisonDots(res)
 			s.applyMovement(res)
 			s.applyPlayerRegen(res)
 			s.savePlayer(ps)
@@ -2049,30 +2064,29 @@ func (s *Sim) dispatchAction(target *entity, in Input, res *TickResult, ack bool
 }
 
 func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) {
-	if !s.consumeBasicAttack(in, res) {
+	weaponSlot, ok := s.consumeBasicAttack(in, res)
+	if !ok {
 		return
 	}
 	if ack {
 		res.ack(in.MessageID)
 	}
-	s.damageMonsterByPlayer(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamage())
-}
-
-func (s *Sim) consumeBasicAttack(in Input, res *TickResult) bool {
-	if s.tick < s.nextBasicAttackTick {
-		res.reject(in.MessageID, "basic_attack_on_cooldown")
-		return false
-	}
-	s.nextBasicAttackTick = s.tick + uint64(s.DerivedStatsView().AttackIntervalTicks)
-	return true
+	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), weaponSlot)
 }
 
 func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
+	return s.damageMonsterByPlayerWithSlot(target, playerID, corr, res, damageRange, "")
+}
+
+func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, weaponSlot string) combatResolution {
 	attackerStats, _ := s.playerEffectiveCombatStats()
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
 	if !outcome.Hit || outcome.Blocked {
 		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
+		if weaponSlot != "" {
+			res.Events[len(res.Events)-1].WeaponSlot = weaponSlot
+		}
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 		return outcome
 	}
@@ -2083,6 +2097,9 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
+	if weaponSlot != "" {
+		res.Events[len(res.Events)-1].WeaponSlot = weaponSlot
+	}
 
 	if outcome.Damage > 0 {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
@@ -2167,7 +2184,7 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 		res.reject(in.MessageID, "invalid_direction")
 		return
 	}
-	if !s.consumeBasicAttack(in, res) {
+	if _, ok := s.consumeBasicAttack(in, res); !ok {
 		return
 	}
 	maxDistance := s.playerActionReach()
@@ -3532,6 +3549,9 @@ func (s *Sim) applyConeSkill(player *entity, skillID string, def SkillDef, targe
 			continue
 		}
 		outcome := s.damageMonsterByPlayerSkill(target, player.id, correlationID, res, s.resolvePlayerAttackDamage())
+		if def.Poison.DurationTicks > 0 && outcome.Damage > 0 && target.hp > 0 {
+			s.startPoisonDot(player, target, skillID, def, outcome.Damage, correlationID, res)
+		}
 		if target.hp <= 0 || outcome.Damage <= 0 {
 			continue
 		}

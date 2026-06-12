@@ -22,7 +22,8 @@ func _initialize() -> void:
 	var visuals: Dictionary = _read(shared.path_join("assets/item_visuals.v0.json"))["item_visuals"]
 	var item_rules: Dictionary = _read(shared.path_join("rules/items.v0.json"))["items"]
 	var item_templates: Dictionary = _read(shared.path_join("rules/item_templates.v0.json"))["templates"]
-	var presentations: Dictionary = _read(shared.path_join("assets/item_presentations.v0.json"))["items"]
+	var presentation_catalog := _read(shared.path_join("assets/item_presentations.v0.json"))
+	var presentations: Dictionary = _resolved_item_presentations(presentation_catalog)
 
 	var def_id := str(golden["item_def_id"])
 	if not visuals.has(def_id):
@@ -58,7 +59,7 @@ func _initialize() -> void:
 			_fail("item_presentations is missing item_def_id %s" % item_def_id)
 			return
 		var p: Dictionary = presentations[str(item_def_id)]
-		if not p.has("icon") or not p.has("ground"):
+		if not p.has("family") or not p.has("icon") or not p.has("ground"):
 			_fail("item_presentations %s must define icon and ground metadata" % item_def_id)
 			return
 	for item_def_id in item_templates.keys():
@@ -108,6 +109,24 @@ func _read(path: String) -> Dictionary:
 		_fail("invalid JSON in %s" % path)
 		return {}
 	return parsed
+
+
+func _resolved_item_presentations(catalog: Dictionary) -> Dictionary:
+	var families: Dictionary = catalog.get("families", {})
+	var items: Dictionary = catalog.get("items", {})
+	var resolved := {}
+	for item_def_id in items.keys():
+		var entry: Dictionary = items.get(item_def_id, {})
+		var family_id := str(entry.get("family", ""))
+		var family: Dictionary = families.get(family_id, {})
+		var presentation := family.duplicate(true)
+		for key in ["icon", "ground", "3d_model"]:
+			if entry.has(key):
+				var value = entry.get(key)
+				presentation[key] = (value as Dictionary).duplicate(true) if typeof(value) == TYPE_DICTIONARY else value
+		presentation["family"] = family_id
+		resolved[str(item_def_id)] = presentation
+	return resolved
 
 
 func _verify_equipped_fallback_resolver() -> bool:
@@ -244,6 +263,22 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		main.free()
 		return false
 	gold_node.free()
+
+	var root_path := ProjectSettings.globalize_path("res://")
+	main.asset_manifest = _read(root_path.path_join("../assets/manifests/assets.v0.json"))["assets"]
+	var sword_node := main._make_loot_node({"item_def_id": "rusty_sword", "rarity": "magic"})
+	var sword_model := sword_node.find_child("GroundModel_weapon_rusty_sword_v0", true, false) as Node3D
+	if sword_model == null:
+		_fail("equipment floor loot did not use manifest-backed ground model")
+		sword_node.free()
+		main.free()
+		return false
+	if absf(sword_model.scale.x - 0.25) > 0.001 or absf(sword_model.scale.y - 0.25) > 0.001 or absf(sword_model.scale.z - 0.25) > 0.001:
+		_fail("equipment floor loot model was not scaled to 25%%: %s" % str(sword_model.scale))
+		sword_node.free()
+		main.free()
+		return false
+	sword_node.free()
 
 	var loot_a := _make_labelled_loot_node()
 	var loot_b := _make_labelled_loot_node()

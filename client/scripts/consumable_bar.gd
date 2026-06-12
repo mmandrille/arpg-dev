@@ -4,6 +4,7 @@ extends Control
 signal intent_requested(intent_type: String, payload: Dictionary)
 
 const SLOT_COUNT := 10
+const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
 var inventory: Array = []
@@ -374,19 +375,8 @@ func _tooltip(item: Dictionary) -> String:
 func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var def_id := str(item.get("item_def_id", ""))
 	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
-	var shape := str(icon.get("shape", "box"))
-	var color := Color(str(icon.get("color", "#d8d0bd")))
-	var accent := Color(str(icon.get("accent", "#6b5420")))
 	var rect := Rect2(Vector2.ZERO, slot.size)
-	var center := rect.get_center()
-	var min_side = min(rect.size.x, rect.size.y)
-
-	match shape:
-		"potion":
-			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.13, -min_side * 0.05), Vector2(min_side * 0.26, min_side * 0.28)), color, true)
-			slot.draw_rect(Rect2(center + Vector2(-min_side * 0.08, -min_side * 0.22), Vector2(min_side * 0.16, min_side * 0.16)), accent, true)
-		_:
-			slot.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
+	ItemIconDrawerScript.draw(slot, rect, icon, "", false, 0.38, 16)
 
 
 func _panel_style() -> StyleBoxFlat:

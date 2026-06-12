@@ -1,23 +1,23 @@
 class_name ClassIcon
 extends Control
 
+static var _presentations: Dictionary = {}
+static var _loaded_presentations: bool = false
+
 var class_id: String = "barbarian"
+var shape: String = "axe"
 var fill_color := Color("#c85f3d")
 var accent_color := Color("#ffd9a8")
 
 
 func configure(next_class_id: String) -> void:
 	class_id = next_class_id
-	match class_id:
-		"sorcerer":
-			fill_color = Color("#5e8cff")
-			accent_color = Color("#dce7ff")
-		"paladin":
-			fill_color = Color("#d9b44a")
-			accent_color = Color("#fff3ba")
-		_:
-			fill_color = Color("#c85f3d")
-			accent_color = Color("#ffd9a8")
+	_ensure_presentations()
+	var presentation: Dictionary = _presentations.get(class_id, {})
+	var icon: Dictionary = presentation.get("icon", {})
+	shape = str(icon.get("shape", _fallback_shape(class_id)))
+	fill_color = Color(str(icon.get("color", _fallback_color(class_id))))
+	accent_color = Color(str(icon.get("accent", _fallback_accent(class_id))))
 	queue_redraw()
 
 
@@ -33,14 +33,59 @@ func _draw() -> void:
 	var center := rect.size * 0.5
 	var radius := min_side * 0.42
 	draw_circle(center, radius, Color(0.012, 0.012, 0.014, 0.94))
-	match class_id:
-		"sorcerer":
+	match shape:
+		"spark":
 			_draw_spark(center, radius)
-		"paladin":
+		"shield":
 			_draw_shield(center, radius)
 		_:
 			_draw_axe(center, radius)
 	draw_arc(center, radius, 0.0, TAU, 40, accent_color, 2.0, true)
+
+
+static func _ensure_presentations() -> void:
+	if _loaded_presentations:
+		return
+	_loaded_presentations = true
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/class_presentations.v0.json")
+	if not FileAccess.file_exists(path):
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		_presentations = parsed.get("classes", {})
+
+
+static func _fallback_shape(next_class_id: String) -> String:
+	match next_class_id:
+		"sorcerer":
+			return "spark"
+		"paladin":
+			return "shield"
+		_:
+			return "axe"
+
+
+static func _fallback_color(next_class_id: String) -> String:
+	match next_class_id:
+		"sorcerer":
+			return "#5e8cff"
+		"paladin":
+			return "#d9b44a"
+		_:
+			return "#c85f3d"
+
+
+static func _fallback_accent(next_class_id: String) -> String:
+	match next_class_id:
+		"sorcerer":
+			return "#dce7ff"
+		"paladin":
+			return "#fff3ba"
+		_:
+			return "#ffd9a8"
 
 
 func _draw_axe(center: Vector2, radius: float) -> void:

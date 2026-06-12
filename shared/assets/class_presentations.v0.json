@@ -1,0 +1,14 @@
+{
+  "version": 0,
+  "classes": {
+    "barbarian": {
+      "icon": { "label": "B", "shape": "axe", "color": "#c85f3d", "accent": "#ffd9a8" }
+    },
+    "sorcerer": {
+      "icon": { "label": "S", "shape": "spark", "color": "#5e8cff", "accent": "#dce7ff" }
+    },
+    "paladin": {
+      "icon": { "label": "P", "shape": "shield", "color": "#d9b44a", "accent": "#fff3ba" }
+    }
+  }
+}

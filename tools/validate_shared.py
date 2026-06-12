@@ -44,6 +44,7 @@ GOLDEN = SHARED / "golden"
 ASSETS = SHARED / "assets"
 CONTENT = SHARED / "content"
 I18N = SHARED / "i18n"
+ASSET_MANIFEST = ROOT / "assets" / "manifests" / "assets.v0.json"
 
 
 def load(path: Path):
@@ -214,6 +215,7 @@ def cross_checks(report: Report) -> None:
     ]
     skills = load(RULES / "skills.v0.json")
     skill_presentations = load(ASSETS / "skill_presentations.v0.json")
+    class_presentations = load(ASSETS / "class_presentations.v0.json")
     items = load(RULES / "items.v0.json")
     item_templates = load(RULES / "item_templates.v0.json")
     unique_items = load(RULES / "unique_items.v0.json")
@@ -542,6 +544,15 @@ def cross_checks(report: Report) -> None:
             report.fail("character_progression classes", "each class must have distinct starting stats")
         else:
             report.ok("character_progression classes are valid")
+    class_presentation_defs = class_presentations.get("classes", {})
+    missing_class_presentations = sorted(set(class_defs) - set(class_presentation_defs))
+    extra_class_presentations = sorted(set(class_presentation_defs) - set(class_defs))
+    if missing_class_presentations:
+        report.fail("class_presentations coverage", f"missing presentations for {missing_class_presentations}")
+    elif extra_class_presentations:
+        report.fail("class_presentations keys", f"unknown classes {extra_class_presentations}")
+    else:
+        report.ok("class presentations cover character classes")
 
     if character_progression["points_per_level"] <= 0:
         report.fail("character_progression points_per_level", "must be positive")
@@ -3109,12 +3120,34 @@ def cross_checks(report: Report) -> None:
 
     # presentation entry points at a missing item. This is client-only rendering
     # data, but drift would make loot/inventory presentation fall back silently.
-    presentations = load(ASSETS / "item_presentations.v0.json")["items"]
+    item_presentations = load(ASSETS / "item_presentations.v0.json")
+    manifest_assets = load(ASSET_MANIFEST)["assets"]
+    presentation_families = item_presentations["families"]
+    presentations = item_presentations["items"]
+    expected_families = {str(template.get("item_type", "")) for template in item_templates["templates"].values()}
+    expected_families |= {"gold", "quest", "health_potion", "mana_potion"}
+    missing_families = sorted(expected_families - set(presentation_families))
+    if missing_families:
+        report.fail("item presentation families", f"missing families: {missing_families}")
+    else:
+        report.ok("item presentation families cover every item family")
+    for family_id, family in sorted(presentation_families.items()):
+        model_id = family.get("3d_model")
+        if model_id and model_id not in manifest_assets:
+            report.fail("item presentation family 3d_model", f"{family_id}: unknown asset {model_id}")
+        elif model_id:
+            report.ok(f"item presentation family {family_id} 3d_model resolves")
     for def_id in sorted(presentations):
         if def_id not in items["items"] and def_id not in item_templates["templates"]:
             report.fail("item_presentations key", f"{def_id} not in items.v0.json or item_templates.v0.json")
+            continue
+        family_id = str(presentations[def_id].get("family", ""))
+        if family_id not in presentation_families:
+            report.fail("item_presentations family", f"{def_id}: unknown family {family_id}")
+        elif presentations[def_id].get("3d_model") and presentations[def_id]["3d_model"] not in manifest_assets:
+            report.fail("item_presentations 3d_model", f"{def_id}: unknown asset {presentations[def_id]['3d_model']}")
         else:
-            report.ok(f"item_presentations {def_id} resolves to item/template rules")
+            report.ok(f"item_presentations {def_id} resolves to item/template rules and family {family_id}")
     missing_presentations = sorted((set(items["items"]) | set(item_templates["templates"])) - set(presentations))
     if missing_presentations:
         report.fail("item_presentations coverage", f"missing entries: {missing_presentations}")

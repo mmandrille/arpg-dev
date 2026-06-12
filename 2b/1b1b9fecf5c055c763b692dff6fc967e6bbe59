@@ -1,0 +1,106 @@
+scripts/client_smoke.sh
+  s_9e5840f177c4bc::t_807c74a4a3f9ca 110
+.maintainability/file-size-baseline.tsv
+  s_9e5840f177c4bc::t_468ce26aa82e93 14,16,19
+shared/rules/skills.v0.schema.json
+  s_9e5840f177c4bc::t_cb2cb532301b3a 24
+shared/assets/skill_presentations.v0.schema.json
+  s_9e5840f177c4bc::t_cb2cb532301b3a 31
+client/tests/test_text_catalog.gd.uid
+  s_9e5840f177c4bc::t_9e23a9d9cdcb43 1
+client/scripts/character_select_panel.gd
+  s_9e5840f177c4bc::t_ab0589c9154c70 11,20,22,27,29,34,36,482-484,495-496,500-501,510,512,514,516,518,520,540-544
+docs/as-built/v90_text-catalog-foundation.md
+  s_9e5840f177c4bc::t_2b6c88a8ead46f 1-18,23-30,35-36,38-44
+  s_9e5840f177c4bc::t_fb9f7d60d58316 32-34,37
+  s_9e5840f177c4bc::t_468ce26aa82e93 19-22,31
+client/scripts/text_catalog.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 1-49
+client/scripts/skills_panel.gd
+  s_a539ce2bf87640::t_981dea8fb2be84 163-167,252-256
+  s_9e5840f177c4bc::t_ab0589c9154c70 479,509-511,526-528,675,677,679
+tools/bot/run.py
+  s_9e5840f177c4bc::t_acd3e8afb767fd 194
+  s_9e5840f177c4bc::t_dd842d964d78cf 36,197
+client/scripts/client_settings.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 5-6,67,69
+client/scripts/stat_labels.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 4-5,30-31
+client/scripts/text_catalog.gd.uid
+  s_9e5840f177c4bc::t_9e23a9d9cdcb43 1
+client/scripts/skill_bar.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 222,232
+client/scripts/pause_menu.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 4-5,50,55-58
+client/scripts/status_effects_bar.gd
+  s_9e5840f177c4bc::t_ab0589c9154c70 79
+shared/i18n/en.json
+  s_9e5840f177c4bc::t_d77a60777b2564 1-21,23-32,34,36,38-84
+  s_9e5840f177c4bc::t_69b6e03c3a3e4d 22,33,35,37
+docs/specs/v90_spec-text-catalog-foundation.md
+  s_9e5840f177c4bc::t_2b6c88a8ead46f 3
+  s_9e5840f177c4bc::t_096ac391d8549c 1-2,4-86
+client/scripts/skill_rules_loader.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 9,40-47
+shared/assets/skill_presentations.v0.json
+  s_9e5840f177c4bc::t_d77a60777b2564 12-13,24-25,36-37,47-48,58-59,69-70,80-81
+PROGRESS.md
+  s_9e5840f177c4bc::t_2b6c88a8ead46f 15,18,111,241,371-374
+tools/bot/scenarios/client/20_menu_create_join_flow.json
+  s_9e5840f177c4bc::t_6307086665383e 6,17
+client/scripts/settings_panel.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 4-5,91,108,116-117,120,130,140
+tools/bot/scenarios/45_class_second_combat_skills.json
+  s_9e5840f177c4bc::t_b97f728d1a69fc 8-15
+shared/i18n/i18n.v0.schema.json
+  s_9e5840f177c4bc::t_cb2cb532301b3a 1-22
+docs/plans/v90_2026-06-12-text-catalog-foundation.md
+  s_9e5840f177c4bc::t_468ce26aa82e93 50-53,139
+  s_9e5840f177c4bc::t_096ac391d8549c 1-2,4-42,44-45,48,55-63,67-76,80-96,101-111,115-127,134,143-153
+  s_9e5840f177c4bc::t_fb9f7d60d58316 140-142
+  s_9e5840f177c4bc::t_2b6c88a8ead46f 3,43,46-47,49,54,64-66,77-79,97-100,112-114,128-133,135-138
+client/scripts/main_menu.gd
+  s_9e5840f177c4bc::t_ad9ade1241bed4 4-5,48,54-57
+tools/validate_i18n.py
+  s_9e5840f177c4bc::t_470a4a76d046fb 1-50
+client/tests/test_skill_rules_loader.gd
+  s_9e5840f177c4bc::t_3a96f2d9ae616a 29-30,40-41
+tools/bot/debug_progression.py
+  s_9e5840f177c4bc::t_470a4a76d046fb 2-6,9-15
+  s_9e5840f177c4bc::t_dd842d964d78cf 1,7-8
+tools/validate_shared.py
+  s_9e5840f177c4bc::t_5505b8bff5088d 46,105-106,129,209,257
+  s_9e5840f177c4bc::t_470a4a76d046fb 29,37,256
+shared/rules/monsters.v0.schema.json
+  s_9e5840f177c4bc::t_cb2cb532301b3a 20
+client/tests/test_text_catalog.gd
+  s_9e5840f177c4bc::t_69b6e03c3a3e4d 1-37
+shared/rules/monsters.v0.json
+  s_9e5840f177c4bc::t_d77a60777b2564 10,14-18,26,30-34,42,46-50,58,62-66,73-74,78-82,90,93-94,102,105-106,114,117-118,126,130-133,135-139,147,153-155,157-162,170,176-178,180-183,186-189,197,203-205,207-212,220,226-228,230-235,243,247-251,259,263-267,275,279-283,290-292,296-297,299-304,311-313,317-318,320-325
+shared/rules/skills.v0.json
+  s_9e5840f177c4bc::t_d77a60777b2564 7-10,17-22,26-29,39-40,45-47,52-55,62-73,76-79,89-90,102-103,108-110,115-118,125-136,139-142,152-153,163-165,170-173,180-187,191-194,197-200,205-207,212-215,222-229,233-236,241-244,253-255,260-263,270-275,279-282,289-290,297-299,304-307,314-321,325-328,335-340,350-351
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2b1b1b9fecf5c055c763b692dff6fc967e6bbe59",
+  "prompts": {},
+  "sessions": {
+    "s_9e5840f177c4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb912-51bb-7052-bc31-6696387df364",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a539ce2bf87640": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb9ea-dd40-7542-a30a-c8c12e0b4bd0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+tools/validate_shared.py
+  s_9e5840f177c4bc::t_42387fd698cc89 29,37,262-263
+  s_9e5840f177c4bc::t_e2b9b15d17a458 210-214
+client/scripts/main.gd
+  s_9e5840f177c4bc::t_a7f76f01a8daa7 276,278,605-606,619-620,660-667,674-683
+tools/validate_i18n.py
+  s_9e5840f177c4bc::t_42387fd698cc89 38-54
+client/scripts/main_menu.gd
+  s_9e5840f177c4bc::t_cea21b7339afc7 12-13,49-53,59,67,80-100
+client/tests/test_coop_client.gd
+  s_9e5840f177c4bc::t_e2b9b15d17a458 383-384,397
+  s_9e5840f177c4bc::t_f110197633c10f 54
+  s_9e5840f177c4bc::t_bc83f16766f963 388,391-392,395-396,401-409
+docs/as-built/v91_spanish-language-selector.md
+  s_9e5840f177c4bc::t_4d83cf68b1bf17 1-24
+shared/i18n/es.json
+  s_9e5840f177c4bc::t_6a5c1d85c7cfc4 1-87
+shared/i18n/en.json
+  s_9e5840f177c4bc::t_6a5c1d85c7cfc4 82-85
+client/tests/test_text_catalog.gd
+  s_9e5840f177c4bc::t_bc83f16766f963 27-31
+client/scripts/settings_panel.gd
+  s_9e5840f177c4bc::t_cea21b7339afc7 11,15,18,21-24,35,42,79-86,106-109,122-125,151-167,182-192,198-225
+PROGRESS.md
+  s_9e5840f177c4bc::t_4d83cf68b1bf17 15,18,112,243,378-380
+client/scripts/text_catalog.gd
+  s_9e5840f177c4bc::t_7c114f1e1acdf3 6,9-10,16-17,26,32-54,59-60,68-73
+client/scripts/pause_menu.gd
+  s_9e5840f177c4bc::t_cea21b7339afc7 11-12,51-54,56-60,63,65,69-83
+docs/plans/v91_2026-06-12-spanish-language-selector.md
+  s_9e5840f177c4bc::t_4d83cf68b1bf17 26
+  s_9e5840f177c4bc::t_b9277fa51e1207 1-25,27-32
+client/scripts/client_settings.gd
+  s_9e5840f177c4bc::t_908937665b214d 11-12,28,75-86,117-122,129,137,153,201-205
+docs/specs/v91_spec-spanish-language-selector.md
+  s_9e5840f177c4bc::t_b9277fa51e1207 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f5df77bd2d1f74a7e8d29c941316c83cb4d7d3ab",
+  "prompts": {},
+  "sessions": {
+    "s_9e5840f177c4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb912-51bb-7052-bc31-6696387df364",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,80 @@
+tools/bot/run.py
+  s_5ef4c125d45464::t_f1d6e05561b61e 2102,2113-2118
+  s_5ef4c125d45464::t_9e7bfa3e9f802b 2221-2223,2401-2406
+shared/protocol/session_snapshot.v8.schema.json
+  s_5ef4c125d45464::t_a04834c40ae977 401
+server/internal/game/types.go
+  s_5ef4c125d45464::t_8403a8f7c5d248 388
+docs/specs/v100_spec-damage-types-and-resistances.md
+  s_5ef4c125d45464::t_888678e7a1d461 1-2,4-77
+  s_5ef4c125d45464::t_1ac43b0dea7498 3
+shared/rules/worlds.v0.json
+  s_5ef4c125d45464::t_ffef662a047863 379-398
+server/internal/game/damage_types.go
+  s_5ef4c125d45464::t_b86ed7af94f4d0 1-2,7,22-45,47-59,61-64,68-71,80,82,84-95
+  s_5ef4c125d45464::t_596a81d27ac95d 3-6,19
+  s_5ef4c125d45464::t_b8337d862b7ecb 8-18,20-21
+  s_5ef4c125d45464::t_069425918a6f38 46
+  s_5ef4c125d45464::t_e8c4eead8f4f8c 60,65-67
+  s_5ef4c125d45464::t_25833fe9e3a797 72-79,81,83
+server/internal/game/rogue_skills.go
+  s_5ef4c125d45464::t_c1c4366b3db3f9 179
+  s_5ef4c125d45464::t_25833fe9e3a797 258-259,276,278-279
+shared/i18n/en.json
+  s_5ef4c125d45464::t_ffef662a047863 84-85
+server/internal/game/rules.go
+  s_5ef4c125d45464::t_8403a8f7c5d248 464,504,668
+  s_5ef4c125d45464::t_f2eb67c29e6665 1156-1158,1393-1399
+  s_5ef4c125d45464::t_35bbf8dcdd04fd 2722-2724
+  s_5ef4c125d45464::t_1fd4150740d192 660-667,669-682
+shared/rules/skills.v0.schema.json
+  s_5ef4c125d45464::t_a04834c40ae977 26,109-111
+server/internal/game/handlers.go
+  s_5ef4c125d45464::t_5da4e97652a559 106
+tools/bot/scenarios/48_damage_types_and_resistances.json
+  s_5ef4c125d45464::t_c5eea71c7a8da2 13,45,53
+  s_5ef4c125d45464::t_f1d6e05561b61e 1-12,14-44,46-52,54-63
+docs/as-built/v100_damage-types-and-resistances.md
+  s_5ef4c125d45464::t_1ac43b0dea7498 1-39
+PROGRESS.md
+  s_5ef4c125d45464::t_1ac43b0dea7498 15,18,121,261,442-446
+shared/i18n/es.json
+  s_5ef4c125d45464::t_ffef662a047863 25-26
+shared/rules/monsters.v0.json
+  s_5ef4c125d45464::t_5aa13daadae9ee 201-203,227-229,259-287
+shared/rules/monsters.v0.schema.json
+  s_5ef4c125d45464::t_a04834c40ae977 29,62-78
+shared/rules/items.v0.schema.json
+  s_5ef4c125d45464::t_a04834c40ae977 33,190-193
+server/internal/game/sim.go
+  s_5ef4c125d45464::t_3288c36c74064c 4862,4869,4872-4873,4915,5013
+  s_5ef4c125d45464::t_8f9ab6afebe86e 2076,2080,2083,2087,2118-2121,2124,5442
+  s_5ef4c125d45464::t_8403a8f7c5d248 137,214
+  s_5ef4c125d45464::t_c1c4366b3db3f9 3576
+  s_5ef4c125d45464::t_1fd4150740d192 2200-2208,2210-2212,3147-3156,3158-3160,5008-5012,5014-5020
+  s_5ef4c125d45464::t_bc00f980df399c 2209,3157
+shared/rules/skills.v0.json
+  s_5ef4c125d45464::t_5aa13daadae9ee 7,59,129,390
+docs/plans/v100_2026-06-12-damage-types-and-resistances.md
+  s_5ef4c125d45464::t_b488a2b98e21ee 39-43,46-47,65-68,84-88,100-102
+  s_5ef4c125d45464::t_d79e8c982d1491 114-116,123-127
+  s_5ef4c125d45464::t_f04d1f984e2eb7 1-38,44-45,48-64,69-83,89-99,103-113,117-122
+server/internal/game/damage_types_test.go
+  s_5ef4c125d45464::t_d2db13edd4063c 1-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0f4561f7d5da2e7655cfe98a9665775c3159a8a2",
+  "prompts": {},
+  "sessions": {
+    "s_5ef4c125d45464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebcce-14fc-7791-855e-883bea5a95a1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

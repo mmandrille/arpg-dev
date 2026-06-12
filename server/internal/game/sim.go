@@ -3315,8 +3315,23 @@ func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast 
 			}
 			applications = append(applications, skillHealApplication{Target: target, Heal: heal})
 		}
+		if effect.IncludeCaster && player.hp < player.maxHP && !skillHealApplicationsContainTarget(applications, player.id) {
+			heal := healAmountForTarget(player, percent)
+			if heal > 0 {
+				applications = append(applications, skillHealApplication{Target: player, Heal: heal})
+			}
+		}
 	}
 	return applications, ""
+}
+
+func skillHealApplicationsContainTarget(applications []skillHealApplication, targetID uint64) bool {
+	for _, app := range applications {
+		if app.Target != nil && app.Target.id == targetID {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Sim) startAreaHealZones(player *entity, skillID string, def SkillDef, rank int, cast *CastSkillIntent, correlationID string) {

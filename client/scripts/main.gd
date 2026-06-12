@@ -1009,6 +1009,8 @@ func _apply_delta(p: Dictionary) -> void:
 				skill_bar.flash_cast()
 			if player_anim != null:
 				player_anim.play_one_shot("attack")
+			if ev.has("angle_degrees") and ev.has("range") and ev.has("direction"):
+				_spawn_skill_cone(ev)
 			continue
 		if event_type == "skill_cooldown_rejected" and eid == player_id:
 			_show_skill_rejected_feedback(str(ev.get("reason", "")))
@@ -1582,6 +1584,56 @@ func _spawn_heal_rain_at_position(world_position: Vector3) -> void:
 	effect.setup(HEAL_RAIN_RADIUS)
 	effect.position = world_position
 	add_child(effect)
+
+
+func _spawn_skill_cone(ev: Dictionary) -> void:
+	var pos := _vec2_from_dict(ev.get("position", {}))
+	var dir := _vec2_from_dict(ev.get("direction", {}))
+	if dir.length_squared() <= 0.0001:
+		return
+	dir = dir.normalized()
+	var radius := maxf(float(ev.get("range", 0.0)), 0.1)
+	var angle := deg_to_rad(clampf(float(ev.get("angle_degrees", 0.0)), 1.0, 360.0))
+	var segments := 18
+	var points := PackedVector3Array()
+	points.append(Vector3.ZERO)
+	var base_angle := atan2(dir.y, dir.x)
+	for i in range(segments + 1):
+		var t := -angle * 0.5 + angle * float(i) / float(segments)
+		var a := base_angle + t
+		points.append(Vector3(cos(a) * radius, 0.0, sin(a) * radius))
+	var vertices := PackedVector3Array()
+	for i in range(1, points.size() - 1):
+		vertices.append(points[0])
+		vertices.append(points[i])
+		vertices.append(points[i + 1])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.08, 0.03, 0.38)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.04, 0.02)
+	mat.emission_energy_multiplier = 1.4
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var wedge := MeshInstance3D.new()
+	wedge.name = "CleaveCone"
+	wedge.mesh = mesh
+	wedge.material_override = mat
+	wedge.position = Vector3(pos.x, 0.08, pos.y)
+	add_child(wedge)
+	var tween := wedge.create_tween()
+	tween.tween_property(wedge, "scale", Vector3.ONE * 1.03, 0.16)
+	tween.tween_callback(wedge.queue_free)
+
+
+func _vec2_from_dict(value) -> Vector2:
+	if value is Dictionary:
+		return Vector2(float(value.get("x", 0.0)), float(value.get("y", 0.0)))
+	return Vector2.ZERO
 
 
 func _node_for_entity_id(entity_id: String) -> Node3D:
@@ -4022,6 +4074,8 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	rec["base_tint"] = base_tint.to_html(false)
 	if not bool(rec.get("boss_telegraph_active", false)):
 		_apply_model_tint(node, base_tint)
+		if PlayerStatusEffectMarkers.has_ice_slow_effect(rec.get("effect_ids", [])):
+			_apply_model_tint(node, Color(0.62, 0.86, 1.0))
 	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
 	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []))

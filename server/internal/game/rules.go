@@ -505,6 +505,9 @@ type SkillDef struct {
 	Cost         SkillCostDef        `json:"cost"`
 	Damage       SkillDamageDef      `json:"damage"`
 	Projectile   SkillProjectileDef  `json:"projectile"`
+	Cone         SkillConeDef        `json:"cone"`
+	Slow         SkillSlowDef        `json:"slow"`
+	Shatter      SkillShatterDef     `json:"shatter"`
 	Effects      []SkillEffectDef    `json:"effects"`
 	Cooldown     SkillCooldownDef    `json:"cooldown"`
 }
@@ -555,6 +558,32 @@ type SkillProjectileDef struct {
 	Range  float64 `json:"range"`
 	Speed  float64 `json:"speed"`
 	Visual string  `json:"visual"`
+}
+
+// SkillConeDef defines a server-owned cone attack shape and push behavior.
+type SkillConeDef struct {
+	Range        float64 `json:"range"`
+	AngleDegrees float64 `json:"angle_degrees"`
+	PushMin      float64 `json:"push_min"`
+	PushMax      float64 `json:"push_max"`
+	DamageSource string  `json:"damage_source"`
+}
+
+// SkillSlowDef defines a stackable movement slow applied by cold skills.
+type SkillSlowDef struct {
+	EffectID      string `json:"effect_id"`
+	Percent       int    `json:"percent"`
+	DurationTicks int    `json:"duration_ticks"`
+	MaxPercent    int    `json:"max_percent"`
+}
+
+// SkillShatterDef defines secondary projectile fan-out after a cold hit.
+type SkillShatterDef struct {
+	MinShards int     `json:"min_shards"`
+	MaxShards int     `json:"max_shards"`
+	Range     float64 `json:"range"`
+	Speed     float64 `json:"speed"`
+	Visual    string  `json:"visual"`
 }
 
 // SkillEffectDef is a closed data contract for supported active-skill effects.
@@ -2627,7 +2656,7 @@ func validateSkillRules(skills map[string]SkillDef) error {
 
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "self_buff", "area_heal", "area_stat_buff":
+	case "projectile_attack", "cold_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff":
 		return true
 	default:
 		return false
@@ -2641,6 +2670,19 @@ func validateSkillKindPayload(skillID string, skill SkillDef) error {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for projectile_attack", skillID, skill.Targeting)
 		}
 		return validateProjectileSkillPayload(skillID, skill)
+	case "cold_projectile_attack":
+		if skill.Targeting != "direction_or_target" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for cold_projectile_attack", skillID, skill.Targeting)
+		}
+		if err := validateProjectileSkillPayload(skillID, skill); err != nil {
+			return err
+		}
+		return validateColdSkillPayload(skillID, skill)
+	case "cone_attack":
+		if skill.Targeting != "direction_or_target" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for cone_attack", skillID, skill.Targeting)
+		}
+		return validateConeSkillPayload(skillID, skill)
 	case "self_buff":
 		if skill.Targeting != "self" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for self_buff", skillID, skill.Targeting)
@@ -2682,6 +2724,47 @@ func validateProjectileSkillPayload(skillID string, skill SkillDef) error {
 	}
 	if len(skill.Effects) > 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.effects: projectile_attack does not support effects", skillID)
+	}
+	return nil
+}
+
+func validateConeSkillPayload(skillID string, skill SkillDef) error {
+	if skill.Cone.Range <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.cone.range: must be positive", skillID)
+	}
+	if skill.Cone.AngleDegrees <= 0 || skill.Cone.AngleDegrees > 360 {
+		return fmt.Errorf("game: invalid rules skills.%s.cone.angle_degrees: must be > 0 and <= 360", skillID)
+	}
+	if skill.Cone.PushMin < 0 || skill.Cone.PushMax < skill.Cone.PushMin {
+		return fmt.Errorf("game: invalid rules skills.%s.cone.push: min/max must be valid", skillID)
+	}
+	if skill.Cone.DamageSource != "weapon" {
+		return fmt.Errorf("game: invalid rules skills.%s.cone.damage_source: unsupported %s", skillID, skill.Cone.DamageSource)
+	}
+	if len(skill.Effects) > 0 || skill.Projectile.Range > 0 {
+		return fmt.Errorf("game: invalid rules skills.%s: cone_attack does not support effects or projectile", skillID)
+	}
+	return nil
+}
+
+func validateColdSkillPayload(skillID string, skill SkillDef) error {
+	if skill.Slow.EffectID == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.slow.effect_id: required", skillID)
+	}
+	if skill.Slow.Percent <= 0 || skill.Slow.Percent > 100 {
+		return fmt.Errorf("game: invalid rules skills.%s.slow.percent: must be between 1 and 100", skillID)
+	}
+	if skill.Slow.MaxPercent < skill.Slow.Percent || skill.Slow.MaxPercent > 100 {
+		return fmt.Errorf("game: invalid rules skills.%s.slow.max_percent: must be between percent and 100", skillID)
+	}
+	if skill.Slow.DurationTicks <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.slow.duration_ticks: must be positive", skillID)
+	}
+	if skill.Shatter.MinShards <= 0 || skill.Shatter.MaxShards < skill.Shatter.MinShards {
+		return fmt.Errorf("game: invalid rules skills.%s.shatter.shards: min/max must be valid", skillID)
+	}
+	if skill.Shatter.Range <= 0 || skill.Shatter.Speed <= 0 || skill.Shatter.Visual == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.shatter: range, speed, and visual are required", skillID)
 	}
 	return nil
 }

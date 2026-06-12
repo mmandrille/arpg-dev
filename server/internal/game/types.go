@@ -408,6 +408,10 @@ type Event struct {
 	RemainingTicks     *int                    `json:"remaining_ticks,omitempty"`
 	TotalTicks         *int                    `json:"total_ticks,omitempty"`
 	ProjectileDefID    string                  `json:"projectile_def_id,omitempty"`
+	Position           *Vec2                   `json:"position,omitempty"`
+	Direction          *Vec2                   `json:"direction,omitempty"`
+	Range              *float64                `json:"range,omitempty"`
+	AngleDegrees       *float64                `json:"angle_degrees,omitempty"`
 	Reason             string                  `json:"reason,omitempty"`
 	ShopID             string                  `json:"shop_id,omitempty"`
 	Offers             []ShopOfferView         `json:"offers,omitempty"`

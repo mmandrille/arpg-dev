@@ -52,8 +52,9 @@ func _run() -> void:
 	_assert_true("skills top is on screen", panel._panel.position.y >= 0.0)
 	stats_panel.queue_free()
 	_assert_eq("unspent skill points", int(state.get("unspent_skill_points", -1)), 1)
-	_assert_eq("class-filtered skill count", (state.get("skill_ids", []) as Array).size(), 1)
+	_assert_eq("class-filtered skill count", (state.get("skill_ids", []) as Array).size(), 2)
 	_assert_eq("sorcerer skill visible", str((state.get("skill_ids", []) as Array)[0]), "magic_bolt")
+	_assert_eq("sorcerer second skill visible", str((state.get("skill_ids", []) as Array)[1]), "ice_shard")
 	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
 	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "bolt")
@@ -209,9 +210,11 @@ func _remove_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute_path)
 
 
-func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false) -> Array:
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false) -> Array:
 	return [
+		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": 5, "can_spend": cleave_can_spend},
 		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": 5, "can_spend": magic_can_spend},
+		{"skill_id": "ice_shard", "rank": ice_shard_rank, "max_rank": 5, "can_spend": ice_shard_can_spend},
 		{"skill_id": "rage", "rank": rage_rank, "max_rank": 5, "can_spend": rage_can_spend},
 		{"skill_id": "heal", "rank": heal_rank, "max_rank": 5, "can_spend": heal_can_spend},
 		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": 5, "can_spend": holy_shield_can_spend},

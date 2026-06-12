@@ -26,6 +26,7 @@ func _run() -> void:
 		open_count["count"] = int(open_count["count"]) + 1
 	)
 
+	bar.set_skill_id("magic_bolt")
 	bar.set_skill_progression({
 		"unspent_skill_points": 0,
 		"skills": _skill_rows(0),
@@ -109,9 +110,12 @@ func _assert_false(label: String, value: bool) -> void:
 	_assert_true(label, not value)
 
 
-func _skill_rows(magic_rank: int, rage_rank: int = 0, heal_rank: int = 0) -> Array:
+func _skill_rows(magic_rank: int, rage_rank: int = 0, heal_rank: int = 0, cleave_rank: int = 0, ice_shard_rank: int = 0, holy_shield_rank: int = 0) -> Array:
 	return [
+		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": 5, "can_spend": false},
 		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": 5, "can_spend": false},
+		{"skill_id": "ice_shard", "rank": ice_shard_rank, "max_rank": 5, "can_spend": false},
 		{"skill_id": "rage", "rank": rage_rank, "max_rank": 5, "can_spend": false},
 		{"skill_id": "heal", "rank": heal_rank, "max_rank": 5, "can_spend": false},
+		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": 5, "can_spend": false},
 	]

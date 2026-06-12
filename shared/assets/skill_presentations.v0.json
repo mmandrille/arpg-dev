@@ -11,6 +11,27 @@
       "summary": "Projectile spell",
       "projectile_visual": "magic_bolt_projectile"
     },
+    "ice_shard": {
+      "icon": {
+        "label": "I",
+        "shape": "bolt",
+        "color": "#8fdcff",
+        "accent": "#effcff"
+      },
+      "summary": "Cold shattering projectile",
+      "projectile_visual": "ice_shard_projectile",
+      "effect_visual": "ice_slow"
+    },
+    "cleave": {
+      "icon": {
+        "label": "C",
+        "shape": "burst",
+        "color": "#c93830",
+        "accent": "#ffd4c9"
+      },
+      "summary": "Cone weapon attack",
+      "effect_visual": "cleave_cone"
+    },
     "rage": {
       "icon": {
         "label": "R",

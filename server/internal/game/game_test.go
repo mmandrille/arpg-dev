@@ -1034,6 +1034,115 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	assertAck(t, second, "cast_magic_again")
 }
 
+func TestCleaveDamagesConeTargetsAndPushes(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_cleave", "01", rules)
+	sim.progression.CharacterClass = "barbarian"
+	sim.progression.BaseStats.Str = 10
+	sim.progression.BaseStats.Vit = 10
+	sim.progression.SkillRanks["cleave"] = 1
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	player.mana = player.maxMana
+	for id, e := range sim.entities {
+		if e != nil && e.kind == monsterEntity {
+			delete(sim.entities, id)
+		}
+	}
+	front := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 2, Y: player.pos.Y}, hp: 20, maxHP: 20, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	side := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 2, Y: player.pos.Y + 2}, hp: 20, maxHP: 20, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	sim.entities[front.id] = front
+	sim.entities[side.id] = side
+	beforeX := front.pos.X
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_cleave",
+		CorrelationID: "corr_cleave",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "cleave", Direction: &Vec2{X: 1, Y: 0}},
+	}})
+	assertAck(t, cast, "cast_cleave")
+	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "monster_damaged") || !hasEvent(cast, "monster_pushed") {
+		t.Fatalf("cleave missing cast/damage/push events: %+v", cast.Events)
+	}
+	if front.hp >= 20 {
+		t.Fatalf("front monster hp = %d, want damaged", front.hp)
+	}
+	if front.pos.X <= beforeX {
+		t.Fatalf("front monster x = %.2f, want pushed beyond %.2f", front.pos.X, beforeX)
+	}
+	if side.hp != 20 {
+		t.Fatalf("side monster hp = %d, want untouched outside 50 degree cone", side.hp)
+	}
+	var castEvent *Event
+	for i := range cast.Events {
+		if cast.Events[i].EventType == "skill_cast" {
+			castEvent = &cast.Events[i]
+			break
+		}
+	}
+	if castEvent == nil || castEvent.Direction == nil || castEvent.Range == nil || castEvent.AngleDegrees == nil {
+		t.Fatalf("cleave cast event missing cone geometry: %+v", cast.Events)
+	}
+}
+
+func TestIceShardAlwaysHitsAppliesSlowAndSpawnsShards(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	skill := rules.Skills["ice_shard"]
+	skill.Damage.MinBase = 8
+	skill.Damage.MaxBase = 8
+	skill.Shatter.MinShards = 3
+	skill.Shatter.MaxShards = 3
+	rules.Skills["ice_shard"] = skill
+	sim := MustNewSim("sess_ice_shard", "01", rules)
+	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.BaseStats.Magic = 15
+	sim.progression.SkillRanks["ice_shard"] = 1
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	for id, e := range sim.entities {
+		if e != nil && e.kind == monsterEntity {
+			delete(sim.entities, id)
+		}
+	}
+	monster := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 5, Y: player.pos.Y}, hp: 30, maxHP: 30, monsterDefID: "combat_lab_blocking_target", lootTable: "no_drop"}
+	sim.entities[monster.id] = monster
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_ice",
+		CorrelationID: "corr_ice",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "ice_shard", TargetID: idStr(monster.id)},
+	}})
+	assertAck(t, cast, "cast_ice")
+	var impact TickResult
+	impactEvents := []Event{}
+	impactChanges := []Change{}
+	for i := 0; i < 30; i++ {
+		impact = sim.Tick(nil)
+		impactEvents = append(impactEvents, impact.Events...)
+		impactChanges = append(impactChanges, impact.Changes...)
+		if hasEvent(impact, "skill_effect_started") {
+			break
+		}
+	}
+	if !eventListHas(impactEvents, "monster_damaged") || !eventListHas(impactEvents, "skill_effect_started") {
+		t.Fatalf("ice shard impact missing damage/slow: %+v", impactEvents)
+	}
+	if !sameStringSlice(monster.effectIDs, []string{"ice_slow"}) {
+		t.Fatalf("monster effect ids = %v, want ice_slow", monster.effectIDs)
+	}
+	shards := 0
+	for _, change := range impactChanges {
+		if change.Op == OpEntitySpawn && change.Entity != nil && change.Entity.Type == projectileEntity && change.Entity.ProjectileDefID == "ice_shard_shard" {
+			shards++
+		}
+	}
+	if shards != 3 {
+		t.Fatalf("ice shard spawned %d shards, want 3; changes=%+v", shards, impactChanges)
+	}
+}
+
 func TestMagicBoltAutoNavigatesToCastRange(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	skill := rules.Skills[magicBoltSkillID]
@@ -8009,6 +8118,15 @@ func assertLevelChanged(t *testing.T, r TickResult, fromLevel, toLevel int) {
 
 func hasEvent(r TickResult, eventType string) bool {
 	for _, ev := range r.Events {
+		if ev.EventType == eventType {
+			return true
+		}
+	}
+	return false
+}
+
+func eventListHas(events []Event, eventType string) bool {
+	for _, ev := range events {
 		if ev.EventType == eventType {
 			return true
 		}

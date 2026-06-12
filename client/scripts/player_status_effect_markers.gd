@@ -2,6 +2,7 @@ extends RefCounted
 
 const HOLY_SHIELD_EFFECT_ID := "holy_shield"
 const RAGE_EFFECT_ID := "rage"
+const ICE_SLOW_EFFECT_ID := "ice_slow"
 
 const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
 const RAGE_MARKER_NAME := "RageVisualEffect"
@@ -46,6 +47,11 @@ static func sync_rage_effect(root: Node3D, active: bool) -> void:
 
 static func has_rage_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(RAGE_MARKER_NAME, false, false) != null
+
+
+static func has_ice_slow_effect(effect_ids_value) -> bool:
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	return effect_ids.has(ICE_SLOW_EFFECT_ID)
 
 
 static func pulse_holy_shield_aura(root: Node3D, affected_roots: Array, radius: float) -> void:

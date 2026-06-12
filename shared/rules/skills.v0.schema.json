@@ -23,13 +23,16 @@
         "name": { "type": "string", "minLength": 1 },
         "class": { "type": "string", "minLength": 1 },
         "tree": { "$ref": "#/$defs/tree_position" },
-        "kind": { "type": "string", "enum": ["projectile_attack", "self_buff", "area_heal", "area_stat_buff"] },
+        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff"] },
         "max_rank": { "type": "integer", "minimum": 1 },
         "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
         "cost": { "$ref": "#/$defs/cost" },
         "damage": { "$ref": "#/$defs/rank_linear_damage" },
         "projectile": { "$ref": "#/$defs/projectile" },
+        "cone": { "$ref": "#/$defs/cone" },
+        "slow": { "$ref": "#/$defs/slow" },
+        "shatter": { "$ref": "#/$defs/shatter" },
         "effects": {
           "type": "array",
           "minItems": 1,
@@ -42,6 +45,20 @@
           "if": { "properties": { "kind": { "const": "projectile_attack" } }, "required": ["kind"] },
           "then": {
             "required": ["damage", "projectile"],
+            "properties": { "targeting": { "const": "direction_or_target" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "cold_projectile_attack" } }, "required": ["kind"] },
+          "then": {
+            "required": ["damage", "projectile", "slow", "shatter"],
+            "properties": { "targeting": { "const": "direction_or_target" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "cone_attack" } }, "required": ["kind"] },
+          "then": {
+            "required": ["cone"],
             "properties": { "targeting": { "const": "direction_or_target" } }
           }
         },
@@ -154,6 +171,41 @@
       "required": ["range", "speed", "visual"],
       "additionalProperties": false,
       "properties": {
+        "range": { "type": "number", "exclusiveMinimum": 0 },
+        "speed": { "type": "number", "exclusiveMinimum": 0 },
+        "visual": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cone": {
+      "type": "object",
+      "required": ["range", "angle_degrees", "push_min", "push_max", "damage_source"],
+      "additionalProperties": false,
+      "properties": {
+        "range": { "type": "number", "exclusiveMinimum": 0 },
+        "angle_degrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
+        "push_min": { "type": "number", "minimum": 0 },
+        "push_max": { "type": "number", "minimum": 0 },
+        "damage_source": { "type": "string", "enum": ["weapon"] }
+      }
+    },
+    "slow": {
+      "type": "object",
+      "required": ["effect_id", "percent", "duration_ticks", "max_percent"],
+      "additionalProperties": false,
+      "properties": {
+        "effect_id": { "type": "string", "minLength": 1 },
+        "percent": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "max_percent": { "type": "integer", "minimum": 1, "maximum": 100 }
+      }
+    },
+    "shatter": {
+      "type": "object",
+      "required": ["min_shards", "max_shards", "range", "speed", "visual"],
+      "additionalProperties": false,
+      "properties": {
+        "min_shards": { "type": "integer", "minimum": 1 },
+        "max_shards": { "type": "integer", "minimum": 1 },
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "speed": { "type": "number", "exclusiveMinimum": 0 },
         "visual": { "type": "string", "minLength": 1 }

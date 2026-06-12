@@ -185,6 +185,16 @@ func _run() -> void:
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
 	_assert_true("inventory red potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines(inventory[1]), "Restores 5 HP"))
 	_assert_true("inventory blue potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines({"item_def_id": "blue_potion"}), "Restores 5 mana"))
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60, [{"slot_index": 0, "item_instance_id": "2003"}], 2)
+	inventory_panel._handle_shift_click(inventory[1])
+	_assert_eq("inventory shift click hotbar emitted count", inventory_emitted.size(), 1)
+	_assert_eq("inventory shift click hotbar emitted type", str(inventory_emitted[0]["type"]), "assign_hotbar_intent")
+	_assert_eq("inventory shift click hotbar slot", int(inventory_emitted[0]["payload"].get("slot_index", -1)), 1)
+	_assert_eq("inventory shift click hotbar item", str(inventory_emitted[0]["payload"].get("item_instance_id", "")), "2002")
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60, [{"slot_index": 0, "item_instance_id": "2003"}, {"slot_index": 1, "item_instance_id": "2002"}], 2)
+	inventory_panel._handle_shift_click(inventory[1])
+	_assert_eq("inventory shift click full belt emits no intent", inventory_emitted.size(), 1)
+	_assert_eq("inventory shift click full belt hint", inventory_panel._gesture_hint.text, "belt full")
 	var amulet := {
 		"item_instance_id": "2003",
 		"item_def_id": "cave_amulet",
@@ -245,6 +255,7 @@ func _run() -> void:
 	var potion_tooltip := inventory_panel._make_item_tooltip(inventory[1])
 	_assert_eq("inventory fixed tooltip computed gold value", potion_tooltip.debug_gold_value_text(), "5 gold")
 	potion_tooltip.queue_free()
+	inventory_emitted.clear()
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
 	inventory_panel._handle_drop_on_slot("bag", {
 		"source": "shop_offer",

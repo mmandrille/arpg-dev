@@ -14,34 +14,35 @@ import (
 )
 
 type starterLoadoutItem struct {
-	itemDefID string
-	slot      string
-	equipped  bool
-	rolled    bool
+	itemDefID     string
+	slot          string
+	equipped      bool
+	rolled        bool
+	hotbarSlotIdx *int
 }
 
 var starterLoadouts = map[string][]starterLoadoutItem{
 	"barbarian": {
 		{itemDefID: "starter_barbarian_axe", slot: "main_hand", equipped: true, rolled: true},
-		{itemDefID: "red_potion"},
-		{itemDefID: "blue_potion"},
+		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
+		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 	"sorcerer": {
 		{itemDefID: "starter_sorcerer_staff", slot: "main_hand", equipped: true, rolled: true},
-		{itemDefID: "red_potion"},
-		{itemDefID: "blue_potion"},
+		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
+		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 	"paladin": {
 		{itemDefID: "starter_paladin_sword", slot: "main_hand", equipped: true, rolled: true},
 		{itemDefID: "starter_paladin_shield", slot: "off_hand", equipped: true, rolled: true},
-		{itemDefID: "red_potion"},
-		{itemDefID: "blue_potion"},
+		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
+		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 	"rogue": {
 		{itemDefID: "starter_rogue_sword", slot: "main_hand", equipped: true, rolled: true},
 		{itemDefID: "starter_rogue_sword", slot: "off_hand", equipped: true, rolled: true},
-		{itemDefID: "red_potion"},
-		{itemDefID: "blue_potion"},
+		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
+		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 }
 
@@ -80,6 +81,11 @@ func (s *Server) ensureStarterLoadout(ctx context.Context, character store.Chara
 			RolledStats: rolledStats,
 		}); err != nil {
 			return err
+		}
+		if item.hotbarSlotIdx != nil {
+			if err := s.store.SetCharacterHotbarSlot(ctx, character.AccountID, character.ID, *item.hotbarSlotIdx, &itemID); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -129,4 +135,8 @@ func cloneIntMapHTTP(in map[string]int) map[string]int {
 		out[key] = value
 	}
 	return out
+}
+
+func intPtrHTTP(v int) *int {
+	return &v
 }

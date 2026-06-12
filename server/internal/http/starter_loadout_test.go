@@ -32,6 +32,11 @@ func TestCreatedCharactersReceiveClassStarterLoadouts(t *testing.T) {
 				t.Fatalf("list character items: %v", err)
 			}
 			assertStarterLoadoutItems(t, items, tc.mainHand, tc.offHand)
+			hotbar, err := db.ListCharacterHotbar(ctx, accountID, character.CharacterID)
+			if err != nil {
+				t.Fatalf("list character hotbar: %v", err)
+			}
+			assertStarterPotionHotbar(t, items, hotbar)
 		})
 	}
 }
@@ -74,5 +79,30 @@ func assertStarterLoadoutItems(t *testing.T, items []store.CharacterItemInstance
 	}
 	if countByDef["red_potion"] != 1 || countByDef["blue_potion"] != 1 {
 		t.Fatalf("potion counts = red %d blue %d, want 1/1 (items=%+v)", countByDef["red_potion"], countByDef["blue_potion"], items)
+	}
+}
+
+func assertStarterPotionHotbar(t *testing.T, items []store.CharacterItemInstance, hotbar []store.CharacterHotbarSlot) {
+	t.Helper()
+	itemIDByDef := map[string]string{}
+	for _, item := range items {
+		if item.ItemDefID == "red_potion" || item.ItemDefID == "blue_potion" {
+			itemIDByDef[item.ItemDefID] = item.ID
+		}
+	}
+	if itemIDByDef["red_potion"] == "" || itemIDByDef["blue_potion"] == "" {
+		t.Fatalf("starter potion IDs missing: %+v", items)
+	}
+	if len(hotbar) < 2 {
+		t.Fatalf("hotbar slots = %d, want at least 2", len(hotbar))
+	}
+	assertHotbarSlotItem(t, hotbar[0], itemIDByDef["red_potion"], "red_potion")
+	assertHotbarSlotItem(t, hotbar[1], itemIDByDef["blue_potion"], "blue_potion")
+}
+
+func assertHotbarSlotItem(t *testing.T, slot store.CharacterHotbarSlot, wantItemID, label string) {
+	t.Helper()
+	if slot.ItemInstanceID == nil || *slot.ItemInstanceID != wantItemID {
+		t.Fatalf("hotbar slot %d = %+v, want %s item %s", slot.SlotIndex, slot, label, wantItemID)
 	}
 }

@@ -132,6 +132,8 @@ type entity struct {
 	ownerID               uint64
 	targetID              uint64
 	projectileDefID       string
+	sourceSkillID         string
+	shardProjectile       bool
 	effectIDs             []string
 	dir                   Vec2
 	speed                 float64
@@ -905,6 +907,15 @@ func removeStringValue(in []string, value string) []string {
 		}
 	}
 	return out
+}
+
+func containsStringValue(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func normalizeSkillFunctionKeys(in []string) []string {
@@ -2057,6 +2068,46 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 	return outcome
 }
 
+func (s *Sim) damageMonsterByPlayerSkill(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
+	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
+	outcome := s.resolveSkillDamage(defenderStats, damageRange)
+	target.hp -= outcome.Damage
+	if target.hp < 0 {
+		target.hp = 0
+	}
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
+	if outcome.Damage > 0 {
+		s.aggroMonsterOnHit(target, playerID, corr, res)
+	}
+	if target.hp == 0 {
+		s.finishMonsterKill(target, playerID, corr, res)
+	}
+	s.retaliate(target, corr, res)
+	return outcome
+}
+
+func (s *Sim) resolveSkillDamage(defender effectiveCombatStats, damageRange DamageRange) combatResolution {
+	if damageRange.Max < damageRange.Min {
+		damageRange.Max = damageRange.Min
+	}
+	raw := s.rollRange(damageRange)
+	mitigated := raw - int(math.Round(defender.Armor))
+	finalDamage := mitigated
+	if finalDamage < s.rules.Combat.MinimumDamage {
+		finalDamage = s.rules.Combat.MinimumDamage
+	}
+	return combatResolution{
+		Outcome:         "hit",
+		Damage:          finalDamage,
+		RawDamage:       raw,
+		MitigatedDamage: mitigated,
+		Blocked:         false,
+		Critical:        false,
+		Hit:             true,
+	}
+}
+
 func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool) {
 	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
@@ -2921,6 +2972,10 @@ func skillDamageRange(def SkillDef, rank int) DamageRange {
 }
 
 func (s *Sim) skillCastDirection(def SkillDef, cast *CastSkillIntent, player *entity) (Vec2, uint64, string) {
+	return s.skillCastDirectionWithRange(def, cast, player, def.Projectile.Range)
+}
+
+func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, player *entity, castRange float64) (Vec2, uint64, string) {
 	if cast == nil || player == nil {
 		return Vec2{}, 0, "invalid_payload"
 	}
@@ -2929,7 +2984,7 @@ func (s *Sim) skillCastDirection(def SkillDef, cast *CastSkillIntent, player *en
 		if target == nil || target.kind != monsterEntity || target.hp <= 0 {
 			return Vec2{}, 0, "invalid_target"
 		}
-		if distance(player.pos, target.pos) > def.Projectile.Range+meleeRangeEpsilon {
+		if distance(player.pos, target.pos) > castRange+meleeRangeEpsilon {
 			return Vec2{}, 0, "target_out_of_range"
 		}
 		dir := normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
@@ -2965,6 +3020,7 @@ func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef,
 		speed:           def.Projectile.Speed,
 		maxDistance:     def.Projectile.Range,
 		damageRange:     skillDamageRange(def, rank),
+		sourceSkillID:   skillID,
 		sourceMsgID:     in.MessageID,
 		sourceCorrID:    in.CorrelationID,
 		spawnTick:       s.tick,
@@ -3233,6 +3289,79 @@ func (s *Sim) applyAreaStatBuff(player *entity, skillID string, rank int, applic
 			TotalTicks:     intPtr(totalTicks),
 		})
 	}
+}
+
+func (s *Sim) coneSkillTargets(player *entity, dir Vec2, cone SkillConeDef) []*entity {
+	targets := []*entity{}
+	if player == nil {
+		return targets
+	}
+	dir = normalize(dir)
+	if dir.X == 0 && dir.Y == 0 {
+		return targets
+	}
+	cosLimit := math.Cos(cone.AngleDegrees * math.Pi / 360.0)
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		target := s.activeLevel().entities[id]
+		if target == nil || target.kind != monsterEntity || target.hp <= 0 {
+			continue
+		}
+		toTarget := Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y}
+		dist := distance(player.pos, target.pos)
+		if dist > cone.Range+monsterRadius+meleeRangeEpsilon || dist <= meleeRangeEpsilon {
+			continue
+		}
+		targetDir := normalize(toTarget)
+		if targetDir.X*dir.X+targetDir.Y*dir.Y+0.000000001 < cosLimit {
+			continue
+		}
+		targets = append(targets, target)
+	}
+	return targets
+}
+
+func (s *Sim) applyConeSkill(player *entity, skillID string, def SkillDef, targets []*entity, correlationID string, res *TickResult) {
+	for _, target := range targets {
+		if target == nil || target.hp <= 0 {
+			continue
+		}
+		outcome := s.damageMonsterByPlayerSkill(target, player.id, correlationID, res, s.resolvePlayerAttackDamage())
+		if target.hp <= 0 || outcome.Damage <= 0 {
+			continue
+		}
+		push := s.rollFloatRange(def.Cone.PushMin, def.Cone.PushMax)
+		if push <= 0 {
+			continue
+		}
+		away := normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
+		if away.X == 0 && away.Y == 0 {
+			away = Vec2{X: 1}
+		}
+		before := target.pos
+		target.pos = s.resolveMonsterMovement(target, Vec2{X: away.X * push, Y: away.Y * push})
+		if target.pos != before {
+			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+			res.Events = append(res.Events, Event{
+				EventType:      "monster_pushed",
+				EntityID:       idStr(target.id),
+				SourceEntityID: idStr(player.id),
+				TargetEntityID: idStr(target.id),
+				CorrelationID:  correlationID,
+				SkillID:        skillID,
+				Amount:         intPtr(int(math.Round(push))),
+			})
+		}
+	}
+}
+
+func (s *Sim) rollFloatRange(minValue, maxValue float64) float64 {
+	if maxValue < minValue {
+		maxValue = minValue
+	}
+	if math.Abs(maxValue-minValue) <= 0.000001 {
+		return minValue
+	}
+	return minValue + s.rollUnitFloat()*(maxValue-minValue)
 }
 
 func (s *Sim) applyMovement(res *TickResult) {
@@ -3707,13 +3836,38 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 				continue
 			}
 		}
-		moveSpeed := def.effectiveMoveSpeed(nav)
+		moveSpeed := s.monsterMoveSpeed(monster, def, nav)
 		before := monster.pos
 		monster.pos = s.resolveMonsterMovement(monster, s.monsterMoveDelta(monster.pos, goal, steps, moveSpeed))
 		if monster.pos != before {
 			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(monster))})
 		}
 	}
+}
+
+func (s *Sim) monsterMoveSpeed(monster *entity, def MonsterDef, nav NavigationRules) float64 {
+	speed := def.effectiveMoveSpeed(nav)
+	if monster == nil || speed <= 0 {
+		return speed
+	}
+	slowPercent := 0
+	for _, stateKey := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[stateKey]
+		if effect.TargetID != monster.id || effect.EndsTick <= s.tick {
+			continue
+		}
+		if !containsStringValue(effect.Stats, "movement_speed") || effect.Percent <= slowPercent {
+			continue
+		}
+		slowPercent = effect.Percent
+	}
+	if slowPercent <= 0 {
+		return speed
+	}
+	if slowPercent > 95 {
+		slowPercent = 95
+	}
+	return speed * (1.0 - float64(slowPercent)/100.0)
 }
 
 func (s *Sim) advanceMonsterAttack(res *TickResult) {
@@ -4450,7 +4604,108 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
 		return
 	}
+	if p.sourceSkillID != "" {
+		s.resolveSkillProjectileMonsterHit(p, target, res)
+		return
+	}
 	s.damageMonsterByPlayer(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+}
+
+func (s *Sim) resolveSkillProjectileMonsterHit(p *entity, target *entity, res *TickResult) {
+	skillID := p.sourceSkillID
+	def, ok := s.rules.Skills[skillID]
+	if !ok {
+		s.damageMonsterByPlayerSkill(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+		return
+	}
+	outcome := s.damageMonsterByPlayerSkill(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+	if def.Kind != "cold_projectile_attack" || outcome.Damage <= 0 {
+		return
+	}
+	s.applyMonsterSlow(target, p.ownerID, skillID, def.Slow, p.sourceCorrID, res)
+	if p.shardProjectile || target.hp <= 0 {
+		return
+	}
+	s.spawnIceShardProjectiles(target, p.ownerID, skillID, def, outcome.Damage, p.sourceCorrID, res)
+}
+
+func (s *Sim) applyMonsterSlow(target *entity, sourceID uint64, skillID string, slow SkillSlowDef, correlationID string, res *TickResult) {
+	if target == nil || target.kind != monsterEntity || target.hp <= 0 || slow.DurationTicks <= 0 {
+		return
+	}
+	effectID := slow.EffectID
+	if effectID == "" {
+		effectID = skillID
+	}
+	stateKey := fmt.Sprintf("%s:%d", skillID, target.id)
+	current := 0
+	if existing, ok := s.skillEffects[stateKey]; ok && existing.EndsTick > s.tick {
+		current = existing.Percent
+	}
+	percent := current + slow.Percent
+	if percent > slow.MaxPercent {
+		percent = slow.MaxPercent
+	}
+	s.skillEffects[stateKey] = skillEffectState{
+		SkillID:    skillID,
+		TargetID:   target.id,
+		Stats:      []string{"movement_speed"},
+		Percent:    percent,
+		EffectID:   effectID,
+		EndsTick:   s.tick + uint64(slow.DurationTicks),
+		TotalTicks: slow.DurationTicks,
+	}
+	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+	res.Events = append(res.Events, Event{
+		EventType:      "skill_effect_started",
+		EntityID:       idStr(target.id),
+		SourceEntityID: idStr(sourceID),
+		TargetEntityID: idStr(target.id),
+		CorrelationID:  correlationID,
+		SkillID:        skillID,
+		Amount:         intPtr(percent),
+		RemainingTicks: intPtr(slow.DurationTicks),
+		TotalTicks:     intPtr(slow.DurationTicks),
+	})
+}
+
+func (s *Sim) spawnIceShardProjectiles(origin *entity, ownerID uint64, skillID string, def SkillDef, damage int, correlationID string, res *TickResult) {
+	if origin == nil || def.Shatter.MaxShards <= 0 {
+		return
+	}
+	count := def.Shatter.MinShards
+	if def.Shatter.MaxShards > def.Shatter.MinShards {
+		count += s.rng.IntN(def.Shatter.MaxShards - def.Shatter.MinShards + 1)
+	}
+	if count <= 0 {
+		return
+	}
+	shardDamage := damage / count
+	if shardDamage < 1 {
+		shardDamage = 1
+	}
+	for i := 0; i < count; i++ {
+		angle := s.rollUnitFloat() * 2 * math.Pi
+		dir := Vec2{X: math.Cos(angle), Y: math.Sin(angle)}
+		projectile := &entity{
+			kind:            projectileEntity,
+			pos:             origin.pos,
+			ownerID:         ownerID,
+			projectileDefID: def.Shatter.Visual,
+			sourceSkillID:   skillID,
+			shardProjectile: true,
+			dir:             dir,
+			speed:           def.Shatter.Speed,
+			maxDistance:     def.Shatter.Range,
+			damageRange:     DamageRange{Min: shardDamage, Max: shardDamage},
+			sourceCorrID:    correlationID,
+			spawnTick:       s.tick,
+		}
+		projectile.id = s.alloc()
+		s.activeLevel().entities[projectile.id] = projectile
+		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
+	}
 }
 
 func (s *Sim) resolveMonsterProjectileHit(p *entity, hit projectileHit, res *TickResult) {
@@ -4843,6 +5098,10 @@ func (s *Sim) rollChance(chance float64) bool {
 		return true
 	}
 	return float64(draw%10000)/10000.0 < chance
+}
+
+func (s *Sim) rollUnitFloat() float64 {
+	return float64(s.rng.Next()%1000000) / 1000000.0
 }
 
 func (s *Sim) combatEventType(defenderKind string, outcome combatResolution) string {

@@ -12,9 +12,9 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v88 — `skill-visual-rank-seeding` |
+| **Latest completed slice** | v89 — `class-second-combat-skills` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-12 (9 phases) |
+| **CI gate** | `make ci` green on 2026-06-12 |
 | **Next slice** | TBD |
 | **Last engineering review** | v80 — [`docs/reviews/20260611_v80-overview.md`](docs/reviews/20260611_v80-overview.md) (2026-06-11) |
 | **Next engineering review** | v90 (~every 10 slices) |
@@ -107,6 +107,7 @@ v85_* = skill-demo-catalog
 v86_* = skill-visual-command
 v87_* = skill-visual-matrix
 v88_* = skill-visual-rank-seeding
+v89_* = class-second-combat-skills
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -235,6 +236,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v86** | `skill-visual-command` | Complete (`make ci` green) | [`v86_spec-skill-visual-command.md`](docs/specs/v86_spec-skill-visual-command.md) | [`v86_2026-06-11-skill-visual-command.md`](docs/plans/v86_2026-06-11-skill-visual-command.md) | [`as-built`](docs/as-built/v86_skill-visual-command.md) |
 | **v87** | `skill-visual-matrix` | Complete (`make ci` green) | [`v87_spec-skill-visual-matrix.md`](docs/specs/v87_spec-skill-visual-matrix.md) | [`v87_2026-06-11-skill-visual-matrix.md`](docs/plans/v87_2026-06-11-skill-visual-matrix.md) | [`as-built`](docs/as-built/v87_skill-visual-matrix.md) |
 | **v88** | `skill-visual-rank-seeding` | Complete (`make ci` green) | — | — | [`as-built`](docs/as-built/v88_skill-visual-rank-seeding.md) |
+| **v89** | `class-second-combat-skills` | Complete (`make ci` green) | [`v89_spec-class-second-combat-skills.md`](docs/specs/v89_spec-class-second-combat-skills.md) | [`v89_2026-06-12-class-second-combat-skills.md`](docs/plans/v89_2026-06-12-class-second-combat-skills.md) | [`as-built`](docs/as-built/v89_class-second-combat-skills.md) |
 
 ---
 
@@ -358,6 +360,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Barbarian and Sorcerer now have second combat skills.** v89 adds Cleave as a
+server-owned cone weapon attack with pushback and Ice Shard as a cold projectile with stackable
+slow plus deterministic shard fan-out; skill visuals now list and replay both skills from the
+shared catalog.
 
 **Skill visual replays now seed requested rank directly.** v88 lets `make skill-visual
 skill=<id> rank=<n>` start from the requested class, minimum level/stats, and skill rank without

@@ -1148,8 +1148,10 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		return
 	}
 	switch def.Kind {
-	case "projectile_attack":
+	case "projectile_attack", "cold_projectile_attack":
 		s.handleProjectileSkillCast(in, res, player, skillID, def, rank, manaCost)
+	case "cone_attack":
+		s.handleConeSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "self_buff":
 		s.handleSelfBuffSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "area_heal":
@@ -1187,6 +1189,18 @@ func (s *Sim) appendSkillCastEvent(res *TickResult, player *entity, skillID stri
 	res.Events = append(res.Events, event)
 }
 
+func (s *Sim) appendConeSkillCastEvent(res *TickResult, player *entity, skillID string, rank int, manaCost int, correlationID string, targetID uint64, dir Vec2, cone SkillConeDef) {
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, correlationID, targetID, "")
+	if len(res.Events) == 0 {
+		return
+	}
+	event := &res.Events[len(res.Events)-1]
+	event.Position = cloneVec2Ptr(&player.pos)
+	event.Direction = cloneVec2Ptr(&dir)
+	event.Range = floatPtr(cone.Range)
+	event.AngleDegrees = floatPtr(cone.AngleDegrees)
+}
+
 func (s *Sim) appendSkillCooldownStartedEvent(res *TickResult, player *entity, skillID string, correlationID string, cooldownTicks int) {
 	res.Events = append(res.Events, Event{
 		EventType:      "skill_cooldown_started",
@@ -1217,6 +1231,33 @@ func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entit
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, skillID)
+	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleConeSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
+	dir, targetID, rejectReason := s.skillCastDirectionWithRange(def, in.CastSkill, player, def.Cone.Range)
+	if rejectReason != "" {
+		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
+			s.beginSkillAutoNav(in, res, def.Cone.Range, false)
+			return
+		}
+		res.reject(in.MessageID, rejectReason)
+		return
+	}
+	targets := s.coneSkillTargets(player, dir, def.Cone)
+	if len(targets) == 0 {
+		res.reject(in.MessageID, "no_valid_targets")
+		return
+	}
+
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	s.appendConeSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, dir, def.Cone)
+	s.applyConeSkill(player, skillID, def, targets, in.CorrelationID, res)
+	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)
 }

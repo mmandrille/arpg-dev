@@ -95,7 +95,7 @@ def rank_assertion(entry: SkillDemoEntry, rank: int) -> dict[str, Any]:
 
 def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
-    if entry.kind == "projectile_attack":
+    if entry.kind in {"projectile_attack", "cold_projectile_attack", "cone_attack"}:
         steps.extend([
             {"action": "move_until_player_position", "x": 4, "y": 5, "pathfind": True, "max_ticks": 220},
             {
@@ -126,7 +126,7 @@ def build_assertions(entry: SkillDemoEntry, rank: int = 1) -> list[dict[str, Any
         {"type": "event_seen", "event_type": "skill_cast", "skill_id": entry.skill_id, "rank": rank},
         rank_assertion(entry, rank),
     ]
-    if entry.kind == "projectile_attack":
+    if entry.kind in {"projectile_attack", "cold_projectile_attack", "cone_attack"}:
         assertions.append({"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1})
     elif entry.kind in {"self_buff", "area_stat_buff"}:
         assertions.append({"type": "event_seen", "event_type": "skill_effect_started", "skill_id": entry.skill_id})

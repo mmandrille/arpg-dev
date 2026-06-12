@@ -88,7 +88,9 @@ def all_skill_demo_entries(manifest_path: Path = MANIFEST_PATH) -> list[SkillDem
 
 def demo_category(skill: dict[str, Any]) -> str:
     kind = str(skill.get("kind", ""))
-    if kind == "projectile_attack":
+    if kind in {"projectile_attack", "cold_projectile_attack"}:
+        return "attack"
+    if kind == "cone_attack":
         return "attack"
     if kind == "area_heal":
         return "heal"

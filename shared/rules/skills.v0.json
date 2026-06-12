@@ -35,6 +35,82 @@
         "multiplier": 2.0
       }
     },
+    "ice_shard": {
+      "name": "Ice Shard",
+      "class": "sorcerer",
+      "tree": { "tier": 1, "column": 2 },
+      "kind": "cold_projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": { "magic": 5 },
+        "stats_per_rank": { "magic": 3 },
+        "skills": []
+      },
+      "cost": {
+        "mana": { "base": 6, "per_rank": 1 }
+      },
+      "damage": {
+        "type": "rank_linear_range",
+        "min_base": 3,
+        "max_base": 5,
+        "min_per_rank": 1,
+        "max_per_rank": 1
+      },
+      "projectile": {
+        "range": 18.0,
+        "speed": 10.0,
+        "visual": "ice_shard_projectile"
+      },
+      "slow": {
+        "effect_id": "ice_slow",
+        "percent": 25,
+        "duration_ticks": 60,
+        "max_percent": 75
+      },
+      "shatter": {
+        "min_shards": 2,
+        "max_shards": 5,
+        "range": 7.0,
+        "speed": 12.0,
+        "visual": "ice_shard_shard"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.0
+      }
+    },
+    "cleave": {
+      "name": "Cleave",
+      "class": "barbarian",
+      "tree": { "tier": 1, "column": 1 },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": { "str": 5, "vit": 5 },
+        "stats_per_rank": { "str": 1, "vit": 1 },
+        "skills": []
+      },
+      "cost": {
+        "mana": { "base": 8, "per_rank": 1 }
+      },
+      "cone": {
+        "range": 3.0,
+        "angle_degrees": 50.0,
+        "push_min": 1.0,
+        "push_max": 3.0,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.0
+      }
+    },
     "rage": {
       "name": "Rage",
       "class": "barbarian",

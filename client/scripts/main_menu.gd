@@ -11,6 +11,8 @@ signal exit_pressed
 var _button_labels: Array = []
 var _buttons_by_action: Dictionary = {}
 var _title: Label
+var _account_label: Label
+var _account_text: String = ""
 
 
 func _ready() -> void:
@@ -52,6 +54,12 @@ func _build() -> void:
 	_title.add_theme_color_override("font_color", Color("#f1efe4"))
 	box.add_child(_title)
 
+	_account_label = Label.new()
+	_account_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_account_label.add_theme_font_size_override("font_size", 16)
+	_account_label.add_theme_color_override("font_color", Color("#b9b4a7"))
+	box.add_child(_account_label)
+
 	box.add_child(_button(TextCatalogScript.get_text("menu.create_game", "Create Game"), create_game_pressed.emit, "create_game"))
 	box.add_child(_button(TextCatalogScript.get_text("menu.join_game", "Join Game"), join_game_pressed.emit, "join_game"))
 	box.add_child(_button(TextCatalogScript.get_text("menu.settings", "Settings"), settings_pressed.emit))
@@ -79,9 +87,19 @@ func available_actions() -> Array:
 	return ["create_game", "join_game", "settings", "exit"]
 
 
+func set_account_email(email: String) -> void:
+	_account_text = email.strip_edges()
+	if _account_label != null:
+		_account_label.text = _account_text
+		_account_label.visible = _account_text != ""
+
+
 func refresh_texts() -> void:
 	if _title != null:
 		_title.text = TextCatalogScript.get_text("app.title", "ARPG Dev")
+	if _account_label != null:
+		_account_label.text = _account_text
+		_account_label.visible = _account_text != ""
 	_set_button_text("create_game", TextCatalogScript.get_text("menu.create_game", "Create Game"))
 	_set_button_text("join_game", TextCatalogScript.get_text("menu.join_game", "Join Game"))
 	_set_button_text("settings", TextCatalogScript.get_text("menu.settings", "Settings"))

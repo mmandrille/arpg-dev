@@ -20,6 +20,7 @@ type devLoginRequest struct {
 
 type devLoginResponse struct {
 	AccountID   string `json:"account_id"`
+	Email       string `json:"email"`
 	AccessToken string `json:"access_token"`
 	ExpiresAt   string `json:"expires_at"`
 }
@@ -47,6 +48,7 @@ func (s *Server) handleDevLogin(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, devLoginResponse{
 		AccountID:   res.Account.ID,
+		Email:       res.Account.Email,
 		AccessToken: res.Token,
 		ExpiresAt:   res.ExpiresAt.UTC().Format(time.RFC3339),
 	})

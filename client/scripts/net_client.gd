@@ -14,6 +14,7 @@ var use_tls: bool
 
 var token: String = ""
 var account_id: String = ""
+var account_email: String = ""
 var session_id: String = ""
 var seed: String = ""
 var world_id: String = ""
@@ -90,6 +91,7 @@ func login(email: String, dev_token: String) -> bool:
 	if r.get("_code", 0) == 200 and r.has("body"):
 		token = r["body"]["access_token"]
 		account_id = r["body"]["account_id"]
+		account_email = str(r["body"].get("email", email))
 		return true
 	push_error("login failed: %s" % r)
 	return false

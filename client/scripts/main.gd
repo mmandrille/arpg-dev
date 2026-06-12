@@ -300,6 +300,8 @@ func _ready() -> void:
 		return
 	if bot_client_run:
 		print("[bot-client] login ok")
+	if main_menu != null:
+		main_menu.set_account_email(client.account_email)
 	visual_replay_manifest_path = _env("ARPG_VISUAL_REPLAY_MANIFEST", "")
 	visual_replay_enabled = visual_replay_manifest_path != ""
 	if visual_replay_enabled:
@@ -388,7 +390,27 @@ func _show_main_menu() -> void:
 	_hide_all_menus()
 	gameplay_active = false
 	if main_menu != null:
+		main_menu.set_account_email(_account_email())
 		main_menu.show_menu()
+
+
+func _raise_gameplay_windows() -> void:
+	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, character_stats_panel, skills_panel]:
+		if panel != null and panel is CanvasItem:
+			(panel as CanvasItem).move_to_front()
+
+
+func _account_email() -> String:
+	if client == null:
+		return ""
+	return client.account_email
+
+
+func _account_title(title: String) -> String:
+	var email := _account_email()
+	if email == "":
+		return title
+	return "%s - %s" % [title, email]
 
 
 func _hide_all_menus() -> void:
@@ -419,9 +441,9 @@ func _on_create_game_pressed() -> void:
 		if main_menu != null:
 			main_menu.visible = false
 		if characters.is_empty():
-			character_panel.show_forced_create("Create Character")
+			character_panel.show_forced_create(_account_title("Create Character"))
 		else:
-			character_panel.show_choose_or_create(characters, "Choose Character")
+			character_panel.show_choose_or_create(characters, _account_title("Choose Character"))
 
 
 func _on_join_game_pressed() -> void:
@@ -497,9 +519,9 @@ func _show_character_picker_for_flow(title: String = "Choose Character") -> void
 	if main_menu != null:
 		main_menu.visible = false
 	if characters.is_empty():
-		character_panel.show_forced_create("Create Character")
+		character_panel.show_forced_create(_account_title("Create Character"))
 	else:
-		character_panel.show_choose_or_create(characters, title)
+		character_panel.show_choose_or_create(characters, _account_title(title))
 
 
 func _on_character_create_requested(name: String, character_class: String = "barbarian") -> void:
@@ -533,9 +555,9 @@ func _refresh_character_panel_for_current_flow() -> void:
 		return
 	var characters := client.list_characters()
 	if characters.is_empty():
-		character_panel.show_forced_create("Create Character")
+		character_panel.show_forced_create(_account_title("Create Character"))
 	else:
-		character_panel.show_choose_or_create(characters, "Choose Character")
+		character_panel.show_choose_or_create(characters, _account_title("Choose Character"))
 
 
 func _start_selected_character(character_id: String) -> void:
@@ -2963,6 +2985,7 @@ func _build_scene() -> void:
 	add_child(light)
 
 	var ui := CanvasLayer.new()
+	ui.layer = 5
 	add_child(ui)
 	_debug_label = Label.new()
 	_debug_label.position = Vector2(12, 12)
@@ -3017,6 +3040,7 @@ func _build_scene() -> void:
 	_health_bar = PlayerHealthBarScript.new()
 	_refresh_player_hud_identity()
 	ui.add_child(_health_bar)
+	_raise_gameplay_windows()
 	_setup_menu_layer()
 
 	input_shadow = InputShadowOverlayScript.new()
@@ -5368,6 +5392,7 @@ func get_bot_state() -> Dictionary:
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
+		"account_email": _account_email(),
 		"main_menu_visible": main_menu != null and main_menu.visible,
 		"main_menu_button_labels": main_menu.button_labels() if main_menu != null else [],
 		"main_menu_actions": main_menu.available_actions() if main_menu != null else [],

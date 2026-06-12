@@ -8,6 +8,7 @@ import (
 const (
 	damageTypeForce     = "force"
 	damageTypeCold      = "cold"
+	damageTypeFire      = "fire"
 	damageTypePoison    = "poison"
 	damageTypeLightning = "lightning"
 )
@@ -21,7 +22,7 @@ func validateDamageType(label string, damageType string) error {
 
 func canonicalDamageType(damageType string) string {
 	switch damageType {
-	case damageTypeCold, damageTypePoison, damageTypeLightning:
+	case damageTypeCold, damageTypeFire, damageTypePoison, damageTypeLightning:
 		return damageType
 	default:
 		return damageTypeForce
@@ -31,6 +32,7 @@ func canonicalDamageType(damageType string) string {
 func validDamageType(damageType string) bool {
 	return damageType == damageTypeForce ||
 		damageType == damageTypeCold ||
+		damageType == damageTypeFire ||
 		damageType == damageTypePoison ||
 		damageType == damageTypeLightning
 }

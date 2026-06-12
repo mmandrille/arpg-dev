@@ -859,7 +859,7 @@ func _event_matches(step: Dictionary, event) -> bool:
 	if typeof(event) != TYPE_DICTIONARY:
 		return false
 	var ev := event as Dictionary
-	for key in ["outcome", "source_entity_id", "target_entity_id", "shop_id", "offer_id", "item_instance_id", "skill_id"]:
+	for key in ["outcome", "source_entity_id", "target_entity_id", "shop_id", "offer_id", "item_instance_id", "skill_id", "damage_type"]:
 		if step.has(key) and str(ev.get(key, "")) != str(step.get(key, "")):
 			return false
 	for key in ["damage", "raw_damage", "mitigated_damage", "price", "total_gold", "level", "from_level", "to_level", "rank", "mana", "remaining_ticks", "total_ticks", "amount", "unspent_skill_points"]:
@@ -912,6 +912,8 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 	if step.has("hp") and int(rec.get("hp", -999999)) != int(step.get("hp", 0)):
 		return false
 	if step.has("has_bow_marker") and bool(rec.get("has_bow_marker", false)) != bool(step.get("has_bow_marker", false)):
+		return false
+	if step.has("has_burning_effect") and bool(rec.get("has_burning_effect", false)) != bool(step.get("has_burning_effect", false)):
 		return false
 	if step.has("is_boss") and bool(rec.get("is_boss", false)) != bool(step.get("is_boss", false)):
 		return false

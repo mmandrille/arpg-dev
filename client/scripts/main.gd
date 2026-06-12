@@ -1108,6 +1108,13 @@ func _apply_delta(p: Dictionary) -> void:
 			if event_type == "skill_effect_ended":
 				_set_entity_poison_tint(eid, false)
 				continue
+		if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.BURNING_EFFECT_ID:
+			if event_type == "skill_effect_started":
+				_set_entity_burning(eid, true)
+				continue
+			if event_type == "skill_effect_ended":
+				_set_entity_burning(eid, false)
+				continue
 		if event_type == "skill_effect_started" and eid == player_id:
 			if status_effects_bar != null:
 				status_effects_bar.start_effect(ev)
@@ -4553,6 +4560,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
 	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []))
+	PlayerStatusEffectMarkers.sync_burning_effect(node, PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
 	_normalize_boss_phase_metadata(rec)
 	_sync_boss_telegraph_marker_from_record(rec)
 
@@ -4727,6 +4735,16 @@ func _set_entity_poison_tint(entity_id: String, active: bool) -> void:
 	_apply_entity_status_tint(rec)
 
 
+func _set_entity_burning(entity_id: String, active: bool) -> void:
+	var rec: Dictionary = entities.get(entity_id, {})
+	if rec.is_empty():
+		return
+	rec["burning"] = active
+	var node := rec.get("node", null) as Node3D
+	PlayerStatusEffectMarkers.sync_burning_effect(node, active)
+	_apply_entity_status_tint(rec)
+
+
 func _apply_entity_status_tint(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
 	if node == null or bool(rec.get("boss_telegraph_active", false)):
@@ -4734,6 +4752,8 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 	var tint := Color("#" + str(rec.get("base_tint", "ffffff")))
 	if PlayerStatusEffectMarkers.has_ice_slow_effect(rec.get("effect_ids", [])):
 		tint = Color(0.62, 0.86, 1.0)
+	if bool(rec.get("burning", false)) or PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])):
+		tint = Color(1.0, 0.38, 0.12)
 	if bool(rec.get("poisoned", false)):
 		tint = POISON_TINT
 	var reaction = rec.get("reaction", null)
@@ -5712,6 +5732,7 @@ func _bot_entities_presentation_debug() -> Array:
 			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
 			"effect_ids": rec.get("effect_ids", []),
 			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node),
+			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node),
 			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node),
 			"hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {},

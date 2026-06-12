@@ -67,6 +67,7 @@
       "properties": {
         "force": { "$ref": "#/$defs/resistance_value" },
         "cold": { "$ref": "#/$defs/resistance_value" },
+        "fire": { "$ref": "#/$defs/resistance_value" },
         "poison": { "$ref": "#/$defs/resistance_value" },
         "lightning": { "$ref": "#/$defs/resistance_value" }
       }

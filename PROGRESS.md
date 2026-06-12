@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v104 — `unique-drop-roll-contract` |
+| **Latest completed slice** | v105 — `unique-burn-effect-live` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | v105 — TBD |
+| **Next slice** | v106 — TBD |
 | **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
 | **Next engineering review** | v110 (~every 10 slices) |
 
@@ -123,6 +123,7 @@ v101_* = undead-skeleton-poison-immunity
 v102_* = class-bot-visual-scenarios
 v103_* = unique-effect-catalog-foundation
 v104_* = unique-drop-roll-contract
+v105_* = unique-burn-effect-live
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -267,6 +268,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v102** | `class-bot-visual-scenarios` | Complete (`make ci` green) | [`v102_spec-class-bot-visual-scenarios.md`](docs/specs/v102_spec-class-bot-visual-scenarios.md) | [`v102_2026-06-12-class-bot-visual-scenarios.md`](docs/plans/v102_2026-06-12-class-bot-visual-scenarios.md) | [`as-built`](docs/as-built/v102_class-bot-visual-scenarios.md) |
 | **v103** | `unique-effect-catalog-foundation` | Complete (`make ci` green) | [`v103_spec-unique-effect-catalog-foundation.md`](docs/specs/v103_spec-unique-effect-catalog-foundation.md) | [`v103_2026-06-12-unique-effect-catalog-foundation.md`](docs/plans/v103_2026-06-12-unique-effect-catalog-foundation.md) | [`as-built`](docs/as-built/v103_unique-effect-catalog-foundation.md) |
 | **v104** | `unique-drop-roll-contract` | Complete (`make ci` green) | [`v104_spec-unique-drop-roll-contract.md`](docs/specs/v104_spec-unique-drop-roll-contract.md) | [`v104_2026-06-12-unique-drop-roll-contract.md`](docs/plans/v104_2026-06-12-unique-drop-roll-contract.md) | [`as-built`](docs/as-built/v104_unique-drop-roll-contract.md) |
+| **v105** | `unique-burn-effect-live` | Complete (`make ci` green) | [`v105_spec-unique-burn-effect-live.md`](docs/specs/v105_spec-unique-burn-effect-live.md) | [`v105_2026-06-12-unique-burn-effect-live.md`](docs/plans/v105_2026-06-12-unique-burn-effect-live.md) | [`as-built`](docs/as-built/v105_unique-burn-effect-live.md) |
 
 ---
 

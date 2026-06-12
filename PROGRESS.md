@@ -12,7 +12,7 @@ Last updated: 2026-06-11
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v84 — `client-bot-step-registry` |
+| **Latest completed slice** | v85 — `skill-demo-catalog` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-11 (9 phases) |
 | **Next slice** | TBD |
@@ -103,6 +103,7 @@ v81_* = paladin-holy-shield
 v82_* = realtime-fanout-level-snapshot
 v83_* = defensive-client-envelope-payloads
 v84_* = client-bot-step-registry
+v85_* = skill-demo-catalog
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -227,6 +228,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v82** | `realtime-fanout-level-snapshot` | Complete (`make ci` green) | [`v82_spec-realtime-fanout-level-snapshot.md`](docs/specs/v82_spec-realtime-fanout-level-snapshot.md) | [`v82_2026-06-11-realtime-fanout-level-snapshot.md`](docs/plans/v82_2026-06-11-realtime-fanout-level-snapshot.md) | [`as-built`](docs/as-built/v82_realtime-fanout-level-snapshot.md) |
 | **v83** | `defensive-client-envelope-payloads` | Complete (`make ci` green) | [`v83_spec-defensive-client-envelope-payloads.md`](docs/specs/v83_spec-defensive-client-envelope-payloads.md) | [`v83_2026-06-11-defensive-client-envelope-payloads.md`](docs/plans/v83_2026-06-11-defensive-client-envelope-payloads.md) | [`as-built`](docs/as-built/v83_defensive-client-envelope-payloads.md) |
 | **v84** | `client-bot-step-registry` | Complete (`make ci` green) | [`v84_spec-client-bot-step-registry.md`](docs/specs/v84_spec-client-bot-step-registry.md) | [`v84_2026-06-11-client-bot-step-registry.md`](docs/plans/v84_2026-06-11-client-bot-step-registry.md) | [`as-built`](docs/as-built/v84_client-bot-step-registry.md) |
+| **v85** | `skill-demo-catalog` | Complete (`make ci` green) | [`v85_spec-skill-demo-catalog.md`](docs/specs/v85_spec-skill-demo-catalog.md) | [`v85_2026-06-11-skill-demo-catalog.md`](docs/plans/v85_2026-06-11-skill-demo-catalog.md) | [`as-built`](docs/as-built/v85_skill-demo-catalog.md) |
 
 ---
 

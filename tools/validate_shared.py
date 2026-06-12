@@ -219,6 +219,7 @@ def cross_checks(report: Report) -> None:
     items = load(RULES / "items.v0.json")
     item_templates = load(RULES / "item_templates.v0.json")
     unique_items = load(RULES / "unique_items.v0.json")
+    unique_effects = load(RULES / "unique_effects.v0.json")
     treasure_classes = load(RULES / "treasure_classes.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
@@ -3187,6 +3188,54 @@ def cross_checks(report: Report) -> None:
                 failed_uniques = True
         if not failed_uniques:
             report.ok("unique_items disabled seeds reference valid templates and behavior hooks")
+
+    template_item_types = {template.get("item_type") for template in item_templates["templates"].values()}
+    unique_effect_defs = unique_effects.get("effects", {})
+    if not unique_effect_defs:
+        report.fail("unique_effects catalog", "must define at least one unique effect")
+    else:
+        failed_unique_effects = False
+        supported_hooks = {"on_hero_damage_dealt", "on_basic_attack_hit", "on_equip_passive"}
+        for effect_id, effect in unique_effect_defs.items():
+            if effect.get("id") != effect_id:
+                report.fail("unique_effects id", f"{effect_id}: id field must match key")
+                failed_unique_effects = True
+            if effect.get("enabled") is not True or effect.get("status") != "ready":
+                report.fail("unique_effects status", f"{effect_id}: v103 effects must be ready and enabled")
+                failed_unique_effects = True
+            hook = effect.get("hook")
+            if hook not in supported_hooks:
+                report.fail("unique_effects hook", f"{effect_id}: unsupported hook {hook}")
+                failed_unique_effects = True
+            compatible_types = set(effect.get("compatible_item_types", []))
+            unknown_types = sorted(compatible_types - template_item_types)
+            if unknown_types:
+                report.fail("unique_effects compatibility", f"{effect_id}: unknown item types {unknown_types}")
+                failed_unique_effects = True
+            params = effect.get("params", {})
+            if hook == "on_hero_damage_dealt":
+                required_params = {
+                    "status_id",
+                    "damage_type",
+                    "tick_damage_percent_of_original_hit",
+                    "duration_seconds",
+                    "tick_interval_seconds",
+                }
+                missing = sorted(required_params - set(params))
+                if missing:
+                    report.fail("unique_effects burn params", f"{effect_id}: missing {missing}")
+                    failed_unique_effects = True
+                elif params.get("status_id") != "burning":
+                    report.fail("unique_effects burn params", f"{effect_id}: status_id must be burning")
+                    failed_unique_effects = True
+                elif params.get("tick_damage_percent_of_original_hit") != 10:
+                    report.fail("unique_effects burn params", f"{effect_id}: burn tick percent must be 10")
+                    failed_unique_effects = True
+                elif params.get("duration_seconds") != 10 or params.get("tick_interval_seconds") != 1:
+                    report.fail("unique_effects burn params", f"{effect_id}: burn must tick every second for 10 seconds")
+                    failed_unique_effects = True
+        if not failed_unique_effects:
+            report.ok("unique_effects ready effects define hooks, params, and valid item-type compatibility")
 
 
 def main() -> int:

@@ -4,6 +4,8 @@
 extends SceneTree
 
 const MainScript := preload("res://scripts/main.gd")
+const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
+const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -15,6 +17,8 @@ func _initialize() -> void:
 	_test_holy_shield_started_blinks_models_in_range()
 	_test_holy_shield_ended_clears_local_world_effect()
 	_test_unique_burn_started_and_ended_updates_monster_cue()
+	_test_potion_heal_uses_personal_effect()
+	_test_paladin_heal_uses_area_rain()
 
 	print("[gdtest] PASS: test_status_effect_presentation (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -172,11 +176,47 @@ func _test_unique_burn_started_and_ended_updates_monster_cue() -> void:
 	_free_main(main)
 
 
+func _test_potion_heal_uses_personal_effect() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._apply_delta({"events": [{
+		"event_type": "player_healed",
+		"entity_id": "1001",
+		"item_instance_id": "potion_1",
+		"heal": 5,
+	}], "changes": []})
+	_assert_eq("potion heal does not spawn area rain", _child_count(main, HealRainEffectScript), 0)
+	_assert_eq("potion heal spawns personal effect", _child_count(main, ConsumableHealEffectScript), 1)
+	_free_main(main)
+
+
+func _test_paladin_heal_uses_area_rain() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._apply_delta({"events": [{
+		"event_type": "player_healed",
+		"entity_id": "1001",
+		"skill_id": "heal",
+		"heal": 5,
+	}], "changes": []})
+	_assert_eq("paladin heal spawns area rain", _child_count(main, HealRainEffectScript), 1)
+	_assert_eq("paladin heal does not spawn potion effect", _child_count(main, ConsumableHealEffectScript), 0)
+	_free_main(main)
+
+
 func _free_main(main) -> void:
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
+
+
+func _child_count(root: Node, script: Script) -> int:
+	var count := 0
+	for child in root.get_children():
+		if child.get_script() == script:
+			count += 1
+	return count
 
 
 func _assert_eq(label: String, got, want) -> void:

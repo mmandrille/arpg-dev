@@ -108,7 +108,7 @@
       },
       "projectile": {
         "range": 18.0,
-        "speed": 10.0,
+        "speed": 7.0,
         "visual": "ligthing_projectile"
       },
       "chain": {

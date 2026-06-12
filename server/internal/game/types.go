@@ -414,10 +414,12 @@ type Event struct {
 	AngleDegrees       *float64                `json:"angle_degrees,omitempty"`
 	Reason             string                  `json:"reason,omitempty"`
 	ShopID             string                  `json:"shop_id,omitempty"`
+	Service            string                  `json:"service,omitempty"`
 	Offers             []ShopOfferView         `json:"offers,omitempty"`
 	SellAppraisals     []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
 	OfferID            string                  `json:"offer_id,omitempty"`
 	Price              *int                    `json:"price,omitempty"`
+	Affordable         *bool                   `json:"affordable,omitempty"`
 	RefreshKey         string                  `json:"refresh_key,omitempty"`
 	Item               *ItemView               `json:"item,omitempty"`
 	StashID            string                  `json:"stash_id,omitempty"`

@@ -2755,20 +2755,25 @@ def cross_checks(report: Report) -> None:
             transition = interactable.get("transition")
             shop_id = interactable.get("shop_id")
             stash_id = interactable.get("stash_id")
-            if sum([bool(transition), bool(shop_id), bool(stash_id)]) != 1:
-                report.fail("interactable action", f"{interactable_id}: ready interactable needs exactly one transition, shop_id, or stash_id")
+            service = interactable.get("service")
+            if sum([bool(transition), bool(shop_id), bool(stash_id), bool(service)]) != 1:
+                report.fail("interactable action", f"{interactable_id}: ready interactable needs exactly one transition, shop_id, stash_id, or service")
             elif transition and transition not in ("ascend", "descend", "waypoint"):
                 report.fail("interactable transition", f"{interactable_id}: unsupported transition {transition}")
             elif shop_id and shop_id not in shop_defs:
                 report.fail("interactable shop", f"{interactable_id}: unknown shop_id {shop_id}")
             elif stash_id and stash_id != "account_stash":
                 report.fail("interactable stash", f"{interactable_id}: unknown stash_id {stash_id}")
+            elif service and service != "bishop":
+                report.fail("interactable service", f"{interactable_id}: unsupported service {service}")
             elif "barrier_when_closed" in interactable:
                 report.fail("interactable barrier", f"{interactable_id}: ready interactable must not block")
             elif shop_id:
                 report.ok(f"interactable {interactable_id} ready shop is {shop_id}")
             elif stash_id:
                 report.ok(f"interactable {interactable_id} ready stash is {stash_id}")
+            elif service:
+                report.ok(f"interactable {interactable_id} ready service is {service}")
             else:
                 report.ok(f"interactable {interactable_id} ready transition is {transition}")
             continue

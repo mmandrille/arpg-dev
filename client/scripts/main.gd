@@ -19,6 +19,7 @@ const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
+const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
@@ -217,6 +218,7 @@ var walls_root: Node3D
 var inventory_panel: InventoryPanel
 var shop_panel: ShopPanel
 var stash_panel: StashPanel
+var bishop_panel: BishopPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
@@ -887,6 +889,8 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		shop_panel.show_status(reason.replace("_", " "), true)
 	elif stash_panel != null and stash_panel.visible:
 		stash_panel.show_status(reason.replace("_", " "), true)
+	elif bishop_panel != null and bishop_panel.visible:
+		bishop_panel.show_status(reason.replace("_", " "), true)
 
 
 func _apply_snapshot(p: Dictionary) -> void:
@@ -955,6 +959,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_hide_waypoint_panel()
 			_hide_shop_panel()
 			_hide_stash_panel()
+			_hide_bishop_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -1143,6 +1148,13 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "stash_gold_withdrawn" and stash_panel != null and stash_panel.visible:
 			stash_panel.show_status("Withdrew %d gold" % int(ev.get("amount", 0)))
+			continue
+		if event_type == "bishop_service_opened":
+			_show_bishop_panel(ev)
+			continue
+		if event_type == "bishop_respec" and bishop_panel != null and bishop_panel.visible:
+			bishop_panel.set_gold(gold)
+			bishop_panel.show_status("Respec complete")
 			continue
 		if event_type == "boss_killed":
 			_last_boss_reward_status = "%s defeated" % _boss_health_bar_title(str(ev.get("boss_template_id", "")))
@@ -1415,6 +1427,8 @@ func _refresh_inventory_ui() -> void:
 	if stash_panel != null and stash_panel.visible:
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
 		stash_panel.set_inventory_state(inventory, equipped, gold, hotbar)
+	if bishop_panel != null and bishop_panel.visible:
+		bishop_panel.set_gold(gold)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
@@ -2010,12 +2024,14 @@ func _is_skill_slot_key(event: InputEventKey) -> bool:
 
 
 func _close_gameplay_panels(except: String = "") -> void:
-	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory"]) and inventory_panel != null:
+	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop"]) and inventory_panel != null:
 		inventory_panel.hide_display()
 	if not (except in ["shop", "shop_with_inventory"]):
 		_hide_shop_panel()
 	if not (except in ["stash", "stash_with_inventory"]):
 		_hide_stash_panel()
+	if except != "bishop":
+		_hide_bishop_panel()
 	if not (except in ["stats", "skills", "inventory"]) and character_stats_panel != null:
 		character_stats_panel.hide_display()
 	if not (except in ["skills", "stats"]) and skills_panel != null:
@@ -2911,6 +2927,9 @@ func _build_scene() -> void:
 	stash_panel = StashPanelScript.new()
 	stash_panel.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(stash_panel)
+	bishop_panel = BishopPanelScript.new()
+	bishop_panel.respec_requested.connect(_on_bishop_respec_requested)
+	ui.add_child(bishop_panel)
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(consumable_bar)
@@ -3803,6 +3822,31 @@ func _hide_stash_panel() -> void:
 		stash_panel.hide_display()
 
 
+func _show_bishop_panel(ev: Dictionary) -> void:
+	if bishop_panel == null:
+		return
+	_close_gameplay_panels("bishop")
+	var next_entity_id := str(ev.get("entity_id", ""))
+	bishop_panel.show_bishop(
+		next_entity_id,
+		str(ev.get("service", "bishop")),
+		int(ev.get("price", 250)),
+		bool(ev.get("affordable", gold >= int(ev.get("price", 250)))),
+		gold
+	)
+
+
+func _hide_bishop_panel() -> void:
+	if bishop_panel != null:
+		bishop_panel.hide_display()
+
+
+func _on_bishop_respec_requested(bishop_entity_id: String) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":
+		return
+	client.send("bishop_respec_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+
+
 func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:
 		"town_vendor":
@@ -3839,6 +3883,10 @@ func _sync_actionable_panel_reach() -> void:
 		if not _panel_source_in_activation_range(stash_panel.stash_entity_id):
 			_hide_stash_panel()
 			closed_actionable = true
+	if bishop_panel != null and bishop_panel.visible:
+		if not _panel_source_in_activation_range(bishop_panel.bishop_entity_id):
+			_hide_bishop_panel()
+			closed_actionable = true
 	if closed_actionable:
 		_hide_inventory_if_no_actionable_panel()
 
@@ -3855,7 +3903,8 @@ func _hide_inventory_if_no_actionable_panel() -> void:
 		return
 	var shop_visible := shop_panel != null and shop_panel.visible
 	var stash_visible := stash_panel != null and stash_panel.visible
-	if not shop_visible and not stash_visible:
+	var bishop_visible := bishop_panel != null and bishop_panel.visible
+	if not shop_visible and not stash_visible and not bishop_visible:
 		inventory_panel.hide_display()
 
 
@@ -4108,6 +4157,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_chest_node(def_id)
 		if def_id == "town_vendor" or def_id == "town_mystery_seller":
 			return _make_merchant_node(def_id)
+		if def_id == "town_bishop":
+			return _make_bishop_node()
 		return _make_door_node()
 	if kind == "projectile":
 		return ProjectileVisualsScript.make_node(str(e.get("projectile_def_id", "")))
@@ -4683,6 +4734,34 @@ func _make_merchant_node(def_id: String) -> Node3D:
 	return root
 
 
+func _make_bishop_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "TownBishop"
+	var robe := Color("#b92d2d")
+	var robe_dark := Color("#621717")
+	var trim := Color("#f3d7a8")
+	var skin := Color("#c99666")
+	var gold_trim := Color("#d8a342")
+
+	_add_merchant_box(root, "BishopShadow", Vector3(0.92, 0.035, 0.78), Vector3(0.0, 0.018, 0.0), Color("#171313"))
+	_add_merchant_box(root, "RobeLower", Vector3(0.54, 0.62, 0.36), Vector3(0.0, 0.46, 0.0), robe_dark)
+	_add_merchant_box(root, "RobeUpper", Vector3(0.46, 0.58, 0.30), Vector3(0.0, 0.92, 0.0), robe)
+	_add_merchant_box(root, "Sash", Vector3(0.12, 0.68, 0.34), Vector3(0.0, 0.78, 0.02), trim)
+	_add_merchant_box(root, "Shoulders", Vector3(0.62, 0.12, 0.34), Vector3(0.0, 1.16, 0.0), robe_dark)
+	_add_merchant_box(root, "Head", Vector3(0.30, 0.30, 0.28), Vector3(0.0, 1.42, 0.0), skin)
+	_add_merchant_box(root, "MitreBase", Vector3(0.38, 0.16, 0.28), Vector3(0.0, 1.64, 0.0), robe)
+	_add_merchant_box(root, "MitrePeak", Vector3(0.24, 0.24, 0.20), Vector3(0.0, 1.84, 0.0), robe)
+	_add_merchant_box(root, "MitreTrim", Vector3(0.42, 0.06, 0.30), Vector3(0.0, 1.56, 0.0), trim)
+	_add_merchant_box(root, "LeftArm", Vector3(0.12, 0.50, 0.14), Vector3(-0.36, 0.86, 0.02), robe_dark)
+	_add_merchant_box(root, "RightArm", Vector3(0.12, 0.50, 0.14), Vector3(0.36, 0.86, 0.02), robe_dark)
+	_add_merchant_box(root, "LeftHand", Vector3(0.12, 0.10, 0.12), Vector3(-0.36, 0.56, 0.06), skin)
+	_add_merchant_box(root, "RightHand", Vector3(0.12, 0.10, 0.12), Vector3(0.36, 0.56, 0.06), skin)
+	_add_merchant_cylinder(root, "Staff", 0.035, 1.18, Vector3(0.55, 0.82, 0.02), Color("#5a351c"))
+	_add_merchant_cylinder(root, "StaffCrown", 0.11, 0.09, Vector3(0.55, 1.44, 0.02), gold_trim, true)
+	_add_merchant_box(root, "ServiceBook", Vector3(0.30, 0.08, 0.22), Vector3(-0.18, 0.58, 0.24), Color("#efe0bc"))
+	return root
+
+
 func _add_merchant_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
 	part.name = part_name
@@ -4956,6 +5035,7 @@ func get_bot_state() -> Dictionary:
 		"inventory_panel_visible": inventory_panel != null and inventory_panel.visible,
 		"shop_panel_visible": shop_panel != null and shop_panel.visible,
 		"stash_panel_visible": stash_panel != null and stash_panel.visible,
+		"bishop_panel_visible": bishop_panel != null and bishop_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
@@ -4963,6 +5043,7 @@ func get_bot_state() -> Dictionary:
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
 		"shop_panel": shop_panel.get_debug_state() if shop_panel != null else {},
 		"stash_panel": stash_panel.get_debug_state() if stash_panel != null else {},
+		"bishop_panel": bishop_panel.get_debug_state() if bishop_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
@@ -5249,6 +5330,12 @@ func bot_click_stash_withdraw_gold(amount: int = 1) -> void:
 	if stash_panel == null:
 		return
 	stash_panel.bot_click_withdraw_gold(amount)
+
+
+func bot_click_bishop_respec() -> void:
+	if bishop_panel == null:
+		return
+	bishop_panel.bot_click_respec()
 
 
 func bot_set_stash_search(text: String) -> void:

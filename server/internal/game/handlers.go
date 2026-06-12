@@ -45,6 +45,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"shop_buy_intent":             (*Sim).handleShopBuy,
 	"shop_sell_intent":            (*Sim).handleShopSell,
 	"shop_reroll_intent":          (*Sim).handleShopReroll,
+	"bishop_respec_intent":        (*Sim).handleBishopRespec,
 	"stash_deposit_item_intent":   (*Sim).handleStashDepositItem,
 	"stash_withdraw_item_intent":  (*Sim).handleStashWithdrawItem,
 	"stash_deposit_gold_intent":   (*Sim).handleStashDepositGold,
@@ -333,6 +334,52 @@ func (s *Sim) handleShopReroll(in Input, res *TickResult) {
 		TotalGold:     intPtr(s.gold),
 		RefreshKey:    state.RefreshKey,
 		Offers:        offers,
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleBishopRespec(in Input, res *TickResult) {
+	if in.BishopRespec == nil || in.BishopRespec.BishopEntityID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	bishopEntity, ok, reason := s.resolveBishopIntentTarget(in.BishopRespec.BishopEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	cost := s.respecCostGold()
+	if s.gold < cost {
+		res.reject(in.MessageID, "not_enough_gold")
+		return
+	}
+	s.gold -= cost
+	s.progression.Gold = s.gold
+	s.resetCharacterBuildForRespec()
+	player.maxHP = s.currentMaxHP()
+	player.maxMana = s.currentMaxMana()
+	healed, restored := s.restorePlayerResources(player, res)
+	s.skillCooldowns = make(map[string]skillCooldownState)
+
+	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
+	s.appendProgressionAndSkillUpdates(res)
+	s.appendSkillCooldownUpdate(res)
+	res.Events = append(res.Events, Event{
+		EventType:          "bishop_respec",
+		EntityID:           idStr(bishopEntity.id),
+		CorrelationID:      in.CorrelationID,
+		Service:            "bishop",
+		Heal:               intPtr(healed),
+		Mana:               intPtr(restored),
+		Price:              intPtr(cost),
+		TotalGold:          intPtr(s.gold),
+		UnspentStatPoints:  intPtr(s.progression.UnspentStatPoints),
+		UnspentSkillPoints: intPtr(s.progression.UnspentSkillPoints),
 	})
 	res.ack(in.MessageID)
 }

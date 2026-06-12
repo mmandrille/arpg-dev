@@ -44,6 +44,7 @@ type MainGameplayConfig struct {
 	BaseAttackIntervalTicks int     `json:"base_attack_interval_ticks"`
 	BaseMovementSpeed       float64 `json:"base_movement_speed"`
 	BaseDropRatePercent     int     `json:"base_drop_rate_percent"`
+	RespecCostGold          int     `json:"respec_cost_gold"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -629,6 +630,7 @@ type InteractableDef struct {
 	Transition        string               `json:"transition,omitempty"`
 	ShopID            string               `json:"shop_id,omitempty"`
 	StashID           string               `json:"stash_id,omitempty"`
+	Service           string               `json:"service,omitempty"`
 	BarrierWhenClosed *InteractableBarrier `json:"barrier_when_closed,omitempty"`
 }
 
@@ -897,6 +899,9 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.BaseDropRatePercent < 0 || mainConfig.Gameplay.BaseDropRatePercent > 100 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_drop_rate_percent: must be within [0,100]")
+	}
+	if mainConfig.Gameplay.RespecCostGold < 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.respec_cost_gold: must be non-negative")
 	}
 	r.MainConfig = MainConfig{Gameplay: mainConfig.Gameplay}
 
@@ -1512,6 +1517,9 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.StashID != "" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.stash_id: closed interactable must not declare stash_id", id)
 			}
+			if def.Service != "" {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.service: closed interactable must not declare service", id)
+			}
 			if def.BarrierWhenClosed != nil && (def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0) {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
 			}
@@ -1529,8 +1537,11 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.StashID != "" {
 				actionCount++
 			}
+			if def.Service != "" {
+				actionCount++
+			}
 			if actionCount != 1 {
-				return nil, fmt.Errorf("game: invalid rules interactables.%s: must declare exactly one of transition, shop_id, or stash_id", id)
+				return nil, fmt.Errorf("game: invalid rules interactables.%s: must declare exactly one of transition, shop_id, stash_id, or service", id)
 			}
 			if def.Transition != "" {
 				switch def.Transition {
@@ -1546,6 +1557,9 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 			if def.StashID != "" && def.StashID != "account_stash" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.stash_id: unknown stash %s", id, def.StashID)
+			}
+			if def.Service != "" && def.Service != "bishop" {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.service: unsupported service %s", id, def.Service)
 			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules interactables.%s.initial_state: unsupported state %s", id, def.InitialState)

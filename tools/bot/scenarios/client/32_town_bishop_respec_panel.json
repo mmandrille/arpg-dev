@@ -1,0 +1,15 @@
+{
+  "id": "town_bishop_respec_panel",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "v92_client_bishop_respec",
+  "title": "Town bishop respec panel",
+  "description": "Client opens the red town bishop service panel and verifies the respec option and unaffordable state.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_bishop" },
+    { "type": "wait_bishop_panel", "price": 250, "affordable": false, "respec_enabled": false, "timeout_s": 15.0 },
+    { "type": "assert_bishop_panel_visible", "visible": true },
+    { "type": "assert_bishop_panel", "price": 250, "service_id": "bishop", "affordable": false, "respec_enabled": false }
+  ]
+}

@@ -31,6 +31,7 @@
         "shop_buy_intent",
         "shop_sell_intent",
         "shop_reroll_intent",
+        "bishop_respec_intent",
         "stash_deposit_item_intent",
         "stash_withdraw_item_intent",
         "stash_deposit_gold_intent",
@@ -91,6 +92,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/shop_sell_intent" } } } },
     { "if": { "properties": { "type": { "const": "shop_reroll_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/shop_reroll_intent" } } } },
+    { "if": { "properties": { "type": { "const": "bishop_respec_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_respec_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_deposit_item_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_deposit_item_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_withdraw_item_intent" } } },
@@ -306,6 +309,14 @@
       "additionalProperties": false,
       "properties": {
         "shop_entity_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "bishop_respec_intent": {
+      "type": "object",
+      "required": ["bishop_entity_id"],
+      "additionalProperties": false,
+      "properties": {
+        "bishop_entity_id": { "$ref": "#/$defs/decimal_id" }
       }
     },
     "stash_deposit_item_intent": {

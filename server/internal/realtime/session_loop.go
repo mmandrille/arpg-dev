@@ -144,6 +144,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	sim.LoadDiscoveredTeleportersForPlayer(hostPlayerID, waypointLevels(hostStart.Waypoints))
 	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
 	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
+	h.loadCharacterCorpses(ctx, h.log, sim, host)
 	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
 	}
@@ -170,6 +171,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 		sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
+		h.loadCharacterCorpses(ctx, h.log, sim, member)
 		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
 		}
@@ -284,6 +286,7 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
+	l.hub.loadCharacterCorpses(context.Background(), l.log, l.sim, member)
 	l.mu.Unlock()
 	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 		l.log.Error("set late-joined member player", "account_id", member.AccountID, "character_id", member.CharacterID, "player_id", playerID, "error", err)
@@ -351,17 +354,17 @@ func (l *sessionLoop) snapshotEnvelope(playerID uint64) outEnvelope {
 
 func (l *sessionLoop) broadcastSnapshots() {
 	l.mu.Lock()
-		clients := make([]*loopClient, 0, len(l.clients))
-		membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
-		levelsByPlayerID := make(map[uint64]int, len(l.clients))
-		for _, client := range l.clients {
-			clients = append(clients, client)
-			membersByPlayerID[client.playerID] = client.member
-			if level, ok := l.sim.PlayerCurrentLevel(client.playerID); ok {
-				levelsByPlayerID[client.playerID] = level
-			}
+	clients := make([]*loopClient, 0, len(l.clients))
+	membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
+	levelsByPlayerID := make(map[uint64]int, len(l.clients))
+	for _, client := range l.clients {
+		clients = append(clients, client)
+		membersByPlayerID[client.playerID] = client.member
+		if level, ok := l.sim.PlayerCurrentLevel(client.playerID); ok {
+			levelsByPlayerID[client.playerID] = level
 		}
-		l.mu.Unlock()
+	}
+	l.mu.Unlock()
 	for _, client := range clients {
 		client.enqueue(l.snapshotEnvelope(client.playerID))
 	}
@@ -508,18 +511,18 @@ func (l *sessionLoop) doTick() {
 				delete(l.received, ack.MessageID)
 			}
 		}
+	}
+	clients := make([]*loopClient, 0, len(l.clients))
+	membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
+	levelsByPlayerID := make(map[uint64]int, len(l.clients))
+	for _, client := range l.clients {
+		clients = append(clients, client)
+		membersByPlayerID[client.playerID] = client.member
+		if level, ok := l.sim.PlayerCurrentLevel(client.playerID); ok {
+			levelsByPlayerID[client.playerID] = level
 		}
-		clients := make([]*loopClient, 0, len(l.clients))
-		membersByPlayerID := make(map[uint64]store.SessionMember, len(l.clients))
-		levelsByPlayerID := make(map[uint64]int, len(l.clients))
-		for _, client := range l.clients {
-			clients = append(clients, client)
-			membersByPlayerID[client.playerID] = client.member
-			if level, ok := l.sim.PlayerCurrentLevel(client.playerID); ok {
-				levelsByPlayerID[client.playerID] = level
-			}
-		}
-		l.mu.Unlock()
+	}
+	l.mu.Unlock()
 
 	l.hub.metrics.TickDuration.Observe(time.Since(start).Seconds())
 	for _, latency := range latencies {
@@ -615,7 +618,7 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 	out := make([]game.Event, 0, len(events))
 	for _, event := range events {
 		switch event.EventType {
-		case "level_changed", "shop_opened", "shop_purchase", "shop_sale", "stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn":
+		case "level_changed", "shop_opened", "shop_purchase", "shop_sale", "stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn", "corpse_opened", "corpse_item_recovered":
 			if actorPlayerID != clientPlayerID {
 				continue
 			}
@@ -658,7 +661,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 		}
 		if ev.EventType == "player_killed" {
 			if member, ok := killedEventMember(ev, membersByPlayerID); ok {
-				if err := l.hub.store.MarkCharacterDead(ctx, member.AccountID, member.CharacterID); err != nil && !errors.Is(err, store.ErrNotFound) {
+				if err := l.hub.store.MarkCharacterDead(ctx, member.AccountID, member.CharacterID, res.Level); err != nil && !errors.Is(err, store.ErrNotFound) {
 					l.hub.metrics.PersistenceErrors.Inc()
 					l.log.Error("persist character death", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
 				}
@@ -696,6 +699,14 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if _, _, err := l.hub.store.TransferAccountStashGoldToCharacter(ctx, member.AccountID, member.CharacterID, *ev.Amount); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist stash gold withdraw", "account_id", member.AccountID, "character_id", member.CharacterID, "amount", *ev.Amount, "error", err)
+			}
+		case "corpse_item_recovered":
+			if ev.CorpseCharacterID == "" || ev.StashItemID == "" || ev.ItemInstanceID == "" {
+				break
+			}
+			if _, err := l.hub.store.TransferCorpseItemToCharacter(ctx, member.AccountID, ev.CorpseCharacterID, member.CharacterID, ev.StashItemID, ev.ItemInstanceID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist corpse item recovery", "account_id", member.AccountID, "corpse_character_id", ev.CorpseCharacterID, "character_id", member.CharacterID, "corpse_item_id", ev.StashItemID, "item_instance_id", ev.ItemInstanceID, "error", err)
 			}
 		}
 		eventSequence++

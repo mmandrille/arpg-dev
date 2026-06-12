@@ -19,6 +19,7 @@ type Character struct {
 	Name           string
 	CharacterClass string
 	Dead           bool
+	DeathLevel     *int
 	CreatedAt      time.Time
 }
 
@@ -31,6 +32,7 @@ type CharacterSummary struct {
 	Name                string
 	CharacterClass      string
 	Dead                bool
+	DeathLevel          *int
 	Level               int
 	Gold                int
 	DeepestDungeonDepth int
@@ -105,6 +107,15 @@ type CharacterItemInstance struct {
 	RolledStats json.RawMessage
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+// CharacterCorpse is a dead character with recoverable inventory/equipment.
+type CharacterCorpse struct {
+	CharacterID string
+	Name        string
+	Level       int
+	DeathLevel  int
+	Items       []CharacterItemInstance
 }
 
 const (

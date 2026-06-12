@@ -109,6 +109,20 @@ func (s *Server) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 		if member.CharacterID != "" {
 			characterID = member.CharacterID
 		}
+		character, charErr := s.store.GetCharacter(ctx, characterID)
+		if errors.Is(charErr, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "session_not_found", "session not found")
+			return
+		}
+		if charErr != nil {
+			s.metrics.PersistenceErrors.Inc()
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not load character")
+			return
+		}
+		if character.Dead {
+			writeError(w, http.StatusConflict, "character_dead", "character is dead")
+			return
+		}
 		writeJSON(w, http.StatusOK, sessionResponse(sess, characterID, ""))
 		return
 	}

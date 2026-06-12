@@ -3238,6 +3238,9 @@ def cross_checks(report: Report) -> None:
                 elif params.get("status_id") != "burning":
                     report.fail("unique_effects burn params", f"{effect_id}: status_id must be burning")
                     failed_unique_effects = True
+                elif params.get("damage_type") != "fire":
+                    report.fail("unique_effects burn params", f"{effect_id}: damage_type must be fire")
+                    failed_unique_effects = True
                 elif params.get("tick_damage_percent_of_original_hit") != 10:
                     report.fail("unique_effects burn params", f"{effect_id}: burn tick percent must be 10")
                     failed_unique_effects = True

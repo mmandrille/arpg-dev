@@ -190,7 +190,7 @@
     },
     "damage_type": {
       "type": "string",
-      "enum": ["force", "cold", "poison", "lightning"]
+      "enum": ["force", "cold", "fire", "poison", "lightning"]
     }
   }
 }

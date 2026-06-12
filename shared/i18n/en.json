@@ -81,6 +81,8 @@
     "monster.dungeon_wolf.name": "Cave Wolf",
     "monster.dungeon_bat.name": "Cave Bat",
     "monster.combat_lab_soft_target.name": "Combat Lab Soft Target",
+    "monster.combat_lab_lightning_resistant.name": "Lightning Resistant Target",
+    "monster.combat_lab_lightning_weak.name": "Lightning Weak Target",
     "monster.combat_lab_armored_target.name": "Combat Lab Armored Target",
     "monster.combat_lab_blocking_target.name": "Combat Lab Blocking Target",
     "monster.combat_lab_crit_attacker.name": "Combat Lab Crit Attacker",

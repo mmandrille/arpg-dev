@@ -2099,6 +2099,7 @@ def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state:
         "entity_id",
         "skill_id",
         "weapon_slot",
+        "damage_type",
     ):
         if key in expected and event.get(key) != expected[key]:
             return False
@@ -2108,6 +2109,13 @@ def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state:
         ("min_mitigated_damage", "mitigated_damage"),
     ):
         if key in expected and int(event.get(event_key, -999999)) < int(expected[key]):
+            return False
+    for key, event_key in (
+        ("max_damage", "damage"),
+        ("max_raw_damage", "raw_damage"),
+        ("max_mitigated_damage", "mitigated_damage"),
+    ):
+        if key in expected and int(event.get(event_key, 999999)) > int(expected[key]):
             return False
     if not combat_event_entity_matches(event, expected, state, "source"):
         return False
@@ -2210,6 +2218,9 @@ def combat_event_entity_matches(
     if state is None:
         return False
     entity_id = str(event.get(f"{prefix}_entity_id", ""))
+    event_monster_def_id = str(event.get(f"{prefix}_monster_def_id", ""))
+    if "monster_def_id" in selector and event_monster_def_id:
+        return event_monster_def_id == str(selector["monster_def_id"])
     entity = state.entities.get(entity_id)
     if entity is None:
         return False
@@ -2387,7 +2398,12 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
         if event_type in {"bishop_service_opened", "bishop_respec"} and "total_gold" in ev:
             state.gold = int(ev.get("total_gold", state.gold))
         if event_type in {"monster_damaged", "player_damaged", "player_killed", "attack_missed", "attack_blocked"}:
-            state.combat_events.append(dict(ev))
+            combat_event = dict(ev)
+            for prefix in ("source", "target"):
+                entity = state.entities.get(str(ev.get(f"{prefix}_entity_id", "")))
+                if entity is not None and entity.get("monster_def_id"):
+                    combat_event[f"{prefix}_monster_def_id"] = str(entity["monster_def_id"])
+            state.combat_events.append(combat_event)
         if event_type == "skill_effect_started" and str(ev.get("skill_id", "")) == "poison_stab":
             target_id = str(ev.get("target_entity_id") or ev.get("entity_id") or "")
             if target_id:

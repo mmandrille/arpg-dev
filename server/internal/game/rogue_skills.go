@@ -176,7 +176,7 @@ func (s *Sim) applyDashSkill(player *entity, skillID string, def SkillDef, rank 
 			continue
 		}
 		beforeEvents := len(res.Events)
-		s.damageMonsterByPlayerSkill(target, player.id, correlationID, res, damageRange)
+		s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, damageRange, s.skillDamageType(def))
 		for i := beforeEvents; i < len(res.Events); i++ {
 			if res.Events[i].EventType == "monster_damaged" && res.Events[i].TargetEntityID == idStr(target.id) {
 				res.Events[i].SkillID = skillID
@@ -255,7 +255,8 @@ func (s *Sim) advancePoisonDots(res *TickResult) {
 		if s.tick < dot.NextTick {
 			continue
 		}
-		damage := dot.DamagePerTick
+		rawDamage := dot.DamagePerTick
+		damage := s.applyResistanceToDamage(rawDamage, s.monsterResistance(target, damageTypePoison))
 		if damage > target.hp {
 			damage = target.hp
 		}
@@ -272,9 +273,10 @@ func (s *Sim) advancePoisonDots(res *TickResult) {
 			SkillID:         dot.SkillID,
 			Rank:            intPtr(dot.Rank),
 			Damage:          intPtr(damage),
+			DamageType:      damageTypePoison,
 			Outcome:         "hit",
-			RawDamage:       intPtr(damage),
-			MitigatedDamage: intPtr(damage),
+			RawDamage:       intPtr(rawDamage),
+			MitigatedDamage: intPtr(rawDamage),
 		})
 		if target.hp == 0 {
 			s.finishMonsterKill(target, dot.SourcePlayerID, dot.CorrelationID, res)

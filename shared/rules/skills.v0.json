@@ -4,6 +4,7 @@
     "magic_bolt": {
       "name": "Magic Bolt",
       "class": "sorcerer",
+      "damage_type": "force",
       "tree": {
         "tier": 1,
         "column": 1
@@ -55,6 +56,7 @@
     "ice_shard": {
       "name": "Ice Shard",
       "class": "sorcerer",
+      "damage_type": "cold",
       "tree": {
         "tier": 2,
         "column": 1
@@ -124,6 +126,7 @@
     "ligthing": {
       "name": "Ligthing",
       "class": "sorcerer",
+      "damage_type": "lightning",
       "tree": {
         "tier": 2,
         "column": 2
@@ -384,6 +387,7 @@
     "poison_stab": {
       "name": "Poison Stab",
       "class": "rogue",
+      "damage_type": "poison",
       "tree": {
         "tier": 1,
         "column": 1

@@ -134,6 +134,7 @@ type entity struct {
 	targetID              uint64
 	projectileDefID       string
 	sourceSkillID         string
+	sourceDamageType      string
 	shardProjectile       bool
 	effectIDs             []string
 	dir                   Vec2
@@ -210,6 +211,7 @@ type effectiveCombatStats struct {
 type combatResolution struct {
 	Outcome         string
 	Damage          int
+	DamageType      string
 	RawDamage       int
 	MitigatedDamage int
 	Blocked         bool
@@ -2071,17 +2073,18 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 	if ack {
 		res.ack(in.MessageID)
 	}
-	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), weaponSlot)
+	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), s.playerWeaponDamageTypeForSlot(weaponSlot), weaponSlot)
 }
 
 func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
-	return s.damageMonsterByPlayerWithSlot(target, playerID, corr, res, damageRange, "")
+	return s.damageMonsterByPlayerWithSlot(target, playerID, corr, res, damageRange, damageTypeForce, "")
 }
 
-func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, weaponSlot string) combatResolution {
+func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, damageType string, weaponSlot string) combatResolution {
 	attackerStats, _ := s.playerEffectiveCombatStats()
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
+	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
 	if !outcome.Hit || outcome.Blocked {
 		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
 		if weaponSlot != "" {
@@ -2112,8 +2115,13 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 }
 
 func (s *Sim) damageMonsterByPlayerSkill(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
+	return s.damageMonsterByPlayerSkillTyped(target, playerID, corr, res, damageRange, damageTypeForce)
+}
+
+func (s *Sim) damageMonsterByPlayerSkillTyped(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, damageType string) combatResolution {
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveSkillDamage(defenderStats, s.applySkillDamageBonus(damageRange))
+	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
 	target.hp -= outcome.Damage
 	if target.hp < 0 {
 		target.hp = 0
@@ -2189,18 +2197,19 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 	}
 	maxDistance := s.playerActionReach()
 	projectile := &entity{
-		kind:            projectileEntity,
-		pos:             player.pos,
-		ownerID:         player.id,
-		targetID:        targetID,
-		projectileDefID: trainingArrowProjectileDefID,
-		dir:             dir,
-		speed:           projectileSpeed,
-		maxDistance:     maxDistance,
-		damageRange:     s.resolvePlayerAttackDamage(),
-		sourceMsgID:     in.MessageID,
-		sourceCorrID:    in.CorrelationID,
-		spawnTick:       s.tick,
+		kind:             projectileEntity,
+		pos:              player.pos,
+		ownerID:          player.id,
+		targetID:         targetID,
+		projectileDefID:  trainingArrowProjectileDefID,
+		dir:              dir,
+		speed:            projectileSpeed,
+		maxDistance:      maxDistance,
+		damageRange:      s.resolvePlayerAttackDamage(),
+		sourceDamageType: s.playerWeaponDamageTypeForSlot(mainHandSlot),
+		sourceMsgID:      in.MessageID,
+		sourceCorrID:     in.CorrelationID,
+		spawnTick:        s.tick,
 	}
 	projectile.id = s.alloc()
 	s.activeLevel().entities[projectile.id] = projectile
@@ -3135,19 +3144,20 @@ func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, p
 func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef, rank int, dir Vec2, targetID uint64, in Input) *entity {
 	damageRange := s.scaleSkillDamageForMagic(def, rank, skillDamageRange(def, rank))
 	projectile := &entity{
-		kind:            projectileEntity,
-		pos:             player.pos,
-		ownerID:         player.id,
-		targetID:        targetID,
-		projectileDefID: skillID,
-		dir:             normalize(dir),
-		speed:           def.Projectile.Speed,
-		maxDistance:     def.Projectile.Range,
-		damageRange:     damageRange,
-		sourceSkillID:   skillID,
-		sourceMsgID:     in.MessageID,
-		sourceCorrID:    in.CorrelationID,
-		spawnTick:       s.tick,
+		kind:             projectileEntity,
+		pos:              player.pos,
+		ownerID:          player.id,
+		targetID:         targetID,
+		projectileDefID:  skillID,
+		dir:              normalize(dir),
+		speed:            def.Projectile.Speed,
+		maxDistance:      def.Projectile.Range,
+		damageRange:      damageRange,
+		sourceSkillID:    skillID,
+		sourceDamageType: s.skillDamageType(def),
+		sourceMsgID:      in.MessageID,
+		sourceCorrID:     in.CorrelationID,
+		spawnTick:        s.tick,
 	}
 	projectile.id = s.alloc()
 	s.activeLevel().entities[projectile.id] = projectile
@@ -3563,7 +3573,7 @@ func (s *Sim) applyConeSkill(player *entity, skillID string, def SkillDef, targe
 		if target == nil || target.hp <= 0 {
 			continue
 		}
-		outcome := s.damageMonsterByPlayerSkill(target, player.id, correlationID, res, s.resolvePlayerAttackDamage())
+		outcome := s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, s.resolvePlayerAttackDamage(), s.skillDamageType(def))
 		if def.Poison.DurationTicks > 0 && outcome.Damage > 0 && target.hp > 0 {
 			s.startPoisonDot(player, target, skillID, def, outcome.Damage, correlationID, res)
 		}
@@ -4849,17 +4859,18 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		s.resolveSkillProjectileMonsterHit(p, target, res)
 		return
 	}
-	s.damageMonsterByPlayer(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+	s.damageMonsterByPlayerWithSlot(target, p.ownerID, p.sourceCorrID, res, p.damageRange, p.sourceDamageType, "")
 }
 
 func (s *Sim) resolveSkillProjectileMonsterHit(p *entity, target *entity, res *TickResult) {
 	skillID := p.sourceSkillID
 	def, ok := s.rules.Skills[skillID]
 	if !ok {
-		s.damageMonsterByPlayerSkill(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+		s.damageMonsterByPlayerSkillTyped(target, p.ownerID, p.sourceCorrID, res, p.damageRange, p.sourceDamageType)
 		return
 	}
-	outcome := s.damageMonsterByPlayerSkill(target, p.ownerID, p.sourceCorrID, res, p.damageRange)
+	damageType := s.skillDamageType(def)
+	outcome := s.damageMonsterByPlayerSkillTyped(target, p.ownerID, p.sourceCorrID, res, p.damageRange, damageType)
 	if def.Kind == "chain_projectile_attack" && outcome.Damage > 0 {
 		s.applySkillChain(target, p.ownerID, skillID, def, p.damageRange, p.sourceCorrID, res)
 		return
@@ -4901,7 +4912,7 @@ func (s *Sim) applySkillChain(origin *entity, ownerID uint64, skillID string, de
 			Direction:       cloneVec2Ptr(&dir),
 			Range:           floatPtr(distance(current.pos, next.pos)),
 		})
-		s.damageMonsterByPlayerSkill(next, ownerID, correlationID, res, damageRange)
+		s.damageMonsterByPlayerSkillTyped(next, ownerID, correlationID, res, damageRange, s.skillDamageType(def))
 		current = next
 		currentRange *= def.Chain.RangeMultiplier
 	}
@@ -4994,18 +5005,19 @@ func (s *Sim) spawnIceShardProjectiles(origin *entity, ownerID uint64, skillID s
 			Y: origin.pos.Y + dir.Y*(monsterRadius+projectileRadius+0.05),
 		}
 		projectile := &entity{
-			kind:            projectileEntity,
-			pos:             start,
-			ownerID:         ownerID,
-			projectileDefID: def.Shatter.Visual,
-			sourceSkillID:   skillID,
-			shardProjectile: true,
-			dir:             dir,
-			speed:           def.Shatter.Speed,
-			maxDistance:     def.Shatter.Range,
-			damageRange:     DamageRange{Min: shardDamage, Max: shardDamage},
-			sourceCorrID:    correlationID,
-			spawnTick:       s.tick,
+			kind:             projectileEntity,
+			pos:              start,
+			ownerID:          ownerID,
+			projectileDefID:  def.Shatter.Visual,
+			sourceSkillID:    skillID,
+			sourceDamageType: s.skillDamageType(def),
+			shardProjectile:  true,
+			dir:              dir,
+			speed:            def.Shatter.Speed,
+			maxDistance:      def.Shatter.Range,
+			damageRange:      DamageRange{Min: shardDamage, Max: shardDamage},
+			sourceCorrID:     correlationID,
+			spawnTick:        s.tick,
 		}
 		projectile.id = s.alloc()
 		s.activeLevel().entities[projectile.id] = projectile
@@ -5427,6 +5439,7 @@ func combatEvent(eventType string, sourceID, targetID uint64, corr string, outco
 		TargetEntityID:  idStr(targetID),
 		CorrelationID:   corr,
 		Damage:          intPtr(outcome.Damage),
+		DamageType:      outcome.DamageType,
 		Outcome:         outcome.Outcome,
 		RawDamage:       intPtr(outcome.RawDamage),
 		MitigatedDamage: intPtr(outcome.MitigatedDamage),

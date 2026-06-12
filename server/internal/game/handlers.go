@@ -103,7 +103,7 @@ func (s *Sim) handleDirectionalAttack(in Input, res *TickResult) {
 	if target == nil {
 		return
 	}
-	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), weaponSlot)
+	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), s.playerWeaponDamageTypeForSlot(weaponSlot), weaponSlot)
 }
 
 func (s *Sim) handleMoveTo(in Input, res *TickResult) {

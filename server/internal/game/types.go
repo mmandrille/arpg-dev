@@ -385,6 +385,7 @@ type Event struct {
 	BossTemplateID     string                  `json:"boss_template_id,omitempty"`
 	CorrelationID      string                  `json:"correlation_id,omitempty"`
 	Damage             *int                    `json:"damage,omitempty"`
+	DamageType         string                  `json:"damage_type,omitempty"`
 	Outcome            string                  `json:"outcome,omitempty"`
 	RawDamage          *int                    `json:"raw_damage,omitempty"`
 	MitigatedDamage    *int                    `json:"mitigated_damage,omitempty"`

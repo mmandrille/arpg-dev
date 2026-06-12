@@ -1,0 +1,26 @@
+tools/validate_shared.py
+  s_ab63a63fb76fe1::t_72f737415e8137 3208-3220
+  s_ab63a63fb76fe1::t_6af4884dc15445 3238
+shared/rules/unique_effects.v0.json
+  s_ab63a63fb76fe1::t_72f737415e8137 48-219
+shared/rules/unique_effects.v0.schema.json
+  s_ab63a63fb76fe1::t_72f737415e8137 24-36
+shared/golden/item_rolls.json
+  s_ab63a63fb76fe1::t_ea4fe37a6b9eb2 55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "705b4aab3c4fd6b069827f1c911e0053ce3c9243",
+  "prompts": {},
+  "sessions": {
+    "s_ab63a63fb76fe1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebddb-b253-72b0-9015-616d3b773776",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

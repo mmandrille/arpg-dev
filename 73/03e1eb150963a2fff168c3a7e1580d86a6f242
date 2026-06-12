@@ -1,0 +1,88 @@
+server/internal/store/repos.go
+  s_cceb4e38c2d6e0::t_71bccfcfcce4fc 56,58,67,69,79-80,92,116,136,138,150-151,153,163,166,168
+client/scripts/stash_panel.gd
+  s_cceb4e38c2d6e0::t_d96dd8fd71df4f 38-39,57,121-122,130-149,189,375-380,463-467
+  s_cceb4e38c2d6e0::t_3255a6aa58be18 354-358
+  s_cceb4e38c2d6e0::t_c67135b5bdc6aa 321-322
+server/internal/realtime/runner.go
+  s_cceb4e38c2d6e0::t_6a20ecb1de51aa 406
+server/internal/game/types.go
+  s_cceb4e38c2d6e0::t_b8997488a07ed6 46-49,436-448
+server/internal/inputdecode/inputdecode.go
+  s_cceb4e38c2d6e0::t_6b274fc26977c0 38,126-129,135,300-305
+server/internal/game/corpse.go
+  s_cceb4e38c2d6e0::t_106787046d02b0 1-132,134-217,219-222,224-247,249-250,262-269,271-279
+  s_cceb4e38c2d6e0::t_009378d4e17bd0 133,223,270
+  s_cceb4e38c2d6e0::t_b8997488a07ed6 218,248,251-261
+server/internal/store/interfaces.go
+  s_cceb4e38c2d6e0::t_5f2c112f5cba29 22,72-73
+client/scripts/main.gd
+  s_cceb4e38c2d6e0::t_adb52a77982fb3 4172-4210
+  s_cceb4e38c2d6e0::t_060887bac0fc75 1207-1214,3995-4011,4506-4507
+client/scripts/character_select_panel.gd
+  s_cceb4e38c2d6e0::t_6ae81d7211192f 614-618
+  s_cceb4e38c2d6e0::t_b83c9ee9c4a12b 519-522
+  s_cceb4e38c2d6e0::t_275a1122bc2f6b 297
+  s_cceb4e38c2d6e0::t_21a8654604cb5a 89,96,312-332,347-364,569-574
+  s_cceb4e38c2d6e0::t_efbcd7b7c550a6 594-595
+server/internal/replay/replay_test.go
+  s_cceb4e38c2d6e0::t_ec1cac40fd60b6 1359,1403
+  s_cceb4e38c2d6e0::t_a23f3a4728969d 1406
+  s_cceb4e38c2d6e0::t_0a577199e41989 1358,1404-1405,1407
+server/internal/realtime/session_corpses.go
+  s_cceb4e38c2d6e0::t_6a20ecb1de51aa 1-19
+server/internal/game/sim.go
+  s_cceb4e38c2d6e0::t_106787046d02b0 44,134-137,352,1503,1590-1592
+  s_cceb4e38c2d6e0::t_07c95998169fbb 2050,2106-2109,6169-6171,7527-7535
+shared/protocol/envelope.v8.schema.json
+  s_cceb4e38c2d6e0::t_8ea9485e38a1aa 37
+shared/protocol/messages.v8.schema.json
+  s_cceb4e38c2d6e0::t_8ea9485e38a1aa 39,106-107,343-349
+skills/showme/scripts/render_focus.py
+  s_cceb4e38c2d6e0::t_5ff70d34952376 24,44-45
+shared/protocol/state_delta.v8.schema.json
+  s_cceb4e38c2d6e0::t_0521a8c17a811a 377-386,639-652
+  s_cceb4e38c2d6e0::t_8ea9485e38a1aa 73-76,374-376
+shared/protocol/session_snapshot.v8.schema.json
+  s_cceb4e38c2d6e0::t_92e5d846bc408a 448-457,677-690
+  s_cceb4e38c2d6e0::t_8ea9485e38a1aa 99-102,445-447
+skills/showme/scripts/visual_capture.gd
+  s_cceb4e38c2d6e0::t_4a33f2db969d48 78-81
+  s_cceb4e38c2d6e0::t_5ff70d34952376 218-274,407
+server/internal/store/models.go
+  s_cceb4e38c2d6e0::t_5f2c112f5cba29 22,35,112-118
+server/internal/realtime/hub.go
+  s_cceb4e38c2d6e0::t_6a20ecb1de51aa 155-173
+server/migrations/0021_character_death_level.sql
+  s_cceb4e38c2d6e0::t_5f2c112f5cba29 1-12
+server/internal/http/session.go
+  s_cceb4e38c2d6e0::t_fa4672996c54d3 112-125
+server/internal/http/character.go
+  s_cceb4e38c2d6e0::t_fa4672996c54d3 29,188,202
+client/tests/test_coop_client.gd
+  s_cceb4e38c2d6e0::t_3797a8f997214e 280-283,285-291,294-296,299-302,307,309-310
+server/internal/game/handlers.go
+  s_cceb4e38c2d6e0::t_07c95998169fbb 53
+server/internal/realtime/session_loop.go
+  s_cceb4e38c2d6e0::t_6a20ecb1de51aa 147,174,289,357-364,366-367,514-522,524-525,621,664,703-710
+server/internal/store/corpse.go
+  s_cceb4e38c2d6e0::t_5f2c112f5cba29 1-96
+shared/protocol/examples/corpse_withdraw_item_intent.json
+  s_cceb4e38c2d6e0::t_8ea9485e38a1aa 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7303e1eb150963a2fff168c3a7e1580d86a6f242",
+  "prompts": {},
+  "sessions": {
+    "s_cceb4e38c2d6e0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd70-5746-78e2-929d-86c8e05de7f5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

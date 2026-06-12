@@ -461,6 +461,7 @@ type ItemDef struct {
 	Handedness      string       `json:"handedness,omitempty"`
 	OccupiesHands   []string     `json:"occupies_hands,omitempty"`
 	AttackMode      string       `json:"attack_mode,omitempty"`
+	DamageType      string       `json:"damage_type,omitempty"`
 	AttackSpeed     float64      `json:"attack_speed,omitempty"`
 	Damage          *DamageRange `json:"damage,omitempty"`
 	Reach           *float64     `json:"reach,omitempty"`
@@ -500,6 +501,7 @@ type ItemTemplateDef struct {
 type SkillDef struct {
 	Name         string              `json:"name"`
 	Class        string              `json:"class"`
+	DamageType   string              `json:"damage_type,omitempty"`
 	Tree         SkillTreeDef        `json:"tree"`
 	Kind         string              `json:"kind"`
 	MaxRank      int                 `json:"max_rank"`
@@ -655,28 +657,29 @@ type InteractableBarrier struct {
 
 // MonsterDef is a single monster definition.
 type MonsterDef struct {
-	Name              string       `json:"name"`
-	MaxHP             int          `json:"max_hp"`
-	LootTable         string       `json:"loot_table"`
-	HitChance         *float64     `json:"hit_chance,omitempty"`
-	CritChance        *float64     `json:"crit_chance,omitempty"`
-	CritDamage        *float64     `json:"crit_damage,omitempty"`
-	Armor             int          `json:"armor,omitempty"`
-	BlockPercent      int          `json:"block_percent,omitempty"`
-	RetaliationDamage *DamageRange `json:"retaliation_damage,omitempty"`
-	AttackDamage      *DamageRange `json:"attack_damage,omitempty"`
-	AttackCooldown    int          `json:"attack_cooldown_ticks,omitempty"`
-	AttackMode        string       `json:"attack_mode,omitempty"`
-	AttackRange       float64      `json:"attack_range,omitempty"`
-	ProjectileSpeed   float64      `json:"projectile_speed,omitempty"`
-	ProjectileDefID   string       `json:"projectile_def_id,omitempty"`
-	Behavior          string       `json:"behavior,omitempty"`
-	PackRole          string       `json:"pack_role,omitempty"`
-	AggroRadius       float64      `json:"aggro_radius,omitempty"`
-	AssistRadius      float64      `json:"assist_radius,omitempty"`
-	LeashRadius       float64      `json:"leash_radius,omitempty"`
-	MoveSpeed         float64      `json:"move_speed,omitempty"`
-	XPReward          int          `json:"xp_reward,omitempty"`
+	Name              string             `json:"name"`
+	MaxHP             int                `json:"max_hp"`
+	LootTable         string             `json:"loot_table"`
+	HitChance         *float64           `json:"hit_chance,omitempty"`
+	CritChance        *float64           `json:"crit_chance,omitempty"`
+	CritDamage        *float64           `json:"crit_damage,omitempty"`
+	Armor             int                `json:"armor,omitempty"`
+	BlockPercent      int                `json:"block_percent,omitempty"`
+	Resistances       map[string]float64 `json:"resistances,omitempty"`
+	RetaliationDamage *DamageRange       `json:"retaliation_damage,omitempty"`
+	AttackDamage      *DamageRange       `json:"attack_damage,omitempty"`
+	AttackCooldown    int                `json:"attack_cooldown_ticks,omitempty"`
+	AttackMode        string             `json:"attack_mode,omitempty"`
+	AttackRange       float64            `json:"attack_range,omitempty"`
+	ProjectileSpeed   float64            `json:"projectile_speed,omitempty"`
+	ProjectileDefID   string             `json:"projectile_def_id,omitempty"`
+	Behavior          string             `json:"behavior,omitempty"`
+	PackRole          string             `json:"pack_role,omitempty"`
+	AggroRadius       float64            `json:"aggro_radius,omitempty"`
+	AssistRadius      float64            `json:"assist_radius,omitempty"`
+	LeashRadius       float64            `json:"leash_radius,omitempty"`
+	MoveSpeed         float64            `json:"move_speed,omitempty"`
+	XPReward          int                `json:"xp_reward,omitempty"`
 }
 
 func (d MonsterDef) effectiveAssistRadius() float64 {
@@ -1150,6 +1153,9 @@ func LoadRules(dir string) (*Rules, error) {
 			if err := validateDamageRange("items."+id+".damage", *def.Damage); err != nil {
 				return nil, err
 			}
+			if err := validateDamageType("items."+id+".damage_type", def.DamageType); err != nil {
+				return nil, err
+			}
 			if def.AttackSpeed <= 0 {
 				return nil, fmt.Errorf("game: invalid rules items.%s.attack_speed: weapon attack speed must be positive", id)
 			}
@@ -1383,6 +1389,14 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 		if def.BlockPercent < 0 || def.BlockPercent > 100 {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.block_percent: must be within [0,100]", id)
+		}
+		for damageType, resistance := range def.Resistances {
+			if err := validateDamageType("monsters."+id+".resistances", damageType); err != nil {
+				return nil, err
+			}
+			if resistance < -1 || resistance > 1 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.resistances.%s: must be within [-1,1]", id, damageType)
+			}
 		}
 		if def.XPReward < 0 {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.xp_reward: must be non-negative", id)
@@ -2705,6 +2719,9 @@ func isSupportedSkillKind(kind string) bool {
 }
 
 func validateSkillKindPayload(skillID string, skill SkillDef) error {
+	if err := validateDamageType("skills."+skillID+".damage_type", skill.DamageType); err != nil {
+		return err
+	}
 	switch skill.Kind {
 	case "projectile_attack":
 		if skill.Targeting != "direction_or_target" {

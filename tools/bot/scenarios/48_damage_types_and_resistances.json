@@ -1,0 +1,63 @@
+{
+  "id": "damage_types_and_resistances",
+  "world_id": "damage_types_lab",
+  "seed": "damage_types_and_resistances_seed",
+  "character_class": "sorcerer",
+  "title": "Damage types and resistances",
+  "description": "Cast the lightning skill into resistant, neutral, and weak lab targets and prove authoritative damage_type plus resistance math.",
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 5, "vit": 5, "magic": 20 },
+    "skill_ranks": { "magic_bolt": 1, "ligthing": 1 }
+  },
+  "steps": [
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "combat_lab_lightning_resistant",
+      "event_type": "skill_cast"
+    },
+    { "action": "wait_ticks", "ticks": 32 },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    { "action": "wait_ticks", "ticks": 32 },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "combat_lab_lightning_weak",
+      "event_type": "skill_cast"
+    }
+  ],
+  "assertions": [
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "target_monster_def_id": "combat_lab_lightning_resistant",
+      "min_damage": 1,
+      "max_damage": 4
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 3,
+      "max_damage": 7
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "target_monster_def_id": "combat_lab_lightning_weak",
+      "min_damage": 5
+    }
+  ]
+}

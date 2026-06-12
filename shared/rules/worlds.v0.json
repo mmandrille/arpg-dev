@@ -376,6 +376,26 @@
         }
       ]
     },
+    "damage_types_lab": {
+      "player": { "position": { "x": 4, "y": 5 } },
+      "entities": [
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_lightning_resistant",
+          "position": { "x": 8, "y": 4 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": { "x": 8, "y": 5 }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_lightning_weak",
+          "position": { "x": 8, "y": 6 }
+        }
+      ]
+    },
     "skill_visual_lab": {
       "player": { "position": { "x": 4, "y": 5 } },
       "entities": [

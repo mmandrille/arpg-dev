@@ -23,6 +23,7 @@
         "name": { "type": "string", "minLength": 1 },
         "name_key": { "type": "string", "minLength": 1 },
         "class": { "type": "string", "minLength": 1 },
+        "damage_type": { "$ref": "#/$defs/damage_type" },
         "tree": { "$ref": "#/$defs/tree_position" },
         "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff"] },
         "max_rank": { "type": "integer", "minimum": 1 },
@@ -104,6 +105,10 @@
         "tier": { "type": "integer", "minimum": 1 },
         "column": { "type": "integer", "minimum": 1 }
       }
+    },
+    "damage_type": {
+      "type": "string",
+      "enum": ["force", "cold", "poison", "lightning"]
     },
     "requirements": {
       "type": "object",

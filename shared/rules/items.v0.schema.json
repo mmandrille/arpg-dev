@@ -30,6 +30,7 @@
             "uniqueItems": true
           },
           "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
+          "damage_type": { "$ref": "#/$defs/damage_type" },
           "attack_speed": { "type": "number", "exclusiveMinimum": 0 },
           "damage": { "$ref": "#/$defs/damage_range" },
           "reach": { "type": "number", "exclusiveMinimum": 0 },
@@ -186,6 +187,10 @@
         "min": { "type": "integer", "minimum": 0 },
         "max": { "type": "integer", "minimum": 0 }
       }
+    },
+    "damage_type": {
+      "type": "string",
+      "enum": ["force", "cold", "poison", "lightning"]
     }
   }
 }

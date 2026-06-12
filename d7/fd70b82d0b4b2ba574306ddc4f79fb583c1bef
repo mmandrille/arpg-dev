@@ -1,0 +1,19 @@
+skills/autoloop/SKILL.md
+  s_ede78fc0a09338::t_41370e6508e357 5-11,21-22,24,30-32,35-36,39-42,45-46,60-65,68,70,100,122,126-130,145-148,152,159-161,163,165,168,170-171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d7fd70b82d0b4b2ba574306ddc4f79fb583c1bef",
+  "prompts": {},
+  "sessions": {
+    "s_ede78fc0a09338": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eba0f-a476-78b1-bdf1-82884d2124d9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

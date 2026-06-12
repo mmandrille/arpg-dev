@@ -1,0 +1,61 @@
+skills/showme/scripts/render_focus.py
+  s_c88be8e83fa4bc::t_67ccf41c12413b 24,64-65
+tools/bot/scenarios/client/29_mystery_seller_paid_reroll.json
+  s_c88be8e83fa4bc::t_07e973b4f9259e 25-26
+.maintainability/file-size-baseline.tsv
+  s_c88be8e83fa4bc::t_00c1c29ddf2160 6,29
+tools/bot/scenarios/client/32_town_bishop_respec_panel.json
+  s_c88be8e83fa4bc::t_7fc3b89f77e17f 10-11
+server/internal/replay/replay_test.go
+  s_c88be8e83fa4bc::t_4d9342711a623c 688,705,766
+  s_c88be8e83fa4bc::t_5bb0b1e496a49a 1487-1489
+client/tests/test_item_visuals.gd
+  s_c88be8e83fa4bc::t_1145b5352d3984 488
+  s_c88be8e83fa4bc::t_67ccf41c12413b 84-85,446,457-460,470-477,481-487,489-497,511
+  s_c88be8e83fa4bc::t_d861ed5058f467 500-510
+  s_c88be8e83fa4bc::t_93bf2c80acf293 478-480
+client/scripts/main.gd
+  s_c88be8e83fa4bc::t_5bb0b1e496a49a 4982-4983,5008
+  s_c88be8e83fa4bc::t_67ccf41c12413b 3094-3097,4969-4981,4989-4997,4999-5002,5004-5007,5009-5055
+  s_c88be8e83fa4bc::t_6704b798ef2bc2 4984-4988,4998,5003
+  s_c88be8e83fa4bc::t_5f90a2c9bc8c59 3088,3098-3099
+  s_c88be8e83fa4bc::t_bcd001aa164a15 3089-3093
+tools/bot/scenarios/client/24_mystery_seller_core.json
+  s_c88be8e83fa4bc::t_07e973b4f9259e 22-23
+docs/plans/v96_2026-06-12-town-presentation-polish.md
+  s_c88be8e83fa4bc::t_09b3d3b3a2cf5f 77
+  s_c88be8e83fa4bc::t_5570134d41af43 106,115-120
+  s_c88be8e83fa4bc::t_33e6b39b589178 1-2,4-30,33-34,37-47,50-59,64-74,78-87,90-103,107-114,121-124
+  s_c88be8e83fa4bc::t_67ccf41c12413b 31-32,35,49,60-63,75-76,88-89
+  s_c88be8e83fa4bc::t_d861ed5058f467 48
+  s_c88be8e83fa4bc::t_00c1c29ddf2160 3,36,104-105
+docs/as-built/v96_town-presentation-polish.md
+  s_c88be8e83fa4bc::t_00c1c29ddf2160 1-38
+skills/showme/scripts/visual_capture.gd
+  s_c88be8e83fa4bc::t_aa8d8673a7c5d7 495
+  s_c88be8e83fa4bc::t_67ccf41c12413b 67-68,486-494,496-497
+shared/rules/worlds.v0.json
+  s_c88be8e83fa4bc::t_6704b798ef2bc2 521,526,531,536,541
+docs/specs/v96_spec-town-presentation-polish.md
+  s_c88be8e83fa4bc::t_00c1c29ddf2160 3
+  s_c88be8e83fa4bc::t_d861ed5058f467 22
+  s_c88be8e83fa4bc::t_33e6b39b589178 1-2,4-21,23-50
+PROGRESS.md
+  s_c88be8e83fa4bc::t_00c1c29ddf2160 15,117,253,411-414,796
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "56006e59e8b0d0f7af5629ef6ae657f0049e45cb",
+  "prompts": {},
+  "sessions": {
+    "s_c88be8e83fa4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfa-d65a-7650-81f2-89f916faeef8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

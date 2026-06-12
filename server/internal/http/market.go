@@ -11,6 +11,7 @@ import (
 )
 
 func (s *Server) registerMarketRoutes(mux *http.ServeMux) {
+	mux.Handle("GET /v0/market/summary", s.requireAuth(http.HandlerFunc(s.handleMarketSummary)))
 	mux.Handle("GET /v0/market/listings", s.requireAuth(http.HandlerFunc(s.handleListMarketListings)))
 	mux.Handle("POST /v0/market/listings", s.requireAuth(http.HandlerFunc(s.handleCreateMarketListing)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketListing)))
@@ -60,6 +61,28 @@ type listMarketOffersResponse struct {
 
 type createMarketOfferRequest struct {
 	StashItemIDs []string `json:"stash_item_ids"`
+}
+
+type marketSummaryResponse struct {
+	PublishedListings int `json:"published_listings"`
+	IncomingBids      int `json:"incoming_bids"`
+}
+
+func (s *Server) handleMarketSummary(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account")
+		return
+	}
+	summary, err := s.store.GetMarketSummary(r.Context(), accountID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load market summary")
+		return
+	}
+	writeJSON(w, http.StatusOK, marketSummaryResponse{
+		PublishedListings: summary.PublishedListings,
+		IncomingBids:      summary.IncomingBids,
+	})
 }
 
 func (s *Server) handleListMarketListings(w http.ResponseWriter, r *http.Request) {

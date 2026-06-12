@@ -601,6 +601,17 @@ func TestMarketOfferRoutesSubmitListAndAccept(t *testing.T) {
 	if len(offers.Offers) != 1 || offers.Offers[0].OfferID != offer.OfferID {
 		t.Fatalf("listed offers = %+v", offers.Offers)
 	}
+	rec = getJSON(h, "/v0/market/summary", sellerToken)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("seller market summary status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var sellerSummary marketSummaryResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &sellerSummary); err != nil {
+		t.Fatal(err)
+	}
+	if sellerSummary.PublishedListings != 1 || sellerSummary.IncomingBids != 1 {
+		t.Fatalf("seller market summary = %+v, want 1 listing and 1 bid", sellerSummary)
+	}
 	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers/"+offer.OfferID+"/accept", foreignToken, map[string]string{})
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("foreign accept status = %d body=%s", rec.Code, rec.Body.String())

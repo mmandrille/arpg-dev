@@ -2503,6 +2503,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.openBishopService(e, in, res, ack)
 		return
 	}
+	if service := s.serviceForInteractable(e); service == "market" {
+		s.openMarketService(e, in, res, ack)
+		return
+	}
 	if e.state != interactableClosed {
 		res.reject(in.MessageID, "already_open")
 		return
@@ -2513,6 +2517,22 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 	if e.interactableDefID == treasureChestDefID && e.lootTable != "" {
 		s.spawnLootDrops(s.rules.LootDrops(e.lootTable, s.rng), e.pos, s.targetInteractionRadius(e), in.CorrelationID, res, goldRollContext{levelNum: s.activeLevel().levelNum})
 	}
+	if ack {
+		res.ack(in.MessageID)
+	}
+}
+
+func (s *Sim) openMarketService(e *entity, in Input, res *TickResult, ack bool) {
+	if e.state != interactableReady {
+		res.reject(in.MessageID, "not_actionable")
+		return
+	}
+	res.Events = append(res.Events, Event{
+		EventType:     "market_service_opened",
+		EntityID:      idStr(e.id),
+		CorrelationID: in.CorrelationID,
+		Service:       "market",
+	})
 	if ack {
 		res.ack(in.MessageID)
 	}
@@ -6000,7 +6020,7 @@ func (s *Sim) actionable(e *entity) bool {
 		if s.stashIDForInteractable(e) != "" && e.state == interactableReady {
 			return true
 		}
-		if s.serviceForInteractable(e) == "bishop" && e.state == interactableReady {
+		if s.serviceForInteractable(e) != "" && e.state == interactableReady {
 			return true
 		}
 		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)

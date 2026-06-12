@@ -5,6 +5,7 @@ const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
+const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
@@ -69,6 +70,12 @@ func _initialize() -> void:
 			await _setup_skills()
 		"shop":
 			await _setup_shop()
+		"market-board":
+			await _setup_market_board()
+		"market-publish":
+			await _setup_market_publish()
+		"market-offer":
+			await _setup_market_offer()
 		_:
 			await _setup_gear()
 
@@ -232,6 +239,56 @@ func _setup_shop() -> void:
 	var tooltip = panel._make_offer_tooltip(offers[3])
 	tooltip.position = Vector2(286, 142)
 	get_root().add_child(tooltip)
+
+
+func _setup_market_board() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackMarketBoard"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(2.8, 2.8, 4.5), Vector3(0.0, 0.82, 0.0), 2.4)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(3.0, 0.04, 2.2)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.025, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#353735")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var main: Node3D = MainScript.new()
+	var board := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_market_board"}) as Node3D
+	board.name = "PreviewMarketBoard"
+	root.add_child(board)
+	var incoming := board.find_child("IncomingBidCount", true, false) as Label3D
+	var published := board.find_child("PublishedListingCount", true, false) as Label3D
+	if incoming != null:
+		incoming.text = "3"
+		incoming.modulate = Color("#ffcf5a")
+	if published != null:
+		published.text = "2"
+		published.modulate = Color("#9fd7ff")
+	_subject = board
+
+
+func _setup_market_publish() -> void:
+	var panel = MarketPanelScript.new()
+	get_root().add_child(panel)
+	await process_frame
+	panel.show_market("1009", _market_listings(), _market_stash_items(), "acct_player", "Publish from account stash")
+	panel.bot_select_tab("publish")
+
+
+func _setup_market_offer() -> void:
+	var panel = MarketPanelScript.new()
+	get_root().add_child(panel)
+	await process_frame
+	panel.show_market("1009", _market_listings(), _market_stash_items(), "acct_player", "Choose a stash item to offer")
+	panel.bot_select_tab("offer")
 
 
 func _setup_character_menu() -> void:
@@ -648,6 +705,21 @@ func _shop_sell_appraisals() -> Array:
 			"sell_price": 88,
 			"summary_lines": ["Slot: chest", "Armor +9", "+9 Armor vs equipped"],
 		},
+	]
+
+
+func _market_stash_items() -> Array:
+	return [
+		{"stash_item_id": "stash_9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Magic Cave Bow", "rarity": "magic", "slot": "main_hand", "summary_lines": ["Slot: main hand", "Damage 2-5"]},
+		{"stash_item_id": "stash_9002", "item_def_id": "cave_ring", "item_template_id": "cave_ring", "display_name": "Rare Cave Ring", "rarity": "rare", "slot": "ring", "summary_lines": ["Slot: ring", "Maximum Health +4"]},
+		{"stash_item_id": "stash_9003", "item_def_id": "cave_mail", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "slot": "chest", "summary_lines": ["Slot: chest", "Armor +8"]},
+	]
+
+
+func _market_listings() -> Array:
+	return [
+		{"listing_id": "listing_1001", "seller_account_id": "acct_other", "stash_item_id": "seller_stash_1", "item_def_id": "cave_blade", "display_name": "Rare Cave Blade", "rarity": "rare", "rolled_stats": {"damage_min": 4, "damage_max": 8}},
+		{"listing_id": "listing_1002", "seller_account_id": "acct_player", "stash_item_id": "my_stash_1", "item_def_id": "cave_shield", "display_name": "Magic Cave Shield", "rarity": "magic", "rolled_stats": {"block_percent": 8}},
 	]
 
 

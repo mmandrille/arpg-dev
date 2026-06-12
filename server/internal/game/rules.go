@@ -1566,7 +1566,7 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.StashID != "" && def.StashID != "account_stash" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.stash_id: unknown stash %s", id, def.StashID)
 			}
-			if def.Service != "" && def.Service != "bishop" {
+			if def.Service != "" && def.Service != "bishop" && def.Service != "market" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.service: unsupported service %s", id, def.Service)
 			}
 		default:

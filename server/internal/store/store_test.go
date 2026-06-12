@@ -1196,6 +1196,13 @@ func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 	if len(offers) != 2 {
 		t.Fatalf("seller offers = %+v, want 2", offers)
 	}
+	summary, err := s.GetMarketSummary(ctx, seller.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if summary.PublishedListings != 1 || summary.IncomingBids != 2 {
+		t.Fatalf("seller market summary = %+v, want 1 listing and 2 bids", summary)
+	}
 	accepted, err := s.AcceptMarketOffer(ctx, seller.ID, listing.ID, offer.ID)
 	if err != nil {
 		t.Fatal(err)

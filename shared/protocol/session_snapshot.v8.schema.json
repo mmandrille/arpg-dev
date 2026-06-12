@@ -426,7 +426,7 @@
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "angle_degrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
         "reason": { "type": "string" },
-        "service": { "type": "string", "enum": ["bishop"] },
+        "service": { "type": "string", "enum": ["bishop", "market"] },
         "price": { "type": "integer", "minimum": 0 },
         "affordable": { "type": "boolean" },
         "stash_id": { "type": "string" },
@@ -621,6 +621,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "service", "heal", "mana", "price", "affordable", "total_gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "market_service_opened" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service"] }
         },
         {
           "if": {

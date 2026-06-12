@@ -1884,6 +1884,27 @@ func (s *Store) AcceptMarketOffer(ctx context.Context, sellerAccountID, listingI
 	return accepted, err
 }
 
+func (s *Store) GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error) {
+	var out MarketSummary
+	if err := s.pool.QueryRow(ctx,
+		`SELECT
+			(SELECT COUNT(*)
+			 FROM market_listings
+			 WHERE seller_account_id = $1 AND status = $3),
+			(SELECT COUNT(*)
+			 FROM market_offers mo
+			 JOIN market_listings ml ON ml.id = mo.listing_id
+			 WHERE ml.seller_account_id = $1
+			   AND ml.status = $3
+			   AND mo.status = $2
+			   AND mo.bidder_account_id <> $1)`,
+		accountID, MarketOfferActive, MarketListingActive,
+	).Scan(&out.PublishedListings, &out.IncomingBids); err != nil {
+		return MarketSummary{}, fmt.Errorf("store: get market summary: %w", err)
+	}
+	return out, nil
+}
+
 type stashGoldTransferResult struct {
 	characterGold int
 	stashGold     int

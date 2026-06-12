@@ -2,6 +2,28 @@ package game
 
 import "testing"
 
+func TestMarketBoardOpenEmitsServiceEvent(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_market_board_open", "v_market_board_open", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	board := findInteractableByDefID(t, sim, "town_market_board")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: board.pos.X - 0.5, Y: board.pos.Y}
+
+	open := sim.Tick([]Input{{
+		MessageID:     "open_market",
+		CorrelationID: "corr_market_open",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: idStr(board.id)},
+	}})
+
+	assertAck(t, open, "open_market")
+	ev := findEvent(open.Events, "market_service_opened")
+	if ev == nil || ev.EntityID != idStr(board.id) || ev.Service != "market" {
+		t.Fatalf("market service event = %+v", ev)
+	}
+}
+
 func TestBishopServiceRestoresResourcesOnOpen(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_bishop_open", "v92_bishop_open", loadRules(t), "vendor_lab")
 	if err != nil {

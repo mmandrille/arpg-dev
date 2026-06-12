@@ -1,0 +1,23 @@
+client/scripts/skills_panel.gd
+  s_6cd8e180f3214c::t_6ecab27f7ac7c7 14-15,132-133,250-251,367,376-384
+  s_6cd8e180f3214c::t_868ca3c89aebf2 815-818
+client/tests/test_skills_panel.gd
+  s_6cd8e180f3214c::t_35abe56da5ff6c 77-80,82
+  s_6cd8e180f3214c::t_0b7a45cc5fe21d 81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2f6e1c7af995c15e714a46404e0bf3d535a1dfc1",
+  "prompts": {},
+  "sessions": {
+    "s_6cd8e180f3214c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd22-fd05-7d40-aeb7-c0624a10de1e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

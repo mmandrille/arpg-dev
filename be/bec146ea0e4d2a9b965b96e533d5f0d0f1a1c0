@@ -1,0 +1,35 @@
+shared/rules/unique_effects.v0.schema.json
+  s_fe4ee1c1e49e89::t_1398a5362713d5 1-43
+docs/specs/v103_spec-unique-effect-catalog-foundation.md
+  s_fe4ee1c1e49e89::t_1398a5362713d5 1-60
+docs/as-built/v103_unique-effect-catalog-foundation.md
+  s_fe4ee1c1e49e89::t_c6ec03b7358bb0 1-34
+.maintainability/file-size-baseline.tsv
+  s_fe4ee1c1e49e89::t_3f7aca17749e24 8,32
+docs/plans/v103_2026-06-12-unique-effect-catalog-foundation.md
+  s_fe4ee1c1e49e89::t_3f7aca17749e24 35-37
+  s_fe4ee1c1e49e89::t_1398a5362713d5 1-34,38-49,51,53-62,65,67-78,81-88,92-97
+  s_fe4ee1c1e49e89::t_c6ec03b7358bb0 50,52,63-64,66,79-80,89-91
+tools/validate_shared.py
+  s_fe4ee1c1e49e89::t_ea5c819c40af38 222,3192-3238
+shared/rules/unique_effects.v0.json
+  s_fe4ee1c1e49e89::t_1398a5362713d5 1-50
+PROGRESS.md
+  s_fe4ee1c1e49e89::t_c6ec03b7358bb0 15,18,124,267
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bebec146ea0e4d2a9b965b96e533d5f0d0f1a1c0",
+  "prompts": {},
+  "sessions": {
+    "s_fe4ee1c1e49e89": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebc09-eb17-7121-b6d8-9a1af60943f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

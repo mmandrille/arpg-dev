@@ -20,6 +20,7 @@ const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
+const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
@@ -220,6 +221,7 @@ var inventory_panel: InventoryPanel
 var shop_panel: ShopPanel
 var stash_panel: StashPanel
 var bishop_panel: BishopPanel
+var market_panel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
@@ -937,6 +939,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_refresh_progression_ui()
 	_refresh_skill_ui()
 	_update_character_info_panel()
+	_refresh_market_board_summary()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
 		_bot_logged_snapshot = true
@@ -961,6 +964,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_hide_shop_panel()
 			_hide_stash_panel()
 			_hide_bishop_panel()
+			_hide_market_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -1160,6 +1164,9 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "bishop_service_opened":
 			_show_bishop_panel(ev)
+			continue
+		if event_type == "market_service_opened":
+			_show_market_panel(ev)
 			continue
 		if event_type == "bishop_respec" and bishop_panel != null and bishop_panel.visible:
 			bishop_panel.set_gold(gold)
@@ -2060,7 +2067,7 @@ func _is_skill_slot_key(event: InputEventKey) -> bool:
 
 
 func _close_gameplay_panels(except: String = "") -> void:
-	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop"]) and inventory_panel != null:
+	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop", "market"]) and inventory_panel != null:
 		inventory_panel.hide_display()
 	if not (except in ["shop", "shop_with_inventory"]):
 		_hide_shop_panel()
@@ -2068,6 +2075,8 @@ func _close_gameplay_panels(except: String = "") -> void:
 		_hide_stash_panel()
 	if except != "bishop":
 		_hide_bishop_panel()
+	if except != "market":
+		_hide_market_panel()
 	if not (except in ["stats", "skills", "inventory"]) and character_stats_panel != null:
 		character_stats_panel.hide_display()
 	if not (except in ["skills", "stats"]) and skills_panel != null:
@@ -2338,10 +2347,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	var typ := str(rec.get("type", ""))
 	var state := str(rec.get("state", ""))
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
-	if typ == "interactable" and interactable_def_id in ["stairs_down", "stairs_up"]:
-		_activate_or_approach_interactable(target_id, rec)
-		return
-	if typ == "interactable" and interactable_def_id == "teleporter":
+	if typ == "interactable" and _interactable_should_approach_before_action(interactable_def_id):
 		_activate_or_approach_interactable(target_id, rec)
 		return
 	if player_anim != null and (typ == "monster" or (typ == "interactable" and state == "closed")) and _target_in_local_attack_range(target_id):
@@ -2484,6 +2490,19 @@ func _try_action_at_mouse() -> void:
 		return
 
 	_execute_click_pick(_resolve_click_at_mouse())
+
+
+func _interactable_should_approach_before_action(interactable_def_id: String) -> bool:
+	return interactable_def_id in [
+		"stairs_down",
+		"stairs_up",
+		"teleporter",
+		"town_vendor",
+		"town_mystery_seller",
+		"town_stash",
+		"town_bishop",
+		"town_market_board",
+	]
 
 
 func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> void:
@@ -2970,6 +2989,9 @@ func _build_scene() -> void:
 	bishop_panel = BishopPanelScript.new()
 	bishop_panel.respec_requested.connect(_on_bishop_respec_requested)
 	ui.add_child(bishop_panel)
+	market_panel = MarketPanelScript.new()
+	market_panel.market_action_requested.connect(_on_market_action_requested)
+	ui.add_child(market_panel)
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(consumable_bar)
@@ -3203,6 +3225,7 @@ func _show_loss_popup() -> void:
 	_hide_waypoint_panel()
 	_hide_shop_panel()
 	_hide_stash_panel()
+	_hide_market_panel()
 	if skills_panel != null:
 		skills_panel.hide_display()
 	loss_popup.visible = true
@@ -3881,6 +3904,112 @@ func _hide_bishop_panel() -> void:
 		bishop_panel.hide_display()
 
 
+func _show_market_panel(ev: Dictionary) -> void:
+	if market_panel == null:
+		return
+	_close_gameplay_panels("market")
+	var next_entity_id := str(ev.get("entity_id", ""))
+	var listings: Array = []
+	var status := "Active listings"
+	if client != null:
+		_refresh_market_board_summary()
+		var body := client.list_market_listings()
+		listings = body.get("listings", [])
+		if body.has("_error"):
+			status = "Could not load market listings"
+		elif listings.is_empty():
+			status = "No active listings"
+	market_panel.show_market(next_entity_id, listings, stash_items, client.account_id if client != null else "", status)
+
+
+func _on_market_action_requested(action: String, payload: Dictionary) -> void:
+	if client == null:
+		return
+	var result := {}
+	if action == "publish":
+		result = client.create_market_listing(str(payload.get("stash_item_id", "")))
+		if result.has("_error"):
+			if market_panel != null:
+				market_panel.show_status("Could not publish item", true)
+			return
+		_remove_market_stash_item(str(payload.get("stash_item_id", "")))
+		if market_panel != null:
+			market_panel.show_status("Item published")
+	elif action == "offer":
+		result = client.create_market_offer(str(payload.get("listing_id", "")), payload.get("stash_item_ids", []))
+		if result.has("_error"):
+			if market_panel != null:
+				market_panel.show_status("Could not make offer", true)
+			return
+		for stash_item_id in payload.get("stash_item_ids", []):
+			_remove_market_stash_item(str(stash_item_id))
+		if market_panel != null:
+			market_panel.show_status("Offer sent")
+	else:
+		return
+	_refresh_market_panel_data()
+
+
+func _refresh_market_panel_data() -> void:
+	_refresh_market_board_summary()
+	if market_panel == null or client == null:
+		return
+	var body := client.list_market_listings()
+	var listings: Array = body.get("listings", [])
+	market_panel.show_market(market_panel.market_entity_id, listings, stash_items, client.account_id, market_panel.get_debug_state().get("status", ""))
+
+
+func _remove_market_stash_item(stash_item_id: String) -> void:
+	for i in range(stash_items.size() - 1, -1, -1):
+		if str((stash_items[i] as Dictionary).get("stash_item_id", "")) == stash_item_id:
+			stash_items.remove_at(i)
+			return
+
+
+func _refresh_market_board_summary() -> void:
+	if client == null or interactable_ids.is_empty():
+		return
+	var has_market_board := false
+	for id in interactable_ids:
+		var key := str(id)
+		if entities.has(key) and str((entities[key] as Dictionary).get("interactable_def_id", "")) == "town_market_board":
+			has_market_board = true
+			break
+	if not has_market_board:
+		return
+	var summary := client.market_summary()
+	_update_market_board_badges(
+		int(summary.get("incoming_bids", 0)),
+		int(summary.get("published_listings", 0))
+	)
+
+
+func _update_market_board_badges(incoming_bids: int, published_listings: int) -> void:
+	for id in interactable_ids:
+		var key := str(id)
+		if not entities.has(key):
+			continue
+		var rec: Dictionary = entities[key]
+		if str(rec.get("interactable_def_id", "")) != "town_market_board":
+			continue
+		var node := rec.get("node", null) as Node3D
+		if node == null:
+			continue
+		var left := node.find_child("IncomingBidCount", true, false) as Label3D
+		var right := node.find_child("PublishedListingCount", true, false) as Label3D
+		if left != null:
+			left.text = str(incoming_bids)
+			left.modulate = Color("#ffcf5a") if incoming_bids > 0 else Color("#776d5e")
+		if right != null:
+			right.text = str(published_listings)
+			right.modulate = Color("#9fd7ff") if published_listings > 0 else Color("#776d5e")
+
+
+func _hide_market_panel() -> void:
+	if market_panel != null:
+		market_panel.hide_display()
+
+
 func _on_bishop_respec_requested(bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":
 		return
@@ -3927,6 +4056,10 @@ func _sync_actionable_panel_reach() -> void:
 		if not _panel_source_in_activation_range(bishop_panel.bishop_entity_id):
 			_hide_bishop_panel()
 			closed_actionable = true
+	if market_panel != null and market_panel.visible:
+		if not _panel_source_in_activation_range(market_panel.market_entity_id):
+			_hide_market_panel()
+			closed_actionable = true
 	if closed_actionable:
 		_hide_inventory_if_no_actionable_panel()
 
@@ -3944,7 +4077,8 @@ func _hide_inventory_if_no_actionable_panel() -> void:
 	var shop_visible := shop_panel != null and shop_panel.visible
 	var stash_visible := stash_panel != null and stash_panel.visible
 	var bishop_visible := bishop_panel != null and bishop_panel.visible
-	if not shop_visible and not stash_visible and not bishop_visible:
+	var market_visible: bool = market_panel != null and market_panel.visible
+	if not shop_visible and not stash_visible and not bishop_visible and not market_visible:
 		inventory_panel.hide_display()
 
 
@@ -4199,6 +4333,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_merchant_node(def_id)
 		if def_id == "town_bishop":
 			return _make_bishop_node()
+		if def_id == "town_market_board":
+			return _make_market_board_node()
 		return _make_door_node()
 	if kind == "projectile":
 		return ProjectileVisualsScript.make_node(str(e.get("projectile_def_id", "")))
@@ -4802,6 +4938,43 @@ func _make_bishop_node() -> Node3D:
 	return root
 
 
+func _make_market_board_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "MarketBoard"
+	_add_merchant_box(root, "MarketBoardShadow", Vector3(1.70, 0.035, 0.52), Vector3(0.0, 0.018, 0.03), Color("#171513"))
+	_add_merchant_box(root, "MarketBoardLeftPost", Vector3(0.13, 1.24, 0.13), Vector3(-0.68, 0.62, 0.0), Color("#4a2b17"))
+	_add_merchant_box(root, "MarketBoardRightPost", Vector3(0.13, 1.24, 0.13), Vector3(0.68, 0.62, 0.0), Color("#4a2b17"))
+	_add_merchant_box(root, "MarketBoardPanel", Vector3(1.34, 0.82, 0.12), Vector3(0.0, 0.88, 0.02), Color("#6f431f"))
+	_add_merchant_box(root, "MarketBoardInset", Vector3(1.12, 0.58, 0.135), Vector3(0.0, 0.88, 0.09), Color("#2c2118"))
+	_add_merchant_box(root, "MarketBoardHeader", Vector3(1.44, 0.16, 0.14), Vector3(0.0, 1.38, 0.04), Color("#c99d4a"))
+	_add_merchant_box(root, "MarketBoardPaperA", Vector3(0.30, 0.36, 0.145), Vector3(-0.24, 0.83, 0.16), Color("#efe0bc"))
+	_add_merchant_box(root, "MarketBoardPaperB", Vector3(0.27, 0.30, 0.145), Vector3(0.22, 0.96, 0.16), Color("#d7c99e"))
+	_add_merchant_box(root, "MarketBoardSeal", Vector3(0.13, 0.13, 0.16), Vector3(0.48, 0.70, 0.17), Color("#b93131"))
+
+	root.add_child(_make_market_badge("IncomingBidBadge", "IncomingBidCount", Vector3(-0.58, 1.42, 0.20), Color("#4f2b12"), Color("#776d5e")))
+	root.add_child(_make_market_badge("PublishedListingBadge", "PublishedListingCount", Vector3(0.58, 1.42, 0.20), Color("#14324f"), Color("#776d5e")))
+	return root
+
+
+func _make_market_badge(badge_name: String, count_name: String, position: Vector3, bg_color: Color, text_color: Color) -> Node3D:
+	var badge := Node3D.new()
+	badge.name = badge_name
+	badge.position = position
+	_add_merchant_box(badge, "BadgeBack", Vector3(0.34, 0.24, 0.055), Vector3.ZERO, bg_color)
+	var label := Label3D.new()
+	label.name = count_name
+	label.text = "0"
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.font_size = 42
+	label.modulate = text_color
+	label.outline_size = 8
+	label.outline_modulate = Color("#14110d")
+	label.position = Vector3(0.0, -0.055, 0.04)
+	label.pixel_size = 0.006
+	badge.add_child(label)
+	return badge
+
+
 func _add_merchant_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
 	part.name = part_name
@@ -5076,6 +5249,7 @@ func get_bot_state() -> Dictionary:
 		"shop_panel_visible": shop_panel != null and shop_panel.visible,
 		"stash_panel_visible": stash_panel != null and stash_panel.visible,
 		"bishop_panel_visible": bishop_panel != null and bishop_panel.visible,
+		"market_panel_visible": market_panel != null and market_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
@@ -5084,6 +5258,7 @@ func get_bot_state() -> Dictionary:
 		"shop_panel": shop_panel.get_debug_state() if shop_panel != null else {},
 		"stash_panel": stash_panel.get_debug_state() if stash_panel != null else {},
 		"bishop_panel": bishop_panel.get_debug_state() if bishop_panel != null else {},
+		"market_panel": market_panel.get_debug_state() if market_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
@@ -5317,7 +5492,7 @@ func bot_click_entity_id(target_id: String) -> void:
 	var rec: Dictionary = entities[target_id]
 	var typ := str(rec.get("type", ""))
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
-	if typ == "interactable" and interactable_def_id in ["stairs_down", "stairs_up", "teleporter"]:
+	if typ == "interactable" and _interactable_should_approach_before_action(interactable_def_id):
 		_activate_or_approach_interactable(target_id, rec)
 		return
 	_send_action_intent(target_id)

@@ -42,6 +42,11 @@
       "initial_state": "ready",
       "stash_id": "account_stash"
     },
+    "town_market_board": {
+      "name": "Market Board",
+      "initial_state": "ready",
+      "service": "market"
+    },
     "town_bishop": {
       "name": "Town Bishop",
       "initial_state": "ready",

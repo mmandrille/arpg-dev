@@ -75,6 +75,8 @@ func _initialize() -> void:
 		return
 	if not _verify_interactable_vendor_models():
 		return
+	if not _verify_market_board_model():
+		return
 	if not _verify_interactable_stair_models():
 		return
 	if not _verify_ground_texture_selection():
@@ -365,6 +367,28 @@ func _verify_interactable_vendor_models() -> bool:
 		return false
 	vendor.free()
 	mystery.free()
+	main.free()
+	return true
+
+
+func _verify_market_board_model() -> bool:
+	var main = MainScript.new()
+	var board := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_market_board"})
+	if board == null or board.name != "MarketBoard":
+		_fail("market board did not use board model")
+		main.free()
+		return false
+	if board.find_child("IncomingBidCount", true, false) == null:
+		_fail("market board missing incoming bid counter")
+		board.free()
+		main.free()
+		return false
+	if board.find_child("PublishedListingCount", true, false) == null:
+		_fail("market board missing published listing counter")
+		board.free()
+		main.free()
+		return false
+	board.free()
 	main.free()
 	return true
 

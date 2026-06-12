@@ -184,6 +184,12 @@ type MarketOfferItem struct {
 	CreatedAt         time.Time
 }
 
+// MarketSummary is the count-only notification surface for the town board.
+type MarketSummary struct {
+	PublishedListings int
+	IncomingBids      int
+}
+
 // CharacterWaypoint is a durable unlocked waypoint level for a character.
 type CharacterWaypoint struct {
 	CharacterID  string

@@ -239,6 +239,42 @@ func get_replay_timeline(debug_token: String, replay_session_id: String, through
 	return {}
 
 
+func list_market_listings() -> Dictionary:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/market/listings",
+		["Authorization: Bearer " + token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("list_market_listings failed: %s" % r)
+	return {"listings": [], "_error": str(r)}
+
+
+func market_summary() -> Dictionary:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/market/summary",
+		["Authorization: Bearer " + token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("market_summary failed: %s" % r)
+	return {"published_listings": 0, "incoming_bids": 0, "_error": str(r)}
+
+
+func create_market_listing(stash_item_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings",
+		["Authorization: Bearer " + token], JSON.stringify({"stash_item_id": stash_item_id}))
+	if r.get("_code", 0) == 201 and r.has("body"):
+		return r["body"]
+	push_error("create_market_listing failed: %s" % r)
+	return {"_error": str(r)}
+
+
+func create_market_offer(listing_id: String, stash_item_ids: Array) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/offers" % listing_id,
+		["Authorization: Bearer " + token], JSON.stringify({"stash_item_ids": stash_item_ids}))
+	if r.get("_code", 0) == 201 and r.has("body"):
+		return r["body"]
+	push_error("create_market_offer failed: %s" % r)
+	return {"_error": str(r)}
+
+
 # --- WebSocket --------------------------------------------------------------
 
 func connect_ws() -> void:

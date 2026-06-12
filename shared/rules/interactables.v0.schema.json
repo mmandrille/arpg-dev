@@ -20,7 +20,7 @@
           "transition": { "type": "string", "enum": ["ascend", "descend", "waypoint"] },
           "shop_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
           "stash_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
-          "service": { "type": "string", "enum": ["bishop"] },
+          "service": { "type": "string", "enum": ["bishop", "market"] },
           "barrier_when_closed": {
             "type": "object",
             "required": ["size"],

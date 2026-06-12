@@ -1,0 +1,20 @@
+client/scripts/main.gd
+  s_fe4ee1c1e49e89::t_92ba4b51e811f9 398,2951,3335,3344,3755,5897,5909,5921
+  s_fe4ee1c1e49e89::t_efcc97a02b1a0b 1984,1992,2000,3890,3923,3943,3967
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "291b375c8b588007cdfef5fab59a7cc0117dd406",
+  "prompts": {},
+  "sessions": {
+    "s_fe4ee1c1e49e89": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebc09-eb17-7121-b6d8-9a1af60943f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

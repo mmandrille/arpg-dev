@@ -21,7 +21,19 @@
           "summary": { "type": "string", "minLength": 1 },
           "hook": {
             "type": "string",
-            "enum": ["on_hero_damage_dealt", "on_basic_attack_hit", "on_equip_passive"]
+            "enum": [
+              "on_hero_damage_dealt",
+              "on_basic_attack_hit",
+              "on_equip_passive",
+              "on_lethal_damage_taken",
+              "on_block_or_evade",
+              "on_enemy_killed",
+              "on_skill_resource_shortfall",
+              "on_large_hit_taken",
+              "on_continuous_movement_attack",
+              "on_projectile_hit_taken",
+              "on_repeated_same_target_hit"
+            ]
           },
           "compatible_item_types": {
             "type": "array",

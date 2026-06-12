@@ -45,6 +45,178 @@
         "cooldown_seconds": 30
       },
       "status": "ready"
+    },
+    "veil_of_the_last_oath": {
+      "id": "veil_of_the_last_oath",
+      "enabled": true,
+      "display_name": "Veil of the Last Oath",
+      "summary": "When a hit would kill the hero, prevent that damage, cloak the hero for 3 seconds, and show a spectral shield marker. The effect then enters a 60 second cooldown; lethal hits can kill during cooldown.",
+      "hook": "on_lethal_damage_taken",
+      "compatible_item_types": ["shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+      "params": {
+        "prevent_lethal_damage": true,
+        "cloak_status_id": "last_oath_veil",
+        "cloak_duration_seconds": 3,
+        "cooldown_seconds": 60,
+        "hotbar_cooldown_visible": true,
+        "presentation_marker": "spectral_shield"
+      },
+      "status": "ready"
+    },
+    "ashen_reprisal": {
+      "id": "ashen_reprisal",
+      "enabled": true,
+      "display_name": "Ashen Reprisal",
+      "summary": "After blocking or evading, the hero's next hit within 3 seconds deals bonus fire damage and applies a short burn.",
+      "hook": "on_block_or_evade",
+      "compatible_item_types": ["shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+      "params": {
+        "primed_duration_seconds": 3,
+        "bonus_fire_damage_percent": 35,
+        "burn_status_id": "burning",
+        "burn_duration_seconds": 3,
+        "burn_tick_interval_seconds": 1
+      },
+      "status": "ready"
+    },
+    "grave_pact": {
+      "id": "grave_pact",
+      "enabled": true,
+      "display_name": "Grave Pact",
+      "summary": "Killing an enemy restores a small amount of HP if the hero was below half health when the enemy died.",
+      "hook": "on_enemy_killed",
+      "compatible_item_types": ["sword", "greatsword", "axe", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+      "params": {
+        "hero_hp_percent_below": 50,
+        "heal_percent_max_hp": 8,
+        "minimum_heal": 1
+      },
+      "status": "ready"
+    },
+    "stormbound_echo": {
+      "id": "stormbound_echo",
+      "enabled": true,
+      "display_name": "Stormbound Echo",
+      "summary": "Basic attacks have a 25% chance to chain lightning to one nearby enemy for reduced damage.",
+      "hook": "on_basic_attack_hit",
+      "compatible_item_types": ["sword", "greatsword", "axe", "staff", "bow", "gloves", "ring", "amulet"],
+      "params": {
+        "trigger_chance_percent": 25,
+        "chain_damage_percent": 45,
+        "search_radius_tiles": 4,
+        "max_secondary_targets": 1,
+        "damage_type": "lightning"
+      },
+      "status": "ready"
+    },
+    "blood_price": {
+      "id": "blood_price",
+      "enabled": true,
+      "display_name": "Blood Price",
+      "summary": "When the hero lacks enough mana for a skill, the missing cost can be paid with HP instead, but cannot reduce the hero below 1 HP.",
+      "hook": "on_skill_resource_shortfall",
+      "compatible_item_types": ["staff", "ring", "amulet", "gloves", "belt"],
+      "params": {
+        "resource_shortfall": "mana",
+        "fallback_resource": "hp",
+        "hp_cost_per_missing_mana": 1,
+        "minimum_remaining_hp": 1
+      },
+      "status": "ready"
+    },
+    "frostglass_ward": {
+      "id": "frostglass_ward",
+      "enabled": true,
+      "display_name": "Frostglass Ward",
+      "summary": "Taking a large hit slows nearby enemies and grants the hero a brief armor bonus.",
+      "hook": "on_large_hit_taken",
+      "compatible_item_types": ["shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+      "params": {
+        "hit_damage_percent_max_hp_threshold": 25,
+        "slow_status_id": "ice_slow",
+        "slow_percent": 35,
+        "slow_radius_tiles": 3,
+        "armor_bonus_percent": 20,
+        "duration_seconds": 4,
+        "cooldown_seconds": 12
+      },
+      "status": "ready"
+    },
+    "executioners_mark": {
+      "id": "executioners_mark",
+      "enabled": true,
+      "display_name": "Executioner's Mark",
+      "summary": "Damaging a low-health enemy marks it; if it dies quickly, nearby enemies take a small damage pulse.",
+      "hook": "on_hero_damage_dealt",
+      "compatible_item_types": ["sword", "greatsword", "axe", "bow", "gloves", "ring", "amulet"],
+      "params": {
+        "target_hp_percent_threshold": 20,
+        "mark_status_id": "executioners_mark",
+        "mark_duration_seconds": 2,
+        "pulse_damage_percent_of_marking_hit": 30,
+        "pulse_radius_tiles": 3,
+        "damage_type": "physical"
+      },
+      "status": "ready"
+    },
+    "pilgrims_momentum": {
+      "id": "pilgrims_momentum",
+      "enabled": true,
+      "display_name": "Pilgrim's Momentum",
+      "summary": "Moving continuously builds a charge; the next attack deals bonus damage and briefly knocks the target back.",
+      "hook": "on_continuous_movement_attack",
+      "compatible_item_types": ["sword", "greatsword", "axe", "staff", "bow", "boots", "ring", "amulet"],
+      "params": {
+        "required_movement_seconds": 2,
+        "bonus_damage_percent": 25,
+        "knockback_tiles": 1,
+        "charge_expire_seconds": 4
+      },
+      "status": "ready"
+    },
+    "lantern_of_the_fallen": {
+      "id": "lantern_of_the_fallen",
+      "enabled": true,
+      "display_name": "Lantern of the Fallen",
+      "summary": "When a nearby enemy dies, it releases a short-lived healing wisp that travels to the lowest-health nearby hero.",
+      "hook": "on_enemy_killed",
+      "compatible_item_types": ["staff", "shield", "helm", "chest", "belt", "ring", "amulet"],
+      "params": {
+        "trigger_radius_tiles": 6,
+        "wisp_duration_seconds": 4,
+        "heal_percent_max_hp": 6,
+        "target": "lowest_health_hero"
+      },
+      "status": "ready"
+    },
+    "mirrorsteel_skin": {
+      "id": "mirrorsteel_skin",
+      "enabled": true,
+      "display_name": "Mirrorsteel Skin",
+      "summary": "The first projectile hit taken every 15 seconds is heavily reduced and reflects part of its damage back to the attacker.",
+      "hook": "on_projectile_hit_taken",
+      "compatible_item_types": ["shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"],
+      "params": {
+        "damage_reduction_percent": 70,
+        "reflect_damage_percent": 35,
+        "cooldown_seconds": 15
+      },
+      "status": "ready"
+    },
+    "hunger_of_the_deep": {
+      "id": "hunger_of_the_deep",
+      "enabled": true,
+      "display_name": "Hunger of the Deep",
+      "summary": "Consecutive hits against the same enemy ramp outgoing damage until the hero changes target or stops attacking.",
+      "hook": "on_repeated_same_target_hit",
+      "compatible_item_types": ["sword", "greatsword", "axe", "staff", "bow", "gloves", "ring", "amulet"],
+      "params": {
+        "damage_bonus_percent_per_stack": 4,
+        "max_stacks": 5,
+        "stack_expire_seconds": 3,
+        "reset_on_target_change": true
+      },
+      "status": "ready"
     }
   }
 }

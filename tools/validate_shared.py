@@ -553,6 +553,18 @@ def cross_checks(report: Report) -> None:
         report.fail("class_presentations keys", f"unknown classes {extra_class_presentations}")
     else:
         report.ok("class presentations cover character classes")
+    manifest_assets = load(ASSET_MANIFEST)["assets"]
+    bad_class_models = []
+    for class_id, presentation in sorted(class_presentation_defs.items()):
+        model = presentation.get("model", {})
+        asset_id = model.get("asset_id") if isinstance(model, dict) else None
+        asset = manifest_assets.get(asset_id or "")
+        if not asset_id or asset is None or asset.get("type") != "character":
+            bad_class_models.append(f"{class_id}:{asset_id}")
+    if bad_class_models:
+        report.fail("class_presentations model assets", f"must resolve to character assets: {bad_class_models}")
+    else:
+        report.ok("class presentation model assets resolve")
 
     if character_progression["points_per_level"] <= 0:
         report.fail("character_progression points_per_level", "must be positive")
@@ -3121,7 +3133,6 @@ def cross_checks(report: Report) -> None:
     # presentation entry points at a missing item. This is client-only rendering
     # data, but drift would make loot/inventory presentation fall back silently.
     item_presentations = load(ASSETS / "item_presentations.v0.json")
-    manifest_assets = load(ASSET_MANIFEST)["assets"]
     presentation_families = item_presentations["families"]
     presentations = item_presentations["items"]
     expected_families = {str(template.get("item_type", "")) for template in item_templates["templates"].values()}

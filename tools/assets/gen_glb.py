@@ -173,12 +173,18 @@ def _build_skinned_glb(color, joints, parts):
     cube_pos, cube_nrm, cube_idx = _cube_geometry()
     globals_ = _joint_globals(joints)
 
-    positions, normals, indices, joints0, weights0 = [], [], [], [], []
-    for joint_idx, (tx, ty, tz), (sx, sy, sz) in parts:
+    positions, normals, colors0, indices, joints0, weights0 = [], [], [], [], [], []
+    for part in parts:
+        if len(part) == 4:
+            joint_idx, (tx, ty, tz), (sx, sy, sz), part_color = part
+        else:
+            joint_idx, (tx, ty, tz), (sx, sy, sz) = part
+            part_color = color
         base = len(positions)
         for (px, py, pz), n in zip(cube_pos, cube_nrm):
             positions.append((px * sx + tx, py * sy + ty, pz * sz + tz))
             normals.append(n)
+            colors0.append(part_color)
             joints0.append((joint_idx, 0, 0, 0))
             weights0.append((1.0, 0.0, 0.0, 0.0))
         for i in cube_idx:
@@ -191,6 +197,9 @@ def _build_skinned_glb(color, joints, parts):
     nrm_off = len(bin_buf)
     for n in normals:
         bin_buf += struct.pack("<fff", *n)
+    color_off = len(bin_buf)
+    for c in colors0:
+        bin_buf += struct.pack("<ffff", *c)
     j_off = len(bin_buf)
     for j in joints0:
         bin_buf += struct.pack("<HHHH", *j)
@@ -228,7 +237,7 @@ def _build_skinned_glb(color, joints, parts):
         "nodes": nodes,
         "meshes": [{
             "primitives": [{
-                "attributes": {"POSITION": 0, "NORMAL": 1, "JOINTS_0": 3, "WEIGHTS_0": 4},
+                "attributes": {"POSITION": 0, "NORMAL": 1, "JOINTS_0": 3, "WEIGHTS_0": 4, "COLOR_0": 6},
                 "indices": 2,
                 "material": 0,
                 "mode": 4,
@@ -237,7 +246,7 @@ def _build_skinned_glb(color, joints, parts):
         "skins": [{"joints": list(range(len(joints))), "inverseBindMatrices": 5}],
         "materials": [{
             "pbrMetallicRoughness": {
-                "baseColorFactor": list(color),
+                "baseColorFactor": [1.0, 1.0, 1.0, 1.0],
                 "metallicFactor": 0.0,
                 "roughnessFactor": 0.9,
             },
@@ -249,14 +258,16 @@ def _build_skinned_glb(color, joints, parts):
             {"bufferView": 3, "componentType": 5123, "count": len(joints0), "type": "VEC4"},
             {"bufferView": 4, "componentType": 5126, "count": len(weights0), "type": "VEC4"},
             {"bufferView": 5, "componentType": 5126, "count": len(joints), "type": "MAT4"},
+            {"bufferView": 6, "componentType": 5126, "count": len(colors0), "type": "VEC4"},
         ],
         "bufferViews": [
             {"buffer": 0, "byteOffset": pos_off, "byteLength": nrm_off - pos_off, "target": 34962},
-            {"buffer": 0, "byteOffset": nrm_off, "byteLength": j_off - nrm_off, "target": 34962},
+            {"buffer": 0, "byteOffset": nrm_off, "byteLength": color_off - nrm_off, "target": 34962},
             {"buffer": 0, "byteOffset": idx_off, "byteLength": ibm_off - idx_off, "target": 34963},
             {"buffer": 0, "byteOffset": j_off, "byteLength": w_off - j_off, "target": 34962},
             {"buffer": 0, "byteOffset": w_off, "byteLength": idx_off - w_off, "target": 34962},
             {"buffer": 0, "byteOffset": ibm_off, "byteLength": len(joints) * 64},
+            {"buffer": 0, "byteOffset": color_off, "byteLength": j_off - color_off, "target": 34962},
         ],
         "buffers": [{"byteLength": len(bin_buf)}],
     }
@@ -271,14 +282,13 @@ def _build_skinned_glb(color, joints, parts):
     return header + json_chunk + bin_chunk
 
 
-def base_humanoid_glb() -> bytes:
-    """Low-poly blue-grey humanoid (~1.9 m) as a SKINNED rig.
+def _humanoid_glb(color, parts) -> bytes:
+    """Low-poly humanoid as a SKINNED rig.
 
     Joints (translation-only bind): arm_r pivots at the shoulder so the attack
     clip swings the arm; hand_r is a child of arm_r (the weapon mount) so a
     BoneAttachment3D on hand_r rides the swing. leg_l/leg_r drive the walk clip.
     """
-    color = (0.55, 0.62, 0.72, 1.0)
     joints = [
         ("root", -1, (0.0, 0.0, 0.0)),     # 0
         ("spine", 0, (0.0, 1.15, 0.0)),    # 1  global (0,1.15,0)
@@ -287,15 +297,66 @@ def base_humanoid_glb() -> bytes:
         ("leg_l", 0, (-0.16, 0.9, 0.0)),   # 4
         ("leg_r", 0, (0.16, 0.9, 0.0)),    # 5
     ]
-    parts = [
+    return _build_skinned_glb(color, joints, parts)
+
+
+def base_humanoid_glb() -> bytes:
+    """Low-poly blue-grey humanoid (~1.9 m) as the generic fallback."""
+    return _humanoid_glb((0.55, 0.62, 0.72, 1.0), [
         (1, (0.0, 1.15, 0.0), (0.5, 0.8, 0.3)),     # torso -> spine
         (1, (0.0, 1.78, 0.0), (0.34, 0.34, 0.34)),  # head  -> spine
         (1, (-0.42, 1.15, 0.0), (0.16, 0.72, 0.16)),# left arm -> spine
         (2, (0.42, 1.15, 0.0), (0.16, 0.72, 0.16)), # right arm -> arm_r
         (4, (-0.16, 0.45, 0.0), (0.2, 0.9, 0.2)),   # left leg -> leg_l
         (5, (0.16, 0.45, 0.0), (0.2, 0.9, 0.2)),    # right leg -> leg_r
-    ]
-    return _build_skinned_glb(color, joints, parts)
+    ])
+
+
+def barbarian_glb() -> bytes:
+    """Wide chest and oversized arms for a heavy melee class."""
+    return _humanoid_glb((0.66, 0.36, 0.25, 1.0), [
+        (1, (0.0, 1.15, 0.0), (0.68, 0.86, 0.38)),
+        (1, (0.0, 1.82, 0.0), (0.36, 0.34, 0.34)),
+        (1, (-0.56, 1.13, 0.0), (0.24, 0.82, 0.22)),
+        (2, (0.56, 1.13, 0.0), (0.24, 0.82, 0.22)),
+        (4, (-0.22, 0.45, 0.0), (0.24, 0.9, 0.24)),
+        (5, (0.22, 0.45, 0.0), (0.24, 0.9, 0.24)),
+    ])
+
+
+def sorcerer_glb() -> bytes:
+    """Robe silhouette with a pointed hat."""
+    return _humanoid_glb((0.26, 0.30, 0.70, 1.0), [
+        (1, (0.0, 1.06, 0.0), (0.54, 0.96, 0.36)),   # robe body
+        (1, (0.0, 0.55, 0.0), (0.68, 0.42, 0.40)),   # robe hem
+        (1, (0.0, 1.78, 0.0), (0.30, 0.30, 0.30)),   # head
+        (1, (0.0, 2.08, 0.0), (0.34, 0.34, 0.34)),   # hat brim
+        (1, (0.0, 2.32, 0.0), (0.18, 0.50, 0.18)),   # pointed hat
+        (1, (-0.38, 1.14, 0.0), (0.13, 0.70, 0.14)),
+        (2, (0.38, 1.14, 0.0), (0.13, 0.70, 0.14)),
+        (4, (-0.14, 0.38, 0.0), (0.15, 0.62, 0.15)),
+        (5, (0.14, 0.38, 0.0), (0.15, 0.62, 0.15)),
+    ])
+
+
+def paladin_glb() -> bytes:
+    """Armored but thinner than the barbarian, with a chest cross."""
+    return _humanoid_glb((0.62, 0.58, 0.48, 1.0), [
+        (1, (0.0, 1.15, 0.0), (0.52, 0.82, 0.32)),
+        (1, (0.0, 1.78, 0.0), (0.32, 0.32, 0.32)),
+        (1, (0.0, 1.20, 0.21), (0.08, 0.62, 0.06), (0.96, 0.91, 0.50, 1.0)), # front cross vertical
+        (1, (0.0, 1.34, 0.24), (0.38, 0.08, 0.06), (0.96, 0.91, 0.50, 1.0)), # front cross horizontal
+        (1, (0.0, 1.20, -0.21), (0.08, 0.62, 0.06), (0.96, 0.91, 0.50, 1.0)), # back cross vertical
+        (1, (0.0, 1.34, -0.24), (0.38, 0.08, 0.06), (0.96, 0.91, 0.50, 1.0)), # back cross horizontal
+        (1, (0.31, 1.20, 0.0), (0.06, 0.62, 0.08), (0.96, 0.91, 0.50, 1.0)), # side cross vertical
+        (1, (0.34, 1.34, 0.0), (0.06, 0.08, 0.38), (0.96, 0.91, 0.50, 1.0)), # side cross horizontal
+        (1, (-0.31, 1.20, 0.0), (0.06, 0.62, 0.08), (0.96, 0.91, 0.50, 1.0)), # opposite side cross vertical
+        (1, (-0.34, 1.34, 0.0), (0.06, 0.08, 0.38), (0.96, 0.91, 0.50, 1.0)), # opposite side cross horizontal
+        (1, (-0.43, 1.15, 0.0), (0.17, 0.74, 0.17)),
+        (2, (0.43, 1.15, 0.0), (0.17, 0.74, 0.17)),
+        (4, (-0.17, 0.45, 0.0), (0.19, 0.88, 0.19)),
+        (5, (0.17, 0.45, 0.0), (0.19, 0.88, 0.19)),
+    ])
 
 
 def monster_dummy_glb() -> bytes:
@@ -422,6 +483,9 @@ def starter_axe_glb() -> bytes:
 
 TARGETS = {
     "client/assets/characters/base_humanoid/base_humanoid.glb": base_humanoid_glb,
+    "client/assets/characters/barbarian/barbarian.glb": barbarian_glb,
+    "client/assets/characters/sorcerer/sorcerer.glb": sorcerer_glb,
+    "client/assets/characters/paladin/paladin.glb": paladin_glb,
     "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
     "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
     "client/assets/equipment/weapons/starter_staff/starter_staff.glb": starter_staff_glb,

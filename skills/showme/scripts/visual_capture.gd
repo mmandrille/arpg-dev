@@ -11,6 +11,7 @@ const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessi
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const MainScript := preload("res://scripts/main.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
+const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 
 const DEFAULT_GEAR_ITEMS := ["cave_blade", "cave_shield", "cave_helm", "cave_mail", "cave_boots"]
 const ITEM_SLOT := {
@@ -66,6 +67,8 @@ func _initialize() -> void:
 			await _setup_vendors()
 		"monsters":
 			await _setup_monsters()
+		"classes":
+			await _setup_classes()
 		"heal-rain":
 			await _setup_heal_rain()
 		"town":
@@ -490,6 +493,48 @@ func _setup_monsters() -> void:
 	_subject = root
 
 
+func _setup_classes() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackClasses"
+	get_root().add_child(root)
+
+	_add_light(root)
+	_add_camera(root, Vector3(4.5, 3.2, 5.4), Vector3(0.0, 1.05, 0.0), 4.7)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "reference_floor"
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(5.8, 0.04, 2.8)
+	floor.mesh = floor_mesh
+	floor.position = Vector3(0, -0.025, 0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#383936")
+	floor.material_override = floor_mat
+	root.add_child(floor)
+
+	var entries := [
+		{"class_id": "barbarian", "label": "Barbarian", "x": -1.75},
+		{"class_id": "sorcerer", "label": "Sorcerer", "x": 0.0},
+		{"class_id": "paladin", "label": "Paladin", "x": 1.75},
+	]
+	for entry in entries:
+		var packed := ClassPresentationsLoaderScript.packed_scene_for_class(str(entry["class_id"]))
+		var model := packed.instantiate() as Node3D
+		model.name = "Preview%s" % str(entry["label"])
+		model.position = Vector3(float(entry["x"]), 0.0, 0.0)
+		model.rotation.y = deg_to_rad(18.0)
+		root.add_child(model)
+		var label := Label3D.new()
+		label.name = "%sLabel" % str(entry["label"])
+		label.text = str(entry["label"])
+		label.position = Vector3(float(entry["x"]), 2.85, 0.0)
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.font_size = 42
+		label.modulate = Color("#f3efe5")
+		root.add_child(label)
+	_subject = root
+
+
 func _setup_heal_rain() -> void:
 	var root := Node3D.new()
 	root.name = "VisualFeedbackHealRain"
@@ -574,6 +619,17 @@ func _add_camera(root: Node3D, position: Vector3, target: Vector3, size: float) 
 	root.add_child(camera)
 	camera.look_at_from_position(position, target, Vector3.UP)
 	camera.current = true
+
+
+func _tint_node(root: Node, color: Color) -> void:
+	if root is MeshInstance3D:
+		var mesh := root as MeshInstance3D
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = color
+		mat.roughness = 0.82
+		mesh.material_override = mat
+	for child in root.get_children():
+		_tint_node(child, color)
 
 
 func _read_json(path: String):

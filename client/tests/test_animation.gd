@@ -4,6 +4,7 @@ extends SceneTree
 const ControllerScript := preload("res://scripts/animation_controller.gd")
 const ReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
+const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 
 
 var _failed: bool = false
@@ -33,6 +34,8 @@ func _initialize() -> void:
 	# await a frame to let _ready fire before asserting. This makes _initialize
 	# a coroutine; quit() still sets the exit code correctly when it resumes.
 	await _test_character_scene()
+	if _failed: quit(1); return
+	await _test_class_character_models()
 	if _failed: quit(1); return
 	await _test_player_snapshot_death_pose()
 	if _failed: quit(1); return
@@ -212,6 +215,28 @@ func _test_character_scene() -> void:
 			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
 	s.free()
 	await process_frame
+
+
+func _test_class_character_models() -> void:
+	for class_id in ["barbarian", "sorcerer", "paladin"]:
+		var resolved := ClassPresentationsLoaderScript.resolve(class_id)
+		_assert(str(resolved.get("asset_id", "")) == "character_%s_v0" % class_id, "%s model asset mismatch: %s" % [class_id, resolved])
+		var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
+		_assert(packed != null, "%s model packed scene missing" % class_id)
+		if packed == null:
+			continue
+		var model := packed.instantiate() as Node3D
+		get_root().add_child(model)
+		await process_frame
+		var skel := model.find_child("Skeleton3D", true, false) as Skeleton3D
+		_assert(skel != null, "%s model missing Skeleton3D" % class_id)
+		if skel != null:
+			for bone in ["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"]:
+				_assert(skel.find_bone(bone) >= 0, "%s model missing bone %s" % [class_id, bone])
+		model.free()
+		await process_frame
+	var fallback := ClassPresentationsLoaderScript.resolve("necromancer")
+	_assert(str(fallback.get("asset_id", "")) == "character_base_humanoid_v0", "unknown class should use base humanoid fallback: %s" % fallback)
 
 
 func _test_player_snapshot_death_pose() -> void:

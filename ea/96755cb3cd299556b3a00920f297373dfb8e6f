@@ -1,0 +1,74 @@
+server/internal/game/rules.go
+  s_c88be8e83fa4bc::t_a3f0670e36e8b7 512-513
+  s_c88be8e83fa4bc::t_17775eac1f1410 2799
+server/internal/game/sim.go
+  s_c88be8e83fa4bc::t_9120031895f520 620,1101,1364-1367,1384,1403,1414
+  s_c88be8e83fa4bc::t_7ab826ed551c6f 286,297,330,342,404
+  s_c88be8e83fa4bc::t_f2514c8c5a5efa 2187
+  s_c88be8e83fa4bc::t_c9ae59d958c58b 2067-2068,2074,2077-2078,2081,2087-2089,2100-2102
+  s_c88be8e83fa4bc::t_df0087d2c438ae 1647,3552-3554
+PROGRESS.md
+  s_c88be8e83fa4bc::t_79b8dbcd45e36a 120
+  s_c88be8e83fa4bc::t_20106815e219a3 432-438
+  s_c88be8e83fa4bc::t_24ca21858d76f5 15,18
+  s_c88be8e83fa4bc::t_2b8fd548e2a68f 259
+tools/bot/run.py
+  s_c88be8e83fa4bc::t_b3973af0b82c6f 2100
+  s_c88be8e83fa4bc::t_0909815f081b3e 2101
+docs/as-built/v99_rogue-skill-mechanics.md
+  s_c88be8e83fa4bc::t_81584fb8205e3a 46-49
+  s_c88be8e83fa4bc::t_ab120f924f0a7b 1-45
+shared/rules/skills.v0.schema.json
+  s_c88be8e83fa4bc::t_a3f0670e36e8b7 35-36,214-234
+.maintainability/file-size-baseline.tsv
+  s_c88be8e83fa4bc::t_9247a33b132301 5
+tools/bot/scenarios/46_class_starter_loadout.json
+  s_c88be8e83fa4bc::t_4f2516b136977f 7,11
+tools/bot/test_protocol.py
+  s_c88be8e83fa4bc::t_893c8ad068174b 469,473-475
+shared/rules/skills.v0.json
+  s_c88be8e83fa4bc::t_a3f0670e36e8b7 418-423,464-469
+  s_c88be8e83fa4bc::t_6fc9d195c2c4e8 407,453
+server/internal/game/handlers.go
+  s_c88be8e83fa4bc::t_c9ae59d958c58b 97-98,106
+  s_c88be8e83fa4bc::t_df0087d2c438ae 1202-1205
+docs/specs/v99_spec-rogue-skill-mechanics.md
+  s_c88be8e83fa4bc::t_c1f4c99181b33f 1-79
+server/internal/game/types.go
+  s_c88be8e83fa4bc::t_a3f0670e36e8b7 415
+server/internal/game/rogue_skills_test.go
+  s_c88be8e83fa4bc::t_e732ab1eef0e04 1-83,85-89,91-93,95-114,117-144,154-158
+  s_c88be8e83fa4bc::t_ae24fbf1ebc582 84,90,94,145-153
+  s_c88be8e83fa4bc::t_0909815f081b3e 115-116
+docs/plans/v99_2026-06-12-rogue-skill-mechanics.md
+  s_c88be8e83fa4bc::t_3547e417966b14 121,129,135
+  s_c88be8e83fa4bc::t_42d808982fc809 3,22-24,36-37,41-43,59-61,74-78,90-93,105-106,119-120,130-134
+  s_c88be8e83fa4bc::t_6d5b5110340a80 38,44-46
+  s_c88be8e83fa4bc::t_c1f4c99181b33f 1-2,4-21,25-35,39-40,47-58,62-73,79-89,94-104,107-118,122-128,136-141
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_c88be8e83fa4bc::t_0024c8cd11cbe7 32,38,42-44
+  s_c88be8e83fa4bc::t_b3973af0b82c6f 3,8-31,33-37,39-41,45,50-56
+  s_c88be8e83fa4bc::t_a8217d707b5d7b 57
+  s_c88be8e83fa4bc::t_40c83179771f94 7
+server/internal/game/rogue_skills.go
+  s_c88be8e83fa4bc::t_bfb18283d9d75b 1-52,88-296,310-350
+  s_c88be8e83fa4bc::t_1f8cc4ffd6ee68 53-87,297-309
+server/internal/game/rogue_rules.go
+  s_c88be8e83fa4bc::t_0bc3f38a4b423d 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ea96755cb3cd299556b3a00920f297373dfb8e6f",
+  "prompts": {},
+  "sessions": {
+    "s_c88be8e83fa4bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfa-d65a-7650-81f2-89f916faeef8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

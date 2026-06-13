@@ -79,13 +79,19 @@ func set_skill_cooldowns(cooldowns: Array) -> void:
 		var rec := row as Dictionary
 		if str(rec.get("skill_id", "")) != _current_skill_id():
 			continue
-		_remaining_ticks = float(rec.get("remaining_ticks", 0))
-		_total_ticks = int(rec.get("total_ticks", 0))
+		_apply_skill_cooldown(float(rec.get("remaining_ticks", 0)), int(rec.get("total_ticks", 0)), false)
 		found = true
 		break
 	if not found:
 		_remaining_ticks = 0.0
 		_total_ticks = 0
+	_render()
+
+
+func start_skill_cooldown(skill_id: String, remaining_ticks: int, total_ticks: int) -> void:
+	if skill_id != _current_skill_id():
+		return
+	_apply_skill_cooldown(float(remaining_ticks), total_ticks, true)
 	_render()
 
 
@@ -232,6 +238,20 @@ func _cooldown_fraction() -> float:
 	if _total_ticks <= 0:
 		return 0.0
 	return clampf(_remaining_ticks / float(_total_ticks), 0.0, 1.0)
+
+
+func _apply_skill_cooldown(remaining_ticks: float, total_ticks: int, allow_restart: bool) -> void:
+	var next_remaining := maxf(0.0, remaining_ticks)
+	var next_total := maxi(0, total_ticks)
+	if next_remaining <= 0.0 or next_total <= 0:
+		_remaining_ticks = 0.0
+		_total_ticks = 0
+		return
+	if not allow_restart and _remaining_ticks > 0.0 and next_remaining > _remaining_ticks:
+		_total_ticks = maxi(_total_ticks, next_total)
+		return
+	_remaining_ticks = next_remaining
+	_total_ticks = next_total
 
 
 func _unspent_skill_points() -> int:

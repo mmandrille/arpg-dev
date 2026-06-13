@@ -1082,6 +1082,13 @@ func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
+		if event_type == "skill_cooldown_started" and eid == player_id:
+			if skill_bar != null:
+				skill_bar.start_skill_cooldown(
+					str(ev.get("skill_id", "")),
+					int(ev.get("remaining_ticks", 0)),
+					int(ev.get("total_ticks", 0))
+				)
 		if event_type == "skill_cast" and eid == player_id:
 			if skill_bar != null:
 				skill_bar.flash_cast()

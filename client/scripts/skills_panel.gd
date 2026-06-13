@@ -35,6 +35,169 @@ var _tooltip_body: RichTextLabel
 var _tooltip_plain_text: String = ""
 
 
+static func skill_tooltip_text(skill_id: String, rank: int, max_rank: int, skill_progression: Dictionary, character_progression: Dictionary) -> String:
+	var safe_rank := maxi(rank, 1)
+	return "%s\nRank %d / %d\n%s" % [
+		SkillRulesLoader.skill_display_name(skill_id),
+		rank,
+		max_rank,
+		tooltip_plain_body(skill_id, safe_rank, skill_progression, character_progression),
+	]
+
+
+static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: Dictionary, character_progression: Dictionary) -> String:
+	var def := SkillRulesLoader.skill_definition(skill_id)
+	var summary := SkillRulesLoader.skill_summary(skill_id)
+	if summary == "":
+		summary = _static_kind_label(def)
+	var text := summary
+	text += "\nMana: %d" % _static_skill_mana_cost(def, rank)
+	text += "\n%s" % _static_skill_cooldown_text(def)
+	var requirement_lines := tooltip_requirement_lines(skill_id, skill_progression, character_progression)
+	if not requirement_lines.is_empty():
+		text += "\nRequires:"
+		for line in requirement_lines:
+			text += "\n%s" % str((line as Dictionary).get("text", ""))
+	return text
+
+
+static func tooltip_requirement_lines(skill_id: String, skill_progression: Dictionary, character_progression: Dictionary) -> Array:
+	var rows := tooltip_requirement_status(skill_id, skill_progression, character_progression)
+	if rows.is_empty():
+		return []
+	var lines: Array = []
+	for row in rows:
+		var rec := row as Dictionary
+		var label := str(rec.get("label", rec.get("stat", "")))
+		var required := int(rec.get("required", 0))
+		var current := int(rec.get("current", 0))
+		var met := bool(rec.get("met", current >= required))
+		var suffix := "" if met else "(%d)" % (current - required)
+		lines.append({
+			"text": "%s %d%s" % [label, required, suffix],
+			"color": _static_requirement_color(met),
+		})
+	return lines
+
+
+static func tooltip_requirement_status(skill_id: String, skill_progression: Dictionary, character_progression: Dictionary) -> Array:
+	var def := SkillRulesLoader.skill_definition(skill_id)
+	var requirements: Dictionary = def.get("requirements", {})
+	var out: Array = []
+	var target_rank := _static_requirement_target_rank(skill_id, skill_progression)
+	var level_required := _static_ranked_requirement_value(int(requirements.get("level", 0)), int(requirements.get("level_per_rank", 0)), target_rank)
+	if level_required > 0:
+		var current_level := int(character_progression.get("level", 1))
+		out.append({
+			"stat": "level",
+			"label": "Level",
+			"required": level_required,
+			"current": current_level,
+			"met": current_level >= level_required,
+		})
+	var stats: Dictionary = requirements.get("stats", {})
+	var stats_per_rank: Dictionary = requirements.get("stats_per_rank", {})
+	for stat in ["str", "dex", "vit", "magic"]:
+		if not stats.has(stat) and not stats_per_rank.has(stat):
+			continue
+		var required := _static_ranked_requirement_value(int(stats.get(stat, 0)), int(stats_per_rank.get(stat, 0)), target_rank)
+		if required <= 0:
+			continue
+		var current := _static_current_stat_value(character_progression, stat)
+		out.append({
+			"stat": stat,
+			"label": _static_stat_label(stat),
+			"required": required,
+			"current": current,
+			"met": current >= required,
+		})
+	var skills: Array = requirements.get("skills", [])
+	for prereq in skills:
+		if typeof(prereq) != TYPE_DICTIONARY:
+			continue
+		var rec := prereq as Dictionary
+		var prereq_id := str(rec.get("skill_id", ""))
+		var required_rank := int(rec.get("rank", 0))
+		if prereq_id == "" or required_rank <= 0:
+			continue
+		var current_rank := int(_static_skill_row(skill_progression, prereq_id).get("rank", 0))
+		out.append({
+			"stat": prereq_id,
+			"label": SkillRulesLoader.skill_display_name(prereq_id),
+			"required": required_rank,
+			"current": current_rank,
+			"met": current_rank >= required_rank,
+		})
+	return out
+
+
+static func _static_skill_row(skill_progression: Dictionary, skill_id: String) -> Dictionary:
+	var rows: Array = skill_progression.get("skills", [])
+	for row in rows:
+		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("skill_id", "")) == skill_id:
+			return row as Dictionary
+	return {}
+
+
+static func _static_requirement_target_rank(skill_id: String, skill_progression: Dictionary) -> int:
+	var skill := _static_skill_row(skill_progression, skill_id)
+	var rank := int(skill.get("rank", 0))
+	var max_rank := int(skill.get("max_rank", int(SkillRulesLoader.skill_definition(skill_id).get("max_rank", 1))))
+	if max_rank <= 0:
+		max_rank = 1
+	if rank >= max_rank:
+		return max_rank
+	return rank + 1
+
+
+static func _static_ranked_requirement_value(base: int, per_rank: int, rank: int) -> int:
+	return maxi(0, base + per_rank * maxi(0, rank - 1))
+
+
+static func _static_current_stat_value(character_progression: Dictionary, stat: String) -> int:
+	var stats: Dictionary = character_progression.get("base_stats", {})
+	return int(stats.get(stat, 0))
+
+
+static func _static_stat_label(stat: String) -> String:
+	match stat:
+		"str":
+			return TextCatalog.get_text("stat.strength", "Strength")
+		"dex":
+			return TextCatalog.get_text("stat.dexterity", "Dexterity")
+		"vit":
+			return TextCatalog.get_text("stat.vitality", "Vitality")
+		"magic":
+			return "Magic"
+		_:
+			return stat.capitalize()
+
+
+static func _static_skill_mana_cost(def: Dictionary, rank: int) -> int:
+	var cost: Dictionary = def.get("cost", {})
+	var mana: Dictionary = cost.get("mana", {})
+	return maxi(0, int(mana.get("base", 0)) + int(mana.get("per_rank", 0)) * maxi(0, rank - 1))
+
+
+static func _static_skill_cooldown_text(def: Dictionary) -> String:
+	var cooldown: Dictionary = def.get("cooldown", {})
+	if str(cooldown.get("type", "")) == "attack_interval_multiplier":
+		var multiplier := float(cooldown.get("multiplier", 1.0))
+		if is_equal_approx(multiplier, roundf(multiplier)):
+			return "Cooldown: attack x%d" % int(roundf(multiplier))
+		return "Cooldown: attack x%.1f" % multiplier
+	return "Cooldown: %s" % str(cooldown.get("type", "none"))
+
+
+static func _static_kind_label(def: Dictionary) -> String:
+	var kind := str(def.get("kind", "skill")).replace("_", " ")
+	return kind.capitalize()
+
+
+static func _static_requirement_color(met: bool) -> String:
+	return "#b9d6a3" if met else "#e07a67"
+
+
 func _ready() -> void:
 	SkillRulesLoader.ensure_loaded()
 	_selected_skill_id = _current_skill_id()
@@ -513,20 +676,7 @@ func _set_tooltip_body(skill_id: String, rank: int) -> void:
 
 
 func _tooltip_plain_text_for(skill_id: String, rank: int) -> String:
-	var def := _skill_def(skill_id)
-	var presentation := _skill_presentation(skill_id)
-	var summary := SkillRulesLoader.skill_summary(skill_id)
-	if summary == "":
-		summary = _kind_label(def)
-	var text := summary
-	text += "\nMana: %d" % _skill_mana_cost(def, rank)
-	text += "\n%s" % _skill_cooldown_text(def)
-	var requirement_lines := _requirement_lines(skill_id)
-	if not requirement_lines.is_empty():
-		text += "\nRequires:"
-		for line in requirement_lines:
-			text += "\n%s" % str((line as Dictionary).get("text", ""))
-	return text
+	return tooltip_plain_body(skill_id, rank, skill_progression, character_progression)
 
 
 func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
@@ -573,22 +723,7 @@ func _skill_cooldown_text(def: Dictionary) -> String:
 
 
 func _requirement_lines(skill_id: String) -> Array:
-	var rows := _requirement_status(skill_id)
-	if rows.is_empty():
-		return []
-	var lines: Array = []
-	for row in rows:
-		var rec := row as Dictionary
-		var label := str(rec.get("label", rec.get("stat", "")))
-		var required := int(rec.get("required", 0))
-		var current := int(rec.get("current", 0))
-		var met := bool(rec.get("met", current >= required))
-		var suffix := "" if met else "(%d)" % (current - required)
-		lines.append({
-			"text": "%s %d%s" % [label, required, suffix],
-			"color": _requirement_color(met),
-		})
-	return lines
+	return tooltip_requirement_lines(skill_id, skill_progression, character_progression)
 
 
 func _requirement_color(met: bool) -> String:
@@ -601,54 +736,7 @@ func _escape_bbcode(text: String) -> String:
 
 
 func _requirement_status(skill_id: String) -> Array:
-	var def := _skill_def(skill_id)
-	var requirements: Dictionary = def.get("requirements", {})
-	var out: Array = []
-	var target_rank := _requirement_target_rank(skill_id)
-	var level_required := _ranked_requirement_value(int(requirements.get("level", 0)), int(requirements.get("level_per_rank", 0)), target_rank)
-	if level_required > 0:
-		var current_level := int(character_progression.get("level", 1))
-		out.append({
-			"stat": "level",
-			"label": "Level",
-			"required": level_required,
-			"current": current_level,
-			"met": current_level >= level_required,
-		})
-	var stats: Dictionary = requirements.get("stats", {})
-	var stats_per_rank: Dictionary = requirements.get("stats_per_rank", {})
-	for stat in ["str", "dex", "vit", "magic"]:
-		if not stats.has(stat) and not stats_per_rank.has(stat):
-			continue
-		var required := _ranked_requirement_value(int(stats.get(stat, 0)), int(stats_per_rank.get(stat, 0)), target_rank)
-		if required <= 0:
-			continue
-		var current := _current_stat_value(stat)
-		out.append({
-			"stat": stat,
-			"label": _stat_label(stat),
-			"required": required,
-			"current": current,
-			"met": current >= required,
-		})
-	var skills: Array = requirements.get("skills", [])
-	for prereq in skills:
-		if typeof(prereq) != TYPE_DICTIONARY:
-			continue
-		var rec := prereq as Dictionary
-		var prereq_id := str(rec.get("skill_id", ""))
-		var required_rank := int(rec.get("rank", 0))
-		if prereq_id == "" or required_rank <= 0:
-			continue
-		var current_rank := int(_skill_row(prereq_id).get("rank", 0))
-		out.append({
-			"stat": prereq_id,
-			"label": _skill_name(prereq_id),
-			"required": required_rank,
-			"current": current_rank,
-			"met": current_rank >= required_rank,
-		})
-	return out
+	return tooltip_requirement_status(skill_id, skill_progression, character_progression)
 
 
 func _requirement_target_rank(skill_id: String) -> int:

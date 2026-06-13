@@ -5,6 +5,7 @@ extends SceneTree
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -16,6 +17,13 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_remove_user_file(DraggableWindowScript.layout_storage_path)
+	SkillRulesLoaderScript.reset_for_tests()
+	SkillRulesLoaderScript.ensure_loaded()
+	var magic_bolt_max_rank := _skill_max_rank("magic_bolt")
+	var magic_rank1_req := _skill_stat_requirement("magic_bolt", "magic", 0)
+	var magic_rank2_req := _skill_stat_requirement("magic_bolt", "magic", 1)
+	var magic_bolt_level_req := _skill_level_requirement("magic_bolt", 0)
+	var magic_bolt_mana_cost := _skill_mana_cost("magic_bolt", 0)
 	var panel := SkillsPanelScript.new()
 	root.add_child(panel)
 	await process_frame
@@ -28,7 +36,7 @@ func _run() -> void:
 	panel.set_character_progression({
 		"character_class": "sorcerer",
 		"level": 3,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": magic_rank1_req},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
@@ -60,14 +68,14 @@ func _run() -> void:
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
 	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "orb_projectile")
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
-	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
+	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), magic_bolt_max_rank)
 	_assert_true("spend button enabled at initial magic requirement", bool(state.get("spend_button_enabled", false)))
 	_assert_false("spend button is not visible", bool(state.get("spend_button_visible", true)))
 	_assert_eq("unbought met requirement is highlighted", str(state.get("visual_state", "")), "highlight")
-	_assert_true("requirements met at magic 5", bool(state.get("requirements_met", false)))
+	_assert_true("requirements met at rule-derived magic", bool(state.get("requirements_met", false)))
 	var requirement_status: Array = state.get("requirement_status", [])
 	_assert_eq("requirement row count", requirement_status.size(), 2)
-	_assert_eq("magic requirement current", int((requirement_status[1] as Dictionary).get("current", -1)), 5)
+	_assert_eq("magic requirement current", int((requirement_status[1] as Dictionary).get("current", -1)), magic_rank1_req)
 	_assert_eq("no hovered skill by default", str(state.get("hovered_skill_id", "")), "")
 	_assert_false("tooltip hidden by default", bool(state.get("tooltip_visible", true)))
 	panel.bot_hover_skill("magic_bolt")
@@ -80,8 +88,8 @@ func _run() -> void:
 	if magic_block != null:
 		_assert_true("tooltip opens under hovered skill", float(tooltip_position.get("y", 0.0)) >= magic_block.position.y + magic_block.size.y)
 	_assert_eq("tooltip ignores mouse so skill remains clickable", int(state.get("tooltip_mouse_filter", -1)), Control.MOUSE_FILTER_IGNORE)
-	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: 3"))
-	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel 1\nMagic 5"))
+	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: %d" % magic_bolt_mana_cost))
+	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel %d\nMagic %d" % [magic_bolt_level_req, magic_rank1_req]))
 	panel.bot_leave_skill_tooltip()
 	state = panel.get_debug_state()
 	_assert_eq("tooltip leave clears hovered skill", str(state.get("hovered_skill_id", "")), "")
@@ -95,14 +103,14 @@ func _run() -> void:
 	panel.set_character_progression({
 		"character_class": "sorcerer",
 		"level": 5,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": magic_rank1_req},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
 		"skills": _skill_rows(0, true),
 	})
 	state = panel.get_debug_state()
-	_assert_true("requirements met at magic 5", bool(state.get("requirements_met", false)))
+	_assert_true("requirements met at rule-derived magic", bool(state.get("requirements_met", false)))
 	_assert_true("spend button enabled after magic requirement", bool(state.get("spend_button_enabled", false)))
 	_assert_eq("rankable skill is highlighted", str(state.get("visual_state", "")), "highlight")
 	panel.bot_click_skill_button("magic_bolt")
@@ -165,29 +173,29 @@ func _run() -> void:
 	panel.set_character_progression({
 		"character_class": "sorcerer",
 		"level": 6,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": magic_rank1_req},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
 		"skills": _skill_rows(1, false),
 	})
 	state = panel.get_debug_state()
-	_assert_false("rank 2 requirement blocks magic 5", bool(state.get("requirements_met", true)))
-	_assert_false("rank 2 spend disabled before magic 8", bool(state.get("spend_button_enabled", true)))
+	_assert_false("rank 2 requirement blocks previous-rank magic", bool(state.get("requirements_met", true)))
+	_assert_false("rank 2 spend disabled before rule-derived magic", bool(state.get("spend_button_enabled", true)))
 	_assert_eq("bought skill missing next-rank req stays normal", str(state.get("visual_state", "")), "normal")
-	_assert_true("tooltip includes rank 2 missing magic diff", str(state.get("tooltip_body", "")).contains("Magic 8(-3)"))
+	_assert_true("tooltip includes rank 2 missing magic diff", str(state.get("tooltip_body", "")).contains("Magic %d(-%d)" % [magic_rank2_req, magic_rank2_req - magic_rank1_req]))
 
 	panel.set_character_progression({
 		"character_class": "sorcerer",
 		"level": 6,
-		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 8},
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": magic_rank2_req},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
 		"skills": _skill_rows(1, true),
 	})
 	state = panel.get_debug_state()
-	_assert_true("rank 2 requirements met at magic 8", bool(state.get("requirements_met", false)))
+	_assert_true("rank 2 requirements met at rule-derived magic", bool(state.get("requirements_met", false)))
 	_assert_true("rank 2 spend enabled at magic 8", bool(state.get("spend_button_enabled", false)))
 	panel.set_skill_bindings(["", "magic_bolt", "", "", "", "", "", ""], "magic_bolt")
 	state = panel.get_debug_state()
@@ -242,13 +250,35 @@ func _remove_user_file(path: String) -> void:
 
 func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false) -> Array:
 	return [
-		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": 5, "can_spend": cleave_can_spend},
-		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": 5, "can_spend": magic_can_spend},
-		{"skill_id": "ice_shard", "rank": ice_shard_rank, "max_rank": 5, "can_spend": ice_shard_can_spend},
-		{"skill_id": "ligthing", "rank": ligthing_rank, "max_rank": 5, "can_spend": ligthing_can_spend},
-		{"skill_id": "rage", "rank": rage_rank, "max_rank": 5, "can_spend": rage_can_spend},
-		{"skill_id": "heal", "rank": heal_rank, "max_rank": 5, "can_spend": heal_can_spend},
-		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": 5, "can_spend": holy_shield_can_spend},
-		{"skill_id": "poison_stab", "rank": poison_stab_rank, "max_rank": 5, "can_spend": poison_stab_can_spend},
-		{"skill_id": "dash", "rank": dash_rank, "max_rank": 5, "can_spend": dash_can_spend},
+		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": _skill_max_rank("cleave"), "can_spend": cleave_can_spend},
+		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": _skill_max_rank("magic_bolt"), "can_spend": magic_can_spend},
+		{"skill_id": "ice_shard", "rank": ice_shard_rank, "max_rank": _skill_max_rank("ice_shard"), "can_spend": ice_shard_can_spend},
+		{"skill_id": "ligthing", "rank": ligthing_rank, "max_rank": _skill_max_rank("ligthing"), "can_spend": ligthing_can_spend},
+		{"skill_id": "rage", "rank": rage_rank, "max_rank": _skill_max_rank("rage"), "can_spend": rage_can_spend},
+		{"skill_id": "heal", "rank": heal_rank, "max_rank": _skill_max_rank("heal"), "can_spend": heal_can_spend},
+		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": _skill_max_rank("holy_shield"), "can_spend": holy_shield_can_spend},
+		{"skill_id": "poison_stab", "rank": poison_stab_rank, "max_rank": _skill_max_rank("poison_stab"), "can_spend": poison_stab_can_spend},
+		{"skill_id": "dash", "rank": dash_rank, "max_rank": _skill_max_rank("dash"), "can_spend": dash_can_spend},
 	]
+
+
+func _skill_max_rank(skill_id: String) -> int:
+	return int(SkillRulesLoaderScript.skill_definition(skill_id).get("max_rank", 1))
+
+
+func _skill_level_requirement(skill_id: String, current_rank: int) -> int:
+	var req: Dictionary = SkillRulesLoaderScript.skill_definition(skill_id).get("requirements", {})
+	return int(req.get("level", 1)) + current_rank * int(req.get("level_per_rank", 0))
+
+
+func _skill_stat_requirement(skill_id: String, stat: String, current_rank: int) -> int:
+	var req: Dictionary = SkillRulesLoaderScript.skill_definition(skill_id).get("requirements", {})
+	var stats: Dictionary = req.get("stats", {})
+	var stats_per_rank: Dictionary = req.get("stats_per_rank", {})
+	return int(stats.get(stat, 0)) + current_rank * int(stats_per_rank.get(stat, 0))
+
+
+func _skill_mana_cost(skill_id: String, current_rank: int) -> int:
+	var cost: Dictionary = SkillRulesLoaderScript.skill_definition(skill_id).get("cost", {})
+	var mana: Dictionary = cost.get("mana", {})
+	return int(mana.get("base", 0)) + current_rank * int(mana.get("per_rank", 0))

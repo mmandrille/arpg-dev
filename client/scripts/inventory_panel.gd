@@ -12,6 +12,7 @@ const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
 const DRAG_SOURCE_STASH := "stash"
 const DRAG_SOURCE_CORPSE := "corpse"
+const DRAG_SOURCE_UNIQUE_CHEST := "unique_chest"
 const BAG_COLUMNS := 5
 const BASE_INVENTORY_ROWS := 3
 const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
@@ -141,6 +142,10 @@ class InventorySlotButton:
 			if source == DRAG_SOURCE_CORPSE \
 					and str(data.get("corpse_entity_id", "")) != "" \
 					and str(data.get("item_instance_id", "")) != "":
+				return true
+			if source == DRAG_SOURCE_UNIQUE_CHEST \
+					and str(data.get("stash_entity_id", "")) != "" \
+					and str(data.get("stash_item_id", "")) != "":
 				return true
 			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
 				return true
@@ -898,6 +903,11 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 			intent_requested.emit("corpse_withdraw_item_intent", {
 				"corpse_entity_id": str(data.get("corpse_entity_id", "")),
 				"item_instance_id": str(data.get("item_instance_id", "")),
+			})
+		elif source == DRAG_SOURCE_UNIQUE_CHEST:
+			intent_requested.emit("unique_chest_take_item_intent", {
+				"chest_entity_id": str(data.get("stash_entity_id", "")),
+				"chest_item_id": str(data.get("stash_item_id", "")),
 			})
 		elif source == "blacksmith_stage":
 			var blacksmith = data.get("blacksmith_panel", null)

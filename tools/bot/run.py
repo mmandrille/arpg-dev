@@ -1599,6 +1599,33 @@ async def execute_step(
             raise AssertionError(f"withdraw_stash_item: inventory did not grow after withdrawing {stash_item_id}")
         return
 
+    if action == "take_unique_chest_item":
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_unique_chest")))
+        if target is None:
+            raise AssertionError(f"take_unique_chest_item: missing unique chest on level {state.current_level}")
+        item = select_stash_item(state, step)
+        chest_item_id = str(item["stash_item_id"])
+        before_inventory_count = len(state.inventory)
+        start_index = len(state.stash_events)
+        env = make_envelope(
+            "unique_chest_take_item_intent",
+            session_id,
+            state.last_tick,
+            {"chest_entity_id": str(target["id"]), "chest_item_id": chest_item_id},
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        event = await wait_for_stash_event(ws, state, "unique_chest_item_taken", loop, stash_id="unique_test_chest", start_index=start_index)
+        if str(event.get("stash_item_id")) != chest_item_id:
+            raise AssertionError(f"take_unique_chest_item: event chest item {event.get('stash_item_id')} != {chest_item_id}")
+        if len(state.inventory) <= before_inventory_count:
+            raise AssertionError(f"take_unique_chest_item: inventory did not grow after taking {chest_item_id}")
+        return
+
     if action == "deposit_stash_gold":
         amount = int(step["amount"])
         stash_id = str(step.get("stash_id", "account_stash"))
@@ -2460,7 +2487,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
                     str(appraisal["item_instance_id"]): dict(appraisal)
                     for appraisal in ev.get("sell_appraisals", [])
                 }
-        if event_type in {"stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn"}:
+        if event_type in {"stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn", "unique_chest_opened", "unique_chest_item_taken"}:
             stash_event = dict(ev)
             state.stash_events.append(stash_event)
             state.last_stash_event = stash_event
@@ -2926,6 +2953,8 @@ def filtered_inventory_items(inventory: list[dict[str, Any]], step: dict[str, An
         items = [item for item in items if str(item.get("item_def_id", "")) == str(step["item_def_id"])]
     if step.get("item_template_id") is not None:
         items = [item for item in items if str(item.get("item_template_id", "")) == str(step["item_template_id"])]
+    if step.get("display_name") is not None:
+        items = [item for item in items if str(item.get("display_name", "")) == str(step["display_name"])]
     if step.get("rolled") is not None:
         want_rolled = bool(step["rolled"])
         items = [item for item in items if bool(item.get("item_template_id")) == want_rolled]
@@ -2953,6 +2982,8 @@ def filtered_stash_items(stash_items: list[dict[str, Any]], step: dict[str, Any]
         items = [item for item in items if str(item.get("item_def_id", "")) == str(step["item_def_id"])]
     if step.get("item_template_id") is not None:
         items = [item for item in items if str(item.get("item_template_id", "")) == str(step["item_template_id"])]
+    if step.get("display_name") is not None:
+        items = [item for item in items if str(item.get("display_name", "")) == str(step["display_name"])]
     if step.get("rolled") is not None:
         want_rolled = bool(step["rolled"])
         items = [item for item in items if bool(item.get("item_template_id")) == want_rolled]
@@ -3666,6 +3697,8 @@ def run_assertions(
                 matches = [item for item in matches if str(item.get("item_def_id", "")) == str(assertion["item_def_id"])]
             if assertion.get("item_template_id") is not None:
                 matches = [item for item in matches if str(item.get("item_template_id", "")) == str(assertion["item_template_id"])]
+            if assertion.get("display_name") is not None:
+                matches = [item for item in matches if str(item.get("display_name", "")) == str(assertion["display_name"])]
             if assertion.get("equipped") is not None:
                 matches = [item for item in matches if bool(item.get("equipped")) == bool(assertion["equipped"])]
             assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")

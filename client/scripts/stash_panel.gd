@@ -5,6 +5,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(390, 520)
 const COLUMNS := 5
@@ -23,6 +24,7 @@ const SORT_MODES := [SORT_ACQUIRED, SORT_NAME, SORT_RARITY, SORT_SLOT]
 const DRAG_SOURCE_INVENTORY_BAG := "bag"
 const DRAG_SOURCE_STASH := "stash"
 const DRAG_SOURCE_CORPSE := "corpse"
+const DRAG_SOURCE_UNIQUE_CHEST := "unique_chest"
 const ITEM_RARITY_BACKGROUNDS := {
 	"common": Color("#343432"),
 	"magic": Color("#1b3458"),
@@ -98,7 +100,7 @@ class StashSlotButton:
 		if not panel._interactive or item.is_empty() or slot_kind != "stash":
 			return null
 		var data := {
-			"source": DRAG_SOURCE_CORPSE if panel.container_mode == "corpse" else DRAG_SOURCE_STASH,
+			"source": panel._drag_source_for_container(),
 			"stash_entity_id": panel.stash_entity_id,
 			"stash_item_id": str(item.get("stash_item_id", "")),
 			"corpse_entity_id": panel.stash_entity_id if panel.container_mode == "corpse" else "",
@@ -123,6 +125,13 @@ class StashSlotButton:
 
 	func _drop_data(_at_position: Vector2, data: Variant) -> void:
 		panel._handle_drop_on_stash(data)
+
+	func _make_custom_tooltip(for_text: String) -> Object:
+		if panel == null:
+			return null
+		if item.is_empty():
+			return panel._make_text_tooltip(for_text)
+		return panel._make_item_tooltip(item)
 
 
 func _ready() -> void:
@@ -161,6 +170,19 @@ func show_corpse(next_entity_id: String, corpse_name: String, corpse_items: Arra
 		rec["stash_item_id"] = str(rec.get("item_instance_id", rec.get("stash_item_id", "")))
 		mapped_items.append(rec)
 	set_stash_state(mapped_items, 0, mapped_items.size())
+	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
+	visible = true
+	_apply_interaction_filters()
+	_render()
+
+
+func show_unique_chest(next_entity_id: String, chest_items: Array, next_inventory: Array, next_equipped: Dictionary, next_gold: int, next_hotbar: Array = []) -> void:
+	stash_entity_id = next_entity_id
+	stash_id = "unique_test_chest"
+	stash_title = "Unique Chest"
+	container_mode = "unique_chest"
+	container_label = "Chest"
+	set_stash_state(chest_items, 0, chest_items.size())
 	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
 	visible = true
 	_apply_interaction_filters()
@@ -425,7 +447,7 @@ func _render() -> void:
 	if _section_title_label != null:
 		_section_title_label.text = container_label
 	if _search_field != null:
-		_search_field.placeholder_text = "Search corpse" if container_mode == "corpse" else "Search stash"
+		_search_field.placeholder_text = _search_placeholder()
 	if _search_field != null and _search_field.text != _search_text:
 		_search_field.text = _search_text
 	if _sort_option != null:
@@ -461,6 +483,22 @@ func _section_label(text: String) -> Label:
 	label.add_theme_color_override("font_color", Color("#d8c7a6"))
 	label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	return label
+
+
+func _drag_source_for_container() -> String:
+	if container_mode == "corpse":
+		return DRAG_SOURCE_CORPSE
+	if container_mode == "unique_chest":
+		return DRAG_SOURCE_UNIQUE_CHEST
+	return DRAG_SOURCE_STASH
+
+
+func _search_placeholder() -> String:
+	if container_mode == "corpse":
+		return "Search corpse"
+	if container_mode == "unique_chest":
+		return "Search chest"
+	return "Search stash"
 
 
 func _gold_button(text: String) -> Button:
@@ -520,6 +558,27 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	ItemIconDrawerScript.draw(slot, rect, icon, label, slot is Button and (slot as Button).disabled, 0.10, ICON_FONT_SIZE)
 
 
+func _make_item_tooltip(item: Dictionary) -> Control:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup(
+		item,
+		item_presentations,
+		_tooltip_lines(item),
+		_requirement_lines(item),
+		[],
+		-1,
+		true,
+		_short_label(str(item.get("item_def_id", "")))
+	)
+	return tooltip
+
+
+func _make_text_tooltip(text: String) -> Control:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup({}, item_presentations, [text], [], [], -1, true, "")
+	return tooltip
+
+
 func _emit_deposit(item: Dictionary) -> void:
 	if stash_entity_id == "" or item.is_empty():
 		return
@@ -539,6 +598,12 @@ func _emit_withdraw(item: Dictionary) -> void:
 		intent_requested.emit("corpse_withdraw_item_intent", {
 			"corpse_entity_id": stash_entity_id,
 			"item_instance_id": str(item.get("item_instance_id", item.get("stash_item_id", ""))),
+		})
+		return
+	if container_mode == "unique_chest":
+		intent_requested.emit("unique_chest_take_item_intent", {
+			"chest_entity_id": stash_entity_id,
+			"chest_item_id": str(item.get("stash_item_id", "")),
 		})
 		return
 	intent_requested.emit("stash_withdraw_item_intent", {
@@ -848,6 +913,37 @@ func _tooltip_lines(row: Dictionary) -> Array:
 		if typeof(req) == TYPE_DICTIONARY and int((req as Dictionary).get("level", 0)) > 0:
 			lines.append("Requires level %d" % int((req as Dictionary).get("level", 0)))
 	return lines
+
+
+func _requirement_lines(row: Dictionary) -> Array:
+	var req = row.get("requirements", {})
+	if typeof(req) != TYPE_DICTIONARY:
+		return []
+	var status_rows = row.get("requirement_status", [])
+	var status_by_stat := {}
+	if typeof(status_rows) == TYPE_ARRAY:
+		for entry in status_rows:
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			var rec := entry as Dictionary
+			status_by_stat[str(rec.get("stat", ""))] = rec
+	var out: Array = []
+	for key in (req as Dictionary).keys():
+		var stat := str(key)
+		var required := int((req as Dictionary).get(stat, 0))
+		if required <= 0:
+			continue
+		var status: Dictionary = status_by_stat.get(stat, {})
+		var current := int(status.get("current", 0))
+		var met := bool(status.get("met", true))
+		var text := "%s %d" % [StatLabels.display_name(stat), required]
+		if status_by_stat.has(stat):
+			text = "%s %d/%d" % [StatLabels.display_name(stat), current, required]
+		out.append({"text": text, "color": Color("#d8c7a6") if met else Color("#ff8f70")})
+	out.sort_custom(func(a, b) -> bool:
+		return str((a as Dictionary).get("text", "")) < str((b as Dictionary).get("text", ""))
+	)
+	return out
 
 
 func _stat_lines(stats_value: Variant) -> Array:

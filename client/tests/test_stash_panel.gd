@@ -134,6 +134,16 @@ func _run() -> void:
 	_assert_eq("corpse drag to bag type", str(inventory_emitted[1]["type"]), "corpse_withdraw_item_intent")
 	_assert_eq("corpse drag to bag entity", str(inventory_emitted[1]["payload"].get("corpse_entity_id", "")), "corpse_entity_1")
 	_assert_eq("corpse drag to bag item", str(inventory_emitted[1]["payload"].get("item_instance_id", "")), "dead_item_1")
+	inventory_panel._handle_drop_on_slot("bag", {
+		"source": "unique_chest",
+		"stash_entity_id": "unique_chest_entity_1",
+		"stash_item_id": "unique_item_1",
+		"item": {"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique"},
+	})
+	_assert_eq("unique chest drag to bag emitted count", inventory_emitted.size(), 3)
+	_assert_eq("unique chest drag to bag type", str(inventory_emitted[2]["type"]), "unique_chest_take_item_intent")
+	_assert_eq("unique chest drag to bag entity", str(inventory_emitted[2]["payload"].get("chest_entity_id", "")), "unique_chest_entity_1")
+	_assert_eq("unique chest drag to bag item", str(inventory_emitted[2]["payload"].get("chest_item_id", "")), "unique_item_1")
 	_assert_true("test equip slot kind recognized", inventory_panel._slot_kind_is_equipment("equip:main_hand"))
 	_assert_true("test stash item can equip to main hand", inventory_panel._item_can_equip_to(stash_items[0], "main_hand"))
 	_assert_false("non-rogue cannot equip main-hand weapon to off hand", inventory_panel._item_can_equip_to(inventory[0], "off_hand"))
@@ -152,11 +162,11 @@ func _run() -> void:
 		"stash_item_id": "9001",
 		"item": stash_items[0],
 	})
-	_assert_eq("stash drag to equip emitted count", inventory_emitted.size(), 3)
-	if inventory_emitted.size() >= 3:
-		_assert_eq("stash drag to equip type", str(inventory_emitted[2]["type"]), "stash_equip_item_intent")
-		_assert_eq("stash drag to equip stash item", str(inventory_emitted[2]["payload"].get("stash_item_id", "")), "9001")
-		_assert_eq("stash drag to equip slot", str(inventory_emitted[2]["payload"].get("slot", "")), "main_hand")
+	_assert_eq("stash drag to equip emitted count", inventory_emitted.size(), 4)
+	if inventory_emitted.size() >= 4:
+		_assert_eq("stash drag to equip type", str(inventory_emitted[3]["type"]), "stash_equip_item_intent")
+		_assert_eq("stash drag to equip stash item", str(inventory_emitted[3]["payload"].get("stash_item_id", "")), "9001")
+		_assert_eq("stash drag to equip slot", str(inventory_emitted[3]["payload"].get("slot", "")), "main_hand")
 	inventory_panel.queue_free()
 
 	panel.bot_click_deposit_gold(7)
@@ -205,6 +215,26 @@ func _run() -> void:
 	_assert_eq("corpse double-click emitted type", str(emitted[7]["type"]), "corpse_withdraw_item_intent")
 	_assert_eq("corpse double-click emitted entity", str(emitted[7]["payload"].get("corpse_entity_id", "")), "corpse_entity_1")
 	_assert_eq("corpse double-click emitted item", str(emitted[7]["payload"].get("item_instance_id", "")), "dead_item_2")
+	panel.show_unique_chest(
+		"unique_chest_entity_1",
+		[
+			{"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+		],
+		inventory,
+		{},
+		67,
+		[]
+	)
+	state = panel.get_debug_state()
+	_assert_eq("unique chest panel mode", str(state.get("container_mode", "")), "unique_chest")
+	_assert_eq("unique chest entity id retained", str(state.get("stash_entity_id", "")), "unique_chest_entity_1")
+	_assert_false("unique chest deposit gold hidden", bool(state.get("deposit_gold_enabled", true)))
+	_assert_false("unique chest withdraw gold hidden", bool(state.get("withdraw_gold_enabled", true)))
+	panel.bot_drag_stash_to_bag("unique_item_1")
+	_assert_eq("unique chest take emitted count", emitted.size(), 9)
+	_assert_eq("unique chest take emitted type", str(emitted[8]["type"]), "unique_chest_take_item_intent")
+	_assert_eq("unique chest take emitted entity", str(emitted[8]["payload"].get("chest_entity_id", "")), "unique_chest_entity_1")
+	_assert_eq("unique chest take emitted item", str(emitted[8]["payload"].get("chest_item_id", "")), "unique_item_1")
 	var drag_start_position: Dictionary = (panel.get_debug_state().get("window", {}) as Dictionary).get("position", {})
 	panel.bot_drag_window_by(Vector2(35, 20))
 	state = panel.get_debug_state()

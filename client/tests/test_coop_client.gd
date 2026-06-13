@@ -64,6 +64,7 @@ func _initialize() -> void:
 	_test_actionable_panels_autoclose_out_of_range()
 	_test_market_board_activation_sends_action_intent()
 	_test_movement_closes_gameplay_panels()
+	_test_hero_corpse_is_easy_to_target_and_labels_like_loot()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -864,6 +865,51 @@ func _test_consumable_heal_spawns_personal_effect() -> void:
 		_assert_eq("heal floating text", str((numbers[0] as Dictionary).get("text", "")), "+4")
 	main.damage_numbers_layer.queue_free()
 	main._camera.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
+
+
+func _test_hero_corpse_is_easy_to_target_and_labels_like_loot() -> void:
+	var main = _make_main()
+	main._upsert_entity({
+		"id": "4001",
+		"type": "interactable",
+		"interactable_def_id": "hero_corpse",
+		"corpse_character_id": "dead_hero",
+		"corpse_name": "p2",
+		"corpse_level": 7,
+		"corpse_item_count": 4,
+		"state": "ready",
+		"position": {"x": 4.0, "y": 5.0},
+	})
+	_assert_true("corpse uses approach before action", main._interactable_should_approach_before_action("hero_corpse"))
+	_assert_true("corpse is tracked as interactable", main.interactable_ids.has("4001"))
+	var rec: Dictionary = main.entities.get("4001", {})
+	var node := rec.get("node", null) as Node3D
+	var pick_body: StaticBody3D = null
+	if node != null:
+		pick_body = node.get_node_or_null("PickBody") as StaticBody3D
+	var shape: CollisionShape3D = null
+	if pick_body != null and pick_body.get_child_count() > 0:
+		shape = pick_body.get_child(0) as CollisionShape3D
+	var box: BoxShape3D = null
+	if shape != null:
+		box = shape.shape as BoxShape3D
+	_assert_true("corpse pick body covers fallen model", box != null and box.size.x >= 1.79 and box.size.z >= 1.34)
+	main.loot_label_reveal_held = true
+	main._refresh_loot_label_visibility()
+	var labels := main._bot_loot_label_debug()
+	var found_label := false
+	for row in labels:
+		var label: Dictionary = row
+		if str(label.get("id", "")) == "4001":
+			found_label = true
+			_assert_eq("corpse label type", str(label.get("interactable_def_id", "")), "hero_corpse")
+			_assert_eq("corpse label text", str(label.get("text", "")), "p2 Lv 7")
+			_assert_true("corpse label visible on reveal", bool(label.get("visible", false)))
+	_assert_true("corpse label listed with loot labels", found_label)
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

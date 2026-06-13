@@ -11,6 +11,7 @@ const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
 const DRAG_SOURCE_STASH := "stash"
+const DRAG_SOURCE_CORPSE := "corpse"
 const BAG_COLUMNS := 5
 const BASE_INVENTORY_ROWS := 3
 const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
@@ -122,13 +123,17 @@ class InventorySlotButton:
 		if dragged.is_empty():
 			return false
 		if panel._slot_kind_is_equipment(slot_kind):
-			return (source == SLOT_KIND_BAG or source == DRAG_SOURCE_STASH) and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
+			return (source == SLOT_KIND_BAG or source == DRAG_SOURCE_STASH or source == DRAG_SOURCE_CORPSE) and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 		if slot_kind == SLOT_KIND_BAG:
 			if source == DRAG_SOURCE_SHOP_OFFER and str(data.get("offer_id", "")) != "" and str(data.get("shop_entity_id", "")) != "":
 				return true
 			if source == DRAG_SOURCE_STASH \
 					and str(data.get("stash_entity_id", "")) != "" \
 					and str(data.get("stash_item_id", "")) != "":
+				return true
+			if source == DRAG_SOURCE_CORPSE \
+					and str(data.get("corpse_entity_id", "")) != "" \
+					and str(data.get("item_instance_id", "")) != "":
 				return true
 			return panel._slot_kind_is_equipment(source)
 		return false
@@ -791,6 +796,11 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 					"stash_item_id": str(data.get("stash_item_id", "")),
 					"slot": slot,
 				})
+			elif source == DRAG_SOURCE_CORPSE:
+				intent_requested.emit("corpse_withdraw_item_intent", {
+					"corpse_entity_id": str(data.get("corpse_entity_id", "")),
+					"item_instance_id": str(data.get("item_instance_id", "")),
+				})
 			else:
 				intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
 	elif slot_kind == SLOT_KIND_BAG:
@@ -804,6 +814,11 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 			intent_requested.emit("stash_withdraw_item_intent", {
 				"stash_entity_id": str(data.get("stash_entity_id", "")),
 				"stash_item_id": str(data.get("stash_item_id", "")),
+			})
+		elif source == DRAG_SOURCE_CORPSE:
+			intent_requested.emit("corpse_withdraw_item_intent", {
+				"corpse_entity_id": str(data.get("corpse_entity_id", "")),
+				"item_instance_id": str(data.get("item_instance_id", "")),
 			})
 		elif _slot_kind_is_equipment(source):
 			intent_requested.emit("unequip_intent", {"slot": _slot_from_kind(source)})

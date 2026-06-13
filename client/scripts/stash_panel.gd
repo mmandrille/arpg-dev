@@ -22,6 +22,7 @@ const SORT_SLOT := "slot"
 const SORT_MODES := [SORT_ACQUIRED, SORT_NAME, SORT_RARITY, SORT_SLOT]
 const DRAG_SOURCE_INVENTORY_BAG := "bag"
 const DRAG_SOURCE_STASH := "stash"
+const DRAG_SOURCE_CORPSE := "corpse"
 const ITEM_RARITY_BACKGROUNDS := {
 	"common": Color("#343432"),
 	"magic": Color("#1b3458"),
@@ -71,6 +72,18 @@ class StashSlotButton:
 	var item: Dictionary = {}
 	var slot_kind: String = "stash"
 
+	func _gui_input(event: InputEvent) -> void:
+		if not panel._interactive:
+			return
+		if event is InputEventMouseButton \
+				and event.button_index == MOUSE_BUTTON_LEFT \
+				and event.pressed \
+				and event.double_click \
+				and slot_kind == "stash" \
+				and not item.is_empty():
+			panel._emit_withdraw(item)
+			accept_event()
+
 	func _draw() -> void:
 		if item.is_empty():
 			return
@@ -80,9 +93,11 @@ class StashSlotButton:
 		if not panel._interactive or item.is_empty() or slot_kind != "stash":
 			return null
 		var data := {
-			"source": DRAG_SOURCE_STASH,
+			"source": DRAG_SOURCE_CORPSE if panel.container_mode == "corpse" else DRAG_SOURCE_STASH,
 			"stash_entity_id": panel.stash_entity_id,
 			"stash_item_id": str(item.get("stash_item_id", "")),
+			"corpse_entity_id": panel.stash_entity_id if panel.container_mode == "corpse" else "",
+			"item_instance_id": str(item.get("item_instance_id", item.get("stash_item_id", ""))),
 			"item": item,
 		}
 		var preview := Label.new()

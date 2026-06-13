@@ -1,0 +1,24 @@
+server/internal/game/stash_test.go
+  s_68a7da5dad7d6a::t_8a3610ae00b1d1 105,107,109,113-114,116-120
+client/scripts/stash_panel.gd
+  s_68a7da5dad7d6a::t_63214784a39242 119,554-555
+server/internal/game/handlers.go
+  s_68a7da5dad7d6a::t_076d6b2cdada6e 404-405,427-439,441
+  s_68a7da5dad7d6a::t_fb8747918d68d1 425-426,440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "84ab2fecd2ee2ec0d4dc5169d403e2916fbc5feb",
+  "prompts": {},
+  "sessions": {
+    "s_68a7da5dad7d6a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf3e-573d-7d92-a6c1-01a1b92ccbea",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

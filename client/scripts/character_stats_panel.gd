@@ -37,6 +37,7 @@ var _derived_labels: Dictionary = {}
 var _derived_toggle: Button
 var _derived_container: VBoxContainer
 var _derived_open: bool = false
+var _hero_name: String = "Character"
 
 
 func _ready() -> void:
@@ -67,6 +68,13 @@ func set_progression(next_progression: Dictionary) -> void:
 	_render()
 
 
+func set_hero_name(next_name: String) -> void:
+	_hero_name = next_name.strip_edges()
+	if _hero_name == "":
+		_hero_name = "Character"
+	_sync_title()
+
+
 func set_allocation_enabled(enabled: bool) -> void:
 	allocation_enabled = enabled
 	_render_buttons()
@@ -94,6 +102,7 @@ func get_debug_state() -> Dictionary:
 		"derived_open": _derived_open,
 		"derived_labels": derived_labels,
 		"stat_breakdowns": _breakdowns_by_key(),
+		"hero_name": _hero_name,
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
 
@@ -186,6 +195,11 @@ func _build() -> void:
 		_derived_container.add_child(label)
 
 	_render()
+
+
+func _sync_title() -> void:
+	if _panel != null:
+		_panel.configure(_hero_name, Vector2(304, 436))
 
 
 func _render() -> void:

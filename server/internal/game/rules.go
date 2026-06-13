@@ -519,6 +519,8 @@ type SkillDef struct {
 	Cost         SkillCostDef        `json:"cost"`
 	Damage       SkillDamageDef      `json:"damage"`
 	Projectile   SkillProjectileDef  `json:"projectile"`
+	Pierce       SkillPierceDef      `json:"pierce"`
+	Root         SkillRootDef        `json:"root"`
 	Cone         SkillConeDef        `json:"cone"`
 	Poison       SkillPoisonDef      `json:"poison"`
 	Dash         SkillDashDef        `json:"dash"`
@@ -584,6 +586,18 @@ type SkillProjectileDef struct {
 	Range  float64 `json:"range"`
 	Speed  float64 `json:"speed"`
 	Visual string  `json:"visual"`
+}
+
+// SkillPierceDef defines a deterministic projectile that can hit multiple monsters.
+type SkillPierceDef struct {
+	MaxHits                  int `json:"max_hits"`
+	DamagePercentPerExtraHit int `json:"damage_percent_per_extra_hit"`
+}
+
+// SkillRootDef defines a movement root applied by a projectile skill.
+type SkillRootDef struct {
+	EffectID      string `json:"effect_id"`
+	DurationTicks int    `json:"duration_ticks"`
 }
 
 // SkillConeDef defines a server-owned cone attack shape and push behavior.
@@ -2846,6 +2860,29 @@ func validateProjectileSkillPayload(skillID string, skill SkillDef) error {
 	}
 	if len(skill.Effects) > 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.effects: projectile_attack does not support effects", skillID)
+	}
+	return validateRangerProjectileSkillPayload(skillID, skill)
+}
+
+func validateRangerProjectileSkillPayload(skillID string, skill SkillDef) error {
+	if skill.Pierce.MaxHits > 0 {
+		if skill.Pierce.MaxHits < 2 {
+			return fmt.Errorf("game: invalid rules skills.%s.pierce.max_hits: must be at least 2", skillID)
+		}
+		if skill.Pierce.DamagePercentPerExtraHit <= 0 || skill.Pierce.DamagePercentPerExtraHit > 100 {
+			return fmt.Errorf("game: invalid rules skills.%s.pierce.damage_percent_per_extra_hit: must be 1..100", skillID)
+		}
+	}
+	if skill.Root.DurationTicks > 0 || skill.Root.EffectID != "" {
+		if skill.Root.EffectID == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.root.effect_id: required", skillID)
+		}
+		if skill.Root.DurationTicks <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.root.duration_ticks: must be positive", skillID)
+		}
+	}
+	if skill.Pierce.MaxHits > 0 && skill.Root.DurationTicks > 0 {
+		return fmt.Errorf("game: invalid rules skills.%s: pierce and root cannot be combined", skillID)
 	}
 	return nil
 }

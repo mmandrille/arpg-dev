@@ -1215,6 +1215,10 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 	}
 	switch def.Kind {
 	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack":
+		if def.Pierce.MaxHits > 0 || def.Root.DurationTicks > 0 {
+			s.handleRangerProjectileSkillCast(in, res, player, skillID, def, rank, manaCost)
+			return
+		}
 		s.handleProjectileSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "cone_attack":
 		if def.Dash.RangeBase > 0 {

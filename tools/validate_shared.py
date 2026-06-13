@@ -1241,8 +1241,14 @@ def cross_checks(report: Report) -> None:
     unknown_skill_classes = {skill_id: class_id for skill_id, class_id in skill_class_map.items() if class_id not in class_defs}
     if unknown_skill_classes:
         report.fail("skill classes", f"unknown classes: {unknown_skill_classes}")
-    elif skill_class_map.get("magic_bolt") != "sorcerer" or skill_class_map.get("rage") != "barbarian" or skill_class_map.get("heal") != "paladin":
-        report.fail("skill classes", "magic_bolt/rage/heal must map to sorcerer/barbarian/paladin")
+    elif (
+        skill_class_map.get("magic_bolt") != "sorcerer"
+        or skill_class_map.get("rage") != "barbarian"
+        or skill_class_map.get("heal") != "paladin"
+        or skill_class_map.get("piercing_shot") != "ranger"
+        or skill_class_map.get("pinning_shot") != "ranger"
+    ):
+        report.fail("skill classes", "core class skills must map to their owning classes")
     else:
         report.ok("skill classes reference character classes")
     if magic_bolt is None:
@@ -1288,9 +1294,13 @@ def cross_checks(report: Report) -> None:
     elif extra_skill_presentations:
         report.fail("skill_presentations keys", f"unknown skills {extra_skill_presentations}")
     elif magic_bolt is not None:
-        presentation = skill_presentations["skills"].get("magic_bolt", {})
-        if presentation.get("projectile_visual") != magic_bolt.get("projectile", {}).get("visual"):
-            report.fail("skill_presentations magic_bolt", "projectile_visual must match rules projectile.visual")
+        mismatched_projectiles = []
+        for skill_id, skill in skills.get("skills", {}).items():
+            projectile_visual = skill.get("projectile", {}).get("visual", "")
+            if projectile_visual and skill_presentations["skills"].get(skill_id, {}).get("projectile_visual") != projectile_visual:
+                mismatched_projectiles.append(skill_id)
+        if mismatched_projectiles:
+            report.fail("skill_presentations projectile visuals", f"mismatched skills {mismatched_projectiles}")
         else:
             report.ok("skill presentations cover skill rules")
 

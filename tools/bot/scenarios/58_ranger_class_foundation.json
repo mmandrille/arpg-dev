@@ -15,7 +15,7 @@
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
     "stats": { "str": 4, "dex": 8, "vit": 5, "magic": 3 },
-    "skill_ranks": {}
+    "skill_ranks": { "piercing_shot": 1, "pinning_shot": 1 }
   },
   "steps": [
     { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },

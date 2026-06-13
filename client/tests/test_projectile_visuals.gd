@@ -11,6 +11,7 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	_test_training_arrow_is_white_arrow_shape()
+	_test_ranger_projectiles_use_green_arrow_cues()
 	_test_magic_bolt_remains_blue_energy_bolt()
 
 	print("[gdtest] PASS: test_projectile_visuals (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -29,6 +30,24 @@ func _test_training_arrow_is_white_arrow_shape() -> void:
 	var mat := shaft.material_override as StandardMaterial3D
 	_assert_true("arrow material is white", mat.albedo_color.r > 0.9 and mat.albedo_color.g > 0.9 and mat.albedo_color.b > 0.9)
 	arrow.free()
+
+
+func _test_ranger_projectiles_use_green_arrow_cues() -> void:
+	var piercing := ProjectileVisualsScript.make_node("piercing_shot_projectile")
+	_assert_true("piercing shot shaft exists", piercing.find_child("ArrowShaft", false, false) != null)
+	_assert_true("piercing shot trail exists", piercing.find_child("PiercingTrail", false, false) != null)
+	var piercing_shaft := piercing.find_child("ArrowShaft", false, false) as MeshInstance3D
+	var piercing_mat := piercing_shaft.material_override as StandardMaterial3D
+	_assert_true("piercing shot is green", piercing_mat.albedo_color.g > piercing_mat.albedo_color.r and piercing_mat.albedo_color.g > piercing_mat.albedo_color.b)
+	piercing.free()
+
+	var pinning := ProjectileVisualsScript.make_node("pinning_shot_projectile")
+	_assert_true("pinning shot shaft exists", pinning.find_child("ArrowShaft", false, false) != null)
+	_assert_true("pinning shot glow exists", pinning.find_child("PinningGlow", false, false) != null)
+	var pinning_shaft := pinning.find_child("ArrowShaft", false, false) as MeshInstance3D
+	var pinning_mat := pinning_shaft.material_override as StandardMaterial3D
+	_assert_true("pinning shot is green", pinning_mat.albedo_color.g > pinning_mat.albedo_color.r)
+	pinning.free()
 
 
 func _test_magic_bolt_remains_blue_energy_bolt() -> void:

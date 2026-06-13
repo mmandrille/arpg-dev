@@ -33,7 +33,9 @@
                   "dash",
                   "ice_spike",
                   "orb_projectile",
-                  "poison_dagger"
+                  "poison_dagger",
+                  "arrow",
+                  "pin"
                 ]
               },
               "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },

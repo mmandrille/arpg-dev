@@ -3,7 +3,7 @@ name: autoloop
 description: >-
   Detect repository-maintenance documentation cleanup needs as permission-gated
   pre-tasks, then either execute the user-provided slice idea(s) directly or,
-  when no idea is provided, present a curated menu of 5-10 possible
+  when no idea is provided, present a curated menu of 15 possible
   non-documentation SDD slices. Batch any blocking clarification questions
   across the selected queue, then execute a bounded autonomous loop through
   next, spec, plan, execute, and finish with committed slices. Use when the
@@ -18,10 +18,10 @@ disable-model-invocation: true
 
 Examples:
 
-- `$autoloop 1` — present 5-10 ideas, then complete one selected slice after the user picks.
+- `$autoloop 1` — present 15 ideas, then complete one selected slice after the user picks.
 - `$autoloop 1 add a town healer` — treat the inline idea as selected and complete one slice if gates pass.
-- `$autoloop 3` — present 5-10 ideas, then complete up to three selected slices, stopping early on any gate.
-- `$autoloop 3 idea A; idea B; idea C` — treat the inline ideas as selected and complete up to three viable slices.
+- `$autoloop 5` — present 15 ideas, then complete up to five selected slices, stopping early on any gate.
+- `$autoloop 5 idea A; idea B; idea C; idea D; idea E` — treat the inline ideas as selected and complete up to five viable slices.
 
 **Announce at start:** "Using the **autoloop** skill to curate slice ideas, then run a bounded autonomous SDD loop after you choose."
 
@@ -56,11 +56,11 @@ blockers.
 
 1. Parse `{count}` as an integer.
 2. If missing, zero, negative, or not an integer, ask the user for a valid count.
-3. If `{count} > 3`, run at most **3** slices and say the execution request was capped.
+3. If `{count} > 5`, run at most **5** slices and say the execution request was capped.
 4. If the initial command includes idea text after the count, do **not** show
-   the 5-10 idea menu. Treat the inline idea text as selected input and proceed
+   the 15 idea menu. Treat the inline idea text as selected input and proceed
    to ordering and the batch clarification gate.
-5. If no inline idea text is provided, show **5-10** slice ideas before execution,
+5. If no inline idea text is provided, show **15** slice ideas before execution,
    regardless of the execution count.
 6. After inline idea parsing or user menu selection, set the execution target to the smaller of:
    - the capped count, and
@@ -96,7 +96,7 @@ Stop immediately and report the reason if any of these occur:
 4. CI fails after reasonable diagnosis and focused fixes.
 5. A decision requires product/design judgment not covered by the defaults.
 6. Secrets, credentials, `.env`, or local-only artifacts appear in the diff or staged changes.
-7. Completing another slice would exceed the capped count of 3.
+7. Completing another slice would exceed the capped count of 5.
 8. No inline idea was provided and the user has not yet selected ideas from the generated menu.
 9. A selected idea is too vague, too large, or not verifiable enough to turn into a small slice.
 10. Batch clarification questions were emitted and the user has not answered them yet.
@@ -144,8 +144,7 @@ Before writing any spec, plan, or code:
      menu can be curated safely, then resume Phase 1.
 4. If inline idea text was provided, skip menu generation and continue to the
    "selected ideas" validation and ordering steps below.
-5. Present **5-10** slice ideas when no inline idea text was provided. Prefer 8
-   when the backlog has enough credible options.
+5. Present **15** slice ideas when no inline idea text was provided.
    Slice ideas must be gameplay, systems, tooling, test, infrastructure, or quality work with a
    verifiable repo/runtime proof. They must not be documentation-only cleaning, updating, or
    ordering work discovered as repository maintenance.
@@ -158,9 +157,9 @@ Before writing any spec, plan, or code:
    - main risk or dependency.
 7. When no inline idea text was provided, do **not** choose for the user during
    the first autoloop response. Ask them to pick the idea numbers/codenames they like.
-8. If the user asks for fewer than 5 ideas, honor that explicit request; otherwise the
-   default menu remains 5-10 ideas.
-9. If fewer than 5 credible candidates exist, show the credible candidates and say why the
+8. If the user asks for fewer than 15 ideas, honor that explicit request; otherwise the
+   default menu remains 15 ideas.
+9. If fewer than 15 credible candidates exist, show the credible candidates and say why the
    menu is shorter.
 10. Do not write or modify files during the idea menu phase unless the user approved a
    documentation-maintenance pre-task or inspection of repo state requires no file changes.

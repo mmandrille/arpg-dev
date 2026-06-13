@@ -1,0 +1,72 @@
+docs/plans/v137_2026-06-13-bot-assertion-domain-split.md
+  s_806d7d64679b30::t_501bd5f9316c37 20-21,64,72
+  s_806d7d64679b30::t_497d8992521a63 22-26,69,74-87
+  s_806d7d64679b30::t_8477f7ef7361fd 1-2,4-19,27-36,39-53,56-63,65-66,70-71,73,88-96,99-106,110-115
+  s_806d7d64679b30::t_f4679a63fc7752 38
+  s_806d7d64679b30::t_81e7e27eeff762 107
+  s_806d7d64679b30::t_87466c948d15ed 3,37,54-55,67-68,97-98,108-109
+tools/bot/scenarios/61_purple_town_unique_chest.json
+  s_806d7d64679b30::t_2470995ceb7c2b 13-14
+  s_806d7d64679b30::t_d3882cce4ac00e 12
+scripts/bot_client_local.sh
+  s_806d7d64679b30::t_a2d5d30d01afb8 17,33
+.maintainability/file-size-baseline.tsv
+  s_806d7d64679b30::t_f4679a63fc7752 21
+docs/specs/v137_spec-bot-assertion-domain-split.md
+  s_806d7d64679b30::t_8477f7ef7361fd 1-2,4-15,17-32,37-42,44-46,49-53
+  s_806d7d64679b30::t_501bd5f9316c37 33-34
+  s_806d7d64679b30::t_c9dc9a3e7c85f7 16,35-36,43,47-48
+  s_806d7d64679b30::t_87466c948d15ed 3
+tools/bot/test_item_assertions.py
+  s_806d7d64679b30::t_cf84a3a765082e 1-32
+server/internal/replay/replay_test.go
+  s_806d7d64679b30::t_a081951afc397a 714,718-723,778-786
+tools/bot/test_stash_assertions.py
+  s_806d7d64679b30::t_dec79e83ab003d 1-62
+client/scripts/main.gd
+  s_806d7d64679b30::t_9d104796306b89 6367,6377
+tools/bot/run.py
+  s_806d7d64679b30::t_fd2081506c4e56 37-45,3715,4025,4028,4031,4057
+  s_806d7d64679b30::t_3923502a73ee49 3444-3447
+  s_806d7d64679b30::t_d3882cce4ac00e 1624-1625,2897-2898
+client/tests/test_golden.gd
+  s_806d7d64679b30::t_d8f469a7e8c11c 338-355
+scripts/bot_local.sh
+  s_806d7d64679b30::t_257b373d3f5b3b 21,39
+client/scripts/bot_controller.gd
+  s_806d7d64679b30::t_aeec3d71055da2 412,427-431
+tools/bot/scenarios/client/32_town_bishop_respec_panel.json
+  s_806d7d64679b30::t_7b8de57e305623 12
+  s_806d7d64679b30::t_307739a05cf5f4 11
+docs/as-built/v137_bot-assertion-domain-split.md
+  s_806d7d64679b30::t_f4679a63fc7752 43-46
+  s_806d7d64679b30::t_87466c948d15ed 1-11,16-17,28-30,36-40,42
+  s_806d7d64679b30::t_615d51994b57e6 14-15,18-27,31-35,41
+  s_806d7d64679b30::t_501bd5f9316c37 12-13
+scripts/bot_client.sh
+  s_806d7d64679b30::t_f48b983e909f40 27,281,296
+tools/bot/stash_assertions.py
+  s_806d7d64679b30::t_fd2081506c4e56 1-81
+scripts/ci.sh
+  s_806d7d64679b30::t_707abd8d4e02a8 175
+  s_806d7d64679b30::t_257b373d3f5b3b 18,135
+PROGRESS.md
+  s_806d7d64679b30::t_88f725ae5b02bb 468-472
+  s_806d7d64679b30::t_87466c948d15ed 15,158,335,466-467
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "338c6b9afe1732ef504cb68a9a26b18ee7bd8153",
+  "prompts": {},
+  "sessions": {
+    "s_806d7d64679b30": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec316-a146-70b2-bc83-fdcfc1136441",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

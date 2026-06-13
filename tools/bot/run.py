@@ -3374,8 +3374,12 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
     req = item.get("requirements", {})
     if int(req.get("level", 0)) != int(assertion.get("required_level", 1)):
         raise AssertionError(f"{where}: required level {req.get('level')} mismatch: {item}")
-    if item.get("effect_ids", []) != []:
-        raise AssertionError(f"{where}: effect_ids should be empty in v23: {item}")
+    if assertion.get("effect_ids") is not None:
+        expected_effects = [str(effect_id) for effect_id in assertion["effect_ids"]]
+        if item.get("effect_ids", []) != expected_effects:
+            raise AssertionError(f"{where}: effect_ids {item.get('effect_ids', [])} != {expected_effects}: {item}")
+    elif item.get("rarity") != "unique" and item.get("effect_ids", []) != []:
+        raise AssertionError(f"{where}: non-unique effect_ids should be empty: {item}")
 
 
 def assert_rolled_inventory_any(inventory: list[dict], equipped: bool | None, where: str) -> None:
@@ -3392,8 +3396,8 @@ def assert_rolled_inventory_any(inventory: list[dict], equipped: bool | None, wh
     req = item.get("requirements", {})
     if int(req.get("level", 0)) != 1:
         raise AssertionError(f"{where}: rolled item required level mismatch: {item}")
-    if item.get("effect_ids", []) != []:
-        raise AssertionError(f"{where}: rolled item effect_ids should be empty: {item}")
+    if item.get("rarity") != "unique" and item.get("effect_ids", []) != []:
+        raise AssertionError(f"{where}: non-unique rolled item effect_ids should be empty: {item}")
 
 
 def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: str) -> None:

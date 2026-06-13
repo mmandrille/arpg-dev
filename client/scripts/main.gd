@@ -24,6 +24,7 @@ const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
+const TownServiceBridgeScript := preload("res://scripts/town_service_bridge.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
@@ -3432,13 +3433,7 @@ func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) ->
 	if intent_type == "stash_equip_item_intent":
 		_send_stash_equip_item_intent(payload)
 		return
-	if intent_type == "market_stage_inventory_item":
-		if market_panel != null:
-			market_panel.stage_inventory_item(str(payload.get("context", "")), payload.get("item", {}))
-		return
-	if intent_type == "blacksmith_stage_inventory_item":
-		if blacksmith_panel != null:
-			blacksmith_panel.stage_inventory_item(payload.get("item", {}))
+	if TownServiceBridgeScript.route_inventory_stage_intent(intent_type, payload, market_panel, blacksmith_panel):
 		return
 	client.send(intent_type, last_server_tick, payload)
 
@@ -4180,9 +4175,7 @@ func _show_market_panel(ev: Dictionary) -> void:
 	if market_panel == null:
 		return
 	_close_gameplay_panels("market")
-	if inventory_panel != null:
-		inventory_panel.ensure_display_visible()
-		inventory_panel.set_market_context("publish")
+	TownServiceBridgeScript.open_market_inventory_context(inventory_panel)
 	var next_entity_id := str(ev.get("entity_id", ""))
 	var listings: Array = []
 	var status := "Active listings"
@@ -4271,12 +4264,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 
 
 func _on_market_inventory_context_requested(context: String) -> void:
-	if inventory_panel == null:
-		return
-	if context == "":
-		inventory_panel.clear_market_context()
-	else:
-		inventory_panel.set_market_context(context)
+	TownServiceBridgeScript.set_market_inventory_context(inventory_panel, context)
 
 
 func _refresh_market_panel_data() -> void:
@@ -4337,17 +4325,14 @@ func _update_market_board_badges(incoming_bids: int, published_listings: int) ->
 func _hide_market_panel() -> void:
 	if market_panel != null:
 		market_panel.hide_display()
-	if inventory_panel != null:
-		inventory_panel.clear_market_context()
+	TownServiceBridgeScript.close_market_inventory_context(inventory_panel)
 
 
 func _show_blacksmith_panel(ev: Dictionary) -> void:
 	if blacksmith_panel == null:
 		return
 	_close_gameplay_panels("blacksmith")
-	if inventory_panel != null:
-		inventory_panel.ensure_display_visible()
-		inventory_panel.set_blacksmith_context(true)
+	TownServiceBridgeScript.open_blacksmith_inventory_context(inventory_panel)
 	var next_entity_id := str(ev.get("entity_id", ""))
 	stash_items = ev.get("stash_items", stash_items)
 	stash_gold = int(ev.get("stash_gold", stash_gold))
@@ -4359,8 +4344,7 @@ func _show_blacksmith_panel(ev: Dictionary) -> void:
 func _hide_blacksmith_panel() -> void:
 	if blacksmith_panel != null:
 		blacksmith_panel.hide_display()
-	if inventory_panel != null:
-		inventory_panel.set_blacksmith_context(false)
+	TownServiceBridgeScript.close_blacksmith_inventory_context(inventory_panel)
 
 
 func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:

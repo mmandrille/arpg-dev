@@ -104,10 +104,13 @@ run_gate "GDScript directional attack input test" "[gdtest] PASS: test_direction
 # 2i. Shop panel render and intent payload test (server-independent; v41).
 run_gate "GDScript shop panel test" "[gdtest] PASS: test_shop_panel" res://tests/test_shop_panel.gd
 
-# 2j. Stash panel render and intent payload test (server-independent; v50).
+# 2j. Town service bridge routing test (server-independent; v127).
+run_gate "GDScript town service bridge test" "[gdtest] PASS: test_town_service_bridge" res://tests/test_town_service_bridge.gd
+
+# 2k. Stash panel render and intent payload test (server-independent; v50).
 run_gate "GDScript stash panel test" "[gdtest] PASS: test_stash_panel" res://tests/test_stash_panel.gd
 
-# 2k. Skill point panel and skill bar tests (server-independent; v44).
+# 2l. Skill point panel and skill bar tests (server-independent; v44).
 run_gate "GDScript text catalog test" "[gdtest] PASS: test_text_catalog" res://tests/test_text_catalog.gd
 run_gate "GDScript skill rules loader test" "[gdtest] PASS: test_skill_rules_loader" res://tests/test_skill_rules_loader.gd
 run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://tests/test_skills_panel.gd

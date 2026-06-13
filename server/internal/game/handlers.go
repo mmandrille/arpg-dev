@@ -401,8 +401,8 @@ func (s *Sim) handleStashDepositItem(in Input, res *TickResult) {
 		res.reject(in.MessageID, "not_in_inventory")
 		return
 	}
-	if item.equipped {
-		res.reject(in.MessageID, "item_equipped")
+	if item.equipped && s.bagOccupancyCount() > s.inventoryCapacityWithItemUnequipped(item) {
+		res.reject(in.MessageID, "capacity_would_overflow")
 		return
 	}
 	if s.hotbarHasItem(item.instanceID) {
@@ -422,6 +422,23 @@ func (s *Sim) handleStashDepositItem(in Input, res *TickResult) {
 	}
 	removedID := idStr(item.instanceID)
 	transferID := "stash_deposit_item:" + idStr(stashItemID)
+	wasEquipped := item.equipped
+	if wasEquipped {
+		for _, slot := range sortedStringKeys(s.equipped) {
+			if s.equipped[slot] == item.instanceID {
+				s.equipped[slot] = 0
+				res.Changes = append(res.Changes, Change{
+					Op:             OpEquippedUpdate,
+					Slot:           slot,
+					ItemInstanceID: nil,
+					HotbarCapacity: intPtr(s.hotbarCapacity()),
+					InventoryRows:  intPtr(s.inventoryRows()),
+					InventoryCap:   intPtr(s.inventoryCapacity()),
+				})
+			}
+		}
+		s.appendEquipmentProgressionChanges(res)
+	}
 	s.removeItemByID(item.instanceID)
 	s.stashItems = append(s.stashItems, deposited)
 

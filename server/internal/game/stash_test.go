@@ -102,18 +102,22 @@ func TestAccountStashRejectsHotbarAssignedItem(t *testing.T) {
 }
 
 func TestAccountStashRejectsInvalidTransfers(t *testing.T) {
-	t.Run("equipped item", func(t *testing.T) {
+	t.Run("equipped item deposits and clears slot", func(t *testing.T) {
 		sim, stash := newReadyStashSim(t, "equipped")
-		item := &invItem{instanceID: sim.alloc(), itemDefID: "red_potion", equipped: true}
+		item := &invItem{instanceID: sim.alloc(), itemDefID: "cave_blade", slot: mainHandSlot, equipped: true}
 		sim.inventory = append(sim.inventory, item)
+		sim.equipped[mainHandSlot] = item.instanceID
 		sim.savePlayer(sim.defaultPlayer())
 
 		res := sim.Tick([]Input{{MessageID: "deposit_equipped", Type: "stash_deposit_item_intent", StashDepositItem: &StashDepositItemIntent{StashEntityID: idStr(stash.id), ItemInstanceID: idStr(item.instanceID)}}})
-		if !hasReject(res, "deposit_equipped", "item_equipped") {
-			t.Fatalf("deposit equipped reject missing: %+v", res)
+		if !hasAck(res, "deposit_equipped") {
+			t.Fatalf("deposit equipped ack missing: %+v", res)
 		}
-		if len(sim.stashItems) != 0 || sim.findItemByID(item.instanceID) == nil {
-			t.Fatalf("equipped deposit mutated state: stash=%d item=%v", len(sim.stashItems), sim.findItemByID(item.instanceID))
+		if len(sim.stashItems) != 1 || sim.findItemByID(item.instanceID) != nil || sim.equipped[mainHandSlot] != 0 {
+			t.Fatalf("equipped deposit state stash=%d item=%v equipped=%d", len(sim.stashItems), sim.findItemByID(item.instanceID), sim.equipped[mainHandSlot])
+		}
+		if !hasChangeOp(res, OpEquippedUpdate) || !hasChangeOp(res, OpInventoryRemove) || !hasChangeOp(res, OpStashItemAdd) {
+			t.Fatalf("equipped deposit changes missing equipped/inventory/stash updates: %+v", res.Changes)
 		}
 	})
 

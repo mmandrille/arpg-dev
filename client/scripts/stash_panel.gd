@@ -116,7 +116,7 @@ class StashSlotButton:
 			return false
 		var source := str((data as Dictionary).get("source", ""))
 		var dragged: Dictionary = (data as Dictionary).get("item", {})
-		return source == DRAG_SOURCE_INVENTORY_BAG \
+		return (source == DRAG_SOURCE_INVENTORY_BAG or source.begins_with("equip:")) \
 			and panel.stash_entity_id != "" \
 			and not dragged.is_empty() \
 			and str(dragged.get("item_instance_id", "")) != ""
@@ -551,7 +551,8 @@ func _handle_drop_on_stash(data: Variant) -> void:
 	if typeof(data) != TYPE_DICTIONARY:
 		return
 	var rec := data as Dictionary
-	if str(rec.get("source", "")) != DRAG_SOURCE_INVENTORY_BAG:
+	var source := str(rec.get("source", ""))
+	if source != DRAG_SOURCE_INVENTORY_BAG and not source.begins_with("equip:"):
 		return
 	var item: Dictionary = rec.get("item", {})
 	_emit_deposit(item)

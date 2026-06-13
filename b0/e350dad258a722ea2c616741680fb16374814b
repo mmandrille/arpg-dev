@@ -1,0 +1,21 @@
+README.md
+  s_a7077bd5daf373::t_17771ab809a909 74
+make/client.mk
+  s_a7077bd5daf373::t_a57b68f637b2d8 6-7,26-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b0e350dad258a722ea2c616741680fb16374814b",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

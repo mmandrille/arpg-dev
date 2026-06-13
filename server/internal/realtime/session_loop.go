@@ -84,6 +84,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		if err != nil {
 			return nil, nil, fmt.Errorf("reconstruct session: %w", err)
 		}
+		recon.Sim.SetGameplayDebug(h.gameplayDebug)
 		return recon.Sim, &recon.Metadata, nil
 	}
 
@@ -136,6 +137,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	if err != nil {
 		return nil, nil, err
 	}
+	sim.SetGameplayDebug(h.gameplayDebug)
 	hostPlayerID := sim.DefaultPlayerID()
 	sim.SetPlayerMetadata(hostPlayerID, host.AccountID, host.CharacterID, "Hero", store.SessionMemberHost)
 	sim.LoadInventoryForPlayer(hostPlayerID, persistedItems(hostStart.Items))

@@ -218,6 +218,56 @@ func TestDecodeShopRerollIntentRejectsInvalidPayload(t *testing.T) {
 	}
 }
 
+func TestDecodeBishopDebugIntents(t *testing.T) {
+	tests := []struct {
+		typ  string
+		want string
+	}{
+		{typ: TypeBishopDebugLevel, want: "level"},
+		{typ: TypeBishopDebugSkill, want: "skill"},
+		{typ: TypeBishopDebugStat, want: "stat"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.typ, func(t *testing.T) {
+			in, ok := Decode(tt.typ, "msg_bishop_debug", "corr_bishop_debug", json.RawMessage(`{"bishop_entity_id":"1013"}`))
+			if !ok {
+				t.Fatalf("Decode %s rejected valid payload", tt.typ)
+			}
+			if !IsClientIntent(tt.typ) {
+				t.Fatalf("%s not marked as client intent", tt.typ)
+			}
+			switch tt.want {
+			case "level":
+				if in.BishopDebugLevel == nil || in.BishopDebugLevel.BishopEntityID != "1013" {
+					t.Fatalf("decoded bishop debug level = %+v", in.BishopDebugLevel)
+				}
+			case "skill":
+				if in.BishopDebugSkill == nil || in.BishopDebugSkill.BishopEntityID != "1013" {
+					t.Fatalf("decoded bishop debug skill = %+v", in.BishopDebugSkill)
+				}
+			case "stat":
+				if in.BishopDebugStat == nil || in.BishopDebugStat.BishopEntityID != "1013" {
+					t.Fatalf("decoded bishop debug stat = %+v", in.BishopDebugStat)
+				}
+			}
+		})
+	}
+}
+
+func TestDecodeBishopDebugIntentsRejectInvalidPayload(t *testing.T) {
+	for _, typ := range []string{TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat} {
+		for _, payload := range []json.RawMessage{
+			json.RawMessage(`{}`),
+			json.RawMessage(`{"bishop_entity_id":""}`),
+			json.RawMessage(`{"bishop_entity_id":1013}`),
+		} {
+			if _, ok := Decode(typ, "msg_bishop_debug", "", payload); ok {
+				t.Fatalf("Decode %s accepted invalid payload %s", typ, payload)
+			}
+		}
+	}
+}
+
 func TestDecodeStoredShopIntent(t *testing.T) {
 	raw := []byte(`{
 		"type":"shop_buy_intent",

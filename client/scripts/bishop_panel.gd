@@ -2,9 +2,10 @@ class_name BishopPanel
 extends Control
 
 signal respec_requested(bishop_entity_id: String)
+signal debug_requested(action: String, bishop_entity_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
-const PANEL_SIZE := Vector2(320, 220)
+const PANEL_SIZE := Vector2(320, 360)
 const TITLE_FONT_SIZE := 29
 const BODY_FONT_SIZE := 20
 
@@ -13,11 +14,15 @@ var service_id: String = "bishop"
 var price: int = 250
 var affordable: bool = false
 var gold: int = 0
+var debug_enabled: bool = false
 
 var _panel: DraggableWindow
 var _title_label: Label
 var _body_label: Label
 var _respec_button: Button
+var _debug_level_button: Button
+var _debug_skill_button: Button
+var _debug_stat_button: Button
 var _status_label: Label
 var _interactive: bool = true
 
@@ -57,6 +62,11 @@ func set_interactive(enabled: bool) -> void:
 	_render()
 
 
+func set_debug_enabled(enabled: bool) -> void:
+	debug_enabled = enabled
+	_render()
+
+
 func show_status(text: String, error: bool = false) -> void:
 	if _status_label == null:
 		return
@@ -73,6 +83,7 @@ func get_debug_state() -> Dictionary:
 		"gold": gold,
 		"affordable": affordable,
 		"respec_enabled": _respec_enabled(),
+		"debug_enabled": debug_enabled,
 		"status": _status_label.text if _status_label != null else "",
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
@@ -81,6 +92,11 @@ func get_debug_state() -> Dictionary:
 func bot_click_respec() -> void:
 	if _respec_enabled():
 		_emit_respec()
+
+
+func bot_click_debug(action: String) -> void:
+	if _debug_action_enabled():
+		_emit_debug(action)
 
 
 func bot_click_close() -> void:
@@ -128,6 +144,24 @@ func _build() -> void:
 	_respec_button.pressed.connect(_emit_respec)
 	root.add_child(_respec_button)
 
+	_debug_level_button = Button.new()
+	_debug_level_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
+	_debug_level_button.text = "Debug: gain level"
+	_debug_level_button.pressed.connect(func() -> void: _emit_debug("level"))
+	root.add_child(_debug_level_button)
+
+	_debug_skill_button = Button.new()
+	_debug_skill_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
+	_debug_skill_button.text = "Debug: gain skill point"
+	_debug_skill_button.pressed.connect(func() -> void: _emit_debug("skill_point"))
+	root.add_child(_debug_skill_button)
+
+	_debug_stat_button = Button.new()
+	_debug_stat_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
+	_debug_stat_button.text = "Debug: gain stat point"
+	_debug_stat_button.pressed.connect(func() -> void: _emit_debug("stat_point"))
+	root.add_child(_debug_stat_button)
+
 	_status_label = Label.new()
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE - 2)
@@ -145,6 +179,10 @@ func _render() -> void:
 	if _respec_button != null:
 		_respec_button.text = "Respec - %d gold" % price
 		_respec_button.disabled = not _respec_enabled()
+	for button in [_debug_level_button, _debug_skill_button, _debug_stat_button]:
+		if button != null:
+			button.visible = debug_enabled
+			button.disabled = not _debug_action_enabled()
 	if _status_label != null and _status_label.text == "":
 		_status_label.text = "Gold: %d" % gold
 		_status_label.add_theme_color_override("font_color", Color("#d9c8b5"))
@@ -157,8 +195,18 @@ func _emit_respec() -> void:
 	respec_requested.emit(bishop_entity_id)
 
 
+func _emit_debug(action: String) -> void:
+	if not _debug_action_enabled():
+		return
+	debug_requested.emit(action, bishop_entity_id)
+
+
 func _respec_enabled() -> bool:
 	return _interactive and visible and bishop_entity_id != "" and affordable and gold >= price
+
+
+func _debug_action_enabled() -> bool:
+	return _interactive and visible and bishop_entity_id != "" and debug_enabled
 
 
 func _reposition_panel() -> void:

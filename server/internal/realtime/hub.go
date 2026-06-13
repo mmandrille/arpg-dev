@@ -15,13 +15,14 @@ import (
 
 // Hub builds session runners for authenticated WebSocket connections.
 type Hub struct {
-	store    store.Repository
-	rules    *game.Rules
-	log      *slog.Logger
-	metrics  *metrics.Metrics
-	upgrader websocket.Upgrader
-	mu       sync.Mutex
-	loops    map[string]*sessionLoop
+	store         store.Repository
+	rules         *game.Rules
+	log           *slog.Logger
+	metrics       *metrics.Metrics
+	gameplayDebug bool
+	upgrader      websocket.Upgrader
+	mu            sync.Mutex
+	loops         map[string]*sessionLoop
 }
 
 // NewHub constructs a realtime hub.
@@ -38,6 +39,12 @@ func NewHub(st store.Repository, rules *game.Rules, log *slog.Logger, m *metrics
 			CheckOrigin: func(*http.Request) bool { return true },
 		},
 	}
+}
+
+// SetGameplayDebug enables local development-only gameplay conveniences for
+// sessions built by this hub.
+func (h *Hub) SetGameplayDebug(enabled bool) {
+	h.gameplayDebug = enabled
 }
 
 // Run upgrades the request to a WebSocket and attaches it to the authoritative

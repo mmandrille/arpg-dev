@@ -22,6 +22,8 @@ type Config struct {
 	Env string
 	// MetricsEnabled gates the /metrics route (deployment-gated per spec).
 	MetricsEnabled bool
+	// GameplayDebug enables development-only gameplay conveniences.
+	GameplayDebug bool
 }
 
 const (
@@ -41,6 +43,7 @@ func Load() Config {
 		DebugToken:     getenv("ARPG_DEBUG_TOKEN", defaultDebugToken),
 		Env:            getenv("ARPG_ENV", defaultEnv),
 		MetricsEnabled: getenvBool("ARPG_METRICS_ENABLED", true),
+		GameplayDebug:  getenvBool("ARPG_GAMEPLAY_DEBUG", false),
 	}
 }
 
@@ -58,6 +61,9 @@ func (c Config) Validate() error {
 		return fmt.Errorf("config: ARPG_DATABASE_URL must not be empty")
 	}
 	if !c.IsLocal() {
+		if c.GameplayDebug {
+			return fmt.Errorf("config: ARPG_GAMEPLAY_DEBUG must be false when ARPG_ENV=%q", c.Env)
+		}
 		if c.DebugToken == "" || c.DebugToken == defaultDebugToken {
 			return fmt.Errorf("config: ARPG_DEBUG_TOKEN must be set to a non-default value when ARPG_ENV=%q", c.Env)
 		}

@@ -48,6 +48,10 @@ func (r *Rules) validateNamedUniqueEffects(uniqueID string, unique UniqueItemDef
 }
 
 func (s *Sim) openUniqueTestChest(e *entity, in Input, res *TickResult, ack bool) {
+	if !s.gameplayDebug {
+		res.reject(in.MessageID, "debug_disabled")
+		return
+	}
 	if e.state != interactableReady && e.state != interactableOpen {
 		res.reject(in.MessageID, "not_actionable")
 		return
@@ -93,6 +97,10 @@ func (s *Sim) openUniqueTestChest(e *entity, in Input, res *TickResult, ack bool
 }
 
 func (s *Sim) handleUniqueChestTakeItem(in Input, res *TickResult) {
+	if !s.gameplayDebug {
+		res.reject(in.MessageID, "debug_disabled")
+		return
+	}
 	if in.UniqueChestTakeItem == nil || in.UniqueChestTakeItem.ChestEntityID == "" || in.UniqueChestTakeItem.ChestItemID == "" {
 		res.reject(in.MessageID, "invalid_payload")
 		return

@@ -1,0 +1,71 @@
+docs/plans/v129_2026-06-13-market-offer-withdrawal.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-32
+docs/specs/v129_spec-market-offer-withdrawal.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-25
+docs/plans/v130_2026-06-13-market-trade-audit-records.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-32
+docs/specs/v130_spec-market-trade-audit-records.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-26
+server/internal/store/models.go
+  s_79901a5b592284::t_808bcd4b51ca0a 151,164,169,176,190,210-211,217-218
+  s_79901a5b592284::t_54113302b27ffe 212-216,219-222
+server/internal/store/test_cleanup_test.go
+  s_79901a5b592284::t_0c778e788e08c4 39-49
+server/migrations/0024_market_expiration_and_audit.sql
+  s_79901a5b592284::t_808bcd4b51ca0a 1-40
+PROGRESS.md
+  s_79901a5b592284::t_7b2691c3ada711 319-321
+  s_79901a5b592284::t_d289d0eae9012d 1001
+  s_79901a5b592284::t_49ef4243f69061 15,18,20,149-151
+  s_79901a5b592284::t_23d77004d921c1 451-456
+server/internal/store/market_purchase.go
+  s_79901a5b592284::t_8b8519e86e2424 66,68,72-82,91,93,96
+docs/as-built/v130_market-trade-audit-records.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-16
+server/internal/http/test_cleanup_test.go
+  s_79901a5b592284::t_0c778e788e08c4 39-49
+docs/specs/v128_spec-market-listing-expiration.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-27
+server/internal/store/repos.go
+  s_79901a5b592284::t_1ad860b61a2ab5 2477,2482,2492,2505
+  s_79901a5b592284::t_54113302b27ffe 1932-1935,1937
+  s_79901a5b592284::t_9708896516e62b 1699-1701,1703,1705,1752-1754,1756,1767-1777,1787,1792,1817,1819,1823-1832,1848,1885-1895,1901-1931,1936,1938-1945,1969,1971,1974,2013,2015,2028-2039
+  s_79901a5b592284::t_4a6c301b519ff6 1864,1866
+  s_79901a5b592284::t_4c64a82ee226ed 2046-2136,2231,2236,2287,2301,2327-2367
+server/internal/http/market_purchase_test.go
+  s_79901a5b592284::t_c9b8f5b8c6c6c3 92-97,99,101-163
+  s_79901a5b592284::t_5d595a2d01b777 98,100
+docs/plans/v128_2026-06-13-market-listing-expiration.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-29
+server/internal/replay/replay_test.go
+  s_79901a5b592284::t_0c778e788e08c4 1493-1495,1502-1503
+client/scripts/net_client.gd
+  s_79901a5b592284::t_f7a6b5bae7c43a 337-345
+docs/as-built/v128_market-listing-expiration.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-16
+docs/as-built/v129_market-offer-withdrawal.md
+  s_79901a5b592284::t_f7b44f6712ebf6 1-16
+server/internal/http/market.go
+  s_79901a5b592284::t_f7a6b5bae7c43a 22,324-346
+server/internal/store/interfaces.go
+  s_79901a5b592284::t_f7a6b5bae7c43a 81,84
+server/internal/store/store_test.go
+  s_79901a5b592284::t_817edb1ceb5694 11,1477-1482
+  s_79901a5b592284::t_80ce0de3ba6720 1294,1297-1301,1309-1315,1377-1476,1483-1520
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f06ef79a4c31fd85b2f022afa8ee1ebe3383835a",
+  "prompts": {},
+  "sessions": {
+    "s_79901a5b592284": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec0fa-68d3-7982-b835-3a94d9f5efc3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

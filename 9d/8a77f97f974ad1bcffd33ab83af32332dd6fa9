@@ -1,0 +1,23 @@
+server/internal/http/auth_session_test.go
+  s_a7077bd5daf373::t_d27bab5637aadf 653-654,674-676,690-696,699-710
+server/internal/http/account_stash.go
+  s_a7077bd5daf373::t_7000cfe13d6451 17-24,30-32,34-35,173,178-186,194,201-228
+server/internal/store/store_test.go
+  s_a7077bd5daf373::t_7f84e24c3cd634 1162,1180-1184,1189-1191,1195-1196
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9d8a77f97f974ad1bcffd33ab83af32332dd6fa9",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -5,9 +5,12 @@ signal market_action_requested(action: String, payload: Dictionary)
 signal inventory_context_requested(context: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const StatLabels := preload("res://scripts/stat_labels.gd")
 const PANEL_SIZE := Vector2(640, 520)
 const BODY_FONT_SIZE := 19
 const DETAIL_FONT_SIZE := 16
+const LISTING_ICON_SIZE := Vector2(52, 52)
 const DEFAULT_PUBLISH_PRICE_GOLD := 25
 
 var market_entity_id: String = ""
@@ -25,6 +28,34 @@ var _browse_rows: VBoxContainer
 var _publish_rows: VBoxContainer
 var _offer_rows: VBoxContainer
 var _publish_price_spin: SpinBox
+
+class MarketItemIcon:
+	extends Control
+
+	var item: Dictionary = {}
+	var presentations: Dictionary = {}
+
+	func setup(next_item: Dictionary, next_presentations: Dictionary) -> void:
+		item = next_item.duplicate(true)
+		presentations = next_presentations.duplicate(true)
+		custom_minimum_size = LISTING_ICON_SIZE
+		queue_redraw()
+
+	func _draw() -> void:
+		draw_rect(Rect2(Vector2.ZERO, size), Color("#0a0908"), true)
+		draw_rect(Rect2(Vector2.ZERO, size), Color("#5c4a1f"), false, 1.0)
+		var def_id := str(item.get("item_def_id", ""))
+		var icon: Dictionary = presentations.get(def_id, {}).get("icon", {})
+		ItemIconDrawerScript.draw(self, Rect2(Vector2.ZERO, size), icon, str(icon.get("label", _short_label(def_id))), false, 0.38, 20)
+
+	func _short_label(def_id: String) -> String:
+		if def_id == "":
+			return "?"
+		var out := ""
+		for part in def_id.split("_"):
+			if str(part).length() > 0:
+				out += str(part).substr(0, 1).to_upper()
+		return out.substr(0, 3)
 
 class MarketStageSlot:
 	extends Button
@@ -46,6 +77,7 @@ class MarketStageSlot:
 		panel.stage_inventory_item(str(slot_context), data.get("item", {}), slot_index)
 
 func _ready() -> void:
+	ItemRulesLoader.ensure_loaded()
 	_build()
 	hide_display()
 
@@ -305,9 +337,18 @@ func _rebuild_offer_rows() -> void:
 func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 	var row := PanelContainer.new()
 	row.add_theme_stylebox_override("panel", _row_style())
+	var outer := HBoxContainer.new()
+	outer.add_theme_constant_override("separation", 8)
+	row.add_child(outer)
+
+	var icon := MarketItemIcon.new()
+	icon.setup(listing, ItemRulesLoader.item_presentations)
+	outer.add_child(icon)
+
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
-	row.add_child(box)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	outer.add_child(box)
 
 	var title := Label.new()
 	title.text = _listing_title(listing)
@@ -316,10 +357,17 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 	box.add_child(title)
 
 	var detail := Label.new()
-	detail.text = "%d gold - Listing %s - seller %s" % [int(listing.get("price_gold", 0)), str(listing.get("listing_id", "")), str(listing.get("seller_account_id", "")).substr(0, 10)]
+	detail.text = "%d gold - seller %s" % [int(listing.get("price_gold", 0)), str(listing.get("seller_account_id", "")).substr(0, 10)]
 	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
 	box.add_child(detail)
+
+	for stat_line in _listing_stat_lines(listing):
+		var stat_label := Label.new()
+		stat_label.text = stat_line
+		stat_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+		stat_label.add_theme_color_override("font_color", Color("#cfc3aa"))
+		box.add_child(stat_label)
 
 	if selectable:
 		var actions := HBoxContainer.new()
@@ -545,6 +593,9 @@ func _debug_listing_rows() -> Array:
 			"item_template_id": str(rec.get("item_template_id", "")),
 			"seller_account_id": str(rec.get("seller_account_id", "")),
 			"price_gold": int(rec.get("price_gold", 0)),
+			"visible_detail": "%d gold - seller %s" % [int(rec.get("price_gold", 0)), str(rec.get("seller_account_id", "")).substr(0, 10)],
+			"has_icon": str(rec.get("item_def_id", "")) != "",
+			"stat_lines": _listing_stat_lines(rec),
 		})
 	return rows
 
@@ -645,6 +696,56 @@ func _item_detail(item: Dictionary) -> String:
 	if slot != "":
 		return "Slot: %s" % slot.replace("_", " ")
 	return str(item.get("stash_item_id", ""))
+
+
+func _listing_stat_lines(item: Dictionary) -> Array:
+	var lines: Array = []
+	var requirements: Dictionary = _item_requirements(item)
+	if int(requirements.get("level", 0)) > 0:
+		lines.append("Level %d" % int(requirements.get("level", 0)))
+	var base_stats := _item_base_stats(item)
+	for stat in _ordered_stat_keys(base_stats):
+		lines.append("Base %s: %s" % [StatLabels.display_name(stat), _signed_stat_value(stat, int(base_stats.get(stat, 0)))])
+	var rolled_stats: Dictionary = item.get("rolled_stats", {})
+	for stat in _ordered_stat_keys(rolled_stats):
+		var base := int(base_stats.get(stat, 0))
+		var total := int(rolled_stats.get(stat, 0))
+		var delta := total - base
+		if delta != 0:
+			lines.append("Rolled %s: %s" % [StatLabels.display_name(stat), _signed_stat_value(stat, delta)])
+	return lines
+
+
+func _item_base_stats(item: Dictionary) -> Dictionary:
+	var template_id := str(item.get("item_template_id", item.get("item_def_id", "")))
+	var template: Dictionary = ItemRulesLoader.item_templates.get(template_id, {})
+	return (template.get("base_stats", {}) as Dictionary).duplicate(true) if typeof(template.get("base_stats", {})) == TYPE_DICTIONARY else {}
+
+
+func _item_requirements(item: Dictionary) -> Dictionary:
+	var requirements = item.get("requirements", {})
+	if typeof(requirements) == TYPE_DICTIONARY and not (requirements as Dictionary).is_empty():
+		return (requirements as Dictionary).duplicate(true)
+	var template_id := str(item.get("item_template_id", item.get("item_def_id", "")))
+	var template: Dictionary = ItemRulesLoader.item_templates.get(template_id, {})
+	return (template.get("requirements", {}) as Dictionary).duplicate(true) if typeof(template.get("requirements", {})) == TYPE_DICTIONARY else {}
+
+
+func _ordered_stat_keys(stats: Dictionary) -> Array:
+	var order := ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows", "str", "dex", "vit", "magic", "all_skills"]
+	var keys: Array = []
+	for stat in order:
+		if stats.has(stat):
+			keys.append(stat)
+	for stat in stats.keys():
+		if not keys.has(str(stat)):
+			keys.append(str(stat))
+	return keys
+
+
+func _signed_stat_value(stat: String, value: int) -> String:
+	var suffix := "%" if stat in ["block_percent", "attack_speed_percent", "skill_damage_percent"] else ""
+	return "%+d%s" % [value, suffix]
 
 
 func _rarity_color(rarity: String) -> Color:

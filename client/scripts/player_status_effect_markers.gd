@@ -400,43 +400,72 @@ static func make_elite_command_radius_preview(radius: float) -> Node3D:
 static func make_pinning_root_effect() -> Node3D:
 	var marker := Node3D.new()
 	marker.name = PINNING_ROOT_MARKER_NAME
+	var root_mat := _pinning_root_material(Color(0.32, 0.95, 0.18, 0.9), Color(0.14, 0.72, 0.08), 2.8)
+	var floor_mat := _pinning_root_material(Color(0.45, 1.0, 0.24, 0.38), Color(0.20, 0.90, 0.10), 2.0)
+
+	var ring := MeshInstance3D.new()
+	ring.name = "PinningRootRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.58
+	ring_mesh.outer_radius = 0.72
+	ring_mesh.ring_segments = 72
+	ring.mesh = ring_mesh
+	ring.position.y = 0.045
+	ring.material_override = floor_mat
+	marker.add_child(ring)
+
+	var inner_ring := MeshInstance3D.new()
+	inner_ring.name = "PinningRootInnerRing"
+	var inner_mesh := TorusMesh.new()
+	inner_mesh.inner_radius = 0.26
+	inner_mesh.outer_radius = 0.32
+	inner_mesh.ring_segments = 48
+	inner_ring.mesh = inner_mesh
+	inner_ring.position.y = 0.055
+	inner_ring.material_override = floor_mat
+	marker.add_child(inner_ring)
+
+	for i in range(6):
+		var tendril := MeshInstance3D.new()
+		tendril.name = "PinningRootTendril%d" % i
+		var tendril_mesh := BoxMesh.new()
+		tendril_mesh.size = Vector3(0.08, 0.06, 0.72)
+		tendril.mesh = tendril_mesh
+		var angle := float(i) * TAU / 6.0
+		tendril.position = Vector3(cos(angle) * 0.28, 0.06, sin(angle) * 0.28)
+		tendril.rotation.y = -angle
+		tendril.material_override = root_mat
+		marker.add_child(tendril)
+
+	for i in range(4):
+		var stake := MeshInstance3D.new()
+		stake.name = "PinningRootStake%d" % i
+		var stake_mesh := CylinderMesh.new()
+		stake_mesh.top_radius = 0.035
+		stake_mesh.bottom_radius = 0.10
+		stake_mesh.height = 0.82
+		stake_mesh.radial_segments = 6
+		stake.mesh = stake_mesh
+		var angle := float(i) * TAU / 4.0 + PI / 4.0
+		stake.position = Vector3(cos(angle) * 0.48, 0.40, sin(angle) * 0.48)
+		stake.rotation_degrees.z = 16.0 * (1.0 if i % 2 == 0 else -1.0)
+		stake.material_override = root_mat
+		marker.add_child(stake)
+	return marker
+
+
+static func _pinning_root_material(color: Color, emission: Color, emission_energy: float) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.42, 1.0, 0.20, 0.68)
+	mat.albedo_color = color
 	mat.emission_enabled = true
-	mat.emission = Color(0.28, 0.92, 0.16)
-	mat.emission_energy_multiplier = 2.4
+	mat.emission = emission
+	mat.emission_energy_multiplier = emission_energy
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.no_depth_test = true
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-
-	var ring := MeshInstance3D.new()
-	ring.name = "PinningRootRing"
-	var ring_mesh := TorusMesh.new()
-	ring_mesh.inner_radius = 0.52
-	ring_mesh.outer_radius = 0.64
-	ring_mesh.ring_segments = 48
-	ring.mesh = ring_mesh
-	ring.position.y = 0.08
-	ring.material_override = mat
-	marker.add_child(ring)
-
-	for i in range(3):
-		var stake := MeshInstance3D.new()
-		stake.name = "PinningRootStake%d" % i
-		var stake_mesh := CylinderMesh.new()
-		stake_mesh.top_radius = 0.03
-		stake_mesh.bottom_radius = 0.08
-		stake_mesh.height = 0.72
-		stake_mesh.radial_segments = 6
-		stake.mesh = stake_mesh
-		var angle := float(i) * TAU / 3.0
-		stake.position = Vector3(cos(angle) * 0.42, 0.36, sin(angle) * 0.42)
-		stake.rotation_degrees.z = 12.0
-		stake.material_override = mat
-		marker.add_child(stake)
-	return marker
+	return mat
 
 
 static func active_holy_shield_aura_pulse_count(root: Node3D) -> int:

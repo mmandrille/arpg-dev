@@ -34,6 +34,7 @@ func newStore(t *testing.T) *store.Store {
 	if err := s.Migrate(ctx); err != nil {
 		t.Fatalf("migrate: %v", err)
 	}
+	cleanupMarketRowsForTestAccounts(t)
 	t.Cleanup(s.Close)
 	return s
 }

@@ -51,6 +51,7 @@ func fullServerWithConfigAndStore(t *testing.T, cfg config.Config) (http.Handler
 	if err := db.Migrate(ctx); err != nil {
 		t.Fatalf("migrate: %v", err)
 	}
+	cleanupMarketRowsForTestAccounts(t, url)
 	t.Cleanup(db.Close)
 	rulesDir, err := game.FindSharedRulesDir()
 	if err != nil {

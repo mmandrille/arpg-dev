@@ -229,7 +229,7 @@ func get_debug_state() -> Dictionary:
 		"publish_button_width": int(_publish_button.custom_minimum_size.x) if _publish_button != null else 0,
 		"publish_button_same_row": _publish_button != null and _publish_price_spin != null and _publish_button.get_parent() == _publish_price_spin.get_parent(),
 		"publish_rows_centered": _rows_centered(_publish_rows),
-		"offer_rows_centered": _rows_centered(_offer_rows),
+		"offer_rows_top_aligned": _rows_top_aligned(_offer_rows),
 		"selected_listing_id": selected_listing_id,
 		"status": _status_label.text if _status_label != null else "",
 		"tab": _tabs.current_tab if _tabs != null else -1,
@@ -316,7 +316,7 @@ func _tab_rows(title: String) -> VBoxContainer:
 	rows.add_theme_constant_override("separation", 6)
 	if title == "Browse":
 		scroll.add_child(rows)
-	else:
+	elif title == "Publish":
 		var center := CenterContainer.new()
 		center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		center.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -325,6 +325,16 @@ func _tab_rows(title: String) -> VBoxContainer:
 		rows.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		rows.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		center.add_child(rows)
+	else:
+		var margin := MarginContainer.new()
+		margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		margin.add_theme_constant_override("margin_top", 16)
+		scroll.add_child(margin)
+		rows.alignment = BoxContainer.ALIGNMENT_BEGIN
+		rows.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		rows.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		margin.add_child(rows)
 	return rows
 
 
@@ -732,6 +742,15 @@ func _rows_centered(rows: VBoxContainer) -> bool:
 		and rows.alignment == BoxContainer.ALIGNMENT_CENTER \
 		and rows.size_flags_horizontal == Control.SIZE_SHRINK_CENTER \
 		and rows.size_flags_vertical == Control.SIZE_SHRINK_CENTER
+
+
+func _rows_top_aligned(rows: VBoxContainer) -> bool:
+	if rows == null:
+		return false
+	return rows.get_parent() is MarginContainer \
+		and rows.alignment == BoxContainer.ALIGNMENT_BEGIN \
+		and rows.size_flags_horizontal == Control.SIZE_SHRINK_CENTER \
+		and rows.size_flags_vertical == Control.SIZE_SHRINK_BEGIN
 
 
 func _offer_items(offer: Dictionary) -> Array:

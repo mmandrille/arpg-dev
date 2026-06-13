@@ -1,0 +1,88 @@
+tools/bot/test_protocol.py
+  s_691f0e84e5587e::t_60ae580b8fe5f9 495-506
+client/tests/test_skill_rules_loader.gd
+  s_691f0e84e5587e::t_cde4ba03857f51 26-27,44-47,68-73
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_691f0e84e5587e::t_1bc06d61495028 18
+server/internal/game/handlers.go
+  s_691f0e84e5587e::t_0696d2cf960050 1218-1221
+client/scripts/projectile_visuals.gd
+  s_691f0e84e5587e::t_a4656b5b5b3f55 7-10,15-18,21,26,36-37,40,55-75
+docs/as-built/v123_ranger-piercing-and-pinning-shots.md
+  s_691f0e84e5587e::t_c0cfc4ffed9b9a 1-34
+docs/plans/v123_2026-06-13-ranger-piercing-and-pinning-shots.md
+  s_691f0e84e5587e::t_53973092abd0f8 1-2,4-40,46-47,50-65,69,72-85,88,90,92,94,96-108,112,114-128,132,134-146,149,151-158,166-172
+  s_691f0e84e5587e::t_a3683933e6905d 3,41-45,48-49,66-68,70-71,86-87,89,91,93,95,109-111,113,129-131,133,147-148,150,159-165
+tools/bot/scenarios/59_ranger_piercing_and_pinning_shots.json
+  s_691f0e84e5587e::t_b3fe94fe28305c 1-42
+shared/i18n/en.json
+  s_691f0e84e5587e::t_e32fd1b8f736f2 71-74
+server/internal/game/rules.go
+  s_691f0e84e5587e::t_03391eb1f0b856 522-523,591-592,594-600
+  s_691f0e84e5587e::t_9cf349e91b7c1e 2864-2886
+  s_691f0e84e5587e::t_3fe51fe98b5170 593
+shared/rules/skills.v0.json
+  s_691f0e84e5587e::t_0bc6db9f5e073d 480-579,582
+shared/rules/worlds.v0.json
+  s_691f0e84e5587e::t_52b6f8dc677bfb 774-780
+client/tests/test_status_effect_presentation.gd
+  s_691f0e84e5587e::t_792b411a4722f5 20,181-214
+.maintainability/file-size-baseline.tsv
+  s_691f0e84e5587e::t_4b95b19e38707e 18,32-33
+shared/assets/skill_presentations.v0.json
+  s_691f0e84e5587e::t_cde75bc0f471b0 104-127
+server/internal/game/ranger_skills.go
+  s_691f0e84e5587e::t_598967cfafae7f 1-99,101,107-182
+  s_691f0e84e5587e::t_6a810592343fa5 100,102-106
+server/internal/game/ranger_skills_test.go
+  s_691f0e84e5587e::t_9f47e2d3b0b672 39
+  s_691f0e84e5587e::t_dfb2ba46f98a55 96-97
+  s_691f0e84e5587e::t_7d833a564c4d51 1-38,40-95,98-126
+shared/rules/skills.v0.schema.json
+  s_691f0e84e5587e::t_012e871e24d8ca 35-36,209-224
+PROGRESS.md
+  s_691f0e84e5587e::t_cfc5f4bb6d7f42 440-443
+  s_691f0e84e5587e::t_2d10c09a4f0fae 380-381
+  s_691f0e84e5587e::t_0ee56f2525e953 307
+  s_691f0e84e5587e::t_ea8458ba99f829 15,18,144
+server/internal/game/sim.go
+  s_691f0e84e5587e::t_7fc4182f1ee795 4205-4207
+  s_691f0e84e5587e::t_a4477c747fb316 6747
+client/scripts/player_status_effect_markers.gd
+  s_691f0e84e5587e::t_00308ab1439c89 8,15,74-78,115-132,400-438
+tools/validate_shared.py
+  s_691f0e84e5587e::t_24a7e80838c64f 1244-1251,1297-1303
+docs/specs/v123_spec-ranger-piercing-and-pinning-shots.md
+  s_691f0e84e5587e::t_53973092abd0f8 1-91
+client/tests/test_projectile_visuals.gd
+  s_691f0e84e5587e::t_72d11f9b6d2d1a 14,35-50
+shared/i18n/es.json
+  s_691f0e84e5587e::t_34d8ce94ffeccd 72-75
+tools/bot/run.py
+  s_691f0e84e5587e::t_85a44054dc5a77 1234,1243-1246
+  s_691f0e84e5587e::t_f7d94586dea60b 2077-2093
+client/scripts/main.gd
+  s_691f0e84e5587e::t_918089128d4deb 1130-1136,5091-5103
+  s_691f0e84e5587e::t_1dc20cb2ec4678 1471,4905,6151
+shared/assets/skill_presentations.v0.schema.json
+  s_691f0e84e5587e::t_4b09ea7b82d58e 37-38
+  s_691f0e84e5587e::t_f07aa8014e11b8 36
+client/scripts/skill_icon.gd
+  s_691f0e84e5587e::t_0de45a5cdbd56b 34-35,46-47,83-104,167-177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "107537b73b821260f5cba298c8c0ec4390ba2e5c",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+PROGRESS.md
+  s_691f0e84e5587e::t_25a714a8bc8d8e 15,18,147,313,443-445
+docs/as-built/v126_skill-validation-split.md
+  s_691f0e84e5587e::t_25a714a8bc8d8e 1-18
+tools/test_validate_shared.py
+  s_691f0e84e5587e::t_804c3f83c9a6b8 3,11,23-33,76-89,91-96
+  s_691f0e84e5587e::t_23c2d1e3cecefd 90
+tools/validate_shared.py
+  s_691f0e84e5587e::t_aa788df94cc6f4 1228-1237
+  s_691f0e84e5587e::t_2ac6a57b7b04c0 30,39
+docs/specs/v126_spec-skill-validation-split.md
+  s_691f0e84e5587e::t_a08c726096c7aa 1-2,4-42
+  s_691f0e84e5587e::t_25a714a8bc8d8e 3
+docs/plans/v126_2026-06-13-skill-validation-split.md
+  s_691f0e84e5587e::t_17505d7ae480ad 54-55,61
+  s_691f0e84e5587e::t_a08c726096c7aa 1-2,4-30,33-34,36-39,43-45,48,50-52
+  s_691f0e84e5587e::t_25a714a8bc8d8e 3,31-32,35,40-42,46-47,49,53,56-60
+tools/validate_skills.py
+  s_691f0e84e5587e::t_2ac6a57b7b04c0 1-199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "770731684c6f8d75b705bd91fb50e82bcb8d6204",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

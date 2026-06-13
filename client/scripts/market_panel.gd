@@ -921,13 +921,13 @@ func _tooltip_lines(item: Dictionary) -> Array:
 func _requirement_lines(item: Dictionary) -> Array:
 	var requirements := _item_requirements(item)
 	var lines: Array = []
-	if int(requirements.get("level", 0)) > 0:
-		lines.append("Level %d" % int(requirements.get("level", 0)))
+	if _stat_int(requirements.get("level", 0)) > 0:
+		lines.append("Level %d" % _stat_int(requirements.get("level", 0)))
 	for key in requirements.keys():
 		var stat := str(key)
 		if stat == "level":
 			continue
-		lines.append("%s %d" % [StatLabels.display_name(stat), int(requirements.get(key, 0))])
+		lines.append("%s %d" % [StatLabels.display_name(stat), _stat_int(requirements.get(key, 0))])
 	return lines
 
 
@@ -951,19 +951,34 @@ func _short_label(def_id: String) -> String:
 func _listing_stat_lines(item: Dictionary) -> Array:
 	var lines: Array = []
 	var requirements: Dictionary = _item_requirements(item)
-	if int(requirements.get("level", 0)) > 0:
-		lines.append("Level %d" % int(requirements.get("level", 0)))
+	if _stat_int(requirements.get("level", 0)) > 0:
+		lines.append("Level %d" % _stat_int(requirements.get("level", 0)))
 	var base_stats := _item_base_stats(item)
 	for stat in _ordered_stat_keys(base_stats):
-		lines.append("Base %s: %s" % [StatLabels.display_name(stat), _signed_stat_value(stat, int(base_stats.get(stat, 0)))])
+		lines.append("Base %s: %s" % [StatLabels.display_name(stat), _signed_stat_value(stat, _stat_int(base_stats.get(stat, 0)))])
 	var rolled_stats: Dictionary = item.get("rolled_stats", {})
 	for stat in _ordered_stat_keys(rolled_stats):
-		var base := int(base_stats.get(stat, 0))
-		var total := int(rolled_stats.get(stat, 0))
+		var base := _stat_int(base_stats.get(stat, 0))
+		var total := _stat_int(rolled_stats.get(stat, 0))
 		var delta := total - base
 		if delta != 0:
 			lines.append("Rolled %s: %s" % [StatLabels.display_name(stat), _signed_stat_value(stat, delta)])
 	return lines
+
+
+func _stat_int(value) -> int:
+	match typeof(value):
+		TYPE_INT:
+			return int(value)
+		TYPE_FLOAT:
+			return int(value)
+		TYPE_STRING:
+			var text := str(value)
+			if text.is_valid_int():
+				return int(text)
+			if text.is_valid_float():
+				return int(float(text))
+	return 0
 
 
 func _item_base_stats(item: Dictionary) -> Dictionary:

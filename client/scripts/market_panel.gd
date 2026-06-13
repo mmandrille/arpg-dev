@@ -6,11 +6,13 @@ signal inventory_context_requested(context: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const PANEL_SIZE := Vector2(640, 520)
 const BODY_FONT_SIZE := 19
 const DETAIL_FONT_SIZE := 16
 const LISTING_ICON_SIZE := Vector2(52, 52)
+const STAGE_SLOT_SIZE := Vector2(68, 54)
 const DEFAULT_PUBLISH_PRICE_GOLD := 25
 
 var market_entity_id: String = ""
@@ -65,6 +67,16 @@ class MarketStageSlot:
 	var slot_context: String = "publish"
 	var slot_index: int = 0
 	var item: Dictionary = {}
+
+	func _draw() -> void:
+		if item.is_empty():
+			return
+		panel._draw_item_icon(self, item)
+
+	func _make_custom_tooltip(for_text: String) -> Object:
+		if item.is_empty():
+			return panel._make_text_tooltip(for_text)
+		return panel._make_item_tooltip(item)
 
 	func _get_drag_data(_at_position: Vector2) -> Variant:
 		if item.is_empty():
@@ -191,6 +203,7 @@ func get_debug_state() -> Dictionary:
 		"staged_publish_item": staged_publish_item.duplicate(true),
 		"staged_offer_count": staged_offer_items.size(),
 		"staged_offer_item_ids": _staged_offer_item_ids(),
+		"staged_offer_slots": _debug_staged_offer_slots(),
 		"offer_count": active_offers.size(),
 		"offer_rows": _debug_offer_rows(),
 		"publish_price_gold": _publish_price(),
@@ -437,11 +450,15 @@ func _stage_slot(context: String, item: Dictionary, slot_index: int) -> Control:
 	btn.panel = self
 	btn.slot_context = context
 	btn.slot_index = slot_index
-	btn.custom_minimum_size = Vector2(112, 54)
-	btn.text = _item_title(item) if not item.is_empty() else "Empty"
+	btn.item = item.duplicate(true)
+	btn.custom_minimum_size = STAGE_SLOT_SIZE
+	btn.text = "" if not item.is_empty() else "Empty"
 	btn.tooltip_text = _item_detail(item) if not item.is_empty() else "Drop inventory item"
 	btn.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	btn.add_theme_color_override("font_color", _rarity_color(str(item.get("rarity", "common"))) if not item.is_empty() else Color("#8f826b"))
+	btn.add_theme_stylebox_override("normal", _stage_slot_style(str(item.get("rarity", "common")), false))
+	btn.add_theme_stylebox_override("hover", _stage_slot_style(str(item.get("rarity", "common")), true))
+	btn.add_theme_stylebox_override("pressed", _stage_slot_style(str(item.get("rarity", "common")), true))
 	return btn
 
 
@@ -629,6 +646,21 @@ func _staged_offer_item_ids() -> Array:
 	return ids
 
 
+func _debug_staged_offer_slots() -> Array:
+	var slots: Array = []
+	for i in range(10):
+		var item: Dictionary = staged_offer_items[i] if i < staged_offer_items.size() and typeof(staged_offer_items[i]) == TYPE_DICTIONARY else {}
+		slots.append({
+			"index": i,
+			"occupied": not item.is_empty(),
+			"item_def_id": str(item.get("item_def_id", "")),
+			"has_icon": not item.is_empty() and str(item.get("item_def_id", "")) != "",
+			"slot_size": {"x": int(STAGE_SLOT_SIZE.x), "y": int(STAGE_SLOT_SIZE.y)},
+			"uses_shared_tooltip": not item.is_empty(),
+		})
+	return slots
+
+
 func _debug_offer_rows() -> Array:
 	var rows: Array = []
 	for offer in active_offers:
@@ -704,6 +736,73 @@ func _item_detail(item: Dictionary) -> String:
 	return str(item.get("stash_item_id", ""))
 
 
+func _make_item_tooltip(item: Dictionary) -> Control:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup(
+		item,
+		ItemRulesLoader.item_presentations,
+		_tooltip_lines(item),
+		_requirement_lines(item),
+		[],
+		-1,
+		true,
+		_short_label(str(item.get("item_def_id", "")))
+	)
+	return tooltip
+
+
+func _make_text_tooltip(text: String) -> Control:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup({}, ItemRulesLoader.item_presentations, [text], [], [], -1, true, "")
+	return tooltip
+
+
+func _tooltip_lines(item: Dictionary) -> Array:
+	var rarity := str(item.get("rarity", ""))
+	var lines: Array = [{"text": _item_title(item), "color": _rarity_color(rarity)}]
+	if rarity != "":
+		lines.append({"text": "Rarity: %s" % rarity.capitalize(), "color": Color("#cdbd9f"), "font_size": 19})
+	var slot := str(item.get("slot", ""))
+	if slot != "":
+		lines.append({"text": "Slot: %s" % slot, "color": Color("#cdbd9f"), "font_size": 19})
+	for line in _listing_stat_lines(item):
+		var text := str(line)
+		if text.begins_with("Level "):
+			continue
+		lines.append(text.replace("Base ", "").replace("Rolled ", ""))
+	return lines
+
+
+func _requirement_lines(item: Dictionary) -> Array:
+	var requirements := _item_requirements(item)
+	var lines: Array = []
+	if int(requirements.get("level", 0)) > 0:
+		lines.append("Level %d" % int(requirements.get("level", 0)))
+	for key in requirements.keys():
+		var stat := str(key)
+		if stat == "level":
+			continue
+		lines.append("%s %d" % [StatLabels.display_name(stat), int(requirements.get(key, 0))])
+	return lines
+
+
+func _draw_item_icon(slot: Control, item: Dictionary) -> void:
+	var def_id := str(item.get("item_def_id", ""))
+	var icon: Dictionary = ItemRulesLoader.item_presentations.get(def_id, {}).get("icon", {})
+	var rect := Rect2(Vector2.ZERO, slot.size)
+	ItemIconDrawerScript.draw(slot, rect, icon, str(icon.get("label", _short_label(def_id))), false, 0.24, 22)
+
+
+func _short_label(def_id: String) -> String:
+	if def_id == "":
+		return "?"
+	var out := ""
+	for part in def_id.split("_"):
+		if str(part).length() > 0:
+			out += str(part).substr(0, 1).to_upper()
+	return out.substr(0, 3)
+
+
 func _listing_stat_lines(item: Dictionary) -> Array:
 	var lines: Array = []
 	var requirements: Dictionary = _item_requirements(item)
@@ -772,6 +871,23 @@ func _row_style() -> StyleBoxFlat:
 	s.border_color = Color("#3b3020")
 	s.set_border_width_all(1)
 	s.set_content_margin_all(8)
+	return s
+
+
+func _stage_slot_style(rarity: String, hover: bool) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	var base := Color("#242422")
+	match rarity:
+		"magic":
+			base = Color("#16304e")
+		"rare":
+			base = Color("#4b3a18")
+		"unique":
+			base = Color("#4b2815")
+	s.bg_color = base.lightened(0.12) if hover else base
+	s.border_color = base.lightened(0.46) if hover else base.lightened(0.28)
+	s.set_border_width_all(1)
+	s.set_content_margin_all(4)
 	return s
 
 

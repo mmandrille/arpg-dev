@@ -12,10 +12,10 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v108 — `resource-support-mobility-unique-effects` |
+| **Latest completed slice** | v109 — `permanent-death-corpse-recovery` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | v109 — TBD |
+| **Next slice** | v110 — TBD |
 | **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
 | **Next engineering review** | v110 (~every 10 slices) |
 
@@ -127,6 +127,7 @@ v105_* = unique-burn-effect-live
 v106_* = offensive-unique-effects
 v107_* = survival-reactive-unique-effects
 v108_* = resource-support-mobility-unique-effects
+v109_* = permanent-death-corpse-recovery
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -275,6 +276,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v106** | `offensive-unique-effects` | Complete (`make ci` green) | [`v106_spec-offensive-unique-effects.md`](docs/specs/v106_spec-offensive-unique-effects.md) | [`v106_2026-06-12-offensive-unique-effects.md`](docs/plans/v106_2026-06-12-offensive-unique-effects.md) | [`as-built`](docs/as-built/v106_offensive-unique-effects.md) |
 | **v107** | `survival-reactive-unique-effects` | Complete (`make ci` green) | [`v107_spec-survival-reactive-unique-effects.md`](docs/specs/v107_spec-survival-reactive-unique-effects.md) | [`v107_2026-06-12-survival-reactive-unique-effects.md`](docs/plans/v107_2026-06-12-survival-reactive-unique-effects.md) | [`as-built`](docs/as-built/v107_survival-reactive-unique-effects.md) |
 | **v108** | `resource-support-mobility-unique-effects` | Complete (`make ci` green) | [`v108_spec-resource-support-mobility-unique-effects.md`](docs/specs/v108_spec-resource-support-mobility-unique-effects.md) | [`v108_2026-06-12-resource-support-mobility-unique-effects.md`](docs/plans/v108_2026-06-12-resource-support-mobility-unique-effects.md) | [`as-built`](docs/as-built/v108_resource-support-mobility-unique-effects.md) |
+| **v109** | `permanent-death-corpse-recovery` | Complete (`make ci` green) | — | — | [`as-built`](docs/as-built/v109_permanent-death-corpse-recovery.md) |
 
 ---
 

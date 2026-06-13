@@ -237,17 +237,58 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
 	}
+	if got, want := r.Skills["rage"].Cooldown.FlatTicks, 675; got != want {
+		t.Fatalf("rage cooldown flat_ticks = %d, want %d", got, want)
+	}
 	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 || skill.Effects[0].DurationTicks != 30 {
 		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and enlarged range/radius effect", skill)
 	}
 	if scaling := r.Skills["heal"].Effects[0].MagicScaling; scaling.Stat != "magic" || scaling.PercentPerPoint <= 0 || scaling.MaxBonusPercent <= 0 || !scaling.UseRequirementBaseline {
 		t.Fatalf("heal magic scaling = %+v, want capped requirement-based magic scaling", scaling)
 	}
+	if got, want := r.Skills["holy_shield"].Cooldown.FlatTicks, 450; got != want {
+		t.Fatalf("holy shield cooldown flat_ticks = %d, want %d", got, want)
+	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
 	}
 	if _, ok := r.Worlds["combat_control_lab"]; !ok {
 		t.Fatal("missing combat_control_lab world")
+	}
+}
+
+func TestValidateSkillRulesRequiresBuffCooldownLongerThanDuration(t *testing.T) {
+	skills := map[string]SkillDef{
+		"short_buff": {
+			Name:      "Short Buff",
+			Class:     "barbarian",
+			Tree:      SkillTreeDef{Tier: 1, Column: 1},
+			Kind:      "self_buff",
+			MaxRank:   1,
+			Targeting: "self",
+			Requirements: SkillRequirementDef{
+				Level:        1,
+				Stats:        map[string]int{},
+				StatsPerRank: map[string]int{},
+			},
+			Effects: []SkillEffectDef{{
+				Type:          "stat_percent_buff",
+				Stats:         []string{"str"},
+				PercentBase:   10,
+				DurationTicks: 100,
+			}},
+			Cooldown: SkillCooldownDef{Type: "attack_interval_multiplier", Multiplier: 1, FlatTicks: 120},
+		},
+	}
+	if err := validateSkillRules(skills, 10); err == nil || !strings.Contains(err.Error(), "must be at least 150% of duration") {
+		t.Fatalf("validateSkillRules error = %v, want buff cooldown ratio failure", err)
+	}
+
+	skill := skills["short_buff"]
+	skill.Cooldown.FlatTicks = 140
+	skills["short_buff"] = skill
+	if err := validateSkillRules(skills, 10); err != nil {
+		t.Fatalf("validateSkillRules valid buff cooldown: %v", err)
 	}
 }
 

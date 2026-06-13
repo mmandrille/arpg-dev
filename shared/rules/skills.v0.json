@@ -272,7 +272,8 @@
       ],
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2
+        "multiplier": 1,
+        "flat_ticks": 675
       },
       "name_key": "skill.rage.name"
     },
@@ -381,7 +382,8 @@
       ],
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.5
+        "multiplier": 1,
+        "flat_ticks": 450
       },
       "name_key": "skill.holy_shield.name"
     },

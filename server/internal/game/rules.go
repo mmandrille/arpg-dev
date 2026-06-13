@@ -1380,7 +1380,7 @@ func LoadRules(dir string) (*Rules, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := validateSkillRules(skills); err != nil {
+	if err := validateSkillRules(skills, r.Combat.BaseAttackIntervalTicks); err != nil {
 		return nil, err
 	}
 	r.Skills = skills
@@ -2742,7 +2742,7 @@ func validateCoopCombatRules(coop CoopCombat) error {
 	return nil
 }
 
-func validateSkillRules(skills map[string]SkillDef) error {
+func validateSkillRules(skills map[string]SkillDef, baseAttackIntervalTicks int) error {
 	if len(skills) == 0 {
 		return fmt.Errorf("game: invalid rules skills: at least one skill is required")
 	}
@@ -2783,6 +2783,34 @@ func validateSkillRules(skills map[string]SkillDef) error {
 		if skill.Cooldown.FlatTicks < 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.cooldown.flat_ticks: must be non-negative", id)
 		}
+		if err := validateBuffSkillCooldown(id, skill, baseAttackIntervalTicks); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateBuffSkillCooldown(skillID string, skill SkillDef, baseAttackIntervalTicks int) error {
+	if skill.Kind != "self_buff" && skill.Kind != "area_stat_buff" {
+		return nil
+	}
+	maxDuration := 0
+	for _, effect := range skill.Effects {
+		if effect.DurationTicks > maxDuration {
+			maxDuration = effect.DurationTicks
+		}
+	}
+	if maxDuration <= 0 {
+		return nil
+	}
+	if baseAttackIntervalTicks < 1 {
+		baseAttackIntervalTicks = 1
+	}
+	cooldownTicks := int(math.Ceil(float64(baseAttackIntervalTicks)*skill.Cooldown.Multiplier)) + skill.Cooldown.FlatTicks
+	minCooldownTicks := int(math.Ceil(float64(maxDuration) * 1.5))
+	if cooldownTicks < minCooldownTicks {
+		return fmt.Errorf("game: invalid rules skills.%s.cooldown: buff cooldown %d must be at least 150%% of duration %d (min %d)",
+			skillID, cooldownTicks, maxDuration, minCooldownTicks)
 	}
 	return nil
 }

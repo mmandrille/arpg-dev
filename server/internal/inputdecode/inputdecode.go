@@ -9,33 +9,34 @@ import (
 )
 
 const (
-	TypeClientReady        = "client_ready"
-	TypeMoveIntent         = "move_intent"
-	TypeMoveTo             = "move_to_intent"
-	TypeDirectional        = "directional_attack_intent"
-	TypeAction             = "action_intent"
-	TypeDescend            = "descend_intent"
-	TypeAscend             = "ascend_intent"
-	TypeTeleport           = "teleport_intent"
-	TypeEquip              = "equip_intent"
-	TypeUnequip            = "unequip_intent"
-	TypeDrop               = "drop_intent"
-	TypeUse                = "use_intent"
-	TypeAssignHotbar       = "assign_hotbar_intent"
-	TypeUseHotbar          = "use_hotbar_intent"
-	TypeAllocateStat       = "allocate_stat_intent"
-	TypeAllocateSkillPoint = "allocate_skill_point_intent"
-	TypeCastSkill          = "cast_skill_intent"
-	TypeSetSkillBindings   = "set_skill_bindings_intent"
-	TypeShopBuy            = "shop_buy_intent"
-	TypeShopSell           = "shop_sell_intent"
-	TypeShopReroll         = "shop_reroll_intent"
-	TypeBishopRespec       = "bishop_respec_intent"
-	TypeStashDepositItem   = "stash_deposit_item_intent"
-	TypeStashWithdrawItem  = "stash_withdraw_item_intent"
-	TypeStashDepositGold   = "stash_deposit_gold_intent"
-	TypeStashWithdrawGold  = "stash_withdraw_gold_intent"
-	TypeCorpseWithdrawItem = "corpse_withdraw_item_intent"
+	TypeClientReady         = "client_ready"
+	TypeMoveIntent          = "move_intent"
+	TypeMoveTo              = "move_to_intent"
+	TypeDirectional         = "directional_attack_intent"
+	TypeAction              = "action_intent"
+	TypeDescend             = "descend_intent"
+	TypeAscend              = "ascend_intent"
+	TypeTeleport            = "teleport_intent"
+	TypeEquip               = "equip_intent"
+	TypeUnequip             = "unequip_intent"
+	TypeDrop                = "drop_intent"
+	TypeUse                 = "use_intent"
+	TypeAssignHotbar        = "assign_hotbar_intent"
+	TypeUseHotbar           = "use_hotbar_intent"
+	TypeAllocateStat        = "allocate_stat_intent"
+	TypeAllocateSkillPoint  = "allocate_skill_point_intent"
+	TypeCastSkill           = "cast_skill_intent"
+	TypeSetSkillBindings    = "set_skill_bindings_intent"
+	TypeShopBuy             = "shop_buy_intent"
+	TypeShopSell            = "shop_sell_intent"
+	TypeShopReroll          = "shop_reroll_intent"
+	TypeBishopRespec        = "bishop_respec_intent"
+	TypeStashDepositItem    = "stash_deposit_item_intent"
+	TypeStashWithdrawItem   = "stash_withdraw_item_intent"
+	TypeStashDepositGold    = "stash_deposit_gold_intent"
+	TypeStashWithdrawGold   = "stash_withdraw_gold_intent"
+	TypeCorpseWithdrawItem  = "corpse_withdraw_item_intent"
+	TypeUniqueChestTakeItem = "unique_chest_take_item_intent"
 )
 
 type envelope struct {
@@ -127,12 +128,16 @@ type (
 		CorpseEntityID string `json:"corpse_entity_id"`
 		ItemInstanceID string `json:"item_instance_id"`
 	}
+	uniqueChestTakeItemPayloadWire struct {
+		ChestEntityID string `json:"chest_entity_id"`
+		ChestItemID   string `json:"chest_item_id"`
+	}
 )
 
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
@@ -303,6 +308,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.CorpseWithdrawItem = &game.CorpseWithdrawItemIntent{CorpseEntityID: p.CorpseEntityID, ItemInstanceID: p.ItemInstanceID}
+	case TypeUniqueChestTakeItem:
+		var p uniqueChestTakeItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.ChestEntityID == "" || p.ChestItemID == "" {
+			return in, false
+		}
+		in.UniqueChestTakeItem = &game.UniqueChestTakeItemIntent{ChestEntityID: p.ChestEntityID, ChestItemID: p.ChestItemID}
 	default:
 		return in, false
 	}

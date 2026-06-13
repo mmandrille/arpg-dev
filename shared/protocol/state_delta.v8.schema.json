@@ -657,6 +657,20 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "corpse_character_id", "corpse_name", "item_instance_id", "stash_item_id", "corpse_items", "inventory", "equipped", "hotbar", "gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "unique_chest_opened" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "stash_items", "inventory", "equipped", "hotbar", "gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "unique_chest_item_taken" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "item_instance_id", "stash_item_id", "stash_items", "inventory", "equipped", "hotbar", "gold"] }
         }
       ]
     },

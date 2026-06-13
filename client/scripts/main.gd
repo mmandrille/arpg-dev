@@ -5009,6 +5009,30 @@ func _add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Colo
 			_add_loot_box(root, "BowTop", Vector3(0.10, 0.08, 0.42) * scale, Vector3(0.14 * scale, 0.20, -0.18 * scale), color)
 			_add_loot_box(root, "BowBottom", Vector3(0.10, 0.08, 0.42) * scale, Vector3(-0.14 * scale, 0.20, 0.18 * scale), color)
 			_add_loot_box(root, "String", Vector3(0.04, 0.06, 0.75) * scale, Vector3(0.0, 0.18, 0.0), accent)
+		"shield":
+			_add_loot_cylinder(root, "ShieldFace", 0.30 * scale, 0.08 * scale, Vector3(0.0, 0.18, 0.0), color)
+			_add_loot_cylinder(root, "ShieldBoss", 0.11 * scale, 0.10 * scale, Vector3(0.0, 0.24, 0.0), accent)
+		"helm":
+			_add_loot_cylinder(root, "HelmCap", 0.25 * scale, 0.22 * scale, Vector3(0.0, 0.22, 0.0), color)
+			_add_loot_box(root, "HelmBrow", Vector3(0.44, 0.08, 0.18) * scale, Vector3(0.0, 0.26, -0.12 * scale), accent)
+		"chest":
+			_add_loot_box(root, "ChestPlate", Vector3(0.46, 0.16, 0.40) * scale, Vector3(0.0, 0.18, 0.0), color)
+			_add_loot_box(root, "ChestTrim", Vector3(0.34, 0.18, 0.08) * scale, Vector3(0.0, 0.26, -0.16 * scale), accent)
+		"gloves":
+			_add_loot_box(root, "LeftGlove", Vector3(0.22, 0.12, 0.20) * scale, Vector3(-0.16 * scale, 0.18, 0.0), color)
+			_add_loot_box(root, "RightGlove", Vector3(0.22, 0.12, 0.20) * scale, Vector3(0.16 * scale, 0.18, 0.0), accent)
+		"belt":
+			_add_loot_box(root, "BeltBand", Vector3(0.56, 0.10, 0.20) * scale, Vector3(0.0, 0.16, 0.0), color)
+			_add_loot_box(root, "BeltBuckle", Vector3(0.14, 0.12, 0.23) * scale, Vector3(0.0, 0.22, -0.02 * scale), accent)
+		"boots":
+			_add_loot_box(root, "LeftBoot", Vector3(0.20, 0.16, 0.34) * scale, Vector3(-0.14 * scale, 0.18, 0.0), color)
+			_add_loot_box(root, "RightBoot", Vector3(0.20, 0.16, 0.34) * scale, Vector3(0.14 * scale, 0.18, 0.0), accent)
+		"ring":
+			_add_loot_cylinder(root, "RingBand", 0.18 * scale, 0.05 * scale, Vector3(0.0, 0.17, 0.0), color)
+			_add_loot_box(root, "RingStone", Vector3(0.09, 0.08, 0.08) * scale, Vector3(0.0, 0.24, -0.14 * scale), accent)
+		"amulet":
+			_add_loot_cylinder(root, "AmuletChain", 0.20 * scale, 0.04 * scale, Vector3(0.0, 0.17, 0.0), color)
+			_add_loot_box(root, "AmuletGem", Vector3(0.13, 0.12, 0.08) * scale, Vector3(0.0, 0.25, -0.15 * scale), accent)
 		"badge", "coin":
 			_add_loot_cylinder(root, "Badge", 0.24 * scale, 0.08 * scale, Vector3(0.0, 0.16, 0.0), color)
 			_add_loot_cylinder(root, "BadgeMark", 0.12 * scale, 0.10 * scale, Vector3(0.0, 0.21, 0.0), accent)
@@ -5026,6 +5050,8 @@ func _make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D
 	var presentation: Dictionary = item_presentations.get(item_def_id, {})
 	var asset_id := str(presentation.get("3d_model", ""))
 	if asset_id == "":
+		return null
+	if asset_id.begins_with("fallback_equipment_"):
 		return null
 	var entry = asset_manifest.get(asset_id, null)
 	if typeof(entry) != TYPE_DICTIONARY:

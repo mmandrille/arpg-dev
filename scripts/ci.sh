@@ -15,6 +15,7 @@ ADDR="${ARPG_ADDR:-:8888}"
 BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-local-dev-token}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-local-debug-token}"
+GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
 
 SERVER_PID=""
 SERVER_LOG="$(mktemp -t arpg-ci-server.XXXXXX.log)"
@@ -131,6 +132,7 @@ SERVER_BIN="$(mktemp -t arpg-ci-server.XXXXXX)"
 "$RUN_QUIET" --label "go build arpg-server" -- bash -c "cd server && go build -o \"$SERVER_BIN\" ./cmd/arpg-server"
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
   ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
+  ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
   ARPG_RULES_DIR="$ROOT/shared/rules" \
   "$SERVER_BIN" >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
@@ -170,7 +172,7 @@ fi
 rm -f "$BOT_LOG"
 echo "bot completed session: $SESSION_ID"
 "$RUN_QUIET" --label "arpg-replay" -- bash -c \
-  "cd server && ARPG_DATABASE_URL=\"$DATABASE_URL\" go run ./cmd/arpg-replay --session-id \"$SESSION_ID\""
+  "cd server && ARPG_DATABASE_URL=\"$DATABASE_URL\" ARPG_GAMEPLAY_DEBUG=\"$GAMEPLAY_DEBUG\" go run ./cmd/arpg-replay --session-id \"$SESSION_ID\""
 finish_step
 
 begin_step "== 8/9 Godot client bot scenarios =="

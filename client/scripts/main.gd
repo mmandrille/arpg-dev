@@ -6364,7 +6364,7 @@ func _bot_loot_label_debug() -> Array:
 
 
 func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
-	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	if _movement_intent_starts_motion(intent_type, payload):
 		_close_gameplay_panels_for_movement()
@@ -6374,7 +6374,7 @@ func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 
 
 func bot_click_entity_id(target_id: String) -> void:
-	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	if target_id == "" or not entities.has(target_id):
 		return

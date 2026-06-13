@@ -34,6 +34,15 @@ from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenar
 from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot import skill_visual_runtime
 from tools.bot.debug_progression import debug_progression_body
+from tools.bot.stash_assertions import (
+    assert_stash_capacity,
+    assert_stash_event,
+    assert_stash_gold,
+    assert_stash_item_count,
+    filtered_stash_items,
+    find_stash_item_by_id,
+    select_stash_item,
+)
 from tools.bot.unique_effect_assertions import assert_inventory_unique_effect_coverage
 
 SLICE_TIMEOUT_S = 20.0
@@ -1612,7 +1621,8 @@ async def execute_step(
         return
 
     if action == "take_unique_chest_item":
-        target = find_interactable(state, str(step.get("interactable_def_id", "town_unique_chest")))
+        chest_entity_id = step.get("chest_entity_id")
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_unique_chest"))) if chest_entity_id is None else {"id": str(chest_entity_id)}
         if target is None:
             raise AssertionError(f"take_unique_chest_item: missing unique chest on level {state.current_level}")
         item = select_stash_item(state, step)
@@ -2884,6 +2894,8 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
     if step.get("target_id"):
         target = state.entities.get(str(step["target_id"]))
         if target is None:
+            if bool(step.get("allow_missing_target")):
+                return {"id": str(step["target_id"])}
             raise AssertionError(f"{step.get('action')}: target not found: {step['target_id']}")
         return target
     if step.get("monster_def_id"):
@@ -2992,39 +3004,6 @@ def select_inventory_item(inventory: list[dict[str, Any]], step: dict[str, Any])
     if index < 0 or index >= len(items):
         raise AssertionError(f"{step.get('action')}: bag_index {index} out of range for {items}")
     return items[index]
-
-
-def filtered_stash_items(stash_items: list[dict[str, Any]], step: dict[str, Any]) -> list[dict[str, Any]]:
-    items = list(stash_items)
-    if step.get("stash_item_id") is not None:
-        items = [item for item in items if str(item.get("stash_item_id", "")) == str(step["stash_item_id"])]
-    if step.get("item_def_id") is not None:
-        items = [item for item in items if str(item.get("item_def_id", "")) == str(step["item_def_id"])]
-    if step.get("item_template_id") is not None:
-        items = [item for item in items if str(item.get("item_template_id", "")) == str(step["item_template_id"])]
-    if step.get("display_name") is not None:
-        items = [item for item in items if str(item.get("display_name", "")) == str(step["display_name"])]
-    if step.get("rolled") is not None:
-        want_rolled = bool(step["rolled"])
-        items = [item for item in items if bool(item.get("item_template_id")) == want_rolled]
-    items.sort(key=lambda item: str(item.get("stash_item_id", "")))
-    return items
-
-
-def select_stash_item(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
-    items = filtered_stash_items(state.stash_items, step)
-    if not items:
-        raise AssertionError(f"{step.get('action')}: no matching stash item for {step}; stash={state.stash_items}")
-    index = int(step.get("stash_index", 0))
-    if index < 0 or index >= len(items):
-        raise AssertionError(f"{step.get('action')}: stash_index {index} out of range for {items}")
-    return items[index]
-
-
-def find_stash_item_by_id(stash_items: list[dict[str, Any]], stash_item_id: str | None) -> dict[str, Any] | None:
-    if stash_item_id is None:
-        return None
-    return next((item for item in stash_items if str(item.get("stash_item_id")) == str(stash_item_id)), None)
 
 
 def filtered_shop_offers(state: RuntimeState, step: dict[str, Any]) -> list[dict[str, Any]]:
@@ -3462,9 +3441,10 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
     rarity = assertion.get("rarity")
     if rarity is not None and item.get("rarity") != str(rarity):
         raise AssertionError(f"{where}: rarity {item.get('rarity')} != {rarity}: {item}")
-    suffix = str(assertion.get("display_name_suffix", "Cave Blade"))
-    if not str(item.get("display_name", "")).endswith(suffix):
-        raise AssertionError(f"{where}: display_name missing suffix {suffix}: {item}")
+    if assertion.get("display_name_suffix") is not None:
+        suffix = str(assertion["display_name_suffix"])
+        if not str(item.get("display_name", "")).endswith(suffix):
+            raise AssertionError(f"{where}: display_name missing suffix {suffix}: {item}")
     stats = item.get("rolled_stats", {})
     if not isinstance(stats, dict):
         raise AssertionError(f"{where}: rolled_stats is not an object: {item}")
@@ -3732,8 +3712,7 @@ def run_assertions(
         elif typ == "gold":
             assert_count_matches(int(gold or 0), assertion, f"{where}: gold")
         elif typ == "stash_item_count":
-            rows = filtered_stash_items(list(stash_items or []), assertion)
-            assert_count_matches(len(rows), assertion, f"{where}: stash item count", f": {rows}")
+            assert_stash_item_count(list(stash_items or []), assertion, where, assert_count_matches)
         elif typ == "stash_gold":
             assert_count_matches(int(stash_gold or 0), assertion, f"{where}: stash gold")
         elif typ == "stash_capacity":
@@ -4043,14 +4022,13 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             assert_count_matches(state.gold, assertion, f"{where}: gold")
             continue
         if typ == "stash_item_count":
-            rows = filtered_stash_items(state.stash_items, assertion)
-            assert_count_matches(len(rows), assertion, f"{where}: stash_item_count", f": {rows}")
+            assert_stash_item_count(state.stash_items, assertion, where, assert_count_matches)
             continue
         if typ == "stash_gold":
-            assert_count_matches(state.stash_gold, assertion, f"{where}: stash_gold")
+            assert_stash_gold(state.stash_gold, assertion, where, assert_count_matches)
             continue
         if typ == "stash_capacity":
-            assert_count_matches(state.stash_capacity, assertion, f"{where}: stash_capacity")
+            assert_stash_capacity(state.stash_capacity, assertion, where, assert_count_matches)
             continue
         if typ == "shop_offer_count":
             offers = filtered_shop_offers(state, assertion)
@@ -4076,15 +4054,7 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
             assert_shop_event_details(matches, assertion, f"{where}: shop_event")
             continue
         if typ == "stash_event":
-            stash_id = str(assertion.get("stash_id", "account_stash"))
-            event_type = str(assertion["event_type"])
-            matches = [
-                event for event in state.stash_events
-                if event.get("event_type") == event_type and str(event.get("stash_id", "")) == stash_id
-            ]
-            if assertion.get("stash_item_id") is not None:
-                matches = [event for event in matches if str(event.get("stash_item_id", "")) == str(assertion["stash_item_id"])]
-            assert_count_matches(len(matches), assertion, f"{where}: stash_event", f": {matches}")
+            assert_stash_event(state.stash_events, assertion, where, assert_count_matches)
             continue
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)

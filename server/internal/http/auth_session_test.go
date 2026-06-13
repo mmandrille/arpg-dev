@@ -825,15 +825,29 @@ func TestMarketOfferRoutesSubmitListAndAccept(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(sellerStash) != 2 {
-		t.Fatalf("seller stash after accept = %+v", sellerStash)
+	if len(sellerStash) != 0 {
+		t.Fatalf("seller stash after accept = %+v, want accepted items on character", sellerStash)
+	}
+	sellerItems, err := db.ListCharacterItems(ctx, sellerID, sellerChar.CharacterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !characterItemsContain(sellerItems, "stash_market_offer_bid_item_a_"+suffix) || !characterItemsContain(sellerItems, "stash_market_offer_bid_item_b_"+suffix) {
+		t.Fatalf("seller character after accept = %+v, want accepted offer items", sellerItems)
 	}
 	bidderStash, err := db.ListAccountStashItems(ctx, bidderID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(bidderStash) != 1 || bidderStash[0].StashItemID != "market_offer_listing_stash_"+suffix {
-		t.Fatalf("bidder stash after accept = %+v", bidderStash)
+	if len(bidderStash) != 0 {
+		t.Fatalf("bidder stash after accept = %+v, want listed item on character", bidderStash)
+	}
+	bidderItems, err := db.ListCharacterItems(ctx, bidderID, bidderChar.CharacterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !characterItemsContain(bidderItems, "market_offer_listing_stash_"+suffix) {
+		t.Fatalf("bidder character after accept = %+v, want listed item", bidderItems)
 	}
 }
 
@@ -888,6 +902,26 @@ func TestMarketOfferRouteAcceptsInventoryItems(t *testing.T) {
 		if characterItemsContain(items, itemID) {
 			t.Fatalf("offered item %s still on bidder character after inventory offer = %+v", itemID, items)
 		}
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers/"+offer.OfferID+"/accept", sellerToken, map[string]string{})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("accept inventory offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	sellerItems, err := db.ListCharacterItems(ctx, sellerID, sellerChar.CharacterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, itemID := range offer.Items {
+		if !characterItemsContain(sellerItems, itemID.StashItemID) {
+			t.Fatalf("seller character did not receive offered item %s after accept = %+v", itemID.StashItemID, sellerItems)
+		}
+	}
+	bidderItems, err := db.ListCharacterItems(ctx, bidderID, bidderChar.CharacterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !characterItemsContain(bidderItems, listing.StashItemID) {
+		t.Fatalf("bidder character did not receive listed item after accept = %+v", bidderItems)
 	}
 }
 

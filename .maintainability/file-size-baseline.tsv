@@ -12,7 +12,7 @@ client/tests/test_client_bot.gd	1093
 client/tests/test_coop_client.gd	1305
 client/tests/test_golden.gd	769
 server/internal/game/dungeon_gen.go	1061
-server/internal/game/game_test.go	8766
+server/internal/game/game_test.go	8815
 server/internal/game/handlers.go	1405
 server/internal/game/rules.go	3122
 server/internal/game/shop.go	1163
@@ -30,5 +30,5 @@ server/internal/store/store_test.go	1420
 skills/showme/scripts/visual_capture.gd	920
 tools/bot/run.py	5092
 tools/bot/test_protocol.py	1278
-tools/validate_shared.py	3255
+tools/validate_shared.py	3285
 client/tests/test_item_visuals.gd	679

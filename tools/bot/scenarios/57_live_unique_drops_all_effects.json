@@ -1,0 +1,22 @@
+{
+  "id": "live_unique_drops_all_effects",
+  "world_id": "unique_drop_lab",
+  "seed": "00000000000000b1",
+  "title": "Live unique drops all effects",
+  "description": "Pick up a deterministic rolled unique item from floor loot and prove the live effect_ids payload is present.",
+  "steps": [
+    { "action": "pick_up_first_rolled_loot" },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "cave_blade",
+      "item_template_id": "cave_blade",
+      "rarity": "unique",
+      "effect_ids": ["executioners_mark"],
+      "stat_keys": ["damage_min", "damage_max"]
+    }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": 0 },
+    { "type": "rolled_inventory_any", "equipped": false }
+  ]
+}

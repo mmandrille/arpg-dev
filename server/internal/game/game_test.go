@@ -3233,6 +3233,34 @@ func TestUniqueEffectRollsRespectItemTypeCompatibility(t *testing.T) {
 	}
 }
 
+func TestAllEnabledUniqueEffectsReachACompatibleTemplateRoll(t *testing.T) {
+	r := loadRules(t)
+	for effectID, effect := range r.UniqueEffects {
+		if !effect.Enabled || effect.Status != "ready" {
+			continue
+		}
+		if !uniqueEffectReachableByTemplateRoll(r, effectID, effect) {
+			t.Fatalf("enabled unique effect %s was not selected by any compatible template roll", effectID)
+		}
+	}
+}
+
+func uniqueEffectReachableByTemplateRoll(r *Rules, effectID string, effect UniqueEffectDef) bool {
+	for _, templateID := range sortedStringKeys(r.ItemTemplates) {
+		template := r.ItemTemplates[templateID]
+		if !containsString(effect.CompatibleItemTypes, template.ItemType) {
+			continue
+		}
+		for seed := uint64(0); seed < 4096; seed++ {
+			got, ok := r.rollUniqueEffectForTemplate(template, NewRNG(seed))
+			if ok && got == effectID {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func TestTreasureClassRollsGolden(t *testing.T) {
 	rules := loadRules(t)
 	var golden struct {

@@ -3190,15 +3190,20 @@ def cross_checks(report: Report) -> None:
             if template_id not in item_templates["templates"]:
                 report.fail("unique_items base template", f"{unique_id}: unknown template {template_id}")
                 failed_uniques = True
-            if unique.get("enabled") is not False or unique.get("status") != "disabled_seed":
-                report.fail("unique_items seed status", f"{unique_id}: v95 seeds must remain disabled")
+            enabled = unique.get("enabled")
+            status = unique.get("status")
+            if enabled is True and status != "ready":
+                report.fail("unique_items status", f"{unique_id}: enabled entries must be ready")
+                failed_uniques = True
+            elif enabled is False and status != "disabled_seed":
+                report.fail("unique_items status", f"{unique_id}: disabled entries must remain disabled_seed")
                 failed_uniques = True
             hook = str(unique.get("behavior_hook", "")).lower()
-            if "future" not in hook and "behavior" not in hook:
-                report.fail("unique_items behavior hook", f"{unique_id}: must describe future behavior, not only stats")
+            if "effect" not in hook and "behavior" not in hook:
+                report.fail("unique_items behavior hook", f"{unique_id}: must describe effect or behavior ownership, not only stats")
                 failed_uniques = True
         if not failed_uniques:
-            report.ok("unique_items disabled seeds reference valid templates and behavior hooks")
+            report.ok("unique_items entries reference valid templates and behavior hooks")
 
     template_item_types = {template.get("item_type") for template in item_templates["templates"].values()}
     if not unique_effect_defs:

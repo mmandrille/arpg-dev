@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v125 — `tuning-friendly-bot-scenarios` |
+| **Latest completed slice** | v126 — `skill-validation-split` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v126 — TBD |
+| **Next slice** | v127 — TBD |
 | **Last engineering review** | v120 — [`docs/reviews/20260613_v120-overview.md`](docs/reviews/20260613_v120-overview.md) (2026-06-13) |
 | **Next engineering review** | v130 (~every 10 slices) |
 
@@ -144,6 +144,7 @@ v122_* = ranger-class-foundation
 v123_* = ranger-piercing-and-pinning-shots
 v124_* = ranger-volley-and-visual-scenario
 v125_* = tuning-friendly-bot-scenarios
+v126_* = skill-validation-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -309,6 +310,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v123** | `ranger-piercing-and-pinning-shots` | Complete (`make ci` green) | [`v123_spec-ranger-piercing-and-pinning-shots.md`](docs/specs/v123_spec-ranger-piercing-and-pinning-shots.md) | [`v123_2026-06-13-ranger-piercing-and-pinning-shots.md`](docs/plans/v123_2026-06-13-ranger-piercing-and-pinning-shots.md) | [`as-built`](docs/as-built/v123_ranger-piercing-and-pinning-shots.md) |
 | **v124** | `ranger-volley-and-visual-scenario` | Complete (`make ci` green) | [`v124_spec-ranger-volley-and-visual-scenario.md`](docs/specs/v124_spec-ranger-volley-and-visual-scenario.md) | [`v124_2026-06-13-ranger-volley-and-visual-scenario.md`](docs/plans/v124_2026-06-13-ranger-volley-and-visual-scenario.md) | [`as-built`](docs/as-built/v124_ranger-volley-and-visual-scenario.md) |
 | **v125** | `tuning-friendly-bot-scenarios` | Complete (`make bot` green) | [`v125_spec-tuning-friendly-bot-scenarios.md`](docs/specs/v125_spec-tuning-friendly-bot-scenarios.md) | [`v125_2026-06-13-tuning-friendly-bot-scenarios.md`](docs/plans/v125_2026-06-13-tuning-friendly-bot-scenarios.md) | [`as-built`](docs/as-built/v125_tuning-friendly-bot-scenarios.md) |
+| **v126** | `skill-validation-split` | Complete (`make validate-shared` green) | [`v126_spec-skill-validation-split.md`](docs/specs/v126_spec-skill-validation-split.md) | [`v126_2026-06-13-skill-validation-split.md`](docs/plans/v126_2026-06-13-skill-validation-split.md) | [`as-built`](docs/as-built/v126_skill-validation-split.md) |
 
 ---
 
@@ -437,6 +439,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Skill validation is split out of the monolithic shared validator.** v126 moves skill class,
+Magic Bolt tuning, skill presentation, prerequisite, and skill golden parity checks into
+`tools/validate_skills.py` while keeping `make validate-shared` behavior intact.
 
 **Bot skill scenarios can derive skill caps from shared rules.** v125 adds
 `max_rank: "from_rules"` support to bot skill progression assertions and migrates the Magic Bolt,

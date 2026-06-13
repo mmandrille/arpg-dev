@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 
@@ -7,6 +8,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from tools.content_manifest import ManifestError, merge_catalog_files, skill_rule_entries
+from tools.validate_skills import validate_skill_catalogs
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -16,6 +18,17 @@ MANIFEST_SCHEMA = ROOT / "shared/content/content_libraries.v0.schema.json"
 def load(path: Path):
     with path.open(encoding="utf-8") as fh:
         return json.load(fh)
+
+
+class CapturingReport:
+    def __init__(self) -> None:
+        self.failures: list[str] = []
+
+    def ok(self, _label: str) -> None:
+        pass
+
+    def fail(self, label: str, detail: str) -> None:
+        self.failures.append(f"{label}: {detail}")
 
 
 def test_content_manifest_schema_rejects_unknown_top_level_group() -> None:
@@ -60,3 +73,24 @@ def test_content_manifest_merge_rejects_duplicate_skill_ids(tmp_path: Path) -> N
 
     with pytest.raises(ManifestError, match="duplicate skills id magic_bolt"):
         merge_catalog_files(manifest_path, skill_rule_entries(load(manifest_path)), "skills")
+
+
+def test_skill_validator_reports_unknown_skill_class() -> None:
+    skills = copy.deepcopy(load(ROOT / "shared/rules/skills.v0.json"))
+    skills["skills"]["magic_bolt"]["class"] = "ghost"
+    class_defs = load(ROOT / "shared/rules/character_progression.v0.json")["classes"]
+    combat = load(ROOT / "shared/rules/combat.v0.json")
+    report = CapturingReport()
+
+    validate_skill_catalogs(
+        report,
+        skills,
+        load(ROOT / "shared/assets/skill_presentations.v0.json"),
+        class_defs,
+        load(ROOT / "shared/golden/skill_points_and_magic_bolt.json"),
+        base_attack_interval=int(combat["base_attack_interval_ticks"]),
+        min_attack_speed=float(combat["min_effective_attack_speed"]),
+        max_attack_speed=float(combat["max_effective_attack_speed"]),
+    )
+
+    assert any("skill classes: unknown classes" in failure and "ghost" in failure for failure in report.failures)

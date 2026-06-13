@@ -90,8 +90,10 @@ func _run() -> void:
 		_assert_true("tooltip opens under hovered skill", float(tooltip_position.get("y", 0.0)) >= magic_block.position.y + magic_block.size.y)
 	_assert_eq("tooltip ignores mouse so skill remains clickable", int(state.get("tooltip_mouse_filter", -1)), Control.MOUSE_FILTER_IGNORE)
 	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: %d" % magic_bolt_mana_cost))
-	_assert_true("tooltip includes next-rank damage", str(state.get("tooltip_body", "")).contains("Next rank:\nDamage: 4-6 -> 5-7"))
-	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel %d\nMagic %d" % [magic_bolt_level_req, magic_rank1_req]))
+	_assert_true("tooltip includes inline next-rank damage", str(state.get("tooltip_body", "")).contains("Damage: 4-6 -> 5-7"))
+	_assert_false("tooltip omits next-rank section header", str(state.get("tooltip_body", "")).contains("Next rank:"))
+	_assert_true("tooltip colors next-rank value green", str(state.get("tooltip_rich_text", "")).contains("Damage: 4-6[color=#6fd66f] -> 5-7[/color]"))
+	_assert_true("tooltip separates stats from requirements", str(state.get("tooltip_body", "")).contains("\n\nRequires:\nLevel %d\nMagic %d" % [magic_bolt_level_req, magic_rank1_req]))
 	panel.bot_leave_skill_tooltip()
 	state = panel.get_debug_state()
 	_assert_eq("tooltip leave clears hovered skill", str(state.get("hovered_skill_id", "")), "")
@@ -145,7 +147,9 @@ func _run() -> void:
 	_assert_eq("paladin has two compact visible skills", paladin_skill_ids.size(), 2)
 	_assert_eq("paladin first local skill", str(paladin_skill_ids[0]), "heal")
 	_assert_eq("paladin second local skill", str(paladin_skill_ids[1]), "holy_shield")
-	_assert_true("heal tooltip includes next-rank percent", SkillsPanelScript.tooltip_plain_body("heal", 1, panel.skill_progression, panel.character_progression).contains("Heal: 25% -> 35%"))
+	var heal_tooltip := SkillsPanelScript.tooltip_plain_body("heal", 1, panel.skill_progression, panel.character_progression)
+	_assert_true("heal tooltip includes inline next-rank percent", heal_tooltip.contains("Heal: 25% -> 35%"))
+	_assert_false("heal tooltip omits next-rank header", heal_tooltip.contains("Next rank:"))
 	var heal_block := panel._skill_blocks.get("heal", null) as Control
 	var holy_shield_block := panel._skill_blocks.get("holy_shield", null) as Control
 	_assert_true("paladin heal block exists", heal_block != null)

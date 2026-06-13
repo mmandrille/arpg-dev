@@ -54,13 +54,11 @@ static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: D
 	text += "\nMana: %d" % _static_skill_mana_cost(def, rank)
 	text += "\n%s" % _static_skill_cooldown_text(def)
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
-	if not next_lines.is_empty():
-		text += "\nNext rank:"
-		for line in next_lines:
-			text += "\n%s" % str(line)
+	for line in next_lines:
+		text += "\n%s" % str(line)
 	var requirement_lines := tooltip_requirement_lines(skill_id, skill_progression, character_progression)
 	if not requirement_lines.is_empty():
-		text += "\nRequires:"
+		text += "\n\nRequires:"
 		for line in requirement_lines:
 			text += "\n%s" % str((line as Dictionary).get("text", ""))
 	return text
@@ -349,6 +347,7 @@ func get_debug_state() -> Dictionary:
 		"tooltip_position": _vec2_debug(_tooltip.position if _tooltip != null else Vector2.ZERO),
 		"tooltip_mouse_filter": _tooltip.mouse_filter if _tooltip != null else -1,
 		"tooltip_body": _tooltip_plain_text,
+		"tooltip_rich_text": _tooltip_body.text if _tooltip_body != null else "",
 		"points_label_visible": _points_label != null and _points_label.visible,
 		"requirements_met": _requirements_met(requirement_status),
 		"requirement_status": requirement_status,
@@ -750,12 +749,11 @@ func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
 		_escape_bbcode(_skill_cooldown_text(def)),
 	]
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
-	if not next_lines.is_empty():
-		lines.append(_escape_bbcode("Next rank:"))
-		for line in next_lines:
-			lines.append(_escape_bbcode(str(line)))
+	for line in next_lines:
+		lines.append(_next_rank_rich_line(str(line)))
 	var requirement_lines := _requirement_lines(skill_id)
 	if not requirement_lines.is_empty():
+		lines.append("")
 		lines.append(_escape_bbcode("Requires:"))
 		for line in requirement_lines:
 			var rec := line as Dictionary
@@ -796,6 +794,16 @@ func _requirement_color(met: bool) -> String:
 
 func _escape_bbcode(text: String) -> String:
 	return text.replace("[", "\\[").replace("]", "\\]")
+
+
+func _next_rank_rich_line(text: String) -> String:
+	var marker := " -> "
+	var marker_index := text.find(marker)
+	if marker_index < 0:
+		return _escape_bbcode(text)
+	var left := text.substr(0, marker_index)
+	var right := text.substr(marker_index)
+	return "%s[color=#6fd66f]%s[/color]" % [_escape_bbcode(left), _escape_bbcode(right)]
 
 
 

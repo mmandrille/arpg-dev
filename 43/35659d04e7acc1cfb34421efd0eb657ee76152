@@ -1,0 +1,71 @@
+server/internal/realtime/session_loop.go
+  s_68a7da5dad7d6a::t_73f1a02cde1493 817,819
+server/internal/game/game_test.go
+  s_68a7da5dad7d6a::t_0e58c438f76822 996-997,1703-1704
+  s_68a7da5dad7d6a::t_4ef70cea9af91e 730,1528-1529
+  s_68a7da5dad7d6a::t_e2a27de82ed34b 1363-1364
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 686,1419-1420
+  s_68a7da5dad7d6a::t_d934e04f18c60b 1546-1547
+  s_68a7da5dad7d6a::t_0f91897d4647cc 1018,1641-1642
+server/migrations/0023_account_waypoints.sql
+  s_68a7da5dad7d6a::t_73f1a02cde1493 1-15
+server/internal/game/shop_test.go
+  s_68a7da5dad7d6a::t_c4d205f9c26945 4,843-864
+tools/validate_shared.py
+  s_68a7da5dad7d6a::t_eb3f02d63e39ca 2221,2224-2230,2305
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 27
+server/internal/store/store_test.go
+  s_68a7da5dad7d6a::t_2b5f778497f7c8 570,577,612,619-629,724
+shared/golden/shop_offers.json
+  s_68a7da5dad7d6a::t_341adf935a7638 25-27,39
+server/internal/store/repos.go
+  s_68a7da5dad7d6a::t_73f1a02cde1493 815,817-819,821,824,832,839,841,843-844,847
+server/internal/replay/replay_test.go
+  s_68a7da5dad7d6a::t_1545552982a0ed 140
+  s_68a7da5dad7d6a::t_73f1a02cde1493 1417,1420
+  s_68a7da5dad7d6a::t_6099137493e2f0 1475-1477
+server/internal/game/character_stats_test.go
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 46,52-62,64,66-67,77-78,86,92-100,102,104-105
+tools/bot/test_skill_visual.py
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 196
+tools/bot/scenarios/40_paladin_heal_skill.json
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 37
+server/internal/realtime/runner.go
+  s_68a7da5dad7d6a::t_73f1a02cde1493 528,530
+server/internal/http/session.go
+  s_68a7da5dad7d6a::t_73f1a02cde1493 371,374
+shared/rules/character_progression.v0.json
+  s_68a7da5dad7d6a::t_0a4e7a33925fb3 526,532
+shared/rules/skills.v0.json
+  s_68a7da5dad7d6a::t_6cc83adf065732 47,104,117,174
+  s_68a7da5dad7d6a::t_0a4e7a33925fb3 28,85-86,155-156,213-214,255,301,354-355,411-412,457-458,482
+shared/golden/character_progression.json
+  s_68a7da5dad7d6a::t_0a4e7a33925fb3 45-46,84-85,123-124,162-163,203-204,242-243,281-282
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 18,23
+shared/golden/skill_points_and_magic_bolt.json
+  s_68a7da5dad7d6a::t_0a4e7a33925fb3 122,130,138
+tools/bot/scenarios/43_paladin_holy_shield.json
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 26
+tools/bot/scenarios/45_class_second_combat_skills.json
+  s_68a7da5dad7d6a::t_94b0ac5003d9bc 34
+server/internal/store/interfaces.go
+  s_68a7da5dad7d6a::t_73f1a02cde1493 53-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4335659d04e7acc1cfb34421efd0eb657ee76152",
+  "prompts": {},
+  "sessions": {
+    "s_68a7da5dad7d6a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf3e-573d-7d92-a6c1-01a1b92ccbea",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

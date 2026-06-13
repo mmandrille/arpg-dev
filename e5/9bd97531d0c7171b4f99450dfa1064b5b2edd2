@@ -1,0 +1,39 @@
+tools/test_validate_unique_items.py
+  s_beaba83981e74e::t_083a2a1e5c3b6e 1-151
+docs/plans/v133_2026-06-13-unique-validation-split.md
+  s_beaba83981e74e::t_1e7c4fa2f02c95 33-34,37-38,52,54-55,66-67,80,82,108-110
+  s_beaba83981e74e::t_f02a276a12cbee 3,96-98,107
+  s_beaba83981e74e::t_eba8a2389a2774 1-2,4-32,35-36,39-51,53,56-65,68-79,81,83-95,99-106
+  s_beaba83981e74e::t_df80835023807a 111
+docs/as-built/v133_unique-validation-split.md
+  s_beaba83981e74e::t_f02a276a12cbee 1-29
+PROGRESS.md
+  s_beaba83981e74e::t_d63a4af3a73075 15,18,154,327,457-459
+server/internal/game/unique_items_validation_test.go
+  s_beaba83981e74e::t_1616ea0f43c89e 51,61
+  s_beaba83981e74e::t_e912848b03ebe9 1-50,52-60,62-142
+docs/specs/v133_spec-unique-validation-split.md
+  s_beaba83981e74e::t_f02a276a12cbee 3
+  s_beaba83981e74e::t_334a4633026c0c 1-2,4-58
+tools/validate_shared.py
+  s_beaba83981e74e::t_327e1f358f5420 31,41
+  s_beaba83981e74e::t_afabcec3b8c8e5 3063
+tools/validate_unique_items.py
+  s_beaba83981e74e::t_0281f56db4a888 1-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e59bd97531d0c7171b4f99450dfa1064b5b2edd2",
+  "prompts": {},
+  "sessions": {
+    "s_beaba83981e74e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec25d-47e7-77c0-a56a-06124fe8de87",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

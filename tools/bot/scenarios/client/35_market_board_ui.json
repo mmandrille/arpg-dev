@@ -1,0 +1,26 @@
+{
+  "id": "market_board_ui",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "market_board_ui_114",
+  "title": "Market board priced listing UI",
+  "description": "Client collects a rolled item, stores it in account stash, publishes it through the market board with a gold price, and verifies the browse row exposes that price.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 10.0 },
+    { "type": "click_loot_item", "rolled": true },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_stash" },
+    { "type": "wait_stash_panel", "equals": 0, "timeout_s": 15.0 },
+    { "type": "drag_bag_to_stash", "rolled": true },
+    { "type": "wait_event", "event_type": "stash_item_deposited", "timeout_s": 15.0 },
+    { "type": "wait_stash_panel", "rolled": true, "equals": 1, "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
+    { "type": "wait_market_panel", "at_least": 0, "timeout_s": 15.0 },
+    { "type": "assert_market_panel_visible", "visible": true },
+    { "type": "set_market_publish_price", "price_gold": 25 },
+    { "type": "click_market_publish_item", "rolled": true },
+    { "type": "wait_market_panel", "item_def_id": "cave_blade", "price_gold": 25, "at_least": 1, "timeout_s": 15.0 },
+    { "type": "assert_market_listing_rows", "item_def_id": "cave_blade", "price_gold": 25, "at_least": 1 }
+  ]
+}

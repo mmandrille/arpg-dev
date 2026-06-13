@@ -4101,7 +4101,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		return
 	var result := {}
 	if action == "publish":
-		result = client.create_market_listing(str(payload.get("stash_item_id", "")))
+		result = client.create_market_listing(str(payload.get("stash_item_id", "")), int(payload.get("price_gold", 0)))
 		if result.has("_error"):
 			if market_panel != null:
 				market_panel.show_status("Could not publish item", true)
@@ -6012,6 +6012,18 @@ func bot_select_stash_sort(mode: String) -> void:
 	if stash_panel == null:
 		return
 	stash_panel.bot_select_sort_mode(mode)
+
+
+func bot_set_market_publish_price(price_gold: int) -> void:
+	if market_panel == null:
+		return
+	market_panel.bot_set_publish_price(price_gold)
+
+
+func bot_click_market_publish_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
+	if market_panel == null:
+		return
+	market_panel.bot_click_publish_stash_item(stash_item_id, item_def_id, rolled, stash_index)
 
 
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:

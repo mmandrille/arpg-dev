@@ -7,6 +7,7 @@ const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(640, 520)
 const BODY_FONT_SIZE := 19
 const DETAIL_FONT_SIZE := 16
+const DEFAULT_PUBLISH_PRICE_GOLD := 25
 
 var market_entity_id: String = ""
 var account_id: String = ""
@@ -19,6 +20,7 @@ var _tabs: TabContainer
 var _browse_rows: VBoxContainer
 var _publish_rows: VBoxContainer
 var _offer_rows: VBoxContainer
+var _publish_price_spin: SpinBox
 
 
 func _ready() -> void:
@@ -65,12 +67,29 @@ func bot_select_tab(tab_name: String) -> void:
 			_tabs.current_tab = 0
 
 
+func bot_set_publish_price(price_gold: int) -> void:
+	if _publish_price_spin == null:
+		return
+	_publish_price_spin.value = max(1, price_gold)
+
+
+func bot_click_publish_stash_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
+	var item := _matching_stash_item(stash_item_id, item_def_id, rolled, stash_index)
+	if item.is_empty():
+		show_status("No matching stash item to publish", true)
+		return
+	_emit_market_action("publish", item)
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"market_entity_id": market_entity_id,
 		"listing_count": listings.size(),
+		"listing_rows": _debug_listing_rows(),
 		"stash_item_count": stash_items.size(),
+		"stash_rows": _debug_stash_rows(),
+		"publish_price_gold": _publish_price(),
 		"selected_listing_id": selected_listing_id,
 		"status": _status_label.text if _status_label != null else "",
 		"tab": _tabs.current_tab if _tabs != null else -1,
@@ -140,6 +159,7 @@ func _rebuild_browse_rows() -> void:
 
 func _rebuild_publish_rows() -> void:
 	_clear_rows(_publish_rows)
+	_publish_rows.add_child(_publish_price_row())
 	if stash_items.is_empty():
 		_publish_rows.add_child(_empty_label("Your stash has no items to publish"))
 		return
@@ -177,7 +197,8 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 	box.add_child(title)
 
 	var detail := Label.new()
-	detail.text = "Listing %s - seller %s" % [
+	detail.text = "%d gold - Listing %s - seller %s" % [
+		int(listing.get("price_gold", 0)),
 		str(listing.get("listing_id", "")),
 		str(listing.get("seller_account_id", "")).substr(0, 10),
 	]
@@ -235,7 +256,10 @@ func _emit_market_action(action: String, item: Dictionary) -> void:
 		show_status("Missing stash item id", true)
 		return
 	if action == "publish":
-		market_action_requested.emit("publish", {"stash_item_id": stash_item_id})
+		market_action_requested.emit("publish", {
+			"stash_item_id": stash_item_id,
+			"price_gold": _publish_price(),
+		})
 		return
 	if action == "offer":
 		if selected_listing_id == "":
@@ -253,6 +277,80 @@ func _selected_listing() -> Dictionary:
 			selected_listing_id = str((listing as Dictionary).get("listing_id", ""))
 			return listing as Dictionary
 	return {}
+
+
+func _publish_price_row() -> Control:
+	var current_price := _publish_price()
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var label := Label.new()
+	label.text = "Price"
+	label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	label.add_theme_color_override("font_color", Color("#e8dcc8"))
+	row.add_child(label)
+	_publish_price_spin = SpinBox.new()
+	_publish_price_spin.min_value = 1
+	_publish_price_spin.max_value = 999999
+	_publish_price_spin.step = 1
+	_publish_price_spin.value = current_price
+	_publish_price_spin.custom_minimum_size = Vector2(140, 34)
+	row.add_child(_publish_price_spin)
+	return row
+
+
+func _publish_price() -> int:
+	if _publish_price_spin == null:
+		return DEFAULT_PUBLISH_PRICE_GOLD
+	return max(1, int(_publish_price_spin.value))
+
+
+func _matching_stash_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> Dictionary:
+	var matches: Array = []
+	for item in stash_items:
+		if typeof(item) != TYPE_DICTIONARY:
+			continue
+		var rec := item as Dictionary
+		if stash_item_id != "" and str(rec.get("stash_item_id", "")) != stash_item_id:
+			continue
+		if item_def_id != "" and str(rec.get("item_def_id", "")) != item_def_id:
+			continue
+		if rolled != null and (str(rec.get("item_template_id", "")) != "") != bool(rolled):
+			continue
+		matches.append(rec)
+	if matches.is_empty():
+		return {}
+	var index = clampi(stash_index, 0, matches.size() - 1)
+	return (matches[index] as Dictionary).duplicate(true)
+
+
+func _debug_listing_rows() -> Array:
+	var rows: Array = []
+	for listing in listings:
+		if typeof(listing) != TYPE_DICTIONARY:
+			continue
+		var rec := listing as Dictionary
+		rows.append({
+			"listing_id": str(rec.get("listing_id", "")),
+			"item_def_id": str(rec.get("item_def_id", "")),
+			"item_template_id": str(rec.get("item_template_id", "")),
+			"seller_account_id": str(rec.get("seller_account_id", "")),
+			"price_gold": int(rec.get("price_gold", 0)),
+		})
+	return rows
+
+
+func _debug_stash_rows() -> Array:
+	var rows: Array = []
+	for item in stash_items:
+		if typeof(item) != TYPE_DICTIONARY:
+			continue
+		var rec := item as Dictionary
+		rows.append({
+			"stash_item_id": str(rec.get("stash_item_id", "")),
+			"item_def_id": str(rec.get("item_def_id", "")),
+			"item_template_id": str(rec.get("item_template_id", "")),
+		})
+	return rows
 
 
 func _clear_rows(rows: VBoxContainer) -> void:

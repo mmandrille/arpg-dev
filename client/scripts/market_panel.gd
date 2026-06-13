@@ -24,6 +24,7 @@ var active_offers: Array = []
 var selected_listing_id: String = ""
 var staged_publish_item: Dictionary = {}
 var staged_offer_items: Array = []
+var _offer_tab_visible: bool = false
 var _panel: DraggableWindow
 var _status_label: Label
 var _tabs: TabContainer
@@ -110,6 +111,9 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 	account_id = next_account_id
 	staged_publish_item = {}
 	staged_offer_items = []
+	active_offers = []
+	selected_listing_id = ""
+	_offer_tab_visible = false
 	staged_offer_items_changed.emit([])
 	_status_label.text = status
 	_rebuild_all()
@@ -139,6 +143,8 @@ func return_to_browse_after_offer() -> void:
 	staged_offer_items_changed.emit([])
 	if _tabs != null:
 		_tabs.current_tab = 0
+	_offer_tab_visible = false
+	_apply_offer_tab_visibility()
 	inventory_context_requested.emit("")
 	_rebuild_offer_rows()
 
@@ -151,6 +157,8 @@ func bot_select_tab(tab_name: String) -> void:
 			_tabs.current_tab = 1
 			inventory_context_requested.emit("publish")
 		"offer":
+			_offer_tab_visible = true
+			_apply_offer_tab_visibility()
 			_tabs.current_tab = 2
 			inventory_context_requested.emit("offer")
 		_:
@@ -203,6 +211,8 @@ func show_offers(listing_id: String, offers: Array, status: String = "") -> void
 	active_offers = _dup_array(offers)
 	if status != "":
 		_status_label.text = status
+	_offer_tab_visible = true
+	_apply_offer_tab_visibility()
 	_tabs.current_tab = 2
 	_rebuild_offer_rows()
 
@@ -213,7 +223,8 @@ func get_debug_state() -> Dictionary:
 		"market_entity_id": market_entity_id,
 		"account_id": account_id,
 		"listing_count": listings.size(),
-		"listing_rows": _debug_listing_rows(),
+		"listing_rows": _debug_listing_rows(_foreign_listings()),
+		"owned_listing_rows": _debug_listing_rows(_owned_listings()),
 		"stash_item_count": inventory_items.size(),
 		"stash_rows": _debug_inventory_rows(),
 		"inventory_item_count": inventory_items.size(),
@@ -231,6 +242,8 @@ func get_debug_state() -> Dictionary:
 		"publish_rows_centered": _rows_centered(_publish_rows),
 		"offer_rows_top_aligned": _rows_top_aligned(_offer_rows),
 		"selected_listing_id": selected_listing_id,
+		"offer_tab_visible": _offer_tab_visible,
+		"visible_tab_titles": _visible_tab_titles(),
 		"status": _status_label.text if _status_label != null else "",
 		"tab": _tabs.current_tab if _tabs != null else -1,
 		"window": _panel.get_debug_state() if _panel != null else {},
@@ -305,6 +318,7 @@ func _build() -> void:
 	_browse_rows = _tab_rows("Browse")
 	_publish_rows = _tab_rows("Publish")
 	_offer_rows = _tab_rows("Offer")
+	_apply_offer_tab_visibility()
 
 
 func _tab_rows(title: String) -> VBoxContainer:
@@ -346,16 +360,19 @@ func _rebuild_all() -> void:
 
 func _rebuild_browse_rows() -> void:
 	_clear_rows(_browse_rows)
-	if listings.is_empty():
+	var browse_listings := _foreign_listings()
+	if browse_listings.is_empty():
 		_browse_rows.add_child(_empty_label("No active listings"))
 		return
-	for listing in listings:
-		if typeof(listing) == TYPE_DICTIONARY:
-			_browse_rows.add_child(_listing_row(listing as Dictionary, true))
+	for listing in browse_listings:
+		_browse_rows.add_child(_listing_row(listing as Dictionary, "browse"))
 
 
 func _rebuild_publish_rows() -> void:
 	_clear_rows(_publish_rows)
+	var owned := _owned_listings()
+	for listing in owned:
+		_publish_rows.add_child(_listing_row(listing as Dictionary, "publish"))
 	_publish_rows.add_child(_stage_slot("publish", staged_publish_item, 0))
 	_publish_rows.add_child(_publish_controls_row())
 	_publish_rows.add_child(_empty_label("Double-click or drag an inventory item here"))
@@ -367,7 +384,7 @@ func _rebuild_offer_rows() -> void:
 	if selected.is_empty():
 		_offer_rows.add_child(_empty_label("Select another player's listing in Browse"))
 		return
-	_offer_rows.add_child(_listing_row(selected, false))
+	_offer_rows.add_child(_listing_row(selected, "readonly"))
 	if str(selected.get("seller_account_id", "")) == account_id:
 		if active_offers.is_empty():
 			_offer_rows.add_child(_empty_label("No active offers"))
@@ -386,7 +403,7 @@ func _rebuild_offer_rows() -> void:
 	_offer_rows.add_child(_empty_label("Double-click or drag up to 10 inventory items"))
 
 
-func _listing_row(listing: Dictionary, selectable: bool) -> Control:
+func _listing_row(listing: Dictionary, mode: String) -> Control:
 	var row := PanelContainer.new()
 	row.add_theme_stylebox_override("panel", _row_style())
 	var outer := HBoxContainer.new()
@@ -421,10 +438,10 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 		stat_label.add_theme_color_override("font_color", Color("#cfc3aa"))
 		box.add_child(stat_label)
 
-	if selectable:
+	if mode != "readonly":
 		var actions := HBoxContainer.new()
 		actions.add_theme_constant_override("separation", 8)
-		if str(listing.get("seller_account_id", "")) == account_id:
+		if mode == "publish":
 			var offers_btn := Button.new()
 			offers_btn.text = "View Offers"
 			offers_btn.custom_minimum_size = Vector2(136, 34)
@@ -433,7 +450,7 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 				market_action_requested.emit("list_offers", {"listing_id": selected_listing_id})
 			)
 			actions.add_child(offers_btn)
-		elif int(listing.get("price_gold", 0)) > 0:
+		elif mode == "browse" and int(listing.get("price_gold", 0)) > 0:
 			var buy_btn := Button.new()
 			buy_btn.text = "Buy"
 			buy_btn.custom_minimum_size = Vector2(86, 34)
@@ -441,12 +458,14 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 				_emit_purchase_action(listing)
 			)
 			actions.add_child(buy_btn)
-		if str(listing.get("seller_account_id", "")) != account_id:
+		if mode == "browse":
 			var btn := Button.new()
 			btn.text = "Make Offer"
 			btn.custom_minimum_size = Vector2(136, 34)
 			btn.pressed.connect(func() -> void:
 				selected_listing_id = str(listing.get("listing_id", ""))
+				_offer_tab_visible = true
+				_apply_offer_tab_visibility()
 				_tabs.current_tab = 2
 				inventory_context_requested.emit("offer")
 				_rebuild_offer_rows()
@@ -572,6 +591,22 @@ func _selected_listing() -> Dictionary:
 	return {}
 
 
+func _owned_listings() -> Array:
+	var out: Array = []
+	for listing in listings:
+		if typeof(listing) == TYPE_DICTIONARY and str((listing as Dictionary).get("seller_account_id", "")) == account_id:
+			out.append(listing)
+	return out
+
+
+func _foreign_listings() -> Array:
+	var out: Array = []
+	for listing in listings:
+		if typeof(listing) == TYPE_DICTIONARY and str((listing as Dictionary).get("seller_account_id", "")) != account_id:
+			out.append(listing)
+	return out
+
+
 func _matching_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0, seller_owned: bool = false) -> Dictionary:
 	var matches: Array = []
 	for listing in listings:
@@ -660,9 +695,9 @@ func _matching_inventory_item(stash_item_id: String = "", item_def_id: String = 
 	return (matches[index] as Dictionary).duplicate(true)
 
 
-func _debug_listing_rows() -> Array:
+func _debug_listing_rows(source: Array) -> Array:
 	var rows: Array = []
-	for listing in listings:
+	for listing in source:
 		if typeof(listing) != TYPE_DICTIONARY:
 			continue
 		var rec := listing as Dictionary
@@ -677,6 +712,23 @@ func _debug_listing_rows() -> Array:
 			"stat_lines": _listing_stat_lines(rec),
 		})
 	return rows
+
+
+func _apply_offer_tab_visibility() -> void:
+	if _tabs == null:
+		return
+	if _tabs.get_tab_count() >= 3:
+		_tabs.set_tab_hidden(2, not _offer_tab_visible)
+
+
+func _visible_tab_titles() -> Array:
+	var titles: Array = []
+	if _tabs == null:
+		return titles
+	for i in range(_tabs.get_tab_count()):
+		if not _tabs.is_tab_hidden(i):
+			titles.append(_tabs.get_tab_title(i))
+	return titles
 
 
 func _debug_inventory_rows() -> Array:

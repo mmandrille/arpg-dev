@@ -322,7 +322,22 @@ func _run() -> void:
 		"price_gold": 25,
 		"requirements": {"level": 1},
 		"rolled_stats": {"armor": 6},
+	}, {
+		"listing_id": "listing-owned",
+		"item_def_id": "cave_bow",
+		"item_template_id": "cave_bow",
+		"display_name": "Common Cave Bow",
+		"rarity": "common",
+		"seller_account_id": "me",
+		"price_gold": 25,
+		"requirements": {"level": 1},
+		"rolled_stats": {"damage_min": 1, "damage_max": 2},
 	}], inventory, "me", "Active listings")
+	var initial_market_state := market_panel.get_debug_state()
+	var initial_tab_titles: Array = initial_market_state.get("visible_tab_titles", [])
+	_assert_true("market offer tab hidden by default", not initial_tab_titles.has("Offer"))
+	_assert_eq("market browse hides owned listings", (initial_market_state.get("listing_rows", []) as Array).size(), 1)
+	_assert_eq("market publish shows owned listings", (initial_market_state.get("owned_listing_rows", []) as Array).size(), 1)
 	market_panel.stage_inventory_item("publish", inventory[0])
 	market_panel.bot_set_publish_price(33)
 	market_panel._emit_publish_action()
@@ -361,19 +376,12 @@ func _run() -> void:
 	var listing_rows: Array = market_state.get("listing_rows", [])
 	_assert_true("market listing debug row exists", not listing_rows.is_empty())
 	var listing_row: Dictionary = listing_rows[0] if not listing_rows.is_empty() else {}
+	_assert_eq("market browse listing is foreign", str(listing_row.get("seller_account_id", "")), "other")
 	_assert_true("market listing row has item icon", bool(listing_row.get("has_icon", false)))
 	_assert_false("market visible detail hides listing id", str(listing_row.get("visible_detail", "")).contains("listing-1"))
 	_assert_true("market listing shows level", _array_contains_text(listing_row.get("stat_lines", []), "Level 1"))
 	_assert_true("market listing shows base armor", _array_contains_text(listing_row.get("stat_lines", []), "Base Armor: +3"))
 	_assert_true("market listing shows rolled armor", _array_contains_text(listing_row.get("stat_lines", []), "Rolled Armor: +3"))
-	market_panel.show_market("market-1", [{
-		"listing_id": "listing-owned",
-		"item_def_id": "cave_mail",
-		"display_name": "Magic Cave Mail",
-		"rarity": "magic",
-		"seller_account_id": "me",
-		"price_gold": 25,
-	}], inventory, "me", "Active listings")
 	market_panel.show_offers("listing-owned", [{
 		"offer_id": "offer-1",
 		"listing_id": "listing-owned",
@@ -382,6 +390,8 @@ func _run() -> void:
 		"items": [inventory[0], inventory[1]],
 	}])
 	market_state = market_panel.get_debug_state()
+	_assert_true("market offer tab visible while viewing offers", (market_state.get("visible_tab_titles", []) as Array).has("Offer"))
+	_assert_eq("market offer view selected tab", int(market_state.get("tab", -1)), 2)
 	var offer_rows: Array = market_state.get("offer_rows", [])
 	_assert_eq("market viewed offer row count", offer_rows.size(), 1)
 	var viewed_offer_slots: Array = (offer_rows[0] as Dictionary).get("item_slots", [])

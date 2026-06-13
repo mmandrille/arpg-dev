@@ -134,6 +134,8 @@ func get_debug_state() -> Dictionary:
 		"stage_slot_size": {"x": STAGE_SLOT_SIZE.x, "y": STAGE_SLOT_SIZE.y},
 		"stage_slot_centered": true,
 		"stage_icon_visible": not staged_item.is_empty(),
+		"preview_lines": _upgrade_preview_lines(staged_item) if not staged_item.is_empty() else [],
+		"instruction_visible": false,
 		"rows": _debug_rows(),
 		"status": _status_label.text if _status_label != null else "",
 		"window": _panel.get_debug_state() if _panel != null else {},
@@ -206,7 +208,6 @@ func _rebuild() -> void:
 	button.disabled = staged_item.is_empty() or not _upgrade_enabled(staged_item)
 	button.pressed.connect(func() -> void: _emit_upgrade(staged_item))
 	_rows.add_child(button)
-	_rows.add_child(_empty_label("Double-click or drag an inventory item into the center block"))
 
 
 func _stage_slot() -> Control:
@@ -344,11 +345,13 @@ func _next_cost(level: int) -> int:
 
 func _upgrade_preview_lines(item: Dictionary) -> Array:
 	var lines: Array = []
-	var stats := _stats_map(item)
+	var stats := _summary_stat_map(item)
+	if stats.is_empty():
+		stats = _stats_map(item)
 	var level := _item_level(item)
 	if level >= max_level:
 		return ["Max level reached"]
-	for key in stats.keys():
+	for key in _ordered_upgrade_stat_keys(stats):
 		var current := int(stats.get(key, 0))
 		var next := current
 		if str(key) == "item_level":
@@ -356,20 +359,91 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 		elif current > 0:
 			next = current + 1
 		if next != current:
-			lines.append("%s: %d -> %d" % [str(key).replace("_", " ").capitalize(), current, next])
+			lines.append("%s: %d -> %d" % [_display_stat(str(key)), current, next])
 	if lines.is_empty():
 		lines.append("Item level: %d -> %d" % [level, min(max_level, level + 1)])
 	return lines
 
 
 func _stats_map(item: Dictionary) -> Dictionary:
-	var rolled = item.get("rolled_stats", {})
+	var rolled: Variant = item.get("rolled_stats", {})
 	if typeof(rolled) == TYPE_DICTIONARY:
-		var payload := rolled as Dictionary
+		var payload := _dictionary_from_variant(rolled)
 		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-			return (payload.get("stats", {}) as Dictionary).duplicate(true)
-		return payload.duplicate(true)
-	return {}
+			return _dictionary_from_variant(payload.get("stats", {}))
+		var out := payload
+		var summary_stats := _summary_stat_map(item)
+		for key in summary_stats.keys():
+			if not out.has(key):
+				out[key] = summary_stats.get(key)
+		return out
+	return _summary_stat_map(item)
+
+
+func _dictionary_from_variant(value: Variant) -> Dictionary:
+	var parsed = JSON.parse_string(JSON.stringify(value))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return {}
+	var out := {}
+	for key in (parsed as Dictionary).keys():
+		out[str(key)] = (parsed as Dictionary).get(key)
+	return out
+
+
+func _summary_stat_map(item: Dictionary) -> Dictionary:
+	var out := {}
+	var summary: Variant = item.get("summary_lines", [])
+	if typeof(summary) != TYPE_ARRAY:
+		return out
+	for line in summary as Array:
+		var text := str(line)
+		if text.begins_with("Armor"):
+			out["armor"] = _last_int_in_text(text)
+		elif text.begins_with("Block"):
+			out["block_percent"] = _last_int_in_text(text)
+		elif text.begins_with("Min damage"):
+			out["damage_min"] = _last_int_in_text(text)
+		elif text.begins_with("Max damage"):
+			out["damage_max"] = _last_int_in_text(text)
+	return out
+
+
+func _last_int_in_text(text: String) -> int:
+	var regex := RegEx.new()
+	regex.compile("-?\\d+")
+	var matches := regex.search_all(text)
+	if matches.is_empty():
+		return 0
+	return int(matches[matches.size() - 1].get_string())
+
+
+func _ordered_upgrade_stat_keys(stats: Dictionary) -> Array:
+	var out: Array = []
+	for key in ["armor", "block_percent", "damage_min", "damage_max", "str", "dex", "vit", "magic", "max_hp", "max_mana", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows", "item_level"]:
+		if stats.has(key):
+			out.append(key)
+	for key in stats.keys():
+		if not out.has(str(key)):
+			out.append(str(key))
+	return out
+
+
+func _display_stat(stat: String) -> String:
+	match stat:
+		"block_percent":
+			return "Block"
+		"damage_min":
+			return "Min damage"
+		"damage_max":
+			return "Max damage"
+		"max_hp":
+			return "Max HP"
+		"max_mana":
+			return "Max mana"
+		"item_level":
+			return "Item level"
+		_:
+			return stat.replace("_", " ").capitalize()
 
 
 func _item_title(item: Dictionary) -> String:

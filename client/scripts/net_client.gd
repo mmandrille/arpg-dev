@@ -291,6 +291,24 @@ func create_market_offer(listing_id: String, stash_item_ids: Array) -> Dictionar
 	return {"_error": str(r)}
 
 
+func list_market_offers(listing_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/market/listings/%s/offers" % listing_id,
+		["Authorization: Bearer " + token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("list_market_offers failed: %s" % r)
+	return {"offers": [], "_error": str(r)}
+
+
+func accept_market_offer(listing_id: String, offer_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/offers/%s/accept" % [listing_id, offer_id],
+		["Authorization: Bearer " + token], "{}")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("accept_market_offer failed: %s" % r)
+	return {"_error": str(r)}
+
+
 func purchase_market_listing(listing_id: String) -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/purchase" % listing_id,
 		["Authorization: Bearer " + token], "{}")

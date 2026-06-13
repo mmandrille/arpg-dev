@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v116 — `elite-aura-radius-preview` |
+| **Latest completed slice** | v117 — `market-active-offer-ui` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v117 — TBD |
+| **Next slice** | v118 — TBD |
 | **Last engineering review** | v110 — [`docs/reviews/20260613_v110-overview.md`](docs/reviews/20260613_v110-overview.md) (2026-06-13) |
 | **Next engineering review** | v120 (~every 10 slices) |
 
@@ -135,6 +135,7 @@ v113_* = elite-aura-readability
 v114_* = market-board-ui
 v115_* = market-purchase-ui
 v116_* = elite-aura-radius-preview
+v117_* = market-active-offer-ui
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -291,6 +292,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v114** | `market-board-ui` | Complete (`make ci` green) | [`v114_spec-market-board-ui.md`](docs/specs/v114_spec-market-board-ui.md) | [`v114_2026-06-13-market-board-ui.md`](docs/plans/v114_2026-06-13-market-board-ui.md) | [`as-built`](docs/as-built/v114_market-board-ui.md) |
 | **v115** | `market-purchase-ui` | Complete (`make ci` green) | [`v115_spec-market-purchase-ui.md`](docs/specs/v115_spec-market-purchase-ui.md) | [`v115_2026-06-13-market-purchase-ui.md`](docs/plans/v115_2026-06-13-market-purchase-ui.md) | [`as-built`](docs/as-built/v115_market-purchase-ui.md) |
 | **v116** | `elite-aura-radius-preview` | Complete (`make ci` green) | [`v116_spec-elite-aura-radius-preview.md`](docs/specs/v116_spec-elite-aura-radius-preview.md) | [`v116_2026-06-13-elite-aura-radius-preview.md`](docs/plans/v116_2026-06-13-elite-aura-radius-preview.md) | [`as-built`](docs/as-built/v116_elite-aura-radius-preview.md) |
+| **v117** | `market-active-offer-ui` | Complete (`make ci` green) | [`v117_spec-market-active-offer-ui.md`](docs/specs/v117_spec-market-active-offer-ui.md) | [`v117_2026-06-13-market-active-offer-ui.md`](docs/plans/v117_2026-06-13-market-active-offer-ui.md) | [`as-built`](docs/as-built/v117_market-active-offer-ui.md) |
 
 ---
 
@@ -420,6 +422,11 @@ Do **not** assume these are the next slice — they are documented backlog items
 to monster entity views, renders a display-only radius ring around visible pack leaders whose
 followers are server-marked with `elite_command`, and proves the marker plus shared-radius debug
 state with client bot scenario `37_elite_aura_radius_preview`.
+
+**Market active offers are now inspectable and acceptable from Godot.** v117 adds seller-side offer
+inspection to the market board, lets sellers accept an active item offer through the existing HTTP
+contract, refreshes the listing list after acceptance, and proves the flow with client bot scenario
+`38_market_active_offer_ui`.
 
 **Market purchase is now usable from the Godot board.** v115 adds a buyer-only `Buy` action for
 priced listings, calls the existing v111 purchase route, refreshes active listings, and proves the

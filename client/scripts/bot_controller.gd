@@ -182,6 +182,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_market_publish_item(action)
 		"click_market_purchase_listing":
 			_do_click_market_purchase_listing(action)
+		"click_market_view_offers":
+			_do_click_market_view_offers(action)
+		"click_market_accept_offer":
+			_do_click_market_accept_offer(action)
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -361,6 +365,21 @@ func _do_click_market_purchase_listing(action: Dictionary) -> void:
 			int(action.get("price_gold", -1)),
 			int(action.get("listing_index", 0))
 		)
+
+
+func _do_click_market_view_offers(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_market_view_offers"):
+		_main.bot_click_market_view_offers(
+			str(action.get("listing_id", "")),
+			str(action.get("item_def_id", "")),
+			int(action.get("price_gold", -1)),
+			int(action.get("listing_index", 0))
+		)
+
+
+func _do_click_market_accept_offer(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_market_accept_offer"):
+		_main.bot_click_market_accept_offer(str(action.get("offer_id", "")), int(action.get("offer_index", 0)))
 
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
@@ -671,6 +690,15 @@ func _format_action(action: Dictionary) -> String:
 				str(action.get("price_gold", "")),
 				str(action.get("listing_index", 0)),
 			]
+		"click_market_view_offers":
+			return "click_market_view_offers listing=%s item=%s price=%s index=%s" % [
+				str(action.get("listing_id", "")),
+				str(action.get("item_def_id", "")),
+				str(action.get("price_gold", "")),
+				str(action.get("listing_index", 0)),
+			]
+		"click_market_accept_offer":
+			return "click_market_accept_offer offer=%s index=%s" % [str(action.get("offer_id", "")), str(action.get("offer_index", 0))]
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
 				str(action.get("slot_index", "")),

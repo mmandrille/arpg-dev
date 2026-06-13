@@ -305,7 +305,17 @@ func _run() -> void:
 	market_panel.market_action_requested.connect(func(action: String, payload: Dictionary) -> void:
 		market_emitted.append({"action": action, "payload": payload.duplicate(true)})
 	)
-	market_panel.show_market("market-1", [{"listing_id": "listing-1", "item_def_id": "cave_mail", "seller_account_id": "other", "price_gold": 25}], inventory, "me", "Active listings")
+	market_panel.show_market("market-1", [{
+		"listing_id": "listing-1",
+		"item_def_id": "cave_mail",
+		"item_template_id": "cave_mail",
+		"display_name": "Magic Cave Mail",
+		"rarity": "magic",
+		"seller_account_id": "other",
+		"price_gold": 25,
+		"requirements": {"level": 1},
+		"rolled_stats": {"armor": 6},
+	}], inventory, "me", "Active listings")
 	market_panel.stage_inventory_item("publish", inventory[0])
 	market_panel.bot_set_publish_price(33)
 	market_panel._emit_publish_action()
@@ -320,6 +330,14 @@ func _run() -> void:
 	_assert_eq("market offer inventory count", (market_emitted[1]["payload"].get("item_instance_ids", []) as Array).size(), 2)
 	var market_state := market_panel.get_debug_state()
 	_assert_eq("market staged offer count", int(market_state.get("staged_offer_count", 0)), 2)
+	var listing_rows: Array = market_state.get("listing_rows", [])
+	_assert_true("market listing debug row exists", not listing_rows.is_empty())
+	var listing_row: Dictionary = listing_rows[0] if not listing_rows.is_empty() else {}
+	_assert_true("market listing row has item icon", bool(listing_row.get("has_icon", false)))
+	_assert_false("market visible detail hides listing id", str(listing_row.get("visible_detail", "")).contains("listing-1"))
+	_assert_true("market listing shows level", _array_contains_text(listing_row.get("stat_lines", []), "Level 1"))
+	_assert_true("market listing shows base armor", _array_contains_text(listing_row.get("stat_lines", []), "Base Armor: +3"))
+	_assert_true("market listing shows rolled armor", _array_contains_text(listing_row.get("stat_lines", []), "Rolled Armor: +3"))
 	market_panel.queue_free()
 
 	var blacksmith_panel := BlacksmithPanelScript.new()

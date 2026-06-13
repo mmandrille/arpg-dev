@@ -1,0 +1,52 @@
+shared/protocol/state_delta.v8.schema.json
+  s_bc00fb3f98ae13::t_4357dad67e0ebc 54-55
+client/scripts/elite_aura_preview_sync.gd.uid
+  s_bc00fb3f98ae13::t_7a1e94b4f13c86 1
+docs/plans/v116_2026-06-13-elite-aura-radius-preview.md
+  s_bc00fb3f98ae13::t_5e20b7c0295774 1-2,4-21,23-35,37-51,53-54,57-67,70-79,81-87
+  s_bc00fb3f98ae13::t_45b8a1bf64b93d 3,36,55-56,68-69,80,88-89
+  s_bc00fb3f98ae13::t_6d45c47ace149e 90-91
+  s_bc00fb3f98ae13::t_98c7c5fcc5ce21 22,52
+server/internal/game/sim.go
+  s_bc00fb3f98ae13::t_4357dad67e0ebc 7505-7506
+client/scripts/bot_scenario_runner.gd
+  s_bc00fb3f98ae13::t_4357dad67e0ebc 929-936
+client/scripts/elite_aura_preview_sync.gd
+  s_bc00fb3f98ae13::t_98c7c5fcc5ce21 1-27
+client/scripts/player_status_effect_markers.gd
+  s_bc00fb3f98ae13::t_4357dad67e0ebc 13,108-139,346-371
+PROGRESS.md
+  s_bc00fb3f98ae13::t_45b8a1bf64b93d 15,18,137,293,419-422
+server/internal/game/types.go
+  s_bc00fb3f98ae13::t_4357dad67e0ebc 26-27
+  s_bc00fb3f98ae13::t_7ae46169c46dc4 15
+docs/specs/v116_spec-elite-aura-radius-preview.md
+  s_bc00fb3f98ae13::t_5e20b7c0295774 1-70
+shared/protocol/session_snapshot.v8.schema.json
+  s_bc00fb3f98ae13::t_4357dad67e0ebc 80-81
+tools/bot/scenarios/client/37_elite_aura_radius_preview.json
+  s_bc00fb3f98ae13::t_9dd67fe1968891 24-25
+  s_bc00fb3f98ae13::t_4357dad67e0ebc 1-23,26-29
+client/scripts/main.gd
+  s_bc00fb3f98ae13::t_f08a63934eaefb 5848,5850
+  s_bc00fb3f98ae13::t_98c7c5fcc5ce21 17,4665,4686
+  s_bc00fb3f98ae13::t_7ae46169c46dc4 5852,5856,5860
+docs/as-built/v116_elite-aura-radius-preview.md
+  s_bc00fb3f98ae13::t_45b8a1bf64b93d 1-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "df4348c958b07606cf006dda175a612d08087512",
+  "prompts": {},
+  "sessions": {
+    "s_bc00fb3f98ae13": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebed0-991b-7680-9f06-9611c1dc4420",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1998,19 +1998,12 @@ func (s *Store) AcceptMarketOffer(ctx context.Context, sellerAccountID, listingI
 			return err
 		}
 		offer.Items = items
-		listedStats := listing.RolledStats
-		if len(listedStats) == 0 {
-			listedStats = []byte(`{}`)
-		}
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
-			 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
-			offer.BidderAccountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, []byte(listedStats),
-		); err != nil {
-			return fmt.Errorf("store: deliver accepted listing to bidder stash: %w", err)
+		bidderCharacterID := firstSourceCharacterID(items)
+		if err := deliverMarketListingItem(ctx, tx, offer.BidderAccountID, bidderCharacterID, listing); err != nil {
+			return err
 		}
 		for _, item := range items {
-			if err := restoreOfferItemToAccountStash(ctx, tx, sellerAccountID, item); err != nil {
+			if err := deliverMarketOfferItem(ctx, tx, sellerAccountID, listing.SourceCharacterID, item); err != nil {
 				return err
 			}
 		}
@@ -2283,6 +2276,80 @@ func restoreOfferItemToAccountStash(ctx context.Context, tx pgx.Tx, accountID st
 		return fmt.Errorf("store: restore offer item to account stash: %w", err)
 	}
 	return nil
+}
+
+func deliverMarketListingItem(ctx context.Context, tx pgx.Tx, accountID, characterID string, listing MarketListing) error {
+	rolledStats := listing.RolledStats
+	if len(rolledStats) == 0 {
+		rolledStats = []byte(`{}`)
+	}
+	if characterID != "" {
+		if err := insertCharacterInventoryItem(ctx, tx, accountID, characterID, listing.StashItemID, listing.ItemDefID, rolledStats); err != nil {
+			return fmt.Errorf("store: deliver accepted listing to bidder character: %w", err)
+		}
+		return nil
+	}
+	if _, err := tx.Exec(ctx,
+		`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
+		 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
+		accountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, []byte(rolledStats),
+	); err != nil {
+		return fmt.Errorf("store: deliver accepted listing to bidder stash: %w", err)
+	}
+	return nil
+}
+
+func deliverMarketOfferItem(ctx context.Context, tx pgx.Tx, accountID, characterID string, item MarketOfferItem) error {
+	if characterID != "" {
+		rolledStats := item.RolledStats
+		if len(rolledStats) == 0 {
+			rolledStats = []byte(`{}`)
+		}
+		if err := insertCharacterInventoryItem(ctx, tx, accountID, characterID, item.StashItemID, item.ItemDefID, rolledStats); err != nil {
+			return fmt.Errorf("store: deliver accepted offer item to seller character: %w", err)
+		}
+		return nil
+	}
+	if err := restoreOfferItemToAccountStash(ctx, tx, accountID, item); err != nil {
+		return err
+	}
+	return nil
+}
+
+func insertCharacterInventoryItem(ctx context.Context, tx pgx.Tx, accountID, characterID, itemID, itemDefID string, rolledStats []byte) error {
+	if len(rolledStats) == 0 {
+		rolledStats = []byte(`{}`)
+	}
+	tag, err := tx.Exec(ctx,
+		`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
+		 SELECT $1, $2, $3, $4, $5, NULL, false, $6::jsonb
+		 WHERE EXISTS (SELECT 1 FROM characters WHERE account_id = $2 AND id = $3)
+		 ON CONFLICT (character_id, id) DO UPDATE SET
+		   item_def_id = EXCLUDED.item_def_id,
+		   location = EXCLUDED.location,
+		   slot = EXCLUDED.slot,
+		   equipped = EXCLUDED.equipped,
+		   rolled_stats = EXCLUDED.rolled_stats,
+		   updated_at = now()
+		 WHERE character_item_instances.account_id = EXCLUDED.account_id`,
+		itemID, accountID, characterID, itemDefID, ItemLocationInventory, rolledStats,
+	)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func firstSourceCharacterID(items []MarketOfferItem) string {
+	for _, item := range items {
+		if item.SourceCharacterID != "" {
+			return item.SourceCharacterID
+		}
+	}
+	return ""
 }
 
 func refundActiveMarketOffers(ctx context.Context, tx pgx.Tx, listingID, errPrefix string) error {

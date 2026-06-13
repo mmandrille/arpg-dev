@@ -1513,12 +1513,13 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 	return result.characterGold, result.stashGold, nil
 }
 
-func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, costGold, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, error) {
-	if costGold < 0 || maxLevel <= 0 {
-		return AccountStashItem{}, 0, ErrConflict
+func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, error) {
+	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 {
+		return AccountStashItem{}, 0, 0, ErrConflict
 	}
 	var out AccountStashItem
 	var stashGold int
+	var chargedCost int
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO account_stash_gold (account_id, gold)
@@ -1542,9 +1543,6 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 		if err != nil {
 			return fmt.Errorf("store: lock account stash gold for upgrade: %w", err)
 		}
-		if stashGold < costGold {
-			return ErrConflict
-		}
 		item, err := lockAccountStashItem(ctx, tx, accountID, stashItemID)
 		if err != nil {
 			return err
@@ -1552,11 +1550,19 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 		if _, ok := eligibleItemDefs[item.ItemDefID]; !ok {
 			return ErrConflict
 		}
+		currentLevel, err := rolledStatsItemLevel(item.RolledStats)
+		if err != nil {
+			return err
+		}
+		chargedCost = baseCostGold + currentLevel*costGrowthPerLevel
+		if stashGold < chargedCost {
+			return ErrConflict
+		}
 		upgradedStats, err := upgradedRolledStats(item.RolledStats, maxLevel)
 		if err != nil {
 			return err
 		}
-		stashGold -= costGold
+		stashGold -= chargedCost
 		if _, err := tx.Exec(ctx,
 			`UPDATE account_stash_gold
 			 SET gold = $2, updated_at = now()
@@ -1577,7 +1583,17 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 		}
 		return nil
 	})
-	return out, stashGold, err
+	return out, stashGold, chargedCost, err
+}
+
+func rolledStatsItemLevel(raw json.RawMessage) (int, error) {
+	stats := map[string]any{}
+	if len(raw) > 0 {
+		if err := json.Unmarshal(raw, &stats); err != nil {
+			return 0, fmt.Errorf("store: decode rolled stats for upgrade: %w", err)
+		}
+	}
+	return numericStatValue(stats["item_level"]), nil
 }
 
 func upgradedRolledStats(raw json.RawMessage, maxLevel int) ([]byte, error) {

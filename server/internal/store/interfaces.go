@@ -71,7 +71,7 @@ type CharacterProgressionRepo interface {
 	TransferAccountStashGoldToCharacter(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
 	ListRecoverableCharacterCorpses(ctx context.Context, accountID, excludeCharacterID string) ([]CharacterCorpse, error)
 	TransferCorpseItemToCharacter(ctx context.Context, accountID, corpseCharacterID, targetCharacterID, corpseItemID, newItemID string) (CharacterItemInstance, error)
-	UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, costGold, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, error)
+	UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, error)
 	ListActiveMarketListings(ctx context.Context) ([]MarketListing, error)
 	CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string) (MarketListing, error)
 	CancelMarketListing(ctx context.Context, accountID, listingID string) (MarketListing, error)

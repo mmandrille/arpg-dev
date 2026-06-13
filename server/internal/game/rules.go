@@ -47,6 +47,7 @@ type MainGameplayConfig struct {
 	BaseDropRatePercent     int     `json:"base_drop_rate_percent"`
 	RespecCostGold          int     `json:"respec_cost_gold"`
 	ItemUpgradeCostGold     int     `json:"item_upgrade_cost_gold"`
+	ItemUpgradeCostGrowth   int     `json:"item_upgrade_cost_growth_per_level"`
 	ItemUpgradeMaxLevel     int     `json:"item_upgrade_max_level"`
 }
 
@@ -934,6 +935,9 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.ItemUpgradeCostGold < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_cost_gold: must be non-negative")
+	}
+	if mainConfig.Gameplay.ItemUpgradeCostGrowth < 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_cost_growth_per_level: must be non-negative")
 	}
 	if mainConfig.Gameplay.ItemUpgradeMaxLevel <= 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_max_level: must be positive")

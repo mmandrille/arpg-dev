@@ -651,7 +651,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	}
 	itemID := "inventory_upgrade_item_" + suffix
 	rareShield := `{"item_template_id":"cave_shield","display_name":"Rare Cave Shield","rarity":"rare","stats":{"armor":4,"block_percent":8},"requirements":{"level":1,"str":5},"effect_ids":[]}`
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_shield", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(rareShield)}); err != nil {
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_shield", Location: store.ItemLocationEquipped, Slot: "off_hand", Equipped: true, RolledStats: json.RawMessage(rareShield)}); err != nil {
 		t.Fatal(err)
 	}
 	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 40); err != nil {
@@ -668,7 +668,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.Item.ItemInstanceID != itemID || upgraded.Gold != 0 || upgraded.StashGold != 0 || upgraded.CostGold != 100 {
+	if upgraded.Item.ItemInstanceID != itemID || !upgraded.Item.Equipped || upgraded.Item.Slot != "off_hand" || upgraded.Gold != 0 || upgraded.StashGold != 0 || upgraded.CostGold != 100 {
 		t.Fatalf("inventory upgrade response = %+v", upgraded)
 	}
 	if upgraded.Item.ItemDefID != "cave_shield" || upgraded.Item.ItemTemplateID != "cave_shield" || upgraded.Item.DisplayName != "Rare Cave Shield" || upgraded.Item.Rarity != "rare" {
@@ -686,6 +686,9 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 		if item.ID == itemID {
 			found = item
 		}
+	}
+	if found.Location != store.ItemLocationEquipped || found.Slot != "off_hand" || !found.Equipped {
+		t.Fatalf("upgraded equipped shield placement = %+v", found)
 	}
 	var payload struct {
 		ItemTemplateID string         `json:"item_template_id"`

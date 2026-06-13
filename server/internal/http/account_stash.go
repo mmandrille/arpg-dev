@@ -85,6 +85,22 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		writeError(w, http.StatusBadRequest, "invalid_inventory_item", "item_instance_id and character_id are required")
 		return
 	}
+	originalItems, err := s.store.ListCharacterItems(r.Context(), accountID, req.CharacterID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect inventory item")
+		return
+	}
+	var originalItem store.CharacterItemInstance
+	for _, item := range originalItems {
+		if item.ID == req.ItemInstanceID {
+			originalItem = item
+			break
+		}
+	}
+	if originalItem.ID == "" {
+		writeError(w, http.StatusNotFound, "inventory_item_not_found", "inventory item not found")
+		return
+	}
 	stashItemID := "upgrade_" + req.ItemInstanceID
 	if _, err := s.store.TransferCharacterItemToAccountStash(r.Context(), accountID, req.CharacterID, req.ItemInstanceID, stashItemID); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
@@ -103,7 +119,7 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		s.writeUpgradeAccountStashError(w, err)
 		return
 	}
-	owned, err := s.store.TransferAccountStashItemToCharacter(r.Context(), accountID, req.CharacterID, item.StashItemID, req.ItemInstanceID)
+	owned, err := s.store.TransferAccountStashItemToCharacterWithPlacement(r.Context(), accountID, req.CharacterID, item.StashItemID, req.ItemInstanceID, originalItem.Location, originalItem.Slot, originalItem.Equipped)
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "stash_item_not_found", "stash item not found")
 		return

@@ -1390,9 +1390,9 @@ func (s *Store) TransferCharacterItemToAccountStash(ctx context.Context, account
 		err := tx.QueryRow(ctx,
 			`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at
 			 FROM character_item_instances
-			 WHERE account_id = $1 AND character_id = $2 AND id = $3 AND location = $4 AND equipped = FALSE
+			 WHERE account_id = $1 AND character_id = $2 AND id = $3 AND location IN ($4, $5)
 			 FOR UPDATE`,
-			accountID, characterID, itemInstanceID, ItemLocationInventory,
+			accountID, characterID, itemInstanceID, ItemLocationInventory, ItemLocationEquipped,
 		).Scan(&item.ID, &item.AccountID, &item.CharacterID, &item.ItemDefID, &item.Location, &item.Slot, &item.Equipped, &item.RolledStats, &item.CreatedAt, &item.UpdatedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
@@ -1514,10 +1514,16 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 }
 
 func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, error) {
+	item, _, stashGold, chargedCost, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, eligibleItemDefs)
+	return item, stashGold, chargedCost, err
+}
+
+func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, int, error) {
 	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 {
-		return AccountStashItem{}, 0, 0, ErrConflict
+		return AccountStashItem{}, 0, 0, 0, ErrConflict
 	}
 	var out AccountStashItem
+	var characterGold int
 	var stashGold int
 	var chargedCost int
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
@@ -1543,6 +1549,21 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 		if err != nil {
 			return fmt.Errorf("store: lock account stash gold for upgrade: %w", err)
 		}
+		if characterID != "" {
+			err = tx.QueryRow(ctx,
+				`SELECT gold
+				 FROM character_progression
+				 WHERE account_id = $1 AND character_id = $2
+				 FOR UPDATE`,
+				accountID, characterID,
+			).Scan(&characterGold)
+			if errors.Is(err, pgx.ErrNoRows) {
+				return ErrNotFound
+			}
+			if err != nil {
+				return fmt.Errorf("store: lock character gold for upgrade: %w", err)
+			}
+		}
 		item, err := lockAccountStashItem(ctx, tx, accountID, stashItemID)
 		if err != nil {
 			return err
@@ -1555,14 +1576,30 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 			return err
 		}
 		chargedCost = baseCostGold + currentLevel*costGrowthPerLevel
-		if stashGold < chargedCost {
+		if characterGold+stashGold < chargedCost {
 			return ErrConflict
 		}
 		upgradedStats, err := upgradedRolledStats(item.RolledStats, maxLevel)
 		if err != nil {
 			return err
 		}
-		stashGold -= chargedCost
+		spendCharacter := chargedCost
+		if spendCharacter > characterGold {
+			spendCharacter = characterGold
+		}
+		spendStash := chargedCost - spendCharacter
+		characterGold -= spendCharacter
+		stashGold -= spendStash
+		if characterID != "" {
+			if _, err := tx.Exec(ctx,
+				`UPDATE character_progression
+				 SET gold = $3, updated_at = now()
+				 WHERE account_id = $1 AND character_id = $2`,
+				accountID, characterID, characterGold,
+			); err != nil {
+				return fmt.Errorf("store: spend character gold for upgrade: %w", err)
+			}
+		}
 		if _, err := tx.Exec(ctx,
 			`UPDATE account_stash_gold
 			 SET gold = $2, updated_at = now()
@@ -1583,7 +1620,7 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 		}
 		return nil
 	})
-	return out, stashGold, chargedCost, err
+	return out, characterGold, stashGold, chargedCost, err
 }
 
 func rolledStatsItemLevel(raw json.RawMessage) (int, error) {

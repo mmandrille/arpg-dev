@@ -530,6 +530,55 @@ func TestMarketListingRoutesMoveStashItemAndRejectForeignCancel(t *testing.T) {
 	}
 }
 
+func TestMarketListingRouteAcceptsInventoryItem(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	accountID, token := loginEmail(t, h, "market-inventory-listing+"+suffix+"@example.test")
+	char := createCharacter(t, h, token, "Inventory Market Seller")
+	itemID := "market_inventory_listing_item_" + suffix
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{
+		ID:          itemID,
+		AccountID:   accountID,
+		CharacterID: char.CharacterID,
+		ItemDefID:   "rusty_sword",
+		Location:    store.ItemLocationInventory,
+		RolledStats: json.RawMessage(`{"damage_min":2}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	rec := postJSON(h, "/v0/market/listings", token, map[string]any{
+		"item_instance_id": itemID,
+		"character_id":     char.CharacterID,
+		"price_gold":       77,
+	})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create inventory listing status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var created marketListingResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &created); err != nil {
+		t.Fatal(err)
+	}
+	if created.StashItemID == "" || created.ItemDefID != "rusty_sword" || created.PriceGold != 77 {
+		t.Fatalf("inventory listing = %+v", created)
+	}
+	items, err := db.ListCharacterItems(ctx, accountID, char.CharacterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if characterItemsContain(items, itemID) {
+		t.Fatalf("listed item still on character after inventory listing = %+v", items)
+	}
+	stashItems, err := db.ListAccountStashItems(ctx, accountID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stashItems) != 0 {
+		t.Fatalf("stash should be reserved into listing, got %+v", stashItems)
+	}
+}
+
 func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	h, db := fullServerWithStore(t)
 	ctx := context.Background()
@@ -586,6 +635,68 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
 	if rec.Code != http.StatusConflict {
 		t.Fatalf("max-level upgrade status = %d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	accountID, token := loginEmail(t, h, "inventory-upgrade+"+suffix+"@example.test")
+	char := createCharacter(t, h, token, "Inventory Upgrade Hero")
+	prog := store.CharacterProgression{AccountID: accountID, CharacterID: char.CharacterID, CharacterClass: "barbarian", Level: 1, Gold: 100, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
+	if err := db.UpsertCharacterProgression(ctx, accountID, prog); err != nil {
+		t.Fatal(err)
+	}
+	itemID := "inventory_upgrade_item_" + suffix
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 40); err != nil {
+		t.Fatal(err)
+	}
+	rec := postJSON(h, "/v0/account-stash/items/upgrade", token, map[string]string{
+		"item_instance_id": itemID,
+		"character_id":     char.CharacterID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("inventory upgrade status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var upgraded upgradeInventoryItemResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
+		t.Fatal(err)
+	}
+	if upgraded.Item.ItemInstanceID != itemID || upgraded.Gold != 0 || upgraded.StashGold != 0 || upgraded.CostGold != 100 {
+		t.Fatalf("inventory upgrade response = %+v", upgraded)
+	}
+	items, err := db.ListCharacterItems(ctx, accountID, char.CharacterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !characterItemsContain(items, itemID) {
+		t.Fatalf("upgraded item missing from character after inventory upgrade = %+v", items)
+	}
+	var found store.CharacterItemInstance
+	for _, item := range items {
+		if item.ID == itemID {
+			found = item
+		}
+	}
+	var stats map[string]int
+	if err := json.Unmarshal(found.RolledStats, &stats); err != nil {
+		t.Fatal(err)
+	}
+	if stats["item_level"] != 1 || stats["damage_max"] != 5 {
+		t.Fatalf("upgraded inventory stats = %+v raw=%s", stats, string(found.RolledStats))
+	}
+	stashItems, err := db.ListAccountStashItems(ctx, accountID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range stashItems {
+		if item.StashItemID == "upgrade_"+itemID {
+			t.Fatalf("inventory upgrade left reserved stash item behind: %+v", stashItems)
+		}
 	}
 }
 
@@ -701,6 +812,69 @@ func TestMarketOfferRoutesSubmitListAndAccept(t *testing.T) {
 	if len(bidderStash) != 1 || bidderStash[0].StashItemID != "market_offer_listing_stash_"+suffix {
 		t.Fatalf("bidder stash after accept = %+v", bidderStash)
 	}
+}
+
+func TestMarketOfferRouteAcceptsInventoryItems(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	sellerID, sellerToken := loginEmail(t, h, "market-inventory-offer-seller+"+suffix+"@example.test")
+	sellerChar := createCharacter(t, h, sellerToken, "Inventory Offer Seller")
+	bidderID, bidderToken := loginEmail(t, h, "market-inventory-offer-bidder+"+suffix+"@example.test")
+	bidderChar := createCharacter(t, h, bidderToken, "Inventory Offer Bidder")
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "inventory_offer_listing_item_" + suffix, AccountID: sellerID, CharacterID: sellerChar.CharacterID, ItemDefID: "rusty_sword", Location: store.ItemLocationInventory}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, sellerID, sellerChar.CharacterID, "inventory_offer_listing_item_"+suffix, "inventory_offer_listing_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	var bidderItemIDs []string
+	for _, itemID := range []string{"inventory_offer_bid_item_a_" + suffix, "inventory_offer_bid_item_b_" + suffix} {
+		bidderItemIDs = append(bidderItemIDs, itemID)
+		if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: bidderID, CharacterID: bidderChar.CharacterID, ItemDefID: "red_potion", Location: store.ItemLocationInventory}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	rec := postJSON(h, "/v0/market/listings", sellerToken, map[string]string{"stash_item_id": "inventory_offer_listing_stash_" + suffix})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create listing status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var listing marketListingResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listing); err != nil {
+		t.Fatal(err)
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers", bidderToken, map[string]any{
+		"item_instance_ids": bidderItemIDs,
+		"character_id":      bidderChar.CharacterID,
+	})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("inventory offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var offer marketOfferResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &offer); err != nil {
+		t.Fatal(err)
+	}
+	if offer.OfferID == "" || len(offer.Items) != 2 {
+		t.Fatalf("inventory offer = %+v", offer)
+	}
+	items, err := db.ListCharacterItems(ctx, bidderID, bidderChar.CharacterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, itemID := range bidderItemIDs {
+		if characterItemsContain(items, itemID) {
+			t.Fatalf("offered item %s still on bidder character after inventory offer = %+v", itemID, items)
+		}
+	}
+}
+
+func characterItemsContain(items []store.CharacterItemInstance, itemID string) bool {
+	for _, item := range items {
+		if item.ID == itemID {
+			return true
+		}
+	}
+	return false
 }
 
 func TestCharactersAreAccountScoped(t *testing.T) {

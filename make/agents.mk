@@ -1,7 +1,7 @@
 # --- Agents -------------------------------------------------------------------
 .PHONY: bot bot-visual bot-client replay
 bot: db-up tools ## Run all Python protocol bot scenarios (quiet; VERBOSE=1 for full logs)
-	DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" \
+	ARPG_ADDR="$(BOT_ADDR)" BASE_URL="$(BOT_BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" \
 	SCENARIO="$(or $(SCENARIO),$(scenario),all)" ./scripts/bot_local.sh
 
 bot-visual: db-up tools ## Record bot scenarios + Godot replay (quiet when headless; VERBOSE=1 for full logs)

@@ -19,6 +19,7 @@ type Rules struct {
 	Navigation           NavigationRules
 	Items                map[string]ItemDef
 	ItemTemplates        map[string]ItemTemplateDef
+	UniqueItems          map[string]UniqueItemDef
 	UniqueEffects        map[string]UniqueEffectDef
 	Skills               map[string]SkillDef
 	Rarities             map[string]RarityDef
@@ -820,6 +821,18 @@ type UniqueEffectDef struct {
 	Status              string                 `json:"status"`
 }
 
+type UniqueItemDef struct {
+	ID             string         `json:"id"`
+	Enabled        bool           `json:"enabled"`
+	BaseTemplateID string         `json:"base_template_id"`
+	DisplayName    string         `json:"display_name"`
+	MinimumLevel   int            `json:"minimum_level"`
+	FixedStats     map[string]int `json:"fixed_stats"`
+	FixedEffectIDs []string       `json:"fixed_effect_ids"`
+	BehaviorHook   string         `json:"behavior_hook"`
+	Status         string         `json:"status"`
+}
+
 type TreasureClassEntry struct {
 	ItemDefID      string `json:"item_def_id"`
 	ItemTemplateID string `json:"item_template_id"`
@@ -1375,6 +1388,17 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 	r.UniqueEffects = uniqueEffects.Effects
+
+	var uniqueItems struct {
+		Uniques map[string]UniqueItemDef `json:"uniques"`
+	}
+	if err := readJSON(filepath.Join(dir, "unique_items.v0.json"), &uniqueItems); err != nil {
+		return nil, err
+	}
+	if err := r.validateUniqueItemRules(uniqueItems.Uniques); err != nil {
+		return nil, err
+	}
+	r.UniqueItems = uniqueItems.Uniques
 
 	skills, err := loadSkillRulesFromManifest(dir)
 	if err != nil {

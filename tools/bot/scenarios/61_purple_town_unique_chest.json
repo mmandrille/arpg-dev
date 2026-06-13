@@ -3,7 +3,7 @@
   "world_id": "dungeon_levels",
   "seed": "purple_town_unique_chest_seed",
   "title": "Purple town unique chest",
-  "description": "Open the purple town test chest and prove it grants one unique rolled item for every enabled unique effect.",
+  "description": "Open the purple town test chest and prove it grants unique effect coverage plus named fixed uniques.",
   "visual": {
     "camera": { "x": 6, "y": 7, "zoom": 1.0 },
     "post_complete_hold_s": 3.0
@@ -12,11 +12,25 @@
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "town_unique_chest", "state": "ready", "equals": 1 },
     { "action": "action_entity", "interactable_def_id": "town_unique_chest", "event_type": "interactable_activated", "timeout_s": 10 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "town_unique_chest", "state": "open", "equals": 1 },
-    { "action": "assert_inventory_unique_effect_coverage", "equals_enabled": true, "requires_single_effect": true }
+    {
+      "action": "assert_inventory_unique_effect_coverage",
+      "equals_enabled": true,
+      "requires_single_effect": true,
+      "required_named_uniques": [
+        { "display_name": "Embercall Blade", "effect_ids": ["everburning_wound"] }
+      ]
+    }
   ],
   "assertions": [
     { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "town_unique_chest", "state": "open", "equals": 1 },
     { "type": "event_seen", "event_type": "interactable_activated" },
-    { "type": "inventory_unique_effect_coverage", "equals_enabled": true, "requires_single_effect": true }
+    {
+      "type": "inventory_unique_effect_coverage",
+      "equals_enabled": true,
+      "requires_single_effect": true,
+      "required_named_uniques": [
+        { "display_name": "Embercall Blade", "effect_ids": ["everburning_wound"] }
+      ]
+    }
   ]
 }

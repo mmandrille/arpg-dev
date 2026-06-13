@@ -520,7 +520,12 @@ def test_load_scenarios_discovers_purple_town_unique_chest():
     chest = next(s for s in scenarios if s.id == "purple_town_unique_chest")
     assert chest.world_id == "dungeon_levels"
     assert any(step.get("interactable_def_id") == "town_unique_chest" for step in chest.steps)
-    assert {"type": "inventory_unique_effect_coverage", "equals_enabled": True, "requires_single_effect": True} in chest.assertions
+    assert {
+        "type": "inventory_unique_effect_coverage",
+        "equals_enabled": True,
+        "requires_single_effect": True,
+        "required_named_uniques": [{"display_name": "Embercall Blade", "effect_ids": ["everburning_wound"]}],
+    } in chest.assertions
 
 
 def test_class_foundation_scenarios_cover_every_class_skill():
@@ -1236,13 +1241,18 @@ def test_structured_assertions_support_unique_effect_coverage():
             "item_template_id": "cave_blade",
             "rarity": "unique",
             "effect_ids": [effect_id],
-            "rolled_stats": {"damage_min": 2, "damage_max": 4},
-            "requirements": {"level": 1},
             "equipped": False,
         }
         for index, effect_id in enumerate(enabled_unique_effect_ids())
     ]
-    run_assertions([{"type": "inventory_unique_effect_coverage"}], [], inventory, {}, None, "test")
+    inventory.append({
+        "item_instance_id": "named-unique",
+        "display_name": "Embercall Blade",
+        "rarity": "unique",
+        "effect_ids": ["everburning_wound"],
+    })
+    required = [{"display_name": "Embercall Blade", "effect_ids": ["everburning_wound"]}]
+    run_assertions([{"type": "inventory_unique_effect_coverage", "required_named_uniques": required}], [], inventory, {}, None, "test")
 
 
 def test_structured_assertions_reject_range_mismatch():

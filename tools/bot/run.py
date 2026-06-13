@@ -761,11 +761,12 @@ async def execute_step(
             return
         await wait_for_accept(ws, state, env["message_id"], loop)
         if target_type == "loot" and target_item_def_id:
+            target_id = str(target["id"])
             if target_item_def_id == "gold":
                 await wait_for_event(ws, state, "gold_picked_up", loop)
                 return
             deadline = loop.time() + SLICE_TIMEOUT_S
-            while find_inventory_item(state.inventory, target_item_def_id) is None:
+            while target_id in state.entities:
                 if loop.time() > deadline:
                     raise TimeoutError(f"action_entity stalled waiting for loot pickup {target_item_def_id}")
                 await pump_one(ws, state, timeout=0.1)
@@ -1028,15 +1029,16 @@ async def execute_step(
             loop,
             max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
         )
+        loot_id = str(loot["id"])
         await ws.send(json.dumps(make_envelope(
-            "action_intent", session_id, state.last_tick, {"target_id": loot["id"]})))
-        log("picking up", item_def_id, "loot", loot["id"])
+            "action_intent", session_id, state.last_tick, {"target_id": loot_id})))
+        log("picking up", item_def_id, "loot", loot_id)
         if item_def_id == "gold":
             await wait_for_event(ws, state, "gold_picked_up", loop)
             return
         wait_started = loop.time()
         last_wait_log = wait_started
-        while find_inventory_item(state.inventory, item_def_id, bag_index) is None:
+        while loot_id in state.entities:
             if loop.time() > deadline:
                 raise TimeoutError(f"pick_up_loot stalled waiting for {item_def_id}")
             if loop.time() - last_wait_log >= WAIT_LOG_INTERVAL_S:
@@ -1145,8 +1147,12 @@ async def execute_step(
         if item_def_id is not None:
             item = find_inventory_item(state.inventory, str(item_def_id))
             if item is None:
-                raise AssertionError(f"assign_hotbar: missing inventory item {item_def_id}")
-            item_id = str(item["item_instance_id"])
+                slot = find_hotbar_slot_by_item_def(state.hotbar, str(item_def_id))
+                if slot is None:
+                    raise AssertionError(f"assign_hotbar: missing inventory or hotbar item {item_def_id}")
+                item_id = str(slot["item_instance_id"])
+            else:
+                item_id = str(item["item_instance_id"])
         await ws.send(json.dumps(make_envelope(
             "assign_hotbar_intent",
             session_id,
@@ -1162,6 +1168,12 @@ async def execute_step(
 
     if action == "use_hotbar_slot":
         slot_index = int(step["slot_index"])
+        item_def_id = step.get("item_def_id")
+        if item_def_id is not None:
+            slot = find_hotbar_slot_by_item_def(state.hotbar, str(item_def_id))
+            if slot is None:
+                raise AssertionError(f"use_hotbar_slot: missing hotbar item {item_def_id}")
+            slot_index = int(slot.get("slot_index", slot_index))
         env = make_envelope(
             "use_hotbar_intent",
             session_id,
@@ -2675,6 +2687,14 @@ def hotbar_item_id(hotbar: list[dict[str, Any]], slot_index: int) -> str | None:
         if int(slot.get("slot_index", -1)) == slot_index:
             raw = slot.get("item_instance_id")
             return None if raw is None else str(raw)
+    return None
+
+
+def find_hotbar_slot_by_item_def(hotbar: list[dict[str, Any]], item_def_id: str) -> dict[str, Any] | None:
+    for slot in hotbar:
+        item = slot.get("item")
+        if isinstance(item, dict) and str(item.get("item_def_id", "")) == item_def_id:
+            return slot
     return None
 
 

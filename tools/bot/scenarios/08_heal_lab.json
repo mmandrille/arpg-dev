@@ -8,12 +8,13 @@
     { "action": "pick_up_loot", "item_def_id": "blue_potion" },
     { "action": "pick_up_loot", "item_def_id": "red_potion" },
     { "action": "assert_player_hp", "equals": 5 },
-    { "action": "use_inventory_item", "item_def_id": "red_potion", "bag_index": 0 },
+    { "action": "use_hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" },
     { "action": "assert_player_hp", "equals": 10 },
-    { "action": "use_inventory_item", "item_def_id": "blue_potion", "bag_index": 0, "expect_reject": "already_full_mana" }
+    { "action": "use_hotbar_slot", "slot_index": 0, "item_def_id": "blue_potion", "expect_reject": "already_full_mana" }
   ],
   "assertions": [
     { "type": "player_hp_equals", "equals": 10 },
-    { "type": "inventory_count", "equals": 1 }
+    { "type": "inventory_count", "equals": 0 },
+    { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "blue_potion" }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "id": "resource_support_mobility_unique_effects",
   "world_id": "unique_momentum_lab",
-  "seed": "1469",
+  "seed": "00000000000000b1",
   "title": "Resource support mobility unique effects",
   "description": "Pick up a deterministic Pilgrim's Momentum blade, move long enough to charge it, and prove the charge is visible over the live protocol.",
   "steps": [

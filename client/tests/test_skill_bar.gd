@@ -111,6 +111,15 @@ func _run() -> void:
 	bar._process(0.10)
 	state = bar.get_debug_state()
 	_assert_true("cooldown locally decays", int(state.get("remaining_ticks", 40)) < 40)
+	var decayed_remaining := int(state.get("remaining_ticks", 40))
+
+	bar.set_skill_cooldowns([{"skill_id": "magic_bolt", "remaining_ticks": 40, "total_ticks": 40}])
+	state = bar.get_debug_state()
+	_assert_eq("stale cooldown update does not restart visual", int(state.get("remaining_ticks", -1)), decayed_remaining)
+
+	bar.start_skill_cooldown("magic_bolt", 40, 40)
+	state = bar.get_debug_state()
+	_assert_eq("cooldown start event restarts visual", int(state.get("remaining_ticks", -1)), 40)
 
 	bar.set_skill_cooldowns([])
 	state = bar.get_debug_state()

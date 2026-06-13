@@ -17,6 +17,7 @@ func _initialize() -> void:
 	_test_holy_shield_started_blinks_models_in_range()
 	_test_holy_shield_ended_clears_local_world_effect()
 	_test_unique_burn_started_and_ended_updates_monster_cue()
+	_test_monster_death_clears_elite_aura_markers()
 	_test_potion_heal_uses_personal_effect()
 	_test_paladin_heal_uses_area_rain()
 
@@ -176,6 +177,40 @@ func _test_unique_burn_started_and_ended_updates_monster_cue() -> void:
 	_free_main(main)
 
 
+func _test_monster_death_clears_elite_aura_markers() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1002",
+		"type": "monster",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"monster_def_id": "training_dummy",
+		"effect_ids": ["elite_command"],
+		"monster_pack_id": "pack_1",
+		"monster_pack_leader": true,
+	})
+	var rows: Array = main._bot_entities_presentation_debug()
+	var before: Dictionary = _presentation_row(rows, "1002")
+	_assert_true("elite command marker active before death", bool(before.get("has_elite_command_effect", false)))
+	_assert_true("elite command radius active before death", bool(before.get("has_elite_command_radius_preview", false)))
+
+	main.entities["1002"]["reaction"] = null
+	main._apply_delta({"events": [{
+		"event_type": "monster_killed",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+	}], "changes": []})
+	rows = main._bot_entities_presentation_debug()
+	var after: Dictionary = _presentation_row(rows, "1002")
+	_assert_eq("elite monster hp after death", int(after.get("hp", 1)), 0)
+	_assert_true("elite command marker removed on death", not bool(after.get("has_elite_command_effect", true)))
+	_assert_true("elite command radius removed on death", not bool(after.get("has_elite_command_radius_preview", true)))
+	_free_main(main)
+
+
 func _test_potion_heal_uses_personal_effect() -> void:
 	var main = _make_main()
 	main.player_id = "1001"
@@ -217,6 +252,14 @@ func _child_count(root: Node, script: Script) -> int:
 		if child.get_script() == script:
 			count += 1
 	return count
+
+
+func _presentation_row(rows: Array, entity_id: String) -> Dictionary:
+	for row in rows:
+		var rec: Dictionary = row
+		if str(rec.get("id", "")) == entity_id:
+			return rec
+	return {}
 
 
 func _assert_eq(label: String, got, want) -> void:

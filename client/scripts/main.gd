@@ -1272,6 +1272,7 @@ func _apply_delta(p: Dictionary) -> void:
 				var dead_rec: Dictionary = entities[eid]
 				dead_rec["hp"] = 0
 				_set_pickable(dead_rec["node"] as Node3D, false)
+				_clear_terminal_entity_status_markers(dead_rec)
 				_play_entity_reaction(eid, ev, "death")
 		if autoplay_enabled and event_type == "monster_killed":
 			autoplay_phase = "pickup"
@@ -1424,6 +1425,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			_upsert_monster_health_bar(id, rec["node"] as Node3D, int(hp), int(max_hp))
 		if hp != null and int(hp) <= 0:
 			_set_pickable(rec["node"] as Node3D, false)
+			_clear_terminal_entity_status_markers(rec)
 			_enter_entity_terminal_death(id, rec)
 
 
@@ -1447,6 +1449,16 @@ func _remove_entity(id: String) -> void:
 	monster_ids.erase(id)
 	interactable_ids.erase(id)
 	_sync_boss_health_bar()
+
+
+func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
+	var node := rec.get("node", null) as Node3D
+	if node == null:
+		return
+	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, [])
+	PlayerStatusEffectMarkers.sync_burning_effect(node, false)
+	PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
+	PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
 
 
 func _clear_level_entities() -> void:
@@ -4766,9 +4778,10 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	_apply_entity_status_tint(rec)
 	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
-	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []))
-	PlayerStatusEffectMarkers.sync_burning_effect(node, PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
-	PlayerStatusEffectMarkers.sync_elite_command_effect(node, PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
+	var alive := int(rec.get("hp", 1)) > 0
+	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []) if alive else [])
+	PlayerStatusEffectMarkers.sync_burning_effect(node, alive and PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
+	PlayerStatusEffectMarkers.sync_elite_command_effect(node, alive and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	_normalize_boss_phase_metadata(rec)
 	_sync_boss_telegraph_marker_from_record(rec)
 	EliteAuraPreviewSync.sync(entities, dungeon_generation)

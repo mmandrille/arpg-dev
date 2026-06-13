@@ -43,18 +43,28 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	player.hp = player.maxHP - 2
 	player.mana = player.maxMana - 2
 
-	for i := 0; i < 199; i++ {
+	for i := 0; i < 99; i++ {
 		base.Tick(nil)
 	}
 	if player.hp != player.maxHP-2 || player.mana != player.maxMana-2 {
 		t.Fatalf("base regen before threshold hp/mana = %d/%d, want %d/%d", player.hp, player.mana, player.maxHP-2, player.maxMana-2)
 	}
-	heal := base.Tick(nil)
-	if player.hp != player.maxHP-1 || player.mana != player.maxMana-1 {
-		t.Fatalf("base regen after 10s hp/mana = %d/%d, want %d/%d", player.hp, player.mana, player.maxHP-1, player.maxMana-1)
+	manaHeal := base.Tick(nil)
+	if player.hp != player.maxHP-2 || player.mana != player.maxMana-1 {
+		t.Fatalf("base regen after mana threshold hp/mana = %d/%d, want %d/%d", player.hp, player.mana, player.maxHP-2, player.maxMana-1)
 	}
-	if !hasPlayerResourceUpdate(heal, player.hp, player.mana) {
-		t.Fatalf("base regen missing player update: %+v", heal.Changes)
+	if !hasPlayerResourceUpdate(manaHeal, player.hp, player.mana) {
+		t.Fatalf("base mana regen missing player update: %+v", manaHeal.Changes)
+	}
+	for i := 0; i < 33; i++ {
+		base.Tick(nil)
+	}
+	hpHeal := base.Tick(nil)
+	if player.hp != player.maxHP-1 || player.mana != player.maxMana-1 {
+		t.Fatalf("base regen after hp threshold hp/mana = %d/%d, want %d/%d", player.hp, player.mana, player.maxHP-1, player.maxMana-1)
+	}
+	if !hasPlayerResourceUpdate(hpHeal, player.hp, player.mana) {
+		t.Fatalf("base hp regen missing player update: %+v", hpHeal.Changes)
 	}
 
 	geared := MustNewSim("sess_regen_item", "01", rules)
@@ -64,8 +74,8 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	gearedPlayer.hp = gearedPlayer.maxHP - 2
 	gearedPlayer.mana = gearedPlayer.maxMana - 2
 	view := geared.CharacterProgressionView()
-	if math.Abs(view.DerivedStats.HealthRegenPerSecond-0.6) > 0.000001 || math.Abs(view.DerivedStats.ManaRegenPerSecond-0.6) > 0.000001 {
-		t.Fatalf("geared regen stats = %+v, want 0.6/0.6", view.DerivedStats)
+	if math.Abs(view.DerivedStats.HealthRegenPerSecond-0.65) > 0.000001 || math.Abs(view.DerivedStats.ManaRegenPerSecond-0.7) > 0.000001 {
+		t.Fatalf("geared regen stats = %+v, want 0.65/0.7", view.DerivedStats)
 	}
 	hpRegen := findStatBreakdown(view.StatBreakdowns, "health_regen_per_second")
 	manaRegen := findStatBreakdown(view.StatBreakdowns, "mana_regen_per_second")
@@ -73,18 +83,26 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 		t.Fatalf("missing regen equipment breakdowns hp=%+v mana=%+v all=%+v", hpRegen, manaRegen, view.StatBreakdowns)
 	}
 
-	for i := 0; i < 33; i++ {
+	for i := 0; i < 28; i++ {
 		geared.Tick(nil)
 	}
 	if gearedPlayer.hp != gearedPlayer.maxHP-2 || gearedPlayer.mana != gearedPlayer.maxMana-2 {
 		t.Fatalf("geared regen before threshold hp/mana = %d/%d, want %d/%d", gearedPlayer.hp, gearedPlayer.mana, gearedPlayer.maxHP-2, gearedPlayer.maxMana-2)
 	}
-	gearedHeal := geared.Tick(nil)
-	if gearedPlayer.hp != gearedPlayer.maxHP-1 || gearedPlayer.mana != gearedPlayer.maxMana-1 {
-		t.Fatalf("geared regen after boosted ticks hp/mana = %d/%d, want %d/%d", gearedPlayer.hp, gearedPlayer.mana, gearedPlayer.maxHP-1, gearedPlayer.maxMana-1)
+	gearedManaHeal := geared.Tick(nil)
+	if gearedPlayer.hp != gearedPlayer.maxHP-2 || gearedPlayer.mana != gearedPlayer.maxMana-1 {
+		t.Fatalf("geared regen after mana threshold hp/mana = %d/%d, want %d/%d", gearedPlayer.hp, gearedPlayer.mana, gearedPlayer.maxHP-2, gearedPlayer.maxMana-1)
 	}
-	if !hasPlayerResourceUpdate(gearedHeal, gearedPlayer.hp, gearedPlayer.mana) {
-		t.Fatalf("geared regen missing player update: %+v", gearedHeal.Changes)
+	if !hasPlayerResourceUpdate(gearedManaHeal, gearedPlayer.hp, gearedPlayer.mana) {
+		t.Fatalf("geared mana regen missing player update: %+v", gearedManaHeal.Changes)
+	}
+	geared.Tick(nil)
+	gearedHPHeal := geared.Tick(nil)
+	if gearedPlayer.hp != gearedPlayer.maxHP-1 || gearedPlayer.mana != gearedPlayer.maxMana-1 {
+		t.Fatalf("geared regen after hp threshold hp/mana = %d/%d, want %d/%d", gearedPlayer.hp, gearedPlayer.mana, gearedPlayer.maxHP-1, gearedPlayer.maxMana-1)
+	}
+	if !hasPlayerResourceUpdate(gearedHPHeal, gearedPlayer.hp, gearedPlayer.mana) {
+		t.Fatalf("geared hp regen missing player update: %+v", gearedHPHeal.Changes)
 	}
 }
 

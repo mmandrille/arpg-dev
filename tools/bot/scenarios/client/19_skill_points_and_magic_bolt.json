@@ -15,12 +15,12 @@
     { "type": "wait_skill_progression", "unspent_skill_points": 2, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false, "timeout_s": 5.0 },
     { "type": "press_key", "keycode": "KEY_K" },
     { "type": "assert_skills_panel_visible", "visible": true },
-    { "type": "assert_skill_button_enabled", "skill_id": "rage", "enabled": true, "requirements_met": true, "skill_name": "Rage", "tooltip_contains": "Mana: 10" },
+    { "type": "assert_skill_button_enabled", "skill_id": "rage", "enabled": true, "requirements_met": true, "skill_name": "Rage", "tooltip_contains": "Mana: 5" },
     { "type": "click_skill_button", "skill_id": "rage" },
     { "type": "wait_skill_progression", "unspent_skill_points": 1, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": false, "timeout_s": 5.0 },
     { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "enabled": true, "remaining_ticks": 0, "slot_text": "", "tooltip_contains": "Rage", "timeout_s": 5.0 },
     { "type": "use_skill_slot", "skill_id": "rage", "force_direct": true },
-    { "type": "wait_event", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 10, "timeout_s": 5.0 },
+    { "type": "wait_event", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 5, "timeout_s": 5.0 },
     { "type": "wait_event", "event_type": "skill_cooldown_started", "skill_id": "rage", "timeout_s": 5.0 },
     { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "disabled": true, "remaining_ticks_min": 1, "slot_text": "", "timeout_s": 5.0 }
   ]

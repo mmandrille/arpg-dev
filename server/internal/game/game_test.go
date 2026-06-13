@@ -683,7 +683,7 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	sim.progression.CharacterClass = "sorcerer"
 	sim.savePlayer(sim.defaultPlayer())
 	res := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
-	sim.awardExperience(140, "corr_skill_xp", &res)
+	sim.awardExperience(157, "corr_skill_xp", &res)
 	sim.savePlayer(sim.defaultPlayer())
 
 	view := sim.CharacterProgressionView()
@@ -727,7 +727,7 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}
 
 	rankTwoXP := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
-	sim.awardExperience(60, "corr_rank_two_xp", &rankTwoXP)
+	sim.awardExperience(76, "corr_rank_two_xp", &rankTwoXP)
 	sim.savePlayer(sim.defaultPlayer())
 	view = sim.CharacterProgressionView()
 	if view.Level != 6 || view.UnspentStatPoints != 15 || view.UnspentSkillPoints != 1 {
@@ -993,8 +993,8 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
 	}})
 	assertAck(t, cast, "cast_magic")
-	if player.mana != 7 {
-		t.Fatalf("mana after cast = %d, want 7", player.mana)
+	if player.mana != 9 {
+		t.Fatalf("mana after cast = %d, want 9", player.mana)
 	}
 	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_cooldown_started") {
 		t.Fatalf("missing cast/cooldown events: %+v", cast.Events)
@@ -1015,7 +1015,7 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
 	}})
 	assertReject(t, recast, "recast_magic", "skill_on_cooldown")
-	if player.mana != 7 {
+	if player.mana != 9 {
 		t.Fatalf("recast spent mana: %d", player.mana)
 	}
 	if !hasEvent(recast, "skill_cooldown_rejected") {
@@ -1360,8 +1360,8 @@ func TestRageBuffAppliesStatsVisualScaleAndExpires(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "rage", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "cast_rage")
-	if player.mana != 0 {
-		t.Fatalf("rage mana after cast = %d, want 0", player.mana)
+	if player.mana != 5 {
+		t.Fatalf("rage mana after cast = %d, want 5", player.mana)
 	}
 	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "skill_cooldown_started") {
 		t.Fatalf("rage missing cast/effect/cooldown events: %+v", cast.Events)
@@ -1416,8 +1416,8 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
 	}})
 	assertAck(t, cast, "cast_heal")
-	if player.mana != 0 {
-		t.Fatalf("heal mana after cast = %d, want 0", player.mana)
+	if player.mana != 5 {
+		t.Fatalf("heal mana after cast = %d, want 5", player.mana)
 	}
 	if player.hp != 7 || guest.hp != 5 {
 		t.Fatalf("heal hp host/guest = %d/%d, want 7/5", player.hp, guest.hp)
@@ -1525,8 +1525,8 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	if !hasEvent(completed, "skill_cast") || !hasEvent(completed, "skill_cooldown_started") {
 		t.Fatalf("auto-nav heal completion missing cast/cooldown events: %+v", completed.Events)
 	}
-	if player.mana != beforeMana-10 {
-		t.Fatalf("auto-nav heal mana after cast = %d, want %d", player.mana, beforeMana-10)
+	if player.mana != beforeMana-5 {
+		t.Fatalf("auto-nav heal mana after cast = %d, want %d", player.mana, beforeMana-5)
 	}
 
 	for i := 0; i < 50; i++ {
@@ -1543,8 +1543,8 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill: &CastSkillIntent{SkillID: "heal"},
 	}})
 	assertAck(t, noop, "cast_heal_full")
-	if player.mana != 0 {
-		t.Fatalf("full-hp heal mana = %d, want spent to 0", player.mana)
+	if player.mana != 5 {
+		t.Fatalf("full-hp heal mana = %d, want spent to 5", player.mana)
 	}
 	if hasEvent(noop, "player_healed") {
 		t.Fatalf("full-hp heal events = %+v, want no player_healed", noop.Events)
@@ -1638,8 +1638,8 @@ func TestHolyShieldAreaBuffAppliesDefenseVisualStateAndExpires(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "holy_shield"},
 	}})
 	assertAck(t, cast, "cast_holy_shield")
-	if player.mana != beforeMana-10 {
-		t.Fatalf("holy shield mana after cast = %d, want %d", player.mana, beforeMana-10)
+	if player.mana != beforeMana-5 {
+		t.Fatalf("holy shield mana after cast = %d, want %d", player.mana, beforeMana-5)
 	}
 	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "skill_cooldown_started") {
 		t.Fatalf("holy shield missing cast/effect/cooldown events: %+v", cast.Events)
@@ -1700,8 +1700,8 @@ func TestHolyShieldIgnoresAimAndAlwaysBuffsCaster(t *testing.T) {
 	if !sameStringSlice(player.effectIDs, []string{"holy_shield"}) {
 		t.Fatalf("player effect ids = %v, want holy_shield", player.effectIDs)
 	}
-	if player.mana != beforeMana-10 {
-		t.Fatalf("holy shield mana after bad-target cast = %d, want %d", player.mana, beforeMana-10)
+	if player.mana != beforeMana-5 {
+		t.Fatalf("holy shield mana after bad-target cast = %d, want %d", player.mana, beforeMana-5)
 	}
 }
 

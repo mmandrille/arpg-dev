@@ -22,9 +22,9 @@
       "expected": [
         { "offer_id": "generated:depth2:000", "kind": "generated", "item_template_id": "cave_mail", "display_name": "Magic Cave Mail", "rarity": "magic", "rolled_stats": { "armor": 9 }, "buy_price": 160, "source": "common_dungeon_mob", "depth": 2 },
         { "offer_id": "generated:depth2:001", "kind": "generated", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "rolled_stats": { "armor": 5 }, "buy_price": 70, "source": "common_dungeon_mob", "depth": 2 },
-        { "offer_id": "generated:depth2:002", "kind": "generated", "item_template_id": "cave_shield", "display_name": "Magic Cave Shield", "rarity": "magic", "rolled_stats": { "armor": 3, "block_percent": 9 }, "buy_price": 135, "source": "common_dungeon_mob", "depth": 2 },
-        { "offer_id": "generated:depth2:003", "kind": "generated", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "rolled_stats": { "armor": 7 }, "buy_price": 85, "source": "common_dungeon_mob", "depth": 2 },
-        { "offer_id": "generated:depth2:004", "kind": "generated", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "rolled_stats": { "armor": 8 }, "buy_price": 95, "source": "common_dungeon_mob", "depth": 2 }
+        { "offer_id": "generated:depth2:002", "kind": "generated", "item_template_id": "cave_shield", "display_name": "Common Cave Shield", "rarity": "common", "rolled_stats": { "armor": 5, "block_percent": 5 }, "buy_price": 80, "source": "common_dungeon_mob", "depth": 2 },
+        { "offer_id": "generated:depth2:003", "kind": "generated", "item_template_id": "cave_shield", "display_name": "Magic Cave Shield", "rarity": "magic", "rolled_stats": { "armor": 3, "block_percent": 9 }, "buy_price": 135, "source": "common_dungeon_mob", "depth": 2 },
+        { "offer_id": "generated:depth2:004", "kind": "generated", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "rolled_stats": { "armor": 7 }, "buy_price": 85, "source": "common_dungeon_mob", "depth": 2 }
       ]
     },
     {
@@ -36,7 +36,7 @@
         { "offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 2 }, "buy_price": 75, "source": "common_dungeon_mob", "depth": 3 },
         { "offer_id": "generated:depth3:002", "kind": "generated", "item_template_id": "cave_boots", "display_name": "Magic Cave Boots", "rarity": "magic", "rolled_stats": { "armor": 4 }, "buy_price": 75, "source": "common_dungeon_mob", "depth": 3 },
         { "offer_id": "generated:depth3:003", "kind": "generated", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 3, "damage_max": 4 }, "buy_price": 110, "source": "common_dungeon_mob", "depth": 3 },
-        { "offer_id": "generated:depth3:004", "kind": "generated", "item_template_id": "cave_helm", "display_name": "Magic Cave Helm", "rarity": "magic", "rolled_stats": { "armor": 4 }, "buy_price": 80, "source": "common_dungeon_mob", "depth": 3 }
+        { "offer_id": "generated:depth3:004", "kind": "generated", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "rolled_stats": { "armor": 8 }, "buy_price": 95, "source": "common_dungeon_mob", "depth": 3 }
       ]
     }
   ]

@@ -50,8 +50,8 @@ type CharacterProgressionRepo interface {
 	SetCharacterItemLocation(ctx context.Context, accountID, characterID, itemInstanceID, location string) error
 	SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool) error
 	RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error
-	ListCharacterWaypoints(ctx context.Context, characterID string) ([]CharacterWaypoint, error)
-	AddCharacterWaypoint(ctx context.Context, characterID string, level int) (bool, error)
+	ListAccountWaypoints(ctx context.Context, accountID, characterID string) ([]CharacterWaypoint, error)
+	AddAccountWaypoint(ctx context.Context, accountID string, level int) (bool, error)
 	GetOrCreateCharacterProgression(ctx context.Context, accountID, characterID string, defaults CharacterProgressionDefaults) (CharacterProgression, error)
 	GetCharacterProgression(ctx context.Context, accountID, characterID string) (CharacterProgression, error)
 	UpsertCharacterProgression(ctx context.Context, accountID string, progression CharacterProgression) error

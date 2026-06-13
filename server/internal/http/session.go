@@ -368,10 +368,10 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		return false
 	}
 	progression.CharacterClass = character.CharacterClass
-	waypoints, err := s.store.ListCharacterWaypoints(ctx, characterID)
+	waypoints, err := s.store.ListAccountWaypoints(ctx, accountID, characterID)
 	if err != nil {
 		s.metrics.PersistenceErrors.Inc()
-		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character waypoints")
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load account waypoints")
 		return false
 	}
 	hotbar, err := s.store.ListCharacterHotbar(ctx, accountID, characterID)

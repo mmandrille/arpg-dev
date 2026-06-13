@@ -25,7 +25,7 @@
       },
       "cost": {
         "mana": {
-          "base": 3,
+          "base": 1,
           "per_rank": 0
         }
       },
@@ -44,7 +44,7 @@
       },
       "projectile": {
         "range": 18,
-        "speed": 15,
+        "speed": 22.5,
         "visual": "magic_bolt_projectile"
       },
       "cooldown": {
@@ -82,8 +82,8 @@
       },
       "cost": {
         "mana": {
-          "base": 6,
-          "per_rank": 1
+          "base": 3,
+          "per_rank": 0
         }
       },
       "damage": {
@@ -101,7 +101,7 @@
       },
       "projectile": {
         "range": 18,
-        "speed": 10,
+        "speed": 15,
         "visual": "ice_shard_projectile"
       },
       "slow": {
@@ -114,7 +114,7 @@
         "min_shards": 2,
         "max_shards": 5,
         "range": 7,
-        "speed": 12,
+        "speed": 18,
         "visual": "ice_shard_shard"
       },
       "cooldown": {
@@ -152,8 +152,8 @@
       },
       "cost": {
         "mana": {
-          "base": 7,
-          "per_rank": 1
+          "base": 3,
+          "per_rank": 0
         }
       },
       "damage": {
@@ -171,7 +171,7 @@
       },
       "projectile": {
         "range": 18,
-        "speed": 7,
+        "speed": 10.5,
         "visual": "ligthing_projectile"
       },
       "chain": {
@@ -210,8 +210,8 @@
       },
       "cost": {
         "mana": {
-          "base": 8,
-          "per_rank": 1
+          "base": 4,
+          "per_rank": 0
         }
       },
       "cone": {
@@ -252,7 +252,7 @@
       },
       "cost": {
         "mana": {
-          "base": 10,
+          "base": 5,
           "per_rank": 0
         }
       },
@@ -298,7 +298,7 @@
       },
       "cost": {
         "mana": {
-          "base": 10,
+          "base": 5,
           "per_rank": 0
         }
       },
@@ -351,8 +351,8 @@
       },
       "cost": {
         "mana": {
-          "base": 10,
-          "per_rank": 1
+          "base": 5,
+          "per_rank": 0
         }
       },
       "effects": [
@@ -408,8 +408,8 @@
       },
       "cost": {
         "mana": {
-          "base": 3,
-          "per_rank": 1
+          "base": 1,
+          "per_rank": 0
         }
       },
       "cone": {
@@ -454,8 +454,8 @@
       },
       "cost": {
         "mana": {
-          "base": 4,
-          "per_rank": 1
+          "base": 2,
+          "per_rank": 0
         }
       },
       "cone": {

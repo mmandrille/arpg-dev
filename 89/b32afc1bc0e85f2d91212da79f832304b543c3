@@ -1,0 +1,43 @@
+server/internal/http/market.go
+  s_23f64e3b90cbb0::t_67bc76f2155c5b 41-44,68-70,119-135,139,225-248,252
+server/internal/store/interfaces.go
+  s_23f64e3b90cbb0::t_fb58779755f662 75
+server/internal/http/auth_session_test.go
+  s_23f64e3b90cbb0::t_86496d34b4efdb 570-571,864-877
+  s_23f64e3b90cbb0::t_05d5a8e2220968 655
+  s_23f64e3b90cbb0::t_bb7d4fe62bc9eb 533-569,572-581,641-646,648-654,656-664,666-668,670-675,817-863
+  s_23f64e3b90cbb0::t_9b2bf61404503e 647
+  s_68a7da5dad7d6a::t_61d2963f7e726b 665,669,676-699
+server/internal/store/repos.go
+  s_23f64e3b90cbb0::t_fb58779755f662 1517-1521,1523,1526,1552-1566,1579,1586-1602,1623
+  s_68a7da5dad7d6a::t_99f06aa373be05 1393,1395
+server/internal/http/account_stash.go
+  s_68a7da5dad7d6a::t_7de069294a53a1 22-29,37-43,89-98,101-114,118-131,140-143,169-180
+  s_23f64e3b90cbb0::t_fb58779755f662 60,117,139,181-182
+  s_23f64e3b90cbb0::t_67bc76f2155c5b 13,44-48,61-88,99-100,115-116
+  s_23f64e3b90cbb0::t_df186448265950 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "89b32afc1bc0e85f2d91212da79f832304b543c3",
+  "prompts": {},
+  "sessions": {
+    "s_23f64e3b90cbb0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf38-ccda-77c2-a6a6-e725007afc98",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_68a7da5dad7d6a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf3e-573d-7d92-a6c1-01a1b92ccbea",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

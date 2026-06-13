@@ -82,6 +82,9 @@ func _run() -> void:
 	offer_tooltip.queue_free()
 	var magic_offer_tooltip := panel._make_offer_tooltip(offers[3])
 	_assert_eq("vendor magic tooltip name is rarity blue", magic_offer_tooltip.debug_first_main_line_color(), "93c5fd")
+	var magic_offer_fonts: Array = magic_offer_tooltip.debug_main_line_font_sizes()
+	_assert_eq("vendor tooltip rarity uses smaller font", _font_size_for_text(magic_offer_fonts, "Rarity: Magic"), 19)
+	_assert_eq("vendor tooltip slot uses smaller font", _font_size_for_text(magic_offer_fonts, "Slot: gloves"), 19)
 	magic_offer_tooltip.queue_free()
 
 	panel.bot_click_buy_offer("fixed:red_potion")
@@ -247,6 +250,9 @@ func _run() -> void:
 	inventory_tooltip.queue_free()
 	var blade_tooltip := inventory_panel._make_item_tooltip(blade)
 	_assert_eq("inventory magic tooltip name is rarity blue", blade_tooltip.debug_first_main_line_color(), "93c5fd")
+	var blade_fonts: Array = blade_tooltip.debug_main_line_font_sizes()
+	_assert_eq("inventory tooltip rarity uses smaller font", _font_size_for_text(blade_fonts, "Rarity: Magic"), 19)
+	_assert_eq("inventory tooltip slot uses smaller font", _font_size_for_text(blade_fonts, "Slot: main_hand"), 19)
 	blade_tooltip.queue_free()
 	var ring := {
 		"item_instance_id": "2005",
@@ -403,3 +409,10 @@ func _array_contains_text(rows: Array, needle: String) -> bool:
 		if str(row).contains(needle):
 			return true
 	return false
+
+
+func _font_size_for_text(rows: Array, text: String) -> int:
+	for row in rows:
+		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("text", "")) == text:
+			return int((row as Dictionary).get("font_size", -1))
+	return -1

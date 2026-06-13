@@ -16,6 +16,7 @@ const SLOT_GAP := 6
 const TITLE_FONT_SIZE := 33
 const BODY_FONT_SIZE := 23
 const DETAIL_FONT_SIZE := 20
+const TOOLTIP_META_FONT_SIZE := BODY_FONT_SIZE - 4
 const ICON_FONT_SIZE := 20
 const PRICE_FONT_SIZE := 13
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -743,13 +744,28 @@ func _tooltip_lines(row: Dictionary) -> Array:
 	var rarity := str(row.get("rarity", ""))
 	var lines: Array = [_item_name_tooltip_line(_offer_name(row), rarity)]
 	if rarity != "":
-		lines.append("Rarity: %s" % rarity.capitalize())
-	lines.append_array(_detail_lines(row, false, false))
+		lines.append(_metadata_tooltip_line("Rarity: %s" % rarity.capitalize()))
+	lines.append_array(_compact_metadata_lines(_detail_lines(row, false, false)))
 	return lines
 
 
 func _item_name_tooltip_line(text: String, rarity: String) -> Dictionary:
 	return {"text": text, "color": _rarity_color(rarity)}
+
+
+func _metadata_tooltip_line(text: String) -> Dictionary:
+	return {"text": text, "color": Color("#cdbd9f"), "font_size": TOOLTIP_META_FONT_SIZE}
+
+
+func _compact_metadata_lines(lines: Array) -> Array:
+	var out: Array = []
+	for line in lines:
+		var text := str(line)
+		if text.begins_with("Slot:"):
+			out.append(_metadata_tooltip_line(text))
+		else:
+			out.append(line)
+	return out
 
 
 func _detail_lines(row: Dictionary, include_requirements: bool = true, include_comparison: bool = true) -> Array:

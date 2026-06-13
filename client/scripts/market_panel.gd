@@ -134,6 +134,15 @@ func show_status(message: String, warning: bool = false) -> void:
 	_status_label.add_theme_color_override("font_color", Color("#ffcf5a") if warning else Color("#9fd7ff"))
 
 
+func return_to_browse_after_offer() -> void:
+	staged_offer_items = []
+	staged_offer_items_changed.emit([])
+	if _tabs != null:
+		_tabs.current_tab = 0
+	inventory_context_requested.emit("")
+	_rebuild_offer_rows()
+
+
 func bot_select_tab(tab_name: String) -> void:
 	if _tabs == null:
 		return

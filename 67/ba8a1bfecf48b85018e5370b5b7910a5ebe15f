@@ -1,0 +1,33 @@
+PROGRESS.md
+  s_beaba83981e74e::t_bb812b001c3019 15,18,156,331,461-463
+docs/as-built/v135_second-named-unique.md
+  s_beaba83981e74e::t_bb812b001c3019 1-26
+docs/plans/v135_2026-06-13-second-named-unique.md
+  s_beaba83981e74e::t_bb812b001c3019 3,31,34,47-49,57-59,75-77,86-90
+  s_beaba83981e74e::t_0c24b4848140c4 1-2,4-30,32-33,35-46,50-56,60-74,78-85
+shared/rules/unique_items.v0.json
+  s_beaba83981e74e::t_656a456370371f 18-32
+server/internal/game/unique_chest_test.go
+  s_beaba83981e74e::t_656a456370371f 92,94-118,120-143,168-171,178-183
+docs/specs/v135_spec-second-named-unique.md
+  s_beaba83981e74e::t_0c24b4848140c4 1-2,4-52
+  s_beaba83981e74e::t_bb812b001c3019 3
+tools/test_validate_unique_items.py
+  s_beaba83981e74e::t_656a456370371f 33-43,47,56-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "67ba8a1bfecf48b85018e5370b5b7910a5ebe15f",
+  "prompts": {},
+  "sessions": {
+    "s_beaba83981e74e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec25d-47e7-77c0-a56a-06124fe8de87",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

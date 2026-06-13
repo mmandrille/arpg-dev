@@ -23,6 +23,8 @@ func _run() -> void:
 	_assert_true("manifest-loaded skills include ligthing", ids.has("ligthing"))
 	_assert_true("manifest-loaded skills include poison stab", ids.has("poison_stab"))
 	_assert_true("manifest-loaded skills include dash", ids.has("dash"))
+	_assert_true("manifest-loaded skills include piercing shot", ids.has("piercing_shot"))
+	_assert_true("manifest-loaded skills include pinning shot", ids.has("pinning_shot"))
 	_assert_eq("alphabetical first id stable", str(ids[0]), "cleave")
 	_assert_eq("tree-order first skill stable", SkillRulesLoaderScript.first_skill_id(), "cleave")
 
@@ -39,6 +41,10 @@ func _run() -> void:
 	_assert_eq("holy shield kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("holy_shield").get("kind", "")), "area_stat_buff")
 	_assert_eq("poison stab kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("poison_stab").get("kind", "")), "cone_attack")
 	_assert_eq("dash kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("dash").get("kind", "")), "cone_attack")
+	_assert_eq("piercing shot kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("piercing_shot").get("kind", "")), "projectile_attack")
+	_assert_eq("pinning shot kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("pinning_shot").get("kind", "")), "projectile_attack")
+	_assert_eq("piercing shot max hits", int(SkillRulesLoaderScript.skill_definition("piercing_shot").get("pierce", {}).get("max_hits", 0)), 4)
+	_assert_eq("pinning shot root effect", str(SkillRulesLoaderScript.skill_definition("pinning_shot").get("root", {}).get("effect_id", "")), "pinning_root")
 
 	var presentation := SkillRulesLoaderScript.skill_presentation("magic_bolt")
 	_assert_eq("presentation summary key from manifest-listed assets", str(presentation.get("summary_key", "")), "skill.magic_bolt.summary")
@@ -59,6 +65,12 @@ func _run() -> void:
 	_assert_eq("poison stab presentation shape", str(SkillRulesLoaderScript.skill_presentation("poison_stab").get("icon", {}).get("shape", "")), "poison_dagger")
 	_assert_eq("dash presentation label", str(SkillRulesLoaderScript.skill_presentation("dash").get("icon", {}).get("label", "")), "D")
 	_assert_eq("dash presentation shape", str(SkillRulesLoaderScript.skill_presentation("dash").get("icon", {}).get("shape", "")), "dash")
+	_assert_eq("piercing shot presentation label", str(SkillRulesLoaderScript.skill_presentation("piercing_shot").get("icon", {}).get("label", "")), "P")
+	_assert_eq("piercing shot presentation shape", str(SkillRulesLoaderScript.skill_presentation("piercing_shot").get("icon", {}).get("shape", "")), "arrow")
+	_assert_eq("pinning shot presentation label", str(SkillRulesLoaderScript.skill_presentation("pinning_shot").get("icon", {}).get("label", "")), "N")
+	_assert_eq("pinning shot presentation shape", str(SkillRulesLoaderScript.skill_presentation("pinning_shot").get("icon", {}).get("shape", "")), "pin")
+	_assert_eq("piercing shot projectile presentation", str(SkillRulesLoaderScript.skill_presentation("piercing_shot").get("projectile_visual", "")), "piercing_shot_projectile")
+	_assert_eq("pinning shot projectile presentation", str(SkillRulesLoaderScript.skill_presentation("pinning_shot").get("projectile_visual", "")), "pinning_shot_projectile")
 
 	print("[gdtest] PASS: test_skill_rules_loader (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)

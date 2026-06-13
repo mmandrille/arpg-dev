@@ -5,12 +5,14 @@ const RAGE_EFFECT_ID := "rage"
 const ICE_SLOW_EFFECT_ID := "ice_slow"
 const BURNING_EFFECT_ID := "everburning_wound"
 const ELITE_COMMAND_EFFECT_ID := "elite_command"
+const PINNING_ROOT_EFFECT_ID := "pinning_root"
 
 const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
 const RAGE_MARKER_NAME := "RageVisualEffect"
 const BURNING_MARKER_NAME := "BurningVisualEffect"
 const ELITE_COMMAND_MARKER_NAME := "EliteCommandVisualEffect"
 const ELITE_COMMAND_RADIUS_PREVIEW_NAME := "EliteCommandRadiusPreview"
+const PINNING_ROOT_MARKER_NAME := "PinningRootVisualEffect"
 const HOLY_SHIELD_AURA_PULSE_NAME := "HolyShieldAuraPulse"
 const HOLY_SHIELD_TARGET_PULSE_NAME := "HolyShieldTargetPulse"
 const AURA_PULSE_SECONDS := 0.30
@@ -69,6 +71,11 @@ static func has_elite_command_effect_id(effect_ids_value) -> bool:
 	return effect_ids.has(ELITE_COMMAND_EFFECT_ID)
 
 
+static func has_pinning_root_effect_id(effect_ids_value) -> bool:
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	return effect_ids.has(PINNING_ROOT_EFFECT_ID)
+
+
 static func sync_burning_effect(root: Node3D, active: bool) -> void:
 	if root == null:
 		return
@@ -103,6 +110,24 @@ static func sync_elite_command_effect(root: Node3D, active: bool) -> void:
 
 static func has_elite_command_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(ELITE_COMMAND_MARKER_NAME, false, false) != null
+
+
+static func sync_pinning_root_effect(root: Node3D, active: bool) -> void:
+	if root == null:
+		return
+	var existing := root.find_child(PINNING_ROOT_MARKER_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = make_pinning_root_effect()
+		root.add_child(existing)
+
+
+static func has_pinning_root_effect(root: Node3D) -> bool:
+	return root != null and root.find_child(PINNING_ROOT_MARKER_NAME, false, false) != null
 
 
 static func sync_elite_command_radius_preview(root: Node3D, active: bool, radius: float) -> void:
@@ -369,6 +394,48 @@ static func make_elite_command_radius_preview(radius: float) -> Node3D:
 	ring.scale = Vector3.ONE * maxf(radius, 0.5)
 	ring.material_override = mat
 	marker.add_child(ring)
+	return marker
+
+
+static func make_pinning_root_effect() -> Node3D:
+	var marker := Node3D.new()
+	marker.name = PINNING_ROOT_MARKER_NAME
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.42, 1.0, 0.20, 0.68)
+	mat.emission_enabled = true
+	mat.emission = Color(0.28, 0.92, 0.16)
+	mat.emission_energy_multiplier = 2.4
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.no_depth_test = true
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	var ring := MeshInstance3D.new()
+	ring.name = "PinningRootRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.52
+	ring_mesh.outer_radius = 0.64
+	ring_mesh.ring_segments = 48
+	ring.mesh = ring_mesh
+	ring.position.y = 0.08
+	ring.material_override = mat
+	marker.add_child(ring)
+
+	for i in range(3):
+		var stake := MeshInstance3D.new()
+		stake.name = "PinningRootStake%d" % i
+		var stake_mesh := CylinderMesh.new()
+		stake_mesh.top_radius = 0.03
+		stake_mesh.bottom_radius = 0.08
+		stake_mesh.height = 0.72
+		stake_mesh.radial_segments = 6
+		stake.mesh = stake_mesh
+		var angle := float(i) * TAU / 3.0
+		stake.position = Vector3(cos(angle) * 0.42, 0.36, sin(angle) * 0.42)
+		stake.rotation_degrees.z = 12.0
+		stake.material_override = mat
+		marker.add_child(stake)
 	return marker
 
 

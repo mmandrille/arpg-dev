@@ -1231,6 +1231,7 @@ async def execute_step(
         else:
             direction = step.get("direction", {"x": 1, "y": 0})
             payload["direction"] = {"x": float(direction.get("x", 0)), "y": float(direction.get("y", 0))}
+        event_start_index = len(state.events)
         env = make_envelope("cast_skill_intent", session_id, state.last_tick, payload)
         await ws.send(json.dumps(env))
         expect_reject = step.get("expect_reject")
@@ -1239,7 +1240,10 @@ async def execute_step(
             return
         await wait_for_accept(ws, state, env["message_id"], loop)
         if step.get("event_type"):
-            await wait_for_event(ws, state, str(step["event_type"]), loop)
+            expected_event: dict[str, Any] = {"event_type": str(step["event_type"])}
+            if step.get("skill_id") is not None:
+                expected_event["skill_id"] = skill_id
+            await wait_for_matching_event(ws, state, expected_event, loop, start_index=event_start_index)
         expected = step.get("expect_skill_cooldown")
         if isinstance(expected, dict):
             await wait_for_skill_cooldown(ws, state, expected, loop)
@@ -2062,6 +2066,30 @@ async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, time
             player = find_player(state)
             raise TimeoutError(
                 f"stalled waiting for event {event_type}; "
+                f"level={state.current_level} tick={state.last_tick} "
+                f"player_hp={(player or {}).get('hp')} "
+                f"seen_events={sorted(state.seen_events)} "
+                f"recent_combat={state.combat_events[-5:]}"
+            )
+        await pump_one(ws, state, timeout=0.1)
+
+
+async def wait_for_matching_event(
+    ws,
+    state: RuntimeState,
+    expected: dict[str, Any],
+    loop,
+    *,
+    timeout_s: float = SLICE_TIMEOUT_S,
+    start_index: int = 0,
+) -> None:
+    event_type = str(expected.get("event_type", ""))
+    deadline = loop.time() + timeout_s
+    while not any(event_matches(ev, expected) for ev in state.events[start_index:]):
+        if loop.time() > deadline:
+            player = find_player(state)
+            raise TimeoutError(
+                f"stalled waiting for event {event_type or expected}; "
                 f"level={state.current_level} tick={state.last_tick} "
                 f"player_hp={(player or {}).get('hp')} "
                 f"seen_events={sorted(state.seen_events)} "

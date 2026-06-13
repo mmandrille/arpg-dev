@@ -101,6 +101,30 @@
       "summary": "Forward dash strike",
       "effect_visual": "dash",
       "summary_key": "skill.dash.summary"
+    },
+    "piercing_shot": {
+      "icon": {
+        "label": "P",
+        "shape": "arrow",
+        "color": "#2fbf61",
+        "accent": "#d7ffd6"
+      },
+      "summary": "Arrow that pierces enemies",
+      "projectile_visual": "piercing_shot_projectile",
+      "effect_visual": "piercing_shot",
+      "summary_key": "skill.piercing_shot.summary"
+    },
+    "pinning_shot": {
+      "icon": {
+        "label": "N",
+        "shape": "pin",
+        "color": "#6bcf45",
+        "accent": "#f4ffd1"
+      },
+      "summary": "Arrow that roots one enemy",
+      "projectile_visual": "pinning_shot_projectile",
+      "effect_visual": "pinning_root",
+      "summary_key": "skill.pinning_shot.summary"
     }
   }
 }

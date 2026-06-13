@@ -17,6 +17,7 @@ func _initialize() -> void:
 	_test_holy_shield_started_blinks_models_in_range()
 	_test_holy_shield_ended_clears_local_world_effect()
 	_test_unique_burn_started_and_ended_updates_monster_cue()
+	_test_pinning_root_started_and_ended_updates_monster_cue()
 	_test_monster_death_clears_elite_aura_markers()
 	_test_potion_heal_uses_personal_effect()
 	_test_paladin_heal_uses_area_rain()
@@ -174,6 +175,43 @@ func _test_unique_burn_started_and_ended_updates_monster_cue() -> void:
 		if str(rec.get("id", "")) == "1002":
 			has_burning = bool(rec.get("has_burning_effect", true))
 	_assert_true("monster burning marker removed", not has_burning)
+	_free_main(main)
+
+
+func _test_pinning_root_started_and_ended_updates_monster_cue() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1002",
+		"type": "monster",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"monster_def_id": "training_dummy",
+	})
+	main._apply_delta({"events": [{
+		"event_type": "skill_effect_started",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+		"skill_id": "pinning_shot",
+	}], "changes": []})
+	var rows: Array = main._bot_entities_presentation_debug()
+	var before: Dictionary = _presentation_row(rows, "1002")
+	_assert_true("monster pinning root marker active", bool(before.get("has_pinning_root_effect", false)))
+	_assert_true("monster pinning root effect id tracked", (before.get("effect_ids", []) as Array).has("pinning_root"))
+
+	main._apply_delta({"events": [{
+		"event_type": "skill_effect_ended",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+		"skill_id": "pinning_shot",
+	}], "changes": []})
+	rows = main._bot_entities_presentation_debug()
+	var after: Dictionary = _presentation_row(rows, "1002")
+	_assert_true("monster pinning root marker removed", not bool(after.get("has_pinning_root_effect", true)))
+	_assert_true("monster pinning root effect id removed", not (after.get("effect_ids", []) as Array).has("pinning_root"))
 	_free_main(main)
 
 

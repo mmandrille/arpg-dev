@@ -477,6 +477,106 @@
         "multiplier": 3
       },
       "name_key": "skill.dash.name"
+    },
+    "piercing_shot": {
+      "name": "Piercing Shot",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 1,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 8
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 2,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "rank_linear_range",
+        "min_base": 3,
+        "max_base": 5,
+        "min_per_rank": 1,
+        "max_per_rank": 1
+      },
+      "projectile": {
+        "range": 16,
+        "speed": 24,
+        "visual": "piercing_shot_projectile"
+      },
+      "pierce": {
+        "max_hits": 4,
+        "damage_percent_per_extra_hit": 75
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2
+      },
+      "name_key": "skill.piercing_shot.name"
+    },
+    "pinning_shot": {
+      "name": "Pinning Shot",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 1,
+        "column": 2
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 8
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 3,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "rank_linear_range",
+        "min_base": 2,
+        "max_base": 4,
+        "min_per_rank": 1,
+        "max_per_rank": 1
+      },
+      "projectile": {
+        "range": 15,
+        "speed": 22,
+        "visual": "pinning_shot_projectile"
+      },
+      "root": {
+        "effect_id": "pinning_root",
+        "duration_ticks": 30
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.pinning_shot.name"
     }
   }
 }

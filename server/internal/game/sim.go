@@ -4202,6 +4202,9 @@ func (s *Sim) monsterMoveSpeed(monster *entity, def MonsterDef, nav NavigationRu
 	if monster == nil || speed <= 0 {
 		return speed
 	}
+	if s.monsterRooted(monster) {
+		return 0
+	}
 	slowPercent := 0
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
@@ -6741,7 +6744,7 @@ func (s *Sim) entityView(e *entity) EntityView {
 	}
 	view := e.view()
 	if e.kind == monsterEntity {
-		view.EffectIDs = s.eliteAuraEffectIDs(e)
+		view.EffectIDs = sortedUniqueStrings(append(cloneStringSlice(e.effectIDs), s.eliteAuraEffectIDs(e)...))
 	}
 	if e.kind != lootEntity {
 		return view

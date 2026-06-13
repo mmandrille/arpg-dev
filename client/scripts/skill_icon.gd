@@ -31,6 +31,8 @@ func _draw() -> void:
 	var radius := min_side * 0.42
 	draw_circle(center, radius, Color(0.015, 0.014, 0.012, 0.92))
 	match shape:
+		"arrow":
+			_draw_arrow(center, radius)
 		"burst":
 			_draw_burst(center, radius)
 		"dash":
@@ -41,6 +43,8 @@ func _draw() -> void:
 			_draw_ice_spike(center, radius)
 		"orb_projectile":
 			_draw_orb_projectile(center, radius)
+		"pin":
+			_draw_pin(center, radius)
 		"poison_dagger":
 			_draw_poison_dagger(center, radius)
 		"shield":
@@ -74,6 +78,28 @@ func _draw_burst(center: Vector2, radius: float) -> void:
 	draw_colored_polygon(points, fill_color)
 	draw_polyline(points, accent_color, 2.0, true)
 	draw_circle(center, radius * 0.34, accent_color)
+
+
+func _draw_arrow(center: Vector2, radius: float) -> void:
+	var shaft_start := center + Vector2(-radius * 0.62, radius * 0.34)
+	var shaft_end := center + Vector2(radius * 0.34, -radius * 0.30)
+	draw_line(shaft_start, shaft_end, fill_color, radius * 0.24, true)
+	draw_line(shaft_start, shaft_end, accent_color, radius * 0.08, true)
+	var head := PackedVector2Array([
+		center + Vector2(radius * 0.78, -radius * 0.60),
+		center + Vector2(radius * 0.30, -radius * 0.10),
+		center + Vector2(radius * 0.10, -radius * 0.68),
+	])
+	draw_colored_polygon(head, fill_color)
+	draw_polyline(head, accent_color, 2.0, true)
+	for side in [-1.0, 1.0]:
+		draw_line(
+			center + Vector2(-radius * 0.46, radius * 0.24 + radius * 0.12 * side),
+			center + Vector2(-radius * 0.72, radius * 0.02 + radius * 0.18 * side),
+			accent_color,
+			2.0,
+			true
+		)
 
 
 func _draw_dash(center: Vector2, radius: float) -> void:
@@ -136,6 +162,19 @@ func _draw_orb_projectile(center: Vector2, radius: float) -> void:
 	draw_circle(center + Vector2(radius * 0.12, 0.0), radius * 0.46, fill_color)
 	draw_arc(center + Vector2(radius * 0.12, 0.0), radius * 0.46, 0.0, TAU, 32, accent_color, 2.0, true)
 	draw_circle(center + Vector2(radius * 0.28, -radius * 0.18), radius * 0.14, accent_color)
+
+
+func _draw_pin(center: Vector2, radius: float) -> void:
+	draw_circle(center + Vector2(0.0, -radius * 0.40), radius * 0.30, fill_color)
+	draw_arc(center + Vector2(0.0, -radius * 0.40), radius * 0.30, 0.0, TAU, 24, accent_color, 2.0, true)
+	var spike := PackedVector2Array([
+		center + Vector2(-radius * 0.18, -radius * 0.18),
+		center + Vector2(radius * 0.18, -radius * 0.18),
+		center + Vector2(0.0, radius * 0.82),
+	])
+	draw_colored_polygon(spike, fill_color)
+	draw_polyline(spike, accent_color, 2.0, true)
+	draw_line(center + Vector2(-radius * 0.42, radius * 0.68), center + Vector2(radius * 0.42, radius * 0.68), accent_color, 2.0, true)
 
 
 func _draw_poison_dagger(center: Vector2, radius: float) -> void:

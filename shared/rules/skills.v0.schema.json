@@ -32,6 +32,8 @@
         "cost": { "$ref": "#/$defs/cost" },
         "damage": { "$ref": "#/$defs/rank_linear_damage" },
         "projectile": { "$ref": "#/$defs/projectile" },
+        "pierce": { "$ref": "#/$defs/pierce" },
+        "root": { "$ref": "#/$defs/root" },
         "cone": { "$ref": "#/$defs/cone" },
         "poison": { "$ref": "#/$defs/poison" },
         "dash": { "$ref": "#/$defs/dash" },
@@ -202,6 +204,24 @@
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "speed": { "type": "number", "exclusiveMinimum": 0 },
         "visual": { "type": "string", "minLength": 1 }
+      }
+    },
+    "pierce": {
+      "type": "object",
+      "required": ["max_hits", "damage_percent_per_extra_hit"],
+      "additionalProperties": false,
+      "properties": {
+        "max_hits": { "type": "integer", "minimum": 2 },
+        "damage_percent_per_extra_hit": { "type": "integer", "minimum": 1, "maximum": 100 }
+      }
+    },
+    "root": {
+      "type": "object",
+      "required": ["effect_id", "duration_ticks"],
+      "additionalProperties": false,
+      "properties": {
+        "effect_id": { "type": "string", "minLength": 1 },
+        "duration_ticks": { "type": "integer", "minimum": 1 }
       }
     },
     "cone": {

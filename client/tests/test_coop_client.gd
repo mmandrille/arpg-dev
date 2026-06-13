@@ -1217,6 +1217,7 @@ func _test_expired_skill_cooldown_not_restored_by_left_click_refresh() -> void:
 	}
 	main.skill_cooldowns = [{"skill_id": "magic_bolt", "remaining_ticks": 2, "total_ticks": 40}]
 	main._sync_skill_bar_selection()
+	main.skill_bar.start_skill_cooldown("magic_bolt", 2, 40)
 	main.skill_bar.set_interactive(true)
 	var cooling: Dictionary = main.skill_bar.get_debug_state()
 	_assert_true("cooldown initially greys skill", bool(cooling.get("greyed", false)))

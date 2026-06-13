@@ -2,6 +2,7 @@ class_name MarketPanel
 extends Control
 
 signal market_action_requested(action: String, payload: Dictionary)
+signal inventory_context_requested(context: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(640, 520)
@@ -12,9 +13,11 @@ const DEFAULT_PUBLISH_PRICE_GOLD := 25
 var market_entity_id: String = ""
 var account_id: String = ""
 var listings: Array = []
-var stash_items: Array = []
+var inventory_items: Array = []
 var active_offers: Array = []
 var selected_listing_id: String = ""
+var staged_publish_item: Dictionary = {}
+var staged_offer_items: Array = []
 var _panel: DraggableWindow
 var _status_label: Label
 var _tabs: TabContainer
@@ -23,6 +26,24 @@ var _publish_rows: VBoxContainer
 var _offer_rows: VBoxContainer
 var _publish_price_spin: SpinBox
 
+class MarketStageSlot:
+	extends Button
+
+	var panel: MarketPanel
+	var slot_context: String = "publish"
+	var slot_index: int = 0
+	var item: Dictionary = {}
+
+	func _get_drag_data(_at_position: Vector2) -> Variant:
+		if item.is_empty():
+			return null
+		return {"source": "market_stage", "context": slot_context, "slot_index": slot_index, "item": item}
+
+	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+		return typeof(data) == TYPE_DICTIONARY and str(data.get("source", "")) == "bag" and typeof(data.get("item", {})) == TYPE_DICTIONARY
+
+	func _drop_data(_at_position: Vector2, data: Variant) -> void:
+		panel.stage_inventory_item(str(slot_context), data.get("item", {}), slot_index)
 
 func _ready() -> void:
 	_build()
@@ -34,9 +55,11 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 		_build()
 	market_entity_id = entity_id
 	listings = _dup_array(next_listings)
-	stash_items = _dup_array(next_stash_items)
+	inventory_items = _dup_array(next_stash_items)
 	active_offers = []
 	account_id = next_account_id
+	staged_publish_item = {}
+	staged_offer_items = []
 	_status_label.text = status
 	_rebuild_all()
 	visible = true
@@ -63,10 +86,13 @@ func bot_select_tab(tab_name: String) -> void:
 	match tab_name:
 		"publish":
 			_tabs.current_tab = 1
+			inventory_context_requested.emit("publish")
 		"offer":
 			_tabs.current_tab = 2
+			inventory_context_requested.emit("offer")
 		_:
 			_tabs.current_tab = 0
+			inventory_context_requested.emit("")
 
 
 func bot_set_publish_price(price_gold: int) -> void:
@@ -76,11 +102,12 @@ func bot_set_publish_price(price_gold: int) -> void:
 
 
 func bot_click_publish_stash_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
-	var item := _matching_stash_item(stash_item_id, item_def_id, rolled, stash_index)
+	var item := _matching_inventory_item(stash_item_id, item_def_id, rolled, stash_index)
 	if item.is_empty():
-		show_status("No matching stash item to publish", true)
+		show_status("No matching inventory item to publish", true)
 		return
-	_emit_market_action("publish", item)
+	stage_inventory_item("publish", item)
+	_emit_publish_action()
 
 
 func bot_click_purchase_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
@@ -124,8 +151,13 @@ func get_debug_state() -> Dictionary:
 		"account_id": account_id,
 		"listing_count": listings.size(),
 		"listing_rows": _debug_listing_rows(),
-		"stash_item_count": stash_items.size(),
-		"stash_rows": _debug_stash_rows(),
+		"stash_item_count": inventory_items.size(),
+		"stash_rows": _debug_inventory_rows(),
+		"inventory_item_count": inventory_items.size(),
+		"inventory_rows": _debug_inventory_rows(),
+		"staged_publish_item": staged_publish_item.duplicate(true),
+		"staged_offer_count": staged_offer_items.size(),
+		"staged_offer_item_ids": _staged_offer_item_ids(),
 		"offer_count": active_offers.size(),
 		"offer_rows": _debug_offer_rows(),
 		"publish_price_gold": _publish_price(),
@@ -134,6 +166,34 @@ func get_debug_state() -> Dictionary:
 		"tab": _tabs.current_tab if _tabs != null else -1,
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
+
+
+func stage_inventory_item(context: String, item: Dictionary, slot_index: int = -1) -> void:
+	if item.is_empty():
+		return
+	if context == "publish":
+		staged_publish_item = item.duplicate(true)
+		show_status("Ready to publish %s" % _item_title(staged_publish_item))
+		_rebuild_publish_rows()
+		return
+	if context == "offer":
+		var item_id := str(item.get("item_instance_id", ""))
+		if item_id == "":
+			show_status("Missing item id", true)
+			return
+		for staged in staged_offer_items:
+			if typeof(staged) == TYPE_DICTIONARY and str((staged as Dictionary).get("item_instance_id", "")) == item_id:
+				show_status("Item already in offer", true)
+				return
+		if staged_offer_items.size() >= 10:
+			show_status("Offer is full", true)
+			return
+		if slot_index >= 0 and slot_index < staged_offer_items.size():
+			staged_offer_items[slot_index] = item.duplicate(true)
+		else:
+			staged_offer_items.append(item.duplicate(true))
+		show_status("Offer staged: %d/10" % staged_offer_items.size())
+		_rebuild_offer_rows()
 
 
 func _build() -> void:
@@ -162,6 +222,14 @@ func _build() -> void:
 
 	_tabs = TabContainer.new()
 	_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_tabs.tab_changed.connect(func(tab: int) -> void:
+		if tab == 1:
+			inventory_context_requested.emit("publish")
+		elif tab == 2:
+			inventory_context_requested.emit("offer")
+		else:
+			inventory_context_requested.emit("")
+	)
 	root.add_child(_tabs)
 
 	_browse_rows = _tab_rows("Browse")
@@ -199,12 +267,14 @@ func _rebuild_browse_rows() -> void:
 func _rebuild_publish_rows() -> void:
 	_clear_rows(_publish_rows)
 	_publish_rows.add_child(_publish_price_row())
-	if stash_items.is_empty():
-		_publish_rows.add_child(_empty_label("Your stash has no items to publish"))
-		return
-	for item in stash_items:
-		if typeof(item) == TYPE_DICTIONARY:
-			_publish_rows.add_child(_stash_item_row(item as Dictionary, "Publish", "publish"))
+	_publish_rows.add_child(_stage_slot("publish", staged_publish_item, 0))
+	var publish_btn := Button.new()
+	publish_btn.text = "Publish"
+	publish_btn.custom_minimum_size = Vector2(140, 38)
+	publish_btn.disabled = staged_publish_item.is_empty()
+	publish_btn.pressed.connect(_emit_publish_action)
+	_publish_rows.add_child(publish_btn)
+	_publish_rows.add_child(_empty_label("Double-click or drag an inventory item here"))
 
 
 func _rebuild_offer_rows() -> void:
@@ -222,12 +292,14 @@ func _rebuild_offer_rows() -> void:
 			if typeof(offer) == TYPE_DICTIONARY:
 				_offer_rows.add_child(_offer_row(offer as Dictionary))
 		return
-	if stash_items.is_empty():
-		_offer_rows.add_child(_empty_label("Your stash has no items to offer"))
-		return
-	for item in stash_items:
-		if typeof(item) == TYPE_DICTIONARY:
-			_offer_rows.add_child(_stash_item_row(item as Dictionary, "Offer", "offer"))
+	_offer_rows.add_child(_offer_grid())
+	var offer_btn := Button.new()
+	offer_btn.text = "Offer"
+	offer_btn.custom_minimum_size = Vector2(140, 38)
+	offer_btn.disabled = staged_offer_items.is_empty()
+	offer_btn.pressed.connect(_emit_offer_action)
+	_offer_rows.add_child(offer_btn)
+	_offer_rows.add_child(_empty_label("Double-click or drag up to 10 inventory items"))
 
 
 func _listing_row(listing: Dictionary, selectable: bool) -> Control:
@@ -276,6 +348,7 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 			btn.pressed.connect(func() -> void:
 				selected_listing_id = str(listing.get("listing_id", ""))
 				_tabs.current_tab = 2
+				inventory_context_requested.emit("offer")
 				_rebuild_offer_rows()
 			)
 			actions.add_child(btn)
@@ -313,53 +386,52 @@ func _offer_row(offer: Dictionary) -> Control:
 	return row
 
 
-func _stash_item_row(item: Dictionary, action_label: String, action: String) -> Control:
-	var row := PanelContainer.new()
-	row.add_theme_stylebox_override("panel", _row_style())
-	var box := HBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	row.add_child(box)
-
-	var info := VBoxContainer.new()
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_child(info)
-	var title := Label.new()
-	title.text = _item_title(item)
-	title.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	title.add_theme_color_override("font_color", _rarity_color(str(item.get("rarity", "common"))))
-	info.add_child(title)
-	var detail := Label.new()
-	detail.text = _item_detail(item)
-	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
-	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
-	info.add_child(detail)
-
-	var btn := Button.new()
-	btn.text = action_label
-	btn.custom_minimum_size = Vector2(110, 38)
-	btn.pressed.connect(func() -> void:
-		_emit_market_action(action, item)
-	)
-	box.add_child(btn)
-	return row
+func _stage_slot(context: String, item: Dictionary, slot_index: int) -> Control:
+	var btn := MarketStageSlot.new()
+	btn.panel = self
+	btn.slot_context = context
+	btn.slot_index = slot_index
+	btn.custom_minimum_size = Vector2(112, 54)
+	btn.text = _item_title(item) if not item.is_empty() else "Empty"
+	btn.tooltip_text = _item_detail(item) if not item.is_empty() else "Drop inventory item"
+	btn.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	btn.add_theme_color_override("font_color", _rarity_color(str(item.get("rarity", "common"))) if not item.is_empty() else Color("#8f826b"))
+	return btn
 
 
-func _emit_market_action(action: String, item: Dictionary) -> void:
-	var stash_item_id := str(item.get("stash_item_id", ""))
-	if stash_item_id == "":
-		show_status("Missing stash item id", true)
+func _offer_grid() -> Control:
+	var grid := GridContainer.new()
+	grid.columns = 5
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	for i in range(10):
+		var item: Dictionary = staged_offer_items[i] if i < staged_offer_items.size() else {}
+		grid.add_child(_stage_slot("offer", item, i))
+	return grid
+
+
+func _emit_publish_action() -> void:
+	if staged_publish_item.is_empty():
+		show_status("Choose an inventory item first", true)
 		return
-	if action == "publish":
-		market_action_requested.emit("publish", {
-			"stash_item_id": stash_item_id,
-			"price_gold": _publish_price(),
-		})
+	market_action_requested.emit("publish_inventory", {
+		"item_instance_id": str(staged_publish_item.get("item_instance_id", "")),
+		"price_gold": _publish_price(),
+	})
+
+
+func _emit_offer_action() -> void:
+	if selected_listing_id == "":
+		show_status("Select a listing first", true)
 		return
-	if action == "offer":
-		if selected_listing_id == "":
-			show_status("Select a listing first", true)
-			return
-		market_action_requested.emit("offer", {"listing_id": selected_listing_id, "stash_item_ids": [stash_item_id]})
+	var ids: Array = []
+	for item in staged_offer_items:
+		if typeof(item) == TYPE_DICTIONARY:
+			ids.append(str((item as Dictionary).get("item_instance_id", "")))
+	if ids.is_empty():
+		show_status("Choose inventory items first", true)
+		return
+	market_action_requested.emit("offer_inventory", {"listing_id": selected_listing_id, "item_instance_ids": ids})
 
 
 func _emit_purchase_action(listing: Dictionary) -> void:
@@ -442,13 +514,13 @@ func _publish_price() -> int:
 	return max(1, int(_publish_price_spin.value))
 
 
-func _matching_stash_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> Dictionary:
+func _matching_inventory_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> Dictionary:
 	var matches: Array = []
-	for item in stash_items:
+	for item in inventory_items:
 		if typeof(item) != TYPE_DICTIONARY:
 			continue
 		var rec := item as Dictionary
-		if stash_item_id != "" and str(rec.get("stash_item_id", "")) != stash_item_id:
+		if stash_item_id != "" and str(rec.get("item_instance_id", rec.get("stash_item_id", ""))) != stash_item_id:
 			continue
 		if item_def_id != "" and str(rec.get("item_def_id", "")) != item_def_id:
 			continue
@@ -477,18 +549,27 @@ func _debug_listing_rows() -> Array:
 	return rows
 
 
-func _debug_stash_rows() -> Array:
+func _debug_inventory_rows() -> Array:
 	var rows: Array = []
-	for item in stash_items:
+	for item in inventory_items:
 		if typeof(item) != TYPE_DICTIONARY:
 			continue
 		var rec := item as Dictionary
 		rows.append({
+			"item_instance_id": str(rec.get("item_instance_id", "")),
 			"stash_item_id": str(rec.get("stash_item_id", "")),
 			"item_def_id": str(rec.get("item_def_id", "")),
 			"item_template_id": str(rec.get("item_template_id", "")),
 		})
 	return rows
+
+
+func _staged_offer_item_ids() -> Array:
+	var ids: Array = []
+	for item in staged_offer_items:
+		if typeof(item) == TYPE_DICTIONARY:
+			ids.append(str((item as Dictionary).get("item_instance_id", "")))
+	return ids
 
 
 func _debug_offer_rows() -> Array:

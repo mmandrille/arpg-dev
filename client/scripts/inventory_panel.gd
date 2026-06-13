@@ -77,6 +77,8 @@ var _gesture_hint: Label
 var _gesture_tween: Tween
 var _rendered_bag_slot_count: int = 0
 var _shop_sell_entity_id: String = ""
+var _market_context: String = ""
+var _blacksmith_context_enabled: bool = false
 
 
 class InventorySlotButton:
@@ -123,6 +125,8 @@ class InventorySlotButton:
 		if dragged.is_empty():
 			return false
 		if panel._slot_kind_is_equipment(slot_kind):
+			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
+				return panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 			return (source == SLOT_KIND_BAG or source == DRAG_SOURCE_STASH or source == DRAG_SOURCE_CORPSE) and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 		if slot_kind == SLOT_KIND_BAG:
 			if source == DRAG_SOURCE_SHOP_OFFER and str(data.get("offer_id", "")) != "" and str(data.get("shop_entity_id", "")) != "":
@@ -134,6 +138,8 @@ class InventorySlotButton:
 			if source == DRAG_SOURCE_CORPSE \
 					and str(data.get("corpse_entity_id", "")) != "" \
 					and str(data.get("item_instance_id", "")) != "":
+				return true
+			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
 				return true
 			return panel._slot_kind_is_equipment(source)
 		return false
@@ -177,6 +183,18 @@ func set_shop_sell_context(shop_entity_id: String) -> void:
 
 func clear_shop_sell_context() -> void:
 	_shop_sell_entity_id = ""
+
+
+func set_market_context(context: String) -> void:
+	_market_context = context
+
+
+func clear_market_context() -> void:
+	_market_context = ""
+
+
+func set_blacksmith_context(enabled: bool) -> void:
+	_blacksmith_context_enabled = enabled
 
 
 func ensure_display_visible() -> void:
@@ -760,6 +778,17 @@ func _handle_double_click(item: Dictionary) -> void:
 			"item_instance_id": str(item.get("item_instance_id", "")),
 		})
 		return
+	if _market_context != "" and not _is_equipped_instance(str(item.get("item_instance_id", ""))):
+		intent_requested.emit("market_stage_inventory_item", {
+			"context": _market_context,
+			"item": item.duplicate(true),
+		})
+		return
+	if _blacksmith_context_enabled and not _is_equipped_instance(str(item.get("item_instance_id", ""))):
+		intent_requested.emit("blacksmith_stage_inventory_item", {
+			"item": item.duplicate(true),
+		})
+		return
 	var slot := _preferred_equip_slot(item)
 	if slot != "":
 		intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
@@ -801,6 +830,10 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 					"corpse_entity_id": str(data.get("corpse_entity_id", "")),
 					"item_instance_id": str(data.get("item_instance_id", "")),
 				})
+			elif source == "blacksmith_stage":
+				var blacksmith = data.get("blacksmith_panel", null)
+				if blacksmith != null and blacksmith.has_method("unstage_item"):
+					blacksmith.call("unstage_item")
 			else:
 				intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
 	elif slot_kind == SLOT_KIND_BAG:
@@ -820,6 +853,10 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 				"corpse_entity_id": str(data.get("corpse_entity_id", "")),
 				"item_instance_id": str(data.get("item_instance_id", "")),
 			})
+		elif source == "blacksmith_stage":
+			var blacksmith = data.get("blacksmith_panel", null)
+			if blacksmith != null and blacksmith.has_method("unstage_item"):
+				blacksmith.call("unstage_item")
 		elif _slot_kind_is_equipment(source):
 			intent_requested.emit("unequip_intent", {"slot": _slot_from_kind(source)})
 
@@ -942,12 +979,28 @@ func _random_stat_lines(stats_value: Variant, def: Dictionary) -> Array:
 	var base_stats: Dictionary = def.get("base_stats", {})
 	var deltas: Dictionary = {}
 	for key in (stats_value as Dictionary).keys():
-		var total := int((stats_value as Dictionary).get(key, 0))
-		var base := int(base_stats.get(key, 0))
+		var total_value = _numeric_stat_or_null((stats_value as Dictionary).get(key, null))
+		if total_value == null:
+			continue
+		var base_value = _numeric_stat_or_null(base_stats.get(key, 0))
+		var total := int(total_value)
+		var base := int(base_value if base_value != null else 0)
 		var delta := total - base
 		if delta != 0:
 			deltas[key] = delta
 	return _stat_lines_for_tooltip(deltas, true)
+
+
+func _numeric_stat_or_null(value: Variant):
+	match typeof(value):
+		TYPE_INT:
+			return int(value)
+		TYPE_FLOAT:
+			return int(value)
+		TYPE_STRING:
+			if str(value).is_valid_int():
+				return int(value)
+	return null
 
 
 func _stat_lines_for_tooltip(stats: Dictionary, signed: bool) -> Array:

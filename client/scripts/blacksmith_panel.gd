@@ -2,34 +2,83 @@ class_name BlacksmithPanel
 extends Control
 
 signal upgrade_requested(stash_item_id: String)
+signal upgrade_inventory_requested(item_instance_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const PANEL_SIZE := Vector2(520, 440)
+const STAGE_SLOT_SIZE := Vector2(96, 96)
 const BODY_FONT_SIZE := 18
 const DETAIL_FONT_SIZE := 15
+const ICON_FONT_SIZE := 28
 
 var blacksmith_entity_id: String = ""
-var stash_items: Array = []
+var inventory_items: Array = []
+var gold: int = 0
 var stash_gold: int = 0
 var base_cost: int = 100
 var growth_cost: int = 50
 var max_level: int = 3
+var item_presentations: Dictionary:
+	get: return ItemRulesLoader.item_presentations
+var staged_item: Dictionary = {}
 var _panel: DraggableWindow
 var _status_label: Label
 var _gold_label: Label
 var _rows: VBoxContainer
 
+class BlacksmithStageSlot:
+	extends Button
+
+	var panel: BlacksmithPanel
+	var item: Dictionary = {}
+
+	func _draw() -> void:
+		if item.is_empty():
+			return
+		panel._draw_item_icon(self, item)
+
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton \
+				and event.button_index == MOUSE_BUTTON_LEFT \
+				and event.pressed \
+				and event.double_click \
+				and not item.is_empty():
+			panel.unstage_item()
+			accept_event()
+
+	func _get_drag_data(_at_position: Vector2) -> Variant:
+		if item.is_empty():
+			return null
+		var data := {
+			"source": "blacksmith_stage",
+			"item": item.duplicate(true),
+			"blacksmith_panel": panel,
+		}
+		set_drag_preview(panel._drag_preview(item))
+		return data
+
+	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+		if typeof(data) != TYPE_DICTIONARY or typeof(data.get("item", {})) != TYPE_DICTIONARY:
+			return false
+		var source := str(data.get("source", ""))
+		return source == "bag" or source.begins_with("equip:")
+
+	func _drop_data(_at_position: Vector2, data: Variant) -> void:
+		panel.stage_inventory_item(data.get("item", {}))
 
 func _ready() -> void:
+	ItemRulesLoader.ensure_loaded()
 	_build()
 	hide_display()
 
 
-func show_blacksmith(entity_id: String, next_stash_items: Array, next_stash_gold: int, config: Dictionary, status: String = "") -> void:
+func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int, next_stash_gold: int, config: Dictionary, status: String = "") -> void:
 	if _panel == null:
 		_build()
 	blacksmith_entity_id = entity_id
-	stash_items = _dup_array(next_stash_items)
+	inventory_items = _dup_array(next_stash_items)
+	gold = next_gold
 	stash_gold = next_stash_gold
 	base_cost = int(config.get("item_upgrade_cost_gold", base_cost))
 	growth_cost = int(config.get("item_upgrade_cost_growth_per_level", growth_cost))
@@ -42,6 +91,7 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_stash_gold
 
 
 func hide_display() -> void:
+	unstage_item(false)
 	visible = false
 	if _panel != null:
 		_panel.visible = false
@@ -54,12 +104,9 @@ func show_status(message: String, warning: bool = false) -> void:
 	_status_label.add_theme_color_override("font_color", Color("#ffcf5a") if warning else Color("#9fd7ff"))
 
 
-func update_after_upgrade(item: Dictionary, next_stash_gold: int, charged_cost: int) -> void:
-	var id := str(item.get("stash_item_id", ""))
-	for i in range(stash_items.size()):
-		if typeof(stash_items[i]) == TYPE_DICTIONARY and str((stash_items[i] as Dictionary).get("stash_item_id", "")) == id:
-			stash_items[i] = item.duplicate(true)
-			break
+func update_after_upgrade(item: Dictionary, next_gold: int, next_stash_gold: int, charged_cost: int) -> void:
+	staged_item = item.duplicate(true)
+	gold = next_gold
 	stash_gold = next_stash_gold
 	show_status("Upgraded for %d gold" % charged_cost)
 	_rebuild()
@@ -68,21 +115,47 @@ func update_after_upgrade(item: Dictionary, next_stash_gold: int, charged_cost: 
 func bot_click_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	var item := _matching_item(stash_item_id, item_def_id, stash_index)
 	if item.is_empty():
-		show_status("No matching stash item", true)
+		show_status("No matching inventory item", true)
 		return
-	_emit_upgrade(item)
+	stage_inventory_item(item)
+	_emit_upgrade(staged_item)
 
 
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"blacksmith_entity_id": blacksmith_entity_id,
+		"gold": gold,
 		"stash_gold": stash_gold,
-		"item_count": stash_items.size(),
+		"wallet_gold": _wallet_gold(),
+		"item_count": inventory_items.size(),
+		"staged_item": staged_item.duplicate(true),
+		"staged_item_id": str(staged_item.get("item_instance_id", staged_item.get("stash_item_id", ""))),
+		"stage_slot_size": {"x": STAGE_SLOT_SIZE.x, "y": STAGE_SLOT_SIZE.y},
+		"stage_slot_centered": true,
+		"stage_icon_visible": not staged_item.is_empty(),
 		"rows": _debug_rows(),
 		"status": _status_label.text if _status_label != null else "",
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
+
+
+func stage_inventory_item(item: Dictionary) -> void:
+	if item.is_empty():
+		return
+	staged_item = item.duplicate(true)
+	show_status("Ready to upgrade %s" % _item_title(staged_item))
+	_rebuild()
+
+
+func unstage_item(show_message: bool = true) -> void:
+	if staged_item.is_empty():
+		return
+	var title := _item_title(staged_item)
+	staged_item = {}
+	if show_message:
+		show_status("%s returned to inventory" % title)
+	_rebuild()
 
 
 func _build() -> void:
@@ -123,48 +196,63 @@ func _build() -> void:
 
 
 func _rebuild() -> void:
-	_gold_label.text = "Stash gold: %d" % stash_gold
+	_gold_label.text = "Gold: %d  Stash: %d" % [gold, stash_gold]
 	_clear_rows()
-	if stash_items.is_empty():
-		_rows.add_child(_empty_label("Your account stash has no upgradeable items"))
-		return
-	for item in stash_items:
-		if typeof(item) == TYPE_DICTIONARY:
-			_rows.add_child(_item_row(item as Dictionary))
-
-
-func _item_row(item: Dictionary) -> Control:
-	var row := PanelContainer.new()
-	row.add_theme_stylebox_override("panel", _row_style())
-	var box := HBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
-	row.add_child(box)
-
-	var text := VBoxContainer.new()
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_child(text)
-
-	var title := Label.new()
-	title.text = _item_title(item)
-	title.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	title.add_theme_color_override("font_color", _rarity_color(str(item.get("rarity", ""))))
-	text.add_child(title)
-
-	var level := _item_level(item)
-	var cost := _next_cost(level)
-	var detail := Label.new()
-	detail.text = "Level %d/%d  Next: %d gold" % [level, max_level, cost]
-	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
-	detail.add_theme_color_override("font_color", Color("#d8c8a8"))
-	text.add_child(detail)
-
+	_rows.add_child(_stage_slot())
+	_rows.add_child(_preview_block())
 	var button := Button.new()
 	button.text = "Upgrade"
-	button.disabled = level >= max_level or stash_gold < cost
-	button.tooltip_text = "Max level" if level >= max_level else ("Need %d gold" % cost if stash_gold < cost else "Upgrade item")
-	button.pressed.connect(func() -> void: _emit_upgrade(item))
-	box.add_child(button)
-	return row
+	button.custom_minimum_size = Vector2(150, 40)
+	button.disabled = staged_item.is_empty() or not _upgrade_enabled(staged_item)
+	button.pressed.connect(func() -> void: _emit_upgrade(staged_item))
+	_rows.add_child(button)
+	_rows.add_child(_empty_label("Double-click or drag an inventory item into the center block"))
+
+
+func _stage_slot() -> Control:
+	var center := CenterContainer.new()
+	var btn := BlacksmithStageSlot.new()
+	btn.panel = self
+	btn.item = staged_item.duplicate(true)
+	btn.custom_minimum_size = STAGE_SLOT_SIZE
+	btn.text = "" if not staged_item.is_empty() else "Empty"
+	btn.clip_text = true
+	btn.tooltip_text = _item_detail(staged_item) if not staged_item.is_empty() else "Drop inventory item"
+	btn.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	btn.add_theme_color_override("font_color", _rarity_color(str(staged_item.get("rarity", ""))) if not staged_item.is_empty() else Color("#8f826b"))
+	btn.add_theme_stylebox_override("normal", _stage_slot_style(false))
+	btn.add_theme_stylebox_override("hover", _stage_slot_style(true))
+	btn.add_theme_stylebox_override("pressed", _stage_slot_style(true))
+	center.add_child(btn)
+	return center
+
+
+func _preview_block() -> Control:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	if staged_item.is_empty():
+		box.add_child(_empty_label("No item selected"))
+		return box
+	var level := _item_level(staged_item)
+	var cost := _next_cost(level)
+	var cost_row := HBoxContainer.new()
+	cost_row.add_theme_constant_override("separation", 8)
+	var level_label := Label.new()
+	level_label.text = "Level %d/%d" % [level, max_level]
+	level_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	level_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	level_label.add_theme_color_override("font_color", Color("#b8b8b8"))
+	cost_row.add_child(level_label)
+	var cost_label := Label.new()
+	cost_label.text = "%d gold" % cost
+	cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cost_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	cost_label.add_theme_color_override("font_color", Color("#d8c8a8"))
+	cost_row.add_child(cost_label)
+	box.add_child(cost_row)
+	for line in _upgrade_preview_lines(staged_item):
+		box.add_child(_empty_label(line))
+	return box
 
 
 func _emit_upgrade(item: Dictionary) -> void:
@@ -173,23 +261,27 @@ func _emit_upgrade(item: Dictionary) -> void:
 	if level >= max_level:
 		show_status("Item is already at max level", true)
 		return
-	if stash_gold < cost:
+	if _wallet_gold() < cost:
 		show_status("Need %d gold" % cost, true)
+		return
+	var item_instance_id := str(item.get("item_instance_id", ""))
+	if item_instance_id != "":
+		upgrade_inventory_requested.emit(item_instance_id)
 		return
 	var stash_item_id := str(item.get("stash_item_id", ""))
 	if stash_item_id == "":
-		show_status("Missing stash item id", true)
+		show_status("Missing item id", true)
 		return
 	upgrade_requested.emit(stash_item_id)
 
 
 func _matching_item(stash_item_id: String, item_def_id: String, stash_index: int) -> Dictionary:
 	var matches: Array = []
-	for value in stash_items:
+	for value in inventory_items:
 		if typeof(value) != TYPE_DICTIONARY:
 			continue
 		var item := value as Dictionary
-		if stash_item_id != "" and str(item.get("stash_item_id", "")) != stash_item_id:
+		if stash_item_id != "" and str(item.get("item_instance_id", item.get("stash_item_id", ""))) != stash_item_id:
 			continue
 		if item_def_id != "" and str(item.get("item_def_id", "")) != item_def_id:
 			continue
@@ -201,21 +293,39 @@ func _matching_item(stash_item_id: String, item_def_id: String, stash_index: int
 
 func _debug_rows() -> Array:
 	var rows: Array = []
-	for value in stash_items:
+	if not staged_item.is_empty():
+		rows.append(_debug_row(staged_item))
+	for value in inventory_items:
 		if typeof(value) != TYPE_DICTIONARY:
 			continue
 		var item := value as Dictionary
-		var level := _item_level(item)
-		rows.append({
-			"stash_item_id": str(item.get("stash_item_id", "")),
-			"item_def_id": str(item.get("item_def_id", "")),
-			"display_name": _item_title(item),
-			"rarity": str(item.get("rarity", "")),
-			"item_level": level,
-			"next_cost_gold": _next_cost(level),
-			"upgrade_enabled": level < max_level and stash_gold >= _next_cost(level),
-		})
+		if not staged_item.is_empty() and str(item.get("item_instance_id", "")) == str(staged_item.get("item_instance_id", "")):
+			continue
+		rows.append(_debug_row(item))
 	return rows
+
+
+func _debug_row(item: Dictionary) -> Dictionary:
+	var level := _item_level(item)
+	return {
+		"item_instance_id": str(item.get("item_instance_id", "")),
+		"stash_item_id": str(item.get("stash_item_id", "")),
+		"item_def_id": str(item.get("item_def_id", "")),
+		"display_name": _item_title(item),
+		"rarity": str(item.get("rarity", "")),
+		"item_level": level,
+		"next_cost_gold": _next_cost(level),
+		"upgrade_enabled": level < max_level and _wallet_gold() >= _next_cost(level),
+	}
+
+
+func _upgrade_enabled(item: Dictionary) -> bool:
+	var level := _item_level(item)
+	return level < max_level and _wallet_gold() >= _next_cost(level)
+
+
+func _wallet_gold() -> int:
+	return gold + stash_gold
 
 
 func _item_level(item: Dictionary) -> int:
@@ -232,11 +342,75 @@ func _next_cost(level: int) -> int:
 	return base_cost + level * growth_cost
 
 
+func _upgrade_preview_lines(item: Dictionary) -> Array:
+	var lines: Array = []
+	var stats := _stats_map(item)
+	var level := _item_level(item)
+	if level >= max_level:
+		return ["Max level reached"]
+	for key in stats.keys():
+		var current := int(stats.get(key, 0))
+		var next := current
+		if str(key) == "item_level":
+			next = min(max_level, level + 1)
+		elif current > 0:
+			next = current + 1
+		if next != current:
+			lines.append("%s: %d -> %d" % [str(key).replace("_", " ").capitalize(), current, next])
+	if lines.is_empty():
+		lines.append("Item level: %d -> %d" % [level, min(max_level, level + 1)])
+	return lines
+
+
+func _stats_map(item: Dictionary) -> Dictionary:
+	var rolled = item.get("rolled_stats", {})
+	if typeof(rolled) == TYPE_DICTIONARY:
+		var payload := rolled as Dictionary
+		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
+			return (payload.get("stats", {}) as Dictionary).duplicate(true)
+		return payload.duplicate(true)
+	return {}
+
+
 func _item_title(item: Dictionary) -> String:
 	var display := str(item.get("display_name", ""))
 	if display != "":
 		return display
 	return str(item.get("item_def_id", "Unknown item")).replace("_", " ").capitalize()
+
+
+func _item_detail(item: Dictionary) -> String:
+	var lines: Array = item.get("summary_lines", [])
+	if not lines.is_empty():
+		return str(lines[0])
+	return "Level %d/%d" % [_item_level(item), max_level]
+
+
+func _draw_item_icon(slot: Control, item: Dictionary) -> void:
+	var def_id := str(item.get("item_def_id", ""))
+	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
+	var rect := Rect2(Vector2.ZERO, slot.size)
+	var label := str(icon.get("label", _short_label(def_id)))
+	ItemIconDrawerScript.draw(slot, rect, icon, label, false, 0.18, ICON_FONT_SIZE)
+
+
+func _drag_preview(item: Dictionary) -> Control:
+	var preview := Control.new()
+	preview.custom_minimum_size = STAGE_SLOT_SIZE
+	preview.size = STAGE_SLOT_SIZE
+	preview.draw.connect(func() -> void:
+		_draw_item_icon(preview, item)
+	)
+	return preview
+
+
+func _short_label(def_id: String) -> String:
+	var parts := def_id.replace("_", " ").split(" ")
+	var out := ""
+	for part in parts:
+		if part.length() > 0:
+			out += part.substr(0, 1).to_upper()
+	return out.substr(0, 3)
 
 
 func _rarity_color(rarity: String) -> Color:
@@ -270,6 +444,15 @@ func _row_style() -> StyleBoxFlat:
 	s.border_color = Color("#3b3020")
 	s.set_border_width_all(1)
 	s.set_content_margin_all(8)
+	return s
+
+
+func _stage_slot_style(hover: bool) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color("#241d15") if hover else Color("#15110d")
+	s.border_color = Color("#c59035") if hover else Color("#6f5524")
+	s.set_border_width_all(2)
+	s.set_content_margin_all(6)
 	return s
 
 

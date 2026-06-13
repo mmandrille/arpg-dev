@@ -1958,12 +1958,12 @@ func _basic_attack_cooldown_seconds() -> float:
 
 
 func _start_basic_attack_recovery_ui(duration_seconds: float = -1.0) -> void:
-	if _health_bar == null:
+	if character_bar == null:
 		return
 	var duration := duration_seconds
 	if duration <= 0.0:
 		duration = _basic_attack_cooldown_seconds()
-	_health_bar.start_attack_recovery(duration)
+	character_bar.start_attack_recovery(duration)
 
 
 func _remove_monster_health_bar(entity_id: String) -> void:

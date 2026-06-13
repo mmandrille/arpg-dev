@@ -1,0 +1,30 @@
+server/internal/game/rules.go
+  s_bf09982b8ba9b3::t_5ba0988362537a 1383,2745,2786-2812
+shared/rules/skills.v0.json
+  s_bf09982b8ba9b3::t_3d7f03a748b545 275-276
+  s_bf09982b8ba9b3::t_93424f09fe0bab 385
+server/internal/game/game_test.go
+  s_bf09982b8ba9b3::t_d71998f9869f2d 270
+  s_bf09982b8ba9b3::t_ab44acbbb123d5 240-242,249-251,260-269,271-291
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0d03e1cf4d79d58c0c4c70cf526bc59188df685c",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_bf09982b8ba9b3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec218-8775-77c2-92ca-4bc406ae563b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

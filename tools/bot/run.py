@@ -34,6 +34,7 @@ from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenar
 from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot import skill_visual_runtime
 from tools.bot.debug_progression import debug_progression_body
+from tools.bot.unique_effect_assertions import assert_inventory_unique_effect_coverage
 
 SLICE_TIMEOUT_S = 20.0
 MAX_SCENARIO_ELAPSED_S = 15.0
@@ -540,6 +541,10 @@ async def execute_step(
 
     if action == "assert_inventory_requirement_status":
         assert_inventory_requirement_status(state.inventory, step, "runtime protocol")
+        return
+
+    if action == "assert_inventory_unique_effect_coverage":
+        assert_inventory_unique_effect_coverage(state.inventory, step, "runtime protocol")
         return
 
     if action == "assert_equipped_weapon_def":
@@ -3443,8 +3448,6 @@ def assert_rolled_inventory_any(inventory: list[dict], equipped: bool | None, wh
     req = item.get("requirements", {})
     if int(req.get("level", 0)) != 1:
         raise AssertionError(f"{where}: rolled item required level mismatch: {item}")
-    if item.get("rarity") != "unique" and item.get("effect_ids", []) != []:
-        raise AssertionError(f"{where}: non-unique rolled item effect_ids should be empty: {item}")
 
 
 def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: str) -> None:
@@ -3697,6 +3700,8 @@ def run_assertions(
         elif typ == "rolled_inventory_any":
             expected_equipped = assertion.get("equipped")
             assert_rolled_inventory_any(inventory, expected_equipped, where)
+        elif typ == "inventory_unique_effect_coverage":
+            assert_inventory_unique_effect_coverage(inventory, assertion, where)
         elif typ == "entity_count":
             assert_entity_count(entities, assertion, where)
         elif typ == "equipped_weapon_def":
@@ -4033,6 +4038,9 @@ def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: st
         if typ == "rolled_inventory_any":
             expected_equipped = assertion.get("equipped")
             assert_rolled_inventory_any(state.inventory, expected_equipped, where)
+            continue
+        if typ == "inventory_unique_effect_coverage":
+            assert_inventory_unique_effect_coverage(state.inventory, assertion, where)
             continue
         if typ == "equipped_slot_def":
             slot = str(assertion["slot"])

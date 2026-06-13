@@ -501,7 +501,7 @@ func _initialize() -> void:
 		var interval := _attack_interval_ticks(progression_combat_rules, effective)
 		var cooldown := maxi(1, int(ceil(float(interval) * cooldown_multiplier)))
 		if interval != int(c["expected_attack_interval_ticks"]) or cooldown != int(c["expected_magic_bolt_cooldown_ticks"]):
-			_fail("skill golden attack speed case %s interval/cooldown mismatch" % str(c["name"]))
+			_fail("skill golden attack speed case %s interval/cooldown got %d/%d want %d/%d" % [str(c["name"]), interval, cooldown, int(c["expected_attack_interval_ticks"]), int(c["expected_magic_bolt_cooldown_ticks"])])
 			return
 	for c in skill_golden["skill"]["rank_requirement_cases"]:
 		var req_rank := int(c["rank"])

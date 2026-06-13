@@ -39,6 +39,7 @@ const (
 	stairsUpDefID                  = "stairs_up"
 	teleporterDefID                = "teleporter"
 	treasureChestDefID             = "treasure_chest"
+	uniqueTestChestService         = "unique_test_chest"
 	townStashDefID                 = "town_stash"
 	accountStashID                 = "account_stash"
 	heroCorpseDefID                = "hero_corpse"
@@ -2610,6 +2611,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 	}
 	if service := s.serviceForInteractable(e); service == "blacksmith" {
 		s.openBlacksmithService(e, in, res, ack)
+		return
+	}
+	if service := s.serviceForInteractable(e); service == uniqueTestChestService {
+		s.openUniqueTestChest(e, in, res, ack)
 		return
 	}
 	if e.state != interactableClosed {

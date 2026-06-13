@@ -52,6 +52,11 @@
       "initial_state": "ready",
       "service": "blacksmith"
     },
+    "town_unique_chest": {
+      "name": "Unique Test Chest",
+      "initial_state": "ready",
+      "service": "unique_test_chest"
+    },
     "town_bishop": {
       "name": "Town Bishop",
       "initial_state": "ready",

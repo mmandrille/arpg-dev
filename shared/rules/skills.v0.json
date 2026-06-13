@@ -324,7 +324,7 @@
       ],
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 3
+        "multiplier": 10
       },
       "name_key": "skill.heal.name"
     },

@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v130 — `market-trade-audit-records` |
+| **Latest completed slice** | v131 — `purple-town-unique-chest` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v131 — TBD |
+| **Next slice** | v132 — TBD |
 | **Last engineering review** | v130 — [`docs/reviews/20260613_v130-overview.md`](docs/reviews/20260613_v130-overview.md) (2026-06-13) |
 | **Next engineering review** | v140 due before more feature batches |
 
@@ -149,6 +149,7 @@ v127_* = town-service-bridge-split
 v128_* = market-listing-expiration
 v129_* = market-offer-withdrawal
 v130_* = market-trade-audit-records
+v131_* = purple-town-unique-chest
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -319,6 +320,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v128** | `market-listing-expiration` | Complete (`make ci` green) | [`v128_spec-market-listing-expiration.md`](docs/specs/v128_spec-market-listing-expiration.md) | [`v128_2026-06-13-market-listing-expiration.md`](docs/plans/v128_2026-06-13-market-listing-expiration.md) | [`as-built`](docs/as-built/v128_market-listing-expiration.md) |
 | **v129** | `market-offer-withdrawal` | Complete (`make ci` green) | [`v129_spec-market-offer-withdrawal.md`](docs/specs/v129_spec-market-offer-withdrawal.md) | [`v129_2026-06-13-market-offer-withdrawal.md`](docs/plans/v129_2026-06-13-market-offer-withdrawal.md) | [`as-built`](docs/as-built/v129_market-offer-withdrawal.md) |
 | **v130** | `market-trade-audit-records` | Complete (`make ci` green) | [`v130_spec-market-trade-audit-records.md`](docs/specs/v130_spec-market-trade-audit-records.md) | [`v130_2026-06-13-market-trade-audit-records.md`](docs/plans/v130_2026-06-13-market-trade-audit-records.md) | [`as-built`](docs/as-built/v130_market-trade-audit-records.md) |
+| **v131** | `purple-town-unique-chest` | Complete (`make ci` green) | [`v131_spec-purple-town-unique-chest.md`](docs/specs/v131_spec-purple-town-unique-chest.md) | [`v131_2026-06-13-purple-town-unique-chest.md`](docs/plans/v131_2026-06-13-purple-town-unique-chest.md) | [`as-built`](docs/as-built/v131_purple-town-unique-chest.md) |
 
 ---
 
@@ -447,6 +449,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Purple town unique chest is available for testing all current unique effects.** v131 adds a
+purple `town_unique_chest` interactable in town. Activating it grants deterministic unique rolled
+items covering every enabled ready unique effect exactly once, bypassing inventory capacity only for
+this debug/test chest. `61_purple_town_unique_chest` proves the coverage through the protocol bot.
 
 **Market ownership transitions now expire, withdraw, and audit cleanly.** v128-v130 add 24-hour
 listing expiration with seller/bidder refunds, bidder-owned offer withdrawal, and

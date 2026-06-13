@@ -1474,6 +1474,8 @@ func TestRageBuffAppliesStatsVisualScaleAndExpires(t *testing.T) {
 
 func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	rules := loadRules(t)
+	healSkill := rules.Skills["heal"]
+	healCooldownTicks := int(math.Ceil(float64(rules.Combat.BaseAttackIntervalTicks)*healSkill.Cooldown.Multiplier)) + healSkill.Cooldown.FlatTicks
 	sim := MustNewSim("sess_heal_skill", "01", rules)
 	sim.progression.CharacterClass = "paladin"
 	sim.savePlayer(sim.defaultPlayer())
@@ -1500,7 +1502,7 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
 	}})
 	assertAck(t, cast, "cast_heal")
-	wantMana := player.maxMana - skillManaCost(rules.Skills["heal"], 1)
+	wantMana := player.maxMana - skillManaCost(healSkill, 1)
 	if player.mana != wantMana {
 		t.Fatalf("heal mana after cast = %d, want %d", player.mana, wantMana)
 	}
@@ -1551,7 +1553,7 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		t.Fatalf("expired heal rain healed late entrant to %d, want unchanged 3", guest.hp)
 	}
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < healCooldownTicks+1; i++ {
 		sim.Tick(nil)
 	}
 	sim.usePlayer(sim.players[hostID])
@@ -1578,12 +1580,12 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		t.Fatalf("monster-targeted heal guest hp = %d, want unchanged full hp %d", guest.hp, guest.maxHP)
 	}
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < healCooldownTicks+1; i++ {
 		sim.Tick(nil)
 	}
 	sim.usePlayer(sim.players[hostID])
 	player.pos = Vec2{X: 2, Y: 5}
-	monster.pos = Vec2{X: player.pos.X + rules.Skills["heal"].Effects[0].Range + 2, Y: player.pos.Y}
+	monster.pos = Vec2{X: player.pos.X + healSkill.Effects[0].Range + 2, Y: player.pos.Y}
 	player.mana = player.maxMana
 	beforeMana := player.mana
 	sim.savePlayer(sim.players[hostID])
@@ -1610,12 +1612,12 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	if !hasEvent(completed, "skill_cast") || !hasEvent(completed, "skill_cooldown_started") {
 		t.Fatalf("auto-nav heal completion missing cast/cooldown events: %+v", completed.Events)
 	}
-	wantAutoNavMana := beforeMana - skillManaCost(rules.Skills["heal"], 1)
+	wantAutoNavMana := beforeMana - skillManaCost(healSkill, 1)
 	if player.mana != wantAutoNavMana {
 		t.Fatalf("auto-nav heal mana after cast = %d, want %d", player.mana, wantAutoNavMana)
 	}
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < healCooldownTicks+1; i++ {
 		sim.Tick(nil)
 	}
 	sim.usePlayer(sim.players[hostID])
@@ -1629,7 +1631,7 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill: &CastSkillIntent{SkillID: "heal"},
 	}})
 	assertAck(t, noop, "cast_heal_full")
-	wantNoopMana := player.maxMana - skillManaCost(rules.Skills["heal"], 1)
+	wantNoopMana := player.maxMana - skillManaCost(healSkill, 1)
 	if player.mana != wantNoopMana {
 		t.Fatalf("full-hp heal mana = %d, want %d", player.mana, wantNoopMana)
 	}

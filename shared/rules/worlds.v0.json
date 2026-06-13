@@ -614,6 +614,11 @@
           "type": "interactable",
           "interactable_def_id": "town_blacksmith",
           "position": { "x": 6, "y": 10 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_unique_chest",
+          "position": { "x": 6, "y": 7 }
         }
       ]
     },
@@ -692,6 +697,11 @@
           "type": "interactable",
           "interactable_def_id": "town_blacksmith",
           "position": { "x": 5, "y": 12 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_unique_chest",
+          "position": { "x": 5, "y": 10 }
         },
         { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 13, "y": 11 } },
         { "type": "loot", "item_template_id": "cave_greatsword", "position": { "x": 13, "y": 12 } },

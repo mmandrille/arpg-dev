@@ -4202,6 +4202,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 				market_panel.show_status("Could not publish item", true)
 			return
 		_remove_market_stash_item(str(payload.get("stash_item_id", "")))
+		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Item published")
 	elif action == "publish_inventory":
@@ -4211,6 +4212,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 				market_panel.show_status("Could not publish item", true)
 			return
 		_remove_inventory_item(str(payload.get("item_instance_id", "")))
+		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Item published")
 	elif action == "offer":
@@ -4221,6 +4223,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			return
 		for stash_item_id in payload.get("stash_item_ids", []):
 			_remove_market_stash_item(str(stash_item_id))
+		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Offer sent")
 	elif action == "offer_inventory":
@@ -4231,6 +4234,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			return
 		for item_instance_id in payload.get("item_instance_ids", []):
 			_remove_inventory_item(str(item_instance_id))
+		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Offer sent")
 	elif action == "purchase":

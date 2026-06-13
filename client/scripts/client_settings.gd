@@ -4,7 +4,7 @@ class_name ClientSettings
 
 const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 
-const DEFAULT_SIZE := Vector2i(1920, 1080)
+const DEFAULT_SIZE := Vector2i(2560, 1440)
 const CREATE_GAME_SESSION_TYPE_COOP := "coop"
 const CREATE_GAME_SESSION_TYPE_SOLO := "solo"
 const DEFAULT_CREATE_GAME_SESSION_TYPE := CREATE_GAME_SESSION_TYPE_COOP
@@ -14,6 +14,7 @@ const SUPPORTED_SIZES := [
 	Vector2i(1280, 720),
 	Vector2i(1600, 900),
 	Vector2i(1920, 1080),
+	Vector2i(2560, 1440),
 ]
 const SUPPORTED_CREATE_GAME_SESSION_TYPES := [
 	CREATE_GAME_SESSION_TYPE_COOP,
@@ -155,12 +156,29 @@ func save() -> void:
 
 
 func apply() -> void:
-	var target_size := window_size
-	var screen := DisplayServer.window_get_current_screen()
-	var scale := DisplayServer.screen_get_scale(screen)
-	if scale > 1.0:
-		target_size = Vector2i(roundi(float(window_size.x) * scale), roundi(float(window_size.y) * scale))
+	var target_size := _fit_size_to_screen(window_size)
+	DisplayServer.window_set_min_size(SUPPORTED_SIZES[0])
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	DisplayServer.window_set_size(target_size)
+	_center_window(target_size)
+
+
+static func _fit_size_to_screen(size: Vector2i) -> Vector2i:
+	var screen := DisplayServer.window_get_current_screen()
+	var screen_size := DisplayServer.screen_get_size(screen)
+	var margin := Vector2i(96, 96)
+	var available := Vector2i(maxi(640, screen_size.x - margin.x), maxi(360, screen_size.y - margin.y))
+	if size.x <= available.x and size.y <= available.y:
+		return size
+	var fit_scale := minf(float(available.x) / float(size.x), float(available.y) / float(size.y))
+	return Vector2i(
+		maxi(SUPPORTED_SIZES[0].x, roundi(float(size.x) * fit_scale)),
+		maxi(SUPPORTED_SIZES[0].y, roundi(float(size.y) * fit_scale))
+	)
+
+
+static func _center_window(target_size: Vector2i) -> void:
+	var screen := DisplayServer.window_get_current_screen()
 	var screen_pos := DisplayServer.screen_get_position(screen)
 	var screen_size := DisplayServer.screen_get_size(screen)
 	var centered := screen_pos + Vector2i(

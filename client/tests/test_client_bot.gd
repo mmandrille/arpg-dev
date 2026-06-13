@@ -840,20 +840,21 @@ func _test_client_settings_supported_size_labels() -> void:
 	_assert_true("settings include 1280x720", labels.has("1280x720"))
 	_assert_true("settings include 1600x900", labels.has("1600x900"))
 	_assert_true("settings include 1920x1080", labels.has("1920x1080"))
+	_assert_true("settings include 2560x1440", labels.has("2560x1440"))
 
 
 func _test_client_settings_parse_size_label() -> void:
 	_assert_eq("settings parse valid size", ClientSettingsScript.parse_size_label("1600x900"), Vector2i(1600, 900))
-	_assert_eq("settings parse invalid size fallback", ClientSettingsScript.parse_size_label("1440x900"), Vector2i(1920, 1080))
-	_assert_eq("settings parse malformed fallback", ClientSettingsScript.parse_size_label("bad"), Vector2i(1920, 1080))
+	_assert_eq("settings parse invalid size fallback", ClientSettingsScript.parse_size_label("1440x900"), ClientSettingsScript.DEFAULT_SIZE)
+	_assert_eq("settings parse malformed fallback", ClientSettingsScript.parse_size_label("bad"), ClientSettingsScript.DEFAULT_SIZE)
 
 
 func _test_client_settings_size_from_data() -> void:
 	var valid := {"window_size": {"width": 1280, "height": 720}}
 	_assert_eq("settings data valid", ClientSettingsScript.size_from_data(valid), Vector2i(1280, 720))
 	var invalid := {"window_size": {"width": 777, "height": 444}}
-	_assert_eq("settings data invalid fallback", ClientSettingsScript.size_from_data(invalid), Vector2i(1920, 1080))
-	_assert_eq("settings data missing fallback", ClientSettingsScript.size_from_data({}), Vector2i(1920, 1080))
+	_assert_eq("settings data invalid fallback", ClientSettingsScript.size_from_data(invalid), ClientSettingsScript.DEFAULT_SIZE)
+	_assert_eq("settings data missing fallback", ClientSettingsScript.size_from_data({}), ClientSettingsScript.DEFAULT_SIZE)
 
 
 func _test_client_settings_floating_combat_text_from_data() -> void:

@@ -2,6 +2,7 @@ extends Control
 class_name SettingsPanel
 
 const TextCatalogScript := preload("res://scripts/text_catalog.gd")
+const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 
 signal back_requested
 signal size_selected(label: String)
@@ -108,7 +109,7 @@ func _build() -> void:
 	_title.add_theme_font_size_override("font_size", 45)
 	box.add_child(_title)
 
-	for label in ["1280x720", "1600x900", "1920x1080"]:
+	for label in ClientSettingsScript.supported_size_labels():
 		var button := Button.new()
 		button.text = label
 		button.custom_minimum_size = Vector2(320, 46)

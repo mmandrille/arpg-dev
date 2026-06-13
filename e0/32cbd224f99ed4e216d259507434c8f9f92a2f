@@ -1,0 +1,21 @@
+client/scripts/market_panel.gd
+  s_a7077bd5daf373::t_924a7d508cf633 8-9,13,32-59,80,340-347,350-351,360,365-371,596-598,701-748
+client/tests/test_shop_panel.gd
+  s_a7077bd5daf373::t_6039423a6d0144 308-318,333-340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e032cbd224f99ed4e216d259507434c8f9f92a2f",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

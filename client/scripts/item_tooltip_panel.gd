@@ -10,6 +10,7 @@ const PREVIEW_GAP := 8
 const CONTENT_WIDTH := 360.0
 const MAIN_STAT_WIDTH := CONTENT_WIDTH - PREVIEW_SIZE.x - PREVIEW_GAP
 const PRICE_WIDTH := 132.0
+const LEVEL_WIDTH := 132.0
 const FOOTER_TOP_GAP := 10
 
 
@@ -83,10 +84,11 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 		preview.setup(item, item_presentations, fallback_label, price >= 0 and not affordable)
 		top_row.add_child(preview)
 
-	if not requirement_lines.is_empty():
+	var visible_requirement_lines := _visible_requirement_lines(requirement_lines)
+	if not visible_requirement_lines.is_empty():
 		root.add_child(_tooltip_spacer(8))
 		root.add_child(_tooltip_label("Requirements", Color("#c9a227")))
-		for line in requirement_lines:
+		for line in visible_requirement_lines:
 			root.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#d8c7a6")), CONTENT_WIDTH, REQUIREMENT_FONT_SIZE))
 	if not comparison_entries.is_empty():
 		root.add_child(_tooltip_spacer(6))
@@ -99,23 +101,33 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 			var color: Color = rec.get("color", Color("#d8c7a6"))
 			root.add_child(_tooltip_label(str(rec.get("text", "")), color))
 
-	if price >= 0:
+	var level_text := _item_level_text(item)
+	if price >= 0 or level_text != "":
 		root.add_child(_tooltip_spacer(FOOTER_TOP_GAP))
 		var footer := HBoxContainer.new()
 		footer.name = "GoldValueFooter"
 		footer.add_theme_constant_override("separation", 0)
 		footer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var level_label := Label.new()
+		level_label.name = "ItemLevelLabel"
+		level_label.text = level_text
+		level_label.custom_minimum_size = Vector2(LEVEL_WIDTH, 0)
+		level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		level_label.add_theme_color_override("font_color", Color("#9a9489"))
+		level_label.add_theme_font_size_override("font_size", REQUIREMENT_FONT_SIZE)
+		footer.add_child(level_label)
 		var spacer := Control.new()
 		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		footer.add_child(spacer)
-		var price_label := Label.new()
-		price_label.name = "GoldValueLabel"
-		price_label.text = "%d gold" % price
-		price_label.custom_minimum_size = Vector2(PRICE_WIDTH, 0)
-		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		price_label.add_theme_color_override("font_color", Color("#f4c84f") if affordable else Color("#ff6f6f"))
-		price_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-		footer.add_child(price_label)
+		if price >= 0:
+			var price_label := Label.new()
+			price_label.name = "GoldValueLabel"
+			price_label.text = "%d gold" % price
+			price_label.custom_minimum_size = Vector2(PRICE_WIDTH, 0)
+			price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			price_label.add_theme_color_override("font_color", Color("#f4c84f") if affordable else Color("#ff6f6f"))
+			price_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+			footer.add_child(price_label)
 		root.add_child(footer)
 
 
@@ -124,6 +136,31 @@ func debug_gold_value_text() -> String:
 	if label == null:
 		return ""
 	return label.text
+
+
+func debug_item_level_text() -> String:
+	var label := find_child("ItemLevelLabel", true, false) as Label
+	if label == null:
+		return ""
+	return label.text
+
+
+func debug_requirement_texts() -> Array:
+	var out: Array = []
+	var in_requirements := false
+	for child in find_children("*", "Label", true, false):
+		var label := child as Label
+		if label == null:
+			continue
+		if label.text == "Requirements":
+			in_requirements = true
+			continue
+		if label.name == "GoldValueLabel" or label.name == "ItemLevelLabel":
+			in_requirements = false
+			continue
+		if in_requirements and label.text != "":
+			out.append(label.text)
+	return out
 
 
 func debug_first_main_line_color() -> String:
@@ -215,3 +252,43 @@ func _entry_font_size(value, fallback: int) -> int:
 		return fallback
 	var rec := value as Dictionary
 	return int(rec.get("font_size", fallback))
+
+
+func _visible_requirement_lines(requirement_lines: Array) -> Array:
+	var out: Array = []
+	for line in requirement_lines:
+		if _is_level_line(_entry_text(line)):
+			continue
+		out.append(line)
+	return out
+
+
+func _item_level_text(item: Dictionary) -> String:
+	if item.is_empty():
+		return ""
+	var requirements = item.get("requirements", {})
+	if typeof(requirements) == TYPE_DICTIONARY:
+		var req := requirements as Dictionary
+		if req.has("level"):
+			return "Level %s" % _format_level_value(req.get("level", 0))
+	var statuses = item.get("requirement_status", [])
+	if typeof(statuses) == TYPE_ARRAY:
+		for status in statuses:
+			if typeof(status) != TYPE_DICTIONARY:
+				continue
+			var rec := status as Dictionary
+			if str(rec.get("stat", "")) == "level" and int(rec.get("required", 0)) > 0:
+				return "Level %s" % _format_level_value(rec.get("required", 0))
+	return ""
+
+
+func _format_level_value(value: Variant) -> String:
+	if typeof(value) == TYPE_FLOAT:
+		var number := float(value)
+		if is_equal_approx(number, float(int(number))):
+			return str(int(number))
+	return str(value)
+
+
+func _is_level_line(text: String) -> bool:
+	return text.strip_edges().to_lower().begins_with("level ")

@@ -242,6 +242,8 @@ func _run() -> void:
 	var inventory_tooltip := inventory_panel._make_item_tooltip(sell_appraisals[0])
 	_assert_eq("inventory tooltip uses shared panel", inventory_tooltip.get_script(), ItemTooltipPanelScript)
 	_assert_eq("inventory tooltip gold value", inventory_tooltip.debug_gold_value_text(), "27 gold")
+	_assert_eq("inventory tooltip item level footer", inventory_tooltip.debug_item_level_text(), "Level 2")
+	_assert_false("inventory tooltip hides level from requirements block", _array_contains_text(inventory_tooltip.debug_requirement_texts(), "Level 2"))
 	_assert_false("inventory tooltip stats exclude requirements", _array_contains_text(inventory_panel._tooltip_lines(sell_appraisals[0]), "Requires"))
 	_assert_true("inventory tooltip requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "Level 2"))
 	_assert_true("inventory tooltip stat requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "%s 15(-3)" % StatLabels.display_name("str")))
@@ -264,10 +266,10 @@ func _run() -> void:
 		"rolled_stats": {"max_hp": 2, "mana_regen_per_10_seconds": 2},
 	}
 	var ring_tooltip := inventory_panel._make_item_tooltip(ring)
-	_assert_eq("inventory generated tooltip computed gold value", ring_tooltip.debug_gold_value_text(), "11 gold")
+	_assert_eq("inventory generated tooltip computed gold value", ring_tooltip.debug_gold_value_text(), "21 gold")
 	ring_tooltip.queue_free()
 	var potion_tooltip := inventory_panel._make_item_tooltip(inventory[1])
-	_assert_eq("inventory fixed tooltip computed gold value", potion_tooltip.debug_gold_value_text(), "5 gold")
+	_assert_eq("inventory fixed tooltip computed gold value", potion_tooltip.debug_gold_value_text(), "10 gold")
 	potion_tooltip.queue_free()
 	inventory_emitted.clear()
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)

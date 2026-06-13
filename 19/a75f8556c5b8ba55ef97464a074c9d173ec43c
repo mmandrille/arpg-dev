@@ -1,0 +1,37 @@
+PROGRESS.md
+  s_691f0e84e5587e::t_f5927e7629ce10 15,18,146,311,441-443
+docs/specs/v125_spec-tuning-friendly-bot-scenarios.md
+  s_691f0e84e5587e::t_b02102913d2f09 1-2,4-44
+  s_691f0e84e5587e::t_f5927e7629ce10 3
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_691f0e84e5587e::t_00b138bc5d41a5 10-11,15,30-31
+docs/plans/v125_2026-06-13-tuning-friendly-bot-scenarios.md
+  s_691f0e84e5587e::t_b02102913d2f09 1-2,4-32,35-36,38-41,45-47,51-53
+  s_691f0e84e5587e::t_f5927e7629ce10 3,33-34,37,42-44,48-50,54-61
+tools/bot/scenarios/60_ranger_volley_and_visual_showcase.json
+  s_691f0e84e5587e::t_00b138bc5d41a5 22
+tools/bot/test_protocol.py
+  s_691f0e84e5587e::t_4ecf4b2848c030 1304-1347
+tools/bot/run.py
+  s_691f0e84e5587e::t_4ecf4b2848c030 61-73,3557-3561
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_691f0e84e5587e::t_00b138bc5d41a5 22,32,72,81
+docs/as-built/v125_tuning-friendly-bot-scenarios.md
+  s_691f0e84e5587e::t_f5927e7629ce10 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "19a75f8556c5b8ba55ef97464a074c9d173ec43c",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

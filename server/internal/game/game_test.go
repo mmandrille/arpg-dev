@@ -1067,8 +1067,8 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		}
 	}
 	damage := eventDamage(impact, "monster_damaged")
-	if damage < 4 || damage > 6 {
-		t.Fatalf("magic bolt impact damage = %d, want rank 1 damage 4..6; events=%+v", damage, impact.Events)
+	if damage < 6 || damage > 9 {
+		t.Fatalf("magic bolt impact damage = %d, want rank 1 damage 6..9; events=%+v", damage, impact.Events)
 	}
 
 	for i := 0; i < 50; i++ {

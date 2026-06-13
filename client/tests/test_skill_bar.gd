@@ -50,7 +50,7 @@ func _run() -> void:
 	)
 	_assert_true("skillbar tooltip includes rank", str(state.get("tooltip_text", "")).contains("Rank 0 / 5"))
 	_assert_true("skillbar tooltip includes mana", str(state.get("tooltip_text", "")).contains("Mana:"))
-	_assert_false("rank 0 skillbar tooltip omits next-rank damage", str(state.get("tooltip_text", "")).contains("Damage: 4-6 -> 5-7"))
+	_assert_false("rank 0 skillbar tooltip omits next-rank damage", str(state.get("tooltip_text", "")).contains("Damage: 6-9 -> 7-10"))
 	_assert_false("skillbar tooltip omits next-rank header", str(state.get("tooltip_text", "")).contains("Next rank:"))
 	_assert_true("skillbar tooltip includes requirements", str(state.get("tooltip_text", "")).contains("Requires:"))
 	bar._slot.pressed.emit()

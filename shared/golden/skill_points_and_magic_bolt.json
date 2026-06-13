@@ -121,24 +121,24 @@
         "rank": 1,
         "mana_cost": 1,
         "damage": {
-          "min": 4,
-          "max": 6
+          "min": 6,
+          "max": 9
         }
       },
       {
         "rank": 2,
         "mana_cost": 1,
         "damage": {
-          "min": 5,
-          "max": 7
+          "min": 7,
+          "max": 10
         }
       },
       {
         "rank": 5,
         "mana_cost": 1,
         "damage": {
-          "min": 8,
-          "max": 10
+          "min": 10,
+          "max": 13
         }
       }
     ]

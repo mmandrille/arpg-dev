@@ -3,6 +3,7 @@ extends Control
 
 signal market_action_requested(action: String, payload: Dictionary)
 signal inventory_context_requested(context: String)
+signal staged_offer_items_changed(item_instance_ids: Array)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
@@ -79,14 +80,18 @@ class MarketStageSlot:
 		return panel._make_item_tooltip(item)
 
 	func _get_drag_data(_at_position: Vector2) -> Variant:
-		if item.is_empty():
+		if item.is_empty() or slot_context == "view_offer":
 			return null
 		return {"source": "market_stage", "context": slot_context, "slot_index": slot_index, "item": item}
 
 	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+		if slot_context == "view_offer":
+			return false
 		return typeof(data) == TYPE_DICTIONARY and str(data.get("source", "")) == "bag" and typeof(data.get("item", {})) == TYPE_DICTIONARY
 
 	func _drop_data(_at_position: Vector2, data: Variant) -> void:
+		if slot_context == "view_offer":
+			return
 		panel.stage_inventory_item(str(slot_context), data.get("item", {}), slot_index)
 
 func _ready() -> void:
@@ -105,6 +110,7 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 	account_id = next_account_id
 	staged_publish_item = {}
 	staged_offer_items = []
+	staged_offer_items_changed.emit([])
 	_status_label.text = status
 	_rebuild_all()
 	visible = true
@@ -113,6 +119,9 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 
 
 func hide_display() -> void:
+	if not staged_offer_items.is_empty():
+		staged_offer_items = []
+		staged_offer_items_changed.emit([])
 	visible = false
 	if _panel != null:
 		_panel.visible = false
@@ -244,6 +253,7 @@ func stage_inventory_item(context: String, item: Dictionary, slot_index: int = -
 		else:
 			staged_offer_items.append(item.duplicate(true))
 		show_status("Offer staged: %d/10" % staged_offer_items.size())
+		staged_offer_items_changed.emit(_staged_offer_item_ids())
 		_rebuild_offer_rows()
 
 
@@ -442,10 +452,11 @@ func _offer_row(offer: Dictionary) -> Control:
 	title.add_theme_color_override("font_color", Color("#e8dcc8"))
 	info.add_child(title)
 	var detail := Label.new()
-	detail.text = "%s - bidder %s - %s" % [str(offer.get("offer_id", "")), str(offer.get("bidder_account_id", "")).substr(0, 10), _offer_item_names(offer)]
+	detail.text = "Bidder %s" % str(offer.get("bidder_account_id", "")).substr(0, 10)
 	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
 	info.add_child(detail)
+	info.add_child(_offer_items_grid(_offer_items(offer)))
 	var btn := Button.new()
 	btn.text = "Accept"
 	btn.custom_minimum_size = Vector2(110, 38)
@@ -482,6 +493,20 @@ func _offer_grid() -> Control:
 	for i in range(10):
 		var item: Dictionary = staged_offer_items[i] if i < staged_offer_items.size() else {}
 		grid.add_child(_stage_slot("offer", item, i))
+	return grid
+
+
+func _offer_items_grid(items: Array) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = 5
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	var index := 0
+	for value in items:
+		if typeof(value) != TYPE_DICTIONARY:
+			continue
+		grid.add_child(_stage_slot("view_offer", value as Dictionary, index))
+		index += 1
 	return grid
 
 
@@ -686,6 +711,7 @@ func _debug_offer_rows() -> Array:
 			"status": str(rec.get("status", "")),
 			"item_count": _offer_items(rec).size(),
 			"item_def_ids": _offer_item_def_ids(rec),
+			"item_slots": _debug_offer_item_slots(rec),
 		})
 	return rows
 
@@ -718,6 +744,24 @@ func _offer_item_def_ids(offer: Dictionary) -> Array:
 		if typeof(item) == TYPE_DICTIONARY:
 			ids.append(str((item as Dictionary).get("item_def_id", "")))
 	return ids
+
+
+func _debug_offer_item_slots(offer: Dictionary) -> Array:
+	var slots: Array = []
+	var index := 0
+	for item in _offer_items(offer):
+		if typeof(item) != TYPE_DICTIONARY:
+			continue
+		var rec := item as Dictionary
+		slots.append({
+			"index": index,
+			"item_def_id": str(rec.get("item_def_id", "")),
+			"has_icon": str(rec.get("item_def_id", "")) != "",
+			"uses_shared_tooltip": true,
+			"slot_size": {"x": int(STAGE_SLOT_SIZE.x), "y": int(STAGE_SLOT_SIZE.y)},
+		})
+		index += 1
+	return slots
 
 
 func _clear_rows(rows: VBoxContainer) -> void:

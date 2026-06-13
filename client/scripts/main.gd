@@ -3706,6 +3706,7 @@ func _refresh_progression_ui() -> void:
 	if inventory_panel != null:
 		inventory_panel.set_character_progression(character_progression)
 	if character_stats_panel != null:
+		character_stats_panel.set_hero_name(_local_character_display_name())
 		character_stats_panel.set_progression(character_progression)
 		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
 	if character_bar != null:

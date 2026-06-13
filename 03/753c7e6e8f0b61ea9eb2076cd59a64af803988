@@ -1,0 +1,97 @@
+shared/assets/class_presentations.v0.schema.json
+  s_691f0e84e5587e::t_610be7f72c7ad3 25
+client/scripts/character_select_panel.gd
+  s_691f0e84e5587e::t_67174c702175dd 46-52,54
+client/assets/characters/ranger/ranger.glb.import
+  s_691f0e84e5587e::t_28c3f7be77b8b6 1-42
+docs/specs/v122_spec-ranger-class-foundation.md
+  s_691f0e84e5587e::t_0e9b1d72a97fc5 1-2,4-68
+  s_691f0e84e5587e::t_b9ea45de23c0f5 3
+tools/bot/scenarios/40_paladin_heal_skill.json
+  s_691f0e84e5587e::t_4eefc5035b641d 37
+shared/rules/items.v0.schema.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 25
+tools/bot/test_protocol.py
+  s_691f0e84e5587e::t_0119e4d55f5eb0 483,490
+  s_691f0e84e5587e::t_bb60dcaec49f05 479-482,484-489,491-494
+tools/bot/run.py
+  s_691f0e84e5587e::t_6ccacc3745d4a5 54-59,4708,4714-4715,4730-4731,4736-4737
+shared/assets/item_presentations.v0.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 103-107,119-123
+PROGRESS.md
+  s_691f0e84e5587e::t_b9ea45de23c0f5 15,18,142-143,304-305,433-435
+shared/rules/character_progression.v0.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 45-53
+shared/assets/class_presentations.v0.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 19-22
+client/tests/test_coop_client.gd
+  s_691f0e84e5587e::t_0119e4d55f5eb0 351
+tools/assets/gen_glb.py
+  s_691f0e84e5587e::t_67174c702175dd 377-391,548
+shared/i18n/es.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 10
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_691f0e84e5587e::t_9e52ed58fadcce 10-16,29-30
+shared/rules/item_templates.v0.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 72-92
+server/internal/http/starter_loadout_test.go
+  s_691f0e84e5587e::t_67174c702175dd 26
+server/internal/store/store_test.go
+  s_691f0e84e5587e::t_13bea66c02a2ee 619
+shared/assets/item_visuals.v0.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 104-123
+tools/validate_shared.py
+  s_691f0e84e5587e::t_b8be30b9285169 532,892
+client/scripts/class_icon.gd
+  s_691f0e84e5587e::t_e134c8a86cc93a 43-44,73-74,87-88,101-102,155-169
+docs/plans/v122_2026-06-13-ranger-class-foundation.md
+  s_691f0e84e5587e::t_b9ea45de23c0f5 3,140-141,149-156
+  s_691f0e84e5587e::t_397e52f675e1fb 48-51,55,57-61,81-83,95-96,111-112,124-126
+  s_691f0e84e5587e::t_0e9b1d72a97fc5 1-2,4-47,52-54,56,62-80,84-94,97-110,113-123,127-139,142-148
+  s_691f0e84e5587e::t_6f91fda6136cd8 157
+shared/i18n/en.json
+  s_691f0e84e5587e::t_f20ae21d5587b2 27
+shared/rules/items.v0.json
+  s_691f0e84e5587e::t_e18c26f264b661 6
+assets/manifests/assets.v0.json
+  s_691f0e84e5587e::t_b8be30b9285169 69-81
+shared/rules/worlds.v0.json
+  s_691f0e84e5587e::t_6d88a3155b3ea3 698-701
+  s_691f0e84e5587e::t_70501e8bd3db98 744-745
+server/internal/game/game_test.go
+  s_691f0e84e5587e::t_afcb342c8789ce 1551-1553
+  s_691f0e84e5587e::t_b8be30b9285169 204-205,213,217-220
+  s_691f0e84e5587e::t_12f7bfe874e432 1422
+  s_691f0e84e5587e::t_13bea66c02a2ee 1423-1424
+  s_691f0e84e5587e::t_c7e8b3e7fa7562 1532-1534
+docs/as-built/v122_ranger-class-foundation.md
+  s_691f0e84e5587e::t_b9ea45de23c0f5 1-17,22-45
+  s_691f0e84e5587e::t_70501e8bd3db98 18-19
+  s_691f0e84e5587e::t_4fa5d28ba3c3c5 20-21
+tools/bot/scenarios/31_equipment_requirements_and_preview.json
+  s_691f0e84e5587e::t_70501e8bd3db98 22
+server/internal/http/starter_loadout.go
+  s_691f0e84e5587e::t_67174c702175dd 47-51
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_691f0e84e5587e::t_bb60dcaec49f05 1-2,4-22,25-29,32-33
+  s_691f0e84e5587e::t_0119e4d55f5eb0 3,23-24,31
+  s_691f0e84e5587e::t_d76d4fafb026c5 30
+.maintainability/file-size-baseline.tsv
+  s_691f0e84e5587e::t_397e52f675e1fb 6-7,13,16-17,19,21,28,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "03753c7e6e8f0b61ea9eb2076cd59a64af803988",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

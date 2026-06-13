@@ -1,0 +1,35 @@
+server/internal/http/auth_session_test.go
+  s_691f0e84e5587e::t_dff39590b62d91 54
+client/scripts/main.gd
+  s_691f0e84e5587e::t_dff39590b62d91 4205,4215,4226,4237
+server/internal/store/store_test.go
+  s_691f0e84e5587e::t_dff39590b62d91 37
+client/tests/test_client_bot.gd
+  s_691f0e84e5587e::t_dff39590b62d91 843,848-849,856-857
+client/project.godot
+  s_691f0e84e5587e::t_dff39590b62d91 25-26
+client/scripts/client_settings.gd
+  s_691f0e84e5587e::t_dff39590b62d91 7,17,159-161,163-181
+client/scripts/settings_panel.gd
+  s_691f0e84e5587e::t_dff39590b62d91 5,112
+server/internal/store/test_cleanup_test.go
+  s_691f0e84e5587e::t_dff39590b62d91 1-58
+server/internal/http/test_cleanup_test.go
+  s_691f0e84e5587e::t_dff39590b62d91 1-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "11fd4cb791ae53cba1cfd25563bac4d6e764ca48",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+shared/rules/skills.v0.json
+  s_a7077bd5daf373::t_b9ed1c43470ac4 47,104,117,174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4b63fb3d3acbbecdd7d054f3caa8677536c72af6",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -30,10 +30,21 @@ def base_catalogs() -> tuple[dict, dict, dict]:
                 "fixed_effect_ids": ["everburning_wound"],
                 "behavior_hook": "Applies live effect behavior.",
                 "status": "ready",
+            },
+            "stormstring_bow": {
+                "id": "stormstring_bow",
+                "enabled": True,
+                "base_template_id": "cave_bow",
+                "display_name": "Stormstring Bow",
+                "minimum_level": 1,
+                "fixed_stats": {"damage_max": 6},
+                "fixed_effect_ids": ["stormbound_echo"],
+                "behavior_hook": "Applies live stormbound_echo behavior.",
+                "status": "ready",
             }
         }
     }
-    item_templates = {"templates": {"cave_blade": {"item_type": "sword"}}}
+    item_templates = {"templates": {"cave_blade": {"item_type": "sword"}, "cave_bow": {"item_type": "bow"}}}
     unique_effects = {
         "effects": {
             "everburning_wound": {
@@ -41,6 +52,12 @@ def base_catalogs() -> tuple[dict, dict, dict]:
                 "enabled": True,
                 "status": "ready",
                 "compatible_item_types": ["sword"],
+            },
+            "stormbound_echo": {
+                "id": "stormbound_echo",
+                "enabled": True,
+                "status": "ready",
+                "compatible_item_types": ["bow"],
             },
             "shield_only": {
                 "id": "shield_only",

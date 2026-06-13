@@ -89,26 +89,58 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 	}
 }
 
-func TestNamedUniquePayloadBuildsFixedPackage(t *testing.T) {
+func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 	rules := loadRules(t)
-	payload, ok := rules.namedUniquePayload("embercall_blade")
-	if !ok {
-		t.Fatal("namedUniquePayload returned false")
+
+	tests := []struct {
+		uniqueID     string
+		templateID   string
+		displayName  string
+		wantStats    map[string]int
+		requirements map[string]int
+		effectIDs    []string
+	}{
+		{
+			uniqueID:     "embercall_blade",
+			templateID:   "cave_blade",
+			displayName:  "Embercall Blade",
+			wantStats:    map[string]int{"damage_min": 3, "damage_max": 9, "max_hp": 4},
+			requirements: map[string]int{"level": 5, "str": 5},
+			effectIDs:    []string{"everburning_wound"},
+		},
+		{
+			uniqueID:     "stormstring_bow",
+			templateID:   "cave_bow",
+			displayName:  "Stormstring Bow",
+			wantStats:    map[string]int{"damage_min": 2, "damage_max": 6, "attack_speed_percent": 6},
+			requirements: map[string]int{"level": 5, "dex": 5},
+			effectIDs:    []string{"stormbound_echo"},
+		},
 	}
-	if payload.ItemTemplateID != "cave_blade" || payload.DisplayName != "Embercall Blade" || payload.Rarity != "unique" {
-		t.Fatalf("named unique identity = %+v", payload)
-	}
-	wantStats := map[string]int{"damage_min": 3, "damage_max": 9, "max_hp": 4}
-	for stat, want := range wantStats {
-		if payload.Stats[stat] != want {
-			t.Fatalf("stat %s = %d, want %d in %+v", stat, payload.Stats[stat], want, payload.Stats)
-		}
-	}
-	if payload.Requirements["level"] != 5 || payload.Requirements["str"] != 5 {
-		t.Fatalf("requirements = %+v, want level 5 and str 5", payload.Requirements)
-	}
-	if !reflect.DeepEqual(payload.EffectIDs, []string{"everburning_wound"}) {
-		t.Fatalf("effect ids = %+v, want everburning_wound", payload.EffectIDs)
+
+	for _, tc := range tests {
+		t.Run(tc.uniqueID, func(t *testing.T) {
+			payload, ok := rules.namedUniquePayload(tc.uniqueID)
+			if !ok {
+				t.Fatal("namedUniquePayload returned false")
+			}
+			if payload.ItemTemplateID != tc.templateID || payload.DisplayName != tc.displayName || payload.Rarity != "unique" {
+				t.Fatalf("named unique identity = %+v", payload)
+			}
+			for stat, want := range tc.wantStats {
+				if payload.Stats[stat] != want {
+					t.Fatalf("stat %s = %d, want %d in %+v", stat, payload.Stats[stat], want, payload.Stats)
+				}
+			}
+			for stat, want := range tc.requirements {
+				if payload.Requirements[stat] != want {
+					t.Fatalf("requirement %s = %d, want %d in %+v", stat, payload.Requirements[stat], want, payload.Requirements)
+				}
+			}
+			if !reflect.DeepEqual(payload.EffectIDs, tc.effectIDs) {
+				t.Fatalf("effect ids = %+v, want %+v", payload.EffectIDs, tc.effectIDs)
+			}
+		})
 	}
 }
 
@@ -133,12 +165,22 @@ func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
 	if len(itemsA) != len(itemsB) {
 		t.Fatalf("item counts differ %d != %d", len(itemsA), len(itemsB))
 	}
+	if len(itemsA) != enabledUniqueEffectCount(rules)+enabledNamedUniqueCount(rules) {
+		t.Fatalf("item count = %d, want enabled effects + named uniques", len(itemsA))
+	}
+	namedCounts := map[string]int{}
 	for i := range itemsA {
 		a := itemsA[i].rollPayload
 		b := itemsB[i].rollPayload
 		if a.ItemTemplateID != b.ItemTemplateID || a.Rarity != b.Rarity || len(a.EffectIDs) != 1 || len(b.EffectIDs) != 1 || a.EffectIDs[0] != b.EffectIDs[0] {
 			t.Fatalf("payload %d differs: %+v != %+v", i, a, b)
 		}
+		if a.DisplayName == "Embercall Blade" || a.DisplayName == "Stormstring Bow" {
+			namedCounts[a.DisplayName]++
+		}
+	}
+	if namedCounts["Embercall Blade"] != 1 || namedCounts["Stormstring Bow"] != 1 {
+		t.Fatalf("named unique counts = %+v", namedCounts)
 	}
 }
 

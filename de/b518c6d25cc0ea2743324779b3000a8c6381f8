@@ -1,0 +1,29 @@
+shared/golden/shop_appraisals.json
+  s_a7077bd5daf373::t_04477e93a2c6e8 9,39
+  s_a7077bd5daf373::t_aca255d78c8ef5 22
+shared/golden/shop_offers.json
+  s_a7077bd5daf373::t_bef52cae3f0c44 11-12,14-15,24-27,35-38
+  s_a7077bd5daf373::t_13e07838d9c509 13,23,39
+shared/golden/shop_stock_lifecycle.json
+  s_a7077bd5daf373::t_8453e06bbddcdc 42-43
+shared/rules/shops.v0.json
+  s_a7077bd5daf373::t_b0c87178288bbd 7-8,29-32
+shared/golden/shop_pricing.json
+  s_a7077bd5daf373::t_a780af15b07bf2 7,12,22,32,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "deb518c6d25cc0ea2743324779b3000a8c6381f8",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

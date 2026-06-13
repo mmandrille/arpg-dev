@@ -1307,15 +1307,15 @@ func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(sellerStash) != 0 {
-		t.Fatalf("seller stash after accept = %+v, want accepted inventory offer items on character", sellerStash)
+	if !accountStashItemsContainStore(sellerStash, "stash_bidder_item_a_"+suffix) || !accountStashItemsContainStore(sellerStash, "stash_bidder_item_b_"+suffix) {
+		t.Fatalf("seller stash after accept = %+v, want accepted offer items", sellerStash)
 	}
 	sellerItems, err := s.ListCharacterItems(ctx, seller.ID, sellerChar.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !characterItemsContainStore(sellerItems, "stash_bidder_item_a_"+suffix) || !characterItemsContainStore(sellerItems, "stash_bidder_item_b_"+suffix) {
-		t.Fatalf("seller character after accept = %+v, want accepted offer items", sellerItems)
+	if characterItemsContainStore(sellerItems, "stash_bidder_item_a_"+suffix) || characterItemsContainStore(sellerItems, "stash_bidder_item_b_"+suffix) {
+		t.Fatalf("seller character after accept = %+v, want accepted offer items in account stash", sellerItems)
 	}
 	bidderStash, err := s.ListAccountStashItems(ctx, bidder.ID)
 	if err != nil {
@@ -1325,14 +1325,14 @@ func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !characterItemsContainStore(bidderItems, listing.StashItemID) {
-		t.Fatalf("bidder character after accept = %+v, want listed item", bidderItems)
+	if characterItemsContainStore(bidderItems, listing.StashItemID) {
+		t.Fatalf("bidder character after accept = %+v, want listed item in account stash", bidderItems)
 	}
 	if characterItemsContainStore(bidderItems, "stash_bidder_item_a_"+suffix) || characterItemsContainStore(bidderItems, "stash_bidder_item_b_"+suffix) {
 		t.Fatalf("bidder kept accepted offered item after accept: %+v", bidderItems)
 	}
-	if len(bidderStash) != 1 || bidderStash[0].StashItemID != secondBidderOffer.Items[0].StashItemID {
-		t.Fatalf("bidder stash after accept = %+v, want refunded competing bidder offer", bidderStash)
+	if !accountStashItemsContainStore(bidderStash, listing.StashItemID) || !accountStashItemsContainStore(bidderStash, secondBidderOffer.Items[0].StashItemID) {
+		t.Fatalf("bidder stash after accept = %+v, want listed item and refunded competing bidder offer", bidderStash)
 	}
 	otherStash, err := s.ListAccountStashItems(ctx, otherBidder.ID)
 	if err != nil {
@@ -1472,6 +1472,15 @@ func TestMarketOfferCancelRefundsBidderItems(t *testing.T) {
 func characterItemsContainStore(items []store.CharacterItemInstance, itemID string) bool {
 	for _, item := range items {
 		if item.ID == itemID {
+			return true
+		}
+	}
+	return false
+}
+
+func accountStashItemsContainStore(items []store.AccountStashItem, stashItemID string) bool {
+	for _, item := range items {
+		if item.StashItemID == stashItemID {
 			return true
 		}
 	}

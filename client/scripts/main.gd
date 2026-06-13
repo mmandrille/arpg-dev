@@ -4290,6 +4290,10 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			if market_panel != null:
 				market_panel.show_status("Could not accept offer", true)
 			return
+		for item in result.get("items", []):
+			if typeof(item) == TYPE_DICTIONARY:
+				_upsert_stash_item(item as Dictionary)
+		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Offer accepted")
 	else:

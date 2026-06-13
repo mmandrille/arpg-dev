@@ -24,6 +24,7 @@
     { "type": "assert_market_offer_rows", "offer_item_def_id": "cave_blade", "offer_status": "active", "offer_at_least": 1 },
     { "type": "click_market_accept_offer", "offer_index": 0 },
     { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 41, "seller_owned": true, "equals": 0, "timeout_s": 15.0 },
-    { "type": "assert_market_listing_rows", "item_def_id": "cave_mail", "price_gold": 41, "seller_owned": true, "equals": 0 }
+    { "type": "assert_market_listing_rows", "item_def_id": "cave_mail", "price_gold": 41, "seller_owned": true, "equals": 0 },
+    { "type": "assert_stash_item_count", "item_def_id": "cave_blade", "equals": 1 }
   ]
 }

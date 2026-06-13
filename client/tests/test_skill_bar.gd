@@ -99,7 +99,7 @@ func _run() -> void:
 	_assert_eq("heal cast signal skill", str(emitted[1]), "heal")
 	bar.set_skill_id("magic_bolt")
 
-	bar.set_skill_cooldowns([{"skill_id": "magic_bolt", "remaining_ticks": 40, "total_ticks": 40}])
+	bar.start_skill_cooldown("magic_bolt", 40, 40)
 	state = bar.get_debug_state()
 	_assert_false("cooldown disables slot", bool(state.get("enabled", true)))
 	_assert_true("cooldown greys skill", bool(state.get("greyed", false)))
@@ -125,6 +125,11 @@ func _run() -> void:
 	state = bar.get_debug_state()
 	_assert_true("slot re-enables without cooldown", bool(state.get("enabled", false)))
 	_assert_false("cooldown visual hides without cooldown", bool(state.get("cooldown_visible", true)))
+
+	bar.set_skill_cooldowns([{"skill_id": "magic_bolt", "remaining_ticks": 20, "total_ticks": 40}])
+	state = bar.get_debug_state()
+	_assert_eq("stale cooldown update does not start idle visual", int(state.get("remaining_ticks", -1)), 0)
+	_assert_false("stale cooldown update keeps idle visual hidden", bool(state.get("cooldown_visible", true)))
 
 	bar.queue_free()
 	print("[gdtest] PASS: test_skill_bar (%d passed, %d failed)" % [_pass_count, _fail_count])

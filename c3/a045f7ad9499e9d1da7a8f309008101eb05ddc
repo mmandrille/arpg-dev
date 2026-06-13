@@ -1,0 +1,34 @@
+client/tests/test_coop_client.gd
+  s_eb8fc978f46112::t_933b868fee6765 900
+  s_eb8fc978f46112::t_b32f2b03abfbd2 893
+  s_eb8fc978f46112::t_faf2b6b63bc703 891-892,894-899
+  s_eb8fc978f46112::t_07f53e3efa4788 67,874-890,901-912
+client/scripts/stash_panel.gd
+  s_eb8fc978f46112::t_4d5e9f7bc92e31 25,75-86,96,99-100
+client/scripts/inventory_panel.gd
+  s_eb8fc978f46112::t_4d5e9f7bc92e31 14,126,134-137,799-803,818-821
+client/scripts/main.gd
+  s_eb8fc978f46112::t_6259eaed5fa3e5 1355-1367,1369,1372,1374-1380
+  s_eb8fc978f46112::t_08f0c3902cc837 2603,4237,4241,5559-5564
+  s_eb8fc978f46112::t_f354ef2c335fe4 1371,5548
+  s_eb8fc978f46112::t_686d1d8d14f531 2838,2853-2854,2859-2876,5908-5909,5915
+client/tests/test_stash_panel.gd
+  s_eb8fc978f46112::t_23ca0dfb488398 111-120,129-133,173-181
+  s_eb8fc978f46112::t_f474df239bafe0 154-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c3a045f7ad9499e9d1da7a8f309008101eb05ddc",
+  "prompts": {},
+  "sessions": {
+    "s_eb8fc978f46112": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe09-ce4f-78c2-b989-7cea8a0e00af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -11,7 +11,7 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["id", "enabled", "base_template_id", "display_name", "minimum_level", "behavior_hook", "status"],
+        "required": ["id", "enabled", "base_template_id", "display_name", "minimum_level", "fixed_stats", "fixed_effect_ids", "behavior_hook", "status"],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
@@ -19,6 +19,15 @@
           "base_template_id": { "type": "string", "minLength": 1 },
           "display_name": { "type": "string", "minLength": 1 },
           "minimum_level": { "type": "integer", "minimum": 1 },
+          "fixed_stats": {
+            "type": "object",
+            "additionalProperties": { "type": "integer" }
+          },
+          "fixed_effect_ids": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+            "uniqueItems": true
+          },
           "behavior_hook": { "type": "string", "minLength": 1 },
           "status": { "type": "string", "enum": ["disabled_seed", "ready"] }
         }

@@ -7,7 +7,13 @@
       "base_template_id": "cave_blade",
       "display_name": "Embercall Blade",
       "minimum_level": 5,
-      "behavior_hook": "Live unique drops attach enabled unique effects through rolled equipment effect_ids; this named concept remains metadata until fixed unique stat packages land.",
+      "fixed_stats": {
+        "damage_min": 3,
+        "damage_max": 9,
+        "max_hp": 4
+      },
+      "fixed_effect_ids": ["everburning_wound"],
+      "behavior_hook": "Named fixed unique package applies the live everburning_wound effect through rolled equipment effect_ids.",
       "status": "ready"
     }
   }

@@ -1,6 +1,10 @@
 package game
 
-import "testing"
+import (
+	"reflect"
+	"strings"
+	"testing"
+)
 
 func TestUniqueTestChestGrantsEveryEnabledEffectOnce(t *testing.T) {
 	rules := loadRules(t)
@@ -22,11 +26,13 @@ func TestUniqueTestChestGrantsEveryEnabledEffectOnce(t *testing.T) {
 		t.Fatalf("chest state = %s, want open", chest.state)
 	}
 	ev := findEvent(open.Events, "interactable_activated")
-	if ev == nil || ev.Service != uniqueTestChestService || ev.Amount == nil || *ev.Amount != enabledUniqueEffectCount(rules) {
+	wantAmount := enabledUniqueEffectCount(rules) + enabledNamedUniqueCount(rules)
+	if ev == nil || ev.Service != uniqueTestChestService || ev.Amount == nil || *ev.Amount != wantAmount {
 		t.Fatalf("unique chest event = %+v", ev)
 	}
 
 	gotEffects := map[string]int{}
+	gotNamed := false
 	for _, item := range sim.inventory {
 		if item.rollPayload == nil || item.rollPayload.Rarity != "unique" {
 			t.Fatalf("granted item missing unique payload: %+v", item)
@@ -34,12 +40,17 @@ func TestUniqueTestChestGrantsEveryEnabledEffectOnce(t *testing.T) {
 		if len(item.rollPayload.EffectIDs) != 1 {
 			t.Fatalf("granted item effects = %+v, want exactly one", item.rollPayload.EffectIDs)
 		}
-		effectID := item.rollPayload.EffectIDs[0]
-		gotEffects[effectID]++
-		effect := rules.UniqueEffects[effectID]
-		template := rules.ItemTemplates[item.rollPayload.ItemTemplateID]
-		if !uniqueChestEffectCompatible(effect, template.ItemType) {
-			t.Fatalf("effect %s is not compatible with template %s type %s", effectID, item.rollPayload.ItemTemplateID, template.ItemType)
+		if strings.HasPrefix(item.rollPayload.DisplayName, "Unique ") {
+			effectID := item.rollPayload.EffectIDs[0]
+			gotEffects[effectID]++
+			effect := rules.UniqueEffects[effectID]
+			template := rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+			if !uniqueChestEffectCompatible(effect, template.ItemType) {
+				t.Fatalf("effect %s is not compatible with template %s type %s", effectID, item.rollPayload.ItemTemplateID, template.ItemType)
+			}
+		}
+		if item.rollPayload.DisplayName == "Embercall Blade" {
+			gotNamed = true
 		}
 	}
 	for _, effectID := range sortedStringKeys(rules.UniqueEffects) {
@@ -50,6 +61,32 @@ func TestUniqueTestChestGrantsEveryEnabledEffectOnce(t *testing.T) {
 		if gotEffects[effectID] != 1 {
 			t.Fatalf("effect %s count = %d, want 1; inventory=%+v", effectID, gotEffects[effectID], sim.inventory)
 		}
+	}
+	if !gotNamed {
+		t.Fatalf("unique chest did not grant Embercall Blade: %+v", sim.inventory)
+	}
+}
+
+func TestNamedUniquePayloadBuildsFixedPackage(t *testing.T) {
+	rules := loadRules(t)
+	payload, ok := rules.namedUniquePayload("embercall_blade")
+	if !ok {
+		t.Fatal("namedUniquePayload returned false")
+	}
+	if payload.ItemTemplateID != "cave_blade" || payload.DisplayName != "Embercall Blade" || payload.Rarity != "unique" {
+		t.Fatalf("named unique identity = %+v", payload)
+	}
+	wantStats := map[string]int{"damage_min": 3, "damage_max": 9, "max_hp": 4}
+	for stat, want := range wantStats {
+		if payload.Stats[stat] != want {
+			t.Fatalf("stat %s = %d, want %d in %+v", stat, payload.Stats[stat], want, payload.Stats)
+		}
+	}
+	if payload.Requirements["level"] != 5 || payload.Requirements["str"] != 5 {
+		t.Fatalf("requirements = %+v, want level 5 and str 5", payload.Requirements)
+	}
+	if !reflect.DeepEqual(payload.EffectIDs, []string{"everburning_wound"}) {
+		t.Fatalf("effect ids = %+v, want everburning_wound", payload.EffectIDs)
 	}
 }
 
@@ -117,6 +154,16 @@ func enabledUniqueEffectCount(rules *Rules) int {
 	count := 0
 	for _, effect := range rules.UniqueEffects {
 		if effect.Enabled && effect.Status == "ready" {
+			count++
+		}
+	}
+	return count
+}
+
+func enabledNamedUniqueCount(rules *Rules) int {
+	count := 0
+	for _, unique := range rules.UniqueItems {
+		if unique.Enabled && unique.Status == "ready" {
 			count++
 		}
 	}

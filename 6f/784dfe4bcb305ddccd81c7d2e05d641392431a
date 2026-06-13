@@ -1,0 +1,21 @@
+docs/as-built/v121_inventory-market-blacksmith-flow.md
+  s_691f0e84e5587e::t_3c68141a37342b 1-33
+PROGRESS.md
+  s_691f0e84e5587e::t_d6473a4261e20e 306,439-442
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6f784dfe4bcb305ddccd81c7d2e05d641392431a",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
@@ -839,6 +840,28 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 	}
 	sim.inventory = append(sim.inventory, equipped, sellable)
 	sim.equipped[mainHandSlot] = equipped.instanceID
+	bladePayload, err := json.Marshal(ItemRollPayload{
+		ItemTemplateID: "cave_blade",
+		DisplayName:    "Magic Cave Blade",
+		Rarity:         "magic",
+		Stats:          map[string]int{"damage_min": 3, "damage_max": 6},
+		Requirements:   map[string]int{"level": 1},
+		EffectIDs:      []string{},
+	})
+	if err != nil {
+		t.Fatalf("marshal blade payload: %v", err)
+	}
+	sim.LoadShopStock([]PersistedShopStockItem{{
+		ShopID:         "town_vendor",
+		RefreshKey:     sim.shopRefreshKey(),
+		OfferIndex:     0,
+		OfferID:        "generated:test:000",
+		SourceDepth:    2,
+		ItemTemplateID: "cave_blade",
+		RolledPayload:  bladePayload,
+		BuyPrice:       215,
+		Available:      true,
+	}})
 	sim.savePlayer(sim.defaultPlayer())
 
 	open := sim.Tick([]Input{{

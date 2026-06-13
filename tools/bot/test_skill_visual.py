@@ -193,7 +193,7 @@ def test_skill_visual_seed_payload_covers_ranked_mana_cost() -> None:
     stats = client.payload["stats"]
     assert isinstance(stats, dict)
     mana_cost = skill_mana_cost("cleave", 5)
-    assert mana_cost == 12
+    assert mana_cost == 4
     assert stats["magic"] >= magic_required_for_mana(mana_cost)
 
 

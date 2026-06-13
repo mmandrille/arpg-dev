@@ -525,9 +525,9 @@ func (r *runner) persistTick(res game.TickResult) {
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
-				if _, err := r.store.AddCharacterWaypoint(ctx, r.sess.CharacterID, c.Level); err != nil {
+				if _, err := r.store.AddAccountWaypoint(ctx, r.sess.AccountID, c.Level); err != nil {
 					r.metrics.PersistenceErrors.Inc()
-					r.log.Error("persist character waypoint", "error", err)
+					r.log.Error("persist account waypoint", "error", err)
 				}
 			}
 		case game.OpShopStockReplace:

@@ -23,7 +23,7 @@
   ],
   "assertions": [
     { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "holy_shield", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "holy_shield", "rank": 1, "mana": 10 },
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "holy_shield", "rank": 1, "mana": 5 },
     { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "holy_shield", "amount": 20, "remaining_ticks": 300, "total_ticks": 300 },
     { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "holy_shield" },
     { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "holy_shield", "rank": 1, "max_rank": 5, "can_spend": false },

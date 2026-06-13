@@ -2218,11 +2218,16 @@ def cross_checks(report: Report) -> None:
         if not failed_pricing:
             report.ok("shop_pricing golden matches v41 formula")
 
-        def roll_treasure_class(class_id: str, rng: ShopRNG) -> list[dict]:
+        def roll_treasure_class(class_id: str, rng: ShopRNG, drop_rate_override: int | None = None) -> list[dict]:
             out = []
             for attempt in treasure_class_defs[class_id].get("attempts", []):
-                total = int(attempt.get("success_weight", 0)) + int(attempt.get("no_drop_weight", 0))
-                if total <= 0 or rng.intn(total) >= int(attempt.get("success_weight", 0)):
+                success_weight = int(attempt.get("success_weight", 0))
+                no_drop_weight = int(attempt.get("no_drop_weight", 0))
+                if drop_rate_override is not None and attempt.get("attempt_id") == "primary":
+                    success_weight = drop_rate_override
+                    no_drop_weight = 100 - drop_rate_override
+                total = success_weight + no_drop_weight
+                if total <= 0 or rng.intn(total) >= success_weight:
                     continue
                 total_entries = sum(int(entry["weight"]) for entry in attempt.get("entries", []))
                 if total_entries <= 0:
@@ -2297,7 +2302,7 @@ def cross_checks(report: Report) -> None:
             attempts = 0
             while len(out) < int(generated["offer_count"]) and attempts < int(generated["max_roll_attempts"]):
                 attempts += 1
-                for drop in roll_treasure_class(class_id, rng):
+                for drop in roll_treasure_class(class_id, rng, expected_base_drop_rate):
                     template_id = drop.get("item_template_id")
                     if not template_id:
                         continue

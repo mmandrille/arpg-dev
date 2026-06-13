@@ -523,13 +523,13 @@
     "health_regen_per_second": {
       "type": "linear",
       "base": 0,
-      "per_vit": 0.02,
+      "per_vit": 0.03,
       "min": 0
     },
     "mana_regen_per_second": {
       "type": "linear",
       "base": 0,
-      "per_magic": 0.02,
+      "per_magic": 0.04,
       "min": 0
     }
   }

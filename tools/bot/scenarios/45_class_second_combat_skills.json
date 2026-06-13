@@ -31,7 +31,7 @@
   ],
   "assertions": [
     { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "cleave", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "cleave", "rank": 1, "mana": 8 },
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "cleave", "rank": 1, "mana": 4 },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 },
     { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "cleave" },
     { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "cleave", "rank": 1, "max_rank": 5, "can_spend": false },

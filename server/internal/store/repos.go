@@ -812,16 +812,16 @@ func (s *Store) RemoveCharacterItem(ctx context.Context, accountID, characterID,
 	})
 }
 
-func (s *Store) ListCharacterWaypoints(ctx context.Context, characterID string) ([]CharacterWaypoint, error) {
+func (s *Store) ListAccountWaypoints(ctx context.Context, accountID, characterID string) ([]CharacterWaypoint, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT character_id, level, discovered_at
-		 FROM character_waypoints
-		 WHERE character_id = $1
+		`SELECT $2::text AS character_id, level, discovered_at
+		 FROM account_waypoints
+		 WHERE account_id = $1
 		 ORDER BY level DESC`,
-		characterID,
+		accountID, characterID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("store: list character waypoints: %w", err)
+		return nil, fmt.Errorf("store: list account waypoints: %w", err)
 	}
 	defer rows.Close()
 
@@ -829,22 +829,22 @@ func (s *Store) ListCharacterWaypoints(ctx context.Context, characterID string) 
 	for rows.Next() {
 		var wp CharacterWaypoint
 		if err := rows.Scan(&wp.CharacterID, &wp.Level, &wp.DiscoveredAt); err != nil {
-			return nil, fmt.Errorf("store: scan character waypoint: %w", err)
+			return nil, fmt.Errorf("store: scan account waypoint: %w", err)
 		}
 		out = append(out, wp)
 	}
 	return out, rows.Err()
 }
 
-func (s *Store) AddCharacterWaypoint(ctx context.Context, characterID string, level int) (bool, error) {
+func (s *Store) AddAccountWaypoint(ctx context.Context, accountID string, level int) (bool, error) {
 	tag, err := s.pool.Exec(ctx,
-		`INSERT INTO character_waypoints (character_id, level)
+		`INSERT INTO account_waypoints (account_id, level)
 		 VALUES ($1, $2)
-		 ON CONFLICT (character_id, level) DO NOTHING`,
-		characterID, level,
+		 ON CONFLICT (account_id, level) DO NOTHING`,
+		accountID, level,
 	)
 	if err != nil {
-		return false, fmt.Errorf("store: add character waypoint: %w", err)
+		return false, fmt.Errorf("store: add account waypoint: %w", err)
 	}
 	return tag.RowsAffected() > 0, nil
 }

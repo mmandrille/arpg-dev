@@ -567,14 +567,14 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "main_hand", true); err != nil {
 		t.Fatalf("set equipped: %v", err)
 	}
-	insertedWaypoint, err := s.AddCharacterWaypoint(ctx, char.ID, -1)
+	insertedWaypoint, err := s.AddAccountWaypoint(ctx, acct.ID, -1)
 	if err != nil {
 		t.Fatalf("add waypoint: %v", err)
 	}
 	if !insertedWaypoint {
 		t.Fatalf("first waypoint insert returned false")
 	}
-	insertedWaypoint, err = s.AddCharacterWaypoint(ctx, char.ID, -1)
+	insertedWaypoint, err = s.AddAccountWaypoint(ctx, acct.ID, -1)
 	if err != nil {
 		t.Fatalf("re-add waypoint: %v", err)
 	}
@@ -609,12 +609,23 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("rolled stats not preserved: %+v raw=%s", payload, string(items[0].RolledStats))
 	}
 
-	waypoints, err := s.ListCharacterWaypoints(ctx, char.ID)
+	waypoints, err := s.ListAccountWaypoints(ctx, acct.ID, char.ID)
 	if err != nil {
 		t.Fatalf("list waypoints: %v", err)
 	}
 	if len(waypoints) != 1 || waypoints[0].Level != -1 {
 		t.Fatalf("waypoints = %+v, want level -1", waypoints)
+	}
+	altChar, err := s.CreateCharacter(ctx, "char_store_secondary", acct.ID, "Secondary", "sorcerer")
+	if err != nil {
+		t.Fatalf("create secondary character: %v", err)
+	}
+	altWaypoints, err := s.ListAccountWaypoints(ctx, acct.ID, altChar.ID)
+	if err != nil {
+		t.Fatalf("list secondary waypoints: %v", err)
+	}
+	if len(altWaypoints) != 1 || altWaypoints[0].CharacterID != altChar.ID || altWaypoints[0].Level != -1 {
+		t.Fatalf("secondary account waypoints = %+v, want level -1 for %s", altWaypoints, altChar.ID)
 	}
 
 	hotbar, err := s.ListCharacterHotbar(ctx, acct.ID, char.ID)
@@ -710,7 +721,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
 		t.Fatalf("mutate live item: %v", err)
 	}
-	if _, err := s.AddCharacterWaypoint(ctx, char.ID, -2); err != nil {
+	if _, err := s.AddAccountWaypoint(ctx, acct.ID, -2); err != nil {
 		t.Fatalf("mutate live waypoints: %v", err)
 	}
 	mutatedProgression := loadedProgression

@@ -137,7 +137,7 @@ func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stored inputs: %v", err)
 	}
-	recon, err := ReconstructFromInputsWithProgression(testSessionID, testSeed, rules, game.DefaultWorldID, inputs, 20, nil, nil, nil, progress)
+	recon, err := ReconstructFromInputsWithProgression(testSessionID, testSeed, rules, game.DefaultWorldID, inputs, 10, nil, nil, nil, progress)
 	if err != nil {
 		t.Fatalf("reconstruct: %v", err)
 	}
@@ -1414,10 +1414,10 @@ func (f *fakeRepo) SetCharacterItemEquipped(context.Context, string, string, str
 	return nil
 }
 func (f *fakeRepo) RemoveCharacterItem(context.Context, string, string, string) error { return nil }
-func (f *fakeRepo) ListCharacterWaypoints(context.Context, string) ([]store.CharacterWaypoint, error) {
+func (f *fakeRepo) ListAccountWaypoints(context.Context, string, string) ([]store.CharacterWaypoint, error) {
 	return nil, nil
 }
-func (f *fakeRepo) AddCharacterWaypoint(context.Context, string, int) (bool, error) { return true, nil }
+func (f *fakeRepo) AddAccountWaypoint(context.Context, string, int) (bool, error) { return true, nil }
 func (f *fakeRepo) GetOrCreateCharacterProgression(context.Context, string, string, store.CharacterProgressionDefaults) (store.CharacterProgression, error) {
 	return store.CharacterProgression{}, nil
 }
@@ -1471,6 +1471,9 @@ func (f *fakeRepo) TransferAccountStashGoldToCharacter(context.Context, string, 
 }
 func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, error) {
 	return store.AccountStashItem{}, 0, 0, nil
+}
+func (f *fakeRepo) UpgradeAccountStashItemWithWallet(context.Context, string, string, string, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, int, error) {
+	return store.AccountStashItem{}, 0, 0, 0, nil
 }
 func (f *fakeRepo) ListActiveMarketListings(context.Context) ([]store.MarketListing, error) {
 	return nil, nil

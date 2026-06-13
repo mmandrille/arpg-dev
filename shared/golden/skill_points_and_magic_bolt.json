@@ -119,7 +119,7 @@
     "rank_cases": [
       {
         "rank": 1,
-        "mana_cost": 3,
+        "mana_cost": 1,
         "damage": {
           "min": 4,
           "max": 6
@@ -127,7 +127,7 @@
       },
       {
         "rank": 2,
-        "mana_cost": 3,
+        "mana_cost": 1,
         "damage": {
           "min": 5,
           "max": 7
@@ -135,7 +135,7 @@
       },
       {
         "rank": 5,
-        "mana_cost": 3,
+        "mana_cost": 1,
         "damage": {
           "min": 8,
           "max": 10

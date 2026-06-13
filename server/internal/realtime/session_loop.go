@@ -814,9 +814,9 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
-				if _, err := l.hub.store.AddCharacterWaypoint(ctx, changeMember.CharacterID, c.Level); err != nil {
+				if _, err := l.hub.store.AddAccountWaypoint(ctx, changeMember.AccountID, c.Level); err != nil {
 					l.hub.metrics.PersistenceErrors.Inc()
-					l.log.Error("persist character waypoint", "error", err)
+					l.log.Error("persist account waypoint", "error", err)
 				}
 			}
 		case game.OpShopStockReplace:

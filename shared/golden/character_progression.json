@@ -42,8 +42,8 @@
           "movement_speed": 0.497,
           "max_hp": 10,
           "max_mana": 10,
-          "health_regen_per_second": 0.1,
-          "mana_regen_per_second": 0.1
+          "health_regen_per_second": 0.15,
+          "mana_regen_per_second": 0.2
         }
       }
     },
@@ -81,8 +81,8 @@
           "movement_speed": 0.497,
           "max_hp": 10,
           "max_mana": 10,
-          "health_regen_per_second": 0.1,
-          "mana_regen_per_second": 0.1
+          "health_regen_per_second": 0.15,
+          "mana_regen_per_second": 0.2
         }
       }
     },
@@ -120,8 +120,8 @@
           "movement_speed": 0.497,
           "max_hp": 10,
           "max_mana": 10,
-          "health_regen_per_second": 0.1,
-          "mana_regen_per_second": 0.1
+          "health_regen_per_second": 0.15,
+          "mana_regen_per_second": 0.2
         }
       }
     },
@@ -159,8 +159,8 @@
           "movement_speed": 0.497,
           "max_hp": 10,
           "max_mana": 10,
-          "health_regen_per_second": 0.1,
-          "mana_regen_per_second": 0.1
+          "health_regen_per_second": 0.15,
+          "mana_regen_per_second": 0.2
         }
       }
     },
@@ -200,8 +200,8 @@
           "movement_speed": 0.497,
           "max_hp": 11,
           "max_mana": 10,
-          "health_regen_per_second": 0.12,
-          "mana_regen_per_second": 0.1
+          "health_regen_per_second": 0.18,
+          "mana_regen_per_second": 0.2
         }
       }
     },
@@ -239,8 +239,8 @@
           "movement_speed": 0.497,
           "max_hp": 10,
           "max_mana": 10,
-          "health_regen_per_second": 0.1,
-          "mana_regen_per_second": 0.1
+          "health_regen_per_second": 0.15,
+          "mana_regen_per_second": 0.2
         }
       }
     },
@@ -278,8 +278,8 @@
           "movement_speed": 0.63,
           "max_hp": 10,
           "max_mana": 10,
-          "health_regen_per_second": 0.1,
-          "mana_regen_per_second": 0.1
+          "health_regen_per_second": 0.15,
+          "mana_regen_per_second": 0.2
         }
       }
     }

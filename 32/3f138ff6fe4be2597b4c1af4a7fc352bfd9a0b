@@ -1,0 +1,29 @@
+client/scripts/blacksmith_panel.gd
+  s_a7077bd5daf373::t_c185ccf033c820 369,375-376,378
+  s_a7077bd5daf373::t_d60c0435bc4b63 137-138
+  s_a7077bd5daf373::t_1259884ca0b24d 354,362,377,379-380,391-394,396-397,399-403,408-446
+  s_a7077bd5daf373::t_d14bbeb215b5a9 371,373,381-390
+  s_a7077bd5daf373::t_d23a0a2c8955d4 348-350
+  s_a7077bd5daf373::t_8f02b4b2f1f347 374
+  s_a7077bd5daf373::t_2f94e5a5ba7b59 395,398
+  s_a7077bd5daf373::t_de84b23c94e869 404-407
+client/tests/test_shop_panel.gd
+  s_a7077bd5daf373::t_dce314a79d68fc 377-385
+  s_a7077bd5daf373::t_d3b537248cd317 366
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "323f138ff6fe4be2597b4c1af4a7fc352bfd9a0b",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -6,11 +6,11 @@ signal allocate_skill_point_requested(skill_id: String)
 const SkillIconScript := preload("res://scripts/skill_icon.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 
-const SKILL_BLOCK_SIZE := Vector2(64, 64)
-const SKILL_ICON_SIZE := Vector2(48, 48)
-const SKILL_TREE_ORIGIN := Vector2(18, 54)
-const SKILL_TREE_SPACING := Vector2(74, 98)
-const SKILL_TREE_WIDTH := 304.0
+const SKILL_BLOCK_SIZE := Vector2(83, 83)
+const SKILL_ICON_SIZE := Vector2(62, 62)
+const SKILL_TREE_ORIGIN := Vector2(23, 70)
+const SKILL_TREE_SPACING := Vector2(96, 127)
+const SKILL_TREE_WIDTH := 395.0
 const SKILL_TOOLTIP_SIZE := Vector2(208, 178)
 const SKILL_TOOLTIP_GAP := 8.0
 
@@ -176,9 +176,9 @@ func _sync_viewport_size() -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = DraggableWindowScript.new()
-	_panel.custom_minimum_size = Vector2(330, 500)
+	_panel.custom_minimum_size = Vector2(429, 650)
 	_panel.position = Vector2(362, 118)
-	_panel.configure("Skills", Vector2(304, 436))
+	_panel.configure("Skills", Vector2(395, 567))
 	_panel.set_layout_key("skills")
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -187,28 +187,28 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 10)
-	root.custom_minimum_size = Vector2(304, 436)
+	root.custom_minimum_size = Vector2(395, 567)
 	_panel.set_content(root)
 
 	var tree := Control.new()
-	tree.custom_minimum_size = Vector2(304, 356)
+	tree.custom_minimum_size = Vector2(395, 463)
 	tree.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(tree)
 
 	var backdrop := ColorRect.new()
 	backdrop.color = Color("#151617")
-	backdrop.custom_minimum_size = Vector2(304, 356)
+	backdrop.custom_minimum_size = Vector2(395, 463)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(backdrop)
 
 	var line := ColorRect.new()
 	line.color = Color(0.05, 0.045, 0.04, 0.95)
-	line.position = Vector2(151, 126)
-	line.custom_minimum_size = Vector2(4, 126)
+	line.position = Vector2(196, 164)
+	line.custom_minimum_size = Vector2(5, 164)
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(line)
-	_add_disabled_slot(tree, Vector2(111, 252))
-	_add_disabled_slot(tree, Vector2(176, 252))
+	_add_disabled_slot(tree, Vector2(144, 328))
+	_add_disabled_slot(tree, Vector2(229, 328))
 
 	for raw_skill_id in _tree_skill_ids():
 		var skill_id := str(raw_skill_id)
@@ -227,21 +227,21 @@ func _build() -> void:
 		_skill_blocks[skill_id] = skill_block
 
 		var icon = SkillIconScript.new()
-		icon.position = Vector2(8, 8)
+		icon.position = Vector2(10, 10)
 		icon.size = SKILL_ICON_SIZE
 		icon.configure(skill_id, _skill_presentation(skill_id))
 		skill_block.add_child(icon)
 		_skill_icons[skill_id] = icon
 
 		var assigned_key_label := _badge_label("")
-		assigned_key_label.position = Vector2(39, 45)
-		assigned_key_label.custom_minimum_size = Vector2(25, 19)
+		assigned_key_label.position = Vector2(53, 64)
+		assigned_key_label.custom_minimum_size = Vector2(30, 19)
 		skill_block.add_child(assigned_key_label)
 		_assigned_key_labels[skill_id] = assigned_key_label
 
 		var rank_label := _badge_label("")
-		rank_label.position = Vector2(0, 45)
-		rank_label.custom_minimum_size = Vector2(36, 19)
+		rank_label.position = Vector2(0, 64)
+		rank_label.custom_minimum_size = Vector2(45, 19)
 		skill_block.add_child(rank_label)
 		_skill_rank_labels[skill_id] = rank_label
 
@@ -695,7 +695,7 @@ func _stat_label(stat: String) -> String:
 func _add_disabled_slot(parent: Control, position: Vector2) -> void:
 	var slot := PanelContainer.new()
 	slot.position = position
-	slot.custom_minimum_size = Vector2(40, 40)
+	slot.custom_minimum_size = Vector2(52, 52)
 	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	slot.add_theme_stylebox_override("panel", _disabled_slot_style())
 	parent.add_child(slot)

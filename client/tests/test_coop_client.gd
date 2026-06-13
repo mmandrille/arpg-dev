@@ -482,6 +482,11 @@ func _test_character_stats_probability_values_use_percentages() -> void:
 		},
 	})
 	var state: Dictionary = panel.get_debug_state()
+	_assert_true("derived stats closed by default", not bool(state.get("derived_open", true)))
+	_assert_eq("derived labels hidden by default", (state.get("derived_labels", {}) as Dictionary).size(), 0)
+	panel.bot_toggle_derived()
+	state = panel.get_debug_state()
+	_assert_true("derived stats toggle opens", bool(state.get("derived_open", false)))
 	var labels: Dictionary = state.get("derived_labels", {})
 	_assert_eq("hit chance displays percent", str(labels.get("hit_chance", "")), "Hit chance  50%")
 	_assert_eq("crit chance displays percent", str(labels.get("crit_chance", "")), "Crit chance  6%")

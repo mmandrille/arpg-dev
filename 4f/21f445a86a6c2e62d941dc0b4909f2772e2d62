@@ -1,0 +1,78 @@
+docs/specs/v118_spec-blacksmith-upgrade-ui.md
+  s_de4a263eac247b::t_01116a3e3dc08c 3
+  s_de4a263eac247b::t_ceeb255be5acf4 1-2,4-74
+client/scripts/bot_controller.gd
+  s_de4a263eac247b::t_552c1c4e05d5dc 175-176,337-345,684-689
+shared/rules/interactables.v0.schema.json
+  s_de4a263eac247b::t_2b2d48bbfb277d 23
+server/internal/store/repos.go
+  s_de4a263eac247b::t_2eaa3f85a2075d 1590,1592,1596,1601,1603,1607,1628,1635-1639
+PROGRESS.md
+  s_de4a263eac247b::t_cde1af0cc9e77f 15,18,139,297,424-427
+  s_de4a263eac247b::t_54188c3f46852f 393
+server/internal/game/sim.go
+  s_de4a263eac247b::t_29efa8749af67c 2611-2614,2646-2658
+server/internal/replay/replay_test.go
+  s_de4a263eac247b::t_6b5a18a601cfc9 688,705,766
+.maintainability/file-size-baseline.tsv
+  s_de4a263eac247b::t_0417365ca8458e 4,7,20,29
+tools/bot/test_skill_demo.py
+  s_de4a263eac247b::t_41d0a583b1608f 40
+  s_de4a263eac247b::t_c6e549765780a3 41
+docs/plans/v118_2026-06-13-blacksmith-upgrade-ui.md
+  s_de4a263eac247b::t_0417365ca8458e 40,43,47-50,122
+  s_de4a263eac247b::t_d950ca724beec3 1-2,4-39,41-42,44-46,51-63,67-79,84-95,98-110,114-121,127-131
+  s_de4a263eac247b::t_9370d068d644c4 126
+  s_de4a263eac247b::t_01116a3e3dc08c 3,64-66,80-83,96-97,111-113,123-125
+client/scripts/blacksmith_panel.gd
+  s_de4a263eac247b::t_8cf23f992a943b 1-223,228-280
+  s_de4a263eac247b::t_290310dc43f19c 224-227
+tools/validate_shared.py
+  s_de4a263eac247b::t_2b2d48bbfb277d 2800
+client/scripts/net_client.gd
+  s_de4a263eac247b::t_a94c9be25e7c2b 321-329
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_de4a263eac247b::t_50e1c50f42a23a 1-37
+server/internal/store/store_test.go
+  s_de4a263eac247b::t_6ebb19b07c01f9 1133-1176
+docs/as-built/v118_blacksmith-upgrade-ui.md
+  s_de4a263eac247b::t_01116a3e3dc08c 1-18,21-29,31-42
+  s_de4a263eac247b::t_0417365ca8458e 19-20,30
+client/scripts/main.gd
+  s_de4a263eac247b::t_43f1288ac0b570 5389-5413
+  s_de4a263eac247b::t_4063e20b0194c3 4649-4650,5452,5821,5831
+  s_de4a263eac247b::t_6fe69133005814 2631,4235-4274
+  s_de4a263eac247b::t_0a8f29b7d59179 6130-6135
+  s_de4a263eac247b::t_8891c26c8896da 26,234,410,931-932,1005,1237-1239,1524-1531,3152-3154
+  s_de4a263eac247b::t_80b294053dfd37 2193,2203-2204,4367-4370,4389-4390
+server/internal/game/rules.go
+  s_de4a263eac247b::t_a94c9be25e7c2b 1637
+client/scripts/bot_scenario_runner.gd
+  s_de4a263eac247b::t_3d521362de04c1 2021-2022,2279-2281,2316-2318
+  s_de4a263eac247b::t_90d58d0d09d29a 16,44,57,214-217,453-458
+  s_de4a263eac247b::t_42d844a7ede077 1409-1445,1466-1476
+client/scripts/blacksmith_panel.gd.uid
+  s_de4a263eac247b::t_ed340149280673 1
+shared/rules/worlds.v0.json
+  s_de4a263eac247b::t_a94c9be25e7c2b 612-616,691-694
+client/tests/test_skill_bar.gd
+  s_de4a263eac247b::t_d8e164a026062c 54
+shared/rules/interactables.v0.json
+  s_de4a263eac247b::t_a94c9be25e7c2b 50-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4f21f445a86a6c2e62d941dc0b4909f2772e2d62",
+  "prompts": {},
+  "sessions": {
+    "s_de4a263eac247b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebeff-879c-75d0-a596-174e94193786",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

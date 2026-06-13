@@ -1,0 +1,21 @@
+shared/rules/item_templates.v0.json
+  s_a7077bd5daf373::t_bd3dec52c0b165 311-312,327-328
+server/internal/game/game_test.go
+  s_a7077bd5daf373::t_e56dcc50dcbed7 3267-3280
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ef646a022cd9968991b4228853aa760fe8824a82",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -18,7 +18,7 @@
       "attack_mode": "melee",
       "attack_speed": 1.0,
       "reach": 1.5,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": {
         "damage_min": 2,
         "damage_max": 4
@@ -41,7 +41,7 @@
       "attack_mode": "melee",
       "attack_speed": 1.0,
       "reach": 1.5,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "damage_min": 3, "damage_max": 5 },
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
@@ -60,7 +60,7 @@
       "attack_mode": "melee",
       "attack_speed": 1.05,
       "reach": 1.45,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "damage_min": 2, "damage_max": 4 },
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
@@ -81,7 +81,7 @@
       "attack_speed": 1.1,
       "reach": 13.0,
       "projectile_speed": 55.0,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "dex": 5 },
       "base_stats": { "damage_min": 2, "damage_max": 4 },
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
@@ -98,7 +98,7 @@
       "equippable": true,
       "handedness": "one_handed",
       "occupies_hands": ["off_hand"],
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "armor": 2, "block_percent": 5 },
       "rollable_stats": [
         { "stat": "armor", "min": 1, "max": 2, "weight": 3 },
@@ -117,7 +117,7 @@
       "attack_mode": "melee",
       "attack_speed": 0.9,
       "reach": 1.8,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "magic": 5 },
       "base_stats": { "damage_min": 2, "damage_max": 4, "max_mana": 2 },
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 1, "weight": 1 },
@@ -139,7 +139,7 @@
       "attack_mode": "melee",
       "attack_speed": 0.75,
       "reach": 1.7,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "damage_min": 5, "damage_max": 8 },
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
@@ -158,7 +158,7 @@
       "attack_mode": "melee",
       "attack_speed": 0.70,
       "reach": 1.8,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "damage_min": 4, "damage_max": 7 },
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
@@ -197,7 +197,7 @@
       "attack_speed": 0.85,
       "reach": 12.0,
       "projectile_speed": 50.0,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "dex": 5 },
       "base_stats": { "damage_min": 1, "damage_max": 2 },
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
@@ -213,7 +213,7 @@
       "equippable": true,
       "handedness": "one_handed",
       "occupies_hands": ["off_hand"],
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "armor": 2, "block_percent": 5 },
       "rollable_stats": [
         { "stat": "armor", "min": 1, "max": 3, "weight": 3 },
@@ -227,7 +227,7 @@
       "item_type": "helm",
       "slot": "head",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "armor": 1 },
       "rollable_stats": [{ "stat": "armor", "min": 1, "max": 3, "weight": 1 }],
       "effect_pool": []
@@ -238,7 +238,7 @@
       "item_type": "chest",
       "slot": "chest",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "armor": 3 },
       "rollable_stats": [{ "stat": "armor", "min": 2, "max": 5, "weight": 1 }],
       "effect_pool": []
@@ -249,7 +249,7 @@
       "item_type": "gloves",
       "slot": "gloves",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "armor": 1, "attack_speed_percent": 5 },
       "rollable_stats": [
         { "stat": "armor", "min": 1, "max": 2, "weight": 2 },
@@ -263,7 +263,7 @@
       "item_type": "belt",
       "slot": "belt",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "hotbar_slots": 3, "armor": 1 },
       "rollable_stats": [
         { "stat": "hotbar_slots", "min": 3, "max": 10, "weight": 4 },
@@ -277,7 +277,7 @@
       "item_type": "belt",
       "slot": "belt",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "hotbar_slots": 3, "inventory_rows": 1, "armor": 1 },
       "rollable_stats": [
         { "stat": "hotbar_slots", "min": 3, "max": 10, "weight": 3 },
@@ -291,7 +291,7 @@
       "item_type": "boots",
       "slot": "boots",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "str": 5 },
       "base_stats": { "armor": 1 },
       "rollable_stats": [{ "stat": "armor", "min": 1, "max": 2, "weight": 1 }],
       "effect_pool": []
@@ -302,7 +302,7 @@
       "item_type": "ring",
       "slot": "ring",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "magic": 5 },
       "base_stats": { "max_hp": 1 },
       "rollable_stats": [
         { "stat": "max_hp", "min": 1, "max": 4, "weight": 2 },
@@ -319,7 +319,7 @@
       "item_type": "amulet",
       "slot": "amulet",
       "equippable": true,
-      "requirements": { "level": 1 },
+      "requirements": { "level": 1, "magic": 5 },
       "base_stats": { "max_hp": 2 },
       "rollable_stats": [
         { "stat": "max_hp", "min": 2, "max": 6, "weight": 2 },

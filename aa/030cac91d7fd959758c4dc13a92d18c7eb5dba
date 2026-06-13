@@ -1,0 +1,25 @@
+shared/golden/item_rolls.v0.schema.json
+  s_a7077bd5daf373::t_d6f3b873d7e2d7 46-50
+shared/rules/item_templates.v0.json
+  s_a7077bd5daf373::t_eaf97ca062c6fd 21,44,63,84,101,120,142,161,200,216,230,241,252,266,280,294,305,322
+server/internal/game/game_test.go
+  s_a7077bd5daf373::t_8918cdc5fbd8ed 254-288
+shared/golden/item_rolls.json
+  s_a7077bd5daf373::t_1691a8ac561c09 17-18,37-38,56-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "aa030cac91d7fd959758c4dc13a92d18c7eb5dba",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -21,6 +21,11 @@
     "pack_member_radius": 3.0,
     "pack_composition": { "frontline_min": 1, "ranged_max": 1 },
     "elite_pack_chance_percent": 30,
+    "elite_aura": {
+      "id": "elite_command",
+      "radius": 4.0,
+      "damage_bonus_percent": 20
+    },
     "monster_pool": [
       { "monster_def_id": "dungeon_mob", "weight": 7 },
       { "monster_def_id": "dungeon_archer", "weight": 1 },

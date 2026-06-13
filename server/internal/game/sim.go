@@ -105,6 +105,8 @@ type entity struct {
 	displayName           string
 	monsterDefID          string
 	monsterRarityID       string
+	monsterPackID         string
+	monsterPackLeader     bool
 	monsterAttackDamage   *DamageRange
 	monsterAttackCooldown int
 	monsterArmor          float64
@@ -2021,6 +2023,8 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			maxHP:                def.MaxHP,
 			monsterDefID:         generated.defID,
 			monsterRarityID:      generated.rarityID,
+			monsterPackID:        generated.packID,
+			monsterPackLeader:    generated.packLeader,
 			lootTable:            lootTable,
 			aiMode:               monsterAIModeIdle,
 			isBoss:               generated.isBoss,

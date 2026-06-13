@@ -216,11 +216,18 @@ type MonsterPlacementRules struct {
 	PackMemberRadius float64               `json:"pack_member_radius"`
 	PackComposition  PackCompositionRules  `json:"pack_composition"`
 	ElitePackChance  int                   `json:"elite_pack_chance_percent"`
+	EliteAura        *EliteAuraRules       `json:"elite_aura,omitempty"`
 	MonsterPool      []MonsterPoolEntry    `json:"monster_pool,omitempty"`
 	MinimumMonsters  []MinimumMonsterEntry `json:"minimum_monsters,omitempty"`
 	MarginFromWall   float64               `json:"margin_from_wall"`
 	MinSpawnDistance float64               `json:"min_spawn_distance"`
 	MaxAttempts      int                   `json:"max_attempts"`
+}
+
+type EliteAuraRules struct {
+	ID                 string  `json:"id"`
+	Radius             float64 `json:"radius"`
+	DamageBonusPercent int     `json:"damage_bonus_percent"`
 }
 
 type PackCompositionRules struct {
@@ -1697,6 +1704,17 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if err := validateMonsterPlacementPool(dungeonGeneration.MonsterPlacement, r); err != nil {
 		return nil, err
+	}
+	if aura := dungeonGeneration.MonsterPlacement.EliteAura; aura != nil {
+		if aura.ID == "" {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.elite_aura.id: must be non-empty")
+		}
+		if aura.Radius <= 0 {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.elite_aura.radius: must be positive")
+		}
+		if aura.DamageBonusPercent < 0 || aura.DamageBonusPercent > 200 {
+			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.elite_aura.damage_bonus_percent: must be between 0 and 200")
+		}
 	}
 	if dungeonGeneration.MonsterPlacement.MarginFromWall < 0 {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.margin_from_wall: must be non-negative")

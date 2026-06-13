@@ -1,5 +1,5 @@
 {
-  "description": "Deterministic rolled item outcomes for cave_blade rarity cases, including unique effect attachment.",
+  "description": "Deterministic item rolls for one template across rarities, including the generated unique naming contract.",
   "template_id": "cave_blade",
   "cases": [
     {
@@ -45,7 +45,7 @@
       "seed": "00000000000000b1",
       "expected": {
         "item_template_id": "cave_blade",
-        "display_name": "Unique Cave Blade",
+        "display_name": "Sword of Pilgrim's Momentum",
         "rarity": "unique",
         "stats": {
           "damage_max": 7,

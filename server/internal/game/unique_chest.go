@@ -3,6 +3,8 @@ package game
 import (
 	"fmt"
 	"strconv"
+	"strings"
+	"unicode"
 )
 
 func (r *Rules) validateUniqueItemRules(uniqueItems map[string]UniqueItemDef) error {
@@ -282,7 +284,7 @@ func (r *Rules) uniqueChestPayload(templateID string, effectID string) (ItemRoll
 	}
 	return ItemRollPayload{
 		ItemTemplateID: templateID,
-		DisplayName:    "Unique " + template.Name,
+		DisplayName:    uniqueItemDisplayName(template, effect),
 		Rarity:         "unique",
 		Stats:          cloneIntMap(template.BaseStats),
 		Requirements:   cloneIntMap(template.Requirements),
@@ -297,6 +299,9 @@ func (r *Rules) namedUniquePayload(uniqueID string) (ItemRollPayload, bool) {
 	}
 	template, ok := r.ItemTemplates[unique.BaseTemplateID]
 	if !ok {
+		return ItemRollPayload{}, false
+	}
+	if len(unique.FixedEffectIDs) == 0 {
 		return ItemRollPayload{}, false
 	}
 	for _, effectID := range unique.FixedEffectIDs {
@@ -333,4 +338,24 @@ func uniqueChestEffectCompatible(effect UniqueEffectDef, itemType string) bool {
 		}
 	}
 	return false
+}
+
+func uniqueItemDisplayName(template ItemTemplateDef, effect UniqueEffectDef) string {
+	return uniqueFamilyTypeName(template.ItemType) + " of " + effect.DisplayName
+}
+
+func uniqueFamilyTypeName(itemType string) string {
+	words := strings.Fields(strings.ReplaceAll(itemType, "_", " "))
+	for i, word := range words {
+		runes := []rune(word)
+		if len(runes) == 0 {
+			continue
+		}
+		runes[0] = unicode.ToUpper(runes[0])
+		for j := 1; j < len(runes); j++ {
+			runes[j] = unicode.ToLower(runes[j])
+		}
+		words[i] = string(runes)
+	}
+	return strings.Join(words, " ")
 }

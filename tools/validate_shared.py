@@ -2763,18 +2763,6 @@ def cross_checks(report: Report) -> None:
                 report.fail("item_rolls golden", f"{case['name']}: unknown rarity {rarity}")
                 golden_failed = True
                 break
-            if not expected["display_name"].endswith(template["name"]):
-                report.fail("item_rolls golden", f"{case['name']}: display_name must include template name")
-                golden_failed = True
-                break
-            if stats["damage_max"] < stats["damage_min"]:
-                report.fail("item_rolls golden", f"{case['name']}: damage_max must be >= damage_min")
-                golden_failed = True
-                break
-            if expected.get("requirements", {}) != template.get("requirements", {}):
-                report.fail("item_rolls golden", f"{case['name']}: requirements mismatch template")
-                golden_failed = True
-                break
             effect_ids = expected.get("effect_ids", [])
             if expected.get("rarity") == "unique":
                 if len(effect_ids) != 1:
@@ -2785,8 +2773,27 @@ def cross_checks(report: Report) -> None:
                     report.fail("item_rolls golden", f"{case['name']}: unknown unique effect id {effect_ids[0]}")
                     golden_failed = True
                     break
+                effect_name = unique_effect_defs[effect_ids[0]].get("display_name", "")
+                item_type_name = str(template.get("item_type", "")).replace("_", " ").title()
+                expected_unique_name = f"{item_type_name} of {effect_name}"
+                if expected["display_name"] != expected_unique_name:
+                    report.fail("item_rolls golden", f"{case['name']}: unique display_name must be {expected_unique_name!r}")
+                    golden_failed = True
+                    break
             elif effect_ids != []:
                 report.fail("item_rolls golden", f"{case['name']}: non-unique effect_ids must be empty")
+                golden_failed = True
+                break
+            elif not expected["display_name"].endswith(template["name"]):
+                report.fail("item_rolls golden", f"{case['name']}: non-unique display_name must include template name")
+                golden_failed = True
+                break
+            if stats["damage_max"] < stats["damage_min"]:
+                report.fail("item_rolls golden", f"{case['name']}: damage_max must be >= damage_min")
+                golden_failed = True
+                break
+            if expected.get("requirements", {}) != template.get("requirements", {}):
+                report.fail("item_rolls golden", f"{case['name']}: requirements mismatch template")
                 golden_failed = True
                 break
         if not golden_failed:

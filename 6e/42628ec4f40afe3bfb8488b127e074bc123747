@@ -1,0 +1,49 @@
+server/internal/store/store_test.go
+  s_71c23b08e947b7::t_a427916ac425de 1005,1184,1282
+docs/plans/v111_2026-06-13-market-purchase-and-delivery.md
+  s_71c23b08e947b7::t_4104e4cc669266 36-38,41,43,58-59,71,73,75,77,89-91
+  s_71c23b08e947b7::t_c312f503c6adfd 103-105,112-115
+  s_71c23b08e947b7::t_00d51656ab12a7 116
+  s_71c23b08e947b7::t_31c78c8b7e91ba 1-35,39-40,42,44-57,60-70,72,74,76,78-88,92-102,106-111
+docs/specs/v111_spec-market-purchase-and-delivery.md
+  s_71c23b08e947b7::t_2a30a383b8e4e4 1-72
+server/internal/replay/replay_test.go
+  s_71c23b08e947b7::t_a427916ac425de 1478,1484
+server/migrations/0022_market_listing_price_gold.sql
+  s_71c23b08e947b7::t_5545613a1a0b7d 1-9
+server/internal/store/models.go
+  s_71c23b08e947b7::t_5545613a1a0b7d 161
+docs/as-built/v111_market-purchase-and-delivery.md
+  s_71c23b08e947b7::t_c312f503c6adfd 1-31
+server/internal/store/repos.go
+  s_71c23b08e947b7::t_5545613a1a0b7d 1654,1678-1681,1703-1707,1727,1732,1757,1759,1843,1848,2204
+server/internal/store/market_purchase_test.go
+  s_71c23b08e947b7::t_c8ebcd927af135 1-152
+server/internal/store/market_purchase.go
+  s_71c23b08e947b7::t_a427916ac425de 1-120
+server/internal/store/interfaces.go
+  s_71c23b08e947b7::t_5545613a1a0b7d 76,78
+server/internal/http/market.go
+  s_71c23b08e947b7::t_3c436934a36594 17,162-183
+  s_71c23b08e947b7::t_5545613a1a0b7d 30,42,119,291
+PROGRESS.md
+  s_71c23b08e947b7::t_c312f503c6adfd 15,18,132,283,409-413
+server/internal/http/market_purchase_test.go
+  s_71c23b08e947b7::t_c7bb06a5459e28 1-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6e42628ec4f40afe3bfb8488b127e074bc123747",
+  "prompts": {},
+  "sessions": {
+    "s_71c23b08e947b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe31-f567-70e3-9572-f4c3d8591ba3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

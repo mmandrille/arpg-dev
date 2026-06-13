@@ -22,7 +22,7 @@
             "enum": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
           },
           "equippable": { "type": "boolean" },
-          "class_required": { "type": "string", "enum": ["barbarian", "sorcerer", "paladin"] },
+          "class_required": { "type": "string", "enum": ["barbarian", "sorcerer", "paladin", "ranger"] },
           "handedness": { "type": "string", "enum": ["one_handed", "two_handed"] },
           "occupies_hands": {
             "type": "array",

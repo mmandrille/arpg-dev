@@ -51,6 +51,12 @@ def load_known_world_ids() -> set[str]:
     return set(data["worlds"])
 
 
+def monster_xp_reward(monster_def_id: str) -> int:
+    monsters_path = ROOT / "shared" / "rules" / "monsters.v0.json"
+    data = json.loads(monsters_path.read_text(encoding="utf-8"))
+    return int(data.get("monsters", {}).get(monster_def_id, {}).get("xp_reward", 0))
+
+
 KNOWN_WORLD_IDS = load_known_world_ids()
 
 
@@ -4699,13 +4705,14 @@ async def run_coop_rewards_and_scaling(
         before_host_xp = state_experience(host.state)
         before_nearby_xp = state_experience(nearby.state)
         before_excluded_xp = state_experience(excluded.state)
+        expected_xp = monster_xp_reward(monster_def_id)
 
         await coop_attack_until_kill(reward_peers, nearby, monster_def_id, companions=[host])
         await wait_coop_until(
             peers,
             "shared xp applied to nearby only",
-            lambda: state_experience(host.state) >= before_host_xp + 10
-            and state_experience(nearby.state) >= before_nearby_xp + 10
+            lambda: state_experience(host.state) >= before_host_xp + expected_xp
+            and state_experience(nearby.state) >= before_nearby_xp + expected_xp
             and state_experience(excluded.state) == before_excluded_xp,
         )
 
@@ -4720,14 +4727,14 @@ async def run_coop_rewards_and_scaling(
         fresh_host = create_session(client, tokens[0], scenario.world_id)
         fresh_host_state = fetch_state(client, tokens[0], debug_token, str(fresh_host["session_id"]))
         host_fresh_xp = int(fresh_host_state.get("character_progression", {}).get("experience", 0))
-        if host_fresh_xp < before_host_xp + 10:
-            raise AssertionError(f"host fresh xp={host_fresh_xp}, want >= {before_host_xp + 10}")
+        if host_fresh_xp < before_host_xp + expected_xp:
+            raise AssertionError(f"host fresh xp={host_fresh_xp}, want >= {before_host_xp + expected_xp}")
 
         fresh_nearby = create_session(client, tokens[1], scenario.world_id)
         fresh_nearby_state = fetch_state(client, tokens[1], debug_token, str(fresh_nearby["session_id"]))
         nearby_fresh_xp = int(fresh_nearby_state.get("character_progression", {}).get("experience", 0))
-        if nearby_fresh_xp < before_nearby_xp + 10:
-            raise AssertionError(f"nearby fresh xp={nearby_fresh_xp}, want >= {before_nearby_xp + 10}")
+        if nearby_fresh_xp < before_nearby_xp + expected_xp:
+            raise AssertionError(f"nearby fresh xp={nearby_fresh_xp}, want >= {before_nearby_xp + expected_xp}")
 
         fresh_excluded = create_session(client, tokens[2], scenario.world_id)
         fresh_excluded_state = fetch_state(client, tokens[2], debug_token, str(fresh_excluded["session_id"]))

@@ -19,7 +19,7 @@
       ]
     },
     { "action": "equip_inventory_item", "item_def_id": "cave_war_sword", "slot": "main_hand", "expect_reject": "requirements_not_met" },
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 2, "timeout_s": 30 },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 4, "timeout_s": 30 },
     {
       "action": "assert_character_progression",
       "level": 2,

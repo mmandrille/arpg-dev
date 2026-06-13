@@ -374,6 +374,21 @@ def rogue_glb() -> bytes:
     ])
 
 
+def ranger_glb() -> bytes:
+    """Tall, thin hooded bow class silhouette."""
+    return _humanoid_glb((0.20, 0.50, 0.27, 1.0), [
+        (1, (0.0, 1.16, 0.0), (0.40, 0.92, 0.25)),
+        (1, (0.0, 1.86, 0.0), (0.27, 0.30, 0.27)),
+        (1, (0.0, 1.94, 0.0), (0.42, 0.34, 0.36), (0.07, 0.15, 0.10, 1.0)),
+        (1, (0.0, 1.20, -0.18), (0.36, 0.78, 0.06), (0.09, 0.22, 0.13, 1.0)),
+        (1, (0.0, 1.28, 0.18), (0.30, 0.08, 0.05), (0.74, 0.66, 0.34, 1.0)),
+        (2, (-0.36, 1.18, 0.0), (0.12, 0.78, 0.12)),
+        (4, (0.36, 1.18, 0.0), (0.12, 0.78, 0.12)),
+        (6, (-0.13, 0.46, 0.0), (0.14, 0.92, 0.14)),
+        (7, (0.13, 0.46, 0.0), (0.14, 0.92, 0.14)),
+    ])
+
+
 def monster_dummy_glb() -> bytes:
     """Training dummy: a post on a base, skinned so hit/death clips rotate it.
 
@@ -530,6 +545,7 @@ TARGETS = {
     "client/assets/characters/sorcerer/sorcerer.glb": sorcerer_glb,
     "client/assets/characters/paladin/paladin.glb": paladin_glb,
     "client/assets/characters/rogue/rogue.glb": rogue_glb,
+    "client/assets/characters/ranger/ranger.glb": ranger_glb,
     "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
     "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
     "client/assets/equipment/weapons/starter_staff/starter_staff.glb": starter_staff_glb,

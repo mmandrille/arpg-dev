@@ -40,6 +40,8 @@ func _draw() -> void:
 			_draw_shield(center, radius)
 		"dagger":
 			_draw_dagger(center, radius)
+		"bow":
+			_draw_bow(center, radius)
 		_:
 			_draw_axe(center, radius)
 	draw_arc(center, radius, 0.0, TAU, 40, accent_color, 2.0, true)
@@ -68,6 +70,8 @@ static func _fallback_shape(next_class_id: String) -> String:
 			return "shield"
 		"rogue":
 			return "dagger"
+		"ranger":
+			return "bow"
 		_:
 			return "axe"
 
@@ -80,6 +84,8 @@ static func _fallback_color(next_class_id: String) -> String:
 			return "#d9b44a"
 		"rogue":
 			return "#3f8f6d"
+		"ranger":
+			return "#2f8f4e"
 		_:
 			return "#c85f3d"
 
@@ -92,6 +98,8 @@ static func _fallback_accent(next_class_id: String) -> String:
 			return "#fff3ba"
 		"rogue":
 			return "#d7f2df"
+		"ranger":
+			return "#d6f2a8"
 		_:
 			return "#ffd9a8"
 
@@ -144,3 +152,18 @@ func _draw_dagger(center: Vector2, radius: float) -> void:
 	draw_polyline(blade, accent_color, 2.0, true)
 	draw_line(center + Vector2(-radius * 0.38, radius * 0.22), center + Vector2(radius * 0.38, radius * 0.22), accent_color, 3.0)
 	draw_line(center + Vector2(0, radius * 0.28), center + Vector2(0, radius * 0.64), accent_color, 4.0)
+
+
+func _draw_bow(center: Vector2, radius: float) -> void:
+	var bow_points := PackedVector2Array([
+		center + Vector2(-radius * 0.12, -radius * 0.78),
+		center + Vector2(radius * 0.42, -radius * 0.36),
+		center + Vector2(radius * 0.48, 0.0),
+		center + Vector2(radius * 0.42, radius * 0.36),
+		center + Vector2(-radius * 0.12, radius * 0.78),
+	])
+	draw_polyline(bow_points, fill_color, 5.0, false)
+	draw_line(center + Vector2(-radius * 0.12, -radius * 0.78), center + Vector2(-radius * 0.12, radius * 0.78), accent_color, 2.0)
+	draw_line(center + Vector2(-radius * 0.60, 0.0), center + Vector2(radius * 0.56, 0.0), accent_color, 3.0)
+	draw_line(center + Vector2(radius * 0.56, 0.0), center + Vector2(radius * 0.38, -radius * 0.12), accent_color, 3.0)
+	draw_line(center + Vector2(radius * 0.56, 0.0), center + Vector2(radius * 0.38, radius * 0.12), accent_color, 3.0)

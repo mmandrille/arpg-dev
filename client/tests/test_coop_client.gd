@@ -348,7 +348,7 @@ func _test_character_panel_modes_for_v45() -> void:
 	_assert_true("expanded class picker visible", bool(expanded.get("class_picker_visible", false)))
 	_assert_eq("default selected class", str(expanded.get("selected_class", "")), "barbarian")
 	var options: Array = expanded.get("class_options", [])
-	_assert_eq("four class options", options.size(), 4)
+	_assert_eq("five class options", options.size(), 5)
 	_assert_true("barbarian tooltip includes skill", str((options[0] as Dictionary).get("tooltip", "")).contains("Skill: Rage"))
 	panel.select_class("sorcerer")
 	var sorc_state := panel.get_debug_state()

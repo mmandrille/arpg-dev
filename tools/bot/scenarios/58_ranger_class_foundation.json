@@ -1,0 +1,33 @@
+{
+  "id": "ranger_class_foundation",
+  "world_id": "ranged_lab",
+  "seed": "ranger_class_foundation_seed",
+  "character_class": "ranger",
+  "title": "Ranger class foundation",
+  "description": "Create a Ranger, prove starter bow and ranged class stats, then damage a lab target with a basic bow attack.",
+  "visual": {
+    "camera": { "x": 8, "y": 5, "zoom": 1.0 },
+    "post_complete_hold_s": 3.0
+  },
+  "debug_progression": {
+    "level": 1,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 8, "vit": 5, "magic": 3 },
+    "skill_ranks": {}
+  },
+  "steps": [
+    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
+    { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
+    { "action": "move_until_player_position", "x": 2, "y": 8 },
+    { "action": "action_until_event", "monster_def_id": "training_dummy_ranged", "event_type": "monster_killed" }
+  ],
+  "assertions": [
+    { "type": "character_progression", "str": 4, "dex": 8, "vit": 5, "magic": 3 },
+    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
+    { "type": "equipped_slot_empty", "slot": "off_hand" },
+    { "type": "combat_event_seen", "event_type": "monster_damaged", "target_monster_def_id": "training_dummy_ranged", "min_damage": 1 },
+    { "type": "monster_dead", "monster_def_id": "training_dummy_ranged" }
+  ]
+}

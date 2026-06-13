@@ -44,6 +44,11 @@ var starterLoadouts = map[string][]starterLoadoutItem{
 		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
 		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
+	"ranger": {
+		{itemDefID: "starter_ranger_bow", slot: "main_hand", equipped: true, rolled: true},
+		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
+		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
+	},
 }
 
 func (s *Server) ensureStarterLoadout(ctx context.Context, character store.Character) error {

@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v120 — `tuning-friendly-rule-tests` |
+| **Latest completed slice** | v122 — `ranger-class-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v121 — TBD |
+| **Next slice** | v123 — `ranger-piercing-and-pinning-shots` |
 | **Last engineering review** | v120 — [`docs/reviews/20260613_v120-overview.md`](docs/reviews/20260613_v120-overview.md) (2026-06-13) |
 | **Next engineering review** | v130 (~every 10 slices) |
 
@@ -139,6 +139,8 @@ v117_* = market-active-offer-ui
 v118_* = blacksmith-upgrade-ui
 v119_* = live-unique-drops-all-effects
 v120_* = tuning-friendly-rule-tests
+v121_* = inventory-market-blacksmith-flow
+v122_* = ranger-class-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -299,6 +301,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v118** | `blacksmith-upgrade-ui` | Complete (`make ci` green) | [`v118_spec-blacksmith-upgrade-ui.md`](docs/specs/v118_spec-blacksmith-upgrade-ui.md) | [`v118_2026-06-13-blacksmith-upgrade-ui.md`](docs/plans/v118_2026-06-13-blacksmith-upgrade-ui.md) | [`as-built`](docs/as-built/v118_blacksmith-upgrade-ui.md) |
 | **v119** | `live-unique-drops-all-effects` | Complete (`make ci` green) | [`v119_spec-live-unique-drops-all-effects.md`](docs/specs/v119_spec-live-unique-drops-all-effects.md) | [`v119_2026-06-13-live-unique-drops-all-effects.md`](docs/plans/v119_2026-06-13-live-unique-drops-all-effects.md) | [`as-built`](docs/as-built/v119_live-unique-drops-all-effects.md) |
 | **v120** | `tuning-friendly-rule-tests` | Complete (`make ci` green) | [`v120_spec-tuning-friendly-rule-tests.md`](docs/specs/v120_spec-tuning-friendly-rule-tests.md) | [`v120_2026-06-13-tuning-friendly-rule-tests.md`](docs/plans/v120_2026-06-13-tuning-friendly-rule-tests.md) | [`as-built`](docs/as-built/v120_tuning-friendly-rule-tests.md) |
+| **v121** | `inventory-market-blacksmith-flow` | Approved draft (reserved) | [`v121_spec-inventory-market-blacksmith-flow.md`](docs/specs/v121_spec-inventory-market-blacksmith-flow.md) | [`v121_2026-06-13-inventory-market-blacksmith-flow.md`](docs/plans/v121_2026-06-13-inventory-market-blacksmith-flow.md) | — |
+| **v122** | `ranger-class-foundation` | Complete (`make ci` green) | [`v122_spec-ranger-class-foundation.md`](docs/specs/v122_spec-ranger-class-foundation.md) | [`v122_2026-06-13-ranger-class-foundation.md`](docs/plans/v122_2026-06-13-ranger-class-foundation.md) | [`as-built`](docs/as-built/v122_ranger-class-foundation.md) |
 
 ---
 
@@ -425,6 +429,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Ranger is now a playable bow class.** v122 adds Ranger as the fifth class with dexterity-leaning
+stats, a green bow icon, a deterministic tall hooded model, starter bow loadout, and protocol bot
+scenario `58_ranger_class_foundation` proving creation and ranged basic combat.
 
 **Tuning-friendly rule tests started with the skills panel.** v120 converts the Godot skills-panel
 Magic Bolt test to derive requirements, mana cost, and max-rank expectations from `SkillRulesLoader`

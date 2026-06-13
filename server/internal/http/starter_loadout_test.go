@@ -23,6 +23,7 @@ func TestCreatedCharactersReceiveClassStarterLoadouts(t *testing.T) {
 		{className: "sorcerer", mainHand: "starter_sorcerer_staff"},
 		{className: "paladin", mainHand: "starter_paladin_sword", offHand: "starter_paladin_shield"},
 		{className: "rogue", mainHand: "starter_rogue_sword", offHand: "starter_rogue_sword"},
+		{className: "ranger", mainHand: "starter_ranger_bow"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.className, func(t *testing.T) {

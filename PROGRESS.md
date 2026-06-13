@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v111 — `market-purchase-and-delivery` |
+| **Latest completed slice** | v112 — `elite-aura-foundation` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v112 — TBD |
+| **Next slice** | v113 — TBD |
 | **Last engineering review** | v110 — [`docs/reviews/20260613_v110-overview.md`](docs/reviews/20260613_v110-overview.md) (2026-06-13) |
 | **Next engineering review** | v120 (~every 10 slices) |
 
@@ -130,6 +130,7 @@ v108_* = resource-support-mobility-unique-effects
 v109_* = permanent-death-corpse-recovery
 v110_* = item-upgrade-repeat-action
 v111_* = market-purchase-and-delivery
+v112_* = elite-aura-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -281,6 +282,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v109** | `permanent-death-corpse-recovery` | Complete (`make ci` green) | — | — | [`as-built`](docs/as-built/v109_permanent-death-corpse-recovery.md) |
 | **v110** | `item-upgrade-repeat-action` | Complete (`make ci` green) | [`v110_spec-item-upgrade-repeat-action.md`](docs/specs/v110_spec-item-upgrade-repeat-action.md) | [`v110_2026-06-13-item-upgrade-repeat-action.md`](docs/plans/v110_2026-06-13-item-upgrade-repeat-action.md) | [`as-built`](docs/as-built/v110_item-upgrade-repeat-action.md) |
 | **v111** | `market-purchase-and-delivery` | Complete (`make ci` green) | [`v111_spec-market-purchase-and-delivery.md`](docs/specs/v111_spec-market-purchase-and-delivery.md) | [`v111_2026-06-13-market-purchase-and-delivery.md`](docs/plans/v111_2026-06-13-market-purchase-and-delivery.md) | [`as-built`](docs/as-built/v111_market-purchase-and-delivery.md) |
+| **v112** | `elite-aura-foundation` | Complete (`make ci` green) | [`v112_spec-elite-aura-foundation.md`](docs/specs/v112_spec-elite-aura-foundation.md) | [`v112_2026-06-13-elite-aura-foundation.md`](docs/plans/v112_2026-06-13-elite-aura-foundation.md) | [`as-built`](docs/as-built/v112_elite-aura-foundation.md) |
 
 ---
 
@@ -405,6 +407,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Elite packs now have an authoritative aura foundation.** v112 adds a data-driven `elite_command`
+aura under dungeon monster placement rules, preserves generated pack metadata on live monsters, and
+applies a nearby living leader damage bonus to same-pack followers. Client aura VFX, protocol aura
+state, additional aura types, and presentation bot proof remain deferred.
 
 **Market listings can now be purchased for stash gold.** v111 adds optional `price_gold` on
 market listings and a direct purchase route that atomically debits buyer stash gold, credits seller
@@ -879,7 +886,7 @@ validation while removing a duplicated maintenance list.
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history, starter loadout backfill for existing or compatibility-default characters | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59/v97 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
-| Economy / trade | Market offers/purchases, gold/resource pricing, 24-hour expiration/delisting, multi-item trade offers, active-offer item locking/reservations beyond listing-row removal, atomic buyer/seller ownership transfer, stash delivery for purchases, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
+| Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, 24-hour expiration/delisting, active-offer item locking/reservations beyond listing-row removal, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |

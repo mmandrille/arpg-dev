@@ -1,0 +1,68 @@
+client/tests/test_skill_rules_loader.gd
+  s_691f0e84e5587e::t_cf5abd487df4af 28,49-50,77-79
+docs/plans/v124_2026-06-13-ranger-volley-and-visual-scenario.md
+  s_691f0e84e5587e::t_5a56a6766d0e4d 3,40-43,46-47,51-52,54-55,59-63,68-70,72,76-78,82-83,85,89-95
+  s_691f0e84e5587e::t_120a89070dae3d 1-2,4-39,44-45,48-50,53,56-58,64-67,71,73-75,79-81,84,86-88,96
+PROGRESS.md
+  s_691f0e84e5587e::t_529527f601cedb 15,18,145,309,384,447-449
+shared/i18n/es.json
+  s_691f0e84e5587e::t_8acc93157bb208 76-77
+tools/validate_shared.py
+  s_691f0e84e5587e::t_152fc89939fbc9 1250
+shared/rules/skills.v0.schema.json
+  s_691f0e84e5587e::t_3a7917b41b62cd 37,228-234
+server/internal/game/ranger_skills_test.go
+  s_691f0e84e5587e::t_3e57eaba141867 127
+  s_691f0e84e5587e::t_3801cb0d9e1907 76-104,115-117,130
+shared/i18n/en.json
+  s_691f0e84e5587e::t_435e9f1053cf20 75-76
+tools/bot/test_protocol.py
+  s_691f0e84e5587e::t_92649b47a7b9fe 507-519
+docs/as-built/v124_ranger-volley-and-visual-scenario.md
+  s_691f0e84e5587e::t_3f4ff0033fabfd 1-42
+server/internal/game/rules.go
+  s_691f0e84e5587e::t_73a18c66c1ccd9 524,604-607
+  s_691f0e84e5587e::t_94dc76a7d29eff 2891-2910
+server/internal/game/handlers.go
+  s_691f0e84e5587e::t_74cb634ec761be 1218
+server/internal/game/ranger_skills.go
+  s_691f0e84e5587e::t_b2c6aa8e83c84c 34-38,118-162
+shared/rules/skills.v0.json
+  s_691f0e84e5587e::t_e6f1d292ce0338 580-634
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_691f0e84e5587e::t_8cd8da3016af25 18
+client/tests/test_projectile_visuals.gd
+  s_691f0e84e5587e::t_0f27d1b7426934 52-59
+client/scripts/skill_icon.gd
+  s_691f0e84e5587e::t_a347628e721e46 54-55,182-195
+client/scripts/projectile_visuals.gd
+  s_691f0e84e5587e::t_f1027dff90cb21 11-12
+tools/bot/scenarios/60_ranger_volley_and_visual_showcase.json
+  s_691f0e84e5587e::t_496d76c35a6d67 17
+  s_691f0e84e5587e::t_fdb715cf9fa287 1-16,18-42
+shared/rules/worlds.v0.json
+  s_691f0e84e5587e::t_6ed4330f6ac6e9 787-801
+shared/assets/skill_presentations.v0.json
+  s_691f0e84e5587e::t_7f5cd219dd0630 128-139
+docs/specs/v124_spec-ranger-volley-and-visual-scenario.md
+  s_691f0e84e5587e::t_5a56a6766d0e4d 3
+  s_691f0e84e5587e::t_78edecdb5bb0fb 1-2,4-73
+shared/assets/skill_presentations.v0.schema.json
+  s_691f0e84e5587e::t_5ae90527408c1f 38-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3aa19a4d15a7050fa7488bf115df91558bd28975",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

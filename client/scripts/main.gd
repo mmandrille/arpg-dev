@@ -14,6 +14,7 @@ const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_markers.gd")
+const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
@@ -4661,7 +4662,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 		var visual := MonsterVisualsLoaderScript.resolve(str(e["monster_def_id"]), str(e.get("visual_model", "")))
 		if not e.has("visual_model"):
 			rec["visual_model"] = str(visual.get("visual_model", visual.get("scene", "")))
-	for key in ["boss_template_id", "visual_model", "visual_tint", "boss_phase", "effect_ids"]:
+	for key in ["boss_template_id", "visual_model", "visual_tint", "boss_phase", "effect_ids", "monster_pack_id", "monster_pack_leader"]:
 		if e.has(key):
 			rec[key] = e[key]
 	if e.has("is_boss"):
@@ -4682,6 +4683,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	_normalize_boss_phase_metadata(rec)
 	_sync_boss_telegraph_marker_from_record(rec)
+	EliteAuraPreviewSync.sync(entities, dungeon_generation)
 
 
 func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
@@ -5843,20 +5845,19 @@ func _bot_entities_presentation_debug() -> Array:
 			"character_id": str(rec.get("character_id", "")),
 			"visual_model": _visual_model_name(rec, node),
 			"visual_scale": float(rec.get("visual_scale", 1.0)),
-			"is_boss": bool(rec.get("is_boss", false)),
-			"boss_template_id": str(rec.get("boss_template_id", "")),
+			"is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
 			"boss_phase": rec.get("boss_phase", {}),
-			"boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
-			"telegraph_tint": str(rec.get("telegraph_tint", "")),
+			"boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)), "telegraph_tint": str(rec.get("telegraph_tint", "")),
 			"has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
-			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)),
-			"telegraph_marker_color": str(rec.get("telegraph_marker_color", "")),
+			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")),
 			"base_tint": str(rec.get("base_tint", "")),
 			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
 			"effect_ids": rec.get("effect_ids", []),
+			"monster_pack_id": str(rec.get("monster_pack_id", "")), "monster_pack_leader": bool(rec.get("monster_pack_leader", false)),
 			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node),
 			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node),
 			"has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
+			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),
 			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node),
 			"hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {},

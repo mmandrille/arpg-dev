@@ -926,6 +926,14 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		return false
 	if step.has("has_elite_command_effect") and bool(rec.get("has_elite_command_effect", false)) != bool(step.get("has_elite_command_effect", false)):
 		return false
+	if step.has("has_elite_command_radius_preview") and bool(rec.get("has_elite_command_radius_preview", false)) != bool(step.get("has_elite_command_radius_preview", false)):
+		return false
+	if step.has("elite_command_radius_min") and float(rec.get("elite_command_radius_preview", -1.0)) < float(step.get("elite_command_radius_min", 0.0)):
+		return false
+	if step.has("elite_command_radius_max") and float(rec.get("elite_command_radius_preview", 999999.0)) > float(step.get("elite_command_radius_max", 0.0)):
+		return false
+	if step.has("monster_pack_leader") and bool(rec.get("monster_pack_leader", false)) != bool(step.get("monster_pack_leader", false)):
+		return false
 	if step.has("is_boss") and bool(rec.get("is_boss", false)) != bool(step.get("is_boss", false)):
 		return false
 	if step.has("boss_template_id") and str(rec.get("boss_template_id", "")) != str(step.get("boss_template_id", "")):

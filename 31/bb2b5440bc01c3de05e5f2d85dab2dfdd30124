@@ -1,0 +1,21 @@
+docs/as-built/v109_permanent-death-corpse-recovery.md
+  s_71c23b08e947b7::t_77846aa19d3fcc 1-20
+PROGRESS.md
+  s_71c23b08e947b7::t_77846aa19d3fcc 15,18,130,279
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "31bb2b5440bc01c3de05e5f2d85dab2dfdd30124",
+  "prompts": {},
+  "sessions": {
+    "s_71c23b08e947b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe31-f567-70e3-9572-f4c3d8591ba3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

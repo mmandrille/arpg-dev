@@ -71,6 +71,7 @@ sessions.
 
 ```bash
 make play
+make play mail=client2@mail.com
 make play 3
 ```
 

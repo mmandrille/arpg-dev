@@ -2678,7 +2678,7 @@ def cross_checks(report: Report) -> None:
                 report.fail("interactable shop", f"{interactable_id}: unknown shop_id {shop_id}")
             elif stash_id and stash_id != "account_stash":
                 report.fail("interactable stash", f"{interactable_id}: unknown stash_id {stash_id}")
-            elif service and service not in {"bishop", "market", "blacksmith"}:
+            elif service and service not in {"bishop", "market", "blacksmith", "unique_test_chest"}:
                 report.fail("interactable service", f"{interactable_id}: unsupported service {service}")
             elif "barrier_when_closed" in interactable:
                 report.fail("interactable barrier", f"{interactable_id}: ready interactable must not block")

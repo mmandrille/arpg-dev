@@ -4854,7 +4854,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_stair_node(def_id)
 		if def_id == "teleporter":
 			return _make_teleporter_node()
-		if def_id == "treasure_chest" or def_id == "town_stash":
+		if def_id == "treasure_chest" or def_id == "town_stash" or def_id == "town_unique_chest":
 			return _make_chest_node(def_id)
 		if def_id == "hero_corpse":
 			return _make_hero_corpse_node(e)
@@ -5514,15 +5514,16 @@ func _make_door_node() -> Node3D:
 
 func _make_chest_node(def_id: String) -> Node3D:
 	var is_stash := def_id == "town_stash"
+	var is_unique_test := def_id == "town_unique_chest"
 	var root := Node3D.new()
-	root.name = "TownStashChest" if is_stash else "TreasureChest"
-	var scale := 1.12 if is_stash else 1.0
-	var wood := Color("#6f3b18") if is_stash else Color("#744018")
-	var dark_wood := Color("#3c2111") if is_stash else Color("#4a2711")
-	var metal := Color("#d1b15d") if is_stash else Color("#8d8f8f")
-	var metal_dark := Color("#6f5b2e") if is_stash else Color("#3d4143")
-	var cloth := Color("#244e66") if is_stash else Color("#5a2017")
-	var glow := Color("#f3d36b") if is_stash else Color("#f5b449")
+	root.name = "UniqueTestChest" if is_unique_test else ("TownStashChest" if is_stash else "TreasureChest")
+	var scale := 1.12 if is_stash else (1.08 if is_unique_test else 1.0)
+	var wood := Color("#5a2d7a") if is_unique_test else (Color("#6f3b18") if is_stash else Color("#744018"))
+	var dark_wood := Color("#30143f") if is_unique_test else (Color("#3c2111") if is_stash else Color("#4a2711"))
+	var metal := Color("#c77dff") if is_unique_test else (Color("#d1b15d") if is_stash else Color("#8d8f8f"))
+	var metal_dark := Color("#6f37a8") if is_unique_test else (Color("#6f5b2e") if is_stash else Color("#3d4143"))
+	var cloth := Color("#f0b8ff") if is_unique_test else (Color("#244e66") if is_stash else Color("#5a2017"))
+	var glow := Color("#d77dff") if is_unique_test else (Color("#f3d36b") if is_stash else Color("#f5b449"))
 
 	_add_chest_part(root, "ChestShadow", Vector3(1.28, 0.035, 0.82) * scale, Vector3(0.0, 0.018, 0.0), Color("#181715"))
 	_add_chest_part(root, "ChestBody", Vector3(1.08, 0.48, 0.70) * scale, Vector3(0.0, 0.29 * scale, 0.0), wood)
@@ -5543,7 +5544,7 @@ func _make_chest_node(def_id: String) -> Node3D:
 	lid_pivot.position = Vector3(0.0, 0.56 * scale, -0.36 * scale)
 	root.add_child(lid_pivot)
 	_add_chest_part(lid_pivot, "ChestLid", Vector3(1.16, 0.30, 0.72) * scale, Vector3(0.0, 0.15 * scale, 0.36 * scale), wood)
-	_add_chest_part(lid_pivot, "ChestLidCrown", Vector3(0.92, 0.12, 0.58) * scale, Vector3(0.0, 0.33 * scale, 0.36 * scale), Color("#8a4f20") if is_stash else Color("#8b511f"))
+	_add_chest_part(lid_pivot, "ChestLidCrown", Vector3(0.92, 0.12, 0.58) * scale, Vector3(0.0, 0.33 * scale, 0.36 * scale), Color("#7b35b0") if is_unique_test else (Color("#8a4f20") if is_stash else Color("#8b511f")))
 	_add_chest_part(lid_pivot, "ChestLidFrontBand", Vector3(1.22, 0.08, 0.075) * scale, Vector3(0.0, 0.13 * scale, 0.74 * scale), metal)
 	for x in [-0.42, 0.42]:
 		_add_chest_part(lid_pivot, "ChestLidStrap", Vector3(0.075, 0.36, 0.80) * scale, Vector3(x * scale, 0.20 * scale, 0.36 * scale), metal)
@@ -5552,7 +5553,7 @@ func _make_chest_node(def_id: String) -> Node3D:
 	_add_chest_part(root, "ChestLockSlot", Vector3(0.075, 0.11, 0.085) * scale, Vector3(0.0, 0.40 * scale, 0.502 * scale), metal_dark)
 	_add_chest_part(root, "ChestLeftHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(-0.64 * scale, 0.36 * scale, 0.0), metal)
 	_add_chest_part(root, "ChestRightHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(0.64 * scale, 0.36 * scale, 0.0), metal)
-	if is_stash:
+	if is_stash or is_unique_test:
 		_add_chest_part(root, "ChestStashCrest", Vector3(0.36, 0.12, 0.082) * scale, Vector3(0.0, 0.61 * scale, 0.456 * scale), cloth)
 
 	var inner := _add_chest_part(root, "ChestInnerGlow", Vector3(0.84, 0.045, 0.46) * scale, Vector3(0.0, 0.57 * scale, 0.02 * scale), glow)
@@ -5983,7 +5984,7 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 	if node == null:
 		return
 	var def_id := str(rec.get("interactable_def_id", ""))
-	if def_id == "treasure_chest" or def_id == "town_stash":
+	if def_id == "treasure_chest" or def_id == "town_stash" or def_id == "town_unique_chest":
 		var glow := node.find_child("ChestInnerGlow", true, false) as MeshInstance3D
 		if glow != null:
 			glow.visible = state == "open"
@@ -5997,7 +5998,7 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 				lock_mat.emission_enabled = true
 				lock_mat.emission = Color("#8a6122")
 			else:
-				lock_mat.albedo_color = Color("#d1b15d") if def_id == "town_stash" else Color("#8d8f8f")
+				lock_mat.albedo_color = Color("#c77dff") if def_id == "town_unique_chest" else (Color("#d1b15d") if def_id == "town_stash" else Color("#8d8f8f"))
 			lock.material_override = lock_mat
 		return
 	if def_id == "teleporter":

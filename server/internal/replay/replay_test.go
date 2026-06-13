@@ -685,7 +685,7 @@ func TestReconstructCoopDisconnectedMemberIsRemovedForReconnect(t *testing.T) {
 
 func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	rules := loadRules(t)
-	const guestPlayerID = 1010
+	guestPlayerID := uint64(1002 + len(rules.Worlds["dungeon_levels"].Entities))
 	repo := &fakeRepo{
 		session: store.Session{ID: testSessionID, Seed: "v33_coop_replay", WorldID: "dungeon_levels", Mode: store.SessionModeCoop},
 		members: []store.SessionMember{
@@ -702,7 +702,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 				SessionID:      testSessionID,
 				AccountID:      "acct_guest",
 				CharacterID:    "char_guest",
-				PlayerEntityID: "1010",
+				PlayerEntityID: fmt.Sprintf("%d", guestPlayerID),
 				Role:           store.SessionMemberGuest,
 				Status:         store.SessionMemberActive,
 				Connected:      true,
@@ -763,7 +763,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	if !rep.Match {
 		t.Fatalf("verify mismatch: %s", rep.Mismatch)
 	}
-	if entityByID(rep.Snapshot, "1010") != nil {
+	if entityByID(rep.Snapshot, fmt.Sprintf("%d", guestPlayerID)) != nil {
 		t.Fatalf("disconnected guest should be absent from replay snapshot: %+v", rep.Snapshot.Entities)
 	}
 	if hasStoreEvent(events, "item_picked_up") {

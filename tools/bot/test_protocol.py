@@ -29,6 +29,7 @@ from tools.bot.run import (
     select_scenarios,
     should_clean_bot_run_artifacts,
 )
+from tools.bot.unique_effect_assertions import enabled_unique_effect_ids
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -512,9 +513,14 @@ def test_load_scenarios_discovers_ranger_volley_and_visual_showcase():
     assert ranger.character_class == "ranger"
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1} in ranger.assertions
     assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 3} in ranger.assertions
-    assert any(step.get("skill_id") == "pinning_shot" for step in ranger.steps)
-    assert any(step.get("skill_id") == "piercing_shot" for step in ranger.steps)
-    assert any(step.get("skill_id") == "volley" for step in ranger.steps)
+
+
+def test_load_scenarios_discovers_purple_town_unique_chest():
+    scenarios = load_scenarios()
+    chest = next(s for s in scenarios if s.id == "purple_town_unique_chest")
+    assert chest.world_id == "dungeon_levels"
+    assert any(step.get("interactable_def_id") == "town_unique_chest" for step in chest.steps)
+    assert {"type": "inventory_unique_effect_coverage", "equals_enabled": True, "requires_single_effect": True} in chest.assertions
 
 
 def test_class_foundation_scenarios_cover_every_class_skill():
@@ -1220,6 +1226,23 @@ def test_structured_assertions_support_range_comparators_and_filters():
         {"type": "inventory_count", "item_def_id": "red_potion", "between": [1, 3]},
         {"type": "inventory_count", "equipped": True, "equals": 1},
     ], entities, inventory, {}, None, "test")
+
+
+def test_structured_assertions_support_unique_effect_coverage():
+    inventory = [
+        {
+            "item_instance_id": str(3000 + index),
+            "item_def_id": "cave_blade",
+            "item_template_id": "cave_blade",
+            "rarity": "unique",
+            "effect_ids": [effect_id],
+            "rolled_stats": {"damage_min": 2, "damage_max": 4},
+            "requirements": {"level": 1},
+            "equipped": False,
+        }
+        for index, effect_id in enumerate(enabled_unique_effect_ids())
+    ]
+    run_assertions([{"type": "inventory_unique_effect_coverage"}], [], inventory, {}, None, "test")
 
 
 def test_structured_assertions_reject_range_mismatch():

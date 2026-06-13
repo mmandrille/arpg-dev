@@ -50,6 +50,7 @@ func _run() -> void:
 	)
 	_assert_true("skillbar tooltip includes rank", str(state.get("tooltip_text", "")).contains("Rank 0 / 5"))
 	_assert_true("skillbar tooltip includes mana", str(state.get("tooltip_text", "")).contains("Mana:"))
+	_assert_true("skillbar tooltip includes next-rank damage", str(state.get("tooltip_text", "")).contains("Next rank:\nDamage: 4-6 -> 5-7"))
 	_assert_true("skillbar tooltip includes requirements", str(state.get("tooltip_text", "")).contains("Requires:"))
 	bar._slot.pressed.emit()
 	_assert_eq("slot click opens skills panel", int(open_count["count"]), 1)

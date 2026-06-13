@@ -89,6 +89,7 @@ func _run() -> void:
 		_assert_true("tooltip opens under hovered skill", float(tooltip_position.get("y", 0.0)) >= magic_block.position.y + magic_block.size.y)
 	_assert_eq("tooltip ignores mouse so skill remains clickable", int(state.get("tooltip_mouse_filter", -1)), Control.MOUSE_FILTER_IGNORE)
 	_assert_true("tooltip includes mana from catalog", str(state.get("tooltip_body", "")).contains("Mana: %d" % magic_bolt_mana_cost))
+	_assert_true("tooltip includes next-rank damage", str(state.get("tooltip_body", "")).contains("Next rank:\nDamage: 4-6 -> 5-7"))
 	_assert_true("tooltip lists requirements", str(state.get("tooltip_body", "")).contains("Requires:\nLevel %d\nMagic %d" % [magic_bolt_level_req, magic_rank1_req]))
 	panel.bot_leave_skill_tooltip()
 	state = panel.get_debug_state()
@@ -142,6 +143,7 @@ func _run() -> void:
 	_assert_eq("paladin has two compact visible skills", paladin_skill_ids.size(), 2)
 	_assert_eq("paladin first local skill", str(paladin_skill_ids[0]), "heal")
 	_assert_eq("paladin second local skill", str(paladin_skill_ids[1]), "holy_shield")
+	_assert_true("heal tooltip includes next-rank percent", SkillsPanelScript.tooltip_plain_body("heal", 1, panel.skill_progression, panel.character_progression).contains("Heal: 25% -> 35%"))
 	var heal_block := panel._skill_blocks.get("heal", null) as Control
 	var holy_shield_block := panel._skill_blocks.get("holy_shield", null) as Control
 	_assert_true("paladin heal block exists", heal_block != null)
@@ -197,6 +199,11 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_true("rank 2 requirements met at rule-derived magic", bool(state.get("requirements_met", false)))
 	_assert_true("rank 2 spend enabled at magic 8", bool(state.get("spend_button_enabled", false)))
+	panel.bot_leave_skill_tooltip()
+	panel.bot_hover_skill("magic_bolt")
+	state = panel.get_debug_state()
+	var rank_one_magic_tooltip := str(((state.get("skills", {}) as Dictionary).get("magic_bolt", {}) as Dictionary).get("tooltip_body", ""))
+	_assert_true("rank 1 tooltip includes next-rank damage", rank_one_magic_tooltip.contains("Damage: 4-6 -> 5-7"))
 	panel.set_skill_bindings(["", "magic_bolt", "", "", "", "", "", ""], "magic_bolt")
 	state = panel.get_debug_state()
 	_assert_eq("assigned key shown", str(state.get("assigned_key", "")), "F2")

@@ -44,7 +44,7 @@
       },
       "projectile": {
         "range": 18,
-        "speed": 10,
+        "speed": 15,
         "visual": "magic_bolt_projectile"
       },
       "cooldown": {

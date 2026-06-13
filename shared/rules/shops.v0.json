@@ -4,8 +4,8 @@
     "town_vendor": {
       "name": "Town Vendor",
       "fixed_offers": [
-        { "offer_id": "fixed:red_potion", "item_def_id": "red_potion", "buy_price": 20 },
-        { "offer_id": "fixed:blue_potion", "item_def_id": "blue_potion", "buy_price": 20 }
+        { "offer_id": "fixed:red_potion", "item_def_id": "red_potion", "buy_price": 40 },
+        { "offer_id": "fixed:blue_potion", "item_def_id": "blue_potion", "buy_price": 40 }
       ],
       "generated_offers": {
         "offer_count": 5,
@@ -26,10 +26,10 @@
         "sell_multiplier": 0.25,
         "round_buy_to": 5,
         "rarity_multipliers": {
-          "common": 1.0,
-          "magic": 1.6,
-          "rare": 2.4,
-          "unique": 4.0
+          "common": 2.0,
+          "magic": 3.2,
+          "rare": 4.8,
+          "unique": 8.0
         },
         "slot_base": {
           "main_hand": 30,

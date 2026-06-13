@@ -6,7 +6,7 @@
       "display_name": "Red Potion",
       "slot": "",
       "category": "consumable",
-      "buy_price": 20,
+      "buy_price": 40,
       "summary_lines": ["Kind: consumable", "Restores 5 HP"]
     }
   },
@@ -19,7 +19,7 @@
       "display_name": "Magic Cave Blade",
       "slot": "main_hand",
       "category": "equipment",
-      "buy_price": 215,
+      "buy_price": 425,
       "summary_lines": ["Slot: Main hand", "Damage 3-6", "Requires level 1"],
       "comparison": [
         { "stat": "damage_min", "offered": 3, "equipped": 2, "delta": 1 },
@@ -36,7 +36,7 @@
       "display_name": "Magic Cave Shield",
       "slot": "off_hand",
       "category": "equipment",
-      "sell_price": 38,
+      "sell_price": 77,
       "summary_lines": ["Slot: Off hand", "Armor +5", "Block +9%", "Requires level 1"],
       "comparison": [
         { "stat": "armor", "offered": 5, "equipped": 0, "delta": 5 },

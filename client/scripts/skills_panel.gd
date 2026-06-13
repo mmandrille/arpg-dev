@@ -36,12 +36,11 @@ var _tooltip_plain_text: String = ""
 
 
 static func skill_tooltip_text(skill_id: String, rank: int, max_rank: int, skill_progression: Dictionary, character_progression: Dictionary) -> String:
-	var safe_rank := maxi(rank, 1)
 	return "%s\nRank %d / %d\n%s" % [
 		SkillRulesLoader.skill_display_name(skill_id),
 		rank,
 		max_rank,
-		tooltip_plain_body(skill_id, safe_rank, skill_progression, character_progression),
+		tooltip_plain_body(skill_id, rank, skill_progression, character_progression),
 	]
 
 
@@ -68,6 +67,8 @@ static func tooltip_next_rank_lines(skill_id: String, rank: int) -> Array:
 	var def := SkillRulesLoader.skill_definition(skill_id)
 	var max_rank := int(def.get("max_rank", 1))
 	var current_rank := maxi(rank, 1)
+	if rank <= 0:
+		return []
 	if current_rank >= max_rank:
 		return []
 	var next_rank := current_rank + 1
@@ -323,7 +324,7 @@ func get_debug_state() -> Dictionary:
 			"right_click_assigned": _right_click_skill_id == row_skill_id,
 			"requirements_met": _requirements_met(row_requirements),
 			"requirement_status": row_requirements,
-			"tooltip_body": _tooltip_plain_text_for(row_skill_id, maxi(int(row.get("rank", 0)), 1)),
+			"tooltip_body": _tooltip_plain_text_for(row_skill_id, int(row.get("rank", 0))),
 		}
 	return {
 		"visible": visible,
@@ -507,7 +508,7 @@ func _render() -> void:
 	if _tooltip_title != null:
 		_tooltip_title.text = _skill_name(skill_id)
 	_tooltip_rank.text = "Rank %d / %d" % [rank, max_rank]
-	_set_tooltip_body(skill_id, maxi(rank, 1))
+	_set_tooltip_body(skill_id, rank)
 	for raw_skill_id in _tree_skill_ids():
 		var row_skill_id := str(raw_skill_id)
 		var row_visible := _skill_is_visible(row_skill_id)

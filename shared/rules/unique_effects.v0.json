@@ -159,6 +159,18 @@
       },
       "status": "ready"
     },
+    "replicating_blight": {
+      "id": "replicating_blight",
+      "enabled": true,
+      "display_name": "Replicating Blight",
+      "summary": "Debuffs applied by damaging hero effects are replicated to other enemies within 5 meters of the original target for the same duration.",
+      "hook": "on_hero_damage_dealt",
+      "compatible_item_types": ["sword", "greatsword", "axe", "staff", "bow", "gloves", "ring", "amulet"],
+      "params": {
+        "replicate_radius_tiles": 5
+      },
+      "status": "ready"
+    },
     "pilgrims_momentum": {
       "id": "pilgrims_momentum",
       "enabled": true,

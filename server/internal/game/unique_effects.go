@@ -8,9 +8,10 @@ import (
 const everburningWoundEffectID = "everburning_wound"
 
 const (
-	stormboundEchoEffectID   = "stormbound_echo"
-	executionersMarkEffectID = "executioners_mark"
-	hungerOfTheDeepEffectID  = "hunger_of_the_deep"
+	stormboundEchoEffectID    = "stormbound_echo"
+	executionersMarkEffectID  = "executioners_mark"
+	replicatingBlightEffectID = "replicating_blight"
+	hungerOfTheDeepEffectID   = "hunger_of_the_deep"
 )
 
 type uniqueHeroDamageSource struct {
@@ -247,6 +248,7 @@ func (s *Sim) startUniqueBurnDot(playerID uint64, target *entity, def UniqueEffe
 		TotalTicks:     intPtr(totalTicks),
 		DamageType:     damageType,
 	})
+	s.replicateUniqueBurnDot(playerID, target, s.uniqueBurnDots[uniqueBurnDotKey(def.ID, target.id)], res)
 }
 
 func (s *Sim) advanceUniqueBurnDots(res *TickResult) {

@@ -1131,6 +1131,9 @@ func _test_character_bar_opens_stats_panel() -> void:
 	_assert_eq("character bar is the stats button", str(character_bar_state.get("tooltip_text", "")), "Character")
 	_assert_true("character bar stat badge visible with points", bool(character_bar_state.get("upgrade_badge_visible", false)))
 	_assert_eq("character bar stat badge text", str(character_bar_state.get("upgrade_badge_text", "")), "+")
+	var stat_badge_pos: Dictionary = character_bar_state.get("upgrade_badge_position", {})
+	_assert_true("character bar stat badge is top-left", float(stat_badge_pos.get("x", 99.0)) <= 0.0 and float(stat_badge_pos.get("y", 99.0)) <= 0.0)
+	_assert_true("character bar stat badge is bold", int(character_bar_state.get("upgrade_badge_font_size", 0)) >= 22 and int(character_bar_state.get("upgrade_badge_outline_size", 0)) >= 3)
 	main.skills_panel.visible = true
 	main.inventory_panel.visible = true
 	main.character_bar.open_slot()

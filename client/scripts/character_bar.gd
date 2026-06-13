@@ -40,6 +40,9 @@ func get_debug_state() -> Dictionary:
 		"unspent_stat_points": _unspent_stat_points(),
 		"upgrade_badge_visible": _badge.visible if _badge != null else false,
 		"upgrade_badge_text": _badge.text if _badge != null else "",
+		"upgrade_badge_position": _vec2_debug(_badge.position if _badge != null else Vector2.ZERO),
+		"upgrade_badge_font_size": _badge.label_settings.font_size if _badge != null and _badge.label_settings != null else 0,
+		"upgrade_badge_outline_size": _badge.label_settings.outline_size if _badge != null and _badge.label_settings != null else 0,
 		"slot_text": _slot.text if _slot != null else "",
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
 	}
@@ -106,14 +109,19 @@ func _make_upgrade_badge() -> Label:
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	badge.position = Vector2(34.0, -2.0)
-	badge.size = Vector2(20.0, 20.0)
-	badge.add_theme_font_size_override("font_size", 18)
-	badge.add_theme_color_override("font_color", Color("#5eff62"))
-	badge.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.85))
-	badge.add_theme_constant_override("shadow_offset_x", 1)
-	badge.add_theme_constant_override("shadow_offset_y", 1)
+	badge.position = Vector2(-3.0, -5.0)
+	badge.size = Vector2(24.0, 24.0)
+	var settings := LabelSettings.new()
+	settings.font_size = 22
+	settings.font_color = Color("#5eff62")
+	settings.outline_size = 3
+	settings.outline_color = Color(0.0, 0.0, 0.0, 0.95)
+	badge.label_settings = settings
 	return badge
+
+
+func _vec2_debug(v: Vector2) -> Dictionary:
+	return {"x": v.x, "y": v.y}
 
 
 func _panel_style() -> StyleBoxFlat:

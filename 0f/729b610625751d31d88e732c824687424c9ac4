@@ -1,0 +1,42 @@
+client/tests/test_town_service_bridge.gd
+  s_691f0e84e5587e::t_f438352f4d5afa 1-112
+client/scripts/town_service_bridge.gd
+  s_691f0e84e5587e::t_51ca494bdb8f7e 1-7,10-15,17,19-23,25-29,32-36,38-42,44-46,48-49
+  s_691f0e84e5587e::t_247dc83af06675 8-9,16,18,24,30-31,37,43,47
+client/scripts/main.gd
+  s_691f0e84e5587e::t_51ca494bdb8f7e 27,3436,4178,4267,4328,4335,4347
+scripts/client_smoke.sh
+  s_691f0e84e5587e::t_f438352f4d5afa 107-110,113
+docs/plans/v127_2026-06-13-town-service-bridge-split.md
+  s_691f0e84e5587e::t_3404f32ee6f023 61-62,69
+  s_691f0e84e5587e::t_1a995268f5bafe 3,38-39,42,47-49,54-56,60,63-68
+  s_691f0e84e5587e::t_02f32dc673005b 1-2,4-37,40-41,43-46,50-53,57-59
+docs/specs/v127_spec-town-service-bridge-split.md
+  s_691f0e84e5587e::t_1a995268f5bafe 3
+  s_691f0e84e5587e::t_02f32dc673005b 1-2,4-44
+PROGRESS.md
+  s_691f0e84e5587e::t_25a714a8bc8d8e 448
+  s_691f0e84e5587e::t_1a995268f5bafe 15,18,148,315,445-447
+client/scripts/town_service_bridge.gd.uid
+  s_691f0e84e5587e::t_0266894da8901e 1
+client/tests/test_town_service_bridge.gd.uid
+  s_691f0e84e5587e::t_0266894da8901e 1
+docs/as-built/v127_town-service-bridge-split.md
+  s_691f0e84e5587e::t_1a995268f5bafe 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0f729b610625751d31d88e732c824687424c9ac4",
+  "prompts": {},
+  "sessions": {
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -2,6 +2,7 @@
 .PHONY: validate-shared validate-assets gen-assets gen-anims
 validate-shared: tools ## Validate all shared JSON (protocol, rules, golden) against schemas
 	$(PY) tools/validate_shared.py
+	$(PY) tools/validate_codemap.py
 
 validate-assets: tools ## Validate the asset manifest, runtime .glb paths, and GLB nodes
 	$(PY) tools/assets/validate_assets.py

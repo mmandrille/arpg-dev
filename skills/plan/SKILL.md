@@ -97,6 +97,7 @@ Hotspot / over-limit files touched:
 - [ ] `tools/bot/run.py`
 - [ ] `tools/validate_shared.py`
 - [ ] Other over-limit file from `.maintainability/file-size-baseline.tsv`: `<path or none>`
+- [ ] Did every touched grandfathered file stay at or below its baseline (touch-to-shrink)?
 
 Decision:
 - [ ] Extract focused helper/module/test file as part of this slice, or

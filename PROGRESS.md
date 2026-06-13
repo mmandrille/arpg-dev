@@ -12,7 +12,7 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v137 — `bot-assertion-domain-split` |
+| **Latest completed slice** | v138 — `codemap-and-reduction-ratchet` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
 | **Next slice** | TBD — run `$next` |
@@ -156,6 +156,7 @@ v134_* = unique-inspection-ui
 v135_* = second-named-unique
 v136_* = unique-chest-client-proof
 v137_* = bot-assertion-domain-split
+v138_* = codemap-and-reduction-ratchet
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -333,6 +334,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v135** | `second-named-unique` | Complete (`make ci` green) | [`v135_spec-second-named-unique.md`](docs/specs/v135_spec-second-named-unique.md) | [`v135_2026-06-13-second-named-unique.md`](docs/plans/v135_2026-06-13-second-named-unique.md) | [`as-built`](docs/as-built/v135_second-named-unique.md) |
 | **v136** | `unique-chest-client-proof` | Complete (`make ci` green) | [`v136_spec-unique-chest-client-proof.md`](docs/specs/v136_spec-unique-chest-client-proof.md) | [`v136_2026-06-13-unique-chest-client-proof.md`](docs/plans/v136_2026-06-13-unique-chest-client-proof.md) | [`as-built`](docs/as-built/v136_unique-chest-client-proof.md) |
 | **v137** | `bot-assertion-domain-split` | Complete (`make ci` green) | [`v137_spec-bot-assertion-domain-split.md`](docs/specs/v137_spec-bot-assertion-domain-split.md) | [`v137_2026-06-13-bot-assertion-domain-split.md`](docs/plans/v137_2026-06-13-bot-assertion-domain-split.md) | [`as-built`](docs/as-built/v137_bot-assertion-domain-split.md) |
+| **v138** | `codemap-and-reduction-ratchet` | Complete (`make ci` green) | [`v138_spec-codemap-and-reduction-ratchet.md`](docs/specs/v138_spec-codemap-and-reduction-ratchet.md) | [`v138_2026-06-13-codemap-and-reduction-ratchet.md`](docs/plans/v138_2026-06-13-codemap-and-reduction-ratchet.md) | [`as-built`](docs/as-built/v138_codemap-and-reduction-ratchet.md) |
 
 ---
 
@@ -462,6 +464,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**CODEMAP and the maintainability ratchet are now reduction-oriented.** v138 adds
+`docs/CODEMAP.md` as the domain-to-files index, validates its paths through `make validate-shared`,
+adds lower-bound file-size ratcheting so shrinks lock in, prints the grandfathered-file trend, and
+makes `make ci` run `make maintainability` before the full suite.
 
 **Protocol bot stash assertions now have a focused helper module.** v137 moves stash filtering,
 selection, id lookup, count/gold/capacity assertions, and stash-event matching into

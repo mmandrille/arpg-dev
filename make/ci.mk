@@ -3,5 +3,5 @@
 maintainability: ## Run maintainability ratchet checks
 	./scripts/check-file-size-ratchet.sh
 
-ci: ## Run the full local CI suite (quiet; VERBOSE=1 for full logs)
+ci: maintainability ## Run the full local CI suite (quiet; VERBOSE=1 for full logs)
 	ARPG_ADDR="$(CI_ADDR)" BASE_URL="$(CI_BASE_URL)" ./scripts/ci.sh

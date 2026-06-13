@@ -72,6 +72,8 @@
     "skill.piercing_shot.summary": "Arrow that pierces enemies",
     "skill.pinning_shot.name": "Pinning Shot",
     "skill.pinning_shot.summary": "Arrow that roots one enemy",
+    "skill.volley.name": "Volley",
+    "skill.volley.summary": "Fan of arrows",
     "monster.training_dummy.name": "Training Dummy",
     "monster.training_dummy_reward.name": "Training Dummy",
     "monster.training_dummy_path.name": "Training Dummy",

@@ -73,6 +73,8 @@
     "skill.piercing_shot.summary": "Flecha que atraviesa enemigos",
     "skill.pinning_shot.name": "Disparo inmovilizador",
     "skill.pinning_shot.summary": "Flecha que enraiza a un enemigo",
+    "skill.volley.name": "Andanada",
+    "skill.volley.summary": "Abanico de flechas",
     "stat.armor": "Armadura",
     "stat.block_percent": "Bloqueo",
     "stat.damage_max": "Dano maximo",

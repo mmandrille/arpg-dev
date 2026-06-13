@@ -49,6 +49,14 @@ func _test_ranger_projectiles_use_green_arrow_cues() -> void:
 	_assert_true("pinning shot is green", pinning_mat.albedo_color.g > pinning_mat.albedo_color.r)
 	pinning.free()
 
+	var volley := ProjectileVisualsScript.make_node("volley_arrow_projectile")
+	_assert_true("volley arrow shaft exists", volley.find_child("ArrowShaft", false, false) != null)
+	_assert_true("volley arrow head exists", volley.find_child("ArrowHead", false, false) != null)
+	var volley_shaft := volley.find_child("ArrowShaft", false, false) as MeshInstance3D
+	var volley_mat := volley_shaft.material_override as StandardMaterial3D
+	_assert_true("volley arrow is green", volley_mat.albedo_color.g > volley_mat.albedo_color.r)
+	volley.free()
+
 
 func _test_magic_bolt_remains_blue_energy_bolt() -> void:
 	var bolt := ProjectileVisualsScript.make_node("magic_bolt_projectile")

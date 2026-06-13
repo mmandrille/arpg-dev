@@ -25,6 +25,7 @@ func _run() -> void:
 	_assert_true("manifest-loaded skills include dash", ids.has("dash"))
 	_assert_true("manifest-loaded skills include piercing shot", ids.has("piercing_shot"))
 	_assert_true("manifest-loaded skills include pinning shot", ids.has("pinning_shot"))
+	_assert_true("manifest-loaded skills include volley", ids.has("volley"))
 	_assert_eq("alphabetical first id stable", str(ids[0]), "cleave")
 	_assert_eq("tree-order first skill stable", SkillRulesLoaderScript.first_skill_id(), "cleave")
 
@@ -45,6 +46,8 @@ func _run() -> void:
 	_assert_eq("pinning shot kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("pinning_shot").get("kind", "")), "projectile_attack")
 	_assert_eq("piercing shot max hits", int(SkillRulesLoaderScript.skill_definition("piercing_shot").get("pierce", {}).get("max_hits", 0)), 4)
 	_assert_eq("pinning shot root effect", str(SkillRulesLoaderScript.skill_definition("pinning_shot").get("root", {}).get("effect_id", "")), "pinning_root")
+	_assert_eq("volley kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("volley").get("kind", "")), "projectile_attack")
+	_assert_eq("volley arrow count", int(SkillRulesLoaderScript.skill_definition("volley").get("volley", {}).get("arrow_count", 0)), 5)
 
 	var presentation := SkillRulesLoaderScript.skill_presentation("magic_bolt")
 	_assert_eq("presentation summary key from manifest-listed assets", str(presentation.get("summary_key", "")), "skill.magic_bolt.summary")
@@ -71,6 +74,9 @@ func _run() -> void:
 	_assert_eq("pinning shot presentation shape", str(SkillRulesLoaderScript.skill_presentation("pinning_shot").get("icon", {}).get("shape", "")), "pin")
 	_assert_eq("piercing shot projectile presentation", str(SkillRulesLoaderScript.skill_presentation("piercing_shot").get("projectile_visual", "")), "piercing_shot_projectile")
 	_assert_eq("pinning shot projectile presentation", str(SkillRulesLoaderScript.skill_presentation("pinning_shot").get("projectile_visual", "")), "pinning_shot_projectile")
+	_assert_eq("volley presentation label", str(SkillRulesLoaderScript.skill_presentation("volley").get("icon", {}).get("label", "")), "V")
+	_assert_eq("volley presentation shape", str(SkillRulesLoaderScript.skill_presentation("volley").get("icon", {}).get("shape", "")), "volley")
+	_assert_eq("volley projectile presentation", str(SkillRulesLoaderScript.skill_presentation("volley").get("projectile_visual", "")), "volley_arrow_projectile")
 
 	print("[gdtest] PASS: test_skill_rules_loader (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)

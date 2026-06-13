@@ -73,6 +73,35 @@ func TestRangerPinningShotRootsMonsterMovementUntilExpiry(t *testing.T) {
 	}
 }
 
+func TestRangerVolleyDamagesFanTargetsOnce(t *testing.T) {
+	sim := rangerSkillSim(t, "sess_ranger_volley")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: 2, Y: 2}
+	center := addRangerSkillMonster(sim, Vec2{X: 8, Y: 2}, 40)
+	upper := addRangerSkillMonster(sim, Vec2{X: 8, Y: 4}, 40)
+	lower := addRangerSkillMonster(sim, Vec2{X: 8, Y: 0}, 40)
+	behind := addRangerSkillMonster(sim, Vec2{X: 0, Y: 2}, 40)
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "volley",
+		CorrelationID: "corr_volley",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "volley", Direction: &Vec2{X: 1}},
+	}})
+	assertAck(t, cast, "volley")
+	if countSkillDamageEvents(cast, "volley") < 3 {
+		t.Fatalf("volley damage events = %+v, want at least three", cast.Events)
+	}
+	for _, monster := range []*entity{center, upper, lower} {
+		if monster.hp >= monster.maxHP {
+			t.Fatalf("volley target %d hp=%d/%d, want damaged", monster.id, monster.hp, monster.maxHP)
+		}
+	}
+	if behind.hp != behind.maxHP {
+		t.Fatalf("behind monster hp=%d/%d, want undamaged", behind.hp, behind.maxHP)
+	}
+}
+
 func TestRangerSkillRulesLoad(t *testing.T) {
 	rules := loadRules(t)
 	pierce := rules.Skills["piercing_shot"]
@@ -83,6 +112,10 @@ func TestRangerSkillRulesLoad(t *testing.T) {
 	if pin.Class != "ranger" || pin.Root.EffectID != "pinning_root" || pin.Root.DurationTicks <= 0 || pin.Projectile.Visual != "pinning_shot_projectile" {
 		t.Fatalf("pinning_shot = %+v, want ranger projectile with root", pin)
 	}
+	volley := rules.Skills["volley"]
+	if volley.Class != "ranger" || volley.Volley.ArrowCount < 3 || volley.Volley.SpreadDegrees <= 0 || volley.Projectile.Visual != "volley_arrow_projectile" {
+		t.Fatalf("volley = %+v, want ranger projectile with fan", volley)
+	}
 }
 
 func rangerSkillSim(t *testing.T, sessionID string) *Sim {
@@ -91,8 +124,10 @@ func rangerSkillSim(t *testing.T, sessionID string) *Sim {
 	sim := MustNewSim(sessionID, sessionID+"_seed", rules)
 	sim.progression.CharacterClass = "ranger"
 	sim.progression.BaseStats = rules.CharacterProgression.Classes["ranger"].BaseStats
+	sim.progression.BaseStats.Dex = 14
 	sim.progression.SkillRanks["piercing_shot"] = 1
 	sim.progression.SkillRanks["pinning_shot"] = 1
+	sim.progression.SkillRanks["volley"] = 1
 	ps := sim.defaultPlayer()
 	ps.Progression = sim.progression
 	player := sim.activeLevel().entities[sim.playerID]

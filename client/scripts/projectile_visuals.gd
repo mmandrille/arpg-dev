@@ -8,6 +8,8 @@ static func make_node(projectile_def_id: String = "") -> Node3D:
 		return _make_arrow_projectile(Color(0.48, 1.0, 0.56), Color(0.18, 0.88, 0.32), 1.8, true)
 	if projectile_def_id == "pinning_shot_projectile":
 		return _make_arrow_projectile(Color(0.72, 1.0, 0.42), Color(0.42, 0.92, 0.16), 2.1, false)
+	if projectile_def_id == "volley_arrow_projectile":
+		return _make_arrow_projectile(Color(0.36, 1.0, 0.44), Color(0.16, 0.92, 0.28), 1.9, false)
 	return _make_energy_projectile(projectile_def_id)
 
 

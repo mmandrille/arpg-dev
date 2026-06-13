@@ -504,6 +504,19 @@ def test_load_scenarios_discovers_ranger_piercing_and_pinning_shots():
     assert any(step.get("skill_id") == "piercing_shot" for step in ranger.steps)
 
 
+def test_load_scenarios_discovers_ranger_volley_and_visual_showcase():
+    scenarios = load_scenarios()
+    ranger = next(s for s in scenarios if s.id == "ranger_volley_and_visual_showcase")
+
+    assert ranger.world_id == "ranger_showcase_lab"
+    assert ranger.character_class == "ranger"
+    assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1} in ranger.assertions
+    assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 3} in ranger.assertions
+    assert any(step.get("skill_id") == "pinning_shot" for step in ranger.steps)
+    assert any(step.get("skill_id") == "piercing_shot" for step in ranger.steps)
+    assert any(step.get("skill_id") == "volley" for step in ranger.steps)
+
+
 def test_class_foundation_scenarios_cover_every_class_skill():
     scenarios = load_scenarios()
     result = validate_class_foundation_coverage(ROOT / "shared" / "rules", scenarios)

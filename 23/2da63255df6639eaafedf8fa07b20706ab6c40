@@ -1,0 +1,39 @@
+client/scripts/inventory_panel.gd
+  s_74a7d6f000b3a7::t_0f835215b4c3fc 15,146-149,907-910
+tools/bot/scenarios/61_purple_town_unique_chest.json
+  s_74a7d6f000b3a7::t_1a732a5f63e484 6,13,15-16,20-22
+client/scripts/stash_panel.gd
+  s_74a7d6f000b3a7::t_5e3d425a25c498 27,103,179-191,450,603-606
+  s_74a7d6f000b3a7::t_75e413aeedb455 488-503
+  s_74a7d6f000b3a7::t_63f0e4e6c8fb73 918-948
+  s_74a7d6f000b3a7::t_a696f44ce5cebf 8,129-134,561-579
+tools/bot/run.py
+  s_74a7d6f000b3a7::t_7a19cb1fb389bf 1602-1621,1623-1628,2490
+  s_74a7d6f000b3a7::t_7d94e8f00890f8 2985-2986
+  s_74a7d6f000b3a7::t_2ad1f253e2b9f4 2956-2957
+  s_74a7d6f000b3a7::t_725de5cc9880d1 3700-3701
+  s_74a7d6f000b3a7::t_1e89aa6fb1a474 1622
+client/tests/test_stash_panel.gd
+  s_74a7d6f000b3a7::t_d9cf33276e9d6a 137-146,165-169
+  s_74a7d6f000b3a7::t_95901c63d36d81 218-237
+tools/bot/test_protocol.py
+  s_74a7d6f000b3a7::t_0d7606578b613c 523-525
+client/scripts/main.gd
+  s_74a7d6f000b3a7::t_71b5d9162f1701 1244-1251,4234-4244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "232da63255df6639eaafedf8fa07b20706ab6c40",
+  "prompts": {},
+  "sessions": {
+    "s_74a7d6f000b3a7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec24c-bffc-7952-a214-30c7d845e548",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

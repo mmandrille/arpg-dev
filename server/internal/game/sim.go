@@ -3170,7 +3170,7 @@ func (s *Sim) skillCooldownTicks(def SkillDef) int {
 	if interval < 1 {
 		interval = s.rules.Combat.BaseAttackIntervalTicks
 	}
-	cooldown := int(math.Ceil(float64(interval) * def.Cooldown.Multiplier))
+	cooldown := int(math.Ceil(float64(interval)*def.Cooldown.Multiplier)) + def.Cooldown.FlatTicks
 	if cooldown < 1 {
 		return 1
 	}

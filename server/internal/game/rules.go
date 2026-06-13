@@ -659,6 +659,7 @@ type SkillEffectDef struct {
 type SkillCooldownDef struct {
 	Type       string  `json:"type"`
 	Multiplier float64 `json:"multiplier"`
+	FlatTicks  int     `json:"flat_ticks,omitempty"`
 }
 
 // RollableStatDef is one weighted bounded stat increment.
@@ -2778,6 +2779,9 @@ func validateSkillRules(skills map[string]SkillDef) error {
 		}
 		if skill.Cooldown.Multiplier <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.cooldown.multiplier: must be positive", id)
+		}
+		if skill.Cooldown.FlatTicks < 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.cooldown.flat_ticks: must be non-negative", id)
 		}
 	}
 	return nil

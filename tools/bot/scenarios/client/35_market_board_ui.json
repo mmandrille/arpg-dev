@@ -15,7 +15,7 @@
     { "type": "assert_market_panel_visible", "visible": true },
     { "type": "set_market_publish_price", "price_gold": 25 },
     { "type": "click_market_publish_item", "rolled": true },
-    { "type": "wait_market_panel", "item_def_id": "cave_blade", "price_gold": 25, "at_least": 1, "timeout_s": 15.0 },
-    { "type": "assert_market_listing_rows", "item_def_id": "cave_blade", "price_gold": 25, "at_least": 1 }
+    { "type": "wait_market_panel", "item_def_id": "cave_blade", "price_gold": 25, "seller_owned": true, "at_least": 1, "timeout_s": 15.0 },
+    { "type": "assert_market_listing_rows", "item_def_id": "cave_blade", "price_gold": 25, "seller_owned": true, "at_least": 1 }
   ]
 }

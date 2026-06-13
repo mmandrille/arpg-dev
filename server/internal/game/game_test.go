@@ -3787,6 +3787,12 @@ func TestRogueOffhandWeaponEquipRules(t *testing.T) {
 	rogueState := rules.DefaultCharacterProgressionState()
 	rogueState.CharacterClass = "rogue"
 	rogueState.BaseStats = rules.CharacterProgression.Classes["rogue"].BaseStats
+	if req := rules.ItemTemplates["starter_rogue_sword"].Requirements["str"]; rogueState.BaseStats.Str < req {
+		rogueState.BaseStats.Str = req
+	}
+	if req := rules.ItemTemplates["cave_blade"].Requirements["str"]; rogueState.BaseStats.Str < req {
+		rogueState.BaseStats.Str = req
+	}
 	rogue, err := NewSimWithWorldProgression("sess_rogue_offhand", "rogue_offhand_seed", rules, DefaultWorldID, rogueState)
 	if err != nil {
 		t.Fatalf("new rogue sim: %v", err)

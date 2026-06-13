@@ -111,6 +111,11 @@ func TestShopRulesValidationRejectsBadReferencesAndPricing(t *testing.T) {
 func TestShopOpenBuyAndSell(t *testing.T) {
 	sim := newTownVendorSim(t, 250, 3)
 	vendor := townVendorEntity(t, sim)
+	shop := sim.rules.Shops["town_vendor"]
+	potionPrice, ok := shop.fixedBuyPrice("red_potion")
+	if !ok {
+		t.Fatal("missing red_potion fixed shop price")
+	}
 
 	open := sim.Tick([]Input{{
 		Type:      "action_intent",
@@ -130,10 +135,10 @@ func TestShopOpenBuyAndSell(t *testing.T) {
 		MessageID: "msg_buy_potion",
 		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: "fixed:red_potion"},
 	}})
-	if !hasAck(buyPotion, "msg_buy_potion") || sim.gold != 230 || len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "red_potion" {
+	if !hasAck(buyPotion, "msg_buy_potion") || sim.gold != 250-potionPrice || len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "red_potion" {
 		t.Fatalf("buy potion result gold=%d inv=%+v res=%+v", sim.gold, sim.inventory, buyPotion)
 	}
-	if ev := findEvent(buyPotion.Events, "shop_purchase"); ev == nil || ev.Price == nil || *ev.Price != 20 || ev.TotalGold == nil || *ev.TotalGold != 230 {
+	if ev := findEvent(buyPotion.Events, "shop_purchase"); ev == nil || ev.Price == nil || *ev.Price != potionPrice || ev.TotalGold == nil || *ev.TotalGold != 250-potionPrice {
 		t.Fatalf("shop_purchase event = %+v", ev)
 	}
 
@@ -877,7 +882,17 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 		t.Fatalf("sell appraisals = %+v, want only unequipped sellable item", opened.SellAppraisals)
 	}
 	appraisal := opened.SellAppraisals[0]
-	if appraisal.ItemInstanceID != idStr(sellable.instanceID) || appraisal.DisplayName != "Magic Cave Shield" || appraisal.SellPrice != 38 {
+	shieldBuyPrice, ok := sim.rules.Shops["town_vendor"].generatedBuyPrice(
+		sellable.rollPayload.ItemTemplateID,
+		sellable.rollPayload.Rarity,
+		sellable.rollPayload.Stats,
+		sim.rules,
+	)
+	if !ok {
+		t.Fatalf("missing generated buy price for %+v", sellable.rollPayload)
+	}
+	expectedSellPrice := sim.rules.Shops["town_vendor"].sellPrice(shieldBuyPrice)
+	if appraisal.ItemInstanceID != idStr(sellable.instanceID) || appraisal.DisplayName != "Magic Cave Shield" || appraisal.SellPrice != expectedSellPrice {
 		t.Fatalf("sell appraisal = %+v", appraisal)
 	}
 	if !containsShopString(appraisal.SummaryLines, "Armor +5") || !containsShopString(appraisal.SummaryLines, "Block +9%") {

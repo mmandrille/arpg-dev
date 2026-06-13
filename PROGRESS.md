@@ -16,8 +16,8 @@ Last updated: 2026-06-13
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
 | **Next slice** | v131 — TBD |
-| **Last engineering review** | v120 — [`docs/reviews/20260613_v120-overview.md`](docs/reviews/20260613_v120-overview.md) (2026-06-13) |
-| **Next engineering review** | v130 due before more feature batches |
+| **Last engineering review** | v130 — [`docs/reviews/20260613_v130-overview.md`](docs/reviews/20260613_v130-overview.md) (2026-06-13) |
+| **Next engineering review** | v140 due before more feature batches |
 
 ### Slice numbering note
 
@@ -453,6 +453,12 @@ listing expiration with seller/bidder refunds, bidder-owned offer withdrawal, an
 `market_audit_records` for publish, offer, accept/reject/cancel, purchase, listing cancel, and
 expiration. The accept-offer regression now proves the bidder loses offered items and receives the
 listed item.
+
+**The v130 engineering review is complete.** The review set recommends the next unique-items batch
+keep the purple town unique chest server-authored and deterministic, then follow with fixed named
+unique packages, unique/effect validation split work, and player-facing unique inspection.
+The review pre-task also refreshed the maintainability baseline to current v130 file sizes after
+detecting pre-existing ratchet drift; future slices should avoid growing those large files further.
 
 **Town service inventory bridge wiring is split out of `main.gd`.** v127 adds
 `client/scripts/town_service_bridge.gd` for market/blacksmith context toggles and inventory staging

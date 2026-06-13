@@ -1463,6 +1463,9 @@ func (f *fakeRepo) TransferCharacterItemToAccountStash(context.Context, string, 
 func (f *fakeRepo) TransferAccountStashItemToCharacter(context.Context, string, string, string, string) (store.CharacterItemInstance, error) {
 	return store.CharacterItemInstance{}, nil
 }
+func (f *fakeRepo) TransferAccountStashItemToCharacterWithPlacement(context.Context, string, string, string, string, string, string, bool) (store.CharacterItemInstance, error) {
+	return store.CharacterItemInstance{}, nil
+}
 func (f *fakeRepo) TransferCharacterGoldToAccountStash(context.Context, string, string, int) (int, int, error) {
 	return 0, 0, nil
 }

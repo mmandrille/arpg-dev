@@ -4,7 +4,7 @@
   "world_id": "vendor_lab",
   "seed": "blacksmith_upgrade_ui_118",
   "title": "Blacksmith upgrade UI",
-  "description": "Client funds stash gold, deposits a rolled item, opens the blacksmith, upgrades once, and observes the upgraded stash row.",
+  "description": "Client funds stash gold, keeps a rolled item in inventory, opens the blacksmith, upgrades once, and observes the upgraded staged item.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_loot_count", "min_count": 3, "timeout_s": 10.0 },
@@ -25,13 +25,10 @@
     { "type": "click_stash_deposit_gold", "amount": 100 },
     { "type": "wait_event", "event_type": "stash_gold_deposited", "timeout_s": 15.0 },
     { "type": "assert_stash_gold", "at_least": 100 },
-    { "type": "drag_bag_to_stash", "rolled": true },
-    { "type": "wait_event", "event_type": "stash_item_deposited", "timeout_s": 15.0 },
-    { "type": "wait_stash_panel", "rolled": true, "equals": 1, "timeout_s": 15.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_blacksmith" },
     { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 0, "upgrade_enabled": true, "timeout_s": 15.0 },
     { "type": "click_blacksmith_upgrade", "item_def_id": "cave_blade" },
-    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 1, "stash_gold_equals": 0, "timeout_s": 15.0 },
+    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 1, "timeout_s": 15.0 },
     { "type": "assert_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 1, "upgrade_enabled": false, "status_contains": "Upgraded" }
   ]
 }

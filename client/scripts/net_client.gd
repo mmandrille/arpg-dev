@@ -16,6 +16,7 @@ var token: String = ""
 var account_id: String = ""
 var account_email: String = ""
 var session_id: String = ""
+var character_id: String = ""
 var seed: String = ""
 var world_id: String = ""
 var session_mode: String = ""
@@ -148,7 +149,7 @@ func delete_character(character_id: String) -> bool:
 	return r.get("_code", 0) == 204
 
 
-func create_session(resume_session_id: String = "", requested_world_id: String = "", character_id: String = "", requested_seed: String = "") -> bool:
+func create_session(resume_session_id: String = "", requested_world_id: String = "", requested_character_id: String = "", requested_seed: String = "") -> bool:
 	# resume_session_id rejoins an existing session: the server rehydrates
 	# inventory AND equipped state before the initial session_snapshot (no
 	# protocol change — see spec §4.5). Empty string mints a fresh session.
@@ -158,14 +159,15 @@ func create_session(resume_session_id: String = "", requested_world_id: String =
 	else:
 		if requested_world_id != "":
 			body["world_id"] = requested_world_id
-		if character_id != "":
-			body["character_id"] = character_id
+		if requested_character_id != "":
+			body["character_id"] = requested_character_id
 		if requested_seed != "":
 			body["seed"] = requested_seed
 	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
 		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) in [200, 201] and r.has("body"):
 		session_id = r["body"]["session_id"]
+		character_id = str(r["body"].get("character_id", requested_character_id))
 		seed = r["body"]["seed"]
 		world_id = str(r["body"].get("world_id", "vertical_slice"))
 		session_mode = str(r["body"].get("mode", "solo"))
@@ -176,17 +178,18 @@ func create_session(resume_session_id: String = "", requested_world_id: String =
 	return false
 
 
-func create_listed_coop_session(character_id: String) -> bool:
+func create_listed_coop_session(requested_character_id: String) -> bool:
 	var body := {
 		"mode": "coop",
 		"listed": true,
 		"world_id": "dungeon_levels",
-		"character_id": character_id,
+		"character_id": requested_character_id,
 	}
 	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions",
 		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) == 201 and r.has("body"):
 		session_id = r["body"]["session_id"]
+		character_id = str(r["body"].get("character_id", requested_character_id))
 		seed = r["body"]["seed"]
 		world_id = str(r["body"].get("world_id", "dungeon_levels"))
 		session_mode = str(r["body"].get("mode", "coop"))
@@ -206,11 +209,12 @@ func list_active_sessions() -> Array:
 	return []
 
 
-func join_listed_session(listed_session_id: String, character_id: String) -> bool:
+func join_listed_session(listed_session_id: String, requested_character_id: String) -> bool:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/sessions/%s/join" % listed_session_id,
-		["Authorization: Bearer " + token], JSON.stringify({"character_id": character_id}))
+		["Authorization: Bearer " + token], JSON.stringify({"character_id": requested_character_id}))
 	if r.get("_code", 0) == 200 and r.has("body"):
 		session_id = r["body"]["session_id"]
+		character_id = str(r["body"].get("character_id", requested_character_id))
 		seed = r["body"]["seed"]
 		world_id = str(r["body"].get("world_id", "dungeon_levels"))
 		session_mode = str(r["body"].get("mode", "coop"))
@@ -282,12 +286,33 @@ func create_market_listing(stash_item_id: String, price_gold: int = 0) -> Dictio
 	return {"_error": str(r)}
 
 
+func create_market_listing_from_inventory(item_instance_id: String, p_character_id: String, price_gold: int = 0) -> Dictionary:
+	var body := {"item_instance_id": item_instance_id, "character_id": p_character_id}
+	if price_gold > 0:
+		body["price_gold"] = price_gold
+	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings",
+		["Authorization: Bearer " + token], JSON.stringify(body))
+	if r.get("_code", 0) == 201 and r.has("body"):
+		return r["body"]
+	push_error("create_market_listing_from_inventory failed: %s" % r)
+	return {"_error": str(r)}
+
+
 func create_market_offer(listing_id: String, stash_item_ids: Array) -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/offers" % listing_id,
 		["Authorization: Bearer " + token], JSON.stringify({"stash_item_ids": stash_item_ids}))
 	if r.get("_code", 0) == 201 and r.has("body"):
 		return r["body"]
 	push_error("create_market_offer failed: %s" % r)
+	return {"_error": str(r)}
+
+
+func create_market_offer_from_inventory(listing_id: String, item_instance_ids: Array, p_character_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/offers" % listing_id,
+		["Authorization: Bearer " + token], JSON.stringify({"item_instance_ids": item_instance_ids, "character_id": p_character_id}))
+	if r.get("_code", 0) == 201 and r.has("body"):
+		return r["body"]
+	push_error("create_market_offer_from_inventory failed: %s" % r)
 	return {"_error": str(r)}
 
 
@@ -324,6 +349,15 @@ func upgrade_account_stash_item(stash_item_id: String) -> Dictionary:
 	if r.get("_code", 0) == 200 and r.has("body"):
 		return r["body"]
 	push_error("upgrade_account_stash_item failed: %s" % r)
+	return {"_error": str(r)}
+
+
+func upgrade_inventory_item(item_instance_id: String, p_character_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/items/upgrade",
+		["Authorization: Bearer " + token], JSON.stringify({"item_instance_id": item_instance_id, "character_id": p_character_id}))
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("upgrade_inventory_item failed: %s" % r)
 	return {"_error": str(r)}
 
 

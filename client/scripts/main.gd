@@ -813,6 +813,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		player_anchor.position = Vector3.ZERO
 	if clear_session and client != null:
 		client.session_id = ""
+		client.character_id = ""
 		client.seed = ""
 		client.world_id = ""
 		client.session_mode = ""
@@ -1536,7 +1537,8 @@ func _refresh_inventory_ui() -> void:
 	if blacksmith_panel != null and blacksmith_panel.visible:
 		blacksmith_panel.show_blacksmith(
 			blacksmith_panel.blacksmith_entity_id,
-			stash_items,
+			inventory,
+			gold,
 			stash_gold,
 			_blacksmith_config(),
 			blacksmith_panel.get_debug_state().get("status", "")
@@ -3160,9 +3162,11 @@ func _build_scene() -> void:
 	ui.add_child(bishop_panel)
 	market_panel = MarketPanelScript.new()
 	market_panel.market_action_requested.connect(_on_market_action_requested)
+	market_panel.inventory_context_requested.connect(_on_market_inventory_context_requested)
 	ui.add_child(market_panel)
 	blacksmith_panel = BlacksmithPanelScript.new()
 	blacksmith_panel.upgrade_requested.connect(_on_blacksmith_upgrade_requested)
+	blacksmith_panel.upgrade_inventory_requested.connect(_on_blacksmith_inventory_upgrade_requested)
 	ui.add_child(blacksmith_panel)
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
@@ -3417,6 +3421,14 @@ func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) ->
 		return
 	if intent_type == "stash_equip_item_intent":
 		_send_stash_equip_item_intent(payload)
+		return
+	if intent_type == "market_stage_inventory_item":
+		if market_panel != null:
+			market_panel.stage_inventory_item(str(payload.get("context", "")), payload.get("item", {}))
+		return
+	if intent_type == "blacksmith_stage_inventory_item":
+		if blacksmith_panel != null:
+			blacksmith_panel.stage_inventory_item(payload.get("item", {}))
 		return
 	client.send(intent_type, last_server_tick, payload)
 
@@ -4116,6 +4128,9 @@ func _show_market_panel(ev: Dictionary) -> void:
 	if market_panel == null:
 		return
 	_close_gameplay_panels("market")
+	if inventory_panel != null:
+		inventory_panel.ensure_display_visible()
+		inventory_panel.set_market_context("publish")
 	var next_entity_id := str(ev.get("entity_id", ""))
 	var listings: Array = []
 	var status := "Active listings"
@@ -4127,7 +4142,7 @@ func _show_market_panel(ev: Dictionary) -> void:
 			status = "Could not load market listings"
 		elif listings.is_empty():
 			status = "No active listings"
-	market_panel.show_market(next_entity_id, listings, stash_items, client.account_id if client != null else "", status)
+	market_panel.show_market(next_entity_id, listings, inventory, client.account_id if client != null else "", status)
 	_raise_gameplay_windows()
 
 
@@ -4144,6 +4159,15 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		_remove_market_stash_item(str(payload.get("stash_item_id", "")))
 		if market_panel != null:
 			market_panel.show_status("Item published")
+	elif action == "publish_inventory":
+		result = client.create_market_listing_from_inventory(str(payload.get("item_instance_id", "")), client.character_id, int(payload.get("price_gold", 0)))
+		if result.has("_error"):
+			if market_panel != null:
+				market_panel.show_status("Could not publish item", true)
+			return
+		_remove_inventory_item(str(payload.get("item_instance_id", "")))
+		if market_panel != null:
+			market_panel.show_status("Item published")
 	elif action == "offer":
 		result = client.create_market_offer(str(payload.get("listing_id", "")), payload.get("stash_item_ids", []))
 		if result.has("_error"):
@@ -4152,6 +4176,16 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			return
 		for stash_item_id in payload.get("stash_item_ids", []):
 			_remove_market_stash_item(str(stash_item_id))
+		if market_panel != null:
+			market_panel.show_status("Offer sent")
+	elif action == "offer_inventory":
+		result = client.create_market_offer_from_inventory(str(payload.get("listing_id", "")), payload.get("item_instance_ids", []), client.character_id)
+		if result.has("_error"):
+			if market_panel != null:
+				market_panel.show_status("Could not make offer", true)
+			return
+		for item_instance_id in payload.get("item_instance_ids", []):
+			_remove_inventory_item(str(item_instance_id))
 		if market_panel != null:
 			market_panel.show_status("Offer sent")
 	elif action == "purchase":
@@ -4184,13 +4218,22 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	_refresh_market_panel_data()
 
 
+func _on_market_inventory_context_requested(context: String) -> void:
+	if inventory_panel == null:
+		return
+	if context == "":
+		inventory_panel.clear_market_context()
+	else:
+		inventory_panel.set_market_context(context)
+
+
 func _refresh_market_panel_data() -> void:
 	_refresh_market_board_summary()
 	if market_panel == null or client == null:
 		return
 	var body := client.list_market_listings()
 	var listings: Array = body.get("listings", [])
-	market_panel.show_market(market_panel.market_entity_id, listings, stash_items, client.account_id, market_panel.get_debug_state().get("status", ""))
+	market_panel.show_market(market_panel.market_entity_id, listings, inventory, client.account_id, market_panel.get_debug_state().get("status", ""))
 
 
 func _remove_market_stash_item(stash_item_id: String) -> void:
@@ -4242,23 +4285,30 @@ func _update_market_board_badges(incoming_bids: int, published_listings: int) ->
 func _hide_market_panel() -> void:
 	if market_panel != null:
 		market_panel.hide_display()
+	if inventory_panel != null:
+		inventory_panel.clear_market_context()
 
 
 func _show_blacksmith_panel(ev: Dictionary) -> void:
 	if blacksmith_panel == null:
 		return
 	_close_gameplay_panels("blacksmith")
+	if inventory_panel != null:
+		inventory_panel.ensure_display_visible()
+		inventory_panel.set_blacksmith_context(true)
 	var next_entity_id := str(ev.get("entity_id", ""))
 	stash_items = ev.get("stash_items", stash_items)
 	stash_gold = int(ev.get("stash_gold", stash_gold))
 	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
-	blacksmith_panel.show_blacksmith(next_entity_id, stash_items, stash_gold, _blacksmith_config(), "Choose a stash item to upgrade")
+	blacksmith_panel.show_blacksmith(next_entity_id, inventory, gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade")
 	_raise_gameplay_windows()
 
 
 func _hide_blacksmith_panel() -> void:
 	if blacksmith_panel != null:
 		blacksmith_panel.hide_display()
+	if inventory_panel != null:
+		inventory_panel.set_blacksmith_context(false)
 
 
 func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
@@ -4270,12 +4320,30 @@ func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 			blacksmith_panel.show_status("Could not upgrade item", true)
 		return
 	var item: Dictionary = result.get("item", {})
+	gold = int(result.get("gold", gold))
 	stash_gold = int(result.get("stash_gold", stash_gold))
 	_upsert_stash_item(item)
 	if blacksmith_panel != null:
-		blacksmith_panel.update_after_upgrade(item, stash_gold, int(result.get("cost_gold", 0)))
+		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)))
 	if stash_panel != null and stash_panel.visible:
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
+
+
+func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> void:
+	if client == null or item_instance_id == "":
+		return
+	var result := client.upgrade_inventory_item(item_instance_id, client.character_id)
+	if result.has("_error"):
+		if blacksmith_panel != null:
+			blacksmith_panel.show_status("Could not upgrade item", true)
+		return
+	var item: Dictionary = result.get("item", {})
+	gold = int(result.get("gold", gold))
+	stash_gold = int(result.get("stash_gold", stash_gold))
+	_update_inventory_item(item)
+	if blacksmith_panel != null:
+		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)))
+	_refresh_inventory_ui()
 
 
 func _blacksmith_config() -> Dictionary:

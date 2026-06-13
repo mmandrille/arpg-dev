@@ -1,0 +1,35 @@
+server/internal/game/rogue_skills.go
+  s_8424e1afd55dfd::t_8ae6980207093b 242-266
+server/internal/game/unique_debuff_replication.go
+  s_8424e1afd55dfd::t_a7d1898ee6acaa 5-46
+  s_8424e1afd55dfd::t_b5eda0a07de5e9 1-4,47-131
+server/internal/game/unique_effects.go
+  s_8424e1afd55dfd::t_1f9be014aca8b9 13
+  s_8424e1afd55dfd::t_0615f73e2b760d 251
+  s_8424e1afd55dfd::t_344ece61a08f21 11-12,14
+server/internal/game/unique_debuff_replication_test.go
+  s_8424e1afd55dfd::t_6380aad4ac9635 1-97
+server/internal/game/ranger_skills.go
+  s_8424e1afd55dfd::t_72ab70b44b07f6 220
+shared/golden/item_rolls.json
+  s_8424e1afd55dfd::t_a3a7832495df38 60
+shared/rules/unique_effects.v0.json
+  s_8424e1afd55dfd::t_90a957e2cbbf61 166,170
+  s_8424e1afd55dfd::t_dc9865d0ee367d 162-165,167-169,171-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4298dc1ab6cf2100a1fd5700c7c37de4dfa107dd",
+  "prompts": {},
+  "sessions": {
+    "s_8424e1afd55dfd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec25d-002d-79e1-bdd4-f394ff1f1d98",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -77,6 +77,8 @@
         "mana": { "type": "integer", "minimum": 0 },
         "max_mana": { "type": "integer", "minimum": 0 },
         "monster_def_id": { "type": "string" },
+        "monster_pack_id": { "type": "string" },
+        "monster_pack_leader": { "type": "boolean" },
         "character_id": { "$ref": "#/$defs/prefixed_id" },
         "item_def_id": { "type": "string" },
         "amount": { "type": "integer", "minimum": 1 },

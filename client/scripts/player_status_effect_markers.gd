@@ -10,6 +10,7 @@ const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
 const RAGE_MARKER_NAME := "RageVisualEffect"
 const BURNING_MARKER_NAME := "BurningVisualEffect"
 const ELITE_COMMAND_MARKER_NAME := "EliteCommandVisualEffect"
+const ELITE_COMMAND_RADIUS_PREVIEW_NAME := "EliteCommandRadiusPreview"
 const HOLY_SHIELD_AURA_PULSE_NAME := "HolyShieldAuraPulse"
 const HOLY_SHIELD_TARGET_PULSE_NAME := "HolyShieldTargetPulse"
 const AURA_PULSE_SECONDS := 0.30
@@ -102,6 +103,38 @@ static func sync_elite_command_effect(root: Node3D, active: bool) -> void:
 
 static func has_elite_command_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(ELITE_COMMAND_MARKER_NAME, false, false) != null
+
+
+static func sync_elite_command_radius_preview(root: Node3D, active: bool, radius: float) -> void:
+	if root == null:
+		return
+	var existing := root.find_child(ELITE_COMMAND_RADIUS_PREVIEW_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	var safe_radius := maxf(radius, 0.5)
+	if existing == null:
+		existing = make_elite_command_radius_preview(safe_radius)
+		root.add_child(existing)
+	existing.set_meta("radius", safe_radius)
+	var ring := existing.find_child("EliteCommandRadiusRing", false, false) as MeshInstance3D
+	if ring != null:
+		ring.scale = Vector3.ONE * safe_radius
+
+
+static func has_elite_command_radius_preview(root: Node3D) -> bool:
+	return root != null and root.find_child(ELITE_COMMAND_RADIUS_PREVIEW_NAME, false, false) != null
+
+
+static func elite_command_radius_preview_value(root: Node3D) -> float:
+	if root == null:
+		return 0.0
+	var existing := root.find_child(ELITE_COMMAND_RADIUS_PREVIEW_NAME, false, false) as Node3D
+	if existing == null:
+		return 0.0
+	return float(existing.get_meta("radius", 0.0))
 
 
 static func pulse_holy_shield_aura(root: Node3D, affected_roots: Array, radius: float) -> void:
@@ -307,6 +340,35 @@ static func make_elite_command_effect() -> Node3D:
 	crown.position.y = 1.60
 	crown.material_override = mat
 	marker.add_child(crown)
+	return marker
+
+
+static func make_elite_command_radius_preview(radius: float) -> Node3D:
+	var marker := Node3D.new()
+	marker.name = ELITE_COMMAND_RADIUS_PREVIEW_NAME
+	marker.set_meta("radius", maxf(radius, 0.5))
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.32, 0.74, 1.0, 0.18)
+	mat.emission_enabled = true
+	mat.emission = Color(0.20, 0.64, 1.0)
+	mat.emission_energy_multiplier = 1.6
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.no_depth_test = true
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	var ring := MeshInstance3D.new()
+	ring.name = "EliteCommandRadiusRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.98
+	ring_mesh.outer_radius = 1.0
+	ring_mesh.ring_segments = 96
+	ring.mesh = ring_mesh
+	ring.position.y = 0.06
+	ring.scale = Vector3.ONE * maxf(radius, 0.5)
+	ring.material_override = mat
+	marker.add_child(ring)
 	return marker
 
 

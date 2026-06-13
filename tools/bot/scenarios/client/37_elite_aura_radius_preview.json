@@ -1,0 +1,29 @@
+{
+  "id": "elite_aura_radius_preview",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v112_pack_metadata",
+  "title": "Elite aura radius preview",
+  "description": "Client descends into a generated dungeon and verifies an elite leader shows a display-only command aura radius preview when a follower is server-marked as buffed.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 20.0 },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "has_elite_command_effect": true,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "monster_pack_leader": true,
+      "has_elite_command_radius_preview": true,
+      "elite_command_radius_min": 3.9,
+      "elite_command_radius_max": 4.1,
+      "timeout_s": 10.0
+    }
+  ]
+}

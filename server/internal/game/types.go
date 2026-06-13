@@ -11,10 +11,8 @@ type Vec2 struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
 }
-
 // EntityView is the protocol view of a scene entity.
-// HP/MaxHP are pointers so a value of 0 (a dead monster) is preserved while a
-// loot entity simply omits them.
+// HP/MaxHP preserve dead monsters while loot entities omit them.
 type EntityView struct {
 	ID                string                  `json:"id"`
 	Type              string                  `json:"type"`
@@ -25,6 +23,8 @@ type EntityView struct {
 	MaxMana           *int                    `json:"max_mana,omitempty"`
 	CharacterID       string                  `json:"character_id,omitempty"`
 	MonsterDefID      string                  `json:"monster_def_id,omitempty"`
+	MonsterPackID     string                  `json:"monster_pack_id,omitempty"`
+	MonsterPackLeader bool                    `json:"monster_pack_leader,omitempty"`
 	IsBoss            bool                    `json:"is_boss,omitempty"`
 	BossTemplateID    string                  `json:"boss_template_id,omitempty"`
 	VisualModel       string                  `json:"visual_model,omitempty"`

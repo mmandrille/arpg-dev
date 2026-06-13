@@ -7502,6 +7502,8 @@ func (e *entity) view() EntityView {
 		}
 		if e.kind == monsterEntity {
 			ev.MonsterDefID = e.monsterDefID
+			ev.MonsterPackID = e.monsterPackID
+			ev.MonsterPackLeader = e.monsterPackLeader
 			if e.monsterRarityID != "" {
 				ev.Rarity = e.monsterRarityID
 			}

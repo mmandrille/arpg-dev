@@ -12,9 +12,17 @@ SERVER_DIR := $(ROOT)/server
 # Connection + runtime settings (override on the command line as needed).
 DATABASE_URL ?= postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable
 ADDR ?= :8888
+BASE_URL ?= http://localhost:8888
+PLAY_ADDR ?= $(ADDR)
+PLAY_BASE_URL ?= $(BASE_URL)
+TEST_ADDR ?= :18081
+TEST_BASE_URL ?= http://localhost:18081
+CI_ADDR ?= $(TEST_ADDR)
+CI_BASE_URL ?= $(TEST_BASE_URL)
+BOT_ADDR ?= $(TEST_ADDR)
+BOT_BASE_URL ?= $(TEST_BASE_URL)
 DEV_TOKEN ?= local-dev-token
 DEBUG_TOKEN ?= local-debug-token
-BASE_URL ?= http://localhost:8888
 GODOT ?= godot
 SESSION_ID ?=
 
@@ -38,6 +46,7 @@ help: ## List available commands
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  Output: make test/ci/bot/test-all/client-* are quiet by default. Use VERBOSE=1 (or V=1) for full logs."
+	@echo "  Ports: make play defaults to $(PLAY_BASE_URL); CI/bot defaults to $(TEST_BASE_URL). Override with PLAY_ADDR/PLAY_BASE_URL or CI_ADDR/CI_BASE_URL/BOT_ADDR/BOT_BASE_URL."
 
 .PHONY: skill-visual
 skill-visual: ## Run a bot-visual replay for a skill: make skill-visual skill=holy_shield rank=1

@@ -15,14 +15,14 @@ client-unit: ## Run Godot headless unit tests (quiet; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" CLIENT_UNIT_ONLY=1 ./scripts/client_smoke.sh
 
 client-smoke: ## Run Godot headless client smoke test (quiet; VERBOSE=1 for full logs)
-	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" ./scripts/client_smoke.sh
+	GODOT="$(GODOT)" BASE_URL="$(TEST_BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" ./scripts/client_smoke.sh
 
 skill-logo-sheet: tools ## Render current skill logos and labels to an SVG image
 	@mkdir -p "$$(dirname "$(SKILL_LOGO_SHEET_OUT)")"
 	$(PY) tools/assets/skill_logo_sheet.py --out "$(abspath $(SKILL_LOGO_SHEET_OUT))"
 
 play: db-up ## Play locally: pass a client count as `make play 3` for menu co-op
-	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" ./scripts/play.sh
+	GODOT="$(GODOT)" ARPG_ADDR="$(PLAY_ADDR)" BASE_URL="$(PLAY_BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" ./scripts/play.sh
 
 play-remote: ## Launch menu client(s) against an existing backend: `BASE_URL=https://... make play-remote 3`
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" ./scripts/play_remote.sh

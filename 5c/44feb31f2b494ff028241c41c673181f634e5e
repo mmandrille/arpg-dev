@@ -1,0 +1,50 @@
+docs/as-built/v132_fixed-named-unique-package.md
+  s_beaba83981e74e::t_4b0465ddbe65f4 1-35
+docs/plans/v132_2026-06-13-fixed-named-unique-package.md
+  s_beaba83981e74e::t_4b0465ddbe65f4 3,103-104,113,118
+tools/bot/run.py
+  s_beaba83981e74e::t_4f582e46929d0d 1171-1176,2693-2697
+  s_beaba83981e74e::t_25c3e7618c8784 1150-1155
+  s_beaba83981e74e::t_9011dc3d7e0ae9 764,769,1032,1034-1035,1041
+PROGRESS.md
+  s_beaba83981e74e::t_4b0465ddbe65f4 15,18,153,325,455-458
+tools/bot/scenarios/54_offensive_unique_effects.json
+  s_beaba83981e74e::t_76493c13094a44 4
+tools/bot/scenarios/57_live_unique_drops_all_effects.json
+  s_beaba83981e74e::t_2d4b3034a22f68 4
+tools/bot/scenarios/client/06_use_potion_hotbar.json
+  s_beaba83981e74e::t_00495f11acce2c 5-6,13,15,18-20,24,26
+tools/bot/scenarios/53_unique_burn_effect_live.json
+  s_beaba83981e74e::t_56191a60a58923 4
+tools/bot/scenarios/06_ranged_lab.json
+  s_beaba83981e74e::t_062bb892621528 31
+tools/bot/scenarios/56_resource_support_mobility_unique_effects.json
+  s_beaba83981e74e::t_fd7dddc121b591 4
+tools/bot/scenarios/08_heal_lab.json
+  s_beaba83981e74e::t_c93f519b8f1644 17-18
+  s_beaba83981e74e::t_968c516fd5558f 11,13
+.maintainability/file-size-baseline.tsv
+  s_beaba83981e74e::t_b9a76670614058 7,11,16,32-33
+tools/bot/scenarios/client/10_full_equipment.json
+  s_beaba83981e74e::t_00495f11acce2c 15,24,29-30
+tools/bot/scenarios/client/33_unique_burn_effect_live.json
+  s_beaba83981e74e::t_dbb833e421a009 5
+docs/specs/v132_spec-fixed-named-unique-package.md
+  s_beaba83981e74e::t_4b0465ddbe65f4 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5c44feb31f2b494ff028241c41c673181f634e5e",
+  "prompts": {},
+  "sessions": {
+    "s_beaba83981e74e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec25d-47e7-77c0-a56a-06124fe8de87",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

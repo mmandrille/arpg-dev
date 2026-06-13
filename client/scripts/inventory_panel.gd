@@ -111,7 +111,7 @@ class InventorySlotButton:
 				panel._handle_double_click(item)
 
 	func _get_drag_data(_at_position: Vector2) -> Variant:
-		if not panel._interactive or item.is_empty():
+		if not panel._interactive or item.is_empty() or bool(item.get("_blocked_by_two_handed", false)):
 			return null
 		panel._drag_data = {"source": slot_kind, "item": item}
 		var preview := Label.new()
@@ -155,6 +155,8 @@ class InventorySlotButton:
 			return null
 		if item.is_empty():
 			return panel._make_text_tooltip(for_text)
+		if bool(item.get("_blocked_by_two_handed", false)):
+			return panel._make_text_tooltip("%s occupies both hands" % str(item.get("display_name", item.get("item_def_id", "Two-handed item"))))
 		return panel._make_item_tooltip(item)
 
 
@@ -260,6 +262,7 @@ func _sync_viewport_size() -> void:
 
 
 func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0, next_hotbar: Array = [], next_hotbar_capacity: int = 2) -> void:
+	ItemRulesLoader.ensure_loaded()
 	inventory = []
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
@@ -473,7 +476,7 @@ func _render() -> void:
 	if _bag_grid == null:
 		return
 	for slot in EQUIPMENT_SLOTS:
-		_fill_slot(_equipment_slots.get(slot, null), _equipped_item(str(slot)))
+		_fill_slot(_equipment_slots.get(slot, null), _equipment_slot_display_item(str(slot)))
 	for child in _bag_grid.get_children():
 		child.queue_free()
 	var bag_items := _bag_items()
@@ -544,9 +547,15 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 	slot.text = ""
 	slot.tooltip_text = _tooltip(item)
 	var rarity := str(item.get("rarity", "common"))
-	slot.add_theme_stylebox_override("normal", _item_slot_style(rarity, false))
-	slot.add_theme_stylebox_override("hover", _item_slot_style(rarity, true))
-	slot.add_theme_stylebox_override("pressed", _item_slot_style(rarity, true))
+	if bool(item.get("_blocked_by_two_handed", false)):
+		slot.tooltip_text = "%s occupies both hands" % str(item.get("display_name", item.get("item_def_id", "Two-handed item")))
+		slot.add_theme_stylebox_override("normal", _blocked_slot_style(false))
+		slot.add_theme_stylebox_override("hover", _blocked_slot_style(true))
+		slot.add_theme_stylebox_override("pressed", _blocked_slot_style(true))
+	else:
+		slot.add_theme_stylebox_override("normal", _item_slot_style(rarity, false))
+		slot.add_theme_stylebox_override("hover", _item_slot_style(rarity, true))
+		slot.add_theme_stylebox_override("pressed", _item_slot_style(rarity, true))
 	slot.queue_redraw()
 
 
@@ -570,7 +579,11 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
 	var rect := Rect2(Vector2.ZERO, slot.size)
 	var label := str(icon.get("label", _short_label(def_id)))
-	ItemIconDrawerScript.draw(slot, rect, icon, label, false, 0.38, ICON_FONT_SIZE)
+	var blocked := bool(item.get("_blocked_by_two_handed", false))
+	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked, 0.38, ICON_FONT_SIZE)
+	if blocked:
+		slot.draw_rect(rect.grow(-3.0), Color(0.05, 0.05, 0.05, 0.46), true)
+		return
 	_draw_hotbar_badge(slot, item)
 
 
@@ -767,6 +780,13 @@ func _empty_slot_style(hover: bool) -> StyleBoxFlat:
 	return s
 
 
+func _blocked_slot_style(hover: bool) -> StyleBoxFlat:
+	var s := _empty_slot_style(hover)
+	s.bg_color = Color("#2f302f") if hover else Color("#202120")
+	s.border_color = Color("#96928a") if hover else Color("#6f6b64")
+	return s
+
+
 func _paper_doll_style() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = Color("#171715")
@@ -933,6 +953,33 @@ func _equipped_item(slot: String) -> Dictionary:
 		if str(item.get("item_instance_id", "")) == str(item_id):
 			return item
 	return {}
+
+
+func _equipment_slot_display_item(slot: String) -> Dictionary:
+	var item := _equipped_item(slot)
+	if not item.is_empty():
+		return item
+	if slot == "off_hand":
+		var main_hand := _equipped_item("main_hand")
+		if _item_occupies_off_hand(main_hand):
+			var blocked := main_hand.duplicate(true)
+			blocked["_blocked_by_two_handed"] = true
+			blocked["_blocked_slot"] = "off_hand"
+			return blocked
+	return {}
+
+
+func _item_occupies_off_hand(item: Dictionary) -> bool:
+	if item.is_empty():
+		return false
+	var def := _item_definition_for_item(item)
+	if str(def.get("handedness", "")) == "two_handed":
+		return true
+	var occupies = def.get("occupies_hands", [])
+	if typeof(occupies) == TYPE_ARRAY and (occupies as Array).has("off_hand"):
+		return true
+	var item_occupies = item.get("occupies_hands", [])
+	return typeof(item_occupies) == TYPE_ARRAY and (item_occupies as Array).has("off_hand")
 
 
 func _is_equipped_instance(item_instance_id: String) -> bool:
@@ -1486,13 +1533,16 @@ func _debug_paper_doll_slots() -> Dictionary:
 	var out := {}
 	for slot in EQUIPMENT_SLOTS:
 		var btn: InventorySlotButton = _equipment_slots.get(str(slot), null)
+		var display_item := _equipment_slot_display_item(str(slot))
 		out[str(slot)] = {
 			"exists": btn != null,
 			"position": {
 				"x": btn.position.x if btn != null else 0.0,
 				"y": btn.position.y if btn != null else 0.0,
 			},
-			"empty": _equipped_item(str(slot)).is_empty(),
+			"empty": display_item.is_empty(),
+			"blocked_by_two_handed": bool(display_item.get("_blocked_by_two_handed", false)),
+			"item_def_id": str(display_item.get("item_def_id", "")),
 			"label": str(EQUIPMENT_LABELS.get(str(slot), str(slot))),
 		}
 	return out

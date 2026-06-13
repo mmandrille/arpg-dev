@@ -66,6 +66,9 @@ func TestMarketPurchaseRouteTransfersGoldAndItem(t *testing.T) {
 	if purchased.Status != store.MarketListingAccepted || purchased.PriceGold != 75 {
 		t.Fatalf("purchased listing = %+v", purchased)
 	}
+	if purchased.DeliveredItem == nil || purchased.DeliveredItem.StashItemID != "market_buy_listing_stash_"+suffix || purchased.DeliveredItem.ItemDefID != "rusty_sword" {
+		t.Fatalf("purchase delivered item = %+v", purchased.DeliveredItem)
+	}
 	sellerGold, err := db.GetOrCreateAccountStashGold(ctx, sellerID)
 	if err != nil {
 		t.Fatal(err)

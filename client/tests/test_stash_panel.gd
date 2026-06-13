@@ -137,6 +137,13 @@ func _run() -> void:
 	_assert_true("test equip slot kind recognized", inventory_panel._slot_kind_is_equipment("equip:main_hand"))
 	_assert_true("test stash item can equip to main hand", inventory_panel._item_can_equip_to(stash_items[0], "main_hand"))
 	_assert_false("non-rogue cannot equip main-hand weapon to off hand", inventory_panel._item_can_equip_to(inventory[0], "off_hand"))
+	inventory_panel.set_inventory_state([
+		{"item_instance_id": "2003", "item_def_id": "training_bow", "slot": "main_hand", "equipped": true, "rarity": "common"},
+	], {"main_hand": "2003"})
+	var paper_slots: Dictionary = inventory_panel.get_debug_state().get("paper_doll_slots", {})
+	var off_hand_slot: Dictionary = paper_slots.get("off_hand", {})
+	_assert_true("two-handed weapon greys off hand", bool(off_hand_slot.get("blocked_by_two_handed", false)))
+	_assert_eq("two-handed off hand shows weapon icon", str(off_hand_slot.get("item_def_id", "")), "training_bow")
 	inventory_panel.set_character_progression({"character_class": "rogue"})
 	_assert_true("rogue can equip one-handed weapon to off hand", inventory_panel._item_can_equip_to(inventory[0], "off_hand"))
 	inventory_panel._handle_drop_on_slot("equip:main_hand", {

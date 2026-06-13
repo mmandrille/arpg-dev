@@ -1547,7 +1547,7 @@ func _refresh_inventory_ui() -> void:
 		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold, hotbar, hotbar_capacity)
 	if shop_panel != null and shop_panel.visible:
 		shop_panel.set_inventory_state(inventory, equipped, gold)
-	if stash_panel != null and stash_panel.visible:
+	if stash_panel != null:
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
 		stash_panel.set_inventory_state(inventory, equipped, gold, hotbar)
 	if bishop_panel != null and bishop_panel.visible:
@@ -4268,6 +4268,11 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			if market_panel != null:
 				market_panel.show_status("Could not purchase listing", true)
 			return
+		var delivered_item_raw = result.get("delivered_item", {})
+		var delivered_item: Dictionary = delivered_item_raw if typeof(delivered_item_raw) == TYPE_DICTIONARY else {}
+		if not delivered_item.is_empty():
+			_upsert_stash_item(delivered_item)
+			_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Listing purchased")
 	elif action == "list_offers":

@@ -23,15 +23,16 @@ func (s *Server) registerMarketRoutes(mux *http.ServeMux) {
 }
 
 type marketListingResponse struct {
-	ListingID       string          `json:"listing_id"`
-	SellerAccountID string          `json:"seller_account_id"`
-	StashItemID     string          `json:"stash_item_id"`
-	ItemDefID       string          `json:"item_def_id"`
-	RolledStats     json.RawMessage `json:"rolled_stats"`
-	PriceGold       int             `json:"price_gold"`
-	Status          string          `json:"status"`
-	CreatedAt       string          `json:"created_at"`
-	UpdatedAt       string          `json:"updated_at"`
+	ListingID       string                    `json:"listing_id"`
+	SellerAccountID string                    `json:"seller_account_id"`
+	StashItemID     string                    `json:"stash_item_id"`
+	ItemDefID       string                    `json:"item_def_id"`
+	RolledStats     json.RawMessage           `json:"rolled_stats"`
+	PriceGold       int                       `json:"price_gold"`
+	Status          string                    `json:"status"`
+	CreatedAt       string                    `json:"created_at"`
+	UpdatedAt       string                    `json:"updated_at"`
+	DeliveredItem   *accountStashItemResponse `json:"delivered_item,omitempty"`
 }
 
 type listMarketListingsResponse struct {
@@ -204,7 +205,10 @@ func (s *Server) handlePurchaseMarketListing(w http.ResponseWriter, r *http.Requ
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not purchase market listing")
 		return
 	}
-	writeJSON(w, http.StatusOK, marketListingResponseFromStore(listing))
+	response := marketListingResponseFromStore(listing)
+	delivered := accountStashItemResponseFromMarketListing(listing)
+	response.DeliveredItem = &delivered
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) handleCreateMarketOffer(w http.ResponseWriter, r *http.Request) {
@@ -365,6 +369,18 @@ func marketListingResponseFromStore(listing store.MarketListing) marketListingRe
 		CreatedAt:       listing.CreatedAt.UTC().Format(time.RFC3339Nano),
 		UpdatedAt:       listing.UpdatedAt.UTC().Format(time.RFC3339Nano),
 	}
+}
+
+func accountStashItemResponseFromMarketListing(listing store.MarketListing) accountStashItemResponse {
+	rolled := listing.RolledStats
+	if len(rolled) == 0 {
+		rolled = json.RawMessage(`{}`)
+	}
+	return accountStashItemResponseFromStore(store.AccountStashItem{
+		StashItemID: listing.StashItemID,
+		ItemDefID:   listing.ItemDefID,
+		RolledStats: rolled,
+	})
 }
 
 func marketOfferResponseFromStore(offer store.MarketOffer) marketOfferResponse {

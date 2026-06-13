@@ -8,77 +8,139 @@
       "first_grant_level": 1
     },
     "level_cases": [
-      { "level": 1, "expected_unspent_stat_points": 0, "expected_unspent_skill_points": 1 },
-      { "level": 2, "expected_unspent_stat_points": 3, "expected_unspent_skill_points": 1 },
-      { "level": 3, "expected_unspent_stat_points": 6, "expected_unspent_skill_points": 1 },
-      { "level": 6, "expected_unspent_stat_points": 15, "expected_unspent_skill_points": 2 }
+      {
+        "level": 1,
+        "expected_unspent_stat_points": 0,
+        "expected_unspent_skill_points": 1
+      },
+      {
+        "level": 2,
+        "expected_unspent_stat_points": 3,
+        "expected_unspent_skill_points": 1
+      },
+      {
+        "level": 3,
+        "expected_unspent_stat_points": 6,
+        "expected_unspent_skill_points": 1
+      },
+      {
+        "level": 6,
+        "expected_unspent_stat_points": 15,
+        "expected_unspent_skill_points": 2
+      }
     ]
   },
   "attack_speed": {
-    "base_attack_interval_ticks": 16,
+    "base_attack_interval_ticks": 14,
     "min_effective_attack_speed": 0.25,
-    "max_effective_attack_speed": 3.0,
+    "max_effective_attack_speed": 3,
     "cases": [
       {
         "name": "baseline_rusty_sword",
         "dex_attack_speed": 1.28125,
-        "weapon_attack_speed": 1.0,
+        "weapon_attack_speed": 1,
         "item_attack_speed_percent": 0,
         "expected_effective_attack_speed": 1.28125,
-        "expected_attack_interval_ticks": 13,
-        "expected_magic_bolt_cooldown_ticks": 26
+        "expected_attack_interval_ticks": 11,
+        "expected_magic_bolt_cooldown_ticks": 22
       },
       {
         "name": "greatsword_slow",
         "dex_attack_speed": 1.28125,
-        "weapon_attack_speed": 0.70,
+        "weapon_attack_speed": 0.7,
         "item_attack_speed_percent": 0,
         "expected_effective_attack_speed": 0.896875,
-        "expected_attack_interval_ticks": 18,
-        "expected_magic_bolt_cooldown_ticks": 36
+        "expected_attack_interval_ticks": 16,
+        "expected_magic_bolt_cooldown_ticks": 32
       },
       {
         "name": "positive_speed_item",
         "dex_attack_speed": 1.28125,
-        "weapon_attack_speed": 1.0,
+        "weapon_attack_speed": 1,
         "item_attack_speed_percent": 10,
         "expected_effective_attack_speed": 1.409375,
-        "expected_attack_interval_ticks": 12,
-        "expected_magic_bolt_cooldown_ticks": 24
+        "expected_attack_interval_ticks": 10,
+        "expected_magic_bolt_cooldown_ticks": 20
       },
       {
         "name": "negative_speed_item",
         "dex_attack_speed": 1.28125,
-        "weapon_attack_speed": 1.0,
+        "weapon_attack_speed": 1,
         "item_attack_speed_percent": -20,
         "expected_effective_attack_speed": 1.025,
-        "expected_attack_interval_ticks": 16,
-        "expected_magic_bolt_cooldown_ticks": 32
+        "expected_attack_interval_ticks": 14,
+        "expected_magic_bolt_cooldown_ticks": 28
       }
     ]
   },
   "skill": {
     "skill_id": "magic_bolt",
     "class": "sorcerer",
-    "tree": { "tier": 1, "column": 1 },
+    "tree": {
+      "tier": 1,
+      "column": 1
+    },
     "kind": "projectile_attack",
     "max_rank": 5,
     "requirements": {
       "level": 1,
       "level_per_rank": 1,
-      "stats": { "magic": 5 },
-      "stats_per_rank": { "magic": 3 },
+      "stats": {
+        "magic": 5
+      },
+      "stats_per_rank": {
+        "magic": 3
+      },
       "skills": []
     },
     "rank_requirement_cases": [
-      { "rank": 1, "level": 1, "stats": { "magic": 5 } },
-      { "rank": 2, "level": 2, "stats": { "magic": 8 } },
-      { "rank": 5, "level": 5, "stats": { "magic": 17 } }
+      {
+        "rank": 1,
+        "level": 1,
+        "stats": {
+          "magic": 5
+        }
+      },
+      {
+        "rank": 2,
+        "level": 2,
+        "stats": {
+          "magic": 8
+        }
+      },
+      {
+        "rank": 5,
+        "level": 5,
+        "stats": {
+          "magic": 17
+        }
+      }
     ],
     "rank_cases": [
-      { "rank": 1, "mana_cost": 3, "damage": { "min": 4, "max": 6 } },
-      { "rank": 2, "mana_cost": 3, "damage": { "min": 5, "max": 7 } },
-      { "rank": 5, "mana_cost": 3, "damage": { "min": 8, "max": 10 } }
+      {
+        "rank": 1,
+        "mana_cost": 3,
+        "damage": {
+          "min": 4,
+          "max": 6
+        }
+      },
+      {
+        "rank": 2,
+        "mana_cost": 3,
+        "damage": {
+          "min": 5,
+          "max": 7
+        }
+      },
+      {
+        "rank": 5,
+        "mana_cost": 3,
+        "damage": {
+          "min": 8,
+          "max": 10
+        }
+      }
     ]
   }
 }

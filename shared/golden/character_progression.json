@@ -11,7 +11,12 @@
     {
       "name": "initial",
       "experience": 0,
-      "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+      "base_stats": {
+        "str": 5,
+        "dex": 5,
+        "vit": 5,
+        "magic": 5
+      },
       "starting_unspent_stat_points": 0,
       "expected": {
         "level": 1,
@@ -19,13 +24,18 @@
         "next_level_xp": 20,
         "unspent_stat_points": 0,
         "unspent_skill_points": 1,
-        "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+        "base_stats": {
+          "str": 5,
+          "dex": 5,
+          "vit": 5,
+          "magic": 5
+        },
         "derived_stats": {
           "damage_min": 2,
           "damage_max": 4,
           "armor": 1,
           "attack_speed": 1.53125,
-          "attack_interval_ticks": 11,
+          "attack_interval_ticks": 10,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
           "crit_damage": 1.525,
@@ -40,7 +50,12 @@
     {
       "name": "xp_below_threshold",
       "experience": 10,
-      "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+      "base_stats": {
+        "str": 5,
+        "dex": 5,
+        "vit": 5,
+        "magic": 5
+      },
       "starting_unspent_stat_points": 0,
       "expected": {
         "level": 1,
@@ -48,13 +63,18 @@
         "next_level_xp": 20,
         "unspent_stat_points": 0,
         "unspent_skill_points": 1,
-        "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+        "base_stats": {
+          "str": 5,
+          "dex": 5,
+          "vit": 5,
+          "magic": 5
+        },
         "derived_stats": {
           "damage_min": 2,
           "damage_max": 4,
           "armor": 1,
           "attack_speed": 1.53125,
-          "attack_interval_ticks": 11,
+          "attack_interval_ticks": 10,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
           "crit_damage": 1.525,
@@ -69,21 +89,31 @@
     {
       "name": "single_level_up",
       "experience": 20,
-      "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+      "base_stats": {
+        "str": 5,
+        "dex": 5,
+        "vit": 5,
+        "magic": 5
+      },
       "starting_unspent_stat_points": 0,
       "expected": {
         "level": 2,
         "current_level_xp": 0,
-        "next_level_xp": 30,
+        "next_level_xp": 32,
         "unspent_stat_points": 3,
         "unspent_skill_points": 1,
-        "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+        "base_stats": {
+          "str": 5,
+          "dex": 5,
+          "vit": 5,
+          "magic": 5
+        },
         "derived_stats": {
           "damage_min": 2,
           "damage_max": 4,
           "armor": 1,
           "attack_speed": 1.53125,
-          "attack_interval_ticks": 11,
+          "attack_interval_ticks": 10,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
           "crit_damage": 1.525,
@@ -98,21 +128,31 @@
     {
       "name": "multi_level_up",
       "experience": 55,
-      "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+      "base_stats": {
+        "str": 5,
+        "dex": 5,
+        "vit": 5,
+        "magic": 5
+      },
       "starting_unspent_stat_points": 0,
       "expected": {
         "level": 3,
-        "current_level_xp": 5,
-        "next_level_xp": 40,
+        "current_level_xp": 3,
+        "next_level_xp": 45,
         "unspent_stat_points": 6,
         "unspent_skill_points": 1,
-        "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+        "base_stats": {
+          "str": 5,
+          "dex": 5,
+          "vit": 5,
+          "magic": 5
+        },
         "derived_stats": {
           "damage_min": 2,
           "damage_max": 4,
           "armor": 1,
           "attack_speed": 1.53125,
-          "attack_interval_ticks": 11,
+          "attack_interval_ticks": 10,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
           "crit_damage": 1.525,
@@ -127,23 +167,33 @@
     {
       "name": "vit_allocation",
       "experience": 20,
-      "base_stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+      "base_stats": {
+        "str": 5,
+        "dex": 5,
+        "vit": 5,
+        "magic": 5
+      },
       "starting_unspent_stat_points": 0,
       "allocated_stat": "vit",
       "allocated_points": 1,
       "expected": {
         "level": 2,
         "current_level_xp": 0,
-        "next_level_xp": 30,
+        "next_level_xp": 32,
         "unspent_stat_points": 2,
         "unspent_skill_points": 1,
-        "base_stats": { "str": 5, "dex": 5, "vit": 6, "magic": 5 },
+        "base_stats": {
+          "str": 5,
+          "dex": 5,
+          "vit": 6,
+          "magic": 5
+        },
         "derived_stats": {
           "damage_min": 2,
           "damage_max": 4,
           "armor": 1,
           "attack_speed": 1.53125,
-          "attack_interval_ticks": 11,
+          "attack_interval_ticks": 10,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
           "crit_damage": 1.525,
@@ -158,21 +208,31 @@
     {
       "name": "strength_damage_bonus",
       "experience": 20,
-      "base_stats": { "str": 10, "dex": 5, "vit": 5, "magic": 5 },
+      "base_stats": {
+        "str": 10,
+        "dex": 5,
+        "vit": 5,
+        "magic": 5
+      },
       "starting_unspent_stat_points": 0,
       "expected": {
         "level": 2,
         "current_level_xp": 0,
-        "next_level_xp": 30,
+        "next_level_xp": 32,
         "unspent_stat_points": 3,
         "unspent_skill_points": 1,
-        "base_stats": { "str": 10, "dex": 5, "vit": 5, "magic": 5 },
+        "base_stats": {
+          "str": 10,
+          "dex": 5,
+          "vit": 5,
+          "magic": 5
+        },
         "derived_stats": {
           "damage_min": 3,
           "damage_max": 6,
           "armor": 1,
           "attack_speed": 1.53125,
-          "attack_interval_ticks": 11,
+          "attack_interval_ticks": 10,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
           "crit_damage": 1.55,
@@ -187,21 +247,31 @@
     {
       "name": "dex_hit_chance_cap",
       "experience": 20,
-      "base_stats": { "str": 5, "dex": 100, "vit": 5, "magic": 5 },
+      "base_stats": {
+        "str": 5,
+        "dex": 100,
+        "vit": 5,
+        "magic": 5
+      },
       "starting_unspent_stat_points": 0,
       "expected": {
         "level": 2,
         "current_level_xp": 0,
-        "next_level_xp": 30,
+        "next_level_xp": 32,
         "unspent_stat_points": 3,
         "unspent_skill_points": 1,
-        "base_stats": { "str": 5, "dex": 100, "vit": 5, "magic": 5 },
+        "base_stats": {
+          "str": 5,
+          "dex": 100,
+          "vit": 5,
+          "magic": 5
+        },
         "derived_stats": {
           "damage_min": 2,
           "damage_max": 4,
           "armor": 20,
           "attack_speed": 2.125,
-          "attack_interval_ticks": 8,
+          "attack_interval_ticks": 7,
           "hit_chance": 1,
           "crit_chance": 0.25,
           "crit_damage": 1.525,

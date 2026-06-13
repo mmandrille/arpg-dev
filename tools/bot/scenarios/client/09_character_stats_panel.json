@@ -24,7 +24,7 @@
     { "type": "press_key", "keycode": "KEY_I" },
     { "type": "assert_panel_visible", "visible": false },
     { "type": "assert_character_stats_panel_visible", "visible": true },
-    { "type": "assert_xp_bar", "level": 2, "experience": 30, "progress_min": 0.32, "progress_max": 0.34 },
+    { "type": "assert_xp_bar", "level": 2, "experience": 30, "progress_min": 0.31, "progress_max": 0.32 },
     { "type": "press_key", "keycode": "KEY_ESCAPE" },
     { "type": "wait_pause_menu", "timeout_s": 3.0 },
     { "type": "assert_stat_button_enabled", "stat": "vit", "enabled": false },
@@ -36,6 +36,6 @@
     { "type": "click_stat_button", "stat": "vit" },
     { "type": "wait_character_progression", "level": 2, "experience": 30, "unspent_stat_points": 2, "vit": 6, "derived_stats": { "max_hp": 11 }, "player_max_hp": 11, "timeout_s": 5.0 },
     { "type": "assert_character_stats_panel_visible", "visible": true },
-    { "type": "assert_xp_bar", "level": 2, "experience": 30, "progress_min": 0.32, "progress_max": 0.34 }
+    { "type": "assert_xp_bar", "level": 2, "experience": 30, "progress_min": 0.31, "progress_max": 0.32 }
   ]
 }

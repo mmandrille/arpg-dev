@@ -85,7 +85,7 @@
       "name": "Skill XP Dummy",
       "max_hp": 1,
       "loot_table": "no_drop",
-      "xp_reward": 200,
+      "xp_reward": 233,
       "hit_chance": 0.5,
       "crit_chance": 0,
       "crit_damage": 1.5,
@@ -97,7 +97,7 @@
       "name": "Skill XP Dummy",
       "max_hp": 1,
       "loot_table": "no_drop",
-      "xp_reward": 270,
+      "xp_reward": 326,
       "hit_chance": 0.5,
       "crit_chance": 0,
       "crit_damage": 1.5,
@@ -135,14 +135,14 @@
       "aggro_radius": 8,
       "assist_radius": 8,
       "leash_radius": 8,
-      "move_speed": 0.49,
+      "move_speed": 0.392,
       "name_key": "monster.training_dummy_chase.name"
     },
     "dungeon_mob": {
       "name": "Cave Wraith",
       "max_hp": 4,
       "loot_table": "dungeon_mob_drop",
-      "xp_reward": 10,
+      "xp_reward": 5,
       "hit_chance": 0.5,
       "crit_chance": 0,
       "crit_damage": 1.5,
@@ -153,7 +153,7 @@
       "aggro_radius": 6,
       "assist_radius": 8,
       "leash_radius": 10,
-      "move_speed": 0.49,
+      "move_speed": 0.392,
       "attack_damage": {
         "min": 1,
         "max": 2
@@ -165,7 +165,7 @@
       "name": "Cave Archer",
       "max_hp": 4,
       "loot_table": "dungeon_mob_drop",
-      "xp_reward": 10,
+      "xp_reward": 5,
       "hit_chance": 0.5,
       "crit_chance": 0,
       "crit_damage": 1.5,
@@ -176,7 +176,7 @@
       "aggro_radius": 6,
       "assist_radius": 8,
       "leash_radius": 10,
-      "move_speed": 0.42,
+      "move_speed": 0.336,
       "attack_damage": {
         "min": 1,
         "max": 1
@@ -192,7 +192,7 @@
       "name": "Cave Wolf",
       "max_hp": 4,
       "loot_table": "dungeon_mob_drop",
-      "xp_reward": 10,
+      "xp_reward": 5,
       "hit_chance": 0.5,
       "crit_chance": 0,
       "crit_damage": 1.5,
@@ -206,7 +206,7 @@
       "aggro_radius": 6,
       "assist_radius": 8,
       "leash_radius": 10,
-      "move_speed": 0.49,
+      "move_speed": 0.392,
       "attack_damage": {
         "min": 1,
         "max": 2
@@ -218,7 +218,7 @@
       "name": "Cave Bat",
       "max_hp": 4,
       "loot_table": "dungeon_mob_drop",
-      "xp_reward": 10,
+      "xp_reward": 5,
       "hit_chance": 0.5,
       "crit_chance": 0,
       "crit_damage": 1.5,
@@ -232,7 +232,7 @@
       "aggro_radius": 6,
       "assist_radius": 8,
       "leash_radius": 10,
-      "move_speed": 0.49,
+      "move_speed": 0.392,
       "attack_damage": {
         "min": 1,
         "max": 2
@@ -244,21 +244,21 @@
       "name": "Skeleton",
       "max_hp": 8,
       "loot_table": "dungeon_mob_drop",
-      "xp_reward": 12,
+      "xp_reward": 6,
       "hit_chance": 0.5,
       "crit_chance": 0,
       "crit_damage": 1.5,
       "armor": 1,
       "block_percent": 0,
       "resistances": {
-        "poison": 1.0
+        "poison": 1
       },
       "pack_role": "frontline",
       "behavior": "chase",
       "aggro_radius": 6,
       "assist_radius": 8,
       "leash_radius": 10,
-      "move_speed": 0.42,
+      "move_speed": 0.336,
       "attack_damage": {
         "min": 1,
         "max": 2
@@ -357,7 +357,7 @@
       "behavior": "chase",
       "aggro_radius": 4,
       "leash_radius": 6,
-      "move_speed": 0.49,
+      "move_speed": 0.392,
       "attack_damage": {
         "min": 2,
         "max": 2
@@ -378,7 +378,7 @@
       "behavior": "chase",
       "aggro_radius": 4,
       "leash_radius": 6,
-      "move_speed": 0.49,
+      "move_speed": 0.392,
       "attack_damage": {
         "min": 2,
         "max": 2

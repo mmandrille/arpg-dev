@@ -175,6 +175,10 @@ type stashItem struct {
 	rollPayload *ItemRollPayload
 }
 
+type uniqueChestState struct {
+	items []*stashItem
+}
+
 type goldRollContext struct {
 	levelNum        int
 	monsterRarityID string
@@ -299,6 +303,7 @@ type playerState struct {
 	UniqueHungerStacks    map[uint64]uniqueHungerStackState
 	UniqueAshenReprisals  map[uint64]uniqueAshenReprisalState
 	UniquePilgrimMomentum map[uint64]uniquePilgrimMomentumState
+	UniqueChestItems      map[uint64][]*stashItem
 	SkillFunctionKeys     []string
 	RightClickSkillID     string
 	ShopStock             map[string]*shopStockState
@@ -348,6 +353,7 @@ type Sim struct {
 	uniqueHungerStacks    map[uint64]uniqueHungerStackState
 	uniqueAshenReprisals  map[uint64]uniqueAshenReprisalState
 	uniquePilgrimMomentum map[uint64]uniquePilgrimMomentumState
+	uniqueChests          map[uint64]*uniqueChestState
 	areaHealZones         map[uint64]areaHealZoneState
 	skillFunctionKeys     []string
 	rightClickSkillID     string
@@ -427,6 +433,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		uniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
 		uniqueHungerStacks:    make(map[uint64]uniqueHungerStackState),
 		uniqueAshenReprisals:  make(map[uint64]uniqueAshenReprisalState),
+		uniqueChests:          make(map[uint64]*uniqueChestState),
 		areaHealZones:         make(map[uint64]areaHealZoneState),
 		skillFunctionKeys:     make([]string, skillFunctionKeyCount),
 		shopStock:             make(map[string]*shopStockState),
@@ -648,6 +655,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		UniqueHungerStacks:    cloneUniqueHungerStacks(s.uniqueHungerStacks),
 		UniqueAshenReprisals:  cloneUniqueAshenReprisals(s.uniqueAshenReprisals),
 		UniquePilgrimMomentum: cloneUniquePilgrimMomentum(s.uniquePilgrimMomentum),
+		UniqueChestItems:      cloneUniqueChestItems(s.uniqueChests),
 		SkillFunctionKeys:     cloneStringSlice(s.skillFunctionKeys),
 		RightClickSkillID:     s.rightClickSkillID,
 		ShopStock:             s.shopStock,
@@ -1416,6 +1424,7 @@ func (s *Sim) usePlayer(ps *playerState) {
 		s.uniqueAshenReprisals = make(map[uint64]uniqueAshenReprisalState)
 	}
 	s.usePlayerUniquePilgrimMomentum(ps)
+	s.uniqueChests = restoreUniqueChestItems(ps.UniqueChestItems)
 	s.skillFunctionKeys = normalizeSkillFunctionKeys(ps.SkillFunctionKeys)
 	s.rightClickSkillID = ps.RightClickSkillID
 	s.shopStock = ps.ShopStock
@@ -1457,6 +1466,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.UniqueHungerStacks = s.uniqueHungerStacks
 	ps.UniqueAshenReprisals = s.uniqueAshenReprisals
 	ps.UniquePilgrimMomentum = s.uniquePilgrimMomentum
+	ps.UniqueChestItems = cloneUniqueChestItems(s.uniqueChests)
 	ps.SkillFunctionKeys = normalizeSkillFunctionKeys(s.skillFunctionKeys)
 	ps.RightClickSkillID = s.rightClickSkillID
 	ps.ShopStock = s.shopStock
@@ -1488,37 +1498,38 @@ func (s *Sim) CurrentTick() uint64 { return s.tick }
 
 // Input is a decoded client intent applied to a specific tick.
 type Input struct {
-	MessageID          string
-	CorrelationID      string
-	Sequence           int64
-	ActorPlayerID      uint64
-	Type               string
-	Move               *MoveIntent
-	MoveTo             *MoveToIntent
-	DirectionalAttack  *DirectionalAttackIntent
-	Action             *ActionIntent
-	Descend            *DescendIntent
-	Ascend             *AscendIntent
-	Teleport           *TeleportIntent
-	Equip              *EquipIntent
-	Unequip            *UnequipIntent
-	Drop               *DropIntent
-	Use                *UseIntent
-	AssignHotbar       *AssignHotbarIntent
-	UseHotbar          *UseHotbarIntent
-	AllocateStat       *AllocateStatIntent
-	AllocateSkillPoint *AllocateSkillPointIntent
-	CastSkill          *CastSkillIntent
-	SetSkillBindings   *SetSkillBindingsIntent
-	ShopBuy            *ShopBuyIntent
-	ShopSell           *ShopSellIntent
-	ShopReroll         *ShopRerollIntent
-	BishopRespec       *BishopRespecIntent
-	StashDepositItem   *StashDepositItemIntent
-	StashWithdrawItem  *StashWithdrawItemIntent
-	StashDepositGold   *StashDepositGoldIntent
-	StashWithdrawGold  *StashWithdrawGoldIntent
-	CorpseWithdrawItem *CorpseWithdrawItemIntent
+	MessageID           string
+	CorrelationID       string
+	Sequence            int64
+	ActorPlayerID       uint64
+	Type                string
+	Move                *MoveIntent
+	MoveTo              *MoveToIntent
+	DirectionalAttack   *DirectionalAttackIntent
+	Action              *ActionIntent
+	Descend             *DescendIntent
+	Ascend              *AscendIntent
+	Teleport            *TeleportIntent
+	Equip               *EquipIntent
+	Unequip             *UnequipIntent
+	Drop                *DropIntent
+	Use                 *UseIntent
+	AssignHotbar        *AssignHotbarIntent
+	UseHotbar           *UseHotbarIntent
+	AllocateStat        *AllocateStatIntent
+	AllocateSkillPoint  *AllocateSkillPointIntent
+	CastSkill           *CastSkillIntent
+	SetSkillBindings    *SetSkillBindingsIntent
+	ShopBuy             *ShopBuyIntent
+	ShopSell            *ShopSellIntent
+	ShopReroll          *ShopRerollIntent
+	BishopRespec        *BishopRespecIntent
+	StashDepositItem    *StashDepositItemIntent
+	StashWithdrawItem   *StashWithdrawItemIntent
+	StashDepositGold    *StashDepositGoldIntent
+	StashWithdrawGold   *StashWithdrawGoldIntent
+	CorpseWithdrawItem  *CorpseWithdrawItemIntent
+	UniqueChestTakeItem *UniqueChestTakeItemIntent
 }
 
 // Intent payloads.
@@ -1608,6 +1619,10 @@ type (
 	CorpseWithdrawItemIntent struct {
 		CorpseEntityID string
 		ItemInstanceID string
+	}
+	UniqueChestTakeItemIntent struct {
+		ChestEntityID string
+		ChestItemID   string
 	}
 )
 
@@ -6271,6 +6286,9 @@ func (s *Sim) actionable(e *entity) bool {
 			return true
 		}
 		if s.serviceForInteractable(e) != "" && e.state == interactableReady {
+			return true
+		}
+		if s.serviceForInteractable(e) == uniqueTestChestService && e.state == interactableOpen {
 			return true
 		}
 		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)

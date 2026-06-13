@@ -28,7 +28,7 @@
     { "type": "monster_dead", "monster_def_id": "training_dummy_ranged" },
     { "type": "gold", "at_least": 6 },
     { "type": "inventory_contains", "item_def_id": "quest_leaf", "equipped": false },
-    { "type": "inventory_contains", "item_def_id": "red_potion", "equipped": false },
+    { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" },
     {
       "type": "player_never_in_melee_range_of",
       "monster_def_id": "training_dummy_ranged",

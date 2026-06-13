@@ -1,6 +1,6 @@
 # v132 Spec: Fixed Named Unique Package
 
-Status: In progress
+Status: Complete
 Date: 2026-06-13
 Codename: `fixed-named-unique-package`
 

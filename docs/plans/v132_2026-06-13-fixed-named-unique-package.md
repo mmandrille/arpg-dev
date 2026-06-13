@@ -1,6 +1,6 @@
 # v132 Plan — Fixed Named Unique Package
 
-Status: In implementation
+Status: Complete
 Goal: Make `embercall_blade` a deterministic named unique item package and expose it through the purple test chest.
 Architecture: Shared rules own fixed named unique stats and effect ids. Go rules validate and load
 the catalog, then the existing server-authored purple chest appends named unique payloads after its
@@ -100,8 +100,8 @@ Files:
 - Create: `docs/as-built/v132_fixed-named-unique-package.md`
 - Modify: `PROGRESS.md`
 
-- [ ] Step 4.1: Record v132 completion and deferred scope.
-- [ ] Step 4.2: Run final verification.
+- [x] Step 4.1: Record v132 completion and deferred scope.
+- [x] Step 4.2: Run final verification.
 
 ```bash
 make maintainability
@@ -110,9 +110,9 @@ make ci
 
 ## Final Verification
 
-- [ ] `make maintainability`
+- [x] `make maintainability`
 - [x] `make validate-shared`
 - [x] `cd server && go test ./internal/game -run 'TestNamedUnique|TestUniqueTestChest|TestLoadRules'`
 - [x] `.venv/bin/python -m pytest tools/bot/test_protocol.py -q`
 - [x] `make bot scenario=purple_town_unique_chest`
-- [ ] `make ci`
+- [x] `make ci`

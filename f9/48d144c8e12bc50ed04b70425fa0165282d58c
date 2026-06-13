@@ -1,0 +1,25 @@
+client/scripts/market_panel.gd
+  s_a7077bd5daf373::t_051d773e421ff1 6,83,88-89,93-94,113,122-124,256,455,459,499-512,714,749-764
+client/scripts/main.gd
+  s_a7077bd5daf373::t_c12a2385495c8b 3190,4288-4296,4358
+client/tests/test_shop_panel.gd
+  s_a7077bd5daf373::t_e0786fb381ac35 296-298,300-301,362-383
+client/scripts/inventory_panel.gd
+  s_a7077bd5daf373::t_6720710c9335a6 83,193-194,199-211,285-286,496
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f948d144c8e12bc50ed04b70425fa0165282d58c",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+client/tests/test_stash_panel.gd
+  s_ba6d60369dc985::t_d0c177e3596c04 140-146
+server/internal/http/market_purchase_test.go
+  s_ba6d60369dc985::t_783e4e31e3d2c1 69-71
+client/scripts/main.gd
+  s_ba6d60369dc985::t_7abab735117e40 4273-4275
+  s_ba6d60369dc985::t_2907e64d6a5091 1550,4271-4272
+client/scripts/market_panel.gd
+  s_ba6d60369dc985::t_84c0444f45b860 924-925,930,954-955,958,961-962,969-981
+client/scripts/inventory_panel.gd
+  s_ba6d60369dc985::t_de00593dff2309 265
+  s_ba6d60369dc985::t_519d2b836bc8ae 958-984
+  s_ba6d60369dc985::t_ade50d9902a86d 1536,1543-1545
+  s_ba6d60369dc985::t_114ec37e6e7bd9 114,158-159,479,550-558,582-586,783-786
+tools/bot/scenarios/client/36_market_purchase_ui.json
+  s_ba6d60369dc985::t_5c0f2dbabb543b 39-40
+server/internal/http/market.go
+  s_ba6d60369dc985::t_dfe89283d05455 35,208-211,374-383
+client/scripts/smoke.gd
+  s_ba6d60369dc985::t_298e5a857953d5 405-412
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "89d687f0b4835dbf9f75f73b6fca316b01211aad",
+  "prompts": {},
+  "sessions": {
+    "s_ba6d60369dc985": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec157-af30-7c61-8b46-8c4ec504aa0a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

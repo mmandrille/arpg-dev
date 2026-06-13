@@ -303,7 +303,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v118** | `blacksmith-upgrade-ui` | Complete (`make ci` green) | [`v118_spec-blacksmith-upgrade-ui.md`](docs/specs/v118_spec-blacksmith-upgrade-ui.md) | [`v118_2026-06-13-blacksmith-upgrade-ui.md`](docs/plans/v118_2026-06-13-blacksmith-upgrade-ui.md) | [`as-built`](docs/as-built/v118_blacksmith-upgrade-ui.md) |
 | **v119** | `live-unique-drops-all-effects` | Complete (`make ci` green) | [`v119_spec-live-unique-drops-all-effects.md`](docs/specs/v119_spec-live-unique-drops-all-effects.md) | [`v119_2026-06-13-live-unique-drops-all-effects.md`](docs/plans/v119_2026-06-13-live-unique-drops-all-effects.md) | [`as-built`](docs/as-built/v119_live-unique-drops-all-effects.md) |
 | **v120** | `tuning-friendly-rule-tests` | Complete (`make ci` green) | [`v120_spec-tuning-friendly-rule-tests.md`](docs/specs/v120_spec-tuning-friendly-rule-tests.md) | [`v120_2026-06-13-tuning-friendly-rule-tests.md`](docs/plans/v120_2026-06-13-tuning-friendly-rule-tests.md) | [`as-built`](docs/as-built/v120_tuning-friendly-rule-tests.md) |
-| **v121** | `inventory-market-blacksmith-flow` | Approved draft (reserved) | [`v121_spec-inventory-market-blacksmith-flow.md`](docs/specs/v121_spec-inventory-market-blacksmith-flow.md) | [`v121_2026-06-13-inventory-market-blacksmith-flow.md`](docs/plans/v121_2026-06-13-inventory-market-blacksmith-flow.md) | — |
+| **v121** | `inventory-market-blacksmith-flow` | Complete (`make ci` green) | [`v121_spec-inventory-market-blacksmith-flow.md`](docs/specs/v121_spec-inventory-market-blacksmith-flow.md) | [`v121_2026-06-13-inventory-market-blacksmith-flow.md`](docs/plans/v121_2026-06-13-inventory-market-blacksmith-flow.md) | [`as-built`](docs/as-built/v121_inventory-market-blacksmith-flow.md) |
 | **v122** | `ranger-class-foundation` | Complete (`make ci` green) | [`v122_spec-ranger-class-foundation.md`](docs/specs/v122_spec-ranger-class-foundation.md) | [`v122_2026-06-13-ranger-class-foundation.md`](docs/plans/v122_2026-06-13-ranger-class-foundation.md) | [`as-built`](docs/as-built/v122_ranger-class-foundation.md) |
 | **v123** | `ranger-piercing-and-pinning-shots` | Complete (`make ci` green) | [`v123_spec-ranger-piercing-and-pinning-shots.md`](docs/specs/v123_spec-ranger-piercing-and-pinning-shots.md) | [`v123_2026-06-13-ranger-piercing-and-pinning-shots.md`](docs/plans/v123_2026-06-13-ranger-piercing-and-pinning-shots.md) | [`as-built`](docs/as-built/v123_ranger-piercing-and-pinning-shots.md) |
 | **v124** | `ranger-volley-and-visual-scenario` | Complete (`make ci` green) | [`v124_spec-ranger-volley-and-visual-scenario.md`](docs/specs/v124_spec-ranger-volley-and-visual-scenario.md) | [`v124_2026-06-13-ranger-volley-and-visual-scenario.md`](docs/plans/v124_2026-06-13-ranger-volley-and-visual-scenario.md) | [`as-built`](docs/as-built/v124_ranger-volley-and-visual-scenario.md) |
@@ -435,6 +435,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Inventory market and blacksmith actions can stage bag items directly.** v121 shipped
+inventory-origin market listings, inventory-origin multi-item offers, and inventory-origin
+blacksmith upgrades that reserve items server-side before using the existing authoritative stash
+paths. The missing lifecycle closeout was backfilled after audit.
 
 **Ranger is now a playable bow class.** v122 adds Ranger as the fifth class with dexterity-leaning
 stats, a green bow icon, a deterministic tall hooded model, starter bow loadout, and protocol bot

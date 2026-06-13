@@ -1,0 +1,31 @@
+shared/rules/skills.v0.json
+  s_ba6d60369dc985::t_9fa7bfb33796cf 174,184-185
+client/scripts/skills_panel.gd
+  s_ba6d60369dc985::t_d1561874a67e6f 239,241-242,246-254,792,794-795
+server/internal/game/rules.go
+  s_ba6d60369dc985::t_715a5bfa42f3a4 662,2783-2784
+server/internal/game/game_test.go
+  s_ba6d60369dc985::t_9d7132a27dd4b1 234-235,1244-1248
+client/tests/test_skills_panel.gd
+  s_ba6d60369dc985::t_abb9765b8dca44 97
+server/internal/game/sim.go
+  s_ba6d60369dc985::t_022417be24aae9 3173
+shared/rules/skills.v0.schema.json
+  s_ba6d60369dc985::t_263443eadc0211 375-376
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "df26f70e5bf52337c4955c8232853271193896fb",
+  "prompts": {},
+  "sessions": {
+    "s_ba6d60369dc985": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec157-af30-7c61-8b46-8c4ec504aa0a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

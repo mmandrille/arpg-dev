@@ -1002,7 +1002,7 @@ func TestMarketListingMovesStashItemAndCancelReturnsIt(t *testing.T) {
 	}
 
 	listingID := "listing_market_" + suffix
-	listing, err := s.CreateMarketListingFromStash(ctx, acct.ID, stashID, listingID)
+	listing, err := s.CreateMarketListingFromStash(ctx, acct.ID, stashID, listingID, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1181,7 +1181,7 @@ func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	listing, err := s.CreateMarketListingFromStash(ctx, seller.ID, "seller_stash_"+suffix, "listing_offer_"+suffix)
+	listing, err := s.CreateMarketListingFromStash(ctx, seller.ID, "seller_stash_"+suffix, "listing_offer_"+suffix, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1279,7 +1279,7 @@ func TestMarketListingCancelRefundsActiveOffers(t *testing.T) {
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, bidder.ID, bidderChar.ID, "cancel_bidder_item_"+suffix, "cancel_bidder_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	listing, err := s.CreateMarketListingFromStash(ctx, seller.ID, "cancel_seller_stash_"+suffix, "cancel_listing_"+suffix)
+	listing, err := s.CreateMarketListingFromStash(ctx, seller.ID, "cancel_seller_stash_"+suffix, "cancel_listing_"+suffix, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

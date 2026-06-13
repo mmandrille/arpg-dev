@@ -1475,10 +1475,13 @@ func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int,
 func (f *fakeRepo) ListActiveMarketListings(context.Context) ([]store.MarketListing, error) {
 	return nil, nil
 }
-func (f *fakeRepo) CreateMarketListingFromStash(context.Context, string, string, string) (store.MarketListing, error) {
+func (f *fakeRepo) CreateMarketListingFromStash(context.Context, string, string, string, int) (store.MarketListing, error) {
 	return store.MarketListing{}, nil
 }
 func (f *fakeRepo) CancelMarketListing(context.Context, string, string) (store.MarketListing, error) {
+	return store.MarketListing{}, nil
+}
+func (f *fakeRepo) PurchaseMarketListing(context.Context, string, string) (store.MarketListing, error) {
 	return store.MarketListing{}, nil
 }
 func (f *fakeRepo) CreateMarketOffer(context.Context, string, string, string, []string) (store.MarketOffer, error) {

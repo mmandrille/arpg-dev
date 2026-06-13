@@ -8,12 +8,15 @@ var _hp_fill: ColorRect
 var _hp_label: Label
 var _mana_fill: ColorRect
 var _mana_label: Label
+var _attack_fill: ColorRect
 var _identity_label: Label
 var _panel: PanelContainer
 var _hp: int = 10
 var _max_hp: int = 10
 var _mana: int = 10
 var _max_mana: int = 10
+var _attack_recovery_remaining: float = 0.0
+var _attack_recovery_total: float = 0.0
 var _character_name := "Hero"
 var _level := 1
 var _tween: Tween
@@ -24,6 +27,14 @@ func _ready() -> void:
 	_build()
 	_sync_position()
 	get_viewport().size_changed.connect(_sync_position)
+	set_process(true)
+
+
+func _process(delta: float) -> void:
+	if _attack_recovery_remaining <= 0.0:
+		return
+	_attack_recovery_remaining = maxf(0.0, _attack_recovery_remaining - maxf(0.0, delta))
+	_update_attack_recovery()
 
 
 func update_hp(hp: int, max_hp: int, is_heal: bool = false) -> void:
@@ -46,6 +57,12 @@ func update_mana(mana: int, max_mana: int, is_restore: bool = false) -> void:
 		_flash(_mana_fill, Color(0.45, 0.90, 1.0), _mana_bar_color())
 
 
+func start_attack_recovery(duration_seconds: float) -> void:
+	_attack_recovery_total = maxf(0.0, duration_seconds)
+	_attack_recovery_remaining = _attack_recovery_total
+	_update_attack_recovery()
+
+
 func set_identity(character_name: String, level: int) -> void:
 	var next_name := character_name.strip_edges()
 	_character_name = next_name if next_name != "" else "Hero"
@@ -62,6 +79,9 @@ func get_debug_state() -> Dictionary:
 		"max_hp": _max_hp,
 		"mana": _mana,
 		"max_mana": _max_mana,
+		"attack_recovery_remaining": _attack_recovery_remaining,
+		"attack_recovery_total": _attack_recovery_total,
+		"attack_recovery_fraction": _attack_recovery_fraction(),
 	}
 
 
@@ -146,8 +166,10 @@ func _build() -> void:
 	root.add_child(meters)
 	_build_meter(meters, "♥", Color("#c0392b"), true)
 	_build_meter(meters, "✦", Color("#48aeea"), false)
+	_build_attack_recovery(root)
 	_update_identity_label()
 	_update_bars()
+	_update_attack_recovery()
 
 
 func _build_meter(parent: HBoxContainer, icon_text: String, icon_color: Color, is_hp: bool) -> void:
@@ -190,6 +212,32 @@ func _build_meter(parent: HBoxContainer, icon_text: String, icon_color: Color, i
 		_mana_fill = fill
 
 
+func _build_attack_recovery(parent: VBoxContainer) -> void:
+	var bar_bg := ColorRect.new()
+	bar_bg.custom_minimum_size = Vector2((BAR_W * 2.0) + 34.0, 5.0)
+	bar_bg.color = Color(0.13, 0.10, 0.08)
+	parent.add_child(bar_bg)
+
+	_attack_fill = ColorRect.new()
+	_attack_fill.size = Vector2(0.0, 5.0)
+	_attack_fill.position = Vector2.ZERO
+	_attack_fill.color = Color("#d9a23a")
+	_attack_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar_bg.add_child(_attack_fill)
+
+
+func _update_attack_recovery() -> void:
+	if _attack_fill == null:
+		return
+	_attack_fill.size.x = ((BAR_W * 2.0) + 34.0) * _attack_recovery_fraction()
+
+
+func _attack_recovery_fraction() -> float:
+	if _attack_recovery_total <= 0.0:
+		return 0.0
+	return clampf(_attack_recovery_remaining / _attack_recovery_total, 0.0, 1.0)
+
+
 func _sync_position() -> void:
 	if _panel != null:
-		_panel.set_deferred("position", Vector2(12.0, get_viewport_rect().size.y - 84.0))
+		_panel.set_deferred("position", Vector2(12.0, get_viewport_rect().size.y - 92.0))

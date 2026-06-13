@@ -210,6 +210,8 @@ func get_debug_state() -> Dictionary:
 		"publish_price_width": int(_publish_price_spin.custom_minimum_size.x) if _publish_price_spin != null else 0,
 		"publish_button_width": int(_publish_button.custom_minimum_size.x) if _publish_button != null else 0,
 		"publish_button_same_row": _publish_button != null and _publish_price_spin != null and _publish_button.get_parent() == _publish_price_spin.get_parent(),
+		"publish_rows_centered": _rows_centered(_publish_rows),
+		"offer_rows_centered": _rows_centered(_offer_rows),
 		"selected_listing_id": selected_listing_id,
 		"status": _status_label.text if _status_label != null else "",
 		"tab": _tabs.current_tab if _tabs != null else -1,
@@ -293,7 +295,17 @@ func _tab_rows(title: String) -> VBoxContainer:
 	_tabs.add_child(scroll)
 	var rows := VBoxContainer.new()
 	rows.add_theme_constant_override("separation", 6)
-	scroll.add_child(rows)
+	if title == "Browse":
+		scroll.add_child(rows)
+	else:
+		var center := CenterContainer.new()
+		center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		center.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		scroll.add_child(center)
+		rows.alignment = BoxContainer.ALIGNMENT_CENTER
+		rows.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		rows.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		center.add_child(rows)
 	return rows
 
 
@@ -676,6 +688,15 @@ func _debug_offer_rows() -> Array:
 			"item_def_ids": _offer_item_def_ids(rec),
 		})
 	return rows
+
+
+func _rows_centered(rows: VBoxContainer) -> bool:
+	if rows == null:
+		return false
+	return rows.get_parent() is CenterContainer \
+		and rows.alignment == BoxContainer.ALIGNMENT_CENTER \
+		and rows.size_flags_horizontal == Control.SIZE_SHRINK_CENTER \
+		and rows.size_flags_vertical == Control.SIZE_SHRINK_CENTER
 
 
 func _offer_items(offer: Dictionary) -> Array:

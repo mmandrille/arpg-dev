@@ -6652,6 +6652,9 @@ func (s *Sim) entityView(e *entity) EntityView {
 		return EntityView{}
 	}
 	view := e.view()
+	if e.kind == monsterEntity {
+		view.EffectIDs = s.eliteAuraEffectIDs(e)
+	}
 	if e.kind != lootEntity {
 		return view
 	}

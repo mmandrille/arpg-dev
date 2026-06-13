@@ -915,6 +915,8 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		return false
 	if step.has("has_burning_effect") and bool(rec.get("has_burning_effect", false)) != bool(step.get("has_burning_effect", false)):
 		return false
+	if step.has("has_elite_command_effect") and bool(rec.get("has_elite_command_effect", false)) != bool(step.get("has_elite_command_effect", false)):
+		return false
 	if step.has("is_boss") and bool(rec.get("is_boss", false)) != bool(step.get("is_boss", false)):
 		return false
 	if step.has("boss_template_id") and str(rec.get("boss_template_id", "")) != str(step.get("boss_template_id", "")):

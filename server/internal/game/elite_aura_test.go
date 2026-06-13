@@ -38,6 +38,10 @@ func TestEliteAuraAppliesOnlyToNearbyPackFollowers(t *testing.T) {
 	if got != (DamageRange{Min: 15, Max: 18}) {
 		t.Fatalf("aura damage = %+v, want 15..18", got)
 	}
+	view := sim.entityView(follower)
+	if len(view.EffectIDs) != 1 || view.EffectIDs[0] != "elite_command" {
+		t.Fatalf("aura effect ids = %+v, want elite_command", view.EffectIDs)
+	}
 
 	leaderDamage := sim.applyEliteAuraToMonsterDamage(leader, DamageRange{Min: 10, Max: 12})
 	if leaderDamage != (DamageRange{Min: 10, Max: 12}) {
@@ -48,6 +52,9 @@ func TestEliteAuraAppliesOnlyToNearbyPackFollowers(t *testing.T) {
 	farDamage := sim.applyEliteAuraToMonsterDamage(follower, DamageRange{Min: 10, Max: 12})
 	if farDamage != (DamageRange{Min: 10, Max: 12}) {
 		t.Fatalf("far follower damage = %+v, want unchanged", farDamage)
+	}
+	if effectIDs := sim.entityView(follower).EffectIDs; len(effectIDs) != 0 {
+		t.Fatalf("far follower effect ids = %+v, want none", effectIDs)
 	}
 
 	follower.pos = Vec2{X: 12, Y: 10}

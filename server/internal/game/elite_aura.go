@@ -1,5 +1,7 @@
 package game
 
+const eliteCommandAuraEffectID = "elite_command"
+
 func (s *Sim) applyEliteAuraToMonsterDamage(monster *entity, damage DamageRange) DamageRange {
 	if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
 		return damage
@@ -35,4 +37,18 @@ func (s *Sim) monsterHasLivingPackLeaderInAura(monster *entity, radius float64) 
 		}
 	}
 	return false
+}
+
+func (s *Sim) eliteAuraEffectIDs(monster *entity) []string {
+	aura := s.rules.DungeonGeneration.MonsterPlacement.EliteAura
+	if aura == nil || aura.ID == "" || monster == nil || monster.kind != monsterEntity {
+		return nil
+	}
+	if monster.monsterPackID == "" || monster.monsterPackLeader || monster.hp <= 0 {
+		return nil
+	}
+	if !s.monsterHasLivingPackLeaderInAura(monster, aura.Radius) {
+		return nil
+	}
+	return []string{aura.ID}
 }

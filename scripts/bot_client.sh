@@ -24,6 +24,7 @@ _ts() {
 
 BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
+GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
 EMAIL="${ARPG_EMAIL:-client-bot@example.test}"
 EMAIL_RUN_ID="${ARPG_BOT_CLIENT_RUN_ID:-$(date -u +%Y%m%d%H%M%S)-$$}"
 SCENARIO="${SCENARIO:-all}"
@@ -277,6 +278,7 @@ run_scenario() {
       ARPG_SEED="$seed" \
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
+      ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
@@ -291,6 +293,7 @@ run_scenario() {
       ARPG_SEED="$seed" \
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
+      ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \

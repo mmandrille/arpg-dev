@@ -685,7 +685,6 @@ func TestReconstructCoopDisconnectedMemberIsRemovedForReconnect(t *testing.T) {
 
 func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	rules := loadRules(t)
-	guestPlayerID := uint64(1002 + len(rules.Worlds["dungeon_levels"].Entities))
 	repo := &fakeRepo{
 		session: store.Session{ID: testSessionID, Seed: "v33_coop_replay", WorldID: "dungeon_levels", Mode: store.SessionModeCoop},
 		members: []store.SessionMember{
@@ -702,7 +701,6 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 				SessionID:      testSessionID,
 				AccountID:      "acct_guest",
 				CharacterID:    "char_guest",
-				PlayerEntityID: fmt.Sprintf("%d", guestPlayerID),
 				Role:           store.SessionMemberGuest,
 				Status:         store.SessionMemberActive,
 				Connected:      true,
@@ -713,9 +711,15 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
 		},
 	}
-	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, players, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
+	}
+	guestPlayerID := playerIDForCharacter(t, players, "char_guest")
+	for i := range repo.members {
+		if repo.members[i].CharacterID == "char_guest" {
+			repo.members[i].PlayerEntityID = fmt.Sprintf("%d", guestPlayerID)
+		}
 	}
 
 	var rows []store.SessionInput
@@ -769,6 +773,17 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 	if hasStoreEvent(events, "item_picked_up") {
 		assertRecordedEventHasEntity(t, events, "item_picked_up", "1001")
 	}
+}
+
+func playerIDForCharacter(t *testing.T, players []memberPlayer, characterID string) uint64 {
+	t.Helper()
+	for _, player := range players {
+		if player.member.CharacterID == characterID {
+			return player.playerID
+		}
+	}
+	t.Fatalf("missing replay member for character %s in %+v", characterID, players)
+	return 0
 }
 
 func TestVerifyCoopReplayMatchesActorCombatAndLootEvents(t *testing.T) {

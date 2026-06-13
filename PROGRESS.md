@@ -12,7 +12,7 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v136 — `unique-chest-client-proof` |
+| **Latest completed slice** | v137 — `bot-assertion-domain-split` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
 | **Next slice** | TBD — run `$next` |
@@ -155,6 +155,7 @@ v133_* = unique-validation-split
 v134_* = unique-inspection-ui
 v135_* = second-named-unique
 v136_* = unique-chest-client-proof
+v137_* = bot-assertion-domain-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -331,6 +332,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v134** | `unique-inspection-ui` | Complete (`make ci` green) | [`v134_spec-unique-inspection-ui.md`](docs/specs/v134_spec-unique-inspection-ui.md) | [`v134_2026-06-13-unique-inspection-ui.md`](docs/plans/v134_2026-06-13-unique-inspection-ui.md) | [`as-built`](docs/as-built/v134_unique-inspection-ui.md) |
 | **v135** | `second-named-unique` | Complete (`make ci` green) | [`v135_spec-second-named-unique.md`](docs/specs/v135_spec-second-named-unique.md) | [`v135_2026-06-13-second-named-unique.md`](docs/plans/v135_2026-06-13-second-named-unique.md) | [`as-built`](docs/as-built/v135_second-named-unique.md) |
 | **v136** | `unique-chest-client-proof` | Complete (`make ci` green) | [`v136_spec-unique-chest-client-proof.md`](docs/specs/v136_spec-unique-chest-client-proof.md) | [`v136_2026-06-13-unique-chest-client-proof.md`](docs/plans/v136_2026-06-13-unique-chest-client-proof.md) | [`as-built`](docs/as-built/v136_unique-chest-client-proof.md) |
+| **v137** | `bot-assertion-domain-split` | Complete (`make ci` green) | [`v137_spec-bot-assertion-domain-split.md`](docs/specs/v137_spec-bot-assertion-domain-split.md) | [`v137_2026-06-13-bot-assertion-domain-split.md`](docs/plans/v137_2026-06-13-bot-assertion-domain-split.md) | [`as-built`](docs/as-built/v137_bot-assertion-domain-split.md) |
 
 ---
 
@@ -460,6 +462,14 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Protocol bot stash assertions now have a focused helper module.** v137 moves stash filtering,
+selection, id lookup, count/gold/capacity assertions, and stash-event matching into
+`tools/bot/stash_assertions.py`, with direct pytest coverage and no gameplay/protocol behavior
+changes. The closeout also repairs brittle existing bot/golden assumptions around debug-gated
+scenarios, replay guest ids, and unique item display names, and refreshes the
+`server/internal/game/sim.go` file-size baseline for pre-existing drift surfaced by the ratchet;
+v137 did not touch the sim.
 
 **The purple unique chest now has a Godot client proof.** v136 adds client bot scenario
 `unique_chest_client_proof`, opens `town_unique_chest`, and asserts the `Embercall Blade` plus

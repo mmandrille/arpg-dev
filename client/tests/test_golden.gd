@@ -335,7 +335,24 @@ func _initialize() -> void:
 		if str(expected["item_template_id"]) != template_id:
 			_fail("item_rolls item_template_id mismatch")
 			return
-		if not str(expected["display_name"]).ends_with(str(template["name"])):
+		var effect_ids := expected["effect_ids"] as Array
+		if str(expected["rarity"]) == "unique":
+			if effect_ids.size() != 1:
+				_fail("unique item_rolls must attach one effect_id")
+				return
+			if not (unique_effects["effects"] as Dictionary).has(str(effect_ids[0])):
+				_fail("unique item_rolls references unknown effect_id")
+				return
+			var effect: Dictionary = unique_effects["effects"][str(effect_ids[0])]
+			var item_type_name := str(template.get("item_type", "")).replace("_", " ").capitalize()
+			var expected_unique_name := "%s of %s" % [item_type_name, str(effect.get("display_name", ""))]
+			if str(expected["display_name"]) != expected_unique_name:
+				_fail("unique item_rolls display_name mismatch")
+				return
+		elif effect_ids.size() != 0:
+			_fail("non-unique item_rolls effect_ids must be empty")
+			return
+		elif not str(expected["display_name"]).ends_with(str(template["name"])):
 			_fail("item_rolls display_name missing template name")
 			return
 		var stats: Dictionary = expected["stats"]
@@ -347,17 +364,6 @@ func _initialize() -> void:
 			return
 		if expected["requirements"] != template["requirements"]:
 			_fail("item_rolls requirements mismatch")
-			return
-		var effect_ids := expected["effect_ids"] as Array
-		if str(expected["rarity"]) == "unique":
-			if effect_ids.size() != 1:
-				_fail("unique item_rolls must attach one effect_id")
-				return
-			if not (unique_effects["effects"] as Dictionary).has(str(effect_ids[0])):
-				_fail("unique item_rolls references unknown effect_id")
-				return
-		elif effect_ids.size() != 0:
-			_fail("non-unique item_rolls effect_ids must be empty")
 			return
 
 	# 17. Treasure class golden references shared item/template reward sources.

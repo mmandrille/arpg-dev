@@ -409,7 +409,7 @@ func _do_click_entity(action: Dictionary, state: Dictionary) -> void:
 	var entity_index := int(action.get("entity_index", 0))
 	var ids_key := "%s_ids" % entity_type
 	var ids: Array = _select_entity_ids(state, action)
-	if ids.is_empty():
+	if ids.is_empty() and not _has_entity_filter(action):
 		ids = state.get(ids_key, [])
 	if ids.is_empty():
 		printerr("[bot-client] click_entity: no %s entity found" % entity_type)
@@ -422,6 +422,13 @@ func _do_click_entity(action: Dictionary, state: Dictionary) -> void:
 		_main.bot_click_entity_id(target_id)
 	elif _main.has_method("bot_dispatch_action"):
 		_main.bot_dispatch_action("action_intent", {"target_id": target_id})
+
+
+func _has_entity_filter(selector: Dictionary) -> bool:
+	for key in ["monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state", "is_boss"]:
+		if selector.has(key) and str(selector.get(key, "")) != "":
+			return true
+	return false
 
 
 func _select_entity_ids(state: Dictionary, selector: Dictionary) -> Array:

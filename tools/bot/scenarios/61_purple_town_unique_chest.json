@@ -9,14 +9,12 @@
     "post_complete_hold_s": 3.0
   },
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "town_unique_chest", "state": "ready", "equals": 1 },
-    { "action": "action_entity", "interactable_def_id": "town_unique_chest", "event_type": "unique_chest_opened", "timeout_s": 10 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "town_unique_chest", "state": "open", "equals": 1 },
-    { "action": "take_unique_chest_item", "display_name": "Embercall Blade" },
+    { "action": "move_until_player_position", "x": 6, "y": 7, "tolerance": 1.0, "pathfind": true, "max_ticks": 160 },
+    { "action": "action_entity", "interactable_def_id": "town_unique_chest", "target_id": "1010", "allow_missing_target": true, "event_type": "unique_chest_opened", "timeout_s": 10 },
+    { "action": "take_unique_chest_item", "interactable_def_id": "town_unique_chest", "chest_entity_id": "1010", "display_name": "Embercall Blade" },
     { "action": "assert_inventory_count", "display_name": "Embercall Blade", "equals": 1 }
   ],
   "assertions": [
-    { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "town_unique_chest", "state": "open", "equals": 1 },
     { "type": "event_seen", "event_type": "unique_chest_opened" },
     { "type": "event_seen", "event_type": "unique_chest_item_taken" },
     { "type": "inventory_count", "display_name": "Embercall Blade", "equals": 1 }

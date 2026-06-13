@@ -14,6 +14,7 @@ ADDR="${ARPG_ADDR:-:8888}"
 BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
+GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
 
 SERVER_PID=""
 SERVER_LOG="$(mktemp -t arpg-bot-client-server.XXXXXX.log)"
@@ -29,6 +30,7 @@ SERVER_BIN="$(mktemp -t arpg-bot-client-server.XXXXXX)"
 echo "[bot-client-local] starting server on $ADDR (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
   ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
+  ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
   ARPG_RULES_DIR="$ROOT/shared/rules" \
   "$SERVER_BIN" >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!

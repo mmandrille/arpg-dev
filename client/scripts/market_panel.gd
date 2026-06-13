@@ -28,6 +28,7 @@ var _browse_rows: VBoxContainer
 var _publish_rows: VBoxContainer
 var _offer_rows: VBoxContainer
 var _publish_price_spin: SpinBox
+var _publish_button: Button
 
 class MarketItemIcon:
 	extends Control
@@ -193,6 +194,9 @@ func get_debug_state() -> Dictionary:
 		"offer_count": active_offers.size(),
 		"offer_rows": _debug_offer_rows(),
 		"publish_price_gold": _publish_price(),
+		"publish_price_width": int(_publish_price_spin.custom_minimum_size.x) if _publish_price_spin != null else 0,
+		"publish_button_width": int(_publish_button.custom_minimum_size.x) if _publish_button != null else 0,
+		"publish_button_same_row": _publish_button != null and _publish_price_spin != null and _publish_button.get_parent() == _publish_price_spin.get_parent(),
 		"selected_listing_id": selected_listing_id,
 		"status": _status_label.text if _status_label != null else "",
 		"tab": _tabs.current_tab if _tabs != null else -1,
@@ -298,14 +302,8 @@ func _rebuild_browse_rows() -> void:
 
 func _rebuild_publish_rows() -> void:
 	_clear_rows(_publish_rows)
-	_publish_rows.add_child(_publish_price_row())
 	_publish_rows.add_child(_stage_slot("publish", staged_publish_item, 0))
-	var publish_btn := Button.new()
-	publish_btn.text = "Publish"
-	publish_btn.custom_minimum_size = Vector2(140, 38)
-	publish_btn.disabled = staged_publish_item.is_empty()
-	publish_btn.pressed.connect(_emit_publish_action)
-	_publish_rows.add_child(publish_btn)
+	_publish_rows.add_child(_publish_controls_row())
 	_publish_rows.add_child(_empty_label("Double-click or drag an inventory item here"))
 
 
@@ -537,7 +535,7 @@ func _matching_offer(offer_id: String = "", offer_index: int = 0) -> Dictionary:
 	return (matches[index] as Dictionary).duplicate(true)
 
 
-func _publish_price_row() -> Control:
+func _publish_controls_row() -> Control:
 	var current_price := _publish_price()
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
@@ -551,8 +549,16 @@ func _publish_price_row() -> Control:
 	_publish_price_spin.max_value = 999999
 	_publish_price_spin.step = 1
 	_publish_price_spin.value = current_price
-	_publish_price_spin.custom_minimum_size = Vector2(140, 34)
+	_publish_price_spin.custom_minimum_size = Vector2(180, 38)
+	_publish_price_spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_publish_price_spin)
+	_publish_button = Button.new()
+	_publish_button.text = "Publish"
+	_publish_button.custom_minimum_size = Vector2(180, 38)
+	_publish_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_publish_button.disabled = staged_publish_item.is_empty()
+	_publish_button.pressed.connect(_emit_publish_action)
+	row.add_child(_publish_button)
 	return row
 
 

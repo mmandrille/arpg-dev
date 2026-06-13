@@ -330,6 +330,9 @@ func _run() -> void:
 	_assert_eq("market offer inventory count", (market_emitted[1]["payload"].get("item_instance_ids", []) as Array).size(), 2)
 	var market_state := market_panel.get_debug_state()
 	_assert_eq("market staged offer count", int(market_state.get("staged_offer_count", 0)), 2)
+	_assert_true("market publish price and button share row", bool(market_state.get("publish_button_same_row", false)))
+	_assert_eq("market publish price half width", int(market_state.get("publish_price_width", 0)), 180)
+	_assert_eq("market publish button half width", int(market_state.get("publish_button_width", 0)), 180)
 	var listing_rows: Array = market_state.get("listing_rows", [])
 	_assert_true("market listing debug row exists", not listing_rows.is_empty())
 	var listing_row: Dictionary = listing_rows[0] if not listing_rows.is_empty() else {}

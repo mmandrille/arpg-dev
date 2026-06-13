@@ -4,9 +4,9 @@
     "magic_bolt": {
       "icon": {
         "label": "M",
-        "shape": "bolt",
-        "color": "#62b7ff",
-        "accent": "#e8f7ff"
+        "shape": "orb_projectile",
+        "color": "#3fa7ff",
+        "accent": "#dff5ff"
       },
       "summary": "Projectile spell",
       "projectile_visual": "magic_bolt_projectile",
@@ -15,9 +15,9 @@
     "ice_shard": {
       "icon": {
         "label": "I",
-        "shape": "bolt",
+        "shape": "ice_spike",
         "color": "#8fdcff",
-        "accent": "#effcff"
+        "accent": "#f2fdff"
       },
       "summary": "Cold shattering projectile",
       "projectile_visual": "ice_shard_projectile",
@@ -73,8 +73,8 @@
       "icon": {
         "label": "S",
         "shape": "shield",
-        "color": "#f0c85a",
-        "accent": "#fff7bf"
+        "color": "#f0c23d",
+        "accent": "#fff7b0"
       },
       "summary": "Area ally defense",
       "effect_visual": "holy_shield",
@@ -83,9 +83,9 @@
     "poison_stab": {
       "icon": {
         "label": "P",
-        "shape": "burst",
-        "color": "#44b66f",
-        "accent": "#d7f7df"
+        "shape": "poison_dagger",
+        "color": "#34c46f",
+        "accent": "#c5ffd6"
       },
       "summary": "Close poison weapon strike",
       "effect_visual": "poison_stab",
@@ -94,9 +94,9 @@
     "dash": {
       "icon": {
         "label": "D",
-        "shape": "burst",
-        "color": "#58c7d8",
-        "accent": "#dcfbff"
+        "shape": "dash",
+        "color": "#55d5ff",
+        "accent": "#e7fbff"
       },
       "summary": "Forward dash strike",
       "effect_visual": "dash",

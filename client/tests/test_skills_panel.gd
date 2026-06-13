@@ -58,7 +58,7 @@ func _run() -> void:
 	_assert_eq("sorcerer third skill visible", str((state.get("skill_ids", []) as Array)[2]), "ligthing")
 	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
-	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "bolt")
+	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "orb_projectile")
 	_assert_eq("magic bolt rank", int(state.get("rank", -1)), 0)
 	_assert_eq("magic bolt max rank", int(state.get("max_rank", -1)), 5)
 	_assert_true("spend button enabled at initial magic requirement", bool(state.get("spend_button_enabled", false)))

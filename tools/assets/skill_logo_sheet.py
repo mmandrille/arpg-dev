@@ -122,6 +122,30 @@ def _shape_svg(shape: str, cx: float, cy: float, radius: float, fill: str, accen
                 f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{radius * 0.34:.2f}" fill="{html.escape(accent)}"/>',
             ]
         )
+    if shape == "dash":
+        body = [
+            (cx + radius * 0.46, cy - radius * 0.70),
+            (cx + radius * 0.78, cy - radius * 0.22),
+            (cx + radius * 0.28, cy - radius * 0.12),
+            (cx + radius * 0.54, cy + radius * 0.62),
+            (cx - radius * 0.02, cy + radius * 0.20),
+            (cx - radius * 0.18, cy - radius * 0.34),
+        ]
+        streaks = []
+        for i in range(3):
+            y = cy - radius * 0.42 + i * radius * 0.34
+            streaks.append(
+                f'<line x1="{cx - radius * 0.78:.2f}" y1="{y:.2f}" '
+                f'x2="{cx - radius * 0.28:.2f}" y2="{y - radius * 0.10:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="2" stroke-linecap="round"/>'
+            )
+        return "\n".join(
+            [
+                _polygon(body, fill, accent),
+                *streaks,
+                f'<circle cx="{cx + radius * 0.12:.2f}" cy="{cy - radius * 0.42:.2f}" r="{radius * 0.11:.2f}" fill="{html.escape(accent)}"/>',
+            ]
+        )
     if shape == "heart":
         points = []
         for i in range(34):
@@ -130,6 +154,79 @@ def _shape_svg(shape: str, cx: float, cy: float, radius: float, fill: str, accen
             y = -(13.0 * math.cos(t) - 5.0 * math.cos(2.0 * t) - 2.0 * math.cos(3.0 * t) - math.cos(4.0 * t))
             points.append((cx + x * (radius / 18.0), cy + y * (radius / 18.0)))
         return _polygon(points, fill, accent)
+    if shape == "ice_spike":
+        spike = [
+            (cx + radius * 0.10, cy - radius * 0.92),
+            (cx + radius * 0.48, cy + radius * 0.62),
+            (cx - radius * 0.08, cy + radius * 0.82),
+            (cx - radius * 0.36, cy + radius * 0.18),
+        ]
+        facets = [
+            f'<line x1="{cx + radius * 0.06:.2f}" y1="{cy - radius * 0.68:.2f}" '
+            f'x2="{cx + radius * 0.06:.2f}" y2="{cy + radius * 0.54:.2f}" '
+            f'stroke="{html.escape(accent)}" stroke-width="2" stroke-linecap="round"/>',
+            f'<line x1="{cx - radius * 0.12:.2f}" y1="{cy - radius * 0.12:.2f}" '
+            f'x2="{cx + radius * 0.34:.2f}" y2="{cy + radius * 0.44:.2f}" '
+            f'stroke="{html.escape(accent)}" stroke-width="1.6" stroke-linecap="round"/>',
+        ]
+        return _polygon(spike, fill, accent) + "\n" + "\n".join(facets)
+    if shape == "orb_projectile":
+        streaks = []
+        for i in range(3):
+            offset = radius * (0.46 + i * 0.18)
+            streaks.append(
+                f'<line x1="{cx - offset:.2f}" y1="{cy - radius * (0.20 - i * 0.13):.2f}" '
+                f'x2="{cx - offset - radius * 0.34:.2f}" y2="{cy - radius * (0.30 - i * 0.10):.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="1.8" stroke-linecap="round"/>'
+            )
+        orb_x = cx + radius * 0.12
+        return "\n".join(
+            [
+                *streaks,
+                f'<circle cx="{orb_x:.2f}" cy="{cy:.2f}" r="{radius * 0.46:.2f}" fill="{html.escape(fill)}"/>',
+                f'<circle cx="{orb_x:.2f}" cy="{cy:.2f}" r="{radius * 0.46:.2f}" fill="none" stroke="{html.escape(accent)}" stroke-width="2"/>',
+                f'<circle cx="{cx + radius * 0.28:.2f}" cy="{cy - radius * 0.18:.2f}" r="{radius * 0.14:.2f}" fill="{html.escape(accent)}"/>',
+            ]
+        )
+    if shape == "poison_dagger":
+        blade = [
+            (cx + radius * 0.52, cy - radius * 0.78),
+            (cx + radius * 0.22, cy + radius * 0.18),
+            (cx - radius * 0.02, cy + radius * 0.02),
+        ]
+        return "\n".join(
+            [
+                _polygon(blade, fill, accent),
+                f'<line x1="{cx + radius * 0.08:.2f}" y1="{cy + radius * 0.12:.2f}" '
+                f'x2="{cx - radius * 0.48:.2f}" y2="{cy + radius * 0.66:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="4" stroke-linecap="round"/>',
+                f'<line x1="{cx - radius * 0.26:.2f}" y1="{cy + radius * 0.22:.2f}" '
+                f'x2="{cx + radius * 0.10:.2f}" y2="{cy + radius * 0.58:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="2" stroke-linecap="round"/>',
+                f'<circle cx="{cx - radius * 0.42:.2f}" cy="{cy - radius * 0.18:.2f}" r="{radius * 0.13:.2f}" fill="{html.escape(fill)}"/>',
+                f'<circle cx="{cx - radius * 0.62:.2f}" cy="{cy + radius * 0.10:.2f}" r="{radius * 0.09:.2f}" fill="{html.escape(accent)}"/>',
+                f'<circle cx="{cx - radius * 0.28:.2f}" cy="{cy - radius * 0.38:.2f}" r="{radius * 0.08:.2f}" fill="{html.escape(accent)}"/>',
+            ]
+        )
+    if shape == "shield":
+        points = [
+            (cx, cy - radius * 0.86),
+            (cx + radius * 0.62, cy - radius * 0.46),
+            (cx + radius * 0.48, cy + radius * 0.34),
+            (cx, cy + radius * 0.84),
+            (cx - radius * 0.48, cy + radius * 0.34),
+            (cx - radius * 0.62, cy - radius * 0.46),
+        ]
+        return "\n".join(
+            [
+                _polygon(points, fill, accent),
+                f'<line x1="{cx:.2f}" y1="{cy - radius * 0.64:.2f}" x2="{cx:.2f}" y2="{cy + radius * 0.52:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="2" stroke-linecap="round"/>',
+                f'<path d="M {cx + radius * 0.32:.2f} {cy + radius * 0.13:.2f} '
+                f'A {radius * 0.34:.2f} {radius * 0.34:.2f} 0 0 0 {cx - radius * 0.32:.2f} {cy + radius * 0.13:.2f}" '
+                f'fill="none" stroke="{html.escape(accent)}" stroke-width="2" stroke-linecap="round"/>',
+            ]
+        )
     if shape == "slash":
         upper = (cx + radius * 0.58, cy - radius * 0.68)
         lower = (cx - radius * 0.58, cy + radius * 0.68)

@@ -9,6 +9,7 @@ const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
+const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const PANEL_SIZE := Vector2(640, 520)
 const BODY_FONT_SIZE := 19
 const DETAIL_FONT_SIZE := 16
@@ -888,7 +889,7 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		ItemRulesLoader.item_presentations,
 		_tooltip_lines(item),
 		_requirement_lines(item),
-		[],
+		UniqueEffectTooltipScript.rich_lines_for_item(item),
 		-1,
 		true,
 		_short_label(str(item.get("item_def_id", "")))

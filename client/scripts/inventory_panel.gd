@@ -6,6 +6,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
+const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
@@ -629,7 +630,7 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		item_presentations,
 		_tooltip_lines(item),
 		_requirement_lines(item),
-		_comparison_entries(item),
+		_comparison_entries(item) + UniqueEffectTooltipScript.rich_lines_for_item(item),
 		_item_gold_value(item),
 		true,
 		_short_label(str(item.get("item_def_id", "")))
@@ -1017,7 +1018,7 @@ func _slot_from_kind(kind: String) -> String:
 
 
 func _tooltip(item: Dictionary) -> String:
-	return "\n".join(_tooltip_text_lines(_tooltip_lines(item)) + _requirement_lines_as_summary(item) + _comparison_text_lines(item))
+	return "\n".join(_tooltip_text_lines(_tooltip_lines(item)) + _requirement_lines_as_summary(item) + _comparison_text_lines(item) + UniqueEffectTooltipScript.text_lines_for_item(item))
 
 
 func _tooltip_lines(item: Dictionary) -> Array:

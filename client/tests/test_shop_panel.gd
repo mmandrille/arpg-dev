@@ -268,6 +268,26 @@ func _run() -> void:
 	var ring_tooltip := inventory_panel._make_item_tooltip(ring)
 	_assert_eq("inventory generated tooltip computed gold value", ring_tooltip.debug_gold_value_text(), "21 gold")
 	ring_tooltip.queue_free()
+	var unique_blade := {
+		"item_instance_id": "2006",
+		"item_def_id": "cave_blade",
+		"item_template_id": "cave_blade",
+		"display_name": "Embercall Blade",
+		"rarity": "unique",
+		"slot": "main_hand",
+		"summary_lines": ["Slot: Main hand", "Damage 5-9", "Requires level 2"],
+		"requirements": {"level": 2},
+		"comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 9, "equipped": 4, "delta": 5}]},
+		"effect_ids": ["everburning_wound"],
+	}
+	var unique_plain_lines := Array(inventory_panel._tooltip(unique_blade).split("\n"))
+	_assert_true("inventory unique tooltip names effect", _array_contains_text(unique_plain_lines, "Unique effect: Everburning Wound"))
+	_assert_eq("inventory unique tooltip effect summary at bottom", str(unique_plain_lines[unique_plain_lines.size() - 1]), "All hero damage applies burn for 10 seconds, ticking once per second for 10% of the original hit damage.")
+	var unique_tooltip := inventory_panel._make_item_tooltip(unique_blade)
+	var unique_tooltip_texts: Array = unique_tooltip.debug_main_line_font_sizes()
+	_assert_true("inventory unique rendered tooltip names effect", _array_contains_text(unique_tooltip_texts, "Unique effect: Everburning Wound"))
+	_assert_true("inventory unique rendered tooltip summarizes effect", _array_contains_text(unique_tooltip_texts, "All hero damage applies burn"))
+	unique_tooltip.queue_free()
 	var potion_tooltip := inventory_panel._make_item_tooltip(inventory[1])
 	_assert_eq("inventory fixed tooltip computed gold value", potion_tooltip.debug_gold_value_text(), "10 gold")
 	potion_tooltip.queue_free()
@@ -368,6 +388,11 @@ func _run() -> void:
 	var staged_tooltip := market_panel._make_item_tooltip(inventory[0])
 	_assert_eq("market staged tooltip uses shared panel", staged_tooltip.get_script(), ItemTooltipPanelScript)
 	staged_tooltip.queue_free()
+	var market_unique_tooltip := market_panel._make_item_tooltip(unique_blade)
+	var market_unique_texts: Array = market_unique_tooltip.debug_main_line_font_sizes()
+	_assert_true("market unique tooltip names effect", _array_contains_text(market_unique_texts, "Unique effect: Everburning Wound"))
+	_assert_true("market unique tooltip summarizes effect", _array_contains_text(market_unique_texts, "All hero damage applies burn"))
+	market_unique_tooltip.queue_free()
 	_assert_true("market publish rows centered", bool(market_state.get("publish_rows_centered", false)))
 	_assert_true("market offer rows top aligned", bool(market_state.get("offer_rows_top_aligned", false)))
 	_assert_true("market publish price and button share row", bool(market_state.get("publish_button_same_row", false)))

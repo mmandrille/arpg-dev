@@ -1159,7 +1159,7 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
 		t.Fatal(err)
 	}
-	payload := `{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":5},"requirements":{"level":1},"effect_ids":[]}`
+	payload := `{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":5},"requirements":{"level":1,"str":5},"effect_ids":[]}`
 	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "payload_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(payload)}); err != nil {
 		t.Fatal(err)
 	}
@@ -1177,13 +1177,23 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 		t.Fatalf("payload upgrade cost/gold = %d/%d, want 100/0", cost, gold)
 	}
 	var upgraded struct {
-		Stats map[string]int `json:"stats"`
+		ItemTemplateID string         `json:"item_template_id"`
+		DisplayName    string         `json:"display_name"`
+		Rarity         string         `json:"rarity"`
+		Stats          map[string]int `json:"stats"`
+		Requirements   map[string]int `json:"requirements"`
 	}
 	if err := json.Unmarshal(item.RolledStats, &upgraded); err != nil {
 		t.Fatal(err)
 	}
+	if upgraded.ItemTemplateID != "cave_blade" || upgraded.DisplayName != "Rare Cave Blade" || upgraded.Rarity != "rare" {
+		t.Fatalf("payload metadata after upgrade = %+v raw=%s", upgraded, string(item.RolledStats))
+	}
 	if upgraded.Stats["item_level"] != 1 || upgraded.Stats["damage_max"] != 6 || upgraded.Stats["damage_min"] != 4 {
 		t.Fatalf("payload upgraded stats = %+v raw=%s", upgraded.Stats, string(item.RolledStats))
+	}
+	if upgraded.Requirements["str"] != 5 {
+		t.Fatalf("payload requirements after upgrade = %+v raw=%s", upgraded.Requirements, string(item.RolledStats))
 	}
 }
 

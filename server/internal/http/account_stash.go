@@ -14,15 +14,25 @@ func (s *Server) registerAccountStashRoutes(mux *http.ServeMux) {
 }
 
 type accountStashItemResponse struct {
-	StashItemID string          `json:"stash_item_id"`
-	ItemDefID   string          `json:"item_def_id"`
-	RolledStats json.RawMessage `json:"rolled_stats"`
+	StashItemID    string          `json:"stash_item_id"`
+	ItemDefID      string          `json:"item_def_id"`
+	ItemTemplateID string          `json:"item_template_id,omitempty"`
+	DisplayName    string          `json:"display_name,omitempty"`
+	Rarity         string          `json:"rarity,omitempty"`
+	RolledStats    json.RawMessage `json:"rolled_stats"`
+	Requirements   map[string]int  `json:"requirements,omitempty"`
+	EffectIDs      []string        `json:"effect_ids,omitempty"`
 }
 
 type characterItemResponse struct {
 	ItemInstanceID string          `json:"item_instance_id"`
 	ItemDefID      string          `json:"item_def_id"`
+	ItemTemplateID string          `json:"item_template_id,omitempty"`
+	DisplayName    string          `json:"display_name,omitempty"`
+	Rarity         string          `json:"rarity,omitempty"`
 	RolledStats    json.RawMessage `json:"rolled_stats"`
+	Requirements   map[string]int  `json:"requirements,omitempty"`
+	EffectIDs      []string        `json:"effect_ids,omitempty"`
 	Slot           string          `json:"slot"`
 	Equipped       bool            `json:"equipped"`
 }
@@ -160,11 +170,20 @@ func accountStashItemResponseFromStore(item store.AccountStashItem) accountStash
 	if len(rolled) == 0 {
 		rolled = json.RawMessage(`{}`)
 	}
-	return accountStashItemResponse{
+	out := accountStashItemResponse{
 		StashItemID: item.StashItemID,
 		ItemDefID:   item.ItemDefID,
 		RolledStats: rolled,
 	}
+	applyRolledPayloadResponseFields(rolled, func(templateID, displayName, rarity string, stats json.RawMessage, requirements map[string]int, effectIDs []string) {
+		out.ItemTemplateID = templateID
+		out.DisplayName = displayName
+		out.Rarity = rarity
+		out.RolledStats = stats
+		out.Requirements = requirements
+		out.EffectIDs = effectIDs
+	})
+	return out
 }
 
 func characterItemResponseFromStore(item store.CharacterItemInstance) characterItemResponse {
@@ -172,11 +191,39 @@ func characterItemResponseFromStore(item store.CharacterItemInstance) characterI
 	if len(rolled) == 0 {
 		rolled = json.RawMessage(`{}`)
 	}
-	return characterItemResponse{
+	out := characterItemResponse{
 		ItemInstanceID: item.ID,
 		ItemDefID:      item.ItemDefID,
 		RolledStats:    rolled,
 		Slot:           item.Slot,
 		Equipped:       item.Equipped,
 	}
+	applyRolledPayloadResponseFields(rolled, func(templateID, displayName, rarity string, stats json.RawMessage, requirements map[string]int, effectIDs []string) {
+		out.ItemTemplateID = templateID
+		out.DisplayName = displayName
+		out.Rarity = rarity
+		out.RolledStats = stats
+		out.Requirements = requirements
+		out.EffectIDs = effectIDs
+	})
+	return out
+}
+
+func applyRolledPayloadResponseFields(raw json.RawMessage, set func(string, string, string, json.RawMessage, map[string]int, []string)) {
+	var payload struct {
+		ItemTemplateID string         `json:"item_template_id"`
+		DisplayName    string         `json:"display_name"`
+		Rarity         string         `json:"rarity"`
+		Stats          map[string]int `json:"stats"`
+		Requirements   map[string]int `json:"requirements"`
+		EffectIDs      []string       `json:"effect_ids"`
+	}
+	if len(raw) == 0 || json.Unmarshal(raw, &payload) != nil || payload.ItemTemplateID == "" {
+		return
+	}
+	stats, err := json.Marshal(payload.Stats)
+	if err != nil {
+		return
+	}
+	set(payload.ItemTemplateID, payload.DisplayName, payload.Rarity, stats, payload.Requirements, payload.EffectIDs)
 }

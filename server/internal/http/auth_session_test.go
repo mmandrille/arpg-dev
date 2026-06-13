@@ -650,7 +650,8 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 		t.Fatal(err)
 	}
 	itemID := "inventory_upgrade_item_" + suffix
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+	rareShield := `{"item_template_id":"cave_shield","display_name":"Rare Cave Shield","rarity":"rare","stats":{"armor":4,"block_percent":8},"requirements":{"level":1,"str":5},"effect_ids":[]}`
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_shield", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(rareShield)}); err != nil {
 		t.Fatal(err)
 	}
 	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 40); err != nil {
@@ -670,6 +671,9 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if upgraded.Item.ItemInstanceID != itemID || upgraded.Gold != 0 || upgraded.StashGold != 0 || upgraded.CostGold != 100 {
 		t.Fatalf("inventory upgrade response = %+v", upgraded)
 	}
+	if upgraded.Item.ItemDefID != "cave_shield" || upgraded.Item.ItemTemplateID != "cave_shield" || upgraded.Item.DisplayName != "Rare Cave Shield" || upgraded.Item.Rarity != "rare" {
+		t.Fatalf("upgraded rare shield response = %+v", upgraded.Item)
+	}
 	items, err := db.ListCharacterItems(ctx, accountID, char.CharacterID)
 	if err != nil {
 		t.Fatal(err)
@@ -683,12 +687,27 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 			found = item
 		}
 	}
-	var stats map[string]int
-	if err := json.Unmarshal(found.RolledStats, &stats); err != nil {
+	var payload struct {
+		ItemTemplateID string         `json:"item_template_id"`
+		DisplayName    string         `json:"display_name"`
+		Rarity         string         `json:"rarity"`
+		Stats          map[string]int `json:"stats"`
+	}
+	if err := json.Unmarshal(found.RolledStats, &payload); err != nil {
 		t.Fatal(err)
 	}
-	if stats["item_level"] != 1 || stats["damage_max"] != 5 {
-		t.Fatalf("upgraded inventory stats = %+v raw=%s", stats, string(found.RolledStats))
+	if payload.ItemTemplateID != "cave_shield" || payload.DisplayName != "Rare Cave Shield" || payload.Rarity != "rare" {
+		t.Fatalf("persisted upgraded rare shield metadata = %+v raw=%s", payload, string(found.RolledStats))
+	}
+	if payload.Stats["item_level"] != 1 || payload.Stats["armor"] != 5 || payload.Stats["block_percent"] != 8 {
+		t.Fatalf("upgraded inventory stats = %+v raw=%s", payload.Stats, string(found.RolledStats))
+	}
+	var responseStats map[string]int
+	if err := json.Unmarshal(upgraded.Item.RolledStats, &responseStats); err != nil {
+		t.Fatal(err)
+	}
+	if responseStats["item_level"] != 1 || responseStats["armor"] != 5 || responseStats["block_percent"] != 8 {
+		t.Fatalf("upgraded response stats = %+v raw=%s", responseStats, string(upgraded.Item.RolledStats))
 	}
 	stashItems, err := db.ListAccountStashItems(ctx, accountID)
 	if err != nil {

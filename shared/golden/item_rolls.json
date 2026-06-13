@@ -14,7 +14,8 @@
           "damage_min": 2
         },
         "requirements": {
-          "level": 1
+          "level": 1,
+          "str": 5
         },
         "effect_ids": []
       }
@@ -33,7 +34,8 @@
           "vit": 1
         },
         "requirements": {
-          "level": 1
+          "level": 1,
+          "str": 5
         },
         "effect_ids": []
       }
@@ -51,7 +53,8 @@
           "max_hp": 1
         },
         "requirements": {
-          "level": 1
+          "level": 1,
+          "str": 5
         },
         "effect_ids": [
           "executioners_mark"

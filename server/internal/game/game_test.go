@@ -251,6 +251,41 @@ func TestLoadRules(t *testing.T) {
 	}
 }
 
+func TestItemTemplateFamilyStatRequirements(t *testing.T) {
+	rules := loadRules(t)
+	expectedByType := map[string]string{
+		"sword":      "str",
+		"greatsword": "str",
+		"axe":        "str",
+		"staff":      "magic",
+		"bow":        "dex",
+		"shield":     "str",
+		"helm":       "str",
+		"chest":      "str",
+		"gloves":     "str",
+		"belt":       "str",
+		"boots":      "str",
+		"ring":       "magic",
+		"amulet":     "magic",
+	}
+
+	for templateID, template := range rules.ItemTemplates {
+		if !template.Equippable {
+			continue
+		}
+		stat, ok := expectedByType[template.ItemType]
+		if !ok {
+			t.Fatalf("template %s has unmapped item_type %q", templateID, template.ItemType)
+		}
+		if template.Requirements["level"] < 1 {
+			t.Fatalf("template %s requirements = %+v, want level requirement", templateID, template.Requirements)
+		}
+		if template.Requirements[stat] < 1 {
+			t.Fatalf("template %s item_type %s requirements = %+v, want %s requirement", templateID, template.ItemType, template.Requirements, stat)
+		}
+	}
+}
+
 func TestMainConfigAttackIntervalOverridesCombatMirror(t *testing.T) {
 	rules := loadRulesWithMainGameplay(t, map[string]any{
 		"base_attack_interval_ticks": 10,

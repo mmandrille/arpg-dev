@@ -82,6 +82,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("hovered skill updates", str(state.get("hovered_skill_id", "")), "magic_bolt")
 	_assert_true("tooltip visible on hover", bool(state.get("tooltip_visible", false)))
+	_assert_false("points label hidden under tooltip", bool(state.get("points_label_visible", true)))
 	var tooltip_position: Dictionary = state.get("tooltip_position", {})
 	var magic_block := panel._skill_blocks.get("magic_bolt", null) as Control
 	_assert_true("magic block exists for tooltip placement", magic_block != null)
@@ -95,6 +96,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("tooltip leave clears hovered skill", str(state.get("hovered_skill_id", "")), "")
 	_assert_false("tooltip hides after leaving tooltip", bool(state.get("tooltip_visible", true)))
+	_assert_true("points label returns after tooltip hides", bool(state.get("points_label_visible", false)))
 	panel.bot_hover_skill("heal")
 	state = panel.get_debug_state()
 	_assert_eq("non-class skill selection ignored", str(state.get("selected_skill_id", "")), "magic_bolt")

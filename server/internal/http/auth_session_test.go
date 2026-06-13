@@ -825,29 +825,29 @@ func TestMarketOfferRoutesSubmitListAndAccept(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(sellerStash) != 0 {
-		t.Fatalf("seller stash after accept = %+v, want accepted items on character", sellerStash)
+	if !accountStashItemsContain(sellerStash, "stash_market_offer_bid_item_a_"+suffix) || !accountStashItemsContain(sellerStash, "stash_market_offer_bid_item_b_"+suffix) {
+		t.Fatalf("seller stash after accept = %+v, want accepted offer items", sellerStash)
 	}
 	sellerItems, err := db.ListCharacterItems(ctx, sellerID, sellerChar.CharacterID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !characterItemsContain(sellerItems, "stash_market_offer_bid_item_a_"+suffix) || !characterItemsContain(sellerItems, "stash_market_offer_bid_item_b_"+suffix) {
-		t.Fatalf("seller character after accept = %+v, want accepted offer items", sellerItems)
+	if characterItemsContain(sellerItems, "stash_market_offer_bid_item_a_"+suffix) || characterItemsContain(sellerItems, "stash_market_offer_bid_item_b_"+suffix) {
+		t.Fatalf("seller character after accept = %+v, want accepted offer items in account stash", sellerItems)
 	}
 	bidderStash, err := db.ListAccountStashItems(ctx, bidderID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(bidderStash) != 0 {
-		t.Fatalf("bidder stash after accept = %+v, want listed item on character", bidderStash)
+	if !accountStashItemsContain(bidderStash, "market_offer_listing_stash_"+suffix) {
+		t.Fatalf("bidder stash after accept = %+v, want listed item", bidderStash)
 	}
 	bidderItems, err := db.ListCharacterItems(ctx, bidderID, bidderChar.CharacterID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !characterItemsContain(bidderItems, "market_offer_listing_stash_"+suffix) {
-		t.Fatalf("bidder character after accept = %+v, want listed item", bidderItems)
+	if characterItemsContain(bidderItems, "market_offer_listing_stash_"+suffix) {
+		t.Fatalf("bidder character after accept = %+v, want listed item in account stash", bidderItems)
 	}
 }
 
@@ -912,17 +912,42 @@ func TestMarketOfferRouteAcceptsInventoryItems(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, itemID := range offer.Items {
-		if !characterItemsContain(sellerItems, itemID.StashItemID) {
-			t.Fatalf("seller character did not receive offered item %s after accept = %+v", itemID.StashItemID, sellerItems)
+		if characterItemsContain(sellerItems, itemID.StashItemID) {
+			t.Fatalf("seller character received offered item %s after accept = %+v, want account stash", itemID.StashItemID, sellerItems)
+		}
+	}
+	sellerStash, err := db.ListAccountStashItems(ctx, sellerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, itemID := range offer.Items {
+		if !accountStashItemsContain(sellerStash, itemID.StashItemID) {
+			t.Fatalf("seller stash did not receive offered item %s after accept = %+v", itemID.StashItemID, sellerStash)
 		}
 	}
 	bidderItems, err := db.ListCharacterItems(ctx, bidderID, bidderChar.CharacterID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !characterItemsContain(bidderItems, listing.StashItemID) {
-		t.Fatalf("bidder character did not receive listed item after accept = %+v", bidderItems)
+	if characterItemsContain(bidderItems, listing.StashItemID) {
+		t.Fatalf("bidder character received listed item after accept = %+v, want account stash", bidderItems)
 	}
+	bidderStash, err := db.ListAccountStashItems(ctx, bidderID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !accountStashItemsContain(bidderStash, listing.StashItemID) {
+		t.Fatalf("bidder stash did not receive listed item after accept = %+v", bidderStash)
+	}
+}
+
+func accountStashItemsContain(items []store.AccountStashItem, stashItemID string) bool {
+	for _, item := range items {
+		if item.StashItemID == stashItemID {
+			return true
+		}
+	}
+	return false
 }
 
 func characterItemsContain(items []store.CharacterItemInstance, itemID string) bool {

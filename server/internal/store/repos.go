@@ -1998,12 +1998,11 @@ func (s *Store) AcceptMarketOffer(ctx context.Context, sellerAccountID, listingI
 			return err
 		}
 		offer.Items = items
-		bidderCharacterID := firstSourceCharacterID(items)
-		if err := deliverMarketListingItem(ctx, tx, offer.BidderAccountID, bidderCharacterID, listing); err != nil {
+		if err := deliverMarketListingItem(ctx, tx, offer.BidderAccountID, listing); err != nil {
 			return err
 		}
 		for _, item := range items {
-			if err := deliverMarketOfferItem(ctx, tx, sellerAccountID, listing.SourceCharacterID, item); err != nil {
+			if err := deliverMarketOfferItem(ctx, tx, sellerAccountID, item); err != nil {
 				return err
 			}
 		}
@@ -2278,16 +2277,10 @@ func restoreOfferItemToAccountStash(ctx context.Context, tx pgx.Tx, accountID st
 	return nil
 }
 
-func deliverMarketListingItem(ctx context.Context, tx pgx.Tx, accountID, characterID string, listing MarketListing) error {
+func deliverMarketListingItem(ctx context.Context, tx pgx.Tx, accountID string, listing MarketListing) error {
 	rolledStats := listing.RolledStats
 	if len(rolledStats) == 0 {
 		rolledStats = []byte(`{}`)
-	}
-	if characterID != "" {
-		if err := insertCharacterInventoryItem(ctx, tx, accountID, characterID, listing.StashItemID, listing.ItemDefID, rolledStats); err != nil {
-			return fmt.Errorf("store: deliver accepted listing to bidder character: %w", err)
-		}
-		return nil
 	}
 	if _, err := tx.Exec(ctx,
 		`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
@@ -2299,17 +2292,7 @@ func deliverMarketListingItem(ctx context.Context, tx pgx.Tx, accountID, charact
 	return nil
 }
 
-func deliverMarketOfferItem(ctx context.Context, tx pgx.Tx, accountID, characterID string, item MarketOfferItem) error {
-	if characterID != "" {
-		rolledStats := item.RolledStats
-		if len(rolledStats) == 0 {
-			rolledStats = []byte(`{}`)
-		}
-		if err := insertCharacterInventoryItem(ctx, tx, accountID, characterID, item.StashItemID, item.ItemDefID, rolledStats); err != nil {
-			return fmt.Errorf("store: deliver accepted offer item to seller character: %w", err)
-		}
-		return nil
-	}
+func deliverMarketOfferItem(ctx context.Context, tx pgx.Tx, accountID string, item MarketOfferItem) error {
 	if err := restoreOfferItemToAccountStash(ctx, tx, accountID, item); err != nil {
 		return err
 	}
@@ -2341,15 +2324,6 @@ func insertCharacterInventoryItem(ctx context.Context, tx pgx.Tx, accountID, cha
 		return ErrNotFound
 	}
 	return nil
-}
-
-func firstSourceCharacterID(items []MarketOfferItem) string {
-	for _, item := range items {
-		if item.SourceCharacterID != "" {
-			return item.SourceCharacterID
-		}
-	}
-	return ""
 }
 
 func refundActiveMarketOffers(ctx context.Context, tx pgx.Tx, listingID, errPrefix string) error {

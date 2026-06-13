@@ -1482,6 +1482,8 @@ func _matching_blacksmith_rows(step: Dictionary, state: Dictionary) -> Array:
 func _matching_market_listing_rows(step: Dictionary, state: Dictionary) -> Array:
 	var panel: Dictionary = state.get("market_panel", {})
 	var rows: Array = panel.get("listing_rows", [])
+	if bool(step.get("seller_owned", false)):
+		rows = panel.get("owned_listing_rows", [])
 	var out: Array = []
 	for row in rows:
 		if typeof(row) != TYPE_DICTIONARY:

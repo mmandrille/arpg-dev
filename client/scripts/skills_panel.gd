@@ -11,7 +11,7 @@ const SKILL_ICON_SIZE := Vector2(62, 62)
 const SKILL_TREE_ORIGIN := Vector2(23, 70)
 const SKILL_TREE_SPACING := Vector2(96, 127)
 const SKILL_TREE_WIDTH := 395.0
-const SKILL_TOOLTIP_SIZE := Vector2(208, 178)
+const SKILL_TOOLTIP_SIZE := Vector2(218, 218)
 const SKILL_TOOLTIP_GAP := 8.0
 
 var skill_progression: Dictionary = {}
@@ -53,12 +53,52 @@ static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: D
 	var text := summary
 	text += "\nMana: %d" % _static_skill_mana_cost(def, rank)
 	text += "\n%s" % _static_skill_cooldown_text(def)
+	var next_lines := tooltip_next_rank_lines(skill_id, rank)
+	if not next_lines.is_empty():
+		text += "\nNext rank:"
+		for line in next_lines:
+			text += "\n%s" % str(line)
 	var requirement_lines := tooltip_requirement_lines(skill_id, skill_progression, character_progression)
 	if not requirement_lines.is_empty():
 		text += "\nRequires:"
 		for line in requirement_lines:
 			text += "\n%s" % str((line as Dictionary).get("text", ""))
 	return text
+
+
+static func tooltip_next_rank_lines(skill_id: String, rank: int) -> Array:
+	var def := SkillRulesLoader.skill_definition(skill_id)
+	var max_rank := int(def.get("max_rank", 1))
+	var current_rank := maxi(rank, 1)
+	if current_rank >= max_rank:
+		return []
+	var next_rank := current_rank + 1
+	var lines: Array = []
+	var mana_now := _static_skill_mana_cost(def, current_rank)
+	var mana_next := _static_skill_mana_cost(def, next_rank)
+	if mana_next != mana_now:
+		lines.append("Mana: %d -> %d" % [mana_now, mana_next])
+	var damage: Dictionary = def.get("damage", {})
+	if str(damage.get("type", "")) == "rank_linear_range":
+		var min_now := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), current_rank)
+		var max_now := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), current_rank)
+		var min_next := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), next_rank)
+		var max_next := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), next_rank)
+		if min_now != min_next or max_now != max_next:
+			lines.append("Damage: %d-%d -> %d-%d" % [min_now, max_now, min_next, max_next])
+	var effects: Array = def.get("effects", [])
+	for effect in effects:
+		if typeof(effect) != TYPE_DICTIONARY:
+			continue
+		var rec := effect as Dictionary
+		if not rec.has("percent_base") and not rec.has("percent_per_rank"):
+			continue
+		var percent_now := _static_ranked_stat_value(int(rec.get("percent_base", 0)), int(rec.get("percent_per_rank", 0)), current_rank)
+		var percent_next := _static_ranked_stat_value(int(rec.get("percent_base", 0)), int(rec.get("percent_per_rank", 0)), next_rank)
+		if percent_now == percent_next:
+			continue
+		lines.append("%s: %d%% -> %d%%" % [_static_effect_label(rec), percent_now, percent_next])
+	return lines
 
 
 static func tooltip_requirement_lines(skill_id: String, skill_progression: Dictionary, character_progression: Dictionary) -> Array:
@@ -152,6 +192,20 @@ static func _static_requirement_target_rank(skill_id: String, skill_progression:
 
 static func _static_ranked_requirement_value(base: int, per_rank: int, rank: int) -> int:
 	return maxi(0, base + per_rank * maxi(0, rank - 1))
+
+
+static func _static_ranked_stat_value(base: int, per_rank: int, rank: int) -> int:
+	return base + per_rank * maxi(0, rank - 1)
+
+
+static func _static_effect_label(effect: Dictionary) -> String:
+	match str(effect.get("type", "")):
+		"area_percent_heal":
+			return "Heal"
+		"stat_percent_buff", "area_stat_percent_buff":
+			return "Buff"
+		_:
+			return "Effect"
 
 
 static func _static_current_stat_value(character_progression: Dictionary, stat: String) -> int:
@@ -690,6 +744,11 @@ func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
 		_escape_bbcode("Mana: %d" % _skill_mana_cost(def, rank)),
 		_escape_bbcode(_skill_cooldown_text(def)),
 	]
+	var next_lines := tooltip_next_rank_lines(skill_id, rank)
+	if not next_lines.is_empty():
+		lines.append(_escape_bbcode("Next rank:"))
+		for line in next_lines:
+			lines.append(_escape_bbcode(str(line)))
 	var requirement_lines := _requirement_lines(skill_id)
 	if not requirement_lines.is_empty():
 		lines.append(_escape_bbcode("Requires:"))

@@ -1,0 +1,42 @@
+shared/rules/dungeon_generation.v0.schema.json
+  s_71c23b08e947b7::t_d7cae58ccc86f7 79-88
+server/internal/game/elite_aura.go
+  s_71c23b08e947b7::t_d7cae58ccc86f7 1-38
+shared/rules/dungeon_generation.v0.json
+  s_71c23b08e947b7::t_d7cae58ccc86f7 24-28
+server/internal/game/sim.go
+  s_71c23b08e947b7::t_d7cae58ccc86f7 108-109,2026-2027
+docs/as-built/v112_elite-aura-foundation.md
+  s_71c23b08e947b7::t_c3b714fab5306a 1-29
+server/internal/game/rules.go
+  s_71c23b08e947b7::t_d7cae58ccc86f7 219,227-232,1708-1717
+docs/specs/v112_spec-elite-aura-foundation.md
+  s_71c23b08e947b7::t_3b348bc245fe7d 1-69
+server/internal/game/unique_survival_effects.go
+  s_71c23b08e947b7::t_d7cae58ccc86f7 28
+PROGRESS.md
+  s_71c23b08e947b7::t_c3b714fab5306a 15,18,133,285,411-415,889
+docs/plans/v112_2026-06-13-elite-aura-foundation.md
+  s_71c23b08e947b7::t_e905be665aaabe 95-96,98,114-115
+  s_71c23b08e947b7::t_4ef2d44deec20a 116
+  s_71c23b08e947b7::t_3b348bc245fe7d 1-33,36-37,40-52,55-65,69-79,83-94,97,99-111
+  s_71c23b08e947b7::t_17793560fd8f13 34-35,38-39,53-54,66-68,80-82,112-113
+server/internal/game/elite_aura_test.go
+  s_71c23b08e947b7::t_4e0277d7414ed8 1-103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d3a6172dd15872f95e1efa6ec40285cd2757fd50",
+  "prompts": {},
+  "sessions": {
+    "s_71c23b08e947b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe31-f567-70e3-9572-f4c3d8591ba3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

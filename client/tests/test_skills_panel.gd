@@ -94,6 +94,7 @@ func _run() -> void:
 	_assert_false("tooltip omits next-rank section header", str(state.get("tooltip_body", "")).contains("Next rank:"))
 	_assert_false("rank 0 tooltip omits next-rank rich damage", str(state.get("tooltip_rich_text", "")).contains("Damage: 4-6[color=#6fd66f] -> 5-7[/color]"))
 	_assert_true("tooltip separates stats from requirements", str(state.get("tooltip_body", "")).contains("\n\nRequires:\nLevel %d\nMagic %d" % [magic_bolt_level_req, magic_rank1_req]))
+	_assert_true("ligthing tooltip includes flat cooldown", SkillsPanelScript.tooltip_plain_body("ligthing", 1, panel.skill_progression, panel.character_progression).contains("Cooldown: attack x2 + 1s"))
 	panel.bot_leave_skill_tooltip()
 	state = panel.get_debug_state()
 	_assert_eq("tooltip leave clears hovered skill", str(state.get("hovered_skill_id", "")), "")

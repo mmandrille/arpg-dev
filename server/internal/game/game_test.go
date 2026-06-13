@@ -231,8 +231,8 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["ice_shard"]; len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Requirements.Skills[0].Rank != 1 {
 		t.Fatalf("ice_shard prerequisites = %+v, want magic_bolt rank 1", skill.Requirements.Skills)
 	}
-	if skill := r.Skills["ligthing"]; skill.Class != "sorcerer" || skill.Kind != "chain_projectile_attack" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Chain.RangeMultiplier != 0.8 {
-		t.Fatalf("ligthing skill = %+v, want sorcerer chain_projectile_attack with magic_bolt prerequisite and 0.8 chain", skill)
+	if skill := r.Skills["ligthing"]; skill.Class != "sorcerer" || skill.Kind != "chain_projectile_attack" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Chain.RangeMultiplier != 0.8 || skill.Projectile.Speed != r.Skills[magicBoltSkillID].Projectile.Speed || skill.Cooldown.FlatTicks != 10 {
+		t.Fatalf("ligthing skill = %+v, want sorcerer chain_projectile_attack with magic_bolt prerequisite, magic_bolt speed, 0.8 chain, and +1s cooldown", skill)
 	}
 	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
@@ -1241,6 +1241,11 @@ func TestLigthingChainsToNearestTargetsWithShrinkingRange(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "ligthing", TargetID: idStr(first.id)},
 	}})
 	assertAck(t, cast, "cast_ligthing")
+	cooldowns := skillCooldownUpdate(cast)
+	expectedCooldown := sim.skillCooldownTicks(rules.Skills["ligthing"])
+	if len(cooldowns) != 1 || cooldowns[0].SkillID != "ligthing" || cooldowns[0].TotalTicks != expectedCooldown {
+		t.Fatalf("ligthing cooldown update = %+v, want ligthing total %d", cooldowns, expectedCooldown)
+	}
 	var impactEvents []Event
 	for i := 0; i < 30; i++ {
 		res := sim.Tick(nil)

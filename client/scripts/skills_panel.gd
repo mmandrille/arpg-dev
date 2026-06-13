@@ -236,10 +236,20 @@ static func _static_skill_cooldown_text(def: Dictionary) -> String:
 	var cooldown: Dictionary = def.get("cooldown", {})
 	if str(cooldown.get("type", "")) == "attack_interval_multiplier":
 		var multiplier := float(cooldown.get("multiplier", 1.0))
+		var suffix := _static_flat_cooldown_suffix(int(cooldown.get("flat_ticks", 0)))
 		if is_equal_approx(multiplier, roundf(multiplier)):
-			return "Cooldown: attack x%d" % int(roundf(multiplier))
-		return "Cooldown: attack x%.1f" % multiplier
+			return "Cooldown: attack x%d%s" % [int(roundf(multiplier)), suffix]
+		return "Cooldown: attack x%.1f%s" % [multiplier, suffix]
 	return "Cooldown: %s" % str(cooldown.get("type", "none"))
+
+
+static func _static_flat_cooldown_suffix(flat_ticks: int) -> String:
+	if flat_ticks <= 0:
+		return ""
+	var seconds := float(flat_ticks) / 10.0
+	if is_equal_approx(seconds, roundf(seconds)):
+		return " + %ds" % int(roundf(seconds))
+	return " + %.1fs" % seconds
 
 
 static func _static_kind_label(def: Dictionary) -> String:
@@ -779,9 +789,10 @@ func _skill_cooldown_text(def: Dictionary) -> String:
 	var cooldown: Dictionary = def.get("cooldown", {})
 	if str(cooldown.get("type", "")) == "attack_interval_multiplier":
 		var multiplier := float(cooldown.get("multiplier", 1.0))
+		var suffix := _static_flat_cooldown_suffix(int(cooldown.get("flat_ticks", 0)))
 		if is_equal_approx(multiplier, roundf(multiplier)):
-			return "Cooldown: attack x%d" % int(roundf(multiplier))
-		return "Cooldown: attack x%.1f" % multiplier
+			return "Cooldown: attack x%d%s" % [int(roundf(multiplier)), suffix]
+		return "Cooldown: attack x%.1f%s" % [multiplier, suffix]
 	return "Cooldown: %s" % str(cooldown.get("type", "none"))
 
 

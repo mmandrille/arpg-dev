@@ -1587,22 +1587,24 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 }
 
 func rolledStatsItemLevel(raw json.RawMessage) (int, error) {
-	stats := map[string]any{}
+	payload := map[string]any{}
 	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &stats); err != nil {
+		if err := json.Unmarshal(raw, &payload); err != nil {
 			return 0, fmt.Errorf("store: decode rolled stats for upgrade: %w", err)
 		}
 	}
+	stats := upgradeStatsMap(payload)
 	return numericStatValue(stats["item_level"]), nil
 }
 
 func upgradedRolledStats(raw json.RawMessage, maxLevel int) ([]byte, error) {
-	stats := map[string]any{}
+	payload := map[string]any{}
 	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &stats); err != nil {
+		if err := json.Unmarshal(raw, &payload); err != nil {
 			return nil, fmt.Errorf("store: decode rolled stats for upgrade: %w", err)
 		}
 	}
+	stats := upgradeStatsMap(payload)
 	level := numericStatValue(stats["item_level"])
 	if level >= maxLevel {
 		return nil, ErrConflict
@@ -1623,11 +1625,18 @@ func upgradedRolledStats(raw json.RawMessage, maxLevel int) ([]byte, error) {
 	current, _ := numericStatValueOK(stats[keys[0]])
 	stats[keys[0]] = current + 1
 	stats["item_level"] = level + 1
-	out, err := json.Marshal(stats)
+	out, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("store: encode upgraded rolled stats: %w", err)
 	}
 	return out, nil
+}
+
+func upgradeStatsMap(payload map[string]any) map[string]any {
+	if nested, ok := payload["stats"].(map[string]any); ok {
+		return nested
+	}
+	return payload
 }
 
 func numericStatValue(value any) int {

@@ -1130,6 +1130,50 @@ func TestAccountStashItemUpgradeRejectsInsufficientGold(t *testing.T) {
 	}
 }
 
+func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	acct, err := s.UpsertAccountByEmail(ctx, "acct_upgrade_payload_"+suffix, "upgrade-payload+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	char, err := s.CreateCharacter(ctx, "char_upgrade_payload_"+suffix, acct.ID, "Payload Upgrade Hero", "barbarian")
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog := store.CharacterProgression{AccountID: acct.ID, CharacterID: char.ID, CharacterClass: "barbarian", Level: 1, Gold: 150, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
+	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
+		t.Fatal(err)
+	}
+	payload := `{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":5},"requirements":{"level":1},"effect_ids":[]}`
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "payload_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(payload)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "payload_upgrade_item_"+suffix, "payload_upgrade_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 100); err != nil {
+		t.Fatal(err)
+	}
+	item, gold, cost, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, 100, 50, 2, map[string]struct{}{"cave_blade": {}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cost != 100 || gold != 0 {
+		t.Fatalf("payload upgrade cost/gold = %d/%d, want 100/0", cost, gold)
+	}
+	var upgraded struct {
+		Stats map[string]int `json:"stats"`
+	}
+	if err := json.Unmarshal(item.RolledStats, &upgraded); err != nil {
+		t.Fatal(err)
+	}
+	if upgraded.Stats["item_level"] != 1 || upgraded.Stats["damage_max"] != 6 || upgraded.Stats["damage_min"] != 4 {
+		t.Fatalf("payload upgraded stats = %+v raw=%s", upgraded.Stats, string(item.RolledStats))
+	}
+}
+
 func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 	s := newStore(t)
 	ctx := context.Background()

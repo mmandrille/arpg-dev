@@ -318,6 +318,15 @@ func purchase_market_listing(listing_id: String) -> Dictionary:
 	return {"_error": str(r)}
 
 
+func upgrade_account_stash_item(stash_item_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/items/%s/upgrade" % stash_item_id,
+		["Authorization: Bearer " + token], "{}")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("upgrade_account_stash_item failed: %s" % r)
+	return {"_error": str(r)}
+
+
 # --- WebSocket --------------------------------------------------------------
 
 func connect_ws() -> void:

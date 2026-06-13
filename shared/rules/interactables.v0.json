@@ -47,6 +47,11 @@
       "initial_state": "ready",
       "service": "market"
     },
+    "town_blacksmith": {
+      "name": "Blacksmith",
+      "initial_state": "ready",
+      "service": "blacksmith"
+    },
     "town_bishop": {
       "name": "Town Bishop",
       "initial_state": "ready",

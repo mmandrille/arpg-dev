@@ -1,0 +1,27 @@
+client/tests/test_skills_panel.gd
+  s_ba6d60369dc985::t_91f7925973d03a 93,95,213
+shared/rules/skills.v0.json
+  s_ba6d60369dc985::t_f8feed8ff44be3 34-35
+shared/golden/skill_points_and_magic_bolt.json
+  s_ba6d60369dc985::t_ad86b477d54729 124-125,132-133,140-141
+client/tests/test_skill_bar.gd
+  s_ba6d60369dc985::t_a3e6aa036ea59d 53
+server/internal/game/game_test.go
+  s_ba6d60369dc985::t_56e78bc2ecad06 1070-1071
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "22671879f21c660c27bb63b7fe365af7b06b5b70",
+  "prompts": {},
+  "sessions": {
+    "s_ba6d60369dc985": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec157-af30-7c61-8b46-8c4ec504aa0a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

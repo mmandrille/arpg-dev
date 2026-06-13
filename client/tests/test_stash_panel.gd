@@ -108,6 +108,16 @@ func _run() -> void:
 	_assert_eq("stash drag to bag emitted count", inventory_emitted.size(), 1)
 	_assert_eq("stash drag to bag type", str(inventory_emitted[0]["type"]), "stash_withdraw_item_intent")
 	_assert_eq("stash drag to bag item", str(inventory_emitted[0]["payload"].get("stash_item_id", "")), "9001")
+	inventory_panel._handle_drop_on_slot("bag", {
+		"source": "corpse",
+		"corpse_entity_id": "corpse_entity_1",
+		"item_instance_id": "dead_item_1",
+		"item": {"item_instance_id": "dead_item_1", "item_def_id": "red_potion"},
+	})
+	_assert_eq("corpse drag to bag emitted count", inventory_emitted.size(), 2)
+	_assert_eq("corpse drag to bag type", str(inventory_emitted[1]["type"]), "corpse_withdraw_item_intent")
+	_assert_eq("corpse drag to bag entity", str(inventory_emitted[1]["payload"].get("corpse_entity_id", "")), "corpse_entity_1")
+	_assert_eq("corpse drag to bag item", str(inventory_emitted[1]["payload"].get("item_instance_id", "")), "dead_item_1")
 	_assert_true("test equip slot kind recognized", inventory_panel._slot_kind_is_equipment("equip:main_hand"))
 	_assert_true("test stash item can equip to main hand", inventory_panel._item_can_equip_to(stash_items[0], "main_hand"))
 	inventory_panel._handle_drop_on_slot("equip:main_hand", {
@@ -116,11 +126,11 @@ func _run() -> void:
 		"stash_item_id": "9001",
 		"item": stash_items[0],
 	})
-	_assert_eq("stash drag to equip emitted count", inventory_emitted.size(), 2)
-	if inventory_emitted.size() >= 2:
-		_assert_eq("stash drag to equip type", str(inventory_emitted[1]["type"]), "stash_equip_item_intent")
-		_assert_eq("stash drag to equip stash item", str(inventory_emitted[1]["payload"].get("stash_item_id", "")), "9001")
-		_assert_eq("stash drag to equip slot", str(inventory_emitted[1]["payload"].get("slot", "")), "main_hand")
+	_assert_eq("stash drag to equip emitted count", inventory_emitted.size(), 3)
+	if inventory_emitted.size() >= 3:
+		_assert_eq("stash drag to equip type", str(inventory_emitted[2]["type"]), "stash_equip_item_intent")
+		_assert_eq("stash drag to equip stash item", str(inventory_emitted[2]["payload"].get("stash_item_id", "")), "9001")
+		_assert_eq("stash drag to equip slot", str(inventory_emitted[2]["payload"].get("slot", "")), "main_hand")
 	inventory_panel.queue_free()
 
 	panel.bot_click_deposit_gold(1)
@@ -141,6 +151,34 @@ func _run() -> void:
 
 	panel.show_status("stored", false)
 	_assert_eq("status text", str(panel.get_debug_state().get("status", "")), "stored")
+	panel.show_corpse(
+		"corpse_entity_1",
+		"p2",
+		[
+			{"item_instance_id": "dead_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Lost Cave Blade", "rarity": "common", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+		],
+		inventory,
+		{},
+		67,
+		[]
+	)
+	state = panel.get_debug_state()
+	_assert_eq("corpse panel mode", str(state.get("container_mode", "")), "corpse")
+	_assert_eq("corpse entity id retained", str(state.get("stash_entity_id", "")), "corpse_entity_1")
+	panel.bot_drag_stash_to_bag("dead_item_1")
+	_assert_eq("corpse withdraw emitted count", emitted.size(), 7)
+	_assert_eq("corpse withdraw emitted type", str(emitted[6]["type"]), "corpse_withdraw_item_intent")
+	_assert_eq("corpse withdraw emitted entity", str(emitted[6]["payload"].get("corpse_entity_id", "")), "corpse_entity_1")
+	_assert_eq("corpse withdraw emitted item", str(emitted[6]["payload"].get("item_instance_id", "")), "dead_item_1")
+	panel._emit_withdraw({
+		"item_instance_id": "dead_item_2",
+		"stash_item_id": "dead_item_2",
+		"item_def_id": "red_potion",
+	})
+	_assert_eq("corpse double-click emitted count", emitted.size(), 8)
+	_assert_eq("corpse double-click emitted type", str(emitted[7]["type"]), "corpse_withdraw_item_intent")
+	_assert_eq("corpse double-click emitted entity", str(emitted[7]["payload"].get("corpse_entity_id", "")), "corpse_entity_1")
+	_assert_eq("corpse double-click emitted item", str(emitted[7]["payload"].get("item_instance_id", "")), "dead_item_2")
 	var drag_start_position: Dictionary = (panel.get_debug_state().get("window", {}) as Dictionary).get("position", {})
 	panel.bot_drag_window_by(Vector2(35, 20))
 	state = panel.get_debug_state()

@@ -1352,25 +1352,32 @@ func _upsert_entity(e: Dictionary) -> void:
 			rec["amount"] = int(e["amount"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-		for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
-			if e.has(key):
-				rec[key] = e[key]
-		if e.has("is_boss"):
-			rec["is_boss"] = bool(e["is_boss"])
-		if e.has("visual_scale"):
-			rec["visual_scale"] = float(e["visual_scale"])
-		if e.has("interactable_def_id"):
-			rec["interactable_def_id"] = str(e["interactable_def_id"])
+	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase"]:
+		if e.has(key):
+			rec[key] = e[key]
+	for key in ["corpse_character_id", "corpse_name", "corpse_level", "corpse_item_count"]:
+		if e.has(key):
+			rec[key] = e[key]
+	if e.has("is_boss"):
+		rec["is_boss"] = bool(e["is_boss"])
+	if e.has("visual_scale"):
+		rec["visual_scale"] = float(e["visual_scale"])
+	if e.has("interactable_def_id"):
+		rec["interactable_def_id"] = str(e["interactable_def_id"])
+	if is_new:
 		entities[id] = rec
+		var new_node := rec["node"] as Node3D
 		if e["type"] != "projectile" and e["type"] != "player":
-			_attach_pick_collider(node, id, str(e["type"]))
-		if e["type"] == "loot" and not loot_ids.has(id):
-			loot_ids.append(id)
+			_attach_pick_collider(new_node, id, str(e["type"]), str(rec.get("interactable_def_id", "")))
+		if str(rec.get("interactable_def_id", "")) == "hero_corpse":
 			_set_loot_label_visible(id, loot_label_reveal_held or id == hovered_loot_id, id == hovered_loot_id)
-		if e["type"] == "monster" and not monster_ids.has(id):
-			monster_ids.append(id)
-		if e["type"] == "interactable" and not interactable_ids.has(id):
-			interactable_ids.append(id)
+	if e["type"] == "loot" and not loot_ids.has(id):
+		loot_ids.append(id)
+		_set_loot_label_visible(id, loot_label_reveal_held or id == hovered_loot_id, id == hovered_loot_id)
+	if e["type"] == "monster" and not monster_ids.has(id):
+		monster_ids.append(id)
+	if e["type"] == "interactable" and not interactable_ids.has(id):
+		interactable_ids.append(id)
 	if rec["type"] == "projectile":
 		if is_new:
 			(rec["node"] as Node3D).position = server_pos
@@ -2593,6 +2600,7 @@ func _try_action_at_mouse() -> void:
 
 func _interactable_should_approach_before_action(interactable_def_id: String) -> bool:
 	return interactable_def_id in [
+		"hero_corpse",
 		"stairs_down",
 		"stairs_up",
 		"teleporter",
@@ -2827,7 +2835,7 @@ func _update_loot_hover_label() -> void:
 	var next_hover := ""
 	if not _input_locked() and _camera != null:
 		var target_id := _pick_entity_at_mouse()
-		if target_id != "" and entities.has(target_id) and str(entities[target_id].get("type", "")) == "loot":
+		if target_id != "" and _entity_uses_loot_label(target_id):
 			next_hover = target_id
 		else:
 			next_hover = _nearest_loot_at_ground(_mouse_ground_point())
@@ -2842,10 +2850,28 @@ func _is_loot_label_reveal_held() -> bool:
 
 
 func _refresh_loot_label_visibility() -> void:
-	for loot_id in loot_ids:
-		var id := str(loot_id)
+	for label_id in _loot_label_entity_ids():
+		var id := str(label_id)
 		var highlighted := id == hovered_loot_id
 		_set_loot_label_visible(id, loot_label_reveal_held or highlighted, highlighted)
+
+
+func _loot_label_entity_ids() -> Array:
+	var out: Array = []
+	for loot_id in loot_ids:
+		out.append(str(loot_id))
+	for interactable_id in interactable_ids:
+		var id := str(interactable_id)
+		if _entity_uses_loot_label(id) and not out.has(id):
+			out.append(id)
+	return out
+
+
+func _entity_uses_loot_label(entity_id: String) -> bool:
+	if entity_id == "" or not entities.has(entity_id):
+		return false
+	var rec: Dictionary = entities[entity_id]
+	return str(rec.get("type", "")) == "loot" or str(rec.get("interactable_def_id", "")) == "hero_corpse"
 
 
 func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = false) -> void:
@@ -4208,10 +4234,11 @@ func _make_hero_corpse_node(e: Dictionary) -> Node3D:
 	root.add_child(shadow)
 
 	var marker := Label3D.new()
-	marker.name = "CorpseMarker"
+	marker.name = "LootLabel"
 	var corpse_name := str(e.get("corpse_name", "Hero"))
 	var corpse_level := int(e.get("corpse_level", 0))
 	marker.text = "%s Lv %d" % [corpse_name, corpse_level] if corpse_level > 0 else corpse_name
+	marker.visible = false
 	marker.font_size = 28
 	marker.modulate = Color("#e8dcc8")
 	marker.outline_size = 10
@@ -5518,7 +5545,7 @@ func _make_teleporter_node() -> Node3D:
 	return root
 
 
-func _attach_pick_collider(node: Node3D, entity_id: String, kind: String) -> void:
+func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, interactable_def_id: String = "") -> void:
 	var body := StaticBody3D.new()
 	body.name = "PickBody"
 	body.set_meta("entity_id", entity_id)
@@ -5529,8 +5556,12 @@ func _attach_pick_collider(node: Node3D, entity_id: String, kind: String) -> voi
 			box.size = Vector3(1.0, 1.6, 1.0)
 			shape.position = Vector3(0.0, 0.8, 0.0)
 		"interactable":
-			box.size = Vector3(1.2, 1.2, 0.45)
-			shape.position = Vector3(0.0, 0.6, 0.0)
+			if interactable_def_id == "hero_corpse":
+				box.size = Vector3(1.8, 0.75, 1.35)
+				shape.position = Vector3(0.0, 0.35, 0.0)
+			else:
+				box.size = Vector3(1.2, 1.2, 0.45)
+				shape.position = Vector3(0.0, 0.6, 0.0)
 		_:
 			box.size = Vector3(0.75, 0.75, 0.75)
 			shape.position = Vector3(0.0, 0.375, 0.0)
@@ -5874,13 +5905,14 @@ func _bot_loot_debug() -> Array:
 
 func _bot_loot_label_debug() -> Array:
 	var out: Array = []
-	for loot_id in loot_ids:
-		var id := str(loot_id)
+	for label_id in _loot_label_entity_ids():
+		var id := str(label_id)
 		var rec: Dictionary = entities.get(id, {})
 		var label := _loot_label_node(id)
 		out.append({
 			"id": id,
 			"item_def_id": str(rec.get("item_def_id", "")),
+			"interactable_def_id": str(rec.get("interactable_def_id", "")),
 			"rarity": str(rec.get("rarity", "")),
 			"text": label.text if label != null else "",
 			"visible": label.visible if label != null else false,

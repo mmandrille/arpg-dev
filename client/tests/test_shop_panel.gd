@@ -80,6 +80,9 @@ func _run() -> void:
 	_assert_eq("vendor tooltip uses shared panel", offer_tooltip.get_script(), ItemTooltipPanelScript)
 	_assert_eq("vendor tooltip gold value", offer_tooltip.debug_gold_value_text(), "50 gold")
 	offer_tooltip.queue_free()
+	var magic_offer_tooltip := panel._make_offer_tooltip(offers[3])
+	_assert_eq("vendor magic tooltip name is rarity blue", magic_offer_tooltip.debug_first_main_line_color(), "93c5fd")
+	magic_offer_tooltip.queue_free()
 
 	panel.bot_click_buy_offer("fixed:red_potion")
 	_assert_eq("buy emitted count", emitted.size(), 1)
@@ -242,6 +245,9 @@ func _run() -> void:
 	_assert_true("inventory tooltip preview extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "preview"))
 	_assert_true("inventory tooltip comparison extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "vs equipped"))
 	inventory_tooltip.queue_free()
+	var blade_tooltip := inventory_panel._make_item_tooltip(blade)
+	_assert_eq("inventory magic tooltip name is rarity blue", blade_tooltip.debug_first_main_line_color(), "93c5fd")
+	blade_tooltip.queue_free()
 	var ring := {
 		"item_instance_id": "2005",
 		"item_def_id": "cave_ring",

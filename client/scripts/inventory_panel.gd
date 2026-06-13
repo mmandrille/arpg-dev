@@ -945,8 +945,8 @@ func _tooltip(item: Dictionary) -> String:
 func _tooltip_lines(item: Dictionary) -> Array:
 	var def_id := str(item.get("item_def_id", ""))
 	var def: Dictionary = _item_definition(def_id)
-	var lines: Array = [str(item.get("display_name", def.get("name", def_id)))]
 	var rarity := str(item.get("rarity", ""))
+	var lines: Array = [_item_name_tooltip_line(str(item.get("display_name", def.get("name", def_id))), rarity)]
 	if rarity != "":
 		lines.append("Rarity: %s" % rarity.capitalize())
 	var summary_lines := _detail_lines(item, false, false)
@@ -979,6 +979,22 @@ func _tooltip_lines(item: Dictionary) -> Array:
 		lines.append("Damage: %s-%s" % [str(dmg.get("min", "?")), str(dmg.get("max", "?"))])
 	_append_hotbar_tooltip_line(lines, item)
 	return lines
+
+
+func _item_name_tooltip_line(text: String, rarity: String) -> Dictionary:
+	return {"text": text, "color": _rarity_color(rarity)}
+
+
+func _rarity_color(rarity: String) -> Color:
+	match rarity.to_lower():
+		"magic":
+			return Color("#93c5fd")
+		"rare":
+			return Color("#f4d481")
+		"unique":
+			return Color("#ffb26b")
+		_:
+			return Color("#e8dcc8")
 
 
 func _base_stat_lines(def: Dictionary) -> Array:

@@ -529,7 +529,7 @@ def cross_checks(report: Report) -> None:
         report.ok("character_progression base_stats are valid")
 
     class_defs = character_progression.get("classes", {})
-    expected_classes = {"barbarian", "sorcerer", "paladin", "rogue"}
+    expected_classes = {"barbarian", "sorcerer", "paladin", "rogue", "ranger"}
     if set(class_defs) != expected_classes:
         report.fail("character_progression classes", f"must define exactly {sorted(expected_classes)}")
     else:
@@ -889,6 +889,7 @@ def cross_checks(report: Report) -> None:
         "barbarian_axe": "barbarian",
         "sorcerer_staff": "sorcerer",
         "paladin_mace": "paladin",
+        "ranger_shortbow": "ranger",
     }
     rusty_damage = items["items"].get("rusty_sword", {}).get("damage", {})
     for item_id, class_id in class_weapons.items():

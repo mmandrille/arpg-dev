@@ -616,7 +616,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(waypoints) != 1 || waypoints[0].Level != -1 {
 		t.Fatalf("waypoints = %+v, want level -1", waypoints)
 	}
-	altChar, err := s.CreateCharacter(ctx, "char_store_secondary", acct.ID, "Secondary", "sorcerer")
+	altChar, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Secondary", "sorcerer")
 	if err != nil {
 		t.Fatalf("create secondary character: %v", err)
 	}

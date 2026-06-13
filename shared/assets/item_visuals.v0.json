@@ -101,6 +101,26 @@
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
       }
     },
+    "starter_ranger_bow": {
+      "asset_id": "weapon_training_bow_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.04, "y": 1.04, "z": 1.04 }
+      }
+    },
+    "ranger_shortbow": {
+      "asset_id": "weapon_training_bow_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.04, "y": 1.04, "z": 1.04 }
+      }
+    },
     "barbarian_axe": {
       "asset_id": "weapon_starter_axe_v0",
       "slot": "main_hand",

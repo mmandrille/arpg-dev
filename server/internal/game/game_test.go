@@ -201,8 +201,8 @@ func TestLoadRules(t *testing.T) {
 	if !bow.Equippable || bow.Slot != "main_hand" || bow.AttackMode != attackModeRanged || bow.Damage == nil || bow.Reach == nil || bow.ProjectileSpeed == nil {
 		t.Fatalf("training_bow def = %+v, want ranged weapon", bow)
 	}
-	if r.Items["barbarian_axe"].ClassRequired != "barbarian" || r.Items["sorcerer_staff"].ClassRequired != "sorcerer" || r.Items["paladin_mace"].ClassRequired != "paladin" {
-		t.Fatalf("class weapon requirements = axe:%q staff:%q mace:%q", r.Items["barbarian_axe"].ClassRequired, r.Items["sorcerer_staff"].ClassRequired, r.Items["paladin_mace"].ClassRequired)
+	if r.Items["barbarian_axe"].ClassRequired != "barbarian" || r.Items["sorcerer_staff"].ClassRequired != "sorcerer" || r.Items["paladin_mace"].ClassRequired != "paladin" || r.Items["ranger_shortbow"].ClassRequired != "ranger" {
+		t.Fatalf("class weapon requirements = axe:%q staff:%q mace:%q bow:%q", r.Items["barbarian_axe"].ClassRequired, r.Items["sorcerer_staff"].ClassRequired, r.Items["paladin_mace"].ClassRequired, r.Items["ranger_shortbow"].ClassRequired)
 	}
 	if r.Interactables["wooden_door"].InitialState != interactableClosed {
 		t.Fatalf("wooden_door = %+v, want initially closed", r.Interactables["wooden_door"])
@@ -210,12 +210,14 @@ func TestLoadRules(t *testing.T) {
 	if r.CharacterProgression.PointsPerLevel != 3 || r.CharacterProgression.LevelCap != 100 {
 		t.Fatalf("character progression = %+v, want points_per_level 3 level_cap 100", r.CharacterProgression)
 	}
-	if len(r.CharacterProgression.Classes) != 4 ||
+	if len(r.CharacterProgression.Classes) != 5 ||
 		r.CharacterProgression.Classes["barbarian"].BaseStats.Str != 5 ||
 		r.CharacterProgression.Classes["sorcerer"].BaseStats.Str != 3 ||
 		r.CharacterProgression.Classes["paladin"].BaseStats.Vit != 8 ||
-		r.CharacterProgression.Classes["rogue"].BaseStats.Dex != 8 {
-		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin/rogue starting stats", r.CharacterProgression.Classes)
+		r.CharacterProgression.Classes["rogue"].BaseStats.Dex != 8 ||
+		r.CharacterProgression.Classes["ranger"].BaseStats.Dex != 8 ||
+		r.CharacterProgression.Classes["ranger"].BaseStats.Magic != 3 {
+		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin/rogue/ranger starting stats", r.CharacterProgression.Classes)
 	}
 	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 1 {
 		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 1", r.CharacterProgression.SkillPoints)
@@ -1417,8 +1419,9 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
 	}})
 	assertAck(t, cast, "cast_heal")
-	if player.mana != 5 {
-		t.Fatalf("heal mana after cast = %d, want 5", player.mana)
+	wantMana := player.maxMana - skillManaCost(rules.Skills["heal"], 1)
+	if player.mana != wantMana {
+		t.Fatalf("heal mana after cast = %d, want %d", player.mana, wantMana)
 	}
 	if player.hp != 7 || guest.hp != 5 {
 		t.Fatalf("heal hp host/guest = %d/%d, want 7/5", player.hp, guest.hp)
@@ -1526,8 +1529,9 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	if !hasEvent(completed, "skill_cast") || !hasEvent(completed, "skill_cooldown_started") {
 		t.Fatalf("auto-nav heal completion missing cast/cooldown events: %+v", completed.Events)
 	}
-	if player.mana != beforeMana-5 {
-		t.Fatalf("auto-nav heal mana after cast = %d, want %d", player.mana, beforeMana-5)
+	wantAutoNavMana := beforeMana - skillManaCost(rules.Skills["heal"], 1)
+	if player.mana != wantAutoNavMana {
+		t.Fatalf("auto-nav heal mana after cast = %d, want %d", player.mana, wantAutoNavMana)
 	}
 
 	for i := 0; i < 50; i++ {
@@ -1544,8 +1548,9 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill: &CastSkillIntent{SkillID: "heal"},
 	}})
 	assertAck(t, noop, "cast_heal_full")
-	if player.mana != 5 {
-		t.Fatalf("full-hp heal mana = %d, want spent to 5", player.mana)
+	wantNoopMana := player.maxMana - skillManaCost(rules.Skills["heal"], 1)
+	if player.mana != wantNoopMana {
+		t.Fatalf("full-hp heal mana = %d, want %d", player.mana, wantNoopMana)
 	}
 	if hasEvent(noop, "player_healed") {
 		t.Fatalf("full-hp heal events = %+v, want no player_healed", noop.Events)

@@ -69,6 +69,27 @@
       ],
       "effect_pool": []
     },
+    "starter_ranger_bow": {
+      "name": "Ranger Bow",
+      "category": "equipment",
+      "item_type": "bow",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "ranged",
+      "attack_speed": 1.1,
+      "reach": 13.0,
+      "projectile_speed": 55.0,
+      "requirements": { "level": 1 },
+      "base_stats": { "damage_min": 2, "damage_max": 4 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 },
+        { "stat": "attack_speed_percent", "min": 1, "max": 4, "weight": 1 }
+      ],
+      "effect_pool": []
+    },
     "starter_paladin_shield": {
       "name": "Paladin Shield",
       "category": "equipment",

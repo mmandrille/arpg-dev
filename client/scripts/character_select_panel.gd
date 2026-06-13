@@ -43,8 +43,15 @@ const CLASS_DEFS := {
 		"skill_key": "skill.poison_stab.name",
 		"stats": {"str": 4, "dex": 8, "vit": 5, "magic": 4},
 	},
+	"ranger": {
+		"name": "Ranger",
+		"name_key": "character.class.ranger",
+		"skill": "Piercing Shot",
+		"skill_key": "skill.piercing_shot.name",
+		"stats": {"str": 4, "dex": 8, "vit": 5, "magic": 3},
+	},
 }
-const CLASS_ORDER := ["barbarian", "sorcerer", "paladin", "rogue"]
+const CLASS_ORDER := ["barbarian", "sorcerer", "paladin", "rogue", "ranger"]
 
 var _title: Label
 var _rows: VBoxContainer

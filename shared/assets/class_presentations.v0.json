@@ -16,6 +16,10 @@
     "rogue": {
       "icon": { "label": "R", "shape": "dagger", "color": "#3f8f6d", "accent": "#d7f2df" },
       "model": { "asset_id": "character_rogue_v0" }
+    },
+    "ranger": {
+      "icon": { "label": "Ra", "shape": "bow", "color": "#2f8f4e", "accent": "#d6f2a8" },
+      "model": { "asset_id": "character_ranger_v0" }
     }
   }
 }

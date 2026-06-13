@@ -1,0 +1,38 @@
+shared/golden/monster_rarity.json
+  s_68a7da5dad7d6a::t_3d095dca3b5fc7 9-12,14-15,17,21-24,27,30,49-52,58,65,67,77-80,86,93-95,105-108,114,155-158,164,171-174,180
+server/internal/game/game_test.go
+  s_68a7da5dad7d6a::t_59eb18be99ba82 137,139
+shared/rules/monsters.v0.json
+  s_68a7da5dad7d6a::t_3d095dca3b5fc7 138,145,156,168,179,195,209,221,235,247,254,261,360,381
+  s_68a7da5dad7d6a::t_d8227f83ba4f26 88,100
+tools/bot/scenarios/client/09_character_stats_panel.json
+  s_68a7da5dad7d6a::t_d8227f83ba4f26 27,39
+shared/golden/skill_points_and_magic_bolt.json
+  s_68a7da5dad7d6a::t_3d095dca3b5fc7 11-30,34,36,41,44-45,50,53-54,59,62-63,68,71-72,79-82,88-93,97-117,120-143
+shared/golden/monster_chase.json
+  s_68a7da5dad7d6a::t_59eb18be99ba82 22
+shared/rules/combat.v0.json
+  s_68a7da5dad7d6a::t_7f8d5a302ce2c9 8
+shared/rules/main_config.v0.json
+  s_68a7da5dad7d6a::t_3d095dca3b5fc7 4-6
+shared/rules/character_progression.v0.json
+  s_68a7da5dad7d6a::t_3d095dca3b5fc7 12-17,21-26,30-35,39-44,57-452,456-534
+shared/golden/character_progression.json
+  s_68a7da5dad7d6a::t_3d095dca3b5fc7 14-19,27-32,38,53-58,66-71,77,92-97,102,105-110,116,131-136,140-141,144-149,155,170-175,182,185-190,196,211-216,221,224-229,235,250-255,260,263-268,274
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d395f8b3c7ffe33c2daef410fb6761434957ec8c",
+  "prompts": {},
+  "sessions": {
+    "s_68a7da5dad7d6a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf3e-573d-7d92-a6c1-01a1b92ccbea",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

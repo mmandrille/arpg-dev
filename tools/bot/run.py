@@ -58,6 +58,19 @@ def monster_xp_reward(monster_def_id: str) -> int:
 
 
 KNOWN_WORLD_IDS = load_known_world_ids()
+_SKILL_RULES: dict[str, Any] | None = None
+
+
+def skill_rule_max_rank(skill_id: str) -> int:
+    global _SKILL_RULES
+    if _SKILL_RULES is None:
+        skills_path = ROOT / "shared" / "rules" / "skills.v0.json"
+        data = json.loads(skills_path.read_text(encoding="utf-8"))
+        _SKILL_RULES = dict(data.get("skills", {}))
+    skill = _SKILL_RULES.get(skill_id)
+    if not isinstance(skill, dict):
+        raise AssertionError(f"shared skill rule {skill_id} not found")
+    return int(skill.get("max_rank", -1))
 
 
 def log(*args: Any) -> None:
@@ -3541,7 +3554,11 @@ def assert_skill_progression(progression: dict[str, Any], assertion: dict[str, A
         raise AssertionError(f"{where}: missing skill {skill_id}: {progression}")
     for key in ("rank", "max_rank"):
         if key in assertion:
-            want = int(assertion[key])
+            want_raw = assertion[key]
+            if key == "max_rank" and str(want_raw) == "from_rules":
+                want = skill_rule_max_rank(skill_id)
+            else:
+                want = int(want_raw)
             got = int(skill.get(key, -1))
             if got != want:
                 raise AssertionError(f"{where}: skill {skill_id}.{key} {got} != {want}: {progression}")

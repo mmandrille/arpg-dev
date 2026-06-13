@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v124 — `ranger-volley-and-visual-scenario` |
+| **Latest completed slice** | v125 — `tuning-friendly-bot-scenarios` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v125 — TBD |
+| **Next slice** | v126 — TBD |
 | **Last engineering review** | v120 — [`docs/reviews/20260613_v120-overview.md`](docs/reviews/20260613_v120-overview.md) (2026-06-13) |
 | **Next engineering review** | v130 (~every 10 slices) |
 
@@ -143,6 +143,7 @@ v121_* = inventory-market-blacksmith-flow
 v122_* = ranger-class-foundation
 v123_* = ranger-piercing-and-pinning-shots
 v124_* = ranger-volley-and-visual-scenario
+v125_* = tuning-friendly-bot-scenarios
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -307,6 +308,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v122** | `ranger-class-foundation` | Complete (`make ci` green) | [`v122_spec-ranger-class-foundation.md`](docs/specs/v122_spec-ranger-class-foundation.md) | [`v122_2026-06-13-ranger-class-foundation.md`](docs/plans/v122_2026-06-13-ranger-class-foundation.md) | [`as-built`](docs/as-built/v122_ranger-class-foundation.md) |
 | **v123** | `ranger-piercing-and-pinning-shots` | Complete (`make ci` green) | [`v123_spec-ranger-piercing-and-pinning-shots.md`](docs/specs/v123_spec-ranger-piercing-and-pinning-shots.md) | [`v123_2026-06-13-ranger-piercing-and-pinning-shots.md`](docs/plans/v123_2026-06-13-ranger-piercing-and-pinning-shots.md) | [`as-built`](docs/as-built/v123_ranger-piercing-and-pinning-shots.md) |
 | **v124** | `ranger-volley-and-visual-scenario` | Complete (`make ci` green) | [`v124_spec-ranger-volley-and-visual-scenario.md`](docs/specs/v124_spec-ranger-volley-and-visual-scenario.md) | [`v124_2026-06-13-ranger-volley-and-visual-scenario.md`](docs/plans/v124_2026-06-13-ranger-volley-and-visual-scenario.md) | [`as-built`](docs/as-built/v124_ranger-volley-and-visual-scenario.md) |
+| **v125** | `tuning-friendly-bot-scenarios` | Complete (`make bot` green) | [`v125_spec-tuning-friendly-bot-scenarios.md`](docs/specs/v125_spec-tuning-friendly-bot-scenarios.md) | [`v125_2026-06-13-tuning-friendly-bot-scenarios.md`](docs/plans/v125_2026-06-13-tuning-friendly-bot-scenarios.md) | [`as-built`](docs/as-built/v125_tuning-friendly-bot-scenarios.md) |
 
 ---
 
@@ -435,6 +437,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Bot skill scenarios can derive skill caps from shared rules.** v125 adds
+`max_rank: "from_rules"` support to bot skill progression assertions and migrates the Magic Bolt,
+Rage/Heal, and Ranger Volley proofs away from hardcoded skill-cap tuning locks.
 
 **Inventory market and blacksmith actions can stage bag items directly.** v121 shipped
 inventory-origin market listings, inventory-origin multi-item offers, and inventory-origin

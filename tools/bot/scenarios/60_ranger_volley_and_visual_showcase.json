@@ -19,7 +19,7 @@
   },
   "steps": [
     { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
-    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "volley", "rank": 1, "max_rank": 5, "can_spend": false },
+    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "volley", "rank": 1, "max_rank": "from_rules", "can_spend": false },
     { "action": "cast_skill", "skill_id": "pinning_shot", "monster_def_id": "training_dummy_chase", "event_type": "skill_cast" },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" }, "timeout_s": 3 },
     { "action": "wait_ticks", "ticks": 8 },

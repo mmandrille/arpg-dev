@@ -1301,6 +1301,50 @@ def test_skill_progression_assertions_for_runtime_and_state_payloads():
     run_assertions([assertion], [], [], {}, None, "unit state", skill_progression=progression)
 
 
+def test_skill_progression_assertions_can_derive_max_rank_from_rules():
+    progression = {
+        "unspent_skill_points": 0,
+        "skills": [
+            {"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": False},
+        ],
+    }
+    assertion = {
+        "type": "skill_progression",
+        "unspent_skill_points": 0,
+        "skill_id": "magic_bolt",
+        "rank": 1,
+        "max_rank": "from_rules",
+        "can_spend": False,
+    }
+
+    state = RuntimeState(skill_progression=progression)
+    run_runtime_assertions([assertion], state, "unit runtime")
+    run_assertions([assertion], [], [], {}, None, "unit state", skill_progression=progression)
+
+
+def test_skill_progression_rule_derived_max_rank_requires_known_skill():
+    progression = {
+        "skills": [
+            {"skill_id": "missing_skill", "rank": 0, "max_rank": 1, "can_spend": False},
+        ],
+    }
+
+    try:
+        run_assertions(
+            [{"type": "skill_progression", "skill_id": "missing_skill", "max_rank": "from_rules"}],
+            [],
+            [],
+            {},
+            None,
+            "unit state",
+            skill_progression=progression,
+        )
+    except AssertionError as exc:
+        assert "shared skill rule missing_skill not found" in str(exc)
+    else:
+        raise AssertionError("unknown skill rule was accepted")
+
+
 def test_skill_cooldown_assertions_support_ranges_and_absence():
     cooldowns = [{"skill_id": "magic_bolt", "remaining_ticks": 18, "total_ticks": 40}]
     assertion = {"type": "skill_cooldown", "skill_id": "magic_bolt", "remaining_ticks": {"between": [1, 40]}, "total_ticks": 40}

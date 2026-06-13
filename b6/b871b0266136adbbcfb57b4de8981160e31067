@@ -1,0 +1,44 @@
+docs/specs/v119_spec-live-unique-drops-all-effects.md
+  s_de4a263eac247b::t_71b1f46fa24300 1-2,4-51
+  s_de4a263eac247b::t_8903bc78be3ddd 3
+tools/validate_shared.py
+  s_de4a263eac247b::t_15f310ecd7a26f 3193-3199,3202-3203,3206
+docs/as-built/v119_live-unique-drops-all-effects.md
+  s_de4a263eac247b::t_e0e67fee8427c7 19-20,28
+  s_de4a263eac247b::t_8903bc78be3ddd 29
+  s_de4a263eac247b::t_fb8fdf1e7de94b 1-18,21-27,30-35
+docs/plans/v119_2026-06-13-live-unique-drops-all-effects.md
+  s_de4a263eac247b::t_fb8fdf1e7de94b 37-38,50,52,65,67,93-95
+  s_de4a263eac247b::t_71b1f46fa24300 1-2,4-36,39-49,51,53-64,66,68-81,85-92,98-102
+  s_de4a263eac247b::t_8903bc78be3ddd 3,82-84,96-97
+tools/bot/run.py
+  s_de4a263eac247b::t_15f310ecd7a26f 3377-3382,3399-3400
+server/internal/game/game_test.go
+  s_de4a263eac247b::t_f8e7cab8643b6e 3236-3263
+.maintainability/file-size-baseline.tsv
+  s_de4a263eac247b::t_e0e67fee8427c7 15,33
+shared/rules/worlds.v0.json
+  s_de4a263eac247b::t_f8e7cab8643b6e 725-729
+shared/rules/unique_items.v0.json
+  s_de4a263eac247b::t_15f310ecd7a26f 6,10-11
+tools/bot/scenarios/57_live_unique_drops_all_effects.json
+  s_de4a263eac247b::t_f8e7cab8643b6e 1-22
+PROGRESS.md
+  s_de4a263eac247b::t_a8849bcf4876fc 15,18,140,299,396,427-430
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b6b871b0266136adbbcfb57b4de8981160e31067",
+  "prompts": {},
+  "sessions": {
+    "s_de4a263eac247b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebeff-879c-75d0-a596-174e94193786",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

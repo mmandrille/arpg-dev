@@ -1,0 +1,30 @@
+shared/golden/item_rolls.json
+  s_e8364b7da0a89e::t_984628356c9a53 2
+  s_e8364b7da0a89e::t_6f4430a3e49c03 48
+server/internal/game/unique_chest_test.go
+  s_e8364b7da0a89e::t_0fef6267f853f8 51-53
+  s_e8364b7da0a89e::t_5648bb5f8e801c 46
+server/internal/game/unique_chest.go
+  s_e8364b7da0a89e::t_dfaa0748a2fc3e 6-7,287,342-360
+  s_e8364b7da0a89e::t_b8d39c39fe069e 304-306
+server/internal/game/shop.go
+  s_e8364b7da0a89e::t_0fef6267f853f8 1167,1172,1177
+tools/validate_shared.py
+  s_e8364b7da0a89e::t_984628356c9a53 2776-2782,2787-2796
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "635c4e33910587e45540406a3f21a6db38092b19",
+  "prompts": {},
+  "sessions": {
+    "s_e8364b7da0a89e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec30f-cd12-7d62-af0b-75e92cf24282",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

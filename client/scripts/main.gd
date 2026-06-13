@@ -1324,6 +1324,7 @@ func _upsert_entity(e: Dictionary) -> void:
 				player_max_mana = int(e["max_mana"])
 			if _health_bar != null:
 				_health_bar.update_mana(player_mana, player_max_mana)
+			_refresh_skill_ui()
 		if e.has("visual_scale"):
 			_apply_local_player_visual_scale(float(e["visual_scale"]))
 		if e.has("effect_ids"):
@@ -3543,6 +3544,8 @@ func _skill_cast_block_reason(skill_id: String = "") -> String:
 		return "dead"
 	if _skill_rank(resolved_skill_id) <= 0:
 		return "skill_not_learned"
+	if player_mana < _skill_mana_cost(resolved_skill_id):
+		return "not_enough_mana"
 	return ""
 
 
@@ -3631,6 +3634,7 @@ func _sync_skill_bar_selection() -> void:
 	skill_bar.set_skill_id(selected_skill_id)
 	skill_bar.set_skill_progression(skill_progression)
 	skill_bar.set_skill_cooldowns(skill_cooldowns)
+	skill_bar.set_player_mana(player_mana, player_max_mana)
 	skill_bar.set_interactive(not _skill_cast_blocked(selected_skill_id))
 
 
@@ -3655,6 +3659,8 @@ func _first_learned_skill_id() -> String:
 
 
 func _refresh_progression_ui() -> void:
+	if inventory_panel != null:
+		inventory_panel.set_character_progression(character_progression)
 	if character_stats_panel != null:
 		character_stats_panel.set_progression(character_progression)
 		character_stats_panel.set_allocation_enabled(not _stat_allocation_blocked())
@@ -3682,6 +3688,7 @@ func _sync_progression_interactivity() -> void:
 	if skills_panel != null:
 		skills_panel.set_interactive(not _skill_allocation_blocked())
 	if skill_bar != null:
+		skill_bar.set_player_mana(player_mana, player_max_mana)
 		skill_bar.set_interactive(not _skill_cast_blocked(str(skill_bar.get_debug_state().get("skill_id", ""))))
 
 
@@ -3823,6 +3830,16 @@ func _skill_reject_message(reason: String) -> String:
 func _skill_rank(skill_id: String) -> int:
 	var row := _skill_progression_row(skill_id)
 	return int(row.get("rank", 0))
+
+
+func _skill_mana_cost(skill_id: String) -> int:
+	var rank := _skill_rank(skill_id)
+	if rank <= 0:
+		return 0
+	var def := SkillRulesLoader.skill_definition(skill_id)
+	var cost: Dictionary = def.get("cost", {})
+	var mana: Dictionary = cost.get("mana", {})
+	return maxi(0, int(mana.get("base", 0)) + int(mana.get("per_rank", 0)) * maxi(0, rank - 1))
 
 
 func _skill_progression_row(skill_id: String) -> Dictionary:

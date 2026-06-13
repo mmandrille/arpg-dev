@@ -136,6 +136,9 @@ func _run() -> void:
 	_assert_eq("corpse drag to bag item", str(inventory_emitted[1]["payload"].get("item_instance_id", "")), "dead_item_1")
 	_assert_true("test equip slot kind recognized", inventory_panel._slot_kind_is_equipment("equip:main_hand"))
 	_assert_true("test stash item can equip to main hand", inventory_panel._item_can_equip_to(stash_items[0], "main_hand"))
+	_assert_false("non-rogue cannot equip main-hand weapon to off hand", inventory_panel._item_can_equip_to(inventory[0], "off_hand"))
+	inventory_panel.set_character_progression({"character_class": "rogue"})
+	_assert_true("rogue can equip one-handed weapon to off hand", inventory_panel._item_can_equip_to(inventory[0], "off_hand"))
 	inventory_panel._handle_drop_on_slot("equip:main_hand", {
 		"source": "stash",
 		"stash_entity_id": "1005",

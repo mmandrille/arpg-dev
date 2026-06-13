@@ -34,6 +34,9 @@ var _points_label: Label
 var _stat_value_labels: Dictionary = {}
 var _stat_buttons: Dictionary = {}
 var _derived_labels: Dictionary = {}
+var _derived_toggle: Button
+var _derived_container: VBoxContainer
+var _derived_open: bool = false
 
 
 func _ready() -> void:
@@ -78,15 +81,17 @@ func get_debug_state() -> Dictionary:
 			"disabled": btn == null or btn.disabled,
 		}
 	var derived_labels := {}
-	for key in _derived_labels.keys():
-		var label: Label = _derived_labels.get(key, null)
-		if label != null:
-			derived_labels[key] = label.text
+	if _derived_open:
+		for key in _derived_labels.keys():
+			var label: Label = _derived_labels.get(key, null)
+			if label != null:
+				derived_labels[key] = label.text
 	return {
 		"visible": visible,
 		"progression": progression.duplicate(true),
 		"allocation_enabled": allocation_enabled,
 		"stat_buttons": stat_buttons,
+		"derived_open": _derived_open,
 		"derived_labels": derived_labels,
 		"stat_breakdowns": _breakdowns_by_key(),
 		"window": _panel.get_debug_state() if _panel != null else {},
@@ -103,6 +108,11 @@ func bot_click_stat_button(stat: String) -> void:
 func bot_click_close() -> void:
 	if _panel != null and _panel.close_button() != null:
 		_panel.close_button().pressed.emit()
+
+
+func bot_toggle_derived() -> void:
+	if _derived_toggle != null:
+		_derived_toggle.pressed.emit()
 
 
 func bot_drag_window_by(delta: Vector2) -> void:
@@ -156,11 +166,24 @@ func _build() -> void:
 		_stat_buttons[stat] = btn
 		root.add_child(row)
 
-	root.add_child(_section_label("Derived"))
+	_derived_toggle = Button.new()
+	_derived_toggle.text = "Derived"
+	_derived_toggle.tooltip_text = "Toggle derived stats"
+	_derived_toggle.focus_mode = Control.FOCUS_NONE
+	_derived_toggle.custom_minimum_size = Vector2(180, 28)
+	_derived_toggle.add_theme_font_size_override("font_size", 23)
+	_derived_toggle.add_theme_color_override("font_color", Color("#c9a227"))
+	_derived_toggle.pressed.connect(_toggle_derived_stats)
+	root.add_child(_derived_toggle)
+
+	_derived_container = VBoxContainer.new()
+	_derived_container.add_theme_constant_override("separation", 3)
+	_derived_container.visible = _derived_open
+	root.add_child(_derived_container)
 	for key in DERIVED_LABELS.keys():
 		var label := _value_label()
 		_derived_labels[key] = label
-		root.add_child(label)
+		_derived_container.add_child(label)
 
 	_render()
 
@@ -179,6 +202,10 @@ func _render() -> void:
 		if label != null:
 			label.text = "%s  %d" % [StatLabels.display_name(stat), int(base.get(stat, 0))]
 	var derived: Dictionary = progression.get("derived_stats", {})
+	if _derived_toggle != null:
+		_derived_toggle.text = "Derived  %s" % ("-" if _derived_open else "+")
+	if _derived_container != null:
+		_derived_container.visible = _derived_open
 	for key in DERIVED_LABELS.keys():
 		var label: Label = _derived_labels.get(key, null)
 		if label != null:
@@ -189,6 +216,11 @@ func _render() -> void:
 
 func _on_stat_button_pressed(stat: String) -> void:
 	allocate_stat_requested.emit(stat)
+
+
+func _toggle_derived_stats() -> void:
+	_derived_open = not _derived_open
+	_render()
 
 
 func _render_buttons() -> void:

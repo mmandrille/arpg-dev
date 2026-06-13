@@ -46,8 +46,8 @@ func _run() -> void:
 	panel.ensure_display_visible()
 	var state := panel.get_debug_state()
 	_assert_true("panel visible", bool(state.get("visible", false)))
-	_assert_eq("panel width matches stats", int(panel._panel.custom_minimum_size.x), 330)
-	_assert_eq("panel height matches stats", int(panel._panel.custom_minimum_size.y), 500)
+	_assert_eq("panel width is 30 percent larger", int(panel._panel.custom_minimum_size.x), 429)
+	_assert_eq("panel height is 30 percent larger", int(panel._panel.custom_minimum_size.y), 650)
 	var window: Dictionary = state.get("window", {})
 	_assert_eq("skills window title", str(window.get("title", "")), "Skills")
 	_assert_true("skills window has close button", bool(window.get("close_visible", false)))
@@ -147,8 +147,8 @@ func _run() -> void:
 	_assert_true("paladin heal block exists", heal_block != null)
 	_assert_true("paladin holy shield block exists", holy_shield_block != null)
 	if heal_block != null and holy_shield_block != null:
-		_assert_true("paladin third-column skill reflows into compact row", heal_block.position.x <= 120.0)
-		_assert_true("paladin fourth-column skill remains inside tree", holy_shield_block.position.x + holy_shield_block.size.x <= 304.0)
+		_assert_true("paladin third-column skill reflows into compact row", heal_block.position.x <= 160.0)
+		_assert_true("paladin fourth-column skill remains inside tree", holy_shield_block.position.x + holy_shield_block.size.x <= 395.0)
 	_assert_eq("rankable paladin skill is highlighted", str(((state.get("skills", {}) as Dictionary).get("heal", {}) as Dictionary).get("visual_state", "")), "highlight")
 
 	panel.set_character_progression({

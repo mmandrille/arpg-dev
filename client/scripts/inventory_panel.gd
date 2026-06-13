@@ -60,6 +60,7 @@ var hotbar_capacity: int = 2
 var inventory_rows: int = BASE_INVENTORY_ROWS
 var inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS
 var gold: int = 0
+var character_progression: Dictionary = {}
 var item_rules: Dictionary:
 	get: return ItemRulesLoader.item_rules
 var item_templates: Dictionary:
@@ -195,6 +196,10 @@ func clear_market_context() -> void:
 
 func set_blacksmith_context(enabled: bool) -> void:
 	_blacksmith_context_enabled = enabled
+
+
+func set_character_progression(next_progression: Dictionary) -> void:
+	character_progression = next_progression.duplicate(true)
 
 
 func ensure_display_visible() -> void:
@@ -868,6 +873,8 @@ func _item_can_equip_to(item: Dictionary, slot: String) -> bool:
 	var item_slot := str(def.get("slot", ""))
 	if item_slot == "ring":
 		return slot == "ring_left" or slot == "ring_right"
+	if slot == "off_hand" and item_slot == "main_hand":
+		return _can_rogue_offhand_weapon(def)
 	return item_slot == slot
 
 
@@ -880,7 +887,15 @@ func _preferred_equip_slot(item: Dictionary) -> String:
 		if equipped.get("ring_left", null) == null:
 			return "ring_left"
 		return "ring_right"
+	if item_slot == "main_hand" and _can_rogue_offhand_weapon(def) and equipped.get("main_hand", null) != null and equipped.get("off_hand", null) == null:
+		return "off_hand"
 	return item_slot
+
+
+func _can_rogue_offhand_weapon(def: Dictionary) -> bool:
+	return str(character_progression.get("character_class", "")) == "rogue" \
+		and str(def.get("handedness", "")) == "one_handed" \
+		and str(def.get("attack_mode", "melee")) == "melee"
 
 
 func _is_consumable(item: Dictionary) -> bool:

@@ -4671,6 +4671,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
 	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []))
 	PlayerStatusEffectMarkers.sync_burning_effect(node, PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
+	PlayerStatusEffectMarkers.sync_elite_command_effect(node, PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	_normalize_boss_phase_metadata(rec)
 	_sync_boss_telegraph_marker_from_record(rec)
 
@@ -5847,6 +5848,7 @@ func _bot_entities_presentation_debug() -> Array:
 			"effect_ids": rec.get("effect_ids", []),
 			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node),
 			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node),
+			"has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
 			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node),
 			"hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {},

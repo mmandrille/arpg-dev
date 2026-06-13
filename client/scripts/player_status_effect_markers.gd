@@ -4,10 +4,12 @@ const HOLY_SHIELD_EFFECT_ID := "holy_shield"
 const RAGE_EFFECT_ID := "rage"
 const ICE_SLOW_EFFECT_ID := "ice_slow"
 const BURNING_EFFECT_ID := "everburning_wound"
+const ELITE_COMMAND_EFFECT_ID := "elite_command"
 
 const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
 const RAGE_MARKER_NAME := "RageVisualEffect"
 const BURNING_MARKER_NAME := "BurningVisualEffect"
+const ELITE_COMMAND_MARKER_NAME := "EliteCommandVisualEffect"
 const HOLY_SHIELD_AURA_PULSE_NAME := "HolyShieldAuraPulse"
 const HOLY_SHIELD_TARGET_PULSE_NAME := "HolyShieldTargetPulse"
 const AURA_PULSE_SECONDS := 0.30
@@ -61,6 +63,11 @@ static func has_burning_effect_id(effect_ids_value) -> bool:
 	return effect_ids.has(BURNING_EFFECT_ID)
 
 
+static func has_elite_command_effect_id(effect_ids_value) -> bool:
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	return effect_ids.has(ELITE_COMMAND_EFFECT_ID)
+
+
 static func sync_burning_effect(root: Node3D, active: bool) -> void:
 	if root == null:
 		return
@@ -77,6 +84,24 @@ static func sync_burning_effect(root: Node3D, active: bool) -> void:
 
 static func has_burning_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(BURNING_MARKER_NAME, false, false) != null
+
+
+static func sync_elite_command_effect(root: Node3D, active: bool) -> void:
+	if root == null:
+		return
+	var existing := root.find_child(ELITE_COMMAND_MARKER_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = make_elite_command_effect()
+		root.add_child(existing)
+
+
+static func has_elite_command_effect(root: Node3D) -> bool:
+	return root != null and root.find_child(ELITE_COMMAND_MARKER_NAME, false, false) != null
 
 
 static func pulse_holy_shield_aura(root: Node3D, affected_roots: Array, radius: float) -> void:
@@ -243,6 +268,45 @@ static func make_burning_effect() -> Node3D:
 		lick.position = Vector3(cos(angle) * 0.36, 0.62, sin(angle) * 0.36)
 		lick.material_override = mat
 		marker.add_child(lick)
+	return marker
+
+
+static func make_elite_command_effect() -> Node3D:
+	var marker := Node3D.new()
+	marker.name = ELITE_COMMAND_MARKER_NAME
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.36, 0.78, 1.0, 0.70)
+	mat.emission_enabled = true
+	mat.emission = Color(0.24, 0.72, 1.0)
+	mat.emission_energy_multiplier = 2.2
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.no_depth_test = true
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	var ring := MeshInstance3D.new()
+	ring.name = "EliteCommandRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.78
+	ring_mesh.outer_radius = 0.92
+	ring_mesh.ring_segments = 72
+	ring.mesh = ring_mesh
+	ring.position.y = 0.10
+	ring.material_override = mat
+	marker.add_child(ring)
+
+	var crown := MeshInstance3D.new()
+	crown.name = "EliteCommandCrown"
+	var crown_mesh := CylinderMesh.new()
+	crown_mesh.top_radius = 0.20
+	crown_mesh.bottom_radius = 0.42
+	crown_mesh.height = 0.28
+	crown_mesh.radial_segments = 5
+	crown.mesh = crown_mesh
+	crown.position.y = 1.60
+	crown.material_override = mat
+	marker.add_child(crown)
 	return marker
 
 

@@ -1,0 +1,29 @@
+docs/specs/v121_spec-inventory-market-blacksmith-flow.md
+  s_23f64e3b90cbb0::t_09bfe5f551a4e5 31-32,43-44
+  s_23f64e3b90cbb0::t_4f499aa72de092 1-30,33-42,45-66
+.maintainability/file-size-baseline.tsv
+  s_23f64e3b90cbb0::t_dea4f08c956d78 29
+  s_23f64e3b90cbb0::t_c33101a3c1d216 6-8,11,23
+docs/plans/v121_2026-06-13-inventory-market-blacksmith-flow.md
+  s_23f64e3b90cbb0::t_dea4f08c956d78 40-46
+  s_23f64e3b90cbb0::t_4f499aa72de092 1-5,8-14,16-26,36,48-49
+  s_23f64e3b90cbb0::t_09bfe5f551a4e5 6-7,15,33
+  s_23f64e3b90cbb0::t_c388c206776c27 27-32,34-35,52-54
+  s_23f64e3b90cbb0::t_c33101a3c1d216 37-39,47,50-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5d2de1fdcf4b88d8d4fff7a7fe9a0ee2f1d77fe8",
+  "prompts": {},
+  "sessions": {
+    "s_23f64e3b90cbb0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf38-ccda-77c2-a6a6-e725007afc98",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

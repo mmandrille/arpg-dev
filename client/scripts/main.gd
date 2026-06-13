@@ -4489,7 +4489,7 @@ func _make_hero_corpse_node(e: Dictionary) -> Node3D:
 	var corpse_level := int(e.get("corpse_level", 0))
 	marker.text = "%s Lv %d" % [corpse_name, corpse_level] if corpse_level > 0 else corpse_name
 	marker.visible = false
-	marker.font_size = 28
+	marker.font_size = 60
 	marker.modulate = Color("#e8dcc8")
 	marker.outline_size = 10
 	marker.position = Vector3(0.0, 1.15, 0.0)
@@ -6248,6 +6248,7 @@ func _bot_loot_label_debug() -> Array:
 			"text": label.text if label != null else "",
 			"visible": label.visible if label != null else false,
 			"color": label.modulate.to_html(false) if label != null else "",
+			"font_size": label.font_size if label != null else 0,
 		})
 	return out
 

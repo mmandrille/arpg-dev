@@ -919,6 +919,7 @@ func _test_hero_corpse_is_easy_to_target_and_labels_like_loot() -> void:
 			found_label = true
 			_assert_eq("corpse label type", str(label.get("interactable_def_id", "")), "hero_corpse")
 			_assert_eq("corpse label text", str(label.get("text", "")), "p2 Lv 7")
+			_assert_true("corpse label font is prominent", int(label.get("font_size", 0)) >= 60)
 			_assert_true("corpse label visible on reveal", bool(label.get("visible", false)))
 	_assert_true("corpse label listed with loot labels", found_label)
 	main.player_anchor.queue_free()

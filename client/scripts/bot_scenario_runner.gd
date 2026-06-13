@@ -1343,6 +1343,8 @@ func _shop_offer_count_matches(step: Dictionary, state: Dictionary) -> bool:
 func _stash_item_count_matches(step: Dictionary, state: Dictionary) -> bool:
 	if not step.has("equals") and not step.has("at_least"):
 		return true
+	if step.has("container_mode") and str((state.get("stash_panel", {}) as Dictionary).get("container_mode", "")) != str(step.get("container_mode", "")):
+		return false
 	var rows := _matching_stash_rows(step, state)
 	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
 		return false
@@ -1469,8 +1471,10 @@ func _matching_stash_rows(step: Dictionary, state: Dictionary) -> Array:
 			continue
 		if step.has("item_template_id") and str(rec.get("item_template_id", "")) != str(step.get("item_template_id", "")):
 			continue
+		if step.has("display_name") and str(rec.get("display_name", "")) != str(step.get("display_name", "")): continue
 		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
 			continue
+		if step.has("summary_contains") and not _row_summary_contains(rec, step.get("summary_contains", "")): continue
 		out.append(rec)
 	return out
 

@@ -1,0 +1,22 @@
+client/scripts/blacksmith_panel.gd
+  s_a7077bd5daf373::t_a38a8d4c3b29e9 9-10,178,195-197,205,211-212,236,258-260,374,379-381,387,389-405
+client/tests/test_shop_panel.gd
+  s_a7077bd5daf373::t_f01ce1678c7150 373-374,386-393,395
+  s_a7077bd5daf373::t_aaa182e584a416 394
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "88d652cc0b4c53d8fd704819c31acb982455bc9b",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

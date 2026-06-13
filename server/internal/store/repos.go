@@ -1442,6 +1442,17 @@ func (s *Store) TransferCharacterItemToAccountStash(ctx context.Context, account
 }
 
 func (s *Store) TransferAccountStashItemToCharacter(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID string) (CharacterItemInstance, error) {
+	return s.TransferAccountStashItemToCharacterWithPlacement(ctx, accountID, characterID, stashItemID, itemInstanceID, ItemLocationInventory, "", false)
+}
+
+func (s *Store) TransferAccountStashItemToCharacterWithPlacement(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID, location, slot string, equipped bool) (CharacterItemInstance, error) {
+	if location != ItemLocationInventory && location != ItemLocationEquipped {
+		location = ItemLocationInventory
+	}
+	if !equipped || location != ItemLocationEquipped {
+		slot = ""
+		equipped = false
+	}
 	var out CharacterItemInstance
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		var stash AccountStashItem
@@ -1475,10 +1486,10 @@ func (s *Store) TransferAccountStashItemToCharacter(ctx context.Context, account
 		}
 		err = tx.QueryRow(ctx,
 			`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
-			 SELECT $1, $2, $3, $4, $5, NULL, FALSE, $6::jsonb
+			 SELECT $1, $2, $3, $4, $5, NULLIF($6, ''), $7, $8::jsonb
 			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $3 AND account_id = $2)
 			 RETURNING id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at`,
-			itemInstanceID, accountID, characterID, stash.ItemDefID, ItemLocationInventory, []byte(rolledStats),
+			itemInstanceID, accountID, characterID, stash.ItemDefID, location, slot, equipped, []byte(rolledStats),
 		).Scan(&out.ID, &out.AccountID, &out.CharacterID, &out.ItemDefID, &out.Location, &out.Slot, &out.Equipped, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound

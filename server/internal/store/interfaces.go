@@ -67,6 +67,7 @@ type CharacterProgressionRepo interface {
 	GetOrCreateAccountStashGold(ctx context.Context, accountID string) (AccountStashGold, error)
 	TransferCharacterItemToAccountStash(ctx context.Context, accountID, characterID, itemInstanceID, stashItemID string) (AccountStashItem, error)
 	TransferAccountStashItemToCharacter(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID string) (CharacterItemInstance, error)
+	TransferAccountStashItemToCharacterWithPlacement(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID, location, slot string, equipped bool) (CharacterItemInstance, error)
 	TransferCharacterGoldToAccountStash(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
 	TransferAccountStashGoldToCharacter(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
 	ListRecoverableCharacterCorpses(ctx context.Context, accountID, excludeCharacterID string) ([]CharacterCorpse, error)

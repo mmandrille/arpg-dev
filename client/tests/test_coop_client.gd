@@ -46,6 +46,7 @@ func _initialize() -> void:
 	_test_holy_shield_effect_ids_drive_world_shine()
 	_test_local_attack_range_uses_equipped_reach()
 	_test_basic_attack_cooldown_uses_derived_interval()
+	_test_expired_skill_cooldown_not_restored_by_left_click_refresh()
 	_test_character_bar_opens_stats_panel()
 	_test_skill_function_key_selects_right_click_skill()
 	_test_learned_skill_auto_selects_right_click()
@@ -1146,6 +1147,41 @@ func _test_basic_attack_cooldown_uses_derived_interval() -> void:
 	_assert_float("basic attack cooldown uses derived attack interval", main._basic_attack_cooldown_seconds(), 0.7)
 	main.character_progression = {"derived_stats": {"attack_interval_ticks": 0}}
 	_assert_float("basic attack cooldown falls back to default interval", main._basic_attack_cooldown_seconds(), 2.0)
+	main.free()
+
+
+func _test_expired_skill_cooldown_not_restored_by_left_click_refresh() -> void:
+	var main = MainScript.new()
+	main.skill_bar = SkillBarScript.new()
+	root.add_child(main.skill_bar)
+	main.right_click_skill_id = "magic_bolt"
+	main.player_id = "1001"
+	main.player_hp = 10
+	main.player_mana = 10
+	main.player_max_mana = 10
+	main.skill_progression = {
+		"unspent_skill_points": 0,
+		"skills": [
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false},
+		],
+	}
+	main.skill_cooldowns = [{"skill_id": "magic_bolt", "remaining_ticks": 2, "total_ticks": 40}]
+	main._sync_skill_bar_selection()
+	main.skill_bar.set_interactive(true)
+	var cooling: Dictionary = main.skill_bar.get_debug_state()
+	_assert_true("cooldown initially greys skill", bool(cooling.get("greyed", false)))
+	main._tick_skill_cooldowns(0.3)
+	main.skill_bar.set_interactive(true)
+	var expired: Dictionary = main.skill_bar.get_debug_state()
+	_assert_eq("expired cooldown removed from main cache", main.skill_cooldowns.size(), 0)
+	_assert_eq("expired cooldown remaining", int(expired.get("remaining_ticks", -1)), 0)
+	_assert_true("expired cooldown enables skill", bool(expired.get("enabled", false)))
+	main._sync_skill_bar_selection()
+	main.skill_bar.set_interactive(true)
+	var refreshed: Dictionary = main.skill_bar.get_debug_state()
+	_assert_eq("left-click refresh does not restore cooldown", int(refreshed.get("remaining_ticks", -1)), 0)
+	_assert_true("left-click refresh keeps skill ready", bool(refreshed.get("enabled", false)))
+	main.skill_bar.queue_free()
 	main.free()
 
 

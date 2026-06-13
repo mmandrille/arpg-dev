@@ -5,7 +5,7 @@
   "cases": [
     {
       "name": "no_chest",
-      "seed": "chest_seed_custom_3",
+      "seed": "chest_seed_custom_4",
       "expected_chest": null,
       "expected_monster_count": 8
     },

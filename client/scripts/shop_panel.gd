@@ -925,7 +925,7 @@ func _stat_lines(stats_value: Variant) -> Array:
 	var lines: Array = []
 	if int(stats.get("damage_min", 0)) > 0 or int(stats.get("damage_max", 0)) > 0:
 		lines.append("Damage %d-%d" % [int(stats.get("damage_min", 0)), int(stats.get("damage_max", 0))])
-	for key in ["armor", "block_percent", "max_hp", "hotbar_slots", "inventory_rows"]:
+	for key in ["str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"]:
 		var value := int(stats.get(key, 0))
 		if value > 0:
 			lines.append("%s %s" % [_display_stat(key), _format_stat_value(key, value)])
@@ -933,7 +933,7 @@ func _stat_lines(stats_value: Variant) -> Array:
 
 
 func _format_stat_value(stat: String, value: int) -> String:
-	if stat == "block_percent" or stat == "attack_speed_percent":
+	if stat == "block_percent" or stat == "attack_speed_percent" or stat == "skill_damage_percent":
 		return "+%d%%" % value
 	return "+%d" % value
 

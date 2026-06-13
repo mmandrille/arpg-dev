@@ -45,6 +45,11 @@
         "stat_weights": {
           "damage_min": 10,
           "damage_max": 12,
+          "str": 8,
+          "dex": 8,
+          "vit": 8,
+          "magic": 8,
+          "all_skills": 150,
           "armor": 7,
           "block_percent": 4,
           "attack_speed_percent": 3,
@@ -111,6 +116,11 @@
         "stat_weights": {
           "damage_min": 10,
           "damage_max": 12,
+          "str": 8,
+          "dex": 8,
+          "vit": 8,
+          "magic": 8,
+          "all_skills": 150,
           "armor": 7,
           "block_percent": 4,
           "attack_speed_percent": 3,

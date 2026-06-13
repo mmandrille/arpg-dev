@@ -27,9 +27,10 @@
         "display_name": "Rare Cave Blade",
         "rarity": "rare",
         "stats": {
-          "damage_max": 7,
+          "damage_max": 4,
           "damage_min": 2,
-          "max_hp": 3
+          "dex": 2,
+          "vit": 1
         },
         "requirements": {
           "level": 1
@@ -45,8 +46,9 @@
         "display_name": "Unique Cave Blade",
         "rarity": "unique",
         "stats": {
-          "damage_max": 6,
-          "damage_min": 2
+          "damage_max": 7,
+          "damage_min": 2,
+          "max_hp": 1
         },
         "requirements": {
           "level": 1

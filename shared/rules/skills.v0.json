@@ -215,10 +215,10 @@
         }
       },
       "cone": {
-        "range": 3,
+        "range": 6,
         "angle_degrees": 50,
-        "push_min": 1,
-        "push_max": 3,
+        "push_min": 2,
+        "push_max": 6,
         "damage_source": "weapon"
       },
       "cooldown": {
@@ -298,8 +298,8 @@
       },
       "cost": {
         "mana": {
-          "base": 5,
-          "per_rank": 0
+          "base": 6,
+          "per_rank": 1
         }
       },
       "effects": [
@@ -322,7 +322,7 @@
       ],
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2
+        "multiplier": 3
       },
       "name_key": "skill.heal.name"
     },
@@ -466,7 +466,7 @@
         "damage_source": "weapon"
       },
       "dash": {
-        "range_base": 5,
+        "range_base": 10,
         "range_per_rank": 1,
         "damage_percent_base": 50,
         "damage_percent_per_magic": 3,

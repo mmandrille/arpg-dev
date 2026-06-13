@@ -1060,13 +1060,14 @@ func TestCleaveDamagesConeTargetsAndPushes(t *testing.T) {
 	sim.progression.SkillRanks["cleave"] = 1
 	sim.savePlayer(sim.defaultPlayer())
 	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 20, Y: 20}
 	player.mana = player.maxMana
 	for id, e := range sim.entities {
 		if e != nil && e.kind == monsterEntity {
 			delete(sim.entities, id)
 		}
 	}
-	front := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 2, Y: player.pos.Y}, hp: 20, maxHP: 20, monsterDefID: monsterDefID, lootTable: "no_drop"}
+	front := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 1, Y: player.pos.Y}, hp: 20, maxHP: 20, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	side := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 2, Y: player.pos.Y + 2}, hp: 20, maxHP: 20, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[front.id] = front
 	sim.entities[side.id] = side
@@ -3186,7 +3187,7 @@ func TestItemRollsGolden(t *testing.T) {
 
 	for i, c := range golden.Cases {
 		sim := MustNewSim("sess_item_roll_"+c.Name, c.Seed, r)
-		got, ok := sim.rollItemTemplate(golden.TemplateID)
+		got, ok := sim.rollItemTemplate(golden.TemplateID, 1)
 		if !ok {
 			t.Fatalf("%s: rollItemTemplate returned false", c.Name)
 		}
@@ -3210,6 +3211,61 @@ func TestItemRollsGolden(t *testing.T) {
 	if *update {
 		writeGolden(t, "item_rolls.json", golden)
 	}
+}
+
+func TestDepthScaledAttributeAffixRanges(t *testing.T) {
+	minValue, maxValue := scaledAttributeRollRange(1)
+	if minValue != 1 || maxValue != 3 {
+		t.Fatalf("depth 1 attribute range = %d-%d, want 1-3", minValue, maxValue)
+	}
+	_, maxValue = scaledAttributeRollRange(100)
+	if maxValue != 50 {
+		t.Fatalf("depth 100 attribute max = %d, want 50", maxValue)
+	}
+	if _, _, ok := scaledAllSkillsRollRange(9); ok {
+		t.Fatal("all_skills should not roll before depth 10")
+	}
+	if minValue, maxValue, ok := scaledAllSkillsRollRange(25); !ok || minValue != 1 || maxValue != 2 {
+		t.Fatalf("depth 25 all_skills range = %d-%d ok=%v, want 1-2 true", minValue, maxValue, ok)
+	}
+	if minValue, maxValue, ok := scaledAllSkillsRollRange(100); !ok || minValue != 1 || maxValue != 10 {
+		t.Fatalf("depth 100 all_skills range = %d-%d ok=%v, want 1-10 true", minValue, maxValue, ok)
+	}
+}
+
+func TestGeneratedMagicAndRareAffixPools(t *testing.T) {
+	rules := loadRules(t)
+	base := []RollableStatDef{}
+	magic := rules.rollableStatsForRarity(base, "magic", 1)
+	for _, stat := range []string{"str", "dex", "vit", "magic"} {
+		roll, ok := findRollableStat(magic, stat)
+		if !ok {
+			t.Fatalf("magic pool missing %s", stat)
+		}
+		if roll.Min != 1 || roll.Max != 3 {
+			t.Fatalf("magic %s range = %d-%d, want 1-3", stat, roll.Min, roll.Max)
+		}
+	}
+	if _, ok := findRollableStat(magic, "all_skills"); ok {
+		t.Fatal("magic pool should not include all_skills")
+	}
+	rare := rules.rollableStatsForRarity(base, "rare", 20)
+	roll, ok := findRollableStat(rare, "all_skills")
+	if !ok {
+		t.Fatal("rare depth 20 pool missing all_skills")
+	}
+	if roll.Min != 1 || roll.Max != 2 {
+		t.Fatalf("rare depth 20 all_skills range = %d-%d, want 1-2", roll.Min, roll.Max)
+	}
+}
+
+func findRollableStat(stats []RollableStatDef, stat string) (RollableStatDef, bool) {
+	for _, roll := range stats {
+		if roll.Stat == stat {
+			return roll, true
+		}
+	}
+	return RollableStatDef{}, false
 }
 
 func TestUniqueEffectRollsRespectItemTypeCompatibility(t *testing.T) {
@@ -3549,6 +3605,57 @@ func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
 	assertEventDamage(t, res, "monster_damaged", 7)
 	if player.hp != playerStartHP-1 {
 		t.Fatalf("rolled max_hp should be display-only; player hp = %d", player.hp)
+	}
+}
+
+func TestRolledBaseStatsAndAllSkillsApplyWhenEquipped(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_rolled_base_stats", "01", rules)
+	sim.progression.SkillRanks["magic_bolt"] = 1
+	beforeStats := sim.effectiveBaseStatsView()
+	beforeDerived := sim.characterDerivedStatsView()
+	item := &invItem{
+		instanceID: 5200,
+		itemDefID:  "cave_ring",
+		slot:       ringLeftSlot,
+		equipped:   true,
+		rollPayload: &ItemRollPayload{
+			ItemTemplateID: "cave_ring",
+			DisplayName:    "Rare Test Ring",
+			Rarity:         "rare",
+			Stats: map[string]int{
+				"magic":      10,
+				"vit":        8,
+				"all_skills": 2,
+			},
+			Requirements: map[string]int{"level": 1},
+			EffectIDs:    []string{},
+		},
+	}
+	addTestInventoryItem(sim, item)
+	sim.equipped[ringLeftSlot] = item.instanceID
+
+	afterStats := sim.effectiveBaseStatsView()
+	if afterStats.Magic != beforeStats.Magic+10 || afterStats.Vit != beforeStats.Vit+8 {
+		t.Fatalf("effective base stats = %+v, before %+v", afterStats, beforeStats)
+	}
+	afterDerived := sim.characterDerivedStatsView()
+	if afterDerived.MaxMana <= beforeDerived.MaxMana || afterDerived.MaxHP <= beforeDerived.MaxHP {
+		t.Fatalf("derived stats did not improve: before %+v after %+v", beforeDerived, afterDerived)
+	}
+	if rank := sim.effectiveSkillRank("magic_bolt"); rank != 3 {
+		t.Fatalf("effective magic_bolt rank = %d, want 3", rank)
+	}
+	view := sim.SkillProgressionView()
+	var shownRank int
+	for _, skill := range view.Skills {
+		if skill.SkillID == "magic_bolt" {
+			shownRank = skill.Rank
+			break
+		}
+	}
+	if shownRank != 3 {
+		t.Fatalf("skill progression magic_bolt rank = %d, want 3", shownRank)
 	}
 }
 
@@ -5207,6 +5314,7 @@ func TestTreasureChestOpensOnceAndDropsLoot(t *testing.T) {
 	}
 	sim.activeLevel().entities[sim.playerID].pos = chest.pos
 	beforeLoot := countEntitiesByKind(sim.activeLevel(), lootEntity)
+	beforeGold := countLootByItemDef(sim.activeLevel(), goldItemDefID)
 	open := sim.Tick([]Input{{MessageID: "open_chest", CorrelationID: "corr_chest", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(chest.id)}}})
 	assertAck(t, open, "open_chest")
 	if !hasEvent(open, "interactable_activated") || !hasEvent(open, "loot_dropped") {
@@ -5218,6 +5326,9 @@ func TestTreasureChestOpensOnceAndDropsLoot(t *testing.T) {
 	afterLoot := countEntitiesByKind(sim.activeLevel(), lootEntity)
 	if afterLoot <= beforeLoot {
 		t.Fatalf("loot count after open = %d, before %d", afterLoot, beforeLoot)
+	}
+	if got := countLootByItemDef(sim.activeLevel(), goldItemDefID); got != beforeGold+1 {
+		t.Fatalf("gold drops after chest open = %d, want %d", got, beforeGold+1)
 	}
 	again := sim.Tick([]Input{{MessageID: "open_chest_again", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(chest.id)}}})
 	assertReject(t, again, "open_chest_again", "invalid_target")
@@ -8354,6 +8465,16 @@ func countEntitiesByKind(level *LevelState, kind string) int {
 	count := 0
 	for _, entity := range level.entities {
 		if entity.kind == kind {
+			count++
+		}
+	}
+	return count
+}
+
+func countLootByItemDef(level *LevelState, itemDefID string) int {
+	count := 0
+	for _, entity := range level.entities {
+		if entity.kind == lootEntity && entity.itemDefID == itemDefID {
 			count++
 		}
 	}

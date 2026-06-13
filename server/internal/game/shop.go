@@ -135,7 +135,7 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 			if !ok || template.Category != "equipment" || !template.Equippable {
 				continue
 			}
-			payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng)
+			payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng, depth)
 			if !ok {
 				continue
 			}
@@ -302,7 +302,7 @@ func (s *Sim) rollGeneratedShopStock(shopID string, shop ShopDef, refreshKey str
 			if !ok || template.Category != "equipment" || !template.Equippable {
 				continue
 			}
-			payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng)
+			payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng, sourceDepth)
 			if !ok || !shopRarityAllowedByCap(payload.Rarity, gen.MaxRarity) {
 				continue
 			}
@@ -353,7 +353,7 @@ func (s *Sim) rollMysteryShopStockForSlot(shop ShopDef, refreshKey, slot string,
 				continue
 			}
 		}
-		payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng)
+		payload, ok := s.rules.rollItemTemplateWithRNG(templateID, rng, sourceDepth)
 		if !ok || !mysteryRarityAllowed(payload.Rarity, mystery.MinRarity, mystery.MaxRarity) {
 			continue
 		}
@@ -1033,7 +1033,7 @@ func (s *Sim) statsForInventoryItem(item *invItem) map[string]int {
 }
 
 func shopStatOrder() []string {
-	return []string{"damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "hotbar_slots", "inventory_rows"}
+	return []string{"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"}
 }
 
 func displayStatName(stat string) string {
@@ -1042,10 +1042,22 @@ func displayStatName(stat string) string {
 		return "Min damage"
 	case "damage_max":
 		return "Max damage"
+	case "str":
+		return "Strength"
+	case "dex":
+		return "Dexterity"
+	case "vit":
+		return "Vitality"
+	case "magic":
+		return "Magic"
+	case "all_skills":
+		return "All skills"
 	case "armor":
 		return "Armor"
 	case "max_hp":
 		return "Max HP"
+	case "max_mana":
+		return "Max Mana"
 	case "health_regen_per_10_seconds":
 		return "HP regen / 10s"
 	case "mana_regen_per_10_seconds":
@@ -1054,6 +1066,8 @@ func displayStatName(stat string) string {
 		return "Block"
 	case "attack_speed_percent":
 		return "Attack speed %"
+	case "skill_damage_percent":
+		return "Skill damage %"
 	case "hotbar_slots":
 		return "Hotbar slots"
 	case "inventory_rows":
@@ -1118,7 +1132,7 @@ func (s *Sim) itemFromShopStock(row *shopStockItem, instanceID uint64) *invItem 
 	return item
 }
 
-func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG) (ItemRollPayload, bool) {
+func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG, sourceDepth int) (ItemRollPayload, bool) {
 	template, ok := r.ItemTemplates[templateID]
 	if !ok || len(r.RarityOrder) == 0 {
 		return ItemRollPayload{}, false
@@ -1141,8 +1155,9 @@ func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG) (ItemRollPa
 	}
 	rarity := r.Rarities[rarityID]
 	stats := cloneIntMap(template.BaseStats)
+	rollableStats := r.rollableStatsForRarity(template.RollableStats, rarityID, sourceDepth)
 	for i := 0; i < rarity.StatRolls; i++ {
-		stat, ok := weightedRollableStat(template.RollableStats, rng)
+		stat, ok := weightedRollableStat(rollableStats, rng)
 		if !ok {
 			continue
 		}
@@ -1163,6 +1178,65 @@ func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG) (ItemRollPa
 		Requirements:   cloneIntMap(template.Requirements),
 		EffectIDs:      effectIDs,
 	}, true
+}
+
+func (r *Rules) rollableStatsForRarity(base []RollableStatDef, rarityID string, sourceDepth int) []RollableStatDef {
+	out := append([]RollableStatDef{}, base...)
+	if itemRarityRank(rarityID) >= itemRarityRank("magic") {
+		minValue, maxValue := scaledAttributeRollRange(sourceDepth)
+		for _, stat := range []string{"str", "dex", "vit", "magic"} {
+			out = append(out, RollableStatDef{Stat: stat, Min: minValue, Max: maxValue, Weight: 2})
+		}
+	}
+	if itemRarityRank(rarityID) >= itemRarityRank("rare") {
+		minValue, maxValue, ok := scaledAllSkillsRollRange(sourceDepth)
+		if ok {
+			out = append(out, RollableStatDef{Stat: "all_skills", Min: minValue, Max: maxValue, Weight: 1})
+		}
+	}
+	return out
+}
+
+func itemRarityRank(rarityID string) int {
+	switch rarityID {
+	case "common":
+		return 0
+	case "magic":
+		return 1
+	case "rare":
+		return 2
+	case "unique":
+		return 3
+	default:
+		return -1
+	}
+}
+
+func scaledAttributeRollRange(sourceDepth int) (int, int) {
+	if sourceDepth < 1 {
+		sourceDepth = 1
+	}
+	if sourceDepth <= 1 {
+		return 1, 3
+	}
+	progress := clampFloat(float64(sourceDepth-1)/99.0, 0, 1)
+	maxValue := int(math.Round(3.0 + 47.0*math.Pow(progress, 1.15)))
+	if maxValue < 3 {
+		maxValue = 3
+	}
+	minValue := maxInt(1, int(math.Floor(float64(maxValue)*0.35)))
+	return minValue, maxValue
+}
+
+func scaledAllSkillsRollRange(sourceDepth int) (int, int, bool) {
+	if sourceDepth < 10 {
+		return 0, 0, false
+	}
+	maxValue := sourceDepth / 10
+	if maxValue < 1 {
+		maxValue = 1
+	}
+	return 1, maxValue, true
 }
 
 func (r *Rules) rollUniqueEffectForTemplate(template ItemTemplateDef, rng *RNG) (string, bool) {

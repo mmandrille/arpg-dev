@@ -133,6 +133,15 @@ func debug_first_main_line_color() -> String:
 	return label.get_theme_color("font_color").to_html(false)
 
 
+func debug_main_line_font_sizes() -> Array:
+	var out: Array = []
+	for child in find_children("*", "Label", true, false):
+		var label := child as Label
+		if label != null and label.name != "GoldValueLabel" and label.text != "":
+			out.append({"text": label.text, "font_size": label.get_theme_font_size("font_size")})
+	return out
+
+
 func _first_main_line_label() -> Label:
 	for child in find_children("*", "Label", true, false):
 		var label := child as Label

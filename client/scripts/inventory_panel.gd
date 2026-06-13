@@ -17,6 +17,7 @@ const BASE_INVENTORY_ROWS := 3
 const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 const TITLE_FONT_SIZE := 33
 const BODY_FONT_SIZE := 23
+const TOOLTIP_META_FONT_SIZE := BODY_FONT_SIZE - 4
 const SLOT_FONT_SIZE := 23
 const ICON_FONT_SIZE := 22
 const EQUIPMENT_SLOT_SIZE := Vector2(96, 58)
@@ -939,7 +940,7 @@ func _slot_from_kind(kind: String) -> String:
 
 
 func _tooltip(item: Dictionary) -> String:
-	return "\n".join(_tooltip_lines(item) + _requirement_lines_as_summary(item) + _comparison_text_lines(item))
+	return "\n".join(_tooltip_text_lines(_tooltip_lines(item)) + _requirement_lines_as_summary(item) + _comparison_text_lines(item))
 
 
 func _tooltip_lines(item: Dictionary) -> Array:
@@ -948,15 +949,15 @@ func _tooltip_lines(item: Dictionary) -> Array:
 	var rarity := str(item.get("rarity", ""))
 	var lines: Array = [_item_name_tooltip_line(str(item.get("display_name", def.get("name", def_id))), rarity)]
 	if rarity != "":
-		lines.append("Rarity: %s" % rarity.capitalize())
+		lines.append(_metadata_tooltip_line("Rarity: %s" % rarity.capitalize()))
 	var summary_lines := _detail_lines(item, false, false)
 	if not summary_lines.is_empty():
-		lines.append_array(summary_lines)
+		lines.append_array(_compact_metadata_lines(summary_lines))
 		_append_hotbar_tooltip_line(lines, item)
 		return lines
 	var slot := str(def.get("slot", ""))
 	if slot != "":
-		lines.append("Slot: %s" % slot)
+		lines.append(_metadata_tooltip_line("Slot: %s" % slot))
 	else:
 		var category := str(def.get("category", ""))
 		if category != "":
@@ -983,6 +984,31 @@ func _tooltip_lines(item: Dictionary) -> Array:
 
 func _item_name_tooltip_line(text: String, rarity: String) -> Dictionary:
 	return {"text": text, "color": _rarity_color(rarity)}
+
+
+func _metadata_tooltip_line(text: String) -> Dictionary:
+	return {"text": text, "color": Color("#cdbd9f"), "font_size": TOOLTIP_META_FONT_SIZE}
+
+
+func _compact_metadata_lines(lines: Array) -> Array:
+	var out: Array = []
+	for line in lines:
+		var text := str(line)
+		if text.begins_with("Slot:"):
+			out.append(_metadata_tooltip_line(text))
+		else:
+			out.append(line)
+	return out
+
+
+func _tooltip_text_lines(lines: Array) -> Array:
+	var out: Array = []
+	for line in lines:
+		if typeof(line) == TYPE_DICTIONARY:
+			out.append(str((line as Dictionary).get("text", "")))
+		else:
+			out.append(str(line))
+	return out
 
 
 func _rarity_color(rarity: String) -> Color:

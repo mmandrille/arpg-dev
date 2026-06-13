@@ -5072,47 +5072,6 @@ func (s *Sim) nearestChainMonster(origin Vec2, maxRange float64, visited map[uin
 	return best
 }
 
-func (s *Sim) applyMonsterSlow(target *entity, sourceID uint64, skillID string, slow SkillSlowDef, correlationID string, res *TickResult) {
-	if target == nil || target.kind != monsterEntity || target.hp <= 0 || slow.DurationTicks <= 0 {
-		return
-	}
-	effectID := slow.EffectID
-	if effectID == "" {
-		effectID = skillID
-	}
-	stateKey := fmt.Sprintf("%s:%d", skillID, target.id)
-	current := 0
-	if existing, ok := s.skillEffects[stateKey]; ok && existing.EndsTick > s.tick {
-		current = existing.Percent
-	}
-	percent := current + slow.Percent
-	if percent > slow.MaxPercent {
-		percent = slow.MaxPercent
-	}
-	s.skillEffects[stateKey] = skillEffectState{
-		SkillID:    skillID,
-		TargetID:   target.id,
-		Stats:      []string{"movement_speed"},
-		Percent:    percent,
-		EffectID:   effectID,
-		EndsTick:   s.tick + uint64(slow.DurationTicks),
-		TotalTicks: slow.DurationTicks,
-	}
-	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_effect_started",
-		EntityID:       idStr(target.id),
-		SourceEntityID: idStr(sourceID),
-		TargetEntityID: idStr(target.id),
-		CorrelationID:  correlationID,
-		SkillID:        skillID,
-		Amount:         intPtr(percent),
-		RemainingTicks: intPtr(slow.DurationTicks),
-		TotalTicks:     intPtr(slow.DurationTicks),
-	})
-}
-
 func (s *Sim) spawnIceShardProjectiles(origin *entity, ownerID uint64, skillID string, def SkillDef, damage int, correlationID string, res *TickResult) {
 	if origin == nil || def.Shatter.MaxShards <= 0 {
 		return

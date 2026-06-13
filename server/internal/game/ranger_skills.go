@@ -217,6 +217,7 @@ func (s *Sim) applyMonsterRoot(target *entity, sourceID uint64, skillID string, 
 		RemainingTicks: intPtr(root.DurationTicks),
 		TotalTicks:     intPtr(root.DurationTicks),
 	})
+	s.replicateSkillEffectToNearbyMonsters(sourceID, target, stateKey, res)
 }
 
 func (s *Sim) monsterRooted(monster *entity) bool {

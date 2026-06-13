@@ -39,8 +39,8 @@
     "enabled": true,
     "offer_id": "buyback:1004",
     "scope": "session_town_visit",
-    "sell_price": 27,
-    "buy_price": 27,
+    "sell_price": 55,
+    "buy_price": 55,
     "buy_price_multiplier": 1.0,
     "clear_on_leave_town": true,
     "persisted": false

@@ -4,12 +4,12 @@
     {
       "name": "fixed red potion",
       "input": { "item_def_id": "red_potion" },
-      "expected": { "buy_price": 20, "sell_price": 5 }
+      "expected": { "buy_price": 40, "sell_price": 10 }
     },
     {
       "name": "fixed blue potion",
       "input": { "item_def_id": "blue_potion" },
-      "expected": { "buy_price": 20, "sell_price": 5 }
+      "expected": { "buy_price": 40, "sell_price": 10 }
     },
     {
       "name": "common cave blade low roll",
@@ -19,7 +19,7 @@
         "rarity": "common",
         "rolled_stats": { "damage_min": 2, "damage_max": 5 }
       },
-      "expected": { "buy_price": 110, "sell_price": 27 }
+      "expected": { "buy_price": 220, "sell_price": 55 }
     },
     {
       "name": "magic cave shield high roll",
@@ -29,7 +29,7 @@
         "rarity": "magic",
         "rolled_stats": { "armor": 5, "block_percent": 9 }
       },
-      "expected": { "buy_price": 155, "sell_price": 38 }
+      "expected": { "buy_price": 310, "sell_price": 77 }
     },
     {
       "name": "rare cave amulet high roll",
@@ -39,7 +39,7 @@
         "rarity": "rare",
         "rolled_stats": { "max_hp": 8 }
       },
-      "expected": { "buy_price": 165, "sell_price": 41 }
+      "expected": { "buy_price": 330, "sell_price": 82 }
     }
   ]
 }

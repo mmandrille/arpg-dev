@@ -1,0 +1,27 @@
+client/tests/test_skills_panel.gd
+  s_a7077bd5daf373::t_21372d3fd35843 92,203-204
+  s_a7077bd5daf373::t_35acb6073df845 205
+  s_a7077bd5daf373::t_ce62999d512681 146
+  s_a7077bd5daf373::t_12c54305f9a000 202
+  s_a7077bd5daf373::t_341f6244f3b414 206
+client/scripts/skills_panel.gd
+  s_a7077bd5daf373::t_5ab3a55c88450b 14,56-60,69-103,197-210,747-751
+client/tests/test_skill_bar.gd
+  s_a7077bd5daf373::t_e1ac1625b33dda 53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0334a94e03a41e519857c1756b68fe517fa4d10a",
+  "prompts": {},
+  "sessions": {
+    "s_a7077bd5daf373": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec123-0d3a-7971-bc8e-4bf2248a159a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

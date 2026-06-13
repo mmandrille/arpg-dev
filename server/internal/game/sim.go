@@ -2608,6 +2608,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.openMarketService(e, in, res, ack)
 		return
 	}
+	if service := s.serviceForInteractable(e); service == "blacksmith" {
+		s.openBlacksmithService(e, in, res, ack)
+		return
+	}
 	if e.state != interactableClosed {
 		res.reject(in.MessageID, "already_open")
 		return
@@ -2633,6 +2637,25 @@ func (s *Sim) openMarketService(e *entity, in Input, res *TickResult, ack bool) 
 		EntityID:      idStr(e.id),
 		CorrelationID: in.CorrelationID,
 		Service:       "market",
+	})
+	if ack {
+		res.ack(in.MessageID)
+	}
+}
+
+func (s *Sim) openBlacksmithService(e *entity, in Input, res *TickResult, ack bool) {
+	if e.state != interactableReady {
+		res.reject(in.MessageID, "not_actionable")
+		return
+	}
+	res.Events = append(res.Events, Event{
+		EventType:     "blacksmith_service_opened",
+		EntityID:      idStr(e.id),
+		CorrelationID: in.CorrelationID,
+		Service:       "blacksmith",
+		StashItems:    s.stashItemViews(),
+		StashGold:     intPtr(s.stashGold),
+		StashCapacity: intPtr(s.stashCapacity),
 	})
 	if ack {
 		res.ack(in.MessageID)

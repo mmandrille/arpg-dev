@@ -37,8 +37,8 @@ def test_single_skill_demo_entry_has_display_metadata() -> None:
     assert entry.kind == "area_stat_buff"
     assert entry.max_rank == 5
     assert entry.targeting == "self_or_ally_area"
-    assert entry.icon_color == "#f0c85a"
-    assert entry.icon_accent == "#fff7bf"
+    assert entry.icon_color == "#f0c23d"
+    assert entry.icon_accent == "#fff7b0"
     assert entry.summary == "Area ally defense"
 
 

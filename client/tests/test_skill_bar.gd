@@ -51,7 +51,7 @@ func _run() -> void:
 	_assert_eq("skill upgrade badge text", str(state.get("upgrade_badge_text", "")), "+")
 	_assert_true("ranked skill enabled", bool(state.get("enabled", false)))
 	_assert_eq("ranked slot uses icon control", str(state.get("slot_text", "")), "")
-	_assert_eq("magic bolt icon shape", str(state.get("icon_shape", "")), "bolt")
+	_assert_eq("magic bolt icon shape", str(state.get("icon_shape", "")), "orb_projectile")
 	bar.use_slot()
 	_assert_eq("cast signal count", emitted.size(), 1)
 	_assert_eq("cast signal skill", str(emitted[0]), "magic_bolt")

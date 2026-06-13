@@ -23,6 +23,7 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
+const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
@@ -230,6 +231,7 @@ var shop_panel: ShopPanel
 var stash_panel: StashPanel
 var bishop_panel: BishopPanel
 var market_panel
+var blacksmith_panel: BlacksmithPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
@@ -405,7 +407,7 @@ func _show_main_menu() -> void:
 
 
 func _raise_gameplay_windows() -> void:
-	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, character_stats_panel, skills_panel, character_info_panel]:
+	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, blacksmith_panel, character_stats_panel, skills_panel, character_info_panel]:
 		if panel != null and panel is CanvasItem:
 			(panel as CanvasItem).move_to_front()
 
@@ -926,6 +928,8 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		stash_panel.show_status(reason.replace("_", " "), true)
 	elif bishop_panel != null and bishop_panel.visible:
 		bishop_panel.show_status(reason.replace("_", " "), true)
+	elif blacksmith_panel != null and blacksmith_panel.visible:
+		blacksmith_panel.show_status(reason.replace("_", " "), true)
 
 
 func _apply_snapshot(p: Dictionary) -> void:
@@ -998,6 +1002,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_hide_stash_panel()
 			_hide_bishop_panel()
 			_hide_market_panel()
+			_hide_blacksmith_panel()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -1228,6 +1233,9 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "market_service_opened":
 			_show_market_panel(ev)
+			continue
+		if event_type == "blacksmith_service_opened":
+			_show_blacksmith_panel(ev)
 			continue
 		if event_type == "bishop_respec" and bishop_panel != null and bishop_panel.visible:
 			bishop_panel.set_gold(gold)
@@ -1513,6 +1521,14 @@ func _refresh_inventory_ui() -> void:
 		stash_panel.set_inventory_state(inventory, equipped, gold, hotbar)
 	if bishop_panel != null and bishop_panel.visible:
 		bishop_panel.set_gold(gold)
+	if blacksmith_panel != null and blacksmith_panel.visible:
+		blacksmith_panel.show_blacksmith(
+			blacksmith_panel.blacksmith_entity_id,
+			stash_items,
+			stash_gold,
+			_blacksmith_config(),
+			blacksmith_panel.get_debug_state().get("status", "")
+		)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
@@ -2174,7 +2190,7 @@ func _is_skill_slot_key(event: InputEventKey) -> bool:
 
 
 func _close_gameplay_panels(except: String = "") -> void:
-	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop", "market"]) and inventory_panel != null:
+	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop", "market", "blacksmith"]) and inventory_panel != null:
 		inventory_panel.hide_display()
 	if not (except in ["shop", "shop_with_inventory"]):
 		_hide_shop_panel()
@@ -2184,6 +2200,8 @@ func _close_gameplay_panels(except: String = "") -> void:
 		_hide_bishop_panel()
 	if except != "market":
 		_hide_market_panel()
+	if except != "blacksmith":
+		_hide_blacksmith_panel()
 	if not (except in ["stats", "skills", "inventory"]) and character_stats_panel != null:
 		character_stats_panel.hide_display()
 	if not (except in ["skills", "stats"]) and skills_panel != null:
@@ -2610,6 +2628,7 @@ func _interactable_should_approach_before_action(interactable_def_id: String) ->
 		"town_stash",
 		"town_bishop",
 		"town_market_board",
+		"town_blacksmith",
 	]
 
 
@@ -3130,6 +3149,9 @@ func _build_scene() -> void:
 	market_panel = MarketPanelScript.new()
 	market_panel.market_action_requested.connect(_on_market_action_requested)
 	ui.add_child(market_panel)
+	blacksmith_panel = BlacksmithPanelScript.new()
+	blacksmith_panel.upgrade_requested.connect(_on_blacksmith_upgrade_requested)
+	ui.add_child(blacksmith_panel)
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
 	ui.add_child(consumable_bar)
@@ -4210,6 +4232,48 @@ func _hide_market_panel() -> void:
 		market_panel.hide_display()
 
 
+func _show_blacksmith_panel(ev: Dictionary) -> void:
+	if blacksmith_panel == null:
+		return
+	_close_gameplay_panels("blacksmith")
+	var next_entity_id := str(ev.get("entity_id", ""))
+	stash_items = ev.get("stash_items", stash_items)
+	stash_gold = int(ev.get("stash_gold", stash_gold))
+	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
+	blacksmith_panel.show_blacksmith(next_entity_id, stash_items, stash_gold, _blacksmith_config(), "Choose a stash item to upgrade")
+	_raise_gameplay_windows()
+
+
+func _hide_blacksmith_panel() -> void:
+	if blacksmith_panel != null:
+		blacksmith_panel.hide_display()
+
+
+func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
+	if client == null or stash_item_id == "":
+		return
+	var result := client.upgrade_account_stash_item(stash_item_id)
+	if result.has("_error"):
+		if blacksmith_panel != null:
+			blacksmith_panel.show_status("Could not upgrade item", true)
+		return
+	var item: Dictionary = result.get("item", {})
+	stash_gold = int(result.get("stash_gold", stash_gold))
+	_upsert_stash_item(item)
+	if blacksmith_panel != null:
+		blacksmith_panel.update_after_upgrade(item, stash_gold, int(result.get("cost_gold", 0)))
+	if stash_panel != null and stash_panel.visible:
+		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
+
+
+func _blacksmith_config() -> Dictionary:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/main_config.v0.json")
+	var parsed = _read_json(path)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		return (parsed as Dictionary).get("gameplay", {})
+	return {}
+
+
 func _on_bishop_respec_requested(bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":
 		return
@@ -4300,6 +4364,10 @@ func _sync_actionable_panel_reach() -> void:
 		if not _panel_source_in_activation_range(market_panel.market_entity_id):
 			_hide_market_panel()
 			closed_actionable = true
+	if blacksmith_panel != null and blacksmith_panel.visible:
+		if not _panel_source_in_activation_range(blacksmith_panel.blacksmith_entity_id):
+			_hide_blacksmith_panel()
+			closed_actionable = true
 	if closed_actionable:
 		_hide_inventory_if_no_actionable_panel()
 
@@ -4318,7 +4386,8 @@ func _hide_inventory_if_no_actionable_panel() -> void:
 	var stash_visible := stash_panel != null and stash_panel.visible
 	var bishop_visible := bishop_panel != null and bishop_panel.visible
 	var market_visible: bool = market_panel != null and market_panel.visible
-	if not shop_visible and not stash_visible and not bishop_visible and not market_visible:
+	var blacksmith_visible := blacksmith_panel != null and blacksmith_panel.visible
+	if not shop_visible and not stash_visible and not bishop_visible and not market_visible and not blacksmith_visible:
 		inventory_panel.hide_display()
 
 
@@ -4577,6 +4646,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			return _make_bishop_node()
 		if def_id == "town_market_board":
 			return _make_market_board_node()
+		if def_id == "town_blacksmith":
+			return _make_blacksmith_node()
 		return _make_door_node()
 	if kind == "projectile":
 		return ProjectileVisualsScript.make_node(str(e.get("projectile_def_id", "")))
@@ -5315,6 +5386,31 @@ func _make_bishop_node() -> Node3D:
 	return root
 
 
+func _make_blacksmith_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "TownBlacksmith"
+	var apron := Color("#2f3f46")
+	var apron_dark := Color("#182429")
+	var ember := Color("#ff7a2f")
+	var metal := Color("#9da3a6")
+	var skin := Color("#b87955")
+
+	_add_merchant_box(root, "BlacksmithShadow", Vector3(1.42, 0.035, 0.82), Vector3(0.0, 0.018, 0.0), Color("#171513"))
+	_add_merchant_box(root, "AnvilBase", Vector3(0.72, 0.18, 0.46), Vector3(0.38, 0.18, 0.34), Color("#33383a"))
+	_add_merchant_box(root, "AnvilTop", Vector3(0.92, 0.16, 0.34), Vector3(0.38, 0.36, 0.34), metal)
+	_add_merchant_box(root, "ForgeBody", Vector3(0.58, 0.44, 0.50), Vector3(-0.46, 0.30, 0.28), Color("#4a2b17"))
+	_add_merchant_box(root, "ForgeMouth", Vector3(0.40, 0.22, 0.08), Vector3(-0.46, 0.32, 0.56), ember)
+	_add_merchant_box(root, "Body", Vector3(0.46, 0.66, 0.30), Vector3(0.0, 0.78, -0.06), apron)
+	_add_merchant_box(root, "Apron", Vector3(0.34, 0.58, 0.34), Vector3(0.0, 0.68, 0.08), apron_dark)
+	_add_merchant_box(root, "Head", Vector3(0.32, 0.30, 0.30), Vector3(0.0, 1.28, -0.04), skin)
+	_add_merchant_box(root, "Cap", Vector3(0.42, 0.12, 0.34), Vector3(0.0, 1.48, -0.04), Color("#4b5154"))
+	_add_merchant_box(root, "LeftArm", Vector3(0.13, 0.48, 0.16), Vector3(-0.35, 0.80, 0.02), skin)
+	_add_merchant_box(root, "RightArm", Vector3(0.13, 0.48, 0.16), Vector3(0.35, 0.80, 0.02), skin)
+	_add_merchant_box(root, "HammerHandle", Vector3(0.07, 0.42, 0.07), Vector3(0.53, 0.58, 0.26), Color("#5b3218"))
+	_add_merchant_box(root, "HammerHead", Vector3(0.28, 0.12, 0.14), Vector3(0.53, 0.82, 0.26), metal)
+	return root
+
+
 func _make_market_board_node() -> Node3D:
 	var root := Node3D.new()
 	root.name = "MarketBoard"
@@ -5353,6 +5449,7 @@ func make_town_preview_scene() -> Node3D:
 		{"def_id": "town_stash", "position": Vector3(7.0, 0.0, 14.0)},
 		{"def_id": "town_bishop", "position": Vector3(15.0, 0.0, 6.0)},
 		{"def_id": "town_market_board", "position": Vector3(10.0, 0.0, 18.0)},
+		{"def_id": "town_blacksmith", "position": Vector3(6.0, 0.0, 10.0)},
 	]
 	for entry in service_entries:
 		var service := _make_entity_node({"type": "interactable", "interactable_def_id": str(entry["def_id"])})
@@ -5721,6 +5818,7 @@ func get_bot_state() -> Dictionary:
 		"stash_panel_visible": stash_panel != null and stash_panel.visible,
 		"bishop_panel_visible": bishop_panel != null and bishop_panel.visible,
 		"market_panel_visible": market_panel != null and market_panel.visible,
+		"blacksmith_panel_visible": blacksmith_panel != null and blacksmith_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
@@ -5730,6 +5828,7 @@ func get_bot_state() -> Dictionary:
 		"stash_panel": stash_panel.get_debug_state() if stash_panel != null else {},
 		"bishop_panel": bishop_panel.get_debug_state() if bishop_panel != null else {},
 		"market_panel": market_panel.get_debug_state() if market_panel != null else {},
+		"blacksmith_panel": blacksmith_panel.get_debug_state() if blacksmith_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
@@ -6026,6 +6125,12 @@ func bot_click_bishop_respec() -> void:
 	if bishop_panel == null:
 		return
 	bishop_panel.bot_click_respec()
+
+
+func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
+	if blacksmith_panel == null:
+		return
+	blacksmith_panel.bot_click_upgrade(stash_item_id, item_def_id, stash_index)
 
 
 func bot_set_stash_search(text: String) -> void:

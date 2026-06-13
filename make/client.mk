@@ -1,5 +1,6 @@
 # --- Client -------------------------------------------------------------------
-.PHONY: client-unit client-smoke play play-remote
+.PHONY: client-unit client-smoke play play-remote skill-logo-sheet
+SKILL_LOGO_SHEET_OUT := $(or $(OUT),.artifacts/skill-logo-sheet.svg)
 PLAY_CLIENTS_FROM_GOALS := $(firstword $(filter-out play play-remote,$(MAKECMDGOALS)))
 PLAY_CLIENTS ?= $(if $(PLAY_CLIENTS_FROM_GOALS),$(PLAY_CLIENTS_FROM_GOALS),1)
 ifneq ($(filter play play-remote,$(MAKECMDGOALS)),)
@@ -15,6 +16,10 @@ client-unit: ## Run Godot headless unit tests (quiet; VERBOSE=1 for full logs)
 
 client-smoke: ## Run Godot headless client smoke test (quiet; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" ./scripts/client_smoke.sh
+
+skill-logo-sheet: tools ## Render current skill logos and labels to an SVG image
+	@mkdir -p "$$(dirname "$(SKILL_LOGO_SHEET_OUT)")"
+	$(PY) tools/assets/skill_logo_sheet.py --out "$(abspath $(SKILL_LOGO_SHEET_OUT))"
 
 play: db-up ## Play locally: pass a client count as `make play 3` for menu co-op
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" ./scripts/play.sh

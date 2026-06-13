@@ -60,6 +60,11 @@ var _stash_grid: GridContainer
 var _withdraw_buttons: Dictionary = {}
 var _deposit_gold_button: Button
 var _withdraw_gold_button: Button
+var _gold_amount_bar: HBoxContainer
+var _gold_amount_label: Label
+var _gold_amount_input: LineEdit
+var _gold_amount_ok_button: Button
+var _gold_amount_mode: String = ""
 var _interactive: bool = true
 var _search_text: String = ""
 var _sort_mode: String = SORT_ACQUIRED
@@ -214,6 +219,10 @@ func get_debug_state() -> Dictionary:
 		"withdraw_buttons": _debug_withdraw_buttons(),
 		"deposit_gold_enabled": _deposit_gold_button != null and not _deposit_gold_button.disabled,
 		"withdraw_gold_enabled": _withdraw_gold_button != null and not _withdraw_gold_button.disabled,
+		"gold_amount_visible": _gold_amount_bar != null and _gold_amount_bar.visible,
+		"gold_amount_mode": _gold_amount_mode,
+		"gold_amount_text": _gold_amount_input.text if _gold_amount_input != null else "",
+		"gold_amount_ok_enabled": _gold_amount_ok_button != null and not _gold_amount_ok_button.disabled,
 		"status": _status_label.text if _status_label != null else "",
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
@@ -234,11 +243,35 @@ func bot_drag_stash_to_bag(stash_item_id: String = "", item_def_id: String = "",
 
 
 func bot_click_deposit_gold(amount: int = 1) -> void:
-	_emit_deposit_gold(amount)
+	_show_gold_amount_entry("deposit")
+	if _gold_amount_input != null:
+		_gold_amount_input.text = str(amount)
+	_confirm_gold_amount()
 
 
 func bot_click_withdraw_gold(amount: int = 1) -> void:
-	_emit_withdraw_gold(amount)
+	_show_gold_amount_entry("withdraw")
+	if _gold_amount_input != null:
+		_gold_amount_input.text = str(amount)
+	_confirm_gold_amount()
+
+
+func bot_open_deposit_gold() -> void:
+	_show_gold_amount_entry("deposit")
+
+
+func bot_open_withdraw_gold() -> void:
+	_show_gold_amount_entry("withdraw")
+
+
+func bot_set_gold_amount_text(text: String) -> void:
+	if _gold_amount_input != null:
+		_gold_amount_input.text = text
+		_update_gold_amount_ok_state()
+
+
+func bot_confirm_gold_amount() -> void:
+	_confirm_gold_amount()
 
 
 func bot_set_search_text(text: String) -> void:
@@ -350,12 +383,34 @@ func _build() -> void:
 	var gold_bar := HBoxContainer.new()
 	gold_bar.add_theme_constant_override("separation", 8)
 	root.add_child(gold_bar)
-	_deposit_gold_button = _gold_button("Deposit 1")
-	_deposit_gold_button.pressed.connect(func() -> void: _emit_deposit_gold(1))
+	_deposit_gold_button = _gold_button("Deposit")
+	_deposit_gold_button.pressed.connect(func() -> void: _show_gold_amount_entry("deposit"))
 	gold_bar.add_child(_deposit_gold_button)
-	_withdraw_gold_button = _gold_button("Withdraw 1")
-	_withdraw_gold_button.pressed.connect(func() -> void: _emit_withdraw_gold(1))
+	_withdraw_gold_button = _gold_button("Withdraw")
+	_withdraw_gold_button.pressed.connect(func() -> void: _show_gold_amount_entry("withdraw"))
 	gold_bar.add_child(_withdraw_gold_button)
+
+	_gold_amount_bar = HBoxContainer.new()
+	_gold_amount_bar.add_theme_constant_override("separation", 6)
+	_gold_amount_bar.visible = false
+	root.add_child(_gold_amount_bar)
+	_gold_amount_label = _section_label("Amount")
+	_gold_amount_label.custom_minimum_size = Vector2(82, 30)
+	_gold_amount_bar.add_child(_gold_amount_label)
+	_gold_amount_input = LineEdit.new()
+	_gold_amount_input.placeholder_text = "0"
+	_gold_amount_input.custom_minimum_size = Vector2(0, 32)
+	_gold_amount_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_gold_amount_input.text_changed.connect(func(_text: String) -> void: _update_gold_amount_ok_state())
+	_gold_amount_input.text_submitted.connect(func(_text: String) -> void: _confirm_gold_amount())
+	_gold_amount_bar.add_child(_gold_amount_input)
+	_gold_amount_ok_button = Button.new()
+	_gold_amount_ok_button.text = "OK"
+	_gold_amount_ok_button.custom_minimum_size = Vector2(58, 32)
+	_gold_amount_ok_button.focus_mode = Control.FOCUS_NONE
+	_gold_amount_ok_button.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	_gold_amount_ok_button.pressed.connect(_confirm_gold_amount)
+	_gold_amount_bar.add_child(_gold_amount_ok_button)
 
 	_render()
 
@@ -393,6 +448,11 @@ func _render() -> void:
 		if _withdraw_gold_button != null:
 			_withdraw_gold_button.visible = container_mode == "stash"
 			_withdraw_gold_button.disabled = not _interactive or container_mode != "stash" or stash_entity_id == "" or stash_gold <= 0
+		if _gold_amount_bar != null:
+			_gold_amount_bar.visible = container_mode == "stash" and _gold_amount_mode != ""
+			if container_mode != "stash":
+				_gold_amount_mode = ""
+			_update_gold_amount_ok_state()
 
 
 func _section_label(text: String) -> Label:
@@ -495,6 +555,67 @@ func _handle_drop_on_stash(data: Variant) -> void:
 		return
 	var item: Dictionary = rec.get("item", {})
 	_emit_deposit(item)
+
+
+func _show_gold_amount_entry(mode: String) -> void:
+	if mode != "deposit" and mode != "withdraw":
+		return
+	if container_mode != "stash" or stash_entity_id == "":
+		return
+	var max_amount := gold if mode == "deposit" else stash_gold
+	if max_amount <= 0:
+		show_status("no gold available", true)
+		return
+	_gold_amount_mode = mode
+	if _gold_amount_label != null:
+		_gold_amount_label.text = "Deposit" if mode == "deposit" else "Withdraw"
+	if _gold_amount_input != null:
+		_gold_amount_input.text = str(max_amount)
+		_gold_amount_input.select_all()
+		_gold_amount_input.grab_focus()
+	if _gold_amount_bar != null:
+		_gold_amount_bar.visible = true
+	_update_gold_amount_ok_state()
+
+
+func _confirm_gold_amount() -> void:
+	if _gold_amount_mode == "":
+		return
+	var amount := _gold_amount_input_amount()
+	if amount <= 0:
+		show_status("enter a gold amount", true)
+		_update_gold_amount_ok_state()
+		return
+	if _gold_amount_mode == "deposit":
+		_emit_deposit_gold(amount)
+	elif _gold_amount_mode == "withdraw":
+		_emit_withdraw_gold(amount)
+	_gold_amount_mode = ""
+	if _gold_amount_bar != null:
+		_gold_amount_bar.visible = false
+
+
+func _gold_amount_input_amount() -> int:
+	if _gold_amount_input == null:
+		return 0
+	var text := _gold_amount_input.text.strip_edges()
+	if text == "":
+		return 0
+	if not text.is_valid_int():
+		return 0
+	return int(text)
+
+
+func _update_gold_amount_ok_state() -> void:
+	if _gold_amount_ok_button == null:
+		return
+	var amount := _gold_amount_input_amount()
+	var max_amount := 0
+	if _gold_amount_mode == "deposit":
+		max_amount = gold
+	elif _gold_amount_mode == "withdraw":
+		max_amount = stash_gold
+	_gold_amount_ok_button.disabled = not _interactive or container_mode != "stash" or stash_entity_id == "" or amount <= 0 or amount > max_amount
 
 
 func _emit_deposit_gold(amount: int) -> void:

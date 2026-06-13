@@ -8,7 +8,7 @@ static func sync(entities: Dictionary, dungeon_generation: Dictionary) -> void:
 	var active_pack_ids: Dictionary = {}
 	for id in entities.keys():
 		var rec: Dictionary = entities[id]
-		if str(rec.get("type", "")) == "monster" and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])):
+		if str(rec.get("type", "")) == "monster" and int(rec.get("hp", 1)) > 0 and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])):
 			var pack_id := str(rec.get("monster_pack_id", ""))
 			if pack_id != "":
 				active_pack_ids[pack_id] = true
@@ -17,7 +17,7 @@ static func sync(entities: Dictionary, dungeon_generation: Dictionary) -> void:
 		if str(rec.get("type", "")) != "monster":
 			continue
 		var pack_id := str(rec.get("monster_pack_id", ""))
-		var active := bool(rec.get("monster_pack_leader", false)) and pack_id != "" and active_pack_ids.has(pack_id)
+		var active := int(rec.get("hp", 1)) > 0 and bool(rec.get("monster_pack_leader", false)) and pack_id != "" and active_pack_ids.has(pack_id)
 		PlayerStatusEffectMarkers.sync_elite_command_radius_preview(rec.get("node", null) as Node3D, active, radius)
 
 

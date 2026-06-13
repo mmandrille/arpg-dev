@@ -308,7 +308,8 @@
         { "stat": "max_hp", "min": 1, "max": 4, "weight": 2 },
         { "stat": "armor", "min": 1, "max": 2, "weight": 1 },
         { "stat": "health_regen_per_10_seconds", "min": 1, "max": 3, "weight": 1 },
-        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 1 }
+        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 1 },
+        { "stat": "inventory_rows", "min": 1, "max": 1, "weight": 1 }
       ],
       "effect_pool": []
     },
@@ -323,7 +324,8 @@
       "rollable_stats": [
         { "stat": "max_hp", "min": 2, "max": 6, "weight": 2 },
         { "stat": "health_regen_per_10_seconds", "min": 1, "max": 4, "weight": 1 },
-        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 4, "weight": 1 }
+        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 4, "weight": 1 },
+        { "stat": "inventory_rows", "min": 1, "max": 1, "weight": 1 }
       ],
       "effect_pool": []
     }

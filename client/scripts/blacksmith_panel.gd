@@ -6,7 +6,7 @@ signal upgrade_inventory_requested(item_instance_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
-const PANEL_SIZE := Vector2(380, 300)
+const PANEL_SIZE := Vector2(320, 220)
 const STAGE_SLOT_SIZE := Vector2(84, 84)
 const BODY_FONT_SIZE := 18
 const DETAIL_FONT_SIZE := 15
@@ -168,6 +168,8 @@ func _build() -> void:
 
 	_panel = DraggableWindowScript.new()
 	_panel.configure("Blacksmith", PANEL_SIZE)
+	_panel.custom_minimum_size = Vector2(PANEL_SIZE.x, PANEL_SIZE.y + DraggableWindowScript.TITLEBAR_HEIGHT)
+	_panel.size = _panel.custom_minimum_size
 	_panel.set_layout_key("blacksmith_panel")
 	_panel.position = Vector2(300, 88)
 	_panel.close_requested.connect(hide_display)

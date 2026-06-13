@@ -65,6 +65,8 @@ func get_debug_state() -> Dictionary:
 	return {
 		"title": window_title,
 		"position": {"x": position.x, "y": position.y},
+		"size": {"x": size.x, "y": size.y},
+		"minimum_size": {"x": custom_minimum_size.x, "y": custom_minimum_size.y},
 		"close_visible": _close_button != null and _close_button.visible,
 		"draggable": draggable,
 		"layout_key": layout_key,

@@ -341,6 +341,8 @@ func _run() -> void:
 	var staged_tooltip := market_panel._make_item_tooltip(inventory[0])
 	_assert_eq("market staged tooltip uses shared panel", staged_tooltip.get_script(), ItemTooltipPanelScript)
 	staged_tooltip.queue_free()
+	_assert_true("market publish rows centered", bool(market_state.get("publish_rows_centered", false)))
+	_assert_true("market offer rows centered", bool(market_state.get("offer_rows_centered", false)))
 	_assert_true("market publish price and button share row", bool(market_state.get("publish_button_same_row", false)))
 	_assert_eq("market publish price half width", int(market_state.get("publish_price_width", 0)), 180)
 	_assert_eq("market publish button half width", int(market_state.get("publish_button_width", 0)), 180)

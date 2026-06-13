@@ -99,6 +99,7 @@ func run(cfg config.Config, log *slog.Logger, migrateOnly bool) error {
 	log.Info("rules loaded", "dir", rulesDir)
 
 	hub := realtime.NewHub(db, rules, log, m)
+	hub.SetGameplayDebug(cfg.GameplayDebug)
 
 	srv := httpapi.New(httpapi.Deps{
 		Config:   cfg,

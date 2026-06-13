@@ -188,6 +188,7 @@ var visual_replay_envelope_index: int = 0
 var visual_replay_timer: float = 0.0
 var visual_replay_title: String = ""
 var visual_replay_debug_token: String = ""
+var gameplay_debug_enabled: bool = false
 var visual_replay_dev_token: String = ""
 var visual_replay_exit_on_complete: bool = false
 var visual_replay_exit_requested: bool = false
@@ -287,6 +288,7 @@ func _ready() -> void:
 		player_anim = AnimationControllerScript.new(ap)
 	_apply_model_tint(character_visual, PLAYER_TINT)
 	player_reaction = ModelReactionControllerScript.new(character_visual, PLAYER_TINT)
+	gameplay_debug_enabled = _truthy_env("ARPG_GAMEPLAY_DEBUG")
 	_build_scene()
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
@@ -1267,6 +1269,14 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "bishop_respec" and bishop_panel != null and bishop_panel.visible:
 			bishop_panel.set_gold(gold)
 			bishop_panel.show_status("Respec complete")
+			continue
+		if event_type in ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained"] and bishop_panel != null and bishop_panel.visible:
+			if event_type == "bishop_debug_level_gained":
+				bishop_panel.show_status("Level gained")
+			elif event_type == "bishop_debug_skill_point_gained":
+				bishop_panel.show_status("Skill point gained")
+			else:
+				bishop_panel.show_status("Stat point gained")
 			continue
 		if event_type == "boss_killed":
 			_last_boss_reward_status = "%s defeated" % _boss_health_bar_title(str(ev.get("boss_template_id", "")))
@@ -3252,6 +3262,8 @@ func _build_scene() -> void:
 	ui.add_child(stash_panel)
 	bishop_panel = BishopPanelScript.new()
 	bishop_panel.respec_requested.connect(_on_bishop_respec_requested)
+	bishop_panel.debug_requested.connect(_on_bishop_debug_requested)
+	bishop_panel.set_debug_enabled(gameplay_debug_enabled)
 	ui.add_child(bishop_panel)
 	market_panel = MarketPanelScript.new()
 	market_panel.market_action_requested.connect(_on_market_action_requested)
@@ -4523,6 +4535,18 @@ func _on_bishop_respec_requested(bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":
 		return
 	client.send("bishop_respec_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+
+
+func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "" or not gameplay_debug_enabled:
+		return
+	match action:
+		"level":
+			client.send("bishop_debug_level_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+		"skill_point":
+			client.send("bishop_debug_skill_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+		"stat_point":
+			client.send("bishop_debug_stat_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 
 
 func _shop_title(next_shop_id: String) -> String:

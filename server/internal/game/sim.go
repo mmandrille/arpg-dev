@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 	"sort"
 	"strconv"
 )
@@ -321,10 +322,11 @@ type playerState struct {
 // Given the same seed and the same ordered inputs, it produces identical
 // outputs (entity ids, events, final state) on every run (ADR-0001 D8.1).
 type Sim struct {
-	sessionID string
-	seed      string
-	rng       *RNG
-	rules     *Rules
+	sessionID     string
+	seed          string
+	rng           *RNG
+	rules         *Rules
+	gameplayDebug bool
 
 	tick               uint64
 	nextID             uint64
@@ -416,6 +418,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		seed:                  seed,
 		rng:                   NewRNG(SeedToUint64(seed)),
 		rules:                 rules,
+		gameplayDebug:         gameplayDebugEnabledFromEnv(),
 		nextID:                baseEntityID,
 		nextAreaHealZoneID:    1,
 		players:               make(map[uint64]*playerState),
@@ -698,6 +701,9 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, source: "preset"})
 		case interactableEntity:
 			def := s.rules.Interactables[preset.InteractableDefID]
+			if def.Service == uniqueTestChestService && !s.gameplayDebug {
+				continue
+			}
 			interactable := &entity{
 				kind:              interactableEntity,
 				pos:               preset.Position,
@@ -1496,6 +1502,20 @@ func sortedPlayerIDs(players map[uint64]*playerState) []uint64 {
 // CurrentTick returns the next tick to be processed.
 func (s *Sim) CurrentTick() uint64 { return s.tick }
 
+// SetGameplayDebug enables local development-only gameplay conveniences.
+func (s *Sim) SetGameplayDebug(enabled bool) {
+	s.gameplayDebug = enabled
+}
+
+func gameplayDebugEnabledFromEnv() bool {
+	switch os.Getenv("ARPG_GAMEPLAY_DEBUG") {
+	case "1", "true", "TRUE", "yes", "YES", "on", "ON":
+		return true
+	default:
+		return false
+	}
+}
+
 // Input is a decoded client intent applied to a specific tick.
 type Input struct {
 	MessageID           string
@@ -1524,6 +1544,9 @@ type Input struct {
 	ShopSell            *ShopSellIntent
 	ShopReroll          *ShopRerollIntent
 	BishopRespec        *BishopRespecIntent
+	BishopDebugLevel    *BishopDebugLevelIntent
+	BishopDebugSkill    *BishopDebugSkillPointIntent
+	BishopDebugStat     *BishopDebugStatPointIntent
 	StashDepositItem    *StashDepositItemIntent
 	StashWithdrawItem   *StashWithdrawItemIntent
 	StashDepositGold    *StashDepositGoldIntent
@@ -1598,6 +1621,15 @@ type (
 		ShopEntityID string
 	}
 	BishopRespecIntent struct {
+		BishopEntityID string
+	}
+	BishopDebugLevelIntent struct {
+		BishopEntityID string
+	}
+	BishopDebugSkillPointIntent struct {
+		BishopEntityID string
+	}
+	BishopDebugStatPointIntent struct {
 		BishopEntityID string
 	}
 	StashDepositItemIntent struct {
@@ -2654,6 +2686,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		return
 	}
 	if service := s.serviceForInteractable(e); service == uniqueTestChestService {
+		if !s.gameplayDebug {
+			res.reject(in.MessageID, "debug_disabled")
+			return
+		}
 		s.openUniqueTestChest(e, in, res, ack)
 		return
 	}

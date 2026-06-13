@@ -1398,7 +1398,7 @@ func _bishop_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 	for key in ["price", "gold"]:
 		if step.has(key) and int(panel.get(key, -1)) != int(step.get(key, 0)):
 			return false
-	for key in ["affordable", "respec_enabled", "visible"]:
+	for key in ["affordable", "respec_enabled", "visible", "debug_enabled"]:
 		if step.has(key) and bool(panel.get(key, false)) != bool(step.get(key, false)):
 			return false
 	if step.has("service_id") and str(panel.get("service_id", "")) != str(step.get("service_id", "")):

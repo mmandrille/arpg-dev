@@ -6,6 +6,7 @@ import (
 )
 
 func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
+	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess_unique_test_chest", "unique_test_chest_seed", rules, "dungeon_levels")
 	if err != nil {
@@ -147,6 +148,7 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 }
 
 func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
+	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
 	rules := loadRules(t)
 	simA, err := NewSimWithWorld("sess_unique_test_chest_a", "seed_a", rules, "dungeon_levels")
 	if err != nil {
@@ -187,6 +189,7 @@ func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
 }
 
 func TestUniqueTestChestRepeatActivationReopensRemainingItems(t *testing.T) {
+	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess_unique_test_chest_repeat", "unique_test_chest_seed", rules, "dungeon_levels")
 	if err != nil {
@@ -209,6 +212,18 @@ func TestUniqueTestChestRepeatActivationReopensRemainingItems(t *testing.T) {
 	}
 	if len(sim.inventory) != 0 {
 		t.Fatalf("repeat activation inventory count = %d, want 0", len(sim.inventory))
+	}
+}
+
+func TestUniqueTestChestHiddenWhenGameplayDebugDisabled(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_unique_test_chest_hidden", "unique_test_chest_seed", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	for _, e := range sim.activeLevel().entities {
+		if e.kind == interactableEntity && e.interactableDefID == "town_unique_chest" {
+			t.Fatalf("unique chest spawned with gameplay debug disabled: %+v", e)
+		}
 	}
 }
 

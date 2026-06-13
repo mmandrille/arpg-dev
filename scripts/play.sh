@@ -13,6 +13,7 @@ ADDR="${ARPG_ADDR:-:8888}"
 BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-local-dev-token}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-local-debug-token}"
+GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
 PLAY_CLIENTS="${PLAY_CLIENTS:-1}"
 
 if ! [[ "$PLAY_CLIENTS" =~ ^[0-9]+$ ]] || (( PLAY_CLIENTS < 1 )); then
@@ -43,7 +44,7 @@ SERVER_BIN="$(mktemp -t arpg-play-server.XXXXXX)"
 
 echo "[play] starting server on $ADDR (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
-  ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
+  ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
   ARPG_RULES_DIR="$ROOT/shared/rules" \
   "$SERVER_BIN" >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
@@ -71,6 +72,7 @@ if (( PLAY_CLIENTS == 1 )); then
     "ARPG_BASE_URL=$BASE_URL"
     "ARPG_DEV_TOKEN=$DEV_TOKEN"
     "ARPG_EMAIL=$EMAIL"
+    "ARPG_GAMEPLAY_DEBUG=$GAMEPLAY_DEBUG"
   )
   [[ -n "${ARPG_AUTOSTART:-}" ]] && GODOT_ENV+=("ARPG_AUTOSTART=$ARPG_AUTOSTART")
   [[ -n "${ARPG_WORLD_ID:-}" ]] && GODOT_ENV+=("ARPG_WORLD_ID=$ARPG_WORLD_ID")
@@ -87,6 +89,7 @@ else
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_EMAIL="$EMAIL" \
+      ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
       "$GODOT" --path "$ROOT/client" &
     CLIENT_PIDS+=("$!")
   done

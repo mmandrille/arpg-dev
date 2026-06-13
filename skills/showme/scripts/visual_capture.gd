@@ -5,6 +5,7 @@ const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
+const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
@@ -83,6 +84,8 @@ func _initialize() -> void:
 			await _setup_skills()
 		"shop":
 			await _setup_shop()
+		"bishop":
+			await _setup_bishop()
 		"market-board":
 			await _setup_market_board()
 		"market-publish":
@@ -346,6 +349,14 @@ func _setup_shop() -> void:
 	var tooltip = panel._make_offer_tooltip(offers[3])
 	tooltip.position = Vector2(286, 142)
 	get_root().add_child(tooltip)
+
+
+func _setup_bishop() -> void:
+	var panel = BishopPanelScript.new()
+	get_root().add_child(panel)
+	await process_frame
+	panel.set_debug_enabled(true)
+	panel.show_bishop("1004", "bishop", 250, false, 30)
 
 
 func _setup_market_board() -> void:

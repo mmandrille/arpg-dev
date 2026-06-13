@@ -133,6 +133,100 @@ func TestBishopRespecRejectsWithoutGold(t *testing.T) {
 	}
 }
 
+func TestBishopDebugLevelRequiresGameplayDebug(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_disabled", "v_bishop_debug_disabled", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+
+	res := sim.Tick([]Input{{
+		MessageID:        "debug_level_disabled",
+		Type:             "bishop_debug_level_intent",
+		BishopDebugLevel: &BishopDebugLevelIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertReject(t, res, "debug_level_disabled", "debug_disabled")
+	if sim.progression.Level != 1 || sim.progression.Experience != 0 {
+		t.Fatalf("disabled debug level mutated progression: %+v", sim.progression)
+	}
+}
+
+func TestBishopDebugLevelGrantsSingleLevel(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_level", "v_bishop_debug_level", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.SetGameplayDebug(true)
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	player.hp = 1
+	player.mana = 0
+	wantXP, ok := sim.rules.nextLevelTotalXP(1)
+	if !ok {
+		t.Fatal("missing level 2 xp threshold")
+	}
+
+	res := sim.Tick([]Input{{
+		MessageID:        "debug_level",
+		CorrelationID:    "corr_debug_level",
+		Type:             "bishop_debug_level_intent",
+		BishopDebugLevel: &BishopDebugLevelIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, res, "debug_level")
+	if sim.progression.Level != 2 || sim.progression.Experience != wantXP || sim.progression.UnspentStatPoints != sim.rules.CharacterProgression.PointsPerLevel {
+		t.Fatalf("debug level progression = %+v, want level 2 xp %d stat points %d", sim.progression, wantXP, sim.rules.CharacterProgression.PointsPerLevel)
+	}
+	if player.hp != player.maxHP || player.mana != player.maxMana {
+		t.Fatalf("debug level resources hp/mana=%d/%d max=%d/%d", player.hp, player.mana, player.maxHP, player.maxMana)
+	}
+	ev := findEvent(res.Events, "bishop_debug_level_gained")
+	if ev == nil || ev.Amount == nil || *ev.Amount != wantXP || ev.FromLevel == nil || *ev.FromLevel != 1 || ev.ToLevel == nil || *ev.ToLevel != 2 {
+		t.Fatalf("bishop_debug_level_gained event = %+v", ev)
+	}
+}
+
+func TestBishopDebugPointsGrantOnePoint(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_points", "v_bishop_debug_points", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.SetGameplayDebug(true)
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	startSkillPoints := sim.progression.UnspentSkillPoints
+	startStatPoints := sim.progression.UnspentStatPoints
+
+	skill := sim.Tick([]Input{{
+		MessageID:        "debug_skill",
+		Type:             "bishop_debug_skill_point_intent",
+		BishopDebugSkill: &BishopDebugSkillPointIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+	assertAck(t, skill, "debug_skill")
+	if sim.progression.UnspentSkillPoints != startSkillPoints+1 || sim.progression.UnspentStatPoints != startStatPoints {
+		t.Fatalf("debug skill progression = %+v", sim.progression)
+	}
+	if ev := findEvent(skill.Events, "bishop_debug_skill_point_gained"); ev == nil || ev.Amount == nil || *ev.Amount != 1 {
+		t.Fatalf("bishop_debug_skill_point_gained event = %+v", ev)
+	}
+
+	stat := sim.Tick([]Input{{
+		MessageID:       "debug_stat",
+		Type:            "bishop_debug_stat_point_intent",
+		BishopDebugStat: &BishopDebugStatPointIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+	assertAck(t, stat, "debug_stat")
+	if sim.progression.UnspentStatPoints != startStatPoints+1 || sim.progression.UnspentSkillPoints != startSkillPoints+1 {
+		t.Fatalf("debug stat progression = %+v", sim.progression)
+	}
+	if ev := findEvent(stat.Events, "bishop_debug_stat_point_gained"); ev == nil || ev.Amount == nil || *ev.Amount != 1 {
+		t.Fatalf("bishop_debug_stat_point_gained event = %+v", ev)
+	}
+}
+
 func findInteractableByDefID(t *testing.T, sim *Sim, defID string) *entity {
 	t.Helper()
 	for _, e := range sim.activeLevel().entities {

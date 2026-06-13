@@ -32,6 +32,9 @@
         "shop_sell_intent",
         "shop_reroll_intent",
         "bishop_respec_intent",
+        "bishop_debug_level_intent",
+        "bishop_debug_skill_point_intent",
+        "bishop_debug_stat_point_intent",
         "stash_deposit_item_intent",
         "stash_withdraw_item_intent",
         "stash_deposit_gold_intent",
@@ -96,6 +99,12 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/shop_reroll_intent" } } } },
     { "if": { "properties": { "type": { "const": "bishop_respec_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_respec_intent" } } } },
+    { "if": { "properties": { "type": { "const": "bishop_debug_level_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
+    { "if": { "properties": { "type": { "const": "bishop_debug_skill_point_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
+    { "if": { "properties": { "type": { "const": "bishop_debug_stat_point_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_deposit_item_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_deposit_item_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_withdraw_item_intent" } } },
@@ -318,6 +327,14 @@
       }
     },
     "bishop_respec_intent": {
+      "type": "object",
+      "required": ["bishop_entity_id"],
+      "additionalProperties": false,
+      "properties": {
+        "bishop_entity_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "bishop_debug_intent": {
       "type": "object",
       "required": ["bishop_entity_id"],
       "additionalProperties": false,

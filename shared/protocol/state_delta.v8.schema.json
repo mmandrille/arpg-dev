@@ -625,6 +625,13 @@
         },
         {
           "if": {
+            "properties": { "event_type": { "enum": ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "heal", "mana", "from_level", "to_level", "amount", "total_experience", "unspent_stat_points", "unspent_skill_points"] }
+        },
+        {
+          "if": {
             "properties": { "event_type": { "const": "stash_opened" } },
             "required": ["event_type"]
           },

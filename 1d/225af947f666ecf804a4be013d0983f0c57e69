@@ -1,0 +1,38 @@
+shared/protocol/state_delta.v8.schema.json
+  s_74a7d6f000b3a7::t_eea98d91565523 660-673
+shared/protocol/messages.v8.schema.json
+  s_74a7d6f000b3a7::t_d6d2102e2ed21e 40,109-110,355-361
+server/internal/game/sim.go
+  s_74a7d6f000b3a7::t_a0066d08f0468d 1427,1469
+  s_74a7d6f000b3a7::t_8d68993ce9eb9c 1532,1623-1625
+  s_74a7d6f000b3a7::t_b6413cdbcad9e3 178-181,306,356,436,658
+  s_74a7d6f000b3a7::t_1b92abe85c524a 6291-6293
+  s_74a7d6f000b3a7::t_41c0b6aa21ad21 1501-1531
+server/internal/game/unique_chest.go
+  s_74a7d6f000b3a7::t_49a69132f192cc 3-6,49,53-68,70-72,75,79-86,91-158,162-170
+  s_74a7d6f000b3a7::t_d7e26d4b3ff2db 173-216
+server/internal/game/unique_chest_test.go
+  s_74a7d6f000b3a7::t_5a900d665cf302 9,28,30,33-35,39-41,44-45,47-48,51,53,56,70-88,145,155-158,161-167
+server/internal/game/handlers.go
+  s_74a7d6f000b3a7::t_41c0b6aa21ad21 27-53
+  s_74a7d6f000b3a7::t_518caa6f1a9224 54
+server/internal/inputdecode/inputdecode.go
+  s_74a7d6f000b3a7::t_76f5623e6fbbd9 39,131-134,140,311-316
+  s_74a7d6f000b3a7::t_41c0b6aa21ad21 12-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1d225af947f666ecf804a4be013d0983f0c57e69",
+  "prompts": {},
+  "sessions": {
+    "s_74a7d6f000b3a7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec24c-bffc-7952-a214-30c7d845e548",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

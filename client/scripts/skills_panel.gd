@@ -349,6 +349,7 @@ func get_debug_state() -> Dictionary:
 		"tooltip_position": _vec2_debug(_tooltip.position if _tooltip != null else Vector2.ZERO),
 		"tooltip_mouse_filter": _tooltip.mouse_filter if _tooltip != null else -1,
 		"tooltip_body": _tooltip_plain_text,
+		"points_label_visible": _points_label != null and _points_label.visible,
 		"requirements_met": _requirements_met(requirement_status),
 		"requirement_status": requirement_status,
 		"window": _panel.get_debug_state() if _panel != null else {},
@@ -583,11 +584,15 @@ func _show_tooltip(skill_id: String) -> void:
 		return
 	_position_tooltip_below_skill(skill_id)
 	_tooltip.visible = true
+	if _points_label != null:
+		_points_label.visible = false
 
 
 func _hide_tooltip() -> void:
 	if _tooltip != null:
 		_tooltip.visible = false
+	if _points_label != null:
+		_points_label.visible = true
 
 
 func _position_tooltip_below_skill(skill_id: String) -> void:

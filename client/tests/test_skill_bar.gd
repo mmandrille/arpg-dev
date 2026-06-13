@@ -106,6 +106,7 @@ func _run() -> void:
 	_assert_eq("cooldown remaining", int(state.get("remaining_ticks", -1)), 40)
 	_assert_eq("cooldown total", int(state.get("total_ticks", -1)), 40)
 	_assert_true("cooldown fraction full", float(state.get("cooldown_fraction", 0.0)) > 0.99)
+	_assert_true("cooldown visual shows during cooldown", bool(state.get("cooldown_visible", false)))
 
 	bar._process(0.10)
 	state = bar.get_debug_state()
@@ -114,6 +115,7 @@ func _run() -> void:
 	bar.set_skill_cooldowns([])
 	state = bar.get_debug_state()
 	_assert_true("slot re-enables without cooldown", bool(state.get("enabled", false)))
+	_assert_false("cooldown visual hides without cooldown", bool(state.get("cooldown_visible", true)))
 
 	bar.queue_free()
 	print("[gdtest] PASS: test_skill_bar (%d passed, %d failed)" % [_pass_count, _fail_count])

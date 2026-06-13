@@ -1190,6 +1190,7 @@ func _test_basic_attack_recovery_cue_lives_on_character_bar() -> void:
 	_assert_eq("basic attack cue leaves skill cooldown remaining empty", int(skill_state.get("remaining_ticks", -1)), 0)
 	_assert_true("basic attack cue leaves skillbar enabled", bool(skill_state.get("enabled", false)))
 	_assert_true("basic attack cue leaves skillbar ungreyed", not bool(skill_state.get("greyed", true)))
+	_assert_true("basic attack cue leaves skill cooldown visual hidden", not bool(skill_state.get("cooldown_visible", true)))
 	main.character_bar._process(0.35)
 	character_state = main.character_bar.get_debug_state()
 	_assert_true("basic attack recovery cue decays on character bar", float(character_state.get("attack_recovery_fraction", 1.0)) < 0.99)

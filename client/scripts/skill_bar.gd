@@ -137,6 +137,7 @@ func get_debug_state() -> Dictionary:
 		"remaining_ticks": int(ceil(_remaining_ticks)),
 		"total_ticks": _total_ticks,
 		"cooldown_fraction": _cooldown_fraction(),
+		"cooldown_visible": _cooldown.visible if _cooldown != null else false,
 		"slot_text": _slot.text if _slot != null else "",
 		"icon_shape": _slot_icon.shape if _slot_icon != null else "",
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
@@ -214,7 +215,9 @@ func _render() -> void:
 		_mana_cost_label.modulate = Color("#8a8a8a") if _current_mana < _mana_cost() else Color("#9fe4ff")
 	if _badge != null:
 		_badge.visible = _unspent_skill_points() > 0
-	_cooldown.value = _cooldown_fraction()
+	var cooldown_fraction := _cooldown_fraction()
+	_cooldown.visible = cooldown_fraction > 0.0
+	_cooldown.value = cooldown_fraction
 
 
 func _cast_enabled() -> bool:

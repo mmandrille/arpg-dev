@@ -12,12 +12,12 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v119 — `live-unique-drops-all-effects` |
+| **Latest completed slice** | v120 — `tuning-friendly-rule-tests` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v120 — `tuning-friendly-rule-tests` |
-| **Last engineering review** | v110 — [`docs/reviews/20260613_v110-overview.md`](docs/reviews/20260613_v110-overview.md) (2026-06-13) |
-| **Next engineering review** | v120 (~every 10 slices) |
+| **Next slice** | v121 — TBD |
+| **Last engineering review** | v120 — [`docs/reviews/20260613_v120-overview.md`](docs/reviews/20260613_v120-overview.md) (2026-06-13) |
+| **Next engineering review** | v130 (~every 10 slices) |
 
 ### Slice numbering note
 
@@ -138,6 +138,7 @@ v116_* = elite-aura-radius-preview
 v117_* = market-active-offer-ui
 v118_* = blacksmith-upgrade-ui
 v119_* = live-unique-drops-all-effects
+v120_* = tuning-friendly-rule-tests
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -297,6 +298,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v117** | `market-active-offer-ui` | Complete (`make ci` green) | [`v117_spec-market-active-offer-ui.md`](docs/specs/v117_spec-market-active-offer-ui.md) | [`v117_2026-06-13-market-active-offer-ui.md`](docs/plans/v117_2026-06-13-market-active-offer-ui.md) | [`as-built`](docs/as-built/v117_market-active-offer-ui.md) |
 | **v118** | `blacksmith-upgrade-ui` | Complete (`make ci` green) | [`v118_spec-blacksmith-upgrade-ui.md`](docs/specs/v118_spec-blacksmith-upgrade-ui.md) | [`v118_2026-06-13-blacksmith-upgrade-ui.md`](docs/plans/v118_2026-06-13-blacksmith-upgrade-ui.md) | [`as-built`](docs/as-built/v118_blacksmith-upgrade-ui.md) |
 | **v119** | `live-unique-drops-all-effects` | Complete (`make ci` green) | [`v119_spec-live-unique-drops-all-effects.md`](docs/specs/v119_spec-live-unique-drops-all-effects.md) | [`v119_2026-06-13-live-unique-drops-all-effects.md`](docs/plans/v119_2026-06-13-live-unique-drops-all-effects.md) | [`as-built`](docs/as-built/v119_live-unique-drops-all-effects.md) |
+| **v120** | `tuning-friendly-rule-tests` | Complete (`make ci` green) | [`v120_spec-tuning-friendly-rule-tests.md`](docs/specs/v120_spec-tuning-friendly-rule-tests.md) | [`v120_2026-06-13-tuning-friendly-rule-tests.md`](docs/plans/v120_2026-06-13-tuning-friendly-rule-tests.md) | [`as-built`](docs/as-built/v120_tuning-friendly-rule-tests.md) |
 
 ---
 
@@ -423,6 +425,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Tuning-friendly rule tests started with the skills panel.** v120 converts the Godot skills-panel
+Magic Bolt test to derive requirements, mana cost, and max-rank expectations from `SkillRulesLoader`
+instead of copying current shared-rule tuning values. The v120 review set is also complete and
+points the next batch toward focused `main.gd`, validator, bot-runner, and test-bucket splits.
 
 **Live unique drops now expose the full enabled effect catalog.** v119 marks named unique metadata
 ready, keeps live behavior on rolled equipment `effect_ids`, proves every enabled unique effect can

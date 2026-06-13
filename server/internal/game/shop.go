@@ -1164,15 +1164,17 @@ func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG, sourceDepth
 		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
 	}
 	effectIDs := cloneStringSlice(template.EffectPool)
+	displayName := rarity.NamePrefix + " " + template.Name
 	if rarityID == "unique" {
 		effectID, ok := r.rollUniqueEffectForTemplate(template, rng)
 		if ok {
 			effectIDs = append(effectIDs, effectID)
+			displayName = uniqueItemDisplayName(template, r.UniqueEffects[effectID])
 		}
 	}
 	return ItemRollPayload{
 		ItemTemplateID: templateID,
-		DisplayName:    rarity.NamePrefix + " " + template.Name,
+		DisplayName:    displayName,
 		Rarity:         rarityID,
 		Stats:          stats,
 		Requirements:   cloneIntMap(template.Requirements),

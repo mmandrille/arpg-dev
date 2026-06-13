@@ -2,7 +2,6 @@ package game
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -44,11 +43,14 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 		if len(payload.EffectIDs) != 1 {
 			t.Fatalf("granted item effects = %+v, want exactly one", payload.EffectIDs)
 		}
-		if strings.HasPrefix(payload.DisplayName, "Unique ") {
+		if payload.DisplayName != "Embercall Blade" && payload.DisplayName != "Stormstring Bow" {
 			effectID := payload.EffectIDs[0]
 			gotEffects[effectID]++
 			effect := rules.UniqueEffects[effectID]
 			template := rules.ItemTemplates[payload.ItemTemplateID]
+			if payload.DisplayName != uniqueItemDisplayName(template, effect) {
+				t.Fatalf("generated unique display name = %q, want %q", payload.DisplayName, uniqueItemDisplayName(template, effect))
+			}
 			if !uniqueChestEffectCompatible(effect, template.ItemType) {
 				t.Fatalf("effect %s is not compatible with template %s type %s", effectID, payload.ItemTemplateID, template.ItemType)
 			}

@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v135 — `second-named-unique` |
+| **Latest completed slice** | v136 — `unique-chest-client-proof` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v136 — `unique-chest-client-proof` |
+| **Next slice** | TBD — run `$next` |
 | **Last engineering review** | v130 — [`docs/reviews/20260613_v130-overview.md`](docs/reviews/20260613_v130-overview.md) (2026-06-13) |
 | **Next engineering review** | v140 due before more feature batches |
 
@@ -154,6 +154,7 @@ v132_* = fixed-named-unique-package
 v133_* = unique-validation-split
 v134_* = unique-inspection-ui
 v135_* = second-named-unique
+v136_* = unique-chest-client-proof
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -329,6 +330,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v133** | `unique-validation-split` | Complete (`make ci` green) | [`v133_spec-unique-validation-split.md`](docs/specs/v133_spec-unique-validation-split.md) | [`v133_2026-06-13-unique-validation-split.md`](docs/plans/v133_2026-06-13-unique-validation-split.md) | [`as-built`](docs/as-built/v133_unique-validation-split.md) |
 | **v134** | `unique-inspection-ui` | Complete (`make ci` green) | [`v134_spec-unique-inspection-ui.md`](docs/specs/v134_spec-unique-inspection-ui.md) | [`v134_2026-06-13-unique-inspection-ui.md`](docs/plans/v134_2026-06-13-unique-inspection-ui.md) | [`as-built`](docs/as-built/v134_unique-inspection-ui.md) |
 | **v135** | `second-named-unique` | Complete (`make ci` green) | [`v135_spec-second-named-unique.md`](docs/specs/v135_spec-second-named-unique.md) | [`v135_2026-06-13-second-named-unique.md`](docs/plans/v135_2026-06-13-second-named-unique.md) | [`as-built`](docs/as-built/v135_second-named-unique.md) |
+| **v136** | `unique-chest-client-proof` | Complete (`make ci` green) | [`v136_spec-unique-chest-client-proof.md`](docs/specs/v136_spec-unique-chest-client-proof.md) | [`v136_2026-06-13-unique-chest-client-proof.md`](docs/plans/v136_2026-06-13-unique-chest-client-proof.md) | [`as-built`](docs/as-built/v136_unique-chest-client-proof.md) |
 
 ---
 
@@ -434,6 +436,7 @@ client_boss_health_bar_ui: headless Godot client descends to first boss floor �
 client_boss_phase_readability: headless Godot client descends to first boss floor → asserts boss phase countdown and telegraph marker
 character_select_summaries: headless Godot client opens Create Game → asserts character row level/gold/depth/status summaries
 mystery_seller_paid_reroll: open mystery seller → spend 50 gold to reroll concealed stock → prove old offers are replaced, gold persists, and replay/fresh stock remain deterministic
+unique_chest_client_proof: headless Godot client opens the purple unique chest and asserts named unique rows expose readable effect summaries
 stash_search_and_sorting: headless Godot client opens stash → searches and sorts bag/stash rows → deposits/withdraws by stable server IDs
 ```
 
@@ -457,6 +460,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**The purple unique chest now has a Godot client proof.** v136 adds client bot scenario
+`unique_chest_client_proof`, opens `town_unique_chest`, and asserts the `Embercall Blade` plus
+`Stormstring Bow` rows expose readable effect summaries in the client stash panel state.
 
 **A second named unique is live in the deterministic chest.** v135 adds `stormstring_bow`, an
 enabled ready bow-based named unique with the live `stormbound_echo` effect, and extends rule tests

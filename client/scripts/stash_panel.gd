@@ -880,7 +880,7 @@ func _debug_item_row(item: Dictionary, kind: String) -> Dictionary:
 		"rarity": str(item.get("rarity", "")),
 		"slot": str(item.get("slot", "")),
 		"kind": kind,
-		"summary_lines": _tooltip_lines(item),
+		"summary_lines": _tooltip_lines(item) + UniqueEffectTooltipScript.text_lines_for_item(item),
 	}
 
 

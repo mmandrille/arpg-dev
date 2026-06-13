@@ -1,0 +1,42 @@
+server/internal/game/elite_aura.go
+  s_71c23b08e947b7::t_9d6d6a511bada5 3-4,41-53
+server/internal/game/elite_aura_test.go
+  s_71c23b08e947b7::t_9d6d6a511bada5 41-44,56-57
+client/scripts/bot_scenario_runner.gd
+  s_71c23b08e947b7::t_bace5e33ea8dd7 918-919
+client/scripts/player_status_effect_markers.gd
+  s_71c23b08e947b7::t_8036ee0ca3d2de 7,12,66-70,89-106,274-309
+PROGRESS.md
+  s_71c23b08e947b7::t_b3d1c1099c245b 15,18,134,287,413-416,419-420
+docs/plans/v113_2026-06-13-elite-aura-readability.md
+  s_71c23b08e947b7::t_e1308b2be3bf70 94-96,106
+  s_71c23b08e947b7::t_dcfea19a24cb92 1-34,38-39,42-54,58-67,71-80,83-93,97-102
+  s_71c23b08e947b7::t_7d398274da79cf 107
+  s_71c23b08e947b7::t_894b6a35daf8ca 35-37,40-41,55-57,68-70,81-82,103-105
+server/internal/game/sim.go
+  s_71c23b08e947b7::t_9d6d6a511bada5 6655-6657
+client/scripts/main.gd
+  s_71c23b08e947b7::t_8036ee0ca3d2de 4674,5851
+docs/specs/v113_spec-elite-aura-readability.md
+  s_71c23b08e947b7::t_dcfea19a24cb92 1-67
+tools/bot/scenarios/client/34_elite_aura_readability.json
+  s_71c23b08e947b7::t_bace5e33ea8dd7 1-20
+docs/as-built/v113_elite-aura-readability.md
+  s_71c23b08e947b7::t_b3d1c1099c245b 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "994dba0f1e1473ff8e3486727e515db83313713c",
+  "prompts": {},
+  "sessions": {
+    "s_71c23b08e947b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe31-f567-70e3-9572-f4c3d8591ba3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

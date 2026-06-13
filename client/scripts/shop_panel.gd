@@ -740,12 +740,16 @@ func _make_text_tooltip(text: String) -> Control:
 func _tooltip_lines(row: Dictionary) -> Array:
 	if _is_mystery_offer(row):
 		return _mystery_tooltip_lines(row)
-	var lines: Array = [_offer_name(row)]
 	var rarity := str(row.get("rarity", ""))
+	var lines: Array = [_item_name_tooltip_line(_offer_name(row), rarity)]
 	if rarity != "":
 		lines.append("Rarity: %s" % rarity.capitalize())
 	lines.append_array(_detail_lines(row, false, false))
 	return lines
+
+
+func _item_name_tooltip_line(text: String, rarity: String) -> Dictionary:
+	return {"text": text, "color": _rarity_color(rarity)}
 
 
 func _detail_lines(row: Dictionary, include_requirements: bool = true, include_comparison: bool = true) -> Array:

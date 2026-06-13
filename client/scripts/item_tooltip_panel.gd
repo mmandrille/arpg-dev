@@ -76,7 +76,7 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 	top_row.add_child(main_stats)
 
 	for line in main_lines:
-		main_stats.add_child(_tooltip_label(str(line), Color("#e8dcc8"), MAIN_STAT_WIDTH if has_item else CONTENT_WIDTH))
+		main_stats.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#e8dcc8")), MAIN_STAT_WIDTH if has_item else CONTENT_WIDTH, _entry_font_size(line, BODY_FONT_SIZE)))
 
 	if has_item:
 		var preview := ItemPreview.new()
@@ -124,6 +124,21 @@ func debug_gold_value_text() -> String:
 	if label == null:
 		return ""
 	return label.text
+
+
+func debug_first_main_line_color() -> String:
+	var label := _first_main_line_label()
+	if label == null:
+		return ""
+	return label.get_theme_color("font_color").to_html(false)
+
+
+func _first_main_line_label() -> Label:
+	for child in find_children("*", "Label", true, false):
+		var label := child as Label
+		if label != null and label.name != "GoldValueLabel" and label.text != "":
+			return label
+	return null
 
 
 func _tooltip_label(text: String, color: Color, width: float = CONTENT_WIDTH, font_size: int = BODY_FONT_SIZE) -> Label:
@@ -184,3 +199,10 @@ func _entry_color(value, fallback: Color) -> Color:
 	if color is Color:
 		return color
 	return fallback
+
+
+func _entry_font_size(value, fallback: int) -> int:
+	if typeof(value) != TYPE_DICTIONARY:
+		return fallback
+	var rec := value as Dictionary
+	return int(rec.get("font_size", fallback))

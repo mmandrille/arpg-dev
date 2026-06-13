@@ -42,13 +42,6 @@ static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label:
 		_:
 			canvas.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
 
-	var label := str(icon.get("label", fallback_label))
-	if label == "":
-		return
-	var font := canvas.get_theme_default_font()
-	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
-	canvas.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * label_y_factor), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#f4ead8"))
-
 
 static func _draw_blade(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
 	var a := center + Vector2(-min_side * 0.23, min_side * 0.22)

@@ -1426,7 +1426,7 @@ func _blacksmith_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 		var want_level := int(step.get("item_level", 0))
 		var found_level := false
 		for row in rows:
-			if int((row as Dictionary).get("item_level", -1)) == want_level:
+			if _blacksmith_row_item_level(row as Dictionary) == want_level:
 				found_level = true
 				break
 		if not found_level:
@@ -1441,6 +1441,18 @@ func _blacksmith_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 		if not found_enabled:
 			return false
 	return true
+
+
+func _blacksmith_row_item_level(row: Dictionary) -> int:
+	if row.has("item_level"):
+		return int(row.get("item_level", -1))
+	var rolled: Variant = row.get("rolled_stats", {})
+	if typeof(rolled) == TYPE_DICTIONARY:
+		var payload := rolled as Dictionary
+		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
+			return int((payload.get("stats", {}) as Dictionary).get("item_level", 0))
+		return int(payload.get("item_level", 0))
+	return -1
 
 
 func _matching_stash_rows(step: Dictionary, state: Dictionary) -> Array:
@@ -1465,7 +1477,11 @@ func _matching_stash_rows(step: Dictionary, state: Dictionary) -> Array:
 
 func _matching_blacksmith_rows(step: Dictionary, state: Dictionary) -> Array:
 	var panel: Dictionary = state.get("blacksmith_panel", {})
-	var rows: Array = panel.get("rows", [])
+	var rows: Array = []
+	var staged: Variant = panel.get("staged_item", {})
+	if typeof(staged) == TYPE_DICTIONARY and not (staged as Dictionary).is_empty():
+		rows.append(staged)
+	rows.append_array(panel.get("rows", []))
 	var out: Array = []
 	for row in rows:
 		if typeof(row) != TYPE_DICTIONARY:
@@ -2082,6 +2098,8 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		parts.append("stash_panel=%s" % str(state.get("stash_panel", {})))
 	if stype == "wait_market_panel":
 		parts.append("market_panel=%s" % str(state.get("market_panel", {})))
+	if stype == "wait_blacksmith_panel":
+		parts.append("blacksmith_panel=%s" % str(state.get("blacksmith_panel", {})))
 	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):
 		parts.append("next_attack_soon=true")
 	print("[bot-client] %s scenario=%s step=%d" % [" ".join(parts), str(scenario.get("id", "?")), _step_index])

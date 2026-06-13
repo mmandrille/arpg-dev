@@ -19,6 +19,7 @@ DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
 EMAIL="${ARPG_EMAIL:-bot@example.test}"
 AUTOPLAY_STEP_DELAY="${AUTOPLAY_STEP_DELAY:-0.45}"
 EXIT_ON_COMPLETE="${ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE:-1}"
+RECORDING_CLEANUP_CHARACTERS="${ARPG_VISUAL_REPLAY_CLEANUP_CHARACTERS:-0}"
 MANIFEST="${ARPG_VISUAL_REPLAY_MANIFEST:-$ROOT/.artifacts/bot-runs/$(date -u +%Y%m%dT%H%M%SZ)-visual.json}"
 SCENARIO="${ARPG_BOT_SCENARIO:-${SCENARIO:-${scenario:-all}}}"
 HEADLESS_REPLAY=0
@@ -62,11 +63,17 @@ for i in $(seq 1 60); do
 done
 curl -fsS "$BASE_URL/readyz" >/dev/null
 
+recording_args=(
+  "$ROOT/.venv/bin/python" -m tools.bot.run
+  --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN"
+  --email "$EMAIL" --scenario "$SCENARIO" --write-manifest "$MANIFEST"
+)
+if [[ "$RECORDING_CLEANUP_CHARACTERS" == "1" ]]; then
+  recording_args+=(--cleanup-characters)
+fi
+
 echo "[bot-visual] recording bot scenario selection '$SCENARIO' (manifest: $MANIFEST)..."
-"$RUN_QUIET" --label "protocol bot recording ($SCENARIO)" -- \
-  "$ROOT/.venv/bin/python" -m tools.bot.run \
-  --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
-  --email "$EMAIL" --scenario "$SCENARIO" --write-manifest "$MANIFEST" --cleanup-characters
+"$RUN_QUIET" --label "protocol bot recording ($SCENARIO)" -- "${recording_args[@]}"
 
 "$RUN_QUIET" --label "Godot asset import" -- bash -c '"$1" --headless --path "$2/client" --import || true' _ "$GODOT" "$ROOT"
 

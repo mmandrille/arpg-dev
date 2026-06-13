@@ -1,0 +1,56 @@
+docs/reviews/backend/20260613_v110-backend.md
+  s_71c23b08e947b7::t_ee54635bb5763e 1-39
+docs/plans/v110_2026-06-13-item-upgrade-repeat-action.md
+  s_71c23b08e947b7::t_49dcb35a13c2f2 103-104,106,113-118
+  s_71c23b08e947b7::t_da94f60653313b 43-46
+  s_71c23b08e947b7::t_47ad80019e7eb0 36-38,41,60-61,73,75-76,78,90-91
+  s_71c23b08e947b7::t_a81cc5b84c95b1 1-35,39-40,42,47-59,62-72,74,77,79-89,92-102,105,107-112
+server/internal/store/interfaces.go
+  s_71c23b08e947b7::t_5e6a07e77f41a1 74
+server/internal/store/store_test.go
+  s_71c23b08e947b7::t_1ca0f0a1723694 1062,1072,1075,1079-1080,1089-1101,1105,1128
+server/internal/http/account_stash.go
+  s_71c23b08e947b7::t_5e6a07e77f41a1 43,45,61
+docs/reviews/client/20260613_v110-client.md
+  s_71c23b08e947b7::t_ee54635bb5763e 1-36
+shared/rules/main_config.v0.json
+  s_71c23b08e947b7::t_5e6a07e77f41a1 9-10
+server/internal/game/rules.go
+  s_71c23b08e947b7::t_5e6a07e77f41a1 50,939-940
+PROGRESS.md
+  s_71c23b08e947b7::t_ee54635bb5763e 7,15,17-20,131,281,407-411
+server/internal/replay/replay_test.go
+  s_71c23b08e947b7::t_ab6552fb234cfa 1472-1473
+docs/specs/v110_spec-item-upgrade-repeat-action.md
+  s_71c23b08e947b7::t_4326cfa335106d 1-72
+docs/as-built/v110_item-upgrade-repeat-action.md
+  s_71c23b08e947b7::t_ee54635bb5763e 1-29
+server/internal/http/auth_session_test.go
+  s_71c23b08e947b7::t_b1a4c43f4e6e05 539,549,560,571-584
+.maintainability/file-size-baseline.tsv
+  s_71c23b08e947b7::t_da94f60653313b 5,7,12,20,22,28,30-31
+docs/reviews/extras/20260613_v110-shared-tooling-and-process.md
+  s_71c23b08e947b7::t_ee54635bb5763e 1-35
+shared/rules/main_config.v0.schema.json
+  s_71c23b08e947b7::t_5e6a07e77f41a1 13,21
+docs/reviews/20260613_v110-overview.md
+  s_71c23b08e947b7::t_ee54635bb5763e 1-53
+server/internal/store/repos.go
+  s_71c23b08e947b7::t_3340d9698b15c6 1516-1518,1522,1553-1560,1565,1586-1596
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "005ce3138d212280107728133ddc58957fb7bb94",
+  "prompts": {},
+  "sessions": {
+    "s_71c23b08e947b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe31-f567-70e3-9572-f4c3d8591ba3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

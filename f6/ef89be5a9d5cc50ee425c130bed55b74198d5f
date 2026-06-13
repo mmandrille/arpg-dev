@@ -1,0 +1,27 @@
+client/scripts/main.gd
+  s_bf09982b8ba9b3::t_eab272ae57d737 1097-1098
+  s_bf09982b8ba9b3::t_2662c8774a1828 1879-1930
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_bf09982b8ba9b3::t_c5408f86ba31ff 9
+  s_bf09982b8ba9b3::t_8f5df445e140eb 23,25-27,32-33,40-41
+client/scripts/player_status_effect_markers.gd
+  s_bf09982b8ba9b3::t_78f107dadec86a 403-404,409-411,413-414,417-440,444-446,449-452,457-468
+tools/bot/test_protocol.py
+  s_bf09982b8ba9b3::t_25539a506d9d3d 488-489
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f6ef89be5a9d5cc50ee425c130bed55b74198d5f",
+  "prompts": {},
+  "sessions": {
+    "s_bf09982b8ba9b3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec218-8775-77c2-92ca-4bc406ae563b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

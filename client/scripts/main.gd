@@ -4242,6 +4242,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Offer sent")
+			market_panel.return_to_browse_after_offer()
 	elif action == "offer_inventory":
 		result = client.create_market_offer_from_inventory(str(payload.get("listing_id", "")), payload.get("item_instance_ids", []), client.character_id)
 		if result.has("_error"):
@@ -4253,6 +4254,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Offer sent")
+			market_panel.return_to_browse_after_offer()
 	elif action == "purchase":
 		result = client.purchase_market_listing(str(payload.get("listing_id", "")))
 		if result.has("_error"):

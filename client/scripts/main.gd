@@ -3649,6 +3649,7 @@ func _sync_skill_bar_selection() -> void:
 	if selected_skill_id == "":
 		selected_skill_id = SkillRulesLoader.first_skill_id()
 	skill_bar.set_skill_id(selected_skill_id)
+	skill_bar.set_character_progression(character_progression)
 	skill_bar.set_skill_progression(skill_progression)
 	skill_bar.set_skill_cooldowns(skill_cooldowns)
 	skill_bar.set_player_mana(player_mana, player_max_mana)
@@ -6382,6 +6383,7 @@ func bot_use_skill_bar(skill_id: String = "", target_id: String = "", force_dire
 		right_click_skill_id = skill_id
 		if skill_bar != null:
 			skill_bar.set_skill_id(skill_id)
+			skill_bar.set_character_progression(character_progression)
 			skill_bar.set_skill_progression(skill_progression)
 			skill_bar.set_skill_cooldowns(skill_cooldowns)
 		_sync_skill_bindings_ui()

@@ -6,8 +6,10 @@ signal open_skills_requested
 
 const TICK_DURATION_S := 1.0 / 10.0
 const SkillIconScript := preload("res://scripts/skill_icon.gd")
+const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 
 var skill_progression: Dictionary = {}
+var character_progression: Dictionary = {}
 var _interactive: bool = true
 var _skill_id: String = ""
 var _rank: int = 0
@@ -49,6 +51,11 @@ func _process(delta: float) -> void:
 func set_skill_progression(next_progression: Dictionary) -> void:
 	skill_progression = next_progression.duplicate(true)
 	_sync_rank_from_progression()
+	_render()
+
+
+func set_character_progression(next_progression: Dictionary) -> void:
+	character_progression = next_progression.duplicate(true)
 	_render()
 
 
@@ -256,7 +263,7 @@ func _skill_icon_label_text(skill_id: String) -> String:
 
 
 func _tooltip_text(skill_id: String) -> String:
-	return "%s\n%s" % [_skill_name(skill_id), SkillRulesLoader.skill_summary(skill_id)]
+	return SkillsPanelScript.skill_tooltip_text(skill_id, _rank, _max_rank, skill_progression, character_progression)
 
 
 func _mana_cost() -> int:

@@ -3,6 +3,7 @@
 extends SceneTree
 
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
+const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -27,6 +28,10 @@ func _run() -> void:
 	)
 
 	bar.set_skill_id("magic_bolt")
+	bar.set_character_progression({
+		"level": 1,
+		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 5},
+	})
 	bar.set_skill_progression({
 		"unspent_skill_points": 0,
 		"skills": _skill_rows(0),
@@ -38,6 +43,14 @@ func _run() -> void:
 	_assert_false("unranked skill disabled", bool(state.get("enabled", true)))
 	_assert_eq("unranked slot text", str(state.get("slot_text", "")), "-")
 	_assert_true("tooltip uses catalog name", str(state.get("tooltip_text", "")).contains("Magic Bolt"))
+	_assert_eq(
+		"skillbar tooltip matches skill tree formatter",
+		str(state.get("tooltip_text", "")),
+		SkillsPanelScript.skill_tooltip_text("magic_bolt", 0, 5, bar.skill_progression, bar.character_progression)
+	)
+	_assert_true("skillbar tooltip includes rank", str(state.get("tooltip_text", "")).contains("Rank 0 / 5"))
+	_assert_true("skillbar tooltip includes mana", str(state.get("tooltip_text", "")).contains("Mana:"))
+	_assert_true("skillbar tooltip includes requirements", str(state.get("tooltip_text", "")).contains("Requires:"))
 	bar._slot.pressed.emit()
 	_assert_eq("slot click opens skills panel", int(open_count["count"]), 1)
 	_assert_eq("slot click does not cast", emitted.size(), 0)

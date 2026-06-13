@@ -15,6 +15,21 @@
       "fixed_effect_ids": ["everburning_wound"],
       "behavior_hook": "Named fixed unique package applies the live everburning_wound effect through rolled equipment effect_ids.",
       "status": "ready"
+    },
+    "stormstring_bow": {
+      "id": "stormstring_bow",
+      "enabled": true,
+      "base_template_id": "cave_bow",
+      "display_name": "Stormstring Bow",
+      "minimum_level": 5,
+      "fixed_stats": {
+        "damage_min": 2,
+        "damage_max": 6,
+        "attack_speed_percent": 6
+      },
+      "fixed_effect_ids": ["stormbound_echo"],
+      "behavior_hook": "Named fixed unique package applies the live stormbound_echo effect through rolled equipment effect_ids.",
+      "status": "ready"
     }
   }
 }

@@ -166,10 +166,8 @@ func _build() -> void:
 	root.add_child(meters)
 	_build_meter(meters, "♥", Color("#c0392b"), true)
 	_build_meter(meters, "✦", Color("#48aeea"), false)
-	_build_attack_recovery(root)
 	_update_identity_label()
 	_update_bars()
-	_update_attack_recovery()
 
 
 func _build_meter(parent: HBoxContainer, icon_text: String, icon_color: Color, is_hp: bool) -> void:

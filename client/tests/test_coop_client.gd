@@ -46,7 +46,7 @@ func _initialize() -> void:
 	_test_holy_shield_effect_ids_drive_world_shine()
 	_test_local_attack_range_uses_equipped_reach()
 	_test_basic_attack_cooldown_uses_derived_interval()
-	_test_basic_attack_recovery_cue_lives_on_health_bar()
+	_test_basic_attack_recovery_cue_lives_on_character_bar()
 	_test_expired_skill_cooldown_not_restored_by_left_click_refresh()
 	_test_character_bar_opens_stats_panel()
 	_test_skill_function_key_selects_right_click_skill()
@@ -1158,10 +1158,13 @@ func _test_basic_attack_cooldown_uses_derived_interval() -> void:
 	main.free()
 
 
-func _test_basic_attack_recovery_cue_lives_on_health_bar() -> void:
+func _test_basic_attack_recovery_cue_lives_on_character_bar() -> void:
 	var main = MainScript.new()
 	main.skill_bar = SkillBarScript.new()
 	root.add_child(main.skill_bar)
+	main.character_bar = CharacterBarScript.new()
+	root.add_child(main.character_bar)
+	main.character_bar._build()
 	main._health_bar = PlayerHealthBarScript.new()
 	main._health_bar._build()
 	main.right_click_skill_id = "magic_bolt"
@@ -1175,16 +1178,23 @@ func _test_basic_attack_recovery_cue_lives_on_health_bar() -> void:
 	}
 	main.skill_cooldowns = []
 	main._sync_skill_bar_selection()
+	main.skill_bar.set_interactive(true)
 	main._start_basic_attack_recovery_ui(0.7)
 	var health_state: Dictionary = main._health_bar.get_debug_state()
+	var character_state: Dictionary = main.character_bar.get_debug_state()
 	var skill_state: Dictionary = main.skill_bar.get_debug_state()
-	_assert_true("basic attack recovery cue starts on health bar", float(health_state.get("attack_recovery_fraction", 0.0)) > 0.99)
+	_assert_eq("basic attack recovery cue stays off health bar", float(health_state.get("attack_recovery_fraction", -1.0)), 0.0)
+	_assert_true("basic attack recovery cue starts on character bar", float(character_state.get("attack_recovery_fraction", 0.0)) > 0.99)
+	_assert_true("basic attack recovery overlay visible on C", bool(character_state.get("cooldown_overlay_visible", false)))
 	_assert_eq("basic attack cue leaves skill cooldown cache empty", main.skill_cooldowns.size(), 0)
 	_assert_eq("basic attack cue leaves skill cooldown remaining empty", int(skill_state.get("remaining_ticks", -1)), 0)
-	main._health_bar._process(0.35)
-	health_state = main._health_bar.get_debug_state()
-	_assert_true("basic attack recovery cue decays on health bar", float(health_state.get("attack_recovery_fraction", 1.0)) < 0.99)
+	_assert_true("basic attack cue leaves skillbar enabled", bool(skill_state.get("enabled", false)))
+	_assert_true("basic attack cue leaves skillbar ungreyed", not bool(skill_state.get("greyed", true)))
+	main.character_bar._process(0.35)
+	character_state = main.character_bar.get_debug_state()
+	_assert_true("basic attack recovery cue decays on character bar", float(character_state.get("attack_recovery_fraction", 1.0)) < 0.99)
 	main._health_bar.free()
+	main.character_bar.queue_free()
 	main.skill_bar.queue_free()
 	main.free()
 

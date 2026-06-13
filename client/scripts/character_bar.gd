@@ -8,13 +8,24 @@ var _progression: Dictionary = {}
 var _panel: PanelContainer
 var _slot: Button
 var _badge: Label
+var _cooldown_overlay: ColorRect
+var _attack_recovery_remaining: float = 0.0
+var _attack_recovery_total: float = 0.0
 
 
 func _ready() -> void:
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_process(true)
 	_build()
+
+
+func _process(delta: float) -> void:
+	if _attack_recovery_remaining <= 0.0:
+		return
+	_attack_recovery_remaining = maxf(0.0, _attack_recovery_remaining - maxf(0.0, delta))
+	_render()
 
 
 func set_interactive(enabled: bool) -> void:
@@ -33,6 +44,12 @@ func open_slot() -> void:
 	open_character_requested.emit()
 
 
+func start_attack_recovery(duration_seconds: float) -> void:
+	_attack_recovery_total = maxf(0.0, duration_seconds)
+	_attack_recovery_remaining = _attack_recovery_total
+	_render()
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"enabled": _interactive,
@@ -45,6 +62,12 @@ func get_debug_state() -> Dictionary:
 		"upgrade_badge_outline_size": _badge.label_settings.outline_size if _badge != null and _badge.label_settings != null else 0,
 		"slot_text": _slot.text if _slot != null else "",
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
+		"attack_recovery_remaining": _attack_recovery_remaining,
+		"attack_recovery_total": _attack_recovery_total,
+		"attack_recovery_fraction": _attack_recovery_fraction(),
+		"cooldown_overlay_visible": _cooldown_overlay.visible if _cooldown_overlay != null else false,
+		"cooldown_overlay_size": _vec2_debug(_cooldown_overlay.size if _cooldown_overlay != null else Vector2.ZERO),
+		"cooldown_overlay_position": _vec2_debug(_cooldown_overlay.position if _cooldown_overlay != null else Vector2.ZERO),
 	}
 
 
@@ -74,6 +97,12 @@ func _build() -> void:
 	_slot.add_theme_font_size_override("font_size", 22)
 	box.add_child(_slot)
 
+	_cooldown_overlay = ColorRect.new()
+	_cooldown_overlay.color = Color(0.18, 0.18, 0.18, 0.62)
+	_cooldown_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_cooldown_overlay.visible = false
+	_slot.add_child(_cooldown_overlay)
+
 	_badge = _make_upgrade_badge()
 	_slot.add_child(_badge)
 
@@ -97,10 +126,22 @@ func _render() -> void:
 	_slot.disabled = not _interactive
 	if _badge != null:
 		_badge.visible = _unspent_stat_points() > 0
+	if _cooldown_overlay != null:
+		var fraction := _attack_recovery_fraction()
+		var slot_size := _slot.custom_minimum_size
+		_cooldown_overlay.visible = fraction > 0.0
+		_cooldown_overlay.position = Vector2(0.0, slot_size.y * (1.0 - fraction))
+		_cooldown_overlay.size = Vector2(slot_size.x, slot_size.y * fraction)
 
 
 func _unspent_stat_points() -> int:
 	return int(_progression.get("unspent_stat_points", 0))
+
+
+func _attack_recovery_fraction() -> float:
+	if _attack_recovery_total <= 0.0:
+		return 0.0
+	return clampf(_attack_recovery_remaining / _attack_recovery_total, 0.0, 1.0)
 
 
 func _make_upgrade_badge() -> Label:

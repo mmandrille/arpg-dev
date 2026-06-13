@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v132 — `fixed-named-unique-package` |
+| **Latest completed slice** | v133 — `unique-validation-split` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v133 — `unique-validation-split` |
+| **Next slice** | v134 — `unique-inspection-ui` |
 | **Last engineering review** | v130 — [`docs/reviews/20260613_v130-overview.md`](docs/reviews/20260613_v130-overview.md) (2026-06-13) |
 | **Next engineering review** | v140 due before more feature batches |
 
@@ -151,6 +151,7 @@ v129_* = market-offer-withdrawal
 v130_* = market-trade-audit-records
 v131_* = purple-town-unique-chest
 v132_* = fixed-named-unique-package
+v133_* = unique-validation-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -323,6 +324,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v130** | `market-trade-audit-records` | Complete (`make ci` green) | [`v130_spec-market-trade-audit-records.md`](docs/specs/v130_spec-market-trade-audit-records.md) | [`v130_2026-06-13-market-trade-audit-records.md`](docs/plans/v130_2026-06-13-market-trade-audit-records.md) | [`as-built`](docs/as-built/v130_market-trade-audit-records.md) |
 | **v131** | `purple-town-unique-chest` | Complete (`make ci` green) | [`v131_spec-purple-town-unique-chest.md`](docs/specs/v131_spec-purple-town-unique-chest.md) | [`v131_2026-06-13-purple-town-unique-chest.md`](docs/plans/v131_2026-06-13-purple-town-unique-chest.md) | [`as-built`](docs/as-built/v131_purple-town-unique-chest.md) |
 | **v132** | `fixed-named-unique-package` | Complete (`make ci` green) | [`v132_spec-fixed-named-unique-package.md`](docs/specs/v132_spec-fixed-named-unique-package.md) | [`v132_2026-06-13-fixed-named-unique-package.md`](docs/plans/v132_2026-06-13-fixed-named-unique-package.md) | [`as-built`](docs/as-built/v132_fixed-named-unique-package.md) |
+| **v133** | `unique-validation-split` | Complete (`make ci` green) | [`v133_spec-unique-validation-split.md`](docs/specs/v133_spec-unique-validation-split.md) | [`v133_2026-06-13-unique-validation-split.md`](docs/plans/v133_2026-06-13-unique-validation-split.md) | [`as-built`](docs/as-built/v133_unique-validation-split.md) |
 
 ---
 
@@ -451,6 +453,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Named unique validation is split and covered.** v133 moves named unique catalog validation out of
+the large shared validator body into `tools/validate_unique_items.py`, with Python bad-catalog tests
+and Go `LoadRules` parity tests for invalid named unique packages.
 
 **Embercall Blade is now a fixed named unique package.** v132 turns the ready
 `embercall_blade` catalog row into a deterministic named item with fixed rolled stats and the live

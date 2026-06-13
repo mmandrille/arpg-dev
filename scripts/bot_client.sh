@@ -182,6 +182,24 @@ start_preflight() {
   if [[ -z "$preflight_type" ]]; then
     return 0
   fi
+  if [[ "$preflight_type" == "market_listing" ]]; then
+    host_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "${scenario_id}-seller")"
+    echo "[bot-client $(_ts)] starting market preflight for $scenario_id email=$host_email"
+    "$PYTHON" "$ROOT/tools/bot/client_market_preflight.py" \
+      --base-url "$BASE_URL" \
+      --dev-token "$DEV_TOKEN" \
+      --debug-token "${ARPG_DEBUG_TOKEN:-local-debug-token}" \
+      --world-id "$world_id" \
+      --seed "$seed" \
+      --email "$host_email" \
+      --character-name "Market Seller" \
+      --metadata-file "$metadata_file" \
+      --item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('item_def_id', 'cave_mail')")" \
+      --price-gold "$(json_field "$scenario_path" "d.get('preflight', {}).get('price_gold', 37)")" \
+      >"$log_file" 2>&1
+    echo "[bot-client $(_ts)] market preflight ready listing=$(metadata_field "$metadata_file" listing_id)"
+    return 0
+  fi
   if [[ "$preflight_type" != "listed_coop_host" ]]; then
     echo "[bot-client] FAIL: $scenario_path: unsupported preflight type '$preflight_type'" >&2
     return 1

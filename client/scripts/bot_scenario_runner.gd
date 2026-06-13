@@ -54,7 +54,7 @@ const STEP_TYPES_ACTION := [
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
 	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort",
-	"set_market_publish_price", "click_market_publish_item", "click_waypoint_level",
+	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -1896,7 +1896,7 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort":
 			return "stash=%s" % str(step)
 		"wait_market_panel", "assert_market_panel_visible", "assert_market_listing_rows", \
-		"set_market_publish_price", "click_market_publish_item":
+		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing":
 			return "market=%s" % str(step)
 		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec":
 			return "bishop=%s" % str(step)
@@ -2187,6 +2187,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "click_market_publish_item":
 		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
 			return "client_steps[%d] (%s) requires stash_item_id, item_def_id, or rolled" % [index, stype]
+	if stype == "click_market_purchase_listing":
+		if str(step.get("listing_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("price_gold"):
+			return "client_steps[%d] (%s) requires listing_id, item_def_id, or price_gold" % [index, stype]
 	if stype == "assert_stash_filter":
 		if not step.has("search_text") and not step.has("sort_mode") and not step.has("filtered_equals") and not step.has("first_item_def_id"):
 			return "client_steps[%d] (%s) requires search_text, sort_mode, filtered_equals, or first_item_def_id" % [index, stype]

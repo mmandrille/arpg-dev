@@ -1,0 +1,106 @@
+shared/protocol/state_delta.v4.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 187-191
+client/scripts/shop_panel.gd
+  s_68a7da5dad7d6a::t_6cba63231c79fc 928,936
+server/internal/game/rogue_skills.go
+  s_68a7da5dad7d6a::t_ec34beba4b7027 207
+server/internal/game/handlers.go
+  s_68a7da5dad7d6a::t_aa316535760c48 1186
+shared/golden/item_rolls.json
+  s_68a7da5dad7d6a::t_1abdc1fd2f0eb1 30,32-33,49-51
+shared/golden/shop_offers.json
+  s_68a7da5dad7d6a::t_5c611176c21ff3 11-12,14,23,26,37
+tools/validate_shared.py
+  s_68a7da5dad7d6a::t_0cfcde16498008 2345,2382
+  s_68a7da5dad7d6a::t_509dadf101419e 905,2161,2245-2278,2289,2300,2302
+server/internal/game/sim.go
+  s_68a7da5dad7d6a::t_aef54ae0374553 2623-2625
+  s_68a7da5dad7d6a::t_57d078b5fc88de 679,2416,5534-5551,6360-6361,6366,6449-6453,6478-6516
+client/scripts/stat_labels.gd
+  s_68a7da5dad7d6a::t_e7490123a4a45c 14,21-22
+shared/golden/item_rolls.v0.schema.json
+  s_68a7da5dad7d6a::t_df17a093fe51ff 56-60
+shared/protocol/session_snapshot.v7.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 161-165
+server/internal/game/shop.go
+  s_68a7da5dad7d6a::t_acdf27ab4c3f4b 138,305,356,1036,1045-1054,1059-1060,1069-1070,1135,1158,1160,1183-1239
+shared/rules/dungeon_generation.v0.json
+  s_68a7da5dad7d6a::t_9abd5098b341ce 46-47
+shared/protocol/state_delta.v8.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 252-256
+shared/protocol/session_snapshot.v3.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 132-136
+shared/protocol/session_snapshot.v1.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 94-98
+server/internal/game/game_test.go
+  s_68a7da5dad7d6a::t_854b828f670f9b 3216-3270
+  s_68a7da5dad7d6a::t_ec34beba4b7027 3190
+  s_68a7da5dad7d6a::t_501b8403b9c2e4 3611-3661
+  s_68a7da5dad7d6a::t_8c7da98e652d3e 1070
+  s_68a7da5dad7d6a::t_2fe9c35259d105 5317,5330-5332,8474-8477
+  s_68a7da5dad7d6a::t_23e1f77faa63ab 1063
+shared/protocol/state_delta.v7.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 222-226
+shared/golden/guarded_chest_generation.json
+  s_68a7da5dad7d6a::t_df92fde7dfe2d2 8
+shared/protocol/session_snapshot.v2.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 114-118
+shared/protocol/state_delta.v1.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 78-82
+shared/protocol/state_delta.v6.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 204-208
+shared/protocol/state_delta.v3.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 99-103
+shared/rules/shops.v0.json
+  s_68a7da5dad7d6a::t_4474dfac529e75 48-52,119-123
+client/scripts/stash_panel.gd
+  s_68a7da5dad7d6a::t_fa9b24e9e98329 860,868
+client/scripts/main.gd
+  s_68a7da5dad7d6a::t_65e6a2289e656a 839,3642-3665
+shared/protocol/state_delta.v2.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 82-86
+shared/protocol/session_snapshot.v8.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 168-172
+client/tests/test_coop_client.gd
+  s_68a7da5dad7d6a::t_788681e1ae558b 1170,1174,1179-1180
+  s_68a7da5dad7d6a::t_8154a92639cc78 49,1153-1169,1172-1173,1176-1178,1182-1184
+  s_68a7da5dad7d6a::t_e7e28e083e8b0d 1171,1175,1181
+shared/rules/item_templates.v0.schema.json
+  s_68a7da5dad7d6a::t_77bb72a8ebecfb 85-88
+  s_68a7da5dad7d6a::t_4474dfac529e75 89,107
+shared/protocol/session_snapshot.v5.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 140-144
+shared/protocol/session_snapshot.v6.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 140-144
+client/scripts/inventory_panel.gd
+  s_68a7da5dad7d6a::t_773bd1f4f4326d 1031,1037
+shared/rules/skills.v0.json
+  h_6c904e338a0e5a 301-302,325
+  s_68a7da5dad7d6a::t_e4e4634426a3eb 218,220-221
+  s_68a7da5dad7d6a::t_4474dfac529e75 469
+shared/protocol/state_delta.v5.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 187-191
+shared/protocol/session_snapshot.v4.schema.json
+  s_68a7da5dad7d6a::t_51d493e9ef75f8 138-142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5cdcaeff37eeb4877e85316bacc27547cf82cfff",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_68a7da5dad7d6a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf3e-573d-7d92-a6c1-01a1b92ccbea",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

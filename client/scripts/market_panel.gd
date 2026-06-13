@@ -81,6 +81,14 @@ func bot_click_publish_stash_item(stash_item_id: String = "", item_def_id: Strin
 	_emit_market_action("publish", item)
 
 
+func bot_click_purchase_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
+	var listing := _matching_listing(listing_id, item_def_id, price_gold, listing_index)
+	if listing.is_empty():
+		show_status("No matching listing to purchase", true)
+		return
+	_emit_purchase_action(listing)
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
@@ -207,6 +215,16 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 	box.add_child(detail)
 
 	if selectable and str(listing.get("seller_account_id", "")) != account_id:
+		var actions := HBoxContainer.new()
+		actions.add_theme_constant_override("separation", 8)
+		if int(listing.get("price_gold", 0)) > 0:
+			var buy_btn := Button.new()
+			buy_btn.text = "Buy"
+			buy_btn.custom_minimum_size = Vector2(86, 34)
+			buy_btn.pressed.connect(func() -> void:
+				_emit_purchase_action(listing)
+			)
+			actions.add_child(buy_btn)
 		var btn := Button.new()
 		btn.text = "Make Offer"
 		btn.custom_minimum_size = Vector2(136, 34)
@@ -215,7 +233,8 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 			_tabs.current_tab = 2
 			_rebuild_offer_rows()
 		)
-		box.add_child(btn)
+		actions.add_child(btn)
+		box.add_child(actions)
 	return row
 
 
@@ -268,6 +287,17 @@ func _emit_market_action(action: String, item: Dictionary) -> void:
 		market_action_requested.emit("offer", {"listing_id": selected_listing_id, "stash_item_ids": [stash_item_id]})
 
 
+func _emit_purchase_action(listing: Dictionary) -> void:
+	var listing_id := str(listing.get("listing_id", ""))
+	if listing_id == "":
+		show_status("Missing listing id", true)
+		return
+	market_action_requested.emit("purchase", {
+		"listing_id": listing_id,
+		"price_gold": int(listing.get("price_gold", 0)),
+	})
+
+
 func _selected_listing() -> Dictionary:
 	for listing in listings:
 		if typeof(listing) == TYPE_DICTIONARY and str((listing as Dictionary).get("listing_id", "")) == selected_listing_id:
@@ -277,6 +307,27 @@ func _selected_listing() -> Dictionary:
 			selected_listing_id = str((listing as Dictionary).get("listing_id", ""))
 			return listing as Dictionary
 	return {}
+
+
+func _matching_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> Dictionary:
+	var matches: Array = []
+	for listing in listings:
+		if typeof(listing) != TYPE_DICTIONARY:
+			continue
+		var rec := listing as Dictionary
+		if str(rec.get("seller_account_id", "")) == account_id:
+			continue
+		if listing_id != "" and str(rec.get("listing_id", "")) != listing_id:
+			continue
+		if item_def_id != "" and str(rec.get("item_def_id", "")) != item_def_id:
+			continue
+		if price_gold >= 0 and int(rec.get("price_gold", 0)) != price_gold:
+			continue
+		matches.append(rec)
+	if matches.is_empty():
+		return {}
+	var index = clampi(listing_index, 0, matches.size() - 1)
+	return (matches[index] as Dictionary).duplicate(true)
 
 
 func _publish_price_row() -> Control:

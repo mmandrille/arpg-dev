@@ -180,6 +180,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_set_market_publish_price(action)
 		"click_market_publish_item":
 			_do_click_market_publish_item(action)
+		"click_market_purchase_listing":
+			_do_click_market_purchase_listing(action)
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -348,6 +350,16 @@ func _do_click_market_publish_item(action: Dictionary) -> void:
 			str(action.get("item_def_id", "")),
 			action.get("rolled", null),
 			int(action.get("stash_index", 0))
+		)
+
+
+func _do_click_market_purchase_listing(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_market_purchase_listing"):
+		_main.bot_click_market_purchase_listing(
+			str(action.get("listing_id", "")),
+			str(action.get("item_def_id", "")),
+			int(action.get("price_gold", -1)),
+			int(action.get("listing_index", 0))
 		)
 
 
@@ -651,6 +663,13 @@ func _format_action(action: Dictionary) -> String:
 				str(action.get("item_def_id", "")),
 				str(action.get("rolled", "")),
 				str(action.get("stash_index", 0)),
+			]
+		"click_market_purchase_listing":
+			return "click_market_purchase_listing listing=%s item=%s price=%s index=%s" % [
+				str(action.get("listing_id", "")),
+				str(action.get("item_def_id", "")),
+				str(action.get("price_gold", "")),
+				str(action.get("listing_index", 0)),
 			]
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [

@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v114 — `market-board-ui` |
+| **Latest completed slice** | v115 — `market-purchase-ui` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v115 — TBD |
+| **Next slice** | v116 — TBD |
 | **Last engineering review** | v110 — [`docs/reviews/20260613_v110-overview.md`](docs/reviews/20260613_v110-overview.md) (2026-06-13) |
 | **Next engineering review** | v120 (~every 10 slices) |
 
@@ -133,6 +133,7 @@ v111_* = market-purchase-and-delivery
 v112_* = elite-aura-foundation
 v113_* = elite-aura-readability
 v114_* = market-board-ui
+v115_* = market-purchase-ui
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -287,6 +288,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v112** | `elite-aura-foundation` | Complete (`make ci` green) | [`v112_spec-elite-aura-foundation.md`](docs/specs/v112_spec-elite-aura-foundation.md) | [`v112_2026-06-13-elite-aura-foundation.md`](docs/plans/v112_2026-06-13-elite-aura-foundation.md) | [`as-built`](docs/as-built/v112_elite-aura-foundation.md) |
 | **v113** | `elite-aura-readability` | Complete (`make ci` green) | [`v113_spec-elite-aura-readability.md`](docs/specs/v113_spec-elite-aura-readability.md) | [`v113_2026-06-13-elite-aura-readability.md`](docs/plans/v113_2026-06-13-elite-aura-readability.md) | [`as-built`](docs/as-built/v113_elite-aura-readability.md) |
 | **v114** | `market-board-ui` | Complete (`make ci` green) | [`v114_spec-market-board-ui.md`](docs/specs/v114_spec-market-board-ui.md) | [`v114_2026-06-13-market-board-ui.md`](docs/plans/v114_2026-06-13-market-board-ui.md) | [`as-built`](docs/as-built/v114_market-board-ui.md) |
+| **v115** | `market-purchase-ui` | Complete (`make ci` green) | [`v115_spec-market-purchase-ui.md`](docs/specs/v115_spec-market-purchase-ui.md) | [`v115_2026-06-13-market-purchase-ui.md`](docs/plans/v115_2026-06-13-market-purchase-ui.md) | [`as-built`](docs/as-built/v115_market-purchase-ui.md) |
 
 ---
 
@@ -411,6 +413,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Market purchase is now usable from the Godot board.** v115 adds a buyer-only `Buy` action for
+priced listings, calls the existing v111 purchase route, refreshes active listings, and proves the
+flow with a seller-listing preflight plus client bot scenario `36_market_purchase_ui`.
 
 **Market board priced listing UI is now proven in Godot.** v114 adds a deterministic publish price
 control, sends `price_gold` through the existing listing-create HTTP route, renders listing prices in

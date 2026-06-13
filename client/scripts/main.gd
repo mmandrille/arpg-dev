@@ -1241,6 +1241,14 @@ func _apply_delta(p: Dictionary) -> void:
 			if stash_panel != null and stash_panel.visible:
 				stash_panel.show_status("Item recovered")
 			continue
+		if event_type == "unique_chest_opened":
+			_show_unique_chest_panel(ev)
+			continue
+		if event_type == "unique_chest_item_taken":
+			_show_unique_chest_panel(ev)
+			if stash_panel != null and stash_panel.visible:
+				stash_panel.show_status("Item taken")
+			continue
 		if event_type == "stash_gold_deposited" and stash_panel != null and stash_panel.visible:
 			stash_panel.show_status("Stored %d gold" % int(ev.get("amount", 0)))
 			continue
@@ -4215,6 +4223,25 @@ func _show_corpse_panel(ev: Dictionary) -> void:
 		next_entity_id,
 		corpse_name,
 		corpse_items,
+		inventory,
+		equipped,
+		gold,
+		hotbar
+	)
+	_raise_gameplay_windows()
+
+
+func _show_unique_chest_panel(ev: Dictionary) -> void:
+	if stash_panel == null:
+		return
+	_close_gameplay_panels("stash_with_inventory")
+	var next_entity_id := str(ev.get("entity_id", ""))
+	var chest_items: Array = ev.get("stash_items", [])
+	if inventory_panel != null:
+		inventory_panel.ensure_display_visible()
+	stash_panel.show_unique_chest(
+		next_entity_id,
+		chest_items,
 		inventory,
 		equipped,
 		gold,

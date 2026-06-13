@@ -520,12 +520,9 @@ def test_load_scenarios_discovers_purple_town_unique_chest():
     chest = next(s for s in scenarios if s.id == "purple_town_unique_chest")
     assert chest.world_id == "dungeon_levels"
     assert any(step.get("interactable_def_id") == "town_unique_chest" for step in chest.steps)
-    assert {
-        "type": "inventory_unique_effect_coverage",
-        "equals_enabled": True,
-        "requires_single_effect": True,
-        "required_named_uniques": [{"display_name": "Embercall Blade", "effect_ids": ["everburning_wound"]}],
-    } in chest.assertions
+    assert {"type": "event_seen", "event_type": "unique_chest_opened"} in chest.assertions
+    assert {"type": "event_seen", "event_type": "unique_chest_item_taken"} in chest.assertions
+    assert {"type": "inventory_count", "display_name": "Embercall Blade", "equals": 1} in chest.assertions
 
 
 def test_class_foundation_scenarios_cover_every_class_skill():

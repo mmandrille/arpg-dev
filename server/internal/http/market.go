@@ -19,6 +19,7 @@ func (s *Server) registerMarketRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleCreateMarketOffer)))
 	mux.Handle("GET /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleListMarketOffers)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/accept", s.requireAuth(http.HandlerFunc(s.handleAcceptMarketOffer)))
+	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketOffer)))
 }
 
 type marketListingResponse struct {
@@ -315,6 +316,34 @@ func (s *Server) handleAcceptMarketOffer(w http.ResponseWriter, r *http.Request)
 	}
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not accept market offer")
+		return
+	}
+	writeJSON(w, http.StatusOK, marketOfferResponseFromStore(offer))
+}
+
+func (s *Server) handleCancelMarketOffer(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account")
+		return
+	}
+	listingID := r.PathValue("listing_id")
+	offerID := r.PathValue("offer_id")
+	if listingID == "" || offerID == "" {
+		writeError(w, http.StatusBadRequest, "invalid_offer", "listing_id and offer_id are required")
+		return
+	}
+	offer, err := s.store.CancelMarketOffer(r.Context(), accountID, listingID, offerID)
+	if errors.Is(err, store.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "offer_not_found", "offer not found")
+		return
+	}
+	if errors.Is(err, store.ErrConflict) {
+		writeError(w, http.StatusConflict, "offer_conflict", "could not cancel market offer")
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not cancel market offer")
 		return
 	}
 	writeJSON(w, http.StatusOK, marketOfferResponseFromStore(offer))

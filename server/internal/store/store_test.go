@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
@@ -1290,8 +1291,13 @@ func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(bidderStash) != 1 || bidderStash[0].StashItemID != listing.StashItemID {
+	if len(bidderStash) != 1 || bidderStash[0].StashItemID != listing.StashItemID || bidderStash[0].ItemDefID != "rusty_sword" {
 		t.Fatalf("bidder stash after accept = %+v, want listed item", bidderStash)
+	}
+	for _, item := range bidderStash {
+		if item.StashItemID == "stash_bidder_item_a_"+suffix || item.StashItemID == "stash_bidder_item_b_"+suffix {
+			t.Fatalf("bidder kept offered item after accept: %+v", bidderStash)
+		}
 	}
 	otherStash, err := s.ListAccountStashItems(ctx, otherBidder.ID)
 	if err != nil {
@@ -1299,6 +1305,13 @@ func TestMarketOfferAcceptMovesItemsAndRefundsCompetingOffers(t *testing.T) {
 	}
 	if len(otherStash) != 1 || otherStash[0].StashItemID != competing.Items[0].StashItemID {
 		t.Fatalf("other bidder stash after competing refund = %+v", otherStash)
+	}
+	audit, err := s.ListMarketAuditRecords(ctx, listing.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(audit) < 4 || audit[len(audit)-1].Action != "offer_accepted" {
+		t.Fatalf("market audit after accept = %+v", audit)
 	}
 }
 
@@ -1358,6 +1371,153 @@ func TestMarketListingCancelRefundsActiveOffers(t *testing.T) {
 	}
 	if len(bidderStash) != 1 || bidderStash[0].StashItemID != "cancel_bidder_stash_"+suffix {
 		t.Fatalf("bidder stash after cancel refund = %+v", bidderStash)
+	}
+}
+
+func TestMarketOfferCancelRefundsBidderItems(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+
+	seller, err := s.UpsertAccountByEmail(ctx, "acct_market_offer_cancel_seller_"+suffix, "market-offer-cancel-seller+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sellerChar, err := s.CreateCharacter(ctx, "char_market_offer_cancel_seller_"+suffix, seller.ID, "Market Offer Cancel Seller", "barbarian")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bidder, err := s.UpsertAccountByEmail(ctx, "acct_market_offer_cancel_bidder_"+suffix, "market-offer-cancel-bidder+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bidderChar, err := s.CreateCharacter(ctx, "char_market_offer_cancel_bidder_"+suffix, bidder.ID, "Market Offer Cancel Bidder", "barbarian")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "offer_cancel_seller_item_" + suffix, AccountID: seller.ID, CharacterID: sellerChar.ID, ItemDefID: "rusty_sword", Location: store.ItemLocationInventory}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, seller.ID, sellerChar.ID, "offer_cancel_seller_item_"+suffix, "offer_cancel_seller_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "offer_cancel_bidder_item_" + suffix, AccountID: bidder.ID, CharacterID: bidderChar.ID, ItemDefID: "red_potion", Location: store.ItemLocationInventory}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, bidder.ID, bidderChar.ID, "offer_cancel_bidder_item_"+suffix, "offer_cancel_bidder_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	listing, err := s.CreateMarketListingFromStash(ctx, seller.ID, "offer_cancel_seller_stash_"+suffix, "offer_cancel_listing_"+suffix, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	offer, err := s.CreateMarketOffer(ctx, bidder.ID, listing.ID, "offer_cancel_offer_"+suffix, []string{"offer_cancel_bidder_stash_" + suffix})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.CancelMarketOffer(ctx, seller.ID, listing.ID, offer.ID); !errors.Is(err, store.ErrNotFound) {
+		t.Fatalf("foreign offer cancel err = %v, want ErrNotFound", err)
+	}
+	canceled, err := s.CancelMarketOffer(ctx, bidder.ID, listing.ID, offer.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if canceled.Status != store.MarketOfferCanceled || canceled.CanceledAt == nil {
+		t.Fatalf("canceled offer = %+v", canceled)
+	}
+	bidderStash, err := s.ListAccountStashItems(ctx, bidder.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(bidderStash) != 1 || bidderStash[0].StashItemID != "offer_cancel_bidder_stash_"+suffix {
+		t.Fatalf("bidder stash after offer cancel = %+v", bidderStash)
+	}
+}
+
+func TestMarketListingExpirationRefundsListingAndOffers(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+
+	seller, err := s.UpsertAccountByEmail(ctx, "acct_market_expire_seller_"+suffix, "market-expire-seller+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sellerChar, err := s.CreateCharacter(ctx, "char_market_expire_seller_"+suffix, seller.ID, "Market Expire Seller", "barbarian")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bidder, err := s.UpsertAccountByEmail(ctx, "acct_market_expire_bidder_"+suffix, "market-expire-bidder+"+suffix+"@example.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bidderChar, err := s.CreateCharacter(ctx, "char_market_expire_bidder_"+suffix, bidder.ID, "Market Expire Bidder", "barbarian")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "expire_seller_item_" + suffix, AccountID: seller.ID, CharacterID: sellerChar.ID, ItemDefID: "rusty_sword", Location: store.ItemLocationInventory}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, seller.ID, sellerChar.ID, "expire_seller_item_"+suffix, "expire_seller_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "expire_bidder_item_" + suffix, AccountID: bidder.ID, CharacterID: bidderChar.ID, ItemDefID: "red_potion", Location: store.ItemLocationInventory}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TransferCharacterItemToAccountStash(ctx, bidder.ID, bidderChar.ID, "expire_bidder_item_"+suffix, "expire_bidder_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	listing, err := s.CreateMarketListingFromStash(ctx, seller.ID, "expire_seller_stash_"+suffix, "expire_listing_"+suffix, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.CreateMarketOffer(ctx, bidder.ID, listing.ID, "expire_offer_"+suffix, []string{"expire_bidder_stash_" + suffix}); err != nil {
+		t.Fatal(err)
+	}
+	conn, err := pgx.Connect(ctx, testDatabaseURL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close(ctx)
+	if _, err := conn.Exec(ctx, `UPDATE market_listings SET expires_at = now() - INTERVAL '1 second' WHERE id = $1`, listing.ID); err != nil {
+		t.Fatal(err)
+	}
+	expired, err := s.ExpireMarketListings(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if expired != 1 {
+		t.Fatalf("expired count = %d, want 1", expired)
+	}
+	sellerStash, err := s.ListAccountStashItems(ctx, seller.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sellerStash) != 1 || sellerStash[0].StashItemID != listing.StashItemID {
+		t.Fatalf("seller stash after expiration = %+v", sellerStash)
+	}
+	bidderStash, err := s.ListAccountStashItems(ctx, bidder.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(bidderStash) != 1 || bidderStash[0].StashItemID != "expire_bidder_stash_"+suffix {
+		t.Fatalf("bidder stash after expiration refund = %+v", bidderStash)
+	}
+	active, err := s.ListActiveMarketListings(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rec := range active {
+		if rec.ID == listing.ID {
+			t.Fatalf("expired listing still active: %+v", active)
+		}
+	}
+	audit, err := s.ListMarketAuditRecords(ctx, listing.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(audit) < 3 || audit[len(audit)-1].Action != "listing_expired" {
+		t.Fatalf("market audit after expiration = %+v", audit)
 	}
 }
 

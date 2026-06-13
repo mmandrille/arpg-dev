@@ -78,8 +78,10 @@ type CharacterProgressionRepo interface {
 	CancelMarketListing(ctx context.Context, accountID, listingID string) (MarketListing, error)
 	PurchaseMarketListing(ctx context.Context, buyerAccountID, listingID string) (MarketListing, error)
 	CreateMarketOffer(ctx context.Context, bidderAccountID, listingID, offerID string, stashItemIDs []string) (MarketOffer, error)
+	CancelMarketOffer(ctx context.Context, bidderAccountID, listingID, offerID string) (MarketOffer, error)
 	ListMarketOffersForSeller(ctx context.Context, sellerAccountID, listingID string) ([]MarketOffer, error)
 	AcceptMarketOffer(ctx context.Context, sellerAccountID, listingID, offerID string) (MarketOffer, error)
+	ExpireMarketListings(ctx context.Context) (int, error)
 	GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error)
 	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)

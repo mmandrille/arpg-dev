@@ -148,6 +148,7 @@ const (
 	MarketListingActive   = "active"
 	MarketListingCanceled = "canceled"
 	MarketListingAccepted = "accepted"
+	MarketListingExpired  = "expired"
 )
 
 // MarketListing is a durable seller listing backed by one former stash item.
@@ -160,16 +161,19 @@ type MarketListing struct {
 	RolledStats       json.RawMessage
 	PriceGold         int
 	Status            string
+	ExpiresAt         time.Time
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	CanceledAt        *time.Time
 	AcceptedAt        *time.Time
+	ExpiredAt         *time.Time
 }
 
 const (
 	MarketOfferActive   = "active"
 	MarketOfferAccepted = "accepted"
 	MarketOfferRejected = "rejected"
+	MarketOfferCanceled = "canceled"
 )
 
 // MarketOffer is a durable item-for-item bid on one market listing.
@@ -183,6 +187,7 @@ type MarketOffer struct {
 	UpdatedAt       time.Time
 	AcceptedAt      *time.Time
 	RejectedAt      *time.Time
+	CanceledAt      *time.Time
 }
 
 // MarketOfferItem is one item snapshot reserved inside a market offer.
@@ -200,6 +205,21 @@ type MarketOfferItem struct {
 type MarketSummary struct {
 	PublishedListings int
 	IncomingBids      int
+}
+
+// MarketAuditRecord is an immutable ownership-transition trace for market actions.
+type MarketAuditRecord struct {
+	ID              int64
+	Action          string
+	ListingID       string
+	OfferID         string
+	ActorAccountID  string
+	SellerAccountID string
+	BidderAccountID string
+	ItemDefID       string
+	StashItemID     string
+	Details         json.RawMessage
+	CreatedAt       time.Time
 }
 
 // CharacterWaypoint is a durable unlocked waypoint level for a character.

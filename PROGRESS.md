@@ -12,12 +12,12 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v127 — `town-service-bridge-split` |
+| **Latest completed slice** | v130 — `market-trade-audit-records` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v128 — TBD |
+| **Next slice** | v131 — TBD |
 | **Last engineering review** | v120 — [`docs/reviews/20260613_v120-overview.md`](docs/reviews/20260613_v120-overview.md) (2026-06-13) |
-| **Next engineering review** | v130 (~every 10 slices) |
+| **Next engineering review** | v130 due before more feature batches |
 
 ### Slice numbering note
 
@@ -146,6 +146,9 @@ v124_* = ranger-volley-and-visual-scenario
 v125_* = tuning-friendly-bot-scenarios
 v126_* = skill-validation-split
 v127_* = town-service-bridge-split
+v128_* = market-listing-expiration
+v129_* = market-offer-withdrawal
+v130_* = market-trade-audit-records
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -313,6 +316,9 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v125** | `tuning-friendly-bot-scenarios` | Complete (`make bot` green) | [`v125_spec-tuning-friendly-bot-scenarios.md`](docs/specs/v125_spec-tuning-friendly-bot-scenarios.md) | [`v125_2026-06-13-tuning-friendly-bot-scenarios.md`](docs/plans/v125_2026-06-13-tuning-friendly-bot-scenarios.md) | [`as-built`](docs/as-built/v125_tuning-friendly-bot-scenarios.md) |
 | **v126** | `skill-validation-split` | Complete (`make validate-shared` green) | [`v126_spec-skill-validation-split.md`](docs/specs/v126_spec-skill-validation-split.md) | [`v126_2026-06-13-skill-validation-split.md`](docs/plans/v126_2026-06-13-skill-validation-split.md) | [`as-built`](docs/as-built/v126_skill-validation-split.md) |
 | **v127** | `town-service-bridge-split` | Complete (`make ci` green) | [`v127_spec-town-service-bridge-split.md`](docs/specs/v127_spec-town-service-bridge-split.md) | [`v127_2026-06-13-town-service-bridge-split.md`](docs/plans/v127_2026-06-13-town-service-bridge-split.md) | [`as-built`](docs/as-built/v127_town-service-bridge-split.md) |
+| **v128** | `market-listing-expiration` | Complete (`make ci` green) | [`v128_spec-market-listing-expiration.md`](docs/specs/v128_spec-market-listing-expiration.md) | [`v128_2026-06-13-market-listing-expiration.md`](docs/plans/v128_2026-06-13-market-listing-expiration.md) | [`as-built`](docs/as-built/v128_market-listing-expiration.md) |
+| **v129** | `market-offer-withdrawal` | Complete (`make ci` green) | [`v129_spec-market-offer-withdrawal.md`](docs/specs/v129_spec-market-offer-withdrawal.md) | [`v129_2026-06-13-market-offer-withdrawal.md`](docs/plans/v129_2026-06-13-market-offer-withdrawal.md) | [`as-built`](docs/as-built/v129_market-offer-withdrawal.md) |
+| **v130** | `market-trade-audit-records` | Complete (`make ci` green) | [`v130_spec-market-trade-audit-records.md`](docs/specs/v130_spec-market-trade-audit-records.md) | [`v130_2026-06-13-market-trade-audit-records.md`](docs/plans/v130_2026-06-13-market-trade-audit-records.md) | [`as-built`](docs/as-built/v130_market-trade-audit-records.md) |
 
 ---
 
@@ -441,6 +447,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Market ownership transitions now expire, withdraw, and audit cleanly.** v128-v130 add 24-hour
+listing expiration with seller/bidder refunds, bidder-owned offer withdrawal, and
+`market_audit_records` for publish, offer, accept/reject/cancel, purchase, listing cancel, and
+expiration. The accept-offer regression now proves the bidder loses offered items and receives the
+listed item.
 
 **Town service inventory bridge wiring is split out of `main.gd`.** v127 adds
 `client/scripts/town_service_bridge.gd` for market/blacksmith context toggles and inventory staging
@@ -986,7 +998,7 @@ validation while removing a duplicated maintenance list.
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history, starter loadout backfill for existing or compatibility-default characters | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59/v97 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
-| Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, 24-hour expiration/delisting, active-offer item locking/reservations beyond listing-row removal, trade audit records, market restrictions for upgraded/bound/equipped/hotbar-assigned items, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
+| Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, market restrictions for upgraded/bound/equipped/hotbar-assigned items, player-facing offer browser/cancel UI polish, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111/v128/v129/v130 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |

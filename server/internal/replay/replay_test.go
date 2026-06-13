@@ -1490,11 +1490,17 @@ func (f *fakeRepo) PurchaseMarketListing(context.Context, string, string) (store
 func (f *fakeRepo) CreateMarketOffer(context.Context, string, string, string, []string) (store.MarketOffer, error) {
 	return store.MarketOffer{}, nil
 }
+func (f *fakeRepo) CancelMarketOffer(context.Context, string, string, string) (store.MarketOffer, error) {
+	return store.MarketOffer{}, nil
+}
 func (f *fakeRepo) ListMarketOffersForSeller(context.Context, string, string) ([]store.MarketOffer, error) {
 	return nil, nil
 }
 func (f *fakeRepo) AcceptMarketOffer(context.Context, string, string, string) (store.MarketOffer, error) {
 	return store.MarketOffer{}, nil
+}
+func (f *fakeRepo) ExpireMarketListings(context.Context) (int, error) {
+	return 0, nil
 }
 func (f *fakeRepo) GetMarketSummary(context.Context, string) (store.MarketSummary, error) {
 	return store.MarketSummary{}, nil

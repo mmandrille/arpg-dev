@@ -63,11 +63,22 @@ func (s *Store) PurchaseMarketListing(ctx context.Context, buyerAccountID, listi
 			`UPDATE market_listings
 			 SET status = $3, accepted_at = now(), updated_at = now()
 			 WHERE id = $1 AND status = $2
-			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, created_at, updated_at, canceled_at, accepted_at`,
+			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, expires_at, created_at, updated_at, canceled_at, accepted_at, expired_at`,
 			listingID, MarketListingActive, MarketListingAccepted,
-		).Scan(&purchased.ID, &purchased.SellerAccountID, &purchased.StashItemID, &purchased.SourceCharacterID, &purchased.ItemDefID, &purchased.RolledStats, &purchased.PriceGold, &purchased.Status, &purchased.CreatedAt, &purchased.UpdatedAt, &purchased.CanceledAt, &purchased.AcceptedAt)
+		).Scan(&purchased.ID, &purchased.SellerAccountID, &purchased.StashItemID, &purchased.SourceCharacterID, &purchased.ItemDefID, &purchased.RolledStats, &purchased.PriceGold, &purchased.Status, &purchased.ExpiresAt, &purchased.CreatedAt, &purchased.UpdatedAt, &purchased.CanceledAt, &purchased.AcceptedAt, &purchased.ExpiredAt)
 		if err != nil {
 			return fmt.Errorf("store: mark purchased listing accepted: %w", err)
+		}
+		if err := insertMarketAuditRecord(ctx, tx, marketAuditRecordInput{
+			Action:          "listing_purchased",
+			ListingID:       listingID,
+			ActorAccountID:  buyerAccountID,
+			SellerAccountID: listing.SellerAccountID,
+			ItemDefID:       listing.ItemDefID,
+			StashItemID:     listing.StashItemID,
+			Details:         map[string]any{"price_gold": listing.PriceGold},
+		}); err != nil {
+			return err
 		}
 		return nil
 	})
@@ -77,12 +88,12 @@ func (s *Store) PurchaseMarketListing(ctx context.Context, buyerAccountID, listi
 func lockActiveMarketListingForPurchase(ctx context.Context, tx pgx.Tx, listingID string) (MarketListing, error) {
 	var listing MarketListing
 	err := tx.QueryRow(ctx,
-		`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, created_at, updated_at, canceled_at, accepted_at
+		`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, expires_at, created_at, updated_at, canceled_at, accepted_at, expired_at
 		 FROM market_listings
-		 WHERE id = $1 AND status = $2
+		 WHERE id = $1 AND status = $2 AND expires_at > now()
 		 FOR UPDATE`,
 		listingID, MarketListingActive,
-	).Scan(&listing.ID, &listing.SellerAccountID, &listing.StashItemID, &listing.SourceCharacterID, &listing.ItemDefID, &listing.RolledStats, &listing.PriceGold, &listing.Status, &listing.CreatedAt, &listing.UpdatedAt, &listing.CanceledAt, &listing.AcceptedAt)
+	).Scan(&listing.ID, &listing.SellerAccountID, &listing.StashItemID, &listing.SourceCharacterID, &listing.ItemDefID, &listing.RolledStats, &listing.PriceGold, &listing.Status, &listing.ExpiresAt, &listing.CreatedAt, &listing.UpdatedAt, &listing.CanceledAt, &listing.AcceptedAt, &listing.ExpiredAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return MarketListing{}, ErrNotFound
 	}

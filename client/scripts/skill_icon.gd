@@ -51,6 +51,8 @@ func _draw() -> void:
 			_draw_shield(center, radius)
 		"slash":
 			_draw_slash(center, radius)
+		"volley":
+			_draw_volley(center, radius)
 		_:
 			_draw_bolt(center, radius)
 	draw_arc(center, radius, 0.0, TAU, 40, accent_color, 2.0, true)
@@ -175,6 +177,22 @@ func _draw_pin(center: Vector2, radius: float) -> void:
 	draw_colored_polygon(spike, fill_color)
 	draw_polyline(spike, accent_color, 2.0, true)
 	draw_line(center + Vector2(-radius * 0.42, radius * 0.68), center + Vector2(radius * 0.42, radius * 0.68), accent_color, 2.0, true)
+
+
+func _draw_volley(center: Vector2, radius: float) -> void:
+	for i in range(3):
+		var offset := float(i - 1) * radius * 0.28
+		var start := center + Vector2(-radius * 0.58, radius * 0.38 + offset)
+		var end := center + Vector2(radius * 0.46, -radius * 0.24 + offset * 0.30)
+		draw_line(start, end, fill_color, radius * 0.14, true)
+		draw_line(start, end, accent_color, radius * 0.05, true)
+		var head := PackedVector2Array([
+			end + Vector2(radius * 0.28, -radius * 0.18),
+			end + Vector2(-radius * 0.02, radius * 0.04),
+			end + Vector2(-radius * 0.12, -radius * 0.28),
+		])
+		draw_colored_polygon(head, fill_color)
+		draw_polyline(head, accent_color, 1.6, true)
 
 
 func _draw_poison_dagger(center: Vector2, radius: float) -> void:

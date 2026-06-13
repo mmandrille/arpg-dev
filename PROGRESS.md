@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v123 — `ranger-piercing-and-pinning-shots` |
+| **Latest completed slice** | v124 — `ranger-volley-and-visual-scenario` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v124 — `ranger-volley-and-visual-scenario` |
+| **Next slice** | v125 — TBD |
 | **Last engineering review** | v120 — [`docs/reviews/20260613_v120-overview.md`](docs/reviews/20260613_v120-overview.md) (2026-06-13) |
 | **Next engineering review** | v130 (~every 10 slices) |
 
@@ -142,6 +142,7 @@ v120_* = tuning-friendly-rule-tests
 v121_* = inventory-market-blacksmith-flow
 v122_* = ranger-class-foundation
 v123_* = ranger-piercing-and-pinning-shots
+v124_* = ranger-volley-and-visual-scenario
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -305,6 +306,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v121** | `inventory-market-blacksmith-flow` | Approved draft (reserved) | [`v121_spec-inventory-market-blacksmith-flow.md`](docs/specs/v121_spec-inventory-market-blacksmith-flow.md) | [`v121_2026-06-13-inventory-market-blacksmith-flow.md`](docs/plans/v121_2026-06-13-inventory-market-blacksmith-flow.md) | — |
 | **v122** | `ranger-class-foundation` | Complete (`make ci` green) | [`v122_spec-ranger-class-foundation.md`](docs/specs/v122_spec-ranger-class-foundation.md) | [`v122_2026-06-13-ranger-class-foundation.md`](docs/plans/v122_2026-06-13-ranger-class-foundation.md) | [`as-built`](docs/as-built/v122_ranger-class-foundation.md) |
 | **v123** | `ranger-piercing-and-pinning-shots` | Complete (`make ci` green) | [`v123_spec-ranger-piercing-and-pinning-shots.md`](docs/specs/v123_spec-ranger-piercing-and-pinning-shots.md) | [`v123_2026-06-13-ranger-piercing-and-pinning-shots.md`](docs/plans/v123_2026-06-13-ranger-piercing-and-pinning-shots.md) | [`as-built`](docs/as-built/v123_ranger-piercing-and-pinning-shots.md) |
+| **v124** | `ranger-volley-and-visual-scenario` | Complete (`make ci` green) | [`v124_spec-ranger-volley-and-visual-scenario.md`](docs/specs/v124_spec-ranger-volley-and-visual-scenario.md) | [`v124_2026-06-13-ranger-volley-and-visual-scenario.md`](docs/plans/v124_2026-06-13-ranger-volley-and-visual-scenario.md) | [`as-built`](docs/as-built/v124_ranger-volley-and-visual-scenario.md) |
 
 ---
 
@@ -379,6 +381,7 @@ boss_floor_gate: start on compact boss floor → assert locked exits → observe
 boss_kill_reward_polish: compact boss floor → kill Cave Warden → observe `boss_killed` with `boss_template_id` and client reward status
 paladin_class_foundation / barbarian_class_foundation / sorcerer_class_foundation / rogue_class_foundation / ranger_class_foundation: class starter gear → movement → at least three basic attacks → all current class skills
 ranger_piercing_and_pinning_shots: Ranger casts Pinning Shot to root a chase target, waits for expiry, then fires Piercing Shot through lined-up monsters
+ranger_volley_and_visual_showcase: Ranger shows starter bow, Pinning Shot, Piercing Shot, and Volley in a compact visual lab
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
@@ -440,6 +443,10 @@ scenario `58_ranger_class_foundation` proving creation and ranged basic combat.
 **Ranger has its first two bow skills.** v123 adds schema-backed `Piercing Shot` and `Pinning Shot`,
 with authoritative line-pierce damage, root movement control, green projectile/icon VFX, a visible
 pinning-root marker, and protocol scenario `59_ranger_piercing_and_pinning_shots`.
+
+**Ranger now has a complete three-skill starter kit.** v124 adds `Volley` as an authoritative
+multi-arrow fan attack, green Volley icon/projectile presentation, and visual scenario
+`60_ranger_volley_and_visual_showcase` covering starter bow plus all three Ranger skills.
 
 **Tuning-friendly rule tests started with the skills panel.** v120 converts the Godot skills-panel
 Magic Bolt test to derive requirements, mana cost, and max-rank expectations from `SkillRulesLoader`

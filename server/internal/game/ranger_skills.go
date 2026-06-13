@@ -31,7 +31,11 @@ func (s *Sim) handleRangerProjectileSkillCast(in Input, res *TickResult, player 
 	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.appendRangerShotCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, dir, def)
-	s.applyRangerShot(player, skillID, def, rank, targets, in.CorrelationID, res)
+	if def.Volley.ArrowCount > 0 {
+		s.applyRangerVolley(player, skillID, def, rank, dir, in.CorrelationID, res)
+	} else {
+		s.applyRangerShot(player, skillID, def, rank, targets, in.CorrelationID, res)
+	}
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)
@@ -109,6 +113,53 @@ func (s *Sim) applyRangerShot(player *entity, skillID string, def SkillDef, rank
 			break
 		}
 	}
+}
+
+func (s *Sim) applyRangerVolley(player *entity, skillID string, def SkillDef, rank int, dir Vec2, correlationID string, res *TickResult) {
+	count := def.Volley.ArrowCount
+	if count <= 0 {
+		return
+	}
+	damageRange := s.scaleSkillDamageForMagic(def, rank, skillDamageRange(def, rank))
+	hitIDs := map[uint64]bool{}
+	for _, arrowDir := range volleyDirections(dir, count, def.Volley.SpreadDegrees) {
+		targets := s.rangerLineTargets(player, arrowDir, def.Projectile.Range)
+		for _, row := range targets {
+			target := row.Target
+			if target == nil || target.hp <= 0 || hitIDs[target.id] {
+				continue
+			}
+			hitIDs[target.id] = true
+			beforeEvents := len(res.Events)
+			s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, damageRange, s.skillDamageType(def))
+			for i := beforeEvents; i < len(res.Events); i++ {
+				if res.Events[i].EventType == "monster_damaged" && res.Events[i].TargetEntityID == idStr(target.id) {
+					res.Events[i].SkillID = skillID
+				}
+			}
+			break
+		}
+	}
+}
+
+func volleyDirections(dir Vec2, count int, spreadDegrees float64) []Vec2 {
+	dir = normalize(dir)
+	if count <= 0 || (dir.X == 0 && dir.Y == 0) {
+		return []Vec2{}
+	}
+	if count == 1 || spreadDegrees <= 0 {
+		return []Vec2{dir}
+	}
+	baseAngle := math.Atan2(dir.Y, dir.X)
+	spreadRadians := spreadDegrees * math.Pi / 180.0
+	start := -spreadRadians * 0.5
+	step := spreadRadians / float64(count-1)
+	out := make([]Vec2, 0, count)
+	for i := 0; i < count; i++ {
+		angle := baseAngle + start + step*float64(i)
+		out = append(out, Vec2{X: math.Cos(angle), Y: math.Sin(angle)})
+	}
+	return out
 }
 
 func scaleDamageRangePercent(in DamageRange, percent int) DamageRange {

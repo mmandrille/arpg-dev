@@ -1,0 +1,42 @@
+{
+  "id": "ranger_volley_and_visual_showcase",
+  "world_id": "ranger_showcase_lab",
+  "seed": "ranger_volley_and_visual_showcase_seed",
+  "character_class": "ranger",
+  "title": "Ranger Volley and visual showcase",
+  "description": "Ranger shows Pinning Shot, Piercing Shot, and Volley against staged lab targets.",
+  "visual": {
+    "camera": { "x": 8, "y": 5, "zoom": 1.0 },
+    "post_complete_hold_s": 4.0
+  },
+  "debug_progression": {
+    "level": 7,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 14, "vit": 5, "magic": 8 },
+    "skill_ranks": { "piercing_shot": 1, "pinning_shot": 1, "volley": 1 }
+  },
+  "steps": [
+    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
+    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "volley", "rank": 1, "max_rank": 5, "can_spend": false },
+    { "action": "cast_skill", "skill_id": "pinning_shot", "monster_def_id": "training_dummy_chase", "event_type": "skill_cast" },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" }, "timeout_s": 3 },
+    { "action": "wait_ticks", "ticks": 8 },
+    { "action": "wait_until_assertion", "assertion": { "type": "monster_near_spawn", "monster_def_id": "training_dummy_chase", "max_distance_from_spawn": 0.05 }, "timeout_s": 1 },
+    { "action": "cast_skill", "skill_id": "piercing_shot", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 }, "timeout_s": 3 },
+    { "action": "wait_ticks", "ticks": 20 },
+    { "action": "cast_skill", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 3 }, "timeout_s": 3 }
+  ],
+  "assertions": [
+    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "pinning_shot", "rank": 1 },
+    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" },
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "piercing_shot", "rank": 1 },
+    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 },
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1 },
+    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 3 }
+  ]
+}

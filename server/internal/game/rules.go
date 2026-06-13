@@ -521,6 +521,7 @@ type SkillDef struct {
 	Projectile   SkillProjectileDef  `json:"projectile"`
 	Pierce       SkillPierceDef      `json:"pierce"`
 	Root         SkillRootDef        `json:"root"`
+	Volley       SkillVolleyDef      `json:"volley"`
 	Cone         SkillConeDef        `json:"cone"`
 	Poison       SkillPoisonDef      `json:"poison"`
 	Dash         SkillDashDef        `json:"dash"`
@@ -598,6 +599,12 @@ type SkillPierceDef struct {
 type SkillRootDef struct {
 	EffectID      string `json:"effect_id"`
 	DurationTicks int    `json:"duration_ticks"`
+}
+
+// SkillVolleyDef defines a deterministic fan of projectile rays.
+type SkillVolleyDef struct {
+	ArrowCount    int     `json:"arrow_count"`
+	SpreadDegrees float64 `json:"spread_degrees"`
 }
 
 // SkillConeDef defines a server-owned cone attack shape and push behavior.
@@ -2881,8 +2888,26 @@ func validateRangerProjectileSkillPayload(skillID string, skill SkillDef) error 
 			return fmt.Errorf("game: invalid rules skills.%s.root.duration_ticks: must be positive", skillID)
 		}
 	}
-	if skill.Pierce.MaxHits > 0 && skill.Root.DurationTicks > 0 {
-		return fmt.Errorf("game: invalid rules skills.%s: pierce and root cannot be combined", skillID)
+	if skill.Volley.ArrowCount > 0 || skill.Volley.SpreadDegrees > 0 {
+		if skill.Volley.ArrowCount < 3 || skill.Volley.ArrowCount > 9 {
+			return fmt.Errorf("game: invalid rules skills.%s.volley.arrow_count: must be 3..9", skillID)
+		}
+		if skill.Volley.SpreadDegrees <= 0 || skill.Volley.SpreadDegrees > 120 {
+			return fmt.Errorf("game: invalid rules skills.%s.volley.spread_degrees: must be > 0 and <= 120", skillID)
+		}
+	}
+	mechanicCount := 0
+	if skill.Pierce.MaxHits > 0 {
+		mechanicCount++
+	}
+	if skill.Root.DurationTicks > 0 {
+		mechanicCount++
+	}
+	if skill.Volley.ArrowCount > 0 {
+		mechanicCount++
+	}
+	if mechanicCount > 1 {
+		return fmt.Errorf("game: invalid rules skills.%s: ranger projectile mechanics cannot be combined", skillID)
 	}
 	return nil
 }

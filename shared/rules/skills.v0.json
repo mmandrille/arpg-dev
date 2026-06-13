@@ -577,6 +577,61 @@
         "multiplier": 2.5
       },
       "name_key": "skill.pinning_shot.name"
+    },
+    "volley": {
+      "name": "Volley",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 2,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 10
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "piercing_shot",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "rank_linear_range",
+        "min_base": 2,
+        "max_base": 4,
+        "min_per_rank": 1,
+        "max_per_rank": 1
+      },
+      "projectile": {
+        "range": 14,
+        "speed": 23,
+        "visual": "volley_arrow_projectile"
+      },
+      "volley": {
+        "arrow_count": 5,
+        "spread_degrees": 42
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.volley.name"
     }
   }
 }

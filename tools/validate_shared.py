@@ -1247,6 +1247,7 @@ def cross_checks(report: Report) -> None:
         or skill_class_map.get("heal") != "paladin"
         or skill_class_map.get("piercing_shot") != "ranger"
         or skill_class_map.get("pinning_shot") != "ranger"
+        or skill_class_map.get("volley") != "ranger"
     ):
         report.fail("skill classes", "core class skills must map to their owning classes")
     else:

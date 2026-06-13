@@ -125,6 +125,18 @@
       "projectile_visual": "pinning_shot_projectile",
       "effect_visual": "pinning_root",
       "summary_key": "skill.pinning_shot.summary"
+    },
+    "volley": {
+      "icon": {
+        "label": "V",
+        "shape": "volley",
+        "color": "#3fd65e",
+        "accent": "#dfffd2"
+      },
+      "summary": "Fan of arrows",
+      "projectile_visual": "volley_arrow_projectile",
+      "effect_visual": "volley_fan",
+      "summary_key": "skill.volley.summary"
     }
   }
 }

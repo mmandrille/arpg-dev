@@ -35,7 +35,8 @@
                   "orb_projectile",
                   "poison_dagger",
                   "arrow",
-                  "pin"
+                  "pin",
+                  "volley"
                 ]
               },
               "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },

@@ -34,6 +34,7 @@
         "projectile": { "$ref": "#/$defs/projectile" },
         "pierce": { "$ref": "#/$defs/pierce" },
         "root": { "$ref": "#/$defs/root" },
+        "volley": { "$ref": "#/$defs/volley" },
         "cone": { "$ref": "#/$defs/cone" },
         "poison": { "$ref": "#/$defs/poison" },
         "dash": { "$ref": "#/$defs/dash" },
@@ -222,6 +223,15 @@
       "properties": {
         "effect_id": { "type": "string", "minLength": 1 },
         "duration_ticks": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "volley": {
+      "type": "object",
+      "required": ["arrow_count", "spread_degrees"],
+      "additionalProperties": false,
+      "properties": {
+        "arrow_count": { "type": "integer", "minimum": 3, "maximum": 9 },
+        "spread_degrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 }
       }
     },
     "cone": {

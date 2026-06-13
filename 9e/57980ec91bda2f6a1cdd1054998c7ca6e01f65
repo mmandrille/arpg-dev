@@ -1,0 +1,34 @@
+make/client.mk
+  s_dda15a9a5a8f99::t_4ac3f6251c2dd6 18,25
+shared/rules/skills.v0.json
+  h_6c904e338a0e5a 47
+Makefile
+  s_dda15a9a5a8f99::t_013f8e57375de2 49
+  s_dda15a9a5a8f99::t_dac417b7ac2f7e 15-17
+  s_dda15a9a5a8f99::t_8472e87847b42a 18-23
+make/agents.mk
+  s_dda15a9a5a8f99::t_4b0655033d0861 8,11
+make/ci.mk
+  s_dda15a9a5a8f99::t_e5cc8498a4e580 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9e57980ec91bda2f6a1cdd1054998c7ca6e01f65",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_dda15a9a5a8f99": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf0b-4103-7033-8493-f438e395fadb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

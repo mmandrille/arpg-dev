@@ -1,0 +1,38 @@
+docs/specs/v120_spec-tuning-friendly-rule-tests.md
+  s_de4a263eac247b::t_5694cc9389f9c2 1-38
+docs/as-built/v120_tuning-friendly-rule-tests.md
+  s_de4a263eac247b::t_2e279dcb87af21 13-14
+  s_de4a263eac247b::t_5694cc9389f9c2 1-12,15-32
+docs/plans/v120_2026-06-13-tuning-friendly-rule-tests.md
+  s_de4a263eac247b::t_5694cc9389f9c2 1-34,39-66
+  s_de4a263eac247b::t_2e279dcb87af21 35-38
+docs/reviews/extras/20260613_v120-shared-tooling-and-process.md
+  s_de4a263eac247b::t_4a14c1b1619f53 1-52
+PROGRESS.md
+  s_de4a263eac247b::t_5694cc9389f9c2 15,18-20,141,301,429-432
+docs/reviews/20260613_v120-overview.md
+  s_de4a263eac247b::t_4a14c1b1619f53 1-60,63
+  s_de4a263eac247b::t_2e279dcb87af21 61-62
+docs/reviews/backend/20260613_v120-backend.md
+  s_de4a263eac247b::t_4a14c1b1619f53 1-58
+docs/reviews/client/20260613_v120-client.md
+  s_de4a263eac247b::t_4a14c1b1619f53 1-56
+.maintainability/file-size-baseline.tsv
+  s_de4a263eac247b::t_2e279dcb87af21 7,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d549a4ee296836096134aff775a345c3544602f2",
+  "prompts": {},
+  "sessions": {
+    "s_de4a263eac247b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebeff-879c-75d0-a596-174e94193786",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

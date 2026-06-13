@@ -363,6 +363,7 @@ func _run() -> void:
 	)
 	var upgrade_item: Dictionary = (inventory[0] as Dictionary).duplicate(true)
 	upgrade_item["rolled_stats"] = {"damage_min": 2, "damage_max": 4}
+	upgrade_item["summary_lines"] = ["Min damage: +2", "Max damage: +4"]
 	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item], 40, 60, {"item_upgrade_cost_gold": 100, "item_upgrade_cost_growth_per_level": 50, "item_upgrade_max_level": 3}, "Choose")
 	blacksmith_panel.stage_inventory_item(upgrade_item)
 	var blacksmith_state := blacksmith_panel.get_debug_state()
@@ -373,6 +374,15 @@ func _run() -> void:
 	_assert_eq("blacksmith stage slot height", int(stage_size.get("y", 0)), 96)
 	_assert_eq("blacksmith stage slot centered", bool(blacksmith_state.get("stage_slot_centered", false)), true)
 	_assert_eq("blacksmith stage icon visible", bool(blacksmith_state.get("stage_icon_visible", false)), true)
+	_assert_true("blacksmith direct preview includes min damage", _array_contains_text(blacksmith_state.get("preview_lines", []), "Min damage: 2 -> 3"))
+	_assert_false("blacksmith instruction removed", bool(blacksmith_state.get("instruction_visible", true)))
+	var summary_shield: Dictionary = upgrade_item.duplicate(true)
+	summary_shield["rolled_stats"] = {"item_level": 0}
+	summary_shield["summary_lines"] = ["Armor: +2", "Block: +12%"]
+	blacksmith_panel.stage_inventory_item(summary_shield)
+	blacksmith_state = blacksmith_panel.get_debug_state()
+	_assert_true("blacksmith summary preview includes armor", _array_contains_text(blacksmith_state.get("preview_lines", []), "Armor: 2 -> 3"))
+	_assert_true("blacksmith summary preview includes block", _array_contains_text(blacksmith_state.get("preview_lines", []), "Block: 12 -> 13"))
 	blacksmith_panel.unstage_item()
 	blacksmith_state = blacksmith_panel.get_debug_state()
 	_assert_eq("blacksmith unstage clears item", str(blacksmith_state.get("staged_item_id", "")), "")

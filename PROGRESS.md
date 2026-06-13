@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v110 — `item-upgrade-repeat-action` |
+| **Latest completed slice** | v111 — `market-purchase-and-delivery` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v111 — TBD |
+| **Next slice** | v112 — TBD |
 | **Last engineering review** | v110 — [`docs/reviews/20260613_v110-overview.md`](docs/reviews/20260613_v110-overview.md) (2026-06-13) |
 | **Next engineering review** | v120 (~every 10 slices) |
 
@@ -129,6 +129,7 @@ v107_* = survival-reactive-unique-effects
 v108_* = resource-support-mobility-unique-effects
 v109_* = permanent-death-corpse-recovery
 v110_* = item-upgrade-repeat-action
+v111_* = market-purchase-and-delivery
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -279,6 +280,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v108** | `resource-support-mobility-unique-effects` | Complete (`make ci` green) | [`v108_spec-resource-support-mobility-unique-effects.md`](docs/specs/v108_spec-resource-support-mobility-unique-effects.md) | [`v108_2026-06-12-resource-support-mobility-unique-effects.md`](docs/plans/v108_2026-06-12-resource-support-mobility-unique-effects.md) | [`as-built`](docs/as-built/v108_resource-support-mobility-unique-effects.md) |
 | **v109** | `permanent-death-corpse-recovery` | Complete (`make ci` green) | — | — | [`as-built`](docs/as-built/v109_permanent-death-corpse-recovery.md) |
 | **v110** | `item-upgrade-repeat-action` | Complete (`make ci` green) | [`v110_spec-item-upgrade-repeat-action.md`](docs/specs/v110_spec-item-upgrade-repeat-action.md) | [`v110_2026-06-13-item-upgrade-repeat-action.md`](docs/plans/v110_2026-06-13-item-upgrade-repeat-action.md) | [`as-built`](docs/as-built/v110_item-upgrade-repeat-action.md) |
+| **v111** | `market-purchase-and-delivery` | Complete (`make ci` green) | [`v111_spec-market-purchase-and-delivery.md`](docs/specs/v111_spec-market-purchase-and-delivery.md) | [`v111_2026-06-13-market-purchase-and-delivery.md`](docs/plans/v111_2026-06-13-market-purchase-and-delivery.md) | [`as-built`](docs/as-built/v111_market-purchase-and-delivery.md) |
 
 ---
 
@@ -403,6 +405,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Market listings can now be purchased for stash gold.** v111 adds optional `price_gold` on
+market listings and a direct purchase route that atomically debits buyer stash gold, credits seller
+stash gold, delivers the listed item to the buyer stash, marks the listing accepted, and refunds
+active item offers. The first purchase proof stays store/HTTP-only; player-facing market UI,
+notifications, expiration, fees, and listing edits remain deferred.
 
 **Item upgrades can now repeat with scaling gold costs.** v110 extends the account-stash upgrade
 route so equipment can upgrade through `item_upgrade_max_level`, charging

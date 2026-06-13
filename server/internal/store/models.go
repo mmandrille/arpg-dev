@@ -158,6 +158,7 @@ type MarketListing struct {
 	SourceCharacterID string
 	ItemDefID         string
 	RolledStats       json.RawMessage
+	PriceGold         int
 	Status            string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time

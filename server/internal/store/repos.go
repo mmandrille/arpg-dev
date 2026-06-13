@@ -1651,7 +1651,7 @@ func numericStatValueOK(value any) (int, bool) {
 
 func (s *Store) ListActiveMarketListings(ctx context.Context) ([]MarketListing, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at
+		`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, created_at, updated_at, canceled_at, accepted_at
 		 FROM market_listings
 		 WHERE status = $1
 		 ORDER BY created_at DESC, id ASC`,
@@ -1675,7 +1675,10 @@ func (s *Store) ListActiveMarketListings(ctx context.Context) ([]MarketListing, 
 	return out, nil
 }
 
-func (s *Store) CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string) (MarketListing, error) {
+func (s *Store) CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string, priceGold int) (MarketListing, error) {
+	if priceGold < 0 {
+		return MarketListing{}, ErrConflict
+	}
 	var out MarketListing
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		var stash AccountStashItem
@@ -1697,11 +1700,11 @@ func (s *Store) CreateMarketListingFromStash(ctx context.Context, accountID, sta
 			rolledStats = []byte(`{}`)
 		}
 		err = tx.QueryRow(ctx,
-			`INSERT INTO market_listings (id, seller_account_id, stash_item_id, source_character_id, item_def_id, rolled_stats, status)
-			 VALUES ($1, $2, $3, NULLIF($4, ''), $5, $6::jsonb, $7)
-			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at`,
-			listingID, accountID, stashItemID, stash.SourceCharacterID, stash.ItemDefID, []byte(rolledStats), MarketListingActive,
-		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
+			`INSERT INTO market_listings (id, seller_account_id, stash_item_id, source_character_id, item_def_id, rolled_stats, price_gold, status)
+			 VALUES ($1, $2, $3, NULLIF($4, ''), $5, $6::jsonb, $7, $8)
+			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, created_at, updated_at, canceled_at, accepted_at`,
+			listingID, accountID, stashItemID, stash.SourceCharacterID, stash.ItemDefID, []byte(rolledStats), priceGold, MarketListingActive,
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.PriceGold, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
 		if err != nil {
 			return fmt.Errorf("store: insert market listing: %w", err)
 		}
@@ -1721,12 +1724,12 @@ func (s *Store) CancelMarketListing(ctx context.Context, accountID, listingID st
 	var out MarketListing
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		err := tx.QueryRow(ctx,
-			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at
+			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, created_at, updated_at, canceled_at, accepted_at
 			 FROM market_listings
 			 WHERE id = $1 AND seller_account_id = $2 AND status = $3
 			 FOR UPDATE`,
 			listingID, accountID, MarketListingActive,
-		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.PriceGold, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -1751,9 +1754,9 @@ func (s *Store) CancelMarketListing(ctx context.Context, accountID, listingID st
 			`UPDATE market_listings
 			 SET status = $3, canceled_at = now(), updated_at = now()
 			 WHERE id = $1 AND seller_account_id = $2
-			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at`,
+			 RETURNING id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, created_at, updated_at, canceled_at, accepted_at`,
 			listingID, accountID, MarketListingCanceled,
-		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
+		).Scan(&out.ID, &out.SellerAccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.PriceGold, &out.Status, &out.CreatedAt, &out.UpdatedAt, &out.CanceledAt, &out.AcceptedAt)
 		if err != nil {
 			return fmt.Errorf("store: cancel market listing: %w", err)
 		}
@@ -1837,12 +1840,12 @@ func (s *Store) AcceptMarketOffer(ctx context.Context, sellerAccountID, listingI
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		var listing MarketListing
 		err := tx.QueryRow(ctx,
-			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, status, created_at, updated_at, canceled_at, accepted_at
+			`SELECT id, seller_account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, price_gold, status, created_at, updated_at, canceled_at, accepted_at
 			 FROM market_listings
 			 WHERE id = $1 AND seller_account_id = $2 AND status = $3
 			 FOR UPDATE`,
 			listingID, sellerAccountID, MarketListingActive,
-		).Scan(&listing.ID, &listing.SellerAccountID, &listing.StashItemID, &listing.SourceCharacterID, &listing.ItemDefID, &listing.RolledStats, &listing.Status, &listing.CreatedAt, &listing.UpdatedAt, &listing.CanceledAt, &listing.AcceptedAt)
+		).Scan(&listing.ID, &listing.SellerAccountID, &listing.StashItemID, &listing.SourceCharacterID, &listing.ItemDefID, &listing.RolledStats, &listing.PriceGold, &listing.Status, &listing.CreatedAt, &listing.UpdatedAt, &listing.CanceledAt, &listing.AcceptedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -2198,6 +2201,7 @@ func scanMarketListing(row rowScanner) (MarketListing, error) {
 		&listing.SourceCharacterID,
 		&listing.ItemDefID,
 		&listing.RolledStats,
+		&listing.PriceGold,
 		&listing.Status,
 		&listing.CreatedAt,
 		&listing.UpdatedAt,

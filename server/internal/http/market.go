@@ -14,6 +14,7 @@ func (s *Server) registerMarketRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /v0/market/summary", s.requireAuth(http.HandlerFunc(s.handleMarketSummary)))
 	mux.Handle("GET /v0/market/listings", s.requireAuth(http.HandlerFunc(s.handleListMarketListings)))
 	mux.Handle("POST /v0/market/listings", s.requireAuth(http.HandlerFunc(s.handleCreateMarketListing)))
+	mux.Handle("POST /v0/market/listings/{listing_id}/purchase", s.requireAuth(http.HandlerFunc(s.handlePurchaseMarketListing)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketListing)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleCreateMarketOffer)))
 	mux.Handle("GET /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleListMarketOffers)))
@@ -26,6 +27,7 @@ type marketListingResponse struct {
 	StashItemID     string          `json:"stash_item_id"`
 	ItemDefID       string          `json:"item_def_id"`
 	RolledStats     json.RawMessage `json:"rolled_stats"`
+	PriceGold       int             `json:"price_gold"`
 	Status          string          `json:"status"`
 	CreatedAt       string          `json:"created_at"`
 	UpdatedAt       string          `json:"updated_at"`
@@ -37,6 +39,7 @@ type listMarketListingsResponse struct {
 
 type createMarketListingRequest struct {
 	StashItemID string `json:"stash_item_id"`
+	PriceGold   int    `json:"price_gold,omitempty"`
 }
 
 type marketOfferItemResponse struct {
@@ -113,7 +116,7 @@ func (s *Server) handleCreateMarketListing(w http.ResponseWriter, r *http.Reques
 		writeError(w, http.StatusBadRequest, "invalid_stash_item", "stash_item_id is required")
 		return
 	}
-	listing, err := s.store.CreateMarketListingFromStash(r.Context(), accountID, req.StashItemID, ids.New("listing"))
+	listing, err := s.store.CreateMarketListingFromStash(r.Context(), accountID, req.StashItemID, ids.New("listing"), req.PriceGold)
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "stash_item_not_found", "stash item not found")
 		return
@@ -151,6 +154,33 @@ func (s *Server) handleCancelMarketListing(w http.ResponseWriter, r *http.Reques
 	}
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not cancel market listing")
+		return
+	}
+	writeJSON(w, http.StatusOK, marketListingResponseFromStore(listing))
+}
+
+func (s *Server) handlePurchaseMarketListing(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account")
+		return
+	}
+	listingID := r.PathValue("listing_id")
+	if listingID == "" {
+		writeError(w, http.StatusBadRequest, "invalid_listing", "listing_id is required")
+		return
+	}
+	listing, err := s.store.PurchaseMarketListing(r.Context(), accountID, listingID)
+	if errors.Is(err, store.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "listing_not_found", "listing not found")
+		return
+	}
+	if errors.Is(err, store.ErrConflict) {
+		writeError(w, http.StatusConflict, "purchase_conflict", "could not purchase listing")
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not purchase market listing")
 		return
 	}
 	writeJSON(w, http.StatusOK, marketListingResponseFromStore(listing))
@@ -258,6 +288,7 @@ func marketListingResponseFromStore(listing store.MarketListing) marketListingRe
 		StashItemID:     listing.StashItemID,
 		ItemDefID:       listing.ItemDefID,
 		RolledStats:     rolled,
+		PriceGold:       listing.PriceGold,
 		Status:          listing.Status,
 		CreatedAt:       listing.CreatedAt.UTC().Format(time.RFC3339Nano),
 		UpdatedAt:       listing.UpdatedAt.UTC().Format(time.RFC3339Nano),

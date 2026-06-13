@@ -4,7 +4,7 @@
 It is the canonical snapshot of where the project stands and what is still open. Per-slice as-built
 summaries live in [`docs/as-built/`](docs/as-built/).
 
-Last updated: 2026-06-12
+Last updated: 2026-06-13
 
 ---
 
@@ -12,12 +12,12 @@ Last updated: 2026-06-12
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v109 — `permanent-death-corpse-recovery` |
+| **Latest completed slice** | v110 — `item-upgrade-repeat-action` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-12 |
-| **Next slice** | v110 — TBD |
-| **Last engineering review** | v100 — [`docs/reviews/20260612_v100-overview.md`](docs/reviews/20260612_v100-overview.md) (2026-06-12) |
-| **Next engineering review** | v110 (~every 10 slices) |
+| **CI gate** | `make ci` green on 2026-06-13 |
+| **Next slice** | v111 — TBD |
+| **Last engineering review** | v110 — [`docs/reviews/20260613_v110-overview.md`](docs/reviews/20260613_v110-overview.md) (2026-06-13) |
+| **Next engineering review** | v120 (~every 10 slices) |
 
 ### Slice numbering note
 
@@ -128,6 +128,7 @@ v106_* = offensive-unique-effects
 v107_* = survival-reactive-unique-effects
 v108_* = resource-support-mobility-unique-effects
 v109_* = permanent-death-corpse-recovery
+v110_* = item-upgrade-repeat-action
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -277,6 +278,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v107** | `survival-reactive-unique-effects` | Complete (`make ci` green) | [`v107_spec-survival-reactive-unique-effects.md`](docs/specs/v107_spec-survival-reactive-unique-effects.md) | [`v107_2026-06-12-survival-reactive-unique-effects.md`](docs/plans/v107_2026-06-12-survival-reactive-unique-effects.md) | [`as-built`](docs/as-built/v107_survival-reactive-unique-effects.md) |
 | **v108** | `resource-support-mobility-unique-effects` | Complete (`make ci` green) | [`v108_spec-resource-support-mobility-unique-effects.md`](docs/specs/v108_spec-resource-support-mobility-unique-effects.md) | [`v108_2026-06-12-resource-support-mobility-unique-effects.md`](docs/plans/v108_2026-06-12-resource-support-mobility-unique-effects.md) | [`as-built`](docs/as-built/v108_resource-support-mobility-unique-effects.md) |
 | **v109** | `permanent-death-corpse-recovery` | Complete (`make ci` green) | — | — | [`as-built`](docs/as-built/v109_permanent-death-corpse-recovery.md) |
+| **v110** | `item-upgrade-repeat-action` | Complete (`make ci` green) | [`v110_spec-item-upgrade-repeat-action.md`](docs/specs/v110_spec-item-upgrade-repeat-action.md) | [`v110_2026-06-13-item-upgrade-repeat-action.md`](docs/plans/v110_2026-06-13-item-upgrade-repeat-action.md) | [`as-built`](docs/as-built/v110_item-upgrade-repeat-action.md) |
 
 ---
 
@@ -401,6 +403,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Item upgrades can now repeat with scaling gold costs.** v110 extends the account-stash upgrade
+route so equipment can upgrade through `item_upgrade_max_level`, charging
+`item_upgrade_cost_gold + current_item_level * item_upgrade_cost_growth_per_level` from stash gold
+and preserving deterministic stat mutation. The v110 review also catches the maintainability
+baseline up to the post-v109 file sizes so the ratchet enforces from the current repo state.
 
 **Barbarian and Sorcerer now have second combat skills.** v89 adds Cleave as a
 server-owned cone weapon attack with pushback and Ice Shard as a cold projectile with stackable

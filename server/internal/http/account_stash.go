@@ -40,8 +40,9 @@ func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Re
 		eligible[itemDefID] = struct{}{}
 	}
 	cost := s.rules.MainConfig.Gameplay.ItemUpgradeCostGold
+	growth := s.rules.MainConfig.Gameplay.ItemUpgradeCostGrowth
 	maxLevel := s.rules.MainConfig.Gameplay.ItemUpgradeMaxLevel
-	item, stashGold, err := s.store.UpgradeAccountStashItem(r.Context(), accountID, stashItemID, cost, maxLevel, eligible)
+	item, stashGold, chargedCost, err := s.store.UpgradeAccountStashItem(r.Context(), accountID, stashItemID, cost, growth, maxLevel, eligible)
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "stash_item_not_found", "stash item not found")
 		return
@@ -57,7 +58,7 @@ func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Re
 	writeJSON(w, http.StatusOK, upgradeAccountStashItemResponse{
 		Item:      accountStashItemResponseFromStore(item),
 		StashGold: stashGold,
-		CostGold:  cost,
+		CostGold:  chargedCost,
 	})
 }
 

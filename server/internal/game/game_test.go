@@ -3264,6 +3264,20 @@ func TestGeneratedMagicAndRareAffixPools(t *testing.T) {
 	}
 }
 
+func TestJewelryTemplatesCanRollInventoryRows(t *testing.T) {
+	rules := loadRules(t)
+	for _, templateID := range []string{"cave_ring", "cave_amulet"} {
+		template := rules.ItemTemplates[templateID]
+		roll, ok := findRollableStat(template.RollableStats, "inventory_rows")
+		if !ok {
+			t.Fatalf("%s rollable stats missing inventory_rows", templateID)
+		}
+		if roll.Min < 1 || roll.Max < roll.Min {
+			t.Fatalf("%s inventory_rows roll range = %d-%d, want positive valid range", templateID, roll.Min, roll.Max)
+		}
+	}
+}
+
 func findRollableStat(stats []RollableStatDef, stat string) (RollableStatDef, bool) {
 	for _, roll := range stats {
 		if roll.Stat == stat {

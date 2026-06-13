@@ -485,7 +485,8 @@ def test_load_scenarios_discovers_ranger_class_foundation():
     assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow"} in ranger.assertions
     assert {"type": "equipped_slot_empty", "slot": "off_hand"} in ranger.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "pinning_shot", "rank": 1} in ranger.assertions
-    assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "pinning_shot", "min": 1} in ranger.assertions
+    assert {"type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot"} in ranger.assertions
+    assert {"type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "pinning_shot"} in ranger.assertions
     assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2} in ranger.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1} in ranger.assertions
     assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 2} in ranger.assertions

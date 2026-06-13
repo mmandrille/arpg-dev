@@ -6,7 +6,7 @@
   "title": "Ranger class foundation",
   "description": "Create a Ranger, prove starter bow and ranged class stats, then use Pinning Shot, Piercing Shot, and Volley across the class lab pack.",
   "visual": {
-    "camera": { "x": 8, "y": 5, "zoom": 1.0 },
+    "camera": { "x": 6, "y": 5, "zoom": 1.0 },
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
@@ -20,20 +20,25 @@
   "steps": [
     { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
     { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
+    { "action": "move_until_player_position", "x": 2, "y": 3 },
     { "action": "cast_skill", "skill_id": "pinning_shot", "monster_def_id": "combat_lab_soft_target", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "pinning_shot", "min": 1 }, "timeout_s": 3 },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" }, "timeout_s": 3 },
+    { "action": "wait_ticks", "ticks": 10 },
+    { "action": "move_until_player_position", "x": 2, "y": 5 },
     { "action": "cast_skill", "skill_id": "piercing_shot", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
     { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 }, "timeout_s": 3 },
     { "action": "wait_ticks", "ticks": 20 },
     { "action": "cast_skill", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 2 }, "timeout_s": 3 }
+    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 2 }, "timeout_s": 3 },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "pinning_shot" }, "timeout_s": 6 }
   ],
   "assertions": [
     { "type": "character_progression", "str": 4, "dex": 14, "vit": 5, "magic": 8 },
     { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
     { "type": "equipped_slot_empty", "slot": "off_hand" },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "pinning_shot", "rank": 1 },
-    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "pinning_shot", "min": 1 },
+    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" },
+    { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "pinning_shot" },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "piercing_shot", "rank": 1 },
     { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1 },

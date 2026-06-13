@@ -1094,6 +1094,8 @@ func _apply_delta(p: Dictionary) -> void:
 				skill_bar.flash_cast()
 			if player_anim != null:
 				player_anim.play_one_shot("attack")
+			if ev.has("projectile_def_id") and ev.has("position") and ev.has("direction"):
+				_spawn_skill_projectile_visual(ev)
 			if ev.has("angle_degrees") and ev.has("range") and ev.has("direction"):
 				_spawn_skill_cone(ev)
 			var correlation_id := str(ev.get("correlation_id", ""))
@@ -1872,6 +1874,58 @@ func _spawn_skill_cone(ev: Dictionary) -> void:
 	var tween := wedge.create_tween()
 	tween.tween_property(wedge, "scale", Vector3.ONE * 1.03, 0.16)
 	tween.tween_callback(wedge.queue_free)
+
+
+func _spawn_skill_projectile_visual(ev: Dictionary) -> void:
+	var projectile_def_id := str(ev.get("projectile_def_id", ""))
+	if projectile_def_id == "":
+		return
+	var pos := _vec2_from_dict(ev.get("position", {}))
+	var dir := _vec2_from_dict(ev.get("direction", {}))
+	if dir.length_squared() <= 0.0001:
+		return
+	dir = dir.normalized()
+	var max_range := maxf(float(ev.get("range", 0.0)), 1.0)
+	var start := Vector3(pos.x + dir.x * 0.45, 0.0, pos.y + dir.y * 0.45)
+	var distance := minf(max_range, 8.5)
+	var target_id := str(ev.get("target_entity_id", ""))
+	if target_id != "" and entities.has(target_id):
+		var target_node := (entities[target_id] as Dictionary).get("node", null) as Node3D
+		if target_node != null:
+			var target_pos := _node_world_or_local_position(target_node)
+			var target_flat := Vector2(target_pos.x - start.x, target_pos.z - start.z)
+			if target_flat.length_squared() > 0.0001:
+				distance = clampf(target_flat.length(), 1.0, max_range)
+	var arrow_count := 1
+	var spread_degrees := 0.0
+	if str(ev.get("skill_id", "")) == "volley":
+		arrow_count = 5
+		spread_degrees = 32.0
+	for i in range(arrow_count):
+		var shot_dir := dir
+		if arrow_count > 1:
+			var t := 0.0 if arrow_count == 1 else (float(i) / float(arrow_count - 1) - 0.5)
+			shot_dir = dir.rotated(deg_to_rad(spread_degrees * t)).normalized()
+		var finish := Vector3(start.x + shot_dir.x * distance, 0.0, start.z + shot_dir.y * distance)
+		_spawn_single_projectile_visual(projectile_def_id, start, finish, i)
+
+
+func _spawn_single_projectile_visual(projectile_def_id: String, start: Vector3, finish: Vector3, index: int = 0) -> void:
+	var node := ProjectileVisualsScript.make_node(projectile_def_id)
+	node.name = "SkillProjectilePreview_%s" % projectile_def_id
+	node.position = start
+	entities_root.add_child(node)
+	var flat := Vector2(finish.x - start.x, finish.z - start.z)
+	if flat.length_squared() > 0.0001:
+		node.look_at(Vector3(finish.x, start.y, finish.z), Vector3.UP)
+	var duration := 0.42
+	if visual_replay_enabled:
+		duration = maxf(autoplay_step_delay * 0.85, 0.32)
+	var tween := create_tween()
+	if index > 0:
+		tween.tween_interval(0.025 * float(index))
+	tween.tween_property(node, "position", finish, duration).set_trans(Tween.TRANS_LINEAR)
+	tween.tween_callback(node.queue_free)
 
 
 func _spawn_ligthing_chain(ev: Dictionary) -> void:

@@ -370,8 +370,8 @@ func _run() -> void:
 	_assert_eq("blacksmith staged item id", str(blacksmith_state.get("staged_item_id", "")), "2001")
 	_assert_eq("blacksmith wallet gold", int(blacksmith_state.get("wallet_gold", 0)), 100)
 	var stage_size: Dictionary = blacksmith_state.get("stage_slot_size", {})
-	_assert_eq("blacksmith stage slot width", int(stage_size.get("x", 0)), 96)
-	_assert_eq("blacksmith stage slot height", int(stage_size.get("y", 0)), 96)
+	_assert_eq("blacksmith stage slot width", int(stage_size.get("x", 0)), 84)
+	_assert_eq("blacksmith stage slot height", int(stage_size.get("y", 0)), 84)
 	_assert_eq("blacksmith stage slot centered", bool(blacksmith_state.get("stage_slot_centered", false)), true)
 	_assert_eq("blacksmith stage icon visible", bool(blacksmith_state.get("stage_icon_visible", false)), true)
 	_assert_true("blacksmith direct preview includes min damage", _array_contains_text(blacksmith_state.get("preview_lines", []), "Min damage: 2 -> 3"))
@@ -383,6 +383,16 @@ func _run() -> void:
 	blacksmith_state = blacksmith_panel.get_debug_state()
 	_assert_true("blacksmith summary preview includes armor", _array_contains_text(blacksmith_state.get("preview_lines", []), "Armor: 2 -> 3"))
 	_assert_true("blacksmith summary preview includes block", _array_contains_text(blacksmith_state.get("preview_lines", []), "Block: 12 -> 13"))
+	var common_bow: Dictionary = upgrade_item.duplicate(true)
+	common_bow["item_def_id"] = "cave_bow"
+	common_bow["display_name"] = "Common Cave Bow"
+	common_bow["rarity"] = "common"
+	common_bow["rolled_stats"] = {"item_level": 0}
+	common_bow["summary_lines"] = []
+	blacksmith_panel.stage_inventory_item(common_bow)
+	blacksmith_state = blacksmith_panel.get_debug_state()
+	_assert_true("blacksmith template preview includes bow min damage", _array_contains_text(blacksmith_state.get("preview_lines", []), "Min damage: 1 -> 2"))
+	_assert_true("blacksmith template preview includes bow max damage", _array_contains_text(blacksmith_state.get("preview_lines", []), "Max damage: 2 -> 3"))
 	blacksmith_panel.unstage_item()
 	blacksmith_state = blacksmith_panel.get_debug_state()
 	_assert_eq("blacksmith unstage clears item", str(blacksmith_state.get("staged_item_id", "")), "")

@@ -6,8 +6,8 @@ signal upgrade_inventory_requested(item_instance_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
-const PANEL_SIZE := Vector2(520, 440)
-const STAGE_SLOT_SIZE := Vector2(96, 96)
+const PANEL_SIZE := Vector2(380, 300)
+const STAGE_SLOT_SIZE := Vector2(84, 84)
 const BODY_FONT_SIZE := 18
 const DETAIL_FONT_SIZE := 15
 const ICON_FONT_SIZE := 28
@@ -175,6 +175,7 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
+	root.alignment = BoxContainer.ALIGNMENT_CENTER
 	_panel.set_content(root)
 
 	_status_label = Label.new()
@@ -189,12 +190,11 @@ func _build() -> void:
 	_gold_label.add_theme_color_override("font_color", Color("#f4d481"))
 	root.add_child(_gold_label)
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(scroll)
 	_rows = VBoxContainer.new()
 	_rows.add_theme_constant_override("separation", 6)
-	scroll.add_child(_rows)
+	_rows.alignment = BoxContainer.ALIGNMENT_CENTER
+	_rows.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	root.add_child(_rows)
 
 
 func _rebuild() -> void:
@@ -202,12 +202,14 @@ func _rebuild() -> void:
 	_clear_rows()
 	_rows.add_child(_stage_slot())
 	_rows.add_child(_preview_block())
+	var button_center := CenterContainer.new()
 	var button := Button.new()
 	button.text = "Upgrade"
 	button.custom_minimum_size = Vector2(150, 40)
 	button.disabled = staged_item.is_empty() or not _upgrade_enabled(staged_item)
 	button.pressed.connect(func() -> void: _emit_upgrade(staged_item))
-	_rows.add_child(button)
+	button_center.add_child(button)
+	_rows.add_child(button_center)
 
 
 func _stage_slot() -> Control:
@@ -231,6 +233,7 @@ func _stage_slot() -> Control:
 func _preview_block() -> Control:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
+	box.custom_minimum_size = Vector2(280, 0)
 	if staged_item.is_empty():
 		box.add_child(_empty_label("No item selected"))
 		return box
@@ -252,7 +255,9 @@ func _preview_block() -> Control:
 	cost_row.add_child(cost_label)
 	box.add_child(cost_row)
 	for line in _upgrade_preview_lines(staged_item):
-		box.add_child(_empty_label(line))
+		var label := _empty_label(line)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		box.add_child(label)
 	return box
 
 
@@ -366,18 +371,38 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 
 
 func _stats_map(item: Dictionary) -> Dictionary:
+	var base_stats := _template_base_stats(item)
 	var rolled: Variant = item.get("rolled_stats", {})
 	if typeof(rolled) == TYPE_DICTIONARY:
 		var payload := _dictionary_from_variant(rolled)
 		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-			return _dictionary_from_variant(payload.get("stats", {}))
+			var nested := _dictionary_from_variant(payload.get("stats", {}))
+			_merge_missing_stats(nested, base_stats)
+			return nested
 		var out := payload
 		var summary_stats := _summary_stat_map(item)
 		for key in summary_stats.keys():
 			if not out.has(key):
 				out[key] = summary_stats.get(key)
+		_merge_missing_stats(out, base_stats)
 		return out
-	return _summary_stat_map(item)
+	var summary_only := _summary_stat_map(item)
+	_merge_missing_stats(summary_only, base_stats)
+	return summary_only
+
+
+func _template_base_stats(item: Dictionary) -> Dictionary:
+	var def_id := str(item.get("item_def_id", ""))
+	var template: Dictionary = ItemRulesLoader.item_definition(def_id)
+	if typeof(template.get("base_stats", {})) != TYPE_DICTIONARY:
+		return {}
+	return _dictionary_from_variant(template.get("base_stats", {}))
+
+
+func _merge_missing_stats(target: Dictionary, fallback: Dictionary) -> void:
+	for key in fallback.keys():
+		if not target.has(key):
+			target[key] = fallback.get(key)
 
 
 func _dictionary_from_variant(value: Variant) -> Dictionary:

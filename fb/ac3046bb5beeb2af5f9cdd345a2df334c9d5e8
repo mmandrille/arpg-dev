@@ -1,0 +1,42 @@
+client/scripts/main.gd
+  s_71c23b08e947b7::t_5f3aa53f238910 4122-4129,6034-6037
+docs/specs/v115_spec-market-purchase-ui.md
+  s_71c23b08e947b7::t_d563e0e61d814f 1-65
+client/scripts/bot_scenario_runner.gd
+  s_71c23b08e947b7::t_5f3aa53f238910 57,1899,2190-2192
+docs/plans/v115_2026-06-13-market-purchase-ui.md
+  s_71c23b08e947b7::t_7e54c8a7e857fe 3,35-37,40-42,51-53,67-70,82-84,91-94
+  s_71c23b08e947b7::t_d563e0e61d814f 1-2,4-34,38-39,43-50,54-66,71-81,85-90
+tools/bot/scenarios/client/36_market_purchase_ui.json
+  s_71c23b08e947b7::t_a4255b2d7c7ce0 1-41
+scripts/bot_client.sh
+  s_71c23b08e947b7::t_a4255b2d7c7ce0 185-202
+client/scripts/market_panel.gd
+  s_71c23b08e947b7::t_5f3aa53f238910 84-91,218-227,236-237,290-300,312-330
+docs/as-built/v115_market-purchase-ui.md
+  s_71c23b08e947b7::t_7e54c8a7e857fe 1-26
+PROGRESS.md
+  s_71c23b08e947b7::t_7e54c8a7e857fe 15,18,136,291,417-419
+tools/bot/client_market_preflight.py
+  s_71c23b08e947b7::t_a4255b2d7c7ce0 1-119
+client/scripts/bot_controller.gd
+  s_71c23b08e947b7::t_5f3aa53f238910 183-184,356-365,667-672
+client/scripts/net_client.gd
+  s_71c23b08e947b7::t_5f3aa53f238910 294-302
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fbac3046bb5beeb2af5f9cdd345a2df334c9d5e8",
+  "prompts": {},
+  "sessions": {
+    "s_71c23b08e947b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebe31-f567-70e3-9572-f4c3d8591ba3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

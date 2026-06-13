@@ -4,6 +4,7 @@ extends SceneTree
 
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -230,6 +231,22 @@ func _run() -> void:
 	_assert_eq("unique chest entity id retained", str(state.get("stash_entity_id", "")), "unique_chest_entity_1")
 	_assert_false("unique chest deposit gold hidden", bool(state.get("deposit_gold_enabled", true)))
 	_assert_false("unique chest withdraw gold hidden", bool(state.get("withdraw_gold_enabled", true)))
+	var unique_chest_item := {
+		"stash_item_id": "unique_item_1",
+		"item_def_id": "cave_blade",
+		"item_template_id": "cave_blade",
+		"display_name": "Embercall Blade",
+		"rarity": "unique",
+		"slot": "main_hand",
+		"summary_lines": ["Slot: Main hand"],
+		"effect_ids": ["everburning_wound"],
+	}
+	var unique_chest_tooltip := panel._make_item_tooltip(unique_chest_item)
+	_assert_eq("unique chest tooltip uses shared panel", unique_chest_tooltip.get_script(), ItemTooltipPanelScript)
+	var unique_chest_texts: Array = unique_chest_tooltip.debug_main_line_font_sizes()
+	_assert_true("unique chest tooltip names effect", _array_contains_text(unique_chest_texts, "Unique effect: Everburning Wound"))
+	_assert_true("unique chest tooltip summarizes effect", _array_contains_text(unique_chest_texts, "All hero damage applies burn"))
+	unique_chest_tooltip.queue_free()
 	panel.bot_drag_stash_to_bag("unique_item_1")
 	_assert_eq("unique chest take emitted count", emitted.size(), 9)
 	_assert_eq("unique chest take emitted type", str(emitted[8]["type"]), "unique_chest_take_item_intent")
@@ -283,3 +300,10 @@ func _rows_have_summary(rows: Variant) -> bool:
 		if (row as Dictionary).get("summary_lines", []).is_empty():
 			return false
 	return true
+
+
+func _array_contains_text(rows: Array, needle: String) -> bool:
+	for row in rows:
+		if str(row).contains(needle):
+			return true
+	return false

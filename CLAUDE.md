@@ -105,19 +105,25 @@ Rules:
 
 1. New source/test/tool files should stay at or below 600 lines.
 2. Existing over-limit files are grandfathered in `.maintainability/file-size-baseline.tsv`.
-3. Grandfathered files may not grow by more than 25 lines unless the slice plan documents why
-   splitting now is riskier and the baseline is intentionally updated.
-4. When touching an over-limit file, prefer extracting a focused helper, module, or test file as
-   part of the same slice.
-5. Run `make maintainability` before finishing a slice that adds or expands source/test/tool files.
+3. Grandfathered files may not grow by more than 25 lines, and their baseline may not remain more
+   than 25 lines above the current file size. When a large file shrinks, lower the baseline in the
+   same slice, or drop the entry if the file is now at or below 600 lines.
+4. touch-to-shrink: a slice that edits a grandfathered file should leave it at or below its current
+   baseline. The +25 allowance exists for incidental drift, not for routinely growing coordinators.
+5. New gameplay or tooling domains start in their own focused file. Do not add a new domain to a
+   large coordinator just because related code already lives there.
+6. `make maintainability` prints the current grandfathered file count and total line count. Reviews
+   should record that trend and expect it to move down over time.
+7. `make ci` runs `make maintainability`; the ratchet is a CI gate, not an advisory check.
 
-This is a ratchet, not a repo-wide rewrite mandate: shrink large files opportunistically and block
-new large files from appearing.
+This is a reduction ratchet, not a repo-wide rewrite mandate: shrink large files opportunistically,
+lock in those reductions, and block new large files from appearing.
 
 ## Architecture
 
 ```
 PROGRESS.md  slice lifecycle + current status (read before new work)
+docs/CODEMAP.md domain → files index for loading focused context
 client/      Godot 4 (GDScript) — thin client: renders + locally predicts movement/attack feedback
 server/      Go authoritative server — owns all game state, loot rolls, inventory, persistence
 shared/      Data contracts: JSON schemas, rules-as-data, cross-language golden fixtures

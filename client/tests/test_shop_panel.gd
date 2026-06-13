@@ -293,7 +293,12 @@ func _run() -> void:
 	_assert_eq("inventory double click market emitted count", inventory_emitted.size(), 3)
 	_assert_eq("inventory double click market type", str(inventory_emitted[2]["type"]), "market_stage_inventory_item")
 	_assert_eq("inventory double click market context", str(inventory_emitted[2]["payload"].get("context", "")), "offer")
+	inventory_panel.set_market_hidden_item_ids(["2001"])
+	var hidden_state := inventory_panel.get_debug_state()
+	_assert_eq("inventory hides staged market offer item", int(hidden_state.get("visible_bag_count", 0)), 1)
 	inventory_panel.clear_market_context()
+	hidden_state = inventory_panel.get_debug_state()
+	_assert_eq("inventory restores hidden market item on context clear", int(hidden_state.get("visible_bag_count", 0)), 2)
 	inventory_panel.set_blacksmith_context(true)
 	inventory_panel._handle_double_click(inventory[0])
 	_assert_eq("inventory double click blacksmith emitted count", inventory_emitted.size(), 4)
@@ -354,6 +359,28 @@ func _run() -> void:
 	_assert_true("market listing shows level", _array_contains_text(listing_row.get("stat_lines", []), "Level 1"))
 	_assert_true("market listing shows base armor", _array_contains_text(listing_row.get("stat_lines", []), "Base Armor: +3"))
 	_assert_true("market listing shows rolled armor", _array_contains_text(listing_row.get("stat_lines", []), "Rolled Armor: +3"))
+	market_panel.show_market("market-1", [{
+		"listing_id": "listing-owned",
+		"item_def_id": "cave_mail",
+		"display_name": "Magic Cave Mail",
+		"rarity": "magic",
+		"seller_account_id": "me",
+		"price_gold": 25,
+	}], inventory, "me", "Active listings")
+	market_panel.show_offers("listing-owned", [{
+		"offer_id": "offer-1",
+		"listing_id": "listing-owned",
+		"bidder_account_id": "bidder",
+		"status": "active",
+		"items": [inventory[0], inventory[1]],
+	}])
+	market_state = market_panel.get_debug_state()
+	var offer_rows: Array = market_state.get("offer_rows", [])
+	_assert_eq("market viewed offer row count", offer_rows.size(), 1)
+	var viewed_offer_slots: Array = (offer_rows[0] as Dictionary).get("item_slots", [])
+	_assert_eq("market viewed offer slot count", viewed_offer_slots.size(), 2)
+	_assert_true("market viewed offer slot uses icon", bool((viewed_offer_slots[0] as Dictionary).get("has_icon", false)))
+	_assert_true("market viewed offer slot uses shared tooltip", bool((viewed_offer_slots[0] as Dictionary).get("uses_shared_tooltip", false)))
 	market_panel.queue_free()
 
 	var blacksmith_panel := BlacksmithPanelScript.new()

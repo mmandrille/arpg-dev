@@ -80,6 +80,7 @@ var _gesture_tween: Tween
 var _rendered_bag_slot_count: int = 0
 var _shop_sell_entity_id: String = ""
 var _market_context: String = ""
+var _market_hidden_item_ids: Array = []
 var _blacksmith_context_enabled: bool = false
 
 
@@ -189,10 +190,25 @@ func clear_shop_sell_context() -> void:
 
 func set_market_context(context: String) -> void:
 	_market_context = context
+	if _bag_grid != null:
+		_render()
 
 
 func clear_market_context() -> void:
 	_market_context = ""
+	_market_hidden_item_ids = []
+	if _bag_grid != null:
+		_render()
+
+
+func set_market_hidden_item_ids(item_instance_ids: Array) -> void:
+	_market_hidden_item_ids = []
+	for item_id in item_instance_ids:
+		var id := str(item_id)
+		if id != "" and not _market_hidden_item_ids.has(id):
+			_market_hidden_item_ids.append(id)
+	if _bag_grid != null:
+		_render()
 
 
 func set_blacksmith_context(enabled: bool) -> void:
@@ -266,6 +282,8 @@ func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"bag_count": inventory.size(),
+		"visible_bag_count": _bag_items().size(),
+		"market_hidden_item_ids": _market_hidden_item_ids.duplicate(),
 		"equipped": equipped.duplicate(true),
 		"equipped_main_hand": equipped.get("main_hand", null),
 		"main_hand_item": _equipped_item("main_hand"),
@@ -474,6 +492,8 @@ func _bag_items() -> Array:
 	var items: Array = []
 	for item in inventory:
 		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
+			continue
+		if _market_context == "offer" and _market_hidden_item_ids.has(str(item.get("item_instance_id", ""))):
 			continue
 		items.append(item)
 	return items

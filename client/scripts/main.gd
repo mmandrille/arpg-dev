@@ -3187,6 +3187,7 @@ func _build_scene() -> void:
 	market_panel = MarketPanelScript.new()
 	market_panel.market_action_requested.connect(_on_market_action_requested)
 	market_panel.inventory_context_requested.connect(_on_market_inventory_context_requested)
+	market_panel.staged_offer_items_changed.connect(_on_market_staged_offer_items_changed)
 	ui.add_child(market_panel)
 	blacksmith_panel = BlacksmithPanelScript.new()
 	blacksmith_panel.upgrade_requested.connect(_on_blacksmith_upgrade_requested)
@@ -4284,6 +4285,15 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 
 func _on_market_inventory_context_requested(context: String) -> void:
 	TownServiceBridgeScript.set_market_inventory_context(inventory_panel, context)
+	if context != "" and market_panel != null:
+		_on_market_staged_offer_items_changed(market_panel.get_debug_state().get("staged_offer_item_ids", []))
+	else:
+		_on_market_staged_offer_items_changed([])
+
+
+func _on_market_staged_offer_items_changed(item_instance_ids: Array) -> void:
+	if inventory_panel != null:
+		inventory_panel.set_market_hidden_item_ids(item_instance_ids)
 
 
 func _refresh_market_panel_data() -> void:
@@ -4345,6 +4355,7 @@ func _hide_market_panel() -> void:
 	if market_panel != null:
 		market_panel.hide_display()
 	TownServiceBridgeScript.close_market_inventory_context(inventory_panel)
+	_on_market_staged_offer_items_changed([])
 
 
 func _show_blacksmith_panel(ev: Dictionary) -> void:

@@ -1957,6 +1957,15 @@ func _basic_attack_cooldown_seconds() -> float:
 	return maxf(SEND_INTERVAL, float(ticks) / SERVER_TICK_RATE)
 
 
+func _start_basic_attack_recovery_ui(duration_seconds: float = -1.0) -> void:
+	if _health_bar == null:
+		return
+	var duration := duration_seconds
+	if duration <= 0.0:
+		duration = _basic_attack_cooldown_seconds()
+	_health_bar.start_attack_recovery(duration)
+
+
 func _remove_monster_health_bar(entity_id: String) -> void:
 	if not monster_health_bars.has(entity_id):
 		return
@@ -2505,6 +2514,8 @@ func _execute_click_pick(pick: Dictionary) -> void:
 
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else SEND_INTERVAL
+	if typ == "monster":
+		_start_basic_attack_recovery_ui(_attack_cooldown)
 
 
 func _target_in_local_attack_range(target_id: String) -> bool:
@@ -2615,6 +2626,7 @@ func _repeat_hold_attack() -> void:
 
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds()
+	_start_basic_attack_recovery_ui(_attack_cooldown)
 
 
 func _repeat_hold_move() -> void:
@@ -2808,6 +2820,7 @@ func _try_send_directional_attack() -> void:
 		player_anim.play_one_shot("attack")
 	client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(direction))
 	_attack_cooldown = _basic_attack_cooldown_seconds()
+	_start_basic_attack_recovery_ui(_attack_cooldown)
 
 
 func _mouse_ground_point() -> Vector3:
@@ -6235,6 +6248,8 @@ func bot_click_entity_id(target_id: String) -> void:
 		return
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else SEND_INTERVAL
+	if typ == "monster":
+		_start_basic_attack_recovery_ui(_attack_cooldown)
 
 
 func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> void:

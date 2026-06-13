@@ -38,8 +38,10 @@ type listMarketListingsResponse struct {
 }
 
 type createMarketListingRequest struct {
-	StashItemID string `json:"stash_item_id"`
-	PriceGold   int    `json:"price_gold,omitempty"`
+	StashItemID    string `json:"stash_item_id"`
+	ItemInstanceID string `json:"item_instance_id,omitempty"`
+	CharacterID    string `json:"character_id,omitempty"`
+	PriceGold      int    `json:"price_gold,omitempty"`
 }
 
 type marketOfferItemResponse struct {
@@ -63,7 +65,9 @@ type listMarketOffersResponse struct {
 }
 
 type createMarketOfferRequest struct {
-	StashItemIDs []string `json:"stash_item_ids"`
+	StashItemIDs    []string `json:"stash_item_ids"`
+	ItemInstanceIDs []string `json:"item_instance_ids,omitempty"`
+	CharacterID     string   `json:"character_id,omitempty"`
 }
 
 type marketSummaryResponse struct {
@@ -112,11 +116,27 @@ func (s *Server) handleCreateMarketListing(w http.ResponseWriter, r *http.Reques
 		writeError(w, http.StatusBadRequest, "invalid_json", "request body must be JSON")
 		return
 	}
-	if req.StashItemID == "" {
+	stashItemID := req.StashItemID
+	if stashItemID == "" && req.ItemInstanceID != "" && req.CharacterID != "" {
+		stashItemID = ids.New("stash")
+		if _, err := s.store.TransferCharacterItemToAccountStash(r.Context(), accountID, req.CharacterID, req.ItemInstanceID, stashItemID); err != nil {
+			if errors.Is(err, store.ErrNotFound) {
+				writeError(w, http.StatusNotFound, "inventory_item_not_found", "inventory item not found")
+				return
+			}
+			if errors.Is(err, store.ErrConflict) {
+				writeError(w, http.StatusConflict, "inventory_item_conflict", "could not reserve inventory item")
+				return
+			}
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not reserve inventory item")
+			return
+		}
+	}
+	if stashItemID == "" {
 		writeError(w, http.StatusBadRequest, "invalid_stash_item", "stash_item_id is required")
 		return
 	}
-	listing, err := s.store.CreateMarketListingFromStash(r.Context(), accountID, req.StashItemID, ids.New("listing"), req.PriceGold)
+	listing, err := s.store.CreateMarketListingFromStash(r.Context(), accountID, stashItemID, ids.New("listing"), req.PriceGold)
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "stash_item_not_found", "stash item not found")
 		return
@@ -202,11 +222,34 @@ func (s *Server) handleCreateMarketOffer(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusBadRequest, "invalid_json", "request body must be JSON")
 		return
 	}
-	if len(req.StashItemIDs) == 0 || len(req.StashItemIDs) > 10 {
+	stashItemIDs := append([]string{}, req.StashItemIDs...)
+	if len(stashItemIDs) == 0 && len(req.ItemInstanceIDs) > 0 && req.CharacterID != "" {
+		if len(req.ItemInstanceIDs) > 10 {
+			writeError(w, http.StatusBadRequest, "invalid_offer_items", "item_instance_ids must include 1 to 10 items")
+			return
+		}
+		for _, itemInstanceID := range req.ItemInstanceIDs {
+			stashItemID := ids.New("stash")
+			if _, err := s.store.TransferCharacterItemToAccountStash(r.Context(), accountID, req.CharacterID, itemInstanceID, stashItemID); err != nil {
+				if errors.Is(err, store.ErrNotFound) {
+					writeError(w, http.StatusNotFound, "inventory_item_not_found", "inventory item not found")
+					return
+				}
+				if errors.Is(err, store.ErrConflict) {
+					writeError(w, http.StatusConflict, "inventory_item_conflict", "could not reserve inventory item")
+					return
+				}
+				writeError(w, http.StatusInternalServerError, "internal_error", "could not reserve inventory item")
+				return
+			}
+			stashItemIDs = append(stashItemIDs, stashItemID)
+		}
+	}
+	if len(stashItemIDs) == 0 || len(stashItemIDs) > 10 {
 		writeError(w, http.StatusBadRequest, "invalid_offer_items", "stash_item_ids must include 1 to 10 items")
 		return
 	}
-	offer, err := s.store.CreateMarketOffer(r.Context(), accountID, listingID, ids.New("offer"), req.StashItemIDs)
+	offer, err := s.store.CreateMarketOffer(r.Context(), accountID, listingID, ids.New("offer"), stashItemIDs)
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "listing_or_stash_item_not_found", "listing or stash item not found")
 		return

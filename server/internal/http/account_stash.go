@@ -10,6 +10,7 @@ import (
 
 func (s *Server) registerAccountStashRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/account-stash/items/{stash_item_id}/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeAccountStashItem)))
+	mux.Handle("POST /v0/account-stash/items/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeInventoryItem)))
 }
 
 type accountStashItemResponse struct {
@@ -18,10 +19,31 @@ type accountStashItemResponse struct {
 	RolledStats json.RawMessage `json:"rolled_stats"`
 }
 
+type characterItemResponse struct {
+	ItemInstanceID string          `json:"item_instance_id"`
+	ItemDefID      string          `json:"item_def_id"`
+	RolledStats    json.RawMessage `json:"rolled_stats"`
+	Slot           string          `json:"slot"`
+	Equipped       bool            `json:"equipped"`
+}
+
 type upgradeAccountStashItemResponse struct {
 	Item      accountStashItemResponse `json:"item"`
+	Gold      int                      `json:"gold"`
 	StashGold int                      `json:"stash_gold"`
 	CostGold  int                      `json:"cost_gold"`
+}
+
+type upgradeInventoryItemResponse struct {
+	Item      characterItemResponse `json:"item"`
+	Gold      int                   `json:"gold"`
+	StashGold int                   `json:"stash_gold"`
+	CostGold  int                   `json:"cost_gold"`
+}
+
+type upgradeInventoryItemRequest struct {
+	ItemInstanceID string `json:"item_instance_id"`
+	CharacterID    string `json:"character_id"`
 }
 
 func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +57,78 @@ func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Re
 		writeError(w, http.StatusBadRequest, "invalid_stash_item", "stash_item_id is required")
 		return
 	}
+	s.upgradeAccountStashItem(w, r, accountID, "", stashItemID)
+}
+
+func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account")
+		return
+	}
+	var req upgradeInventoryItemRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_json", "request body must be JSON")
+		return
+	}
+	if req.ItemInstanceID == "" || req.CharacterID == "" {
+		writeError(w, http.StatusBadRequest, "invalid_inventory_item", "item_instance_id and character_id are required")
+		return
+	}
+	stashItemID := "upgrade_" + req.ItemInstanceID
+	if _, err := s.store.TransferCharacterItemToAccountStash(r.Context(), accountID, req.CharacterID, req.ItemInstanceID, stashItemID); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "inventory_item_not_found", "inventory item not found")
+			return
+		}
+		if errors.Is(err, store.ErrConflict) {
+			writeError(w, http.StatusConflict, "inventory_item_conflict", "could not reserve inventory item")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not reserve inventory item")
+		return
+	}
+	item, characterGold, stashGold, chargedCost, err := s.upgradeAccountStashItemForRequest(r, accountID, req.CharacterID, stashItemID)
+	if err != nil {
+		s.writeUpgradeAccountStashError(w, err)
+		return
+	}
+	owned, err := s.store.TransferAccountStashItemToCharacter(r.Context(), accountID, req.CharacterID, item.StashItemID, req.ItemInstanceID)
+	if errors.Is(err, store.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "stash_item_not_found", "stash item not found")
+		return
+	}
+	if errors.Is(err, store.ErrConflict) {
+		writeError(w, http.StatusConflict, "inventory_item_conflict", "could not restore upgraded item")
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not restore upgraded item")
+		return
+	}
+	writeJSON(w, http.StatusOK, upgradeInventoryItemResponse{
+		Item:      characterItemResponseFromStore(owned),
+		Gold:      characterGold,
+		StashGold: stashGold,
+		CostGold:  chargedCost,
+	})
+}
+
+func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request, accountID string, characterID string, stashItemID string) {
+	item, characterGold, stashGold, chargedCost, err := s.upgradeAccountStashItemForRequest(r, accountID, characterID, stashItemID)
+	if err != nil {
+		s.writeUpgradeAccountStashError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, upgradeAccountStashItemResponse{
+		Item:      accountStashItemResponseFromStore(item),
+		Gold:      characterGold,
+		StashGold: stashGold,
+		CostGold:  chargedCost,
+	})
+}
+
+func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID string, characterID string, stashItemID string) (store.AccountStashItem, int, int, int, error) {
 	eligible := make(map[string]struct{}, len(s.rules.ItemTemplates))
 	for itemDefID := range s.rules.ItemTemplates {
 		eligible[itemDefID] = struct{}{}
@@ -42,7 +136,11 @@ func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Re
 	cost := s.rules.MainConfig.Gameplay.ItemUpgradeCostGold
 	growth := s.rules.MainConfig.Gameplay.ItemUpgradeCostGrowth
 	maxLevel := s.rules.MainConfig.Gameplay.ItemUpgradeMaxLevel
-	item, stashGold, chargedCost, err := s.store.UpgradeAccountStashItem(r.Context(), accountID, stashItemID, cost, growth, maxLevel, eligible)
+	item, characterGold, stashGold, chargedCost, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, eligible)
+	return item, characterGold, stashGold, chargedCost, err
+}
+
+func (s *Server) writeUpgradeAccountStashError(w http.ResponseWriter, err error) {
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "stash_item_not_found", "stash item not found")
 		return
@@ -55,11 +153,6 @@ func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Re
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not upgrade stash item")
 		return
 	}
-	writeJSON(w, http.StatusOK, upgradeAccountStashItemResponse{
-		Item:      accountStashItemResponseFromStore(item),
-		StashGold: stashGold,
-		CostGold:  chargedCost,
-	})
 }
 
 func accountStashItemResponseFromStore(item store.AccountStashItem) accountStashItemResponse {
@@ -71,5 +164,19 @@ func accountStashItemResponseFromStore(item store.AccountStashItem) accountStash
 		StashItemID: item.StashItemID,
 		ItemDefID:   item.ItemDefID,
 		RolledStats: rolled,
+	}
+}
+
+func characterItemResponseFromStore(item store.CharacterItemInstance) characterItemResponse {
+	rolled := item.RolledStats
+	if len(rolled) == 0 {
+		rolled = json.RawMessage(`{}`)
+	}
+	return characterItemResponse{
+		ItemInstanceID: item.ID,
+		ItemDefID:      item.ItemDefID,
+		RolledStats:    rolled,
+		Slot:           item.Slot,
+		Equipped:       item.Equipped,
 	}
 }

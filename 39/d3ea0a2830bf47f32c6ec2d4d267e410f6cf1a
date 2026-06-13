@@ -1,0 +1,66 @@
+make/shared.mk
+  s_806d7d64679b30::t_2ae62437676cca 5
+make/ci.mk
+  s_806d7d64679b30::t_385051595076c8 6
+CLAUDE.md
+  s_806d7d64679b30::t_c5c8bf45ed13c9 111
+  s_806d7d64679b30::t_8756a24d6c9b26 108-110,112-120,126
+PROGRESS.md
+  s_806d7d64679b30::t_9b830fc10e1c1f 15,159,337,468-471
+tools/test_validate_codemap.py
+  s_806d7d64679b30::t_83571c33361121 4,14,33
+  s_806d7d64679b30::t_a0695389220542 1-3,5-13,15-32,34-40
+scripts/check-file-size-ratchet.sh
+  s_806d7d64679b30::t_d74ce53fbaf7f8 4-5,37-65,98
+  s_806d7d64679b30::t_a5bf5717e198bf 89
+skills/plan/SKILL.md
+  s_806d7d64679b30::t_0b01ab8ab4140f 100
+docs/as-built/v138_codemap-and-reduction-ratchet.md
+  s_806d7d64679b30::t_caf86d794bb209 1-32
+.maintainability/file-size-baseline.tsv
+  s_806d7d64679b30::t_245575c1d747c8 3-9,11-12,14,17-19,22,26,28,31-32,34
+tools/test_file_size_ratchet.py
+  s_806d7d64679b30::t_aa1340b6cf28d3 1-56
+tools/validate_codemap.py
+  s_806d7d64679b30::t_1b50ecd9d442d2 1-58
+docs/specs/v138_spec-codemap-and-reduction-ratchet.md
+  s_4c4d08cfef7ab9::t_83cdeb4b0bbf5f 1-2,4-167
+  s_806d7d64679b30::t_e1cdf461d8d890 3
+AGENTS.md
+  s_806d7d64679b30::t_7baadb0c03c155 7-8
+docs/CODEMAP.md
+  s_806d7d64679b30::t_48143c87b94d34 1-26
+docs/plans/v138_2026-06-13-codemap-and-reduction-ratchet.md
+  s_806d7d64679b30::t_d0cb4b1b326e3b 119,122
+  s_806d7d64679b30::t_a1b8c3466648b9 76,80,85,89,91,103,105,107,109
+  s_806d7d64679b30::t_1a56f695434c98 205-208
+  s_806d7d64679b30::t_f0d26021d3bb38 3
+  s_806d7d64679b30::t_ff2a672e03a3cc 133,136,142,154,158,161
+  s_4c4d08cfef7ab9::t_2171f48164254d 1-2,4-75,77-79,81-84,86-88,90,92-102,104,106,108,110-118,120-121,123-132,134-135,137-141,143-153,155-157,159-160,162-174,176-179,181,183-194,196,199-204,209-224
+  s_806d7d64679b30::t_3376169cc21caa 195,197-198
+  s_806d7d64679b30::t_c4f6c7722d9f77 175,180,182
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "39d3ea0a2830bf47f32c6ec2d4d267e410f6cf1a",
+  "prompts": {},
+  "sessions": {
+    "s_4c4d08cfef7ab9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1551ba4-2cdc-4660-b8aa-02625ddf77e4",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_806d7d64679b30": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec316-a146-70b2-bc83-fdcfc1136441",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

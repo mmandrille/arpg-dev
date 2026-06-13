@@ -184,6 +184,9 @@ start_preflight() {
   fi
   if [[ "$preflight_type" == "market_listing" ]]; then
     host_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "${scenario_id}-seller")"
+    if [[ "$(json_field "$scenario_path" "d.get('preflight', {}).get('seller_is_client', False)")" == "True" ]]; then
+      host_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
+    fi
     echo "[bot-client $(_ts)] starting market preflight for $scenario_id email=$host_email"
     "$PYTHON" "$ROOT/tools/bot/client_market_preflight.py" \
       --base-url "$BASE_URL" \
@@ -196,6 +199,8 @@ start_preflight() {
       --metadata-file "$metadata_file" \
       --item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('item_def_id', 'cave_mail')")" \
       --price-gold "$(json_field "$scenario_path" "d.get('preflight', {}).get('price_gold', 37)")" \
+      --offer-email "$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "${scenario_id}-bidder")" \
+      --offer-item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('offer_item_def_id', '')")" \
       >"$log_file" 2>&1
     echo "[bot-client $(_ts)] market preflight ready listing=$(metadata_field "$metadata_file" listing_id)"
     return 0

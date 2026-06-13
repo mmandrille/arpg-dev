@@ -39,46 +39,77 @@ def create_listing(client: httpx.Client, token: str, stash_item_id: str, price_g
     return resp.json()
 
 
-def run(args: argparse.Namespace) -> int:
+def create_offer(client: httpx.Client, token: str, listing_id: str, stash_item_ids: list[str]) -> dict[str, Any]:
+    resp = client.post(
+        f"/v0/market/listings/{listing_id}/offers",
+        headers=auth(token),
+        json={"stash_item_ids": stash_item_ids},
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def stash_item_for(
+    client: httpx.Client,
+    args: argparse.Namespace,
+    email: str,
+    character_name: str,
+    item_def_id: str,
+) -> tuple[str, str, str]:
+    account_id, token = dev_login(client, email, args.dev_token)
+    character_id = ensure_character(client, token, character_name)
     scenario = Scenario(
         id="client_market_preflight",
         world_id=args.world_id,
         seed=args.seed,
         peer_count=1,
         title="Client market preflight",
-        description="Create a priced seller listing for a Godot client-bot buyer.",
+        description="Create a market stash item for a Godot client-bot market scenario.",
         character_class="",
         debug_progression={},
         steps=[
-            {"action": "action_entity", "item_def_id": args.item_def_id},
+            {"action": "action_entity", "item_def_id": item_def_id},
             {"action": "open_stash"},
-            {"action": "deposit_stash_item", "item_def_id": args.item_def_id},
+            {"action": "deposit_stash_item", "item_def_id": item_def_id},
         ],
         assertions=[],
         fresh_session_checks=[],
         path=Path(__file__),
     )
+    _session, state = run_verified_session(
+        client=client,
+        base_url=args.base_url,
+        token=token,
+        debug_token=args.debug_token,
+        scenario=scenario,
+        world_id=args.world_id,
+        steps=scenario.steps,
+        assertions=[],
+        seed=args.seed,
+        debug_progression={},
+    )
+    matches = [item for item in state.stash_items if str(item.get("item_def_id", "")) == item_def_id]
+    if not matches:
+        raise AssertionError(f"stash missing {item_def_id}: {state.stash_items}")
+    return account_id, character_id, str(matches[0]["stash_item_id"])
+
+
+def run(args: argparse.Namespace) -> int:
     metadata_path = Path(args.metadata_file)
     with httpx.Client(base_url=args.base_url, timeout=10.0) as client:
-        seller_account_id, token = dev_login(client, args.email, args.dev_token)
-        seller_character_id = ensure_character(client, token, args.character_name)
-        _session, state = run_verified_session(
-            client=client,
-            base_url=args.base_url,
-            token=token,
-            debug_token=args.debug_token,
-            scenario=scenario,
-            world_id=args.world_id,
-            steps=scenario.steps,
-            assertions=[],
-            seed=args.seed,
-            debug_progression={},
+        seller_account_id, seller_character_id, stash_item_id = stash_item_for(
+            client, args, args.email, args.character_name, args.item_def_id
         )
-        matches = [item for item in state.stash_items if str(item.get("item_def_id", "")) == args.item_def_id]
-        if not matches:
-            raise AssertionError(f"seller stash missing {args.item_def_id}: {state.stash_items}")
-        stash_item_id = str(matches[0]["stash_item_id"])
-        listing = create_listing(client, token, stash_item_id, args.price_gold)
+        _seller_account_id, seller_token = dev_login(client, args.email, args.dev_token)
+        listing = create_listing(client, seller_token, stash_item_id, args.price_gold)
+        offer: dict[str, Any] = {}
+        bidder_account_id = ""
+        if args.offer_email and args.offer_item_def_id:
+            bidder_account_id, _bidder_character_id, offer_stash_item_id = stash_item_for(
+                client, args, args.offer_email, args.offer_character_name, args.offer_item_def_id
+            )
+            _bidder_account_id, bidder_token = dev_login(client, args.offer_email, args.dev_token)
+            offer = create_offer(client, bidder_token, str(listing.get("listing_id", "")), [offer_stash_item_id])
         write_metadata(
             metadata_path,
             {
@@ -87,6 +118,9 @@ def run(args: argparse.Namespace) -> int:
                 "seller_email": args.email,
                 "seller_account_id": seller_account_id,
                 "seller_character_id": seller_character_id,
+                "host_email": args.offer_email,
+                "bidder_account_id": bidder_account_id,
+                "offer_id": str(offer.get("offer_id", "")),
                 "listing_id": str(listing.get("listing_id", "")),
                 "item_def_id": str(listing.get("item_def_id", args.item_def_id)),
                 "price_gold": int(listing.get("price_gold", args.price_gold)),
@@ -108,6 +142,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--metadata-file", required=True)
     parser.add_argument("--item-def-id", default="cave_mail")
     parser.add_argument("--price-gold", type=int, default=37)
+    parser.add_argument("--offer-email", default="")
+    parser.add_argument("--offer-character-name", default="Market Bidder")
+    parser.add_argument("--offer-item-def-id", default="cave_blade")
     return parser.parse_args(argv)
 
 

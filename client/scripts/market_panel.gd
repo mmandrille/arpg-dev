@@ -13,6 +13,7 @@ var market_entity_id: String = ""
 var account_id: String = ""
 var listings: Array = []
 var stash_items: Array = []
+var active_offers: Array = []
 var selected_listing_id: String = ""
 var _panel: DraggableWindow
 var _status_label: Label
@@ -34,6 +35,7 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 	market_entity_id = entity_id
 	listings = _dup_array(next_listings)
 	stash_items = _dup_array(next_stash_items)
+	active_offers = []
 	account_id = next_account_id
 	_status_label.text = status
 	_rebuild_all()
@@ -89,14 +91,43 @@ func bot_click_purchase_listing(listing_id: String = "", item_def_id: String = "
 	_emit_purchase_action(listing)
 
 
+func bot_click_view_offers(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
+	var listing := _matching_listing(listing_id, item_def_id, price_gold, listing_index, true)
+	if listing.is_empty():
+		show_status("No matching seller listing", true)
+		return
+	selected_listing_id = str(listing.get("listing_id", ""))
+	market_action_requested.emit("list_offers", {"listing_id": selected_listing_id})
+
+
+func bot_click_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
+	var offer := _matching_offer(offer_id, offer_index)
+	if offer.is_empty():
+		show_status("No matching offer", true)
+		return
+	market_action_requested.emit("accept_offer", {"listing_id": str(offer.get("listing_id", selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
+
+
+func show_offers(listing_id: String, offers: Array, status: String = "") -> void:
+	selected_listing_id = listing_id
+	active_offers = _dup_array(offers)
+	if status != "":
+		_status_label.text = status
+	_tabs.current_tab = 2
+	_rebuild_offer_rows()
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"market_entity_id": market_entity_id,
+		"account_id": account_id,
 		"listing_count": listings.size(),
 		"listing_rows": _debug_listing_rows(),
 		"stash_item_count": stash_items.size(),
 		"stash_rows": _debug_stash_rows(),
+		"offer_count": active_offers.size(),
+		"offer_rows": _debug_offer_rows(),
 		"publish_price_gold": _publish_price(),
 		"selected_listing_id": selected_listing_id,
 		"status": _status_label.text if _status_label != null else "",
@@ -183,6 +214,14 @@ func _rebuild_offer_rows() -> void:
 		_offer_rows.add_child(_empty_label("Select another player's listing in Browse"))
 		return
 	_offer_rows.add_child(_listing_row(selected, false))
+	if str(selected.get("seller_account_id", "")) == account_id:
+		if active_offers.is_empty():
+			_offer_rows.add_child(_empty_label("No active offers"))
+			return
+		for offer in active_offers:
+			if typeof(offer) == TYPE_DICTIONARY:
+				_offer_rows.add_child(_offer_row(offer as Dictionary))
+		return
 	if stash_items.is_empty():
 		_offer_rows.add_child(_empty_label("Your stash has no items to offer"))
 		return
@@ -205,19 +244,24 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 	box.add_child(title)
 
 	var detail := Label.new()
-	detail.text = "%d gold - Listing %s - seller %s" % [
-		int(listing.get("price_gold", 0)),
-		str(listing.get("listing_id", "")),
-		str(listing.get("seller_account_id", "")).substr(0, 10),
-	]
+	detail.text = "%d gold - Listing %s - seller %s" % [int(listing.get("price_gold", 0)), str(listing.get("listing_id", "")), str(listing.get("seller_account_id", "")).substr(0, 10)]
 	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
 	box.add_child(detail)
 
-	if selectable and str(listing.get("seller_account_id", "")) != account_id:
+	if selectable:
 		var actions := HBoxContainer.new()
 		actions.add_theme_constant_override("separation", 8)
-		if int(listing.get("price_gold", 0)) > 0:
+		if str(listing.get("seller_account_id", "")) == account_id:
+			var offers_btn := Button.new()
+			offers_btn.text = "View Offers"
+			offers_btn.custom_minimum_size = Vector2(136, 34)
+			offers_btn.pressed.connect(func() -> void:
+				selected_listing_id = str(listing.get("listing_id", ""))
+				market_action_requested.emit("list_offers", {"listing_id": selected_listing_id})
+			)
+			actions.add_child(offers_btn)
+		elif int(listing.get("price_gold", 0)) > 0:
 			var buy_btn := Button.new()
 			buy_btn.text = "Buy"
 			buy_btn.custom_minimum_size = Vector2(86, 34)
@@ -225,16 +269,47 @@ func _listing_row(listing: Dictionary, selectable: bool) -> Control:
 				_emit_purchase_action(listing)
 			)
 			actions.add_child(buy_btn)
-		var btn := Button.new()
-		btn.text = "Make Offer"
-		btn.custom_minimum_size = Vector2(136, 34)
-		btn.pressed.connect(func() -> void:
-			selected_listing_id = str(listing.get("listing_id", ""))
-			_tabs.current_tab = 2
-			_rebuild_offer_rows()
-		)
-		actions.add_child(btn)
+		if str(listing.get("seller_account_id", "")) != account_id:
+			var btn := Button.new()
+			btn.text = "Make Offer"
+			btn.custom_minimum_size = Vector2(136, 34)
+			btn.pressed.connect(func() -> void:
+				selected_listing_id = str(listing.get("listing_id", ""))
+				_tabs.current_tab = 2
+				_rebuild_offer_rows()
+			)
+			actions.add_child(btn)
 		box.add_child(actions)
+	return row
+
+
+func _offer_row(offer: Dictionary) -> Control:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _row_style())
+	var box := HBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	row.add_child(box)
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_child(info)
+	var title := Label.new()
+	title.text = "%d item offer" % _offer_items(offer).size()
+	title.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	title.add_theme_color_override("font_color", Color("#e8dcc8"))
+	info.add_child(title)
+	var detail := Label.new()
+	detail.text = "%s - bidder %s - %s" % [str(offer.get("offer_id", "")), str(offer.get("bidder_account_id", "")).substr(0, 10), _offer_item_names(offer)]
+	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
+	info.add_child(detail)
+	var btn := Button.new()
+	btn.text = "Accept"
+	btn.custom_minimum_size = Vector2(110, 38)
+	btn.disabled = str(offer.get("status", "active")) != "active"
+	btn.pressed.connect(func() -> void:
+		market_action_requested.emit("accept_offer", {"listing_id": str(offer.get("listing_id", selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
+	)
+	box.add_child(btn)
 	return row
 
 
@@ -292,10 +367,7 @@ func _emit_purchase_action(listing: Dictionary) -> void:
 	if listing_id == "":
 		show_status("Missing listing id", true)
 		return
-	market_action_requested.emit("purchase", {
-		"listing_id": listing_id,
-		"price_gold": int(listing.get("price_gold", 0)),
-	})
+	market_action_requested.emit("purchase", {"listing_id": listing_id, "price_gold": int(listing.get("price_gold", 0))})
 
 
 func _selected_listing() -> Dictionary:
@@ -309,13 +381,13 @@ func _selected_listing() -> Dictionary:
 	return {}
 
 
-func _matching_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> Dictionary:
+func _matching_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0, seller_owned: bool = false) -> Dictionary:
 	var matches: Array = []
 	for listing in listings:
 		if typeof(listing) != TYPE_DICTIONARY:
 			continue
 		var rec := listing as Dictionary
-		if str(rec.get("seller_account_id", "")) == account_id:
+		if seller_owned != (str(rec.get("seller_account_id", "")) == account_id):
 			continue
 		if listing_id != "" and str(rec.get("listing_id", "")) != listing_id:
 			continue
@@ -327,6 +399,21 @@ func _matching_listing(listing_id: String = "", item_def_id: String = "", price_
 	if matches.is_empty():
 		return {}
 	var index = clampi(listing_index, 0, matches.size() - 1)
+	return (matches[index] as Dictionary).duplicate(true)
+
+
+func _matching_offer(offer_id: String = "", offer_index: int = 0) -> Dictionary:
+	var matches: Array = []
+	for offer in active_offers:
+		if typeof(offer) != TYPE_DICTIONARY:
+			continue
+		var rec := offer as Dictionary
+		if offer_id != "" and str(rec.get("offer_id", "")) != offer_id:
+			continue
+		matches.append(rec)
+	if matches.is_empty():
+		return {}
+	var index = clampi(offer_index, 0, matches.size() - 1)
 	return (matches[index] as Dictionary).duplicate(true)
 
 
@@ -402,6 +489,44 @@ func _debug_stash_rows() -> Array:
 			"item_template_id": str(rec.get("item_template_id", "")),
 		})
 	return rows
+
+
+func _debug_offer_rows() -> Array:
+	var rows: Array = []
+	for offer in active_offers:
+		if typeof(offer) != TYPE_DICTIONARY:
+			continue
+		var rec := offer as Dictionary
+		rows.append({
+			"offer_id": str(rec.get("offer_id", "")),
+			"listing_id": str(rec.get("listing_id", "")),
+			"bidder_account_id": str(rec.get("bidder_account_id", "")),
+			"status": str(rec.get("status", "")),
+			"item_count": _offer_items(rec).size(),
+			"item_def_ids": _offer_item_def_ids(rec),
+		})
+	return rows
+
+
+func _offer_items(offer: Dictionary) -> Array:
+	var items: Array = offer.get("items", [])
+	return items if items is Array else []
+
+
+func _offer_item_names(offer: Dictionary) -> String:
+	var names: Array = []
+	for item in _offer_items(offer):
+		if typeof(item) == TYPE_DICTIONARY:
+			names.append(_item_title(item as Dictionary))
+	return ", ".join(names)
+
+
+func _offer_item_def_ids(offer: Dictionary) -> Array:
+	var ids: Array = []
+	for item in _offer_items(offer):
+		if typeof(item) == TYPE_DICTIONARY:
+			ids.append(str((item as Dictionary).get("item_def_id", "")))
+	return ids
 
 
 func _clear_rows(rows: VBoxContainer) -> void:

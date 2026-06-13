@@ -4128,6 +4128,23 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			return
 		if market_panel != null:
 			market_panel.show_status("Listing purchased")
+	elif action == "list_offers":
+		result = client.list_market_offers(str(payload.get("listing_id", "")))
+		if result.has("_error"):
+			if market_panel != null:
+				market_panel.show_status("Could not load offers", true)
+			return
+		if market_panel != null:
+			market_panel.show_offers(str(payload.get("listing_id", "")), result.get("offers", []), "Active offers")
+		return
+	elif action == "accept_offer":
+		result = client.accept_market_offer(str(payload.get("listing_id", "")), str(payload.get("offer_id", "")))
+		if result.has("_error"):
+			if market_panel != null:
+				market_panel.show_status("Could not accept offer", true)
+			return
+		if market_panel != null:
+			market_panel.show_status("Offer accepted")
 	else:
 		return
 	_refresh_market_panel_data()
@@ -6036,6 +6053,16 @@ func bot_click_market_purchase_listing(listing_id: String = "", item_def_id: Str
 	if market_panel == null:
 		return
 	market_panel.bot_click_purchase_listing(listing_id, item_def_id, price_gold, listing_index)
+
+func bot_click_market_view_offers(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
+	if market_panel == null:
+		return
+	market_panel.bot_click_view_offers(listing_id, item_def_id, price_gold, listing_index)
+
+func bot_click_market_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
+	if market_panel == null:
+		return
+	market_panel.bot_click_accept_offer(offer_id, offer_index)
 
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:
 	if consumable_bar == null:

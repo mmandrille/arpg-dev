@@ -40,7 +40,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_boss_health_bar",
+	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_boss_reward_status", "assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
@@ -54,7 +54,8 @@ const STEP_TYPES_ACTION := [
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
 	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort",
-	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_waypoint_level",
+	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
+	"click_market_view_offers", "click_market_accept_offer", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -204,7 +205,7 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 		"wait_market_panel":
 			if not bool(state.get("market_panel_visible", false)):
 				return false
-			return _market_listing_rows_match(step, state)
+			return _market_listing_rows_match(step, state) and _market_offer_rows_match(step, state)
 		"wait_bishop_panel":
 			if not bool(state.get("bishop_panel_visible", false)):
 				return false
@@ -433,6 +434,8 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_bool_state("assert_market_panel_visible", "market_panel_visible", step, state)
 		"assert_market_listing_rows":
 			return _assert_market_listing_rows(step, state)
+		"assert_market_offer_rows":
+			return _assert_market_offer_rows(step, state)
 		"assert_bishop_panel_visible":
 			return _assert_bool_state("assert_bishop_panel_visible", "bishop_panel_visible", step, state)
 		"assert_bishop_panel":
@@ -1354,6 +1357,26 @@ func _assert_market_listing_rows(step: Dictionary, state: Dictionary) -> bool:
 	return false
 
 
+func _market_offer_rows_match(step: Dictionary, state: Dictionary) -> bool:
+	if not (step.has("offer_equals") or step.has("offer_at_least") or step.has("offer_item_def_id") or step.has("offer_status")):
+		return true
+	var rows := _matching_market_offer_rows(step, state)
+	if step.has("offer_equals") and rows.size() != int(step.get("offer_equals", 0)):
+		return false
+	if step.has("offer_at_least") and rows.size() < int(step.get("offer_at_least", 0)):
+		return false
+	return true
+
+
+func _assert_market_offer_rows(step: Dictionary, state: Dictionary) -> bool:
+	if _market_offer_rows_match(step, state):
+		return true
+	_fail("assert_market_offer_rows failed: want=%s panel=%s step=%d scenario=%s" % [
+		str(step), str(state.get("market_panel", {})), _step_index, str(scenario.get("id", "?"))
+	])
+	return false
+
+
 func _bishop_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 	var panel: Dictionary = state.get("bishop_panel", {})
 	for key in ["price", "gold"]:
@@ -1404,6 +1427,26 @@ func _matching_market_listing_rows(step: Dictionary, state: Dictionary) -> Array
 		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
 			continue
 		if step.has("price_gold") and int(rec.get("price_gold", 0)) != int(step.get("price_gold", 0)):
+			continue
+		if step.has("seller_owned") and bool(step.get("seller_owned", false)) != (str(rec.get("seller_account_id", "")) == str(panel.get("account_id", ""))):
+			continue
+		out.append(rec)
+	return out
+
+
+func _matching_market_offer_rows(step: Dictionary, state: Dictionary) -> Array:
+	var panel: Dictionary = state.get("market_panel", {})
+	var rows: Array = panel.get("offer_rows", [])
+	var out: Array = []
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if step.has("offer_id") and str(rec.get("offer_id", "")) != str(step.get("offer_id", "")):
+			continue
+		if step.has("offer_status") and str(rec.get("status", "")) != str(step.get("offer_status", "")):
+			continue
+		if step.has("offer_item_def_id") and not (rec.get("item_def_ids", []) as Array).has(str(step.get("offer_item_def_id", ""))):
 			continue
 		out.append(rec)
 	return out
@@ -1903,8 +1946,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"drag_bag_to_stash", "drag_stash_to_bag", \
 		"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort":
 			return "stash=%s" % str(step)
-		"wait_market_panel", "assert_market_panel_visible", "assert_market_listing_rows", \
-		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing":
+		"wait_market_panel", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", \
+		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_market_view_offers", "click_market_accept_offer":
 			return "market=%s" % str(step)
 		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec":
 			return "bishop=%s" % str(step)
@@ -2156,8 +2199,11 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
 	if stype in ["wait_market_panel", "assert_market_listing_rows"]:
-		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled"):
+		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("offer_equals") and not step.has("offer_at_least") and not step.has("offer_item_def_id") and not step.has("offer_status"):
 			return "client_steps[%d] (%s) requires a market listing expectation" % [index, stype]
+	if stype == "assert_market_offer_rows":
+		if not step.has("offer_equals") and not step.has("offer_at_least"):
+			return "client_steps[%d] (%s) requires offer_equals or offer_at_least" % [index, stype]
 	if stype in ["wait_bishop_panel", "assert_bishop_panel"]:
 		if not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("respec_enabled") and not step.has("service_id") and not step.has("visible") and not step.has("status_contains"):
 			return "client_steps[%d] (%s) requires a bishop panel expectation" % [index, stype]

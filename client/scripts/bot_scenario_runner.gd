@@ -13,7 +13,7 @@ const STEP_TYPES_WAIT := [
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
-	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel", "wait_bishop_panel",
+	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel",
 	"wait_boss_health_bar", "wait_remote_player_count",
 	"wait_ticks",
 ]
@@ -40,7 +40,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold", "assert_stash_filter", "assert_boss_health_bar",
+	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_boss_health_bar",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_boss_reward_status", "assert_remote_player_count",
 ]
 const STEP_TYPES_ACTION := [
@@ -53,7 +53,8 @@ const STEP_TYPES_ACTION := [
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
-	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort", "click_waypoint_level",
+	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort",
+	"set_market_publish_price", "click_market_publish_item", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -200,6 +201,10 @@ func _eval_wait(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			if not bool(state.get("stash_panel_visible", false)):
 				return false
 			return _stash_item_count_matches(step, state)
+		"wait_market_panel":
+			if not bool(state.get("market_panel_visible", false)):
+				return false
+			return _market_listing_rows_match(step, state)
 		"wait_bishop_panel":
 			if not bool(state.get("bishop_panel_visible", false)):
 				return false
@@ -424,6 +429,10 @@ func _eval_assert(step: Dictionary, stype: String, state: Dictionary) -> bool:
 			return _assert_stash_gold(step, state)
 		"assert_stash_filter":
 			return _assert_stash_filter(step, state)
+		"assert_market_panel_visible":
+			return _assert_bool_state("assert_market_panel_visible", "market_panel_visible", step, state)
+		"assert_market_listing_rows":
+			return _assert_market_listing_rows(step, state)
 		"assert_bishop_panel_visible":
 			return _assert_bool_state("assert_bishop_panel_visible", "bishop_panel_visible", step, state)
 		"assert_bishop_panel":
@@ -1317,6 +1326,26 @@ func _stash_item_count_matches(step: Dictionary, state: Dictionary) -> bool:
 	return true
 
 
+func _market_listing_rows_match(step: Dictionary, state: Dictionary) -> bool:
+	if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled"):
+		return true
+	var rows := _matching_market_listing_rows(step, state)
+	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
+		return false
+	if step.has("at_least") and rows.size() < int(step.get("at_least", 0)):
+		return false
+	return true
+
+
+func _assert_market_listing_rows(step: Dictionary, state: Dictionary) -> bool:
+	if _market_listing_rows_match(step, state):
+		return true
+	_fail("assert_market_listing_rows failed: want=%s panel=%s step=%d scenario=%s" % [
+		str(step), str(state.get("market_panel", {})), _step_index, str(scenario.get("id", "?"))
+	])
+	return false
+
+
 func _bishop_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 	var panel: Dictionary = state.get("bishop_panel", {})
 	for key in ["price", "gold"]:
@@ -1347,6 +1376,26 @@ func _matching_stash_rows(step: Dictionary, state: Dictionary) -> Array:
 		if step.has("item_template_id") and str(rec.get("item_template_id", "")) != str(step.get("item_template_id", "")):
 			continue
 		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
+			continue
+		out.append(rec)
+	return out
+
+
+func _matching_market_listing_rows(step: Dictionary, state: Dictionary) -> Array:
+	var panel: Dictionary = state.get("market_panel", {})
+	var rows: Array = panel.get("listing_rows", [])
+	var out: Array = []
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if step.has("listing_id") and str(rec.get("listing_id", "")) != str(step.get("listing_id", "")):
+			continue
+		if step.has("item_def_id") and str(rec.get("item_def_id", "")) != str(step.get("item_def_id", "")):
+			continue
+		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
+			continue
+		if step.has("price_gold") and int(rec.get("price_gold", 0)) != int(step.get("price_gold", 0)):
 			continue
 		out.append(rec)
 	return out
@@ -1846,6 +1895,9 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"drag_bag_to_stash", "drag_stash_to_bag", \
 		"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort":
 			return "stash=%s" % str(step)
+		"wait_market_panel", "assert_market_panel_visible", "assert_market_listing_rows", \
+		"set_market_publish_price", "click_market_publish_item":
+			return "market=%s" % str(step)
 		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec":
 			return "bishop=%s" % str(step)
 		"press_key":
@@ -1906,6 +1958,8 @@ func _log_wait_progress(step: Dictionary, stype: String, state: Dictionary) -> v
 		parts.append("shop_panel=%s" % str(state.get("shop_panel", {})))
 	if stype == "wait_stash_panel":
 		parts.append("stash_panel=%s" % str(state.get("stash_panel", {})))
+	if stype == "wait_market_panel":
+		parts.append("market_panel=%s" % str(state.get("market_panel", {})))
 	if stype == "click_entity_until_event" and _step_elapsed - _last_retry_at < float(step.get("retry_s", 0.25)):
 		parts.append("next_attack_soon=true")
 	print("[bot-client] %s scenario=%s step=%d" % [" ".join(parts), str(scenario.get("id", "?")), _step_index])
@@ -2093,6 +2147,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_stash_panel", "assert_stash_item_count", "assert_stash_gold"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
+	if stype in ["wait_market_panel", "assert_market_listing_rows"]:
+		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled"):
+			return "client_steps[%d] (%s) requires a market listing expectation" % [index, stype]
 	if stype in ["wait_bishop_panel", "assert_bishop_panel"]:
 		if not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("respec_enabled") and not step.has("service_id") and not step.has("visible") and not step.has("status_contains"):
 			return "client_steps[%d] (%s) requires a bishop panel expectation" % [index, stype]
@@ -2124,6 +2181,12 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		var mode := str(step.get("mode", ""))
 		if not ["acquired", "name", "rarity", "slot"].has(mode):
 			return "client_steps[%d] (%s) requires mode acquired, name, rarity, or slot" % [index, stype]
+	if stype == "set_market_publish_price":
+		if int(step.get("price_gold", 0)) <= 0:
+			return "client_steps[%d] (%s) requires positive price_gold" % [index, stype]
+	if stype == "click_market_publish_item":
+		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
+			return "client_steps[%d] (%s) requires stash_item_id, item_def_id, or rolled" % [index, stype]
 	if stype == "assert_stash_filter":
 		if not step.has("search_text") and not step.has("sort_mode") and not step.has("filtered_equals") and not step.has("first_item_def_id"):
 			return "client_steps[%d] (%s) requires search_text, sort_mode, filtered_equals, or first_item_def_id" % [index, stype]

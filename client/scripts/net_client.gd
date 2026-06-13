@@ -270,9 +270,12 @@ func market_summary() -> Dictionary:
 	return {"published_listings": 0, "incoming_bids": 0, "_error": str(r)}
 
 
-func create_market_listing(stash_item_id: String) -> Dictionary:
+func create_market_listing(stash_item_id: String, price_gold: int = 0) -> Dictionary:
+	var body := {"stash_item_id": stash_item_id}
+	if price_gold > 0:
+		body["price_gold"] = price_gold
 	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings",
-		["Authorization: Bearer " + token], JSON.stringify({"stash_item_id": stash_item_id}))
+		["Authorization: Bearer " + token], JSON.stringify(body))
 	if r.get("_code", 0) == 201 and r.has("body"):
 		return r["body"]
 	push_error("create_market_listing failed: %s" % r)

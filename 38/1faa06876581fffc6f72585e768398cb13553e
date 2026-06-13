@@ -1,0 +1,74 @@
+client/scripts/main.gd
+  s_3c4701eda0c7bb::t_cf891c10c65974 4857,5517,5519-5526,5547,5556,5987,6001
+shared/rules/interactables.v0.schema.json
+  s_3c4701eda0c7bb::t_cf891c10c65974 23
+PROGRESS.md
+  s_3c4701eda0c7bb::t_e8a5ef319b1705 15,18,152,323,453-456
+.maintainability/file-size-baseline.tsv
+  s_3c4701eda0c7bb::t_e8a5ef319b1705 7
+  s_3c4701eda0c7bb::t_2fe6a813b90e9f 16,18
+server/internal/game/game_test.go
+  s_3c4701eda0c7bb::t_4aab950cea627a 1477-1478,1505,1556,1583,1588,1615,1620,1634
+docs/as-built/v131_purple-town-unique-chest.md
+  s_3c4701eda0c7bb::t_e8a5ef319b1705 1-34
+  s_3c4701eda0c7bb::t_2fe6a813b90e9f 35-38
+docs/specs/v131_spec-purple-town-unique-chest.md
+  s_3c4701eda0c7bb::t_e8a5ef319b1705 3,74,76-78
+  s_3c4701eda0c7bb::t_3b641f1f7aba5d 1-2,4-73,75
+docs/plans/v131_2026-06-13-purple-town-unique-chest.md
+  s_3c4701eda0c7bb::t_2fe6a813b90e9f 56-58
+  s_3c4701eda0c7bb::t_8009d23a4f2df6 1-42,48-53,59-72,76-87,90-91,93,95,97-109,112,114-125,129-135,141-145
+  s_3c4701eda0c7bb::t_e8a5ef319b1705 43-47,54-55,73-75,88-89,92,94,96,110-111,113,126-128,136-140
+tools/bot/test_protocol.py
+  s_3c4701eda0c7bb::t_73bbdb7663b665 516-521,523,1231-1242,1244
+  s_3c4701eda0c7bb::t_eeb852e5674474 32,522,1243,1245
+shared/rules/interactables.v0.json
+  s_3c4701eda0c7bb::t_cf891c10c65974 55-59
+tools/bot/run.py
+  s_3c4701eda0c7bb::t_eeb852e5674474 37
+  s_3c4701eda0c7bb::t_73bbdb7663b665 546-549,3703-3704,4042-4043
+server/internal/game/unique_chest_test.go
+  s_3c4701eda0c7bb::t_b6805cf8240910 99
+  s_3c4701eda0c7bb::t_69165cbfc1c8d6 1-98,100-124
+server/internal/game/rules.go
+  s_3c4701eda0c7bb::t_cf891c10c65974 1659
+server/internal/replay/replay_test.go
+  s_3c4701eda0c7bb::t_0f8e91e8de4a3d 688,705,766
+shared/rules/skills.v0.json
+  h_6c904e338a0e5a 327
+tools/bot/unique_effect_assertions.py
+  s_3c4701eda0c7bb::t_eeb852e5674474 1-42
+client/tests/test_golden.gd
+  s_3c4701eda0c7bb::t_afc440d841893e 504
+server/internal/game/sim.go
+  s_3c4701eda0c7bb::t_daafaaa886214f 42,2616-2617
+server/internal/game/unique_chest.go
+  s_3c4701eda0c7bb::t_daafaaa886214f 1-102
+shared/rules/worlds.v0.json
+  s_3c4701eda0c7bb::t_cf891c10c65974 617-621,701-704
+tools/validate_shared.py
+  s_3c4701eda0c7bb::t_b6805cf8240910 2681
+tools/bot/scenarios/61_purple_town_unique_chest.json
+  s_3c4701eda0c7bb::t_73bbdb7663b665 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "381faa06876581fffc6f72585e768398cb13553e",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_3c4701eda0c7bb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec204-d911-7022-b083-046dbacfc7bd",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

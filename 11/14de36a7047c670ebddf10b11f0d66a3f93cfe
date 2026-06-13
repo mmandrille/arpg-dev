@@ -1,0 +1,53 @@
+scripts/bot_client.sh
+  s_bc00fb3f98ae13::t_6e90aa26ecb812 187-189,202-203
+client/scripts/bot_scenario_runner.gd
+  s_bc00fb3f98ae13::t_58b3f4a647e279 43,57-58,208,437-438,1360-1379,1433-1450,1949-1950,2204-2206
+  s_bc00fb3f98ae13::t_b52ab563f722df 1431-1432
+  s_bc00fb3f98ae13::t_8175fa11aa8820 2202
+docs/plans/v117_2026-06-13-market-active-offer-ui.md
+  s_bc00fb3f98ae13::t_92238633a80b59 1-2,4-40,42-43,48-60,64-76,80-89,91-97
+  s_bc00fb3f98ae13::t_4da11078711efc 3,41,61-63,77-79,90,98-101
+  s_bc00fb3f98ae13::t_055596b8a73c29 44-47
+tools/bot/client_market_preflight.py
+  s_bc00fb3f98ae13::t_6e90aa26ecb812 42-60,67,71,73,79-97,100-101,103-106,108-112,121-123,145-147
+  s_bc00fb3f98ae13::t_1b52428c2684ef 107
+tools/bot/scenarios/client/38_market_active_offer_ui.json
+  s_bc00fb3f98ae13::t_091708b46a71bf 1-16,20,22-25,28-29
+  s_bc00fb3f98ae13::t_b3dd4564ecdb5f 17-19
+  s_bc00fb3f98ae13::t_b52ab563f722df 21,26-27
+docs/as-built/v117_market-active-offer-ui.md
+  s_bc00fb3f98ae13::t_4da11078711efc 1-33
+client/scripts/market_panel.gd
+  s_bc00fb3f98ae13::t_fefe52337451c7 16,38,94-107,109-119,129-130,217-224,252,255-264,272-281,286-312,384,390,405-419,494-529
+  s_bc00fb3f98ae13::t_6728747794f84a 247
+  s_bc00fb3f98ae13::t_055596b8a73c29 108,370
+  s_bc00fb3f98ae13::t_b52ab563f722df 124
+.maintainability/file-size-baseline.tsv
+  s_bc00fb3f98ae13::t_055596b8a73c29 3-4,7
+client/scripts/bot_controller.gd
+  s_bc00fb3f98ae13::t_e573943493d369 185-188,370-384,693-701
+docs/specs/v117_spec-market-active-offer-ui.md
+  s_bc00fb3f98ae13::t_92238633a80b59 1-80
+PROGRESS.md
+  s_bc00fb3f98ae13::t_4da11078711efc 15,18,138,295,426-429
+client/scripts/main.gd
+  s_bc00fb3f98ae13::t_cabdf9928c1fa3 4131-4147,6057-6065
+client/scripts/net_client.gd
+  s_bc00fb3f98ae13::t_fefe52337451c7 294-311
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1114de36a7047c670ebddf10b11f0d66a3f93cfe",
+  "prompts": {},
+  "sessions": {
+    "s_bc00fb3f98ae13": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebed0-991b-7680-9f06-9611c1dc4420",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

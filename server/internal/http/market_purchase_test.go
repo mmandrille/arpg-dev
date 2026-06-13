@@ -89,3 +89,75 @@ func TestMarketPurchaseRouteTransfersGoldAndItem(t *testing.T) {
 		t.Fatalf("repurchase status = %d body=%s", rec.Code, rec.Body.String())
 	}
 }
+
+func TestMarketOfferCancelRouteRefundsBidderItem(t *testing.T) {
+	h, db := fullServerWithStore(t)
+	ctx := context.Background()
+	suffix := ids.Token()[:12]
+	sellerID, sellerToken := loginEmail(t, h, "market-offer-cancel-seller+"+suffix+"@example.test")
+	sellerChar := createCharacter(t, h, sellerToken, "Offer Cancel Seller")
+	bidderID, bidderToken := loginEmail(t, h, "market-offer-cancel-bidder+"+suffix+"@example.test")
+	bidderChar := createCharacter(t, h, bidderToken, "Offer Cancel Bidder")
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{
+		ID:          "market_offer_cancel_listing_item_" + suffix,
+		AccountID:   sellerID,
+		CharacterID: sellerChar.CharacterID,
+		ItemDefID:   "rusty_sword",
+		Location:    store.ItemLocationInventory,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, sellerID, sellerChar.CharacterID, "market_offer_cancel_listing_item_"+suffix, "market_offer_cancel_listing_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{
+		ID:          "market_offer_cancel_bidder_item_" + suffix,
+		AccountID:   bidderID,
+		CharacterID: bidderChar.CharacterID,
+		ItemDefID:   "red_potion",
+		Location:    store.ItemLocationInventory,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.TransferCharacterItemToAccountStash(ctx, bidderID, bidderChar.CharacterID, "market_offer_cancel_bidder_item_"+suffix, "market_offer_cancel_bidder_stash_"+suffix); err != nil {
+		t.Fatal(err)
+	}
+	rec := postJSON(h, "/v0/market/listings", sellerToken, map[string]any{"stash_item_id": "market_offer_cancel_listing_stash_" + suffix})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create listing status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var listing marketListingResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &listing); err != nil {
+		t.Fatal(err)
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers", bidderToken, map[string]any{"stash_item_ids": []string{"market_offer_cancel_bidder_stash_" + suffix}})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var offer marketOfferResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &offer); err != nil {
+		t.Fatal(err)
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers/"+offer.OfferID+"/cancel", sellerToken, map[string]string{})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign cancel offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/market/listings/"+listing.ListingID+"/offers/"+offer.OfferID+"/cancel", bidderToken, map[string]string{})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("cancel offer status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var canceled marketOfferResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &canceled); err != nil {
+		t.Fatal(err)
+	}
+	if canceled.Status != store.MarketOfferCanceled {
+		t.Fatalf("canceled offer = %+v", canceled)
+	}
+	bidderStash, err := db.ListAccountStashItems(ctx, bidderID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(bidderStash) != 1 || bidderStash[0].StashItemID != "market_offer_cancel_bidder_stash_"+suffix {
+		t.Fatalf("bidder stash after route cancel = %+v", bidderStash)
+	}
+}

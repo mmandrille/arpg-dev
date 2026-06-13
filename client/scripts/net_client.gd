@@ -334,6 +334,15 @@ func accept_market_offer(listing_id: String, offer_id: String) -> Dictionary:
 	return {"_error": str(r)}
 
 
+func cancel_market_offer(listing_id: String, offer_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/offers/%s/cancel" % [listing_id, offer_id],
+		["Authorization: Bearer " + token], "{}")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("cancel_market_offer failed: %s" % r)
+	return {"_error": str(r)}
+
+
 func purchase_market_listing(listing_id: String) -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/purchase" % listing_id,
 		["Authorization: Bearer " + token], "{}")

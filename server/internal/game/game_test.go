@@ -4926,6 +4926,78 @@ func TestInventoryCapacityPickupRejectsFullBagBeforeMutation(t *testing.T) {
 	}
 }
 
+func TestPickupConsumablePrefersFirstFreeHotbarSlot(t *testing.T) {
+	sim := MustNewSim("sess_pickup_consumable_hotbar", "01", loadRules(t))
+	occupied := addStaticInventoryItem(sim, 7450, "red_potion")
+	sim.hotbar[0] = occupied.instanceID
+	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "blue_potion"}
+	sim.entities[loot.id] = loot
+
+	res := sim.Tick([]Input{{MessageID: "pick_potion", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(loot.id)}}})
+	assertAck(t, res, "pick_potion")
+	pickedID := sim.hotbar[1]
+	if pickedID == 0 {
+		t.Fatalf("pickup did not assign potion to first free hotbar slot: hotbar=%v changes=%+v", sim.hotbar, res.Changes)
+	}
+	if sim.findItemByID(pickedID) == nil {
+		t.Fatalf("hotbar item %d missing from owned inventory", pickedID)
+	}
+	if !hasInventoryAdd(res, pickedID) || !hasInventoryRemove(res, pickedID) || !hasHotbarUpdateItem(res, 1, pickedID, "blue_potion") {
+		t.Fatalf("pickup did not move potion through bag persistence into hotbar view: %+v", res.Changes)
+	}
+	if findSnapshotItemByID(sim.Snapshot().Inventory, pickedID) != nil {
+		t.Fatalf("picked hotbar potion still visible in bag snapshot: %+v", sim.Snapshot().Inventory)
+	}
+}
+
+func TestPickupConsumableFallsBackToBagWhenActiveHotbarFull(t *testing.T) {
+	sim := MustNewSim("sess_pickup_consumable_hotbar_full", "01", loadRules(t))
+	first := addStaticInventoryItem(sim, 7460, "red_potion")
+	second := addStaticInventoryItem(sim, 7461, "blue_potion")
+	sim.hotbar[0] = first.instanceID
+	sim.hotbar[1] = second.instanceID
+	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "red_potion"}
+	sim.entities[loot.id] = loot
+
+	res := sim.Tick([]Input{{MessageID: "pick_potion", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(loot.id)}}})
+	assertAck(t, res, "pick_potion")
+	if sim.hotbar[0] != first.instanceID || sim.hotbar[1] != second.instanceID {
+		t.Fatalf("full active hotbar changed on pickup: hotbar=%v", sim.hotbar)
+	}
+	var pickedID uint64
+	for _, item := range sim.inventory {
+		if item != nil && item.instanceID != first.instanceID && item.instanceID != second.instanceID {
+			pickedID = item.instanceID
+			break
+		}
+	}
+	if pickedID == 0 || !hasInventoryAdd(res, pickedID) || hasInventoryRemove(res, pickedID) {
+		t.Fatalf("pickup did not fall back to bag add: picked=%d changes=%+v", pickedID, res.Changes)
+	}
+	if findSnapshotItemByID(sim.Snapshot().Inventory, pickedID) == nil {
+		t.Fatalf("bag fallback potion missing from snapshot inventory: %+v", sim.Snapshot().Inventory)
+	}
+}
+
+func TestPickupConsumableAllowsFullBagWhenHotbarHasSpace(t *testing.T) {
+	sim := MustNewSim("sess_pickup_consumable_full_bag_hotbar", "01", loadRules(t))
+	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
+		addStaticInventoryItem(sim, uint64(7470+i), "quest_leaf")
+	}
+	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "red_potion"}
+	sim.entities[loot.id] = loot
+
+	res := sim.Tick([]Input{{MessageID: "pick_potion", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(loot.id)}}})
+	assertAck(t, res, "pick_potion")
+	pickedID := sim.hotbar[0]
+	if pickedID == 0 || sim.bagOccupancyCount() != inventoryCapacityForRows(baseInventoryRows) {
+		t.Fatalf("full bag hotbar pickup failed: picked=%d bag=%d changes=%+v", pickedID, sim.bagOccupancyCount(), res.Changes)
+	}
+	if !hasInventoryAdd(res, pickedID) || !hasInventoryRemove(res, pickedID) || !hasHotbarUpdateItem(res, 0, pickedID, "red_potion") {
+		t.Fatalf("full bag pickup missing hotbar move changes: %+v", res.Changes)
+	}
+}
+
 func TestInventoryCapacityUnequipAndShrinkRejectBeforeMutation(t *testing.T) {
 	sim := MustNewSim("sess_inventory_unequip_full", "01", loadRules(t))
 	sword := addStaticInventoryItem(sim, 7500, "rusty_sword")

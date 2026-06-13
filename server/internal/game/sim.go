@@ -2473,16 +2473,25 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 		s.pickUpGoldForPlayer(e, s.playerID, in.CorrelationID, ackMessageID, res)
 		return
 	}
-	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
+	itemDefID := e.itemDefID
+	itemSlot := s.itemSlot(itemDefID, e.rollPayload)
+	hotbarSlot := 0
+	assignToHotbar := false
+	if e.rollPayload == nil {
+		if def, ok := s.rules.Items[itemDefID]; ok && def.Category == "consumable" {
+			hotbarSlot, assignToHotbar = s.firstEmptyActiveHotbarSlot()
+		}
+	}
+	if !assignToHotbar && s.bagOccupancyCount()+1 > s.inventoryCapacity() {
 		res.reject(in.MessageID, "inventory_full")
 		return
 	}
 
 	item := &invItem{
 		instanceID:  s.alloc(),
-		itemDefID:   e.itemDefID,
+		itemDefID:   itemDefID,
 		rollPayload: cloneRollPayload(e.rollPayload),
-		slot:        s.itemSlot(e.itemDefID, e.rollPayload),
+		slot:        itemSlot,
 		equipped:    false,
 	}
 
@@ -2491,6 +2500,22 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 
 	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
+	if assignToHotbar {
+		itemID := idStr(item.instanceID)
+		itemView := s.itemView(item)
+		s.hotbar[hotbarSlot] = item.instanceID
+		res.Changes = append(res.Changes,
+			Change{Op: OpInventoryRemove, ItemInstanceID: &itemID},
+			Change{
+				Op:             OpHotbarUpdate,
+				SlotIndex:      hotbarSlot,
+				ItemInstanceID: &itemID,
+				Item:           &itemView,
+				InventoryRows:  intPtr(s.inventoryRows()),
+				InventoryCap:   intPtr(s.inventoryCapacity()),
+			},
+		)
+	}
 	res.Events = append(res.Events, Event{
 		EventType:      "item_picked_up",
 		EntityID:       idStr(s.playerID),
@@ -5797,6 +5822,19 @@ func (s *Sim) hotbarHasItemExcept(instanceID uint64, exceptSlot int) bool {
 		}
 	}
 	return false
+}
+
+func (s *Sim) firstEmptyActiveHotbarSlot() (int, bool) {
+	capacity := s.hotbarCapacity()
+	if len(s.hotbar) != maxHotbarCapacity {
+		s.hotbar = make([]uint64, maxHotbarCapacity)
+	}
+	for i := 0; i < capacity; i++ {
+		if s.hotbar[i] == 0 {
+			return i, true
+		}
+	}
+	return 0, false
 }
 
 func (s *Sim) hotbarView() []HotbarSlotView {

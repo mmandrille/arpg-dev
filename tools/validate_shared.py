@@ -902,7 +902,7 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"class weapon {item_id} is valid")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -2158,7 +2158,7 @@ def cross_checks(report: Report) -> None:
             report.fail("shop slot_base", f"missing template slots {missing_slots}")
         else:
             report.ok("shop slot_base covers current template slots")
-        template_stats = set()
+        template_stats = {"str", "dex", "vit", "magic", "all_skills"}
         for template in item_templates["templates"].values():
             template_stats.update(template.get("base_stats", {}))
             template_stats.update(roll["stat"] for roll in template.get("rollable_stats", []))
@@ -2242,8 +2242,40 @@ def cross_checks(report: Report) -> None:
 
         rarity_order = sorted(rarities)
 
-        def weighted_rollable_stat(template: dict, rng: ShopRNG) -> dict | None:
-            stats = template.get("rollable_stats", [])
+        def item_rarity_rank(rarity_id: str) -> int:
+            return {"common": 0, "magic": 1, "rare": 2, "unique": 3}.get(rarity_id, -1)
+
+        def scaled_attribute_roll_range(source_depth: int) -> tuple[int, int]:
+            if source_depth < 1:
+                source_depth = 1
+            if source_depth <= 1:
+                return 1, 3
+            progress = min(1.0, max(0.0, float(source_depth - 1) / 99.0))
+            max_value = round(3.0 + 47.0 * math.pow(progress, 1.15))
+            if max_value < 3:
+                max_value = 3
+            min_value = max(1, math.floor(float(max_value) * 0.35))
+            return int(min_value), int(max_value)
+
+        def scaled_all_skills_roll_range(source_depth: int) -> tuple[int, int] | None:
+            if source_depth < 10:
+                return None
+            return 1, max(1, source_depth // 10)
+
+        def rollable_stats_for_rarity(template: dict, rarity_id: str, source_depth: int) -> list[dict]:
+            stats = list(template.get("rollable_stats", []))
+            if item_rarity_rank(rarity_id) >= item_rarity_rank("magic"):
+                min_value, max_value = scaled_attribute_roll_range(source_depth)
+                for stat in ("str", "dex", "vit", "magic"):
+                    stats.append({"stat": stat, "min": min_value, "max": max_value, "weight": 2})
+            if item_rarity_rank(rarity_id) >= item_rarity_rank("rare"):
+                all_skills_range = scaled_all_skills_roll_range(source_depth)
+                if all_skills_range is not None:
+                    min_value, max_value = all_skills_range
+                    stats.append({"stat": "all_skills", "min": min_value, "max": max_value, "weight": 1})
+            return stats
+
+        def weighted_rollable_stat(stats: list[dict], rng: ShopRNG) -> dict | None:
             total = sum(int(stat["weight"]) for stat in stats)
             if total <= 0:
                 return None
@@ -2254,7 +2286,7 @@ def cross_checks(report: Report) -> None:
                     return stat
             return stats[-1]
 
-        def roll_template(template_id: str, rng: ShopRNG) -> dict:
+        def roll_template(template_id: str, rng: ShopRNG, source_depth: int = 1) -> dict:
             template = item_templates["templates"][template_id]
             total = sum(int(rarities[rarity_id]["weight"]) for rarity_id in rarity_order)
             roll = rng.intn(total)
@@ -2265,8 +2297,9 @@ def cross_checks(report: Report) -> None:
                     rarity_id = candidate
                     break
             stats = dict(template.get("base_stats", {}))
+            rollable_stats = rollable_stats_for_rarity(template, rarity_id, source_depth)
             for _ in range(int(rarities[rarity_id]["stat_rolls"])):
-                stat = weighted_rollable_stat(template, rng)
+                stat = weighted_rollable_stat(rollable_stats, rng)
                 if stat is None:
                     continue
                 stats[stat["stat"]] = int(stats.get(stat["stat"], 0)) + int(stat["min"]) + rng.intn(int(stat["max"]) - int(stat["min"]) + 1)
@@ -2309,7 +2342,7 @@ def cross_checks(report: Report) -> None:
                     template = item_templates["templates"].get(template_id)
                     if not template or template.get("category") != "equipment" or not template.get("equippable"):
                         continue
-                    payload = roll_template(template_id, rng)
+                    payload = roll_template(template_id, rng, depth)
                     buy = generated_buy_price(template_id, payload["rarity"], payload["rolled_stats"])
                     offer_index = len(out)
                     out.append({
@@ -2346,7 +2379,7 @@ def cross_checks(report: Report) -> None:
         if not failed_offers:
             report.ok("shop_offers golden matches deterministic catalog")
 
-        stat_order = ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"]
+        stat_order = ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"]
 
         def comparison_deltas(offered: dict, equipped: dict) -> list[dict]:
             out = []

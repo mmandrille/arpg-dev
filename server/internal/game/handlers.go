@@ -1183,7 +1183,7 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		res.reject(in.MessageID, "player_dead")
 		return
 	}
-	rank := s.progression.SkillRanks[skillID]
+	rank := s.effectiveSkillRank(skillID)
 	if rank <= 0 {
 		res.reject(in.MessageID, "skill_not_learned")
 		return

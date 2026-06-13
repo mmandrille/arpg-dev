@@ -1028,13 +1028,13 @@ func _stat_lines_for_tooltip(stats: Dictionary, signed: bool) -> Array:
 				lines.append("%s: %s" % [_display_stat("damage_max"), _format_stat_value(stats.get("damage_max", 0), false)])
 		else:
 			lines.append("Damage: %s-%s" % [str(stats.get("damage_min", "?")), str(stats.get("damage_max", "?"))])
-	for key in ["armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "hotbar_slots", "inventory_rows"]:
+	for key in ["str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"]:
 		if not stats.has(key):
 			continue
 		var value := int(stats.get(key, 0))
 		if value == 0:
 			continue
-		lines.append("%s: %s" % [_display_stat(key), _format_stat_value(value, key == "block_percent" or key == "attack_speed_percent")])
+		lines.append("%s: %s" % [_display_stat(key), _format_stat_value(value, key == "block_percent" or key == "attack_speed_percent" or key == "skill_damage_percent")])
 	return lines
 
 

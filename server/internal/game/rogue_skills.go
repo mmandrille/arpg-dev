@@ -204,7 +204,7 @@ func (s *Sim) startPoisonDot(player *entity, target *entity, skillID string, def
 	if player == nil || target == nil || sourceDamage < 0 {
 		return
 	}
-	rank := s.progression.SkillRanks[skillID]
+	rank := s.effectiveSkillRank(skillID)
 	if rank < 1 {
 		rank = 1
 	}

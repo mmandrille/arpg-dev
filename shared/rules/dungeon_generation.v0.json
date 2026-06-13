@@ -43,8 +43,8 @@
   },
   "chest_placement": {
     "enabled": true,
-    "chance_weight": 5,
-    "no_chest_weight": 95,
+    "chance_weight": 10,
+    "no_chest_weight": 90,
     "interactable_def_id": "treasure_chest",
     "loot_table": "guarded_chest_drop",
     "monster_count_bonus": 2,

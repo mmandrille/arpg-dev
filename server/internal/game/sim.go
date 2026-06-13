@@ -676,7 +676,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		case lootEntity:
 			loot := s.newLootEntity(preset.ItemDefID, preset.Position, nil, goldRollContext{levelNum: level.levelNum})
 			if preset.ItemTemplateID != "" {
-				rolled, ok := s.rollItemTemplate(preset.ItemTemplateID)
+				rolled, ok := s.rollItemTemplate(preset.ItemTemplateID, absInt(level.levelNum))
 				if !ok {
 					return ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
 				}
@@ -2413,7 +2413,7 @@ func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius floa
 		itemDefID := drop.ItemDefID
 		var payload *ItemRollPayload
 		if drop.ItemTemplateID != "" {
-			rolled, ok := s.rollItemTemplate(drop.ItemTemplateID)
+			rolled, ok := s.rollItemTemplate(drop.ItemTemplateID, s.itemRollSourceDepth(goldCtx))
 			if !ok {
 				continue
 			}
@@ -2620,7 +2620,9 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(e))})
 	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
 	if e.interactableDefID == treasureChestDefID && e.lootTable != "" {
-		s.spawnLootDrops(s.rules.LootDrops(e.lootTable, s.rng), e.pos, s.targetInteractionRadius(e), in.CorrelationID, res, goldRollContext{levelNum: s.activeLevel().levelNum})
+		drops := s.rules.LootDrops(e.lootTable, s.rng)
+		drops = append(drops, LootDrop{ItemDefID: goldItemDefID})
+		s.spawnLootDrops(drops, e.pos, s.targetInteractionRadius(e), in.CorrelationID, res, goldRollContext{levelNum: s.activeLevel().levelNum})
 	}
 	if ack {
 		res.ack(in.MessageID)
@@ -5529,8 +5531,24 @@ func combatEvent(eventType string, sourceID, targetID uint64, corr string, outco
 	}
 }
 
-func (s *Sim) rollItemTemplate(templateID string) (ItemRollPayload, bool) {
-	return s.rules.rollItemTemplateWithRNG(templateID, s.rng)
+func (s *Sim) rollItemTemplate(templateID string, sourceDepth int) (ItemRollPayload, bool) {
+	return s.rules.rollItemTemplateWithRNG(templateID, s.rng, sourceDepth)
+}
+
+func (s *Sim) itemRollSourceDepth(ctx goldRollContext) int {
+	depth := absInt(ctx.levelNum)
+	if depth < 1 {
+		depth = 1
+	}
+	if ctx.monsterRarityID != "" {
+		if rarity, ok := s.rules.DungeonGeneration.MonsterRarity(ctx.monsterRarityID); ok {
+			depth += rarity.LootDepthOffset
+		}
+	}
+	if depth < 1 {
+		return 1
+	}
+	return depth
 }
 
 func weightedRollableStat(stats []RollableStatDef, rng *RNG) (RollableStatDef, bool) {
@@ -6339,12 +6357,13 @@ func (s *Sim) SkillProgressionView() SkillProgressionView {
 	skills := make([]SkillProgressionSkillView, 0, len(s.rules.Skills))
 	for _, skillID := range sortedStringKeys(s.rules.Skills) {
 		def := s.rules.Skills[skillID]
-		rank := s.progression.SkillRanks[skillID]
+		baseRank := s.progression.SkillRanks[skillID]
+		rank := s.effectiveSkillRank(skillID)
 		skills = append(skills, SkillProgressionSkillView{
 			SkillID:  skillID,
 			Rank:     rank,
 			MaxRank:  def.MaxRank,
-			CanSpend: s.progression.UnspentSkillPoints > 0 && rank < def.MaxRank && s.skillClassAllowed(def) && s.skillRequirementsMet(def, rank+1),
+			CanSpend: s.progression.UnspentSkillPoints > 0 && baseRank < def.MaxRank && s.skillClassAllowed(def) && s.skillRequirementsMet(def, baseRank+1),
 		})
 	}
 	return SkillProgressionView{
@@ -6427,6 +6446,11 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 
 func (s *Sim) effectiveBaseStatsView() BaseStatsView {
 	stats := s.progression.BaseStats
+	equipment := s.equipmentBaseStatBonuses()
+	stats.Str += equipment.Str
+	stats.Dex += equipment.Dex
+	stats.Vit += equipment.Vit
+	stats.Magic += equipment.Magic
 	if len(s.skillEffects) == 0 {
 		return stats
 	}
@@ -6449,6 +6473,47 @@ func (s *Sim) effectiveBaseStatsView() BaseStatsView {
 		}
 	}
 	return stats
+}
+
+func (s *Sim) equipmentBaseStatBonuses() BaseStatsView {
+	out := BaseStatsView{}
+	for _, slot := range equipmentSlots {
+		item := s.findItemByID(s.equipped[slot])
+		if item == nil {
+			continue
+		}
+		stats := s.statsForInventoryItem(item)
+		out.Str += stats["str"]
+		out.Dex += stats["dex"]
+		out.Vit += stats["vit"]
+		out.Magic += stats["magic"]
+	}
+	return out
+}
+
+func (s *Sim) effectiveSkillRank(skillID string) int {
+	baseRank := s.progression.SkillRanks[skillID]
+	if baseRank <= 0 {
+		return 0
+	}
+	rank := baseRank + s.allSkillsBonus()
+	if def, ok := s.rules.Skills[skillID]; ok && def.MaxRank > 0 && rank > def.MaxRank {
+		rank = def.MaxRank
+	}
+	return rank
+}
+
+func (s *Sim) allSkillsBonus() int {
+	bonus := 0
+	for _, slot := range equipmentSlots {
+		item := s.findItemByID(s.equipped[slot])
+		if item == nil {
+			continue
+		}
+		stats := s.statsForInventoryItem(item)
+		bonus += stats["all_skills"]
+	}
+	return bonus
 }
 
 func scaleStatPercent(value int, percent int) int {

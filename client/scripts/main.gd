@@ -836,6 +836,7 @@ func _process(delta: float) -> void:
 		for env in client.poll():
 			_handle_message(env)
 		_advance_boss_phase_display(delta)
+		_tick_skill_cooldowns(delta)
 	_sync_progression_interactivity()
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
@@ -3636,6 +3637,32 @@ func _sync_skill_bar_selection() -> void:
 	skill_bar.set_skill_cooldowns(skill_cooldowns)
 	skill_bar.set_player_mana(player_mana, player_max_mana)
 	skill_bar.set_interactive(not _skill_cast_blocked(selected_skill_id))
+
+
+func _tick_skill_cooldowns(delta: float) -> void:
+	if skill_cooldowns.is_empty():
+		return
+	var elapsed_ticks := maxf(0.0, delta) * SERVER_TICK_RATE
+	var next: Array = []
+	var changed := false
+	for row in skill_cooldowns:
+		if typeof(row) != TYPE_DICTIONARY:
+			changed = true
+			continue
+		var rec := (row as Dictionary).duplicate(true)
+		var remaining := float(rec.get("remaining_ticks", 0.0)) - elapsed_ticks
+		if remaining <= 0.0:
+			changed = true
+			continue
+		var next_remaining := int(ceil(remaining))
+		if next_remaining != int(rec.get("remaining_ticks", 0)):
+			changed = true
+		rec["remaining_ticks"] = next_remaining
+		next.append(rec)
+	if changed:
+		skill_cooldowns = next
+		if skill_bar != null:
+			skill_bar.set_skill_cooldowns(skill_cooldowns)
 
 
 func _auto_select_right_click_skill() -> void:

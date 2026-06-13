@@ -82,6 +82,11 @@
       "properties": {
         "damage_min": { "type": "integer", "minimum": 0 },
         "damage_max": { "type": "integer", "minimum": 0 },
+        "str": { "type": "integer", "minimum": 0 },
+        "dex": { "type": "integer", "minimum": 0 },
+        "vit": { "type": "integer", "minimum": 0 },
+        "magic": { "type": "integer", "minimum": 0 },
+        "all_skills": { "type": "integer", "minimum": 0 },
         "max_hp": { "type": "integer", "minimum": 0 },
         "max_mana": { "type": "integer", "minimum": 0 },
         "armor": { "type": "integer", "minimum": 0 },
@@ -99,7 +104,7 @@
       "required": ["stat", "min", "max", "weight"],
       "additionalProperties": false,
       "properties": {
-        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"] },
+        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"] },
         "min": { "type": "integer" },
         "max": { "type": "integer" },
         "weight": { "type": "integer", "minimum": 1 }

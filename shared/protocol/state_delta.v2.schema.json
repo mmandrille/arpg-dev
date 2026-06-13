@@ -79,6 +79,11 @@
       "properties": {
         "damage_min": { "type": "integer", "minimum": 0 },
         "damage_max": { "type": "integer", "minimum": 0 },
+        "str": { "type": "integer", "minimum": 0 },
+        "dex": { "type": "integer", "minimum": 0 },
+        "vit": { "type": "integer", "minimum": 0 },
+        "magic": { "type": "integer", "minimum": 0 },
+        "all_skills": { "type": "integer", "minimum": 0 },
         "max_hp": { "type": "integer", "minimum": 0 },
         "armor": { "type": "integer", "minimum": 0 },
         "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },

@@ -1,0 +1,48 @@
+client/scripts/unique_effect_tooltip.gd
+  s_beaba83981e74e::t_45e2a8011ba883 1-35
+client/scripts/item_rules_loader.gd
+  s_beaba83981e74e::t_45e2a8011ba883 3,18,31,45-48,85-94
+docs/specs/v134_spec-unique-inspection-ui.md
+  s_beaba83981e74e::t_54cab81bad1e67 1-2,4-56
+  s_beaba83981e74e::t_0b11f4bd282851 3
+docs/plans/v134_2026-06-13-unique-inspection-ui.md
+  s_beaba83981e74e::t_54cab81bad1e67 1-2,4-35,39-40,43-53,57-62,66-73,75,78-84,86,89-101,105-112
+  s_beaba83981e74e::t_0b11f4bd282851 3,36-38,41-42,54-56,63-65,74,76-77,85,87-88,102-104,113-115
+client/scripts/inventory_panel.gd
+  s_beaba83981e74e::t_c09e87ba721d93 633
+  s_beaba83981e74e::t_3b9b91665e9208 9,1021
+client/tests/test_stash_panel.gd
+  s_beaba83981e74e::t_262f92a4e4ef4d 7,234-245,247-249
+  s_beaba83981e74e::t_c168544f6ae8f9 303-309
+  s_beaba83981e74e::t_43a2f36169ec4b 246
+client/scripts/stash_panel.gd
+  s_beaba83981e74e::t_c09e87ba721d93 9,569
+client/scripts/market_panel.gd
+  s_beaba83981e74e::t_c09e87ba721d93 12,892
+client/tests/test_shop_panel.gd
+  s_beaba83981e74e::t_262f92a4e4ef4d 271-282,284-286,288-290,391,393-395
+  s_beaba83981e74e::t_43a2f36169ec4b 287,392
+  s_beaba83981e74e::t_e2c772b99b0579 283
+docs/as-built/v134_unique-inspection-ui.md
+  s_beaba83981e74e::t_0b11f4bd282851 1-28
+client/scripts/unique_effect_tooltip.gd.uid
+  s_beaba83981e74e::t_e117920fb20a46 1
+PROGRESS.md
+  s_beaba83981e74e::t_0b11f4bd282851 15,18,155,329,459-461
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1567cc117170115974b307f18d3e696a4a9f94c0",
+  "prompts": {},
+  "sessions": {
+    "s_beaba83981e74e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec25d-47e7-77c0-a56a-06124fe8de87",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

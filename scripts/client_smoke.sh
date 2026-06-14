@@ -107,6 +107,7 @@ run_gate "GDScript shop panel test" "[gdtest] PASS: test_shop_panel" res://tests
 
 # 2j. Town service bridge routing test (server-independent; v127).
 run_gate "GDScript town service bridge test" "[gdtest] PASS: test_town_service_bridge" res://tests/test_town_service_bridge.gd
+run_gate "GDScript inventory transfer router test" "[gdtest] PASS: test_inventory_transfer_router" res://tests/test_inventory_transfer_router.gd
 
 # 2k. Stash panel render and intent payload test (server-independent; v50).
 run_gate "GDScript stash panel test" "[gdtest] PASS: test_stash_panel" res://tests/test_stash_panel.gd

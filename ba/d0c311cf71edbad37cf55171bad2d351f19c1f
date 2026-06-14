@@ -1,0 +1,37 @@
+docs/specs/v172_spec-loot-filter-persistence.md
+  s_f9c66ca3cb4339::t_b368a7c7aa9099 3
+  s_f9c66ca3cb4339::t_11281d6eee096c 1-2,4-56
+docs/plans/v172_2026-06-14-loot-filter-persistence.md
+  s_f9c66ca3cb4339::t_b9a33f177504c8 1-2,4-36,38-54,58-68,71-82,85-92,96-101
+  s_f9c66ca3cb4339::t_b368a7c7aa9099 3,37,55-57,69-70,83-84,93-95
+client/scripts/client_settings.gd
+  s_f9c66ca3cb4339::t_1140b0dd0e7626 12,14,32,91-98,135-140,148,157,174,246-249
+PROGRESS.md
+  s_f9c66ca3cb4339::t_f5f52d2b403dc7 15,18,191,404,537-541,1328
+client/tests/test_loot_label_filter.gd
+  s_f9c66ca3cb4339::t_dadc2c3f185ebf 19-20,77-90
+client/scripts/main.gd
+  s_f9c66ca3cb4339::t_28c89c793b8654 299,2242-2243
+docs/as-built/v172_loot-filter-persistence.md
+  s_f9c66ca3cb4339::t_b368a7c7aa9099 1-28
+client/tests/test_client_bot.gd
+  s_f9c66ca3cb4339::t_3dfc400e66e7fe 56,892-898,907,912,917
+client/scripts/loot_label_filter.gd
+  s_f9c66ca3cb4339::t_8a585d5e0e24a0 55-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bad0c311cf71edbad37cf55171bad2d351f19c1f",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

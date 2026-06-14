@@ -1,0 +1,36 @@
+skills/README.md
+  s_6d95ae0bb7b3ed::t_73328fdac1ee09 14-15,21,23
+CLAUDE.md
+  s_6d95ae0bb7b3ed::t_73328fdac1ee09 191
+skills/finish/SKILL.md
+  s_6d95ae0bb7b3ed::t_73328fdac1ee09 66
+skills/review/SKILL.md
+  s_6d95ae0bb7b3ed::t_73328fdac1ee09 7-9,24-27
+PROGRESS.md
+  s_6d95ae0bb7b3ed::t_73328fdac1ee09 199-203,1355-1357
+skills/refactor/SKILL.md
+  s_6d95ae0bb7b3ed::t_8f4170ae9323aa 1-186
+skills/autoloop/SKILL.md
+  s_6d95ae0bb7b3ed::t_8f4170ae9323aa 75
+  s_6d95ae0bb7b3ed::t_7e2e1a7b24ea6d 4-10,14,25,29-36,39-40,47-51,86-90,111-113,132-135,147-152,156-158,172,300,302,307-312
+AGENTS.md
+  s_6d95ae0bb7b3ed::t_73328fdac1ee09 5,25-26,28,34,36
+scripts/link-agent-skills.sh
+  s_6d95ae0bb7b3ed::t_baca75b324a463 11,24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "69316ffc323aa1411afeee10478df1d27224b192",
+  "prompts": {},
+  "sessions": {
+    "s_6d95ae0bb7b3ed": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec859-f62a-7d21-83ea-645e02f799f1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

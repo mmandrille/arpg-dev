@@ -1,0 +1,21 @@
+client/scripts/inventory_panel.gd
+  s_68dc3007c896cc::t_31f6d4de68205c 281,288-289
+client/tests/test_shop_panel.gd
+  s_68dc3007c896cc::t_9be52957591702 336-341
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ba4a3cd27d7c2417b8d24f7c7e4475ee063e786a",
+  "prompts": {},
+  "sessions": {
+    "s_68dc3007c896cc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec6a9-43a2-71e1-b61a-6cd772ae9f29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

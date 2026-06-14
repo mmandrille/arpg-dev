@@ -112,9 +112,12 @@ Rules:
    baseline. The +25 allowance exists for incidental drift, not for routinely growing coordinators.
 5. New gameplay or tooling domains start in their own focused file. Do not add a new domain to a
    large coordinator just because related code already lives there.
-6. `make maintainability` prints the current grandfathered file count and total line count. Reviews
+6. A documented exception that grows a grandfathered coordinator is allowed only when the same slice
+   extracts at least as many lines from that file as it adds. If that net non-positive split is not
+   possible, the next slice must be a payback slice that shrinks the touched coordinator.
+7. `make maintainability` prints the current grandfathered file count and total line count. Reviews
    should record that trend and expect it to move down over time.
-7. `make ci` runs `make maintainability`; the ratchet is a CI gate, not an advisory check.
+8. `make ci` runs `make maintainability`; the ratchet is a CI gate, not an advisory check.
 
 This is a reduction ratchet, not a repo-wide rewrite mandate: shrink large files opportunistically,
 lock in those reductions, and block new large files from appearing.

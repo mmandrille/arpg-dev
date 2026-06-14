@@ -8,6 +8,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from tools.content_manifest import ManifestError, merge_catalog_files, skill_rule_entries
+from tools.validate_main_config import validate_main_config_gameplay
 from tools.validate_skills import validate_skill_catalogs
 
 
@@ -94,3 +95,33 @@ def test_skill_validator_reports_unknown_skill_class() -> None:
     )
 
     assert any("skill classes: unknown classes" in failure and "ghost" in failure for failure in report.failures)
+
+
+def test_main_config_validator_reports_invalid_drop_rate() -> None:
+    main_config = copy.deepcopy(load(ROOT / "shared/rules/main_config.v0.json"))
+    main_config["gameplay"]["base_drop_rate_percent"] = 101
+    dungeon_generation = load(ROOT / "shared/rules/dungeon_generation.v0.json")
+    treasure_class_defs = load(ROOT / "shared/rules/treasure_classes.v0.json")["classes"]
+    loot = load(ROOT / "shared/rules/loot_tables.v0.json")
+    report = CapturingReport()
+
+    def treasure_class_id_for_table(table_id: str) -> str | None:
+        loot_def = loot["loot_tables"].get(table_id)
+        if loot_def and loot_def.get("mode") == "treasure_class":
+            return str(loot_def.get("treasure_class_id"))
+        if table_id in treasure_class_defs:
+            return table_id
+        return None
+
+    validate_main_config_gameplay(
+        report,
+        main_config["gameplay"],
+        dungeon_generation,
+        treasure_class_defs,
+        treasure_class_id_for_table,
+    )
+
+    assert any(
+        "main_config gameplay: base_drop_rate_percent must be within [0,100]" in failure
+        for failure in report.failures
+    )

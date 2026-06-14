@@ -31,5 +31,5 @@ server/internal/store/store_test.go	1645
 skills/showme/scripts/visual_capture.gd	931
 tools/bot/run.py	4269
 tools/bot/test_protocol.py	1400
-tools/validate_shared.py	3149
+tools/validate_shared.py	3140
 client/tests/test_item_visuals.gd	710

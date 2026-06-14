@@ -27,6 +27,7 @@ try:
         skill_rule_entries,
     )
     from .validate_i18n import validate_i18n_catalog, validate_locale_catalog
+    from .validate_main_config import validate_main_config_gameplay
     from .validate_skills import validate_skill_catalogs
     from .validate_unique_items import validate_unique_items_catalog
 except ImportError:  # pragma: no cover - direct script execution
@@ -37,6 +38,7 @@ except ImportError:  # pragma: no cover - direct script execution
         skill_rule_entries,
     )
     from validate_i18n import validate_i18n_catalog, validate_locale_catalog  # type: ignore[no-redef]
+    from validate_main_config import validate_main_config_gameplay  # type: ignore[no-redef]
     from validate_skills import validate_skill_catalogs  # type: ignore[no-redef]
     from validate_unique_items import validate_unique_items_catalog  # type: ignore[no-redef]
 
@@ -1150,45 +1152,14 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok("equipment_lab treasure class covers every v28 template")
 
-    if int(main_gameplay.get("base_attack_interval_ticks", 0)) <= 0:
-        report.fail("main_config gameplay", "base_attack_interval_ticks must be positive")
-    elif float(main_gameplay.get("base_movement_speed", 0)) <= 0:
-        report.fail("main_config gameplay", "base_movement_speed must be positive")
-    else:
-        report.ok("main_config gameplay owns attack cadence and movement speed")
-
-    def treasure_class_at_least_one_drop_rate(class_id: str) -> int | None:
-        treasure_class = treasure_class_defs.get(class_id)
-        if treasure_class is None:
-            return None
-        no_drop_chance = 1.0
-        for attempt in treasure_class.get("attempts", []):
-            total = int(attempt.get("success_weight", 0)) + int(attempt.get("no_drop_weight", 0))
-            if total <= 0:
-                continue
-            no_drop_chance *= int(attempt.get("no_drop_weight", 0)) / total
-        return int(round((1.0 - no_drop_chance) * 100))
-
-    monster_drop_sources = {}
-    for table_id in ["dungeon_mob_drop", *[band["monster_loot_table"] for band in dungeon_generation.get("loot_bands", [])]]:
-        treasure_class_id = treasure_class_id_for_table(table_id)
-        if not treasure_class_id:
-            continue
-        monster_drop_sources[treasure_class_id] = treasure_class_at_least_one_drop_rate(treasure_class_id)
+    validate_main_config_gameplay(
+        report,
+        main_gameplay,
+        dungeon_generation,
+        treasure_class_defs,
+        treasure_class_id_for_table,
+    )
     expected_base_drop_rate = int(main_gameplay.get("base_drop_rate_percent", -1))
-    if expected_base_drop_rate < 0 or expected_base_drop_rate > 100:
-        report.fail("main_config gameplay", "base_drop_rate_percent must be within [0,100]")
-    elif any(rate is None for rate in monster_drop_sources.values()):
-        report.fail("main_config gameplay", f"dungeon monster drop profile has unresolved sources {monster_drop_sources}")
-    else:
-        report.ok("main_config gameplay owns dungeon monster drop rate")
-
-    if int(main_gameplay.get("item_upgrade_cost_gold", -1)) < 0:
-        report.fail("main_config gameplay", "item_upgrade_cost_gold must be non-negative")
-    elif int(main_gameplay.get("item_upgrade_max_level", 0)) <= 0:
-        report.fail("main_config gameplay", "item_upgrade_max_level must be positive")
-    else:
-        report.ok("main_config gameplay owns starter item upgrade tuning")
 
     if combat.get("unarmed_reach", 0) <= 0:
         report.fail("combat unarmed_reach", "must be positive")

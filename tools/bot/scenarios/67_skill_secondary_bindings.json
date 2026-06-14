@@ -4,6 +4,10 @@
   "seed": "v157_skill_secondary_bindings",
   "title": "Skill secondary bindings",
   "description": "Authoritative skill binding array supports primary F1-F8 and secondary Shift+F1-Shift+F8 slots.",
+  "visual": {
+    "camera": { "x": 10, "y": 7, "zoom": 1.0 },
+    "post_complete_hold_s": 4.0
+  },
   "steps": [
     {
       "action": "set_skill_bindings",

@@ -18,7 +18,7 @@ server/internal/game/handlers.go	1440
 server/internal/game/rules.go	3262
 server/internal/game/shop.go	1263
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	7022
+server/internal/game/sim.go	6836
 server/internal/game/types.go	695
 server/internal/http/auth_session_test.go	1501
 server/internal/http/ws_test.go	1482

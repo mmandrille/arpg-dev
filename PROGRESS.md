@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v144 — `client-bot-runner-split` |
+| **Latest completed slice** | v145 — `bot-runtime-assertion-split` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | v145 — `bot-runtime-assertion-split` |
+| **Next slice** | TBD — run `$next` |
 | **Last engineering review** | v140 — [`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md) (2026-06-13) |
 | **Next engineering review** | v150 due before more feature batches |
 
@@ -162,6 +162,7 @@ v141_* = market-store-extraction
 v142_* = sim-load-and-players-extraction
 v143_* = client-bot-facade
 v144_* = client-bot-runner-split
+v145_* = bot-runtime-assertion-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -345,6 +346,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v142** | `sim-load-and-players-extraction` | Complete (`make ci` green) | [`v142_spec-sim-load-and-players-extraction.md`](docs/specs/v142_spec-sim-load-and-players-extraction.md) | [`v142_2026-06-13-sim-load-and-players-extraction.md`](docs/plans/v142_2026-06-13-sim-load-and-players-extraction.md) | [`as-built`](docs/as-built/v142_sim-load-and-players-extraction.md) |
 | **v143** | `client-bot-facade` | Complete (`make ci` green) | [`v143_spec-client-bot-facade.md`](docs/specs/v143_spec-client-bot-facade.md) | [`v143_2026-06-13-client-bot-facade.md`](docs/plans/v143_2026-06-13-client-bot-facade.md) | [`as-built`](docs/as-built/v143_client-bot-facade.md) |
 | **v144** | `client-bot-runner-split` | Complete (`make ci` green) | [`v144_spec-client-bot-runner-split.md`](docs/specs/v144_spec-client-bot-runner-split.md) | [`v144_2026-06-13-client-bot-runner-split.md`](docs/plans/v144_2026-06-13-client-bot-runner-split.md) | [`as-built`](docs/as-built/v144_client-bot-runner-split.md) |
+| **v145** | `bot-runtime-assertion-split` | Complete (`make ci` green) | [`v145_spec-bot-runtime-assertion-split.md`](docs/specs/v145_spec-bot-runtime-assertion-split.md) | [`v145_2026-06-13-bot-runtime-assertion-split.md`](docs/plans/v145_2026-06-13-bot-runtime-assertion-split.md) | [`as-built`](docs/as-built/v145_bot-runtime-assertion-split.md) |
 
 ---
 
@@ -474,6 +476,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Python bot runtime assertion dispatch is split out of `run.py`.** v145 moves snapshot/runtime
+assertion dispatch into `tools/bot/runtime_assertions.py`, keeps `run.py` compatibility wrappers,
+and lowers the `run.py` ratchet baseline from 5179 to 4768 lines.
 
 **Client bot runner dispatch is split out of `bot_scenario_runner.gd`.** v144 moves step
 catalog/validation, wait dispatch, assertion dispatch, and action dispatch into focused helper

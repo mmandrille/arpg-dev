@@ -29,7 +29,7 @@ server/internal/replay/replay_test.go	1565
 server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1645
 skills/showme/scripts/visual_capture.gd	931
-tools/bot/run.py	5179
+tools/bot/run.py	4768
 tools/bot/test_protocol.py	1400
 tools/validate_shared.py	3149
 client/tests/test_item_visuals.gd	710

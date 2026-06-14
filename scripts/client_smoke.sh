@@ -125,6 +125,9 @@ run_gate "GDScript boss health bar test" "[gdtest] PASS: test_boss_health_bar" r
 # 2m. Delta and snapshot state-mutation unit tests (server-independent; v53).
 run_gate "GDScript delta apply test" "[gdtest] PASS: test_delta_apply" res://tests/test_delta_apply.gd
 
+# 2n. Loot label rarity filter unit test (server-independent; v153).
+run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filter" res://tests/test_loot_label_filter.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0

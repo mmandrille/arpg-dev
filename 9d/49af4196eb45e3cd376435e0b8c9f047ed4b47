@@ -1,0 +1,33 @@
+tools/bot/test_protocol.py
+  s_23f83c83efc7fd::t_44a138608ef244 477,485,495-496
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_23f83c83efc7fd::t_c48f072a1c76e5 7,30-31,40-41
+  s_23f83c83efc7fd::t_55a357f73a2530 32,42
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_23f83c83efc7fd::t_622625d1775523 65,89
+  s_23f83c83efc7fd::t_5699a95ff79360 17,78
+  s_23f83c83efc7fd::t_c29272ad59ad32 7,16,21-22,34-36,56-64,66,83,88,91
+  s_23f83c83efc7fd::t_f4e2697a54f07c 26,31
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_23f83c83efc7fd::t_f977e8cd0d60bf 7,33,46-48
+  s_23f83c83efc7fd::t_9fcaa912ddf624 31-32
+  s_23f83c83efc7fd::t_889794500c9e10 3,25
+tools/bot/scenarios/67_skill_secondary_bindings.json
+  s_23f83c83efc7fd::t_40e0bb98aa3bea 7-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9d49af4196eb45e3cd376435e0b8c9f047ed4b47",
+  "prompts": {},
+  "sessions": {
+    "s_23f83c83efc7fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec446-d2d1-7b11-98e3-d5469ecd879e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

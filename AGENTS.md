@@ -22,7 +22,7 @@ Canonical definitions live in [`skills/`](skills/README.md). Tool paths are syml
 | `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Consolidate `PROGRESS.md` + uncommitted changes → `make ci` green → commit `feat: v{N}: {title}` |
 | `/review {vN?}` | [`skills/review/SKILL.md`](skills/review/SKILL.md) | Analyze the full repo → write overview at `docs/reviews/YYYYMMDD_vN-overview.md` plus companion reports under `docs/reviews/{backend,client,extras}/` |
 | `/showme {gear\|inventory\|...}` | [`skills/showme/SKILL.md`](skills/showme/SKILL.md) | Open or capture a focused Godot client preview for fast visual feedback |
-| `/autoloop {count}` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for up to 3 autonomous committed slices |
+| `/autoloop {count}` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for the requested number of autonomous committed slices, then run any due engineering review |
 
 Workflow: `/next` → `/spec` → `/plan` → `/execute` → `/finish`. Use `/review` when the engineering-review cadence is due, and `/showme` during client visual work when fast focused feedback is useful. Do not skip the review gates.
 

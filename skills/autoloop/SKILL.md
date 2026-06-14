@@ -5,7 +5,7 @@ description: >-
   pre-tasks, then either execute the user-provided slice idea(s) directly or,
   when no idea is provided, present a curated menu of 15 possible
   non-documentation SDD slices. Batch any blocking clarification questions
-  across the selected queue, then execute a bounded autonomous loop through
+  across the selected queue, then execute an autonomous loop through
   next, spec, plan, execute, and finish with committed slices. Use when the
   user runs $autoloop N, /autoloop N, or asks Codex to curate and run multiple
   SDD slices.
@@ -20,10 +20,10 @@ Examples:
 
 - `$autoloop 1` — present 15 ideas, then complete one selected slice after the user picks.
 - `$autoloop 1 add a town healer` — treat the inline idea as selected and complete one slice if gates pass.
-- `$autoloop 5` — present 15 ideas, then complete up to five selected slices, stopping early on any gate.
-- `$autoloop 5 idea A; idea B; idea C; idea D; idea E` — treat the inline ideas as selected and complete up to five viable slices.
+- `$autoloop 5` — present 15 ideas, then complete five selected slices, stopping early only on a hard stop.
+- `$autoloop 12 idea A; idea B; ...` — treat the inline ideas as selected and complete up to twelve viable slices.
 
-**Announce at start:** "Using the **autoloop** skill to curate slice ideas, then run a bounded autonomous SDD loop after you choose."
+**Announce at start:** "Using the **autoloop** skill to curate slice ideas, then run an autonomous SDD loop after you choose."
 
 ## Purpose
 
@@ -56,18 +56,19 @@ blockers.
 
 1. Parse `{count}` as an integer.
 2. If missing, zero, negative, or not an integer, ask the user for a valid count.
-3. If `{count} > 5`, run at most **5** slices and say the execution request was capped.
+3. Do not impose a maximum cap. The requested count is the execution limit, even when it is large.
 4. If the initial command includes idea text after the count, do **not** show
    the 15 idea menu. Treat the inline idea text as selected input and proceed
    to ordering and the batch clarification gate.
 5. If no inline idea text is provided, show **15** slice ideas before execution,
    regardless of the execution count.
 6. After inline idea parsing or user menu selection, set the execution target to the smaller of:
-   - the capped count, and
+   - the requested count, and
    - the number of viable selected ideas.
 7. If the user selects more ideas than the execution target, order all selected ideas,
    execute the first target-sized prefix, and report the rest as deferred.
-8. Stop after the execution target is completed and committed, or earlier on any stop condition.
+8. After the execution target is completed and committed, run the post-loop review gate; stop
+   earlier only on a hard stop condition.
 
 ## Defaults for non-blocking choices
 
@@ -96,7 +97,7 @@ Stop immediately and report the reason if any of these occur:
 4. CI fails after reasonable diagnosis and focused fixes.
 5. A decision requires product/design judgment not covered by the defaults.
 6. Secrets, credentials, `.env`, or local-only artifacts appear in the diff or staged changes.
-7. Completing another slice would exceed the capped count of 5.
+7. Completing another slice would exceed the requested execution target.
 8. No inline idea was provided and the user has not yet selected ideas from the generated menu.
 9. A selected idea is too vague, too large, or not verifiable enough to turn into a small slice.
 10. Batch clarification questions were emitted and the user has not answered them yet.
@@ -118,6 +119,11 @@ commands unless the user explicitly asks in a later message.
    - [`skills/plan/SKILL.md`](../plan/SKILL.md)
    - [`skills/execute/SKILL.md`](../execute/SKILL.md)
    - [`skills/finish/SKILL.md`](../finish/SKILL.md)
+   - [`skills/review/SKILL.md`](../review/SKILL.md), only when an engineering review is due
+     after the loop finishes.
+6. If `PROGRESS.md` says an engineering review is due, record that it must be handled
+   after the requested loop completes. Do **not** stop the loop or replace a selected
+   slice with review work solely because the review cadence is due.
 
 ## Phase 1 — Idea intake, menu, and selection
 
@@ -174,7 +180,7 @@ When selected ideas come from inline text or from a later menu reply:
    - smallest vertical proof next,
    - player-visible progress next,
    - bot/test proof clarity as a tie-breaker.
-4. Show the ordered execution queue and the capped execution target.
+4. Show the ordered execution queue and the execution target.
 5. Run the batch clarification gate below before beginning the per-slice loop.
 
 ## Phase 2 — Batch clarification gate
@@ -290,7 +296,28 @@ After the checkpoint and optional context hygiene:
 
 1. If only unrelated pre-existing dirty changes remain, stop and report them.
 2. If the worktree is clean and the execution target is not reached, begin the next slice.
-3. If the worktree is clean and the execution target is reached, stop and report completion.
+3. If the worktree is clean and the execution target is reached, run the post-loop review gate below.
+
+### 8. Post-loop engineering review gate
+
+After all requested slices have completed and committed:
+
+1. Re-read `PROGRESS.md`.
+2. If the engineering-review cadence is due, run the **review** skill then, after the loop's slice
+   commits are complete. This review may be forced by the autoloop flow and does not require a
+   separate user confirmation.
+3. Let the review skill write the normal review set under `docs/reviews/`.
+4. Run the review skill's required verification.
+5. Commit the review documents separately from gameplay/system slices, using the repo's review
+   commit convention if one is established; otherwise use:
+
+```text
+docs: engineering review after autoloop
+```
+
+6. If the review cannot complete, report that the requested slices are complete and explain the
+   review blocker separately.
+7. If no engineering review is due, stop and report completion.
 
 ## Reporting
 

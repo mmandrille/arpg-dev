@@ -1114,12 +1114,12 @@ func (s *Store) SetCharacterHotbarSlot(ctx context.Context, accountID, character
 }
 
 func (s *Store) GetOrCreateCharacterSkillBindings(ctx context.Context, accountID, characterID string) (CharacterSkillBindings, error) {
-	out := CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 8)}
+	out := CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 16)}
 	if err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO character_skill_bindings (account_id, character_id, slot_index, skill_id)
 			 SELECT $1, $2, slots.slot_index, ''
-			 FROM generate_series(0, 7) AS slots(slot_index)
+			 FROM generate_series(0, 15) AS slots(slot_index)
 			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $2 AND account_id = $1)
 			 ON CONFLICT (character_id, slot_index) DO NOTHING`,
 			accountID, characterID,
@@ -1218,7 +1218,7 @@ func (s *Store) SetCharacterSkillBindings(ctx context.Context, bindings Characte
 }
 
 func normalizeSkillFunctionKeys(keys []string) []string {
-	out := make([]string, 8)
+	out := make([]string, 16)
 	copy(out, keys)
 	return out
 }
@@ -2105,7 +2105,7 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 		return snap, err
 	}
 
-	snap.SkillBinds = CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 8)}
+	snap.SkillBinds = CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 16)}
 	skillRows, err := s.pool.Query(ctx,
 		`SELECT slot_index, skill_id
 		 FROM session_start_skill_bindings

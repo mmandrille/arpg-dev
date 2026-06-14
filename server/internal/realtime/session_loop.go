@@ -344,6 +344,8 @@ func (l *sessionLoop) detach(client *loopClient) {
 }
 
 func (l *sessionLoop) snapshotEnvelope(playerID uint64) outEnvelope {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	snap := l.sim.SnapshotForPlayer(playerID)
 	return outEnvelope{
 		Type:      typeSnapshot,

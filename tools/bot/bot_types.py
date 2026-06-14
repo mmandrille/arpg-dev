@@ -72,6 +72,8 @@ class RuntimeState:
     character_progression: dict[str, Any] = field(default_factory=dict)
     skill_progression: dict[str, Any] = field(default_factory=dict)
     skill_cooldowns: list[dict[str, Any]] = field(default_factory=list)
+    skill_function_keys: list[str] = field(default_factory=list)
+    right_click_skill_id: str = ""
     shop_offers: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     shop_sell_appraisals: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     shop_events: list[dict[str, Any]] = field(default_factory=list)

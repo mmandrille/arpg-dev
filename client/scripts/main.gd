@@ -58,7 +58,7 @@ const PLAYER_EVENT_CLIPS := {
 }
 const PLAYER_START_HP := 10
 const INTERACTABLE_ACTIVATION_RANGE := 1.5
-const SKILL_FUNCTION_KEY_COUNT := 8
+const SKILL_FUNCTION_KEY_COUNT := 16
 const LOCAL_UNARMED_REACH := 1.0
 const LOCAL_MONSTER_RADIUS := 0.45
 const LOCAL_LOOT_RADIUS := 0.35
@@ -138,7 +138,7 @@ var character_progression: Dictionary = {}
 var skill_progression: Dictionary = {}
 var skill_cooldowns: Array = []
 var right_click_skill_id: String = ""
-var skill_function_keys: Array = ["", "", "", "", "", "", "", ""]
+var skill_function_keys: Array = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
 var pending_skill_casts: Dictionary = {}
 var _last_holy_shield_aura_pulse_key: String = ""
 var item_rules: Dictionary:
@@ -775,7 +775,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	skill_progression = {}
 	skill_cooldowns = []
 	right_click_skill_id = ""
-	skill_function_keys = ["", "", "", "", "", "", "", ""]
+	skill_function_keys = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
 	if status_effects_bar != null:
 		status_effects_bar.clear_effects()
 	loot_ids.clear()
@@ -2447,7 +2447,8 @@ func _hotbar_slot_for_key(event: InputEventKey) -> int:
 func _skill_function_key_slot(event: InputEventKey) -> int:
 	var code := event.keycode if event.keycode != KEY_NONE else event.physical_keycode
 	if code >= KEY_F1 and code <= KEY_F8:
-		return int(code - KEY_F1)
+		var offset := 8 if event.shift_pressed else 0
+		return int(code - KEY_F1) + offset
 	return -1
 
 

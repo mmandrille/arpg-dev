@@ -842,8 +842,8 @@
       "properties": {
         "function_keys": {
           "type": "array",
-          "minItems": 8,
-          "maxItems": 8,
+          "minItems": 16,
+          "maxItems": 16,
           "items": { "type": "string" }
         },
         "right_click_skill_id": { "type": "string" }

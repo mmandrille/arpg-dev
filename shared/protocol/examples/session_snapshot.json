@@ -121,7 +121,7 @@
     { "skill_id": "magic_bolt", "remaining_ticks": 12, "total_ticks": 40 }
   ],
   "skill_bindings": {
-    "function_keys": ["magic_bolt", "heal", "", "", "", "", "", ""],
+    "function_keys": ["magic_bolt", "heal", "", "", "", "", "", "", "cleave", "", "", "", "", "", "", ""],
     "right_click_skill_id": "magic_bolt"
   },
   "recent_events": []

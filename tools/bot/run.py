@@ -805,7 +805,8 @@ async def execute_step(
         return
 
     if action == "kill_monsters":
-        monster_def_id = str(step["monster_def_id"])
+        monster_def_id = str(step.get("monster_def_id", ""))
+        monster_pack_leader = step.get("monster_pack_leader")
         max_count = int(step.get("count", 99))
         step_timeout_s = float(step.get("timeout_s", SLICE_TIMEOUT_S * max(1, max_count)))
         killed = 0
@@ -821,7 +822,7 @@ async def execute_step(
             if find_player(state) is None:
                 await pump_one(ws, state, timeout=0.1)
                 continue
-            candidates = find_live_monsters_sorted(state, monster_def_id, exclude_ids=skipped_ids)
+            candidates = find_live_monsters_sorted(state, monster_def_id, monster_pack_leader=monster_pack_leader, exclude_ids=skipped_ids)
             if not candidates:
                 if skipped_ids:
                     skipped_ids.clear()
@@ -863,7 +864,7 @@ async def execute_step(
                     break
                 if reason in {"no_path", "path_too_long"}:
                     skipped_ids.add(target_id)
-                    live = find_live_monsters_sorted(state, monster_def_id)
+                    live = find_live_monsters_sorted(state, monster_def_id, monster_pack_leader=monster_pack_leader)
                     if live and len(skipped_ids) >= len(live):
                         raise AssertionError(
                             f"kill_monsters: all live {monster_def_id} targets rejected {reason}; player="
@@ -876,7 +877,6 @@ async def execute_step(
                     continue
                 raise AssertionError(f"action_intent for {monster_def_id} {target_id} was rejected: {reason}")
         return
-
     if action == "move_until_in_range":
         target = resolve_target(state, step)
         stop_distance = float(step.get("stop_distance", WALK_STOP_DISTANCE))
@@ -891,7 +891,7 @@ async def execute_step(
                 max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
             )
             return
-        await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=stop_distance)
+        await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=stop_distance, max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)))
         return
 
     if action == "use_stair":
@@ -2403,18 +2403,17 @@ def find_nearest_monster(
     skip: int = 0,
 ) -> dict[str, Any] | None:
     monsters = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, is_boss=is_boss, exclude_ids=exclude_ids)
-    if skip < 0:
-        skip = 0
+    if skip < 0: skip = 0
     if len(monsters) <= skip:
         return None
     return monsters[skip]
-
 
 def find_live_monsters_sorted(
     state: RuntimeState,
     monster_def_id: str,
     rarity: str | None = None,
     is_boss: bool | None = None,
+    monster_pack_leader: bool | None = None,
     exclude_ids: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     excluded = exclude_ids or set()
@@ -2432,6 +2431,7 @@ def find_live_monsters_sorted(
             or (monster_def_id and entity.get("monster_def_id") != monster_def_id)
             or (rarity is not None and entity.get("rarity") != rarity)
             or (is_boss is not None and bool(entity.get("is_boss", False)) != is_boss)
+            or (monster_pack_leader is not None and bool(entity.get("monster_pack_leader", False)) != bool(monster_pack_leader))
             or int(entity.get("hp", 0)) <= 0
             or entity_id in excluded
         ):

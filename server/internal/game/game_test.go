@@ -240,8 +240,8 @@ func TestLoadRules(t *testing.T) {
 	if got, want := r.Skills["rage"].Cooldown.FlatTicks, 675; got != want {
 		t.Fatalf("rage cooldown flat_ticks = %d, want %d", got, want)
 	}
-	if skill := r.Skills["earthbreaker"]; skill.Class != "barbarian" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "cleave" || skill.Cone.Range <= r.Skills["cleave"].Cone.Range {
-		t.Fatalf("earthbreaker skill = %+v, want barbarian tier 2 cone requiring cleave with longer range", skill)
+	if skill := r.Skills["earthbreaker"]; skill.Class != "barbarian" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "cleave" || skill.Cone.AngleDegrees != 360 || skill.Cone.Range <= r.Skills["cleave"].Cone.Range {
+		t.Fatalf("earthbreaker skill = %+v, want barbarian tier 2 radial smash requiring cleave with longer range", skill)
 	}
 	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 || skill.Effects[0].DurationTicks != 30 {
 		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and enlarged range/radius effect", skill)

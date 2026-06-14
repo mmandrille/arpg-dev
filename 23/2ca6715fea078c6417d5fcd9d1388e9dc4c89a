@@ -1,0 +1,80 @@
+docs/plans/v154_2026-06-14-class-third-skill-trio.md
+  s_23f83c83efc7fd::t_5e1d20bf6fa645 113,129-130
+  s_23f83c83efc7fd::t_44e5abdc558dbf 25
+  s_23f83c83efc7fd::t_e7cee561450e7e 28-30,92-94,97,100-102
+  s_23f83c83efc7fd::t_8bcedd3a1eca14 79-81
+  s_23f83c83efc7fd::t_5abac75042b695 112,122-128
+  s_23f83c83efc7fd::t_b1f77a2198e92e 64-66
+  s_23f83c83efc7fd::t_1ebcbf064cad02 96
+  s_23f83c83efc7fd::t_33fed2f955491c 1-24,26-27,31-63,67-78,82-91,95,98-99,103-111,114-121,131-136
+shared/assets/skill_presentations.v0.json
+  s_23f83c83efc7fd::t_6df2caaa70d777 61-63,65-71,116-126,162-173
+  s_23f83c83efc7fd::t_44b5cc893b3d96 64
+tools/bot/scenarios/63_rogue_shadow_flurry.json
+  s_23f83c83efc7fd::t_422e9f9cdaed23 1-18,20-22,24-29
+  s_23f83c83efc7fd::t_b0c0c9f322d59b 19,23
+tools/bot/scenarios/64_ranger_split_arrow.json
+  s_23f83c83efc7fd::t_422e9f9cdaed23 1-33
+shared/rules/skills.v0.json
+  s_23f83c83efc7fd::t_ccaf1a372c6376 280-326,531-575,730-784
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_23f83c83efc7fd::t_ccd2529fb300bb 18
+docs/specs/v154_spec-class-third-skill-trio.md
+  s_23f83c83efc7fd::t_33fed2f955491c 1-2,4-39,42-53,57-65,69-76,78-85
+  s_23f83c83efc7fd::t_d6760fb01623f7 40-41,54-56,66-68,77
+  s_23f83c83efc7fd::t_5abac75042b695 3
+client/tests/test_skill_rules_loader.gd
+  s_23f83c83efc7fd::t_0c4bdb6a108273 22,27,31,42,49,56-57,66,79,89-90
+PROGRESS.md
+  s_23f83c83efc7fd::t_e2faed206597ab 15,18,173,365
+  s_23f83c83efc7fd::t_91dee0bf212122 496-503
+shared/i18n/es.json
+  s_23f83c83efc7fd::t_860d6493adca59 68-69,74-75,82-83
+server/internal/game/game_test.go
+  s_23f83c83efc7fd::t_ebbcaa82b7392d 243-245,255-260
+shared/i18n/en.json
+  s_23f83c83efc7fd::t_414a45aeac9dd3 63-64,73-74,81-82
+docs/as-built/v154_class-third-skill-trio.md
+  s_23f83c83efc7fd::t_a0070a94296569 1-45
+  s_23f83c83efc7fd::t_5e1d20bf6fa645 46-47
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_23f83c83efc7fd::t_ccd2529fb300bb 18
+tools/bot/scenarios/62_barbarian_earthbreaker.json
+  s_23f83c83efc7fd::t_422e9f9cdaed23 1-18,20-22,24-29
+  s_23f83c83efc7fd::t_b0c0c9f322d59b 19,23
+server/internal/game/class_third_skills_test.go
+  s_23f83c83efc7fd::t_4986a4193e3faf 1-38
+client/tests/test_skills_panel.gd
+  s_23f83c83efc7fd::t_d170327d879fbc 174,177,182,267,270,279-280
+tools/bot/test_skill_demo.py
+  s_23f83c83efc7fd::t_3c744e78d75bb6 24-27,36-42
+tools/validate_skills.py
+  s_691f0e84e5587e::t_2ac6a57b7b04c0 142
+  s_23f83c83efc7fd::t_79c1df8ab5bd9a 40,42,46,121-141
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_23f83c83efc7fd::t_6575f5b6788b89 71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "232ca6715fea078c6417d5fcd9d1388e9dc4c89a",
+  "prompts": {},
+  "sessions": {
+    "s_23f83c83efc7fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec446-d2d1-7b11-98e3-d5469ecd879e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_691f0e84e5587e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5c-8575-7c41-a1ea-66e7f871c5e1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

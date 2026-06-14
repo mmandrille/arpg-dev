@@ -1,0 +1,33 @@
+scripts/client_smoke.sh
+  s_68dc3007c896cc::t_da6ecc864bf6e3 130
+client/scripts/main.gd
+  s_68dc3007c896cc::t_e4746b0ef076e1 4867
+  s_68dc3007c896cc::t_f22a5ad12f3fa7 3016-3019
+  s_68dc3007c896cc::t_3fdccc2b4fce65 1431,2235,2238,3014-3015
+client/scripts/loot_label_filter.gd
+  s_68dc3007c896cc::t_8c9747611483ec 53-56
+client/tests/test_loot_filter_ground_items.gd
+  s_68dc3007c896cc::t_8166825d531311 1-41,46-48,51-67,77-85
+  s_68dc3007c896cc::t_4360bbbdd9a15d 42-45,49-50,68-76
+docs/as-built/v153_loot-label-filter-core.md
+  s_68dc3007c896cc::t_04e55a762e44d4 22-24
+  s_68dc3007c896cc::t_15b84407c810a3 21,45
+client/tests/test_loot_label_filter.gd
+  s_68dc3007c896cc::t_4e20841814521c 43,52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "843c7c91431354d081181035c76502b8608f1154",
+  "prompts": {},
+  "sessions": {
+    "s_68dc3007c896cc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec6a9-43a2-71e1-b61a-6cd772ae9f29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

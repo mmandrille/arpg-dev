@@ -1,0 +1,37 @@
+docs/specs/v142_spec-sim-load-and-players-extraction.md
+  s_acdaa3d060b019::t_00c0ad227bb078 3
+  s_acdaa3d060b019::t_19e51e987b9474 1-2,4-61
+docs/plans/v142_2026-06-13-sim-load-and-players-extraction.md
+  s_acdaa3d060b019::t_00c0ad227bb078 33-35,38,51-53,65-67,83-84,95-97
+  s_acdaa3d060b019::t_19e51e987b9474 1-32,36-37,39-50,54-64,68-82,86-94,99-103
+  s_acdaa3d060b019::t_33b0bc1cac373c 85,98
+docs/CODEMAP.md
+  s_acdaa3d060b019::t_aed187af690104 20
+PROGRESS.md
+  s_acdaa3d060b019::t_00c0ad227bb078 15,162,343,474-478
+docs/as-built/v142_sim-load-and-players-extraction.md
+  s_acdaa3d060b019::t_00c0ad227bb078 1-30
+server/internal/game/sim_load.go
+  s_acdaa3d060b019::t_6c1bc728755ff9 1-344
+server/internal/game/sim_players.go
+  s_acdaa3d060b019::t_eedd7994c392a5 6
+  s_acdaa3d060b019::t_6c1bc728755ff9 1-5,7-425
+.maintainability/file-size-baseline.tsv
+  s_acdaa3d060b019::t_aed187af690104 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0eda68f73b3ffd5170f711d78d352aa37c85a810",
+  "prompts": {},
+  "sessions": {
+    "s_acdaa3d060b019": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec37d-5ac4-7c62-a265-27a8d0c55a16",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

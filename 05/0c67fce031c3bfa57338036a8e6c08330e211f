@@ -1,0 +1,34 @@
+docs/plans/v148_2026-06-14-bot-state-ingest-split.md
+  s_acdaa3d060b019::t_81bb5727fad29c 3,32-34,37,50-52,63-64,80-82,91-96
+  s_acdaa3d060b019::t_f33f4b2d36ba4f 1-2,4-31,35-36,38-49,53-62,65-79,83-90,97-101
+docs/specs/v148_spec-bot-state-ingest-split.md
+  s_acdaa3d060b019::t_f33f4b2d36ba4f 1-49
+tools/bot/run.py
+  s_acdaa3d060b019::t_5bc3d3a12d5308 2237-2239,2243-2245,2249-2251,2255-2257,2261-2263,2283-2285,2289-2291,2295-2297,2301-2303,2307-2309,2313-2315,2319-2321,2325-2327
+tools/bot/state_ingest.py
+  s_acdaa3d060b019::t_5bc3d3a12d5308 1-378
+.maintainability/file-size-baseline.tsv
+  s_acdaa3d060b019::t_81bb5727fad29c 32
+docs/CODEMAP.md
+  s_acdaa3d060b019::t_81bb5727fad29c 24
+PROGRESS.md
+  s_acdaa3d060b019::t_de74b82ef7adc9 15,18,168,355,486-489
+docs/as-built/v148_bot-state-ingest-split.md
+  s_acdaa3d060b019::t_de74b82ef7adc9 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "050c67fce031c3bfa57338036a8e6c08330e211f",
+  "prompts": {},
+  "sessions": {
+    "s_acdaa3d060b019": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec37d-5ac4-7c62-a265-27a8d0c55a16",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

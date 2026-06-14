@@ -12,7 +12,7 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v141 — `market-store-extraction` |
+| **Latest completed slice** | v142 — `sim-load-and-players-extraction` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
 | **Next slice** | TBD — run `$next` |
@@ -159,6 +159,7 @@ v137_* = bot-assertion-domain-split
 v138_* = codemap-and-reduction-ratchet
 v139_* = market-expiration-read-freshness
 v141_* = market-store-extraction
+v142_* = sim-load-and-players-extraction
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -339,6 +340,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v138** | `codemap-and-reduction-ratchet` | Complete (`make ci` green) | [`v138_spec-codemap-and-reduction-ratchet.md`](docs/specs/v138_spec-codemap-and-reduction-ratchet.md) | [`v138_2026-06-13-codemap-and-reduction-ratchet.md`](docs/plans/v138_2026-06-13-codemap-and-reduction-ratchet.md) | [`as-built`](docs/as-built/v138_codemap-and-reduction-ratchet.md) |
 | **v139** | `market-expiration-read-freshness` | Complete (`make ci` green) | [`v139_spec-market-expiration-read-freshness.md`](docs/specs/v139_spec-market-expiration-read-freshness.md) | [`v139_2026-06-13-market-expiration-read-freshness.md`](docs/plans/v139_2026-06-13-market-expiration-read-freshness.md) | [`as-built`](docs/as-built/v139_market-expiration-read-freshness.md) |
 | **v141** | `market-store-extraction` | Complete (`make ci` green) | [`v141_spec-market-store-extraction.md`](docs/specs/v141_spec-market-store-extraction.md) | [`v141_2026-06-13-market-store-extraction.md`](docs/plans/v141_2026-06-13-market-store-extraction.md) | [`as-built`](docs/as-built/v141_market-store-extraction.md) |
+| **v142** | `sim-load-and-players-extraction` | Complete (`make ci` green) | [`v142_spec-sim-load-and-players-extraction.md`](docs/specs/v142_spec-sim-load-and-players-extraction.md) | [`v142_2026-06-13-sim-load-and-players-extraction.md`](docs/plans/v142_2026-06-13-sim-load-and-players-extraction.md) | [`as-built`](docs/as-built/v142_sim-load-and-players-extraction.md) |
 
 ---
 
@@ -468,6 +470,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Sim load and player lifecycle helpers are split out of `sim.go`.** v142 moves persisted load
+methods and payload clone helpers into `server/internal/game/sim_load.go`, moves co-op player
+creation, respawn, spawn selection, context switching, save/default, and sorted player helpers into
+`server/internal/game/sim_players.go`, and lowers the `sim.go` ratchet baseline from 7801 to 7045
+lines.
 
 **Market store persistence is split out of `repos.go`.** v141 moves listing, offer, expiration,
 audit, summary, and market-only helper code into `server/internal/store/market_repo.go` and

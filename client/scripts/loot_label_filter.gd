@@ -50,3 +50,7 @@ func threshold_rarity() -> String:
 
 func mode_label() -> String:
 	return MODE_LABELS[_threshold]
+
+
+func is_active() -> bool:
+	return _threshold > 0

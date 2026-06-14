@@ -18,8 +18,10 @@ visual noise on crowded drops.
   is never hidden.
 - `main.gd` integration is minimal and net-negative: it holds a filter instance, gates non-hovered
   label visibility through `allows()` in `_refresh_loot_label_visibility()`, delegates dimming to
-  `display_color()`, and cycles the filter on `]` (`KEY_BRACKETRIGHT`), logging the mode. The hovered
-  label always shows regardless of filter, so you never lose the item under the cursor.
+  `display_color()`, and cycles the filter on `L`, logging the mode. Active non-`All` modes are
+  shown in the existing top-right HUD as `Loot: Magic+` / `Loot: Rare+` / `Loot: Unique`. The same
+  threshold hides filtered ground item props and disables their pick colliders; hovered loot remains
+  visible so the item under the cursor does not disappear.
 - Server, protocol, store, replay, and shared rules are untouched — the server still owns every loot
   roll and pickup.
 
@@ -40,5 +42,4 @@ visual noise on crowded drops.
 ## Deferred
 
 - Category (currency/quest/consumable) filtering; a persisted filter via `client_settings`; a
-  dedicated always-on HUD indicator widget; a `make bot-visual` showcase scenario once a visible
-  indicator lands.
+  dedicated standalone HUD indicator widget; a `make bot-visual` showcase scenario.

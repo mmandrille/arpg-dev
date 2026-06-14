@@ -40,6 +40,7 @@ func _check(cond: bool, msg: String) -> void:
 func _test_default_mode_allows_all() -> void:
 	var f := LootLabelFilterScript.new()
 	_check(f.mode_label() == "All", "default mode is All")
+	_check(not f.is_active(), "default mode is inactive")
 	for rarity in ["common", "magic", "rare", "unique"]:
 		_check(f.allows(rarity), "All allows %s" % rarity)
 
@@ -48,6 +49,7 @@ func _test_cycle_thresholds() -> void:
 	var f := LootLabelFilterScript.new()
 	f.cycle()  # Magic+
 	_check(f.mode_label() == "Magic+", "after one cycle = Magic+")
+	_check(f.is_active(), "Magic+ mode is active")
 	_check(not f.allows("common"), "Magic+ hides common")
 	_check(f.allows("magic") and f.allows("rare") and f.allows("unique"), "Magic+ allows magic and above")
 

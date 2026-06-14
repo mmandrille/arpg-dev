@@ -1428,7 +1428,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			_set_loot_label_visible(id, loot_label_reveal_held or id == hovered_loot_id, id == hovered_loot_id)
 	if e["type"] == "loot" and not loot_ids.has(id):
 		loot_ids.append(id)
-		_set_loot_label_visible(id, loot_label_reveal_held or id == hovered_loot_id, id == hovered_loot_id)
+		_refresh_loot_label_visibility()
 	if e["type"] == "monster" and not monster_ids.has(id):
 		monster_ids.append(id)
 	if e["type"] == "interactable" and not interactable_ids.has(id):
@@ -2232,9 +2232,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				client.send("swap_weapon_set_intent", last_server_tick, {})
 			get_viewport().set_input_as_handled()
 			return
-		if (event as InputEventKey).keycode == KEY_BRACKETRIGHT:
+		if (event as InputEventKey).keycode == KEY_L:
 			_loot_filter.cycle()
 			_refresh_loot_label_visibility()
+			_update_level_hud()
 			_debug("loot filter: " + _loot_filter.mode_label())
 			get_viewport().set_input_as_handled()
 			return
@@ -3010,7 +3011,13 @@ func _refresh_loot_label_visibility() -> void:
 		var id := str(label_id)
 		var highlighted := id == hovered_loot_id
 		var rarity := str(entities.get(id, {}).get("rarity", "common"))
-		var revealed := loot_label_reveal_held and _loot_filter.allows(rarity)
+		var allowed := _loot_filter.allows(rarity)
+		var revealed := loot_label_reveal_held and allowed
+		if str(entities.get(id, {}).get("type", "")) == "loot":
+			var node := entities[id].get("node", null) as Node3D
+			if node != null:
+				node.visible = allowed or highlighted
+				_set_pickable(node, allowed or highlighted)
 		_set_loot_label_visible(id, revealed or highlighted, highlighted)
 
 
@@ -4857,6 +4864,8 @@ func _update_level_hud() -> void:
 		lines.append("Level %d - %s" % [depth, _dungeon_level_name(current_level)])
 	if client != null and client.session_id != "" and (client.session_mode == "coop" or client.session_listed):
 		lines.append("Session %s" % client.session_id)
+	if _loot_filter.is_active():
+		lines.append("Loot: " + _loot_filter.mode_label())
 	_level_label.visible = lines.size() > 0
 	_level_label.text = "\n".join(lines)
 
@@ -6684,7 +6693,7 @@ func _update_debug() -> void:
 		visual_replay_title,
 	] if visual_replay_enabled else ("bot-client" if bot_mode else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual"))
 	var boss_status := "\nboss=%s" % _last_boss_reward_status if _last_boss_reward_status != "" else ""
-	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s%s\nW/A/S/D move  LMB action  scroll zoom  I inventory" % [
+	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s%s\nW/A/S/D move  LMB action  scroll zoom  I inventory  L loot filter" % [
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis, boss_status]
 
 

@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v148 — `bot-state-ingest-split` |
+| **Latest completed slice** | v149 — `bot-coop-runtime-split` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v149 — `bot-coop-runtime-split` |
+| **Next slice** | v150 — engineering review |
 | **Last engineering review** | v140 — [`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md) (2026-06-13) |
 | **Next engineering review** | v150 due before more feature batches |
 
@@ -166,6 +166,7 @@ v145_* = bot-runtime-assertion-split
 v146_* = bot-movement-runtime-split
 v147_* = bot-wait-runtime-split
 v148_* = bot-state-ingest-split
+v149_* = bot-coop-runtime-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -353,6 +354,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v146** | `bot-movement-runtime-split` | Complete (`make ci` green) | [`v146_spec-bot-movement-runtime-split.md`](docs/specs/v146_spec-bot-movement-runtime-split.md) | [`v146_2026-06-14-bot-movement-runtime-split.md`](docs/plans/v146_2026-06-14-bot-movement-runtime-split.md) | [`as-built`](docs/as-built/v146_bot-movement-runtime-split.md) |
 | **v147** | `bot-wait-runtime-split` | Complete (`make ci` green) | [`v147_spec-bot-wait-runtime-split.md`](docs/specs/v147_spec-bot-wait-runtime-split.md) | [`v147_2026-06-14-bot-wait-runtime-split.md`](docs/plans/v147_2026-06-14-bot-wait-runtime-split.md) | [`as-built`](docs/as-built/v147_bot-wait-runtime-split.md) |
 | **v148** | `bot-state-ingest-split` | Complete (`make ci` green) | [`v148_spec-bot-state-ingest-split.md`](docs/specs/v148_spec-bot-state-ingest-split.md) | [`v148_2026-06-14-bot-state-ingest-split.md`](docs/plans/v148_2026-06-14-bot-state-ingest-split.md) | [`as-built`](docs/as-built/v148_bot-state-ingest-split.md) |
+| **v149** | `bot-coop-runtime-split` | Complete (`make ci` green) | [`v149_spec-bot-coop-runtime-split.md`](docs/specs/v149_spec-bot-coop-runtime-split.md) | [`v149_2026-06-14-bot-coop-runtime-split.md`](docs/plans/v149_2026-06-14-bot-coop-runtime-split.md) | [`as-built`](docs/as-built/v149_bot-coop-runtime-split.md) |
 
 ---
 
@@ -482,6 +484,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Python bot co-op runtime helpers are split out of `run.py`.** v149 moves reusable co-op peer
+connect/close, peer pumping, wait/send/accept helpers, player entity selectors, and party role
+assertion into `tools/bot/coop_runtime.py`, keeps `run.py` compatibility wrappers, and lowers the
+`run.py` ratchet baseline from 4288 to 4269 lines. Scenario-specific co-op proof bodies remain in
+`run.py` for future paydown.
 
 **Python bot state ingestion is split out of `run.py`.** v148 moves snapshot/delta ingestion,
 teleporter parsing, inventory/stash/hotbar mutation helpers, cooldown decay, active-level clearing,

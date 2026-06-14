@@ -323,6 +323,16 @@ func _run() -> void:
 	inventory_panel._handle_double_click(inventory[0])
 	_assert_eq("inventory double click blacksmith emitted count", inventory_emitted.size(), 4)
 	_assert_eq("inventory double click blacksmith type", str(inventory_emitted[3]["type"]), "blacksmith_stage_inventory_item")
+	var weapon_sets := [
+		{"index": 0, "main_hand": "2001", "off_hand": null},
+		{"index": 1, "main_hand": null, "off_hand": null},
+	]
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60, [], 2, 0, weapon_sets)
+	inventory_panel.viewed_weapon_set = 1
+	inventory_panel._handle_drop_on_slot("equip:main_hand", {"source": "bag", "item": inventory[0]})
+	_assert_eq("inventory hand tab equip emitted count", inventory_emitted.size(), 5)
+	_assert_eq("inventory hand tab equip type", str(inventory_emitted[4]["type"]), "equip_intent")
+	_assert_eq("inventory hand tab equip weapon set", int(inventory_emitted[4]["payload"].get("weapon_set", -1)), 1)
 	inventory_panel.queue_free()
 
 	var market_panel := MarketPanelScript.new()

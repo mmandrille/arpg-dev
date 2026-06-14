@@ -39,6 +39,8 @@ class RuntimeState:
     entities: dict[str, dict[str, Any]] = field(default_factory=dict)
     inventory: list[dict[str, Any]] = field(default_factory=list)
     equipped: dict[str, Any] = field(default_factory=dict)
+    active_weapon_set: int = 0
+    weapon_sets: list[dict[str, Any]] = field(default_factory=list)
     hotbar_capacity: int = 2
     hotbar: list[dict[str, Any]] = field(default_factory=list)
     inventory_rows: int = 3

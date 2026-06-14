@@ -34,6 +34,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"teleport_intent":                 wrapLevelTravel,
 	"equip_intent":                    (*Sim).handleEquip,
 	"unequip_intent":                  (*Sim).handleUnequip,
+	"swap_weapon_set_intent":          (*Sim).handleSwapWeaponSet,
 	"drop_intent":                     (*Sim).handleDrop,
 	"use_intent":                      (*Sim).handleUse,
 	"assign_hotbar_intent":            (*Sim).handleAssignHotbar,
@@ -428,18 +429,15 @@ func (s *Sim) handleStashDepositItem(in Input, res *TickResult) {
 	transferID := "stash_deposit_item:" + idStr(stashItemID)
 	wasEquipped := item.equipped
 	if wasEquipped {
-		for _, slot := range sortedStringKeys(s.equipped) {
-			if s.equipped[slot] == item.instanceID {
-				s.equipped[slot] = 0
-				res.Changes = append(res.Changes, Change{
-					Op:             OpEquippedUpdate,
-					Slot:           slot,
-					ItemInstanceID: nil,
-					HotbarCapacity: intPtr(s.hotbarCapacity()),
-					InventoryRows:  intPtr(s.inventoryRows()),
-					InventoryCap:   intPtr(s.inventoryCapacity()),
-				})
-			}
+		for _, slot := range s.clearEquippedItem(item.instanceID) {
+			res.Changes = append(res.Changes, Change{
+				Op:             OpEquippedUpdate,
+				Slot:           slot,
+				ItemInstanceID: nil,
+				HotbarCapacity: intPtr(s.hotbarCapacity()),
+				InventoryRows:  intPtr(s.inventoryRows()),
+				InventoryCap:   intPtr(s.inventoryCapacity()),
+			})
 		}
 		s.appendEquipmentProgressionChanges(res)
 	}
@@ -737,7 +735,8 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "wrong_slot")
 		return
 	}
-	if s.slotBlockedByHands(in.Equip.Slot, item) {
+	weaponSet := s.weaponSetForEquipIntent(in.Equip)
+	if s.slotBlockedByHandsForSet(in.Equip.Slot, item, weaponSet) {
 		res.reject(in.MessageID, "hands_blocked")
 		return
 	}
@@ -753,7 +752,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 	clearedSlots := s.slotsClearedByEquip(in.Equip.Slot, item)
 	bagCountAfter := s.bagOccupancyCount()
 	for _, slot := range clearedSlots {
-		prevID := s.equipped[slot]
+		prevID := s.equippedSlot(slot, weaponSet)
 		if prevID == 0 || prevID == item.instanceID {
 			continue
 		}
@@ -771,7 +770,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		return
 	}
 	for _, slot := range clearedSlots {
-		prevID := s.equipped[slot]
+		prevID := s.equippedSlot(slot, weaponSet)
 		if prevID == 0 || prevID == item.instanceID {
 			continue
 		}
@@ -779,24 +778,31 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 			prev.equipped = false
 			res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(prev))})
 		}
-		s.equipped[slot] = 0
-		res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
+		s.setEquippedSlot(slot, 0, weaponSet)
+		if !isHandSlot(slot) || weaponSet == s.activeWeaponSet {
+			res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
+		}
 	}
 
 	item.slot = in.Equip.Slot
 	item.equipped = true
-	s.equipped[in.Equip.Slot] = item.instanceID
+	s.setEquippedSlot(in.Equip.Slot, item.instanceID, weaponSet)
 
 	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item))})
 	idCopy := idStr(item.instanceID)
-	res.Changes = append(res.Changes, Change{
-		Op:             OpEquippedUpdate,
-		Slot:           in.Equip.Slot,
-		ItemInstanceID: &idCopy,
-		HotbarCapacity: intPtr(s.hotbarCapacity()),
-		InventoryRows:  intPtr(s.inventoryRows()),
-		InventoryCap:   intPtr(s.inventoryCapacity()),
-	})
+	if !isHandSlot(in.Equip.Slot) || weaponSet == s.activeWeaponSet {
+		res.Changes = append(res.Changes, Change{
+			Op:             OpEquippedUpdate,
+			Slot:           in.Equip.Slot,
+			ItemInstanceID: &idCopy,
+			HotbarCapacity: intPtr(s.hotbarCapacity()),
+			InventoryRows:  intPtr(s.inventoryRows()),
+			InventoryCap:   intPtr(s.inventoryCapacity()),
+		})
+	}
+	if isHandSlot(in.Equip.Slot) {
+		res.Changes = append(res.Changes, Change{Op: OpWeaponSetUpdate, ActiveWeaponSet: intPtr(s.activeWeaponSet), WeaponSets: s.weaponSetViews()})
+	}
 	s.appendEquipmentProgressionChanges(res)
 	res.Events = append(res.Events, Event{EventType: "item_equipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
 	res.ack(in.MessageID)
@@ -807,7 +813,8 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_payload")
 		return
 	}
-	instanceID := s.equipped[in.Unequip.Slot]
+	weaponSet := s.weaponSetForUnequipIntent(in.Unequip)
+	instanceID := s.equippedSlot(in.Unequip.Slot, weaponSet)
 	if instanceID == 0 {
 		res.reject(in.MessageID, "slot_empty")
 		return
@@ -827,16 +834,21 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 		return
 	}
 	item.equipped = false
-	s.equipped[in.Unequip.Slot] = 0
+	s.setEquippedSlot(in.Unequip.Slot, 0, weaponSet)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item))})
-	res.Changes = append(res.Changes, Change{
-		Op:             OpEquippedUpdate,
-		Slot:           in.Unequip.Slot,
-		ItemInstanceID: nil,
-		HotbarCapacity: intPtr(s.hotbarCapacity()),
-		InventoryRows:  intPtr(s.inventoryRows()),
-		InventoryCap:   intPtr(s.inventoryCapacity()),
-	})
+	if !isHandSlot(in.Unequip.Slot) || weaponSet == s.activeWeaponSet {
+		res.Changes = append(res.Changes, Change{
+			Op:             OpEquippedUpdate,
+			Slot:           in.Unequip.Slot,
+			ItemInstanceID: nil,
+			HotbarCapacity: intPtr(s.hotbarCapacity()),
+			InventoryRows:  intPtr(s.inventoryRows()),
+			InventoryCap:   intPtr(s.inventoryCapacity()),
+		})
+	}
+	if isHandSlot(in.Unequip.Slot) {
+		res.Changes = append(res.Changes, Change{Op: OpWeaponSetUpdate, ActiveWeaponSet: intPtr(s.activeWeaponSet), WeaponSets: s.weaponSetViews()})
+	}
 	s.appendEquipmentProgressionChanges(res)
 	idCopy := idStr(item.instanceID)
 	res.Events = append(res.Events, Event{EventType: "item_unequipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
@@ -861,11 +873,8 @@ func (s *Sim) handleDrop(in Input, res *TickResult) {
 
 	wasEquipped := item.equipped
 	if item.equipped {
-		for _, slot := range sortedStringKeys(s.equipped) {
-			if s.equipped[slot] == item.instanceID {
-				s.equipped[slot] = 0
-				res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
-			}
+		for _, slot := range s.clearEquippedItem(item.instanceID) {
+			res.Changes = append(res.Changes, Change{Op: OpEquippedUpdate, Slot: slot, ItemInstanceID: nil})
 		}
 	}
 

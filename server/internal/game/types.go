@@ -11,6 +11,7 @@ type Vec2 struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
 }
+
 // EntityView is the protocol view of a scene entity.
 // HP/MaxHP preserve dead monsters while loot entities omit them.
 type EntityView struct {
@@ -418,6 +419,7 @@ type Event struct {
 	Range              *float64                `json:"range,omitempty"`
 	AngleDegrees       *float64                `json:"angle_degrees,omitempty"`
 	WeaponSlot         string                  `json:"weapon_slot,omitempty"`
+	WeaponSet          *int                    `json:"weapon_set,omitempty"`
 	Reason             string                  `json:"reason,omitempty"`
 	ShopID             string                  `json:"shop_id,omitempty"`
 	Service            string                  `json:"service,omitempty"`
@@ -490,6 +492,8 @@ type Snapshot struct {
 	Entities              []EntityView              `json:"entities"`
 	Inventory             []ItemView                `json:"inventory"`
 	Equipped              map[string]*string        `json:"equipped"`
+	ActiveWeaponSet       int                       `json:"active_weapon_set"`
+	WeaponSets            []WeaponSetView           `json:"weapon_sets"`
 	HotbarCapacity        int                       `json:"hotbar_capacity"`
 	Hotbar                []HotbarSlotView          `json:"hotbar"`
 	InventoryRows         int                       `json:"inventory_rows"`
@@ -506,6 +510,12 @@ type Snapshot struct {
 	RecentEvents          []Event                   `json:"recent_events"`
 }
 
+type WeaponSetView struct {
+	Index    int     `json:"index"`
+	MainHand *string `json:"main_hand"`
+	OffHand  *string `json:"off_hand"`
+}
+
 // Change operation names (the state_delta ops).
 const (
 	OpEntitySpawn                = "entity_spawn"
@@ -515,6 +525,7 @@ const (
 	OpInventoryUpdate            = "inventory_update"
 	OpInventoryRemove            = "inventory_remove"
 	OpEquippedUpdate             = "equipped_update"
+	OpWeaponSetUpdate            = "weapon_set_update"
 	OpHotbarUpdate               = "hotbar_update"
 	OpGoldUpdate                 = "gold_update"
 	OpStashItemAdd               = "stash_item_add"
@@ -543,6 +554,8 @@ type Change struct {
 	StashItemID      string
 	Slot             string
 	ItemInstanceID   *string // for equipped_update; nil marshals as null
+	ActiveWeaponSet  *int
+	WeaponSets       []WeaponSetView
 	SlotIndex        int
 	HotbarCapacity   *int
 	InventoryRows    *int
@@ -600,6 +613,12 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			InventoryRows  *int    `json:"inventory_rows,omitempty"`
 			InventoryCap   *int    `json:"inventory_capacity,omitempty"`
 		}{c.Op, c.Slot, c.ItemInstanceID, c.HotbarCapacity, c.InventoryRows, c.InventoryCap})
+	case OpWeaponSetUpdate:
+		return json.Marshal(struct {
+			Op              string          `json:"op"`
+			ActiveWeaponSet *int            `json:"active_weapon_set"`
+			WeaponSets      []WeaponSetView `json:"weapon_sets"`
+		}{c.Op, c.ActiveWeaponSet, c.WeaponSets})
 	case OpHotbarUpdate:
 		return json.Marshal(struct {
 			Op             string    `json:"op"`

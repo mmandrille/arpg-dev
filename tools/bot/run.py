@@ -46,6 +46,7 @@ from tools.bot.stash_assertions import (
     select_stash_item,
 )
 from tools.bot.unique_effect_assertions import assert_inventory_unique_effect_coverage
+from tools.bot.weapon_set_runtime import equipped_slot_id
 
 SLICE_TIMEOUT_S = 20.0
 MAX_SCENARIO_ELAPSED_S = 15.0
@@ -586,6 +587,22 @@ async def execute_step(
             raise AssertionError(f"assert_equipped_slot_empty: {slot}={state.equipped.get(slot)}, want empty")
         return
 
+    if action == "assert_active_weapon_set":
+        assert_count_matches(state.active_weapon_set, step, "assert_active_weapon_set")
+        return
+
+    if action == "assert_weapon_set_slot_def":
+        weapon_set = int(step["weapon_set"])
+        slot = str(step["slot"])
+        expected_def = str(step["item_def_id"])
+        item_id = equipped_slot_id(state, slot, weapon_set)
+        if item_id is None:
+            raise AssertionError(f"assert_weapon_set_slot_def: set {weapon_set} {slot} is empty, want {expected_def}")
+        item = next((i for i in state.inventory if str(i.get("item_instance_id")) == str(item_id)), None)
+        if item is None or item.get("item_def_id") != expected_def:
+            raise AssertionError(f"assert_weapon_set_slot_def: set {weapon_set} {slot} {item_id} row={item}, want {expected_def}")
+        return
+
     if action == "assert_hotbar_slot":
         assert_hotbar_slot(state.hotbar, int(step["slot_index"]), step.get("item_def_id"), "runtime protocol", state.inventory)
         return
@@ -1097,19 +1114,18 @@ async def execute_step(
             item = find_inventory_item(state.inventory, item_def_id, bag_index)
         slot = str(step.get("slot", item.get("slot", "main_hand")))
         item_id = str(item["item_instance_id"])
-        env = make_envelope(
-            "equip_intent",
-            session_id,
-            state.last_tick,
-            {"item_instance_id": item_id, "slot": slot},
-        )
+        payload = {"item_instance_id": item_id, "slot": slot}
+        weapon_set = step.get("weapon_set")
+        if weapon_set is not None:
+            payload["weapon_set"] = int(weapon_set)
+        env = make_envelope("equip_intent", session_id, state.last_tick, payload)
         await ws.send(json.dumps(env))
         log("equipping", item_def_id, item_id)
         expect_reject = step.get("expect_reject")
         if expect_reject:
             await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
             return
-        while state.equipped.get(slot) != item_id:
+        while equipped_slot_id(state, slot, weapon_set) != item_id:
             if loop.time() > deadline:
                 raise TimeoutError(f"equip_inventory_item stalled waiting for equipped_update for {item_def_id}")
             await pump_one(ws, state, timeout=0.1)
@@ -1139,15 +1155,30 @@ async def execute_step(
 
     if action == "unequip_slot":
         slot = str(step.get("slot", "main_hand"))
+        weapon_set = step.get("weapon_set")
         deadline = loop.time() + SLICE_TIMEOUT_S
-        if state.equipped.get(slot) is None:
+        if equipped_slot_id(state, slot, weapon_set) is None:
             raise AssertionError(f"unequip_slot: slot {slot} is already empty")
-        await ws.send(json.dumps(make_envelope(
-            "unequip_intent", session_id, state.last_tick, {"slot": slot})))
+        payload = {"slot": slot}
+        if weapon_set is not None:
+            payload["weapon_set"] = int(weapon_set)
+        await ws.send(json.dumps(make_envelope("unequip_intent", session_id, state.last_tick, payload)))
         log("unequipping", slot)
-        while state.equipped.get(slot) is not None:
+        while equipped_slot_id(state, slot, weapon_set) is not None:
             if loop.time() > deadline:
                 raise TimeoutError(f"unequip_slot stalled waiting for empty {slot}")
+            await pump_one(ws, state, timeout=0.1)
+        return
+
+    if action == "swap_weapon_set":
+        want = int(step.get("active_weapon_set", 1 if state.active_weapon_set == 0 else 0))
+        env = make_envelope("swap_weapon_set_intent", session_id, state.last_tick, {})
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        deadline = loop.time() + SLICE_TIMEOUT_S
+        while state.active_weapon_set != want:
+            if loop.time() > deadline:
+                raise TimeoutError(f"swap_weapon_set stalled waiting for active set {want}")
             await pump_one(ws, state, timeout=0.1)
         return
 

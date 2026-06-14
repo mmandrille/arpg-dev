@@ -1,0 +1,27 @@
+{
+  "id": "weapon_set_swap_and_tabs",
+  "world_id": "equipment_lab",
+  "seed": "v156_weapon_sets",
+  "title": "Weapon set swap and hand tabs",
+  "description": "Equips separate main-hand weapons into set 1 and set 2, swaps active weapon set, and proves active hand compatibility state follows the swap.",
+  "steps": [
+    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
+    { "action": "pick_up_loot", "item_def_id": "cave_bow" },
+    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand", "weapon_set": 0 },
+    { "action": "equip_inventory_item", "item_def_id": "cave_bow", "slot": "main_hand", "weapon_set": 1 },
+    { "action": "assert_active_weapon_set", "equals": 0 },
+    { "action": "assert_weapon_set_slot_def", "weapon_set": 0, "slot": "main_hand", "item_def_id": "cave_blade" },
+    { "action": "assert_weapon_set_slot_def", "weapon_set": 1, "slot": "main_hand", "item_def_id": "cave_bow" },
+    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_blade" },
+    { "action": "swap_weapon_set", "active_weapon_set": 1 },
+    { "action": "assert_active_weapon_set", "equals": 1 },
+    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_bow" }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "weapon_set_swapped" },
+    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_bow" }
+  ],
+  "visual": {
+    "camera": { "x": 8, "y": 7, "zoom": 1.15 }
+  }
+}

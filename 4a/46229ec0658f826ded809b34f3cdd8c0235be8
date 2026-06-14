@@ -1,0 +1,53 @@
+server/internal/game/interactables.go
+  s_aa5200bb83fad3::t_4b5f10fd8d4cfd 64-65,68
+  s_aa5200bb83fad3::t_81621e2176843e 1-63,66-67,69
+server/internal/game/game_test.go
+  s_aa5200bb83fad3::t_d1c6ce99820c36 5489-5491
+server/internal/game/level.go
+  s_aa5200bb83fad3::t_694ebcc098a054 6-7,9-12,17-18,20
+  s_aa5200bb83fad3::t_81621e2176843e 8,19
+server/internal/game/handlers.go
+  s_aa5200bb83fad3::t_a30365c1ea5647 154-157
+server/internal/game/dungeon_elite_objective_test.go
+  s_aa5200bb83fad3::t_3c4499f5d3cea7 37-41,43-64,66-98
+  s_aa5200bb83fad3::t_d9c09781dc0044 42
+  s_aa5200bb83fad3::t_4b5f10fd8d4cfd 65
+docs/plans/v159_2026-06-14-kill-gated-elite-objective.md
+  s_aa5200bb83fad3::t_8fae423c551a18 1-2,6-29,35-36,38-51,55-64,67-76,79-92,96-103
+  s_aa5200bb83fad3::t_cb3cc4b6c216cc 30-34,37,52-54,65-66,77-78
+  s_aa5200bb83fad3::t_a09630a98b45aa 107
+  s_aa5200bb83fad3::t_9a99c8a5f773da 4-5
+  s_aa5200bb83fad3::t_76961fc28d1c0f 3,93-95,104-106
+.maintainability/file-size-baseline.tsv
+  s_aa5200bb83fad3::t_76961fc28d1c0f 21
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_aa5200bb83fad3::t_a368d92801739e 16
+  s_aa5200bb83fad3::t_3c4499f5d3cea7 6,15
+docs/as-built/v159_kill-gated-elite-objective.md
+  s_aa5200bb83fad3::t_a09630a98b45aa 19
+  s_aa5200bb83fad3::t_76961fc28d1c0f 1-18,20-30
+server/internal/game/sim.go
+  s_aa5200bb83fad3::t_10864d2b1e6291 1285-1287
+docs/specs/v159_spec-kill-gated-elite-objective.md
+  s_aa5200bb83fad3::t_8fae423c551a18 1-3,5-8,10-19,22-46,48
+  s_aa5200bb83fad3::t_76961fc28d1c0f 4
+  s_aa5200bb83fad3::t_9a99c8a5f773da 9,20-21,47
+PROGRESS.md
+  s_aa5200bb83fad3::t_76961fc28d1c0f 15,18,178,375,506-513,541,1211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4a46229ec0658f826ded809b34f3cdd8c0235be8",
+  "prompts": {},
+  "sessions": {
+    "s_aa5200bb83fad3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec6ef-6ea9-7152-8edd-b96a6ba6de4f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

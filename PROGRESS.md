@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v154 — class third skill trio |
+| **Latest completed slice** | v155 — random quest reward floors |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v155 — TBD — continue selected `$autoloop` queue |
+| **Next slice** | v156 — weapon set swap and inventory hand tabs |
 | **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
 | **Next engineering review** | v160 due before more feature batches |
 
@@ -171,6 +171,7 @@ v151_* = extraction-independence-gate
 v152_* = bot-context-movement-decouple
 v153_* = loot-label-filter-core
 v154_* = class-third-skill-trio
+v155_* = random-quest-reward-floors
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -363,6 +364,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v152** | `bot-context-movement-decouple` | Complete (`make ci` green) | [`v152_spec-bot-context-movement-decouple.md`](docs/specs/v152_spec-bot-context-movement-decouple.md) | [`v152_2026-06-14-bot-context-movement-decouple.md`](docs/plans/v152_2026-06-14-bot-context-movement-decouple.md) | [`as-built`](docs/as-built/v152_bot-context-movement-decouple.md) |
 | **v153** | `loot-label-filter-core` | Complete (`make ci` green) | [`v153_spec-loot-label-filter-core.md`](docs/specs/v153_spec-loot-label-filter-core.md) | [`v153_2026-06-14-loot-label-filter-core.md`](docs/plans/v153_2026-06-14-loot-label-filter-core.md) | [`as-built`](docs/as-built/v153_loot-label-filter-core.md) |
 | **v154** | `class-third-skill-trio` | Complete (`make ci` green) | [`v154_spec-class-third-skill-trio.md`](docs/specs/v154_spec-class-third-skill-trio.md) | [`v154_2026-06-14-class-third-skill-trio.md`](docs/plans/v154_2026-06-14-class-third-skill-trio.md) | [`as-built`](docs/as-built/v154_class-third-skill-trio.md) |
+| **v155** | `random-quest-reward-floors` | Complete (`make ci` green) | [`v155_spec-random-quest-reward-floors.md`](docs/specs/v155_spec-random-quest-reward-floors.md) | [`v155_2026-06-14-random-quest-reward-floors.md`](docs/plans/v155_2026-06-14-random-quest-reward-floors.md) | [`as-built`](docs/as-built/v155_random-quest-reward-floors.md) |
 
 ---
 
@@ -500,6 +502,11 @@ three protocol bot proofs:
 `62_barbarian_earthbreaker`, `63_rogue_shadow_flurry`, and `64_ranger_split_arrow`.
 The slice deliberately reuses existing skill capability types and leaves existing skill definitions
 unchanged.
+
+**Random quest reward floors now seed a first generated quest hook.** v155 rolls roughly 10% of
+generated non-boss dungeon floors on a separate deterministic RNG stream, adds one extra reachable
+treasure chest on rolled floors, excludes boss floors, and proves the user-facing reward path with
+`65_random_quest_reward_floor`. Full NPC offers, quest logs, and durable quest state remain deferred.
 
 **Extraction independence is now a maintainability gate.** v151 adds
 `scripts/check-extraction-coupling-ratchet.py`, wires it into `make maintainability`, and baselines

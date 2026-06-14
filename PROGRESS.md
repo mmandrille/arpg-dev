@@ -16,8 +16,8 @@ Last updated: 2026-06-13
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
 | **Next slice** | TBD — run `$next` |
-| **Last engineering review** | v130 — [`docs/reviews/20260613_v130-overview.md`](docs/reviews/20260613_v130-overview.md) (2026-06-13) |
-| **Next engineering review** | v140 due before more feature batches |
+| **Last engineering review** | v140 — [`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md) (2026-06-13) |
+| **Next engineering review** | v150 due before more feature batches |
 
 ### Slice numbering note
 
@@ -466,6 +466,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**The v140 engineering review gate is complete.** The new review set starts at
+[`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md), with backend,
+client, and shared/tooling companion reports. It clears the v140 cadence gate and points the next
+batch toward market store extraction, client bot facade/runner split, Python bot assertion split,
+and continued CODEMAP/ratchet discipline.
 
 **Market summary and offer reads now expire stale listings first.** v139 makes
 `GetMarketSummary` and `ListMarketOffersForSeller` run the existing market expiration sweep before

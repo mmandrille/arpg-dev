@@ -1,0 +1,34 @@
+docs/plans/v149_2026-06-14-bot-coop-runtime-split.md
+  s_acdaa3d060b019::t_8ea848782d19fb 3,33-35,38,51-53,64-65,81-83,92-97
+  s_acdaa3d060b019::t_835b93b0026339 1-2,4-32,36-37,39-50,54-63,66-80,84-91,98-102
+docs/specs/v149_spec-bot-coop-runtime-split.md
+  s_acdaa3d060b019::t_835b93b0026339 1-49
+docs/CODEMAP.md
+  s_acdaa3d060b019::t_8ea848782d19fb 24
+tools/bot/run.py
+  s_acdaa3d060b019::t_667ee14e6a5f49 3352-3354,3358-3360,3364-3366,3370-3372,3376-3378,3382-3384,3388-3390,3394-3396,3412-3414
+docs/as-built/v149_bot-coop-runtime-split.md
+  s_acdaa3d060b019::t_31bb162829d4b0 1-30
+tools/bot/coop_runtime.py
+  s_acdaa3d060b019::t_667ee14e6a5f49 1-108
+.maintainability/file-size-baseline.tsv
+  s_acdaa3d060b019::t_8ea848782d19fb 32
+PROGRESS.md
+  s_acdaa3d060b019::t_31bb162829d4b0 15,18,169,357,488-492
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1c7e50d7970c5d248d7fa5e3bbd8812a3886d96e",
+  "prompts": {},
+  "sessions": {
+    "s_acdaa3d060b019": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec37d-5ac4-7c62-a265-27a8d0c55a16",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

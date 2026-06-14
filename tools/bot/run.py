@@ -3349,70 +3349,51 @@ def run_verified_session(
 
 
 async def connect_coop_peer(base_url: str, token: str, sess: dict[str, Any], label: str, world_id: str) -> CoopPeer:
-    uri = to_ws_url(base_url, sess["ws_url"])
-    ws = await websockets.connect(uri, additional_headers=auth(token))
-    first = await recv_json(ws)
-    assert first["type"] == "session_snapshot", first["type"]
-    state = RuntimeState(world_id=world_id)
-    ingest_snapshot(first["payload"], state)
-    await ws.send(json.dumps(make_envelope(
-        "client_ready",
-        sess["session_id"],
-        state.last_tick,
-        {"client_version": f"bot-{label}", "last_seen_tick": state.last_tick},
-    )))
-    log("co-op peer connected", label, "local_player_id", state.local_player_id, "level", state.current_level)
-    return CoopPeer(label=label, token=token, session=sess, state=state, ws=ws)
+    from tools.bot.coop_runtime import connect_coop_peer as connect_coop_peer_impl
+
+    return await connect_coop_peer_impl(base_url, token, sess, label, world_id, helpers=globals())
 
 
 async def close_coop_peer(peer: CoopPeer) -> None:
-    await peer.ws.close()
+    from tools.bot.coop_runtime import close_coop_peer as close_coop_peer_impl
+
+    await close_coop_peer_impl(peer, helpers=globals())
 
 
 async def pump_coop(peers: list[CoopPeer], timeout: float = 0.1) -> None:
-    tasks = {asyncio.create_task(peer.ws.recv()): peer for peer in peers}
-    done, pending = await asyncio.wait(tasks.keys(), timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
-    for task in pending:
-        task.cancel()
-    for task in done:
-        peer = tasks[task]
-        ingest_message(json.loads(task.result()), peer.state)
+    from tools.bot.coop_runtime import pump_coop as pump_coop_impl
+
+    await pump_coop_impl(peers, timeout, helpers=globals())
 
 
 async def wait_coop_until(peers: list[CoopPeer], label: str, predicate, timeout_s: float = SLICE_TIMEOUT_S) -> None:
-    loop = asyncio.get_event_loop()
-    deadline = loop.time() + timeout_s
-    while not predicate():
-        if loop.time() > deadline:
-            raise TimeoutError(f"co-op wait timed out: {label}")
-        await pump_coop(peers, timeout=0.1)
+    from tools.bot.coop_runtime import wait_coop_until as wait_coop_until_impl
+
+    await wait_coop_until_impl(peers, label, predicate, timeout_s, helpers=globals())
 
 
 async def send_coop_intent(peer: CoopPeer, msg_type: str, payload: dict[str, Any]) -> str:
-    env = make_envelope(msg_type, peer.session["session_id"], peer.state.last_tick, payload)
-    await peer.ws.send(json.dumps(env))
-    return str(env["message_id"])
+    from tools.bot.coop_runtime import send_coop_intent as send_coop_intent_impl
+
+    return await send_coop_intent_impl(peer, msg_type, payload, helpers=globals())
 
 
 async def wait_coop_accept(peers: list[CoopPeer], peer: CoopPeer, message_id: str) -> None:
-    await wait_coop_until(
-        peers,
-        f"{peer.label} accept {message_id}",
-        lambda: message_id in peer.state.accepted_message_ids or message_id in peer.state.rejected_message_reasons,
-    )
-    if message_id in peer.state.rejected_message_reasons:
-        raise AssertionError(f"{peer.label} intent {message_id} rejected: {peer.state.rejected_message_reasons[message_id]}")
+    from tools.bot.coop_runtime import wait_coop_accept as wait_coop_accept_impl
+
+    await wait_coop_accept_impl(peers, peer, message_id, helpers=globals())
 
 
 def player_position(state: RuntimeState) -> dict[str, Any]:
-    player = find_player(state)
-    if player is None:
-        raise AssertionError(f"missing local player {state.local_player_id}")
-    return dict(player.get("position", {}))
+    from tools.bot.coop_runtime import player_position as player_position_impl
+
+    return player_position_impl(state, helpers=globals())
 
 
 def player_entity_ids(state: RuntimeState) -> set[str]:
-    return {str(entity_id) for entity_id, entity in state.entities.items() if entity.get("type") == "player"}
+    from tools.bot.coop_runtime import player_entity_ids as player_entity_ids_impl
+
+    return player_entity_ids_impl(state, helpers=globals())
 
 
 def state_experience(state: RuntimeState) -> int:
@@ -3428,9 +3409,9 @@ def dict_distance(a: dict[str, Any], b: dict[str, Any]) -> float:
 
 
 def assert_party_contains_roles(state: RuntimeState, where: str) -> None:
-    roles = {str(row.get("role", "")) for row in state.party}
-    if not {"host", "guest"} <= roles:
-        raise AssertionError(f"{where}: party roles {roles}, want host+guest; party={state.party}")
+    from tools.bot.coop_runtime import assert_party_contains_roles as assert_party_contains_roles_impl
+
+    assert_party_contains_roles_impl(state, where, helpers=globals())
 
 
 def find_non_gold_loot(state: RuntimeState) -> dict[str, Any] | None:

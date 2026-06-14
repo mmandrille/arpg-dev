@@ -6,16 +6,12 @@ from typing import Any
 
 from tools.bot.bot_types import RuntimeState
 from tools.bot.protocol import make_envelope
+from tools.bot.bot_context import BotContext
+from tools.bot.runtime_queries import find_player, dict_distance
 
 SLICE_TIMEOUT_S = 20.0
 WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
-
-
-def _require_helpers(helpers: dict[str, Any] | None) -> dict[str, Any]:
-    if helpers is None:
-        raise AssertionError("movement runtime helpers require helper bindings")
-    return helpers
 
 
 async def walk_toward(
@@ -26,15 +22,11 @@ async def walk_toward(
     loop,
     max_ticks: int = WALK_MAX_TICKS,
     stop_distance: float = WALK_STOP_DISTANCE,
-    helpers: dict[str, Any] | None = None,
+    *,
+    ctx: BotContext,
 ) -> None:
-    helpers = _require_helpers(helpers)
-    find_player = helpers["find_player"]
-    move_to_position = helpers["move_to_position"]
-    wait_for_player_move_or_accept = helpers["wait_for_player_move_or_accept"]
-    pump_one = helpers["pump_one"]
     if state.world_id == "dungeon_levels" and state.current_level < 0:
-        await move_to_position(ws, session_id, state, target_pos, loop, max_ticks=max_ticks, stop_distance=stop_distance)
+        await move_to_position(ws, session_id, state, target_pos, loop, max_ticks=max_ticks, stop_distance=stop_distance, ctx=ctx)
         return
     for _ in range(max_ticks):
         player = find_player(state)
@@ -64,7 +56,7 @@ async def walk_toward(
                 {"direction": direction, "duration_ticks": 1},
             )
             await ws.send(json.dumps(env))
-            if await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop):
+            if await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop, ctx=ctx):
                 moved = True
                 break
         if moved:
@@ -82,13 +74,8 @@ async def move_until_entity_in_range(
     *,
     stop_distance: float,
     max_ticks: int = WALK_MAX_TICKS,
-    helpers: dict[str, Any] | None = None,
+    ctx: BotContext,
 ) -> None:
-    helpers = _require_helpers(helpers)
-    find_player = helpers["find_player"]
-    dict_distance = helpers["dict_distance"]
-    range_candidate_positions = helpers["range_candidate_positions"]
-    walk_toward = helpers["walk_toward"]
     last_error: Exception | None = None
     attempts = max(1, max_ticks // 20)
     for _ in range(attempts):
@@ -111,6 +98,7 @@ async def move_until_entity_in_range(
                     loop,
                     max_ticks=min(max_ticks, 120),
                     stop_distance=0.75,
+                    ctx=ctx,
                 )
             except AssertionError as exc:
                 if "no_path" not in str(exc) and "path_too_long" not in str(exc):
@@ -143,10 +131,7 @@ def range_candidate_positions(
     player_pos: dict[str, Any],
     target_pos: dict[str, Any],
     stop_distance: float,
-    helpers: dict[str, Any] | None = None,
 ) -> list[dict[str, float]]:
-    helpers = _require_helpers(helpers)
-    dict_distance = helpers["dict_distance"]
     radius = max(1.25, stop_distance * 0.85)
     player_x = float(player_pos["x"])
     player_y = float(player_pos["y"])
@@ -180,10 +165,7 @@ def derived_walk_max_ticks(
     state: RuntimeState,
     target_pos: dict[str, Any],
     requested: int,
-    helpers: dict[str, Any] | None = None,
 ) -> int:
-    helpers = _require_helpers(helpers)
-    find_player = helpers["find_player"]
     player = find_player(state)
     if player is None:
         return requested
@@ -202,12 +184,9 @@ async def move_to_position(
     loop,
     max_ticks: int = WALK_MAX_TICKS,
     stop_distance: float = WALK_STOP_DISTANCE,
-    helpers: dict[str, Any] | None = None,
+    *,
+    ctx: BotContext,
 ) -> None:
-    helpers = _require_helpers(helpers)
-    find_player = helpers["find_player"]
-    wait_for_player_move_or_accept = helpers["wait_for_player_move_or_accept"]
-    pump_one = helpers["pump_one"]
     player = find_player(state)
     if player is None:
         raise AssertionError("move_to_position: player not found")
@@ -220,7 +199,7 @@ async def move_to_position(
     env = make_envelope("move_to_intent", session_id, state.last_tick, {"position": target_pos})
     await ws.send(json.dumps(env))
     before = {"x": player_pos["x"], "y": player_pos["y"]}
-    await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop)
+    await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop, ctx=ctx)
     unchanged_ticks = 0
     stalled_reissues = 0
     last_pos = before
@@ -245,14 +224,14 @@ async def move_to_position(
                     )
                 env = make_envelope("move_to_intent", session_id, state.last_tick, {"position": target_pos})
                 await ws.send(json.dumps(env))
-                await wait_for_player_move_or_accept(ws, state, current_pos, env["message_id"], loop)
+                await wait_for_player_move_or_accept(ws, state, current_pos, env["message_id"], loop, ctx=ctx)
                 unchanged_ticks = 0
                 last_pos = current_pos
         else:
             unchanged_ticks = 0
             stalled_reissues = 0
             last_pos = current_pos
-        await pump_one(ws, state, timeout=0.05)
+        await ctx.pump_one(ws, state, timeout=0.05)
     player = find_player(state)
     player_pos = (player or {}).get("position")
     raise TimeoutError(f"move_to_position exhausted {max_ticks} ticks toward {target_pos}; player={player_pos}")
@@ -264,11 +243,9 @@ async def wait_for_player_move_or_accept(
     before: dict[str, Any],
     message_id: str,
     loop,
-    helpers: dict[str, Any] | None = None,
+    *,
+    ctx: BotContext,
 ) -> bool:
-    helpers = _require_helpers(helpers)
-    find_player = helpers["find_player"]
-    pump_one = helpers["pump_one"]
     deadline = loop.time() + SLICE_TIMEOUT_S
     while True:
         player = find_player(state)
@@ -282,4 +259,4 @@ async def wait_for_player_move_or_accept(
             raise AssertionError(f"move_intent rejected: {state.rejected_message_reasons[message_id]}")
         if loop.time() > deadline:
             raise TimeoutError(f"stalled waiting for player movement from {before}")
-        await pump_one(ws, state, timeout=0.1)
+        await ctx.pump_one(ws, state, timeout=0.1)

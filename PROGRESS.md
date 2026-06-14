@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v151 — extraction independence gate |
+| **Latest completed slice** | v152 — bot context movement decouple |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v152 — resume feature work with extraction-independence gate enforced |
+| **Next slice** | v153 — resume feature work with extraction-independence gate enforced |
 | **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
 | **Next engineering review** | v160 due before more feature batches |
 
@@ -168,6 +168,7 @@ v147_* = bot-wait-runtime-split
 v148_* = bot-state-ingest-split
 v149_* = bot-coop-runtime-split
 v151_* = extraction-independence-gate
+v152_* = bot-context-movement-decouple
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -357,6 +358,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v148** | `bot-state-ingest-split` | Complete (`make ci` green) | [`v148_spec-bot-state-ingest-split.md`](docs/specs/v148_spec-bot-state-ingest-split.md) | [`v148_2026-06-14-bot-state-ingest-split.md`](docs/plans/v148_2026-06-14-bot-state-ingest-split.md) | [`as-built`](docs/as-built/v148_bot-state-ingest-split.md) |
 | **v149** | `bot-coop-runtime-split` | Complete (`make ci` green) | [`v149_spec-bot-coop-runtime-split.md`](docs/specs/v149_spec-bot-coop-runtime-split.md) | [`v149_2026-06-14-bot-coop-runtime-split.md`](docs/plans/v149_2026-06-14-bot-coop-runtime-split.md) | [`as-built`](docs/as-built/v149_bot-coop-runtime-split.md) |
 | **v151** | `extraction-independence-gate` | Complete (`make ci` green) | [`v151_spec-extraction-independence-gate.md`](docs/specs/v151_spec-extraction-independence-gate.md) | [`v151_2026-06-14-extraction-independence-gate.md`](docs/plans/v151_2026-06-14-extraction-independence-gate.md) | [`as-built`](docs/as-built/v151_extraction-independence-gate.md) |
+| **v152** | `bot-context-movement-decouple` | Complete (`make ci` green) | [`v152_spec-bot-context-movement-decouple.md`](docs/specs/v152_spec-bot-context-movement-decouple.md) | [`v152_2026-06-14-bot-context-movement-decouple.md`](docs/plans/v152_2026-06-14-bot-context-movement-decouple.md) | [`as-built`](docs/as-built/v152_bot-context-movement-decouple.md) |
 
 ---
 

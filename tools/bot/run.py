@@ -32,6 +32,8 @@ import websockets
 
 from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenario
 from tools.bot.protocol import make_envelope, to_ws_url
+from tools.bot.bot_context import BotContext
+from tools.bot.runtime_queries import dict_distance, find_player
 from tools.bot import skill_visual_runtime
 from tools.bot.debug_progression import debug_progression_body
 from tools.bot.stash_assertions import (
@@ -1783,6 +1785,10 @@ async def execute_step(
     raise ValueError(f"unsupported scenario action: {action}")
 
 
+def _runtime_context() -> BotContext:
+    return BotContext(pump_one=pump_one)
+
+
 async def walk_toward(
     ws,
     session_id: str,
@@ -1794,7 +1800,7 @@ async def walk_toward(
 ) -> None:
     from tools.bot.movement_runtime import walk_toward as walk_toward_impl
 
-    await walk_toward_impl(ws, session_id, state, target_pos, loop, max_ticks, stop_distance, helpers=globals())
+    await walk_toward_impl(ws, session_id, state, target_pos, loop, max_ticks, stop_distance, ctx=_runtime_context())
 
 
 async def move_until_entity_in_range(
@@ -1817,7 +1823,7 @@ async def move_until_entity_in_range(
         loop,
         stop_distance=stop_distance,
         max_ticks=max_ticks,
-        helpers=globals(),
+        ctx=_runtime_context(),
     )
 
 
@@ -1828,13 +1834,13 @@ def range_candidate_positions(
 ) -> list[dict[str, float]]:
     from tools.bot.movement_runtime import range_candidate_positions as range_candidate_positions_impl
 
-    return range_candidate_positions_impl(player_pos, target_pos, stop_distance, helpers=globals())
+    return range_candidate_positions_impl(player_pos, target_pos, stop_distance)
 
 
 def derived_walk_max_ticks(state: RuntimeState, target_pos: dict[str, Any], requested: int) -> int:
     from tools.bot.movement_runtime import derived_walk_max_ticks as derived_walk_max_ticks_impl
 
-    return derived_walk_max_ticks_impl(state, target_pos, requested, helpers=globals())
+    return derived_walk_max_ticks_impl(state, target_pos, requested)
 
 
 async def move_to_position(
@@ -1848,7 +1854,7 @@ async def move_to_position(
 ) -> None:
     from tools.bot.movement_runtime import move_to_position as move_to_position_impl
 
-    await move_to_position_impl(ws, session_id, state, target_pos, loop, max_ticks, stop_distance, helpers=globals())
+    await move_to_position_impl(ws, session_id, state, target_pos, loop, max_ticks, stop_distance, ctx=_runtime_context())
 
 
 async def attack_until_monster_event(
@@ -1928,7 +1934,7 @@ async def attack_until_monster_event(
 async def wait_for_player_move_or_accept(ws, state: RuntimeState, before: dict[str, Any], message_id: str, loop) -> bool:
     from tools.bot.movement_runtime import wait_for_player_move_or_accept as wait_for_player_move_or_accept_impl
 
-    return await wait_for_player_move_or_accept_impl(ws, state, before, message_id, loop, helpers=globals())
+    return await wait_for_player_move_or_accept_impl(ws, state, before, message_id, loop, ctx=_runtime_context())
 
 
 async def wait_for_tick_advance(ws, state: RuntimeState, loop) -> None:
@@ -2729,17 +2735,6 @@ def assert_shop_detail_rows(rows: list[dict[str, Any]], step: dict[str, Any], la
             raise AssertionError(f"{label}: no summary line contains {needle!r}: {rows}")
 
 
-def find_player(state: RuntimeState) -> dict[str, Any] | None:
-    if state.local_player_id:
-        player = state.entities.get(state.local_player_id)
-        if player is not None and player.get("type") == "player":
-            return player
-    for entity in state.entities.values():
-        if entity.get("type") == "player":
-            return entity
-    return None
-
-
 async def check_persistence(base_url: str, token: str, session_id: str, item_id: str | None, assertions: list[Any]) -> None:
     """Reconnect and assert the snapshot was reconstructed from recorded inputs."""
     uri = to_ws_url(base_url, "/v0/ws?session_id=" + session_id)
@@ -3402,10 +3397,6 @@ def state_experience(state: RuntimeState) -> int:
 
 def state_gold(state: RuntimeState) -> int:
     return int(state.gold)
-
-
-def dict_distance(a: dict[str, Any], b: dict[str, Any]) -> float:
-    return math.hypot(float(a["x"]) - float(b["x"]), float(a["y"]) - float(b["y"]))
 
 
 def assert_party_contains_roles(state: RuntimeState, where: str) -> None:

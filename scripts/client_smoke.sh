@@ -127,6 +127,7 @@ run_gate "GDScript delta apply test" "[gdtest] PASS: test_delta_apply" res://tes
 
 # 2n. Loot label rarity filter unit test (server-independent; v153).
 run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filter" res://tests/test_loot_label_filter.gd
+run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"

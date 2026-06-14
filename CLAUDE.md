@@ -188,7 +188,7 @@ This project uses Spec-Driven Development. Before touching code for any new feat
 4. Consult the relevant ADRs in `docs/adr/` — especially ADR-0001 (foundational) and any feature-specific ones.
 5. When the slice completes, update `PROGRESS.md` (lifecycle table, new gaps) and
    `docs/as-built/vN_<codename>.md` (what it proved).
-6. At ~10-slice milestones, write a repo-wide engineering review under `docs/reviews/` (see `PROGRESS.md` → **Periodic engineering reviews**).
+6. At ~10-slice milestones, run `$refactor` for scorecard-driven minor cleanup, then write a repo-wide engineering review under `docs/reviews/` (see `PROGRESS.md` → **Periodic engineering reviews**).
 
 ## Key Invariants
 

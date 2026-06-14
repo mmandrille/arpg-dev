@@ -11,15 +11,16 @@ Canonical skill definitions for this repo. **Edit files here only** — tool-spe
 | [`finish/`](finish/SKILL.md) | `/finish` → consolidate PROGRESS, CI, `feat: vN:` commit |
 | [`review/`](review/SKILL.md) | `/review` or `$review` → write repo-wide engineering review docs |
 | [`showme/`](showme/SKILL.md) | `/showme` or `$showme` → focused Godot screenshot/live preview for visual tuning |
-| [`autoloop/`](autoloop/SKILL.md) | `$autoloop {count}` → repeat next/spec/plan/execute/finish for the requested number of committed slices, then run any due engineering review |
+| [`autoloop/`](autoloop/SKILL.md) | `$autoloop {count}` → repeat next/spec/plan/execute/finish for feature/gameplay slices only |
+| [`refactor/`](refactor/SKILL.md) | `$refactor` → scorecard-driven minor cleanup commits before review generation |
 
 ## Discovery paths
 
 | Agent | Project path | How to invoke |
 |-------|--------------|---------------|
-| **Cursor** | `.cursor/skills/*` → `skills/` | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/review`, `/showme`, `/autoloop` |
+| **Cursor** | `.cursor/skills/*` → `skills/` | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/review`, `/showme`, `/autoloop`, `/refactor` |
 | **Claude Code** | `.claude/skills/*` → `skills/` | same slash commands |
-| **Codex** | `skills/` (repo) + optional `~/.codex/skills/` symlink | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$review`, `$showme`, `$autoloop` |
+| **Codex** | `skills/` (repo) + optional `~/.codex/skills/` symlink | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$review`, `$showme`, `$autoloop`, `$refactor` |
 
 Run once per machine for Codex user-level discovery:
 

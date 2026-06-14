@@ -1,18 +1,17 @@
 ---
 name: autoloop
 description: >-
-  Detect repository-maintenance documentation cleanup needs as permission-gated
-  pre-tasks, then either execute the user-provided slice idea(s) directly or,
-  when no idea is provided, present a curated menu of 15 possible
-  non-documentation SDD slices. Batch any blocking clarification questions
-  across the selected queue, then execute an autonomous loop through
-  next, spec, plan, execute, and finish with committed slices. Use when the
-  user runs $autoloop N, /autoloop N, or asks Codex to curate and run multiple
-  SDD slices.
+  Curate and execute autonomous feature/gameplay SDD slices only. Either use
+  the user-provided slice idea(s) directly or, when no idea is provided, present
+  a curated menu of 15 player-visible feature, game-improvement, or addition
+  candidates. Batch blocking clarification questions across the selected queue,
+  then execute an autonomous loop through next, spec, plan, execute, and finish
+  with committed slices. Use when the user runs $autoloop N, /autoloop N, or asks
+  Codex to curate and run multiple feature slices.
 disable-model-invocation: true
 ---
 
-# $autoloop — Curated Autonomous SDD Slice Loop
+# $autoloop — Curated Autonomous Feature Slice Loop
 
 **Trigger:** `$autoloop {count}` or `/autoloop {count}`
 
@@ -23,27 +22,33 @@ Examples:
 - `$autoloop 5` — present 15 ideas, then complete five selected slices, stopping early only on a hard stop.
 - `$autoloop 12 idea A; idea B; ...` — treat the inline ideas as selected and complete up to twelve viable slices.
 
-**Announce at start:** "Using the **autoloop** skill to curate slice ideas, then run an autonomous SDD loop after you choose."
+**Announce at start:** "Using the **autoloop** skill to curate feature/gameplay slice ideas, then run an autonomous SDD loop after you choose."
 
 ## Purpose
 
-Run the normal SDD workflow repeatedly. If the user supplied idea text in the
-initial command, that text is the selection gate. If the command has only a
-count, present a menu and wait for the user to select:
+Run the normal SDD workflow repeatedly for feature/gameplay progress only. An
+autoloop slice should usually be watchable end-to-end and treat backend,
+shared contracts, bot proof, and client presentation as one vertical slice when
+the behavior reaches the player.
+
+If the user supplied idea text in the initial command, that text is the
+selection gate. If the command has only a count, present a menu and wait for the
+user to select:
 
 ```text
-$autoloop with idea -> pre-task check -> order inline idea(s) -> batch questions -> $spec -> $plan -> $execute -> $finish
-$autoloop without idea -> pre-task check -> idea menu -> user picks -> order picks -> batch questions -> $spec -> $plan -> $execute -> $finish
+$autoloop with idea -> order inline feature idea(s) -> batch questions -> $spec -> $plan -> $execute -> $finish
+$autoloop without idea -> feature idea menu -> user picks -> order picks -> batch questions -> $spec -> $plan -> $execute -> $finish
 ```
 
 The initial `$autoloop` invocation authorizes preflight and idea discovery only
 when no idea text is provided. When idea text is provided after the count, that
 same invocation authorizes using the provided idea(s) as the selected queue,
 up to the requested slice count.
-It does **not** authorize documentation cleanup, documentation reordering, or
-repository-maintenance edits. If such work is detected as needed to keep the
-repo coherent, treat it as a permission-gated pre-task before menu presentation
-or inline-idea execution, not as a slice candidate.
+It does **not** authorize architecture cleanup, documentation cleanup,
+documentation reordering, scorecard paydown, repository-maintenance edits, or
+refactor-only work. If such work is detected, do not treat it as a pre-task or
+slice candidate; record it as input for `$refactor`, which runs before
+engineering review generation.
 After the user picks one or more ideas from the menu, that reply authorizes the
 agent to order the selected ideas and run the batch clarification gate. If that
 gate emits no questions, the agent may continue from brief to spec, plan,
@@ -67,7 +72,7 @@ blockers.
    - the number of viable selected ideas.
 7. If the user selects more ideas than the execution target, order all selected ideas,
    execute the first target-sized prefix, and report the rest as deferred.
-8. After the execution target is completed and committed, run the post-loop review gate; stop
+8. After the execution target is completed and committed, run the post-loop refactor/review handoff; stop
    earlier only on a hard stop condition.
 
 ## Defaults for non-blocking choices
@@ -78,9 +83,11 @@ choice is not a true blocker:
 - Choose the smallest vertical slice.
 - Prefer player-visible progress.
 - Prefer existing backlog, open gaps, ADR deferred work, or in-flight specs over new inventions.
-- Exclude documentation-only cleaning, updating, ordering, reshaping, index repair, or lifecycle
-  hygiene from the slice menu when the value is repository maintenance rather than a new
-  gameplay/system proof.
+- Exclude architecture cleanup, documentation-only work, scorecard paydown, pure test
+  reorganization, coordinator splitting, naming cleanup, lifecycle hygiene, stale-link cleanup,
+  and similar maintenance unless it is necessary inside a player-visible feature slice.
+- When a selected idea has both backend and client impact, keep them in the same vertical slice
+  so the result is playable or watchable rather than a backend-only installment.
 - Defer risky or large scope into explicit non-goals.
 - Prefer server authority, deterministic sim changes, shared contracts, and bot proof over
   client-only presentation shortcuts.
@@ -101,6 +108,9 @@ Stop immediately and report the reason if any of these occur:
 8. No inline idea was provided and the user has not yet selected ideas from the generated menu.
 9. A selected idea is too vague, too large, or not verifiable enough to turn into a small slice.
 10. Batch clarification questions were emitted and the user has not answered them yet.
+11. The next available work is architecture cleanup, documentation maintenance, scorecard
+    improvement, or refactor-only paydown rather than feature/gameplay progress; stop and tell the
+    user to run `$refactor` if they want autonomous quality paydown.
 
 Do not create branches. Do not push. Do not use `--no-verify`, `--amend`, or destructive git
 commands unless the user explicitly asks in a later message.
@@ -119,11 +129,10 @@ commands unless the user explicitly asks in a later message.
    - [`skills/plan/SKILL.md`](../plan/SKILL.md)
    - [`skills/execute/SKILL.md`](../execute/SKILL.md)
    - [`skills/finish/SKILL.md`](../finish/SKILL.md)
-   - [`skills/review/SKILL.md`](../review/SKILL.md), only when an engineering review is due
-     after the loop finishes.
-6. If `PROGRESS.md` says an engineering review is due, record that it must be handled
-   after the requested loop completes. Do **not** stop the loop or replace a selected
-   slice with review work solely because the review cadence is due.
+6. If `PROGRESS.md` says an engineering review is due, record that `$refactor` and `$review`
+   should run after the requested feature loop completes. Do **not** stop the loop or replace a
+   selected feature slice with review, refactor, or cleanup work solely because the review cadence
+   is due.
 
 ## Phase 1 — Idea intake, menu, and selection
 
@@ -135,25 +144,18 @@ Before writing any spec, plan, or code:
      semicolons, or separate paragraphs.
    - If no, use the **next** skill discovery inputs to gather candidate slices from `PROGRESS.md`,
    ADRs, existing specs/plans, open gaps, bot gaps, and natural project trajectory.
-2. Detect whether repository-maintenance documentation work is needed before credible slice
-   selection. This includes documentation cleaning, updating, ordering, index repair,
-   lifecycle-table correction, stale-link cleanup, or backlog/review hygiene whose purpose is
-   to maintain repo coherence.
-3. If such documentation maintenance is needed:
-   - Do **not** include it in the slice menu.
-   - Present it as a **pre-task** before the menu with the concrete files/symptoms found and the
-     smallest proposed maintenance action.
-   - Ask the user for permission to do the pre-task before continuing to slice presentation.
-   - Stop and wait for the user's answer. If the user declines, continue to the slice menu only if
-     the maintenance issue does not make candidate selection unsafe or misleading; otherwise stop.
-   - If the user approves, complete the pre-task first, verify the relevant docs enough to know the
-     menu can be curated safely, then resume Phase 1.
+2. Ignore repository-maintenance and architecture-cleanup work for autoloop selection. This
+   includes documentation cleaning, updating, ordering, index repair, lifecycle-table correction,
+   stale-link cleanup, backlog/review hygiene, file-size paydown, coordinator splitting, and
+   scorecard improvement whose purpose is codebase health rather than a new gameplay/system proof.
+   Mention notable cleanup signals only as `$refactor` input; do not ask permission to perform
+   them during `$autoloop`.
 4. If inline idea text was provided, skip menu generation and continue to the
    "selected ideas" validation and ordering steps below.
 5. Present **15** slice ideas when no inline idea text was provided.
-   Slice ideas must be gameplay, systems, tooling, test, infrastructure, or quality work with a
-   verifiable repo/runtime proof. They must not be documentation-only cleaning, updating, or
-   ordering work discovered as repository maintenance.
+   Slice ideas must be features, game improvements, player-facing additions, or the minimal
+   supporting system/tooling needed to make those additions playable and verifiable. They must not
+   be cleanup-only, architecture-only, documentation-only, test-only, or scorecard-paydown work.
 6. Keep each menu idea compact and selection-friendly:
    - stable number or short code the user can choose,
    - codename,
@@ -167,8 +169,7 @@ Before writing any spec, plan, or code:
    default menu remains 15 ideas.
 9. If fewer than 15 credible candidates exist, show the credible candidates and say why the
    menu is shorter.
-10. Do not write or modify files during the idea menu phase unless the user approved a
-   documentation-maintenance pre-task or inspection of repo state requires no file changes.
+10. Do not write or modify files during the idea menu phase.
 
 When selected ideas come from inline text or from a later menu reply:
 
@@ -296,28 +297,19 @@ After the checkpoint and optional context hygiene:
 
 1. If only unrelated pre-existing dirty changes remain, stop and report them.
 2. If the worktree is clean and the execution target is not reached, begin the next slice.
-3. If the worktree is clean and the execution target is reached, run the post-loop review gate below.
+3. If the worktree is clean and the execution target is reached, run the post-loop handoff below.
 
-### 8. Post-loop engineering review gate
+### 8. Post-loop refactor/review handoff
 
 After all requested slices have completed and committed:
 
 1. Re-read `PROGRESS.md`.
-2. If the engineering-review cadence is due, run the **review** skill then, after the loop's slice
-   commits are complete. This review may be forced by the autoloop flow and does not require a
-   separate user confirmation.
-3. Let the review skill write the normal review set under `docs/reviews/`.
-4. Run the review skill's required verification.
-5. Commit the review documents separately from gameplay/system slices, using the repo's review
-   commit convention if one is established; otherwise use:
-
-```text
-docs: engineering review after autoloop
-```
-
-6. If the review cannot complete, report that the requested slices are complete and explain the
-   review blocker separately.
-7. If no engineering review is due, stop and report completion.
+2. If the engineering-review cadence is due, do **not** generate the review from `$autoloop`.
+   Report that the requested feature slices are complete and that the next autonomous step is
+   `$refactor`, followed by `$review`.
+3. `$refactor` is responsible for scorecard-driven minor cleanup commits before the fresh
+   engineering review is written.
+4. If no engineering review is due, stop and report completion.
 
 ## Reporting
 

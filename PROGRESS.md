@@ -196,8 +196,11 @@ Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codena
 Every **~10 completed slices**, pause for a repo-wide engineering review under [`docs/reviews/`](docs/reviews/).
 Use the milestone slice number in filenames and headings (e.g. v50, v60, v70 — v60 is the latest pass).
 
-**When to write:** after the milestone slice ships and `make ci` is green — typically as part of `/finish`
-close-out or as a dedicated review task before `/next` proposes the next batch.
+**When to write:** after the milestone slice ships and `make ci` is green. Before generating the
+fresh review, run `$refactor` to read the previous review scorecard and land minor, verified
+architecture/maintainability/test/docs/process cleanup commits until every scorecard area is
+plausibly 9+ or only major/product work remains. Then run `$review` as the review-generation step
+before `/next` proposes the next feature batch.
 
 **Minimum set** (follow the v53 pattern):
 
@@ -1349,8 +1352,9 @@ the next autoloop pass unless code changes make them stale.
 7. **Update this file** when the slice completes: lifecycle table row, open gaps, and status fields.
    Write the as-built summary in `docs/as-built/vN_<codename>.md` (not inline here).
 8. **Engineering review cadence** — when the latest completed slice hits the next ~10-slice milestone
-   (see **Next engineering review** above), write or refresh the review set under [`docs/reviews/`](docs/reviews/)
-   before piling on more feature slices.
+   (see **Next engineering review** above), run `$refactor` first for scorecard-driven minor cleanup
+   commits, then write or refresh the review set under [`docs/reviews/`](docs/reviews/) before piling
+   on more feature slices.
 
 ### Invariants (do not break)
 

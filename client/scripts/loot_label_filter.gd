@@ -52,5 +52,14 @@ func mode_label() -> String:
 	return MODE_LABELS[_threshold]
 
 
+func set_mode_label(label: String) -> void:
+	var normalized := label.strip_edges().to_lower()
+	for i in range(MODE_LABELS.size()):
+		if MODE_LABELS[i].to_lower() == normalized:
+			_threshold = i
+			return
+	_threshold = 0
+
+
 func is_active() -> bool:
 	return _threshold > 0

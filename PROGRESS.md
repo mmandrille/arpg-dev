@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v171 — sorcerer paladin third skills |
+| **Latest completed slice** | v172 — loot filter persistence |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v172 — TBD via `$next` |
+| **Next slice** | v173 — TBD via `$next` |
 | **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
 | **Next engineering review** | v180 due before more feature batches |
 
@@ -188,6 +188,7 @@ v168_* = bot-step-validation-split
 v169_* = game-test-domain-drain
 v170_* = validate-shared-catalog-split
 v171_* = sorcerer-paladin-third-skills
+v172_* = loot-filter-persistence
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -400,6 +401,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v169** | `game-test-domain-drain` | Complete (`make ci` green) | [`v169_spec-game-test-domain-drain.md`](docs/specs/v169_spec-game-test-domain-drain.md) | [`v169_2026-06-14-game-test-domain-drain.md`](docs/plans/v169_2026-06-14-game-test-domain-drain.md) | [`as-built`](docs/as-built/v169_game-test-domain-drain.md) |
 | **v170** | `validate-shared-catalog-split` | Complete (`make ci` green) | [`v170_spec-validate-shared-catalog-split.md`](docs/specs/v170_spec-validate-shared-catalog-split.md) | [`v170_2026-06-14-validate-shared-catalog-split.md`](docs/plans/v170_2026-06-14-validate-shared-catalog-split.md) | [`as-built`](docs/as-built/v170_validate-shared-catalog-split.md) |
 | **v171** | `sorcerer-paladin-third-skills` | Complete (`make ci` green) | [`v171_spec-sorcerer-paladin-third-skills.md`](docs/specs/v171_spec-sorcerer-paladin-third-skills.md) | [`v171_2026-06-14-sorcerer-paladin-third-skills.md`](docs/plans/v171_2026-06-14-sorcerer-paladin-third-skills.md) | [`as-built`](docs/as-built/v171_sorcerer-paladin-third-skills.md) |
+| **v172** | `loot-filter-persistence` | Complete (`make ci` green) | [`v172_spec-loot-filter-persistence.md`](docs/specs/v172_spec-loot-filter-persistence.md) | [`v172_2026-06-14-loot-filter-persistence.md`](docs/plans/v172_2026-06-14-loot-filter-persistence.md) | [`as-built`](docs/as-built/v172_loot-filter-persistence.md) |
 
 ---
 
@@ -531,6 +533,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Loot filter mode now persists locally.** v172 saves the existing loot label rarity threshold in
+`ClientSettings`, restores it when the Godot client starts, and keeps invalid or missing saved
+values normalized to `All`. The feature remains display-only and local; server loot ownership,
+protocol, and pickup authority are unchanged.
 
 **Sorcerer and Paladin now have third-row active skills.** v171 adds Sorcerer `arcane_barrage`
 and Paladin `sanctuary` to the shared skill catalog, presentations, and i18n text. Validation
@@ -1318,7 +1325,7 @@ validation while removing a duplicated maintenance list.
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield/Arcane Barrage/Sanctuary, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81/v159/v161/v171 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
 | Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, market restrictions for upgraded/bound/equipped/hotbar-assigned items, player-facing offer browser/cancel UI polish, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111/v128/v129/v130 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
-| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97 non-goals, ADR-0013 |
+| Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97/v172 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |
 | Dungeon generation | Generated doors in obstacle walls, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final obstacle density/biome/difficulty balance | v40 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |

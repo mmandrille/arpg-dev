@@ -16,6 +16,8 @@ func _initialize() -> void:
 	_test_default_mode_allows_all()
 	_test_cycle_thresholds()
 	_test_cycle_wraps_around()
+	_test_restore_mode_label()
+	_test_restore_invalid_mode_falls_back()
 	_test_off_ladder_always_allowed()
 	_test_case_insensitive()
 	_test_display_color_dims_unhighlighted()
@@ -70,6 +72,22 @@ func _test_cycle_wraps_around() -> void:
 		f.cycle()
 	_check(f.mode_label() == "All", "four cycles wraps back to All")
 	_check(f.allows("common"), "wrapped All allows common again")
+
+
+func _test_restore_mode_label() -> void:
+	var f := LootLabelFilterScript.new()
+	f.set_mode_label("Rare+")
+	_check(f.mode_label() == "Rare+", "restore Rare+ mode")
+	_check(not f.allows("magic"), "restored Rare+ hides magic")
+	_check(f.allows("rare"), "restored Rare+ allows rare")
+
+
+func _test_restore_invalid_mode_falls_back() -> void:
+	var f := LootLabelFilterScript.new()
+	f.set_mode_label("Unique")
+	f.set_mode_label("legendary")
+	_check(f.mode_label() == "All", "invalid restore falls back to All")
+	_check(f.allows("common"), "invalid fallback allows common")
 
 
 func _test_off_ladder_always_allowed() -> void:

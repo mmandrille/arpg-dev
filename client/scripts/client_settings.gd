@@ -9,7 +9,9 @@ const CREATE_GAME_SESSION_TYPE_COOP := "coop"
 const CREATE_GAME_SESSION_TYPE_SOLO := "solo"
 const DEFAULT_CREATE_GAME_SESSION_TYPE := CREATE_GAME_SESSION_TYPE_COOP
 const DEFAULT_LANGUAGE := "en"
+const DEFAULT_LOOT_FILTER_MODE := "All"
 const SUPPORTED_LANGUAGES := ["en", "es"]
+const SUPPORTED_LOOT_FILTER_MODES := ["All", "Magic+", "Rare+", "Unique"]
 const SUPPORTED_SIZES := [
 	Vector2i(1280, 720),
 	Vector2i(1600, 900),
@@ -27,6 +29,7 @@ var floating_combat_text: bool = true
 var status_text: bool = true
 var create_game_session_type: String = DEFAULT_CREATE_GAME_SESSION_TYPE
 var language: String = DEFAULT_LANGUAGE
+var loot_filter_mode: String = DEFAULT_LOOT_FILTER_MODE
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -85,6 +88,14 @@ static func language_label(language_id: String) -> String:
 	return TextCatalogScript.get_text("settings.language.%s" % normalized, normalized)
 
 
+static func normalize_loot_filter_mode(mode: String) -> String:
+	var normalized := mode.strip_edges().to_lower()
+	for supported in SUPPORTED_LOOT_FILTER_MODES:
+		if supported.to_lower() == normalized:
+			return supported
+	return DEFAULT_LOOT_FILTER_MODE
+
+
 static func size_from_data(data) -> Vector2i:
 	if typeof(data) != TYPE_DICTIONARY:
 		return DEFAULT_SIZE
@@ -121,6 +132,12 @@ static func language_from_data(data) -> String:
 	return normalize_language(str((data as Dictionary).get("language", DEFAULT_LANGUAGE)))
 
 
+static func loot_filter_mode_from_data(data) -> String:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_LOOT_FILTER_MODE
+	return normalize_loot_filter_mode(str((data as Dictionary).get("loot_filter_mode", DEFAULT_LOOT_FILTER_MODE)))
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
@@ -128,6 +145,7 @@ func load() -> void:
 		status_text = true
 		create_game_session_type = DEFAULT_CREATE_GAME_SESSION_TYPE
 		language = DEFAULT_LANGUAGE
+		loot_filter_mode = DEFAULT_LOOT_FILTER_MODE
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
@@ -136,6 +154,7 @@ func load() -> void:
 	status_text = status_text_from_data(parsed)
 	create_game_session_type = create_game_session_type_from_data(parsed)
 	language = language_from_data(parsed)
+	loot_filter_mode = loot_filter_mode_from_data(parsed)
 
 
 func save() -> void:
@@ -152,6 +171,7 @@ func save() -> void:
 		"status_text": status_text,
 		"create_game_session_type": create_game_session_type,
 		"language": language,
+		"loot_filter_mode": loot_filter_mode,
 	}))
 
 
@@ -221,5 +241,11 @@ func set_create_game_session_type(session_type: String, persist: bool = true) ->
 func set_language(language_id: String, persist: bool = true) -> void:
 	language = normalize_language(language_id)
 	TextCatalogScript.set_locale(language)
+	if persist:
+		save()
+
+
+func set_loot_filter_mode(mode: String, persist: bool = true) -> void:
+	loot_filter_mode = normalize_loot_filter_mode(mode)
 	if persist:
 		save()

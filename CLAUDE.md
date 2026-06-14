@@ -122,6 +122,18 @@ Rules:
 This is a reduction ratchet, not a repo-wide rewrite mandate: shrink large files opportunistically,
 lock in those reductions, and block new large files from appearing.
 
+### Extraction independence
+
+Line-count reduction is not enough to count as architectural decoupling. A newly extracted module
+must be importable and unit-testable without importing the file it came from and without receiving
+that file's full namespace through `globals()` or equivalent helper laundering. If an extracted
+module needs runtime services, pass a typed context object or an explicit narrow helper set and add a
+focused test that imports the extracted module directly.
+
+`make maintainability` also runs an extraction-coupling ratchet. Existing `helpers=globals()` sites
+are grandfathered as debt; new sites fail CI, and removals must lower the baseline in the same
+slice.
+
 ## Architecture
 
 ```
@@ -234,31 +246,36 @@ These rules emerged from paying down the god-file debt. Agents should follow the
    both names are present. The `health_regen_per_10_seconds` ↔ `health_regen_per_second` example
    is the template.
 
+6. **run.py split freeze.** Do not run another mechanical `tools/bot/run.py` split that passes
+   `helpers=globals()` into the extracted module. Keep `run.py` as a grandfathered orchestrator
+   unless a future slice introduces a typed bot runtime context and replaces helper-global wrappers
+   directly.
+
 ### GDScript client
 
-6. **ItemRulesLoader pattern for shared data.** Any data loaded from `shared/` that is needed by
+7. **ItemRulesLoader pattern for shared data.** Any data loaded from `shared/` that is needed by
    multiple scripts goes through a `class_name Foo extends RefCounted` static singleton with
    `ensure_loaded()`. Do NOT duplicate file-load code across scripts.
 
-7. **Delta payload access.** Never use `c["key"]` on a delta change dictionary — always use
+8. **Delta payload access.** Never use `c["key"]` on a delta change dictionary — always use
    `c.get("key", default)`. Direct access crashes on partial/malformed server messages; `.get()`
    degrades gracefully and makes the malformed-delta test pass cleanly.
 
-8. **Headless unit tests avoid scene-tree ops.** Tests in `tests/` using `extends SceneTree`
+9. **Headless unit tests avoid scene-tree ops.** Tests in `tests/` using `extends SceneTree`
    can test pure state mutations on a `MainScript.new()` instance, but must not call paths that
    access `$Node` children, `get_parent()`, or require `entities_root`/`_walls_root`/etc.
    Those paths are covered indirectly by bot scenarios; unit tests cover state correctness.
 
 ### CI / process
 
-9. **Test and commit between independent refactoring steps.** Each structural change should be
+10. **Test and commit between independent refactoring steps.** Each structural change should be
    committed with a passing test suite before the next one begins. This keeps `git bisect` clean
    and avoids entangling unrelated failures.
 
-10. **Trivials first, then structural splits, then infrastructure.** Safety bugs (bare ranges,
+11. **Trivials first, then structural splits, then infrastructure.** Safety bugs (bare ranges,
     missing guards) should land before monolith splits so the split is on proven-correct code.
 
-11. **Protocol bot scenarios stay under 10 seconds.** `tools/bot/run.py` fails any protocol bot
+12. **Protocol bot scenarios stay under 10 seconds.** `tools/bot/run.py` fails any protocol bot
     scenario whose full run exceeds 10.0 seconds. If a scenario drifts over budget, shorten it to
     the contract it is really proving: use compact lab worlds, focused setup, or lower-level
     Go/Python tests for exhaustive traversal/timing coverage instead of waiting through unrelated

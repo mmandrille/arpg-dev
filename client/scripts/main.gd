@@ -6453,6 +6453,13 @@ func bot_set_stash_search(text: String) -> void:
 func bot_select_stash_sort(mode: String) -> void:
 	BotFacade.select_stash_sort(self, mode)
 
+
+func bot_set_multiplayer_search(text: String) -> void:
+	if multiplayer_panel != null: multiplayer_panel.bot_set_search(text)
+
+
+func bot_select_multiplayer_sort(mode: String) -> void:
+	if multiplayer_panel != null: multiplayer_panel.bot_select_sort(mode)
 func bot_set_market_publish_price(price_gold: int) -> void:
 	BotFacade.set_market_publish_price(self, price_gold)
 

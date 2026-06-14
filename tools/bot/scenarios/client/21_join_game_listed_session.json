@@ -27,6 +27,26 @@
       "connected_count_min": 1,
       "selected": false
     },
+    { "type": "set_multiplayer_search", "text_env": "ARPG_EXPECTED_JOIN_SESSION_ID" },
+    { "type": "select_multiplayer_sort", "mode": "host" },
+    {
+      "type": "assert_multiplayer_filter",
+      "search_text_env": "ARPG_EXPECTED_JOIN_SESSION_ID",
+      "sort_mode": "host",
+      "filtered_equals": 1,
+      "total_at_least": 1
+    },
+    {
+      "type": "assert_multiplayer_session_rows",
+      "session_id_env": "ARPG_EXPECTED_JOIN_SESSION_ID",
+      "mode": "coop",
+      "listed": true,
+      "member_count_min": 1,
+      "connected_count_min": 1,
+      "selected": false
+    },
+    { "type": "set_multiplayer_search", "text": "" },
+    { "type": "select_multiplayer_sort", "mode": "recent" },
     { "type": "click_menu_button", "button": "back" },
     { "type": "wait_main_menu", "timeout_s": 3.0 },
     { "type": "assert_current_session", "exists": false },

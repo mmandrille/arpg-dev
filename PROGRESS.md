@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v163 — inventory transfer router |
+| **Latest completed slice** | v164 — session browser filters |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v164 — session browser filters |
+| **Next slice** | v165 — TBD via `$next` |
 | **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
 | **Next engineering review** | v170 due before more feature batches |
 
@@ -180,6 +180,7 @@ v160_* = dungeon-population-extraction
 v161_* = full-elite-clear-objective
 v162_* = objective-chest-presentation
 v163_* = inventory-transfer-router
+v164_* = session-browser-filters
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -381,6 +382,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v161** | `full-elite-clear-objective` | Complete (`make ci` green) | [`v161_spec-full-elite-clear-objective.md`](docs/specs/v161_spec-full-elite-clear-objective.md) | [`v161_2026-06-14-full-elite-clear-objective.md`](docs/plans/v161_2026-06-14-full-elite-clear-objective.md) | [`as-built`](docs/as-built/v161_full-elite-clear-objective.md) |
 | **v162** | `objective-chest-presentation` | Complete (`make ci` green) | [`v162_spec-objective-chest-presentation.md`](docs/specs/v162_spec-objective-chest-presentation.md) | [`v162_2026-06-14-objective-chest-presentation.md`](docs/plans/v162_2026-06-14-objective-chest-presentation.md) | [`as-built`](docs/as-built/v162_objective-chest-presentation.md) |
 | **v163** | `inventory-transfer-router` | Complete (`make ci` green) | [`v163_spec-inventory-transfer-router.md`](docs/specs/v163_spec-inventory-transfer-router.md) | [`v163_2026-06-14-inventory-transfer-router.md`](docs/plans/v163_2026-06-14-inventory-transfer-router.md) | [`as-built`](docs/as-built/v163_inventory-transfer-router.md) |
+| **v164** | `session-browser-filters` | Complete (`make ci` green) | [`v164_spec-session-browser-filters.md`](docs/specs/v164_spec-session-browser-filters.md) | [`v164_2026-06-14-session-browser-filters.md`](docs/plans/v164_2026-06-14-session-browser-filters.md) | [`as-built`](docs/as-built/v164_session-browser-filters.md) |
 
 ---
 
@@ -510,6 +512,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Join Game sessions can now be searched and sorted client-side.** v164 adds display-only
+search/sort controls to `MultiplayerSessionsPanel`, keeping active-session discovery and joins
+server-authoritative while exposing filter state to client bot assertions and extending
+`21_join_game_listed_session.json` to prove filtering before joining.
 
 **Inventory transfer routing is now isolated.** v163 moves inventory double-click, shift-click, and
 drag/drop routing decisions into `client/scripts/inventory_transfer_router.gd`, preserving existing
@@ -1259,7 +1266,7 @@ validation while removing a duplicated maintenance list.
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
-| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, active-session filters/search/sorting controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49 non-goals, ADR-0001, ADR-0014 |
+| Multiplayer | Matchmaking/lobby beyond backend-listed sessions, advanced active-session filtering/pagination/load-aware capacity controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49/v164 non-goals, ADR-0001, ADR-0014 |
 | Companions / AI | Hired mercenaries derived from other players' characters, mercenary follow/aggro/combat AI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, mercenary loot/XP/potion behavior | ADR-0010 |
 
 ### Curated autoloop candidates
@@ -1275,7 +1282,7 @@ the next autoloop pass unless code changes make them stale.
 | `mystery-seller-paid-reroll` | Completed in v64 | Let players spend gold to reroll concealed mystery seller stock. | M | shared/protocol, server, store, client, bot, docs | Shipped with a 50 gold server-owned reroll and deterministic stock replacement. |
 | `stash-search-and-sorting` | Completed in v65 | Add search/sort controls to stash and bag views without changing item authority. | S/M | client, bot, docs | Shipped as display-only Godot controls with server-ID mutation safety. |
 | `character-select-summaries` | Completed in v54 | Show level, gold, deepest depth, and status in character selection. | M | store, HTTP, client, bot, docs | Needs careful aggregate/query shape; rename/delete already exists. |
-| `session-browser-filters` | Open | Add Join Game search/filter/sort controls for listed sessions. | S/M | client, HTTP tests maybe, bot, docs | Headless proof needs stable multi-session setup. |
+| `session-browser-filters` | Completed in v164 | Add Join Game search/filter/sort controls for listed sessions. | S/M | client, bot, docs | Shipped as display-only client controls using the existing listed-session endpoint. |
 | `loot-label-filter-core` | Open | Add display-only loot label filtering/highlighting for rarity/category. | M | client, bot, docs | Presentation-only; avoid changing shared loot ownership. |
 | `tuning-friendly-rule-tests` | Open | Make shared-rule balance tuning less brittle by replacing accidental hardcoded rule values in tests/scenarios with rule-derived or semantic assertions. | M | shared, server tests, client tests, bot scenarios, validation docs | Must preserve exact locks for schemas, replay determinism, persistence boundaries, and named goldens. |
 | `client-boss-telegraph-polish` | Completed in v57 | Improve boss telegraph readability with a clearer in-world warning marker. | S/M | client, bot, docs | Reused in-repo primitive marker patterns; external plugins/assets rejected. |

@@ -255,12 +255,18 @@ func _test_multiplayer_menu_step_types_load() -> void:
 		{"type": "click_menu_button", "button": "join_first_listed_session"},
 		{"type": "click_menu_button", "button": "select_expected_join_session"},
 		{"type": "click_menu_button", "button": "join_expected_session"},
+		{"type": "set_multiplayer_search", "text": "sess"},
+		{"type": "select_multiplayer_sort", "mode": "host"},
+		{"type": "assert_multiplayer_filter", "search_text": "sess", "sort_mode": "host", "filtered_equals": 1, "total_at_least": 1},
 		{"type": "wait_remote_player_count", "at_least": 1, "timeout_s": 1.0},
 		{"type": "assert_remote_player_count", "equals": 1},
 	]
 	var err := BotScenarioRunnerScript.validate_scenario(data)
 	_assert_eq("multiplayer menu step scenario valid", err, "")
 	_assert_ne("multiplayer row assertion without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_multiplayer_session_rows"}, 0), "")
+	_assert_ne("multiplayer search without text rejected", BotScenarioRunnerScript.validate_step({"type": "set_multiplayer_search"}, 0), "")
+	_assert_ne("multiplayer sort invalid mode rejected", BotScenarioRunnerScript.validate_step({"type": "select_multiplayer_sort", "mode": "bad"}, 0), "")
+	_assert_ne("multiplayer filter without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "assert_multiplayer_filter"}, 0), "")
 	_assert_ne("remote player count requires expectation", BotScenarioRunnerScript.validate_step({"type": "assert_remote_player_count"}, 0), "")
 
 
@@ -274,6 +280,7 @@ func _test_multiplayer_menu_assertions() -> void:
 			{"type": "wait_multiplayer_panel", "timeout_s": 1.0},
 			{"type": "assert_multiplayer_panel_visible", "visible": true},
 			{"type": "assert_multiplayer_session_rows", "session_id": "sess_1", "min_count": 1, "selected": true, "listed": true, "mode": "coop", "member_count_min": 3, "connected_count_min": 1},
+			{"type": "assert_multiplayer_filter", "search_text": "sess", "sort_mode": "host", "filtered_equals": 1, "total_at_least": 1},
 			{"type": "assert_current_session", "session_id": "sess_1", "mode": "coop", "listed": true},
 			{"type": "assert_remote_player_count", "equals": 1},
 		],
@@ -283,6 +290,10 @@ func _test_multiplayer_menu_assertions() -> void:
 		"multiplayer_panel_visible": true,
 		"multiplayer_panel": {
 			"selected_session_id": "sess_1",
+			"search_text": "sess",
+			"sort_mode": "host",
+			"filtered_session_count": 1,
+			"total_session_count": 1,
 			"sessions": [
 				{"session_id": "sess_1", "mode": "coop", "listed": true, "member_count": 3, "connected_count": 1},
 			],
@@ -292,6 +303,7 @@ func _test_multiplayer_menu_assertions() -> void:
 		"current_session_listed": true,
 		"remote_player_ids": ["1002"],
 	}
+	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)

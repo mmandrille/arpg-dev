@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v142 — `sim-load-and-players-extraction` |
+| **Latest completed slice** | v143 — `client-bot-facade` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | TBD — run `$next` |
+| **Next slice** | v144 — `client-bot-runner-split` |
 | **Last engineering review** | v140 — [`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md) (2026-06-13) |
 | **Next engineering review** | v150 due before more feature batches |
 
@@ -160,6 +160,7 @@ v138_* = codemap-and-reduction-ratchet
 v139_* = market-expiration-read-freshness
 v141_* = market-store-extraction
 v142_* = sim-load-and-players-extraction
+v143_* = client-bot-facade
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -341,6 +342,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v139** | `market-expiration-read-freshness` | Complete (`make ci` green) | [`v139_spec-market-expiration-read-freshness.md`](docs/specs/v139_spec-market-expiration-read-freshness.md) | [`v139_2026-06-13-market-expiration-read-freshness.md`](docs/plans/v139_2026-06-13-market-expiration-read-freshness.md) | [`as-built`](docs/as-built/v139_market-expiration-read-freshness.md) |
 | **v141** | `market-store-extraction` | Complete (`make ci` green) | [`v141_spec-market-store-extraction.md`](docs/specs/v141_spec-market-store-extraction.md) | [`v141_2026-06-13-market-store-extraction.md`](docs/plans/v141_2026-06-13-market-store-extraction.md) | [`as-built`](docs/as-built/v141_market-store-extraction.md) |
 | **v142** | `sim-load-and-players-extraction` | Complete (`make ci` green) | [`v142_spec-sim-load-and-players-extraction.md`](docs/specs/v142_spec-sim-load-and-players-extraction.md) | [`v142_2026-06-13-sim-load-and-players-extraction.md`](docs/plans/v142_2026-06-13-sim-load-and-players-extraction.md) | [`as-built`](docs/as-built/v142_sim-load-and-players-extraction.md) |
+| **v143** | `client-bot-facade` | Complete (`make ci` green) | [`v143_spec-client-bot-facade.md`](docs/specs/v143_spec-client-bot-facade.md) | [`v143_2026-06-13-client-bot-facade.md`](docs/plans/v143_2026-06-13-client-bot-facade.md) | [`as-built`](docs/as-built/v143_client-bot-facade.md) |
 
 ---
 
@@ -470,6 +472,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Client bot facade helpers are split out of `main.gd`.** v143 moves shop, stash, bishop,
+blacksmith, market, hotbar, stat, skill-bar, and directional skill-cast bot adapter bodies into
+`client/scripts/bot_facade.gd`, keeps `main.gd` public `bot_*` wrappers for `BotController`, adds
+headless fake-panel unit coverage, and lowers the `main.gd` ratchet baseline from 6769 to 6703
+lines.
 
 **Sim load and player lifecycle helpers are split out of `sim.go`.** v142 moves persisted load
 methods and payload clone helpers into `server/internal/game/sim_load.go`, moves co-op player

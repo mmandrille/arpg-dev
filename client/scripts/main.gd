@@ -6397,151 +6397,85 @@ func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> 
 
 
 func bot_click_shop_buy_offer(offer_id: String = "", offer_kind: String = "", offer_index: int = 0) -> void:
-	if shop_panel == null:
-		return
-	shop_panel.bot_click_buy_offer(offer_id, offer_kind, offer_index)
+	BotFacade.click_shop_buy_offer(self, offer_id, offer_kind, offer_index)
 
 
 func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
-	if shop_panel == null:
-		return
-	shop_panel.bot_click_sell_item(item_def_id, rolled, bag_index)
+	BotFacade.click_shop_sell_item(self, item_def_id, rolled, bag_index)
 
 
 func bot_click_shop_reroll() -> void:
-	if shop_panel == null:
-		return
-	shop_panel.bot_click_reroll()
+	BotFacade.click_shop_reroll(self)
 
 
 func bot_drag_bag_to_stash(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
-	if stash_panel == null:
-		return
-	stash_panel.bot_drag_bag_to_stash(item_def_id, rolled, bag_index)
+	BotFacade.drag_bag_to_stash(self, item_def_id, rolled, bag_index)
 
 
 func bot_drag_stash_to_bag(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
-	if stash_panel == null:
-		return
-	stash_panel.bot_drag_stash_to_bag(stash_item_id, item_def_id, rolled, stash_index)
+	BotFacade.drag_stash_to_bag(self, stash_item_id, item_def_id, rolled, stash_index)
 
 
 func bot_click_stash_deposit_gold(amount: int = 1) -> void:
-	if stash_panel == null:
-		return
-	stash_panel.bot_click_deposit_gold(amount)
+	BotFacade.click_stash_deposit_gold(self, amount)
 
 
 func bot_click_stash_withdraw_gold(amount: int = 1) -> void:
-	if stash_panel == null:
-		return
-	stash_panel.bot_click_withdraw_gold(amount)
+	BotFacade.click_stash_withdraw_gold(self, amount)
 
 
 func bot_click_bishop_respec() -> void:
-	if bishop_panel == null:
-		return
-	bishop_panel.bot_click_respec()
+	BotFacade.click_bishop_respec(self)
 
 
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
-	if blacksmith_panel == null:
-		return
-	blacksmith_panel.bot_click_upgrade(stash_item_id, item_def_id, stash_index)
+	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
 
 
 func bot_set_stash_search(text: String) -> void:
-	if stash_panel == null:
-		return
-	stash_panel.bot_set_search_text(text)
+	BotFacade.set_stash_search(self, text)
 
 
 func bot_select_stash_sort(mode: String) -> void:
-	if stash_panel == null:
-		return
-	stash_panel.bot_select_sort_mode(mode)
+	BotFacade.select_stash_sort(self, mode)
 
 func bot_set_market_publish_price(price_gold: int) -> void:
-	if market_panel == null:
-		return
-	market_panel.bot_set_publish_price(price_gold)
+	BotFacade.set_market_publish_price(self, price_gold)
 
 func bot_click_market_publish_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
-	if market_panel == null:
-		return
-	market_panel.bot_click_publish_stash_item(stash_item_id, item_def_id, rolled, stash_index)
+	BotFacade.click_market_publish_item(self, stash_item_id, item_def_id, rolled, stash_index)
 
 func bot_click_market_purchase_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
-	if market_panel == null:
-		return
-	market_panel.bot_click_purchase_listing(listing_id, item_def_id, price_gold, listing_index)
+	BotFacade.click_market_purchase_listing(self, listing_id, item_def_id, price_gold, listing_index)
 
 func bot_click_market_view_offers(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
-	if market_panel == null:
-		return
-	market_panel.bot_click_view_offers(listing_id, item_def_id, price_gold, listing_index)
+	BotFacade.click_market_view_offers(self, listing_id, item_def_id, price_gold, listing_index)
 
 func bot_click_market_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
-	if market_panel == null:
-		return
-	market_panel.bot_click_accept_offer(offer_id, offer_index)
+	BotFacade.click_market_accept_offer(self, offer_id, offer_index)
 
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:
-	if consumable_bar == null:
-		return
-	consumable_bar.assign_slot(slot_index, item_instance_id)
+	BotFacade.assign_consumable_hotbar(self, slot_index, item_instance_id)
 
 
 func bot_use_consumable_hotbar(slot_index: int) -> void:
-	if consumable_bar == null:
-		return
-	consumable_bar.use_slot(slot_index)
+	BotFacade.use_consumable_hotbar(self, slot_index)
 
 
 func bot_click_stat_button(stat: String) -> void:
-	if character_stats_panel == null:
-		return
-	character_stats_panel.bot_click_stat_button(stat)
+	BotFacade.click_stat_button(self, stat)
 
 
 func bot_click_skill_button(skill_id: String = "") -> void:
-	if skills_panel == null:
-		return
-	skills_panel.bot_click_skill_button(skill_id)
+	BotFacade.click_skill_button(self, skill_id)
 
 
 func bot_use_skill_bar(skill_id: String = "", target_id: String = "", force_direct: bool = false) -> void:
-	if skill_id == "":
-		skill_id = SkillRulesLoader.first_skill_id()
-	if force_direct or target_id != "":
-		_send_skill_cast_intent(skill_id, target_id)
-		return
-	if skill_id != "" and _skill_rank(skill_id) > 0:
-		right_click_skill_id = skill_id
-		if skill_bar != null:
-			skill_bar.set_skill_id(skill_id)
-			skill_bar.set_character_progression(character_progression)
-			skill_bar.set_skill_progression(skill_progression)
-			skill_bar.set_skill_cooldowns(skill_cooldowns)
-		_sync_skill_bindings_ui()
-	if skill_bar != null:
-		skill_bar.use_slot()
+	BotFacade.use_skill_bar(self, skill_id, target_id, force_direct)
 
 
 func bot_cast_skill_direction(skill_id: String = "", direction: Dictionary = {}) -> void:
-	if skill_id == "":
-		skill_id = SkillRulesLoader.first_skill_id()
-	if _skill_cast_blocked(skill_id):
-		return
-	var dir := Vector2(float(direction.get("x", _last_facing_direction.x)), float(direction.get("y", _last_facing_direction.y)))
-	if dir.length_squared() <= 0.0001:
-		dir = Vector2(1.0, 0.0)
-	dir = dir.normalized()
-	_face_direction(dir)
-	client.send("cast_skill_intent", last_server_tick, {"skill_id": skill_id, "direction": {"x": dir.x, "y": dir.y}})
-	_attack_cooldown = SEND_INTERVAL
-	if player_anim != null:
-		player_anim.play_one_shot("attack")
+	BotFacade.cast_skill_direction(self, skill_id, direction)
 
 
 func bot_click_menu_button(button: String) -> void:

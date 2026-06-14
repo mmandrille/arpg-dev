@@ -1,0 +1,38 @@
+client/scripts/inventory_panel.gd
+  s_c33fd0490c9854::t_3bf3addc6ce3e0 138,159,562,883,887,986
+client/tests/test_stash_panel.gd
+  s_c33fd0490c9854::t_767db89b6bea67 7,149
+docs/specs/v165_spec-inventory-panel-routing-paydown.md
+  s_c33fd0490c9854::t_ede0ab2a5fc841 1-2,4-33,35-48
+  s_c33fd0490c9854::t_b2084fb99f91d8 34
+  s_c33fd0490c9854::t_4467f4421ffdb9 3
+docs/plans/v165_2026-06-14-inventory-panel-routing-paydown.md
+  s_c33fd0490c9854::t_4467f4421ffdb9 3,31-33,36,49,51,63-64,76-77,87
+  s_c33fd0490c9854::t_b2084fb99f91d8 21,61
+  s_c33fd0490c9854::t_41de7ebd0235f7 78,86,88
+  s_c33fd0490c9854::t_ede0ab2a5fc841 1-2,4-20,22-30,34-35,37-48,50,52-60,62,65-75,79-85
+client/tests/test_inventory_transfer_router.gd
+  s_c33fd0490c9854::t_8c794507de8db0 31-34
+.maintainability/file-size-baseline.tsv
+  s_c33fd0490c9854::t_4467f4421ffdb9 6
+PROGRESS.md
+  s_c33fd0490c9854::t_2eac3ac3c1aa42 15,18,184,387,518-521
+docs/as-built/v165_inventory-panel-routing-paydown.md
+  s_c33fd0490c9854::t_4467f4421ffdb9 1-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6a224d058284ab1cdffdc15e0b7a7e8a59c09d13",
+  "prompts": {},
+  "sessions": {
+    "s_c33fd0490c9854": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec80a-f35b-7dd1-863f-336688766070",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -58,6 +58,17 @@
       "effect_visual": "rage_scale",
       "summary_key": "skill.rage.summary"
     },
+    "earthbreaker": {
+      "icon": {
+        "label": "E",
+        "shape": "burst",
+        "color": "#9b5f2f",
+        "accent": "#ffe0b5"
+      },
+      "summary": "Heavy cone smash",
+      "effect_visual": "earthbreaker_cone",
+      "summary_key": "skill.earthbreaker.summary"
+    },
     "heal": {
       "icon": {
         "label": "H",
@@ -102,6 +113,17 @@
       "effect_visual": "dash",
       "summary_key": "skill.dash.summary"
     },
+    "shadow_flurry": {
+      "icon": {
+        "label": "F",
+        "shape": "slash",
+        "color": "#7c65ff",
+        "accent": "#e8e0ff"
+      },
+      "summary": "Fast close flurry",
+      "effect_visual": "shadow_flurry",
+      "summary_key": "skill.shadow_flurry.summary"
+    },
     "piercing_shot": {
       "icon": {
         "label": "P",
@@ -137,6 +159,18 @@
       "projectile_visual": "volley_arrow_projectile",
       "effect_visual": "volley_fan",
       "summary_key": "skill.volley.summary"
+    },
+    "split_arrow": {
+      "icon": {
+        "label": "S",
+        "shape": "arrow",
+        "color": "#53d7a2",
+        "accent": "#e0fff0"
+      },
+      "summary": "Piercing split arrow",
+      "projectile_visual": "split_arrow_projectile",
+      "effect_visual": "split_arrow",
+      "summary_key": "skill.split_arrow.summary"
     }
   }
 }

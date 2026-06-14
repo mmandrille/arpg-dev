@@ -37,10 +37,13 @@ def validate_skill_catalogs(
     elif (
         skill_class_map.get("magic_bolt") != "sorcerer"
         or skill_class_map.get("rage") != "barbarian"
+        or skill_class_map.get("earthbreaker") != "barbarian"
         or skill_class_map.get("heal") != "paladin"
+        or skill_class_map.get("shadow_flurry") != "rogue"
         or skill_class_map.get("piercing_shot") != "ranger"
         or skill_class_map.get("pinning_shot") != "ranger"
         or skill_class_map.get("volley") != "ranger"
+        or skill_class_map.get("split_arrow") != "ranger"
     ):
         report.fail("skill classes", "core class skills must map to their owning classes")
     else:
@@ -114,6 +117,28 @@ def validate_skill_catalogs(
             break
         else:
             report.ok("skill prerequisites reference known skills")
+
+    skill_prereqs = {
+        skill_id: {
+            str(req.get("skill_id", "")): int(req.get("rank", 0))
+            for req in skill.get("requirements", {}).get("skills", [])
+        }
+        for skill_id, skill in skills.get("skills", {}).items()
+    }
+    expected_prereqs = {
+        "earthbreaker": {"cleave": 1},
+        "shadow_flurry": {"dash": 1},
+        "split_arrow": {"volley": 1},
+    }
+    mismatched_prereqs = {
+        skill_id: skill_prereqs.get(skill_id, {})
+        for skill_id, prereqs in expected_prereqs.items()
+        if skill_prereqs.get(skill_id, {}) != prereqs
+    }
+    if mismatched_prereqs:
+        report.fail("class third skill prerequisites", f"unexpected prerequisites: {mismatched_prereqs}")
+    else:
+        report.ok("class third skill prerequisites are stable")
 
     if magic_bolt is not None:
         skill_golden = skill_magic_golden.get("skill", {})

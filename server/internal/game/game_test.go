@@ -240,6 +240,9 @@ func TestLoadRules(t *testing.T) {
 	if got, want := r.Skills["rage"].Cooldown.FlatTicks, 675; got != want {
 		t.Fatalf("rage cooldown flat_ticks = %d, want %d", got, want)
 	}
+	if skill := r.Skills["earthbreaker"]; skill.Class != "barbarian" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "cleave" || skill.Cone.Range <= r.Skills["cleave"].Cone.Range {
+		t.Fatalf("earthbreaker skill = %+v, want barbarian tier 2 cone requiring cleave with longer range", skill)
+	}
 	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 || skill.Effects[0].DurationTicks != 30 {
 		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and enlarged range/radius effect", skill)
 	}
@@ -248,6 +251,12 @@ func TestLoadRules(t *testing.T) {
 	}
 	if got, want := r.Skills["holy_shield"].Cooldown.FlatTicks, 450; got != want {
 		t.Fatalf("holy shield cooldown flat_ticks = %d, want %d", got, want)
+	}
+	if skill := r.Skills["shadow_flurry"]; skill.Class != "rogue" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "dash" || skill.Cone.AngleDegrees <= r.Skills["dash"].Cone.AngleDegrees {
+		t.Fatalf("shadow_flurry skill = %+v, want rogue tier 2 cone requiring dash with wider angle", skill)
+	}
+	if skill := r.Skills["split_arrow"]; skill.Class != "ranger" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "volley" || skill.Pierce.MaxHits != 3 || skill.Projectile.Visual != "split_arrow_projectile" {
+		t.Fatalf("split_arrow skill = %+v, want ranger tier 3 projectile requiring volley with pierce", skill)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)

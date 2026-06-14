@@ -1,0 +1,29 @@
+{
+  "id": "barbarian_earthbreaker",
+  "world_id": "skill_progression_lab",
+  "seed": "v154_barbarian_earthbreaker",
+  "character_class": "barbarian",
+  "title": "Barbarian Earthbreaker",
+  "description": "Seed Cleave, cast the new Earthbreaker higher-row skill, and prove authoritative damage.",
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 12, "dex": 5, "vit": 10, "magic": 5 },
+    "skill_ranks": { "cleave": 1, "earthbreaker": 1 }
+  },
+  "steps": [
+    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "earthbreaker", "rank": 1, "max_rank": "from_rules", "can_spend": false },
+    { "action": "cast_skill", "skill_id": "earthbreaker", "monster_def_id": "skill_xp_level7_dummy", "event_type": "skill_cast" },
+    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 }, "timeout_s": 3 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "earthbreaker", "rank": 1, "mana": 6 },
+    { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 },
+    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "earthbreaker" }
+  ],
+  "visual": {
+    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+  }
+}

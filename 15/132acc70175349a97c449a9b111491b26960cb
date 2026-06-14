@@ -1,0 +1,31 @@
+docs/plans/v139_2026-06-13-market-expiration-read-freshness.md
+  s_806d7d64679b30::t_5a171e41227742 22,34-36,63
+  s_806d7d64679b30::t_f3f72d5404c0a0 1-21,23-33,37-62,64-97
+docs/specs/v139_spec-market-expiration-read-freshness.md
+  s_806d7d64679b30::t_5a171e41227742 37
+  s_806d7d64679b30::t_13cd33994ee271 1-36,38-55
+server/internal/store/market_expiration_read_test.go
+  s_806d7d64679b30::t_b7ddc70ee0e49e 1-127
+docs/as-built/v139_market-expiration-read-freshness.md
+  s_806d7d64679b30::t_483b94455c706d 1-31
+server/internal/store/repos.go
+  s_806d7d64679b30::t_cfc4c8a45f3ba3 1958-1960,2144-2146
+PROGRESS.md
+  s_806d7d64679b30::t_483b94455c706d 15,160,339,470-474
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "15132acc70175349a97c449a9b111491b26960cb",
+  "prompts": {},
+  "sessions": {
+    "s_806d7d64679b30": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec316-a146-70b2-bc83-fdcfc1136441",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

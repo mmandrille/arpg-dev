@@ -4,7 +4,7 @@
 It is the canonical snapshot of where the project stands and what is still open. Per-slice as-built
 summaries live in [`docs/as-built/`](docs/as-built/).
 
-Last updated: 2026-06-13
+Last updated: 2026-06-14
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v145 — `bot-runtime-assertion-split` |
+| **Latest completed slice** | v146 — `bot-movement-runtime-split` |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-13 |
-| **Next slice** | TBD — run `$next` |
+| **CI gate** | `make ci` green on 2026-06-14 |
+| **Next slice** | v147 — `bot-wait-runtime-split` |
 | **Last engineering review** | v140 — [`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md) (2026-06-13) |
 | **Next engineering review** | v150 due before more feature batches |
 
@@ -163,6 +163,7 @@ v142_* = sim-load-and-players-extraction
 v143_* = client-bot-facade
 v144_* = client-bot-runner-split
 v145_* = bot-runtime-assertion-split
+v146_* = bot-movement-runtime-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -347,6 +348,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v143** | `client-bot-facade` | Complete (`make ci` green) | [`v143_spec-client-bot-facade.md`](docs/specs/v143_spec-client-bot-facade.md) | [`v143_2026-06-13-client-bot-facade.md`](docs/plans/v143_2026-06-13-client-bot-facade.md) | [`as-built`](docs/as-built/v143_client-bot-facade.md) |
 | **v144** | `client-bot-runner-split` | Complete (`make ci` green) | [`v144_spec-client-bot-runner-split.md`](docs/specs/v144_spec-client-bot-runner-split.md) | [`v144_2026-06-13-client-bot-runner-split.md`](docs/plans/v144_2026-06-13-client-bot-runner-split.md) | [`as-built`](docs/as-built/v144_client-bot-runner-split.md) |
 | **v145** | `bot-runtime-assertion-split` | Complete (`make ci` green) | [`v145_spec-bot-runtime-assertion-split.md`](docs/specs/v145_spec-bot-runtime-assertion-split.md) | [`v145_2026-06-13-bot-runtime-assertion-split.md`](docs/plans/v145_2026-06-13-bot-runtime-assertion-split.md) | [`as-built`](docs/as-built/v145_bot-runtime-assertion-split.md) |
+| **v146** | `bot-movement-runtime-split` | Complete (`make ci` green) | [`v146_spec-bot-movement-runtime-split.md`](docs/specs/v146_spec-bot-movement-runtime-split.md) | [`v146_2026-06-14-bot-movement-runtime-split.md`](docs/plans/v146_2026-06-14-bot-movement-runtime-split.md) | [`as-built`](docs/as-built/v146_bot-movement-runtime-split.md) |
 
 ---
 
@@ -476,6 +478,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Python bot movement runtime helpers are split out of `run.py`.** v146 moves walking,
+move-to-position, in-range movement, movement candidate calculation, and movement accept/reject
+waiting into `tools/bot/movement_runtime.py`, keeps `run.py` compatibility wrappers, and lowers the
+`run.py` ratchet baseline from 4768 to 4612 lines.
 
 **Python bot runtime assertion dispatch is split out of `run.py`.** v145 moves snapshot/runtime
 assertion dispatch into `tools/bot/runtime_assertions.py`, keeps `run.py` compatibility wrappers,

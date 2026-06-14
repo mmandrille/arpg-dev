@@ -21,6 +21,10 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["rage"].class_id == "barbarian"
     assert entries["rage"].icon_shape == "burst"
 
+    assert entries["earthbreaker"].category == "attack"
+    assert entries["earthbreaker"].class_id == "barbarian"
+    assert entries["earthbreaker"].icon_label == "E"
+
     assert entries["heal"].category == "heal"
     assert entries["heal"].class_id == "paladin"
     assert entries["heal"].icon_shape == "heart"
@@ -28,6 +32,14 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["holy_shield"].category == "stat_buff"
     assert entries["holy_shield"].class_id == "paladin"
     assert entries["holy_shield"].icon_shape == "shield"
+
+    assert entries["shadow_flurry"].category == "attack"
+    assert entries["shadow_flurry"].class_id == "rogue"
+    assert entries["shadow_flurry"].icon_shape == "slash"
+
+    assert entries["split_arrow"].category == "attack"
+    assert entries["split_arrow"].class_id == "ranger"
+    assert entries["split_arrow"].icon_label == "S"
 
 
 def test_single_skill_demo_entry_has_display_metadata() -> None:

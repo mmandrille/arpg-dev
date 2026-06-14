@@ -171,13 +171,15 @@ func _run() -> void:
 	})
 	state = panel.get_debug_state()
 	var rogue_skill_ids: Array = state.get("skill_ids", [])
-	_assert_eq("rogue has two starter visible skills", rogue_skill_ids.size(), 2)
+	_assert_eq("rogue has two starter skills plus gated flurry", rogue_skill_ids.size(), 3)
 	_assert_eq("rogue first starter skill", str(rogue_skill_ids[0]), "poison_stab")
 	_assert_eq("rogue second starter skill", str(rogue_skill_ids[1]), "dash")
+	_assert_eq("rogue higher-row skill visible", str(rogue_skill_ids[2]), "shadow_flurry")
 	_assert_eq("rogue skill name from catalog", str(state.get("skill_name", "")), "Poison Stab")
 	_assert_eq("rogue skill icon from presentation", str(state.get("icon_label", "")), "P")
 	_assert_true("rogue poison stab can spend", bool(((state.get("skills", {}) as Dictionary).get("poison_stab", {}) as Dictionary).get("can_spend", false)))
 	_assert_true("rogue dash can spend", bool(((state.get("skills", {}) as Dictionary).get("dash", {}) as Dictionary).get("can_spend", false)))
+	_assert_false("rogue shadow flurry gated before dash rank", bool(((state.get("skills", {}) as Dictionary).get("shadow_flurry", {}) as Dictionary).get("can_spend", true)))
 
 	panel.set_character_progression({
 		"character_class": "sorcerer",
@@ -262,9 +264,10 @@ func _remove_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute_path)
 
 
-func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false) -> Array:
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false, earthbreaker_rank: int = 0, earthbreaker_can_spend: bool = false, shadow_flurry_rank: int = 0, shadow_flurry_can_spend: bool = false, split_arrow_rank: int = 0, split_arrow_can_spend: bool = false) -> Array:
 	return [
 		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": _skill_max_rank("cleave"), "can_spend": cleave_can_spend},
+		{"skill_id": "earthbreaker", "rank": earthbreaker_rank, "max_rank": _skill_max_rank("earthbreaker"), "can_spend": earthbreaker_can_spend},
 		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": _skill_max_rank("magic_bolt"), "can_spend": magic_can_spend},
 		{"skill_id": "ice_shard", "rank": ice_shard_rank, "max_rank": _skill_max_rank("ice_shard"), "can_spend": ice_shard_can_spend},
 		{"skill_id": "ligthing", "rank": ligthing_rank, "max_rank": _skill_max_rank("ligthing"), "can_spend": ligthing_can_spend},
@@ -273,6 +276,8 @@ func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rag
 		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": _skill_max_rank("holy_shield"), "can_spend": holy_shield_can_spend},
 		{"skill_id": "poison_stab", "rank": poison_stab_rank, "max_rank": _skill_max_rank("poison_stab"), "can_spend": poison_stab_can_spend},
 		{"skill_id": "dash", "rank": dash_rank, "max_rank": _skill_max_rank("dash"), "can_spend": dash_can_spend},
+		{"skill_id": "shadow_flurry", "rank": shadow_flurry_rank, "max_rank": _skill_max_rank("shadow_flurry"), "can_spend": shadow_flurry_can_spend},
+		{"skill_id": "split_arrow", "rank": split_arrow_rank, "max_rank": _skill_max_rank("split_arrow"), "can_spend": split_arrow_can_spend},
 	]
 
 

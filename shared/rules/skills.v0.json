@@ -277,6 +277,53 @@
       },
       "name_key": "skill.rage.name"
     },
+    "earthbreaker": {
+      "name": "Earthbreaker",
+      "class": "barbarian",
+      "tree": {
+        "tier": 2,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "str": 7,
+          "vit": 7
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "cleave",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 7,
+        "angle_degrees": 65,
+        "push_min": 3,
+        "push_max": 8,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.earthbreaker.name"
+    },
     "heal": {
       "name": "Heal",
       "class": "paladin",
@@ -481,6 +528,51 @@
       },
       "name_key": "skill.dash.name"
     },
+    "shadow_flurry": {
+      "name": "Shadow Flurry",
+      "class": "rogue",
+      "tree": {
+        "tier": 2,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 10
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "dash",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 3.2,
+        "angle_degrees": 90,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1.8
+      },
+      "name_key": "skill.shadow_flurry.name"
+    },
     "piercing_shot": {
       "name": "Piercing Shot",
       "class": "ranger",
@@ -635,6 +727,61 @@
         "multiplier": 3
       },
       "name_key": "skill.volley.name"
+    },
+    "split_arrow": {
+      "name": "Split Arrow",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 12
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "volley",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "rank_linear_range",
+        "min_base": 4,
+        "max_base": 6,
+        "min_per_rank": 1,
+        "max_per_rank": 1
+      },
+      "projectile": {
+        "range": 17,
+        "speed": 25,
+        "visual": "split_arrow_projectile"
+      },
+      "pierce": {
+        "max_hits": 3,
+        "damage_percent_per_extra_hit": 80
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3.2
+      },
+      "name_key": "skill.split_arrow.name"
     }
   }
 }

@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v153 — loot label filter core |
+| **Latest completed slice** | v154 — class third skill trio |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v154 — TBD — run `$next` |
+| **Next slice** | v155 — TBD — continue selected `$autoloop` queue |
 | **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
 | **Next engineering review** | v160 due before more feature batches |
 
@@ -170,6 +170,7 @@ v149_* = bot-coop-runtime-split
 v151_* = extraction-independence-gate
 v152_* = bot-context-movement-decouple
 v153_* = loot-label-filter-core
+v154_* = class-third-skill-trio
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -361,6 +362,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v151** | `extraction-independence-gate` | Complete (`make ci` green) | [`v151_spec-extraction-independence-gate.md`](docs/specs/v151_spec-extraction-independence-gate.md) | [`v151_2026-06-14-extraction-independence-gate.md`](docs/plans/v151_2026-06-14-extraction-independence-gate.md) | [`as-built`](docs/as-built/v151_extraction-independence-gate.md) |
 | **v152** | `bot-context-movement-decouple` | Complete (`make ci` green) | [`v152_spec-bot-context-movement-decouple.md`](docs/specs/v152_spec-bot-context-movement-decouple.md) | [`v152_2026-06-14-bot-context-movement-decouple.md`](docs/plans/v152_2026-06-14-bot-context-movement-decouple.md) | [`as-built`](docs/as-built/v152_bot-context-movement-decouple.md) |
 | **v153** | `loot-label-filter-core` | Complete (`make ci` green) | [`v153_spec-loot-label-filter-core.md`](docs/specs/v153_spec-loot-label-filter-core.md) | [`v153_2026-06-14-loot-label-filter-core.md`](docs/plans/v153_2026-06-14-loot-label-filter-core.md) | [`as-built`](docs/as-built/v153_loot-label-filter-core.md) |
+| **v154** | `class-third-skill-trio` | Complete (`make ci` green) | [`v154_spec-class-third-skill-trio.md`](docs/specs/v154_spec-class-third-skill-trio.md) | [`v154_2026-06-14-class-third-skill-trio.md`](docs/plans/v154_2026-06-14-class-third-skill-trio.md) | [`as-built`](docs/as-built/v154_class-third-skill-trio.md) |
 
 ---
 
@@ -490,6 +492,14 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Barbarian, Rogue, and Ranger have one new higher-row active skill each.** v154 adds
+`earthbreaker`, `shadow_flurry`, and `split_arrow` as data-driven shared skill catalog entries with
+presentation/i18n metadata, prerequisite validation, focused Go and Godot loader/panel coverage, and
+three protocol bot proofs:
+`62_barbarian_earthbreaker`, `63_rogue_shadow_flurry`, and `64_ranger_split_arrow`.
+The slice deliberately reuses existing skill capability types and leaves existing skill definitions
+unchanged.
 
 **Extraction independence is now a maintainability gate.** v151 adds
 `scripts/check-extraction-coupling-ratchet.py`, wires it into `make maintainability`, and baselines

@@ -68,6 +68,7 @@
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "dash", "rank": 1 },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "dash", "min_damage": 1 },
     { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "poison_stab" },
+    { "type": "skill_progression", "skill_id": "shadow_flurry", "rank": 0, "max_rank": 5, "can_spend": false },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "weapon_slot": "main_hand", "min_damage": 1 },
     { "type": "combat_event_seen", "weapon_slot": "off_hand" }
   ]

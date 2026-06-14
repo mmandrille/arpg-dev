@@ -1,0 +1,40 @@
+PROGRESS.md
+  s_acdaa3d060b019::t_792b212499f863 15,161,341,472-476
+CLAUDE.md
+  s_acdaa3d060b019::t_5490453d9bd148 115-118,120
+docs/as-built/v141_market-store-extraction.md
+  s_acdaa3d060b019::t_792b212499f863 1-29
+docs/plans/v141_2026-06-13-market-store-extraction.md
+  s_acdaa3d060b019::t_792b212499f863 35-37,40,54-56,69-71,84-85,93-95
+  s_acdaa3d060b019::t_489e3bc42c2fd7 21-22,51
+  s_acdaa3d060b019::t_04ac3d55ea2b6d 1-20,23-34,38-39,41-50,52-53,57-68,72-83,87-92,97-101
+  s_acdaa3d060b019::t_3544969c10d2f2 86,96
+server/internal/store/market_helpers.go
+  s_acdaa3d060b019::t_3a1fcf4a02246e 1-295
+docs/CODEMAP.md
+  s_acdaa3d060b019::t_489e3bc42c2fd7 9
+.maintainability/file-size-baseline.tsv
+  s_acdaa3d060b019::t_489e3bc42c2fd7 29
+server/internal/store/market_repo.go
+  s_acdaa3d060b019::t_e5071da5874a8f 1-467
+docs/specs/v141_spec-market-store-extraction.md
+  s_acdaa3d060b019::t_04ac3d55ea2b6d 1-2,4-24,28-38,40-59
+  s_acdaa3d060b019::t_792b212499f863 3
+  s_acdaa3d060b019::t_489e3bc42c2fd7 25-27,39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a116c4e892d2575f89ae052750153141fc5f52a7",
+  "prompts": {},
+  "sessions": {
+    "s_acdaa3d060b019": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec37d-5ac4-7c62-a265-27a8d0c55a16",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

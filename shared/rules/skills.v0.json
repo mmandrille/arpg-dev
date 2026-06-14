@@ -186,6 +186,67 @@
       },
       "name_key": "skill.ligthing.name"
     },
+    "arcane_barrage": {
+      "name": "Arcane Barrage",
+      "class": "sorcerer",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 8
+        },
+        "stats_per_rank": {
+          "magic": 3
+        },
+        "skills": [
+          {
+            "skill_id": "ligthing",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "rank_linear_range",
+        "min_base": 8,
+        "max_base": 11,
+        "min_per_rank": 2,
+        "max_per_rank": 2,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 30,
+          "use_requirement_baseline": true
+        }
+      },
+      "projectile": {
+        "range": 20,
+        "speed": 31.25,
+        "visual": "arcane_barrage_projectile"
+      },
+      "pierce": {
+        "max_hits": 2,
+        "damage_percent_per_extra_hit": 80
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.arcane_barrage.name"
+    },
     "cleave": {
       "name": "Cleave",
       "class": "barbarian",
@@ -433,6 +494,70 @@
         "flat_ticks": 450
       },
       "name_key": "skill.holy_shield.name"
+    },
+    "sanctuary": {
+      "name": "Sanctuary",
+      "class": "paladin",
+      "tree": {
+        "tier": 3,
+        "column": 4
+      },
+      "kind": "area_stat_buff",
+      "max_rank": 5,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": {
+          "vit": 8,
+          "magic": 8
+        },
+        "stats_per_rank": {
+          "vit": 2,
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "holy_shield",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 7,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_stat_percent_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 9,
+          "radius": 6,
+          "stats": [
+            "armor",
+            "block_percent"
+          ],
+          "percent_base": 28,
+          "percent_per_rank": 8,
+          "duration_ticks": 360,
+          "effect_id": "sanctuary",
+          "magic_scaling": {
+            "stat": "magic",
+            "percent_per_point": 1,
+            "max_bonus_percent": 20,
+            "use_requirement_baseline": true
+          }
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 540
+      },
+      "name_key": "skill.sanctuary.name"
     },
     "poison_stab": {
       "name": "Poison Stab",

@@ -4,7 +4,7 @@
   "seed": "paladin_class_foundation_seed",
   "character_class": "paladin",
   "title": "Paladin class foundation",
-  "description": "Create a Paladin, prove starter sword and shield, move into combat, attack three times, then cast Holy Shield and Heal.",
+  "description": "Create a Paladin, prove starter sword and shield, move into combat, attack three times, seed all current Paladin skills, then cast Holy Shield and Heal.",
   "visual": {
     "camera": { "x": 8, "y": 5, "zoom": 1.0 },
     "post_complete_hold_s": 3.0
@@ -15,7 +15,7 @@
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
     "stats": { "str": 6, "dex": 20, "vit": 8, "magic": 20 },
-    "skill_ranks": { "heal": 1, "holy_shield": 1 }
+    "skill_ranks": { "heal": 1, "holy_shield": 1, "sanctuary": 1 }
   },
   "steps": [
     { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_paladin_sword" },

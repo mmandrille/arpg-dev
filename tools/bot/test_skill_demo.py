@@ -17,6 +17,10 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["ligthing"].class_id == "sorcerer"
     assert entries["ligthing"].icon_label == "L"
 
+    assert entries["arcane_barrage"].category == "attack"
+    assert entries["arcane_barrage"].class_id == "sorcerer"
+    assert entries["arcane_barrage"].icon_label == "A"
+
     assert entries["rage"].category == "self_buff"
     assert entries["rage"].class_id == "barbarian"
     assert entries["rage"].icon_shape == "burst"
@@ -32,6 +36,10 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["holy_shield"].category == "stat_buff"
     assert entries["holy_shield"].class_id == "paladin"
     assert entries["holy_shield"].icon_shape == "shield"
+
+    assert entries["sanctuary"].category == "stat_buff"
+    assert entries["sanctuary"].class_id == "paladin"
+    assert entries["sanctuary"].icon_label == "T"
 
     assert entries["shadow_flurry"].category == "attack"
     assert entries["shadow_flurry"].class_id == "rogue"

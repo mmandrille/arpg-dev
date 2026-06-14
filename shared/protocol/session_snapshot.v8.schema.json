@@ -105,6 +105,7 @@
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "interactable_def_id": { "type": "string" },
+        "elite_objective": { "type": "boolean" },
         "corpse_character_id": { "$ref": "#/$defs/prefixed_id" },
         "corpse_name": { "type": "string" },
         "corpse_level": { "type": "integer", "minimum": 1 },

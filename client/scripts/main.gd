@@ -17,6 +17,7 @@ const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_m
 const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
+const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
@@ -1421,6 +1422,8 @@ func _upsert_entity(e: Dictionary) -> void:
 		rec["visual_scale"] = float(e["visual_scale"])
 	if e.has("interactable_def_id"):
 		rec["interactable_def_id"] = str(e["interactable_def_id"])
+	if e.has("elite_objective"):
+		rec["elite_objective"] = bool(e["elite_objective"])
 	if is_new:
 		entities[id] = rec
 		var new_node := rec["node"] as Node3D
@@ -4926,7 +4929,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		if def_id == "teleporter":
 			return _make_teleporter_node()
 		if def_id == "treasure_chest" or def_id == "town_stash" or def_id == "town_unique_chest":
-			return _make_chest_node(def_id)
+			return _make_chest_node(def_id, bool(e.get("elite_objective", false)))
 		if def_id == "hero_corpse":
 			return _make_hero_corpse_node(e)
 		if def_id == "town_vendor" or def_id == "town_mystery_seller":
@@ -5583,7 +5586,7 @@ func _make_door_node() -> Node3D:
 	return root
 
 
-func _make_chest_node(def_id: String) -> Node3D:
+func _make_chest_node(def_id: String, elite_objective: bool = false) -> Node3D:
 	var is_stash := def_id == "town_stash"
 	var is_unique_test := def_id == "town_unique_chest"
 	var root := Node3D.new()
@@ -5596,57 +5599,44 @@ func _make_chest_node(def_id: String) -> Node3D:
 	var cloth := Color("#f0b8ff") if is_unique_test else (Color("#244e66") if is_stash else Color("#5a2017"))
 	var glow := Color("#d77dff") if is_unique_test else (Color("#f3d36b") if is_stash else Color("#f5b449"))
 
-	_add_chest_part(root, "ChestShadow", Vector3(1.28, 0.035, 0.82) * scale, Vector3(0.0, 0.018, 0.0), Color("#181715"))
-	_add_chest_part(root, "ChestBody", Vector3(1.08, 0.48, 0.70) * scale, Vector3(0.0, 0.29 * scale, 0.0), wood)
-	_add_chest_part(root, "ChestFrontPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, 0.374 * scale), dark_wood)
-	_add_chest_part(root, "ChestBackPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, -0.374 * scale), dark_wood)
-	_add_chest_part(root, "ChestLeftPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(-0.564 * scale, 0.30 * scale, 0.0), dark_wood)
-	_add_chest_part(root, "ChestRightPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(0.564 * scale, 0.30 * scale, 0.0), dark_wood)
-	_add_chest_part(root, "ChestFrontBand", Vector3(1.18, 0.08, 0.055) * scale, Vector3(0.0, 0.48 * scale, 0.405 * scale), metal)
-	_add_chest_part(root, "ChestBottomBand", Vector3(1.18, 0.075, 0.055) * scale, Vector3(0.0, 0.13 * scale, 0.405 * scale), metal_dark)
+	ChestPresentationScript.add_part(root, "ChestShadow", Vector3(1.28, 0.035, 0.82) * scale, Vector3(0.0, 0.018, 0.0), Color("#181715"))
+	ChestPresentationScript.add_part(root, "ChestBody", Vector3(1.08, 0.48, 0.70) * scale, Vector3(0.0, 0.29 * scale, 0.0), wood)
+	ChestPresentationScript.add_part(root, "ChestFrontPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, 0.374 * scale), dark_wood)
+	ChestPresentationScript.add_part(root, "ChestBackPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, -0.374 * scale), dark_wood)
+	ChestPresentationScript.add_part(root, "ChestLeftPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(-0.564 * scale, 0.30 * scale, 0.0), dark_wood)
+	ChestPresentationScript.add_part(root, "ChestRightPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(0.564 * scale, 0.30 * scale, 0.0), dark_wood)
+	ChestPresentationScript.add_part(root, "ChestFrontBand", Vector3(1.18, 0.08, 0.055) * scale, Vector3(0.0, 0.48 * scale, 0.405 * scale), metal)
+	ChestPresentationScript.add_part(root, "ChestBottomBand", Vector3(1.18, 0.075, 0.055) * scale, Vector3(0.0, 0.13 * scale, 0.405 * scale), metal_dark)
 	for x in [-0.42, 0.42]:
-		_add_chest_part(root, "ChestVerticalBand", Vector3(0.085, 0.54, 0.085) * scale, Vector3(x * scale, 0.33 * scale, 0.405 * scale), metal)
+		ChestPresentationScript.add_part(root, "ChestVerticalBand", Vector3(0.085, 0.54, 0.085) * scale, Vector3(x * scale, 0.33 * scale, 0.405 * scale), metal)
 	for x in [-0.43, 0.43]:
 		for z in [-0.28, 0.28]:
-			_add_chest_part(root, "ChestFoot", Vector3(0.22, 0.10, 0.16) * scale, Vector3(x * scale, 0.055 * scale, z * scale), metal_dark)
+			ChestPresentationScript.add_part(root, "ChestFoot", Vector3(0.22, 0.10, 0.16) * scale, Vector3(x * scale, 0.055 * scale, z * scale), metal_dark)
 
 	var lid_pivot := Node3D.new()
 	lid_pivot.name = "ChestLidPivot"
 	lid_pivot.position = Vector3(0.0, 0.56 * scale, -0.36 * scale)
 	root.add_child(lid_pivot)
-	_add_chest_part(lid_pivot, "ChestLid", Vector3(1.16, 0.30, 0.72) * scale, Vector3(0.0, 0.15 * scale, 0.36 * scale), wood)
-	_add_chest_part(lid_pivot, "ChestLidCrown", Vector3(0.92, 0.12, 0.58) * scale, Vector3(0.0, 0.33 * scale, 0.36 * scale), Color("#7b35b0") if is_unique_test else (Color("#8a4f20") if is_stash else Color("#8b511f")))
-	_add_chest_part(lid_pivot, "ChestLidFrontBand", Vector3(1.22, 0.08, 0.075) * scale, Vector3(0.0, 0.13 * scale, 0.74 * scale), metal)
+	ChestPresentationScript.add_part(lid_pivot, "ChestLid", Vector3(1.16, 0.30, 0.72) * scale, Vector3(0.0, 0.15 * scale, 0.36 * scale), wood)
+	ChestPresentationScript.add_part(lid_pivot, "ChestLidCrown", Vector3(0.92, 0.12, 0.58) * scale, Vector3(0.0, 0.33 * scale, 0.36 * scale), Color("#7b35b0") if is_unique_test else (Color("#8a4f20") if is_stash else Color("#8b511f")))
+	ChestPresentationScript.add_part(lid_pivot, "ChestLidFrontBand", Vector3(1.22, 0.08, 0.075) * scale, Vector3(0.0, 0.13 * scale, 0.74 * scale), metal)
 	for x in [-0.42, 0.42]:
-		_add_chest_part(lid_pivot, "ChestLidStrap", Vector3(0.075, 0.36, 0.80) * scale, Vector3(x * scale, 0.20 * scale, 0.36 * scale), metal)
+		ChestPresentationScript.add_part(lid_pivot, "ChestLidStrap", Vector3(0.075, 0.36, 0.80) * scale, Vector3(x * scale, 0.20 * scale, 0.36 * scale), metal)
 
-	_add_chest_part(root, "ChestLockPlate", Vector3(0.22, 0.24, 0.075) * scale, Vector3(0.0, 0.42 * scale, 0.452 * scale), metal)
-	_add_chest_part(root, "ChestLockSlot", Vector3(0.075, 0.11, 0.085) * scale, Vector3(0.0, 0.40 * scale, 0.502 * scale), metal_dark)
-	_add_chest_part(root, "ChestLeftHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(-0.64 * scale, 0.36 * scale, 0.0), metal)
-	_add_chest_part(root, "ChestRightHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(0.64 * scale, 0.36 * scale, 0.0), metal)
+	ChestPresentationScript.add_part(root, "ChestLockPlate", Vector3(0.22, 0.24, 0.075) * scale, Vector3(0.0, 0.42 * scale, 0.452 * scale), metal)
+	ChestPresentationScript.add_part(root, "ChestLockSlot", Vector3(0.075, 0.11, 0.085) * scale, Vector3(0.0, 0.40 * scale, 0.502 * scale), metal_dark)
+	ChestPresentationScript.add_part(root, "ChestLeftHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(-0.64 * scale, 0.36 * scale, 0.0), metal)
+	ChestPresentationScript.add_part(root, "ChestRightHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(0.64 * scale, 0.36 * scale, 0.0), metal)
 	if is_stash or is_unique_test:
-		_add_chest_part(root, "ChestStashCrest", Vector3(0.36, 0.12, 0.082) * scale, Vector3(0.0, 0.61 * scale, 0.456 * scale), cloth)
+		ChestPresentationScript.add_part(root, "ChestStashCrest", Vector3(0.36, 0.12, 0.082) * scale, Vector3(0.0, 0.61 * scale, 0.456 * scale), cloth)
 
-	var inner := _add_chest_part(root, "ChestInnerGlow", Vector3(0.84, 0.045, 0.46) * scale, Vector3(0.0, 0.57 * scale, 0.02 * scale), glow)
+	var inner := ChestPresentationScript.add_part(root, "ChestInnerGlow", Vector3(0.84, 0.045, 0.46) * scale, Vector3(0.0, 0.57 * scale, 0.02 * scale), glow)
 	var glow_mat := inner.material_override as StandardMaterial3D
 	glow_mat.emission_enabled = true
 	glow_mat.emission = glow
 	inner.visible = false
+	ChestPresentationScript.sync_objective_marker(root, elite_objective, false)
 	return root
-
-
-func _add_chest_part(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
-	var part := MeshInstance3D.new()
-	part.name = part_name
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	part.mesh = mesh
-	part.position = position
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	part.material_override = mat
-	parent.add_child(part)
-	return part
 
 
 func _make_merchant_node(def_id: String) -> Node3D:
@@ -6056,6 +6046,7 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 		return
 	var def_id := str(rec.get("interactable_def_id", ""))
 	if def_id == "treasure_chest" or def_id == "town_stash" or def_id == "town_unique_chest":
+		ChestPresentationScript.sync_objective_marker(node, bool(rec.get("elite_objective", false)), state == "open")
 		var glow := node.find_child("ChestInnerGlow", true, false) as MeshInstance3D
 		if glow != null:
 			glow.visible = state == "open"
@@ -6240,6 +6231,7 @@ func _bot_entities_debug(live_monster_ids: Array) -> Array:
 			"type": str(rec.get("type", "")),
 			"monster_def_id": str(rec.get("monster_def_id", "")),
 			"interactable_def_id": str(rec.get("interactable_def_id", "")),
+			"elite_objective": bool(rec.get("elite_objective", false)),
 			"item_def_id": str(rec.get("item_def_id", "")),
 			"item_template_id": str(rec.get("item_template_id", "")),
 			"rarity": str(rec.get("rarity", "")),
@@ -6303,6 +6295,8 @@ func _bot_entities_presentation_debug() -> Array:
 			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
 			"effect_ids": rec.get("effect_ids", []),
 			"monster_pack_id": str(rec.get("monster_pack_id", "")), "monster_pack_leader": bool(rec.get("monster_pack_leader", false)),
+			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)),
+			"has_objective_marker": ChestPresentationScript.has_objective_marker(node),
 			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node),
 			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node),
 			"has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),

@@ -488,6 +488,10 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		return false
 	if step.has("monster_pack_leader") and bool(rec.get("monster_pack_leader", false)) != bool(step.get("monster_pack_leader", false)):
 		return false
+	if step.has("elite_objective") and bool(rec.get("elite_objective", false)) != bool(step.get("elite_objective", false)):
+		return false
+	if step.has("has_objective_marker") and bool(rec.get("has_objective_marker", false)) != bool(step.get("has_objective_marker", false)):
+		return false
 	if step.has("is_boss") and bool(rec.get("is_boss", false)) != bool(step.get("is_boss", false)):
 		return false
 	if step.has("boss_template_id") and str(rec.get("boss_template_id", "")) != str(step.get("boss_template_id", "")):

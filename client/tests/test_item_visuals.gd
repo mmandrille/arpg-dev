@@ -424,6 +424,7 @@ func _verify_interactable_chest_models() -> bool:
 	get_root().add_child(main)
 	var stash := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_stash"})
 	var chest := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest"})
+	var objective := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest", "elite_objective": true})
 	if stash == null or stash.name != "TownStashChest" or stash.find_child("ChestStashCrest", true, false) == null:
 		_fail("town stash did not use fortified chest model")
 		main.free()
@@ -441,10 +442,24 @@ func _verify_interactable_chest_models() -> bool:
 		chest.free()
 		main.free()
 		return false
+	if objective == null or objective.find_child("EliteObjectiveMarker", true, false) == null:
+		_fail("objective treasure chest did not expose marker")
+		stash.free()
+		chest.free()
+		main.free()
+		return false
 	main.add_child(chest)
 	main._set_interactable_state("chest_1", {"node": chest, "interactable_def_id": "treasure_chest", "state": "closed"}, "open")
 	if not glow.visible:
 		_fail("opened treasure chest did not reveal inner glow")
+		stash.free()
+		main.free()
+		return false
+	var objective_marker := objective.find_child("EliteObjectiveMarker", true, false) as MeshInstance3D
+	main.add_child(objective)
+	main._set_interactable_state("objective_chest_1", {"node": objective, "interactable_def_id": "treasure_chest", "elite_objective": true, "state": "closed"}, "open")
+	if objective_marker == null or not objective_marker.visible:
+		_fail("opened objective treasure chest did not keep marker visible")
 		stash.free()
 		main.free()
 		return false

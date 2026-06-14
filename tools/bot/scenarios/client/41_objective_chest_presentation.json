@@ -1,0 +1,26 @@
+{
+  "id": "objective_chest_presentation",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v161_fast_objective_0018",
+  "title": "Objective chest presentation",
+  "description": "Client descends into a generated dungeon and verifies the elite objective reward chest carries the objective marker.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "interactable",
+      "elite_objective": true,
+      "has_objective_marker": true,
+      "timeout_s": 20.0
+    },
+    {
+      "type": "assert_entity_reaction",
+      "entity_type": "interactable",
+      "elite_objective": true,
+      "has_objective_marker": true
+    }
+  ]
+}

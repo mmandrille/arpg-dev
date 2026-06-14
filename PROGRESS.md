@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v164 — session browser filters |
+| **Latest completed slice** | v165 — inventory panel routing paydown |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v165 — TBD via `$next` |
+| **Next slice** | v166 — TBD via `$next` |
 | **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
 | **Next engineering review** | v170 due before more feature batches |
 
@@ -181,6 +181,7 @@ v161_* = full-elite-clear-objective
 v162_* = objective-chest-presentation
 v163_* = inventory-transfer-router
 v164_* = session-browser-filters
+v165_* = inventory-panel-routing-paydown
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -383,6 +384,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v162** | `objective-chest-presentation` | Complete (`make ci` green) | [`v162_spec-objective-chest-presentation.md`](docs/specs/v162_spec-objective-chest-presentation.md) | [`v162_2026-06-14-objective-chest-presentation.md`](docs/plans/v162_2026-06-14-objective-chest-presentation.md) | [`as-built`](docs/as-built/v162_objective-chest-presentation.md) |
 | **v163** | `inventory-transfer-router` | Complete (`make ci` green) | [`v163_spec-inventory-transfer-router.md`](docs/specs/v163_spec-inventory-transfer-router.md) | [`v163_2026-06-14-inventory-transfer-router.md`](docs/plans/v163_2026-06-14-inventory-transfer-router.md) | [`as-built`](docs/as-built/v163_inventory-transfer-router.md) |
 | **v164** | `session-browser-filters` | Complete (`make ci` green) | [`v164_spec-session-browser-filters.md`](docs/specs/v164_spec-session-browser-filters.md) | [`v164_2026-06-14-session-browser-filters.md`](docs/plans/v164_2026-06-14-session-browser-filters.md) | [`as-built`](docs/as-built/v164_session-browser-filters.md) |
+| **v165** | `inventory-panel-routing-paydown` | Complete (`make ci` green) | [`v165_spec-inventory-panel-routing-paydown.md`](docs/specs/v165_spec-inventory-panel-routing-paydown.md) | [`v165_2026-06-14-inventory-panel-routing-paydown.md`](docs/plans/v165_2026-06-14-inventory-panel-routing-paydown.md) | [`as-built`](docs/as-built/v165_inventory-panel-routing-paydown.md) |
 
 ---
 
@@ -512,6 +514,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Inventory panel routing now reuses the transfer router for slot-kind parsing.** v165 removes the
+duplicate equipment slot-kind parser from `inventory_panel.gd`, relies on `InventoryTransferRouter`
+for that routing primitive, extends the focused router unit test, and lowers the panel
+maintainability baseline from 1559 to 1528 lines.
 
 **Join Game sessions can now be searched and sorted client-side.** v164 adds display-only
 search/sort controls to `MultiplayerSessionsPanel`, keeping active-session discovery and joins

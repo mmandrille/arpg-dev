@@ -28,6 +28,10 @@ func _run() -> void:
 	_assert_eq("full hotbar shift ignored", Router.shift_click_route(item, true, -1), {})
 	_assert_intent("shift assigns hotbar", Router.shift_click_route(item, true, 2), "assign_hotbar_intent")
 	_assert_eq("shift slot", int(_payload(Router.shift_click_route(item, true, 2)).get("slot_index", -1)), 2)
+	_assert_eq("equipment slot recognized", Router.is_equipment_slot("equip:main_hand"), true)
+	_assert_eq("bag is not equipment slot", Router.is_equipment_slot("bag"), false)
+	_assert_eq("equipment slot parsed", Router.slot_from_kind("equip:off_hand"), "off_hand")
+	_assert_eq("non-equipment slot parsed empty", Router.slot_from_kind("bag"), "")
 
 	_assert_intent("shop offer to bag", Router.drop_route("bag", {
 		"source": "shop_offer", "shop_entity_id": "shop_1", "offer_id": "offer_1", "item": item,

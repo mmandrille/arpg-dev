@@ -4,6 +4,7 @@ extends SceneTree
 
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer_router.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 
 var _pass_count: int = 0
@@ -145,7 +146,7 @@ func _run() -> void:
 	_assert_eq("unique chest drag to bag type", str(inventory_emitted[2]["type"]), "unique_chest_take_item_intent")
 	_assert_eq("unique chest drag to bag entity", str(inventory_emitted[2]["payload"].get("chest_entity_id", "")), "unique_chest_entity_1")
 	_assert_eq("unique chest drag to bag item", str(inventory_emitted[2]["payload"].get("chest_item_id", "")), "unique_item_1")
-	_assert_true("test equip slot kind recognized", inventory_panel._slot_kind_is_equipment("equip:main_hand"))
+	_assert_true("test equip slot kind recognized", InventoryTransferRouterScript.is_equipment_slot("equip:main_hand"))
 	_assert_true("test stash item can equip to main hand", inventory_panel._item_can_equip_to(stash_items[0], "main_hand"))
 	_assert_false("non-rogue cannot equip main-hand weapon to off hand", inventory_panel._item_can_equip_to(inventory[0], "off_hand"))
 	inventory_panel.set_inventory_state([

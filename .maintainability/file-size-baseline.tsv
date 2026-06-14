@@ -3,7 +3,7 @@
 client/scripts/bot_controller.gd	742
 client/scripts/bot_scenario_runner.gd	1665
 client/scripts/character_select_panel.gd	642
-client/scripts/inventory_panel.gd	1559
+client/scripts/inventory_panel.gd	1528
 client/scripts/main.gd	6699
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217

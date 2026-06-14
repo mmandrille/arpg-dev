@@ -135,7 +135,7 @@ class InventorySlotButton:
 		var dragged: Dictionary = data.get("item", {})
 		if dragged.is_empty():
 			return false
-		if panel._slot_kind_is_equipment(slot_kind):
+		if InventoryTransferRouterScript.is_equipment_slot(slot_kind):
 			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
 				return panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 			return (source == SLOT_KIND_BAG or source == DRAG_SOURCE_STASH or source == DRAG_SOURCE_CORPSE) and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
@@ -156,7 +156,7 @@ class InventorySlotButton:
 				return true
 			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
 				return true
-			return panel._slot_kind_is_equipment(source)
+			return InventoryTransferRouterScript.is_equipment_slot(source)
 		return false
 
 	func _drop_data(_at_position: Vector2, data: Variant) -> void:
@@ -559,7 +559,7 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 		return
 	slot.item = item.duplicate(true)
 	if item.is_empty():
-		if _slot_kind_is_equipment(slot.slot_kind):
+		if InventoryTransferRouterScript.is_equipment_slot(slot.slot_kind):
 			var slot_name := _slot_from_kind(slot.slot_kind)
 			slot.text = str(EQUIPMENT_LABELS.get(slot_name, slot_name))
 			slot.tooltip_text = "Empty %s" % str(EQUIPMENT_LABELS.get(slot_name, slot_name))
@@ -880,11 +880,11 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 		return
 	var can_equip_to_slot := false
 	var weapon_payload := {}
-	if _slot_kind_is_equipment(slot_kind):
+	if InventoryTransferRouterScript.is_equipment_slot(slot_kind):
 		var slot := _slot_from_kind(slot_kind)
 		can_equip_to_slot = _item_can_equip_to(item, slot)
 		weapon_payload = _weapon_set_payload_for_slot(slot)
-	elif slot_kind == SLOT_KIND_BAG and _slot_kind_is_equipment(str(data.get("source", ""))):
+	elif slot_kind == SLOT_KIND_BAG and InventoryTransferRouterScript.is_equipment_slot(str(data.get("source", ""))):
 		weapon_payload = _weapon_set_payload_for_slot(_slot_from_kind(str(data.get("source", ""))))
 	_apply_transfer_decision(InventoryTransferRouterScript.drop_route(slot_kind, data, can_equip_to_slot, weapon_payload), data)
 
@@ -982,14 +982,8 @@ func _slot_kind_for_equipment(slot: String) -> String:
 	return SLOT_KIND_EQUIP_PREFIX + slot
 
 
-func _slot_kind_is_equipment(kind: String) -> bool:
-	return kind.begins_with(SLOT_KIND_EQUIP_PREFIX)
-
-
 func _slot_from_kind(kind: String) -> String:
-	if not _slot_kind_is_equipment(kind):
-		return ""
-	return kind.substr(SLOT_KIND_EQUIP_PREFIX.length())
+	return InventoryTransferRouterScript.slot_from_kind(kind)
 
 
 func _tooltip(item: Dictionary) -> String:

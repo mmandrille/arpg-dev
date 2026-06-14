@@ -1,0 +1,32 @@
+docs/specs/v167_spec-protocol-runtime-assertion-split.md
+  s_c33fd0490c9854::t_5959696da26d4c 1-2,4-41
+  s_c33fd0490c9854::t_ea09e86e626760 3
+tools/bot/runtime_economy_assertions.py
+  s_c33fd0490c9854::t_7d84c662dcc3ea 1-45
+docs/plans/v167_2026-06-14-protocol-runtime-assertion-split.md
+  s_c33fd0490c9854::t_ea09e86e626760 3,29-31,34,47,50,61,70
+  s_c33fd0490c9854::t_5959696da26d4c 1-2,4-28,32-33,35-46,48-49,51-60,63-69
+  s_c33fd0490c9854::t_8b955ae1cc927c 62,71-72
+PROGRESS.md
+  s_c33fd0490c9854::t_ea09e86e626760 15,18,186,391,522-525
+docs/as-built/v167_protocol-runtime-assertion-split.md
+  s_c33fd0490c9854::t_ea09e86e626760 1-20
+tools/bot/runtime_assertions.py
+  s_c33fd0490c9854::t_7d84c662dcc3ea 5-6,418
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d3280ee87d2dafa3aefc0a20db72ad6ba01ea959",
+  "prompts": {},
+  "sessions": {
+    "s_c33fd0490c9854": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec80a-f35b-7dd1-863f-336688766070",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

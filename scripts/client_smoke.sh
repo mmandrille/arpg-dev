@@ -87,6 +87,7 @@ run_gate "GDScript animation test" "[gdtest] PASS: animation controller + scenes
 
 # 2d. Bot scenario runner unit tests (server-independent).
 run_gate "GDScript client bot unit test" "[gdtest] PASS: test_client_bot" res://tests/test_client_bot.gd
+run_gate "GDScript bot facade unit test" "[gdtest] PASS: test_bot_facade" res://tests/test_bot_facade.gd
 
 # 2e. Co-op local/remote player handling test (server-independent; v33).
 run_gate "GDScript co-op client unit test" "[gdtest] PASS: test_coop_client" res://tests/test_coop_client.gd

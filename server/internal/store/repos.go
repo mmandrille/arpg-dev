@@ -1955,6 +1955,9 @@ func (s *Store) CancelMarketOffer(ctx context.Context, bidderAccountID, listingI
 }
 
 func (s *Store) ListMarketOffersForSeller(ctx context.Context, sellerAccountID, listingID string) ([]MarketOffer, error) {
+	if _, err := s.ExpireMarketListings(ctx); err != nil {
+		return nil, err
+	}
 	var owner string
 	err := s.pool.QueryRow(ctx,
 		`SELECT seller_account_id FROM market_listings WHERE id = $1`,
@@ -2138,6 +2141,9 @@ func (s *Store) ListMarketAuditRecords(ctx context.Context, listingID string) ([
 }
 
 func (s *Store) GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error) {
+	if _, err := s.ExpireMarketListings(ctx); err != nil {
+		return MarketSummary{}, err
+	}
 	var out MarketSummary
 	if err := s.pool.QueryRow(ctx,
 		`SELECT

@@ -12,7 +12,7 @@ Last updated: 2026-06-13
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v138 — `codemap-and-reduction-ratchet` |
+| **Latest completed slice** | v139 — `market-expiration-read-freshness` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-13 |
 | **Next slice** | TBD — run `$next` |
@@ -157,6 +157,7 @@ v135_* = second-named-unique
 v136_* = unique-chest-client-proof
 v137_* = bot-assertion-domain-split
 v138_* = codemap-and-reduction-ratchet
+v139_* = market-expiration-read-freshness
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -335,6 +336,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v136** | `unique-chest-client-proof` | Complete (`make ci` green) | [`v136_spec-unique-chest-client-proof.md`](docs/specs/v136_spec-unique-chest-client-proof.md) | [`v136_2026-06-13-unique-chest-client-proof.md`](docs/plans/v136_2026-06-13-unique-chest-client-proof.md) | [`as-built`](docs/as-built/v136_unique-chest-client-proof.md) |
 | **v137** | `bot-assertion-domain-split` | Complete (`make ci` green) | [`v137_spec-bot-assertion-domain-split.md`](docs/specs/v137_spec-bot-assertion-domain-split.md) | [`v137_2026-06-13-bot-assertion-domain-split.md`](docs/plans/v137_2026-06-13-bot-assertion-domain-split.md) | [`as-built`](docs/as-built/v137_bot-assertion-domain-split.md) |
 | **v138** | `codemap-and-reduction-ratchet` | Complete (`make ci` green) | [`v138_spec-codemap-and-reduction-ratchet.md`](docs/specs/v138_spec-codemap-and-reduction-ratchet.md) | [`v138_2026-06-13-codemap-and-reduction-ratchet.md`](docs/plans/v138_2026-06-13-codemap-and-reduction-ratchet.md) | [`as-built`](docs/as-built/v138_codemap-and-reduction-ratchet.md) |
+| **v139** | `market-expiration-read-freshness` | Complete (`make ci` green) | [`v139_spec-market-expiration-read-freshness.md`](docs/specs/v139_spec-market-expiration-read-freshness.md) | [`v139_2026-06-13-market-expiration-read-freshness.md`](docs/plans/v139_2026-06-13-market-expiration-read-freshness.md) | [`as-built`](docs/as-built/v139_market-expiration-read-freshness.md) |
 
 ---
 
@@ -464,6 +466,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Market summary and offer reads now expire stale listings first.** v139 makes
+`GetMarketSummary` and `ListMarketOffersForSeller` run the existing market expiration sweep before
+returning active counts or seller offers. Focused store tests prove those reads restore the seller's
+listed item, refund reserved bidder items, clear active counts/offers, and append the
+`listing_expired` audit row.
 
 **CODEMAP and the maintainability ratchet are now reduction-oriented.** v138 adds
 `docs/CODEMAP.md` as the domain-to-files index, validates its paths through `make validate-shared`,

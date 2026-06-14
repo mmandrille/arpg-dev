@@ -1,0 +1,36 @@
+tools/bot/run.py
+  s_acdaa3d060b019::t_066625ef7b7281 1935-1937,1947-1949,1953-1955,1959-1961,1973-1983,1995-1999,2011-2015,2188-2190,2194-2196,2200-2202,2206-2208,2212-2214,2225-2227,2231-2233
+  s_acdaa3d060b019::t_ca785a65c45155 1941-1943
+.maintainability/file-size-baseline.tsv
+  s_acdaa3d060b019::t_769a78a3056481 32
+PROGRESS.md
+  s_acdaa3d060b019::t_02c4d402d53eca 15,18,167,353,484-487
+docs/plans/v147_2026-06-14-bot-wait-runtime-split.md
+  s_acdaa3d060b019::t_b5410a0e7dbed6 1-2,4-30,34-35,37-48,52-61,64-78,82-89,96-100
+  s_acdaa3d060b019::t_769a78a3056481 3,31-33,36,49-51,62-63,79-81,90-95
+docs/specs/v147_spec-bot-wait-runtime-split.md
+  s_acdaa3d060b019::t_b5410a0e7dbed6 1-49
+docs/as-built/v147_bot-wait-runtime-split.md
+  s_acdaa3d060b019::t_02c4d402d53eca 1-29
+tools/bot/wait_runtime.py
+  s_acdaa3d060b019::t_ca785a65c45155 29,33,35
+  s_acdaa3d060b019::t_066625ef7b7281 1-28,30-32,34,36-255
+docs/CODEMAP.md
+  s_acdaa3d060b019::t_769a78a3056481 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8da1b969c326efbfdc6207ed372ff7ba8e6bda9b",
+  "prompts": {},
+  "sessions": {
+    "s_acdaa3d060b019": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec37d-5ac4-7c62-a265-27a8d0c55a16",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+server/internal/game/interactables.go
+  s_ca0f0784178b67::t_a99bdb6c3d04a6 62,65-69,72
+server/internal/game/dungeon_elite_objective_test.go
+  s_ca0f0784178b67::t_46234e912aa597 52-53,65-67
+  s_ca0f0784178b67::t_a99bdb6c3d04a6 83-143,153-154,158,161
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_ca0f0784178b67::t_a41a703269d6fa 7
+  s_ca0f0784178b67::t_8fcdeafbc79052 4,25
+  s_ca0f0784178b67::t_5c983cfd550f7c 13,26
+  s_ca0f0784178b67::t_e601f53717e908 24
+  s_ca0f0784178b67::t_7da30ae10aa9c1 5,8-12,14
+docs/as-built/v161_full-elite-clear-objective.md
+  s_ca0f0784178b67::t_b05e51e532950f 1-29
+PROGRESS.md
+  s_ca0f0784178b67::t_b05e51e532950f 15,18,180,379,510-515,1236
+docs/specs/v161_spec-full-elite-clear-objective.md
+  s_ca0f0784178b67::t_121396aa226f03 1-3,5-18,21-29,32-58
+  s_ca0f0784178b67::t_e601f53717e908 19-20,30-31
+  s_ca0f0784178b67::t_b05e51e532950f 4
+tools/bot/run.py
+  s_ca0f0784178b67::t_e2f08fea821047 894
+  s_ca0f0784178b67::t_e601f53717e908 808-809,825,867,2416,2434
+  s_ca0f0784178b67::t_cea5c7013eae5a 2406
+docs/plans/v161_2026-06-14-full-elite-clear-objective.md
+  s_ca0f0784178b67::t_121396aa226f03 1-2,4-22,24-33,37-38,40-51,55-64,68-75,77-78,82-94,97-104
+  s_ca0f0784178b67::t_e601f53717e908 23,76
+  s_ca0f0784178b67::t_b05e51e532950f 3,34-36,39,52-54,65-67,79-81,95-96,105-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bea864e9c7db76a6325a1684f5d68c7b3825dce7",
+  "prompts": {},
+  "sessions": {
+    "s_ca0f0784178b67": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec725-9146-73e0-a7c8-62184c27f9e5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

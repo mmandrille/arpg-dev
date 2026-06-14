@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from tools.bot.runtime_economy_assertions import handle_runtime_economy_assertion
+
 
 def run_assertions(
     assertions: list[Any],
@@ -219,15 +221,6 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
     assert_inventory_contains = helpers["assert_inventory_contains"]
     assert_inventory_requirement_status = helpers["assert_inventory_requirement_status"]
     assert_loot_requirement_status = helpers["assert_loot_requirement_status"]
-    assert_stash_item_count = helpers["assert_stash_item_count"]
-    assert_stash_gold = helpers["assert_stash_gold"]
-    assert_stash_capacity = helpers["assert_stash_capacity"]
-    filtered_shop_offers = helpers["filtered_shop_offers"]
-    assert_shop_detail_rows = helpers["assert_shop_detail_rows"]
-    filtered_shop_sell_appraisals = helpers["filtered_shop_sell_appraisals"]
-    filtered_shop_events = helpers["filtered_shop_events"]
-    assert_shop_event_details = helpers["assert_shop_event_details"]
-    assert_stash_event = helpers["assert_stash_event"]
     assert_rolled_inventory_item = helpers["assert_rolled_inventory_item"]
     assert_rolled_inventory_any = helpers["assert_rolled_inventory_any"]
     assert_inventory_unique_effect_coverage = helpers["assert_inventory_unique_effect_coverage"]
@@ -422,40 +415,7 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
         if typ == "gold":
             assert_count_matches(state.gold, assertion, f"{where}: gold")
             continue
-        if typ == "stash_item_count":
-            assert_stash_item_count(state.stash_items, assertion, where, assert_count_matches)
-            continue
-        if typ == "stash_gold":
-            assert_stash_gold(state.stash_gold, assertion, where, assert_count_matches)
-            continue
-        if typ == "stash_capacity":
-            assert_stash_capacity(state.stash_capacity, assertion, where, assert_count_matches)
-            continue
-        if typ == "shop_offer_count":
-            offers = filtered_shop_offers(state, assertion)
-            assert_count_matches(len(offers), assertion, f"{where}: shop_offer_count", f": {offers}")
-            continue
-        if typ == "shop_offer_details":
-            offers = filtered_shop_offers(state, assertion)
-            assert_shop_detail_rows(offers, assertion, f"{where}: shop_offer_details")
-            continue
-        if typ == "shop_sell_appraisal_count":
-            rows = filtered_shop_sell_appraisals(state, assertion)
-            assert_count_matches(len(rows), assertion, f"{where}: shop_sell_appraisal_count", f": {rows}")
-            continue
-        if typ == "shop_sell_appraisal_details":
-            rows = filtered_shop_sell_appraisals(state, assertion)
-            assertion = dict(assertion)
-            assertion.setdefault("price_key", "sell_price")
-            assert_shop_detail_rows(rows, assertion, f"{where}: shop_sell_appraisal_details")
-            continue
-        if typ == "shop_event":
-            matches = filtered_shop_events(state, assertion)
-            assert_count_matches(len(matches), assertion, f"{where}: shop_event", f": {matches}")
-            assert_shop_event_details(matches, assertion, f"{where}: shop_event")
-            continue
-        if typ == "stash_event":
-            assert_stash_event(state.stash_events, assertion, where, assert_count_matches)
+        if handle_runtime_economy_assertion(state, assertion, where, helpers):
             continue
         if typ == "rolled_inventory_item":
             assert_rolled_inventory_item(state.inventory, assertion, where)

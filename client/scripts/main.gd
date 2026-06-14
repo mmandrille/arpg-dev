@@ -1103,6 +1103,8 @@ func _apply_delta(p: Dictionary) -> void:
 				skill_bar.flash_cast()
 			if player_anim != null:
 				player_anim.play_one_shot("attack")
+			if str(ev.get("skill_id", "")) == "earthbreaker":
+				EarthbreakerJump.play(character_visual, self)
 			if ev.has("projectile_def_id") and ev.has("position") and ev.has("direction"):
 				_spawn_skill_projectile_visual(ev)
 			if ev.has("angle_degrees") and ev.has("range") and ev.has("direction"):
@@ -1891,7 +1893,7 @@ func _spawn_skill_cone(ev: Dictionary) -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	var wedge := MeshInstance3D.new()
-	wedge.name = "CleaveCone"
+	wedge.name = "EarthbreakerRing" if str(ev.get("skill_id", "")) == "earthbreaker" else "CleaveCone"
 	wedge.mesh = mesh
 	wedge.material_override = mat
 	wedge.position = Vector3(pos.x, 0.08, pos.y)

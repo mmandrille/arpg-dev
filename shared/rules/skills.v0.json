@@ -313,7 +313,7 @@
       },
       "cone": {
         "range": 7,
-        "angle_degrees": 65,
+        "angle_degrees": 360,
         "push_min": 3,
         "push_max": 8,
         "damage_source": "weapon"

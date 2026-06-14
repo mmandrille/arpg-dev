@@ -65,8 +65,8 @@
         "color": "#9b5f2f",
         "accent": "#ffe0b5"
       },
-      "summary": "Heavy cone smash",
-      "effect_visual": "earthbreaker_cone",
+      "summary": "Radial leap smash",
+      "effect_visual": "earthbreaker_ring",
       "summary_key": "skill.earthbreaker.summary"
     },
     "heal": {

@@ -1282,6 +1282,9 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		}
 		e.id = s.alloc()
 		level.entities[e.id] = e
+		if chest.eliteObjective {
+			level.eliteObjectiveChestIDs[e.id] = true
+		}
 	}
 	for _, generated := range gen.loot {
 		if _, ok := s.rules.Items[generated.itemDefID]; !ok {
@@ -1917,56 +1920,6 @@ func (s *Sim) pickUpGoldForPlayer(e *entity, playerID uint64, correlationID, ack
 	}
 	s.savePlayer(ps)
 	return true
-}
-
-func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack bool) {
-	if e.interactableDefID == teleporterDefID {
-		s.activateTeleporter(e, in, res, ack)
-		return
-	}
-	if shopID := s.shopIDForInteractable(e); shopID != "" {
-		s.openShop(e, shopID, in, res, ack)
-		return
-	}
-	if stashID := s.stashIDForInteractable(e); stashID != "" {
-		s.openStash(e, stashID, in, res, ack)
-		return
-	}
-	if service := s.serviceForInteractable(e); service == "bishop" {
-		s.openBishopService(e, in, res, ack)
-		return
-	}
-	if service := s.serviceForInteractable(e); service == "market" {
-		s.openMarketService(e, in, res, ack)
-		return
-	}
-	if service := s.serviceForInteractable(e); service == "blacksmith" {
-		s.openBlacksmithService(e, in, res, ack)
-		return
-	}
-	if service := s.serviceForInteractable(e); service == uniqueTestChestService {
-		if !s.gameplayDebug {
-			res.reject(in.MessageID, "debug_disabled")
-			return
-		}
-		s.openUniqueTestChest(e, in, res, ack)
-		return
-	}
-	if e.state != interactableClosed {
-		res.reject(in.MessageID, "already_open")
-		return
-	}
-	e.state = interactableOpen
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(e))})
-	res.Events = append(res.Events, Event{EventType: "interactable_activated", EntityID: idStr(e.id), CorrelationID: in.CorrelationID})
-	if e.interactableDefID == treasureChestDefID && e.lootTable != "" {
-		drops := s.rules.LootDrops(e.lootTable, s.rng)
-		drops = append(drops, LootDrop{ItemDefID: goldItemDefID})
-		s.spawnLootDrops(drops, e.pos, s.targetInteractionRadius(e), in.CorrelationID, res, goldRollContext{levelNum: s.activeLevel().levelNum})
-	}
-	if ack {
-		res.ack(in.MessageID)
-	}
 }
 
 func (s *Sim) openMarketService(e *entity, in Input, res *TickResult, ack bool) {

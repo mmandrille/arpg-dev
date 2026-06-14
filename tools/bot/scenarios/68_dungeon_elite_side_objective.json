@@ -3,7 +3,7 @@
   "world_id": "dungeon_levels",
   "seed": "v158_elite_objective_0000",
   "title": "Dungeon elite side objective",
-  "description": "Pinned generated floor includes a side-objective reward chest on an elite-pack floor and opens it through the normal chest path.",
+  "description": "Pinned generated floor includes a side-objective reward chest that rejects while an elite leader is alive, then opens after the leader is killed.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     {
@@ -12,6 +12,8 @@
       "assertion": { "type": "entity_count", "entity_type": "monster", "alive": true, "monster_pack_leader": true, "at_least": 1 }
     },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "at_least": 1 },
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "expect_reject": "elite_objective_incomplete" },
+    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1, "timeout_s": 20 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 }
   ],
@@ -19,7 +21,6 @@
     { "type": "current_level", "equals": -1 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -1 },
-    { "type": "entity_count", "entity_type": "monster", "alive": true, "monster_pack_leader": true, "at_least": 1 },
     { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 },
     { "type": "event_seen", "event_type": "interactable_activated" },
     { "type": "event_seen", "event_type": "loot_dropped" }

@@ -5486,7 +5486,9 @@ func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
 }
 
 func TestTreasureChestOpensOnceAndDropsLoot(t *testing.T) {
-	sim, err := NewSimWithWorld("sess_chest_open", "chest_seed_22", loadRules(t), "dungeon_levels")
+	rules := loadRules(t)
+	rules.DungeonGeneration.EliteObjective.Enabled = false
+	sim, err := NewSimWithWorld("sess_chest_open", "chest_seed_22", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}

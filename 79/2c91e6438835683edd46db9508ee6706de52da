@@ -1,0 +1,37 @@
+client/scripts/bot_action_step_validator.gd
+  s_c33fd0490c9854::t_b13ea1554d066b 1-4,21-23,25-106
+  s_c33fd0490c9854::t_1eb3f094767ebd 5-20,24
+docs/specs/v168_spec-bot-step-validation-split.md
+  s_c33fd0490c9854::t_da36d7357b49a5 1-2,4-40
+  s_c33fd0490c9854::t_eee0e055f79715 3
+docs/plans/v168_2026-06-14-bot-step-validation-split.md
+  s_c33fd0490c9854::t_da36d7357b49a5 1-2,4-29,33-34,36-47,49,51-60,63-69
+  s_c33fd0490c9854::t_eee0e055f79715 3,30-32,35,48,50,61,70
+  s_c33fd0490c9854::t_5d5312d9fa6d52 62,71-72
+client/scripts/bot_step_catalog.gd
+  s_c33fd0490c9854::t_b13ea1554d066b 4-5,94-96,139,188
+client/scripts/bot_action_step_validator.gd.uid
+  s_c33fd0490c9854::t_6e9dc7a2883dad 1
+PROGRESS.md
+  s_c33fd0490c9854::t_08415b28228db8 527
+  s_c33fd0490c9854::t_eee0e055f79715 15,18,187,393,524-526
+docs/as-built/v168_bot-step-validation-split.md
+  s_c33fd0490c9854::t_eee0e055f79715 1-14,16-21
+  s_c33fd0490c9854::t_e6ae6e400757f0 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "792c91e6438835683edd46db9508ee6706de52da",
+  "prompts": {},
+  "sessions": {
+    "s_c33fd0490c9854": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec80a-f35b-7dd1-863f-336688766070",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

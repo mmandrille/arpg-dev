@@ -1,0 +1,25 @@
+AGENTS.md
+  s_68dc3007c896cc::t_47bf4e7a52950b 25
+skills/README.md
+  s_68dc3007c896cc::t_029a919e63c739 14
+skills/autoloop/SKILL.md
+  s_68dc3007c896cc::t_e1e731732c8d0f 8,23-24,26,59,66,100,124-126,183
+  s_68dc3007c896cc::t_492bc90b1204f4 70-71
+  s_68dc3007c896cc::t_772c9dcc1818aa 122-123,299-320
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "11362c04fddd4b0bfa954b817397f6502ba8eac0",
+  "prompts": {},
+  "sessions": {
+    "s_68dc3007c896cc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec6a9-43a2-71e1-b61a-6cd772ae9f29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

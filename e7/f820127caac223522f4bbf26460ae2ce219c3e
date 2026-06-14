@@ -1,0 +1,39 @@
+scripts/check-extraction-coupling-ratchet.py
+  s_70602f2dde7cee::t_057251915bbe9b 1-120
+.maintainability/extraction-coupling-baseline.tsv
+  s_70602f2dde7cee::t_057251915bbe9b 1
+docs/as-built/v151_extraction-independence-gate.md
+  s_70602f2dde7cee::t_00e7fef3d30500 1-28
+docs/specs/v151_spec-extraction-independence-gate.md
+  s_70602f2dde7cee::t_057251915bbe9b 1-2,4-60
+  s_70602f2dde7cee::t_00e7fef3d30500 3
+tools/test_extraction_coupling_ratchet.py
+  s_70602f2dde7cee::t_26d3d22eb5cab2 36
+  s_70602f2dde7cee::t_057251915bbe9b 1-35,37-64
+PROGRESS.md
+  s_70602f2dde7cee::t_00e7fef3d30500 15,18,170,359,490-496
+docs/plans/v151_2026-06-14-extraction-independence-gate.md
+  s_70602f2dde7cee::t_057251915bbe9b 1-2,4-30,37-52,55-64,67-77,80-91,94-99
+  s_70602f2dde7cee::t_00e7fef3d30500 3,31-36,53-54,65-66,78-79,92-93,100-102
+  s_70602f2dde7cee::t_529a340df8ed80 103
+make/ci.mk
+  s_70602f2dde7cee::t_057251915bbe9b 5
+CLAUDE.md
+  s_70602f2dde7cee::t_00e7fef3d30500 125-136,249-253,256,260,264,271,275,278
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e7f820127caac223522f4bbf26460ae2ce219c3e",
+  "prompts": {},
+  "sessions": {
+    "s_70602f2dde7cee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec410-3d00-7aa2-835f-8dc6918b1267",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

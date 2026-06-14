@@ -1,0 +1,43 @@
+docs/as-built/v143_client-bot-facade.md
+  s_acdaa3d060b019::t_04fab122a6bbc5 1-30
+docs/plans/v143_2026-06-13-client-bot-facade.md
+  s_acdaa3d060b019::t_04fab122a6bbc5 3,34-36,39,52-54,65-67,82-84,86,93-100
+  s_acdaa3d060b019::t_35bc4879fdf93a 1-2,4-33,37-38,40-51,55-64,68-81,85,87-92,101-105
+client/scripts/bot_facade.gd.uid
+  s_acdaa3d060b019::t_78c644c7d69e8b 1
+client/scripts/bot_facade.gd
+  s_acdaa3d060b019::t_389c0dcc8ee431 1-172
+PROGRESS.md
+  s_acdaa3d060b019::t_04fab122a6bbc5 15,18,163,345,476-480
+client/tests/test_bot_facade.gd
+  s_acdaa3d060b019::t_8667e04f0b8a66 1-214
+scripts/client_smoke.sh
+  s_acdaa3d060b019::t_8667e04f0b8a66 90
+client/tests/test_bot_facade.gd.uid
+  s_acdaa3d060b019::t_78c644c7d69e8b 1
+.maintainability/file-size-baseline.tsv
+  s_acdaa3d060b019::t_c493bd7fd666ea 7
+docs/specs/v143_spec-client-bot-facade.md
+  s_acdaa3d060b019::t_35bc4879fdf93a 1-2,4-50,52-59
+  s_acdaa3d060b019::t_04fab122a6bbc5 3,51
+docs/CODEMAP.md
+  s_acdaa3d060b019::t_c493bd7fd666ea 24
+client/scripts/main.gd
+  s_acdaa3d060b019::t_240e62ce474f85 6400,6404,6408,6412,6416,6420,6424,6428,6432,6436,6440,6443,6446,6449,6452,6455,6458,6462,6466,6470,6474,6478
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ccdd34cac09d8d98f3237bd5debcbaea8abb0b47",
+  "prompts": {},
+  "sessions": {
+    "s_acdaa3d060b019": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec37d-5ac4-7c62-a265-27a8d0c55a16",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

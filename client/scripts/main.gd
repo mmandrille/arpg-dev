@@ -93,7 +93,6 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 	"quest": Color("#6ee68b"),
 	"consumable": Color("#ff8f70"),
 }
-const LOOT_LABEL_REVEAL_DIM_FACTOR := 0.58
 const GROUND_EQUIPMENT_MODEL_SCALE := 1.0
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
 const BOSS_PHASE_TICK_RATE := 10.0
@@ -154,6 +153,7 @@ var dungeon_generation: Dictionary = {}
 var loot_ids: Array = []
 var hovered_loot_id: String = ""
 var loot_label_reveal_held: bool = false
+var _loot_filter := preload("res://scripts/loot_label_filter.gd").new()
 var monster_ids: Array = []
 var interactable_ids: Array = []
 var current_world_id: String = "vertical_slice"
@@ -2220,6 +2220,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				skill_bar.use_slot()
 			get_viewport().set_input_as_handled()
 			return
+		if (event as InputEventKey).keycode == KEY_BRACKETRIGHT:
+			_loot_filter.cycle()
+			_refresh_loot_label_visibility()
+			_debug("loot filter: " + _loot_filter.mode_label())
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
@@ -2990,7 +2996,9 @@ func _refresh_loot_label_visibility() -> void:
 	for label_id in _loot_label_entity_ids():
 		var id := str(label_id)
 		var highlighted := id == hovered_loot_id
-		_set_loot_label_visible(id, loot_label_reveal_held or highlighted, highlighted)
+		var rarity := str(entities.get(id, {}).get("rarity", "common"))
+		var revealed := loot_label_reveal_held and _loot_filter.allows(rarity)
+		_set_loot_label_visible(id, revealed or highlighted, highlighted)
 
 
 func _loot_label_entity_ids() -> Array:
@@ -3017,20 +3025,8 @@ func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = f
 	var label := _loot_label_node(loot_id)
 	if label != null:
 		label.visible = shown
-		label.modulate = _loot_label_display_color(loot_id, highlighted)
-
-
-func _loot_label_display_color(loot_id: String, highlighted: bool) -> Color:
-	var rec: Dictionary = entities.get(loot_id, {})
-	var base := _loot_label_color(rec)
-	if highlighted:
-		return base
-	return Color(
-		base.r * LOOT_LABEL_REVEAL_DIM_FACTOR,
-		base.g * LOOT_LABEL_REVEAL_DIM_FACTOR,
-		base.b * LOOT_LABEL_REVEAL_DIM_FACTOR,
-		base.a
-	)
+		var rec: Dictionary = entities.get(loot_id, {})
+		label.modulate = _loot_filter.display_color(_loot_label_color(rec), highlighted)
 
 
 func _loot_label_node(loot_id: String) -> Label3D:

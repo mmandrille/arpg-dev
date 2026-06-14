@@ -1,7 +1,7 @@
 """Typed runtime context for extracted protocol-bot modules.
 
-This is the decoupling primitive that replaces ``helpers=globals()`` laundering
-(v145-v149). A module that needs a *stateful* runtime service (e.g. the
+This is the decoupling primitive that replaces the module-namespace injection
+laundering of v145-v149. A module that needs a *stateful* runtime service (e.g. the
 WebSocket pump) declares a ``BotContext`` parameter instead of reaching back
 into run.py's module namespace. The module then:
 

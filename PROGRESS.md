@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v172 — loot filter persistence |
+| **Latest completed slice** | v173 — quest floor map marker |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v173 — TBD via `$next` |
+| **Next slice** | v174 — quest journal foundation |
 | **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
 | **Next engineering review** | v180 due before more feature batches |
 
@@ -189,6 +189,7 @@ v169_* = game-test-domain-drain
 v170_* = validate-shared-catalog-split
 v171_* = sorcerer-paladin-third-skills
 v172_* = loot-filter-persistence
+v173_* = quest-floor-map-marker
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -402,6 +403,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v170** | `validate-shared-catalog-split` | Complete (`make ci` green) | [`v170_spec-validate-shared-catalog-split.md`](docs/specs/v170_spec-validate-shared-catalog-split.md) | [`v170_2026-06-14-validate-shared-catalog-split.md`](docs/plans/v170_2026-06-14-validate-shared-catalog-split.md) | [`as-built`](docs/as-built/v170_validate-shared-catalog-split.md) |
 | **v171** | `sorcerer-paladin-third-skills` | Complete (`make ci` green) | [`v171_spec-sorcerer-paladin-third-skills.md`](docs/specs/v171_spec-sorcerer-paladin-third-skills.md) | [`v171_2026-06-14-sorcerer-paladin-third-skills.md`](docs/plans/v171_2026-06-14-sorcerer-paladin-third-skills.md) | [`as-built`](docs/as-built/v171_sorcerer-paladin-third-skills.md) |
 | **v172** | `loot-filter-persistence` | Complete (`make ci` green) | [`v172_spec-loot-filter-persistence.md`](docs/specs/v172_spec-loot-filter-persistence.md) | [`v172_2026-06-14-loot-filter-persistence.md`](docs/plans/v172_2026-06-14-loot-filter-persistence.md) | [`as-built`](docs/as-built/v172_loot-filter-persistence.md) |
+| **v173** | `quest-floor-map-marker` | Complete (`make ci` green) | [`v173_spec-quest-floor-map-marker.md`](docs/specs/v173_spec-quest-floor-map-marker.md) | [`v173_2026-06-14-quest-floor-map-marker.md`](docs/plans/v173_2026-06-14-quest-floor-map-marker.md) | [`as-built`](docs/as-built/v173_quest-floor-map-marker.md) |
 
 ---
 
@@ -533,6 +535,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Random quest reward chests now have a client-visible marker.** v173 threads server-authored
+`quest_reward` metadata through v8 entity views, tracks reward chest ids on generated dungeon
+levels, renders a distinct Godot chest marker, and proves the pinned random quest floor with
+protocol and client bot scenarios.
 
 **Loot filter mode now persists locally.** v172 saves the existing loot label rarity threshold in
 `ClientSettings`, restores it when the Godot client starts, and keeps invalid or missing saved

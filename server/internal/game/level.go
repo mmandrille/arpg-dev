@@ -6,6 +6,7 @@ type LevelState struct {
 	levelNum               int
 	entities               map[uint64]*entity
 	eliteObjectiveChestIDs map[uint64]bool
+	questRewardChestIDs    map[uint64]bool
 	walls                  []wallObstacle
 	move                   *activeMove
 	autoNav                *autoNavState
@@ -17,6 +18,7 @@ func newLevelState(levelNum int, nav *NavigationRules) *LevelState {
 		levelNum:               levelNum,
 		entities:               make(map[uint64]*entity),
 		eliteObjectiveChestIDs: make(map[uint64]bool),
+		questRewardChestIDs:    make(map[uint64]bool),
 		nav:                    nav,
 	}
 }

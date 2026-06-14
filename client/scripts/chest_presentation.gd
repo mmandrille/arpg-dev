@@ -2,6 +2,7 @@ class_name ChestPresentation
 extends RefCounted
 
 const OBJECTIVE_MARKER_NAME := "EliteObjectiveMarker"
+const QUEST_MARKER_NAME := "QuestRewardMarker"
 
 
 static func add_part(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
@@ -36,8 +37,33 @@ static func sync_objective_marker(root: Node3D, enabled: bool, opened: bool) -> 
 	marker.visible = true
 
 
+static func sync_quest_marker(root: Node3D, enabled: bool, opened: bool) -> void:
+	if root == null:
+		return
+	var marker := root.find_child(QUEST_MARKER_NAME, true, false) as MeshInstance3D
+	if not enabled:
+		if marker != null:
+			marker.visible = false
+		return
+	if marker == null:
+		marker = add_part(root, QUEST_MARKER_NAME, Vector3(0.58, 0.08, 0.58), Vector3(0.0, 0.98, 0.0), Color("#79b8ff"))
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("#f7e27a") if opened else Color("#79b8ff")
+	mat.emission_enabled = true
+	mat.emission = Color("#8c6f18") if opened else Color("#164a8c")
+	marker.material_override = mat
+	marker.visible = true
+
+
 static func has_objective_marker(root: Node3D) -> bool:
 	if root == null:
 		return false
 	var marker := root.find_child(OBJECTIVE_MARKER_NAME, true, false) as MeshInstance3D
+	return marker != null and marker.visible
+
+
+static func has_quest_marker(root: Node3D) -> bool:
+	if root == null:
+		return false
+	var marker := root.find_child(QUEST_MARKER_NAME, true, false) as MeshInstance3D
 	return marker != null and marker.visible

@@ -103,6 +103,10 @@ func TestRandomQuestRewardChestOpensAndDropsLoot(t *testing.T) {
 	if chest == nil {
 		t.Fatalf("missing quest reward chest entity at %+v on level %d", questChest.pos, levelNum)
 	}
+	view := sim.entityView(chest)
+	if !view.QuestReward {
+		t.Fatalf("quest reward chest view missing QuestReward: %+v", view)
+	}
 	sim.activeLevel().entities[sim.playerID].pos = chest.pos
 	open := sim.Tick([]Input{{MessageID: "open_quest_reward_chest", CorrelationID: "corr_random_quest_reward", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(chest.id)}}})
 	assertAck(t, open, "open_quest_reward_chest")

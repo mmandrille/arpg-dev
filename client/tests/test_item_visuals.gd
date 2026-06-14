@@ -12,7 +12,6 @@ extends SceneTree
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
 const MainScript := preload("res://scripts/main.gd")
 
-
 func _initialize() -> void:
 	var shared := ProjectSettings.globalize_path("res://").path_join("../shared")
 	var assets := ProjectSettings.globalize_path("res://").path_join("../assets")
@@ -92,14 +91,12 @@ func _initialize() -> void:
 	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
 	quit(0)
 
-
 func _res_path(runtime_path: String) -> String:
 	# Manifest runtime_path (client/assets/...) -> Godot res:// (ADR-0006 D6).
 	var p := runtime_path
 	if p.begins_with("client/"):
 		p = p.substr("client/".length())
 	return "res://" + p
-
 
 func _read(path: String) -> Dictionary:
 	var f := FileAccess.open(path, FileAccess.READ)
@@ -111,7 +108,6 @@ func _read(path: String) -> Dictionary:
 		_fail("invalid JSON in %s" % path)
 		return {}
 	return parsed
-
 
 func _resolved_item_presentations(catalog: Dictionary) -> Dictionary:
 	var families: Dictionary = catalog.get("families", {})
@@ -129,7 +125,6 @@ func _resolved_item_presentations(catalog: Dictionary) -> Dictionary:
 		presentation["family"] = family_id
 		resolved[str(item_def_id)] = presentation
 	return resolved
-
 
 func _verify_equipped_fallback_resolver() -> bool:
 	var mount := _make_mount_root()
@@ -220,7 +215,6 @@ func _verify_equipped_fallback_resolver() -> bool:
 	mount.queue_free()
 	return true
 
-
 func _verify_off_hand_weapon_resolver() -> bool:
 	var mount := _make_mount_root()
 	var resolver = ResolverScript.new(mount)
@@ -254,7 +248,6 @@ func _verify_off_hand_weapon_resolver() -> bool:
 		return false
 	mount.queue_free()
 	return true
-
 
 func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dictionary, presentations: Dictionary) -> bool:
 	var main = MainScript.new()
@@ -418,13 +411,13 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 	main.free()
 	return true
 
-
 func _verify_interactable_chest_models() -> bool:
 	var main = MainScript.new()
 	get_root().add_child(main)
 	var stash := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_stash"})
 	var chest := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest"})
 	var objective := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest", "elite_objective": true})
+	var quest := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest", "quest_reward": true})
 	if stash == null or stash.name != "TownStashChest" or stash.find_child("ChestStashCrest", true, false) == null:
 		_fail("town stash did not use fortified chest model")
 		main.free()
@@ -446,6 +439,14 @@ func _verify_interactable_chest_models() -> bool:
 		_fail("objective treasure chest did not expose marker")
 		stash.free()
 		chest.free()
+		quest.free()
+		main.free()
+		return false
+	if quest == null or quest.find_child("QuestRewardMarker", true, false) == null:
+		_fail("quest reward treasure chest did not expose marker")
+		stash.free()
+		chest.free()
+		objective.free()
 		main.free()
 		return false
 	main.add_child(chest)
@@ -463,10 +464,17 @@ func _verify_interactable_chest_models() -> bool:
 		stash.free()
 		main.free()
 		return false
+	var quest_marker := quest.find_child("QuestRewardMarker", true, false) as MeshInstance3D
+	main.add_child(quest)
+	main._set_interactable_state("quest_chest_1", {"node": quest, "interactable_def_id": "treasure_chest", "quest_reward": true, "state": "closed"}, "open")
+	if quest_marker == null or not quest_marker.visible:
+		_fail("opened quest reward treasure chest did not keep marker visible")
+		stash.free()
+		main.free()
+		return false
 	stash.free()
 	main.free()
 	return true
-
 
 func _verify_interactable_vendor_models() -> bool:
 	var main = MainScript.new()
@@ -499,7 +507,6 @@ func _verify_interactable_vendor_models() -> bool:
 	mystery.free()
 	main.free()
 	return true
-
 
 func _verify_market_board_model() -> bool:
 	var main = MainScript.new()

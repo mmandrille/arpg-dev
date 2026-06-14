@@ -1,0 +1,51 @@
+PROGRESS.md
+  s_4c4d08cfef7ab9::t_5cfe9f41e5f1b1 172
+  s_4c4d08cfef7ab9::t_5098246f41c0b3 15,18
+  s_4c4d08cfef7ab9::t_8cf52a7cbef949 363
+docs/CODEMAP.md
+  s_4c4d08cfef7ab9::t_3acf60ee19a20a 17
+client/tests/test_loot_label_filter.gd
+  s_4c4d08cfef7ab9::t_d0713f9c5042e8 21
+  s_4c4d08cfef7ab9::t_9114cdee2715ae 1-20,22-85
+  s_4c4d08cfef7ab9::t_0428dc975ca67c 86-95
+scripts/client_smoke.sh
+  s_4c4d08cfef7ab9::t_0ef14b4b992c72 128-130
+docs/as-built/v153_loot-label-filter-core.md
+  s_4c4d08cfef7ab9::t_38e713c742f727 1-44
+client/scripts/main.gd
+  s_4c4d08cfef7ab9::t_a0a9d606c8682c 156
+  s_4c4d08cfef7ab9::t_8668199b08bcd1 2223-2228
+  s_4c4d08cfef7ab9::t_939c6773b27054 2999-3001
+  s_4c4d08cfef7ab9::t_003413013a8f28 3028-3029
+client/scripts/loot_label_filter.gd.uid
+  s_4c4d08cfef7ab9::t_b0bb27d52f5625 1
+client/tests/test_loot_label_filter.gd.uid
+  s_4c4d08cfef7ab9::t_b0bb27d52f5625 1
+docs/specs/v153_spec-loot-label-filter-core.md
+  s_4c4d08cfef7ab9::t_1cd1bbfdb721d4 1-81
+.maintainability/file-size-baseline.tsv
+  s_4c4d08cfef7ab9::t_68e2cd48757154 7
+client/scripts/loot_label_filter.gd
+  s_4c4d08cfef7ab9::t_c76651fbfc0dd0 1-15,17-18,33-52
+  s_4c4d08cfef7ab9::t_d23eb68fbdbc67 16,19-32
+docs/plans/v153_2026-06-14-loot-label-filter-core.md
+  s_4c4d08cfef7ab9::t_c8935169f4c345 1-102
+tools/bot/bot_context.py
+  s_4c4d08cfef7ab9::t_a1c57a921b659b 3-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7b47b71f20c8bb455af0157e69c0f36588d56edd",
+  "prompts": {},
+  "sessions": {
+    "s_4c4d08cfef7ab9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1551ba4-2cdc-4660-b8aa-02625ddf77e4",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

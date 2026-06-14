@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v159 — kill-gated elite objective |
+| **Latest completed slice** | v160 — dungeon population extraction |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v160 — queued after engineering review |
+| **Next slice** | v161 — full elite clear objective |
 | **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
 | **Next engineering review** | v170 due before more feature batches |
 
@@ -176,6 +176,7 @@ v156_* = weapon-set-swap-and-hand-tabs
 v157_* = skill-bar-secondary-bindings
 v158_* = dungeon-elite-side-objective
 v159_* = kill-gated-elite-objective
+v160_* = dungeon-population-extraction
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -373,6 +374,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v157** | `skill-bar-secondary-bindings` | Complete (`make ci` green) | [`v157_spec-skill-bar-secondary-bindings.md`](docs/specs/v157_spec-skill-bar-secondary-bindings.md) | [`v157_2026-06-14-skill-bar-secondary-bindings.md`](docs/plans/v157_2026-06-14-skill-bar-secondary-bindings.md) | [`as-built`](docs/as-built/v157_skill-bar-secondary-bindings.md) |
 | **v158** | `dungeon-elite-side-objective` | Complete (`make ci` green) | [`v158_spec-dungeon-elite-side-objective.md`](docs/specs/v158_spec-dungeon-elite-side-objective.md) | [`v158_2026-06-14-dungeon-elite-side-objective.md`](docs/plans/v158_2026-06-14-dungeon-elite-side-objective.md) | [`as-built`](docs/as-built/v158_dungeon-elite-side-objective.md) |
 | **v159** | `kill-gated-elite-objective` | Complete (`make ci` green) | [`v159_spec-kill-gated-elite-objective.md`](docs/specs/v159_spec-kill-gated-elite-objective.md) | [`v159_2026-06-14-kill-gated-elite-objective.md`](docs/plans/v159_2026-06-14-kill-gated-elite-objective.md) | [`as-built`](docs/as-built/v159_kill-gated-elite-objective.md) |
+| **v160** | `dungeon-population-extraction` | Complete (`make ci` green) | [`v160_spec-dungeon-population-extraction.md`](docs/specs/v160_spec-dungeon-population-extraction.md) | [`v160_2026-06-14-dungeon-population-extraction.md`](docs/plans/v160_2026-06-14-dungeon-population-extraction.md) | [`as-built`](docs/as-built/v160_dungeon-population-extraction.md) |
 
 ---
 
@@ -502,6 +504,13 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Generated dungeon runtime population now has a focused server module.** v160 moves dungeon
+population from `sim.go` into `server/internal/game/dungeon_population.go`, preserving generated
+stairs, teleporters, chests, elite-objective chest IDs, loose loot, generated monsters, boss visual
+selection, rarity scaling, party HP scaling, and corpse spawning behavior. The slice adds focused
+population tests, keeps protocol/client behavior unchanged, and lowers the `sim.go` maintainability
+baseline from 7022 to 6836 lines.
 
 **The v160 engineering review gate is complete.** The new review set starts at
 [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md), with backend,

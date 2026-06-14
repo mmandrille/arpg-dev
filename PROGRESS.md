@@ -15,9 +15,9 @@ Last updated: 2026-06-14
 | **Latest completed slice** | v159 — kill-gated elite objective |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v160 engineering review gate |
-| **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
-| **Next engineering review** | v160 due before more feature batches |
+| **Next slice** | v160 — queued after engineering review |
+| **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
+| **Next engineering review** | v170 due before more feature batches |
 
 ### Slice numbering note
 
@@ -502,6 +502,14 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**The v160 engineering review gate is complete.** The new review set starts at
+[`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md), with backend,
+client, and shared/tooling companion reports. It records the v151-v159 feature-and-paydown batch at
+`main` commit `4a46229e`, notes `make maintainability` passing with 33 grandfathered files / 65747
+lines and 37 legacy helper-global injections, and points the next batch toward dungeon population
+extraction, `game_test.go` draining, inventory transfer/staging routing, client bot dispatch splits,
+protocol bot runtime assertion splits, and `validate_shared.py` paydown.
 
 **Elite objective chests now require objective completion.** v159 preserves v158 generated
 elite-objective chest placement, carries the objective identity into runtime `LevelState`, rejects

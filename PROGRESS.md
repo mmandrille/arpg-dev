@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v158 — dungeon elite side objective |
+| **Latest completed slice** | v159 — kill-gated elite objective |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v159 — queued after autoloop completion |
+| **Next slice** | v160 engineering review gate |
 | **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
 | **Next engineering review** | v160 due before more feature batches |
 
@@ -175,6 +175,7 @@ v155_* = random-quest-reward-floors
 v156_* = weapon-set-swap-and-hand-tabs
 v157_* = skill-bar-secondary-bindings
 v158_* = dungeon-elite-side-objective
+v159_* = kill-gated-elite-objective
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -371,6 +372,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v156** | `weapon-set-swap-and-hand-tabs` | Complete (`make ci` green) | [`v156_spec-weapon-set-swap-and-hand-tabs.md`](docs/specs/v156_spec-weapon-set-swap-and-hand-tabs.md) | [`v156_2026-06-14-weapon-set-swap-and-hand-tabs.md`](docs/plans/v156_2026-06-14-weapon-set-swap-and-hand-tabs.md) | [`as-built`](docs/as-built/v156_weapon-set-swap-and-hand-tabs.md) |
 | **v157** | `skill-bar-secondary-bindings` | Complete (`make ci` green) | [`v157_spec-skill-bar-secondary-bindings.md`](docs/specs/v157_spec-skill-bar-secondary-bindings.md) | [`v157_2026-06-14-skill-bar-secondary-bindings.md`](docs/plans/v157_2026-06-14-skill-bar-secondary-bindings.md) | [`as-built`](docs/as-built/v157_skill-bar-secondary-bindings.md) |
 | **v158** | `dungeon-elite-side-objective` | Complete (`make ci` green) | [`v158_spec-dungeon-elite-side-objective.md`](docs/specs/v158_spec-dungeon-elite-side-objective.md) | [`v158_2026-06-14-dungeon-elite-side-objective.md`](docs/plans/v158_2026-06-14-dungeon-elite-side-objective.md) | [`as-built`](docs/as-built/v158_dungeon-elite-side-objective.md) |
+| **v159** | `kill-gated-elite-objective` | Complete (`make ci` green) | [`v159_spec-kill-gated-elite-objective.md`](docs/specs/v159_spec-kill-gated-elite-objective.md) | [`v159_2026-06-14-kill-gated-elite-objective.md`](docs/plans/v159_2026-06-14-kill-gated-elite-objective.md) | [`as-built`](docs/as-built/v159_kill-gated-elite-objective.md) |
 
 ---
 
@@ -501,6 +503,14 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Recently closed
 
+**Elite objective chests now require objective completion.** v159 preserves v158 generated
+elite-objective chest placement, carries the objective identity into runtime `LevelState`, rejects
+objective chest activation with `elite_objective_incomplete` until at least one generated pack
+leader on that floor has been killed, then reuses the existing treasure chest loot path. The slice
+also extracts interactable activation into `server/internal/game/interactables.go`, lowers the
+`sim.go` ratchet baseline, trims pre-existing `inventory_panel.gd` line-count drift, and updates
+`68_dungeon_elite_side_objective` as the protocol bot proof.
+
 **Barbarian, Rogue, and Ranger have one new higher-row active skill each.** v154 adds
 `earthbreaker`, `shadow_flurry`, and `split_arrow` as data-driven shared skill catalog entries with
 presentation/i18n metadata, prerequisite validation, focused Go and Godot loader/panel coverage, and
@@ -528,7 +538,7 @@ Shift+F keys to the secondary row, and `67_skill_secondary_bindings` proves the 
 **Elite-pack floors now get a small side-objective reward hook.** v158 adds a data-backed
 `elite_objective` rule block, places one extra reachable treasure chest only when generated dungeon
 monsters include an elite pack leader, and proves the path with `68_dungeon_elite_side_objective`.
-Full quest log text, kill-gated objective completion, and special chest presentation remain deferred.
+Full quest log text and special chest presentation remain deferred.
 
 **Extraction independence is now a maintainability gate.** v151 adds
 `scripts/check-extraction-coupling-ratchet.py`, wires it into `make maintainability`, and baselines
@@ -1198,7 +1208,7 @@ validation while removing a duplicated maintenance list.
 | Area | Deferred item | Source |
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history, starter loadout backfill for existing or compatibility-default characters | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59/v97 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
-| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81 non-goals |
+| Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, clearing every elite leader for elite-objective completion, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81/v159 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
 | Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, market restrictions for upgraded/bound/equipped/hotbar-assigned items, player-facing offer browser/cancel UI polish, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111/v128/v129/v130 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97 non-goals, ADR-0013 |

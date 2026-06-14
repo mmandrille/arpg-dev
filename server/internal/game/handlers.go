@@ -151,6 +151,10 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_target")
 		return
 	}
+	if s.eliteObjectiveChestLocked(target) {
+		res.reject(in.MessageID, "elite_objective_incomplete")
+		return
+	}
 	if target.kind == interactableEntity &&
 		target.interactableDefID == teleporterDefID &&
 		(target.state == interactableDisabled || target.state == interactableLocked) {

@@ -196,16 +196,13 @@ func set_interactive(enabled: bool) -> void:
 func set_shop_sell_context(shop_entity_id: String) -> void:
 	_shop_sell_entity_id = shop_entity_id
 
-
 func clear_shop_sell_context() -> void:
 	_shop_sell_entity_id = ""
-
 
 func set_market_context(context: String) -> void:
 	_market_context = context
 	if _bag_grid != null:
 		_render()
-
 
 func clear_market_context() -> void:
 	_market_context = ""
@@ -226,7 +223,6 @@ func set_market_hidden_item_ids(item_instance_ids: Array) -> void:
 
 func set_blacksmith_context(enabled: bool) -> void:
 	_blacksmith_context_enabled = enabled
-
 
 func set_character_progression(next_progression: Dictionary) -> void:
 	character_progression = next_progression.duplicate(true)

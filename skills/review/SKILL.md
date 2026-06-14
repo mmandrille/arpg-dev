@@ -4,7 +4,9 @@ description: >-
   Generate a repo-wide engineering review set under docs/reviews, following the
   overview-at-root + backend/client/extras subfolder layout. Use when the user
   runs /review or $review, asks for the next periodic engineering review, or
-  asks for a full-repo architecture/maintainability review document set.
+  asks for a full-repo architecture/maintainability review document set. When a
+  periodic review is due, $refactor should run first to pay down scorecard gaps
+  with minor commits before this skill writes the fresh review set.
 ---
 
 # /review — Repo-wide Engineering Review
@@ -18,6 +20,11 @@ Examples:
 - `/review backend only` — write or update the relevant review file, then summarize what was skipped.
 
 **Announce at start:** "Using the **review** skill to audit the repo and write the engineering review set."
+
+**Periodic review precondition:** If `PROGRESS.md` says the review is due and there is no evidence
+that `$refactor` has already run after the last feature batch, stop and tell the user to run
+`$refactor` first. Proceed without `$refactor` only when the user explicitly asks to skip the
+scorecard paydown step.
 
 ## Hard rules
 

@@ -63,7 +63,7 @@ Read [`PROGRESS.md`](../../PROGRESS.md) and verify it reflects the shipped slice
 | **As-built summary** | Add or update `docs/as-built/vN_<codename>.md`: what it proves, key decisions, scope limits |
 | **Open gaps & deferred work** | Move closed items to **Recently closed**; add any new deferred items from spec non-goals |
 | **Last updated** | Today's date |
-| **Engineering review** | If the shipped slice hits the next ~10-slice milestone in `PROGRESS.md` → **Next engineering review**, update **Last/Next engineering review** and add the review set: overview at `docs/reviews/`, companion reports under `docs/reviews/{backend,client,extras}/` |
+| **Engineering review** | If the shipped slice hits the next ~10-slice milestone in `PROGRESS.md` → **Next engineering review**, stop after the slice commit and hand off to `$refactor` then `$review`; `$review` updates **Last/Next engineering review** and adds the review set |
 | **Maintenance ratchet** | Confirm any touched over-600-line files were split, stayed within allowance, or have a documented exception |
 
 Cross-check against:

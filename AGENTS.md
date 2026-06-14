@@ -2,7 +2,7 @@
 
 Read these **before** specs, plans, or code:
 
-1. [`PROGRESS.md`](PROGRESS.md) — **start here** for where the project stands: latest completed slice, active branch, open gaps, deferred backlog, engineering-review cadence, and the agent checklist. Do not rely on stale slice numbers in other docs — `PROGRESS.md` is the canonical baseline. When **Next engineering review** is due, read [`docs/reviews/`](docs/reviews/) and write a fresh review set before the next batch of slices.
+1. [`PROGRESS.md`](PROGRESS.md) — **start here** for where the project stands: latest completed slice, active branch, open gaps, deferred backlog, engineering-review cadence, and the agent checklist. Do not rely on stale slice numbers in other docs — `PROGRESS.md` is the canonical baseline. When **Next engineering review** is due, run `$refactor` first to pay down scorecard gaps with minor commits, then read [`docs/reviews/`](docs/reviews/) and write a fresh review set before the next batch of slices.
 2. [`CLAUDE.md`](CLAUDE.md) — commands, architecture, invariants, SDD process.
 3. [`docs/CODEMAP.md`](docs/CODEMAP.md) — domain → files index. Use it to decide which files to load before grepping broad coordinators.
 4. [`docs/researchs/godot-plugins-and-shortcuts.md`](docs/researchs/godot-plugins-and-shortcuts.md) — **check for existing Godot plugins, demos, and asset packs** before building new client UI, inventory presentation, isometric/camera tooling, or placeholder art from scratch.
@@ -22,17 +22,18 @@ Canonical definitions live in [`skills/`](skills/README.md). Tool paths are syml
 | `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Consolidate `PROGRESS.md` + uncommitted changes → `make ci` green → commit `feat: v{N}: {title}` |
 | `/review {vN?}` | [`skills/review/SKILL.md`](skills/review/SKILL.md) | Analyze the full repo → write overview at `docs/reviews/YYYYMMDD_vN-overview.md` plus companion reports under `docs/reviews/{backend,client,extras}/` |
 | `/showme {gear\|inventory\|...}` | [`skills/showme/SKILL.md`](skills/showme/SKILL.md) | Open or capture a focused Godot client preview for fast visual feedback |
-| `/autoloop {count}` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for the requested number of autonomous committed slices, then run any due engineering review |
+| `/autoloop {count}` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for feature/gameplay slices only |
+| `/refactor` | [`skills/refactor/SKILL.md`](skills/refactor/SKILL.md) | Read the latest review scorecard → make small verified cleanup commits until scorecard areas are 9+ or only major work remains → hand off to `/review` |
 
-Workflow: `/next` → `/spec` → `/plan` → `/execute` → `/finish`. Use `/review` when the engineering-review cadence is due, and `/showme` during client visual work when fast focused feedback is useful. Do not skip the review gates.
+Workflow: `/next` → `/spec` → `/plan` → `/execute` → `/finish`. Use `/refactor` → `/review` when the engineering-review cadence is due, and `/showme` during client visual work when fast focused feedback is useful. Do not skip the review gates.
 
 ### Per-agent setup
 
 | Agent | Discovery | Invoke |
 |-------|-----------|--------|
-| **Cursor** | `.cursor/skills/` → `skills/` (committed symlink) | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/review`, `/showme`, `/autoloop` |
+| **Cursor** | `.cursor/skills/` → `skills/` (committed symlink) | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/review`, `/showme`, `/autoloop`, `/refactor` |
 | **Claude Code** | `.claude/skills/` → `skills/` (committed symlink) | same; `/reload-skills` after pull |
-| **Codex** | `skills/` in repo + run [`scripts/link-agent-skills.sh`](scripts/link-agent-skills.sh) once for `~/.codex/skills/` | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$review`, `$showme`, `$autoloop` |
+| **Codex** | `skills/` in repo + run [`scripts/link-agent-skills.sh`](scripts/link-agent-skills.sh) once for `~/.codex/skills/` | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$review`, `$showme`, `$autoloop`, `$refactor` |
 
 Edit skills only under `skills/` — never duplicate into `.cursor/` or `.claude/`.
 

@@ -7259,7 +7259,8 @@ func TestGuardedChestGenerationGolden(t *testing.T) {
 		} `json:"cases"`
 	}
 	loadGolden(t, "guarded_chest_generation.json", &golden)
-	rules := loadRules(t)
+	rules := cloneRules(loadRules(t))
+	rules.DungeonGeneration.EliteObjective.Enabled = false
 	for _, c := range golden.Cases {
 		level, err := GenerateDungeonLevel(c.Seed, golden.Level, rules.DungeonGeneration)
 		if err != nil {
@@ -7293,6 +7294,7 @@ func TestGeneratedDungeonSourcesUseDepthLootTables(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	rules.DungeonGeneration.ChestPlacement.ChanceWeight = 1
 	rules.DungeonGeneration.ChestPlacement.NoChestWeight = 0
+	rules.DungeonGeneration.EliteObjective.Enabled = false
 	cases := []struct {
 		levelNum       int
 		chestLootTable string

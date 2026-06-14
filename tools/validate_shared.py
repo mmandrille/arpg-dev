@@ -1302,6 +1302,26 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation chest_placement", "max_attempts must be positive")
     else:
         report.ok("dungeon_generation chest placement is valid")
+    elite_objective = dungeon_generation.get("elite_objective", {})
+    objective_interactable_id = elite_objective.get("interactable_def_id")
+    objective_loot_table = elite_objective.get("loot_table")
+    objective_loot_def = loot["loot_tables"].get(objective_loot_table)
+    if elite_objective.get("enabled") and objective_interactable_id not in interactables["interactables"]:
+        report.fail("dungeon_generation elite_objective", f"unknown interactable_def_id {objective_interactable_id}")
+    elif elite_objective.get("enabled") and objective_interactable_id != "treasure_chest":
+        report.fail("dungeon_generation elite_objective", "interactable_def_id must be treasure_chest in v158")
+    elif elite_objective.get("enabled") and objective_loot_def is None:
+        report.fail("dungeon_generation elite_objective", f"unknown loot_table {objective_loot_table}")
+    elif elite_objective.get("enabled") and not objective_loot_def.get("treasure_class_id"):
+        report.fail("dungeon_generation elite_objective", "loot_table must resolve to a treasure class")
+    elif elite_objective.get("enabled") and objective_loot_def["treasure_class_id"] not in treasure_class_defs:
+        report.fail("dungeon_generation elite_objective", f"unknown treasure class {objective_loot_def['treasure_class_id']}")
+    elif elite_objective.get("enabled") and elite_objective.get("min_stair_distance", 0) <= 0:
+        report.fail("dungeon_generation elite_objective", "min_stair_distance must be positive")
+    elif elite_objective.get("enabled") and elite_objective.get("max_attempts", 0) <= 0:
+        report.fail("dungeon_generation elite_objective", "max_attempts must be positive")
+    else:
+        report.ok("dungeon_generation elite objective is valid")
     obstacle_generation = dungeon_generation.get("obstacle_generation", {})
     target_group_count = obstacle_generation.get("target_group_count", {})
     wall_segment = obstacle_generation.get("wall_segment", {})

@@ -31,10 +31,11 @@ type generatedTeleporter struct {
 }
 
 type generatedChest struct {
-	defID       string
-	lootTable   string
-	pos         Vec2
-	questReward bool
+	defID          string
+	lootTable      string
+	pos            Vec2
+	questReward    bool
+	eliteObjective bool
 }
 
 type generatedLoot struct {
@@ -68,6 +69,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	levelSeed := SeedToUint64(seed + "|" + strconv.Itoa(absInt(levelNum)))
 	rng := NewRNG(levelSeed)
 	chestRNG := NewRNG(SeedToUint64(seed + "|chest|" + strconv.Itoa(absInt(levelNum))))
+	eliteObjectiveRNG := NewRNG(SeedToUint64(seed + "|elite_objective|" + strconv.Itoa(absInt(levelNum))))
 	rarityRNG := NewRNG(SeedToUint64(seed + "|monster_rarity|" + strconv.Itoa(absInt(levelNum))))
 	monsterDefRNG := NewRNG(SeedToUint64(seed + "|monster_def|" + strconv.Itoa(absInt(levelNum))))
 	out := generatedDungeonLevel{
@@ -106,6 +108,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := placeDungeonMonsters(rng, monsterDefRNG, rarityRNG, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
+		if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
+			return generatedDungeonLevel{}, err
+		}
 		if err := validateGeneratedDungeonReachability(rules, out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
@@ -133,6 +138,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, err
 	}
 	if err := placeDungeonMonsters(rng, monsterDefRNG, rarityRNG, rules, &out); err != nil {
+		return generatedDungeonLevel{}, err
+	}
+	if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	if err := validateGeneratedDungeonReachability(rules, out); err != nil {

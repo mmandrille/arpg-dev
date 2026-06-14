@@ -16,8 +16,8 @@ Last updated: 2026-06-14
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
 | **Next slice** | v171 — TBD via `$next` |
-| **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
-| **Next engineering review** | v170 due before more feature batches |
+| **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
+| **Next engineering review** | v180 due before more feature batches |
 
 ### Slice numbering note
 
@@ -524,6 +524,14 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**The v170 engineering review gate is complete.** The review set starts at
+[`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md), with backend,
+client, and shared/tooling companion reports. It records the v161-v170 feature-and-paydown batch at
+`main` commit `05804d77`, notes `make maintainability` passing with 33 grandfathered files / 65347
+lines and 37 legacy helper-global injections, and points the next batch toward `game_test.go`
+domain drains, typed bot runtime assertion context, `main.gd`/bot runner ownership splits, and more
+`validate_shared.py` catalog extraction.
 
 **Main-config gameplay validation now has a focused helper.** v170 adds
 `tools/validate_main_config.py` for `main_config` gameplay bounds and dungeon monster drop-source

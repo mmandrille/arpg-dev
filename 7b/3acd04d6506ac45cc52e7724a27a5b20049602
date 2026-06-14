@@ -1,0 +1,30 @@
+PROGRESS.md
+  s_c33fd0490c9854::t_8ffe31b8aaaca4 15,18,188,395,526-528
+docs/plans/v169_2026-06-14-game-test-domain-drain.md
+  s_c33fd0490c9854::t_9217418d2e9bbc 61,70-71
+  s_c33fd0490c9854::t_8ffe31b8aaaca4 1-60,62-69
+server/internal/game/gold_auto_pickup_test.go
+  s_c33fd0490c9854::t_8d26b2f8d676fc 1-226
+docs/as-built/v169_game-test-domain-drain.md
+  s_c33fd0490c9854::t_8ffe31b8aaaca4 1-21
+.maintainability/file-size-baseline.tsv
+  s_c33fd0490c9854::t_8ffe31b8aaaca4 16
+docs/specs/v169_spec-game-test-domain-drain.md
+  s_c33fd0490c9854::t_8ffe31b8aaaca4 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7b3acd04d6506ac45cc52e7724a27a5b20049602",
+  "prompts": {},
+  "sessions": {
+    "s_c33fd0490c9854": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec80a-f35b-7dd1-863f-336688766070",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

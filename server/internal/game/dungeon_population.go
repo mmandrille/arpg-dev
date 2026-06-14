@@ -55,6 +55,9 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		if chest.eliteObjective {
 			level.eliteObjectiveChestIDs[e.id] = true
 		}
+		if chest.questReward {
+			level.questRewardChestIDs[e.id] = true
+		}
 	}
 	for _, generated := range gen.loot {
 		if _, ok := s.rules.Items[generated.itemDefID]; !ok {

@@ -5833,8 +5833,9 @@ func (s *Sim) entityView(e *entity) EntityView {
 		view.EffectIDs = sortedUniqueStrings(append(cloneStringSlice(e.effectIDs), s.eliteAuraEffectIDs(e)...))
 	}
 	if e.kind == interactableEntity {
-		if level := s.activeLevel(); level != nil && level.eliteObjectiveChestIDs[e.id] {
-			view.EliteObjective = true
+		if level := s.activeLevel(); level != nil {
+			view.EliteObjective = level.eliteObjectiveChestIDs[e.id]
+			view.QuestReward = level.questRewardChestIDs[e.id]
 		}
 	}
 	if e.kind != lootEntity {

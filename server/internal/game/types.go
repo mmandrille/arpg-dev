@@ -45,6 +45,7 @@ type EntityView struct {
 	EffectIDs         []string                `json:"effect_ids,omitempty"`
 	InteractableDefID string                  `json:"interactable_def_id,omitempty"`
 	EliteObjective    bool                    `json:"elite_objective,omitempty"`
+	QuestReward       bool                    `json:"quest_reward,omitempty"`
 	CorpseCharacterID string                  `json:"corpse_character_id,omitempty"`
 	CorpseName        string                  `json:"corpse_name,omitempty"`
 	CorpseLevel       int                     `json:"corpse_level,omitempty"`

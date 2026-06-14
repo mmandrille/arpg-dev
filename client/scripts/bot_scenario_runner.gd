@@ -492,6 +492,8 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		return false
 	if step.has("has_objective_marker") and bool(rec.get("has_objective_marker", false)) != bool(step.get("has_objective_marker", false)):
 		return false
+	if step.has("quest_reward") and bool(rec.get("quest_reward", false)) != bool(step.get("quest_reward", false)) or step.has("has_quest_marker") and bool(rec.get("has_quest_marker", false)) != bool(step.get("has_quest_marker", false)):
+		return false
 	if step.has("is_boss") and bool(rec.get("is_boss", false)) != bool(step.get("is_boss", false)):
 		return false
 	if step.has("boss_template_id") and str(rec.get("boss_template_id", "")) != str(step.get("boss_template_id", "")):

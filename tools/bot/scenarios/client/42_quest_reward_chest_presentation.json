@@ -1,0 +1,28 @@
+{
+  "id": "quest_reward_chest_presentation",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v155_bot_quest_0015",
+  "title": "Quest reward chest presentation",
+  "description": "Client descends to a deterministic random quest reward floor and verifies the reward chest carries the quest marker.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "quest_reward": true,
+      "has_quest_marker": true,
+      "timeout_s": 20.0
+    },
+    {
+      "type": "assert_entity_reaction",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "quest_reward": true,
+      "has_quest_marker": true
+    }
+  ]
+}

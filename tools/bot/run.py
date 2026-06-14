@@ -47,7 +47,7 @@ from tools.bot.stash_assertions import (
 )
 from tools.bot.unique_effect_assertions import assert_inventory_unique_effect_coverage
 from tools.bot.weapon_set_runtime import equipped_slot_id
-
+from tools.bot.skill_binding_runtime import assert_skill_bindings, set_skill_bindings
 SLICE_TIMEOUT_S = 20.0
 MAX_SCENARIO_ELAPSED_S = 15.0
 WAIT_LOG_INTERVAL_S = 2.0
@@ -1336,6 +1336,9 @@ async def execute_step(
     if action == "wait_skill_cooldown":
         await wait_for_skill_cooldown(ws, state, step, loop)
         return
+
+    if action == "set_skill_bindings": await set_skill_bindings(ws, session_id, state, step, loop, make_envelope, wait_for_accept, wait_for_reject, pump_one, SLICE_TIMEOUT_S); return
+    if action == "assert_skill_bindings": assert_skill_bindings(state, step, assert_count_matches); return
 
     if action == "assert_character_progression":
         assert_character_progression(state.character_progression, step, "runtime protocol")

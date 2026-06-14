@@ -64,7 +64,7 @@ const (
 	maxHotbarCapacity              = 10
 	weaponSetCount                 = 2
 	defaultWeaponSet               = 0
-	skillFunctionKeyCount          = 8
+	skillFunctionKeyCount          = 16
 	baseInventoryRows              = 3
 	inventoryColumns               = 5
 	maxInventoryRows               = 20

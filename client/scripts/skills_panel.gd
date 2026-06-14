@@ -619,6 +619,8 @@ func _position_tooltip_below_skill(skill_id: String) -> void:
 func _assigned_key_for_skill(skill_id: String) -> String:
 	for i in range(_skill_function_keys.size()):
 		if str(_skill_function_keys[i]) == skill_id:
+			if i >= 8:
+				return "S-F%d" % (i - 7)
 			return "F%d" % (i + 1)
 	return ""
 

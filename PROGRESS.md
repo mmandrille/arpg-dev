@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v156 — weapon set swap and hand tabs |
+| **Latest completed slice** | v157 — skill-bar secondary bindings |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v157 — skill-bar secondary bindings |
+| **Next slice** | v158 — dungeon side objective lab and elite mini-objective |
 | **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
 | **Next engineering review** | v160 due before more feature batches |
 
@@ -173,6 +173,7 @@ v153_* = loot-label-filter-core
 v154_* = class-third-skill-trio
 v155_* = random-quest-reward-floors
 v156_* = weapon-set-swap-and-hand-tabs
+v157_* = skill-bar-secondary-bindings
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -367,6 +368,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v154** | `class-third-skill-trio` | Complete (`make ci` green) | [`v154_spec-class-third-skill-trio.md`](docs/specs/v154_spec-class-third-skill-trio.md) | [`v154_2026-06-14-class-third-skill-trio.md`](docs/plans/v154_2026-06-14-class-third-skill-trio.md) | [`as-built`](docs/as-built/v154_class-third-skill-trio.md) |
 | **v155** | `random-quest-reward-floors` | Complete (`make ci` green) | [`v155_spec-random-quest-reward-floors.md`](docs/specs/v155_spec-random-quest-reward-floors.md) | [`v155_2026-06-14-random-quest-reward-floors.md`](docs/plans/v155_2026-06-14-random-quest-reward-floors.md) | [`as-built`](docs/as-built/v155_random-quest-reward-floors.md) |
 | **v156** | `weapon-set-swap-and-hand-tabs` | Complete (`make ci` green) | [`v156_spec-weapon-set-swap-and-hand-tabs.md`](docs/specs/v156_spec-weapon-set-swap-and-hand-tabs.md) | [`v156_2026-06-14-weapon-set-swap-and-hand-tabs.md`](docs/plans/v156_2026-06-14-weapon-set-swap-and-hand-tabs.md) | [`as-built`](docs/as-built/v156_weapon-set-swap-and-hand-tabs.md) |
+| **v157** | `skill-bar-secondary-bindings` | Complete (`make ci` green) | [`v157_spec-skill-bar-secondary-bindings.md`](docs/specs/v157_spec-skill-bar-secondary-bindings.md) | [`v157_2026-06-14-skill-bar-secondary-bindings.md`](docs/plans/v157_2026-06-14-skill-bar-secondary-bindings.md) | [`as-built`](docs/as-built/v157_skill-bar-secondary-bindings.md) |
 
 ---
 
@@ -515,6 +517,11 @@ active set through `swap_weapon_set_intent`, and the inventory paper doll has se
 viewing and equipping either hand configuration. Existing `equipped.main_hand` / `off_hand` remain
 the active compatibility fields, while v8 snapshots/deltas expose `active_weapon_set` and
 `weapon_sets`. Durable two-set storage and richer tab art remain deferred.
+
+**Skill bindings now have a secondary row.** v157 expands authoritative `function_keys` from 8 to
+16 entries, preserving F1-F8 as primary slots and adding Shift+F1 through Shift+F8 as secondary
+slots. The store accepts slots 0-15, snapshots/deltas expose the full fixed array, the client maps
+Shift+F keys to the secondary row, and `67_skill_secondary_bindings` proves the runtime contract.
 
 **Extraction independence is now a maintainability gate.** v151 adds
 `scripts/check-extraction-coupling-ratchet.py`, wires it into `make maintainability`, and baselines

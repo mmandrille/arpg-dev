@@ -698,12 +698,12 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 				Connected:      true,
 			},
 			{
-				SessionID:      testSessionID,
-				AccountID:      "acct_guest",
-				CharacterID:    "char_guest",
-				Role:           store.SessionMemberGuest,
-				Status:         store.SessionMemberActive,
-				Connected:      true,
+				SessionID:   testSessionID,
+				AccountID:   "acct_guest",
+				CharacterID: "char_guest",
+				Role:        store.SessionMemberGuest,
+				Status:      store.SessionMemberActive,
+				Connected:   true,
 			},
 		},
 		starts: map[string]store.SessionStartSnapshot{
@@ -1452,7 +1452,7 @@ func (f *fakeRepo) SetCharacterHotbarSlot(context.Context, string, string, int, 
 	return nil
 }
 func (f *fakeRepo) GetOrCreateCharacterSkillBindings(_ context.Context, accountID, characterID string) (store.CharacterSkillBindings, error) {
-	return store.CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 8)}, nil
+	return store.CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 16)}, nil
 }
 func (f *fakeRepo) SetCharacterSkillBindings(context.Context, store.CharacterSkillBindings) error {
 	return nil

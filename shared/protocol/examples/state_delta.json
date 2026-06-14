@@ -82,7 +82,7 @@
     {
       "op": "skill_bindings_update",
       "skill_bindings": {
-        "function_keys": ["magic_bolt", "heal", "", "", "", "", "", ""],
+        "function_keys": ["magic_bolt", "heal", "", "", "", "", "", "", "cleave", "", "", "", "", "", "", ""],
         "right_click_skill_id": "heal"
       }
     },

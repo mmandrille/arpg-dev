@@ -872,7 +872,7 @@ func TestSetSkillBindingsIntentUpdatesSnapshotAndDelta(t *testing.T) {
 		MessageID: "bind_skills",
 		Type:      "set_skill_bindings_intent",
 		SetSkillBindings: &SetSkillBindingsIntent{
-			FunctionKeys:      []string{magicBoltSkillID, "heal"},
+			FunctionKeys:      []string{magicBoltSkillID, "heal", "", "", "", "", "", "", "cleave"},
 			RightClickSkillID: "heal",
 		},
 	}})
@@ -884,11 +884,11 @@ func TestSetSkillBindingsIntentUpdatesSnapshotAndDelta(t *testing.T) {
 			break
 		}
 	}
-	if got == nil || len(got.FunctionKeys) != skillFunctionKeyCount || got.FunctionKeys[0] != magicBoltSkillID || got.FunctionKeys[1] != "heal" || got.RightClickSkillID != "heal" {
+	if got == nil || len(got.FunctionKeys) != skillFunctionKeyCount || got.FunctionKeys[0] != magicBoltSkillID || got.FunctionKeys[1] != "heal" || got.FunctionKeys[8] != "cleave" || got.RightClickSkillID != "heal" {
 		t.Fatalf("skill binding update = %+v changes=%+v", got, update.Changes)
 	}
 	snap := sim.Snapshot()
-	if len(snap.SkillBindings.FunctionKeys) != skillFunctionKeyCount || snap.SkillBindings.FunctionKeys[0] != magicBoltSkillID || snap.SkillBindings.RightClickSkillID != "heal" {
+	if len(snap.SkillBindings.FunctionKeys) != skillFunctionKeyCount || snap.SkillBindings.FunctionKeys[0] != magicBoltSkillID || snap.SkillBindings.FunctionKeys[8] != "cleave" || snap.SkillBindings.RightClickSkillID != "heal" {
 		t.Fatalf("snapshot skill bindings = %+v", snap.SkillBindings)
 	}
 

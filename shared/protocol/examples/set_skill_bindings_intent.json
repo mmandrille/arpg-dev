@@ -4,7 +4,7 @@
   "session_id": "sess_01H00000000000000000000000",
   "tick": 42,
   "payload": {
-    "function_keys": ["magic_bolt", "heal", "", "", "", "", "", ""],
+    "function_keys": ["magic_bolt", "heal", "", "", "", "", "", "", "cleave", "", "", "", "", "", "", ""],
     "right_click_skill_id": "heal"
   }
 }

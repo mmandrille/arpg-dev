@@ -1251,10 +1251,15 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	var event := InputEventKey.new()
 	event.keycode = KEY_F1
 	_assert_eq("F1 maps to skill slot 0", main._skill_function_key_slot(event), 0)
+	event.shift_pressed = true
+	_assert_eq("Shift+F1 maps to secondary skill slot 8", main._skill_function_key_slot(event), 8)
+	event.shift_pressed = false
 	_assert_true("assign F1 to magic bolt", main._assign_skill_function_key(0, "magic_bolt"))
 	_assert_eq("F1 binding stored", str(main.skill_function_keys[0]), "magic_bolt")
 	_assert_eq("ranked binding selects immediately", main.right_click_skill_id, "magic_bolt")
 	_assert_eq("ranked binding updates skill bar", str(main.skill_bar.get_debug_state().get("skill_id", "")), "magic_bolt")
+	_assert_true("assign Shift+F1 to heal", main._assign_skill_function_key(8, "heal"))
+	_assert_eq("secondary binding stored", str(main.skill_function_keys[8]), "heal")
 	_assert_true("assign F2 to heal", main._assign_skill_function_key(1, "heal"))
 	_assert_eq("F2 binding selects heal", main.right_click_skill_id, "heal")
 	_assert_eq("F2 binding updates skill bar", str(main.skill_bar.get_debug_state().get("skill_id", "")), "heal")
@@ -1272,10 +1277,11 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	_assert_true("unranked binding cannot select right click", not main._select_right_click_skill_from_function_key(1))
 	_assert_eq("right click stays empty for unranked skill", main.right_click_skill_id, "")
 	main._apply_skill_bindings({
-		"function_keys": ["heal", "magic_bolt", "", "", "", "", "", ""],
+		"function_keys": ["heal", "magic_bolt", "", "", "", "", "", "", "magic_bolt", "", "", "", "", "", "", ""],
 		"right_click_skill_id": "heal",
 	})
 	_assert_eq("snapshot restores F1 skill binding", str(main.skill_function_keys[0]), "heal")
+	_assert_eq("snapshot restores Shift+F1 skill binding", str(main.skill_function_keys[8]), "magic_bolt")
 	_assert_eq("snapshot restores right click skill", main.right_click_skill_id, "heal")
 	main.skill_bar.queue_free()
 	main.free()

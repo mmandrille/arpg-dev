@@ -266,7 +266,7 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 		in.CastSkill = &game.CastSkillIntent{SkillID: p.SkillID, TargetID: p.TargetID, Direction: p.Direction}
 	case TypeSetSkillBindings:
 		var p setSkillBindingsPayloadWire
-		if err := json.Unmarshal(payload, &p); err != nil || len(p.FunctionKeys) > 8 {
+		if err := json.Unmarshal(payload, &p); err != nil || len(p.FunctionKeys) > 16 {
 			return in, false
 		}
 		in.SetSkillBindings = &game.SetSkillBindingsIntent{FunctionKeys: p.FunctionKeys, RightClickSkillID: p.RightClickSkillID}

@@ -192,6 +192,10 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, helpers: dict[str, An
             state.skill_progression = dict(c.get("skill_progression") or {})
         elif c["op"] == "skill_cooldown_update":
             state.skill_cooldowns = [dict(row) for row in c.get("skill_cooldowns", [])]
+        elif c["op"] == "skill_bindings_update":
+            bindings = dict(c.get("skill_bindings") or {})
+            state.skill_function_keys = [str(row) for row in bindings.get("function_keys", state.skill_function_keys)]
+            state.right_click_skill_id = str(bindings.get("right_click_skill_id", state.right_click_skill_id))
     if state.pending_level_load is not None and delta_level == state.pending_level_load and find_player(state) is not None:
         state.pending_level_load = None
     update_runtime_distances(state)
@@ -223,6 +227,9 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, helpers: dict[
     state.character_progression = dict(payload.get("character_progression", {}))
     state.skill_progression = dict(payload.get("skill_progression", {}))
     state.skill_cooldowns = [dict(row) for row in payload.get("skill_cooldowns", [])]
+    bindings = dict(payload.get("skill_bindings", {}))
+    state.skill_function_keys = [str(row) for row in bindings.get("function_keys", state.skill_function_keys)]
+    state.right_click_skill_id = str(bindings.get("right_click_skill_id", state.right_click_skill_id))
     state.gold = int(payload.get("gold", state.character_progression.get("gold", 0)))
     state.stash_items = [dict(item) for item in payload.get("stash_items", [])]
     state.stash_gold = int(payload.get("stash_gold", 0))

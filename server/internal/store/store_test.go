@@ -653,6 +653,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	skillBinds.FunctionKeys[0] = "magic_bolt"
 	skillBinds.FunctionKeys[1] = "heal"
+	skillBinds.FunctionKeys[8] = "cleave"
 	skillBinds.RightClickSkillID = "heal"
 	if err := s.SetCharacterSkillBindings(ctx, skillBinds); err != nil {
 		t.Fatalf("set skill bindings: %v", err)
@@ -661,7 +662,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reload skill bindings: %v", err)
 	}
-	if len(skillBinds.FunctionKeys) != 8 || skillBinds.FunctionKeys[0] != "magic_bolt" || skillBinds.FunctionKeys[1] != "heal" || skillBinds.RightClickSkillID != "heal" {
+	if len(skillBinds.FunctionKeys) != 16 || skillBinds.FunctionKeys[0] != "magic_bolt" || skillBinds.FunctionKeys[1] != "heal" || skillBinds.FunctionKeys[8] != "cleave" || skillBinds.RightClickSkillID != "heal" {
 		t.Fatalf("skill bindings mismatch: %+v", skillBinds)
 	}
 
@@ -771,7 +772,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(snap.Hotbar) != 10 || snap.Hotbar[2].ItemInstanceID == nil || *snap.Hotbar[2].ItemInstanceID != item.ID {
 		t.Fatalf("snapshot hotbar mutated with live state: %+v", snap.Hotbar)
 	}
-	if len(snap.SkillBinds.FunctionKeys) != 8 || snap.SkillBinds.FunctionKeys[0] != "magic_bolt" || snap.SkillBinds.FunctionKeys[1] != "heal" || snap.SkillBinds.RightClickSkillID != "heal" {
+	if len(snap.SkillBinds.FunctionKeys) != 16 || snap.SkillBinds.FunctionKeys[0] != "magic_bolt" || snap.SkillBinds.FunctionKeys[1] != "heal" || snap.SkillBinds.FunctionKeys[8] != "cleave" || snap.SkillBinds.RightClickSkillID != "heal" {
 		t.Fatalf("snapshot skill bindings mutated with live state: %+v", snap.SkillBinds)
 	}
 	if len(snap.Waypoints) != 1 || snap.Waypoints[0].Level != -1 {

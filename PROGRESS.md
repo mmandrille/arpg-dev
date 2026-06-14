@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v146 — `bot-movement-runtime-split` |
+| **Latest completed slice** | v147 — `bot-wait-runtime-split` |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v147 — `bot-wait-runtime-split` |
+| **Next slice** | v148 — `bot-state-ingest-split` |
 | **Last engineering review** | v140 — [`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md) (2026-06-13) |
 | **Next engineering review** | v150 due before more feature batches |
 
@@ -164,6 +164,7 @@ v143_* = client-bot-facade
 v144_* = client-bot-runner-split
 v145_* = bot-runtime-assertion-split
 v146_* = bot-movement-runtime-split
+v147_* = bot-wait-runtime-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -349,6 +350,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v144** | `client-bot-runner-split` | Complete (`make ci` green) | [`v144_spec-client-bot-runner-split.md`](docs/specs/v144_spec-client-bot-runner-split.md) | [`v144_2026-06-13-client-bot-runner-split.md`](docs/plans/v144_2026-06-13-client-bot-runner-split.md) | [`as-built`](docs/as-built/v144_client-bot-runner-split.md) |
 | **v145** | `bot-runtime-assertion-split` | Complete (`make ci` green) | [`v145_spec-bot-runtime-assertion-split.md`](docs/specs/v145_spec-bot-runtime-assertion-split.md) | [`v145_2026-06-13-bot-runtime-assertion-split.md`](docs/plans/v145_2026-06-13-bot-runtime-assertion-split.md) | [`as-built`](docs/as-built/v145_bot-runtime-assertion-split.md) |
 | **v146** | `bot-movement-runtime-split` | Complete (`make ci` green) | [`v146_spec-bot-movement-runtime-split.md`](docs/specs/v146_spec-bot-movement-runtime-split.md) | [`v146_2026-06-14-bot-movement-runtime-split.md`](docs/plans/v146_2026-06-14-bot-movement-runtime-split.md) | [`as-built`](docs/as-built/v146_bot-movement-runtime-split.md) |
+| **v147** | `bot-wait-runtime-split` | Complete (`make ci` green) | [`v147_spec-bot-wait-runtime-split.md`](docs/specs/v147_spec-bot-wait-runtime-split.md) | [`v147_2026-06-14-bot-wait-runtime-split.md`](docs/plans/v147_2026-06-14-bot-wait-runtime-split.md) | [`as-built`](docs/as-built/v147_bot-wait-runtime-split.md) |
 
 ---
 
@@ -478,6 +480,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Python bot wait/pump helpers are split out of `run.py`.** v147 moves accept/reject waits,
+event/progression waits, level/teleporter waits, player-position waits, and message pumping into
+`tools/bot/wait_runtime.py`, keeps `run.py` compatibility wrappers, and lowers the `run.py` ratchet
+baseline from 4612 to 4546 lines.
 
 **Python bot movement runtime helpers are split out of `run.py`.** v146 moves walking,
 move-to-position, in-range movement, movement candidate calculation, and movement accept/reject

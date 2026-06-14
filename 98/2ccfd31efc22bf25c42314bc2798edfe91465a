@@ -1,0 +1,46 @@
+tools/bot/run.py
+  s_4c4d08cfef7ab9::t_6ded5072b3e9bc 1826,1837,1843
+  s_4c4d08cfef7ab9::t_a45569fed5f9df 35-36
+  s_4c4d08cfef7ab9::t_a5423a694ad26c 1937
+  s_4c4d08cfef7ab9::t_e57e6c41f21093 1857
+  s_4c4d08cfef7ab9::t_abe2366e343cb5 1788-1791,1803
+tools/bot/movement_runtime.py
+  s_4c4d08cfef7ab9::t_949c4b56d324e0 9-10,25-26,29,59,77,101,187-188,202,227,234,246-247,262
+tools/bot/runtime_queries.py
+  s_4c4d08cfef7ab9::t_e060b700cdbfce 1-29
+docs/as-built/v152_bot-context-movement-decouple.md
+  s_4c4d08cfef7ab9::t_f8a35137c7f552 1-40
+.maintainability/extraction-coupling-baseline.tsv
+  s_4c4d08cfef7ab9::t_6f277a3cb4fd90 1
+tools/bot/bot_context.py
+  s_4c4d08cfef7ab9::t_6787421e36c21a 19
+  s_4c4d08cfef7ab9::t_f3f47d825fee78 1-18,20-30
+docs/plans/v152_2026-06-14-bot-context-movement-decouple.md
+  s_4c4d08cfef7ab9::t_ff335a2039e0ef 1-125
+docs/specs/v152_spec-bot-context-movement-decouple.md
+  s_4c4d08cfef7ab9::t_00a176d352788d 1-80
+tools/bot/test_movement_runtime.py
+  s_4c4d08cfef7ab9::t_301765b8040130 1-75
+docs/CODEMAP.md
+  s_4c4d08cfef7ab9::t_fa50f54ebf691a 24
+PROGRESS.md
+  s_4c4d08cfef7ab9::t_9df0f4fc2728e8 15,18
+  s_4c4d08cfef7ab9::t_273486373ab6ae 361
+  s_4c4d08cfef7ab9::t_03d1f6b4182ad9 171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "982ccfd31efc22bf25c42314bc2798edfe91465a",
+  "prompts": {},
+  "sessions": {
+    "s_4c4d08cfef7ab9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1551ba4-2cdc-4660-b8aa-02625ddf77e4",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

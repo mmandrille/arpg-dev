@@ -1,0 +1,55 @@
+server/internal/game/dungeon_elite_objective_rules.go
+  s_23f83c83efc7fd::t_84b1ba67d3443b 1-37
+server/internal/game/game_test.go
+  s_23f83c83efc7fd::t_29be982739e5e7 7262-7263,7297
+tools/bot/scenarios/65_random_quest_reward_floor.json
+  s_23f83c83efc7fd::t_2e0ae61d94067e 6,9,11,17
+docs/plans/v158_2026-06-14-dungeon-elite-side-objective.md
+  s_23f83c83efc7fd::t_37e91a05ee0ed3 1-29
+server/internal/game/dungeon_gen.go
+  s_23f83c83efc7fd::t_233961ef44904e 34-38,72,111-113,143
+shared/rules/dungeon_generation.v0.schema.json
+  s_23f83c83efc7fd::t_37e91a05ee0ed3 15,128-135
+tools/validate_shared.py
+  s_23f83c83efc7fd::t_2fe2e5beac56aa 1305-1324
+server/internal/game/dungeon_elite_objective_test.go
+  s_23f83c83efc7fd::t_59ef445e5ff623 1-36
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_23f83c83efc7fd::t_9578bfc1d39bd0 1-3,5-8,14-21,23-30
+  s_23f83c83efc7fd::t_8f299dd5c0e5e5 4
+  s_23f83c83efc7fd::t_42f9c5530e5ca1 9-13
+  s_23f83c83efc7fd::t_9fa5d318addfa7 22
+shared/rules/dungeon_generation.v0.json
+  s_23f83c83efc7fd::t_37e91a05ee0ed3 54-60
+docs/specs/v158_spec-dungeon-elite-side-objective.md
+  s_23f83c83efc7fd::t_37e91a05ee0ed3 1-28
+server/internal/game/rules.go
+  s_23f83c83efc7fd::t_8c8059e8e5dd9d 128,1702,1848
+  s_23f83c83efc7fd::t_157612d5d40d5b 1804-1805
+server/internal/game/dungeon_elite_objective.go
+  s_23f83c83efc7fd::t_7344b19106cba1 1-67
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_23f83c83efc7fd::t_bc60f4de784c22 6,10,13,19
+docs/as-built/v158_dungeon-elite-side-objective.md
+  s_23f83c83efc7fd::t_0a1e1cea190564 1-30
+PROGRESS.md
+  s_23f83c83efc7fd::t_c78e9127b7da73 15,18,177,373,528-531
+tools/bot/run.py
+  s_23f83c83efc7fd::t_28044351cda418 3060-3061
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5927f035b09091a5266c4974ff8cb8602ca9abf1",
+  "prompts": {},
+  "sessions": {
+    "s_23f83c83efc7fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec446-d2d1-7b11-98e3-d5469ecd879e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

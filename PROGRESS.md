@@ -12,12 +12,12 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v149 — `bot-coop-runtime-split` |
+| **Latest completed slice** | v150 — engineering review |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v150 — engineering review |
-| **Last engineering review** | v140 — [`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md) (2026-06-13) |
-| **Next engineering review** | v150 due before more feature batches |
+| **Next slice** | v151 — run `$next` using v150 review findings |
+| **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
+| **Next engineering review** | v160 due before more feature batches |
 
 ### Slice numbering note
 
@@ -484,6 +484,13 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**The v150 engineering review gate is complete.** The new review set starts at
+[`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md), with backend,
+client, and shared/tooling companion reports. It records the v141-v149 architecture paydown trend
+(`make maintainability`: 33 grandfathered files / 65592 lines, down from 68778 at v140) and points
+the next batch toward `game_test.go`, remaining `sim.go` domains, client/Python bot assertion
+dispatch, `BotStepCatalog.validate_step`, and `tools/validate_shared.py` paydown.
 
 **Python bot co-op runtime helpers are split out of `run.py`.** v149 moves reusable co-op peer
 connect/close, peer pumping, wait/send/accept helpers, player entity selectors, and party role

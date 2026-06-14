@@ -1,9 +1,17 @@
 {
   "id": "dungeon_elite_side_objective",
   "world_id": "dungeon_levels",
-  "seed": "v158_elite_objective_0000",
+  "seed": "v161_fast_objective_0018",
+  "character_class": "barbarian",
   "title": "Dungeon elite side objective",
-  "description": "Pinned generated floor includes a side-objective reward chest that rejects while an elite leader is alive, then opens after the leader is killed.",
+  "description": "Pinned generated floor includes a side-objective reward chest that rejects while the generated elite objective is incomplete, then opens after the objective is cleared.",
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 80, "dex": 80, "vit": 80, "magic": 5 }
+  },
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     {
@@ -13,8 +21,9 @@
     },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "at_least": 1 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "expect_reject": "elite_objective_incomplete" },
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1, "timeout_s": 20 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
+    { "action": "kill_monsters", "monster_pack_leader": true, "timeout_s": 60 },
+    { "action": "move_until_in_range", "interactable_def_id": "treasure_chest", "stop_distance": 1.2, "max_ticks": 160 },
+    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated", "timeout_s": 30 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 }
   ],
   "assertions": [

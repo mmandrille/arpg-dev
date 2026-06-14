@@ -59,11 +59,15 @@ func (s *Sim) eliteObjectiveChestLocked(e *entity) bool {
 	if e == nil || level == nil || !level.eliteObjectiveChestIDs[e.id] {
 		return false
 	}
+	foundLeader := false
 	for _, entityID := range sortedEntityIDs(level.entities) {
 		candidate := level.entities[entityID]
-		if candidate.kind == monsterEntity && candidate.monsterPackLeader && candidate.hp <= 0 {
-			return false
+		if candidate.kind == monsterEntity && candidate.monsterPackLeader {
+			foundLeader = true
+			if candidate.hp > 0 {
+				return true
+			}
 		}
 	}
-	return true
+	return !foundLeader
 }

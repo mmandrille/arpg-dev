@@ -1,0 +1,35 @@
+shared/assets/skill_presentations.v0.json
+  s_23f83c83efc7fd::t_da45d2cb492d61 68-69
+client/scripts/main.gd
+  s_23f83c83efc7fd::t_50c6f994650146 1107
+  s_23f83c83efc7fd::t_d67e502ddd4dd0 1106
+  s_23f83c83efc7fd::t_6ed5591ade79e0 1896
+server/internal/game/game_test.go
+  s_23f83c83efc7fd::t_8f9c839c5da0f8 243-244
+shared/i18n/en.json
+  s_23f83c83efc7fd::t_7afec23234de74 64
+server/internal/game/earthbreaker_test.go
+  s_23f83c83efc7fd::t_152e85cdbb2fe6 1-47
+client/scripts/earthbreaker_jump.gd
+  s_23f83c83efc7fd::t_50c6f994650146 1-16
+shared/i18n/es.json
+  s_23f83c83efc7fd::t_3774f02b5ba1f8 69
+shared/rules/skills.v0.json
+  s_23f83c83efc7fd::t_96f052ef7000cd 316
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6cd0f0473320d8128b42c89f590ad850a6de6924",
+  "prompts": {},
+  "sessions": {
+    "s_23f83c83efc7fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec446-d2d1-7b11-98e3-d5469ecd879e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,6 +1,8 @@
 class_name BotStepCatalog
 extends RefCounted
 
+const BotActionStepValidatorScript := preload("res://scripts/bot_action_step_validator.gd")
+
 
 const STEP_TYPES_WAIT := [
 	"wait_ws_open", "wait_entity", "wait_event", "wait_inventory_item",
@@ -89,6 +91,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		return "client_steps[%d].type is missing" % index
 	if stype not in ALL_STEP_TYPES:
 		return "client_steps[%d].type '%s' is unknown" % [index, stype]
+	var action_err := BotActionStepValidatorScript.validate(step, stype, index)
+	if action_err != BotActionStepValidatorScript.UNHANDLED:
+		return action_err
 	if stype in STEP_TYPES_WAIT and stype != "wait_loot_item":
 		var timeout = step.get("timeout_s", null)
 		if timeout == null or float(timeout) <= 0.0:
@@ -102,24 +107,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "click_entity_until_event":
 		if str(step.get("entity_type", "")) == "" or str(step.get("event_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type and event_type" % [index, stype]
-	if stype == "click_loot_item":
-		if str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
-			return "client_steps[%d] (%s) requires item_def_id or rolled" % [index, stype]
 	if stype == "wait_player_near":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]
-	if stype in ["drag_bag_to_weapon_slot", "drag_bag_to_equipment_slot", "drag_bag_to_outside", "assign_hotbar_slot", "double_click_bag_item"]:
-		if str(step.get("item_def_id", "")) == "":
-			return "client_steps[%d] (%s) requires item_def_id" % [index, stype]
-	if stype in ["drag_bag_to_equipment_slot", "drag_equipment_to_bag"]:
-		if str(step.get("slot", "")) == "":
-			return "client_steps[%d] (%s) requires slot" % [index, stype]
-	if stype == "assign_hotbar_slot":
-		if not step.has("slot_index"):
-			return "client_steps[%d] (%s) requires slot_index" % [index, stype]
-	if stype == "use_hotbar_slot":
-		if not step.has("slot_index"):
-			return "client_steps[%d] (%s) requires slot_index" % [index, stype]
 	if stype in ["wait_inventory_count", "assert_inventory_count"]:
 		if not step.has("equals"):
 			return "client_steps[%d] (%s) requires equals" % [index, stype]
@@ -146,10 +136,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "assert_player_hp":
 		if not step.has("equals"):
 			return "client_steps[%d] (%s) requires equals" % [index, stype]
-	if stype == "press_key":
-		if str(step.get("keycode", "")) == "":
-			return "client_steps[%d] (%s) requires keycode" % [index, stype]
-	if stype in ["click_stat_button", "assert_stat_button_enabled"]:
+	if stype == "assert_stat_button_enabled":
 		if str(step.get("stat", "")) == "":
 			return "client_steps[%d] (%s) requires stat" % [index, stype]
 	if stype == "assert_stat_button_enabled":
@@ -198,7 +185,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["set_floating_combat_text", "assert_floating_combat_text_enabled"]:
 		if not step.has("enabled"):
 			return "client_steps[%d] (%s) requires enabled" % [index, stype]
-	if stype == "select_create_game_type" or stype == "assert_create_game_type":
+	if stype == "assert_create_game_type":
 		var session_type := str(step.get("session_type", ""))
 		if session_type != "coop" and session_type != "solo":
 			return "client_steps[%d] (%s) requires session_type coop or solo" % [index, stype]
@@ -248,44 +235,6 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["assert_shop_sell_rows", "assert_shop_offer_details", "assert_shop_sell_details"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
-	if stype == "click_shop_buy_offer":
-		if str(step.get("offer_id", "")) == "" and str(step.get("offer_kind", "")) == "":
-			return "client_steps[%d] (%s) requires offer_id or offer_kind" % [index, stype]
-	if stype == "drag_bag_to_stash":
-		if str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
-			return "client_steps[%d] (%s) requires item_def_id or rolled" % [index, stype]
-	if stype == "drag_stash_to_bag":
-		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
-			return "client_steps[%d] (%s) requires stash_item_id, item_def_id, or rolled" % [index, stype]
-	if stype in ["click_stash_deposit_gold", "click_stash_withdraw_gold"]:
-		if int(step.get("amount", 0)) <= 0:
-			return "client_steps[%d] (%s) requires positive amount" % [index, stype]
-	if stype == "set_stash_search":
-		if not step.has("text"):
-			return "client_steps[%d] (%s) requires text" % [index, stype]
-	if stype == "select_stash_sort":
-		var mode := str(step.get("mode", ""))
-		if not ["acquired", "name", "rarity", "slot"].has(mode):
-			return "client_steps[%d] (%s) requires mode acquired, name, rarity, or slot" % [index, stype]
-	if stype == "set_multiplayer_search":
-		if not step.has("text") and not step.has("text_env"):
-			return "client_steps[%d] (%s) requires text or text_env" % [index, stype]
-	if stype == "select_multiplayer_sort":
-		var mode := str(step.get("mode", ""))
-		if not ["recent", "host", "players"].has(mode):
-			return "client_steps[%d] (%s) requires mode recent, host, or players" % [index, stype]
-	if stype == "set_market_publish_price":
-		if int(step.get("price_gold", 0)) <= 0:
-			return "client_steps[%d] (%s) requires positive price_gold" % [index, stype]
-	if stype == "click_market_publish_item":
-		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
-			return "client_steps[%d] (%s) requires stash_item_id, item_def_id, or rolled" % [index, stype]
-	if stype == "click_blacksmith_upgrade":
-		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "":
-			return "client_steps[%d] (%s) requires stash_item_id or item_def_id" % [index, stype]
-	if stype == "click_market_purchase_listing":
-		if str(step.get("listing_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("price_gold"):
-			return "client_steps[%d] (%s) requires listing_id, item_def_id, or price_gold" % [index, stype]
 	if stype == "assert_stash_filter":
 		if not step.has("search_text") and not step.has("sort_mode") and not step.has("filtered_equals") and not step.has("first_item_def_id"):
 			return "client_steps[%d] (%s) requires search_text, sort_mode, filtered_equals, or first_item_def_id" % [index, stype]
@@ -298,25 +247,4 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_remote_player_count", "assert_remote_player_count"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
-	if stype == "click_menu_button":
-		if str(step.get("button", "")) == "":
-			return "client_steps[%d] (%s) requires button" % [index, stype]
-	if stype == "enter_character_name":
-		if str(step.get("name", "")) == "":
-			return "client_steps[%d] (%s) requires name" % [index, stype]
-	if stype == "select_character_class":
-		if str(step.get("class_id", "")) == "":
-			return "client_steps[%d] (%s) requires class_id" % [index, stype]
-	if stype == "select_window_size":
-		if str(step.get("size", "")) == "":
-			return "client_steps[%d] (%s) requires size" % [index, stype]
-	if stype == "click_entity":
-		if str(step.get("entity_type", "")) == "":
-			return "client_steps[%d] (%s) requires entity_type" % [index, stype]
-	if stype == "click_waypoint_level":
-		if not step.has("target_level"):
-			return "client_steps[%d] (%s) requires target_level" % [index, stype]
-	if stype == "click_floor":
-		if not step.has("x") or not step.has("z"):
-			return "client_steps[%d] (%s) requires x and z" % [index, stype]
 	return ""

@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v167 — protocol runtime assertion split |
+| **Latest completed slice** | v168 — bot step validation split |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v168 — TBD via `$next` |
+| **Next slice** | v169 — TBD via `$next` |
 | **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
 | **Next engineering review** | v170 due before more feature batches |
 
@@ -184,6 +184,7 @@ v164_* = session-browser-filters
 v165_* = inventory-panel-routing-paydown
 v166_* = client-bot-assertion-domain-split
 v167_* = protocol-runtime-assertion-split
+v168_* = bot-step-validation-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -389,6 +390,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v165** | `inventory-panel-routing-paydown` | Complete (`make ci` green) | [`v165_spec-inventory-panel-routing-paydown.md`](docs/specs/v165_spec-inventory-panel-routing-paydown.md) | [`v165_2026-06-14-inventory-panel-routing-paydown.md`](docs/plans/v165_2026-06-14-inventory-panel-routing-paydown.md) | [`as-built`](docs/as-built/v165_inventory-panel-routing-paydown.md) |
 | **v166** | `client-bot-assertion-domain-split` | Complete (`make ci` green) | [`v166_spec-client-bot-assertion-domain-split.md`](docs/specs/v166_spec-client-bot-assertion-domain-split.md) | [`v166_2026-06-14-client-bot-assertion-domain-split.md`](docs/plans/v166_2026-06-14-client-bot-assertion-domain-split.md) | [`as-built`](docs/as-built/v166_client-bot-assertion-domain-split.md) |
 | **v167** | `protocol-runtime-assertion-split` | Complete (`make ci` green) | [`v167_spec-protocol-runtime-assertion-split.md`](docs/specs/v167_spec-protocol-runtime-assertion-split.md) | [`v167_2026-06-14-protocol-runtime-assertion-split.md`](docs/plans/v167_2026-06-14-protocol-runtime-assertion-split.md) | [`as-built`](docs/as-built/v167_protocol-runtime-assertion-split.md) |
+| **v168** | `bot-step-validation-split` | Complete (`make ci` green) | [`v168_spec-bot-step-validation-split.md`](docs/specs/v168_spec-bot-step-validation-split.md) | [`v168_2026-06-14-bot-step-validation-split.md`](docs/plans/v168_2026-06-14-bot-step-validation-split.md) | [`as-built`](docs/as-built/v168_bot-step-validation-split.md) |
 
 ---
 
@@ -518,6 +520,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Client bot action-step validation now has a focused helper.** v168 adds
+`bot_action_step_validator.gd` for key, click, drag, hotbar, stash, multiplayer, market,
+blacksmith, and menu action validations while preserving `BotStepCatalog.validate_step` as the
+public API. The catalog drops from 322 to 250 lines.
 
 **Protocol bot runtime economy assertions now have a focused helper.** v167 adds
 `runtime_economy_assertions.py` for runtime shop/stash counts, details, appraisals, and events while

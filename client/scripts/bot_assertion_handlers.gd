@@ -1,46 +1,14 @@
 class_name BotAssertionHandlers
 extends RefCounted
 
+const BotUiAssertionHandlersScript := preload("res://scripts/bot_ui_assertion_handlers.gd")
+
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
+	var ui_result := BotUiAssertionHandlersScript.try_evaluate(runner, step, stype, state)
+	if bool(ui_result.get("handled", false)):
+		return bool(ui_result.get("ok", false))
 	match stype:
-		"assert_panel_visible":
-			var want := bool(step.get("visible", true))
-			var got := bool(state.get("inventory_panel_visible", false))
-			if want != got:
-				runner._fail("assert_panel_visible failed: want=%s got=%s step=%d scenario=%s" % [
-					want, got, runner._step_index, str(runner.scenario.get("id", "?"))
-				])
-				return false
-			return true
-		"assert_main_menu_visible":
-			return runner._assert_bool_state("assert_main_menu_visible", "main_menu_visible", step, state)
-		"assert_main_menu_actions":
-			return runner._assert_main_menu_actions(step, state)
-		"assert_character_panel_visible":
-			return runner._assert_bool_state("assert_character_panel_visible", "character_panel_visible", step, state)
-		"assert_character_panel":
-			return runner._assert_character_panel(step, state)
-		"assert_create_game_type":
-			return runner._assert_create_game_type(step, state)
-		"assert_current_session":
-			return runner._assert_current_session(step, state)
-		"assert_multiplayer_panel_visible":
-			return runner._assert_bool_state("assert_multiplayer_panel_visible", "multiplayer_panel_visible", step, state)
-		"assert_multiplayer_session_rows":
-			return runner._assert_multiplayer_session_rows(step, state)
-		"assert_multiplayer_filter":
-			return runner._assert_multiplayer_filter(step, state)
-		"assert_settings_panel_visible":
-			return runner._assert_bool_state("assert_settings_panel_visible", "settings_panel_visible", step, state)
-		"assert_pause_menu_visible":
-			return runner._assert_bool_state("assert_pause_menu_visible", "pause_menu_visible", step, state)
-		"assert_character_stats_panel_visible":
-			return runner._assert_bool_state("assert_character_stats_panel_visible", "character_stats_panel_visible", step, state)
-		"assert_character_info_panel_visible":
-			return runner._assert_bool_state("assert_character_info_panel_visible", "character_info_panel_visible", step, state)
-		"assert_character_info":
-			return runner._assert_character_info(step, state)
 		"assert_character_progression":
 			return runner._assert_character_progression(step, state)
 		"assert_stat_button_enabled":

@@ -425,8 +425,11 @@ func _do_click_entity(action: Dictionary, state: Dictionary) -> void:
 
 
 func _has_entity_filter(selector: Dictionary) -> bool:
-	for key in ["monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state", "is_boss"]:
+	for key in ["monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state"]:
 		if selector.has(key) and str(selector.get(key, "")) != "":
+			return true
+	for key in ["is_boss", "elite_objective"]:
+		if selector.has(key):
 			return true
 	return false
 
@@ -446,6 +449,8 @@ func _select_entity_ids(state: Dictionary, selector: Dictionary) -> Array:
 				ok = false
 				break
 		if selector.has("is_boss") and bool(rec.get("is_boss", false)) != bool(selector.get("is_boss", false)):
+			ok = false
+		if selector.has("elite_objective") and bool(rec.get("elite_objective", false)) != bool(selector.get("elite_objective", false)):
 			ok = false
 		if ok:
 			out.append(str(rec.get("id", "")))

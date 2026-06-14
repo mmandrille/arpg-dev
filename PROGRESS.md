@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v161 — full elite clear objective |
+| **Latest completed slice** | v162 — objective chest presentation |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v162 — objective chest presentation |
+| **Next slice** | v163 — inventory transfer router |
 | **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
 | **Next engineering review** | v170 due before more feature batches |
 
@@ -178,6 +178,7 @@ v158_* = dungeon-elite-side-objective
 v159_* = kill-gated-elite-objective
 v160_* = dungeon-population-extraction
 v161_* = full-elite-clear-objective
+v162_* = objective-chest-presentation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -377,6 +378,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v159** | `kill-gated-elite-objective` | Complete (`make ci` green) | [`v159_spec-kill-gated-elite-objective.md`](docs/specs/v159_spec-kill-gated-elite-objective.md) | [`v159_2026-06-14-kill-gated-elite-objective.md`](docs/plans/v159_2026-06-14-kill-gated-elite-objective.md) | [`as-built`](docs/as-built/v159_kill-gated-elite-objective.md) |
 | **v160** | `dungeon-population-extraction` | Complete (`make ci` green) | [`v160_spec-dungeon-population-extraction.md`](docs/specs/v160_spec-dungeon-population-extraction.md) | [`v160_2026-06-14-dungeon-population-extraction.md`](docs/plans/v160_2026-06-14-dungeon-population-extraction.md) | [`as-built`](docs/as-built/v160_dungeon-population-extraction.md) |
 | **v161** | `full-elite-clear-objective` | Complete (`make ci` green) | [`v161_spec-full-elite-clear-objective.md`](docs/specs/v161_spec-full-elite-clear-objective.md) | [`v161_2026-06-14-full-elite-clear-objective.md`](docs/plans/v161_2026-06-14-full-elite-clear-objective.md) | [`as-built`](docs/as-built/v161_full-elite-clear-objective.md) |
+| **v162** | `objective-chest-presentation` | Complete (`make ci` green) | [`v162_spec-objective-chest-presentation.md`](docs/specs/v162_spec-objective-chest-presentation.md) | [`v162_2026-06-14-objective-chest-presentation.md`](docs/plans/v162_2026-06-14-objective-chest-presentation.md) | [`as-built`](docs/as-built/v162_objective-chest-presentation.md) |
 
 ---
 
@@ -506,6 +508,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Elite objective chests now have client presentation.** v162 carries optional `elite_objective`
+metadata in v8 entity views, renders marked reward chests with a display-only objective marker in
+the Godot client, and adds client bot presentation proof through
+`41_objective_chest_presentation.json` while preserving the existing open-lid/glow behavior.
 
 **Elite objective chests now require a full elite leader clear.** v161 strengthens the v159
 side-objective gate so objective chests stay locked while any generated pack leader on the floor is

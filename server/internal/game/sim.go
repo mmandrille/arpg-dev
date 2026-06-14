@@ -5832,6 +5832,11 @@ func (s *Sim) entityView(e *entity) EntityView {
 	if e.kind == monsterEntity {
 		view.EffectIDs = sortedUniqueStrings(append(cloneStringSlice(e.effectIDs), s.eliteAuraEffectIDs(e)...))
 	}
+	if e.kind == interactableEntity {
+		if level := s.activeLevel(); level != nil && level.eliteObjectiveChestIDs[e.id] {
+			view.EliteObjective = true
+		}
+	}
 	if e.kind != lootEntity {
 		return view
 	}

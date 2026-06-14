@@ -378,11 +378,28 @@ func _test_multiplayer_sessions_panel_row_join_affordances() -> void:
 	panel._build()
 	panel.show_panel()
 	panel.set_sessions([
-		{"session_id": "sess_1", "host_display_name": "Host", "connected_count": 1, "member_count": 4, "world_id": "dungeon_levels", "mode": "coop", "listed": true},
+		{"session_id": "sess_1", "host_display_name": "Beta Host", "connected_count": 1, "member_count": 4, "world_id": "dungeon_levels", "mode": "coop", "listed": true, "updated_at": "2026-06-14T10:00:00Z"},
+		{"session_id": "sess_2", "host_display_name": "Alpha Host", "connected_count": 2, "member_count": 3, "world_id": "vendor_lab", "mode": "coop", "listed": true, "updated_at": "2026-06-14T11:00:00Z"},
 	])
 	var debug := panel.get_debug_state()
 	var actions: Array = debug.get("actions", [])
 	_assert_true("join selected action removed", not actions.has("join_selected_session"))
+	_assert_eq("session browser total count", int(debug.get("total_session_count", 0)), 2)
+	_assert_eq("session browser filtered count", int(debug.get("filtered_session_count", 0)), 2)
+	panel.bot_set_search("vendor")
+	debug = panel.get_debug_state()
+	_assert_eq("session search text", str(debug.get("search_text", "")), "vendor")
+	_assert_eq("session search filtered count", int(debug.get("filtered_session_count", 0)), 1)
+	_assert_eq("session search first world", str(((debug.get("sessions", []) as Array)[0] as Dictionary).get("world_id", "")), "vendor_lab")
+	panel.bot_set_search("")
+	panel.bot_select_sort("host")
+	debug = panel.get_debug_state()
+	_assert_eq("session sort mode", str(debug.get("sort_mode", "")), "host")
+	_assert_eq("session host sort first", str(((debug.get("sessions", []) as Array)[0] as Dictionary).get("session_id", "")), "sess_2")
+	panel.bot_select_sort("players")
+	debug = panel.get_debug_state()
+	_assert_eq("session player sort first", str(((debug.get("sessions", []) as Array)[0] as Dictionary).get("session_id", "")), "sess_2")
+	panel.bot_set_search("sess_1")
 	var row := panel._rows.get_child(0) as HBoxContainer
 	_assert_eq("session row has label and check", row.get_child_count(), 2)
 	var row_button := row.get_child(0) as Button

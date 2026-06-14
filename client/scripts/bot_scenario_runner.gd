@@ -1462,6 +1462,24 @@ func _assert_multiplayer_session_rows(step: Dictionary, state: Dictionary) -> bo
 	return true
 
 
+func _assert_multiplayer_filter(step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("multiplayer_panel", {})
+	var expected_search := OS.get_environment(str(step.get("search_text_env", ""))) if step.has("search_text_env") else str(step.get("search_text", ""))
+	if (step.has("search_text") or step.has("search_text_env")) and str(panel.get("search_text", "")) != expected_search:
+		_fail("assert_multiplayer_filter search_text failed: want=%s panel=%s step=%d scenario=%s" % [expected_search, str(panel), _step_index, str(scenario.get("id", "?"))])
+		return false
+	var checks := [
+		["sort_mode", step.has("sort_mode"), str(panel.get("sort_mode", "")) == str(step.get("sort_mode", "")), str(step.get("sort_mode", ""))],
+		["filtered_equals", step.has("filtered_equals"), int(panel.get("filtered_session_count", 0)) == int(step.get("filtered_equals", 0)), str(step.get("filtered_equals", 0))],
+		["total_at_least", step.has("total_at_least"), int(panel.get("total_session_count", 0)) >= int(step.get("total_at_least", 0)), str(step.get("total_at_least", 0))],
+	]
+	for check in checks:
+		if bool(check[1]) and not bool(check[2]):
+			_fail("assert_multiplayer_filter %s failed: want=%s panel=%s step=%d scenario=%s" % [str(check[0]), str(check[3]), str(panel), _step_index, str(scenario.get("id", "?"))])
+			return false
+	return true
+
+
 func _expected_session_id(step: Dictionary) -> String:
 	if step.has("session_id"):
 		return str(step.get("session_id", ""))

@@ -29,6 +29,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return runner._assert_bool_state("assert_multiplayer_panel_visible", "multiplayer_panel_visible", step, state)
 		"assert_multiplayer_session_rows":
 			return runner._assert_multiplayer_session_rows(step, state)
+		"assert_multiplayer_filter":
+			return runner._assert_multiplayer_filter(step, state)
 		"assert_settings_panel_visible":
 			return runner._assert_bool_state("assert_settings_panel_visible", "settings_panel_visible", step, state)
 		"assert_pause_menu_visible":
@@ -295,4 +297,3 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				return false
 			return true
 	return true
-

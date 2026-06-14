@@ -24,7 +24,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_current_session",
 	"assert_character_panel_visible", "assert_settings_panel_visible",
 	"assert_pause_menu_visible", "assert_session_changed",
-	"assert_multiplayer_panel_visible", "assert_multiplayer_session_rows",
+	"assert_multiplayer_panel_visible", "assert_multiplayer_session_rows", "assert_multiplayer_filter",
 	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
 	"assert_character_info_panel_visible", "assert_character_info",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
@@ -52,6 +52,7 @@ const STEP_TYPES_ACTION := [
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
 	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort",
+	"set_multiplayer_search", "select_multiplayer_sort",
 	"click_blacksmith_upgrade",
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
 	"click_market_view_offers", "click_market_accept_offer", "click_waypoint_level",
@@ -266,6 +267,13 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		var mode := str(step.get("mode", ""))
 		if not ["acquired", "name", "rarity", "slot"].has(mode):
 			return "client_steps[%d] (%s) requires mode acquired, name, rarity, or slot" % [index, stype]
+	if stype == "set_multiplayer_search":
+		if not step.has("text") and not step.has("text_env"):
+			return "client_steps[%d] (%s) requires text or text_env" % [index, stype]
+	if stype == "select_multiplayer_sort":
+		var mode := str(step.get("mode", ""))
+		if not ["recent", "host", "players"].has(mode):
+			return "client_steps[%d] (%s) requires mode recent, host, or players" % [index, stype]
 	if stype == "set_market_publish_price":
 		if int(step.get("price_gold", 0)) <= 0:
 			return "client_steps[%d] (%s) requires positive price_gold" % [index, stype]
@@ -284,6 +292,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "assert_multiplayer_session_rows":
 		if not step.has("equals") and not step.has("min_count") and not step.has("selected") and not step.has("listed") and not step.has("session_id") and not step.has("session_id_env") and not step.has("mode") and not step.has("member_count_min") and not step.has("connected_count_min"):
 			return "client_steps[%d] (%s) requires a row expectation" % [index, stype]
+	if stype == "assert_multiplayer_filter":
+		if not step.has("search_text") and not step.has("search_text_env") and not step.has("sort_mode") and not step.has("filtered_equals") and not step.has("total_at_least"):
+			return "client_steps[%d] (%s) requires search_text, search_text_env, sort_mode, filtered_equals, or total_at_least" % [index, stype]
 	if stype in ["wait_remote_player_count", "assert_remote_player_count"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
@@ -309,4 +320,3 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]
 	return ""
-

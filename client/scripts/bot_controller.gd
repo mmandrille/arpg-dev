@@ -178,6 +178,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_set_stash_search(action)
 		"select_stash_sort":
 			_do_select_stash_sort(action)
+		"set_multiplayer_search":
+			_do_set_multiplayer_search(action)
+		"select_multiplayer_sort":
+			_do_select_multiplayer_sort(action)
 		"set_market_publish_price":
 			_do_set_market_publish_price(action)
 		"click_market_publish_item":
@@ -351,6 +355,18 @@ func _do_set_stash_search(action: Dictionary) -> void:
 func _do_select_stash_sort(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_select_stash_sort"):
 		_main.bot_select_stash_sort(str(action.get("mode", "acquired")))
+
+
+func _do_set_multiplayer_search(action: Dictionary) -> void:
+	if _main == null or not _main.has_method("bot_set_multiplayer_search"):
+		return
+	var env_key := str(action.get("text_env", ""))
+	_main.bot_set_multiplayer_search(OS.get_environment(env_key) if env_key != "" else str(action.get("text", "")))
+
+
+func _do_select_multiplayer_sort(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_select_multiplayer_sort"):
+		_main.bot_select_multiplayer_sort(str(action.get("mode", "recent")))
 
 
 func _do_set_market_publish_price(action: Dictionary) -> void:

@@ -3057,8 +3057,8 @@ def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) ->
     if "level" in selector and selector["level"] is not None:
         if int(entity.get("level", -999999)) != int(selector["level"]):
             return False
-    if selector.get("is_boss") is not None:
-        if bool(entity.get("is_boss", False)) != bool(selector["is_boss"]):
+    for bool_key in ("is_boss", "monster_pack_leader"):
+        if selector.get(bool_key) is not None and bool(entity.get(bool_key, False)) != bool(selector[bool_key]):
             return False
     if selector.get("visual_scale") is not None:
         if abs(float(entity.get("visual_scale", 1.0)) - float(selector["visual_scale"])) > 0.000001:

@@ -125,6 +125,7 @@ type DungeonGenerationRules struct {
 	TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+	EliteObjective           EliteObjectiveRules      `json:"elite_objective"`
 	ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 	BossFloor                BossFloorRules           `json:"boss_floor"`
 	MonsterRarityNote        string                   `json:"monster_rarity_note"`
@@ -1698,6 +1699,7 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement      TeleporterPlacementRules `json:"teleporter_placement"`
 		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
+		EliteObjective           EliteObjectiveRules      `json:"elite_objective"`
 		ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 		BossFloor                BossFloorRules           `json:"boss_floor"`
 		MonsterRarityNote        string                   `json:"monster_rarity_note"`
@@ -1799,6 +1801,9 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules dungeon_generation.chest_placement.max_attempts: must be positive")
 		}
 	}
+	if err := validateEliteObjectiveRules(dungeonGeneration.EliteObjective, r); err != nil {
+		return nil, err
+	}
 	if err := validateObstacleGenerationRules(dungeonGeneration.ObstacleGeneration, dungeonGeneration.FloorSize); err != nil {
 		return nil, err
 	}
@@ -1840,6 +1845,7 @@ func LoadRules(dir string) (*Rules, error) {
 		TeleporterPlacement:      dungeonGeneration.TeleporterPlacement,
 		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
 		ChestPlacement:           dungeonGeneration.ChestPlacement,
+		EliteObjective:           dungeonGeneration.EliteObjective,
 		ObstacleGeneration:       dungeonGeneration.ObstacleGeneration,
 		BossFloor:                dungeonGeneration.BossFloor,
 		MonsterRarityNote:        dungeonGeneration.MonsterRarityNote,

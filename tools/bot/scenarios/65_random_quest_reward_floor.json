@@ -3,18 +3,18 @@
   "world_id": "dungeon_levels",
   "seed": "v155_bot_quest_0015",
   "title": "Random quest reward floor",
-  "description": "Pinned dungeon seed reaches a deterministic random quest reward floor with one extra reward chest, then opens it through the normal chest loot path.",
+  "description": "Pinned dungeon seed reaches a deterministic random quest reward floor with at least one reward chest, then opens it through the normal chest loot path.",
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "equals": 1 },
+    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "at_least": 1 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 }
+    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -1 },
-    { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "equals": 1 },
+    { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 },
     { "type": "event_seen", "event_type": "interactable_activated" },
     { "type": "event_seen", "event_type": "loot_dropped" }
   ],

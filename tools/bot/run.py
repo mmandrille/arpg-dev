@@ -1932,57 +1932,33 @@ async def wait_for_player_move_or_accept(ws, state: RuntimeState, before: dict[s
 
 
 async def wait_for_tick_advance(ws, state: RuntimeState, loop) -> None:
-    start = state.last_tick
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while state.last_tick <= start:
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for tick advance from {start}")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_tick_advance as wait_for_tick_advance_impl
+
+    await wait_for_tick_advance_impl(ws, state, loop, helpers=globals())
 
 
 async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while state.last_tick < target_tick:
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for tick {target_tick}")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_tick as wait_for_tick_impl
+
+    await wait_for_tick_impl(ws, state, target_tick, loop, helpers=globals())
 
 
 async def wait_for_accept(ws, state: RuntimeState, message_id: str, loop) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while message_id not in state.accepted_message_ids:
-        reason = state.rejected_message_reasons.get(message_id)
-        if reason is not None:
-            raise AssertionError(f"intent {message_id} rejected while waiting for accept: {reason}")
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for accept {message_id}")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_accept as wait_for_accept_impl
+
+    await wait_for_accept_impl(ws, state, message_id, loop, helpers=globals())
 
 
 async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str, loop) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while message_id not in state.rejected_message_reasons:
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for reject {message_id}")
-        await pump_one(ws, state, timeout=0.1)
-    got = state.rejected_message_reasons[message_id]
-    if got != reason:
-        raise AssertionError(f"reject {message_id} reason={got}, want {reason}")
+    from tools.bot.wait_runtime import wait_for_reject as wait_for_reject_impl
+
+    await wait_for_reject_impl(ws, state, message_id, reason, loop, helpers=globals())
 
 
 async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S, start_index: int = 0) -> None:
-    deadline = loop.time() + timeout_s
-    while not any(ev.get("event_type") == event_type for ev in state.events[start_index:]):
-        if loop.time() > deadline:
-            player = find_player(state)
-            raise TimeoutError(
-                f"stalled waiting for event {event_type}; "
-                f"level={state.current_level} tick={state.last_tick} "
-                f"player_hp={(player or {}).get('hp')} "
-                f"seen_events={sorted(state.seen_events)} "
-                f"recent_combat={state.combat_events[-5:]}"
-            )
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_event as wait_for_event_impl
+
+    await wait_for_event_impl(ws, state, event_type, loop, timeout_s=timeout_s, start_index=start_index, helpers=globals())
 
 
 async def wait_for_matching_event(
@@ -1994,19 +1970,17 @@ async def wait_for_matching_event(
     timeout_s: float = SLICE_TIMEOUT_S,
     start_index: int = 0,
 ) -> None:
-    event_type = str(expected.get("event_type", ""))
-    deadline = loop.time() + timeout_s
-    while not any(event_matches(ev, expected) for ev in state.events[start_index:]):
-        if loop.time() > deadline:
-            player = find_player(state)
-            raise TimeoutError(
-                f"stalled waiting for event {event_type or expected}; "
-                f"level={state.current_level} tick={state.last_tick} "
-                f"player_hp={(player or {}).get('hp')} "
-                f"seen_events={sorted(state.seen_events)} "
-                f"recent_combat={state.combat_events[-5:]}"
-            )
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_matching_event as wait_for_matching_event_impl
+
+    await wait_for_matching_event_impl(
+        ws,
+        state,
+        expected,
+        loop,
+        timeout_s=timeout_s,
+        start_index=start_index,
+        helpers=globals(),
+    )
 
 
 async def wait_for_shop_event(
@@ -2018,14 +1992,11 @@ async def wait_for_shop_event(
     shop_id: str = "town_vendor",
     start_index: int = 0,
 ) -> dict[str, Any]:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while True:
-        for event in state.shop_events[start_index:]:
-            if event.get("event_type") == event_type and str(event.get("shop_id", "")) == shop_id:
-                return event
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for shop event {event_type} shop_id={shop_id}")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_shop_event as wait_for_shop_event_impl
+
+    return await wait_for_shop_event_impl(
+        ws, state, event_type, loop, shop_id=shop_id, start_index=start_index, helpers=globals()
+    )
 
 
 async def wait_for_stash_event(
@@ -2037,14 +2008,11 @@ async def wait_for_stash_event(
     stash_id: str = "account_stash",
     start_index: int = 0,
 ) -> dict[str, Any]:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while True:
-        for event in state.stash_events[start_index:]:
-            if event.get("event_type") == event_type and str(event.get("stash_id", "")) == stash_id:
-                return event
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for stash event {event_type} stash_id={stash_id}")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_stash_event as wait_for_stash_event_impl
+
+    return await wait_for_stash_event_impl(
+        ws, state, event_type, loop, stash_id=stash_id, start_index=start_index, helpers=globals()
+    )
 
 
 def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state: RuntimeState | None = None) -> bool:
@@ -2217,58 +2185,33 @@ def combat_event_summary(expected: dict[str, Any]) -> str:
 
 
 async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, loop) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while state.current_level == previous_level or state.pending_level_load is not None:
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for level change from {previous_level}")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_level_change as wait_for_level_change_impl
+
+    await wait_for_level_change_impl(ws, state, previous_level, loop, helpers=globals())
 
 
 async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loop) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while not state.discovered_teleporters.get(level, False):
-        if loop.time() > deadline:
-            raise TimeoutError(f"stalled waiting for teleporter discovery level {level}")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_teleporter_discovery as wait_for_teleporter_discovery_impl
+
+    await wait_for_teleporter_discovery_impl(ws, state, level, loop, helpers=globals())
 
 
 async def wait_for_character_progression(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while True:
-        try:
-            assert_character_progression(state.character_progression, expected, "runtime protocol")
-            return
-        except AssertionError:
-            pass
-        if loop.time() > deadline:
-            assert_character_progression(state.character_progression, expected, "runtime protocol")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_character_progression as wait_for_character_progression_impl
+
+    await wait_for_character_progression_impl(ws, state, expected, loop, helpers=globals())
 
 
 async def wait_for_skill_progression(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
-    deadline = loop.time() + float(expected.get("timeout_s", SLICE_TIMEOUT_S))
-    while True:
-        try:
-            assert_skill_progression(state.skill_progression, expected, "runtime protocol")
-            return
-        except AssertionError:
-            pass
-        if loop.time() > deadline:
-            assert_skill_progression(state.skill_progression, expected, "runtime protocol")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_skill_progression as wait_for_skill_progression_impl
+
+    await wait_for_skill_progression_impl(ws, state, expected, loop, helpers=globals())
 
 
 async def wait_for_skill_cooldown(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
-    deadline = loop.time() + float(expected.get("timeout_s", SLICE_TIMEOUT_S))
-    while True:
-        try:
-            assert_skill_cooldown(state.skill_cooldowns, expected, "runtime protocol")
-            return
-        except AssertionError:
-            pass
-        if loop.time() > deadline:
-            assert_skill_cooldown(state.skill_cooldowns, expected, "runtime protocol")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_skill_cooldown as wait_for_skill_cooldown_impl
+
+    await wait_for_skill_cooldown_impl(ws, state, expected, loop, helpers=globals())
 
 
 async def wait_for_player_position(
@@ -2279,24 +2222,15 @@ async def wait_for_player_position(
     tolerance: float,
     loop,
 ) -> None:
-    deadline = loop.time() + SLICE_TIMEOUT_S
-    while True:
-        try:
-            assert_player_position(state, x, y, tolerance, "runtime protocol")
-            return
-        except AssertionError:
-            pass
-        if loop.time() > deadline:
-            assert_player_position(state, x, y, tolerance, "runtime protocol")
-        await pump_one(ws, state, timeout=0.1)
+    from tools.bot.wait_runtime import wait_for_player_position as wait_for_player_position_impl
+
+    await wait_for_player_position_impl(ws, state, x, y, tolerance, loop, helpers=globals())
 
 
 async def pump_one(ws, state: RuntimeState, timeout: float) -> None:
-    try:
-        msg = await asyncio.wait_for(ws.recv(), timeout=timeout)
-    except asyncio.TimeoutError:
-        return
-    ingest_message(json.loads(msg), state)
+    from tools.bot.wait_runtime import pump_one as pump_one_impl
+
+    await pump_one_impl(ws, state, timeout, helpers=globals())
 
 
 def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:

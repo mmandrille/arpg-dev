@@ -1,0 +1,58 @@
+shared/rules/skills.v0.json
+  s_f9c66ca3cb4339::t_47562f0bd7472a 241-242
+  s_f9c66ca3cb4339::t_5a3fd0023c6503 189-240,243-249,498-560
+server/internal/game/class_third_skills_test.go
+  s_f9c66ca3cb4339::t_3ca251c03aef36 13,15
+tools/bot/scenarios/69_sorcerer_arcane_barrage.json
+  s_f9c66ca3cb4339::t_608e0b0bf466a4 1-30
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_f9c66ca3cb4339::t_655ce97fbbcaf2 7,18
+PROGRESS.md
+  s_f9c66ca3cb4339::t_e7c9e82687a01a 15,18,190,402,478-479,535-539,1318
+tools/bot/test_skill_demo.py
+  s_f9c66ca3cb4339::t_5350337f3ee34e 20-23,40-42
+docs/plans/v171_2026-06-14-sorcerer-paladin-third-skills.md
+  s_f9c66ca3cb4339::t_29d12b5b721bfb 3,39,43,47,64-67,81-83,97,111-112,121-128
+  s_f9c66ca3cb4339::t_f229e8ed0ca0c0 1-2,4-38,40-42,44-46,48-63,68-80,84-96,98-110,113-120,129-133
+client/tests/test_skill_rules_loader.gd
+  s_f9c66ca3cb4339::t_1cd63d7fbc2913 33
+  s_f9c66ca3cb4339::t_e4ddfc9bd52c1d 25,46-47,50-51,77-78,82-83
+tools/bot/scenarios/70_paladin_sanctuary.json
+  s_f9c66ca3cb4339::t_608e0b0bf466a4 1-22,24-31
+  s_f9c66ca3cb4339::t_be3d2658d57610 23
+shared/i18n/en.json
+  s_f9c66ca3cb4339::t_cf42fd0b9fd434 59-60,71-72
+tools/validate_skills.py
+  s_f9c66ca3cb4339::t_b083397f22262b 39,43,131,133
+shared/i18n/es.json
+  s_f9c66ca3cb4339::t_97103d3b90f05f 60-61,66-67
+docs/as-built/v171_sorcerer-paladin-third-skills.md
+  s_f9c66ca3cb4339::t_29d12b5b721bfb 1-47
+client/tests/test_skills_panel.gd
+  s_f9c66ca3cb4339::t_808d77601b0b7e 63,67,149,152,272,279,283
+server/internal/game/game_test.go
+  s_f9c66ca3cb4339::t_0dd4392ae3ab7f 237-239,258-259
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_f9c66ca3cb4339::t_655ce97fbbcaf2 7,18
+shared/assets/skill_presentations.v0.json
+  s_f9c66ca3cb4339::t_3ca679602ef552 39-50,106-115
+docs/specs/v171_spec-sorcerer-paladin-third-skills.md
+  s_f9c66ca3cb4339::t_29d12b5b721bfb 3
+  s_f9c66ca3cb4339::t_6b60bd74dc9979 1-2,4-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8716676258b646f7bf6d7c982efa3a7c58b3676d",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

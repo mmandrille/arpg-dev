@@ -165,6 +165,9 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, helpers: dict[str, An
                 state.inventory_rows = int(c["inventory_rows"])
             if "inventory_capacity" in c:
                 state.inventory_capacity = int(c["inventory_capacity"])
+        elif c["op"] == "weapon_set_update":
+            state.active_weapon_set = int(c.get("active_weapon_set", state.active_weapon_set))
+            state.weapon_sets = [dict(row) for row in c.get("weapon_sets", state.weapon_sets)]
         elif c["op"] == "hotbar_update":
             upsert_hotbar(state, int(c["slot_index"]), c.get("item_instance_id"), c.get("item"))
             if "inventory_rows" in c:
@@ -211,6 +214,8 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, helpers: dict[
     state.entities = {str(e["id"]): dict(e) for e in payload.get("entities", [])}
     state.inventory = [dict(i) for i in payload.get("inventory", [])]
     state.equipped = dict(payload.get("equipped", {}))
+    state.active_weapon_set = int(payload.get("active_weapon_set", state.active_weapon_set))
+    state.weapon_sets = [dict(row) for row in payload.get("weapon_sets", state.weapon_sets)]
     state.hotbar_capacity = int(payload.get("hotbar_capacity", 2))
     state.hotbar = [dict(slot) for slot in payload.get("hotbar", [])]
     state.inventory_rows = int(payload.get("inventory_rows", 3))

@@ -20,6 +20,7 @@
         "teleport_intent",
         "equip_intent",
         "unequip_intent",
+        "swap_weapon_set_intent",
         "drop_intent",
         "use_intent",
         "assign_hotbar_intent",
@@ -75,6 +76,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/equip_intent" } } } },
     { "if": { "properties": { "type": { "const": "unequip_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/unequip_intent" } } } },
+    { "if": { "properties": { "type": { "const": "swap_weapon_set_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/swap_weapon_set_intent" } } } },
     { "if": { "properties": { "type": { "const": "drop_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/drop_intent" } } } },
     { "if": { "properties": { "type": { "const": "use_intent" } } },
@@ -202,7 +205,8 @@
       "additionalProperties": false,
       "properties": {
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
-        "slot": { "$ref": "#/$defs/equipment_slot" }
+        "slot": { "$ref": "#/$defs/equipment_slot" },
+        "weapon_set": { "type": "integer", "minimum": 0, "maximum": 1 }
       }
     },
     "unequip_intent": {
@@ -210,8 +214,14 @@
       "required": ["slot"],
       "additionalProperties": false,
       "properties": {
-        "slot": { "$ref": "#/$defs/equipment_slot" }
+        "slot": { "$ref": "#/$defs/equipment_slot" },
+        "weapon_set": { "type": "integer", "minimum": 0, "maximum": 1 }
       }
+    },
+    "swap_weapon_set_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
     },
     "drop_intent": {
       "type": "object",

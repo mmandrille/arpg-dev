@@ -17,6 +17,13 @@
     "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
     "inventory": { "type": "array", "items": { "$ref": "#/$defs/item" } },
     "equipped": { "$ref": "#/$defs/equipped" },
+    "active_weapon_set": { "type": "integer", "minimum": 0, "maximum": 1 },
+    "weapon_sets": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/weapon_set" }
+    },
     "hotbar_capacity": { "type": "integer", "minimum": 2, "maximum": 10 },
     "hotbar": {
       "type": "array",
@@ -139,6 +146,16 @@
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
         "equipped": { "type": "boolean" }
+      }
+    },
+    "weapon_set": {
+      "type": "object",
+      "required": ["index", "main_hand", "off_hand"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "main_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "off_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
       }
     },
     "stash_item": {

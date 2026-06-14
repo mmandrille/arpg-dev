@@ -19,6 +19,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	spawn := s.findTownSpawnPosition(level)
 	progression = s.rules.normalizeProgressionState(progression)
 	equipped := newEquippedMap()
+	weaponSets := newWeaponSetMaps()
 	hotbar := make([]uint64, maxHotbarCapacity)
 	discovered := map[int]bool{townLevel: true}
 	cooldowns := make(map[string]skillCooldownState)
@@ -29,6 +30,8 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	character := progression
 	gold := progression.Gold
 	s.equipped = equipped
+	s.weaponSets = weaponSets
+	s.activeWeaponSet = defaultWeaponSet
 	s.hotbar = hotbar
 	s.discoveredTeleporters = discovered
 	s.progression = character
@@ -62,6 +65,8 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		Connected:             true,
 		CurrentLevel:          townLevel,
 		Equipped:              equipped,
+		WeaponSets:            cloneWeaponSetMaps(weaponSets),
+		ActiveWeaponSet:       defaultWeaponSet,
 		Hotbar:                hotbar,
 		DiscoveredTeleporters: discovered,
 		Progression:           character,
@@ -323,6 +328,8 @@ func (s *Sim) usePlayer(ps *playerState) {
 	s.currentLevel = ps.CurrentLevel
 	s.inventory = ps.Inventory
 	s.equipped = ps.Equipped
+	s.weaponSets = cloneWeaponSetMaps(ps.WeaponSets)
+	s.activeWeaponSet = normalizeWeaponSetIndex(ps.ActiveWeaponSet)
 	s.hotbar = ps.Hotbar
 	s.discoveredTeleporters = ps.DiscoveredTeleporters
 	s.progression = ps.Progression
@@ -383,9 +390,12 @@ func (s *Sim) savePlayer(ps *playerState) {
 	if ps == nil {
 		return
 	}
+	s.syncEquippedHandsToActiveWeaponSet()
 	ps.CurrentLevel = s.currentLevel
 	ps.Inventory = s.inventory
 	ps.Equipped = s.equipped
+	ps.WeaponSets = cloneWeaponSetMaps(s.weaponSets)
+	ps.ActiveWeaponSet = s.activeWeaponSet
 	ps.Hotbar = s.hotbar
 	ps.DiscoveredTeleporters = s.discoveredTeleporters
 	ps.Progression = s.progression

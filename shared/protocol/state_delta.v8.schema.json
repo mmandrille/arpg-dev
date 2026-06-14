@@ -102,6 +102,16 @@
         "equipped": { "type": "boolean" }
       }
     },
+    "weapon_set": {
+      "type": "object",
+      "required": ["index", "main_hand", "off_hand"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "main_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "off_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+      }
+    },
     "stash_item": {
       "type": "object",
       "required": ["stash_item_id", "item_def_id"],
@@ -900,6 +910,21 @@
             "hotbar_capacity": { "type": "integer", "minimum": 2, "maximum": 10 },
             "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 },
             "inventory_capacity": { "type": "integer", "minimum": 0, "maximum": 100 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "active_weapon_set", "weapon_sets"],
+          "properties": {
+            "op": { "const": "weapon_set_update" },
+            "active_weapon_set": { "type": "integer", "minimum": 0, "maximum": 1 },
+            "weapon_sets": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "$ref": "#/$defs/weapon_set" }
+            }
           }
         },
         {

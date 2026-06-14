@@ -62,6 +62,8 @@ const (
 	healRainPulseIntervalTicks     = 10
 	minHotbarCapacity              = 2
 	maxHotbarCapacity              = 10
+	weaponSetCount                 = 2
+	defaultWeaponSet               = 0
 	skillFunctionKeyCount          = 8
 	baseInventoryRows              = 3
 	inventoryColumns               = 5
@@ -292,6 +294,8 @@ type playerState struct {
 	AutoNav               *autoNavState
 	Inventory             []*invItem
 	Equipped              map[string]uint64
+	WeaponSets            []map[string]uint64
+	ActiveWeaponSet       int
 	Hotbar                []uint64
 	DiscoveredTeleporters map[int]bool
 	Progression           CharacterProgressionState
@@ -343,7 +347,9 @@ type Sim struct {
 	autoNav               *autoNavState
 	inventory             []*invItem
 	equipped              map[string]uint64 // slot -> instanceID (0 = none)
-	hotbar                []uint64          // fixed 10-slot item instance assignments (0 = none)
+	weaponSets            []map[string]uint64
+	activeWeaponSet       int
+	hotbar                []uint64 // fixed 10-slot item instance assignments (0 = none)
 	discoveredTeleporters map[int]bool
 	progression           CharacterProgressionState
 	skillCooldowns        map[string]skillCooldownState
@@ -425,6 +431,8 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		currentLevel:          levelZero,
 		multiLevel:            world.Mode == worldModeMultiLevel,
 		equipped:              newEquippedMap(),
+		weaponSets:            newWeaponSetMaps(),
+		activeWeaponSet:       defaultWeaponSet,
 		hotbar:                make([]uint64, 10),
 		discoveredTeleporters: make(map[int]bool),
 		progression:           progression,
@@ -646,6 +654,8 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		Connected:             true,
 		CurrentLevel:          level.levelNum,
 		Equipped:              s.equipped,
+		WeaponSets:            cloneWeaponSetMaps(s.weaponSets),
+		ActiveWeaponSet:       s.activeWeaponSet,
 		Hotbar:                s.hotbar,
 		DiscoveredTeleporters: s.discoveredTeleporters,
 		Progression:           s.progression,
@@ -776,6 +786,7 @@ type Input struct {
 	Teleport            *TeleportIntent
 	Equip               *EquipIntent
 	Unequip             *UnequipIntent
+	SwapWeaponSet       *SwapWeaponSetIntent
 	Drop                *DropIntent
 	Use                 *UseIntent
 	AssignHotbar        *AssignHotbarIntent
@@ -820,11 +831,14 @@ type (
 	EquipIntent struct {
 		ItemInstanceID string
 		Slot           string
+		WeaponSet      *int
 	}
 	UnequipIntent struct {
-		Slot string
+		Slot      string
+		WeaponSet *int
 	}
-	DropIntent struct {
+	SwapWeaponSetIntent struct{}
+	DropIntent          struct {
 		ItemInstanceID string
 	}
 	UseIntent struct {
@@ -1185,6 +1199,7 @@ func (s *Sim) activeWalls() []wallObstacle {
 }
 
 func (s *Sim) syncCompatibilityFields() {
+	s.syncActiveWeaponSetToEquipped()
 	level := s.activeLevel()
 	s.entities = level.entities
 	s.walls = level.walls
@@ -5188,10 +5203,14 @@ func (s *Sim) clearHotbarReferences(instanceID uint64, res *TickResult) {
 }
 
 func (s *Sim) slotBlockedByHands(slot string, item *invItem) bool {
+	return s.slotBlockedByHandsForSet(slot, item, s.activeWeaponSet)
+}
+
+func (s *Sim) slotBlockedByHandsForSet(slot string, item *invItem, weaponSet int) bool {
 	if slot != offHandSlot {
 		return false
 	}
-	mainHand := s.findItemByID(s.equipped[mainHandSlot])
+	mainHand := s.findItemByID(s.equippedSlot(mainHandSlot, weaponSet))
 	if mainHand == nil || mainHand.instanceID == item.instanceID {
 		return false
 	}
@@ -6708,6 +6727,8 @@ func (s *Sim) Snapshot() Snapshot {
 		Entities:          []EntityView{},
 		Inventory:         []ItemView{},
 		Equipped:          newSnapshotEquippedMap(newEquippedMap()),
+		ActiveWeaponSet:   defaultWeaponSet,
+		WeaponSets:        weaponSetViewsFromMaps(newWeaponSetMaps()),
 		Hotbar:            []HotbarSlotView{},
 		InventoryRows:     baseInventoryRows,
 		InventoryCapacity: inventoryCapacityForRows(baseInventoryRows),
@@ -6751,6 +6772,7 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 	}
 
 	equipped := newSnapshotEquippedMap(s.equipped)
+	weaponSets := s.weaponSetViews()
 	party := s.partyView()
 
 	snap := Snapshot{
@@ -6764,6 +6786,8 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		Entities:              entities,
 		Inventory:             inventory,
 		Equipped:              equipped,
+		ActiveWeaponSet:       s.activeWeaponSet,
+		WeaponSets:            weaponSets,
 		HotbarCapacity:        s.hotbarCapacity(),
 		Hotbar:                s.hotbarView(),
 		InventoryRows:         s.inventoryRows(),

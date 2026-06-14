@@ -38,6 +38,7 @@ type PersistedStashItem struct {
 // The entity counter is advanced past any reloaded instance id so newly
 // allocated ids never collide with reloaded ones.
 func (s *Sim) LoadInventory(items []PersistedItem) {
+	s.ensureWeaponSets()
 	for _, p := range items {
 		id, err := strconv.ParseUint(p.InstanceID, 10, 64)
 		if err != nil {
@@ -46,12 +47,13 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 		it := &invItem{instanceID: id, itemDefID: p.ItemDefID, slot: p.Slot, equipped: p.Equipped, rollPayload: parseRollPayload(p.RolledStats)}
 		s.inventory = append(s.inventory, it)
 		if p.Equipped && p.Slot != "" {
-			s.equipped[p.Slot] = id
+			s.setEquippedSlot(p.Slot, id, defaultWeaponSet)
 		}
 		if id >= s.nextID {
 			s.nextID = id + 1
 		}
 	}
+	s.syncActiveWeaponSetToEquipped()
 	s.syncActivePlayerResourceCaps(nil)
 	s.savePlayer(s.defaultPlayer())
 }

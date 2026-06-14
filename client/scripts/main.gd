@@ -123,6 +123,8 @@ var reconciliation_delta: float = 0.0
 var last_server_tick: int = 0
 var inventory: Array = []
 var equipped: Dictionary = {}
+var active_weapon_set: int = 0
+var weapon_sets: Array = []
 var inventory_rows: int = 3
 var inventory_capacity: int = 15
 var gold: int = 0
@@ -961,6 +963,8 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_sync_boss_health_bar()
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
+	active_weapon_set = int(p.get("active_weapon_set", active_weapon_set))
+	weapon_sets = p.get("weapon_sets", weapon_sets)
 	inventory_rows = int(p.get("inventory_rows", inventory_rows))
 	inventory_capacity = int(p.get("inventory_capacity", inventory_capacity))
 	gold = int(p.get("gold", gold))
@@ -1041,6 +1045,9 @@ func _apply_delta(p: Dictionary) -> void:
 					hotbar_capacity = int(c.get("hotbar_capacity", hotbar_capacity))
 					if consumable_bar != null:
 						consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
+			"weapon_set_update":
+				active_weapon_set = int(c.get("active_weapon_set", active_weapon_set))
+				weapon_sets = c.get("weapon_sets", weapon_sets)
 			"hotbar_update":
 				if c.has("inventory_rows"):
 					inventory_rows = int(c.get("inventory_rows", inventory_rows))
@@ -1564,7 +1571,7 @@ func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = 
 
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
-		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold, hotbar, hotbar_capacity)
+		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold, hotbar, hotbar_capacity, active_weapon_set, weapon_sets)
 	if shop_panel != null and shop_panel.visible:
 		shop_panel.set_inventory_state(inventory, equipped, gold)
 	if stash_panel != null:
@@ -2218,6 +2225,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _is_skill_slot_key(event):
 			if skill_bar != null:
 				skill_bar.use_slot()
+			get_viewport().set_input_as_handled()
+			return
+		if (event as InputEventKey).keycode == KEY_R:
+			if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
+				client.send("swap_weapon_set_intent", last_server_tick, {})
 			get_viewport().set_input_as_handled()
 			return
 		if (event as InputEventKey).keycode == KEY_BRACKETRIGHT:

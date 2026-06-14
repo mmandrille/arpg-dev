@@ -19,6 +19,7 @@ const (
 	TypeTeleport            = "teleport_intent"
 	TypeEquip               = "equip_intent"
 	TypeUnequip             = "unequip_intent"
+	TypeSwapWeaponSet       = "swap_weapon_set_intent"
 	TypeDrop                = "drop_intent"
 	TypeUse                 = "use_intent"
 	TypeAssignHotbar        = "assign_hotbar_intent"
@@ -71,11 +72,14 @@ type (
 	equipPayloadWire struct {
 		ItemInstanceID string `json:"item_instance_id"`
 		Slot           string `json:"slot"`
+		WeaponSet      *int   `json:"weapon_set"`
 	}
 	unequipPayloadWire struct {
-		Slot string `json:"slot"`
+		Slot      string `json:"slot"`
+		WeaponSet *int   `json:"weapon_set"`
 	}
-	dropPayloadWire struct {
+	swapWeaponSetPayloadWire struct{}
+	dropPayloadWire          struct {
 		ItemInstanceID string `json:"item_instance_id"`
 	}
 	usePayloadWire struct {
@@ -143,7 +147,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
@@ -205,13 +209,19 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 		if err := json.Unmarshal(payload, &p); err != nil || p.ItemInstanceID == "" || p.Slot == "" {
 			return in, false
 		}
-		in.Equip = &game.EquipIntent{ItemInstanceID: p.ItemInstanceID, Slot: p.Slot}
+		in.Equip = &game.EquipIntent{ItemInstanceID: p.ItemInstanceID, Slot: p.Slot, WeaponSet: p.WeaponSet}
 	case TypeUnequip:
 		var p unequipPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.Slot == "" {
 			return in, false
 		}
-		in.Unequip = &game.UnequipIntent{Slot: p.Slot}
+		in.Unequip = &game.UnequipIntent{Slot: p.Slot, WeaponSet: p.WeaponSet}
+	case TypeSwapWeaponSet:
+		var p swapWeaponSetPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil {
+			return in, false
+		}
+		in.SwapWeaponSet = &game.SwapWeaponSetIntent{}
 	case TypeDrop:
 		var p dropPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.ItemInstanceID == "" {

@@ -8,6 +8,7 @@ const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -58,6 +59,9 @@ const PAPER_DOLL_SLOT_POSITIONS := {
 
 var inventory: Array = []
 var equipped: Dictionary = {}
+var active_weapon_set: int = 0
+var viewed_weapon_set: int = 0
+var weapon_sets: Array = []
 var hotbar: Array = []
 var hotbar_capacity: int = 2
 var inventory_rows: int = BASE_INVENTORY_ROWS
@@ -72,6 +76,7 @@ var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 var _panel: DraggableWindow
 var _equipment_slots: Dictionary = {}
+var _weapon_set_tabs: Array = []
 var _bag_grid: GridContainer
 var _gold_label: Label
 var _paper_doll_preview: Control
@@ -267,12 +272,19 @@ func _sync_viewport_size() -> void:
 	_reposition_panel()
 
 
-func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0, next_hotbar: Array = [], next_hotbar_capacity: int = 2) -> void:
+func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_inventory_rows: int = BASE_INVENTORY_ROWS, next_inventory_capacity: int = BASE_INVENTORY_ROWS * BAG_COLUMNS, next_gold: int = 0, next_hotbar: Array = [], next_hotbar_capacity: int = 2, next_active_weapon_set: int = 0, next_weapon_sets: Array = []) -> void:
 	ItemRulesLoader.ensure_loaded()
 	inventory = []
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
 	equipped = next_equipped.duplicate(true)
+	active_weapon_set = clamp(next_active_weapon_set, 0, 1)
+	weapon_sets = []
+	for set_data in next_weapon_sets:
+		weapon_sets.append((set_data as Dictionary).duplicate(true))
+	if weapon_sets.is_empty():
+		weapon_sets = WeaponSetTabsScript.fallback_sets(equipped)
+	viewed_weapon_set = clamp(viewed_weapon_set, 0, 1)
 	hotbar = []
 	for slot in next_hotbar:
 		hotbar.append((slot as Dictionary).duplicate(true))
@@ -294,6 +306,9 @@ func get_debug_state() -> Dictionary:
 		"visible_bag_count": _bag_items().size(),
 		"market_hidden_item_ids": _market_hidden_item_ids.duplicate(),
 		"equipped": equipped.duplicate(true),
+		"active_weapon_set": active_weapon_set,
+		"viewed_weapon_set": viewed_weapon_set,
+		"weapon_sets": weapon_sets.duplicate(true),
 		"equipped_main_hand": equipped.get("main_hand", null),
 		"main_hand_item": _equipped_item("main_hand"),
 		"weapon_item": _equipped_item("main_hand"),
@@ -450,6 +465,7 @@ func _build() -> void:
 		btn.size = btn.custom_minimum_size
 		_equipment_slots[str(slot)] = btn
 		paper.add_child(btn)
+	_weapon_set_tabs = WeaponSetTabsScript.build_tabs(paper, Callable(self, "_set_viewed_weapon_set"))
 
 	var right := VBoxContainer.new()
 	right.custom_minimum_size = Vector2(350, 0)
@@ -483,6 +499,7 @@ func _render() -> void:
 		return
 	for slot in EQUIPMENT_SLOTS:
 		_fill_slot(_equipment_slots.get(slot, null), _equipment_slot_display_item(str(slot)))
+	WeaponSetTabsScript.render_tabs(_weapon_set_tabs, active_weapon_set, viewed_weapon_set)
 	for child in _bag_grid.get_children():
 		child.queue_free()
 	var bag_items := _bag_items()
@@ -496,6 +513,13 @@ func _render() -> void:
 		_gold_label.text = "Gold: %d" % gold
 	_position_gesture_hint()
 
+func _set_viewed_weapon_set(index: int) -> void:
+	viewed_weapon_set = clamp(index, 0, 1)
+	_render()
+
+
+func _weapon_set_payload_for_slot(slot: String) -> Dictionary:
+	return {"weapon_set": viewed_weapon_set} if slot == "main_hand" or slot == "off_hand" else {}
 
 func _bag_items() -> Array:
 	var items: Array = []
@@ -843,7 +867,9 @@ func _handle_double_click(item: Dictionary) -> void:
 		return
 	var slot := _preferred_equip_slot(item)
 	if slot != "":
-		intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
+		var payload := {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot}
+		payload.merge(_weapon_set_payload_for_slot(slot), true)
+		intent_requested.emit("equip_intent", payload)
 	elif _is_consumable(item):
 		intent_requested.emit("use_intent", {"item_instance_id": str(item.get("item_instance_id", ""))})
 
@@ -887,7 +913,9 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 				if blacksmith != null and blacksmith.has_method("unstage_item"):
 					blacksmith.call("unstage_item")
 			else:
-				intent_requested.emit("equip_intent", {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot})
+				var payload := {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot}
+				payload.merge(_weapon_set_payload_for_slot(slot), true)
+				intent_requested.emit("equip_intent", payload)
 	elif slot_kind == SLOT_KIND_BAG:
 		var source := str(data.get("source", ""))
 		if source == DRAG_SOURCE_SHOP_OFFER:
@@ -915,7 +943,10 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 			if blacksmith != null and blacksmith.has_method("unstage_item"):
 				blacksmith.call("unstage_item")
 		elif _slot_kind_is_equipment(source):
-			intent_requested.emit("unequip_intent", {"slot": _slot_from_kind(source)})
+			var slot := _slot_from_kind(source)
+			var payload := {"slot": slot}
+			payload.merge(_weapon_set_payload_for_slot(slot), true)
+			intent_requested.emit("unequip_intent", payload)
 
 
 func _item_can_equip_to(item: Dictionary, slot: String) -> bool:
@@ -957,7 +988,7 @@ func _is_consumable(item: Dictionary) -> bool:
 
 
 func _equipped_item(slot: String) -> Dictionary:
-	var item_id = equipped.get(slot, null)
+	var item_id = WeaponSetTabsScript.hand_equipped_id(weapon_sets, equipped, viewed_weapon_set, slot)
 	if item_id == null:
 		return {}
 	for item in inventory:
@@ -994,13 +1025,7 @@ func _item_occupies_off_hand(item: Dictionary) -> bool:
 
 
 func _is_equipped_instance(item_instance_id: String) -> bool:
-	if item_instance_id == "":
-		return false
-	for slot in EQUIPMENT_SLOTS:
-		var equipped_id = equipped.get(str(slot), null)
-		if equipped_id != null and str(equipped_id) == item_instance_id:
-			return true
-	return false
+	return WeaponSetTabsScript.is_equipped_instance(equipped, weapon_sets, EQUIPMENT_SLOTS, item_instance_id)
 
 
 func _slot_kind_for_equipment(slot: String) -> String:

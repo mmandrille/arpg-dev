@@ -24,12 +24,14 @@ func _initialize() -> void:
 	_test_inventory_remove()
 	_test_inventory_update()
 	_test_equipped_update()
+	_test_weapon_set_update()
 	_test_hotbar_update()
 	_test_stash_gold_update()
 	_test_stash_item_add()
 	_test_stash_item_remove()
 	_test_snapshot_gold_and_inventory()
 	_test_snapshot_equipped()
+	_test_snapshot_weapon_sets()
 	_test_snapshot_stash()
 	_test_malformed_delta_does_not_crash()
 	_test_malformed_envelope_payloads_do_not_crash()
@@ -83,6 +85,20 @@ func _test_equipped_update() -> void:
 	]})
 	_assert_eq("equipped_update sets slot",
 		str(m.equipped.get("main_hand", "")), "ii_9")
+
+
+func _test_weapon_set_update() -> void:
+	var m := _new_main()
+	m._apply_delta({"changes": [
+		{"op": "weapon_set_update", "active_weapon_set": 1, "weapon_sets": [
+			{"index": 0, "main_hand": "ii_1", "off_hand": null},
+			{"index": 1, "main_hand": "ii_2", "off_hand": null},
+		]}
+	]})
+	_assert_eq("weapon_set_update active", m.active_weapon_set, 1)
+	_assert_eq("weapon_set_update set count", m.weapon_sets.size(), 2)
+	_assert_eq("weapon_set_update set 2 main",
+		str((m.weapon_sets[1] as Dictionary).get("main_hand", "")), "ii_2")
 
 
 func _test_hotbar_update() -> void:
@@ -154,6 +170,20 @@ func _test_snapshot_equipped() -> void:
 	m._apply_snapshot(snap)
 	_assert_eq("snapshot sets equipped slot",
 		str(m.equipped.get("main_hand", "")), "ii_5")
+
+
+func _test_snapshot_weapon_sets() -> void:
+	var m := _new_main()
+	var snap := _base_snapshot()
+	snap["active_weapon_set"] = 1
+	snap["weapon_sets"] = [
+		{"index": 0, "main_hand": "ii_5", "off_hand": null},
+		{"index": 1, "main_hand": "ii_6", "off_hand": null},
+	]
+	m._apply_snapshot(snap)
+	_assert_eq("snapshot active weapon set", m.active_weapon_set, 1)
+	_assert_eq("snapshot weapon set 1 main",
+		str((m.weapon_sets[0] as Dictionary).get("main_hand", "")), "ii_5")
 
 
 func _test_snapshot_stash() -> void:

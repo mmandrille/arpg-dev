@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v155 — random quest reward floors |
+| **Latest completed slice** | v156 — weapon set swap and hand tabs |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v156 — weapon set swap and inventory hand tabs |
+| **Next slice** | v157 — skill-bar secondary bindings |
 | **Last engineering review** | v150 — [`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md) (2026-06-14) |
 | **Next engineering review** | v160 due before more feature batches |
 
@@ -172,6 +172,7 @@ v152_* = bot-context-movement-decouple
 v153_* = loot-label-filter-core
 v154_* = class-third-skill-trio
 v155_* = random-quest-reward-floors
+v156_* = weapon-set-swap-and-hand-tabs
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -365,6 +366,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v153** | `loot-label-filter-core` | Complete (`make ci` green) | [`v153_spec-loot-label-filter-core.md`](docs/specs/v153_spec-loot-label-filter-core.md) | [`v153_2026-06-14-loot-label-filter-core.md`](docs/plans/v153_2026-06-14-loot-label-filter-core.md) | [`as-built`](docs/as-built/v153_loot-label-filter-core.md) |
 | **v154** | `class-third-skill-trio` | Complete (`make ci` green) | [`v154_spec-class-third-skill-trio.md`](docs/specs/v154_spec-class-third-skill-trio.md) | [`v154_2026-06-14-class-third-skill-trio.md`](docs/plans/v154_2026-06-14-class-third-skill-trio.md) | [`as-built`](docs/as-built/v154_class-third-skill-trio.md) |
 | **v155** | `random-quest-reward-floors` | Complete (`make ci` green) | [`v155_spec-random-quest-reward-floors.md`](docs/specs/v155_spec-random-quest-reward-floors.md) | [`v155_2026-06-14-random-quest-reward-floors.md`](docs/plans/v155_2026-06-14-random-quest-reward-floors.md) | [`as-built`](docs/as-built/v155_random-quest-reward-floors.md) |
+| **v156** | `weapon-set-swap-and-hand-tabs` | Complete (`make ci` green) | [`v156_spec-weapon-set-swap-and-hand-tabs.md`](docs/specs/v156_spec-weapon-set-swap-and-hand-tabs.md) | [`v156_2026-06-14-weapon-set-swap-and-hand-tabs.md`](docs/plans/v156_2026-06-14-weapon-set-swap-and-hand-tabs.md) | [`as-built`](docs/as-built/v156_weapon-set-swap-and-hand-tabs.md) |
 
 ---
 
@@ -507,6 +509,12 @@ unchanged.
 generated non-boss dungeon floors on a separate deterministic RNG stream, adds one extra reachable
 treasure chest on rolled floors, excludes boss floors, and proves the user-facing reward path with
 `65_random_quest_reward_floor`. Full NPC offers, quest logs, and durable quest state remain deferred.
+
+**Weapon set swap and hand tabs are playable.** v156 adds two authoritative hand sets, `R` swaps the
+active set through `swap_weapon_set_intent`, and the inventory paper doll has set I/II hand tabs for
+viewing and equipping either hand configuration. Existing `equipped.main_hand` / `off_hand` remain
+the active compatibility fields, while v8 snapshots/deltas expose `active_weapon_set` and
+`weapon_sets`. Durable two-set storage and richer tab art remain deferred.
 
 **Extraction independence is now a maintainability gate.** v151 adds
 `scripts/check-extraction-coupling-ratchet.py`, wires it into `make maintainability`, and baselines

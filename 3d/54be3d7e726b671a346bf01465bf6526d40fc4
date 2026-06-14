@@ -1,0 +1,34 @@
+docs/specs/v160_spec-dungeon-population-extraction.md
+  s_ca0f0784178b67::t_e35e62678f424d 1-3,5-52
+  s_ca0f0784178b67::t_cc836d5c49f6f7 4
+docs/as-built/v160_dungeon-population-extraction.md
+  s_ca0f0784178b67::t_cc836d5c49f6f7 1-27
+server/internal/game/dungeon_population_test.go
+  s_ca0f0784178b67::t_b3792020e93207 1-74
+PROGRESS.md
+  s_ca0f0784178b67::t_cc836d5c49f6f7 15,18,179,377,508-513
+server/internal/game/dungeon_population.go
+  s_ca0f0784178b67::t_ac525935c26c5b 1-192
+docs/plans/v160_2026-06-14-dungeon-population-extraction.md
+  s_ca0f0784178b67::t_cc836d5c49f6f7 3,93-95,104-107
+  s_ca0f0784178b67::t_e35e62678f424d 1-2,4-32,36-37,39-51,56-65,68-77,79-92,96-103
+  s_ca0f0784178b67::t_fe7b3fbf87e32a 33-35,38,52-55,66-67,78
+.maintainability/file-size-baseline.tsv
+  s_ca0f0784178b67::t_fe7b3fbf87e32a 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3d54be3d7e726b671a346bf01465bf6526d40fc4",
+  "prompts": {},
+  "sessions": {
+    "s_ca0f0784178b67": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec725-9146-73e0-a7c8-62184c27f9e5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

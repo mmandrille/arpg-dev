@@ -31,9 +31,10 @@ type generatedTeleporter struct {
 }
 
 type generatedChest struct {
-	defID     string
-	lootTable string
-	pos       Vec2
+	defID       string
+	lootTable   string
+	pos         Vec2
+	questReward bool
 }
 
 type generatedLoot struct {
@@ -96,6 +97,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
+		if err := maybePlaceRandomQuestRewardChest(seed, rules, lootBand, &out); err != nil {
+			return generatedDungeonLevel{}, err
+		}
 		if err := placeDungeonObstacles(seed, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
@@ -120,6 +124,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, err
 	}
 	if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
+		return generatedDungeonLevel{}, err
+	}
+	if err := maybePlaceRandomQuestRewardChest(seed, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	if err := placeDungeonObstacles(seed, rules, &out); err != nil {
@@ -594,6 +601,15 @@ func randomChestPosition(rng *RNG, rules DungeonGenerationRules, out *generatedD
 		}
 		for _, teleporter := range out.teleporterPositions() {
 			if distance(pos, teleporter) < rules.TeleporterPlacement.MinStairDistance {
+				blocked = true
+				break
+			}
+		}
+		if blocked {
+			continue
+		}
+		for _, chest := range out.chestPositions() {
+			if distance(pos, chest) < placement.MinStairDistance {
 				blocked = true
 				break
 			}

@@ -53,6 +53,7 @@ func _initialize() -> void:
 	_test_client_settings_floating_combat_text_from_data()
 	_test_client_settings_status_text_from_data()
 	_test_client_settings_create_game_session_type_from_data()
+	_test_client_settings_loot_filter_mode_from_data()
 	_test_client_settings_create_game_session_type_save_shape()
 	_test_combat_feedback_step_types_load()
 	_test_combat_event_and_damage_number_assertions()
@@ -888,6 +889,13 @@ func _test_client_settings_create_game_session_type_from_data() -> void:
 	_assert_eq("settings create game label solo", ClientSettingsScript.create_game_session_type_label("solo"), "Solo")
 
 
+func _test_client_settings_loot_filter_mode_from_data() -> void:
+	_assert_eq("settings loot filter defaults all", ClientSettingsScript.loot_filter_mode_from_data({}), "All")
+	_assert_eq("settings loot filter parses Rare+", ClientSettingsScript.loot_filter_mode_from_data({"loot_filter_mode": "Rare+"}), "Rare+")
+	_assert_eq("settings loot filter normalizes case", ClientSettingsScript.loot_filter_mode_from_data({"loot_filter_mode": "unique"}), "Unique")
+	_assert_eq("settings loot filter rejects unknown", ClientSettingsScript.loot_filter_mode_from_data({"loot_filter_mode": "legendary"}), "All")
+
+
 func _test_client_settings_create_game_session_type_save_shape() -> void:
 	var path := "user://test_settings_v45.json"
 	var absolute_path := ProjectSettings.globalize_path(path)
@@ -896,14 +904,17 @@ func _test_client_settings_create_game_session_type_save_shape() -> void:
 	var settings = ClientSettingsScript.new(path)
 	settings.set_create_game_session_type("solo", false)
 	settings.set_status_text(false, false)
+	settings.set_loot_filter_mode("Rare+", false)
 	settings.save()
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
 	_assert_eq("settings save includes create game session type", str((parsed as Dictionary).get("create_game_session_type", "")), "solo")
 	_assert_eq("settings save includes status text", bool((parsed as Dictionary).get("status_text", true)), false)
+	_assert_eq("settings save includes loot filter mode", str((parsed as Dictionary).get("loot_filter_mode", "")), "Rare+")
 	var reloaded = ClientSettingsScript.new(path)
 	reloaded.load()
 	_assert_eq("settings reload restores create game session type", reloaded.create_game_session_type, "solo")
 	_assert_eq("settings reload restores status text", reloaded.status_text, false)
+	_assert_eq("settings reload restores loot filter mode", reloaded.loot_filter_mode, "Rare+")
 	DirAccess.remove_absolute(absolute_path)
 
 

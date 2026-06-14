@@ -296,6 +296,7 @@ func _ready() -> void:
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
 	client_settings.set_language(client_settings.language, false)
+	_loot_filter.set_mode_label(client_settings.loot_filter_mode)
 	client_settings.apply()
 	_refresh_localized_texts()
 	_sync_status_text_visibility()
@@ -307,7 +308,6 @@ func _ready() -> void:
 	_load_ground_item_visual_data()
 	var base_url := _env("ARPG_BASE_URL", "http://localhost:8888")
 	var dev_token := _env("ARPG_DEV_TOKEN", "local-dev-token")
-
 	client = NetClientScript.new(base_url)
 	var bot_client_run := _truthy_env("ARPG_BOT_CLIENT")
 	var bot_menu_run := bot_client_run and _bot_uses_menu()
@@ -2239,9 +2239,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if (event as InputEventKey).keycode == KEY_L:
 			_loot_filter.cycle()
+			if client_settings != null:
+				client_settings.set_loot_filter_mode(_loot_filter.mode_label())
 			_refresh_loot_label_visibility()
 			_update_level_hud()
-			_debug("loot filter: " + _loot_filter.mode_label())
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.pressed:
@@ -6698,7 +6699,6 @@ func _update_debug() -> void:
 	var boss_status := "\nboss=%s" % _last_boss_reward_status if _last_boss_reward_status != "" else ""
 	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s%s\nW/A/S/D move  LMB action  scroll zoom  I inventory  L loot filter" % [
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis, boss_status]
-
 
 func _sync_status_text_visibility() -> void:
 	if _debug_label == null:

@@ -1,0 +1,85 @@
+server/internal/realtime/session_loop.go
+  s_23f83c83efc7fd::t_0830362b99ac50 347-348
+shared/protocol/messages.v8.schema.json
+  s_23f83c83efc7fd::t_a81aee3e83b673 271-272
+client/tests/test_skills_panel.gd
+  s_23f83c83efc7fd::t_c6266ecde854b6 220,222
+  s_23f83c83efc7fd::t_b83c5fdfe8a085 216,221
+server/internal/store/store_test.go
+  s_23f83c83efc7fd::t_ff51b0ecb2270e 656,665,775
+tools/bot/run.py
+  s_23f83c83efc7fd::t_b83c5fdfe8a085 1342
+  s_23f83c83efc7fd::t_39c2c5a8df5111 1340-1341
+  s_23f83c83efc7fd::t_bb97613d7bb224 50
+server/internal/game/sim.go
+  s_23f83c83efc7fd::t_a81aee3e83b673 67
+PROGRESS.md
+  s_23f83c83efc7fd::t_c158a3995de8bd 15,18,176,371,521-524
+client/scripts/main.gd
+  s_23f83c83efc7fd::t_48db92f76bf737 61,141,778,2450-2451
+shared/protocol/state_delta.v8.schema.json
+  s_23f83c83efc7fd::t_a81aee3e83b673 845-846
+tools/bot/bot_types.py
+  s_23f83c83efc7fd::t_b83c5fdfe8a085 75-76
+tools/bot/skill_binding_runtime.py
+  s_23f83c83efc7fd::t_bb97613d7bb224 1-55
+docs/as-built/v157_skill-bar-secondary-bindings.md
+  s_23f83c83efc7fd::t_c158a3995de8bd 1-34
+docs/specs/v157_spec-skill-bar-secondary-bindings.md
+  s_23f83c83efc7fd::t_2b3ab887042982 1-35
+tools/bot/state_ingest.py
+  s_23f83c83efc7fd::t_b83c5fdfe8a085 195-198,230-232
+client/scripts/skills_panel.gd
+  s_23f83c83efc7fd::t_48db92f76bf737 622-623
+server/internal/replay/replay_test.go
+  s_23f83c83efc7fd::t_b758277d341183 701-706
+  s_23f83c83efc7fd::t_e57c9a8df08d0e 1455
+server/migrations/0025_skill_secondary_bindings.sql
+  s_68dc3007c896cc::t_dee19519cf3b7e 1-16
+shared/protocol/examples/set_skill_bindings_intent.json
+  s_23f83c83efc7fd::t_a81aee3e83b673 7
+tools/bot/scenarios/67_skill_secondary_bindings.json
+  s_23f83c83efc7fd::t_1181c22051d662 1-21,33-38
+  s_23f83c83efc7fd::t_cf90e013cd92e6 22-32
+server/internal/store/repos.go
+  s_23f83c83efc7fd::t_a81aee3e83b673 1122,1221,2108
+  s_23f83c83efc7fd::t_e57c9a8df08d0e 1117
+client/tests/test_coop_client.gd
+  s_23f83c83efc7fd::t_b83c5fdfe8a085 1254-1256,1261-1262,1280,1284
+server/internal/game/game_test.go
+  s_23f83c83efc7fd::t_d85fb6f3f41db8 875,887,891
+docs/plans/v157_2026-06-14-skill-bar-secondary-bindings.md
+  s_23f83c83efc7fd::t_2b3ab887042982 1-36
+shared/protocol/session_snapshot.v8.schema.json
+  s_23f83c83efc7fd::t_a81aee3e83b673 412-413
+shared/protocol/examples/session_snapshot.json
+  s_23f83c83efc7fd::t_a81aee3e83b673 124
+shared/protocol/examples/state_delta.json
+  s_23f83c83efc7fd::t_a81aee3e83b673 85
+server/internal/inputdecode/inputdecode.go
+  s_23f83c83efc7fd::t_a6404d72f158aa 269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e898fd0e38cae74b7dfd3c50ea7e20a4ec7fe40a",
+  "prompts": {},
+  "sessions": {
+    "s_23f83c83efc7fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec446-d2d1-7b11-98e3-d5469ecd879e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_68dc3007c896cc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec6a9-43a2-71e1-b61a-6cd772ae9f29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

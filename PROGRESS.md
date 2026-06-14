@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v169 — game test domain drain |
+| **Latest completed slice** | v170 — validate shared catalog split |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v170 — TBD via `$next` |
+| **Next slice** | v171 — TBD via `$next` |
 | **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
 | **Next engineering review** | v170 due before more feature batches |
 
@@ -186,6 +186,7 @@ v166_* = client-bot-assertion-domain-split
 v167_* = protocol-runtime-assertion-split
 v168_* = bot-step-validation-split
 v169_* = game-test-domain-drain
+v170_* = validate-shared-catalog-split
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -393,6 +394,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v167** | `protocol-runtime-assertion-split` | Complete (`make ci` green) | [`v167_spec-protocol-runtime-assertion-split.md`](docs/specs/v167_spec-protocol-runtime-assertion-split.md) | [`v167_2026-06-14-protocol-runtime-assertion-split.md`](docs/plans/v167_2026-06-14-protocol-runtime-assertion-split.md) | [`as-built`](docs/as-built/v167_protocol-runtime-assertion-split.md) |
 | **v168** | `bot-step-validation-split` | Complete (`make ci` green) | [`v168_spec-bot-step-validation-split.md`](docs/specs/v168_spec-bot-step-validation-split.md) | [`v168_2026-06-14-bot-step-validation-split.md`](docs/plans/v168_2026-06-14-bot-step-validation-split.md) | [`as-built`](docs/as-built/v168_bot-step-validation-split.md) |
 | **v169** | `game-test-domain-drain` | Complete (`make ci` green) | [`v169_spec-game-test-domain-drain.md`](docs/specs/v169_spec-game-test-domain-drain.md) | [`v169_2026-06-14-game-test-domain-drain.md`](docs/plans/v169_2026-06-14-game-test-domain-drain.md) | [`as-built`](docs/as-built/v169_game-test-domain-drain.md) |
+| **v170** | `validate-shared-catalog-split` | Complete (`make ci` green) | [`v170_spec-validate-shared-catalog-split.md`](docs/specs/v170_spec-validate-shared-catalog-split.md) | [`v170_2026-06-14-validate-shared-catalog-split.md`](docs/plans/v170_2026-06-14-validate-shared-catalog-split.md) | [`as-built`](docs/as-built/v170_validate-shared-catalog-split.md) |
 
 ---
 
@@ -522,6 +524,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Main-config gameplay validation now has a focused helper.** v170 adds
+`tools/validate_main_config.py` for `main_config` gameplay bounds and dungeon monster drop-source
+checks, keeps `validate_shared.py` as the shared-validation entrypoint, adds a bad-drop-rate
+regression, and lowers the `validate_shared.py` maintainability baseline from 3149 to 3140 lines.
 
 **Gold auto-pickup tests now live in a focused Go test file.** v169 moves the gold auto-pickup
 domain from `game_test.go` into `gold_auto_pickup_test.go`, keeps shared helpers in place, and

@@ -1,0 +1,95 @@
+PROGRESS.md
+  s_23f83c83efc7fd::t_2bec7e01df354b 15,18,175,369,513-517
+client/scripts/main.gd
+  s_23f83c83efc7fd::t_c61c3391f4e572 126-127,966-967,1048-1050,1574,2230-2232
+server/internal/game/handlers.go
+  s_23f83c83efc7fd::t_15e32a50204a7c 738-739,755,773,781,789,803-805,816-817,837,849-851
+  s_23f83c83efc7fd::t_bac5d47a907000 432-440,876-877
+  s_23f83c83efc7fd::t_8a9c10b8ebb62b 37
+  s_23f83c83efc7fd::t_49092ff741b51d 782-784,793-802,839-848
+server/internal/game/weapon_sets_test.go
+  s_23f83c83efc7fd::t_d95b0f29849c33 31-33
+  s_23f83c83efc7fd::t_a31cafeb5d2726 1-9,12-30,34-54,57-67
+  s_23f83c83efc7fd::t_21800d48ed2c65 10-11,55-56
+docs/plans/v156_2026-06-14-weapon-set-swap-and-hand-tabs.md
+  s_23f83c83efc7fd::t_800a6fdb92e2ce 1-127
+tools/bot/run.py
+  s_23f83c83efc7fd::t_aab60c9078b7c3 1121,1165
+  s_23f83c83efc7fd::t_c93855d1f4a37f 49
+  s_23f83c83efc7fd::t_531486f787efeb 1117-1120,1128,1158,1160,1162-1164,1167,1173-1181
+  s_23f83c83efc7fd::t_4dc5a3133c2fdc 590-605
+client/scripts/weapon_set_tabs.gd.uid
+  s_23f83c83efc7fd::t_1364bc3c8af270 1
+server/internal/game/weapon_set_handlers.go
+  s_23f83c83efc7fd::t_c93855d1f4a37f 1-18
+server/internal/game/types.go
+  s_23f83c83efc7fd::t_fcae3fc9c6e196 616-621
+  s_23f83c83efc7fd::t_fd9785d344cd76 422
+  s_23f83c83efc7fd::t_1ce17680ffe7e4 14,557-558
+  s_23f83c83efc7fd::t_b223de33f28a3f 495-496,513-518,528
+client/tests/test_delta_apply.gd
+  s_23f83c83efc7fd::t_b3cec281962eff 27,34,90-103,175-186
+server/internal/game/sim_load.go
+  s_23f83c83efc7fd::t_01a0b89b166e0c 41,50,56
+docs/as-built/v156_weapon-set-swap-and-hand-tabs.md
+  s_23f83c83efc7fd::t_8327b7ac712c96 1-40
+server/internal/inputdecode/inputdecode.go
+  s_23f83c83efc7fd::t_b9d23c37a64b25 22,75,78-79,81,150,212,218-224
+  s_23f83c83efc7fd::t_1ce17680ffe7e4 82
+tools/bot/scenarios/66_weapon_set_swap_and_tabs.json
+  s_23f83c83efc7fd::t_1548449983caff 1-27
+client/scripts/weapon_set_tabs.gd
+  s_23f83c83efc7fd::t_c93855d1f4a37f 1-78
+tools/bot/bot_types.py
+  s_23f83c83efc7fd::t_e64f54fb05fc13 42-43
+docs/specs/v156_spec-weapon-set-swap-and-hand-tabs.md
+  s_23f83c83efc7fd::t_6b3a0eebd9e104 1-80
+server/internal/game/sim.go
+  s_23f83c83efc7fd::t_16208363a6a350 434-435,657-658
+  s_23f83c83efc7fd::t_695c435b07a41c 6730-6731,6775,6789-6790
+  s_23f83c83efc7fd::t_1ce17680ffe7e4 351-352,841
+  s_23f83c83efc7fd::t_8fbab96c173204 834,837-838,840
+  s_23f83c83efc7fd::t_7f5407035b90e4 5206-5209,5213
+  s_23f83c83efc7fd::t_556fa7ef7edfeb 1202
+  s_23f83c83efc7fd::t_57a014604e06a6 789
+  s_23f83c83efc7fd::t_5ad725f68a12fa 65-66,297-298,350
+server/internal/game/sim_players.go
+  s_23f83c83efc7fd::t_6f78c198df37d8 22,33-34,68-69,331-332,397-398
+  s_23f83c83efc7fd::t_bac5d47a907000 393
+client/tests/test_shop_panel.gd
+  s_23f83c83efc7fd::t_c5e50db8a7172f 326-335
+tools/bot/state_ingest.py
+  s_23f83c83efc7fd::t_3153a0e18da46a 168-170,217-218
+shared/protocol/examples/swap_weapon_set_intent.json
+  s_23f83c83efc7fd::t_1eb447fb04e846 1-7
+tools/bot/weapon_set_runtime.py
+  s_23f83c83efc7fd::t_c93855d1f4a37f 1-15
+server/internal/game/weapon_sets.go
+  s_23f83c83efc7fd::t_faeb08b55a8def 129-132,137-138
+  s_23f83c83efc7fd::t_1ce17680ffe7e4 8
+  s_23f83c83efc7fd::t_323cb029d32a83 1-7,9-56,63-81,111-128,133-136,139-150
+  s_23f83c83efc7fd::t_bac5d47a907000 57-62,82-110
+client/scripts/inventory_panel.gd
+  s_23f83c83efc7fd::t_163c91002bc14e 991
+  s_23f83c83efc7fd::t_a41c9324e4f256 519-521
+  s_23f83c83efc7fd::t_4a09dda29bb5c5 62-64,79,275,281-285,287,309-311
+  s_23f83c83efc7fd::t_c93855d1f4a37f 11,286,468,516-518,1028
+  s_23f83c83efc7fd::t_aab60c9078b7c3 502,522
+  s_23f83c83efc7fd::t_3396279a58fa55 870-872,916-918,946-949
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d6f480d8d102deb267415793f8674c7d8933b1ac",
+  "prompts": {},
+  "sessions": {
+    "s_23f83c83efc7fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec446-d2d1-7b11-98e3-d5469ecd879e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

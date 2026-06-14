@@ -10,7 +10,9 @@ func TestThirdClassSkillsRequirePrerequisites(t *testing.T) {
 		prereq  string
 		stats   BaseStatsView
 	}{
+		{classID: "sorcerer", skillID: "arcane_barrage", prereq: "ligthing", stats: BaseStatsView{Str: 3, Dex: 5, Vit: 5, Magic: 11}},
 		{classID: "barbarian", skillID: "earthbreaker", prereq: "cleave", stats: BaseStatsView{Str: 8, Dex: 5, Vit: 8, Magic: 5}},
+		{classID: "paladin", skillID: "sanctuary", prereq: "holy_shield", stats: BaseStatsView{Str: 6, Dex: 4, Vit: 10, Magic: 10}},
 		{classID: "rogue", skillID: "shadow_flurry", prereq: "dash", stats: BaseStatsView{Str: 4, Dex: 12, Vit: 5, Magic: 4}},
 		{classID: "ranger", skillID: "split_arrow", prereq: "volley", stats: BaseStatsView{Str: 4, Dex: 14, Vit: 5, Magic: 4}},
 	}

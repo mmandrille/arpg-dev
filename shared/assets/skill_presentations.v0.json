@@ -36,6 +36,18 @@
       "effect_visual": "ligthing_chain",
       "summary_key": "skill.ligthing.summary"
     },
+    "arcane_barrage": {
+      "icon": {
+        "label": "A",
+        "shape": "orb_projectile",
+        "color": "#9f6fff",
+        "accent": "#f1e9ff"
+      },
+      "summary": "Piercing arcane projectile",
+      "projectile_visual": "arcane_barrage_projectile",
+      "effect_visual": "arcane_barrage",
+      "summary_key": "skill.arcane_barrage.summary"
+    },
     "cleave": {
       "icon": {
         "label": "C",
@@ -90,6 +102,17 @@
       "summary": "Area ally defense",
       "effect_visual": "holy_shield",
       "summary_key": "skill.holy_shield.summary"
+    },
+    "sanctuary": {
+      "icon": {
+        "label": "T",
+        "shape": "shield",
+        "color": "#74d6a1",
+        "accent": "#e5fff0"
+      },
+      "summary": "Stronger ally sanctuary",
+      "effect_visual": "sanctuary",
+      "summary_key": "skill.sanctuary.summary"
     },
     "poison_stab": {
       "icon": {

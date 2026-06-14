@@ -234,6 +234,9 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["ligthing"]; skill.Class != "sorcerer" || skill.Kind != "chain_projectile_attack" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Chain.RangeMultiplier != 0.8 || skill.Projectile.Speed != r.Skills[magicBoltSkillID].Projectile.Speed || skill.Cooldown.FlatTicks != 10 {
 		t.Fatalf("ligthing skill = %+v, want sorcerer chain_projectile_attack with magic_bolt prerequisite, magic_bolt speed, 0.8 chain, and +1s cooldown", skill)
 	}
+	if skill := r.Skills["arcane_barrage"]; skill.Class != "sorcerer" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "ligthing" || skill.Pierce.MaxHits != 2 || skill.Projectile.Visual != "arcane_barrage_projectile" {
+		t.Fatalf("arcane_barrage skill = %+v, want sorcerer tier 3 projectile requiring ligthing with pierce", skill)
+	}
 	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
 	}
@@ -251,6 +254,9 @@ func TestLoadRules(t *testing.T) {
 	}
 	if got, want := r.Skills["holy_shield"].Cooldown.FlatTicks, 450; got != want {
 		t.Fatalf("holy shield cooldown flat_ticks = %d, want %d", got, want)
+	}
+	if skill := r.Skills["sanctuary"]; skill.Class != "paladin" || skill.Kind != "area_stat_buff" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "holy_shield" || len(skill.Effects) != 1 || skill.Effects[0].EffectID != "sanctuary" {
+		t.Fatalf("sanctuary skill = %+v, want paladin tier 3 area stat buff requiring holy_shield", skill)
 	}
 	if skill := r.Skills["shadow_flurry"]; skill.Class != "rogue" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "dash" || skill.Cone.AngleDegrees <= r.Skills["dash"].Cone.AngleDegrees {
 		t.Fatalf("shadow_flurry skill = %+v, want rogue tier 2 cone requiring dash with wider angle", skill)

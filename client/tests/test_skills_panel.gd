@@ -60,10 +60,11 @@ func _run() -> void:
 	_assert_true("skills top is on screen", panel._panel.position.y >= 0.0)
 	stats_panel.queue_free()
 	_assert_eq("unspent skill points", int(state.get("unspent_skill_points", -1)), 1)
-	_assert_eq("class-filtered skill count", (state.get("skill_ids", []) as Array).size(), 3)
+	_assert_eq("class-filtered skill count", (state.get("skill_ids", []) as Array).size(), 4)
 	_assert_eq("sorcerer skill visible", str((state.get("skill_ids", []) as Array)[0]), "magic_bolt")
 	_assert_eq("sorcerer second skill visible", str((state.get("skill_ids", []) as Array)[1]), "ice_shard")
 	_assert_eq("sorcerer third skill visible", str((state.get("skill_ids", []) as Array)[2]), "ligthing")
+	_assert_eq("sorcerer fourth skill visible", str((state.get("skill_ids", []) as Array)[3]), "arcane_barrage")
 	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
 	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "orb_projectile")
@@ -145,9 +146,10 @@ func _run() -> void:
 	})
 	state = panel.get_debug_state()
 	var paladin_skill_ids: Array = state.get("skill_ids", [])
-	_assert_eq("paladin has two compact visible skills", paladin_skill_ids.size(), 2)
+	_assert_eq("paladin has three compact visible skills", paladin_skill_ids.size(), 3)
 	_assert_eq("paladin first local skill", str(paladin_skill_ids[0]), "heal")
 	_assert_eq("paladin second local skill", str(paladin_skill_ids[1]), "holy_shield")
+	_assert_eq("paladin third local skill", str(paladin_skill_ids[2]), "sanctuary")
 	var heal_tooltip := SkillsPanelScript.tooltip_plain_body("heal", 1, panel.skill_progression, panel.character_progression)
 	_assert_true("heal tooltip includes inline next-rank percent", heal_tooltip.contains("Heal: 25% -> 35%"))
 	_assert_false("heal tooltip omits next-rank header", heal_tooltip.contains("Next rank:"))
@@ -267,16 +269,18 @@ func _remove_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute_path)
 
 
-func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false, earthbreaker_rank: int = 0, earthbreaker_can_spend: bool = false, shadow_flurry_rank: int = 0, shadow_flurry_can_spend: bool = false, split_arrow_rank: int = 0, split_arrow_can_spend: bool = false) -> Array:
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false, earthbreaker_rank: int = 0, earthbreaker_can_spend: bool = false, shadow_flurry_rank: int = 0, shadow_flurry_can_spend: bool = false, split_arrow_rank: int = 0, split_arrow_can_spend: bool = false, arcane_barrage_rank: int = 0, arcane_barrage_can_spend: bool = false, sanctuary_rank: int = 0, sanctuary_can_spend: bool = false) -> Array:
 	return [
 		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": _skill_max_rank("cleave"), "can_spend": cleave_can_spend},
 		{"skill_id": "earthbreaker", "rank": earthbreaker_rank, "max_rank": _skill_max_rank("earthbreaker"), "can_spend": earthbreaker_can_spend},
 		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": _skill_max_rank("magic_bolt"), "can_spend": magic_can_spend},
 		{"skill_id": "ice_shard", "rank": ice_shard_rank, "max_rank": _skill_max_rank("ice_shard"), "can_spend": ice_shard_can_spend},
 		{"skill_id": "ligthing", "rank": ligthing_rank, "max_rank": _skill_max_rank("ligthing"), "can_spend": ligthing_can_spend},
+		{"skill_id": "arcane_barrage", "rank": arcane_barrage_rank, "max_rank": _skill_max_rank("arcane_barrage"), "can_spend": arcane_barrage_can_spend},
 		{"skill_id": "rage", "rank": rage_rank, "max_rank": _skill_max_rank("rage"), "can_spend": rage_can_spend},
 		{"skill_id": "heal", "rank": heal_rank, "max_rank": _skill_max_rank("heal"), "can_spend": heal_can_spend},
 		{"skill_id": "holy_shield", "rank": holy_shield_rank, "max_rank": _skill_max_rank("holy_shield"), "can_spend": holy_shield_can_spend},
+		{"skill_id": "sanctuary", "rank": sanctuary_rank, "max_rank": _skill_max_rank("sanctuary"), "can_spend": sanctuary_can_spend},
 		{"skill_id": "poison_stab", "rank": poison_stab_rank, "max_rank": _skill_max_rank("poison_stab"), "can_spend": poison_stab_can_spend},
 		{"skill_id": "dash", "rank": dash_rank, "max_rank": _skill_max_rank("dash"), "can_spend": dash_can_spend},
 		{"skill_id": "shadow_flurry", "rank": shadow_flurry_rank, "max_rank": _skill_max_rank("shadow_flurry"), "can_spend": shadow_flurry_can_spend},

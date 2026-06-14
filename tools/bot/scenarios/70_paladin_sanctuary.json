@@ -1,0 +1,31 @@
+{
+  "id": "paladin_sanctuary",
+  "world_id": "skill_progression_lab",
+  "seed": "v171_paladin_sanctuary",
+  "character_class": "paladin",
+  "title": "Paladin Sanctuary",
+  "description": "Seed Holy Shield, cast the new Sanctuary higher-row skill, and prove authoritative area buff effects.",
+  "debug_progression": {
+    "level": 7,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 6, "dex": 4, "vit": 11, "magic": 11 },
+    "skill_ranks": { "holy_shield": 1, "sanctuary": 1 }
+  },
+  "steps": [
+    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "sanctuary", "rank": 1, "max_rank": "from_rules", "can_spend": false },
+    { "action": "cast_skill", "skill_id": "sanctuary", "target_self": true, "event_type": "skill_cast" },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "sanctuary" }, "timeout_s": 3 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "sanctuary", "rank": 1, "mana": 7 },
+    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "sanctuary", "remaining_ticks": 360, "total_ticks": 360 },
+    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "sanctuary" },
+    { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "sanctuary", "rank": 1, "max_rank": "from_rules", "can_spend": false }
+  ],
+  "visual": {
+    "camera": { "x": 16, "y": 10, "zoom": 1.0 },
+    "post_complete_hold_s": 3.0
+  }
+}

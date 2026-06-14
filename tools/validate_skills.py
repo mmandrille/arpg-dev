@@ -36,9 +36,11 @@ def validate_skill_catalogs(
         report.fail("skill classes", f"unknown classes: {unknown_skill_classes}")
     elif (
         skill_class_map.get("magic_bolt") != "sorcerer"
+        or skill_class_map.get("arcane_barrage") != "sorcerer"
         or skill_class_map.get("rage") != "barbarian"
         or skill_class_map.get("earthbreaker") != "barbarian"
         or skill_class_map.get("heal") != "paladin"
+        or skill_class_map.get("sanctuary") != "paladin"
         or skill_class_map.get("shadow_flurry") != "rogue"
         or skill_class_map.get("piercing_shot") != "ranger"
         or skill_class_map.get("pinning_shot") != "ranger"
@@ -126,7 +128,9 @@ def validate_skill_catalogs(
         for skill_id, skill in skills.get("skills", {}).items()
     }
     expected_prereqs = {
+        "arcane_barrage": {"ligthing": 1},
         "earthbreaker": {"cleave": 1},
+        "sanctuary": {"holy_shield": 1},
         "shadow_flurry": {"dash": 1},
         "split_arrow": {"volley": 1},
     }

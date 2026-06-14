@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v162 — objective chest presentation |
+| **Latest completed slice** | v163 — inventory transfer router |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v163 — inventory transfer router |
+| **Next slice** | v164 — session browser filters |
 | **Last engineering review** | v160 — [`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md) (2026-06-14) |
 | **Next engineering review** | v170 due before more feature batches |
 
@@ -179,6 +179,7 @@ v159_* = kill-gated-elite-objective
 v160_* = dungeon-population-extraction
 v161_* = full-elite-clear-objective
 v162_* = objective-chest-presentation
+v163_* = inventory-transfer-router
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -379,6 +380,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v160** | `dungeon-population-extraction` | Complete (`make ci` green) | [`v160_spec-dungeon-population-extraction.md`](docs/specs/v160_spec-dungeon-population-extraction.md) | [`v160_2026-06-14-dungeon-population-extraction.md`](docs/plans/v160_2026-06-14-dungeon-population-extraction.md) | [`as-built`](docs/as-built/v160_dungeon-population-extraction.md) |
 | **v161** | `full-elite-clear-objective` | Complete (`make ci` green) | [`v161_spec-full-elite-clear-objective.md`](docs/specs/v161_spec-full-elite-clear-objective.md) | [`v161_2026-06-14-full-elite-clear-objective.md`](docs/plans/v161_2026-06-14-full-elite-clear-objective.md) | [`as-built`](docs/as-built/v161_full-elite-clear-objective.md) |
 | **v162** | `objective-chest-presentation` | Complete (`make ci` green) | [`v162_spec-objective-chest-presentation.md`](docs/specs/v162_spec-objective-chest-presentation.md) | [`v162_2026-06-14-objective-chest-presentation.md`](docs/plans/v162_2026-06-14-objective-chest-presentation.md) | [`as-built`](docs/as-built/v162_objective-chest-presentation.md) |
+| **v163** | `inventory-transfer-router` | Complete (`make ci` green) | [`v163_spec-inventory-transfer-router.md`](docs/specs/v163_spec-inventory-transfer-router.md) | [`v163_2026-06-14-inventory-transfer-router.md`](docs/plans/v163_2026-06-14-inventory-transfer-router.md) | [`as-built`](docs/as-built/v163_inventory-transfer-router.md) |
 
 ---
 
@@ -508,6 +510,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Inventory transfer routing is now isolated.** v163 moves inventory double-click, shift-click, and
+drag/drop routing decisions into `client/scripts/inventory_transfer_router.gd`, preserving existing
+shop, stash, market, blacksmith, corpse, unique-chest, equip, unequip, use, and hotbar intent
+payloads while lowering `inventory_panel.gd` from 1583 to 1534 lines.
 
 **Elite objective chests now have client presentation.** v162 carries optional `elite_objective`
 metadata in v8 entity views, renders marked reward chests with a display-only objective marker in

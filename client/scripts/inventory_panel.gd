@@ -9,6 +9,7 @@ const StatLabels := preload("res://scripts/stat_labels.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
+const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer_router.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -847,30 +848,18 @@ func _tooltip_style() -> StyleBoxFlat:
 
 
 func _handle_double_click(item: Dictionary) -> void:
-	if _shop_sell_entity_id != "" and not _is_equipped_instance(str(item.get("item_instance_id", ""))):
-		intent_requested.emit("shop_sell_intent", {
-			"shop_entity_id": _shop_sell_entity_id,
-			"item_instance_id": str(item.get("item_instance_id", "")),
-		})
-		return
-	if _market_context != "" and not _is_equipped_instance(str(item.get("item_instance_id", ""))):
-		intent_requested.emit("market_stage_inventory_item", {
-			"context": _market_context,
-			"item": item.duplicate(true),
-		})
-		return
-	if _blacksmith_context_enabled and not _is_equipped_instance(str(item.get("item_instance_id", ""))):
-		intent_requested.emit("blacksmith_stage_inventory_item", {
-			"item": item.duplicate(true),
-		})
-		return
 	var slot := _preferred_equip_slot(item)
-	if slot != "":
-		var payload := {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot}
-		payload.merge(_weapon_set_payload_for_slot(slot), true)
-		intent_requested.emit("equip_intent", payload)
-	elif _is_consumable(item):
-		intent_requested.emit("use_intent", {"item_instance_id": str(item.get("item_instance_id", ""))})
+	var decision := InventoryTransferRouterScript.double_click_route(
+		item,
+		_shop_sell_entity_id,
+		_market_context,
+		_blacksmith_context_enabled,
+		_is_equipped_instance(str(item.get("item_instance_id", ""))),
+		slot,
+		_weapon_set_payload_for_slot(slot),
+		_is_consumable(item)
+	)
+	_apply_transfer_decision(decision, {})
 
 
 func _handle_shift_click(item: Dictionary) -> void:
@@ -880,10 +869,7 @@ func _handle_shift_click(item: Dictionary) -> void:
 	if slot_index < 0:
 		show_gesture_hint("belt full")
 		return
-	intent_requested.emit("assign_hotbar_intent", {
-		"slot_index": slot_index,
-		"item_instance_id": str(item.get("item_instance_id", "")),
-	})
+	_apply_transfer_decision(InventoryTransferRouterScript.shift_click_route(item, true, slot_index), {})
 
 
 func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
@@ -892,60 +878,25 @@ func _handle_drop_on_slot(slot_kind: String, data: Variant) -> void:
 	var item: Dictionary = data.get("item", {})
 	if item.is_empty():
 		return
+	var can_equip_to_slot := false
+	var weapon_payload := {}
 	if _slot_kind_is_equipment(slot_kind):
 		var slot := _slot_from_kind(slot_kind)
-		if _item_can_equip_to(item, slot):
-			var source := str(data.get("source", ""))
-			if source == DRAG_SOURCE_STASH:
-				intent_requested.emit("stash_equip_item_intent", {
-					"stash_entity_id": str(data.get("stash_entity_id", "")),
-					"stash_item_id": str(data.get("stash_item_id", "")),
-					"slot": slot,
-				})
-			elif source == DRAG_SOURCE_CORPSE:
-				intent_requested.emit("corpse_withdraw_item_intent", {
-					"corpse_entity_id": str(data.get("corpse_entity_id", "")),
-					"item_instance_id": str(data.get("item_instance_id", "")),
-				})
-			elif source == "blacksmith_stage":
-				var blacksmith = data.get("blacksmith_panel", null)
-				if blacksmith != null and blacksmith.has_method("unstage_item"):
-					blacksmith.call("unstage_item")
-			else:
-				var payload := {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot}
-				payload.merge(_weapon_set_payload_for_slot(slot), true)
-				intent_requested.emit("equip_intent", payload)
-	elif slot_kind == SLOT_KIND_BAG:
-		var source := str(data.get("source", ""))
-		if source == DRAG_SOURCE_SHOP_OFFER:
-			intent_requested.emit("shop_buy_intent", {
-				"shop_entity_id": str(data.get("shop_entity_id", "")),
-				"offer_id": str(data.get("offer_id", "")),
-			})
-		elif source == DRAG_SOURCE_STASH:
-			intent_requested.emit("stash_withdraw_item_intent", {
-				"stash_entity_id": str(data.get("stash_entity_id", "")),
-				"stash_item_id": str(data.get("stash_item_id", "")),
-			})
-		elif source == DRAG_SOURCE_CORPSE:
-			intent_requested.emit("corpse_withdraw_item_intent", {
-				"corpse_entity_id": str(data.get("corpse_entity_id", "")),
-				"item_instance_id": str(data.get("item_instance_id", "")),
-			})
-		elif source == DRAG_SOURCE_UNIQUE_CHEST:
-			intent_requested.emit("unique_chest_take_item_intent", {
-				"chest_entity_id": str(data.get("stash_entity_id", "")),
-				"chest_item_id": str(data.get("stash_item_id", "")),
-			})
-		elif source == "blacksmith_stage":
+		can_equip_to_slot = _item_can_equip_to(item, slot)
+		weapon_payload = _weapon_set_payload_for_slot(slot)
+	elif slot_kind == SLOT_KIND_BAG and _slot_kind_is_equipment(str(data.get("source", ""))):
+		weapon_payload = _weapon_set_payload_for_slot(_slot_from_kind(str(data.get("source", ""))))
+	_apply_transfer_decision(InventoryTransferRouterScript.drop_route(slot_kind, data, can_equip_to_slot, weapon_payload), data)
+
+
+func _apply_transfer_decision(decision: Dictionary, data: Dictionary) -> void:
+	match str(decision.get("kind", "")):
+		InventoryTransferRouterScript.KIND_INTENT:
+			intent_requested.emit(str(decision.get("intent_type", "")), decision.get("payload", {}))
+		InventoryTransferRouterScript.KIND_BLACKSMITH_UNSTAGE:
 			var blacksmith = data.get("blacksmith_panel", null)
 			if blacksmith != null and blacksmith.has_method("unstage_item"):
 				blacksmith.call("unstage_item")
-		elif _slot_kind_is_equipment(source):
-			var slot := _slot_from_kind(source)
-			var payload := {"slot": slot}
-			payload.merge(_weapon_set_payload_for_slot(slot), true)
-			intent_requested.emit("unequip_intent", payload)
 
 
 func _item_can_equip_to(item: Dictionary, slot: String) -> bool:

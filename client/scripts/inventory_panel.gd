@@ -278,12 +278,15 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	for item in next_inventory:
 		inventory.append((item as Dictionary).duplicate(true))
 	equipped = next_equipped.duplicate(true)
+	var previous_active_weapon_set := active_weapon_set
 	active_weapon_set = clamp(next_active_weapon_set, 0, 1)
 	weapon_sets = []
 	for set_data in next_weapon_sets:
 		weapon_sets.append((set_data as Dictionary).duplicate(true))
 	if weapon_sets.is_empty():
 		weapon_sets = WeaponSetTabsScript.fallback_sets(equipped)
+	if active_weapon_set != previous_active_weapon_set:
+		viewed_weapon_set = active_weapon_set
 	viewed_weapon_set = clamp(viewed_weapon_set, 0, 1)
 	hotbar = []
 	for slot in next_hotbar:

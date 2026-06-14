@@ -333,6 +333,12 @@ func _run() -> void:
 	_assert_eq("inventory hand tab equip emitted count", inventory_emitted.size(), 5)
 	_assert_eq("inventory hand tab equip type", str(inventory_emitted[4]["type"]), "equip_intent")
 	_assert_eq("inventory hand tab equip weapon set", int(inventory_emitted[4]["payload"].get("weapon_set", -1)), 1)
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60, [], 2, 0, weapon_sets)
+	_assert_eq("inventory preserves manually viewed inactive hand tab", int(inventory_panel.get_debug_state().get("viewed_weapon_set", -1)), 1)
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60, [], 2, 1, weapon_sets)
+	_assert_eq("inventory follows active weapon set swap to set 2", int(inventory_panel.get_debug_state().get("viewed_weapon_set", -1)), 1)
+	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60, [], 2, 0, weapon_sets)
+	_assert_eq("inventory follows active weapon set swap back to set 1", int(inventory_panel.get_debug_state().get("viewed_weapon_set", -1)), 0)
 	inventory_panel.queue_free()
 
 	var market_panel := MarketPanelScript.new()

@@ -1126,7 +1126,7 @@ func _apply_delta(p: Dictionary) -> void:
 				_apply_local_player_visual_scale(1.0 + float(ev.get("amount", 0)) / 100.0)
 				PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, true)
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID:
-				PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, [PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID])
+				PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, [PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID], _sanctuary_radius())
 			continue
 		if event_type == "skill_effect_ended" and eid == player_id:
 			if status_effects_bar != null:
@@ -1344,7 +1344,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			_apply_local_player_visual_scale(float(e["visual_scale"]))
 		if e.has("effect_ids"):
 			PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, e.get("effect_ids", []))
-			PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, e.get("effect_ids", []))
+			PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, e.get("effect_ids", []), _sanctuary_radius())
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		var prev_predicted_pos := predicted_pos
 		# Reconcile: snap prediction back toward authoritative truth.
@@ -1728,12 +1728,18 @@ func _entity_roots_in_radius(center_root: Node3D, radius: float) -> Array:
 	return roots
 
 func _holy_shield_aura_radius() -> float:
-	var def := SkillRulesLoader.skill_definition(PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID)
+	return _skill_effect_radius(PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID, 5.0)
+
+func _sanctuary_radius() -> float:
+	return _skill_effect_radius(PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID, 5.0)
+
+func _skill_effect_radius(skill_id: String, fallback: float) -> float:
+	var def := SkillRulesLoader.skill_definition(skill_id)
 	for effect in def.get("effects", []):
 		var row: Dictionary = effect
-		if str(row.get("type", "")) == "area_stat_percent_buff":
-			return maxf(float(row.get("radius", 5.0)), 0.5)
-	return 5.0
+		if str(row.get("effect_id", skill_id)) == skill_id and row.has("radius"):
+			return maxf(float(row.get("radius", fallback)), 0.5)
+	return fallback
 
 func _on_status_effect_expired(skill_id: String) -> void:
 	if skill_id == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
@@ -4961,7 +4967,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
 	var alive := int(rec.get("hp", 1)) > 0
 	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []) if alive else [])
-	PlayerStatusEffectMarkers.sync_sanctuary_effect(node, rec.get("effect_ids", []) if alive else [])
+	PlayerStatusEffectMarkers.sync_sanctuary_effect(node, rec.get("effect_ids", []) if alive else [], _sanctuary_radius())
 	PlayerStatusEffectMarkers.sync_burning_effect(node, alive and PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, alive and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, alive and PlayerStatusEffectMarkers.has_pinning_root_effect_id(rec.get("effect_ids", [])))

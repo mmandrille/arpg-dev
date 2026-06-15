@@ -6,6 +6,7 @@ extends SceneTree
 const MainScript := preload("res://scripts/main.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
+const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -148,6 +149,13 @@ func _test_sanctuary_started_and_ended_updates_local_dome() -> void:
 	var local_state := main._bot_local_player_presentation()
 	_assert_true("local sanctuary dome active", bool(local_state.get("has_sanctuary_effect", false)))
 	_assert_true("local sanctuary effect id visible", (local_state.get("effect_ids", []) as Array).has("sanctuary"))
+	var marker := main.player_anchor.find_child("SanctuaryDomeEffect", false, false) as Node3D
+	var dome := marker.find_child("SanctuaryDome", false, false) as MeshInstance3D
+	var ground := marker.find_child("SanctuaryGround", false, false) as MeshInstance3D
+	var expected_radius := _skill_effect_radius("sanctuary", 5.0)
+	_assert_float("sanctuary dome radius follows skill rule", (dome.mesh as SphereMesh).radius, expected_radius)
+	_assert_float("sanctuary ground top radius follows skill rule", (ground.mesh as CylinderMesh).top_radius, expected_radius)
+	_assert_float("sanctuary ground bottom radius follows skill rule", (ground.mesh as CylinderMesh).bottom_radius, expected_radius)
 
 	main._apply_delta({"events": [{"event_type": "skill_effect_ended", "entity_id": "1001", "skill_id": "sanctuary"}], "changes": []})
 	local_state = main._bot_local_player_presentation()
@@ -334,6 +342,15 @@ func _presentation_row(rows: Array, entity_id: String) -> Dictionary:
 		if str(rec.get("id", "")) == entity_id:
 			return rec
 	return {}
+
+
+func _skill_effect_radius(skill_id: String, fallback: float) -> float:
+	var def := SkillRulesLoaderScript.skill_definition(skill_id)
+	for effect in def.get("effects", []):
+		var row: Dictionary = effect
+		if str(row.get("effect_id", skill_id)) == skill_id and row.has("radius"):
+			return maxf(float(row.get("radius", fallback)), 0.5)
+	return fallback
 
 
 func _assert_eq(label: String, got, want) -> void:

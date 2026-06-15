@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v184 — revived monster companion |
+| **Latest completed slice** | v185 — paladin defense fixes |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -201,6 +201,7 @@ v181_* = set-item-foundation
 v182_* = companion-ai-foundation
 v183_* = ranger-wolf-companion
 v184_* = revived-monster-companion
+v185_* = paladin-defense-fixes
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -426,6 +427,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v182** | `companion-ai-foundation` | Complete (`make ci` green) | [`v182_spec-companion-ai-foundation.md`](docs/specs/v182_spec-companion-ai-foundation.md) | [`v182_2026-06-15-companion-ai-foundation.md`](docs/plans/v182_2026-06-15-companion-ai-foundation.md) | [`as-built`](docs/as-built/v182_companion-ai-foundation.md) |
 | **v183** | `ranger-wolf-companion` | Complete (`make ci` green) | [`v183_spec-ranger-wolf-companion.md`](docs/specs/v183_spec-ranger-wolf-companion.md) | [`v183_2026-06-15-ranger-wolf-companion.md`](docs/plans/v183_2026-06-15-ranger-wolf-companion.md) | [`as-built`](docs/as-built/v183_ranger-wolf-companion.md) |
 | **v184** | `revived-monster-companion` | Complete (`make ci` green) | [`v184_spec-revived-monster-companion.md`](docs/specs/v184_spec-revived-monster-companion.md) | [`v184_2026-06-15-revived-monster-companion.md`](docs/plans/v184_2026-06-15-revived-monster-companion.md) | [`as-built`](docs/as-built/v184_revived-monster-companion.md) |
+| **v185** | `paladin-defense-fixes` | Complete (`make ci` green) | [`v185_spec-paladin-defense-fixes.md`](docs/specs/v185_spec-paladin-defense-fixes.md) | [`v185_2026-06-15-paladin-defense-fixes.md`](docs/plans/v185_2026-06-15-paladin-defense-fixes.md) | [`as-built`](docs/as-built/v185_paladin-defense-fixes.md) |
 
 ---
 
@@ -558,6 +560,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Paladin defensive skills now update stats and prevent damage correctly.** v185 exposes effective
+block in derived stats, refreshes derived stat payloads when skill buffs start/end, keeps Holy
+Shield's armor/block benefit visible, and changes Sanctuary into a 5-unit, 6-second yellow immunity
+dome with a 60-second cooldown.
 
 **Sorcerer can revive slain monsters as companions.** v184 adds the `revive`
 Sorcerer skill with a data-driven `revive_companion` payload, dead non-boss targeting,

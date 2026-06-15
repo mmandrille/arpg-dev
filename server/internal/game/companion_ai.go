@@ -84,6 +84,112 @@ func (s *Sim) handleSummonCompanionSkillCast(in Input, res *TickResult, player *
 	res.ack(in.MessageID)
 }
 
+func (s *Sim) handleReviveCompanionSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
+	target, rejectReason := s.reviveCompanionTarget(in.CastSkill)
+	if rejectReason != "" {
+		res.reject(in.MessageID, rejectReason)
+		return
+	}
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	companion := s.reviveMonsterCompanion(player, target, skillID, def, rank, res)
+	targetID := uint64(0)
+	if companion != nil {
+		targetID = companion.id
+	}
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, "")
+	s.appendSkillCooldownUpdate(res)
+	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) reviveCompanionTarget(cast *CastSkillIntent) (*entity, string) {
+	if cast == nil || cast.TargetID == "" {
+		return nil, "invalid_target"
+	}
+	target := s.findEntity(cast.TargetID)
+	if target == nil || target.kind != monsterEntity {
+		return nil, "invalid_target"
+	}
+	if target.isBoss {
+		return nil, "cannot_revive_boss"
+	}
+	if target.hp > 0 {
+		return nil, "target_not_dead"
+	}
+	return target, ""
+}
+
+func (s *Sim) reviveMonsterCompanion(owner *entity, target *entity, skillID string, def SkillDef, rank int, res *TickResult) *entity {
+	if owner == nil || target == nil {
+		return nil
+	}
+	level := s.activeLevel()
+	for _, id := range sortedEntityIDs(level.entities) {
+		existing := level.entities[id]
+		if existing == nil || existing.kind != companionEntity || existing.ownerID != owner.id || existing.sourceSkillID != skillID {
+			continue
+		}
+		delete(level.entities, id)
+		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
+	}
+	delete(level.entities, target.id)
+	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(target.id)})
+
+	monsterDef := s.rules.Monsters[target.monsterDefID]
+	powerPercent := revivePowerPercent(def, rank)
+	maxHP := scalePositiveInt(monsterDef.MaxHP, powerPercent)
+	companion := &entity{
+		kind:                  companionEntity,
+		pos:                   target.pos,
+		spawnPos:              target.pos,
+		hp:                    maxHP,
+		maxHP:                 maxHP,
+		ownerID:               owner.id,
+		monsterDefID:          target.monsterDefID,
+		lootTable:             "no_drop",
+		speed:                 monsterDef.MoveSpeed,
+		monsterAttackDamage:   scaleRevivedDamageRange(monsterDef.AttackDamage, powerPercent),
+		monsterAttackCooldown: monsterDef.AttackCooldown,
+		monsterHitChance:      target.monsterHitChance,
+		monsterCritChance:     target.monsterCritChance,
+		monsterBlockPercent:   target.monsterBlockPercent,
+		monsterArmor:          target.monsterArmor,
+		aiMode:                monsterAIModeIdle,
+		sourceSkillID:         skillID,
+		visualModel:           target.visualModel,
+		visualTint:            target.visualTint,
+		visualScale:           target.visualScale,
+	}
+	companion.id = s.alloc()
+	level.entities[companion.id] = companion
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(companion))})
+	return companion
+}
+
+func scalePositiveInt(value int, percent int) int {
+	if value <= 0 || percent <= 0 {
+		return 1
+	}
+	scaled := int(math.Ceil(float64(value) * float64(percent) / 100.0))
+	if scaled < 1 {
+		return 1
+	}
+	return scaled
+}
+
+func scaleRevivedDamageRange(damage *DamageRange, percent int) *DamageRange {
+	if damage == nil {
+		return nil
+	}
+	return &DamageRange{
+		Min: scalePositiveInt(damage.Min, percent),
+		Max: scalePositiveInt(damage.Max, percent),
+	}
+}
+
 func companionSpawnPosition(owner *entity) Vec2 {
 	return Vec2{X: owner.pos.X + companionFollowDistance, Y: owner.pos.Y}
 }

@@ -247,6 +247,49 @@
       },
       "name_key": "skill.arcane_barrage.name"
     },
+    "revive": {
+      "name": "Revive",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 2,
+        "column": 2
+      },
+      "kind": "revive_companion",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 10
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "magic_bolt",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 0
+        }
+      },
+      "revive": {
+        "power_percent_base": 50,
+        "power_percent_per_rank": 10,
+        "limit": 1
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 4
+      },
+      "name_key": "skill.revive.name"
+    },
     "cleave": {
       "name": "Cleave",
       "class": "barbarian",

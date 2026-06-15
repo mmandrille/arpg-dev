@@ -15,7 +15,7 @@
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
     "stats": { "str": 4, "dex": 20, "vit": 5, "magic": 20 },
-    "skill_ranks": { "magic_bolt": 1, "ice_shard": 1, "ligthing": 1, "arcane_barrage": 1 }
+    "skill_ranks": { "magic_bolt": 1, "ice_shard": 1, "ligthing": 1, "arcane_barrage": 1, "revive": 1 }
   },
   "steps": [
     { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff" },

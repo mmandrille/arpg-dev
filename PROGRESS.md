@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v183 — ranger wolf companion |
+| **Latest completed slice** | v184 — revived monster companion |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -200,6 +200,7 @@ v180_* = upgrade-resource-drop
 v181_* = set-item-foundation
 v182_* = companion-ai-foundation
 v183_* = ranger-wolf-companion
+v184_* = revived-monster-companion
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -424,6 +425,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v181** | `set-item-foundation` | Complete (`make ci` green) | [`v181_spec-set-item-foundation.md`](docs/specs/v181_spec-set-item-foundation.md) | [`v181_2026-06-15-set-item-foundation.md`](docs/plans/v181_2026-06-15-set-item-foundation.md) | [`as-built`](docs/as-built/v181_set-item-foundation.md) |
 | **v182** | `companion-ai-foundation` | Complete (`make ci` green) | [`v182_spec-companion-ai-foundation.md`](docs/specs/v182_spec-companion-ai-foundation.md) | [`v182_2026-06-15-companion-ai-foundation.md`](docs/plans/v182_2026-06-15-companion-ai-foundation.md) | [`as-built`](docs/as-built/v182_companion-ai-foundation.md) |
 | **v183** | `ranger-wolf-companion` | Complete (`make ci` green) | [`v183_spec-ranger-wolf-companion.md`](docs/specs/v183_spec-ranger-wolf-companion.md) | [`v183_2026-06-15-ranger-wolf-companion.md`](docs/plans/v183_2026-06-15-ranger-wolf-companion.md) | [`as-built`](docs/as-built/v183_ranger-wolf-companion.md) |
+| **v184** | `revived-monster-companion` | Complete (`make ci` green) | [`v184_spec-revived-monster-companion.md`](docs/specs/v184_spec-revived-monster-companion.md) | [`v184_2026-06-15-revived-monster-companion.md`](docs/plans/v184_2026-06-15-revived-monster-companion.md) | [`as-built`](docs/as-built/v184_revived-monster-companion.md) |
 
 ---
 
@@ -556,6 +558,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Sorcerer can revive slain monsters as companions.** v184 adds the `revive`
+Sorcerer skill with a data-driven `revive_companion` payload, dead non-boss targeting,
+boss/living target rejection, original monster visual identity, and protocol bot scenario
+`75_sorcerer_revive_companion` proving kill, revive, companion spawn, and companion damage.
 
 **Ranger can now summon a black wolf companion.** v183 adds the `black_wolf_companion`
 Ranger skill with a data-driven `summon_companion` payload, one-active-wolf replacement,

@@ -2399,21 +2399,22 @@ def find_nearest_monster(
     monster_def_id: str,
     rarity: str | None = None,
     is_boss: bool | None = None,
+    alive: bool | None = True,
     exclude_ids: set[str] | None = None,
     skip: int = 0,
 ) -> dict[str, Any] | None:
-    monsters = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, is_boss=is_boss, exclude_ids=exclude_ids)
-    if skip < 0: skip = 0
+    monsters = find_live_monsters_sorted(state, monster_def_id, rarity=rarity, is_boss=is_boss, alive=alive, exclude_ids=exclude_ids)
+    skip = max(skip, 0)
     if len(monsters) <= skip:
         return None
     return monsters[skip]
-
 def find_live_monsters_sorted(
     state: RuntimeState,
     monster_def_id: str,
     rarity: str | None = None,
     is_boss: bool | None = None,
     monster_pack_leader: bool | None = None,
+    alive: bool | None = True,
     exclude_ids: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     excluded = exclude_ids or set()
@@ -2432,9 +2433,10 @@ def find_live_monsters_sorted(
             or (rarity is not None and entity.get("rarity") != rarity)
             or (is_boss is not None and bool(entity.get("is_boss", False)) != is_boss)
             or (monster_pack_leader is not None and bool(entity.get("monster_pack_leader", False)) != bool(monster_pack_leader))
-            or int(entity.get("hp", 0)) <= 0
             or entity_id in excluded
         ):
+            continue
+        if alive is not None and (not isinstance(entity.get("hp"), int) or entity["hp"] > 0) != bool(alive):
             continue
         pos = entity.get("position", {})
         distance = max(abs(float(pos.get("x", 0.0)) - player_x), abs(float(pos.get("y", 0.0)) - player_y))
@@ -2461,14 +2463,10 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
     if step.get("monster_def_id"):
         rarity = str(step["rarity"]) if step.get("rarity") is not None else None
         exclude_ids = _remembered_excluded_ids(state, step)
-        target = find_nearest_monster(
-            state,
-            str(step["monster_def_id"]),
-            rarity,
-            bool(step["is_boss"]) if step.get("is_boss") is not None else None,
-            exclude_ids=exclude_ids,
-            skip=int(step.get("target_skip", 0)),
-        )
+        target = find_nearest_monster(state, str(step["monster_def_id"]), rarity,
+                                      bool(step["is_boss"]) if step.get("is_boss") is not None else None,
+                                      bool(step["alive"]) if step.get("alive") is not None else True,
+                                      exclude_ids=exclude_ids, skip=int(step.get("target_skip", 0)))
         if target is None:
             raise AssertionError(f"{step.get('action')}: monster not found: {step}")
         return target

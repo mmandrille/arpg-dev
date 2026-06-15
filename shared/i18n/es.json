@@ -66,6 +66,8 @@
     "skill.ligthing.summary": "Proyectil electrico en cadena",
     "skill.arcane_barrage.name": "Descarga arcana",
     "skill.arcane_barrage.summary": "Proyectil arcano perforante",
+    "skill.revive.name": "Revivir",
+    "skill.revive.summary": "Revive un monstruo abatido",
     "skill.magic_bolt.name": "Proyectil magico",
     "skill.magic_bolt.summary": "Hechizo de proyectil",
     "skill.rage.name": "Furia",

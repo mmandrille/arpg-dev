@@ -1253,6 +1253,8 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		s.handleAreaStatBuffSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "summon_companion":
 		s.handleSummonCompanionSkillCast(in, res, player, skillID, def, rank, manaCost)
+	case "revive_companion":
+		s.handleReviveCompanionSkillCast(in, res, player, skillID, def, rank, manaCost)
 	default:
 		res.reject(in.MessageID, "unsupported_skill_kind")
 	}

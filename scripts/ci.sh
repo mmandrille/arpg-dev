@@ -79,7 +79,7 @@ ci_step() {
   set +e
   "$@"
   local status=$?
-  set -e
+  set +e
   if [[ $status -ne 0 ]]; then
     finish_step_failed
     FAILED_STEPS+=("${label}")
@@ -113,6 +113,22 @@ stream_bot_progress() {
         printf "OK: protocol bot scenario %s (%s)\n", scenario, elapsed
       } else {
         printf "OK: protocol bot scenario %s\n", scenario
+      }
+      fflush()
+    }
+    /\] scenario failed / {
+      line = $0
+      sub(/^.*\] scenario failed /, "", line)
+      scenario = line
+      sub(/ .*/, "", scenario)
+      elapsed = ""
+      if (match(line, /elapsed=[^ ]+/)) {
+        elapsed = substr(line, RSTART, RLENGTH)
+      }
+      if (elapsed != "") {
+        printf "FAIL: protocol bot scenario %s (%s)\n", scenario, elapsed
+      } else {
+        printf "FAIL: protocol bot scenario %s\n", scenario
       }
       fflush()
     }
@@ -156,7 +172,7 @@ start_server() {
   if [[ $db_status -ne 0 ]]; then
     echo "FAILED: make db-up"
     finish_step_failed
-    set -e
+    set +e
     FAILED_STEPS+=("== 8/11 start Postgres + server ==")
     return 1
   fi
@@ -167,7 +183,7 @@ start_server() {
   local build_status=$?
   if [[ $build_status -ne 0 ]]; then
     finish_step_failed
-    set -e
+    set +e
     FAILED_STEPS+=("== 8/11 start Postgres + server ==")
     return 1
   fi
@@ -188,12 +204,12 @@ start_server() {
     echo "server failed readiness check; log:"
     show_log "$SERVER_LOG" "server"
     finish_step_failed
-    set -e
+    set +e
     FAILED_STEPS+=("== 8/11 start Postgres + server ==")
     return 1
   fi
 
-  set -e
+  set +e
   finish_step
   return 0
 }
@@ -207,18 +223,18 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
   # Step 9: protocol bot + replay
   begin_step "== 9/11 protocol bot + replay =="
   BOT_LOG="$(mktemp -t arpg-ci-bot.XXXXXX.log)"
+  step9_failed=0
   set +e
   SESSION_ID="$("$ROOT/.venv/bin/python" -m tools.bot.run \
     --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
     --print-session-id 2> >(stream_bot_progress "$BOT_LOG" >&2))"
   bot_status=$?
-  set -e
+  set +e
   if [[ "$bot_status" -ne 0 ]]; then
     echo "FAILED: protocol bot"
     show_log "$BOT_LOG" "protocol bot"
     rm -f "$BOT_LOG"
-    finish_step_failed
-    FAILED_STEPS+=("== 9/11 protocol bot + replay ==")
+    step9_failed=1
   else
     if [[ "${ARPG_VERBOSE:-0}" == "1" ]]; then
       cat "$BOT_LOG"
@@ -227,19 +243,26 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
     fi
     rm -f "$BOT_LOG"
     echo "bot completed session: $SESSION_ID"
+  fi
 
+  if [[ -n "$SESSION_ID" ]]; then
     set +e
     "$RUN_QUIET" --label "arpg-replay" -- bash -c \
       "cd server && ARPG_DATABASE_URL=\"$DATABASE_URL\" ARPG_GAMEPLAY_DEBUG=\"$GAMEPLAY_DEBUG\" \
        go run ./cmd/arpg-replay --session-id \"$SESSION_ID\""
     replay_status=$?
-    set -e
+    set +e
     if [[ $replay_status -ne 0 ]]; then
-      finish_step_failed
-      FAILED_STEPS+=("== 9/11 protocol bot + replay ==")
-    else
-      finish_step
+      step9_failed=1
     fi
+  else
+    echo "SKIPPED: replay (protocol bot did not report a session id)"
+  fi
+  if [[ "$step9_failed" -ne 0 ]]; then
+    finish_step_failed
+    FAILED_STEPS+=("== 9/11 protocol bot + replay ==")
+  else
+    finish_step
   fi
 
   # Steps 10-11: Godot

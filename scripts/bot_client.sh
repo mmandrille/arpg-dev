@@ -101,9 +101,16 @@ validate_scenario_file() {
   fi
 }
 
+VALIDATION_FAIL_COUNT=0
 for f in "${SCENARIO_FILES[@]}"; do
-  validate_scenario_file "$f"
+  if ! validate_scenario_file "$f"; then
+    VALIDATION_FAIL_COUNT=$((VALIDATION_FAIL_COUNT + 1))
+  fi
 done
+if [[ "$VALIDATION_FAIL_COUNT" -gt 0 ]]; then
+  echo "[bot-client] FAIL: $VALIDATION_FAIL_COUNT scenario file(s) failed validation" >&2
+  exit 1
+fi
 
 READY_URL="${BASE_URL%/}/readyz"
 if ! server_error="$(curl --max-time 2 -fsS "$READY_URL" 2>&1)"; then
@@ -254,7 +261,9 @@ run_scenario() {
   preflight_metadata="$(mktemp)"
   preflight_log="$(mktemp)"
 
-  if ! is_quiet_mode || [[ "$HEADLESS" != "1" ]]; then
+  if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
+    echo "RUNNING: client bot scenario $scenario_id"
+  else
     echo "[bot-client $(_ts)] running scenario: $scenario_id (world=$world_id file=$(basename "$scenario_path"))"
   fi
   exit_code=0

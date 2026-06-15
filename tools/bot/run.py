@@ -25,6 +25,7 @@ import math
 from pathlib import Path
 import sys
 import time
+import traceback
 from typing import Any
 
 import httpx
@@ -4120,6 +4121,7 @@ def main() -> int:
         return 0
     selected = select_scenarios(scenarios, args.scenario)
     results: list[dict[str, Any]] = []
+    failed_scenarios: list[str] = []
     cleanup_emails: set[str] = set()
     last_session_id = ""
 
@@ -4127,130 +4129,110 @@ def main() -> int:
         for scenario in selected:
             scenario_started = time.monotonic()
             log("scenario begin", scenario.id, "-", scenario.title, f"world={scenario.world_id}")
-            if scenario.id == "skill_visual":
-                scenario, replay_email, token, sess, observed = skill_visual_runtime.run_selected(globals(), args, client, scenario)
-            elif scenario.id == "true_coop_session":
-                replay_email = scenario_email(args.email, scenario.id + "-host")
-                guest_email = scenario_email(args.email, scenario.id + "-guest")
-                cleanup_emails.update({replay_email, guest_email})
-                _, host_token = dev_login(client, replay_email, args.dev_token)
-                _, guest_token = dev_login(client, guest_email, args.dev_token)
-                host_character_id = ensure_character(client, host_token, "Coop Host")
-                guest_character_id = ensure_character(client, guest_token, "Coop Guest")
-                sess, observed = asyncio.run(run_true_coop_session(
-                    client=client,
-                    base_url=args.base_url,
-                    host_token=host_token,
-                    guest_token=guest_token,
-                    debug_token=args.debug_token,
-                    scenario=scenario,
-                    host_character_id=host_character_id,
-                    guest_character_id=guest_character_id,
-                ))
-                token = host_token
-            elif scenario.id == "session_browser_uncapped_coop":
-                tokens: list[str] = []
-                character_ids: list[str] = []
-                replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
-                for index in range(scenario.peer_count):
-                    email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
-                    cleanup_emails.add(email)
-                    _, peer_token = dev_login(client, email, args.dev_token)
-                    tokens.append(peer_token)
-                    character_ids.append(ensure_character(client, peer_token, f"Coop Peer {index + 1}"))
-                sess, observed = asyncio.run(run_session_browser_uncapped_coop(
-                    client=client,
-                    base_url=args.base_url,
-                    tokens=tokens,
-                    debug_token=args.debug_token,
-                    scenario=scenario,
-                    character_ids=character_ids,
-                ))
-                token = tokens[0]
-            elif scenario.id == "coop_rewards_and_scaling":
-                tokens = []
-                character_ids = []
-                peer_count = max(3, scenario.peer_count)
-                replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
-                for index in range(peer_count):
-                    email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
-                    cleanup_emails.add(email)
-                    _, peer_token = dev_login(client, email, args.dev_token)
-                    tokens.append(peer_token)
-                    character_ids.append(ensure_character(client, peer_token, f"Reward Peer {index + 1}"))
-                sess, observed = asyncio.run(run_coop_rewards_and_scaling(
-                    client=client,
-                    base_url=args.base_url,
-                    tokens=tokens,
-                    debug_token=args.debug_token,
-                    scenario=scenario,
-                    character_ids=character_ids,
-                ))
-                token = tokens[0]
-            elif scenario.id == "gold_autopickup_shared_loot":
-                tokens = []
-                character_ids = []
-                peer_count = max(2, scenario.peer_count)
-                replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
-                for index in range(peer_count):
-                    email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
-                    cleanup_emails.add(email)
-                    _, peer_token = dev_login(client, email, args.dev_token)
-                    tokens.append(peer_token)
-                    character_ids.append(ensure_character(client, peer_token, f"Gold Peer {index + 1}"))
-                sess, observed = asyncio.run(run_gold_autopickup_shared_loot(
-                    client=client,
-                    base_url=args.base_url,
-                    tokens=tokens,
-                    debug_token=args.debug_token,
-                    scenario=scenario,
-                    character_ids=character_ids,
-                ))
-                token = tokens[0]
-            else:
-                replay_email = scenario_email(args.email, scenario.id)
-                cleanup_emails.add(replay_email)
-                _, token = dev_login(client, replay_email, args.dev_token)
-                sess, observed = run_verified_session(
-                    client=client,
-                    base_url=args.base_url,
-                    token=token,
-                    debug_token=args.debug_token,
-                    scenario=scenario,
-                    world_id=scenario.world_id,
-                    steps=scenario.steps,
-                    assertions=scenario.assertions,
-                    seed=scenario.seed,
-                )
-            session_id = sess["session_id"]
-            last_session_id = session_id
+            try:
+                if scenario.id == "skill_visual":
+                    scenario, replay_email, token, sess, observed = skill_visual_runtime.run_selected(globals(), args, client, scenario)
+                elif scenario.id == "true_coop_session":
+                    replay_email = scenario_email(args.email, scenario.id + "-host")
+                    guest_email = scenario_email(args.email, scenario.id + "-guest")
+                    cleanup_emails.update({replay_email, guest_email})
+                    _, host_token = dev_login(client, replay_email, args.dev_token)
+                    _, guest_token = dev_login(client, guest_email, args.dev_token)
+                    host_character_id = ensure_character(client, host_token, "Coop Host")
+                    guest_character_id = ensure_character(client, guest_token, "Coop Guest")
+                    sess, observed = asyncio.run(run_true_coop_session(
+                        client=client, base_url=args.base_url, host_token=host_token, guest_token=guest_token,
+                        debug_token=args.debug_token, scenario=scenario,
+                        host_character_id=host_character_id, guest_character_id=guest_character_id,
+                    ))
+                    token = host_token
+                elif scenario.id == "session_browser_uncapped_coop":
+                    tokens: list[str] = []
+                    character_ids: list[str] = []
+                    replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
+                    for index in range(scenario.peer_count):
+                        email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                        cleanup_emails.add(email)
+                        _, peer_token = dev_login(client, email, args.dev_token)
+                        tokens.append(peer_token)
+                        character_ids.append(ensure_character(client, peer_token, f"Coop Peer {index + 1}"))
+                    sess, observed = asyncio.run(run_session_browser_uncapped_coop(
+                        client=client, base_url=args.base_url, tokens=tokens,
+                        debug_token=args.debug_token, scenario=scenario, character_ids=character_ids,
+                    ))
+                    token = tokens[0]
+                elif scenario.id == "coop_rewards_and_scaling":
+                    tokens = []
+                    character_ids = []
+                    peer_count = max(3, scenario.peer_count)
+                    replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
+                    for index in range(peer_count):
+                        email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                        cleanup_emails.add(email)
+                        _, peer_token = dev_login(client, email, args.dev_token)
+                        tokens.append(peer_token)
+                        character_ids.append(ensure_character(client, peer_token, f"Reward Peer {index + 1}"))
+                    sess, observed = asyncio.run(run_coop_rewards_and_scaling(
+                        client=client, base_url=args.base_url, tokens=tokens,
+                        debug_token=args.debug_token, scenario=scenario, character_ids=character_ids,
+                    ))
+                    token = tokens[0]
+                elif scenario.id == "gold_autopickup_shared_loot":
+                    tokens = []
+                    character_ids = []
+                    peer_count = max(2, scenario.peer_count)
+                    replay_email = scenario_email(args.email, f"{scenario.id}-peer-0")
+                    for index in range(peer_count):
+                        email = replay_email if index == 0 else scenario_email(args.email, f"{scenario.id}-peer-{index}")
+                        cleanup_emails.add(email)
+                        _, peer_token = dev_login(client, email, args.dev_token)
+                        tokens.append(peer_token)
+                        character_ids.append(ensure_character(client, peer_token, f"Gold Peer {index + 1}"))
+                    sess, observed = asyncio.run(run_gold_autopickup_shared_loot(
+                        client=client, base_url=args.base_url, tokens=tokens,
+                        debug_token=args.debug_token, scenario=scenario, character_ids=character_ids,
+                    ))
+                    token = tokens[0]
+                else:
+                    replay_email = scenario_email(args.email, scenario.id)
+                    cleanup_emails.add(replay_email)
+                    _, token = dev_login(client, replay_email, args.dev_token)
+                    sess, observed = run_verified_session(
+                        client=client, base_url=args.base_url, token=token, debug_token=args.debug_token,
+                        scenario=scenario, world_id=scenario.world_id, steps=scenario.steps,
+                        assertions=scenario.assertions, seed=scenario.seed,
+                    )
+                session_id = sess["session_id"]
+                last_session_id = session_id
 
-            for idx, check in enumerate(scenario.fresh_session_checks, start=1):
-                if scenario.id == "true_coop_session":
-                    break
-                log("fresh session check begin", scenario.id, f"#{idx}")
-                check_world = str(check.get("world_id", scenario.world_id))
-                check_steps = list(check.get("steps", []))
-                check_assertions = list(check.get("assertions", []))
-                check_sess, check_observed = run_verified_session(
-                    client=client,
-                    base_url=args.base_url,
-                    token=token,
-                    debug_token=args.debug_token,
-                    scenario=scenario,
-                    world_id=check_world,
-                    steps=check_steps,
-                    assertions=check_assertions,
-                    seed=str(check.get("seed", "")),
-                    debug_progression=dict(check.get("debug_progression", scenario.debug_progression)),
-                )
-                last_session_id = check_sess["session_id"]
-                observed = check_observed
-                log("fresh session check done", scenario.id, f"#{idx}")
-
-            scenario_elapsed = time.monotonic() - scenario_started
-            assert_scenario_elapsed_within_budget(scenario.id, scenario_elapsed)
-            log("scenario done", scenario.id, f"elapsed={scenario_elapsed:.2f}s")
+                for idx, check in enumerate(scenario.fresh_session_checks, start=1):
+                    if scenario.id == "true_coop_session":
+                        break
+                    log("fresh session check begin", scenario.id, f"#{idx}")
+                    check_world = str(check.get("world_id", scenario.world_id))
+                    check_steps = list(check.get("steps", []))
+                    check_assertions = list(check.get("assertions", []))
+                    check_sess, check_observed = run_verified_session(
+                        client=client, base_url=args.base_url, token=token, debug_token=args.debug_token,
+                        scenario=scenario, world_id=check_world, steps=check_steps,
+                        assertions=check_assertions, seed=str(check.get("seed", "")),
+                        debug_progression=dict(check.get("debug_progression", scenario.debug_progression)),
+                    )
+                    last_session_id = check_sess["session_id"]
+                    observed = check_observed
+                    log("fresh session check done", scenario.id, f"#{idx}")
+                scenario_elapsed = time.monotonic() - scenario_started
+                assert_scenario_elapsed_within_budget(scenario.id, scenario_elapsed)
+                log("scenario done", scenario.id, f"elapsed={scenario_elapsed:.2f}s")
+            except Exception as exc:
+                scenario_elapsed = time.monotonic() - scenario_started
+                failure = f"{type(exc).__name__}: {exc}"
+                failed_scenarios.append(scenario.id)
+                log("scenario failed", scenario.id, f"elapsed={scenario_elapsed:.2f}s", failure)
+                traceback.print_exc(file=sys.stderr)
+                results.append({"id": scenario.id, "title": scenario.title, "description": scenario.description,
+                                "world_id": scenario.world_id, "status": "failed", "error": failure})
+                continue
 
             scenario_visual = json.loads(scenario.path.read_text()).get("visual")
             entry = {
@@ -4284,7 +4266,16 @@ def main() -> int:
         write_manifest(args.write_manifest, args.base_url, results)
         log("wrote manifest", args.write_manifest)
 
-    log("BOT OK", "- scenarios:", ", ".join(r["id"] for r in results))
+    passed_scenarios = [r["id"] for r in results if r.get("status") == "passed"]
+    if failed_scenarios:
+        log("BOT FAILED", "- failed scenarios:", ", ".join(failed_scenarios))
+        if passed_scenarios:
+            log("BOT PARTIAL OK", "- passed scenarios:", ", ".join(passed_scenarios))
+        if args.print_session_id and last_session_id:
+            print(last_session_id)
+        return 1
+
+    log("BOT OK", "- scenarios:", ", ".join(passed_scenarios))
     if args.print_session_id:
         print(last_session_id)
     return 0

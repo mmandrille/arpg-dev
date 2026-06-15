@@ -16,6 +16,7 @@ Date: 2026-06-15
 - `cd server && go test ./internal/game -run 'TestRulesLoad|TestSanctuary|TestHolyShield|TestCombatStatBreakdownsIncludeEquipmentAndCap' -count=1`
 - `make client-unit`
 - `ARPG_ADDR=:8097 scenario=70_paladin_sanctuary.json ./scripts/bot_local.sh`
+- `make COMPOSE=true ci`
 
 ## Deferred
 

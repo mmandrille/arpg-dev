@@ -25,4 +25,4 @@ Builds on v81 Holy Shield and v171 Sanctuary. Godot plugin adoption checklist: r
 - [x] `cd server && go test ./internal/game -run 'TestRulesLoad|TestSanctuary|TestHolyShield|TestCombatStatBreakdownsIncludeEquipmentAndCap' -count=1`
 - [x] `make client-unit`
 - [x] `ARPG_ADDR=:8097 scenario=70_paladin_sanctuary.json ./scripts/bot_local.sh`
-- [ ] `make ci`
+- [x] `make COMPOSE=true ci`

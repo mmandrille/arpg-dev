@@ -6317,7 +6317,8 @@ func TestBossPhaseTimingAndDodge(t *testing.T) {
 	if !hasEvent(start, "boss_phase_started") || hasEvent(start, "player_damaged") {
 		t.Fatalf("boss telegraph start events = %+v", start.Events)
 	}
-	for i := 0; i < 28; i++ {
+	telegraphTicks := rules.BossPatterns["charged_melee"].Phases[0].DurationTicks
+	for i := 0; i < telegraphTicks-2; i++ {
 		res := sim.Tick(nil)
 		if hasEvent(res, "player_damaged") || hasEvent(res, "player_killed") {
 			t.Fatalf("player damaged during telegraph tick %d: %+v", i, res.Events)
@@ -6366,9 +6367,14 @@ func TestBossPatternDeckCycles(t *testing.T) {
 		t.Fatalf("second boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
 	}
 
-	waitForBossPatternStart(t, sim, "ground_slam", 220)
-	if boss.bossPatternDeckIndex != 2 || boss.bossPatternID != "ground_slam" {
+	waitForBossPatternStart(t, sim, "summon_wolves", 220)
+	if boss.bossPatternDeckIndex != 2 || boss.bossPatternID != "summon_wolves" {
 		t.Fatalf("third boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
+	}
+
+	waitForBossPatternStart(t, sim, "ground_slam", 220)
+	if boss.bossPatternDeckIndex != 3 || boss.bossPatternID != "ground_slam" {
+		t.Fatalf("fourth boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
 	}
 
 	waitForBossPatternStart(t, sim, "charged_melee", 220)

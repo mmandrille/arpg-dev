@@ -36,6 +36,7 @@ func (s *Sim) ensureBossPhase(boss *entity, res *TickResult) (bossPhaseRuntime, 
 	boss.bossPhaseStarted = s.tick
 	boss.bossPhaseEnds = s.tick + uint64(next.phase.DurationTicks)
 	boss.bossActiveHit = map[uint64]bool{}
+	boss.bossPhaseExecuted = false
 	s.captureBossPhaseAim(boss, next.phase)
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(boss))})
 	res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
@@ -89,6 +90,7 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		boss.bossPhaseStarted = 0
 		boss.bossPhaseEnds = 0
 		boss.bossActiveHit = nil
+		boss.bossPhaseExecuted = false
 		boss.bossPhaseHasAim = false
 		s.advanceBossPatternDeck(boss)
 	} else {
@@ -98,6 +100,7 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		boss.bossPhaseStarted = s.tick + 1
 		boss.bossPhaseEnds = s.tick + 1 + uint64(next.phase.DurationTicks)
 		boss.bossActiveHit = map[uint64]bool{}
+		boss.bossPhaseExecuted = false
 		if next.phase.Kind == "telegraph" {
 			s.captureBossPhaseAim(boss, next.phase)
 		}
@@ -120,6 +123,9 @@ func (s *Sim) advanceBossPatternDeck(boss *entity) {
 }
 
 func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *TickResult) {
+	if phase.SummonMonsterDefID != "" {
+		s.applyBossSummonPhase(boss, phase, res)
+	}
 	if phase.Damage == nil {
 		return
 	}
@@ -156,6 +162,107 @@ func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *Ti
 		res.Events = append(res.Events, combatEvent(eventType, boss.id, player.id, "", outcome))
 		s.triggerUniqueEffectsAfterPlayerDamage(player, boss, "", res, outcome)
 	}
+}
+
+func (s *Sim) applyBossSummonPhase(boss *entity, phase BossPatternPhase, res *TickResult) {
+	if boss.bossPhaseExecuted || phase.SummonCount <= 0 || phase.SummonMonsterDefID == "" {
+		return
+	}
+	boss.bossPhaseExecuted = true
+	spawned := 0
+	for _, pos := range s.bossSummonPositions(boss, phase) {
+		add := s.newBossSummonedAdd(phase.SummonMonsterDefID, pos)
+		if add == nil {
+			continue
+		}
+		s.activeLevel().entities[add.id] = add
+		res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(add))})
+		spawned++
+		if spawned >= phase.SummonCount {
+			break
+		}
+	}
+	if spawned == 0 {
+		return
+	}
+	res.Events = append(res.Events, Event{
+		EventType:     "boss_summoned_adds",
+		EntityID:      idStr(boss.id),
+		MonsterDefID:  phase.SummonMonsterDefID,
+		PatternID:     boss.bossPatternID,
+		PhaseIndex:    intPtr(boss.bossPhaseIndex),
+		PhaseKind:     boss.bossPhaseKind,
+		Amount:        intPtr(spawned),
+		Position:      &boss.pos,
+		DurationTicks: intPtr(phase.DurationTicks),
+	})
+}
+
+func (s *Sim) bossSummonPositions(boss *entity, phase BossPatternPhase) []Vec2 {
+	radius := phase.SummonRadius
+	if radius <= 0 {
+		return nil
+	}
+	directions := []Vec2{
+		{X: 1, Y: 0},
+		{X: -1, Y: 0},
+		{X: 0, Y: 1},
+		{X: 0, Y: -1},
+		{X: 0.70710678118, Y: 0.70710678118},
+		{X: -0.70710678118, Y: 0.70710678118},
+		{X: 0.70710678118, Y: -0.70710678118},
+		{X: -0.70710678118, Y: -0.70710678118},
+	}
+	radii := []float64{radius, radius * 0.7, radius * 0.45}
+	out := make([]Vec2, 0, phase.SummonCount)
+	for _, candidateRadius := range radii {
+		for _, dir := range directions {
+			if len(out) >= phase.SummonCount {
+				return out
+			}
+			pos := Vec2{X: boss.pos.X + dir.X*candidateRadius, Y: boss.pos.Y + dir.Y*candidateRadius}
+			if s.monsterPositionBlocked(pos, 0) {
+				continue
+			}
+			out = append(out, pos)
+		}
+	}
+	return out
+}
+
+func (s *Sim) newBossSummonedAdd(monsterDefID string, pos Vec2) *entity {
+	def, ok := s.rules.Monsters[monsterDefID]
+	if !ok {
+		return nil
+	}
+	add := &entity{
+		id:              s.alloc(),
+		kind:            monsterEntity,
+		pos:             pos,
+		spawnPos:        pos,
+		hp:              def.MaxHP,
+		maxHP:           def.MaxHP,
+		monsterDefID:    monsterDefID,
+		monsterRarityID: "common",
+		lootTable:       "no_drop",
+		aiMode:          monsterAIModeIdle,
+	}
+	if rarity, ok := s.rules.DungeonGeneration.MonsterRarity("common"); ok {
+		stats := s.generatedMonsterStats(def, s.currentLevel, rarity)
+		add.maxHP = stats.maxHP
+		add.hp = add.maxHP
+		add.visualScale = rarity.VisualScale
+		add.visualTint = rarity.Color
+		add.monsterAttackDamage = stats.attackDamage
+		add.monsterAttackCooldown = stats.attackCooldown
+		add.monsterArmor = stats.armor
+		add.monsterHitChance = stats.hitChance
+		add.monsterCritChance = stats.critChance
+		add.monsterBlockPercent = stats.blockPercent
+		add.monsterXPReward = stats.xpReward
+	}
+	s.applyPartyHPScale(s.activeLevel(), add)
+	return add
 }
 
 func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {

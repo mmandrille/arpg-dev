@@ -25,9 +25,9 @@
       "phase_kind": "telegraph",
       "pattern_id": "charged_melee",
       "phase_index": 0,
-      "duration_ticks": 30,
+      "duration_ticks": 20,
       "remaining_ticks_min": 1,
-      "remaining_ticks_max": 30,
+      "remaining_ticks_max": 20,
       "phase_ratio_min": 0.01,
       "phase_ratio_max": 1.0,
       "timeout_s": 15.0

@@ -1564,6 +1564,10 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 		return
 	}
 	retaliationDamage := s.scaleMonsterDamageForParty(s.currentLevel, *def.RetaliationDamage)
+	if outcome, immune := s.playerDamageImmunityOutcome(player); immune {
+		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
+		return
+	}
 	attackerStats := s.monsterEffectiveCombatStats(monster, retaliationDamage)
 	defenderStats, _ := s.playerEffectiveCombatStats()
 	outcome := s.resolveCombat(attackerStats, defenderStats, retaliationDamage)
@@ -2438,11 +2442,14 @@ func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, c
 	}
 	applications := []skillBuffApplication{}
 	for _, effect := range def.Effects {
-		if effect.Type != "area_stat_percent_buff" {
+		if effect.Type != "area_stat_percent_buff" && effect.Type != "area_immunity_buff" {
 			continue
 		}
 		center := player.pos
-		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank))
+		percent := 0
+		if effect.Type == "area_stat_percent_buff" {
+			percent = s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank))
+		}
 		scale := 1.0
 		targets := s.healSkillTargets(center, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
 		for _, target := range targets {
@@ -4372,6 +4379,26 @@ func (s *Sim) combatEventType(defenderKind string, outcome combatResolution) str
 		return "player_damaged"
 	}
 	return "monster_damaged"
+}
+
+func (s *Sim) playerDamageImmunityOutcome(player *entity) (combatResolution, bool) {
+	if player == nil || player.kind != playerEntity || player.hp <= 0 {
+		return combatResolution{}, false
+	}
+	for _, stateKey := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[stateKey]
+		if effect.TargetID != player.id || effect.EffectID != "sanctuary" || effect.EndsTick <= s.tick {
+			continue
+		}
+		return combatResolution{
+			Outcome:         "immune",
+			Damage:          0,
+			RawDamage:       0,
+			MitigatedDamage: 0,
+			Hit:             true,
+		}, true
+	}
+	return combatResolution{}, false
 }
 
 func combatEvent(eventType string, sourceID, targetID uint64, corr string, outcome combatResolution) Event {

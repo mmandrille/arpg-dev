@@ -436,7 +436,7 @@
         "correlation_id": { "$ref": "#/$defs/prefixed_id" },
         "damage": { "type": "integer", "minimum": 0 },
         "damage_type": { "type": "string", "enum": ["force", "cold", "poison", "lightning"] },
-        "outcome": { "type": "string", "enum": ["hit", "crit", "miss", "block", "kill"] },
+        "outcome": { "type": "string", "enum": ["hit", "crit", "miss", "block", "immune", "kill"] },
         "raw_damage": { "type": "integer", "minimum": 0 },
         "mitigated_damage": { "type": "integer" },
         "blocked": { "type": "boolean" },

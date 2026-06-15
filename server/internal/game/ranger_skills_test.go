@@ -102,6 +102,47 @@ func TestRangerVolleyDamagesFanTargetsOnce(t *testing.T) {
 	}
 }
 
+func TestRangerBlackWolfCompanionSummonsAndReplaces(t *testing.T) {
+	sim := rangerSkillSim(t, "sess_ranger_black_wolf")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: 4, Y: 4}
+
+	firstCast := sim.Tick([]Input{{
+		MessageID:     "wolf_1",
+		CorrelationID: "corr_wolf_1",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "black_wolf_companion"},
+	}})
+	assertAck(t, firstCast, "wolf_1")
+	firstWolf := onlyRangerWolfCompanion(t, sim)
+	if firstWolf.ownerID != player.id || firstWolf.sourceSkillID != "black_wolf_companion" {
+		t.Fatalf("wolf owner/source = %d/%s, want %d/black_wolf_companion", firstWolf.ownerID, firstWolf.sourceSkillID, player.id)
+	}
+	view := sim.entityView(firstWolf)
+	if view.Type != companionEntity || view.MonsterDefID != "companion_black_wolf" || view.VisualModel != "monster_quadruped" || view.VisualTint != "101014" {
+		t.Fatalf("wolf view = %+v, want black quadruped companion", view)
+	}
+	if !hasEvent(firstCast, "skill_cast") || !hasEntitySpawn(firstCast, idStr(firstWolf.id)) {
+		t.Fatalf("first wolf cast changes/events = %+v / %+v", firstCast.Changes, firstCast.Events)
+	}
+
+	delete(sim.skillCooldowns, "black_wolf_companion")
+	secondCast := sim.Tick([]Input{{
+		MessageID:     "wolf_2",
+		CorrelationID: "corr_wolf_2",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "black_wolf_companion"},
+	}})
+	assertAck(t, secondCast, "wolf_2")
+	secondWolf := onlyRangerWolfCompanion(t, sim)
+	if secondWolf.id == firstWolf.id {
+		t.Fatalf("recast kept same wolf id %d, want replacement", secondWolf.id)
+	}
+	if !hasEntityRemove(secondCast, idStr(firstWolf.id)) || !hasEntitySpawn(secondCast, idStr(secondWolf.id)) {
+		t.Fatalf("recast changes = %+v, want remove old and spawn new", secondCast.Changes)
+	}
+}
+
 func TestRangerSkillRulesLoad(t *testing.T) {
 	rules := loadRules(t)
 	pierce := rules.Skills["piercing_shot"]
@@ -116,6 +157,10 @@ func TestRangerSkillRulesLoad(t *testing.T) {
 	if volley.Class != "ranger" || volley.Volley.ArrowCount < 3 || volley.Volley.SpreadDegrees <= 0 || volley.Projectile.Visual != "volley_arrow_projectile" {
 		t.Fatalf("volley = %+v, want ranger projectile with fan", volley)
 	}
+	wolf := rules.Skills["black_wolf_companion"]
+	if wolf.Class != "ranger" || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || wolf.Companion.Limit != 1 {
+		t.Fatalf("black_wolf_companion = %+v, want one black wolf summon", wolf)
+	}
 }
 
 func rangerSkillSim(t *testing.T, sessionID string) *Sim {
@@ -128,6 +173,7 @@ func rangerSkillSim(t *testing.T, sessionID string) *Sim {
 	sim.progression.SkillRanks["piercing_shot"] = 1
 	sim.progression.SkillRanks["pinning_shot"] = 1
 	sim.progression.SkillRanks["volley"] = 1
+	sim.progression.SkillRanks["black_wolf_companion"] = 1
 	ps := sim.defaultPlayer()
 	ps.Progression = sim.progression
 	player := sim.activeLevel().entities[sim.playerID]
@@ -148,6 +194,25 @@ func addRangerSkillMonster(sim *Sim, pos Vec2, hp int) *entity {
 	}
 	sim.activeLevel().entities[monster.id] = monster
 	return monster
+}
+
+func onlyRangerWolfCompanion(t *testing.T, sim *Sim) *entity {
+	t.Helper()
+	var found *entity
+	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
+		entity := sim.activeLevel().entities[id]
+		if entity == nil || entity.kind != companionEntity || entity.monsterDefID != "companion_black_wolf" {
+			continue
+		}
+		if found != nil {
+			t.Fatalf("multiple black wolf companions: %d and %d", found.id, entity.id)
+		}
+		found = entity
+	}
+	if found == nil {
+		t.Fatalf("missing black wolf companion")
+	}
+	return found
 }
 
 func countSkillDamageEvents(r TickResult, skillID string) int {

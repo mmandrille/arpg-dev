@@ -853,6 +853,51 @@
       },
       "name_key": "skill.volley.name"
     },
+    "black_wolf_companion": {
+      "name": "Black Wolf Companion",
+      "class": "ranger",
+      "tree": {
+        "tier": 2,
+        "column": 2
+      },
+      "kind": "summon_companion",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 10
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "piercing_shot",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "companion": {
+        "monster_def_id": "companion_black_wolf",
+        "visual_model": "monster_quadruped",
+        "visual_tint": "101014",
+        "visual_scale": 1.0,
+        "limit": 1
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 4
+      },
+      "name_key": "skill.black_wolf_companion.name"
+    },
     "split_arrow": {
       "name": "Split Arrow",
       "class": "ranger",

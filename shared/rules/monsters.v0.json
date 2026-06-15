@@ -214,6 +214,28 @@
       "attack_cooldown_ticks": 21,
       "name_key": "monster.dungeon_wolf.name"
     },
+    "companion_black_wolf": {
+      "name": "Black Wolf Companion",
+      "max_hp": 8,
+      "loot_table": "no_drop",
+      "xp_reward": 0,
+      "hit_chance": 0.75,
+      "crit_chance": 0.05,
+      "crit_damage": 1.5,
+      "armor": 0,
+      "block_percent": 0,
+      "behavior": "chase",
+      "aggro_radius": 0.1,
+      "assist_radius": 5,
+      "leash_radius": 10,
+      "move_speed": 0.392,
+      "attack_damage": {
+        "min": 1,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 24,
+      "name_key": "monster.companion_black_wolf.name"
+    },
     "dungeon_bat": {
       "name": "Cave Bat",
       "max_hp": 4,

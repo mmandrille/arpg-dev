@@ -8,7 +8,6 @@ Related:
 
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for inventory UI presentation work
 - [`v13_spec-inventory-ui.md`](v13_spec-inventory-ui.md) - inventory panel, equip/unequip/drop intents
 - [`v22_spec-character-scoped-persistence.md`](v22_spec-character-scoped-persistence.md) - durable character inventory
 - [`v23_spec-item-templates-and-rolled-drops.md`](v23_spec-item-templates-and-rolled-drops.md) - rolled item stats and templates
@@ -58,8 +57,6 @@ and delta sync -> 5-column Godot bag grid -> paper-doll equipment layout -> bot/
   `inventory_rows`.
 - No skill tree implementation. Future skills may add rows, but v36 only reserves a clean derived
   stat path.
-- No Godot inventory logic plugin as authority. The plan may adopt or borrow presentation patterns
-  only after recording the plugin checklist result.
 - No Protobuf migration.
 
 ## 3. Files to create or modify
@@ -305,5 +302,4 @@ Required shared/golden proof:
 - ADR-0001 D6 remains intact: `inventory_rows` is a shared rules/data stat, not a client-only
   setting.
 - ADR-0001 D8 remains intact: capacity behavior must replay deterministically from seed and inputs.
-- The Godot plugins checklist must be recorded in the implementation plan. Inventory logic plugins
   remain rejected as authority; UI patterns may be borrowed if the checklist supports it.

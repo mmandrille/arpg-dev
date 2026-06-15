@@ -8,9 +8,6 @@ Tech stack: shared JSON schemas/goldens, Go authoritative sim and replay tests, 
 ## Baseline and shortcut decision
 
 v25 builds on v24 `main-menu-and-character-start`, reusing v18 dungeon generation, v21 dungeon mobs, v23 item templates/rolled item persistence, and existing interactable/action handling from v10/v18/v19.
-
-Godot plugin adoption checklist: **reject/adopt none for this slice**. The client work is limited to presenting a placeholder chest interactable and preserving existing click/action behavior. No new inventory UI, art pack, camera tooling, or addon-level presentation system is needed.
-
 ## File map
 
 | Action | Path | Responsibility |

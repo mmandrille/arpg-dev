@@ -21,4 +21,3 @@ and direct item-stat comparisons without moving economy authority into the Godot
 
 **Explicit non-goals:** no derived character-stat preview after hypothetical equip, buyback,
 stash, repair, crafting, search, sorting, filters, bulk operations, external shop/inventory UI
-plugin adoption, or item/economy rebalance.

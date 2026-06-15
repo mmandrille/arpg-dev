@@ -50,5 +50,4 @@ future visual runners will consume.
 
 - Risk: Skill kind classification may drift when new skill kinds land. Mitigation: keep the helper
   data-driven and unit-test every current kind.
-- Godot plugin shortcut decision: reject. This is Python tooling over existing shared JSON, not a
   client UI/art integration.

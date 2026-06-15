@@ -7,8 +7,6 @@ Tech stack: shared JSON/schema, Python validator, lifecycle docs.
 
 ## Baseline and shortcut decision
 
-Builds on item templates, mystery-seller ADR direction, and ADR-0014 D5. No Godot plugin adoption applies because there is no UI/art work.
-
 ## File map
 
 | Action | Path | Responsibility |

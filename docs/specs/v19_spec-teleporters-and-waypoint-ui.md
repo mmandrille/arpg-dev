@@ -9,7 +9,6 @@ Related:
 - [`v18_spec-dungeon-levels-and-stairs.md`](v18_spec-dungeon-levels-and-stairs.md) — multi-level Sim, generated stairs, scoped transition deltas
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — D4 waypoints deferred from v18
 - [`v10_spec-click-action-and-melee-range.md`](v10_spec-click-action-and-melee-range.md) — interactable activation pattern
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) — client UI shortcut checklist
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
@@ -44,7 +43,6 @@ After this slice:
 - No arbitrary target IDs in `teleport_intent`; the target is a level number.
 - No hidden infinite level catalog. The UI lists only generated/visited levels known to the
   current session.
-- No plugin adoption for this UI slice.
 
 ## 3. Files to create or modify
 

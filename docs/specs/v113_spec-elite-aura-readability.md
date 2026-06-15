@@ -51,13 +51,6 @@ Visual verification command for manual inspection:
 ```bash
 make bot-visual scenario=34_elite_aura_readability
 ```
-
-## Plugin / shortcut note
-
-Client work is a small code-native marker layered onto the existing status-effect marker helpers.
-Do not adopt an external plugin or asset pack for this slice; the plan should record this as
-`reject external plugin/assets`.
-
 ## Open questions and risks
 
 | # | Question / risk | Resolution |

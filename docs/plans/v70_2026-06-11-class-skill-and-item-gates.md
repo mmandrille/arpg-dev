@@ -7,8 +7,6 @@ Tech stack: Shared JSON/schema, Go sim/store/realtime/replay, Go tests.
 
 ## Baseline and Shortcut Decision
 
-Builds on v69. Godot plugin decision: reject for this slice because no client UI/art is in scope.
-
 ## File Map
 
 | Action | Path | Responsibility |

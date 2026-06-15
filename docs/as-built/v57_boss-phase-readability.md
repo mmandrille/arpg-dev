@@ -15,7 +15,6 @@ Plan: [`docs/plans/v57_2026-06-10-boss-phase-readability.md`](../plans/v57_2026-
 - Bot state now reports boss bar phase fields and boss presentation fields for marker presence,
   telegraph radius, and color.
 - The client bot runner can assert boss health bar phase windows and boss telegraph presentation rows.
-- External Godot plugins/assets were rejected for this slice; existing in-repo UI and primitive marker
   patterns were enough for the display-only proof.
 
 ## Proof

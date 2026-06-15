@@ -9,7 +9,6 @@ Related:
 - [`v10_spec-click-action-and-melee-range.md`](v10_spec-click-action-and-melee-range.md) — `action_intent`, melee reach, interactables
 - [`v9_spec-solid-collision-and-obstacles.md`](v9_spec-solid-collision-and-obstacles.md) — wall/monster collision reused by pathfinder
 - [`../../PROGRESS.md`](../../PROGRESS.md)
-- [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md)
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures, replay determinism)
 - ADR-0007 (client-only presentation; path preview optional)
 
@@ -472,7 +471,6 @@ make ci
 | 3 | Keep `out_of_range` for anything? | **No** for `action_intent` / `move_to_intent`; use `no_path` / `path_too_long`. |
 | 4 | 4-way vs 8-way paths? | **8-way** with octile heuristic; matches diagonal `move_intent` normalization. |
 | 5 | Client path preview? | **Optional**; golden + server authority sufficient for v11. |
-| 6 | Plugin adoption? | **Reject** NavMesh plugins — grid A\* in-repo mirrors collision rules. |
 
 ## 9. Risks and mitigations
 

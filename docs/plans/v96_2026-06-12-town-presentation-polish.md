@@ -8,9 +8,6 @@ Tech stack: Shared JSON world rules, Godot client presentation/tests, showme vis
 ## Baseline and shortcut decision
 
 Builds on v95 `unique-item-catalog-seed` with current branch `main`.
-
-Godot plugin / asset shortcut decision: reject adopting a plugin or imported asset pack for this slice. Borrow the existing in-repo procedural primitive style used by merchant, stash, stairs, and market-board presentation. Imported Kenney-style buildings remain future art-direction work because this slice only needs a compact proof and no asset-pipeline expansion.
-
 ## File map
 
 | Action | Path | Responsibility |

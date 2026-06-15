@@ -25,7 +25,6 @@ Plan: [`docs/plans/v154_2026-06-14-class-third-skill-trio.md`](../plans/v154_202
   focused on player-visible class expansion without a new mechanics framework.
 - Used focused per-class bot scenarios because the current protocol bot scenario shape creates one
   character per scenario.
-- Rejected external Godot skill-tree/VFX plugins; the existing shared-rule loader and code-native
   presentation path already cover this scope.
 
 ## Deferred

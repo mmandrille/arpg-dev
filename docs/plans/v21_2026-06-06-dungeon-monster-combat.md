@@ -12,7 +12,6 @@ v21 builds on v20 `play-session-loop`: sessions start in town level `0`, dungeon
 
 Godot shortcut adoption checklist:
 
-- **Decision:** reject plugin adoption.
 - **Reason:** this slice has no new client UI, camera, art, or presentation system. Existing `player_damaged` / `player_killed` event mappings already trigger hit/death reactions.
 - **Borrow:** existing Godot golden fixture pattern in `client/tests/test_golden.gd`; no addon or asset pack needed.
 

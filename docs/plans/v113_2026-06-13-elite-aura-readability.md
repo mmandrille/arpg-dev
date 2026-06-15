@@ -9,8 +9,6 @@ Tech stack: Go sim, Godot client presentation, client bot, lifecycle docs.
 
 ## Baseline and shortcut decision
 
-Builds on v112 `elite-aura-foundation`. Godot plugin adoption decision: reject external
-plugins/assets because the feature is a small code-native marker using existing
 `player_status_effect_markers.gd` patterns.
 
 ## File map

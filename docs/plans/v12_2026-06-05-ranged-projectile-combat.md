@@ -41,14 +41,6 @@
 | Modify | `client/tests/test_golden.gd` | Validate ranged projectile golden/rules consistency |
 | Modify | `client/scripts/smoke.gd` | Cover projectile entity rendering if practical |
 | Modify | `PROGRESS.md` | Add v12 completion notes when shipped |
-
-## Plugin adoption
-
-- [x] Consult `docs/researchs/godot-plugins-and-shortcuts.md`.
-- [x] Decision: **reject** projectile/VFX plugins for v12. The slice needs a simple placeholder mesh and server-authoritative wire entity, not client-side gameplay logic or production art.
-
----
-
 ## Task 1: Shared Contracts And Rules
 
 - [x] **Step 1.1:** Add `attack_mode` and `projectile_speed` support to `items.v0.schema.json`.

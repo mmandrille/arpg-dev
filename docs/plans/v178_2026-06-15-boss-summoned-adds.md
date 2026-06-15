@@ -12,7 +12,6 @@ client bot regression, SDD docs.
 ## Baseline and Shortcut Decision
 
 Builds on v177 boss ranged pattern and the extracted `server/internal/game/boss_patterns.go`
-runtime. Godot plugin adoption decision: reject/not applicable; this slice has no new client UI,
 art, camera, or inventory presentation and reuses existing monster rendering.
 
 ## File Map

@@ -13,7 +13,6 @@ Make the generated elite side-objective reward chest easier to locate while play
 - No server protocol, quest, objective, or world-generation changes.
 - No full minimap, fog-of-war, route line, compass, or persistent floor map.
 - No changes to elite objective locking, leader count rules, loot, or reward chest generation.
-- No external Godot minimap plugin adoption for this compact overlay.
 
 ## Acceptance Criteria
 

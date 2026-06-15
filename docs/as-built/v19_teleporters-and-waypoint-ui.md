@@ -16,4 +16,3 @@ server-authoritative fast travel.
   -2, and teleport back to -1.
 
 **Explicit non-goals:** no character-scoped waypoint persistence, town waypoint, VFX/audio,
-production teleporter art, hidden infinite level catalog, or plugin adoption.

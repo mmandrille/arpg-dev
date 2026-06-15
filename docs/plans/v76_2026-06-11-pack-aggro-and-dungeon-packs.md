@@ -7,8 +7,6 @@ Tech stack: Shared JSON rules/schemas, Go sim and dungeon generator, Python prot
 
 ## Baseline and shortcut decision
 
-Builds on v37 aggro-on-hit, v40 reachable dungeon obstacles, v52 ranged monster AI, and v72 monster visual catalog. No Godot plugin or asset shortcut applies; this slice does not add client UI/art and uses existing monster rendering.
-
 ## File Map
 
 | Action | Path | Responsibility |

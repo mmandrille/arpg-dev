@@ -29,5 +29,3 @@ Status: Complete
 - Market ownership, offer acceptance, purchase, listing cancellation, and upgrade math stayed on the
   existing authoritative paths.
 - No upgrade recipes, success chance, bricking, material costs, or equipped-item upgrades.
-- No new external inventory plugin was adopted.
-

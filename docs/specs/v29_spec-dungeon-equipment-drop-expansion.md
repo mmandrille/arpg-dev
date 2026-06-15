@@ -11,7 +11,6 @@ Related:
 - [`v28_spec-full-equipment-and-belt-hotbar.md`](v28_spec-full-equipment-and-belt-hotbar.md) - paper-doll equipment, all current templates, and belt hotbar
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - dungeon progression and better loot by depth
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist; expect no client plugin adoption for this server/data slice
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose

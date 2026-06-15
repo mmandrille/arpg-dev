@@ -9,8 +9,6 @@ Tech stack: Shared JSON/schema, Go deterministic sim, Python asset validators/ge
 
 Builds on v71 `class-picker-and-sprites` with v72 as the next free slice. Current code has one monster scene (`monster_dummy.tscn`), a hardcoded client model branch in `main.gd`, and boss visuals pinned to `current_humanoid_player` in `boss_templates.v0.json` plus validation. The slice replaces those model-choice branches with shared visual metadata.
 
-Godot shortcut decision: **reject external plugin / asset-pack adoption for this slice**. The need is two deterministic placeholder model families and a small resolver; existing generated GLB tooling is lower risk than vendoring external art. Use the showme workflow for visual approval before final wiring.
-
 ## File Map
 
 | Action | Path | Responsibility |

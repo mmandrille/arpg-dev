@@ -34,7 +34,6 @@ presentation maps should be equivalent to v59.
 - No protocol schema bump and no new persisted fields.
 - No file-path references in runtime state, protocol payloads, replay output, or goldens.
 - No free-form formula language or new skill capability.
-- No client UI redesign or external Godot plugin adoption.
 
 ## 3. Acceptance Criteria
 

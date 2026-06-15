@@ -11,7 +11,6 @@ client bot preflight.
 ## Baseline and shortcut decision
 
 Builds on v38/v45/v46 listed-session browser work and the backlog item
-`session-browser-filters`. Godot plugin/adoption checklist: reject external UI plugins/assets; this
 is a small in-repo panel control addition.
 
 ## File map

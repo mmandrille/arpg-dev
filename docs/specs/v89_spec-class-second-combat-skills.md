@@ -26,7 +26,6 @@ bot proof path so future class-skill additions follow a repeatable data-driven p
 ## Non-goals
 
 - No final balance pass across all skills.
-- No production VFX/audio or external Godot plugin dependency.
 - No new explicit ground-targeting intent shape.
 - No player-vs-player behavior.
 - No persistent monster debuff storage beyond live session/replay state.
@@ -125,7 +124,3 @@ make bot-visual scenario=45_class_second_combat_skills.json
   extraction and document any unavoidable small growth.
 
 ## Shortcut decision
-
-Godot plugin adoption: reject external plugins/assets. The slice needs small code-native cone,
-projectile, push, and tint presentation hooked to server-owned events/state; gameplay authority and
-determinism stay in the Go sim and shared rule catalog.

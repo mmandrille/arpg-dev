@@ -15,9 +15,6 @@ Baseline is v49 `gold-autopickup-and-shared-loot-rules` on `main`. Reuse:
 - v41/v47 server-authored town vendor panel, private shop events, and refreshed panel payload patterns.
 - v33/v38/v48/v49 co-op recipient-scoped snapshot/delta routing and explicit owner-private changes.
 - Existing session-start snapshots and replay reconstruction instead of reading live mutable rows during replay.
-
-Godot plugin shortcut decision: **reject external plugin adoption for v50 implementation**. The adoption checklist in `docs/researchs/godot-plugins-and-shortcuts.md` was reviewed during planning. GLoot, Godot-Inventory, and Wyvernbox can be borrowed only as UI references for side-by-side inventory/stash gestures; no external gameplay, item state, inventory authority, save/load, or capacity logic should be adopted. Client work should extend the existing in-repo `inventory_panel.gd`, `shop_panel.gd`, tooltip, and bot-debug patterns.
-
 Key implementation decisions:
 
 - Add protocol v7 because clients need explicit stash item/gold transfer intents and actor-private stash item/gold views.

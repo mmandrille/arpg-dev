@@ -8,9 +8,6 @@ Tech stack: shared JSON/schema, Go authoritative sim, Python protocol bot, Godot
 ## Baseline And Shortcut Decision
 
 Builds on v98 Rogue class foundation plus the post-v98 fix that made `poison_stab` and `dash` visible in the skill tree.
-
-Godot plugin adoption: reject. This slice does not add UI frameworks, art packs, camera tooling, or client authority. Any client work is small event presentation inside the existing in-repo client.
-
 ## File Map
 
 | Action | Path | Responsibility |

@@ -16,7 +16,6 @@ Related:
 - [`v21_spec-dungeon-monster-combat.md`](v21_spec-dungeon-monster-combat.md) - proactive monster attacks
 - [`v27_spec-hold-click-controls.md`](v27_spec-hold-click-controls.md) - sustained mouse input
 - [`v35_spec-boss-floor-gate.md`](v35_spec-boss-floor-gate.md) - first boss floor and pattern events
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin checklist if client presentation expands
 
 ## 1. Purpose
 

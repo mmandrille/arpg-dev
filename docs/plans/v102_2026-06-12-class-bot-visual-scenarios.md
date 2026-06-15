@@ -9,11 +9,6 @@ Tech stack: shared JSON rules, Python protocol bot, declarative bot scenarios, G
 
 Builds on v97 `class-starter-loadouts`, v98 `rogue-class-foundation`, v99 `rogue-skill-mechanics`,
 v100 `damage-types-and-resistances`, and v101 `undead-skeleton-poison-immunity`.
-
-Godot plugin / asset shortcut decision: **reject**. This slice does not add client UI, camera
-systems, imported art, or production VFX. Existing protocol bot scenarios and `make bot-visual`
-already provide the needed visual approval path.
-
 Current branch: `main`. Do not create branches.
 
 ## File map
@@ -296,4 +291,3 @@ rg -n "\\[ \\]" docs/plans/v102_2026-06-12-class-bot-visual-scenarios.md
 - Skill id cleanup for `ligthing` remains out of scope.
 - New class skills, new classes, and combat balance remain out of scope.
 - Rich cinematic camera choreography remains out of scope; class scenario visual metadata is enough.
-- External Godot plugins/assets remain rejected for this slice.

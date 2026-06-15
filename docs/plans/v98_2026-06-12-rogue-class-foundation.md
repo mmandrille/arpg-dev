@@ -7,10 +7,7 @@ Tech stack: shared JSON rules/assets, Go server/game/http tests, Godot client sc
 
 ## Baseline and shortcut decision
 
-Builds on v69-v71 class identity/picker/presentation and v97 starter loadouts. Godot plugin adoption:
-reject external plugins and asset packs for this slice. Existing deterministic GLB generation, class
 presentation metadata, and equipment presentation loaders already cover the required visual surface;
-adopting a plugin would add dependency risk without solving a missing capability.
 
 ## Scope split
 

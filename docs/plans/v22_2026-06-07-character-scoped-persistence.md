@@ -11,7 +11,6 @@ v22 builds on v21 `dungeon-monster-combat`: fresh play starts in town level `0`,
 
 Godot shortcut adoption checklist:
 
-- **Decision:** reject plugin adoption.
 - **Reason:** this slice has no new Godot UI, camera, placeholder art, inventory presentation, or isometric tooling. Existing inventory and waypoint panels should render persisted snapshot state without client feature work.
 - **Borrow:** existing client-unit/smoke coverage only if server snapshot shape changes unexpectedly.
 
@@ -204,4 +203,3 @@ make play
 - No durable dungeon map, monster state, corpses, opened doors, floor drops, or player HP.
 - No stash UI/interactions, vendors, gold, crafting, quests, character stats, skills, level/XP, respawn, or checkpoints.
 - No random item stat generation yet; v22 only persists the future-ready `rolled_stats` payload.
-- No new Godot UI, production art, or plugin adoption.

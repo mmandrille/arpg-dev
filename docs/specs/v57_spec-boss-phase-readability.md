@@ -22,7 +22,6 @@ telegraph phases using the server-provided telegraph radius/color.
 - No new boss pattern variety; that remains queued as the next selected slice.
 - No client-side hit detection or gameplay decisions.
 - No production VFX/audio, boss portraits, phase history, multi-boss layout, or phase-specific art.
-- No external Godot plugin or asset dependency.
 
 ## Acceptance criteria
 
@@ -44,15 +43,6 @@ telegraph phases using the server-provided telegraph radius/color.
    scenarios can assert readability state.
 8. Client bot scenario coverage reaches the first boss floor, waits for a telegraph, asserts the
    boss health bar phase state, and asserts the in-world telegraph marker is active.
-
-## Plugin and asset adoption
-
-Decision: reject external Godot plugins, demos, and asset packs.
-
-Reason: this is a narrow display-only extension of existing boss health bar and primitive marker
-patterns. The project already uses in-repo procedural Godot primitives for placeholder presentation,
-and a plugin would add maintenance surface without improving authority, testability, or scope.
-
 ## Scope and likely files
 
 - `client/scripts/boss_health_bar.gd` - phase label/progress/debug state.

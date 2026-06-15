@@ -10,7 +10,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - character-scoped progression
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
 - [`v23_spec-item-templates-and-rolled-drops.md`](v23_spec-item-templates-and-rolled-drops.md) - template requirements and rolled payloads
 - [`v26_spec-character-stats-and-leveling.md`](v26_spec-character-stats-and-leveling.md) - durable base stats and derived stat views
 - [`v42_spec-vendor-appraisal-and-item-comparison.md`](v42_spec-vendor-appraisal-and-item-comparison.md) - server-authored shop appraisals and direct comparisons
@@ -42,7 +41,6 @@ this data; it does not decide whether an item is usable.
   the proof.
 - No main-menu character summaries or old-session resume UI.
 - No production item art, inventory art, vendor art, animation, VFX, or audio pass.
-- No external inventory/shop plugin adoption. The plan must record the adoption checklist result;
   the expected default is to extend the in-repo inventory and shop panels.
 
 ## 3. Acceptance Criteria

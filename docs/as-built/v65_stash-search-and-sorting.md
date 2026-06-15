@@ -30,5 +30,4 @@ Full `make ci` passed with 9 phases.
 ## Notes
 
 - No shared protocol, Go server, persistence, or replay contract changed in this slice.
-- External inventory plugin adoption was rejected after the required shortcut checklist because the
   existing server-backed `StashPanel` only needed a small local view adapter.

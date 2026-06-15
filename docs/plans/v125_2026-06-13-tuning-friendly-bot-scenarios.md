@@ -9,10 +9,6 @@ Tech stack: Python protocol bot, JSON scenarios, SDD docs.
 ## Baseline And Shortcut Decision
 
 Baseline is v124 `ranger-volley-and-visual-scenario` on `main`, committed before this loop.
-
-Godot plugin adoption checklist: not applicable. This slice touches protocol bot tooling and JSON
-scenario assertions only.
-
 ## File Map
 
 | Action | Path | Responsibility |

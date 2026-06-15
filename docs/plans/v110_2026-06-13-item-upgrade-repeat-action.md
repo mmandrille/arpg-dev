@@ -10,7 +10,6 @@ Tech stack: shared JSON rules, Go store, Go HTTP tests, lifecycle docs.
 ## Baseline and shortcut decision
 
 Builds on v94 `item-upgrade-starter` and v109 `permanent-death-corpse-recovery`. No client UI,
-camera, inventory presentation, or art is in scope, so the Godot plugin adoption checklist is not
 required for this slice.
 
 ## File map

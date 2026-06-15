@@ -9,7 +9,6 @@ Tech stack: Makefile, Python tooling, existing bot-visual shell script.
 
 ## Baseline and shortcut decision
 
-Builds on v85 `skill-demo-catalog`. Godot plugin decision: reject, because this is command tooling
 around existing replay infrastructure.
 
 ## File map

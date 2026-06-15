@@ -9,7 +9,6 @@ Tech stack: Go dungeon generation, protocol bot scenario, lifecycle docs.
 
 ## Baseline and shortcut decision
 
-Builds on v154. Godot plugin decision: reject/none; this slice reuses existing chest and loot
 presentation and does not add client UI.
 
 ## File map
@@ -95,4 +94,3 @@ make ci
 - Quest log UI.
 - Durable quest progress.
 - Kill/collect/reach objective catalogs.
-

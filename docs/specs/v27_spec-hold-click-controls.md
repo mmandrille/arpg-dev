@@ -15,7 +15,6 @@ Related:
 - [`v24_spec-main-menu-and-character-start.md`](v24_spec-main-menu-and-character-start.md) — gameplay input lock during pause/menu
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) — thin client; server owns outcomes
 - [`../adr/0007-animation-state-model.md`](../adr/0007-animation-state-model.md) — client-only attack/locomotion presentation
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) — adoption checklist (expected: reject plugins)
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
@@ -279,13 +278,6 @@ PROGRESS.md                                        - lifecycle update when v27 s
 | Q-3 | Hold on chest | **No hold on chest**; open chest is non-actionable → hold stops, no spam |
 | Q-4 | Chase while holding | **Yes** — repeat `action_intent`, v11 auto-approach unchanged |
 | Q-5 | Walk anim during hold-move | **Deferred** — locomotion anim WASD-only for v27 |
-
-## 9. Godot plugin adoption
-
-Run checklist from [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md).
-
-**Expected outcome:** **Reject** — input timing belongs in existing `main.gd`; no inventory/UI/camera
-plugin adds value.
 
 ## 10. Open questions
 

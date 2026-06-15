@@ -8,7 +8,6 @@ Tech stack: Go store, SQL migrations, Go HTTP, lifecycle docs.
 ## Baseline and shortcut decision
 
 Builds on v68 `market-stash-listing-foundation`, where active listings already move one seller stash
-item out of `account_stash_items`. No Godot plugin adoption applies because this slice has no client
 UI, camera, inventory presentation, or art.
 
 ## File map

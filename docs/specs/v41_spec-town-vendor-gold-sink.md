@@ -9,7 +9,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub, character progression, deepest level reached
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for client presentation work
 - [`v22_spec-character-scoped-persistence.md`](v22_spec-character-scoped-persistence.md) - durable character inventory, equipment, and waypoints
 - [`v23_spec-item-templates-and-rolled-drops.md`](v23_spec-item-templates-and-rolled-drops.md) - rolled item payloads
 - [`v25_spec-treasure-classes-and-guarded-chests.md`](v25_spec-treasure-classes-and-guarded-chests.md) - treasure class rolls
@@ -480,21 +479,6 @@ Vendor transactions are character-owned, not session-owned.
 - Persistence must use the acting member's account/character, not the session host's.
 
 ## 6. Client presentation
-
-### 6.1 Plugin checklist
-
-Reject plugin adoption for v41. This slice needs one small display-only panel over server-authored
-offer data. Existing in-repo Godot UI patterns already cover inventory, gold labels, buttons, and
-panel lifecycle. External inventory/shop plugins would add maintenance weight and risk duplicating
-economy authority.
-
-The v41 plan must record:
-
-```text
-Godot plugin decision: reject external plugin for town vendor UI.
-Reason: display-only panel; server owns pricing, offers, buy/sell validation, and persistence.
-```
-
 ### 6.2 Shop panel expectations
 
 The panel should:
@@ -614,7 +598,6 @@ the direct subject of the buy/sell operation.
 | Q-1 | Buy only, or buy and sell in v41? | Resolved: buy and sell. |
 | Q-2 | Initial fixed catalog? | Resolved: `red_potion`, `blue_potion`, plus five generated common-mob rolled equipment offers. |
 | Q-3 | How should prices be calculated? | Resolved: first-pass formula from rarity, base stats, rolled stats, slot base, and fixed consumable prices. |
-| Q-4 | Use an external shop/inventory plugin? | Resolved: reject; use a small in-repo display-only panel. |
 | Q-5 | What counts as "max dungeon level achieved"? | Resolved: durable `deepest_dungeon_depth`, updated when the actor enters a deeper negative level. |
 
 ## 12. Deferred follow-ups

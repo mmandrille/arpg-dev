@@ -11,7 +11,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one authoritative `Sim`
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client shortcut checklist
 - [`v25_spec-treasure-classes-and-guarded-chests.md`](v25_spec-treasure-classes-and-guarded-chests.md) - chest loot rolls and open-once behavior
 - [`v30_spec-monster-rarity-and-loot-scaling.md`](v30_spec-monster-rarity-and-loot-scaling.md) - monster rarity and loot-depth scaling
 - [`v39_spec-ui-currency-and-mana-polish.md`](v39_spec-ui-currency-and-mana-polish.md) - character gold, `gold_picked_up`, and `gold_update`
@@ -39,11 +38,6 @@ This slice makes that shared-loot policy explicit and improves gold pickup feel:
 The client continues to render existing loot entities and consume existing `entity_remove`,
 `gold_update`, `character_progression_update`, and `gold_picked_up` messages. No client-side loot
 authority or local pickup shortcut is introduced.
-
-Client/plugin shortcut decision: reject plugin adoption for this slice. No new Godot UI, art,
-inventory presentation, camera tooling, or placeholder assets are expected. If the implementation
-unexpectedly changes client presentation, the plan must record the adoption checklist result from
-the plugin research doc before editing client code.
 
 ## 2. Non-goals
 

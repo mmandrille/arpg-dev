@@ -12,7 +12,6 @@ Baseline is v31 `combat-stat-effects-and-feedback`, with scenarios currently num
 `tools/bot/scenarios/client/11_combat_feedback.json`.
 
 This slice reuses the existing Go test suite, Python bot runner, shared JSON validation, and Godot
-headless tests. Godot plugin decision: **reject adoption** for this slice. Client work is limited to
 test/scenario assertion cleanup, not new UI, camera, inventory presentation, isometric tooling, or
 placeholder art.
 

@@ -19,7 +19,6 @@ Tech stack: Godot GDScript client + headless unit tests; no shared/server/bot sc
 | Client-only scope; no hidden server work | OK |
 | Bot proof explicitly deferred with reason | OK — regression-only in this plan |
 | As-built: `main.gd` edge-triggered LMB + `_attack_cooldown` | OK |
-| Plugin adoption | Reject (spec §9) |
 | Minor drift | Spec AC #8 mentions inventory lock; `_menu_blocks_gameplay_input()` does not include inventory today — plan clears hold when inventory is visible |
 
 ---
@@ -27,9 +26,6 @@ Tech stack: Godot GDScript client + headless unit tests; no shared/server/bot sc
 ## Baseline and shortcut decision
 
 v27 builds on v25 `treasure-classes-and-guarded-chests`, reusing v10 `action_intent`, v11 `move_to_intent` + auto-approach, and v24 menu/pause input guards.
-
-Godot plugin adoption checklist (**reject**): input timing belongs in existing client scripts; no UI/camera/inventory plugin adds value.
-
 **Testability choice:** Extract hold state + pure decision helpers into `client/scripts/sustained_click_input.gd` (RefCounted). `main.gd` owns lifecycle and network sends; unit tests target the helper without loading the full game scene.
 
 ---

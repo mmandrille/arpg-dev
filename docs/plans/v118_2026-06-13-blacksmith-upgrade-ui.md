@@ -11,8 +11,6 @@ SDD docs.
 
 ## Baseline and shortcut decision
 
-Builds on v94/v110 item upgrade routes and v117 market/stash UI patterns. `docs/researchs/godot-plugins-and-shortcuts.md`
-was checked. Decision: **reject plugin adoption**; reuse existing draggable-window, stash panel,
 HTTP client, and town NPC presentation patterns.
 
 ## File map

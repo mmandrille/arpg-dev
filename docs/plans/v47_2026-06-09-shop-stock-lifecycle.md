@@ -9,8 +9,6 @@ Tech stack: shared JSON rules/schemas/goldens, Go `server/internal/game` + `stor
 
 Baseline is v46 `client-join-game-proof`, with v41 `town-vendor-gold-sink`, v42 `vendor-appraisal-and-item-comparison`, v43 `equipment-requirements-and-preview`, v44 `skill-points-and-magic-bolt`, and v45/v46 menu/session flows already complete.
 
-Godot shortcut decision: reject plugin adoption. v47 extends the existing `ShopPanel`, inventory panel, item tooltip, drag/drop, and bot debug state; no external shop/inventory UI plugin or asset pack is needed. This follows `docs/researchs/godot-plugins-and-shortcuts.md`: server authority remains in Go, and client work is presentation only.
-
 Key implementation decisions:
 
 - Add protocol v6 because v5 only allows `fixed` and `generated` shop offer kinds and offer-id prefixes.
@@ -430,7 +428,6 @@ make ci
 - Fixed potion stock limits.
 - Durable buyback across town exits or session ends.
 - Multiple vendor types, stash, repair, crafting, gambling, sorting, filters, search, bulk operations, or player trade.
-- Production vendor art, portraits, sounds, imported UI assets, or external shop/inventory plugin adoption.
 - Clock-based daily/hourly refresh.
 - Expanded item-level/depth economy bands beyond the current `1`, `2`, and `3+` loot bands.
 - Unique/set item catalogs and unique/set shop offers.

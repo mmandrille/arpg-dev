@@ -33,9 +33,6 @@ Branch: `feature/equipped-weapon-damage`
   keyed by accepted attack message IDs, then checked after the scenario run.
 - `intent_accepted` is a separate WebSocket envelope, not part of
   `state_delta`; the bot must ingest it while pumping messages.
-- No Godot UI or asset work is required. Per the plugins checklist:
-  **reject plugin adoption for v8** because this slice changes authoritative
-  combat math and golden validation only; GLoot/Godot-Inventory remain future
   display-only candidates.
 
 ## Decisions
@@ -47,7 +44,6 @@ Branch: `feature/equipped-weapon-damage`
 | Fallback path | No weapon, missing equipped item, non-weapon slot, or no item damage falls back to `combat.player_damage`. |
 | Attack counting | Count acknowledged `attack_intent` messages sent by the `attack_until_event` step for the selected `monster_def_id`; with v8 hit chance `1.0`, this equals successful attacks. |
 | Runtime vs final assertions | `monster_killed_in_attacks` is runtime-only; `/state`, reconnect, and replay keep final-state assertions. |
-| Client plugins | Reject for this slice; no inventory UI, drag/drop, tooltip, or addon integration. |
 
 ## File Map
 
@@ -231,7 +227,6 @@ Files:
   and replay verification still pass.
 - [x] Step 6.3: Run `make ci`.
 - [x] Step 6.4: Update `PROGRESS.md` only after the slice passes:
-  mark v8 complete, add summary, and keep deferred UI/plugin work in backlog.
 
 Final verification:
 
@@ -259,7 +254,6 @@ defaults unless the product direction changes:
 | 1 | Should weapon damage replace base damage instead of adding to it? | Yes, replace. |
 | 2 | Should the one-attack bot assertion count sent attacks or acknowledged attacks? | Acknowledged `attack_intent` messages. |
 | 3 | Should runtime-only assertions run against `/state` and reconnect snapshots? | No; final-state assertions continue there. |
-| 4 | Should v8 adopt any Godot inventory plugin? | No; explicitly reject for this slice. |
 
 ## Risks and Mitigations
 

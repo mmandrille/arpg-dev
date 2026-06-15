@@ -35,7 +35,6 @@ Full `make ci` passed with 9 phases.
 
 ## Notes
 
-- External Godot plugin adoption was rejected for this slice after the required shortcut checklist:
   the existing server-backed `ShopPanel` already owned the relevant UI and interaction contract.
 - Scenario funding sells three vendor-lab rolled items before rerolling so the bot can still afford
   a post-reroll mystery purchase.

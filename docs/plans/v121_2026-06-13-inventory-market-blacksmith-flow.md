@@ -23,7 +23,6 @@ uses character gold first, then account stash gold for the remainder.
 
 ## Tasks
 
-- [x] Record plugin decision and contract shape in spec.
 - [x] Add server acceptance tests for inventory-origin market listing, offer, and upgrade.
 - [x] Implement HTTP request handling without removing existing stash fields.
 - [x] Update NetClient and main coordinator for inventory-origin requests.

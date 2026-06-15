@@ -27,7 +27,3 @@ Make the remaining resource, support, and mobility unique effects from `shared/r
 ## Bot Scenario
 
 Add a protocol bot scenario that proves at least one v108 effect over the live protocol.
-
-## Godot Plugin Adoption
-
-No client-side UI or asset pipeline is introduced in this slice. Existing protocol events and status surfaces are reused, so the Godot plugin adoption result is **reject** for new plugin use.

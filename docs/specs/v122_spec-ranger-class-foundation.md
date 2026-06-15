@@ -18,7 +18,6 @@ ranged basic attack path from creation.
 
 - No Ranger active skills yet.
 - No new projectile protocol fields.
-- No external Godot plugin or asset-pack adoption.
 - No existing-character backfill or class-change UI.
 
 ## Acceptance Criteria

@@ -7,8 +7,6 @@ Tech stack: Godot GDScript client, client unit tests, lifecycle docs.
 
 ## Baseline And Shortcut Decision
 
-Builds on v74. Godot plugin adoption checklist: reject plugin adoption; persistence is a small extension of the in-repo window helper and existing local settings pattern.
-
 ## File Map
 
 | Action | Path | Responsibility |

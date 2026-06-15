@@ -13,7 +13,6 @@ The loadout is durable server-owned inventory state, so fresh sessions, resume s
 ## Non-goals
 
 - Backfilling already-created characters, including login-created compatibility defaults.
-- New production art, models, icons, or a Godot equipment plugin.
 - New class selection UI; existing character creation/class picker stays in place.
 - A full affix naming system or elemental skill-scaling redesign beyond the starter staff stat needed here.
 

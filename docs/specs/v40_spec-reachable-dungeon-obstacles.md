@@ -9,7 +9,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - on-demand seeded dungeon generation
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for client presentation work
 - [`v9_spec-solid-collision-and-obstacles.md`](v9_spec-solid-collision-and-obstacles.md) - existing wall collision contract
 - [`v11_spec-click-to-move-and-auto-path.md`](v11_spec-click-to-move-and-auto-path.md) - server-owned A* navigation and auto-approach
 - [`v18_spec-dungeon-levels-and-stairs.md`](v18_spec-dungeon-levels-and-stairs.md) - generated levels and stairs
@@ -235,18 +234,6 @@ Generated walls must reuse existing `wallObstacle` collision behavior:
 
 No gameplay authority moves to Godot. Godot only renders wall meshes from server-provided layout
 and keeps using existing input paths.
-
-### 5.5 Client presentation and plugin decision
-
-The implementation plan must record the Godot shortcut decision required by `AGENTS.md`.
-Expected decision for this slice:
-
-```text
-Reject plugin adoption. v40 needs simple server-provided AABB wall boxes rendered through the
-existing in-repo Godot wall path. No UI framework, camera plugin, asset pack, or external collision
-tool should be adopted for the first proof.
-```
-
 ## 6. Determinism and replay
 
 The generator must be deterministic for the same seed, level, and rules. Tests should avoid locking

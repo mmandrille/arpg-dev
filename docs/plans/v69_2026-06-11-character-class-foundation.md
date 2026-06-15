@@ -7,8 +7,6 @@ Tech stack: Shared JSON/schema, Go store/API/session, Go tests, lifecycle docs.
 
 ## Baseline and Shortcut Decision
 
-Builds on v68. Godot plugin decision: reject for this slice because v69 has no client UI or art work; class visuals are deferred to v71.
-
 ## File Map
 
 | Action | Path | Responsibility |

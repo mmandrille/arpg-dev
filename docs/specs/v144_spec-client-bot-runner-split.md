@@ -45,7 +45,6 @@ dispatch, and static validation tables into focused helper modules while preserv
 
 ## Shortcut Decision
 
-Reject external plugins/addons for this slice. This is internal bot-test infrastructure with no
 player UI, art, camera, inventory presentation, or asset work; an addon would add dependency surface
 without replacing the current scenario-runner contract.
 

@@ -10,7 +10,6 @@ Tech stack: Go sim, Go tests, SDD docs.
 
 ## Baseline and shortcut decision
 
-Builds on v159 `kill-gated-elite-objective`. Existing plugins/assets: reject; this is backend-only
 simulation structure with no Godot client work.
 
 ## File map

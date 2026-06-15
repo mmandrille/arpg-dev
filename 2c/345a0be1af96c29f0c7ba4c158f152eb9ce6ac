@@ -1,0 +1,51 @@
+client/scripts/main.gd
+  s_d651e97b83a874::t_a73db1c028397a 1149-1150,1169-1170,1597-1598
+  s_d651e97b83a874::t_c6a47bba787990 5962,5972-5979
+  s_d651e97b83a874::t_5f7be3a4e40cdd 1123-1124,1134-1135
+  s_d651e97b83a874::t_4616c418ffd88b 1342,4826,6030
+server/internal/game/unique_survival_effects.go
+  s_d651e97b83a874::t_6591b6925909d4 28-31
+shared/rules/skills.v0.json
+  s_d651e97b83a874::t_88ba7257dbf7d7 577,580-583,589
+shared/assets/skill_presentations.v0.json
+  s_d651e97b83a874::t_be2c59197b874d 124
+shared/rules/skills.v0.schema.json
+  s_d651e97b83a874::t_e86e43563b03da 347-348,408-417
+server/internal/game/boss_patterns.go
+  s_d651e97b83a874::t_6591b6925909d4 143-147
+client/scripts/player_status_effect_markers.gd
+  s_d651e97b83a874::t_fd3d0b8455f89e 4,12,43-62,238-267
+server/internal/game/sim.go
+  s_d651e97b83a874::t_6591b6925909d4 1567-1570
+  s_d651e97b83a874::t_76ab687f54ed25 2445,2449-2452,4384-4401
+server/internal/game/game_test.go
+  s_d651e97b83a874::t_d7e5370fc8f23b 249-253,1796-1848
+  s_d651e97b83a874::t_9e18e38abebeec 7702-7719
+client/tests/test_status_effect_presentation.gd
+  s_d651e97b83a874::t_fb682949a40d04 19,138-155
+shared/i18n/en.json
+  s_d651e97b83a874::t_be2c59197b874d 74
+server/internal/game/rules.go
+  s_d651e97b83a874::t_88ba7257dbf7d7 2873,3009,3011,3014,3030-3031
+  s_d651e97b83a874::t_be18e984803d1b 3082-3118
+shared/i18n/es.json
+  s_d651e97b83a874::t_be2c59197b874d 62
+tools/bot/scenarios/70_paladin_sanctuary.json
+  s_d651e97b83a874::t_d3b50adae9c52d 7,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2c345a0be1af96c29f0c7ba4c158f152eb9ce6ac",
+  "prompts": {},
+  "sessions": {
+    "s_d651e97b83a874": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec989-bab7-7240-b2f6-ba0d99e9cc7c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

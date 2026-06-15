@@ -1,0 +1,39 @@
+shared/rules/skills.v0.json
+  s_23edecc223cbe3::t_f7c65ffbac4f63 285-286
+server/internal/game/sorcerer_revive_test.go
+  s_23edecc223cbe3::t_ac684da1e38066 32-34,42-44,80-101,103-106,137
+  s_23edecc223cbe3::t_846e5ed5d9c802 102
+server/internal/game/sim.go
+  s_23edecc223cbe3::t_8b8682b6dd8e90 151-152
+  s_23edecc223cbe3::t_2e3686cf696b14 5567-5575
+server/internal/game/companion_ai.go
+  s_23edecc223cbe3::t_7d10dbdd191970 129,150,240-242
+  s_23edecc223cbe3::t_397ebe2fda865d 149
+shared/protocol/session_snapshot.v8.schema.json
+  s_23edecc223cbe3::t_4ff381c6a56539 117-118
+server/internal/game/types.go
+  s_23edecc223cbe3::t_b551095d7c31ba 56-57
+server/internal/game/rules_companion.go
+  s_23edecc223cbe3::t_b2be28093179b5 16-20
+  s_23edecc223cbe3::t_e71b7c44c39755 76-81,111-119
+shared/rules/skills.v0.schema.json
+  s_23edecc223cbe3::t_3f70c4970b525c 240,245-246
+shared/protocol/state_delta.v8.schema.json
+  s_23edecc223cbe3::t_093ace7bc7ed4e 84-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9aaf4b4f02c118ba7eb7b85b352ba122c47669cb",
+  "prompts": {},
+  "sessions": {
+    "s_23edecc223cbe3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecccc-5176-7512-8798-ea6883235cfa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

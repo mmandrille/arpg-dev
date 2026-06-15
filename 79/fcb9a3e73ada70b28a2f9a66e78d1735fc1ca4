@@ -1,0 +1,74 @@
+client/scripts/stat_labels.gd
+  s_3d722d65688e0b::t_68bdc450bfd108 28
+shared/rules/shops.v0.schema.json
+  s_3d722d65688e0b::t_53b172e5b5f386 128,145
+server/internal/game/affix_names.go
+  s_3d722d65688e0b::t_81dc34b6490278 57-58
+shared/rules/shops.v0.json
+  s_3d722d65688e0b::t_53b172e5b5f386 66,143
+shared/protocol/session_snapshot.v8.schema.json
+  s_3d722d65688e0b::t_d08da78020aad1 202-204,207-210
+  s_3d722d65688e0b::t_102a2287f3a1a8 338-339,358
+server/internal/game/magic_find.go
+  s_3d722d65688e0b::t_e9c1f34fa23f4e 1-6
+server/internal/game/sim.go
+  s_3d722d65688e0b::t_e9c1f34fa23f4e 5710,5731,5840-5843,5903,5922
+  s_3d722d65688e0b::t_82389c3c5b4c99 191,229
+  s_3d722d65688e0b::t_7b23c9c2bcce56 1468,1555,4344-4348
+.maintainability/file-size-baseline.tsv
+  s_3d722d65688e0b::t_e8abcda02fa7cc 19
+server/internal/game/magic_find_test.go
+  s_3d722d65688e0b::t_efd8f5d25d2ad0 1-8,10-23,32-50
+  s_3d722d65688e0b::t_bc5be7a715ebd1 9,24-31
+shared/rules/item_templates.v0.schema.json
+  s_3d722d65688e0b::t_68bdc450bfd108 106,116
+server/internal/game/derived_stats.go
+  s_3d722d65688e0b::t_e9c1f34fa23f4e 20,43,69
+docs/as-built/v192_magic-find-stat.md
+  s_3d722d65688e0b::t_8dcd159f97d634 1-33
+shared/i18n/es.json
+  s_3d722d65688e0b::t_a21069ef86fec2 104
+tools/validate_shared.py
+  s_3d722d65688e0b::t_0528f3cd79a0d8 2039
+  s_3d722d65688e0b::t_53b172e5b5f386 903,980,2147
+server/internal/game/shop.go
+  s_3d722d65688e0b::t_76f9403b3e1e9f 1036
+  s_3d722d65688e0b::t_b5abf29926aeeb 1146
+server/internal/game/rules.go
+  s_3d722d65688e0b::t_76f9403b3e1e9f 3171
+PROGRESS.md
+  s_3d722d65688e0b::t_8dcd159f97d634 15,211,444,578-581
+shared/i18n/en.json
+  s_3d722d65688e0b::t_a21069ef86fec2 51
+server/internal/game/item_rolls.go
+  s_3d722d65688e0b::t_b5abf29926aeeb 1-82
+shared/protocol/state_delta.v8.schema.json
+  s_3d722d65688e0b::t_d08da78020aad1 275-277,280-283
+  s_3d722d65688e0b::t_102a2287f3a1a8 784-785,804
+docs/specs/v192_spec-magic-find-stat.md
+  s_3d722d65688e0b::t_8dcd159f97d634 28-29,31-32
+  s_3d722d65688e0b::t_c60be37244d14d 1-27,30,33-52
+docs/plans/v192_2026-06-15-magic-find-stat.md
+  s_3d722d65688e0b::t_8dcd159f97d634 3,35-37,40,56-58,71-73,84-85,97-98,106-110
+  s_3d722d65688e0b::t_c60be37244d14d 1-2,4-34,38-39,41-55,59-70,74-83,86-96,99-105
+shared/rules/item_templates.v0.json
+  s_3d722d65688e0b::t_35f9f200e05809 321,339
+tools/bot/scenarios/81_magic_find_stat.json
+  s_3d722d65688e0b::t_c21e2ec78c17c4 1-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "79fcb9a3e73ada70b28a2f9a66e78d1735fc1ca4",
+  "prompts": {},
+  "sessions": {
+    "s_3d722d65688e0b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecc06-930f-72b2-adcf-6aa19782dbac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

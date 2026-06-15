@@ -1,0 +1,19 @@
+.maintainability/file-size-baseline.tsv
+  s_434783ee30d988::t_94780cbe83a6d8 7,13,18,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7705d64046da99054c843ff39e61bf234d359f71",
+  "prompts": {},
+  "sessions": {
+    "s_434783ee30d988": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecd8d-db64-7242-9e68-b837098134cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

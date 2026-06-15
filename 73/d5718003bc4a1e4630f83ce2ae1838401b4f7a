@@ -1,0 +1,23 @@
+client/scripts/bot_scenario_runner.gd
+  s_f9c66ca3cb4339::t_5ddf6a79d1999e 11,1612-1614
+client/scripts/bot_wait_progress_logger.gd
+  s_f9c66ca3cb4339::t_5ddf6a79d1999e 1-75
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_b5176dc99df597 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "73d5718003bc4a1e4630f83ce2ae1838401b4f7a",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

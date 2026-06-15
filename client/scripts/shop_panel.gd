@@ -1105,6 +1105,8 @@ func _rarity_color(rarity: String) -> Color:
 			return Color("#f4d481")
 		"unique":
 			return Color("#ffb26b")
+		"set":
+			return Color("#55e66f")
 		_:
 			return Color("#e8dcc8")
 

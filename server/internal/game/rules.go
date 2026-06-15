@@ -19,7 +19,9 @@ type Rules struct {
 	Navigation           NavigationRules
 	Items                map[string]ItemDef
 	ItemTemplates        map[string]ItemTemplateDef
+	SetCatalogs          map[string]SetItemCatalogDef
 	UniqueItems          map[string]UniqueItemDef
+	SetItems             map[string]SetItemDef
 	UniqueEffects        map[string]UniqueEffectDef
 	Skills               map[string]SkillDef
 	Rarities             map[string]RarityDef
@@ -1404,6 +1406,17 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	r.UniqueItems = uniqueItems.Uniques
+
+	var setItems struct {
+		Sets map[string]SetItemCatalogDef `json:"sets"`
+	}
+	if err := readJSON(filepath.Join(dir, "set_items.v0.json"), &setItems); err != nil {
+		return nil, err
+	}
+	if err := r.validateSetItemRules(setItems.Sets); err != nil {
+		return nil, err
+	}
+	r.SetCatalogs = setItems.Sets
 
 	skills, err := loadSkillRulesFromManifest(dir)
 	if err != nil {

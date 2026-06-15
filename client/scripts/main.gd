@@ -85,12 +85,14 @@ const ITEM_RARITY_BACKGROUNDS := {
 	"magic": Color("#1b3458"),
 	"rare": Color("#5a4520"),
 	"unique": Color("#5a2f17"),
+	"set": Color("#173f28"),
 }
 const LOOT_LABEL_RARITY_COLORS := {
 	"common": Color("#e8dcc8"),
 	"magic": Color("#93c5fd"),
 	"rare": Color("#f4d481"),
 	"unique": Color("#ffb26b"),
+	"set": Color("#55e66f"),
 }
 const LOOT_LABEL_CATEGORY_COLORS := {
 	"currency": Color("#ffd75e"),
@@ -5102,6 +5104,8 @@ func _ground_item_tint(rarity: String) -> Color:
 			return Color("#ffd75e")
 		"unique":
 			return Color("#ff9f52")
+		"set":
+			return Color("#55e66f")
 		_:
 			return Color("#d8d0bd")
 

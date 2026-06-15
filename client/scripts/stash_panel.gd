@@ -31,6 +31,7 @@ const ITEM_RARITY_BACKGROUNDS := {
 	"magic": Color("#1b3458"),
 	"rare": Color("#5a4520"),
 	"unique": Color("#5a2f17"),
+	"set": Color("#173f28"),
 }
 
 var stash_entity_id: String = ""
@@ -823,6 +824,8 @@ func _rarity_rank(rarity: String) -> int:
 	match rarity.to_lower():
 		"unique":
 			return 4
+		"set":
+			return 5
 		"rare":
 			return 3
 		"magic":

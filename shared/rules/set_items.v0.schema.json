@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/set_items.v0.schema.json",
+  "title": "Set item catalog (v0)",
+  "type": "object",
+  "required": ["version", "sets"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "sets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "enabled", "display_name", "rarity", "items", "piece_bonuses", "full_set_bonus", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "enabled": { "type": "boolean" },
+          "display_name": { "type": "string", "minLength": 1 },
+          "rarity": { "const": "set" },
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "items": { "$ref": "#/$defs/item" },
+            "uniqueItems": true
+          },
+          "piece_bonuses": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/bonus" }
+          },
+          "full_set_bonus": { "$ref": "#/$defs/bonus" },
+          "status": { "type": "string", "enum": ["disabled_seed", "ready"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["id", "base_template_id", "display_name", "minimum_level", "fixed_stats"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "base_template_id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string", "minLength": 1 },
+        "minimum_level": { "type": "integer", "minimum": 1 },
+        "fixed_stats": { "$ref": "#/$defs/stats" }
+      }
+    },
+    "bonus": {
+      "type": "object",
+      "required": ["required_pieces", "stats"],
+      "additionalProperties": false,
+      "properties": {
+        "required_pieces": { "type": "integer", "minimum": 1 },
+        "stats": { "$ref": "#/$defs/stats" }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "integer" }
+    }
+  }
+}

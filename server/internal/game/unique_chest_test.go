@@ -26,7 +26,7 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 		t.Fatalf("chest state = %s, want open", chest.state)
 	}
 	ev := findEvent(open.Events, "unique_chest_opened")
-	wantAmount := enabledUniqueEffectCount(rules) + enabledNamedUniqueCount(rules)
+	wantAmount := enabledUniqueEffectCount(rules) + enabledNamedUniqueCount(rules) + enabledSetItemCount(rules)
 	if ev == nil || ev.Service != uniqueTestChestService || ev.Amount == nil || *ev.Amount != wantAmount || len(ev.StashItems) != wantAmount {
 		t.Fatalf("unique chest event = %+v", ev)
 	}
@@ -36,10 +36,18 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 
 	gotEffects := map[string]int{}
 	gotNamed := false
+	gotSet := false
 	for _, item := range ev.StashItems {
 		payload := item.RollPayload()
-		if payload == nil || payload.Rarity != "unique" {
-			t.Fatalf("granted item missing unique payload: %+v", item)
+		if payload == nil || (payload.Rarity != "unique" && payload.Rarity != "set") {
+			t.Fatalf("granted item missing unique/set payload: %+v", item)
+		}
+		if payload.Rarity == "set" {
+			gotSet = true
+			if item.Rarity != "set" || item.DisplayName == "" {
+				t.Fatalf("set item view missing presentation fields: %+v", item)
+			}
+			continue
 		}
 		if len(payload.EffectIDs) != 1 {
 			t.Fatalf("granted item effects = %+v, want exactly one", payload.EffectIDs)
@@ -71,6 +79,9 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 	}
 	if !gotNamed {
 		t.Fatalf("unique chest did not offer Embercall Blade: %+v", ev.StashItems)
+	}
+	if !gotSet {
+		t.Fatalf("unique chest did not offer a set item: %+v", ev.StashItems)
 	}
 
 	take := sim.Tick([]Input{{
@@ -169,15 +180,18 @@ func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
 	if len(itemsA) != len(itemsB) {
 		t.Fatalf("item counts differ %d != %d", len(itemsA), len(itemsB))
 	}
-	if len(itemsA) != enabledUniqueEffectCount(rules)+enabledNamedUniqueCount(rules) {
-		t.Fatalf("item count = %d, want enabled effects + named uniques", len(itemsA))
+	if len(itemsA) != enabledUniqueEffectCount(rules)+enabledNamedUniqueCount(rules)+enabledSetItemCount(rules) {
+		t.Fatalf("item count = %d, want enabled effects + named uniques + set items", len(itemsA))
 	}
 	namedCounts := map[string]int{}
 	for i := range itemsA {
 		a := itemsA[i].rollPayload
 		b := itemsB[i].rollPayload
-		if a.ItemTemplateID != b.ItemTemplateID || a.Rarity != b.Rarity || len(a.EffectIDs) != 1 || len(b.EffectIDs) != 1 || a.EffectIDs[0] != b.EffectIDs[0] {
+		if a.ItemTemplateID != b.ItemTemplateID || a.Rarity != b.Rarity || a.DisplayName != b.DisplayName {
 			t.Fatalf("payload %d differs: %+v != %+v", i, a, b)
+		}
+		if a.Rarity == "unique" && (len(a.EffectIDs) != 1 || len(b.EffectIDs) != 1 || a.EffectIDs[0] != b.EffectIDs[0]) {
+			t.Fatalf("unique payload %d differs effects: %+v != %+v", i, a, b)
 		}
 		if a.DisplayName == "Embercall Blade" || a.DisplayName == "Stormstring Bow" {
 			namedCounts[a.DisplayName]++
@@ -185,6 +199,54 @@ func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
 	}
 	if namedCounts["Embercall Blade"] != 1 || namedCounts["Stormstring Bow"] != 1 {
 		t.Fatalf("named unique counts = %+v", namedCounts)
+	}
+}
+
+func TestSetItemPayloadsAndEquippedBonuses(t *testing.T) {
+	rules := loadRules(t)
+	setItemIDs := sortedStringKeys(rules.SetItems)
+	if len(setItemIDs) != 5 {
+		t.Fatalf("set item count = %d, want 5", len(setItemIDs))
+	}
+	payload, ok := rules.setItemPayload("verdant_vanguard_blade")
+	if !ok {
+		t.Fatal("setItemPayload returned false")
+	}
+	if payload.Rarity != "set" {
+		t.Fatalf("set payload identity = %+v", payload)
+	}
+	if payload.DisplayName != "Verdant Vanguard Blade" || payload.Stats["damage_max"] != 7 || payload.Requirements["level"] != 5 {
+		t.Fatalf("set payload fields = %+v", payload)
+	}
+
+	sim := MustNewSim("sess_set_items", "set_item_seed", rules)
+	sim.progression.Level = 5
+	sim.progression.SkillRanks["magic_bolt"] = 1
+	addSetItemToInventory(t, sim, "verdant_vanguard_blade", 9101)
+	addSetItemToInventory(t, sim, "verdant_vanguard_helm", 9102)
+	addSetItemToInventory(t, sim, "verdant_vanguard_mail", 9103)
+	addSetItemToInventory(t, sim, "verdant_vanguard_gloves", 9104)
+	addSetItemToInventory(t, sim, "verdant_vanguard_boots", 9105)
+
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_blade", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9101", Slot: mainHandSlot}}}), "equip_blade")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_helm", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9102", Slot: "head"}}}), "equip_helm")
+	twoPiece := sim.equippedSetBonusStats()
+	if twoPiece["armor"] != 3 || twoPiece["max_hp"] != 0 || sim.equippedItemStatTotal("skill_damage_percent") != 0 {
+		t.Fatalf("two-piece set stats = %+v", twoPiece)
+	}
+
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_mail", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9103", Slot: "chest"}}}), "equip_mail")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_gloves", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9104", Slot: "gloves"}}}), "equip_gloves")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_boots", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9105", Slot: "boots"}}}), "equip_boots")
+	full := sim.equippedSetBonusStats()
+	if full["armor"] != 3 || full["max_hp"] != 8 || full["attack_speed_percent"] != 8 || full["all_skills"] != 1 || full["skill_damage_percent"] != 20 {
+		t.Fatalf("full set stats = %+v", full)
+	}
+	if sim.effectiveSkillRank("magic_bolt") != 2 {
+		t.Fatalf("effective magic_bolt rank = %d, want 2", sim.effectiveSkillRank("magic_bolt"))
+	}
+	if sim.equippedItemStatTotal("skill_damage_percent") != 20 {
+		t.Fatalf("skill damage bonus = %d, want 20", sim.equippedItemStatTotal("skill_damage_percent"))
 	}
 }
 
@@ -236,6 +298,30 @@ func findUniqueTestChest(t *testing.T, sim *Sim) *entity {
 	}
 	t.Fatalf("missing town_unique_chest: %+v", sim.activeLevel().entities)
 	return nil
+}
+
+func enabledSetItemCount(rules *Rules) int {
+	count := 0
+	for _, setItemID := range sortedStringKeys(rules.SetItems) {
+		if rules.SetItems[setItemID].SetID != "" {
+			count++
+		}
+	}
+	return count
+}
+
+func addSetItemToInventory(t *testing.T, sim *Sim, setItemID string, instanceID uint64) {
+	t.Helper()
+	payload, ok := sim.rules.setItemPayload(setItemID)
+	if !ok {
+		t.Fatalf("missing set payload %s", setItemID)
+	}
+	addTestInventoryItem(sim, &invItem{
+		instanceID:  instanceID,
+		itemDefID:   payload.ItemTemplateID,
+		slot:        sim.itemSlot(payload.ItemTemplateID, &payload),
+		rollPayload: cloneRollPayload(&payload),
+	})
 }
 
 func enabledUniqueEffectCount(rules *Rules) int {

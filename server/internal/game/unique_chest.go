@@ -249,6 +249,11 @@ func (s *Sim) uniqueTestChestItems() ([]*invItem, bool) {
 		return nil, false
 	}
 	items = append(items, namedItems...)
+	setItems, ok := s.rules.setChestItems()
+	if !ok {
+		return nil, false
+	}
+	items = append(items, setItems...)
 	return items, true
 }
 

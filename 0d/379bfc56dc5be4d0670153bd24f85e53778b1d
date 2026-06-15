@@ -1,0 +1,27 @@
+docs/specs/v39_spec-ui-currency-and-mana-polish.md
+  s_862e5d21aac8a6::t_1e88b8cdec1030 20
+docs/specs/v90_spec-text-catalog-foundation.md
+  s_862e5d21aac8a6::t_4522f209d1a03b 83
+docs/specs/v121_spec-inventory-market-blacksmith-flow.md
+  s_862e5d21aac8a6::t_1e88b8cdec1030 58
+docs/specs/v61_spec-rage-and-heal-skills.md
+  s_862e5d21aac8a6::t_4522f209d1a03b 55
+docs/specs/v89_spec-class-second-combat-skills.md
+  s_862e5d21aac8a6::t_4522f209d1a03b 126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0d379bfc56dc5be4d0670153bd24f85e53778b1d",
+  "prompts": {},
+  "sessions": {
+    "s_862e5d21aac8a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddc8e6a7-0c3c-4d08-9cfa-2e284d6c22f8",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

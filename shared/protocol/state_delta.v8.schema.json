@@ -477,6 +477,13 @@
         },
         {
           "if": {
+            "properties": { "event_type": { "const": "player_mana_regenerated" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "mana"] }
+        },
+        {
+          "if": {
             "properties": { "event_type": { "const": "interactable_activated" } },
             "required": ["event_type"]
           },

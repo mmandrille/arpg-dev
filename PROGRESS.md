@@ -12,10 +12,10 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v178 — boss summoned adds |
+| **Latest completed slice** | v179 — mana regeneration |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
-| **Next slice** | v179 — mana regeneration |
+| **Next slice** | v180 — upgrade resource drop |
 | **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
 | **Next engineering review** | v180 due before more feature batches |
 
@@ -195,6 +195,7 @@ v175_* = elite-objective-hud
 v176_* = elite-objective-minimap-pin
 v177_* = boss-ranged-pattern
 v178_* = boss-summoned-adds
+v179_* = mana-regeneration
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -414,6 +415,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v176** | `elite-objective-minimap-pin` | Complete (`make ci` green) | [`v176_spec-elite-objective-minimap-pin.md`](docs/specs/v176_spec-elite-objective-minimap-pin.md) | [`v176_2026-06-15-elite-objective-minimap-pin.md`](docs/plans/v176_2026-06-15-elite-objective-minimap-pin.md) | [`as-built`](docs/as-built/v176_elite-objective-minimap-pin.md) |
 | **v177** | `boss-ranged-pattern` | Complete (`make ci` green) | [`v177_spec-boss-ranged-pattern.md`](docs/specs/v177_spec-boss-ranged-pattern.md) | [`v177_2026-06-15-boss-ranged-pattern.md`](docs/plans/v177_2026-06-15-boss-ranged-pattern.md) | [`as-built`](docs/as-built/v177_boss-ranged-pattern.md) |
 | **v178** | `boss-summoned-adds` | Complete (`make ci` green) | [`v178_spec-boss-summoned-adds.md`](docs/specs/v178_spec-boss-summoned-adds.md) | [`v178_2026-06-15-boss-summoned-adds.md`](docs/plans/v178_2026-06-15-boss-summoned-adds.md) | [`as-built`](docs/as-built/v178_boss-summoned-adds.md) |
+| **v179** | `mana-regeneration` | Complete (`make ci` green) | [`v179_spec-mana-regeneration.md`](docs/specs/v179_spec-mana-regeneration.md) | [`v179_2026-06-15-mana-regeneration.md`](docs/plans/v179_2026-06-15-mana-regeneration.md) | [`as-built`](docs/as-built/v179_mana-regeneration.md) |
 
 ---
 
@@ -546,6 +548,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Passive mana regeneration is now an explicit gameplay event.** v179 emits
+`player_mana_regenerated` when passive stat-driven regen restores mana, validates the event in v8
+schemas, and proves the loop with protocol bot scenario `71_mana_regeneration.json`.
 
 **Cave Warden now summons combat adds.** v178 adds the data-driven `summon_wolves` pattern,
 spawns normal server-owned `dungeon_wolf` adds exactly once during the active phase, emits

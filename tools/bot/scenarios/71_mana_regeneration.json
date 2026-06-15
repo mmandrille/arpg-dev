@@ -1,0 +1,30 @@
+{
+  "id": "mana_regeneration",
+  "world_id": "skill_progression_lab",
+  "seed": "v179_mana_regeneration",
+  "character_class": "barbarian",
+  "title": "Mana regeneration",
+  "description": "Spend mana on Rage, then prove passive regeneration restores mana without a potion.",
+  "debug_progression": {
+    "level": 7,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 8, "dex": 5, "vit": 5, "magic": 45 },
+    "skill_ranks": { "rage": 1 }
+  },
+  "steps": [
+    { "action": "assert_player_mana", "equals": 50 },
+    { "action": "cast_skill", "skill_id": "rage", "target_self": true, "event_type": "skill_cast" },
+    { "action": "assert_player_mana", "equals": 45 },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "player_mana_regenerated", "mana": 1 }, "timeout_s": 3 },
+    { "action": "assert_player_mana", "at_least": 46 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 5 },
+    { "type": "event_seen", "event_type": "player_mana_regenerated", "mana": 1 }
+  ],
+  "visual": {
+    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+  }
+}

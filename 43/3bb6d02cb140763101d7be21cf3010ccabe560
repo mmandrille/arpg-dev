@@ -1,0 +1,62 @@
+client/scripts/bot_elite_objective_minimap_assertions.gd.uid
+  s_f9c66ca3cb4339::t_835fd64f433ec6 1
+client/scripts/elite_objective_minimap_state.gd
+  s_f9c66ca3cb4339::t_d8a4d88666892c 1-37
+client/scripts/elite_objective_minimap.gd
+  s_f9c66ca3cb4339::t_d8a4d88666892c 1-55,58-93
+  s_f9c66ca3cb4339::t_95d993ac37e91b 56-57
+client/scripts/bot_wait_handlers.gd
+  s_f9c66ca3cb4339::t_4fd22543d1c6f9 6,65-66
+docs/plans/v176_2026-06-15-elite-objective-minimap-pin.md
+  s_f9c66ca3cb4339::t_009cc852f57ce7 1-33,41-42,45-58,62-70,74-87,90-101,104-109
+  s_f9c66ca3cb4339::t_ae35d16da9149d 44
+  s_f9c66ca3cb4339::t_2f54416043ebaa 113
+  s_f9c66ca3cb4339::t_722be1cd30fb81 34-40,43,59-61,71-73,88-89,102-103,110-112
+tools/bot/scenarios/client/45_elite_objective_minimap_pin.json
+  s_f9c66ca3cb4339::t_4fd22543d1c6f9 1-41
+PROGRESS.md
+  s_f9c66ca3cb4339::t_05c9ce5e62e3f6 522
+  s_f9c66ca3cb4339::t_dd37e412d0aa10 7,15,17-18,195,412,546-549
+client/scripts/main.gd
+  s_f9c66ca3cb4339::t_d5299c94f9e82c 5828,5841
+  s_f9c66ca3cb4339::t_f4eca15a6fb4df 5972-5979
+  s_f9c66ca3cb4339::t_a8a89e17d7b09b 939
+  s_f9c66ca3cb4339::t_52e2aed03d0a8d 32-33,244
+  s_f9c66ca3cb4339::t_e3fe97ee1f304e 1045,3154-3155
+client/scripts/bot_assertion_handlers.gd
+  s_f9c66ca3cb4339::t_4fd22543d1c6f9 7,151-154
+client/tests/test_elite_objective_minimap.gd
+  s_f9c66ca3cb4339::t_d8a4d88666892c 1-76
+client/scripts/elite_objective_minimap_state.gd.uid
+  s_f9c66ca3cb4339::t_dc25839a7a7bd6 1
+docs/specs/v176_spec-elite-objective-minimap-pin.md
+  s_f9c66ca3cb4339::t_009cc852f57ce7 1-45
+client/scripts/bot_step_catalog.gd
+  s_f9c66ca3cb4339::t_4fd22543d1c6f9 18,45
+docs/as-built/v176_elite-objective-minimap-pin.md
+  s_f9c66ca3cb4339::t_dd37e412d0aa10 1-22
+scripts/client_smoke.sh
+  s_f9c66ca3cb4339::t_d8a4d88666892c 100
+client/scripts/elite_objective_minimap.gd.uid
+  s_f9c66ca3cb4339::t_dc25839a7a7bd6 1
+client/tests/test_elite_objective_minimap.gd.uid
+  s_f9c66ca3cb4339::t_dc25839a7a7bd6 1
+client/scripts/bot_elite_objective_minimap_assertions.gd
+  s_f9c66ca3cb4339::t_4fd22543d1c6f9 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "433bb6d02cb140763101d7be21cf3010ccabe560",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

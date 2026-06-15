@@ -1033,7 +1033,7 @@ func (s *Sim) statsForInventoryItem(item *invItem) map[string]int {
 }
 
 func shopStatOrder() []string {
-	return []string{"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "hotbar_slots", "inventory_rows"}
+	return []string{"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows"}
 }
 
 func displayStatName(stat string) string {
@@ -1143,68 +1143,7 @@ func (s *Sim) itemFromShopStock(row *shopStockItem, instanceID uint64) *invItem 
 }
 
 func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG, sourceDepth int) (ItemRollPayload, bool) {
-	template, ok := r.ItemTemplates[templateID]
-	if !ok || len(r.RarityOrder) == 0 {
-		return ItemRollPayload{}, false
-	}
-	total := 0
-	for _, rarityID := range r.RarityOrder {
-		if !r.rarityRandomRollable(rarityID) {
-			continue
-		}
-		total += r.Rarities[rarityID].Weight
-	}
-	if total <= 0 {
-		return ItemRollPayload{}, false
-	}
-	roll := rng.IntN(total)
-	rarityID := ""
-	for _, candidate := range r.RarityOrder {
-		if !r.rarityRandomRollable(candidate) {
-			continue
-		}
-		roll -= r.Rarities[candidate].Weight
-		if roll < 0 {
-			rarityID = candidate
-			break
-		}
-	}
-	if rarityID == "" {
-		return ItemRollPayload{}, false
-	}
-	rarity := r.Rarities[rarityID]
-	stats := cloneIntMap(template.BaseStats)
-	rollableStats := r.rollableStatsForRarity(template.RollableStats, rarityID, sourceDepth)
-	rollCount := rarity.StatRollsMin
-	if rarity.StatRollsMax > rarity.StatRollsMin {
-		rollCount += rng.IntN(rarity.StatRollsMax - rarity.StatRollsMin + 1)
-	}
-	for i := 0; i < rollCount; i++ {
-		stat, ok := weightedRollableStat(rollableStats, rng)
-		if !ok {
-			continue
-		}
-		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
-	}
-	effectIDs := cloneStringSlice(template.EffectPool)
-	displayName := rarity.NamePrefix + " " + template.Name
-	if rarityID == "unique" {
-		effectID, ok := r.rollUniqueEffectForTemplate(template, rng)
-		if ok {
-			effectIDs = append(effectIDs, effectID)
-			displayName = uniqueItemDisplayName(template, r.UniqueEffects[effectID])
-		}
-	} else if rarityID != "set" {
-		displayName = r.affixDisplayName(template, rarityID, stats)
-	}
-	return ItemRollPayload{
-		ItemTemplateID: templateID,
-		DisplayName:    displayName,
-		Rarity:         rarityID,
-		Stats:          stats,
-		Requirements:   cloneIntMap(template.Requirements),
-		EffectIDs:      effectIDs,
-	}, true
+	return r.rollItemTemplateWithMagicFind(templateID, rng, sourceDepth, 0)
 }
 
 func (r *Rules) rollableStatsForRarity(base []RollableStatDef, rarityID string, sourceDepth int) []RollableStatDef {

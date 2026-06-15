@@ -17,6 +17,7 @@ type DerivedStatsView struct {
 	MaxMana              float64 `json:"max_mana"`
 	HealthRegenPerSecond float64 `json:"health_regen_per_second"`
 	ManaRegenPerSecond   float64 `json:"mana_regen_per_second"`
+	MagicFindPercent     float64 `json:"magic_find_percent"`
 }
 
 // DerivedStatsView returns the authoritative protocol view of combat/display stats.
@@ -39,6 +40,7 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 		MaxMana:              effective.MaxMana,
 		HealthRegenPerSecond: effective.HealthRegenPerSecond,
 		ManaRegenPerSecond:   effective.ManaRegenPerSecond,
+		MagicFindPercent:     effective.MagicFindPercent,
 	}
 }
 
@@ -64,5 +66,6 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 		MaxMana:              eval("max_mana"),
 		HealthRegenPerSecond: eval("health_regen_per_second"),
 		ManaRegenPerSecond:   eval("mana_regen_per_second"),
+		MagicFindPercent:     0,
 	}
 }

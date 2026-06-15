@@ -272,8 +272,15 @@
         "armor": { "type": "integer", "minimum": 0 },
         "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
         "attack_speed_percent": { "type": "integer", "minimum": -75, "maximum": 100 },
+        "hit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "crit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "evade_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
         "health_regen_per_10_seconds": { "type": "integer", "minimum": 0 },
         "mana_regen_per_10_seconds": { "type": "integer", "minimum": 0 },
+        "skill_damage_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "skill_cooldown_reduction_percent": { "type": "integer", "minimum": 0, "maximum": 75 },
+        "skill_mana_cost_reduction": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "magic_find_percent": { "type": "integer", "minimum": 0, "maximum": 500 },
         "hotbar_slots": { "type": "integer", "minimum": 0, "maximum": 10 },
         "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
@@ -774,7 +781,8 @@
         "max_hp": { "type": "number", "minimum": 1 },
         "max_mana": { "type": "number", "minimum": 0 },
         "health_regen_per_second": { "type": "number", "minimum": 0 },
-        "mana_regen_per_second": { "type": "number", "minimum": 0 }
+        "mana_regen_per_second": { "type": "number", "minimum": 0 },
+        "magic_find_percent": { "type": "number", "minimum": 0 }
       }
     },
     "stat_breakdown_source": {
@@ -793,7 +801,7 @@
       "required": ["key", "value", "sources"],
       "additionalProperties": false,
       "properties": {
-        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "block_percent"] },
+        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "magic_find_percent", "block_percent"] },
         "value": { "type": "number" },
         "uncapped_value": { "type": "number" },
         "cap": { "type": ["number", "null"] },

@@ -101,6 +101,7 @@
     "stat.hotbar_slots": "Espacios de barra",
     "stat.inventory_rows": "Filas de inventario",
     "stat.level": "Nivel",
+    "stat.magic_find_percent": "Hallazgo magico",
     "stat.magic": "Magia",
     "stat.mana_regen_per_10_seconds": "Regen. mana / 10s",
     "stat.mana_regen_per_second": "Regen. mana /s",

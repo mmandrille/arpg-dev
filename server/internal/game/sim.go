@@ -188,6 +188,7 @@ type uniqueChestState struct {
 type goldRollContext struct {
 	levelNum        int
 	monsterRarityID string
+	magicFind       bool
 }
 
 type activeMove struct {
@@ -225,6 +226,7 @@ type effectiveCombatStats struct {
 	MaxMana              float64
 	HealthRegenPerSecond float64
 	ManaRegenPerSecond   float64
+	MagicFindPercent     float64
 }
 
 type combatResolution struct {
@@ -1463,6 +1465,7 @@ func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
 	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res, goldRollContext{
 		levelNum:        s.activeLevel().levelNum,
 		monsterRarityID: monster.monsterRarityID,
+		magicFind:       true,
 	})
 }
 
@@ -1549,7 +1552,7 @@ func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius floa
 		itemDefID := drop.ItemDefID
 		var payload *ItemRollPayload
 		if drop.ItemTemplateID != "" {
-			rolled, ok := s.rollItemTemplate(drop.ItemTemplateID, s.itemRollSourceDepth(goldCtx))
+			rolled, ok := s.rollItemTemplateForLoot(drop.ItemTemplateID, s.itemRollSourceDepth(goldCtx), goldCtx)
 			if !ok {
 				continue
 			}
@@ -4338,6 +4341,13 @@ func (s *Sim) rollItemTemplate(templateID string, sourceDepth int) (ItemRollPayl
 	return s.rules.rollItemTemplateWithRNG(templateID, s.rng, sourceDepth)
 }
 
+func (s *Sim) rollItemTemplateForLoot(templateID string, sourceDepth int, ctx goldRollContext) (ItemRollPayload, bool) {
+	if !ctx.magicFind {
+		return s.rollItemTemplate(templateID, sourceDepth)
+	}
+	return s.rules.rollItemTemplateWithMagicFind(templateID, s.rng, sourceDepth, int(s.playerMagicFindPercent()))
+}
+
 func (s *Sim) itemRollSourceDepth(ctx goldRollContext) int {
 	depth := absInt(ctx.levelNum)
 	if depth < 1 {
@@ -5697,6 +5707,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	maxMana := character.MaxMana
 	healthRegen := character.HealthRegenPerSecond
 	manaRegen := character.ManaRegenPerSecond
+	magicFindPercent := 0.0
 	blockPercent := 0.0
 	weaponSpeed := 1.0
 	itemSpeedPercent := 0.0
@@ -5717,6 +5728,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	maxManaSources := []StatBreakdownSourceView{{Label: "Magic", Value: character.MaxMana, Kind: "character_formula"}}
 	healthRegenSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.HealthRegenPerSecond, Kind: "character_formula"}}
 	manaRegenSources := []StatBreakdownSourceView{{Label: "Magic", Value: character.ManaRegenPerSecond, Kind: "character_formula"}}
+	magicFindSources := []StatBreakdownSourceView{}
 	blockSources := []StatBreakdownSourceView{}
 	hitChanceSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.HitChance, Kind: "character_formula"}}
 	critChanceSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.CritChance, Kind: "character_formula"}}
@@ -5825,6 +5837,10 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			evadeChancePercent += float64(value)
 			evadeChanceSources = append(evadeChanceSources, StatBreakdownSourceView{Label: "Rolled evade chance", Value: float64(value) / 100.0, Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
+		if value := rolledStats["magic_find_percent"]; value != 0 {
+			magicFindPercent += float64(value)
+			magicFindSources = append(magicFindSources, StatBreakdownSourceView{Label: "Rolled Magic Find", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
 	}
 	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources)
 
@@ -5884,6 +5900,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		MaxMana:              maxFloat(0, maxMana),
 		HealthRegenPerSecond: maxFloat(0, healthRegen),
 		ManaRegenPerSecond:   maxFloat(0, manaRegen),
+		MagicFindPercent:     maxFloat(0, magicFindPercent),
 	}
 	if effective.DamageMax < effective.DamageMin {
 		effective.DamageMax = effective.DamageMin
@@ -5902,6 +5919,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		{Key: "max_mana", Value: effective.MaxMana, UncappedValue: effective.MaxMana, Cap: nil, Sources: maxManaSources},
 		{Key: "health_regen_per_second", Value: effective.HealthRegenPerSecond, UncappedValue: effective.HealthRegenPerSecond, Cap: nil, Sources: healthRegenSources},
 		{Key: "mana_regen_per_second", Value: effective.ManaRegenPerSecond, UncappedValue: effective.ManaRegenPerSecond, Cap: nil, Sources: manaRegenSources},
+		{Key: "magic_find_percent", Value: effective.MagicFindPercent, UncappedValue: effective.MagicFindPercent, Cap: nil, Sources: magicFindSources},
 		{Key: "block_percent", Value: effective.BlockPercent, UncappedValue: uncappedBlock, Cap: floatPtr(blockCap), Sources: blockSources},
 	}
 	return effective, breakdowns

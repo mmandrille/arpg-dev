@@ -359,12 +359,7 @@
           "str": 1,
           "vit": 1
         },
-        "skills": [
-          {
-            "skill_id": "piercing_shot",
-            "rank": 1
-          }
-        ]
+        "skills": []
       },
       "cost": {
         "mana": {
@@ -850,7 +845,7 @@
       "class": "ranger",
       "damage_type": "force",
       "tree": {
-        "tier": 3,
+        "tier": 2,
         "column": 1
       },
       "kind": "projectile_attack",
@@ -867,7 +862,7 @@
         },
         "skills": [
           {
-            "skill_id": "split_arrow",
+            "skill_id": "piercing_shot",
             "rank": 1
           }
         ]
@@ -953,7 +948,7 @@
       "class": "ranger",
       "damage_type": "force",
       "tree": {
-        "tier": 2,
+        "tier": 3,
         "column": 1
       },
       "kind": "projectile_attack",
@@ -970,7 +965,7 @@
         },
         "skills": [
           {
-            "skill_id": "piercing_shot",
+            "skill_id": "volley",
             "rank": 1
           }
         ]

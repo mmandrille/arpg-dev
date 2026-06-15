@@ -221,6 +221,7 @@ func _run() -> void:
 		"unique_chest_entity_1",
 		[
 			{"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "set_item_1", "item_def_id": "verdant_vanguard_blade", "item_template_id": "verdant_vanguard_blade", "display_name": "Verdant Vanguard Blade", "rarity": "set", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
 		],
 		inventory,
 		{},
@@ -232,6 +233,18 @@ func _run() -> void:
 	_assert_eq("unique chest entity id retained", str(state.get("stash_entity_id", "")), "unique_chest_entity_1")
 	_assert_false("unique chest deposit gold hidden", bool(state.get("deposit_gold_enabled", true)))
 	_assert_false("unique chest withdraw gold hidden", bool(state.get("withdraw_gold_enabled", true)))
+	_assert_true("unique chest tabs visible", bool(state.get("unique_chest_tabs_visible", false)))
+	_assert_eq("unique chest starts on uniques tab", str(state.get("unique_chest_active_tab", "")), "uniques")
+	var unique_chest_counts: Dictionary = state.get("unique_chest_tab_counts", {})
+	_assert_eq("unique chest unique tab count", int(unique_chest_counts.get("uniques", 0)), 1)
+	_assert_eq("unique chest set tab count", int(unique_chest_counts.get("sets", 0)), 1)
+	_assert_eq("unique chest uniques tab filters items", int(state.get("filtered_stash_item_count", 0)), 1)
+	_assert_eq("unique chest uniques tab row", str((state.get("stash_rows", [])[0] as Dictionary).get("stash_item_id", "")), "unique_item_1")
+	panel.bot_select_unique_chest_tab("sets")
+	state = panel.get_debug_state()
+	_assert_eq("unique chest sets tab selected", str(state.get("unique_chest_active_tab", "")), "sets")
+	_assert_eq("unique chest sets tab filters items", int(state.get("filtered_stash_item_count", 0)), 1)
+	_assert_eq("unique chest sets tab row", str((state.get("stash_rows", [])[0] as Dictionary).get("stash_item_id", "")), "set_item_1")
 	var unique_chest_item := {
 		"stash_item_id": "unique_item_1",
 		"item_def_id": "cave_blade",
@@ -248,11 +261,11 @@ func _run() -> void:
 	_assert_true("unique chest tooltip names effect", _array_contains_text(unique_chest_texts, "Unique effect: Everburning Wound"))
 	_assert_true("unique chest tooltip summarizes effect", _array_contains_text(unique_chest_texts, "All hero damage applies burn"))
 	unique_chest_tooltip.queue_free()
-	panel.bot_drag_stash_to_bag("unique_item_1")
+	panel.bot_drag_stash_to_bag("set_item_1")
 	_assert_eq("unique chest take emitted count", emitted.size(), 9)
 	_assert_eq("unique chest take emitted type", str(emitted[8]["type"]), "unique_chest_take_item_intent")
 	_assert_eq("unique chest take emitted entity", str(emitted[8]["payload"].get("chest_entity_id", "")), "unique_chest_entity_1")
-	_assert_eq("unique chest take emitted item", str(emitted[8]["payload"].get("chest_item_id", "")), "unique_item_1")
+	_assert_eq("unique chest take emitted item", str(emitted[8]["payload"].get("chest_item_id", "")), "set_item_1")
 	var drag_start_position: Dictionary = (panel.get_debug_state().get("window", {}) as Dictionary).get("position", {})
 	panel.bot_drag_window_by(Vector2(35, 20))
 	state = panel.get_debug_state()

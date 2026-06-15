@@ -92,6 +92,23 @@ func _run() -> void:
 	var set_offer_tooltip := panel._make_offer_tooltip(set_offer)
 	_assert_eq("vendor set tooltip name is rarity green", set_offer_tooltip.debug_first_main_line_color(), "55e66f")
 	set_offer_tooltip.queue_free()
+	var set_inventory_panel := InventoryPanelScript.new()
+	var set_item := {
+		"item_instance_id": "set_item_1",
+		"item_def_id": "cave_gloves",
+		"item_template_id": "cave_gloves",
+		"display_name": "Verdant Vanguard Gloves",
+		"rarity": "set",
+		"slot": "gloves",
+		"category": "equipment",
+		"summary_lines": ["Slot: gloves", "Armor +4"],
+	}
+	var set_inventory_tooltip := set_inventory_panel._make_item_tooltip(set_item)
+	_assert_eq("inventory set tooltip name is rarity green", set_inventory_tooltip.debug_first_main_line_color(), "55e66f")
+	set_inventory_tooltip.queue_free()
+	_assert_eq("inventory set slot background is green", set_inventory_panel._item_slot_style("set", false).bg_color.to_html(false), "173f28")
+	_assert_eq("inventory set hover background stays green", set_inventory_panel._item_slot_style("set", true).bg_color.to_html(false), "335642")
+	set_inventory_panel.free()
 
 	panel.bot_click_buy_offer("fixed:red_potion")
 	_assert_eq("buy emitted count", emitted.size(), 1)

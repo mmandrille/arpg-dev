@@ -7,6 +7,7 @@ const StatLabels := preload("res://scripts/stat_labels.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
+const UniqueChestTabsScript := preload("res://scripts/unique_chest_tabs.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(390, 520)
 const COLUMNS := 5
@@ -60,6 +61,7 @@ var _status_label: Label
 var _search_field: LineEdit
 var _sort_option: OptionButton
 var _section_title_label: Label
+var _unique_chest_tab_bar: HBoxContainer
 var _stash_grid: GridContainer
 var _withdraw_buttons: Dictionary = {}
 var _deposit_gold_button: Button
@@ -72,6 +74,7 @@ var _gold_amount_mode: String = ""
 var _interactive: bool = true
 var _search_text: String = ""
 var _sort_mode: String = SORT_ACQUIRED
+var _unique_chest_tab: String = UniqueChestTabsScript.UNIQUES
 
 
 class StashSlotButton:
@@ -184,6 +187,7 @@ func show_unique_chest(next_entity_id: String, chest_items: Array, next_inventor
 	stash_title = "Unique Chest"
 	container_mode = "unique_chest"
 	container_label = "Chest"
+	_unique_chest_tab = UniqueChestTabsScript.UNIQUES
 	set_stash_state(chest_items, 0, chest_items.size())
 	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
 	visible = true
@@ -239,6 +243,9 @@ func get_debug_state() -> Dictionary:
 		"filtered_stash_item_count": _visible_stash_items().size(),
 		"stash_search_text": _search_text,
 		"stash_sort_mode": _sort_mode,
+		"unique_chest_active_tab": _unique_chest_tab,
+		"unique_chest_tabs_visible": _unique_chest_tab_bar != null and _unique_chest_tab_bar.visible,
+		"unique_chest_tab_counts": UniqueChestTabsScript.counts(stash_items),
 		"stash_rows": _debug_stash_rows(),
 		"withdraw_buttons": _debug_withdraw_buttons(),
 		"deposit_gold_enabled": _deposit_gold_button != null and not _deposit_gold_button.disabled,
@@ -308,6 +315,10 @@ func bot_set_search_text(text: String) -> void:
 
 func bot_select_sort_mode(mode: String) -> void:
 	_set_sort_mode(mode)
+
+
+func bot_select_unique_chest_tab(tab: String) -> void:
+	_set_unique_chest_tab(tab)
 
 
 func bot_click_close() -> void:
@@ -392,6 +403,7 @@ func _build() -> void:
 
 	_section_title_label = _section_label("Stash")
 	root.add_child(_section_title_label)
+	_unique_chest_tab_bar = UniqueChestTabsScript.add_bar(root, DETAIL_FONT_SIZE, Callable(self, "_set_unique_chest_tab"))
 	var stash_scroll := ScrollContainer.new()
 	stash_scroll.custom_minimum_size = Vector2(
 		COLUMNS * SLOT_SIZE.x + (COLUMNS - 1) * SLOT_GAP + 18,
@@ -447,7 +459,8 @@ func _render() -> void:
 	_panel.configure(stash_title, Vector2(PANEL_SIZE.x - 28, PANEL_SIZE.y - 58))
 	_gold_label.text = "%d / %d gold" % [gold, stash_gold] if container_mode == "stash" else "%d gold" % gold
 	if _section_title_label != null:
-		_section_title_label.text = container_label
+		_section_title_label.text = UniqueChestTabsScript.label(_unique_chest_tab) if container_mode == "unique_chest" else container_label
+	UniqueChestTabsScript.sync_bar(_unique_chest_tab_bar, container_mode == "unique_chest", _unique_chest_tab, stash_items, _interactive)
 	if _search_field != null:
 		_search_field.placeholder_text = _search_placeholder()
 	if _search_field != null and _search_field.text != _search_text:
@@ -459,7 +472,7 @@ func _render() -> void:
 	_clear_children(_stash_grid)
 
 	var visible_items := _visible_stash_items()
-	var stash_slots: int = max(stash_capacity, stash_items.size())
+	var stash_slots: int = max(visible_items.size(), COLUMNS) if container_mode == "unique_chest" else max(stash_capacity, stash_items.size())
 	for i in range(stash_slots):
 		var slot := _slot_button("stash")
 		var item: Dictionary = visible_items[i] if i < visible_items.size() else {}
@@ -765,7 +778,8 @@ func _visible_stash_items() -> Array:
 		if typeof(item) != TYPE_DICTIONARY:
 			continue
 		var rec := (item as Dictionary).duplicate(true)
-		if _stash_item_matches_search(rec):
+		var in_tab := container_mode != "unique_chest" or UniqueChestTabsScript.item_matches_tab(rec, _unique_chest_tab)
+		if in_tab and _stash_item_matches_search(rec):
 			rows.append(rec)
 	_sort_stash_rows(rows)
 	return rows
@@ -844,6 +858,14 @@ func _set_sort_mode(mode: String) -> void:
 		var selected := SORT_MODES.find(mode)
 		if selected >= 0 and _sort_option.selected != selected:
 			_sort_option.select(selected)
+	if _panel != null:
+		_render()
+
+
+func _set_unique_chest_tab(tab: String) -> void:
+	if not UniqueChestTabsScript.TABS.has(tab):
+		return
+	_unique_chest_tab = tab
 	if _panel != null:
 		_render()
 

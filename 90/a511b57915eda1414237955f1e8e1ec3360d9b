@@ -1,0 +1,19 @@
+scripts/ci.sh
+  s_862e5d21aac8a6::t_86a0ffbd6e8b60 95-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "90a511b57915eda1414237955f1e8e1ec3360d9b",
+  "prompts": {},
+  "sessions": {
+    "s_862e5d21aac8a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddc8e6a7-0c3c-4d08-9cfa-2e284d6c22f8",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

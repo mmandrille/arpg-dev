@@ -12,10 +12,10 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v179 — mana regeneration |
+| **Latest completed slice** | v180 — upgrade resource drop |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
-| **Next slice** | v180 — upgrade resource drop |
+| **Next slice** | Engineering review gate — run `$refactor`, then `$review` |
 | **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
 | **Next engineering review** | v180 due before more feature batches |
 
@@ -196,6 +196,7 @@ v176_* = elite-objective-minimap-pin
 v177_* = boss-ranged-pattern
 v178_* = boss-summoned-adds
 v179_* = mana-regeneration
+v180_* = upgrade-resource-drop
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -416,6 +417,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v177** | `boss-ranged-pattern` | Complete (`make ci` green) | [`v177_spec-boss-ranged-pattern.md`](docs/specs/v177_spec-boss-ranged-pattern.md) | [`v177_2026-06-15-boss-ranged-pattern.md`](docs/plans/v177_2026-06-15-boss-ranged-pattern.md) | [`as-built`](docs/as-built/v177_boss-ranged-pattern.md) |
 | **v178** | `boss-summoned-adds` | Complete (`make ci` green) | [`v178_spec-boss-summoned-adds.md`](docs/specs/v178_spec-boss-summoned-adds.md) | [`v178_2026-06-15-boss-summoned-adds.md`](docs/plans/v178_2026-06-15-boss-summoned-adds.md) | [`as-built`](docs/as-built/v178_boss-summoned-adds.md) |
 | **v179** | `mana-regeneration` | Complete (`make ci` green) | [`v179_spec-mana-regeneration.md`](docs/specs/v179_spec-mana-regeneration.md) | [`v179_2026-06-15-mana-regeneration.md`](docs/plans/v179_2026-06-15-mana-regeneration.md) | [`as-built`](docs/as-built/v179_mana-regeneration.md) |
+| **v180** | `upgrade-resource-drop` | Complete (`make ci` green) | [`v180_spec-upgrade-resource-drop.md`](docs/specs/v180_spec-upgrade-resource-drop.md) | [`v180_2026-06-15-upgrade-resource-drop.md`](docs/plans/v180_2026-06-15-upgrade-resource-drop.md) | [`as-built`](docs/as-built/v180_upgrade-resource-drop.md) |
 
 ---
 
@@ -548,6 +550,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Upgrade resources now drop as tangible loot.** v180 adds `upgrade_shard`, presentation metadata,
+and a deterministic ranged-lab drop source, with protocol bot scenario
+`72_upgrade_resource_drop.json` proving pickup into inventory.
 
 **Passive mana regeneration is now an explicit gameplay event.** v179 emits
 `player_mana_regenerated` when passive stat-driven regen restores mana, validates the event in v8

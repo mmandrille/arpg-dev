@@ -4,7 +4,7 @@
     "cave_warden": {
       "name": "Cave Warden",
       "base_monster_def_id": "dungeon_mob",
-      "pattern_deck": ["charged_melee", "ground_slam"],
+      "pattern_deck": ["charged_melee", "stone_lance", "ground_slam"],
       "hp_multiplier": 8.0,
       "damage_multiplier": 1.0,
       "loot_table": "boss_drop_tier_1",

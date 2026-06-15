@@ -51,6 +51,33 @@
         }
       ],
       "cooldown_ticks": 50
+    },
+    "stone_lance": {
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 32,
+          "telegraph_type": "line",
+          "from_color": "#b77cff",
+          "to_color": "#79b8ff",
+          "hit_shape": "line",
+          "radius": 7.5,
+          "width": 1.0
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 4,
+          "shape": "line",
+          "radius": 7.5,
+          "width": 1.0,
+          "damage": { "min": 4, "max": 8 }
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 22
+        }
+      ],
+      "cooldown_ticks": 45
     }
   }
 }

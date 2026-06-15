@@ -375,12 +375,14 @@ type BossTelegraphView struct {
 	ToColor   string  `json:"to_color,omitempty"`
 	HitShape  string  `json:"hit_shape,omitempty"`
 	Radius    float64 `json:"radius,omitempty"`
+	Width     float64 `json:"width,omitempty"`
 }
 
 // BossHitShapeView describes the authoritative active hit predicate.
 type BossHitShapeView struct {
 	Shape  string  `json:"shape"`
 	Radius float64 `json:"radius,omitempty"`
+	Width  float64 `json:"width,omitempty"`
 }
 
 // Event is an authoritative event emitted by the sim.

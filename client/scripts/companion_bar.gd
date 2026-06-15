@@ -1,6 +1,65 @@
 class_name CompanionBar
 extends Control
 
+class CompanionIcon extends Control:
+	var companion: Dictionary = {}
+
+	func _init(next_companion: Dictionary = {}) -> void:
+		companion = next_companion.duplicate(true)
+		custom_minimum_size = ICON_SIZE
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var kind := CompanionBar._icon_kind(companion)
+		match kind:
+			"revived":
+				_draw_skull_icon()
+			"wolf":
+				_draw_wolf_icon()
+			"mercenary":
+				_draw_mercenary_icon()
+			_:
+				_draw_generic_icon()
+
+	func _draw_skull_icon() -> void:
+		draw_rect(Rect2(Vector2(4, 4), Vector2(28, 28)), Color("#191512"), true)
+		draw_circle(Vector2(18, 15), 10.0, Color("#d2c9aa"))
+		draw_rect(Rect2(Vector2(11, 22), Vector2(14, 7)), Color("#d2c9aa"), true)
+		draw_circle(Vector2(14, 15), 2.6, Color("#17110e"))
+		draw_circle(Vector2(22, 15), 2.6, Color("#17110e"))
+		draw_polygon(PackedVector2Array([Vector2(18, 17), Vector2(15.8, 21), Vector2(20.2, 21)]), PackedColorArray([Color("#17110e")]))
+		for x in [13.0, 17.0, 21.0]:
+			draw_line(Vector2(x, 23), Vector2(x, 28), Color("#6d604e"), 1.0)
+
+	func _draw_wolf_icon() -> void:
+		draw_rect(Rect2(Vector2(4, 4), Vector2(28, 28)), Color("#131614"), true)
+		var fur := Color("#d7d0bf")
+		var shadow := Color("#151412")
+		draw_polygon(PackedVector2Array([
+			Vector2(9, 14), Vector2(16, 7), Vector2(28, 11), Vector2(31, 17),
+			Vector2(23, 22), Vector2(15, 25), Vector2(8, 20)
+		]), PackedColorArray([fur]))
+		draw_polygon(PackedVector2Array([Vector2(14, 8), Vector2(18, 3), Vector2(21, 11)]), PackedColorArray([fur]))
+		draw_polygon(PackedVector2Array([Vector2(21, 11), Vector2(31, 13), Vector2(28, 17)]), PackedColorArray([Color("#f0ead8")]))
+		draw_circle(Vector2(23.5, 13.8), 1.4, shadow)
+		draw_line(Vector2(27, 18), Vector2(31, 18), shadow, 1.5)
+		draw_line(Vector2(12, 20), Vector2(8, 26), fur, 2.0)
+
+	func _draw_mercenary_icon() -> void:
+		draw_rect(Rect2(Vector2(4, 4), Vector2(28, 28)), Color("#17202a"), true)
+		var steel := Color("#d7dde5")
+		var hilt := Color("#9a6a2f")
+		draw_line(Vector2(12, 27), Vector2(26, 9), steel, 3.0)
+		draw_line(Vector2(24, 8), Vector2(28, 6), steel, 2.0)
+		draw_line(Vector2(14, 23), Vector2(20, 28), hilt, 3.0)
+		draw_line(Vector2(11, 23), Vector2(17, 29), Color("#e0b45b"), 1.5)
+		draw_circle(Vector2(12, 12), 5.2, Color("#d7a72f"))
+		draw_arc(Vector2(12, 12), 3.2, 0.0, TAU, 18, Color("#f5dc75"), 1.2)
+
+	func _draw_generic_icon() -> void:
+		draw_rect(Rect2(Vector2(4, 4), Vector2(28, 28)), CompanionBar._portrait_color(companion), true)
+		draw_circle(Vector2(18, 18), 8.0, Color("#f4e7c6"))
+
 const SLOT_SIZE := Vector2(44.0, 62.0)
 const ICON_SIZE := Vector2(36.0, 36.0)
 const BAR_HEIGHT := 6.0
@@ -40,10 +99,17 @@ func set_companions(next_companions: Array) -> void:
 
 
 func get_debug_state() -> Dictionary:
+	var debug_companions: Array = []
+	for companion in _companions:
+		if typeof(companion) != TYPE_DICTIONARY:
+			continue
+		var rec := (companion as Dictionary).duplicate(true)
+		rec["icon_kind"] = _icon_kind(rec)
+		debug_companions.append(rec)
 	return {
 		"visible": visible,
 		"count": _companions.size(),
-		"companions": _companions.duplicate(true),
+		"companions": debug_companions,
 		"slot_count": _row.get_child_count() if _row != null else 0,
 	}
 
@@ -91,21 +157,7 @@ func _make_slot(companion: Dictionary) -> Control:
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(icon)
 
-	var portrait := ColorRect.new()
-	portrait.position = Vector2(4.0, 4.0)
-	portrait.size = Vector2(28.0, 28.0)
-	portrait.color = _portrait_color(companion)
-	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.add_child(portrait)
-
-	var glyph := Label.new()
-	glyph.size = ICON_SIZE
-	glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	glyph.text = _glyph(companion)
-	glyph.label_settings = _glyph_settings()
-	icon.add_child(glyph)
+	icon.add_child(CompanionIcon.new(companion))
 
 	stack.add_child(_make_meter(Color(0.10, 0.70, 0.18, 0.94), _hp_ratio(companion)))
 	if _has_duration(companion):
@@ -142,16 +194,7 @@ func _slot_style() -> StyleBoxFlat:
 	return style
 
 
-func _glyph_settings() -> LabelSettings:
-	var settings := LabelSettings.new()
-	settings.font_size = 15
-	settings.font_color = Color("#f4e7c6")
-	settings.outline_size = 3
-	settings.outline_color = Color(0.02, 0.01, 0.0, 0.85)
-	return settings
-
-
-func _portrait_color(companion: Dictionary) -> Color:
+static func _portrait_color(companion: Dictionary) -> Color:
 	var tint := str(companion.get("visual_tint", ""))
 	if tint.begins_with("#") and tint.length() == 7:
 		return Color(tint)
@@ -165,17 +208,15 @@ func _portrait_color(companion: Dictionary) -> Color:
 	return Color("#5c4a36")
 
 
-func _glyph(companion: Dictionary) -> String:
+static func _icon_kind(companion: Dictionary) -> String:
+	if int(companion.get("total_ticks", 0)) > 0:
+		return "revived"
 	var monster_def_id := str(companion.get("monster_def_id", ""))
 	if monster_def_id.find("wolf") >= 0:
-		return "W"
-	if monster_def_id.find("skeleton") >= 0:
-		return "S"
+		return "wolf"
 	if monster_def_id.find("mercenary") >= 0:
-		return "M"
-	if monster_def_id == "":
-		return "C"
-	return monster_def_id.substr(0, 1).to_upper()
+		return "mercenary"
+	return "generic"
 
 
 func _hp_ratio(companion: Dictionary) -> float:

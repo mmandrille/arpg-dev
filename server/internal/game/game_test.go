@@ -2689,6 +2689,8 @@ func TestRolledWeaponDamageOverridesStaticFallback(t *testing.T) {
 func TestRolledBaseStatsAndAllSkillsApplyWhenEquipped(t *testing.T) {
 	rules := loadRules(t)
 	sim := MustNewSim("sess_rolled_base_stats", "01", rules)
+	sim.progression.Level = 3
+	sim.progression.BaseStats.Magic = 11
 	sim.progression.SkillRanks["magic_bolt"] = 1
 	beforeStats := sim.effectiveBaseStatsView()
 	beforeDerived := sim.characterDerivedStatsView()
@@ -2734,6 +2736,40 @@ func TestRolledBaseStatsAndAllSkillsApplyWhenEquipped(t *testing.T) {
 	}
 	if shownRank != 3 {
 		t.Fatalf("skill progression magic_bolt rank = %d, want 3", shownRank)
+	}
+}
+
+func TestAllSkillsBonusDoesNotBypassRankRequirements(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_all_skills_requirements", "01", rules)
+	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.Level = 1
+	sim.progression.BaseStats.Magic = 5
+	sim.progression.SkillRanks["magic_bolt"] = 1
+	item := &invItem{
+		instanceID: 5300,
+		itemDefID:  "cave_ring",
+		slot:       ringLeftSlot,
+		equipped:   true,
+		rollPayload: &ItemRollPayload{
+			ItemTemplateID: "cave_ring",
+			DisplayName:    "Rare Skill Ring",
+			Rarity:         "rare",
+			Stats:          map[string]int{"all_skills": 2},
+			Requirements:   map[string]int{"level": 1},
+			EffectIDs:      []string{},
+		},
+	}
+	addTestInventoryItem(sim, item)
+	sim.equipped[ringLeftSlot] = item.instanceID
+
+	if rank := sim.effectiveSkillRank("magic_bolt"); rank != 1 {
+		t.Fatalf("effective magic_bolt rank = %d, want capped rank 1 without rank 2 requirements", rank)
+	}
+	sim.progression.Level = 3
+	sim.progression.BaseStats.Magic = 11
+	if rank := sim.effectiveSkillRank("magic_bolt"); rank != 3 {
+		t.Fatalf("effective magic_bolt rank = %d, want rank 3 after requirements are met", rank)
 	}
 }
 

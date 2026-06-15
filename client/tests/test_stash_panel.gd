@@ -266,6 +266,19 @@ func _run() -> void:
 	_assert_eq("unique chest take emitted type", str(emitted[8]["type"]), "unique_chest_take_item_intent")
 	_assert_eq("unique chest take emitted entity", str(emitted[8]["payload"].get("chest_entity_id", "")), "unique_chest_entity_1")
 	_assert_eq("unique chest take emitted item", str(emitted[8]["payload"].get("chest_item_id", "")), "set_item_1")
+	panel.show_unique_chest(
+		"unique_chest_entity_1",
+		[
+			{"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "set_item_2", "item_def_id": "verdant_vanguard_helm", "item_template_id": "verdant_vanguard_helm", "display_name": "Verdant Vanguard Helm", "rarity": "set", "slot": "head", "summary_lines": ["Slot: head"]},
+		],
+		inventory,
+		{},
+		77
+	)
+	state = panel.get_debug_state()
+	_assert_eq("unique chest refresh keeps sets tab selected", str(state.get("unique_chest_active_tab", "")), "sets")
+	_assert_eq("unique chest refresh still filters set rows", str((state.get("stash_rows", [])[0] as Dictionary).get("stash_item_id", "")), "set_item_2")
 	var drag_start_position: Dictionary = (panel.get_debug_state().get("window", {}) as Dictionary).get("position", {})
 	panel.bot_drag_window_by(Vector2(35, 20))
 	state = panel.get_debug_state()

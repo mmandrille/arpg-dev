@@ -149,8 +149,7 @@ func (s *Sim) handleUniqueChestTakeItem(in Input, res *TickResult) {
 	item.slot = s.itemSlot(item.itemDefID, item.rollPayload)
 	state.items = append(state.items[:idx], state.items[idx+1:]...)
 	s.inventory = append(s.inventory, item)
-	transferID := "unique_chest_take_item:" + idStr(chestItemID)
-	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item)), StashTransferID: transferID})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
 	res.Events = append(res.Events, Event{
 		EventType:      "unique_chest_item_taken",
 		EntityID:       idStr(entity.id),

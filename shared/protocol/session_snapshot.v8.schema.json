@@ -146,6 +146,7 @@
         "requirements_met": { "type": "boolean" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
+        "summary_lines": { "$ref": "#/$defs/item_summary_lines" },
         "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
         "equipped": { "type": "boolean" }
       }
@@ -175,8 +176,13 @@
         "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
         "requirements_met": { "type": "boolean" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
-        "effect_ids": { "$ref": "#/$defs/effect_ids" }
+        "effect_ids": { "$ref": "#/$defs/effect_ids" },
+        "summary_lines": { "$ref": "#/$defs/item_summary_lines" }
       }
+    },
+    "item_summary_lines": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
     },
     "rolled_stats": {
       "type": "object",

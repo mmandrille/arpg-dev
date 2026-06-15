@@ -5391,8 +5391,15 @@ func (s *Sim) effectiveSkillRank(skillID string) int {
 		return 0
 	}
 	rank := baseRank + s.allSkillsBonus()
-	if def, ok := s.rules.Skills[skillID]; ok && def.MaxRank > 0 && rank > def.MaxRank {
+	def, ok := s.rules.Skills[skillID]
+	if !ok {
+		return rank
+	}
+	if def.MaxRank > 0 && rank > def.MaxRank {
 		rank = def.MaxRank
+	}
+	for rank > baseRank && !s.skillRequirementsMet(def, rank) {
+		rank--
 	}
 	return rank
 }
@@ -5599,11 +5606,25 @@ func (s *Sim) stashItemView(item *stashItem) StashItemView {
 		view.RequirementsMet = met
 	})
 	if previewItem := item.previewItem(); previewItem != nil {
+		view.SummaryLines = s.itemSummaryLines("", viewSlotForSummary(previewItem, view.ItemTemplateID, s.rules), s.statsForInventoryItem(previewItem), view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID]))
+		view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(previewItem)...)
 		if preview := s.equipPreviewForItem(previewItem, ""); preview != nil {
 			view.EquipPreview = preview
 		}
 	}
 	return view
+}
+
+func viewSlotForSummary(item *invItem, itemTemplateID string, rules *Rules) string {
+	if item != nil && item.slot != "" {
+		return item.slot
+	}
+	if itemTemplateID != "" {
+		if template, ok := rules.ItemTemplates[itemTemplateID]; ok {
+			return template.Slot
+		}
+	}
+	return ""
 }
 
 func (s *Sim) stashItemViews() []StashItemView {
@@ -5621,6 +5642,8 @@ func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
 	if item == nil {
 		return
 	}
+	view.SummaryLines = s.itemSummaryLines("", view.Slot, s.statsForInventoryItem(item), view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID]))
+	view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(item)...)
 	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met

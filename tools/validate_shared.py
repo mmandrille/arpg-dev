@@ -1992,10 +1992,8 @@ def cross_checks(report: Report) -> None:
             return out
 
         rarity_order = sorted(rarities)
-
         def item_rarity_rank(rarity_id: str) -> int:
             return {"common": 0, "magic": 1, "rare": 2, "unique": 3, "set": 3}.get(rarity_id, -1)
-
         def scaled_attribute_roll_range(source_depth: int) -> tuple[int, int]:
             if source_depth < 1:
                 source_depth = 1
@@ -2007,12 +2005,10 @@ def cross_checks(report: Report) -> None:
                 max_value = 3
             min_value = max(1, math.floor(float(max_value) * 0.35))
             return int(min_value), int(max_value)
-
         def scaled_all_skills_roll_range(source_depth: int) -> tuple[int, int] | None:
             if source_depth < 10:
                 return None
             return 1, max(1, source_depth // 10)
-
         def rollable_stats_for_rarity(template: dict, rarity_id: str, source_depth: int) -> list[dict]:
             stats = []
             for stat in template.get("rollable_stats", []):
@@ -2029,7 +2025,6 @@ def cross_checks(report: Report) -> None:
                     min_value, max_value = all_skills_range
                     stats.append({"stat": "all_skills", "min_rarity": "rare", "min": min_value, "max": max_value, "weight": 1})
             return stats
-
         def weighted_rollable_stat(stats: list[dict], rng: ShopRNG) -> dict | None:
             total = sum(int(stat["weight"]) for stat in stats)
             if total <= 0:
@@ -2040,6 +2035,8 @@ def cross_checks(report: Report) -> None:
                 if roll < 0:
                     return stat
             return stats[-1]
+
+        affix_words = {stat: (word, priority) for word, priority, group in [("Arcane", 90, "all_skills skill_damage_percent"), ("Focused", 85, "skill_cooldown_reduction_percent skill_mana_cost_reduction"), ("Keen", 80, "crit_chance hit_chance attack_speed_percent"), ("Savage", 70, "damage_min damage_max"), ("Stalwart", 65, "evade_chance block_percent armor"), ("Vigorous", 60, "max_hp health_regen_per_10_seconds vit"), ("Mystic", 55, "max_mana mana_regen_per_10_seconds magic"), ("Mighty", 50, "str"), ("Nimble", 50, "dex"), ("Traveler's", 45, "inventory_rows hotbar_slots")] for stat in group.split()}
 
         def roll_template(template_id: str, rng: ShopRNG, source_depth: int = 1) -> dict:
             template = item_templates["templates"][template_id]
@@ -2067,9 +2064,13 @@ def cross_checks(report: Report) -> None:
                 if stat is None:
                     continue
                 stats[stat["stat"]] = int(stats.get(stat["stat"], 0)) + int(stat["min"]) + rng.intn(int(stat["max"]) - int(stat["min"]) + 1)
+            display_name = f"{rarities[rarity_id]['name_prefix']} {template['name']}"
+            gains = [(affix_words[s][1], int(v) - int(template.get("base_stats", {}).get(s, 0)), s, affix_words[s][0]) for s, v in stats.items() if s in affix_words and int(v) > int(template.get("base_stats", {}).get(s, 0))]
+            if item_rarity_rank(rarity_id) >= item_rarity_rank("magic") and gains:
+                display_name = f"{max(gains, key=lambda row: (row[0], row[1], ''.join(chr(255 - ord(ch)) for ch in row[2])))[3]} {display_name}"
             return {
                 "item_template_id": template_id,
-                "display_name": f"{rarities[rarity_id]['name_prefix']} {template['name']}",
+                "display_name": display_name,
                 "rarity": rarity_id,
                 "rolled_stats": stats,
             }

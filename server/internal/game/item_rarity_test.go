@@ -82,6 +82,31 @@ func TestJewelryTemplatesCanRollInventoryRows(t *testing.T) {
 	}
 }
 
+func TestAffixDisplayNameUsesSkillAffixFamily(t *testing.T) {
+	rules := loadRules(t)
+	template := rules.ItemTemplates["starter_sorcerer_staff"]
+	stats := cloneIntMap(template.BaseStats)
+	stats["skill_cooldown_reduction_percent"] = 12
+	stats["skill_mana_cost_reduction"] = 1
+
+	got := rules.affixDisplayName(template, "rare", stats)
+	if got != "Focused Rare Sorcerer Staff" {
+		t.Fatalf("affix display name = %q, want Focused Rare Sorcerer Staff", got)
+	}
+}
+
+func TestAffixDisplayNamePreservesCommonRarityName(t *testing.T) {
+	rules := loadRules(t)
+	template := rules.ItemTemplates["cave_blade"]
+	stats := cloneIntMap(template.BaseStats)
+	stats["damage_max"] += 2
+
+	got := rules.affixDisplayName(template, "common", stats)
+	if got != "Common Cave Blade" {
+		t.Fatalf("common affix display name = %q, want Common Cave Blade", got)
+	}
+}
+
 func findRollableStat(stats []RollableStatDef, stat string) (RollableStatDef, bool) {
 	for _, roll := range stats {
 		if roll.Stat == stat {

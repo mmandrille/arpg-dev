@@ -11,6 +11,7 @@
       "action": "assert_rolled_inventory_item",
       "item_def_id": "starter_sorcerer_staff",
       "item_template_id": "starter_sorcerer_staff",
+      "display_name": "Focused Rare Sorcerer Staff",
       "stat_keys": ["skill_cooldown_reduction_percent", "skill_mana_cost_reduction"]
     }
   ],
@@ -19,6 +20,7 @@
       "type": "rolled_inventory_item",
       "item_def_id": "starter_sorcerer_staff",
       "item_template_id": "starter_sorcerer_staff",
+      "display_name": "Focused Rare Sorcerer Staff",
       "stat_keys": ["skill_cooldown_reduction_percent", "skill_mana_cost_reduction"]
     }
   ],

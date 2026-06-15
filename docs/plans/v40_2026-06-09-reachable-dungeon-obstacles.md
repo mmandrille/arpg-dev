@@ -9,8 +9,6 @@ Tech stack: shared JSON rules/schemas/goldens, Go `server/internal/game`, JSON W
 
 Baseline is v39 `ui-currency-and-mana-polish`, with v9 wall collision, v11 server-owned A* navigation, v18 generated levels/stairs, v21 dungeon monsters, v25 guarded chests, v35 boss floors, and v38+ co-op/session replay already in place.
 
-Godot shortcut decision: reject plugin adoption. v40 only needs simple AABB wall-box rendering from authoritative server layout; no UI framework, camera plugin, asset pack, imported dungeon art, or external collision tool is needed for this proof.
-
 Implementation notes:
 
 - Work stays on the current branch; do not create branches.

@@ -16,11 +16,6 @@ This slice reuses:
 - v23 rolled item template payloads and persistence.
 - v25 treasure class attempts and guarded chest open-once behavior.
 - v28 template catalog and equipment slot assertions.
-
-Godot plugin adoption: **reject for v29**. The slice changes shared loot data, Go source selection,
-goldens, and protocol bot proof. It does not add client UI, camera, inventory presentation, or art,
-so there is no plugin or asset pack to adopt/borrow.
-
 ## File map
 
 | Action | Path | Responsibility |

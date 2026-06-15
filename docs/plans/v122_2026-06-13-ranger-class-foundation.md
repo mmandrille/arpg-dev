@@ -8,7 +8,6 @@ Tech stack: shared JSON rules/assets, Go server/game/http tests, Godot client sc
 ## Baseline and shortcut decision
 
 Builds on v69-v71 class identity/picker/presentation, v97 starter loadouts, v98 Rogue foundation,
-and existing ranged basic-attack support. Godot plugin adoption: **reject external plugins and asset
 packs** for this slice. Existing deterministic GLB generation, class presentation metadata, and item
 visual loaders cover the required art and UI surface with less dependency risk.
 

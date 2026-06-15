@@ -9,7 +9,6 @@ Related:
 - [`v9_spec-solid-collision-and-obstacles.md`](v9_spec-solid-collision-and-obstacles.md) — wall collision; door barrier reuses AABB checks
 - [`v8_spec-equipped-weapon-damage.md`](v8_spec-equipped-weapon-damage.md) — equipped weapon `reach` follows same item-rules pattern as `damage`
 - [`../../PROGRESS.md`](../../PROGRESS.md)
-- [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md)
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures)
 - ADR-0007 (client-only presentation; door swing animation is client-side)
 
@@ -254,8 +253,6 @@ Bot must: reject action on door from far → walk into reach → `action_intent`
 - Closed: upright box panel (distinct color from static walls).
 - On `state == open` (from `entity_update` or after `interactable_activated` event): tween rotation ~90° around hinge edge (client-only; server sends state only).
 - Pick collider stays on door node for the closed state; open door does not block movement visually or logically.
-
-Plugin adoption: **reject** — same rationale as v9 walls; simple in-repo mesh + tween.
 
 ## 5. Architecture and flow
 

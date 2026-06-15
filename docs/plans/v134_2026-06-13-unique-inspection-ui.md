@@ -8,7 +8,6 @@ Tech stack: Godot GDScript client UI/tests, lifecycle docs.
 
 ## Baseline And Shortcut Decision
 
-Builds on v133 unique validation split. Godot plugin adoption is rejected for this slice: the change
 is a narrow extension of the existing item tooltip panel and shared rule loader, with no new inventory
 presentation system, art pipeline, or external UI widget need.
 

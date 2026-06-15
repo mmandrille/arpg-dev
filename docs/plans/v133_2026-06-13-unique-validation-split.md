@@ -9,7 +9,6 @@ Tech stack: Python validator/tests, Go rule tests, docs.
 
 ## Baseline And Shortcut Decision
 
-Builds on v132 fixed named unique package. Godot plugin adoption is not applicable because this slice
 does not touch client UI, presentation, art, camera, or inventory controls.
 
 ## File Map

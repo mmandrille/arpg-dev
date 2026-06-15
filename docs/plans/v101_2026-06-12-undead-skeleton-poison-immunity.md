@@ -8,12 +8,6 @@ Tech stack: Go sim, shared JSON/schema catalogs, deterministic GLB generator, Go
 ## Baseline and Shortcut Decision
 
 Builds on v100 `damage-types-and-resistances`, which added data-driven damage types, monster resistance maps, and combat event `damage_type`.
-
-Godot plugin / asset decision:
-- Adopt: none.
-- Borrow: existing deterministic generated GLB pipeline, asset manifest, monster visual catalog, and low-poly monster scene pattern.
-- Reject: external Godot plugins and third-party skeleton art packs for this narrow CI-backed proof.
-
 ## File Map
 
 | Action | Path | Responsibility |

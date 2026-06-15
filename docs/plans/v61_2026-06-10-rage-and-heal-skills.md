@@ -8,9 +8,6 @@ Tech stack: Shared JSON/schema, Go sim, Python bot, Godot client, SDD docs.
 ## Baseline and Shortcut Decision
 
 Builds on v60 content manifest loading and v59 skill catalog data. The skill catalog remains loaded through `shared/content/content_libraries.v0.json`.
-
-Godot plugin research decision: reject external plugins. Rage presentation can reuse the local player/equipment root scale path, and Heal can reuse `player_healed` floating text.
-
 ## File Map
 
 | Action | Path | Responsibility |

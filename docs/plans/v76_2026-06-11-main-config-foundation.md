@@ -7,8 +7,6 @@ Tech stack: Shared JSON schema/data, Python validator, Go rules loader and focus
 
 ## Baseline and shortcut decision
 
-Builds on v75 plus the committed loot tuning change. No client UI, art, camera, or inventory presentation work is in scope, so the Godot plugin adoption checklist is not applicable.
-
 ## File map
 
 | Action | Path | Responsibility |

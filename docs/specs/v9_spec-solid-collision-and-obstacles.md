@@ -2,7 +2,6 @@
 
 Status: Draft
 Branch: `feature/solid-collision-and-obstacles`
-Related: ADR-0001 D2/D3/D8, `docs/researchs/godot-plugins-and-shortcuts.md`
 
 ## 1. Purpose
 
@@ -79,9 +78,6 @@ not get blocked by corpses.
 Wall obstacles are loaded from the persisted `world_id`, so fresh attach, resume, `/state`, replay,
 and visual replay all reconstruct the same collision environment without adding mutable wall state.
 
-## 6. Plugin adoption decision
-
-The adoption checklist in `docs/researchs/godot-plugins-and-shortcuts.md` was consulted for isometric
 collision resources.
 
 Decision: **borrow/reject for v9**.

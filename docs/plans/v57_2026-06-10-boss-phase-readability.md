@@ -17,7 +17,6 @@ Adoption checklist:
 - Adopt: existing in-repo `BossHealthBar`, `get_bot_state()`, procedural primitive marker, and
   client bot assertion patterns.
 - Borrow: current boss tint behavior and archer marker primitive style.
-- Reject: external plugins/assets. The slice is a narrow presentation layer over existing server
   phase facts; adding dependencies would increase surface area without reducing risk.
 
 ## File map

@@ -9,8 +9,6 @@ Tech stack: Python shared validation and maintainability ratchet.
 
 ## Baseline and shortcut decision
 
-Builds on v169. No Godot plugin decision is required; this is Python tooling-only maintenance.
-
 ## File map
 
 | Action | Path | Responsibility |

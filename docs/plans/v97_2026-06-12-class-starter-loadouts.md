@@ -7,8 +7,6 @@ Tech stack: shared JSON rules/assets, Go HTTP/store/game tests, Python protocol 
 
 ## Baseline and shortcut decision
 
-Builds on v96 `town-presentation-polish` and reuses v69-v71 class identity, v23/v28 rolled equipment persistence, and v44+ skill damage paths. Godot plugin adoption: reject for this slice because no new client UI/art system is needed; placeholder item visuals/presentations are already manifest-driven and sufficient for protocol-visible starter gear.
-
 ## File map
 
 | Action | Path | Responsibility |

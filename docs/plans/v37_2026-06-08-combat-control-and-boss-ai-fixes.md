@@ -8,9 +8,6 @@ Tech stack: Shared JSON protocol/examples/world presets, Go deterministic sim, P
 ## Baseline and shortcut decision
 
 Baseline is v36 `inventory-paper-doll-capacity` on `main`, building on v27 sustained click controls, v12 projectile authority, v17/v21 chase combat, v33 co-op actor-scoped inputs, and v35 boss floor phase/gate work.
-
-Godot plugin adoption decision for this slice: **reject external plugins**. The work is input routing and authoritative combat behavior, not a new UI/camera/art system. Reuse/borrow existing in-repo paths instead: `sustained_click_input.gd`, `_mouse_ground_point()`, `_aim_direction_from_mouse()`, existing animation one-shots, and current boss telegraph presentation.
-
 Plan decisions:
 
 - Add `directional_attack_intent { direction: { x, y } }` to the current protocol schema set with coordinated client/server updates and no compatibility shim.

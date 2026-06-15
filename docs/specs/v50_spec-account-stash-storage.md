@@ -14,7 +14,6 @@ Related:
 - [`../adr/0011-player-market-and-multi-item-trade-offers.md`](../adr/0011-player-market-and-multi-item-trade-offers.md) - future market delivery needs town stash ownership rules
 - [`../adr/0012-item-upgrades-and-item-levels.md`](../adr/0012-item-upgrades-and-item-levels.md) - future resources/upgrades need durable storage rules
 - [`../adr/0013-mystery-seller-and-unidentified-item-offers.md`](../adr/0013-mystery-seller-and-unidentified-item-offers.md) - future mystery purchases may deliver to inventory or stash
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - inventory/stash UI shortcut checklist
 - [`v36_spec-inventory-paper-doll-capacity.md`](v36_spec-inventory-paper-doll-capacity.md) - bag capacity and full-bag rejection
 - [`v39_spec-ui-currency-and-mana-polish.md`](v39_spec-ui-currency-and-mana-polish.md) - character gold wallet and gold updates
 - [`v41_spec-town-vendor-gold-sink.md`](v41_spec-town-vendor-gold-sink.md) - town vendor, buy/sell, durable gold mutation
@@ -43,8 +42,6 @@ durable account-level storage surface that future market delivery, mystery-selle
 upgrade resources can build on.
 
 Client shortcut decision for the spec: **borrow UI patterns, do not adopt gameplay logic**. The
-implementation plan must record the adoption checklist from the plugin research doc. GLoot,
-Godot-Inventory, or Wyvernbox may be used as UI references for side-by-side inventory/stash
 gestures, but item state, capacity, gold, validation, and mutation authority must remain in the Go
 server.
 
@@ -291,5 +288,4 @@ Implementation risks for the plan:
   inventory in a way that leaves duplicate ownership.
 - Replay needs a session-start account stash snapshot or equivalent stable baseline. Replaying
   against live current account stash would make historical sessions nondeterministic.
-- Client UI work touches inventory presentation. The plan must record the Godot plugin shortcut
   checklist result before editing client UI code.

@@ -10,7 +10,6 @@ Tech stack: Python protocol bot, pytest, maintainability ratchet, full bot/CI ga
 
 ## Baseline and shortcut decision
 
-Builds on v147 `bot-wait-runtime-split`. No Godot/plugin shortcut decision is needed; this slice
 touches Python bot tooling only.
 
 ## File map

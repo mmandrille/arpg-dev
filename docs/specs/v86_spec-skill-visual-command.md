@@ -58,4 +58,3 @@ make skill-visual skill=holy_shield
 
 - Risk: Existing scenarios show rank-1 behavior only. Mitigation: v87 will add generated rank target
   demos and buff stat proof.
-- Godot plugin shortcut decision: reject. This slice reuses existing bot-visual infrastructure.

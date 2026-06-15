@@ -15,7 +15,6 @@ and visual metadata.
 ## Non-goals
 
 - No third Ranger skill; `Volley` is reserved for v124.
-- No production animation set or external Godot plugin dependency.
 - No new ground-targeting intent shape beyond the existing direction/target cast payload.
 - No broad class balance pass outside the new skill data.
 - No PvP behavior.
@@ -88,4 +87,3 @@ make bot-visual scenario=59_ranger_piercing_and_pinning_shots
 - `server/internal/game/sim.go`, `server/internal/game/game_test.go`, `client/scripts/main.gd`, and
   `tools/bot/run.py` are over the maintainability target. This slice should prefer focused helper
   files and only add thin wiring to existing large files.
-

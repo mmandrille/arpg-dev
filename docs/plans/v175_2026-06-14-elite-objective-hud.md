@@ -7,8 +7,6 @@ Tech stack: Godot client UI/tests, client bot scenario JSON, lifecycle docs.
 
 ## Baseline and Shortcut Decision
 
-Builds on v158-v162 elite objective generation, locking, full-clear rules, and chest presentation. Godot plugin adoption checklist: reject external plugins because this is a compact in-repo HUD label using existing Control nodes.
-
 ## File Map
 
 | Action | Path | Responsibility |

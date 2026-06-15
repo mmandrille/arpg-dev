@@ -11,7 +11,6 @@ Tech stack: Shared JSON/schema, Go rules, Go sim, focused Go tests, lifecycle do
 
 Builds on v79 generated elite pack roles and the existing dungeon pack metadata in
 `server/internal/game/dungeon_gen.go`. No client UI, camera, inventory presentation, or art work is
-in scope, so the Godot plugin adoption checklist is not required.
 
 ## File map
 

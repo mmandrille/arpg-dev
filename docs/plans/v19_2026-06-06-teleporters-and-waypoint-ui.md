@@ -16,9 +16,7 @@ Add deterministic per-level dungeon teleporters, session-scoped discovery, a ser
 
 Godot shortcut adoption checklist:
 
-- **Decision:** reject plugin/addon adoption for v19.
 - **Reason:** the client surface is a compact list panel, scroll container, buttons, and one
-  placeholder teleporter mesh. Inventory UI plugins are irrelevant and would add authority-risking
   state abstractions.
 - **Borrow:** reuse existing in-repo `main.gd` HUD/panel style and interactable click routing.
 

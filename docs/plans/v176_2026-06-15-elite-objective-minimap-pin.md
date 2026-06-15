@@ -7,8 +7,6 @@ Tech stack: Godot client UI/tests, client bot scenario JSON, lifecycle docs.
 
 ## Baseline and Shortcut Decision
 
-Builds on v158-v162 elite objective generation and v175 elite objective HUD tracker. Godot plugin adoption checklist: reject external minimap plugins because the slice only needs a compact presentation overlay driven by existing entity metadata; a full minimap dependency would add more maintenance surface than behavior.
-
 ## File Map
 
 | Action | Path | Responsibility |

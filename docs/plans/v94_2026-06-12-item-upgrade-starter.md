@@ -7,8 +7,6 @@ Tech stack: shared JSON/schema, Go rules loader, Go store, Go HTTP, lifecycle do
 
 ## Baseline and shortcut decision
 
-Builds on v50 account stash, v68/v93 market ownership, and ADR-0012. No Godot plugin adoption applies because this slice has no client UI/art.
-
 ## File map
 
 | Action | Path | Responsibility |

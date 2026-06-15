@@ -16,7 +16,6 @@ Add a server-authoritative town vendor that gives gold a repeatable sink. The ve
 - Protocol advances to v4 for shop intents and events. Existing protocol examples and validators should move together with the schemas.
 - Deepest dungeon depth is durable progression state, updated when a character reaches a deeper negative dungeon floor.
 - Co-op behavior follows v38/v39 actor-scoped patterns: only the acting player can buy, sell, and receive private shop responses.
-- No external Godot shop/inventory plugin is adopted for this slice. Existing local panels and signals are enough, and a plugin would not reduce server/protocol work.
 
 ## File Map
 
@@ -287,4 +286,3 @@ make ci
 - Buyback tab.
 - Item comparison UI.
 - Economy balancing beyond the simple v41 formula.
-- External inventory/shop plugins.

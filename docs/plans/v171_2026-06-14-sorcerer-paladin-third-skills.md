@@ -9,8 +9,6 @@ Tech stack: shared JSON, Go sim validation/tests, Godot client tests, Python bot
 
 ## Baseline and shortcut decision
 
-Builds on v170 and follows the v154 class skill expansion pattern. Godot plugin decision: reject
-external skill-tree or VFX plugins; existing server-owned skill rules and code-native Godot
 presentation are sufficient for two catalog-driven skills.
 
 ## File map

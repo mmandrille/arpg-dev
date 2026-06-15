@@ -10,7 +10,6 @@ Tech stack: Go realtime loop and focused Go tests.
 
 ## Baseline and shortcut decision
 
-Builds on v81 `paladin-holy-shield`. No Godot plugin/adoption decision is needed because this is
 server-only realtime infrastructure.
 
 ## File map

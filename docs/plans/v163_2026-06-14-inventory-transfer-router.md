@@ -10,7 +10,6 @@ Tech stack: Godot GDScript, client unit tests, existing client bot scenarios.
 ## Baseline and shortcut decision
 
 Builds on the v160 review recommendation to extract inventory transfer/staging routing. Godot
-plugin/adoption checklist: reject external plugins/assets; this is pure in-repo GDScript
 maintainability work.
 
 ## File map

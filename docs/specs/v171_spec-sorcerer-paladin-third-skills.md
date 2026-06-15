@@ -23,7 +23,6 @@ without adding a new mechanics framework.
 - No new skill capability type or protocol schema.
 - No changes to existing skill definitions or behavior.
 - No passive skill tree, mana regeneration, or final balance pass.
-- No production VFX/audio or external Godot plugin dependency.
 - No broad skill-tree restructuring beyond the two new prerequisite links.
 
 ## Acceptance criteria

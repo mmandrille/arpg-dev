@@ -11,9 +11,6 @@ Tech stack: Godot client, shared JSON loader, Python/Godot client bot, docs.
 
 ## Baseline and shortcut decision
 
-Builds on v112 elite aura foundation and v113 elite aura readability. Godot plugin/assets decision:
-reject external plugins/assets; the existing `player_status_effect_markers.gd` helper is sufficient.
-
 ## File map
 
 | Action | Path | Responsibility |

@@ -16,7 +16,6 @@ Adoption checklist:
 - Adopt: existing in-repo `DamageNumber`, floating combat text setting, `get_bot_state()`, and
   client bot damage-number assertions.
 - Borrow: existing block/miss/crit text styling pattern in `damage_number.gd`.
-- Reject: external plugins/assets. The slice is a narrow presentation mapping over existing
   authoritative events.
 
 ## File map

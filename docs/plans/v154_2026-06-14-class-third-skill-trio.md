@@ -9,7 +9,6 @@ Tech stack: shared JSON, Go sim validation/tests, Godot client tests, Python bot
 
 ## Baseline and shortcut decision
 
-Builds on v153. Godot plugin decision: reject external skill-tree or VFX plugins. Existing
 server-owned skill rules and code-native Godot presentation are sufficient for three catalog-driven
 skills.
 

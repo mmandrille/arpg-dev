@@ -26,7 +26,6 @@ new mechanics framework.
 - No Sorcerer or Paladin additions in this slice.
 - No new skill kind or protocol schema.
 - No final class balance pass.
-- No production VFX/audio or external Godot plugin dependency.
 
 ## Acceptance criteria
 

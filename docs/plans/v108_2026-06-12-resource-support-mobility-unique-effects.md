@@ -26,4 +26,3 @@ Implement server-authoritative mechanics for `grave_pact`, `blood_price`, `pilgr
 
 - Do not touch corpse looting files or contracts.
 - No new branch.
-- No new Godot plugin adoption; reuse current protocol/status presentation.

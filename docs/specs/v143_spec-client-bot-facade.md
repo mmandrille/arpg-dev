@@ -16,7 +16,6 @@ future client-bot adapter work.
 - No client bot scenario semantics or JSON step changes.
 - No server, protocol, gameplay, or shared-rule changes.
 - No split of `bot_scenario_runner.gd`; that remains v144.
-- No visual, UI layout, asset, or plugin adoption work.
 
 ## Acceptance Criteria
 
@@ -41,8 +40,6 @@ future client-bot adapter work.
 
 ## Shortcut Decision
 
-Reject external plugins/addons for this slice. The task is a small internal test adapter split with
-no presentation assets, UI layout, camera, inventory UI, or art; a plugin would add dependency
 surface without replacing any domain logic.
 
 ## Test And Bot Proof

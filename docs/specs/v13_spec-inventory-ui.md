@@ -11,7 +11,6 @@ Related:
 - [`v2_spec-equip-and-see-it.md`](v2_spec-equip-and-see-it.md) — `EquipmentVisualResolver`, item visuals pipeline
 - [`v8_spec-equipped-weapon-damage.md`](v8_spec-equipped-weapon-damage.md) — weapon stats for tooltips
 - [`../../PROGRESS.md`](../../PROGRESS.md)
-- [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md) — **reject** inventory plugins for v13; custom UI only
 - ADR-0001 (authoritative server; client sends intents only)
 - ADR-0007 (client-only presentation; panel layout and drag feedback are not on the wire)
 
@@ -41,7 +40,6 @@ After this slice:
   snapshot/deltas (no pixel tests).
 
 The proof is **new intents → sim inventory mutations → loot respawn → bot scenario → client panel
-sync**, not stash grids, vendors, crafting, or plugin adoption.
 
 ## 2. Current Problems
 
@@ -70,7 +68,6 @@ schema enum is `["weapon"]` only — tighten in this slice so bag rows validate 
 
 ## 3. Non-goals
 
-- **No Godot inventory plugins** (GLoot, Godot-Inventory, etc.) — custom `Control` UI only.
 - **No stash**, shared storage, vendor, buy/sell, or crafting UI.
 - **No stack splitting**, item combining, or quantity > 1.
 - **No new equipment slots** beyond existing `weapon` (UI may show a single equip slot only).
@@ -430,7 +427,6 @@ scenario remains the end-to-end proof.
 
 | # | Question | Decision |
 |---|----------|----------|
-| 1 | Plugin vs custom UI? | **Custom UI (C)** — no addons |
 | 2 | Equip gestures? | **Double-click and drag** both |
 | 3 | Panel toggle / layout? | **`I` toggle**, weapon slot + bag, game keeps running |
 | 4 | Tooltip depth? | **Rich** stats + **empty thumbnails** |

@@ -49,12 +49,6 @@ Manual visual command:
 ```bash
 make bot-visual scenario=37_elite_aura_radius_preview
 ```
-
-## Plugin / shortcut note
-
-Reject external plugins/assets. This is a small code-native marker layered on existing status-effect
-marker helpers and shared rule loading.
-
 ## Open questions and risks
 
 | # | Question / risk | Resolution |
@@ -67,4 +61,3 @@ marker helpers and shared rule loading.
 
 - ADR-0001: preserves server authority; the client renders state already authored by the server.
 - ADR-0007: keeps aura preview as client-only presentation state.
-

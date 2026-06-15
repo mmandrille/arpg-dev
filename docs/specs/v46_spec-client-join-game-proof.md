@@ -10,7 +10,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client, backend-owned sessions, agent-playability
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one authoritative Sim
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI/lobby shortcut checklist
 - [`v33_spec-true-coop-session.md`](v33_spec-true-coop-session.md) - server-owned co-op session baseline
 - [`v38_spec-session-browser-and-uncapped-coop-menu.md`](v38_spec-session-browser-and-uncapped-coop-menu.md) - listed session discovery and uncapped co-op
 - [`v45_spec-menu-create-join-flow.md`](v45_spec-menu-create-join-flow.md) - current Create Game / Join Game menu baseline
@@ -45,7 +44,6 @@ Steam, trade, or matchmaking work.
 - No full two-window visual choreography. The default proof is one protocol-held host plus one
   Godot guest.
 - No production multiplayer UI redesign, art, audio, or animated lobby treatment.
-- No Godot UI or lobby plugin adoption. The plan must record the plugin shortcut checklist result;
   expected decision is to reuse the existing in-repo `Control` panels and protocol bot helpers.
 
 ## 3. Acceptance Criteria

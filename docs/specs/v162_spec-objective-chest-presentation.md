@@ -15,7 +15,6 @@ views.
 
 - No quest journal, minimap pin, objective tracker, NPC turn-in, or durable quest state.
 - No new chest loot, monster tuning, objective completion rule, or interaction behavior.
-- No external Godot plugin or asset dependency.
 
 ## Acceptance criteria
 

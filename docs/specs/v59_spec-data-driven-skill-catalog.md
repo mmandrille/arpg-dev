@@ -9,7 +9,6 @@ Related:
 
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, bounded formula catalog
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client presentation shortcut checklist
 - [`v44_spec-skill-points-and-magic-bolt.md`](v44_spec-skill-points-and-magic-bolt.md) - current skill point and Magic Bolt loop
 
 ## 1. Purpose
@@ -46,7 +45,6 @@ without the new requirement is explicitly not required.
 - No final combat balance pass. Damage/cooldown numbers may change only as needed to keep the
   existing proof deterministic.
 - No production skill VFX/audio.
-- No external gameplay or skill-tree plugin adoption. The plan should record **reject** for plugins
   that want to own skill authority; this slice should extend the in-repo display-only client UI.
 - No production migration for stale local character data; a local `make db-reset`/character wipe is
   acceptable before bot proof.
@@ -212,8 +210,6 @@ Expected UI behavior:
 - Skill cooldown display continues to come from `skill_cooldowns`, with local interpolation only as
   presentation.
 
-Because this slice changes client skill UI but does not add new art/plugin dependencies, the plan
-should record the Godot shortcut decision as **reject external plugin; extend in-repo display-only
 UI**.
 
 ## 7. Scope And Likely Files

@@ -11,7 +11,6 @@ v23 builds on v22 `character-scoped-persistence`: character item instances alrea
 
 Godot shortcut adoption checklist:
 
-- **Decision:** reject plugin adoption.
 - **Reason:** this slice only extends the existing inventory tooltip and placeholder item presentation for one template weapon. No new inventory grid, drag/drop model, camera system, production art, or addon-level UI is needed.
 - **Borrow:** existing `inventory_panel.gd` tooltip/presentation pattern and `client/tests/test_golden.gd` data-only fixture checks. Existing placeholder sword visuals can represent `cave_blade`; no external asset pack is required.
 
@@ -253,5 +252,4 @@ make play
 - No full affix economy, prefix/suffix grammar, procedural item-name generator, or special-effect execution.
 - No armor, rings, amulets, offhand, stash, crafting, vendors, gold, trade, item comparison UI, or loot filters.
 - No character level/stat system beyond validating and rejecting unsupported requirements.
-- No production item art or inventory plugin adoption.
 - No Protobuf migration or non-additive protocol redesign.

@@ -20,7 +20,6 @@ Status: Complete
   focused on player-visible class expansion without a new mechanics framework.
 - Kept the shipped misspelled `ligthing` skill id as the Sorcerer prerequisite to avoid a broad
   compatibility rename.
-- Rejected external Godot skill-tree/VFX plugins; existing shared-rule loaders and code-native
   presentation cover this scope.
 
 ## Deferred

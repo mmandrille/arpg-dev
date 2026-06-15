@@ -9,7 +9,6 @@ Tech stack: Godot GDScript client UI/debug state, client bot scenario JSON, life
 
 ## Baseline And Shortcut Decision
 
-Builds on v135 second named unique. Godot plugin adoption is rejected for this slice because it only
 adds a client bot proof around existing UI/debug state; no new UI component or asset pipeline is
 needed.
 

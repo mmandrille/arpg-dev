@@ -11,7 +11,6 @@ Tech stack: Go store integration tests, lifecycle docs.
 
 Builds on v138 `codemap-and-reduction-ratchet` and the v130 review finding that market summary/detail
 reads should not depend on the active-list route to run expiration side effects. No client UI,
-camera, inventory presentation, or art is in scope, so the Godot plugin adoption checklist is not
 required.
 
 ## File map

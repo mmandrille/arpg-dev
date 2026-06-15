@@ -8,7 +8,6 @@ Tech stack: Godot GDScript client bot runner and unit tests.
 
 ## Baseline and shortcut decision
 
-Builds on v83 `defensive-client-envelope-payloads`. No Godot plugin/adoption checklist is needed:
 this is test tooling infrastructure, not UI, camera, inventory presentation, or art.
 
 ## File map

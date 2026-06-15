@@ -23,9 +23,6 @@ Baseline is v44 `skill-points-and-magic-bolt` on `main`. Reuse:
 - v24 main menu, character selection, settings, pause, Return to Main Menu, and client bot menu helpers.
 - v38 listed co-op create, active session list, listed join, multi-client launchers, and protocol bot proof.
 - v44 skill UI state in `main.gd` teardown/input-lock paths, so menu changes do not leave skill panels active.
-
-Godot plugin shortcut decision: **reject** external menu/lobby plugins for v45. The slice is a small navigation cleanup over existing in-repo `Control` panels, and adopting a plugin would add dependency and headless-CI surface without improving server-backed session routing. Steam/GodotSteam lobby UI remains deferred to a platform slice.
-
 Implementation decisions:
 
 - `Create Game` uses a local `ClientSettings.create_game_session_type` value with allowed values `coop` and `solo`; default `coop`.

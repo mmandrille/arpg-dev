@@ -11,7 +11,6 @@ Tech stack: Go sim, shared JSON/schema, Python bot, existing Godot interactable 
 ## Baseline and shortcut decision
 
 Builds on v103-v108 unique effect execution, v119 live unique-effect drop coverage, and v130 review
-guidance. Godot plugin checklist reviewed: reject external adoption because this is server-authored
 debug content, not a new inventory UI/art system.
 
 Capacity decision: the unique test chest bypasses normal inventory capacity for this explicit

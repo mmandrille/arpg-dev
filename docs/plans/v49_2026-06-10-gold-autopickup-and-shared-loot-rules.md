@@ -14,9 +14,6 @@ Baseline is v48 `coop-rewards-and-scaling` on `main`. Reuse:
 - v25/v30 shared loot table and rarity/depth drop behavior.
 - v39 gold wallet, `gold_picked_up`, `gold_update`, and durable character gold persistence.
 - v33/v38/v48 co-op membership, recipient-scoped snapshots/deltas, explicit owner routing, and replay proof patterns.
-
-Godot plugin shortcut decision: **reject / not applicable**. v49 has no new client UI, camera, art, inventory presentation, or placeholder asset work. The existing Godot client should observe existing `entity_remove`, `gold_update`, `character_progression_update`, and `gold_picked_up` deltas. If implementation unexpectedly touches `client/`, rerun the plugin adoption checklist from `docs/researchs/godot-plugins-and-shortcuts.md` before editing client code.
-
 ## File map
 
 | Action | Path | Responsibility |

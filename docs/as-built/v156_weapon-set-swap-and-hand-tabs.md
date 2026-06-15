@@ -18,7 +18,6 @@ Plan: [`docs/plans/v156_2026-06-14-weapon-set-swap-and-hand-tabs.md`](../plans/v
 
 ## Key decisions
 
-- Rejected inventory UI plugins for this slice and extended the existing panel directly.
 - Kept non-hand equipment shared across both weapon sets.
 - Kept old `equipped` hand fields as the active weapon set so existing combat, visuals, and tests
   continue to consume one active loadout.

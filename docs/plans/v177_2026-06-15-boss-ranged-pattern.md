@@ -7,8 +7,6 @@ Tech stack: shared JSON rules/schemas, Go sim/tests, Python protocol bot scenari
 
 ## Baseline and Shortcut Decision
 
-Builds on v57 boss phase readability and v58 deterministic boss pattern decks. Godot plugin adoption decision: not applicable; this slice changes authoritative rules/sim behavior and only reuses existing client boss telegraph presentation.
-
 ## File Map
 
 | Action | Path | Responsibility |

@@ -9,7 +9,6 @@ Tech stack: Godot GDScript UI/tests, existing REST character API, client bot sce
 
 ## Baseline and Shortcut Decision
 
-Builds on v70. Godot plugin decision: reject external plugins because this is a small bespoke
 panel affordance and the project already has a code-native `SkillIcon` drawing pattern to borrow.
 Borrow pattern from `client/scripts/skill_icon.gd` for lightweight class sprites.
 

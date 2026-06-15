@@ -56,12 +56,6 @@ Manual visual command:
 ```bash
 make bot-visual scenario=38_market_active_offer_ui
 ```
-
-## Plugin / shortcut note
-
-Reject external UI plugins/assets. The existing market panel, draggable window chrome, and client
-bot preflight harness cover the slice.
-
 ## Open questions and risks
 
 | # | Question / risk | Resolution |
@@ -77,4 +71,3 @@ bot preflight harness cover the slice.
   transfer.
 - ADR-0014 D12: keeps market work moving toward the long-term endgame economy without adding new
   resource complexity.
-

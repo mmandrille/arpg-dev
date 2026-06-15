@@ -9,7 +9,6 @@ Related:
 - [`v7_spec-gear-before-combat-scenario.md`](v7_spec-gear-before-combat-scenario.md) — deferred combat math; gear loop proves equip-before-attack ordering
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) — damage roll + retaliation golden pattern
 - [`../../PROGRESS.md`](../../PROGRESS.md)
-- [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md) — inventory UI plugins deferred to a future client slice
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures)
 
 ## 1. Purpose
@@ -26,8 +25,6 @@ After this slice:
 - Replay, resume, `/state`, and replay timeline remain consistent — damage depends only on equipped state at attack time, which is already persisted and reconstructed.
 
 The proof is **rules data → sim math → golden fixtures → bot scenario**, not UI polish or new protocol fields.
-
-**Inventory UI is out of scope.** Authoritative inventory and equip already exist (v0/v2); the client still mirrors server state in `main.gd` with no grid panel. A future slice will add display-only inventory/equip UI (e.g. GLoot or Oen44/Godot-Inventory wired to `state_delta` and intents — see plugins doc). v8 does not adopt or require any Godot inventory addon.
 
 ## 2. Current Problems
 
@@ -58,7 +55,6 @@ The gear-before-combat scenario only asserts ordering and inventory state. A pla
 - **No attack range gate, miss tuning, armor, healing, or respawn.**
 - **No new attack intents, events, or protocol schema bump.** Damage changes are invisible on the wire except via HP deltas already present in `entity_update`.
 - **No client-side damage preview or floating combat numbers.**
-- **No client inventory UI** — no grid panel, drag-drop, tooltips, or Godot inventory plugin integration (GLoot, Godot-Inventory, etc.). Equip remains via existing intents (`Q` / autoplay / bot); UI belongs in a **future client slice** after v8 proves weapon damage in sim.
 - **No new bot scenario file** — extend assertions on existing `02_gear_before_combat.json` and keep `01_vertical_slice.json` as the unarmed baseline.
 - **No pickup range gate** (still deferred).
 - **No `world_id` on WebSocket snapshots** (still deferred).
@@ -284,7 +280,6 @@ make bot-visual   # gear scenario should show faster kill after equip
 | 3 | Expose damage range on inventory snapshots? | **No** — client can read rules files for tooltips later; no protocol change in v8. |
 | 4 | Count attacks including misses? | **N/A** — `base_hit_chance` is 1.0; count `attack_intent` acks that precede `monster_killed`. |
 | 5 | New dedicated golden for full gear scenario outcome? | **No** — bot assertion + focused Go sim test are enough; avoid duplicating `slice_outcome` pattern. |
-| 6 | When to add Godot inventory UI (GLoot / Godot-Inventory)? | **Future slice** — after v8; display-only adapter over existing protocol; tooltips may read `shared/rules/items.v0.json` for damage text. |
 
 ## 10. Risks and mitigations
 

@@ -10,10 +10,6 @@ Tech stack: shared JSON/schema, Go sim, Python protocol bot, Godot client, lifec
 Baseline is v88 `skill-visual-rank-seeding` on `main`, with a clean worktree after maintenance.
 This slice builds on v59/v61 skill catalogs, v70 class gates, v81/v88 skill visual tooling, and
 existing projectile/combat text/client status-effect presentation.
-
-Godot plugin adoption checklist: reject external plugins/assets. The requested visuals are small
-code-native overlays/tints driven by server events and authoritative entity/effect state.
-
 ## File map
 
 | Action | Path | Responsibility |

@@ -10,4 +10,3 @@
 - Replay, reconnect resume, `/state`, and Godot smoke stay green through `make ci`.
 
 **Explicit non-goals:** no additive stat system, armor, healing, client damage preview, or inventory
-UI/plugin adoption. Attack range was deferred in v8 and closed by v10.

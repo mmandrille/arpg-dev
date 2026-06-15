@@ -9,8 +9,6 @@ Tech stack: Go entity views, shared JSON schemas, Godot client, client bot scena
 
 ## Baseline and shortcut decision
 
-Builds on v161 `full-elite-clear-objective`. Godot plugin/adoption checklist: reject external
-plugins/assets; this is a small in-repo presentation marker using the existing primitive chest
 model and bot debug patterns.
 
 ## File map

@@ -45,7 +45,6 @@ numbers should only break tests that intentionally lock those values.
   same authoritative result.
 - No removal of cross-language golden coverage for formula contracts.
 - No broad test framework migration.
-- No client UI redesign or new Godot plugin adoption.
 
 ## 3. Files to create or modify
 

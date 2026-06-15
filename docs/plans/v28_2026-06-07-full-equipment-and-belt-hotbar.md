@@ -17,14 +17,12 @@ Tech stack: shared JSON schemas/rules/goldens, Go authoritative sim/store/realti
 |-------|--------|
 | Baseline v28 after completed v27/v26 | OK |
 | Branch | Resolved in chat: work on current `main`; ignore spec branch placeholder |
-| Scope and non-goals | OK — no affix grammar, mitigation, stash/vendors, production art, or plugin-owned logic |
 | Protocol contracts | OK with resolution: add `assign_hotbar_intent` and `use_hotbar_intent`; migrate `weapon` to `main_hand`/`off_hand` everywhere |
 | Server authority | OK — client is presentation only; Go sim owns equip, hand rules, capacity, use, persistence |
 | Determinism | OK — no wall clock/randomness outside seeded sim; equipment lab/golden must pin seed/order |
 | Shared rules/goldens | OK — cross-language golden and validator updates required |
 | Bot proof | OK — protocol scenario `19_full_equipment.json` and client scenario `10_full_equipment.json` required |
 | Replay | OK — session-start equipped + hotbar snapshot and input replay must be updated |
-| Client plugin adoption | Reject GLoot/Godot-Inventory/Wyvernbox logic plugins; borrow layout/tooltip patterns only |
 | As-built drift | Current schemas, bots, Go sim, assets, and Godot UI are still `weapon`-centric; migration is explicit plan work |
 
 Spec edits recommended before or during implementation:
@@ -48,8 +46,6 @@ The current as-built system has:
 
 Godot shortcut adoption checklist:
 
-- **Reject:** GLoot, Godot-Inventory, Wyvernbox, RPGNodes, and other inventory logic plugins as authorities. They conflict with ADR-0001 because item stats, slot legality, equip outcomes, and persistence must remain server-owned.
-- **Borrow:** paper-doll layout, drag/drop affordances, tooltip wording, and disabled-slot styling ideas from the plugin catalog and existing `inventory_panel.gd` / `consumable_bar.gd` patterns.
 - **No new asset dependency:** placeholder category colors/icons through existing presentation metadata are enough for v28.
 
 Protocol choice resolved during review:
@@ -416,7 +412,6 @@ Files:
 - Modify: `PROGRESS.md`
 - Modify: `docs/plans/v28_2026-06-07-full-equipment-and-belt-hotbar.md`
 
-- [x] Step 11.1: Update spec status and resolved review notes when implementation lands: branch `main`, `use_hotbar_intent { slot_index }`, and no plugin adoption.
 - [x] Step 11.2: Add v28 to the `PROGRESS.md` slice numbering note and lifecycle table.
 - [x] Step 11.3: Add a concise "What v28 proved" section covering paper-doll equipment, two-hand rules, belt-gated hotbar persistence, droppable equipment templates, bot proofs, and client UI sync.
 - [x] Step 11.4: Record deferred gaps: armor mitigation, block execution, affix grammar, comparison UI, stash/vendors, production icons/art, offhand abilities/dual-wield, and deeper dungeon drop economy.
@@ -470,4 +465,3 @@ make ci
 - Production paper-doll art, production item icons, belt/hotbar VFX
 - Offhand active abilities and dual-wield damage rules
 - Expanding dungeon-wide treasure classes beyond the deterministic v28 equipment lab
-- Adopting GLoot/Godot-Inventory/Wyvernbox as dependencies; revisit only for presentation-only UI after this server contract is stable

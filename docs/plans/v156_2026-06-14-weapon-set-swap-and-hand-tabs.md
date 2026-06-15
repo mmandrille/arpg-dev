@@ -1,16 +1,6 @@
 # v156 Plan - Weapon Set Swap and Hand Tabs
 
 Spec: [`docs/specs/v156_spec-weapon-set-swap-and-hand-tabs.md`](../specs/v156_spec-weapon-set-swap-and-hand-tabs.md)
-
-## Plugin / shortcut adoption checklist
-
-- **Inventory UI plugins:** reject for this slice. GLoot/Godot-Inventory remain useful references,
-  but this change is a focused extension of the existing authoritative inventory panel. Adopting a
-  plugin would add migration work and risks duplicating item/equip logic client-side.
-- **Borrowed pattern:** Diablo-style hand tabs only: two small tabs near hand slots, selected tab
-  controls the visible hand set, active tab is highlighted separately.
-- **Authority boundary:** server owns both weapon sets and active set; client sends intents only.
-
 ## Implementation Tasks
 
 ### 1. Server weapon-set model

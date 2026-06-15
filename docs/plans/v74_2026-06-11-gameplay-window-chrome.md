@@ -7,8 +7,6 @@ Tech stack: Godot GDScript client, client unit tests, lifecycle docs.
 
 ## Baseline And Shortcut Decision
 
-Builds on v73. Godot plugin adoption checklist: reject plugin adoption; the reusable in-repo chrome already exists and this slice is a migration of custom panels rather than a new UI framework.
-
 ## File Map
 
 | Action | Path | Responsibility |

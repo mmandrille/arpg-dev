@@ -11,7 +11,6 @@ Related:
 - [`../adr/0007-animation-state-model.md`](../adr/0007-animation-state-model.md) - client-only event-driven presentation
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - generated dungeon levels and level transitions
 - [`../adr/0009-boss-floors-and-timing-mechanics.md`](../adr/0009-boss-floors-and-timing-mechanics.md) - boss floor cadence, timing mechanics, and progression gate
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for client presentation work
 - [`v18_spec-dungeon-levels-and-stairs.md`](v18_spec-dungeon-levels-and-stairs.md) - generated floors and stairs
 - [`v25_spec-treasure-classes-and-guarded-chests.md`](v25_spec-treasure-classes-and-guarded-chests.md) - chest interactables and deterministic loot
 - [`v31_spec-combat-stat-effects-and-feedback.md`](v31_spec-combat-stat-effects-and-feedback.md) - authoritative combat outcome metadata and client feedback
@@ -363,24 +362,6 @@ The Godot client must render monster scale metadata from authoritative entity/ru
 
 Scaling is presentation-only in v35. The client must not derive HP, damage, collision, loot, or XP
 from scale.
-
-### 7.3 Plugin and shortcut decision
-
-The v35 plan must run the adoption checklist in
-[`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md)
-because this slice touches Godot presentation.
-
-Expected v35 decision:
-
-| Candidate | Decision | Reason |
-|-----------|----------|--------|
-| Existing Godot material/tint tweens and primitive geometry | Borrow/reuse | Enough for a body-color charge or simple floor telegraph without dependency cost. |
-| Existing `AnimationController` and reaction path | Borrow/reuse | Boss hit/death can reuse the v34 character-like reaction path in v35. |
-| Built-in `AnimationTree` | Reject for v35 unless required | No new skeletal boss animation is needed. |
-| LimboAI or external behavior-tree plugin | Reject | Boss combat timing is server-authoritative and deterministic. |
-| New boss model or asset pack | Reject | v35 boss reuses the current humanoid/player model with `2.0x` scale and special colors. |
-| New telegraph asset pack | Reject unless plan proves a small CC0 decal/mesh is useful | The first telegraph can be a material/tint charge or generated in-code primitive. |
-
 ### 7.4 Locked stairs feedback
 
 The client should make locked exits understandable enough for testing:

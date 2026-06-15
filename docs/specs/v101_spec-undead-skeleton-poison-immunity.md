@@ -54,9 +54,6 @@ from poison-applying attacks, but poison damage must mitigate to `0` because the
 - Visual verification command to report after implementation:
   `make bot-visual scenario=undead_skeleton_poison_immunity`
 
-## Godot Plugin / Asset Decision
-
-Reject external Godot plugins and third-party art packs for this slice. Borrow the existing
 deterministic generated-GLB pipeline, asset manifest, and monster visual catalog so the new
 skeleton remains repo-native and CI-validatable.
 

@@ -11,7 +11,6 @@ Make the level-0 town read as a small settled hub instead of a row of service no
 ## Non-goals
 
 - No new town services, interactions, quests, combat rules, or safe-zone rules.
-- No imported asset pack or plugin dependency.
 - No protocol schema version bump.
 - No collision or pathing changes for decorative cabin/fire props.
 - No production art pass beyond in-repo procedural Godot primitives.

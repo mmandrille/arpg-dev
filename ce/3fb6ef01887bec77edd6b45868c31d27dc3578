@@ -1,0 +1,21 @@
+server/internal/game/ranger_skills_test.go
+  s_434783ee30d988::t_20462abf644756 195-196,199-200
+.maintainability/file-size-baseline.tsv
+  s_434783ee30d988::t_94780cbe83a6d8 7,13,18,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ce3fb6ef01887bec77edd6b45868c31d27dc3578",
+  "prompts": {},
+  "sessions": {
+    "s_434783ee30d988": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecd8d-db64-7242-9e68-b837098134cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

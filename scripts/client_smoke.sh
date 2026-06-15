@@ -97,6 +97,7 @@ run_gate "GDScript rogue presentation test" "[gdtest] PASS: test_rogue_presentat
 run_gate "GDScript waypoint panel test" "[gdtest] PASS: test_waypoint_panel" res://tests/test_waypoint_panel.gd
 run_gate "GDScript quest journal panel test" "[gdtest] PASS: test_quest_journal_panel" res://tests/test_quest_journal_panel.gd
 run_gate "GDScript elite objective tracker test" "[gdtest] PASS: test_elite_objective_tracker" res://tests/test_elite_objective_tracker.gd
+run_gate "GDScript elite objective minimap test" "[gdtest] PASS: test_elite_objective_minimap" res://tests/test_elite_objective_minimap.gd
 
 # 2g. Sustained click hold state (server-independent; v27).
 run_gate "GDScript sustained input test" "[gdtest] PASS: test_sustained_input" res://tests/test_sustained_input.gd

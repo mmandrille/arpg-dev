@@ -29,6 +29,8 @@ const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const QuestJournalPanelScript := preload("res://scripts/quest_journal_panel.gd")
 const EliteObjectiveTrackerScript := preload("res://scripts/elite_objective_tracker.gd")
+const EliteObjectiveMinimapScript := preload("res://scripts/elite_objective_minimap.gd")
+const EliteObjectiveMinimapStateScript := preload("res://scripts/elite_objective_minimap_state.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
@@ -239,6 +241,7 @@ var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
 var quest_journal_panel: QuestJournalPanel
 var elite_objective_tracker: EliteObjectiveTracker
+var elite_objective_minimap: EliteObjectiveMinimap
 var character_bar: Control
 var skill_bar: SkillBar
 var status_effects_bar: StatusEffectsBar
@@ -933,6 +936,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_update_character_info_panel()
 	_sync_quest_journal()
 	_sync_elite_objective_tracker()
+	_sync_elite_objective_minimap()
 	_refresh_market_board_summary()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
@@ -1038,6 +1042,7 @@ func _apply_delta(p: Dictionary) -> void:
 	_refresh_inventory_ui()
 	_sync_quest_journal()
 	_sync_elite_objective_tracker()
+	_sync_elite_objective_minimap()
 	var heal_cast_rain_correlations := _heal_cast_rain_correlations(p.get("events", []))
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
@@ -3146,6 +3151,8 @@ func _build_scene() -> void:
 	ui.add_child(quest_journal_panel)
 	elite_objective_tracker = EliteObjectiveTrackerScript.new()
 	ui.add_child(elite_objective_tracker)
+	elite_objective_minimap = EliteObjectiveMinimapScript.new()
+	ui.add_child(elite_objective_minimap)
 	character_bar = CharacterBarScript.new()
 	character_bar.open_character_requested.connect(_open_character_panel_from_bar)
 	ui.add_child(character_bar)
@@ -5818,6 +5825,7 @@ func get_bot_state() -> Dictionary:
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"quest_journal_panel_visible": quest_journal_panel != null and quest_journal_panel.visible,
 		"elite_objective_tracker_visible": elite_objective_tracker != null and elite_objective_tracker.visible,
+		"elite_objective_minimap_visible": elite_objective_minimap != null and elite_objective_minimap.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
@@ -5830,6 +5838,7 @@ func get_bot_state() -> Dictionary:
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"quest_journal_panel": quest_journal_panel.get_debug_state() if quest_journal_panel != null else {},
 		"elite_objective_tracker": elite_objective_tracker.get_debug_state() if elite_objective_tracker != null else {},
+		"elite_objective_minimap": elite_objective_minimap.get_debug_state() if elite_objective_minimap != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
@@ -5960,6 +5969,14 @@ func _quest_journal_objectives() -> Array:
 func _sync_elite_objective_tracker() -> void:
 	if elite_objective_tracker != null:
 		elite_objective_tracker.set_state(_elite_objective_tracker_state())
+
+
+func _sync_elite_objective_minimap() -> void:
+	if elite_objective_minimap != null:
+		var pos := player_anchor.position if player_anchor != null else Vector3.ZERO
+		elite_objective_minimap.set_state(EliteObjectiveMinimapStateScript.from_entities(entities, pos))
+
+
 func _elite_objective_tracker_state() -> Dictionary:
 	var chest_found := false
 	var chest_open := false
@@ -6109,60 +6126,42 @@ func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> 
 
 func bot_click_shop_buy_offer(offer_id: String = "", offer_kind: String = "", offer_index: int = 0) -> void:
 	BotFacade.click_shop_buy_offer(self, offer_id, offer_kind, offer_index)
-
 func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	BotFacade.click_shop_sell_item(self, item_def_id, rolled, bag_index)
-
 func bot_click_shop_reroll() -> void:
 	BotFacade.click_shop_reroll(self)
-
 func bot_drag_bag_to_stash(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	BotFacade.drag_bag_to_stash(self, item_def_id, rolled, bag_index)
-
 func bot_drag_stash_to_bag(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
 	BotFacade.drag_stash_to_bag(self, stash_item_id, item_def_id, rolled, stash_index)
-
 func bot_click_stash_deposit_gold(amount: int = 1) -> void:
 	BotFacade.click_stash_deposit_gold(self, amount)
-
 func bot_click_stash_withdraw_gold(amount: int = 1) -> void:
 	BotFacade.click_stash_withdraw_gold(self, amount)
-
 func bot_click_bishop_respec() -> void:
 	BotFacade.click_bishop_respec(self)
-
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
-
 func bot_set_stash_search(text: String) -> void:
 	BotFacade.set_stash_search(self, text)
-
 func bot_select_stash_sort(mode: String) -> void:
 	BotFacade.select_stash_sort(self, mode)
-
 func bot_set_multiplayer_search(text: String) -> void:
 	if multiplayer_panel != null: multiplayer_panel.bot_set_search(text)
-
 func bot_select_multiplayer_sort(mode: String) -> void:
 	if multiplayer_panel != null: multiplayer_panel.bot_select_sort(mode)
 func bot_set_market_publish_price(price_gold: int) -> void:
 	BotFacade.set_market_publish_price(self, price_gold)
-
 func bot_click_market_publish_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
 	BotFacade.click_market_publish_item(self, stash_item_id, item_def_id, rolled, stash_index)
-
 func bot_click_market_purchase_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
 	BotFacade.click_market_purchase_listing(self, listing_id, item_def_id, price_gold, listing_index)
-
 func bot_click_market_view_offers(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
 	BotFacade.click_market_view_offers(self, listing_id, item_def_id, price_gold, listing_index)
-
 func bot_click_market_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
 	BotFacade.click_market_accept_offer(self, offer_id, offer_index)
-
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:
 	BotFacade.assign_consumable_hotbar(self, slot_index, item_instance_id)
-
 func bot_use_consumable_hotbar(slot_index: int) -> void:
 	BotFacade.use_consumable_hotbar(self, slot_index)
 

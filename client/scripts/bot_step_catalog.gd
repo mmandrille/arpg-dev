@@ -15,7 +15,7 @@ const STEP_TYPES_WAIT := [
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel", "wait_blacksmith_panel",
 	"wait_boss_health_bar", "wait_remote_player_count",
-	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker",
+	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -42,7 +42,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
-	"assert_quest_journal", "assert_elite_objective_tracker",
+	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_loot_item", "click_floor",

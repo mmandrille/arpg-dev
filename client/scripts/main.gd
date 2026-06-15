@@ -28,6 +28,7 @@ const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const QuestJournalPanelScript := preload("res://scripts/quest_journal_panel.gd")
+const QuestEliteObjectiveStateScript := preload("res://scripts/quest_elite_objective_state.gd")
 const EliteObjectiveTrackerScript := preload("res://scripts/elite_objective_tracker.gd")
 const EliteObjectiveMinimapScript := preload("res://scripts/elite_objective_minimap.gd")
 const EliteObjectiveMinimapStateScript := preload("res://scripts/elite_objective_minimap_state.gd")
@@ -5949,26 +5950,11 @@ func _character_info_debug_state() -> Dictionary:
 
 func _sync_quest_journal() -> void:
 	if quest_journal_panel != null:
-		quest_journal_panel.set_objectives(_quest_journal_objectives())
-
-func _quest_journal_objectives() -> Array:
-	var reward_found := false
-	var reward_complete := true
-	for rec in entities.values():
-		if bool((rec as Dictionary).get("quest_reward", false)):
-			reward_found = true
-			reward_complete = reward_complete and str((rec as Dictionary).get("state", "")) == "open"
-	if not reward_found:
-		return []
-	return [{
-		"id": "reward_chest",
-		"title": "Open the marked reward chest",
-		"complete": reward_complete,
-	}]
+		quest_journal_panel.set_objectives(QuestEliteObjectiveStateScript.quest_journal_objectives(entities))
 
 func _sync_elite_objective_tracker() -> void:
 	if elite_objective_tracker != null:
-		elite_objective_tracker.set_state(_elite_objective_tracker_state())
+		elite_objective_tracker.set_state(QuestEliteObjectiveStateScript.elite_tracker_state(entities))
 
 
 func _sync_elite_objective_minimap() -> void:
@@ -5977,24 +5963,6 @@ func _sync_elite_objective_minimap() -> void:
 		elite_objective_minimap.set_state(EliteObjectiveMinimapStateScript.from_entities(entities, pos))
 
 
-func _elite_objective_tracker_state() -> Dictionary:
-	var chest_found := false
-	var chest_open := false
-	var remaining := 0
-	for rec in entities.values():
-		var row: Dictionary = rec
-		if bool(row.get("elite_objective", false)):
-			chest_found = true
-			chest_open = chest_open or str(row.get("state", "")) == "open"
-		if bool(row.get("monster_pack_leader", false)) and int(row.get("hp", 1)) > 0:
-			remaining += 1
-	if not chest_found:
-		return {"visible": false, "status": "hidden", "remaining_leaders": 0}
-	if chest_open:
-		return {"visible": true, "status": "complete", "remaining_leaders": 0}
-	if remaining > 0:
-		return {"visible": true, "status": "active", "remaining_leaders": remaining}
-	return {"visible": true, "status": "claim", "remaining_leaders": 0}
 func _bot_entities_presentation_debug() -> Array:
 	var out: Array = []
 	for id in entities.keys():

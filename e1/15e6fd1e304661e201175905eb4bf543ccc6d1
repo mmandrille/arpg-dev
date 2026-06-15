@@ -1,0 +1,52 @@
+client/scripts/bot_assertion_handlers.gd
+  s_f9c66ca3cb4339::t_17d149dfb9bfd6 6,143-146
+client/scripts/main.gd
+  s_f9c66ca3cb4339::t_5751155136d0a3 31,241,935,1040,3147-3148,3376-3377,5820,5832
+  s_f9c66ca3cb4339::t_2fb6e923b94c2d 5960-5980
+client/scripts/bot_step_catalog.gd
+  s_f9c66ca3cb4339::t_17d149dfb9bfd6 18,45
+client/scripts/bot_wait_handlers.gd
+  s_f9c66ca3cb4339::t_17d149dfb9bfd6 5,62-63
+client/tests/test_elite_objective_tracker.gd.uid
+  s_f9c66ca3cb4339::t_61b1efbb4da8bc 1
+tools/bot/scenarios/client/44_elite_objective_hud.json
+  s_f9c66ca3cb4339::t_17d149dfb9bfd6 1-33
+scripts/client_smoke.sh
+  s_f9c66ca3cb4339::t_f9295f614783ac 99
+docs/as-built/v175_elite-objective-hud.md
+  s_f9c66ca3cb4339::t_e56a0d3870f7fa 1-22
+docs/specs/v175_spec-elite-objective-hud.md
+  s_f9c66ca3cb4339::t_d080a8b487692c 1-45
+client/scripts/bot_elite_objective_assertions.gd.uid
+  s_f9c66ca3cb4339::t_61b1efbb4da8bc 1
+client/tests/test_elite_objective_tracker.gd
+  s_f9c66ca3cb4339::t_f9295f614783ac 1-41
+client/scripts/elite_objective_tracker.gd.uid
+  s_f9c66ca3cb4339::t_61b1efbb4da8bc 1
+client/scripts/elite_objective_tracker.gd
+  s_f9c66ca3cb4339::t_f9295f614783ac 1-80
+client/scripts/bot_elite_objective_assertions.gd
+  s_f9c66ca3cb4339::t_17d149dfb9bfd6 1-13
+docs/plans/v175_2026-06-14-elite-objective-hud.md
+  s_f9c66ca3cb4339::t_e56a0d3870f7fa 33-39,42-43,57-59,69-71,86-87,108-110
+  s_f9c66ca3cb4339::t_d080a8b487692c 1-32,40-41,44-56,60-68,72-85,88-99,102-107
+  s_f9c66ca3cb4339::t_7798e5fe52e7e0 100-101,111
+PROGRESS.md
+  s_f9c66ca3cb4339::t_e56a0d3870f7fa 15,18,194,410,543-546
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e115e6fd1e304661e201175905eb4bf543ccc6d1",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

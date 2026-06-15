@@ -1,7 +1,7 @@
 {
   "id": "offensive_unique_effects",
   "world_id": "combat_stat_lab",
-  "seed": "0000000000000a97",
+  "seed": "00000000000003a1",
   "title": "Offensive unique effects",
   "description": "Pick up a deterministic unique cave blade, equip it, and prove Stormbound Echo chains lightning through the normal protocol path.",
   "steps": [

@@ -1,5 +1,5 @@
 {
-  "description": "Deterministic item rolls for one template across rarities, including the generated unique naming contract.",
+  "description": "Deterministic item rolls for one template across rarities, including rarity roll-count ranges and inherited roll pools.",
   "template_id": "cave_blade",
   "cases": [
     {
@@ -29,9 +29,8 @@
         "rarity": "rare",
         "stats": {
           "damage_max": 4,
-          "damage_min": 2,
-          "dex": 2,
-          "vit": 1
+          "damage_min": 3,
+          "max_mana": 3
         },
         "requirements": {
           "level": 1,
@@ -48,9 +47,11 @@
         "display_name": "Sword of Pilgrim's Momentum",
         "rarity": "unique",
         "stats": {
-          "damage_max": 7,
+          "attack_speed_percent": 4,
+          "damage_max": 4,
           "damage_min": 2,
-          "max_hp": 1
+          "dex": 3,
+          "vit": 3
         },
         "requirements": {
           "level": 1,

@@ -1,10 +1,11 @@
 {
   "version": 0,
   "rarities": {
-    "common": { "weight": 70, "stat_rolls": 1, "name_prefix": "Common" },
-    "magic": { "weight": 25, "stat_rolls": 2, "name_prefix": "Magic" },
-    "rare": { "weight": 5, "stat_rolls": 3, "name_prefix": "Rare" },
-    "unique": { "weight": 1, "stat_rolls": 4, "name_prefix": "Unique" }
+    "common": { "weight": 70, "stat_rolls_min": 1, "stat_rolls_max": 1, "name_prefix": "Common" },
+    "magic": { "weight": 25, "stat_rolls_min": 1, "stat_rolls_max": 2, "name_prefix": "Magic" },
+    "rare": { "weight": 5, "stat_rolls_min": 2, "stat_rolls_max": 4, "name_prefix": "Rare" },
+    "unique": { "weight": 1, "stat_rolls_min": 3, "stat_rolls_max": 5, "name_prefix": "Unique" },
+    "set": { "weight": 1, "stat_rolls_min": 3, "stat_rolls_max": 5, "name_prefix": "Set", "random_rollable": false }
   },
   "templates": {
     "cave_blade": {
@@ -26,7 +27,9 @@
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 1, "weight": 3 },
         { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 },
-        { "stat": "max_hp", "min": 1, "max": 3, "weight": 1 }
+        { "stat": "max_hp", "min": 1, "max": 3, "weight": 1 },
+        { "stat": "max_mana", "min": 1, "max": 3, "weight": 1, "min_rarity": "magic" },
+        { "stat": "attack_speed_percent", "min": 1, "max": 5, "weight": 1, "min_rarity": "rare" }
       ],
       "effect_pool": []
     },

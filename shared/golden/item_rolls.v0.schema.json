@@ -62,7 +62,9 @@
         "vit": { "type": "integer", "minimum": 0 },
         "magic": { "type": "integer", "minimum": 0 },
         "all_skills": { "type": "integer", "minimum": 0 },
-        "max_hp": { "type": "integer", "minimum": 0 }
+        "max_hp": { "type": "integer", "minimum": 0 },
+        "max_mana": { "type": "integer", "minimum": 0 },
+        "attack_speed_percent": { "type": "integer", "minimum": 0 }
       }
     }
   }

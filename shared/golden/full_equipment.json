@@ -27,8 +27,8 @@
     {
       "name": "belt expands hotbar and disabled assignments persist",
       "expected": {
-        "belt_stats": { "hotbar_slots": 10 },
-        "capacity_with_belt": 10,
+        "belt_stats": { "hotbar_slots": 6 },
+        "capacity_with_belt": 6,
         "capacity_without_belt": 2,
         "assigned_slots": [
           { "slot_index": 0, "active_with_belt": true, "active_without_belt": true },

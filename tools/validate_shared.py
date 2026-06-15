@@ -906,8 +906,12 @@ def cross_checks(report: Report) -> None:
     for rarity_id, rarity in rarities.items():
         if rarity["weight"] <= 0:
             report.fail("item template rarity", f"{rarity_id}: weight must be positive")
-        elif rarity["stat_rolls"] <= 0:
-            report.fail("item template rarity", f"{rarity_id}: stat_rolls must be positive")
+        elif rarity["stat_rolls_min"] <= 0:
+            report.fail("item template rarity", f"{rarity_id}: stat_rolls_min must be positive")
+        elif rarity["stat_rolls_max"] < rarity["stat_rolls_min"]:
+            report.fail("item template rarity", f"{rarity_id}: stat_rolls_max must be >= stat_rolls_min")
+        elif rarity_id == "set" and rarity.get("random_rollable", True):
+            report.fail("item template rarity", "set: random_rollable must stay false until random set drops are designed")
         else:
             report.ok(f"item template rarity {rarity_id} is valid")
     for template_id, template in item_templates["templates"].items():
@@ -1885,7 +1889,8 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok("shop buyback config matches v47")
 
-        rarity_missing = sorted(set(rarities) - set(pricing["rarity_multipliers"]))
+        random_rarities = {rarity_id for rarity_id, rarity in rarities.items() if rarity.get("random_rollable", True)}
+        rarity_missing = sorted(random_rarities - set(pricing["rarity_multipliers"]))
         if rarity_missing:
             report.fail("shop rarity multipliers", f"missing current rarities {rarity_missing}")
         elif "unique" not in pricing["rarity_multipliers"]:
@@ -1983,7 +1988,7 @@ def cross_checks(report: Report) -> None:
         rarity_order = sorted(rarities)
 
         def item_rarity_rank(rarity_id: str) -> int:
-            return {"common": 0, "magic": 1, "rare": 2, "unique": 3}.get(rarity_id, -1)
+            return {"common": 0, "magic": 1, "rare": 2, "unique": 3, "set": 3}.get(rarity_id, -1)
 
         def scaled_attribute_roll_range(source_depth: int) -> tuple[int, int]:
             if source_depth < 1:
@@ -2003,16 +2008,20 @@ def cross_checks(report: Report) -> None:
             return 1, max(1, source_depth // 10)
 
         def rollable_stats_for_rarity(template: dict, rarity_id: str, source_depth: int) -> list[dict]:
-            stats = list(template.get("rollable_stats", []))
+            stats = []
+            for stat in template.get("rollable_stats", []):
+                min_rarity = stat.get("min_rarity", "common")
+                if item_rarity_rank(rarity_id) >= item_rarity_rank(min_rarity):
+                    stats.append(stat)
             if item_rarity_rank(rarity_id) >= item_rarity_rank("magic"):
                 min_value, max_value = scaled_attribute_roll_range(source_depth)
                 for stat in ("str", "dex", "vit", "magic"):
-                    stats.append({"stat": stat, "min": min_value, "max": max_value, "weight": 2})
+                    stats.append({"stat": stat, "min_rarity": "magic", "min": min_value, "max": max_value, "weight": 2})
             if item_rarity_rank(rarity_id) >= item_rarity_rank("rare"):
                 all_skills_range = scaled_all_skills_roll_range(source_depth)
                 if all_skills_range is not None:
                     min_value, max_value = all_skills_range
-                    stats.append({"stat": "all_skills", "min": min_value, "max": max_value, "weight": 1})
+                    stats.append({"stat": "all_skills", "min_rarity": "rare", "min": min_value, "max": max_value, "weight": 1})
             return stats
 
         def weighted_rollable_stat(stats: list[dict], rng: ShopRNG) -> dict | None:
@@ -2028,17 +2037,26 @@ def cross_checks(report: Report) -> None:
 
         def roll_template(template_id: str, rng: ShopRNG, source_depth: int = 1) -> dict:
             template = item_templates["templates"][template_id]
-            total = sum(int(rarities[rarity_id]["weight"]) for rarity_id in rarity_order)
+            total = sum(int(rarities[rarity_id]["weight"]) for rarity_id in rarity_order if rarities[rarity_id].get("random_rollable", True))
             roll = rng.intn(total)
-            rarity_id = rarity_order[-1]
+            rarity_id = ""
             for candidate in rarity_order:
+                if not rarities[candidate].get("random_rollable", True):
+                    continue
                 roll -= int(rarities[candidate]["weight"])
                 if roll < 0:
                     rarity_id = candidate
                     break
+            if not rarity_id:
+                raise AssertionError("no random item rarity selected")
             stats = dict(template.get("base_stats", {}))
             rollable_stats = rollable_stats_for_rarity(template, rarity_id, source_depth)
-            for _ in range(int(rarities[rarity_id]["stat_rolls"])):
+            min_rolls = int(rarities[rarity_id]["stat_rolls_min"])
+            max_rolls = int(rarities[rarity_id]["stat_rolls_max"])
+            roll_count = min_rolls
+            if max_rolls > min_rolls:
+                roll_count += rng.intn(max_rolls - min_rolls + 1)
+            for _ in range(roll_count):
                 stat = weighted_rollable_stat(rollable_stats, rng)
                 if stat is None:
                     continue

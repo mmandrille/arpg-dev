@@ -488,13 +488,6 @@ type ItemDef struct {
 	Gold            *DamageRange `json:"gold,omitempty"`
 }
 
-// RarityDef controls how many bounded stat rolls a rolled item gets.
-type RarityDef struct {
-	Weight     int    `json:"weight"`
-	StatRolls  int    `json:"stat_rolls"`
-	NamePrefix string `json:"name_prefix"`
-}
-
 // ItemTemplateDef is a server-authoritative rolled item template.
 type ItemTemplateDef struct {
 	Name            string            `json:"name"`
@@ -670,14 +663,6 @@ type SkillCooldownDef struct {
 	Type       string  `json:"type"`
 	Multiplier float64 `json:"multiplier"`
 	FlatTicks  int     `json:"flat_ticks,omitempty"`
-}
-
-// RollableStatDef is one weighted bounded stat increment.
-type RollableStatDef struct {
-	Stat   string `json:"stat"`
-	Min    int    `json:"min"`
-	Max    int    `json:"max"`
-	Weight int    `json:"weight"`
 }
 
 // InteractableDef is a single activatable world object definition.
@@ -1295,12 +1280,20 @@ func LoadRules(dir string) (*Rules, error) {
 		if rarity.Weight <= 0 {
 			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.weight: must be positive", id)
 		}
-		if rarity.StatRolls <= 0 {
-			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.stat_rolls: must be positive", id)
+		if rarity.StatRollsMin == 0 && rarity.StatRollsMax == 0 && rarity.StatRolls > 0 {
+			rarity.StatRollsMin = rarity.StatRolls
+			rarity.StatRollsMax = rarity.StatRolls
+		}
+		if rarity.StatRollsMin <= 0 {
+			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.stat_rolls_min: must be positive", id)
+		}
+		if rarity.StatRollsMax < rarity.StatRollsMin {
+			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.stat_rolls_max: must be >= stat_rolls_min", id)
 		}
 		if rarity.NamePrefix == "" {
 			return nil, fmt.Errorf("game: invalid rules item_templates.rarities.%s.name_prefix: required", id)
 		}
+		itemTemplates.Rarities[id] = rarity
 	}
 	for id, def := range itemTemplates.Templates {
 		if !def.Equippable || def.Category != "equipment" {
@@ -1359,6 +1352,11 @@ func LoadRules(dir string) (*Rules, error) {
 		for _, roll := range def.RollableStats {
 			if !isSupportedItemStat(roll.Stat) {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: unsupported stat %s", id, roll.Stat)
+			}
+			if roll.MinRarity != "" {
+				if _, ok := itemTemplates.Rarities[roll.MinRarity]; !ok {
+					return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats.%s.min_rarity: unknown rarity %s", id, roll.Stat, roll.MinRarity)
+				}
 			}
 			if roll.Max < roll.Min {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats.%s: max must be >= min", id, roll.Stat)
@@ -2486,6 +2484,9 @@ func validateShopRules(r *Rules) error {
 			return fmt.Errorf("game: invalid rules shops.%s.pricing.round_buy_to: must be positive", shopID)
 		}
 		for rarityID := range r.Rarities {
+			if !r.rarityRandomRollable(rarityID) {
+				continue
+			}
 			if pricing.RarityMultipliers[rarityID] <= 0 {
 				return fmt.Errorf("game: invalid rules shops.%s.pricing.rarity_multipliers.%s: must be positive", shopID, rarityID)
 			}
@@ -3204,7 +3205,7 @@ func isSupportedRequirementStat(stat string) bool {
 
 func isSupportedItemStat(stat string) bool {
 	switch stat {
-	case "damage_min", "damage_max", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows":
+	case "damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows":
 		return true
 	default:
 		return false

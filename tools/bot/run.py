@@ -2998,8 +2998,9 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
     for key in assertion.get("stat_keys", []):
         if key not in stats:
             raise AssertionError(f"{where}: missing rolled stat {key}: {item}")
-    min_damage = assertion.get("min_damage")
-    if min_damage is not None and int(stats.get("damage_min", -1)) < int(min_damage):
+    if (stat_count_min := assertion.get("stat_count_min")) is not None and len(stats) < int(stat_count_min): raise AssertionError(f"{where}: rolled stat count {len(stats)} < {stat_count_min}: {item}")
+    if (stat_count_max := assertion.get("stat_count_max")) is not None and len(stats) > int(stat_count_max): raise AssertionError(f"{where}: rolled stat count {len(stats)} > {stat_count_max}: {item}")
+    if (min_damage := assertion.get("min_damage")) is not None and int(stats.get("damage_min", -1)) < int(min_damage):
         raise AssertionError(f"{where}: damage_min {stats.get('damage_min')} < {min_damage}: {item}")
     req = item.get("requirements", {})
     if int(req.get("level", 0)) != int(assertion.get("required_level", 1)):

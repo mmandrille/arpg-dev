@@ -13,11 +13,14 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["weight", "stat_rolls", "name_prefix"],
+        "required": ["weight", "stat_rolls_min", "stat_rolls_max", "name_prefix"],
         "additionalProperties": false,
         "properties": {
           "weight": { "type": "integer", "minimum": 1 },
           "stat_rolls": { "type": "integer", "minimum": 1 },
+          "stat_rolls_min": { "type": "integer", "minimum": 1 },
+          "stat_rolls_max": { "type": "integer", "minimum": 1 },
+          "random_rollable": { "type": "boolean" },
           "name_prefix": { "type": "string", "minLength": 1 }
         }
       }
@@ -105,6 +108,7 @@
       "additionalProperties": false,
       "properties": {
         "stat": { "type": "string", "enum": ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"] },
+        "min_rarity": { "type": "string", "enum": ["common", "magic", "rare", "unique", "set"] },
         "min": { "type": "integer" },
         "max": { "type": "integer" },
         "weight": { "type": "integer", "minimum": 1 }

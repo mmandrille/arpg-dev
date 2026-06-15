@@ -354,7 +354,8 @@
       "oneOf": [
         { "$ref": "#/$defs/stat_percent_buff_effect" },
         { "$ref": "#/$defs/area_percent_heal_effect" },
-        { "$ref": "#/$defs/area_stat_percent_buff_effect" }
+        { "$ref": "#/$defs/area_stat_percent_buff_effect" },
+        { "$ref": "#/$defs/area_immunity_buff_effect" }
       ]
     },
     "stat_percent_buff_effect": {
@@ -409,6 +410,21 @@
         },
         "percent_base": { "type": "integer", "minimum": 0 },
         "percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "effect_id": { "type": "string", "minLength": 1 },
+        "magic_scaling": { "$ref": "#/$defs/magic_scaling" }
+      }
+    },
+    "area_immunity_buff_effect": {
+      "type": "object",
+      "required": ["type", "target", "include_caster", "range", "radius", "duration_ticks", "effect_id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "area_immunity_buff" },
+        "target": { "const": "allies" },
+        "include_caster": { "type": "boolean" },
+        "range": { "type": "number", "exclusiveMinimum": 0 },
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
         "duration_ticks": { "type": "integer", "minimum": 1 },
         "effect_id": { "type": "string", "minLength": 1 },
         "magic_scaling": { "$ref": "#/$defs/magic_scaling" }

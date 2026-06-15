@@ -1,6 +1,7 @@
 extends RefCounted
 
 const HOLY_SHIELD_EFFECT_ID := "holy_shield"
+const SANCTUARY_EFFECT_ID := "sanctuary"
 const RAGE_EFFECT_ID := "rage"
 const ICE_SLOW_EFFECT_ID := "ice_slow"
 const BURNING_EFFECT_ID := "everburning_wound"
@@ -8,6 +9,7 @@ const ELITE_COMMAND_EFFECT_ID := "elite_command"
 const PINNING_ROOT_EFFECT_ID := "pinning_root"
 
 const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
+const SANCTUARY_MARKER_NAME := "SanctuaryDomeEffect"
 const RAGE_MARKER_NAME := "RageVisualEffect"
 const BURNING_MARKER_NAME := "BurningVisualEffect"
 const ELITE_COMMAND_MARKER_NAME := "EliteCommandVisualEffect"
@@ -36,6 +38,26 @@ static func sync_holy_shield_effect(root: Node3D, effect_ids_value) -> void:
 
 static func has_holy_shield_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(HOLY_SHIELD_MARKER_NAME, false, false) != null
+
+
+static func sync_sanctuary_effect(root: Node3D, effect_ids_value) -> void:
+	if root == null:
+		return
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	var active := effect_ids.has(SANCTUARY_EFFECT_ID)
+	var existing := root.find_child(SANCTUARY_MARKER_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = make_sanctuary_dome_effect()
+		root.add_child(existing)
+
+
+static func has_sanctuary_effect(root: Node3D) -> bool:
+	return root != null and root.find_child(SANCTUARY_MARKER_NAME, false, false) != null
 
 
 static func sync_rage_effect(root: Node3D, active: bool) -> void:
@@ -210,6 +232,39 @@ static func make_holy_shield_effect() -> Node3D:
 	column.position.y = 0.72
 	column.material_override = mat
 	marker.add_child(column)
+	return marker
+
+
+static func make_sanctuary_dome_effect() -> Node3D:
+	var marker := Node3D.new()
+	marker.name = SANCTUARY_MARKER_NAME
+	var mat := _holy_shield_pulse_material(0.24)
+	mat.emission_energy_multiplier = 2.8
+
+	var dome := MeshInstance3D.new()
+	dome.name = "SanctuaryDome"
+	var dome_mesh := SphereMesh.new()
+	dome_mesh.radius = 5.0
+	dome_mesh.height = 5.0
+	dome_mesh.radial_segments = 72
+	dome_mesh.rings = 16
+	dome.mesh = dome_mesh
+	dome.position.y = 0.08
+	dome.scale.y = 0.5
+	dome.material_override = mat
+	marker.add_child(dome)
+
+	var floor := MeshInstance3D.new()
+	floor.name = "SanctuaryGround"
+	var floor_mesh := CylinderMesh.new()
+	floor_mesh.top_radius = 5.0
+	floor_mesh.bottom_radius = 5.0
+	floor_mesh.height = 0.04
+	floor_mesh.radial_segments = 72
+	floor.mesh = floor_mesh
+	floor.position.y = 0.03
+	floor.material_override = mat
+	marker.add_child(floor)
 	return marker
 
 

@@ -1120,6 +1120,8 @@ func _apply_delta(p: Dictionary) -> void:
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
 				_apply_local_player_visual_scale(1.0 + float(ev.get("amount", 0)) / 100.0)
 				PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, true)
+			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID:
+				PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, [PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID])
 			continue
 		if event_type == "skill_effect_ended" and eid == player_id:
 			if status_effects_bar != null:
@@ -1129,6 +1131,8 @@ func _apply_delta(p: Dictionary) -> void:
 				PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, false)
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
 				PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, [])
+			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID:
+				PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, [])
 			continue
 		if visual_replay_enabled and inventory_panel != null:
 			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)
@@ -1142,7 +1146,8 @@ func _apply_delta(p: Dictionary) -> void:
 				continue
 			if event_type == "player_damaged":
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
-				_play_entity_reaction(eid, ev, "hit")
+				if str(ev.get("outcome", "")) != "immune":
+					_play_entity_reaction(eid, ev, "hit")
 				if _health_bar != null:
 					_health_bar.update_hp(player_hp, player_max_hp)
 			if event_type == "player_killed":
@@ -1161,7 +1166,8 @@ func _apply_delta(p: Dictionary) -> void:
 		if PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
 			if event_type == "player_damaged":
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
-				_play_entity_reaction(eid, ev, "hit")
+				if str(ev.get("outcome", "")) != "immune":
+					_play_entity_reaction(eid, ev, "hit")
 			if event_type == "player_killed":
 				var remote_dead: Dictionary = entities[eid]
 				remote_dead["hp"] = 0
@@ -1333,6 +1339,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			_apply_local_player_visual_scale(float(e["visual_scale"]))
 		if e.has("effect_ids"):
 			PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, e.get("effect_ids", []))
+			PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, e.get("effect_ids", []))
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		var prev_predicted_pos := predicted_pos
 		# Reconcile: snap prediction back toward authoritative truth.
@@ -1586,6 +1593,9 @@ func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_colo
 		return
 	if outcome == "block":
 		_show_damage_number(entity_id, Color(0.35, 0.78, 1.0), null, "", 0.0, "block", "BLOCK")
+		return
+	if outcome == "immune":
+		_show_damage_number(entity_id, Color(1.0, 0.86, 0.28), null, "", 0.0, "immune", "IMMUNE")
 		return
 	if skill_id == "poison_stab":
 		_show_damage_number(entity_id, Color("#55e66f"), damage, "", 0.0, "poison")
@@ -4813,6 +4823,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
 	var alive := int(rec.get("hp", 1)) > 0
 	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []) if alive else [])
+	PlayerStatusEffectMarkers.sync_sanctuary_effect(node, rec.get("effect_ids", []) if alive else [])
 	PlayerStatusEffectMarkers.sync_burning_effect(node, alive and PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, alive and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, alive and PlayerStatusEffectMarkers.has_pinning_root_effect_id(rec.get("effect_ids", [])))
@@ -5942,24 +5953,26 @@ func _bot_entities_debug(live_monster_ids: Array) -> Array:
 
 func _bot_local_player_presentation() -> Dictionary:
 	return {
-		"id": player_id,
-		"type": "player",
-		"visual_model": "character",
-		"visual_scale": player_visual_scale,
+		"id": player_id, "type": "player", "visual_model": "character", "visual_scale": player_visual_scale,
 		"effect_ids": _local_player_effect_ids(),
 		"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor),
+		"has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(player_anchor),
 		"holy_shield_aura_pulses": PlayerStatusEffectMarkers.active_holy_shield_aura_pulse_count(player_anchor),
 		"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(player_anchor),
-		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor),
-		"base_tint": PLAYER_TINT.to_html(false),
+		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor), "base_tint": PLAYER_TINT.to_html(false),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
 	}
 
 func _local_player_effect_ids() -> Array:
-	if player_anchor == null or not PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor):
-		return []
-	return [PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID]
+	var out := []
+	if player_anchor == null:
+		return out
+	if PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor):
+		out.append(PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID)
+	if PlayerStatusEffectMarkers.has_sanctuary_effect(player_anchor):
+		out.append(PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID)
+	return out
 
 func _character_info_debug_state() -> Dictionary:
 	return {
@@ -5992,32 +6005,23 @@ func _bot_entities_presentation_debug() -> Array:
 		var reaction = rec.get("reaction", null)
 		var controller = rec.get("controller", null)
 		out.append({
-			"id": str(id),
-			"type": str(rec.get("type", "")),
-			"monster_def_id": str(rec.get("monster_def_id", "")),
-			"character_id": str(rec.get("character_id", "")),
-			"visual_model": _visual_model_name(rec, node),
+			"id": str(id), "type": str(rec.get("type", "")), "monster_def_id": str(rec.get("monster_def_id", "")),
+			"character_id": str(rec.get("character_id", "")), "visual_model": _visual_model_name(rec, node),
 			"visual_scale": float(rec.get("visual_scale", 1.0)),
 			"is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
-			"boss_phase": rec.get("boss_phase", {}),
-			"boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)), "telegraph_tint": str(rec.get("telegraph_tint", "")),
-			"has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
+			"boss_phase": rec.get("boss_phase", {}), "boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
+			"telegraph_tint": str(rec.get("telegraph_tint", "")), "has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
 			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")),
-			"base_tint": str(rec.get("base_tint", "")),
-			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
-			"effect_ids": rec.get("effect_ids", []),
+			"base_tint": str(rec.get("base_tint", "")), "has_bow_marker": bool(rec.get("has_bow_marker", false)), "effect_ids": rec.get("effect_ids", []),
 			"monster_pack_id": str(rec.get("monster_pack_id", "")), "monster_pack_leader": bool(rec.get("monster_pack_leader", false)),
 			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)),
 			"quest_reward": bool(rec.get("quest_reward", false)), "has_objective_marker": ChestPresentationScript.has_objective_marker(node), "has_quest_marker": ChestPresentationScript.has_quest_marker(node),
-			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node),
-			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node),
-			"has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
+			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node), "has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(node),
+			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
 			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node),
 			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),
-			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node),
-			"hp": int(rec.get("hp", 1)),
-			"reaction": reaction.get_debug_state() if reaction != null else {},
-			"animation": controller.get_debug_state() if controller != null else {},
+			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node), "hp": int(rec.get("hp", 1)),
+			"reaction": reaction.get_debug_state() if reaction != null else {}, "animation": controller.get_debug_state() if controller != null else {},
 		})
 	return out
 

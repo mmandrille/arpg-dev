@@ -140,6 +140,11 @@ func (s *Sim) applyBossActivePhase(boss *entity, phase BossPatternPhase, res *Ti
 		}
 		s.usePlayer(ps)
 		scaledDamage := s.scaleMonsterDamageForParty(s.currentLevel, *phase.Damage)
+		if outcome, immune := s.playerDamageImmunityOutcome(player); immune {
+			boss.bossActiveHit[playerID] = true
+			res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), boss.id, player.id, "", outcome))
+			continue
+		}
 		attackerStats := s.monsterEffectiveCombatStats(boss, scaledDamage)
 		defenderStats, _ := s.playerEffectiveCombatStats()
 		outcome := s.resolveCombat(attackerStats, defenderStats, scaledDamage)

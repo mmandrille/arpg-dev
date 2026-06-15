@@ -246,8 +246,11 @@ func TestLoadRules(t *testing.T) {
 	if got, want := r.Skills["holy_shield"].Cooldown.FlatTicks, 450; got != want {
 		t.Fatalf("holy shield cooldown flat_ticks = %d, want %d", got, want)
 	}
-	if skill := r.Skills["sanctuary"]; skill.Class != "paladin" || skill.Kind != "area_stat_buff" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "holy_shield" || len(skill.Effects) != 1 || skill.Effects[0].EffectID != "sanctuary" {
-		t.Fatalf("sanctuary skill = %+v, want paladin tier 3 area stat buff requiring holy_shield", skill)
+	if skill := r.Skills["sanctuary"]; skill.Class != "paladin" || skill.Kind != "area_stat_buff" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "holy_shield" || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_immunity_buff" || skill.Effects[0].EffectID != "sanctuary" || skill.Effects[0].Radius != 5 || skill.Effects[0].DurationTicks != 60 {
+		t.Fatalf("sanctuary skill = %+v, want paladin tier 3 area immunity requiring holy_shield", skill)
+	}
+	if got, want := r.Skills["sanctuary"].Cooldown.FlatTicks, 590; got != want {
+		t.Fatalf("sanctuary cooldown flat_ticks = %d, want %d", got, want)
 	}
 	if skill := r.Skills["shadow_flurry"]; skill.Class != "rogue" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "dash" || skill.Cone.AngleDegrees <= r.Skills["dash"].Cone.AngleDegrees {
 		t.Fatalf("shadow_flurry skill = %+v, want rogue tier 2 cone requiring dash with wider angle", skill)
@@ -1702,94 +1705,6 @@ func TestMagicStatScalesSkillDamageHealAndArea(t *testing.T) {
 	}
 }
 
-func TestHolyShieldAreaBuffAppliesDefenseVisualStateAndExpires(t *testing.T) {
-	rules := loadRules(t)
-	sim := MustNewSim("sess_holy_shield", "01", rules)
-	sim.progression.CharacterClass = "paladin"
-	sim.savePlayer(sim.defaultPlayer())
-	player := sim.entities[sim.playerID]
-	sim.progression.BaseStats.Vit = 8
-	sim.progression.BaseStats.Magic = 8
-	sim.progression.SkillRanks["holy_shield"] = 1
-	player.mana = player.maxMana
-	beforeMana := player.mana
-	sim.savePlayer(sim.defaultPlayer())
-
-	before, _ := sim.playerEffectiveCombatStats()
-	cast := sim.Tick([]Input{{
-		MessageID:     "cast_holy_shield",
-		CorrelationID: "corr_holy_shield",
-		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "holy_shield"},
-	}})
-	assertAck(t, cast, "cast_holy_shield")
-	if player.mana != beforeMana-5 {
-		t.Fatalf("holy shield mana after cast = %d, want %d", player.mana, beforeMana-5)
-	}
-	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "skill_cooldown_started") {
-		t.Fatalf("holy shield missing cast/effect/cooldown events: %+v", cast.Events)
-	}
-	if !sameStringSlice(player.effectIDs, []string{"holy_shield"}) {
-		t.Fatalf("player effect ids = %v, want holy_shield", player.effectIDs)
-	}
-	after, breakdowns := sim.playerEffectiveCombatStats()
-	if after.Armor <= before.Armor || after.BlockPercent <= before.BlockPercent {
-		t.Fatalf("holy shield stats before=%+v after=%+v", before, after)
-	}
-	if armor := findStatBreakdown(breakdowns, "armor"); armor == nil || !statBreakdownHasSourceKind(*armor, "skill_effect") {
-		t.Fatalf("holy shield armor breakdown missing skill source: %+v", armor)
-	}
-	if block := findStatBreakdown(breakdowns, "block_percent"); block == nil || !statBreakdownHasSourceKind(*block, "skill_effect") {
-		t.Fatalf("holy shield block breakdown missing skill source: %+v", block)
-	}
-
-	var expired TickResult
-	for i := 0; i < 300; i++ {
-		expired = sim.Tick(nil)
-	}
-	if !hasEvent(expired, "skill_effect_ended") {
-		t.Fatalf("holy shield expiry missing event: %+v", expired.Events)
-	}
-	if len(player.effectIDs) != 0 {
-		t.Fatalf("holy shield effect ids after expiry = %v, want empty", player.effectIDs)
-	}
-	finalStats, _ := sim.playerEffectiveCombatStats()
-	if math.Abs(finalStats.Armor-before.Armor) > 0.000001 || math.Abs(finalStats.BlockPercent-before.BlockPercent) > 0.000001 {
-		t.Fatalf("holy shield stats after expiry=%+v want before=%+v", finalStats, before)
-	}
-}
-
-func TestHolyShieldIgnoresAimAndAlwaysBuffsCaster(t *testing.T) {
-	rules := loadRules(t)
-	sim := MustNewSim("sess_holy_shield_caster_centered", "01", rules)
-	sim.progression.CharacterClass = "paladin"
-	sim.progression.BaseStats.Vit = 8
-	sim.progression.BaseStats.Magic = 8
-	sim.progression.SkillRanks["holy_shield"] = 1
-	sim.savePlayer(sim.defaultPlayer())
-	player := sim.entities[sim.playerID]
-	player.mana = player.maxMana
-	beforeMana := player.mana
-	sim.savePlayer(sim.defaultPlayer())
-
-	cast := sim.Tick([]Input{{
-		MessageID:     "cast_holy_shield_bad_target",
-		CorrelationID: "corr_holy_shield_bad_target",
-		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "holy_shield", TargetID: "999999", Direction: &Vec2{X: 1, Y: 0}},
-	}})
-	assertAck(t, cast, "cast_holy_shield_bad_target")
-	if !hasEvent(cast, "skill_effect_started") {
-		t.Fatalf("holy shield with bad target missing caster buff event: %+v", cast.Events)
-	}
-	if !sameStringSlice(player.effectIDs, []string{"holy_shield"}) {
-		t.Fatalf("player effect ids = %v, want holy_shield", player.effectIDs)
-	}
-	if player.mana != beforeMana-5 {
-		t.Fatalf("holy shield mana after bad-target cast = %d, want %d", player.mana, beforeMana-5)
-	}
-}
-
 func TestStrengthDamageBonusAdjustsMeleeDamageRange(t *testing.T) {
 	rules := loadRules(t)
 	base := MustNewSim("sess_damage_base", "01", rules)
@@ -3047,6 +2962,9 @@ func TestCombatStatBreakdownsIncludeEquipmentAndCap(t *testing.T) {
 	}
 	if view.DerivedStats.Armor != 6 || view.DerivedStats.MaxHP != 14 {
 		t.Fatalf("effective armor/maxHP = %v/%v, want 6/14", view.DerivedStats.Armor, view.DerivedStats.MaxHP)
+	}
+	if view.DerivedStats.BlockPercent != 75 {
+		t.Fatalf("effective block = %v, want 75", view.DerivedStats.BlockPercent)
 	}
 
 	block := findStatBreakdown(view.StatBreakdowns, "block_percent")

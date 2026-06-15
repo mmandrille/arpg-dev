@@ -216,6 +216,7 @@ type effectiveCombatStats struct {
 	HitChance            float64
 	CritChance           float64
 	CritDamage           float64
+	EvadeChance          float64
 	Armor                float64
 	BlockPercent         float64
 	AttackSpeed          float64
@@ -4322,6 +4323,9 @@ func (s *Sim) resolveCombat(attacker, defender effectiveCombatStats, damageRange
 	if !hit {
 		return combatResolution{Outcome: "miss", Hit: false}
 	}
+	if defender.EvadeChance > 0 && s.rollChance(defender.EvadeChance) {
+		return combatResolution{Outcome: "miss", Hit: false}
+	}
 	blocked := s.rollChance(defender.BlockPercent / 100.0)
 	if blocked {
 		return combatResolution{Outcome: "block", Hit: true, Blocked: true}
@@ -5285,49 +5289,6 @@ func (s *Sim) ProgressionState() CharacterProgressionState {
 	return out
 }
 
-func (s *Sim) DerivedStatsView() DerivedStatsView {
-	effective, _ := s.playerEffectiveCombatStats()
-	character := s.characterDerivedStatsView()
-	return DerivedStatsView{
-		DamageMin:            effective.DamageMin,
-		DamageMax:            effective.DamageMax,
-		Armor:                effective.Armor,
-		AttackSpeed:          effective.AttackSpeed,
-		AttackIntervalTicks:  effective.AttackIntervalTicks,
-		HitChance:            effective.HitChance,
-		CritChance:           effective.CritChance,
-		CritDamage:           effective.CritDamage,
-		MovementSpeed:        character.MovementSpeed,
-		MaxHP:                effective.MaxHP,
-		MaxMana:              effective.MaxMana,
-		HealthRegenPerSecond: effective.HealthRegenPerSecond,
-		ManaRegenPerSecond:   effective.ManaRegenPerSecond,
-	}
-}
-
-func (s *Sim) characterDerivedStatsView() DerivedStatsView {
-	stats := s.effectiveBaseStatsView()
-	eval := func(key string) float64 {
-		formula := s.rules.CharacterProgression.DerivedStats[key]
-		return evalProgressionFormula(formula, stats)
-	}
-	return DerivedStatsView{
-		DamageMin:            eval("damage_min"),
-		DamageMax:            eval("damage_max"),
-		Armor:                eval("armor"),
-		AttackSpeed:          eval("attack_speed"),
-		AttackIntervalTicks:  s.attackIntervalTicksFromSpeed(eval("attack_speed")),
-		HitChance:            eval("hit_chance"),
-		CritChance:           eval("crit_chance"),
-		CritDamage:           eval("crit_damage"),
-		MovementSpeed:        eval("movement_speed"),
-		MaxHP:                eval("max_hp"),
-		MaxMana:              eval("max_mana"),
-		HealthRegenPerSecond: eval("health_regen_per_second"),
-		ManaRegenPerSecond:   eval("mana_regen_per_second"),
-	}
-}
-
 func (s *Sim) effectiveBaseStatsView() BaseStatsView {
 	stats := s.progression.BaseStats
 	equipment := s.equipmentBaseStatBonuses()
@@ -5804,6 +5765,9 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	blockPercent := 0.0
 	weaponSpeed := 1.0
 	itemSpeedPercent := 0.0
+	hitChancePercent := character.HitChance * 100.0
+	critChancePercent := character.CritChance * 100.0
+	evadeChancePercent := 0.0
 
 	damageMinSources := []StatBreakdownSourceView{
 		{Label: "Base damage", Value: float64(s.rules.Combat.PlayerDamage.Min), Kind: "character_formula"},
@@ -5819,6 +5783,9 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	healthRegenSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.HealthRegenPerSecond, Kind: "character_formula"}}
 	manaRegenSources := []StatBreakdownSourceView{{Label: "Magic", Value: character.ManaRegenPerSecond, Kind: "character_formula"}}
 	blockSources := []StatBreakdownSourceView{}
+	hitChanceSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.HitChance, Kind: "character_formula"}}
+	critChanceSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.CritChance, Kind: "character_formula"}}
+	evadeChanceSources := []StatBreakdownSourceView{}
 	attackSpeedSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.AttackSpeed, Kind: "character_formula"}}
 
 	if weapon := equippedItems[mainHandSlot]; weapon != nil {
@@ -5911,6 +5878,18 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			itemSpeedPercent += float64(value)
 			attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: "Rolled attack speed", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
+		if value := rolledStats["hit_chance"]; value != 0 {
+			hitChancePercent += float64(value)
+			hitChanceSources = append(hitChanceSources, StatBreakdownSourceView{Label: "Rolled hit chance", Value: float64(value) / 100.0, Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["crit_chance"]; value != 0 {
+			critChancePercent += float64(value)
+			critChanceSources = append(critChanceSources, StatBreakdownSourceView{Label: "Rolled crit chance", Value: float64(value) / 100.0, Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["evade_chance"]; value != 0 {
+			evadeChancePercent += float64(value)
+			evadeChanceSources = append(evadeChanceSources, StatBreakdownSourceView{Label: "Rolled evade chance", Value: float64(value) / 100.0, Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
 	}
 	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources)
 
@@ -5958,9 +5937,10 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	effective := effectiveCombatStats{
 		DamageMin:            maxFloat(0, damageMin),
 		DamageMax:            maxFloat(0, damageMax),
-		HitChance:            clampFloat(character.HitChance, 0, 1),
-		CritChance:           clampFloat(character.CritChance, 0, 1),
+		HitChance:            clampFloat(hitChancePercent/100.0, 0, 1),
+		CritChance:           clampFloat(critChancePercent/100.0, 0, 1),
 		CritDamage:           maxFloat(1, character.CritDamage),
+		EvadeChance:          clampFloat(evadeChancePercent/100.0, 0, 1),
 		Armor:                maxFloat(0, armor),
 		BlockPercent:         maxFloat(0, blockPercent),
 		AttackSpeed:          attackSpeed,
@@ -5978,6 +5958,9 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		{Key: "damage_min", Value: effective.DamageMin, UncappedValue: effective.DamageMin, Cap: nil, Sources: damageMinSources},
 		{Key: "damage_max", Value: effective.DamageMax, UncappedValue: effective.DamageMax, Cap: nil, Sources: damageMaxSources},
 		{Key: "armor", Value: effective.Armor, UncappedValue: effective.Armor, Cap: nil, Sources: armorSources},
+		{Key: "hit_chance", Value: effective.HitChance, UncappedValue: hitChancePercent / 100.0, Cap: floatPtr(1), Sources: hitChanceSources},
+		{Key: "crit_chance", Value: effective.CritChance, UncappedValue: critChancePercent / 100.0, Cap: floatPtr(1), Sources: critChanceSources},
+		{Key: "evade_chance", Value: effective.EvadeChance, UncappedValue: evadeChancePercent / 100.0, Cap: floatPtr(1), Sources: evadeChanceSources},
 		{Key: "attack_speed", Value: effective.AttackSpeed, UncappedValue: uncappedAttackSpeed, Cap: floatPtr(s.rules.Combat.MaxEffectiveAttackSpeed), Sources: attackSpeedSources},
 		{Key: "attack_interval_ticks", Value: float64(effective.AttackIntervalTicks), UncappedValue: float64(effective.AttackIntervalTicks), Cap: nil, Sources: attackIntervalSources},
 		{Key: "max_hp", Value: effective.MaxHP, UncappedValue: effective.MaxHP, Cap: nil, Sources: maxHPSources},

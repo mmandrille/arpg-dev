@@ -64,7 +64,10 @@
         "all_skills": { "type": "integer", "minimum": 0 },
         "max_hp": { "type": "integer", "minimum": 0 },
         "max_mana": { "type": "integer", "minimum": 0 },
-        "attack_speed_percent": { "type": "integer", "minimum": 0 }
+        "attack_speed_percent": { "type": "integer", "minimum": 0 },
+        "hit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "crit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "evade_chance": { "type": "integer", "minimum": 0, "maximum": 100 }
       }
     }
   }

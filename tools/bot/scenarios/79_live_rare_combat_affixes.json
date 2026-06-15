@@ -1,0 +1,72 @@
+{
+  "id": "live_rare_combat_affixes",
+  "world_id": "equipment_lab",
+  "seed": "000000000000ba40",
+  "title": "Live rare combat affixes",
+  "description": "Equip deterministic rare rolled gear and verify hit, crit, evade, and attack-speed rolls surface through character progression breakdowns.",
+  "steps": [
+    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
+    { "action": "pick_up_loot", "item_def_id": "cave_gloves" },
+    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
+    { "action": "equip_inventory_item", "item_def_id": "cave_gloves", "slot": "gloves" },
+    {
+      "action": "assert_character_progression",
+      "stat_breakdowns": [
+        {
+          "key": "hit_chance",
+          "min_value": 0.73,
+          "cap": 1,
+          "source_kinds": ["character_formula", "equipment_roll"]
+        },
+        {
+          "key": "crit_chance",
+          "min_value": 0.08,
+          "cap": 1,
+          "source_kinds": ["character_formula", "equipment_roll"]
+        },
+        {
+          "key": "evade_chance",
+          "min_value": 0.03,
+          "cap": 1,
+          "source_kinds": ["equipment_roll"]
+        },
+        {
+          "key": "attack_speed",
+          "min_value": 1.1,
+          "source_kinds": ["character_formula", "equipment_base"]
+        }
+      ]
+    }
+  ],
+  "assertions": [
+    {
+      "type": "character_progression",
+      "stat_breakdowns": [
+        {
+          "key": "hit_chance",
+          "min_value": 0.73,
+          "cap": 1,
+          "source_kinds": ["character_formula", "equipment_roll"]
+        },
+        {
+          "key": "crit_chance",
+          "min_value": 0.08,
+          "cap": 1,
+          "source_kinds": ["character_formula", "equipment_roll"]
+        },
+        {
+          "key": "evade_chance",
+          "min_value": 0.03,
+          "cap": 1,
+          "source_kinds": ["equipment_roll"]
+        },
+        {
+          "key": "attack_speed",
+          "min_value": 1.1,
+          "source_kinds": ["character_formula", "equipment_base"]
+        }
+      ]
+    }
+  ],
+  "fresh_session_checks": []
+}

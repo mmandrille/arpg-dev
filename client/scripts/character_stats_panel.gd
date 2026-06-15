@@ -15,6 +15,7 @@ const DERIVED_LABELS := {
 	"hit_chance": "Hit chance",
 	"crit_chance": "Crit chance",
 	"crit_damage": "Crit damage",
+	"evade_chance": "Evade chance",
 	"block_percent": "Block",
 	"movement_speed": "Move speed",
 	"max_hp": "HP",
@@ -22,7 +23,7 @@ const DERIVED_LABELS := {
 	"health_regen_per_second": "HP regen /s",
 	"mana_regen_per_second": "Mana regen /s",
 }
-const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance"]
+const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance", "evade_chance"]
 const WHOLE_PERCENT_STATS := ["block_percent"]
 
 var progression: Dictionary = {}

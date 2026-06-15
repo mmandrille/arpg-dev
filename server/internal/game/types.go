@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 )
+
 // Vec2 is a 2D position in scene units.
 type Vec2 struct {
 	X float64 `json:"x"`
@@ -161,23 +162,6 @@ type BaseStatsView struct {
 	Dex   int `json:"dex"`
 	Vit   int `json:"vit"`
 	Magic int `json:"magic"`
-}
-
-// DerivedStatsView is the protocol view of stat-derived combat/display values.
-type DerivedStatsView struct {
-	DamageMin            float64 `json:"damage_min"`
-	DamageMax            float64 `json:"damage_max"`
-	Armor                float64 `json:"armor"`
-	AttackSpeed          float64 `json:"attack_speed"`
-	AttackIntervalTicks  int     `json:"attack_interval_ticks"`
-	HitChance            float64 `json:"hit_chance"`
-	CritChance           float64 `json:"crit_chance"`
-	CritDamage           float64 `json:"crit_damage"`
-	MovementSpeed        float64 `json:"movement_speed"`
-	MaxHP                float64 `json:"max_hp"`
-	MaxMana              float64 `json:"max_mana"`
-	HealthRegenPerSecond float64 `json:"health_regen_per_second"`
-	ManaRegenPerSecond   float64 `json:"mana_regen_per_second"`
 }
 
 // RequirementStatusView is the server-authored usability state for one item

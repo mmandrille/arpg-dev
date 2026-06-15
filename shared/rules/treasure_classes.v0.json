@@ -221,6 +221,54 @@
         }
       ]
     },
+    "boss_special_tc_tier_1": {
+      "attempts": [
+        {
+          "attempt_id": "named_unique",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "unique_item_id": "conduit_staff", "weight": 1 }
+          ]
+        },
+        {
+          "attempt_id": "set_piece",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "set_item_id": "stormrunner_covenant_bow", "weight": 1 }
+          ]
+        },
+        {
+          "attempt_id": "equipment",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_amulet", "weight": 1 }
+          ]
+        }
+      ]
+    },
+    "elite_objective_special_tc_1": {
+      "attempts": [
+        {
+          "attempt_id": "set_piece",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "set_item_id": "verdant_vanguard_gloves", "weight": 1 }
+          ]
+        },
+        {
+          "attempt_id": "equipment",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            { "item_template_id": "cave_ring", "weight": 1 }
+          ]
+        }
+      ]
+    },
     "equipment_lab_tc_1": {
       "attempts": [
         {

@@ -1555,7 +1555,21 @@ func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius floa
 
 		itemDefID := drop.ItemDefID
 		var payload *ItemRollPayload
-		if drop.ItemTemplateID != "" {
+		if drop.UniqueItemID != "" {
+			rolled, ok := s.rules.namedUniquePayload(drop.UniqueItemID)
+			if !ok {
+				continue
+			}
+			payload = &rolled
+			itemDefID = rolled.ItemTemplateID
+		} else if drop.SetItemID != "" {
+			rolled, ok := s.rules.setItemPayload(drop.SetItemID)
+			if !ok {
+				continue
+			}
+			payload = &rolled
+			itemDefID = rolled.ItemTemplateID
+		} else if drop.ItemTemplateID != "" {
 			rolled, ok := s.rollItemTemplateForLoot(drop.ItemTemplateID, s.itemRollSourceDepth(goldCtx), goldCtx)
 			if !ok {
 				continue

@@ -218,6 +218,7 @@ def cross_checks(report: Report) -> None:
     unique_items = load(RULES / "unique_items.v0.json")
     unique_effects = load(RULES / "unique_effects.v0.json")
     unique_effect_defs = unique_effects.get("effects", {})
+    set_item_ids = {piece.get("id") for set_def in load(RULES / "set_items.v0.json")["sets"].values() for piece in set_def.get("items", [])}
     treasure_classes = load(RULES / "treasure_classes.v0.json")
     monsters = load(RULES / "monsters.v0.json")
     loot = load(RULES / "loot_tables.v0.json")
@@ -1129,22 +1130,21 @@ def cross_checks(report: Report) -> None:
             for entry in attempt.get("entries", []):
                 item_def_id = entry.get("item_def_id")
                 item_template_id = entry.get("item_template_id")
-                if bool(item_def_id) == bool(item_template_id):
-                    report.fail("treasure class entry", f"{class_id}.{attempt_id}: exactly one of item_def_id/item_template_id")
-                    failed_class = True
-                    break
+                unique_item_id, set_item_id = entry.get("unique_item_id"), entry.get("set_item_id")
+                if sum(1 for ref in [item_def_id, item_template_id, unique_item_id, set_item_id] if ref) != 1:
+                    report.fail("treasure class entry", f"{class_id}.{attempt_id}: exactly one drop reference"); failed_class = True; break
                 if entry.get("weight", 0) <= 0:
                     report.fail("treasure class entry", f"{class_id}.{attempt_id}: entry weight must be positive")
                     failed_class = True
                     break
                 if item_def_id and item_def_id not in items["items"]:
-                    report.fail("treasure class item", f"{class_id}.{attempt_id}: unknown item {item_def_id}")
-                    failed_class = True
-                    break
+                    report.fail("treasure class item", f"{class_id}.{attempt_id}: unknown item {item_def_id}"); failed_class = True; break
+                if unique_item_id and unique_item_id not in unique_items["uniques"]:
+                    report.fail("treasure class unique item", f"{class_id}.{attempt_id}: unknown unique item {unique_item_id}"); failed_class = True; break
+                if set_item_id and set_item_id not in set_item_ids:
+                    report.fail("treasure class set item", f"{class_id}.{attempt_id}: unknown set item {set_item_id}"); failed_class = True; break
                 if item_template_id and item_template_id not in item_templates["templates"]:
-                    report.fail("treasure class template", f"{class_id}.{attempt_id}: unknown template {item_template_id}")
-                    failed_class = True
-                    break
+                    report.fail("treasure class template", f"{class_id}.{attempt_id}: unknown template {item_template_id}"); failed_class = True; break
             if failed_class:
                 break
         if not failed_class:
@@ -1801,15 +1801,13 @@ def cross_checks(report: Report) -> None:
         for entry in loot_table.get("entries", []):
             item_def_id = entry.get("item_def_id")
             item_template_id = entry.get("item_template_id")
-            if bool(item_def_id) == bool(item_template_id):
-                report.fail("loot entry item", f"{table}: exactly one of item_def_id/item_template_id is required")
-                break
+            unique_item_id, set_item_id = entry.get("unique_item_id"), entry.get("set_item_id")
+            if sum(1 for ref in [item_def_id, item_template_id, unique_item_id, set_item_id] if ref) != 1:
+                report.fail("loot entry item", f"{table}: exactly one drop reference is required"); break
             if item_def_id and item_def_id not in items["items"]:
-                report.fail("loot entry item", f"{table} -> unknown item {item_def_id}")
-                break
+                report.fail("loot entry item", f"{table} -> unknown item {item_def_id}"); break
             if item_template_id and item_template_id not in item_templates["templates"]:
-                report.fail("loot entry template", f"{table} -> unknown template {item_template_id}")
-                break
+                report.fail("loot entry template", f"{table} -> unknown template {item_template_id}"); break
         else:
             for item_id in loot_table.get("drops", []):
                 if item_id not in items["items"]:

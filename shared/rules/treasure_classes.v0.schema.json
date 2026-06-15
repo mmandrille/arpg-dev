@@ -37,11 +37,15 @@
                     "properties": {
                       "item_def_id": { "type": "string", "minLength": 1 },
                       "item_template_id": { "type": "string", "minLength": 1 },
+                      "unique_item_id": { "type": "string", "minLength": 1 },
+                      "set_item_id": { "type": "string", "minLength": 1 },
                       "weight": { "type": "integer", "minimum": 1 }
                     },
                     "oneOf": [
                       { "required": ["item_def_id"] },
-                      { "required": ["item_template_id"] }
+                      { "required": ["item_template_id"] },
+                      { "required": ["unique_item_id"] },
+                      { "required": ["set_item_id"] }
                     ]
                   }
                 }

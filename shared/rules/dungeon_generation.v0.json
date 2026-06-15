@@ -54,7 +54,7 @@
   "elite_objective": {
     "enabled": true,
     "interactable_def_id": "treasure_chest",
-    "loot_table": "guarded_chest_drop",
+    "loot_table": "elite_objective_special_drop",
     "min_stair_distance": 4.0,
     "max_attempts": 32
   },

@@ -1,0 +1,68 @@
+PROGRESS.md
+  s_21a9048984b529::t_0a6ca85fdf3b39 15,201-202,426,560-563
+server/internal/game/game_test.go
+  s_21a9048984b529::t_be9b549429f5f8 289,295
+  s_21a9048984b529::t_c30f48d762bd40 14,16,124
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_21a9048984b529::t_0203da186fb715 18
+shared/i18n/en.json
+  s_21a9048984b529::t_01b38603255221 85-86,101
+shared/i18n/es.json
+  s_21a9048984b529::t_01b38603255221 35,87-88
+server/internal/game/rules.go
+  s_21a9048984b529::t_98b619ecbb470d 539
+  s_21a9048984b529::t_be9b549429f5f8 1426,1584-1586
+  s_21a9048984b529::t_aff27237f19356 2746,2821,2874-2877
+  s_21a9048984b529::t_ded93a2a4e0bfa 2775,2828,2878
+shared/assets/monster_visuals.v0.json
+  s_21a9048984b529::t_399459db940bd2 116-122
+docs/specs/v183_spec-ranger-wolf-companion.md
+  s_21a9048984b529::t_11f4cb70be65fd 3
+  s_21a9048984b529::t_95e967e9d64afa 1-2,4-31
+shared/rules/skills.v0.schema.json
+  s_21a9048984b529::t_50849b845daba0 101-107,218-227
+  s_21a9048984b529::t_0498e14543caaa 28,44
+server/internal/game/ranger_skills_test.go
+  s_21a9048984b529::t_f169652ed0a3ae 105-145,160-163,176,199-215
+server/internal/game/rules_companion.go
+  s_21a9048984b529::t_c3ef6b2172d4e8 1-48
+shared/rules/monsters.v0.json
+  s_21a9048984b529::t_2cb9f4a102210a 217-227,229-238
+  s_21a9048984b529::t_01b38603255221 228
+server/internal/game/handlers.go
+  s_21a9048984b529::t_daa2198a7feae4 1254-1255
+shared/assets/skill_presentations.v0.json
+  s_21a9048984b529::t_38e0046f4a23bb 186-196
+server/internal/game/companion_ai.go
+  s_21a9048984b529::t_89f3c0a9e83d6d 71-86
+  s_21a9048984b529::t_266f66b479ded6 33-70,87-90
+shared/rules/worlds.v0.json
+  s_21a9048984b529::t_1d9897e896a74f 823-832
+docs/plans/v183_2026-06-15-ranger-wolf-companion.md
+  s_21a9048984b529::t_e42cedc392ad85 22
+  s_21a9048984b529::t_95e967e9d64afa 1-2,4-14,23-39
+  s_21a9048984b529::t_11f4cb70be65fd 3,15-21
+tools/bot/scenarios/74_ranger_wolf_companion.json
+  s_21a9048984b529::t_411d5a7b4a09d3 1-24,26-36
+  s_21a9048984b529::t_c795f98b2b72aa 25
+shared/rules/skills.v0.json
+  s_21a9048984b529::t_f692d237811abf 856-900
+docs/as-built/v183_ranger-wolf-companion.md
+  s_21a9048984b529::t_11f4cb70be65fd 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6036815bd4ac08f06ec9f96ac9f164fd0a0b080b",
+  "prompts": {},
+  "sessions": {
+    "s_21a9048984b529": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec984-931d-7740-965d-620664ca32a9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

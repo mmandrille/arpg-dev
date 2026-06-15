@@ -578,31 +578,19 @@
       },
       "effects": [
         {
-          "type": "area_stat_percent_buff",
+          "type": "area_immunity_buff",
           "target": "allies",
           "include_caster": true,
-          "range": 9,
-          "radius": 6,
-          "stats": [
-            "armor",
-            "block_percent"
-          ],
-          "percent_base": 28,
-          "percent_per_rank": 8,
-          "duration_ticks": 360,
-          "effect_id": "sanctuary",
-          "magic_scaling": {
-            "stat": "magic",
-            "percent_per_point": 1,
-            "max_bonus_percent": 20,
-            "use_requirement_baseline": true
-          }
+          "range": 5,
+          "radius": 5,
+          "duration_ticks": 60,
+          "effect_id": "sanctuary"
         }
       ],
       "cooldown": {
         "type": "attack_interval_multiplier",
         "multiplier": 1,
-        "flat_ticks": 540
+        "flat_ticks": 590
       },
       "name_key": "skill.sanctuary.name"
     },

@@ -1088,6 +1088,7 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 	}
 	player := s.activeLevel().entities[s.playerID]
 	changed := false
+	activePlayerProgressionChanged := false
 	updatedTargets := map[uint64]bool{}
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
@@ -1105,6 +1106,9 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 			if effect.EffectID != "" {
 				target.effectIDs = removeStringValue(target.effectIDs, effect.EffectID)
 			}
+			if target.id == s.playerID {
+				activePlayerProgressionChanged = true
+			}
 			updatedTargets[target.id] = true
 			res.Events = append(res.Events, Event{
 				EventType: "skill_effect_ended",
@@ -1120,6 +1124,9 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 	visualChanged := s.syncActivePlayerVisualScale()
 	if resourcesChanged || visualChanged {
 		updatedTargets[player.id] = true
+	}
+	if activePlayerProgressionChanged {
+		s.appendCharacterProgressionUpdate(res)
 	}
 	for _, id := range sortedUint64Keys(updatedTargets) {
 		target := s.activeLevel().entities[id]
@@ -1152,6 +1159,11 @@ func (s *Sim) syncActivePlayerMaxResources() bool {
 		changed = true
 	}
 	return changed
+}
+
+func (s *Sim) appendCharacterProgressionUpdate(res *TickResult) {
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
 }
 
 func regenAmount(ratePerSecond float64, secondsPerTick float64, carry *float64, missing int) int {
@@ -1565,6 +1577,10 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 		return
 	}
 	retaliationDamage := s.scaleMonsterDamageForParty(s.currentLevel, *def.RetaliationDamage)
+	if outcome, immune := s.playerDamageImmunityOutcome(player); immune {
+		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
+		return
+	}
 	attackerStats := s.monsterEffectiveCombatStats(monster, retaliationDamage)
 	defenderStats, _ := s.playerEffectiveCombatStats()
 	outcome := s.resolveCombat(attackerStats, defenderStats, retaliationDamage)
@@ -2399,69 +2415,6 @@ func skillCastRange(def SkillDef) float64 {
 	return castRange
 }
 
-func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
-	if player == nil {
-		return
-	}
-	for _, effect := range def.Effects {
-		if effect.Type != "stat_percent_buff" {
-			continue
-		}
-		percent := skillEffectPercent(effect, rank)
-		scale := 1.0
-		if effect.VisualScale {
-			scale += float64(percent) / 100.0
-		}
-		totalTicks := effect.DurationTicks
-		s.skillEffects[skillID] = skillEffectState{
-			SkillID:     skillID,
-			TargetID:    player.id,
-			Stats:       cloneStringSlice(effect.Stats),
-			Percent:     percent,
-			VisualScale: scale,
-			EffectID:    skillID,
-			EndsTick:    s.tick + uint64(totalTicks),
-			TotalTicks:  totalTicks,
-		}
-		s.syncActivePlayerVisualScale()
-		res.Events = append(res.Events, Event{
-			EventType:      "skill_effect_started",
-			EntityID:       idStr(player.id),
-			CorrelationID:  correlationID,
-			SkillID:        skillID,
-			Rank:           intPtr(rank),
-			Amount:         intPtr(percent),
-			RemainingTicks: intPtr(totalTicks),
-			TotalTicks:     intPtr(totalTicks),
-		})
-	}
-}
-
-func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, cast *CastSkillIntent) ([]skillBuffApplication, string) {
-	if player == nil {
-		return nil, "player_dead"
-	}
-	applications := []skillBuffApplication{}
-	for _, effect := range def.Effects {
-		if effect.Type != "area_stat_percent_buff" {
-			continue
-		}
-		center := player.pos
-		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank))
-		scale := 1.0
-		targets := s.healSkillTargets(center, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
-		for _, target := range targets {
-			applications = append(applications, skillBuffApplication{
-				Target:      target,
-				Effect:      effect,
-				Percent:     percent,
-				VisualScale: scale,
-			})
-		}
-	}
-	return applications, ""
-}
-
 func (s *Sim) skillAreaCenter(effect SkillEffectDef, cast *CastSkillIntent, player *entity) (Vec2, string) {
 	if cast == nil || player == nil {
 		return Vec2{}, "invalid_payload"
@@ -2704,48 +2657,6 @@ func (s *Sim) applyAreaHeal(player *entity, skillID string, rank int, applicatio
 			SkillID:        skillID,
 			Rank:           intPtr(rank),
 			Heal:           intPtr(app.Heal),
-		})
-	}
-}
-
-func (s *Sim) applyAreaStatBuff(player *entity, skillID string, rank int, applications []skillBuffApplication, correlationID string, res *TickResult) {
-	for _, app := range applications {
-		target := app.Target
-		if target == nil || target.kind != playerEntity || target.hp <= 0 {
-			continue
-		}
-		effectID := app.Effect.EffectID
-		if effectID == "" {
-			effectID = skillID
-		}
-		stateKey := skillID
-		if target.id != s.playerID {
-			stateKey = fmt.Sprintf("%s:%d", skillID, target.id)
-		}
-		totalTicks := app.Effect.DurationTicks
-		s.skillEffects[stateKey] = skillEffectState{
-			SkillID:     skillID,
-			TargetID:    target.id,
-			Stats:       cloneStringSlice(app.Effect.Stats),
-			Percent:     app.Percent,
-			VisualScale: app.VisualScale,
-			EffectID:    effectID,
-			EndsTick:    s.tick + uint64(totalTicks),
-			TotalTicks:  totalTicks,
-		}
-		target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-		res.Events = append(res.Events, Event{
-			EventType:      "skill_effect_started",
-			EntityID:       idStr(target.id),
-			SourceEntityID: idStr(player.id),
-			TargetEntityID: idStr(target.id),
-			CorrelationID:  correlationID,
-			SkillID:        skillID,
-			Rank:           intPtr(rank),
-			Amount:         intPtr(app.Percent),
-			RemainingTicks: intPtr(totalTicks),
-			TotalTicks:     intPtr(totalTicks),
 		})
 	}
 }
@@ -4386,6 +4297,26 @@ func (s *Sim) combatEventType(defenderKind string, outcome combatResolution) str
 	return "monster_damaged"
 }
 
+func (s *Sim) playerDamageImmunityOutcome(player *entity) (combatResolution, bool) {
+	if player == nil || player.kind != playerEntity || player.hp <= 0 {
+		return combatResolution{}, false
+	}
+	for _, stateKey := range sortedStringKeys(s.skillEffects) {
+		effect := s.skillEffects[stateKey]
+		if effect.TargetID != player.id || effect.EffectID != "sanctuary" || effect.EndsTick <= s.tick {
+			continue
+		}
+		return combatResolution{
+			Outcome:         "immune",
+			Damage:          0,
+			RawDamage:       0,
+			MitigatedDamage: 0,
+			Hit:             true,
+		}, true
+	}
+	return combatResolution{}, false
+}
+
 func combatEvent(eventType string, sourceID, targetID uint64, corr string, outcome combatResolution) Event {
 	return Event{
 		EventType:       eventType,
@@ -5291,6 +5222,51 @@ func (s *Sim) ProgressionState() CharacterProgressionState {
 	out := s.progression
 	out.SkillRanks = cloneIntMap(s.progression.SkillRanks)
 	return out
+}
+
+func (s *Sim) DerivedStatsView() DerivedStatsView {
+	effective, _ := s.playerEffectiveCombatStats()
+	character := s.characterDerivedStatsView()
+	return DerivedStatsView{
+		DamageMin:            effective.DamageMin,
+		DamageMax:            effective.DamageMax,
+		Armor:                effective.Armor,
+		BlockPercent:         effective.BlockPercent,
+		AttackSpeed:          effective.AttackSpeed,
+		AttackIntervalTicks:  effective.AttackIntervalTicks,
+		HitChance:            effective.HitChance,
+		CritChance:           effective.CritChance,
+		CritDamage:           effective.CritDamage,
+		MovementSpeed:        character.MovementSpeed,
+		MaxHP:                effective.MaxHP,
+		MaxMana:              effective.MaxMana,
+		HealthRegenPerSecond: effective.HealthRegenPerSecond,
+		ManaRegenPerSecond:   effective.ManaRegenPerSecond,
+	}
+}
+
+func (s *Sim) characterDerivedStatsView() DerivedStatsView {
+	stats := s.effectiveBaseStatsView()
+	eval := func(key string) float64 {
+		formula := s.rules.CharacterProgression.DerivedStats[key]
+		return evalProgressionFormula(formula, stats)
+	}
+	return DerivedStatsView{
+		DamageMin:            eval("damage_min"),
+		DamageMax:            eval("damage_max"),
+		Armor:                eval("armor"),
+		BlockPercent:         0,
+		AttackSpeed:          eval("attack_speed"),
+		AttackIntervalTicks:  s.attackIntervalTicksFromSpeed(eval("attack_speed")),
+		HitChance:            eval("hit_chance"),
+		CritChance:           eval("crit_chance"),
+		CritDamage:           eval("crit_damage"),
+		MovementSpeed:        eval("movement_speed"),
+		MaxHP:                eval("max_hp"),
+		MaxMana:              eval("max_mana"),
+		HealthRegenPerSecond: eval("health_regen_per_second"),
+		ManaRegenPerSecond:   eval("mana_regen_per_second"),
+	}
 }
 
 func (s *Sim) effectiveBaseStatsView() BaseStatsView {

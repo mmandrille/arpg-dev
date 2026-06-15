@@ -4,7 +4,7 @@
   "seed": "v171_paladin_sanctuary",
   "character_class": "paladin",
   "title": "Paladin Sanctuary",
-  "description": "Seed Holy Shield, cast the new Sanctuary higher-row skill, and prove authoritative area buff effects.",
+  "description": "Seed Holy Shield, cast Sanctuary, and prove authoritative immunity effect state.",
   "debug_progression": {
     "level": 7,
     "experience": 0,
@@ -20,7 +20,7 @@
   ],
   "assertions": [
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "sanctuary", "rank": 1, "mana": 7 },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "sanctuary", "remaining_ticks": 360, "total_ticks": 360 },
+    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "sanctuary", "remaining_ticks": 60, "total_ticks": 60 },
     { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "sanctuary" },
     { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "sanctuary", "rank": 1, "max_rank": "from_rules", "can_spend": false }
   ],

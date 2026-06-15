@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_test_rage_icon_expiry_clears_world_aura()
 	_test_holy_shield_started_blinks_models_in_range()
 	_test_holy_shield_ended_clears_local_world_effect()
+	_test_sanctuary_started_and_ended_updates_local_dome()
 	_test_unique_burn_started_and_ended_updates_monster_cue()
 	_test_pinning_root_started_and_ended_updates_monster_cue()
 	_test_monster_death_clears_elite_aura_markers()
@@ -131,6 +132,27 @@ func _test_holy_shield_ended_clears_local_world_effect() -> void:
 	main._apply_delta({"events": [{"event_type": "skill_effect_ended", "entity_id": "1001", "skill_id": "holy_shield"}], "changes": []})
 	local_state = main._bot_local_player_presentation()
 	_assert_true("local holy shield marker removed by end event", not bool(local_state.get("has_holy_shield_effect", true)))
+	_free_main(main)
+
+
+func _test_sanctuary_started_and_ended_updates_local_dome() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._apply_delta({"events": [{
+		"event_type": "skill_effect_started",
+		"entity_id": "1001",
+		"skill_id": "sanctuary",
+		"remaining_ticks": 60,
+		"total_ticks": 60,
+	}], "changes": []})
+	var local_state := main._bot_local_player_presentation()
+	_assert_true("local sanctuary dome active", bool(local_state.get("has_sanctuary_effect", false)))
+	_assert_true("local sanctuary effect id visible", (local_state.get("effect_ids", []) as Array).has("sanctuary"))
+
+	main._apply_delta({"events": [{"event_type": "skill_effect_ended", "entity_id": "1001", "skill_id": "sanctuary"}], "changes": []})
+	local_state = main._bot_local_player_presentation()
+	_assert_true("local sanctuary dome removed by end event", not bool(local_state.get("has_sanctuary_effect", true)))
+	_assert_true("local sanctuary effect id removed", not (local_state.get("effect_ids", []) as Array).has("sanctuary"))
 	_free_main(main)
 
 

@@ -100,5 +100,6 @@ func (s *Sim) equippedItemStatTotal(stat string) int {
 		baseStats, rolledStats := s.itemBaseAndRollStats(item)
 		total += baseStats[stat] + rolledStats[stat]
 	}
+	total += s.equippedSetBonusStats()[stat]
 	return total
 }

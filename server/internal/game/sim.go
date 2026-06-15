@@ -5377,6 +5377,11 @@ func (s *Sim) equipmentBaseStatBonuses() BaseStatsView {
 		out.Vit += stats["vit"]
 		out.Magic += stats["magic"]
 	}
+	setStats := s.equippedSetBonusStats()
+	out.Str += setStats["str"]
+	out.Dex += setStats["dex"]
+	out.Vit += setStats["vit"]
+	out.Magic += setStats["magic"]
 	return out
 }
 
@@ -5402,6 +5407,7 @@ func (s *Sim) allSkillsBonus() int {
 		stats := s.statsForInventoryItem(item)
 		bonus += stats["all_skills"]
 	}
+	bonus += s.equippedSetBonusStats()["all_skills"]
 	return bonus
 }
 
@@ -5888,6 +5894,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: "Rolled attack speed", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
 	}
+	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources)
 
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]

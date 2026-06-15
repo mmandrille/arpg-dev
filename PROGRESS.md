@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v180 — upgrade resource drop |
+| **Latest completed slice** | v181 — set item foundation |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -197,6 +197,7 @@ v177_* = boss-ranged-pattern
 v178_* = boss-summoned-adds
 v179_* = mana-regeneration
 v180_* = upgrade-resource-drop
+v181_* = set-item-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -418,6 +419,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v178** | `boss-summoned-adds` | Complete (`make ci` green) | [`v178_spec-boss-summoned-adds.md`](docs/specs/v178_spec-boss-summoned-adds.md) | [`v178_2026-06-15-boss-summoned-adds.md`](docs/plans/v178_2026-06-15-boss-summoned-adds.md) | [`as-built`](docs/as-built/v178_boss-summoned-adds.md) |
 | **v179** | `mana-regeneration` | Complete (`make ci` green) | [`v179_spec-mana-regeneration.md`](docs/specs/v179_spec-mana-regeneration.md) | [`v179_2026-06-15-mana-regeneration.md`](docs/plans/v179_2026-06-15-mana-regeneration.md) | [`as-built`](docs/as-built/v179_mana-regeneration.md) |
 | **v180** | `upgrade-resource-drop` | Complete (`make ci` green) | [`v180_spec-upgrade-resource-drop.md`](docs/specs/v180_spec-upgrade-resource-drop.md) | [`v180_2026-06-15-upgrade-resource-drop.md`](docs/plans/v180_2026-06-15-upgrade-resource-drop.md) | [`as-built`](docs/as-built/v180_upgrade-resource-drop.md) |
+| **v181** | `set-item-foundation` | Complete (`make ci` green) | [`v181_spec-set-item-foundation.md`](docs/specs/v181_spec-set-item-foundation.md) | [`v181_2026-06-15-set-item-foundation.md`](docs/plans/v181_2026-06-15-set-item-foundation.md) | [`as-built`](docs/as-built/v181_set-item-foundation.md) |
 
 ---
 
@@ -550,6 +552,12 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**The first five-piece set item package is live.** v181 adds the green `Verdant Vanguard` set
+catalog, exposes its five fixed pieces in the debug unique chest, applies server-authoritative
+2/3/4/full-set bonuses from equipped pieces, and colors set items green in existing loot/tooltips.
+The requested skill-cast visual troubleshooting command already exists as
+`make skill-visual skill=<skill_id> rank=<rank>` and `make skill-visual-list`.
 
 **Upgrade resources now drop as tangible loot.** v180 adds `upgrade_shard`, presentation metadata,
 and a deterministic ranged-lab drop source, with protocol bot scenario
@@ -1377,7 +1385,7 @@ validation while removing a duplicated maintenance list.
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, passive skills, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable buyback history, starter loadout backfill for existing or compatibility-default characters | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59/v97 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, quadruped pounce, bat dive/swarm behavior, true flying gameplay/pathing, ranged boss patterns, elite archer packs, retreat/cover seeking, predictive leading, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v58 Cave Warden deck, enrage phases, summoned adds, monster population-count scaling, weighted/random boss pattern selection, final skill tree and active ability catalog, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield/Arcane Barrage/Sanctuary, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81/v159/v161/v171 non-goals |
-| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, unique/set catalogs, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
+| Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, additional unique/set catalogs beyond the first set package, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, item upgrade resources, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51/v181 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
 | Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, market restrictions for upgraded/bound/equipped/hotbar-assigned items, player-facing offer browser/cancel UI polish, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111/v128/v129/v130 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production chest art/animation/audio, production archer/bow model and attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97/v172 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75 non-goals, ADR-0009 |

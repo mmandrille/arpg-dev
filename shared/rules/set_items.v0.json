@@ -1,0 +1,58 @@
+{
+  "version": 0,
+  "sets": {
+    "verdant_vanguard": {
+      "id": "verdant_vanguard",
+      "enabled": true,
+      "display_name": "Verdant Vanguard",
+      "rarity": "set",
+      "items": [
+        {
+          "id": "verdant_vanguard_blade",
+          "base_template_id": "cave_blade",
+          "display_name": "Verdant Vanguard Blade",
+          "minimum_level": 5,
+          "fixed_stats": { "damage_min": 3, "damage_max": 7, "str": 1 }
+        },
+        {
+          "id": "verdant_vanguard_helm",
+          "base_template_id": "cave_helm",
+          "display_name": "Verdant Vanguard Helm",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 4, "vit": 1 }
+        },
+        {
+          "id": "verdant_vanguard_mail",
+          "base_template_id": "cave_mail",
+          "display_name": "Verdant Vanguard Mail",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 7, "max_hp": 5 }
+        },
+        {
+          "id": "verdant_vanguard_gloves",
+          "base_template_id": "cave_gloves",
+          "display_name": "Verdant Vanguard Gloves",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 3, "attack_speed_percent": 8 }
+        },
+        {
+          "id": "verdant_vanguard_boots",
+          "base_template_id": "cave_boots",
+          "display_name": "Verdant Vanguard Boots",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 3, "dex": 1 }
+        }
+      ],
+      "piece_bonuses": [
+        { "required_pieces": 2, "stats": { "armor": 3 } },
+        { "required_pieces": 3, "stats": { "max_hp": 8 } },
+        { "required_pieces": 4, "stats": { "attack_speed_percent": 8 } }
+      ],
+      "full_set_bonus": {
+        "required_pieces": 5,
+        "stats": { "all_skills": 1, "skill_damage_percent": 20, "health_regen_per_10_seconds": 5 }
+      },
+      "status": "ready"
+    }
+  }
+}

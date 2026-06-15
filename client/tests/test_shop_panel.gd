@@ -86,6 +86,12 @@ func _run() -> void:
 	_assert_eq("vendor tooltip rarity uses smaller font", _font_size_for_text(magic_offer_fonts, "Rarity: Magic"), 19)
 	_assert_eq("vendor tooltip slot uses smaller font", _font_size_for_text(magic_offer_fonts, "Slot: gloves"), 19)
 	magic_offer_tooltip.queue_free()
+	var set_offer: Dictionary = offers[3].duplicate(true)
+	set_offer["display_name"] = "Verdant Vanguard Gloves"
+	set_offer["rarity"] = "set"
+	var set_offer_tooltip := panel._make_offer_tooltip(set_offer)
+	_assert_eq("vendor set tooltip name is rarity green", set_offer_tooltip.debug_first_main_line_color(), "55e66f")
+	set_offer_tooltip.queue_free()
 
 	panel.bot_click_buy_offer("fixed:red_potion")
 	_assert_eq("buy emitted count", emitted.size(), 1)

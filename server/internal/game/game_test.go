@@ -4944,6 +4944,14 @@ func cloneRules(r *Rules) *Rules {
 	for id, def := range r.ItemTemplates {
 		out.ItemTemplates[id] = def
 	}
+	out.SetCatalogs = make(map[string]SetItemCatalogDef, len(r.SetCatalogs))
+	for id, def := range r.SetCatalogs {
+		out.SetCatalogs[id] = def
+	}
+	out.SetItems = make(map[string]SetItemDef, len(r.SetItems))
+	for id, def := range r.SetItems {
+		out.SetItems[id] = def
+	}
 	out.Skills = make(map[string]SkillDef, len(r.Skills))
 	for id, def := range r.Skills {
 		out.Skills[id] = def

@@ -4,6 +4,7 @@ extends RefCounted
 const BotUiAssertionHandlersScript := preload("res://scripts/bot_ui_assertion_handlers.gd")
 const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journal_assertions.gd")
 const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_objective_assertions.gd")
+const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -144,6 +145,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			if not BotEliteObjectiveAssertionsScript.matches(step, state):
 				runner._fail("assert_elite_objective_tracker failed: want=%s tracker=%s step=%d scenario=%s" % [
 					str(step), str(state.get("elite_objective_tracker", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_elite_objective_minimap":
+			if not BotEliteObjectiveMinimapAssertionsScript.matches(step, state):
+				runner._fail("assert_elite_objective_minimap failed: want=%s minimap=%s step=%d scenario=%s" % [
+					str(step), str(state.get("elite_objective_minimap", {})), runner._step_index, str(runner.scenario.get("id", "?"))
 				])
 				return false
 			return true

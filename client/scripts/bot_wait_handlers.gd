@@ -3,6 +3,7 @@ extends RefCounted
 
 const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journal_assertions.gd")
 const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_objective_assertions.gd")
+const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -61,6 +62,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return BotQuestJournalAssertionsScript.matches(step, state)
 		"wait_elite_objective_tracker":
 			return BotEliteObjectiveAssertionsScript.matches(step, state)
+		"wait_elite_objective_minimap":
+			return BotEliteObjectiveMinimapAssertionsScript.matches(step, state)
 		"wait_ticks":
 			return runner._wait_ticks(step, state)
 		"wait_entity":

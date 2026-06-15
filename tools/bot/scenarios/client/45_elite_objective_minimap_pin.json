@@ -1,0 +1,41 @@
+{
+  "id": "elite_objective_minimap_pin",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v161_fast_objective_0018",
+  "title": "Elite objective minimap pin",
+  "description": "Client descends to a deterministic elite-objective floor and verifies the compact minimap shows an active objective pin.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "elite_objective": true,
+      "timeout_s": 20.0
+    },
+    {
+      "type": "wait_elite_objective_minimap",
+      "visible": true,
+      "has_pin": true,
+      "status": "active",
+      "pin_x_min": 0.0,
+      "pin_x_max": 1.0,
+      "pin_y_min": 0.0,
+      "pin_y_max": 1.0,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "assert_elite_objective_minimap",
+      "visible": true,
+      "has_pin": true,
+      "status": "active",
+      "pin_x_min": 0.0,
+      "pin_x_max": 1.0,
+      "pin_y_min": 0.0,
+      "pin_y_max": 1.0
+    }
+  ]
+}

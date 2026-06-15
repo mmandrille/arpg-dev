@@ -4,7 +4,7 @@
 It is the canonical snapshot of where the project stands and what is still open. Per-slice as-built
 summaries live in [`docs/as-built/`](docs/as-built/).
 
-Last updated: 2026-06-14
+Last updated: 2026-06-15
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v175 — elite objective HUD |
+| **Latest completed slice** | v176 — elite objective minimap pin |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v176 — elite objective minimap pin |
+| **CI gate** | `make ci` green on 2026-06-15 |
+| **Next slice** | v177 — boss ranged pattern |
 | **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
 | **Next engineering review** | v180 due before more feature batches |
 
@@ -192,6 +192,7 @@ v172_* = loot-filter-persistence
 v173_* = quest-floor-map-marker
 v174_* = quest-journal-foundation
 v175_* = elite-objective-hud
+v176_* = elite-objective-minimap-pin
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -408,6 +409,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v173** | `quest-floor-map-marker` | Complete (`make ci` green) | [`v173_spec-quest-floor-map-marker.md`](docs/specs/v173_spec-quest-floor-map-marker.md) | [`v173_2026-06-14-quest-floor-map-marker.md`](docs/plans/v173_2026-06-14-quest-floor-map-marker.md) | [`as-built`](docs/as-built/v173_quest-floor-map-marker.md) |
 | **v174** | `quest-journal-foundation` | Complete (`make ci` green) | [`v174_spec-quest-journal-foundation.md`](docs/specs/v174_spec-quest-journal-foundation.md) | [`v174_2026-06-14-quest-journal-foundation.md`](docs/plans/v174_2026-06-14-quest-journal-foundation.md) | [`as-built`](docs/as-built/v174_quest-journal-foundation.md) |
 | **v175** | `elite-objective-hud` | Complete (`make ci` green) | [`v175_spec-elite-objective-hud.md`](docs/specs/v175_spec-elite-objective-hud.md) | [`v175_2026-06-14-elite-objective-hud.md`](docs/plans/v175_2026-06-14-elite-objective-hud.md) | [`as-built`](docs/as-built/v175_elite-objective-hud.md) |
+| **v176** | `elite-objective-minimap-pin` | Complete (`make ci` green) | [`v176_spec-elite-objective-minimap-pin.md`](docs/specs/v176_spec-elite-objective-minimap-pin.md) | [`v176_2026-06-15-elite-objective-minimap-pin.md`](docs/plans/v176_2026-06-15-elite-objective-minimap-pin.md) | [`as-built`](docs/as-built/v176_elite-objective-minimap-pin.md) |
 
 ---
 
@@ -517,6 +519,7 @@ character_select_summaries: headless Godot client opens Create Game → asserts 
 mystery_seller_paid_reroll: open mystery seller → spend 50 gold to reroll concealed stock → prove old offers are replaced, gold persists, and replay/fresh stock remain deterministic
 unique_chest_client_proof: headless Godot client opens the purple unique chest and asserts named unique rows expose readable effect summaries
 stash_search_and_sorting: headless Godot client opens stash → searches and sorts bag/stash rows → deposits/withdraws by stable server IDs
+elite_objective_minimap_pin: headless Godot client descends to a deterministic elite-objective floor → asserts compact minimap pin visibility and active debug state
 ```
 
 **Verify:**
@@ -539,6 +542,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Elite objective chests now have a compact minimap pin.** v176 adds a top-right minimap-style
+widget with a player dot and objective pin for closed `elite_objective` chests, derives its
+position from existing client entity metadata, and proves the active state with client bot scenario
+`45_elite_objective_minimap_pin`.
 
 **Elite objective state is now visible in the HUD.** v175 adds a compact tracker for generated
 elite-objective floors, showing remaining elite leaders, claim-ready state, and completion from

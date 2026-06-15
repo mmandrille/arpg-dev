@@ -1,0 +1,67 @@
+server/internal/game/item_rarity_test.go
+  s_2721a37551d805::t_1269d613ff082a 1-92
+tools/bot/scenarios/78_rarity_roll_pools.json
+  s_2721a37551d805::t_855467a0f33e7d 1-15,18-27
+  s_2721a37551d805::t_c31f896dc224b6 16-17
+tools/validate_shared.py
+  s_2721a37551d805::t_6e23461a1ea503 2056-2058
+  s_2721a37551d805::t_fc50fc727fcb63 909-914,1892-1893,1991,2011-2015,2019,2024,2040,2042,2044-2045,2050-2051,2054-2055,2059
+shared/golden/shop_offers.json
+  s_2721a37551d805::t_29e8be91435100 14-16,18-20,22,29-31,33-34,37,44-45,48,50,72-73,77
+  s_2721a37551d805::t_f300e17e75c399 11-13,17,21,23-28,32,35-36,38-43,46-47,49,51-56,60,64,66-71,74-75,78,80-82,90-92,96,100,102-111,113,115-120,124,127,129-139,142,144-150,153,155,157-159,167-169,172-173,175,177-182,186,189,191-196,199-200,203,205-211,214,217,219-224,227-228,230,232-234
+  s_2721a37551d805::t_7954a28ccbd988 93-95,97-99,101,121-123,126,140-141,143,151-152,154,156
+  s_2721a37551d805::t_c55545f8e3b541 170-171,183-185,197-198,201-202,204,212-213,216,225-226
+  s_2721a37551d805::t_02b6ee76fa6d38 57-59,61-63,65,76,79,112,114,125,128,174,176,187-188,190,215,218,229,231
+shared/golden/full_equipment.json
+  s_2721a37551d805::t_d64bcbaa42055b 30-31
+tools/bot/scenarios/55_survival_reactive_unique_effects.json
+  s_2721a37551d805::t_cdad4d4fb4425b 4
+tools/bot/scenarios/57_live_unique_drops_all_effects.json
+  s_2721a37551d805::t_d278c04fdd5b8d 4
+tools/bot/scenarios/client/33_unique_burn_effect_live.json
+  s_2721a37551d805::t_bf108fa7059e15 5
+shared/golden/item_rolls.json
+  s_2721a37551d805::t_1269d613ff082a 2
+  s_2721a37551d805::t_a90c46bbbcbf4a 32-33,50-51,53-54
+docs/specs/v187_spec-rarity-roll-pools.md
+  s_2721a37551d805::t_9dae930351f7b6 1-85
+docs/plans/v187_2026-06-15-rarity-roll-pools.md
+  s_2721a37551d805::t_9dae930351f7b6 1-2,4-118,121-123
+  s_2721a37551d805::t_e33644dc318aa7 3,119-120,124
+PROGRESS.md
+  s_2721a37551d805::t_c6d09a1db97c0d 15,206,434,568-571
+shared/golden/item_rolls.v0.schema.json
+  s_2721a37551d805::t_6aa8c1757ff61d 66-67
+  s_2721a37551d805::t_153d85785e01a6 65
+tools/bot/scenarios/19_full_equipment.json
+  s_2721a37551d805::t_d64bcbaa42055b 37,45,59,71
+server/internal/game/item_rarity.go
+  s_2721a37551d805::t_1269d613ff082a 1-43
+server/internal/game/rules.go
+  s_2721a37551d805::t_752939db6a741f 2487-2489
+docs/as-built/v187_rarity-roll-pools.md
+  s_2721a37551d805::t_37c63ec9d2e8e3 1-34
+tools/bot/scenarios/53_unique_burn_effect_live.json
+  s_2721a37551d805::t_12a9952e38ae3f 4
+tools/bot/scenarios/54_offensive_unique_effects.json
+  s_2721a37551d805::t_f5b48b625e9e47 4
+tools/bot/run.py
+  s_2721a37551d805::t_155c4880561908 3003
+  s_2721a37551d805::t_153d85785e01a6 3001-3002
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a772594c2e5bfb047f6eb39bbf7e612f9e8a271f",
+  "prompts": {},
+  "sessions": {
+    "s_2721a37551d805": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec9e3-8f9e-7360-a4ce-aafa7309e195",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

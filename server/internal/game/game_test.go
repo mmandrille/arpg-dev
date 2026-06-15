@@ -3097,6 +3097,9 @@ func TestCombatStatBreakdownsIncludeEquipmentAndCap(t *testing.T) {
 	if view.DerivedStats.Armor != 6 || view.DerivedStats.MaxHP != 14 {
 		t.Fatalf("effective armor/maxHP = %v/%v, want 6/14", view.DerivedStats.Armor, view.DerivedStats.MaxHP)
 	}
+	if view.DerivedStats.BlockPercent != 75 {
+		t.Fatalf("effective block = %v, want 75", view.DerivedStats.BlockPercent)
+	}
 
 	block := findStatBreakdown(view.StatBreakdowns, "block_percent")
 	if block == nil {

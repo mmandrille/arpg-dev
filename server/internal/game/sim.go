@@ -1087,6 +1087,7 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 	}
 	player := s.activeLevel().entities[s.playerID]
 	changed := false
+	activePlayerProgressionChanged := false
 	updatedTargets := map[uint64]bool{}
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
@@ -1104,6 +1105,9 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 			if effect.EffectID != "" {
 				target.effectIDs = removeStringValue(target.effectIDs, effect.EffectID)
 			}
+			if target.id == s.playerID {
+				activePlayerProgressionChanged = true
+			}
 			updatedTargets[target.id] = true
 			res.Events = append(res.Events, Event{
 				EventType: "skill_effect_ended",
@@ -1119,6 +1123,9 @@ func (s *Sim) expireSkillEffects(res *TickResult) {
 	visualChanged := s.syncActivePlayerVisualScale()
 	if resourcesChanged || visualChanged {
 		updatedTargets[player.id] = true
+	}
+	if activePlayerProgressionChanged {
+		s.appendCharacterProgressionUpdate(res)
 	}
 	for _, id := range sortedUint64Keys(updatedTargets) {
 		target := s.activeLevel().entities[id]
@@ -1151,6 +1158,11 @@ func (s *Sim) syncActivePlayerMaxResources() bool {
 		changed = true
 	}
 	return changed
+}
+
+func (s *Sim) appendCharacterProgressionUpdate(res *TickResult) {
+	view := s.CharacterProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
 }
 
 func regenAmount(ratePerSecond float64, secondsPerTick float64, carry *float64, missing int) int {
@@ -2434,6 +2446,7 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 			TotalTicks:     intPtr(totalTicks),
 		})
 	}
+	s.appendCharacterProgressionUpdate(res)
 }
 
 func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, cast *CastSkillIntent) ([]skillBuffApplication, string) {
@@ -2711,6 +2724,7 @@ func (s *Sim) applyAreaHeal(player *entity, skillID string, rank int, applicatio
 }
 
 func (s *Sim) applyAreaStatBuff(player *entity, skillID string, rank int, applications []skillBuffApplication, correlationID string, res *TickResult) {
+	activePlayerProgressionChanged := false
 	for _, app := range applications {
 		target := app.Target
 		if target == nil || target.kind != playerEntity || target.hp <= 0 {
@@ -2736,6 +2750,9 @@ func (s *Sim) applyAreaStatBuff(player *entity, skillID string, rank int, applic
 			TotalTicks:  totalTicks,
 		}
 		target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
+		if target.id == s.playerID {
+			activePlayerProgressionChanged = true
+		}
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
 		res.Events = append(res.Events, Event{
 			EventType:      "skill_effect_started",
@@ -2749,6 +2766,9 @@ func (s *Sim) applyAreaStatBuff(player *entity, skillID string, rank int, applic
 			RemainingTicks: intPtr(totalTicks),
 			TotalTicks:     intPtr(totalTicks),
 		})
+	}
+	if activePlayerProgressionChanged {
+		s.appendCharacterProgressionUpdate(res)
 	}
 }
 

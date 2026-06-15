@@ -1735,6 +1735,16 @@ func TestHolyShieldAreaBuffAppliesDefenseVisualStateAndExpires(t *testing.T) {
 	if !sameStringSlice(player.effectIDs, []string{"holy_shield"}) {
 		t.Fatalf("player effect ids = %v, want holy_shield", player.effectIDs)
 	}
+	progression := characterProgressionUpdate(cast)
+	if progression == nil {
+		t.Fatalf("holy shield cast missing character progression update: %+v", cast.Changes)
+	}
+	if progression.DerivedStats.BlockPercent <= before.BlockPercent {
+		t.Fatalf("holy shield progression block = %v, want above %v", progression.DerivedStats.BlockPercent, before.BlockPercent)
+	}
+	if block := findStatBreakdown(progression.StatBreakdowns, "block_percent"); block == nil || !statBreakdownHasSourceKind(*block, "skill_effect") {
+		t.Fatalf("holy shield progression block breakdown missing skill source: %+v", block)
+	}
 	after, breakdowns := sim.playerEffectiveCombatStats()
 	if after.Armor <= before.Armor || after.BlockPercent <= before.BlockPercent {
 		t.Fatalf("holy shield stats before=%+v after=%+v", before, after)

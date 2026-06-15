@@ -1,0 +1,19 @@
+client/scripts/bot_wait_progress_logger.gd.uid
+  s_f9c66ca3cb4339::t_cb2fdecaa91720 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "da4c5b80e0851a23cfe0f384ad8b080bdf5f4218",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

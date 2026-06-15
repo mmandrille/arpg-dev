@@ -25,10 +25,10 @@ Last updated: 2026-06-15
 |-------|-------|
 | **Latest completed slice** | v200 — progress doc compaction |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-15 |
+| **CI gate** | `make ci` green on 2026-06-15 after v200 review-gate repairs |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
-| **Last engineering review** | v190 — [`docs/reviews/20260615_v190-overview.md`](docs/reviews/20260615_v190-overview.md) (2026-06-15) |
-| **Next engineering review** | v200 due before more feature batches |
+| **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
+| **Next engineering review** | v210 after the next feature batch, once CI is green |
 
 
 ### Periodic engineering reviews
@@ -84,6 +84,12 @@ and ADR-0013.
 ## Open gaps & deferred work
 
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
+
+### Active review follow-ups
+
+- **Progress archive links need repair.** The v200 progress compaction moved history under
+  `docs/progress/`; many archive links still use `docs/...` paths that likely resolve relative to the
+  new folder.
 
 ### Other deferred items (from specs / ADRs)
 
@@ -176,4 +182,3 @@ docs/            ADRs, specs, plans, as-built, progress archives, reviews (~ever
 
 **Agent entrypoints:** [`CLAUDE.md`](CLAUDE.md) (commands + architecture), this file (progress),
 [`README.md`](README.md) (human onboarding), [`docs/reviews/`](docs/reviews/) (periodic engineering audits).
-

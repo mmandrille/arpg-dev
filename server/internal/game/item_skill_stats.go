@@ -19,6 +19,26 @@ func (s *Sim) applySkillDamageBonus(damageRange DamageRange) DamageRange {
 	return damageRange
 }
 
+func (s *Sim) applySkillDamageModifiers(playerID uint64, skillID string, damageRange DamageRange) DamageRange {
+	damageRange = s.applySkillDamageBonus(damageRange)
+	if skillID == "" {
+		return damageRange
+	}
+	for _, effectID := range s.equippedUniqueEffectIDs(playerID) {
+		def, ok := s.liveUniqueEffect(effectID, "on_skill_damage_roll")
+		if !ok || uniqueEffectStringParam(def, "skill_id", "") != skillID {
+			continue
+		}
+		bonusPercent := uniqueEffectIntParam(def, "damage_bonus_percent", 0)
+		if bonusPercent <= 0 {
+			continue
+		}
+		damageRange.Min = applyPercentBonus(damageRange.Min, bonusPercent)
+		damageRange.Max = applyPercentBonus(damageRange.Max, bonusPercent)
+	}
+	return damageRange
+}
+
 func (s *Sim) effectiveSkillManaCost(def SkillDef, rank int) int {
 	cost := skillManaCost(def, rank) - s.equippedItemStatTotal("skill_mana_cost_reduction")
 	if cost < 0 {

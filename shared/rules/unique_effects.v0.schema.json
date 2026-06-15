@@ -32,7 +32,8 @@
               "on_large_hit_taken",
               "on_continuous_movement_attack",
               "on_projectile_hit_taken",
-              "on_repeated_same_target_hit"
+              "on_repeated_same_target_hit",
+              "on_skill_damage_roll"
             ]
           },
           "compatible_item_types": {

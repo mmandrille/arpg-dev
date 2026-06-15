@@ -35,7 +35,7 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 	}
 
 	gotEffects := map[string]int{}
-	gotNamed := false
+	gotNamed := map[string]int{}
 	gotSet := false
 	for _, item := range ev.StashItems {
 		payload := item.RollPayload()
@@ -52,7 +52,7 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 		if len(payload.EffectIDs) != 1 {
 			t.Fatalf("granted item effects = %+v, want exactly one", payload.EffectIDs)
 		}
-		if payload.DisplayName != "Embercall Blade" && payload.DisplayName != "Stormstring Bow" {
+		if _, named := rules.UniqueItems[payloadNamedUniqueID(rules, payload.DisplayName)]; !named {
 			effectID := payload.EffectIDs[0]
 			gotEffects[effectID]++
 			effect := rules.UniqueEffects[effectID]
@@ -63,9 +63,8 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 			if !uniqueChestEffectCompatible(effect, template.ItemType) {
 				t.Fatalf("effect %s is not compatible with template %s type %s", effectID, payload.ItemTemplateID, template.ItemType)
 			}
-		}
-		if payload.DisplayName == "Embercall Blade" {
-			gotNamed = true
+		} else {
+			gotNamed[payload.DisplayName]++
 		}
 	}
 	for _, effectID := range sortedStringKeys(rules.UniqueEffects) {
@@ -77,8 +76,11 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 			t.Fatalf("effect %s count = %d, want 1; inventory=%+v", effectID, gotEffects[effectID], sim.inventory)
 		}
 	}
-	if !gotNamed {
-		t.Fatalf("unique chest did not offer Embercall Blade: %+v", ev.StashItems)
+	for _, uniqueID := range sortedStringKeys(rules.UniqueItems) {
+		unique := rules.UniqueItems[uniqueID]
+		if unique.Enabled && unique.Status == "ready" && gotNamed[unique.DisplayName] != 1 {
+			t.Fatalf("unique chest named %s count = %d, want 1; all=%+v", unique.DisplayName, gotNamed[unique.DisplayName], ev.StashItems)
+		}
 	}
 	if !gotSet {
 		t.Fatalf("unique chest did not offer a set item: %+v", ev.StashItems)
@@ -121,6 +123,14 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 		requirements map[string]int
 		effectIDs    []string
 	}{
+		{
+			uniqueID:     "conduit_staff",
+			templateID:   "starter_sorcerer_staff",
+			displayName:  "Conduit Staff",
+			wantStats:    map[string]int{"damage_min": 1, "damage_max": 3, "max_mana": 8},
+			requirements: map[string]int{"level": 5, "magic": 5},
+			effectIDs:    []string{"arcane_conduit"},
+		},
 		{
 			uniqueID:     "embercall_blade",
 			templateID:   "cave_blade",
@@ -200,13 +210,26 @@ func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
 		if a.Rarity == "unique" && (len(a.EffectIDs) != 1 || len(b.EffectIDs) != 1 || a.EffectIDs[0] != b.EffectIDs[0]) {
 			t.Fatalf("unique payload %d differs effects: %+v != %+v", i, a, b)
 		}
-		if a.DisplayName == "Embercall Blade" || a.DisplayName == "Stormstring Bow" {
+		if payloadNamedUniqueID(rules, a.DisplayName) != "" {
 			namedCounts[a.DisplayName]++
 		}
 	}
-	if namedCounts["Embercall Blade"] != 1 || namedCounts["Stormstring Bow"] != 1 {
-		t.Fatalf("named unique counts = %+v", namedCounts)
+	for _, uniqueID := range sortedStringKeys(rules.UniqueItems) {
+		unique := rules.UniqueItems[uniqueID]
+		if unique.Enabled && unique.Status == "ready" && namedCounts[unique.DisplayName] != 1 {
+			t.Fatalf("named unique %s count = %d, want 1; all=%+v", unique.DisplayName, namedCounts[unique.DisplayName], namedCounts)
+		}
 	}
+}
+
+func payloadNamedUniqueID(rules *Rules, displayName string) string {
+	for _, uniqueID := range sortedStringKeys(rules.UniqueItems) {
+		unique := rules.UniqueItems[uniqueID]
+		if unique.DisplayName == displayName {
+			return uniqueID
+		}
+	}
+	return ""
 }
 
 func TestSetItemPayloadsAndEquippedBonuses(t *testing.T) {

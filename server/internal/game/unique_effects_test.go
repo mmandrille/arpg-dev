@@ -397,6 +397,36 @@ func TestResourceUniqueBloodPricePaysMissingManaWithHP(t *testing.T) {
 	}
 }
 
+func TestUniqueSkillModifierBoostsConfiguredSkill(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := MustNewSim("sess_arcane_conduit", "arcane_conduit", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 100)
+	equipUniqueTestEffect(t, sim, arcaneConduitEffectID, 9914, "cave_amulet", "amulet")
+
+	res := &TickResult{}
+	outcome := sim.damageMonsterByPlayerSkillTypedWithID(target, player.id, magicBoltSkillID, "arcane_conduit", res, DamageRange{Min: 10, Max: 10}, damageTypeForce)
+	if outcome.Damage != 15 {
+		t.Fatalf("magic bolt unique-modified damage = %d, want 15; events=%+v", outcome.Damage, res.Events)
+	}
+}
+
+func TestUniqueSkillModifierDoesNotBoostOtherSkills(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := MustNewSim("sess_arcane_conduit_other", "arcane_conduit_other", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 100)
+	equipUniqueTestEffect(t, sim, arcaneConduitEffectID, 9915, "cave_amulet", "amulet")
+
+	res := &TickResult{}
+	outcome := sim.damageMonsterByPlayerSkillTypedWithID(target, player.id, "ice_shard", "arcane_conduit_other", res, DamageRange{Min: 10, Max: 10}, damageTypeForce)
+	if outcome.Damage != 10 {
+		t.Fatalf("non-target skill damage = %d, want 10; events=%+v", outcome.Damage, res.Events)
+	}
+}
+
 func TestResourceUniquePilgrimsMomentumChargesAndKnocksBack(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	rules.Combat.BaseHitChance = 1

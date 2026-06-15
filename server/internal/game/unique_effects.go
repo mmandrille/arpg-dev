@@ -9,6 +9,7 @@ const everburningWoundEffectID = "everburning_wound"
 
 const (
 	stormboundEchoEffectID    = "stormbound_echo"
+	arcaneConduitEffectID     = "arcane_conduit"
 	executionersMarkEffectID  = "executioners_mark"
 	replicatingBlightEffectID = "replicating_blight"
 	hungerOfTheDeepEffectID   = "hunger_of_the_deep"

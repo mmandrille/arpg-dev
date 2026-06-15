@@ -13,7 +13,7 @@
       "rarity": "unique",
       "stat_count_min": 3,
       "stat_count_max": 5,
-      "stat_keys": ["damage_min", "damage_max", "dex", "str"],
+      "stat_keys": ["damage_min", "damage_max", "hit_chance", "magic"],
       "effect_ids": ["everburning_wound"]
     }
   ],

@@ -900,7 +900,7 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"class weapon {item_id} is valid")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -966,7 +966,8 @@ def cross_checks(report: Report) -> None:
         invalid_base_values = [
             stat for stat, value in base_stats.items()
             if (stat == "attack_speed_percent" and not -75 <= int(value) <= 100)
-            or (stat != "attack_speed_percent" and int(value) < 0)
+            or (stat in {"hit_chance", "crit_chance", "evade_chance"} and not 0 <= int(value) <= 100)
+            or (stat not in {"attack_speed_percent", "hit_chance", "crit_chance", "evade_chance"} and int(value) < 0)
         ]
         if invalid_base_values:
             report.fail("item template base_stats", f"{template_id}: invalid value(s) for {invalid_base_values}")
@@ -985,6 +986,10 @@ def cross_checks(report: Report) -> None:
                 break
             if stat == "attack_speed_percent" and (roll["min"] < -50 or roll["max"] > 50):
                 report.fail("item template rollable stat", f"{template_id}.{stat}: min/max must be within -50..50")
+                failed_roll = True
+                break
+            if stat in {"hit_chance", "crit_chance", "evade_chance"} and (roll["min"] < 0 or roll["max"] > 100):
+                report.fail("item template rollable stat", f"{template_id}.{stat}: min/max must be within 0..100")
                 failed_roll = True
                 break
             if stat != "attack_speed_percent" and roll["min"] < 0:
@@ -2137,7 +2142,7 @@ def cross_checks(report: Report) -> None:
         if not failed_offers:
             report.ok("shop_offers golden matches deterministic catalog")
 
-        stat_order = ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"]
+        stat_order = ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"]
 
         def comparison_deltas(offered: dict, equipped: dict) -> list[dict]:
             out = []

@@ -7766,6 +7766,7 @@ func assertDerivedStats(t *testing.T, got, want DerivedStatsView) {
 	assertFloat("hit_chance", got.HitChance, want.HitChance)
 	assertFloat("crit_chance", got.CritChance, want.CritChance)
 	assertFloat("crit_damage", got.CritDamage, want.CritDamage)
+	assertFloat("evade_chance", got.EvadeChance, want.EvadeChance)
 	assertFloat("movement_speed", got.MovementSpeed, want.MovementSpeed)
 	assertFloat("max_hp", got.MaxHP, want.MaxHP)
 	assertFloat("max_mana", got.MaxMana, want.MaxMana)

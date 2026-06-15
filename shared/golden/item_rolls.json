@@ -28,9 +28,9 @@
         "display_name": "Rare Cave Blade",
         "rarity": "rare",
         "stats": {
+          "attack_speed_percent": 3,
           "damage_max": 4,
-          "damage_min": 3,
-          "max_mana": 3
+          "damage_min": 3
         },
         "requirements": {
           "level": 1,
@@ -47,11 +47,10 @@
         "display_name": "Sword of Pilgrim's Momentum",
         "rarity": "unique",
         "stats": {
-          "attack_speed_percent": 4,
-          "damage_max": 4,
-          "damage_min": 2,
-          "dex": 3,
-          "vit": 3
+          "damage_max": 7,
+          "damage_min": 3,
+          "dex": 2,
+          "vit": 1
         },
         "requirements": {
           "level": 1,

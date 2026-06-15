@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestRangerPiercingShotDamagesLineTargets(t *testing.T) {
 	sim := rangerSkillSim(t, "sess_ranger_pierce")
@@ -122,6 +125,13 @@ func TestRangerBlackWolfCompanionSummonsAndReplaces(t *testing.T) {
 	if view.Type != companionEntity || view.MonsterDefID != "companion_black_wolf" || view.VisualModel != "monster_quadruped" || view.VisualTint != "101014" {
 		t.Fatalf("wolf view = %+v, want black quadruped companion", view)
 	}
+	percent := companionHeroStatPercent(sim.rules.Skills["black_wolf_companion"], sim.effectiveSkillRank("black_wolf_companion"))
+	if firstWolf.maxHP != scalePositiveInt(player.maxHP, percent) || firstWolf.monsterAttackDamage == nil {
+		t.Fatalf("wolf stats hp=%d damage=%+v percent=%d player=%+v", firstWolf.maxHP, firstWolf.monsterAttackDamage, percent, player)
+	}
+	if math.Abs(view.VisualScale-(float64(percent)/100.0)) > 1e-9 {
+		t.Fatalf("wolf visual_scale = %.2f, want %.2f", view.VisualScale, float64(percent)/100.0)
+	}
 	if !hasEvent(firstCast, "skill_cast") || !hasEntitySpawn(firstCast, idStr(firstWolf.id)) {
 		t.Fatalf("first wolf cast changes/events = %+v / %+v", firstCast.Changes, firstCast.Events)
 	}
@@ -143,23 +153,71 @@ func TestRangerBlackWolfCompanionSummonsAndReplaces(t *testing.T) {
 	}
 }
 
+func TestRangerBlackWolfCompanionFollowsAcrossLevelTravel(t *testing.T) {
+	sim := rangerDungeonSkillSim(t, "sess_ranger_wolf_travel")
+	player := sim.activeLevel().entities[sim.playerID]
+	cast := sim.Tick([]Input{{
+		MessageID: "wolf",
+		Type:      "cast_skill_intent",
+		CastSkill: &CastSkillIntent{SkillID: "black_wolf_companion"},
+	}})
+	assertAck(t, cast, "wolf")
+	wolf := onlyRangerWolfCompanion(t, sim)
+	wolfID := idStr(wolf.id)
+
+	results := descendFromCurrentLevel(t, sim, "descend_with_wolf")
+	if len(results) != 2 {
+		t.Fatalf("descend results = %d, want source and destination: %+v", len(results), results)
+	}
+	if !hasEntityRemove(results[0], wolfID) || !hasEntitySpawn(results[1], wolfID) {
+		t.Fatalf("travel changes missing wolf transfer remove/spawn: from=%+v to=%+v", results[0].Changes, results[1].Changes)
+	}
+	movedWolf := onlyRangerWolfCompanion(t, sim)
+	if movedWolf.id != wolf.id || movedWolf.ownerID != player.id || movedWolf.sourceSkillID != "black_wolf_companion" {
+		t.Fatalf("moved wolf = %+v, want same owner/source/id %s", movedWolf, wolfID)
+	}
+	if distance(movedWolf.pos, sim.activeLevel().entities[sim.playerID].pos) > companionFollowStopRadius {
+		t.Fatalf("moved wolf pos=%+v too far from player=%+v", movedWolf.pos, sim.activeLevel().entities[sim.playerID].pos)
+	}
+}
+
 func TestRangerSkillRulesLoad(t *testing.T) {
 	rules := loadRules(t)
 	pierce := rules.Skills["piercing_shot"]
-	if pierce.Class != "ranger" || pierce.Pierce.MaxHits < 2 || pierce.Projectile.Visual != "piercing_shot_projectile" {
+	if pierce.Class != "ranger" || pierce.Tree.Tier != 1 || pierce.Pierce.MaxHits < 2 || pierce.Projectile.Visual != "piercing_shot_projectile" {
 		t.Fatalf("piercing_shot = %+v, want ranger projectile with pierce", pierce)
 	}
 	pin := rules.Skills["pinning_shot"]
-	if pin.Class != "ranger" || pin.Root.EffectID != "pinning_root" || pin.Root.DurationTicks <= 0 || pin.Projectile.Visual != "pinning_shot_projectile" {
-		t.Fatalf("pinning_shot = %+v, want ranger projectile with root", pin)
+	if pin.Class != "ranger" || pin.Tree.Tier != 2 || len(pin.Requirements.Skills) != 1 || pin.Requirements.Skills[0].SkillID != "piercing_shot" || pin.Root.EffectID != "pinning_root" || pin.Root.DurationTicks <= 0 || pin.Projectile.Visual != "pinning_shot_projectile" {
+		t.Fatalf("pinning_shot = %+v, want tier 2 ranger projectile with piercing prereq and root", pin)
+	}
+	split := rules.Skills["split_arrow"]
+	if split.Class != "ranger" || split.Tree.Tier != 2 || len(split.Requirements.Skills) != 1 || split.Requirements.Skills[0].SkillID != "piercing_shot" {
+		t.Fatalf("split_arrow = %+v, want tier 2 with piercing prereq", split)
 	}
 	volley := rules.Skills["volley"]
-	if volley.Class != "ranger" || volley.Volley.ArrowCount < 3 || volley.Volley.SpreadDegrees <= 0 || volley.Projectile.Visual != "volley_arrow_projectile" {
-		t.Fatalf("volley = %+v, want ranger projectile with fan", volley)
+	if volley.Class != "ranger" || volley.Tree.Tier != 3 || len(volley.Requirements.Skills) != 1 || volley.Requirements.Skills[0].SkillID != "split_arrow" || volley.Volley.ArrowCount < 3 || volley.Volley.SpreadDegrees <= 0 || volley.Projectile.Visual != "volley_arrow_projectile" {
+		t.Fatalf("volley = %+v, want tier 3 ranger projectile with split prereq and fan", volley)
 	}
 	wolf := rules.Skills["black_wolf_companion"]
-	if wolf.Class != "ranger" || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || companionLimitAtRank(wolf.Companion.Limit, 5) != 1 {
-		t.Fatalf("black_wolf_companion = %+v, want one black wolf summon", wolf)
+	if wolf.Class != "ranger" || wolf.Tree.Tier != 1 || wolf.Requirements.Stats["magic"] != 8 || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || companionHeroStatPercent(wolf, 1) != 70 || companionHeroStatPercent(wolf, 2) != 85 || companionLimitAtRank(wolf.Companion.Limit, 5) != 1 {
+		t.Fatalf("black_wolf_companion = %+v, want tier 1 magic-scaled black wolf summon", wolf)
+	}
+	if wolf.Cooldown.FixedTicks != 1200 || wolf.Cooldown.MagicReductionTicksPerPoint <= 0 {
+		t.Fatalf("black_wolf_companion cooldown = %+v, want 120s base with magic reduction", wolf.Cooldown)
+	}
+}
+
+func TestRangerBlackWolfCooldownReducedByExtraMagic(t *testing.T) {
+	sim := rangerSkillSim(t, "sess_ranger_wolf_cooldown")
+	def := sim.rules.Skills["black_wolf_companion"]
+	sim.progression.BaseStats.Magic = skillStatRequirementForRank(def, "magic", 1)
+	if got := sim.skillCooldownTicks(def); got != 1200 {
+		t.Fatalf("wolf baseline cooldown = %d, want 1200", got)
+	}
+	sim.progression.BaseStats.Magic += 5
+	if got := sim.skillCooldownTicks(def); got != 1150 {
+		t.Fatalf("wolf magic-reduced cooldown = %d, want 1150", got)
 	}
 }
 
@@ -170,9 +228,31 @@ func rangerSkillSim(t *testing.T, sessionID string) *Sim {
 	sim.progression.CharacterClass = "ranger"
 	sim.progression.BaseStats = rules.CharacterProgression.Classes["ranger"].BaseStats
 	sim.progression.BaseStats.Dex = 14
+	sim.progression.BaseStats.Magic = 12
 	sim.progression.SkillRanks["piercing_shot"] = 1
 	sim.progression.SkillRanks["pinning_shot"] = 1
 	sim.progression.SkillRanks["volley"] = 1
+	sim.progression.SkillRanks["split_arrow"] = 1
+	sim.progression.SkillRanks["black_wolf_companion"] = 1
+	ps := sim.defaultPlayer()
+	ps.Progression = sim.progression
+	player := sim.activeLevel().entities[sim.playerID]
+	player.maxMana = 50
+	player.mana = 50
+	return sim
+}
+
+func rangerDungeonSkillSim(t *testing.T, sessionID string) *Sim {
+	t.Helper()
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld(sessionID, sessionID+"_seed", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new dungeon ranger sim: %v", err)
+	}
+	sim.progression.CharacterClass = "ranger"
+	sim.progression.BaseStats = rules.CharacterProgression.Classes["ranger"].BaseStats
+	sim.progression.BaseStats.Dex = 14
+	sim.progression.BaseStats.Magic = 12
 	sim.progression.SkillRanks["black_wolf_companion"] = 1
 	ps := sim.defaultPlayer()
 	ps.Progression = sim.progression

@@ -35,3 +35,10 @@ Add a Ranger summon skill that creates one server-owned black wolf companion usi
 - Active local-player companions render in a compact top-left companion row.
 - Each companion slot shows a small identity block derived from the companion's shared monster visual metadata and a health bar attached to the bottom of the block.
 - The row consumes generic companion entity state (`type`, `owner_id`, `monster_def_id`, `hp`, `max_hp`, visual metadata) so future companion families do not need one-off HUD wiring.
+
+## Follow-up Addendum
+
+- Owned companions transfer with their hero across stairs and teleport travel; the destination-level spawn snapshot includes the same companion entity instead of leaving it behind on the previous level.
+- `black_wolf_companion` is a tier-1 Ranger skill gated by Magic, not Dexterity.
+- The wolf scales from hero stats at 70% on rank 1, plus 15% per additional rank; its visual size uses the same percentage.
+- The wolf cooldown is 120 seconds before allocated-Magic reduction.

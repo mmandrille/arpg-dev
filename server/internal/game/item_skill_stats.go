@@ -49,6 +49,13 @@ func (s *Sim) effectiveSkillManaCost(def SkillDef, rank int) int {
 
 func (s *Sim) effectiveSkillCooldownTicks(def SkillDef) int {
 	cooldown := s.baseSkillCooldownTicks(def)
+	if def.Cooldown.MagicReductionTicksPerPoint > 0 {
+		magic := s.progression.BaseStats.Magic
+		baseline := skillStatRequirementForRank(def, "magic", 1)
+		if excess := magic - baseline; excess > 0 {
+			cooldown -= excess * def.Cooldown.MagicReductionTicksPerPoint
+		}
+	}
 	reduction := s.equippedItemStatTotal("skill_cooldown_reduction_percent")
 	if reduction > 75 {
 		reduction = 75

@@ -30,3 +30,9 @@ Make companion quantity and core rank scaling data-driven so summon/revive behav
 - The row must remain data-driven by active companion entity state rather than skill-specific constants, so Revive rank scaling and future mercenary companions appear without bespoke UI branches.
 - Revive gains a targeting affordance: when Revive is selected and learned, hovering a valid dead monster corpse highlights it and reveals a corpse name/status label.
 - Revived companions last 60 seconds at rank 1, plus 10 seconds per additional rank, and the companion row shows their remaining duration with a cooldown-style strip on the companion block.
+
+## Follow-up Addendum
+
+- Companion replacement/pruning checks same-owner/same-skill companions across all loaded levels, so recasting after travel still replaces the previous summon deterministically.
+- Summoned companions can declare hero-stat scaling and fixed cooldown tuning in shared rules.
+- Ranger tree dependencies now use Piercing Shot as the base prerequisite: Split Arrow and Pinning Shot require Piercing Shot, and Volley requires Split Arrow.

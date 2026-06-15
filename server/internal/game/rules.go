@@ -661,9 +661,11 @@ type SkillEffectDef struct {
 
 // SkillCooldownDef defines how a skill cooldown is derived.
 type SkillCooldownDef struct {
-	Type       string  `json:"type"`
-	Multiplier float64 `json:"multiplier"`
-	FlatTicks  int     `json:"flat_ticks,omitempty"`
+	Type                        string  `json:"type"`
+	Multiplier                  float64 `json:"multiplier"`
+	FlatTicks                   int     `json:"flat_ticks,omitempty"`
+	FixedTicks                  int     `json:"fixed_ticks,omitempty"`
+	MagicReductionTicksPerPoint int     `json:"magic_reduction_ticks_per_point,omitempty"`
 }
 
 // InteractableDef is a single activatable world object definition.
@@ -2817,6 +2819,12 @@ func validateSkillRules(skills map[string]SkillDef, monsters map[string]MonsterD
 		}
 		if skill.Cooldown.FlatTicks < 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.cooldown.flat_ticks: must be non-negative", id)
+		}
+		if skill.Cooldown.FixedTicks < 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.cooldown.fixed_ticks: must be non-negative", id)
+		}
+		if skill.Cooldown.MagicReductionTicksPerPoint < 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.cooldown.magic_reduction_ticks_per_point: must be non-negative", id)
 		}
 		if err := validateBuffSkillCooldown(id, skill, baseAttackIntervalTicks); err != nil {
 			return err

@@ -192,12 +192,12 @@ func TestRangerSkillRulesLoad(t *testing.T) {
 		t.Fatalf("pinning_shot = %+v, want tier 2 ranger projectile with piercing prereq and root", pin)
 	}
 	split := rules.Skills["split_arrow"]
-	if split.Class != "ranger" || split.Tree.Tier != 2 || len(split.Requirements.Skills) != 1 || split.Requirements.Skills[0].SkillID != "piercing_shot" {
-		t.Fatalf("split_arrow = %+v, want tier 2 with piercing prereq", split)
+	if split.Class != "ranger" || split.Tree.Tier != 3 || len(split.Requirements.Skills) != 1 || split.Requirements.Skills[0].SkillID != "volley" {
+		t.Fatalf("split_arrow = %+v, want tier 3 with volley prereq", split)
 	}
 	volley := rules.Skills["volley"]
-	if volley.Class != "ranger" || volley.Tree.Tier != 3 || len(volley.Requirements.Skills) != 1 || volley.Requirements.Skills[0].SkillID != "split_arrow" || volley.Volley.ArrowCount < 3 || volley.Volley.SpreadDegrees <= 0 || volley.Projectile.Visual != "volley_arrow_projectile" {
-		t.Fatalf("volley = %+v, want tier 3 ranger projectile with split prereq and fan", volley)
+	if volley.Class != "ranger" || volley.Tree.Tier != 2 || len(volley.Requirements.Skills) != 1 || volley.Requirements.Skills[0].SkillID != "piercing_shot" || volley.Volley.ArrowCount < 3 || volley.Volley.SpreadDegrees <= 0 || volley.Projectile.Visual != "volley_arrow_projectile" {
+		t.Fatalf("volley = %+v, want tier 2 ranger projectile with piercing prereq and fan", volley)
 	}
 	wolf := rules.Skills["black_wolf_companion"]
 	if wolf.Class != "ranger" || wolf.Tree.Tier != 1 || wolf.Requirements.Stats["magic"] != 8 || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || companionHeroStatPercent(wolf, 1) != 70 || companionHeroStatPercent(wolf, 2) != 85 || companionLimitAtRank(wolf.Companion.Limit, 5) != 1 {

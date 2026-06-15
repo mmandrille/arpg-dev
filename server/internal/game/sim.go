@@ -18,6 +18,7 @@ const (
 	monsterDefID                   = "training_dummy"
 	playerEntity                   = "player"
 	monsterEntity                  = "monster"
+	companionEntity                = "companion"
 	lootEntity                     = "loot"
 	projectileEntity               = "projectile"
 	wallEntity                     = "wall"
@@ -682,19 +683,8 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 
 	for _, preset := range world.Entities {
 		switch preset.Type {
-		case monsterEntity:
-			def := s.rules.Monsters[preset.MonsterDefID]
-			monster := &entity{
-				kind:         monsterEntity,
-				pos:          preset.Position,
-				spawnPos:     preset.Position,
-				hp:           def.MaxHP,
-				maxHP:        def.MaxHP,
-				monsterDefID: preset.MonsterDefID,
-				lootTable:    def.LootTable,
-				aiMode:       monsterAIModeIdle,
-			}
-			s.applyPartyHPScale(level, monster)
+		case monsterEntity, companionEntity:
+			monster := s.newPresetMonsterOrCompanion(level, preset, player.id)
 			monster.id = s.alloc()
 			level.entities[monster.id] = monster
 		case lootEntity:
@@ -1029,6 +1019,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.syncCompatibilityFields()
 			res := resultFor(levelNum, 0)
 			s.advanceMonsterMovement(res)
+			s.advanceCompanions(res)
 			s.advanceBossPhases(res)
 			s.advanceMonsterAttack(res)
 			s.advanceProjectiles(res)
@@ -5658,7 +5649,7 @@ func (s *Sim) entityView(e *entity) EntityView {
 		return EntityView{}
 	}
 	view := e.view()
-	if e.kind == monsterEntity {
+	if e.kind == monsterEntity || e.kind == companionEntity {
 		view.EffectIDs = sortedUniqueStrings(append(cloneStringSlice(e.effectIDs), s.eliteAuraEffectIDs(e)...))
 	}
 	if e.kind == interactableEntity {
@@ -6503,7 +6494,7 @@ func (s *Sim) levelHasTeleporter(levelNum int) bool {
 func (e *entity) view() EntityView {
 	ev := EntityView{ID: idStr(e.id), Type: e.kind, Position: e.pos}
 	switch e.kind {
-	case playerEntity, monsterEntity:
+	case playerEntity, monsterEntity, companionEntity:
 		hp, maxHP := e.hp, e.maxHP
 		ev.HP = &hp
 		ev.MaxHP = &maxHP
@@ -6518,21 +6509,8 @@ func (e *entity) view() EntityView {
 				ev.VisualScale = e.visualScale
 			}
 		}
-		if e.kind == monsterEntity {
-			ev.MonsterDefID = e.monsterDefID
-			ev.MonsterPackID = e.monsterPackID
-			ev.MonsterPackLeader = e.monsterPackLeader
-			if e.monsterRarityID != "" {
-				ev.Rarity = e.monsterRarityID
-			}
-			ev.IsBoss = e.isBoss
-			ev.BossTemplateID = e.bossTemplateID
-			ev.VisualModel = e.visualModel
-			ev.VisualScale = e.visualScale
-			ev.VisualTint = e.visualTint
-			if e.isBoss && e.bossPhaseKind != "" {
-				ev.BossPhase = e.bossPhaseView()
-			}
+		if e.kind == monsterEntity || e.kind == companionEntity {
+			e.applyMonsterLikeViewFields(&ev)
 		}
 	case lootEntity:
 		ev.ItemDefID = e.itemDefID

@@ -786,7 +786,7 @@
       "entities": [
         { "type": "monster", "monster_def_id": "training_dummy_chase", "position": { "x": 8, "y": 4 } },
         { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 6, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 9, "y": 5 } },
+        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
         { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 12, "y": 5 } },
         { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
         { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
@@ -799,7 +799,7 @@
       "entities": [
         { "type": "monster", "monster_def_id": "training_dummy_chase", "position": { "x": 8, "y": 4 } },
         { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 6, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 9, "y": 5 } },
+        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
         { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 12, "y": 5 } },
         { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8, "y": 3 } },
         { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8, "y": 7 } },
@@ -818,6 +818,17 @@
         { "type": "wall", "position": { "x": 15, "y": 9.5 }, "size": { "x": 30, "y": 1 } },
         { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
         { "type": "wall", "position": { "x": 29.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+      ]
+    },
+    "companion_ai_lab": {
+      "player": { "position": { "x": 2, "y": 5 } },
+      "entities": [
+        { "type": "companion", "monster_def_id": "combat_lab_crit_attacker", "position": { "x": 2.8, "y": 5 } },
+        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
       ]
     },
     "inventory_capacity_lab": {

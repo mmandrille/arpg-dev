@@ -34,7 +34,6 @@ const ITEM_RARITY_BACKGROUNDS := {
 	"unique": Color("#5a2f17"),
 	"set": Color("#173f28"),
 }
-
 var stash_entity_id: String = ""
 var stash_id: String = "account_stash"
 var stash_title: String = "Account Stash"
@@ -75,8 +74,6 @@ var _interactive: bool = true
 var _search_text: String = ""
 var _sort_mode: String = SORT_ACQUIRED
 var _unique_chest_tab: String = UniqueChestTabsScript.UNIQUES
-
-
 class StashSlotButton:
 	extends Button
 

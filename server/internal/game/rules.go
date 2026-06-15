@@ -1927,7 +1927,7 @@ func LoadRules(dir string) (*Rules, error) {
 		for i, entity := range world.Entities {
 			label := fmt.Sprintf("worlds.%s.entities[%d]", worldID, i)
 			switch entity.Type {
-			case monsterEntity:
+			case monsterEntity, companionEntity:
 				if entity.MonsterDefID == "" {
 					return nil, fmt.Errorf("game: invalid rules %s: missing monster_def_id", label)
 				}

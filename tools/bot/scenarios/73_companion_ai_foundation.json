@@ -1,0 +1,29 @@
+{
+  "id": "companion_ai_foundation",
+  "world_id": "companion_ai_lab",
+  "seed": "v182_companion_ai_foundation",
+  "title": "Companion AI foundation",
+  "description": "Spawns a server-owned test companion, moves the owner away, and proves the companion follows and damages a nearby monster.",
+  "steps": [
+    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "combat_lab_crit_attacker", "alive": true, "equals": 1 },
+    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "combat_lab_soft_target", "alive": true, "equals": 1 },
+    { "action": "move_until_player_position", "x": 6, "y": 5, "tolerance": 0.2, "max_ticks": 120 },
+    { "action": "wait_ticks", "ticks": 95 }
+  ],
+  "assertions": [
+    { "type": "entity_count", "entity_type": "companion", "monster_def_id": "combat_lab_crit_attacker", "alive": true, "equals": 1 },
+    { "type": "entity_moved", "entity_type": "companion", "monster_def_id": "combat_lab_crit_attacker", "min_distance": 0.5 },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "source_entity_type": "companion",
+      "source_monster_def_id": "combat_lab_crit_attacker",
+      "target_entity_type": "monster",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 1
+    }
+  ],
+  "visual": {
+    "camera": { "x": 6, "y": 5, "zoom": 1.0 }
+  }
+}

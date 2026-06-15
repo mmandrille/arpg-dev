@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 )
-
 // Vec2 is a 2D position in scene units.
 type Vec2 struct {
 	X float64 `json:"x"`

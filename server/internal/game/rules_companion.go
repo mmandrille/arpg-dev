@@ -13,9 +13,11 @@ type SkillCompanionDef struct {
 
 // SkillReviveDef defines rank-scaled revived-monster companion power.
 type SkillReviveDef struct {
-	PowerPercentBase    int                    `json:"power_percent_base"`
-	PowerPercentPerRank int                    `json:"power_percent_per_rank"`
-	Limit               SkillCompanionLimitDef `json:"limit"`
+	PowerPercentBase       int                    `json:"power_percent_base"`
+	PowerPercentPerRank    int                    `json:"power_percent_per_rank"`
+	DurationSecondsBase    int                    `json:"duration_seconds_base"`
+	DurationSecondsPerRank int                    `json:"duration_seconds_per_rank"`
+	Limit                  SkillCompanionLimitDef `json:"limit"`
 }
 
 // SkillCompanionLimitDef defines active companion quantity scaling.
@@ -71,6 +73,12 @@ func validateReviveCompanionSkillPayload(skillID string, skill SkillDef) error {
 	if skill.Revive.PowerPercentPerRank < 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.revive.power_percent_per_rank: must be non-negative", skillID)
 	}
+	if skill.Revive.DurationSecondsBase <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.revive.duration_seconds_base: must be positive", skillID)
+	}
+	if skill.Revive.DurationSecondsPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.revive.duration_seconds_per_rank: must be non-negative", skillID)
+	}
 	if err := validateCompanionLimit("skills."+skillID+".revive.limit", skill.Revive.Limit); err != nil {
 		return err
 	}
@@ -98,6 +106,17 @@ func revivePowerPercent(def SkillDef, rank int) int {
 		rank = 1
 	}
 	return def.Revive.PowerPercentBase + def.Revive.PowerPercentPerRank*(rank-1)
+}
+
+func reviveDurationTicks(def SkillDef, rank int) int {
+	if rank < 1 {
+		rank = 1
+	}
+	seconds := def.Revive.DurationSecondsBase + def.Revive.DurationSecondsPerRank*(rank-1)
+	if seconds < 1 {
+		seconds = 1
+	}
+	return seconds * 10
 }
 
 func companionLimitAtRank(limit SkillCompanionLimitDef, rank int) int {

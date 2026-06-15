@@ -237,11 +237,13 @@
     },
     "revive": {
       "type": "object",
-      "required": ["power_percent_base", "power_percent_per_rank", "limit"],
+      "required": ["power_percent_base", "power_percent_per_rank", "duration_seconds_base", "duration_seconds_per_rank", "limit"],
       "additionalProperties": false,
       "properties": {
         "power_percent_base": { "type": "integer", "minimum": 1 },
         "power_percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_seconds_base": { "type": "integer", "minimum": 1 },
+        "duration_seconds_per_rank": { "type": "integer", "minimum": 0 },
         "limit": { "$ref": "#/$defs/companion_limit" }
       }
     },

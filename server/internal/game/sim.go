@@ -148,6 +148,8 @@ type entity struct {
 	targetID              uint64
 	projectileDefID       string
 	sourceSkillID         string
+	expiresTick           uint64
+	totalDurationTicks    int
 	sourceDamageType      string
 	shardProjectile       bool
 	effectIDs             []string
@@ -5561,6 +5563,15 @@ func (s *Sim) entityView(e *entity) EntityView {
 	view := e.view()
 	if e.kind == monsterEntity || e.kind == companionEntity {
 		view.EffectIDs = sortedUniqueStrings(append(cloneStringSlice(e.effectIDs), s.eliteAuraEffectIDs(e)...))
+	}
+	if e.kind == companionEntity && e.expiresTick > 0 && e.totalDurationTicks > 0 {
+		remaining := 0
+		if e.expiresTick > s.tick {
+			remaining = int(e.expiresTick - s.tick)
+		}
+		total := e.totalDurationTicks
+		view.RemainingTicks = &remaining
+		view.TotalTicks = &total
 	}
 	if e.kind == interactableEntity {
 		if level := s.activeLevel(); level != nil {

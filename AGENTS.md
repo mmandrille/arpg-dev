@@ -12,10 +12,10 @@ When starting client-side work that could use outside assets or plugins, record 
 ## Timestamped task updates
 
 During any multi-step task, prefix every intermediary user-facing progress update with the local
-time in `HH:MM` format:
+time in `HH:MM:SS` format:
 
 ```text
-[HH:MM] <message>
+[HH:MM:SS] <message>
 ```
 
 Apply this to progress/update messages printed while working, not final answers, code blocks, file

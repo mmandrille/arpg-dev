@@ -2735,10 +2735,11 @@ func TestRangedDummyDropsSeparatedLootItems(t *testing.T) {
 	}
 
 	want := map[string]bool{
-		"gold":        false,
-		"quest_leaf":  false,
-		"red_potion":  false,
-		"blue_potion": false,
+		"gold":          false,
+		"quest_leaf":    false,
+		"upgrade_shard": false,
+		"red_potion":    false,
+		"blue_potion":   false,
 	}
 	positions := map[Vec2]string{}
 	for _, c := range r.Changes {

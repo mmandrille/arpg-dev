@@ -1078,6 +1078,11 @@ func (s *Sim) applyPlayerRegen(res *TickResult) {
 	}
 	if delta := regenAmount(stats.ManaRegenPerSecond, tickDuration, &s.manaRegenCarry, player.maxMana-player.mana); delta > 0 {
 		player.mana += delta
+		res.Events = append(res.Events, Event{
+			EventType: "player_mana_regenerated",
+			EntityID:  idStr(player.id),
+			Mana:      intPtr(delta),
+		})
 		changed = true
 	}
 	if changed {

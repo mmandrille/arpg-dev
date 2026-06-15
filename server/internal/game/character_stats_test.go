@@ -56,6 +56,9 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	if !hasPlayerResourceUpdate(manaHeal, player.hp, player.mana) {
 		t.Fatalf("base mana regen missing player update: %+v", manaHeal.Changes)
 	}
+	if !hasManaRegenEvent(manaHeal, player.id, 1) {
+		t.Fatalf("base mana regen missing event: %+v", manaHeal.Events)
+	}
 	for i := 0; i < 33; i++ {
 		base.Tick(nil)
 	}
@@ -65,6 +68,9 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	}
 	if !hasPlayerResourceUpdate(hpHeal, player.hp, player.mana) {
 		t.Fatalf("base hp regen missing player update: %+v", hpHeal.Changes)
+	}
+	if hasEvent(hpHeal, "player_mana_regenerated") {
+		t.Fatalf("base hp regen emitted mana event: %+v", hpHeal.Events)
 	}
 
 	geared := MustNewSim("sess_regen_item", "01", rules)
@@ -96,6 +102,9 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	if !hasPlayerResourceUpdate(gearedManaHeal, gearedPlayer.hp, gearedPlayer.mana) {
 		t.Fatalf("geared mana regen missing player update: %+v", gearedManaHeal.Changes)
 	}
+	if !hasManaRegenEvent(gearedManaHeal, gearedPlayer.id, 1) {
+		t.Fatalf("geared mana regen missing event: %+v", gearedManaHeal.Events)
+	}
 	geared.Tick(nil)
 	gearedHPHeal := geared.Tick(nil)
 	if gearedPlayer.hp != gearedPlayer.maxHP-1 || gearedPlayer.mana != gearedPlayer.maxMana-1 {
@@ -104,6 +113,18 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	if !hasPlayerResourceUpdate(gearedHPHeal, gearedPlayer.hp, gearedPlayer.mana) {
 		t.Fatalf("geared hp regen missing player update: %+v", gearedHPHeal.Changes)
 	}
+	if hasEvent(gearedHPHeal, "player_mana_regenerated") {
+		t.Fatalf("geared hp regen emitted mana event: %+v", gearedHPHeal.Events)
+	}
+}
+
+func hasManaRegenEvent(res TickResult, entityID uint64, mana int) bool {
+	for _, event := range res.Events {
+		if event.EventType == "player_mana_regenerated" && event.EntityID == idStr(entityID) && event.Mana != nil && *event.Mana == mana {
+			return true
+		}
+	}
+	return false
 }
 
 func TestStarterStaffAddsMaxManaAndSkillDamage(t *testing.T) {

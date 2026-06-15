@@ -1,0 +1,23 @@
+tools/validate_shared.py
+  s_f9c66ca3cb4339::t_fd8b61a09c3f5b 30,42,3027-3034
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_15d039180f9e51 34
+tools/validate_item_presentations.py
+  s_f9c66ca3cb4339::t_fd8b61a09c3f5b 1-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c00b4ce591451afe03431b342a258bb25e7e7283",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

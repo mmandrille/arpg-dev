@@ -18,6 +18,7 @@ var _current_mana: int = 0
 var _max_mana: int = 0
 var _remaining_ticks: float = 0.0
 var _total_ticks: int = 0
+var _allow_cooldown_sync_start: bool = true
 var _panel: PanelContainer
 var _slot: Button
 var _slot_icon
@@ -67,6 +68,7 @@ func set_skill_id(skill_id: String) -> void:
 	_skill_id = skill_id
 	_remaining_ticks = 0.0
 	_total_ticks = 0
+	_allow_cooldown_sync_start = true
 	_sync_rank_from_progression()
 	_render()
 
@@ -79,18 +81,20 @@ func set_skill_cooldowns(cooldowns: Array) -> void:
 		var rec := row as Dictionary
 		if str(rec.get("skill_id", "")) != _current_skill_id():
 			continue
-		_apply_skill_cooldown(float(rec.get("remaining_ticks", 0)), int(rec.get("total_ticks", 0)), false)
+		_apply_skill_cooldown(float(rec.get("remaining_ticks", 0)), int(rec.get("total_ticks", 0)), _allow_cooldown_sync_start)
 		found = true
 		break
 	if not found:
 		_remaining_ticks = 0.0
 		_total_ticks = 0
+	_allow_cooldown_sync_start = false
 	_render()
 
 
 func start_skill_cooldown(skill_id: String, remaining_ticks: int, total_ticks: int) -> void:
 	if skill_id != _current_skill_id():
 		return
+	_allow_cooldown_sync_start = false
 	_apply_skill_cooldown(float(remaining_ticks), total_ticks, true)
 	_render()
 

@@ -1,0 +1,21 @@
+docs/plans/v187_2026-06-15-rarity-roll-pools.md
+  s_2721a37551d805::t_4c808d06b1e070 1-124
+docs/specs/v187_spec-rarity-roll-pools.md
+  s_2721a37551d805::t_04781c7b3c9c60 1-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fa0e1f750a8673b7c727d9be18011cd70add6888",
+  "prompts": {},
+  "sessions": {
+    "s_2721a37551d805": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec9e3-8f9e-7360-a4ce-aafa7309e195",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

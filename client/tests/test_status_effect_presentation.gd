@@ -156,6 +156,7 @@ func _test_sanctuary_started_and_ended_updates_local_dome() -> void:
 	_assert_float("sanctuary dome radius follows skill rule", (dome.mesh as SphereMesh).radius, expected_radius)
 	_assert_float("sanctuary ground top radius follows skill rule", (ground.mesh as CylinderMesh).top_radius, expected_radius)
 	_assert_float("sanctuary ground bottom radius follows skill rule", (ground.mesh as CylinderMesh).bottom_radius, expected_radius)
+	_assert_float("sanctuary dome alpha is subtle", (dome.material_override as StandardMaterial3D).albedo_color.a, 0.10)
 
 	main._apply_delta({"events": [{"event_type": "skill_effect_ended", "entity_id": "1001", "skill_id": "sanctuary"}], "changes": []})
 	local_state = main._bot_local_player_presentation()

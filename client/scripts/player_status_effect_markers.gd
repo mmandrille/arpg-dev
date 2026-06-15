@@ -239,8 +239,7 @@ static func make_sanctuary_dome_effect(radius: float = 5.0) -> Node3D:
 	var marker := Node3D.new()
 	marker.name = SANCTUARY_MARKER_NAME
 	var safe_radius := maxf(radius, 0.5)
-	var mat := _holy_shield_pulse_material(0.24)
-	mat.emission_energy_multiplier = 2.8
+	var mat := _sanctuary_dome_material()
 
 	var dome := MeshInstance3D.new()
 	dome.name = "SanctuaryDome"
@@ -538,6 +537,20 @@ static func _holy_shield_pulse_material(alpha: float) -> StandardMaterial3D:
 	mat.emission_enabled = true
 	mat.emission = Color(1.0, 0.86, 0.28)
 	mat.emission_energy_multiplier = 3.4
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.no_depth_test = true
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	return mat
+
+
+static func _sanctuary_dome_material() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.90, 0.32, 0.10)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.86, 0.28)
+	mat.emission_energy_multiplier = 0.75
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED

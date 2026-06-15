@@ -236,6 +236,28 @@
       "attack_cooldown_ticks": 24,
       "name_key": "monster.companion_black_wolf.name"
     },
+    "mercenary_guard": {
+      "name": "Mercenary Guard",
+      "max_hp": 12,
+      "loot_table": "no_drop",
+      "xp_reward": 0,
+      "hit_chance": 0.75,
+      "crit_chance": 0.05,
+      "crit_damage": 1.5,
+      "armor": 1,
+      "block_percent": 0,
+      "behavior": "chase",
+      "aggro_radius": 0.1,
+      "assist_radius": 5,
+      "leash_radius": 10,
+      "move_speed": 0.34,
+      "attack_damage": {
+        "min": 1,
+        "max": 3
+      },
+      "attack_cooldown_ticks": 28,
+      "name_key": "monster.mercenary_guard.name"
+    },
     "dungeon_bat": {
       "name": "Cave Bat",
       "max_hp": 4,

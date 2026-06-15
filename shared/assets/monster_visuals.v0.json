@@ -120,6 +120,13 @@
       "height_offset": 0.0,
       "animation_profile": "ground_quadruped"
     },
+    "mercenary_guard": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 1.05,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
     "dungeon_bat": {
       "asset_id": "monster_tiny_flyer_v0",
       "scene": "monster_tiny_flyer",

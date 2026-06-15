@@ -20,6 +20,24 @@ func TestCompanionAppearsInSnapshotWithOwner(t *testing.T) {
 	}
 }
 
+func TestMercenaryFoundationCompanionAppearsWithOwnedStats(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_mercenary_foundation", "v198_mercenary_foundation", loadRules(t), "mercenary_foundation_lab")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	mercenary := firstEntityByKind(sim, companionEntity)
+	if mercenary == nil {
+		t.Fatalf("missing mercenary companion in entities: %+v", sim.entities)
+	}
+	view := sim.entityView(mercenary)
+	if view.Type != companionEntity || view.OwnerID != idStr(sim.playerID) || view.MonsterDefID != "mercenary_guard" {
+		t.Fatalf("mercenary view = %+v", view)
+	}
+	if mercenary.hp != 12 || mercenary.monsterAttackDamage == nil || mercenary.monsterAttackDamage.Max != 3 {
+		t.Fatalf("mercenary stats hp=%d damage=%+v, want hp 12 damage max 3", mercenary.hp, mercenary.monsterAttackDamage)
+	}
+}
+
 func TestCompanionFollowsOwnerAndDamagesMonster(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_companion_ai", "v182_companion_ai", loadRules(t), "companion_ai_lab")
 	if err != nil {

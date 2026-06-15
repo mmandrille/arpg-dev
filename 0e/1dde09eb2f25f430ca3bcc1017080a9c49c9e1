@@ -1,0 +1,40 @@
+docs/as-built/v186_elite-minion-pack-ai.md
+  s_21a9048984b529::t_f929a457ddaca0 1-30
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_21a9048984b529::t_4e8da5f842ea56 22
+server/internal/game/elite_minion_ai_test.go
+  s_21a9048984b529::t_63d286bff5373b 1-85
+docs/specs/v186_spec-elite-minion-pack-ai.md
+  s_21a9048984b529::t_a3e2b3e04d5103 1-24
+tools/bot/scenarios/77_elite_minion_pack_ai.json
+  s_21a9048984b529::t_d9a54415250c8e 1-46
+tools/bot/run.py
+  s_21a9048984b529::t_fba9a02f3906bf 2191
+  s_21a9048984b529::t_cb9ad35f6bbcf7 650,1903-1904
+  s_21a9048984b529::t_efa1bbaccca10c 1925,2201
+  s_21a9048984b529::t_2a4dd576c8610c 1919
+server/internal/game/elite_minion_ai.go
+  s_21a9048984b529::t_6ca54e7ab545fb 1-109
+PROGRESS.md
+  s_21a9048984b529::t_f929a457ddaca0 15,205,432,566-569
+docs/plans/v186_2026-06-15-elite-minion-pack-ai.md
+  s_21a9048984b529::t_a3e2b3e04d5103 1-41
+server/internal/game/sim.go
+  s_21a9048984b529::t_6ca54e7ab545fb 3265-3268,3354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0e1dde09eb2f25f430ca3bcc1017080a9c49c9e1",
+  "prompts": {},
+  "sessions": {
+    "s_21a9048984b529": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec984-931d-7740-965d-620664ca32a9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -5,6 +5,7 @@ type DerivedStatsView struct {
 	DamageMin            float64 `json:"damage_min"`
 	DamageMax            float64 `json:"damage_max"`
 	Armor                float64 `json:"armor"`
+	BlockPercent         float64 `json:"block_percent"`
 	AttackSpeed          float64 `json:"attack_speed"`
 	AttackIntervalTicks  int     `json:"attack_interval_ticks"`
 	HitChance            float64 `json:"hit_chance"`
@@ -26,6 +27,7 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 		DamageMin:            effective.DamageMin,
 		DamageMax:            effective.DamageMax,
 		Armor:                effective.Armor,
+		BlockPercent:         effective.BlockPercent,
 		AttackSpeed:          effective.AttackSpeed,
 		AttackIntervalTicks:  effective.AttackIntervalTicks,
 		HitChance:            effective.HitChance,
@@ -50,6 +52,7 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 		DamageMin:            eval("damage_min"),
 		DamageMax:            eval("damage_max"),
 		Armor:                eval("armor"),
+		BlockPercent:         0,
 		AttackSpeed:          eval("attack_speed"),
 		AttackIntervalTicks:  s.attackIntervalTicksFromSpeed(eval("attack_speed")),
 		HitChance:            eval("hit_chance"),

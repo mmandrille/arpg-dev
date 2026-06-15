@@ -5224,51 +5224,6 @@ func (s *Sim) ProgressionState() CharacterProgressionState {
 	return out
 }
 
-func (s *Sim) DerivedStatsView() DerivedStatsView {
-	effective, _ := s.playerEffectiveCombatStats()
-	character := s.characterDerivedStatsView()
-	return DerivedStatsView{
-		DamageMin:            effective.DamageMin,
-		DamageMax:            effective.DamageMax,
-		Armor:                effective.Armor,
-		BlockPercent:         effective.BlockPercent,
-		AttackSpeed:          effective.AttackSpeed,
-		AttackIntervalTicks:  effective.AttackIntervalTicks,
-		HitChance:            effective.HitChance,
-		CritChance:           effective.CritChance,
-		CritDamage:           effective.CritDamage,
-		MovementSpeed:        character.MovementSpeed,
-		MaxHP:                effective.MaxHP,
-		MaxMana:              effective.MaxMana,
-		HealthRegenPerSecond: effective.HealthRegenPerSecond,
-		ManaRegenPerSecond:   effective.ManaRegenPerSecond,
-	}
-}
-
-func (s *Sim) characterDerivedStatsView() DerivedStatsView {
-	stats := s.effectiveBaseStatsView()
-	eval := func(key string) float64 {
-		formula := s.rules.CharacterProgression.DerivedStats[key]
-		return evalProgressionFormula(formula, stats)
-	}
-	return DerivedStatsView{
-		DamageMin:            eval("damage_min"),
-		DamageMax:            eval("damage_max"),
-		Armor:                eval("armor"),
-		BlockPercent:         0,
-		AttackSpeed:          eval("attack_speed"),
-		AttackIntervalTicks:  s.attackIntervalTicksFromSpeed(eval("attack_speed")),
-		HitChance:            eval("hit_chance"),
-		CritChance:           eval("crit_chance"),
-		CritDamage:           eval("crit_damage"),
-		MovementSpeed:        eval("movement_speed"),
-		MaxHP:                eval("max_hp"),
-		MaxMana:              eval("max_mana"),
-		HealthRegenPerSecond: eval("health_regen_per_second"),
-		ManaRegenPerSecond:   eval("mana_regen_per_second"),
-	}
-}
-
 func (s *Sim) effectiveBaseStatsView() BaseStatsView {
 	stats := s.progression.BaseStats
 	equipment := s.equipmentBaseStatBonuses()

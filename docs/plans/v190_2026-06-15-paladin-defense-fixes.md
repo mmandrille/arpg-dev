@@ -1,4 +1,4 @@
-# v185 Plan - Paladin Defense Fixes
+# v190 Plan - Paladin Defense Fixes
 
 Status: Complete
 Goal: Make Paladin block, Holy Shield, and Sanctuary behavior match the in-game expectations.

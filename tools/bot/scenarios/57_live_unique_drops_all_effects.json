@@ -1,7 +1,7 @@
 {
   "id": "live_unique_drops_all_effects",
   "world_id": "unique_drop_lab",
-  "seed": "00000000000001d8",
+  "seed": "00000000000003ed",
   "title": "Live unique drops all effects",
   "description": "Pick up a deterministic rolled unique item from floor loot and prove the live effect_ids payload is present.",
   "steps": [

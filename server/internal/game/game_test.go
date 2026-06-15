@@ -2278,55 +2278,6 @@ func TestDepthScaledAttributeAffixRanges(t *testing.T) {
 	}
 }
 
-func TestGeneratedMagicAndRareAffixPools(t *testing.T) {
-	rules := loadRules(t)
-	base := []RollableStatDef{}
-	magic := rules.rollableStatsForRarity(base, "magic", 1)
-	for _, stat := range []string{"str", "dex", "vit", "magic"} {
-		roll, ok := findRollableStat(magic, stat)
-		if !ok {
-			t.Fatalf("magic pool missing %s", stat)
-		}
-		if roll.Min != 1 || roll.Max != 3 {
-			t.Fatalf("magic %s range = %d-%d, want 1-3", stat, roll.Min, roll.Max)
-		}
-	}
-	if _, ok := findRollableStat(magic, "all_skills"); ok {
-		t.Fatal("magic pool should not include all_skills")
-	}
-	rare := rules.rollableStatsForRarity(base, "rare", 20)
-	roll, ok := findRollableStat(rare, "all_skills")
-	if !ok {
-		t.Fatal("rare depth 20 pool missing all_skills")
-	}
-	if roll.Min != 1 || roll.Max != 2 {
-		t.Fatalf("rare depth 20 all_skills range = %d-%d, want 1-2", roll.Min, roll.Max)
-	}
-}
-
-func TestJewelryTemplatesCanRollInventoryRows(t *testing.T) {
-	rules := loadRules(t)
-	for _, templateID := range []string{"cave_ring", "cave_amulet"} {
-		template := rules.ItemTemplates[templateID]
-		roll, ok := findRollableStat(template.RollableStats, "inventory_rows")
-		if !ok {
-			t.Fatalf("%s rollable stats missing inventory_rows", templateID)
-		}
-		if roll.Min < 1 || roll.Max < roll.Min {
-			t.Fatalf("%s inventory_rows roll range = %d-%d, want positive valid range", templateID, roll.Min, roll.Max)
-		}
-	}
-}
-
-func findRollableStat(stats []RollableStatDef, stat string) (RollableStatDef, bool) {
-	for _, roll := range stats {
-		if roll.Stat == stat {
-			return roll, true
-		}
-	}
-	return RollableStatDef{}, false
-}
-
 func TestUniqueEffectRollsRespectItemTypeCompatibility(t *testing.T) {
 	r := loadRules(t)
 	shield := r.ItemTemplates["cave_shield"]

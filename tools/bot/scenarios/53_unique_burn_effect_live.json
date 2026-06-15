@@ -1,7 +1,7 @@
 {
   "id": "unique_burn_effect_live",
   "world_id": "unique_burn_lab",
-  "seed": "000000000000040a",
+  "seed": "00000000000001d8",
   "title": "Unique burn effect live",
   "description": "Pick up a deterministic unique cave blade, equip it, hit a lab target, and prove Everburning Wound applies fire burn ticks.",
   "steps": [

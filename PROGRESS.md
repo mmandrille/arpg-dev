@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v186 — elite minion pack AI |
+| **Latest completed slice** | v187 — rarity roll pools |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -203,6 +203,7 @@ v183_* = ranger-wolf-companion
 v184_* = revived-monster-companion
 v185_* = companion-rank-scaling-and-limits
 v186_* = elite-minion-pack-ai
+v187_* = rarity-roll-pools
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -430,6 +431,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v184** | `revived-monster-companion` | Complete (`make ci` green) | [`v184_spec-revived-monster-companion.md`](docs/specs/v184_spec-revived-monster-companion.md) | [`v184_2026-06-15-revived-monster-companion.md`](docs/plans/v184_2026-06-15-revived-monster-companion.md) | [`as-built`](docs/as-built/v184_revived-monster-companion.md) |
 | **v185** | `companion-rank-scaling-and-limits` | Complete (`make ci` green) | [`v185_spec-companion-rank-scaling-and-limits.md`](docs/specs/v185_spec-companion-rank-scaling-and-limits.md) | [`v185_2026-06-15-companion-rank-scaling-and-limits.md`](docs/plans/v185_2026-06-15-companion-rank-scaling-and-limits.md) | [`as-built`](docs/as-built/v185_companion-rank-scaling-and-limits.md) |
 | **v186** | `elite-minion-pack-ai` | Complete (`make ci` green) | [`v186_spec-elite-minion-pack-ai.md`](docs/specs/v186_spec-elite-minion-pack-ai.md) | [`v186_2026-06-15-elite-minion-pack-ai.md`](docs/plans/v186_2026-06-15-elite-minion-pack-ai.md) | [`as-built`](docs/as-built/v186_elite-minion-pack-ai.md) |
+| **v187** | `rarity-roll-pools` | Complete (`make ci` green) | [`v187_spec-rarity-roll-pools.md`](docs/specs/v187_spec-rarity-roll-pools.md) | [`v187_2026-06-15-rarity-roll-pools.md`](docs/plans/v187_2026-06-15-rarity-roll-pools.md) | [`as-built`](docs/as-built/v187_rarity-roll-pools.md) |
 
 ---
 
@@ -562,6 +564,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Item rarity now controls roll counts and inherited roll pools.** v187 replaces fixed item
+`stat_rolls` with data-driven rarity roll-count ranges, adds `min_rarity` roll candidates,
+keeps fixed set rarity out of random rolls, updates item/shop goldens, and adds protocol bot
+scenario `78_rarity_roll_pools` proving high-rarity roll count and inherited stat-pool payloads.
 
 **Elite minions now use leader-driven pack AI.** v186 routes non-leader elite pack members
 through deterministic leader follow/assist behavior, suppresses standalone passive aggro while

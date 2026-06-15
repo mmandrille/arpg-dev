@@ -34,7 +34,7 @@
     { "action": "equip_inventory_item", "item_def_id": "cave_bow", "slot": "main_hand" },
     { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
     { "action": "equip_inventory_item", "item_def_id": "cave_belt", "slot": "belt" },
-    { "action": "assert_hotbar_capacity", "equals": 10 },
+    { "action": "assert_hotbar_capacity", "equals": 6 },
     { "action": "assign_hotbar", "slot_index": 0, "item_def_id": "red_potion" },
     { "action": "assign_hotbar", "slot_index": 2, "item_def_id": "red_potion" },
     { "action": "assign_hotbar", "slot_index": 5, "item_def_id": "red_potion" },
@@ -42,7 +42,7 @@
     { "action": "assert_hotbar_capacity", "equals": 2 },
     { "action": "use_hotbar_slot", "slot_index": 5, "expect_reject": "hotbar_slot_disabled" },
     { "action": "equip_inventory_item", "item_def_id": "cave_belt", "slot": "belt" },
-    { "action": "assert_hotbar_capacity", "equals": 10 },
+    { "action": "assert_hotbar_capacity", "equals": 6 },
     { "action": "use_hotbar_slot", "slot_index": 5, "expect_reject": "already_full_hp" }
   ],
   "assertions": [
@@ -56,7 +56,7 @@
     { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_bow" },
     { "type": "equipped_slot_empty", "slot": "off_hand" },
     { "type": "equipped_slot_def", "slot": "belt", "item_def_id": "cave_belt" },
-    { "type": "hotbar_capacity", "equals": 10 },
+    { "type": "hotbar_capacity", "equals": 6 },
     { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" },
     { "type": "hotbar_slot", "slot_index": 2, "item_def_id": "red_potion" },
     { "type": "hotbar_slot", "slot_index": 5, "item_def_id": "red_potion" }
@@ -68,7 +68,7 @@
       "assertions": [
         { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_bow" },
         { "type": "equipped_slot_def", "slot": "belt", "item_def_id": "cave_belt" },
-        { "type": "hotbar_capacity", "equals": 10 },
+        { "type": "hotbar_capacity", "equals": 6 },
         { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" }
       ]
     }

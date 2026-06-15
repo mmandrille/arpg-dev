@@ -1139,24 +1139,37 @@ func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG, sourceDepth
 	}
 	total := 0
 	for _, rarityID := range r.RarityOrder {
+		if !r.rarityRandomRollable(rarityID) {
+			continue
+		}
 		total += r.Rarities[rarityID].Weight
 	}
 	if total <= 0 {
 		return ItemRollPayload{}, false
 	}
 	roll := rng.IntN(total)
-	rarityID := r.RarityOrder[len(r.RarityOrder)-1]
+	rarityID := ""
 	for _, candidate := range r.RarityOrder {
+		if !r.rarityRandomRollable(candidate) {
+			continue
+		}
 		roll -= r.Rarities[candidate].Weight
 		if roll < 0 {
 			rarityID = candidate
 			break
 		}
 	}
+	if rarityID == "" {
+		return ItemRollPayload{}, false
+	}
 	rarity := r.Rarities[rarityID]
 	stats := cloneIntMap(template.BaseStats)
 	rollableStats := r.rollableStatsForRarity(template.RollableStats, rarityID, sourceDepth)
-	for i := 0; i < rarity.StatRolls; i++ {
+	rollCount := rarity.StatRollsMin
+	if rarity.StatRollsMax > rarity.StatRollsMin {
+		rollCount += rng.IntN(rarity.StatRollsMax - rarity.StatRollsMin + 1)
+	}
+	for i := 0; i < rollCount; i++ {
 		stat, ok := weightedRollableStat(rollableStats, rng)
 		if !ok {
 			continue
@@ -1183,35 +1196,29 @@ func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG, sourceDepth
 }
 
 func (r *Rules) rollableStatsForRarity(base []RollableStatDef, rarityID string, sourceDepth int) []RollableStatDef {
-	out := append([]RollableStatDef{}, base...)
+	out := []RollableStatDef{}
+	for _, stat := range base {
+		minRarity := stat.MinRarity
+		if minRarity == "" {
+			minRarity = "common"
+		}
+		if itemRarityRank(rarityID) >= itemRarityRank(minRarity) {
+			out = append(out, stat)
+		}
+	}
 	if itemRarityRank(rarityID) >= itemRarityRank("magic") {
 		minValue, maxValue := scaledAttributeRollRange(sourceDepth)
 		for _, stat := range []string{"str", "dex", "vit", "magic"} {
-			out = append(out, RollableStatDef{Stat: stat, Min: minValue, Max: maxValue, Weight: 2})
+			out = append(out, RollableStatDef{Stat: stat, MinRarity: "magic", Min: minValue, Max: maxValue, Weight: 2})
 		}
 	}
 	if itemRarityRank(rarityID) >= itemRarityRank("rare") {
 		minValue, maxValue, ok := scaledAllSkillsRollRange(sourceDepth)
 		if ok {
-			out = append(out, RollableStatDef{Stat: "all_skills", Min: minValue, Max: maxValue, Weight: 1})
+			out = append(out, RollableStatDef{Stat: "all_skills", MinRarity: "rare", Min: minValue, Max: maxValue, Weight: 1})
 		}
 	}
 	return out
-}
-
-func itemRarityRank(rarityID string) int {
-	switch rarityID {
-	case "common":
-		return 0
-	case "magic":
-		return 1
-	case "rare":
-		return 2
-	case "unique":
-		return 3
-	default:
-		return -1
-	}
 }
 
 func scaledAttributeRollRange(sourceDepth int) (int, int) {

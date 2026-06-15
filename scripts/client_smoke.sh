@@ -95,6 +95,7 @@ run_gate "GDScript rogue presentation test" "[gdtest] PASS: test_rogue_presentat
 
 # 2f. Waypoint panel scroll/layout test (server-independent; v19).
 run_gate "GDScript waypoint panel test" "[gdtest] PASS: test_waypoint_panel" res://tests/test_waypoint_panel.gd
+run_gate "GDScript quest journal panel test" "[gdtest] PASS: test_quest_journal_panel" res://tests/test_quest_journal_panel.gd
 
 # 2g. Sustained click hold state (server-independent; v27).
 run_gate "GDScript sustained input test" "[gdtest] PASS: test_sustained_input" res://tests/test_sustained_input.gd

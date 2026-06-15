@@ -29,6 +29,7 @@ const TownServiceBridgeScript := preload("res://scripts/town_service_bridge.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
+const QuestJournalPanelScript := preload("res://scripts/quest_journal_panel.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
@@ -240,6 +241,7 @@ var blacksmith_panel: BlacksmithPanel
 var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
+var quest_journal_panel: QuestJournalPanel
 var character_bar: Control
 var skill_bar: SkillBar
 var status_effects_bar: StatusEffectsBar
@@ -277,7 +279,6 @@ const PROJECTILE_LERP_SECONDS := 0.10
 const GROUND_TEXTURE_TOWN := "town_grass"
 const GROUND_TEXTURE_DUNGEON := "dungeon_rock"
 const WALL_TEXTURE_CAVE := "cave_wall"
-
 
 func _ready() -> void:
 	player_anchor = $World/PlayerAnchor
@@ -351,7 +352,6 @@ func _ready() -> void:
 		return
 	_show_main_menu()
 
-
 func _bot_uses_menu() -> bool:
 	if _truthy_env("ARPG_BOT_MENU"):
 		return true
@@ -362,7 +362,6 @@ func _bot_uses_menu() -> bool:
 		or file_name.begins_with("21_join_game_listed_session") \
 		or file_name.begins_with("27_character_select_summaries")
 
-
 func _mount_bot_controller() -> void:
 	if input_shadow != null and DisplayServer.get_name() != "headless":
 		input_shadow.set_active(true)
@@ -370,7 +369,6 @@ func _mount_bot_controller() -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	var bot := preload("res://scripts/bot_controller.gd").new()
 	add_child(bot)
-
 
 func _start_automation_session(resume_session_id: String, requested_world_id: String, requested_seed: String, bot_client_run: bool) -> bool:
 	if not client.create_session(resume_session_id, requested_world_id, "", requested_seed):
@@ -385,7 +383,6 @@ func _start_automation_session(resume_session_id: String, requested_world_id: St
 	if bot_client_run:
 		print("[bot-client] ws connect requested session=%s" % client.session_id)
 	return true
-
 
 func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
@@ -403,7 +400,6 @@ func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
 
-
 func _show_main_menu() -> void:
 	_hide_all_menus()
 	gameplay_active = false
@@ -411,25 +407,21 @@ func _show_main_menu() -> void:
 		main_menu.set_account_email(_account_email())
 		main_menu.show_menu()
 
-
 func _raise_gameplay_windows() -> void:
-	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, blacksmith_panel, character_stats_panel, skills_panel, character_info_panel]:
+	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, blacksmith_panel, character_stats_panel, skills_panel, quest_journal_panel, character_info_panel]:
 		if panel != null and panel is CanvasItem:
 			(panel as CanvasItem).move_to_front()
-
 
 func _account_email() -> String:
 	if client == null:
 		return ""
 	return client.account_email
 
-
 func _account_title(title: String) -> String:
 	var email := _account_email()
 	if email == "":
 		return title
 	return "%s - %s" % [title, email]
-
 
 func _hide_all_menus() -> void:
 	if main_menu != null:
@@ -450,7 +442,6 @@ func _hide_all_menus() -> void:
 		skills_panel.hide_display()
 	_hide_character_info_panel()
 
-
 func _on_create_game_pressed() -> void:
 	character_flow = CHARACTER_FLOW_CREATE_GAME
 	pending_join_session_id = ""
@@ -463,24 +454,19 @@ func _on_create_game_pressed() -> void:
 		else:
 			character_panel.show_choose_or_create(characters, _account_title("Choose Character"))
 
-
 func _on_join_game_pressed() -> void:
 	character_flow = CHARACTER_FLOW_JOIN_GAME
 	pending_join_session_id = ""
 	_show_join_game_panel(true)
 
-
 func _on_continue_pressed() -> void:
 	_on_create_game_pressed()
-
 
 func _on_new_game_pressed() -> void:
 	_on_create_game_pressed()
 
-
 func _on_multiplayer_pressed() -> void:
 	_on_join_game_pressed()
-
 
 func _show_join_game_panel(refresh: bool = false) -> void:
 	_hide_all_menus()
@@ -491,22 +477,18 @@ func _show_join_game_panel(refresh: bool = false) -> void:
 	if refresh:
 		_refresh_multiplayer_sessions()
 
-
 func _show_multiplayer_panel(refresh: bool = false) -> void:
 	_show_join_game_panel(refresh)
-
 
 func _refresh_multiplayer_sessions() -> void:
 	if multiplayer_panel == null:
 		return
 	multiplayer_panel.set_sessions(client.list_active_sessions())
 
-
 func _on_host_listed_session_requested() -> void:
 	character_flow = CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST
 	pending_join_session_id = ""
 	_show_character_picker_for_flow("Choose Character")
-
 
 func _on_join_listed_session_requested(session_id: String) -> void:
 	if session_id == "":
@@ -514,7 +496,6 @@ func _on_join_listed_session_requested(session_id: String) -> void:
 	character_flow = CHARACTER_FLOW_JOIN_GAME
 	pending_join_session_id = session_id
 	_show_character_picker_for_flow("Choose Character")
-
 
 func _on_character_panel_back() -> void:
 	if character_panel != null:
@@ -526,7 +507,6 @@ func _on_character_panel_back() -> void:
 			pending_join_session_id = ""
 			if main_menu != null:
 				main_menu.show_menu()
-
 
 func _show_character_picker_for_flow(title: String = "Choose Character") -> void:
 	if character_panel == null:
@@ -541,14 +521,12 @@ func _show_character_picker_for_flow(title: String = "Choose Character") -> void
 	else:
 		character_panel.show_choose_or_create(characters, _account_title(title))
 
-
 func _on_character_create_requested(name: String, character_class: String = "barbarian") -> void:
 	var character := client.create_character(name, character_class)
 	if character.is_empty():
 		character_panel.set_error("Could not create character")
 		return
 	_start_selected_character(str(character.get("character_id", "")))
-
 
 func _on_character_delete_requested(character_id: String) -> void:
 	if not client.delete_character(character_id):
@@ -558,7 +536,6 @@ func _on_character_delete_requested(character_id: String) -> void:
 	if character_panel != null:
 		_refresh_character_panel_for_current_flow()
 
-
 func _on_character_rename_requested(character_id: String, name: String) -> void:
 	if client.rename_character(character_id, name).is_empty():
 		if character_panel != null:
@@ -566,7 +543,6 @@ func _on_character_rename_requested(character_id: String, name: String) -> void:
 		return
 	if character_panel != null:
 		_refresh_character_panel_for_current_flow()
-
 
 func _refresh_character_panel_for_current_flow() -> void:
 	if character_panel == null:
@@ -576,7 +552,6 @@ func _refresh_character_panel_for_current_flow() -> void:
 		character_panel.show_forced_create(_account_title("Create Character"))
 	else:
 		character_panel.show_choose_or_create(characters, _account_title("Choose Character"))
-
 
 func _start_selected_character(character_id: String) -> void:
 	match character_flow:
@@ -591,7 +566,6 @@ func _start_selected_character(character_id: String) -> void:
 		_:
 			_start_character_session(character_id)
 
-
 func _start_character_session(character_id: String) -> void:
 	if character_id == "":
 		if character_panel != null:
@@ -605,13 +579,11 @@ func _start_character_session(character_id: String) -> void:
 	bot_mode = false
 	_begin_gameplay_connection(false)
 
-
 func _start_create_game_session(character_id: String) -> void:
 	if client_settings != null and client_settings.create_game_session_type == ClientSettingsScript.CREATE_GAME_SESSION_TYPE_SOLO:
 		_start_character_session(character_id)
 	else:
 		_start_listed_host_session(character_id)
-
 
 func _start_listed_host_session(character_id: String) -> void:
 	if character_id == "":
@@ -624,7 +596,6 @@ func _start_listed_host_session(character_id: String) -> void:
 	bot_mode = false
 	character_flow = CHARACTER_FLOW_CREATE_GAME
 	_begin_gameplay_connection(false)
-
 
 func _start_listed_join_session(character_id: String) -> void:
 	if character_id == "" or pending_join_session_id == "":
@@ -639,7 +610,6 @@ func _start_listed_join_session(character_id: String) -> void:
 	pending_join_session_id = ""
 	_begin_gameplay_connection(false)
 
-
 func _on_settings_from_main() -> void:
 	settings_return_target = "main"
 	main_menu.visible = false
@@ -651,7 +621,6 @@ func _on_settings_from_main() -> void:
 			client_settings.create_game_session_type,
 			client_settings.language
 		)
-
 
 func _on_settings_from_pause() -> void:
 	settings_return_target = "pause"
@@ -666,7 +635,6 @@ func _on_settings_from_pause() -> void:
 			client_settings.language
 		)
 
-
 func _on_settings_back() -> void:
 	if settings_panel != null:
 		settings_panel.hide_panel()
@@ -675,18 +643,15 @@ func _on_settings_back() -> void:
 	elif main_menu != null:
 		main_menu.show_menu()
 
-
 func _on_window_size_selected(label: String) -> void:
 	client_settings.set_window_size_label(label)
 	_sync_settings_panel()
-
 
 func _on_floating_combat_text_toggled(enabled: bool) -> void:
 	if client_settings == null:
 		return
 	client_settings.set_floating_combat_text(enabled)
 	_sync_settings_panel()
-
 
 func _on_status_text_toggled(enabled: bool) -> void:
 	if client_settings == null:
@@ -695,13 +660,11 @@ func _on_status_text_toggled(enabled: bool) -> void:
 	_sync_settings_panel()
 	_sync_status_text_visibility()
 
-
 func _on_create_game_session_type_selected(session_type: String) -> void:
 	if client_settings == null:
 		return
 	client_settings.set_create_game_session_type(session_type)
 	_sync_settings_panel()
-
 
 func _on_language_selected(language: String) -> void:
 	if client_settings == null:
@@ -709,7 +672,6 @@ func _on_language_selected(language: String) -> void:
 	client_settings.set_language(language)
 	_refresh_localized_texts()
 	_sync_settings_panel()
-
 
 func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
@@ -719,7 +681,6 @@ func _sync_settings_panel() -> void:
 		settings_panel.set_create_game_session_type(client_settings.create_game_session_type)
 		settings_panel.set_language(client_settings.language)
 
-
 func _refresh_localized_texts() -> void:
 	if main_menu != null:
 		main_menu.refresh_texts()
@@ -728,16 +689,13 @@ func _refresh_localized_texts() -> void:
 	if settings_panel != null:
 		settings_panel.refresh_texts()
 
-
 func _show_pause_menu() -> void:
 	if gameplay_active and pause_menu != null:
 		pause_menu.show_pause()
 
-
 func _resume_from_pause() -> void:
 	if pause_menu != null:
 		pause_menu.hide_pause()
-
 
 func _return_to_main_menu() -> void:
 	if client != null:
@@ -747,14 +705,12 @@ func _return_to_main_menu() -> void:
 	_teardown_gameplay_state(true)
 	_show_main_menu()
 
-
 func _exit_game() -> void:
 	if client != null:
 		if gameplay_active and client.session_id != "":
 			client.end_session()
 		client.close()
 	get_tree().quit(0)
-
 
 func _teardown_gameplay_state(clear_session: bool) -> void:
 	gameplay_active = false
@@ -826,7 +782,6 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		client.session_listed = false
 		client.ws_url = ""
 
-
 func _process(delta: float) -> void:
 	if client == null:
 		return
@@ -862,7 +817,6 @@ func _process(delta: float) -> void:
 		_update_facing_toward_mouse()
 	_update_debug()
 
-
 # --- message handling -------------------------------------------------------
 
 func _handle_message(env: Dictionary) -> void:
@@ -885,13 +839,11 @@ func _handle_message(env: Dictionary) -> void:
 		_:
 			push_warning("_handle_message: unknown server message type '%s'" % env.get("type", ""))
 
-
 func _envelope_payload(env: Dictionary) -> Dictionary:
 	var payload = env.get("payload", {})
 	if payload is Dictionary:
 		return payload
 	return {}
-
 
 func _snapshot_local_player_id(p: Dictionary) -> String:
 	var explicit := str(p.get("local_player_id", ""))
@@ -902,7 +854,6 @@ func _snapshot_local_player_id(p: Dictionary) -> String:
 			return str(e.get("id", ""))
 	return player_id
 
-
 func _event_subject_entity_id(ev: Dictionary) -> String:
 	var event_type := str(ev.get("event_type", ""))
 	if event_type in ["monster_damaged", "monster_killed", "player_damaged", "player_killed"]:
@@ -910,7 +861,6 @@ func _event_subject_entity_id(ev: Dictionary) -> String:
 		if target_id != "":
 			return target_id
 	return str(ev.get("entity_id", ""))
-
 
 func _handle_intent_rejected(payload: Dictionary) -> void:
 	var message_id := str(payload.get("rejected_message_id", ""))
@@ -938,7 +888,6 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		bishop_panel.show_status(reason.replace("_", " "), true)
 	elif blacksmith_panel != null and blacksmith_panel.visible:
 		blacksmith_panel.show_status(reason.replace("_", " "), true)
-
 
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
@@ -986,6 +935,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_refresh_progression_ui()
 	_refresh_skill_ui()
 	_update_character_info_panel()
+	_sync_quest_journal()
 	_refresh_market_board_summary()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
@@ -993,7 +943,6 @@ func _apply_snapshot(p: Dictionary) -> void:
 		print("[bot-client] snapshot applied entities=%d monsters=%d loot=%d hp=%d" % [
 			entities.size(), monster_ids.size(), loot_ids.size(), player_hp
 		])
-
 
 func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
@@ -1013,6 +962,8 @@ func _apply_delta(p: Dictionary) -> void:
 			_hide_bishop_panel()
 			_hide_market_panel()
 			_hide_blacksmith_panel()
+			if quest_journal_panel != null:
+				quest_journal_panel.hide_display()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -1088,6 +1039,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_:
 				pass
 	_refresh_inventory_ui()
+	_sync_quest_journal()
 	var heal_cast_rain_correlations := _heal_cast_rain_correlations(p.get("events", []))
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
@@ -1339,7 +1291,6 @@ func _apply_delta(p: Dictionary) -> void:
 	_sync_boss_health_bar()
 	_reconcile_player()
 
-
 func _upsert_entity(e: Dictionary) -> void:
 	var id := str(e["id"])
 	var pos: Dictionary = e["position"]
@@ -1476,7 +1427,6 @@ func _upsert_entity(e: Dictionary) -> void:
 			_clear_terminal_entity_status_markers(rec)
 			_enter_entity_terminal_death(id, rec)
 
-
 func _remove_entity(id: String) -> void:
 	if str(pending_interactable_action.get("target_id", "")) == id:
 		pending_interactable_action.clear()
@@ -1498,7 +1448,6 @@ func _remove_entity(id: String) -> void:
 	interactable_ids.erase(id)
 	_sync_boss_health_bar()
 
-
 func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
 	if node == null:
@@ -1508,7 +1457,6 @@ func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, false)
 	PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
-
 
 func _clear_level_entities() -> void:
 	for id in entities.keys():
@@ -1525,7 +1473,6 @@ func _clear_level_entities() -> void:
 	monster_ids.clear()
 	interactable_ids.clear()
 
-
 func _update_inventory_item(item: Dictionary) -> void:
 	for i in range(inventory.size()):
 		if inventory[i]["item_instance_id"] == item["item_instance_id"]:
@@ -1533,12 +1480,10 @@ func _update_inventory_item(item: Dictionary) -> void:
 			return
 	inventory.append(item)
 
-
 func _remove_inventory_item(item_instance_id: String) -> void:
 	for i in range(inventory.size() - 1, -1, -1):
 		if str(inventory[i].get("item_instance_id", "")) == item_instance_id:
 			inventory.remove_at(i)
-
 
 func _upsert_stash_item(item: Dictionary) -> void:
 	var stash_item_id := str(item.get("stash_item_id", ""))
@@ -1552,12 +1497,10 @@ func _upsert_stash_item(item: Dictionary) -> void:
 			return
 	stash_items.append(item.duplicate(true))
 
-
 func _remove_stash_item(stash_item_id: String) -> void:
 	for i in range(stash_items.size() - 1, -1, -1):
 		if str(stash_items[i].get("stash_item_id", "")) == stash_item_id:
 			stash_items.remove_at(i)
-
 
 func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = {}) -> void:
 	if slot_index < 0 or slot_index >= 10:
@@ -1570,7 +1513,6 @@ func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = 
 	hotbar[slot_index] = slot
 	if consumable_bar != null:
 		consumable_bar.apply_hotbar_update(slot_index, item_instance_id, item)
-
 
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
@@ -1595,18 +1537,15 @@ func _refresh_inventory_ui() -> void:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
 
-
 func _refresh_inventory_panel() -> void:
 	_refresh_inventory_ui()
 	if visual_replay_enabled:
 		_sync_inventory_replay_display()
 
-
 func _reconcile_player() -> void:
 	if player_anchor != null:
 		player_anchor.position = predicted_pos
 		_sync_camera_to_player()
-
 
 func _sync_camera_to_player() -> void:
 	if _camera == null or player_anchor == null:
@@ -1614,7 +1553,6 @@ func _sync_camera_to_player() -> void:
 	var target := player_anchor.global_position
 	_camera.global_position = target + CAMERA_FOLLOW_OFFSET
 	_camera.look_at(target, Vector3.UP)
-
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
 	var outcome := str(ev.get("outcome", ""))
@@ -1635,13 +1573,11 @@ func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_colo
 		return
 	_show_damage_number(entity_id, default_color, damage)
 
-
 func _play_local_attack_animation_for_event(ev: Dictionary) -> void:
 	if player_anim == null:
 		return
 	var weapon_slot := str(ev.get("weapon_slot", "main_hand"))
 	player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack")
-
 
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null:
@@ -1649,7 +1585,6 @@ func _play_local_player_reaction_animation(clip: String) -> void:
 	if clip == "hit" and player_anim.current_clip() in ["attack", "attack_off_hand"]:
 		return
 	player_anim.play_one_shot(clip)
-
 
 func _play_entity_reaction(entity_id: String, ev: Dictionary, reaction_name: String) -> void:
 	var reaction = _reaction_for_entity(entity_id)
@@ -1662,7 +1597,6 @@ func _play_entity_reaction(entity_id: String, ev: Dictionary, reaction_name: Str
 	else:
 		reaction.play_hit(source_pos, fallback)
 
-
 func _reaction_for_entity(entity_id: String):
 	if entity_id == player_id:
 		return player_reaction
@@ -1670,7 +1604,6 @@ func _reaction_for_entity(entity_id: String):
 		var rec: Dictionary = entities[entity_id]
 		return rec.get("reaction", null)
 	return null
-
 
 func _source_position_for_event(ev: Dictionary) -> Vector3:
 	var source_id := str(ev.get("source_entity_id", ""))
@@ -1685,7 +1618,6 @@ func _source_position_for_event(ev: Dictionary) -> Vector3:
 			return _node_world_or_local_position(node)
 	return ModelReactionControllerScript.UNRESOLVED_SOURCE
 
-
 func _fallback_reaction_direction(entity_id: String) -> Vector3:
 	var target := _entity_world_position(entity_id)
 	if target != ModelReactionControllerScript.UNRESOLVED_SOURCE and player_anchor != null:
@@ -1694,7 +1626,6 @@ func _fallback_reaction_direction(entity_id: String) -> Vector3:
 		if direction.length() > 0.001:
 			return direction.normalized()
 	return Vector3.BACK
-
 
 func _entity_world_position(entity_id: String) -> Vector3:
 	if entity_id == player_id and player_anchor != null:
@@ -1706,12 +1637,10 @@ func _entity_world_position(entity_id: String) -> Vector3:
 			return _node_world_or_local_position(node)
 	return ModelReactionControllerScript.UNRESOLVED_SOURCE
 
-
 func _node_world_or_local_position(node: Node3D) -> Vector3:
 	if node.is_inside_tree():
 		return node.global_position
 	return node.position
-
 
 func _pulse_holy_shield_aura(ev: Dictionary) -> void:
 	var source_id := str(ev.get("source_entity_id", ""))
@@ -1729,7 +1658,6 @@ func _pulse_holy_shield_aura(ev: Dictionary) -> void:
 	var radius := _holy_shield_aura_radius()
 	PlayerStatusEffectMarkers.pulse_holy_shield_aura(source_root, _entity_roots_in_radius(source_root, radius), radius)
 
-
 func _entity_root_for_id(entity_id: String) -> Node3D:
 	if entity_id == player_id:
 		return player_anchor
@@ -1737,7 +1665,6 @@ func _entity_root_for_id(entity_id: String) -> Node3D:
 		var rec: Dictionary = entities[entity_id]
 		return rec.get("node", null) as Node3D
 	return null
-
 
 func _entity_roots_in_radius(center_root: Node3D, radius: float) -> Array:
 	var roots: Array = []
@@ -1753,7 +1680,6 @@ func _entity_roots_in_radius(center_root: Node3D, radius: float) -> Array:
 			roots.append(node)
 	return roots
 
-
 func _holy_shield_aura_radius() -> float:
 	var def := SkillRulesLoader.skill_definition(PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID)
 	for effect in def.get("effects", []):
@@ -1762,7 +1688,6 @@ func _holy_shield_aura_radius() -> float:
 			return maxf(float(row.get("radius", 5.0)), 0.5)
 	return 5.0
 
-
 func _on_status_effect_expired(skill_id: String) -> void:
 	if skill_id == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
 		_apply_local_player_visual_scale(1.0)
@@ -1770,10 +1695,8 @@ func _on_status_effect_expired(skill_id: String) -> void:
 	if skill_id == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
 		PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, [])
 
-
 func _flat_distance(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
-
 
 func _enter_entity_terminal_death(entity_id: String, rec: Dictionary) -> void:
 	var ctrl = rec.get("controller", null)
@@ -1782,7 +1705,6 @@ func _enter_entity_terminal_death(entity_id: String, rec: Dictionary) -> void:
 	var reaction = rec.get("reaction", null)
 	if reaction != null:
 		reaction.enter_death()
-
 
 func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0, variant: String = "normal", text_override: String = "") -> void:
 	if damage_numbers_layer == null or _camera == null:
@@ -1809,13 +1731,11 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null, p
 	var side := side_override if side_override != 0.0 else (-1.0 if entity_id == player_id else 1.0)
 	pop.setup(_camera, target, world_position, amount, color, side, prefix, variant, text_override)
 
-
 func _spawn_heal_rain(entity_id: String) -> void:
 	var target := _node_for_entity_id(entity_id)
 	if target == null:
 		return
 	_spawn_heal_rain_at_position(_node_world_or_local_position(target))
-
 
 func _spawn_consumable_heal_effect(entity_id: String) -> void:
 	var target := _node_for_entity_id(entity_id)
@@ -1824,7 +1744,6 @@ func _spawn_consumable_heal_effect(entity_id: String) -> void:
 	var effect := ConsumableHealEffectScript.new() as Node3D
 	effect.position = _node_world_or_local_position(target) + Vector3(0.0, 0.45, 0.0)
 	add_child(effect)
-
 
 func _heal_cast_rain_correlations(events: Array) -> Dictionary:
 	var heal_casts := {}
@@ -1852,13 +1771,11 @@ func _heal_cast_rain_correlations(events: Array) -> Dictionary:
 		heal_casts["__uncorrelated__"] = true
 	return heal_casts
 
-
 func _spawn_heal_rain_at_position(world_position: Vector3) -> void:
 	var effect := HealRainEffectScript.new() as HealRainEffect
 	effect.setup(HEAL_RAIN_RADIUS)
 	effect.position = world_position
 	add_child(effect)
-
 
 func _spawn_skill_cone(ev: Dictionary) -> void:
 	var pos := _vec2_from_dict(ev.get("position", {}))
@@ -1903,7 +1820,6 @@ func _spawn_skill_cone(ev: Dictionary) -> void:
 	tween.tween_property(wedge, "scale", Vector3.ONE * 1.03, 0.16)
 	tween.tween_callback(wedge.queue_free)
 
-
 func _spawn_skill_projectile_visual(ev: Dictionary) -> void:
 	var projectile_def_id := str(ev.get("projectile_def_id", ""))
 	if projectile_def_id == "":
@@ -1937,7 +1853,6 @@ func _spawn_skill_projectile_visual(ev: Dictionary) -> void:
 		var finish := Vector3(start.x + shot_dir.x * distance, 0.0, start.z + shot_dir.y * distance)
 		_spawn_single_projectile_visual(projectile_def_id, start, finish, i)
 
-
 func _spawn_single_projectile_visual(projectile_def_id: String, start: Vector3, finish: Vector3, index: int = 0) -> void:
 	var node := ProjectileVisualsScript.make_node(projectile_def_id)
 	node.name = "SkillProjectilePreview_%s" % projectile_def_id
@@ -1954,7 +1869,6 @@ func _spawn_single_projectile_visual(projectile_def_id: String, start: Vector3, 
 		tween.tween_interval(0.025 * float(index))
 	tween.tween_property(node, "position", finish, duration).set_trans(Tween.TRANS_LINEAR)
 	tween.tween_callback(node.queue_free)
-
 
 func _spawn_ligthing_chain(ev: Dictionary) -> void:
 	var source := _node_for_entity_id(str(ev.get("source_entity_id", "")))
@@ -1991,12 +1905,10 @@ func _spawn_ligthing_chain(ev: Dictionary) -> void:
 	tween.tween_property(root, "scale", Vector3(1.25, 1.25, 1.0), 0.5)
 	tween.tween_callback(root.queue_free)
 
-
 func _vec2_from_dict(value) -> Vector2:
 	if value is Dictionary:
 		return Vector2(float(value.get("x", 0.0)), float(value.get("y", 0.0)))
 	return Vector2.ZERO
-
 
 func _node_for_entity_id(entity_id: String) -> Node3D:
 	if entity_id == player_id:
@@ -2004,7 +1916,6 @@ func _node_for_entity_id(entity_id: String) -> Node3D:
 	if entities.has(entity_id):
 		return entities[entity_id].get("node", null) as Node3D
 	return null
-
 
 func _show_inventory_full_text(target_id: String) -> void:
 	if damage_numbers_layer == null or _camera == null:
@@ -2021,20 +1932,17 @@ func _show_inventory_full_text(target_id: String) -> void:
 	damage_numbers_layer.add_child(pop)
 	pop.setup(_camera, target, target.global_position, null, Color("#ffcf5a"), 0.0, "", "inventory", "BAG FULL")
 
-
 func _show_bag_full_cant_unequip_text() -> void:
 	_last_inventory_feedback_text = BAG_FULL_CANT_UNEQUIP_TEXT
 	if inventory_panel != null:
 		inventory_panel.show_gesture_hint(BAG_FULL_CANT_UNEQUIP_TEXT)
 	_show_damage_number(player_id, Color("#ffcf5a"), null, "", 0.0, "inventory", BAG_FULL_CANT_UNEQUIP_TEXT)
 
-
 func _send_action_intent(target_id: String) -> void:
 	if client == null or target_id == "":
 		return
 	var message_id := client.send("action_intent", last_server_tick, {"target_id": target_id})
 	pending_action_targets[message_id] = {"target_id": target_id}
-
 
 func _basic_attack_cooldown_seconds() -> float:
 	var ticks := DEFAULT_ATTACK_INTERVAL_TICKS
@@ -2045,7 +1953,6 @@ func _basic_attack_cooldown_seconds() -> float:
 		ticks = DEFAULT_ATTACK_INTERVAL_TICKS
 	return maxf(SEND_INTERVAL, float(ticks) / SERVER_TICK_RATE)
 
-
 func _start_basic_attack_recovery_ui(duration_seconds: float = -1.0) -> void:
 	if character_bar == null:
 		return
@@ -2054,7 +1961,6 @@ func _start_basic_attack_recovery_ui(duration_seconds: float = -1.0) -> void:
 		duration = _basic_attack_cooldown_seconds()
 	character_bar.start_attack_recovery(duration)
 
-
 func _remove_monster_health_bar(entity_id: String) -> void:
 	if not monster_health_bars.has(entity_id):
 		return
@@ -2062,7 +1968,6 @@ func _remove_monster_health_bar(entity_id: String) -> void:
 	if is_instance_valid(bar):
 		bar.queue_free()
 	monster_health_bars.erase(entity_id)
-
 
 func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_hp: int) -> void:
 	if hp <= 0:
@@ -2078,11 +1983,9 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 	bar.setup(_camera, target, hp, max_hp)
 	monster_health_bars[entity_id] = bar
 
-
 func _hide_boss_health_bar() -> void:
 	if boss_health_bar != null:
 		boss_health_bar.hide_boss()
-
 
 func _sync_boss_health_bar() -> void:
 	if boss_health_bar == null:
@@ -2102,7 +2005,6 @@ func _sync_boss_health_bar() -> void:
 	else:
 		boss_health_bar.set_phase_state(phase)
 
-
 func _advance_boss_phase_display(delta: float) -> void:
 	var changed := false
 	for id in entities.keys():
@@ -2118,7 +2020,6 @@ func _advance_boss_phase_display(delta: float) -> void:
 		changed = true
 	if changed:
 		_sync_boss_health_bar()
-
 
 func _boss_phase_for_display(rec: Dictionary) -> Dictionary:
 	var raw = rec.get("boss_phase", {})
@@ -2139,7 +2040,6 @@ func _boss_phase_for_display(rec: Dictionary) -> Dictionary:
 	rec["boss_phase"] = phase
 	return phase
 
-
 func _active_boss_entity_id() -> String:
 	var candidates: Array = []
 	for id in entities.keys():
@@ -2154,7 +2054,6 @@ func _active_boss_entity_id() -> String:
 	candidates.sort()
 	return str(candidates[0]) if not candidates.is_empty() else ""
 
-
 func _boss_health_bar_title(template_id: String) -> String:
 	if template_id == "":
 		return "Boss"
@@ -2166,7 +2065,6 @@ func _boss_health_bar_title(template_id: String) -> String:
 			continue
 		words.append(word.substr(0, 1).to_upper() + word.substr(1).to_lower())
 	return " ".join(words) if words.size() > 0 else template_id
-
 
 # --- input + prediction -----------------------------------------------------
 
@@ -2221,6 +2119,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				_raise_gameplay_windows()
 			get_viewport().set_input_as_handled()
 			return
+		if _is_quest_journal_key(event):
+			if quest_journal_panel != null:
+				_close_gameplay_panels("quest_journal")
+				_sync_quest_journal()
+				quest_journal_panel.toggle()
+				_raise_gameplay_windows()
+			get_viewport().set_input_as_handled()
+			return
 		if _is_character_info_key(event):
 			_toggle_character_info_panel()
 			get_viewport().set_input_as_handled()
@@ -2263,7 +2169,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			MOUSE_BUTTON_WHEEL_DOWN:
 				_adjust_camera_zoom(CAMERA_ZOOM_STEP)
 
-
 func _handle_input(delta: float) -> void:
 	_update_loot_hover_label()
 	if _user_input_blocked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
@@ -2304,26 +2209,23 @@ func _handle_input(delta: float) -> void:
 	elif _sustained_click.active:
 		_sustained_click.clear()
 
-
 func _is_inventory_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_I or event.physical_keycode == KEY_I or event.unicode == 105 or event.unicode == 73
-
 
 func _is_character_stats_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_C or event.physical_keycode == KEY_C or event.unicode == 99 or event.unicode == 67
 
-
 func _is_character_info_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_P or event.physical_keycode == KEY_P or event.unicode == 112 or event.unicode == 80
-
 
 func _is_skills_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_K or event.physical_keycode == KEY_K or event.unicode == 107 or event.unicode == 75
 
+func _is_quest_journal_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_J or event.physical_keycode == KEY_J or event.unicode == 106 or event.unicode == 74
 
 func _is_skill_slot_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_Q or event.physical_keycode == KEY_Q or event.unicode == 113 or event.unicode == 81
-
 
 func _close_gameplay_panels(except: String = "") -> void:
 	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop", "market", "blacksmith"]) and inventory_panel != null:
@@ -2342,15 +2244,15 @@ func _close_gameplay_panels(except: String = "") -> void:
 		character_stats_panel.hide_display()
 	if not (except in ["skills", "stats"]) and skills_panel != null:
 		skills_panel.hide_display()
+	if except != "quest_journal" and quest_journal_panel != null:
+		quest_journal_panel.hide_display()
 	if except != "character_info":
 		_hide_character_info_panel()
 	if except != "waypoint":
 		_hide_waypoint_panel()
 
-
 func _close_gameplay_panels_for_movement() -> void:
 	_close_gameplay_panels()
-
 
 func _movement_intent_starts_motion(intent_type: String, payload: Dictionary) -> bool:
 	if intent_type == "move_to_intent":
@@ -2362,10 +2264,8 @@ func _movement_intent_starts_motion(intent_type: String, payload: Dictionary) ->
 		return false
 	return absf(float(direction.get("x", 0.0))) > 0.0001 or absf(float(direction.get("y", 0.0))) > 0.0001
 
-
 func _mark_local_player_walking() -> void:
 	_player_walk_linger = WALK_ANIMATION_LINGER_SECONDS
-
 
 func _local_player_is_walking() -> bool:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
@@ -2376,7 +2276,6 @@ func _local_player_is_walking() -> bool:
 		return true
 	return Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
 		or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D)
-
 
 func _tick_movement_animation_linger(delta: float) -> void:
 	_player_walk_linger = maxf(0.0, _player_walk_linger - delta)
@@ -2391,18 +2290,14 @@ func _tick_movement_animation_linger(delta: float) -> void:
 		var hp := int(rec.get("hp", 1))
 		ctrl.set_locomotion(float(rec.get("walk_linger", 0.0)) > 0.0 and hp > 0)
 
-
 func _is_escape_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_ESCAPE or event.physical_keycode == KEY_ESCAPE
-
 
 func _is_force_stand_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_SHIFT or event.physical_keycode == KEY_SHIFT
 
-
 func _is_force_stand_held() -> bool:
 	return Input.is_key_pressed(KEY_SHIFT)
-
 
 func _begin_force_stand() -> void:
 	if not _hold_input_allowed() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -2414,12 +2309,10 @@ func _begin_force_stand() -> void:
 		_reconcile_player()
 	_send_stop_movement_intent()
 
-
 func _send_stop_movement_intent() -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send("move_intent", last_server_tick, {"direction": {"x": 0, "y": 0}, "duration_ticks": 1})
-
 
 func _handle_escape() -> void:
 	if settings_panel != null and settings_panel.visible:
@@ -2439,7 +2332,6 @@ func _handle_escape() -> void:
 	if gameplay_active:
 		_show_pause_menu()
 
-
 func _hotbar_slot_for_key(event: InputEventKey) -> int:
 	var code := event.keycode if event.keycode != KEY_NONE else event.physical_keycode
 	if code >= KEY_1 and code <= KEY_9:
@@ -2448,7 +2340,6 @@ func _hotbar_slot_for_key(event: InputEventKey) -> int:
 		return 9
 	return -1
 
-
 func _skill_function_key_slot(event: InputEventKey) -> int:
 	var code := event.keycode if event.keycode != KEY_NONE else event.physical_keycode
 	if code >= KEY_F1 and code <= KEY_F8:
@@ -2456,16 +2347,13 @@ func _skill_function_key_slot(event: InputEventKey) -> int:
 		return int(code - KEY_F1) + offset
 	return -1
 
-
 func _input_locked() -> bool:
 	return visual_replay_enabled or autoplay_enabled or _menu_blocks_gameplay_input()
-
 
 func _user_input_blocked() -> bool:
 	# Replay/autoplay fully lock input. Bot mode blocks real mouse/WASD but still
 	# allows push_input() key events through _unhandled_input().
 	return _input_locked() or bot_mode
-
 
 func _menu_blocks_gameplay_input() -> bool:
 	return (main_menu != null and main_menu.visible) \
@@ -2474,7 +2362,6 @@ func _menu_blocks_gameplay_input() -> bool:
 		or (settings_panel != null and settings_panel.visible) \
 		or (pause_menu != null and pause_menu.visible) \
 		or (loss_popup != null and loss_popup.visible)
-
 
 func _handle_autoplay(delta: float) -> void:
 	if client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -2540,7 +2427,6 @@ func _handle_autoplay(delta: float) -> void:
 		"done":
 			return
 
-
 func _hold_input_allowed() -> bool:
 	if _input_locked() or bot_mode:
 		return false
@@ -2560,7 +2446,6 @@ func _hold_input_allowed() -> bool:
 
 	return true
 
-
 func _resolve_click_at_mouse() -> Dictionary:
 	var target_id := _pick_entity_at_mouse()
 	if target_id == "" or not entities.has(target_id):
@@ -2576,7 +2461,6 @@ func _resolve_click_at_mouse() -> Dictionary:
 		return {"kind": "monster", "target_id": target_id}
 
 	return {"kind": "oneshot", "target_id": target_id}
-
 
 func _execute_click_pick(pick: Dictionary) -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
@@ -2620,7 +2504,6 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	if typ == "monster":
 		_start_basic_attack_recovery_ui(_attack_cooldown)
 
-
 func _target_in_local_attack_range(target_id: String) -> bool:
 	if player_anchor == null or target_id == "" or not entities.has(target_id):
 		return false
@@ -2634,7 +2517,6 @@ func _target_in_local_attack_range(target_id: String) -> bool:
 	var reach := _local_player_attack_reach()
 	return flat.length() <= reach + _local_target_interaction_radius(rec) + LOCAL_REACH_EPSILON
 
-
 func _local_player_attack_reach() -> float:
 	var item := _local_equipped_weapon_item()
 	if item.is_empty():
@@ -2642,7 +2524,6 @@ func _local_player_attack_reach() -> float:
 	var def := _local_equipped_weapon_definition(item)
 	var reach := float(def.get("reach", LOCAL_UNARMED_REACH))
 	return reach if reach > 0.0 else LOCAL_UNARMED_REACH
-
 
 func _local_equipped_weapon_item() -> Dictionary:
 	var raw_weapon_id = equipped.get("main_hand", null)
@@ -2657,7 +2538,6 @@ func _local_equipped_weapon_item() -> Dictionary:
 			return row
 	return {}
 
-
 func _local_equipped_weapon_definition(item: Dictionary) -> Dictionary:
 	ItemRulesLoader.ensure_loaded()
 	var template_id := str(item.get("item_template_id", ""))
@@ -2670,7 +2550,6 @@ func _local_equipped_weapon_definition(item: Dictionary) -> Dictionary:
 		return ItemRulesLoader.item_definition(item_def_id)
 	return {}
 
-
 func _local_target_interaction_radius(rec: Dictionary) -> float:
 	match str(rec.get("type", "")):
 		"monster":
@@ -2681,7 +2560,6 @@ func _local_target_interaction_radius(rec: Dictionary) -> float:
 			return LOCAL_INTERACTABLE_RADIUS
 		_:
 			return 0.0
-
 
 func _tick_sustained_click() -> void:
 	if not _sustained_click.active:
@@ -2700,7 +2578,6 @@ func _tick_sustained_click() -> void:
 		_repeat_directional_attack()
 	elif _sustained_click.mode == "move":
 		_repeat_hold_move()
-
 
 func _repeat_hold_attack() -> void:
 	var target_id := _sustained_click.target_id
@@ -2731,7 +2608,6 @@ func _repeat_hold_attack() -> void:
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
 
-
 func _repeat_hold_move() -> void:
 	if _is_force_stand_held():
 		_sustained_click.clear()
@@ -2746,7 +2622,6 @@ func _repeat_hold_move() -> void:
 	_sustained_click.mark_move_sent(ground)
 	_attack_cooldown = SEND_INTERVAL
 
-
 func _try_action_at_mouse() -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
 		return
@@ -2755,7 +2630,6 @@ func _try_action_at_mouse() -> void:
 		return
 
 	_execute_click_pick(_resolve_click_at_mouse())
-
 
 func _interactable_should_approach_before_action(interactable_def_id: String) -> bool:
 	return interactable_def_id in [
@@ -2770,7 +2644,6 @@ func _interactable_should_approach_before_action(interactable_def_id: String) ->
 		"town_market_board",
 		"town_blacksmith",
 	]
-
 
 func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> void:
 	if _interactable_in_activation_range(rec):
@@ -2796,7 +2669,6 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 	})
 	_attack_cooldown = SEND_INTERVAL
 
-
 func _try_complete_pending_interactable_action() -> void:
 	if pending_interactable_action.is_empty() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		return
@@ -2810,7 +2682,6 @@ func _try_complete_pending_interactable_action() -> void:
 	pending_interactable_action.clear()
 	_activate_interactable_now(target_id, rec)
 
-
 func _interactable_in_activation_range(rec: Dictionary) -> bool:
 	var target_node := rec.get("node") as Node3D
 	if target_node == null or player_anchor == null:
@@ -2822,7 +2693,6 @@ func _interactable_in_activation_range(rec: Dictionary) -> bool:
 		target_pos.z - player_pos.z
 	)
 	return flat.length() <= INTERACTABLE_ACTIVATION_RANGE
-
 
 func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
@@ -2844,12 +2714,10 @@ func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
 	_send_action_intent(target_id)
 	_attack_cooldown = SEND_INTERVAL
 
-
 func _update_facing_toward_mouse() -> void:
 	var aim := _aim_direction_from_mouse()
 	if aim != Vector2.ZERO:
 		_face_direction(aim)
-
 
 func _face_direction(flat_dir: Vector2) -> void:
 	if character_visual == null or player_anchor == null:
@@ -2861,13 +2729,11 @@ func _face_direction(flat_dir: Vector2) -> void:
 
 	character_visual.rotation.y = atan2(facing.x, facing.y)
 
-
 func _face_entity_direction(node: Node3D, flat_dir: Vector2) -> void:
 	if node == null or flat_dir.length_squared() <= 0.0001:
 		return
 	var facing := flat_dir.normalized()
 	node.rotation.y = atan2(facing.x, facing.y)
-
 
 func _camera_relative_flat_direction(input: Vector2) -> Vector2:
 	# WASD is screen-relative under the isometric camera, not world X/Z.
@@ -2889,7 +2755,6 @@ func _camera_relative_flat_direction(input: Vector2) -> Vector2:
 	var world := right * input.x - forward * input.y
 	return Vector2(world.x, world.z).normalized()
 
-
 func _aim_direction_from_mouse() -> Vector2:
 	if _camera == null or player_anchor == null:
 		return Vector2.ZERO
@@ -2901,18 +2766,15 @@ func _aim_direction_from_mouse() -> Vector2:
 
 	return flat.normalized()
 
-
 func _start_directional_attack_hold() -> void:
 	_sustained_click.begin_directional_attack()
 	_try_send_directional_attack()
-
 
 func _repeat_directional_attack() -> void:
 	if not DirectionalAttackInputScript.can_repeat(_is_force_stand_held(), Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT), _hold_input_allowed(), player_hp):
 		_sustained_click.clear()
 		return
 	_try_send_directional_attack()
-
 
 func _try_send_directional_attack() -> void:
 	if _attack_cooldown > 0.0 or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -2924,7 +2786,6 @@ func _try_send_directional_attack() -> void:
 	client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(direction))
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
-
 
 func _mouse_ground_point() -> Vector3:
 	var mouse_pos := get_viewport().get_mouse_position()
@@ -2938,7 +2799,6 @@ func _mouse_ground_point() -> Vector3:
 		return player_anchor.global_position
 
 	return origin + normal * t
-
 
 func _pick_entity_at_mouse() -> String:
 	if _camera == null:
@@ -2962,13 +2822,11 @@ func _pick_entity_at_mouse() -> String:
 		return hit_entity_id
 	return ""
 
-
 func _is_dead_monster(entity_id: String) -> bool:
 	if not entities.has(entity_id):
 		return false
 	var rec: Dictionary = entities[entity_id]
 	return str(rec.get("type", "")) == "monster" and int(rec.get("hp", 1)) <= 0
-
 
 func _nearest_loot_at_ground(ground: Vector3) -> String:
 	var best_id := ""
@@ -2987,7 +2845,6 @@ func _nearest_loot_at_ground(ground: Vector3) -> String:
 		return best_id
 	return ""
 
-
 func _update_loot_hover_label() -> void:
 	var reveal_held := _is_loot_label_reveal_held()
 	var reveal_changed := reveal_held != loot_label_reveal_held
@@ -3005,10 +2862,8 @@ func _update_loot_hover_label() -> void:
 	hovered_loot_id = next_hover
 	_refresh_loot_label_visibility()
 
-
 func _is_loot_label_reveal_held() -> bool:
 	return Input.is_key_pressed(KEY_ALT)
-
 
 func _refresh_loot_label_visibility() -> void:
 	for label_id in _loot_label_entity_ids():
@@ -3024,7 +2879,6 @@ func _refresh_loot_label_visibility() -> void:
 				_set_pickable(node, allowed or highlighted)
 		_set_loot_label_visible(id, revealed or highlighted, highlighted)
 
-
 func _loot_label_entity_ids() -> Array:
 	var out: Array = []
 	for loot_id in loot_ids:
@@ -3035,13 +2889,11 @@ func _loot_label_entity_ids() -> Array:
 			out.append(id)
 	return out
 
-
 func _entity_uses_loot_label(entity_id: String) -> bool:
 	if entity_id == "" or not entities.has(entity_id):
 		return false
 	var rec: Dictionary = entities[entity_id]
 	return str(rec.get("type", "")) == "loot" or str(rec.get("interactable_def_id", "")) == "hero_corpse"
-
 
 func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = false) -> void:
 	if loot_id == "" or not entities.has(loot_id):
@@ -3052,7 +2904,6 @@ func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = f
 		var rec: Dictionary = entities.get(loot_id, {})
 		label.modulate = _loot_filter.display_color(_loot_label_color(rec), highlighted)
 
-
 func _loot_label_node(loot_id: String) -> Label3D:
 	if loot_id == "" or not entities.has(loot_id):
 		return null
@@ -3060,7 +2911,6 @@ func _loot_label_node(loot_id: String) -> Label3D:
 	if node == null:
 		return null
 	return node.find_child("LootLabel", true, false) as Label3D
-
 
 func _set_pickable(node: Node3D, pickable: bool) -> void:
 	if node == null:
@@ -3072,13 +2922,11 @@ func _set_pickable(node: Node3D, pickable: bool) -> void:
 	body.collision_mask = 1 if pickable else 0
 	body.input_ray_pickable = pickable
 
-
 func _adjust_camera_zoom(delta_size: float) -> void:
 	if _camera == null:
 		return
 
 	_camera.size = clampf(_camera.size + delta_size, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
-
 
 # --- visual replay playlist -------------------------------------------------
 
@@ -3093,7 +2941,6 @@ func _load_visual_replay_manifest(path: String) -> bool:
 		return false
 	visual_replay_scenarios = parsed.get("scenarios", [])
 	return visual_replay_scenarios.size() > 0
-
 
 func _start_next_visual_replay() -> void:
 	visual_replay_index += 1
@@ -3151,7 +2998,6 @@ func _start_next_visual_replay() -> void:
 	if visual_replay_envelopes.is_empty():
 		_start_next_visual_replay()
 
-
 func _handle_visual_replay(delta: float) -> void:
 	if visual_replay_exit_requested:
 		visual_replay_exit_timer -= delta
@@ -3179,7 +3025,6 @@ func _handle_visual_replay(delta: float) -> void:
 	_handle_message(env)
 	visual_replay_timer = _visual_replay_delay_for(env)
 
-
 func _visual_replay_delay_for(env: Dictionary) -> float:
 	if str(env.get("type", "")) != "state_delta":
 		return autoplay_step_delay
@@ -3204,7 +3049,6 @@ func _visual_replay_delay_for(env: Dictionary) -> float:
 			delay = maxf(delay, autoplay_step_delay * 1.35)
 	return delay
 
-
 func _sync_inventory_replay_display() -> void:
 	if inventory_panel == null or not visual_replay_enabled:
 		return
@@ -3216,14 +3060,12 @@ func _sync_inventory_replay_display() -> void:
 	else:
 		inventory_panel.hide_display()
 
-
 func _apply_shop_event_refresh(ev: Dictionary) -> void:
 	if shop_panel == null or not shop_panel.visible:
 		return
 	if not ev.has("offers") and not ev.has("sell_appraisals"):
 		return
 	shop_panel.apply_shop_refresh(ev.get("offers", []), ev.get("sell_appraisals", []))
-
 
 func _entity_world_center(entity_id: String) -> Vector3:
 	if not entities.has(entity_id):
@@ -3232,7 +3074,6 @@ func _entity_world_center(entity_id: String) -> Vector3:
 	if node == null:
 		return Vector3.ZERO
 	return node.global_position
-
 
 # --- scene construction (placeholder primitives) ----------------------------
 
@@ -3303,6 +3144,8 @@ func _build_scene() -> void:
 	skills_panel = SkillsPanelScript.new()
 	skills_panel.allocate_skill_point_requested.connect(_on_skill_point_requested)
 	ui.add_child(skills_panel)
+	quest_journal_panel = QuestJournalPanelScript.new()
+	ui.add_child(quest_journal_panel)
 	character_bar = CharacterBarScript.new()
 	character_bar.open_character_requested.connect(_open_character_panel_from_bar)
 	ui.add_child(character_bar)
@@ -3336,7 +3179,6 @@ func _build_scene() -> void:
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
 
-
 func _make_ground_node() -> MeshInstance3D:
 	var node := MeshInstance3D.new()
 	node.name = "Ground"
@@ -3349,16 +3191,13 @@ func _make_ground_node() -> MeshInstance3D:
 	node.material_override = _ground_material_for_level(current_level)
 	return node
 
-
 func _update_ground_material() -> void:
 	if ground_node == null:
 		return
 	ground_node.material_override = _ground_material_for_level(current_level)
 
-
 func _ground_texture_id_for_level(level: int) -> String:
 	return GROUND_TEXTURE_TOWN if level == 0 else GROUND_TEXTURE_DUNGEON
-
 
 func _ground_material_for_level(level: int) -> StandardMaterial3D:
 	var texture_id := _ground_texture_id_for_level(level)
@@ -3370,7 +3209,6 @@ func _ground_material_for_level(level: int) -> StandardMaterial3D:
 	mat.uv1_scale = Vector3(28.0, 18.0, 1.0)
 	return mat
 
-
 func _make_ground_texture(texture_id: String) -> ImageTexture:
 	if ground_textures.has(texture_id):
 		return ground_textures[texture_id] as ImageTexture
@@ -3381,7 +3219,6 @@ func _make_ground_texture(texture_id: String) -> ImageTexture:
 	var texture := ImageTexture.create_from_image(image)
 	ground_textures[texture_id] = texture
 	return texture
-
 
 func _ground_texel(texture_id: String, x: int, y: int) -> Color:
 	var n := int((x * 37 + y * 19 + ((x / 8) * 11) + ((y / 8) * 23)) % 17)
@@ -3406,7 +3243,6 @@ func _ground_texel(texture_id: String, x: int, y: int) -> Color:
 		rock = rock.lerp(Color("#a09a8e"), 0.28)
 	return rock
 
-
 func _make_wall_texture(texture_id: String) -> ImageTexture:
 	if wall_textures.has(texture_id):
 		return wall_textures[texture_id] as ImageTexture
@@ -3417,7 +3253,6 @@ func _make_wall_texture(texture_id: String) -> ImageTexture:
 	var texture := ImageTexture.create_from_image(image)
 	wall_textures[texture_id] = texture
 	return texture
-
 
 func _wall_texel(_texture_id: String, x: int, y: int) -> Color:
 	var brick_w := 16
@@ -3437,7 +3272,6 @@ func _wall_texel(_texture_id: String, x: int, y: int) -> Color:
 	if ((x - y) % 19) == 0:
 		stone = stone.lerp(Color("#22252a"), 0.30)
 	return stone
-
 
 func _setup_menu_layer() -> void:
 	menu_layer = CanvasLayer.new()
@@ -3487,7 +3321,6 @@ func _setup_menu_layer() -> void:
 	loss_popup = _build_loss_popup()
 	menu_layer.add_child(loss_popup)
 
-
 func _build_loss_popup() -> Control:
 	var root := Control.new()
 	root.visible = false
@@ -3527,7 +3360,6 @@ func _build_loss_popup() -> Control:
 	box.add_child(button)
 	return root
 
-
 func _show_loss_popup() -> void:
 	if loss_popup == null or loss_popup.visible:
 		return
@@ -3539,8 +3371,9 @@ func _show_loss_popup() -> void:
 	_hide_market_panel()
 	if skills_panel != null:
 		skills_panel.hide_display()
+	if quest_journal_panel != null:
+		quest_journal_panel.hide_display()
 	loss_popup.visible = true
-
 
 func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) -> void:
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -3551,7 +3384,6 @@ func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) ->
 	if TownServiceBridgeScript.route_inventory_stage_intent(intent_type, payload, market_panel, blacksmith_panel):
 		return
 	client.send(intent_type, last_server_tick, payload)
-
 
 func _send_stash_equip_item_intent(payload: Dictionary) -> void:
 	var stash_item_id := str(payload.get("stash_item_id", ""))
@@ -3564,7 +3396,6 @@ func _send_stash_equip_item_intent(payload: Dictionary) -> void:
 		"stash_entity_id": stash_entity_id,
 		"stash_item_id": stash_item_id,
 	})
-
 
 func _handle_stash_item_withdrawn(ev: Dictionary) -> void:
 	var stash_item_id := str(ev.get("stash_item_id", ""))
@@ -3580,26 +3411,21 @@ func _handle_stash_item_withdrawn(ev: Dictionary) -> void:
 		"slot": slot,
 	})
 
-
 func _is_equipment_slot(slot: String) -> bool:
 	return slot in ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
-
 
 func _on_character_stat_requested(stat: String) -> void:
 	if _stat_allocation_blocked():
 		return
 	client.send("allocate_stat_intent", last_server_tick, {"stat": stat, "points": 1})
 
-
 func _on_skill_point_requested(skill_id: String) -> void:
 	if _skill_allocation_blocked():
 		return
 	client.send("allocate_skill_point_intent", last_server_tick, {"skill_id": skill_id})
 
-
 func _on_skill_cast_requested(skill_id: String) -> void:
 	_send_skill_cast_intent(skill_id)
-
 
 func _open_skills_panel_from_bar() -> void:
 	if skills_panel == null:
@@ -3609,7 +3435,6 @@ func _open_skills_panel_from_bar() -> void:
 	_refresh_skill_ui()
 	_raise_gameplay_windows()
 
-
 func _open_character_panel_from_bar() -> void:
 	if character_stats_panel == null or _input_locked():
 		return
@@ -3617,7 +3442,6 @@ func _open_character_panel_from_bar() -> void:
 	character_stats_panel.ensure_display_visible()
 	_refresh_progression_ui()
 	_raise_gameplay_windows()
-
 
 func _stat_allocation_blocked() -> bool:
 	return visual_replay_enabled \
@@ -3628,7 +3452,6 @@ func _stat_allocation_blocked() -> bool:
 		or player_hp <= 0 \
 		or int(character_progression.get("unspent_stat_points", 0)) <= 0
 
-
 func _skill_allocation_blocked() -> bool:
 	return visual_replay_enabled \
 		or autoplay_enabled \
@@ -3638,10 +3461,8 @@ func _skill_allocation_blocked() -> bool:
 		or player_hp <= 0 \
 		or int(skill_progression.get("unspent_skill_points", 0)) <= 0
 
-
 func _skill_cast_blocked(skill_id: String = "") -> bool:
 	return _skill_cast_block_reason(skill_id) != ""
-
 
 func _skill_cast_block_reason(skill_id: String = "") -> String:
 	var resolved_skill_id := skill_id
@@ -3667,7 +3488,6 @@ func _skill_cast_block_reason(skill_id: String = "") -> String:
 		return "not_enough_mana"
 	return ""
 
-
 func _assign_right_click_skill(skill_id: String) -> bool:
 	if _skill_rank(skill_id) <= 0:
 		return false
@@ -3676,7 +3496,6 @@ func _assign_right_click_skill(skill_id: String) -> bool:
 	_sync_skill_bar_selection()
 	_send_skill_bindings_intent()
 	return true
-
 
 func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
 	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT or skill_id == "":
@@ -3690,7 +3509,6 @@ func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
 	_send_skill_bindings_intent()
 	return true
 
-
 func _select_right_click_skill_from_function_key(slot_index: int) -> bool:
 	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT:
 		return false
@@ -3699,7 +3517,6 @@ func _select_right_click_skill_from_function_key(slot_index: int) -> bool:
 	if skill_id == "":
 		return false
 	return _assign_right_click_skill(skill_id)
-
 
 func _handle_skill_function_key(slot_index: int) -> bool:
 	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT:
@@ -3710,13 +3527,11 @@ func _handle_skill_function_key(slot_index: int) -> bool:
 			return _assign_skill_function_key(slot_index, hovered_skill_id)
 	return _select_right_click_skill_from_function_key(slot_index)
 
-
 func _ensure_skill_function_key_slots() -> void:
 	while skill_function_keys.size() < SKILL_FUNCTION_KEY_COUNT:
 		skill_function_keys.append("")
 	if skill_function_keys.size() > SKILL_FUNCTION_KEY_COUNT:
 		skill_function_keys.resize(SKILL_FUNCTION_KEY_COUNT)
-
 
 func _apply_skill_bindings(bindings: Dictionary) -> void:
 	var keys: Array = bindings.get("function_keys", [])
@@ -3725,7 +3540,6 @@ func _apply_skill_bindings(bindings: Dictionary) -> void:
 	right_click_skill_id = str(bindings.get("right_click_skill_id", right_click_skill_id))
 	_sync_skill_bindings_ui()
 	_sync_skill_bar_selection()
-
 
 func _send_skill_bindings_intent() -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
@@ -3736,11 +3550,9 @@ func _send_skill_bindings_intent() -> void:
 		"right_click_skill_id": right_click_skill_id,
 	})
 
-
 func _sync_skill_bindings_ui() -> void:
 	if skills_panel != null:
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
-
 
 func _sync_skill_bar_selection() -> void:
 	if skill_bar == null:
@@ -3756,7 +3568,6 @@ func _sync_skill_bar_selection() -> void:
 	skill_bar.set_skill_cooldowns(skill_cooldowns)
 	skill_bar.set_player_mana(player_mana, player_max_mana)
 	skill_bar.set_interactive(not _skill_cast_blocked(selected_skill_id))
-
 
 func _tick_skill_cooldowns(delta: float) -> void:
 	if skill_cooldowns.is_empty():
@@ -3783,7 +3594,6 @@ func _tick_skill_cooldowns(delta: float) -> void:
 		if skill_bar != null:
 			skill_bar.set_skill_cooldowns(skill_cooldowns)
 
-
 func _auto_select_right_click_skill() -> void:
 	if right_click_skill_id != "" and _skill_rank(right_click_skill_id) > 0:
 		return
@@ -3795,14 +3605,12 @@ func _auto_select_right_click_skill() -> void:
 			return
 	right_click_skill_id = _first_learned_skill_id()
 
-
 func _first_learned_skill_id() -> String:
 	for id in SkillRulesLoader.skill_ids_by_tree():
 		var skill_id := str(id)
 		if _skill_rank(skill_id) > 0:
 			return skill_id
 	return ""
-
 
 func _refresh_progression_ui() -> void:
 	if inventory_panel != null:
@@ -3816,7 +3624,6 @@ func _refresh_progression_ui() -> void:
 	if consumable_bar != null:
 		consumable_bar.set_character_progression(character_progression)
 
-
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
 	if skills_panel != null:
@@ -3825,7 +3632,6 @@ func _refresh_skill_ui() -> void:
 		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
 		skills_panel.set_interactive(not _skill_allocation_blocked())
 	_sync_skill_bar_selection()
-
 
 func _sync_progression_interactivity() -> void:
 	if character_stats_panel != null:
@@ -3837,7 +3643,6 @@ func _sync_progression_interactivity() -> void:
 	if skill_bar != null:
 		skill_bar.set_player_mana(player_mana, player_max_mana)
 		skill_bar.set_interactive(not _skill_cast_blocked(str(skill_bar.get_debug_state().get("skill_id", ""))))
-
 
 func _try_use_right_click_skill() -> bool:
 	if right_click_skill_id == "":
@@ -3851,7 +3656,6 @@ func _try_use_right_click_skill() -> bool:
 		direction = _aim_direction_from_mouse()
 	var sent := _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
 	return sent
-
 
 func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> bool:
 	var blocked_reason := _skill_cast_block_reason(skill_id)
@@ -3868,7 +3672,6 @@ func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction
 	if player_anim != null:
 		player_anim.play_one_shot("attack")
 	return true
-
 
 func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> Dictionary:
 	var payload := {"skill_id": skill_id}
@@ -3901,11 +3704,9 @@ func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Ve
 	payload["direction"] = {"x": dir.x, "y": dir.y}
 	return payload
 
-
 func _skill_targeting(skill_id: String) -> String:
 	var def := SkillRulesLoader.skill_definition(skill_id)
 	return str(def.get("targeting", "direction_or_target"))
-
 
 func _is_skill_reject_reason(reason: String) -> bool:
 	return reason.begins_with("skill_") \
@@ -3919,7 +3720,6 @@ func _is_skill_reject_reason(reason: String) -> bool:
 		or reason == "projectile_busy" \
 		or reason == "unsupported_skill_kind"
 
-
 func _show_skill_rejected_feedback(reason: String = "") -> void:
 	if skill_bar != null:
 		skill_bar.flash_rejected()
@@ -3930,7 +3730,6 @@ func _show_skill_rejected_feedback(reason: String = "") -> void:
 		color = Color("#54c7f3")
 		variant = "mana"
 	_show_damage_number(player_id, color, null, "", 0.0, variant, message)
-
 
 func _skill_reject_message(reason: String) -> String:
 	match reason:
@@ -3973,11 +3772,9 @@ func _skill_reject_message(reason: String) -> String:
 		_:
 			return reason.replace("_", " ").to_upper()
 
-
 func _skill_rank(skill_id: String) -> int:
 	var row := _skill_progression_row(skill_id)
 	return int(row.get("rank", 0))
-
 
 func _skill_mana_cost(skill_id: String) -> int:
 	var rank := _skill_rank(skill_id)
@@ -3988,14 +3785,12 @@ func _skill_mana_cost(skill_id: String) -> int:
 	var mana: Dictionary = cost.get("mana", {})
 	return maxi(0, int(mana.get("base", 0)) + int(mana.get("per_rank", 0)) * maxi(0, rank - 1))
 
-
 func _skill_progression_row(skill_id: String) -> Dictionary:
 	var rows: Array = skill_progression.get("skills", [])
 	for row in rows:
 		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("skill_id", "")) == skill_id:
 			return row as Dictionary
 	return {}
-
 
 func _nearest_live_monster_id() -> String:
 	var best_id := ""
@@ -4017,7 +3812,6 @@ func _nearest_live_monster_id() -> String:
 			best_id = id
 	return best_id
 
-
 func _face_toward_entity(target_id: String) -> void:
 	if target_id == "" or not entities.has(target_id):
 		return
@@ -4029,7 +3823,6 @@ func _face_toward_entity(target_id: String) -> void:
 	var flat := Vector2(pos.x - predicted_pos.x, pos.z - predicted_pos.z)
 	if flat.length_squared() > 0.0001:
 		_face_direction(flat.normalized())
-
 
 func _setup_character_info_panel(ui: CanvasLayer) -> void:
 	character_info_panel = PanelContainer.new()
@@ -4063,7 +3856,6 @@ func _setup_character_info_panel(ui: CanvasLayer) -> void:
 	root.add_child(character_info_area_label)
 	_update_character_info_panel()
 
-
 func _toggle_character_info_panel() -> void:
 	if character_info_panel == null or not gameplay_active:
 		return
@@ -4073,11 +3865,9 @@ func _toggle_character_info_panel() -> void:
 		_update_character_info_panel()
 		_raise_gameplay_windows()
 
-
 func _hide_character_info_panel() -> void:
 	if character_info_panel != null:
 		character_info_panel.visible = false
-
 
 func _update_character_info_panel() -> void:
 	if character_info_panel == null:
@@ -4089,11 +3879,9 @@ func _update_character_info_panel() -> void:
 	if character_info_area_label != null:
 		character_info_area_label.text = "Area  %s" % _current_area_label()
 
-
 func _refresh_player_hud_identity() -> void:
 	if _health_bar != null:
 		_health_bar.set_identity(_local_character_display_name(), int(character_progression.get("level", 1)))
-
 
 func _local_character_display_name() -> String:
 	for member in party:
@@ -4106,13 +3894,11 @@ func _local_character_display_name() -> String:
 				return display_name
 	return "Hero"
 
-
 func _current_area_label() -> String:
 	if current_level == 0:
 		return "Town"
 	var depth: int = abs(current_level)
 	return "Dungeon lvl%d - %s" % [depth, _dungeon_level_name(current_level)]
-
 
 func _character_info_label() -> Label:
 	var label := Label.new()
@@ -4120,7 +3906,6 @@ func _character_info_label() -> Label:
 	label.add_theme_font_size_override("font_size", 21)
 	label.clip_text = true
 	return label
-
 
 func _character_info_panel_style() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -4139,7 +3924,6 @@ func _character_info_panel_style() -> StyleBoxFlat:
 	s.content_margin_top = 10
 	s.content_margin_bottom = 10
 	return s
-
 
 func _setup_waypoint_panel(ui: CanvasLayer) -> void:
 	waypoint_panel = PanelContainer.new()
@@ -4165,14 +3949,12 @@ func _setup_waypoint_panel(ui: CanvasLayer) -> void:
 	waypoint_panel.add_child(panel_box)
 	ui.add_child(waypoint_panel)
 
-
 func _apply_teleporter_snapshot(rows: Array) -> void:
 	discovered_teleporters.clear()
 	for row in rows:
 		if typeof(row) != TYPE_DICTIONARY:
 			continue
 		discovered_teleporters[int(row.get("level", 0))] = bool(row.get("discovered", false))
-
 
 func _show_waypoint_panel() -> void:
 	if waypoint_panel == null:
@@ -4181,11 +3963,9 @@ func _show_waypoint_panel() -> void:
 	_refresh_waypoint_panel()
 	waypoint_panel.visible = true
 
-
 func _hide_waypoint_panel() -> void:
 	if waypoint_panel != null:
 		waypoint_panel.visible = false
-
 
 func _show_shop_panel(ev: Dictionary) -> void:
 	if shop_panel == null:
@@ -4208,13 +3988,11 @@ func _show_shop_panel(ev: Dictionary) -> void:
 	)
 	_raise_gameplay_windows()
 
-
 func _hide_shop_panel() -> void:
 	if shop_panel != null:
 		shop_panel.hide_display()
 	if inventory_panel != null:
 		inventory_panel.clear_shop_sell_context()
-
 
 func _show_stash_panel(ev: Dictionary) -> void:
 	if stash_panel == null:
@@ -4241,7 +4019,6 @@ func _show_stash_panel(ev: Dictionary) -> void:
 	)
 	_raise_gameplay_windows()
 
-
 func _show_corpse_panel(ev: Dictionary) -> void:
 	if stash_panel == null:
 		return
@@ -4262,7 +4039,6 @@ func _show_corpse_panel(ev: Dictionary) -> void:
 	)
 	_raise_gameplay_windows()
 
-
 func _show_unique_chest_panel(ev: Dictionary) -> void:
 	if stash_panel == null:
 		return
@@ -4281,11 +4057,9 @@ func _show_unique_chest_panel(ev: Dictionary) -> void:
 	)
 	_raise_gameplay_windows()
 
-
 func _hide_stash_panel() -> void:
 	if stash_panel != null:
 		stash_panel.hide_display()
-
 
 func _show_bishop_panel(ev: Dictionary) -> void:
 	if bishop_panel == null:
@@ -4301,11 +4075,9 @@ func _show_bishop_panel(ev: Dictionary) -> void:
 	)
 	_raise_gameplay_windows()
 
-
 func _hide_bishop_panel() -> void:
 	if bishop_panel != null:
 		bishop_panel.hide_display()
-
 
 func _show_market_panel(ev: Dictionary) -> void:
 	if market_panel == null:
@@ -4325,7 +4097,6 @@ func _show_market_panel(ev: Dictionary) -> void:
 			status = "No active listings"
 	market_panel.show_market(next_entity_id, listings, inventory, client.account_id if client != null else "", status)
 	_raise_gameplay_windows()
-
 
 func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	if client == null:
@@ -4413,7 +4184,6 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		return
 	_refresh_market_panel_data()
 
-
 func _on_market_inventory_context_requested(context: String) -> void:
 	TownServiceBridgeScript.set_market_inventory_context(inventory_panel, context)
 	if context != "" and market_panel != null:
@@ -4421,11 +4191,9 @@ func _on_market_inventory_context_requested(context: String) -> void:
 	else:
 		_on_market_staged_offer_items_changed([])
 
-
 func _on_market_staged_offer_items_changed(item_instance_ids: Array) -> void:
 	if inventory_panel != null:
 		inventory_panel.set_market_hidden_item_ids(item_instance_ids)
-
 
 func _refresh_market_panel_data() -> void:
 	_refresh_market_board_summary()
@@ -4435,13 +4203,11 @@ func _refresh_market_panel_data() -> void:
 	var listings: Array = body.get("listings", [])
 	market_panel.show_market(market_panel.market_entity_id, listings, inventory, client.account_id, market_panel.get_debug_state().get("status", ""))
 
-
 func _remove_market_stash_item(stash_item_id: String) -> void:
 	for i in range(stash_items.size() - 1, -1, -1):
 		if str((stash_items[i] as Dictionary).get("stash_item_id", "")) == stash_item_id:
 			stash_items.remove_at(i)
 			return
-
 
 func _refresh_market_board_summary() -> void:
 	if client == null or interactable_ids.is_empty():
@@ -4459,7 +4225,6 @@ func _refresh_market_board_summary() -> void:
 		int(summary.get("incoming_bids", 0)),
 		int(summary.get("published_listings", 0))
 	)
-
 
 func _update_market_board_badges(incoming_bids: int, published_listings: int) -> void:
 	for id in interactable_ids:
@@ -4481,13 +4246,11 @@ func _update_market_board_badges(incoming_bids: int, published_listings: int) ->
 			right.text = str(published_listings)
 			right.modulate = Color("#9fd7ff") if published_listings > 0 else Color("#776d5e")
 
-
 func _hide_market_panel() -> void:
 	if market_panel != null:
 		market_panel.hide_display()
 	TownServiceBridgeScript.close_market_inventory_context(inventory_panel)
 	_on_market_staged_offer_items_changed([])
-
 
 func _show_blacksmith_panel(ev: Dictionary) -> void:
 	if blacksmith_panel == null:
@@ -4501,12 +4264,10 @@ func _show_blacksmith_panel(ev: Dictionary) -> void:
 	blacksmith_panel.show_blacksmith(next_entity_id, inventory, gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade")
 	_raise_gameplay_windows()
 
-
 func _hide_blacksmith_panel() -> void:
 	if blacksmith_panel != null:
 		blacksmith_panel.hide_display()
 	TownServiceBridgeScript.close_blacksmith_inventory_context(inventory_panel)
-
 
 func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 	if client == null or stash_item_id == "":
@@ -4525,7 +4286,6 @@ func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 	if stash_panel != null and stash_panel.visible:
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
 
-
 func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> void:
 	if client == null or item_instance_id == "":
 		return
@@ -4542,7 +4302,6 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> voi
 		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)))
 	_refresh_inventory_ui()
 
-
 func _blacksmith_config() -> Dictionary:
 	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/main_config.v0.json")
 	var parsed = _read_json(path)
@@ -4550,12 +4309,10 @@ func _blacksmith_config() -> Dictionary:
 		return (parsed as Dictionary).get("gameplay", {})
 	return {}
 
-
 func _on_bishop_respec_requested(bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":
 		return
 	client.send("bishop_respec_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
-
 
 func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "" or not gameplay_debug_enabled:
@@ -4568,7 +4325,6 @@ func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> voi
 		"stat_point":
 			client.send("bishop_debug_stat_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 
-
 func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:
 		"town_vendor":
@@ -4578,14 +4334,12 @@ func _shop_title(next_shop_id: String) -> String:
 		_:
 			return next_shop_id.replace("_", " ").capitalize()
 
-
 func _stash_title(next_stash_id: String) -> String:
 	match next_stash_id:
 		"account_stash":
 			return "Account Stash"
 		_:
 			return next_stash_id.replace("_", " ").capitalize()
-
 
 func _make_hero_corpse_node(e: Dictionary) -> Node3D:
 	var root := Node3D.new()
@@ -4626,14 +4380,12 @@ func _make_hero_corpse_node(e: Dictionary) -> Node3D:
 	root.add_child(marker)
 	return root
 
-
 func _sync_waypoint_panel_reach() -> void:
 	if waypoint_panel == null or not waypoint_panel.visible:
 		return
 	var teleporter := _current_teleporter_record()
 	if teleporter.is_empty() or not _interactable_in_activation_range(teleporter):
 		_hide_waypoint_panel()
-
 
 func _sync_actionable_panel_reach() -> void:
 	var closed_actionable := false
@@ -4660,13 +4412,11 @@ func _sync_actionable_panel_reach() -> void:
 	if closed_actionable:
 		_hide_inventory_if_no_actionable_panel()
 
-
 func _panel_source_in_activation_range(entity_id: String) -> bool:
 	if entity_id == "" or not entities.has(entity_id):
 		return false
 	var rec: Dictionary = entities.get(entity_id, {})
 	return _interactable_in_activation_range(rec)
-
 
 func _hide_inventory_if_no_actionable_panel() -> void:
 	if inventory_panel == null:
@@ -4678,7 +4428,6 @@ func _hide_inventory_if_no_actionable_panel() -> void:
 	var blacksmith_visible := blacksmith_panel != null and blacksmith_panel.visible
 	if not shop_visible and not stash_visible and not bishop_visible and not market_visible and not blacksmith_visible:
 		inventory_panel.hide_display()
-
 
 func _refresh_waypoint_panel() -> void:
 	if waypoint_panel == null or waypoint_rows == null:
@@ -4694,18 +4443,15 @@ func _refresh_waypoint_panel() -> void:
 		row.pressed.connect(_on_waypoint_level_pressed.bind(level))
 		waypoint_rows.add_child(row)
 
-
 func discovered_teleporter_levels() -> Array:
 	var levels: Array = discovered_teleporters.keys()
 	levels.sort()
 	return levels
 
-
 func _waypoint_row_text(level: int) -> String:
 	var depth: int = abs(level)
 	var state := "" if bool(discovered_teleporters.get(level, false)) else " (undiscovered)"
 	return "Level %d - %s%s" % [depth, _dungeon_level_name(level), state]
-
 
 func _on_waypoint_level_pressed(level: int) -> void:
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -4729,14 +4475,12 @@ func _on_waypoint_level_pressed(level: int) -> void:
 		})
 	_hide_waypoint_panel()
 
-
 func bot_click_waypoint_level(level: int) -> void:
 	if waypoint_panel == null or not waypoint_panel.visible:
 		return
 	if not bool(discovered_teleporters.get(level, false)):
 		return
 	_on_waypoint_level_pressed(level)
-
 
 func _try_complete_pending_waypoint_travel() -> void:
 	if not pending_waypoint_travel or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
@@ -4751,14 +4495,12 @@ func _try_complete_pending_waypoint_travel() -> void:
 	pending_waypoint_travel = false
 	client.send("teleport_intent", last_server_tick, {"target_level": target_level})
 
-
 func _current_teleporter_record() -> Dictionary:
 	for id in interactable_ids:
 		var rec: Dictionary = entities.get(id, {})
 		if str(rec.get("interactable_def_id", "")) == "teleporter":
 			return rec
 	return {}
-
 
 func _render_world_walls(world_id: String) -> void:
 	if walls_root == null:
@@ -4791,7 +4533,6 @@ func _render_world_walls(world_id: String) -> void:
 		local_index += 1
 	_render_wall_layout(local_walls)
 
-
 func _render_wall_layout(walls: Array) -> void:
 	if walls_root == null:
 		return
@@ -4804,14 +4545,12 @@ func _render_wall_layout(walls: Array) -> void:
 		current_wall_layout.append(normalized)
 		walls_root.add_child(_make_wall_node(normalized))
 
-
 func _clear_wall_nodes() -> void:
 	if walls_root == null:
 		return
 	for child in walls_root.get_children():
 		walls_root.remove_child(child)
 		child.queue_free()
-
 
 func _normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 	var pos: Dictionary = {}
@@ -4828,7 +4567,6 @@ func _normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 	if wall.has("source"):
 		out["source"] = str(wall.get("source", ""))
 	return out
-
 
 func _make_wall_node(wall: Dictionary) -> MeshInstance3D:
 	var pos: Dictionary = wall.get("position", {})
@@ -4856,7 +4594,6 @@ func _make_wall_node(wall: Dictionary) -> MeshInstance3D:
 	node.material_override = mat
 	return node
 
-
 func _update_level_hud() -> void:
 	if _level_label == null:
 		return
@@ -4873,7 +4610,6 @@ func _update_level_hud() -> void:
 	_level_label.visible = lines.size() > 0
 	_level_label.text = "\n".join(lines)
 
-
 func _dungeon_level_name(level: int) -> String:
 	var names: Dictionary = dungeon_generation.get("level_names", {})
 	var key := str(level)
@@ -4882,13 +4618,11 @@ func _dungeon_level_name(level: int) -> String:
 	var template := str(dungeon_generation.get("default_level_name_template", "Depth {n}"))
 	return template.replace("{n}", str(abs(level)))
 
-
 func _read_json(path: String):
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
 		return null
 	return JSON.parse_string(f.get_as_text())
-
 
 func _make_entity_node(e: Dictionary) -> Node3D:
 	var kind := str(e.get("type", ""))
@@ -4944,7 +4678,6 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		return ProjectileVisualsScript.make_node(str(e.get("projectile_def_id", "")))
 	return _make_loot_node(e)
 
-
 func _monster_scene_for_visual(scene_key: String) -> PackedScene:
 	match scene_key:
 		"monster_quadruped":
@@ -4956,7 +4689,6 @@ func _monster_scene_for_visual(scene_key: String) -> PackedScene:
 		_:
 			return MonsterDummyScene
 
-
 func _make_remote_player_node(e: Dictionary) -> Node3D:
 	var root = CharacterScene.instantiate() as Node3D
 	root.name = "RemotePlayer_%s" % str(e.get("id", ""))
@@ -4965,10 +4697,8 @@ func _make_remote_player_node(e: Dictionary) -> Node3D:
 	_apply_model_tint(root, REMOTE_PLAYER_TINT)
 	return root
 
-
 func _monster_tint(rarity: String) -> Color:
 	return MONSTER_RARITY_TINTS.get(rarity, MONSTER_RARITY_TINTS["common"])
-
 
 func _entity_base_tint(e: Dictionary) -> Color:
 	var kind := str(e.get("type", ""))
@@ -4980,19 +4710,16 @@ func _entity_base_tint(e: Dictionary) -> Color:
 		return _monster_tint(str(e.get("rarity", "common")))
 	return Color.WHITE
 
-
 func _entity_visual_scale(e: Dictionary) -> float:
 	var scale := float(e.get("visual_scale", 1.0))
 	if scale <= 0.0:
 		return 1.0
 	return scale
 
-
 func _apply_local_player_visual_scale(scale: float) -> void:
 	player_visual_scale = scale if scale > 0.0 else 1.0
 	if character_visual != null:
 		character_visual.scale = Vector3.ONE * player_visual_scale
-
 
 func _apply_local_player_class_model() -> void:
 	if character_visual == null:
@@ -5010,7 +4737,6 @@ func _apply_local_player_class_model() -> void:
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
-
 
 func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 	var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
@@ -5033,7 +4759,6 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 		root.call("_ensure_weapon_socket")
 	if root.has_method("_ensure_fallback_sockets"):
 		root.call("_ensure_fallback_sockets")
-
 
 func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	if e.has("monster_def_id"):
@@ -5066,7 +4791,6 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	_sync_boss_telegraph_marker_from_record(rec)
 	EliteAuraPreviewSync.sync(entities, dungeon_generation)
 
-
 func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 	if root == null:
 		return
@@ -5080,10 +4804,8 @@ func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 		root.add_child(existing)
 	_apply_archer_bow_material(existing)
 
-
 func _has_archer_bow_marker(root: Node3D) -> bool:
 	return root != null and root.find_child(ARCHER_BOW_MARKER_NAME, true, false) != null
-
 
 func _make_archer_bow_marker() -> Node3D:
 	var marker := Node3D.new()
@@ -5096,7 +4818,6 @@ func _make_archer_bow_marker() -> Node3D:
 	marker.add_child(_make_archer_bow_part("BowString", Vector3(0.018, 0.90, 0.018), Vector3(0.18, 0.0, 0.0), 0.0, Color(0.86, 0.82, 0.68)))
 	return marker
 
-
 func _make_archer_bow_part(part_name: String, size: Vector3, position: Vector3, z_rotation_degrees: float, color: Color) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
 	part.name = part_name
@@ -5108,7 +4829,6 @@ func _make_archer_bow_part(part_name: String, size: Vector3, position: Vector3, 
 	part.set_meta("archer_bow_color", color.to_html(false))
 	return part
 
-
 func _apply_archer_bow_material(root: Node) -> void:
 	if root is MeshInstance3D and root.has_meta("archer_bow_color"):
 		var mat := StandardMaterial3D.new()
@@ -5116,7 +4836,6 @@ func _apply_archer_bow_material(root: Node) -> void:
 		(root as MeshInstance3D).material_override = mat
 	for child in root.get_children():
 		_apply_archer_bow_material(child)
-
 
 func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
@@ -5150,7 +4869,6 @@ func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 		_apply_entity_status_tint(rec)
 	_sync_boss_health_bar()
 
-
 func _apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
 	if rec.is_empty():
@@ -5160,7 +4878,6 @@ func _apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
 	_remove_boss_telegraph_marker(rec)
 	_apply_entity_status_tint(rec)
 	_sync_boss_health_bar()
-
 
 func _normalize_boss_phase_metadata(rec: Dictionary) -> void:
 	var phase := _boss_phase_for_display(rec)
@@ -5172,7 +4889,6 @@ func _normalize_boss_phase_metadata(rec: Dictionary) -> void:
 			rec["boss_telegraph_active"] = true
 			rec["telegraph_tint"] = Color(str(telegraph.get("to_color", "#ff0000"))).to_html(false)
 
-
 func _sync_boss_telegraph_marker_from_record(rec: Dictionary) -> void:
 	var phase := _boss_phase_for_display(rec)
 	if phase.is_empty() or str(phase.get("phase_kind", "")) != "telegraph":
@@ -5183,7 +4899,6 @@ func _sync_boss_telegraph_marker_from_record(rec: Dictionary) -> void:
 		_remove_boss_telegraph_marker(rec)
 		return
 	_sync_boss_telegraph_marker(rec, telegraph)
-
 
 func _sync_boss_telegraph_marker(rec: Dictionary, telegraph: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
@@ -5217,7 +4932,6 @@ func _sync_boss_telegraph_marker(rec: Dictionary, telegraph: Dictionary) -> void
 	rec["telegraph_radius"] = radius
 	rec["telegraph_marker_color"] = color.to_html(false)
 
-
 func _remove_boss_telegraph_marker(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
 	if node != null:
@@ -5228,14 +4942,12 @@ func _remove_boss_telegraph_marker(rec: Dictionary) -> void:
 	rec["telegraph_radius"] = 0.0
 	rec["telegraph_marker_color"] = ""
 
-
 func _set_entity_poison_tint(entity_id: String, active: bool) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
 	if rec.is_empty():
 		return
 	rec["poisoned"] = active
 	_apply_entity_status_tint(rec)
-
 
 func _set_entity_burning(entity_id: String, active: bool) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
@@ -5245,7 +4957,6 @@ func _set_entity_burning(entity_id: String, active: bool) -> void:
 	var node := rec.get("node", null) as Node3D
 	PlayerStatusEffectMarkers.sync_burning_effect(node, active)
 	_apply_entity_status_tint(rec)
-
 
 func _set_entity_pinning_root(entity_id: String, active: bool) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
@@ -5260,7 +4971,6 @@ func _set_entity_pinning_root(entity_id: String, active: bool) -> void:
 	rec["effect_ids"] = effect_ids
 	var node := rec.get("node", null) as Node3D
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, active)
-
 
 func _apply_entity_status_tint(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
@@ -5279,7 +4989,6 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 	else:
 		_apply_model_tint(node, tint)
 
-
 func _apply_model_tint(root: Node, color: Color) -> void:
 	if root is MeshInstance3D:
 		var mat := StandardMaterial3D.new()
@@ -5287,7 +4996,6 @@ func _apply_model_tint(root: Node, color: Color) -> void:
 		(root as MeshInstance3D).material_override = mat
 	for child in root.get_children():
 		_apply_model_tint(child, color)
-
 
 func _make_loot_node(e: Dictionary) -> Node3D:
 	var item_def_id := str(e.get("item_def_id", ""))
@@ -5306,7 +5014,6 @@ func _make_loot_node(e: Dictionary) -> Node3D:
 		_add_loot_primitive(root, shape, color, accent, scale)
 	_add_loot_label(root, _loot_label_text(e), scale, _loot_label_color(e))
 	return root
-
 
 func _add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color, scale: float) -> void:
 	match shape:
@@ -5353,7 +5060,6 @@ func _add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Colo
 		_:
 			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
 
-
 func _make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
 	var presentation: Dictionary = item_presentations.get(item_def_id, {})
 	var asset_id := str(presentation.get("3d_model", ""))
@@ -5378,7 +5084,6 @@ func _make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D
 	_apply_model_tint(inst, _ground_item_tint(rarity))
 	return inst
 
-
 func _ground_item_tint(rarity: String) -> Color:
 	match rarity.to_lower():
 		"magic":
@@ -5390,12 +5095,10 @@ func _ground_item_tint(rarity: String) -> Color:
 		_:
 			return Color("#d8d0bd")
 
-
 func _add_loot_rarity_background(parent: Node3D, color: Color, scale: float) -> void:
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(0.82, 0.04, 0.82) * maxf(scale, 0.85)
 	_add_loot_mesh(parent, "RarityBackground", mesh, Vector3(0.0, 0.045, 0.0), color)
-
 
 func _add_loot_label(parent: Node3D, text: String, scale: float, color: Color = Color("#f4ead8")) -> void:
 	if text == "":
@@ -5414,12 +5117,10 @@ func _add_loot_label(parent: Node3D, text: String, scale: float, color: Color = 
 	label.outline_size = 4
 	parent.add_child(label)
 
-
 func _add_loot_box(parent: Node3D, name: String, size: Vector3, position: Vector3, color: Color) -> void:
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	_add_loot_mesh(parent, name, mesh, position, color)
-
 
 func _add_loot_cylinder(parent: Node3D, name: String, radius: float, height: float, position: Vector3, color: Color) -> void:
 	var mesh := CylinderMesh.new()
@@ -5428,7 +5129,6 @@ func _add_loot_cylinder(parent: Node3D, name: String, radius: float, height: flo
 	mesh.height = height
 	mesh.radial_segments = 16
 	_add_loot_mesh(parent, name, mesh, position, color)
-
 
 func _add_loot_mesh(parent: Node3D, name: String, mesh: Mesh, position: Vector3, color: Color) -> void:
 	var node := MeshInstance3D.new()
@@ -5439,7 +5139,6 @@ func _add_loot_mesh(parent: Node3D, name: String, mesh: Mesh, position: Vector3,
 	mat.albedo_color = color
 	node.material_override = mat
 	parent.add_child(node)
-
 
 func _loot_color(item_def_id: String) -> Color:
 	var def: Dictionary = item_rules.get(item_def_id, {})
@@ -5454,7 +5153,6 @@ func _loot_color(item_def_id: String) -> Color:
 		_:
 			return Color(1.0, 0.85, 0.2)
 
-
 func _loot_label_color(e: Dictionary) -> Color:
 	var item_def_id := str(e.get("item_def_id", ""))
 	var def := _item_definition(item_def_id)
@@ -5465,7 +5163,6 @@ func _loot_label_color(e: Dictionary) -> Color:
 		return LOOT_LABEL_CATEGORY_COLORS[category]
 	var rarity := str(e.get("rarity", "common")).to_lower()
 	return LOOT_LABEL_RARITY_COLORS.get(rarity, LOOT_LABEL_RARITY_COLORS["common"])
-
 
 func _loot_label_text(e: Dictionary) -> String:
 	var item_def_id := str(e.get("item_def_id", ""))
@@ -5478,15 +5175,12 @@ func _loot_label_text(e: Dictionary) -> String:
 		return "gold"
 	return _generic_loot_name(item_def_id)
 
-
 func _item_rarity_background(rarity: String) -> Color:
 	var key := rarity.to_lower()
 	return ITEM_RARITY_BACKGROUNDS.get(key, ITEM_RARITY_BACKGROUNDS["common"])
 
-
 func _item_definition(item_def_id: String) -> Dictionary:
 	return ItemRulesLoader.item_definition(item_def_id)
-
 
 func _generic_loot_name(item_def_id: String) -> String:
 	var def := _item_definition(item_def_id)
@@ -5523,13 +5217,11 @@ func _generic_loot_name(item_def_id: String) -> String:
 			return "Item"
 	return "Item"
 
-
 func _load_dungeon_generation() -> void:
 	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/dungeon_generation.v0.json")
 	var parsed = _read_json(path)
 	if typeof(parsed) == TYPE_DICTIONARY:
 		dungeon_generation = parsed
-
 
 func _load_ground_item_visual_data() -> void:
 	var base := ProjectSettings.globalize_path("res://")
@@ -5537,13 +5229,11 @@ func _load_ground_item_visual_data() -> void:
 	if typeof(manifest) == TYPE_DICTIONARY:
 		asset_manifest = manifest.get("assets", {})
 
-
 func _res_path(runtime_path: String) -> String:
 	var p := runtime_path
 	if p.begins_with("client/"):
 		p = p.substr("client/".length())
 	return "res://" + p
-
 
 func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:
 	var node := rec["node"] as Node3D
@@ -5564,7 +5254,6 @@ func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:
 	rec["move_tween"] = tween
 	tween.tween_property(node, "position", target_pos, duration).set_trans(Tween.TRANS_LINEAR)
 
-
 func _make_door_node() -> Node3D:
 	var root := Node3D.new()
 	root.name = "InteractableDoor"
@@ -5583,7 +5272,6 @@ func _make_door_node() -> Node3D:
 	panel.material_override = mat
 	pivot.add_child(panel)
 	return root
-
 
 func _make_chest_node(def_id: String, elite_objective: bool = false, quest_reward: bool = false) -> Node3D:
 	var is_stash := def_id == "town_stash"
@@ -5638,7 +5326,6 @@ func _make_chest_node(def_id: String, elite_objective: bool = false, quest_rewar
 	ChestPresentationScript.sync_quest_marker(root, quest_reward, false)
 	return root
 
-
 func _make_merchant_node(def_id: String) -> Node3D:
 	var is_mystery := def_id == "town_mystery_seller"
 	var root := Node3D.new()
@@ -5680,7 +5367,6 @@ func _make_merchant_node(def_id: String) -> Node3D:
 		_add_merchant_box(root, "VendorSign", Vector3(0.34, 0.24, 0.07), Vector3(0.36, 0.67, 0.62), accent)
 	return root
 
-
 func _make_bishop_node() -> Node3D:
 	var root := Node3D.new()
 	root.name = "TownBishop"
@@ -5708,7 +5394,6 @@ func _make_bishop_node() -> Node3D:
 	_add_merchant_box(root, "ServiceBook", Vector3(0.30, 0.08, 0.22), Vector3(-0.18, 0.58, 0.24), Color("#efe0bc"))
 	return root
 
-
 func _make_blacksmith_node() -> Node3D:
 	var root := Node3D.new()
 	root.name = "TownBlacksmith"
@@ -5733,7 +5418,6 @@ func _make_blacksmith_node() -> Node3D:
 	_add_merchant_box(root, "HammerHead", Vector3(0.28, 0.12, 0.14), Vector3(0.53, 0.82, 0.26), metal)
 	return root
 
-
 func _make_market_board_node() -> Node3D:
 	var root := Node3D.new()
 	root.name = "MarketBoard"
@@ -5750,7 +5434,6 @@ func _make_market_board_node() -> Node3D:
 	root.add_child(_make_market_badge("IncomingBidBadge", "IncomingBidCount", Vector3(-0.58, 1.42, 0.20), Color("#4f2b12"), Color("#776d5e")))
 	root.add_child(_make_market_badge("PublishedListingBadge", "PublishedListingCount", Vector3(0.58, 1.42, 0.20), Color("#14324f"), Color("#776d5e")))
 	return root
-
 
 func make_town_preview_scene() -> Node3D:
 	var root := Node3D.new()
@@ -5796,7 +5479,6 @@ func make_town_preview_scene() -> Node3D:
 	root.add_child(fire)
 	return root
 
-
 func _make_town_cabin_node(variant: String = "plain") -> Node3D:
 	var root := Node3D.new()
 	root.name = "TownCabin"
@@ -5814,7 +5496,6 @@ func _make_town_cabin_node(variant: String = "plain") -> Node3D:
 	for x in [-0.76, 0.0, 0.76]:
 		_add_merchant_box(root, "CabinWallLog", Vector3(0.08, 1.04, 1.36), Vector3(x, 0.56, 0.0), Color("#4f2d18"))
 	return root
-
 
 func _make_town_campfire_node() -> Node3D:
 	var root := Node3D.new()
@@ -5842,7 +5523,6 @@ func _make_town_campfire_node() -> Node3D:
 	root.add_child(light)
 	return root
 
-
 func _make_market_badge(badge_name: String, count_name: String, position: Vector3, bg_color: Color, text_color: Color) -> Node3D:
 	var badge := Node3D.new()
 	badge.name = badge_name
@@ -5861,7 +5541,6 @@ func _make_market_badge(badge_name: String, count_name: String, position: Vector
 	badge.add_child(label)
 	return badge
 
-
 func _add_merchant_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
 	part.name = part_name
@@ -5872,7 +5551,6 @@ func _add_merchant_box(parent: Node3D, part_name: String, size: Vector3, positio
 	part.material_override = _merchant_material(color)
 	parent.add_child(part)
 	return part
-
 
 func _add_merchant_cylinder(parent: Node3D, part_name: String, radius: float, height: float, position: Vector3, color: Color, emit: bool = false) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
@@ -5888,7 +5566,6 @@ func _add_merchant_cylinder(parent: Node3D, part_name: String, radius: float, he
 	parent.add_child(part)
 	return part
 
-
 func _merchant_material(color: Color, emit: bool = false) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
@@ -5896,7 +5573,6 @@ func _merchant_material(color: Color, emit: bool = false) -> StandardMaterial3D:
 		mat.emission_enabled = true
 		mat.emission = color
 	return mat
-
 
 func _make_stair_node(def_id: String) -> Node3D:
 	var root := Node3D.new()
@@ -5932,7 +5608,6 @@ func _make_stair_node(def_id: String) -> Node3D:
 			)
 	return root
 
-
 func _add_stair_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
 	part.name = part_name
@@ -5944,14 +5619,12 @@ func _add_stair_box(parent: Node3D, part_name: String, size: Vector3, position: 
 	parent.add_child(part)
 	return part
 
-
 func _stair_base_color(def_id: String, state: String) -> Color:
 	if state == "locked" or state == "disabled":
 		return Color("#6b2e2e")
 	if def_id == "stairs_down":
 		return Color("#111821")
 	return Color("#666d68")
-
 
 func _stair_material(color: Color, glow: bool = false) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -5960,7 +5633,6 @@ func _stair_material(color: Color, glow: bool = false) -> StandardMaterial3D:
 		mat.emission_enabled = true
 		mat.emission = color
 	return mat
-
 
 func _make_teleporter_node() -> Node3D:
 	var root := Node3D.new()
@@ -5992,7 +5664,6 @@ func _make_teleporter_node() -> Node3D:
 	root.add_child(core)
 	return root
 
-
 func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, interactable_def_id: String = "") -> void:
 	var body := StaticBody3D.new()
 	body.name = "PickBody"
@@ -6017,7 +5688,6 @@ func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, intera
 	body.add_child(shape)
 	node.add_child(body)
 
-
 func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String) -> void:
 	if rec.get("state", "") == state:
 		return
@@ -6038,7 +5708,6 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 	var target_rot := deg_to_rad(90.0) if state == "open" else 0.0
 	var tween := create_tween()
 	tween.tween_property(pivot, "rotation:y", target_rot, 0.25)
-
 
 func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 	var node := rec.get("node", null) as Node3D
@@ -6088,7 +5757,6 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 		else:
 			mat.albedo_color = _stair_base_color(def_id, state)
 		base.material_override = mat
-
 
 # --- bot API (read-only state + intent dispatch) ----------------------------
 
@@ -6146,6 +5814,7 @@ func get_bot_state() -> Dictionary:
 		"blacksmith_panel_visible": blacksmith_panel != null and blacksmith_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
+		"quest_journal_panel_visible": quest_journal_panel != null and quest_journal_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
@@ -6156,6 +5825,7 @@ func get_bot_state() -> Dictionary:
 		"blacksmith_panel": blacksmith_panel.get_debug_state() if blacksmith_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
+		"quest_journal_panel": quest_journal_panel.get_debug_state() if quest_journal_panel != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
@@ -6192,14 +5862,12 @@ func get_bot_state() -> Dictionary:
 	}
 	return out
 
-
 func _wall_count_by_source(source: String) -> int:
 	var count := 0
 	for wall in current_wall_layout:
 		if typeof(wall) == TYPE_DICTIONARY and str((wall as Dictionary).get("source", "")) == source:
 			count += 1
 	return count
-
 
 func _non_perimeter_wall_count() -> int:
 	var count := 0
@@ -6210,7 +5878,6 @@ func _non_perimeter_wall_count() -> int:
 			count += 1
 	return count
 
-
 func _remote_player_ids() -> Array:
 	var out: Array = []
 	for id in entities.keys():
@@ -6219,7 +5886,6 @@ func _remote_player_ids() -> Array:
 			out.append(str(id))
 	out.sort()
 	return out
-
 
 func _bot_entities_debug(live_monster_ids: Array) -> Array:
 	var out: Array = []
@@ -6239,7 +5905,6 @@ func _bot_entities_debug(live_monster_ids: Array) -> Array:
 		})
 	return out
 
-
 func _bot_local_player_presentation() -> Dictionary:
 	return {
 		"id": player_id,
@@ -6256,12 +5921,10 @@ func _bot_local_player_presentation() -> Dictionary:
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
 	}
 
-
 func _local_player_effect_ids() -> Array:
 	if player_anchor == null or not PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor):
 		return []
 	return [PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID]
-
 
 func _character_info_debug_state() -> Dictionary:
 	return {
@@ -6271,6 +5934,24 @@ func _character_info_debug_state() -> Dictionary:
 		"area": _current_area_label(),
 	}
 
+func _sync_quest_journal() -> void:
+	if quest_journal_panel != null:
+		quest_journal_panel.set_objectives(_quest_journal_objectives())
+
+func _quest_journal_objectives() -> Array:
+	var reward_found := false
+	var reward_complete := true
+	for rec in entities.values():
+		if bool((rec as Dictionary).get("quest_reward", false)):
+			reward_found = true
+			reward_complete = reward_complete and str((rec as Dictionary).get("state", "")) == "open"
+	if not reward_found:
+		return []
+	return [{
+		"id": "reward_chest",
+		"title": "Open the marked reward chest",
+		"complete": reward_complete,
+	}]
 
 func _bot_entities_presentation_debug() -> Array:
 	var out: Array = []
@@ -6309,7 +5990,6 @@ func _bot_entities_presentation_debug() -> Array:
 		})
 	return out
 
-
 func _visual_model_name(rec: Dictionary, node: Node3D) -> String:
 	if str(rec.get("visual_model", "")) != "":
 		return str(rec.get("visual_model", ""))
@@ -6318,7 +5998,6 @@ func _visual_model_name(rec: Dictionary, node: Node3D) -> String:
 	if str(rec.get("type", "")) == "player":
 		return "primitive"
 	return ""
-
 
 func _bot_damage_numbers() -> Array:
 	var out: Array = []
@@ -6334,7 +6013,6 @@ func _bot_damage_numbers() -> Array:
 			})
 	return out
 
-
 func _bot_loot_presentations() -> Dictionary:
 	var out := {}
 	for loot_id in loot_ids:
@@ -6343,7 +6021,6 @@ func _bot_loot_presentations() -> Dictionary:
 		if item_def_id != "":
 			out[item_def_id] = item_presentations.has(item_def_id)
 	return out
-
 
 func _bot_loot_debug() -> Array:
 	var out: Array = []
@@ -6356,7 +6033,6 @@ func _bot_loot_debug() -> Array:
 			"rarity": str(rec.get("rarity", "")),
 		})
 	return out
-
 
 func _bot_loot_label_debug() -> Array:
 	var out: Array = []
@@ -6376,7 +6052,6 @@ func _bot_loot_label_debug() -> Array:
 		})
 	return out
 
-
 func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
@@ -6385,7 +6060,6 @@ func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 		_mark_local_player_walking()
 	client.send(intent_type, last_server_tick, payload)
 	_attack_cooldown = SEND_INTERVAL
-
 
 func bot_click_entity_id(target_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -6403,60 +6077,46 @@ func bot_click_entity_id(target_id: String) -> void:
 	if typ == "monster":
 		_start_basic_attack_recovery_ui(_attack_cooldown)
 
-
 func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> void:
 	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send(intent_type, last_server_tick, payload)
 
-
 func bot_click_shop_buy_offer(offer_id: String = "", offer_kind: String = "", offer_index: int = 0) -> void:
 	BotFacade.click_shop_buy_offer(self, offer_id, offer_kind, offer_index)
-
 
 func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	BotFacade.click_shop_sell_item(self, item_def_id, rolled, bag_index)
 
-
 func bot_click_shop_reroll() -> void:
 	BotFacade.click_shop_reroll(self)
-
 
 func bot_drag_bag_to_stash(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	BotFacade.drag_bag_to_stash(self, item_def_id, rolled, bag_index)
 
-
 func bot_drag_stash_to_bag(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
 	BotFacade.drag_stash_to_bag(self, stash_item_id, item_def_id, rolled, stash_index)
-
 
 func bot_click_stash_deposit_gold(amount: int = 1) -> void:
 	BotFacade.click_stash_deposit_gold(self, amount)
 
-
 func bot_click_stash_withdraw_gold(amount: int = 1) -> void:
 	BotFacade.click_stash_withdraw_gold(self, amount)
-
 
 func bot_click_bishop_respec() -> void:
 	BotFacade.click_bishop_respec(self)
 
-
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
-
 
 func bot_set_stash_search(text: String) -> void:
 	BotFacade.set_stash_search(self, text)
 
-
 func bot_select_stash_sort(mode: String) -> void:
 	BotFacade.select_stash_sort(self, mode)
 
-
 func bot_set_multiplayer_search(text: String) -> void:
 	if multiplayer_panel != null: multiplayer_panel.bot_set_search(text)
-
 
 func bot_select_multiplayer_sort(mode: String) -> void:
 	if multiplayer_panel != null: multiplayer_panel.bot_select_sort(mode)
@@ -6478,26 +6138,20 @@ func bot_click_market_accept_offer(offer_id: String = "", offer_index: int = 0) 
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:
 	BotFacade.assign_consumable_hotbar(self, slot_index, item_instance_id)
 
-
 func bot_use_consumable_hotbar(slot_index: int) -> void:
 	BotFacade.use_consumable_hotbar(self, slot_index)
-
 
 func bot_click_stat_button(stat: String) -> void:
 	BotFacade.click_stat_button(self, stat)
 
-
 func bot_click_skill_button(skill_id: String = "") -> void:
 	BotFacade.click_skill_button(self, skill_id)
-
 
 func bot_use_skill_bar(skill_id: String = "", target_id: String = "", force_direct: bool = false) -> void:
 	BotFacade.use_skill_bar(self, skill_id, target_id, force_direct)
 
-
 func bot_cast_skill_direction(skill_id: String = "", direction: Dictionary = {}) -> void:
 	BotFacade.cast_skill_direction(self, skill_id, direction)
-
 
 func bot_click_menu_button(button: String) -> void:
 	match button:
@@ -6547,43 +6201,34 @@ func bot_click_menu_button(button: String) -> void:
 		"exit":
 			_exit_game()
 
-
 func bot_enter_character_name(name: String) -> void:
 	if character_panel != null:
 		character_panel.set_name_text(name)
-
 
 func bot_select_character(index: int) -> void:
 	if character_panel != null:
 		character_panel.start_character_at_index(index)
 
-
 func bot_select_character_class(class_id: String) -> void:
 	if character_panel != null:
 		character_panel.select_class(class_id)
 
-
 func bot_select_window_size(size: String) -> void:
 	_on_window_size_selected(size)
-
 
 func bot_set_floating_combat_text(enabled: bool) -> void:
 	_on_floating_combat_text_toggled(enabled)
 
-
 func bot_select_create_game_type(session_type: String) -> void:
 	_on_create_game_session_type_selected(session_type)
 
-
 func bot_select_language(language: String) -> void:
 	_on_language_selected(language)
-
 
 func bot_consume_pending_event_at(index: int) -> void:
 	if index < 0 or index >= _bot_pending_events.size():
 		return
 	_bot_pending_events.remove_at(index)
-
 
 func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:
 	if not bot_mode or input_shadow == null or DisplayServer.get_name() == "headless":
@@ -6618,7 +6263,6 @@ func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:
 			if drop_id != "":
 				_bot_shadow_inventory_drop(drop_id)
 
-
 func _bot_bag_item_id_for_def(item_def_id: String, state: Dictionary) -> String:
 	var inv: Array = state.get("inventory", [])
 	var eq: Dictionary = state.get("equipped", {})
@@ -6629,7 +6273,6 @@ func _bot_bag_item_id_for_def(item_def_id: String, state: Dictionary) -> String:
 			if str(equipped_weapon) != iid:
 				return iid
 	return ""
-
 
 func _bot_shadow_inventory_equip(item_instance_id: String) -> void:
 	if inventory_panel == null:
@@ -6642,7 +6285,6 @@ func _bot_shadow_inventory_equip(item_instance_id: String) -> void:
 		return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag"]))
 
-
 func _bot_shadow_inventory_unequip() -> void:
 	if inventory_panel == null:
 		return
@@ -6653,7 +6295,6 @@ func _bot_shadow_inventory_unequip() -> void:
 	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
 		return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "bag"]))
-
 
 func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 	if inventory_panel == null:
@@ -6667,7 +6308,6 @@ func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
 		return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "drop"]))
-
 
 # --- debug ------------------------------------------------------------------
 
@@ -6704,19 +6344,15 @@ func _sync_status_text_visibility() -> void:
 		return
 	_debug_label.visible = client_settings == null or client_settings.status_text
 
-
 func _debug(msg: String) -> void:
 	print("[client] ", msg)
-
 
 func _env(key: String, fallback: String) -> String:
 	var v := OS.get_environment(key)
 	return v if v != "" else fallback
 
-
 func _truthy_env(key: String) -> bool:
 	return _truthy_text(OS.get_environment(key))
-
 
 func _truthy_text(value: String) -> bool:
 	var v := value.to_lower()

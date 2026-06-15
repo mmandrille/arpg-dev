@@ -649,6 +649,7 @@ async def execute_step(
             is_boss=bool(step["is_boss"]) if step.get("is_boss") is not None else None,
             target_id=str(step["target_id"]) if step.get("target_id") else None,
             timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
+            fresh_event=bool(step.get("fresh_event", False)),
         )
         return
 
@@ -1903,8 +1904,9 @@ async def attack_until_monster_event(
     is_boss: bool | None = None,
     target_id: str | None = None,
     timeout_s: float = SLICE_TIMEOUT_S,
+    fresh_event: bool = False,
 ) -> None:
-    deadline = loop.time() + timeout_s
+    deadline = loop.time() + timeout_s; start_event_count = sum(1 for ev in state.events if ev.get("event_type") == event_type)
     skipped_ids: set[str] = set()
     active_target_id = target_id
     pending_message_id = ""
@@ -1913,7 +1915,7 @@ async def attack_until_monster_event(
         if find_player(state) is not None:
             break
         await pump_one(ws, state, timeout=0.1)
-    while event_type not in state.seen_events:
+    while event_type not in state.seen_events or (fresh_event and sum(1 for ev in state.events if ev.get("event_type") == event_type) <= start_event_count):
         if loop.time() > deadline:
             raise TimeoutError(f"attack_until_monster_event stalled waiting for {event_type}")
         if (monster_def_id or is_boss is not None) and (active_target_id is None or active_target_id in skipped_ids):
@@ -2309,7 +2311,6 @@ def hotbar_item_id(hotbar: list[dict[str, Any]], slot_index: int) -> str | None:
             raw = slot.get("item_instance_id")
             return None if raw is None else str(raw)
     return None
-
 
 def find_hotbar_slot_by_item_def(hotbar: list[dict[str, Any]], item_def_id: str) -> dict[str, Any] | None:
     for slot in hotbar:
@@ -3035,7 +3036,6 @@ def assert_entity_count(entities: list[dict], assertion: dict[str, Any], where: 
             matches.append(entity)
     assert_count_matches(len(matches), assertion, f"{where}: entity count", f" for {assertion}: {matches}")
 
-
 def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) -> bool:
     string_filters = {
         "entity_type": "type",
@@ -3061,6 +3061,8 @@ def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) ->
     if selector.get("visual_scale") is not None:
         if abs(float(entity.get("visual_scale", 1.0)) - float(selector["visual_scale"])) > 0.000001:
             return False
+    if selector.get("hp") is not None and int(entity.get("hp", -999999)) != int(selector["hp"]): return False
+    if selector.get("max_hp") is not None and int(entity.get("max_hp", -999999)) != int(selector["max_hp"]): return False
     if selector.get("alive") is not None:
         hp = entity.get("hp")
         is_alive = not isinstance(hp, int) or hp > 0

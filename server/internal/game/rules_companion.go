@@ -4,18 +4,25 @@ import "fmt"
 
 // SkillCompanionDef defines a server-owned summoned companion.
 type SkillCompanionDef struct {
-	MonsterDefID string  `json:"monster_def_id"`
-	VisualModel  string  `json:"visual_model"`
-	VisualTint   string  `json:"visual_tint"`
-	VisualScale  float64 `json:"visual_scale"`
-	Limit        int     `json:"limit"`
+	MonsterDefID string                 `json:"monster_def_id"`
+	VisualModel  string                 `json:"visual_model"`
+	VisualTint   string                 `json:"visual_tint"`
+	VisualScale  float64                `json:"visual_scale"`
+	Limit        SkillCompanionLimitDef `json:"limit"`
 }
 
 // SkillReviveDef defines rank-scaled revived-monster companion power.
 type SkillReviveDef struct {
-	PowerPercentBase    int `json:"power_percent_base"`
-	PowerPercentPerRank int `json:"power_percent_per_rank"`
-	Limit               int `json:"limit"`
+	PowerPercentBase    int                    `json:"power_percent_base"`
+	PowerPercentPerRank int                    `json:"power_percent_per_rank"`
+	Limit               SkillCompanionLimitDef `json:"limit"`
+}
+
+// SkillCompanionLimitDef defines active companion quantity scaling.
+type SkillCompanionLimitDef struct {
+	Base         int `json:"base"`
+	PerRankStep  int `json:"per_rank_step"`
+	RanksPerStep int `json:"ranks_per_step"`
 }
 
 func validateSummonCompanionSkillPayload(skillID string, skill SkillDef, monsters map[string]MonsterDef) error {
@@ -27,8 +34,8 @@ func validateSummonCompanionSkillPayload(skillID string, skill SkillDef, monster
 			return fmt.Errorf("game: invalid rules skills.%s.companion.monster_def_id: unknown monster %s", skillID, skill.Companion.MonsterDefID)
 		}
 	}
-	if skill.Companion.Limit != 1 {
-		return fmt.Errorf("game: invalid rules skills.%s.companion.limit: must be 1 for this slice", skillID)
+	if err := validateCompanionLimit("skills."+skillID+".companion.limit", skill.Companion.Limit); err != nil {
+		return err
 	}
 	if skill.Companion.VisualModel == "" {
 		return fmt.Errorf("game: invalid rules skills.%s.companion.visual_model: required", skillID)
@@ -64,11 +71,24 @@ func validateReviveCompanionSkillPayload(skillID string, skill SkillDef) error {
 	if skill.Revive.PowerPercentPerRank < 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.revive.power_percent_per_rank: must be non-negative", skillID)
 	}
-	if skill.Revive.Limit != 1 {
-		return fmt.Errorf("game: invalid rules skills.%s.revive.limit: must be 1 for this slice", skillID)
+	if err := validateCompanionLimit("skills."+skillID+".revive.limit", skill.Revive.Limit); err != nil {
+		return err
 	}
 	if skill.Damage.Type != "" || skill.Projectile.Range > 0 || len(skill.Effects) > 0 {
 		return fmt.Errorf("game: invalid rules skills.%s: revive_companion does not support damage, projectile, or effects", skillID)
+	}
+	return nil
+}
+
+func validateCompanionLimit(label string, limit SkillCompanionLimitDef) error {
+	if limit.Base <= 0 {
+		return fmt.Errorf("game: invalid rules %s.base: must be positive", label)
+	}
+	if limit.PerRankStep < 0 {
+		return fmt.Errorf("game: invalid rules %s.per_rank_step: must be non-negative", label)
+	}
+	if limit.RanksPerStep <= 0 {
+		return fmt.Errorf("game: invalid rules %s.ranks_per_step: must be positive", label)
 	}
 	return nil
 }
@@ -78,4 +98,15 @@ func revivePowerPercent(def SkillDef, rank int) int {
 		rank = 1
 	}
 	return def.Revive.PowerPercentBase + def.Revive.PowerPercentPerRank*(rank-1)
+}
+
+func companionLimitAtRank(limit SkillCompanionLimitDef, rank int) int {
+	if rank < 1 {
+		rank = 1
+	}
+	out := limit.Base + ((rank - 1) / limit.RanksPerStep * limit.PerRankStep)
+	if out < 1 {
+		return 1
+	}
+	return out
 }

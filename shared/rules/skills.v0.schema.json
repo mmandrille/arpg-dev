@@ -232,7 +232,7 @@
         "visual_model": { "type": "string", "minLength": 1 },
         "visual_tint": { "type": "string", "pattern": "^[0-9a-fA-F]{6}$" },
         "visual_scale": { "type": "number", "minimum": 0 },
-        "limit": { "const": 1 }
+        "limit": { "$ref": "#/$defs/companion_limit" }
       }
     },
     "revive": {
@@ -242,7 +242,17 @@
       "properties": {
         "power_percent_base": { "type": "integer", "minimum": 1 },
         "power_percent_per_rank": { "type": "integer", "minimum": 0 },
-        "limit": { "const": 1 }
+        "limit": { "$ref": "#/$defs/companion_limit" }
+      }
+    },
+    "companion_limit": {
+      "type": "object",
+      "required": ["base", "per_rank_step", "ranks_per_step"],
+      "additionalProperties": false,
+      "properties": {
+        "base": { "type": "integer", "minimum": 1 },
+        "per_rank_step": { "type": "integer", "minimum": 0 },
+        "ranks_per_step": { "type": "integer", "minimum": 1 }
       }
     },
     "pierce": {

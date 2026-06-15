@@ -38,6 +38,42 @@ func TestSorcererReviveCreatesScaledCompanionFromDeadMonster(t *testing.T) {
 	}
 }
 
+func TestSorcererReviveRankScalingAllowsMultipleCompanions(t *testing.T) {
+	sim := sorcererReviveSim(t, "sess_sorcerer_revive_rank4")
+	sim.progression.SkillRanks["revive"] = 4
+	player := sim.activeLevel().entities[sim.playerID]
+	first := addReviveTestMonster(sim, "dungeon_wolf", Vec2{X: player.pos.X + 2, Y: player.pos.Y}, 0)
+	second := addReviveTestMonster(sim, "dungeon_wolf", Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 0)
+
+	firstCast := sim.Tick([]Input{{
+		MessageID:     "revive_rank4_1",
+		CorrelationID: "corr_revive_rank4_1",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "revive", TargetID: idStr(first.id)},
+	}})
+	assertAck(t, firstCast, "revive_rank4_1")
+	delete(sim.skillCooldowns, "revive")
+	secondCast := sim.Tick([]Input{{
+		MessageID:     "revive_rank4_2",
+		CorrelationID: "corr_revive_rank4_2",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "revive", TargetID: idStr(second.id)},
+	}})
+	assertAck(t, secondCast, "revive_rank4_2")
+
+	companions := revivedCompanions(sim, "dungeon_wolf")
+	if len(companions) != 2 {
+		t.Fatalf("rank 4 revived companions = %d, want 2: %+v", len(companions), companions)
+	}
+	def := sim.rules.Monsters["dungeon_wolf"]
+	wantHP := scalePositiveInt(def.MaxHP, 80)
+	for _, companion := range companions {
+		if companion.maxHP != wantHP || companion.monsterAttackDamage == nil || companion.monsterAttackDamage.Max != 2 {
+			t.Fatalf("rank 4 companion stats hp=%d damage=%+v, want scaled hp=%d and damage max=2", companion.maxHP, companion.monsterAttackDamage, wantHP)
+		}
+	}
+}
+
 func TestSorcererReviveRejectsBossAndLivingTargets(t *testing.T) {
 	sim := sorcererReviveSim(t, "sess_sorcerer_revive_reject")
 	player := sim.activeLevel().entities[sim.playerID]
@@ -65,7 +101,7 @@ func TestSorcererReviveRejectsBossAndLivingTargets(t *testing.T) {
 func TestSorcererReviveRulesLoad(t *testing.T) {
 	rules := loadRules(t)
 	revive := rules.Skills["revive"]
-	if revive.Class != "sorcerer" || revive.Kind != "revive_companion" || revive.Revive.PowerPercentBase != 50 || revive.Revive.PowerPercentPerRank != 10 || revive.Revive.Limit != 1 {
+	if revive.Class != "sorcerer" || revive.Kind != "revive_companion" || revive.Revive.PowerPercentBase != 50 || revive.Revive.PowerPercentPerRank != 10 || companionLimitAtRank(revive.Revive.Limit, 4) != 2 {
 		t.Fatalf("revive = %+v, want sorcerer revive companion scaling", revive)
 	}
 }
@@ -75,8 +111,9 @@ func sorcererReviveSim(t *testing.T, sessionID string) *Sim {
 	rules := loadRules(t)
 	sim := MustNewSim(sessionID, sessionID+"_seed", rules)
 	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.Level = 7
 	sim.progression.BaseStats = rules.CharacterProgression.Classes["sorcerer"].BaseStats
-	sim.progression.BaseStats.Magic = 12
+	sim.progression.BaseStats.Magic = 18
 	sim.progression.SkillRanks["magic_bolt"] = 1
 	sim.progression.SkillRanks["revive"] = 1
 	ps := sim.defaultPlayer()
@@ -109,19 +146,21 @@ func addReviveTestMonster(sim *Sim, monsterDefID string, pos Vec2, hp int) *enti
 
 func onlyRevivedCompanion(t *testing.T, sim *Sim, monsterDefID string) *entity {
 	t.Helper()
-	var found *entity
+	found := revivedCompanions(sim, monsterDefID)
+	if len(found) != 1 {
+		t.Fatalf("revived %s companions = %d, want 1", monsterDefID, len(found))
+	}
+	return found[0]
+}
+
+func revivedCompanions(sim *Sim, monsterDefID string) []*entity {
+	out := []*entity{}
 	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
 		entity := sim.activeLevel().entities[id]
 		if entity == nil || entity.kind != companionEntity || entity.monsterDefID != monsterDefID {
 			continue
 		}
-		if found != nil {
-			t.Fatalf("multiple revived companions: %d and %d", found.id, entity.id)
-		}
-		found = entity
+		out = append(out, entity)
 	}
-	if found == nil {
-		t.Fatalf("missing revived %s companion", monsterDefID)
-	}
-	return found
+	return out
 }

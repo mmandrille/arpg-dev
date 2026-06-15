@@ -30,19 +30,12 @@ func (s *Sim) newPresetMonsterOrCompanion(level *LevelState, preset WorldEntity,
 	return monster
 }
 
-func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, res *TickResult) *entity {
+func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank int, res *TickResult) *entity {
 	if owner == nil {
 		return nil
 	}
 	level := s.activeLevel()
-	for _, id := range sortedEntityIDs(level.entities) {
-		existing := level.entities[id]
-		if existing == nil || existing.kind != companionEntity || existing.ownerID != owner.id || existing.sourceSkillID != skillID {
-			continue
-		}
-		delete(level.entities, id)
-		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
-	}
+	s.pruneCompanionsForNewSpawn(owner.id, skillID, companionLimitAtRank(def.Companion.Limit, rank), res)
 	monsterDef := s.rules.Monsters[def.Companion.MonsterDefID]
 	companion := &entity{
 		kind:                  companionEntity,
@@ -73,7 +66,7 @@ func (s *Sim) handleSummonCompanionSkillCast(in Input, res *TickResult, player *
 	s.clearAutoNav()
 	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
-	companion := s.summonCompanion(player, skillID, def, res)
+	companion := s.summonCompanion(player, skillID, def, rank, res)
 	targetID := uint64(0)
 	if companion != nil {
 		targetID = companion.id
@@ -127,14 +120,7 @@ func (s *Sim) reviveMonsterCompanion(owner *entity, target *entity, skillID stri
 		return nil
 	}
 	level := s.activeLevel()
-	for _, id := range sortedEntityIDs(level.entities) {
-		existing := level.entities[id]
-		if existing == nil || existing.kind != companionEntity || existing.ownerID != owner.id || existing.sourceSkillID != skillID {
-			continue
-		}
-		delete(level.entities, id)
-		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
-	}
+	s.pruneCompanionsForNewSpawn(owner.id, skillID, companionLimitAtRank(def.Revive.Limit, rank), res)
 	delete(level.entities, target.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(target.id)})
 
@@ -167,6 +153,27 @@ func (s *Sim) reviveMonsterCompanion(owner *entity, target *entity, skillID stri
 	level.entities[companion.id] = companion
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(companion))})
 	return companion
+}
+
+func (s *Sim) pruneCompanionsForNewSpawn(ownerID uint64, skillID string, limit int, res *TickResult) {
+	if limit < 1 {
+		limit = 1
+	}
+	level := s.activeLevel()
+	existingIDs := make([]uint64, 0)
+	for _, id := range sortedEntityIDs(level.entities) {
+		existing := level.entities[id]
+		if existing == nil || existing.kind != companionEntity || existing.ownerID != ownerID || existing.sourceSkillID != skillID {
+			continue
+		}
+		existingIDs = append(existingIDs, id)
+	}
+	removeCount := len(existingIDs) - limit + 1
+	for i := 0; i < removeCount; i++ {
+		id := existingIDs[i]
+		delete(level.entities, id)
+		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
+	}
 }
 
 func scalePositiveInt(value int, percent int) int {

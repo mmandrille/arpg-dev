@@ -48,6 +48,17 @@
       "effect_visual": "arcane_barrage",
       "summary_key": "skill.arcane_barrage.summary"
     },
+    "revive": {
+      "icon": {
+        "label": "R",
+        "shape": "burst",
+        "color": "#4fbf7a",
+        "accent": "#d7ffe8"
+      },
+      "summary": "Revives a slain monster",
+      "effect_visual": "revive_companion",
+      "summary_key": "skill.revive.summary"
+    },
     "cleave": {
       "icon": {
         "label": "C",

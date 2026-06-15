@@ -537,6 +537,7 @@ type SkillDef struct {
 	Shatter      SkillShatterDef     `json:"shatter"`
 	Chain        SkillChainDef       `json:"chain"`
 	Companion    SkillCompanionDef   `json:"companion"`
+	Revive       SkillReviveDef      `json:"revive"`
 	Effects      []SkillEffectDef    `json:"effects"`
 	Cooldown     SkillCooldownDef    `json:"cooldown"`
 }
@@ -2815,10 +2816,9 @@ func validateBuffSkillCooldown(skillID string, skill SkillDef, baseAttackInterva
 	}
 	return nil
 }
-
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion":
 		return true
 	default:
 		return false
@@ -2876,6 +2876,8 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for summon_companion", skillID, skill.Targeting)
 		}
 		return validateSummonCompanionSkillPayload(skillID, skill, monsters)
+	case "revive_companion":
+		return validateReviveCompanionSkillPayload(skillID, skill)
 	default:
 		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
 	}

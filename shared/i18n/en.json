@@ -58,6 +58,8 @@
     "skill.ligthing.summary": "Chaining lightning projectile",
     "skill.arcane_barrage.name": "Arcane Barrage",
     "skill.arcane_barrage.summary": "Piercing arcane projectile",
+    "skill.revive.name": "Revive",
+    "skill.revive.summary": "Revives a slain monster",
     "skill.cleave.name": "Cleave",
     "skill.cleave.summary": "Cone weapon attack",
     "skill.rage.name": "Rage",

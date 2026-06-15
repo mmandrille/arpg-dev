@@ -176,7 +176,7 @@ func (s *Sim) applyDashSkill(player *entity, skillID string, def SkillDef, rank 
 			continue
 		}
 		beforeEvents := len(res.Events)
-		s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, damageRange, s.skillDamageType(def))
+		s.damageMonsterByPlayerSkillTypedWithID(target, player.id, skillID, correlationID, res, damageRange, s.skillDamageType(def))
 		for i := beforeEvents; i < len(res.Events); i++ {
 			if res.Events[i].EventType == "monster_damaged" && res.Events[i].TargetEntityID == idStr(target.id) {
 				res.Events[i].SkillID = skillID

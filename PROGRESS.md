@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v192 — magic find stat |
+| **Latest completed slice** | v193 — unique skill modifier |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -209,6 +209,7 @@ v189_* = skill-affix-rolls
 v190_* = paladin-defense-fixes
 v191_* = affix-name-grammar
 v192_* = magic-find-stat
+v193_* = unique-skill-modifier
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -442,6 +443,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v190** | `paladin-defense-fixes` | Complete (`make ci` green) | [`v190_spec-paladin-defense-fixes.md`](docs/specs/v190_spec-paladin-defense-fixes.md) | [`v190_2026-06-15-paladin-defense-fixes.md`](docs/plans/v190_2026-06-15-paladin-defense-fixes.md) | [`as-built`](docs/as-built/v190_paladin-defense-fixes.md) |
 | **v191** | `affix-name-grammar` | Complete (`make ci` green) | [`v191_spec-affix-name-grammar.md`](docs/specs/v191_spec-affix-name-grammar.md) | [`v191_2026-06-15-affix-name-grammar.md`](docs/plans/v191_2026-06-15-affix-name-grammar.md) | [`as-built`](docs/as-built/v191_affix-name-grammar.md) |
 | **v192** | `magic-find-stat` | Complete (`make ci` green) | [`v192_spec-magic-find-stat.md`](docs/specs/v192_spec-magic-find-stat.md) | [`v192_2026-06-15-magic-find-stat.md`](docs/plans/v192_2026-06-15-magic-find-stat.md) | [`as-built`](docs/as-built/v192_magic-find-stat.md) |
+| **v193** | `unique-skill-modifier` | Complete (`make ci` green) | [`v193_spec-unique-skill-modifier.md`](docs/specs/v193_spec-unique-skill-modifier.md) | [`v193_2026-06-15-unique-skill-modifier.md`](docs/plans/v193_2026-06-15-unique-skill-modifier.md) | [`as-built`](docs/as-built/v193_unique-skill-modifier.md) |
 
 ---
 
@@ -574,6 +576,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Unique items can now modify a named skill.** v193 adds the `Arcane Conduit` effect and
+`Conduit Staff` named unique, threads skill identity into server-owned skill damage, and proves
+Magic Bolt receives the unique damage bonus while other skills remain baseline. Protocol bot
+scenario `82_unique_skill_modifier` proves the named unique is available through the unique chest.
 
 **Magic Find is now a visible loot stat.** v192 adds `magic_find_percent` as a rollable equipment
 stat, exposes equipped Magic Find in derived stats and stat breakdowns, applies it only to monster

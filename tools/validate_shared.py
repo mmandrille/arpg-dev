@@ -2978,7 +2978,7 @@ def cross_checks(report: Report) -> None:
             "on_large_hit_taken",
             "on_continuous_movement_attack",
             "on_projectile_hit_taken",
-            "on_repeated_same_target_hit",
+            "on_repeated_same_target_hit", "on_skill_damage_roll",
         }
         for effect_id, effect in unique_effect_defs.items():
             if effect.get("id") != effect_id:

@@ -1326,9 +1326,13 @@ func (s *Sim) damageMonsterByPlayerSkill(target *entity, playerID uint64, corr s
 }
 
 func (s *Sim) damageMonsterByPlayerSkillTyped(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, damageType string) combatResolution {
+	return s.damageMonsterByPlayerSkillTypedWithID(target, playerID, "", corr, res, damageRange, damageType)
+}
+
+func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uint64, skillID string, corr string, res *TickResult, damageRange DamageRange, damageType string) combatResolution {
 	damageRange = s.applyUniqueDamageBeforeHeroHit(target, playerID, damageRange)
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
-	outcome := s.resolveSkillDamage(defenderStats, s.applySkillDamageBonus(damageRange))
+	outcome := s.resolveSkillDamage(defenderStats, s.applySkillDamageModifiers(playerID, skillID, damageRange))
 	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
 	target.hp -= outcome.Damage
 	if target.hp < 0 {
@@ -2698,7 +2702,7 @@ func (s *Sim) applyConeSkill(player *entity, skillID string, def SkillDef, targe
 		if target == nil || target.hp <= 0 {
 			continue
 		}
-		outcome := s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, s.resolvePlayerAttackDamage(), s.skillDamageType(def))
+		outcome := s.damageMonsterByPlayerSkillTypedWithID(target, player.id, skillID, correlationID, res, s.resolvePlayerAttackDamage(), s.skillDamageType(def))
 		if def.Poison.DurationTicks > 0 && outcome.Hit && !outcome.Blocked && target.hp > 0 {
 			s.startPoisonDot(player, target, skillID, def, outcome.Damage, correlationID, res)
 		}
@@ -3777,7 +3781,7 @@ func (s *Sim) resolveSkillProjectileMonsterHit(p *entity, target *entity, res *T
 		return
 	}
 	damageType := s.skillDamageType(def)
-	outcome := s.damageMonsterByPlayerSkillTyped(target, p.ownerID, p.sourceCorrID, res, p.damageRange, damageType)
+	outcome := s.damageMonsterByPlayerSkillTypedWithID(target, p.ownerID, skillID, p.sourceCorrID, res, p.damageRange, damageType)
 	if def.Kind == "chain_projectile_attack" && outcome.Damage > 0 {
 		s.applySkillChain(target, p.ownerID, skillID, def, p.damageRange, p.sourceCorrID, res)
 		return
@@ -3819,7 +3823,7 @@ func (s *Sim) applySkillChain(origin *entity, ownerID uint64, skillID string, de
 			Direction:       cloneVec2Ptr(&dir),
 			Range:           floatPtr(distance(current.pos, next.pos)),
 		})
-		s.damageMonsterByPlayerSkillTyped(next, ownerID, correlationID, res, damageRange, s.skillDamageType(def))
+		s.damageMonsterByPlayerSkillTypedWithID(next, ownerID, skillID, correlationID, res, damageRange, s.skillDamageType(def))
 		current = next
 		currentRange *= def.Chain.RangeMultiplier
 	}

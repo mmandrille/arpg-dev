@@ -30,6 +30,21 @@
       "fixed_effect_ids": ["stormbound_echo"],
       "behavior_hook": "Named fixed unique package applies the live stormbound_echo effect through rolled equipment effect_ids.",
       "status": "ready"
+    },
+    "conduit_staff": {
+      "id": "conduit_staff",
+      "enabled": true,
+      "base_template_id": "starter_sorcerer_staff",
+      "display_name": "Conduit Staff",
+      "minimum_level": 5,
+      "fixed_stats": {
+        "damage_min": 1,
+        "damage_max": 3,
+        "max_mana": 8
+      },
+      "fixed_effect_ids": ["arcane_conduit"],
+      "behavior_hook": "Named fixed unique package modifies Magic Bolt damage through the live arcane_conduit effect.",
+      "status": "ready"
     }
   }
 }

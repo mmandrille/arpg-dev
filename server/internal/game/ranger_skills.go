@@ -102,7 +102,7 @@ func (s *Sim) applyRangerShot(player *entity, skillID string, def SkillDef, rank
 			hitDamage = scaleDamageRangePercent(damageRange, def.Pierce.DamagePercentPerExtraHit)
 		}
 		beforeEvents := len(res.Events)
-		outcome := s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, hitDamage, s.skillDamageType(def))
+		outcome := s.damageMonsterByPlayerSkillTypedWithID(target, player.id, skillID, correlationID, res, hitDamage, s.skillDamageType(def))
 		for i := beforeEvents; i < len(res.Events); i++ {
 			if res.Events[i].EventType == "monster_damaged" && res.Events[i].TargetEntityID == idStr(target.id) {
 				res.Events[i].SkillID = skillID
@@ -131,7 +131,7 @@ func (s *Sim) applyRangerVolley(player *entity, skillID string, def SkillDef, ra
 			}
 			hitIDs[target.id] = true
 			beforeEvents := len(res.Events)
-			s.damageMonsterByPlayerSkillTyped(target, player.id, correlationID, res, damageRange, s.skillDamageType(def))
+			s.damageMonsterByPlayerSkillTypedWithID(target, player.id, skillID, correlationID, res, damageRange, s.skillDamageType(def))
 			for i := beforeEvents; i < len(res.Events); i++ {
 				if res.Events[i].EventType == "monster_damaged" && res.Events[i].TargetEntityID == idStr(target.id) {
 					res.Events[i].SkillID = skillID

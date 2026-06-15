@@ -124,6 +124,19 @@
       },
       "status": "ready"
     },
+    "arcane_conduit": {
+      "id": "arcane_conduit",
+      "enabled": true,
+      "display_name": "Arcane Conduit",
+      "summary": "Magic Bolt deals 50% increased damage while this unique is equipped.",
+      "hook": "on_skill_damage_roll",
+      "compatible_item_types": ["staff", "ring", "amulet"],
+      "params": {
+        "skill_id": "magic_bolt",
+        "damage_bonus_percent": 50
+      },
+      "status": "ready"
+    },
     "frostglass_ward": {
       "id": "frostglass_ward",
       "enabled": true,

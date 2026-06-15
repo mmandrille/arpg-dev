@@ -2,6 +2,7 @@ class_name BotAssertionHandlers
 extends RefCounted
 
 const BotUiAssertionHandlersScript := preload("res://scripts/bot_ui_assertion_handlers.gd")
+const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journal_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -128,6 +129,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			if not runner._remote_player_count_matches(step, state):
 				runner._fail("assert_remote_player_count failed: want=%s remote_player_ids=%s step=%d scenario=%s" % [
 					str(step), str(state.get("remote_player_ids", [])), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_quest_journal":
+			if not BotQuestJournalAssertionsScript.matches(step, state):
+				runner._fail("assert_quest_journal failed: want=%s panel=%s step=%d scenario=%s" % [
+					str(step), str(state.get("quest_journal_panel", {})), runner._step_index, str(runner.scenario.get("id", "?"))
 				])
 				return false
 			return true

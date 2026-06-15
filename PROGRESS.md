@@ -12,10 +12,10 @@ Last updated: 2026-06-14
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v173 — quest floor map marker |
+| **Latest completed slice** | v174 — quest journal foundation |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-14 |
-| **Next slice** | v174 — quest journal foundation |
+| **Next slice** | v175 — elite objective HUD |
 | **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
 | **Next engineering review** | v180 due before more feature batches |
 
@@ -190,6 +190,7 @@ v170_* = validate-shared-catalog-split
 v171_* = sorcerer-paladin-third-skills
 v172_* = loot-filter-persistence
 v173_* = quest-floor-map-marker
+v174_* = quest-journal-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -404,6 +405,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v171** | `sorcerer-paladin-third-skills` | Complete (`make ci` green) | [`v171_spec-sorcerer-paladin-third-skills.md`](docs/specs/v171_spec-sorcerer-paladin-third-skills.md) | [`v171_2026-06-14-sorcerer-paladin-third-skills.md`](docs/plans/v171_2026-06-14-sorcerer-paladin-third-skills.md) | [`as-built`](docs/as-built/v171_sorcerer-paladin-third-skills.md) |
 | **v172** | `loot-filter-persistence` | Complete (`make ci` green) | [`v172_spec-loot-filter-persistence.md`](docs/specs/v172_spec-loot-filter-persistence.md) | [`v172_2026-06-14-loot-filter-persistence.md`](docs/plans/v172_2026-06-14-loot-filter-persistence.md) | [`as-built`](docs/as-built/v172_loot-filter-persistence.md) |
 | **v173** | `quest-floor-map-marker` | Complete (`make ci` green) | [`v173_spec-quest-floor-map-marker.md`](docs/specs/v173_spec-quest-floor-map-marker.md) | [`v173_2026-06-14-quest-floor-map-marker.md`](docs/plans/v173_2026-06-14-quest-floor-map-marker.md) | [`as-built`](docs/as-built/v173_quest-floor-map-marker.md) |
+| **v174** | `quest-journal-foundation` | Complete (`make ci` green) | [`v174_spec-quest-journal-foundation.md`](docs/specs/v174_spec-quest-journal-foundation.md) | [`v174_2026-06-14-quest-journal-foundation.md`](docs/plans/v174_2026-06-14-quest-journal-foundation.md) | [`as-built`](docs/as-built/v174_quest-journal-foundation.md) |
 
 ---
 
@@ -535,6 +537,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Quest journal foundation is now visible in the Godot client.** v174 adds a `J`-toggle journal
+panel that lists the current floor reward-chest objective from `quest_reward` entity metadata and
+marks it complete after the marked chest opens. Bot debug/assertions cover the panel, and
+`client/scripts/main.gd`'s file-size baseline was lowered after redundant blank-line compaction.
 
 **Random quest reward chests now have a client-visible marker.** v173 threads server-authored
 `quest_reward` metadata through v8 entity views, tracks reward chest ids on generated dungeon

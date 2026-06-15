@@ -1,6 +1,8 @@
 class_name BotWaitHandlers
 extends RefCounted
 
+const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journal_assertions.gd")
+
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
 	match stype:
@@ -54,6 +56,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return runner._boss_health_bar_matches(step, state)
 		"wait_remote_player_count":
 			return runner._remote_player_count_matches(step, state)
+		"wait_quest_journal":
+			return BotQuestJournalAssertionsScript.matches(step, state)
 		"wait_ticks":
 			return runner._wait_ticks(step, state)
 		"wait_entity":
@@ -129,4 +133,3 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			var eids: Array = state.get("%s_ids" % etype, [])
 			return eids.is_empty()
 	return false
-

@@ -33,7 +33,6 @@ var _memory: Dictionary = {}
 # Filled by tick() on first action call; consumed by controller's _process.
 var pending_action: Dictionary = {}
 
-
 func load_scenario(data: Dictionary) -> bool:
 	scenario = data
 	_steps = data.get("client_steps", [])
@@ -1551,6 +1550,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "ticks=%d" % int(step.get("ticks", 0))
 		"wait_boss_health_bar", "assert_boss_health_bar":
 			return "boss_health_bar=%s" % str(_boss_health_bar_expectation(step))
+		"wait_quest_journal", "assert_quest_journal":
+			return "quest_journal=%s" % str(step)
 		"assert_xp_bar":
 			return "xp_bar=%s" % str(step)
 		"click_menu_button":

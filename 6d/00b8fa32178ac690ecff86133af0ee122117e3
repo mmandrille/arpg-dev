@@ -1,0 +1,54 @@
+server/internal/game/sim_load.go
+  s_3d722d65688e0b::t_53013e6852769b 173-175,190
+PROGRESS.md
+  s_3d722d65688e0b::t_858b005066a349 15,215,452,586-588
+server/internal/game/set_items.go
+  s_3d722d65688e0b::t_dac3b07fe74a06 106
+server/internal/game/item_rolls.go
+  s_3d722d65688e0b::t_7c2a0584f166bf 41,48-52
+docs/specs/v196_spec-item-level-progression.md
+  s_3d722d65688e0b::t_ef7d955b41b1a3 1-36
+shared/protocol/state_delta.v8.schema.json
+  s_3d722d65688e0b::t_8875aa063725c2 62,98,130,157,251
+server/internal/game/item_roll_helpers.go
+  s_3d722d65688e0b::t_432f09f725ca28 1-19
+docs/plans/v196_2026-06-15-item-level-progression.md
+  s_3d722d65688e0b::t_dcee7b9d181868 1-29
+server/internal/game/game_test.go
+  s_3d722d65688e0b::t_48aeb53d51f49a 2443,2447,2465-2466
+tools/bot/scenarios/85_item_level_progression.json
+  s_3d722d65688e0b::t_5115eda8b253d8 1-21
+server/internal/game/types.go
+  s_3d722d65688e0b::t_90182b38ad6ff1 269,327
+  s_3d722d65688e0b::t_267fb7ea7f0922 40,67,86,101,114,127,143,160
+server/internal/game/item_rarity_test.go
+  s_3d722d65688e0b::t_da01a2dab0eaed 71-88
+docs/as-built/v196_item-level-progression.md
+  s_3d722d65688e0b::t_740b9fd4a8a94c 1-30
+server/internal/game/shop.go
+  s_3d722d65688e0b::t_b706346dde2923 160,556,712,752,1119
+tools/bot/run.py
+  s_3d722d65688e0b::t_5a4ee58cfab791 2992-2995
+server/internal/game/sim.go
+  s_3d722d65688e0b::t_a26e73f4890546 6466
+shared/protocol/session_snapshot.v8.schema.json
+  s_3d722d65688e0b::t_15fbbd6be414f4 95,144,176
+server/internal/game/unique_chest.go
+  s_3d722d65688e0b::t_8531782aa37fb2 301,338
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "6d00b8fa32178ac690ecff86133af0ee122117e3",
+  "prompts": {},
+  "sessions": {
+    "s_3d722d65688e0b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecc06-930f-72b2-adcf-6aa19782dbac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -29,3 +29,9 @@ Add a Ranger summon skill that creates one server-owned black wolf companion usi
 - Focused Go tests prove summon, replacement, ownership, and wolf view fields.
 - Bot proof: Ranger casts `black_wolf_companion`; a black wolf companion appears, follows, and damages an enemy.
 - Full `make ci` passes before commit.
+
+## Presentation Addendum
+
+- Active local-player companions render in a compact top-left companion row.
+- Each companion slot shows a small identity block derived from the companion's shared monster visual metadata and a health bar attached to the bottom of the block.
+- The row consumes generic companion entity state (`type`, `owner_id`, `monster_def_id`, `hp`, `max_hp`, visual metadata) so future companion families do not need one-off HUD wiring.

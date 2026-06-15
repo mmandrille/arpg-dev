@@ -1,4 +1,4 @@
-# v185 As-Built - Paladin Defense Fixes
+# v190 As-Built - Paladin Defense Fixes
 
 Date: 2026-06-15
 

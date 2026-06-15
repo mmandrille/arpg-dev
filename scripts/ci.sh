@@ -71,6 +71,27 @@ finish_step_failed() {
   STEP_LABEL=""
 }
 
+summary_label() {
+  local label="$1"
+  label="${label#== }"
+  label="${label/ == (/ (}"
+  label="${label% ==}"
+  printf '%s\n' "$label"
+}
+
+join_details() {
+  local joined=""
+  local detail
+  for detail in "$@"; do
+    if [[ -z "$joined" ]]; then
+      joined="$detail"
+    else
+      joined="${joined}; ${detail}"
+    fi
+  done
+  printf '%s\n' "$joined"
+}
+
 # Run a step: print header, run command, track failure. Never exits.
 ci_step() {
   local label="$1"
@@ -133,6 +154,93 @@ stream_bot_progress() {
       fflush()
     }
   '
+}
+
+client_bot_failure_detail() {
+  local log_path="$1"
+  awk '
+    /^\[bot-client\] FAIL [^ ]+ --/ {
+      scenario = $3
+      if (!seen[scenario]++) {
+        if (scenarios != "") {
+          scenarios = scenarios ", " scenario
+        } else {
+          scenarios = scenario
+        }
+      }
+    }
+    /^\[bot-client\] FAIL: [0-9]+ scenario file\(s\) failed validation/ {
+      validation = $0
+      sub(/^\[bot-client\] FAIL: /, "", validation)
+    }
+    /^\[bot-client\] FAIL: .*: (runner|world_id|client_steps)/ {
+      validation = "scenario file validation failed"
+    }
+    END {
+      if (scenarios != "") {
+        printf "client bot scenario(s) failed: %s", scenarios
+      } else if (validation != "") {
+        printf "%s", validation
+      } else {
+        printf "client bot runner failed"
+      }
+    }
+  ' "$log_path"
+}
+
+client_smoke_failure_detail() {
+  local log_path="$1"
+  awk '
+    /^FAILED: / {
+      gate = $0
+      sub(/^FAILED: /, "", gate)
+      sub(/ \(.*$/, "", gate)
+      if (!seen[gate]++) {
+        if (gates != "") {
+          gates = gates ", " gate
+        } else {
+          gates = gate
+        }
+      }
+    }
+    END {
+      if (gates != "") {
+        printf "GDScript gate(s) failed: %s", gates
+      } else {
+        printf "Godot headless smoke failed"
+      }
+    }
+  ' "$log_path"
+}
+
+ci_captured_step() {
+  local label="$1"
+  local detail_parser="$2"
+  shift 2
+  local log_path status detail
+  log_path="$(mktemp -t arpg-ci-step.XXXXXX.log)"
+
+  begin_step "$label"
+  set +e
+  "$@" 2>&1 | tee "$log_path"
+  status=${PIPESTATUS[0]}
+  set +e
+
+  if [[ "$status" -ne 0 ]]; then
+    detail="$("$detail_parser" "$log_path")"
+    finish_step_failed
+    if [[ -n "$detail" ]]; then
+      FAILED_STEPS+=("${label} (${detail})")
+    else
+      FAILED_STEPS+=("${label}")
+    fi
+    rm -f "$log_path"
+    return 1
+  fi
+
+  rm -f "$log_path"
+  finish_step
+  return 0
 }
 
 # ── Maintainability ratchets (were a Makefile prereq) ────────────────────────
@@ -224,6 +332,7 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
   begin_step "== 9/11 protocol bot + replay =="
   BOT_LOG="$(mktemp -t arpg-ci-bot.XXXXXX.log)"
   step9_failed=0
+  step9_failure_details=()
   set +e
   SESSION_ID="$("$ROOT/.venv/bin/python" -m tools.bot.run \
     --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
@@ -235,6 +344,7 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
     show_log "$BOT_LOG" "protocol bot"
     rm -f "$BOT_LOG"
     step9_failed=1
+    step9_failure_details+=("protocol bot failed")
   else
     if [[ "${ARPG_VERBOSE:-0}" == "1" ]]; then
       cat "$BOT_LOG"
@@ -246,6 +356,7 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
   fi
 
   if [[ -n "$SESSION_ID" ]]; then
+    echo "RUNNING: arpg-replay session=$SESSION_ID"
     set +e
     "$RUN_QUIET" --label "arpg-replay" -- bash -c \
       "cd server && ARPG_DATABASE_URL=\"$DATABASE_URL\" ARPG_GAMEPLAY_DEBUG=\"$GAMEPLAY_DEBUG\" \
@@ -254,23 +365,34 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
     set +e
     if [[ $replay_status -ne 0 ]]; then
       step9_failed=1
+      step9_failure_details+=("arpg-replay failed for session $SESSION_ID")
+    else
+      echo "OK: arpg-replay session=$SESSION_ID"
     fi
   else
     echo "SKIPPED: replay (protocol bot did not report a session id)"
+    if [[ "$bot_status" -eq 0 ]]; then
+      step9_failed=1
+      step9_failure_details+=("replay skipped: protocol bot did not report a session id")
+    fi
   fi
   if [[ "$step9_failed" -ne 0 ]]; then
     finish_step_failed
-    FAILED_STEPS+=("== 9/11 protocol bot + replay ==")
+    if [[ "${#step9_failure_details[@]}" -gt 0 ]]; then
+      FAILED_STEPS+=("== 9/11 protocol bot + replay == ($(join_details "${step9_failure_details[@]}"))")
+    else
+      FAILED_STEPS+=("== 9/11 protocol bot + replay ==")
+    fi
   else
     finish_step
   fi
 
   # Steps 10-11: Godot
-  ci_step "== 10/11 Godot client bot scenarios ==" \
+  ci_captured_step "== 10/11 Godot client bot scenarios ==" client_bot_failure_detail \
     env GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
       SCENARIO=all HEADLESS=1 ./scripts/bot_client.sh
 
-  ci_step "== 11/11 Godot headless smoke (optional) ==" \
+  ci_captured_step "== 11/11 Godot headless smoke (optional) ==" client_smoke_failure_detail \
     env GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
       DEBUG_TOKEN="$DEBUG_TOKEN" ./scripts/client_smoke.sh
 else
@@ -289,7 +411,7 @@ echo
 if [[ ${#FAILED_STEPS[@]} -gt 0 ]]; then
   echo "CI FAILED in $(format_duration $total_elapsed) — ${#FAILED_STEPS[@]} step(s) failed:"
   for step in "${FAILED_STEPS[@]}"; do
-    echo "  ✗  ${step#== }"
+    echo "  ✗  $(summary_label "$step")"
   done
   echo "(scroll up for each step's output)"
   exit 1

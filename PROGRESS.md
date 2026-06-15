@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v189 — skill affix rolls |
+| **Latest completed slice** | v190 — paladin defense fixes |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -437,7 +437,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v187** | `rarity-roll-pools` | Complete (`make ci` green) | [`v187_spec-rarity-roll-pools.md`](docs/specs/v187_spec-rarity-roll-pools.md) | [`v187_2026-06-15-rarity-roll-pools.md`](docs/plans/v187_2026-06-15-rarity-roll-pools.md) | [`as-built`](docs/as-built/v187_rarity-roll-pools.md) |
 | **v188** | `live-rare-combat-affixes` | Complete (`make ci` green) | [`v188_spec-live-rare-combat-affixes.md`](docs/specs/v188_spec-live-rare-combat-affixes.md) | [`v188_2026-06-15-live-rare-combat-affixes.md`](docs/plans/v188_2026-06-15-live-rare-combat-affixes.md) | [`as-built`](docs/as-built/v188_live-rare-combat-affixes.md) |
 | **v189** | `skill-affix-rolls` | Complete (`make ci` green) | [`v189_spec-skill-affix-rolls.md`](docs/specs/v189_spec-skill-affix-rolls.md) | [`v189_2026-06-15-skill-affix-rolls.md`](docs/plans/v189_2026-06-15-skill-affix-rolls.md) | [`as-built`](docs/as-built/v189_skill-affix-rolls.md) |
-| **v190** | `paladin-defense-fixes` | Complete (`make ci` green) | [`v185_spec-paladin-defense-fixes.md`](docs/specs/v185_spec-paladin-defense-fixes.md) | [`v185_2026-06-15-paladin-defense-fixes.md`](docs/plans/v185_2026-06-15-paladin-defense-fixes.md) | [`as-built`](docs/as-built/v185_paladin-defense-fixes.md) |
+| **v190** | `paladin-defense-fixes` | Complete (`make ci` green) | [`v190_spec-paladin-defense-fixes.md`](docs/specs/v190_spec-paladin-defense-fixes.md) | [`v190_2026-06-15-paladin-defense-fixes.md`](docs/plans/v190_2026-06-15-paladin-defense-fixes.md) | [`as-built`](docs/as-built/v190_paladin-defense-fixes.md) |
 
 ---
 

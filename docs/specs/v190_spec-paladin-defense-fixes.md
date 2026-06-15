@@ -3,7 +3,7 @@
 Status: Complete
 Date: 2026-06-15
 Codename: `paladin-defense-fixes`
-Slice: v185 - paladin defense fixes
+Slice: v190 - paladin defense fixes
 Baseline: v184 `revived-monster-companion`
 
 ## Purpose

@@ -647,6 +647,7 @@ async def execute_step(
             monster_def_id=str(step["monster_def_id"]) if step.get("monster_def_id") else None,
             rarity=str(step["rarity"]) if step.get("rarity") is not None else None,
             is_boss=bool(step["is_boss"]) if step.get("is_boss") is not None else None,
+            monster_pack_leader=bool(step["monster_pack_leader"]) if step.get("monster_pack_leader") is not None else None,
             target_id=str(step["target_id"]) if step.get("target_id") else None,
             timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
             fresh_event=bool(step.get("fresh_event", False)),
@@ -1899,11 +1900,8 @@ async def attack_until_monster_event(
     loop,
     event_type: str,
     *,
-    monster_def_id: str | None = None,
-    rarity: str | None = None,
-    is_boss: bool | None = None,
-    target_id: str | None = None,
-    timeout_s: float = SLICE_TIMEOUT_S,
+    monster_def_id: str | None = None, rarity: str | None = None, is_boss: bool | None = None,
+    monster_pack_leader: bool | None = None, target_id: str | None = None, timeout_s: float = SLICE_TIMEOUT_S,
     fresh_event: bool = False,
 ) -> None:
     deadline = loop.time() + timeout_s; start_event_count = sum(1 for ev in state.events if ev.get("event_type") == event_type)
@@ -1918,12 +1916,13 @@ async def attack_until_monster_event(
     while event_type not in state.seen_events or (fresh_event and sum(1 for ev in state.events if ev.get("event_type") == event_type) <= start_event_count):
         if loop.time() > deadline:
             raise TimeoutError(f"attack_until_monster_event stalled waiting for {event_type}")
-        if (monster_def_id or is_boss is not None) and (active_target_id is None or active_target_id in skipped_ids):
+        if (monster_def_id or is_boss is not None or monster_pack_leader is not None) and (active_target_id is None or active_target_id in skipped_ids):
             candidates = find_live_monsters_sorted(
                 state,
                 monster_def_id or "",
                 rarity=rarity,
                 is_boss=is_boss,
+                monster_pack_leader=monster_pack_leader,
                 exclude_ids=skipped_ids,
             )
             if not candidates:
@@ -2189,7 +2188,7 @@ def combat_event_entity_matches(
         (f"{prefix}_entity_type", "entity_type"),
         (f"{prefix}_monster_def_id", "monster_def_id"),
         (f"{prefix}_is_boss", "is_boss"),
-        (f"{prefix}_boss_template_id", "boss_template_id"),
+        (f"{prefix}_boss_template_id", "boss_template_id"), (f"{prefix}_monster_pack_leader", "monster_pack_leader"),
     ):
         if expected_key in expected:
             selector[selector_key] = expected[expected_key]
@@ -2199,7 +2198,7 @@ def combat_event_entity_matches(
         return False
     entity_id = str(event.get(f"{prefix}_entity_id", ""))
     event_monster_def_id = str(event.get(f"{prefix}_monster_def_id", ""))
-    if "monster_def_id" in selector and event_monster_def_id:
+    if len(selector) == 1 and "monster_def_id" in selector and event_monster_def_id:
         return event_monster_def_id == str(selector["monster_def_id"])
     entity = state.entities.get(entity_id)
     if entity is None:

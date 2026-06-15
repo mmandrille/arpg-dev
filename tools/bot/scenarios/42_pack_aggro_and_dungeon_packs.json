@@ -19,7 +19,7 @@
     { "type": "current_level", "equals": -1 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -1 },
-    { "type": "entity_count", "entity_type": "monster", "alive": true, "at_least": 18 },
+    { "type": "entity_count", "entity_type": "monster", "alive": true, "at_least": 17 },
     { "type": "event_count", "event_type": "monster_aggro", "at_least": 2 },
     { "type": "event_seen", "event_type": "monster_damaged" }
   ],

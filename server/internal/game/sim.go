@@ -3262,6 +3262,10 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		if monster.isBoss && monster.bossPhaseKind == "active" {
 			continue
 		}
+		if leader := s.eliteMinionLeader(monster); leader != nil {
+			s.advanceEliteMinionMovement(monster, leader, def, res)
+			continue
+		}
 		targetPlayer := s.nearestLivingPlayerForMonster(s.activeLevel(), monster)
 		if targetPlayer == nil {
 			continue
@@ -3347,7 +3351,7 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if monster.aiMode == monsterAIModeReturn {
 			continue
 		}
-		targetPlayer := s.nearestLivingPlayerForMonster(s.activeLevel(), monster)
+		targetPlayer := s.eliteMinionAttackTarget(s.activeLevel(), monster)
 		if targetPlayer == nil {
 			continue
 		}

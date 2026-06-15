@@ -92,6 +92,14 @@ ci_step() {
 stream_bot_progress() {
   local log_path="$1"
   tee "$log_path" | awk '
+    /\] scenario begin / {
+      line = $0
+      sub(/^.*\] scenario begin /, "", line)
+      current = line
+      sub(/ .*/, "", current)
+      printf "RUNNING: protocol bot scenario %s\n", current
+      fflush()
+    }
     /\] scenario done / {
       line = $0
       sub(/^.*\] scenario done /, "", line)

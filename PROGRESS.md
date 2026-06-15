@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v197 — upgrade success chance |
+| **Latest completed slice** | v198 — mercenary foundation |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -214,6 +214,7 @@ v194_* = second-set-package
 v195_* = boss-and-elite-special-drops
 v196_* = item-level-progression
 v197_* = upgrade-success-chance
+v198_* = mercenary-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -452,6 +453,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v195** | `boss-and-elite-special-drops` | Complete (`make ci` green) | [`v195_spec-boss-and-elite-special-drops.md`](docs/specs/v195_spec-boss-and-elite-special-drops.md) | [`v195_2026-06-15-boss-and-elite-special-drops.md`](docs/plans/v195_2026-06-15-boss-and-elite-special-drops.md) | [`as-built`](docs/as-built/v195_boss-and-elite-special-drops.md) |
 | **v196** | `item-level-progression` | Complete (`make ci` green) | [`v196_spec-item-level-progression.md`](docs/specs/v196_spec-item-level-progression.md) | [`v196_2026-06-15-item-level-progression.md`](docs/plans/v196_2026-06-15-item-level-progression.md) | [`as-built`](docs/as-built/v196_item-level-progression.md) |
 | **v197** | `upgrade-success-chance` | Complete (`make ci` green) | [`v197_spec-upgrade-success-chance.md`](docs/specs/v197_spec-upgrade-success-chance.md) | [`v197_2026-06-15-upgrade-success-chance.md`](docs/plans/v197_2026-06-15-upgrade-success-chance.md) | [`as-built`](docs/as-built/v197_upgrade-success-chance.md) |
+| **v198** | `mercenary-foundation` | Complete (`make ci` green) | [`v198_spec-mercenary-foundation.md`](docs/specs/v198_spec-mercenary-foundation.md) | [`v198_2026-06-15-mercenary-foundation.md`](docs/plans/v198_2026-06-15-mercenary-foundation.md) | [`as-built`](docs/as-built/v198_mercenary-foundation.md) |
 
 ---
 
@@ -584,6 +586,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**A mercenary companion archetype is in place.** v198 adds `mercenary_guard` as a shared-rules
+companion archetype, gives it visual/text catalog entries, and proves owned follow/assist combat in
+`mercenary_foundation_lab` with protocol bot scenario `86_mercenary_foundation`.
 
 **Blacksmith upgrades now have data-driven success chance.** v197 adds
 `item_upgrade_success_chance_percent`, returns per-attempt success, spends gold on failed attempts

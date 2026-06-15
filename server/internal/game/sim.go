@@ -2014,6 +2014,7 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 	delete(current.entities, player.id)
 	player.pos = arrivalPos
 	dest.entities[player.id] = player
+	s.transferOwnedCompanionsToLevel(player.id, current, dest, arrivalPos, res)
 	s.currentLevel = destLevel
 	current.move = nil
 	current.autoNav = nil
@@ -2316,6 +2317,9 @@ func (s *Sim) skillCooldownTicks(def SkillDef) int {
 }
 
 func (s *Sim) baseSkillCooldownTicks(def SkillDef) int {
+	if def.Cooldown.FixedTicks > 0 {
+		return def.Cooldown.FixedTicks
+	}
 	interval := s.DerivedStatsView().AttackIntervalTicks
 	if interval < 1 {
 		interval = s.rules.Combat.BaseAttackIntervalTicks

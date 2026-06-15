@@ -132,7 +132,9 @@ def validate_skill_catalogs(
         "earthbreaker": {"cleave": 1},
         "sanctuary": {"holy_shield": 1},
         "shadow_flurry": {"dash": 1},
-        "split_arrow": {"volley": 1},
+        "pinning_shot": {"piercing_shot": 1},
+        "split_arrow": {"piercing_shot": 1},
+        "volley": {"split_arrow": 1},
     }
     mismatched_prereqs = {
         skill_id: skill_prereqs.get(skill_id, {})

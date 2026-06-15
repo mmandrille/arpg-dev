@@ -342,7 +342,7 @@
       "name": "Rage",
       "class": "barbarian",
       "tree": {
-        "tier": 1,
+        "tier": 2,
         "column": 2
       },
       "kind": "self_buff",
@@ -359,7 +359,12 @@
           "str": 1,
           "vit": 1
         },
-        "skills": []
+        "skills": [
+          {
+            "skill_id": "piercing_shot",
+            "rank": 1
+          }
+        ]
       },
       "cost": {
         "mana": {
@@ -790,7 +795,7 @@
       "class": "ranger",
       "damage_type": "force",
       "tree": {
-        "tier": 1,
+        "tier": 2,
         "column": 2
       },
       "kind": "projectile_attack",
@@ -805,7 +810,12 @@
         "stats_per_rank": {
           "dex": 2
         },
-        "skills": []
+        "skills": [
+          {
+            "skill_id": "piercing_shot",
+            "rank": 1
+          }
+        ]
       },
       "cost": {
         "mana": {
@@ -840,7 +850,7 @@
       "class": "ranger",
       "damage_type": "force",
       "tree": {
-        "tier": 2,
+        "tier": 3,
         "column": 1
       },
       "kind": "projectile_attack",
@@ -857,7 +867,7 @@
         },
         "skills": [
           {
-            "skill_id": "piercing_shot",
+            "skill_id": "split_arrow",
             "rank": 1
           }
         ]
@@ -894,8 +904,8 @@
       "name": "Black Wolf Companion",
       "class": "ranger",
       "tree": {
-        "tier": 2,
-        "column": 2
+        "tier": 1,
+        "column": 3
       },
       "kind": "summon_companion",
       "max_rank": 5,
@@ -904,17 +914,12 @@
         "level": 1,
         "level_per_rank": 1,
         "stats": {
-          "dex": 10
+          "magic": 8
         },
         "stats_per_rank": {
-          "dex": 2
+          "magic": 2
         },
-        "skills": [
-          {
-            "skill_id": "piercing_shot",
-            "rank": 1
-          }
-        ]
+        "skills": []
       },
       "cost": {
         "mana": {
@@ -926,7 +931,9 @@
         "monster_def_id": "companion_black_wolf",
         "visual_model": "monster_quadruped",
         "visual_tint": "101014",
-        "visual_scale": 1.0,
+        "visual_scale": 0.7,
+        "hero_stat_percent_base": 70,
+        "hero_stat_percent_per_rank": 15,
         "limit": {
           "base": 1,
           "per_rank_step": 0,
@@ -935,7 +942,9 @@
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 4
+        "multiplier": 1,
+        "fixed_ticks": 1200,
+        "magic_reduction_ticks_per_point": 10
       },
       "name_key": "skill.black_wolf_companion.name"
     },
@@ -944,7 +953,7 @@
       "class": "ranger",
       "damage_type": "force",
       "tree": {
-        "tier": 3,
+        "tier": 2,
         "column": 1
       },
       "kind": "projectile_attack",
@@ -961,7 +970,7 @@
         },
         "skills": [
           {
-            "skill_id": "volley",
+            "skill_id": "piercing_shot",
             "rank": 1
           }
         ]

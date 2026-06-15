@@ -58,8 +58,9 @@ func _run() -> void:
 	_assert_eq("pinning shot root effect", str(SkillRulesLoaderScript.skill_definition("pinning_shot").get("root", {}).get("effect_id", "")), "pinning_root")
 	_assert_eq("volley kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("volley").get("kind", "")), "projectile_attack")
 	_assert_eq("volley arrow count", int(SkillRulesLoaderScript.skill_definition("volley").get("volley", {}).get("arrow_count", 0)), 5)
+	_assert_eq("volley prerequisite", str(((SkillRulesLoaderScript.skill_definition("volley").get("requirements", {}).get("skills", []) as Array)[0] as Dictionary).get("skill_id", "")), "split_arrow")
 	_assert_eq("split arrow kind from manifest-listed rules", str(SkillRulesLoaderScript.skill_definition("split_arrow").get("kind", "")), "projectile_attack")
-	_assert_eq("split arrow prerequisite", str(((SkillRulesLoaderScript.skill_definition("split_arrow").get("requirements", {}).get("skills", []) as Array)[0] as Dictionary).get("skill_id", "")), "volley")
+	_assert_eq("split arrow prerequisite", str(((SkillRulesLoaderScript.skill_definition("split_arrow").get("requirements", {}).get("skills", []) as Array)[0] as Dictionary).get("skill_id", "")), "piercing_shot")
 
 	var presentation := SkillRulesLoaderScript.skill_presentation("magic_bolt")
 	_assert_eq("presentation summary key from manifest-listed assets", str(presentation.get("summary_key", "")), "skill.magic_bolt.summary")

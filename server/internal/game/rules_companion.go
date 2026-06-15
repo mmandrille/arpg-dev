@@ -4,11 +4,13 @@ import "fmt"
 
 // SkillCompanionDef defines a server-owned summoned companion.
 type SkillCompanionDef struct {
-	MonsterDefID string                 `json:"monster_def_id"`
-	VisualModel  string                 `json:"visual_model"`
-	VisualTint   string                 `json:"visual_tint"`
-	VisualScale  float64                `json:"visual_scale"`
-	Limit        SkillCompanionLimitDef `json:"limit"`
+	MonsterDefID           string                 `json:"monster_def_id"`
+	VisualModel            string                 `json:"visual_model"`
+	VisualTint             string                 `json:"visual_tint"`
+	VisualScale            float64                `json:"visual_scale"`
+	HeroStatPercentBase    int                    `json:"hero_stat_percent_base"`
+	HeroStatPercentPerRank int                    `json:"hero_stat_percent_per_rank"`
+	Limit                  SkillCompanionLimitDef `json:"limit"`
 }
 
 // SkillReviveDef defines rank-scaled revived-monster companion power.
@@ -44,6 +46,12 @@ func validateSummonCompanionSkillPayload(skillID string, skill SkillDef, monster
 	}
 	if skill.Companion.VisualScale < 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.companion.visual_scale: must be non-negative", skillID)
+	}
+	if skill.Companion.HeroStatPercentBase < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.companion.hero_stat_percent_base: must be non-negative", skillID)
+	}
+	if skill.Companion.HeroStatPercentPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.companion.hero_stat_percent_per_rank: must be non-negative", skillID)
 	}
 	if skill.Damage.Type != "" || skill.Projectile.Range > 0 || len(skill.Effects) > 0 {
 		return fmt.Errorf("game: invalid rules skills.%s: summon_companion does not support damage, projectile, or effects", skillID)
@@ -106,6 +114,13 @@ func revivePowerPercent(def SkillDef, rank int) int {
 		rank = 1
 	}
 	return def.Revive.PowerPercentBase + def.Revive.PowerPercentPerRank*(rank-1)
+}
+
+func companionHeroStatPercent(def SkillDef, rank int) int {
+	if rank < 1 {
+		rank = 1
+	}
+	return def.Companion.HeroStatPercentBase + def.Companion.HeroStatPercentPerRank*(rank-1)
 }
 
 func reviveDurationTicks(def SkillDef, rank int) int {

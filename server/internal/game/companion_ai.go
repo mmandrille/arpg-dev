@@ -37,23 +37,36 @@ func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank 
 	level := s.activeLevel()
 	s.pruneCompanionsForNewSpawn(owner.id, skillID, companionLimitAtRank(def.Companion.Limit, rank), res)
 	monsterDef := s.rules.Monsters[def.Companion.MonsterDefID]
+	statPercent := companionHeroStatPercent(def, rank)
+	hp := monsterDef.MaxHP
+	damage := monsterDef.AttackDamage
+	visualScale := def.Companion.VisualScale
+	if statPercent > 0 {
+		hp = scalePositiveInt(owner.maxHP, statPercent)
+		derived := s.DerivedStatsView()
+		damage = &DamageRange{
+			Min: scalePositiveInt(int(math.Round(derived.DamageMin)), statPercent),
+			Max: scalePositiveInt(int(math.Round(derived.DamageMax)), statPercent),
+		}
+		visualScale = float64(statPercent) / 100.0
+	}
 	companion := &entity{
 		kind:                  companionEntity,
 		pos:                   companionSpawnPosition(owner),
 		spawnPos:              owner.pos,
-		hp:                    monsterDef.MaxHP,
-		maxHP:                 monsterDef.MaxHP,
+		hp:                    hp,
+		maxHP:                 hp,
 		ownerID:               owner.id,
 		monsterDefID:          def.Companion.MonsterDefID,
 		lootTable:             monsterDef.LootTable,
 		speed:                 monsterDef.MoveSpeed,
-		monsterAttackDamage:   monsterDef.AttackDamage,
+		monsterAttackDamage:   damage,
 		monsterAttackCooldown: monsterDef.AttackCooldown,
 		aiMode:                monsterAIModeIdle,
 		sourceSkillID:         skillID,
 		visualModel:           def.Companion.VisualModel,
 		visualTint:            def.Companion.VisualTint,
-		visualScale:           def.Companion.VisualScale,
+		visualScale:           visualScale,
 	}
 	companion.id = s.alloc()
 	level.entities[companion.id] = companion
@@ -162,20 +175,49 @@ func (s *Sim) pruneCompanionsForNewSpawn(ownerID uint64, skillID string, limit i
 	if limit < 1 {
 		limit = 1
 	}
-	level := s.activeLevel()
-	existingIDs := make([]uint64, 0)
-	for _, id := range sortedEntityIDs(level.entities) {
-		existing := level.entities[id]
-		if existing == nil || existing.kind != companionEntity || existing.ownerID != ownerID || existing.sourceSkillID != skillID {
+	type companionRef struct {
+		level *LevelState
+		id    uint64
+	}
+	existingRefs := make([]companionRef, 0)
+	for _, levelNum := range s.sortedLevelNums() {
+		level := s.levels[levelNum]
+		if level == nil {
 			continue
 		}
-		existingIDs = append(existingIDs, id)
+		for _, id := range sortedEntityIDs(level.entities) {
+			existing := level.entities[id]
+			if existing == nil || existing.kind != companionEntity || existing.ownerID != ownerID || existing.sourceSkillID != skillID {
+				continue
+			}
+			existingRefs = append(existingRefs, companionRef{level: level, id: id})
+		}
 	}
-	removeCount := len(existingIDs) - limit + 1
+	removeCount := len(existingRefs) - limit + 1
 	for i := 0; i < removeCount; i++ {
-		id := existingIDs[i]
-		delete(level.entities, id)
+		id := existingRefs[i].id
+		delete(existingRefs[i].level.entities, id)
 		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
+	}
+}
+
+func (s *Sim) transferOwnedCompanionsToLevel(ownerID uint64, current, dest *LevelState, ownerPos Vec2, res *TickResult) {
+	if current == nil || dest == nil || current == dest {
+		return
+	}
+	offsetIndex := 0
+	for _, id := range sortedEntityIDs(current.entities) {
+		companion := current.entities[id]
+		if companion == nil || companion.kind != companionEntity || companion.ownerID != ownerID {
+			continue
+		}
+		delete(current.entities, id)
+		companion.pos = companionTravelPosition(ownerPos, offsetIndex)
+		companion.spawnPos = ownerPos
+		companion.targetID = 0
+		dest.entities[id] = companion
+		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
+		offsetIndex++
 	}
 }
 
@@ -202,6 +244,21 @@ func scaleRevivedDamageRange(damage *DamageRange, percent int) *DamageRange {
 
 func companionSpawnPosition(owner *entity) Vec2 {
 	return Vec2{X: owner.pos.X + companionFollowDistance, Y: owner.pos.Y}
+}
+
+func companionTravelPosition(ownerPos Vec2, index int) Vec2 {
+	offsets := []Vec2{
+		{X: companionFollowDistance, Y: 0},
+		{X: -companionFollowDistance, Y: 0},
+		{X: 0, Y: companionFollowDistance},
+		{X: 0, Y: -companionFollowDistance},
+	}
+	offset := offsets[index%len(offsets)]
+	ring := 1 + index/len(offsets)
+	return Vec2{
+		X: ownerPos.X + offset.X*float64(ring),
+		Y: ownerPos.Y + offset.Y*float64(ring),
+	}
 }
 
 func (e *entity) applyMonsterLikeViewFields(ev *EntityView) {

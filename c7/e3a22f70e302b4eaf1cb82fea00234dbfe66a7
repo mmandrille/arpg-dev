@@ -1,0 +1,64 @@
+server/internal/game/rules.go
+  s_f9c66ca3cb4339::t_c9c5abad1d0a3e 1878
+  s_f9c66ca3cb4339::t_0cd71835cc6450 368-380
+shared/rules/boss_templates.v0.json
+  s_f9c66ca3cb4339::t_7685c86948839e 7
+docs/plans/v178_2026-06-15-boss-summoned-adds.md
+  s_f9c66ca3cb4339::t_b6200a6c4f5c5b 1-24,26-27,30,32-35,38-48,50-53,55-59,63-74,76-78,84-91,93,95-98,105-112,119-131,134-139
+  s_f9c66ca3cb4339::t_c64e7c3a1f67ff 145
+  s_f9c66ca3cb4339::t_cfb10da31ab1df 25,28-29,31,36-37,49,54,60-62,75,79-83,92,94,99-104,113-118,132-133,140-144
+shared/golden/boss_pattern_timeline.json
+  s_f9c66ca3cb4339::t_d578531ceef55a 9-10,18-20,28-30,33,36
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_f9c66ca3cb4339::t_334ca9eea6da33 28,30
+server/internal/game/boss_summon_pattern_test.go
+  s_f9c66ca3cb4339::t_181563ef2cdae3 1-120
+server/internal/game/sim.go
+  s_f9c66ca3cb4339::t_ea3c68092f5d61 133
+shared/protocol/session_snapshot.v8.schema.json
+  s_f9c66ca3cb4339::t_bf72db476e9b3c 429,649-654
+server/internal/game/boss_patterns.go
+  s_f9c66ca3cb4339::t_0cd71835cc6450 189-197
+  s_f9c66ca3cb4339::t_b96f2d68d8fab3 39,93,103,126-128,167-188,198-265
+server/internal/game/types.go
+  s_f9c66ca3cb4339::t_ea3c68092f5d61 394
+shared/rules/boss_patterns.v0.schema.json
+  s_f9c66ca3cb4339::t_7685c86948839e 53-55
+shared/protocol/state_delta.v8.schema.json
+  s_f9c66ca3cb4339::t_bf72db476e9b3c 341,576-581
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_05b68664f8c5ee 18
+PROGRESS.md
+  s_f9c66ca3cb4339::t_1d9c51ac4c631c 15,18,197,416,487,550-552
+server/internal/game/boss_pattern_rules.go
+  s_f9c66ca3cb4339::t_5b5b2c790228f7 1-72
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_f9c66ca3cb4339::t_de351f6801c0db 33,49
+  s_f9c66ca3cb4339::t_d60875367ea14f 32,34,48
+server/internal/game/game_test.go
+  s_f9c66ca3cb4339::t_d578531ceef55a 6320-6321
+  s_f9c66ca3cb4339::t_095f323a68a0a1 6370-6371,6375-6377
+docs/specs/v178_spec-boss-summoned-adds.md
+  s_f9c66ca3cb4339::t_bc19f71559a913 1-67
+docs/as-built/v178_boss-summoned-adds.md
+  s_f9c66ca3cb4339::t_04f440a483897b 1-35
+shared/rules/boss_patterns.v0.json
+  s_f9c66ca3cb4339::t_dd6a125b24d2fc 9,18,25,28,59,69,77-80
+  s_f9c66ca3cb4339::t_7685c86948839e 81-102,105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c7e3a22f70e302b4eaf1cb82fea00234dbfe66a7",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

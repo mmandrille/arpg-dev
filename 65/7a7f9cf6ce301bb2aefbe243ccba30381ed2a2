@@ -1,0 +1,37 @@
+docs/plans/v190_2026-06-15-paladin-defense-fixes.md
+  s_3054eba29cf568::t_0676cb559bfaf5 1
+PROGRESS.md
+  s_3054eba29cf568::t_a09fc752f0eb34 15
+  s_3054eba29cf568::t_446c109878f2fc 440
+server/internal/game/derived_stats.go
+  s_3054eba29cf568::t_c4a24ea79d81e9 30
+  s_3054eba29cf568::t_9b4ad673b22d72 55
+  s_3054eba29cf568::t_40ef04958323f7 8
+scripts/ci.sh
+  s_98023320ce653e::t_7cf0c31c73c9b5 74-81,335,347,359,368-370,374-377,381,383-385,414
+  s_98023320ce653e::t_0ee5430cacd4e1 82-94,159-243,382,391,395
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "657a7f9cf6ce301bb2aefbe243ccba30381ed2a2",
+  "prompts": {},
+  "sessions": {
+    "s_3054eba29cf568": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e424f7d2-9b2b-453b-8526-9cbddcbb13d0",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_98023320ce653e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecbed-d881-7182-b5fa-c93b6189c529",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+docs/as-built/v185_companion-rank-scaling-and-limits.md
+  s_21a9048984b529::t_86cf37730c5f03 25
+  s_21a9048984b529::t_828b3ee6399690 1-24,26-31
+docs/specs/v185_spec-companion-rank-scaling-and-limits.md
+  s_21a9048984b529::t_440c2819b7740d 1-25
+server/internal/game/rules_companion.go
+  s_21a9048984b529::t_ebec32917f7eda 7-11,16-25,37-38,74-75,83-95,102-111
+tools/bot/run.py
+  s_21a9048984b529::t_ac15ae3304bd12 652,1907,1918
+  s_21a9048984b529::t_53e75425e5705b 1909,3064-3065
+shared/rules/skills.v0.json
+  s_21a9048984b529::t_6d56aa8e11a8a4 285-289,940-944
+shared/rules/worlds.v0.json
+  s_21a9048984b529::t_79df044c8e3005 849
+  s_21a9048984b529::t_fffc577137b915 844-848,850
+server/internal/game/sorcerer_revive_test.go
+  s_21a9048984b529::t_f7eab80ad8ebee 41-76,104,149-157,163,165
+  s_21a9048984b529::t_b4e985a4f5e837 114,116
+server/internal/game/ranger_skills_test.go
+  s_21a9048984b529::t_12f5c409707d37 161
+server/internal/game/companion_ai.go
+  s_21a9048984b529::t_df586eef9b7359 33,38,69,123,158-176
+shared/rules/skills.v0.schema.json
+  s_21a9048984b529::t_107eadd14e5cd2 235,245-255
+tools/bot/scenarios/76_companion_rank_scaling_and_limits.json
+  s_21a9048984b529::t_67bb666f0f047f 21
+  s_21a9048984b529::t_7b112615ea8235 1-17,19-20,22-32
+  s_21a9048984b529::t_2c4706bf0e7aeb 18
+docs/plans/v185_2026-06-15-companion-rank-scaling-and-limits.md
+  s_21a9048984b529::t_2899bf0739f207 1-23,25-42
+  s_21a9048984b529::t_e952cf0d8576a3 24
+PROGRESS.md
+  s_21a9048984b529::t_8cadbc7b96156a 15,204,430,564-567
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ebcb270d050ece282bc12dcdf3b14c7fe452b46e",
+  "prompts": {},
+  "sessions": {
+    "s_21a9048984b529": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec984-931d-7740-965d-620664ca32a9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

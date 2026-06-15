@@ -12,7 +12,7 @@
           "offer_id": "generated:depth1:000",
           "kind": "generated",
           "item_template_id": "cave_boots",
-          "display_name": "Rare Cave Boots",
+          "display_name": "Nimble Rare Cave Boots",
           "rarity": "rare",
           "rolled_stats": {
             "armor": 1,
@@ -27,7 +27,7 @@
           "offer_id": "generated:depth1:001",
           "kind": "generated",
           "item_template_id": "cave_boots",
-          "display_name": "Magic Cave Boots",
+          "display_name": "Mystic Magic Cave Boots",
           "rarity": "magic",
           "rolled_stats": {
             "armor": 1,
@@ -55,7 +55,7 @@
           "offer_id": "generated:depth1:003",
           "kind": "generated",
           "item_template_id": "cave_bow",
-          "display_name": "Magic Cave Bow",
+          "display_name": "Savage Magic Cave Bow",
           "rarity": "magic",
           "rolled_stats": {
             "damage_min": 1,
@@ -91,7 +91,7 @@
           "offer_id": "generated:depth2:000",
           "kind": "generated",
           "item_template_id": "cave_mail",
-          "display_name": "Magic Cave Mail",
+          "display_name": "Vigorous Magic Cave Mail",
           "rarity": "magic",
           "rolled_stats": {
             "armor": 3,
@@ -133,7 +133,7 @@
           "offer_id": "generated:depth2:003",
           "kind": "generated",
           "item_template_id": "cave_shield",
-          "display_name": "Magic Cave Shield",
+          "display_name": "Mystic Magic Cave Shield",
           "rarity": "magic",
           "rolled_stats": {
             "armor": 2,
@@ -195,7 +195,7 @@
           "offer_id": "generated:depth3:002",
           "kind": "generated",
           "item_template_id": "cave_boots",
-          "display_name": "Magic Cave Boots",
+          "display_name": "Nimble Magic Cave Boots",
           "rarity": "magic",
           "rolled_stats": {
             "armor": 1,

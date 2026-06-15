@@ -1,5 +1,5 @@
 {
-  "description": "Deterministic item rolls for one template across rarities, including rarity roll-count ranges and inherited roll pools.",
+  "description": "Deterministic rolled item payloads for rarity, stats, display names, and effect ids.",
   "template_id": "cave_blade",
   "cases": [
     {
@@ -25,7 +25,7 @@
       "seed": "0000000000000006",
       "expected": {
         "item_template_id": "cave_blade",
-        "display_name": "Rare Cave Blade",
+        "display_name": "Keen Rare Cave Blade",
         "rarity": "rare",
         "stats": {
           "attack_speed_percent": 3,

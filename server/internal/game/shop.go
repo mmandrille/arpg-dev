@@ -1194,6 +1194,8 @@ func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG, sourceDepth
 			effectIDs = append(effectIDs, effectID)
 			displayName = uniqueItemDisplayName(template, r.UniqueEffects[effectID])
 		}
+	} else if rarityID != "set" {
+		displayName = r.affixDisplayName(template, rarityID, stats)
 	}
 	return ItemRollPayload{
 		ItemTemplateID: templateID,

@@ -1,0 +1,23 @@
+server/internal/game/game_test.go
+  s_d651e97b83a874::t_6dade0fb8d814d 3100-3102
+server/internal/game/types.go
+  s_d651e97b83a874::t_01027895ff122e 172
+server/internal/game/sim.go
+  s_d651e97b83a874::t_01027895ff122e 5291,5315
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a3f8122303a2a46a769066f3825d9e808985357a",
+  "prompts": {},
+  "sessions": {
+    "s_d651e97b83a874": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec989-bab7-7240-b2f6-ba0d99e9cc7c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

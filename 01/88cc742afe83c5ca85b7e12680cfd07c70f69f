@@ -1,0 +1,53 @@
+tools/bot/scenarios/82_unique_skill_modifier.json
+  s_3d722d65688e0b::t_81ebf78056e53e 1-19
+shared/rules/unique_items.v0.json
+  s_3d722d65688e0b::t_7a94a25447bbda 33-47
+docs/plans/v193_2026-06-15-unique-skill-modifier.md
+  s_3d722d65688e0b::t_552d17df536d55 1-2,4-35,39-40,42-54,58-69,73-82,84-94,97-103
+  s_3d722d65688e0b::t_172b27ca5c85fc 3,36-38,41,55-57,70-72,83,95-96,104-108
+tools/validate_shared.py
+  s_3d722d65688e0b::t_cb7b916f4028da 2981
+docs/specs/v193_spec-unique-skill-modifier.md
+  s_3d722d65688e0b::t_552d17df536d55 1-47
+shared/rules/unique_effects.v0.schema.json
+  s_3d722d65688e0b::t_7a94a25447bbda 35-36
+server/internal/game/ranger_skills.go
+  s_3d722d65688e0b::t_e770d0f1d111a5 105,134
+server/internal/game/rogue_skills.go
+  s_3d722d65688e0b::t_e770d0f1d111a5 179
+docs/as-built/v193_unique-skill-modifier.md
+  s_3d722d65688e0b::t_172b27ca5c85fc 1-32
+server/internal/game/unique_chest_test.go
+  s_3d722d65688e0b::t_a1f5d449b67836 38,55,66-67,79-83,126-133,213,217-230,232
+server/internal/game/sim.go
+  s_3d722d65688e0b::t_94ad9168c87e73 2705
+  s_3d722d65688e0b::t_e770d0f1d111a5 1329-1332,3784,3826
+  s_3d722d65688e0b::t_4632a97efa9028 1335
+server/internal/game/unique_effects.go
+  s_3d722d65688e0b::t_e770d0f1d111a5 12
+shared/rules/unique_effects.v0.json
+  s_3d722d65688e0b::t_7a94a25447bbda 127-139
+server/internal/game/item_skill_stats.go
+  s_3d722d65688e0b::t_4632a97efa9028 22,27
+  s_3d722d65688e0b::t_e770d0f1d111a5 23-26,28-41
+PROGRESS.md
+  s_3d722d65688e0b::t_172b27ca5c85fc 15,212,446,580-583
+server/internal/game/unique_effects_test.go
+  s_3d722d65688e0b::t_e0f1b1bc49ae9c 400-429
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "0188cc742afe83c5ca85b7e12680cfd07c70f69f",
+  "prompts": {},
+  "sessions": {
+    "s_3d722d65688e0b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecc06-930f-72b2-adcf-6aa19782dbac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

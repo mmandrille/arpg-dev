@@ -25,6 +25,7 @@ const DISPLAY_NAMES := {
 	"skill_damage_percent": "Skill damage %",
 	"skill_cooldown_reduction_percent": "Skill cooldown reduction",
 	"skill_mana_cost_reduction": "Skill mana cost reduction",
+	"magic_find_percent": "Magic Find",
 	"health_regen_per_second": "HP regen /s",
 	"mana_regen_per_second": "Mana regen /s",
 	"health_regen_per_10_seconds": "HP regen / 10s",

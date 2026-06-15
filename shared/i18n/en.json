@@ -48,6 +48,7 @@
     "stat.mana_regen_per_second": "Mana regen /s",
     "stat.health_regen_per_10_seconds": "HP regen / 10s",
     "stat.mana_regen_per_10_seconds": "Mana regen / 10s",
+    "stat.magic_find_percent": "Magic Find",
     "stat.hotbar_slots": "Hotbar slots",
     "stat.inventory_rows": "Inventory rows",
     "skill.magic_bolt.name": "Magic Bolt",

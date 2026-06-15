@@ -318,6 +318,7 @@
         { "stat": "health_regen_per_10_seconds", "min": 1, "max": 3, "weight": 1 },
         { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 1 },
         { "stat": "skill_mana_cost_reduction", "min": 1, "max": 1, "weight": 1, "min_rarity": "rare" },
+        { "stat": "magic_find_percent", "min": 15, "max": 30, "weight": 1, "min_rarity": "rare" },
         { "stat": "inventory_rows", "min": 1, "max": 1, "weight": 1 }
       ],
       "effect_pool": []
@@ -335,6 +336,7 @@
         { "stat": "health_regen_per_10_seconds", "min": 1, "max": 4, "weight": 1 },
         { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 4, "weight": 1 },
         { "stat": "skill_cooldown_reduction_percent", "min": 5, "max": 12, "weight": 1, "min_rarity": "rare" },
+        { "stat": "magic_find_percent", "min": 20, "max": 35, "weight": 1, "min_rarity": "rare" },
         { "stat": "inventory_rows", "min": 1, "max": 1, "weight": 1 }
       ],
       "effect_pool": []

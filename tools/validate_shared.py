@@ -900,7 +900,7 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"class weapon {item_id} is valid")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -977,7 +977,7 @@ def cross_checks(report: Report) -> None:
             continue
         seen_roll_stats = set()
         failed_roll = False
-        bounded_roll_stats = {"hit_chance": 100, "crit_chance": 100, "evade_chance": 100, "skill_cooldown_reduction_percent": 75, "skill_mana_cost_reduction": 20}
+        bounded_roll_stats = {"hit_chance": 100, "crit_chance": 100, "evade_chance": 100, "skill_cooldown_reduction_percent": 75, "skill_mana_cost_reduction": 20, "magic_find_percent": 500}
         for roll in template["rollable_stats"]:
             stat = roll["stat"]
             seen_roll_stats.add(stat)
@@ -2036,7 +2036,7 @@ def cross_checks(report: Report) -> None:
                     return stat
             return stats[-1]
 
-        affix_words = {stat: (word, priority) for word, priority, group in [("Arcane", 90, "all_skills skill_damage_percent"), ("Focused", 85, "skill_cooldown_reduction_percent skill_mana_cost_reduction"), ("Keen", 80, "crit_chance hit_chance attack_speed_percent"), ("Savage", 70, "damage_min damage_max"), ("Stalwart", 65, "evade_chance block_percent armor"), ("Vigorous", 60, "max_hp health_regen_per_10_seconds vit"), ("Mystic", 55, "max_mana mana_regen_per_10_seconds magic"), ("Mighty", 50, "str"), ("Nimble", 50, "dex"), ("Traveler's", 45, "inventory_rows hotbar_slots")] for stat in group.split()}
+        affix_words = {stat: (word, priority) for word, priority, group in [("Arcane", 90, "all_skills skill_damage_percent"), ("Focused", 85, "skill_cooldown_reduction_percent skill_mana_cost_reduction"), ("Keen", 80, "crit_chance hit_chance attack_speed_percent"), ("Savage", 70, "damage_min damage_max"), ("Stalwart", 65, "evade_chance block_percent armor"), ("Vigorous", 60, "max_hp health_regen_per_10_seconds vit"), ("Mystic", 55, "max_mana mana_regen_per_10_seconds magic"), ("Mighty", 50, "str"), ("Nimble", 50, "dex"), ("Fortunate", 48, "magic_find_percent"), ("Traveler's", 45, "inventory_rows hotbar_slots")] for stat in group.split()}
 
         def roll_template(template_id: str, rng: ShopRNG, source_depth: int = 1) -> dict:
             template = item_templates["templates"][template_id]
@@ -2144,7 +2144,7 @@ def cross_checks(report: Report) -> None:
         if not failed_offers:
             report.ok("shop_offers golden matches deterministic catalog")
 
-        stat_order = ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "hotbar_slots", "inventory_rows"]
+        stat_order = ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows"]
 
         def comparison_deltas(offered: dict, equipped: dict) -> list[dict]:
             out = []

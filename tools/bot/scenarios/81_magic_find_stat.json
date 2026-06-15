@@ -1,0 +1,52 @@
+{
+  "id": "magic_find_stat",
+  "world_id": "equipment_lab",
+  "seed": "000000000000006e",
+  "title": "Magic Find stat",
+  "description": "Pick up and equip a deterministic Magic Find ring, then prove the server-authored derived stat and breakdown over protocol.",
+  "steps": [
+    { "action": "pick_up_loot", "item_def_id": "cave_ring" },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "cave_ring",
+      "item_template_id": "cave_ring",
+      "display_name": "Stalwart Rare Cave Ring",
+      "rarity": "rare",
+      "stat_keys": ["magic_find_percent"]
+    },
+    { "action": "equip_inventory_item", "item_def_id": "cave_ring", "slot": "ring_left" },
+    {
+      "action": "assert_character_progression",
+      "derived_stats": { "magic_find_percent": 26 },
+      "stat_breakdowns": [
+        {
+          "key": "magic_find_percent",
+          "value": 26,
+          "source_kinds": ["equipment_roll"]
+        }
+      ]
+    }
+  ],
+  "assertions": [
+    {
+      "type": "rolled_inventory_item",
+      "item_def_id": "cave_ring",
+      "item_template_id": "cave_ring",
+      "rarity": "rare",
+      "stat_keys": ["magic_find_percent"],
+      "equipped": true
+    },
+    {
+      "type": "character_progression",
+      "derived_stats": { "magic_find_percent": 26 },
+      "stat_breakdowns": [
+        {
+          "key": "magic_find_percent",
+          "value": 26,
+          "source_kinds": ["equipment_roll"]
+        }
+      ]
+    }
+  ],
+  "fresh_session_checks": []
+}

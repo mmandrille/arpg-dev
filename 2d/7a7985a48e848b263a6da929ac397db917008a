@@ -1,0 +1,35 @@
+server/internal/game/character_stats_test.go
+  s_f9c66ca3cb4339::t_fc1898ff2c325c 59-61,72-74,105-107,116-127
+docs/plans/v179_2026-06-15-mana-regeneration.md
+  s_f9c66ca3cb4339::t_e45004a5052cdb 1-35
+shared/protocol/state_delta.v8.schema.json
+  s_f9c66ca3cb4339::t_fc1898ff2c325c 480-484
+tools/bot/scenarios/71_mana_regeneration.json
+  s_f9c66ca3cb4339::t_fc1898ff2c325c 1-30
+docs/as-built/v179_mana-regeneration.md
+  s_f9c66ca3cb4339::t_a0e0f822db087d 1-29
+server/internal/game/sim.go
+  s_f9c66ca3cb4339::t_fc1898ff2c325c 1081-1085
+PROGRESS.md
+  s_f9c66ca3cb4339::t_a0e0f822db087d 15,18,198,418,552-554
+shared/protocol/session_snapshot.v8.schema.json
+  s_f9c66ca3cb4339::t_fc1898ff2c325c 558-562
+docs/specs/v179_spec-mana-regeneration.md
+  s_f9c66ca3cb4339::t_e45004a5052cdb 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2d7a7985a48e848b263a6da929ac397db917008a",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

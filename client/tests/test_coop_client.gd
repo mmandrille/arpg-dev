@@ -961,8 +961,6 @@ func _test_local_companions_render_in_top_left_row() -> void:
 		"monster_def_id": "companion_black_wolf",
 		"hp": 3,
 		"max_hp": 5,
-		"remaining_ticks": 450,
-		"total_ticks": 600,
 		"visual_model": "monster_quadruped",
 		"visual_tint": "#101014",
 		"position": {"x": 4.0, "y": 5.0},
@@ -970,20 +968,43 @@ func _test_local_companions_render_in_top_left_row() -> void:
 	main._upsert_entity({
 		"id": "4102",
 		"type": "companion",
-		"owner_id": "9999",
+		"owner_id": "1001",
+		"monster_def_id": "dungeon_undead",
+		"hp": 2,
+		"max_hp": 4,
+		"remaining_ticks": 450,
+		"total_ticks": 600,
+		"position": {"x": 4.5, "y": 5.0},
+	})
+	main._upsert_entity({
+		"id": "4103",
+		"type": "companion",
+		"owner_id": "1001",
 		"monster_def_id": "mercenary_guard",
 		"hp": 7,
 		"max_hp": 7,
 		"position": {"x": 5.0, "y": 5.0},
 	})
+	main._upsert_entity({
+		"id": "4104",
+		"type": "companion",
+		"owner_id": "9999",
+		"monster_def_id": "mercenary_guard",
+		"hp": 7,
+		"max_hp": 7,
+		"position": {"x": 5.5, "y": 5.0},
+	})
 	var state: Dictionary = main.companion_bar.get_debug_state()
 	_assert_true("companion row visible for local companion", bool(state.get("visible", false)))
-	_assert_eq("companion row only shows local owner", int(state.get("count", 0)), 1)
+	_assert_eq("companion row only shows local owner", int(state.get("count", 0)), 3)
 	var companions: Array = state.get("companions", [])
 	_assert_eq("companion row monster id", str((companions[0] as Dictionary).get("monster_def_id", "")), "companion_black_wolf")
 	_assert_eq("companion row hp", int((companions[0] as Dictionary).get("hp", 0)), 3)
-	_assert_eq("companion row duration remaining", int((companions[0] as Dictionary).get("remaining_ticks", 0)), 450)
-	_assert_eq("companion row duration total", int((companions[0] as Dictionary).get("total_ticks", 0)), 600)
+	_assert_eq("companion row wolf icon", str((companions[0] as Dictionary).get("icon_kind", "")), "wolf")
+	_assert_eq("companion row duration remaining", int((companions[1] as Dictionary).get("remaining_ticks", 0)), 450)
+	_assert_eq("companion row duration total", int((companions[1] as Dictionary).get("total_ticks", 0)), 600)
+	_assert_eq("companion row revived icon", str((companions[1] as Dictionary).get("icon_kind", "")), "revived")
+	_assert_eq("companion row mercenary icon", str((companions[2] as Dictionary).get("icon_kind", "")), "mercenary")
 	main.companion_bar.queue_free()
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()

@@ -3,9 +3,7 @@
 # reconciles to authoritative snapshots/deltas; the server owns all combat,
 # loot, and inventory outcomes. Visuals are placeholder primitives (slice v1).
 extends Node3D
-
 const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
-
 const NetClientScript := preload("res://scripts/net_client.gd")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
@@ -30,6 +28,7 @@ const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const QuestJournalPanelScript := preload("res://scripts/quest_journal_panel.gd")
+const EliteObjectiveTrackerScript := preload("res://scripts/elite_objective_tracker.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
@@ -106,7 +105,6 @@ const CHARACTER_FLOW_JOIN_GAME := "join_game"
 const CHARACTER_FLOW_LEGACY_SOLO := "solo"
 const CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST := "multiplayer_host"
 const CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN := "multiplayer_join"
-
 var client: NetClient
 var resolver: EquipmentVisualResolver
 var player_anim: AnimationController
@@ -213,14 +211,12 @@ var gameplay_active: bool = false
 var settings_return_target: String = "main"
 var character_flow: String = CHARACTER_FLOW_CREATE_GAME
 var pending_join_session_id: String = ""
-
 const INVENTORY_REPLAY_EVENT_HINTS := {
 	"item_picked_up": "Pickup",
 	"item_equipped": "Equip (double-click / drag)",
 	"item_unequipped": "Unequip (drag to bag)",
 	"item_dropped": "Drop (drag outside panel)",
 }
-
 # Slice v2 scene graph (spec §5.1): the local player is a humanoid under a
 # PlayerAnchor that follows authoritative position; monsters/loot live under
 # Entities. These are defined in main.tscn and cached on ready.
@@ -242,6 +238,7 @@ var consumable_bar: ConsumableBar
 var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
 var quest_journal_panel: QuestJournalPanel
+var elite_objective_tracker: EliteObjectiveTracker
 var character_bar: Control
 var skill_bar: SkillBar
 var status_effects_bar: StatusEffectsBar
@@ -251,7 +248,6 @@ var character_info_level_label: Label
 var character_info_area_label: Label
 var input_shadow: InputShadowOverlay
 var _health_bar: PlayerHealthBar
-
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
 var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
@@ -936,6 +932,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_refresh_skill_ui()
 	_update_character_info_panel()
 	_sync_quest_journal()
+	_sync_elite_objective_tracker()
 	_refresh_market_board_summary()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
@@ -1040,6 +1037,7 @@ func _apply_delta(p: Dictionary) -> void:
 				pass
 	_refresh_inventory_ui()
 	_sync_quest_journal()
+	_sync_elite_objective_tracker()
 	var heal_cast_rain_correlations := _heal_cast_rain_correlations(p.get("events", []))
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
@@ -3146,6 +3144,8 @@ func _build_scene() -> void:
 	ui.add_child(skills_panel)
 	quest_journal_panel = QuestJournalPanelScript.new()
 	ui.add_child(quest_journal_panel)
+	elite_objective_tracker = EliteObjectiveTrackerScript.new()
+	ui.add_child(elite_objective_tracker)
 	character_bar = CharacterBarScript.new()
 	character_bar.open_character_requested.connect(_open_character_panel_from_bar)
 	ui.add_child(character_bar)
@@ -3373,6 +3373,8 @@ func _show_loss_popup() -> void:
 		skills_panel.hide_display()
 	if quest_journal_panel != null:
 		quest_journal_panel.hide_display()
+	if elite_objective_tracker != null:
+		elite_objective_tracker.visible = false
 	loss_popup.visible = true
 
 func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) -> void:
@@ -5815,6 +5817,7 @@ func get_bot_state() -> Dictionary:
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"quest_journal_panel_visible": quest_journal_panel != null and quest_journal_panel.visible,
+		"elite_objective_tracker_visible": elite_objective_tracker != null and elite_objective_tracker.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
@@ -5826,6 +5829,7 @@ func get_bot_state() -> Dictionary:
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"quest_journal_panel": quest_journal_panel.get_debug_state() if quest_journal_panel != null else {},
+		"elite_objective_tracker": elite_objective_tracker.get_debug_state() if elite_objective_tracker != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
@@ -5953,6 +5957,27 @@ func _quest_journal_objectives() -> Array:
 		"complete": reward_complete,
 	}]
 
+func _sync_elite_objective_tracker() -> void:
+	if elite_objective_tracker != null:
+		elite_objective_tracker.set_state(_elite_objective_tracker_state())
+func _elite_objective_tracker_state() -> Dictionary:
+	var chest_found := false
+	var chest_open := false
+	var remaining := 0
+	for rec in entities.values():
+		var row: Dictionary = rec
+		if bool(row.get("elite_objective", false)):
+			chest_found = true
+			chest_open = chest_open or str(row.get("state", "")) == "open"
+		if bool(row.get("monster_pack_leader", false)) and int(row.get("hp", 1)) > 0:
+			remaining += 1
+	if not chest_found:
+		return {"visible": false, "status": "hidden", "remaining_leaders": 0}
+	if chest_open:
+		return {"visible": true, "status": "complete", "remaining_leaders": 0}
+	if remaining > 0:
+		return {"visible": true, "status": "active", "remaining_leaders": remaining}
+	return {"visible": true, "status": "claim", "remaining_leaders": 0}
 func _bot_entities_presentation_debug() -> Array:
 	var out: Array = []
 	for id in entities.keys():

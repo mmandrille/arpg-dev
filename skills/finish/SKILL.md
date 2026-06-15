@@ -16,7 +16,8 @@ disable-model-invocation: true
 ## Hard rules
 
 1. **`make ci` must pass** before committing. No commit on red CI.
-2. **Update `PROGRESS.md`** if not already current — lifecycle table, summary, open gaps.
+2. **Update `PROGRESS.md`** if not already current — **Current status**, open gaps, review cadence.
+   Update [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) for the new row.
 3. **Commit message format is fixed:**
 
    ```
@@ -59,9 +60,9 @@ Read [`PROGRESS.md`](../../PROGRESS.md) and verify it reflects the shipped slice
 | Section | Action |
 |---------|--------|
 | **Current status** | `Latest completed slice` → vN; `Active branch` → feature branch or TBD; `CI gate` → date + green; `Next slice` → TBD |
-| **Slice lifecycle table** | Add/update row: Status = Complete (`make ci` green), Spec + Plan links |
+| **Slice lifecycle table** | Add/update row in [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md): Status = Complete (`make ci` green), Spec + Plan links |
 | **As-built summary** | Add or update `docs/as-built/vN_<codename>.md`: what it proves, key decisions, scope limits |
-| **Open gaps & deferred work** | Move closed items to **Recently closed**; add any new deferred items from spec non-goals |
+| **Open gaps & deferred work** | Update deferred/autoloop tables when spec non-goals change — **do not** add inline "Recently closed" prose to `PROGRESS.md` |
 | **Last updated** | Today's date |
 | **Engineering review** | If the shipped slice hits the next ~10-slice milestone in `PROGRESS.md` → **Next engineering review**, stop after the slice commit and hand off to `$refactor` then `$review`; `$review` updates **Last/Next engineering review** and adds the review set |
 | **Maintenance ratchet** | Confirm any touched over-600-line files were split, stayed within allowance, or have a documented exception |

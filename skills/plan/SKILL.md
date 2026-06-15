@@ -22,7 +22,8 @@ disable-model-invocation: true
 
 ## Phase 0 — Baseline context (read first)
 
-1. [`PROGRESS.md`](../../PROGRESS.md) — current slice, open gaps, invariants.
+1. [`PROGRESS.md`](../../PROGRESS.md) — **Current status**, **Open gaps**, and **Agent checklist**
+   only unless the spec review needs more.
 2. [`CLAUDE.md`](../../CLAUDE.md) — commands, architecture, SDD process.
 3. [`AGENTS.md`](../../AGENTS.md) — client asset/plugin decision requirement for client work.
 4. The spec file the user provided.

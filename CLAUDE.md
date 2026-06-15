@@ -4,13 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project progress (read first)
 
-**Before any new feature or slice:** read [`PROGRESS.md`](PROGRESS.md) at the repo root.
-
-That file is the canonical lifecycle doc: current branch/merge status, slice index, known gaps,
-deferred backlog, and the agent checklist for starting work. Per-slice as-built notes live in
-`docs/as-built/`.
-It is updated when a slice ships — use its **Current status** table for baseline facts instead
-of hard-coded slice numbers in this file or other entrypoint docs.
+**Before any new feature or slice:** read [`PROGRESS.md`](PROGRESS.md) — **Current status**, **Open
+gaps**, and **Agent checklist** only. Slice history and codenames live in [`docs/progress/`](docs/progress/).
+Per-slice as-built notes live in [`docs/as-built/`](docs/as-built/).
 
 ## Commands
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 )
+
 // Vec2 is a 2D position in scene units.
 type Vec2 struct {
 	X float64 `json:"x"`
@@ -168,6 +169,7 @@ type DerivedStatsView struct {
 	DamageMin            float64 `json:"damage_min"`
 	DamageMax            float64 `json:"damage_max"`
 	Armor                float64 `json:"armor"`
+	BlockPercent         float64 `json:"block_percent"`
 	AttackSpeed          float64 `json:"attack_speed"`
 	AttackIntervalTicks  int     `json:"attack_interval_ticks"`
 	HitChance            float64 `json:"hit_chance"`

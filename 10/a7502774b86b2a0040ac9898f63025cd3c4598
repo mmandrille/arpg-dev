@@ -1,0 +1,34 @@
+PROGRESS.md
+  s_f9c66ca3cb4339::t_8439b07dda2ac5 15,18,199,420,554-556
+shared/rules/items.v0.json
+  s_f9c66ca3cb4339::t_7eb69b4c92f063 11
+shared/assets/item_presentations.v0.json
+  s_f9c66ca3cb4339::t_7eb69b4c92f063 84-87,160
+docs/plans/v180_2026-06-15-upgrade-resource-drop.md
+  s_f9c66ca3cb4339::t_9f88c9b684d31b 1-31
+docs/as-built/v180_upgrade-resource-drop.md
+  s_f9c66ca3cb4339::t_8439b07dda2ac5 1-27
+shared/rules/loot_tables.v0.json
+  s_f9c66ca3cb4339::t_7eb69b4c92f063 15,19
+tools/bot/scenarios/72_upgrade_resource_drop.json
+  s_f9c66ca3cb4339::t_108e7686d0c7b6 12
+  s_f9c66ca3cb4339::t_7eb69b4c92f063 1-11,13-26
+docs/specs/v180_spec-upgrade-resource-drop.md
+  s_f9c66ca3cb4339::t_9f88c9b684d31b 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "10a7502774b86b2a0040ac9898f63025cd3c4598",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

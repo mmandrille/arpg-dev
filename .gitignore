@@ -28,3 +28,4 @@ server/arpg-server
 server/arpg-replay
 
 /.artifacts
+/.claude/worktrees

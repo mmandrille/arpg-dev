@@ -5846,7 +5846,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			magicFindSources = append(magicFindSources, StatBreakdownSourceView{Label: "Rolled Magic Find", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
 	}
-	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources)
+	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &hitChancePercent, &critChancePercent, &evadeChancePercent, &magicFindPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources, &hitChanceSources, &critChanceSources, &evadeChanceSources, &magicFindSources)
 
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]

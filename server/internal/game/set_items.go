@@ -268,6 +268,10 @@ func applySetCombatStats(
 	manaRegen *float64,
 	blockPercent *float64,
 	itemSpeedPercent *float64,
+	hitChancePercent *float64,
+	critChancePercent *float64,
+	evadeChancePercent *float64,
+	magicFindPercent *float64,
 	damageMinSources *[]StatBreakdownSourceView,
 	damageMaxSources *[]StatBreakdownSourceView,
 	armorSources *[]StatBreakdownSourceView,
@@ -277,6 +281,10 @@ func applySetCombatStats(
 	manaRegenSources *[]StatBreakdownSourceView,
 	blockSources *[]StatBreakdownSourceView,
 	attackSpeedSources *[]StatBreakdownSourceView,
+	hitChanceSources *[]StatBreakdownSourceView,
+	critChanceSources *[]StatBreakdownSourceView,
+	evadeChanceSources *[]StatBreakdownSourceView,
+	magicFindSources *[]StatBreakdownSourceView,
 ) {
 	addSetFloat(setStats, "damage_min", damageMin, damageMinSources)
 	addSetFloat(setStats, "damage_max", damageMax, damageMaxSources)
@@ -287,6 +295,10 @@ func applySetCombatStats(
 	addSetRegen(setStats, "mana_regen_per_10_seconds", manaRegen, manaRegenSources)
 	addSetFloat(setStats, "block_percent", blockPercent, blockSources)
 	addSetFloat(setStats, "attack_speed_percent", itemSpeedPercent, attackSpeedSources)
+	addSetPercentFloat(setStats, "hit_chance", hitChancePercent, hitChanceSources)
+	addSetPercentFloat(setStats, "crit_chance", critChancePercent, critChanceSources)
+	addSetPercentFloat(setStats, "evade_chance", evadeChancePercent, evadeChanceSources)
+	addSetFloat(setStats, "magic_find_percent", magicFindPercent, magicFindSources)
 }
 
 func addSetFloat(setStats map[string]int, stat string, target *float64, sources *[]StatBreakdownSourceView) {
@@ -301,5 +313,12 @@ func addSetRegen(setStats map[string]int, stat string, target *float64, sources 
 		perSecond := float64(value) / 10.0
 		*target += perSecond
 		*sources = append(*sources, StatBreakdownSourceView{Label: "Set bonus", Value: perSecond, Kind: "set_bonus"})
+	}
+}
+
+func addSetPercentFloat(setStats map[string]int, stat string, target *float64, sources *[]StatBreakdownSourceView) {
+	if value := setStats[stat]; value != 0 {
+		*target += float64(value)
+		*sources = append(*sources, StatBreakdownSourceView{Label: "Set bonus", Value: float64(value) / 100.0, Kind: "set_bonus"})
 	}
 }

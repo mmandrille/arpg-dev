@@ -1,0 +1,19 @@
+{
+  "id": "second_set_package",
+  "world_id": "dungeon_levels",
+  "seed": "second_set_package_seed",
+  "title": "Second set package",
+  "description": "Open the purple town unique chest and prove the second set package can be taken into inventory.",
+  "steps": [
+    { "action": "move_until_player_position", "x": 6, "y": 7, "tolerance": 1.0, "pathfind": true, "max_ticks": 160 },
+    { "action": "action_entity", "interactable_def_id": "town_unique_chest", "target_id": "1010", "allow_missing_target": true, "event_type": "unique_chest_opened", "timeout_s": 10 },
+    { "action": "take_unique_chest_item", "interactable_def_id": "town_unique_chest", "chest_entity_id": "1010", "display_name": "Stormrunner Covenant Bow" },
+    { "action": "assert_inventory_count", "display_name": "Stormrunner Covenant Bow", "equals": 1 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "unique_chest_opened" },
+    { "type": "event_seen", "event_type": "unique_chest_item_taken" },
+    { "type": "inventory_count", "display_name": "Stormrunner Covenant Bow", "equals": 1 }
+  ],
+  "fresh_session_checks": []
+}

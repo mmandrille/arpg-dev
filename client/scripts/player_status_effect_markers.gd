@@ -40,7 +40,7 @@ static func has_holy_shield_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(HOLY_SHIELD_MARKER_NAME, false, false) != null
 
 
-static func sync_sanctuary_effect(root: Node3D, effect_ids_value) -> void:
+static func sync_sanctuary_effect(root: Node3D, effect_ids_value, radius: float = 5.0) -> void:
 	if root == null:
 		return
 	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
@@ -52,7 +52,7 @@ static func sync_sanctuary_effect(root: Node3D, effect_ids_value) -> void:
 			existing.queue_free()
 		return
 	if existing == null:
-		existing = make_sanctuary_dome_effect()
+		existing = make_sanctuary_dome_effect(radius)
 		root.add_child(existing)
 
 
@@ -235,17 +235,18 @@ static func make_holy_shield_effect() -> Node3D:
 	return marker
 
 
-static func make_sanctuary_dome_effect() -> Node3D:
+static func make_sanctuary_dome_effect(radius: float = 5.0) -> Node3D:
 	var marker := Node3D.new()
 	marker.name = SANCTUARY_MARKER_NAME
+	var safe_radius := maxf(radius, 0.5)
 	var mat := _holy_shield_pulse_material(0.24)
 	mat.emission_energy_multiplier = 2.8
 
 	var dome := MeshInstance3D.new()
 	dome.name = "SanctuaryDome"
 	var dome_mesh := SphereMesh.new()
-	dome_mesh.radius = 5.0
-	dome_mesh.height = 5.0
+	dome_mesh.radius = safe_radius
+	dome_mesh.height = safe_radius
 	dome_mesh.radial_segments = 72
 	dome_mesh.rings = 16
 	dome.mesh = dome_mesh
@@ -257,8 +258,8 @@ static func make_sanctuary_dome_effect() -> Node3D:
 	var floor := MeshInstance3D.new()
 	floor.name = "SanctuaryGround"
 	var floor_mesh := CylinderMesh.new()
-	floor_mesh.top_radius = 5.0
-	floor_mesh.bottom_radius = 5.0
+	floor_mesh.top_radius = safe_radius
+	floor_mesh.bottom_radius = safe_radius
 	floor_mesh.height = 0.04
 	floor_mesh.radial_segments = 72
 	floor.mesh = floor_mesh

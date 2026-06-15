@@ -24,7 +24,7 @@ disable-model-invocation: true
 
 1. [`PROGRESS.md`](../../PROGRESS.md) — current slice, open gaps, invariants.
 2. [`CLAUDE.md`](../../CLAUDE.md) — commands, architecture, SDD process.
-3. [`AGENTS.md`](../../AGENTS.md) — Godot plugin adoption requirement for client work.
+3. [`AGENTS.md`](../../AGENTS.md) — client asset/plugin decision requirement for client work.
 4. The spec file the user provided.
 5. Related specs, ADRs, and as-built code cited by the spec — spot-check that claims match reality.
 
@@ -46,7 +46,7 @@ Review the spec systematically. Produce a short **Spec Review** section in chat 
 | **World presets** | `worlds.v0.json` changes are concrete (entity ids, positions, `world_id`). |
 | **Bot proof** | Acceptance criteria map to bot scenario steps or new scenario JSON. |
 | **Replay** | Input shape changes mention replay test updates. |
-| **Client** | Godot plugin adoption checklist required if UI/camera/art is in scope. |
+| **Client** | Asset/plugin adopt / borrow / reject decision required if UI/camera/art is in scope. |
 | **Maintainability** | Plan identifies touched over-600-line files and either extracts helpers or justifies deferral. |
 | **Docs** | `PROGRESS.md` update is in scope when slice ships. |
 | **As-built drift** | Spec assumptions match current code (grep/read cited files). |
@@ -82,7 +82,7 @@ Architecture: <2–4 sentences — key design decisions>
 Tech stack: <Go sim, shared JSON, Godot client, Python bot, etc.>
 
 ## Baseline and shortcut decision
-<What prior slices this reuses; Godot plugin adopt/borrow/reject if client work>
+<What prior slices this reuses; asset/plugin adopt/borrow/reject if client work>
 
 ## File map
 | Action | Path | Responsibility |

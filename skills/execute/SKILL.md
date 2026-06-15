@@ -95,7 +95,7 @@ When the plan includes bot work:
 
 ### Client work
 
-- Consult [`docs/researchs/godot-plugins-and-shortcuts.md`](../../docs/researchs/godot-plugins-and-shortcuts.md) per plan.
+- Follow the plan's asset/plugin adopt / borrow / reject decision and reuse existing in-repo Godot scripts, scenes, demos, and asset manifests before introducing new dependencies.
 - Run `make client-unit`; run `make client-smoke` when server integration is required.
 
 ## Phase 3 — Final verification

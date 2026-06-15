@@ -12,7 +12,7 @@ Use this skill to write a focused SDD slice spec. Do not implement code or write
 1. Announce: "Using the **spec** skill to draft the slice spec."
 2. Read `CLAUDE.md`, `PROGRESS.md`, and any next brief, ADR, plan, or prior spec the user references.
 3. Determine the correct `vN` from existing `docs/specs/`, `docs/plans/`, and the lifecycle table in `PROGRESS.md`. If a draft already owns the next number, update it instead of creating a duplicate.
-4. For client UI, inventory presentation, camera tooling, or placeholder art, read `docs/researchs/godot-plugins-and-shortcuts.md` and include an adopt / borrow / reject note in the spec or call out that the plan must record it.
+4. For client UI, inventory presentation, camera tooling, or placeholder art, inspect existing in-repo Godot scripts, scenes, demos, and asset manifests before proposing new dependencies, and include an adopt / borrow / reject note in the spec or call out that the plan must record it.
 5. Write `docs/specs/vN_spec-<codename>.md` with concise sections that are specific enough for `/plan`.
 6. Stop after the spec and summarize the file path plus any open questions that block planning.
 
@@ -30,5 +30,5 @@ Use this skill to write a focused SDD slice spec. Do not implement code or write
 
 - Keep specs small enough for one implementation slice.
 - Prefer updating contracts, fixtures, tests, and docs together over preserving stale compatibility.
-- Do not invent plugin or asset choices without checking the project plugin research when visual/client work is in scope.
+- Do not invent plugin or asset choices without checking existing project assets and recording the client asset/plugin decision when visual/client work is in scope.
 - If the brief is too vague to produce acceptance criteria, ask the minimum blocking question before writing the file.

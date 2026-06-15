@@ -1,0 +1,71 @@
+shared/rules/shops.v0.json
+  s_2721a37551d805::t_d2205b41d0045e 64-65,140-141
+docs/specs/v189_spec-skill-affix-rolls.md
+  s_2721a37551d805::t_cc33daf43f9fb9 1-2,4-38
+  s_2721a37551d805::t_7d0ecbb19e5746 3
+client/scripts/market_panel.gd
+  s_2721a37551d805::t_b47744bae73579 1001,1013
+client/scripts/inventory_panel.gd
+  s_2721a37551d805::t_b47744bae73579 1128,1134
+docs/plans/v189_2026-06-15-skill-affix-rolls.md
+  s_2721a37551d805::t_cc33daf43f9fb9 1-2,4-33,37-47,52-61,64-73,77-82
+  s_2721a37551d805::t_7d0ecbb19e5746 3,34-36,48-51,62-63,74-76,83-87
+server/internal/game/rules.go
+  s_2721a37551d805::t_4bf00b6450f019 3208
+server/internal/game/shop.go
+  s_2721a37551d805::t_4bf00b6450f019 938,1036,1077-1080
+client/scripts/stash_panel.gd
+  s_2721a37551d805::t_b47744bae73579 981,989
+server/internal/game/sim.go
+  s_2721a37551d805::t_4bf00b6450f019 2276-2279
+server/internal/game/handlers.go
+  s_2721a37551d805::t_4bf00b6450f019 1230
+shared/golden/item_rolls.v0.schema.json
+  s_2721a37551d805::t_d2205b41d0045e 70-72
+tools/bot/scenarios/80_skill_affix_rolls.json
+  s_2721a37551d805::t_f21f392d1b3287 1-26
+shared/rules/item_templates.v0.schema.json
+  s_2721a37551d805::t_d2205b41d0045e 104-105,115
+docs/as-built/v189_skill-affix-rolls.md
+  s_2721a37551d805::t_7d0ecbb19e5746 1-32
+tools/validate_shared.py
+  s_2721a37551d805::t_d2205b41d0045e 903,2146
+  s_2721a37551d805::t_a6b3f1f5f22968 980,992-993
+PROGRESS.md
+  s_2721a37551d805::t_7d0ecbb19e5746 15,208,438,572-575
+shared/rules/shops.v0.schema.json
+  s_2721a37551d805::t_d2205b41d0045e 128,143-144
+shared/rules/item_templates.v0.json
+  s_2721a37551d805::t_d2205b41d0045e 132-134,320,337
+shared/rules/worlds.v0.json
+  s_2721a37551d805::t_099d550cfe3a82 411-415
+tools/bot/run.py
+  s_2721a37551d805::t_6015fb7fae3624 2981
+  s_2721a37551d805::t_7c74bbc66673b0 2980,2998
+  s_2721a37551d805::t_ce9cd4051ca543 2982
+client/scripts/stat_labels.gd
+  s_2721a37551d805::t_b47744bae73579 26-27
+server/internal/game/item_skill_stats.go
+  s_2721a37551d805::t_4bf00b6450f019 22-44
+client/scripts/shop_panel.gd
+  s_2721a37551d805::t_b47744bae73579 948,956
+server/internal/game/skill_affixes_test.go
+  s_2721a37551d805::t_b2fdc205689605 1-7,10-64
+  s_2721a37551d805::t_a6b3f1f5f22968 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1f6abbf6d805f3a5634392467221ed45350be292",
+  "prompts": {},
+  "sessions": {
+    "s_2721a37551d805": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec9e3-8f9e-7360-a4ce-aafa7309e195",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

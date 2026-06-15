@@ -1,0 +1,31 @@
+client/scripts/main.gd
+  s_f9c66ca3cb4339::t_45ff9b9c42a6df 31,5953,5957
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_8599a8dfbfd5a8 7
+client/tests/test_quest_elite_objective_state.gd.uid
+  s_f9c66ca3cb4339::t_12c9c77117b6a6 1
+client/scripts/quest_elite_objective_state.gd.uid
+  s_f9c66ca3cb4339::t_12c9c77117b6a6 1
+client/tests/test_quest_elite_objective_state.gd
+  s_f9c66ca3cb4339::t_45ff9b9c42a6df 1-63
+client/scripts/quest_elite_objective_state.gd
+  s_f9c66ca3cb4339::t_45ff9b9c42a6df 1-39
+scripts/client_smoke.sh
+  s_f9c66ca3cb4339::t_8599a8dfbfd5a8 98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7ca8fbdb8fbd3d00012a4bed84bbdc1398c98fee",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

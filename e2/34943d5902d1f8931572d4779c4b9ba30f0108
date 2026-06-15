@@ -1,0 +1,21 @@
+server/internal/game/ranger_skills_test.go
+  s_434783ee30d988::t_70acf7754967b0 195-196,199-200
+client/tests/test_skill_rules_loader.gd
+  s_434783ee30d988::t_11c2ef774565f5 61,63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e234943d5902d1f8931572d4779c4b9ba30f0108",
+  "prompts": {},
+  "sessions": {
+    "s_434783ee30d988": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecd8d-db64-7242-9e68-b837098134cb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+client/scripts/stash_panel.gd
+  s_891723d9449485::t_c65c49ce1635ca 406
+  s_891723d9449485::t_c935a688c1ee8f 10,77,190,248,462,866
+  s_891723d9449485::t_10c79675922fdd 64,246-247,320-323,475
+  s_891723d9449485::t_dd636eeca44ddb 463
+  s_891723d9449485::t_51607eeb145322 781-782
+  s_891723d9449485::t_317d0f3955f11f 865,867-868
+client/tests/test_shop_panel.gd
+  s_20a3618c766349::t_a36350ed66733c 110
+  s_20a3618c766349::t_7d099633fdb2b6 96-105,107-108
+  s_20a3618c766349::t_acf2ec469f9ccf 95,106,109,111
+client/scripts/unique_chest_tabs.gd
+  s_891723d9449485::t_d60aa5660baefb 1-33
+  s_891723d9449485::t_4925ea65b09399 34-67
+client/tests/test_stash_panel.gd
+  s_891723d9449485::t_13a863e3928cca 224,236-247,264,268
+client/scripts/unique_chest_tabs.gd.uid
+  s_891723d9449485::t_8dbb3fac5edcd8 1
+client/scripts/inventory_panel.gd
+  s_20a3618c766349::t_df6a82a4368cea 47,1070-1071
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d841ef036f798233c14a87094c6cfb69242f289e",
+  "prompts": {},
+  "sessions": {
+    "s_20a3618c766349": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec95c-1159-7d83-abc8-bd0720a1e4be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_891723d9449485": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec8ab-4929-7ba1-a856-5fdc382180e5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

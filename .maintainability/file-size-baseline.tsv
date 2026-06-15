@@ -13,7 +13,7 @@ client/tests/test_client_bot.gd	1105
 client/tests/test_coop_client.gd	1398
 client/tests/test_golden.gd	784
 server/internal/game/dungeon_gen.go	1061
-server/internal/game/game_test.go	8905
+server/internal/game/game_test.go	8814
 server/internal/game/handlers.go	1440
 server/internal/game/rules.go	3222
 server/internal/game/shop.go	1263

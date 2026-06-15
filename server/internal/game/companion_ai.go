@@ -126,6 +126,7 @@ func (s *Sim) reviveMonsterCompanion(owner *entity, target *entity, skillID stri
 
 	monsterDef := s.rules.Monsters[target.monsterDefID]
 	powerPercent := revivePowerPercent(def, rank)
+	durationTicks := reviveDurationTicks(def, rank)
 	maxHP := scalePositiveInt(monsterDef.MaxHP, powerPercent)
 	companion := &entity{
 		kind:                  companionEntity,
@@ -145,6 +146,8 @@ func (s *Sim) reviveMonsterCompanion(owner *entity, target *entity, skillID stri
 		monsterArmor:          target.monsterArmor,
 		aiMode:                monsterAIModeIdle,
 		sourceSkillID:         skillID,
+		expiresTick:           s.tick + uint64(durationTicks) + 1,
+		totalDurationTicks:    durationTicks,
 		visualModel:           target.visualModel,
 		visualTint:            target.visualTint,
 		visualScale:           target.visualScale,
@@ -232,6 +235,11 @@ func (s *Sim) advanceCompanions(res *TickResult) {
 	for _, id := range sortedEntityIDs(level.entities) {
 		companion := level.entities[id]
 		if companion == nil || companion.kind != companionEntity || companion.hp <= 0 {
+			continue
+		}
+		if companion.expiresTick > 0 && s.tick >= companion.expiresTick {
+			delete(level.entities, id)
+			res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
 			continue
 		}
 		owner := level.entities[companion.ownerID]

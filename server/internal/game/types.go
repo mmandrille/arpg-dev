@@ -53,6 +53,8 @@ type EntityView struct {
 	CorpseItemCount   *int                    `json:"corpse_item_count,omitempty"`
 	OwnerID           string                  `json:"owner_id,omitempty"`
 	TargetID          string                  `json:"target_id,omitempty"`
+	RemainingTicks    *int                    `json:"remaining_ticks,omitempty"`
+	TotalTicks        *int                    `json:"total_ticks,omitempty"`
 	ProjectileDefID   string                  `json:"projectile_def_id,omitempty"`
 	State             string                  `json:"state,omitempty"`
 }

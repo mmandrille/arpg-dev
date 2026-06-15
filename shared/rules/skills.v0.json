@@ -282,6 +282,8 @@
       "revive": {
         "power_percent_base": 50,
         "power_percent_per_rank": 10,
+        "duration_seconds_base": 60,
+        "duration_seconds_per_rank": 10,
         "limit": {
           "base": 1,
           "per_rank_step": 1,

@@ -61,6 +61,8 @@
           "health_regen_per_10_seconds": 4,
           "mana_regen_per_10_seconds": 4,
           "skill_damage_percent": 6,
+          "skill_cooldown_reduction_percent": 5,
+          "skill_mana_cost_reduction": 25,
           "hotbar_slots": 20,
           "inventory_rows": 35
         }
@@ -135,6 +137,8 @@
           "health_regen_per_10_seconds": 4,
           "mana_regen_per_10_seconds": 4,
           "skill_damage_percent": 6,
+          "skill_cooldown_reduction_percent": 5,
+          "skill_mana_cost_reduction": 25,
           "hotbar_slots": 20,
           "inventory_rows": 35
         }

@@ -23,6 +23,8 @@ const DISPLAY_NAMES := {
 	"max_mana": "Max mana",
 	"attack_speed_percent": "Attack speed %",
 	"skill_damage_percent": "Skill damage %",
+	"skill_cooldown_reduction_percent": "Skill cooldown reduction",
+	"skill_mana_cost_reduction": "Skill mana cost reduction",
 	"health_regen_per_second": "HP regen /s",
 	"mana_regen_per_second": "Mana regen /s",
 	"health_regen_per_10_seconds": "HP regen / 10s",

@@ -19,6 +19,29 @@ func (s *Sim) applySkillDamageBonus(damageRange DamageRange) DamageRange {
 	return damageRange
 }
 
+func (s *Sim) effectiveSkillManaCost(def SkillDef, rank int) int {
+	cost := skillManaCost(def, rank) - s.equippedItemStatTotal("skill_mana_cost_reduction")
+	if cost < 0 {
+		return 0
+	}
+	return cost
+}
+
+func (s *Sim) effectiveSkillCooldownTicks(def SkillDef) int {
+	cooldown := s.baseSkillCooldownTicks(def)
+	reduction := s.equippedItemStatTotal("skill_cooldown_reduction_percent")
+	if reduction > 75 {
+		reduction = 75
+	}
+	if reduction > 0 {
+		cooldown = int(math.Ceil(float64(cooldown) * (1.0 - float64(reduction)/100.0)))
+	}
+	if cooldown < 1 {
+		return 1
+	}
+	return cooldown
+}
+
 func (s *Sim) scaleSkillDamageForMagic(def SkillDef, rank int, damageRange DamageRange) DamageRange {
 	scale := s.skillMagicScale(def, rank, def.Damage.MagicScaling)
 	if scale <= 1 {

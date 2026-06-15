@@ -998,7 +998,7 @@ func _item_requirements(item: Dictionary) -> Dictionary:
 
 
 func _ordered_stat_keys(stats: Dictionary) -> Array:
-	var order := ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows", "str", "dex", "vit", "magic", "all_skills"]
+	var order := ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "hotbar_slots", "inventory_rows", "str", "dex", "vit", "magic", "all_skills"]
 	var keys: Array = []
 	for stat in order:
 		if stats.has(stat):
@@ -1010,7 +1010,7 @@ func _ordered_stat_keys(stats: Dictionary) -> Array:
 
 
 func _signed_stat_value(stat: String, value: int) -> String:
-	var suffix := "%" if stat in ["block_percent", "attack_speed_percent", "skill_damage_percent"] else ""
+	var suffix := "%" if stat in ["block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "skill_damage_percent", "skill_cooldown_reduction_percent"] else ""
 	return "%+d%s" % [value, suffix]
 
 

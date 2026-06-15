@@ -1,0 +1,26 @@
+{
+  "id": "skill_affix_rolls",
+  "world_id": "skill_progression_lab",
+  "seed": "00000000000008cc",
+  "character_class": "sorcerer",
+  "title": "Skill affix rolls",
+  "description": "Pick up a deterministic higher-rarity staff and prove cooldown and mana-cost skill affix rolls over protocol.",
+  "steps": [
+    { "action": "pick_up_loot", "item_def_id": "starter_sorcerer_staff" },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "starter_sorcerer_staff",
+      "item_template_id": "starter_sorcerer_staff",
+      "stat_keys": ["skill_cooldown_reduction_percent", "skill_mana_cost_reduction"]
+    }
+  ],
+  "assertions": [
+    {
+      "type": "rolled_inventory_item",
+      "item_def_id": "starter_sorcerer_staff",
+      "item_template_id": "starter_sorcerer_staff",
+      "stat_keys": ["skill_cooldown_reduction_percent", "skill_mana_cost_reduction"]
+    }
+  ],
+  "fresh_session_checks": []
+}

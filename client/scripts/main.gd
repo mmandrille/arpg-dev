@@ -5953,17 +5953,13 @@ func _bot_entities_debug(live_monster_ids: Array) -> Array:
 
 func _bot_local_player_presentation() -> Dictionary:
 	return {
-		"id": player_id,
-		"type": "player",
-		"visual_model": "character",
-		"visual_scale": player_visual_scale,
+		"id": player_id, "type": "player", "visual_model": "character", "visual_scale": player_visual_scale,
 		"effect_ids": _local_player_effect_ids(),
 		"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor),
 		"has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(player_anchor),
 		"holy_shield_aura_pulses": PlayerStatusEffectMarkers.active_holy_shield_aura_pulse_count(player_anchor),
 		"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(player_anchor),
-		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor),
-		"base_tint": PLAYER_TINT.to_html(false),
+		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor), "base_tint": PLAYER_TINT.to_html(false),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
 	}
@@ -6009,33 +6005,23 @@ func _bot_entities_presentation_debug() -> Array:
 		var reaction = rec.get("reaction", null)
 		var controller = rec.get("controller", null)
 		out.append({
-			"id": str(id),
-			"type": str(rec.get("type", "")),
-			"monster_def_id": str(rec.get("monster_def_id", "")),
-			"character_id": str(rec.get("character_id", "")),
-			"visual_model": _visual_model_name(rec, node),
+			"id": str(id), "type": str(rec.get("type", "")), "monster_def_id": str(rec.get("monster_def_id", "")),
+			"character_id": str(rec.get("character_id", "")), "visual_model": _visual_model_name(rec, node),
 			"visual_scale": float(rec.get("visual_scale", 1.0)),
 			"is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
-			"boss_phase": rec.get("boss_phase", {}),
-			"boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)), "telegraph_tint": str(rec.get("telegraph_tint", "")),
-			"has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
+			"boss_phase": rec.get("boss_phase", {}), "boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
+			"telegraph_tint": str(rec.get("telegraph_tint", "")), "has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
 			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")),
-			"base_tint": str(rec.get("base_tint", "")),
-			"has_bow_marker": bool(rec.get("has_bow_marker", false)),
-			"effect_ids": rec.get("effect_ids", []),
+			"base_tint": str(rec.get("base_tint", "")), "has_bow_marker": bool(rec.get("has_bow_marker", false)), "effect_ids": rec.get("effect_ids", []),
 			"monster_pack_id": str(rec.get("monster_pack_id", "")), "monster_pack_leader": bool(rec.get("monster_pack_leader", false)),
 			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)),
 			"quest_reward": bool(rec.get("quest_reward", false)), "has_objective_marker": ChestPresentationScript.has_objective_marker(node), "has_quest_marker": ChestPresentationScript.has_quest_marker(node),
-			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node),
-			"has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(node),
-			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node),
-			"has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
+			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node), "has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(node),
+			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
 			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node),
 			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),
-			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node),
-			"hp": int(rec.get("hp", 1)),
-			"reaction": reaction.get_debug_state() if reaction != null else {},
-			"animation": controller.get_debug_state() if controller != null else {},
+			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node), "hp": int(rec.get("hp", 1)),
+			"reaction": reaction.get_debug_state() if reaction != null else {}, "animation": controller.get_debug_state() if controller != null else {},
 		})
 	return out
 

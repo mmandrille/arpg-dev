@@ -1,0 +1,49 @@
+docs/as-built/v191_affix-name-grammar.md
+  s_3d722d65688e0b::t_0057a77a316ff4 1-16,19-26,28-34
+  s_3d722d65688e0b::t_8aa58a2198b57e 17-18,27
+tools/validate_shared.py
+  s_3d722d65688e0b::t_53f606eb2f455e 2040
+  s_3d722d65688e0b::t_bfeabe4cd3a2f0 2067-2070,2073
+  s_3d722d65688e0b::t_d9241fdd17a12b 2039
+server/internal/game/shop.go
+  s_3d722d65688e0b::t_3ae66b3171e86f 1197-1198
+server/internal/game/item_rarity_test.go
+  s_3d722d65688e0b::t_28e6246b0cc9e0 85-109
+shared/golden/item_rolls.json
+  s_3d722d65688e0b::t_2932302a47a1d2 28
+  s_3d722d65688e0b::t_fa2fb6da312dcd 2
+tools/bot/scenarios/80_skill_affix_rolls.json
+  s_3d722d65688e0b::t_b2b81c3f63f604 14,23
+docs/plans/v191_2026-06-15-affix-name-grammar.md
+  s_3d722d65688e0b::t_0d5260ef0cea07 82,94
+  s_3d722d65688e0b::t_0057a77a316ff4 19-20,34-35,38,48,69
+  s_3d722d65688e0b::t_632e9a3be83351 1-18,21,25-33,36-37,39-47,49-50,54,58-67,70-80,83-89
+  s_3d722d65688e0b::t_eec7f733a01c38 81,90,93
+  s_3d722d65688e0b::t_b2b81c3f63f604 55-57,68
+  s_3d722d65688e0b::t_6cf76c181d4d6e 22-23,51-52,92
+  s_3d722d65688e0b::t_8aa58a2198b57e 24,53,91
+shared/golden/shop_offers.json
+  s_3d722d65688e0b::t_58fe8f091774c9 15,30,58,94,136,198
+docs/specs/v191_spec-affix-name-grammar.md
+  s_3d722d65688e0b::t_632e9a3be83351 1-47
+PROGRESS.md
+  s_3d722d65688e0b::t_ace2b09fd8eddd 15,210,442,576-579
+server/internal/game/affix_names.go
+  s_3d722d65688e0b::t_432d482766e877 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "93b6acd334985bbd6cda2b9541ab689cebfd2ba8",
+  "prompts": {},
+  "sessions": {
+    "s_3d722d65688e0b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecc06-930f-72b2-adcf-6aa19782dbac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

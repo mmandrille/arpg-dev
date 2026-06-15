@@ -1,0 +1,51 @@
+server/internal/game/companion_ai.go
+  s_23edecc223cbe3::t_f4455d98dd1baa 40-52,57-58,63,69,178-182,184-185,188-194,196,198-218,220,249-261
+  s_23edecc223cbe3::t_1a1e906e969634 183
+tools/validate_skills.py
+  s_23edecc223cbe3::t_f334ba414612b1 135-137
+shared/rules/skills.v0.json
+  s_23edecc223cbe3::t_1965da9506ef54 345,362-367,853,870,907-908,917,920,922,934-936,947,956,973
+  s_23edecc223cbe3::t_b13f82532acf04 945-946
+  s_23edecc223cbe3::t_5c9d0b7d0b77c7 798,813-818
+docs/specs/v185_spec-companion-rank-scaling-and-limits.md
+  s_23edecc223cbe3::t_b62b40311d7a26 33-38
+shared/rules/skills.v0.schema.json
+  s_23edecc223cbe3::t_03f54be985eb57 445
+  s_23edecc223cbe3::t_8f51a263704872 235-236,444,446
+server/internal/game/rules_companion.go
+  s_23edecc223cbe3::t_5136640858da7d 7-13
+  s_23edecc223cbe3::t_112f49b6e9b97b 50-55,119-123
+server/internal/game/sim.go
+  s_23edecc223cbe3::t_eb86f77d661459 2017
+  s_23edecc223cbe3::t_516f7709b91e0a 2320-2322
+server/internal/game/rules.go
+  s_23edecc223cbe3::t_8916ce0fa0a653 664-666,668,2825-2827
+  s_23edecc223cbe3::t_a14f97ca1f3508 667,2823-2824
+client/tests/test_skill_rules_loader.gd
+  s_23edecc223cbe3::t_8b8fbb1fd598e8 61,63
+server/internal/game/item_skill_stats.go
+  s_23edecc223cbe3::t_4e6a3b0156282d 53
+  s_23edecc223cbe3::t_9988755979a9ec 54-56
+  s_23edecc223cbe3::t_357505e2161663 52,57-58
+server/internal/game/ranger_skills_test.go
+  s_23edecc223cbe3::t_f81fd6540b9cfa 206
+  s_23edecc223cbe3::t_96f6c77c065e0a 3-6,128-134,156-183,187,191-196,199-200,203-204,207-220,231,235-255
+docs/specs/v183_spec-ranger-wolf-companion.md
+  s_23edecc223cbe3::t_68a112176e4515 38-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f652f304fb1d65ac59594d734a26b899c5e2ed1b",
+  "prompts": {},
+  "sessions": {
+    "s_23edecc223cbe3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecccc-5176-7512-8798-ea6883235cfa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

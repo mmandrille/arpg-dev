@@ -807,6 +807,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 	if isHandSlot(in.Equip.Slot) {
 		res.Changes = append(res.Changes, Change{Op: OpWeaponSetUpdate, ActiveWeaponSet: intPtr(s.activeWeaponSet), WeaponSets: s.weaponSetViews()})
 	}
+	s.appendSetItemInventoryUpdates(res)
 	s.appendEquipmentProgressionChanges(res)
 	res.Events = append(res.Events, Event{EventType: "item_equipped", EntityID: idCopy, CorrelationID: in.CorrelationID})
 	res.ack(in.MessageID)
@@ -853,6 +854,7 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 	if isHandSlot(in.Unequip.Slot) {
 		res.Changes = append(res.Changes, Change{Op: OpWeaponSetUpdate, ActiveWeaponSet: intPtr(s.activeWeaponSet), WeaponSets: s.weaponSetViews()})
 	}
+	s.appendSetItemInventoryUpdates(res)
 	s.appendEquipmentProgressionChanges(res)
 	idCopy := idStr(item.instanceID)
 	res.Events = append(res.Events, Event{EventType: "item_unequipped", EntityID: idCopy, CorrelationID: in.CorrelationID})

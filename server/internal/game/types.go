@@ -69,6 +69,7 @@ type ItemView struct {
 	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
 	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
 	EffectIDs         []string                `json:"effect_ids,omitempty"`
+	SummaryLines      []string                `json:"summary_lines,omitempty"`
 	Slot              string                  `json:"slot"`
 	Equipped          bool                    `json:"equipped"`
 }
@@ -86,6 +87,7 @@ type StashItemView struct {
 	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
 	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
 	EffectIDs         []string                `json:"effect_ids,omitempty"`
+	SummaryLines      []string                `json:"summary_lines,omitempty"`
 }
 
 // ItemRollPayload is the durable JSON payload stored in rolled_stats columns.

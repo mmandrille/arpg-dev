@@ -1044,6 +1044,11 @@ func _compact_metadata_lines(lines: Array) -> Array:
 		var text := str(line)
 		if text.begins_with("Slot:"):
 			out.append(_metadata_tooltip_line(text))
+		elif text.begins_with("Set:"):
+			out.append({"text": text, "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE})
+		elif text.find("set bonus:") >= 0:
+			var active := text.find("(active)") >= 0
+			out.append({"text": text, "color": Color("#7df095") if active else Color("#7d8d7f"), "font_size": TOOLTIP_META_FONT_SIZE})
 		else:
 			out.append(line)
 	return out

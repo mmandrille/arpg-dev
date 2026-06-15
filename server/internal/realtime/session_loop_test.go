@@ -78,10 +78,10 @@ func TestFanoutLevelTravelScopesDepartureAndArrival(t *testing.T) {
 			FromLevel: &fromLevel,
 			ToLevel:   &toLevel,
 		}},
-		}, clients, nil, map[uint64]int{
-			hostID:  fromLevel,
-			guestID: toLevel,
-		})
+	}, clients, nil, map[uint64]int{
+		hostID:  fromLevel,
+		guestID: toLevel,
+	})
 
 	hostDeparture := mustReceiveDelta(t, host)
 	if got := len(hostDeparture.Changes); got != 1 {
@@ -114,10 +114,10 @@ func TestFanoutLevelTravelScopesDepartureAndArrival(t *testing.T) {
 				Position: game.Vec2{X: 4, Y: 4},
 			},
 		}},
-		}, clients, nil, map[uint64]int{
-			hostID:  fromLevel,
-			guestID: toLevel,
-		})
+	}, clients, nil, map[uint64]int{
+		hostID:  fromLevel,
+		guestID: toLevel,
+	})
 
 	assertNoEnvelope(t, host)
 	guestArrival := mustReceiveDelta(t, guest)
@@ -308,11 +308,54 @@ func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
 	}
 }
 
+func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
+	repo := &progressionPersistRepo{}
+	loop := &sessionLoop{
+		hub:  &Hub{store: repo},
+		sess: store.Session{ID: "sess_inventory_persist", AccountID: "acct_host", CharacterID: "char_host"},
+	}
+	loop.persistTick(game.TickResult{
+		Tick:          11,
+		ActorPlayerID: 1001,
+		Changes: []game.Change{
+			{
+				Op: game.OpInventoryAdd,
+				Item: &game.ItemView{
+					ItemInstanceID: "2001",
+					ItemDefID:      "cave_blade",
+					ItemTemplateID: "cave_blade",
+					DisplayName:    "Verdant Vanguard Blade",
+					Rarity:         "set",
+					Slot:           "main_hand",
+				},
+			},
+			{
+				Op:              game.OpInventoryAdd,
+				StashTransferID: "stash_withdraw:3001",
+				Item: &game.ItemView{
+					ItemInstanceID: "3001",
+					ItemDefID:      "cave_helm",
+					Slot:           "head",
+				},
+			},
+		},
+	}, map[uint64]store.SessionMember{
+		1001: {AccountID: "acct_host", CharacterID: "char_host"},
+	}, 0)
+	if len(repo.items) != 1 {
+		t.Fatalf("persisted item count = %d, want only non-stash-transfer add: %+v", len(repo.items), repo.items)
+	}
+	if got := repo.items[0]; got.ID != "2001" || got.ItemDefID != "cave_blade" || got.Location != store.ItemLocationInventory {
+		t.Fatalf("persisted item = %+v, want unique-chest-style inventory item", got)
+	}
+}
+
 type progressionPersistRepo struct {
 	store.Repository
 	progressions []store.CharacterProgression
 	goldUpdates  []persistedGoldUpdate
 	events       []store.SessionEvent
+	items        []store.CharacterItemInstance
 }
 
 type persistedGoldUpdate struct {
@@ -333,6 +376,11 @@ func (r *progressionPersistRepo) SetCharacterGold(_ context.Context, accountID, 
 
 func (r *progressionPersistRepo) AppendEvent(_ context.Context, event store.SessionEvent) error {
 	r.events = append(r.events, event)
+	return nil
+}
+
+func (r *progressionPersistRepo) AddCharacterItem(_ context.Context, item store.CharacterItemInstance) error {
+	r.items = append(r.items, item)
 	return nil
 }
 

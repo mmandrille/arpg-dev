@@ -935,7 +935,7 @@ func statSummaryLines(stats map[string]int) []string {
 }
 
 func displayStatValue(stat string, value int) string {
-	if stat == "block_percent" || stat == "attack_speed_percent" {
+	if stat == "block_percent" || stat == "attack_speed_percent" || stat == "skill_damage_percent" {
 		return fmt.Sprintf("%+d%%", value)
 	}
 	return fmt.Sprintf("%+d", value)

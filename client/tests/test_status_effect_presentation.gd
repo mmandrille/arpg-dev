@@ -229,10 +229,22 @@ func _test_monster_death_clears_elite_aura_markers() -> void:
 		"monster_pack_id": "pack_1",
 		"monster_pack_leader": true,
 	})
+	main._upsert_entity({
+		"id": "1003",
+		"type": "monster",
+		"position": {"x": 2.5, "y": 0.0},
+		"hp": 5,
+		"max_hp": 5,
+		"monster_def_id": "training_dummy",
+		"effect_ids": ["elite_command"],
+		"monster_pack_id": "pack_1",
+	})
 	var rows: Array = main._bot_entities_presentation_debug()
 	var before: Dictionary = _presentation_row(rows, "1002")
+	var minion_before: Dictionary = _presentation_row(rows, "1003")
 	_assert_true("elite command marker active before death", bool(before.get("has_elite_command_effect", false)))
 	_assert_true("elite command radius active before death", bool(before.get("has_elite_command_radius_preview", false)))
+	_assert_true("elite minion command marker active before leader death", bool(minion_before.get("has_elite_command_effect", false)))
 
 	main.entities["1002"]["reaction"] = null
 	main._apply_delta({"events": [{
@@ -243,9 +255,11 @@ func _test_monster_death_clears_elite_aura_markers() -> void:
 	}], "changes": []})
 	rows = main._bot_entities_presentation_debug()
 	var after: Dictionary = _presentation_row(rows, "1002")
+	var minion_after: Dictionary = _presentation_row(rows, "1003")
 	_assert_eq("elite monster hp after death", int(after.get("hp", 1)), 0)
 	_assert_true("elite command marker removed on death", not bool(after.get("has_elite_command_effect", true)))
 	_assert_true("elite command radius removed on death", not bool(after.get("has_elite_command_radius_preview", true)))
+	_assert_true("elite minion command marker removed after leader death", not bool(minion_after.get("has_elite_command_effect", true)))
 	_free_main(main)
 
 

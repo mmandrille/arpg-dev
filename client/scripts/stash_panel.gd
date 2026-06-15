@@ -182,12 +182,14 @@ func show_corpse(next_entity_id: String, corpse_name: String, corpse_items: Arra
 
 
 func show_unique_chest(next_entity_id: String, chest_items: Array, next_inventory: Array, next_equipped: Dictionary, next_gold: int, next_hotbar: Array = []) -> void:
+	var same_unique_chest := container_mode == "unique_chest" and stash_entity_id == next_entity_id
 	stash_entity_id = next_entity_id
 	stash_id = "unique_test_chest"
 	stash_title = "Unique Chest"
 	container_mode = "unique_chest"
 	container_label = "Chest"
-	_unique_chest_tab = UniqueChestTabsScript.UNIQUES
+	if not same_unique_chest:
+		_unique_chest_tab = UniqueChestTabsScript.UNIQUES
 	set_stash_state(chest_items, 0, chest_items.size())
 	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
 	visible = true

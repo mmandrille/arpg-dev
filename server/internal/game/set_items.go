@@ -153,6 +153,63 @@ func (s *Sim) equippedSetBonusStats() map[string]int {
 	return stats
 }
 
+func (s *Sim) equippedSetPieceCounts() map[string]int {
+	counts := map[string]int{}
+	for _, slot := range equipmentSlots {
+		item := s.findItemByID(s.equipped[slot])
+		setItem, ok := s.setItemForEquippedItem(item)
+		if !ok {
+			continue
+		}
+		counts[setItem.SetID]++
+	}
+	return counts
+}
+
+func (s *Sim) setItemSummaryLines(item *invItem) []string {
+	setItem, ok := s.setItemForEquippedItem(item)
+	if !ok {
+		return nil
+	}
+	set, ok := s.rules.SetCatalogs[setItem.SetID]
+	if !ok || !set.Enabled || set.Status != "ready" {
+		return nil
+	}
+	equippedCount := s.equippedSetPieceCounts()[setItem.SetID]
+	totalCount := len(set.Items)
+	lines := []string{
+		fmt.Sprintf("Set: %s (%d/%d equipped)", set.DisplayName, equippedCount, totalCount),
+	}
+	for _, bonus := range set.PieceBonuses {
+		lines = append(lines, setBonusSummaryLine(bonus, equippedCount))
+	}
+	lines = append(lines, setBonusSummaryLine(set.FullSetBonus, equippedCount))
+	return lines
+}
+
+func setBonusSummaryLine(bonus SetItemBonusDef, equippedCount int) string {
+	state := "inactive"
+	if equippedCount >= bonus.RequiredPieces {
+		state = "active"
+	}
+	return fmt.Sprintf("%d-piece set bonus: %s (%s)", bonus.RequiredPieces, setBonusStatsSummary(bonus.Stats), state)
+}
+
+func setBonusStatsSummary(stats map[string]int) string {
+	lines := statSummaryLines(stats)
+	if len(lines) == 0 {
+		return "None"
+	}
+	out := ""
+	for i, line := range lines {
+		if i > 0 {
+			out += ", "
+		}
+		out += line
+	}
+	return out
+}
+
 func (s *Sim) setItemForEquippedItem(item *invItem) (SetItemDef, bool) {
 	if item == nil || item.rollPayload == nil || item.rollPayload.Rarity != "set" {
 		return SetItemDef{}, false
@@ -164,6 +221,34 @@ func (s *Sim) setItemForEquippedItem(item *invItem) (SetItemDef, bool) {
 		}
 	}
 	return SetItemDef{}, false
+}
+
+func (s *Sim) setItemForInventoryItem(item *invItem) (SetItemDef, bool) {
+	if item == nil || item.rollPayload == nil || item.rollPayload.Rarity != "set" {
+		return SetItemDef{}, false
+	}
+	for _, setItemID := range sortedStringKeys(s.rules.SetItems) {
+		setItem := s.rules.SetItems[setItemID]
+		if setItem.Piece.BaseTemplateID == item.rollPayload.ItemTemplateID && setItem.Piece.DisplayName == item.rollPayload.DisplayName {
+			return setItem, true
+		}
+	}
+	return SetItemDef{}, false
+}
+
+func (s *Sim) appendSetItemInventoryUpdates(res *TickResult) {
+	if res == nil {
+		return
+	}
+	for _, item := range s.inventory {
+		if item == nil || s.hotbarHasItem(item.instanceID) {
+			continue
+		}
+		if _, ok := s.setItemForInventoryItem(item); !ok {
+			continue
+		}
+		res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item))})
+	}
 }
 
 func addStats(out map[string]int, in map[string]int) {

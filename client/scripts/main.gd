@@ -1278,6 +1278,7 @@ func _apply_delta(p: Dictionary) -> void:
 				dead_rec["hp"] = 0
 				_set_pickable(dead_rec["node"] as Node3D, false)
 				_clear_terminal_entity_status_markers(dead_rec)
+				_clear_elite_command_for_pack_if_leader_died(dead_rec)
 				_play_entity_reaction(eid, ev, "death")
 		if autoplay_enabled and event_type == "monster_killed":
 			autoplay_phase = "pickup"
@@ -1463,6 +1464,22 @@ func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, false)
 	PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
+
+func _clear_elite_command_for_pack_if_leader_died(dead_rec: Dictionary) -> void:
+	if not bool(dead_rec.get("monster_pack_leader", false)):
+		return
+	var pack_id := str(dead_rec.get("monster_pack_id", ""))
+	if pack_id == "":
+		return
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		if str(rec.get("monster_pack_id", "")) != pack_id:
+			continue
+		var node := rec.get("node", null) as Node3D
+		if node != null:
+			PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
+			PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
+	EliteAuraPreviewSync.sync(entities, dungeon_generation)
 
 func _clear_level_entities() -> void:
 	for id in entities.keys():

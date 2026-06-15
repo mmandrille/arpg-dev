@@ -98,6 +98,13 @@ func TestUniqueTestChestOpensContainerAndTakesSelectedItem(t *testing.T) {
 	if takeEv == nil || takeEv.StashItemID != ev.StashItems[0].StashItemID || takeEv.ItemInstanceID == "" || len(takeEv.StashItems) != wantAmount-1 {
 		t.Fatalf("unique_chest_item_taken event = %+v", takeEv)
 	}
+	add := findInventoryAddChange(take.Changes)
+	if add == nil || add.Item == nil || add.Item.ItemInstanceID != takeEv.ItemInstanceID {
+		t.Fatalf("unique chest take inventory add = %+v, event=%+v", add, takeEv)
+	}
+	if add.StashTransferID != "" {
+		t.Fatalf("unique chest inventory add has stash transfer id %q; this would skip character-item persistence", add.StashTransferID)
+	}
 	if len(sim.inventory) != 1 {
 		t.Fatalf("inventory count after take = %d, want 1", len(sim.inventory))
 	}
@@ -221,6 +228,7 @@ func TestSetItemPayloadsAndEquippedBonuses(t *testing.T) {
 
 	sim := MustNewSim("sess_set_items", "set_item_seed", rules)
 	sim.progression.Level = 5
+	sim.progression.BaseStats.Magic = 8
 	sim.progression.SkillRanks["magic_bolt"] = 1
 	addSetItemToInventory(t, sim, "verdant_vanguard_blade", 9101)
 	addSetItemToInventory(t, sim, "verdant_vanguard_helm", 9102)
@@ -234,19 +242,41 @@ func TestSetItemPayloadsAndEquippedBonuses(t *testing.T) {
 	if twoPiece["armor"] != 3 || twoPiece["max_hp"] != 0 || sim.equippedItemStatTotal("skill_damage_percent") != 0 {
 		t.Fatalf("two-piece set stats = %+v", twoPiece)
 	}
+	helmView := sim.itemView(sim.findItemByID(9102))
+	if !containsShopString(helmView.SummaryLines, "Set: Verdant Vanguard (2/5 equipped)") ||
+		!containsShopString(helmView.SummaryLines, "2-piece set bonus: Armor +3 (active)") ||
+		!containsShopString(helmView.SummaryLines, "3-piece set bonus: Max HP +8 (inactive)") {
+		t.Fatalf("two-piece summary lines = %+v", helmView.SummaryLines)
+	}
 
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_mail", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9103", Slot: "chest"}}}), "equip_mail")
+	threePiece := sim.equippedSetBonusStats()
+	if threePiece["armor"] != 3 || threePiece["max_hp"] != 8 || threePiece["attack_speed_percent"] != 0 {
+		t.Fatalf("three-piece set stats = %+v", threePiece)
+	}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_gloves", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9104", Slot: "gloves"}}}), "equip_gloves")
+	fourPiece := sim.equippedSetBonusStats()
+	if fourPiece["armor"] != 3 || fourPiece["max_hp"] != 8 || fourPiece["attack_speed_percent"] != 8 || fourPiece["all_skills"] != 0 {
+		t.Fatalf("four-piece set stats = %+v", fourPiece)
+	}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_boots", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9105", Slot: "boots"}}}), "equip_boots")
 	full := sim.equippedSetBonusStats()
 	if full["armor"] != 3 || full["max_hp"] != 8 || full["attack_speed_percent"] != 8 || full["all_skills"] != 1 || full["skill_damage_percent"] != 20 {
 		t.Fatalf("full set stats = %+v", full)
+	}
+	bladeView := sim.itemView(sim.findItemByID(9101))
+	if !containsShopString(bladeView.SummaryLines, "Set: Verdant Vanguard (5/5 equipped)") ||
+		!containsShopString(bladeView.SummaryLines, "5-piece set bonus: All skills +1, HP regen / 10s +5, Skill damage % +20% (active)") {
+		t.Fatalf("full set summary lines = %+v", bladeView.SummaryLines)
 	}
 	if sim.effectiveSkillRank("magic_bolt") != 2 {
 		t.Fatalf("effective magic_bolt rank = %d, want 2", sim.effectiveSkillRank("magic_bolt"))
 	}
 	if sim.equippedItemStatTotal("skill_damage_percent") != 20 {
 		t.Fatalf("skill damage bonus = %d, want 20", sim.equippedItemStatTotal("skill_damage_percent"))
+	}
+	if regen := findStatBreakdown(sim.StatBreakdownViews(), "health_regen_per_second"); regen == nil || !statBreakdownHasSourceKind(*regen, "set_bonus") {
+		t.Fatalf("full set health regen breakdown missing set bonus: %+v", sim.StatBreakdownViews())
 	}
 }
 
@@ -308,6 +338,15 @@ func enabledSetItemCount(rules *Rules) int {
 		}
 	}
 	return count
+}
+
+func findInventoryAddChange(changes []Change) *Change {
+	for i := range changes {
+		if changes[i].Op == OpInventoryAdd {
+			return &changes[i]
+		}
+	}
+	return nil
 }
 
 func addSetItemToInventory(t *testing.T, sim *Sim, setItemID string, instanceID uint64) {

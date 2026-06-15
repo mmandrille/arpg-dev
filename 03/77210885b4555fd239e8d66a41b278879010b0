@@ -1,0 +1,21 @@
+server/internal/game/interactables_test.go
+  s_f9c66ca3cb4339::t_010df21b2eea2d 1-111
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_94fa4a2db0ad5f 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0377210885b4555fd239e8d66a41b278879010b0",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

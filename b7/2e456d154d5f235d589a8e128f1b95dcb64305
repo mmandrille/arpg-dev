@@ -1,0 +1,39 @@
+shared/rules/monsters.v0.json
+  s_3d722d65688e0b::t_72f5e29c023f11 239-260
+shared/i18n/en.json
+  s_3d722d65688e0b::t_66635a129be363 105
+shared/i18n/es.json
+  s_3d722d65688e0b::t_1044afd5d66bf6 36
+docs/as-built/v198_mercenary-foundation.md
+  s_3d722d65688e0b::t_f7581855795350 1-28
+PROGRESS.md
+  s_3d722d65688e0b::t_f0acc2152b3a8e 15,217,456,590-592
+server/internal/game/companion_ai_test.go
+  s_3d722d65688e0b::t_78c91cb1435a55 23-40
+docs/plans/v198_2026-06-15-mercenary-foundation.md
+  s_3d722d65688e0b::t_0b34b3148c248e 1-27
+shared/assets/monster_visuals.v0.json
+  s_3d722d65688e0b::t_debc42bfcd618e 123-129
+docs/specs/v198_spec-mercenary-foundation.md
+  s_3d722d65688e0b::t_bb657f0b027f2c 1-34
+tools/bot/scenarios/86_mercenary_foundation.json
+  s_3d722d65688e0b::t_502d4b52712861 1-29
+shared/rules/worlds.v0.json
+  s_3d722d65688e0b::t_c3d79176177aa0 872-880
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b72e456d154d5f235d589a8e128f1b95dcb64305",
+  "prompts": {},
+  "sessions": {
+    "s_3d722d65688e0b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecc06-930f-72b2-adcf-6aa19782dbac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -16,8 +16,8 @@ Last updated: 2026-06-15
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
-| **Last engineering review** | v180 — [`docs/reviews/20260615_v180-overview.md`](docs/reviews/20260615_v180-overview.md) (2026-06-15) |
-| **Next engineering review** | v190 due before more feature batches |
+| **Last engineering review** | v190 — [`docs/reviews/20260615_v190-overview.md`](docs/reviews/20260615_v190-overview.md) (2026-06-15) |
+| **Next engineering review** | v200 due before more feature batches |
 
 ### Slice numbering note
 
@@ -600,6 +600,10 @@ through tuning, gives Revive +1 active monster every 3 ranks, and adds protocol 
 block in derived stats, refreshes derived stat payloads when skill buffs start/end, keeps Holy
 Shield's armor/block benefit visible, and changes Sanctuary into a 5-unit, 6-second yellow immunity
 dome with a 60-second cooldown.
+
+**Engineering review v190 is complete.** The review found the batch healthy and `make ci` green,
+with follow-up pressure on companion AI tuning configurability, Sanctuary client radius drift,
+monster-rarity validation pins, and continued large-file extraction discipline.
 
 **Sorcerer can revive slain monsters as companions.** v184 adds the `revive`
 Sorcerer skill with a data-driven `revive_companion` payload, dead non-boss targeting,

@@ -2,7 +2,11 @@
 
 Read these **before** specs, plans, or code:
 
-1. [`PROGRESS.md`](PROGRESS.md) — **start here** for where the project stands: latest completed slice, active branch, open gaps, deferred backlog, engineering-review cadence, and the agent checklist. Do not rely on stale slice numbers in other docs — `PROGRESS.md` is the canonical baseline. When **Next engineering review** is due, run `$refactor` first to pay down scorecard gaps with minor commits, then read [`docs/reviews/`](docs/reviews/) and write a fresh review set before the next batch of slices.
+1. [`PROGRESS.md`](PROGRESS.md) — **start here** for where the project stands: read **Current status**,
+   **Open gaps**, and **Agent checklist** (not the full file unless needed). Slice history lives in
+   [`docs/progress/slice-lifecycle.md`](docs/progress/slice-lifecycle.md). Per-slice proof lives in
+   [`docs/as-built/`](docs/as-built/). Do not rely on stale slice numbers in other docs —
+   `PROGRESS.md` **Current status** is the canonical baseline.
 2. [`CLAUDE.md`](CLAUDE.md) — commands, architecture, invariants, SDD process.
 3. [`docs/CODEMAP.md`](docs/CODEMAP.md) — domain → files index. Use it to decide which files to load before grepping broad coordinators.
 4. For client UI, inventory presentation, isometric/camera tooling, or placeholder art, first check existing in-repo Godot scripts, scenes, demos, and asset manifests before introducing new dependencies or asset pipelines.

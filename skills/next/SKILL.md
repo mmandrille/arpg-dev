@@ -28,8 +28,11 @@ Examples:
 
 ## Phase 0 — Baseline context (read first)
 
-1. [`PROGRESS.md`](../../PROGRESS.md) — latest completed slice, active branch, open gaps, deferred backlog.
-2. [`CLAUDE.md`](../../CLAUDE.md) — architecture, invariants, slice pattern.
+1. [`PROGRESS.md`](../../PROGRESS.md) — read **Current status**, **Open gaps & deferred work**, and
+   **Agent checklist** only. Do not load the full file when pointers are enough.
+2. [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) — when you need slice
+   history or the next execution number from the lifecycle table.
+3. [`CLAUDE.md`](../../CLAUDE.md) — architecture, invariants, slice pattern.
 3. [`docs/adr/0001-technology-stack.md`](../../docs/adr/0001-technology-stack.md) — if not already familiar.
 4. Relevant ADRs for the candidate area (e.g. [`0008-world-structure-and-dungeon-progression.md`](../../docs/adr/0008-world-structure-and-dungeon-progression.md) for world/progression).
 5. Existing specs/plans without a completed lifecycle row (in-progress or drafted slices).
@@ -37,7 +40,7 @@ Examples:
 
 ### Determine next slice number
 
-- Highest `vN` in `docs/specs/` and `docs/plans/` lifecycle table → next is **v(N+1)** unless a drafted spec already claims a number.
+- Highest `vN` in `docs/specs/`, `docs/plans/`, and [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) → next is **v(N+1)** unless a drafted spec already claims a number.
 - If `v20_spec-…` exists but v20 is not in the lifecycle table, v20 may be the active in-flight slice — say so explicitly.
 
 ## Phase 1 — Candidate discovery

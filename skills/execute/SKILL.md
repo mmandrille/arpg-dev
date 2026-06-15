@@ -24,11 +24,13 @@ disable-model-invocation: true
 
 ## Phase 0 — Baseline context (read first)
 
-1. [`PROGRESS.md`](../../PROGRESS.md)
+1. [`PROGRESS.md`](../../PROGRESS.md) — **Current status**, **Open gaps**, and **Agent checklist**
+   only unless the task needs more.
 2. [`CLAUDE.md`](../../CLAUDE.md)
 3. The plan file the user provided.
 4. The linked spec (`docs/specs/vN_spec-*.md`) if referenced in the plan.
 5. Relevant ADRs cited by spec/plan.
+6. [`docs/CODEMAP.md`](../../docs/CODEMAP.md) when the plan touches a known domain.
 
 ## Phase 1 — Plan review (gate)
 
@@ -116,9 +118,8 @@ If `make ci` fails, fix and re-run until green. Use focused commands while itera
 When `make ci` is green:
 
 1. Mark all plan checkboxes complete.
-2. Update [`PROGRESS.md`](../../PROGRESS.md):
-   - New row in lifecycle table (or mark slice complete).
-   - New open gaps / deferred backlog.
+2. Update [`PROGRESS.md`](../../PROGRESS.md) (**Current status**, open gaps) and
+   [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) (lifecycle row).
 3. Add or update `docs/as-built/vN_<codename>.md` with what the slice proved.
 4. Report to user:
    - What was implemented (concise).

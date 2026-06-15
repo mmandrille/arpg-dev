@@ -10,6 +10,7 @@ const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
+const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const MainScript := preload("res://scripts/main.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
@@ -68,6 +69,8 @@ func _initialize() -> void:
 			await _setup_vendors()
 		"monsters":
 			await _setup_monsters()
+		"companions":
+			await _setup_companions()
 		"classes":
 			await _setup_classes()
 		"heal-rain":
@@ -564,6 +567,88 @@ func _setup_monsters() -> void:
 		monster.position = Vector3(float(entry["x"]), 0.0, 0.0)
 		root.add_child(monster)
 	_subject = root
+
+
+func _setup_companions() -> void:
+	var main = MainScript.new()
+	var world := Node3D.new()
+	world.name = "World"
+	var player_anchor := Node3D.new()
+	player_anchor.name = "PlayerAnchor"
+	var character_visual := CharacterScene.instantiate() as Node3D
+	character_visual.name = "CharacterVisual"
+	player_anchor.add_child(character_visual)
+	world.add_child(player_anchor)
+	main.add_child(world)
+	var entities := Node3D.new()
+	entities.name = "Entities"
+	main.add_child(entities)
+	get_root().add_child(main)
+	await process_frame
+	if main.menu_layer != null:
+		main.menu_layer.visible = false
+	main.player_id = "1001"
+	main.right_click_skill_id = "revive"
+	main.skill_progression = {"skills": [{"skill_id": "revive", "rank": 1}]}
+	main.player_anchor.position = Vector3(4.0, 0.0, 4.0)
+	main._sync_camera_to_player()
+	main._upsert_entity({
+		"id": "5101",
+		"type": "companion",
+		"owner_id": "1001",
+		"monster_def_id": "companion_black_wolf",
+		"hp": 4,
+		"max_hp": 6,
+		"visual_model": "monster_quadruped",
+		"visual_tint": "#101014",
+		"position": {"x": 6.0, "y": 4.0},
+	})
+	main._upsert_entity({
+		"id": "5102",
+		"type": "companion",
+		"owner_id": "1001",
+		"monster_def_id": "dungeon_undead",
+		"hp": 2,
+		"max_hp": 4,
+		"remaining_ticks": 450,
+		"total_ticks": 700,
+		"visual_model": "monster_skeleton",
+		"position": {"x": 7.0, "y": 4.8},
+	})
+	main._upsert_entity({
+		"id": "5103",
+		"type": "companion",
+		"owner_id": "1001",
+		"monster_def_id": "mercenary_guard",
+		"hp": 7,
+		"max_hp": 7,
+		"visual_model": "monster_dummy",
+		"visual_tint": "#53738d",
+		"position": {"x": 5.4, "y": 5.2},
+	})
+	main._upsert_entity({
+		"id": "5201",
+		"type": "monster",
+		"monster_def_id": "dungeon_wolf",
+		"hp": 0,
+		"max_hp": 8,
+		"visual_model": "monster_quadruped",
+		"position": {"x": 4.8, "y": 5.2},
+	})
+	main.hovered_loot_id = "5201"
+	main._refresh_loot_label_visibility()
+	var corpse_rec: Dictionary = main.entities.get("5201", {})
+	if not corpse_rec.is_empty():
+		main._upsert_revive_corpse_status_bar("5201", corpse_rec.get("node", null) as Node3D, "Dungeon Wolf Corpse")
+		var corpse_bar = main.revive_corpse_status_bars.get("5201", null)
+		if corpse_bar == null and main.gameplay_ui_layer != null:
+			corpse_bar = CorpseStatusBarScript.new()
+			main.gameplay_ui_layer.add_child(corpse_bar)
+			corpse_bar.setup(null, corpse_rec.get("node", null) as Node3D, "Dungeon Wolf Corpse")
+		if corpse_bar != null:
+			corpse_bar.set_process(false)
+			corpse_bar.position = Vector2(390.0, 180.0)
+	await process_frame
 
 
 func _setup_classes() -> void:

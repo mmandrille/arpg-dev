@@ -21,7 +21,7 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "heal-rain", "town"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--output", default="", help="PNG output path for screenshot mode.")
@@ -63,6 +63,8 @@ def main() -> int:
         width, height = 960, 640
     if args.focus == "monsters" and (args.width, args.height) == (640, 480):
         width, height = 1120, 640
+    if args.focus == "companions" and (args.width, args.height) == (640, 480):
+        width, height = 960, 640
     if args.focus == "classes" and (args.width, args.height) == (640, 480):
         width, height = 1120, 640
     if args.focus == "heal-rain" and (args.width, args.height) == (640, 480):

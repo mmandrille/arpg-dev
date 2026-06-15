@@ -935,7 +935,7 @@ func statSummaryLines(stats map[string]int) []string {
 }
 
 func displayStatValue(stat string, value int) string {
-	if stat == "block_percent" || stat == "attack_speed_percent" || stat == "hit_chance" || stat == "crit_chance" || stat == "evade_chance" || stat == "skill_damage_percent" || stat == "skill_cooldown_reduction_percent" {
+	if stat == "block_percent" || stat == "attack_speed_percent" || stat == "hit_chance" || stat == "crit_chance" || stat == "evade_chance" || stat == "skill_damage_percent" || stat == "skill_cooldown_reduction_percent" || stat == "magic_find_percent" {
 		return fmt.Sprintf("%+d%%", value)
 	}
 	return fmt.Sprintf("%+d", value)
@@ -1078,6 +1078,8 @@ func displayStatName(stat string) string {
 		return "Skill cooldown reduction"
 	case "skill_mana_cost_reduction":
 		return "Skill mana cost reduction"
+	case "magic_find_percent":
+		return "Magic Find"
 	case "hotbar_slots":
 		return "Hotbar slots"
 	case "inventory_rows":

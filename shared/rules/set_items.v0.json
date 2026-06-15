@@ -53,6 +53,59 @@
         "stats": { "all_skills": 1, "skill_damage_percent": 20, "health_regen_per_10_seconds": 5 }
       },
       "status": "ready"
+    },
+    "stormrunner_covenant": {
+      "id": "stormrunner_covenant",
+      "enabled": true,
+      "display_name": "Stormrunner Covenant",
+      "rarity": "set",
+      "items": [
+        {
+          "id": "stormrunner_covenant_bow",
+          "base_template_id": "cave_bow",
+          "display_name": "Stormrunner Covenant Bow",
+          "minimum_level": 5,
+          "fixed_stats": { "damage_min": 3, "damage_max": 6, "dex": 1 }
+        },
+        {
+          "id": "stormrunner_covenant_mask",
+          "base_template_id": "cave_helm",
+          "display_name": "Stormrunner Covenant Mask",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 3, "max_mana": 4 }
+        },
+        {
+          "id": "stormrunner_covenant_grips",
+          "base_template_id": "cave_gloves",
+          "display_name": "Stormrunner Covenant Grips",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 2, "attack_speed_percent": 7 }
+        },
+        {
+          "id": "stormrunner_covenant_treads",
+          "base_template_id": "cave_boots",
+          "display_name": "Stormrunner Covenant Treads",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 2, "evade_chance": 5 }
+        },
+        {
+          "id": "stormrunner_covenant_loop",
+          "base_template_id": "cave_ring",
+          "display_name": "Stormrunner Covenant Loop",
+          "minimum_level": 5,
+          "fixed_stats": { "max_hp": 3, "magic_find_percent": 18 }
+        }
+      ],
+      "piece_bonuses": [
+        { "required_pieces": 2, "stats": { "dex": 2 } },
+        { "required_pieces": 3, "stats": { "crit_chance": 6 } },
+        { "required_pieces": 4, "stats": { "attack_speed_percent": 6 } }
+      ],
+      "full_set_bonus": {
+        "required_pieces": 5,
+        "stats": { "all_skills": 1, "skill_damage_percent": 15, "magic_find_percent": 20 }
+      },
+      "status": "ready"
     }
   }
 }

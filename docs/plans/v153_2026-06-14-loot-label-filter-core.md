@@ -13,8 +13,6 @@ Tech stack: Godot 4 GDScript, headless client unit test, full CI.
 
 Builds on v152 (`make ci` green at commit `982ccfd3`). First feature slice after the v141–v152
 maintenance arc; proves the architecture flows for player features again and that new code lands in
-a focused file under the touch-to-shrink rule. Godot plugin adopt/borrow/reject: **reject** — no
-loot-filter plugin exists in `docs/researchs/godot-plugins-and-shortcuts.md`; this is a few lines of
 custom presentation over existing `Label3D` labels.
 
 ## File map

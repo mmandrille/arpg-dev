@@ -10,7 +10,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub and NPC economy direction
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
 - [`v41_spec-town-vendor-gold-sink.md`](v41_spec-town-vendor-gold-sink.md) - first town vendor, deterministic offers, buy/sell, deepest dungeon depth
 
 ## 1. Purpose
@@ -42,7 +41,6 @@ The thin proof:
   stats only.
 - No new active skill, mana spender, skill bar behavior, or combat tuning.
 - No production vendor art, portrait, audio, or town art pass.
-- No external inventory/shop plugin adoption. Plan must record the adoption checklist result, but
   the default is to extend the in-repo `ShopPanel` because v41 already owns the panel and server
   protocol adapter.
 
@@ -167,6 +165,5 @@ items compare against zero with no `equipped_item_instance_id`.
 |---|-----------------|---------|
 | Q-1 | Protocol version bump vs extending v4 current files. | Extend v4 unless validators require v5. |
 | Q-2 | Direct stat deltas vs derived character stat preview. | Direct stat deltas only. |
-| Q-3 | Plugin adoption for richer shop UI. | Reject external plugin; extend current in-repo panel. |
 | R-1 | Long generated item names and comparison text can overlap buttons. | Use wrapped/clipped labels in fixed-height rows and expose client tests/debug state. |
 | R-2 | Comparison must not duplicate authority in the client. | Server emits comparison/appraisal data; client renders it only. |

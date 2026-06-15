@@ -20,7 +20,6 @@ all event metadata.
 
 - No server combat, aggro, AI, pack generation, or protocol/schema changes.
 - No new monster intent, threat table, targeting UI, minimap marker, audio, or production VFX.
-- No new external Godot plugin or asset dependency.
 - No balance tuning.
 
 ## Acceptance criteria

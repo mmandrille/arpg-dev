@@ -8,9 +8,6 @@ Tech stack: Shared JSON schemas/rules/goldens, Go `server/internal/game`, protoc
 ## Baseline and shortcut decision
 
 Baseline is v30 `monster-rarity-and-loot-scaling` complete on `main`. This slice reuses v26 character progression/derived stats, v28 paper-doll equipment and rolled `armor` / `block_percent` / `max_hp`, v12 projectile impact, v21 monster proactive attacks, and v30 monster rarity scaling.
-
-Godot plugin adoption decision: **reject gameplay/stat plugins** because combat authority and stat aggregation belong to shared rules plus the Go sim. **Reject full UI plugins for this slice** because current `settings_panel.gd`, `character_stats_panel.gd`, and `damage_number.gd` are small in-repo controls that can be extended directly. Borrow only general tooltip/floating-text layout ideas from the existing plugin catalog if useful; no new addon dependency is planned.
-
 Implementation defaults from the spec:
 
 - Flat armor mitigation: `final_damage = max(1, raw_or_crit_damage - effective_armor)` for successful non-blocked hits.

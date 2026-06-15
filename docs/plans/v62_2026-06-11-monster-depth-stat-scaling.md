@@ -10,7 +10,6 @@ Tech stack: Go sim, shared JSON rules/schemas/goldens, existing bot and CI gates
 ## Baseline and Shortcut Decision
 
 Builds on v30 monster rarity, v31 combat stat effects, v48 co-op challenge scaling, and v56 attack
-cadence. No Godot UI, camera, inventory presentation, or art is in scope, so the plugin adoption
 checklist is not applicable.
 
 ## File Map

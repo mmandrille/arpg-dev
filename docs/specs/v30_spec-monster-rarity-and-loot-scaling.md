@@ -13,7 +13,6 @@ Related:
 - [`v29_spec-dungeon-equipment-drop-expansion.md`](v29_spec-dungeon-equipment-drop-expansion.md) - depth-banded dungeon monster/chest drops
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - seeded procedural dungeon generation and better loot by depth
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist; expect reject for simple tint/material work
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
@@ -288,8 +287,6 @@ The Godot client uses server-provided rarity for presentation only:
 The client must not derive combat power, XP, or loot from tint. If rarity is missing on a legacy or
 static monster, default presentation is `common`.
 
-Plugin adoption decision: **reject**. This slice only needs material/tint changes over existing
-in-repo models. Adopting a Godot plugin or art pack would add integration surface without solving a
 hard UI/camera/art problem.
 
 ## 9. Acceptance criteria
@@ -342,7 +339,6 @@ hard UI/camera/art problem.
 | 4 | Loot depth offsets are `+0`, `+1`, `+2`, `+3`. | Simple, verifiable bridge from monster danger to better v29 dungeon loot bands. |
 | 5 | Unique monster rarity has no relationship to unique item drops. | Avoids prematurely adding unique/set itemization while preserving a useful rarity tier name. |
 | 6 | Visuals reuse the current model with pastel tints; player is green. | Gives immediate readability without production art or a new asset pipeline slice. |
-| 7 | Godot plugins are rejected for v30. | Material tinting is small in-repo presentation work; plugin adoption would add unnecessary dependency surface. |
 
 ## 12. As-built notes
 

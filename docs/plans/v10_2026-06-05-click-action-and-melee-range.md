@@ -54,12 +54,6 @@ Branch: `feature/solid-collision-and-obstacles`
 | Modify | `client/scripts/smoke.gd` | `action_intent` migration |
 | Modify | `client/tests/test_golden.gd` | `melee_reach` golden cases |
 | Modify | `PROGRESS.md` | v10 row when complete |
-
-## Plugin Adoption Checklist
-
-- [x] Consulted `docs/researchs/godot-plugins-and-shortcuts.md`.
-- [x] Decision: **reject** door/collision plugins — server owns barrier; client uses simple box + tween.
-
 ## Task 1: Shared contracts
 
 - [x] Step 1.1: Add `unarmed_reach` to combat rules + schema.

@@ -7,8 +7,6 @@ Tech stack: Go sim, shared JSON schemas, Godot client scripts/tests, client bot 
 
 ## Baseline and Shortcut Decision
 
-Builds on v155 random quest reward floors and v162 objective chest presentation. Godot plugin adoption checklist: reject external plugins because this is a small marker variant over existing in-repo chest presentation helpers; no reusable UI system or asset pipeline is needed.
-
 ## File Map
 
 | Action | Path | Responsibility |

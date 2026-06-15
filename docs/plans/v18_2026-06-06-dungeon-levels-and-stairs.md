@@ -21,15 +21,6 @@ Resolved baseline facts:
 - The spec was reviewed and approved after closing gaps around protocol v1, stair `ready` state,
   transition delta ordering, and dungeon wall presentation.
 
-Godot shortcut adoption checklist:
-
-- **Decision:** reject plugin/addon adoption for v18.
-- **Reason:** v18 client work is limited to placeholder stair meshes, deterministic perimeter wall
-  rendering from shared rules, active-level entity clearing, and a `Label` HUD. Existing plugins in
-  the catalog target larger UI, inventory, camera, animation, or art workflows and would add more
-  integration surface than this slice needs.
-- **Borrow:** keep the existing in-repo door/interactable presentation pattern from v10.
-
 ## 3. Design Decisions Closed During Review
 
 - **Protocol version:** create v1 protocol schemas for new runtime messages/payloads. Keep v0 files

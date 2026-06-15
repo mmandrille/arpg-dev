@@ -26,8 +26,6 @@ inventory/shop panels and unit tests, Godot client bot, and lifecycle docs.
 ## Baseline And Shortcut Decision
 
 This builds directly on v23 item template requirement payloads, v26 durable stats, v31 effective
-stat breakdowns, v42 shop appraisals, and existing inventory/shop tooltip panels. Godot plugin
-checklist result: **reject external inventory/shop plugin** for this slice. GLoot/Godot-Inventory
 would add adapter work while the existing panels already render server-owned item metadata and
 tooltips.
 
@@ -198,4 +196,3 @@ make ci
   stash, trade, and loot filters.
 - Active skills, mana spenders/regeneration, attack-speed gameplay, skill bar behavior, and passive
   skill requirement sources.
-- Main-menu character summaries and broader inventory/shop UI plugin adoption.

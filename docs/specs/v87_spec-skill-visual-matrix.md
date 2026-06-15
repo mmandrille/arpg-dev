@@ -49,4 +49,3 @@ visible and data-driven instead of implicit.
 
 - Risk: This reports rank-5/buff-stat gaps rather than implementing them. Mitigation: the matrix is explicit
   deferred scope and the next slice can target generated rank demos without rediscovery.
-- Godot plugin shortcut decision: reject. This is tooling/reporting over existing bot infrastructure.

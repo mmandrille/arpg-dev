@@ -25,8 +25,6 @@ panel/unit tests/client bot, and lifecycle docs.
 ## Baseline And Shortcut Decision
 
 This builds directly on v41's `ShopPanel`, `shop_opened`, deterministic shop pricing, and
-`shop_buy_intent` / `shop_sell_intent`. Godot plugin checklist result: **reject external plugin**
-for this slice. GLoot/Godot-Inventory would add adapter and vendoring work while v41 already has a
 small in-repo panel backed by the correct authoritative protocol.
 
 ## File Map
@@ -173,5 +171,4 @@ make ci
 
 - Derived character-stat previews after hypothetical equip.
 - Buyback, stash, repair, crafting, search, sorting, filters, and bulk operations.
-- External inventory/shop UI plugin adoption.
 - Item/economy rebalance beyond v41 pricing.

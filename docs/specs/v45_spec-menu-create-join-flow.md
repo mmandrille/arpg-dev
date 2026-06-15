@@ -9,7 +9,6 @@ Related:
 
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client, authoritative backend, no offline gameplay path
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
 - [`v24_spec-main-menu-and-character-start.md`](v24_spec-main-menu-and-character-start.md) - current main menu, character picker, settings, and pause shell
 - [`v38_spec-session-browser-and-uncapped-coop-menu.md`](v38_spec-session-browser-and-uncapped-coop-menu.md) - listed co-op session creation and active-session browser
 - [`v44_spec-skill-points-and-magic-bolt.md`](v44_spec-skill-points-and-magic-bolt.md) - current gameplay/client UI baseline
@@ -55,7 +54,6 @@ sessions.
 - No WebSocket gameplay protocol schema bump.
 - No new backend session model unless the implementation plan finds a small missing guard in the
   existing v24/v38 HTTP APIs.
-- No Godot UI plugin adoption for v45 by default. The plan must record the plugin shortcut
   checklist result; expected decision is to reuse the existing in-repo `Control` menus.
 
 ## 3. Acceptance Criteria
@@ -273,4 +271,3 @@ flow, the plan should either:
 | R-3 | Existing automation may still call `continue`, `new_game`, or `multiplayer` bot actions. | Preserve compatibility aliases inside bot helpers if cheap, but new scenarios should use `create_game` and `join_game`. |
 | R-4 | Co-op create default may surprise solo testers by making sessions listed. | The Settings toggle must be visible, saved, and defaulted intentionally to `Co-op`; solo remains one toggle away. |
 | R-5 | Existing v38 session browser includes `Host Listed Session` inside the multiplayer panel. | Remove host/create from the `Join Game` panel; creation belongs to root `Create Game`. |
-

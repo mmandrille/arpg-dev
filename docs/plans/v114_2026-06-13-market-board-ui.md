@@ -10,9 +10,6 @@ Tech stack: Godot client, authenticated HTTP client helper, client bot, lifecycl
 ## Baseline and shortcut decision
 
 Builds on v68 market listing foundation, v93 offers, and v111 direct priced purchase backend.
-Godot plugin adoption decision: reject external UI plugins/assets; the existing `MarketPanel` and
-draggable window patterns cover this slice.
-
 ## File map
 
 | Action | Path | Responsibility |

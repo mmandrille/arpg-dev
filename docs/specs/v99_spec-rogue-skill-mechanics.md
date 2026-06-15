@@ -13,7 +13,6 @@ existing skill rank, mana, cooldown, bot, replay, and client event paths.
 
 ## Non-goals
 
-- No new Rogue art assets, animation clips, or external Godot plugin dependency.
 - No protocol schema version bump unless an existing event payload cannot carry the required facts.
 - No class rebalance beyond the skill-specific data required by this slice.
 - No multi-target off-hand combo skill; dual-wield base attacks remain the v98/v99 combat behavior.

@@ -33,7 +33,6 @@ Remaining implementation note:
 - **Speed:** v17 requires chase `move_speed == navigation.cell_size`; fractional speeds are a
   follow-up.
 - **Events:** emit `monster_aggro` and `monster_leashed` only on mode transitions.
-- **Client:** Godot only renders authoritative position deltas; no LimboAI, NavMesh, or client AI.
 
 ## 4. File Map
 

@@ -23,20 +23,6 @@ Tech stack: Go sim/tests, shared JSON schemas, Python protocol bot, Godot GDScri
 | Modify | `tools/bot/run.py` | Movement assertion actions |
 | Modify | `client/scripts/main.gd` | Simple wall visuals from shared world rules |
 | Modify | `PROGRESS.md` | v9 completion record |
-
-## Plugin Adoption Checklist
-
-- [x] License: referenced isometric collision demos are MIT.
-- [x] Godot version: demos are references only; no addon compatibility risk.
-- [x] Authoritative boundary: no plugin owns movement or collision outcomes.
-- [x] Agent ergonomics: v9 stays text-first in rules, Go, Python, and GDScript.
-- [x] Maintenance: no new dependency added.
-- [x] Integration cost: no vendored addon; `make client-smoke` remains the gate.
-- [x] Slice scope: borrow UX/layout ideas, implement minimal in-repo collision.
-
-Decision: **borrow/reject**. Borrow isometric collision concepts as reference; reject plugin
-adoption because v9 collision must be deterministic and server-authoritative.
-
 ## Task 1: Shared World Data
 
 - [x] Step 1.1: Spec and plan v9.

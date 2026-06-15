@@ -13,12 +13,6 @@ lifecycle docs.
 
 Baseline is v63 `runtime-sim-error-construction` on `main`, with v51 mystery seller stock already
 persisted through generated shop stock rows.
-
-Godot plugin shortcut decision: **reject external plugin adoption**. The adoption checklist in
-`docs/researchs/godot-plugins-and-shortcuts.md` was reviewed before this autoloop. This slice only
-adds one button/control to the existing server-backed `ShopPanel`; external shop/inventory plugins
-would add authority risk and unnecessary UI surface.
-
 ## File map
 
 | Action | Path | Responsibility |

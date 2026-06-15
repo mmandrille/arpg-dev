@@ -12,7 +12,6 @@ Related:
 - [`v8_spec-equipped-weapon-damage.md`](v8_spec-equipped-weapon-damage.md) — weapon `damage` resolution at hit time
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) — `attack_missed`, retaliation only on successful hits
 - [`../../PROGRESS.md`](../../PROGRESS.md)
-- [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md)
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures, replay determinism)
 - ADR-0007 (client-only presentation; projectile mesh/tween is client-side)
 
@@ -107,7 +106,6 @@ stay melee-only.
 - **No armor, stat modifiers, healing, respawn.**
 - **No protocol version bump** beyond extending entity enum and event types in v0 schemas
   (coordinated client+server update).
-- **No production bow art or VFX plugins** — simple in-repo capsule/arrow mesh + position reconcile.
 
 ## 4. Required Design
 
@@ -461,7 +459,6 @@ stats unless tuning requires otherwise (hp low enough for one bow hit in bot).
 - On `monster_damaged` / `attack_missed` with matching `correlation_id`: play existing hit/miss
   feedback on target.
 - Player attack one-shot on ranged click (same as melee click presentation).
-- **Reject plugin adoption** for projectile VFX — in-repo placeholder sufficient.
 
 No client-side collision or hit prediction.
 
@@ -621,7 +618,6 @@ make ci
 | 4 | `projectile_def_id` catalog file? | **Inline constant** `"training_arrow"` in v12; optional `projectiles.v0.json` deferred. |
 | 5 | Lower global `base_hit_chance` for gameplay? | **No** — keep `1.0` in rules; golden miss case overrides in test harness only. |
 | 6 | Client lerp vs snap for projectile? | **Lerp optional**; server positions authoritative each tick. |
-| 7 | Plugin adoption for bow/projectile art? | **Reject** — placeholder mesh in-repo. |
 
 ## 9. Risks and mitigations
 

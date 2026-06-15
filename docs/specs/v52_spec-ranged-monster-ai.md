@@ -12,7 +12,6 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, deterministic replay, shared rules as data
 - [`../adr/0007-animation-state-model.md`](../adr/0007-animation-state-model.md) - client-only presentation and event-driven reactions
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - generated dungeon levels and town safety
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client presentation shortcut checklist
 - [`v12_spec-ranged-projectile-combat.md`](v12_spec-ranged-projectile-combat.md) - server-authoritative player projectile baseline
 - [`v17_spec-monster-chase-movement.md`](v17_spec-monster-chase-movement.md) - server-authoritative chase/leash baseline
 - [`v21_spec-dungeon-monster-combat.md`](v21_spec-dungeon-monster-combat.md) - generated dungeon monster attacks
@@ -36,14 +35,12 @@ The proof should be a thin vertical slice:
 - The client only renders and labels the distinction; it does not decide range, line of sight,
   projectile collision, damage, or AI state.
 
-Client shortcut decision for the spec: reject external animation or AI plugin adoption for v52.
 The existing `main.gd` monster presentation, primitive projectile rendering, and client bot debug
 surface are sufficient for a minimal bow marker. The implementation plan must record this
 adopt/borrow/reject decision.
 
 ## 2. Non-goals
 
-- No full monster AI rewrite, behavior tree system, LimboAI integration, flocking, strafing,
   predictive leading, retreat, cover seeking, or coordinated ranged packs.
 - No new projectile catalog beyond a rule field or existing `training_arrow`/arrow-style id.
 - No piercing, AoE, homing, DOT, status effects, traps, summons, ammunition, or monster skill bar.

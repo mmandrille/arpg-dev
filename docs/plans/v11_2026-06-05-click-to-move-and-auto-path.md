@@ -46,14 +46,6 @@
 | Modify | `client/tests/test_golden.gd` | `auto_path.json` cases |
 | Modify | `PROGRESS.md` | v11 row when complete |
 | Modify | `docs/specs/v11_spec-click-to-move-and-auto-path.md` | Status → Complete when done |
-
-## Plugin adoption
-
-- [x] Consult `docs/researchs/godot-plugins-and-shortcuts.md`.
-- [x] Decision: **reject** NavMesh / NavigationServer plugins — in-repo grid A\* mirrors v9 collision.
-
----
-
 ## Task 1: Shared contracts
 
 - [ ] **Step 1.1:** Create `navigation.v0.json` + schema per spec §4.1 (`cell_size: 1.0`, `max_auto_steps: 100`, bounds, `stop_distance: 0.25`). Keep `cell_size` equal to server `moveSpeed` for v11.

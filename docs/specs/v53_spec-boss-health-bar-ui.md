@@ -43,13 +43,6 @@ Add a dedicated screen-anchored boss health bar so the active dungeon boss is al
 5. Normal monster world-space health bars continue to render as before.
 6. `get_bot_state()` includes a `boss_health_bar` dictionary with visibility, boss id, template id, title, hp, max hp, and ratio.
 7. A `godot_client` bot scenario can wait/assert the boss bar state on the first boss floor.
-
-## Plugin And Asset Adoption
-
-Decision: reject external Godot plugin or asset adoption for this slice.
-
-Reason: the client already has in-repo `Control`/`CanvasLayer` UI patterns and a monster health bar implementation. The slice is a narrow presentation layer over existing server state, so adopting a plugin or asset pack would add surface area without reducing implementation risk.
-
 ## Test Proof
 
 - `CLIENT_UNIT_ONLY=1 make client-smoke` covers server-independent client and bot-runner assertions.

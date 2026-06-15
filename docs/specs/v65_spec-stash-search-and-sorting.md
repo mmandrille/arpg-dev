@@ -9,7 +9,6 @@ Baseline: v64 `mystery-seller-paid-reroll`
 Related:
 
 - [`../../PROGRESS.md`](../../PROGRESS.md)
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md)
 - [`v50_spec-account-stash-storage.md`](v50_spec-account-stash-storage.md)
 
 ## 1. Purpose
@@ -23,7 +22,6 @@ ownership, item identity, persistence, or transfer semantics.
 - No protocol, schema, server, persistence, or replay contract changes.
 - No tabs, item stacks, materials, capacity upgrades, market delivery, or stash overflow.
 - No new item mutation, direct equip/use/sell from stash, or drag rules.
-- No external inventory plugin adoption.
 
 ## 3. Acceptance Criteria
 

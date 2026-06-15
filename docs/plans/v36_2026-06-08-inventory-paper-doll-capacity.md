@@ -8,9 +8,6 @@ Tech stack: Shared JSON rules/schemas/goldens, Go deterministic sim, JSON protoc
 ## Baseline and shortcut decision
 
 Baseline is v35 `boss-floor-gate` on `main`, building on v28 full equipment/hotbar and v26 character progression. Current `InventoryPanel` already owns drag/drop slot routing and item drawing, while `Sim.hotbarCapacity()` is the closest server pattern for item-derived capacity.
-
-Godot plugin adoption decision for this slice: **reject inventory logic plugins** as authority. **Borrow pattern only** from the inventory UI resources listed in `docs/researchs/godot-plugins-and-shortcuts.md` if useful for paper-doll composition. A full addon is not justified because the current in-repo panel is already wired to server snapshots/intents and the slice needs layout/capacity, not a new inventory logic framework.
-
 Plan decisions:
 
 - Expose direct snapshot fields `inventory_rows` and `inventory_capacity` for simple client/bot consumption.
@@ -263,4 +260,3 @@ make ci
 - Stash, vendor, crafting, filters, sorting, or item comparison.
 - Multi-cell item footprints.
 - Production paper-doll art or a fully model-backed SubViewport preview if the fallback proves sufficient.
-- Inventory UI plugin adoption beyond borrowed presentation ideas.

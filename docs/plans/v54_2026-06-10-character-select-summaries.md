@@ -13,12 +13,6 @@ Tech stack: Go store + HTTP API, Godot client UI/tests, Godot client bot scenari
 Builds on v24/v45 character selection, v26/v39 durable level/gold/deepest-depth progression, and
 v53 client bot coverage style. `GET /v0/characters` is the affected public surface; no OpenAPI file
 exists in this repo, so the SDD spec plus Go tests are the contract.
-
-Godot plugin shortcut decision: **reject external plugin adoption for v54 implementation**. The
-adoption checklist in `docs/researchs/godot-plugins-and-shortcuts.md` was reviewed. This is a small
-extension of an existing in-repo `Control` and does not justify adding GLoot, Godot-Inventory, or a
-menu/UI dependency.
-
 The full autoloop idea menu is persisted in `PROGRESS.md` under curated autoloop candidates so
 future autoloops can reuse it.
 

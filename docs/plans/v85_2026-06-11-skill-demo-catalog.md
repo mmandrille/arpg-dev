@@ -9,7 +9,6 @@ Tech stack: Python tooling, shared JSON, pytest.
 
 ## Baseline and shortcut decision
 
-Builds on v84 `client-bot-step-registry`. Godot plugin decision: reject, because this slice is engine-free
 tooling over existing shared contracts.
 
 ## File map

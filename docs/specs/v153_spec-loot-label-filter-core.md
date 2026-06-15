@@ -55,12 +55,6 @@ The filter changes only which already-revealed labels are drawn on this client.
 - `client/tests/test_loot_label_filter.gd` (new) — headless unit coverage.
 - `docs/CODEMAP.md` — add the new script + test (and a Loot/itemization presentation row if absent).
 - `PROGRESS.md`, `docs/as-built/v153_loot-label-filter-core.md`.
-
-Godot plugin adopt/borrow/reject: **reject** — no plugin. The plugins research
-(`docs/researchs/godot-plugins-and-shortcuts.md`) lists inventory/UI grid addons (GLoot etc.) but
-nothing loot-filter-specific; this is a few lines of custom presentation logic over the existing
-`Label3D` loot labels, so a plugin would add dependency weight for no gain.
-
 ## Test and bot proof
 
 - `client/tests/test_loot_label_filter.gd` headless unit test (pure filter logic) via `make client-unit`.

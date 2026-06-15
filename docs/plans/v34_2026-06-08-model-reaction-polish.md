@@ -8,14 +8,10 @@ Tech stack: Godot client/GDScript, existing shared protocol events, Godot client
 ## Baseline and shortcut decision
 
 Baseline is v33 `true-coop-session`: `main.gd` already distinguishes `local_player_id`, renders remote `type: "player"` entities under `entities_root`, and routes `player_damaged` / `player_killed` by entity id. Current drift to fix: remote players are primitive capsule placeholders and only monsters receive `AnimationController` setup in `_upsert_entity`.
-
-Godot plugin adoption checklist outcome for v34:
-
 | Candidate | Decision | Reason |
 |-----------|----------|--------|
 | Existing `AnimationController` + Godot Tween/AnimationPlayer | Borrow/reuse | Covers event-driven priority and simple transform/material reactions without a dependency. |
 | Built-in `AnimationTree` / state machine | Reject for v34 | Existing terminal > one-shot > locomotion controller is sufficient. |
-| LimboAI / external state-machine plugin | Reject | Too heavy for a small presentation-only reaction slice. |
 | New model/asset pack | Reject | Slice explicitly reuses the current character/monster presentation. |
 
 No shared JSON, Go sim, persistence, replay, or protocol schema work is expected. If implementation discovers a required server/protocol change, stop and revise the spec/plan before coding it.
@@ -129,7 +125,6 @@ Files:
 
 - [x] Step 5.1: Update this plan checkbox state as tasks complete.
 - [x] Step 5.2: Update `PROGRESS.md` lifecycle table and v34 summary when implementation is complete.
-- [x] Step 5.3: Record any actual deviation from the expected plugin shortcut decision.
 - [x] Step 5.4: Run full CI.
 
 ```bash
@@ -149,5 +144,4 @@ make ci
 - No protocol/schema bump.
 - No Go sim, replay, persistence, or shared rules changes.
 - No production character customization or monster art replacement.
-- No external Godot animation/state-machine plugin.
 - No corpse collision, despawn, revive, respawn, or physics ragdoll.

@@ -13,9 +13,6 @@ SDD docs.
 
 Baseline is v55 `consolidation-and-quality-gates` on `main`. Reuse existing monster-rule loading,
 proactive monster attack tests, ranged archer projectile tests, and bot scenarios.
-
-Godot plugin adoption: not applicable. This slice has no client UI/art/camera/presentation work.
-
 ## File map
 
 | Action | Path | Responsibility |

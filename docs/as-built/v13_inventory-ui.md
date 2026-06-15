@@ -19,5 +19,4 @@ intents mutate authoritative state, persistence, replay, and resume.
 - `make ci` green on 2026-06-05.
 
 **Explicit non-goals (still true):** no stash, vendors, crafting, stack splitting, equipment slots
-beyond weapon, production item icons, Godot inventory plugins, character-scoped persistence, item
 destruction, or drop targeting/range gates.

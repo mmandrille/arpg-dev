@@ -9,9 +9,6 @@ Tech stack: Godot client, bot preflight helper, client bot, lifecycle docs.
 ## Baseline and shortcut decision
 
 Builds on v111 purchase/delivery backend and v114 market board UI.
-Godot plugin adoption decision: reject external UI plugins/assets; the existing `MarketPanel` and
-draggable window patterns cover this slice.
-
 ## File map
 
 | Action | Path | Responsibility |

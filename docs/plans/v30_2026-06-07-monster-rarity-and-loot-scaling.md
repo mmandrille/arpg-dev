@@ -18,11 +18,6 @@ This slice reuses:
 - v25 treasure class rolls and replay-stable source loot.
 - v26 XP award path and character progression deltas.
 - v29 loot bands: effective depths `3+` continue routing to the existing `3+` band.
-
-Godot plugin adoption: **reject for v30**. The slice only needs material/tint changes on existing
-in-repo player and monster visuals. No UI framework, camera controller, asset pack, behavior tree,
-or inventory plugin would reduce the core work, and gameplay authority must stay in Go.
-
 ## File map
 
 | Action | Path | Responsibility |

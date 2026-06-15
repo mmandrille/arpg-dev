@@ -10,7 +10,6 @@ Tech stack: shared JSON schemas/rules, Go deterministic sim, Python protocol bot
 Baseline is v58 `boss-pattern-variety` on `main`. This reuses the v44 skill-point/Magic Bolt loop,
 the v55 `ItemRulesLoader` static singleton pattern, and the existing protocol/client bot scenarios.
 
-Godot shortcut decision: **reject external skill-tree/gameplay plugins** for v59. Skill authority
 must stay in Go/shared rules, and this slice only needs to make the existing in-repo one-skill UI
 data-driven. No addon, asset pack, or editor-bound setup is adopted or borrowed.
 

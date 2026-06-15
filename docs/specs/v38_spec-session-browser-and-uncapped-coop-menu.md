@@ -9,7 +9,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, thin client, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one `Sim`
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - multiplayer menu/lobby shortcut review
 - [`v24_spec-main-menu-and-character-start.md`](v24_spec-main-menu-and-character-start.md) - main menu and character start shell
 - [`v33_spec-true-coop-session.md`](v33_spec-true-coop-session.md) - authoritative co-op session foundation
 - [`v37_spec-combat-control-and-boss-ai-fixes.md`](v37_spec-combat-control-and-boss-ai-fixes.md) - current gameplay baseline
@@ -416,7 +415,6 @@ The multiplayer panel should support:
 - Back.
 
 The UI can be plain and functional. It should use existing in-repo Control nodes and styling. No
-plugin adoption is required for v38 unless the plan finds a low-cost display-only menu helper.
 
 ### 7.2 Character selection
 
@@ -446,21 +444,6 @@ The existing v33/v34 remote player presentation must work for more than one remo
 - Every visible remote player is rendered as a remote player node.
 - Camera and local HP UI stay bound to `local_player_id`.
 - Remote player movement, hit, death, remove, and reconnect behavior apply by entity id.
-
-## 8. Plugin and shortcut decision
-
-The required project research document was checked for this spec. Decision for v38:
-
-| Candidate | Decision | Reason |
-|-----------|----------|--------|
-| Godot high-level multiplayer / ENet / `@rpc` | Reject | Conflicts with the authoritative Go sim, WebSocket protocol, and replay. |
-| Steam lobby templates / GodotSteam | Reject for v38 | Useful later for Steam invites, but listed backend sessions are the thin vertical slice now. |
-| Godot multiplayer/lobby plugin | Reject | No plugin should own session membership, game state sync, combat, inventory, or persistence. |
-| Existing Godot Control menu code | Reuse | Current UI is enough for a functional browser without dependency risk. |
-
-The v38 plan must record the adoption checklist result. If a plugin or demo is considered during
-planning, document adopt/borrow/reject there.
-
 ## 9. Acceptance criteria
 
 1. Interactive `make play` still starts local Postgres, starts the local server, and opens one
@@ -579,7 +562,6 @@ make ci
 | 5 | Keep join-code support for private/non-listed sessions. | Existing v33 behavior remains useful and does not conflict with listed sessions. |
 | 6 | Listed session join does not require copy/paste join code. | A browser row already exposes the session intentionally; manual code entry is unnecessary friction. |
 | 7 | Non-host members can keep role `guest`. | Role is not a party slot count; richer roles are future UI/game design. |
-| 8 | Use existing Control UI, not a lobby plugin. | The slice is backend/session flow, not production lobby polish. |
 
 ## 12. Open questions
 

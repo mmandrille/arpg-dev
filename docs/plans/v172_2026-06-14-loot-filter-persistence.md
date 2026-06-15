@@ -9,9 +9,6 @@ Tech stack: Godot GDScript client settings, focused GDScript unit tests, lifecyc
 
 ## Baseline and shortcut decision
 
-Builds on v153 loot label filtering and v171 current baseline. Godot plugin decision: reject
-external settings/UI plugins; existing `ClientSettings` and code-native filter are sufficient.
-
 ## File map
 
 | Action | Path | Responsibility |

@@ -21,7 +21,6 @@ that Poison Stab and Dash can build on in follow-up slices.
 - No separate off-hand attack cadence, animation, or damage events yet; v98 only allows Rogue to
   equip a one-handed weapon in `off_hand` and preserves current main-hand basic attack behavior.
 - No existing-character backfill or class-change UI.
-- No external Godot plugin or asset-pack adoption.
 
 ## Acceptance Criteria
 

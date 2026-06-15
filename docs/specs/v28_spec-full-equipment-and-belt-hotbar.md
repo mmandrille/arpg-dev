@@ -14,7 +14,6 @@ Related:
 - [`v27_spec-hold-click-controls.md`](v27_spec-hold-click-controls.md) — sustained click input (unchanged)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) — authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — character-scoped progression
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) — plugin adoption checklist (expect **reject** logic plugins; custom UI)
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## Resolved implementation notes
@@ -22,7 +21,6 @@ Related:
 - Work landed on the existing `main` checkout; no feature branch was created.
 - Hotbar key use is `use_hotbar_intent { slot_index }`; direct bag use remains
   `use_intent { item_instance_id }`.
-- Godot inventory logic plugins were rejected for v28. The client uses in-repo `Control` UI and
   server-owned equipment/hotbar authority.
 
 ## 1. Purpose
@@ -65,7 +63,6 @@ scenario → client UI sync**, not affix grammar, combat mitigation, or producti
 - No spell system, mana, or offhand abilities beyond passive shield equipment.
 - No stack splitting or consumable quantities > 1.
 - No production paper-doll art, item icons, or belt/hotbar VFX. Placeholder shapes/colors only (v15 style).
-- No Godot inventory **logic** plugins as authority. Custom `Control` UI only.
 - No Protobuf migration.
 - No depth-scaled treasure classes or dungeon-wide drop table expansion beyond the dedicated lab proof.
 
@@ -347,8 +344,6 @@ Replace single weapon column with Diablo-style layout:
   `hotbar_slots` where present.
 - Placeholder icons per category from `item_presentations.v0.json` extensions (minimal new entries).
 
-Plugin checklist outcome (plan gate): **reject** GLoot/Wyvernbox logic; optional layout reference only.
-
 ### 7.2 Consumable bar (`consumable_bar.gd`)
 
 - Sync `hotbar` + `hotbar_capacity` from snapshot/deltas — **not** local-only state.
@@ -471,7 +466,6 @@ seed + ordered inputs. No wall-clock or unseeded RNG in `game/`.
 | 6 | v23 roll model only; no affix grammar | Keeps slice bounded |
 | 7 | Shield `armor` / `block_percent` display-only | Prepares combat slice without scope creep |
 | 8 | `equipment_lab` + dedicated TC for CI | Deterministic proof without changing dungeon economy |
-| 9 | Custom inventory UI; reject logic plugins | ADR-0001 + v13 precedent |
 | 10 | Coordinate breaking equip schema in one slice | Avoids half-migrated wire state |
 
 ## 13. Open questions

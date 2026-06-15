@@ -9,8 +9,6 @@ Tech stack: Godot GDScript, client smoke/unit tests, client bot scenarios, maint
 
 ## Baseline and shortcut decision
 
-Builds on v142 `sim-load-and-players-extraction`. Shortcut decision: reject external plugins/addons.
-This is an internal bot-test adapter split with no UI, art, camera, or asset work; a plugin would
 add maintenance cost and would not replace the existing `BotController` API.
 
 ## File map

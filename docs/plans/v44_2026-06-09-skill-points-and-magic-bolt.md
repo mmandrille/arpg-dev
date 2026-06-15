@@ -8,9 +8,6 @@ Tech stack: Shared JSON schemas/rules/goldens, Go sim/store/replay/http, protoco
 ## Baseline and shortcut decision
 
 Baseline is v43 `equipment-requirements-and-preview` on `main`. Reuse v26 character progression and stat panel, v28 hotbar/equipment, v31 effective stat breakdowns, v37 directional attack input patterns, v39 mana payloads, and v12/v37 projectile sweep/resolution paths.
-
-Godot plugin shortcut decision: **reject** RPG/skill-tree/inventory logic plugins for v44 because skill progression and combat authority live in Go and shared rules. **Borrow pattern only if needed** for a cooldown-slot visual, but implement the actual one-slot UI in existing in-repo `Control` scripts so headless client tests remain simple.
-
 Protocol decision: create coordinated **v5** protocol schemas because v44 adds new client intent types and new top-level snapshot/delta state (`skill_progression`, `skill_cooldowns`). Keep compatibility as a coordinated repo update; do not preserve stale v4-only assumptions inside client/bot/server code.
 
 Timing decision: `magic_bolt` requires `rank >= 1`, so the proof levels to 3, spends one skill point, then casts. Normal basic-attack cooldown and animation-speed scaling remain deferred; v44 computes effective attack speed and attack interval for stat views and skill cooldown only.

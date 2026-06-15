@@ -16,7 +16,6 @@ active listings, and show listing price in the browse row.
 - No listing edit, cancel UI, offer management polish, taxes, expiration, audit feed, search, sort,
   or pagination.
 - No protocol changes; market remains authenticated HTTP plus existing market service event.
-- No external UI plugin adoption.
 
 ## Acceptance criteria
 
@@ -46,12 +45,6 @@ Manual visual command:
 ```bash
 make bot-visual scenario=35_market_board_ui
 ```
-
-## Plugin / shortcut note
-
-Reject external UI plugins/assets. The existing in-repo draggable panel and market board model are
-already sufficient for this narrow UI proof.
-
 ## Open questions and risks
 
 | # | Question / risk | Resolution |

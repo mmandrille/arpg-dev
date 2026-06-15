@@ -5,7 +5,6 @@ Spec: `docs/specs/v158_spec-dungeon-elite-side-objective.md`
 
 ## Adoption checklist
 
-- Existing plugins/assets: reject. This is server-side generation and existing chest presentation.
 - Existing local systems: adopt generated dungeon chests, elite pack metadata, existing treasure chest interaction, and protocol bot entity assertions.
 
 ## Tasks

@@ -15,5 +15,4 @@
   a minimal walk clip.
 - `make ci` green on 2026-06-06.
 
-**Explicit non-goals:** no proactive monster attacks, behavior trees/LimboAI, fractional chase speeds,
 or NavMesh authority. Nearby group aggro was added later in v37.

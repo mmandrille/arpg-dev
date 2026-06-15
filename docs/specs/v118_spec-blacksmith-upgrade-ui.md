@@ -57,14 +57,6 @@ Manual visual proof command:
 ```bash
 make bot-visual scenario=39_blacksmith_upgrade_ui
 ```
-
-## Plugin and asset shortcut note
-
-`docs/researchs/godot-plugins-and-shortcuts.md` was checked. Decision for this slice: **reject new
-plugin adoption**. The work reuses existing in-repo town NPC, stash/inventory, draggable-window, and
-client-bot patterns; bringing in an inventory plugin for one blacksmith action would add authority
-and maintenance risk.
-
 ## Open questions and risks
 
 | Risk | Mitigation |

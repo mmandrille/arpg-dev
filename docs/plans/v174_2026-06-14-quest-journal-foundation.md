@@ -7,8 +7,6 @@ Tech stack: Godot client UI/tests, client bot scenario JSON, lifecycle docs.
 
 ## Baseline and Shortcut Decision
 
-Builds on v155 random quest reward floors and v173 quest reward chest metadata. Godot plugin adoption checklist: reject external plugins because this is a small draggable-window style panel using existing in-repo UI patterns; no general quest framework or asset dependency is needed.
-
 ## File Map
 
 | Action | Path | Responsibility |

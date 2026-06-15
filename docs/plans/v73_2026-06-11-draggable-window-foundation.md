@@ -7,8 +7,6 @@ Tech stack: Godot GDScript client, client unit tests, lifecycle docs.
 
 ## Baseline And Shortcut Decision
 
-Builds on v72. Godot plugin adoption checklist: reject plugin adoption for this slice because draggable window chrome is a small in-repo UI behavior and existing panels are custom GDScript controls; borrowing an inventory/window addon would add more surface than this proof needs.
-
 ## File Map
 
 | Action | Path | Responsibility |

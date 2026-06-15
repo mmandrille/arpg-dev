@@ -12,7 +12,6 @@ Related:
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared contracts, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub and character progression
 - [`../adr/0013-mystery-seller-and-unidentified-item-offers.md`](../adr/0013-mystery-seller-and-unidentified-item-offers.md) - mystery seller product direction
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
 - [`v41_spec-town-vendor-gold-sink.md`](v41_spec-town-vendor-gold-sink.md) - shop interaction and gold sink baseline
 - [`v42_spec-vendor-appraisal-and-item-comparison.md`](v42_spec-vendor-appraisal-and-item-comparison.md) - server-authored item row details
 - [`v47_spec-shop-stock-lifecycle.md`](v47_spec-shop-stock-lifecycle.md) - durable generated shop stock and buyback lifecycle
@@ -41,10 +40,8 @@ This is the smallest end-to-end version of ADR-0013. It uses the existing shop i
 where possible, but the protocol must explicitly distinguish concealed mystery offers from normal
 visible generated offers.
 
-Client shortcut decision for the spec: reject external shop/inventory plugin adoption for v51.
 The existing `ShopPanel`, item tooltip, inventory state, and bot hooks are already the right
 display-only surface. The implementation plan should record this checklist decision and extend the
-in-repo panel instead of adopting GLoot, Godot-Inventory, or Wyvernbox.
 
 ## 2. Non-goals
 

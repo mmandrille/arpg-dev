@@ -8,10 +8,6 @@ Tech stack: shared JSON/schema, Go sim, Python protocol bot, Godot client presen
 ## Baseline And Shortcut Decision
 
 Baseline is v122 `ranger-class-foundation` on `main`, committed as `03753c7e`.
-
-Godot plugin adoption checklist: reject external plugins/assets. This slice adds authoritative
-combat mechanics and small code-native VFX/root markers using existing presentation helpers.
-
 ## File Map
 
 | Action | Path | Responsibility |
@@ -169,4 +165,3 @@ make ci
 - `Volley` and the Ranger visual showcase scenario are deferred to v124.
 - Production animation/audio and custom authored bow attack clips.
 - Full Ranger balance pass beyond conservative data-owned first-skill tuning.
-

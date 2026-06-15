@@ -10,7 +10,6 @@ Tech stack: Go sim constructors and tests, lifecycle docs.
 ## Baseline and shortcut decision
 
 Baseline is v62 `monster-depth-stat-scaling` on `main`. This slice is backend-only and does not
-touch Godot UI, camera, art, or inventory presentation, so the Godot plugin adoption checklist is
 not applicable.
 
 Bot scenarios are not required because the slice changes internal constructor failure handling only;

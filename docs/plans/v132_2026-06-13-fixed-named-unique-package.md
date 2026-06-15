@@ -9,7 +9,6 @@ Tech stack: shared JSON/schema, Python validator/bot, Go sim.
 
 ## Baseline And Shortcut Decision
 
-Builds on v119 live unique effect reachability and v131 purple chest coverage. Godot plugin
 adoption is rejected for this slice because there is no new UI, art, camera, or inventory
 presentation work.
 

@@ -10,9 +10,6 @@ Tech stack: Python shared tooling, SDD docs.
 ## Baseline And Shortcut Decision
 
 Baseline is v125 `tuning-friendly-bot-scenarios` on `main`, committed as `19a75f85`.
-
-Godot plugin adoption checklist: not applicable. This slice is Python validation tooling only.
-
 ## File Map
 
 | Action | Path | Responsibility |

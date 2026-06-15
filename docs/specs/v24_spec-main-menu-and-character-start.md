@@ -11,7 +11,6 @@ Related:
 - [`v23_spec-item-templates-and-rolled-drops.md`](v23_spec-item-templates-and-rolled-drops.md) - rolled item persistence baseline
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client and authoritative server boundary
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - character persistence and session-scoped worlds
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - required client UI plugin adoption checklist
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
@@ -47,7 +46,6 @@ player-facing UI.
   options, graphics quality, and language selection are deferred.
 - No production menu art, audio, or animated title sequence.
 - No gameplay WebSocket protocol schema bump.
-- No Godot UI plugin adoption unless the v24 plan finds a low-cost, display-only candidate through
   the required adoption checklist.
 
 ## 3. Files to create or modify
@@ -266,16 +264,12 @@ ESC behavior:
 - In the main menu root, ESC may do nothing or focus Exit; do not quit unexpectedly without a clear
   button action.
 
-### UI/plugin adoption decision
-
 The v24 plan must run the checklist in
-`docs/researchs/godot-plugins-and-shortcuts.md` and record one of:
 
 - `adopt`
 - `borrow pattern`
 - `reject`
 
-Default recommendation for this slice: reject new plugin adoption for the first menu shell because
 the UI is small, existing client UI is custom GDScript, and avoiding a dependency keeps CI/headless
 automation simpler. Borrow visual/layout patterns from lightweight Godot menu examples only if they
 help without adding runtime dependencies.

@@ -25,7 +25,6 @@ the spec explicitly documents a temporary deferral.
 - Do not rename existing skill ids, including the current `ligthing` id.
 - Do not build a cinematic/choreography framework beyond existing declarative bot scenario steps.
 - Do not replace existing skill-visual scenarios; class-foundation scenarios complement them.
-- Do not adopt external Godot plugins or asset packs. The plan should record this as a reject:
   existing protocol bot and Godot replay tooling are sufficient for this slice.
 
 ## 3. Acceptance Criteria

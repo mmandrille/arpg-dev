@@ -17,7 +17,6 @@ feedback after the authenticated purchase route accepts.
 - No listing cancel/edit, price suggestions, search, sorting, pagination, taxes, expiration, or audit
   feed.
 - No protocol changes.
-- No external UI plugin adoption.
 
 ## Acceptance criteria
 
@@ -49,12 +48,6 @@ Manual visual command:
 ```bash
 make bot-visual scenario=36_market_purchase_ui
 ```
-
-## Plugin / shortcut note
-
-Reject external UI plugins/assets. The existing market panel, draggable window chrome, and client bot
-preflight harness cover this slice.
-
 ## Open questions and risks
 
 | # | Question / risk | Resolution |

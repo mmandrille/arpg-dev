@@ -11,7 +11,6 @@ Tech stack: Go sim, Python protocol bot scenario, SDD docs.
 ## Baseline and shortcut decision
 
 Builds on v160 `dungeon-population-extraction` and v159 `kill-gated-elite-objective`. Existing
-plugins/assets: reject; this is backend-owned objective completion logic. Client visual work is
 deferred to the selected v162 objective chest presentation slice.
 
 ## File map

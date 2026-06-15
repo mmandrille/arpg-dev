@@ -9,8 +9,6 @@ Tech stack: Python protocol bot tests and full repo CI.
 
 ## Baseline and shortcut decision
 
-Builds on v166. No Godot plugin decision is required; this is Python bot tooling.
-
 ## File map
 
 | Action | Path | Responsibility |

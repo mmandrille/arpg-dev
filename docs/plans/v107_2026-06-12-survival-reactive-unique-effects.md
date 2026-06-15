@@ -27,4 +27,3 @@ Implement server-authoritative mechanics for `veil_of_the_last_oath`, `frostglas
 
 - Do not touch corpse looting files or contracts.
 - No new branch.
-- No new Godot plugin adoption; reuse current status/cooldown presentation.

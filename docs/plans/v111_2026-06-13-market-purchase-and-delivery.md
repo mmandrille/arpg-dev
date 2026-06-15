@@ -10,7 +10,6 @@ Tech stack: Postgres migration, Go store, Go HTTP, lifecycle docs.
 ## Baseline and shortcut decision
 
 Builds on v68 market listing foundation, v93 multi-item offers, and v110 repeat item upgrades. No
-client UI/art work is in scope, so the Godot plugin adoption checklist is not required.
 
 ## File map
 

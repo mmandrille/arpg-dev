@@ -11,8 +11,6 @@ docs.
 
 ## Baseline and shortcut decision
 
-Builds on v93 market offers, v114 market board UI, and v115 purchase UI. Godot plugin/assets
-decision: reject external plugins/assets; the current market panel and draggable window chrome are
 the right local surface.
 
 ## File map

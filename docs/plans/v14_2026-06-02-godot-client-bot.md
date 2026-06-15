@@ -36,12 +36,6 @@
 
 ---
 
-## Plugin Adoption
-
-- [x] Consult `docs/researchs/godot-plugins-and-shortcuts.md`.
-- [x] Decision: **reject** new Godot plugins for v14.
-- [x] Reason: this slice is test automation over existing `main.tscn`, ray-pick, and `InventoryPanel` paths. GUT, GLoot, Godot-Inventory, or UI plugins add dependency and setup weight without solving the required live-scene synthetic input problem. Keep the first bot as small in-repo GDScript.
-
 ---
 
 ## Task 0: Headless Input Feasibility Spikes

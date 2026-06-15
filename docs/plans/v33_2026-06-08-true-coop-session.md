@@ -13,15 +13,10 @@ through `tools/bot/scenarios/client/11_combat_feedback.json`.
 
 This slice reuses the existing authoritative Go sim, character persistence, deterministic replay,
 WebSocket protocol shape, Godot `PlayerAnchor`, entity rendering map, and Python bot harness.
-
-Godot plugin decision from `docs/researchs/godot-plugins-and-shortcuts.md`:
-
 | Candidate | Decision | Reason |
 |-----------|----------|--------|
 | Godot high-level multiplayer / ENet / `@rpc` | Reject | Game state must stay Go-authoritative and replayable. |
 | Steam lobby templates / GodotSteam | Reject for v33 | Useful later for discovery/invites; not needed for server co-op authority. |
-| Godot multiplayer asset/plugin | Reject | No plugin owns movement, combat, inventory, or sync. |
-| Existing humanoid/client presentation | Borrow/reuse | Enough to render the second player without asset/plugin risk. |
 
 Work stays on the current branch. Do not create a branch. Preserve unrelated dirty worktree changes.
 

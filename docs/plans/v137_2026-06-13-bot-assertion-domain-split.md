@@ -9,7 +9,6 @@ Tech stack: Python protocol bot tooling, pytest, lifecycle docs.
 
 Builds on v136 `unique-chest-client-proof` and the v130 review finding that bot runtime assertions
 should be split by domain before more unique/chest assertions land. No client UI, camera,
-inventory presentation, or art is in scope, so the Godot plugin adoption checklist is not required.
 
 ## File map
 

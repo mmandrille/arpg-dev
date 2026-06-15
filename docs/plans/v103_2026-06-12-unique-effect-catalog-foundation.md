@@ -10,7 +10,6 @@ Tech stack: shared JSON/schema, Python validator, lifecycle docs.
 ## Baseline And Shortcut Decision
 
 Builds on v95's disabled unique item seed, v100 damage types, v101 poison DOT groundwork, and
-ADR-0014 D5. No Godot plugin adoption applies because there is no client presentation work.
 
 ## File Map
 

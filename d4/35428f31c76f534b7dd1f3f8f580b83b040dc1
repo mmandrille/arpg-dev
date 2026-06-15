@@ -1,0 +1,21 @@
+docs/as-built/v185_paladin-defense-fixes.md
+  s_d651e97b83a874::t_417bb50d0270f4 19
+docs/plans/v185_2026-06-15-paladin-defense-fixes.md
+  s_d651e97b83a874::t_417bb50d0270f4 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d435428f31c76f534b7dd1f3f8f580b83b040dc1",
+  "prompts": {},
+  "sessions": {
+    "s_d651e97b83a874": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec989-bab7-7240-b2f6-ba0d99e9cc7c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

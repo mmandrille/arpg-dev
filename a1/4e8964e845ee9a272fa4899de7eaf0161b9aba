@@ -1,0 +1,56 @@
+client/scripts/corpse_status_bar.gd.uid
+  s_23edecc223cbe3::t_39c86b30007468 1
+client/scripts/corpse_status_bar.gd
+  s_23edecc223cbe3::t_2a39e163792a61 1-65
+client/scripts/main.gd
+  s_23edecc223cbe3::t_e286b45c01bdc5 3010-3012,3028-3035,3038,3040-3050,3054-3070
+  s_23edecc223cbe3::t_98ffbfe5ac7d57 1383,2072-2073
+  s_23edecc223cbe3::t_5680d3e931a1ea 3013-3018
+  s_23edecc223cbe3::t_add5cff97441a8 2019-2027,2029-2030,2032,2035-2037
+  s_23edecc223cbe3::t_4d4785d5f46e81 38
+  s_23edecc223cbe3::t_a047d00e0c07b6 3262
+  s_23edecc223cbe3::t_ee71e6149208eb 6015
+  s_23edecc223cbe3::t_2cf842ad7f41d7 254
+  s_23edecc223cbe3::t_1d6b80a7f66687 3051-3053
+  s_23edecc223cbe3::t_196b0ce04b0e12 4808,4884
+  s_23edecc223cbe3::t_a4c726848f1c08 18,237
+  s_23edecc223cbe3::t_ff8438d405d66c 1438
+  s_23edecc223cbe3::t_084e2763f41557 3828-3829
+  s_23edecc223cbe3::t_81a782719024a0 1469
+  s_23edecc223cbe3::t_415358c4dfc86a 2031,2033
+  s_23edecc223cbe3::t_9036f1b2b5cae4 1474-1477
+  s_23edecc223cbe3::t_a119412de8fdac 2052-2071,2074-2076
+  s_23edecc223cbe3::t_3c4e3db319111d 3871-3872
+  s_23edecc223cbe3::t_4a3212003d676b 2971-2974,3036-3037,3039,3071-3076
+  s_23edecc223cbe3::t_9aeec99afc9fce 3743
+  s_23edecc223cbe3::t_1485cd5e30cbc7 1366,1374,1419,1434,1443-1446,1449,1451
+  s_23edecc223cbe3::t_0fbd4f673c6ef5 234,2028,2034
+  s_23edecc223cbe3::t_29fc6c608652d5 3324-3325
+  s_23edecc223cbe3::t_b5528f90db042e 2909,2985-2988,2995-3000
+client/tests/test_coop_client.gd
+  s_23edecc223cbe3::t_621b81f929b1fc 964-965,985-986
+  s_23edecc223cbe3::t_81a188788cde8f 19,71-72,951-963,966-978,980-984,987-1018
+  s_23edecc223cbe3::t_83715f38971b30 979
+client/scripts/companion_bar.gd.uid
+  s_23edecc223cbe3::t_656d16146ccdec 1
+client/scripts/companion_bar.gd
+  s_23edecc223cbe3::t_fba553d9be0e18 8,16-31,110-112,116-128,185-194
+  s_23edecc223cbe3::t_a471f26d8a2344 1-3,5-7,9-15,32-109,113-115,129-184
+  s_23edecc223cbe3::t_1bd3ba22b9529f 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a14e8964e845ee9a272fa4899de7eaf0161b9aba",
+  "prompts": {},
+  "sessions": {
+    "s_23edecc223cbe3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecccc-5176-7512-8798-ea6883235cfa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

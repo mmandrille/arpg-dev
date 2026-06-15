@@ -158,7 +158,7 @@ func TestRangerSkillRulesLoad(t *testing.T) {
 		t.Fatalf("volley = %+v, want ranger projectile with fan", volley)
 	}
 	wolf := rules.Skills["black_wolf_companion"]
-	if wolf.Class != "ranger" || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || wolf.Companion.Limit != 1 {
+	if wolf.Class != "ranger" || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || companionLimitAtRank(wolf.Companion.Limit, 5) != 1 {
 		t.Fatalf("black_wolf_companion = %+v, want one black wolf summon", wolf)
 	}
 }

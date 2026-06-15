@@ -282,7 +282,11 @@
       "revive": {
         "power_percent_base": 50,
         "power_percent_per_rank": 10,
-        "limit": 1
+        "limit": {
+          "base": 1,
+          "per_rank_step": 1,
+          "ranks_per_step": 3
+        }
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
@@ -933,7 +937,11 @@
         "visual_model": "monster_quadruped",
         "visual_tint": "101014",
         "visual_scale": 1.0,
-        "limit": 1
+        "limit": {
+          "base": 1,
+          "per_rank_step": 0,
+          "ranks_per_step": 1
+        }
       },
       "cooldown": {
         "type": "attack_interval_multiplier",

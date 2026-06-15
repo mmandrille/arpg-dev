@@ -4382,24 +4382,6 @@ func (s *Sim) itemRollSourceDepth(ctx goldRollContext) int {
 	return depth
 }
 
-func weightedRollableStat(stats []RollableStatDef, rng *RNG) (RollableStatDef, bool) {
-	total := 0
-	for _, stat := range stats {
-		total += stat.Weight
-	}
-	if total <= 0 {
-		return RollableStatDef{}, false
-	}
-	roll := rng.IntN(total)
-	for _, stat := range stats {
-		roll -= stat.Weight
-		if roll < 0 {
-			return stat, true
-		}
-	}
-	return stats[len(stats)-1], true
-}
-
 func (s *Sim) itemSlot(itemDefID string, payload *ItemRollPayload) string {
 	if payload != nil {
 		if template, ok := s.rules.ItemTemplates[payload.ItemTemplateID]; ok {
@@ -6481,6 +6463,7 @@ func (e *entity) view() EntityView {
 			ev.ItemTemplateID = e.rollPayload.ItemTemplateID
 			ev.DisplayName = e.rollPayload.DisplayName
 			ev.Rarity = e.rollPayload.Rarity
+			ev.ItemLevel = e.rollPayload.ItemLevel
 			ev.RolledStats = cloneIntMap(e.rollPayload.Stats)
 			ev.Requirements = cloneIntMap(e.rollPayload.Requirements)
 			ev.EffectIDs = cloneStringSlice(e.rollPayload.EffectIDs)

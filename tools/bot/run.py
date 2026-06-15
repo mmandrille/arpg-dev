@@ -2989,6 +2989,10 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
         raise AssertionError(f"{where}: rolled item equipped={item.get('equipped')} want {assertion['equipped']}: {item}")
     if rarity is not None and item.get("rarity") != str(rarity):
         raise AssertionError(f"{where}: rarity {item.get('rarity')} != {rarity}: {item}")
+    if assertion.get("item_level") is not None and int(item.get("item_level", 0)) != int(assertion["item_level"]):
+        raise AssertionError(f"{where}: item_level {item.get('item_level')} != {assertion['item_level']}: {item}")
+    if assertion.get("item_level_min") is not None and int(item.get("item_level", 0)) < int(assertion["item_level_min"]):
+        raise AssertionError(f"{where}: item_level {item.get('item_level')} < {assertion['item_level_min']}: {item}")
     if assertion.get("display_name_suffix") is not None:
         suffix = str(assertion["display_name_suffix"])
         if not str(item.get("display_name", "")).endswith(suffix):

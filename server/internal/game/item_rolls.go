@@ -38,10 +38,18 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 		ItemTemplateID: templateID,
 		DisplayName:    displayName,
 		Rarity:         rarityID,
+		ItemLevel:      itemLevelForSourceDepth(sourceDepth),
 		Stats:          stats,
 		Requirements:   cloneIntMap(template.Requirements),
 		EffectIDs:      effectIDs,
 	}, true
+}
+
+func itemLevelForSourceDepth(sourceDepth int) int {
+	if sourceDepth < 1 {
+		return 1
+	}
+	return sourceDepth
 }
 
 func (r *Rules) rollItemRarityID(rng *RNG, magicFindPercent int) (string, bool) {

@@ -2440,11 +2440,11 @@ func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
 	if loot == nil {
 		t.Fatalf("missing rolled loot entity: %+v", sim.entities)
 	}
-	if loot.itemDefID != "cave_blade" || loot.rollPayload.ItemTemplateID != "cave_blade" || loot.rollPayload.Rarity == "" {
+	if loot.itemDefID != "cave_blade" || loot.rollPayload.ItemTemplateID != "cave_blade" || loot.rollPayload.Rarity == "" || loot.rollPayload.ItemLevel != 1 {
 		t.Fatalf("rolled loot payload = itemDefID %q payload %+v", loot.itemDefID, loot.rollPayload)
 	}
 	lootView := loot.view()
-	if lootView.ItemTemplateID != "cave_blade" || lootView.DisplayName == "" || lootView.RolledStats["damage_max"] == 0 {
+	if lootView.ItemTemplateID != "cave_blade" || lootView.DisplayName == "" || lootView.ItemLevel != 1 || lootView.RolledStats["damage_max"] == 0 {
 		t.Fatalf("loot view missing rolled fields: %+v", lootView)
 	}
 
@@ -2461,6 +2461,9 @@ func TestRolledTemplateLootTransfersToInventory(t *testing.T) {
 	got := sim.inventory[0].view()
 	if got.ItemDefID != "cave_blade" || got.ItemTemplateID != "cave_blade" || got.DisplayName != loot.rollPayload.DisplayName {
 		t.Fatalf("inventory rolled view = %+v, loot payload %+v", got, loot.rollPayload)
+	}
+	if got.ItemLevel != loot.rollPayload.ItemLevel {
+		t.Fatalf("inventory item level = %d, want %d", got.ItemLevel, loot.rollPayload.ItemLevel)
 	}
 	if !sameIntMap(got.RolledStats, loot.rollPayload.Stats) {
 		t.Fatalf("inventory rolled stats = %+v, want %+v", got.RolledStats, loot.rollPayload.Stats)

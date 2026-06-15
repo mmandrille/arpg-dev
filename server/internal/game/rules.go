@@ -373,6 +373,7 @@ type BossPatternPhase struct {
 	HitShape      string       `json:"hit_shape,omitempty"`
 	Shape         string       `json:"shape,omitempty"`
 	Radius        float64      `json:"radius,omitempty"`
+	Width         float64      `json:"width,omitempty"`
 	Damage        *DamageRange `json:"damage,omitempty"`
 }
 
@@ -2371,6 +2372,9 @@ func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks 
 				if phase.Radius <= 0 {
 					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].radius: must be positive", patternID, idx)
 				}
+				if phase.HitShape == "line" && phase.Width <= 0 {
+					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].width: must be positive for line", patternID, idx)
+				}
 				copy := phase
 				priorTelegraph = &copy
 			case "active":
@@ -2381,7 +2385,7 @@ func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks 
 					if err := validateDamageRange(fmt.Sprintf("boss_patterns.%s.phases[%d].damage", patternID, idx), *phase.Damage); err != nil {
 						return err
 					}
-					if phase.Shape != priorTelegraph.HitShape || phase.Radius != priorTelegraph.Radius {
+					if phase.Shape != priorTelegraph.HitShape || phase.Radius != priorTelegraph.Radius || phase.Width != priorTelegraph.Width {
 						return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: active hit predicate must match telegraph", patternID, idx)
 					}
 				}

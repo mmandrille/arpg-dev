@@ -715,7 +715,8 @@
         "type": { "type": "string", "enum": ["body_color_charge", "circle", "line", "cone", "rectangle"] },
         "from_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "to_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
-        "radius": { "type": "number", "exclusiveMinimum": 0 }
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "width": { "type": "number", "exclusiveMinimum": 0 }
       }
     },
     "boss_hit_shape": {
@@ -724,7 +725,8 @@
       "additionalProperties": false,
       "properties": {
         "shape": { "type": "string", "enum": ["melee_contact", "circle", "line", "cone", "rectangle"] },
-        "radius": { "type": "number", "exclusiveMinimum": 0 }
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "width": { "type": "number", "exclusiveMinimum": 0 }
       }
     },
     "base_stats": {

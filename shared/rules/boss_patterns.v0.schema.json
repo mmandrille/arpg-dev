@@ -49,6 +49,7 @@
           "enum": ["melee_contact", "circle", "line", "cone", "rectangle"]
         },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
         "damage": { "$ref": "#/$defs/damage" }
       }
     },

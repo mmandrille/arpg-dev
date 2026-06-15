@@ -12,10 +12,10 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v176 — elite objective minimap pin |
+| **Latest completed slice** | v177 — boss ranged pattern |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
-| **Next slice** | v177 — boss ranged pattern |
+| **Next slice** | v178 — boss summoned adds |
 | **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
 | **Next engineering review** | v180 due before more feature batches |
 
@@ -193,6 +193,7 @@ v173_* = quest-floor-map-marker
 v174_* = quest-journal-foundation
 v175_* = elite-objective-hud
 v176_* = elite-objective-minimap-pin
+v177_* = boss-ranged-pattern
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -410,6 +411,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v174** | `quest-journal-foundation` | Complete (`make ci` green) | [`v174_spec-quest-journal-foundation.md`](docs/specs/v174_spec-quest-journal-foundation.md) | [`v174_2026-06-14-quest-journal-foundation.md`](docs/plans/v174_2026-06-14-quest-journal-foundation.md) | [`as-built`](docs/as-built/v174_quest-journal-foundation.md) |
 | **v175** | `elite-objective-hud` | Complete (`make ci` green) | [`v175_spec-elite-objective-hud.md`](docs/specs/v175_spec-elite-objective-hud.md) | [`v175_2026-06-14-elite-objective-hud.md`](docs/plans/v175_2026-06-14-elite-objective-hud.md) | [`as-built`](docs/as-built/v175_elite-objective-hud.md) |
 | **v176** | `elite-objective-minimap-pin` | Complete (`make ci` green) | [`v176_spec-elite-objective-minimap-pin.md`](docs/specs/v176_spec-elite-objective-minimap-pin.md) | [`v176_2026-06-15-elite-objective-minimap-pin.md`](docs/plans/v176_2026-06-15-elite-objective-minimap-pin.md) | [`as-built`](docs/as-built/v176_elite-objective-minimap-pin.md) |
+| **v177** | `boss-ranged-pattern` | Complete (`make ci` green) | [`v177_spec-boss-ranged-pattern.md`](docs/specs/v177_spec-boss-ranged-pattern.md) | [`v177_2026-06-15-boss-ranged-pattern.md`](docs/plans/v177_2026-06-15-boss-ranged-pattern.md) | [`as-built`](docs/as-built/v177_boss-ranged-pattern.md) |
 
 ---
 
@@ -480,7 +482,7 @@ combat_stat_effects: combat lab proofs for miss, crit, armor floor, block, monst
 client_combat_feedback: equip gear → assert stat breakdowns → prove normal/crit/miss/block floating text and settings toggle
 true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
 model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
-boss_floor_gate: start on compact boss floor → assert locked exits → observe boss phase telegraph → kill boss → unlock exits → descend to -6
+boss_floor_gate: start on compact boss floor → assert locked exits → observe boss phase telegraph including `stone_lance` → kill boss → unlock exits → descend to -6
 boss_kill_reward_polish: compact boss floor → kill Cave Warden → observe `boss_killed` with `boss_template_id` and client reward status
 paladin_class_foundation / barbarian_class_foundation / sorcerer_class_foundation / rogue_class_foundation / ranger_class_foundation: class starter gear → movement → at least three basic attacks → all current class skills
 ranger_piercing_and_pinning_shots: Ranger casts Pinning Shot to root a chase target, waits for expiry, then fires Piercing Shot through lined-up monsters
@@ -542,6 +544,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Cave Warden now has a server-authored ranged line pattern.** v177 adds the data-driven
+`stone_lance` pattern, validates matching line telegraph/active width metadata, locks aim at
+telegraph start, and proves authoritative line hit/miss behavior plus the boss-floor protocol and
+client readability scenarios.
 
 **Elite objective chests now have a compact minimap pin.** v176 adds a top-right minimap-style
 widget with a player dot and objective pin for closed `elite_objective` chests, derives its

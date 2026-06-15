@@ -52,7 +52,10 @@
       "treasure_class_id": "guarded_chest_tc_depth_3_plus"
     },
     "boss_drop_tier_1": {
-      "treasure_class_id": "dungeon_mob_tc_depth_3_plus"
+      "treasure_class_id": "boss_special_tc_tier_1"
+    },
+    "elite_objective_special_drop": {
+      "treasure_class_id": "elite_objective_special_tc_1"
     },
     "no_drop": {
     }

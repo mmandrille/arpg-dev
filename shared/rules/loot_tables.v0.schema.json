@@ -30,11 +30,15 @@
               "properties": {
                 "item_def_id": { "type": "string" },
                 "item_template_id": { "type": "string" },
+                "unique_item_id": { "type": "string" },
+                "set_item_id": { "type": "string" },
                 "weight": { "type": "integer", "minimum": 1 }
               },
               "oneOf": [
                 { "required": ["item_def_id"] },
-                { "required": ["item_template_id"] }
+                { "required": ["item_template_id"] },
+                { "required": ["unique_item_id"] },
+                { "required": ["set_item_id"] }
               ]
             }
           },

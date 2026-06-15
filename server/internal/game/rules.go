@@ -801,6 +801,8 @@ func (d MonsterDef) effectiveCritDamage(combat Combat) float64 {
 type LootEntry struct {
 	ItemDefID      string `json:"item_def_id"`
 	ItemTemplateID string `json:"item_template_id"`
+	UniqueItemID   string `json:"unique_item_id"`
+	SetItemID      string `json:"set_item_id"`
 	Weight         int    `json:"weight"`
 }
 
@@ -830,6 +832,8 @@ type UniqueItemDef struct {
 type TreasureClassEntry struct {
 	ItemDefID      string `json:"item_def_id"`
 	ItemTemplateID string `json:"item_template_id"`
+	UniqueItemID   string `json:"unique_item_id"`
+	SetItemID      string `json:"set_item_id"`
 	Weight         int    `json:"weight"`
 }
 
@@ -1453,8 +1457,8 @@ func LoadRules(dir string) (*Rules, error) {
 				return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: success requires entries", classID, attempt.AttemptID)
 			}
 			for _, entry := range attempt.Entries {
-				if (entry.ItemDefID == "") == (entry.ItemTemplateID == "") {
-					return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: entry must declare exactly one of item_def_id or item_template_id", classID, attempt.AttemptID)
+				if countDropEntryRefs(entry.ItemDefID, entry.ItemTemplateID, entry.UniqueItemID, entry.SetItemID) != 1 {
+					return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: entry must declare exactly one drop reference", classID, attempt.AttemptID)
 				}
 				if entry.Weight <= 0 {
 					return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: entry weight must be positive", classID, attempt.AttemptID)
@@ -1467,6 +1471,17 @@ func LoadRules(dir string) (*Rules, error) {
 				if entry.ItemTemplateID != "" {
 					if _, ok := r.ItemTemplates[entry.ItemTemplateID]; !ok {
 						return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: unknown item template %s", classID, attempt.AttemptID, entry.ItemTemplateID)
+					}
+				}
+				if entry.UniqueItemID != "" {
+					unique, ok := r.UniqueItems[entry.UniqueItemID]
+					if !ok || !unique.Enabled || unique.Status != "ready" {
+						return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: unknown or inactive unique item %s", classID, attempt.AttemptID, entry.UniqueItemID)
+					}
+				}
+				if entry.SetItemID != "" {
+					if _, ok := r.SetItems[entry.SetItemID]; !ok {
+						return nil, fmt.Errorf("game: invalid rules treasure_classes.%s.attempts.%s: unknown or inactive set item %s", classID, attempt.AttemptID, entry.SetItemID)
 					}
 				}
 			}
@@ -1602,8 +1617,8 @@ func LoadRules(dir string) (*Rules, error) {
 			continue
 		}
 		for _, entry := range table.Entries {
-			if (entry.ItemDefID == "") == (entry.ItemTemplateID == "") {
-				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: entry must declare exactly one of item_def_id or item_template_id", tableID)
+			if countDropEntryRefs(entry.ItemDefID, entry.ItemTemplateID, entry.UniqueItemID, entry.SetItemID) != 1 {
+				return nil, fmt.Errorf("game: invalid rules loot_tables.%s: entry must declare exactly one drop reference", tableID)
 			}
 			if entry.ItemDefID != "" {
 				if _, ok := r.Items[entry.ItemDefID]; !ok {
@@ -1613,6 +1628,17 @@ func LoadRules(dir string) (*Rules, error) {
 			if entry.ItemTemplateID != "" {
 				if _, ok := r.ItemTemplates[entry.ItemTemplateID]; !ok {
 					return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown item template %s", tableID, entry.ItemTemplateID)
+				}
+			}
+			if entry.UniqueItemID != "" {
+				unique, ok := r.UniqueItems[entry.UniqueItemID]
+				if !ok || !unique.Enabled || unique.Status != "ready" {
+					return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown or inactive unique item %s", tableID, entry.UniqueItemID)
+				}
+			}
+			if entry.SetItemID != "" {
+				if _, ok := r.SetItems[entry.SetItemID]; !ok {
+					return nil, fmt.Errorf("game: invalid rules loot_tables.%s: unknown or inactive set item %s", tableID, entry.SetItemID)
 				}
 			}
 			if entry.Weight <= 0 {
@@ -1976,6 +2002,8 @@ func LoadRules(dir string) (*Rules, error) {
 type LootDrop struct {
 	ItemDefID      string `json:"item_def_id,omitempty"`
 	ItemTemplateID string `json:"item_template_id,omitempty"`
+	UniqueItemID   string `json:"unique_item_id,omitempty"`
+	SetItemID      string `json:"set_item_id,omitempty"`
 }
 
 // RollLoot selects an item or item template from a loot table using the RNG. A
@@ -1996,11 +2024,11 @@ func (r *Rules) RollLoot(tableID string, rng *RNG) (LootDrop, bool) {
 	for _, e := range table.Entries {
 		roll -= e.Weight
 		if roll < 0 {
-			return LootDrop{ItemDefID: e.ItemDefID, ItemTemplateID: e.ItemTemplateID}, true
+			return LootDrop{ItemDefID: e.ItemDefID, ItemTemplateID: e.ItemTemplateID, UniqueItemID: e.UniqueItemID, SetItemID: e.SetItemID}, true
 		}
 	}
 	last := table.Entries[len(table.Entries)-1]
-	return LootDrop{ItemDefID: last.ItemDefID, ItemTemplateID: last.ItemTemplateID}, true
+	return LootDrop{ItemDefID: last.ItemDefID, ItemTemplateID: last.ItemTemplateID, UniqueItemID: last.UniqueItemID, SetItemID: last.SetItemID}, true
 }
 
 // LootDrops returns all guaranteed drops for a table, or one weighted roll for
@@ -2052,7 +2080,7 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 		for _, entry := range attempt.Entries {
 			roll -= entry.Weight
 			if roll < 0 {
-				out = append(out, LootDrop{ItemDefID: entry.ItemDefID, ItemTemplateID: entry.ItemTemplateID})
+				out = append(out, LootDrop{ItemDefID: entry.ItemDefID, ItemTemplateID: entry.ItemTemplateID, UniqueItemID: entry.UniqueItemID, SetItemID: entry.SetItemID})
 				break
 			}
 		}

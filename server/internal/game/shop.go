@@ -935,7 +935,7 @@ func statSummaryLines(stats map[string]int) []string {
 }
 
 func displayStatValue(stat string, value int) string {
-	if stat == "block_percent" || stat == "attack_speed_percent" || stat == "hit_chance" || stat == "crit_chance" || stat == "evade_chance" || stat == "skill_damage_percent" {
+	if stat == "block_percent" || stat == "attack_speed_percent" || stat == "hit_chance" || stat == "crit_chance" || stat == "evade_chance" || stat == "skill_damage_percent" || stat == "skill_cooldown_reduction_percent" {
 		return fmt.Sprintf("%+d%%", value)
 	}
 	return fmt.Sprintf("%+d", value)
@@ -1033,7 +1033,7 @@ func (s *Sim) statsForInventoryItem(item *invItem) map[string]int {
 }
 
 func shopStatOrder() []string {
-	return []string{"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows"}
+	return []string{"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "hotbar_slots", "inventory_rows"}
 }
 
 func displayStatName(stat string) string {
@@ -1074,6 +1074,10 @@ func displayStatName(stat string) string {
 		return "Evade chance"
 	case "skill_damage_percent":
 		return "Skill damage %"
+	case "skill_cooldown_reduction_percent":
+		return "Skill cooldown reduction"
+	case "skill_mana_cost_reduction":
+		return "Skill mana cost reduction"
 	case "hotbar_slots":
 		return "Hotbar slots"
 	case "inventory_rows":

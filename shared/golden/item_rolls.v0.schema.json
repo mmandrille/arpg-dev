@@ -67,7 +67,9 @@
         "attack_speed_percent": { "type": "integer", "minimum": 0 },
         "hit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
         "crit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "evade_chance": { "type": "integer", "minimum": 0, "maximum": 100 }
+        "evade_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "skill_cooldown_reduction_percent": { "type": "integer", "minimum": 0, "maximum": 75 },
+        "skill_mana_cost_reduction": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
     }
   }

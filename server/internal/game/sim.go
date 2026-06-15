@@ -2273,6 +2273,10 @@ func (s *Sim) skillCooldownView(skillID string) (SkillCooldownView, bool) {
 }
 
 func (s *Sim) skillCooldownTicks(def SkillDef) int {
+	return s.effectiveSkillCooldownTicks(def)
+}
+
+func (s *Sim) baseSkillCooldownTicks(def SkillDef) int {
 	interval := s.DerivedStatsView().AttackIntervalTicks
 	if interval < 1 {
 		interval = s.rules.Combat.BaseAttackIntervalTicks

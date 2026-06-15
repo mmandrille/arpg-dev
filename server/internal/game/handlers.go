@@ -1227,7 +1227,7 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		res.reject(in.MessageID, "skill_on_cooldown")
 		return
 	}
-	manaCost := skillManaCost(def, rank)
+	manaCost := s.effectiveSkillManaCost(def, rank)
 	if player.mana < manaCost && !s.tryBloodPriceForSkill(player, manaCost, in.CorrelationID, res) {
 		res.reject(in.MessageID, "not_enough_mana")
 		return

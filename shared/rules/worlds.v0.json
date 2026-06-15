@@ -408,6 +408,11 @@
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
           "position": { "x": 10, "y": 5 }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "starter_sorcerer_staff",
+          "position": { "x": 4, "y": 4 }
         }
       ]
     },

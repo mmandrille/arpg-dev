@@ -2977,15 +2977,15 @@ def assert_hotbar_slot(hotbar: list[dict], slot_index: int, item_def_id: Any, wh
 
 def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any], where: str) -> None:
     item_def_id = str(assertion["item_def_id"])
-    item = find_inventory_item(inventory, item_def_id)
+    template_id = str(assertion.get("item_template_id", item_def_id))
+    rarity, stat_keys = assertion.get("rarity"), [str(key) for key in assertion.get("stat_keys", [])]
+    item = next((item for item in inventory if item.get("item_def_id") == item_def_id and item.get("item_template_id") == template_id and (rarity is None or item.get("rarity") == str(rarity)) and all(key in item.get("rolled_stats", {}) for key in stat_keys)), None)
     if item is None:
         raise AssertionError(f"{where}: missing rolled inventory item {item_def_id}: {inventory}")
-    template_id = str(assertion.get("item_template_id", item_def_id))
     if item.get("item_template_id") != template_id:
         raise AssertionError(f"{where}: item_template_id {item.get('item_template_id')} != {template_id}: {item}")
     if assertion.get("equipped") is not None and bool(item.get("equipped")) != bool(assertion["equipped"]):
         raise AssertionError(f"{where}: rolled item equipped={item.get('equipped')} want {assertion['equipped']}: {item}")
-    rarity = assertion.get("rarity")
     if rarity is not None and item.get("rarity") != str(rarity):
         raise AssertionError(f"{where}: rarity {item.get('rarity')} != {rarity}: {item}")
     if assertion.get("display_name_suffix") is not None:
@@ -2995,7 +2995,7 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
     stats = item.get("rolled_stats", {})
     if not isinstance(stats, dict):
         raise AssertionError(f"{where}: rolled_stats is not an object: {item}")
-    for key in assertion.get("stat_keys", []):
+    for key in stat_keys:
         if key not in stats:
             raise AssertionError(f"{where}: missing rolled stat {key}: {item}")
     if (stat_count_min := assertion.get("stat_count_min")) is not None and len(stats) < int(stat_count_min): raise AssertionError(f"{where}: rolled stat count {len(stats)} < {stat_count_min}: {item}")

@@ -25,10 +25,12 @@ fi
 
 echo "[client-smoke] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
 
+FAILED_GATES=()
+
 # Godot exits 0 even on a GDScript PARSE/load error when run via --script, so a
 # bare exit-code check could pass silently on a broken gate. run_gate captures
 # each gate's combined output and asserts its expected success sentinel appears,
-# failing nonzero (with a clear message) if it does not.
+# recording a clear failure if it does not.
 run_gate() {
   local label="$1" sentinel="$2" script="$3"
   local gate_log gate_started elapsed
@@ -45,15 +47,17 @@ run_gate() {
   if [[ $status -ne 0 ]]; then
     echo "FAILED: $label (exit $status, elapsed=${elapsed}s)"
     show_log "$gate_log" "$label"
+    FAILED_GATES+=("$label")
     rm -f "$gate_log"
-    exit 1
+    return 0
   fi
 
   if ! grep -qF -- "$sentinel" "$gate_log"; then
     echo "FAILED: $label (missing sentinel: $sentinel, elapsed=${elapsed}s)"
     show_log "$gate_log" "$label"
+    FAILED_GATES+=("$label")
     rm -f "$gate_log"
-    exit 1
+    return 0
   fi
 
   if is_quiet_mode; then
@@ -64,6 +68,19 @@ run_gate() {
   fi
 
   rm -f "$gate_log"
+}
+
+finish_gates() {
+  local suite_label="$1"
+  if [[ "${#FAILED_GATES[@]}" -eq 0 ]]; then
+    return 0
+  fi
+  echo "[client-smoke] FAILED $suite_label: ${#FAILED_GATES[@]} gate(s) failed:"
+  local gate
+  for gate in "${FAILED_GATES[@]}"; do
+    echo "  - $gate"
+  done
+  exit 1
 }
 
 # Import resources once so headless --script runs cleanly.
@@ -135,10 +152,12 @@ run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filte
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
+  finish_gates "client unit"
   echo "[client-unit] PASS"
   exit 0
 fi
 
 # 3. Headless slice smoke against the running server.
 run_gate "headless slice smoke" "[smoke] PASS" res://scripts/smoke.gd
+finish_gates "client smoke"
 echo "[client-smoke] PASS"

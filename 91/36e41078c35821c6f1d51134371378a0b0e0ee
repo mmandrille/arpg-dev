@@ -1,0 +1,50 @@
+skills/finish/SKILL.md
+  s_2856b4a5b66169::t_b8c2ba0461e93c 63,65
+  s_2856b4a5b66169::t_072c992d1eebcd 19-20
+docs/progress/README.md
+  s_2856b4a5b66169::t_c1e284f683ecc5 1-14
+docs/as-built/v200_progress-doc-compaction.md
+  s_2856b4a5b66169::t_4db7f8ba1c68b1 1-25
+skills/spec/SKILL.md
+  s_2856b4a5b66169::t_74c163c311dd56 14-16
+skills/next/SKILL.md
+  s_2856b4a5b66169::t_3710834865f81f 43
+  s_2856b4a5b66169::t_acc1791250fbd8 31-35
+scripts/check-progress-dashboard.sh
+  s_2856b4a5b66169::t_8d855f20f20909 1-39
+CLAUDE.md
+  s_2856b4a5b66169::t_1fc492cb92ab66 7-9
+make/ci.mk
+  s_2856b4a5b66169::t_32f4cc470bbb7f 6
+docs/progress/slice-codename-index.md
+  s_2856b4a5b66169::t_a61db109891cd3 204
+docs/progress/slice-lifecycle.md
+  s_2856b4a5b66169::t_2e1f7e8e639883 216-217
+skills/execute/SKILL.md
+  s_2856b4a5b66169::t_7473e267f9f517 121-122
+  s_2856b4a5b66169::t_abcce77b260e5a 27-28,33
+skills/plan/SKILL.md
+  s_2856b4a5b66169::t_6985f2c1ad9cda 25-26
+PROGRESS.md
+  s_2856b4a5b66169::t_ffc282487d01a0 26
+  s_2856b4a5b66169::t_4e1105b08c8575 136-138
+  s_2856b4a5b66169::t_4e8aaa31b1461b 174
+AGENTS.md
+  s_2856b4a5b66169::t_0a56bcb3ca780e 5-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9136e41078c35821c6f1d51134371378a0b0e0ee",
+  "prompts": {},
+  "sessions": {
+    "s_2856b4a5b66169": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "db92fce0-098f-4d92-9400-1d5b5d83070f",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,69 @@
+client/scripts/character_stats_panel.gd
+  s_2721a37551d805::t_e60727a85cd99b 18,26
+tools/validate_shared.py
+  s_2721a37551d805::t_6cdbedb9e411d1 903,969-970,991-994,2145
+server/internal/game/sim.go
+  s_2721a37551d805::t_02241b8aaffbfc 219,4327-4328
+  s_2721a37551d805::t_0cb4bf08a681ca 4326
+  s_2721a37551d805::t_7e18cfbe4f1e57 5768-5770,5786-5788,5881-5892,5940-5941,5943,5961-5963
+server/internal/game/rare_combat_affixes_test.go
+  s_2721a37551d805::t_595e6b2a84e77a 1-81
+server/internal/game/derived_stats.go
+  s_2721a37551d805::t_608a4f2f4ae7c0 3-20
+  s_2721a37551d805::t_98fcfe3fe2a00e 1-2,21-65
+docs/as-built/v188_live-rare-combat-affixes.md
+  s_2721a37551d805::t_4dc37bf3742bb1 1-30
+server/internal/game/rules.go
+  s_2721a37551d805::t_e60727a85cd99b 3208
+shared/rules/shops.v0.schema.json
+  s_2721a37551d805::t_6b285d4ee138ae 128,135-137
+shared/rules/item_templates.v0.schema.json
+  s_2721a37551d805::t_6cdbedb9e411d1 98-100,113
+PROGRESS.md
+  s_2721a37551d805::t_4dc37bf3742bb1 15,207,436,570-573
+client/scripts/stat_labels.gd
+  s_2721a37551d805::t_e60727a85cd99b 19-21
+server/internal/game/types.go
+  s_2721a37551d805::t_bbd2354ad119eb 8
+server/internal/game/shop.go
+  s_2721a37551d805::t_e60727a85cd99b 938,1036,1069-1074
+shared/golden/item_rolls.json
+  s_2721a37551d805::t_6131738eaab349 31,33
+  s_2721a37551d805::t_107e1c009ae894 50-53
+docs/plans/v188_2026-06-15-live-rare-combat-affixes.md
+  s_2721a37551d805::t_10f54214d44920 1-2,4-37,41-50,55-63,68-79,83-88
+  s_2721a37551d805::t_4dc37bf3742bb1 3,38-40,51-54,64-67,80-82,89-93
+shared/golden/item_rolls.v0.schema.json
+  s_2721a37551d805::t_6cdbedb9e411d1 67-70
+shared/rules/shops.v0.json
+  s_2721a37551d805::t_6b285d4ee138ae 56-58,130-132
+shared/rules/item_templates.v0.json
+  s_2721a37551d805::t_6cdbedb9e411d1 32-34,261-262
+docs/specs/v188_spec-live-rare-combat-affixes.md
+  s_2721a37551d805::t_10f54214d44920 1-2,4-63
+  s_2721a37551d805::t_4dc37bf3742bb1 3
+tools/bot/scenarios/78_rarity_roll_pools.json
+  s_2721a37551d805::t_e77a6330dc9bcd 16
+server/internal/game/game_test.go
+  s_2721a37551d805::t_595e6b2a84e77a 7769
+tools/bot/scenarios/79_live_rare_combat_affixes.json
+  s_2721a37551d805::t_a10094d919e6d1 1-16,18-35,37-46,48-65,67-72
+  s_2721a37551d805::t_98fcfe3fe2a00e 17,47
+  s_2721a37551d805::t_608a4f2f4ae7c0 36,66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "79baf880d24bbfb8f7b9f8611bd85f6deb0fb17b",
+  "prompts": {},
+  "sessions": {
+    "s_2721a37551d805": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec9e3-8f9e-7360-a4ce-aafa7309e195",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

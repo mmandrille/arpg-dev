@@ -5340,9 +5340,14 @@ func TestBossPatternDeckCycles(t *testing.T) {
 		t.Fatalf("third boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
 	}
 
-	waitForBossPatternStart(t, sim, "ground_slam", 220)
-	if boss.bossPatternDeckIndex != 3 || boss.bossPatternID != "ground_slam" {
+	waitForBossPatternStart(t, sim, "shard_fan", 220)
+	if boss.bossPatternDeckIndex != 3 || boss.bossPatternID != "shard_fan" {
 		t.Fatalf("fourth boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
+	}
+
+	waitForBossPatternStart(t, sim, "ground_slam", 220)
+	if boss.bossPatternDeckIndex != 4 || boss.bossPatternID != "ground_slam" {
+		t.Fatalf("fifth boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
 	}
 
 	waitForBossPatternStart(t, sim, "charged_melee", 220)

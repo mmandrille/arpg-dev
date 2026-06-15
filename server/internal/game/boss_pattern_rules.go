@@ -29,8 +29,8 @@ func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks 
 				if phase.Radius <= 0 {
 					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].radius: must be positive", patternID, idx)
 				}
-				if phase.HitShape == "line" && phase.Width <= 0 {
-					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].width: must be positive for line", patternID, idx)
+				if (phase.HitShape == "line" || phase.HitShape == "cone") && phase.Width <= 0 {
+					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].width: must be positive for %s", patternID, idx, phase.HitShape)
 				}
 				copy := phase
 				priorTelegraph = &copy

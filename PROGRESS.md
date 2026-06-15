@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v198 — mercenary foundation |
+| **Latest completed slice** | v199 — new boss pattern deck |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -215,6 +215,7 @@ v195_* = boss-and-elite-special-drops
 v196_* = item-level-progression
 v197_* = upgrade-success-chance
 v198_* = mercenary-foundation
+v199_* = new-boss-pattern-deck
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

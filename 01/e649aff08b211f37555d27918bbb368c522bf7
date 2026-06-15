@@ -1,0 +1,42 @@
+server/internal/game/skill_buffs.go
+  s_d651e97b83a874::t_0cd67214851bf3 1-117
+PROGRESS.md
+  s_d651e97b83a874::t_a55db060fedf55 15,204,430,564-567
+server/internal/game/paladin_defense_test.go
+  s_d651e97b83a874::t_b574c38dc3f6a5 1-2,105-178
+  s_d651e97b83a874::t_48abaa0f4816bc 3-104
+client/scripts/main.gd
+  s_d651e97b83a874::t_eedb1edbc0a97a 5956,5962
+  s_d651e97b83a874::t_1f9b7adf930bf1 6008-6009,6019-6020,6023-6024
+  s_d651e97b83a874::t_09e6c06d0450ef 6012-6013,6015
+.maintainability/file-size-baseline.tsv
+  s_d651e97b83a874::t_24b93eecd769b7 16,21
+docs/as-built/v185_paladin-defense-fixes.md
+  s_d651e97b83a874::t_275c29427f434e 18
+  s_d651e97b83a874::t_a55db060fedf55 1-17,19-22
+docs/plans/v185_2026-06-15-paladin-defense-fixes.md
+  s_d651e97b83a874::t_275c29427f434e 27
+  s_d651e97b83a874::t_a55db060fedf55 1-26,28
+docs/specs/v185_spec-paladin-defense-fixes.md
+  s_d651e97b83a874::t_a55db060fedf55 1-39
+server/internal/game/types_stats.go
+  s_d651e97b83a874::t_9a9f146011b956 1-19
+server/internal/game/rules_area_buffs.go
+  s_d651e97b83a874::t_01eae980972c00 1-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "01e649aff08b211f37555d27918bbb368c522bf7",
+  "prompts": {},
+  "sessions": {
+    "s_d651e97b83a874": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec989-bab7-7240-b2f6-ba0d99e9cc7c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

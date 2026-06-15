@@ -81,6 +81,10 @@
     "mana_potion": {
       "icon": { "shape": "potion", "color": "#42b9e8", "accent": "#d8f7ff", "label": "Mn" },
       "ground": { "shape": "potion", "color": "#42b9e8", "accent": "#d8f7ff", "scale": 0.9 }
+    },
+    "upgrade_resource": {
+      "icon": { "shape": "box", "color": "#8f7cff", "accent": "#e5ddff", "label": "Up" },
+      "ground": { "shape": "box", "color": "#8f7cff", "accent": "#e5ddff", "scale": 0.75 }
     }
   },
   "items": {
@@ -153,6 +157,7 @@
     "cave_ring": { "family": "ring" },
     "cave_amulet": { "family": "amulet" },
     "gold": { "family": "gold" },
+    "upgrade_shard": { "family": "upgrade_resource" },
     "quest_leaf": { "family": "quest" },
     "red_potion": { "family": "health_potion" },
     "blue_potion": { "family": "mana_potion" }

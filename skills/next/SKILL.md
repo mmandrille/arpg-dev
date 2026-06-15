@@ -123,7 +123,7 @@ Produce a structured brief for the **recommended** slice (or the user's idea if 
 - Every acceptance criterion must be **verifiable** (bot step, test command, or observable behavior).
 - Call out **protocol/schema bumps** explicitly.
 - Call out **determinism** risks for Go `game/` changes.
-- For client UI/art — note Godot plugin adoption will be required in plan (`docs/researchs/godot-plugins-and-shortcuts.md`).
+- For client UI/art — note that the spec or plan must record an asset/plugin adopt / borrow / reject decision after checking existing in-repo assets and Godot code.
 - If the idea is too large → propose a **thin vertical slice** and defer the rest to non-goals.
 
 ## Phase 3 — Handoff

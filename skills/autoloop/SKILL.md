@@ -232,9 +232,9 @@ from the selected brief.
 
 - This autoloop invocation counts as the user's approval to write the spec.
 - Keep the slice small and verifiable.
-- If client UI, camera, inventory presentation, or art is in scope, consult
-  [`docs/researchs/godot-plugins-and-shortcuts.md`](../../docs/researchs/godot-plugins-and-shortcuts.md)
-  and ensure the spec or plan records an adopt / borrow / reject decision.
+- If client UI, camera, inventory presentation, or art is in scope, check existing in-repo
+  Godot scripts, scenes, demos, and asset manifests before introducing dependencies, and ensure
+  the spec or plan records an adopt / borrow / reject decision.
 
 ### 3. Plan
 

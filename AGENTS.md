@@ -5,9 +5,9 @@ Read these **before** specs, plans, or code:
 1. [`PROGRESS.md`](PROGRESS.md) — **start here** for where the project stands: latest completed slice, active branch, open gaps, deferred backlog, engineering-review cadence, and the agent checklist. Do not rely on stale slice numbers in other docs — `PROGRESS.md` is the canonical baseline. When **Next engineering review** is due, run `$refactor` first to pay down scorecard gaps with minor commits, then read [`docs/reviews/`](docs/reviews/) and write a fresh review set before the next batch of slices.
 2. [`CLAUDE.md`](CLAUDE.md) — commands, architecture, invariants, SDD process.
 3. [`docs/CODEMAP.md`](docs/CODEMAP.md) — domain → files index. Use it to decide which files to load before grepping broad coordinators.
-4. [`docs/researchs/godot-plugins-and-shortcuts.md`](docs/researchs/godot-plugins-and-shortcuts.md) — **check for existing Godot plugins, demos, and asset packs** before building new client UI, inventory presentation, isometric/camera tooling, or placeholder art from scratch.
+4. For client UI, inventory presentation, isometric/camera tooling, or placeholder art, first check existing in-repo Godot scripts, scenes, demos, and asset manifests before introducing new dependencies or asset pipelines.
 
-When starting client-side work, run the adoption checklist in the plugins doc and record *adopt / borrow / reject* in the slice plan.
+When starting client-side work that could use outside assets or plugins, record an *adopt / borrow / reject* decision in the slice spec or plan. If external adoption needs deeper research, add or update a focused note under `docs/researchs/` as part of that planning work.
 
 ## Slash commands (cross-agent skills)
 

@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v196 — item level progression |
+| **Latest completed slice** | v197 — upgrade success chance |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -213,6 +213,7 @@ v193_* = unique-skill-modifier
 v194_* = second-set-package
 v195_* = boss-and-elite-special-drops
 v196_* = item-level-progression
+v197_* = upgrade-success-chance
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -450,6 +451,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v194** | `second-set-package` | Complete (`make ci` green) | [`v194_spec-second-set-package.md`](docs/specs/v194_spec-second-set-package.md) | [`v194_2026-06-15-second-set-package.md`](docs/plans/v194_2026-06-15-second-set-package.md) | [`as-built`](docs/as-built/v194_second-set-package.md) |
 | **v195** | `boss-and-elite-special-drops` | Complete (`make ci` green) | [`v195_spec-boss-and-elite-special-drops.md`](docs/specs/v195_spec-boss-and-elite-special-drops.md) | [`v195_2026-06-15-boss-and-elite-special-drops.md`](docs/plans/v195_2026-06-15-boss-and-elite-special-drops.md) | [`as-built`](docs/as-built/v195_boss-and-elite-special-drops.md) |
 | **v196** | `item-level-progression` | Complete (`make ci` green) | [`v196_spec-item-level-progression.md`](docs/specs/v196_spec-item-level-progression.md) | [`v196_2026-06-15-item-level-progression.md`](docs/plans/v196_2026-06-15-item-level-progression.md) | [`as-built`](docs/as-built/v196_item-level-progression.md) |
+| **v197** | `upgrade-success-chance` | Complete (`make ci` green) | [`v197_spec-upgrade-success-chance.md`](docs/specs/v197_spec-upgrade-success-chance.md) | [`v197_2026-06-15-upgrade-success-chance.md`](docs/plans/v197_2026-06-15-upgrade-success-chance.md) | [`as-built`](docs/as-built/v197_upgrade-success-chance.md) |
 
 ---
 
@@ -582,6 +584,10 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Blacksmith upgrades now have data-driven success chance.** v197 adds
+`item_upgrade_success_chance_percent`, returns per-attempt success, spends gold on failed attempts
+without mutating item stats, and exposes the chance in the blacksmith panel/debug state.
 
 **Rolled items now carry authoritative item level.** v196 adds `item_level` to the durable
 rolled-item payload, surfaces it across loot/inventory/stash/shop protocol views, maps generated

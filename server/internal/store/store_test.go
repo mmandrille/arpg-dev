@@ -1086,9 +1086,12 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 250); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, map[string]struct{}{"cave_blade": {}})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !success {
+		t.Fatal("first upgrade should succeed")
 	}
 	if cost != 100 || gold != 150 {
 		t.Fatalf("first upgrade cost/gold = %d/%d, want 100/150", cost, gold)
@@ -1100,9 +1103,12 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if stats["item_level"] != 1 || stats["damage_max"] != 5 || stats["damage_min"] != 2 {
 		t.Fatalf("upgraded stats = %+v", stats)
 	}
-	item, gold, cost, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, map[string]struct{}{"cave_blade": {}})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !success {
+		t.Fatal("second upgrade should succeed")
 	}
 	if cost != 150 || gold != 0 {
 		t.Fatalf("second upgrade cost/gold = %d/%d, want 150/0", cost, gold)
@@ -1116,7 +1122,7 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 25); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 1, 1, 2, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 1, 1, 2, 100, 1, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("max level upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1139,7 +1145,7 @@ func TestAccountStashItemUpgradeRejectsInsufficientGold(t *testing.T) {
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "poor_upgrade_item_"+suffix, "poor_upgrade_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, 100, 50, 2, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("insufficient gold upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1170,9 +1176,12 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 100); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, 100, 50, 2, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, map[string]struct{}{"cave_blade": {}})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !success {
+		t.Fatal("payload upgrade should succeed")
 	}
 	if cost != 100 || gold != 0 {
 		t.Fatalf("payload upgrade cost/gold = %d/%d, want 100/0", cost, gold)

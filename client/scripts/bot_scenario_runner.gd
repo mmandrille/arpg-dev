@@ -963,6 +963,8 @@ func _blacksmith_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 		return false
 	if step.has("status_contains") and not str(panel.get("status", "")).contains(str(step.get("status_contains", ""))):
 		return false
+	if step.has("success_chance_percent") and int(panel.get("success_chance_percent", -1)) != int(step.get("success_chance_percent", 0)):
+		return false
 	var rows := _matching_blacksmith_rows(step, state)
 	if step.has("item_def_id") or step.has("stash_item_id") or step.has("item_level") or step.has("upgrade_enabled"):
 		if rows.is_empty():

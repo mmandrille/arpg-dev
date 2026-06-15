@@ -1487,11 +1487,11 @@ func (f *fakeRepo) TransferCharacterGoldToAccountStash(context.Context, string, 
 func (f *fakeRepo) TransferAccountStashGoldToCharacter(context.Context, string, string, int) (int, int, error) {
 	return 0, 0, nil
 }
-func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, error) {
-	return store.AccountStashItem{}, 0, 0, nil
+func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int, int, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, bool, error) {
+	return store.AccountStashItem{}, 0, 0, true, nil
 }
-func (f *fakeRepo) UpgradeAccountStashItemWithWallet(context.Context, string, string, string, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, int, error) {
-	return store.AccountStashItem{}, 0, 0, 0, nil
+func (f *fakeRepo) UpgradeAccountStashItemWithWallet(context.Context, string, string, string, int, int, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, int, bool, error) {
+	return store.AccountStashItem{}, 0, 0, 0, true, nil
 }
 func (f *fakeRepo) ListActiveMarketListings(context.Context) ([]store.MarketListing, error) {
 	return nil, nil

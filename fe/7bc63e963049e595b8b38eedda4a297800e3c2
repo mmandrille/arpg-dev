@@ -1,0 +1,58 @@
+docs/plans/v195_2026-06-15-boss-and-elite-special-drops.md
+  s_3d722d65688e0b::t_c3e87b879fc464 1-2,4-31,37-38,40-53,57-68,73-83,86-98,101-111
+  s_3d722d65688e0b::t_692ec84e2aebbd 54-56,69-72,84-85,113,115
+  s_3d722d65688e0b::t_e2a97f4ba20484 3,32-36,39,99,112,114
+  s_3d722d65688e0b::t_7205fb2d15fecb 100,116
+server/internal/game/rules.go
+  s_3d722d65688e0b::t_f566f9f3351828 804-805,835-836,1460-1461,1476-1486,1620-1621,1633-1643,2005-2006
+  s_3d722d65688e0b::t_f42a43aa931126 2027,2031,2083
+shared/rules/loot_tables.v0.schema.json
+  s_3d722d65688e0b::t_c2aaf51854b783 33-34,39-41
+shared/rules/treasure_classes.v0.json
+  s_3d722d65688e0b::t_c2aaf51854b783 224-271
+PROGRESS.md
+  s_3d722d65688e0b::t_e2a97f4ba20484 15,214,450,584-587
+shared/rules/loot_tables.v0.json
+  s_3d722d65688e0b::t_c2aaf51854b783 55-58
+docs/specs/v195_spec-boss-and-elite-special-drops.md
+  s_3d722d65688e0b::t_e2a97f4ba20484 3
+  s_3d722d65688e0b::t_c3e87b879fc464 1-2,4-44
+shared/rules/treasure_classes.v0.schema.json
+  s_3d722d65688e0b::t_c2aaf51854b783 40-41,46-48
+tools/bot/run.py
+  s_3d722d65688e0b::t_766619437bbfa9 3045-3048
+server/internal/game/sim.go
+  s_3d722d65688e0b::t_33c4dcdb892b55 1558-1572
+docs/as-built/v195_boss-and-elite-special-drops.md
+  s_3d722d65688e0b::t_e2a97f4ba20484 1-31
+tools/bot/scenarios/84_boss_special_drops.json
+  s_3d722d65688e0b::t_4cf7cde9ffe42d 1-33
+server/internal/game/drop_entries.go
+  s_3d722d65688e0b::t_df1cd5f2a7e1fb 1-11
+tools/validate_shared.py
+  s_3d722d65688e0b::t_8796c46d2645a0 1143-1145
+  s_3d722d65688e0b::t_df1cd5f2a7e1fb 1135,1806
+  s_3d722d65688e0b::t_7763ad9add3900 221,1133,1141,1147,1804,1808,1810
+  s_3d722d65688e0b::t_6271b78352a5cc 1134,1142,1805
+server/internal/game/special_drops_test.go
+  s_3d722d65688e0b::t_f25d6c3fe6dbec 1-56,58-79,81-88
+  s_3d722d65688e0b::t_52b1abc8956348 57,80
+shared/rules/dungeon_generation.v0.json
+  s_3d722d65688e0b::t_c2aaf51854b783 57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "fe7bc63e963049e595b8b38eedda4a297800e3c2",
+  "prompts": {},
+  "sessions": {
+    "s_3d722d65688e0b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecc06-930f-72b2-adcf-6aa19782dbac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

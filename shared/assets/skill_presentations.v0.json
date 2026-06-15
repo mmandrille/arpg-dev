@@ -183,6 +183,17 @@
       "effect_visual": "volley_fan",
       "summary_key": "skill.volley.summary"
     },
+    "black_wolf_companion": {
+      "icon": {
+        "label": "W",
+        "shape": "burst",
+        "color": "#101014",
+        "accent": "#9ea7b3"
+      },
+      "summary": "Summons a loyal wolf",
+      "effect_visual": "black_wolf_companion",
+      "summary_key": "skill.black_wolf_companion.summary"
+    },
     "split_arrow": {
       "icon": {
         "label": "S",

@@ -1,0 +1,36 @@
+{
+  "id": "ranger_wolf_companion",
+  "world_id": "ranger_wolf_lab",
+  "seed": "v183_ranger_wolf_companion",
+  "character_class": "ranger",
+  "title": "Ranger black wolf companion",
+  "description": "Ranger casts Black Wolf Companion, the server spawns one black wolf companion, and the wolf follows and damages an enemy.",
+  "visual": {
+    "camera": { "x": 5, "y": 5, "zoom": 1.0 },
+    "post_complete_hold_s": 3.0
+  },
+  "debug_progression": {
+    "level": 4,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 12, "vit": 5, "magic": 8 },
+    "skill_ranks": { "piercing_shot": 1, "black_wolf_companion": 1 }
+  },
+  "steps": [
+    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "companion_black_wolf", "alive": true, "equals": 0 },
+    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "black_wolf_companion", "rank": 1, "max_rank": "from_rules", "can_spend": false },
+    { "action": "cast_skill", "skill_id": "black_wolf_companion", "event_type": "skill_cast" },
+    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "companion_black_wolf", "visual_model": "monster_quadruped", "alive": true, "equals": 1 },
+    { "action": "move", "direction": { "x": 1, "y": 0 }, "duration_ticks": 24 },
+    { "action": "wait_ticks", "ticks": 95 },
+    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "source_entity_type": "companion", "source_monster_def_id": "companion_black_wolf", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 }, "timeout_s": 6 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "black_wolf_companion", "rank": 1, "mana": 5 },
+    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "black_wolf_companion" },
+    { "type": "entity_count", "entity_type": "companion", "monster_def_id": "companion_black_wolf", "visual_model": "monster_quadruped", "alive": true, "equals": 1 },
+    { "type": "entity_moved", "entity_type": "companion", "monster_def_id": "companion_black_wolf", "min_distance": 0.5 },
+    { "type": "combat_event_seen", "event_type": "monster_damaged", "source_entity_type": "companion", "source_monster_def_id": "companion_black_wolf", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 }
+  ]
+}

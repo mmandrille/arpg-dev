@@ -11,7 +11,9 @@ import (
 	"strings"
 	"testing"
 )
+
 var update = flag.Bool("update", false, "rewrite golden fixtures with current sim output")
+
 // --- shared fixture helpers -------------------------------------------------
 func sharedDir(t *testing.T) string {
 	t.Helper()
@@ -119,6 +121,7 @@ func writeGolden(t *testing.T, name string, v any) {
 	}
 	t.Logf("updated golden: %s", name)
 }
+
 // --- rules ------------------------------------------------------------------
 func TestLoadRules(t *testing.T) {
 	r := loadRules(t)
@@ -283,13 +286,13 @@ func TestValidateSkillRulesRequiresBuffCooldownLongerThanDuration(t *testing.T) 
 			Cooldown: SkillCooldownDef{Type: "attack_interval_multiplier", Multiplier: 1, FlatTicks: 120},
 		},
 	}
-	if err := validateSkillRules(skills, 10); err == nil || !strings.Contains(err.Error(), "must be at least 150% of duration") {
+	if err := validateSkillRules(skills, nil, 10); err == nil || !strings.Contains(err.Error(), "must be at least 150% of duration") {
 		t.Fatalf("validateSkillRules error = %v, want buff cooldown ratio failure", err)
 	}
 	skill := skills["short_buff"]
 	skill.Cooldown.FlatTicks = 140
 	skills["short_buff"] = skill
-	if err := validateSkillRules(skills, 10); err != nil {
+	if err := validateSkillRules(skills, nil, 10); err != nil {
 		t.Fatalf("validateSkillRules valid buff cooldown: %v", err)
 	}
 }
@@ -310,7 +313,6 @@ func TestItemTemplateFamilyStatRequirements(t *testing.T) {
 		"ring":       "magic",
 		"amulet":     "magic",
 	}
-
 	for templateID, template := range rules.ItemTemplates {
 		if !template.Equippable {
 			continue
@@ -493,7 +495,6 @@ func TestValidateCoopCombatRules(t *testing.T) {
 
 func TestBossRulesAndGoldens(t *testing.T) {
 	rules := loadRules(t)
-
 	var floorGolden struct {
 		Seed        string           `json:"seed"`
 		Level       int              `json:"level"`
@@ -549,7 +550,6 @@ func TestBossRulesAndGoldens(t *testing.T) {
 	if !stringSliceContains(template.Visual.ModelPool, floorGolden.Expected.Boss.VisualModel) {
 		t.Fatalf("boss visual model %s not in pool %+v", floorGolden.Expected.Boss.VisualModel, template.Visual.ModelPool)
 	}
-
 	var timelineGolden struct {
 		PatternID             string `json:"pattern_id"`
 		MinimumTelegraphTicks int    `json:"minimum_telegraph_ticks"`

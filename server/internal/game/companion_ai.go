@@ -30,6 +30,64 @@ func (s *Sim) newPresetMonsterOrCompanion(level *LevelState, preset WorldEntity,
 	return monster
 }
 
+func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, res *TickResult) *entity {
+	if owner == nil {
+		return nil
+	}
+	level := s.activeLevel()
+	for _, id := range sortedEntityIDs(level.entities) {
+		existing := level.entities[id]
+		if existing == nil || existing.kind != companionEntity || existing.ownerID != owner.id || existing.sourceSkillID != skillID {
+			continue
+		}
+		delete(level.entities, id)
+		res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(id)})
+	}
+	monsterDef := s.rules.Monsters[def.Companion.MonsterDefID]
+	companion := &entity{
+		kind:                  companionEntity,
+		pos:                   companionSpawnPosition(owner),
+		spawnPos:              owner.pos,
+		hp:                    monsterDef.MaxHP,
+		maxHP:                 monsterDef.MaxHP,
+		ownerID:               owner.id,
+		monsterDefID:          def.Companion.MonsterDefID,
+		lootTable:             monsterDef.LootTable,
+		speed:                 monsterDef.MoveSpeed,
+		monsterAttackDamage:   monsterDef.AttackDamage,
+		monsterAttackCooldown: monsterDef.AttackCooldown,
+		aiMode:                monsterAIModeIdle,
+		sourceSkillID:         skillID,
+		visualModel:           def.Companion.VisualModel,
+		visualTint:            def.Companion.VisualTint,
+		visualScale:           def.Companion.VisualScale,
+	}
+	companion.id = s.alloc()
+	level.entities[companion.id] = companion
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(companion))})
+	return companion
+}
+
+func (s *Sim) handleSummonCompanionSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	companion := s.summonCompanion(player, skillID, def, res)
+	targetID := uint64(0)
+	if companion != nil {
+		targetID = companion.id
+	}
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, "")
+	s.appendSkillCooldownUpdate(res)
+	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
+	res.ack(in.MessageID)
+}
+
+func companionSpawnPosition(owner *entity) Vec2 {
+	return Vec2{X: owner.pos.X + companionFollowDistance, Y: owner.pos.Y}
+}
+
 func (e *entity) applyMonsterLikeViewFields(ev *EntityView) {
 	ev.MonsterDefID = e.monsterDefID
 	ev.MonsterPackID = e.monsterPackID

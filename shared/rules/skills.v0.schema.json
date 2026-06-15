@@ -25,7 +25,7 @@
         "class": { "type": "string", "minLength": 1 },
         "damage_type": { "$ref": "#/$defs/damage_type" },
         "tree": { "$ref": "#/$defs/tree_position" },
-        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff"] },
+        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion"] },
         "max_rank": { "type": "integer", "minimum": 1 },
         "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
@@ -41,6 +41,7 @@
         "slow": { "$ref": "#/$defs/slow" },
         "shatter": { "$ref": "#/$defs/shatter" },
         "chain": { "$ref": "#/$defs/chain" },
+        "companion": { "$ref": "#/$defs/companion" },
         "effects": {
           "type": "array",
           "minItems": 1,
@@ -96,6 +97,13 @@
           "then": {
             "required": ["effects"],
             "properties": { "targeting": { "const": "self_or_ally_area" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "summon_companion" } }, "required": ["kind"] },
+          "then": {
+            "required": ["companion"],
+            "properties": { "targeting": { "const": "self" } }
           }
         }
       ]
@@ -205,6 +213,18 @@
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "speed": { "type": "number", "exclusiveMinimum": 0 },
         "visual": { "type": "string", "minLength": 1 }
+      }
+    },
+    "companion": {
+      "type": "object",
+      "required": ["monster_def_id", "visual_model", "visual_tint", "limit"],
+      "additionalProperties": false,
+      "properties": {
+        "monster_def_id": { "type": "string", "minLength": 1 },
+        "visual_model": { "type": "string", "minLength": 1 },
+        "visual_tint": { "type": "string", "pattern": "^[0-9a-fA-F]{6}$" },
+        "visual_scale": { "type": "number", "minimum": 0 },
+        "limit": { "const": 1 }
       }
     },
     "pierce": {

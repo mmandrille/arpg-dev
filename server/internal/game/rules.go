@@ -536,6 +536,7 @@ type SkillDef struct {
 	Slow         SkillSlowDef        `json:"slow"`
 	Shatter      SkillShatterDef     `json:"shatter"`
 	Chain        SkillChainDef       `json:"chain"`
+	Companion    SkillCompanionDef   `json:"companion"`
 	Effects      []SkillEffectDef    `json:"effects"`
 	Cooldown     SkillCooldownDef    `json:"cooldown"`
 }
@@ -1422,7 +1423,7 @@ func LoadRules(dir string) (*Rules, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := validateSkillRules(skills, r.Combat.BaseAttackIntervalTicks); err != nil {
+	if err := validateSkillRules(skills, nil, r.Combat.BaseAttackIntervalTicks); err != nil {
 		return nil, err
 	}
 	r.Skills = skills
@@ -1580,6 +1581,9 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 	r.Monsters = monsters.Monsters
+	if err := validateSkillCompanionMonsterRefs(r.Skills, r.Monsters); err != nil {
+		return nil, err
+	}
 
 	var loot struct {
 		LootTables map[string]LootTable `json:"loot_tables"`
@@ -2739,7 +2743,7 @@ func validateCoopCombatRules(coop CoopCombat) error {
 	return nil
 }
 
-func validateSkillRules(skills map[string]SkillDef, baseAttackIntervalTicks int) error {
+func validateSkillRules(skills map[string]SkillDef, monsters map[string]MonsterDef, baseAttackIntervalTicks int) error {
 	if len(skills) == 0 {
 		return fmt.Errorf("game: invalid rules skills: at least one skill is required")
 	}
@@ -2768,7 +2772,7 @@ func validateSkillRules(skills map[string]SkillDef, baseAttackIntervalTicks int)
 		if skill.Cost.Mana.Base < 0 || skill.Cost.Mana.PerRank < 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.cost.mana: values must be non-negative", id)
 		}
-		if err := validateSkillKindPayload(id, skill); err != nil {
+		if err := validateSkillKindPayload(id, skill, monsters); err != nil {
 			return err
 		}
 		if skill.Cooldown.Type != "attack_interval_multiplier" {
@@ -2814,14 +2818,14 @@ func validateBuffSkillCooldown(skillID string, skill SkillDef, baseAttackInterva
 
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion":
 		return true
 	default:
 		return false
 	}
 }
 
-func validateSkillKindPayload(skillID string, skill SkillDef) error {
+func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[string]MonsterDef) error {
 	if err := validateDamageType("skills."+skillID+".damage_type", skill.DamageType); err != nil {
 		return err
 	}
@@ -2867,6 +2871,11 @@ func validateSkillKindPayload(skillID string, skill SkillDef) error {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for area_stat_buff", skillID, skill.Targeting)
 		}
 		return validateSkillEffects(skillID, skill.Effects, "area_stat_percent_buff")
+	case "summon_companion":
+		if skill.Targeting != "self" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for summon_companion", skillID, skill.Targeting)
+		}
+		return validateSummonCompanionSkillPayload(skillID, skill, monsters)
 	default:
 		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
 	}

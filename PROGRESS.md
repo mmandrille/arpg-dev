@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v182 — companion AI foundation |
+| **Latest completed slice** | v183 — ranger wolf companion |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -198,6 +198,8 @@ v178_* = boss-summoned-adds
 v179_* = mana-regeneration
 v180_* = upgrade-resource-drop
 v181_* = set-item-foundation
+v182_* = companion-ai-foundation
+v183_* = ranger-wolf-companion
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
@@ -421,6 +423,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v180** | `upgrade-resource-drop` | Complete (`make ci` green) | [`v180_spec-upgrade-resource-drop.md`](docs/specs/v180_spec-upgrade-resource-drop.md) | [`v180_2026-06-15-upgrade-resource-drop.md`](docs/plans/v180_2026-06-15-upgrade-resource-drop.md) | [`as-built`](docs/as-built/v180_upgrade-resource-drop.md) |
 | **v181** | `set-item-foundation` | Complete (`make ci` green) | [`v181_spec-set-item-foundation.md`](docs/specs/v181_spec-set-item-foundation.md) | [`v181_2026-06-15-set-item-foundation.md`](docs/plans/v181_2026-06-15-set-item-foundation.md) | [`as-built`](docs/as-built/v181_set-item-foundation.md) |
 | **v182** | `companion-ai-foundation` | Complete (`make ci` green) | [`v182_spec-companion-ai-foundation.md`](docs/specs/v182_spec-companion-ai-foundation.md) | [`v182_2026-06-15-companion-ai-foundation.md`](docs/plans/v182_2026-06-15-companion-ai-foundation.md) | [`as-built`](docs/as-built/v182_companion-ai-foundation.md) |
+| **v183** | `ranger-wolf-companion` | Complete (`make ci` green) | [`v183_spec-ranger-wolf-companion.md`](docs/specs/v183_spec-ranger-wolf-companion.md) | [`v183_2026-06-15-ranger-wolf-companion.md`](docs/plans/v183_2026-06-15-ranger-wolf-companion.md) | [`as-built`](docs/as-built/v183_ranger-wolf-companion.md) |
 
 ---
 
@@ -553,6 +556,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Ranger can now summon a black wolf companion.** v183 adds the `black_wolf_companion`
+Ranger skill with a data-driven `summon_companion` payload, one-active-wolf replacement,
+black quadruped presentation, and protocol bot scenario `74_ranger_wolf_companion`
+proving cast, spawn, follow, and companion-sourced damage.
 
 **Server-owned companion actors now have a foundation.** v182 adds a distinct `companion`
 entity type to v8 snapshots/deltas, a compact `companion_ai_lab`, server-owned follow/target/melee

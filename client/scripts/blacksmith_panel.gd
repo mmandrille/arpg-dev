@@ -19,6 +19,7 @@ var stash_gold: int = 0
 var base_cost: int = 100
 var growth_cost: int = 50
 var max_level: int = 3
+var success_chance_percent: int = 100
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 var staged_item: Dictionary = {}
@@ -83,6 +84,7 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int,
 	base_cost = int(config.get("item_upgrade_cost_gold", base_cost))
 	growth_cost = int(config.get("item_upgrade_cost_growth_per_level", growth_cost))
 	max_level = int(config.get("item_upgrade_max_level", max_level))
+	success_chance_percent = int(config.get("item_upgrade_success_chance_percent", success_chance_percent))
 	_status_label.text = status
 	_rebuild()
 	visible = true
@@ -104,11 +106,11 @@ func show_status(message: String, warning: bool = false) -> void:
 	_status_label.add_theme_color_override("font_color", Color("#ffcf5a") if warning else Color("#9fd7ff"))
 
 
-func update_after_upgrade(item: Dictionary, next_gold: int, next_stash_gold: int, charged_cost: int) -> void:
+func update_after_upgrade(item: Dictionary, next_gold: int, next_stash_gold: int, charged_cost: int, success: bool = true) -> void:
 	staged_item = item.duplicate(true)
 	gold = next_gold
 	stash_gold = next_stash_gold
-	show_status("Upgraded for %d gold" % charged_cost)
+	show_status(("Upgraded for %d gold" if success else "Upgrade failed for %d gold") % charged_cost, not success)
 	_rebuild()
 
 
@@ -128,6 +130,7 @@ func get_debug_state() -> Dictionary:
 		"gold": gold,
 		"stash_gold": stash_gold,
 		"wallet_gold": _wallet_gold(),
+		"success_chance_percent": success_chance_percent,
 		"item_count": inventory_items.size(),
 		"staged_item": staged_item.duplicate(true),
 		"staged_item_id": str(staged_item.get("item_instance_id", staged_item.get("stash_item_id", ""))),
@@ -358,6 +361,7 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 	var level := _item_level(item)
 	if level >= max_level:
 		return ["Max level reached"]
+	lines.append("Success chance: %d%%" % success_chance_percent)
 	for key in _ordered_upgrade_stat_keys(stats):
 		var current := int(stats.get(key, 0))
 		var next := current

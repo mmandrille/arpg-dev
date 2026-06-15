@@ -607,7 +607,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.StashGold != 150 || upgraded.CostGold != 100 {
+	if upgraded.StashGold != 150 || upgraded.CostGold != 100 || !upgraded.Success {
 		t.Fatalf("upgrade balances = %+v", upgraded)
 	}
 	var stats map[string]int
@@ -624,7 +624,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.StashGold != 0 || upgraded.CostGold != 150 {
+	if upgraded.StashGold != 0 || upgraded.CostGold != 150 || !upgraded.Success {
 		t.Fatalf("second upgrade balances = %+v", upgraded)
 	}
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {

@@ -4321,7 +4321,7 @@ func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 	stash_gold = int(result.get("stash_gold", stash_gold))
 	_upsert_stash_item(item)
 	if blacksmith_panel != null:
-		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)))
+		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)))
 	if stash_panel != null and stash_panel.visible:
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
 
@@ -4338,7 +4338,7 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> voi
 	stash_gold = int(result.get("stash_gold", stash_gold))
 	_update_inventory_item(item)
 	if blacksmith_panel != null:
-		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)))
+		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)))
 	_refresh_inventory_ui()
 
 func _blacksmith_config() -> Dictionary:

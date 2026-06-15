@@ -1,8 +1,10 @@
 package httpapi
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"math/big"
 	"net/http"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
@@ -42,6 +44,7 @@ type upgradeAccountStashItemResponse struct {
 	Gold      int                      `json:"gold"`
 	StashGold int                      `json:"stash_gold"`
 	CostGold  int                      `json:"cost_gold"`
+	Success   bool                     `json:"success"`
 }
 
 type upgradeInventoryItemResponse struct {
@@ -49,6 +52,7 @@ type upgradeInventoryItemResponse struct {
 	Gold      int                   `json:"gold"`
 	StashGold int                   `json:"stash_gold"`
 	CostGold  int                   `json:"cost_gold"`
+	Success   bool                  `json:"success"`
 }
 
 type upgradeInventoryItemRequest struct {
@@ -114,7 +118,7 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not reserve inventory item")
 		return
 	}
-	item, characterGold, stashGold, chargedCost, err := s.upgradeAccountStashItemForRequest(r, accountID, req.CharacterID, stashItemID)
+	item, characterGold, stashGold, chargedCost, success, err := s.upgradeAccountStashItemForRequest(r, accountID, req.CharacterID, stashItemID)
 	if err != nil {
 		s.writeUpgradeAccountStashError(w, err)
 		return
@@ -137,11 +141,12 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		Gold:      characterGold,
 		StashGold: stashGold,
 		CostGold:  chargedCost,
+		Success:   success,
 	})
 }
 
 func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request, accountID string, characterID string, stashItemID string) {
-	item, characterGold, stashGold, chargedCost, err := s.upgradeAccountStashItemForRequest(r, accountID, characterID, stashItemID)
+	item, characterGold, stashGold, chargedCost, success, err := s.upgradeAccountStashItemForRequest(r, accountID, characterID, stashItemID)
 	if err != nil {
 		s.writeUpgradeAccountStashError(w, err)
 		return
@@ -151,10 +156,11 @@ func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request,
 		Gold:      characterGold,
 		StashGold: stashGold,
 		CostGold:  chargedCost,
+		Success:   success,
 	})
 }
 
-func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID string, characterID string, stashItemID string) (store.AccountStashItem, int, int, int, error) {
+func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID string, characterID string, stashItemID string) (store.AccountStashItem, int, int, int, bool, error) {
 	eligible := make(map[string]struct{}, len(s.rules.ItemTemplates))
 	for itemDefID := range s.rules.ItemTemplates {
 		eligible[itemDefID] = struct{}{}
@@ -162,8 +168,21 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 	cost := s.rules.MainConfig.Gameplay.ItemUpgradeCostGold
 	growth := s.rules.MainConfig.Gameplay.ItemUpgradeCostGrowth
 	maxLevel := s.rules.MainConfig.Gameplay.ItemUpgradeMaxLevel
-	item, characterGold, stashGold, chargedCost, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, eligible)
-	return item, characterGold, stashGold, chargedCost, err
+	chance := s.rules.MainConfig.Gameplay.ItemUpgradeSuccessPct
+	roll, err := upgradeSuccessRoll()
+	if err != nil {
+		return store.AccountStashItem{}, 0, 0, 0, false, err
+	}
+	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, chance, roll, eligible)
+	return item, characterGold, stashGold, chargedCost, success, err
+}
+
+func upgradeSuccessRoll() (int, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(100))
+	if err != nil {
+		return 0, err
+	}
+	return int(n.Int64()) + 1, nil
 }
 
 func (s *Server) writeUpgradeAccountStashError(w http.ResponseWriter, err error) {

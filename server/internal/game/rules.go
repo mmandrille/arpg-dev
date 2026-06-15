@@ -52,6 +52,7 @@ type MainGameplayConfig struct {
 	ItemUpgradeCostGold     int     `json:"item_upgrade_cost_gold"`
 	ItemUpgradeCostGrowth   int     `json:"item_upgrade_cost_growth_per_level"`
 	ItemUpgradeMaxLevel     int     `json:"item_upgrade_max_level"`
+	ItemUpgradeSuccessPct   int     `json:"item_upgrade_success_chance_percent"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -981,6 +982,9 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.ItemUpgradeMaxLevel <= 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_max_level: must be positive")
+	}
+	if mainConfig.Gameplay.ItemUpgradeSuccessPct < 0 || mainConfig.Gameplay.ItemUpgradeSuccessPct > 100 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_success_chance_percent: must be 0-100")
 	}
 	r.MainConfig = MainConfig{Gameplay: mainConfig.Gameplay}
 

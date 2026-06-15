@@ -1524,19 +1524,20 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 	return result.characterGold, result.stashGold, nil
 }
 
-func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, error) {
-	item, _, stashGold, chargedCost, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, eligibleItemDefs)
-	return item, stashGold, chargedCost, err
+func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, bool, error) {
+	item, _, stashGold, chargedCost, success, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, eligibleItemDefs)
+	return item, stashGold, chargedCost, success, err
 }
 
-func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, int, error) {
-	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 {
-		return AccountStashItem{}, 0, 0, 0, ErrConflict
+func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, int, bool, error) {
+	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 {
+		return AccountStashItem{}, 0, 0, 0, false, ErrConflict
 	}
 	var out AccountStashItem
 	var characterGold int
 	var stashGold int
 	var chargedCost int
+	var success bool
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO account_stash_gold (account_id, gold)
@@ -1590,6 +1591,7 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		if characterGold+stashGold < chargedCost {
 			return ErrConflict
 		}
+		success = successRoll <= successChancePercent
 		upgradedStats, err := upgradedRolledStats(item.RolledStats, maxLevel)
 		if err != nil {
 			return err
@@ -1619,6 +1621,10 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		); err != nil {
 			return fmt.Errorf("store: spend account stash gold for upgrade: %w", err)
 		}
+		if !success {
+			out = item
+			return nil
+		}
 		err = tx.QueryRow(ctx,
 			`UPDATE account_stash_items
 			 SET rolled_stats = $3::jsonb, updated_at = now()
@@ -1631,7 +1637,7 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		}
 		return nil
 	})
-	return out, characterGold, stashGold, chargedCost, err
+	return out, characterGold, stashGold, chargedCost, success, err
 }
 
 func rolledStatsItemLevel(raw json.RawMessage) (int, error) {

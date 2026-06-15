@@ -1,7 +1,7 @@
 # Grandfathered source/test/tool files above the 600-line target.
 # Format: path<TAB>baseline_line_count
 client/scripts/bot_controller.gd	742
-client/scripts/bot_scenario_runner.gd	1665
+client/scripts/bot_scenario_runner.gd	1640
 client/scripts/character_select_panel.gd	642
 client/scripts/inventory_panel.gd	1528
 client/scripts/main.gd	6351

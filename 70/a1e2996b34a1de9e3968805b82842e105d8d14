@@ -1,0 +1,62 @@
+docs/specs/v174_spec-quest-journal-foundation.md
+  s_f9c66ca3cb4339::t_a284b067b7d43e 1-45
+client/scripts/main.gd
+  s_f9c66ca3cb4339::t_2a8e311414978a 32,244,411,2122-2129,2224-2225,2247-2248,3147-3148,3374-3375,5817,5828
+  s_f9c66ca3cb4339::t_48bcd409518c96 938,965-966,1042
+  s_f9c66ca3cb4339::t_d9c457f70e460c 5937-5954
+client/tests/test_quest_journal_panel.gd.uid
+  s_f9c66ca3cb4339::t_e9645efba51182 1
+client/scripts/bot_quest_journal_assertions.gd
+  s_f9c66ca3cb4339::t_7530b0bf117ad2 1-20
+client/scripts/bot_quest_journal_assertions.gd.uid
+  s_f9c66ca3cb4339::t_abca8e158f9b87 1
+client/scripts/bot_assertion_handlers.gd
+  s_f9c66ca3cb4339::t_7530b0bf117ad2 5,136
+  s_f9c66ca3cb4339::t_24e0c33f538bd5 135,137-141
+scripts/client_smoke.sh
+  s_f9c66ca3cb4339::t_1a799334332178 98
+client/scripts/bot_wait_handlers.gd
+  s_f9c66ca3cb4339::t_24e0c33f538bd5 59
+  s_f9c66ca3cb4339::t_7530b0bf117ad2 4,60
+client/scripts/quest_journal_panel.gd
+  s_f9c66ca3cb4339::t_410d065e7275f8 1-97
+docs/as-built/v174_quest-journal-foundation.md
+  s_f9c66ca3cb4339::t_f9c81d3e8c19be 1-23
+client/scripts/bot_step_catalog.gd
+  s_f9c66ca3cb4339::t_24e0c33f538bd5 18,45
+client/scripts/bot_controller.gd
+  s_f9c66ca3cb4339::t_24e0c33f538bd5 625
+client/tests/test_quest_journal_panel.gd
+  s_f9c66ca3cb4339::t_410d065e7275f8 1-43
+docs/plans/v174_2026-06-14-quest-journal-foundation.md
+  s_f9c66ca3cb4339::t_9985fb2606efbf 54-56,66-68
+  s_f9c66ca3cb4339::t_a6e33b25e5ce7a 94-95,105
+  s_f9c66ca3cb4339::t_a284b067b7d43e 1-29,37-38,41-53,57-65,69-79,82-93,96-101
+  s_f9c66ca3cb4339::t_d38daf39f90202 30-36,39-40,80-81,102-104
+client/scripts/quest_journal_panel.gd.uid
+  s_f9c66ca3cb4339::t_e9645efba51182 1
+tools/bot/scenarios/client/43_quest_journal_foundation.json
+  s_f9c66ca3cb4339::t_30e20b961063a5 1-36
+client/scripts/bot_scenario_runner.gd
+  s_f9c66ca3cb4339::t_24e0c33f538bd5 1553-1554
+PROGRESS.md
+  s_f9c66ca3cb4339::t_f9c81d3e8c19be 15,18,193,408,541-544
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_5c34b6c706f873 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "70a1e2996b34a1de9e3968805b82842e105d8d14",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

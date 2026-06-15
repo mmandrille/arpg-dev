@@ -9,6 +9,18 @@ Read these **before** specs, plans, or code:
 
 When starting client-side work that could use outside assets or plugins, record an *adopt / borrow / reject* decision in the slice spec or plan. If external adoption needs deeper research, add or update a focused note under `docs/researchs/` as part of that planning work.
 
+## Timestamped task updates
+
+During any multi-step task, prefix every intermediary user-facing progress update with the local
+time in `HH:MM` format:
+
+```text
+[HH:MM] <message>
+```
+
+Apply this to progress/update messages printed while working, not final answers, code blocks, file
+contents, commit messages, quoted output, or tool output summaries.
+
 ## Slash commands (cross-agent skills)
 
 Canonical definitions live in [`skills/`](skills/README.md). Tool paths are symlinks to the same files.

@@ -50,6 +50,9 @@
         },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "width": { "type": "number", "exclusiveMinimum": 0 },
+        "summon_monster_def_id": { "type": "string", "minLength": 1 },
+        "summon_count": { "type": "integer", "minimum": 1 },
+        "summon_radius": { "type": "number", "exclusiveMinimum": 0 },
         "damage": { "$ref": "#/$defs/damage" }
       }
     },

@@ -426,6 +426,7 @@
         "entity_id": { "$ref": "#/$defs/decimal_id" },
         "source_entity_id": { "$ref": "#/$defs/decimal_id" },
         "target_entity_id": { "$ref": "#/$defs/decimal_id" },
+        "monster_def_id": { "type": "string" },
         "correlation_id": { "$ref": "#/$defs/prefixed_id" },
         "damage": { "type": "integer", "minimum": 0 },
         "damage_type": { "type": "string", "enum": ["force", "cold", "poison", "lightning"] },
@@ -644,6 +645,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "pattern_id", "phase_index", "phase_kind"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "boss_summoned_adds" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "pattern_id", "phase_index", "phase_kind", "monster_def_id", "amount", "position"] }
         },
         {
           "if": {

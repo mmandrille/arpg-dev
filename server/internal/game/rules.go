@@ -365,16 +365,19 @@ type BossPatternDef struct {
 }
 
 type BossPatternPhase struct {
-	Kind          string       `json:"kind"`
-	DurationTicks int          `json:"duration_ticks"`
-	TelegraphType string       `json:"telegraph_type,omitempty"`
-	FromColor     string       `json:"from_color,omitempty"`
-	ToColor       string       `json:"to_color,omitempty"`
-	HitShape      string       `json:"hit_shape,omitempty"`
-	Shape         string       `json:"shape,omitempty"`
-	Radius        float64      `json:"radius,omitempty"`
-	Width         float64      `json:"width,omitempty"`
-	Damage        *DamageRange `json:"damage,omitempty"`
+	Kind               string       `json:"kind"`
+	DurationTicks      int          `json:"duration_ticks"`
+	TelegraphType      string       `json:"telegraph_type,omitempty"`
+	FromColor          string       `json:"from_color,omitempty"`
+	ToColor            string       `json:"to_color,omitempty"`
+	HitShape           string       `json:"hit_shape,omitempty"`
+	Shape              string       `json:"shape,omitempty"`
+	Radius             float64      `json:"radius,omitempty"`
+	Width              float64      `json:"width,omitempty"`
+	SummonMonsterDefID string       `json:"summon_monster_def_id,omitempty"`
+	SummonCount        int          `json:"summon_count,omitempty"`
+	SummonRadius       float64      `json:"summon_radius,omitempty"`
+	Damage             *DamageRange `json:"damage,omitempty"`
 }
 
 func (d DungeonGenerationRules) LootBandForLevel(levelNum int) (DungeonLootBand, bool) {
@@ -1872,7 +1875,7 @@ func LoadRules(dir string) (*Rules, error) {
 	if bossPatterns.MinimumTelegraphTicks <= 0 {
 		return nil, fmt.Errorf("game: invalid rules boss_patterns.minimum_telegraph_ticks: must be positive")
 	}
-	if err := validateBossPatterns(bossPatterns.Patterns, bossPatterns.MinimumTelegraphTicks); err != nil {
+	if err := validateBossPatterns(bossPatterns.Patterns, bossPatterns.MinimumTelegraphTicks, r.Monsters); err != nil {
 		return nil, err
 	}
 	r.BossPatterns = bossPatterns.Patterns
@@ -2340,59 +2343,6 @@ func validateBossFloorRules(b BossFloorRules, r *Rules) error {
 	} {
 		if point.X < 0 || point.Y < 0 || point.X > b.FloorSize.Width || point.Y > b.FloorSize.Height {
 			return fmt.Errorf("game: invalid rules dungeon_generation.boss_floor.%s: outside floor", label)
-		}
-	}
-	return nil
-}
-
-func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks int) error {
-	if len(patterns) == 0 {
-		return fmt.Errorf("game: invalid rules boss_patterns.patterns: required")
-	}
-	for patternID, pattern := range patterns {
-		if len(pattern.Phases) == 0 {
-			return fmt.Errorf("game: invalid rules boss_patterns.%s.phases: required", patternID)
-		}
-		if pattern.CooldownTicks < 0 {
-			return fmt.Errorf("game: invalid rules boss_patterns.%s.cooldown_ticks: must be non-negative", patternID)
-		}
-		var priorTelegraph *BossPatternPhase
-		for idx, phase := range pattern.Phases {
-			if phase.DurationTicks <= 0 {
-				return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].duration_ticks: must be positive", patternID, idx)
-			}
-			switch phase.Kind {
-			case "telegraph":
-				if phase.DurationTicks < minTelegraphTicks {
-					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].duration_ticks: below minimum telegraph", patternID, idx)
-				}
-				if phase.TelegraphType == "" || phase.HitShape == "" {
-					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: telegraph_type and hit_shape required", patternID, idx)
-				}
-				if phase.Radius <= 0 {
-					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].radius: must be positive", patternID, idx)
-				}
-				if phase.HitShape == "line" && phase.Width <= 0 {
-					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].width: must be positive for line", patternID, idx)
-				}
-				copy := phase
-				priorTelegraph = &copy
-			case "active":
-				if phase.Damage != nil {
-					if priorTelegraph == nil {
-						return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: damage requires prior telegraph", patternID, idx)
-					}
-					if err := validateDamageRange(fmt.Sprintf("boss_patterns.%s.phases[%d].damage", patternID, idx), *phase.Damage); err != nil {
-						return err
-					}
-					if phase.Shape != priorTelegraph.HitShape || phase.Radius != priorTelegraph.Radius || phase.Width != priorTelegraph.Width {
-						return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: active hit predicate must match telegraph", patternID, idx)
-					}
-				}
-			case "recovery":
-			default:
-				return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].kind: %s", patternID, idx, phase.Kind)
-			}
 		}
 	}
 	return nil

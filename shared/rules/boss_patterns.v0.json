@@ -6,7 +6,7 @@
       "phases": [
         {
           "kind": "telegraph",
-          "duration_ticks": 30,
+          "duration_ticks": 20,
           "telegraph_type": "body_color_charge",
           "from_color": "#b77cff",
           "to_color": "#ff0000",
@@ -15,17 +15,17 @@
         },
         {
           "kind": "active",
-          "duration_ticks": 4,
+          "duration_ticks": 3,
           "shape": "melee_contact",
           "radius": 1.6,
           "damage": { "min": 4, "max": 6 }
         },
         {
           "kind": "recovery",
-          "duration_ticks": 20
+          "duration_ticks": 8
         }
       ],
-      "cooldown_ticks": 40
+      "cooldown_ticks": 8
     },
     "ground_slam": {
       "phases": [
@@ -56,7 +56,7 @@
       "phases": [
         {
           "kind": "telegraph",
-          "duration_ticks": 32,
+          "duration_ticks": 20,
           "telegraph_type": "line",
           "from_color": "#b77cff",
           "to_color": "#79b8ff",
@@ -66,7 +66,7 @@
         },
         {
           "kind": "active",
-          "duration_ticks": 4,
+          "duration_ticks": 3,
           "shape": "line",
           "radius": 7.5,
           "width": 1.0,
@@ -74,10 +74,35 @@
         },
         {
           "kind": "recovery",
-          "duration_ticks": 22
+          "duration_ticks": 8
         }
       ],
-      "cooldown_ticks": 45
+      "cooldown_ticks": 8
+    },
+    "summon_wolves": {
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 28,
+          "telegraph_type": "circle",
+          "from_color": "#b77cff",
+          "to_color": "#4fd18b",
+          "hit_shape": "circle",
+          "radius": 3.2
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 3,
+          "summon_monster_def_id": "dungeon_wolf",
+          "summon_count": 2,
+          "summon_radius": 3.2
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 20
+        }
+      ],
+      "cooldown_ticks": 55
     }
   }
 }

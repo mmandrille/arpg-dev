@@ -6,8 +6,8 @@
       "phase_index": 0,
       "kind": "telegraph",
       "start_tick": 0,
-      "end_tick": 29,
-      "duration_ticks": 30,
+      "end_tick": 19,
+      "duration_ticks": 20,
       "telegraph_type": "body_color_charge",
       "hit_shape": "melee_contact",
       "radius": 1.6
@@ -15,9 +15,9 @@
     {
       "phase_index": 1,
       "kind": "active",
-      "start_tick": 30,
-      "end_tick": 33,
-      "duration_ticks": 4,
+      "start_tick": 20,
+      "end_tick": 22,
+      "duration_ticks": 3,
       "shape": "melee_contact",
       "radius": 1.6,
       "damage": { "min": 4, "max": 6 }
@@ -25,15 +25,15 @@
     {
       "phase_index": 2,
       "kind": "recovery",
-      "start_tick": 34,
-      "end_tick": 53,
-      "duration_ticks": 20
+      "start_tick": 23,
+      "end_tick": 30,
+      "duration_ticks": 8
     }
   ],
-  "cooldown_ticks": 40,
+  "cooldown_ticks": 8,
   "dodge_case": {
     "player_starts_in_contact": true,
-    "break_contact_before_tick": 29,
+    "break_contact_before_tick": 19,
     "expected_damage": 0
   }
 }

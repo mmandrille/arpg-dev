@@ -130,6 +130,7 @@ type entity struct {
 	bossPhaseEnds         uint64
 	bossCooldownEnds      uint64
 	bossActiveHit         map[uint64]bool
+	bossPhaseExecuted     bool
 	bossPhaseAim          Vec2
 	bossPhaseHasAim       bool
 	itemDefID             string

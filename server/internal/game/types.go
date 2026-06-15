@@ -391,6 +391,7 @@ type Event struct {
 	EntityID           string                  `json:"entity_id,omitempty"`
 	SourceEntityID     string                  `json:"source_entity_id,omitempty"`
 	TargetEntityID     string                  `json:"target_entity_id,omitempty"`
+	MonsterDefID       string                  `json:"monster_def_id,omitempty"`
 	BossTemplateID     string                  `json:"boss_template_id,omitempty"`
 	CorrelationID      string                  `json:"correlation_id,omitempty"`
 	Damage             *int                    `json:"damage,omitempty"`

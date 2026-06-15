@@ -1,0 +1,23 @@
+server/internal/game/combat_aggro_test.go
+  s_f9c66ca3cb4339::t_7f4dd99a6436c0 1-280
+server/internal/game/combat_control_test.go
+  s_f9c66ca3cb4339::t_671069e14acb0f 1-548
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_3511141df43d27 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b6bcf276626557ca8d064fe9089d94652add8c4d",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

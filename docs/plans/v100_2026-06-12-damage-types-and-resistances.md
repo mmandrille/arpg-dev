@@ -7,8 +7,6 @@ Tech stack: Shared JSON/schema, Go sim/rules/tests, protocol event schema, Pytho
 
 ## Baseline and shortcut decision
 
-Builds on v99 `rogue-skill-mechanics` plus the v100 engineering review gate. No client UI, camera, inventory presentation, or art is in scope, so the Godot plugin adoption checklist is not required for this slice.
-
 ## File map
 
 | Action | Path | Responsibility |

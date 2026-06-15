@@ -8,7 +8,6 @@ Tech stack: shared JSON rules, Go rule tests, Python validator tests, lifecycle 
 
 ## Baseline And Shortcut Decision
 
-Builds on v134 unique inspection UI. Godot plugin adoption is not applicable because this slice is a
 data/catalog expansion with server validation tests and no new client presentation code.
 
 ## File Map

@@ -21,7 +21,6 @@ Tech stack: Bash ratchet script, Make fragments, Python validator + pytest, Mark
   (mirrors `validate_unique_items.py` / `validate_i18n.py`); the `scripts/check-file-size-ratchet.sh`
   + `.maintainability/file-size-baseline.tsv` ratchet; the `make/ci.mk` `ci:`/`maintainability:`
   targets.
-- No Godot plugin adoption note required: no client UI/camera/art is in scope (that is downstream
   proposal #4).
 - **Decisions locked with user:** (1) touch-to-shrink = policy + lower-bound ratchet, no git-diff;
   (2) downstream #2/#4/#5 stay roadmap-only in the v138 spec — no pre-created stubs, no folding #5 in.

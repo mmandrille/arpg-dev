@@ -17,7 +17,6 @@ Godot shortcut decision for this client presentation work:
 | Existing humanoid/player model path | Borrow/reuse | The boss intentionally reuses this model at `2.0x` scale with special colors. |
 | Existing `ModelReactionController` / animation controller path | Borrow/reuse | Boss hit/death can use the v34 character-like reaction path. |
 | Built-in `AnimationTree` | Reject for v35 | No new skeletal animation state is needed. |
-| LimboAI / behavior-tree plugin | Reject | Boss timing is authoritative Go sim state, not client AI. |
 | New boss asset pack | Reject | Spec requires model reuse, not new production art. |
 | New telegraph asset pack | Reject for first pass | Material/tint charge or code-created primitive/decal is enough and easier to test headlessly. |
 

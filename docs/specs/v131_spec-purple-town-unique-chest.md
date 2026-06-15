@@ -18,7 +18,6 @@ normal inventory updates.
 
 - No fixed named unique item catalog or flavor-name packages.
 - No new player-facing unique inspection UI beyond existing inventory item payloads/tooltips.
-- No external Godot plugin adoption.
 - No change to natural dungeon/drop rarity odds.
 - No support for reopening the chest to duplicate contents in the same session.
 
@@ -63,11 +62,6 @@ normal inventory updates.
 - `make bot scenario=purple_town_unique_chest` is the targeted gameplay proof.
 - `make ci` is the final closeout gate.
 
-## Plugin Shortcut Decision
-
-Reviewed `docs/researchs/godot-plugins-and-shortcuts.md`.
-
-Decision: reject external plugin adoption. This slice adds server-authored debug/test content and
 uses existing client interactable rendering; inventory authority and item payloads stay in Go and
 shared JSON.
 

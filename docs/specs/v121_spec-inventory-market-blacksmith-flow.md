@@ -16,7 +16,6 @@ the market publish/offer or blacksmith upgrade action.
 - No change to market ownership, offer acceptance, purchase, listing cancellation, or upgrade math.
 - No new account-stash browsing requirement for market publish, market offers, or blacksmith upgrade.
 - No upgrade recipes, success chance, bricking, material costs, or equipped-item upgrades.
-- No external Godot inventory plugin adoption.
 
 ## Contract changes
 
@@ -57,10 +56,3 @@ Manual visual proof command after implementation:
 make bot-visual scenario=35_market_board_ui
 make bot-visual scenario=39_blacksmith_upgrade_ui
 ```
-
-## Plugin / shortcut decision
-
-`docs/researchs/godot-plugins-and-shortcuts.md` was checked. Decision: **reject new plugin
-adoption**. This slice extends the existing in-repo inventory, market, blacksmith, draggable-window,
-and client-bot patterns; importing GLoot or another inventory plugin would add unnecessary adapter
-surface for a focused town-service interaction update.

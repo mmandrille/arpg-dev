@@ -45,15 +45,6 @@
 | Modify | `client/scripts/smoke.gd` or create `client/tests/test_inventory_ui.gd` | Headless panel/model checks |
 | Modify | `client/tests/test_golden.gd` | Validate inventory drop golden if practical |
 | Modify | `PROGRESS.md` | Add v13 completion notes when shipped |
-
-## Plugin adoption
-
-- [x] Consult `docs/researchs/godot-plugins-and-shortcuts.md`.
-- [x] Decision: **reject** GLoot, Godot-Inventory, Expresso Inventory System, Wyvernbox, and RPGNodes for v13.
-- [x] Reason: this slice only needs one weapon slot, a small bag grid, tooltips, and drag/drop intent sending. A plugin would add client-side inventory logic surface that must be stripped or wrapped, which is unnecessary for the first authoritative proof.
-
----
-
 ## Task 1: Shared Contracts, Rules, And Golden
 
 - [x] **Step 1.1:** Add `unequip_intent` and `drop_intent` to `messages.v0.schema.json` and `envelope.v0.schema.json`.

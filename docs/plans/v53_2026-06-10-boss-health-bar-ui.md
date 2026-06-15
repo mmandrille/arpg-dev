@@ -7,7 +7,6 @@ Date: 2026-06-10
 
 - Adopt: existing Godot `Control`/`CanvasLayer` UI patterns and the current client entity debug-state pattern.
 - Borrow: sizing/color language from `monster_health_bar.gd` and the existing HUD palette.
-- Reject: external Godot plugins, demos, and asset packs. The slice is a narrow in-repo UI layer over existing boss state.
 
 ## Tasks
 

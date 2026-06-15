@@ -10,7 +10,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - character-scoped progression
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
 - [`v26_spec-character-stats-and-leveling.md`](v26_spec-character-stats-and-leveling.md) - durable level, stat points, stats, derived stat formulas
 - [`v28_spec-full-equipment-and-belt-hotbar.md`](v28_spec-full-equipment-and-belt-hotbar.md) - hotbar, paper-doll equipment, handedness
 - [`v31_spec-combat-stat-effects-and-feedback.md`](v31_spec-combat-stat-effects-and-feedback.md) - effective stat aggregation and combat event metadata
@@ -60,7 +59,6 @@ server-owned data.
 - No animation-speed scaling or production VFX/audio. Placeholder projectile/impact presentation is
   acceptable.
 - No final combat balance pass. Numbers are first-pass deterministic tuning only.
-- No external RPG/skill plugin adoption as gameplay authority. The plan must record the plugin
   adoption checklist result; expected default is to extend in-repo UI and use shared rules for
   gameplay.
 
@@ -380,12 +378,6 @@ The skill slot is similarly small:
 - The slot gradually re-enables based on `remaining_ticks / total_ticks`.
 - If the server rejects the cast, the slot returns to the last authoritative available state and
   shows the existing kind of status/error feedback.
-
-Plugin adoption note: client presentation touches UI, so the implementation plan must record the
-Godot plugin adoption checklist. Expected decision: reject RPG/skill-tree logic plugins because
-the server owns skill progression and combat; optionally borrow only simple cooldown-slot UI
-patterns if the plan finds a low-cost reference.
-
 ## 8. Test And Bot Proof
 
 - `make validate-shared` validates progression changes, skill rules, weapon attack speed, and the

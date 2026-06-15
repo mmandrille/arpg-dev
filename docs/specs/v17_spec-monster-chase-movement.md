@@ -11,7 +11,6 @@ Related:
 - [`v9_spec-solid-collision-and-obstacles.md`](v9_spec-solid-collision-and-obstacles.md) — wall/monster/player collision reused
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) — retaliation remains hit-triggered only
 - [`../../PROGRESS.md`](../../PROGRESS.md)
-- [`../godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md) — LimboAI deferred
 - ADR-0001 (authoritative server, shared rules-as-data, golden fixtures, replay determinism)
 - ADR-0007 (client-only locomotion presentation from authoritative position deltas)
 
@@ -51,7 +50,6 @@ After this slice:
 
 The proof is **shared behavior rules → server chase sim → pathfinder reuse → collision → golden
 fixtures → bot scenarios → client locomotion**, not proactive monster attacks, ranged monster
-AI, or LimboAI adoption.
 
 ## 2. Current Problems
 
@@ -82,7 +80,6 @@ targets (`walk_to_monster`, `action_once_until_event`). Any movement feature mus
 - **No proactive monster attacks** (melee swing, contact damage, ranged fire). Retaliation
   remains **on successful player hit** only (v4). Monster melee attack is a follow-up slice.
 - **No monster attack animation** when retaliating (still v4 non-goal).
-- **No behavior trees, LimboAI, or client-side AI authority.**
 - **No group aggro, assist calls, flanking, or separation steering.**
 - **No monster click-to-move or player commands over monsters.**
 - **No new client intents or protocol envelope bump** beyond optional new `event_type` strings
@@ -304,14 +301,7 @@ Large floor, player at `(2, 5)`, monster at `(4, 5)`, `training_dummy_chase` wit
 
 **No server animation state on wire.**
 
-### 4.10 Plugin adoption
-
-Consult [`docs/godot-plugins-and-shortcuts.md`](../godot-plugins-and-shortcuts.md).
-
-Decision: **reject LimboAI for v17**.
-
 - Chase is fully server-owned; client only renders `entity_update` deltas.
-- LimboAI remains P3 backlog for ambient **client** BT if server AI grows complex later.
 
 ## 5. Bot scenarios
 
@@ -501,7 +491,6 @@ make bot-visual scenario=10_chase_maze.json   # optional
 | **Monster melee attack** — proactive swing when in range, `player_damaged` without player attacking first | v17 chase + v4 events |
 | **Monster ranged AI** | v12 projectiles |
 | **Jump / gap traversal** | [`docs/ideas/keyboard-jump-and-gaps.md`](../ideas/keyboard-jump-and-gaps.md) |
-| **LimboAI client presentation layer** | Only if server BT becomes too heavy |
 
 ## 11. Architecture diagram
 

@@ -15,9 +15,6 @@ Baseline is v51 `mystery-seller-core` on `main`. Reuse:
 - v30 generated monster rarity scaling for HP, attack damage, XP, tint, scale, and loot depth.
 - v37 combat-control fixes around projectile aggro and stable combat event helpers.
 - Current `main.gd` monster presentation and bot debug state.
-
-Godot plugin shortcut decision: **reject external plugin or asset adoption for v52 implementation**. The adoption checklist in `docs/researchs/godot-plugins-and-shortcuts.md` was reviewed. LimboAI is unnecessary because the authoritative AI is in Go, and Kenney/other asset packs are unnecessary for the requested minimal visual distinction. Build a small procedural bow marker in `main.gd` and defer production archer art/VFX/audio.
-
 Key implementation decisions:
 
 - Add `dungeon_archer` as a separate monster rule with `behavior: "chase"`, `attack_mode: "ranged"`, `attack_range`, `projectile_speed`, and `projectile_def_id`.

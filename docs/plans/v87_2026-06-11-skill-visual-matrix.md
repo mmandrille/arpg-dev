@@ -9,7 +9,6 @@ Tech stack: Makefile, Python tooling, pytest.
 
 ## Baseline and shortcut decision
 
-Builds on v86 `skill-visual-command`. Godot plugin decision: reject, because this slice only reports
 existing coverage.
 
 ## File map

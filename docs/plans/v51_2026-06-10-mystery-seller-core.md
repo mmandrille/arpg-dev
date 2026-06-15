@@ -14,9 +14,6 @@ Baseline is v50 `account-stash-storage` on `main`. Reuse:
 - v47 session-start shop stock snapshots for replay-safe historical shop reconstruction.
 - v50 town interactable placement pattern and actor-private fanout discipline.
 - Existing `ShopPanel` and bot hooks as the client UI surface.
-
-Godot plugin shortcut decision: **reject external plugin adoption for v51 implementation**. The adoption checklist in `docs/researchs/godot-plugins-and-shortcuts.md` was reviewed. GLoot, Godot-Inventory, and Wyvernbox are unnecessary because this slice extends the existing display-only shop panel; hidden offer state, item reveal, price validation, and purchase mutation must remain server-owned.
-
 Key implementation decisions:
 
 - Add `town_mystery_seller` as a separate interactable with `shop_id: "town_mystery_seller"` so vendor and mystery seller stock lifecycles stay independent.
@@ -328,5 +325,4 @@ make ci
 - No paid reroll, clock/timer refresh, daily seller, or account-wide seller stock.
 - No stash overflow delivery, market delivery, refunds, binding, or special resale rules.
 - No new item families, affix grammar, item levels, upgrade resources, or final item economy bands.
-- No separate mystery seller UI plugin or production NPC art/audio.
 - No personal loot, co-op trade, shared gold, or remote cross-session push.

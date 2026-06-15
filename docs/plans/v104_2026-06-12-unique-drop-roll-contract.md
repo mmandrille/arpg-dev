@@ -9,7 +9,6 @@ Tech stack: shared JSON/schema, Go rules loader and item roller, golden fixture,
 
 ## Baseline And Shortcut Decision
 
-Builds on v103's `unique_effects.v0.json`. No Godot plugin adoption applies because there is no
 client presentation work in v104.
 
 ## File Map

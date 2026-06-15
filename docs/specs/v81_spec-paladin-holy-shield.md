@@ -18,7 +18,6 @@ see that Holy Shield is running near the skill/hotbar UI instead of relying only
 
 ## Non-goals
 
-- No production VFX, audio, particle packs, or external Godot plugin dependency.
 - No invulnerability, reflect damage, thorns, taunt, enemy blind, or absorb shield resource.
 - No passive skill tree, respec, or new class selection behavior.
 - No protocol rewrite; additive event/entity/effect metadata is acceptable if required.
@@ -76,5 +75,4 @@ see that Holy Shield is running near the skill/hotbar UI instead of relying only
 - Existing skill effect state is mostly local-player/Rage-shaped. The slice may need to generalize
   active skill effects from one global map to per-player effect state; that is in scope because it
   is required for an area ally buff.
-- Adoption checklist: reject external plugins/assets. This is small code-native presentation using
   existing client effect/debug patterns, with server authority unchanged.

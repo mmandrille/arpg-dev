@@ -8,8 +8,6 @@ Tech stack: Go tests and maintainability ratchet.
 
 ## Baseline and shortcut decision
 
-Builds on v168. No Godot plugin decision is required; this is Go test-only maintenance.
-
 ## File map
 
 | Action | Path | Responsibility |

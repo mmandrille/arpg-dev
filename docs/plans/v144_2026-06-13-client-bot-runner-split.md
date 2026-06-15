@@ -11,7 +11,6 @@ Tech stack: Godot GDScript, client unit tests, headless client bot scenarios, ma
 
 ## Baseline and shortcut decision
 
-Builds on v143 `client-bot-facade`. Shortcut decision: reject external plugins/addons because this
 is internal test-runner infrastructure, not UI/art/camera/asset work.
 
 ## File map

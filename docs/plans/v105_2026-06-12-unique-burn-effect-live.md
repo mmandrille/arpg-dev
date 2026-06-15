@@ -7,7 +7,6 @@ Implement live server behavior and client presentation for `everburning_wound`.
 ## Client shortcut decision
 
 - **Reject addon adoption:** the visual cue is a small status marker and tint layered onto existing
-  entity presentation. A plugin would add maintenance surface without solving an unsolved problem.
 - **Borrow pattern:** reuse the existing in-repo status marker pattern from
   `player_status_effect_markers.gd` and `main.gd` poison/slow tint handling.
 

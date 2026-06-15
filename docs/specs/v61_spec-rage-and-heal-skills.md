@@ -17,7 +17,6 @@ Skill behavior remains server-authoritative and data-driven. The skill catalog s
 
 - No user-authored executable plugin/method dispatch from JSON.
 - No new protocol intent field for ground targeting; Heal reuses existing `target_id` or `direction` cast payloads for this slice.
-- No hostile-area damage, debuffs, resurrect, party UI overhaul, persistent buff storage, or new external Godot plugin adoption.
 - No balance pass beyond the requested mana costs, requirements, durations, and rank scaling.
 
 ## Acceptance Criteria
@@ -54,5 +53,3 @@ Skill behavior remains server-authoritative and data-driven. The skill catalog s
 - Rage active stat effects are runtime-only and not durable progression; requirements continue to use unbuffed base stats.
 
 ## Shortcut Decision
-
-Godot plugin research checked for client presentation work. Decision: reject external plugins for this slice. Existing server events, player/equipment visual roots, and floating text presentation are sufficient for the requested scaling and healing feedback.

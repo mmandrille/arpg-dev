@@ -7,8 +7,6 @@ Tech stack: Go sim, Python protocol bot, SDD docs.
 
 ## Baseline and shortcut decision
 
-Builds on v158 `dungeon-elite-side-objective`. Existing plugins/assets: reject; this is server-side objective state using existing chest presentation.
-
 ## File map
 
 | Action | Path | Responsibility |

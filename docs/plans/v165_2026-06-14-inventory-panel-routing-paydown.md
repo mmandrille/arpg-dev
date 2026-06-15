@@ -8,7 +8,6 @@ Tech stack: Godot GDScript client and headless client unit tests.
 
 ## Baseline and shortcut decision
 
-Builds on v163 `inventory-transfer-router` and v164 `session-browser-filters`. Godot plugin
 adoption: reject, because this is internal GDScript routing extraction with no new UI/art/camera.
 
 ## File map

@@ -4,7 +4,6 @@ Status: In progress (2026-06-06)
 
 ## 1. Adoption checklist
 
-- **License:** reject external art/plugin dependency for this slice. Use in-repo generated shapes
   and shared JSON metadata only.
 - **Godot version:** compatible with existing Godot 4.6.x project; no addon import.
 - **Authoritative boundary:** presentation metadata only; Go server/protocol unchanged.
@@ -12,8 +11,6 @@ Status: In progress (2026-06-06)
 - **Maintenance:** no new third-party dependency.
 - **Integration cost:** low; validate via existing `make validate-shared`, `make client-unit`,
   `make bot-client`, and `make ci`.
-- **Decision:** **borrow/reject**. Borrow the plugin doc recommendation to keep UI display-only;
-  reject GLoot/Godot-Inventory and external asset packs because v15 only needs distinct current
   item presentation, not a new inventory framework or production art pass.
 
 ## 2. File map

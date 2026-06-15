@@ -54,7 +54,6 @@ deferred.
 - No item requirement expansion beyond level checks already introduced by v23. Stat requirements
   may be represented in data later but are not enforced in this slice.
 - No production character-sheet art or audio.
-- No plugin-owned stat logic. Client-side plugins may only be used or borrowed for presentation.
 
 ## 3. Files to create or modify
 
@@ -92,8 +91,6 @@ tools/bot/scenarios/client/09_character_stats_panel.json   - Godot client UI pro
 PROGRESS.md                                           - lifecycle update when v26 ships
 ```
 
-The implementation plan must run the Godot plugin adoption checklist from
-`docs/researchs/godot-plugins-and-shortcuts.md`. Expected decision: reject stat/RPG logic plugins
 because the server owns progression; optionally borrow only UI layout ideas.
 
 ## 4. Data shapes
@@ -440,7 +437,6 @@ historical session began.
 | 6 | Armor, crit, hit chance, attack speed, movement speed, and mana are computed/displayed but mostly deferred for gameplay. | Prevents one slice from becoming a full combat rebalance while preserving the target data shape. |
 | 7 | Stat spending is an intent, not a REST-only character API. | Keeps the same authoritative realtime input/replay model used by gameplay actions. |
 | 8 | Character progression has a session-start snapshot. | Preserves v22's replay boundary and prevents historical replay drift. |
-| 9 | Client UI is custom or borrowed presentation only; no plugin-owned stat logic. | Preserves ADR-0001 server authority and shared-rules discipline. |
 
 ## 11. Open questions
 

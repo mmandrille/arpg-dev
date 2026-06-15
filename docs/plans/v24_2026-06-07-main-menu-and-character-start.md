@@ -11,7 +11,6 @@ v24 builds on v23 `item-templates-and-rolled-drops`, especially v22/v23 characte
 
 Godot shortcut adoption checklist:
 
-- **Decision:** reject new plugin adoption.
 - **Reason:** this slice needs a small main menu, character picker, name prompt, settings panel, and pause overlay. Existing client UI is custom GDScript, the UI has no complex inventory/grid logic, and adding an addon would add more CI/headless integration work than it saves.
 - **Borrow:** keep using in-repo Control nodes and patterns from existing `inventory_panel.gd`, `consumable_bar.gd`, and `waypoint_panel` construction. No external art pack is needed for v24.
 
@@ -215,4 +214,3 @@ make ci
 - Persistent dungeon maps, floor drops, corpses, opened doors, current level, player HP, or death/checkpoint state.
 - Settings beyond fixed window size.
 - Production menu art, audio, and animated title treatment.
-- Godot UI plugin adoption.

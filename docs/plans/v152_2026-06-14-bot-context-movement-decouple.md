@@ -15,7 +15,6 @@ Tech stack: Python protocol bot, pytest, both maintainability ratchets, full bot
 Builds on v151 `extraction-independence-gate`, which baselined 43 `helpers=globals()` sites and froze
 new `run.py` splits. This slice is the sanctioned path the v151 policy left open: "unless a future
 slice introduces a typed bot runtime context and replaces helper-global wrappers directly." Python
-bot tooling only; no Godot/plugin shortcut decision needed.
 
 ## File map
 

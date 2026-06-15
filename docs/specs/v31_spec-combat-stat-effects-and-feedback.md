@@ -13,7 +13,6 @@ Related:
 - [`v30_spec-monster-rarity-and-loot-scaling.md`](v30_spec-monster-rarity-and-loot-scaling.md) - generated monster rarity and scaled HP/damage/XP
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - dungeon progression and character-scoped state
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist if client UI work expands
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 ## 1. Purpose
@@ -448,6 +447,4 @@ until `make ci` is green.
 - ADR-0001 D8: deterministic combat roll order is pinned for replay and agent debugging.
 - ADR-0008: character progression remains character-scoped; session combat state remains replayable.
 
-The plan must run the Godot plugin adoption checklist only if it expands client UI beyond the
-existing in-repo Control/menu/stat-panel patterns. Expected decision: reject gameplay/stat plugins;
 borrow only small UI presentation ideas if useful.

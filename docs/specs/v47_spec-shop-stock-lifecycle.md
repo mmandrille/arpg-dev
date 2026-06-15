@@ -11,7 +11,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative server, shared rules as data, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - town hub, character persistence, waypoints
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - client UI shortcut checklist
 - [`v41_spec-town-vendor-gold-sink.md`](v41_spec-town-vendor-gold-sink.md) - first town vendor, fixed/generated offers, buy/sell, pricing
 - [`v42_spec-vendor-appraisal-and-item-comparison.md`](v42_spec-vendor-appraisal-and-item-comparison.md) - server-authored shop rows and comparisons
 - [`v43_spec-equipment-requirements-and-preview.md`](v43_spec-equipment-requirements-and-preview.md) - shop requirement status and equip previews
@@ -43,7 +42,6 @@ a level 24 character with dungeon depth 50 rolls source depths `25..50`. If the 
 greater than or equal to the deepest achieved dungeon depth, the level floor is ignored and the
 source depth rolls from any achieved depth.
 
-Client shortcut decision: reject external shop/inventory plugin adoption for this slice. The
 existing `ShopPanel`, inventory panel, item tooltip, drag/drop, and client bot hooks already cover
 the required UI surface. The plan should still record the adoption checklist result.
 

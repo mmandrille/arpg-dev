@@ -36,11 +36,6 @@ Baseline is v45 `menu-create-join-flow` on `main`. Reuse:
   debug state.
 - Existing Python protocol helpers in `tools/bot/run.py` for dev login, character creation, listed
   co-op session creation, WebSocket connect, and `client_ready`.
-
-Godot plugin shortcut decision: **reject** external lobby/UI plugins for v46. The slice is a
-testability and routing proof over existing in-repo `Control` panels and existing backend session
-APIs. GodotSteam or lobby templates remain deferred to a platform/lobby slice.
-
 Implementation decisions:
 
 - Add scenario-level preflight support to `scripts/bot_client.sh`, triggered only by scenarios that

@@ -17,7 +17,6 @@ Tech stack: Go authoritative sim, shared JSON contracts, Godot client, Python pr
 
 Godot shortcut adoption checklist:
 
-- **Decision:** reject plugin adoption (same as v19).
 - **Reason:** town is placeholder interactables + existing waypoint panel; no new UI surface.
 - **Borrow:** existing stair/teleporter meshes, waypoint panel, level HUD hide-at-zero behavior.
 

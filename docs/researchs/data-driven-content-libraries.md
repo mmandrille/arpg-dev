@@ -154,5 +154,4 @@ Behavior additions must include:
 - No executable scripts in JSON.
 - No free-form formula expression language.
 - No persisted file-path references.
-- No plugin-owned gameplay authority.
 - No compatibility layer for stale local development data unless a production migration exists.

@@ -131,7 +131,6 @@ emitted as recipient-scoped deltas. If implementation requires private change ow
 the wire, stop and revise the spec/plan before changing protocol shape.
 
 Client note: no Godot UI, art, camera, or inventory presentation work is expected. The plan does not
-need a plugin adoption decision unless implementation discovers a real client-visible change.
 
 ## 5. Data And Behavior Draft
 

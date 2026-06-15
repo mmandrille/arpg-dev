@@ -19,4 +19,3 @@ interactive play loop without changing the authoritative client/server boundary.
   checks were updated for the town preamble and town waypoint row.
 
 **Explicit non-goals:** no character-scoped persistence, player-facing resume, safe-zone combat
-rules, NPCs/vendors/stash, production town art, or plugin adoption.

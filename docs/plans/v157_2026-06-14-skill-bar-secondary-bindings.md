@@ -5,7 +5,6 @@ Spec: `docs/specs/v157_spec-skill-bar-secondary-bindings.md`
 
 ## Adoption checklist
 
-- Existing Godot plugins/assets: reject. This is input/protocol/UI state, not a new UI package or art need.
 - Existing local systems: adopt `set_skill_bindings_intent`, skill panel binding display, and current bot scenario runner.
 
 ## Tasks

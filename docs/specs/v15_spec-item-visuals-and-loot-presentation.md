@@ -25,7 +25,6 @@ Existing state:
 - No server gameplay changes, new intents, protocol schema bump, item stats, stack splitting,
   stash, vendors, crafting, consumable use, or character-scoped persistence.
 - No production art pipeline, remote asset patcher, texture budget, or external asset import.
-- No plugin adoption for inventory logic.
 
 ## 4. Shared presentation contract
 
@@ -55,4 +54,3 @@ The data may be consumed by any client renderer. The Go server must not read it.
 - Client bot can assert presentation metadata is visible through `get_bot_state()` for inventory
   and loot items.
 - `make ci` remains the final gate.
-

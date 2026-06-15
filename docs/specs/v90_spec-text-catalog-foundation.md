@@ -81,6 +81,3 @@ catalog shape, loader, fallback behavior, and tests that the Spanish slice will 
   and starts migrating client presentation paths without requiring one giant content rewrite.
 
 ## Shortcut decision
-
-Godot plugin adoption: reject external plugins/assets. Localization only needs shared JSON, a small
-Godot loader, and existing UI/client tests.

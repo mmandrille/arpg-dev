@@ -9,13 +9,6 @@ Tech stack: Godot GDScript, headless client tests, SDD docs.
 ## Baseline And Shortcut Decision
 
 Baseline is v126 `skill-validation-split` on `main`, committed as `77073168`.
-
-Godot plugin adoption checklist:
-- Adopt: none.
-- Borrow pattern: none.
-- Reject: inventory/UI plugins from `docs/researchs/godot-plugins-and-shortcuts.md`; this slice is
-  internal bridge wiring over existing panels, not a new inventory UI surface.
-
 Note: the worktree contains unrelated user changes around client settings, market refresh, and
 server test cleanup. This slice preserves those changes and stages only v127-owned files.
 

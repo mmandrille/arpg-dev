@@ -7,7 +7,6 @@ Tech stack: Go sim, shared JSON rules, Python bot scenario, lifecycle docs.
 
 ## Baseline and shortcut decision
 
-Builds on v105 `everburning_wound` and the v106 catalog entries already committed. No Godot plugin
 adoption applies because this slice does not add client UI, camera, art, or presentation systems.
 
 ## File map

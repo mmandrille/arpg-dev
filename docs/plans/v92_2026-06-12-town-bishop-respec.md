@@ -11,16 +11,6 @@ Tech stack: shared JSON rules and schemas, Go sim/protocol schemas, Python proto
 
 Builds on v91 `spanish-language-selector` on branch `main`. Reuses the existing interactable,
 action-intent, progression, skill progression, gold, cooldown, and service-panel patterns.
-
-Godot plugin/asset checklist:
-- License: no external asset/plugin.
-- Godot version: in-repo primitive GDScript node only.
-- Authoritative boundary: client sends intent; server owns all outcomes.
-- Agent ergonomics: text-only GDScript and JSON.
-- Maintenance: no new dependency.
-- Integration cost: small panel plus primitive model.
-- Slice scope decision: reject external plugins/assets; build a minimal red bishop primitive/model.
-
 ## File map
 
 | Action | Path | Responsibility |

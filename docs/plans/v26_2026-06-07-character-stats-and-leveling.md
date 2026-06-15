@@ -9,12 +9,6 @@ Tech stack: shared JSON schemas/goldens, Go authoritative sim/store/realtime/rep
 
 v26 builds on v25 `treasure-classes-and-guarded-chests`, especially v22 character-scoped persistence, v23 rolled item payloads, v24 named character session start, and v25 dungeon reward loops. The current player HP model is a fixed `playerStartHP` in `server/internal/game/sim.go`, weapon damage already resolves through item rules/rolled stats, and protocol snapshots/deltas already expose player `hp`/`max_hp`, inventory, equipment, and recent events.
 
-Godot shortcut adoption checklist:
-
-- **Decision:** reject new plugin adoption for stat logic and this first character sheet.
-- **Reason:** RPG/stat plugins conflict with the authoritative server boundary because they want to own formulas or local character state. The UI is compact enough to build from existing in-repo `Control` patterns.
-- **Borrow:** use layout/style patterns from `inventory_panel.gd`, `consumable_bar.gd`, and the current waypoint panel construction. Revisit GLoot/Godot-Inventory only for future stash/inventory complexity, not for v26 stats.
-
 Spec review notes resolved during planning:
 
 - The spec's open questions are locked to their defaults: `str` affects melee/fixed weapon damage first; `magic` is display-only before spells; dungeon mobs get positive XP; UI spends one point per click; menu summaries are deferred; dead players cannot allocate stats; the XP curve is a small explicit table with `level_cap`.
@@ -271,4 +265,3 @@ make ci
 - Stat requirements for items beyond existing level requirements.
 - Class selection, respec/stat reset, character delete/rename, and menu character summaries.
 - Infinite/generated XP curve and real balance pass beyond the v26 explicit table.
-- Production character-sheet art/audio and external UI plugin adoption.

@@ -9,7 +9,6 @@ Tech stack: Godot GDScript client and headless client unit tests.
 
 ## Baseline and shortcut decision
 
-Builds on v82 `realtime-fanout-level-snapshot`. No Godot plugin/adoption checklist is needed:
 this is defensive parsing in existing GDScript, not UI, camera, inventory presentation, or art.
 
 ## File map

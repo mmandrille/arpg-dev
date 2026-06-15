@@ -8,10 +8,6 @@ Tech stack: shared JSON/schema, Go sim, Python protocol bot, Godot presentation,
 ## Baseline And Shortcut Decision
 
 Baseline is v123 `ranger-piercing-and-pinning-shots` on `main`, committed as `107537b7`.
-
-Godot plugin adoption checklist: reject external plugins/assets. Volley uses existing code-native
-skill icon and projectile presentation helpers.
-
 ## File Map
 
 | Action | Path | Responsibility |
@@ -93,4 +89,3 @@ Decision:
 - [x] `make bot scenario=60_ranger_volley_and_visual_showcase`
 - [x] `make client-unit`
 - [x] `make ci`
-

@@ -10,10 +10,6 @@ Tech stack: shared JSON/schema, Python shared validator, Godot client scripts/te
 Baseline is v89 `class-second-combat-skills` plus the v90 engineering review cleanup commit on
 `main`. This slice starts the localization work requested for menus, skills, stats, future quests,
 monster names, and other visible text.
-
-Godot plugin adoption checklist: reject external plugins/assets. This is data/loader/UI wiring, not
-visual UI art.
-
 ## File map
 
 | Action | Path | Responsibility |

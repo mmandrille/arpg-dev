@@ -12,9 +12,6 @@ Baseline is v47 `shop-stock-lifecycle` on `main`. Reuse:
 - v30 generated monster rarity scaling and golden style.
 - v33/v38 co-op session membership, actor-tagged inputs, recipient-scoped snapshots/deltas, and N-member replay.
 - v46 real Join Game proof as regression coverage, but no client UI change is expected.
-
-Godot plugin shortcut decision: **not applicable**. v48 has no client UI, camera, art, inventory presentation, or placeholder asset work. If implementation unexpectedly touches Godot presentation, revisit `docs/researchs/godot-plugins-and-shortcuts.md` and record an adoption decision before editing client code.
-
 ## File map
 
 | Action | Path | Responsibility |

@@ -68,8 +68,6 @@ existing stat and skill panels.
 
 ## Client Shortcut Decision
 
-The plan must record the Godot plugin/asset adoption checklist. Default decision for this slice:
-reject external plugins and borrow no third-party asset, because the requested model can be a small
 in-repo primitive composition and no reusable UI framework is needed for a one-option service menu.
 
 ## Open Questions And Risks

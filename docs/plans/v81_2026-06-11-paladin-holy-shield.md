@@ -11,7 +11,6 @@ Tech stack: shared JSON schemas, Go sim, Python protocol bot, Godot client, life
 ## Baseline and shortcut decision
 
 Builds on v61 Rage/Heal, v70 class gates, v73-v75 skill/status UI chrome, and v80 floating
-presentation patterns. Godot plugin adoption checklist: reject external plugins/assets because the
 slice needs a small code-native halo and status row, not a reusable VFX framework.
 
 ## File map

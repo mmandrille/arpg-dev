@@ -9,7 +9,6 @@ Related:
 - [`v18_spec-dungeon-levels-and-stairs.md`](v18_spec-dungeon-levels-and-stairs.md)
 - [`v19_spec-teleporters-and-waypoint-ui.md`](v19_spec-teleporters-and-waypoint-ui.md)
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) — D2 level 0 = town; D4 town waypoint always active
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md)
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 
 Review status: Approved after gap review against v18/v19 as-built code. Closed gaps:
@@ -42,7 +41,6 @@ to a future slice.
 - No character-scoped inventory, waypoint, quest, or campaign persistence.
 - No town NPCs, vendors, stash, combat safe-zone rules, or production town art.
 - No monster or loot density generation beyond existing generated dungeon placeholders.
-- No new UI plugin adoption. Existing Godot placeholder stair/teleporter presentation is reused.
 - No deletion of the existing resume/replay architecture.
 - No player-facing resume flow for `make play`.
 - No town perimeter art or production hub layout — movement bounds only.

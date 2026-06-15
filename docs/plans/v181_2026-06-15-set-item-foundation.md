@@ -7,8 +7,6 @@ Tech stack: shared JSON/schema, Go sim, Godot client tests, lifecycle docs.
 
 ## Baseline and shortcut decision
 
-Builds on v180. Godot plugin checklist: reject external inventory plugins for this slice because existing stash/unique chest UI already renders server-authored item views and supports take/equip testing.
-
 ## File map
 
 | Action | Path | Responsibility |

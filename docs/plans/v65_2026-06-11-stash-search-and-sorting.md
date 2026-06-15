@@ -10,13 +10,6 @@ Tech stack: Godot `StashPanel`, client bot runner/controller, client unit tests,
 ## Baseline and shortcut decision
 
 Baseline is v64 `mystery-seller-paid-reroll` on `main`.
-
-Godot plugin shortcut decision: **borrow pattern only / reject adoption**. The adoption checklist in
-`docs/researchs/godot-plugins-and-shortcuts.md` was reviewed. Inventory UI plugins such as GLoot or
-Godot-Inventory remain useful references for filtering controls, but this slice only adds a small
-display adapter to the in-repo server-backed stash panel. Adopting a plugin would add unnecessary
-state authority risk.
-
 ## File map
 
 | Action | Path | Responsibility |

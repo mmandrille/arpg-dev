@@ -9,7 +9,6 @@ Related:
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - authoritative Go server, thin Godot client, deterministic replay
 - [`../adr/0008-world-structure-and-dungeon-progression.md`](../adr/0008-world-structure-and-dungeon-progression.md) - co-op players share one `Sim`
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - multiplayer shortcut review
 - [`v20_spec-play-session-loop.md`](v20_spec-play-session-loop.md) - default town/dungeon session loop
 - [`v22_spec-character-scoped-persistence.md`](v22_spec-character-scoped-persistence.md) - character-owned inventory, hotbar, waypoints, progression
 
@@ -453,21 +452,6 @@ Required behavior:
 
 No new multiplayer lobby UI is required. Bot and manual testing can use REST responses, join code,
 and environment variables.
-
-## 8. Plugin and shortcut decision
-
-The required project research document was checked for this spec. Decision for v33:
-
-| Candidate | Decision | Reason |
-|-----------|----------|--------|
-| Godot high-level multiplayer / ENet / `@rpc` | Reject | Conflicts with authoritative Go sim, deterministic replay, and existing WebSocket protocol. |
-| Steam lobby templates / GodotSteam | Reject for v33 | Useful later for session discovery/invites, but this slice needs server co-op authority first. |
-| Godot multiplayer asset/plugin | Reject | No plugin may own combat, inventory, movement authority, or state sync. |
-| Existing humanoid/client presentation | Borrow/reuse | Enough to render a second player without introducing asset/plugin risk. |
-
-The v33 plan should record the same adopt/borrow/reject outcome unless implementation discovers a
-specific display-only asset need.
-
 ## 9. Acceptance criteria
 
 1. Host can create `mode: "coop"` session and receives a non-enumerable join code.

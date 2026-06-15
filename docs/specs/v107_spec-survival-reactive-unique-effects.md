@@ -27,7 +27,3 @@ Make the defensive and reactive unique effects from `shared/rules/unique_effects
 ## Bot Scenario
 
 Add a protocol bot scenario that equips a deterministic survival unique item and observes at least one v107 effect through events/state.
-
-## Godot Plugin Adoption
-
-No client-side UI or asset pipeline is introduced in this slice. Existing status marker and skill cooldown presentation are reused, so the Godot plugin adoption result is **reject** for new plugin use.

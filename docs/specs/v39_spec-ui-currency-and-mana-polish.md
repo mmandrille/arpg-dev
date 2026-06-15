@@ -18,7 +18,3 @@ Slice: v39 - currency, mana, and UI polish follow-up
 - Currency loot uses `item_def_id: "gold"` and a rolled `amount`; pickup removes the loot and emits `gold_picked_up`.
 - Gold min/max rolls scale upward for generated dungeon depth and monster rarity. Static/town rewards use the base gold range.
 - Consumable item definitions may declare `mana_restore`.
-
-## Plugin Checklist
-
-Reject plugin adoption. Existing in-repo Godot panels cover the requested presentation changes, and gameplay authority stays in Go.

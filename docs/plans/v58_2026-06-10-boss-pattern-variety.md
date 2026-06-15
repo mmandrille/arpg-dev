@@ -12,11 +12,6 @@ bot regression, SDD docs.
 ## Baseline and shortcut decision
 
 Baseline is v57 `boss-phase-readability` on `main`.
-
-Godot plugin adoption decision: not applicable for this slice. No new client UI, art, camera,
-inventory presentation, or placeholder assets are introduced. Existing v57 primitive boss telegraph
-marker renders the new circle-radius pattern.
-
 ## File map
 
 | Action | Path | Responsibility |

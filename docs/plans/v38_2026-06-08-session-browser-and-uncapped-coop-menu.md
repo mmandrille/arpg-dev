@@ -15,16 +15,11 @@ This plan builds directly on:
 - v33 authoritative co-op sessions, session members, actor-tagged inputs, and recipient-scoped snapshots.
 - v34 remote player presentation for non-local player entities.
 - v37 current gameplay/control baseline.
-
-Godot plugin adoption checklist result:
-
 | Candidate | Decision | Reason |
 |-----------|----------|--------|
 | Godot high-level multiplayer / ENet / `@rpc` | Reject | Game state remains Go-authoritative over the existing WebSocket protocol. |
 | Steam lobby templates / GodotSteam | Reject for v38 | Useful later for Steam invites, but this slice only needs backend-listed sessions. |
-| Godot lobby/menu plugin | Reject | Current Control-node menu is enough, and a plugin would add dependency surface without solving server discovery. |
 | Existing in-repo menu panels | Reuse/borrow | Matches v24 patterns and keeps headless client bot coverage straightforward. |
-| Character profile hotkey panel | Reuse/borrow | Small display-only Control panel; existing HUD/panel patterns cover name, level, and area without a plugin. |
 
 ## File map
 

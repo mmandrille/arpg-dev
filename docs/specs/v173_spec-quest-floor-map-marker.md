@@ -12,7 +12,6 @@ Random quest reward floors already place an extra reachable treasure chest, but 
 
 - No full quest journal, minimap, compass, or floor-map UI.
 - No changes to the reward floor spawn chance, chest loot table, or floor generation balance.
-- No new Godot plugin or art dependency; reuse the existing chest marker presentation pattern.
 - No quest-specific opening rules; reward chests remain normal treasure chests mechanically.
 
 ## Acceptance Criteria

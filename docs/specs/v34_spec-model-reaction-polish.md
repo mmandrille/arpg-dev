@@ -8,7 +8,6 @@ Related:
 
 - [`../../PROGRESS.md`](../../PROGRESS.md)
 - [`../adr/0001-technology-stack.md`](../adr/0001-technology-stack.md) - thin client, authoritative server, client-only presentation
-- [`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) - plugin adoption checklist for client presentation work
 - [`v3_spec-animate-and-react.md`](v3_spec-animate-and-react.md) - original client animation controller and monster reactions
 - [`v4_spec-take-a-hit.md`](v4_spec-take-a-hit.md) - player damage/death event reactions
 - [`v31_spec-combat-stat-effects-and-feedback.md`](v31_spec-combat-stat-effects-and-feedback.md) - combat outcome feedback metadata
@@ -51,7 +50,6 @@ visually distinct but model-consistent.
 - No requirement to author new skeletal clips if a small Godot-side transform/material reaction can
   satisfy the slice.
 - No final art direction pass for player/monster models.
-- No external animation/state-machine plugin unless the plan finds a very small display-only helper
   worth adopting.
 
 ## 3. Files to create or modify
@@ -146,22 +144,6 @@ The slice must preserve the existing client-only animation boundary. Events are 
 If both damage and kill events appear for the same entity in one delta, terminal death wins. If a
 death event arrives while a hit tween is active, the hit tween must be stopped or superseded so the
 corpse remains down and dark.
-
-## 6. Plugin and shortcut decision
-
-The implementation plan must run the adoption checklist in
-[`../researchs/godot-plugins-and-shortcuts.md`](../researchs/godot-plugins-and-shortcuts.md) because
-this slice touches Godot presentation.
-
-Expected v34 decision:
-
-| Candidate | Decision | Reason |
-|-----------|----------|--------|
-| Existing `AnimationController` and Godot Tween/AnimationPlayer | Borrow/reuse | Enough for simple hit/death reactions without adding dependency weight. |
-| Built-in `AnimationTree` / state machine | Reject for v34 unless needed | The existing priority controller already owns terminal > one-shot > locomotion. |
-| LimboAI or external state-machine plugin | Reject | Too heavy for deterministic event-driven presentation reactions. |
-| New model/asset pack | Reject | The requested slice reuses the existing character/monster presentation. |
-
 ## 7. Acceptance criteria
 
 1. Local player, remote co-op players, and monsters all show a visible hit reaction from their

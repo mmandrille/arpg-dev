@@ -9,7 +9,6 @@ Tech stack: Godot GDScript client bot and headless client unit tests.
 
 ## Baseline and shortcut decision
 
-Builds on v165. Godot plugin adoption: reject, because this is internal client bot test harness
 code with no UI/art/camera presentation change.
 
 ## File map

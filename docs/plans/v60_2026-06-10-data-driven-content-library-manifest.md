@@ -10,8 +10,6 @@ Tech stack: shared JSON schema/data, Go rules loader, Godot GDScript loader, Pyt
 Baseline is v59 `data-driven-skill-catalog` on `main`, plus the v60 review recommendation and
 `docs/researchs/data-driven-content-libraries.md`.
 
-Godot shortcut decision: **reject external plugins/assets**. This slice only changes shared-data
-loading for the existing skill UI; no UI/art shortcut is needed and no plugin may own skill
 authority.
 
 ## File map

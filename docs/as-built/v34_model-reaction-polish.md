@@ -18,6 +18,5 @@ staying client-only and driven by existing authoritative combat events.
 - Client scenario `12_model_reaction_polish.json` proves monster hit, local-player hit from
   retaliation, and monster terminal death presentation through the real Godot client.
 
-**Explicit non-goals:** no server/protocol/schema changes, no external animation plugin, no
 production customization/cosmetics, no monster art replacement, no corpse collision/despawn, and no
 respawn/revive behavior.

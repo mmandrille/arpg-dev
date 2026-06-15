@@ -8,7 +8,6 @@ Tech stack: Python tooling, pytest, Make maintainability target, SDD docs.
 ## Baseline and Shortcut Decision
 
 Builds on v150 engineering review and its critique of v145-v149 line-count-only review. No Godot
-client UI, camera, art, or plugin work is in scope, so the plugin adoption checklist is not
 applicable.
 
 ## File Map

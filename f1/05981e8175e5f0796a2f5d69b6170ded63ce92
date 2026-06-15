@@ -1,0 +1,58 @@
+shared/rules/boss_patterns.v0.schema.json
+  s_f9c66ca3cb4339::t_117e8f11c12ca2 52
+server/internal/game/game_test.go
+  s_f9c66ca3cb4339::t_a1877659ca400e 6371-6373
+  s_f9c66ca3cb4339::t_ab8838ea32fb2e 6364-6365,6369-6370
+shared/rules/boss_patterns.v0.json
+  s_f9c66ca3cb4339::t_117e8f11c12ca2 54-80
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_f9c66ca3cb4339::t_56ba6d3591a171 31,44
+server/internal/game/boss_ranged_pattern_test.go
+  s_f9c66ca3cb4339::t_a1877659ca400e 1-59
+shared/protocol/state_delta.v8.schema.json
+  s_f9c66ca3cb4339::t_117e8f11c12ca2 718-719,728-729
+docs/specs/v177_spec-boss-ranged-pattern.md
+  s_f9c66ca3cb4339::t_1b08db70e2ab55 1-21,23-50
+  s_f9c66ca3cb4339::t_ab8838ea32fb2e 22
+server/internal/game/types.go
+  s_f9c66ca3cb4339::t_46848e089803d1 378,385
+docs/as-built/v177_boss-ranged-pattern.md
+  s_f9c66ca3cb4339::t_d0a7484b01cbbd 1-31
+PROGRESS.md
+  s_f9c66ca3cb4339::t_34d998c52cabf2 15,18,196,414,485,548-551
+server/internal/game/rules.go
+  s_f9c66ca3cb4339::t_76d7ce8b6d1a63 2375-2377,2388
+  s_f9c66ca3cb4339::t_46848e089803d1 376
+.maintainability/file-size-baseline.tsv
+  s_f9c66ca3cb4339::t_4dfc835716d205 21
+shared/protocol/session_snapshot.v8.schema.json
+  s_f9c66ca3cb4339::t_117e8f11c12ca2 749-750,759-760
+server/internal/game/boss_patterns.go
+  s_f9c66ca3cb4339::t_a12afa83450e95 1-253
+server/internal/game/sim.go
+  s_f9c66ca3cb4339::t_46848e089803d1 133-134
+docs/plans/v177_2026-06-15-boss-ranged-pattern.md
+  s_f9c66ca3cb4339::t_acac58722da182 125
+  s_f9c66ca3cb4339::t_ff3fd9bc271a9e 126
+  s_f9c66ca3cb4339::t_ab8838ea32fb2e 17
+  s_f9c66ca3cb4339::t_1b08db70e2ab55 1-16,18-22,27,29-38,42-43,45-46,48-49,54-67,71-82,88-96,100-112,115-120
+  s_f9c66ca3cb4339::t_ee9e43a4eab059 23-26,28,39-41,44,47,50-53,68-70,83-87,97-99,113-114,121-124
+shared/rules/boss_templates.v0.json
+  s_f9c66ca3cb4339::t_ab8838ea32fb2e 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f105981e8175e5f0796a2f5d69b6170ded63ce92",
+  "prompts": {},
+  "sessions": {
+    "s_f9c66ca3cb4339": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec863-0bda-7982-9ffe-1a41ea2e2c1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

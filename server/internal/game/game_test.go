@@ -11,11 +11,8 @@ import (
 	"strings"
 	"testing"
 )
-
 var update = flag.Bool("update", false, "rewrite golden fixtures with current sim output")
-
 // --- shared fixture helpers -------------------------------------------------
-
 func sharedDir(t *testing.T) string {
 	t.Helper()
 	rulesDir, err := FindSharedRulesDir()
@@ -24,7 +21,6 @@ func sharedDir(t *testing.T) string {
 	}
 	return filepath.Dir(rulesDir) // .../shared
 }
-
 func loadRules(t *testing.T) *Rules {
 	t.Helper()
 	rulesDir, err := FindSharedRulesDir()
@@ -37,7 +33,6 @@ func loadRules(t *testing.T) *Rules {
 	}
 	return rules
 }
-
 func loadRulesWithMainGameplay(t *testing.T, overrides map[string]any) *Rules {
 	t.Helper()
 	sourceDir, err := FindSharedRulesDir()
@@ -53,7 +48,6 @@ func loadRulesWithMainGameplay(t *testing.T, overrides map[string]any) *Rules {
 	if err := copyTree(filepath.Join(sourceSharedDir, "content"), filepath.Join(targetSharedDir, "content")); err != nil {
 		t.Fatalf("copy content: %v", err)
 	}
-
 	configPath := filepath.Join(targetRulesDir, "main_config.v0.json")
 	var config map[string]any
 	b, err := os.ReadFile(configPath)
@@ -77,14 +71,12 @@ func loadRulesWithMainGameplay(t *testing.T, overrides map[string]any) *Rules {
 	if err := os.WriteFile(configPath, append(b, '\n'), 0o644); err != nil {
 		t.Fatalf("write temp main_config: %v", err)
 	}
-
 	rules, err := LoadRules(targetRulesDir)
 	if err != nil {
 		t.Fatalf("load temp rules: %v", err)
 	}
 	return rules
 }
-
 func copyTree(sourceDir, targetDir string) error {
 	return filepath.WalkDir(sourceDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -105,7 +97,6 @@ func copyTree(sourceDir, targetDir string) error {
 		return os.WriteFile(target, b, 0o644)
 	})
 }
-
 func loadGolden(t *testing.T, name string, v any) {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join(sharedDir(t), "golden", name))
@@ -116,7 +107,6 @@ func loadGolden(t *testing.T, name string, v any) {
 		t.Fatalf("parse golden %s: %v", name, err)
 	}
 }
-
 func writeGolden(t *testing.T, name string, v any) {
 	t.Helper()
 	b, err := json.MarshalIndent(v, "", "  ")
@@ -129,9 +119,7 @@ func writeGolden(t *testing.T, name string, v any) {
 	}
 	t.Logf("updated golden: %s", name)
 }
-
 // --- rules ------------------------------------------------------------------
-
 func TestLoadRules(t *testing.T) {
 	r := loadRules(t)
 	if r.MainConfig.Gameplay.BaseAttackIntervalTicks != 14 ||
@@ -298,7 +286,6 @@ func TestValidateSkillRulesRequiresBuffCooldownLongerThanDuration(t *testing.T) 
 	if err := validateSkillRules(skills, 10); err == nil || !strings.Contains(err.Error(), "must be at least 150% of duration") {
 		t.Fatalf("validateSkillRules error = %v, want buff cooldown ratio failure", err)
 	}
-
 	skill := skills["short_buff"]
 	skill.Cooldown.FlatTicks = 140
 	skills["short_buff"] = skill
@@ -306,7 +293,6 @@ func TestValidateSkillRulesRequiresBuffCooldownLongerThanDuration(t *testing.T) 
 		t.Fatalf("validateSkillRules valid buff cooldown: %v", err)
 	}
 }
-
 func TestItemTemplateFamilyStatRequirements(t *testing.T) {
 	rules := loadRules(t)
 	expectedByType := map[string]string{
@@ -341,7 +327,6 @@ func TestItemTemplateFamilyStatRequirements(t *testing.T) {
 		}
 	}
 }
-
 func TestMainConfigAttackIntervalOverridesCombatMirror(t *testing.T) {
 	rules := loadRulesWithMainGameplay(t, map[string]any{
 		"base_attack_interval_ticks": 10,
@@ -355,7 +340,6 @@ func TestMainConfigAttackIntervalOverridesCombatMirror(t *testing.T) {
 		t.Fatalf("derived attack interval = %d, want configured interval derived from character speed %d", got, expectedInterval)
 	}
 }
-
 func TestMainConfigMovementSpeedDrivesPlayerMovement(t *testing.T) {
 	rules := loadRulesWithMainGameplay(t, map[string]any{
 		"base_movement_speed": 0.5,
@@ -373,7 +357,6 @@ func TestMainConfigMovementSpeedDrivesPlayerMovement(t *testing.T) {
 		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}
 }
-
 func TestMonsterRarityGolden(t *testing.T) {
 	var golden struct {
 		MonsterDefID string `json:"monster_def_id"`
@@ -456,7 +439,6 @@ func TestMonsterRarityGolden(t *testing.T) {
 		}
 	}
 }
-
 func TestCoopRewardsAndScalingGolden(t *testing.T) {
 	var golden struct {
 		XPShare struct {
@@ -493,7 +475,6 @@ func TestCoopRewardsAndScalingGolden(t *testing.T) {
 		}
 	}
 }
-
 func TestValidateCoopCombatRules(t *testing.T) {
 	rules := loadRules(t).Combat.Coop
 	if err := validateCoopCombatRules(rules); err != nil {

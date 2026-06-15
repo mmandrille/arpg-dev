@@ -77,7 +77,7 @@
       "additionalProperties": false,
       "properties": {
         "id": { "$ref": "#/$defs/decimal_id" },
-        "type": { "type": "string", "enum": ["player", "monster", "loot", "interactable", "projectile"] },
+        "type": { "type": "string", "enum": ["player", "monster", "companion", "loot", "interactable", "projectile"] },
         "position": { "$ref": "#/$defs/vec2" },
         "hp": { "type": "integer", "minimum": 0 },
         "max_hp": { "type": "integer", "minimum": 0 },

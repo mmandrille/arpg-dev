@@ -33,7 +33,7 @@
               "required": ["type", "position"],
               "additionalProperties": false,
               "properties": {
-                "type": { "type": "string", "enum": ["monster", "loot", "wall", "interactable"] },
+                "type": { "type": "string", "enum": ["monster", "companion", "loot", "wall", "interactable"] },
                 "monster_def_id": { "type": "string" },
                 "item_def_id": { "type": "string" },
                 "item_template_id": { "type": "string" },
@@ -45,6 +45,16 @@
                 {
                   "if": {
                     "properties": { "type": { "const": "monster" } },
+                    "required": ["type"]
+                  },
+                  "then": {
+                    "required": ["monster_def_id"],
+                    "not": { "required": ["item_def_id"] }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": { "type": { "const": "companion" } },
                     "required": ["type"]
                   },
                   "then": {

@@ -10,7 +10,6 @@ static func sync(entities: Dictionary, dungeon_generation: Dictionary) -> void:
 		var rec: Dictionary = entities[id]
 		if str(rec.get("type", "")) == "monster" \
 				and int(rec.get("hp", 1)) > 0 \
-				and bool(rec.get("monster_pack_leader", false)) \
 				and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])):
 			var pack_id := str(rec.get("monster_pack_id", ""))
 			if pack_id != "":

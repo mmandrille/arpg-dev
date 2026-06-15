@@ -12,7 +12,7 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v181 — set item foundation |
+| **Latest completed slice** | v182 — companion AI foundation |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
@@ -420,6 +420,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v179** | `mana-regeneration` | Complete (`make ci` green) | [`v179_spec-mana-regeneration.md`](docs/specs/v179_spec-mana-regeneration.md) | [`v179_2026-06-15-mana-regeneration.md`](docs/plans/v179_2026-06-15-mana-regeneration.md) | [`as-built`](docs/as-built/v179_mana-regeneration.md) |
 | **v180** | `upgrade-resource-drop` | Complete (`make ci` green) | [`v180_spec-upgrade-resource-drop.md`](docs/specs/v180_spec-upgrade-resource-drop.md) | [`v180_2026-06-15-upgrade-resource-drop.md`](docs/plans/v180_2026-06-15-upgrade-resource-drop.md) | [`as-built`](docs/as-built/v180_upgrade-resource-drop.md) |
 | **v181** | `set-item-foundation` | Complete (`make ci` green) | [`v181_spec-set-item-foundation.md`](docs/specs/v181_spec-set-item-foundation.md) | [`v181_2026-06-15-set-item-foundation.md`](docs/plans/v181_2026-06-15-set-item-foundation.md) | [`as-built`](docs/as-built/v181_set-item-foundation.md) |
+| **v182** | `companion-ai-foundation` | Complete (`make ci` green) | [`v182_spec-companion-ai-foundation.md`](docs/specs/v182_spec-companion-ai-foundation.md) | [`v182_2026-06-15-companion-ai-foundation.md`](docs/plans/v182_2026-06-15-companion-ai-foundation.md) | [`as-built`](docs/as-built/v182_companion-ai-foundation.md) |
 
 ---
 
@@ -552,6 +553,11 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Recently closed
+
+**Server-owned companion actors now have a foundation.** v182 adds a distinct `companion`
+entity type to v8 snapshots/deltas, a compact `companion_ai_lab`, server-owned follow/target/melee
+AI, and protocol bot scenario `73_companion_ai_foundation` proving a test companion follows its
+owner and damages a lab monster.
 
 **The first five-piece set item package is live.** v181 adds the green `Verdant Vanguard` set
 catalog, exposes its five fixed pieces in the debug unique chest, applies server-authoritative

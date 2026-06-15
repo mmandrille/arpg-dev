@@ -2307,14 +2307,14 @@ def cross_checks(report: Report) -> None:
         for idx, entity in enumerate(world["entities"]):
             etype = entity.get("type")
             label = f"world {world_id} entity {idx}"
-            if etype == "monster":
+            if etype in ("monster", "companion"):
                 monster_id = entity.get("monster_def_id")
                 if not monster_id:
                     report.fail("world monster entity", f"{label}: missing monster_def_id")
                 elif monster_id not in monsters["monsters"]:
                     report.fail("world monster entity", f"{label}: unknown monster {monster_id}")
                 else:
-                    report.ok(f"{label} monster reference resolves")
+                    report.ok(f"{label} {etype} reference resolves")
             elif etype == "loot":
                 item_id = entity.get("item_def_id")
                 template_id = entity.get("item_template_id")

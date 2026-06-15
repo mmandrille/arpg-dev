@@ -170,6 +170,9 @@ func parseRollPayload(raw json.RawMessage) *ItemRollPayload {
 	if err := json.Unmarshal(raw, &payload); err != nil || payload.ItemTemplateID == "" {
 		return nil
 	}
+	if payload.ItemLevel < 1 {
+		payload.ItemLevel = 1
+	}
 	payload.Stats = cloneIntMap(payload.Stats)
 	payload.Requirements = cloneIntMap(payload.Requirements)
 	payload.EffectIDs = cloneStringSlice(payload.EffectIDs)
@@ -184,6 +187,7 @@ func cloneRollPayload(in *ItemRollPayload) *ItemRollPayload {
 		ItemTemplateID: in.ItemTemplateID,
 		DisplayName:    in.DisplayName,
 		Rarity:         in.Rarity,
+		ItemLevel:      itemLevelForSourceDepth(in.ItemLevel),
 		Stats:          cloneIntMap(in.Stats),
 		Requirements:   cloneIntMap(in.Requirements),
 		EffectIDs:      cloneStringSlice(in.EffectIDs),

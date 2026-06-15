@@ -103,6 +103,7 @@ func (r *Rules) setItemPayload(setItemID string) (ItemRollPayload, bool) {
 		ItemTemplateID: setItem.Piece.BaseTemplateID,
 		DisplayName:    setItem.Piece.DisplayName,
 		Rarity:         "set",
+		ItemLevel:      itemLevelForSourceDepth(requirements["level"]),
 		Stats:          stats,
 		Requirements:   requirements,
 		EffectIDs:      []string{},

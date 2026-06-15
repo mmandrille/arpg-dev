@@ -68,6 +68,24 @@ func TestRarityRollCountRanges(t *testing.T) {
 	}
 }
 
+func TestRolledItemLevelFollowsSourceDepth(t *testing.T) {
+	rules := loadRules(t)
+	low, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 0)
+	if !ok {
+		t.Fatal("roll low-depth cave_blade")
+	}
+	deep, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 7)
+	if !ok {
+		t.Fatal("roll deep cave_blade")
+	}
+	if low.ItemLevel != 1 {
+		t.Fatalf("low item level = %d, want 1", low.ItemLevel)
+	}
+	if deep.ItemLevel != 7 {
+		t.Fatalf("deep item level = %d, want 7", deep.ItemLevel)
+	}
+}
+
 func TestJewelryTemplatesCanRollInventoryRows(t *testing.T) {
 	rules := loadRules(t)
 	for _, templateID := range []string{"cave_ring", "cave_amulet"} {

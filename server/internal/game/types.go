@@ -37,6 +37,7 @@ type EntityView struct {
 	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
 	DisplayName       string                  `json:"display_name,omitempty"`
 	Rarity            string                  `json:"rarity,omitempty"`
+	ItemLevel         int                     `json:"item_level,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements      map[string]int          `json:"requirements,omitempty"`
 	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
@@ -63,6 +64,7 @@ type ItemView struct {
 	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
 	DisplayName       string                  `json:"display_name,omitempty"`
 	Rarity            string                  `json:"rarity,omitempty"`
+	ItemLevel         int                     `json:"item_level,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements      map[string]int          `json:"requirements,omitempty"`
 	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
@@ -81,6 +83,7 @@ type StashItemView struct {
 	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
 	DisplayName       string                  `json:"display_name,omitempty"`
 	Rarity            string                  `json:"rarity,omitempty"`
+	ItemLevel         int                     `json:"item_level,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements      map[string]int          `json:"requirements,omitempty"`
 	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
@@ -95,6 +98,7 @@ type ItemRollPayload struct {
 	ItemTemplateID string         `json:"item_template_id"`
 	DisplayName    string         `json:"display_name"`
 	Rarity         string         `json:"rarity"`
+	ItemLevel      int            `json:"item_level"`
 	Stats          map[string]int `json:"stats"`
 	Requirements   map[string]int `json:"requirements"`
 	EffectIDs      []string       `json:"effect_ids"`
@@ -107,6 +111,7 @@ func (p ItemRollPayload) itemViewFields(v *ItemView) {
 	v.ItemTemplateID = p.ItemTemplateID
 	v.DisplayName = p.DisplayName
 	v.Rarity = p.Rarity
+	v.ItemLevel = p.ItemLevel
 	v.RolledStats = cloneIntMap(p.Stats)
 	v.Requirements = cloneIntMap(p.Requirements)
 	v.EffectIDs = cloneStringSlice(p.EffectIDs)
@@ -119,6 +124,7 @@ func (p ItemRollPayload) stashItemViewFields(v *StashItemView) {
 	v.ItemTemplateID = p.ItemTemplateID
 	v.DisplayName = p.DisplayName
 	v.Rarity = p.Rarity
+	v.ItemLevel = p.ItemLevel
 	v.RolledStats = cloneIntMap(p.Stats)
 	v.Requirements = cloneIntMap(p.Requirements)
 	v.EffectIDs = cloneStringSlice(p.EffectIDs)
@@ -134,6 +140,7 @@ func (v ItemView) RollPayload() *ItemRollPayload {
 		ItemTemplateID: v.ItemTemplateID,
 		DisplayName:    v.DisplayName,
 		Rarity:         v.Rarity,
+		ItemLevel:      v.ItemLevel,
 		Stats:          cloneIntMap(v.RolledStats),
 		Requirements:   cloneIntMap(v.Requirements),
 		EffectIDs:      cloneStringSlice(v.EffectIDs),
@@ -150,6 +157,7 @@ func (v StashItemView) RollPayload() *ItemRollPayload {
 		ItemTemplateID: v.ItemTemplateID,
 		DisplayName:    v.DisplayName,
 		Rarity:         v.Rarity,
+		ItemLevel:      v.ItemLevel,
 		Stats:          cloneIntMap(v.RolledStats),
 		Requirements:   cloneIntMap(v.Requirements),
 		EffectIDs:      cloneStringSlice(v.EffectIDs),
@@ -258,6 +266,7 @@ type ShopOfferView struct {
 	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
 	DisplayName       string                  `json:"display_name,omitempty"`
 	Rarity            string                  `json:"rarity,omitempty"`
+	ItemLevel         int                     `json:"item_level,omitempty"`
 	Slot              string                  `json:"slot,omitempty"`
 	Category          string                  `json:"category,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
@@ -315,6 +324,7 @@ type ShopSellAppraisalView struct {
 	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
 	DisplayName       string                  `json:"display_name"`
 	Rarity            string                  `json:"rarity,omitempty"`
+	ItemLevel         int                     `json:"item_level,omitempty"`
 	Slot              string                  `json:"slot,omitempty"`
 	Category          string                  `json:"category,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`

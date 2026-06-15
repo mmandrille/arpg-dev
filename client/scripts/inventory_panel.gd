@@ -44,6 +44,7 @@ const ITEM_RARITY_BACKGROUNDS := {
 	"magic": Color("#1b3458"),
 	"rare": Color("#5a4520"),
 	"unique": Color("#5a2f17"),
+	"set": Color("#173f28"),
 }
 const PAPER_DOLL_SLOT_POSITIONS := {
 	"head": Vector2(122, 10),
@@ -1066,6 +1067,8 @@ func _rarity_color(rarity: String) -> Color:
 			return Color("#f4d481")
 		"unique":
 			return Color("#ffb26b")
+		"set":
+			return Color("#55e66f")
 		_:
 			return Color("#e8dcc8")
 

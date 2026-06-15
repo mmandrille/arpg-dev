@@ -246,8 +246,11 @@ func TestLoadRules(t *testing.T) {
 	if got, want := r.Skills["holy_shield"].Cooldown.FlatTicks, 450; got != want {
 		t.Fatalf("holy shield cooldown flat_ticks = %d, want %d", got, want)
 	}
-	if skill := r.Skills["sanctuary"]; skill.Class != "paladin" || skill.Kind != "area_stat_buff" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "holy_shield" || len(skill.Effects) != 1 || skill.Effects[0].EffectID != "sanctuary" {
-		t.Fatalf("sanctuary skill = %+v, want paladin tier 3 area stat buff requiring holy_shield", skill)
+	if skill := r.Skills["sanctuary"]; skill.Class != "paladin" || skill.Kind != "area_stat_buff" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "holy_shield" || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_immunity_buff" || skill.Effects[0].EffectID != "sanctuary" || skill.Effects[0].Radius != 5 || skill.Effects[0].DurationTicks != 60 {
+		t.Fatalf("sanctuary skill = %+v, want paladin tier 3 area immunity requiring holy_shield", skill)
+	}
+	if got, want := r.Skills["sanctuary"].Cooldown.FlatTicks, 590; got != want {
+		t.Fatalf("sanctuary cooldown flat_ticks = %d, want %d", got, want)
 	}
 	if skill := r.Skills["shadow_flurry"]; skill.Class != "rogue" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "dash" || skill.Cone.AngleDegrees <= r.Skills["dash"].Cone.AngleDegrees {
 		t.Fatalf("shadow_flurry skill = %+v, want rogue tier 2 cone requiring dash with wider angle", skill)
@@ -1787,6 +1790,62 @@ func TestHolyShieldIgnoresAimAndAlwaysBuffsCaster(t *testing.T) {
 	}
 	if player.mana != beforeMana-5 {
 		t.Fatalf("holy shield mana after bad-target cast = %d, want %d", player.mana, beforeMana-5)
+	}
+}
+
+func TestSanctuaryGrantsTemporaryDamageImmunity(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	forceMonsterHitChance(rules, monsterDefID, 1.0)
+	sim := MustNewSim("sess_sanctuary_immunity", "01", rules)
+	sim.progression.CharacterClass = "paladin"
+	sim.progression.BaseStats.Vit = 10
+	sim.progression.BaseStats.Magic = 10
+	sim.progression.SkillRanks["holy_shield"] = 1
+	sim.progression.SkillRanks["sanctuary"] = 1
+	sim.savePlayer(sim.defaultPlayer())
+	player := sim.entities[sim.playerID]
+	player.mana = player.maxMana
+	attacker := addTestMonster(sim, monsterDefID, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 20)
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_sanctuary",
+		CorrelationID: "corr_sanctuary",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "sanctuary"},
+	}})
+	assertAck(t, cast, "cast_sanctuary")
+	if !sameStringSlice(player.effectIDs, []string{"sanctuary"}) {
+		t.Fatalf("player effect ids = %v, want sanctuary", player.effectIDs)
+	}
+	if started := skillEvent(cast.Events, "skill_effect_started", "sanctuary"); started == nil || started.RemainingTicks == nil || *started.RemainingTicks != 60 {
+		t.Fatalf("sanctuary start event = %+v, want 60 ticks", started)
+	}
+	if cooldown := skillEvent(cast.Events, "skill_cooldown_started", "sanctuary"); cooldown == nil || cooldown.RemainingTicks == nil || *cooldown.RemainingTicks != 600 {
+		t.Fatalf("sanctuary cooldown event = %+v, want 600 ticks", cooldown)
+	}
+
+	beforeHP := player.hp
+	res := &TickResult{}
+	outcome := sim.damagePlayerByMonster(attacker, player, DamageRange{Min: 10, Max: 10}, "sanctuary_hit", res)
+	if outcome.Outcome != "immune" || outcome.Damage != 0 || player.hp != beforeHP {
+		t.Fatalf("sanctuary damage outcome=%+v hp=%d want immune and hp %d", outcome, player.hp, beforeHP)
+	}
+	if ev := firstEventOfType(res.Events, "player_damaged"); ev == nil || ev.Outcome != "immune" || ev.Damage == nil || *ev.Damage != 0 {
+		t.Fatalf("sanctuary damage events = %+v, want immune zero-damage player_damaged", res.Events)
+	}
+
+	var expired TickResult
+	for i := 0; i < 60; i++ {
+		expired = sim.Tick(nil)
+	}
+	if !hasEvent(expired, "skill_effect_ended") || len(player.effectIDs) != 0 {
+		t.Fatalf("sanctuary expiry events/effects = %+v / %v, want ended and empty", expired.Events, player.effectIDs)
+	}
+
+	after := &TickResult{}
+	outcome = sim.damagePlayerByMonster(attacker, player, DamageRange{Min: 10, Max: 10}, "after_sanctuary", after)
+	if outcome.Damage <= 0 || player.hp >= beforeHP {
+		t.Fatalf("post-sanctuary damage outcome=%+v hp=%d want normal damage below %d", outcome, player.hp, beforeHP)
 	}
 }
 
@@ -7638,6 +7697,24 @@ func hasEvent(r TickResult, eventType string) bool {
 		}
 	}
 	return false
+}
+
+func firstEventOfType(events []Event, eventType string) *Event {
+	for idx := range events {
+		if events[idx].EventType == eventType {
+			return &events[idx]
+		}
+	}
+	return nil
+}
+
+func skillEvent(events []Event, eventType string, skillID string) *Event {
+	for idx := range events {
+		if events[idx].EventType == eventType && events[idx].SkillID == skillID {
+			return &events[idx]
+		}
+	}
+	return nil
 }
 
 func countEvents(r TickResult, eventType string) int {

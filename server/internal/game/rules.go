@@ -2870,7 +2870,7 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 		if skill.Targeting != "self_or_ally_area" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for area_stat_buff", skillID, skill.Targeting)
 		}
-		return validateSkillEffects(skillID, skill.Effects, "area_stat_percent_buff")
+		return validateSkillEffects(skillID, skill.Effects, "area_stat_percent_buff", "area_immunity_buff")
 	case "summon_companion":
 		if skill.Targeting != "self" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for summon_companion", skillID, skill.Targeting)
@@ -3006,12 +3006,12 @@ func validateChainSkillPayload(skillID string, skill SkillDef) error {
 	return nil
 }
 
-func validateSkillEffects(skillID string, effects []SkillEffectDef, expectedType string) error {
+func validateSkillEffects(skillID string, effects []SkillEffectDef, expectedTypes ...string) error {
 	if len(effects) == 0 {
-		return fmt.Errorf("game: invalid rules skills.%s.effects: at least one %s effect is required", skillID, expectedType)
+		return fmt.Errorf("game: invalid rules skills.%s.effects: at least one supported effect is required", skillID)
 	}
 	for idx, effect := range effects {
-		if effect.Type != expectedType {
+		if !stringInSlice(effect.Type, expectedTypes) {
 			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].type: unsupported %s for skill kind", skillID, idx, effect.Type)
 		}
 		switch effect.Type {
@@ -3025,6 +3025,10 @@ func validateSkillEffects(skillID string, effects []SkillEffectDef, expectedType
 			}
 		case "area_stat_percent_buff":
 			if err := validateAreaStatPercentBuffEffect(skillID, idx, effect); err != nil {
+				return err
+			}
+		case "area_immunity_buff":
+			if err := validateAreaImmunityBuffEffect(skillID, idx, effect); err != nil {
 				return err
 			}
 		default:
@@ -3073,6 +3077,43 @@ func validateAreaStatPercentBuffEffect(skillID string, idx int, effect SkillEffe
 		return err
 	}
 	return nil
+}
+
+func validateAreaImmunityBuffEffect(skillID string, idx int, effect SkillEffectDef) error {
+	if len(effect.Stats) != 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats: immunity buffs do not support stats", skillID, idx)
+	}
+	if effect.PercentBase != 0 || effect.PercentPerRank != 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d]: immunity buffs do not support percent values", skillID, idx)
+	}
+	if effect.DurationTicks <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].duration_ticks: must be positive", skillID, idx)
+	}
+	if effect.Target != "allies" {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].target: unsupported %s", skillID, idx, effect.Target)
+	}
+	if effect.Range <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].range: must be positive", skillID, idx)
+	}
+	if effect.Radius <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].radius: must be positive", skillID, idx)
+	}
+	if effect.EffectID == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].effect_id: required", skillID, idx)
+	}
+	if err := validateSkillMagicScaling(fmt.Sprintf("skills.%s.effects[%d].magic_scaling", skillID, idx), effect.MagicScaling); err != nil {
+		return err
+	}
+	return nil
+}
+
+func stringInSlice(needle string, haystack []string) bool {
+	for _, value := range haystack {
+		if value == needle {
+			return true
+		}
+	}
+	return false
 }
 
 func validateStatPercentBuffEffect(skillID string, idx int, effect SkillEffectDef) error {

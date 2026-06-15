@@ -25,6 +25,10 @@ func (s *Sim) damagePlayerByMonster(monster *entity, player *entity, damageRange
 }
 
 func (s *Sim) damagePlayerByMonsterWithSource(monster *entity, player *entity, damageRange DamageRange, corr string, res *TickResult, source uniqueIncomingDamageSource) combatResolution {
+	if outcome, immune := s.playerDamageImmunityOutcome(player); immune {
+		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
+		return outcome
+	}
 	damageRange = s.applyEliteAuraToMonsterDamage(monster, damageRange)
 	attackerStats := s.monsterEffectiveCombatStats(monster, damageRange)
 	defenderStats, _ := s.playerEffectiveCombatStats()

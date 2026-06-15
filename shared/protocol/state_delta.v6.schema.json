@@ -280,7 +280,7 @@
         "target_entity_id": { "$ref": "#/$defs/decimal_id" },
         "correlation_id": { "$ref": "#/$defs/prefixed_id" },
         "damage": { "type": "integer", "minimum": 0 },
-        "outcome": { "type": "string", "enum": ["hit", "crit", "miss", "block", "kill"] },
+        "outcome": { "type": "string", "enum": ["hit", "crit", "miss", "block", "immune", "kill"] },
         "raw_damage": { "type": "integer", "minimum": 0 },
         "mitigated_damage": { "type": "integer" },
         "blocked": { "type": "boolean" },

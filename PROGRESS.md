@@ -15,9 +15,9 @@ Last updated: 2026-06-15
 | **Latest completed slice** | v180 — upgrade resource drop |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-15 |
-| **Next slice** | Engineering review gate — run `$refactor`, then `$review` |
-| **Last engineering review** | v170 — [`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md) (2026-06-14) |
-| **Next engineering review** | v180 due before more feature batches |
+| **Next slice** | Use `$next` to choose the next feature/gameplay slice |
+| **Last engineering review** | v180 — [`docs/reviews/20260615_v180-overview.md`](docs/reviews/20260615_v180-overview.md) (2026-06-15) |
+| **Next engineering review** | v190 due before more feature batches |
 
 ### Slice numbering note
 

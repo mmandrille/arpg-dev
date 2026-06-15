@@ -99,10 +99,37 @@
         },
         {
           "kind": "recovery",
-          "duration_ticks": 20
+          "duration_ticks": 6
         }
       ],
-      "cooldown_ticks": 55
+      "cooldown_ticks": 5
+    },
+    "shard_fan": {
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 26,
+          "telegraph_type": "cone",
+          "from_color": "#b77cff",
+          "to_color": "#ffd166",
+          "hit_shape": "cone",
+          "radius": 5.8,
+          "width": 70
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 4,
+          "shape": "cone",
+          "radius": 5.8,
+          "width": 70,
+          "damage": { "min": 4, "max": 7 }
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 14
+        }
+      ],
+      "cooldown_ticks": 24
     }
   }
 }

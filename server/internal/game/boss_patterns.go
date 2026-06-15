@@ -1,5 +1,7 @@
 package game
 
+import "math"
+
 func (s *Sim) advanceBossPhases(res *TickResult) {
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		boss := s.activeLevel().entities[id]
@@ -294,13 +296,36 @@ func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {
 		}
 		closest := Vec2{X: boss.pos.X + boss.bossPhaseAim.X*projection, Y: boss.pos.Y + boss.bossPhaseAim.Y*projection}
 		return distance(player.pos, closest) <= phase.Width/2+playerRadius
+	case "cone":
+		if phase.Radius <= 0 || phase.Width <= 0 || !boss.bossPhaseHasAim {
+			return false
+		}
+		delta := Vec2{X: player.pos.X - boss.pos.X, Y: player.pos.Y - boss.pos.Y}
+		dist := distance(Vec2{}, delta)
+		if dist <= meleeRangeEpsilon {
+			return true
+		}
+		if dist > phase.Radius+playerRadius {
+			return false
+		}
+		dir := Vec2{X: delta.X / dist, Y: delta.Y / dist}
+		dot := boss.bossPhaseAim.X*dir.X + boss.bossPhaseAim.Y*dir.Y
+		if dot > 1 {
+			dot = 1
+		}
+		if dot < -1 {
+			dot = -1
+		}
+		halfAngle := (phase.Width / 2) * math.Pi / 180
+		playerAngleAllowance := math.Asin(math.Min(1, playerRadius/math.Max(dist, playerRadius)))
+		return math.Acos(dot) <= halfAngle+playerAngleAllowance
 	default:
 		return false
 	}
 }
 
 func (s *Sim) captureBossPhaseAim(boss *entity, phase BossPatternPhase) {
-	if phase.HitShape != "line" && phase.Shape != "line" {
+	if phase.HitShape != "line" && phase.Shape != "line" && phase.HitShape != "cone" && phase.Shape != "cone" {
 		boss.bossPhaseHasAim = false
 		return
 	}

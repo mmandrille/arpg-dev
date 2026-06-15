@@ -1,0 +1,60 @@
+server/internal/game/sim.go
+  s_20a3618c766349::t_cb4e84bcb64599 5618-5629
+  s_20a3618c766349::t_e93f9069952fac 5609-5610,5645-5646
+  s_20a3618c766349::t_dbf4d3d4778d4e 5394-5398,5401-5402
+server/internal/game/types.go
+  s_20a3618c766349::t_70aa1e4117b312 72,90
+shared/protocol/session_snapshot.v8.schema.json
+  s_20a3618c766349::t_bce04bdee48157 149,179-180,183-185
+server/internal/game/unique_chest_test.go
+  s_20a3618c766349::t_b579128418215d 269
+  s_20a3618c766349::t_497ed8aeeb9773 231
+  s_20a3618c766349::t_86d80ffebaa44c 245-250,253-256,258-261,267-268,270-271,278-279
+  s_20a3618c766349::t_69c6b6d8c87f13 343-351
+  s_20a3618c766349::t_c7579d4b563c80 101-107
+client/scripts/elite_aura_preview_sync.gd
+  s_20a3618c766349::t_c13ce9120bfb9b 11-14
+server/internal/game/handlers.go
+  s_20a3618c766349::t_da3e53710a40dc 810,857
+client/tests/test_stash_panel.gd
+  s_20a3618c766349::t_3048b5fd36fe2f 269-281
+client/scripts/main.gd
+  s_20a3618c766349::t_67cb0179594555 1281,1468-1482
+client/tests/test_status_effect_presentation.gd
+  s_20a3618c766349::t_5adcf81fbcc1d6 232-241,244,247,258,262
+shared/protocol/state_delta.v8.schema.json
+  s_20a3618c766349::t_e9895b4b60e154 103,133-134
+server/internal/game/set_items.go
+  s_20a3618c766349::t_cb00e491b7dbf8 226-253
+  s_20a3618c766349::t_cf15b2dfe876e6 156-212
+client/scripts/stash_panel.gd
+  s_20a3618c766349::t_4d3746241673ad 185,191-192
+server/internal/game/unique_chest.go
+  s_20a3618c766349::t_8877d61ea62f6c 152
+server/internal/game/shop.go
+  s_20a3618c766349::t_8ed5939eb49772 938
+server/internal/realtime/session_loop_test.go
+  s_20a3618c766349::t_c4109db995541c 311-332,334-352,358,382-383
+  s_20a3618c766349::t_bbd77a86a09374 81-84,117-120,333
+server/internal/game/game_test.go
+  s_20a3618c766349::t_97e485e4088bd3 2692,2746,2769
+  s_20a3618c766349::t_b856abc75d9ee1 2693,2740-2745,2747-2768,2770-2772
+client/scripts/inventory_panel.gd
+  s_20a3618c766349::t_d405754135a310 1047-1051
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d780d0c8f9bc9f903911cab1d788838430893048",
+  "prompts": {},
+  "sessions": {
+    "s_20a3618c766349": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ec95c-1159-7d83-abc8-bd0720a1e4be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

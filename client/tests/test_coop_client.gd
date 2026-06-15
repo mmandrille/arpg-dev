@@ -16,6 +16,7 @@ const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
+const CompanionBarScript := preload("res://scripts/companion_bar.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
@@ -67,6 +68,8 @@ func _initialize() -> void:
 	_test_market_board_activation_sends_action_intent()
 	_test_movement_closes_gameplay_panels()
 	_test_hero_corpse_is_easy_to_target_and_labels_like_loot()
+	_test_local_companions_render_in_top_left_row()
+	_test_revive_hover_reveals_dead_monster_corpse_label()
 
 	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -939,6 +942,80 @@ func _test_hero_corpse_is_easy_to_target_and_labels_like_loot() -> void:
 			_assert_true("corpse label font is prominent", int(label.get("font_size", 0)) >= 60)
 			_assert_true("corpse label visible on reveal", bool(label.get("visible", false)))
 	_assert_true("corpse label listed with loot labels", found_label)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
+
+
+func _test_local_companions_render_in_top_left_row() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main.companion_bar = CompanionBarScript.new()
+	get_root().add_child(main.companion_bar)
+	main.companion_bar._ready()
+	main._upsert_entity({
+		"id": "4101",
+		"type": "companion",
+		"owner_id": "1001",
+		"monster_def_id": "companion_black_wolf",
+		"hp": 3,
+		"max_hp": 5,
+		"remaining_ticks": 450,
+		"total_ticks": 600,
+		"visual_model": "monster_quadruped",
+		"visual_tint": "#101014",
+		"position": {"x": 4.0, "y": 5.0},
+	})
+	main._upsert_entity({
+		"id": "4102",
+		"type": "companion",
+		"owner_id": "9999",
+		"monster_def_id": "mercenary_guard",
+		"hp": 7,
+		"max_hp": 7,
+		"position": {"x": 5.0, "y": 5.0},
+	})
+	var state: Dictionary = main.companion_bar.get_debug_state()
+	_assert_true("companion row visible for local companion", bool(state.get("visible", false)))
+	_assert_eq("companion row only shows local owner", int(state.get("count", 0)), 1)
+	var companions: Array = state.get("companions", [])
+	_assert_eq("companion row monster id", str((companions[0] as Dictionary).get("monster_def_id", "")), "companion_black_wolf")
+	_assert_eq("companion row hp", int((companions[0] as Dictionary).get("hp", 0)), 3)
+	_assert_eq("companion row duration remaining", int((companions[0] as Dictionary).get("remaining_ticks", 0)), 450)
+	_assert_eq("companion row duration total", int((companions[0] as Dictionary).get("total_ticks", 0)), 600)
+	main.companion_bar.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
+
+
+func _test_revive_hover_reveals_dead_monster_corpse_label() -> void:
+	var main = _make_main()
+	main.right_click_skill_id = "revive"
+	main.skill_progression = {"skills": [{"skill_id": "revive", "rank": 1}]}
+	main._upsert_entity({
+		"id": "4201",
+		"type": "monster",
+		"monster_def_id": "dungeon_wolf",
+		"hp": 0,
+		"max_hp": 8,
+		"position": {"x": 4.0, "y": 5.0},
+	})
+	_assert_true("dead monster can use loot label while revive selected", main._entity_uses_loot_label("4201"))
+	main.hovered_loot_id = "4201"
+	main._refresh_loot_label_visibility()
+	var labels := main._bot_loot_label_debug()
+	var found_label := false
+	for row in labels:
+		var label: Dictionary = row
+		if str(label.get("id", "")) == "4201":
+			found_label = true
+			_assert_eq("revive corpse label text", str(label.get("text", "")), "Dungeon Wolf Corpse")
+			_assert_true("revive corpse label visible on hover", bool(label.get("visible", false)))
+			_assert_true("revive corpse label font is readable", int(label.get("font_size", 0)) >= 46)
+	_assert_true("revive corpse label listed", found_label)
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

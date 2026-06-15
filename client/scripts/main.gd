@@ -15,6 +15,7 @@ const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_m
 const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
+const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
@@ -34,6 +35,7 @@ const EliteObjectiveMinimapScript := preload("res://scripts/elite_objective_mini
 const EliteObjectiveMinimapStateScript := preload("res://scripts/elite_objective_minimap_state.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
+const CompanionBarScript := preload("res://scripts/companion_bar.gd")
 const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
@@ -229,8 +231,10 @@ var player_anchor: Node3D
 var character_visual: Node3D
 var entities_root: Node3D
 var damage_numbers_layer: CanvasLayer
+var gameplay_ui_layer: CanvasLayer
 var health_bars_layer: CanvasLayer
 var monster_health_bars: Dictionary = {} # id (String) -> MonsterHealthBar
+var revive_corpse_status_bars: Dictionary = {} # id (String) -> CorpseStatusBar
 var boss_health_bar: BossHealthBar
 var walls_root: Node3D
 var inventory_panel: InventoryPanel
@@ -247,6 +251,7 @@ var elite_objective_tracker: EliteObjectiveTracker
 var elite_objective_minimap: EliteObjectiveMinimap
 var character_bar: Control
 var skill_bar: SkillBar
+var companion_bar: Control
 var status_effects_bar: StatusEffectsBar
 var character_info_panel: PanelContainer
 var character_info_name_label: Label
@@ -1358,7 +1363,7 @@ func _upsert_entity(e: Dictionary) -> void:
 		var node := _make_entity_node(e)
 		entities_root.add_child(node)
 		var controller: AnimationController = null
-		if e["type"] == "monster" or e["type"] == "player":
+		if _entity_type_uses_combat_presentation(str(e["type"])):
 			var ap := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 			if ap != null:
 				controller = AnimationControllerScript.new(ap)
@@ -1366,7 +1371,7 @@ func _upsert_entity(e: Dictionary) -> void:
 				push_warning("[main] %s %s has no AnimationPlayer" % [str(e["type"]), id])
 		var base_tint := _entity_base_tint(e)
 		var reaction = null
-		if e["type"] == "monster" or e["type"] == "player":
+		if _entity_type_uses_combat_presentation(str(e["type"])):
 			reaction = ModelReactionControllerScript.new(node, base_tint)
 		rec = {"node": node, "controller": controller, "reaction": reaction, "type": str(e["type"]), "base_tint": base_tint.to_html(false)}
 		if e.has("item_def_id"):
@@ -1375,7 +1380,7 @@ func _upsert_entity(e: Dictionary) -> void:
 			rec["amount"] = int(e["amount"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward"]:
+	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "remaining_ticks", "total_ticks"]:
 		if e.has(key):
 			rec[key] = e[key]
 	for key in ["corpse_character_id", "corpse_name", "corpse_level", "corpse_item_count"]:
@@ -1411,7 +1416,7 @@ func _upsert_entity(e: Dictionary) -> void:
 		var node := rec["node"] as Node3D
 		var prev_pos := node.position
 		node.position = server_pos
-		if (rec["type"] == "monster" or rec["type"] == "player") and rec["controller"] != null and not is_new:
+		if _entity_type_uses_combat_presentation(str(rec["type"])) and rec["controller"] != null and not is_new:
 			var hp_val := int(e.get("hp", rec.get("hp", 1)))
 			var moved := prev_pos.distance_to(server_pos) > 0.001
 			if moved and hp_val > 0:
@@ -1426,20 +1431,24 @@ func _upsert_entity(e: Dictionary) -> void:
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
-	if rec["type"] == "monster" or rec["type"] == "player":
+	if _entity_type_uses_combat_presentation(str(rec["type"])):
 		_apply_entity_visual_metadata(rec, e)
 	# Resume/snapshot consistency: a monster already dead in the snapshot enters
 	# the terminal death pose without waiting for an event (spec §5.4).
-	if rec["type"] == "monster" and rec["controller"] != null:
+	if rec["type"] == "monster" or rec["type"] == "companion":
 		var hp = e.get("hp", null)
 		var max_hp = e.get("max_hp", null)
 		if hp != null and max_hp != null:
 			rec["hp"] = int(hp)
-			_upsert_monster_health_bar(id, rec["node"] as Node3D, int(hp), int(max_hp))
-		if hp != null and int(hp) <= 0:
+			rec["max_hp"] = int(max_hp)
+			if rec["type"] == "monster":
+				_upsert_monster_health_bar(id, rec["node"] as Node3D, int(hp), int(max_hp))
+		if rec["type"] == "monster" and hp != null and int(hp) <= 0:
 			_set_pickable(rec["node"] as Node3D, false)
 			_clear_terminal_entity_status_markers(rec)
+			_ensure_dead_monster_revive_label(id, rec)
 			_enter_entity_terminal_death(id, rec)
+	_sync_companion_bar()
 
 func _remove_entity(id: String) -> void:
 	if str(pending_interactable_action.get("target_id", "")) == id:
@@ -1457,10 +1466,15 @@ func _remove_entity(id: String) -> void:
 		(entities[id]["node"] as Node3D).queue_free()
 		entities.erase(id)
 	_remove_monster_health_bar(id)
+	_remove_revive_corpse_status_bar(id)
 	loot_ids.erase(id)
 	monster_ids.erase(id)
 	interactable_ids.erase(id)
 	_sync_boss_health_bar()
+	_sync_companion_bar()
+
+func _entity_type_uses_combat_presentation(entity_type: String) -> bool:
+	return entity_type == "monster" or entity_type == "player" or entity_type == "companion"
 
 func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
@@ -2002,6 +2016,25 @@ func _remove_monster_health_bar(entity_id: String) -> void:
 		bar.queue_free()
 	monster_health_bars.erase(entity_id)
 
+func _remove_revive_corpse_status_bar(entity_id: String) -> void:
+	if not revive_corpse_status_bars.has(entity_id):
+		return
+	var bar = revive_corpse_status_bars[entity_id]
+	if is_instance_valid(bar):
+		bar.queue_free()
+	revive_corpse_status_bars.erase(entity_id)
+
+func _upsert_revive_corpse_status_bar(entity_id: String, target: Node3D, text: String) -> void:
+	if gameplay_ui_layer == null or _camera == null or target == null:
+		return
+	if revive_corpse_status_bars.has(entity_id):
+		revive_corpse_status_bars[entity_id].setup(_camera, target, text)
+		return
+	var bar = CorpseStatusBarScript.new()
+	gameplay_ui_layer.add_child(bar)
+	bar.setup(_camera, target, text)
+	revive_corpse_status_bars[entity_id] = bar
+
 func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_hp: int) -> void:
 	if hp <= 0:
 		_remove_monster_health_bar(entity_id)
@@ -2015,6 +2048,31 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 	health_bars_layer.add_child(bar)
 	bar.setup(_camera, target, hp, max_hp)
 	monster_health_bars[entity_id] = bar
+
+func _sync_companion_bar() -> void:
+	if companion_bar == null:
+		return
+	var companions: Array = []
+	for id in entities.keys():
+		var rec: Dictionary = entities[id]
+		if str(rec.get("type", "")) != "companion":
+			continue
+		if player_id != "" and str(rec.get("owner_id", "")) != player_id:
+			continue
+		var hp := int(rec.get("hp", 0))
+		if hp <= 0:
+			continue
+		companions.append({
+			"id": str(id),
+			"monster_def_id": str(rec.get("monster_def_id", "")),
+			"hp": hp,
+			"max_hp": int(rec.get("max_hp", hp)),
+			"visual_tint": str(rec.get("visual_tint", "")),
+			"visual_model": str(rec.get("visual_model", "")),
+			"remaining_ticks": int(rec.get("remaining_ticks", 0)),
+			"total_ticks": int(rec.get("total_ticks", 0)),
+		})
+	companion_bar.set_companions(companions)
 
 func _hide_boss_health_bar() -> void:
 	if boss_health_bar != null:
@@ -2848,7 +2906,7 @@ func _pick_entity_at_mouse() -> String:
 	var collider = hit.get("collider")
 	if collider != null and collider.has_meta("entity_id"):
 		var hit_entity_id := str(collider.get_meta("entity_id"))
-		if _is_dead_monster(hit_entity_id):
+		if _is_dead_monster(hit_entity_id) and not _revive_hover_enabled():
 			var loot_id := _nearest_loot_at_ground(hit.get("position", _mouse_ground_point()))
 			if loot_id != "":
 				return loot_id
@@ -2910,6 +2968,10 @@ func _refresh_loot_label_visibility() -> void:
 			if node != null:
 				node.visible = allowed or highlighted
 				_set_pickable(node, allowed or highlighted)
+		elif _is_dead_monster(id):
+			var node := entities[id].get("node", null) as Node3D
+			if node != null:
+				_set_pickable(node, _revive_hover_enabled())
 		_set_loot_label_visible(id, revealed or highlighted, highlighted)
 
 func _loot_label_entity_ids() -> Array:
@@ -2920,13 +2982,22 @@ func _loot_label_entity_ids() -> Array:
 		var id := str(interactable_id)
 		if _entity_uses_loot_label(id) and not out.has(id):
 			out.append(id)
+	for id in entities.keys():
+		var entity_id := str(id)
+		if _entity_uses_loot_label(entity_id) and not out.has(entity_id):
+			out.append(entity_id)
 	return out
 
 func _entity_uses_loot_label(entity_id: String) -> bool:
 	if entity_id == "" or not entities.has(entity_id):
 		return false
 	var rec: Dictionary = entities[entity_id]
-	return str(rec.get("type", "")) == "loot" or str(rec.get("interactable_def_id", "")) == "hero_corpse"
+	if str(rec.get("type", "")) == "loot" or str(rec.get("interactable_def_id", "")) == "hero_corpse":
+		return true
+	return _revive_hover_enabled() and _is_dead_monster(entity_id) and _loot_label_node(entity_id) != null
+
+func _revive_hover_enabled() -> bool:
+	return right_click_skill_id == "revive" and _skill_rank("revive") > 0
 
 func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = false) -> void:
 	if loot_id == "" or not entities.has(loot_id):
@@ -2936,6 +3007,15 @@ func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = f
 		label.visible = shown
 		var rec: Dictionary = entities.get(loot_id, {})
 		label.modulate = _loot_filter.display_color(_loot_label_color(rec), highlighted)
+	var ring := _revive_hover_ring_node(loot_id)
+	if ring != null:
+		ring.visible = highlighted and _revive_hover_enabled()
+	if _is_dead_monster(loot_id):
+		if shown and highlighted and _revive_hover_enabled():
+			var rec: Dictionary = entities.get(loot_id, {})
+			_upsert_revive_corpse_status_bar(loot_id, rec.get("node", null) as Node3D, _monster_corpse_label_text(rec))
+		else:
+			_remove_revive_corpse_status_bar(loot_id)
 
 func _loot_label_node(loot_id: String) -> Label3D:
 	if loot_id == "" or not entities.has(loot_id):
@@ -2944,6 +3024,56 @@ func _loot_label_node(loot_id: String) -> Label3D:
 	if node == null:
 		return null
 	return node.find_child("LootLabel", true, false) as Label3D
+
+func _revive_hover_ring_node(entity_id: String) -> Node3D:
+	if entity_id == "" or not entities.has(entity_id):
+		return null
+	var node := entities[entity_id].get("node", null) as Node3D
+	if node == null:
+		return null
+	return node.find_child("ReviveHoverRing", true, false) as Node3D
+
+func _ensure_dead_monster_revive_label(entity_id: String, rec: Dictionary) -> void:
+	var node := rec.get("node", null) as Node3D
+	if node == null:
+		return
+	if node.find_child("LootLabel", true, false) == null:
+		var marker := Label3D.new()
+		marker.name = "LootLabel"
+		marker.text = _monster_corpse_label_text(rec)
+		marker.visible = false
+		marker.font_size = 72
+		marker.modulate = Color("#c6e0a3")
+		marker.outline_size = 12
+		marker.outline_modulate = Color(0.03, 0.06, 0.02, 0.95)
+		marker.position = Vector3(0.0, 2.25, 0.0)
+		marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		marker.no_depth_test = true
+		marker.fixed_size = true
+		marker.pixel_size = 0.0024
+		node.add_child(marker)
+	if node.find_child("ReviveHoverRing", true, false) == null:
+		var ring := MeshInstance3D.new()
+		ring.name = "ReviveHoverRing"
+		var mesh := TorusMesh.new()
+		mesh.inner_radius = 0.56
+		mesh.outer_radius = 0.62
+		ring.mesh = mesh
+		ring.rotation_degrees.x = 90.0
+		ring.position = Vector3(0.0, 0.055, 0.0)
+		ring.visible = false
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color("#96f06f")
+		mat.emission_enabled = true
+		mat.emission = Color("#4fcf4a")
+		ring.material_override = mat
+		node.add_child(ring)
+
+func _monster_corpse_label_text(rec: Dictionary) -> String:
+	var monster_def_id := str(rec.get("monster_def_id", ""))
+	if monster_def_id == "":
+		return "Corpse"
+	return "%s Corpse" % monster_def_id.replace("_", " ").capitalize()
 
 func _set_pickable(node: Node3D, pickable: bool) -> void:
 	if node == null:
@@ -3129,6 +3259,7 @@ func _build_scene() -> void:
 	var ui := CanvasLayer.new()
 	ui.layer = 5
 	add_child(ui)
+	gameplay_ui_layer = ui
 	_debug_label = Label.new()
 	_debug_label.position = Vector2(12, 12)
 	ui.add_child(_debug_label)
@@ -3190,6 +3321,8 @@ func _build_scene() -> void:
 	skill_bar.cast_skill_requested.connect(_on_skill_cast_requested)
 	skill_bar.open_skills_requested.connect(_open_skills_panel_from_bar)
 	ui.add_child(skill_bar)
+	companion_bar = CompanionBarScript.new()
+	ui.add_child(companion_bar)
 	status_effects_bar = StatusEffectsBarScript.new()
 	status_effects_bar.effect_expired.connect(_on_status_effect_expired)
 	ui.add_child(status_effects_bar)
@@ -3607,6 +3740,7 @@ func _sync_skill_bar_selection() -> void:
 	skill_bar.set_skill_cooldowns(skill_cooldowns)
 	skill_bar.set_player_mana(player_mana, player_max_mana)
 	skill_bar.set_interactive(not _skill_cast_blocked(selected_skill_id))
+	_refresh_loot_label_visibility()
 
 func _tick_skill_cooldowns(delta: float) -> void:
 	if skill_cooldowns.is_empty():
@@ -3691,6 +3825,8 @@ func _try_use_right_click_skill() -> bool:
 	var direction := Vector2.ZERO
 	if str(pick.get("kind", "")) == "monster":
 		target_id = str(pick.get("target_id", ""))
+	elif right_click_skill_id == "revive" and _is_dead_monster(str(pick.get("target_id", ""))):
+		target_id = str(pick.get("target_id", ""))
 	else:
 		direction = _aim_direction_from_mouse()
 	var sent := _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
@@ -3732,6 +3868,8 @@ func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Ve
 			payload["target_id"] = player_id
 			return payload
 	var chosen_target := target_id
+	if skill_id == "revive" and chosen_target == "" and hovered_loot_id != "" and _is_dead_monster(hovered_loot_id):
+		chosen_target = hovered_loot_id
 	if chosen_target == "" and use_nearest_fallback:
 		chosen_target = _nearest_live_monster_id()
 	if chosen_target != "":
@@ -4667,7 +4805,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	var kind := str(e.get("type", ""))
 	# Monsters resolve presentation through shared visual metadata while
 	# gameplay stays server-owned.
-	if kind == "monster":
+	if kind == "monster" or kind == "companion":
 		var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
 		var packed := _monster_scene_for_visual(str(visual.get("scene", "monster_dummy")))
 		if str(e.get("visual_model", "")) == BOSS_VISUAL_MODEL:
@@ -4743,7 +4881,7 @@ func _entity_base_tint(e: Dictionary) -> Color:
 	var kind := str(e.get("type", ""))
 	if kind == "player":
 		return REMOTE_PLAYER_TINT
-	if kind == "monster":
+	if kind == "monster" or kind == "companion":
 		if e.has("visual_tint"):
 			return Color(str(e.get("visual_tint", "#ffffff")))
 		return _monster_tint(str(e.get("rarity", "common")))
@@ -5874,6 +6012,7 @@ func get_bot_state() -> Dictionary:
 		"elite_objective_minimap": elite_objective_minimap.get_debug_state() if elite_objective_minimap != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
+		"companion_bar": companion_bar.get_debug_state() if companion_bar != null else {"visible": false, "count": 0, "companions": []},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
 		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},
 		"character_info_panel": _character_info_debug_state(),

@@ -1,0 +1,65 @@
+client/scripts/bot_controller.gd
+  s_898d01ce740857::t_0084ceb0607a0d 177-178,352-354
+client/scripts/mercenary_panel.gd
+  s_898d01ce740857::t_063dfce235f354 139,153,215,217
+  s_898d01ce740857::t_af17607e5414f8 98-103
+  s_898d01ce740857::t_54c787bd1cf46b 5-7,11,21,26-27,75-82,90-91,121-122,171-187,208-212,220,224,230-233,247-264
+client/scripts/bot_facade.gd
+  s_898d01ce740857::t_0084ceb0607a0d 59-64
+docs/progress/slice-lifecycle.md
+  s_898d01ce740857::t_456bd4ac8b8a8f 234-235
+client/scripts/bot_step_catalog.gd
+  s_898d01ce740857::t_0084ceb0607a0d 59,228
+client/tests/test_coop_client.gd
+  s_898d01ce740857::t_91442f1a4a3ad1 29,1018-1019,1021
+  s_898d01ce740857::t_6168df2892b12d 1020
+client/scripts/companion_bar.gd
+  s_898d01ce740857::t_af17607e5414f8 4-5,149,151-154,174-178
+docs/specs/v219_spec-companion-stance-ui.md
+  s_898d01ce740857::t_c5f7e8260a1938 1-3,5-37,39-42,44-68
+  s_898d01ce740857::t_7aff8589f8e883 4
+  s_898d01ce740857::t_6168df2892b12d 38,43
+client/scripts/mercenary_panel_bridge.gd
+  s_898d01ce740857::t_758fbacfa17e75 30-37,46-47
+client/scripts/main.gd
+  s_898d01ce740857::t_af17607e5414f8 642-650,3412
+  s_898d01ce740857::t_a8a8da52c859ee 636-641,2223,3377-3379,5507-5508
+  s_898d01ce740857::t_e288708d2499de 1417
+tools/bot/scenarios/client/47_mercenary_roster_ui.json
+  s_898d01ce740857::t_0084ceb0607a0d 23,29-37,48
+client/scripts/bot_scenario_runner.gd
+  s_898d01ce740857::t_0084ceb0607a0d 1613
+docs/plans/v219_2026-06-16-companion-stance-ui.md
+  s_898d01ce740857::t_c5f7e8260a1938 1-20,22-55,60-73,76-87,90-96,101-102
+  s_898d01ce740857::t_6168df2892b12d 21,59
+  s_898d01ce740857::t_0084ceb0607a0d 56-58,74-75
+  s_898d01ce740857::t_456bd4ac8b8a8f 97-100
+  s_898d01ce740857::t_7aff8589f8e883 88-89
+client/scripts/bot_mercenary_panel_assertions.gd
+  s_898d01ce740857::t_0084ceb0607a0d 17-18
+client/tests/test_mercenary_panel.gd
+  s_898d01ce740857::t_0084ceb0607a0d 9,20,39,46,50-56
+  s_898d01ce740857::t_9b7e32a379712b 45
+.maintainability/file-size-baseline.tsv
+  s_898d01ce740857::t_456bd4ac8b8a8f 3-4,7,14,19,22
+docs/as-built/v219_companion-stance-ui.md
+  s_898d01ce740857::t_456bd4ac8b8a8f 1-35
+PROGRESS.md
+  s_898d01ce740857::t_456bd4ac8b8a8f 26,28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "dfff44c31f4fde1b78e1cc328eb64fe1d6c8899b",
+  "prompts": {},
+  "sessions": {
+    "s_898d01ce740857": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1c5-b55c-76f1-8252-fcaf1d718185",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

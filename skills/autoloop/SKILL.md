@@ -52,10 +52,10 @@ and the `$refactor` pass that follows them.
 After the user picks one or more ideas from the menu, that reply authorizes the
 agent to order the selected ideas and run the batch clarification gate. If that
 gate emits no questions, the agent may continue from brief to spec, plan,
-implementation, CI, and commit when all gates pass. If that gate emits questions,
-the user's answer authorizes continuing with those answers applied. It does
-**not** authorize pushing, branch creation, bypassing CI, or guessing through
-blockers.
+implementation, focused verification, and commit when all gates pass. If that
+gate emits questions, the user's answer authorizes continuing with those answers
+applied. It does **not** authorize pushing, branch creation, bypassing the final
+CI gate, or guessing through blockers.
 
 ## Count handling
 
@@ -101,7 +101,8 @@ Stop immediately and report the reason if any of these occur:
 2. A `$next`, `$spec`, `$plan`, `$execute`, or `$finish` gate finds a blocker that cannot be
    resolved conservatively from repo context.
 3. A spec or plan contradiction cannot be resolved by the defaults above.
-4. CI fails after reasonable diagnosis and focused fixes.
+4. A focused per-slice verification command fails after reasonable diagnosis and fixes, or the
+   final post-loop `make ci` fails after reasonable diagnosis and focused fixes.
 5. A decision requires product/design judgment not covered by the defaults.
 6. Secrets, credentials, `.env`, or local-only artifacts appear in the diff or staged changes.
 7. Completing another slice would exceed the requested execution target.
@@ -252,7 +253,13 @@ Use the **execute** skill on the plan file.
 - Run the plan review gate.
 - Implement task-by-task in plan order.
 - Update plan checkboxes as tasks complete.
-- Run focused verification while iterating and `make ci` before claiming done.
+- Run focused verification while iterating. In autoloop batch mode, do **not** run `make ci`
+  for each slice unless the slice is unusually broad, focused verification cannot cover the
+  risk, or the user explicitly asks for per-slice CI.
+- Choose the smallest sufficient verification command set for the touched areas, such as
+  `make validate-shared`, a focused Go package test, `make client-unit`, `make client-smoke`,
+  a specific `make bot scenario=...`, or the bot/client scenario named by the plan.
+- Record the exact focused verification commands and results in the slice report/checkpoint.
 - Stop on unresolved ambiguity, unplanned protocol/schema changes, or persistent failing tests.
 
 ### 5. Finish
@@ -260,7 +267,11 @@ Use the **execute** skill on the plan file.
 Use the **finish** skill.
 
 - Consolidate `PROGRESS.md`.
-- Run `make ci`.
+- In autoloop batch mode, use the finish skill's autoloop exception: commit each completed slice
+  after focused verification, without running `make ci` per slice when focused tests are adequate.
+- Do run `make ci` before an individual slice commit only when focused verification is not enough
+  for the changed surface, when the slice is broad enough to justify it, or when the user explicitly
+  requested per-slice CI.
 - Stage only files belonging to the current slice.
 - Commit with exactly:
 
@@ -284,8 +295,8 @@ After each commit:
    - any new hard-stop risks or deferred scope.
 3. Only after the checkpoint exists, clear or compact context if the runtime exposes a safe
    explicit mechanism for doing so.
-4. Do not clear context if the commit failed, `make ci` did not pass, git status is ambiguous,
-   or the next selected idea cannot be reconstructed from the checkpoint.
+4. Do not clear context if the commit failed, focused verification did not pass, git status is
+   ambiguous, or the next selected idea cannot be reconstructed from the checkpoint.
 5. If no explicit context clearing mechanism is available, do manual context hygiene instead:
    treat previous slice implementation details as stale, re-read `CLAUDE.md`, `PROGRESS.md`,
    `AGENTS.md`, the remaining selected idea, and the relevant skill files before the next slice.
@@ -304,15 +315,19 @@ After the checkpoint and optional context hygiene:
 After all requested slices have completed and committed:
 
 1. Re-read `PROGRESS.md`.
-2. If the engineering-review cadence is due, run `$review` first to generate the fresh review set
+2. Run `make ci` once for the completed batch before any review/refactor handoff. If it fails,
+   diagnose, fix minor bugs that belong to the completed slices, re-run focused commands as needed,
+   then re-run `make ci` until it passes or a hard stop condition fires. Commit CI-fix changes as a
+   small follow-up commit that clearly belongs to the autoloop batch.
+3. If the engineering-review cadence is due, run `$review` first to generate the fresh review set
    from the just-completed feature baseline. Treat the autoloop command as authorization for this
    post-loop review only after the feature target is committed and the worktree is clean.
-3. After `$review` writes the fresh overview and companion reports, run `$refactor` pointed at that
+4. After `$review` writes the fresh overview and companion reports, run `$refactor` pointed at that
    new review. `$refactor` must classify every recommendation as `minor-commit`, `future-slice`,
    `future-plan`, or `reject`, and land only small verified cleanup commits.
-4. Stop after `$refactor` reports no more safe minor commits remain, or earlier if either skill
+5. Stop after `$refactor` reports no more safe minor commits remain, or earlier if either skill
    hits a hard stop.
-5. If no engineering review is due, stop and report completion.
+6. If no engineering review is due, stop and report completion.
 
 ## Reporting
 
@@ -320,8 +335,13 @@ For each completed slice, report:
 
 - Slice number and title.
 - Commit hash and commit message.
-- `make ci` result.
+- Focused verification commands and results.
 - Any deferred scope added to `PROGRESS.md`.
+
+For the completed autoloop batch, report:
+
+- Final `make ci` result.
+- Any minor CI-fix follow-up commits made after the per-slice commits.
 
 If the loop stops early, report:
 

@@ -1,9 +1,9 @@
 ---
 name: finish
 description: >-
-  Close out a slice: update PROGRESS.md, run make ci, and commit with
-  feat: vN: title format. Use when the user runs /finish or says the slice
-  is done and wants a consolidated commit.
+  Close out a slice: update PROGRESS.md, verify, and commit with feat: vN:
+  title format. Use when the user runs /finish or says the slice is done and
+  wants a consolidated commit.
 disable-model-invocation: true
 ---
 
@@ -15,7 +15,9 @@ disable-model-invocation: true
 
 ## Hard rules
 
-1. **`make ci` must pass** before committing. No commit on red CI.
+1. **`make ci` must pass** before committing a standalone slice. No commit on red CI.
+   In `$autoloop` batch mode, commit each slice after adequate focused verification, and let
+   `$autoloop` run one final `make ci` after all requested slices are committed.
 2. **Update `PROGRESS.md`** if not already current — **Current status**, open gaps, review cadence.
    Update [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) for the new row.
 3. **Commit message format is fixed:**
@@ -59,8 +61,8 @@ Read [`PROGRESS.md`](../../PROGRESS.md) and verify it reflects the shipped slice
 
 | Section | Action |
 |---------|--------|
-| **Current status** | `Latest completed slice` → vN; `Active branch` → feature branch or TBD; `CI gate` → date + green; `Next slice` → TBD |
-| **Slice lifecycle table** | Add/update row in [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md): Status = Complete (`make ci` green), Spec + Plan links |
+| **Current status** | `Latest completed slice` → vN; `Active branch` → feature branch or TBD; `CI gate` → date + green for standalone slices, or focused verification with final batch CI pending for `$autoloop`; `Next slice` → TBD |
+| **Slice lifecycle table** | Add/update row in [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md): Status = Complete after required verification, Spec + Plan links |
 | **As-built summary** | Add or update `docs/as-built/vN_<codename>.md`: what it proves, key decisions, scope limits |
 | **Open gaps & deferred work** | Update deferred/autoloop tables when spec non-goals change — **do not** add inline "Recently closed" prose to `PROGRESS.md` |
 | **Last updated** | Today's date |
@@ -101,6 +103,8 @@ Review:
 
 ### CI gate
 
+For standalone `/finish`:
+
 ```bash
 make maintainability
 ```
@@ -118,6 +122,15 @@ If CI fails:
 Use focused commands while iterating if helpful: `make validate-shared`, `make test-go`, `make bot`, `make client-unit`.
 
 **Evidence before commit:** confirm `make ci` succeeded in chat (brief summary or exit code 0).
+
+For `$autoloop` batch mode:
+
+1. Confirm the slice's focused verification evidence from `$execute`.
+2. Run additional focused commands only if close-out changes create new risk.
+3. Do **not** run `make ci` for every slice when focused tests cover the changes. `$autoloop`
+   must run one final `make ci` after all requested slices are committed and fix minor batch
+   regressions there.
+4. Before committing, state that final CI is deferred to the autoloop batch gate.
 
 ## Phase 3 — Commit
 
@@ -161,7 +174,8 @@ Confirm clean working tree (or only intentional unstaged files). Report commit h
 Tell the user:
 
 1. Slice vN committed with message `feat: vN: …`.
-2. `make ci` evidence (green).
+2. Verification evidence (`make ci` green for standalone finish, or focused commands with final
+   batch CI pending for `$autoloop`).
 3. PROGRESS.md updated (list what changed).
 4. Suggested follow-ups:
    - `/next` to pick the following slice

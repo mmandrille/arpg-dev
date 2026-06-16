@@ -43,6 +43,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"allocate_skill_point_intent":     (*Sim).handleAllocateSkillPoint,
 	"cast_skill_intent":               (*Sim).handleCastSkill,
 	"set_skill_bindings_intent":       (*Sim).handleSetSkillBindings,
+	"companion_command_intent":        (*Sim).handleCompanionCommand,
 	"shop_buy_intent":                 (*Sim).handleShopBuy,
 	"shop_sell_intent":                (*Sim).handleShopSell,
 	"shop_reroll_intent":              (*Sim).handleShopReroll,

@@ -29,6 +29,7 @@
         "allocate_skill_point_intent",
         "cast_skill_intent",
         "set_skill_bindings_intent",
+        "companion_command_intent",
         "shop_buy_intent",
         "shop_sell_intent",
         "shop_reroll_intent",
@@ -94,6 +95,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/cast_skill_intent" } } } },
     { "if": { "properties": { "type": { "const": "set_skill_bindings_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/set_skill_bindings_intent" } } } },
+    { "if": { "properties": { "type": { "const": "companion_command_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/companion_command_intent" } } } },
     { "if": { "properties": { "type": { "const": "shop_buy_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/shop_buy_intent" } } } },
     { "if": { "properties": { "type": { "const": "shop_sell_intent" } } },
@@ -273,6 +276,14 @@
           "items": { "type": "string" }
         },
         "right_click_skill_id": { "type": "string" }
+      }
+    },
+    "companion_command_intent": {
+      "type": "object",
+      "required": ["stance"],
+      "additionalProperties": false,
+      "properties": {
+        "stance": { "type": "string", "enum": ["assist", "defend", "passive"] }
       }
     },
     "equipment_slot": {

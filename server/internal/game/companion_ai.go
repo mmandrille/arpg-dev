@@ -267,6 +267,7 @@ func (e *entity) applyMonsterLikeViewFields(ev *EntityView) {
 	ev.MonsterPackLeader = e.monsterPackLeader
 	if e.kind == companionEntity {
 		ev.OwnerID = idStr(e.ownerID)
+		ev.CompanionStance = e.companionStanceOrDefault()
 		if e.targetID != 0 {
 			ev.TargetID = idStr(e.targetID)
 		}
@@ -324,6 +325,9 @@ func (s *Sim) advanceCompanions(res *TickResult) {
 
 func (s *Sim) companionTarget(companion *entity) *entity {
 	level := s.activeLevel()
+	if companion.companionStanceOrDefault() == CompanionStancePassive {
+		return nil
+	}
 	if companion.targetID != 0 {
 		target := level.entities[companion.targetID]
 		if s.validCompanionTarget(companion, target) {
@@ -350,7 +354,15 @@ func (s *Sim) validCompanionTarget(companion *entity, target *entity) bool {
 	if companion == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 {
 		return false
 	}
-	return distance(companion.pos, target.pos) <= companionAssistRadius
+	switch companion.companionStanceOrDefault() {
+	case CompanionStancePassive:
+		return false
+	case CompanionStanceDefend:
+		owner := s.activeLevel().entities[companion.ownerID]
+		return owner != nil && owner.kind == playerEntity && owner.hp > 0 && distance(owner.pos, target.pos) <= companionAssistRadius
+	default:
+		return distance(companion.pos, target.pos) <= companionAssistRadius
+	}
 }
 
 func (s *Sim) advanceCompanionMovement(companion *entity, owner *entity, target *entity, res *TickResult) {

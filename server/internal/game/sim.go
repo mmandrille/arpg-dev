@@ -148,6 +148,7 @@ type entity struct {
 	corpseItemCount       int
 	ownerID               uint64
 	targetID              uint64
+	companionStance       string
 	projectileDefID       string
 	sourceSkillID         string
 	expiresTick           uint64
@@ -795,6 +796,7 @@ type Input struct {
 	AllocateSkillPoint  *AllocateSkillPointIntent
 	CastSkill           *CastSkillIntent
 	SetSkillBindings    *SetSkillBindingsIntent
+	CompanionCommand    *CompanionCommandIntent
 	ShopBuy             *ShopBuyIntent
 	ShopSell            *ShopSellIntent
 	ShopReroll          *ShopRerollIntent
@@ -957,9 +959,7 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 	return results[len(results)-1]
 }
 
-// TickResults processes the inputs stamped for the current tick (already
-// ordered by the runner as (sequence, message_id)), applies continuous
-// movement, advances the tick counter, and returns one or more scoped results.
+// TickResults processes current-tick inputs, applies continuous effects, and returns scoped results.
 func (s *Sim) TickResults(inputs []Input) []TickResult {
 	type resultKey struct {
 		level int

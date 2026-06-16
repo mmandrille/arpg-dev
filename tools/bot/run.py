@@ -471,6 +471,8 @@ async def execute_step(
         await wait_for_accept(ws, state, env["message_id"], loop)
         return
 
+    if action == "set_companion_stance": from tools.bot.companion_commands import set_companion_stance; await set_companion_stance(ws, session_id, state, step, loop, globals()); return
+
     if action == "move_until_player_position":
         move_fn = move_to_position if bool(step.get("pathfind")) else walk_toward
         await move_fn(
@@ -2109,6 +2111,7 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "phase_kind",
         "reason",
         "state",
+        "stance",
         "service",
     ):
         if key in expected and str(event.get(key, "")) != str(expected[key]):
@@ -3053,6 +3056,7 @@ def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) ->
         "state": "state",
         "boss_template_id": "boss_template_id",
         "visual_model": "visual_model",
+        "companion_stance": "companion_stance",
     }
     for selector_key, entity_key in string_filters.items():
         if selector_key in selector and selector[selector_key] is not None:

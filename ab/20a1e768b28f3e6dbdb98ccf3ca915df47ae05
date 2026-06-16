@@ -1,0 +1,45 @@
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_4e57aa710a1c1f::t_1375bc6f23e2a7 22-29
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_4e57aa710a1c1f::t_40e97e5e46f7d4 7,18,23-24,42
+  s_4e57aa710a1c1f::t_6c0317483fe4f1 17,39
+docs/plans/v212_2026-06-16-ranger-disengage.md
+  s_4e57aa710a1c1f::t_b630ea6e333a2b 1-80
+shared/assets/skill_presentations.v0.json
+  s_4e57aa710a1c1f::t_40e97e5e46f7d4 206-216
+docs/specs/v212_spec-ranger-disengage.md
+  s_4e57aa710a1c1f::t_b630ea6e333a2b 1-50
+shared/rules/skills.v0.json
+  s_4e57aa710a1c1f::t_8b79ee657282dd 942
+  s_4e57aa710a1c1f::t_40e97e5e46f7d4 918-941,943-962
+server/internal/game/mobility_skills_test.go
+  s_4e57aa710a1c1f::t_1d58d51a461569 89-120
+server/internal/game/mobility_skills.go
+  s_4e57aa710a1c1f::t_82762516347a88 32-36,53,61
+docs/as-built/v212_ranger-disengage.md
+  s_4e57aa710a1c1f::t_b630ea6e333a2b 1-23
+docs/progress/slice-lifecycle.md
+  s_4e57aa710a1c1f::t_b630ea6e333a2b 229
+PROGRESS.md
+  s_4e57aa710a1c1f::t_b630ea6e333a2b 26,28-29
+shared/i18n/es.json
+  s_4e57aa710a1c1f::t_40e97e5e46f7d4 92-93
+shared/i18n/en.json
+  s_4e57aa710a1c1f::t_40e97e5e46f7d4 90-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ab20a1e768b28f3e6dbdb98ccf3ca915df47ae05",
+  "prompts": {},
+  "sessions": {
+    "s_4e57aa710a1c1f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ece4a-9220-7c91-bf31-333e57a6cffa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

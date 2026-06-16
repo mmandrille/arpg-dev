@@ -1,0 +1,52 @@
+client/scripts/bot_ui_assertion_handlers.gd
+  s_91cf6549724495::t_96a8d409932468 44-49,55-101
+client/scripts/bot_action_step_validator.gd
+  s_91cf6549724495::t_56bd75f0852cf6 79-80
+client/scripts/set_collection_panel.gd.uid
+  s_91cf6549724495::t_098030b8d7a61b 1
+client/tests/test_set_collection_panel.gd.uid
+  s_91cf6549724495::t_271e8d54bbdeae 1
+scripts/client_smoke.sh
+  s_91cf6549724495::t_271e8d54bbdeae 129
+client/scripts/set_collection_panel.gd
+  s_91cf6549724495::t_4cfe7ce2d5be36 1-239
+client/scripts/bot_facade.gd
+  s_91cf6549724495::t_96a8d409932468 67-69
+client/tests/test_set_collection_panel.gd
+  s_91cf6549724495::t_271e8d54bbdeae 1-114
+docs/progress/slice-lifecycle.md
+  s_91cf6549724495::t_41b8c695aeba03 221
+docs/as-built/v204_set-collection-panel.md
+  s_91cf6549724495::t_0cec0975fc436d 1-28
+tools/bot/scenarios/client/46_set_collection_panel.json
+  s_91cf6549724495::t_bb44ab7d9335bc 1-31
+PROGRESS.md
+  s_91cf6549724495::t_41b8c695aeba03 26,28
+client/scripts/inventory_panel.gd
+  s_91cf6549724495::t_b7b0c4282a4c77 13,85-86,335,487-489,495-501,528-529,532-537
+docs/specs/v204_spec-set-collection-panel.md
+  s_91cf6549724495::t_0cec0975fc436d 3
+  s_91cf6549724495::t_dd3d2c7d8c4e49 1-2,4-59
+docs/plans/v204_2026-06-15-set-collection-panel.md
+  s_91cf6549724495::t_a7f2751920760f 112
+  s_91cf6549724495::t_0cec0975fc436d 3,35
+  s_91cf6549724495::t_c3491f08b0e3e6 1-2,4-20,24-33,36,38-39,41-54,59-67,72-79,83-84,87-99,103-108,113-116
+  s_91cf6549724495::t_9fb7a77003bb58 100-102
+  s_91cf6549724495::t_d2939e6791288b 21-23,34,37,40,55-58,68-71,80-82,85-86,109-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d6030cf7ce3807b536297aac93d63f67c8604230",
+  "prompts": {},
+  "sessions": {
+    "s_91cf6549724495": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdc2-d0c7-77a3-bdd7-9c7d3b38e3f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -49,6 +49,9 @@ func (s *Sim) effectiveSkillManaCost(def SkillDef, rank int) int {
 
 func (s *Sim) effectiveSkillCooldownTicks(def SkillDef) int {
 	cooldown := s.baseSkillCooldownTicks(def)
+	if cooldown <= 0 {
+		return 0
+	}
 	if def.Cooldown.MagicReductionTicksPerPoint > 0 {
 		magic := s.progression.BaseStats.Magic
 		baseline := skillStatRequirementForRank(def, "magic", 1)

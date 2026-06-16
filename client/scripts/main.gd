@@ -52,6 +52,7 @@ const SustainedClickInputScript := preload("res://scripts/sustained_click_input.
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
@@ -78,9 +79,6 @@ const REMOTE_PLAYER_TINT := Color("#202934")
 const POISON_TINT := Color("#38f06f")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
 const NO_MANA_TEXT := "NO MANA"
-const HEAL_RAIN_RADIUS := 4.0
-const LEAP_VISUAL_DURATION := 1
-const LEAP_VISUAL_HEIGHT := 2.05
 const MONSTER_RARITY_TINTS := {
 	"common": Color("#f2f2ec"),
 	"champion": Color("#9fc7ff"),
@@ -133,6 +131,7 @@ var _local_player_class_asset_id: String = ""
 var predicted_pos := Vector3.ZERO    # client-predicted player position
 var reconciliation_delta: float = 0.0
 var local_leap_visual_active: bool = false
+var local_charge_visual_active: bool = false
 var last_server_tick: int = 0
 var inventory: Array = []
 var equipped: Dictionary = {}
@@ -980,9 +979,9 @@ func _apply_delta(p: Dictionary) -> void:
 			_hide_blacksmith_panel()
 			if quest_journal_panel != null:
 				quest_journal_panel.hide_display()
-	var local_leap_event := _local_player_leap_event(p.get("events", []))
-	var local_leap_landing := Vector3.ZERO
-	var local_leap_has_landing := false
+	var local_motion_skill_id := _local_player_motion_skill_id(p.get("events", []))
+	var local_motion_landing := Vector3.ZERO
+	var local_motion_has_landing := false
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
@@ -990,9 +989,9 @@ func _apply_delta(p: Dictionary) -> void:
 				_render_wall_layout(c.get("walls", []))
 			"entity_spawn", "entity_update":
 				var entity: Dictionary = c.get("entity", {})
-				if not local_leap_event.is_empty() and _is_local_player_entity_update(entity):
-					local_leap_landing = _entity_position(entity)
-					local_leap_has_landing = true
+				if local_motion_skill_id != "" and _is_local_player_entity_update(entity):
+					local_motion_landing = _entity_position(entity)
+					local_motion_has_landing = true
 					_upsert_entity(entity, false)
 				else:
 					_upsert_entity(entity)
@@ -1086,7 +1085,9 @@ func _apply_delta(p: Dictionary) -> void:
 			if str(ev.get("skill_id", "")) == "earthbreaker":
 				EarthbreakerJump.play(character_visual, self)
 			if str(ev.get("skill_id", "")) == "leap":
-				_play_leap_visual(ev, local_leap_landing if local_leap_has_landing else Vector3.INF)
+				_play_leap_visual(ev, local_motion_landing if local_motion_has_landing else Vector3.INF)
+			if str(ev.get("skill_id", "")) == "charge":
+				_play_charge_visual(ev, local_motion_landing if local_motion_has_landing else Vector3.INF)
 			if ev.has("projectile_def_id") and ev.has("position") and ev.has("direction"):
 				_spawn_skill_projectile_visual(ev)
 			if ev.has("angle_degrees") and ev.has("range") and ev.has("direction"):
@@ -1339,16 +1340,17 @@ func _apply_delta(p: Dictionary) -> void:
 	_sync_boss_health_bar()
 	_reconcile_player()
 
-func _local_player_leap_event(events: Array) -> Dictionary:
+func _local_player_motion_skill_id(events: Array) -> String:
 	for raw in events:
 		if not (raw is Dictionary):
 			continue
 		var ev := raw as Dictionary
 		if str(ev.get("event_type", "")) == "skill_cast" \
-				and str(ev.get("skill_id", "")) == "leap" \
 				and _event_subject_entity_id(ev) == player_id:
-			return ev
-	return {}
+			var skill_id := str(ev.get("skill_id", ""))
+			if skill_id == "leap" or skill_id == "charge":
+				return skill_id
+	return ""
 
 func _is_local_player_entity_update(e: Dictionary) -> bool:
 	return str(e.get("type", "")) == "player" and (str(e.get("id", "")) == player_id or player_id == "")
@@ -1396,7 +1398,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		var prev_predicted_pos := predicted_pos
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
-		if apply_local_player_position and not local_leap_visual_active:
+		if apply_local_player_position and not local_leap_visual_active and not local_charge_visual_active:
 			player_anchor.position = server_pos
 		if apply_local_player_position and prev_predicted_pos.distance_to(server_pos) > 0.001 and player_hp > 0:
 			_mark_local_player_walking()
@@ -1890,7 +1892,7 @@ func _heal_cast_rain_correlations(events: Array) -> Dictionary:
 
 func _spawn_heal_rain_at_position(world_position: Vector3) -> void:
 	var effect := HealRainEffectScript.new() as HealRainEffect
-	effect.setup(HEAL_RAIN_RADIUS)
+	effect.setup(_skill_presentation_float("heal", "visual_radius"))
 	effect.position = world_position
 	add_child(effect)
 
@@ -1943,22 +1945,64 @@ func _play_leap_visual(ev: Dictionary, landing_override: Vector3 = Vector3.INF) 
 	var start_2d := _vec2_from_dict(ev.get("position", {}))
 	var landing := landing_override if landing_override != Vector3.INF else predicted_pos
 	var start := Vector3(start_2d.x, landing.y, start_2d.y)
-	var apex := (start + landing) * 0.5 + Vector3(0.0, LEAP_VISUAL_HEIGHT, 0.0)
+	var visual_duration: float = _skill_presentation_float("leap", "visual_duration")
+	var apex := (start + landing) * 0.5 + Vector3(0.0, _skill_presentation_float("leap", "visual_height"), 0.0)
 	local_leap_visual_active = true
 	player_anchor.position = start
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(player_anchor, "position:x", landing.x, LEAP_VISUAL_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(player_anchor, "position:z", landing.z, LEAP_VISUAL_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(player_anchor, "position:x", landing.x, visual_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(player_anchor, "position:z", landing.z, visual_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.chain().tween_callback(_finish_leap_visual)
 	var y_tween := create_tween()
-	y_tween.tween_property(player_anchor, "position:y", apex.y, LEAP_VISUAL_DURATION * 0.48).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	y_tween.tween_property(player_anchor, "position:y", landing.y, LEAP_VISUAL_DURATION * 0.52).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	y_tween.tween_property(player_anchor, "position:y", apex.y, visual_duration * 0.48).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	y_tween.tween_property(player_anchor, "position:y", landing.y, visual_duration * 0.52).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 
 func _finish_leap_visual() -> void:
 	local_leap_visual_active = false
 	if player_anchor != null:
 		player_anchor.position = predicted_pos
+
+func _play_charge_visual(ev: Dictionary, landing_override: Vector3 = Vector3.INF) -> void:
+	if player_anchor == null or not ev.has("position"):
+		return
+	var start_2d := _vec2_from_dict(ev.get("position", {}))
+	var landing := landing_override if landing_override != Vector3.INF else predicted_pos
+	var start := Vector3(start_2d.x, landing.y, start_2d.y)
+	var distance_tiles: float = max(0.01, Vector2(start.x, start.z).distance_to(Vector2(landing.x, landing.z)))
+	var speed_tiles_per_second: float = _skill_mobility_float("charge", "speed_tiles_per_second")
+	var duration: float = max(0.08, distance_tiles / speed_tiles_per_second)
+	local_charge_visual_active = true
+	player_anchor.position = start
+	_face_direction(Vector2(landing.x - start.x, landing.z - start.z))
+	_mark_local_player_walking()
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(player_anchor, "position:x", landing.x, duration).set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(player_anchor, "position:z", landing.z, duration).set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
+	tween.chain().tween_callback(_finish_charge_visual)
+
+func _finish_charge_visual() -> void:
+	local_charge_visual_active = false
+	if player_anchor != null:
+		player_anchor.position = predicted_pos
+
+func _skill_presentation_float(skill_id: String, field: String) -> float:
+	var presentation: Dictionary = SkillRulesLoaderScript.skill_presentation(skill_id)
+	var value := float(presentation.get(field, 0.0))
+	if value > 0.0:
+		return value
+	push_warning("skill presentation %s.%s must be positive" % [skill_id, field])
+	return 0.1
+
+func _skill_mobility_float(skill_id: String, field: String) -> float:
+	var def: Dictionary = SkillRulesLoaderScript.skill_definition(skill_id)
+	var mobility: Dictionary = def.get("mobility", {})
+	var value := float(mobility.get(field, 0.0))
+	if value > 0.0:
+		return value
+	push_warning("skill mobility %s.%s must be positive" % [skill_id, field])
+	return 0.1
 
 func _spawn_skill_projectile_visual(ev: Dictionary) -> void:
 	var projectile_def_id := str(ev.get("projectile_def_id", ""))

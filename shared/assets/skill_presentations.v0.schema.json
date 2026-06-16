@@ -49,7 +49,10 @@
           "summary": { "type": "string", "minLength": 1 },
           "summary_key": { "type": "string", "minLength": 1 },
           "projectile_visual": { "type": "string", "minLength": 1 },
-          "effect_visual": { "type": "string", "minLength": 1 }
+          "effect_visual": { "type": "string", "minLength": 1 },
+          "visual_radius": { "type": "number", "exclusiveMinimum": 0 },
+          "visual_duration": { "type": "number", "exclusiveMinimum": 0 },
+          "visual_height": { "type": "number", "minimum": 0 }
         }
       }
     }

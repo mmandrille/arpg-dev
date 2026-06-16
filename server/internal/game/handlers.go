@@ -1271,7 +1271,9 @@ func (s *Sim) commitSkillSpend(player *entity, skillID string, def SkillDef, man
 		player.mana = 0
 	}
 	cooldownTicks := s.skillCooldownTicks(def)
-	s.skillCooldowns[skillID] = skillCooldownState{EndsTick: s.tick + uint64(cooldownTicks), TotalTicks: cooldownTicks}
+	if cooldownTicks > 0 {
+		s.skillCooldowns[skillID] = skillCooldownState{EndsTick: s.tick + uint64(cooldownTicks), TotalTicks: cooldownTicks}
+	}
 	return cooldownTicks
 }
 
@@ -1307,6 +1309,9 @@ func (s *Sim) appendConeSkillCastEvent(res *TickResult, player *entity, skillID 
 }
 
 func (s *Sim) appendSkillCooldownStartedEvent(res *TickResult, player *entity, skillID string, correlationID string, cooldownTicks int) {
+	if cooldownTicks <= 0 {
+		return
+	}
 	res.Events = append(res.Events, Event{
 		EventType:      "skill_cooldown_started",
 		EntityID:       idStr(player.id),

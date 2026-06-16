@@ -874,8 +874,8 @@ type (
 	ShopRerollIntent struct {
 		ShopEntityID string
 	}
-	BishopRespecIntent    struct{ BishopEntityID string }
-	BishopReviveAllIntent struct{ BishopEntityID string }
+	BishopRespecIntent     struct{ BishopEntityID string }
+	BishopReviveAllIntent  struct{ BishopEntityID string }
 	BishopDebugLevelIntent struct {
 		BishopEntityID string
 	}
@@ -2312,6 +2312,9 @@ func (s *Sim) skillCooldownTicks(def SkillDef) int {
 }
 
 func (s *Sim) baseSkillCooldownTicks(def SkillDef) int {
+	if def.Cooldown.Type == "none" {
+		return 0
+	}
 	if def.Cooldown.FixedTicks > 0 {
 		return def.Cooldown.FixedTicks
 	}

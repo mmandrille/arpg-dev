@@ -1,0 +1,64 @@
+docs/progress/scenario-catalog.md
+  s_91cf6549724495::t_ac5bb339a3e3d3 43
+server/internal/game/boss_patterns.go
+  s_91cf6549724495::t_f010791cce8061 133-137
+  s_91cf6549724495::t_057d036b05f380 11,90,115-132,138-153
+shared/rules/boss_templates.v0.schema.json
+  s_91cf6549724495::t_057d036b05f380 35-43
+PROGRESS.md
+  s_91cf6549724495::t_ac5bb339a3e3d3 26,28
+server/internal/game/companion_ai.go
+  s_91cf6549724495::t_057d036b05f380 285-290
+docs/specs/v205_spec-boss-enrage-phase.md
+  s_91cf6549724495::t_314d75a247be85 1-2,4-35,37-40,42-50,54-61
+  s_91cf6549724495::t_ac5bb339a3e3d3 3,36,41,51-53
+shared/rules/boss_templates.v0.json
+  s_91cf6549724495::t_057d036b05f380 10-13
+server/internal/game/rules.go
+  s_91cf6549724495::t_f010791cce8061 352-356,358-359
+  s_91cf6549724495::t_057d036b05f380 357
+  s_91cf6549724495::t_93b87edaf9ec55 2440-2441
+docs/progress/slice-lifecycle.md
+  s_91cf6549724495::t_ac5bb339a3e3d3 222
+server/internal/game/boss_enrage_test.go
+  s_91cf6549724495::t_0d2990d1082086 1-123
+server/internal/game/sim.go
+  s_91cf6549724495::t_057d036b05f380 137-138
+shared/protocol/state_delta.v8.schema.json
+  s_91cf6549724495::t_93b87edaf9ec55 608
+  s_91cf6549724495::t_f2349ac2c4c0bd 65-66,360,362,605-607
+docs/plans/v205_2026-06-15-boss-enrage-phase.md
+  s_91cf6549724495::t_ac5bb339a3e3d3 3,18-19,26,36-41,44,58-60,74-78,91-93,109-110,118-122
+  s_91cf6549724495::t_71522acd920c6d 123
+  s_91cf6549724495::t_135b843f6afd7d 1-2,4-17,20-25,27-35,42-43,45-57,61-73,79-90,94-108,111-117,124-127
+server/internal/game/dungeon_population.go
+  s_91cf6549724495::t_057d036b05f380 127-129
+shared/protocol/session_snapshot.v8.schema.json
+  s_91cf6549724495::t_93b87edaf9ec55 684
+  s_91cf6549724495::t_f2349ac2c4c0bd 98-99,451,453,681-683
+tools/bot/scenarios/87_boss_enrage_phase.json
+  s_91cf6549724495::t_abe9950ba056f4 1-26
+server/internal/game/boss_template_rules.go
+  s_91cf6549724495::t_93b87edaf9ec55 1-21
+docs/as-built/v205_boss-enrage-phase.md
+  s_91cf6549724495::t_ac5bb339a3e3d3 1-22,24-28
+  s_91cf6549724495::t_71522acd920c6d 23
+server/internal/game/types.go
+  s_91cf6549724495::t_f010791cce8061 18-61,389-462
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2165f782219192df72794dec9dacdd9c47ea6d38",
+  "prompts": {},
+  "sessions": {
+    "s_91cf6549724495": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdc2-d0c7-77a3-bdd7-9c7d3b38e3f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

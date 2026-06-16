@@ -1,6 +1,8 @@
 class_name CompanionBar
 extends Control
 
+signal companion_selected(companion: Dictionary)
+
 class CompanionIcon extends Control:
 	var companion: Dictionary = {}
 
@@ -144,8 +146,12 @@ func _render() -> void:
 func _make_slot(companion: Dictionary) -> Control:
 	var slot := PanelContainer.new()
 	slot.custom_minimum_size = SLOT_SIZE
-	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.mouse_filter = Control.MOUSE_FILTER_STOP
 	slot.add_theme_stylebox_override("panel", _slot_style())
+	slot.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			companion_selected.emit(companion.duplicate(true))
+	)
 
 	var stack := VBoxContainer.new()
 	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -163,6 +169,13 @@ func _make_slot(companion: Dictionary) -> Control:
 	if _has_duration(companion):
 		stack.add_child(_make_meter(Color(0.55, 0.76, 1.0, 0.95), _duration_ratio(companion)))
 	return slot
+
+
+func bot_click_slot(index: int = 0) -> void:
+	if index < 0 or index >= _companions.size():
+		return
+	var companion: Dictionary = _companions[index]
+	companion_selected.emit(companion.duplicate(true))
 
 
 func _make_meter(fill_color: Color, ratio: float) -> ColorRect:

@@ -6,6 +6,7 @@ const MercenaryPanelScript := preload("res://scripts/mercenary_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
+var _requested_stance: String = ""
 
 
 func _initialize() -> void:
@@ -16,6 +17,7 @@ func _run() -> void:
 	var panel := MercenaryPanelScript.new()
 	root.add_child(panel)
 	await process_frame
+	panel.stance_requested.connect(func(stance: String) -> void: _requested_stance = stance)
 
 	panel.show_board("board-1", "mercenary", "fixed:mercenary_guard", "mercenary_guard", 75, true, 125)
 	var state := panel.get_debug_state()
@@ -34,16 +36,24 @@ func _run() -> void:
 		"total_gold": 50,
 	})
 	panel.set_companions([
-		{"id": "2001", "monster_def_id": "mercenary_guard", "hp": 24, "max_hp": 30},
+		{"id": "2001", "monster_def_id": "mercenary_guard", "hp": 24, "max_hp": 30, "companion_stance": "defend"},
 		{"id": "wolf-1", "monster_def_id": "ranger_wolf", "hp": 10, "max_hp": 10},
 	])
 	state = panel.get_debug_state()
 	_assert_eq("hired entity id", str(state.get("hired_entity_id", "")), "2001")
 	_assert_eq("gold after hire", int(state.get("gold", 0)), 50)
-	_assert_eq("mercenary roster filters non mercenary companions", int(state.get("hired_count", -1)), 1)
+	_assert_eq("companion roster includes owned companions", int(state.get("hired_count", -1)), 2)
+	_assert_eq("selected stance follows companion state", str(state.get("selected_stance", "")), "defend")
 	var rows: Array = state.get("hired_rows", [])
 	_assert_eq("roster monster id", str((rows[0] as Dictionary).get("monster_def_id", "")), "mercenary_guard")
 	_assert_true("status names hire", str(state.get("status", "")).contains("Mercenary Guard"))
+	var stance_buttons: Dictionary = state.get("stance_buttons", {})
+	_assert_true("defend stance button disabled", bool((stance_buttons.get("defend", {}) as Dictionary).get("disabled", false)))
+	panel.bot_click_stance("passive")
+	_assert_eq("stance request emitted", _requested_stance, "passive")
+	panel.apply_stance_changed({"stance": "passive"})
+	state = panel.get_debug_state()
+	_assert_eq("selected stance follows event", str(state.get("selected_stance", "")), "passive")
 
 	panel.set_gold(30)
 	state = panel.get_debug_state()

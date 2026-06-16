@@ -633,6 +633,21 @@ func _on_monster_health_bar_mode_selected(mode: String) -> void:
 		_sync_settings_panel()
 		_refresh_monster_health_bar_visibility()
 
+
+func _on_companion_stance_requested(stance: String) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+		return
+	client.send("companion_command_intent", last_server_tick, {"stance": stance})
+
+
+func _on_companion_bar_selected(_companion: Dictionary) -> void:
+	if mercenary_panel == null:
+		return
+	_close_gameplay_panels("mercenary")
+	_sync_companion_bar()
+	mercenary_panel.show_roster(companion_bar.get_debug_state().get("companions", []) if companion_bar != null else [])
+	_raise_gameplay_windows()
+
 func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
 		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
@@ -1399,7 +1414,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			rec["amount"] = int(e["amount"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "remaining_ticks", "total_ticks"]:
+	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "remaining_ticks", "total_ticks", "companion_stance"]:
 		if e.has(key):
 			rec[key] = e[key]
 	for key in ["corpse_character_id", "corpse_name", "corpse_level", "corpse_item_count"]:
@@ -2205,6 +2220,7 @@ func _sync_companion_bar() -> void:
 			"visual_model": str(rec.get("visual_model", "")),
 			"remaining_ticks": int(rec.get("remaining_ticks", 0)),
 			"total_ticks": int(rec.get("total_ticks", 0)),
+			"companion_stance": str(rec.get("companion_stance", "assist")),
 		})
 	companion_bar.set_companions(companions)
 	if mercenary_panel != null: mercenary_panel.set_companions(companions)
@@ -3358,7 +3374,9 @@ func _build_scene() -> void:
 	bishop_panel.debug_requested.connect(_on_bishop_debug_requested)
 	bishop_panel.set_debug_enabled(gameplay_debug_enabled)
 	ui.add_child(bishop_panel)
-	mercenary_panel = MercenaryPanelScript.new(); ui.add_child(mercenary_panel)
+	mercenary_panel = MercenaryPanelScript.new()
+	mercenary_panel.stance_requested.connect(_on_companion_stance_requested)
+	ui.add_child(mercenary_panel)
 	market_panel = MarketPanelScript.new()
 	market_panel.market_action_requested.connect(_on_market_action_requested)
 	market_panel.inventory_context_requested.connect(_on_market_inventory_context_requested)
@@ -3391,6 +3409,7 @@ func _build_scene() -> void:
 	skill_bar.open_skills_requested.connect(_open_skills_panel_from_bar)
 	ui.add_child(skill_bar)
 	companion_bar = CompanionBarScript.new()
+	companion_bar.companion_selected.connect(_on_companion_bar_selected)
 	ui.add_child(companion_bar)
 	status_effects_bar = StatusEffectsBarScript.new()
 	status_effects_bar.effect_expired.connect(_on_status_effect_expired)
@@ -5485,6 +5504,8 @@ func bot_click_bishop_respec() -> void:
 	BotFacade.click_bishop_respec(self)
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
+func bot_click_mercenary_stance(stance: String = "assist") -> void:
+	BotFacade.click_mercenary_stance(self, stance)
 func bot_set_stash_search(text: String) -> void:
 	BotFacade.set_stash_search(self, text)
 func bot_select_stash_sort(mode: String) -> void:

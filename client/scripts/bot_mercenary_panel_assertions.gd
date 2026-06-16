@@ -14,6 +14,8 @@ static func matches(step: Dictionary, state: Dictionary) -> bool:
 	for key in ["service_id", "offer_id", "monster_def_id", "hired_entity_id"]:
 		if step.has(key) and str(panel.get(key, "")) != str(step.get(key, "")):
 			return false
+	if step.has("selected_stance") and str(panel.get("selected_stance", "")) != str(step.get("selected_stance", "")):
+		return false
 	if step.has("status_contains") and not str(panel.get("status", "")).contains(str(step.get("status_contains", ""))):
 		return false
 	var companion_bar: Dictionary = state.get("companion_bar", {})

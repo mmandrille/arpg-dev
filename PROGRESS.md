@@ -23,10 +23,10 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v217 — paladin charge channeling protocol |
+| **Latest completed slice** | v219 — companion stance UI |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-16 after v217 paladin charge channeling protocol |
-| **Next slice** | Run the due v210+ engineering review/refactor handoff, then choose the next feature slice |
+| **CI gate** | Focused v219 verification green on 2026-06-16 during `$autoloop`; final batch `make ci` pending |
+| **Next slice** | Continue selected `$autoloop` queue with v220 `mercenary-death-loss`; then run due v210+ review/refactor handoff after the feature batch |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |
 

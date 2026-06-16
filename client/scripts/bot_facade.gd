@@ -56,6 +56,12 @@ static func click_blacksmith_upgrade(main, stash_item_id: String = "", item_def_
 		panel.bot_click_upgrade(stash_item_id, item_def_id, stash_index)
 
 
+static func click_mercenary_stance(main, stance: String) -> void:
+	var panel = _member(main, "mercenary_panel")
+	if panel != null and panel.has_method("bot_click_stance"):
+		panel.bot_click_stance(stance)
+
+
 static func set_stash_search(main, text: String) -> void:
 	var panel = _member(main, "stash_panel")
 	if panel != null and panel.has_method("bot_set_search_text"):

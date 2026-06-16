@@ -27,6 +27,14 @@ static func apply_hired(owner, panel: MercenaryPanel, ev: Dictionary) -> void:
 	owner._raise_gameplay_windows()
 
 
+static func apply_stance_changed(owner, panel: MercenaryPanel, ev: Dictionary) -> void:
+	if panel == null:
+		return
+	panel.apply_stance_changed(ev)
+	owner._sync_companion_bar()
+	owner._raise_gameplay_windows()
+
+
 static func try_handle_event(owner, panel: MercenaryPanel, ev: Dictionary, gold: int) -> bool:
 	match str(ev.get("event_type", "")):
 		"mercenary_board_opened":
@@ -34,5 +42,8 @@ static func try_handle_event(owner, panel: MercenaryPanel, ev: Dictionary, gold:
 			return true
 		"mercenary_hired":
 			apply_hired(owner, panel, ev)
+			return true
+		"companion_stance_changed":
+			apply_stance_changed(owner, panel, ev)
 			return true
 	return false

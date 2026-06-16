@@ -20,7 +20,17 @@
       "offer_id": "fixed:mercenary_guard",
       "monster_def_id": "mercenary_guard",
       "hired_count": 1,
+      "selected_stance": "assist",
       "status_contains": "Hired",
+      "companion_bar_count": 1,
+      "companion_icon_kind": "mercenary",
+      "timeout_s": 15.0
+    },
+    { "type": "click_mercenary_stance", "stance": "passive" },
+    {
+      "type": "wait_mercenary_panel",
+      "selected_stance": "passive",
+      "hired_count": 1,
       "companion_bar_count": 1,
       "companion_icon_kind": "mercenary",
       "timeout_s": 15.0
@@ -35,6 +45,7 @@
       "offer_id": "fixed:mercenary_guard",
       "monster_def_id": "mercenary_guard",
       "hired_count": 1,
+      "selected_stance": "passive",
       "status_contains": "Mercenary Guard",
       "companion_bar_count": 1,
       "companion_icon_kind": "mercenary"

@@ -1,0 +1,41 @@
+shared/rules/skills.v0.json
+  s_4e57aa710a1c1f::t_25a485f27fbc7b 429-474
+server/internal/game/sim.go
+  s_4e57aa710a1c1f::t_d134e9a6416f83 89
+docs/as-built/v210_barbarian-leap.md
+  s_4e57aa710a1c1f::t_df3cbac1d514fd 1-22
+docs/progress/slice-lifecycle.md
+  s_4e57aa710a1c1f::t_8a5ea88709e9a2 227
+server/internal/game/mobility_skills_test.go
+  s_4e57aa710a1c1f::t_ace48577195af0 31-59
+shared/i18n/en.json
+  s_4e57aa710a1c1f::t_ad47d465ba9738 70-71
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_4e57aa710a1c1f::t_08d5749209968d 7,18,24-25,39
+PROGRESS.md
+  s_4e57aa710a1c1f::t_8a5ea88709e9a2 26,28-29
+shared/i18n/es.json
+  s_4e57aa710a1c1f::t_3226c974c37b99 78-79
+shared/assets/skill_presentations.v0.json
+  s_4e57aa710a1c1f::t_f6db51a9668ecb 95-105
+docs/specs/v210_spec-barbarian-leap.md
+  s_4e57aa710a1c1f::t_df3cbac1d514fd 1-48
+docs/plans/v210_2026-06-16-barbarian-leap.md
+  s_4e57aa710a1c1f::t_df3cbac1d514fd 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8542d926181bf0b4c00ce5317d64f974cde81d56",
+  "prompts": {},
+  "sessions": {
+    "s_4e57aa710a1c1f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ece4a-9220-7c91-bf31-333e57a6cffa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}
